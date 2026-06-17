@@ -23,10 +23,10 @@ import { cli } from './cli';
 interface TestCliRunContext {
   flags: {
     config: string;
-    left: string;
-    right: string;
-    'left-build-dir': string;
-    'right-build-dir': string;
+    left?: string;
+    right?: string;
+    'left-build-dir'?: string;
+    'right-build-dir'?: string;
     profile: boolean;
     'open-profile': boolean;
     grep?: string;
@@ -50,7 +50,7 @@ describe('cli', () => {
     jest.mocked(bench).mockResolvedValue(undefined);
   });
 
-  it('passes build directory override flags to bench', async () => {
+  it('passes build directory comparison flags to bench without refs', async () => {
     const log = new ToolingLog({
       level: 'error',
       writeTo: {
@@ -67,8 +67,6 @@ describe('cli', () => {
     await callback({
       flags: {
         config: 'benchmark.config.ts',
-        left: 'base-ref',
-        right: 'target-ref',
         'left-build-dir': '/tmp/base-build',
         'right-build-dir': '/tmp/target-build',
         profile: false,
@@ -91,8 +89,8 @@ describe('cli', () => {
     expect(withContextSpy).toHaveBeenCalledWith('@kbn/bench');
     expect(bench).toHaveBeenCalledWith({
       log: expect.any(ToolingLog),
-      left: 'base-ref',
-      right: 'target-ref',
+      left: undefined,
+      right: undefined,
       leftBuildDir: '/tmp/base-build',
       rightBuildDir: '/tmp/target-build',
       config: 'benchmark.config.ts',

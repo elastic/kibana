@@ -52,12 +52,21 @@ export async function bench({
 }) {
   const buildDirOverrides = await resolveBuildDirOverrides({ leftBuildDir, rightBuildDir });
 
+  if (buildDirOverrides && (left || right)) {
+    throw new Error(
+      '--left/--right git refs cannot be combined with --left-build-dir/--right-build-dir artifact comparison overrides'
+    );
+  }
+
   log.info(`Creating workspace for ${left || 'current working directory'}`);
 
-  const leftWorkspace = await activateWorktreeOrUseSourceRepo({
+  const sourceWorkspace = await activateWorktreeOrUseSourceRepo({
     log,
     ref: left,
   });
+  const leftWorkspace = buildDirOverrides
+    ? withComparisonIdentity(sourceWorkspace, 'left build-dir', buildDirOverrides.left)
+    : sourceWorkspace;
 
   let rightWorkspace: IWorkspace | undefined;
 
@@ -69,7 +78,7 @@ export async function bench({
           log,
           ref: right,
         })
-      : leftWorkspace;
+      : withComparisonIdentity(sourceWorkspace, 'right build-dir', buildDirOverrides!.right);
   }
 
   const globalConfig = getGlobalConfig();
@@ -165,6 +174,19 @@ export async function bench({
     leftResults,
     rightResults,
   });
+}
+
+function withComparisonIdentity(
+  workspace: IWorkspace,
+  displayName: string,
+  title: string
+): IWorkspace {
+  const workspaceWithComparisonIdentity = Object.create(workspace) as IWorkspace;
+
+  workspaceWithComparisonIdentity.getDisplayName = () => displayName;
+  workspaceWithComparisonIdentity.getCommitLine = async () => title;
+
+  return workspaceWithComparisonIdentity;
 }
 
 async function resolveBuildDirOverrides({

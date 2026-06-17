@@ -353,10 +353,31 @@ describe('bench E2E', () => {
     const records = fs.readFileSync(recordsPath, 'utf8');
     const output = capturedOutput.join('\n');
 
-    expect(records).toContain(`test-workspace=${leftBuildDir}`);
-    expect(records).toContain(`test-workspace=${rightBuildDir}`);
-    expect(output).toContain('Benchmark diff:');
+    expect(records).toContain(`left build-dir=${leftBuildDir}`);
+    expect(records).toContain(`right build-dir=${rightBuildDir}`);
+    expect(output).toContain('Benchmark diff: left build-dir -> right build-dir');
   }, 10000);
+
+  it('should fail clearly when git refs and build directory overrides are combined', async () => {
+    const leftBuildDir = path.join(tempDir, 'exclusive_left_build');
+    const rightBuildDir = path.join(tempDir, 'exclusive_right_build');
+    fs.mkdirSync(leftBuildDir);
+    fs.mkdirSync(rightBuildDir);
+
+    await expect(
+      bench({
+        log,
+        config: fastBenchmarkConfigPath,
+        left: 'base-ref',
+        right: 'target-ref',
+        leftBuildDir,
+        rightBuildDir,
+        runs: 1,
+      })
+    ).rejects.toThrow(
+      '--left/--right git refs cannot be combined with --left-build-dir/--right-build-dir'
+    );
+  });
 
   it('should preserve undefined build directory context when no override is provided', async () => {
     const recordsPath = path.join(tempDir, 'no_build_dir_records.txt');

@@ -43,10 +43,10 @@ export function cli() {
         ],
         boolean: ['profile', 'open-profile', 'config-from-cwd'],
         help: `--config           Location (glob) of benchmark config files
-      --left            Git ref for baseline (defaults to current working directory)
-      --right           Git ref to compare against
-      --left-build-dir  Build directory override for the baseline side
-      --right-build-dir Build directory override for the target side
+      --left            Git ref for baseline (exclusive with build directory comparison)
+      --right           Git ref to compare against (exclusive with build directory comparison)
+      --left-build-dir  Build directory for artifact comparison (exclusive with --left/--right)
+      --right-build-dir Build directory for artifact comparison (exclusive with --left/--right)
       --profile         Collect a CPU profile for each benchmark suite
       --open-profile    After merging, open each merged profile in speedscope
       --grep            Filter benchmarks by (case-insensitive) substring(s); can repeat
