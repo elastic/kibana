@@ -24,17 +24,18 @@ const AD_HOC_WITHOUT_TIME_RANGE = 'logs';
 const PERSISTED_WITHOUT_TIME_RANGE = 'logstas*';
 
 test.describe('tabs - time based save behavior', { tag: tags.stateful.all }, () => {
-  // The setup test creates a persisted data view that subsequent tests depend on.
-  // Serial mode makes this ordering dependency explicit.
-  test.describe.configure({ mode: 'serial' });
   test.setTimeout(180_000);
 
-  test.beforeAll(async ({ kbnClient, esArchiver }) => {
+  test.beforeAll(async ({ apiServices, kbnClient, esArchiver }) => {
     await kbnClient.importExport.load(testData.DISCOVER_KBN_ARCHIVE);
     await esArchiver.loadIfNeeded(
       'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
     );
     await esArchiver.loadIfNeeded(testData.INDEX_PATTERN_WITHOUT_TIMEFIELD_ARCHIVE);
+    await apiServices.dataViews.create({
+      title: PERSISTED_WITHOUT_TIME_RANGE,
+      override: true,
+    });
     await kbnClient.uiSettings.update({
       defaultIndex: testData.DEFAULT_DATA_VIEW,
       'timepicker:timeDefaults': JSON.stringify({
@@ -55,16 +56,6 @@ test.describe('tabs - time based save behavior', { tag: tags.stateful.all }, () 
     await kbnClient.uiSettings.unset('defaultIndex');
     await kbnClient.uiSettings.unset('timepicker:timeDefaults');
     await kbnClient.savedObjects.cleanStandardList();
-  });
-
-  // Create the persisted data view without time field once before the tests
-  test('setup: create persisted data view without time field', async ({ pageObjects, page }) => {
-    await createDataViewFromSearchBar(page, {
-      name: 'logstas',
-      adHoc: false,
-      hasTimeField: false,
-    });
-    await pageObjects.discover.waitUntilSearchingHasFinished();
   });
 
   test('should show time range switch when saving if any tab is time based', async ({
