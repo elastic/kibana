@@ -11,8 +11,9 @@ import { createFleetTestRendererMock } from '../../../../mock';
 import { useFleetStatus } from '../../../../hooks/use_fleet_status';
 import { useAuthz } from '../../../../hooks/use_authz';
 
-import { AgentsApp } from '.';
 import { useGetSpaceSettings } from '../../hooks';
+
+import { AgentsApp } from '.';
 
 jest.mock('../../../../hooks/use_fleet_status', () => ({
   ...jest.requireActual('../../../../hooks/use_fleet_status'),
@@ -31,6 +32,11 @@ jest.mock('./agent_list_page', () => {
     AgentListPage: () => <>AgentListPage</>,
   };
 });
+jest.mock('@kbn/app-header', () => ({
+  AppHeader: ({ children }: { children?: React.ReactNode }) => (
+    <div data-test-subj="appHeader">{children}</div>
+  ),
+}));
 
 const mockedUsedFleetStatus = useFleetStatus as jest.MockedFunction<typeof useFleetStatus>;
 const mockedUseAuthz = useAuthz as jest.MockedFunction<typeof useAuthz>;

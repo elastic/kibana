@@ -31,7 +31,7 @@ export const ContentWrapper = styled.div`
 `;
 
 interface Props {
-  restrictWidth?: number;
+  restrictWidth?: number | string;
   children?: React.ReactNode;
 }
 

@@ -34,6 +34,12 @@ jest.mock('../../../../../hooks/use_request/uninstall_tokens', () => ({
   getUninstallTokenValue: jest.fn(),
 }));
 
+jest.mock('@kbn/app-header', () => ({
+  AppHeader: ({ children }: { children?: React.ReactNode }) => (
+    <div data-test-subj="appHeader">{children}</div>
+  ),
+}));
+
 type MockResponseType<DataType> = Pick<
   UseRequestResponse<DataType, RequestError>,
   'data' | 'error' | 'isLoading'
