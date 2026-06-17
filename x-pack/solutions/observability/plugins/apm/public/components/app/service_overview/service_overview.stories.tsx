@@ -14,6 +14,8 @@ import { mockApmApiCallResponse } from '../../../services/rest/call_apm_api_spy'
 import { MockApmPluginStorybook } from '../../../context/apm_plugin/mock_apm_plugin_storybook';
 import {
   opbeansScenario,
+  SCENARIO_START,
+  SCENARIO_END,
   toLatencyChartResponse,
   toThroughputChartResponse,
   toErrorRateChartResponse,
@@ -119,7 +121,7 @@ const stories: Meta<{}> = {
 
       return (
         <MockApmPluginStorybook
-          routePath={`/services/${SERVICE_NAME}/overview?environment=ENVIRONMENT_ALL&rangeFrom=now-15m&rangeTo=now`}
+          routePath={`/services/${SERVICE_NAME}/overview?environment=ENVIRONMENT_ALL&rangeFrom=${SCENARIO_START.toISOString()}&rangeTo=${SCENARIO_END.toISOString()}`}
           serviceContextValue={serviceContextValue}
         >
           <StoryComponent />
