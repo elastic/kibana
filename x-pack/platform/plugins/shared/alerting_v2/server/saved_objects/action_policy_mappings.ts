@@ -19,18 +19,5 @@ export const actionPolicyMappings: SavedObjectsTypeMappingDefinition = {
     description: { type: 'text' },
     enabled: { type: 'boolean' },
     tags: { type: 'keyword' },
-    // NO NEED TO BE INDEXED
-    // groupBy is only read from _source. The count_with_group_by telemetry
-    // aggregation runs on the `ap_group_by_count` runtime mapping in
-    // server/lib/usage/lib/get_action_policy_stats.ts.
-    // groupBy: { type: 'keyword' },
-    // auth.apiKey is an ESO-encrypted attribute. ESO decrypts from _source,
-    // so the ciphertext never needs to be indexed.
-    // auth: {
-    //   type: 'object',
-    //   properties: {
-    //     apiKey: { type: 'binary' },
-    //   },
-    // },
   },
 };

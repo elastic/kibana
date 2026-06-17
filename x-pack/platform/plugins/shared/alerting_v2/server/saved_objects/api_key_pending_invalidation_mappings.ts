@@ -15,13 +15,6 @@ import type { SavedObjectsTypeMappingDefinition } from '@kbn/core-saved-objects-
 export const apiKeyPendingInvalidationMappings: SavedObjectsTypeMappingDefinition = {
   dynamic: false,
   properties: {
-    // `createdAt` is filtered and sorted by the shared invalidation task in
-    // `@kbn/task-manager-plugin/server`'s `runInvalidate` (KQL filter
-    // `attributes.createdAt <= <delay>` + `sortField: 'createdAt'`).
     createdAt: { type: 'date' },
-    // NO NEED TO BE INDEXED
-    // `uiamApiKey` is only read from _source by the invalidation task; it is
-    // never filtered, sorted, or aggregated on.
-    // uiamApiKey: { type: 'binary' },
   },
 };
