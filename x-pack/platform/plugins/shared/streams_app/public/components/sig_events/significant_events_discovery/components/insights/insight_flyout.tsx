@@ -20,6 +20,7 @@ import {
   EuiHorizontalRule,
   EuiText,
   EuiTitle,
+  EuiToolTip,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -93,14 +94,21 @@ export const InsightFlyout = ({ insight, onClose }: InsightFlyoutProps) => {
             </EuiTitle>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButtonIcon
-              data-test-subj="streamsInsightFlyoutCloseButton"
-              iconType="cross"
-              aria-label={i18n.translate('xpack.streams.insightFlyout.closeButtonAriaLabel', {
+            <EuiToolTip
+              content={i18n.translate('xpack.streams.insightFlyout.closeButtonAriaLabel', {
                 defaultMessage: 'Close',
               })}
-              onClick={onClose}
-            />
+              disableScreenReaderOutput
+            >
+              <EuiButtonIcon
+                data-test-subj="streamsInsightFlyoutCloseButton"
+                iconType="cross"
+                aria-label={i18n.translate('xpack.streams.insightFlyout.closeButtonAriaLabel', {
+                  defaultMessage: 'Close',
+                })}
+                onClick={onClose}
+              />
+            </EuiToolTip>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlyoutHeader>

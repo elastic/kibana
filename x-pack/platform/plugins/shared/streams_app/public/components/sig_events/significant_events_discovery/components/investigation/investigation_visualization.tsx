@@ -31,6 +31,7 @@ const confidenceColor = (confidence: number): 'success' | 'warning' | 'danger' =
 
 interface InvestigationVisualizationProps {
   investigation: InvestigationData;
+  discoveryId?: string;
 }
 
 export const InvestigationVisualization = ({ investigation }: InvestigationVisualizationProps) => {

@@ -104,7 +104,6 @@ export const registerStreamsAgentBuilder = async ({
   registerAgentBuilderSkills({
     agentBuilder,
     telemetry,
-    memoryToolsOptions,
     streamsKIsOnboardingClient,
   });
   registerSignificantEventsDiscoveryAgents(agentBuilder);
