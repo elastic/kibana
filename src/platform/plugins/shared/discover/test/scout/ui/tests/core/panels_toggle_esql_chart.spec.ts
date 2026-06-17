@@ -122,7 +122,7 @@ test.describe('Discover panel toggles in ESQL chart modes', { tag: tags.stateful
     await pageObjects.discover.showChart();
   });
 
-  test('toggles panels for a non-aggregate ES|QL query', async ({ page, pageObjects }) => {
+  test('toggles panels for an aggregate ES|QL query', async ({ page, pageObjects }) => {
     await pageObjects.discover.writeAndSubmitEsqlQuery(ESQL_LIMITED_QUERY);
     await pageObjects.discover.waitForDocTableRendered();
 
