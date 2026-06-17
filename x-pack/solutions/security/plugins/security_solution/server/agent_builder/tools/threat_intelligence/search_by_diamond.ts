@@ -75,7 +75,9 @@ export const searchByDiamondTool: BuiltinToolDefinition<typeof searchByDiamondSc
     'one query per provided vertex, results merged by (vertex-overlap DESC, max-score DESC). ' +
     'Use when you have prose descriptions of adversary behavior, capabilities, infrastructure, ' +
     'or victim profile and want to find semantically related reports. Returns per-vertex scores ' +
-    'and overlap count per hit. Complement with `search_by_anchors` (exact) for full coverage — ' +
+    'and overlap count per hit. Query quality matters: prefer full prose sentences (1+ per vertex) ' +
+    'over terse keywords — short keyword queries produce thin embeddings that may score low and ' +
+    'return few or no candidates. Complement with `search_by_anchors` (exact) for full coverage — ' +
     '`correlate_threat` runs both in parallel.',
   schema: searchByDiamondSchema,
   tags: ['threat-intel', 'correlation'],

@@ -67,6 +67,17 @@ const correlateThreatSchema = z
           'The service fetches its stored anchor fields and extracted diamond for retrieval, ' +
           'skipping the extraction LLM call. Mutually exclusive with `raw_text`.'
       ),
+    depth: z
+      .enum(['extract', 'knn', 'triage', 'full'])
+      .optional()
+      .default('full')
+      .describe(
+        'How far to run the pipeline. ' +
+          '`extract`: diamond extraction only (~secs, ~$0). ' +
+          '`knn`: + anchor/diamond retrieval → per-vertex candidates + scores (~secs, ~$0). ' +
+          '`triage`: + gap-fill/dedup/triage → scored candidate set (~30s, ~$0.24). ' +
+          '`full`: + Opus synthesis → CorrelationFindings (~30–90s, ~$2.35). Default full.'
+      ),
   })
   .refine((b) => Boolean(b.raw_text) !== Boolean(b.report_id), {
     message: 'Exactly one of raw_text or report_id is required',
@@ -79,15 +90,19 @@ export const correlateThreatTool = (
   id: THREAT_INTEL_TOOL_IDS.correlateThreat,
   type: ToolType.builtin,
   description:
-    `Portability wrapper around POST ${CORRELATE_THREAT_API_PATH}. ` +
-    'Run the full threat-correlation pipeline against the knowledge base. Accepts raw report ' +
-    'text (`raw_text`) or a stored report ID (`report_id`). Runs four LLM stages in sequence ' +
-    '(extract → triage → synthesis) — expect 30–90 s total. Returns `CorrelationFindings` ' +
-    'with leads (same_campaign | same_actor | shared_tradecraft), no_match list, synthesis ' +
-    'narrative, and a `trace` with per-stage token counts and cost. ' +
-    'Use this as the primary correlation entry point. Call `search_by_anchors`, ' +
-    '`search_by_diamond`, or `extract_diamond` individually only when you need intermediate ' +
-    'results for step-by-step reasoning.',
+    'Primary correlation entry point — runs the threat-correlation pipeline against the knowledge ' +
+    'base. Choose `depth` to trade cost for detail: ' +
+    '`extract` (~secs, ~$0): diamond extraction only — returns the extracted diamond. ' +
+    '`knn` (~secs, ~$0): + anchor/diamond kNN retrieval — returns per-vertex candidates + scores. ' +
+    '`triage` (~30 s, ~$0.24): + gap-fill/dedup/triage — returns scored candidate set. ' +
+    '`full` (~30–90 s, ~$2.35): + Opus synthesis — returns CorrelationFindings with leads ' +
+    '(same_campaign | same_actor | shared_tradecraft), no_match list, synthesis narrative, and ' +
+    'trace. Result shape varies by depth; all shapes carry a `trace` with per-stage spend. ' +
+    'Accepts raw report text (`raw_text`) or a stored report ID (`report_id`). ' +
+    'Use extract/knn/triage for retrieval-only or cost-sensitive callers. ' +
+    `Wraps POST ${CORRELATE_THREAT_API_PATH}, runs in-process (no route timeout). ` +
+    'Call `search_by_anchors`, `search_by_diamond`, or `extract_diamond` individually only when ' +
+    'you need intermediate results for step-by-step reasoning.',
   schema: correlateThreatSchema,
   tags: ['threat-intel', 'correlation'],
   handler: async (params, { esClient, spaceId, request, savedObjectsClient }) => {
@@ -122,6 +137,10 @@ export const correlateThreatTool = (
         readNumberSetting(TRIAGE_TOP_N_SETTING_KEY, 75),
       ]);
 
+    const { depth } = params;
+    const triageNeeded = depth === 'triage' || depth === 'full';
+    const synthesisNeeded = depth === 'full';
+
     // Resolve the extraction model eagerly so misconfigured deployments fail fast.
     // Required only for raw_text mode; !ok is treated as undefined for report_id.
     const extractionModelOutcome = await resolveScopedModel({
@@ -151,7 +170,7 @@ export const correlateThreatTool = (
       logger,
     });
 
-    if (!triageModelOutcome.ok) {
+    if (!triageModelOutcome.ok && triageNeeded) {
       return {
         results: [
           {
@@ -170,7 +189,7 @@ export const correlateThreatTool = (
       logger,
     });
 
-    if (!synthesisModelOutcome.ok) {
+    if (!synthesisModelOutcome.ok && synthesisNeeded) {
       return {
         results: [
           {
@@ -182,8 +201,8 @@ export const correlateThreatTool = (
     }
 
     const extractionModel = extractionModelOutcome.ok ? extractionModelOutcome.model : undefined;
-    const { model: triageModel } = triageModelOutcome;
-    const { model: synthesisModel } = synthesisModelOutcome;
+    const triageModel = triageModelOutcome.ok ? triageModelOutcome.model : undefined;
+    const synthesisModel = synthesisModelOutcome.ok ? synthesisModelOutcome.model : undefined;
 
     if (!params.raw_text && !params.report_id) {
       return {
@@ -211,21 +230,10 @@ export const correlateThreatTool = (
         input,
         triageFloor,
         triageTopN,
-        depth: 'full',
+        depth,
       });
 
-      if (depthResult.depth !== 'full') {
-        return {
-          results: [
-            {
-              type: ToolResultType.error,
-              data: { message: 'Internal error: unexpected depth result from correlateThreat' },
-            },
-          ],
-        };
-      }
-
-      return { results: [{ type: ToolResultType.other, data: depthResult.findings }] };
+      return { results: [{ type: ToolResultType.other, data: depthResult }] };
     } catch (err) {
       logger.warn(`correlate_threat tool failed: ${(err as Error).message}`);
       return {

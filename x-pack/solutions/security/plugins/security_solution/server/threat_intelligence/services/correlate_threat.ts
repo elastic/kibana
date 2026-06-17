@@ -48,10 +48,10 @@ export interface CorrelateThreatParams {
   esClient: ElasticsearchClient;
   /** Required for raw_text mode (extractDiamond LLM call). */
   extractionModel: ScopedModel | undefined;
-  /** Sonnet-tier model for the triage pass. */
-  triageModel: ScopedModel;
-  /** Opus-tier model for the §6 synthesis pass. */
-  synthesisModel: ScopedModel;
+  /** Sonnet-tier model for the triage pass. Required for depth ∈ {triage, full}; unused otherwise. */
+  triageModel: ScopedModel | undefined;
+  /** Opus-tier model for the §6 synthesis pass. Required for depth === 'full'; unused otherwise. */
+  synthesisModel: ScopedModel | undefined;
   logger: Logger;
   spaceId: string;
   input: CorrelateThreatInput;
@@ -489,6 +489,8 @@ export const correlateThreat = async ({
 
   const sourceReportId = input.mode === 'report_id' ? input.report_id : undefined;
 
+  if (!triageModel) throw new Error('correlateThreat: triageModel required for depth >= triage');
+
   const gapFillCandidates = await keywordGapFill({
     model: triageModel,
     esClient,
@@ -566,6 +568,8 @@ export const correlateThreat = async ({
       ? input.text
       : (await fetchSourceBodyText(esClient, input.report_id)) ??
         buildCaseContextFromDiamond(queryDiamond);
+
+  if (!synthesisModel) throw new Error('correlateThreat: synthesisModel required for depth full');
 
   // groups is intentionally NOT passed — it is a UI diagnostic artifact only and must
   // never become an input to the independent synthesis judge (firewall against rank-leak).
