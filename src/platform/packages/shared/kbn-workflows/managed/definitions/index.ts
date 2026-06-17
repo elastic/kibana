@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { SECURITY_ALERT_VALIDATION_WORKFLOW } from './security_solution';
 import {
   SIGEVENTS_DETECTION_WORKFLOW,
   SIGEVENTS_DISCOVERY_WORKFLOW,
@@ -25,10 +26,12 @@ import {
   STREAMS_MEMORY_SYNTHESIS_WORKFLOW,
 } from './streams_memory';
 import { EXAMPLE_MANAGED_WORKFLOW } from './workflows_extensions_example';
-import { SECURITY_ALERT_VALIDATION_WORKFLOW } from './security_solution';
 
 export { EXAMPLE_MANAGED_WORKFLOW_ID } from './workflows_extensions_example';
-export { SECURITY_ALERT_VALIDATION_WORKFLOW, SECURITY_ALERT_VALIDATION_WORKFLOW_ID } from './security_solution';
+export {
+  SECURITY_ALERT_VALIDATION_WORKFLOW,
+  SECURITY_ALERT_VALIDATION_WORKFLOW_ID,
+} from './security_solution';
 export {
   STREAMS_KI_FEATURES_IDENTIFICATION_WORKFLOW_ID,
   STREAMS_KI_QUERIES_GENERATION_WORKFLOW_ID,
