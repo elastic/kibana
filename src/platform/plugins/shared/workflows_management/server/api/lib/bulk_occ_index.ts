@@ -29,9 +29,29 @@ export interface OccWorkflowHit {
 export type WorkflowStorageClient = ReturnType<WorkflowStorage['getClient']>;
 export type BulkOccIndexClient = Pick<WorkflowStorageClient, 'bulk' | 'search'>;
 
-interface BulkIndexItem {
-  index?: { _id?: string | null; status?: number; error?: estypes.ErrorCause };
+interface BulkIndexOperation {
+  _id?: string | null;
+  status?: number;
+  error?: estypes.ErrorCause;
 }
+
+interface BulkIndexItem {
+  index?: BulkIndexOperation;
+}
+
+const isBulkIndexItem = (item: unknown): item is BulkIndexItem =>
+  typeof item === 'object' &&
+  item !== null &&
+  'index' in item &&
+  (item.index === undefined || (typeof item.index === 'object' && item.index !== null));
+
+const getBulkIndexOperation = (item: unknown): BulkIndexOperation | undefined => {
+  if (!isBulkIndexItem(item)) {
+    return undefined;
+  }
+
+  return item.index;
+};
 
 const toOccHit = (hit: {
   _id: string;
@@ -145,8 +165,7 @@ export const bulkIndexWithOccRetry = async ({
     const conflictIds: string[] = [];
 
     for (let itemIndex = 0; itemIndex < bulkResponse.items.length; itemIndex++) {
-      const item = bulkResponse.items[itemIndex] as BulkIndexItem;
-      const operation = item.index;
+      const operation = getBulkIndexOperation(bulkResponse.items[itemIndex]);
       const hit = pendingHits[itemIndex];
 
       if (operation && hit) {

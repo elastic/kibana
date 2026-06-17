@@ -6,33 +6,41 @@ Platform primitives and bulk patterns: [`@kbn/occ` README](../../../../packages/
 
 ## Entry points
 
-| Path | `OccWriter` method | Reads before write? | Retries |
-|------|------------------|---------------------|---------|
-| `WorkflowCrudService.updateWorkflow` → `writeWorkflowDocument` (`readModifyWrite`) | `readModifyWrite` | Yes — inside helper, per attempt | `3` (`DEFAULT_MAX_RETRIES`) |
-| `ManagedWorkflowsService.installManagedWorkflow` **create** | `create` | No | Outer install loop on id collision |
-| `ManagedWorkflowsService.installManagedWorkflow` **update** | `write` (optimistic OCC) | No — install pre-read supplies `(ifSeqNo, ifPrimaryTerm)` | Outer install loop on 409 |
-| `disableAllWorkflows` | `bulkIndexWithOccRetry` | Per-page search only | `3` |
+| Path | CRUD method | `OccWriter` method | Reads before write? | Retries |
+|------|-------------|-------------------|---------------------|---------|
+| `WorkflowCrudService.updateWorkflow` | `readModifyWriteWorkflowDocument` | `readModifyWrite` | Yes — inside helper, per attempt | `3` (`DEFAULT_MAX_RETRIES`) |
+| `ManagedWorkflowsService.installManagedWorkflow` **create** | `createWorkflowDocument` | `create` | No | Outer install loop on id collision |
+| `ManagedWorkflowsService.installManagedWorkflow` **update** | `writeWorkflowDocumentWithOcc` | `write` (optimistic OCC) | No — install pre-read supplies `(ifSeqNo, ifPrimaryTerm)` | Outer install loop on 409 |
+| `disableAllWorkflows` | `bulkIndexWithOccRetry` | — | Per-page search only | `3` |
 
-## `writeWorkflowDocument` params (discriminated)
+## CRUD write methods
 
 ```typescript
 // Create (op_type: create)
-{ document }
+createWorkflowDocument(id, spaceId, document)
 
 // Optimistic OCC — caller already read version metadata
-{ document, ifSeqNo, ifPrimaryTerm }
+writeWorkflowDocumentWithOcc(id, spaceId, { document, ifSeqNo, ifPrimaryTerm })
 
 // Read-modify-write — merge inside mutate
-{ mutate: (existing) => merged, maxRetries?, getOptions? }
+readModifyWriteWorkflowDocument(id, spaceId, {
+  mutate: (existing) => merged,
+  maxRetries?,
+  getOptions?,
+})
 ```
 
 ## When to use which path
 
-**`readModifyWrite` (default for user updates)** when `mutate` is a **pure merge** over the document the helper just read. On conflict, `OccWriter` re-reads and runs `mutate` again.
+**`readModifyWriteWorkflowDocument` (default for user updates)** when `mutate` is a **pure merge** over the document the helper just read. On conflict, `OccWriter` re-reads and runs `mutate` again.
 
-**`write` (optimistic)** when the caller already has the document to index and version metadata from a prior read. Managed workflow **updates** use this: `installManagedWorkflowOnce` reads once, prepares the document, then writes with the pre-read version metadata. On `409`, the outer `installManagedWorkflow` loop re-reads and re-prepares.
+**`writeWorkflowDocumentWithOcc` (optimistic)** when the caller already has the document to index and version metadata from a prior read. Managed workflow **updates** use this: `installManagedWorkflowOnce` reads once, prepares the document, then writes with the pre-read version metadata. On `409`, the outer `installManagedWorkflow` loop re-reads and re-prepares.
 
-**`create`** for managed **creates** (`op_type: create`). No retry on create conflicts inside `OccWriter`.
+**`createWorkflowDocument`** for managed **creates** (`op_type: create`). No retry on create conflicts inside `OccWriter`.
+
+## Read-modify-write writers
+
+`WorkflowCrudService` constructs a read-modify-write `OccWriter` per call (no process-lifetime cache). Each writer closes over `spaceId`, optional `getOptions`, and `maxRetries` (normalized to `DEFAULT_MAX_RETRIES` when omitted).
 
 ## Bulk writes and conflict refresh
 

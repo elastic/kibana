@@ -9,7 +9,6 @@
 
 import { createHash } from 'node:crypto';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
-import { isElasticsearchWriteConflict } from '@kbn/occ';
 import { pickManagedWorkflowFields } from '@kbn/workflows';
 import {
   getManagedWorkflowDefinition,
@@ -30,6 +29,7 @@ import type {
 import type { WorkflowsExecutionEnginePluginStart } from '@kbn/workflows-execution-engine/server';
 import { updateYamlField } from '@kbn/workflows-yaml';
 import type { WorkflowCrudService } from './workflow_crud_service';
+import { isRetryableWorkflowWriteConflict } from '../lib/workflow_write_conflicts';
 import type { WorkflowProperties } from '../storage/workflow_storage';
 
 const MANAGED_WORKFLOW_SYSTEM_USER = 'elastic/kibana';
@@ -133,7 +133,7 @@ export class ManagedWorkflowsService {
         await this.installManagedWorkflowOnce(id, options, registeredPluginId);
         return;
       } catch (error) {
-        if (!isElasticsearchWriteConflict(error) || attempt === MAX_MANAGED_INSTALL_RETRIES) {
+        if (!isRetryableWorkflowWriteConflict(error) || attempt === MAX_MANAGED_INSTALL_RETRIES) {
           throw error;
         }
 
@@ -184,9 +184,7 @@ export class ManagedWorkflowsService {
         spaceId,
         now,
       });
-      await this.deps.crudService.writeWorkflowDocument(workflowDocumentId, spaceId, {
-        document,
-      });
+      await this.deps.crudService.createWorkflowDocument(workflowDocumentId, spaceId, document);
       return;
     }
 
@@ -223,7 +221,7 @@ export class ManagedWorkflowsService {
       enabled,
       createdAt: existing.created_at,
     });
-    await this.deps.crudService.writeWorkflowDocument(workflowDocumentId, spaceId, {
+    await this.deps.crudService.writeWorkflowDocumentWithOcc(workflowDocumentId, spaceId, {
       document,
       ifSeqNo: existingDocument.seqNo,
       ifPrimaryTerm: existingDocument.primaryTerm,

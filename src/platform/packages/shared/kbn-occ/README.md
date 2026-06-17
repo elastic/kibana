@@ -1,266 +1,48 @@
 # @kbn/occ
 
-Optimistic concurrency control (OCC) for Elasticsearch index documents.
+Optimistic concurrency control (OCC) for **raw Elasticsearch index documents**.
 
-Domains that store entities in normal ES indices inject `get` and `index` functions. `OccWriter` exposes three write paths (mirroring Saved Objects `create` / `update`):
+Inject `get` and `index` functions from your storage layer. `OccWriter` exposes three write paths that mirror Saved Objects `create` / `update(version?)`:
 
 | Method | Read? | Retry on 409? | Use when |
 |--------|-------|---------------|----------|
 | `create` | No | No | New document (`op_type: create`) |
 | `write` | No | No | Caller supplies `document` + `(ifSeqNo, ifPrimaryTerm)` |
-| `readModifyWrite` | Yes | Yes (`maxRetries`) | Merge inside `mutate` against each fresh read |
+| `readModifyWrite` | Yes | Yes (`maxRetries`, default `3`) | Merge inside `mutate` against each fresh read |
 
-`create` and `write` are **optimistic** paths: no hidden read. `readModifyWrite` is read–modify–write with OCC on the index.
+`create` and `write` are **optimistic** — no hidden read. `readModifyWrite` is read–modify–write with OCC on the index.
 
 ## When to use
 
-Use `@kbn/occ` when you store data in a **raw ES index**, perform **read–modify–write on one `_id`**, and **concurrent writers** could cause lost updates if you index blindly.
+Use `@kbn/occ` when you:
 
-### Example: user update races with a background sync
+- Store entities in a **normal ES index** (not Saved Objects)
+- Perform **read–modify–write on one `_id`**
+- Have **concurrent writers** where blind indexing would cause lost updates
 
-A user saves a workflow while a managed-template install updates the same document. Without OCC, whichever write lands last silently drops the other change.
+Domain-specific lookup rules (spaces, soft deletes, routing, aliases) belong in your **`get` / `index` adapters**, not in this package.
+
+## API
+
+### Dependencies
 
 ```typescript
 import { OccWriter } from '@kbn/occ';
+import type { OccDocument, OccWriterDeps } from '@kbn/occ';
 
-const writer = new OccWriter<WorkflowProperties>({
-  get: async (id) => {
-    const hit = await storageClient.search({
-      query: { term: { _id: id } },
-      seq_no_primary_term: true,
-      size: 1,
-    });
-    const doc = hit.hits.hits[0];
-    if (!doc?._source) return null;
-    return {
-      id,
-      source: doc._source as WorkflowProperties,
-      occ: { seqNo: doc._seq_no!, primaryTerm: doc._primary_term! },
-    };
-  },
-  index: ({ id, document, ifSeqNo, ifPrimaryTerm }) =>
-    storageClient.index({
-      id,
-      document,
-      if_seq_no: ifSeqNo,
-      if_primary_term: ifPrimaryTerm,
-      refresh: true,
-    }),
-});
-
-// Merge runs inside mutate so retries re-read fresh state.
-await writer.readModifyWrite({
-  id: workflowId,
-  mutate: (existing) => ({
-    ...existing,
-    yaml: requestBody.yaml,
-    lastUpdatedBy: user,
-    updated_at: new Date().toISOString(),
-  }),
-});
-```
-
-### Example: thin factory over your storage service
-
-Keep ES details in one place; call sites stay domain-focused (see `workflow_occ_writer.ts`).
-
-```typescript
-export const createWorkflowOccWriter = ({ crudService, spaceId, logger, getOptions }) =>
-  new OccWriter<WorkflowProperties>({
-    get: async (id) => {
-      const doc = await crudService.getWorkflowDocumentWithVersion(id, spaceId, getOptions);
-      return doc ? { id, source: doc.source, occ: { seqNo: doc.seqNo, primaryTerm: doc.primaryTerm } } : null;
-    },
-    index: ({ id, document, create, ifSeqNo, ifPrimaryTerm }) =>
-      crudService.indexWorkflowDocument(id, document, { create, ifSeqNo, ifPrimaryTerm }),
-    logger,
-  });
-
-// User update — merge against each fresh read
-await createWorkflowOccWriter({ crudService, spaceId, logger, getOptions }).readModifyWrite({
-  id,
-  mutate: (existing) => mergeWorkflowUpdate(existing, patch),
-});
-
-// Managed create — op_type: create
-await indexOnlyWriter.create({ id, document: preparedDocument });
-
-// Managed update — caller already read version metadata
-await indexOnlyWriter.write({
-  id,
-  document: preparedDocument,
-  ifSeqNo: existing.seqNo,
-  ifPrimaryTerm: existing.primaryTerm,
-});
-```
-
-## When not to use
-
-### Saved Objects — OCC is built in
-
-Dashboards, rules, and other SO-backed types should use the SO client, not `@kbn/occ`.
-
-```typescript
-// ✅ Saved Objects
-await savedObjectsClient.update('dashboard', id, { title: 'New title' }, {
-  version: existing.version,       // optimistic concurrency
-  retryOnConflict: 3,
-});
-
-// ❌ Don't wrap SO storage in OccWriter
-```
-
-### Append-only records — no prior state to protect
-
-Execution logs, audit events, and metrics are written once; there is nothing to merge.
-
-```typescript
-// ✅ Append-only: direct index, no read
-await executionStorageClient.index({
-  id: executionId,
-  document: { workflowId, status: 'completed', finishedAt: now },
-});
-
-// ❌ OccWriter adds a pointless read before every append
-```
-
-### Last-write-wins is acceptable
-
-Ephemeral status snapshots do not need merge semantics.
-
-```typescript
-// ✅ Overwrite the whole doc — fine for heartbeats / poller state
-await statusClient.index({
-  id: nodeId,
-  document: { lastSeenAt: Date.now(), healthy: true },
-});
-```
-
-### Bulk or multi-document writes
-
-`OccWriter.readModifyWrite()` handles **one `_id`** with an internal read. For bulk you still need OCC per document — choose based on batch size and how much merge logic you have.
-
-#### Option A — loop `OccWriter` (simplest)
-
-Best for **small/medium** batches or when you already have a factory wired. Each id gets the full read → mutate → index → retry loop.
-
-```typescript
-// ✅ Correct OCC; one ES round-trip per id (plus retries on conflict)
-await pMap(workflowIds, async (id) =>
-  writer.readModifyWrite({
-    id,
-    mutate: (existing) => ({
-      ...existing!,
-      enabled: false,
-      yaml: updateWorkflowYamlFields(existing!.yaml, { enabled: false }),
-    }),
-  }),
-  { concurrency: 10 }
-);
-
-// ❌ Bulk without if_seq_no — fast but last-write-wins per doc
-```
-
-#### Option B — bulk with per-item OCC + retry conflicts (larger batches)
-
-Best for **paginated bulk** (e.g. disable-all). ES supports `if_seq_no` / `if_primary_term` on each bulk action line. Orchestrate retries at the domain layer (see alerting `resolveAlertConflicts`).
-
-```typescript
-// 1. Read a page with OCC metadata
-const hits = await client.search({
-  query: { term: { enabled: true } },
-  seq_no_primary_term: true,
-  size: 1000,
-});
-
-// 2. Mutate in memory, bulk index with per-item OCC
-const operations = hits.hits.hits.map((hit) => ({
-  index: {
-    _id: hit._id!,
-    if_seq_no: hit._seq_no,
-    if_primary_term: hit._primary_term,
-    document: {
-      ...(hit._source as WorkflowProperties),
-      enabled: false,
-      yaml: patchYaml(hit._source!.yaml, { enabled: false }),
-    },
-  },
-}));
-
-let bulkResponse = await client.bulk({ operations, refresh: true });
-
-// 3. Retry only 409 items: mget fresh seq_no (raw ES), re-mutate, bulk again
-const conflictIds = bulkResponse.items
-  .filter((item) => item.index?.status === 409)
-  .map((item) => item.index!._id!);
-
-if (conflictIds.length > 0) {
-  const fresh = await client.mget({ ids: conflictIds, seq_no_primary_term: true });
-  // rebuild operations from fresh docs + same mutate, bulk retry (cap attempts)
+interface MyDocument {
+  title: string;
+  updated_at: string;
 }
-```
-
-**Storage-adapter consumers:** batch conflict refreshes via `search({ query: { ids: { values: conflictIds } }, seq_no_primary_term: true, size: conflictIds.length })` instead of `mget` — see `bulk_occ_index.ts` in workflows_management.
-
-**Rule of thumb:** reuse `OccWriter` when the set is small or conflicts are rare; use **bulk + conflict subset retry** when you process hundreds/thousands per request. `@kbn/occ` does not ship a bulk helper yet — both patterns compose the same primitives (`get` with `seq_no_primary_term`, `index` with `if_seq_no` / `if_primary_term`).
-
-```typescript
-// ❌ Bulk update without OCC — only when lost updates are acceptable
-await esClient.bulk({
-  operations: workflowIds.flatMap((id) => [
-    { update: { _id: id } },
-    { doc: { enabled: false } },
-  ]),
-});
-```
-
-### Create races — `create()` does not retry on 409
-
-Use `create()` for “must not exist”, but handle TOCTOU separately (e.g. resolve a new id and retry).
-
-```typescript
-// create path: single attempt; 409 means id already exists (not if_seq_no OCC)
-await writer.create({
-  id: candidateId,
-  document: buildNewWorkflowDocument(),
-});
-
-// For id-collision races, catch OccConflictError at the call site — not retried inside OccWriter
-```
-
-### Scripted partial updates — no full-document merge in app code
-
-When you only increment a counter or set one field, ES `update` may be simpler.
-
-```typescript
-await esClient.update({
-  id: taskId,
-  script: {
-    source: 'ctx._source.runCount += 1',
-  },
-});
-```
-
-## Design notes
-
-- On conflict, the **entire** `mutate` runs again against a fresh read in `readModifyWrite` — keep `mutate` pure with respect to the passed `existing` source.
-- `create` and `write` do **not** read or retry — the caller owns re-read + re-prepare on `OccConflictError`.
-- After retries are exhausted, `OccConflictError` (409) is thrown; map it to your domain error at the call site if needed.
-- Use `isOccConflictError` after `OccWriter` (strict `instanceof`). Use `isElasticsearchWriteConflict` for raw ES/client errors before wrapping.
-- Domain logic (validation, version counters, history logging) stays outside this package.
-
-## Usage
-
-```typescript
-import { OccWriter } from '@kbn/occ';
 
 const writer = new OccWriter<MyDocument>({
-  get: async (id) => {
+  // Required for readModifyWrite only
+  get: async (id): Promise<OccDocument<MyDocument> | null> => {
     const hit = await client.get({ id, seq_no_primary_term: true });
     if (!hit._source) return null;
     return {
       id,
-      source: hit._source,
+      source: hit._source as MyDocument,
       occ: { seqNo: hit._seq_no!, primaryTerm: hit._primary_term! },
     };
   },
@@ -268,20 +50,165 @@ const writer = new OccWriter<MyDocument>({
     const response = await client.index({
       id,
       document,
-      ...(create ? { op_type: 'create' } : {}),
+      ...(create ? { op_type: 'create' as const } : {}),
       ...(ifSeqNo != null && ifPrimaryTerm != null
         ? { if_seq_no: ifSeqNo, if_primary_term: ifPrimaryTerm }
         : {}),
     });
-    return { seqNo: response._seq_no, primaryTerm: response._primary_term };
+    return { seqNo: response._seq_no!, primaryTerm: response._primary_term! };
   },
+  maxRetries: 3,       // optional, default 3
+  retryDelayMs: 100,   // optional, default 100
 });
+```
 
+`get` must return `seq_no` and `primary_term` from Elasticsearch (`get` / `search` with `seq_no_primary_term: true`).
+
+### `create({ id, document })`
+
+Single attempt with `op_type: create`. A `409` means the id already exists (`OccConflictError`). No retry — handle id-collision races at the call site.
+
+### `write({ id, document, ifSeqNo, ifPrimaryTerm })`
+
+Conditional index with caller-supplied version metadata. No read, no retry. A `409` means the document changed since the caller read it.
+
+Same semantics as Saved Objects `update(..., { version })` with `maxAttempts = 1`: the caller owns re-read and re-prepare.
+
+### `readModifyWrite({ id, mutate })`
+
+Read → `mutate(existing)` → index with `if_seq_no` / `if_primary_term`. On `409`, re-read and run `mutate` again up to `maxRetries`.
+
+Same role as Saved Objects `update(...)` **without** an explicit `version` (default `retryOnConflict` loop).
+
+Keep `mutate` **pure** with respect to the `existing` source passed in. Hoist work that does not depend on fresh state (validation, parsing request payload) **outside** `mutate` so retries do not repeat it unnecessarily.
+
+## Choosing a method
+
+| Scenario | Method |
+|----------|--------|
+| Insert a new doc; fail if id exists | `create` |
+| Caller already read the doc and has `(seqNo, primaryTerm)` | `write` |
+| Merge request fields into current stored state | `readModifyWrite` |
+| Outer loop re-reads and re-prepares on conflict | `write` (or `create`) + caller retry |
+
+## Example: concurrent updates
+
+Two writers update the same document. Without OCC, last-write-wins drops the other change.
+
+```typescript
 await writer.readModifyWrite({
-  id: 'my-id',
+  id: 'doc-1',
   mutate: (existing) => ({
     ...existing,
+    title: requestBody.title,
     updated_at: new Date().toISOString(),
   }),
 });
 ```
+
+## Example: thin factory over your storage service
+
+Keep ES details in one adapter; call sites stay domain-focused.
+
+```typescript
+export const createMyOccWriter = ({ storage, logger }: { storage: MyStorage; logger: Logger }) =>
+  new OccWriter<MyDocument>({
+    get: async (id) => {
+      const doc = await storage.getWithVersion(id);
+      return doc
+        ? { id, source: doc.source, occ: { seqNo: doc.seqNo, primaryTerm: doc.primaryTerm } }
+        : null;
+    },
+    index: ({ id, document, create, ifSeqNo, ifPrimaryTerm }) =>
+      storage.index(id, document, { create, ifSeqNo, ifPrimaryTerm }),
+    logger,
+  });
+
+const writer = createMyOccWriter({ storage, logger });
+
+// Merge update
+await writer.readModifyWrite({
+  id,
+  mutate: (existing) => ({ ...existing, ...patch }),
+});
+
+// Optimistic update — caller already has version metadata from a prior read
+await writer.write({
+  id,
+  document: prepared,
+  ifSeqNo: existing.seqNo,
+  ifPrimaryTerm: existing.primaryTerm,
+});
+
+// Create
+await writer.create({ id, document: prepared });
+```
+
+Lookup filters, tenancy, and soft-delete semantics live in `storage.getWithVersion` — not in `OccWriter`.
+
+## Errors
+
+| Export | Use |
+|--------|-----|
+| `OccConflictError` | Thrown by `OccWriter` on exhausted or non-retryable conflicts |
+| `isOccConflictError` | After `OccWriter` calls (`instanceof`) |
+| `isElasticsearchWriteConflict` | Raw ES/client errors before wrapping (HTTP `409`) |
+
+Map `OccConflictError` to your domain error at the call site when needed.
+
+## When not to use
+
+### Saved Objects — OCC is built in
+
+```typescript
+// ✅ Saved Objects
+await savedObjectsClient.update('dashboard', id, { title: 'New title' }, {
+  version: existing.version,
+  retryOnConflict: 3,
+});
+
+// ❌ Don't wrap SO storage in OccWriter
+```
+
+### Append-only or last-write-wins
+
+Logs, audit events, heartbeats, and ephemeral status snapshots do not need read–merge–write. Index directly.
+
+### Scripted partial updates
+
+When you only touch one field or increment a counter, ES `update` with a script may be simpler than full-document merge.
+
+### Bulk or multi-document writes
+
+`OccWriter` handles **one `_id`**. For many documents:
+
+1. **Small batches** — loop `readModifyWrite` per id (simplest).
+2. **Large batches** — bulk index with per-item `if_seq_no` / `if_primary_term`, then retry only `409` items after refreshing version metadata (batch `search` or `mget` with `seq_no_primary_term`).
+
+`@kbn/occ` does not ship a bulk helper; compose the same primitives at the domain layer.
+
+```typescript
+// Bulk with per-item OCC (simplified)
+const operations = hits.map((hit) => ({
+  index: {
+    _id: hit._id!,
+    if_seq_no: hit._seq_no,
+    if_primary_term: hit._primary_term,
+    document: mutate(hit._source),
+  },
+}));
+
+const bulkResponse = await client.bulk({ operations, refresh: true });
+// Retry conflict ids after re-reading fresh seq_no / primary_term
+```
+
+## Design notes
+
+- **`readModifyWrite` retries re-run the entire `mutate`** against a fresh read — do not rely on closed-over stale state inside `mutate`.
+- **`create` and `write` do not retry** — the caller owns re-read + re-prepare on `OccConflictError`.
+- **Validation, version history, and business rules** stay outside this package.
+- Defaults: `DEFAULT_MAX_RETRIES = 3`, `DEFAULT_RETRY_DELAY_MS = 100`, `OCC_CONFLICT_STATUS_CODE = 409`.
+
+## Domain integrations
+
+Reference implementations live in consuming plugins (e.g. workflows OCC wiring and bulk retry patterns). See domain `dev_docs` in those plugins for call-site-specific `get` filters and entry-point tables.

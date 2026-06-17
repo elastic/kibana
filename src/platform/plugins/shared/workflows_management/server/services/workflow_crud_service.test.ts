@@ -1074,7 +1074,7 @@ describe('WorkflowCrudService', () => {
       const service = new WorkflowCrudService(deps);
       await expect(
         service.updateWorkflow('missing', { enabled: false }, 'default', request)
-      ).rejects.toThrow(/not found/);
+      ).rejects.toThrow('Workflow with id missing not found');
       expect(client.index).not.toHaveBeenCalled();
     });
 
