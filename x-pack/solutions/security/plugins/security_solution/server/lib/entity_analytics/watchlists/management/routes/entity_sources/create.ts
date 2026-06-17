@@ -24,6 +24,7 @@ import {
   INTEGRATION_TYPES,
   integrationsSourceIndex,
   oktaLastFullSyncMarkersIndex,
+  watchlistEntitySourceTypeName,
 } from '../../../entity_sources/infra';
 import type { IntegrationType } from '../../../entity_sources/infra';
 
@@ -65,8 +66,11 @@ export const createEntitySourceRoute = (
             const secSol = await context.securitySolution;
             const core = await context.core;
             const namespace = secSol.getSpaceId();
+            const soClient = core.savedObjects.getClient({
+              includedHiddenTypes: [watchlistEntitySourceTypeName],
+            });
             const client = new WatchlistEntitySourceClient({
-              soClient: core.savedObjects.client,
+              soClient,
               namespace,
               getStartServices,
               esClient: core.elasticsearch.client.asCurrentUser,
@@ -79,7 +83,7 @@ export const createEntitySourceRoute = (
             const watchlistClient = new WatchlistConfigClient({
               logger,
               namespace,
-              soClient: core.savedObjects.client,
+              soClient,
               esClient: core.elasticsearch.client.asCurrentUser,
             });
             await watchlistClient.addEntitySourceReference(request.params.watchlist_id, body.id);
@@ -89,7 +93,7 @@ export const createEntitySourceRoute = (
               try {
                 const entitySourcesService = createEntitySourcesService({
                   esClient: core.elasticsearch.client.asCurrentUser,
-                  soClient: core.savedObjects.client,
+                  soClient,
                   logger,
                   namespace,
                   getStartServices,

@@ -16,7 +16,10 @@ import { WatchlistDataSources } from '../../../../../../../common/api/entity_ana
 
 import type { EntityAnalyticsRoutesDeps } from '../../../../types';
 import { withMinimumLicense } from '../../../../utils/with_minimum_license';
-import { WatchlistEntitySourceClient } from '../../../entity_sources/infra';
+import {
+  WatchlistEntitySourceClient,
+  watchlistEntitySourceTypeName,
+} from '../../../entity_sources/infra';
 
 export const getEntitySourceRoute = (
   router: EntityAnalyticsRoutesDeps['router'],
@@ -55,7 +58,9 @@ export const getEntitySourceRoute = (
             const secSol = await context.securitySolution;
             const core = await context.core;
             const client = new WatchlistEntitySourceClient({
-              soClient: core.savedObjects.client,
+              soClient: core.savedObjects.getClient({
+                includedHiddenTypes: [watchlistEntitySourceTypeName],
+              }),
               namespace: secSol.getSpaceId(),
               getStartServices,
               esClient: core.elasticsearch.client.asCurrentUser,

@@ -16,6 +16,7 @@ import { SyncWatchlistRequestParams } from '../../../../../../common/api/entity_
 import type { EntityAnalyticsRoutesDeps } from '../../../types';
 import { withMinimumLicense } from '../../../utils/with_minimum_license';
 import { createEntitySourcesService } from '../../entity_sources/entity_sources_service';
+import { watchlistEntitySourceTypeName } from '../../entity_sources/infra';
 
 export const syncWatchlistRoute = (
   router: EntityAnalyticsRoutesDeps['router'],
@@ -51,7 +52,9 @@ export const syncWatchlistRoute = (
 
           const entitySourcesService = createEntitySourcesService({
             esClient: core.elasticsearch.client.asCurrentUser,
-            soClient: core.savedObjects.client,
+            soClient: core.savedObjects.getClient({
+              includedHiddenTypes: [watchlistEntitySourceTypeName],
+            }),
             logger,
             namespace: secSol.getSpaceId(),
             getStartServices,

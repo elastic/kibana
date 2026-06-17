@@ -11,6 +11,7 @@ import { transformError } from '@kbn/securitysolution-es-utils';
 import { API_VERSIONS, APP_ID } from '../../../../../../common/constants';
 import { WATCHLISTS_PREBUILT_INSTALL_URL } from '../../../../../../common/entity_analytics/watchlists/constants';
 import type { EntityAnalyticsRoutesDeps } from '../../../types';
+import { watchlistEntitySourceTypeName } from '../../entity_sources/infra';
 import { WatchlistConfigClient } from '../watchlist_config';
 import { ensurePrebuiltWatchlists } from '../../migrations/install_prebuilt_watchlists';
 
@@ -42,7 +43,9 @@ export const installPrebuiltWatchlistsRoute = (
           const secSol = await context.securitySolution;
           const core = await context.core;
           const namespace = secSol.getSpaceId();
-          const soClient = core.savedObjects.client;
+          const soClient = core.savedObjects.getClient({
+            includedHiddenTypes: [watchlistEntitySourceTypeName],
+          });
           const esClient = core.elasticsearch.client.asCurrentUser;
 
           const watchlistClient = new WatchlistConfigClient({
