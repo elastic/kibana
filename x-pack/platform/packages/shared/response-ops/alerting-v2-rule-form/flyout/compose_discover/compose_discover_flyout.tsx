@@ -48,7 +48,7 @@ import { RULE_BUILDER_REGISTRY, BuilderStateProvider, type BuilderState } from '
 import type { ComposeDiscoverMode, QueryTab, RecoveryType } from './types';
 import { getSandboxTabs, useComposeDiscoverState } from './use_compose_discover_state';
 import { useEsqlAutocomplete } from './use_esql_providers';
-import { guessRecoveryBlock, splitQuery } from './use_heuristic_split';
+import { guessRecoveryBlock, discoverQueryToComposed, splitQuery } from './use_heuristic_split';
 import { useSplitQueryCompletion } from './use_split_query_completion';
 
 const LazyYamlRuleForm = React.lazy(() =>
@@ -257,12 +257,28 @@ export function ComposeDiscoverFlyout({
   const initialKind = initialMapped?.kind ?? 'alert';
   const hasInitialCustomRecovery =
     initialMapped?.query?.format === 'composed' && !!initialMapped.query.recovery?.segment?.trim();
+
+  const inlineResult = useMemo(
+    () =>
+      initialQuery !== undefined
+        ? inlineEsqlVariables(initialQuery, esqlVariables)
+        : { query: '', unresolved: [] as string[] },
+    [initialQuery, esqlVariables]
+  );
+
+  const discoverComposedQuery = useMemo(
+    () => (initialQuery !== undefined ? discoverQueryToComposed(inlineResult.query) : undefined),
+    [initialQuery, inlineResult.query]
+  );
+
+  const isDiscoverQueryComplete = Boolean(discoverComposedQuery?.breach.segment.trim());
+
   const [uiState, dispatch] = useComposeDiscoverState({
     mode: mode === 'clone' ? 'edit' : mode,
     initialKind,
     initialRecoveryType: hasInitialCustomRecovery ? 'custom' : 'default',
     isBuilderMode,
-    isQueryPrePopulated: !!initialQuery,
+    isQueryPrePopulated: isDiscoverQueryComplete,
   });
 
   // Registered once here so providers persist across Sandbox open/close cycles.
@@ -274,14 +290,6 @@ export function ComposeDiscoverFlyout({
     const definition = RULE_BUILDER_REGISTRY[builderType];
     return definition ? definition.createDefaultState() : undefined;
   });
-
-  const inlineResult = useMemo(
-    () =>
-      initialQuery !== undefined
-        ? inlineEsqlVariables(initialQuery, esqlVariables)
-        : { query: '', unresolved: [] as string[] },
-    [initialQuery, esqlVariables]
-  );
 
   const validationErrors = inlineResult.unresolved;
   const hasValidationErrors = validationErrors.length > 0;
@@ -304,11 +312,11 @@ export function ComposeDiscoverFlyout({
     if (initialQuery !== undefined) {
       return {
         ...EMPTY_FORM_VALUES,
-        query: { format: 'composed', base: inlineResult.query, blocks: { breach: '' } },
+        query: discoverComposedQuery ?? discoverQueryToComposed(''),
       };
     }
     return EMPTY_FORM_VALUES;
-  }, [rule, mode, initialQuery, inlineResult.query]);
+  }, [rule, mode, initialQuery, discoverComposedQuery]);
 
   const methods = useForm<ComposeFormValues>({ mode: 'onBlur', defaultValues });
   const [isConfirmCloseVisible, setIsConfirmCloseVisible] = useState(false);
@@ -405,14 +413,12 @@ export function ComposeDiscoverFlyout({
       return;
     }
 
-    const composedQuery: RuleQuery = {
-      format: 'composed',
-      base: inlineResult.query,
-      blocks: { breach: '' },
-    };
+    const composedQuery = discoverQueryToComposed(inlineResult.query);
     methods.reset({ ...methods.getValues(), query: composedQuery });
     setSandboxQuery(composedQuery);
-    dispatch({ type: inlineResult.query.trim() ? 'COMMIT_QUERY' : 'INVALIDATE_QUERY' });
+    dispatch({
+      type: composedQuery.breach.segment.trim() ? 'COMMIT_QUERY' : 'INVALIDATE_QUERY',
+    });
   }, [initialQuery, esqlVariables, inlineResult.query, rule, methods, dispatch]);
 
   const syncSandbox = useCallback(() => {
@@ -650,6 +656,10 @@ export function ComposeDiscoverFlyout({
 
   const handleSubmit = methods.handleSubmit((values) => {
     if (hasValidationErrors) {
+      return;
+    }
+    const query = values.query;
+    if (values.kind === 'alert' && query.format === 'composed' && !query.breach.segment.trim()) {
       return;
     }
     if (builderType) {

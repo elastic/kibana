@@ -35,7 +35,9 @@ test.describe('Rule name validation — Discover flyout', { tag: '@local-statefu
     await browserAuth.loginAsAlertingV2Editor();
     await pageObjects.ruleForm.gotoDiscover();
     await pageObjects.ruleForm.switchToEsqlMode();
-    await pageObjects.discover.writeAndSubmitEsqlQuery(`FROM ${SOURCE_INDEX} | LIMIT 10`);
+    await pageObjects.discover.writeAndSubmitEsqlQuery(
+      `FROM ${SOURCE_INDEX} | WHERE message != "" | LIMIT 10`
+    );
     await pageObjects.discover.waitUntilSearchingHasFinished();
   });
 

@@ -103,7 +103,7 @@ export class RuleFormPage {
   /**
    * Advances through the ComposeDiscoverFlyout steps until the Details step
    * (where the rule name input appears). Assumes the flyout is already open
-   * with a pre-populated query so the alert-condition step can be skipped.
+   * with a Discover query that includes a splittable alert condition (WHERE clause).
    */
   async navigateToDetailsStep() {
     await this.clickNextWhenEnabled();

@@ -82,6 +82,12 @@ describe('createInitialState', () => {
     expect(state.queryCommitted).toBe(true);
     expect(state.childOpen).toBe(true);
   });
+
+  it('sets queryCommitted false when Discover query has no splittable alert condition', () => {
+    const state = createInitialState({ mode: 'create', isQueryPrePopulated: false });
+
+    expect(state.queryCommitted).toBe(false);
+  });
 });
 
 // ── reducer ───────────────────────────────────────────────────────────────────
