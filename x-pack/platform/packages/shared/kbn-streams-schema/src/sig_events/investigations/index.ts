@@ -7,14 +7,8 @@
 
 export {
   investigationInputSchema,
-  contextOutputSchema,
-  gatherOutputSchema,
-  reviewOutputSchema,
   investigationResultSchema,
   type InvestigationInput,
-  type HypothesisProposal,
-  type ContextOutput,
-  type GatherOutput,
-  type ReviewOutput,
   type InvestigationResult,
+  type AlternativeRuledOut,
 } from './schema';

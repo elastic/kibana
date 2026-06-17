@@ -308,16 +308,10 @@ export {
   type SigEventStatus,
   type SigEventImpact,
   investigationInputSchema,
-  contextOutputSchema,
-  gatherOutputSchema,
-  reviewOutputSchema,
   investigationResultSchema,
   type InvestigationInput,
-  type HypothesisProposal,
-  type ContextOutput,
-  type GatherOutput,
-  type ReviewOutput,
   type InvestigationResult,
+  type AlternativeRuledOut,
 } from './src/sig_events';
 export type {
   StreamsKIsOnboardingResult,

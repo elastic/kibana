@@ -91,10 +91,7 @@ export const AGENT_BUILDER_BUILTIN_AGENTS = [
   'sigevents.memory.gap-detector',
   `${internalNamespaces.streams}.significant-events.discovery.investigator`,
   `${internalNamespaces.streams}.significant-events.discovery.judge`,
-  'sigevents.investigation.context',
-  'sigevents.investigation.gather',
-  'sigevents.investigation.review',
-  'sigevents.investigation.synthesis',
+  `${internalNamespaces.streams}.significant-events.investigation`,
 ] as const;
 
 export type AgentBuilderBuiltinAgent = (typeof AGENT_BUILDER_BUILTIN_AGENTS)[number];
@@ -130,11 +127,6 @@ export const AGENT_BUILDER_BUILTIN_SKILLS = [
   'streams-management',
   'significant-events-memory',
   'significant-events-management',
-  'significant-events-investigation-context',
-  'significant-events-investigation-gather',
-  'significant-events-investigation-review',
-  'significant-events-investigation-synthesis',
-  'significant-events-investigation-runner',
   'knowledge-indicators-management',
   'ki-identification-management',
   'streams-memory-synthesis',
