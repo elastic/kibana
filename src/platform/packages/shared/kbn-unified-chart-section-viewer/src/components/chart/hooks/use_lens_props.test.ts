@@ -192,6 +192,38 @@ describe('useLensProps', () => {
     });
   });
 
+  it('uses provided legend config when legend prop is set', async () => {
+    const chartRef = createMockChartRef();
+
+    renderHook(() =>
+      useLensProps({
+        chartId: 'testChartId',
+        title: 'Test Chart',
+        query: 'FROM metrics-*',
+        services: servicesMock as UnifiedHistogramServices,
+        fetchParams,
+        discoverFetch$,
+        chartRef,
+        chartLayers: mockChartLayers,
+        legend: { show: true, position: 'right' },
+        profileId: 'testProfileId',
+      })
+    );
+
+    act(() => {
+      discoverFetch$.next({ fetchParams, lensVisServiceState: undefined });
+    });
+
+    await waitFor(() => {
+      expect(LensConfigBuilder.prototype.build).toHaveBeenCalledWith(
+        expect.objectContaining({
+          legend: { show: true, position: 'right' },
+        }),
+        expect.anything()
+      );
+    });
+  });
+
   it('updates lensProps when discoverFetch$ emits', async () => {
     const chartRef = createMockChartRef();
     const testFetchParams = {
