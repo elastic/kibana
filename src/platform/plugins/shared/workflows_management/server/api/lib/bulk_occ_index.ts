@@ -26,7 +26,8 @@ export interface OccWorkflowHit {
   primaryTerm: number;
 }
 
-type WorkflowStorageClient = ReturnType<WorkflowStorage['getClient']>;
+export type WorkflowStorageClient = ReturnType<WorkflowStorage['getClient']>;
+export type BulkOccIndexClient = Pick<WorkflowStorageClient, 'bulk' | 'search'>;
 
 interface BulkIndexItem {
   index?: { _id?: string | null; status?: number; error?: estypes.ErrorCause };
@@ -64,7 +65,7 @@ const buildBulkIndexOperations = (
   }));
 
 const refreshOccHits = async (
-  client: WorkflowStorageClient,
+  client: BulkOccIndexClient,
   ids: string[]
 ): Promise<{
   refreshed: OccWorkflowHit[];
@@ -122,7 +123,7 @@ export const bulkIndexWithOccRetry = async ({
   retryDelayMs = DEFAULT_RETRY_DELAY_MS,
   refresh = true,
 }: {
-  client: WorkflowStorageClient;
+  client: BulkOccIndexClient;
   hits: OccWorkflowHit[];
   mutate: (source: WorkflowProperties) => WorkflowProperties;
   logger?: Logger;

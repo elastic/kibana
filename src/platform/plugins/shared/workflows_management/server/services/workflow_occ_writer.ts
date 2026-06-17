@@ -12,9 +12,15 @@ import { OccWriter } from '@kbn/occ';
 import type { WorkflowCrudService } from './workflow_crud_service';
 import type { WorkflowProperties } from '../storage/workflow_storage';
 
+export interface WorkflowDocumentGetOptions {
+  includeDeleted?: boolean;
+  includeGlobal?: boolean;
+}
+
 export interface WriteWorkflowDocumentParams {
   create?: boolean;
   maxRetries?: number;
+  getOptions?: WorkflowDocumentGetOptions;
   mutate: (existing: WorkflowProperties | undefined) => WorkflowProperties;
 }
 
@@ -23,15 +29,17 @@ export const createWorkflowOccWriter = ({
   spaceId,
   logger,
   maxRetries,
+  getOptions,
 }: {
   crudService: WorkflowCrudService;
   spaceId: string;
   logger: Logger;
   maxRetries?: number;
+  getOptions?: WorkflowDocumentGetOptions;
 }): OccWriter<WorkflowProperties> =>
   new OccWriter<WorkflowProperties>({
     get: async (id) => {
-      const document = await crudService.getWorkflowDocumentWithVersion(id, spaceId);
+      const document = await crudService.getWorkflowDocumentWithVersion(id, spaceId, getOptions);
       if (!document) {
         return null;
       }

@@ -27,7 +27,11 @@ import type { WorkflowPartialDetailDto } from '@kbn/workflows/types/v1';
 import { WorkflowConflictError } from '@kbn/workflows-yaml';
 import type { z } from '@kbn/zod/v4';
 import type { WorkflowCrudDeps } from './types';
-import { createWorkflowOccWriter, type WriteWorkflowDocumentParams } from './workflow_occ_writer';
+import {
+  createWorkflowOccWriter,
+  type WorkflowDocumentGetOptions,
+  type WriteWorkflowDocumentParams,
+} from './workflow_occ_writer';
 import { getWorkflowZodSchema } from '../../common/schema';
 import { extractBulkItemError } from '../api/lib/bulk_response_helpers';
 import { deleteWorkflows } from '../api/lib/workflow_deletion';
@@ -155,8 +159,16 @@ export class WorkflowCrudService {
     return { seqNo: response._seq_no, primaryTerm: response._primary_term };
   }
 
-  private getOccWriter(spaceId: string, maxRetries?: number) {
-    const cacheKey = `${spaceId}:${maxRetries ?? 'default'}`;
+  private getOccWriter(
+    spaceId: string,
+    maxRetries?: number,
+    getOptions?: WorkflowDocumentGetOptions
+  ) {
+    const includeDeleted = getOptions?.includeDeleted ?? false;
+    const includeGlobal = getOptions?.includeGlobal ?? false;
+    const cacheKey = `${spaceId}:${
+      maxRetries ?? 'default'
+    }:includeDeleted:${includeDeleted}:includeGlobal:${includeGlobal}`;
     let writer = this.occWritersByCacheKey.get(cacheKey);
     if (!writer) {
       writer = createWorkflowOccWriter({
@@ -164,6 +176,7 @@ export class WorkflowCrudService {
         spaceId,
         logger: this.deps.logger,
         maxRetries,
+        getOptions,
       });
       this.occWritersByCacheKey.set(cacheKey, writer);
     }
@@ -175,7 +188,7 @@ export class WorkflowCrudService {
     spaceId: string,
     params: WriteWorkflowDocumentParams
   ): Promise<WorkflowProperties> {
-    const writer = this.getOccWriter(spaceId, params.maxRetries);
+    const writer = this.getOccWriter(spaceId, params.maxRetries, params.getOptions);
 
     try {
       const { document } = await writer.write({
@@ -613,8 +626,17 @@ export class WorkflowCrudService {
       const triggerDefinitions = workflow.yaml
         ? this.deps.workflowsExtensions?.getAllTriggerDefinitions() ?? []
         : undefined;
+      const yamlResult =
+        workflow.yaml && zodSchema && triggerDefinitions
+          ? applyYamlUpdate({
+              workflowYaml: workflow.yaml,
+              zodSchema,
+              triggerDefinitions,
+            })
+          : undefined;
 
       const finalData = await this.writeWorkflowDocument(id, spaceId, {
+        getOptions: { includeDeleted: true, includeGlobal: true },
         mutate: (existingSource) => {
           if (!existingSource) {
             throw new Error(`Workflow with id ${id} not found in space ${spaceId}`);
@@ -628,12 +650,7 @@ export class WorkflowCrudService {
           shouldUpdateScheduler =
             workflow.enabled !== undefined && workflow.enabled !== existingSource.enabled;
 
-          if (workflow.yaml && zodSchema && triggerDefinitions) {
-            const yamlResult = applyYamlUpdate({
-              workflowYaml: workflow.yaml,
-              zodSchema,
-              triggerDefinitions,
-            });
+          if (yamlResult && workflow.yaml) {
             updatedData = { ...updatedData, yaml: workflow.yaml, ...yamlResult.updatedDataPatch };
             validationErrors.length = 0;
             validationErrors.push(...yamlResult.validationErrors);
