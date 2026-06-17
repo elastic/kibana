@@ -7,5 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const EBT_BREAKDOWN_SELECTOR_ACTION = 'selectBreakdown';
-export const EBT_BREAKDOWN_SELECTOR_ELEMENT = 'chartsBreakdownSelector';
+export const EBT_BREAKDOWN_SELECTOR_ELEMENT = 'chartsToolbar';

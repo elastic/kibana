@@ -26,12 +26,12 @@ import {
   ToolbarSelector,
   type SelectableEntry,
 } from '@kbn/shared-ux-toolbar-selector';
-import { getEbtProps } from '@kbn/ebt-click';
+import { EBT_CLICK_ACTIONS, getEbtProps } from '@kbn/ebt-click';
 import type { UnifiedHistogramBreakdownContext } from '../../types';
-import { EBT_BREAKDOWN_SELECTOR_ACTION, EBT_BREAKDOWN_SELECTOR_ELEMENT } from './ebt_constants';
+import { EBT_BREAKDOWN_SELECTOR_ELEMENT } from './ebt_constants';
 
 const EBT_SELECT_BREAKDOWN_PROPS = getEbtProps({
-  action: EBT_BREAKDOWN_SELECTOR_ACTION,
+  action: EBT_CLICK_ACTIONS.SET_BREAKDOWN,
   element: EBT_BREAKDOWN_SELECTOR_ELEMENT,
 });
 
