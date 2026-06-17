@@ -11,19 +11,20 @@ import { i18n } from '@kbn/i18n';
 
 import {
   EuiBasicTable,
-  EuiPanel,
-  EuiText,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiButton,
-  EuiFormRow,
-  EuiFieldText,
   EuiButtonIcon,
   EuiCode,
-  EuiSpacer,
   EuiConfirmModal,
-  useGeneratedHtmlId,
+  EuiFieldText,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFormRow,
+  EuiPanel,
+  EuiSpacer,
+  EuiText,
+  EuiToolTip,
   type EuiBasicTableColumn,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 
 import type { NewAgentPolicy, AgentPolicy, GlobalDataTag } from '../../../../../common/types';
@@ -328,24 +329,28 @@ export const GlobalDataTagsTable: React.FunctionComponent<Props> = ({
               return isEditing || isAddingRow ? (
                 <EuiFlexGroup alignItems="center" gutterSize="s">
                   <EuiFlexItem grow={false}>
-                    <EuiButtonIcon
-                      size="xs"
-                      color="primary"
-                      iconType="checkCircleFill"
-                      onClick={isAdding ? confirmNewTagChanges : () => confirmEditChanges(index)}
-                      aria-label="Confirm"
-                    />
+                    <EuiToolTip content="Confirm" disableScreenReaderOutput>
+                      <EuiButtonIcon
+                        size="xs"
+                        color="primary"
+                        iconType="checkCircleFill"
+                        onClick={isAdding ? confirmNewTagChanges : () => confirmEditChanges(index)}
+                        aria-label="Confirm"
+                      />
+                    </EuiToolTip>
                   </EuiFlexItem>
                 </EuiFlexGroup>
               ) : (
-                <EuiButtonIcon
-                  aria-label="Edit"
-                  iconType="pencil"
-                  color="text"
-                  data-test-subj={`globalDataTagEditField${index}Btn`}
-                  isDisabled={isDisabled}
-                  onClick={() => handleStartEdit(index)}
-                />
+                <EuiToolTip content="Edit" disableScreenReaderOutput>
+                  <EuiButtonIcon
+                    aria-label="Edit"
+                    iconType="pencil"
+                    color="text"
+                    data-test-subj={`globalDataTagEditField${index}Btn`}
+                    isDisabled={isDisabled}
+                    onClick={() => handleStartEdit(index)}
+                  />
+                </EuiToolTip>
               );
             },
           },
@@ -359,24 +364,28 @@ export const GlobalDataTagsTable: React.FunctionComponent<Props> = ({
               return isEditing || isAddingRow ? (
                 <EuiFlexGroup alignItems="center" gutterSize="s">
                   <EuiFlexItem grow={false}>
-                    <EuiButtonIcon
-                      size="xs"
-                      color="danger"
-                      iconType="errorFill"
-                      onClick={isAddingRow ? cancelNewTagChanges : () => cancelEditChanges(index)}
-                      aria-label="Cancel"
-                    />
+                    <EuiToolTip content="Cancel" disableScreenReaderOutput>
+                      <EuiButtonIcon
+                        size="xs"
+                        color="danger"
+                        iconType="errorFill"
+                        onClick={isAddingRow ? cancelNewTagChanges : () => cancelEditChanges(index)}
+                        aria-label="Cancel"
+                      />
+                    </EuiToolTip>
                   </EuiFlexItem>
                 </EuiFlexGroup>
               ) : (
-                <EuiButtonIcon
-                  aria-label="Delete"
-                  iconType="trash"
-                  color="text"
-                  data-test-subj={`globalDataTagDeleteField${index}Btn`}
-                  isDisabled={isDisabled}
-                  onClick={() => deleteTag(index)}
-                />
+                <EuiToolTip content="Delete" disableScreenReaderOutput>
+                  <EuiButtonIcon
+                    aria-label="Delete"
+                    iconType="trash"
+                    color="text"
+                    data-test-subj={`globalDataTagDeleteField${index}Btn`}
+                    isDisabled={isDisabled}
+                    onClick={() => deleteTag(index)}
+                  />
+                </EuiToolTip>
               );
             },
           },
