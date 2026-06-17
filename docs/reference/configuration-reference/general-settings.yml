@@ -845,9 +845,12 @@ groups:
 
       - setting: migrations.useCumulativeLogger
         description: |
-          Skip logging migration progress unless there are any errors. Set to `false` when troubleshooting migration issues and not automatically shown.
+          When enabled, migration progress is only logged if the migration fails, reducing log volume during successful startups. When disabled (the default), migration steps are logged continuously, which keeps failing or stuck migrations visible. Set to `true` to reduce startup log volume.
+        note: |
+          :applies_to: stack: ga 9.2-9.4
+          In these versions, this setting defaults to `true`.
         datatype: bool
-        default: true
+        default: false
         applies_to:
           - "stack: ga 9.2"
           - "ech: unavailable"
