@@ -36,6 +36,7 @@ interface KibanaJsonc {
  */
 function readKibanaJsonc(packagePath: string): KibanaJsonc | null {
   const filePath = nodePath.join(REPO_ROOT, packagePath, 'kibana.jsonc');
+  if (!existsSync(filePath)) return null;
   try {
     const raw = readFileSync(filePath, 'utf8');
     return parseJsonc(raw) as KibanaJsonc;
