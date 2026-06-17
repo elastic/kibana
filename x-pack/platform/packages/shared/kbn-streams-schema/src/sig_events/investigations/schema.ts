@@ -31,7 +31,7 @@ const alternativeRuledOutSchema = z.object({
 export type AlternativeRuledOut = z.infer<typeof alternativeRuledOutSchema>;
 
 export const investigationResultSchema = z.object({
-  root_cause: z.string(),
+  contributing_factors: z.string(),
   confidence: z.number().min(0).max(1),
   evidence_summary: z.string(),
   mechanism: z.string(),

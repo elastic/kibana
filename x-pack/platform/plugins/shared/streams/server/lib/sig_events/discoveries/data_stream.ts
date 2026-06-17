@@ -32,7 +32,7 @@ export const discoveriesMappings = {
       properties: {
         completed_at: { type: 'date' as const },
         workflow_execution_id: { type: 'keyword' as const },
-        root_cause: { type: 'text' as const },
+        contributing_factors: { type: 'text' as const },
         confidence: { type: 'float' as const },
         impact: { type: 'text' as const },
         investigation_complete: { type: 'boolean' as const },
