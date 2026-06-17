@@ -342,16 +342,17 @@ export const seedSiemReadinessData = async ({
   log.info('[siem-readiness] Seeding quality check results');
 
   // Use esClient.index (not bulk) to trigger auto-creation of the quality index.
+  // The quality results index is a data stream — must include @timestamp.
   await esClient.index({
     index: DATA_QUALITY_INDEX,
     refresh: true,
-    document: buildQualityDoc(SIEM_READINESS_INDICES.identity, 2),
+    document: { ...buildQualityDoc(SIEM_READINESS_INDICES.identity, 2), '@timestamp': recentTimestamp(1) },
   });
 
   await esClient.index({
     index: DATA_QUALITY_INDEX,
     refresh: true,
-    document: buildQualityDoc(SIEM_READINESS_INDICES.endpoint, 0),
+    document: { ...buildQualityDoc(SIEM_READINESS_INDICES.endpoint, 0), '@timestamp': recentTimestamp(2) },
   });
 
   log.info(
