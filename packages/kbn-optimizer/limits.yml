@@ -44,7 +44,7 @@ pageLoadAssetSize:
   dataViewManagement: 6250
   dataViews: 66000
   dataVisualizer: 32727
-  developerToolbar: 5758
+  developerToolbar: 15000
   devTools: 8107
   discover: 30501
   discoverEnhanced: 5353
@@ -177,7 +177,7 @@ pageLoadAssetSize:
   share: 64059
   slo: 40437
   snapshotRestore: 22068
-  spaces: 28871
+  spaces: 30180
   stackAlerts: 31499
   stackConnectors: 85421
   streams: 32595

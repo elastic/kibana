@@ -9,7 +9,6 @@
 
 export type {
   AppDeepLinkId,
-  AppId,
   AppHeaderBack,
   AppHeaderBadge,
   AppHeaderBadgeItem,
@@ -23,6 +22,7 @@ export type {
   AppHeaderTab,
   AppHeaderTitle,
   AppHeaderTitleSaveResult,
+  AppId,
   ChromeBadge,
   ChromeBreadcrumbsBadge,
   ChromeBreadcrumb,

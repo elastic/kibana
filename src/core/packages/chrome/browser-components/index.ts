@@ -11,7 +11,8 @@ export { ChromeComponentsProvider } from './src/context';
 export type { ChromeComponentsDeps } from './src/context';
 
 export { ClassicHeader } from './src/classic';
-export { ChromeNextGlobalHeader } from './src/chrome_next';
+export { ChromeNextGlobalHeader, ChromeNextGlobalHeaderShell } from './src/chrome_next';
+export type { ChromeNextGlobalHeaderShellProps } from './src/chrome_next';
 export {
   ChromeAppHeaderRenderer,
   ProjectHeader,

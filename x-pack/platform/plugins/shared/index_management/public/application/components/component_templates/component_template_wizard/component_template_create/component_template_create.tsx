@@ -7,8 +7,8 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
 import type { RouteComponentProps } from 'react-router-dom';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiPageSection, EuiSpacer, EuiPageHeader } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { EuiPageSection, EuiSpacer } from '@elastic/eui';
 
 import { useRedirectPath } from '../../../../hooks/redirect_path';
 import { breadcrumbService, IndexManagementBreadcrumb } from '../../../../services/breadcrumbs';
@@ -17,6 +17,7 @@ import { useComponentTemplatesContext } from '../../component_templates_context'
 import { useUpdateAssociatedDsMappings } from '../component_template_ds_mappings/use_update_associated_ds_mappings';
 import { ComponentTemplateForm } from '../component_template_form';
 import { useStepFromQueryString } from '../use_step_from_query_string';
+import { PageHeader } from '../../../page_header';
 
 interface Props {
   /**
@@ -125,25 +126,18 @@ export const ComponentTemplateCreate: React.FunctionComponent<RouteComponentProp
 
   return (
     <EuiPageSection restrictWidth style={{ width: '100%' }}>
-      <EuiPageHeader
-        pageTitle={
-          <span data-test-subj="pageTitle">
-            {isCloning ? (
-              <FormattedMessage
-                id="xpack.idxMgmt.cloneComponentTemplate.pageTitle"
-                defaultMessage="Clone component template"
-              />
-            ) : (
-              <FormattedMessage
-                id="xpack.idxMgmt.createComponentTemplate.pageTitle"
-                defaultMessage="Create component template"
-              />
-            )}
-          </span>
+      <PageHeader
+        title={
+          isCloning
+            ? i18n.translate('xpack.idxMgmt.cloneComponentTemplate.pageTitle', {
+                defaultMessage: 'Clone component template',
+              })
+            : i18n.translate('xpack.idxMgmt.createComponentTemplate.pageTitle', {
+                defaultMessage: 'Create component template',
+              })
         }
-        bottomBorder
+        back="/app/management/data/index_management/component_templates"
       />
-
       <EuiSpacer size="l" />
 
       <ComponentTemplateForm

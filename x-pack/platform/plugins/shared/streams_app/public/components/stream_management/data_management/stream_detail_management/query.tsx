@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiFlexGroup, EuiPageHeader, EuiToolTip, useEuiTheme } from '@elastic/eui';
+import { EuiFlexGroup, EuiPageHeader, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { Streams } from '@kbn/streams-schema';
@@ -96,23 +96,14 @@ export function QueryStreamDetailManagement({
     tabs.significantEvents = significantEvents;
   }
 
+  const advancedTabLabel = i18n.translate('xpack.streams.queryStreamDetailManagement.advancedTab', {
+    defaultMessage: 'Advanced',
+  });
   tabs.advanced = {
     content: (
       <QueryStreamsAdvancedView definition={definition} refreshDefinition={refreshDefinition} />
     ),
-    label: (
-      <EuiToolTip
-        content={i18n.translate('xpack.streams.queryStreamDetailManagement.advanced.tooltip', {
-          defaultMessage: 'View technical details about this query stream’s underlying setup',
-        })}
-      >
-        <span tabIndex={0}>
-          {i18n.translate('xpack.streams.queryStreamDetailManagement.advancedTab', {
-            defaultMessage: 'Advanced',
-          })}
-        </span>
-      </EuiToolTip>
-    ),
+    label: advancedTabLabel,
   };
 
   if (!isValidManagementSubTab(tab) || !tabs[tab]?.content) {

@@ -7,7 +7,7 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import type { Streams } from '@kbn/streams-schema';
-import { EuiBadgeGroup, EuiFlexGroup, EuiToolTip } from '@elastic/eui';
+import { EuiBadgeGroup, EuiFlexGroup } from '@elastic/eui';
 import { useStreamsAppParams } from '../../../../hooks/use_streams_app_params';
 import { useStreamsPrivileges } from '../../../../hooks/use_streams_privileges';
 import { useKibana } from '../../../../hooks/use_kibana';
@@ -153,23 +153,14 @@ export function ClassicStreamDetailManagement({
     }),
   };
 
+  const dataQualityTabLabel = i18n.translate('xpack.streams.streamDetailView.qualityTab', {
+    defaultMessage: 'Data quality',
+  });
   tabs.dataQuality = {
     content: (
       <StreamDetailDataQuality definition={definition} refreshDefinition={refreshDefinition} />
     ),
-    label: (
-      <EuiToolTip
-        content={i18n.translate('xpack.streams.managementTab.dataQuality.tooltip', {
-          defaultMessage: 'View details about this classic stream’s data quality',
-        })}
-      >
-        <span data-test-subj="dataQualityTab" tabIndex={0}>
-          {i18n.translate('xpack.streams.streamDetailView.qualityTab', {
-            defaultMessage: 'Data quality',
-          })}
-        </span>
-      </EuiToolTip>
-    ),
+    label: dataQualityTabLabel,
   };
 
   tabs.attachments = {
@@ -184,24 +175,14 @@ export function ClassicStreamDetailManagement({
   }
 
   if (definition.privileges.manage || definition.replicated) {
+    const advancedTabLabel = i18n.translate('xpack.streams.streamDetailView.advancedTab', {
+      defaultMessage: 'Advanced',
+    });
     tabs.advanced = {
       content: (
         <ClassicAdvancedView definition={definition} refreshDefinition={refreshDefinition} />
       ),
-      label: (
-        <EuiToolTip
-          content={i18n.translate('xpack.streams.managementTab.advanced.tooltip', {
-            defaultMessage:
-              'View technical details about this classic stream’s underlying index setup',
-          })}
-        >
-          <span tabIndex={0}>
-            {i18n.translate('xpack.streams.streamDetailView.advancedTab', {
-              defaultMessage: 'Advanced',
-            })}
-          </span>
-        </EuiToolTip>
-      ),
+      label: advancedTabLabel,
     };
   }
 

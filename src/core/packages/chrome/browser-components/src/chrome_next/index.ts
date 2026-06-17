@@ -7,5 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { ChromeNextGlobalHeader, ChromeNextGlobalHeaderShell } from './global_header';
-export type { ChromeNextGlobalHeaderShellProps } from './global_header';
+export {
+  ChromeNextGlobalHeader,
+  ChromeNextGlobalHeaderShell,
+  HeaderActionButton,
+} from './global_header';
+export type { ChromeNextGlobalHeaderShellProps, HeaderActionButtonProps } from './global_header';

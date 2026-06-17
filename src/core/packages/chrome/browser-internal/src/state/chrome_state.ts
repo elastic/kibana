@@ -67,9 +67,9 @@ export interface ChromeState {
   globalFooter: State<ReactNode>;
   aiButton: State<ReadonlySet<GlobalHeaderAiButton>>;
   globalSearch: State<GlobalSearchConfig | undefined>;
+  contextSwitcher: State<ReactNode>;
   customNavLink: State<ChromeNavLink | undefined>;
   appMenu: State<AppMenuConfig | undefined>;
-  contextSwitcher: State<ReactNode>;
   inlineAppHeader: State<boolean>;
   appHeader: State<AppHeaderConfig | undefined>;
   userMenu: State<ReactNode>;
@@ -80,6 +80,9 @@ export interface ChromeState {
     supportUrl: State<string>;
     globalMenuLinks: ArrayState<ChromeGlobalHelpExtensionMenuLink>;
   };
+
+  /** App documentation link registered by the current app */
+  appDocumentationLink: State<string | undefined>;
 
   /** Feedback handler registered by the feedback plugin */
   feedbackHandler: State<(() => void) | undefined>;
@@ -124,8 +127,8 @@ export function createChromeState({ application, docLinks }: ChromeStateDeps): C
   const globalFooter = createState<ReactNode>(null);
   const aiButton = createState<ReadonlySet<GlobalHeaderAiButton>>(new Set());
   const globalSearch = createState<GlobalSearchConfig | undefined>(undefined);
-  const customNavLink = createState<ChromeNavLink | undefined>(undefined);
   const contextSwitcher = createState<ReactNode>(null);
+  const customNavLink = createState<ChromeNavLink | undefined>(undefined);
   const inlineAppHeader = createState<boolean>(false);
   const appHeader = createState<AppHeaderConfig | undefined>(undefined);
   const userMenu = createState<ReactNode>(null);
@@ -134,6 +137,9 @@ export function createChromeState({ application, docLinks }: ChromeStateDeps): C
   const helpExtension = createState<ChromeHelpExtension | undefined>(undefined);
   const helpSupportUrl = createState<string>(docLinks.links.kibana.askElastic);
   const globalHelpMenuLinks = createArrayState<ChromeGlobalHelpExtensionMenuLink>();
+
+  // App Documentation Link
+  const appDocumentationLink = createState<string | undefined>(undefined);
 
   // Feedback
   const feedbackHandler = createState<(() => void) | undefined>(undefined);
@@ -170,6 +176,7 @@ export function createChromeState({ application, docLinks }: ChromeStateDeps): C
       supportUrl: helpSupportUrl,
       globalMenuLinks: globalHelpMenuLinks,
     },
+    appDocumentationLink,
     contextSwitcher,
     userMenu,
     feedbackHandler,

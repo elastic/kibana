@@ -7,7 +7,7 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { type Streams, isRoot, isDraftStream, LOGS_ROOT_STREAM_NAME } from '@kbn/streams-schema';
-import { EuiBadgeGroup, EuiCallOut, EuiFlexGroup, EuiToolTip } from '@elastic/eui';
+import { EuiBadgeGroup, EuiCallOut, EuiFlexGroup } from '@elastic/eui';
 import { useStreamsAppParams } from '../../../../hooks/use_streams_app_params';
 import { RedirectTo } from '../../../redirect_to';
 import { StreamDetailRouting } from '../stream_detail_routing';
@@ -165,6 +165,10 @@ export function WiredStreamDetailManagement({
     );
   }
 
+  const dataQualityTabLabel = i18n.translate('xpack.streams.streamDetailView.qualityTab', {
+    defaultMessage: 'Data quality',
+  });
+
   const tabs = {
     overview: {
       content: <StreamOverview />,
@@ -219,19 +223,7 @@ export function WiredStreamDetailManagement({
                 refreshDefinition={refreshDefinition}
               />
             ),
-            label: (
-              <EuiToolTip
-                content={i18n.translate('xpack.streams.managementTab.dataQuality.wired.tooltip', {
-                  defaultMessage: "View details about this stream's data quality",
-                })}
-              >
-                <span data-test-subj="dataQualityTab" tabIndex={0}>
-                  {i18n.translate('xpack.streams.streamDetailView.qualityTab', {
-                    defaultMessage: 'Data quality',
-                  })}
-                </span>
-              </EuiToolTip>
-            ),
+            label: dataQualityTabLabel,
           },
         }
       : {}),

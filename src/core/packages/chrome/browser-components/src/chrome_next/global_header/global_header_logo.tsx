@@ -10,7 +10,7 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
-import { useBasePath, useCustomBranding, useProjectHome } from '../../shared/chrome_hooks';
+import { useProjectHome, useBasePath, useCustomBranding } from '../../shared/chrome_hooks';
 import { LoadingIndicator } from '../../shared/loading_indicator';
 import { headerButtonBaseStyles, useHeaderButtonStyleVars } from './header_action_button';
 

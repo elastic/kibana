@@ -17,7 +17,12 @@ export interface DeveloperToolbarItem {
   priority?: number;
 }
 
-export type KnownItemIds = 'environmentInfo' | 'frameJank' | 'memoryMonitor' | 'errorsMonitor';
+export type KnownItemIds =
+  | 'environmentInfo'
+  | 'frameJank'
+  | 'memoryMonitor'
+  | 'errorsMonitor'
+  | 'cloudEnvironment';
 
 export type ItemId = KnownItemIds | string;
 

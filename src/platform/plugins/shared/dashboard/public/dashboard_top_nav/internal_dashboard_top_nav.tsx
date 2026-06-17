@@ -27,11 +27,12 @@ import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import type { Query } from '@kbn/es-query';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { getManagedContentBadge } from '@kbn/managed-content-badge';
-import type { TopNavMenuBadgeProps, TopNavMenuProps } from '@kbn/navigation-plugin/public';
+import type { TopNavMenuBadgeProps } from '@kbn/navigation-plugin/public';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 import { LazyLabsFlyout, withSuspense } from '@kbn/presentation-util-plugin/public';
 
 import { AppMenu } from '@kbn/core-chrome-app-menu';
+import { ChromeAppHeaderRegistration } from '@kbn/app-header';
 import { UI_SETTINGS } from '../../common/constants';
 import { DASHBOARD_APP_ID } from '../../common/page_bundle_constants';
 import type { SaveDashboardReturn } from '../dashboard_api/save_modal/types';
@@ -117,6 +118,11 @@ export function InternalDashboardTopNav({
     dashboardApi.unpublishedTimeslice$,
     dashboardInternalApi.publishedEsqlVariables$,
     dashboardInternalApi.unpublishedEsqlVariables$
+  );
+
+  const chromeNextHeaderFavoriteGlobalAction = useMemo(
+    () => (lastSavedId ? <DashboardFavoriteButton dashboardId={lastSavedId} /> : undefined),
+    [lastSavedId]
   );
 
   const hasUnpublishedFilters = useMemo(() => {
@@ -311,8 +317,8 @@ export function InternalDashboardTopNav({
     dashboardApi.clearOverlays();
   });
 
-  const badges = useMemo(() => {
-    const allBadges: TopNavMenuProps['badges'] = [];
+  const badges = useMemo<TopNavMenuBadgeProps[]>(() => {
+    const allBadges: TopNavMenuBadgeProps[] = [];
 
     const { showWriteControls } = getDashboardCapabilities();
     if (showWriteControls && dashboardApi.isManaged) {
@@ -327,11 +333,11 @@ export function InternalDashboardTopNav({
           const badgeButton = <EuiBadge {...badgeProps}>{badgeText}</EuiBadge>;
           return (
             <EuiPopover
+              aria-label={dashboardManagedBadge.getBadgeAriaLabel()}
               button={badgeButton}
               isOpen={isPopoverOpen}
               closePopover={() => setIsPopoverOpen(false)}
               panelStyle={{ maxWidth: 250 }}
-              aria-label={dashboardManagedBadge.getBadgeAriaLabel()}
             >
               <FormattedMessage
                 id="dashboard.managedContentPopoverButton"
@@ -376,24 +382,30 @@ export function InternalDashboardTopNav({
     });
   }, [lastSavedId]);
 
+  const appMenuConfig = visibilityProps.showTopNavMenu
+    ? viewMode === 'edit'
+      ? editModeTopNavConfig
+      : viewModeTopNavConfig
+    : undefined;
+
   return (
     <div css={styles.container}>
+      {visibilityProps.showTopNavMenu && viewMode !== 'print' && (
+        <ChromeAppHeaderRegistration
+          title={dashboardTitle}
+          // TODO: instead of hardcoding this should also be dynamic like customLeadingBreadCrumbs
+          back="/app/dashboards#/list"
+          menu={appMenuConfig}
+          favorite={chromeNextHeaderFavoriteGlobalAction}
+        />
+      )}
       <EuiScreenReaderOnly>
         <h1
           id="dashboardTitle"
           ref={dashboardTitleRef}
         >{`${getDashboardBreadcrumb()} - ${dashboardTitle}`}</h1>
       </EuiScreenReaderOnly>
-      <AppMenu
-        setAppMenu={coreServices.chrome.setAppMenu}
-        config={
-          visibilityProps.showTopNavMenu
-            ? viewMode === 'edit'
-              ? editModeTopNavConfig
-              : viewModeTopNavConfig
-            : undefined
-        }
-      />
+      <AppMenu setAppMenu={coreServices.chrome.setAppMenu} config={appMenuConfig} />
       {viewMode !== 'print' && visibilityProps.showSearchBar && (
         <unifiedSearchService.ui.SearchBar
           {...visibilityProps}

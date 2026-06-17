@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { LanguageSelector } from './language_selector';
+export { openLanguageModal } from './language_selector';

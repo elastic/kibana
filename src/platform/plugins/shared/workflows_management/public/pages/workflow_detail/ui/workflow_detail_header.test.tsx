@@ -9,6 +9,8 @@
 
 import { fireEvent, render } from '@testing-library/react';
 import React from 'react';
+import { ChromeServiceProvider } from '@kbn/core-chrome-browser-context';
+import { chromeServiceMock } from '@kbn/core-chrome-browser-mocks';
 import { useWorkflowsCapabilities, type WorkflowsManagementCapabilities } from '@kbn/workflows-ui';
 import { createMockWorkflowsCapabilities } from '@kbn/workflows-ui/mocks';
 import {
@@ -122,7 +124,11 @@ describe('WorkflowDetailHeader', () => {
     }
 
     const wrapper = ({ children }: { children: React.ReactNode }) => {
-      return <TestWrapper store={store}>{children}</TestWrapper>;
+      return (
+        <ChromeServiceProvider value={{ chrome: chromeServiceMock.createStartContract() }}>
+          <TestWrapper store={store}>{children}</TestWrapper>
+        </ChromeServiceProvider>
+      );
     };
 
     return { ...render(component, { wrapper }), store };

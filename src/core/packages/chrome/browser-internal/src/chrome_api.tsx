@@ -203,6 +203,10 @@ export function createChromeApi({
         get$: () => state.globalSearch.$,
         set: (config) => state.globalSearch.set(config),
       },
+      userMenu: {
+        get$: () => state.userMenu.$,
+        set: state.userMenu.set,
+      },
       contextSwitcher: {
         get$: () => state.contextSwitcher.$,
         set: state.contextSwitcher.set,
@@ -242,6 +246,8 @@ export function createChromeApi({
       },
       getNewsfeedHandler$: () => state.newsfeedHandler.$,
     },
+    registerAppDocumentationLink: state.appDocumentationLink.set,
+    getAppDocumentationLink$: () => state.appDocumentationLink.$,
     sidebar,
   };
 

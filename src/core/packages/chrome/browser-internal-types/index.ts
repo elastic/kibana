@@ -135,11 +135,14 @@ export interface InternalChromeNext extends ChromeNext {
   aiButton: ChromeNext['aiButton'] & {
     get$(): Observable<GlobalHeaderAiButton[]>;
   };
-  contextSwitcher: ChromeNext['contextSwitcher'] & {
-    get$(): Observable<ReactNode>;
-  };
   globalSearch: ChromeNext['globalSearch'] & {
     get$(): Observable<GlobalSearchConfig | undefined>;
+  };
+  userMenu: ChromeNext['userMenu'] & {
+    get$(): Observable<ReactNode>;
+  };
+  contextSwitcher: ChromeNext['contextSwitcher'] & {
+    get$(): Observable<ReactNode>;
   };
   inlineAppHeader: {
     get$(): Observable<boolean>;

@@ -57,13 +57,18 @@ export const Navigation = (props: ChromeNavigationProps) => {
 // eslint-disable-next-line import/no-default-export
 export default Navigation;
 
-const useNavigationItems = (): (NavigationItems & { solutionId: SolutionId }) | null => {
+interface NavigationState extends NavigationItems {
+  solutionId: SolutionId;
+}
+
+const useNavigationItems = (): NavigationState | null => {
   const chrome = useChromeService();
   const basePath = useBasePath();
   const isNextChrome = useIsNextChrome();
 
   const items$ = useMemo(() => {
     const panelStateManager = new PanelStateManager(basePath.get());
+
     return chrome.project.getNavigation$().pipe(
       map((nav) => ({
         ...toNavigationItems(nav.navigationTree, nav.activeNodes, panelStateManager, isNextChrome),

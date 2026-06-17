@@ -165,9 +165,8 @@ export class ManagementPlugin
           cloud: deps.cloud,
           isAirGapped,
           setBreadcrumbs: (newBreadcrumbs) => {
+            const [, ...trailingBreadcrumbs] = newBreadcrumbs;
             if (deps.serverless) {
-              // drop the root management breadcrumb in serverless because it comes from the navigation tree
-              const [, ...trailingBreadcrumbs] = newBreadcrumbs;
               deps.serverless.setBreadcrumbs(trailingBreadcrumbs);
             } else {
               const chromeStyle = coreStart.chrome.getChromeStyle();
@@ -175,9 +174,9 @@ export class ManagementPlugin
                 // Project chrome (solution spaces): the navigation tree provides "Stack Management > App".
                 // Management apps provide breadcrumbs as [Stack Management, App, ...details].
                 // We drop the first two and append the rest to the nav tree path.
-                const [, , ...trailingBreadcrumbs] = newBreadcrumbs;
+                const [, , ...projectTrailingBreadcrumbs] = newBreadcrumbs;
                 coreStart.chrome.setBreadcrumbs([], {
-                  project: { value: trailingBreadcrumbs },
+                  project: { value: projectTrailingBreadcrumbs },
                 });
               } else {
                 // Classic chrome: use full breadcrumb trail as-is

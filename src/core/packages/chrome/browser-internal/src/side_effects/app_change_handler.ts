@@ -43,6 +43,9 @@ export function setupAppChangeHandler({
     // Reset help
     state.help.extension.set(undefined);
 
+    // Reset app documentation link
+    state.appDocumentationLink.set(undefined);
+
     // Reset document title
     docTitle.reset();
   });

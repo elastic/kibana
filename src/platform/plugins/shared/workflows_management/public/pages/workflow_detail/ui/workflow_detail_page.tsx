@@ -61,6 +61,8 @@ export function WorkflowDetailPage({ id }: { id?: string }) {
 
   const isReady = !isLoadingWorkflow && !isLoadingConnectors;
 
+  const [highlightDiff, setHighlightDiff] = useState(false);
+
   const activeTabInStore = useSelector(selectActiveTab);
   const workflowId = useSelector(selectWorkflowId);
   const workflowName = useSelector(selectWorkflowName);
@@ -126,9 +128,6 @@ export function WorkflowDetailPage({ id }: { id?: string }) {
       dispatch(setExecution(undefined));
     }
   }, [selectedExecutionId, dispatch]);
-
-  // TODO: manage it in a workflow state context
-  const [highlightDiff, setHighlightDiff] = useState(false);
 
   const onCloseExecutionDetail = useCallback(() => {
     setSelectedExecution(null);

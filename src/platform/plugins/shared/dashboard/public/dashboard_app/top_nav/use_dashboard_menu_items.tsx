@@ -21,6 +21,7 @@ import type {
   AppMenuItemType,
   AppMenuPrimaryActionItem,
 } from '@kbn/core-chrome-app-menu-components';
+import { APP_MENU_SHARE_ID } from '@kbn/core-chrome-app-menu-components';
 import { useDashboardExportItems } from './share/use_dashboard_export_items';
 import { getAccessControlClient } from '../../services/access_control_service';
 import { UI_SETTINGS } from '../../../common/constants';
@@ -292,7 +293,7 @@ export const useDashboardMenuItems = ({
         label: topNavStrings.share.label,
         tooltipContent: getShareTooltip(),
         tooltipTitle: topNavStrings.share.tooltipTitle,
-        id: 'share',
+        id: APP_MENU_SHARE_ID,
         iconType: 'share',
         testId: 'shareTopNavButton',
         disableButton: disableTopNav,
@@ -548,5 +549,8 @@ export const useDashboardMenuItems = ({
     isLabsEnabled,
   ]);
 
-  return { viewModeTopNavConfig, editModeTopNavConfig };
+  return {
+    viewModeTopNavConfig,
+    editModeTopNavConfig,
+  };
 };

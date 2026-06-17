@@ -57,7 +57,16 @@ export interface AppHeaderBadgeItem {
 /** @public */
 export interface AppHeaderTab {
   id: string;
-  label: string;
+  /**
+   * Tab label. A plain `string` is preferred, but `ReactNode` is currently allowed to
+   * accommodate existing consumers (e.g. the Streams management tabs) that render rich
+   * labels with inline actions/tooltips.
+   *
+   * TBD: this is intentionally permissive only to support today's use-cases during the
+   * Chrome-Next transition — it is not meant to allow arbitrary content long term. Revisit
+   * once a first-class API exists for tab-level actions so this can be narrowed back to `string`.
+   */
+  label: ReactNode;
   isSelected?: boolean;
   onClick?: () => void;
   href?: string;
@@ -198,7 +207,15 @@ export interface ChromeNext {
      */
     set(config?: GlobalSearchConfig): void;
   };
-  /** Context switcher content. */
+  userMenu: {
+    /**
+     * Set the user menu content for the Chrome-Next global header.
+     * The provided ReactNode is rendered as-is in the header's user menu slot.
+     * The consumer owns the full UI (avatar button, popover, menu items).
+     * Pass `undefined` to remove. Global — persists across app changes.
+     */
+    set(content?: ReactNode): void;
+  };
   contextSwitcher: {
     /**
      * Set the context switcher content for the Chrome-Next header.

@@ -15,7 +15,7 @@ export const NEXT_CHROME_SESSION_STORAGE_KEY = 'dev.core.chrome.next';
 type FeatureFlagsBooleanReader = Pick<FeatureFlagsStart, 'getBooleanValue'>;
 
 const isNextChromeFeatureFlagEnabled = (featureFlags: FeatureFlagsBooleanReader): boolean =>
-  featureFlags.getBooleanValue(NEXT_CHROME_FEATURE_FLAG_KEY, false);
+  featureFlags.getBooleanValue(NEXT_CHROME_FEATURE_FLAG_KEY, true);
 
 export const isNextChrome = (featureFlags: FeatureFlagsBooleanReader): boolean => {
   if (!isNextChromeFeatureFlagEnabled(featureFlags)) {

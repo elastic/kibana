@@ -17,7 +17,7 @@ import type { InternalChromeStart } from '@kbn/core-chrome-browser-internal-type
 
 type ChromeStorybookStart = Pick<
   InternalChromeStart,
-  'getBadge$' | 'getBreadcrumbsBadges$' | 'getHelpExtension$'
+  'getBadge$' | 'getBreadcrumbsBadges$' | 'getHelpExtension$' | 'getAppDocumentationLink$'
 > & {
   next: Pick<InternalChromeStart['next'], 'getFeedbackHandler$'>;
   componentDeps: {
@@ -50,6 +50,7 @@ export const createChromeStorybookStart = (): InternalChromeStart => {
     getBadge$: () => new BehaviorSubject<ChromeBadge | undefined>(undefined),
     getBreadcrumbsBadges$: () => new BehaviorSubject<ChromeBreadcrumbsBadge[]>([]),
     getHelpExtension$: () => new BehaviorSubject<ChromeHelpExtension | undefined>(undefined),
+    getAppDocumentationLink$: () => new BehaviorSubject<string | undefined>(undefined),
   };
 
   return start as InternalChromeStart;

@@ -8,7 +8,7 @@
 import React, { useState, useCallback, useRef, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiSpacer, EuiButton, EuiPageHeader } from '@elastic/eui';
+import { EuiSpacer, EuiButton } from '@elastic/eui';
 import type { ScopedHistory } from '@kbn/core/public';
 
 import { allowAutoCreateRadioIds, STANDARD_INDEX_MODE } from '../../../../common/constants';
@@ -26,13 +26,14 @@ import {
 } from '../index_templates';
 import { StepLogisticsContainer, StepComponentContainer, StepReviewContainer } from './steps';
 import { buildTemplateFromWizardData } from './utils/build_template_from_wizard_data';
+import { PageHeader } from '../page_header';
 
 const { stripEmptyFields } = serializers;
 const { FormWizard, FormWizardStep } = Forms;
 const { useGlobalFlyout } = GlobalFlyout;
 
 interface Props {
-  title: string | JSX.Element;
+  title: string;
   onSave: (template: TemplateDeserialized) => void;
   clearSaveError: () => void;
   isSaving: boolean;
@@ -273,9 +274,11 @@ export const TemplateForm = ({
 
   return (
     <>
-      {/* Form header */}
-      <EuiPageHeader pageTitle={<span data-test-subj="pageTitle">{title}</span>} bottomBorder />
-
+      <PageHeader
+        title={title}
+        back="/app/management/data/index_management/templates"
+        padding={{ bleed: 'l' }}
+      />
       <EuiSpacer size="m" />
 
       {isLegacyIndexTemplate && (

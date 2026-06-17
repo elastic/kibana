@@ -39,6 +39,7 @@ export const TabsView = (props: SingleTabViewProps) => {
   const unsavedTabIds = useInternalStateSelector((state) => state.tabs.unsavedIds);
   const currentDataView = useCurrentTabRuntimeState((tab) => tab.currentDataView$);
   const scopedEbtManager = useCurrentTabRuntimeState((tab) => tab.scopedEbtManager$);
+  const isNextChrome = services.discoverFeatureFlags.getIsNextChrome();
 
   const {
     shouldCollapseAppMenu,
@@ -117,7 +118,9 @@ export const TabsView = (props: SingleTabViewProps) => {
             getTopTabMenuItems={getTopTabMenuItems}
             getAdditionalTabMenuItems={getAdditionalTabMenuItems}
             appendRight={
-              <AppMenuComponent config={topNavMenuItems} isCollapsed={shouldCollapseAppMenu} />
+              !isNextChrome ? (
+                <AppMenuComponent config={topNavMenuItems} isCollapsed={shouldCollapseAppMenu} />
+              ) : undefined
             }
           />
         </div>

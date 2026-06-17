@@ -157,6 +157,8 @@ steps:
 
   - command: .buildkite/scripts/steps/test/pick_test_group_run_order.sh
     label: 'Pick Test Group Run Order'
+    # Temporary: disable CI test fanout on this branch.
+    if: "false"
     key: pick_test_group_run_order
     agents:
       machineType: n2-standard-2
@@ -174,6 +176,8 @@ steps:
 
   - command: .buildkite/scripts/steps/test/scout/test_run_builder.sh
     label: 'Scout Test Run Builder'
+    # Temporary: disable CI test fanout on this branch.
+    if: "false"
     agents:
       machineType: n2d-standard-8
     key: build_scout_tests

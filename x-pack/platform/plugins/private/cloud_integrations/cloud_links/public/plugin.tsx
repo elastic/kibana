@@ -29,9 +29,11 @@ export class CloudLinksPlugin
   implements Plugin<void, void, CloudLinksDepsSetup, CloudLinksDepsStart>
 {
   public offering: BuildFlavor;
+  private isDev: boolean;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.offering = initializerContext.env.packageInfo.buildFlavor;
+    this.isDev = initializerContext.env.mode.dev;
   }
 
   public setup({ analytics }: CoreSetup) {
@@ -108,6 +110,7 @@ export class CloudLinksPlugin
           cloud,
           share,
           isServerless: this.offering === 'serverless',
+          isDev: this.isDev,
         });
       }
     }

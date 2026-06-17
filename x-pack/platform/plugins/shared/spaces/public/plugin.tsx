@@ -186,6 +186,13 @@ export class SpacesPlugin
     if (!(this.isServerless && this.config.maxSpaces === 1)) {
       initSpacesNavControl(this.spacesManager, core, this.config, this.eventTracker);
     }
+    initContextSwitcher(
+      this.spacesManager,
+      core,
+      this.config.allowSolutionVisibility,
+      plugins.cloud,
+      this.isServerless
+    );
 
     initContextSwitcher(
       this.spacesManager,

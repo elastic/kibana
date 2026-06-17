@@ -333,8 +333,28 @@ describe('SecurityNavControl', () => {
                     </span>
                   </span>
                 </a>
-                <div>
-                  Dummy Component
+                <div
+                  class="euiListItemLayout euiContextMenuItem emotion-euiListItemLayout-euiContextMenuItem-center"
+                  data-test-subj="userMenuLink__dummyComponent"
+                >
+                  <span
+                    class="euiListItemLayout__content emotion-euiListItemLayout__content"
+                  >
+                    <span
+                      class="euiListItemLayout__prepend emotion-euiListItemLayout__prepend"
+                    >
+                      <span
+                        aria-hidden="true"
+                        class="emotion-euiContextMenu__icon"
+                        data-euiicon-type="empty"
+                      />
+                    </span>
+                    <span
+                      class="euiListItemLayout__text euiContextMenuItem__text emotion-euiListItemLayout__text-wrap-euiContextMenuItem__text"
+                    >
+                      dummyComponent
+                    </span>
+                  </span>
                 </div>
                 <div
                   class="euiListItemLayout euiContextMenuItem emotion-euiListItemLayout-euiContextMenuItem-center"

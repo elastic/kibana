@@ -14,12 +14,15 @@ import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { useTopNavMenuItems } from '../top_nav/use_top_nav_menu_items';
 
 export const SingleTabViewWithAppMenu = (props: SingleTabViewProps) => {
-  const { chrome } = useDiscoverServices();
+  const { chrome, discoverFeatureFlags } = useDiscoverServices();
+  const isNextChrome = discoverFeatureFlags.getIsNextChrome();
   const topNavMenuItems = useTopNavMenuItems();
 
   return (
     <>
-      {topNavMenuItems && <AppMenu config={topNavMenuItems} setAppMenu={chrome.setAppMenu} />}
+      {!isNextChrome && topNavMenuItems && (
+        <AppMenu config={topNavMenuItems} setAppMenu={chrome.setAppMenu} />
+      )}
       <SingleTabView {...props} />
     </>
   );

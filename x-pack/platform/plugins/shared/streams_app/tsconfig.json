@@ -15,6 +15,7 @@
   ],
   "exclude": ["target/**/*", ".storybook/**/*.js"],
   "kbn_references": [
+    "@kbn/app-header",
     "@kbn/core",
     "@kbn/data-plugin",
     "@kbn/dataset-quality-plugin",

@@ -15,7 +15,7 @@ import {
   EuiLoadingSpinner,
   EuiPopover,
 } from '@elastic/eui';
-import type { FunctionComponent, MouseEvent, ReactNode } from 'react';
+import type { FunctionComponent, ReactNode } from 'react';
 import React, { Fragment, useCallback, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import type { Observable } from 'rxjs';
@@ -28,9 +28,9 @@ import { UserAvatar, type UserProfileAvatarData } from '@kbn/user-profile-compon
 import { getUserDisplayName, isUserAnonymous } from '../../common/model';
 import { useCurrentUser, useUserProfile } from '../components';
 
-type ContextMenuItem = Omit<EuiContextMenuPanelItemDescriptor, 'content' | 'onClick'> & {
-  content?: ReactNode | ((args: { closePopover: () => void }) => ReactNode);
-  onClick?: (event: MouseEvent<Element>) => void;
+type ContextMenuItem = Omit<EuiContextMenuPanelItemDescriptor, 'onClick' | 'content'> & {
+  onClick?: () => void;
+  content?: ReactNode | ((props: { closePopover: () => void }) => ReactNode);
 };
 
 interface ContextMenuProps {
@@ -40,30 +40,31 @@ interface ContextMenuProps {
 
 const ContextMenuContent = ({ items, closePopover }: ContextMenuProps) => {
   return (
-    <>
-      <EuiContextMenuPanel>
-        {items.map((item, i) => {
-          if (item.content) {
-            return (
-              <Fragment key={i}>
-                {typeof item.content === 'function' ? item.content({ closePopover }) : item.content}
-              </Fragment>
-            );
-          }
+    <EuiContextMenuPanel>
+      {items.map((item, i) => {
+        if (item.content) {
           return (
-            <EuiContextMenuItem
-              key={i}
-              icon={item.icon}
-              href={item.href}
-              onClick={item.onClick}
-              data-test-subj={item['data-test-subj']}
-            >
-              {item.name}
-            </EuiContextMenuItem>
+            <Fragment key={i}>
+              {typeof item.content === 'function' ? item.content({ closePopover }) : item.content}
+            </Fragment>
           );
-        })}
-      </EuiContextMenuPanel>
-    </>
+        }
+        return (
+          <EuiContextMenuItem
+            key={i}
+            icon={item.icon}
+            href={item.href}
+            onClick={() => {
+              item.onClick?.();
+              if (!item.href) closePopover();
+            }}
+            data-test-subj={item['data-test-subj']}
+          >
+            {item.name}
+          </EuiContextMenuItem>
+        );
+      })}
+    </EuiContextMenuPanel>
   );
 };
 
@@ -74,11 +75,11 @@ export interface SecurityNavControlRenderButtonProps {
 }
 
 interface SecurityNavControlProps {
-  avatarSize?: 's' | 'm' | 'l';
   editProfileUrl: string;
   logoutUrl: string;
   renderButton?: (props: SecurityNavControlRenderButtonProps) => NonNullable<ReactNode>;
   userMenuLinks$: Observable<UserMenuLink[]>;
+  avatarSize?: 's' | 'm' | 'l';
 }
 
 export const SecurityNavControl: FunctionComponent<SecurityNavControlProps> = ({
@@ -92,7 +93,7 @@ export const SecurityNavControl: FunctionComponent<SecurityNavControlProps> = ({
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
   const userProfile = useUserProfile<{ avatar: UserProfileAvatarData }>('avatar,userSettings');
-  const currentUser = useCurrentUser(); // User profiles do not exist for anonymous users so need to fetch current user as well
+  const currentUser = useCurrentUser();
 
   const displayName = currentUser.value ? getUserDisplayName(currentUser.value) : '';
 
@@ -135,13 +136,12 @@ export const SecurityNavControl: FunctionComponent<SecurityNavControlProps> = ({
   if (userMenuLinks.length) {
     const userMenuLinkMenuItems = userMenuLinks
       .sort(({ order: orderA = Infinity }, { order: orderB = Infinity }) => orderA - orderB)
-      .map(({ label, iconType, href, onClick, content }: UserMenuLink) => ({
+      .map(({ label, iconType, href, onClick }: UserMenuLink) => ({
         name: label,
         icon: <EuiIcon type={iconType} size="m" aria-hidden={true} />,
         href,
         onClick,
         'data-test-subj': `userMenuLink__${label}`,
-        content,
       }));
     items.push(...userMenuLinkMenuItems);
   }
@@ -150,7 +150,7 @@ export const SecurityNavControl: FunctionComponent<SecurityNavControlProps> = ({
   const hasCustomProfileLinks = userMenuLinks.some(({ setAsProfile }) => setAsProfile === true);
 
   if (!isAnonymous && !hasCustomProfileLinks) {
-    const profileMenuItem: EuiContextMenuPanelItemDescriptor = {
+    const profileMenuItem: ContextMenuItem = {
       name: (
         <FormattedMessage
           id="xpack.security.navControlComponent.editProfileLinkText"

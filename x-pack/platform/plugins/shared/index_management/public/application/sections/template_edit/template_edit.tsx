@@ -10,6 +10,7 @@ import type { RouteComponentProps } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiPageSection, EuiSpacer, EuiCallOut } from '@elastic/eui';
+
 import type { ScopedHistory } from '@kbn/core/public';
 
 import type { TemplateDeserialized } from '../../../../common';
@@ -177,13 +178,10 @@ export const TemplateEdit: React.FunctionComponent<RouteComponentProps<MatchPara
       )}
 
       <TemplateForm
-        title={
-          <FormattedMessage
-            id="xpack.idxMgmt.editTemplate.editTemplatePageTitle"
-            defaultMessage="Edit template ''{name}''"
-            values={{ name: decodedTemplateName }}
-          />
-        }
+        title={i18n.translate('xpack.idxMgmt.editTemplate.editTemplatePageTitle', {
+          defaultMessage: "Edit template ''{name}''",
+          values: { name: decodedTemplateName },
+        })}
         defaultValue={template!}
         onSave={onSave}
         isSaving={isSaving}

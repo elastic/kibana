@@ -234,7 +234,6 @@ export function LifecycleBadge({
 
 interface DiscoverBadgeButtonBaseProps {
   hasDataStream?: boolean;
-  spellOut?: boolean;
 }
 
 interface DiscoverBadgeButtonIngestProps extends DiscoverBadgeButtonBaseProps {
@@ -247,27 +246,29 @@ interface DiscoverBadgeButtonQueryProps extends DiscoverBadgeButtonBaseProps {
   indexMode?: never;
 }
 
-type DiscoverBadgeButtonProps = DiscoverBadgeButtonIngestProps | DiscoverBadgeButtonQueryProps;
+type DiscoverLinkProps = DiscoverBadgeButtonIngestProps | DiscoverBadgeButtonQueryProps;
 
-export function DiscoverBadgeButton({
-  stream,
-  hasDataStream = false,
-  spellOut = false,
-  indexMode,
-}: DiscoverBadgeButtonProps) {
+type DiscoverBadgeButtonProps = DiscoverLinkProps & {
+  spellOut?: boolean;
+};
+
+export function useDiscoverLink(props?: DiscoverLinkProps) {
   const {
     dependencies: {
       start: { share },
     },
   } = useKibana();
-  const isIngestStream = !Streams.QueryStream.Definition.is(stream);
   const { features } = useStreamsPrivileges();
-  const esqlQuery = getDiscoverEsqlQuery({
-    definition: stream,
-    indexMode: isIngestStream ? indexMode : undefined,
-    includeMetadata: Streams.WiredStream.Definition.is(stream),
-    useViews: features.wiredStreamViews.enabled,
-  });
+  const stream = props?.stream;
+  const isIngestStream = stream ? !Streams.QueryStream.Definition.is(stream) : false;
+  const esqlQuery = stream
+    ? getDiscoverEsqlQuery({
+        definition: stream,
+        indexMode: isIngestStream ? props.indexMode : undefined,
+        includeMetadata: Streams.WiredStream.Definition.is(stream),
+        useViews: features.wiredStreamViews.enabled,
+      })
+    : undefined;
   const useUrl = share.url.locators.useUrl;
 
   const discoverLink = useUrl<DiscoverAppLocatorParams>(
@@ -280,13 +281,24 @@ export function DiscoverBadgeButton({
     [esqlQuery]
   );
 
-  if (!discoverLink || !hasDataStream || !esqlQuery) {
+  if (!discoverLink || !props?.hasDataStream || !esqlQuery) {
+    return undefined;
+  }
+
+  return discoverLink;
+}
+
+export function DiscoverBadgeButton({ spellOut = false, ...linkProps }: DiscoverBadgeButtonProps) {
+  const { stream } = linkProps;
+  const discoverLink = useDiscoverLink(linkProps);
+
+  if (!discoverLink) {
     return null;
   }
 
   const ariaLabel = i18n.translate(
     'xpack.streams.entityDetailViewWithoutParams.openInDiscoverBadgeLabel',
-    { defaultMessage: 'Open in Discover' }
+    { defaultMessage: 'View in Discover' }
   );
 
   return spellOut ? (

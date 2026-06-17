@@ -6,18 +6,15 @@
  */
 
 import type { IconType } from '@elastic/eui';
-import type { MouseEvent, ReactNode } from 'react';
 import type { Observable } from 'rxjs';
 
 export interface UserMenuLink {
   label: string;
   iconType: IconType;
-  href: string;
+  href?: string;
   order?: number;
   setAsProfile?: boolean;
-  onClick?: (event: MouseEvent<Element>) => void;
-  /** Render a custom ReactNode instead of the default <EuiContextMenuItem /> */
-  content?: ReactNode | ((args: { closePopover: () => void }) => ReactNode);
+  onClick?: () => void;
 }
 
 export interface SecurityNavControlServiceStart {

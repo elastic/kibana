@@ -7,8 +7,9 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
 import type { RouteComponentProps } from 'react-router-dom';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiPageSection, EuiPageHeader, EuiSpacer, EuiCallOut } from '@elastic/eui';
+import { EuiPageSection, EuiSpacer, EuiCallOut } from '@elastic/eui';
 
 import { breadcrumbService, IndexManagementBreadcrumb } from '../../../../services/breadcrumbs';
 import { useComponentTemplatesContext } from '../../component_templates_context';
@@ -16,6 +17,7 @@ import type { ComponentTemplateDeserialized, Error } from '../../shared_imports'
 import { PageLoading, PageError, attemptToURIDecode } from '../../shared_imports';
 import { ComponentTemplateForm } from '../component_template_form';
 import { useRedirectPath } from '../../../../hooks/redirect_path';
+import { PageHeader } from '../../../page_header';
 
 import { useStepFromQueryString } from '../use_step_from_query_string';
 import { useUpdateAssociatedDsMappings } from '../component_template_ds_mappings/use_update_associated_ds_mappings';
@@ -115,19 +117,13 @@ export const ComponentTemplateEdit: React.FunctionComponent<RouteComponentProps<
 
   return (
     <EuiPageSection restrictWidth style={{ width: '100%' }}>
-      <EuiPageHeader
-        pageTitle={
-          <span data-test-subj="pageTitle">
-            <FormattedMessage
-              id="xpack.idxMgmt.componentTemplateEdit.editPageTitle"
-              defaultMessage="Edit component template ''{name}''"
-              values={{ name: decodedName }}
-            />
-          </span>
-        }
-        bottomBorder
+      <PageHeader
+        title={i18n.translate('xpack.idxMgmt.componentTemplateEdit.editPageTitle', {
+          defaultMessage: "Edit component template ''{name}''",
+          values: { name: decodedName },
+        })}
+        back="/app/management/data/index_management/component_templates"
       />
-
       <EuiSpacer size="l" />
 
       {componentTemplate?.deprecated && (

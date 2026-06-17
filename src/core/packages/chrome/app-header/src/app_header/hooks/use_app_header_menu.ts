@@ -67,6 +67,7 @@ const useStaticItems = ({
   const chrome = useChromeService();
   const basePath = useBasePath();
   const feedbackHandler = useObservable(chrome.next.getFeedbackHandler$(), undefined);
+  const documentationLink = useObservable(chrome.getAppDocumentationLink$(), undefined);
   const helpExtension = useObservable(chrome.getHelpExtension$(), undefined);
 
   return useMemo(() => {
@@ -81,6 +82,7 @@ const useStaticItems = ({
      */
     const docLink =
       explicitDocLink ??
+      documentationLink ??
       helpExtension?.links?.find((link) => link.linkType === 'documentation')?.href;
 
     if (docLink) {
@@ -93,7 +95,14 @@ const useStaticItems = ({
     }
 
     return staticItems;
-  }, [basePath, explicitDocLink, helpExtension, showAddIntegrations, feedbackHandler]);
+  }, [
+    basePath,
+    explicitDocLink,
+    helpExtension,
+    showAddIntegrations,
+    feedbackHandler,
+    documentationLink,
+  ]);
 };
 
 const useResolvedAppMenu = (menu: AppMenuConfig | undefined): ResolvedAppMenu => {

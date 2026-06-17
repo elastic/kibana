@@ -5,71 +5,38 @@
  * 2.0.
  */
 
-import React, { useRef } from 'react';
-import { EuiContextMenuItem } from '@elastic/eui';
-import { i18n, getAvailableLocales } from '@kbn/i18n';
+import React from 'react';
 import type { SecurityPluginStart } from '@kbn/security-plugin/public';
 import { UserProfilesKibanaProvider } from '@kbn/user-profile-components';
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import type { OverlayRef } from '@kbn/core-mount-utils-browser';
-
 import { LanguageModal } from './language_modal';
-import { useLanguage } from './use_language_hook';
 
-interface Props {
-  security: SecurityPluginStart;
+interface OpenLanguageModalParams {
   core: CoreStart;
-  closePopover: () => void;
+  security: SecurityPluginStart;
 }
 
-export const LanguageSelector = ({ security, core, closePopover }: Props) => {
-  return (
-    <UserProfilesKibanaProvider core={core} security={security} toMountPoint={toMountPoint}>
-      <LanguageSelectorUI core={core} security={security} closePopover={closePopover} />
-    </UserProfilesKibanaProvider>
-  );
-};
+let languageModalRef: OverlayRef | null = null;
 
-function LanguageSelectorUI({ security, core, closePopover }: Props) {
-  const { isVisible } = useLanguage();
-  const hasConfiguredLocales = getAvailableLocales().length > 0;
-
-  const modalRef = useRef<OverlayRef | null>(null);
-
-  const closeModal = () => {
-    modalRef.current?.close();
-    modalRef.current = null;
-  };
-
-  const openModal = () => {
-    modalRef.current = core.overlays.openModal(
-      toMountPoint(
-        <UserProfilesKibanaProvider core={core} security={security} toMountPoint={toMountPoint}>
-          <LanguageModal closeModal={closeModal} />
-        </UserProfilesKibanaProvider>,
-        core
-      ),
-      { 'data-test-subj': 'languageModal', maxWidth: 500 }
-    );
-  };
-
-  if (!isVisible || !hasConfiguredLocales) {
-    return null;
+export const openLanguageModal = ({ core, security }: OpenLanguageModalParams) => {
+  if (languageModalRef) {
+    return;
   }
 
-  return (
-    <EuiContextMenuItem
-      icon="globe"
-      onClick={() => {
-        openModal();
-        closePopover();
-      }}
-      data-test-subj="languageSelector"
-    >
-      {i18n.translate('xpack.cloudLinks.userMenuLinks.languageLinkText', {
-        defaultMessage: 'Language',
-      })}
-    </EuiContextMenuItem>
+  const closeModal = () => {
+    languageModalRef?.close();
+    languageModalRef = null;
+  };
+
+  languageModalRef = core.overlays.openModal(
+    toMountPoint(
+      <UserProfilesKibanaProvider core={core} security={security} toMountPoint={toMountPoint}>
+        <LanguageModal closeModal={closeModal} />
+      </UserProfilesKibanaProvider>,
+      core
+    ),
+    { 'data-test-subj': 'languageModal', maxWidth: 500 }
   );
-}
+};
