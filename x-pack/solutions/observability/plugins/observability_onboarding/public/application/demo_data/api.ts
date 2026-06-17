@@ -97,11 +97,87 @@ export interface RunSynthtraceResponse {
   eventsIndexed: number;
 }
 
-export const runSynthtrace = (
+export type SynthtraceRunPhase = 'installing_packages' | 'generating' | 'indexing';
+
+export type SynthtraceProgressEvent =
+  | { type: 'phase'; phase: SynthtraceRunPhase }
+  | { type: 'progress'; eventsIndexed: number }
+  | { type: 'complete'; eventsIndexed: number }
+  | { type: 'error'; message: string };
+
+/**
+ * Runs a scenario and consumes the NDJSON progress stream, invoking `onProgress`
+ * for each event. Uses the native fetch API (rather than the core HTTP client)
+ * so the response body can be read incrementally as it streams in.
+ */
+export const runSynthtraceStreaming = async (
   http: HttpStart,
-  body: RunSynthtraceBody
-): Promise<RunSynthtraceResponse> =>
-  http.post(SYNTHTRACE_RUN_API_PATH, { body: JSON.stringify(body) });
+  body: RunSynthtraceBody,
+  onProgress: (event: SynthtraceProgressEvent) => void
+): Promise<RunSynthtraceResponse> => {
+  const response = await fetch(http.basePath.prepend(SYNTHTRACE_RUN_API_PATH), {
+    method: 'POST',
+    credentials: 'include',
+    headers: {
+      'Content-Type': 'application/json',
+      'kbn-xsrf': 'true',
+      'x-elastic-internal-origin': 'Kibana',
+    },
+    body: JSON.stringify(body),
+  });
+
+  if (!response.ok || !response.body) {
+    const text = await response.text().catch(() => '');
+    let message = `Request failed with status ${response.status}`;
+    try {
+      message = (JSON.parse(text) as { message?: string }).message ?? message;
+    } catch {
+      if (text) {
+        message = text;
+      }
+    }
+    throw new Error(message);
+  }
+
+  const reader = response.body.getReader();
+  const decoder = new TextDecoder();
+  let buffer = '';
+  let eventsIndexed = 0;
+  let errorMessage: string | undefined;
+
+  const handleLine = (line: string): void => {
+    const trimmed = line.trim();
+    if (!trimmed) {
+      return;
+    }
+    const event = JSON.parse(trimmed) as SynthtraceProgressEvent;
+    if (event.type === 'progress' || event.type === 'complete') {
+      eventsIndexed = event.eventsIndexed;
+    }
+    if (event.type === 'error') {
+      errorMessage = event.message;
+    }
+    onProgress(event);
+  };
+
+  for (;;) {
+    const { done, value } = await reader.read();
+    if (done) {
+      break;
+    }
+    buffer += decoder.decode(value, { stream: true });
+    const lines = buffer.split('\n');
+    buffer = lines.pop() ?? '';
+    lines.forEach(handleLine);
+  }
+  handleLine(buffer);
+
+  if (errorMessage) {
+    throw new Error(errorMessage);
+  }
+
+  return { scenarioId: body.scenarioId, eventsIndexed };
+};
 
 /**
  * Feature-detects the dev-only synthtrace runner plugin. Returns false when the

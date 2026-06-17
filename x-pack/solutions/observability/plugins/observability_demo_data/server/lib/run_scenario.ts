@@ -11,9 +11,9 @@ import { Client } from '@elastic/elasticsearch';
 import type { Logger } from '@kbn/core/server';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { timerange } from '@kbn/synthtrace-client';
-import type { RunOptions, Scenario } from '@kbn/synthtrace';
+import type { RunOptions, Scenario, SynthtraceClients } from '@kbn/synthtrace';
 import { createLogger, indexAll, LogLevel, SynthtraceClientsManager } from '@kbn/synthtrace';
-import type { SynthtraceConnectionOverride } from '../../common';
+import type { SynthtraceConnectionOverride, SynthtraceProgressEvent } from '../../common';
 import type { ObservabilityDemoDataConfig } from '../config';
 import { SERVER_SCENARIO_CATALOG } from '../scenario_catalog';
 
@@ -28,6 +28,8 @@ interface RunScenarioParams {
   config: ObservabilityDemoDataConfig;
   connection?: SynthtraceConnectionOverride;
   logger: Logger;
+  /** Optional callback for streaming real progress to the caller. */
+  onProgress?: (event: SynthtraceProgressEvent) => void;
 }
 
 interface RunScenarioResult {
@@ -85,6 +87,7 @@ export const runScenario = async ({
   config,
   connection,
   logger,
+  onProgress,
 }: RunScenarioParams): Promise<RunScenarioResult> => {
   const definition = SERVER_SCENARIO_CATALOG[scenarioId];
 
@@ -102,6 +105,7 @@ export const runScenario = async ({
     const match = /^Produced (\d+) events$/.exec(String(message));
     if (match) {
       eventsIndexed += parseInt(match[1], 10);
+      onProgress?.({ type: 'progress', eventsIndexed });
     }
     originalInfo(message);
   };
@@ -122,6 +126,7 @@ export const runScenario = async ({
 
     // Install integration packages (APM, infra) so generated docs land in the
     // expected data streams.
+    onProgress?.({ type: 'phase', phase: 'installing_packages' });
     await clientsManager.initFleetPackageForClient({ clients, skipInstallation: false });
 
     const scenarioPath = join(REPO_ROOT, definition.relativePath);
@@ -140,6 +145,7 @@ export const runScenario = async ({
       clean,
     } as unknown as RunOptions;
 
+    onProgress?.({ type: 'phase', phase: 'generating' });
     const { generate, setupPipeline, bootstrap } = await scenario({
       ...runOptions,
       logger: synthtraceLogger,
@@ -147,14 +153,16 @@ export const runScenario = async ({
       to,
     });
 
-    if (bootstrap) {
-      throw new Error(
-        `Scenario "${scenarioId}" requires a bootstrap step that is not supported in the browser. Use the CLI command instead.`
-      );
-    }
-
     if (clean) {
       await Promise.all(Object.values(clients).map((client) => client.clean()));
+    }
+
+    // Mirror the CLI pipeline: run the scenario's bootstrap (e.g. installing
+    // custom index templates) before generating. The curated scenarios only use
+    // the synthtrace clients here; bootstraps needing a Kibana client would
+    // surface a clear error the caller can show.
+    if (bootstrap) {
+      await (bootstrap as (synthtraceClients: SynthtraceClients) => Promise<void>)(clients);
     }
 
     const generatorsAndClients = castArray(
@@ -165,6 +173,7 @@ export const runScenario = async ({
       setupPipeline(clients);
     }
 
+    onProgress?.({ type: 'phase', phase: 'indexing' });
     logger.info(`Indexing synthtrace scenario "${scenarioId}"`);
     await indexAll(generatorsAndClients);
 

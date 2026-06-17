@@ -30,3 +30,16 @@ export interface RunSynthtraceResponseBody {
   scenarioId: string;
   eventsIndexed: number;
 }
+
+/** Phases reported by the streaming run endpoint, in order. */
+export type SynthtraceRunPhase = 'installing_packages' | 'generating' | 'indexing';
+
+/**
+ * Progress events streamed (NDJSON, one JSON object per line) while a scenario
+ * runs. Lets the UI show real backend progress instead of a hardcoded timer.
+ */
+export type SynthtraceProgressEvent =
+  | { type: 'phase'; phase: SynthtraceRunPhase }
+  | { type: 'progress'; eventsIndexed: number }
+  | { type: 'complete'; eventsIndexed: number }
+  | { type: 'error'; message: string };

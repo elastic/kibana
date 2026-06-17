@@ -32,9 +32,9 @@ import type { EuiSelectableOption } from '@elastic/eui';
 import type { HttpStart, NotificationsStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useEffect, useMemo, useState } from 'react';
-import type { SynthtraceConnectionOverride } from './api';
-import { runSynthtrace } from './api';
+import React, { useMemo, useState } from 'react';
+import type { SynthtraceConnectionOverride, SynthtraceRunPhase } from './api';
+import { runSynthtraceStreaming } from './api';
 import { DATA_TYPE_META } from './data_types';
 import {
   buildSynthtraceCommand,
@@ -52,19 +52,23 @@ interface Props {
 
 const DEFAULT_FROM = 'now-1w';
 const DEFAULT_TO = 'now';
-const PHASE_ROTATION_MS = 2500;
+// In-browser runs execute in the Kibana server process and target TSDB metrics
+// streams with a ~2h writable window, so they ingest a short recent window. The
+// copyable CLI command keeps the richer default range.
+const BROWSER_RUN_FROM = 'now-1h';
 
-const RUN_PHASE_LABELS = [
-  i18n.translate('xpack.observability_onboarding.demoData.synthtrace.phase.packages', {
-    defaultMessage: 'Installing integration packages…',
-  }),
-  i18n.translate('xpack.observability_onboarding.demoData.synthtrace.phase.generate', {
+const PHASE_LABELS: Record<SynthtraceRunPhase, string> = {
+  installing_packages: i18n.translate(
+    'xpack.observability_onboarding.demoData.synthtrace.phase.packages',
+    { defaultMessage: 'Installing integration packages…' }
+  ),
+  generating: i18n.translate('xpack.observability_onboarding.demoData.synthtrace.phase.generate', {
     defaultMessage: 'Generating events…',
   }),
-  i18n.translate('xpack.observability_onboarding.demoData.synthtrace.phase.index', {
-    defaultMessage: 'Indexing…',
+  indexing: i18n.translate('xpack.observability_onboarding.demoData.synthtrace.phase.index', {
+    defaultMessage: 'Indexing events…',
   }),
-];
+};
 
 const toConnectionOverride = (
   connection: SynthtraceConnectionSettings
@@ -80,7 +84,8 @@ export const SynthtracePanel: React.FC<Props> = ({ http, notifications, canRunIn
   const [selectedId, setSelectedId] = useState<string>(SYNTHTRACE_SCENARIOS[0].id);
   const [live, setLive] = useState(false);
   const [isRunning, setIsRunning] = useState(false);
-  const [runPhaseIndex, setRunPhaseIndex] = useState(0);
+  const [runPhase, setRunPhase] = useState<SynthtraceRunPhase | undefined>();
+  const [runningEventsIndexed, setRunningEventsIndexed] = useState(0);
   const [lastRunEventsIndexed, setLastRunEventsIndexed] = useState<number | undefined>();
   const [connection, setConnection] = useState<SynthtraceConnectionSettings>(() =>
     deriveDefaultConnectionSettings()
@@ -108,21 +113,6 @@ export const SynthtracePanel: React.FC<Props> = ({ http, notifications, canRunIn
       })
     : '';
 
-  useEffect(() => {
-    if (!isRunning) {
-      return;
-    }
-
-    setRunPhaseIndex(0);
-    const intervalId = window.setInterval(() => {
-      setRunPhaseIndex((current) => (current + 1) % RUN_PHASE_LABELS.length);
-    }, PHASE_ROTATION_MS);
-
-    return () => {
-      window.clearInterval(intervalId);
-    };
-  }, [isRunning]);
-
   const updateConnection = (patch: Partial<SynthtraceConnectionSettings>): void => {
     setConnection((current) => ({ ...current, ...patch }));
   };
@@ -134,14 +124,26 @@ export const SynthtracePanel: React.FC<Props> = ({ http, notifications, canRunIn
 
     setIsRunning(true);
     setLastRunEventsIndexed(undefined);
+    setRunPhase(undefined);
+    setRunningEventsIndexed(0);
 
     try {
-      const response = await runSynthtrace(http, {
-        scenarioId: selectedScenario.id,
-        from: DEFAULT_FROM,
-        to: DEFAULT_TO,
-        connection: toConnectionOverride(connection),
-      });
+      const response = await runSynthtraceStreaming(
+        http,
+        {
+          scenarioId: selectedScenario.id,
+          from: BROWSER_RUN_FROM,
+          to: DEFAULT_TO,
+          connection: toConnectionOverride(connection),
+        },
+        (event) => {
+          if (event.type === 'phase') {
+            setRunPhase(event.phase);
+          } else if (event.type === 'progress') {
+            setRunningEventsIndexed(event.eventsIndexed);
+          }
+        }
+      );
       setLastRunEventsIndexed(response.eventsIndexed);
       notifications.toasts.addSuccess(
         i18n.translate('xpack.observability_onboarding.demoData.synthtrace.successToast', {
@@ -342,7 +344,20 @@ export const SynthtracePanel: React.FC<Props> = ({ http, notifications, canRunIn
                 <EuiProgress size="s" color="accent" />
                 <EuiSpacer size="xs" />
                 <EuiText size="s" color="subdued">
-                  {RUN_PHASE_LABELS[runPhaseIndex]}
+                  {runPhase
+                    ? PHASE_LABELS[runPhase]
+                    : i18n.translate(
+                        'xpack.observability_onboarding.demoData.synthtrace.phase.starting',
+                        { defaultMessage: 'Starting…' }
+                      )}
+                  {runningEventsIndexed > 0 &&
+                    ` ${i18n.translate(
+                      'xpack.observability_onboarding.demoData.synthtrace.eventsIndexedCount',
+                      {
+                        defaultMessage: '({count} events indexed)',
+                        values: { count: runningEventsIndexed.toLocaleString() },
+                      }
+                    )}`}
                 </EuiText>
                 <EuiSpacer size="m" />
               </>
@@ -401,6 +416,18 @@ export const SynthtracePanel: React.FC<Props> = ({ http, notifications, canRunIn
                 </EuiFlexItem>
               )}
             </EuiFlexGroup>
+
+            {!live && canRunSelectedInBrowser && (
+              <>
+                <EuiSpacer size="s" />
+                <EuiText size="xs" color="subdued">
+                  <FormattedMessage
+                    id="xpack.observability_onboarding.demoData.synthtrace.browserWindowHint"
+                    defaultMessage="In-browser runs ingest the last hour to stay within memory and metrics retention limits. Copy the CLI command for larger time ranges."
+                  />
+                </EuiText>
+              </>
+            )}
 
             {live && canRunInBrowser && (
               <>
