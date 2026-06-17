@@ -65,6 +65,16 @@ export class InterceptsPageObject {
     }
   }
 
+  async isCompletionStepVisible(): Promise<boolean> {
+    try {
+      const locator = this.page.testSubj.locator('interceptStep-completion');
+      await locator.waitFor({ state: 'visible', timeout: 500 });
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
   async getProgressionButtonText(): Promise<string> {
     const locator = this.page.testSubj.locator('productInterceptProgressionButton');
     return (await locator.textContent()) || '';
