@@ -13,6 +13,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { TableId } from '@kbn/securitysolution-data-table';
 
+import { getOriginalAlertIds } from '../../../../../attack_discovery/helpers';
 import { getFormattedDate } from '../../../../../attack_discovery/pages/loading_callout/loading_messages/get_formatted_time';
 import { useDateFormat } from '../../../../../common/lib/kibana';
 import { AttackDiscoveryMarkdownFormatter } from '../../../../../attack_discovery/pages/results/attack_discovery_markdown_formatter';
@@ -69,11 +70,17 @@ export const Subtitle = React.memo<SubtitleProps>(({ attack, showAnonymized = fa
     showAnonymized,
   ]);
 
+  const originalAlertIds = useMemo(
+    () => getOriginalAlertIds(attack.alertIds, attack.replacements),
+    [attack.alertIds, attack.replacements]
+  );
+
   return (
     <AttackDiscoveryMarkdownFormatter
       scopeId={TableId.alertsOnAttacksPage}
       disableActions={showAnonymized}
       markdown={subtitleMarkdownText}
+      alertIds={originalAlertIds}
     />
   );
 });
