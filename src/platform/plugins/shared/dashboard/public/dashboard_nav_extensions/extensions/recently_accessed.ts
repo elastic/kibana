@@ -10,7 +10,6 @@
 import { map, type Observable } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 import type { ChromeRecentlyAccessed, IBasePath } from '@kbn/core/public';
-import type { NavExtensionEntry } from '@kbn/core-chrome-browser';
 import type { NavExtensionDefinition } from '@kbn/shared-ux-navigation-extension-templates';
 
 /**
@@ -24,13 +23,6 @@ export interface RecentItemRow {
 
 export const RECENTLY_ACCESSED_DASHBOARDS_EXTENSION_ID = 'recentlyAccessedDashboards' as const;
 
-declare module '@kbn/core-chrome-browser' {
-  interface NavExtensionRegistry {
-    // The `list` template receives the full array; the data source emits `RecentItemRow[]`.
-    [RECENTLY_ACCESSED_DASHBOARDS_EXTENSION_ID]: NavExtensionEntry<RecentItemRow[]>;
-  }
-}
-
 const DEFAULT_MAX_RECENT_ITEMS = 5;
 
 /**
@@ -40,6 +32,7 @@ export const recentlyAccessedNavExtensionDefinition: NavExtensionDefinition<
   typeof RECENTLY_ACCESSED_DASHBOARDS_EXTENSION_ID
 > = {
   id: RECENTLY_ACCESSED_DASHBOARDS_EXTENSION_ID,
+  // The `list` template receives the full array; the data source emits `RecentItemRow[]`.
   templateId: 'list',
   config: {
     item: { idField: 'id', labelField: 'label', hrefField: 'href' },
