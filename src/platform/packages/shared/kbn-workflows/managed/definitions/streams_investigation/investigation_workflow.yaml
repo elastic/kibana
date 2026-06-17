@@ -69,24 +69,24 @@ steps:
           a dependency failure, a resource problem, bad data, etc.
           Don't presuppose the failure mode; follow the evidence.
 
-        Generate up to 5 targeted hypotheses ordered by prior confidence (highest first).
+        Generate 2-5 targeted hypotheses ordered by prior confidence (highest first).
         Each hypothesis must identify a specific, testable cause with a concrete mechanism. Usually
         that is a particular service and what is wrong with it, but the root cause does NOT have to
         be a single service — it can be a shared dependency (datastore, queue, cache), infrastructure
         (a node/host, network fabric, DNS), a platform / cloud-provider or AZ outage, or a recent
         deploy or config change. Name whatever the evidence points to, as long as it is specific and
         falsifiable.
+        Quality over quantity: only nominate a cause you found direct evidence for during your
+        investigation — a metric anomaly, error pattern, or log event attributed specifically to that
+        component. Do NOT pad the list with services you found no signal for just to reach a higher
+        count. 2-3 well-evidenced hypotheses are better than 5 where two are unsupported guesses.
         Make the set DIVERSE — each hypothesis is investigated independently in parallel, so they
         must cover genuinely different candidate causes, not minor variations of one explanation. Do
         NOT submit multiple hypotheses that point at the SAME cause and differ only in the precise
-        mechanism — that collapses the parallel investigation into one. Unless the evidence is
-        overwhelming, cover at least 2-3 different candidate causes across your hypotheses (different
-        services, or a mix of service-level and shared/infrastructure/external causes), and ALWAYS
-        include at least one hypothesis proposing a different cause than your leading candidate. This
-        matters most when one high-traffic service shows the loudest symptoms — it is often a victim,
-        so include a competing hypothesis for an independent/upstream service or a shared cause. Each
-        hypothesis must still be plausible and falsifiable; don't pad with junk, but prefer broad
-        coverage of the likely causes over concentrating confidence on one.
+        mechanism. If your investigation turned up clear signals for 2-3 different candidates, name
+        them; if the evidence concentrates strongly on one, 2 hypotheses (the leading candidate plus
+        one alternative) is enough — do not invent diversity by nominating services you have no
+        evidence for.
       schema:
         type: object
         properties:

@@ -18,6 +18,15 @@ Entries where review.decision === "discard" go into discarded_hypotheses only �
 <ranking>
 Rank forwarded hypotheses best-to-worst by posterior_confidence weighted by verdict:
 supported > inconclusive > out_of_reach > refuted
+
+Be skeptical of hypotheses that name a broad, unspecified cause — "shared infrastructure",
+"external dependency", "network fabric", "GCP environment issue" — without identifying a
+specific named component (a particular database instance, cache node, queue, host). These
+hypotheses are often unfalsifiable: they are consistent with any observed symptom and therefore
+carry no explanatory power. If gather did not return evidence pointing at a specific component,
+treat the hypothesis as inconclusive rather than supported, and rank it below hypotheses with a
+named, testable cause even if its posterior_confidence is nominally higher. The root_cause
+statement should name the most specific cause the evidence actually supports.
 </ranking>
 
 <remediation>

@@ -71,5 +71,25 @@ export const RE2OB_SCENARIOS_V2: RcaScenario[] = [
   scenario('recommendationservice', 'mem'),
 ];
 
+// 10-scenario subset for prompt-iteration runs: 2 per service (1 resource fault +
+// 1 network fault), chosen for fault-type coverage, not based on observed scores.
+//   checkoutservice:       cpu (resource),   loss (network)
+//   currencyservice:       disk (resource),  delay (network)
+//   emailservice:          mem (resource),   loss (network)
+//   productcatalogservice: socket (resource),delay (network)
+//   recommendationservice: mem (resource),   delay (network)
+export const RE2OB_SCENARIOS_V2_SUBSET: RcaScenario[] = [
+  scenario('checkoutservice', 'cpu'),
+  scenario('checkoutservice', 'loss'),
+  scenario('currencyservice', 'disk'),
+  scenario('currencyservice', 'delay'),
+  scenario('emailservice', 'mem'),
+  scenario('emailservice', 'loss'),
+  scenario('productcatalogservice', 'socket'),
+  scenario('productcatalogservice', 'delay'),
+  scenario('recommendationservice', 'mem'),
+  scenario('recommendationservice', 'delay'),
+];
+
 // Active set for the current eval run.
-export const RE2OB_SCENARIOS: RcaScenario[] = RE2OB_SCENARIOS_V2;
+export const RE2OB_SCENARIOS: RcaScenario[] = RE2OB_SCENARIOS_V2_SUBSET;
