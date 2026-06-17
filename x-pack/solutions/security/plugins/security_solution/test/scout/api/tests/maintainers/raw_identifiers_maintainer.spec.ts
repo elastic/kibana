@@ -15,4 +15,5 @@ registerRawIdentifiersMaintainerSuite({
   maintainerId: 'administers',
   relationshipKey: 'administers',
   entityPrefix: 'adm',
+  requiredEntitySource: 'entityanalytics_ad',
 });

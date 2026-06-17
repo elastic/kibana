@@ -38,6 +38,13 @@ export interface RawIdentifiersMaintainerSuiteConfig {
   relationshipKey: string;
   /** Short prefix used to namespace the seeded entity ids so suites don't collide. */
   entityPrefix: string;
+  /**
+   * When set, actor entities are seeded with this entity.source value, and the
+   * suite adds a negative test asserting that an actor with a *different* source
+   * is not resolved. Use this for maintainers that filter by entity.source
+   * (e.g. 'entityanalytics_ad' for the administers maintainer).
+   */
+  requiredEntitySource?: string;
 }
 
 /**
@@ -61,7 +68,7 @@ export interface RawIdentifiersMaintainerSuiteConfig {
 export const registerRawIdentifiersMaintainerSuite = (
   config: RawIdentifiersMaintainerSuiteConfig
 ): void => {
-  const { maintainerId, relationshipKey, entityPrefix } = config;
+  const { maintainerId, relationshipKey, entityPrefix, requiredEntitySource } = config;
   const domain = 'acmecrm.com';
   const actorId = (suffix: string) => `host:${entityPrefix}-${suffix}.${domain}`;
   const targetFqdn = (suffix: string) => `${entityPrefix}-${suffix}-target.${domain}`;
@@ -127,11 +134,11 @@ export const registerRawIdentifiersMaintainerSuite = (
           const target = targetId('fresh');
 
           await seedHostEntity(esClient, { entityId: target, hostName: tFqdn });
-
           await seedHostEntity(esClient, {
             entityId: actor,
             hostName: `${entityPrefix}-fresh.${domain}`,
             relationship: { key: relationshipKey, hostNames: [tFqdn] },
+            entitySource: requiredEntitySource,
           });
 
           await triggerMaintainerRun(apiClient, internalHeaders, maintainerId);
@@ -149,14 +156,12 @@ export const registerRawIdentifiersMaintainerSuite = (
           const primingTargetFqdn = targetFqdn('prime');
           const primingTarget = targetId('prime');
 
-          await seedHostEntity(esClient, {
-            entityId: primingTarget,
-            hostName: primingTargetFqdn,
-          });
+          await seedHostEntity(esClient, { entityId: primingTarget, hostName: primingTargetFqdn });
           await seedHostEntity(esClient, {
             entityId: primingActor,
             hostName: `${entityPrefix}-prime.${domain}`,
             relationship: { key: relationshipKey, hostNames: [primingTargetFqdn] },
+            entitySource: requiredEntitySource,
           });
 
           await triggerMaintainerRun(apiClient, internalHeaders, maintainerId, { sync: true });
@@ -184,6 +189,7 @@ export const registerRawIdentifiersMaintainerSuite = (
             relationship: { key: relationshipKey, hostNames: [staleTargetFqdn] },
             lastSeen: pastTs,
             firstSeen: pastTs,
+            entitySource: requiredEntitySource,
           });
           await seedHostEntity(esClient, {
             entityId: freshActor,
@@ -191,6 +197,7 @@ export const registerRawIdentifiersMaintainerSuite = (
             relationship: { key: relationshipKey, hostNames: [freshTargetFqdn] },
             lastSeen: futureTs,
             firstSeen: futureTs,
+            entitySource: requiredEntitySource,
           });
 
           await triggerMaintainerRun(apiClient, internalHeaders, maintainerId, { sync: true });
@@ -199,6 +206,31 @@ export const registerRawIdentifiersMaintainerSuite = (
           await assertNoRelationshipId(esClient, relationshipKey, staleActor, staleTarget);
         }
       );
+
+      if (requiredEntitySource) {
+        apiTest(
+          `skips an actor whose entity.source is not '${requiredEntitySource}'`,
+          async ({ apiClient, esClient }) => {
+            const tFqdn = targetFqdn('src');
+            const target = targetId('src');
+            const wrongSourceActor = actorId('src-wrong');
+
+            await seedHostEntity(esClient, { entityId: target, hostName: tFqdn });
+            // Actor has the correct raw_identifiers but entity.source from a different
+            // integration — the maintainer's entity.source filter must exclude it.
+            await seedHostEntity(esClient, {
+              entityId: wrongSourceActor,
+              hostName: `${entityPrefix}-src-wrong.${domain}`,
+              relationship: { key: relationshipKey, hostNames: [tFqdn] },
+              entitySource: 'elastic_defend',
+            });
+
+            await triggerMaintainerRun(apiClient, internalHeaders, maintainerId, { sync: true });
+
+            await assertNoRelationshipId(esClient, relationshipKey, wrongSourceActor, target);
+          }
+        );
+      }
     }
   );
 };

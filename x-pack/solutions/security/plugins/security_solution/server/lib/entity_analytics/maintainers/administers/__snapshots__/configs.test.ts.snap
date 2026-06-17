@@ -4,6 +4,7 @@ exports[`ADMINISTERS_INTEGRATION_RELATIONSHIP_CONFIGS golden snapshots entityana
 "SET unmapped_fields=\\"nullify\\";
 FROM .entities.v2.latest.security___namespace__-*
 | WHERE (entity.relationships.administers.raw_identifiers.host.name IS NOT NULL)
+    AND entity.source == \\"entityanalytics_ad\\"
 | EVAL actorUserId = entity.id
 | EVAL t0 = CONCAT(\\"host:\\", entity.relationships.administers.raw_identifiers.host.name)
 | EVAL targetEntityId = t0
@@ -17,6 +18,7 @@ FROM .entities.v2.latest.security___namespace__-*
 exports[`ADMINISTERS_INTEGRATION_RELATIONSHIP_CONFIGS golden snapshots entityanalytics_ad: targets-per-actor ES|QL with watermark is locked 1`] = `
 "FROM .entities.v2.latest.security___namespace__-*
 | WHERE (entity.relationships.administers.raw_identifiers.host.name IS NOT NULL)
+    AND entity.source == \\"entityanalytics_ad\\"
     AND entity.lifecycle.last_seen > \\"2026-06-01T00:00:00.000Z\\"
 | EVAL actorUserId = entity.id
 | EVAL t0 = CONCAT(\\"host:\\", entity.relationships.administers.raw_identifiers.host.name)

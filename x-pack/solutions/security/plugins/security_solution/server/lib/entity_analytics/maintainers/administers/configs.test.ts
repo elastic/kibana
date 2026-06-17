@@ -142,6 +142,21 @@ describe('ADMINISTERS_INTEGRATION_RELATIONSHIP_CONFIGS', () => {
     });
   });
 
+  describe('entity.source filter', () => {
+    it('Step 1 composite agg filters include an entity.source term for entityanalytics_ad', () => {
+      const config = buildAdministersConfigs()[0];
+      const filters = config.compositeAggAdditionalFilters ?? [];
+      const sourceFilter = filters.find((f) => JSON.stringify(f).includes('entity.source'));
+      expect(sourceFilter).toEqual({ term: { 'entity.source': 'entityanalytics_ad' } });
+    });
+
+    it('Step 2 ES|QL override filters on entity.source == "entityanalytics_ad"', () => {
+      const config = buildAdministersConfigs()[0] as OverrideRelationshipIntegrationConfig;
+      const query = config.esqlQueryOverride('default');
+      expect(query).toContain('entity.source == "entityanalytics_ad"');
+    });
+  });
+
   describe('watermark behaviour', () => {
     const WATERMARK_FIELD = 'entity.lifecycle.last_seen';
 

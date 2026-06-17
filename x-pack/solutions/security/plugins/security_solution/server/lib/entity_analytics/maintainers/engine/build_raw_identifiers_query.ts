@@ -71,15 +71,19 @@ export function buildRawIdentifiersEsqlQuery({
   rules,
   namespace,
   lastProcessedTimestamp,
+  entitySource,
 }: {
   relationshipKey: EntityRelationshipKey;
   rules: DirectEuidRule[];
   namespace: string;
   lastProcessedTimestamp?: string;
+  /** When set, restricts the query to entities produced by this integration source (entity.source term). */
+  entitySource?: string;
 }): string {
   const entityIndex = getLatestEntityIndexPattern(namespace);
   const rawIdentifiersPrefix = `entity.relationships.${relationshipKey}.raw_identifiers`;
 
+  const entitySourceClause = entitySource ? `\n    AND entity.source == "${entitySource}"` : '';
   const watermarkClause = lastProcessedTimestamp
     ? `\n    AND entity.lifecycle.last_seen > "${lastProcessedTimestamp}"`
     : '';
@@ -97,7 +101,7 @@ export function buildRawIdentifiersEsqlQuery({
     rules.length === 1 ? `t0` : `MV_APPEND(${rules.map((_, i) => `t${i}`).join(', ')})`;
 
   return `FROM ${entityIndex}
-| WHERE (${existenceClause})${watermarkClause}
+| WHERE (${existenceClause})${entitySourceClause}${watermarkClause}
 | EVAL ${ENGINE_COLUMNS.actor} = entity.id
 | ${perFieldEvals}
 | EVAL targetEntityId = ${unionExpr}

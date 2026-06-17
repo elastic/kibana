@@ -140,11 +140,18 @@ interface SeedHostEntityOptions {
   lastSeen?: string;
   /** entity.lifecycle.first_seen. Defaults to lastSeen (or now). */
   firstSeen?: string;
+  /**
+   * Written to entity.source. Mirrors how extraction populates the field from
+   * event.module / data_stream.dataset (e.g. 'entityanalytics_ad'). Maintainers
+   * that filter by entity.source (like the administers maintainer) will skip
+   * entities whose source does not match.
+   */
+  entitySource?: string;
 }
 
 export const seedHostEntity = async (
   esClient: EsClient,
-  { entityId, hostName, relationship, lastSeen, firstSeen }: SeedHostEntityOptions
+  { entityId, hostName, relationship, lastSeen, firstSeen, entitySource }: SeedHostEntityOptions
 ) => {
   const last = lastSeen ?? new Date().toISOString();
   const first = firstSeen ?? last;
@@ -163,6 +170,7 @@ export const seedHostEntity = async (
         id: entityId,
         name: hostName,
         EngineMetadata: { Type: 'host' },
+        ...(entitySource && { source: entitySource }),
         lifecycle: {
           first_seen: first,
           last_seen: last,

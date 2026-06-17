@@ -14,6 +14,7 @@ import {
 } from '../engine/build_raw_identifiers_query';
 
 const RELATIONSHIP_KEY = 'administers';
+const AD_ENTITY_SOURCE = 'entityanalytics_ad';
 
 // host.id carries an LDAP DN, not a valid EUID basis — only host.name (FQDN) is directly resolvable.
 const AD_ADMINISTERS_RULES: DirectEuidRule[] = [{ field: 'host.name', euidType: 'host' }];
@@ -40,8 +41,7 @@ export function buildAdministersConfigs(
       // log-index assumption that would drop entities) and gate on last_seen instead.
       disableLookbackWindow: true,
       compositeAggAdditionalFilters: [
-        // Gate to entities with administers raw_identifiers.* match host.name
-        // (Step 2 resolves from host.name only).
+        { term: { 'entity.source': AD_ENTITY_SOURCE } },
         buildRawIdentifiersExistenceGate({
           relationshipKey: RELATIONSHIP_KEY,
           fields: ['host.name'],
@@ -56,6 +56,7 @@ export function buildAdministersConfigs(
           rules: AD_ADMINISTERS_RULES,
           namespace: ns,
           lastProcessedTimestamp,
+          entitySource: AD_ENTITY_SOURCE,
         }),
     },
   ];
