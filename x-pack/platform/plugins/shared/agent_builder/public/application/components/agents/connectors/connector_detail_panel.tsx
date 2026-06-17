@@ -260,9 +260,12 @@ export const ConnectorDetailPanel: React.FC<ConnectorDetailPanelProps> = ({
 
       <ConnectionSection connector={connector} />
 
-      <EuiSpacer size="l" />
-
-      <SubActionsSection connector={connector} />
+      {connector.subActions.length > 0 && (
+        <>
+          <EuiSpacer size="l" />
+          <SubActionsSection connector={connector} />
+        </>
+      )}
 
       <EuiSpacer size="l" />
 
