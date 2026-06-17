@@ -99,6 +99,7 @@
     "**/hoist-non-react-statics": "3.3.2",
     "**/hono": "4.12.14",
     "**/isomorphic-fetch/node-fetch": "2.7.0",
+    "**/js-yaml": "4.2.0",
     "**/langchain": "1.2.30",
     "**/pixelmatch": "5.3.0",
     "**/qs": "6.15.0",
