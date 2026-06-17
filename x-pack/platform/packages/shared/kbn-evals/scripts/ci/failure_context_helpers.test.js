@@ -21,7 +21,13 @@ const {
   parseEisStreamResponse,
   parseLitellmChatContent,
   resolveEisInferenceCredentials,
+  resolveTriageJudgeId,
+  listLitellmConnectorIds,
+  DEFAULT_TRIAGE_JUDGE_ID,
 } = require('./failure_context_helpers');
+
+const encodeConnectors = (connectors) =>
+  Buffer.from(JSON.stringify(connectors), 'utf8').toString('base64');
 
 describe('failure_context_helpers', () => {
   it('builds failure log metadata keys', () => {
@@ -379,6 +385,101 @@ describe('failure_context_helpers', () => {
       expect(() => resolveEisInferenceCredentials()).toThrow(
         /KIBANA_EIS_CCM_API_KEY or EVALUATIONS_ES_API_KEY is required/
       );
+    });
+  });
+
+  describe('resolveTriageJudgeId', () => {
+    const ENV_KEYS = [
+      'EVAL_TRIAGE_JUDGE_ID',
+      'EVALUATION_CONNECTOR_ID',
+      'EVAL_SUITE_ID',
+      'KBN_EVALS_CONFIG_B64',
+      'KIBANA_TESTING_AI_CONNECTORS',
+    ];
+
+    const noMetadata = { readMetadata: () => '' };
+    let previousEnv;
+
+    beforeEach(() => {
+      previousEnv = {};
+      for (const key of ENV_KEYS) {
+        previousEnv[key] = process.env[key];
+        delete process.env[key];
+      }
+    });
+
+    afterEach(() => {
+      for (const key of ENV_KEYS) {
+        if (previousEnv[key] === undefined) {
+          delete process.env[key];
+        } else {
+          process.env[key] = previousEnv[key];
+        }
+      }
+    });
+
+    it('prefers the EVAL_TRIAGE_JUDGE_ID override', () => {
+      process.env.EVAL_TRIAGE_JUDGE_ID = 'litellm-llm-gateway-claude-4';
+      process.env.EVALUATION_CONNECTOR_ID = 'eis-google-gemini-2-5-flash';
+
+      expect(resolveTriageJudgeId(noMetadata)).toBe('litellm-llm-gateway-claude-4');
+    });
+
+    it('uses the eval judge when it is already LiteLLM-backed', () => {
+      process.env.EVALUATION_CONNECTOR_ID = 'litellm-llm-gateway-gpt-4o';
+
+      expect(resolveTriageJudgeId(noMetadata)).toBe('litellm-llm-gateway-gpt-4o');
+    });
+
+    it('uses the default LiteLLM judge when it is among available connectors', () => {
+      process.env.EVALUATION_CONNECTOR_ID = 'eis-google-gemini-2-5-flash';
+      process.env.KIBANA_TESTING_AI_CONNECTORS = encodeConnectors({
+        'litellm-llm-gateway-claude-4': { config: {} },
+        [DEFAULT_TRIAGE_JUDGE_ID]: { config: {} },
+        'eis-google-gemini-2-5-flash': { config: {} },
+      });
+
+      expect(resolveTriageJudgeId(noMetadata)).toBe(DEFAULT_TRIAGE_JUDGE_ID);
+    });
+
+    it('falls back to the first available LiteLLM connector for an EIS eval judge', () => {
+      process.env.EVALUATION_CONNECTOR_ID = 'eis-google-gemini-2-5-flash';
+      process.env.KIBANA_TESTING_AI_CONNECTORS = encodeConnectors({
+        'litellm-llm-gateway-zeta': { config: {} },
+        'litellm-llm-gateway-alpha': { config: {} },
+        'eis-google-gemini-2-5-flash': { config: {} },
+      });
+
+      expect(resolveTriageJudgeId(noMetadata)).toBe('litellm-llm-gateway-alpha');
+    });
+
+    it('uses the vault LiteLLM judge when no connectors are available', () => {
+      process.env.EVALUATION_CONNECTOR_ID = 'eis-google-gemini-2-5-flash';
+      process.env.KBN_EVALS_CONFIG_B64 = Buffer.from(
+        JSON.stringify({ evaluationConnectorId: 'litellm-llm-gateway-vault-model' }),
+        'utf8'
+      ).toString('base64');
+
+      expect(resolveTriageJudgeId(noMetadata)).toBe('litellm-llm-gateway-vault-model');
+    });
+
+    it('falls back to the default triage judge id when nothing else resolves', () => {
+      process.env.EVALUATION_CONNECTOR_ID = 'eis-google-gemini-2-5-flash';
+
+      expect(resolveTriageJudgeId(noMetadata)).toBe(DEFAULT_TRIAGE_JUDGE_ID);
+    });
+
+    it('lists only LiteLLM connector ids, sorted', () => {
+      process.env.KIBANA_TESTING_AI_CONNECTORS = encodeConnectors({
+        'litellm-llm-gateway-zeta': { config: {} },
+        'eis-google-gemini-2-5-flash': { config: {} },
+        'litellm-llm-gateway-alpha': { config: {} },
+      });
+
+      expect(listLitellmConnectorIds()).toEqual([
+        'litellm-llm-gateway-alpha',
+        'litellm-llm-gateway-zeta',
+      ]);
     });
   });
 });

@@ -15,6 +15,11 @@ const MAX_LOG_EXCERPT_CHARS = 4000;
 const MAX_SCORE_ROWS_PER_MODEL = 10;
 const MAX_CONTEXT_JSON_BYTES = 30 * 1024;
 
+// Triage always uses a LiteLLM judge (the suite_owner_notify step has no ES
+// cluster with EIS inference privileges, so EIS judges cannot be called there).
+// Used only as a last resort when no LiteLLM connectors can be discovered.
+const DEFAULT_TRIAGE_JUDGE_ID = 'litellm-llm-gateway-gpt-4o';
+
 /**
  * @param {string} value
  * @returns {string}
@@ -400,6 +405,93 @@ function resolveEvaluationConnectorId(options = {}) {
 }
 
 /**
+ * Decode KIBANA_TESTING_AI_CONNECTORS (base64-encoded JSON in CI, raw JSON locally).
+ *
+ * @returns {Record<string, { config?: Record<string, unknown>; secrets?: Record<string, unknown> }>}
+ */
+function decodeAiConnectors() {
+  const raw = process.env.KIBANA_TESTING_AI_CONNECTORS || '';
+  if (!raw) {
+    return {};
+  }
+
+  const tryParse = (text) => {
+    try {
+      const parsed = JSON.parse(text);
+      return parsed && typeof parsed === 'object' ? parsed : null;
+    } catch {
+      return null;
+    }
+  };
+
+  const direct = tryParse(raw);
+  if (direct) {
+    return direct;
+  }
+
+  try {
+    const decoded = tryParse(Buffer.from(raw, 'base64').toString('utf8'));
+    return decoded ?? {};
+  } catch {
+    return {};
+  }
+}
+
+/**
+ * Sorted list of LiteLLM connector ids available in KIBANA_TESTING_AI_CONNECTORS.
+ *
+ * @returns {string[]}
+ */
+function listLitellmConnectorIds() {
+  return Object.keys(decodeAiConnectors())
+    .filter((id) => id.startsWith('litellm-'))
+    .sort();
+}
+
+/**
+ * Resolve the judge used for Slack triage summaries. Triage always uses a
+ * LiteLLM judge because the suite_owner_notify step has no ES cluster with EIS
+ * inference privileges. Resolution order:
+ * 1. `EVAL_TRIAGE_JUDGE_ID` env override.
+ * 2. The eval judge when it is already LiteLLM-backed (respects `models:judge:*`).
+ * 3. The default LiteLLM judge when present among available connectors.
+ * 4. The first available LiteLLM connector.
+ * 5. The vault `evaluationConnectorId` when it is LiteLLM-backed.
+ * 6. The default LiteLLM judge id (constructed from vault LiteLLM credentials).
+ *
+ * @param {{ readMetadata?: (key: string) => string }} [options]
+ * @returns {string}
+ */
+function resolveTriageJudgeId(options = {}) {
+  const override = process.env.EVAL_TRIAGE_JUDGE_ID || '';
+  if (override) {
+    return override;
+  }
+
+  const evalJudge = resolveEvaluationConnectorId(options);
+  if (evalJudge.startsWith('litellm-')) {
+    return evalJudge;
+  }
+
+  const litellmConnectorIds = listLitellmConnectorIds();
+  if (litellmConnectorIds.includes(DEFAULT_TRIAGE_JUDGE_ID)) {
+    return DEFAULT_TRIAGE_JUDGE_ID;
+  }
+  if (litellmConnectorIds.length > 0) {
+    return litellmConnectorIds[0];
+  }
+
+  const config = parseVaultConfig();
+  const vaultJudge =
+    typeof config?.evaluationConnectorId === 'string' ? config.evaluationConnectorId : '';
+  if (vaultJudge.startsWith('litellm-')) {
+    return vaultJudge;
+  }
+
+  return DEFAULT_TRIAGE_JUDGE_ID;
+}
+
+/**
  * Credentials for direct EIS `/_inference/chat_completion` calls during CI triage.
  *
  * The API key must authenticate against the ES cluster being called, so pair it
@@ -535,6 +627,10 @@ module.exports = {
   MAX_LOG_EXCERPT_CHARS,
   MAX_SCORE_ROWS_PER_MODEL,
   MAX_CONTEXT_JSON_BYTES,
+  DEFAULT_TRIAGE_JUDGE_ID,
+  decodeAiConnectors,
+  listLitellmConnectorIds,
+  resolveTriageJudgeId,
   projectKeySafe,
   failureLogMetadataKey,
   buildFailureScoresQuery,
