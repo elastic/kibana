@@ -105,7 +105,7 @@ const baseRule = (overrides: Record<string, unknown> = {}) => ({
   name: 'r',
   tags: [],
   alertTypeId: '123',
-  consumer: 'bar',
+  consumer: 'siem',
   schedule: { interval: '1m' },
   throttle: null,
   notifyWhen: null,
@@ -128,7 +128,7 @@ const buildBulkResponse = (
             alertTypeId: '123',
             name: `name-${r.id}`,
             enabled: false,
-            consumer: 'bar',
+            consumer: 'siem',
             schedule: { interval: '1m' },
             params: { foo: true },
             actions: [],
@@ -462,21 +462,28 @@ describe('bulkCreateRules', () => {
     describe('authorization (A2)', () => {
       test('bulk authz: deduped pairs sent in a single call', async () => {
         unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue(
-          buildBulkResponse([{ id: 'mock-id-1' }, { id: 'mock-id-2' }, { id: 'mock-id-3' }])
+          buildBulkResponse([
+            { id: 'mock-id-1' },
+            { id: 'mock-id-2' },
+            { id: 'mock-id-3' },
+            { id: 'mock-id-4' },
+          ])
         );
 
         await rulesClient.bulkCreateRules({
           rules: [
-            { data: baseRule({ name: 'a', alertTypeId: '123', consumer: 'bar' }) },
-            { data: baseRule({ name: 'b', alertTypeId: '123', consumer: 'bar' }) },
+            { data: baseRule({ name: 'a', alertTypeId: '123', consumer: 'siem' }) },
+            { data: baseRule({ name: 'b', alertTypeId: '123', consumer: 'siem' }) },
             { data: baseRule({ name: 'c', alertTypeId: '123', consumer: 'other' }) },
+            { data: baseRule({ name: 'd', alertTypeId: '456', consumer: 'siem' }) },
           ],
         });
 
         expect(authorization.bulkEnsureAuthorized).toHaveBeenCalledTimes(1);
         const callArg = (authorization.bulkEnsureAuthorized as jest.Mock).mock.calls[0][0];
         expect(callArg.ruleTypeIdConsumersPairs).toEqual([
-          { ruleTypeId: '123', consumers: ['bar', 'other'] },
+          { ruleTypeId: '123', consumers: ['siem', 'other'] },
+          { ruleTypeId: '456', consumers: ['siem'] },
         ]);
       });
 
@@ -488,7 +495,7 @@ describe('bulkCreateRules', () => {
         await expect(
           rulesClient.bulkCreateRules({
             rules: [
-              { data: baseRule({ name: 'a', alertTypeId: '123', consumer: 'bar' }) },
+              { data: baseRule({ name: 'a', alertTypeId: '123', consumer: 'siem' }) },
               { data: baseRule({ name: 'b', alertTypeId: '123', consumer: 'other' }) },
             ],
           })
