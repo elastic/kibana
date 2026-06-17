@@ -7,7 +7,7 @@
 
 import { ESSENTIAL_ALERT_FIELDS } from '../../common';
 import { SecurityAgentBuilderAttachments } from '../../common/constants';
-import { alertsToAttachmentGroup, stringifyEssentialAlertData } from './helpers';
+import { alertsToAttachmentGroup, hashIds, stringifyEssentialAlertData } from './helpers';
 
 const makeItem = (id: string) =>
   ({ _id: id, data: [], ecs: { _id: id, _index: '' } } as unknown as Parameters<
@@ -79,6 +79,38 @@ describe('alertsToAttachmentGroup', () => {
     const setA = [makeItem('a'), makeItem('b')];
     const setB = [makeItem('a'), makeItem('c')];
     expect(alertsToAttachmentGroup(setA).id).not.toBe(alertsToAttachmentGroup(setB).id);
+  });
+});
+
+describe('hashIds', () => {
+  it('always returns a non-negative integer', () => {
+    const cases: string[][] = [
+      ['a'],
+      ['alert-1', 'alert-2', 'alert-3'],
+      Array.from({ length: 50 }, (_, i) => `id-${i}`),
+      // high char-code values that can overflow Math.imul to negative without >>> 0
+      ['￿', '￾'],
+    ];
+    for (const ids of cases) {
+      expect(hashIds(ids)).toBeGreaterThanOrEqual(0);
+    }
+  });
+
+  it('returns 0 for an empty array', () => {
+    expect(hashIds([])).toBe(0);
+  });
+
+  it('is stable for the same input', () => {
+    const ids = ['alert-1', 'alert-2', 'alert-3'];
+    expect(hashIds(ids)).toBe(hashIds(ids));
+  });
+
+  it('produces different hashes for different inputs', () => {
+    expect(hashIds(['a', 'b'])).not.toBe(hashIds(['a', 'c']));
+  });
+
+  it('is order-independent (same ids in any order produce the same hash)', () => {
+    expect(hashIds(['b', 'a'])).toBe(hashIds(['a', 'b']));
   });
 });
 

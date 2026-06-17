@@ -17,11 +17,17 @@ export type BulkAlertsAttachmentInput = AttachmentInput<
   { alertIds: string[] }
 >;
 
-const hashIds = (ids: string[]): number =>
-  ids.reduce(
-    (h, id) => [...id].reduce((a, c) => Math.trunc(Math.imul(31, a) + c.charCodeAt(0)), h),
-    0
-  );
+export const hashIds = (ids: string[]): number => {
+  // Math.imul(1, x) applies ToInt32 — keeps the accumulator in signed 32-bit range each step.
+  const signed = [...ids]
+    .sort()
+    .reduce(
+      (h, id) => [...id].reduce((a, c) => Math.imul(1, Math.imul(31, a) + c.charCodeAt(0)), h),
+      0
+    );
+  // Convert signed 32-bit to unsigned without the >>> bitwise operator (banned by no-bitwise).
+  return signed < 0 ? signed + 4294967296 : signed;
+};
 
 const chunkAlerts = (alertItems: TimelineItem[]): BulkAlertsAttachmentInput[] => {
   const batches: BulkAlertsAttachmentInput[] = [];
@@ -41,7 +47,7 @@ const chunkAlerts = (alertItems: TimelineItem[]): BulkAlertsAttachmentInput[] =>
  */
 export const alertsToAttachmentGroup = (alertItems: TimelineItem[]): AttachmentGroup => ({
   type: 'group',
-  id: `alerts:${hashIds(alertItems.map((a) => a._id).sort())}`,
+  id: `alerts:${hashIds(alertItems.map((a) => a._id))}`,
   label: `${alertItems.length} Alert${alertItems.length !== 1 ? 's' : ''}`,
   items: chunkAlerts(alertItems),
 });
