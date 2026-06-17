@@ -43,15 +43,18 @@ const createRow = (source: Partial<EsWorkflowExecution>): DataTableRecord => ({
 });
 
 const ActionsCellHarness = ({
+  onReRunExecution,
   onViewAllExecutionsForWorkflow,
   row,
 }: {
+  onReRunExecution?: (params: { workflowId: string; context?: Record<string, unknown> }) => void;
   onViewAllExecutionsForWorkflow?: (workflowId: string) => void;
   row: DataTableRecord;
 }) => {
   const trailingControlColumns = useWorkflowExecutionsTrailingControlColumns(
     [row],
-    onViewAllExecutionsForWorkflow
+    onViewAllExecutionsForWorkflow,
+    onReRunExecution
   );
   const RowCell = trailingControlColumns[0].rowCellRender;
 
@@ -146,16 +149,19 @@ describe('workflow executions actions column', () => {
     expect(mockNavigateToApp).not.toHaveBeenCalled();
   });
 
-  it('navigates to workflow detail with replay execution id for re-run', () => {
+  it('re-runs execution in place when onReRunExecution is provided', () => {
+    const onReRunExecution = jest.fn();
     const services = createStartServicesMock();
     services.application.navigateToApp = mockNavigateToApp;
 
     render(
       <ActionsCellHarness
+        onReRunExecution={onReRunExecution}
         row={createRow({
           id: 'exec-1',
           workflowId: 'wf-1',
           status: ExecutionStatus.COMPLETED,
+          context: { inputs: { foo: 'bar' } },
         })}
       />,
       { wrapper: getTestProvider({ services }) }
@@ -164,9 +170,11 @@ describe('workflow executions actions column', () => {
     fireEvent.click(screen.getByTestId('workflowExecutionActionsButton'));
     fireEvent.click(screen.getByTestId('workflowExecutionActionReRun'));
 
-    expect(mockNavigateToApp).toHaveBeenCalledWith('workflows', {
-      path: '/wf-1?replayExecutionId=exec-1',
+    expect(onReRunExecution).toHaveBeenCalledWith({
+      workflowId: 'wf-1',
+      context: { inputs: { foo: 'bar' } },
     });
+    expect(mockNavigateToApp).not.toHaveBeenCalled();
   });
 
   it('renders take action menu in flyout footer variant', () => {
@@ -176,6 +184,7 @@ describe('workflow executions actions column', () => {
     render(
       <WorkflowExecutionActionsMenu
         actionContext={{ executionId: 'exec-1', workflowId: 'wf-1' }}
+        onReRunExecution={jest.fn()}
         onViewAllExecutionsForWorkflow={jest.fn()}
         variant="takeAction"
       />,

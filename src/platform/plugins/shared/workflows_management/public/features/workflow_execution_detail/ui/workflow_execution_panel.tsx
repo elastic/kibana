@@ -30,6 +30,7 @@ import { useWorkflowsCapabilities } from '@kbn/workflows-ui';
 import { CancelExecutionButton } from './cancel_execution_button';
 import { WorkflowStepExecutionTree } from './workflow_step_execution_tree';
 import { useKibana } from '../../../hooks/use_kibana';
+import type { RerunWorkflowExecutionParams } from '../../../pages/executions/build_replay_inputs_from_execution_context';
 import { getTestRunTooltipContent } from '../../../shared/ui/workflow_action_buttons/get_workflow_tooltip_content';
 import type { ChildWorkflowExecutionsMap } from '../model/use_child_workflow_executions';
 
@@ -53,6 +54,7 @@ export interface WorkflowExecutionPanelProps {
   selectedId: string | null;
   showBackButton?: boolean;
   onClose: () => void;
+  onReRunExecution?: (params: RerunWorkflowExecutionParams) => Promise<void>;
   childExecutionsMap?: ChildWorkflowExecutionsMap;
   isLoadingChildExecutions?: boolean;
 }
@@ -65,6 +67,7 @@ export const WorkflowExecutionPanel = React.memo<WorkflowExecutionPanelProps>(
     onStepExecutionClick,
     selectedId: selectedStepExecutionId,
     onClose,
+    onReRunExecution,
     childExecutionsMap,
     isLoadingChildExecutions,
   }) => {
@@ -138,7 +141,9 @@ export const WorkflowExecutionPanel = React.memo<WorkflowExecutionPanelProps>(
                 <EuiFlexGroup alignItems="center" justifyContent="flexStart" gutterSize="s">
                   <EuiFlexItem grow={false}>
                     <ReplayExecutionButton
+                      context={execution.context}
                       executionId={execution.id}
+                      onReRunExecution={onReRunExecution}
                       workflowId={execution.workflowId}
                     />
                   </EuiFlexItem>
@@ -174,9 +179,11 @@ const componentStyles = {
 };
 
 const ReplayExecutionButton = React.memo<{
+  context?: Record<string, unknown>;
   executionId: string;
+  onReRunExecution?: (params: RerunWorkflowExecutionParams) => Promise<void>;
   workflowId?: string;
-}>(({ executionId, workflowId }) => {
+}>(({ context, executionId, onReRunExecution, workflowId }) => {
   const { application } = useKibana().services;
   const { canExecuteWorkflow } = useWorkflowsCapabilities();
 
@@ -185,10 +192,15 @@ const ReplayExecutionButton = React.memo<{
       return;
     }
 
+    if (onReRunExecution) {
+      void onReRunExecution({ workflowId, context });
+      return;
+    }
+
     application.navigateToApp('workflows', {
       path: `/${workflowId}?replayExecutionId=${executionId}`,
     });
-  }, [application, canExecuteWorkflow, executionId, workflowId]);
+  }, [application, canExecuteWorkflow, context, executionId, onReRunExecution, workflowId]);
 
   const isRunDisabled = !canExecuteWorkflow || !workflowId;
   const runDisabledTooltipContent = isRunDisabled

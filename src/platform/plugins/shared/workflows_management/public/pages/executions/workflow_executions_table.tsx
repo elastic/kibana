@@ -24,9 +24,17 @@ import type { DataTableRecord, EsHitRecord } from '@kbn/discover-utils/types';
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { SortOrder, UnifiedDataTableSettings } from '@kbn/unified-data-table';
-import { DataLoadingState, UnifiedDataTable } from '@kbn/unified-data-table';
-import { useWorkflowExecutionsBulkActions } from './use_workflow_executions_bulk_actions';
+import type {
+  SortOrder,
+  UnifiedDataTableRenderCustomToolbar,
+  UnifiedDataTableSettings,
+} from '@kbn/unified-data-table';
+import {
+  DataLoadingState,
+  getRenderCustomToolbarWithElements,
+  UnifiedDataTable,
+} from '@kbn/unified-data-table';
+import type { RerunWorkflowExecutionParams } from './build_replay_inputs_from_execution_context';
 import { useWorkflowExecutionsSearch } from './use_workflow_executions_search';
 import {
   EXECUTION_TABLE_DEFAULT_PAGE_SIZE,
@@ -34,6 +42,7 @@ import {
   EXECUTION_TABLE_PAGE_SIZE_OPTIONS,
 } from './workflow_executions_page_constants';
 import { getWorkflowExecutionsFetchErrorMessage } from './workflow_executions_search_query';
+import { WorkflowExecutionsSelectionBar } from './workflow_executions_selection_bar';
 import { useWorkflowExecutionsTrailingControlColumns } from './workflow_executions_table_actions';
 import {
   enrichWorkflowExecutionRowFlattenedValues,
@@ -77,6 +86,7 @@ export interface WorkflowExecutionsTableProps {
   query: Query;
   filters: Filter[];
   liveUpdateIntervalMs?: number;
+  onReRunExecution?: (params: RerunWorkflowExecutionParams) => Promise<void>;
   onViewAllExecutionsForWorkflow?: (workflowId: string) => void;
   timeRange: TimeRange;
   spaceId: string;
@@ -87,6 +97,7 @@ export const WorkflowExecutionsTable = React.memo<WorkflowExecutionsTableProps>(
     dataView,
     filters,
     liveUpdateIntervalMs,
+    onReRunExecution,
     onViewAllExecutionsForWorkflow,
     query,
     spaceId,
@@ -183,13 +194,10 @@ export const WorkflowExecutionsTable = React.memo<WorkflowExecutionsTableProps>(
     const handleRetry = useCallback(() => {
       void refetch();
     }, [refetch]);
-    const customBulkActions = useWorkflowExecutionsBulkActions({
-      onRefresh: handleRetry,
-      rows,
-    });
     const trailingControlColumns = useWorkflowExecutionsTrailingControlColumns(
       rows,
-      onViewAllExecutionsForWorkflow
+      onViewAllExecutionsForWorkflow,
+      onReRunExecution
     );
 
     const expandedDoc = useMemo(() => {
@@ -279,6 +287,32 @@ export const WorkflowExecutionsTable = React.memo<WorkflowExecutionsTableProps>(
     );
     const isPaginationLimited = total > WORKFLOWS_EXECUTIONS_MAX_RESULT_WINDOW;
 
+    const baseToolbarRenderer = useMemo(
+      () =>
+        getRenderCustomToolbarWithElements({
+          leftSide: <></>,
+          bottomSection: <WorkflowExecutionsSelectionBar onRefresh={handleRetry} rows={rows} />,
+        }),
+      [handleRetry, rows]
+    );
+
+    const renderCustomToolbar = useMemo((): UnifiedDataTableRenderCustomToolbar => {
+      function renderExecutionsToolbar(
+        toolbarProps: Parameters<UnifiedDataTableRenderCustomToolbar>[0]
+      ) {
+        return baseToolbarRenderer({
+          ...toolbarProps,
+          gridProps: {
+            ...toolbarProps.gridProps,
+            additionalControls: null,
+          },
+        });
+      }
+
+      renderExecutionsToolbar.displayName = 'WorkflowExecutionsRenderCustomToolbar';
+      return renderExecutionsToolbar;
+    }, [baseToolbarRenderer]);
+
     if (errorMessage) {
       return (
         <EuiEmptyPrompt
@@ -359,7 +393,8 @@ export const WorkflowExecutionsTable = React.memo<WorkflowExecutionsTableProps>(
               sort={sort}
               totalHits={total}
               trailingControlColumns={trailingControlColumns}
-              customBulkActions={customBulkActions}
+              renderCustomToolbar={renderCustomToolbar}
+              enableComparisonMode={false}
               hideFilteringOnComputedColumns
             />
           </CellActionsProvider>

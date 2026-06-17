@@ -326,6 +326,27 @@ describe('WorkflowExecutionPanel', () => {
       expect(screen.queryByTestId('replayExecutionButton')).not.toBeInTheDocument();
     });
 
+    it('should call onReRunExecution when provided', () => {
+      const onReRunExecution = jest.fn();
+      renderComponent({
+        showBackButton: false,
+        execution: {
+          ...mockExecution,
+          status: ExecutionStatus.COMPLETED,
+          context: { inputs: { foo: 'bar' } },
+        },
+        onReRunExecution,
+      });
+
+      fireEvent.click(screen.getByTestId('replayExecutionButton'));
+
+      expect(onReRunExecution).toHaveBeenCalledWith({
+        workflowId: 'workflow-123',
+        context: { inputs: { foo: 'bar' } },
+      });
+      expect(mockNavigateToApp).not.toHaveBeenCalled();
+    });
+
     it('should navigate to workflow detail with replay execution id on click', () => {
       renderComponent({
         showBackButton: false,

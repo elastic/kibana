@@ -10,7 +10,10 @@
 import { act, renderHook } from '@testing-library/react';
 import type { DataTableRecord, EsHitRecord } from '@kbn/discover-utils/types';
 import { ExecutionStatus } from '@kbn/workflows';
-import { useWorkflowExecutionsBulkActions } from './use_workflow_executions_bulk_actions';
+import {
+  useWorkflowExecutionRerun,
+  useWorkflowExecutionsBulkActions,
+} from './use_workflow_executions_bulk_actions';
 import { createStartServicesMock } from '../../mocks';
 import { getTestProvider } from '../../shared/mocks/test_providers';
 
@@ -48,6 +51,7 @@ const createRow = (
 
 describe('useWorkflowExecutionsBulkActions', () => {
   const onRefresh = jest.fn();
+  const onAction = jest.fn();
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -59,11 +63,20 @@ describe('useWorkflowExecutionsBulkActions', () => {
     const services = createStartServicesMock();
     const rows = [createRow('exec-1', 'wf-1')];
 
-    const { result } = renderHook(() => useWorkflowExecutionsBulkActions({ onRefresh, rows }), {
-      wrapper: getTestProvider({ services }),
-    });
+    const { result } = renderHook(
+      () =>
+        useWorkflowExecutionsBulkActions({
+          onRefresh,
+          onAction,
+          rows,
+          selectedDocIds: ['exec-1'],
+        }),
+      {
+        wrapper: getTestProvider({ services }),
+      }
+    );
 
-    const reRunAction = result.current.find((action) => action.key === 'bulk-re-run');
+    const reRunAction = result.current.panels[0]?.items?.find((item) => item.key === 'bulk-re-run');
     expect(reRunAction).toBeDefined();
     expect(reRunAction?.['data-test-subj']).toBe('workflowExecutionsBulkActionReRun');
   });
@@ -73,11 +86,20 @@ describe('useWorkflowExecutionsBulkActions', () => {
     const services = createStartServicesMock();
     const rows = [createRow('exec-1', 'wf-1')];
 
-    const { result } = renderHook(() => useWorkflowExecutionsBulkActions({ onRefresh, rows }), {
-      wrapper: getTestProvider({ services }),
-    });
+    const { result } = renderHook(
+      () =>
+        useWorkflowExecutionsBulkActions({
+          onRefresh,
+          onAction,
+          rows,
+          selectedDocIds: ['exec-1'],
+        }),
+      {
+        wrapper: getTestProvider({ services }),
+      }
+    );
 
-    expect(result.current).toHaveLength(0);
+    expect(result.current.panels).toHaveLength(0);
   });
 
   it('re-runs selected executions and refreshes the list without navigating', async () => {
@@ -89,16 +111,27 @@ describe('useWorkflowExecutionsBulkActions', () => {
       createRow('exec-1', 'wf-1', { inputs: { foo: 'bar' }, event: { type: 'alert' } }),
       createRow('exec-2', 'wf-2', { inputs: { baz: 1 } }),
     ];
-    const { result } = renderHook(() => useWorkflowExecutionsBulkActions({ onRefresh, rows }), {
-      wrapper: getTestProvider({ services }),
-    });
+    const { result } = renderHook(
+      () =>
+        useWorkflowExecutionsBulkActions({
+          onRefresh,
+          onAction,
+          rows,
+          selectedDocIds: ['exec-1', 'exec-2'],
+        }),
+      {
+        wrapper: getTestProvider({ services }),
+      }
+    );
 
-    const reRunAction = result.current.find((action) => action.key === 'bulk-re-run');
+    const reRunAction = result.current.panels[0]?.items?.find((item) => item.key === 'bulk-re-run');
 
     await act(async () => {
-      await reRunAction?.onClick({ selectedDocIds: ['exec-1', 'exec-2'] });
+      // EuiContextMenuItem onClick requires a MouseEvent; the handler ignores it.
+      reRunAction?.onClick?.({} as any);
     });
 
+    expect(onAction).toHaveBeenCalledTimes(1);
     expect(mockRunWorkflow).toHaveBeenCalledTimes(2);
     expect(mockRunWorkflow).toHaveBeenCalledWith({
       id: 'wf-1',
@@ -111,5 +144,54 @@ describe('useWorkflowExecutionsBulkActions', () => {
     expect(onRefresh).toHaveBeenCalledTimes(1);
     expect(mockNavigateToApp).not.toHaveBeenCalled();
     expect(services.notifications.toasts.addSuccess).toHaveBeenCalled();
+  });
+});
+
+describe('useWorkflowExecutionRerun', () => {
+  const mockSetSelectedExecution = jest.fn();
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockRunWorkflow.mockResolvedValue({ workflowExecutionId: 'new-exec' });
+  });
+
+  it('re-runs execution and opens the flyout', async () => {
+    const services = createStartServicesMock();
+
+    const { result } = renderHook(
+      () => useWorkflowExecutionRerun({ setSelectedExecution: mockSetSelectedExecution }),
+      { wrapper: getTestProvider({ services }) }
+    );
+
+    await act(async () => {
+      await result.current({
+        workflowId: 'wf-1',
+        context: { inputs: { foo: 'bar' }, event: { type: 'alert' } },
+      });
+    });
+
+    expect(mockRunWorkflow).toHaveBeenCalledWith({
+      id: 'wf-1',
+      inputs: { foo: 'bar', event: { type: 'alert' } },
+    });
+    expect(mockSetSelectedExecution).toHaveBeenCalledWith('new-exec');
+    expect(services.notifications.toasts.addSuccess).toHaveBeenCalled();
+  });
+
+  it('shows an error toast when re-run fails', async () => {
+    const services = createStartServicesMock();
+    mockRunWorkflow.mockRejectedValue(new Error('run failed'));
+
+    const { result } = renderHook(
+      () => useWorkflowExecutionRerun({ setSelectedExecution: mockSetSelectedExecution }),
+      { wrapper: getTestProvider({ services }) }
+    );
+
+    await act(async () => {
+      await result.current({ workflowId: 'wf-1' });
+    });
+
+    expect(mockSetSelectedExecution).not.toHaveBeenCalled();
+    expect(services.notifications.toasts.addError).toHaveBeenCalled();
   });
 });

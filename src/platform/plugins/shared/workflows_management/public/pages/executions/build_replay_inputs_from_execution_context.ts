@@ -9,6 +9,11 @@
 
 import { isPlainObject } from 'lodash/fp';
 
+export interface RerunWorkflowExecutionParams {
+  workflowId: string;
+  context?: Record<string, unknown>;
+}
+
 export const buildReplayInputsFromExecutionContext = (
   context: Record<string, unknown> | undefined
 ): Record<string, unknown> => {

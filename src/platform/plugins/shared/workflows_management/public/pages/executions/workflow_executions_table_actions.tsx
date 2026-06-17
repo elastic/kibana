@@ -21,6 +21,7 @@ import React, { useCallback, useMemo, useState } from 'react';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import { i18n } from '@kbn/i18n';
 import { useWorkflowsCapabilities } from '@kbn/workflows-ui';
+import type { RerunWorkflowExecutionParams } from './build_replay_inputs_from_execution_context';
 import {
   getWorkflowExecutionId,
   getWorkflowExecutionSource,
@@ -33,6 +34,7 @@ const WORKFLOW_EXECUTIONS_ACTIONS_COLUMN_WIDTH = 64;
 export interface WorkflowExecutionActionContext {
   executionId?: string;
   workflowId?: string;
+  context?: Record<string, unknown>;
 }
 
 export const getWorkflowExecutionActionContext = (
@@ -46,6 +48,7 @@ export const getWorkflowExecutionActionContext = (
   return {
     executionId: getWorkflowExecutionId(row),
     workflowId: execution?.workflowId,
+    context: execution?.context,
   };
 };
 
@@ -62,9 +65,10 @@ const menuAriaLabel = i18n.translate('workflowsManagement.executionsPage.actions
 });
 
 const useExecutionActionListItems = (
-  { executionId, workflowId }: WorkflowExecutionActionContext,
+  { workflowId, context }: WorkflowExecutionActionContext,
   onClosePopover: () => void,
-  onViewAllExecutionsForWorkflow?: (workflowId: string) => void
+  onViewAllExecutionsForWorkflow?: (workflowId: string) => void,
+  onReRunExecution?: (params: RerunWorkflowExecutionParams) => void
 ): EuiListGroupProps['listItems'] => {
   const { application } = useKibana().services;
   const { canExecuteWorkflow, canReadWorkflowExecution, canUpdateWorkflow } =
@@ -88,12 +92,14 @@ const useExecutionActionListItems = (
         }),
         iconType: 'refresh',
         onClick: () => {
-          if (!workflowId || !executionId) {
+          if (!workflowId || !onReRunExecution) {
             return;
           }
-          navigateToWorkflow(`/${workflowId}?replayExecutionId=${executionId}`);
+
+          onClosePopover();
+          void onReRunExecution({ workflowId, context });
         },
-        isDisabled: !workflowId || !executionId,
+        isDisabled: !workflowId || !onReRunExecution,
         'data-test-subj': 'workflowExecutionActionReRun',
       });
     }
@@ -138,9 +144,10 @@ const useExecutionActionListItems = (
     canExecuteWorkflow,
     canReadWorkflowExecution,
     canUpdateWorkflow,
-    executionId,
+    context,
     navigateToWorkflow,
     onClosePopover,
+    onReRunExecution,
     onViewAllExecutionsForWorkflow,
     workflowId,
   ]);
@@ -148,12 +155,14 @@ const useExecutionActionListItems = (
 
 export interface WorkflowExecutionActionsMenuProps {
   actionContext: WorkflowExecutionActionContext;
+  onReRunExecution?: (params: RerunWorkflowExecutionParams) => void;
   onViewAllExecutionsForWorkflow?: (workflowId: string) => void;
   variant?: 'icon' | 'takeAction';
 }
 
 export const WorkflowExecutionActionsMenu = ({
   actionContext,
+  onReRunExecution,
   onViewAllExecutionsForWorkflow,
   variant = 'icon',
 }: WorkflowExecutionActionsMenuProps) => {
@@ -163,7 +172,8 @@ export const WorkflowExecutionActionsMenu = ({
   const listItems = useExecutionActionListItems(
     actionContext,
     closePopover,
-    onViewAllExecutionsForWorkflow
+    onViewAllExecutionsForWorkflow,
+    onReRunExecution
   );
 
   const showActionsLabel = i18n.translate(
@@ -223,14 +233,17 @@ export const WorkflowExecutionActionsMenu = ({
 };
 
 const WorkflowExecutionActionsPopover = ({
+  onReRunExecution,
   onViewAllExecutionsForWorkflow,
   row,
 }: {
+  onReRunExecution?: (params: RerunWorkflowExecutionParams) => void;
   onViewAllExecutionsForWorkflow?: (workflowId: string) => void;
   row: DataTableRecord | undefined;
 }) => (
   <WorkflowExecutionActionsMenu
     actionContext={getWorkflowExecutionActionContext(row)}
+    onReRunExecution={onReRunExecution}
     onViewAllExecutionsForWorkflow={onViewAllExecutionsForWorkflow}
     variant="icon"
   />
@@ -238,7 +251,8 @@ const WorkflowExecutionActionsPopover = ({
 
 export const useWorkflowExecutionsTrailingControlColumns = (
   rows: DataTableRecord[],
-  onViewAllExecutionsForWorkflow?: (workflowId: string) => void
+  onViewAllExecutionsForWorkflow?: (workflowId: string) => void,
+  onReRunExecution?: (params: RerunWorkflowExecutionParams) => void
 ): EuiDataGridControlColumn[] =>
   useMemo(
     () => [
@@ -248,11 +262,12 @@ export const useWorkflowExecutionsTrailingControlColumns = (
         headerCellRender: ActionsHeader,
         rowCellRender: ({ rowIndex }) => (
           <WorkflowExecutionActionsPopover
+            onReRunExecution={onReRunExecution}
             onViewAllExecutionsForWorkflow={onViewAllExecutionsForWorkflow}
             row={rows[rowIndex]}
           />
         ),
       },
     ],
-    [onViewAllExecutionsForWorkflow, rows]
+    [onReRunExecution, onViewAllExecutionsForWorkflow, rows]
   );

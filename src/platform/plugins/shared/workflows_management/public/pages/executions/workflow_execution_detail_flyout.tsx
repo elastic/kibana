@@ -20,6 +20,7 @@ import {
 import { css } from '@emotion/react';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
+import type { RerunWorkflowExecutionParams } from './build_replay_inputs_from_execution_context';
 import { WorkflowExecutionActionsMenu } from './workflow_executions_table_actions';
 import { useWorkflowExecutionPolling } from '../../entities/workflows/model/use_workflow_execution_polling';
 import { WorkflowDetailStoreProvider } from '../../entities/workflows/store/provider';
@@ -28,6 +29,7 @@ import { WorkflowExecutionDetail } from '../../features/workflow_execution_detai
 export interface WorkflowExecutionDetailFlyoutProps {
   executionId: string;
   onClose: () => void;
+  onReRunExecution?: (params: RerunWorkflowExecutionParams) => Promise<void>;
   onViewAllExecutionsForWorkflow?: (workflowId: string) => void;
 }
 
@@ -47,6 +49,7 @@ const flyoutBodyCss = css`
 const WorkflowExecutionDetailFlyoutContent = ({
   executionId,
   onClose,
+  onReRunExecution,
   onViewAllExecutionsForWorkflow,
 }: WorkflowExecutionDetailFlyoutProps) => {
   const { workflowExecution } = useWorkflowExecutionPolling(executionId);
@@ -57,6 +60,7 @@ const WorkflowExecutionDetailFlyoutContent = ({
         <WorkflowExecutionDetail
           executionId={executionId}
           onClose={onClose}
+          onReRunExecution={onReRunExecution}
           showBackButton={false}
         />
       </EuiFlyoutBody>
@@ -67,7 +71,9 @@ const WorkflowExecutionDetailFlyoutContent = ({
               actionContext={{
                 executionId,
                 workflowId: workflowExecution?.workflowId,
+                context: workflowExecution?.context,
               }}
+              onReRunExecution={onReRunExecution}
               onViewAllExecutionsForWorkflow={onViewAllExecutionsForWorkflow}
               variant="takeAction"
             />
@@ -79,7 +85,7 @@ const WorkflowExecutionDetailFlyoutContent = ({
 };
 
 export const WorkflowExecutionDetailFlyout = React.memo<WorkflowExecutionDetailFlyoutProps>(
-  ({ executionId, onClose, onViewAllExecutionsForWorkflow }) => {
+  ({ executionId, onClose, onReRunExecution, onViewAllExecutionsForWorkflow }) => {
     const flyoutTitleId = useGeneratedHtmlId({ prefix: 'workflowExecutionDetailFlyoutTitle' });
 
     return (
@@ -101,6 +107,7 @@ export const WorkflowExecutionDetailFlyout = React.memo<WorkflowExecutionDetailF
           <WorkflowExecutionDetailFlyoutContent
             executionId={executionId}
             onClose={onClose}
+            onReRunExecution={onReRunExecution}
             onViewAllExecutionsForWorkflow={onViewAllExecutionsForWorkflow}
           />
         </WorkflowDetailStoreProvider>

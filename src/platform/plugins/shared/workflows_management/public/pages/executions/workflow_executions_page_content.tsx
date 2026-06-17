@@ -7,9 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiHorizontalRule, EuiSpacer } from '@elastic/eui';
+import { EuiSpacer } from '@elastic/eui';
 import React, { useCallback, useMemo, useRef, useState } from 'react';
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
+import { useWorkflowExecutionRerun } from './use_workflow_executions_bulk_actions';
 import { useWorkflowExecutionsPageFilters } from './use_workflow_executions_page_filters';
 import { WorkflowExecutionDetailFlyout } from './workflow_execution_detail_flyout';
 import { createWorkflowExecutionsDataView } from './workflow_executions_data_view';
@@ -58,6 +59,7 @@ export const WorkflowExecutionsPageContent = React.memo(() => {
   const [isRefreshPaused, setIsRefreshPaused] = useState(false);
   const [refreshIntervalMs, setRefreshIntervalMs] = useState(DEFAULT_REFRESH_INTERVAL_MS);
   const { selectedExecutionId, setSelectedExecution } = useWorkflowUrlState();
+  const rerunExecution = useWorkflowExecutionRerun({ setSelectedExecution });
   const { applyWorkflowIdFilter, controlsUrlState, onFilterGroupInit, setControlsUrlState } =
     useWorkflowExecutionsPageFilters();
   const previousSubmittedSearchKey = useRef<string | null>(null);
@@ -151,7 +153,7 @@ export const WorkflowExecutionsPageContent = React.memo(() => {
         refreshInterval={refreshIntervalMs}
         timeRange={timeRange}
       />
-      <EuiSpacer size="l" />
+      <EuiSpacer size="m" />
       <WorkflowExecutionsFilters
         controlsUrlState={controlsUrlState}
         filters={controlFilters}
@@ -162,8 +164,6 @@ export const WorkflowExecutionsPageContent = React.memo(() => {
         timeRange={timeRange}
       />
       <EuiSpacer size="l" />
-      <EuiHorizontalRule margin="none" />
-      <EuiSpacer size="l" />
       {spaceId ? (
         <WorkflowExecutionsTable
           dataView={dataView}
@@ -171,6 +171,7 @@ export const WorkflowExecutionsPageContent = React.memo(() => {
           liveUpdateIntervalMs={
             !isRefreshPaused && refreshIntervalMs > 0 ? refreshIntervalMs : undefined
           }
+          onReRunExecution={rerunExecution}
           onViewAllExecutionsForWorkflow={handleViewAllExecutionsForWorkflow}
           query={submittedQuery}
           spaceId={spaceId}
@@ -181,6 +182,7 @@ export const WorkflowExecutionsPageContent = React.memo(() => {
         <WorkflowExecutionDetailFlyout
           executionId={selectedExecutionId}
           onClose={handleCloseExecution}
+          onReRunExecution={rerunExecution}
           onViewAllExecutionsForWorkflow={handleViewAllExecutionsForWorkflow}
         />
       ) : null}

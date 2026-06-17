@@ -34,6 +34,7 @@ import {
   setHighlightedStepId,
 } from '../../../entities/workflows/store/workflow_detail/slice';
 import { useWorkflowUrlState } from '../../../hooks/use_workflow_url_state';
+import type { RerunWorkflowExecutionParams } from '../../../pages/executions/build_replay_inputs_from_execution_context';
 import { useChildWorkflowExecutions } from '../model/use_child_workflow_executions';
 import { useStepExecution } from '../model/use_step_execution';
 
@@ -46,6 +47,7 @@ const PSEUDO_STEP_TRIGGER = 'trigger';
 export interface WorkflowExecutionDetailProps {
   executionId: string;
   onClose: () => void;
+  onReRunExecution?: (params: RerunWorkflowExecutionParams) => Promise<void>;
   showBackButton?: boolean;
   selectedStepExecutionId?: string | null;
   onSelectedStepExecutionChange?: (stepExecutionId: string | null) => void;
@@ -68,6 +70,7 @@ export const WorkflowExecutionDetail: React.FC<WorkflowExecutionDetailProps> = R
   ({
     executionId,
     onClose,
+    onReRunExecution,
     showBackButton: showBackButtonOverride,
     selectedStepExecutionId: controlledSelectedStepExecutionId,
     onSelectedStepExecutionChange,
@@ -283,6 +286,7 @@ export const WorkflowExecutionDetail: React.FC<WorkflowExecutionDetailProps> = R
               showBackButton={showBackButton}
               error={error}
               onClose={onClose}
+              onReRunExecution={onReRunExecution}
               onStepExecutionClick={setSelectedStepExecutionId}
               selectedId={selectedStepExecutionId ?? null}
               childExecutionsMap={childExecutions}
