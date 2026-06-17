@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { screen } from '@testing-library/react';
+import { screen, waitFor } from '@testing-library/react';
 import { setupEnvironment } from '../../helpers/setup_environment';
 import { renderEditPolicy } from '../../helpers/render_edit_policy';
 import { createRolloverActions } from '../../helpers/actions/rollover_actions';
@@ -102,5 +102,23 @@ describe('<EditPolicy /> rollover', () => {
     expect(screen.queryByTestId('cold-rolloverMinAgeInputIconTip')).not.toBeInTheDocument();
     expect(screen.queryByTestId('frozen-rolloverMinAgeInputIconTip')).not.toBeInTheDocument();
     expect(screen.queryByTestId('delete-rolloverMinAgeInputIconTip')).not.toBeInTheDocument();
+  });
+
+  test('restore recommended defaults is enabled by restrictions and removes min fields', async () => {
+    const rolloverActions = createRolloverActions();
+    const restoreDefaultsButton = screen.getByTestId('rolloverRestoreRecommendedDefaults');
+
+    expect(restoreDefaultsButton).toBeDisabled();
+
+    await rolloverActions.rollover.setMinDocs('12');
+
+    expect(restoreDefaultsButton).toBeEnabled();
+
+    rolloverActions.rollover.restoreRecommendedDefaults();
+
+    await waitFor(() => {
+      expect(screen.queryByTestId('hot-selectedMinDocuments')).not.toBeInTheDocument();
+      expect(restoreDefaultsButton).toBeDisabled();
+    });
   });
 });

@@ -14,6 +14,8 @@ import { useFormContext, useFormData } from '../../../../../../../shared_imports
 import {
   DEFAULT_ROLLOVER_TRIGGER_FIELDS,
   ROLLOVER_FORM_PATHS,
+  ROLLOVER_RESTRICTION_FIELD_PATH,
+  ROLLOVER_RESTRICTION_FIELD_PATHS,
   ROLLOVER_TRIGGER_FIELD_PATH,
 } from '../../../../constants';
 import { i18nTexts } from '../../../../i18n_texts';
@@ -27,6 +29,7 @@ export const RolloverRecommendedDefaultsButton: FunctionComponent = () => {
   const [formData] = useFormData({
     watch: [
       ROLLOVER_TRIGGER_FIELD_PATH,
+      ROLLOVER_RESTRICTION_FIELD_PATH,
       ROLLOVER_FORM_PATHS.maxAge,
       ROLLOVER_FORM_PATHS.maxPrimaryShardSize,
       '_meta.hot.customRollover.maxAgeUnit',
@@ -38,6 +41,7 @@ export const RolloverRecommendedDefaultsButton: FunctionComponent = () => {
       hasRecommendedRolloverDefaults({
         rollover: get(formData, 'phases.hot.actions.rollover'),
         triggerFields: get(formData, ROLLOVER_TRIGGER_FIELD_PATH),
+        restrictionFields: get(formData, ROLLOVER_RESTRICTION_FIELD_PATH),
         maxAgeUnit: get(formData, '_meta.hot.customRollover.maxAgeUnit'),
         maxPrimaryShardSizeUnit: get(formData, '_meta.hot.customRollover.maxPrimaryShardSizeUnit'),
       }),
@@ -51,6 +55,7 @@ export const RolloverRecommendedDefaultsButton: FunctionComponent = () => {
       isDisabled={isUsingRecommendedDefaults}
       onClick={() => {
         setFieldValue(ROLLOVER_TRIGGER_FIELD_PATH, DEFAULT_ROLLOVER_TRIGGER_FIELDS);
+        setFieldValue(ROLLOVER_RESTRICTION_FIELD_PATH, []);
         setFieldValue(ROLLOVER_FORM_PATHS.maxAge, recommendedRolloverFormValues.max_age);
         setFieldValue(
           ROLLOVER_FORM_PATHS.maxPrimaryShardSize,
@@ -64,6 +69,9 @@ export const RolloverRecommendedDefaultsButton: FunctionComponent = () => {
           '_meta.hot.customRollover.maxPrimaryShardSizeUnit',
           recommendedRolloverFormValues.maxPrimaryShardSizeUnit
         );
+        Object.values(ROLLOVER_RESTRICTION_FIELD_PATHS).forEach((path) => {
+          setFieldValue(path, undefined);
+        });
       }}
       data-test-subj="rolloverRestoreRecommendedDefaults"
     >

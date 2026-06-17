@@ -6,7 +6,10 @@
  */
 
 import type { RolloverAction } from '../../../common/types';
-import type { RolloverTriggerField } from '../sections/edit_policy/constants';
+import type {
+  RolloverRestrictionField,
+  RolloverTriggerField,
+} from '../sections/edit_policy/constants';
 import { DEFAULT_ROLLOVER_TRIGGER_FIELDS } from '../sections/edit_policy/constants';
 
 export const recommendedRolloverFormValues = {
@@ -19,21 +22,25 @@ export const recommendedRolloverFormValues = {
 export const hasRecommendedRolloverDefaults = ({
   rollover,
   triggerFields,
+  restrictionFields,
   maxAgeUnit,
   maxPrimaryShardSizeUnit,
 }: {
   rollover?: RolloverAction;
   triggerFields?: RolloverTriggerField[];
+  restrictionFields?: RolloverRestrictionField[];
   maxAgeUnit?: string;
   maxPrimaryShardSizeUnit?: string;
 }): boolean => {
   const selectedTriggerFields = triggerFields ?? [];
+  const selectedRestrictionFields = restrictionFields ?? [];
   const hasOnlyRecommendedFields =
     selectedTriggerFields.length === DEFAULT_ROLLOVER_TRIGGER_FIELDS.length &&
     DEFAULT_ROLLOVER_TRIGGER_FIELDS.every((field) => selectedTriggerFields.includes(field));
 
   return Boolean(
     hasOnlyRecommendedFields &&
+      selectedRestrictionFields.length === 0 &&
       `${rollover?.max_age ?? ''}` === recommendedRolloverFormValues.max_age &&
       `${rollover?.max_primary_shard_size ?? ''}` ===
         recommendedRolloverFormValues.max_primary_shard_size &&

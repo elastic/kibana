@@ -295,6 +295,29 @@ describe('<EditPolicy /> serialization', () => {
       );
     }, 15000);
 
+    test('restoring recommended rollover defaults removes min values', async () => {
+      await actions.rollover.setMinSize('12', 'mb');
+      await actions.rollover.setMinDocs('12');
+      await actions.rollover.setMinAge('12', 'h');
+      await actions.rollover.setMinPrimaryShardDocs('12');
+      await actions.rollover.setMinPrimaryShardSize('12', 'mb');
+
+      actions.rollover.restoreRecommendedDefaults();
+
+      await actions.savePolicy();
+      await waitFor(() => expect(httpSetup.post).toHaveBeenCalled());
+
+      const lastReq: HttpFetchOptionsWithPath[] = httpSetup.post.mock.calls.pop() || [];
+      const [requestUrl, requestBody] = lastReq;
+      const parsedReqBody = JSON.parse((requestBody as Record<string, any>).body);
+
+      expect(requestUrl).toBe(`${API_BASE_PATH}/policies`);
+      expect(parsedReqBody.phases.hot.actions.rollover).toEqual({
+        max_age: '30d',
+        max_primary_shard_size: '50gb',
+      });
+    });
+
     test('setting searchable snapshot', async () => {
       await actions.hot.setSearchableSnapshot('abc');
 
