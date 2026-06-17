@@ -97,6 +97,10 @@ safe-outputs:
     allowed-base-branches: ['main', '9.*', '8.*', '7.*']
     if-no-changes: 'ignore'
     protected-files: fallback-to-issue
+    # Use git format-patch / `git am --3way` instead of a git bundle. The bundle
+    # transport makes the shallow safe_outputs checkout run `git fetch --unshallow`,
+    # which on a repo Kibana's size cannot finish within the 15m job timeout.
+    patch-format: am
 
 strict: false
 timeout-minutes: 90
