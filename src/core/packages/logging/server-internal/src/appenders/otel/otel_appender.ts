@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { createSecureContext } from 'tls';
 import { isNil } from 'lodash';
 import { set } from '@kbn/safer-lodash-set';
 import type { Ecs } from '@elastic/ecs';
@@ -209,6 +210,7 @@ export class OtelAppender implements DisposableAppender {
             [schema.literal('none'), schema.literal('certificate'), schema.literal('full')],
             { defaultValue: 'full' }
           ),
+          allowPartialTrustChain: schema.boolean({ defaultValue: true }),
         },
         {
           validate: (raw) => {
@@ -344,10 +346,14 @@ const createExporter = (
         metadata,
         ...(tls
           ? {
-              credentials: credentials.createSsl(
-                toGrpcRootCerts(tls),
-                tls.key ?? null,
-                tls.cert ?? null,
+              // Using createFromSecureContext instead of createSsl because createSsl does not support allowPartialTrustChain.
+              credentials: credentials.createFromSecureContext(
+                createSecureContext({
+                  ca: toGrpcRootCerts(tls),
+                  key: tls.key,
+                  cert: tls.cert,
+                  allowPartialTrustChain: tls.allowPartialTrustChain,
+                }),
                 buildGrpcVerifyOptions(tls)
               ),
             }

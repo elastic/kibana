@@ -7,11 +7,67 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { IRouter } from '@kbn/core/server';
+import type { IRouter, Logger } from '@kbn/core/server';
 import { createSHA256Hash } from '@kbn/crypto';
+import { stableStringify } from '@kbn/std';
+import { z } from '@kbn/zod/v4';
 import type { ServerStepRegistry } from '../step_registry';
+import type { ServerStepDefinition } from '../step_registry/types';
 
 const ROUTE_PATH = '/internal/workflows_extensions/step_definitions';
+
+/**
+ * Converts a zod schema to a stable JSON Schema representation for hashing.
+ * Falls back to a deterministic marker so an unconvertible schema still
+ * contributes to (and changes) the hash when it changes.
+ */
+function schemaToJson(schema?: z.ZodType): unknown {
+  if (!schema) {
+    return undefined;
+  }
+  return z.toJSONSchema(schema);
+}
+
+/**
+ * Computes a hash over the entire step definition so changes to the schemas
+ * (inputSchema/outputSchema/configSchema), handler/onCancel implementations, or
+ * metadata are all detected. `id` is excluded since it's the lookup key.
+ */
+function computeDefinitionHash(definition: ServerStepDefinition, logger: Logger): string {
+  const {
+    label,
+    description,
+    category,
+    stability,
+    deprecation,
+    documentation,
+    inputSchema,
+    outputSchema,
+    configSchema,
+    handler,
+    onCancel,
+  } = definition;
+
+  try {
+    const canonical = {
+      label,
+      description,
+      category,
+      stability,
+      deprecation,
+      documentation,
+      inputSchema: schemaToJson(inputSchema),
+      outputSchema: schemaToJson(outputSchema),
+      configSchema: schemaToJson(configSchema),
+      handler: handler?.toString(),
+      onCancel: onCancel?.toString(),
+    };
+    return createSHA256Hash(stableStringify(canonical));
+  } catch (error) {
+    logger.error(`Failed to compute definition hash for step ${definition.id}`, { error });
+    return 'definition-hashing-error';
+  }
+}
 
 /**
  * Registers the route to get all registered step definitions.
@@ -20,7 +76,8 @@ const ROUTE_PATH = '/internal/workflows_extensions/step_definitions';
  */
 export function registerGetStepDefinitionsRoute(
   router: IRouter,
-  registry: ServerStepRegistry
+  registry: ServerStepRegistry,
+  logger: Logger
 ): void {
   router.get(
     {
@@ -39,8 +96,11 @@ export function registerGetStepDefinitionsRoute(
     async (_context, _request, response) => {
       const allStepDefinitions = registry.getAll();
       const steps = allStepDefinitions
-        // create a hash of the handler function to detect changes in the implementation
-        .map(({ id, handler }) => ({ id, handlerHash: createSHA256Hash(handler.toString()) }))
+        // create a hash of the full definition to detect changes in schemas or implementation
+        .map((definition) => ({
+          id: definition.id,
+          definitionHash: computeDefinitionHash(definition, logger),
+        }))
         .sort((a, b) => a.id.localeCompare(b.id));
 
       return response.ok({ body: { steps } });

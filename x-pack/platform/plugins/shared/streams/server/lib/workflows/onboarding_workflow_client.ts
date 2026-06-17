@@ -12,6 +12,7 @@ import { STREAMS_KI_ONBOARDING_WORKFLOW_ID } from '@kbn/workflows/managed';
 import type { ChatCompletionTokenCount } from '@kbn/inference-common';
 import {
   SigEventsWorkflowStatus,
+  type SigEventsWorkflowStatusResult,
   type StreamsKIsOnboardingFeaturesResult,
   type StreamsKIsOnboardingQueriesResult,
   type StreamsKIsOnboardingStatusResult,
@@ -180,7 +181,7 @@ export const parseStreamNameFromConcurrencyKey = (key: string): string | null =>
   return key.slice(CONCURRENCY_KEY_PREFIX.length);
 };
 
-const MAX_STREAMS_PER_QUERY = 10000;
+export const MAX_STREAMS_PER_QUERY = 10000;
 /**
  * Client that wraps the workflows management API to provide a stream-centric
  * interface for running, querying, and canceling KI onboarding workflows.
@@ -252,6 +253,50 @@ export class StreamsKIsOnboardingClient {
     };
     const { features, queries } = parseWorkflowOutput(ctx.output ?? {});
     return { ...result, features, queries };
+  }
+
+  /**
+   * Returns a lightweight status summary for many streams in one query.
+   *
+   * Collapses all onboarding executions via {@link getRecentExecutions} and
+   * filters to the requested names in memory (the management API can't filter
+   * by a set of concurrency keys). Streams with no execution map to
+   * `NotStarted`. Unlike {@link getStatus}, the completed output is omitted so
+   * no extra per-stream fetch is needed.
+   */
+  async getStatuses({
+    streamNames,
+  }: {
+    streamNames: string[];
+  }): Promise<Record<string, SigEventsWorkflowStatusResult>> {
+    if (streamNames.length === 0) {
+      return {};
+    }
+
+    const statuses: Record<string, SigEventsWorkflowStatusResult> = {};
+
+    for (const streamName of streamNames) {
+      statuses[streamName] = { status: SigEventsWorkflowStatus.NotStarted, executionId: null };
+    }
+
+    const requested = new Set(streamNames);
+    const executions = await this.getRecentExecutions();
+
+    for (const execution of executions) {
+      if (execution.concurrencyGroupKey === undefined) {
+        continue;
+      }
+      const streamName = parseStreamNameFromConcurrencyKey(execution.concurrencyGroupKey);
+      if (streamName === null || !requested.has(streamName)) {
+        continue;
+      }
+      statuses[streamName] = WorkflowExecutionService.toStatusResult({
+        execution,
+        workflowId: STREAMS_KI_ONBOARDING_WORKFLOW_ID,
+      });
+    }
+
+    return statuses;
   }
 
   /**
