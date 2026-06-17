@@ -145,22 +145,8 @@ export const samlAuthFixture = coreWorkerFixtures.extend<{}, { samlAuth: SamlAut
         config.serverless
       );
 
-      // Hide the announcements (including the sidenav tour) in advance to prevent
-      // it from interfering with test flows. Default Scout server config_sets do not set
-      // globalOverrides (ECH/MKI parity); a plugin-specific config_set may add
-      // `--uiSettings.globalOverrides.hideAnnouncements`, in which case this POST returns 400.
-      try {
-        await kbnClient.uiSettings.updateGlobal({ hideAnnouncements: true });
-      } catch (err: unknown) {
-        if (isGlobalUiSettingOverrideConflict(err)) {
-          const detail = formatUnknownError(err);
-          log.debug(
-            `Skipping hideAnnouncements update — already enforced by server-level override: ${detail}`
-          );
-        } else {
-          throw err;
-        }
-      }
+      // Hide the announcements (including the sidenav tour) in the default space
+      await kbnClient.uiSettings.update({ hideAnnouncements: true });
 
       // Expose a plain object (not a class instance) so that consumers that
       // spread `samlAuth` (e.g. `{ ...samlAuth, extraMethod }`) get all methods
