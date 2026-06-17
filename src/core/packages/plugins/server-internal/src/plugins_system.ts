@@ -187,6 +187,13 @@ export class PluginsSystem<T extends PluginType> {
 
     this.log.info(`Starting [${this.satupPlugins.length}] plugins: [${[...this.satupPlugins]}]`);
 
+    // Validate cross-plugin DI contracts from the manifests before any plugin
+    // starts, so mismatches surface (and, in `error` mode, abort startup) ahead
+    // of `start()` rather than after.
+    if (this.globalTokenValidation !== 'off') {
+      validateGlobalTokens(this.plugins, this.globalTokenValidation, this.log);
+    }
+
     for (const pluginName of this.satupPlugins) {
       this.log.debug(`Starting plugin "${pluginName}"...`);
       const plugin = this.plugins.get(pluginName)!;
@@ -232,10 +239,6 @@ export class PluginsSystem<T extends PluginType> {
     }
 
     this.runtimeResolver.resolveStartRequests(contracts);
-
-    if (this.globalTokenValidation !== 'off') {
-      validateGlobalTokens(this.plugins, this.globalTokenValidation, this.log);
-    }
 
     return contracts;
   }

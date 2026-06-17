@@ -10,7 +10,8 @@
 import type { InjectedMetadataPlugin } from '@kbn/core-injected-metadata-common-internal';
 
 /**
- * Validates cross-plugin DI services and extension points in the browser.
+ * Validates cross-plugin DI services and extension points in the browser,
+ * before any plugin is started.
  *
  * Logs warnings to the browser console; never throws.
  */

@@ -37,6 +37,10 @@ function createPlugin(
     server = true,
     ui = true,
     type = PluginType.standard,
+    globals = {
+      services: { provides: [], consumes: [] },
+      extensionPoints: { hosts: [], contributes: [] },
+    },
   }: {
     required?: string[];
     optional?: string[];
@@ -44,6 +48,10 @@ function createPlugin(
     server?: boolean;
     ui?: boolean;
     type?: PluginType;
+    globals?: {
+      services: { provides: string[]; consumes: string[] };
+      extensionPoints: { hosts: string[]; contributes: string[] };
+    };
   } = {}
 ): PluginWrapper<any, any> {
   const plugin = new PluginWrapper<any, any>({
@@ -57,10 +65,7 @@ function createPlugin(
       requiredPlugins: required,
       optionalPlugins: optional,
       runtimePluginDependencies: runtime,
-      globals: {
-        services: { provides: [], consumes: [] },
-        extensionPoints: { hosts: [], contributes: [] },
-      },
+      globals,
       requiredBundles: [],
       server,
       ui,
@@ -627,6 +632,26 @@ test('`startPlugins` only starts plugins that were setup', async () => {
       ],
     ]
   `);
+});
+
+test('`startPlugins` validates global tokens before starting plugins and aborts in `error` mode', async () => {
+  const consumer = createPlugin('consumer', {
+    globals: {
+      services: { provides: [], consumes: ['provider.MyService'] },
+      extensionPoints: { hosts: [], contributes: [] },
+    },
+  });
+  jest.spyOn(consumer, 'setup').mockResolvedValue('setup');
+  const startSpy = jest.spyOn(consumer, 'start').mockResolvedValue('started');
+
+  pluginsSystem.addPlugin(consumer);
+  pluginsSystem.setGlobalTokenValidation('error');
+  await pluginsSystem.setupPlugins(setupDeps);
+
+  await expect(pluginsSystem.startPlugins(startDeps)).rejects.toThrow(
+    /Cross-plugin DI validation failed/
+  );
+  expect(startSpy).not.toHaveBeenCalled();
 });
 
 describe('setup', () => {

@@ -12,12 +12,13 @@ import type { Logger } from '@kbn/logging';
 import type { PluginWrapper } from './plugin';
 
 /**
- * Validates cross-plugin DI services and extension points after all plugins
- * have completed `start()`.
+ * Validates cross-plugin DI services and extension points from the plugin
+ * manifests, before any plugin is started.
  *
  * Services must have exactly one provider when consumed. Extension points must
  * have exactly one host when contributions exist. Zero contributions to a
- * hosted extension point are allowed.
+ * hosted extension point are allowed. In `error` mode this throws, aborting
+ * startup before `start()` runs.
  */
 export const validateGlobalTokens = (
   plugins: ReadonlyMap<PluginName, PluginWrapper>,

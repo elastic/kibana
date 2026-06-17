@@ -103,6 +103,24 @@ describe('PluginWrapper', () => {
     expect(container.get(PluginSetup('otherDep'))).toBe('value');
   });
 
+  test('`setup` prefers `services` over `module` when both are exported', () => {
+    const servicesCallback = jest.fn(({ bind }) => {
+      bind(Setup).toConstantValue({ from: 'services' });
+    });
+    const legacyCallback = jest.fn(({ bind }) => {
+      bind(Setup).toConstantValue({ from: 'module' });
+    });
+    mockPluginReader.mockReturnValueOnce({
+      services: new ContainerModule(servicesCallback),
+      module: new ContainerModule(legacyCallback),
+    } as any);
+    const injection = injectionServiceMock.createInternalSetupContract();
+
+    expect(plugin.setup({ injection } as any, {})).toEqual({ from: 'services' });
+    expect(servicesCallback).toHaveBeenCalledTimes(1);
+    expect(legacyCallback).not.toHaveBeenCalled();
+  });
+
   test('`start` fails if setup is not called first', () => {
     expect(() => plugin.start({} as any, {} as any)).toThrowErrorMatchingInlineSnapshot(
       `"Plugin \\"plugin-a\\" can't be started since it isn't set up."`
