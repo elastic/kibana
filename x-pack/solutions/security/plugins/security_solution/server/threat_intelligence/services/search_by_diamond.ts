@@ -19,6 +19,10 @@ export const STRONG_FLOOR = KNN_STRONG_FLOOR;
 export const MID_FLOOR = KNN_MID_FLOOR;
 export const BASE_FLOOR = KNN_BASE_FLOOR;
 
+// low cutoff to drop vector-noise tail; NOT a precision gate — triage does precision.
+// Replaces the tiered qualify floors per mustard.py run_knn.
+const NOISE_FLOOR = 0.7;
+
 // Number of top-K candidates fetched per vertex query. Kept generous so the
 // client-side reducer has a wide pool to qualify against.
 const KNN_CANDIDATES_PER_VERTEX = 50;
@@ -70,7 +74,7 @@ export interface DiamondHit {
    */
   score: number;
   /**
-   * Count of queried vertices where this candidate scored >= BASE_FLOOR.
+   * Count of queried vertices where this candidate scored >= NOISE_FLOOR.
    * Mirrors Mustard's `overlap = len(data["scores"])`. Vertices the source
    * didn't have (never queried) are neutral — not counted against the candidate.
    */
@@ -86,7 +90,7 @@ export interface DiamondHit {
    * not represented (absence ≠ zero).
    */
   vertex_scores: DiamondVertexScore;
-  /** Vertices that scored >= BASE_FLOOR (the overlap set). */
+  /** Vertices that scored >= NOISE_FLOOR (the overlap set). */
   above_floor_vertices: DiamondVertex[];
 }
 
@@ -192,21 +196,8 @@ const fetchSourceVertexQueries = async (
   return queries;
 };
 
-/**
- * Tiered qualification gate — mirrors Mustard's triage selection heuristics:
- *   STRONG_FLOOR: a single vertex carrying strong signal qualifies
- *   MID_FLOOR:    two vertices at mid-strength qualify
- *   BASE_FLOOR:   three vertices at base-strength qualify
- *
- * Only scores for vertices where the candidate appeared in the top-K are
- * considered. Absent vertices are neutral (not penalised).
- */
-const qualifiesForReturn = (presentScores: number[]): boolean => {
-  const aboveStrong = presentScores.filter((s) => s >= STRONG_FLOOR).length;
-  const aboveMid = presentScores.filter((s) => s >= MID_FLOOR).length;
-  const aboveBase = presentScores.filter((s) => s >= BASE_FLOOR).length;
-  return aboveStrong >= 1 || aboveMid >= 2 || aboveBase >= 3;
-};
+const qualifiesForReturn = (presentScores: number[]): boolean =>
+  presentScores.some((s) => s >= NOISE_FLOOR);
 
 /**
  * Determines whether an error indicates the inference endpoint is unavailable,
@@ -370,14 +361,14 @@ const runSemanticSearch = async (
       const aboveFloorScores: number[] = [];
       for (const v of DIAMOND_VERTICES) {
         const s = scores[v];
-        if (s !== undefined && s >= BASE_FLOOR) {
+        if (s !== undefined && s >= NOISE_FLOOR) {
           aboveFloorVertices.push(v);
           aboveFloorScores.push(s);
         }
       }
 
       const overlap = aboveFloorVertices.length;
-      // Headline score = max above-BASE-floor score; ties broken by overlap in sort.
+      // Headline score = max above-NOISE-floor score; ties broken by overlap in sort.
       const maxScore = aboveFloorScores.length > 0 ? Math.max(...aboveFloorScores) : 0;
 
       const vertexScores: DiamondVertexScore = {};
@@ -523,13 +514,11 @@ const runBm25Fallback = async (
  * `extracted.diamond.{vertex}.summary` (semantic_text → .jina-embeddings-v5-text-small),
  * scoped to `extracted.diamond.suitable: true`. Fuses results client-side.
  *
- * Qualifier (tiered, matching Mustard's triage selection heuristics):
- *   - 1 vertex  >= STRONG_FLOOR  →  qualifies
- *   - 2 vertices >= MID_FLOOR    →  qualify
- *   - 3 vertices >= BASE_FLOOR   →  qualify
+ * Qualifier: any vertex score >= NOISE_FLOOR (0.70) qualifies — matches mustard.py
+ * run_knn (no tiered gate). Precision is triage's job.
  *
  * Ranking: (overlap, max_score) descending — where overlap = count of queried
- * vertices scoring >= BASE_FLOOR. Matches Mustard's compact_output sort key.
+ * vertices scoring >= NOISE_FLOOR. Matches Mustard's compact_output sort key.
  * Missing vertices (never queried) are neutral; they are not counted against
  * a candidate's overlap score.
  *
