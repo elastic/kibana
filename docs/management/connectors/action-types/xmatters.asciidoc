@@ -35,7 +35,7 @@ Name:: The name of the connector.
 Authentication Type:: The type of authentication used in the request made to xMatters.
 URL::
 The request URL for the Elastic Alerts trigger in xMatters.
-If you are using URL authentication, include the API key in the URL. For example, `https://example.com?apiKey=1234-abcd`.
+If you are using URL authentication, include the API key in the URL. For example, `https://<example-url>?apiKey=1234-abcd`.
 If you are using the <<action-settings,`xpack.actions.allowedHosts`>> setting, make sure the hostname is added to the allowed hosts.
 Username:: Username for HTTP basic authentication.
 Password:: Password for HTTP basic authentication.
