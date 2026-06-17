@@ -7,6 +7,7 @@
 
 import { SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
 import { panelGridSchema } from '@kbn/agent-builder-dashboards-common';
+import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
 import { z } from '@kbn/zod/v4';
 
 export const markdownPanelInputSchema = z.object({
@@ -19,7 +20,7 @@ export const panelConfigPanelInputSchema = z.object({
   kind: z.literal('panelConfig'),
   type: z
     .string()
-    .describe('Embeddable type for the panel (e.g. the Lens embeddable type for a visualization).'),
+    .describe(`Embeddable type for the panel (e.g. the ${LENS_EMBEDDABLE_TYPE} embeddable type for a visualization).`),
   config: z
     .record(z.string(), z.unknown())
     .describe(
