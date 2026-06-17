@@ -92,14 +92,14 @@ export async function resumeWorkflow({
       workflowTaskManager,
     });
   } finally {
-    await emitWorkflowExecutionFailedEventIfFailed({
-      workflowRuntime,
-      workflowExecutionState,
-      emitEvent: workflowsExecutionEngine.triggerEvents.emitEvent,
-      request: fakeRequest,
-      logger,
-      workflowRunId,
-    });
+    // await emitWorkflowExecutionFailedEventIfFailed({
+    //   workflowRuntime,
+    //   workflowExecutionState,
+    //   emitEvent: workflowsExecutionEngine.triggerEvents.emitEvent,
+    //   request: fakeRequest,
+    //   logger,
+    //   workflowRunId,
+    // });
   }
 
   await handlePostExecutionLoop({

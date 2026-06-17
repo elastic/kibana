@@ -81,6 +81,7 @@ export class WorkflowExecutionRuntimeManager {
   private telemetryClient?: WorkflowExecutionTelemetryClient;
   private request: KibanaRequest;
   private telemetryReported: boolean = false;
+  private terminalDomainEventPublished: boolean = false;
   private get topologicalOrder(): string[] {
     return this.workflowGraph.topologicalOrder;
   }
@@ -562,6 +563,10 @@ export class WorkflowExecutionRuntimeManager {
   }
 
   private publishWorkflowTerminalDomainEvent(): void {
+    if (this.terminalDomainEventPublished) {
+      return;
+    }
+
     const execution = this.getWorkflowExecution();
     if (!isTerminalStatus(execution.status) || execution.isTestRun) {
       return;
@@ -596,6 +601,7 @@ export class WorkflowExecutionRuntimeManager {
       },
       request: this.request,
     });
+    this.terminalDomainEventPublished = true;
   }
 
   private logWorkflowStart(): void {

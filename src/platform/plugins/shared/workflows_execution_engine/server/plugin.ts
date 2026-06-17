@@ -8,6 +8,7 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
+import { omit } from 'lodash';
 import { v4 as generateUuid } from 'uuid';
 import type {
   CoreSetup,
@@ -30,6 +31,7 @@ import {
   WorkflowExecutionInvalidStatusError,
   WorkflowExecutionNotFoundError,
 } from '@kbn/workflows/common/errors';
+import { WORKFLOW_EXECUTION_FAILED_TRIGGER_ID } from '@kbn/workflows-extensions/common';
 import { ConcurrencyManager } from './concurrency/concurrency_manager';
 import type { WorkflowsExecutionEngineConfig } from './config';
 import {
@@ -92,7 +94,6 @@ import {
 } from './workflow_task_manager/workflow_task_manager';
 import { createWorkflowTaskAbortController } from './workflow_task_shutdown';
 import { createIndexes } from '../common';
-import { WORKFLOW_EXECUTION_FAILED_TRIGGER_ID } from '@kbn/workflows-extensions/common';
 
 /**
  * Max Task Manager attempts for `workflow:run`.
@@ -1344,11 +1345,13 @@ export class WorkflowsExecutionEnginePlugin
     };
 
     domainEventBus.subscribe(WORKFLOW_TERMINATED_EVENT_TYPE, (event) => {
-      triggerEvents.emitEvent({
-        triggerId: WORKFLOW_EXECUTION_FAILED_TRIGGER_ID,
-        payload: event.payload,
-        request: event.request,
-      });
+      if (event.payload.status === 'failed') {
+        triggerEvents.emitEvent({
+          triggerId: WORKFLOW_EXECUTION_FAILED_TRIGGER_ID,
+          payload: omit(event.payload, 'status'),
+          request: event.request,
+        });
+      }
     });
 
     return {
