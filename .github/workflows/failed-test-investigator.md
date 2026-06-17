@@ -207,7 +207,7 @@ Add the following snippet of Markdown right after (and outside) the `<details>` 
 
 ```markdown
 > [!TIP]
-> Label this issue `ai:fix-flaky` and we'll **open a fix PR** (share early feedback in #appex-qa).
+> Label this issue `ai:fix-flaky` and an agent will **open a fix PR** for you. This usually takes 15–20 minutes, and the PR will appear below this comment. Share early feedback in #appex-qa.
 ```
 
 If a fix PR is already up (in draft or in review) in the Kibana repository, mention the PR link in the same tip block (instead of suggesting to add the label).
