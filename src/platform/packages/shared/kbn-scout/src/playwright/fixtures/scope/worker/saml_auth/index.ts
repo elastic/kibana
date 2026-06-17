@@ -43,14 +43,6 @@ function formatUnknownError(err: unknown): string {
   return parts.join('\n');
 }
 
-function isGlobalUiSettingOverrideConflict(err: unknown): boolean {
-  const text = formatUnknownError(err);
-  return (
-    text.includes('because it is overridden') ||
-    (text.includes('hideAnnouncements') && text.includes('overridden'))
-  );
-}
-
 export interface SamlAuth {
   session: SamlSessionManager;
   customRoleName: string;
