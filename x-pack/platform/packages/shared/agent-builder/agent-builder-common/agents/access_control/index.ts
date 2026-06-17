@@ -5,12 +5,16 @@
  * 2.0.
  */
 
-import type { CurrentUser, UserIdAndName } from '../base/users';
-import type { AgentDefinition } from './definition';
-import { agentBuilderDefaultAgentId } from './definition';
-import { AgentAccessControlScope } from './access_control_scope';
-import type { AgentAccessControl } from './acl';
-import { AgentAccessControlRole, accessControlRoleMeets, maxAccessControlRole } from './acl';
+import type { CurrentUser, UserIdAndName } from '../../base/users';
+import type { AgentDefinition } from '../definition';
+import { agentBuilderDefaultAgentId } from '../definition';
+import type { AgentAccessControl } from './types';
+import {
+  AgentAccessControlRole,
+  AgentAccessControlScope,
+  accessControlRoleMeets,
+  maxAccessControlRole,
+} from './types';
 
 /** Resolved authorization role on an individual agent. */
 export type EffectiveAgentRole = AgentAccessControlRole | 'owner' | 'admin';

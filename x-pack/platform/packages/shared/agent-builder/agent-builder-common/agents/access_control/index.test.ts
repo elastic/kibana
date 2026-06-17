@@ -15,12 +15,11 @@ import {
   hasAgentUseAccess,
   hasAgentWriteAccess,
   canCurrentUserEditAgent,
-} from './access_control';
-import type { AgentConfiguration, AgentDefinition } from './definition';
-import { agentBuilderDefaultAgentId, AgentType } from './definition';
-import { AgentAccessControlScope } from './access_control_scope';
-import { AgentAccessControlRole } from './acl';
-import type { CurrentUser, UserIdAndName } from '../base/users';
+} from '.';
+import type { AgentConfiguration, AgentDefinition } from '../definition';
+import { agentBuilderDefaultAgentId, AgentType } from '../definition';
+import { AgentAccessControlRole, AgentAccessControlScope } from './types';
+import type { CurrentUser, UserIdAndName } from '../../base/users';
 
 const owner: UserIdAndName = { id: 'owner-id', username: 'owner-user' };
 const currentUser: UserIdAndName = { id: 'owner-id', username: 'owner-user' };

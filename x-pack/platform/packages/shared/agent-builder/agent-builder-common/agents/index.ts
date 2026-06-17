@@ -16,11 +16,6 @@ export {
   type AgentAnswerStepConfiguration,
 } from './definition';
 export {
-  ACCESS_CONTROL_SCOPE_ICON,
-  ACCESS_CONTROL_SCOPE_BADGE_COLOR,
-  AgentAccessControlScope,
-} from './access_control_scope';
-export {
   canCurrentUserEditAgent,
   isAgentOwner,
   canChangeAgentAccessControlScope,
@@ -34,6 +29,9 @@ export {
   type AgentAuthzArgs,
 } from './access_control';
 export {
+  ACCESS_CONTROL_SCOPE_ICON,
+  ACCESS_CONTROL_SCOPE_BADGE_COLOR,
+  AgentAccessControlScope,
   AgentAccessControlRole,
   AGENT_ACCESS_CONTROL_MAX_ENTRIES,
   AGENT_ACCESS_CONTROL_PRINCIPAL_NAME_MAX_LENGTH,
@@ -44,7 +42,7 @@ export {
   type AgentAccessControl,
   type AgentAccessControlEntry,
   type AgentAccessControlPrincipalType,
-} from './acl';
+} from './access_control/types';
 export { agentIdRegexp, agentIdMaxLength, validateAgentId } from './agent_ids';
 export {
   type AgentCapabilities,
