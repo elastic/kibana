@@ -10,7 +10,7 @@ import React, { useCallback } from 'react';
 import { EuiContextMenuItem } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { CaseAttachmentsWithoutOwner } from '@kbn/cases-plugin/public';
-import { useCaseDisabled } from '../hooks/use_case_permission';
+import { useEntityCasePermissions } from '../hooks/use_case_permission';
 import type { EntityToAttach, EntityAttachmentMetadata } from '..';
 import { generateEntityAttachmentsMetadata, generateEntityAttachmentsWithoutOwner } from '..';
 import { useKibana } from '../../../../common/lib/kibana';
@@ -50,13 +50,14 @@ export const AddToExistingCase: FC<AddToExistingCaseProps> = ({
     entity.id,
     attachmentMetadata
   );
+  const { canAddToExistingCase } = useEntityCasePermissions();
 
   const menuItemClicked = useCallback(() => {
     onClick();
     selectCaseModal.open({ getAttachments: () => attachments });
   }, [attachments, onClick, selectCaseModal]);
 
-  const disabled: boolean = useCaseDisabled(attachmentMetadata.entityName);
+  const disabled: boolean = !attachmentMetadata.entityName || !canAddToExistingCase;
 
   return (
     <EuiContextMenuItem onClick={menuItemClicked} data-test-subj={dataTestSubj} disabled={disabled}>
