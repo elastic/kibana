@@ -97,7 +97,12 @@ export async function autocomplete(
         })) ?? [];
       return numericFields;
     case Position.AFTER_VALUE: {
-      return [onCompleteItem, asCompletionItem, byCompleteItem, ...getNewLineAndPipeCompleteItems()];
+      return [
+        onCompleteItem,
+        asCompletionItem,
+        byCompleteItem,
+        ...getNewLineAndPipeCompleteItems(),
+      ];
     }
     case Position.ON_COLUMN: {
       const onFields =

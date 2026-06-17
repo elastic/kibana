@@ -13,7 +13,10 @@ import type {
   ESQLAstQueryExpression,
 } from '@elastic/esql/types';
 import { withAutoSuggest } from '../../definitions/utils/autocomplete/helpers';
-import { getNewLineAndPipeCompleteItems, getCommandAutocompleteDefinitions } from '../complete_items';
+import {
+  getNewLineAndPipeCompleteItems,
+  getCommandAutocompleteDefinitions,
+} from '../complete_items';
 import { pipePrecedesCurrentWord } from '../../definitions/utils/shared';
 import type { ICommandCallbacks } from '../types';
 import { type ISuggestionItem, type ICommandContext } from '../types';
