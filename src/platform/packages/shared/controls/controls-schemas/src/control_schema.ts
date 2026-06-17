@@ -49,7 +49,7 @@ export const dataControlFieldValuesSourceSchema = schema.oneOf(
         'The source of the field options for this control. Defaults to `field` for legacy controls.',
     },
   }
-);
+) as Type<ControlValuesSource.FIELD>; // Cast this to be equivalent to schema.literal to avoid confusing Typescript downstream
 
 export const dataControlFieldVariantProps = {
   ...sharedDataControlProps,

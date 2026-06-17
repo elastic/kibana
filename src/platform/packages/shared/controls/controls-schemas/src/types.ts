@@ -55,7 +55,7 @@ export type ControlWidth = TypeOf<typeof controlWidthSchema>;
 export type ControlState = TypeOf<typeof controlTitleSchema>;
 
 export type StrictDataControlState = TypeOf<typeof dataControlSchema>;
-export type DataControlState = StrictDataControlState;
+export type DataControlState = LooseUnion<StrictDataControlState>;
 
 export type OptionsListDisplaySettings = TypeOf<typeof optionsListDisplaySettingsSchema>;
 

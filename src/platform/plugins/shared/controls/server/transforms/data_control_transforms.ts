@@ -8,7 +8,11 @@
  */
 
 import type { Reference } from '@kbn/content-management-utils';
-import type { LegacyStoredDataControlState, StrictDataControlState } from '@kbn/controls-schemas';
+import type {
+  LegacyStoredDataControlState,
+  StrictDataControlState,
+  DataControlState,
+} from '@kbn/controls-schemas';
 import { ControlValuesSource, DEFAULT_DATA_CONTROL_STATE } from '@kbn/controls-constants';
 import { DATA_VIEW_SAVED_OBJECT_TYPE } from '@kbn/data-views-plugin/common';
 import { convertCamelCasedKeysToSnakeCase } from '@kbn/presentation-publishing';
@@ -27,25 +31,37 @@ type StoredFieldDataControlState = Omit<FieldDataControlState, 'data_view_id'> &
 };
 
 export function transformDataControlIn(
-  state: StrictDataControlState,
+  state: DataControlState,
   referenceName: string
 ): {
   state: StoredFieldDataControlState | EsqlDataControlState;
   references?: Reference[];
 } {
   if (state.values_source === ControlValuesSource.ESQL) {
-    const { data_view_id, field_name, ...rest } = state;
+    const { title, esql_query, use_global_filters, ignore_validations, values_source } =
+      state as EsqlDataControlState;
     return {
-      state: rest as EsqlDataControlState,
+      state: {
+        title,
+        esql_query,
+        use_global_filters,
+        ignore_validations,
+        values_source,
+      },
     };
   }
 
-  const { data_view_id, esql_query, ...rest } = state;
+  const { title, field_name, use_global_filters, ignore_validations, values_source, data_view_id } =
+    state as FieldDataControlState;
   return {
     state: {
-      ...rest,
+      title,
+      field_name,
+      use_global_filters,
+      ignore_validations,
+      values_source,
       dataViewRefName: referenceName,
-    } as StoredFieldDataControlState,
+    },
     references: [
       {
         name: referenceName,
