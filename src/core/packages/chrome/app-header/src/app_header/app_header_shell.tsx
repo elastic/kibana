@@ -116,7 +116,7 @@ const useHeaderStyles = (
       gap: ${euiTheme.size.m};
       min-width: 0;
       min-height: ${APPLICATION_TOP_BAR_MIN_HEIGHT_PX}px;
-      ${!hasPrimaryContent &&
+      ${!hasTitleAppend &&
       css`
         padding-block-start: ${paddingBlock};
         padding-block-end: ${bottomPad(hasTabs || hasMetadata)};
