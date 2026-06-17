@@ -28,6 +28,7 @@ import {
   buildWarmStartMemoryRegressionReport,
   getWarmStartMemoryRegressionReportContextFromEnv,
   type WarmStartMemoryRegressionMetricName,
+  type WarmStartMemoryRegressionReport,
   type WarmStartMemoryDiagnosticMetricName,
   writeWarmStartMemoryRegressionReport,
 } from './memory_regression_report';
@@ -44,6 +45,78 @@ const DIAGNOSTIC_METRICS: Array<{
   { name: 'tailExternal', metricKey: TAIL_EXTERNAL_MEMORY_METRIC_KEY },
   { name: 'tailArrayBuffers', metricKey: TAIL_ARRAY_BUFFERS_METRIC_KEY },
 ];
+
+const REGRESSION_METRIC_LABELS: Record<WarmStartMemoryRegressionMetricName, string> = {
+  tailRss: 'Tail RSS',
+  maxRss: 'Max RSS',
+  tailHeapUsed: 'Tail heap used',
+};
+
+const getRegressionMetricEntries = (
+  report: WarmStartMemoryRegressionReport
+): Array<
+  [
+    WarmStartMemoryRegressionMetricName,
+    NonNullable<WarmStartMemoryRegressionReport['metrics'][WarmStartMemoryRegressionMetricName]>
+  ]
+> => {
+  return [
+    ['tailRss', report.metrics.tailRss],
+    ['maxRss', report.metrics.maxRss],
+    ...(report.metrics.tailHeapUsed
+      ? ([['tailHeapUsed', report.metrics.tailHeapUsed]] as Array<
+          [
+            WarmStartMemoryRegressionMetricName,
+            NonNullable<
+              WarmStartMemoryRegressionReport['metrics'][WarmStartMemoryRegressionMetricName]
+            >
+          ]
+        >)
+      : []),
+  ];
+};
+
+const formatRegressionMetricForError = (
+  metricName: WarmStartMemoryRegressionMetricName,
+  metric: NonNullable<
+    WarmStartMemoryRegressionReport['metrics'][WarmStartMemoryRegressionMetricName]
+  >
+): string => {
+  return `${REGRESSION_METRIC_LABELS[metricName]} delta: ${formatBytes(
+    metric.deltaBytes
+  )} (baseline: ${formatBytes(metric.baselineBytes)}, target: ${formatBytes(
+    metric.targetBytes
+  )}, allowed: ${formatBytes(metric.allowedDeltaBytes)})`;
+};
+
+const buildRegressionErrorMessage = (
+  report: WarmStartMemoryRegressionReport,
+  reportPath: string
+): string => {
+  const metricEntries = getRegressionMetricEntries(report);
+  const triggeredMetricEntries = metricEntries.filter(([metricName]) => {
+    return report.triggeredMetrics.includes(metricName);
+  });
+  const contextMetricEntries = metricEntries.filter(([metricName]) => {
+    return !report.triggeredMetrics.includes(metricName);
+  });
+
+  return [
+    'Warm-start memory regression detected.',
+    `Threshold failure(s): ${triggeredMetricEntries
+      .map(([metricName, metric]) => formatRegressionMetricForError(metricName, metric))
+      .join('; ')}`,
+    ...(contextMetricEntries.length
+      ? [
+          `Metric context: ${contextMetricEntries
+            .map(([metricName, metric]) => formatRegressionMetricForError(metricName, metric))
+            .join('; ')}`,
+        ]
+      : []),
+    `Triggered metric(s): ${report.triggeredMetrics.join(', ')}`,
+    `Report: ${reportPath}`,
+  ].join(' ');
+};
 
 export const compareWarmStartMemory: OnCompareCallback = async ({ leftSummary, rightSummary }) => {
   const baselineMedianTailRssBytes = getMedianTailRssBytes(leftSummary);
@@ -150,32 +223,5 @@ export const compareWarmStartMemory: OnCompareCallback = async ({ leftSummary, r
 
   const reportPath = await writeWarmStartMemoryRegressionReport(report);
 
-  throw new Error(
-    [
-      'Warm-start memory regression detected.',
-      `Triggered metric(s): ${triggeredMetrics.join(', ')}`,
-      `Tail RSS baseline: ${formatBytes(baselineMedianTailRssBytes)}`,
-      `Tail RSS target: ${formatBytes(targetMedianTailRssBytes)}`,
-      `Tail RSS delta: ${formatBytes(
-        targetMedianTailRssBytes - baselineMedianTailRssBytes
-      )} (allowed: ${formatBytes(allowedTailRssDeltaBytes)})`,
-      `Max RSS baseline: ${formatBytes(baselineMedianMaxRssBytes)}`,
-      `Max RSS target: ${formatBytes(targetMedianMaxRssBytes)}`,
-      `Max RSS delta: ${formatBytes(
-        targetMedianMaxRssBytes - baselineMedianMaxRssBytes
-      )} (allowed: ${formatBytes(allowedMaxRssDeltaBytes)})`,
-      ...(baselineMedianTailHeapUsedBytes !== undefined &&
-      targetMedianTailHeapUsedBytes !== undefined &&
-      allowedTailHeapUsedDeltaBytes !== undefined
-        ? [
-            `Tail heap used baseline: ${formatBytes(baselineMedianTailHeapUsedBytes)}`,
-            `Tail heap used target: ${formatBytes(targetMedianTailHeapUsedBytes)}`,
-            `Tail heap used delta: ${formatBytes(
-              targetMedianTailHeapUsedBytes - baselineMedianTailHeapUsedBytes
-            )} (allowed: ${formatBytes(allowedTailHeapUsedDeltaBytes)})`,
-          ]
-        : []),
-      `Report: ${reportPath}`,
-    ].join(' ')
-  );
+  throw new Error(buildRegressionErrorMessage(report, reportPath));
 };

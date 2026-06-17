@@ -93,8 +93,18 @@ describe('compareWarmStartMemory', () => {
     });
 
     try {
-      await expect(compareWarmStartMemory(context)).rejects.toThrow(
-        'Warm-start memory regression detected'
+      let rejection: Error | undefined;
+      try {
+        await compareWarmStartMemory(context);
+      } catch (error) {
+        rejection = error as Error;
+      }
+
+      expect(rejection?.message).toContain('Warm-start memory regression detected');
+      expect(rejection?.message).toContain('Threshold failure(s): Tail RSS delta');
+      expect(rejection?.message).toContain('Metric context: Max RSS delta');
+      expect(rejection!.message.indexOf('Threshold failure(s): Tail RSS delta')).toBeLessThan(
+        rejection!.message.indexOf('Metric context: Max RSS delta')
       );
 
       const writtenReport = JSON.parse(await readFile(reportPath, 'utf8'));
@@ -208,8 +218,18 @@ describe('compareWarmStartMemory', () => {
       ],
     });
 
-    await expect(compareWarmStartMemory(context)).rejects.toThrow(
-      'Triggered metric(s): tailHeapUsed'
+    let rejection: Error | undefined;
+    try {
+      await compareWarmStartMemory(context);
+    } catch (error) {
+      rejection = error as Error;
+    }
+
+    expect(rejection?.message).toContain('Threshold failure(s): Tail heap used delta');
+    expect(rejection?.message).toContain('Metric context: Tail RSS delta');
+    expect(rejection?.message).toContain('Triggered metric(s): tailHeapUsed');
+    expect(rejection!.message.indexOf('Threshold failure(s): Tail heap used delta')).toBeLessThan(
+      rejection!.message.indexOf('Metric context: Tail RSS delta')
     );
   });
 });
