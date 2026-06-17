@@ -10,7 +10,7 @@ import { render, screen } from '@testing-library/react';
 import { TestProviders } from '../../../common/mock';
 import { RESOLUTION_SECTION_TEST_ID } from '../../../entity_analytics/components/entity_resolution/test_ids';
 import { useHasEntityResolutionLicense } from '../../../common/hooks/use_has_entity_resolution_license';
-import { HostPanelContent } from './content';
+import { Content as HostPanelContent } from '../../../flyout_v2/entity/host/main/content';
 
 jest.mock('../../../entity_analytics/components/entity_resolution/resolution_section', () => ({
   ResolutionSection: () => <div data-test-subj="securitySolutionFlyoutResolutionSection" />,
@@ -39,7 +39,7 @@ jest.mock(
 jest.mock('../../../cloud_security_posture/components/entity_insight', () => ({
   EntityInsight: () => null,
 }));
-jest.mock('./components/observed_data_section', () => ({
+jest.mock('../../../flyout_v2/entity/host/main/components/observed_data_section', () => ({
   ObservedDataSection: () => null,
 }));
 
