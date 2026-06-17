@@ -339,62 +339,90 @@ export class SmlCrawlerImpl implements SmlCrawler {
         { index: { _id: string; document: SmlCrawlerStateDocument } } | { delete: { _id: string } }
       > = [];
 
-      const indexPromises = pendingItems
-        .filter((hit) => {
-          if (!hit._id) {
-            this.logger.warn('SML crawler: skipping hit without _id');
-            return false;
-          }
-          const doc = hit._source;
-          if (!doc || !doc.update_action) {
-            this.logger.debug(
-              `SML crawler: skipping hit '${hit._id}' — no source or update_action`
-            );
-            return false;
-          }
-          return true;
-        })
-        .map((hit) => {
-          const doc = hit._source!;
-          const action = doc.update_action!;
+      const validHits = pendingItems.filter((hit) => {
+        if (!hit._id) {
+          this.logger.warn('SML crawler: skipping hit without _id');
+          return false;
+        }
+        const doc = hit._source;
+        if (!doc || !doc.update_action) {
+          this.logger.debug(`SML crawler: skipping hit '${hit._id}' — no source or update_action`);
+          return false;
+        }
+        return true;
+      });
 
-          return limit(async () => {
-            try {
-              this.logger.info(
-                `SML crawler: processing '${action}' for origin '${doc.origin_id}' (type: ${doc.type_id})`
-              );
+      // Identify origin_ids that already have manual entries so the crawler can skip
+      // them entirely (and ACK their state) instead of letting the indexer's safety
+      // net no-op every cycle. Skips apply only to create/update actions; delete is
+      // always allowed because the upstream object is gone.
+      const candidateOriginUris = Array.from(
+        new Set(
+          validHits
+            .filter((hit) => hit._source!.update_action !== 'delete')
+            .map((hit) => `${attachmentType}://${hit._source!.origin_id}`)
+        )
+      );
+      const manualOriginUris = await this.findManualOriginUris({
+        esClient,
+        originUris: candidateOriginUris,
+      });
 
-              await this.indexer.indexAttachment({
-                originId: doc.origin_id,
-                attachmentType: doc.type_id,
-                action,
-                spaces: doc.spaces,
-                esClient,
-                savedObjectsClient,
-                logger: this.logger,
-              });
+      const indexPromises = validHits.map((hit) => {
+        const doc = hit._source!;
+        const action = doc.update_action!;
 
-              if (action === 'delete') {
-                stateAckOps.push({ delete: { _id: hit._id! } });
-              } else {
-                stateAckOps.push({
-                  index: {
-                    _id: hit._id!,
-                    document: { ...doc, update_action: undefined },
-                  },
-                });
-              }
-              processedCount++;
-            } catch (error) {
-              errorCount++;
-              this.logger.error(
-                `SML crawler: failed to process action '${action}' for '${doc.origin_id}': ${
-                  (error as Error).message
-                }`
-              );
-            }
+        if (action !== 'delete' && manualOriginUris.has(`${attachmentType}://${doc.origin_id}`)) {
+          this.logger.debug(
+            `SML crawler: skipping '${action}' for origin '${doc.origin_id}' (type: ${doc.type_id}) — manual entry exists`
+          );
+          stateAckOps.push({
+            index: {
+              _id: hit._id!,
+              document: { ...doc, update_action: undefined },
+            },
           });
+          processedCount++;
+          return Promise.resolve();
+        }
+
+        return limit(async () => {
+          try {
+            this.logger.debug(
+              `SML crawler: processing '${action}' for origin '${doc.origin_id}' (type: ${doc.type_id})`
+            );
+
+            await this.indexer.indexAttachment({
+              originId: doc.origin_id,
+              attachmentType: doc.type_id,
+              action,
+              spaces: doc.spaces,
+              esClient,
+              savedObjectsClient,
+              logger: this.logger,
+            });
+
+            if (action === 'delete') {
+              stateAckOps.push({ delete: { _id: hit._id! } });
+            } else {
+              stateAckOps.push({
+                index: {
+                  _id: hit._id!,
+                  document: { ...doc, update_action: undefined },
+                },
+              });
+            }
+            processedCount++;
+          } catch (error) {
+            errorCount++;
+            this.logger.error(
+              `SML crawler: failed to process action '${action}' for '${doc.origin_id}': ${
+                (error as Error).message
+              }`
+            );
+          }
         });
+      });
 
       await Promise.all(indexPromises);
 
@@ -438,6 +466,64 @@ export class SmlCrawlerImpl implements SmlCrawler {
         `SML crawler: queue processing complete for type '${attachmentType}': ${processedCount} succeeded, ${errorCount} failed`
       );
     }
+  }
+
+  /**
+   * Return the subset of `originIds` that already have at least one chunk with
+   * `ingestion_method: 'manual'` in the SML data index. Used to skip dispatching
+   * the indexer for items that are protected by a user-curated entry.
+   *
+   * Returns an empty set when the index does not exist yet or when the lookup
+   * fails — manual protection is best-effort here; the indexer's own guard is
+   * the authoritative check.
+   */
+  private async findManualOriginUris({
+    esClient,
+    originUris,
+  }: {
+    esClient: ElasticsearchClient;
+    originUris: string[];
+  }): Promise<Set<string>> {
+    const result = new Set<string>();
+    if (originUris.length === 0) return result;
+
+    try {
+      const response = await esClient.search<{ origin?: { uri?: string } }>({
+        index: smlIndexName,
+        ignore_unavailable: true,
+        allow_no_indices: true,
+        size: originUris.length,
+        track_total_hits: false,
+        _source: ['origin.uri'],
+        query: {
+          bool: {
+            filter: [
+              { terms: { 'origin.uri': originUris } },
+              { term: { ingestion_method: 'manual' } },
+            ],
+          },
+        },
+        // Collapse so we get at most one hit per origin.uri even if multiple
+        // manual chunks exist for the same origin.
+        collapse: { field: 'origin.uri' },
+      });
+
+      for (const hit of response.hits.hits) {
+        const originUri = hit._source?.origin?.uri;
+        if (originUri) {
+          result.add(originUri);
+        }
+      }
+    } catch (error) {
+      if (isNotFoundError(error)) {
+        return result;
+      }
+      this.logger.warn(
+        `SML crawler: failed to look up manual origin ids: ${(error as Error).message}`
+      );
+    }
+
+    return result;
   }
 
   /**

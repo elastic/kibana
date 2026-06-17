@@ -1,7 +1,10 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`buildLogsExtractionEsqlQuery generates the expected query for generic entity description 1`] = `
-"FROM test-index-*
+exports[
+  `buildLogsExtractionEsqlQuery generates the expected query for generic entity description 1`
+] = `
+"SET unmapped_fields=\\"nullify\\";
+FROM test-index-*
   | WHERE
       @timestamp >= TO_DATETIME(\\"2022-01-01T00:00:00.000Z\\")
       AND @timestamp <= TO_DATETIME(\\"2022-01-01T23:59:59.999Z\\")
@@ -11,7 +14,7 @@ exports[`buildLogsExtractionEsqlQuery generates the expected query for generic e
  _src_entity_source2 = MV_FIRST(TO_STRING(data_stream.dataset)),
  _src_entity_source = CASE((_src_entity_source0 IS NOT NULL AND _src_entity_source0 != \\"\\"), _src_entity_source0, (_src_entity_source1 IS NOT NULL AND _src_entity_source1 != \\"\\"), _src_entity_source1, (_src_entity_source2 IS NOT NULL AND _src_entity_source2 != \\"\\"), _src_entity_source2, NULL),
  entity.source = CASE((_src_entity_source IS NULL OR _src_entity_source == \\"\\"), NULL, _src_entity_source)
-| EVAL recent.entity.EngineMetadata.UntypedId = entity.id
+| EVAL recent.entity.EngineMetadata.UntypedId = TO_STRING(entity.id)
 | STATS
     entity.EngineMetadata.FirstSeenLogInPage = MIN(@timestamp),
     recent.timestamp = MAX(@timestamp),
@@ -276,8 +279,11 @@ asset*,
 @timestamp"
 `;
 
-exports[`buildLogsExtractionEsqlQuery generates the expected query for host entity description 1`] = `
-"FROM test-index-*
+exports[
+  `buildLogsExtractionEsqlQuery generates the expected query for host entity description 1`
+] = `
+"SET unmapped_fields=\\"nullify\\";
+FROM test-index-*
   | WHERE
       @timestamp >= TO_DATETIME(\\"2022-01-01T00:00:00.000Z\\")
       AND @timestamp <= TO_DATETIME(\\"2022-01-01T23:59:59.999Z\\")
@@ -287,9 +293,12 @@ exports[`buildLogsExtractionEsqlQuery generates the expected query for host enti
  _src_entity_source2 = MV_FIRST(TO_STRING(data_stream.dataset)),
  _src_entity_source = CASE((_src_entity_source0 IS NOT NULL AND _src_entity_source0 != \\"\\"), _src_entity_source0, (_src_entity_source1 IS NOT NULL AND _src_entity_source1 != \\"\\"), _src_entity_source1, (_src_entity_source2 IS NOT NULL AND _src_entity_source2 != \\"\\"), _src_entity_source2, NULL),
  entity.source = CASE((_src_entity_source IS NULL OR _src_entity_source == \\"\\"), NULL, _src_entity_source)
-| EVAL recent.entity.EngineMetadata.UntypedId = CASE((TO_STRING(host.id) IS NOT NULL AND TO_STRING(host.id) != \\"\\"), TO_STRING(host.id),
-(TO_STRING(host.name) IS NOT NULL AND TO_STRING(host.name) != \\"\\"), TO_STRING(host.name),
-(TO_STRING(host.hostname) IS NOT NULL AND TO_STRING(host.hostname) != \\"\\"), TO_STRING(host.hostname), NULL)
+| EVAL host_id_present = TO_STRING(host.id) IS NOT NULL AND TO_STRING(host.id) != \\"\\",
+ host_name_present = TO_STRING(host.name) IS NOT NULL AND TO_STRING(host.name) != \\"\\",
+ host_hostname_present = TO_STRING(host.hostname) IS NOT NULL AND TO_STRING(host.hostname) != \\"\\",
+ recent.entity.EngineMetadata.UntypedId = CASE((host_id_present), TO_STRING(host.id),
+(host_name_present), TO_STRING(host.name),
+(host_hostname_present), TO_STRING(host.hostname), NULL)
 | STATS
     entity.EngineMetadata.FirstSeenLogInPage = MIN(@timestamp),
     recent.timestamp = MAX(@timestamp),
@@ -591,7 +600,8 @@ data_stream*,
 `;
 
 exports[`buildLogsExtractionEsqlQuery generates the expected query for host with pagination 1`] = `
-"FROM test-index-*
+"SET unmapped_fields=\\"nullify\\";
+FROM test-index-*
   | WHERE
       @timestamp >= TO_DATETIME(\\"2022-01-01T00:00:00.000Z\\")
       AND @timestamp <= TO_DATETIME(\\"2022-01-01T23:59:59.999Z\\")
@@ -601,9 +611,12 @@ exports[`buildLogsExtractionEsqlQuery generates the expected query for host with
  _src_entity_source2 = MV_FIRST(TO_STRING(data_stream.dataset)),
  _src_entity_source = CASE((_src_entity_source0 IS NOT NULL AND _src_entity_source0 != \\"\\"), _src_entity_source0, (_src_entity_source1 IS NOT NULL AND _src_entity_source1 != \\"\\"), _src_entity_source1, (_src_entity_source2 IS NOT NULL AND _src_entity_source2 != \\"\\"), _src_entity_source2, NULL),
  entity.source = CASE((_src_entity_source IS NULL OR _src_entity_source == \\"\\"), NULL, _src_entity_source)
-| EVAL recent.entity.EngineMetadata.UntypedId = CASE((TO_STRING(host.id) IS NOT NULL AND TO_STRING(host.id) != \\"\\"), TO_STRING(host.id),
-(TO_STRING(host.name) IS NOT NULL AND TO_STRING(host.name) != \\"\\"), TO_STRING(host.name),
-(TO_STRING(host.hostname) IS NOT NULL AND TO_STRING(host.hostname) != \\"\\"), TO_STRING(host.hostname), NULL)
+| EVAL host_id_present = TO_STRING(host.id) IS NOT NULL AND TO_STRING(host.id) != \\"\\",
+ host_name_present = TO_STRING(host.name) IS NOT NULL AND TO_STRING(host.name) != \\"\\",
+ host_hostname_present = TO_STRING(host.hostname) IS NOT NULL AND TO_STRING(host.hostname) != \\"\\",
+ recent.entity.EngineMetadata.UntypedId = CASE((host_id_present), TO_STRING(host.id),
+(host_name_present), TO_STRING(host.name),
+(host_hostname_present), TO_STRING(host.hostname), NULL)
 | STATS
     entity.EngineMetadata.FirstSeenLogInPage = MIN(@timestamp),
     recent.timestamp = MAX(@timestamp),
@@ -908,7 +921,8 @@ data_stream*,
 `;
 
 exports[`buildLogsExtractionEsqlQuery generates the expected query for host with recoveryId 1`] = `
-"FROM test-index-*
+"SET unmapped_fields=\\"nullify\\";
+FROM test-index-*
   | WHERE
       @timestamp >= TO_DATETIME(\\"2022-01-01T00:00:00.000Z\\")
       AND @timestamp <= TO_DATETIME(\\"2022-01-01T23:59:59.999Z\\")
@@ -918,9 +932,12 @@ exports[`buildLogsExtractionEsqlQuery generates the expected query for host with
  _src_entity_source2 = MV_FIRST(TO_STRING(data_stream.dataset)),
  _src_entity_source = CASE((_src_entity_source0 IS NOT NULL AND _src_entity_source0 != \\"\\"), _src_entity_source0, (_src_entity_source1 IS NOT NULL AND _src_entity_source1 != \\"\\"), _src_entity_source1, (_src_entity_source2 IS NOT NULL AND _src_entity_source2 != \\"\\"), _src_entity_source2, NULL),
  entity.source = CASE((_src_entity_source IS NULL OR _src_entity_source == \\"\\"), NULL, _src_entity_source)
-| EVAL recent.entity.EngineMetadata.UntypedId = CASE((TO_STRING(host.id) IS NOT NULL AND TO_STRING(host.id) != \\"\\"), TO_STRING(host.id),
-(TO_STRING(host.name) IS NOT NULL AND TO_STRING(host.name) != \\"\\"), TO_STRING(host.name),
-(TO_STRING(host.hostname) IS NOT NULL AND TO_STRING(host.hostname) != \\"\\"), TO_STRING(host.hostname), NULL)
+| EVAL host_id_present = TO_STRING(host.id) IS NOT NULL AND TO_STRING(host.id) != \\"\\",
+ host_name_present = TO_STRING(host.name) IS NOT NULL AND TO_STRING(host.name) != \\"\\",
+ host_hostname_present = TO_STRING(host.hostname) IS NOT NULL AND TO_STRING(host.hostname) != \\"\\",
+ recent.entity.EngineMetadata.UntypedId = CASE((host_id_present), TO_STRING(host.id),
+(host_name_present), TO_STRING(host.name),
+(host_hostname_present), TO_STRING(host.hostname), NULL)
 | STATS
     entity.EngineMetadata.FirstSeenLogInPage = MIN(@timestamp),
     recent.timestamp = MAX(@timestamp),
@@ -1224,8 +1241,11 @@ data_stream*,
 @timestamp"
 `;
 
-exports[`buildLogsExtractionEsqlQuery generates the expected query for service entity description 1`] = `
-"FROM test-index-*
+exports[
+  `buildLogsExtractionEsqlQuery generates the expected query for service entity description 1`
+] = `
+"SET unmapped_fields=\\"nullify\\";
+FROM test-index-*
   | WHERE
       @timestamp >= TO_DATETIME(\\"2022-01-01T00:00:00.000Z\\")
       AND @timestamp <= TO_DATETIME(\\"2022-01-01T23:59:59.999Z\\")
@@ -1235,7 +1255,7 @@ exports[`buildLogsExtractionEsqlQuery generates the expected query for service e
  _src_entity_source2 = MV_FIRST(TO_STRING(data_stream.dataset)),
  _src_entity_source = CASE((_src_entity_source0 IS NOT NULL AND _src_entity_source0 != \\"\\"), _src_entity_source0, (_src_entity_source1 IS NOT NULL AND _src_entity_source1 != \\"\\"), _src_entity_source1, (_src_entity_source2 IS NOT NULL AND _src_entity_source2 != \\"\\"), _src_entity_source2, NULL),
  entity.source = CASE((_src_entity_source IS NULL OR _src_entity_source == \\"\\"), NULL, _src_entity_source)
-| EVAL recent.entity.EngineMetadata.UntypedId = service.name
+| EVAL recent.entity.EngineMetadata.UntypedId = TO_STRING(service.name)
 | STATS
     entity.EngineMetadata.FirstSeenLogInPage = MIN(@timestamp),
     recent.timestamp = MAX(@timestamp),
@@ -1471,8 +1491,11 @@ data_stream*,
 @timestamp"
 `;
 
-exports[`buildLogsExtractionEsqlQuery generates the expected query for user entity description 1`] = `
-"FROM test-index-*
+exports[
+  `buildLogsExtractionEsqlQuery generates the expected query for user entity description 1`
+] = `
+"SET unmapped_fields=\\"nullify\\";
+FROM test-index-*
   | WHERE
       @timestamp >= TO_DATETIME(\\"2022-01-01T00:00:00.000Z\\")
       AND @timestamp <= TO_DATETIME(\\"2022-01-01T23:59:59.999Z\\")
@@ -1481,16 +1504,22 @@ exports[`buildLogsExtractionEsqlQuery generates the expected query for user enti
  _src_entity_source1 = MV_FIRST(TO_STRING(event.dataset)),
  _src_entity_source2 = MV_FIRST(TO_STRING(data_stream.dataset)),
  _src_entity_source = CASE((_src_entity_source0 IS NOT NULL AND _src_entity_source0 != \\"\\"), _src_entity_source0, (_src_entity_source1 IS NOT NULL AND _src_entity_source1 != \\"\\"), _src_entity_source1, (_src_entity_source2 IS NOT NULL AND _src_entity_source2 != \\"\\"), _src_entity_source2, NULL),
- entity.source = CASE((_src_entity_source IS NULL OR _src_entity_source == \\"\\"), NULL, _src_entity_source),
- _src_entity_namespace0 = MV_FIRST(TO_STRING(event.module)),
+ entity.source = CASE((_src_entity_source IS NULL OR _src_entity_source == \\"\\"), NULL, _src_entity_source)
+| EVAL _src_entity_namespace0 = MV_FIRST(TO_STRING(event.module)),
  _src_entity_namespace1 = MV_FIRST(SPLIT(MV_FIRST(TO_STRING(data_stream.dataset)), \\".\\")),
  _src_entity_namespace = CASE((_src_entity_namespace0 IS NOT NULL AND _src_entity_namespace0 != \\"\\"), _src_entity_namespace0, (_src_entity_namespace1 IS NOT NULL AND _src_entity_namespace1 != \\"\\"), _src_entity_namespace1, NULL),
- entity.namespace = CASE((TO_STRING(user.name) IS NOT NULL AND TO_STRING(user.name) != \\"\\" AND TO_STRING(host.id) IS NOT NULL AND TO_STRING(host.id) != \\"\\" AND NOT (TO_STRING(user.name) IN (\\"root\\", \\"bin\\", \\"daemon\\", \\"sys\\", \\"nobody\\", \\"jenkins\\", \\"ansible\\", \\"deploy\\", \\"terraform\\", \\"gitlab-runner\\", \\"postgres\\", \\"mysql\\", \\"redis\\", \\"elasticsearch\\", \\"kafka\\", \\"admin\\", \\"operator\\", \\"service\\")) AND (MV_CONTAINS(TO_STRING(event.kind), \\"asset\\") OR NOT (MV_CONTAINS(TO_STRING(event.kind), \\"asset\\") OR (TO_STRING(event.kind) != \\"enrichment\\" OR TO_STRING(event.kind) IS NULL) AND MV_CONTAINS(TO_STRING(event.category), \\"iam\\") AND (MV_CONTAINS(TO_STRING(event.type), \\"user\\") OR MV_CONTAINS(TO_STRING(event.type), \\"creation\\") OR MV_CONTAINS(TO_STRING(event.type), \\"deletion\\") OR MV_CONTAINS(TO_STRING(event.type), \\"group\\"))))), \\"local\\", (_src_entity_namespace == \\"okta\\" OR _src_entity_namespace == \\"entityanalytics_okta\\"), \\"okta\\", (_src_entity_namespace == \\"azure\\" OR _src_entity_namespace == \\"entityanalytics_entra_id\\"), \\"entra_id\\", (_src_entity_namespace == \\"o365\\" OR _src_entity_namespace == \\"o365_metrics\\"), \\"microsoft_365\\", (_src_entity_namespace == \\"entityanalytics_ad\\"), \\"active_directory\\", (_src_entity_namespace IS NULL OR _src_entity_namespace == \\"\\"), \\"unknown\\", _src_entity_namespace)
-| EVAL recent.entity.EngineMetadata.UntypedId = CASE((TO_STRING(entity.namespace) == \\"local\\"), CASE((TO_STRING(user.name) IS NOT NULL AND TO_STRING(user.name) != \\"\\" AND TO_STRING(host.id) IS NOT NULL AND TO_STRING(host.id) != \\"\\" AND TO_STRING(entity.namespace) IS NOT NULL AND TO_STRING(entity.namespace) != \\"\\"), CONCAT(TO_STRING(user.name), \\"@\\", TO_STRING(host.id), \\"@\\", TO_STRING(entity.namespace)), NULL),
-true, CASE((TO_STRING(user.email) IS NOT NULL AND TO_STRING(user.email) != \\"\\" AND TO_STRING(entity.namespace) IS NOT NULL AND TO_STRING(entity.namespace) != \\"\\"), CONCAT(TO_STRING(user.email), \\"@\\", TO_STRING(entity.namespace)),
-(TO_STRING(user.id) IS NOT NULL AND TO_STRING(user.id) != \\"\\" AND TO_STRING(entity.namespace) IS NOT NULL AND TO_STRING(entity.namespace) != \\"\\"), CONCAT(TO_STRING(user.id), \\"@\\", TO_STRING(entity.namespace)),
-(TO_STRING(user.name) IS NOT NULL AND TO_STRING(user.name) != \\"\\" AND TO_STRING(user.domain) IS NOT NULL AND TO_STRING(user.domain) != \\"\\" AND TO_STRING(entity.namespace) IS NOT NULL AND TO_STRING(entity.namespace) != \\"\\"), CONCAT(TO_STRING(user.name), \\"@\\", TO_STRING(user.domain), \\"@\\", TO_STRING(entity.namespace)),
-(TO_STRING(user.name) IS NOT NULL AND TO_STRING(user.name) != \\"\\" AND TO_STRING(entity.namespace) IS NOT NULL AND TO_STRING(entity.namespace) != \\"\\"), CONCAT(TO_STRING(user.name), \\"@\\", TO_STRING(entity.namespace)), NULL), NULL)
+ entity.namespace = CASE((TO_STRING(user.name) IS NOT NULL AND TO_STRING(user.name) != \\"\\" AND TO_STRING(host.id) IS NOT NULL AND TO_STRING(host.id) != \\"\\" AND NOT (TO_STRING(user.name) IN (\\"root\\", \\"bin\\", \\"daemon\\", \\"sys\\", \\"nobody\\", \\"jenkins\\", \\"ansible\\", \\"deploy\\", \\"terraform\\", \\"gitlab-runner\\", \\"postgres\\", \\"mysql\\", \\"redis\\", \\"elasticsearch\\", \\"kafka\\", \\"admin\\", \\"operator\\", \\"service\\")) AND (MV_CONTAINS(TO_STRING(event.kind), \\"asset\\") OR NOT (MV_CONTAINS(TO_STRING(event.kind), \\"asset\\") OR (TO_STRING(event.kind) != \\"enrichment\\" OR TO_STRING(event.kind) IS NULL) AND MV_CONTAINS(TO_STRING(event.category), \\"iam\\") AND (MV_CONTAINS(TO_STRING(event.type), \\"user\\") OR MV_CONTAINS(TO_STRING(event.type), \\"creation\\") OR MV_CONTAINS(TO_STRING(event.type), \\"deletion\\") OR MV_CONTAINS(TO_STRING(event.type), \\"group\\"))))), \\"local\\", (_src_entity_namespace == \\"okta\\" OR _src_entity_namespace == \\"entityanalytics_okta\\"), \\"okta\\", (_src_entity_namespace == \\"azure\\" OR _src_entity_namespace == \\"entityanalytics_entra_id\\"), \\"entra_id\\", (_src_entity_namespace == \\"o365\\" OR _src_entity_namespace == \\"o365_metrics\\"), \\"microsoft_365\\", (_src_entity_namespace == \\"entityanalytics_ad\\"), \\"active_directory\\", (_src_entity_namespace IS NULL OR _src_entity_namespace == \\"\\"), \\"unknown\\", _src_entity_namespace),
+ user_name_present = TO_STRING(user.name) IS NOT NULL AND TO_STRING(user.name) != \\"\\",
+ host_id_present = TO_STRING(host.id) IS NOT NULL AND TO_STRING(host.id) != \\"\\",
+ entity_namespace_present = TO_STRING(entity.namespace) IS NOT NULL AND TO_STRING(entity.namespace) != \\"\\",
+ user_email_present = TO_STRING(user.email) IS NOT NULL AND TO_STRING(user.email) != \\"\\",
+ user_id_present = TO_STRING(user.id) IS NOT NULL AND TO_STRING(user.id) != \\"\\",
+ user_domain_present = TO_STRING(user.domain) IS NOT NULL AND TO_STRING(user.domain) != \\"\\",
+ recent.entity.EngineMetadata.UntypedId = CASE((TO_STRING(entity.namespace) == \\"local\\"), CASE((user_name_present AND host_id_present AND entity_namespace_present), CONCAT(TO_STRING(user.name), \\"@\\", TO_STRING(host.id), \\"@\\", TO_STRING(entity.namespace)), NULL),
+true, CASE((user_email_present AND entity_namespace_present), CONCAT(TO_STRING(user.email), \\"@\\", TO_STRING(entity.namespace)),
+(user_id_present AND entity_namespace_present), CONCAT(TO_STRING(user.id), \\"@\\", TO_STRING(entity.namespace)),
+(user_name_present AND user_domain_present AND entity_namespace_present), CONCAT(TO_STRING(user.name), \\"@\\", TO_STRING(user.domain), \\"@\\", TO_STRING(entity.namespace)),
+(user_name_present AND entity_namespace_present), CONCAT(TO_STRING(user.name), \\"@\\", TO_STRING(entity.namespace)), NULL), NULL)
 | STATS
     entity.EngineMetadata.FirstSeenLogInPage = MIN(@timestamp),
     recent.timestamp = MAX(@timestamp),
@@ -1748,7 +1777,8 @@ host*,
 `;
 
 exports[`buildRemainingLogsCountQuery generates the expected query for generic entity type 1`] = `
-"FROM test-index-*
+"SET unmapped_fields=\\"nullify\\";
+FROM test-index-*
   | WHERE
       @timestamp >= TO_DATETIME(\\"2022-01-01T00:00:00.000Z\\")
       AND @timestamp <= TO_DATETIME(\\"2022-01-01T23:59:59.999Z\\")
@@ -1757,7 +1787,8 @@ exports[`buildRemainingLogsCountQuery generates the expected query for generic e
 `;
 
 exports[`buildRemainingLogsCountQuery generates the expected query for host entity type 1`] = `
-"FROM test-index-*
+"SET unmapped_fields=\\"nullify\\";
+FROM test-index-*
   | WHERE
       @timestamp >= TO_DATETIME(\\"2022-01-01T00:00:00.000Z\\")
       AND @timestamp <= TO_DATETIME(\\"2022-01-01T23:59:59.999Z\\")
@@ -1766,7 +1797,8 @@ exports[`buildRemainingLogsCountQuery generates the expected query for host enti
 `;
 
 exports[`buildRemainingLogsCountQuery generates the expected query for service entity type 1`] = `
-"FROM test-index-*
+"SET unmapped_fields=\\"nullify\\";
+FROM test-index-*
   | WHERE
       @timestamp >= TO_DATETIME(\\"2022-01-01T00:00:00.000Z\\")
       AND @timestamp <= TO_DATETIME(\\"2022-01-01T23:59:59.999Z\\")
@@ -1775,7 +1807,8 @@ exports[`buildRemainingLogsCountQuery generates the expected query for service e
 `;
 
 exports[`buildRemainingLogsCountQuery generates the expected query for user entity type 1`] = `
-"FROM test-index-*
+"SET unmapped_fields=\\"nullify\\";
+FROM test-index-*
   | WHERE
       @timestamp >= TO_DATETIME(\\"2022-01-01T00:00:00.000Z\\")
       AND @timestamp <= TO_DATETIME(\\"2022-01-01T23:59:59.999Z\\")

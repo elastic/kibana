@@ -20,6 +20,7 @@ import { getStepIds, getBuilderStepIds } from '../use_compose_discover_state';
 import type { ComposeFormValues } from '../compose_form_types';
 import type { RuleFormServices } from '../../../form/contexts/rule_form_context';
 import { RULE_BUILDER_REGISTRY } from '../rule_builder';
+import { isActionValid } from '../../../actions_form';
 import { AlertConditionStep } from './alert_condition_step';
 import { RecoveryConditionStep } from './recovery_condition_step';
 import { DetailsAndArtifactsStep } from './details_and_artifacts_step';
@@ -33,6 +34,7 @@ interface Props {
   services: RuleFormServices;
   onRecoveryTypeChange: (type: RecoveryType) => void;
   onKindChange: (kind: 'signal' | 'alert') => void;
+  isEditing: boolean;
   ruleId?: string;
   builderType?: string;
 }
@@ -49,6 +51,7 @@ const STEP_REGISTRY: Record<StepDefinition['id'], StepDefinition> = {
         dispatch={props.dispatch}
         services={props.services}
         onKindChange={props.onKindChange}
+        isEditing={props.isEditing}
       />
     ),
     validate: (_methods, s) => s.queryCommitted,
@@ -93,19 +96,18 @@ const STEP_REGISTRY: Record<StepDefinition['id'], StepDefinition> = {
         <CentralizedActionPoliciesPanel http={props.services.http} />
         <EuiSpacer size="m" />
         <LinkedActionPoliciesStep http={props.services.http} ruleId={props.ruleId} />
-        {props.state.mode !== 'edit' && (
+        {props.ruleId === undefined && (
           <>
             <EuiHorizontalRule margin="m" />
-            <NotificationsStep services={props.services} />
+            <NotificationsStep />
           </>
         )}
       </>
     ),
-    validate: (methods, state, services) => {
-      if (state.mode === 'edit') return true;
+    validate: (methods) => {
       const notifs = methods.getValues('notifications');
       if (!notifs) return true;
-      return services?.workflowForm?.isValid?.(notifs.workflow) ?? true;
+      return notifs.workflows.every(isActionValid);
     },
   },
 };
@@ -149,6 +151,7 @@ export const ComposeDiscoverForm = ({
   services,
   onRecoveryTypeChange,
   onKindChange,
+  isEditing,
   ruleId,
   builderType,
 }: Props) => {
@@ -161,6 +164,7 @@ export const ComposeDiscoverForm = ({
     services,
     onRecoveryTypeChange,
     onKindChange,
+    isEditing,
     ruleId,
     renderBuilderRecovery,
   });

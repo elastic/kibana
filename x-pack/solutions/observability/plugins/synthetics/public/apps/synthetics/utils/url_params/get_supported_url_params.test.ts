@@ -75,12 +75,17 @@ describe('getSupportedUrlParams', () => {
       packagePolicyId: undefined,
       projects: [],
       remoteName: undefined,
+      remoteNames: [],
       schedules: [],
       spaceId: undefined,
       statusCodes: [],
       tags: [],
       useLogicalAndFor: [],
       view: undefined,
+      browserResourceTypes: [],
+      party: [],
+      issuers: [],
+      expiringWithin: undefined,
     });
   });
 
