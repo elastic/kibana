@@ -244,7 +244,6 @@ async function suggestAdditionalSources(
     suggestions.unshift({
       ...newLineCompleteItem,
       text: lastIndex.name + '\n',
-      filterText: lastIndex.name,
       rangeToReplace: { start: indexNameStart, end: innerText.length },
     });
   }
