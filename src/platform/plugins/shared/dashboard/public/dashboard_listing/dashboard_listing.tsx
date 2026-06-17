@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { useParams, useHistory } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 
@@ -23,7 +23,8 @@ import { coreServices } from '../services/kibana_services';
 import { dashboardQueryClient } from '../services/dashboard_query_client';
 import { DASHBOARD_APP_ID, LANDING_PAGE_PATH } from '../../common/page_bundle_constants';
 import { getDashboardListingTabs } from './get_dashboard_listing_tabs';
-import type { DashboardListingProps, DashboardListingTab } from './types';
+import { DashboardListingTableLayoutSwitcher } from './dashboard_listing_table_layout_switcher';
+import type { DashboardListingProps, DashboardListingTab, DashboardListingTableLayout } from './types';
 
 export const DashboardListing = ({
   children,
@@ -40,6 +41,11 @@ export const DashboardListing = ({
 
   const history = useHistory();
   const { activeTab: activeTabParam } = useParams<{ activeTab?: string }>();
+  const [tableLayout, setTableLayout] = useState<DashboardListingTableLayout>('fullWidth');
+
+  const onTableLayoutChange = useCallback((layout: DashboardListingTableLayout) => {
+    setTableLayout(layout);
+  }, []);
 
   const tabs = useMemo(
     () =>
@@ -184,6 +190,10 @@ export const DashboardListing = ({
           changeActiveTab={changeActiveTab}
           showCreateButton={false}
           hideHeader
+        />
+        <DashboardListingTableLayoutSwitcher
+          layout={tableLayout}
+          onLayoutChange={onTableLayoutChange}
         />
       </QueryClientProvider>
     </I18nProvider>

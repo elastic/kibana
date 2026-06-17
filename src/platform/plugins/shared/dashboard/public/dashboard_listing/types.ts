@@ -23,6 +23,8 @@ export type DashboardListingTab = TableListTab & {
   createAction?: () => void | Promise<void>;
 };
 
+export type DashboardListingTableLayout = 'fullWidth' | 'restricted';
+
 export type DashboardListingProps = PropsWithChildren<{
   disableCreateDashboardButton?: boolean;
   initialFilter?: string;
