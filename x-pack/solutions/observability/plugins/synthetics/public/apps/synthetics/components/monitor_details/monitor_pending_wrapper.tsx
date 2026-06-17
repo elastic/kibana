@@ -15,6 +15,7 @@ import { PageLoader } from '../common/components/page_loader';
 import { resetMonitorLastRunAction } from '../../state';
 import { useMonitorLatestPing } from './hooks/use_monitor_latest_ping';
 import { useSyntheticsRefreshContext } from '../../contexts';
+import { MonitorRemoteCallout } from './monitor_remote_callout';
 
 export const MonitorPendingWrapper: FC<PropsWithChildren<unknown>> = ({ children }) => {
   const dispatch = useDispatch();
@@ -62,6 +63,13 @@ export const MonitorPendingWrapper: FC<PropsWithChildren<unknown>> = ({ children
 
   return (
     <>
+      {/*
+        Rendered above the loader so the remote-monitor callout (and its deep
+        link to the origin cluster) is visible immediately on remote pages,
+        rather than waiting for the first ping to arrive. Returns null for
+        local monitors, leaving non-remote pages visually unchanged.
+      */}
+      <MonitorRemoteCallout />
       {!loaded ? (
         <PageLoader
           icon={<EuiLoadingSpinner size="xxl" />}
