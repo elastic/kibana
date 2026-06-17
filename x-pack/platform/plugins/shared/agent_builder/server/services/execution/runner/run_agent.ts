@@ -9,9 +9,7 @@ import type {
   AgentHandlerContext,
   ScopedRunnerRunAgentParams,
   RunAgentReturn,
-  ExperimentalFeatures,
 } from '@kbn/agent-builder-server';
-import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
 import { getCurrentSpaceId } from '../../../utils/spaces';
 import { withAgentSpan } from '../../../tracing';
 import { createAgentHandler } from '../run_agent/create_handler';
@@ -54,24 +52,11 @@ export const createAgentHandlerContext = async <TParams = Record<string, unknown
     toolManager,
     analyticsService,
     trackingService,
+    experimentalFeatures,
   } = manager.deps;
 
   const spaceId = getCurrentSpaceId({ request, spaces });
   const toolRegistry = await toolsService.getRegistry({ request });
-
-  const uiSettingsClient = manager.deps.uiSettings.asScopedToClient(
-    manager.deps.savedObjects.getScopedClient(request)
-  );
-  const isExperimentalEnabled = await uiSettingsClient
-    .get<boolean>(AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID)
-    .catch(() => false);
-
-  const experimentalFeatures: ExperimentalFeatures = {
-    filestore: true,
-    skills: true,
-    subagents: isExperimentalEnabled,
-    todos: isExperimentalEnabled,
-  };
 
   return {
     request,

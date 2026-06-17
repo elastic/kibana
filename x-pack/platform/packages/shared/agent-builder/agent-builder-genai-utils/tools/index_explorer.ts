@@ -209,8 +209,6 @@ export const gatherResourceDescriptors = async ({
   indexPattern = '*',
   includeAliases = true,
   includeDatastream = true,
-  // datasets are only queryable via ES|QL `FROM`, so they're excluded from the `_search`-based
-  // relevance flow by default.
   includeDatasets = false,
   esClient,
 }: {
@@ -242,8 +240,7 @@ export const indexExplorer = async ({
   indexPattern = '*',
   includeAliases = true,
   includeDatastream = true,
-  // index_explorer backs the ES|QL discovery flow, so external ES|QL datasets are included.
-  includeDatasets = true,
+  includeDatasets = false,
   limit = 1,
   esClient,
   model,

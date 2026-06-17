@@ -40,9 +40,26 @@ describe('resolveResourceForEsqlWithSamplingStats', () => {
     const result = await resolveResourceForEsqlWithSamplingStats({
       resourceName: 'employees',
       esClient,
+      includeDatasets: true,
     });
 
     expect(result.type).toBe(EsResourceType.dataset);
     expect(result.fields.map((f) => f.path)).toEqual(['first_name']);
+  });
+
+  it('does not resolve datasets when includeDatasets is not set', async () => {
+    esClient.indices.resolveIndex.mockRejectedValue(
+      new esErrors.ResponseError({ statusCode: 404 } as any)
+    );
+    esClient.transport.request.mockResolvedValue({
+      datasets: [
+        { name: 'employees', data_source: 'local_minio', resource: 's3://my-bucket/*.csv' },
+      ],
+    });
+
+    await expect(
+      resolveResourceForEsqlWithSamplingStats({ resourceName: 'employees', esClient })
+    ).rejects.toThrow("No resource found for 'employees'");
+    expect(esClient.transport.request).not.toHaveBeenCalled();
   });
 });

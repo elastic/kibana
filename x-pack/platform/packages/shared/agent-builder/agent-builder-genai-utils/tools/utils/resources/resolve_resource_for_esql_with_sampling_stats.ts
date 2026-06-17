@@ -22,16 +22,16 @@ export const resolveResourceForEsqlWithSamplingStats = async ({
   resourceName,
   esClient,
   samplingSize,
+  includeDatasets = false,
 }: {
   resourceName: string;
   esClient: ElasticsearchClient;
   samplingSize?: number;
+  includeDatasets?: boolean;
 }) => {
   const [resource, stats] = await Promise.all([
-    resolveResourceForEsql({ resourceName, esClient }),
-    // Sampling is best-effort field enrichment. It uses `_search`, which fails for some targets
-    // (e.g. external ES|QL datasets, which are only queryable via ES|QL), so degrade to no stats
-    // rather than failing the whole resolution.
+    resolveResourceForEsql({ resourceName, esClient, includeDatasets }),
+    // best-effort: sampling uses `_search`, which some targets (e.g. datasets) don't support
     getSampleDocs({ esClient, index: resourceName, size: samplingSize })
       .then(({ samples }) => createStatsFromSamples({ samples }))
       .catch(() => createStatsFromSamples({ samples: [] })),

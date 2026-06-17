@@ -67,12 +67,14 @@ export const createSearchToolGraph = ({
   logger,
   events,
   topSnippetsConfig,
+  includeDatasets = false,
 }: {
   model: ScopedModel;
   esClient: ElasticsearchClient;
   logger: Logger;
   events: ToolEventEmitter;
   topSnippetsConfig?: TopSnippetsConfig;
+  includeDatasets?: boolean;
 }) => {
   const getTools = (state: StateType) => {
     const relevanceTool = createRelevanceSearchTool({
@@ -90,6 +92,7 @@ export const createSearchToolGraph = ({
       rowLimit: state.rowLimit,
       customInstructions: state.customInstructions,
       timeRange: state.timeRange,
+      includeDatasets,
     });
     const noMatchTool = createNoMatchingResourceTool();
     return [relevanceTool, nlSearchTool, noMatchTool];
@@ -103,7 +106,7 @@ export const createSearchToolGraph = ({
         pattern: state.targetPattern,
         excludeIndicesRepresentedAsDatastream: true,
         excludeIndicesRepresentedAsAlias: false,
-        includeDatasets: true,
+        includeDatasets,
         esClient,
       });
       const matchedResourceCount =
@@ -132,9 +135,7 @@ export const createSearchToolGraph = ({
 
     const resources = await gatherResourceDescriptors({
       indexPattern: state.targetPattern ?? '*',
-      // external ES|QL datasets are queryable via the natural_language_search (ES|QL) tool, so
-      // surface them to the dispatcher; the prompt routes them away from relevance (_search).
-      includeDatasets: true,
+      includeDatasets,
       esClient,
     });
 

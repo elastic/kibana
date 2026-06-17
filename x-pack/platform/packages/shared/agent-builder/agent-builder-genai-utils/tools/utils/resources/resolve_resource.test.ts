@@ -245,7 +245,7 @@ describe('resolveResource', () => {
 
       await expect(
         resolveResourceForEsql({ resourceName: 'no-match-*', esClient })
-      ).rejects.toThrow('No resource found for pattern no-match-*');
+      ).rejects.toThrow("No resource found for 'no-match-*'");
     });
 
     it('maps not_found from resolveIndex to a clear error', async () => {
@@ -275,7 +275,11 @@ describe('resolveResource', () => {
         values: [],
       });
 
-      const result = await resolveResourceForEsql({ resourceName: 'employees', esClient });
+      const result = await resolveResourceForEsql({
+        resourceName: 'employees',
+        esClient,
+        includeDatasets: true,
+      });
 
       expect(esClient.esql.query).toHaveBeenCalledWith(
         expect.objectContaining({ query: 'FROM employees | LIMIT 0' }),
@@ -308,7 +312,11 @@ describe('resolveResource', () => {
         values: [],
       });
 
-      const result = await resolveResourceForEsql({ resourceName: 'employees', esClient });
+      const result = await resolveResourceForEsql({
+        resourceName: 'employees',
+        esClient,
+        includeDatasets: true,
+      });
 
       expect(result.type).toBe(EsResourceType.dataset);
       expect(result.fields).toEqual([{ path: 'emp_no', type: 'integer', meta: {} }]);

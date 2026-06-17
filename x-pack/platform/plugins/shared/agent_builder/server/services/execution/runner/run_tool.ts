@@ -282,8 +282,10 @@ export const createToolHandlerContext = async <TParams = Record<string, unknown>
     filestore,
     skillServiceStart,
     toolManager,
+    experimentalFeatures,
   } = manager.deps;
   const spaceId = getCurrentSpaceId({ request, spaces });
+  const savedObjectsClient = savedObjects.getScopedClient(request);
 
   const callContext: ToolHandlerCallContext = {
     toolId,
@@ -297,7 +299,7 @@ export const createToolHandlerContext = async <TParams = Record<string, unknown>
     spaceId,
     logger,
     esClient: elasticsearch.client.asScoped(request),
-    savedObjectsClient: savedObjects.getScopedClient(request),
+    savedObjectsClient,
     modelProvider,
     runner: manager.getRunner(),
     toolProvider: createToolProvider({
@@ -326,6 +328,7 @@ export const createToolHandlerContext = async <TParams = Record<string, unknown>
     runContext: manager.context,
     executionMode: manager.deps.executionMode,
     agentConfiguration: manager.deps.agentConfiguration,
+    experimentalFeatures,
   };
 };
 

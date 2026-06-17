@@ -171,7 +171,7 @@ describe('indexExplorer', () => {
       pattern: 'logs-*',
       excludeIndicesRepresentedAsDatastream: true,
       excludeIndicesRepresentedAsAlias: false,
-      includeDatasets: true,
+      includeDatasets: false,
       esClient,
     });
   });

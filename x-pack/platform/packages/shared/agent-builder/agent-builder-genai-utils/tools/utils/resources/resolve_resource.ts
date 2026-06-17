@@ -123,14 +123,9 @@ export const resolveResource = async ({
 };
 
 /**
- * Retrieve resource metadata for ES|QL generation.
- * Supports index patterns and comma-separated targets by using field_caps
- * when multiple resources are resolved. Multi-target results use {@link EsResourceType.indexPattern}.
- */
-/**
- * Attempts to resolve a single external ES|QL dataset by name. Datasets are invisible to
- * `_resolve/index`/`_field_caps`, so we look them up via `_query/dataset` and introspect their
- * fields with `FROM <name> | LIMIT 0`. Returns undefined when no dataset matches the name.
+ * Resolves a single external ES|QL dataset by name, or undefined when none matches. Datasets are
+ * invisible to `_resolve/index`/`_field_caps`, so they're looked up via `_query/dataset` and their
+ * fields introspected with `FROM <name> | LIMIT 0`.
  */
 const tryResolveDataset = async ({
   resourceName,
@@ -155,12 +150,26 @@ const tryResolveDataset = async ({
   };
 };
 
+const EMPTY_RESOLVE_RESPONSE: IndicesResolveIndexResponse = {
+  indices: [],
+  aliases: [],
+  data_streams: [],
+};
+
+/**
+ * Retrieve resource metadata for ES|QL generation.
+ * Supports index patterns and comma-separated targets by using field_caps
+ * when multiple resources are resolved. Multi-target results use {@link EsResourceType.indexPattern}.
+ * When `includeDatasets` is true, a name that resolves to no index falls back to an external ES|QL dataset.
+ */
 export const resolveResourceForEsql = async ({
   resourceName,
   esClient,
+  includeDatasets = false,
 }: {
   resourceName: string;
   esClient: ElasticsearchClient;
+  includeDatasets?: boolean;
 }): Promise<ResolveResourceResponse> => {
   let resolveRes: IndicesResolveIndexResponse;
   try {
@@ -170,26 +179,23 @@ export const resolveResourceForEsql = async ({
       expand_wildcards: ['all'],
     });
   } catch (e) {
-    if (isNotFoundError(e)) {
-      // The name may be an external ES|QL dataset, which `_resolve/index` cannot see.
-      const dataset = await tryResolveDataset({ resourceName, esClient });
-      if (dataset) {
-        return dataset;
-      }
-      throw new Error(`No resource found for '${resourceName}'`);
+    if (!isNotFoundError(e)) {
+      throw e;
     }
-    throw e;
+    resolveRes = EMPTY_RESOLVE_RESPONSE;
   }
 
   const resourceCount =
     resolveRes.indices.length + resolveRes.aliases.length + resolveRes.data_streams.length;
 
   if (resourceCount === 0) {
-    const dataset = await tryResolveDataset({ resourceName, esClient });
-    if (dataset) {
-      return dataset;
+    if (includeDatasets) {
+      const dataset = await tryResolveDataset({ resourceName, esClient });
+      if (dataset) {
+        return dataset;
+      }
     }
-    throw new Error(`No resource found for pattern ${resourceName}`);
+    throw new Error(`No resource found for '${resourceName}'`);
   }
 
   if (resourceCount === 1) {

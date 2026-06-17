@@ -104,6 +104,8 @@ export interface ExperimentalFeatures {
   subagents: boolean;
   /** Whether the todo list tool and task-management prompt are enabled */
   todos: boolean;
+  /** Whether external ES|QL datasets are surfaced to data-source tools */
+  datasets: boolean;
 }
 
 export interface AgentHandlerContext {

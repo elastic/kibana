@@ -36,8 +36,9 @@ e.g. if the user provided one. Otherwise, do not try to invent or guess a patter
 Datasets are external sources (e.g. CSV files on object storage) that can only be queried with
 ES|QL ("FROM <dataset_name>"); they do not support _search.`,
     schema: listIndicesSchema,
-    handler: async ({ pattern }, { esClient, logger }) => {
+    handler: async ({ pattern }, { esClient, experimentalFeatures, logger }) => {
       logger.debug(`list indices tool called with pattern: ${pattern}`);
+      const includeDatasets = experimentalFeatures.datasets;
       const {
         indices,
         data_streams: dataStreams,
@@ -49,7 +50,7 @@ ES|QL ("FROM <dataset_name>"); they do not support _search.`,
         includeHidden: false,
         excludeIndicesRepresentedAsAlias: false,
         excludeIndicesRepresentedAsDatastream: true,
-        includeDatasets: true,
+        includeDatasets,
         esClient: esClient.asCurrentUser,
       });
 
