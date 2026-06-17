@@ -14,7 +14,7 @@ import { LINKS_LIBRARY_TYPE } from '../../constants';
 import type { LinksEmbeddableState, StoredLinksEmbeddableState } from '../types';
 import { type StoredLinksByValueState910, isLegacyState, transformLegacyState } from './bwc';
 import { getOptions } from './get_options';
-import { injectReferences } from './references';
+import { transformLinksOut } from './transform_links';
 
 export function transformOut(
   storedState: LinksEmbeddableState | StoredLinksEmbeddableState | StoredLinksByValueState910,
@@ -47,7 +47,7 @@ export function transformOut(
   const updatedLinks = latestState.links?.map(({ order, id, ...link }) => link); // strip legacy properties on each link
   return {
     ...state,
-    links: injectReferences(updatedLinks, references).map((link) => ({
+    links: transformLinksOut(updatedLinks, references).map((link) => ({
       ...link,
       ...(link.options && { options: getOptions(link.type, link.options) }),
     })) as LinksState['links'],

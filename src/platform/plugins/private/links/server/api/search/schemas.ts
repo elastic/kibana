@@ -10,7 +10,7 @@
 import {
   asCodeMetaSchema,
   asCodePaginationResponseMetaSchema,
-  asCodeSearchRequestQuerySchema,
+  asCodeSearchRequestSchema,
   MAX_DESCRIPTION_LENGTH,
   MAX_ID_LENGTH,
   MAX_TITLE_LENGTH,
@@ -18,7 +18,7 @@ import {
 } from '@kbn/as-code-shared-schemas';
 import { schema } from '@kbn/config-schema';
 
-export const searchRequestQuerySchema = asCodeSearchRequestQuerySchema;
+export const searchRequestSchema = asCodeSearchRequestSchema;
 
 export const searchResponseBodySchema = schema.object({
   data: schema.arrayOf(

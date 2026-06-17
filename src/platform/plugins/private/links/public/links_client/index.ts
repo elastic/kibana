@@ -16,9 +16,9 @@ import { LINKS_API_PATH, LINKS_LIBRARY_TYPE, PUBLIC_API_VERSION } from '../../co
 import type { LinksState } from '../../server';
 import type { LinksCreateRequestBody, LinksCreateResponseBody } from '../../server/api/create';
 import type { LinksReadResponseBody } from '../../server/api/read';
-import type { LinksSearchRequestQuery, LinksSearchResponseBody } from '../../server/api/search';
+import type { LinksSearchRequestParams, LinksSearchResponseBody } from '../../server/api/search';
 import type { LinksUpdateRequestBody, LinksUpdateResponseBody } from '../../server/api/update';
-import { coreServices } from '../services/kibana_services';
+import { coreServices, savedObjectsTaggingService } from '../services/kibana_services';
 export { hasLibraryItemWithTitle } from './has_library_item_with_title';
 export { runSaveToLibrary } from './save_to_library';
 
@@ -56,7 +56,7 @@ export const linksClient = {
       version: PUBLIC_API_VERSION,
     });
   },
-  search: async (searchQuery: LinksSearchRequestQuery) => {
+  search: async (searchQuery: LinksSearchRequestParams) => {
     const { query, ...params } = searchQuery;
     return await coreServices.http.get<LinksSearchResponseBody>(LINKS_API_PATH, {
       version: PUBLIC_API_VERSION,
@@ -89,9 +89,16 @@ export function getLinksClient<Attr extends LinksState = LinksState>(): Visualiz
       const result = await linksClient.create(data);
       return { item: { id: result.id, attributes: result.data } };
     },
-    update: async ({ id, data }) => {
+    update: async ({ id, data, options }) => {
+      let tags: string[] = [];
+      if (savedObjectsTaggingService) {
+        tags =
+          savedObjectsTaggingService
+            .getTaggingApi()
+            ?.ui.getTagIdsFromReferences(options?.references ?? []) ?? [];
+      }
       const original = await linksClient.get(id); // get the original library item so we can perform a full update
-      const result = await linksClient.update(id, { ...original.data, ...data });
+      const result = await linksClient.update(id, { ...original.data, ...data, tags });
       return { item: { id: result.id, attributes: result.data } };
     },
     delete: linksClient.delete,

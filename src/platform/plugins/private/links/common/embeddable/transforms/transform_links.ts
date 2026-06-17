@@ -18,7 +18,7 @@ import type {
 } from '../../../server';
 import { DASHBOARD_LINK_TYPE } from '../../constants';
 
-export function extractReferences(links: LinksState['links']) {
+export function transformLinksIn(links: LinksState['links']) {
   const extractedReferences: Reference[] = [];
 
   const newLinks = links.map((link) => {
@@ -40,7 +40,7 @@ export function extractReferences(links: LinksState['links']) {
   };
 }
 
-export function injectReferences(
+export function transformLinksOut(
   links: StoredLinksState['links'],
   references: Reference[] = []
 ): LinksState['links'] {

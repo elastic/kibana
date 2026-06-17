@@ -15,13 +15,29 @@ type PartialPaginationParamsSchema = {
   [K in keyof PaginationParamsSchema]: Type<TypeOf<PaginationParamsSchema[K]> | undefined>;
 };
 
-export const asCodeSearchRequestQuerySchema = schema.object({
+export const asCodeSearchRequestSchema = schema.object({
   query: schema.maybe(
     schema.string({
       maxLength: 500,
       meta: {
         description:
           'Filters results by `title` and `description` using Elasticsearch [`simple_query_string`](https://www.elastic.co/docs/reference/query-languages/query-dsl/query-dsl-simple-query-string-query) syntax. Multi-word terms require all words to match.',
+      },
+    })
+  ),
+  tags: schema.maybe(
+    schema.oneOf([schema.string(), schema.arrayOf(schema.string(), { maxSize: 100 })], {
+      meta: {
+        description:
+          'A tag ID to include. Accepts a single tag ID or multiple tag IDs. When multiple are specified, library items matching any of the tag IDs are included.',
+      },
+    })
+  ),
+  excluded_tags: schema.maybe(
+    schema.oneOf([schema.string(), schema.arrayOf(schema.string(), { maxSize: 100 })], {
+      meta: {
+        description:
+          'A tag ID to exclude. Accepts a single tag ID or multiple tag IDs. When multiple are specified, library items matching any of the tag IDs are excluded.',
       },
     })
   ),

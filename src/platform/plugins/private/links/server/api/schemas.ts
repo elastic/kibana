@@ -8,6 +8,7 @@
  */
 
 import { MAX_ID_LENGTH, MAX_TITLE_LENGTH } from '@kbn/as-code-shared-schemas';
+import { getAsCodeTagsSchema } from '@kbn/as-code-shared-schemas/src/schemas';
 import { schema } from '@kbn/config-schema';
 import { dashboardNavigationOptionsSchema } from '@kbn/dashboard-navigation-options-schema';
 import {
@@ -110,6 +111,7 @@ export const linksByValueSchema = serializedTitlesSchema.extends(
   {
     links: linksArraySchema,
     layout: layoutSchema,
+    tags: getAsCodeTagsSchema(),
   },
   { meta: BY_VALUE_SCHEMA_META }
 );
@@ -123,6 +125,7 @@ export const linksByReferenceSchema = serializedTitlesSchema.extends(
         description: 'The unique identifier of the links library item.',
       },
     }),
+    tags: getAsCodeTagsSchema(),
   },
   { meta: BY_REF_SCHEMA_META }
 );

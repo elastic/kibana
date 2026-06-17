@@ -7,18 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { tagSavedObjectTypeName } from '@kbn/saved-objects-tagging-plugin/common';
-import type { DashboardState } from '../../types';
+import { schema } from '@kbn/config-schema';
 
-export function transformTagsIn(tags: DashboardState['tags']) {
-  const uniqueTagIds = new Set<string>([]);
-  (tags ?? []).forEach((tagId) => {
-    uniqueTagIds.add(tagId);
-  });
-
-  return Array.from(uniqueTagIds).map((tagId) => ({
-    type: tagSavedObjectTypeName,
-    id: tagId,
-    name: `tag-ref-${tagId}`,
-  }));
-}
+export const getAsCodeTagsSchema = (customDescrption?: string, customMaxSize?: number) =>
+  schema.maybe(
+    schema.arrayOf(schema.string({ maxLength: 100 }), {
+      maxSize: customMaxSize ?? 1_000,
+      defaultValue: [] as string[],
+      meta: { description: customDescrption ?? 'Tag IDs associated with this library item.' },
+    })
+  );

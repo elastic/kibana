@@ -8,3 +8,4 @@
  */
 
 export { toAsCodeQuery, toStoredQuery } from './src/query_transforms';
+export { toStoredTags } from './src/tags_transforms';

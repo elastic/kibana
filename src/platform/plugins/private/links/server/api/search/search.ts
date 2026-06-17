@@ -7,15 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { getMeta, getTagsSearchRequest } from '@kbn/as-code-shared-schemas';
+import { tagsToFindOptions } from '@kbn/content-management-utils';
 import type { RequestHandlerContext } from '@kbn/core/server';
-import { getMeta } from '@kbn/as-code-shared-schemas';
 import { LINKS_LIBRARY_TYPE } from '../../../common/constants';
-import type { LinksSearchRequestQuery, LinksSearchResponseBody } from './types';
 import type { StoredLinksState } from '../../links_saved_object';
+import type { LinksSearchRequestParams, LinksSearchResponseBody } from './types';
 
 export async function search(
   requestCtx: RequestHandlerContext,
-  searchQuery: LinksSearchRequestQuery
+  searchParams: LinksSearchRequestParams
 ): Promise<LinksSearchResponseBody> {
   const { core } = await requestCtx.resolve(['core']);
 
@@ -23,10 +24,11 @@ export async function search(
     type: LINKS_LIBRARY_TYPE,
     searchFields: ['title^3', 'description'],
     fields: ['description', 'title'],
-    search: searchQuery.query,
-    perPage: searchQuery.per_page,
-    page: searchQuery.page ? +searchQuery.page : undefined,
+    search: searchParams.query,
+    perPage: searchParams.per_page,
+    page: searchParams.page ? +searchParams.page : undefined,
     defaultSearchOperator: 'AND',
+    ...tagsToFindOptions(getTagsSearchRequest(searchParams)),
   });
 
   return {

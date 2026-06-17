@@ -7,20 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { transformTagsIn } from './transform_tags_in';
-
-describe('transformTagsIn', () => {
-  test('Should exclude duplicate tags', () => {
-    const tagRefs = transformTagsIn(['tag2', 'tag2']);
-
-    expect(tagRefs).toMatchInlineSnapshot(`
-      Array [
-        Object {
-          "id": "tag2",
-          "name": "tag-ref-tag2",
-          "type": "tag",
-        },
-      ]
-    `);
-  });
-});
+export { getAsCodeTagsSchema } from './schema';

@@ -13,6 +13,7 @@ import {
   MAX_DESCRIPTION_LENGTH,
   MAX_ID_LENGTH,
   MAX_TITLE_LENGTH,
+  getAsCodeTagsSchema,
 } from '@kbn/as-code-shared-schemas';
 import type { ObjectType, Type } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
@@ -290,11 +291,9 @@ export function getDashboardStateSchema(
       ),
       query: schema.maybe(asCodeQuerySchema),
       refresh_interval: schema.maybe(refreshIntervalSchema),
-      tags: schema.maybe(
-        schema.arrayOf(schema.string({ maxLength: 100 }), {
-          maxSize: isDashboardAppRequest && isReadRequest ? Number.MAX_SAFE_INTEGER : 100,
-          meta: { description: 'Tag IDs to associate with this dashboard.' },
-        })
+      tags: getAsCodeTagsSchema(
+        'Tag IDs to associate with this dashboard.',
+        isDashboardAppRequest && isReadRequest ? Number.MAX_SAFE_INTEGER : undefined
       ),
       time_range: schema.maybe(timeRangeSchema),
       title: schema.string({

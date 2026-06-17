@@ -8,7 +8,15 @@
  */
 
 import type { TypeOf } from '@kbn/config-schema';
-import type { searchRequestSchema, searchResponseBodySchema } from './schemas';
+import type { asCodeSearchRequestSchema } from './schema';
 
-export type LinksSearchRequestParams = TypeOf<typeof searchRequestSchema>;
-export type LinksSearchResponseBody = TypeOf<typeof searchResponseBodySchema>;
+const normalizeToArray = (value?: string | string[]) => {
+  if (value === undefined) return undefined;
+  return Array.isArray(value) ? value : [value];
+};
+
+export const getTagsSearchRequest = (
+  tags: Pick<TypeOf<typeof asCodeSearchRequestSchema>, 'tags' | 'excluded_tags'>
+) => {
+  return { included: normalizeToArray(tags.tags), excluded: normalizeToArray(tags.excluded_tags) };
+};

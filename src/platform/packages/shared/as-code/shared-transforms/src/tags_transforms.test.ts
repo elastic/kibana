@@ -7,24 +7,20 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export {
-  asCodeIdSchema,
-  asCodeMetaSchema,
-  asCodePaginationParamsSchema,
-  asCodePaginationResponseMetaSchema,
-  asCodeQuerySchema,
-  asCodeSearchRequestSchema,
-  getAsCodeTagsSchema,
-  getMeta,
-  getTagsSearchRequest,
-  type AsCodeMeta,
-  type AsCodeQuery,
-} from './src/schemas';
+import { tagIdsToReferences } from './tags_transforms';
 
-export {
-  MAX_DESCRIPTION_LENGTH,
-  MAX_ID_LENGTH,
-  MAX_TITLE_LENGTH,
-  PAGINATION_DEFAULT_PER_PAGE,
-  PAGINATION_MAX_SIZE,
-} from './src/constants';
+describe('transformTagsIn', () => {
+  test('Should exclude duplicate tags', () => {
+    const tagRefs = tagIdsToReferences(['tag2', 'tag2']);
+
+    expect(tagRefs).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "id": "tag2",
+          "name": "tag-ref-tag2",
+          "type": "tag",
+        },
+      ]
+    `);
+  });
+});
