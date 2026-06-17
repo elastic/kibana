@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiText, EuiToolTip } from '@elastic/eui';
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 
@@ -15,15 +15,22 @@ export const ParamsText = ({ text }: { text: string }) => {
   return (
     <EuiFlexGroup gutterSize="s" justifyContent="flexStart">
       <EuiFlexItem grow={false}>
-        <EuiButtonIcon
-          data-test-subj="syntheticsParamsTextButton"
-          iconType={!isViewing ? 'eye' : 'eyeSlash'}
-          aria-label={i18n.translate('xpack.synthetics.settingsRoute.viewParam', {
+        <EuiToolTip
+          content={i18n.translate('xpack.synthetics.settingsRoute.viewParam', {
             defaultMessage: 'View parameter value',
           })}
-          onClick={() => setIsViewing((prevState) => !prevState)}
-          disabled={!text}
-        />
+          disableScreenReaderOutput
+        >
+          <EuiButtonIcon
+            data-test-subj="syntheticsParamsTextButton"
+            iconType={!isViewing ? 'eye' : 'eyeSlash'}
+            aria-label={i18n.translate('xpack.synthetics.settingsRoute.viewParam', {
+              defaultMessage: 'View parameter value',
+            })}
+            onClick={() => setIsViewing((prevState) => !prevState)}
+            disabled={!text}
+          />
+        </EuiToolTip>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiText data-test-subj="syntheticsParamsText" size={isViewing ? 's' : 'm'}>
