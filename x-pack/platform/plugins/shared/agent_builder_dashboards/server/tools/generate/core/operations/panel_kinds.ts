@@ -20,7 +20,9 @@ export const panelConfigPanelInputSchema = z.object({
   kind: z.literal('panelConfig'),
   type: z
     .string()
-    .describe(`Embeddable type for the panel (e.g. the ${LENS_EMBEDDABLE_TYPE} embeddable type for a visualization).`),
+    .describe(
+      `Embeddable type for the panel (e.g. the ${LENS_EMBEDDABLE_TYPE} embeddable type for a visualization).`
+    ),
   config: z
     .record(z.string(), z.unknown())
     .describe(
