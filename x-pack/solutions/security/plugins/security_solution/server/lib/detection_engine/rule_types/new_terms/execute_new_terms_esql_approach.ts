@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { chunk } from 'lodash';
+import { chunk, sum } from 'lodash';
 
 import type { estypes } from '@elastic/elasticsearch';
 
@@ -204,6 +204,7 @@ export const executeNewTermsEsqlApproach = async (execOptions: NewTermsExecutorO
   // For each bucket, create a search query to find the first document in the rule execution interval
   // that contains that combination. Use msearch to execute all queries in parallel.
   let bucketIndex = 0;
+  let alertsCandidateCount: number | undefined;
 
   while (bucketIndex < buckets.length && result.createdSignalsCount < params.maxSignals) {
     const batch = buckets.slice(bucketIndex, bucketIndex + BATCH_SIZE);
@@ -319,6 +320,10 @@ export const executeNewTermsEsqlApproach = async (execOptions: NewTermsExecutorO
       }
     }
 
+    // Collect rule execution metrics: each found document for a new terms combination is a
+    // candidate alert (before suppression / maxSignals truncation).
+    alertsCandidateCount = sum([alertsCandidateCount, eventsAndTerms.length]);
+
     // Create alerts from eventsAndTerms
     if (eventsAndTerms.length > 0) {
       const eventAndTermsChunks = chunk(eventsAndTerms, 5 * params.maxSignals);
@@ -385,6 +390,7 @@ export const executeNewTermsEsqlApproach = async (execOptions: NewTermsExecutorO
   return {
     ...result,
     state,
+    alertsCandidateCount,
     ...(isLoggedRequestsEnabled ? { loggedRequests } : {}),
   };
 };
