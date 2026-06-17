@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z } from '@kbn/zod';
+import { smartIntersectionWith, z } from '@kbn/zod';
 import { LENS_TAGCLOUD_DEFAULT_STATE } from '@kbn/lens-common';
 import { esqlColumnWithFormatSchema } from '../metric_ops';
 import { colorMappingSchema } from '../color';
@@ -86,8 +86,9 @@ export const tagcloudConfigSchemaNoESQL = z
     /**
      * Configure how to break down to tags
      */
-    tag_by: getBucketsWithChartDimensionSchema('tagcloudTag').and(
-      z.object(tagcloudConfigTagsByOptionsShape).strict()
+    tag_by: smartIntersectionWith(
+      getBucketsWithChartDimensionSchema('tagcloudTag'),
+      tagcloudConfigTagsByOptionsShape
     ),
   })
   .strict()

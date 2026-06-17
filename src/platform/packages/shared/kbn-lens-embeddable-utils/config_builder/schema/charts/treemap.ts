@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z } from '@kbn/zod';
+import { smartIntersectionWith, z } from '@kbn/zod';
 import { esqlColumnWithFormatSchema } from '../metric_ops';
 import { colorMappingSchema, staticColorSchema, autoColorSchema, AUTO_COLOR } from '../color';
 import { dataSourceSchema, dataSourceEsqlTableSchema } from '../data_source';
@@ -131,8 +131,9 @@ export const treemapConfigSchemaNoESQL = z
      */
     metrics: z
       .array(
-        getMetricsWithChartDimensionSchemaWithRefBasedOps('treemapMetric').and(
-          z.object(partitionConfigPrimaryMetricOptionsShape).strict()
+        smartIntersectionWith(
+          getMetricsWithChartDimensionSchemaWithRefBasedOps('treemapMetric'),
+          partitionConfigPrimaryMetricOptionsShape
         )
       )
       .min(1)
@@ -143,8 +144,9 @@ export const treemapConfigSchemaNoESQL = z
      */
     group_by: z
       .array(
-        getBucketsWithChartDimensionSchema('treemapGroupBy').and(
-          z.object(partitionConfigBreakdownByOptionsShape).strict()
+        smartIntersectionWith(
+          getBucketsWithChartDimensionSchema('treemapGroupBy'),
+          partitionConfigBreakdownByOptionsShape
         )
       )
       .min(1)

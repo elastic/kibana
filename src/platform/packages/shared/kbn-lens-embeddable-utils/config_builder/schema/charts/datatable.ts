@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z } from '@kbn/zod';
+import { smartIntersection, z } from '@kbn/zod';
 import { DEFAULT_HEADER_ROW_HEIGHT_LINES, DEFAULT_ROW_HEIGHT_LINES } from '@kbn/lens-common';
 import { esqlColumnWithFormatSchema } from '../metric_ops';
 import {
@@ -346,7 +346,8 @@ export const datatableConfigSchemaNoESQL = z
      */
     metrics: z
       .array(
-        getMetricsWithChartDimensionSchemaWithRefBasedOps('datatableMetric').and(
+        smartIntersection(
+          getMetricsWithChartDimensionSchemaWithRefBasedOps('datatableMetric'),
           datatableConfigMetricsOptionsSchema
         )
       )
@@ -358,7 +359,8 @@ export const datatableConfigSchemaNoESQL = z
      */
     rows: z
       .array(
-        getBucketsWithChartDimensionSchema('datatableRow').and(
+        smartIntersection(
+          getBucketsWithChartDimensionSchema('datatableRow'),
           datatableConfigRowsOptionsNoESQLSchema
         )
       )

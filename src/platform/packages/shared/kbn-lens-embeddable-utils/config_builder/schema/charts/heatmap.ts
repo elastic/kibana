@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z } from '@kbn/zod';
+import { smartIntersectionWith, z } from '@kbn/zod';
 
 import { dataSourceSchema, dataSourceEsqlTableSchema } from '../data_source';
 import { colorByValueSchema, autoColorSchema, AUTO_COLOR } from '../color';
@@ -153,8 +153,9 @@ export const heatmapConfigSchemaNoESQL = heatmapSharedConfigSchema
     ...dslOnlyPanelInfoSchema.shape,
     ...dataSourceSchema.shape,
     styling: heatmapStylingSchema.optional(),
-    metric: getMetricsWithChartDimensionSchemaWithRefBasedOps('heatmapMetric').and(
-      z.object(heatmapConfigMetricOptionsShape).strict()
+    metric: smartIntersectionWith(
+      getMetricsWithChartDimensionSchemaWithRefBasedOps('heatmapMetric'),
+      heatmapConfigMetricOptionsShape
     ),
   })
   .meta({

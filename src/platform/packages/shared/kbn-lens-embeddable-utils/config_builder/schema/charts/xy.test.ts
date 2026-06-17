@@ -594,7 +594,6 @@ describe('XY', () => {
               include_empty_rows: false,
             },
             y: [
-              // @ts-expect-error - mixing not allowed
               { operation: 'count', empty_as_null: false },
               { operation: 'average', field: 'price' },
             ],
@@ -602,7 +601,7 @@ describe('XY', () => {
             breakdown_by: { operation: 'terms', fields: ['product', 'category'], limit: 5 },
           },
         ],
-      } satisfies XYConfig);
+      });
       expectPrettyError(result).toMatchInlineSnapshot(`"✖ Invalid input"`);
     });
 

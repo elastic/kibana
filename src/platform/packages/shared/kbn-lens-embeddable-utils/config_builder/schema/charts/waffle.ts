@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z } from '@kbn/zod';
+import { smartIntersectionWith, z } from '@kbn/zod';
 import { esqlColumnWithFormatSchema } from '../metric_ops';
 import { colorMappingSchema, staticColorSchema, autoColorSchema, AUTO_COLOR } from '../color';
 import { dataSourceSchema, dataSourceEsqlTableSchema } from '../data_source';
@@ -95,8 +95,9 @@ export const waffleConfigSchemaNoESQL = z
     styling: waffleStylingSchema.optional(),
     metrics: z
       .array(
-        getMetricsWithChartDimensionSchemaWithRefBasedOps('waffleMetric').and(
-          z.object(partitionConfigPrimaryMetricOptionsShape).strict()
+        smartIntersectionWith(
+          getMetricsWithChartDimensionSchemaWithRefBasedOps('waffleMetric'),
+          partitionConfigPrimaryMetricOptionsShape
         )
       )
       .min(1)
@@ -104,8 +105,9 @@ export const waffleConfigSchemaNoESQL = z
       .meta({ description: 'Array of metric configurations (minimum 1)' }),
     group_by: z
       .array(
-        getBucketsWithChartDimensionSchema('waffleGroupBy').and(
-          z.object(partitionConfigBreakdownByOptionsShape).strict()
+        smartIntersectionWith(
+          getBucketsWithChartDimensionSchema('waffleGroupBy'),
+          partitionConfigBreakdownByOptionsShape
         )
       )
       .min(1)

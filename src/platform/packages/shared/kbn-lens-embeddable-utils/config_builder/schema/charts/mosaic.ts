@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z } from '@kbn/zod';
+import { smartIntersection, smartIntersectionWith, z } from '@kbn/zod';
 import { esqlColumnWithFormatSchema } from '../metric_ops';
 import { colorMappingSchema } from '../color';
 import { dataSourceSchema, dataSourceEsqlTableSchema } from '../data_source';
@@ -113,7 +113,8 @@ export const mosaicConfigSchemaNoESQL = z
     metric: getMetricsWithChartDimensionSchemaWithRefBasedOps('mosaicMetric'),
     group_by: z
       .array(
-        getBucketsWithChartDimensionSchema('mosaicGroupBy').and(
+        smartIntersection(
+          getBucketsWithChartDimensionSchema('mosaicGroupBy'),
           partitionConfigBreakdownByOptionsSchema
         )
       )
@@ -128,9 +129,9 @@ export const mosaicConfigSchemaNoESQL = z
      */
     group_breakdown_by: z
       .array(
-        getBucketsWithChartDimensionSchema('mosaicGroupBreakdownBy').and(
-          z.object({ collapse_by: collapseBySchema.optional() }).strict()
-        )
+        smartIntersectionWith(getBucketsWithChartDimensionSchema('mosaicGroupBreakdownBy'), {
+          collapse_by: collapseBySchema.optional(),
+        })
       )
       .min(1)
       .max(100)

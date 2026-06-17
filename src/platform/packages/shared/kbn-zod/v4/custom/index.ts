@@ -7,8 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export * from 'zod/v4';
-export * from './custom';
-export { isZod } from './utils';
-export { lazySchema, setLazySchemaDisabled } from './lazy_schema';
-export type { ZodObjectType } from './types';
+export {
+  smartIntersection,
+  smartIntersectionWith,
+  isSmartIntersection,
+  SMART_INTERSECTION_MARKER,
+} from './smart_intersection';
+export type {
+  SmartIntersectionInput,
+  SmartIntersectionOutput,
+  SmartIntersectionSchema,
+  SmartIntersectionWithInput,
+  SmartIntersectionWithOutput,
+} from './smart_intersection';
+export { MAX_UNION_OBJECT_NESTING_DEPTH } from './utils';

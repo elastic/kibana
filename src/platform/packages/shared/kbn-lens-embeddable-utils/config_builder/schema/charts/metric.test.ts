@@ -166,7 +166,9 @@ describe('Metric Schema', () => {
         } satisfies MetricInput;
 
         const result = metricConfigSchema.safeParse(input);
-        expectPrettyError(result).toMatchInlineSnapshot(`"✖ Invalid input"`);
+        expectPrettyError(result).toMatchInlineSnapshot(
+          `"✖ When using percentage-based dynamic coloring, a breakdown dimension or max must be defined."`
+        );
       });
 
       it('accepts percentage-based dynamic coloring with breakdown_by', () => {
@@ -451,7 +453,10 @@ describe('Metric Schema', () => {
       } satisfies MetricInput;
 
       const result = metricConfigSchema.safeParse(input);
-      expectPrettyError(result).toMatchInlineSnapshot(`"✖ Invalid input"`);
+      expectPrettyError(result).toMatchInlineSnapshot(`
+        "✖ When two metrics are defined, the primary metric must be the first item and the secondary metric the second item.
+          → at metrics"
+      `);
     });
 
     it('throws for two secondary metrics', () => {
@@ -472,7 +477,10 @@ describe('Metric Schema', () => {
       };
 
       const result = metricConfigSchema.safeParse(input);
-      expectPrettyError(result).toMatchInlineSnapshot(`"✖ Invalid input"`);
+      expectPrettyError(result).toMatchInlineSnapshot(`
+        "✖ When two metrics are defined, the primary metric must be the first item and the secondary metric the second item.
+          → at metrics"
+      `);
     });
 
     it('throws if the only metric is secondary', () => {
@@ -489,7 +497,10 @@ describe('Metric Schema', () => {
       } satisfies MetricInput;
 
       const result = metricConfigSchema.safeParse(input);
-      expectPrettyError(result).toMatchInlineSnapshot(`"✖ Invalid input"`);
+      expectPrettyError(result).toMatchInlineSnapshot(`
+        "✖ The first metric must be the primary metric.
+          → at metrics"
+      `);
     });
 
     it('throws if the icon name is invalid', () => {

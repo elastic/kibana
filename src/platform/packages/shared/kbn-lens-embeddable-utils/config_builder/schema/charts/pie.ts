@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z } from '@kbn/zod';
+import { smartIntersectionWith, z } from '@kbn/zod';
 import { esqlColumnWithFormatSchema } from '../metric_ops';
 import { colorMappingSchema, staticColorSchema, autoColorSchema, AUTO_COLOR } from '../color';
 import { dataSourceSchema, dataSourceEsqlTableSchema } from '../data_source';
@@ -138,8 +138,9 @@ export const pieConfigSchemaNoESQL = z
     styling: pieStylingSchema.optional(),
     metrics: z
       .array(
-        getMetricsWithChartDimensionSchemaWithRefBasedOps('pieMetric').and(
-          z.object(partitionConfigPrimaryMetricOptionsShape).strict()
+        smartIntersectionWith(
+          getMetricsWithChartDimensionSchemaWithRefBasedOps('pieMetric'),
+          partitionConfigPrimaryMetricOptionsShape
         )
       )
       .min(1)
@@ -147,8 +148,9 @@ export const pieConfigSchemaNoESQL = z
       .meta({ description: 'Array of metric configurations (minimum 1)' }),
     group_by: z
       .array(
-        getBucketsWithChartDimensionSchema('pieGroupBy').and(
-          z.object(partitionConfigBreakdownByOptionsShape).strict()
+        smartIntersectionWith(
+          getBucketsWithChartDimensionSchema('pieGroupBy'),
+          partitionConfigBreakdownByOptionsShape
         )
       )
       .min(1)

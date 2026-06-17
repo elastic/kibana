@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z } from '@kbn/zod';
+import { smartIntersectionWith, z } from '@kbn/zod';
 import {
   fieldMetricOrFormulaOperationDefinitionSchema,
   esqlColumnSchema,
@@ -41,8 +41,9 @@ export const regionMapConfigSchemaNoESQL = z
     /**
      * Configure how to break down to regions
      */
-    region: getBucketsWithChartDimensionSchema('regionMapRegion').and(
-      z.object(regionMapConfigRegionOptionsShape).strict()
+    region: smartIntersectionWith(
+      getBucketsWithChartDimensionSchema('regionMapRegion'),
+      regionMapConfigRegionOptionsShape
     ),
   })
   .strict()

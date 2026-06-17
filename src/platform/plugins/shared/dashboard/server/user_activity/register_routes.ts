@@ -9,7 +9,7 @@
 
 import { asCodeFilterSchema } from '@kbn/as-code-filters-schema';
 import { asCodeQuerySchema } from '@kbn/as-code-shared-schemas';
-import { schema } from '@kbn/config-schema';
+import { z } from '@kbn/zod';
 import type { IRouter, RequestHandlerContext } from '@kbn/core/server';
 import { timeRangeSchema } from '@kbn/es-query-server';
 
@@ -21,38 +21,40 @@ export function registerTrackUserActivityRoute(router: IRouter<RequestHandlerCon
     {
       path: '/internal/dashboard/user_activity/{type}/{id}',
       validate: {
-        params: schema.object({
-          type: schema.oneOf([schema.literal('view'), schema.literal('refresh')]),
-          id: schema.string({ maxLength: 100 }),
-        }),
-        body: schema.object({
-          title: schema.string({ maxLength: 100 }),
-          start: schema.number(),
-          end: schema.number(),
-          tags: schema.arrayOf(schema.string({ maxLength: 100 }), { maxSize: 100 }),
-          meta: schema.maybe(
-            schema.object({
-              time_range: schema.maybe(timeRangeSchema),
-              refresh_interval: schema.maybe(schema.number()),
-              query: schema.maybe(asCodeQuerySchema),
-              filters: schema.maybe(
-                schema.arrayOf(asCodeFilterSchema, {
-                  maxSize: 100,
-                })
-              ),
-              panel_count: schema.number(),
-              errors: schema.arrayOf(
-                schema.object({
-                  panel_id: schema.string({ maxLength: 100 }),
-                  error: schema.string({ maxLength: 100 }),
-                }),
-                {
-                  maxSize: 100,
-                }
-              ),
-            })
-          ),
-        }),
+        params: z
+          .object({
+            type: z.union([z.literal('view'), z.literal('refresh')]),
+            id: z.string().max(100),
+          })
+          .strict(),
+        body: z
+          .object({
+            title: z.string().max(100),
+            start: z.number(),
+            end: z.number(),
+            tags: z.array(z.string().max(100)).max(100),
+            meta: z
+              .object({
+                time_range: timeRangeSchema.optional(),
+                refresh_interval: z.number().optional(),
+                query: asCodeQuerySchema.optional(),
+                filters: z.array(asCodeFilterSchema).max(100).optional(),
+                panel_count: z.number(),
+                errors: z
+                  .array(
+                    z
+                      .object({
+                        panel_id: z.string().max(100),
+                        error: z.string().max(100),
+                      })
+                      .strict()
+                  )
+                  .max(100),
+              })
+              .strict()
+              .optional(),
+          })
+          .strict(),
       },
       security: {
         authz: {

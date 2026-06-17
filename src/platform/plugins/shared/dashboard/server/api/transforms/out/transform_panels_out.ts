@@ -121,14 +121,7 @@ function transformPanel(
     defaultTransform(embeddableConfig);
 
   if (transforms?.schema) {
-    transformedPanelConfig = transforms.schema.validate(
-      transformedPanelConfig,
-      undefined,
-      undefined,
-      {
-        stripUnknownKeys: true,
-      }
-    );
+    transformedPanelConfig = transforms.schema.parse(transformedPanelConfig);
   }
 
   return {

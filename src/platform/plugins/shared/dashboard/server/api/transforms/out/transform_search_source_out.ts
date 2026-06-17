@@ -56,7 +56,7 @@ export function transformSearchSourceOut(
   searchSource.filter?.forEach((storedFilter) => {
     try {
       let asCodeFilter = fromStoredFilter(storedFilter, logger);
-      asCodeFilter = asCodeFilterSchema.validate(asCodeFilter);
+      asCodeFilter = asCodeFilterSchema.parse(asCodeFilter);
       validFilters.push(asCodeFilter);
     } catch (error) {
       invalidFilters.push({
@@ -82,7 +82,7 @@ export function transformSearchSourceOut(
   let query: AsCodeQuery | undefined;
   const storedQuery = searchSource.query ? migrateLegacyQuery(searchSource.query) : undefined;
   try {
-    query = strictValidationSchema.validateKey('query', toAsCodeQuery(storedQuery));
+    query = strictValidationSchema.shape.query.parse(toAsCodeQuery(storedQuery));
   } catch (error) {
     const warningMessage = `Unexpected error transforming query state on read. Error: ${error.message}`;
     logger.warn(warningMessage);

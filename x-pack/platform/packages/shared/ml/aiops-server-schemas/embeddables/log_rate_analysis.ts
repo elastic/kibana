@@ -5,28 +5,24 @@
  * 2.0.
  */
 
-import { schema, type TypeOf } from '@kbn/config-schema';
+import { z } from '@kbn/zod';
 import {
   serializedTimeRangeSchema,
   serializedTitlesSchema,
 } from '@kbn/presentation-publishing-schemas';
 
-export const logRateAnalysisEmbeddableStateSchema = schema.object(
-  {
-    ...serializedTitlesSchema.getPropSchemas(),
-    ...serializedTimeRangeSchema.getPropSchemas(),
-    data_view_id: schema.string({
-      minLength: 1,
-      maxLength: 1000,
-      meta: { description: 'The data view ID used to run log rate analysis.' },
+export const logRateAnalysisEmbeddableStateSchema = z
+  .object({
+    ...serializedTitlesSchema.shape,
+    ...serializedTimeRangeSchema.shape,
+    data_view_id: z.string().min(1).max(1000).meta({
+      description: 'The data view ID used to run log rate analysis.',
     }),
-  },
-  {
-    meta: {
-      id: 'aiops_log_rate_analysis',
-      description: 'Log rate analysis embeddable schema',
-    },
-  }
-);
+  })
+  .strict()
+  .meta({
+    id: 'aiops_log_rate_analysis',
+    description: 'Log rate analysis embeddable schema',
+  });
 
-export type LogRateAnalysisEmbeddableState = TypeOf<typeof logRateAnalysisEmbeddableStateSchema>;
+export type LogRateAnalysisEmbeddableState = z.output<typeof logRateAnalysisEmbeddableStateSchema>;

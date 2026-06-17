@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z } from '@kbn/zod';
+import { smartIntersectionWith, z } from '@kbn/zod';
 import { esqlColumnWithFormatSchema } from '../metric_ops';
 import { dataSourceSchema, dataSourceEsqlTableSchema } from '../data_source';
 import { layerSettingsSchema, sharedPanelInfoSchema, dslOnlyPanelInfoSchema } from '../shared';
@@ -90,8 +90,9 @@ export const legacyMetricConfigSchemaNoESQL = z
     /**
      * Metric configuration, must define operation.
      */
-    metric: getMetricsWithChartDimensionSchema('legacyMetric').and(
-      z.object(legacyMetricConfigMetricOptionsShape).strict()
+    metric: smartIntersectionWith(
+      getMetricsWithChartDimensionSchema('legacyMetric'),
+      legacyMetricConfigMetricOptionsShape
     ),
   })
   .strict()

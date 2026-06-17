@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z } from '@kbn/zod';
+import { smartIntersectionWith, z } from '@kbn/zod';
 import { LENS_METRIC_BREAKDOWN_DEFAULT_MAX_COLUMNS } from '@kbn/lens-common';
 import {
   DEFAULT_PRIMARY_POSITION,
@@ -421,20 +421,18 @@ function validateMetrics(metrics: (PrimaryMetricType | SecondaryMetricType)[]) {
   }
 }
 
-export const primaryMetricSchemaNoESQL = getMetricsWithChartDimensionSchemaWithRefBasedOps(
-  'metricPrimary'
-).and(
-  z
-    .object({
-      ...metricConfigPrimaryMetricOptionsShape,
-      ...metricConfigBackgroundChartShapeNoESQL,
-    })
-    .strict()
+export const primaryMetricSchemaNoESQL = smartIntersectionWith(
+  getMetricsWithChartDimensionSchemaWithRefBasedOps('metricPrimary'),
+  {
+    ...metricConfigPrimaryMetricOptionsShape,
+    ...metricConfigBackgroundChartShapeNoESQL,
+  }
 );
 
-const secondaryMetricSchemaNoESQL = getMetricsWithChartDimensionSchemaWithRefBasedOps(
-  'metricSecondary'
-).and(z.object(metricConfigSecondaryMetricOptionsShape).strict());
+const secondaryMetricSchemaNoESQL = smartIntersectionWith(
+  getMetricsWithChartDimensionSchemaWithRefBasedOps('metricSecondary'),
+  metricConfigSecondaryMetricOptionsShape
+);
 
 export const metricConfigSchemaNoESQL = z
   .object({
@@ -464,9 +462,10 @@ export const metricConfigSchemaNoESQL = z
     /**
      * Configure how to break down the metric (e.g. show one metric per term).
      */
-    breakdown_by: getBucketsWithChartDimensionSchema('metricBreakdown')
-      .and(z.object(metricConfigBreakdownByOptionsShape).strict())
-      .optional(),
+    breakdown_by: smartIntersectionWith(
+      getBucketsWithChartDimensionSchema('metricBreakdown'),
+      metricConfigBreakdownByOptionsShape
+    ).optional(),
   })
   .strict()
   .superRefine(({ metrics, breakdown_by }, ctx) => {
