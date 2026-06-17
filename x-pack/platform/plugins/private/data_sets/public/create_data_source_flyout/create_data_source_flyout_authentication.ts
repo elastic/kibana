@@ -9,18 +9,11 @@ import { i18n } from '@kbn/i18n';
 
 import type { DataSourceType, DataSourceWithSecrets } from '../../common/datasource_types';
 
-/** S3 / GCS authentication modes (UI-only; not submitted except `anonymous` → `settings.auth: 'none'`). */
-export type S3GcsAuthenticationMode =
-  | 'access_and_secret_keys'
-  | 'default_credential_chain'
-  | 'anonymous';
+/** S3 / GCS authentication modes (UI-only). */
+export type S3GcsAuthenticationMode = 'access_and_secret_keys';
 
 /** Azure authentication modes (UI-only; `settings.auth` is never submitted). */
-export type AzureAuthenticationMode =
-  | 'credentials'
-  | 'connection_string'
-  | 'sas_token'
-  | 'default_credential_chain';
+export type AzureAuthenticationMode = 'credentials' | 'connection_string' | 'sas_token';
 
 export type CreateDataSourceAuthenticationMode = S3GcsAuthenticationMode | AzureAuthenticationMode;
 
@@ -65,12 +58,6 @@ export const getCreateDataSourceAuthenticationOptions = (
           defaultMessage: 'SAS Token',
         }),
       },
-      {
-        value: 'default_credential_chain',
-        text: i18n.translate('dataSets.createFlyout.authentication.azure.defaultCredentialChain', {
-          defaultMessage: 'Default Credential Chain',
-        }),
-      },
     ];
   }
 
@@ -79,18 +66,6 @@ export const getCreateDataSourceAuthenticationOptions = (
       value: 'access_and_secret_keys',
       text: i18n.translate('dataSets.createFlyout.authentication.accessAndSecretKeys', {
         defaultMessage: 'Access and Secret keys',
-      }),
-    },
-    {
-      value: 'default_credential_chain',
-      text: i18n.translate('dataSets.createFlyout.authentication.defaultCredentialChain', {
-        defaultMessage: 'default credential chain',
-      }),
-    },
-    {
-      value: 'anonymous',
-      text: i18n.translate('dataSets.createFlyout.authentication.anonymous', {
-        defaultMessage: 'anonymous',
       }),
     },
   ];
@@ -116,7 +91,7 @@ export const applyAuthenticationModeToDataSource = (
   data: DataSourceWithSecrets,
   mode: CreateDataSourceAuthenticationMode
 ): DataSourceWithSecrets => {
-  const authSettings = mode === 'anonymous' ? { auth: 'none' as const } : {};
+  const authSettings = {};
 
   switch (data.type) {
     case 's3': {

@@ -61,10 +61,6 @@ export function CreateDataSourceFlyoutTypeSettingsAzureAuthenticationFields({
   control: Control<CreateDataSourceFlyoutFormValues, any>;
   unregister: UseFormUnregister<CreateDataSourceFlyoutFormValues>;
 }) {
-  if (authenticationMode === 'default_credential_chain') {
-    return null;
-  }
-
   if (authenticationMode === 'credentials') {
     return (
       <CreateDataSourceFlyoutTypeSettingsAzureCredentialsFields

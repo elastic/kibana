@@ -82,13 +82,10 @@ export const authenticationModeFromDataSource = (
     ) {
       return 'credentials';
     }
-    return 'default_credential_chain';
+    return 'credentials';
   }
 
   if (data.type === 'gcs') {
-    if (settings.auth === 'none') {
-      return 'anonymous';
-    }
     const { credentials } = settings;
     const hasCredentials =
       typeof credentials === 'string'
@@ -97,20 +94,17 @@ export const authenticationModeFromDataSource = (
     if (hasCredentials) {
       return 'access_and_secret_keys';
     }
-    return 'default_credential_chain';
+    return 'access_and_secret_keys';
   }
 
   if (data.type === 's3') {
-    if (settings.auth === 'none') {
-      return 'anonymous';
-    }
     if (
       (typeof settings.access_key === 'string' && settings.access_key.trim()) ||
       (typeof settings.secret_key === 'string' && settings.secret_key.trim())
     ) {
       return 'access_and_secret_keys';
     }
-    return 'default_credential_chain';
+    return 'access_and_secret_keys';
   }
 
   return getDefaultAuthenticationMode(data.type);
