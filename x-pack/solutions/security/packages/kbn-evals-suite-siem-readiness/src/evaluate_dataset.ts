@@ -48,7 +48,7 @@ export type EvaluateSiemReadinessDataset = (options: {
  */
 export const BASELINE_SIEM_READINESS_CRITERIA = [
   'The response includes a Status section showing overall health (healthy / actionsRequired / noData).',
-  'The response includes a Summary section with 1–2 sentences covering what\'s healthy and what needs attention.',
+  "The response includes a Summary section with 1–2 sentences covering what's healthy and what needs attention.",
   'The response includes a Findings section organized by dimension (Coverage, Quality, Continuity, Retention). Only dimensions with findings are shown.',
   'For every actionable finding shown, the response includes all three blast-radius sub-bullets: Affected Platform, Affected Rules, and Affected Tactics.',
   'The response includes a Suggested Actions section with concrete next steps when there are findings.',
@@ -66,9 +66,13 @@ export function createSiemReadinessCriteriaEvaluator({
     name: 'SIEM Readiness Criteria',
     kind: 'LLM' as const,
     evaluate: async ({ expected, ...rest }) => {
-      const exampleCriteria: string[] = (expected as SiemReadinessDatasetExample['output'])
-        ?.criteria ?? [];
-      const allCriteria = [...BASELINE_SIEM_READINESS_CRITERIA, ...extraCriteria, ...exampleCriteria];
+      const exampleCriteria: string[] =
+        (expected as SiemReadinessDatasetExample['output'])?.criteria ?? [];
+      const allCriteria = [
+        ...BASELINE_SIEM_READINESS_CRITERIA,
+        ...extraCriteria,
+        ...exampleCriteria,
+      ];
       return evaluators.criteria(allCriteria).evaluate({ expected, ...rest });
     },
   };

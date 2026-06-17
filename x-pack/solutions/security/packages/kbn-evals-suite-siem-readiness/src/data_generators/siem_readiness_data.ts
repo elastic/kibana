@@ -71,9 +71,7 @@ async function bulkIndex(esClient: Client, index: string, docs: Doc[]): Promise<
       const op = Object.values(item)[0];
       return op && 'error' in op && op.error;
     });
-    throw new Error(
-      `Bulk indexing into ${index} failed: ${JSON.stringify(firstError, null, 2)}`
-    );
+    throw new Error(`Bulk indexing into ${index} failed: ${JSON.stringify(firstError, null, 2)}`);
   }
 }
 
@@ -438,7 +436,11 @@ export const seedSiemReadinessData = async ({
       operations: failOperations,
     });
   } catch (err) {
-    log.debug(`fail-docs bulk rejected as expected (pipeline fail processor fired): ${err instanceof Error ? err.message : String(err)}`);
+    log.debug(
+      `fail-docs bulk rejected as expected (pipeline fail processor fired): ${
+        err instanceof Error ? err.message : String(err)
+      }`
+    );
   }
 
   log.info(
