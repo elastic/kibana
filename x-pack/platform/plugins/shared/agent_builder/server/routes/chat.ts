@@ -100,11 +100,21 @@ export function registerChatRoutes({
         schema.oneOf([
           schema.object({ allow: schema.boolean() }),
           schema.object({ authorized: schema.boolean() }),
+          schema.object({
+            answers: schema.arrayOf(
+              schema.object({
+                choice: schema.maybe(schema.arrayOf(schema.number(), { maxSize: 100 })),
+                custom: schema.maybe(schema.string({ minLength: 1, maxLength: 20_000 })),
+                skipped: schema.maybe(schema.boolean()),
+              }),
+              { maxSize: 100 }
+            ),
+          }),
         ]),
         {
           meta: {
             description:
-              'Use this field to respond to a confirmation or authorization prompt. Send an `allow` boolean to answer a confirmation prompt, or an `authorized` boolean to answer an authorization prompt.',
+              'Use this field to respond to a confirmation, authorization, or ask_user_question prompt. Send `allow` for confirmation, `authorized` for authorization, or `answers` (array of `{ choice?, custom?, skipped? }`) for ask_user_question.',
           },
         }
       )
