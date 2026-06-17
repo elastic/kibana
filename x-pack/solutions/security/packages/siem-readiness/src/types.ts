@@ -134,11 +134,44 @@ export interface IndexDocCount {
   error?: string;
 }
 
+// Blast radius types for finding enrichment
+export type FindingSeverity = 'CRITICAL' | 'WARNING' | 'INFORMATIONAL';
+
+export interface AffectedRule {
+  id: string;
+  name: string;
+}
+
+export interface AffectedTactic {
+  id: string;
+  name: string;
+  totalRules: number;
+  affectedRulesCount: number;
+}
+
+export interface RecommendedAction {
+  label: string;
+  href: string;
+}
+
 export interface ActionableFinding {
   category?: MainCategories;
-  severity: 'critical' | 'warning';
+  severity: FindingSeverity;
   message: string;
   resource: string;
+  affectedRules?: AffectedRule[];
+  affectedTactics?: AffectedTactic[];
+  affectedPlatform?: string;
+  recommendedActions?: RecommendedAction[];
+  /**
+   * Indicates the reliability of the blast-radius fields on this finding.
+   * - 'healthy': blast radius is complete and trustworthy.
+   * - 'unavailable': a lookup that this dimension depends on failed entirely (e.g. pipeline map
+   *   for continuity, category map for coverage). The affected* fields are intentionally omitted.
+   * - 'partial': at least one rule's index resolution failed, so affectedRules/Tactics may be
+   *   undercounted.
+   */
+  blastRadiusStatus?: 'healthy' | 'partial' | 'unavailable';
 }
 
 export interface CoveragePayload {
