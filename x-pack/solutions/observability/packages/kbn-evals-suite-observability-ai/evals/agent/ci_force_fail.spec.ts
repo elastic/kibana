@@ -5,9 +5,14 @@
  * 2.0.
  */
 
+import { tags } from '@kbn/scout';
 import { evaluate } from './evaluate';
 
 // TODO: remove before merge — intentional failure to exercise suite_owner_notify
-evaluate('intentional failure for Slack notify testing', async () => {
-  throw new Error('Intentional failure for Slack notify testing');
-});
+evaluate(
+  'intentional failure for Slack notify testing',
+  { tag: tags.serverless.observability.complete },
+  async () => {
+    throw new Error('Intentional failure for Slack notify testing');
+  }
+);
