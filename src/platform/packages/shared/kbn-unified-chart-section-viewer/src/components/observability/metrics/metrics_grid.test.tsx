@@ -902,6 +902,66 @@ describe('MetricsGrid', () => {
       expect(createESQLQuery).toHaveBeenCalledTimes(1);
     });
 
+    it('does not recompute esqlQuery when dimensions get a new array with identical content', () => {
+      const dimensions = [{ name: 'host.name' }];
+      const { rerender } = render(
+        <MetricsExperienceStateProvider profileId="test-profile">
+          <MetricsGrid
+            {...defaultProps}
+            discoverFetch$={discoverFetch$}
+            metricItems={nonOverlappingMetrics}
+            dimensions={dimensions}
+          />
+        </MetricsExperienceStateProvider>
+      );
+
+      expect(createESQLQuery).toHaveBeenCalledTimes(nonOverlappingMetrics.length);
+      (createESQLQuery as jest.Mock).mockClear();
+
+      rerender(
+        <MetricsExperienceStateProvider profileId="test-profile">
+          <MetricsGrid
+            {...defaultProps}
+            discoverFetch$={discoverFetch$}
+            metricItems={nonOverlappingMetrics}
+            dimensions={[{ name: 'host.name' }]}
+          />
+        </MetricsExperienceStateProvider>
+      );
+
+      expect(createESQLQuery).not.toHaveBeenCalled();
+    });
+
+    it('recomputes esqlQuery when a dimension type changes but the name stays the same', () => {
+      const hostMetric = nonOverlappingMetrics[0];
+      const { rerender } = render(
+        <MetricsExperienceStateProvider profileId="test-profile">
+          <MetricsGrid
+            {...defaultProps}
+            discoverFetch$={discoverFetch$}
+            metricItems={[hostMetric]}
+            dimensions={[{ name: 'host.name', type: 'keyword' }]}
+          />
+        </MetricsExperienceStateProvider>
+      );
+
+      expect(createESQLQuery).toHaveBeenCalledTimes(1);
+      (createESQLQuery as jest.Mock).mockClear();
+
+      rerender(
+        <MetricsExperienceStateProvider profileId="test-profile">
+          <MetricsGrid
+            {...defaultProps}
+            discoverFetch$={discoverFetch$}
+            metricItems={[hostMetric]}
+            dimensions={[{ name: 'host.name', type: 'ip' }]}
+          />
+        </MetricsExperienceStateProvider>
+      );
+
+      expect(createESQLQuery).toHaveBeenCalledTimes(1);
+    });
+
     it('re-renders every ChartItem when flyoutState changes, exposing a spurious context subscription', () => {
       renderMetricsGrid();
 
