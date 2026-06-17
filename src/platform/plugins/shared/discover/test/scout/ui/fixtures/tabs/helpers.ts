@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ScoutPage } from '@kbn/scout';
+import { EuiToastWrapper, type ScoutPage } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 
 export const openSaveSearchModal = async (page: ScoutPage) => {
@@ -156,11 +156,9 @@ export const selectDataViewMode = async (page: ScoutPage, options?: { discardMod
  * Dismisses all visible toasts by clicking each dismiss button.
  */
 const dismissAllToasts = async (page: ScoutPage) => {
-  const toastList = page.testSubj.locator('globalToastList');
-  const dismissBtns = toastList.locator('[data-test-subj$="dismissToast"]');
-  // Loop until no dismiss buttons remain, avoiding index-shift issues from snapshot arrays.
-  while ((await dismissBtns.count()) > 0) {
-    await dismissBtns.first().click();
+  const toast = new EuiToastWrapper(page, { locator: '.euiToast' });
+  if ((await toast.getCount()) > 0) {
+    await toast.closeAllToasts();
   }
 };
 
