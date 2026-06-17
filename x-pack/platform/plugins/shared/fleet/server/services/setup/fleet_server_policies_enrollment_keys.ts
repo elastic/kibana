@@ -67,12 +67,6 @@ export async function ensureAgentPoliciesFleetServerKeysAndPolicies({
     perPage: SO_SEARCH_LIMIT,
   });
 
-  // TODO: this will be pulled out by https://github.com/elastic/kibana/pull/272428
-  if (agentPolicies.length === 0) {
-    await scheduleBumpAgentPoliciesTask(appContextService.getTaskManagerStart()!);
-    return;
-  }
-
   const agentPolicyIds = agentPolicies.map((agentPolicy) => agentPolicy.id);
 
   // Resolve the latest deployed revision and which policies already have an enrollment API key
