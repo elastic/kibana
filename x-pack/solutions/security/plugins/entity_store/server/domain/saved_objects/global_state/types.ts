@@ -12,7 +12,6 @@ import {
   LOG_EXTRACTION_MAX_TIME_WINDOW_SIZE_DEFAULT,
   LOG_EXTRACTION_MAX_LOGS_PER_WINDOW_DEFAULT,
   LOG_EXTRACTION_CAP_BEHAVIOR_DEFAULT,
-  LOG_EXTRACTION_DISCOVERED_SOURCE_MIN_CONFIDENCE_DEFAULT,
 } from './constants';
 
 export const EntityStoreGlobalStateTypeName = 'entity-store-global-state';
@@ -123,7 +122,6 @@ const version3: SavedObjectsFullModelVersion = {
 
 const logExtractionSchemaV4 = logExtractionSchemaV3.extends({
   useDiscoveredIndexSource: schema.maybe(schema.boolean()),
-  discoveredIndexSourceMinConfidence: schema.maybe(schema.number()),
 });
 
 const globalStateSchemaV4 = globalStateSchemaV3.extends({
@@ -138,8 +136,6 @@ const version4: SavedObjectsFullModelVersion = {
         attributes: {
           logsExtraction: {
             useDiscoveredIndexSource: false,
-            discoveredIndexSourceMinConfidence:
-              LOG_EXTRACTION_DISCOVERED_SOURCE_MIN_CONFIDENCE_DEFAULT,
           },
         },
       }),

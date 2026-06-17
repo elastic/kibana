@@ -25,17 +25,16 @@ const makeFeatureClient = (hits: unknown[] = []): FeatureClient =>
   } as unknown as FeatureClient);
 
 describe('createKnowledgeIndicatorsReader', () => {
-  it('pushes the schema type + minConfidence into the feature query', async () => {
+  it('pushes the dataset_analysis type into the feature query', async () => {
     const streamsClient = makeStreamsClient(['logs.a', 'logs.b']);
     const featureClient = makeFeatureClient([{ uuid: 'x' }]);
     const reader = createKnowledgeIndicatorsReader({ featureClient, streamsClient });
 
-    const result = await reader.listSchemaFeatures({ minConfidence: 60 });
+    const result = await reader.listDatasetAnalysisFeatures();
 
     expect(streamsClient.listStreams).toHaveBeenCalledTimes(1);
     expect(featureClient.getFeatures).toHaveBeenCalledWith(['logs.a', 'logs.b'], {
-      type: ['schema'],
-      minConfidence: 60,
+      type: ['dataset_analysis'],
     });
     expect(result).toEqual([{ uuid: 'x' }]);
   });
@@ -45,7 +44,7 @@ describe('createKnowledgeIndicatorsReader', () => {
     const featureClient = makeFeatureClient();
     const reader = createKnowledgeIndicatorsReader({ featureClient, streamsClient });
 
-    expect(await reader.listEntityFeatures()).toEqual([]);
+    expect(await reader.listDatasetAnalysisFeatures()).toEqual([]);
     expect(featureClient.getFeatures).not.toHaveBeenCalled();
   });
 

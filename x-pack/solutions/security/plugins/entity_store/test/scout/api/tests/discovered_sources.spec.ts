@@ -27,8 +27,8 @@ import {
  * - the `useDiscoveredIndexSource` flag plumbing + data-view-replacement path.
  *
  * NOTE: asserting that a specific KI-discovered index pattern becomes the
- * extraction `FROM` requires seeding `schema`-class Knowledge Indicators on a
- * real Streams stream (KI is manually triggered upstream and depends on the
+ * extraction `FROM` requires seeding `dataset_analysis` Knowledge Indicators on
+ * a real Streams stream (KI is manually triggered upstream and depends on the
  * Streams inference pipeline). That end-to-end seeding is a follow-up; here we
  * verify the contract deterministically: the visibility route shape, the flag
  * toggling through config, and that the updates stream remains a hard-union
@@ -48,7 +48,6 @@ apiTest.describe('Entity Store KI-discovered index source', { tag: ENTITY_STORE_
       body: {
         logExtraction: {
           useDiscoveredIndexSource: enabled,
-          discoveredIndexSourceMinConfidence: 0,
         },
       },
     });
@@ -107,7 +106,7 @@ apiTest.describe('Entity Store KI-discovered index source', { tag: ENTITY_STORE_
       });
       expect(off.statusCode).toBe(200);
       expect(off.body.enabled).toBe(false);
-      // All four engine keys are always present, even with no schema features.
+      // All four engine keys are always present, even with no dataset_analysis features.
       expect(Object.keys(off.body.sources).sort()).toStrictEqual([
         'generic',
         'host',
@@ -123,7 +122,6 @@ apiTest.describe('Entity Store KI-discovered index source', { tag: ENTITY_STORE_
       });
       expect(on.statusCode).toBe(200);
       expect(on.body.enabled).toBe(true);
-      expect(on.body.minConfidence).toBe(0);
     }
   );
 
@@ -145,9 +143,9 @@ apiTest.describe('Entity Store KI-discovered index source', { tag: ENTITY_STORE_
         '2026-05-10T09:00:00Z',
         '2026-05-10T11:00:00Z'
       );
-        expect(extraction.statusCode).toBe(200);
-        expect(extraction.body).toMatchObject({ success: true });
-        expect((extraction.body as { count: number }).count).toBeGreaterThanOrEqual(1);
+      expect(extraction.statusCode).toBe(200);
+      expect(extraction.body).toMatchObject({ success: true });
+      expect((extraction.body as { count: number }).count).toBeGreaterThanOrEqual(1);
 
       const hit = await searchDocById(esClient, 'host:ki-src-host-1');
       expect(hit.hits.hits).toHaveLength(1);

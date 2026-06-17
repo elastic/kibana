@@ -5,27 +5,10 @@
  * 2.0.
  */
 
-import type { Feature } from '@kbn/streams-schema';
+import { DATASET_ANALYSIS_FEATURE_TYPE, type Feature } from '@kbn/streams-schema';
 import { isDefinitionNotFoundError } from '../errors/definition_not_found_error';
 import type { FeatureClient } from '../feature/feature_client';
 import type { StreamsClient } from '../client';
-
-/**
- * Options shared by the per-class list methods on
- * `StreamsKnowledgeIndicatorsReader`. Kept deliberately small: this surface
- * only exposes knobs cross-plugin consumers should reach for. Pagination,
- * excluded-feature inclusion, and arbitrary type selection are NOT exposed
- * — those are properties of the internal `FeatureClient` that the integration
- * has no business depending on.
- */
-export interface StreamsKnowledgeIndicatorsListOptions {
-  /**
-   * Drops features below the given confidence (0–100). Entity store should
-   * pass its configured threshold here so changes are honored without code
-   * changes. Omit to receive every confidence level.
-   */
-  minConfidence?: number;
-}
 
 /**
  * Read-only Knowledge Indicators surface intentionally narrowed for
@@ -48,33 +31,16 @@ export interface StreamsKnowledgeIndicatorsListOptions {
  */
 export interface StreamsKnowledgeIndicatorsReader {
   /**
-   * Lists `type: 'entity'` Knowledge Indicators across all streams the
-   * caller is authorized to read. Filters are pushed into the underlying
-   * storage query — they are not applied client-side.
+   * Lists `type: 'dataset_analysis'` Knowledge Indicators across all streams
+   * the caller is authorized to read. `dataset_analysis` is a deterministic,
+   * computed feature emitted once per analyzed stream; its
+   * `properties.analysis.fields` is an object keyed by
+   * `"<field.path> (<es_types>)"` (e.g. `"user.email (keyword)"`) with sampled
+   * value distributions. Cross-plugin consumers (currently entity_store) read
+   * these to discover which streams carry entity-identity fields and at which
+   * ES type. The `type` filter is pushed into the underlying storage query.
    */
-  listEntityFeatures(options?: StreamsKnowledgeIndicatorsListOptions): Promise<Feature[]>;
-
-  /**
-   * Lists `type: 'dependency'` Knowledge Indicators across all streams the
-   * caller is authorized to read. Each dependency feature carries
-   * `properties.source`, `properties.target`, and `properties.protocol`
-   * naming the two endpoints of a relationship. Filters are pushed into
-   * the underlying storage query — they are not applied client-side.
-   */
-  listDependencyFeatures(options?: StreamsKnowledgeIndicatorsListOptions): Promise<Feature[]>;
-
-  /**
-   * Lists `type: 'schema'` Knowledge Indicators across all streams the caller
-   * is authorized to read. Schema features describe the log schema family
-   * evident in a stream (`properties.schema_family` ∈ `'ecs' | 'otel' |
-   * 'custom'`). Cross-plugin consumers (currently entity_store) read these
-   * to discover which streams carry entity-identity fields, and for their
-   * `properties.ecs_identity_aliases` table when present.
-   *
-   * Filters are pushed into the underlying storage query — they are not
-   * applied client-side.
-   */
-  listSchemaFeatures(options?: StreamsKnowledgeIndicatorsListOptions): Promise<Feature[]>;
+  listDatasetAnalysisFeatures(): Promise<Feature[]>;
 
   /**
    * Resolves a stream name to the Elasticsearch index pattern(s) backing it.
@@ -103,26 +69,18 @@ export const createKnowledgeIndicatorsReader = (deps: {
 }): StreamsKnowledgeIndicatorsReader => {
   const { featureClient, streamsClient } = deps;
 
-  const listFeaturesOfType = async (
-    type: 'entity' | 'dependency' | 'schema',
-    options?: StreamsKnowledgeIndicatorsListOptions
-  ): Promise<Feature[]> => {
-    const streams = await streamsClient.listStreams();
-    const streamNames = streams.map((stream) => stream.name);
-    if (streamNames.length === 0) {
-      return [];
-    }
-    const { hits } = await featureClient.getFeatures(streamNames, {
-      type: [type],
-      minConfidence: options?.minConfidence,
-    });
-    return hits;
-  };
-
   return {
-    listEntityFeatures: (options) => listFeaturesOfType('entity', options),
-    listDependencyFeatures: (options) => listFeaturesOfType('dependency', options),
-    listSchemaFeatures: (options) => listFeaturesOfType('schema', options),
+    listDatasetAnalysisFeatures: async () => {
+      const streams = await streamsClient.listStreams();
+      const streamNames = streams.map((stream) => stream.name);
+      if (streamNames.length === 0) {
+        return [];
+      }
+      const { hits } = await featureClient.getFeatures(streamNames, {
+        type: [DATASET_ANALYSIS_FEATURE_TYPE],
+      });
+      return hits;
+    },
 
     resolveIndexPatterns: async (streamName) => {
       try {

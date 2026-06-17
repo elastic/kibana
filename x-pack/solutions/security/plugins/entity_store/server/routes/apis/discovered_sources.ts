@@ -15,8 +15,6 @@ import type { PerTypeSourceIndices, PerTypeSourceProvenance } from '../../domain
 export interface DiscoveredSourcesResponseBody {
   /** Whether KI-discovered sources are actually used for extraction (the flag). */
   enabled: boolean;
-  /** Confidence floor applied when listing schema features. */
-  minConfidence: number;
   /** Per-entity-type resolved source index patterns the store would extract from. */
   sources: PerTypeSourceIndices;
   /** Which stream/feature contributed each pattern, and on which identity fields. */
@@ -26,9 +24,9 @@ export interface DiscoveredSourcesResponseBody {
 /**
  * Read-only operator visibility into the KI-discovered, per-entity-type
  * extraction sources. Deliberately has NO mutation surface: the entity store
- * derives sources automatically from available schema features, so there is
- * nothing to select or deselect here. The only operator lever is upstream —
- * which streams Knowledge Indicators are run on.
+ * derives sources automatically from available dataset_analysis features, so
+ * there is nothing to select or deselect here. The only operator lever is
+ * upstream — which streams Knowledge Indicators are run on.
  */
 export function registerDiscoveredSources(router: EntityStorePluginRouter) {
   router.versioned
@@ -37,7 +35,7 @@ export function registerDiscoveredSources(router: EntityStorePluginRouter) {
       access: 'internal',
       summary: 'Get KI-discovered extraction sources',
       description:
-        'Returns the per-entity-type index patterns the entity store auto-derives from Knowledge Indicators schema features, with provenance. Read-only.',
+        'Returns the per-entity-type index patterns the entity store auto-derives from Knowledge Indicators dataset_analysis features, with provenance. Read-only.',
       security: {
         authz: DEFAULT_ENTITY_STORE_PERMISSIONS,
       },

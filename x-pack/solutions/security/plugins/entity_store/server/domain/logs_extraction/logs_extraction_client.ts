@@ -161,11 +161,7 @@ export class LogsExtractionClient {
     if (!config.useDiscoveredIndexSource || !this.knowledgeIndicatorsReader) {
       return undefined;
     }
-    const { sources } = await loadPerTypeSourceIndices(
-      this.knowledgeIndicatorsReader,
-      { minConfidence: config.discoveredIndexSourceMinConfidence },
-      this.logger
-    );
+    const { sources } = await loadPerTypeSourceIndices(this.knowledgeIndicatorsReader, this.logger);
     const patterns = sources[type];
     this.logger.debug(
       `[entity_store] KI-discovered index source for type "${type}": ${patterns.length} pattern(s)${
@@ -176,27 +172,24 @@ export class LogsExtractionClient {
   }
 
   /**
-   * Read-only visibility into what the entity store auto-derives from KI schema
-   * features for each entity type, plus provenance (which stream/feature
-   * contributed and on which identity fields). Reflects the configured
-   * confidence floor. Returns empty sources when the streams plugin is absent.
-   * Reports `enabled` (the flag state) so operators can tell whether these
-   * sources are actually being used for extraction or are merely a preview.
+   * Read-only visibility into what the entity store auto-derives from KI
+   * dataset_analysis features for each entity type, plus provenance (which
+   * stream/feature contributed and on which identity fields). Returns empty
+   * sources when the streams plugin is absent. Reports `enabled` (the flag
+   * state) so operators can tell whether these sources are actually being used
+   * for extraction or are merely a preview.
    */
   public async getDiscoveredSources(): Promise<{
     enabled: boolean;
-    minConfidence: number;
     sources: PerTypeSourceIndices;
     provenance: PerTypeSourceProvenance[];
   }> {
     const globalState = await this.globalStateClient.findOrThrow();
-    const { useDiscoveredIndexSource, discoveredIndexSourceMinConfidence } =
-      globalState.logsExtraction;
+    const { useDiscoveredIndexSource } = globalState.logsExtraction;
 
     if (!this.knowledgeIndicatorsReader) {
       return {
         enabled: useDiscoveredIndexSource,
-        minConfidence: discoveredIndexSourceMinConfidence,
         sources: { user: [], host: [], service: [], generic: [] },
         provenance: [],
       };
@@ -204,12 +197,10 @@ export class LogsExtractionClient {
 
     const { sources, provenance } = await loadPerTypeSourceIndices(
       this.knowledgeIndicatorsReader,
-      { minConfidence: discoveredIndexSourceMinConfidence },
       this.logger
     );
     return {
       enabled: useDiscoveredIndexSource,
-      minConfidence: discoveredIndexSourceMinConfidence,
       sources,
       provenance,
     };
@@ -1015,8 +1006,8 @@ export class LogsExtractionClient {
    *   data view is NOT queried and there is no `logs-*` fallback. An empty
    *   discovered set means this engine sources only from `updates` + operator
    *   `additionalIndexPatterns` (typically nothing new) — deliberate, so a type
-   *   with no qualifying schema features does not silently fall back to the
-   *   coarse data view.
+   *   with no qualifying dataset_analysis features does not silently fall back
+   *   to the coarse data view.
    * - **Legacy (default).** When `discoveredSourcePatterns` is `undefined`, the
    *   Security Solution data view is appended as before (`logs-*` on failure).
    *

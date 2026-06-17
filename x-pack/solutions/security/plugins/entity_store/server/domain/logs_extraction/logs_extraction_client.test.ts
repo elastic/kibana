@@ -1835,7 +1835,6 @@ describe('LogsExtractionClient — KI-discovered index source', () => {
     reader?: StreamsKnowledgeIndicatorsReader,
     configOverrides?: Partial<{
       useDiscoveredIndexSource: boolean;
-      discoveredIndexSourceMinConfidence: number;
       additionalIndexPatterns: string[];
     }>
   ) => {
@@ -1872,20 +1871,30 @@ describe('LogsExtractionClient — KI-discovered index source', () => {
     return { client, dataViewsService };
   };
 
+  /**
+   * Builds the `properties.analysis.fields` shape a `dataset_analysis` feature
+   * carries, keyed by `formatDocumentAnalysis`'s `"<name> (<types>)"` format.
+   */
+  const analysisProps = (fieldKeys: string[]): Record<string, unknown> => ({
+    analysis: {
+      total: 100,
+      sampled: 100,
+      fields: Object.fromEntries(fieldKeys.map((key) => [key, ['sample (1%)']])),
+    },
+  });
+
   const readerWith = (
-    schemaFeatures: Array<{ stream_name: string; properties?: Record<string, unknown> }>
+    features: Array<{ stream_name: string; properties?: Record<string, unknown> }>
   ): StreamsKnowledgeIndicatorsReader => ({
-    listEntityFeatures: jest.fn(async () => []),
-    listDependencyFeatures: jest.fn(async () => []),
-    listSchemaFeatures: jest.fn(async () =>
-      schemaFeatures.map(
+    listDatasetAnalysisFeatures: jest.fn(async () =>
+      features.map(
         (f, i) =>
           ({
             id: `f${i}`,
             uuid: `u${i}`,
-            type: 'schema',
+            type: 'dataset_analysis',
             description: '',
-            confidence: 90,
+            confidence: 100,
             status: 'active',
             last_seen: '2026-06-01T00:00:00.000Z',
             stream_name: f.stream_name,
@@ -1898,7 +1907,7 @@ describe('LogsExtractionClient — KI-discovered index source', () => {
 
   it('keeps the security data view source when the flag is OFF (legacy behavior)', async () => {
     const reader = readerWith([
-      { stream_name: 'logs.okta', properties: { entity_field_presence: { user: ['user.name'] } } },
+      { stream_name: 'logs.okta', properties: analysisProps(['user.name (keyword)']) },
     ]);
     const { client, dataViewsService } = buildClient(reader, {
       useDiscoveredIndexSource: false,
@@ -1936,7 +1945,7 @@ describe('LogsExtractionClient — KI-discovered index source', () => {
     const { localIndexPatterns } = await client.getLocalAndRemoteIndexPatterns(
       ['operator-extra-*'],
       [],
-      [] // zero qualifying schema features for this type
+      [] // zero qualifying dataset_analysis features for this type
     );
 
     expect(dataViewsService.get).not.toHaveBeenCalled();
@@ -1953,30 +1962,28 @@ describe('LogsExtractionClient — KI-discovered index source', () => {
       expect(result.provenance).toEqual([]);
     });
 
-    it('returns per-type sources + provenance derived from schema features', async () => {
+    it('returns per-type sources + provenance derived from dataset_analysis features', async () => {
       const reader = readerWith([
         {
           stream_name: 'logs.okta',
-          properties: { entity_field_presence: { user: ['user.name'], host: ['host.id'] } },
+          properties: analysisProps(['user.name (keyword)', 'host.id (keyword)']),
         },
         {
           stream_name: 'logs.apm',
-          properties: { entity_field_presence: { service: ['service.name'] } },
+          properties: analysisProps(['service.name (keyword)']),
         },
       ]);
       const { client } = buildClient(reader, {
         useDiscoveredIndexSource: true,
-        discoveredIndexSourceMinConfidence: 50,
       });
 
       const result = await client.getDiscoveredSources();
 
       expect(result.enabled).toBe(true);
-      expect(result.minConfidence).toBe(50);
       expect(result.sources.user).toEqual(['logs.okta']);
       expect(result.sources.host).toEqual(['logs.okta']);
       expect(result.sources.service).toEqual(['logs.apm']);
-      expect(reader.listSchemaFeatures).toHaveBeenCalledWith({ minConfidence: 50 });
+      expect(reader.listDatasetAnalysisFeatures).toHaveBeenCalledWith();
       expect(result.provenance.length).toBeGreaterThan(0);
     });
   });

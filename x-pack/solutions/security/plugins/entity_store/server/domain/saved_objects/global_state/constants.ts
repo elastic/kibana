@@ -22,10 +22,6 @@ export const LOG_EXTRACTION_MAX_TIME_WINDOW_SIZE_DEFAULT = '15m';
 export const LOG_EXTRACTION_MAX_LOGS_PER_WINDOW_DEFAULT = 100_000;
 export const LOG_EXTRACTION_CAP_BEHAVIOR_DEFAULT = 'drop' as const;
 
-// Default confidence floor for KI-discovered source streams. 0 = include every
-// qualifying schema feature regardless of confidence; operators can raise it.
-export const LOG_EXTRACTION_DISCOVERED_SOURCE_MIN_CONFIDENCE_DEFAULT = 0;
-
 export type LogExtractionConfig = z.infer<typeof LogExtractionConfig>;
 export const LogExtractionConfig = z.object({
   additionalIndexPatterns: z.array(z.string()).default([]),
@@ -38,16 +34,6 @@ export const LogExtractionConfig = z.object({
    * byte-identical to a deployment without this feature.
    */
   useDiscoveredIndexSource: z.boolean().default(false),
-  /**
-   * Confidence floor (0–100) pushed into the schema-feature query when
-   * `useDiscoveredIndexSource` is enabled. Only effective while the flag is on.
-   */
-  discoveredIndexSourceMinConfidence: z
-    .number()
-    .int()
-    .min(0)
-    .max(100)
-    .default(LOG_EXTRACTION_DISCOVERED_SOURCE_MIN_CONFIDENCE_DEFAULT),
   fieldHistoryLength: z.number().int().default(10),
   lookbackPeriod: z
     .string()
