@@ -16,7 +16,6 @@ import {
 
 const mockWatchlistClientCreate = jest.fn();
 const mockAddEntitySourceReference = jest.fn();
-const mockSyncWatchlist = jest.fn();
 const mockValidateIndexPermissions = jest.fn();
 const mockGetStartServices = jest.fn();
 
@@ -43,10 +42,6 @@ const { WatchlistEntitySourceClient: MockWatchlistEntitySourceClient } = jest.re
   '../../../entity_sources/infra'
 ) as { WatchlistEntitySourceClient: jest.Mock };
 
-const { createEntitySourcesService: mockCreateEntitySourcesService } = jest.requireMock(
-  '../../../entity_sources/entity_sources_service'
-) as { createEntitySourcesService: jest.Mock };
-
 // Import after mocks are set up
 import { createEntitySourceRoute } from './create';
 
@@ -66,7 +61,6 @@ describe('POST /api/entity_analytics/watchlists/:watchlist_id/data_sources - cre
 
     mockWatchlistClientCreate.mockReset();
     mockAddEntitySourceReference.mockReset();
-    mockSyncWatchlist.mockReset();
     mockValidateIndexPermissions.mockReset().mockResolvedValue(undefined);
 
     const mockSecurity = { authc: { apiKeys: { grantAsInternalUser: jest.fn() } } };
@@ -75,8 +69,6 @@ describe('POST /api/entity_analytics/watchlists/:watchlist_id/data_sources - cre
     MockWatchlistEntitySourceClient.mockImplementation(() => ({
       create: mockWatchlistClientCreate,
     }));
-
-    mockCreateEntitySourcesService.mockReturnValue({ syncWatchlist: mockSyncWatchlist });
 
     createEntitySourceRoute(server.router, logger, mockGetStartServices, true);
   });
@@ -156,7 +148,6 @@ describe('POST /api/entity_analytics/watchlists/:watchlist_id/data_sources - cre
 
       mockWatchlistClientCreate.mockResolvedValue(sourceResult);
       mockAddEntitySourceReference.mockResolvedValue(undefined);
-      mockSyncWatchlist.mockResolvedValue(undefined);
 
       const request = buildRequest({
         type: 'index',
@@ -178,81 +169,6 @@ describe('POST /api/entity_analytics/watchlists/:watchlist_id/data_sources - cre
         expect.anything()
       );
       expect(mockAddEntitySourceReference).toHaveBeenCalledWith(WATCHLIST_ID, 'es-1');
-    });
-
-    it('triggers background sync after linking entity source', async () => {
-      const sourceResult = {
-        id: 'es-1',
-        type: 'index',
-        name: 'test-source',
-        indexPattern: 'logs-*',
-        enabled: true,
-      };
-
-      mockWatchlistClientCreate.mockResolvedValue(sourceResult);
-      mockAddEntitySourceReference.mockResolvedValue(undefined);
-      mockSyncWatchlist.mockResolvedValue(undefined);
-
-      const request = buildRequest({
-        type: 'index',
-        name: 'test-source',
-        indexPattern: 'logs-*',
-        enabled: true,
-      });
-      const response = await server.inject(request, context);
-
-      expect(response.status).toEqual(200);
-      expect(mockSyncWatchlist).toHaveBeenCalledWith(WATCHLIST_ID);
-    });
-
-    it('logs warning when background sync fails', async () => {
-      const sourceResult = {
-        id: 'es-1',
-        type: 'index',
-        name: 'test-source',
-        indexPattern: 'logs-*',
-        enabled: true,
-      };
-
-      mockWatchlistClientCreate.mockResolvedValue(sourceResult);
-      mockAddEntitySourceReference.mockResolvedValue(undefined);
-      mockSyncWatchlist.mockRejectedValue(new Error('sync error'));
-
-      const request = buildRequest({
-        type: 'index',
-        name: 'test-source',
-        indexPattern: 'logs-*',
-        enabled: true,
-      });
-      const response = await server.inject(request, context);
-
-      expect(response.status).toEqual(200);
-      expect(mockSyncWatchlist).toHaveBeenCalledWith(WATCHLIST_ID);
-    });
-
-    it('still returns 200 when sync fails', async () => {
-      const sourceResult = {
-        id: 'es-1',
-        type: 'index',
-        name: 'test-source',
-        indexPattern: 'logs-*',
-        enabled: true,
-      };
-
-      mockWatchlistClientCreate.mockResolvedValue(sourceResult);
-      mockAddEntitySourceReference.mockResolvedValue(undefined);
-      mockSyncWatchlist.mockRejectedValue(new Error('sync error'));
-
-      const request = buildRequest({
-        type: 'index',
-        name: 'test-source',
-        indexPattern: 'logs-*',
-        enabled: true,
-      });
-      const response = await server.inject(request, context);
-
-      expect(response.status).toEqual(200);
-      expect(response.body).toEqual(sourceResult);
     });
   });
 

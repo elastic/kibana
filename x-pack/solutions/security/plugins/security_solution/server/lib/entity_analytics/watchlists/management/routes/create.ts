@@ -18,7 +18,6 @@ import type { EntityAnalyticsRoutesDeps } from '../../../types';
 import { withMinimumLicense } from '../../../utils/with_minimum_license';
 import { WatchlistConfigClient } from '../watchlist_config';
 import { WatchlistEntitySourceClient } from '../../entity_sources/infra';
-import { createEntitySourcesService } from '../../entity_sources/entity_sources_service';
 import {
   buildWatchlistApiCallSuccessFields,
   reportWatchlistApiCallError,
@@ -92,7 +91,6 @@ export const createWatchlistRoute = (
             if (!watchlist.id) {
               throw new Error('Watchlist creation succeeded but no ID was returned');
             }
-            const watchlistId = watchlist.id;
 
             // Step 3: If entity sources were provided, create and link them (with rollback)
             if (entitySourceInputs?.length) {
@@ -109,7 +107,7 @@ export const createWatchlistRoute = (
               try {
                 for (const entitySourceInput of entitySourceInputs) {
                   const entitySource = await sourceClient.create(entitySourceInput, request);
-                  await watchlistClient.addEntitySourceReference(watchlistId, entitySource.id);
+                  await watchlistClient.addEntitySourceReference(watchlist.id, entitySource.id);
 
                   createdSources.push(entitySource);
                 }
@@ -125,32 +123,6 @@ export const createWatchlistRoute = (
                     }
                   )
                 );
-
-                // Fire-and-forget sync if entity sources were created
-                if (createdSources.length > 0) {
-                  void (async () => {
-                    try {
-                      const entitySourcesService = createEntitySourcesService({
-                        esClient: core.elasticsearch.client.asCurrentUser,
-                        soClient,
-                        logger,
-                        namespace,
-                        getStartServices,
-                        hasEncryptionKey,
-                      });
-                      await entitySourcesService.syncWatchlist(watchlistId);
-                      logger.info(
-                        `[WatchlistCreate] Background sync completed for watchlist ${watchlistId}`
-                      );
-                    } catch (syncError) {
-                      const errorMsg =
-                        syncError instanceof Error ? syncError.message : String(syncError);
-                      logger.warn(
-                        `[WatchlistCreate] Background sync failed for watchlist ${watchlistId}: ${errorMsg}`
-                      );
-                    }
-                  })();
-                }
 
                 return response.ok({
                   body: { ...watchlist, entitySources: createdSources },
