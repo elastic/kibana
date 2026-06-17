@@ -77,17 +77,39 @@ export function CreateDataSourceFlyoutTypeSettingsS3({
 export function CreateDataSourceFlyoutTypeSettingsS3Credentials({
   control,
   unregister,
+  areCredentialsRequired,
 }: {
   control: Control<CreateDataSourceFlyoutFormValues, any>;
   unregister: UseFormUnregister<CreateDataSourceFlyoutFormValues>;
+  areCredentialsRequired: boolean;
 }) {
-  const { field: accessKeyField } = useController({
+  const { field: accessKeyField, fieldState: accessKeyState } = useController({
     name: 'settings.access_key',
     control,
+    rules: areCredentialsRequired
+      ? {
+          validate: (value: string) =>
+            value?.trim()
+              ? true
+              : i18n.translate('dataSets.createFlyout.s3.fields.accessKeyRequired', {
+                  defaultMessage: 'Access key is required.',
+                }),
+        }
+      : undefined,
   });
-  const { field: secretKeyField } = useController({
+  const { field: secretKeyField, fieldState: secretKeyState } = useController({
     name: 'settings.secret_key',
     control,
+    rules: areCredentialsRequired
+      ? {
+          validate: (value: string) =>
+            value?.trim()
+              ? true
+              : i18n.translate('dataSets.createFlyout.s3.fields.secretKeyRequired', {
+                  defaultMessage: 'Secret key is required.',
+                }),
+        }
+      : undefined,
   });
 
   useEffect(() => {
@@ -104,11 +126,14 @@ export function CreateDataSourceFlyoutTypeSettingsS3Credentials({
           defaultMessage: 'Access key',
         })}
         fullWidth
+        isInvalid={Boolean(accessKeyState.error)}
+        error={accessKeyState.error?.message}
       >
         <EuiFieldText
           data-test-subj="createDataSourceFlyoutS3AccessKey"
           fullWidth
           autoComplete="off"
+          isInvalid={Boolean(accessKeyState.error)}
           value={accessKeyField.value}
           onChange={(e) => accessKeyField.onChange(e.target.value)}
           name={accessKeyField.name}
@@ -120,12 +145,15 @@ export function CreateDataSourceFlyoutTypeSettingsS3Credentials({
           defaultMessage: 'Secret key',
         })}
         fullWidth
+        isInvalid={Boolean(secretKeyState.error)}
+        error={secretKeyState.error?.message}
       >
         <EuiFieldPassword
           type="dual"
           data-test-subj="createDataSourceFlyoutS3SecretKey"
           fullWidth
           autoComplete="off"
+          isInvalid={Boolean(secretKeyState.error)}
           value={secretKeyField.value}
           onChange={(e) => secretKeyField.onChange(e.target.value)}
           name={secretKeyField.name}

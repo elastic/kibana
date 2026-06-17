@@ -65,7 +65,7 @@ export const getCreateDataSourceAuthenticationOptions = (
     {
       value: 'access_and_secret_keys',
       text: i18n.translate('dataSets.createFlyout.authentication.accessAndSecretKeys', {
-        defaultMessage: 'Access and Secret keys',
+        defaultMessage: 'Access and Secret Keys',
       }),
     },
   ];

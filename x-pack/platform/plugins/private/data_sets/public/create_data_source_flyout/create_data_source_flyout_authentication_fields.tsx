@@ -24,11 +24,15 @@ import { CreateDataSourceFlyoutTypeSettingsS3Credentials } from './create_data_s
 export function CreateDataSourceFlyoutAuthenticationFields({
   authenticationMode,
   dataSourceType,
+  requireS3Credentials,
+  requireGcsCredentials,
   control,
   unregister,
 }: {
   authenticationMode: CreateDataSourceAuthenticationMode;
   dataSourceType: DataSourceType;
+  requireS3Credentials: boolean;
+  requireGcsCredentials: boolean;
   control: Control<CreateDataSourceFlyoutFormValues, any>;
   unregister: UseFormUnregister<CreateDataSourceFlyoutFormValues>;
 }) {
@@ -46,12 +50,14 @@ export function CreateDataSourceFlyoutAuthenticationFields({
         <CreateDataSourceFlyoutTypeSettingsS3Credentials
           control={control}
           unregister={unregister}
+          areCredentialsRequired={requireS3Credentials}
         />
       ) : null}
       {dataSourceType === 'gcs' ? (
         <CreateDataSourceFlyoutTypeSettingsGcsCredentials
           control={control}
           unregister={unregister}
+          areCredentialsRequired={requireGcsCredentials}
         />
       ) : null}
       {dataSourceType === 'azure' ? (

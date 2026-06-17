@@ -98,13 +98,25 @@ export function CreateDataSourceFlyoutTypeSettingsGcs({
 export function CreateDataSourceFlyoutTypeSettingsGcsCredentials({
   control,
   unregister,
+  areCredentialsRequired,
 }: {
   control: Control<CreateDataSourceFlyoutFormValues, any>;
   unregister: UseFormUnregister<CreateDataSourceFlyoutFormValues>;
+  areCredentialsRequired: boolean;
 }) {
-  const { field: credentialsField } = useController({
+  const { field: credentialsField, fieldState: credentialsState } = useController({
     name: 'settings.credentials',
     control,
+    rules: areCredentialsRequired
+      ? {
+          validate: (value: string) =>
+            value?.trim()
+              ? true
+              : i18n.translate('dataSets.createFlyout.gcs.fields.credentialsRequired', {
+                  defaultMessage: 'Credentials are required.',
+                }),
+        }
+      : undefined,
   });
 
   useEffect(() => {
@@ -119,12 +131,15 @@ export function CreateDataSourceFlyoutTypeSettingsGcsCredentials({
         defaultMessage: 'Credentials',
       })}
       fullWidth
+      isInvalid={Boolean(credentialsState.error)}
+      error={credentialsState.error?.message}
     >
       <EuiTextArea
         data-test-subj="createDataSourceFlyoutGcsCredentials"
         fullWidth
         rows={3}
         autoComplete="off"
+        isInvalid={Boolean(credentialsState.error)}
         value={credentialsField.value ?? ''}
         onChange={(e) => credentialsField.onChange(e.target.value)}
         name={credentialsField.name}

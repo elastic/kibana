@@ -124,7 +124,7 @@ export const CreateDataSourceFlyout: FunctionComponent<CreateDataSourceFlyoutPro
       ALL_DATA_SOURCE_TYPES.map((value) => ({
         value,
         text: getDataSourceTypeVerbose(value),
-      })),
+      })).sort((a, b) => a.text.localeCompare(b.text)),
     []
   );
 
@@ -258,6 +258,8 @@ export const CreateDataSourceFlyout: FunctionComponent<CreateDataSourceFlyoutPro
             authenticationMode={authenticationMode}
             control={control}
             dataSourceType={dataSourceType}
+            requireS3Credentials={!isEditMode}
+            requireGcsCredentials={!isEditMode}
             unregister={unregister}
           />
         </EuiForm>
