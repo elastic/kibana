@@ -95,19 +95,6 @@ export class CloudLinksPlugin
         },
       },
     });
-    analytics.registerEventType({
-      eventType: 'display_language_changed',
-      schema: {
-        from: {
-          type: 'keyword',
-          _meta: { description: 'The previous display language locale code.' },
-        },
-        to: {
-          type: 'keyword',
-          _meta: { description: 'The new display language locale code.' },
-        },
-      },
-    });
   }
 
   public start(core: CoreStart, plugins: CloudLinksDepsStart) {
