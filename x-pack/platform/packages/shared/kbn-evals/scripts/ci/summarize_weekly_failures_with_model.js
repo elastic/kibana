@@ -10,7 +10,7 @@ const {
   buildWeeklyRollupUserPrompt,
   buildLitellmChatRequest,
   buildLitellmConnectorFromVault,
-  resolveTriageJudgeId,
+  resolveTriageModelId,
   parseLitellmChatContent,
   decodeAiConnectors,
 } = require('./failure_context_helpers');
@@ -57,27 +57,27 @@ async function postForContent(url, headers, body) {
 /**
  * @param {Array<{ suiteId: string; suiteName?: string; failingProjects?: string[]; triageBody?: string }>} suites
  * @param {{ buildUrl?: string; totalSuites?: number }} [meta]
- * @returns {Promise<{ summary: string; judgeId: string }>}
+ * @returns {Promise<{ summary: string; modelId: string }>}
  */
 async function summarizeWeeklyFailures(suites, meta = {}) {
-  const judgeId = resolveTriageJudgeId();
-  if (!judgeId) {
+  const modelId = resolveTriageModelId();
+  if (!modelId) {
     throw new Error(
-      'Triage judge connector id could not be resolved (set EVAL_TRIAGE_JUDGE_ID or provide LiteLLM connectors)'
+      'Triage model id could not be resolved (set EVAL_TRIAGE_MODEL_ID or provide LiteLLM connectors)'
     );
   }
-  if (!judgeId.startsWith('litellm-')) {
-    throw new Error(`Unsupported judge connector id for weekly triage: ${judgeId}`);
+  if (!modelId.startsWith('litellm-')) {
+    throw new Error(`Unsupported model connector id for weekly triage: ${modelId}`);
   }
 
   const connectors = decodeAiConnectors();
-  let connector = connectors[judgeId];
+  let connector = connectors[modelId];
   if (!connector) {
-    connector = buildLitellmConnectorFromVault(judgeId);
+    connector = buildLitellmConnectorFromVault(modelId);
   }
   if (!connector) {
     throw new Error(
-      `Judge connector ${judgeId} is not available (set KIBANA_TESTING_AI_CONNECTORS or LiteLLM env/config)`
+      `Model connector ${modelId} is not available (set KIBANA_TESTING_AI_CONNECTORS or LiteLLM env/config)`
     );
   }
 
@@ -97,7 +97,7 @@ async function summarizeWeeklyFailures(suites, meta = {}) {
     summary = `${summary.slice(0, maxOutputChars - 1)}…`;
   }
 
-  return { summary: summary.trim(), judgeId };
+  return { summary: summary.trim(), modelId };
 }
 
 module.exports = { summarizeWeeklyFailures };

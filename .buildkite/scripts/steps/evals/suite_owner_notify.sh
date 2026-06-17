@@ -65,7 +65,7 @@ if [[ ! -d node_modules/@elastic/elasticsearch ]] || ! node -e "require('@elasti
   .buildkite/scripts/bootstrap.sh
 fi
 
-echo "--- Preparing judge connector for triage summary"
+echo "--- Preparing model connector for triage summary"
 if [[ -n "${KBN_EVALS_CONFIG_B64:-}" ]]; then
   source .buildkite/scripts/steps/evals/setup_triage_connectors.sh || {
     echo "WARNING: setup_triage_connectors failed; build_suite_owner_slack_message will use vault LiteLLM fallback"
@@ -77,7 +77,7 @@ fi
 SUMMARY_FILE="$(mktemp -t kbn-evals-suite-summary.XXXXXX.md)"
 FAILING_PROJECTS_CSV="$(IFS=,; echo "${failing_projects[*]}")"
 
-echo "--- Building suite owner Slack message (static + judge triage)"
+echo "--- Building suite owner Slack message (static + model triage)"
 if ! node x-pack/platform/packages/shared/kbn-evals/scripts/ci/build_suite_owner_slack_message.js \
   "$EVAL_SUITE_ID" "$SUMMARY_FILE" "$FAILING_PROJECTS_CSV" "$EVAL_NOTIFY_MODE"; then
   echo "--- build_suite_owner_slack_message crashed; writing static summary with triage error note"
@@ -96,7 +96,7 @@ if ! node x-pack/platform/packages/shared/kbn-evals/scripts/ci/build_suite_owner
     if [[ -n "${BUILDKITE_BUILD_URL:-}" ]]; then
       printf '\n<%s|View build>\n' "${BUILDKITE_BUILD_URL}"
     fi
-    printf '\n*Triage summary (judge unavailable):*\n'
+    printf '\n*Triage summary (model unavailable):*\n'
     printf '_Suite owner message builder failed. See the suite owner notify Buildkite step for details._\n'
   } >"$SUMMARY_FILE"
 fi

@@ -20,9 +20,9 @@ const {
   evaluationConnectorMetadataKey,
   resolveEvaluationConnectorId,
   parseLitellmChatContent,
-  resolveTriageJudgeId,
+  resolveTriageModelId,
   listLitellmConnectorIds,
-  DEFAULT_TRIAGE_JUDGE_ID,
+  DEFAULT_TRIAGE_MODEL_ID,
 } = require('./failure_context_helpers');
 
 const encodeConnectors = (connectors) =>
@@ -130,7 +130,7 @@ describe('failure_context_helpers', () => {
         '',
         '<https://buildkite.com/build/1|View build>',
         '',
-        '*Triage summary (judge: `litellm-llm-gateway-gpt-4o`):*',
+        '*Triage summary (model: `litellm-llm-gateway-gpt-4o`):*',
         '• Likely provider issue (not actionable): gpt-5.4 returned 529 overloaded.',
         '• Other models passed.',
       ].join('\n');
@@ -382,9 +382,9 @@ describe('failure_context_helpers', () => {
     }
   });
 
-  describe('resolveTriageJudgeId', () => {
+  describe('resolveTriageModelId', () => {
     const ENV_KEYS = [
-      'EVAL_TRIAGE_JUDGE_ID',
+      'EVAL_TRIAGE_MODEL_ID',
       'EVALUATION_CONNECTOR_ID',
       'EVAL_SUITE_ID',
       'KBN_EVALS_CONFIG_B64',
@@ -412,31 +412,31 @@ describe('failure_context_helpers', () => {
       }
     });
 
-    it('prefers the EVAL_TRIAGE_JUDGE_ID override', () => {
-      process.env.EVAL_TRIAGE_JUDGE_ID = 'litellm-llm-gateway-claude-4';
+    it('prefers the EVAL_TRIAGE_MODEL_ID override', () => {
+      process.env.EVAL_TRIAGE_MODEL_ID = 'litellm-llm-gateway-claude-4';
       process.env.EVALUATION_CONNECTOR_ID = 'eis-google-gemini-2-5-flash';
 
-      expect(resolveTriageJudgeId(noMetadata)).toBe('litellm-llm-gateway-claude-4');
+      expect(resolveTriageModelId(noMetadata)).toBe('litellm-llm-gateway-claude-4');
     });
 
-    it('uses the eval judge when it is already LiteLLM-backed', () => {
+    it('uses the configured connector when it is already LiteLLM-backed', () => {
       process.env.EVALUATION_CONNECTOR_ID = 'litellm-llm-gateway-gpt-4o';
 
-      expect(resolveTriageJudgeId(noMetadata)).toBe('litellm-llm-gateway-gpt-4o');
+      expect(resolveTriageModelId(noMetadata)).toBe('litellm-llm-gateway-gpt-4o');
     });
 
-    it('uses the default LiteLLM judge when it is among available connectors', () => {
+    it('uses the default LiteLLM model when it is among available connectors', () => {
       process.env.EVALUATION_CONNECTOR_ID = 'eis-google-gemini-2-5-flash';
       process.env.KIBANA_TESTING_AI_CONNECTORS = encodeConnectors({
         'litellm-llm-gateway-claude-4': { config: {} },
-        [DEFAULT_TRIAGE_JUDGE_ID]: { config: {} },
+        [DEFAULT_TRIAGE_MODEL_ID]: { config: {} },
         'eis-google-gemini-2-5-flash': { config: {} },
       });
 
-      expect(resolveTriageJudgeId(noMetadata)).toBe(DEFAULT_TRIAGE_JUDGE_ID);
+      expect(resolveTriageModelId(noMetadata)).toBe(DEFAULT_TRIAGE_MODEL_ID);
     });
 
-    it('falls back to the first available LiteLLM connector for an EIS eval judge', () => {
+    it('falls back to the first available LiteLLM connector for an EIS configured connector', () => {
       process.env.EVALUATION_CONNECTOR_ID = 'eis-google-gemini-2-5-flash';
       process.env.KIBANA_TESTING_AI_CONNECTORS = encodeConnectors({
         'litellm-llm-gateway-zeta': { config: {} },
@@ -444,23 +444,23 @@ describe('failure_context_helpers', () => {
         'eis-google-gemini-2-5-flash': { config: {} },
       });
 
-      expect(resolveTriageJudgeId(noMetadata)).toBe('litellm-llm-gateway-alpha');
+      expect(resolveTriageModelId(noMetadata)).toBe('litellm-llm-gateway-alpha');
     });
 
-    it('uses the vault LiteLLM judge when no connectors are available', () => {
+    it('uses the vault LiteLLM model when no connectors are available', () => {
       process.env.EVALUATION_CONNECTOR_ID = 'eis-google-gemini-2-5-flash';
       process.env.KBN_EVALS_CONFIG_B64 = Buffer.from(
         JSON.stringify({ evaluationConnectorId: 'litellm-llm-gateway-vault-model' }),
         'utf8'
       ).toString('base64');
 
-      expect(resolveTriageJudgeId(noMetadata)).toBe('litellm-llm-gateway-vault-model');
+      expect(resolveTriageModelId(noMetadata)).toBe('litellm-llm-gateway-vault-model');
     });
 
-    it('falls back to the default triage judge id when nothing else resolves', () => {
+    it('falls back to the default triage model id when nothing else resolves', () => {
       process.env.EVALUATION_CONNECTOR_ID = 'eis-google-gemini-2-5-flash';
 
-      expect(resolveTriageJudgeId(noMetadata)).toBe(DEFAULT_TRIAGE_JUDGE_ID);
+      expect(resolveTriageModelId(noMetadata)).toBe(DEFAULT_TRIAGE_MODEL_ID);
     });
 
     it('lists only LiteLLM connector ids, sorted', () => {

@@ -8,7 +8,7 @@
 
 const { readFileSync, writeFileSync } = require('fs');
 const { extractSuiteRootCauseLine } = require('./failure_context_helpers');
-const { summarizeWeeklyFailures } = require('./summarize_weekly_failures_with_judge');
+const { summarizeWeeklyFailures } = require('./summarize_weekly_failures_with_model');
 
 const contextPath = process.argv[2] || process.env.EVAL_WEEKLY_CONTEXT_PATH || '';
 const outputPath = process.argv[3] || process.env.EVAL_WEEKLY_SUMMARY_PATH || '';
@@ -110,11 +110,11 @@ async function main() {
     lines.push('', `<${buildUrl}|${pipelineName} #${buildNumber}>`);
   }
 
-  let judgeId = 'unknown';
+  let modelId = 'unknown';
   try {
     const result = await summarizeWeeklyFailures(suites, { buildUrl, totalSuites });
-    judgeId = result.judgeId;
-    lines.push('', `*Executive summary (judge: \`${judgeId}\`):*`, result.summary);
+    modelId = result.modelId;
+    lines.push('', `*Executive summary (model: \`${modelId}\`):*`, result.summary);
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
     console.error(`--- Weekly executive summary failed: ${message}`);

@@ -2,10 +2,10 @@
 
 set -euo pipefail
 
-# Prepare KIBANA_TESTING_AI_CONNECTORS for suite_owner_notify judge triage.
+# Prepare KIBANA_TESTING_AI_CONNECTORS for suite_owner_notify triage summaries.
 #
-# Triage always uses a LiteLLM judge: the suite_owner_notify step has no ES
-# cluster with EIS inference privileges, so EIS judges cannot be called directly
+# Triage summaries always use a LiteLLM model: the suite_owner_notify step has no
+# ES cluster with EIS inference privileges, so EIS models cannot be called directly
 # here. We therefore only need LiteLLM connectors available for triage.
 #
 # NOTE: This file is `source`d by suite_owner_notify.sh, so it must not call

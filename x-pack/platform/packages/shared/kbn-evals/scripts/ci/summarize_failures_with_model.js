@@ -11,7 +11,7 @@ const {
   buildTriageUserPrompt,
   buildLitellmChatRequest,
   buildLitellmConnectorFromVault,
-  resolveTriageJudgeId,
+  resolveTriageModelId,
   parseLitellmChatContent,
   decodeAiConnectors,
 } = require('./failure_context_helpers');
@@ -57,13 +57,13 @@ async function postForContent(url, headers, body) {
 
 /**
  * @param {string} contextPath
- * @returns {Promise<{ summary: string; judgeId: string }>}
+ * @returns {Promise<{ summary: string; modelId: string }>}
  */
-async function summarizeFailuresWithJudge(contextPath) {
-  const evaluationConnectorId = resolveTriageJudgeId();
-  if (!evaluationConnectorId) {
+async function summarizeFailuresWithModel(contextPath) {
+  const modelId = resolveTriageModelId();
+  if (!modelId) {
     throw new Error(
-      'Triage judge connector id could not be resolved (set EVAL_TRIAGE_JUDGE_ID or provide LiteLLM connectors)'
+      'Triage model id could not be resolved (set EVAL_TRIAGE_MODEL_ID or provide LiteLLM connectors)'
     );
   }
 
@@ -71,15 +71,15 @@ async function summarizeFailuresWithJudge(contextPath) {
   const failingProjects = Array.isArray(context.failingProjects) ? context.failingProjects : [];
 
   const connectors = decodeAiConnectors();
-  let connector = connectors[evaluationConnectorId];
+  let connector = connectors[modelId];
 
-  if (!connector && evaluationConnectorId.startsWith('litellm-')) {
-    connector = buildLitellmConnectorFromVault(evaluationConnectorId);
+  if (!connector && modelId.startsWith('litellm-')) {
+    connector = buildLitellmConnectorFromVault(modelId);
   }
 
   if (!connector) {
     throw new Error(
-      `Judge connector ${evaluationConnectorId} is not available (set KIBANA_TESTING_AI_CONNECTORS or LiteLLM env/config)`
+      `Model connector ${modelId} is not available (set KIBANA_TESTING_AI_CONNECTORS or LiteLLM env/config)`
     );
   }
 
@@ -100,8 +100,8 @@ async function summarizeFailuresWithJudge(contextPath) {
     { role: 'user', content: userPrompt },
   ];
 
-  if (!evaluationConnectorId.startsWith('litellm-')) {
-    throw new Error(`Unsupported judge connector id for triage: ${evaluationConnectorId}`);
+  if (!modelId.startsWith('litellm-')) {
+    throw new Error(`Unsupported model connector id for triage: ${modelId}`);
   }
 
   const request = buildLitellmChatRequest(connector, messages);
@@ -111,26 +111,26 @@ async function summarizeFailuresWithJudge(contextPath) {
     summary = `${summary.slice(0, maxOutputChars - 1)}…`;
   }
 
-  return { summary: summary.trim(), judgeId: evaluationConnectorId };
+  return { summary: summary.trim(), modelId };
 }
 
 async function main() {
   const contextPath = process.argv[2] || process.env.EVAL_FAILURE_CONTEXT_PATH || '';
   if (!contextPath) {
-    console.error('Usage: summarize_failures_with_judge.js <failure-context.json>');
+    console.error('Usage: summarize_failures_with_model.js <failure-context.json>');
     process.exit(1);
   }
 
-  const { summary } = await summarizeFailuresWithJudge(contextPath);
+  const { summary } = await summarizeFailuresWithModel(contextPath);
   process.stdout.write(`${summary}\n`);
 }
 
 if (require.main === module) {
   main().catch((error) => {
     const message = error instanceof Error ? error.message : String(error);
-    console.error(`Judge triage summary failed: ${message}`);
+    console.error(`Triage summary failed: ${message}`);
     process.exit(1);
   });
 }
 
-module.exports = { summarizeFailuresWithJudge };
+module.exports = { summarizeFailuresWithModel };

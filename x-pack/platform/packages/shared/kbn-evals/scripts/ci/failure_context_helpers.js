@@ -15,10 +15,11 @@ const MAX_LOG_EXCERPT_CHARS = 4000;
 const MAX_SCORE_ROWS_PER_MODEL = 10;
 const MAX_CONTEXT_JSON_BYTES = 30 * 1024;
 
-// Triage always uses a LiteLLM judge (the suite_owner_notify step has no ES
-// cluster with EIS inference privileges, so EIS judges cannot be called there).
+// Triage/summary text is always generated with a LiteLLM model (the
+// suite_owner_notify step has no ES cluster with EIS inference privileges, so EIS
+// models cannot be called there).
 // Used only as a last resort when no LiteLLM connectors can be discovered.
-const DEFAULT_TRIAGE_JUDGE_ID = 'litellm-llm-gateway-gpt-4o';
+const DEFAULT_TRIAGE_MODEL_ID = 'litellm-llm-gateway-gpt-4o';
 
 /**
  * @param {string} suiteId
@@ -274,7 +275,7 @@ function extractSuiteRootCauseLine(triageBody, maxChars = 160) {
 /**
  * Build the user prompt for the weekly cross-suite executive summary. Input is
  * the set of failing suites with their per-suite triage bodies; output asks the
- * judge for a short roll-up that separates non-actionable provider/infra noise
+ * model for a short roll-up that separates non-actionable provider/infra noise
  * from real regressions teams must fix.
  *
  * @param {Array<{ suiteId: string; suiteName?: string; failingProjects?: string[]; triageBody?: string }>} suites
@@ -391,10 +392,10 @@ function connectorIdToLitellmModel(connectorId) {
 /**
  * Build a minimal LiteLLM connector from vault config when KIBANA_TESTING_AI_CONNECTORS was not generated.
  *
- * @param {string} judgeConnectorId
+ * @param {string} modelConnectorId
  * @returns {{ config: { apiUrl: string; defaultModel: string }; secrets: { apiKey: string } }}
  */
-function buildLitellmConnectorFromVault(judgeConnectorId) {
+function buildLitellmConnectorFromVault(modelConnectorId) {
   const config = parseVaultConfig();
   const litellm = config?.litellm;
   const baseUrl =
@@ -416,7 +417,7 @@ function buildLitellmConnectorFromVault(judgeConnectorId) {
   return {
     config: {
       apiUrl: `${baseUrl.replace(/\/$/, '')}/v1/chat/completions`,
-      defaultModel: connectorIdToLitellmModel(judgeConnectorId),
+      defaultModel: connectorIdToLitellmModel(modelConnectorId),
     },
     secrets: { apiKey },
   };
@@ -545,46 +546,46 @@ function listLitellmConnectorIds() {
 }
 
 /**
- * Resolve the judge used for Slack triage summaries. Triage always uses a
- * LiteLLM judge because the suite_owner_notify step has no ES cluster with EIS
- * inference privileges. Resolution order:
- * 1. `EVAL_TRIAGE_JUDGE_ID` env override.
- * 2. The eval judge when it is already LiteLLM-backed (respects `models:judge:*`).
- * 3. The default LiteLLM judge when present among available connectors.
+ * Resolve the LiteLLM model used to generate Slack triage/summary text. A
+ * LiteLLM model is always used because the suite_owner_notify step has no ES
+ * cluster with EIS inference privileges. Resolution order:
+ * 1. `EVAL_TRIAGE_MODEL_ID` env override.
+ * 2. The configured LiteLLM connector when one is available.
+ * 3. The default LiteLLM model when present among available connectors.
  * 4. The first available LiteLLM connector.
- * 5. The vault `evaluationConnectorId` when it is LiteLLM-backed.
- * 6. The default LiteLLM judge id (constructed from vault LiteLLM credentials).
+ * 5. The configured LiteLLM connector from vault.
+ * 6. The default LiteLLM model id (constructed from vault LiteLLM credentials).
  *
  * @param {{ readMetadata?: (key: string) => string }} [options]
  * @returns {string}
  */
-function resolveTriageJudgeId(options = {}) {
-  const override = process.env.EVAL_TRIAGE_JUDGE_ID || '';
+function resolveTriageModelId(options = {}) {
+  const override = process.env.EVAL_TRIAGE_MODEL_ID || '';
   if (override) {
     return override;
   }
 
-  const evalJudge = resolveEvaluationConnectorId(options);
-  if (evalJudge.startsWith('litellm-')) {
-    return evalJudge;
+  const configuredModel = resolveEvaluationConnectorId(options);
+  if (configuredModel.startsWith('litellm-')) {
+    return configuredModel;
   }
 
   const litellmConnectorIds = listLitellmConnectorIds();
-  if (litellmConnectorIds.includes(DEFAULT_TRIAGE_JUDGE_ID)) {
-    return DEFAULT_TRIAGE_JUDGE_ID;
+  if (litellmConnectorIds.includes(DEFAULT_TRIAGE_MODEL_ID)) {
+    return DEFAULT_TRIAGE_MODEL_ID;
   }
   if (litellmConnectorIds.length > 0) {
     return litellmConnectorIds[0];
   }
 
   const config = parseVaultConfig();
-  const vaultJudge =
+  const vaultModel =
     typeof config?.evaluationConnectorId === 'string' ? config.evaluationConnectorId : '';
-  if (vaultJudge.startsWith('litellm-')) {
-    return vaultJudge;
+  if (vaultModel.startsWith('litellm-')) {
+    return vaultModel;
   }
 
-  return DEFAULT_TRIAGE_JUDGE_ID;
+  return DEFAULT_TRIAGE_MODEL_ID;
 }
 
 function parseLitellmChatContent(responseJson) {
@@ -609,10 +610,10 @@ module.exports = {
   MAX_LOG_EXCERPT_CHARS,
   MAX_SCORE_ROWS_PER_MODEL,
   MAX_CONTEXT_JSON_BYTES,
-  DEFAULT_TRIAGE_JUDGE_ID,
+  DEFAULT_TRIAGE_MODEL_ID,
   decodeAiConnectors,
   listLitellmConnectorIds,
-  resolveTriageJudgeId,
+  resolveTriageModelId,
   failureLogMetadataKey,
   buildFailureScoresQuery,
   truncateText,

@@ -146,7 +146,7 @@ jq -n \
 
 slack_body_file="$(mktemp -t kbn-evals-weekly-slack.XXXXXX.md)"
 
-echo "--- Building condensed weekly Slack summary (executive judge summary + by-suite)"
+echo "--- Building condensed weekly Slack summary (executive model summary + by-suite)"
 if node "${KIBANA_DIR}/x-pack/platform/packages/shared/kbn-evals/scripts/ci/build_weekly_slack_summary.js" \
   "$context_file" "$slack_body_file"; then
   slack_body="$(cat "$slack_body_file")"

@@ -11,8 +11,8 @@ const { readFileSync, writeFileSync, mkdtempSync, rmSync } = require('fs');
 const { tmpdir } = require('os');
 const { join } = require('path');
 const { fromRoot } = require('./repo_root');
-const { writeMinimalFailureContext, resolveTriageJudgeId } = require('./failure_context_helpers');
-const { summarizeFailuresWithJudge } = require('./summarize_failures_with_judge');
+const { writeMinimalFailureContext, resolveTriageModelId } = require('./failure_context_helpers');
+const { summarizeFailuresWithModel } = require('./summarize_failures_with_model');
 
 const suiteId = process.argv[2] || process.env.EVAL_SUITE_ID || '';
 const outputPath = process.argv[3] || process.env.EVAL_TRIAGE_SUMMARY_PATH || '';
@@ -79,11 +79,11 @@ if (buildUrl) {
 }
 
 /**
- * @param {string} judgeId
+ * @param {string} modelId
  * @param {string} body
  */
-function appendTriageSection(judgeId, body) {
-  lines.push('', `*Triage summary (judge: \`${judgeId}\`):*`, body);
+function appendTriageSection(modelId, body) {
+  lines.push('', `*Triage summary (model: \`${modelId}\`):*`, body);
 }
 
 /**
@@ -118,23 +118,23 @@ async function collectFailureContext(contextPath) {
 }
 
 async function main() {
-  const judgeId = resolveTriageJudgeId() || 'unknown';
+  const modelId = resolveTriageModelId() || 'unknown';
   const tempDir = mkdtempSync(join(tmpdir(), 'kbn-evals-slack-'));
   const contextPath = join(tempDir, 'failure-context.json');
 
   try {
-    console.error('--- Collecting failure context for judge triage');
+    console.error('--- Collecting failure context for triage summary');
     await collectFailureContext(contextPath);
 
-    console.error(`--- Generating judge triage summary (judge: ${judgeId})`);
-    const { summary, judgeId: resolvedJudgeId } = await summarizeFailuresWithJudge(contextPath);
-    appendTriageSection(resolvedJudgeId, summary);
+    console.error(`--- Generating triage summary (model: ${modelId})`);
+    const { summary, modelId: resolvedModelId } = await summarizeFailuresWithModel(contextPath);
+    appendTriageSection(resolvedModelId, summary);
   } catch (error) {
     const message = formatTriageError(error);
-    console.error(`--- Judge triage summary failed: ${message}`);
+    console.error(`--- Triage summary failed: ${message}`);
     appendTriageSection(
-      judgeId,
-      `_Judge triage could not be generated: ${message}. See the suite owner notify Buildkite step for details._`
+      modelId,
+      `_Triage summary could not be generated: ${message}. See the suite owner notify Buildkite step for details._`
     );
   } finally {
     rmSync(tempDir, { recursive: true, force: true });
