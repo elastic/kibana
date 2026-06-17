@@ -105,6 +105,7 @@ const mockPlugin = {
   ml: {
     locator,
   },
+  alerting: {},
   data: {
     query: {
       timefilter: { timefilter: { setTime: () => {}, getTime: () => ({}) } },
@@ -125,9 +126,9 @@ const mockPlugin = {
 export const mockCore = {
   application: {
     capabilities: {
-      apm: {},
-      ml: {},
-      slo: { read: true },
+      apm: { save: true, 'alerting:show': true, 'alerting:save': true },
+      ml: { canGetJobs: true },
+      slo: { read: true, write: true },
       savedObjectsManagement: {},
       dashboard_v2: { show: true },
     },
