@@ -25,7 +25,7 @@ spaceTest.describe('TSVB Metric - Open in Lens', { tag: tags.deploymentAgnostic 
   });
 
   spaceTest.beforeEach(async ({ browserAuth, pageObjects }) => {
-    await browserAuth.loginAsViewer();
+    await browserAuth.loginAsPrivilegedUser();
     const { dashboard } = pageObjects;
     await dashboard.goto();
     await dashboard.clickDashboardTitleLink(testData.TSVB_DASHBOARDS.METRIC);
