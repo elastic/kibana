@@ -214,7 +214,7 @@ const RulesContainerComponent: React.FC = () => {
           <Redirect to={`/rules/${AllRulesTabs.management}`} />
         </Route>
         {isRuleChangesHistoryEnabled && hasCapabilities(capabilities, RULES_UI_READ_PRIVILEGE) && (
-          <Route path="/rules/id/:detailName/changes-history" exact>
+          <Route path="/rules/id/:ruleId/changes-history" exact>
             <RuleChangesHistoryPage />
           </Route>
         )}
