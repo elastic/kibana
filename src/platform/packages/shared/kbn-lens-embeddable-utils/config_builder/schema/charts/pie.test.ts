@@ -713,7 +713,9 @@ describe('Pie Schema', () => {
             };
 
             const result = pieConfigSchema.safeParse(input);
-            expectPrettyError(result).toMatchInlineSnapshot(`"✖ Invalid input"`);
+            expectPrettyError(result).toMatchInlineSnapshot(
+              `"✖ When multiple metrics are defined, the number of non-collapsed group_by dimensions must not exceed 2"`
+            );
           });
         });
       });

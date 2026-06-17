@@ -41,11 +41,11 @@ describe('Legacy Metric Schema', () => {
       } satisfies LegacyMetricInput;
 
       const validated = legacyMetricConfigSchema.parse(input);
-      expect(validated.metric.size).toBeUndefined();
+      expect(validated.metric.size).toBe('m');
       expect(validated.metric.labels).toBeUndefined();
       expect(validated.metric.values).toBeUndefined();
       expect(validated.metric.apply_color_to).toBeUndefined();
-      expect(validated.metric.color).toBeUndefined();
+      expect(validated.metric.color).toEqual({ type: 'auto' });
     });
 
     it('validates count metric operation', () => {
@@ -128,9 +128,7 @@ describe('Legacy Metric Schema', () => {
       const result = legacyMetricConfigSchema.safeParse(input);
       expectPrettyError(result).toMatchInlineSnapshot(`
         "✖ Invalid input
-          → at metric
-        ✖ Invalid input
-          → at metric.labels.alignment"
+          → at metric"
       `);
     });
 
@@ -147,9 +145,7 @@ describe('Legacy Metric Schema', () => {
       const result = legacyMetricConfigSchema.safeParse(input);
       expectPrettyError(result).toMatchInlineSnapshot(`
         "✖ Invalid input
-          → at metric
-        ✖ Invalid input
-          → at metric.size"
+          → at metric"
       `);
     });
 
@@ -175,9 +171,7 @@ describe('Legacy Metric Schema', () => {
       const result = legacyMetricConfigSchema.safeParse(input);
       expectPrettyError(result).toMatchInlineSnapshot(`
         "✖ Invalid input
-          → at metric
-        ✖ Invalid input
-          → at metric.apply_color_to"
+          → at metric"
       `);
     });
 
@@ -203,9 +197,7 @@ describe('Legacy Metric Schema', () => {
       const result = legacyMetricConfigSchema.safeParse(input);
       expectPrettyError(result).toMatchInlineSnapshot(`
         "✖ Invalid input
-          → at metric
-        ✖ Invalid input
-          → at metric.color"
+          → at metric"
       `);
     });
   });

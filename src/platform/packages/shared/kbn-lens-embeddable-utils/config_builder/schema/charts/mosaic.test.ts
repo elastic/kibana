@@ -324,7 +324,9 @@ describe('Mosaic Schema', () => {
         };
 
         const result = mosaicConfigSchema.safeParse(input);
-        expectPrettyError(result).toMatchInlineSnapshot(`"✖ Invalid input"`);
+        expectPrettyError(result).toMatchInlineSnapshot(
+          `"✖ Only a single non-collapsed dimension is allowed for group_by"`
+        );
       });
 
       it('allows single non-collapsed dimension in group_breakdown_by', () => {
@@ -471,7 +473,9 @@ describe('Mosaic Schema', () => {
         };
 
         const result = mosaicConfigSchema.safeParse(input);
-        expectPrettyError(result).toMatchInlineSnapshot(`"✖ Invalid input"`);
+        expectPrettyError(result).toMatchInlineSnapshot(
+          `"✖ Only a single non-collapsed dimension is allowed for group_breakdown_by"`
+        );
       });
 
       it('throws when no grouping dimension are defined', () => {

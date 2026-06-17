@@ -33,6 +33,7 @@ describe('Bucket Operation Schemas', () => {
         suggested_interval: 'auto',
         include_empty_rows: true,
         use_original_time_range: true,
+        drop_partial_intervals: false,
       };
 
       const validated = bucketDateHistogramOperationSchema.parse(input);
@@ -332,6 +333,7 @@ describe('Bucket Operation Schemas', () => {
           suggested_interval: 'auto',
           include_empty_rows: true,
           use_original_time_range: true,
+          drop_partial_intervals: false,
         },
         {
           operation: 'terms',

@@ -8,8 +8,20 @@
  */
 
 import { z } from '@kbn/zod';
+import { isEqual } from 'lodash';
 import type { AutoColorType, ColorMappingType, StaticColorType } from '../color';
+import { DEFAULT_CATEGORICAL_COLOR_MAPPING } from '../color';
 import { groupIsNotCollapsed } from '../../utils';
+
+/**
+ * A grouping dimension is only considered to have an explicit coloring assignment when its color
+ * differs from the default categorical mapping that the schema applies to every breakdown dimension.
+ * Without this check, the auto-applied default would make every dimension look "colored" and the
+ * single-dimension coloring rules below could never be satisfied for multi-breakdown charts.
+ */
+function hasAssignedColoring(color?: ColorMappingType): boolean {
+  return color != null && !isEqual(color, DEFAULT_CATEGORICAL_COLOR_MAPPING);
+}
 
 export const valueDisplaySchema = z
   .object({
@@ -67,7 +79,7 @@ export function validateColoringAssignments({
     // if (group_by.length && hasStaticColoring) {
     //   return 'Coloring cannot be assigned to metric dimensions when grouping dimensions are defined.';
     // }
-    const breakdownsWithColoring = group_by.filter((def) => def.color != null);
+    const breakdownsWithColoring = group_by.filter((def) => hasAssignedColoring(def.color));
     if (breakdownsWithColoring.length > 1) {
       return 'Coloring can only be assigned to a single grouping dimension.';
     }

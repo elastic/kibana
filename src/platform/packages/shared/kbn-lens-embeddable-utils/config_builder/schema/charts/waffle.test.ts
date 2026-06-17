@@ -455,7 +455,9 @@ describe('Waffle Schema', () => {
         };
 
         const result = waffleConfigSchema.safeParse(input);
-        expectPrettyError(result).toMatchInlineSnapshot(`"✖ Invalid input"`);
+        expectPrettyError(result).toMatchInlineSnapshot(
+          `"✖ When multiple metrics are defined, only collapsed group_by dimensions are allowed."`
+        );
       });
     });
   });

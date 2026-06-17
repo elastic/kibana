@@ -539,7 +539,9 @@ describe('Treemap Schema', () => {
           };
 
           const result = treemapConfigSchema.safeParse(input);
-          expectPrettyError(result).toMatchInlineSnapshot(`"✖ Invalid input"`);
+          expectPrettyError(result).toMatchInlineSnapshot(
+            `"✖ When multiple metrics are defined, the number of non-collapsed group_by dimensions must not exceed 1"`
+          );
         });
       });
     });

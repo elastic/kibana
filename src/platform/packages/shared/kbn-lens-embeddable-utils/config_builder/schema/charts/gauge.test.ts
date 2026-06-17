@@ -271,7 +271,7 @@ describe('Gauge Schema', () => {
         field: 'test_field',
         ticks: {
           // @ts-expect-error
-          style: 'invalid',
+          mode: 'invalid',
         },
       },
     } satisfies GaugeInput;
