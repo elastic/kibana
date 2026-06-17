@@ -1762,6 +1762,7 @@
     "@kbn/evals-suite-security-alert-triage": "link:x-pack/solutions/security/packages/kbn-evals-suite-security-alert-triage",
     "@kbn/evals-suite-security-automatic-migrations": "link:x-pack/solutions/security/packages/kbn-evals-suite-security-automatic-migrations",
     "@kbn/evals-suite-security-esql-generation-regression": "link:x-pack/solutions/security/packages/kbn-evals-suite-security-esql-generation-regression",
+    "@kbn/evals-suite-siem-readiness": "link:x-pack/solutions/security/packages/kbn-evals-suite-siem-readiness",
     "@kbn/evals-suite-significant-events": "link:x-pack/platform/packages/shared/kbn-evals-suite-significant-events",
     "@kbn/evals-suite-smoke-tests": "link:x-pack/platform/packages/shared/kbn-evals-suite-smoke-tests",
     "@kbn/evals-suite-streams": "link:x-pack/platform/packages/shared/kbn-evals-suite-streams",

@@ -6942,6 +6942,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/evals-suite-siem-readiness@link:x-pack/solutions/security/packages/kbn-evals-suite-siem-readiness":
+  version "0.0.0"
+  uid ""
+
 "@kbn/evals-suite-significant-events@link:x-pack/platform/packages/shared/kbn-evals-suite-significant-events":
   version "0.0.0"
   uid ""
