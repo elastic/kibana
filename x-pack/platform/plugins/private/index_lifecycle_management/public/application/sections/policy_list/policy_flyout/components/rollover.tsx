@@ -94,7 +94,7 @@ export const Rollover = ({ phase, phases }: ActionComponentProps) => {
     );
   }
 
-  if (rollover?.min_docs) {
+  if (rollover?.min_docs !== undefined) {
     descriptionItems.push(
       <>
         {`${i18nTexts.editPolicy.minDocsLabel}: `}

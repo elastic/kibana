@@ -105,7 +105,7 @@ export const RolloverRuleRow = <T extends RolloverField>({
                 isLoading={formField.isValidating}
                 fullWidth
                 data-test-subj={config.testSubject}
-                min={1}
+                min={config.min ?? 1}
                 prepend={fieldNamePrefix}
                 append={
                   config.unitPath && config.unitOptions ? (

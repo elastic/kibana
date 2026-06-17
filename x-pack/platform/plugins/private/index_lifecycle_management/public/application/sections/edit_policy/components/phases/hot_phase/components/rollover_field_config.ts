@@ -20,6 +20,7 @@ export interface RolloverFieldConfig {
   menuLabel: string;
   path: string;
   testSubject: string;
+  min?: number;
   unitPath?: string;
   unitTestSubject?: string;
   unitAriaLabel?: string;
@@ -120,6 +121,7 @@ export const rolloverFieldConfig: Record<RolloverField, RolloverFieldConfig> = {
     menuLabel: menuLabels.docs,
     path: ROLLOVER_RESTRICTION_FIELD_PATHS.min_docs,
     testSubject: 'hot-selectedMinDocuments',
+    min: 0,
   },
   min_size: {
     menuLabel: menuLabels.indexSize,

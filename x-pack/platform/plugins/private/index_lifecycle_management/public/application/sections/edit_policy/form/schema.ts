@@ -564,7 +564,7 @@ export const getSchema = (isCloudEnabled: boolean): FormSchema => ({
             label: i18nTexts.editPolicy.minDocsLabel,
             validations: [
               {
-                validator: ifExistsNumberGreaterThanZero,
+                validator: ifExistsNumberNonNegative,
               },
               {
                 validator: isInteger({ message: i18nTexts.editPolicy.errors.integerRequired }),

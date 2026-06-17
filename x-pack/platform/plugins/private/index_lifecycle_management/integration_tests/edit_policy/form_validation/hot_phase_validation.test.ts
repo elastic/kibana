@@ -185,6 +185,18 @@ describe('<EditPolicy /> hot phase validation', () => {
 
         await expectErrorMessages([i18nTexts.editPolicy.errors.integerRequired]);
       });
+
+      test(`doesn't allow negative minimum docs`, async () => {
+        await actions.rollover.setMinDocs('-1');
+
+        await expectErrorMessages([i18nTexts.editPolicy.errors.nonNegativeNumberRequired]);
+      });
+
+      test(`allows 0 for minimum docs`, async () => {
+        await actions.rollover.setMinDocs('0');
+
+        await expectErrorMessages([]);
+      });
     });
   });
 
