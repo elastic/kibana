@@ -11,6 +11,7 @@ import type { IndicesGetResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { IScopedClusterClient } from '@kbn/core/server';
 import { isNotFoundError } from '@kbn/es-errors';
 import {
+  MAX_STREAM_NAME_LENGTH,
   Streams,
   findInheritedLifecycle,
   isIlmLifecycle,
@@ -81,7 +82,7 @@ const lifecycleStatsRoute = createServerRoute({
     },
   },
   params: z.object({
-    path: z.object({ name: z.string() }),
+    path: z.object({ name: z.string().max(MAX_STREAM_NAME_LENGTH) }),
   }),
   handler: async ({ params, request, getScopedClients }) => {
     const { scopedClusterClient, streamsClient } = await getScopedClients({ request });
@@ -138,7 +139,7 @@ const lifecycleIlmExplainRoute = createServerRoute({
     },
   },
   params: z.object({
-    path: z.object({ name: z.string() }),
+    path: z.object({ name: z.string().max(MAX_STREAM_NAME_LENGTH) }),
   }),
   handler: async ({ params, request, getScopedClients }) => {
     const { scopedClusterClient, streamsClient } = await getScopedClients({ request });
@@ -164,7 +165,7 @@ const lifecycleInheritedRoute = createServerRoute({
     },
   },
   params: z.object({
-    path: z.object({ name: z.string() }),
+    path: z.object({ name: z.string().max(MAX_STREAM_NAME_LENGTH) }),
   }),
   handler: async ({ params, request, getScopedClients, logger }) => {
     const { scopedClusterClient, streamsClient } = await getScopedClients({ request });
