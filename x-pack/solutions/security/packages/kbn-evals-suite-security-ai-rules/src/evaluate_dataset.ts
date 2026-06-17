@@ -440,7 +440,7 @@ export function createRuleDescriptionEvaluator(
 }
 
 // ---------------------------------------------------------------------------
-// Factory — mirrors the agent-builder createEvaluateDataset pattern
+// Factory — wires CODE + LLM evaluators and per-example success tracking for the suite summary.
 // ---------------------------------------------------------------------------
 
 export function createEvaluateDataset({

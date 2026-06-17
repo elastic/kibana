@@ -15,7 +15,7 @@
  *
  * Usage:
  *   GCS_CREDENTIALS=$(cat /path/to/service-account.json | jq -c) \
- *     node x-pack/solutions/security/packages/kbn-security-evals-rule-data-snapshot/scripts/create-snapshot.js
+ *     node x-pack/solutions/security/packages/kbn-security-evals-rule-data-snapshot/scripts/create_snapshot.js
  */
 
 /* eslint-disable no-console */

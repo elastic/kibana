@@ -17,7 +17,28 @@ This package evaluates the quality of AI-generated detection rules against known
 
 ## API Flow
 
-The eval suite calls the sync Agent Builder API (`POST /api/agent_builder/converse`) and extracts tool results from the `security.create_detection_rule` tool call steps, matching the pattern used by the agent-builder eval suite.
+The eval suite calls the sync Agent Builder API (`POST /api/agent_builder/converse`) with agent id `elastic-ai-agent` and extracts tool results from the `security.create_detection_rule` tool call steps.
+
+## Test data seeding
+
+Playwright `global.setup.ts` runs before the suite and restores pre-seeded Elasticsearch indices so rule generation has realistic field coverage:
+
+1. **Primary path (CI / Scout / weekly evals):** restore the pinned GCS snapshot via `@kbn/security-evals-rule-data-snapshot` (`rule-data/2026-06-16`, snapshot `security-ai-rules-v1`). Requires `GCS_CREDENTIALS` (wired automatically when using `node scripts/evals` with vault profiles).
+2. **Fallback path (local dev without GCS):** seed integration samples from `.cache/integration-samples/` plus endpoint episode NDJSON when present under `security_solution/scripts/data/episodes/attacks/`.
+
+Disable snapshot restore for local-only seeding:
+
+```bash
+SECURITY_AI_RULES_DISABLE=true node scripts/evals run --suite security-ai-rules
+```
+
+| Variable | Description | Default |
+| --- | --- | --- |
+| `SECURITY_AI_RULES_DISABLE` | Skip GCS snapshot restore | (unset) |
+| `SECURITY_AI_RULES_BUCKET` | GCS bucket | `security-ai-datasets` |
+| `SECURITY_AI_RULES_BASE_PATH` | Snapshot base path | `rule-data/2026-06-16` |
+| `SECURITY_AI_RULES_NAME` | Snapshot name | `security-ai-rules-v1` |
+| `GCS_CREDENTIALS` | Service account JSON for repository-gcs | (required for restore) |
 
 ## Package Structure
 
@@ -25,6 +46,8 @@ The eval suite calls the sync Agent Builder API (`POST /api/agent_builder/conver
 kbn-evals-suite-security-ai-rules/
 ├── playwright.config.ts          # Playwright evals configuration
 ├── evals/
+│   ├── global.setup.ts           # Playwright global setup — snapshot restore + fallback seed
+│   ├── seed_data_from_scratch.ts # Integration + endpoint episode seed helpers
 │   └── rule_generation.spec.ts   # Evaluation scenarios (baseline + edge + negative cases)
 ├── datasets/
 │   ├── sample_rules.ts           # 8 canonical reference detection rules with ES|QL translations
@@ -71,6 +94,8 @@ EVALUATION_CONNECTOR_ID=gpt-4o \
 ```
 
 Replace `<KBN_URL>` and `<API_KEY>` with the Kibana endpoint and API key for the target environment where the evals plugin is enabled.
+
+At the end of a run the suite prints a **positive/negative success summary** per dataset (structural pass rate split by `category: 'negative'` examples vs positive cases). Use this table when comparing models — not only per-evaluator means.
 
 ### Environment variables
 
