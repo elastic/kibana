@@ -34,6 +34,7 @@ import {
   PrivilegeMonitoringApiKeyEncryptionParams,
   PrivilegeMonitoringApiKeyType,
 } from './lib/entity_analytics/privilege_monitoring/auth/saved_object';
+import { SavedViewType as ThreatIntelligenceSavedViewType } from './threat_intelligence/saved_objects/saved_view';
 
 // Conditional Saved Object Types
 // Saved object types that will only be registered if the associated feature flag is enabled
@@ -63,6 +64,12 @@ const types = [
   promptType,
   referenceDataSavedObjectType,
   trialCompanionNBASavedObjectType,
+  // `threat-intelligence-saved-view` (migrated from the standalone
+  // threat-intelligence plugin). Registered unconditionally — the type must
+  // stay stable across upgrades so user-created saved views survive when
+  // the `threatIntelligenceSkillEnabled` experimental flag is toggled off.
+  // The saved-object name MUST stay `threat-intelligence-saved-view`.
+  ThreatIntelligenceSavedViewType,
 ];
 
 export const savedObjectTypes = types.map((type) => type.name);

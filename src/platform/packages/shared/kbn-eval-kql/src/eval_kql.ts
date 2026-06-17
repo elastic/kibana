@@ -164,6 +164,19 @@ function readContextPath(
   let result: any = context;
 
   for (const segment of propertyPathSegments) {
+    // The `in` operator throws `TypeError: Cannot use 'in' operator to
+    // search for '<key>' in <value>` when its right-hand side is `null`,
+    // `undefined`, or a primitive. That happens routinely in workflow
+    // step contexts — e.g. `steps.<step>.output` is `null` after a
+    // connector step failed with `on-failure: continue: true`, and a
+    // downstream `if: "NOT steps.<step>.output.<field> : *"` then walks
+    // through that null. Treat any non-traversable intermediate value
+    // as "path does not exist" so the condition resolves to false (and
+    // its `NOT` to true) instead of crashing the workflow execution.
+    if (result == null || typeof result !== 'object') {
+      return { pathExists: false, value: undefined };
+    }
+
     if (!(segment in result)) {
       return { pathExists: false, value: undefined }; // Path not found in context
     }

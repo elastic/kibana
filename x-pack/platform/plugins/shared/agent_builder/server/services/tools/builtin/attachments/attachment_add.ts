@@ -13,14 +13,68 @@ import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { getToolResultId } from '@kbn/agent-builder-server';
 import type { AttachmentToolsOptions } from './types';
 
-const attachmentAddSchema = z.object({
-  id: z.string().optional().describe('Optional custom ID for the attachment'),
-  type: z.string().describe('Type of attachment (e.g., "text", "json", "code")'),
-  data: z
-    .record(z.string(), z.any())
-    .describe('The attachment data/content as a JSON object, required'),
-  description: z.string().optional().describe('Human-readable description of the attachment'),
-});
+const isPlainObject = (value: unknown): value is Record<string, unknown> =>
+  typeof value === 'object' && value !== null && !Array.isArray(value);
+
+/**
+ * Normalizes LLM tool input into the canonical attachment_add shape.
+ * Models often omit the `data` wrapper or pass a string instead of an object.
+ */
+export const normalizeAttachmentAddInput = (
+  input: unknown
+): { id?: string; type: string; data: Record<string, unknown>; description?: string } => {
+  if (!isPlainObject(input)) {
+    throw new Error('Attachment add parameters must be a JSON object');
+  }
+
+  const { id, type, description, data, ...rest } = input;
+
+  if (typeof type !== 'string' || type.length === 0) {
+    throw new Error('Attachment type is required');
+  }
+
+  let resolvedData: Record<string, unknown>;
+
+  if (data !== undefined) {
+    if (typeof data === 'string') {
+      resolvedData = { content: data };
+    } else if (isPlainObject(data)) {
+      resolvedData = data;
+    } else {
+      throw new Error('Attachment data must be a JSON object');
+    }
+  } else if (Object.keys(rest).length > 0) {
+    resolvedData = rest;
+  } else {
+    throw new Error('Attachment data is required (use a `data` object or pass fields at the top level)');
+  }
+
+  return {
+    ...(typeof id === 'string' ? { id } : {}),
+    type,
+    data: resolvedData,
+    ...(typeof description === 'string' ? { description } : {}),
+  };
+};
+
+const attachmentAddSchema = z
+  .object({
+    id: z.string().optional().describe('Optional custom ID for the attachment'),
+    type: z.string().describe('Type of attachment (e.g., "text", "json", "code")'),
+    data: z
+      .record(z.string(), z.any())
+      .optional()
+      .describe(
+        'The attachment payload as a JSON object. Required before the attachment is created — ' +
+          'either pass it here or pass attachment fields at the top level (they are folded into `data`).'
+      ),
+    description: z.string().optional().describe('Human-readable description of the attachment'),
+  })
+  .catchall(z.any())
+  .describe(
+    'Create a conversation attachment. Prefer `{ "type": "<type>", "data": { ... } }`. ' +
+      'Example: `{ "type": "threat-intel-subscription-confirmation", "data": { "tags": ["ransomware"], "severity_threshold": "high", ... } }`.'
+  );
 
 /**
  * Creates the attachment_add tool.
@@ -33,10 +87,13 @@ export const createAttachmentAddTool = ({
   id: attachmentTools.add,
   type: ToolType.builtin,
   description:
-    'Create a new attachment to store data for later use in the conversation. The "data" field is required and must contain the content to store. Attachments persist across conversation rounds and can be read, updated, or deleted.',
+    'Create a new attachment to store data for later use in the conversation. Required: `type` and a `data` object with the attachment payload. ' +
+    'Example: `{ "type": "threat-intel-subscription-confirmation", "data": { "tags": ["ransomware"], "severity_threshold": "high", ... } }`. ' +
+    'Attachments persist across conversation rounds and can be read, updated, or deleted.',
   schema: attachmentAddSchema,
   tags: ['attachment'],
-  handler: async ({ id, type, data, description }, _context) => {
+  handler: async (params, _context) => {
+    const { id, type, data, description } = normalizeAttachmentAddInput(params);
     const definition = attachmentsService?.getTypeDefinition(type);
     if (!definition) {
       const validTypes = attachmentsService?.getRegisteredTypeIds() ?? [];

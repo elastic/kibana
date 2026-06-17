@@ -137,6 +137,22 @@ export const ES_VALID_SAMPLE_STEPS = [
     },
   },
   {
+    // Auto-id form (POST {index}/_doc) — `id` must be acceptable as missing
+    // for data-stream writes with `op_type: create`, where ES rejects a
+    // caller-supplied `_id`. Regression coverage for the previous
+    // `z.union` paramsSchema, which made the YAML language server flag
+    // `Missing property "id"` on this otherwise-valid step.
+    name: 'index-document-without-id',
+    type: 'elasticsearch.index',
+    with: {
+      index: 'test-data-stream',
+      op_type: 'create',
+      document: {
+        message: 'auto-id',
+      },
+    },
+  },
+  {
     name: 'index-document-with-params',
     type: 'elasticsearch.index',
     with: {

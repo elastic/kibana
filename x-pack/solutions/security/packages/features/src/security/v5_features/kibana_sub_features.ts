@@ -27,6 +27,7 @@ import {
   trustedDevicesSubFeature,
   socManagementSubFeature,
   scriptsManagementSubFeature,
+  threatIntelligenceSubFeature,
 } from '../kibana_sub_features';
 
 /**
@@ -66,6 +67,7 @@ export const getSecurityV5SubFeaturesMap = ({
     [SecuritySubFeatureId.fileOperations, fileOperationsSubFeature()],
     [SecuritySubFeatureId.executeAction, executeActionSubFeature()],
     [SecuritySubFeatureId.scanAction, scanActionSubFeature()],
+    [SecuritySubFeatureId.threatIntelligence, threatIntelligenceSubFeature()],
   ];
 
   const securitySubFeaturesMap = new Map<SecuritySubFeatureId, SubFeatureConfig>(

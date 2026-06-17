@@ -87,6 +87,7 @@
       "agentBuilder",
       "llmTasks",
       "workflowsExtensions",
+      "workflowsManagement",
       "cps",
       "searchInferenceEndpoints"
     ],

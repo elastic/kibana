@@ -14,6 +14,7 @@ import { createAlertAttachmentType } from './alert';
 import { createBulkAlertsAttachmentType } from './alerts';
 import { createEntityAttachmentType } from './entity';
 import { createEntityAnalyticsDashboardAttachmentType } from './entity_analytics_dashboard';
+import { ALL_ATTACHMENT_TYPES as THREAT_INTELLIGENCE_ATTACHMENT_TYPES } from './threat_intelligence_attachment_types';
 import { createSiemReadinessAttachmentType } from './siem_readiness';
 import { createRulePreviewAttachmentType, getRulePreviewAlertCount } from './rule_preview';
 
@@ -35,6 +36,19 @@ export const registerAttachments = async (
   agentBuilder.attachments.registerType(createEntityAttachmentType());
   agentBuilder.attachments.registerType(createEntityAnalyticsDashboardAttachmentType());
   agentBuilder.attachments.registerType(createRuleAttachmentType());
+
+  // Threat-intelligence attachment types (folded in from the standalone
+  // threat-intelligence plugin). Registered unconditionally — only the
+  // threat-intelligence tools (gated by `threatIntelligenceSkillEnabled`)
+  // emit attachments of these types, so registering them when the skill is
+  // off is dead weight but harmless. Matches the existing pattern where
+  // attachment types are declarative and never feature-gated here.
+  for (const attachmentType of THREAT_INTELLIGENCE_ATTACHMENT_TYPES) {
+    agentBuilder.attachments.registerType(
+      attachmentType as Parameters<typeof agentBuilder.attachments.registerType>[0]
+    );
+  }
+
   agentBuilder.attachments.registerType(createSiemReadinessAttachmentType());
 
   if (experimentalFeatures.rulePreviewAttachmentEnabled) {

@@ -51,6 +51,11 @@ export const AGENT_BUILDER_BUILTIN_TOOLS = [
   `${internalNamespaces.security}.pci_scope_discovery`,
   `${internalNamespaces.security}.pci_compliance`,
   `${internalNamespaces.security}.pci_field_mapper`,
+  // Threat Intelligence tools are owned by Security Solution but registered under
+  // the `threat_intel.` namespace to match the `threat-intelligence` skill ID
+  // (see `security_solution/common/threat_intelligence/hub/constants.ts`).
+  'threat_intel.extract_iocs',
+  'threat_intel.analyse_environment',
   `${internalNamespaces.security}.siem_readiness.get_coverage`,
   `${internalNamespaces.security}.siem_readiness.get_quality`,
   `${internalNamespaces.security}.siem_readiness.get_continuity`,
@@ -138,6 +143,7 @@ export const AGENT_BUILDER_BUILTIN_SKILLS = [
   'threat-hunting',
   'find-security-rules',
   'pci-compliance',
+  'threat-intelligence',
   'siem-readiness',
 
   // O11Y

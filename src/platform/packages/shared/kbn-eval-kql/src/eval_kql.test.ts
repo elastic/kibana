@@ -385,6 +385,45 @@ describe('evaluateKql', () => {
     });
   });
 
+  describe('null / undefined / primitive intermediates in property path', () => {
+    // Regression: workflow step contexts routinely contain `null` outputs
+    // (e.g. after a connector step failed with `on-failure: continue: true`).
+    // A downstream condition like `NOT steps.fetch.output.data : *` walks
+    // into that `null`; before this fix, `'data' in null` threw
+    // `TypeError: Cannot use 'in' operator to search for 'data' in null`
+    // and bubbled out as the whole workflow execution's error.
+    it('treats path through null as "does not exist" for wildcard existence checks', () => {
+      expect(evaluateKql('steps.fetch.output.data : *', { steps: { fetch: { output: null } } })).toBe(
+        false
+      );
+      expect(
+        evaluateKql('NOT steps.fetch.output.data : *', { steps: { fetch: { output: null } } })
+      ).toBe(true);
+    });
+
+    it('treats path through undefined as "does not exist"', () => {
+      expect(evaluateKql('a.b.c : *', { a: { b: undefined } })).toBe(false);
+      expect(evaluateKql('NOT a.b.c : *', { a: { b: undefined } })).toBe(true);
+    });
+
+    it('treats path through a primitive intermediate as "does not exist"', () => {
+      expect(evaluateKql('a.b.c : *', { a: { b: 'scalar' } })).toBe(false);
+      expect(evaluateKql('a.b.c : *', { a: { b: 42 } })).toBe(false);
+      expect(evaluateKql('a.b.c : *', { a: { b: true } })).toBe(false);
+    });
+
+    it('returns false (not throw) for exact matches and ranges over a null intermediate', () => {
+      expect(evaluateKql('a.b.c: "x"', { a: { b: null } })).toBe(false);
+      expect(evaluateKql('a.b.c > 0', { a: { b: null } })).toBe(false);
+    });
+
+    it('does not regress array index access at the leaf', () => {
+      // Verifies the early "non-object" check doesn't bail out on arrays —
+      // they're still traversable.
+      expect(evaluateKql('users[0].name: "Alice"', { users: [{ name: 'Alice' }] })).toBe(true);
+    });
+  });
+
   describe('logical expressions', () => {
     it('should evaluate AND expressions correctly', () => {
       const kql = 'status: active and isActive: true';

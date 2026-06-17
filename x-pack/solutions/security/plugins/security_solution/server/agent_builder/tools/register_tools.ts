@@ -16,6 +16,7 @@ import { createDetectionRuleTool } from './create_detection_rule_tool';
 import { pciComplianceTool } from './pci_compliance_tool';
 import { pciScopeDiscoveryTool } from './pci_scope_discovery_tool';
 import { pciFieldMapperTool } from './pci_field_mapper_tool';
+import { analyseEnvironmentTool, extractIocsTool } from './threat_intelligence';
 import { registerSiemReadinessTools } from './siem_readiness';
 import { runRulePreviewTool } from './run_rule_preview_tool';
 import type { RunRulePreviewDeps } from '../../lib/detection_engine/rule_preview/api/preview_rules/run_rule_preview';
@@ -52,6 +53,24 @@ export const registerTools = async (
     agentBuilder.tools.register(pciScopeDiscoveryTool(core, logger));
     agentBuilder.tools.register(pciComplianceTool(core, logger));
     agentBuilder.tools.register(pciFieldMapperTool(core, logger));
+  }
+
+  // Threat-intelligence Agent Builder tools (folded in from the standalone
+  // threat-intelligence plugin). Gated behind the
+  // `threatIntelligenceSkillEnabled` experimental flag.
+  //
+  // Only the two `BuiltinToolDefinition` tools are globally registered here:
+  //   - `extractIocsTool`         — invoked by Workflow 2 as a builtin step
+  //   - `analyseEnvironmentTool`  — used by the orchestrating agent through
+  //     the registry to tailor feed recommendations without consuming one of
+  //     the skill's seven inline-tool slots.
+  // The remaining seven tools are `BuiltinSkillBoundedTool` and are
+  // surfaced inline on the threat-intelligence skill (see
+  // `agent_builder/skills/threat_intelligence/threat_intelligence_skill.ts`);
+  // they are not registered in the global tool registry by design.
+  if (experimentalFeatures.threatIntelligenceSkillEnabled) {
+    agentBuilder.tools.register(extractIocsTool);
+    agentBuilder.tools.register(analyseEnvironmentTool);
   }
 
   registerSiemReadinessTools(agentBuilder, core, logger, isServerless);

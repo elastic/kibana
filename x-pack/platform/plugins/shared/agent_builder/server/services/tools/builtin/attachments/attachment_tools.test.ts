@@ -143,6 +143,36 @@ describe('attachment tools', () => {
       expect((result.results[0] as any).data.message).toContain('screen_context');
     });
 
+    it('accepts attachment fields at the top level when data is omitted', async () => {
+      const tool = getTool(attachmentTools.add);
+      const result = (await tool.handler(
+        {
+          type: 'text',
+          content: 'hello world',
+          description: 'Test',
+        },
+        {} as any
+      )) as ToolHandlerStandardReturn;
+
+      expect(result.results[0].type).toBe(ToolResultType.other);
+      expect((result.results[0] as any).data.type).toBe('text');
+    });
+
+    it('coerces string data into an object', async () => {
+      const tool = getTool(attachmentTools.add);
+      const result = (await tool.handler(
+        {
+          type: 'text',
+          data: 'hello world',
+          description: 'Test',
+        },
+        {} as any
+      )) as ToolHandlerStandardReturn;
+
+      expect(result.results[0].type).toBe(ToolResultType.other);
+      expect((result.results[0] as any).data.type).toBe('text');
+    });
+
     it('returns error for duplicate ID', async () => {
       // First, create an attachment with a specific ID
       await attachmentManager.add({

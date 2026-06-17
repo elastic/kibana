@@ -11,9 +11,24 @@
  * OVERRIDE FILE
  *
  * Source: elasticsearch-specification repository, operations: index, index-1, index-2
- * This override is used to add the `document` parameter (body in OpenAPI) to the paramsSchema
- * and also modify the methods to just POST, since PUT and POST are interchangeable for "{index}/_doc/{id}', but POST is needed for "{index}/_doc"
- *
+ * This override:
+ *  - Adds the `document` parameter (body in OpenAPI) to the paramsSchema.
+ *  - Pins the methods to POST, since PUT and POST are interchangeable for
+ *    "{index}/_doc/{id}" but POST is required for "{index}/_doc".
+ *  - Collapses the three OpenAPI variants (index, index-1, index-2 — the
+ *    "{index}/_doc/{id}" twin plus the "{index}/_doc" auto-id form) into a
+ *    single `z.strictObject` with `id` as optional. The OpenAPI generator
+ *    splits these into a union, and Zod-v4 emits that as a JSON Schema
+ *    `anyOf`. The YAML language server then surfaces `Missing property "id"`
+ *    on any step that omits `id` (e.g. data-stream writes with
+ *    `op_type: create`, where ES actually *rejects* a caller-supplied `_id`)
+ *    because it reports the closest-matching branch's missing-property
+ *    error. The runtime request builder (`selectBestPattern` in
+ *    `common/elasticsearch_request_builder.ts`) already picks the right URL
+ *    pattern from the presence of `id`, so the union is purely cosmetic at
+ *    validation time — one strict object with an optional `id` matches the
+ *    runtime semantics exactly and lets the editor stop flagging the
+ *    no-`id` form.
  */
 
 import { z } from '@kbn/zod/v4';
@@ -23,9 +38,8 @@ import { getShapeAt } from '../../../common/utils/zod';
 // import all needed request and response schemas generated from the OpenAPI spec
 import type { InternalConnectorContract } from '../../../types/latest';
 import {
-  index1_request,
   index2_request,
-  index_request,
+  types_id,
   types_write_response_base,
 } from '../generated/schemas/es_openapi_zod.gen';
 
@@ -178,22 +192,15 @@ Even the simple case of updating the Elasticsearch index using data from a datab
     ],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    z.strictObject({
-      document: index_request.shape.body.optional(),
-      ...getShapeAt(index_request, 'path'),
-      ...getShapeAt(index_request, 'query'),
-    }),
-    z.strictObject({
-      document: index1_request.shape.body.optional(),
-      ...getShapeAt(index1_request, 'path'),
-      ...getShapeAt(index1_request, 'query'),
-    }),
-    z.strictObject({
-      document: index2_request.shape.body.optional(),
-      ...getShapeAt(index2_request, 'path'),
-      ...getShapeAt(index2_request, 'query'),
-    }),
-  ]),
+  paramsSchema: z.strictObject({
+    document: index2_request.shape.body.optional(),
+    // `index2_request` is the auto-id variant — `path` has only `index`.
+    // We add `id` as an explicit optional on top, so a single object covers
+    // both "{index}/_doc" and "{index}/_doc/{id}". See the file header for
+    // why this isn't a `z.union` of the three OpenAPI variants.
+    ...getShapeAt(index2_request, 'path'),
+    id: z.optional(types_id),
+    ...getShapeAt(index2_request, 'query'),
+  }),
   outputSchema: types_write_response_base,
 };

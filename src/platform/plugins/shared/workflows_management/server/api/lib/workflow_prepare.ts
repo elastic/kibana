@@ -37,6 +37,33 @@ export const workflowYamlDeclaresTopLevelEnabled = (yamlString: string): boolean
 };
 
 /**
+ * Reads the top-level identifying fields (`name`, `description`, `tags`) from
+ * a workflow YAML without applying any Zod schema. Used as a fallback when
+ * full schema validation fails so the UI can still show the workflow's name.
+ */
+const readWorkflowHeaderFromYaml = (
+  yamlString: string
+): { name?: string; description?: string; tags?: string[] } => {
+  const parsed = parseYamlToJSONWithoutValidation(yamlString);
+  if (!parsed.success || parsed.json == null || typeof parsed.json !== 'object') {
+    return {};
+  }
+  const root = parsed.json as Record<string, unknown>;
+  const header: { name?: string; description?: string; tags?: string[] } = {};
+  if (typeof root.name === 'string' && root.name.trim() !== '') {
+    header.name = root.name;
+  }
+  if (typeof root.description === 'string') {
+    header.description = root.description;
+  }
+  if (Array.isArray(root.tags)) {
+    const tags = root.tags.filter((t): t is string => typeof t === 'string');
+    if (tags.length > 0) header.tags = tags;
+  }
+  return header;
+};
+
+/**
  * Validates YAML and builds a WorkflowProperties document ready for indexing.
  * Shared by user-created and managed workflow creation paths.
  */
@@ -75,6 +102,15 @@ export const prepareWorkflowDocumentFromYaml = (params: {
     workflowToCreate = transformWorkflowYamlJsontoEsWorkflow(validation.parsedWorkflow);
     workflowToCreate.valid = false;
     workflowToCreate.definition = undefined;
+  } else {
+    // Zod parse failed (e.g. an unknown step `type` is rejected by the loose
+    // schema's discriminated union). The workflow is still indexed as invalid,
+    // but we surface its `name` / `description` / `tags` so it remains
+    // identifiable in the UI listing instead of showing as "Untitled workflow".
+    const rawHeader = readWorkflowHeaderFromYaml(yaml);
+    if (rawHeader.name) workflowToCreate.name = rawHeader.name;
+    if (rawHeader.description !== undefined) workflowToCreate.description = rawHeader.description;
+    if (rawHeader.tags) workflowToCreate.tags = rawHeader.tags;
   }
 
   const id = providedId || generateWorkflowId(workflowToCreate.name);

@@ -209,4 +209,25 @@ describe('scheduleWorkflowTriggers', () => {
     expect(scheduler.scheduleWorkflowTask).toHaveBeenCalledTimes(2);
     expect(logger.warn).toHaveBeenCalledTimes(1);
   });
+
+  it('forwards an undefined request to the scheduler when called without one (system mode)', async () => {
+    const scheduler = makeMockScheduler();
+
+    await scheduleWorkflowTriggers({
+      workflowId: 'wf-1',
+      definition: baseDefinition,
+      spaceId: 'default',
+      taskScheduler: scheduler,
+      logger,
+      // no `request` — built-in workflows registered at plugin start use this path
+    });
+
+    expect(scheduler.scheduleWorkflowTask).toHaveBeenCalledTimes(1);
+    expect(scheduler.scheduleWorkflowTask).toHaveBeenCalledWith(
+      'wf-1',
+      'default',
+      expect.objectContaining({ type: 'scheduled' }),
+      undefined
+    );
+  });
 });

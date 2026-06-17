@@ -41,5 +41,19 @@ export function parseObject(
     shape[key] = fieldSchema;
   }
 
-  return z.object(shape);
+  let objectSchema = z.object(shape);
+
+  if (schema.additionalProperties !== undefined) {
+    const additionalProperties = schema.additionalProperties;
+    const valueSchema =
+      additionalProperties === true
+        ? z.unknown()
+        : additionalProperties === false
+          ? z.never()
+          : parseJsonSchema(additionalProperties);
+
+    objectSchema = objectSchema.catchall(valueSchema);
+  }
+
+  return objectSchema;
 }

@@ -82,6 +82,13 @@ export const securityDefaultProductFeaturesConfig: SecurityProductFeaturesConfig
         api: [`${APP_ID}-threat-intelligence`],
       },
     },
+    // The threat-intelligence sub-feature carries the read / write-subscriptions
+    // / manage-sources privilege tiers folded in from the now-deprecated
+    // standalone threat-intelligence Kibana feature. It only attaches to the
+    // Security Solution feature on product tiers where Threat Intelligence is
+    // licensed (i.e. ESS Complete and Serverless Complete), matching the
+    // original Platinum-and-up gating.
+    subFeatureIds: [SecuritySubFeatureId.threatIntelligence],
   },
 
   [ProductFeatureSecurityKey.endpointHostIsolation]: {

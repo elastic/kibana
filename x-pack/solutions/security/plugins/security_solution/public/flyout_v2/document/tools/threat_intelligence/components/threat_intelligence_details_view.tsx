@@ -20,6 +20,7 @@ import {
   THREAT_INTELLIGENCE_MATCHES_TEST_ID,
 } from './test_ids';
 import { FlyoutLoading } from '../../../../shared/components/flyout_loading';
+import { RelatedThreatReportsPanel } from './related_threat_reports_panel';
 
 export interface ThreatIntelligenceDetailsViewProps {
   /**
@@ -91,6 +92,9 @@ export const ThreatIntelligenceDetailsView = memo(({ hit }: ThreatIntelligenceDe
           />
         </>
       ) : null}
+
+      <EuiHorizontalRule />
+      <RelatedThreatReportsPanel hit={hit} />
     </>
   );
 });

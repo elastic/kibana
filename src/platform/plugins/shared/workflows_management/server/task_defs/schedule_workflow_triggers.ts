@@ -15,6 +15,10 @@ import type { WorkflowTaskScheduler } from '../tasks/workflow_task_scheduler';
 /**
  * Schedules trigger tasks for a newly created workflow.
  * Used by both createWorkflow and bulkCreateWorkflows.
+ *
+ * When `request` is omitted the underlying scheduler runs in "system" mode
+ * (no per-user API key). Built-in workflows registered by a plugin at setup
+ * time use this path; user-created workflows always pass a request.
  */
 export const scheduleWorkflowTriggers = async (params: {
   workflowId: string;
@@ -22,7 +26,7 @@ export const scheduleWorkflowTriggers = async (params: {
   enabled: boolean;
   valid: boolean;
   spaceId: string;
-  request: KibanaRequest;
+  request?: KibanaRequest;
   taskScheduler: WorkflowTaskScheduler | null;
   logger: Logger;
 }): Promise<void> => {

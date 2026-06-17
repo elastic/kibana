@@ -13,6 +13,7 @@ import {
   applyFieldUpdates,
   applyYamlUpdate,
   getTriggerTypesFromDefinition,
+  prepareWorkflowDocumentFromYaml,
   workflowYamlDeclaresTopLevelEnabled,
 } from './workflow_prepare';
 import type { WorkflowProperties } from '../../storage/workflow_storage';
@@ -138,6 +139,104 @@ describe('applyFieldUpdates', () => {
     const { patch } = applyFieldUpdates({ name: 'New' }, sourceNoYaml);
     expect(patch.name).toBe('New');
     expect(patch.yaml).toBeUndefined();
+  });
+});
+
+describe('prepareWorkflowDocumentFromYaml', () => {
+  const failingSchema = {
+    parse: () => {
+      throw new Error('invalid');
+    },
+    safeParse: () => ({
+      success: false,
+      error: { issues: [{ message: 'unknown step type', path: ['steps', 0, 'type'] }] },
+    }),
+  } as any;
+
+  const passingSchemaForYaml = (parsed: unknown) =>
+    ({
+      parse: () => parsed,
+      safeParse: () => ({ success: true, data: parsed }),
+    } as any);
+
+  it('falls back to top-level name/description/tags from raw YAML when zod parse fails', () => {
+    const yaml = [
+      'name: Threat intelligence — Source ingestion',
+      'description: Pull enabled sources and write reports',
+      'tags:',
+      '  - threat-intel',
+      '  - built-in',
+      'enabled: true',
+      'triggers:',
+      '  - type: scheduled',
+      '    with:',
+      '      every: "4h"',
+      'steps:',
+      '  - name: fetch',
+      '    type: this.step.type.does.not.exist',
+      '    with:',
+      '      url: https://example.com',
+      '',
+    ].join('\n');
+
+    const { workflowData } = prepareWorkflowDocumentFromYaml({
+      id: 'wf-1',
+      yaml,
+      zodSchema: failingSchema,
+      authenticatedUser: 'tester',
+      now: new Date('2024-01-01T00:00:00.000Z'),
+      spaceId: 'default',
+      triggerDefinitions: [],
+    });
+
+    expect(workflowData.name).toBe('Threat intelligence — Source ingestion');
+    expect(workflowData.description).toBe('Pull enabled sources and write reports');
+    expect(workflowData.tags).toEqual(['threat-intel', 'built-in']);
+    expect(workflowData.valid).toBe(false);
+    expect(workflowData.definition).toBeNull();
+  });
+
+  it('keeps the "Untitled workflow" default when raw YAML has no name and zod parse fails', () => {
+    const yaml = 'steps:\n  - name: x\n    type: unknown.step.type\n';
+
+    const { workflowData } = prepareWorkflowDocumentFromYaml({
+      id: 'wf-2',
+      yaml,
+      zodSchema: failingSchema,
+      authenticatedUser: 'tester',
+      now: new Date('2024-01-01T00:00:00.000Z'),
+      spaceId: 'default',
+      triggerDefinitions: [],
+    });
+
+    expect(workflowData.name).toBe('Untitled workflow');
+    expect(workflowData.valid).toBe(false);
+  });
+
+  it('does not override parsed name when validation succeeds', () => {
+    const parsed = {
+      version: '1' as const,
+      name: 'Parsed name',
+      description: 'Parsed description',
+      enabled: true,
+      tags: ['parsed'],
+      triggers: [],
+      steps: [],
+    };
+    const yaml = 'name: Raw name\n';
+
+    const { workflowData } = prepareWorkflowDocumentFromYaml({
+      id: 'wf-3',
+      yaml,
+      zodSchema: passingSchemaForYaml(parsed),
+      authenticatedUser: 'tester',
+      now: new Date('2024-01-01T00:00:00.000Z'),
+      spaceId: 'default',
+      triggerDefinitions: [],
+    });
+
+    expect(workflowData.name).toBe('Parsed name');
+    expect(workflowData.description).toBe('Parsed description');
   });
 });
 

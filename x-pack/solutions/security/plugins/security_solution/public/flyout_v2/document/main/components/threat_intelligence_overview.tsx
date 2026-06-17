@@ -14,6 +14,7 @@ import { FLYOUT_STORAGE_KEYS } from '../constants/local_storage';
 import { useKibana } from '../../../../common/lib/kibana';
 import { ExpandablePanel } from '../../../shared/components/expandable_panel';
 import { useFetchThreatIntelligence } from '../../tools/threat_intelligence/hooks/use_fetch_threat_intelligence';
+import { useFlyoutInsights } from '../../tools/threat_intelligence/hooks/use_flyout_insights';
 import { InsightsSummaryRow } from './insights_summary_row';
 import {
   INSIGHTS_THREAT_INTELLIGENCE_ENRICHED_WITH_THREAT_INTELLIGENCE_TEST_ID,
@@ -89,6 +90,8 @@ export const ThreatIntelligenceOverview: FC<ThreatIntelligenceOverviewProps> = (
   const { loading, threatMatchesCount, threatEnrichmentsCount } = useFetchThreatIntelligence({
     hit,
   });
+  const { enabled: flyoutInsightsEnabled, data: flyoutInsightsData } = useFlyoutInsights({ hit });
+  const relatedReportsCount = flyoutInsightsData?.related_reports.length ?? 0;
 
   const link = useMemo(
     () =>
@@ -121,6 +124,17 @@ export const ThreatIntelligenceOverview: FC<ThreatIntelligenceOverviewProps> = (
       />
     ),
     [threatEnrichmentsCount]
+  );
+
+  const relatedReportsCountText = useMemo(
+    () => (
+      <FormattedMessage
+        id="xpack.securitySolution.flyout.document.insights.threatIntelligence.relatedReportsDescription"
+        defaultMessage="Related threat {count, plural, one {report} other {reports}}"
+        values={{ count: relatedReportsCount }}
+      />
+    ),
+    [relatedReportsCount]
   );
 
   return (
@@ -161,6 +175,14 @@ export const ThreatIntelligenceOverview: FC<ThreatIntelligenceOverviewProps> = (
           onShowDetails={onShowThreatIntelligence}
           data-test-subj={INSIGHTS_THREAT_INTELLIGENCE_ENRICHED_WITH_THREAT_INTELLIGENCE_TEST_ID}
         />
+        {flyoutInsightsEnabled && relatedReportsCount > 0 ? (
+          <InsightsSummaryRow
+            text={relatedReportsCountText}
+            value={relatedReportsCount}
+            onShowDetails={onShowThreatIntelligence}
+            data-test-subj={`${INSIGHTS_THREAT_INTELLIGENCE_TEST_ID}RelatedReports`}
+          />
+        ) : null}
       </EuiFlexGroup>
     </ExpandablePanel>
   );

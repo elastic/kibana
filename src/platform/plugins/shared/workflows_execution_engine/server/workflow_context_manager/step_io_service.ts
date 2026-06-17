@@ -632,6 +632,16 @@ export class StepIoService implements StepIoWriter, StepIoLifecycle {
     }
 
     // Scope-stack entries — needed by enrichStepContextAccordingToStepScope.
+    // For each foreach scope frame, also keep resident the step outputs
+    // referenced by the foreach expression. `buildForeachContext` re-evaluates
+    // that expression on every iteration to derive `foreach.items` /
+    // `foreach.item` (only `index` and `total` are persisted), so its source
+    // step must outlive the deferred-release pass that happens between
+    // iterations. Without this, the source step gets re-evicted in
+    // `releaseTransientExcept` before the inner step's `getContext()` runs,
+    // and `foreach.item` collapses to undefined for every iteration after
+    // the first flush cycle. Static analysis on the inner node misses this
+    // because the inner node only references `foreach.item.X`.
     const executionId = this.state.getWorkflowExecutionId();
     let currentScope = WorkflowScopeStack.fromStackFrames(
       this.state.getWorkflowExecutionScopeStack()
@@ -1044,4 +1054,19 @@ export class StepIoService implements StepIoWriter, StepIoLifecycle {
 function stripIo(step: EsWorkflowStepExecution): StepExecutionMetadata {
   const { input: _input, output: _output, ...metadata } = step;
   return metadata;
+}
+
+/**
+ * Pulls the foreach expression string out of an enter-foreach step's input.
+ * `EnterForeachNodeImpl` writes `{ foreach: <expression> }` at loop-entry
+ * time (literal arrays are JSON-stringified). Returns `undefined` when the
+ * input is missing or shaped differently — callers must treat that as
+ * "no statically known step references" and rely on other rehydration paths.
+ */
+function extractForeachExpressionFromInput(input: JsonValue | undefined): string | undefined {
+  if (input === null || typeof input !== 'object' || Array.isArray(input)) {
+    return undefined;
+  }
+  const { foreach: expression } = input as Record<string, JsonValue>;
+  return typeof expression === 'string' ? expression : undefined;
 }
