@@ -112,6 +112,9 @@ dependsOn:
   - '@kbn/inbox-plugin'
   - '@kbn/inbox-common'
   - '@kbn/datemath'
+  - '@kbn/core-http-server-utils'
+  - '@kbn/core-spaces-common'
+  - '@kbn/crypto'
 tags:
   - plugin
   - prod
