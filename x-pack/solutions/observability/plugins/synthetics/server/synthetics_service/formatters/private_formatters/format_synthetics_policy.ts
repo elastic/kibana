@@ -70,6 +70,20 @@ export const formatSyntheticsPolicy = (
         }
       });
     }
+    // API monitors emit a companion `synthetics.api.network` document per
+    // request via Heartbeat's enrichSynthEvent → SetEventDataset path.
+    // Enabling the `api.network` stream here is what causes Fleet to include
+    // the matching index privileges in the generated agent API key. Without
+    // it, journey/network_info events are produced and routed correctly by
+    // Heartbeat but rejected at the bulk indexing layer with a 403, leaving
+    // the api.network data stream silently empty.
+    if (monitorType === 'api') {
+      currentInput.streams.forEach((stream) => {
+        if (stream.data_stream.dataset === 'api.network') {
+          stream.enabled = true;
+        }
+      });
+    }
   }
 
   configKeys.forEach((key) => {
@@ -93,7 +107,10 @@ export const formatSyntheticsPolicy = (
   });
 
   // This field is NOT in the monitor config, but needs to be set in the policy
-  // so Heartbeat knows to decode the base64-encoded script
+  // so Heartbeat knows to decode the base64-encoded script.
+  // Browser-only: the API input will define its own script-source / encoding
+  // var names in the integrations package (see TODO above). When that lands,
+  // add the equivalent base64 handling for the API input there, not here.
   const encodingVar = dataStream?.vars?.['source.inline.encoding'];
   if (monitorType === 'browser' && encodingVar && config[ConfigKey.SOURCE_INLINE]) {
     encodingVar.value = 'base64';

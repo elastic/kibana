@@ -81,16 +81,26 @@ function getMonitorTypeBadgeTitle(monitorType: string) {
       return 'Page';
     case FormMonitorType.MULTISTEP:
       return 'Journey';
+    case FormMonitorType.API:
+      return 'API Journey';
   }
 
   switch (monitorType) {
     case MonitorTypeEnum.BROWSER:
       return 'Journey';
+    case MonitorTypeEnum.API:
+      return 'API Journey';
     default:
       return monitorType.toUpperCase();
   }
 }
 
 function getMonitorTypeBadgeIcon(monitorType: string) {
-  return monitorType === 'browser' ? 'videoPlayer' : 'online';
+  if (monitorType === MonitorTypeEnum.BROWSER || monitorType === FormMonitorType.MULTISTEP) {
+    return 'videoPlayer';
+  }
+  if (monitorType === MonitorTypeEnum.API || monitorType === FormMonitorType.API) {
+    return 'apmTrace';
+  }
+  return 'online';
 }
