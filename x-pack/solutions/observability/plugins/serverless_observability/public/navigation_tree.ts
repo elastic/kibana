@@ -455,6 +455,7 @@ export const createNavigationTree = ({
             ),
             children: [
               { link: 'management:index_management' },
+              { link: 'management:data_source_management' },
               { link: 'management:index_lifecycle_management' },
               { link: 'management:snapshot_restore' },
               { link: 'management:transform' },

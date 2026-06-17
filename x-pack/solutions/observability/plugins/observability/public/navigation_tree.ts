@@ -497,6 +497,9 @@ function createNavTree({
                 link: 'management:index_management',
               },
               {
+                link: 'management:data_source_management',
+              },
+              {
                 link: 'management:index_lifecycle_management',
               },
               {
@@ -510,9 +513,6 @@ function createNavTree({
               },
               {
                 link: 'management:data_quality',
-              },
-              {
-                link: 'management:data_source_management',
               },
             ],
           },

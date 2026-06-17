@@ -19,8 +19,8 @@ export class DataSourceManagementPlugin
     management.sections.section.data.registerApp({
       id: PLUGIN_ID,
       title: PLUGIN_NAME,
-      /** Listed after Data usage (6), before Connector/Migration entries (order 8) in Data sidebar. */
-      order: 7,
+      /** Listed immediately after Index Management (0) in the Data sidebar. */
+      order: 1,
       /** Old Stack Management path before this app moved to the Data section. */
       redirectFrom: 'kibana/data_source_management',
       async mount(params: ManagementAppMountParams) {

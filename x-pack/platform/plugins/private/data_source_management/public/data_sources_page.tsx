@@ -17,13 +17,13 @@ import {
   EuiButtonGroup,
   type EuiButtonGroupOptionProps,
   EuiButtonIcon,
-  EuiContextMenuItem,
-  EuiContextMenuPanel,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiHealth,
   EuiInMemoryTable,
   EuiLink,
   EuiPageHeader,
   EuiPageSection,
-  EuiPopover,
   EuiSpacer,
   EuiToolTip,
   useEuiTheme,
@@ -31,7 +31,10 @@ import {
 
 import type { DataSourceType, DataSourceWithSecrets } from '../common';
 import { LIST_BREADCRUMB, PLUGIN_NAME } from '../common';
-import type { DataSourceListItem } from '../common/sample_data_sources_client';
+import type {
+  DataSourceListItem,
+  DataSourceConnectionStatus,
+} from '../common/sample_data_sources_client';
 import type { SampleDataSetsClient } from '../common/sample_data_sets_client';
 import type { SampleDataSourcesClient } from '../common/sample_data_sources_client';
 import type { DataSetListItem } from '../common/sample_data_sets_client';
@@ -50,6 +53,24 @@ import { dataSourcePreviewPageStrings } from './data_source_preview_flyout_i18n'
 
 const TAB_ID_DATA_SETS = 'data_sets_tab';
 const TAB_ID_DATA_SOURCES = 'data_sources_tab';
+
+const DATA_SOURCE_STATUS_LABELS: Record<DataSourceConnectionStatus, string> = {
+  connected: i18n.translate('dataSourceManagement.table.statusConnected', {
+    defaultMessage: 'Connected',
+  }),
+  disconnected: i18n.translate('dataSourceManagement.table.statusDisconnected', {
+    defaultMessage: 'Disconnected',
+  }),
+};
+
+const renderDataSourceConnectionStatus = (status: DataSourceConnectionStatus) => (
+  <EuiHealth
+    color={status === 'connected' ? 'success' : 'danger'}
+    data-test-subj={`dataSourceManagementStatus-${status}`}
+  >
+    {DATA_SOURCE_STATUS_LABELS[status]}
+  </EuiHealth>
+);
 
 /** Renders beside global chrome breadcrumbs via `chrome.setBreadcrumbsAppendExtension`. */
 const PrototypeCatalogChromeToggle: FunctionComponent<{
@@ -98,7 +119,6 @@ interface DataSourcesTabPanelProps {
   dataSetsClient: SampleDataSetsClient;
   onRefreshSourcesAndSets: () => Promise<void>;
   modificationsAllowed: boolean;
-  onOpenConnectFlyout: () => void;
   onOpenCloudSourceFlyout: () => void;
 }
 
@@ -111,62 +131,19 @@ const DataSourcesTabPanel: FunctionComponent<DataSourcesTabPanelProps> = ({
   dataSetsClient,
   onRefreshSourcesAndSets,
   modificationsAllowed,
-  onOpenConnectFlyout,
   onOpenCloudSourceFlyout,
 }) => {
-  const [isConnectPopoverOpen, setIsConnectPopoverOpen] = useState(false);
-
   const connectButton = modificationsAllowed ? (
-    <EuiPopover
-      aria-label={i18n.translate('dataSourceManagement.connectOptions.popoverAriaLabel', {
-        defaultMessage: 'Connect external source options',
-      })}
-      isOpen={isConnectPopoverOpen}
-      closePopover={() => setIsConnectPopoverOpen(false)}
-      button={
-        <EuiButton
-          color="primary"
-          fill
-          data-test-subj="dataSourceManagementCreateButton"
-          onClick={() => setIsConnectPopoverOpen((v) => !v)}
-          iconType="arrowDown"
-          iconSide="right"
-        >
-          {i18n.translate('dataSourceManagement.connectExternalSourceButton', {
-            defaultMessage: 'Connect external source',
-          })}
-        </EuiButton>
-      }
+    <EuiButton
+      color="primary"
+      fill
+      data-test-subj="dataSourceManagementCreateButton"
+      onClick={onOpenCloudSourceFlyout}
     >
-      <EuiContextMenuPanel
-        items={[
-          <EuiContextMenuItem
-            key="option1"
-            data-test-subj="dataSourceManagementConnectOption1"
-            onClick={() => {
-              setIsConnectPopoverOpen(false);
-              onOpenConnectFlyout();
-            }}
-          >
-            {i18n.translate('dataSourceManagement.connectOptions.option1', {
-              defaultMessage: 'Option 1',
-            })}
-          </EuiContextMenuItem>,
-          <EuiContextMenuItem
-            key="option2"
-            data-test-subj="dataSourceManagementConnectOption2"
-            onClick={() => {
-              setIsConnectPopoverOpen(false);
-              onOpenCloudSourceFlyout();
-            }}
-          >
-            {i18n.translate('dataSourceManagement.connectOptions.option2', {
-              defaultMessage: 'Option 2',
-            })}
-          </EuiContextMenuItem>,
-        ]}
-      />
-    </EuiPopover>
+      {i18n.translate('dataSourceManagement.connectExternalSourceButton', {
+        defaultMessage: 'Connect external source',
+      })}
+    </EuiButton>
   ) : undefined;
 
   return (
@@ -186,6 +163,7 @@ const DataSourcesTabPanel: FunctionComponent<DataSourcesTabPanelProps> = ({
             schema: {
               fields: {
                 name: { type: 'string' },
+                status: { type: 'string' },
                 type: { type: 'string' },
                 description: { type: 'string' },
               },
@@ -253,12 +231,9 @@ interface DataSetsTabPanelProps {
   /** Names for the search bar field filter (registered sources and any orphan `sourceName` values from data sets). */
   dataSourceFilterOptions: ReadonlyArray<{ value: string }>;
   modificationsAllowed: boolean;
-  hasDataSources: boolean;
-  /** When false, the catalog has no data sets; show the empty prompt with a link to the Data sources tab. */
+  /** When false, the catalog has no data sets; show the empty prompt. */
   hasAnyDataSetsInCatalog: boolean;
-  onGoToDataSourcesTab: () => void;
   addDataSetButtonLabel: string;
-  addDataSetDisabledTooltip: string;
   onOpenAddDataSetFlyout: () => void;
   onBulkDeleteSelectedDataSets: () => void;
 }
@@ -272,11 +247,8 @@ const DataSetsTabPanel: FunctionComponent<DataSetsTabPanelProps> = ({
   onDataSetsSearchQueryChange,
   dataSourceFilterOptions,
   modificationsAllowed,
-  hasDataSources,
   hasAnyDataSetsInCatalog,
-  onGoToDataSourcesTab,
   addDataSetButtonLabel,
-  addDataSetDisabledTooltip,
   onOpenAddDataSetFlyout,
   onBulkDeleteSelectedDataSets,
 }) => {
@@ -286,7 +258,6 @@ const DataSetsTabPanel: FunctionComponent<DataSetsTabPanelProps> = ({
       fill
       data-test-subj="dataSourceManagementSetsAddButton"
       onClick={onOpenAddDataSetFlyout}
-      disabled={!hasDataSources}
     >
       {addDataSetButtonLabel}
     </EuiButton>
@@ -301,25 +272,10 @@ const DataSetsTabPanel: FunctionComponent<DataSetsTabPanelProps> = ({
     return (
       <FormattedMessage
         id="dataSourceManagement.datasetsTab.emptyCatalogPromptMessage"
-        defaultMessage="You don't have any datasets yet. To add them, you first must {connectDataSourceLink}."
-        values={{
-          connectDataSourceLink: (
-            <EuiLink
-              onClick={() => {
-                onGoToDataSourcesTab();
-              }}
-              data-test-subj="dataSourceManagementEmptyCatalogConnectLink"
-            >
-              <FormattedMessage
-                id="dataSourceManagement.datasetsTab.connectDataSourceLinkLabel"
-                defaultMessage="Connect a data source"
-              />
-            </EuiLink>
-          ),
-        }}
+        defaultMessage="You don't have any datasets yet."
       />
     );
-  }, [hasAnyDataSetsInCatalog, onGoToDataSourcesTab]);
+  }, [hasAnyDataSetsInCatalog]);
 
   const dataSetsSearchFilters = useMemo(
     () =>
@@ -382,14 +338,7 @@ const DataSetsTabPanel: FunctionComponent<DataSetsTabPanelProps> = ({
                 })}
               </EuiButton>
             ) : undefined,
-          toolsRight:
-            modificationsAllowed && hasDataSources ? (
-              addDataSetButton
-            ) : modificationsAllowed && !hasDataSources ? (
-              <EuiToolTip content={addDataSetDisabledTooltip} delay="long" position="bottom">
-                <span tabIndex={0}>{addDataSetButton}</span>
-              </EuiToolTip>
-            ) : undefined,
+          toolsRight: modificationsAllowed ? addDataSetButton : undefined,
           query: dataSetsSearchQuery,
           onChange: ({ queryText, error }) => {
             if (error) {
@@ -456,6 +405,8 @@ export const DataSourcesPage: FunctionComponent<DataSourcesPageProps> = ({
     openConnectFlyoutOnMount && modificationsAllowed
   );
   const [isCloudSourceFlyoutOpen, setCloudSourceFlyoutOpen] = useState(false);
+  /** Name of the data source just created via the connect flyout while the add-dataset flyout was open. */
+  const [newSourceNameForDataSet, setNewSourceNameForDataSet] = useState<string | undefined>();
   const [addDataSetFlyout, setAddDataSetFlyout] = useState<AddDataSetFlyoutOpenState>({
     mode: 'closed',
   });
@@ -497,10 +448,6 @@ export const DataSourcesPage: FunctionComponent<DataSourcesPageProps> = ({
     [prototypeCatalogMode]
   );
 
-  const handleGoToDataSourcesTab = useCallback(() => {
-    setSelectedTabId(TAB_ID_DATA_SOURCES);
-  }, []);
-
   const refreshSourcesAndSets = useCallback(async () => {
     const [sources, sets] = await Promise.all([dataSourcesClient.get(), dataSetsClient.get()]);
     applyFetchedCatalog(sources, sets);
@@ -525,12 +472,16 @@ export const DataSourcesPage: FunctionComponent<DataSourcesPageProps> = ({
     }): Promise<string | null> => {
       try {
         await dataSourcesClient.add(values);
+        if (addDataSetFlyout.mode !== 'closed') {
+          setNewSourceNameForDataSet(values.name);
+        }
+        await refreshSourcesAndSets();
         return null;
       } catch (e) {
         return e instanceof Error ? e.message : 'Unknown error';
       }
     },
-    [dataSourcesClient]
+    [addDataSetFlyout.mode, dataSourcesClient, refreshSourcesAndSets]
   );
 
   const handleCloudSourceFlyoutClose = useCallback(() => {
@@ -545,12 +496,16 @@ export const DataSourcesPage: FunctionComponent<DataSourcesPageProps> = ({
     }): Promise<string | null> => {
       try {
         await dataSourcesClient.add(values);
+        if (addDataSetFlyout.mode !== 'closed') {
+          setNewSourceNameForDataSet(values.name);
+        }
+        await refreshSourcesAndSets();
         return null;
       } catch (e) {
         return e instanceof Error ? e.message : 'Unknown error';
       }
     },
-    [dataSourcesClient]
+    [addDataSetFlyout.mode, dataSourcesClient, refreshSourcesAndSets]
   );
 
   useEffect(() => {
@@ -650,8 +605,30 @@ export const DataSourcesPage: FunctionComponent<DataSourcesPageProps> = ({
     [dataSetsClient, dataSourcesClient, overlays, refreshSourcesAndSets]
   );
 
+  const handleTestConnectionRow = useCallback(
+    (record: DataSourceListItem) => {
+      if (record.status === 'connected') {
+        coreStart.notifications.toasts.addSuccess(
+          i18n.translate('dataSourceManagement.table.testConnectionSuccess', {
+            defaultMessage: 'Successfully connected to "{name}".',
+            values: { name: record.name },
+          })
+        );
+        return;
+      }
+      coreStart.notifications.toasts.addDanger(
+        i18n.translate('dataSourceManagement.table.testConnectionFailure', {
+          defaultMessage: 'Could not connect to "{name}".',
+          values: { name: record.name },
+        })
+      );
+    },
+    [coreStart.notifications.toasts]
+  );
+
   const handleCloseAddDataSetFlyout = useCallback(() => {
     setAddDataSetFlyout({ mode: 'closed' });
+    setNewSourceNameForDataSet(undefined);
   }, []);
 
   const handleAddDataSetSave = useCallback(
@@ -720,6 +697,7 @@ export const DataSourcesPage: FunctionComponent<DataSourcesPageProps> = ({
         name: record.sourceName,
         description: '',
         type: 's3',
+        status: 'disconnected',
       },
     [items]
   );
@@ -858,9 +836,19 @@ export const DataSourcesPage: FunctionComponent<DataSourcesPageProps> = ({
           defaultMessage: 'Name',
         }),
         sortable: true,
-        width: '24%',
+        width: '20%',
         truncateText: true,
         'data-test-subj': 'dataSourceManagementColName',
+      },
+      {
+        field: 'status',
+        name: i18n.translate('dataSourceManagement.table.columnStatus', {
+          defaultMessage: 'Status',
+        }),
+        sortable: true,
+        width: '14%',
+        render: (status: DataSourceConnectionStatus) => renderDataSourceConnectionStatus(status),
+        'data-test-subj': 'dataSourceManagementColStatus',
       },
       {
         name: i18n.translate('dataSourceManagement.table.columnDataSets', {
@@ -891,7 +879,7 @@ export const DataSourcesPage: FunctionComponent<DataSourcesPageProps> = ({
           defaultMessage: 'Type',
         }),
         sortable: true,
-        width: '20%',
+        width: '18%',
         render: (value: DataSourceListItem['type']) => getDataSourceTypeLabel(value),
         'data-test-subj': 'dataSourceManagementColType',
       },
@@ -902,7 +890,7 @@ export const DataSourcesPage: FunctionComponent<DataSourcesPageProps> = ({
         }),
         sortable: true,
         truncateText: true,
-        width: '32%',
+        width: '28%',
         'data-test-subj': 'dataSourceManagementColDescription',
       },
     ];
@@ -915,68 +903,107 @@ export const DataSourcesPage: FunctionComponent<DataSourcesPageProps> = ({
         name: i18n.translate('dataSourceManagement.table.columnActions', {
           defaultMessage: 'Actions',
         }),
-        width: '164px',
-        minWidth: '164px',
-        field: 'id',
-        actions: [
-          {
-            /** EUI disables row actions when any row is selected; keep this control usable and clear selection when opening. */
-            render: (item: DataSourceListItem) => {
-              const editLabel = i18n.translate('dataSourceManagement.table.editSourceAction', {
-                defaultMessage: 'Edit data source',
-              });
-              const editDescription = i18n.translate(
-                'dataSourceManagement.table.editSourceActionDescription',
-                {
-                  defaultMessage: 'Edit the description for this data source.',
-                }
-              );
-              return (
+        width: '132px',
+        minWidth: '132px',
+        align: 'right',
+        render: (record: DataSourceListItem) => {
+          const testLabel = i18n.translate('dataSourceManagement.table.testConnectionAction', {
+            defaultMessage: 'Test connection',
+          });
+          const testDescription = i18n.translate(
+            'dataSourceManagement.table.testConnectionActionDescription',
+            {
+              defaultMessage: 'Verify connectivity to this data source.',
+            }
+          );
+          const editLabel = i18n.translate('dataSourceManagement.table.editSourceAction', {
+            defaultMessage: 'Edit data source',
+          });
+          const editDescription = i18n.translate(
+            'dataSourceManagement.table.editSourceActionDescription',
+            {
+              defaultMessage: 'Edit the description for this data source.',
+            }
+          );
+          const deleteLabel = i18n.translate('dataSourceManagement.deleteButtonLabel', {
+            defaultMessage: 'Delete',
+          });
+          const deleteDescription = i18n.translate(
+            'dataSourceManagement.table.deleteSourceActionDescription',
+            {
+              defaultMessage: 'Delete this data source',
+            }
+          );
+          const stopRowEvent = (event: React.MouseEvent) => {
+            event.stopPropagation();
+          };
+
+          return (
+            <EuiFlexGroup
+              gutterSize="xs"
+              responsive={false}
+              alignItems="center"
+              justifyContent="flexEnd"
+              data-test-subj={`dataSourceManagementRowActions-${record.id}`}
+            >
+              <EuiFlexItem grow={false}>
+                <EuiToolTip content={testDescription} delay="long">
+                  <EuiButtonIcon
+                    aria-label={testLabel}
+                    color="primary"
+                    data-test-subj={`dataSourceManagementRowTestConnection-${record.id}`}
+                    iconType="play"
+                    onClick={(event: React.MouseEvent) => {
+                      event.preventDefault();
+                      stopRowEvent(event);
+                      handleTestConnectionRow(record);
+                    }}
+                    onMouseDown={stopRowEvent}
+                  />
+                </EuiToolTip>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
                 <EuiToolTip content={editDescription} delay="long">
                   <EuiButtonIcon
                     aria-label={editLabel}
                     color="primary"
-                    data-test-subj={`dataSourceManagementRowEditSource-${item.id}`}
+                    data-test-subj={`dataSourceManagementRowEditSource-${record.id}`}
                     iconType="pencil"
                     onClick={(event: React.MouseEvent) => {
                       event.preventDefault();
-                      event.stopPropagation();
-                      openEditDataSourceFlyoutFromSourceRow(item);
+                      stopRowEvent(event);
+                      openEditDataSourceFlyoutFromSourceRow(record);
                     }}
-                    onMouseDown={(event: React.MouseEvent) => {
-                      event.stopPropagation();
-                    }}
+                    onMouseDown={stopRowEvent}
                   />
                 </EuiToolTip>
-              );
-            },
-          },
-          {
-            name: i18n.translate('dataSourceManagement.deleteButtonLabel', {
-              defaultMessage: 'Delete',
-            }),
-            description: i18n.translate(
-              'dataSourceManagement.table.deleteSourceActionDescription',
-              {
-                defaultMessage: 'Delete this data source',
-              }
-            ),
-            type: 'icon',
-            icon: 'trash',
-            color: 'danger',
-            onClick: (item: DataSourceListItem, event: React.MouseEvent) => {
-              event.stopPropagation();
-              event.preventDefault();
-              handleDeleteSourceRow(item);
-            },
-            'data-test-subj': 'dataSourceManagementRowDelete',
-          },
-        ],
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiToolTip content={deleteDescription} delay="long">
+                  <EuiButtonIcon
+                    aria-label={deleteLabel}
+                    color="danger"
+                    data-test-subj="dataSourceManagementRowDelete"
+                    iconType="trash"
+                    onClick={(event: React.MouseEvent) => {
+                      event.preventDefault();
+                      stopRowEvent(event);
+                      handleDeleteSourceRow(record);
+                    }}
+                    onMouseDown={stopRowEvent}
+                  />
+                </EuiToolTip>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          );
+        },
+        'data-test-subj': 'dataSourceManagementColActions',
       },
     ];
   }, [
     dataSets,
     handleDeleteSourceRow,
+    handleTestConnectionRow,
     modificationsAllowed,
     openEditDataSourceFlyoutFromSourceRow,
     pushFilteredDataSetsView,
@@ -1149,13 +1176,6 @@ export const DataSourcesPage: FunctionComponent<DataSourcesPageProps> = ({
       defaultMessage: 'Add dataset',
     }
   );
-  const addDataSetTableButtonDisabledTooltip = i18n.translate(
-    'dataSourceManagement.datasetsTab.addDataSetDisabledTooltip',
-    {
-      defaultMessage: 'Connect a data source before adding a data set.',
-    }
-  );
-
   const isDataSourcesTabSelected = selectedTabId === TAB_ID_DATA_SOURCES;
 
   const prototypeCatalogButtonGroupOptions = useMemo<Array<EuiButtonGroupOptionProps>>(
@@ -1251,11 +1271,6 @@ export const DataSourcesPage: FunctionComponent<DataSourcesPageProps> = ({
             modificationsAllowed={modificationsAllowed}
             selectedSources={selectedSources}
             setSelectedSources={setSelectedSources}
-            onOpenConnectFlyout={() => {
-              if (modificationsAllowed) {
-                setConnectFlyoutOpen(true);
-              }
-            }}
             onOpenCloudSourceFlyout={() => {
               if (modificationsAllowed) {
                 setCloudSourceFlyoutOpen(true);
@@ -1273,11 +1288,8 @@ export const DataSourcesPage: FunctionComponent<DataSourcesPageProps> = ({
             onDataSetsSearchQueryChange={handleDataSetsSearchQueryChange}
             selectedDataSets={selectedDataSets}
             setSelectedDataSets={setSelectedDataSets}
-            hasDataSources={items.length > 0}
             hasAnyDataSetsInCatalog={dataSets.length > 0}
-            onGoToDataSourcesTab={handleGoToDataSourcesTab}
             addDataSetButtonLabel={addDataSetTableButtonLabel}
-            addDataSetDisabledTooltip={addDataSetTableButtonDisabledTooltip}
             onOpenAddDataSetFlyout={openAddDataSetFlyoutChooseSource}
             onBulkDeleteSelectedDataSets={handleBulkDeleteSelectedDataSets}
           />
@@ -1326,6 +1338,12 @@ export const DataSourcesPage: FunctionComponent<DataSourcesPageProps> = ({
           }
           onClose={handleCloseAddDataSetFlyout}
           onSave={handleAddDataSetSave}
+          onAddNewSource={
+            addDataSetFlyout.mode === 'chooseSource'
+              ? () => setCloudSourceFlyoutOpen(true)
+              : undefined
+          }
+          newlyCreatedSourceName={newSourceNameForDataSet}
         />
       ) : null}
     </>

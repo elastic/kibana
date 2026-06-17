@@ -27,7 +27,7 @@ export const DATA_SOURCES_LIST_ROUTE_PATH = `${INTERNAL_API_BASE_PATH}/data_sour
 export const DATA_SOURCE_BY_ID_ROUTE_PATH = `${INTERNAL_API_BASE_PATH}/data_sources/{id}` as const;
 
 export const PLUGIN_NAME = i18n.translate('dataSourceManagement.pluginName', {
-  defaultMessage: 'External datasets',
+  defaultMessage: 'ES|QL Data federation',
 });
 
 export const LIST_BREADCRUMB = [

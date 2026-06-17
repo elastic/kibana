@@ -58,6 +58,10 @@ export const createManagementFooterItemsTree = (
             },
             {
               breadcrumbStatus: 'hidden',
+              link: 'management:data_source_management',
+            },
+            {
+              breadcrumbStatus: 'hidden',
               link: 'management:transform',
             },
             {

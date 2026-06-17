@@ -6,7 +6,7 @@
  */
 
 import type { FunctionComponent } from 'react';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   EuiAccordion,
   EuiButton,
@@ -20,7 +20,11 @@ import {
   EuiFlyoutHeader,
   EuiForm,
   EuiFormRow,
+  EuiHorizontalRule,
+  EuiInputPopover,
   EuiSelect,
+  EuiSelectable,
+  type EuiSelectableOption,
   EuiSpacer,
   EuiText,
   EuiTextArea,
@@ -57,6 +61,10 @@ export interface AddDataSetFlyoutProps {
   onClose: () => void;
   /** Resolve `null` on success, or an error message to display in the flyout. */
   onSave: (values: AddDataSetFlyoutPayload) => Promise<string | null>;
+  /** When provided, renders an "Add new data source" link in the source picker footer. */
+  onAddNewSource?: () => void;
+  /** When set by the parent (after a new source is created), auto-selects that source. */
+  newlyCreatedSourceName?: string;
 }
 
 export const AddDataSetFlyout: FunctionComponent<AddDataSetFlyoutProps> = ({
@@ -66,12 +74,16 @@ export const AddDataSetFlyout: FunctionComponent<AddDataSetFlyoutProps> = ({
   onDeleteExistingSet,
   onClose,
   onSave,
+  onAddNewSource,
+  newlyCreatedSourceName,
 }) => {
   const titleId = 'addDataSetFlyoutTitle';
   const isEditMode = Boolean(existingEditSet);
   const isPickSourceMode = !presetSource && !isEditMode;
 
   const [pickedSourceName, setPickedSourceName] = useState('');
+  const [inputValue, setInputValue] = useState('');
+  const [isSourcePickerOpen, setIsSourcePickerOpen] = useState(false);
   const [datasetId, setDatasetId] = useState(existingEditSet?.name ?? '');
   const [resource, setResource] = useState(existingEditSet?.resource ?? '');
   const [description, setDescription] = useState(existingEditSet?.description ?? '');
@@ -96,13 +108,45 @@ export const AddDataSetFlyout: FunctionComponent<AddDataSetFlyoutProps> = ({
     []
   );
 
-  const sourcePickerOptions = useMemo(() => {
-    const sorted = [...sourcesForPicker].sort((a, b) => a.name.localeCompare(b.name));
-    return [
-      { value: '', text: addDataSetFlyoutStrings.sourcePlaceholder(), disabled: true },
-      ...sorted.map((src) => ({ value: src.name, text: src.name })),
-    ];
-  }, [sourcesForPicker]);
+  const selectableSourceOptions = useMemo((): EuiSelectableOption[] => {
+    const term = inputValue.trim().toLowerCase();
+    return [...sourcesForPicker]
+      .filter((src) => !term || src.name.toLowerCase().includes(term))
+      .sort((a, b) => a.name.localeCompare(b.name))
+      .map((src) => ({
+        label: src.name,
+        key: src.name,
+        checked: src.name === pickedSourceName ? ('on' as const) : undefined,
+      }));
+  }, [sourcesForPicker, pickedSourceName, inputValue]);
+
+  const handleSelectableChange = useCallback((options: EuiSelectableOption[]) => {
+    const selected = options.find((o) => o.checked === 'on');
+    if (selected) {
+      setPickedSourceName(selected.label);
+      setInputValue(selected.label);
+      setSourceError(undefined);
+      setIsSourcePickerOpen(false);
+    }
+  }, []);
+
+  const handleSourcePickerClose = useCallback(() => {
+    setIsSourcePickerOpen(false);
+    setInputValue(pickedSourceName);
+  }, [pickedSourceName]);
+
+  const handleSourceFieldClick = useCallback(() => {
+    setInputValue('');
+    setIsSourcePickerOpen(true);
+  }, []);
+
+  useEffect(() => {
+    if (newlyCreatedSourceName) {
+      setPickedSourceName(newlyCreatedSourceName);
+      setInputValue(newlyCreatedSourceName);
+      setSourceError(undefined);
+    }
+  }, [newlyCreatedSourceName]);
 
   const resolvedSourceName = presetSource ? presetSource.name : pickedSourceName;
 
@@ -217,16 +261,66 @@ export const AddDataSetFlyout: FunctionComponent<AddDataSetFlyoutProps> = ({
                 error={sourceError}
                 fullWidth
               >
-                <EuiSelect
-                  options={sourcePickerOptions}
-                  value={pickedSourceName}
-                  onChange={(e) => setPickedSourceName(e.target.value)}
-                  isInvalid={Boolean(sourceError)}
-                  data-test-subj="addDataSetFlyoutDataSource"
+                <EuiInputPopover
                   fullWidth
-                  aria-label={addDataSetFlyoutStrings.sourceLabel()}
-                  autoFocus
-                />
+                  disableFocusTrap
+                  isOpen={isSourcePickerOpen}
+                  closePopover={handleSourcePickerClose}
+                  input={
+                    <EuiFieldText
+                      value={inputValue}
+                      placeholder={addDataSetFlyoutStrings.sourcePlaceholder()}
+                      isInvalid={Boolean(sourceError)}
+                      onChange={(e) => {
+                        setInputValue(e.target.value);
+                        if (!isSourcePickerOpen) setIsSourcePickerOpen(true);
+                      }}
+                      onClick={handleSourceFieldClick}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Escape') handleSourcePickerClose();
+                      }}
+                      autoFocus={isPickSourceMode}
+                      fullWidth
+                      icon={{ type: isSourcePickerOpen ? 'arrowUp' : 'arrowDown', side: 'right' }}
+                      data-test-subj="addDataSetFlyoutDataSourceTrigger"
+                      aria-label={addDataSetFlyoutStrings.sourceLabel()}
+                      aria-haspopup="listbox"
+                      aria-expanded={isSourcePickerOpen}
+                    />
+                  }
+                >
+                  <EuiSelectable
+                    options={selectableSourceOptions}
+                    onChange={handleSelectableChange}
+                    singleSelection
+                    listProps={{
+                      onFocusBadge: false,
+                      'data-test-subj': 'addDataSetFlyoutDataSource',
+                    }}
+                    noMatchesMessage={addDataSetFlyoutStrings.sourceNoMatches()}
+                    height={Math.min(selectableSourceOptions.length * 32 || 32, 200)}
+                  >
+                    {(list) => list}
+                  </EuiSelectable>
+                  {onAddNewSource ? (
+                    <>
+                      <EuiHorizontalRule margin="none" />
+                      <EuiButtonEmpty
+                        size="s"
+                        iconType="plusInCircle"
+                        flush="left"
+                        onClick={() => {
+                          setIsSourcePickerOpen(false);
+                          onAddNewSource();
+                        }}
+                        data-test-subj="addDataSetFlyoutAddNewSource"
+                        css={{ width: '100%' }}
+                      >
+                        {addDataSetFlyoutStrings.addNewSource()}
+                      </EuiButtonEmpty>
+                    </>
+                  ) : null}
+                </EuiInputPopover>
               </EuiFormRow>
               <EuiSpacer size="m" />
             </>
@@ -342,7 +436,9 @@ export const AddDataSetFlyout: FunctionComponent<AddDataSetFlyoutProps> = ({
                   onClick={() => void handleSave()}
                   isLoading={isSaving}
                   disabled={
-                    isSaving || isDeleting || (isPickSourceMode && sourcesForPicker.length === 0)
+                    isSaving ||
+                    isDeleting ||
+                    (isPickSourceMode && sourcesForPicker.length === 0 && pickedSourceName === '')
                   }
                 >
                   {isEditMode

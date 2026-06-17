@@ -9,11 +9,14 @@ import { i18n } from '@kbn/i18n';
 
 import type { DataSourceType, DataSourceWithSecrets } from './datasource_types';
 
+export type DataSourceConnectionStatus = 'connected' | 'disconnected';
+
 export interface DataSourceListItem {
   id: string;
   name: string;
   description: string;
   type: DataSourceType;
+  status: DataSourceConnectionStatus;
   /** Full persisted config from connect flows (prototype). Used to show readonly connection fields in edit flyout. */
   persistedConfig?: Omit<DataSourceWithSecrets, 'id'>;
 }
@@ -31,6 +34,7 @@ const INITIAL_ROWS: DataSourceListItem[] = [
     name: 'logs-production',
     description: 'Read-only connection used by Observability for production log indices.',
     type: 's3',
+    status: 'connected',
     persistedConfig: {
       type: 's3',
       description: 'Read-only connection used by Observability for production log indices.',
@@ -48,6 +52,7 @@ const INITIAL_ROWS: DataSourceListItem[] = [
     name: 'security-analytics',
     description: 'Cross-cluster search target for detection rules and alert history.',
     type: 'iceberg',
+    status: 'connected',
     persistedConfig: {
       type: 'iceberg',
       description: 'Cross-cluster search target for detection rules and alert history.',
@@ -64,6 +69,7 @@ const INITIAL_ROWS: DataSourceListItem[] = [
     name: 'reporting-archive',
     description: 'Historical CSV and PDF reports stored in a cold-tier cluster.',
     type: 'gcs',
+    status: 'disconnected',
     persistedConfig: {
       type: 'gcs',
       description: 'Historical CSV and PDF reports stored in a cold-tier cluster.',
@@ -81,6 +87,7 @@ const INITIAL_ROWS: DataSourceListItem[] = [
     name: 'staging-metrics',
     description: 'Low-volume metrics cluster for pre-production dashboards and experiments.',
     type: 'jdbc',
+    status: 'connected',
     persistedConfig: {
       type: 'jdbc',
       description: 'Low-volume metrics cluster for pre-production dashboards and experiments.',
@@ -99,6 +106,7 @@ const INITIAL_ROWS: DataSourceListItem[] = [
     name: 'fleet-ingest',
     description: 'Elasticsearch endpoint receiving Elastic Agent documents and fleet metadata.',
     type: 'flight',
+    status: 'disconnected',
     persistedConfig: {
       type: 'flight',
       description: 'Elasticsearch endpoint receiving Elastic Agent documents and fleet metadata.',
@@ -153,6 +161,7 @@ export class SampleDataSourcesClient {
       name,
       description: input.dataSource.description,
       type: input.dataSource.type,
+      status: 'connected',
       persistedConfig: clonePersisted(input.dataSource),
     };
     this.rows.push(row);

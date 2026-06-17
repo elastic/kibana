@@ -40,6 +40,16 @@ export const addDataSetFlyoutStrings = {
       defaultMessage: 'Select a data source',
     }),
 
+  sourceNoMatches: () =>
+    i18n.translate('dataSourceManagement.addDataSetFlyout.sourceNoMatches', {
+      defaultMessage: 'No data sources match your search.',
+    }),
+
+  addNewSource: () =>
+    i18n.translate('dataSourceManagement.addDataSetFlyout.addNewSource', {
+      defaultMessage: 'Add new data source',
+    }),
+
   sourceRequired: () =>
     i18n.translate('dataSourceManagement.addDataSetFlyout.sourceRequired', {
       defaultMessage: 'Select a data source.',
