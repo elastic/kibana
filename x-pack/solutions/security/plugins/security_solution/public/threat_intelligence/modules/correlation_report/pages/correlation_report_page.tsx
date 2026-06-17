@@ -13,11 +13,10 @@ import {
   EuiBadge,
   EuiBasicTable,
   EuiButton,
-  EuiButtonGroup,
+  EuiButtonEmpty,
   EuiButtonIcon,
   EuiCallOut,
   EuiEmptyPrompt,
-  EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
@@ -29,18 +28,16 @@ import {
   EuiPanel,
   EuiPopover,
   EuiRadioGroup,
+  EuiSelectable,
   EuiSpacer,
   EuiText,
   EuiTextArea,
   EuiTitle,
   useEuiTheme,
 } from '@elastic/eui';
-import type {
-  EuiBasicTableColumn,
-  EuiButtonGroupOptionProps,
-  EuiRadioGroupOption,
-} from '@elastic/eui';
+import type { EuiBasicTableColumn, EuiRadioGroupOption } from '@elastic/eui';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+import { useKibana } from '../../../../common/lib/kibana';
 import { CorrelationReport, DiamondSvg } from '../components/correlation_report';
 import { useCorrelationRuns } from '../hooks/use_correlation_findings';
 import type { StartRunInput } from '../hooks/use_correlation_findings';
@@ -56,6 +53,7 @@ import {
   KNN_STRONG_FLOOR,
   KNN_MID_FLOOR,
   KNN_BASE_FLOOR,
+  SEARCH_REPORTS_API_PATH,
 } from '../../../../../common/threat_intelligence/hub';
 import type {
   CorrelationFindingsLead,
@@ -67,13 +65,37 @@ import { i18nText } from '../components/translations';
 // Constants
 // ---------------------------------------------------------------------------
 
-const INPUT_TYPE_OPTION_REPORT_ID = 'correlation-input-report-id';
-const INPUT_TYPE_OPTION_RAW_TEXT = 'correlation-input-raw-text';
+// Matches long single-token IDs like T_glmZ4BBTbfD_VQrqq7 (base64url-ish, ≥16 chars)
+const REPORT_ID_RE = /^[A-Za-z0-9_-]{16,}$/;
+const SHORT_PHRASE_MAX_WORDS = 12;
+const SHORT_PHRASE_MAX_CHARS = 120;
 
-const INPUT_TYPE_OPTIONS: EuiButtonGroupOptionProps[] = [
-  { id: INPUT_TYPE_OPTION_REPORT_ID, label: i18nText.inputTypeReportId() },
-  { id: INPUT_TYPE_OPTION_RAW_TEXT, label: i18nText.inputTypeRawText() },
-];
+type InputIntent = 'report_id' | 'raw_text' | 'pointer';
+
+const classifyInput = (text: string): InputIntent => {
+  const t = text.trim();
+  if (REPORT_ID_RE.test(t)) return 'report_id';
+  const wordCount = t.split(/\s+/).length;
+  if (wordCount <= SHORT_PHRASE_MAX_WORDS && t.length <= SHORT_PHRASE_MAX_CHARS) return 'pointer';
+  return 'raw_text';
+};
+
+interface SearchReportHit {
+  report_id: string;
+  title: string;
+  source?: string;
+}
+
+const extractHit = (raw: Record<string, unknown> & { report_id?: string }): SearchReportHit => {
+  const reportId = raw.report_id ?? '';
+  const contentTitle = (raw['content.title'] as string | undefined) ?? '';
+  // content may arrive nested as { title: string } or flattened as content.title
+  const nested = raw.content as Record<string, unknown> | undefined;
+  const title = contentTitle || (nested?.title as string | undefined) || reportId;
+  const src = raw.source as Record<string, unknown> | undefined;
+  const sourceLabel = (src?.name as string | undefined) ?? (src?.type as string | undefined) ?? '';
+  return { report_id: reportId, title, source: sourceLabel || undefined };
+};
 
 interface DepthOption {
   readonly depth: CorrelationDepth;
@@ -883,12 +905,19 @@ const RecentsPanel: FC<{
 
 export const CorrelationReportPage: FC = () => {
   const skillEnabled = useIsExperimentalFeatureEnabled('threatIntelligenceSkillEnabled');
+  const { http } = useKibana().services;
 
-  const [inputTypeOptionId, setInputTypeOptionId] = useState(INPUT_TYPE_OPTION_REPORT_ID);
-  const [reportId, setReportId] = useState('');
-  const [rawText, setRawText] = useState('');
+  const [inputText, setInputText] = useState('');
   const [depth, setDepth] = useState<CorrelationDepth>('full');
   const [depthPopoverOpen, setDepthPopoverOpen] = useState(false);
+
+  // Disambiguation state
+  const [disambigCandidates, setDisambigCandidates] = useState<SearchReportHit[] | null>(null);
+  const [disambigLoading, setDisambigLoading] = useState(false);
+  const [disambigError, setDisambigError] = useState<string | null>(null);
+  const [selectedCandidateId, setSelectedCandidateId] = useState<string | null>(null);
+  // The original phrase preserved for the "treat as raw text" escape hatch
+  const disambigPhraseRef = useRef<string>('');
 
   const lastInputRef = useRef<StartRunInput | null>(null);
 
@@ -904,10 +933,7 @@ export const CorrelationReportPage: FC = () => {
     updateRunTitle,
   } = useCorrelationRuns();
 
-  const inputType = inputTypeOptionId === INPUT_TYPE_OPTION_REPORT_ID ? 'report_id' : 'raw_text';
-
-  const isInputValid =
-    inputType === 'report_id' ? reportId.trim().length > 0 : rawText.trim().length > 0;
+  const isInputValid = inputText.trim().length > 0;
 
   const depthRadioOptions: EuiRadioGroupOption[] = useMemo(
     () =>
@@ -927,14 +953,64 @@ export const CorrelationReportPage: FC = () => {
     []
   );
 
+  const runWithInput = useCallback(
+    (input: StartRunInput) => {
+      lastInputRef.current = input;
+      void startRun(input);
+    },
+    [startRun]
+  );
+
   const handleRun = useCallback(() => {
-    const input: StartRunInput =
-      inputType === 'report_id'
-        ? { input_type: 'report_id', report_id: reportId.trim(), depth }
-        : { input_type: 'raw_text', raw_text: rawText.trim(), depth };
-    lastInputRef.current = input;
-    void startRun(input);
-  }, [depth, inputType, rawText, reportId, startRun]);
+    const text = inputText.trim();
+    const intent = classifyInput(text);
+
+    if (intent === 'report_id') {
+      runWithInput({ input_type: 'report_id', report_id: text, depth });
+      return;
+    }
+
+    if (intent === 'raw_text') {
+      runWithInput({ input_type: 'raw_text', raw_text: text, depth });
+      return;
+    }
+
+    // pointer — search for matching reports
+    disambigPhraseRef.current = text;
+    setDisambigCandidates(null);
+    setDisambigError(null);
+    setSelectedCandidateId(null);
+    setDisambigLoading(true);
+
+    http
+      .post<{ total: number; reports: Array<Record<string, unknown> & { report_id?: string }> }>(
+        SEARCH_REPORTS_API_PATH,
+        { version: '2023-10-31', body: JSON.stringify({ query: text, size: 5 }) }
+      )
+      .then((res) => {
+        setDisambigCandidates(res.reports.map(extractHit));
+      })
+      .catch((err: unknown) => {
+        const msg = err instanceof Error ? err.message : String(err);
+        setDisambigError(msg);
+        setDisambigCandidates([]);
+      })
+      .finally(() => {
+        setDisambigLoading(false);
+      });
+  }, [depth, http, inputText, runWithInput]);
+
+  const handleDisambigConfirm = useCallback(() => {
+    if (!selectedCandidateId) return;
+    setDisambigCandidates(null);
+    runWithInput({ input_type: 'report_id', report_id: selectedCandidateId, depth });
+  }, [depth, runWithInput, selectedCandidateId]);
+
+  const handleDisambigTreatAsRaw = useCallback(() => {
+    const phrase = disambigPhraseRef.current;
+    setDisambigCandidates(null);
+    runWithInput({ input_type: 'raw_text', raw_text: phrase, depth });
+  }, [depth, runWithInput]);
 
   const handleRetry = useCallback(() => {
     if (lastInputRef.current) {
@@ -944,7 +1020,7 @@ export const CorrelationReportPage: FC = () => {
 
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
-      if (e.key === 'Enter' && isInputValid && !polling) handleRun();
+      if ((e.metaKey || e.ctrlKey) && e.key === 'Enter' && isInputValid && !polling) handleRun();
     },
     [handleRun, isInputValid, polling]
   );
@@ -1029,46 +1105,18 @@ export const CorrelationReportPage: FC = () => {
       <EuiPageTemplate.Section>
         {/* ---- Input panel ---- */}
         <EuiPanel hasBorder paddingSize="m" data-test-subj="correlationReportInputPanel">
-          {/* Input type toggle */}
-          <EuiButtonGroup
-            legend={i18n.translate(
-              'xpack.securitySolution.threatIntelligence.correlationReport.inputTypeLegend',
-              { defaultMessage: 'Input type' }
-            )}
-            options={INPUT_TYPE_OPTIONS}
-            idSelected={inputTypeOptionId}
-            onChange={setInputTypeOptionId}
-            buttonSize="s"
-            data-test-subj="correlationReportInputTypeToggle"
-          />
-
-          <EuiSpacer size="m" />
-
-          {/* Input field */}
-          {inputType === 'report_id' ? (
-            <EuiFormRow label={i18nText.reportIdLabel()} helpText={i18nText.reportIdHelp()}>
-              <EuiFieldText
-                value={reportId}
-                onChange={(e) => setReportId(e.target.value)}
-                onKeyDown={handleKeyDown}
-                placeholder={i18nText.reportIdPlaceholder()}
-                disabled={polling}
-                data-test-subj="correlationReportIdInput"
-              />
-            </EuiFormRow>
-          ) : (
-            <EuiFormRow label={i18nText.rawTextLabel()} helpText={i18nText.rawTextHelp()}>
-              <EuiTextArea
-                value={rawText}
-                onChange={(e) => setRawText(e.target.value)}
-                placeholder={i18nText.rawTextPlaceholder()}
-                disabled={polling}
-                rows={6}
-                resize="vertical"
-                data-test-subj="correlationReportRawTextInput"
-              />
-            </EuiFormRow>
-          )}
+          <EuiFormRow label={i18nText.smartInputLabel()} helpText={i18nText.smartInputHelp()}>
+            <EuiTextArea
+              value={inputText}
+              onChange={(e) => setInputText(e.target.value)}
+              onKeyDown={handleKeyDown}
+              placeholder={i18nText.smartInputPlaceholder()}
+              disabled={polling || disambigLoading}
+              rows={4}
+              resize="vertical"
+              data-test-subj="correlationReportSmartInput"
+            />
+          </EuiFormRow>
 
           <EuiSpacer size="m" />
 
@@ -1108,8 +1156,8 @@ export const CorrelationReportPage: FC = () => {
             <EuiFlexItem grow={false}>
               <EuiButton
                 fill
-                isDisabled={!isInputValid || polling}
-                isLoading={polling}
+                isDisabled={!isInputValid || polling || disambigLoading}
+                isLoading={polling || disambigLoading}
                 onClick={handleRun}
                 data-test-subj="correlationReportRunBtn"
               >
@@ -1117,6 +1165,92 @@ export const CorrelationReportPage: FC = () => {
               </EuiButton>
             </EuiFlexItem>
           </EuiFlexGroup>
+
+          {/* ---- Disambiguation panel ---- */}
+          {disambigLoading ? (
+            <>
+              <EuiSpacer size="m" />
+              <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+                <EuiFlexItem grow={false}>
+                  <EuiLoadingSpinner size="m" />
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  <EuiText size="s" color="subdued">
+                    {i18nText.disambigSearching()}
+                  </EuiText>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </>
+          ) : disambigCandidates !== null ? (
+            <>
+              <EuiSpacer size="m" />
+              <EuiTitle size="xs">
+                <h3>{i18nText.disambigHeader()}</h3>
+              </EuiTitle>
+              <EuiSpacer size="s" />
+              {disambigError ? (
+                <EuiCallOut
+                  title={i18nText.errorTitle()}
+                  color="danger"
+                  iconType="alert"
+                  size="s"
+                  data-test-subj="correlationReportDisambigError"
+                >
+                  <EuiText size="s">{disambigError}</EuiText>
+                </EuiCallOut>
+              ) : disambigCandidates.length === 0 ? (
+                <EuiText size="s" color="subdued" data-test-subj="correlationReportDisambigEmpty">
+                  {i18nText.disambigNoMatches()}
+                </EuiText>
+              ) : (
+                <EuiSelectable<{ report_id: string }>
+                  options={disambigCandidates.map((c) => ({
+                    label: c.title,
+                    append: c.source ? (
+                      <EuiText size="xs" color="subdued">
+                        {c.source}
+                      </EuiText>
+                    ) : undefined,
+                    report_id: c.report_id,
+                    checked: selectedCandidateId === c.report_id ? ('on' as const) : undefined,
+                  }))}
+                  onChange={(opts) => {
+                    const chosen = opts.find((o) => o.checked === 'on');
+                    setSelectedCandidateId(chosen?.report_id ?? null);
+                  }}
+                  singleSelection
+                  data-test-subj="correlationReportDisambigSelectable"
+                >
+                  {(list) => list}
+                </EuiSelectable>
+              )}
+              <EuiSpacer size="s" />
+              <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+                {disambigCandidates.length > 0 && !disambigError ? (
+                  <EuiFlexItem grow={false}>
+                    <EuiButton
+                      fill
+                      size="s"
+                      isDisabled={!selectedCandidateId}
+                      onClick={handleDisambigConfirm}
+                      data-test-subj="correlationReportDisambigConfirmBtn"
+                    >
+                      {i18nText.runBtn()}
+                    </EuiButton>
+                  </EuiFlexItem>
+                ) : null}
+                <EuiFlexItem grow={false}>
+                  <EuiButtonEmpty
+                    size="s"
+                    onClick={handleDisambigTreatAsRaw}
+                    data-test-subj="correlationReportDisambigRawBtn"
+                  >
+                    {i18nText.disambigTreatAsRaw()}
+                  </EuiButtonEmpty>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </>
+          ) : null}
         </EuiPanel>
 
         <EuiSpacer size="l" />

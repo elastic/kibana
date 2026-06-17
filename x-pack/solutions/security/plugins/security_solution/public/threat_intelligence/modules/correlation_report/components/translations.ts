@@ -106,32 +106,35 @@ export const i18nText = {
       defaultMessage: 'Consolidated Reports',
     }),
 
-  // Input mode toggle
-  inputTypeReportId: () =>
-    i18n.translate(`${ns}.inputTypeReportId`, { defaultMessage: 'Report ID' }),
-  inputTypeRawText: () => i18n.translate(`${ns}.inputTypeRawText`, { defaultMessage: 'Free text' }),
-
-  // Report ID input
-  reportIdLabel: () => i18n.translate(`${ns}.reportIdLabel`, { defaultMessage: 'Report ID' }),
-  reportIdHelp: () =>
-    i18n.translate(`${ns}.reportIdHelp`, {
-      defaultMessage: 'The Elasticsearch document ID of the stored threat report to correlate.',
-    }),
-  reportIdPlaceholder: () =>
-    i18n.translate(`${ns}.reportIdPlaceholder`, { defaultMessage: 'e.g. report_abc123' }),
-
-  // Raw text input
-  rawTextLabel: () =>
-    i18n.translate(`${ns}.rawTextLabel`, { defaultMessage: 'Event text / narrative' }),
-  rawTextHelp: () =>
-    i18n.translate(`${ns}.rawTextHelp`, {
+  // Smart input field
+  smartInputLabel: () =>
+    i18n.translate(`${ns}.smartInputLabel`, { defaultMessage: 'Report or incident text' }),
+  smartInputPlaceholder: () =>
+    i18n.translate(`${ns}.smartInputPlaceholder`, {
       defaultMessage:
-        'Paste events, alerts, Slack messages, or any narrative text to correlate against the knowledge base.',
+        'Paste a report ID, a short description of the report to find, or full incident text…',
     }),
-  rawTextPlaceholder: () =>
-    i18n.translate(`${ns}.rawTextPlaceholder`, {
-      defaultMessage: 'e.g. Slack thread, event log snippet, analyst notes…',
+  smartInputHelp: () =>
+    i18n.translate(`${ns}.smartInputHelp`, {
+      defaultMessage:
+        'A long ID runs directly; a short phrase searches for matching reports; longer text is correlated as raw incident content.',
     }),
+
+  // Disambiguation panel
+  disambigHeader: () =>
+    i18n.translate(`${ns}.disambigHeader`, {
+      defaultMessage: 'Found these reports — pick one to correlate',
+    }),
+  disambigNoMatches: () =>
+    i18n.translate(`${ns}.disambigNoMatches`, {
+      defaultMessage: 'No matching reports found for that phrase.',
+    }),
+  disambigTreatAsRaw: () =>
+    i18n.translate(`${ns}.disambigTreatAsRaw`, {
+      defaultMessage: 'None of these — treat as raw text',
+    }),
+  disambigSearching: () =>
+    i18n.translate(`${ns}.disambigSearching`, { defaultMessage: 'Searching reports…' }),
 
   // Execution options
   executionOptionsTitle: () =>
@@ -234,11 +237,6 @@ export const i18nText = {
   triageTriagedOutTitle: () =>
     i18n.translate(`${ns}.triageTriagedOutTitle`, { defaultMessage: 'Triaged out' }),
   triageColScore: () => i18n.translate(`${ns}.triageColScore`, { defaultMessage: 'Score' }),
-  triageColReason: () => i18n.translate(`${ns}.triageColReason`, { defaultMessage: 'Reason' }),
-  triageReasonBelowFloor: () =>
-    i18n.translate(`${ns}.triageReasonBelowFloor`, { defaultMessage: 'below floor' }),
-  triageReasonNotSelected: () =>
-    i18n.translate(`${ns}.triageReasonNotSelected`, { defaultMessage: 'not selected' }),
   triageColConfidenceOut: () =>
     i18n.translate(`${ns}.triageColConfidenceOut`, { defaultMessage: 'Confidence' }),
   triageColJustificationOut: () =>
