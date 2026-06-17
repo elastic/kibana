@@ -22,9 +22,9 @@ const openTestTab = async (page: ScoutPage, connectorName: string) => {
   // mounts and lazy-loads afterwards. Switching tabs while the body is still in that
   // transitional state can leave the Test tab content from rendering. Wait for the
   // configuration form to be fully loaded (its nameInput) before switching tabs.
-  await page.testSubj.locator('nameInput').waitFor({ state: 'visible', timeout: 30_000 });
+  await page.testSubj.locator('nameInput').waitFor({ state: 'visible' });
   await page.testSubj.click('testConnectorTab');
-  await page.testSubj.locator('test-connector-form').waitFor({ state: 'visible', timeout: 30_000 });
+  await page.testSubj.locator('test-connector-form').waitFor({ state: 'visible' });
 };
 
 const fillSubjectAndMessage = async (page: ScoutPage) => {
@@ -62,9 +62,13 @@ test.describe('Email connector', { tag: tags.stateful.classic }, () => {
     await navigateToConnectors(page, kbnUrl);
 
     await page.testSubj.click('createConnectorButton');
-    await page.testSubj.locator('.email-card').waitFor({ state: 'visible', timeout: 30_000 });
+    await page.testSubj.locator('.email-card').waitFor({ state: 'visible' });
+    await page.testSubj.click('.index-card');
+    const backBtn = page.testSubj.locator('create-connector-flyout-back-btn');
+    await backBtn.waitFor({ state: 'visible' });
+    await backBtn.click();
     await page.testSubj.click('.email-card');
-    await page.testSubj.locator('nameInput').waitFor({ state: 'visible', timeout: 30_000 });
+    await page.testSubj.locator('nameInput').waitFor({ state: 'visible' });
     await page.testSubj.locator('emailServiceSelectInput').selectOption('ses');
 
     await expect(page.testSubj.locator('emailHostInput')).toHaveValue(

@@ -146,7 +146,7 @@ test.describe('Tines connector', { tag: tags.stateful.classic }, () => {
     await backBtn.waitFor({ state: 'visible' });
     await backBtn.click();
     await page.testSubj.click('.tines-card');
-    await page.testSubj.locator('nameInput').waitFor({ state: 'visible', timeout: 30_000 });
+    await page.testSubj.locator('nameInput').waitFor({ state: 'visible' });
     await fillTinesConnectorFields(page, { name: connectorName, url: TINES_CONFIG.url });
 
     const saveButton = page.testSubj.locator('create-connector-flyout-save-btn');

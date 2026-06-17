@@ -37,7 +37,7 @@ const THRESHOLD_INDEX = `${THRESHOLD_TEST_INDEX}-jsm`;
 const openJsmTestTab = async (page: ScoutPage, connectorId: string) => {
   await page.testSubj.click(`edit${connectorId}`);
   await page.testSubj.click('testConnectorTab');
-  await page.testSubj.locator('jsm-subActionSelect').waitFor({ state: 'visible', timeout: 10_000 });
+  await page.testSubj.locator('jsm-subActionSelect').waitFor({ state: 'visible' });
 };
 
 test.describe('Jira Service Management connector', { tag: tags.stateful.classic }, () => {
@@ -104,11 +104,13 @@ test.describe('Jira Service Management connector', { tag: tags.stateful.classic 
     const connectorName = `jsm-create-${uuidv4().slice(0, 8)}`;
 
     await page.testSubj.click('createConnectorButton');
-    await page.testSubj
-      .locator('.jira-service-management-card')
-      .waitFor({ state: 'visible', timeout: 30_000 });
+    await page.testSubj.locator('.jira-service-management-card').waitFor({ state: 'visible' });
+    await page.testSubj.click('.index-card');
+    const backBtn = page.testSubj.locator('create-connector-flyout-back-btn');
+    await backBtn.waitFor({ state: 'visible' });
+    await backBtn.click();
     await page.testSubj.click('.jira-service-management-card');
-    await page.testSubj.locator('nameInput').waitFor({ state: 'visible', timeout: 30_000 });
+    await page.testSubj.locator('nameInput').waitFor({ state: 'visible' });
     await page.testSubj.locator('nameInput').fill(connectorName);
     await page.testSubj.locator('config\\.apiUrl-input').fill('https://test.atlassian.net');
     await page.testSubj.locator('secrets\\.apiKey-input').fill('apiKey');

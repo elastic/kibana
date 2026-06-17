@@ -35,7 +35,7 @@ const SLACK_SECRETS = {
 // cache (the default 10s action timeout is not always enough). Editable connectors only
 // — preconfigured flyouts have no nameInput.
 const waitForConnectorForm = async (page: ScoutPage) => {
-  await page.testSubj.locator('nameInput').waitFor({ state: 'visible', timeout: 30_000 });
+  await page.testSubj.locator('nameInput').waitFor({ state: 'visible' });
 };
 
 test.describe('General connector functionality', { tag: tags.stateful.classic }, () => {

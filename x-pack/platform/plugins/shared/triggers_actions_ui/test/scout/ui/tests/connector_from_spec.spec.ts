@@ -35,7 +35,7 @@ test.describe('Create connector from connector spec', { tag: tags.stateful.class
     await backBtn.waitFor({ state: 'visible' });
     await backBtn.click();
     await page.testSubj.click(`${CONNECTOR_TYPE_ID}-card`);
-    await page.testSubj.locator('nameInput').waitFor({ state: 'visible', timeout: 30_000 });
+    await page.testSubj.locator('nameInput').waitFor({ state: 'visible' });
     await page.testSubj.locator('nameInput').fill(CONNECTOR_NAME);
     await page.testSubj.locator('generator-field-secrets-X-OTX-API-KEY').fill('fake-token');
 

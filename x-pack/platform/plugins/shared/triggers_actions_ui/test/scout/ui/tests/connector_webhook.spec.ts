@@ -39,13 +39,15 @@ test.describe('Webhook connector', { tag: tags.stateful.classic }, () => {
     const connectorName = `scout-webhook-${Date.now()}`;
 
     await page.testSubj.click(CREATE_CONNECTOR_BUTTON);
+    await page.testSubj.locator(WEBHOOK_CARD_SUBJ).waitFor({ state: 'visible' });
+    await page.testSubj.click('.index-card');
+    const backBtn = page.testSubj.locator('create-connector-flyout-back-btn');
+    await backBtn.waitFor({ state: 'visible' });
+    await backBtn.click();
     await page.testSubj.click(WEBHOOK_CARD_SUBJ);
 
-    // The webhook form fields render only after the action-type model resolves and
-    // ConnectorForm lazy-loads its field chunk via Suspense. On a cold CI cache that
-    // can exceed the default 10s click timeout, so wait for authNone first.
     const authNone = page.testSubj.locator('authNone');
-    await authNone.waitFor({ state: 'visible', timeout: 30_000 });
+    await authNone.waitFor({ state: 'visible' });
     await authNone.click();
     await page.testSubj.locator('nameInput').fill(connectorName);
     await page.testSubj.locator('webhookUrlText').fill('https://www.example.com');
@@ -90,12 +92,15 @@ test.describe('Webhook connector', { tag: tags.stateful.classic }, () => {
 
   test('renders CR and PFX tabs for SSL auth', async ({ page }) => {
     await page.testSubj.click(CREATE_CONNECTOR_BUTTON);
+    await page.testSubj.locator(WEBHOOK_CARD_SUBJ).waitFor({ state: 'visible' });
+    await page.testSubj.click('.index-card');
+    const backBtn2 = page.testSubj.locator('create-connector-flyout-back-btn');
+    await backBtn2.waitFor({ state: 'visible' });
+    await backBtn2.click();
     await page.testSubj.click(WEBHOOK_CARD_SUBJ);
 
-    // Wait for the lazily-loaded webhook form fields before interacting (cold CI
-    // cache can exceed the default 10s click timeout).
     const authSSL = page.testSubj.locator('authSSL');
-    await authSSL.waitFor({ state: 'visible', timeout: 30_000 });
+    await authSSL.waitFor({ state: 'visible' });
     await authSSL.click();
 
     const tabs = page.testSubj.locator('webhookCertTypeTabs').locator('.euiTab');

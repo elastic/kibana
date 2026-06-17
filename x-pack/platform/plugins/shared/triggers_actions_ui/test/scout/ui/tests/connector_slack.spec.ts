@@ -101,7 +101,7 @@ test.describe('Slack connector', { tag: tags.stateful.classic }, () => {
     // ConnectorForm lazy-loads its field chunk via Suspense. On a cold CI cache
     // that can exceed the default 10s fill timeout, so wait for nameInput first.
     const nameInput = page.testSubj.locator('nameInput');
-    await nameInput.waitFor({ state: 'visible', timeout: 30_000 });
+    await nameInput.waitFor({ state: 'visible' });
     await nameInput.fill(connectorName);
     await page.testSubj.locator('slackWebhookUrlInput').fill('https://test.com');
 
