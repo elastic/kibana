@@ -197,6 +197,7 @@ describe('useSyncUrlDetails', () => {
   let mockReportCardOpen: jest.Mock;
   let mockStartGetCloudTopicId: jest.Mock;
   let mockConfigHas: jest.Mock;
+  let mockCloudOnComplete: (topicId: OnboardingTopicId | null) => void;
 
   beforeEach(() => {
     mockSetStoredUrlDetail = jest.fn();
@@ -209,9 +210,12 @@ describe('useSyncUrlDetails', () => {
     (useStoredUrlDetails as jest.Mock).mockReturnValue([null, mockSetStoredUrlDetail]);
     (useNavigateTo as jest.Mock).mockReturnValue({ navigateTo: mockNavigateTo });
     (useTopicId as jest.Mock).mockReturnValue(OnboardingTopicId.default);
-    (useCloudTopicId as jest.Mock).mockReturnValue({
-      start: mockStartGetCloudTopicId,
-      isLoading: false,
+    (useCloudTopicId as jest.Mock).mockImplementation(({ onComplete }) => {
+      mockCloudOnComplete = onComplete;
+      return {
+        start: mockStartGetCloudTopicId,
+        isLoading: false,
+      };
     });
     (useOnboardingContext as jest.Mock).mockReturnValue({
       config: { has: mockConfigHas },
@@ -251,6 +255,32 @@ describe('useSyncUrlDetails', () => {
     });
   });
 
+  it('clears stored siem migrations topic when URL is empty', () => {
+    (useStoredUrlDetails as jest.Mock).mockReturnValue([
+      OnboardingTopicId.siemMigrations,
+      mockSetStoredUrlDetail,
+    ]);
+
+    renderHook(() => useSyncUrlDetails({ pathTopicId: null, hashCardId: null }));
+
+    expect(mockSetStoredUrlDetail).toHaveBeenCalledWith(null);
+    expect(mockNavigateTo).not.toHaveBeenCalled();
+    expect(mockStartGetCloudTopicId).not.toHaveBeenCalled();
+  });
+
+  it('clears stored siem migrations topic with card detail when URL is empty', () => {
+    (useStoredUrlDetails as jest.Mock).mockReturnValue([
+      `${OnboardingTopicId.siemMigrations}#migrate_rules`,
+      mockSetStoredUrlDetail,
+    ]);
+
+    renderHook(() => useSyncUrlDetails({ pathTopicId: null, hashCardId: null }));
+
+    expect(mockSetStoredUrlDetail).toHaveBeenCalledWith(null);
+    expect(mockNavigateTo).not.toHaveBeenCalled();
+    expect(mockStartGetCloudTopicId).not.toHaveBeenCalled();
+  });
+
   it('calls startGetCloudTopicId when URL is empty and stored detail is undefined', () => {
     // Simulate no stored detail (undefined) – e.g. first time onboarding
     (useStoredUrlDetails as jest.Mock).mockReturnValue([undefined, mockSetStoredUrlDetail]);
@@ -258,6 +288,20 @@ describe('useSyncUrlDetails', () => {
     renderHook(() => useSyncUrlDetails({ pathTopicId: null, hashCardId: null }));
 
     expect(mockStartGetCloudTopicId).toHaveBeenCalled();
+  });
+
+  it('navigates to cloud topic without storing it', () => {
+    renderHook(() => useSyncUrlDetails({ pathTopicId: null, hashCardId: null }));
+
+    act(() => {
+      mockCloudOnComplete(OnboardingTopicId.siemMigrations);
+    });
+
+    expect(mockNavigateTo).toHaveBeenCalledWith({
+      deepLinkId: SecurityPageName.landing,
+      path: OnboardingTopicId.siemMigrations,
+    });
+    expect(mockSetStoredUrlDetail).not.toHaveBeenCalled();
   });
 
   it('clears stored detail if the stored topic is invalid', () => {

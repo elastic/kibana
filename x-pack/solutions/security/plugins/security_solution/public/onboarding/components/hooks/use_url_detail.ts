@@ -77,11 +77,11 @@ interface UseSyncUrlDetailsParams {
  */
 export const useSyncUrlDetails = ({ pathTopicId, hashCardId }: UseSyncUrlDetailsParams) => {
   const { config, telemetry } = useOnboardingContext();
-  const { storedUrlDetail, setStoredUrlDetail, navigateToDetail, setTopic } = useUrlDetail();
+  const { storedUrlDetail, setStoredUrlDetail, navigateToDetail } = useUrlDetail();
 
   const onComplete = useCallback((cloudTopicId: OnboardingTopicId | null) => {
     if (cloudTopicId && config.has(cloudTopicId)) {
-      setTopic(cloudTopicId);
+      navigateToDetail(cloudTopicId);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -105,6 +105,11 @@ export const useSyncUrlDetails = ({ pathTopicId, hashCardId }: UseSyncUrlDetails
     if (!urlDetail && storedUrlDetail) {
       // Check if the stored topic is not valid, if so clear it to prevent inconsistencies
       const [storedTopicId] = storedUrlDetail.split('#');
+      if (storedTopicId === OnboardingTopicId.siemMigrations) {
+        // The SIEM migrations topic now redirects away from Get started, so don't restore it from stale local storage.
+        setStoredUrlDetail(null);
+        return;
+      }
       if (storedTopicId && !config.has(storedTopicId as OnboardingTopicId)) {
         setStoredUrlDetail(null);
         return;
