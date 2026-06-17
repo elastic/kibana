@@ -9,6 +9,7 @@ import {
   agentBuilderDefaultAgentId,
   AgentType,
   AgentAccessControlScope,
+  AgentAccessControlRole,
 } from '@kbn/agent-builder-common';
 import type { AgentCreateRequest, AgentUpdateRequest } from '../../../../../common/agents';
 import type { AgentProperties } from './storage';
@@ -231,6 +232,59 @@ describe('createRequestToEs', () => {
 
     expect(docProperties.config!.skill_ids).toEqual(['skill-a', 'skill-b']);
     expect(docProperties.config!.enable_elastic_capabilities).toBe(true);
+  });
+
+  it('persists create request access-control scope with empty entries', () => {
+    const createRequest: AgentCreateRequest = {
+      id: 'id',
+      name: 'name',
+      description: 'description',
+      access_control: { scope: AgentAccessControlScope.Private },
+      configuration: {
+        instructions: 'instructions',
+        tools: [],
+      },
+    };
+
+    const docProperties = createRequestToEs({
+      profile: createRequest,
+      user: { id: 'user-id', username: 'test-user' },
+      space: 'space',
+      creationDate: new Date(),
+    });
+
+    expect(docProperties.access_control).toEqual({
+      scope: AgentAccessControlScope.Private,
+      entries: [],
+    });
+  });
+
+  it('drops access-control entries from create requests', () => {
+    const createRequest = {
+      id: 'id',
+      name: 'name',
+      description: 'description',
+      access_control: {
+        scope: AgentAccessControlScope.Private,
+        entries: [{ type: 'user' as const, name: 'alice', role: AgentAccessControlRole.Editor }],
+      },
+      configuration: {
+        instructions: 'instructions',
+        tools: [],
+      },
+    } as unknown as AgentCreateRequest;
+
+    const docProperties = createRequestToEs({
+      profile: createRequest,
+      user: { id: 'user-id', username: 'test-user' },
+      space: 'space',
+      creationDate: new Date(),
+    });
+
+    expect(docProperties.access_control).toEqual({
+      scope: AgentAccessControlScope.Private,
+      entries: [],
+    });
   });
 });
 

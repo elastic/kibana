@@ -129,8 +129,12 @@ export function useAgentEdit({
         const { id, ...updatedAgent } = requestData;
         await updateMutation.mutateAsync(updatedAgent);
       } else {
-        const { acl, created_by, avatar_icon, ...createData } = requestData;
-        await createMutation.mutateAsync(createData);
+        const { access_control, created_by, avatar_icon, ...createData } = requestData;
+        await createMutation.mutateAsync(
+          access_control
+            ? { ...createData, access_control: { scope: access_control.scope } }
+            : createData
+        );
       }
     },
     [editingAgentId, createMutation, updateMutation, tools]

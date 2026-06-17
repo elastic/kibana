@@ -6,12 +6,11 @@
  */
 
 import { act, renderHook } from '@testing-library/react';
-import { AgentAclRole, AgentVisibility } from '@kbn/agent-builder-common';
+import { AgentAccessControlRole, AgentAccessControlScope } from '@kbn/agent-builder-common';
 import { useAgentEdit, type AgentEditState } from './use_agent_edit';
 
 const mockCreate = jest.fn();
 const mockUpdate = jest.fn();
-const mockUpdateAcl = jest.fn();
 
 jest.mock('@kbn/react-query', () => ({
   // Run the mutationFn directly so the payload passed to the service is observable.
@@ -28,7 +27,7 @@ jest.mock('react-router-dom-v5-compat', () => ({
 
 jest.mock('../use_agent_builder_service', () => ({
   useAgentBuilderServices: () => ({
-    agentService: { create: mockCreate, update: mockUpdate, updateAcl: mockUpdateAcl },
+    agentService: { create: mockCreate, update: mockUpdate },
   }),
 }));
 
@@ -66,17 +65,19 @@ describe('useAgentEdit submit (create/clone branch)', () => {
     mockCreate.mockResolvedValue({ id: 'cloned-agent' });
   });
 
-  it('strips acl, created_by and avatar_icon from the create payload when cloning', async () => {
+  it('strips access-control entries, created_by and avatar_icon from the create payload when cloning', async () => {
     const cloneData: AgentEditState = {
       id: 'cloned-agent',
       name: 'Cloned Agent',
       description: 'A clone of an existing agent',
-      visibility: AgentVisibility.Public,
+      access_control: {
+        scope: AgentAccessControlScope.Private,
+        entries: [{ type: 'user', name: 'alice', role: AgentAccessControlRole.Editor }],
+      },
       labels: ['support'],
       avatar_color: '#FFFFFF',
       avatar_symbol: 'CA',
       avatar_icon: 'logoElastic',
-      acl: { entries: [{ type: 'user', name: 'alice', role: AgentAclRole.Editor }] },
       created_by: { id: 'u1', username: 'bob' },
       configuration: baseConfiguration,
     };
@@ -91,18 +92,18 @@ describe('useAgentEdit submit (create/clone branch)', () => {
 
     expect(mockCreate).toHaveBeenCalledTimes(1);
     const payload = mockCreate.mock.calls[0][0];
-    expect(payload).not.toHaveProperty('acl');
     expect(payload).not.toHaveProperty('created_by');
     expect(payload).not.toHaveProperty('avatar_icon');
     expect(payload).toMatchObject({
       id: 'cloned-agent',
       name: 'Cloned Agent',
       description: 'A clone of an existing agent',
-      visibility: AgentVisibility.Public,
+      access_control: { scope: AgentAccessControlScope.Private },
       labels: ['support'],
       avatar_color: '#FFFFFF',
       avatar_symbol: 'CA',
     });
+    expect(payload.access_control).not.toHaveProperty('entries');
   });
 
   it('preserves the standard create fields for a brand-new agent', async () => {
@@ -110,7 +111,7 @@ describe('useAgentEdit submit (create/clone branch)', () => {
       id: 'new-agent',
       name: 'New Agent',
       description: 'A new agent',
-      visibility: AgentVisibility.Private,
+      access_control: { scope: AgentAccessControlScope.Private, entries: [] },
       labels: [],
       avatar_color: '',
       avatar_symbol: '',
@@ -129,7 +130,8 @@ describe('useAgentEdit submit (create/clone branch)', () => {
     expect(mockCreate.mock.calls[0][0]).toMatchObject({
       id: 'new-agent',
       name: 'New Agent',
-      visibility: AgentVisibility.Private,
+      access_control: { scope: AgentAccessControlScope.Private },
     });
+    expect(mockCreate.mock.calls[0][0].access_control).not.toHaveProperty('entries');
   });
 });

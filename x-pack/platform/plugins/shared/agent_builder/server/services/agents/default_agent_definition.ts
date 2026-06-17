@@ -18,7 +18,7 @@ export const getDefaultAgentCreateRequest = (): AgentCreateRequest => ({
     defaultMessage:
       'The built-in agent for interacting with Elastic. Leverages built in skills, tools, and plugins, customizable as your use cases evolve. Use it for day-to-day work over your Elastic data, configuration, and capabilities (debugging, analysis, retrieval, operations, and more).',
   }),
-  access_control: { scope: AgentAccessControlScope.Public, entries: [] },
+  access_control: { scope: AgentAccessControlScope.Public },
   configuration: {
     // enable built-in skills and default set of tools for the default agent
     enable_elastic_capabilities: true,

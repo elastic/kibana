@@ -18,7 +18,7 @@ export type AgentCreateRequest = Omit<
   AgentDefinition,
   'type' | 'readonly' | 'created_by' | 'access_control'
 > & {
-  access_control?: AgentAccessControl;
+  access_control?: Pick<AgentAccessControl, 'scope'>;
 };
 
 export type AgentUpdateRequest = Partial<

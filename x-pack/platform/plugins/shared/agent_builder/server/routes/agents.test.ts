@@ -145,7 +145,7 @@ describe('Agent Routes - experimental access-control gate', () => {
   };
 
   describe('POST /agents (create)', () => {
-    it('allows create and calls service.create when access control is provided', async () => {
+    it('allows create and calls service.create when access-control scope is provided', async () => {
       const handler = getCreateHandler();
       expect(handler).toBeDefined();
 
@@ -153,7 +153,7 @@ describe('Agent Routes - experimental access-control gate', () => {
       const request = {
         body: {
           ...createBody,
-          access_control: { scope: AgentAccessControlScope.Shared, entries: [] },
+          access_control: { scope: AgentAccessControlScope.Shared },
         },
       };
 
@@ -161,7 +161,7 @@ describe('Agent Routes - experimental access-control gate', () => {
 
       expect(mockCreate).toHaveBeenCalledWith({
         ...createBody,
-        access_control: { scope: AgentAccessControlScope.Shared, entries: [] },
+        access_control: { scope: AgentAccessControlScope.Shared },
       });
       expect(result).toMatchObject({ type: 'ok', body: mockProfile });
     });

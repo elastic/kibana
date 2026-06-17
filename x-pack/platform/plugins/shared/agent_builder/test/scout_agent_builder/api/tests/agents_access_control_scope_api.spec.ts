@@ -39,7 +39,7 @@ apiTest.describe(
         body: {
           ...mockAgent,
           id: agentId,
-          access_control: { scope: AgentAccessControlScope.Private, entries: [] },
+          access_control: { scope: AgentAccessControlScope.Private },
         },
         responseType: 'json',
       });

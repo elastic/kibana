@@ -83,7 +83,9 @@ export const createRequestToEs = ({
     avatar_symbol: profile.avatar_symbol,
     created_by_id: user.id,
     created_by_name: user.username,
-    access_control: profile.access_control ?? getDefaultAgentAccessControl(),
+    access_control: profile.access_control
+      ? { scope: profile.access_control.scope, entries: [] }
+      : getDefaultAgentAccessControl(),
     config: {
       instructions: profile.configuration.instructions,
       tools: profile.configuration.tools,
