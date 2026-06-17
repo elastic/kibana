@@ -144,6 +144,13 @@ describe('ExecutionHistoryPage', () => {
     expect(screen.getByRole('tab', { name: 'Policies' })).toHaveAttribute('aria-selected', 'true');
   });
 
+  it('renders the experimental badge in the page header', () => {
+    mockFetchResult();
+    renderPage();
+
+    expect(screen.getByTestId('alertingV2ExperimentalBadge')).toBeInTheDocument();
+  });
+
   it('renders the denormalization info tooltip next to the title', () => {
     mockFetchResult();
     renderPage();
