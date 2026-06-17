@@ -13,6 +13,7 @@
     "@kbn/evals",
     "@kbn/inference-common",
     "@kbn/scout",
-    "@kbn/tooling-log"
+    "@kbn/tooling-log",
+    "@kbn/security-evals-rule-data-snapshot"
   ]
 }

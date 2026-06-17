@@ -8802,6 +8802,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/security-evals-rule-data-snapshot@link:x-pack/solutions/security/packages/kbn-security-evals-rule-data-snapshot":
+  version "0.0.0"
+  uid ""
+
 "@kbn/security-form-components@link:x-pack/platform/packages/shared/security/form_components":
   version "0.0.0"
   uid ""
