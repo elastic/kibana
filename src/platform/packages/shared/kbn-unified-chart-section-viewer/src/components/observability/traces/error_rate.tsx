@@ -13,6 +13,7 @@ import { useTraceMetricsContext } from './context/trace_metrics_context';
 import { Chart } from '../../chart';
 import { ACTION_OPEN_IN_DISCOVER } from '../../../common/constants';
 import { getErrorRateChart } from './trace_charts_definition';
+import { BREAKDOWN_LEGEND_CONFIG } from './constants';
 import { getLensMetricFormat } from '../../../common/utils';
 import type { MetricUnit } from '../../../types';
 
@@ -81,6 +82,7 @@ const ErrorRateChartContent = ({
       onExploreInDiscoverTab={actions.openInNewTab}
       title={title}
       chartLayers={chartLayers}
+      legend={breakdownField ? BREAKDOWN_LEGEND_CONFIG : undefined}
       syncCursor
       syncTooltips
       yBounds={ERROR_RATE_Y_BOUNDS}
