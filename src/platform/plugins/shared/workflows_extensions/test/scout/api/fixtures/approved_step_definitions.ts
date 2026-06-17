@@ -196,4 +196,8 @@ export const APPROVED_STEP_DEFINITIONS: Array<{ id: string; definitionHash: stri
     id: 'search.rerank',
     definitionHash: 'c989f0b20019b12079d797d11b122285552e3b863ef96aaddad81640f0c2a951',
   },
+  {
+    id: 'security.setAlertStatus',
+    definitionHash: '0007017ee2a537b28b7f466e1ffeea935bd9d7f5bf3691218383e55ebc5e7024',
+  },
 ];
