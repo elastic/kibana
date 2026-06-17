@@ -320,3 +320,76 @@ describe('Chrome Next mode (isNextChrome)', () => {
     expect(homeItem?.iconType).toBe('home');
   });
 });
+
+describe('extension point sections', () => {
+  it('maps extension point nodes to secondary menu sections', () => {
+    const panelOpener: ChromeProjectNavigationNode = {
+      id: 'dashboards',
+      title: 'Dashboards',
+      icon: 'dashboardApp',
+      renderAs: 'panelOpener',
+      path: 'dashboards',
+      children: [
+        {
+          id: 'recent-dashboards',
+          title: 'Recently viewed',
+          renderAs: 'extension',
+          slotId: 'security.dashboards.recent',
+          extensionId: 'recentlyAccessedDashboards',
+          popoverOnly: true,
+          path: 'dashboards.recent-dashboards',
+        },
+        {
+          id: 'dashboards-section',
+          title: 'Dashboards',
+          path: 'dashboards.dashboards-section',
+          children: [
+            {
+              id: 'all-dashboards',
+              title: 'All dashboards',
+              href: '/app/security/dashboards',
+              path: 'dashboards.dashboards-section.all-dashboards',
+            },
+          ],
+        },
+      ],
+    };
+
+    const tree: NavigationTreeDefinitionUI = {
+      id: 'security',
+      body: [
+        {
+          id: 'home',
+          title: 'Security',
+          renderAs: 'home',
+          href: '/app/security/get_started',
+          path: 'home',
+        },
+        panelOpener,
+      ],
+    };
+
+    const { navItems } = createNavigationItems(tree);
+    const dashboardsItem = navItems.primaryItems.find((item) => item.id === 'dashboards');
+
+    expect(dashboardsItem?.sections).toEqual([
+      {
+        id: 'recent-dashboards',
+        label: 'Recently viewed',
+        slotId: 'security.dashboards.recent',
+        extensionId: 'recentlyAccessedDashboards',
+        popoverOnly: true,
+      },
+      {
+        id: 'dashboards-section',
+        label: 'Dashboards',
+        items: [
+          expect.objectContaining({
+            id: 'all-dashboards',
+            href: '/app/security/dashboards',
+          }),
+        ],
+      },
+    ]);
+  });
+});
