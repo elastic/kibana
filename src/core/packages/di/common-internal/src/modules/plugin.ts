@@ -18,20 +18,28 @@ import {
 import type { PluginOpaqueId } from '@kbn/core-base-common';
 import { OnSetup, OnStart, Setup, Start } from '@kbn/core-di';
 
+export const ProvidedService = Symbol.for(
+  'ProvidedService'
+) as ServiceIdentifier<ServiceIdentifier>;
+export const HostedExtensionPoint = Symbol.for(
+  'HostedExtensionPoint'
+) as ServiceIdentifier<ServiceIdentifier>;
+export const ContributedExtensionPoint = Symbol.for(
+  'ContributedExtensionPoint'
+) as ServiceIdentifier<ServiceIdentifier>;
+
 type ScopeFactory = (id?: PluginOpaqueId) => Container;
 
 /**
  * Current context to resolve the global services.
  *
- * Some short-lived services, such as the current request, cannot be bound in the global scope, and hence, they are placed in a child container.
- * The `Context` service holds a reference to the child container and is used to resolve global services within the current context, making short-lived services available.
+ * Some short-lived services, such as the current request, cannot be bound in the
+ * shared scope, and hence, they are placed in a child container. The `Context`
+ * service holds a reference to the child container and is used to resolve
+ * cross-plugin services and extension-point contributions within the current
+ * context, making short-lived services available.
  */
 const Context = Symbol('Context') as ServiceIdentifier<Container>;
-
-/**
- * The service identifier for the global service references.
- */
-export const Global = Symbol.for('Global') as ServiceIdentifier<ServiceIdentifier>;
 
 /**
  * Current plugin scope identifier.
@@ -52,7 +60,8 @@ const Parent = Symbol('Parent') as ServiceIdentifier<Container>;
  * Plugin scope factory.
  *
  * The factory creates a new container for the plugin dependencies.
- * Services registered in this scope are not visible outside unless they are explicitely exposed using the `Global` symbol.
+ * Services registered in this scope are not visible outside unless they are
+ * explicitly exposed using the cross-plugin marker symbols.
  */
 export const Scope = Symbol.for('Scope') as ServiceIdentifier<ScopeFactory>;
 
@@ -64,7 +73,8 @@ export const Scope = Symbol.for('Scope') as ServiceIdentifier<ScopeFactory>;
 export const Fork = Symbol.for('Fork') as ServiceIdentifier<ScopeFactory>;
 
 export class PluginModule extends ContainerModule {
-  private services = new WeakMap<Container, Map<ServiceIdentifier, number>>();
+  private serviceCounts = new WeakMap<Container, Map<ServiceIdentifier, number>>();
+  private extensionCounts = new WeakMap<Container, Map<ServiceIdentifier, number>>();
   private activated = {
     [OnSetup as symbol]: new WeakSet<Container>(),
     [OnStart as symbol]: new WeakSet<Container>(),
@@ -79,7 +89,12 @@ export class PluginModule extends ContainerModule {
       bind(Scope).toDynamicValue(this.getScopeFactory.bind(this)).inRequestScope();
       bind(Setup).toResolvedValue(this.getDefaultContract.bind(this)).inRequestScope();
       bind(Start).toResolvedValue(this.getDefaultContract.bind(this)).inRequestScope();
-      onActivation(Global, this.onGlobalActivation.bind(this));
+      onActivation(ProvidedService, this.onProvidedServiceActivation.bind(this));
+      onActivation(HostedExtensionPoint, this.onHostedExtensionPointActivation.bind(this));
+      onActivation(
+        ContributedExtensionPoint,
+        this.onContributedExtensionPointActivation.bind(this)
+      );
       onActivation(Setup, this.onContractActivation.bind(this, OnSetup));
       onActivation(Start, this.onContractActivation.bind(this, OnStart));
     });
@@ -105,19 +120,28 @@ export class PluginModule extends ContainerModule {
     return contract;
   }
 
-  protected onGlobalActivation<T extends ServiceIdentifier>(
+  protected onProvidedServiceActivation<T extends ServiceIdentifier>(
     { get }: ResolutionContext,
     service: T
   ): T {
     const scope = get(Container);
-    const parent = get(Parent, { optional: true });
-    const context = get(Context);
-    const id = get(Id);
-    const index = this.getServicesCount(scope, service);
+    const context = get(Context, { optional: true });
+    const index = this.getServiceCount(scope, service);
 
-    this.incrementServicesCount(scope, service);
+    this.incrementCount(this.serviceCounts, scope, service);
+
+    // A fork without a plugin `Context` (e.g. an HTTP request or app-mount
+    // scope bound via `Fork`) is its own context: the service is already bound
+    // here and is inherited by its child plugin scopes, so there is no parent
+    // context to promote it to.
+    if (!context) {
+      return service;
+    }
+
+    const parent = get(Parent, { optional: true });
+    const id = get(Id);
     if (parent !== context) {
-      this.incrementServicesCount(context, service);
+      this.incrementCount(this.serviceCounts, context, service);
     }
 
     context
@@ -130,7 +154,7 @@ export class PluginModule extends ContainerModule {
           this.registerGlobals(origin);
           this.inheritGlobals(target);
 
-          return this.getServicesCount(scope, service) > 1
+          return this.getServiceCount(scope, service) > 1
             ? target.getAll(service)[index]
             : target.get(service);
         },
@@ -139,6 +163,53 @@ export class PluginModule extends ContainerModule {
       .inRequestScope();
 
     return service;
+  }
+
+  protected onContributedExtensionPointActivation<T extends ServiceIdentifier>(
+    { get }: ResolutionContext,
+    extensionPoint: T
+  ): T {
+    const scope = get(Container);
+    const context = get(Context, { optional: true });
+    const index = this.getExtensionCount(scope, extensionPoint);
+
+    this.incrementCount(this.extensionCounts, scope, extensionPoint);
+
+    // See `onProvidedServiceActivation`: a context-less fork is its own context
+    // and needs no promotion to a parent context.
+    if (!context) {
+      return extensionPoint;
+    }
+
+    const parent = get(Parent, { optional: true });
+    const id = get(Id);
+    if (parent !== context) {
+      this.incrementCount(this.extensionCounts, context, extensionPoint);
+    }
+
+    context
+      .bind(extensionPoint)
+      .toResolvedValue<[Container, Container | undefined]>(
+        (origin, requestContext = origin) => {
+          const target = requestContext.get(Scope)(id);
+
+          this.registerGlobals(origin);
+          this.inheritGlobals(target);
+
+          return target.getAll(extensionPoint)[index];
+        },
+        [Container, { serviceIdentifier: Context, optional: true }]
+      )
+      .inRequestScope();
+
+    return extensionPoint;
+  }
+
+  protected onHostedExtensionPointActivation<T extends ServiceIdentifier>(
+    _context: ResolutionContext,
+    extensionPoint: T
+  ): T {
+    return extensionPoint;
   }
 
   protected getForkFactory({ get }: ResolutionContext): ScopeFactory {
@@ -193,10 +264,15 @@ export class PluginModule extends ContainerModule {
     }
     this.bound.add(scope);
 
-    if (!scope.isCurrentBound(Global)) {
-      return;
+    if (scope.isCurrentBound(ProvidedService)) {
+      scope.getAll(ProvidedService);
     }
-    scope.getAll(Global);
+    if (scope.isCurrentBound(HostedExtensionPoint)) {
+      scope.getAll(HostedExtensionPoint);
+    }
+    if (scope.isCurrentBound(ContributedExtensionPoint)) {
+      scope.getAll(ContributedExtensionPoint);
+    }
   }
 
   private inheritGlobals(scope: Container) {
@@ -205,7 +281,7 @@ export class PluginModule extends ContainerModule {
     }
     this.bound.add(scope);
 
-    for (const [service, count] of this.services.get(scope.get(Context)) ?? []) {
+    for (const [service, count] of this.serviceCounts.get(scope.get(Context)) ?? []) {
       for (let index = 0; index < count; index++) {
         scope
           .bind(service)
@@ -213,6 +289,15 @@ export class PluginModule extends ContainerModule {
             (context) => (count > 1 ? context.getAll(service)[index] : context.get(service)),
             [Context]
           )
+          .inRequestScope();
+      }
+    }
+
+    for (const [extensionPoint, count] of this.extensionCounts.get(scope.get(Context)) ?? []) {
+      for (let index = 0; index < count; index++) {
+        scope
+          .bind(extensionPoint)
+          .toResolvedValue((context) => context.getAll(extensionPoint)[index], [Context])
           .inRequestScope();
       }
     }
@@ -226,15 +311,23 @@ export class PluginModule extends ContainerModule {
     return child;
   }
 
-  private getServicesCount(scope: Container, service: ServiceIdentifier<unknown>) {
-    return this.services.get(scope)?.get(service) ?? 0;
+  private getServiceCount(scope: Container, service: ServiceIdentifier<unknown>) {
+    return this.serviceCounts.get(scope)?.get(service) ?? 0;
   }
 
-  private incrementServicesCount(scope: Container, service: ServiceIdentifier<unknown>) {
-    if (!this.services.has(scope)) {
-      this.services.set(scope, new Map());
+  private getExtensionCount(scope: Container, extensionPoint: ServiceIdentifier<unknown>) {
+    return this.extensionCounts.get(scope)?.get(extensionPoint) ?? 0;
+  }
+
+  private incrementCount(
+    counts: WeakMap<Container, Map<ServiceIdentifier, number>>,
+    scope: Container,
+    service: ServiceIdentifier<unknown>
+  ) {
+    if (!counts.has(scope)) {
+      counts.set(scope, new Map());
     }
 
-    this.services.get(scope)?.set(service, this.getServicesCount(scope, service) + 1);
+    counts.get(scope)?.set(service, (counts.get(scope)?.get(service) ?? 0) + 1);
   }
 }
