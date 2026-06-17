@@ -119,6 +119,7 @@ dependsOn:
   - '@kbn/datemath'
   - '@kbn/css-utils'
   - '@kbn/dashboard-plugin'
+  - '@kbn/cps'
 tags:
   - plugin
   - prod

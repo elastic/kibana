@@ -695,17 +695,57 @@ describe('ActionPolicyClient', () => {
       );
     });
 
-    it('forwards search parameter with search fields', async () => {
+    it('forwards search parameter with search fields and AND operator', async () => {
       mockSavedObjectsClient.find.mockResolvedValueOnce(makeFindResponse([]));
 
       await client.findActionPolicies({ search: 'my-search' });
 
       expect(mockSavedObjectsClient.find).toHaveBeenCalledWith(
         expect.objectContaining({
-          search: 'my-search',
-          searchFields: ['name', 'description', 'destinations.id'],
+          search: 'my\\-search*',
+          searchFields: ['name', 'description'],
+          defaultSearchOperator: 'AND',
         })
       );
+    });
+
+    it('escapes operators and appends prefix wildcard to each search token', async () => {
+      mockSavedObjectsClient.find.mockResolvedValueOnce(makeFindResponse([]));
+
+      await client.findActionPolicies({ search: 'memory-alert-rule' });
+
+      expect(mockSavedObjectsClient.find).toHaveBeenCalledWith(
+        expect.objectContaining({
+          search: 'memory\\-alert\\-rule*',
+          searchFields: ['name', 'description'],
+          defaultSearchOperator: 'AND',
+        })
+      );
+    });
+
+    it('handles multi-word search by tokenizing and escaping each word', async () => {
+      mockSavedObjectsClient.find.mockResolvedValueOnce(makeFindResponse([]));
+
+      await client.findActionPolicies({ search: 'prod alerts' });
+
+      expect(mockSavedObjectsClient.find).toHaveBeenCalledWith(
+        expect.objectContaining({
+          search: 'prod* alerts*',
+          searchFields: ['name', 'description'],
+          defaultSearchOperator: 'AND',
+        })
+      );
+    });
+
+    it('does not pass search fields when search is empty', async () => {
+      mockSavedObjectsClient.find.mockResolvedValueOnce(makeFindResponse([]));
+
+      await client.findActionPolicies({ search: '   ' });
+
+      const callArgs = mockSavedObjectsClient.find.mock.calls[0][0];
+      expect(callArgs).not.toHaveProperty('search');
+      expect(callArgs).not.toHaveProperty('searchFields');
+      expect(callArgs).not.toHaveProperty('defaultSearchOperator');
     });
 
     it('builds KQL filter for destinationType', async () => {

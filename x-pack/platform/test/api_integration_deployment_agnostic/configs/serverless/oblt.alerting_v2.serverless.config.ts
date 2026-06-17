@@ -12,7 +12,7 @@ export default createServerlessFeatureFlagTestConfig({
   testFiles: [require.resolve('./oblt.alerting_v2.index.ts')],
   kbnServerArgs: [
     '--xpack.alerting_v2.enabled=true',
-    '--migrations.allowWipTypes=["alerting_rule","alerting_action_policy","alerting_api_key_pending_invalidation"]',
+    '--migrations.allowWipTypes=["alerting_action_policy","alerting_api_key_pending_invalidation","alerting_rule"]',
   ],
   junit: {
     reportName: 'Serverless Observability - Deployment-agnostic Alerting V2 API Integration Tests',

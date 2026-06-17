@@ -115,7 +115,8 @@
     "@kbn/core-spaces-common",
     "@kbn/datemath",
     "@kbn/css-utils",
-    "@kbn/dashboard-plugin"
+    "@kbn/dashboard-plugin",
+    "@kbn/cps"
   ],
   "exclude": ["target/**/*", ".storybook/**/*.js"]
 }

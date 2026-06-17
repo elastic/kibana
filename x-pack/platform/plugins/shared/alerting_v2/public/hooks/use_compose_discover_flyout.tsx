@@ -11,9 +11,11 @@ import type {
   RuleFormServices,
 } from '@kbn/alerting-v2-rule-form';
 import { ComposeDiscoverFlyout, RULE_BUILDER_REGISTRY } from '@kbn/alerting-v2-rule-form';
+import { getBreachEsqlQuery, getRecoverEsqlQuery } from '@kbn/alerting-v2-schemas';
 import { PluginStart } from '@kbn/core-di';
 import { CoreStart, useService } from '@kbn/core-di-browser';
 import type { DashboardStart } from '@kbn/dashboard-plugin/public';
+import type { CPSPluginStart } from '@kbn/cps/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { i18n } from '@kbn/i18n';
@@ -56,6 +58,7 @@ export const useComposeDiscoverFlyout = ({
   const dashboard = useService(PluginStart('dashboard'), { optional: true }) as
     | DashboardStart
     | undefined;
+  const cps = useService(PluginStart('cps'), { optional: true }) as CPSPluginStart | undefined;
 
   const [flyoutOpen, setFlyoutOpen] = useState(false);
   const [flyoutMode, setFlyoutMode] = useState<ComposeDiscoverMode>('create');
@@ -76,8 +79,9 @@ export const useComposeDiscoverFlyout = ({
       lens,
       uiActions,
       dashboard,
+      cps,
     }),
-    [http, data, dataViews, notifications, application, lens, uiActions, dashboard]
+    [http, data, dataViews, notifications, application, lens, uiActions, dashboard, cps]
   );
 
   const closeFlyout = useCallback(() => {
@@ -134,9 +138,10 @@ export const useComposeDiscoverFlyout = ({
       setFlyoutMode(mode);
 
       if (rule.metadata.builder_type) {
-        const query = rule.evaluation?.query?.base;
-        const recoveryQuery =
-          rule.recovery_policy?.type === 'query' ? rule.recovery_policy.query?.base : undefined;
+        const query = rule.query ? getBreachEsqlQuery(rule.query) : '';
+        const recoveryQuery = rule.query
+          ? getRecoverEsqlQuery(rule.query, rule.recovery_strategy)
+          : undefined;
         const state = query
           ? tryParseBuilderState(rule.metadata.builder_type, query, recoveryQuery)
           : null;

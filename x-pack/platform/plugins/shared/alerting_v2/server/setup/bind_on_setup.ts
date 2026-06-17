@@ -6,10 +6,18 @@
  */
 
 import { Logger, OnSetup, PluginSetup, PluginStart } from '@kbn/core-di';
-import { CoreSetup, PluginInitializer } from '@kbn/core-di-server';
 import type { PluginInitializerContext } from '@kbn/core/server';
+import { CoreSetup, PluginInitializer } from '@kbn/core-di-server';
 import type { ContainerModuleLoadOptions } from 'inversify';
 import type { PluginConfig } from '../config';
+import type { AlertingServerSetupDependencies, AlertingServerStartDependencies } from '../types';
+import { registerFeaturePrivileges } from '../lib/security/privileges';
+import { registerSavedObjects } from '../saved_objects';
+import { alertingV2UiSettings } from '../ui_settings/advanced_settings';
+import { EventLoggerToken } from '../lib/services/event_log_service/tokens';
+import { registerStepDefinitions } from '../lib/workflow_extensions/register_step_definitions';
+import { registerTriggerDefinitions } from '../lib/workflow_extensions/register_trigger_definitions';
+import { registerAlertingV2UsageCollector } from '../lib/usage/usage_collector';
 import {
   ACTION_POLICY_EVENT_ACTIONS,
   ACTION_POLICY_EVENT_PROVIDER,
@@ -41,6 +49,11 @@ export function bindOnSetup({ bind }: ContainerModuleLoadOptions) {
 
     registerFeaturePrivileges(container.get(PluginSetup('features')));
 
+    const config = container
+      .get<PluginInitializerContext<PluginConfig>['config']>(PluginInitializer('config'))
+      .get<PluginConfig>();
+
+    // Adding the config check bc alertingV2 SOs are WIP
     if (config.enabled) {
       registerSavedObjects({
         savedObjects: container.get(CoreSetup('savedObjects')),

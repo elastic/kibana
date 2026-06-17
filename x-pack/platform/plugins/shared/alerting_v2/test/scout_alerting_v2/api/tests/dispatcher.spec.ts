@@ -170,10 +170,10 @@ apiTest.describe('Dispatcher', { tag: tags.stateful.classic }, () => {
           // existing index is the cheapest no-op: it parses, runs
           // successfully, and returns zero rows even if the executor task
           // fires before the bulkDisable below lands.
-          evaluation: {
-            query: { base: 'FROM .alert-actions | WHERE rule_id == "__never_matches__"' },
+          query: {
+            format: 'standalone',
+            breach: { query: 'FROM .alert-actions | WHERE rule_id == "__never_matches__"' },
           },
-          recovery_policy: { type: 'no_breach' },
           state_transition: { pending_count: 0, recovering_count: 0 },
         })
       );

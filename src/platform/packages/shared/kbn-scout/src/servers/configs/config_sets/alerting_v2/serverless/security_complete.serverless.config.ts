@@ -17,7 +17,7 @@ export const servers: ScoutServerConfig = {
     serverArgs: [
       ...defaultConfig.kbnTestServer.serverArgs,
       '--xpack.alerting_v2.enabled=true',
-      '--migrations.allowWipTypes=["alerting_rule","alerting_action_policy","alerting_api_key_pending_invalidation"]',
+      '--migrations.allowWipTypes=["alerting_action_policy","alerting_api_key_pending_invalidation","alerting_rule"]',
     ],
   },
 };
