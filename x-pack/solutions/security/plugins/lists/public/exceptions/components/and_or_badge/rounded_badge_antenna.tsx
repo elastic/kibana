@@ -7,36 +7,39 @@
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React from 'react';
-import styled, { css } from 'styled-components';
+import styled from '@emotion/styled';
 
 import { RoundedBadge } from './rounded_badge';
 
 import type { AndOr } from '.';
 
-const antennaStyles = css`
-  background: ${({ theme }): string => theme.eui.euiColorLightShade};
+const TopAntenna = styled(EuiFlexItem)`
+  background: ${({ theme }): string => theme.euiTheme.colors.backgroundBaseSubdued};
   position: relative;
   width: 2px;
   &:after {
-    background: ${({ theme }): string => theme.eui.euiColorLightShade};
+    background: ${({ theme }): string => theme.euiTheme.colors.backgroundBaseSubdued};
     content: '';
     height: 8px;
     right: -4px;
     position: absolute;
     width: 10px;
     clip-path: circle();
-  }
-`;
-
-const TopAntenna = styled(EuiFlexItem)`
-  ${antennaStyles}
-  &:after {
     top: 0;
   }
 `;
 const BottomAntenna = styled(EuiFlexItem)`
-  ${antennaStyles}
+  background: ${({ theme }): string => theme.euiTheme.colors.backgroundBaseSubdued};
+  position: relative;
+  width: 2px;
   &:after {
+    background: ${({ theme }): string => theme.euiTheme.colors.backgroundBaseSubdued};
+    content: '';
+    height: 8px;
+    right: -4px;
+    position: absolute;
+    width: 10px;
+    clip-path: circle();
     bottom: 0;
   }
 `;
