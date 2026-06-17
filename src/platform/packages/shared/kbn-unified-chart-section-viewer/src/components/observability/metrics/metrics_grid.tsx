@@ -50,10 +50,7 @@ const useStableApplicableDimensions = (
     const applicable = dimensions.filter((dimension) =>
       dimensionFields.some((field) => field.name === dimension.name)
     );
-    const key =
-      applicable.length === 0
-        ? null
-        : stableStringify(applicable.map((dimension) => dimension.name));
+    const key = applicable.length === 0 ? null : stableStringify(applicable);
 
     if (stabilizedRef.current.key === key) {
       return stabilizedRef.current.value;
