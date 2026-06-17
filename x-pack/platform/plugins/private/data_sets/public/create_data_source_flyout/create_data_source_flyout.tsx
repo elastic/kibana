@@ -260,6 +260,7 @@ export const CreateDataSourceFlyout: FunctionComponent<CreateDataSourceFlyoutPro
             dataSourceType={dataSourceType}
             requireS3Credentials={!isEditMode}
             requireGcsCredentials={!isEditMode}
+            requireAzureCredentials={!isEditMode}
             unregister={unregister}
           />
         </EuiForm>

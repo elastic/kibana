@@ -54,16 +54,19 @@ export function CreateDataSourceFlyoutTypeSettingsAzure({
 
 export function CreateDataSourceFlyoutTypeSettingsAzureAuthenticationFields({
   authenticationMode,
+  areFieldsRequired,
   control,
   unregister,
 }: {
   authenticationMode: AzureAuthenticationMode;
+  areFieldsRequired: boolean;
   control: Control<CreateDataSourceFlyoutFormValues, any>;
   unregister: UseFormUnregister<CreateDataSourceFlyoutFormValues>;
 }) {
   if (authenticationMode === 'credentials') {
     return (
       <CreateDataSourceFlyoutTypeSettingsAzureCredentialsFields
+        areFieldsRequired={areFieldsRequired}
         control={control}
         unregister={unregister}
       />
@@ -73,6 +76,7 @@ export function CreateDataSourceFlyoutTypeSettingsAzureAuthenticationFields({
   if (authenticationMode === 'connection_string') {
     return (
       <CreateDataSourceFlyoutTypeSettingsAzureConnectionStringField
+        areFieldsRequired={areFieldsRequired}
         control={control}
         unregister={unregister}
       />
@@ -81,6 +85,7 @@ export function CreateDataSourceFlyoutTypeSettingsAzureAuthenticationFields({
 
   return (
     <CreateDataSourceFlyoutTypeSettingsAzureSasTokenField
+      areFieldsRequired={areFieldsRequired}
       control={control}
       unregister={unregister}
     />
@@ -88,19 +93,41 @@ export function CreateDataSourceFlyoutTypeSettingsAzureAuthenticationFields({
 }
 
 function CreateDataSourceFlyoutTypeSettingsAzureCredentialsFields({
+  areFieldsRequired,
   control,
   unregister,
 }: {
+  areFieldsRequired: boolean;
   control: Control<CreateDataSourceFlyoutFormValues, any>;
   unregister: UseFormUnregister<CreateDataSourceFlyoutFormValues>;
 }) {
-  const { field: accountField } = useController({
+  const { field: accountField, fieldState: accountState } = useController({
     name: 'settings.account',
     control,
+    rules: areFieldsRequired
+      ? {
+          validate: (value?: string) =>
+            value?.trim()
+              ? true
+              : i18n.translate('dataSets.createFlyout.azure.fields.accountRequired', {
+                  defaultMessage: 'Account is required.',
+                }),
+        }
+      : undefined,
   });
-  const { field: keyField } = useController({
+  const { field: keyField, fieldState: keyState } = useController({
     name: 'settings.key',
     control,
+    rules: areFieldsRequired
+      ? {
+          validate: (value?: string) =>
+            value?.trim()
+              ? true
+              : i18n.translate('dataSets.createFlyout.azure.fields.keyRequired', {
+                  defaultMessage: 'Key is required.',
+                }),
+        }
+      : undefined,
   });
 
   useEffect(() => {
@@ -117,11 +144,14 @@ function CreateDataSourceFlyoutTypeSettingsAzureCredentialsFields({
           defaultMessage: 'Account',
         })}
         fullWidth
+        isInvalid={Boolean(accountState.error)}
+        error={accountState.error?.message}
       >
         <EuiFieldText
           data-test-subj="createDataSourceFlyoutAzureAccount"
           fullWidth
           autoComplete="off"
+          isInvalid={Boolean(accountState.error)}
           value={accountField.value}
           onChange={(e) => accountField.onChange(e.target.value)}
           name={accountField.name}
@@ -133,12 +163,15 @@ function CreateDataSourceFlyoutTypeSettingsAzureCredentialsFields({
           defaultMessage: 'Key',
         })}
         fullWidth
+        isInvalid={Boolean(keyState.error)}
+        error={keyState.error?.message}
       >
         <EuiFieldPassword
           type="dual"
           data-test-subj="createDataSourceFlyoutAzureKey"
           fullWidth
           autoComplete="off"
+          isInvalid={Boolean(keyState.error)}
           value={keyField.value}
           onChange={(e) => keyField.onChange(e.target.value)}
           name={keyField.name}
@@ -150,15 +183,27 @@ function CreateDataSourceFlyoutTypeSettingsAzureCredentialsFields({
 }
 
 function CreateDataSourceFlyoutTypeSettingsAzureConnectionStringField({
+  areFieldsRequired,
   control,
   unregister,
 }: {
+  areFieldsRequired: boolean;
   control: Control<CreateDataSourceFlyoutFormValues, any>;
   unregister: UseFormUnregister<CreateDataSourceFlyoutFormValues>;
 }) {
-  const { field: connectionStringField } = useController({
+  const { field: connectionStringField, fieldState: connectionStringState } = useController({
     name: 'settings.connection_string',
     control,
+    rules: areFieldsRequired
+      ? {
+          validate: (value?: string) =>
+            value?.trim()
+              ? true
+              : i18n.translate('dataSets.createFlyout.azure.fields.connectionStringRequired', {
+                  defaultMessage: 'Connection string is required.',
+                }),
+        }
+      : undefined,
   });
 
   useEffect(() => {
@@ -173,12 +218,15 @@ function CreateDataSourceFlyoutTypeSettingsAzureConnectionStringField({
         defaultMessage: 'Connection string',
       })}
       fullWidth
+      isInvalid={Boolean(connectionStringState.error)}
+      error={connectionStringState.error?.message}
     >
       <EuiFieldPassword
         type="dual"
         data-test-subj="createDataSourceFlyoutAzureConnectionString"
         fullWidth
         autoComplete="off"
+        isInvalid={Boolean(connectionStringState.error)}
         value={connectionStringField.value}
         onChange={(e) => connectionStringField.onChange(e.target.value)}
         name={connectionStringField.name}
@@ -189,15 +237,27 @@ function CreateDataSourceFlyoutTypeSettingsAzureConnectionStringField({
 }
 
 function CreateDataSourceFlyoutTypeSettingsAzureSasTokenField({
+  areFieldsRequired,
   control,
   unregister,
 }: {
+  areFieldsRequired: boolean;
   control: Control<CreateDataSourceFlyoutFormValues, any>;
   unregister: UseFormUnregister<CreateDataSourceFlyoutFormValues>;
 }) {
-  const { field: sasTokenField } = useController({
+  const { field: sasTokenField, fieldState: sasTokenState } = useController({
     name: 'settings.sas_token',
     control,
+    rules: areFieldsRequired
+      ? {
+          validate: (value?: string) =>
+            value?.trim()
+              ? true
+              : i18n.translate('dataSets.createFlyout.azure.fields.sasTokenRequired', {
+                  defaultMessage: 'SAS token is required.',
+                }),
+        }
+      : undefined,
   });
 
   useEffect(() => {
@@ -212,12 +272,15 @@ function CreateDataSourceFlyoutTypeSettingsAzureSasTokenField({
         defaultMessage: 'SAS token',
       })}
       fullWidth
+      isInvalid={Boolean(sasTokenState.error)}
+      error={sasTokenState.error?.message}
     >
       <EuiFieldPassword
         type="dual"
         data-test-subj="createDataSourceFlyoutAzureSasToken"
         fullWidth
         autoComplete="off"
+        isInvalid={Boolean(sasTokenState.error)}
         value={sasTokenField.value}
         onChange={(e) => sasTokenField.onChange(e.target.value)}
         name={sasTokenField.name}

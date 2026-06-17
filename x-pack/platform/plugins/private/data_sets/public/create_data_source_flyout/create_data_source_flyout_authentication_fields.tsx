@@ -26,6 +26,7 @@ export function CreateDataSourceFlyoutAuthenticationFields({
   dataSourceType,
   requireS3Credentials,
   requireGcsCredentials,
+  requireAzureCredentials,
   control,
   unregister,
 }: {
@@ -33,6 +34,7 @@ export function CreateDataSourceFlyoutAuthenticationFields({
   dataSourceType: DataSourceType;
   requireS3Credentials: boolean;
   requireGcsCredentials: boolean;
+  requireAzureCredentials: boolean;
   control: Control<CreateDataSourceFlyoutFormValues, any>;
   unregister: UseFormUnregister<CreateDataSourceFlyoutFormValues>;
 }) {
@@ -63,6 +65,7 @@ export function CreateDataSourceFlyoutAuthenticationFields({
       {dataSourceType === 'azure' ? (
         <CreateDataSourceFlyoutTypeSettingsAzureAuthenticationFields
           authenticationMode={authenticationMode as AzureAuthenticationMode}
+          areFieldsRequired={requireAzureCredentials}
           control={control}
           unregister={unregister}
         />
