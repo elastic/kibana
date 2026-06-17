@@ -7,7 +7,10 @@
 
 import { schema } from '@kbn/config-schema';
 
-import { SimplifiedPackagePolicyInputsSchema, SimplifiedVarsSchema } from './package_policy_schema';
+import {
+  SimplifiedPackagePolicyInputRecordSchema,
+  SimplifiedVarsSchema,
+} from './package_policy_schema';
 
 const AgentlessPolicyPackageSchema = schema.object(
   {
@@ -66,8 +69,8 @@ export const AgentlessPolicySchema = schema.object(
       })
     ),
     cloud_connector: schema.maybe(schema.nullable(CloudConnectorSchema)),
-    package: schema.maybe(AgentlessPolicyPackageSchema),
-    inputs: SimplifiedPackagePolicyInputsSchema,
+    package: AgentlessPolicyPackageSchema,
+    inputs: SimplifiedPackagePolicyInputRecordSchema,
     created_at: schema.string({
       meta: { description: 'Creation timestamp (ISO 8601).' },
     }),

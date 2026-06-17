@@ -38,8 +38,8 @@ export interface AgentlessPolicy {
   vars?: SimplifiedVars;
   global_data_tags?: GlobalDataTag[];
   cloud_connector?: AgentlessCloudConnector | null;
-  package?: AgentlessPackage;
-  inputs?: SimplifiedInputs;
+  package: AgentlessPackage;
+  inputs: SimplifiedInputs;
   created_at: string;
   created_by: string;
   updated_at: string;

@@ -10,6 +10,12 @@ import { AgentlessPolicySchema, AgentlessPolicyResponseSchema } from './agentles
 const validMinimalPolicy = {
   id: 'policy-1',
   name: 'My Agentless Policy',
+  package: {
+    name: 'cloud_security_posture',
+    title: 'Cloud Security Posture',
+    version: '1.0.0',
+  },
+  inputs: {},
   created_at: '2026-06-04T10:00:00.000Z',
   created_by: 'elastic',
   updated_at: '2026-06-04T10:00:00.000Z',
@@ -76,6 +82,16 @@ describe('AgentlessPolicySchema', () => {
 
     it('should reject a policy without updated_by', () => {
       const { updated_by: _, ...policy } = validMinimalPolicy;
+      expect(() => AgentlessPolicySchema.validate(policy)).toThrow();
+    });
+
+    it('should reject a policy without package', () => {
+      const { package: _, ...policy } = validMinimalPolicy;
+      expect(() => AgentlessPolicySchema.validate(policy)).toThrow();
+    });
+
+    it('should reject a policy without inputs', () => {
+      const { inputs: _, ...policy } = validMinimalPolicy;
       expect(() => AgentlessPolicySchema.validate(policy)).toThrow();
     });
   });
@@ -234,8 +250,9 @@ describe('AgentlessPolicySchema', () => {
       ).not.toThrow();
     });
 
-    it('should accept undefined inputs', () => {
-      expect(() => AgentlessPolicySchema.validate(validMinimalPolicy)).not.toThrow();
+    it('should reject a policy without inputs', () => {
+      const { inputs: _, ...policyWithoutInputs } = validMinimalPolicy;
+      expect(() => AgentlessPolicySchema.validate(policyWithoutInputs)).toThrow();
     });
   });
 });

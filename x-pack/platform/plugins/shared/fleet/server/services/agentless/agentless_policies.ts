@@ -90,19 +90,22 @@ const getAgentlessAgentPolicyConfig = (
 };
 
 export const packagePolicyToAgentlessPolicy = (packagePolicy: PackagePolicy): AgentlessPolicy => {
+  // PackagePolicy.package is always set for agentless policies created through this service but optional in the general type
+  if (!packagePolicy.package) {
+    throw new Error(`Agentless policy ${packagePolicy.id} is missing a package reference`);
+  }
+
   const supportsAgentless = true;
   return {
     id: packagePolicy.id,
     name: packagePolicy.name,
     namespace: packagePolicy.namespace,
-    package: packagePolicy.package
-      ? {
-          name: packagePolicy.package.name,
-          title: packagePolicy.package.title,
-          version: packagePolicy.package.version,
-        }
-      : undefined,
-    inputs: formatInputs(packagePolicy.inputs, supportsAgentless),
+    package: {
+      name: packagePolicy.package.name,
+      title: packagePolicy.package.title,
+      version: packagePolicy.package.version,
+    },
+    inputs: formatInputs(packagePolicy.inputs, supportsAgentless) ?? {},
     vars: formatVars(packagePolicy.vars),
     global_data_tags: packagePolicy.global_data_tags,
     cloud_connector: packagePolicy.cloud_connector_id
