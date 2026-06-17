@@ -33,26 +33,47 @@ const makeExecution = (
     ...overrides,
   } as WorkflowExecutionListItemDto);
 
-const makeStream = (name: string, opts?: { query: boolean }): Streams.all.Definition =>
-  opts?.query
-    ? {
-        name,
-        type: 'query' as const,
-        query: { esql: `FROM ${name}`, view: name },
-        ...STUB_STREAM_FIELDS,
-      }
-    : {
-        name,
-        type: 'classic' as const,
-        ingest: {
-          processing: { steps: [], updated_at: '' },
-          lifecycle: { inherit: {} },
-          settings: {},
-          failure_store: { disabled: {} },
-          classic: {},
-        },
-        ...STUB_STREAM_FIELDS,
-      };
+const makeStream = (
+  name: string,
+  opts?: { query?: boolean; wired?: boolean; draft?: boolean }
+): Streams.all.Definition => {
+  if (opts?.query) {
+    return {
+      name,
+      type: 'query' as const,
+      query: { esql: `FROM ${name}`, view: name },
+      ...STUB_STREAM_FIELDS,
+    };
+  }
+
+  if (opts?.wired || opts?.draft) {
+    return {
+      name,
+      type: 'wired' as const,
+      ingest: {
+        processing: { steps: [], updated_at: '' },
+        lifecycle: { inherit: {} },
+        settings: {},
+        failure_store: { inherit: {} },
+        wired: { fields: {}, routing: [], draft: opts?.draft ?? false },
+      },
+      ...STUB_STREAM_FIELDS,
+    };
+  }
+
+  return {
+    name,
+    type: 'classic' as const,
+    ingest: {
+      processing: { steps: [], updated_at: '' },
+      lifecycle: { inherit: {} },
+      settings: {},
+      failure_store: { disabled: {} },
+      classic: {},
+    },
+    ...STUB_STREAM_FIELDS,
+  };
+};
 
 const candidateNames = (result: ReturnType<typeof classifyStreams>) =>
   result.candidates.map((c) => c.streamName);
@@ -91,6 +112,21 @@ describe('classifyStreams', () => {
 
     expect(candidateNames(result)).toEqual(['logs']);
     expect(result.unsupported).toEqual(['my-query']);
+  });
+
+  it('marks draft wired streams as unsupported while keeping materialized wired streams eligible', () => {
+    const result = classifyStreams({
+      ...defaultArgs,
+      allStreams: [
+        makeStream('logs.materialized', { wired: true }),
+        makeStream('logs.draft', { draft: true }),
+      ],
+    });
+
+    // The materialized wired stream lands in candidates, proving the wired fixture is valid and
+    // that only the draft flag (not an invalid shape) is what routes the draft to `unsupported`.
+    expect(candidateNames(result)).toEqual(['logs.materialized']);
+    expect(result.unsupported).toEqual(['logs.draft']);
   });
 
   it('excludes streams matching exclude patterns', () => {

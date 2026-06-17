@@ -22,6 +22,7 @@ import { useDebouncedValue } from '@kbn/react-hooks';
 import { useQueryClient } from '@kbn/react-query';
 import {
   type Streams,
+  isDraftGetResponse,
   SigEventsWorkflowStatus,
   type SigEventsWorkflowStatusResult,
   type StreamsKIsOnboardingStatusResult,
@@ -34,6 +35,7 @@ import { RUNNING_POLL_INTERVAL_MS } from '../constants';
 import { useSignificantEventsAvailability } from '../../../hooks/sig_events/use_significant_events_availability';
 import { useKibana } from '../../../hooks/use_kibana';
 import { SignificantEventsNotEnabledPrompt } from '../significant_events_not_enabled_prompt';
+import { SignificantEventsDraftPrompt } from './significant_events_draft_prompt';
 import { EmptyState } from './empty_state';
 import { useFetchKnowledgeIndicators } from './hooks/use_knowledge_indicators_data';
 import { KnowledgeIndicatorsTable } from './knowledge_indicators_table';
@@ -61,10 +63,13 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
   } = useKibana();
   const queryClient = useQueryClient();
   const { availability, isLoading: isAvailabilityLoading } = useSignificantEventsAvailability();
+  // Draft streams have no backing index to sample, so significant events can't be generated yet.
+  const isDraft = isDraftGetResponse(definition);
   // Only fetch features and queries once availability has resolved and is not
-  // explicitly unavailable (stays fail-open while the probe result is unknown).
+  // explicitly unavailable (stays fail-open while the probe result is unknown), and never for
+  // drafts (there is nothing to analyze until they are materialized).
   const shouldFetchKnowledgeIndicators =
-    !isAvailabilityLoading && availability?.available !== false;
+    !isAvailabilityLoading && availability?.available !== false && !isDraft;
   const [tableSearchValue, setTableSearchValue] = useState('');
   const debouncedTableSearchValue = useDebouncedValue(tableSearchValue, SEARCH_DEBOUNCE_MS)
     .trim()
@@ -206,6 +211,10 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
     knowledgeIndicatorsOnboardingState?.status === SigEventsWorkflowStatus.BeingCanceled;
   const isGenerateButtonDisabled =
     knowledgeIndicatorsOnboardingState === null || isKnowledgeIndicatorsGenerationPending;
+
+  if (isDraft) {
+    return <SignificantEventsDraftPrompt />;
+  }
 
   if (isAvailabilityLoading) {
     return <LoadingPanel size="xxl" />;
