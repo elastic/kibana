@@ -24,7 +24,10 @@ import {
   Location,
   FULL_TEXT_SEARCH_FUNCTIONS,
 } from '@kbn/esql-language';
-import { readElasticsearchDefinitions } from '../lib/elasticsearch_definitions';
+import {
+  readElasticsearchDefinitions,
+  findDefinitionFileByName,
+} from '../lib/elasticsearch_definitions';
 import {
   aliasTable,
   aliases,
@@ -703,14 +706,15 @@ ${functionsEnum}
 `
   );
 
-  // Copies docs/reference/esql/functions/kibana/inline_cast.json from ES.
+  // Copies inline_cast.json from ES.
   // It holds a mapping of inline casts to the respective function name that performs the cast.
   // Inline casting, `field::int`, is sugar syntax for `to_integer(field)`, so it's usefull to know this mapping
   // to perform validations.
-  const ESInlineCastsFilePath = join(
+  const ESInlineCastsFilePath = findDefinitionFileByName({
     pathToElasticsearch,
-    '/docs/reference/query-languages/esql/kibana/generated/x-pack-esql/definition/inline_cast.json'
-  );
+    language: 'esql',
+    fileName: 'inline_cast.json',
+  });
   const inlineCastsDefinition = JSON.parse(readFileSync(ESInlineCastsFilePath, 'utf-8'));
   const castsMap = JSON.stringify(inlineCastsDefinition, null, 2);
   await writeFile(
@@ -829,4 +833,7 @@ export const inlineCastsMapping = ${castsMap} as const;
     GENERATED_PROMQL_LABEL_MATCHERS_OUTPUT_PATH,
     printPromQLLabelMatchersGeneratedFile(promqlLabelMatcherDefinitions)
   );
-})();
+})().catch((error) => {
+  process.stderr.write(`${error.stack ?? error.message}\n`);
+  process.exit(1);
+});
