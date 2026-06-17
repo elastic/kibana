@@ -169,7 +169,7 @@ export const LogEntryExampleMessageRow: React.FC<Props> = ({
       <EuiTableRowCell width="150px" css={{ color: euiTheme.colors.textSubdued }}>
         {moment(timestamp).format('HH:mm:ss.SSS')}
       </EuiTableRowCell>
-      <EuiTableRowCell>{message}</EuiTableRowCell>
+      <EuiTableRowCell truncateText>{message}</EuiTableRowCell>
 
       <EuiTableRowCell width="250px">{humanFriendlyDataset}</EuiTableRowCell>
 
@@ -268,7 +268,7 @@ export const LogEntryExampleMessageTable: React.FC<{
         },
         '& .euiTableCellContent': {
           padding: 0,
-          minHeight: '24px',
+          height: '24px',
         },
       }}
     >

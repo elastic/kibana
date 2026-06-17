@@ -6,16 +6,13 @@
  */
 
 import React from 'react';
-import { screen } from '@testing-library/react';
-import { matchers as emotionMatchers } from '@emotion/jest';
+import { screen, within } from '@testing-library/react';
 import { renderWithKibanaRenderContext } from '@kbn/test-jest-helpers';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { LogEntryExample, LogEntryAnomaly } from '../../../../../../common/log_analysis';
 import type { TimeRange } from '../../../../../../common/time/time_range';
 import { LogEntryFlyoutProvider } from '../../../../../containers/logs/log_flyout';
 import { LogEntryExampleMessageTable } from './log_entry_example';
-
-expect.extend(emotionMatchers);
 
 const mockServices = {
   ml: {
@@ -76,14 +73,16 @@ const renderTable = () =>
   );
 
 describe('LogEntryExampleMessageTable', () => {
-  it('does not pin the example cell content to a fixed height, so long messages can wrap (SDH #6323)', () => {
+  it('truncates long messages in the message cell to a single line', () => {
     renderTable();
 
-    const table = screen.getByRole('table');
+    const rows = screen.getAllByRole('row');
+    const dataRow = rows[1];
+    const cells = within(dataRow).getAllByRole('cell');
+    const messageCell = cells[1];
 
-    // The fix uses min-height so rows grow to fit wrapping messages instead of
-    // clipping them to a fixed 24px height (which caused overlapping text).
-    expect(table).toHaveStyleRule('min-height', '24px', { target: '.euiTableCellContent' });
-    expect(table).not.toHaveStyleRule('height', '24px', { target: '.euiTableCellContent' });
+    const truncatedSpan = messageCell.querySelector('.euiTableCellContent__text');
+    expect(truncatedSpan).toBeInTheDocument();
+    expect(truncatedSpan).toHaveTextContent(examples[0].message);
   });
 });
