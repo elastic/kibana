@@ -1890,6 +1890,8 @@
       "@kbn/picomatcher/*": ["packages/kbn-picomatcher/*"],
       "@kbn/plugin-check": ["packages/kbn-plugin-check"],
       "@kbn/plugin-check/*": ["packages/kbn-plugin-check/*"],
+      "@kbn/plugin-di": ["src/core/packages/di/plugin"],
+      "@kbn/plugin-di/*": ["src/core/packages/di/plugin/*"],
       "@kbn/plugin-generator": ["packages/kbn-plugin-generator"],
       "@kbn/plugin-generator/*": ["packages/kbn-plugin-generator/*"],
       "@kbn/plugin-helpers": ["packages/kbn-plugin-helpers"],

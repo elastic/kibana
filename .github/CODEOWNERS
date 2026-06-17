@@ -179,6 +179,7 @@ src/core/packages/di/browser-internal @elastic/kibana-core
 src/core/packages/di/common @elastic/kibana-core
 src/core/packages/di/common-internal @elastic/kibana-core
 src/core/packages/di/mocks @elastic/kibana-core
+src/core/packages/di/plugin @elastic/kibana-core
 src/core/packages/di/server @elastic/kibana-core
 src/core/packages/di/server-internal @elastic/kibana-core
 src/core/packages/doc-links/browser @elastic/kibana-core
