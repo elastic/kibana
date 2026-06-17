@@ -29,12 +29,12 @@ export const accessFlyoutSave = i18n.translate('xpack.agentBuilder.acl.flyout.sa
   defaultMessage: 'Save changes',
 });
 
-// Access-control scope context strip ───────────────────────────────────────────
+// Access control scope context strip ───────────────────────────────────────────
 
 /**
- * Per-access-control-scope default-access blurb shown in the banner above the form.
+ * Default-access blurb shown in the banner above the form for each access control scope.
  *
- * Each message stitches together the agent's current access-control scope with the
+ * Each message stitches together the agent's current access control scope with the
  * default behavior that scope implies, plus a reminder that ACL entries grant
  * additional access on top.
  */
@@ -65,7 +65,7 @@ export const accessFlyoutPeopleSection = i18n.translate(
 
 export const accessFlyoutPeopleHelp = i18n.translate(
   'xpack.agentBuilder.acl.flyout.peopleSectionHelp',
-  { defaultMessage: 'Grant additional access beyond the access-control scope.' }
+  { defaultMessage: 'Grant additional access beyond the access control scope.' }
 );
 
 export const accessFlyoutAddPeoplePlaceholder = i18n.translate(
@@ -125,7 +125,7 @@ export const accessSummaryDefaultDescription = i18n.translate(
   'xpack.agentBuilder.acl.summary.defaultDescription',
   {
     defaultMessage:
-      'Anyone who can see this agent gets the access set by its access-control scope. Add entries to grant more.',
+      'Anyone who can see this agent gets the access set by its access control scope. Add entries to grant more.',
   }
 );
 

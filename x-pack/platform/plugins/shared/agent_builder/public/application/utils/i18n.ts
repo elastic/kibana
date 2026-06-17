@@ -2658,12 +2658,12 @@ export const labels = {
       accessControlScopeDisabledReason: i18n.translate(
         'xpack.agentBuilder.overview.editDetails.accessControlScopeDisabledReason',
         {
-          defaultMessage: 'Only the owner or an administrator can change the access-control scope.',
+          defaultMessage: 'Only the owner or an administrator can change the access control scope.',
         }
       ),
       accessControlScopeAriaLabel: i18n.translate(
         'xpack.agentBuilder.overview.editDetails.accessControlScopeAriaLabel',
-        { defaultMessage: 'Agent access-control scope' }
+        { defaultMessage: 'Agent access control scope' }
       ),
       customizationTitle: i18n.translate(
         'xpack.agentBuilder.overview.editDetails.customizationTitle',

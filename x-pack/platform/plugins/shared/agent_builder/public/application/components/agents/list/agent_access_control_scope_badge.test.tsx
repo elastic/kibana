@@ -34,7 +34,7 @@ describe('AgentAccessControlScopeBadge', () => {
     expect(screen.getByText('Read-only')).toBeInTheDocument();
   });
 
-  it('shows Private access-control scope badge when scope is private', () => {
+  it('shows Private access control scope badge when scope is private', () => {
     renderWithIntl(
       <AgentAccessControlScopeBadge
         agent={{
@@ -50,7 +50,7 @@ describe('AgentAccessControlScopeBadge', () => {
     expect(screen.getByText('Private')).toBeInTheDocument();
   });
 
-  it('shows Shared access-control scope badge when scope is shared', () => {
+  it('shows Shared access control scope badge when scope is shared', () => {
     renderWithIntl(
       <AgentAccessControlScopeBadge
         agent={{
@@ -66,7 +66,7 @@ describe('AgentAccessControlScopeBadge', () => {
     expect(screen.getByText('Shared')).toBeInTheDocument();
   });
 
-  it('shows Public access-control scope badge when scope is public', () => {
+  it('shows Public access control scope badge when scope is public', () => {
     renderWithIntl(
       <AgentAccessControlScopeBadge
         agent={{
@@ -82,7 +82,7 @@ describe('AgentAccessControlScopeBadge', () => {
     expect(screen.getByText('Public')).toBeInTheDocument();
   });
 
-  it('defaults to Public when access-control scope is undefined', () => {
+  it('defaults to Public when access control scope is undefined', () => {
     renderWithIntl(<AgentAccessControlScopeBadge agent={baseAgent} />);
 
     expect(

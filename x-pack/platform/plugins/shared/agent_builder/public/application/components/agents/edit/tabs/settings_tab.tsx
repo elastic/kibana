@@ -94,7 +94,7 @@ export const AgentSettingsTab: React.FC<AgentSettingsTabProps> = ({
       isAdmin,
     });
 
-  // Lightweight projection used only by AccessForm to filter selectable access-control roles.
+  // Lightweight projection used only by AccessForm to filter selectable access control roles.
   // The real entries come from the form's `access_control.entries` field via Controller
   // (seeded from the loaded agent in `useAgentEdit`), not from local state.
   const accessFormAgent = useMemo(
@@ -530,7 +530,7 @@ export const AgentSettingsTab: React.FC<AgentSettingsTabProps> = ({
                     'xpack.agentBuilder.agents.form.accessControlScopeDisabledReason',
                     {
                       defaultMessage:
-                        'Only the owner or an administrator can change the access-control scope.',
+                        'Only the owner or an administrator can change the access control scope.',
                     }
                   )
                 : undefined
@@ -551,7 +551,7 @@ export const AgentSettingsTab: React.FC<AgentSettingsTabProps> = ({
                   aria-label={i18n.translate(
                     'xpack.agentBuilder.agents.form.accessControlScopeAriaLabel',
                     {
-                      defaultMessage: 'Agent access-control scope',
+                      defaultMessage: 'Agent access control scope',
                     }
                   )}
                   data-test-subj="agentSettingsAccessControlScopeSelect"

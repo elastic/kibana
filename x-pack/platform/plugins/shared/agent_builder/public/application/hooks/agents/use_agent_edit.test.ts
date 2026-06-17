@@ -66,7 +66,7 @@ describe('useAgentEdit submit (create/clone branch)', () => {
     mockUpdate.mockResolvedValue({ id: 'existing-agent' });
   });
 
-  it('strips access-control entries, created_by and avatar_icon from the create payload when cloning', async () => {
+  it('strips access control entries, created_by and avatar_icon from the create payload when cloning', async () => {
     const cloneData: AgentEditState = {
       id: 'cloned-agent',
       name: 'Cloned Agent',
@@ -136,7 +136,7 @@ describe('useAgentEdit submit (create/clone branch)', () => {
     expect(mockCreate.mock.calls[0][0].access_control).not.toHaveProperty('entries');
   });
 
-  it('strips access-control entries from regular update payloads', async () => {
+  it('strips access control entries from regular update payloads', async () => {
     const updateData: AgentEditState = {
       id: 'existing-agent',
       name: 'Existing Agent',

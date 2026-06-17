@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import { AgentAccessControlScope } from '@kbn/agent-builder-common';
 
-/** Shared access-control scope labels for list badge and settings form. */
+/** Shared access control scope labels for list badge and settings form. */
 export const ACCESS_CONTROL_SCOPE_LABELS: Record<AgentAccessControlScope, string> = {
   [AgentAccessControlScope.Private]: i18n.translate(
     'xpack.agentBuilder.agents.accessControlScope.private',
@@ -30,7 +30,7 @@ export const ACCESS_CONTROL_SCOPE_LABELS: Record<AgentAccessControlScope, string
   ),
 };
 
-/** Shared access-control scope tooltips for list badge. */
+/** Shared access control scope tooltips for list badge. */
 export const ACCESS_CONTROL_SCOPE_TOOLTIPS: Record<AgentAccessControlScope, string> = {
   [AgentAccessControlScope.Private]: i18n.translate(
     'xpack.agentBuilder.agents.accessControlScope.privateTooltip',
