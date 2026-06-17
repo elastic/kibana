@@ -31,11 +31,13 @@ apiTest.describe('content management - updated_by', { tag: tags.deploymentAgnost
     updated_at: string;
   };
 
-  apiTest.beforeAll(async ({ apiClient, requestAuth, samlAuth }) => {
+  apiTest.beforeAll(async ({ apiClient, requestAuth, samlAuth, config }) => {
     adminCredentials = await requestAuth.getApiKeyForAdmin();
+    const privilegedRoleName =
+      config.serverless && config.projectType === 'es' ? 'developer' : 'editor';
 
     // User 1: pre-defined SAML editor
-    ({ cookieHeader: user1CookieHeader } = await samlAuth.asInteractiveUser('editor'));
+    ({ cookieHeader: user1CookieHeader } = await samlAuth.asInteractiveUser(privilegedRoleName));
     const me1 = await apiClient.get('internal/security/me', {
       headers: { ...INTERNAL_HEADERS, ...user1CookieHeader },
     });

@@ -21,9 +21,11 @@ apiTest.describe(
     let adminCredentials: RoleApiCredentials;
     let user1CookieHeader: Record<string, string>;
 
-    apiTest.beforeAll(async ({ requestAuth, samlAuth }) => {
+    apiTest.beforeAll(async ({ requestAuth, samlAuth, config }) => {
       adminCredentials = await requestAuth.getApiKeyForAdmin();
-      ({ cookieHeader: user1CookieHeader } = await samlAuth.asInteractiveUser('editor'));
+      const privilegedRoleName =
+        config.serverless && config.projectType === 'es' ? 'developer' : 'editor';
+      ({ cookieHeader: user1CookieHeader } = await samlAuth.asInteractiveUser(privilegedRoleName));
     });
 
     apiTest('non-interactive user gets 403 on all favorites endpoints', async ({ apiClient }) => {

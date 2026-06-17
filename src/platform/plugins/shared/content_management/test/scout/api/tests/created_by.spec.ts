@@ -38,8 +38,10 @@ apiTest.describe('content management - created_by', { tag: tags.deploymentAgnost
 
   apiTest(
     'created_by is set to profile_uid for interactive user',
-    async ({ apiClient, samlAuth }) => {
-      const { cookieHeader } = await samlAuth.asInteractiveUser('editor');
+    async ({ apiClient, samlAuth, config }) => {
+      const privilegedRoleName =
+        config.serverless && config.projectType === 'es' ? 'developer' : 'editor';
+      const { cookieHeader } = await samlAuth.asInteractiveUser(privilegedRoleName);
 
       // Resolve the profile_uid for this SAML session before making the write request.
       const meResponse = await apiClient.get('internal/security/me', {

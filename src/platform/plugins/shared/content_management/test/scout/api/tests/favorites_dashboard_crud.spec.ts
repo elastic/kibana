@@ -45,9 +45,11 @@ apiTest.describe(
     let user2CookieHeader: Record<string, string>;
     let user3CookieHeader: Record<string, string>;
 
-    apiTest.beforeAll(async ({ requestAuth, samlAuth, kbnClient }) => {
+    apiTest.beforeAll(async ({ config, requestAuth, samlAuth, kbnClient }) => {
+      const privilegedRoleName =
+        config.serverless && config.projectType === 'es' ? 'developer' : 'editor';
       adminCredentials = await requestAuth.getApiKeyForAdmin();
-      ({ cookieHeader: user1CookieHeader } = await samlAuth.asInteractiveUser('editor'));
+      ({ cookieHeader: user1CookieHeader } = await samlAuth.asInteractiveUser(privilegedRoleName));
       // Admin SAML user: different identity from editor → different profile_uid for cross-user isolation.
       ({ cookieHeader: user2CookieHeader } = await samlAuth.asInteractiveUser('admin'));
       ({ cookieHeader: user3CookieHeader } = await samlAuth.asInteractiveUser('viewer'));

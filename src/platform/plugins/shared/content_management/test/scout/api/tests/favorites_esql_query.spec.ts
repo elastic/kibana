@@ -31,8 +31,10 @@ apiTest.describe(
   () => {
     let user1CookieHeader: Record<string, string>;
 
-    apiTest.beforeAll(async ({ samlAuth }) => {
-      ({ cookieHeader: user1CookieHeader } = await samlAuth.asInteractiveUser('editor'));
+    apiTest.beforeAll(async ({ samlAuth, config }) => {
+      const privilegedRoleName =
+        config.serverless && config.projectType === 'es' ? 'developer' : 'editor';
+      ({ cookieHeader: user1CookieHeader } = await samlAuth.asInteractiveUser(privilegedRoleName));
     });
 
     apiTest('favoriting with missing or invalid metadata returns 400', async ({ apiClient }) => {
