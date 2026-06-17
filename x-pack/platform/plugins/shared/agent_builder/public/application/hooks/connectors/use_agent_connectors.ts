@@ -32,14 +32,25 @@ export const useAgentConnectors = ({ agentId }: { agentId: string }) => {
   );
 
   const activeConnectorIdSet = useMemo(
-    () => new Set(agent ? getEffectiveConnectorIds(agent, allConnectors.map((c) => c.id)) : []),
+    () =>
+      new Set(
+        agent
+          ? getEffectiveConnectorIds(
+              agent,
+              allConnectors.map((c) => c.id)
+            )
+          : []
+      ),
     [agent, allConnectors]
   );
 
   const getCurrentConnectorIds = useCallback((): string[] => {
     const currentAgent = queryClient.getQueryData<AgentDefinition>(agentQueryKey);
     return currentAgent
-      ? getEffectiveConnectorIds(currentAgent, allConnectors.map((c) => c.id))
+      ? getEffectiveConnectorIds(
+          currentAgent,
+          allConnectors.map((c) => c.id)
+        )
       : allConnectors.map((c) => c.id);
   }, [queryClient, agentQueryKey, allConnectors]);
 
