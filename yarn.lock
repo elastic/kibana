@@ -8090,6 +8090,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/occ@link:src/platform/packages/shared/kbn-occ":
+  version "0.0.0"
+  uid ""
+
 "@kbn/oidc-provider-plugin@link:x-pack/platform/test/security_api_integration/plugins/oidc_provider":
   version "0.0.0"
   uid ""
