@@ -5,17 +5,11 @@
  * 2.0.
  */
 import Path from 'path';
-import { defineConfig } from '@playwright/test';
 import { createPlaywrightEvalsConfig } from '@kbn/evals';
 
-const evalsConfig = createPlaywrightEvalsConfig({
+export default createPlaywrightEvalsConfig({
   testDir: Path.resolve(__dirname, './evals'),
   // The default Playwright test timeout (5m) is too low for some connector/model combinations.
   // Keep this high enough to avoid spurious timeouts, and use CI step timeouts to bound runtime.
   timeout: 20 * 60_000, // 20 minutes
-});
-
-// TODO: revert before merge — notify testing only (one fail + one pass hook)
-export default defineConfig(evalsConfig, {
-  testMatch: ['**/ci_force_fail.spec.ts', '**/time_range.spec.ts'],
 });
