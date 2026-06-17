@@ -29,6 +29,7 @@ const THRESHOLD_INDEX = `${THRESHOLD_TEST_INDEX}-jsm`;
 
 const openJsmTestTab = async (page: ScoutPage, connectorId: string) => {
   await page.testSubj.click(`edit${connectorId}`);
+  await page.testSubj.locator('nameInput').waitFor({ state: 'visible' });
   await page.testSubj.click('testConnectorTab');
   await page.testSubj.locator('jsm-subActionSelect').waitFor({ state: 'visible' });
 };
@@ -212,6 +213,7 @@ test.describe('Jira Service Management connector', { tag: tags.stateful.classic 
     await searchConnectors(page, connectorName);
     await expect(page.testSubj.locator('connectors-row')).toHaveCount(1);
     await openConnectorFlyout(page);
+    await page.testSubj.locator('nameInput').waitFor({ state: 'visible' });
     await page.testSubj.click('testConnectorTab');
 
     await expect(page.testSubj.locator('executeActionButton')).toBeDisabled();
