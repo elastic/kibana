@@ -118,7 +118,7 @@ describe('createInvestigationAttachmentType', () => {
     });
 
     const resolved = await type.resolve?.('disc-1', createContext());
-    expect(resolved).toMatchObject({ root_cause: investigation.contributing_factors });
+    expect(resolved).toMatchObject({ contributing_factors: investigation.contributing_factors });
   });
 
   it('returns undefined when the discovery has no investigation', async () => {
