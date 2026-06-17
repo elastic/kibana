@@ -14,10 +14,7 @@ import { roundToActions } from './round_to_actions';
 import { pendingAskUserQuestionStepsToActions } from './pending_ask_user_question_steps_to_actions';
 
 /**
- * Single entry point for "paused round → actions to seed the resume run".
- * Combines step-derived actions (from `roundToActions`) and pending-ask_user_question
- * actions (from `pendingAskUserQuestionStepsToActions`). The latter also emits a
- * dedicated SSE event per resolved step so the UI sees the answer in real time.
+ * Build the action list from the current pending round, for execution resuming (after HITL interrupts).
  */
 export const buildPendingRoundActions = ({
   round,

@@ -26,13 +26,7 @@ import type { ResearchAgentAction } from '../actions';
 import type { ProcessedConversationRound } from './prepare_conversation';
 
 /**
- * INVARIANT — single-caller path: the only tool that ever produces an `ask_user_question`
- * prompt (and thus a pending `ask_user_question` step) is the `ask_user_question` tool
- * itself. This helper does NOT re-invoke the tool handler on resume; it synthesizes the
- * action pair directly from the persisted step + the user's response. If any other tool
- * ever started producing `ask_user_question` prompts, its handler would silently never
- * re-run. Keep this path single-caller; do not expose helpers that would let another
- * tool enter it.
+ * Convert the pending ask_user_question step + corresponding response to list of actions + emit the event to be collected
  */
 export const pendingAskUserQuestionStepsToActions = ({
   round,

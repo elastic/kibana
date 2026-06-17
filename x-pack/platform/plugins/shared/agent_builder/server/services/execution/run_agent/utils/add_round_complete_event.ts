@@ -517,10 +517,7 @@ const buildRoundState = ({
     return undefined;
   }
 
-  // ask_user_question prompts don't need a node-state snapshot: the pending
-  // `ask_user_question` step in `round.steps` (with `data.answers === undefined`)
-  // is itself the resume marker. The `pendingAskUserQuestionStepsToActions`
-  // helper walks `round.steps` directly at resume time.
+  // ask_user_question prompts don't need a node-state snapshot as they are stored as steps.
   const toolCallPromptRequests = promptRequestEvents.filter(
     (event) => !isAskUserQuestionPrompt(event.prompt)
   );

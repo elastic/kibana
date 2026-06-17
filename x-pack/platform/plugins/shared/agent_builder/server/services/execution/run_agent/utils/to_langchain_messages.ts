@@ -121,6 +121,7 @@ export const roundToLangchain = async (
         messages.push(createUserMessage(formatSystemNotice(step)));
       } else if (isToolCallStep(step)) {
         // Only process when we hit the first tool call of a group
+        // Other tool calls in the same group are handled by createGroupedToolCallMessages
         const group = groups[groupIndex];
         if (group && group[0] === step) {
           messages.push(
@@ -128,7 +129,6 @@ export const roundToLangchain = async (
           );
           groupIndex++;
         }
-        // Other tool calls in the same group are handled by createGroupedToolCallMessages
       } else if (isAskUserQuestionStep(step) && step.answers !== undefined) {
         // Render answered ask_user_question steps as a tool-call / tool-response pair.
         // A fresh tool_call_id binds the two messages within this LangChain conversation;
