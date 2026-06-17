@@ -30,6 +30,7 @@ import {
 } from '../services/logger_service/logger_service';
 import type { AlertingServerStartDependencies } from '../../types';
 import { collectIdsFromEvents, denormalizeEvent, type NameMaps } from './denormalize_event';
+import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
 
 const TIME_WINDOW_HOURS = 24;
 const DEFAULT_PAGE = 1;
@@ -160,8 +161,12 @@ export class ActionPolicyExecutionHistoryClient {
   private buildRuleIdsFilter(ids: string[]): string {
     return toKqlExpression(
       nodeBuilder.or(
-        ids.map((id) => nodeBuilder.is('id', nodeTypes.literal.buildNode(id, true)))
+        ids.map((id) => nodeBuilder.is('id', nodeTypes.literal.buildNode(this.toSavedObjectIdFilterValue(id), true)))
       )
     );
+  }
+
+  private toSavedObjectIdFilterValue(ruleId: string): string {
+    return ruleId.startsWith(`${RULE_SAVED_OBJECT_TYPE}:`) ? ruleId : `${RULE_SAVED_OBJECT_TYPE}:${ruleId}`;
   }
 }
