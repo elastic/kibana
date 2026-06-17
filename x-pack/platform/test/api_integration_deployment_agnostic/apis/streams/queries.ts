@@ -425,7 +425,11 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       expect(bulkResponse).to.have.property('acknowledged', true);
 
       const getQueriesResponse = await getQueries(apiClient, STREAM_NAME);
-      const expectedQueries = [firstQuery, { ...updateThirdQuery, type: 'match' }, { ...newQuery, type: 'match' }];
+      const expectedQueries = [
+        firstQuery,
+        { ...updateThirdQuery, type: 'match' },
+        { ...newQuery, type: 'match' },
+      ];
       expect(sortBy(getQueriesResponse.queries, 'id')).to.eql(sortBy(expectedQueries, 'id'));
 
       const updatedRules = await alertingApi.searchRules(roleAuthc, '');
