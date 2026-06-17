@@ -12,7 +12,7 @@ import { schema } from '@kbn/config-schema';
 export const serializedTitlesSchema = schema.object({
   description: schema.maybe(
     schema.string({
-      maxLength: 1000,
+      maxLength: 10_000,
       meta: {
         description: 'A short description of the panel.',
       },
@@ -27,7 +27,7 @@ export const serializedTitlesSchema = schema.object({
   ),
   title: schema.maybe(
     schema.string({
-      maxLength: 500,
+      maxLength: 1_000,
       meta: {
         description: 'The panel title.',
       },
