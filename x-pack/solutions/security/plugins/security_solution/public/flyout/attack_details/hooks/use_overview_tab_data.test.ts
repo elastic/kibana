@@ -65,6 +65,7 @@ describe('useOverviewTabData', () => {
       summaryMarkdownWithReplacements: '',
       detailsMarkdown: '',
       detailsMarkdownWithReplacements: '',
+      originalAlertIds: [],
     });
   });
 
@@ -105,5 +106,21 @@ describe('useOverviewTabData', () => {
     expect(getFieldsDataMock).toHaveBeenCalledWith(
       'kibana.alert.attack_discovery.details_markdown_with_replacements'
     );
+  });
+
+  it('should return originalAlertIds when attack is provided', () => {
+    getFieldsDataMock.mockReturnValue(null);
+    (getField as jest.Mock).mockReturnValue(undefined);
+    (useAttackDetailsContext as jest.Mock).mockReturnValue({
+      getFieldsData: getFieldsDataMock,
+      attack: {
+        alertIds: ['alert-1', 'alert-2'],
+        replacements: { 'alert-1': 'original-1' },
+      },
+    });
+
+    const { result } = renderHook(() => useOverviewTabData());
+
+    expect(result.current.originalAlertIds).toEqual(['original-1', 'alert-2']);
   });
 });

@@ -467,7 +467,6 @@ export class SecurityPlugin
     this.anonymousAccessStart = this.anonymousAccessService.start({
       capabilities: core.capabilities,
       clusterClient,
-      basePath: core.http.basePath,
       spaces: spaces?.spacesService,
     });
 

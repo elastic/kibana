@@ -45,6 +45,21 @@ export interface SyntheticsPrivateLocationApi {
   cleanUpPrivateLocationsAndPolicies(): Promise<void>;
 }
 
+/** Shape of a Fleet `GET epm/packages/{name}` item (only the fields we read). */
+interface FleetPackageItem {
+  status?: string;
+  version?: string;
+  latestVersion?: string;
+  installationInfo?: { version?: string };
+}
+
+/** Shape of the public `GET private_locations/{id}` response (only the fields we read). */
+interface PrivateLocationContract {
+  id?: string;
+  label?: string;
+  isInvalid?: boolean;
+}
+
 export function createSyntheticsPrivateLocationApi(
   kbnClient: KbnClient,
   fleetApi: ApiServicesFixture['fleet']
@@ -54,7 +69,15 @@ export function createSyntheticsPrivateLocationApi(
 
   const fetchSyntheticsPackageVersion = async (): Promise<string> => {
     const { data } = await fleetApi.integration.getPackage('synthetics');
-    return data?.item?.version ?? DEFAULT_SYNTHETICS_VERSION;
+    // When a package is installed, Fleet's GET epm/packages/{name} returns the
+    // *installed* version in `item.version` and exposes the registry's latest in
+    // `item.latestVersion`. Prefer `latestVersion` so no-arg callers of
+    // `installSyntheticsPackage()` always target the registry's latest and
+    // perform a real upgrade even when an older version is already installed
+    // (e.g. the "handles auto upgrading policies" test installs an old version
+    // first, then expects a subsequent no-arg install to upgrade it).
+    const item = data?.item as FleetPackageItem | undefined;
+    return item?.latestVersion ?? item?.version ?? DEFAULT_SYNTHETICS_VERSION;
   };
 
   // The synthetics Fleet package install is a *global* operation: every Scout
@@ -67,11 +90,6 @@ export function createSyntheticsPrivateLocationApi(
   // We now install idempotently: never DELETE, short-circuit when the package
   // is already present at the target version, and tolerate concurrent installs
   // from sibling workers.
-  interface FleetPackageItem {
-    status?: string;
-    version?: string;
-    installationInfo?: { version?: string };
-  }
   const isInstalledAt = (item: FleetPackageItem | undefined, wanted: string): boolean =>
     item?.status === 'installed' && (item?.installationInfo?.version ?? item?.version) === wanted;
 
@@ -118,10 +136,17 @@ export function createSyntheticsPrivateLocationApi(
   };
 
   const addFleetPolicy = async (name: string, spaceIds: string[] = ['default']) => {
+    // A private location only needs an agent policy to host its synthetics
+    // package policy; it never needs system monitoring. Enabling `sysMonitoring`
+    // makes Fleet create an extra `system` package policy on every agent policy
+    // — pure overhead for these tests (the suite created ~44 agent policies in a
+    // full run). The synthetics package-policy assertions all filter by
+    // `package.name: synthetics`, so the dropped system policy is invisible to
+    // the count-sensitive specs.
     const { data } = await fleetApi.agent_policies.create({
       policyName: name,
       policyNamespace: 'default',
-      sysMonitoring: true,
+      sysMonitoring: false,
       params: {
         description: '',
         monitoring_enabled: [],
@@ -141,11 +166,6 @@ export function createSyntheticsPrivateLocationApi(
   // `isInvalid: true`. The public `GET private_locations/{id}` route combines
   // the exact same SO + agent-policy reads, so we gate setup on it until the
   // location is both found and `isInvalid: false`.
-  interface PrivateLocationContract {
-    id?: string;
-    label?: string;
-    isInvalid?: boolean;
-  }
   // Single probe of the public `GET private_locations/{id}` route, which combines
   // the same private-location SO + agent-policy reads that the monitor-save
   // validation performs. A location is "ready" only when it is found and
