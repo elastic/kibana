@@ -350,7 +350,7 @@ export default function swimlaneTest({ getService }: FtrProviderContext) {
                 status: 'error',
                 retry: false,
                 errorSource: TaskErrorSource.USER,
-                message: `error validating action params: ✖ Invalid input\n  → at subAction`,
+                message: `error validating action params: ✖ Invalid discriminator value. Expected 'pushToService'\n  → at subAction`,
               });
             });
         });

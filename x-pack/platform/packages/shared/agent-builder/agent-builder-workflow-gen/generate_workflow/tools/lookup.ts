@@ -6,13 +6,8 @@
  */
 
 import type { KibanaRequest } from '@kbn/core-http-server';
-import {
-  AlertEventSchema,
-  BaseEventSchema,
-  builtInStepDefinitions,
-  builtInTriggerDefinitions,
-} from '@kbn/workflows';
-import { z } from '@kbn/zod/v4';
+import { lookupTriggerDefinitionsForAgent } from '@kbn/workflows-management-plugin/common/build_trigger_definitions_for_agent';
+import { builtInStepDefinitions } from '@kbn/workflows';
 import type { WorkflowsManagementApi } from '@kbn/workflows-management-plugin/server';
 import { getAllConnectors } from '@kbn/workflows-management-plugin/common/schema';
 import {
@@ -21,14 +16,6 @@ import {
   formatConnectorStep,
   type StepDefinitionForAgent,
 } from './lookup_helpers';
-
-const zodToJsonSchemaSafe = (schema: z.ZodType): unknown => {
-  try {
-    return z.toJSONSchema(schema, { target: 'draft-7', unrepresentable: 'any' });
-  } catch {
-    return undefined;
-  }
-};
 
 export interface LookupDeps {
   api: WorkflowsManagementApi;
@@ -98,7 +85,6 @@ export const lookupStepDefinitions = async (
     return { error: `No step type matching ${args.stepType ?? args.search ?? 'anything'}` };
   }
 
-  // Match the existing tool: detailed only when ≤5 results.
   if (filtered.length > 5) {
     return {
       count: filtered.length,
@@ -108,30 +94,11 @@ export const lookupStepDefinitions = async (
   return { count: filtered.length, stepTypes: filtered };
 };
 
-export const lookupTriggerDefinitions = async (args: {
-  triggerType?: string;
-}): Promise<unknown> => {
-  let defs = builtInTriggerDefinitions.map((def) => ({
-    id: def.id,
-    label: def.label,
-    description: def.description,
-    jsonSchema: zodToJsonSchemaSafe(def.schema),
-    eventContextSchema:
-      def.id === 'alert'
-        ? zodToJsonSchemaSafe(AlertEventSchema)
-        : zodToJsonSchemaSafe(BaseEventSchema),
-    examples: def.documentation?.examples,
-  }));
-
-  if (args.triggerType) {
-    defs = defs.filter((d) => d.id === args.triggerType);
-  }
-
-  if (defs.length === 0) {
-    return {
-      error: `Trigger type "${args.triggerType}" not found`,
-      availableTypes: builtInTriggerDefinitions.map((d) => d.id),
-    };
-  }
-  return { count: defs.length, triggerTypes: defs };
-};
+export const lookupTriggerDefinitions = async (
+  args: { triggerType?: string },
+  { api }: LookupDeps
+): Promise<unknown> =>
+  lookupTriggerDefinitionsForAgent({
+    registeredTriggers: await api.getRegisteredTriggers(),
+    triggerType: args.triggerType,
+  });

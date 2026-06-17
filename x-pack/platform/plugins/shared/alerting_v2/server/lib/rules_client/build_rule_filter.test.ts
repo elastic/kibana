@@ -45,12 +45,6 @@ describe('buildRuleSoFilter', () => {
       );
     });
 
-    it('maps metadata.owner to SO attributes path', () => {
-      expect(buildRuleSoFilter('metadata.owner: "team-a"')).toBe(
-        'alerting_rule.attributes.metadata.owner: "team-a"'
-      );
-    });
-
     it('maps metadata.description to SO attributes path', () => {
       expect(buildRuleSoFilter('metadata.description: "high cpu"')).toBe(
         'alerting_rule.attributes.metadata.description: "high cpu"'
@@ -60,12 +54,6 @@ describe('buildRuleSoFilter', () => {
     it('maps metadata.tags to SO attributes path', () => {
       expect(buildRuleSoFilter('metadata.tags: "production"')).toBe(
         'alerting_rule.attributes.metadata.tags: "production"'
-      );
-    });
-
-    it('maps grouping.fields to SO attributes path', () => {
-      expect(buildRuleSoFilter('grouping.fields: "host.name"')).toBe(
-        'alerting_rule.attributes.grouping.fields: "host.name"'
       );
     });
   });
@@ -105,6 +93,18 @@ describe('buildRuleSoFilter', () => {
       );
     });
 
+    it('rejects metadata.owner (not an indexed field)', () => {
+      expect(() => buildRuleSoFilter('metadata.owner: "team-a"')).toThrow(
+        'Invalid filter field "metadata.owner"'
+      );
+    });
+
+    it('rejects grouping.fields (not an indexed field)', () => {
+      expect(() => buildRuleSoFilter('grouping.fields: "host.name"')).toThrow(
+        'Invalid filter field "grouping.fields"'
+      );
+    });
+
     it('rejects pre-prefixed SO fields (consumers must use clean API names)', () => {
       expect(() => buildRuleSoFilter('alerting_rule.attributes.kind: signal')).toThrow(
         'Invalid filter field'
@@ -118,6 +118,19 @@ describe('buildRuleSoFilter', () => {
     it('rejects unknown fields within compound expressions', () => {
       expect(() => buildRuleSoFilter('kind: signal AND unknown: value')).toThrow(
         'Invalid filter field "unknown"'
+      );
+    });
+
+    it('attaches INVALID_FILTER_FIELD code and allowed_fields in details', () => {
+      expect(() => buildRuleSoFilter('unknown_field: value')).toThrow(
+        expect.objectContaining({
+          isBoom: true,
+          output: expect.objectContaining({ statusCode: 400 }),
+          data: expect.objectContaining({
+            code: 'INVALID_FILTER_FIELD',
+            details: expect.objectContaining({ field: 'unknown_field' }),
+          }),
+        })
       );
     });
   });
@@ -149,6 +162,25 @@ describe('buildRuleSoFilter', () => {
 
       expect(() => buildRuleSoFilter('kind: signal')).toThrow(
         'Unsupported KQL function "unknown_function" in filter'
+      );
+    });
+
+    it('attaches UNSUPPORTED_FILTER_FUNCTION code with the offending function name', () => {
+      fromKueryExpressionMock.mockImplementationOnce((...args: unknown[]) => {
+        const ast = jest.requireActual('@kbn/es-query').fromKueryExpression(...args);
+        ast.function = 'unknown_function';
+        return ast;
+      });
+
+      expect(() => buildRuleSoFilter('kind: signal')).toThrow(
+        expect.objectContaining({
+          isBoom: true,
+          output: expect.objectContaining({ statusCode: 400 }),
+          data: {
+            code: 'UNSUPPORTED_FILTER_FUNCTION',
+            details: { function: 'unknown_function' },
+          },
+        })
       );
     });
   });

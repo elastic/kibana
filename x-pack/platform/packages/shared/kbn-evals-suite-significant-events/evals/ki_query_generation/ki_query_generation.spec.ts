@@ -15,10 +15,13 @@ import type { GcsConfig } from '../../src/data_generators/replay';
 import {
   canonicalKIFeaturesFromExpectedGroundTruth,
   cleanSignificantEventsDataStreams,
+  deleteTemporaryReplayIndices,
+  ensureStreamsEnabled,
   listAvailableSnapshots,
   loadKIFeaturesFromSnapshot,
   replayIntoManagedStream,
   SIGEVENTS_SNAPSHOT_RUN,
+  SIGEVENTS_WIRED_ROOTS,
 } from '../../src/data_generators/replay';
 import { evaluate } from '../../src/evaluate';
 import { createKIQueryGenerationEvaluators } from '../../src/evaluators/ki_query_generation';
@@ -95,15 +98,14 @@ evaluate.describe('KI query generation', { tag: tags.serverless.observability.co
 
             await cleanSignificantEventsDataStreams(esClient, log);
 
-            for (const name of ['logs.otel', 'logs.ecs']) {
+            for (const name of SIGEVENTS_WIRED_ROOTS) {
               await esClient.indices.deleteDataStream({ name }).catch(() => {});
               await esClient.indices
                 .delete({ index: name, ignore_unavailable: true })
                 .catch(() => {});
             }
 
-            await apiServices.streams.disable().catch(() => {});
-            await apiServices.streams.enable();
+            await ensureStreamsEnabled({ esClient, apiServices, log });
 
             const extractionScenario = dataset.kiFeatureExtraction.find(
               (item) => item.input.scenario_id === scenario.input.scenario_id
@@ -218,26 +220,28 @@ evaluate.describe('KI query generation', { tag: tags.serverless.observability.co
 
             await executorClient.runExperiment(
               {
-                dataset: {
-                  name: `sigevents: KI query generation (${dataset.id}) (${kiSource})`,
-                  description: `[${dataset.id}] KI query generation across scenarios (${kiSource})`,
-                  examples: collectedExamples.map(({ scenario }) => ({
-                    id: scenario.input.scenario_id,
-                    input: {
-                      ...scenario.input,
-                      snapshot_source: scenario.snapshot_source,
-                    },
-                    output: {
-                      ...scenario.output,
-                      criteria: scenario.output.criteria,
-                      expected: scenario.output.expected_ground_truth,
-                    },
-                    metadata: {
-                      ...scenario.metadata,
-                      test_index: MANAGED_STREAM_SEARCH_PATTERN,
-                    },
-                  })),
-                },
+                datasets: [
+                  {
+                    name: `sigevents: KI query generation (${dataset.id}) (${kiSource})`,
+                    description: `[${dataset.id}] KI query generation across scenarios (${kiSource})`,
+                    examples: collectedExamples.map(({ scenario }) => ({
+                      id: scenario.input.scenario_id,
+                      input: {
+                        ...scenario.input,
+                        snapshot_source: scenario.snapshot_source,
+                      },
+                      output: {
+                        ...scenario.output,
+                        criteria: scenario.output.criteria,
+                        expected: scenario.output.expected_ground_truth,
+                      },
+                      metadata: {
+                        ...scenario.metadata,
+                        test_index: MANAGED_STREAM_SEARCH_PATTERN,
+                      },
+                    })),
+                  },
+                ],
                 concurrency: 1,
                 trustUpstreamDataset: TRUST_UPSTREAM,
                 task: async ({ input }: { input: KIQueryGenerationScenario['input'] }) => {
@@ -254,15 +258,26 @@ evaluate.describe('KI query generation', { tag: tags.serverless.observability.co
 
                   if (source.snapshotName !== lastReplayedSnapshot) {
                     await cleanSignificantEventsDataStreams(esClient, log);
-                    for (const name of ['logs.otel', 'logs.ecs']) {
+                    for (const name of SIGEVENTS_WIRED_ROOTS) {
                       await esClient.indices.deleteDataStream({ name }).catch(() => {});
                       await esClient.indices
                         .delete({ index: name, ignore_unavailable: true })
                         .catch(() => {});
                     }
-                    await apiServices.streams.disable().catch(() => {});
-                    await apiServices.streams.enable();
-                    await replayIntoManagedStream(esClient, log, source.snapshotName, source.gcs);
+                    await ensureStreamsEnabled({ esClient, apiServices, log });
+
+                    const stats = await replayIntoManagedStream(
+                      esClient,
+                      log,
+                      source.snapshotName,
+                      source.gcs
+                    );
+                    if (stats.created === 0) {
+                      throw new Error(
+                        `No documents indexed after replaying snapshot "${source.snapshotName}" into managed stream`
+                      );
+                    }
+
                     await esClient.indices.refresh({ index: MANAGED_STREAM_SEARCH_PATTERN });
                     lastReplayedSnapshot = source.snapshotName;
                   }
@@ -331,6 +346,7 @@ evaluate.describe('KI query generation', { tag: tags.serverless.observability.co
 
         evaluate.afterAll(async ({ esClient, apiServices, log }) => {
           log.debug('Cleaning up KI query generation test data');
+          await deleteTemporaryReplayIndices(esClient, log);
           await apiServices.streams.disable().catch(() => {});
           await cleanSignificantEventsDataStreams(esClient, log);
         });
@@ -341,10 +357,9 @@ evaluate.describe('KI query generation', { tag: tags.serverless.observability.co
   evaluate.describe('empty datastream', () => {
     let emptyDataStreamTestIndex: string | undefined;
 
-    evaluate.beforeAll(async ({ esClient, apiServices }) => {
+    evaluate.beforeAll(async ({ esClient, apiServices, log }) => {
       emptyDataStreamTestIndex = `logs-sig-events-test-${Date.now()}`;
-      await apiServices.streams.disable().catch(() => {});
-      await apiServices.streams.enable();
+      await ensureStreamsEnabled({ esClient, apiServices, log });
       await esClient.indices.createDataStream({ name: emptyDataStreamTestIndex });
     });
 
@@ -357,17 +372,19 @@ evaluate.describe('KI query generation', { tag: tags.serverless.observability.co
 
         await executorClient.runExperiment(
           {
-            dataset: {
-              name: 'sigevents: KI query generation: empty datastream',
-              description: 'Significant events KI query generation with empty stream data',
-              examples: [
-                {
-                  input: {},
-                  output: {},
-                  metadata: {},
-                },
-              ],
-            },
+            datasets: [
+              {
+                name: 'sigevents: KI query generation: empty datastream',
+                description: 'Significant events KI query generation with empty stream data',
+                examples: [
+                  {
+                    input: {},
+                    output: {},
+                    metadata: {},
+                  },
+                ],
+              },
+            ],
             task: async () => {
               const { stream: streamFromApi } = await apiServices.streams.getStreamDefinition(
                 emptyDataStreamTestIndex!
@@ -400,7 +417,6 @@ evaluate.describe('KI query generation', { tag: tags.serverless.observability.co
       if (emptyDataStreamTestIndex) {
         await esClient.indices.deleteDataStream({ name: emptyDataStreamTestIndex }).catch(() => {});
       }
-
       await apiServices.streams.disable().catch(() => {});
     });
   });

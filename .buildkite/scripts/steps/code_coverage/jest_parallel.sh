@@ -19,7 +19,7 @@ fi
 
 export TEST_TYPE
 echo "--- downloading jest test run order"
-download_artifact jest_run_order.json .
+download_tmp_artifact jest_run_order.json . "$BUILDKITE_BUILD_ID"
 configs=$(jq -r 'getpath([env.TEST_TYPE]) | .groups[env.JOB | tonumber].names | .[]' jest_run_order.json)
 
 echo "--- KIBANA_DIR: $KIBANA_DIR"

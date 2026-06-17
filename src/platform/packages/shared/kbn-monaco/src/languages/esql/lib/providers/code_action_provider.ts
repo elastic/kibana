@@ -9,7 +9,7 @@
 
 import { getQuickFixForMessage } from '@kbn/esql-language';
 import type { monaco } from '../../../../monaco_imports';
-import { createMonacoProvider } from './providers_factory';
+import { createCancellableCallbacks, createMonacoProvider } from './providers_factory';
 import { wrapAsMonacoCodeAction } from '../converters/code_actions';
 import { findMessageByMarker } from '../shared/utils';
 import type { ESQLDependencies } from './types';
@@ -18,13 +18,14 @@ export function getCodeActionProvider(
   deps?: ESQLDependencies
 ): monaco.languages.CodeActionProvider {
   return {
-    async provideCodeActions(model, _range, context, _token) {
+    async provideCodeActions(model, _range, context, token) {
       return createMonacoProvider({
         model,
         run: async (safeModel) => {
           const actions: monaco.languages.CodeAction[] = [];
           const modelDeps = deps?.getModelDependencies?.(model);
           const resolvedDeps = modelDeps ? { ...deps, ...modelDeps } : deps;
+          const cancellableCallbacks = createCancellableCallbacks(resolvedDeps, token);
 
           const editorMessages = resolvedDeps?.getEditorMessages?.();
           const allMessages = editorMessages
@@ -40,7 +41,7 @@ export function getCodeActionProvider(
               const quickFix = await getQuickFixForMessage({
                 queryString,
                 message,
-                callbacks: resolvedDeps,
+                callbacks: cancellableCallbacks,
               });
 
               if (quickFix) {

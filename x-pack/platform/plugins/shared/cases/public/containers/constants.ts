@@ -31,6 +31,9 @@ export const casesQueriesKeys = {
   templatesAll: (params: unknown) => [...casesQueriesKeys.templatesList(), params] as const,
   templatesTags: () => [...casesQueriesKeys.templates, 'tags'] as const,
   templatesCreators: () => [...casesQueriesKeys.templates, 'creators'] as const,
+  fieldDefinitions: ['field-definitions'] as const,
+  fieldDefinitionsList: (params: unknown) =>
+    [...casesQueriesKeys.fieldDefinitions, 'list', params] as const,
   connectorsList: () => [...casesQueriesKeys.connectors, 'list'] as const,
   casesList: () => [...casesQueriesKeys.all, 'list'] as const,
   casesMetrics: () => [...casesQueriesKeys.casesList(), 'metrics'] as const,
@@ -42,8 +45,9 @@ export const casesQueriesKeys = {
   case: (id: string) => [...casesQueriesKeys.caseView(), id] as const,
   caseFiles: (id: string, params: unknown) =>
     [...casesQueriesKeys.case(id), 'files', params] as const,
+  caseFileStatsAll: (id: string) => [...casesQueriesKeys.case(id), 'files', 'stats'] as const,
   caseFileStats: (id: string, params?: unknown) =>
-    [...casesQueriesKeys.case(id), 'files', 'stats', params] as const,
+    [...casesQueriesKeys.caseFileStatsAll(id), params] as const,
   caseMetrics: (id: string, features: SingleCaseMetricsFeature[]) =>
     [...casesQueriesKeys.case(id), 'metrics', features] as const,
   caseConnectors: (id: string) => [...casesQueriesKeys.case(id), 'connectors'],
@@ -87,6 +91,9 @@ export const casesMutationsKeys = {
   createTemplate: ['create-template'] as const,
   updateTemplate: ['update-template'] as const,
   deleteTemplate: ['delete-template'] as const,
+  createFieldDefinition: ['create-field-definition'] as const,
+  updateFieldDefinition: ['update-field-definition'] as const,
+  deleteFieldDefinition: ['delete-field-definition'] as const,
   exportTemplate: ['export-template'] as const,
   bulkDeleteTemplates: ['bulk-delete-templates'] as const,
   bulkExportTemplates: ['bulk-export-templates'] as const,
@@ -106,6 +113,7 @@ const DEFAULT_SEARCH_FIELDS = [
   'cases-comments.comment',
   'cases-comments.alertId',
   'cases-comments.eventId',
+  'cases.ef_all_values',
 ];
 
 export const DEFAULT_FROM_DATE = 'now-30d';

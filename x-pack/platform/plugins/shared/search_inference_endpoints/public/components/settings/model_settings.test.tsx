@@ -35,7 +35,11 @@ jest.mock('./feature_section', () => ({
   ),
 }));
 jest.mock('./default_model_section', () => ({
-  DefaultModelSection: () => <div data-test-subj="defaultModelSection">DefaultModelSection</div>,
+  DefaultModelSection: ({ disabled }: { disabled?: boolean }) => (
+    <div data-test-subj="defaultModelSection" data-disabled={String(Boolean(disabled))}>
+      DefaultModelSection
+    </div>
+  ),
 }));
 
 const mockUseModelSettingsForm = useModelSettingsForm as jest.Mock;
@@ -54,6 +58,16 @@ const childFeature: InferenceFeatureConfig = {
   featureDescription: 'desc',
   taskType: 'chat_completion',
   recommendedEndpoints: ['ep-1'],
+};
+
+const optOutChildFeature: InferenceFeatureConfig = {
+  featureId: 'child_opt_out',
+  parentFeatureId: 'workflows',
+  featureName: 'Workflow Feature',
+  featureDescription: 'runs in background',
+  taskType: 'chat_completion',
+  recommendedEndpoints: [],
+  ignoreGlobalDefault: true,
 };
 
 const defaultFormState = {
@@ -114,7 +128,13 @@ describe('ModelSettings', () => {
     });
     mockUseKibana.mockReturnValue({
       services: {
-        application: { navigateToUrl: mockNavigateToUrl },
+        application: {
+          navigateToUrl: mockNavigateToUrl,
+          capabilities: {
+            searchInferenceEndpoints: { show: true, manage: true },
+            advancedSettings: { save: true },
+          },
+        },
         http: { basePath: mockBasePath },
       },
     });
@@ -363,6 +383,152 @@ describe('ModelSettings', () => {
     });
   });
 
+  describe('deprecated/EOL assigned models callouts', () => {
+    const gaConnector = {
+      connectorId: 'ep-ga',
+      name: 'GA Model',
+      isPreconfigured: true,
+      metadata: { heuristics: { status: 'ga', end_of_life_date: '2099-01-01' } },
+    };
+    const deprecatedConnector = {
+      connectorId: 'ep-dep',
+      name: 'Deprecated Model',
+      isPreconfigured: true,
+      metadata: { heuristics: { status: 'deprecated', end_of_life_date: '2099-01-01' } },
+    };
+    const eolConnector = {
+      connectorId: 'ep-eol',
+      name: 'EOL Model',
+      isPreconfigured: true,
+      metadata: { heuristics: { status: 'deprecated', end_of_life_date: '2020-01-01' } },
+    };
+
+    it('does not render either callout when only GA connectors are assigned', () => {
+      mockUseConnectors.mockReturnValue({ data: [gaConnector], isLoading: false });
+
+      render(
+        <Wrapper>
+          <ModelSettings />
+        </Wrapper>
+      );
+
+      expect(screen.queryByTestId('deprecatedModelsCallout')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('eolModelsCallout')).not.toBeInTheDocument();
+    });
+
+    it('renders the warning callout when a deprecated connector is assigned to a feature', () => {
+      mockUseConnectors.mockReturnValue({
+        data: [deprecatedConnector],
+        isLoading: false,
+      });
+      mockUseModelSettingsForm.mockReturnValue({
+        ...defaultFormState,
+        assignments: { child_1: ['ep-dep'] },
+      });
+
+      render(
+        <Wrapper>
+          <ModelSettings />
+        </Wrapper>
+      );
+
+      const callout = screen.getByTestId('deprecatedModelsCallout');
+      expect(callout).toBeInTheDocument();
+      expect(callout).toHaveTextContent('Deprecated Model');
+      expect(screen.queryByTestId('eolModelsCallout')).not.toBeInTheDocument();
+    });
+
+    it('renders the danger callout when an EOL connector is assigned to a feature', () => {
+      mockUseConnectors.mockReturnValue({ data: [eolConnector], isLoading: false });
+      mockUseModelSettingsForm.mockReturnValue({
+        ...defaultFormState,
+        assignments: { child_1: ['ep-eol'] },
+      });
+
+      render(
+        <Wrapper>
+          <ModelSettings />
+        </Wrapper>
+      );
+
+      const callout = screen.getByTestId('eolModelsCallout');
+      expect(callout).toBeInTheDocument();
+      expect(callout).toHaveTextContent('EOL Model');
+      expect(screen.queryByTestId('deprecatedModelsCallout')).not.toBeInTheDocument();
+    });
+
+    it('includes the deprecated default model in the warning callout', () => {
+      mockUseConnectors.mockReturnValue({
+        data: [deprecatedConnector],
+        isLoading: false,
+      });
+      mockUseDefaultModelSettings.mockReturnValue({
+        ...defaultModelSettingsState,
+        state: {
+          enableAi: true,
+          defaultModelId: 'ep-dep',
+          featureSpecificModels: true,
+        },
+      });
+      mockUseModelSettingsForm.mockReturnValue({
+        ...defaultFormState,
+        assignments: { child_1: ['ep-1'] },
+      });
+
+      render(
+        <Wrapper>
+          <ModelSettings />
+        </Wrapper>
+      );
+
+      expect(screen.getByTestId('deprecatedModelsCallout')).toHaveTextContent('Deprecated Model');
+    });
+
+    it('renders both callouts when both deprecated and EOL connectors are assigned', () => {
+      mockUseConnectors.mockReturnValue({
+        data: [deprecatedConnector, eolConnector],
+        isLoading: false,
+      });
+      mockUseModelSettingsForm.mockReturnValue({
+        ...defaultFormState,
+        assignments: { child_1: ['ep-dep', 'ep-eol'] },
+      });
+
+      render(
+        <Wrapper>
+          <ModelSettings />
+        </Wrapper>
+      );
+
+      expect(screen.getByTestId('deprecatedModelsCallout')).toHaveTextContent('Deprecated Model');
+      expect(screen.getByTestId('eolModelsCallout')).toHaveTextContent('EOL Model');
+    });
+
+    it('hides callouts when featureSpecificModels is off, even with deprecated connectors assigned', () => {
+      mockUseConnectors.mockReturnValue({
+        data: [deprecatedConnector, eolConnector],
+        isLoading: false,
+      });
+      mockUseDefaultModelSettings.mockReturnValue({
+        ...defaultModelSettingsState,
+        state: { enableAi: true, defaultModelId: 'pre-1', featureSpecificModels: false },
+      });
+      mockUseModelSettingsForm.mockReturnValue({
+        ...defaultFormState,
+        assignments: { child_1: ['ep-dep', 'ep-eol'] },
+      });
+
+      render(
+        <Wrapper>
+          <ModelSettings />
+        </Wrapper>
+      );
+
+      expect(screen.queryByTestId('deprecatedModelsCallout')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('eolModelsCallout')).not.toBeInTheDocument();
+    });
+  });
+
   it('closes unsaved changes modal without navigating when cancel is clicked', async () => {
     const history = createMemoryHistory();
     mockUseModelSettingsForm.mockReturnValue({ ...defaultFormState, isDirty: true });
@@ -390,6 +556,195 @@ describe('ModelSettings', () => {
     expect(mockNavigateToUrl).not.toHaveBeenCalled();
     await waitFor(() => {
       expect(screen.queryByTestId('unsavedChangesModal')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('read-only mode (manage: false)', () => {
+    beforeEach(() => {
+      mockUseKibana.mockReturnValue({
+        services: {
+          application: {
+            navigateToUrl: mockNavigateToUrl,
+            capabilities: {
+              searchInferenceEndpoints: { show: true, manage: false },
+              advancedSettings: { save: true },
+            },
+          },
+          http: { basePath: mockBasePath },
+        },
+      });
+    });
+
+    it('does not render the save settings button', () => {
+      render(
+        <Wrapper>
+          <ModelSettings />
+        </Wrapper>
+      );
+
+      expect(screen.queryByTestId('save-settings-button')).not.toBeInTheDocument();
+    });
+
+    it('still renders the documentation link', () => {
+      render(
+        <Wrapper>
+          <ModelSettings />
+        </Wrapper>
+      );
+
+      expect(screen.getByTestId('settings-api-documentation')).toBeInTheDocument();
+    });
+
+    it('passes disabled to DefaultModelSection', () => {
+      render(
+        <Wrapper>
+          <ModelSettings />
+        </Wrapper>
+      );
+
+      // DefaultModelSection is mocked; confirm it is still rendered
+      // (the disabled prop wiring is covered by default_model_section.test.tsx)
+      expect(screen.getByTestId('defaultModelSection')).toBeInTheDocument();
+    });
+  });
+
+  describe('ignoreGlobalDefault sections', () => {
+    const optOutFormState = {
+      ...defaultFormState,
+      sections: [
+        {
+          featureId: 'workflows',
+          featureName: 'Workflows',
+          featureDescription: 'Background workflows',
+          taskType: '',
+          recommendedEndpoints: [],
+          children: [optOutChildFeature],
+        },
+      ],
+    };
+
+    it('hides opt-out sections when featureSpecificModels is off', () => {
+      mockUseModelSettingsForm.mockReturnValue(optOutFormState);
+      mockUseDefaultModelSettings.mockReturnValue({
+        ...defaultModelSettingsState,
+        state: { enableAi: true, defaultModelId: 'pre-1', featureSpecificModels: false },
+      });
+
+      render(
+        <Wrapper>
+          <ModelSettings />
+        </Wrapper>
+      );
+
+      expect(screen.queryByTestId('featureSection-Workflows')).not.toBeInTheDocument();
+    });
+
+    it('renders opt-out sections when featureSpecificModels is on', () => {
+      mockUseModelSettingsForm.mockReturnValue(optOutFormState);
+
+      render(
+        <Wrapper>
+          <ModelSettings />
+        </Wrapper>
+      );
+
+      expect(screen.getByTestId('featureSection-Workflows')).toBeInTheDocument();
+    });
+
+    it('hides opt-out sections when enableAi is off', () => {
+      mockUseModelSettingsForm.mockReturnValue(optOutFormState);
+      mockUseDefaultModelSettings.mockReturnValue({
+        ...defaultModelSettingsState,
+        state: { enableAi: false, defaultModelId: 'pre-1', featureSpecificModels: false },
+      });
+
+      render(
+        <Wrapper>
+          <ModelSettings />
+        </Wrapper>
+      );
+
+      expect(screen.queryByTestId('featureSection-Workflows')).not.toBeInTheDocument();
+    });
+
+    it('does not render regular sections in default-only mode', () => {
+      mockUseDefaultModelSettings.mockReturnValue({
+        ...defaultModelSettingsState,
+        state: { enableAi: true, defaultModelId: 'pre-1', featureSpecificModels: false },
+      });
+
+      render(
+        <Wrapper>
+          <ModelSettings />
+        </Wrapper>
+      );
+
+      expect(screen.queryByTestId('featureSection-Search')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('Advanced Settings permission', () => {
+    it('does not show the permission callout when advancedSettings.save is true', () => {
+      render(
+        <Wrapper>
+          <ModelSettings />
+        </Wrapper>
+      );
+
+      expect(screen.queryByTestId('noAdvancedSettingsPermissionCallout')).not.toBeInTheDocument();
+    });
+
+    it('shows the permission callout when advancedSettings.save is false', () => {
+      mockUseKibana.mockReturnValue({
+        services: {
+          application: {
+            navigateToUrl: mockNavigateToUrl,
+            capabilities: { advancedSettings: { save: false } },
+          },
+          http: { basePath: mockBasePath },
+        },
+      });
+
+      render(
+        <Wrapper>
+          <ModelSettings />
+        </Wrapper>
+      );
+
+      expect(screen.getByTestId('noAdvancedSettingsPermissionCallout')).toBeInTheDocument();
+      expect(
+        screen.getByTestId('noAdvancedSettingsPermissionCalloutDescription')
+      ).toHaveTextContent(/Advanced Settings: All privilege/);
+    });
+
+    it('passes disabled={true} to DefaultModelSection when advancedSettings.save is false', () => {
+      mockUseKibana.mockReturnValue({
+        services: {
+          application: {
+            navigateToUrl: mockNavigateToUrl,
+            capabilities: { advancedSettings: { save: false } },
+          },
+          http: { basePath: mockBasePath },
+        },
+      });
+
+      render(
+        <Wrapper>
+          <ModelSettings />
+        </Wrapper>
+      );
+
+      expect(screen.getByTestId('defaultModelSection')).toHaveAttribute('data-disabled', 'true');
+    });
+
+    it('passes disabled={false} to DefaultModelSection when advancedSettings.save is true', () => {
+      render(
+        <Wrapper>
+          <ModelSettings />
+        </Wrapper>
+      );
+
+      expect(screen.getByTestId('defaultModelSection')).toHaveAttribute('data-disabled', 'false');
     });
   });
 });

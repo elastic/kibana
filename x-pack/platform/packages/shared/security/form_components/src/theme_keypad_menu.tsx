@@ -46,7 +46,7 @@ export const ThemeKeyPadMenu: FunctionComponent<ThemeKeyPadMenuProps> = ({
         isDisabled={isDisabled}
         onChange={() => helpers.setValue(id)}
       >
-        <EuiIcon type={icon} size="l" />
+        <EuiIcon type={icon} size="l" aria-hidden={true} />
       </EuiKeyPadMenuItem>
     );
   };

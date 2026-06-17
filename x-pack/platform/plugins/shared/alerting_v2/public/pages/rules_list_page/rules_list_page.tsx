@@ -20,23 +20,17 @@ import {
   useGeneratedHtmlId,
   type Criteria,
 } from '@elastic/eui';
-import { CoreStart, useService } from '@kbn/core-di-browser';
-import { PluginStart } from '@kbn/core-di';
-import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
-import type { LensPublicStart } from '@kbn/lens-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useBoolean, useDebouncedValue } from '@kbn/react-hooks';
 import type { FindRulesSortField } from '@kbn/alerting-v2-schemas';
-import { ComposeDiscoverFlyout } from '@kbn/alerting-v2-rule-form';
 import type { RuleApiResponse } from '../../services/rules_api';
+import { ExperimentalBadge } from '../../components/experimental_badge';
 import { useFetchRules } from '../../hooks/use_fetch_rules';
-import { useCreateRule } from '../../hooks/use_create_rule';
-import { useUpdateRule } from '../../hooks/use_update_rule';
 import { useFetchRuleTags } from '../../hooks/use_fetch_rule_tags';
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
-import { paths } from '../../constants';
+import { useComposeDiscoverFlyout } from '../../hooks/use_compose_discover_flyout';
+import { useNavigateToAgentBuilder } from '../../hooks/use_navigate_to_agent_builder';
 
 import { RulesListTableContainer } from './rules_list_table_container';
 import type { RulesListTableSortField } from './rules_list_table';
@@ -45,6 +39,7 @@ import { StatusFilterPopover } from '../../components/rule/popovers/status_filte
 import { TagsFilterPopover } from '../../components/rule/popovers/tag_filter_popover';
 import { buildRulesListFilter } from './utils';
 import { RuleCreateOptionsPanel } from '../../components/rule_create_options/rule_create_options_panel';
+import { RuleCreateOptionsFlyout } from '../../components/rule_create_options/rule_create_options_flyout';
 
 const DEFAULT_PER_PAGE = 20;
 export const SEARCH_DEBOUNCE_MS = 300;
@@ -60,25 +55,17 @@ const TABLE_FIELD_TO_API_SORT_FIELD = Object.fromEntries(
 ) as Partial<Record<string, FindRulesSortField>>;
 
 export const RulesListPage = () => {
-  const http = useService(CoreStart('http'));
-  const notifications = useService(CoreStart('notifications'));
-  const application = useService(CoreStart('application'));
-  const data = useService(PluginStart('data')) as DataPublicPluginStart;
-  const dataViews = useService(PluginStart('dataViews')) as DataViewsPublicPluginStart;
-  const lens = useService(PluginStart('lens')) as LensPublicStart;
   useBreadcrumbs('rules_list');
 
-  const [flyoutOpen, setFlyoutOpen] = useState(false);
+  const [
+    isCreateOptionsFlyoutOpen,
+    { on: openCreateOptionsFlyout, off: closeCreateOptionsFlyout },
+  ] = useBoolean(false);
   const [isCreateMenuOpen, { off: closeCreateMenu, toggle: toggleCreateMenu }] = useBoolean(false);
   const createMenuId = useGeneratedHtmlId({ prefix: 'createRuleMenu' });
-  const [editRule, setEditRule] = useState<RuleApiResponse | null>(null);
-  const historyKey = useMemo(() => Symbol('ruleAuthoring'), []);
-  const createRuleMutation = useCreateRule();
-  const updateRuleMutation = useUpdateRule();
-  const ruleFormServices = useMemo(
-    () => ({ http, data, dataViews, notifications, application, lens }),
-    [http, data, dataViews, notifications, application, lens]
-  );
+  const { flyout, openCreateFlyout, openCreateBuilderFlyout, openEditFlyout, openCloneFlyout } =
+    useComposeDiscoverFlyout();
+  const navigateToAgentBuilder = useNavigateToAgentBuilder();
 
   const [page, setPage] = useState(1);
   const [perPage, setPerPage] = useState(DEFAULT_PER_PAGE);
@@ -144,25 +131,45 @@ export const RulesListPage = () => {
   const isInitialLoad = isLoading && rulesData === undefined;
   const hasRules = (rulesData?.total ?? 0) > 0;
   const showEmptyState = !isInitialLoad && !isError && !hasRules && !hasActiveFilters;
+  const onCreateEsqlRuleFromOptionsFlyout = () => {
+    closeCreateOptionsFlyout();
+    openCreateFlyout();
+  };
+  const onCreateWithAgentFromOptionsFlyout = () => {
+    closeCreateOptionsFlyout();
+    navigateToAgentBuilder();
+  };
+  const onCreateThresholdAlertFromOptionsFlyout = () => {
+    closeCreateOptionsFlyout();
+    openCreateBuilderFlyout('threshold');
+  };
 
   return (
     <div>
       <EuiPageHeader
         pageTitle={
-          <FormattedMessage id="xpack.alertingV2.rulesList.pageTitle" defaultMessage="Rules" />
+          <EuiFlexGroup component="span" alignItems="center" gutterSize="s" responsive={false}>
+            <EuiFlexItem grow={false} component="span">
+              <FormattedMessage id="xpack.alertingV2.rulesList.pageTitle" defaultMessage="Rules" />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false} component="span">
+              <ExperimentalBadge />
+            </EuiFlexItem>
+          </EuiFlexGroup>
         }
         rightSideItems={
           hasRules || hasActiveFilters
             ? [
                 <EuiSplitButton
                   key="create-rule-split"
-                  color="primary"
-                  size="m"
+                  color="text"
+                  fill={false}
                   data-test-subj="createRuleSplitButton"
                 >
                   <EuiSplitButton.ActionPrimary
-                    href={http.basePath.prepend(paths.ruleCreateOptions)}
+                    onClick={openCreateOptionsFlyout}
                     data-test-subj="createRuleButton"
+                    iconType="plusInCircle"
                   >
                     <FormattedMessage
                       id="xpack.alertingV2.rulesList.createRuleButton"
@@ -191,15 +198,27 @@ export const RulesListPage = () => {
                               items: [
                                 {
                                   name: i18n.translate(
-                                    'xpack.alertingV2.rulesList.createRuleFlyoutButton',
-                                    { defaultMessage: 'Create with flyout' }
+                                    'xpack.alertingV2.rulesList.createEsqlRuleButton',
+                                    { defaultMessage: 'Create ES|QL rule' }
                                   ),
-                                  icon: 'popout',
+                                  icon: 'productDiscover',
                                   onClick: () => {
                                     closeCreateMenu();
-                                    setFlyoutOpen(true);
+                                    openCreateFlyout();
                                   },
-                                  'data-test-subj': 'createRuleFlyoutButton',
+                                  'data-test-subj': 'createEsqlRuleButton',
+                                },
+                                {
+                                  name: i18n.translate(
+                                    'xpack.alertingV2.rulesList.createWithAgentButton',
+                                    { defaultMessage: 'Create with agent' }
+                                  ),
+                                  icon: 'sparkles',
+                                  onClick: () => {
+                                    closeCreateMenu();
+                                    navigateToAgentBuilder();
+                                  },
+                                  'data-test-subj': 'createWithAgentButton',
                                 },
                               ],
                             },
@@ -239,7 +258,13 @@ export const RulesListPage = () => {
           <EuiSpacer />
         </>
       ) : null}
-      {showEmptyState ? <RuleCreateOptionsPanel /> : null}
+      {showEmptyState ? (
+        <RuleCreateOptionsPanel
+          onCreateEsqlRule={openCreateFlyout}
+          onCreateWithAgent={navigateToAgentBuilder}
+          onCreateThresholdAlert={onCreateThresholdAlertFromOptionsFlyout}
+        />
+      ) : null}
       {hasRules || hasActiveFilters ? (
         <>
           <EuiFlexGroup gutterSize="s">
@@ -280,45 +305,20 @@ export const RulesListPage = () => {
             sortDirection={sortDirection}
             isLoading={isLoading}
             onTableChange={onTableChange}
-            onEditInFlyout={(rule) => {
-              setEditRule(rule);
-              setFlyoutOpen(true);
-            }}
+            onEditInFlyout={openEditFlyout}
+            onCloneInFlyout={openCloneFlyout}
           />
         </>
       ) : null}
-      {flyoutOpen && (
-        <ComposeDiscoverFlyout
-          historyKey={historyKey}
-          mode={editRule ? 'edit' : 'create'}
-          rule={editRule ?? undefined}
-          ruleId={editRule?.id}
-          onClose={() => {
-            setFlyoutOpen(false);
-            setEditRule(null);
-          }}
-          services={ruleFormServices}
-          onCreateRule={(payload) =>
-            createRuleMutation.mutate(payload, {
-              onSuccess: () => {
-                setFlyoutOpen(false);
-              },
-            })
-          }
-          onUpdateRule={(id, payload) =>
-            updateRuleMutation.mutate(
-              { id, payload },
-              {
-                onSuccess: () => {
-                  setFlyoutOpen(false);
-                  setEditRule(null);
-                },
-              }
-            )
-          }
-          isSaving={createRuleMutation.isLoading || updateRuleMutation.isLoading}
+      {isCreateOptionsFlyoutOpen ? (
+        <RuleCreateOptionsFlyout
+          onClose={closeCreateOptionsFlyout}
+          onCreateEsqlRule={onCreateEsqlRuleFromOptionsFlyout}
+          onCreateWithAgent={onCreateWithAgentFromOptionsFlyout}
+          onCreateThresholdAlert={onCreateThresholdAlertFromOptionsFlyout}
         />
-      )}
+      ) : null}
+      {flyout}
     </div>
   );
 };

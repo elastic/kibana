@@ -12,7 +12,15 @@ import { TestSuiteType } from './constants';
 import type { BuildkiteStep } from '#pipeline-utils';
 import { expandAgentQueue, collectEnvFromLabels, getTrackedBranch } from '#pipeline-utils';
 
-const configJson = process.env.KIBANA_FLAKY_TEST_RUNNER_CONFIG;
+/**
+ * Flaky runner JSON is passed on the Buildkite build via env vars set at trigger time (ci-stats UI,
+ * `bk build create`, or internal CLIs). Both names carry the same JSON array; `_V1` is not a semver.
+ *
+ * - `KIBANA_FLAKY_TEST_RUNNER_CONFIG_V1` — preferred name for newer triggers (includes `command` entries).
+ * - `KIBANA_FLAKY_TEST_RUNNER_CONFIG` — legacy alias; still accepted so older clients keep working.
+ */
+const configJson =
+  process.env.KIBANA_FLAKY_TEST_RUNNER_CONFIG_V1 ?? process.env.KIBANA_FLAKY_TEST_RUNNER_CONFIG;
 if (!configJson) {
   console.error('+++ Triggering directly is not supported anymore');
   console.error(
@@ -34,15 +42,62 @@ if (Number.isNaN(concurrency)) {
 
 const BASE_JOBS = 1;
 const MAX_JOBS = 500;
-// Each scoutConfig now fans out to one Buildkite step per (arch, domain) mode,
-// so a single entry can multiply into many jobs. Cap per-entry runs to keep the
-// total job budget under control and to give users a clear, fast failure when
-// they request too many repetitions for a single config.
-const MAX_SCOUT_COUNT_PER_CONFIG = 50;
+// 50 runs is enough to confirm a test is no longer flaky;
+const MAX_COUNT_PER_CONFIG = 50;
 
 // Scout discovery target for the flaky-setup step. We read the branch name
 // from `package.json` (set when forking a release branch).
 const scoutDiscoveryTarget = getTrackedBranch() === 'main' ? 'local' : 'local-stateful-only';
+
+/**
+ * Cypress group steps use `n2-4-virt` and a larger disk for `defend_workflows` suites. Command steps
+ * inherit the same defaults unless `agentQueue` / `diskSizeGb` are set on the config entry.
+ */
+function defaultCypressFlakyAgentOptions(pathHint: string): {
+  agentQueue: string;
+  diskSizeGb?: number;
+} {
+  const defendWorkflows = pathHint.includes('defend_workflows');
+  return {
+    agentQueue: defendWorkflows ? 'n2-4-virt' : 'n2-4-spot',
+    diskSizeGb: defendWorkflows ? 120 : undefined,
+  };
+}
+
+interface GroupTestSuite {
+  type: 'group';
+  key: string;
+  count: number;
+}
+
+interface FtrConfigTestSuite {
+  type: 'ftrConfig';
+  ftrConfig: string;
+  count: number;
+  /** Forwarded to FTR as FTR_EXTRA_ARGS (e.g. `--grep '…' --include path/to/test.ts`). */
+  ftrExtraArgs?: string;
+}
+
+interface ScoutConfigTestSuite {
+  type: 'scoutConfig';
+  scoutConfig: string;
+  count: number;
+}
+
+interface CommandTestSuite {
+  type: 'command';
+  label: string;
+  workingDirectory: string;
+  command: string;
+  count: number;
+  job?: string;
+  /** Optional label for `upload_scout_cypress_events` (Scout/Cypress analytics). */
+  scoutLabel?: string;
+  agentQueue?: string;
+  diskSizeGb?: number;
+  /** Package path (repo-relative) where `yarn junit:merge` should run when it differs from `workingDirectory`. */
+  junitMergeWorkingDirectory?: string;
+}
 
 function getTestSuitesFromJson(json: string) {
   const fail = (errorMsg: string) => {
@@ -63,9 +118,7 @@ function getTestSuitesFromJson(json: string) {
   }
 
   const testSuites: Array<
-    | { type: 'group'; key: string; count: number }
-    | { type: 'ftrConfig'; ftrConfig: string; count: number }
-    | { type: 'scoutConfig'; scoutConfig: string; count: number }
+    GroupTestSuite | FtrConfigTestSuite | ScoutConfigTestSuite | CommandTestSuite
   > = [];
   for (const item of parsed) {
     if (typeof item !== 'object' || item === null) {
@@ -78,8 +131,45 @@ function getTestSuitesFromJson(json: string) {
     }
 
     const type = item.type;
-    if (type !== 'ftrConfig' && type !== 'scoutConfig' && type !== 'group') {
-      fail(`testSuite.type must be either "ftrConfig" or "scoutConfig" or "group"`);
+    if (!['ftrConfig', 'scoutConfig', 'group', 'command'].includes(type)) {
+      fail(`testSuite.type must be "ftrConfig", "scoutConfig", "group", or "command"`);
+    }
+
+    if (item.type === 'command') {
+      const label = item.label;
+      const workingDirectory = item.workingDirectory;
+      const command = item.command;
+      if (typeof label !== 'string' || label.length === 0) {
+        fail(`testSuite.label must be a non-empty string for command entries`);
+      }
+      if (typeof workingDirectory !== 'string' || workingDirectory.length === 0) {
+        fail(`testSuite.workingDirectory must be a non-empty string for command entries`);
+      }
+      if (typeof command !== 'string' || command.length === 0) {
+        fail(`testSuite.command must be a non-empty string for command entries`);
+      }
+      if (count > MAX_COUNT_PER_CONFIG) {
+        fail(
+          `testSuite.count for command '${label}' is ${count}; ` +
+            `max allowed is ${MAX_COUNT_PER_CONFIG}. Lower the count or split the run.`
+        );
+      }
+
+      testSuites.push({
+        type: 'command',
+        label,
+        workingDirectory,
+        command,
+        count,
+        ...(typeof item.job === 'string' ? { job: item.job } : {}),
+        ...(typeof item.scoutLabel === 'string' ? { scoutLabel: item.scoutLabel } : {}),
+        ...(typeof item.agentQueue === 'string' ? { agentQueue: item.agentQueue } : {}),
+        ...(typeof item.diskSizeGb === 'number' ? { diskSizeGb: item.diskSizeGb } : {}),
+        ...(typeof item.junitMergeWorkingDirectory === 'string'
+          ? { junitMergeWorkingDirectory: item.junitMergeWorkingDirectory }
+          : {}),
+      });
+      continue;
     }
 
     if (item.type === 'ftrConfig') {
@@ -88,10 +178,22 @@ function getTestSuitesFromJson(json: string) {
         fail(`testSuite.ftrConfig must be a string`);
       }
 
+      if (count > MAX_COUNT_PER_CONFIG) {
+        fail(
+          `testSuite.count for ftrConfig '${ftrConfig}' is ${count}; ` +
+            `max allowed is ${MAX_COUNT_PER_CONFIG}. Lower the count or split the run.`
+        );
+      }
+
+      if (item.ftrExtraArgs !== undefined && typeof item.ftrExtraArgs !== 'string') {
+        fail(`testSuite.ftrExtraArgs must be a string for ftrConfig entries`);
+      }
+
       testSuites.push({
         type: 'ftrConfig',
         ftrConfig,
         count,
+        ...(typeof item.ftrExtraArgs === 'string' ? { ftrExtraArgs: item.ftrExtraArgs } : {}),
       });
       continue;
     }
@@ -102,10 +204,10 @@ function getTestSuitesFromJson(json: string) {
         fail(`testSuite.scoutConfig must be a string`);
       }
 
-      if (count > MAX_SCOUT_COUNT_PER_CONFIG) {
+      if (count > MAX_COUNT_PER_CONFIG) {
         fail(
           `testSuite.count for scoutConfig '${scoutConfig}' is ${count}; ` +
-            `max allowed is ${MAX_SCOUT_COUNT_PER_CONFIG}. ` +
+            `max allowed is ${MAX_COUNT_PER_CONFIG}. ` +
             `Each Scout request fans out to one job per (arch x domain) mode, ` +
             `so high counts multiply quickly. Lower the count or split the run.`
         );
@@ -123,6 +225,14 @@ function getTestSuitesFromJson(json: string) {
     if (typeof key !== 'string') {
       fail(`testSuite.key must be a string`);
     }
+
+    if (count > MAX_COUNT_PER_CONFIG) {
+      fail(
+        `testSuite.count for group '${key}' is ${count}; ` +
+          `max allowed is ${MAX_COUNT_PER_CONFIG}. Lower the count or split the run.`
+      );
+    }
+
     testSuites.push({
       type: 'group',
       key,
@@ -174,8 +284,7 @@ if (hasScoutSuites) {
   // extra agent boot and an artifact round-trip just to hand the manifest between
   // two otherwise-coupled steps.
   const scoutFlakyRequests = testSuites.filter(
-    (t): t is { type: 'scoutConfig'; scoutConfig: string; count: number } =>
-      t.type === 'scoutConfig' && t.count > 0
+    (t): t is ScoutConfigTestSuite => t.type === 'scoutConfig' && t.count > 0
   );
 
   // Tell the planner how many jobs are already committed by FTR/Cypress + fixed-overhead
@@ -216,6 +325,7 @@ for (const testSuite of testSuites) {
         command: `.buildkite/scripts/steps/test/ftr_configs.sh`,
         env: {
           FTR_CONFIG: testSuite.ftrConfig,
+          ...(testSuite.ftrExtraArgs ? { FTR_EXTRA_ARGS: testSuite.ftrExtraArgs } : {}),
         },
         key: `${TestSuiteType.FTR}-${suiteIndex++}`,
         label: `${testSuite.ftrConfig}`,
@@ -237,6 +347,39 @@ for (const testSuite of testSuites) {
       // 'scout_flaky_setup' step above, which discovers configs and uploads the steps.
       break;
 
+    case 'command': {
+      const agentDefaults = defaultCypressFlakyAgentOptions(
+        `${testSuite.workingDirectory}/${testSuite.command}`
+      );
+      const agentQueue = testSuite.agentQueue ?? agentDefaults.agentQueue;
+      const diskSizeGb = testSuite.diskSizeGb ?? agentDefaults.diskSizeGb;
+      steps.push({
+        command: '.buildkite/scripts/steps/flaky/run_command.sh',
+        label: testSuite.label,
+        agents: expandAgentQueue(agentQueue, diskSizeGb),
+        key: `${TestSuiteType.COMMAND}-${suiteIndex++}`,
+        depends_on: 'build',
+        timeout_in_minutes: 150,
+        parallelism: testSuite.count,
+        concurrency,
+        concurrency_group: process.env.UUID,
+        concurrency_method: 'eager',
+        retry: {
+          automatic: [{ exit_status: '-1', limit: 3 }],
+        },
+        env: {
+          FLAKY_TEST_WORKING_DIRECTORY: testSuite.workingDirectory,
+          FLAKY_TEST_COMMAND: testSuite.command,
+          ...(testSuite.job ? { FLAKY_TEST_JOB: testSuite.job } : {}),
+          ...(testSuite.scoutLabel ? { FLAKY_TEST_SCOUT_LABEL: testSuite.scoutLabel } : {}),
+          ...(testSuite.junitMergeWorkingDirectory
+            ? { FLAKY_TEST_JUNIT_MERGE_DIRECTORY: testSuite.junitMergeWorkingDirectory }
+            : {}),
+        },
+      });
+      break;
+    }
+
     case 'group': {
       const [category, suiteName] = testSuite.key.split('/');
       switch (category) {
@@ -247,8 +390,7 @@ for (const testSuite of testSuites) {
               `Group configuration was not found in groups.json for the following cypress suite: {${suiteName}}.`
             );
           }
-          const agentQueue = suiteName.includes('defend_workflows') ? 'n2-4-virt' : 'n2-4-spot';
-          const diskSizeGb = suiteName.includes('defend_workflows') ? 120 : undefined;
+          const { agentQueue, diskSizeGb } = defaultCypressFlakyAgentOptions(suiteName);
           steps.push({
             command: `.buildkite/scripts/steps/functional/${suiteName}.sh`,
             label: group.name,

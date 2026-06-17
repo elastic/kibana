@@ -122,7 +122,6 @@ export function InsightBase({
                     isOpen={isActionsPopoverOpen}
                   >
                     <EuiContextMenuPanel
-                      size="s"
                       items={actions?.map(({ id, icon, label, handler }) => (
                         <EuiContextMenuItem key={id} icon={icon} onClick={handler}>
                           {label}

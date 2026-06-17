@@ -29,10 +29,11 @@ import {
 import type { TodoItem } from '@kbn/agent-builder-common/chat/conversation';
 import type { PromptRequest } from '@kbn/agent-builder-common/agents';
 import type { ToolResult } from '@kbn/agent-builder-common/tools/tool_result';
-import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
+import type { AttachmentInput, VersionedAttachment } from '@kbn/agent-builder-common/attachments';
 import type { ConversationsService } from '../../../services/conversations';
 import { queryKeys } from '../../query_keys';
 import { buildOptimisticAttachments } from '../../utils/build_optimistic_attachments';
+import { patchConversationList } from '../../utils/conversation_sidebar_list_cache';
 import { createNewConversation, createNewRound } from '../../utils/new_conversation';
 
 export interface ConversationActions {
@@ -66,12 +67,14 @@ export interface ConversationActions {
   }) => void;
   setAssistantMessage: ({ assistantMessage }: { assistantMessage: string }) => void;
   addAssistantMessageChunk: ({ messageChunk }: { messageChunk: string }) => void;
+  clearAssistantMessage: () => void;
   setTimeToFirstToken: ({ timeToFirstToken }: { timeToFirstToken: number }) => void;
   addPendingPrompt: ({ prompt }: { prompt: PromptRequest }) => void;
   clearPendingPrompts: () => void;
   onConversationCreated: ({ title }: { title: string }) => void;
   addBackgroundExecutionCompleteStep: ({ step }: { step: BackgroundAgentCompleteStep }) => void;
   addOrUpdateTodosStep: ({ todos }: { todos: TodoItem[] }) => void;
+  setAttachments: ({ attachments }: { attachments: VersionedAttachment[] }) => void;
   addCompactionStep: ({ tokenCountBefore }: { tokenCountBefore: number }) => void;
   setCompactionStepComplete: ({
     tokenCountAfter,
@@ -82,6 +85,7 @@ export interface ConversationActions {
   }) => void;
   deleteConversation: (id: string) => Promise<void>;
   renameConversation: (id: string, title: string) => Promise<void>;
+  onRoundComplete: (conversationRound: ConversationRound) => void;
 }
 
 interface UseConversationActionsParams {
@@ -114,15 +118,12 @@ export const createConversationActions = ({
 
   return {
     invalidateConversation: () => {
-      // Prefix-match: invalidates the per-conversation key AND the list queries so the
-      // sidebar (sorted by updated_at) reflects the bumped timestamp.
-
-      // Safe under concurrent streams because of the `enabled: false` gate in
-      // use_conversation.ts: while another conversation is streaming, its per-conversation
-      // query is inactive. The list query stays active and refetches - that's safe
-      // because the list payload is summaries only (no rounds/steps), so it can't clash with
-      // per-conversation streaming data.
-      queryClient.invalidateQueries({ queryKey: queryKeys.conversations.all });
+      // Only this conversation's byId cache. The streamed chunks are best-effort writes;
+      // a server refetch produces canonical state. We deliberately do NOT prefix-invalidate
+      // `['conversations']` — that would also refetch the sidebar list, clobbering any
+      // concurrent optimistic rows for other in-flight new conversations the server hasn't
+      // persisted yet.
+      queryClient.invalidateQueries({ queryKey });
     },
 
     addOptimisticRound: async ({
@@ -249,6 +250,15 @@ export const createConversationActions = ({
         }
       });
     },
+    setAttachments: ({ attachments }: { attachments: VersionedAttachment[] }) => {
+      setConversation(
+        produce((draft) => {
+          if (draft) {
+            draft.attachments = attachments;
+          }
+        })
+      );
+    },
     addCompactionStep: ({ tokenCountBefore }: { tokenCountBefore: number }) => {
       setCurrentRound((round) => {
         const step: CompactionStep = {
@@ -285,6 +295,11 @@ export const createConversationActions = ({
         round.response.message += messageChunk;
       });
     },
+    clearAssistantMessage: () => {
+      setCurrentRound((round) => {
+        round.response.message = '';
+      });
+    },
     setTimeToFirstToken: ({ timeToFirstToken }: { timeToFirstToken: number }) => {
       setCurrentRound((round) => {
         round.time_to_first_token = timeToFirstToken;
@@ -313,7 +328,19 @@ export const createConversationActions = ({
           }
         })
       );
-      queryClient.invalidateQueries({ queryKey: queryKeys.conversations.all });
+      // Patch the optimistic sidebar list row with the server-generated title (it was
+      // inserted with a placeholder by `insertSidebarConversationListRow`).
+      if (conversationId) {
+        const conversation = queryClient.getQueryData<Conversation>(queryKey);
+        if (conversation?.agent_id) {
+          patchConversationList({
+            queryClient,
+            agentId: conversation.agent_id,
+            conversationId,
+            values: { title },
+          });
+        }
+      }
     },
     deleteConversation: async (id: string) => {
       await conversationsService.delete({ conversationId: id });
@@ -327,6 +354,17 @@ export const createConversationActions = ({
       // Call provider-specific callback if provided
       if (onDeleteConversation) {
         onDeleteConversation({ id, isCurrentConversation });
+      }
+    },
+    onRoundComplete: (round: ConversationRound) => {
+      const conversation = queryClient.getQueryData<Conversation>(queryKey);
+      if (conversation?.agent_id) {
+        patchConversationList({
+          queryClient,
+          agentId: conversation.agent_id,
+          conversationId: conversation.id,
+          values: { status: round.status, read: false, updated_at: new Date().toISOString() },
+        });
       }
     },
     renameConversation: async (id: string, title: string) => {

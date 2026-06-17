@@ -14,6 +14,7 @@ import {
   DATE_TYPE_ABSOLUTE,
   DATE_TYPE_NOW,
   DATE_TYPE_RELATIVE,
+  NOW_KEYWORD,
   ROUND_UNIT_MAP,
 } from '../constants';
 import type {
@@ -44,7 +45,7 @@ interface ParserConfig {
 }
 
 const DEFAULT_CONFIG: ParserConfig = {
-  nowKeyword: 'now',
+  nowKeyword: NOW_KEYWORD,
   delimiters: ['to', 'until'],
   namedRanges: {
     today: { start: 'now/d', end: 'now/d' },
@@ -170,7 +171,8 @@ interface CompiledConfig {
 
 const configCache = new WeakMap<ParserConfig, CompiledConfig>();
 
-const escapeRegExp = (input: string) => input.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+/** Escapes regex metacharacters in `input` so it can be embedded verbatim in a pattern. */
+export const escapeRegExp = (input: string) => input.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
 /** The word delimiters recognised by the parser (excluding the universal dash). */
 export const PARSER_DELIMITERS: readonly string[] = DEFAULT_CONFIG.delimiters;

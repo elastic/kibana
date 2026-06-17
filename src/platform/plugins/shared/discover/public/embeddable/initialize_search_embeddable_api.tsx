@@ -289,7 +289,10 @@ export const initializeSearchEmbeddableApi = async ({
       setColumns,
     },
     stateManager,
-    anyStateChange$: onAnyStateChange.pipe(map(() => undefined)),
+    anyStateChange$: onAnyStateChange.pipe(
+      skip(1),
+      map(() => undefined)
+    ),
     reinitializeState,
   };
 };

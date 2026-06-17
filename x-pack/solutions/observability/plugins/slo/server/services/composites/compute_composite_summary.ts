@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import type { CompositeSLOMemberSummary, CompositeSLOSummary, SLOStatus } from '@kbn/slo-schema';
+import {
+  ALL_VALUE,
+  type CompositeSLOMemberWithSummary,
+  type CompositeSLOSummary,
+} from '@kbn/slo-schema';
 import {
   computeNormalisedWeights,
   computeWeightedSli,
@@ -13,26 +17,38 @@ import {
   toErrorBudget,
 } from '../../domain/services';
 import { toHighPrecision } from '../../utils/number';
-import type { CompositeSLODefinition } from '../../domain/models';
-import type { BurnRateWindow } from '../summary_client';
+import {
+  toRichRollingTimeWindow,
+  type CompositeSLODefinition,
+  type Summary,
+} from '../../domain/models';
+import type { BurnRateWindow, SummaryClient } from '../summary_client';
+import type { SLODefinitionRepository } from '../slo_definition_repository';
 
 export interface MemberSummaryData {
   member: { sloId: string; weight: number; instanceId?: string };
   sloName: string;
-  summary: {
-    sliValue: number;
-    status: SLOStatus;
-    fiveMinuteBurnRate: number;
-    oneHourBurnRate: number;
-    oneDayBurnRate: number;
-  };
+  summary: Pick<
+    Summary,
+    | 'sliValue'
+    | 'status'
+    | 'errorBudget'
+    | 'fiveMinuteBurnRate'
+    | 'oneHourBurnRate'
+    | 'oneDayBurnRate'
+  >;
   burnRateWindows: BurnRateWindow[];
+}
+
+interface Dependencies {
+  summaryClient: SummaryClient;
+  repository: SLODefinitionRepository;
 }
 
 export function computeCompositeSummary(
   compositeSlo: CompositeSLODefinition,
   memberSummaries: MemberSummaryData[]
-): { compositeSummary: CompositeSLOSummary; members: CompositeSLOMemberSummary[] } {
+): { compositeSummary: CompositeSLOSummary; members: CompositeSLOMemberWithSummary[] } {
   const sliDataPoints = memberSummaries.map((ms) => ({
     weight: ms.member.weight,
     sliValue: ms.summary.sliValue,
@@ -92,24 +108,22 @@ export function computeCompositeSummary(
 }
 
 function buildMemberSummary(
-  ms: {
-    member: { sloId: string; weight: number; instanceId?: string };
-    sloName: string;
-    summary: { sliValue: number; status: SLOStatus };
-  },
+  ms: MemberSummaryData,
   normalisedWeight: number
-): CompositeSLOMemberSummary {
+): CompositeSLOMemberWithSummary {
   const { sliValue } = ms.summary;
-  const contribution = sliValue === NO_DATA ? 0 : toHighPrecision(normalisedWeight * sliValue);
 
   return {
-    id: ms.member.sloId,
+    sloId: ms.member.sloId,
     name: ms.sloName,
     weight: ms.member.weight,
     normalisedWeight,
     sliValue,
     status: ms.summary.status,
-    contribution,
+    errorBudget: ms.summary.errorBudget,
+    fiveMinuteBurnRate: ms.summary.fiveMinuteBurnRate,
+    oneHourBurnRate: ms.summary.oneHourBurnRate,
+    oneDayBurnRate: ms.summary.oneDayBurnRate,
     ...(ms.member.instanceId !== undefined ? { instanceId: ms.member.instanceId } : {}),
   };
 }
@@ -125,6 +139,18 @@ export function buildNoDataSummary(): CompositeSLOSummary {
   };
 }
 
+export function toMemberWithSummary(
+  member: CompositeSLODefinition['members'][number]
+): CompositeSLOMemberWithSummary {
+  return {
+    ...member,
+    name: member.sloId,
+    normalisedWeight: NO_DATA,
+    sliValue: NO_DATA,
+    status: 'NO_DATA',
+  };
+}
+
 function getWindowSli(windows: BurnRateWindow[], name: string): number {
   return windows.find((w) => w.name === name)?.sli ?? NO_DATA;
 }
@@ -134,4 +160,63 @@ function deriveBurnRate(compositeSli: number, compositeErrorBudget: number): num
     return 0;
   }
   return toHighPrecision((1 - compositeSli) / compositeErrorBudget);
+}
+
+async function computeMemberSummaries(
+  compositeSlo: CompositeSLODefinition,
+  { repository, summaryClient }: Dependencies
+): Promise<{
+  memberSummaries: MemberSummaryData[];
+  unresolvedMemberIds: string[];
+}> {
+  const memberSloIds = compositeSlo.members.map((m) => m.sloId);
+  const memberDefinitions = await repository.findAllByIds(memberSloIds);
+  const memberDefinitionMap = new Map(memberDefinitions.map((slo) => [slo.id, slo]));
+
+  const activeMembers = compositeSlo.members.filter((m) => memberDefinitionMap.has(m.sloId));
+
+  const richTimeWindow = toRichRollingTimeWindow(compositeSlo.timeWindow);
+
+  const summaryParams = activeMembers.map((member) => ({
+    slo: memberDefinitionMap.get(member.sloId)!,
+    instanceId: member.instanceId ?? ALL_VALUE,
+    timeWindowOverride: richTimeWindow,
+  }));
+
+  const summaryResults = await summaryClient.computeSummaries(summaryParams);
+
+  const memberSummaries: MemberSummaryData[] = activeMembers.map((member, i) => ({
+    member,
+    sloName: memberDefinitionMap.get(member.sloId)!.name,
+    summary: {
+      sliValue: summaryResults[i].summary.sliValue,
+      status: summaryResults[i].summary.status,
+      errorBudget: summaryResults[i].summary.errorBudget,
+      fiveMinuteBurnRate: summaryResults[i].summary.fiveMinuteBurnRate,
+      oneHourBurnRate: summaryResults[i].summary.oneHourBurnRate,
+      oneDayBurnRate: summaryResults[i].summary.oneDayBurnRate,
+    },
+    burnRateWindows: summaryResults[i].burnRateWindows,
+  }));
+
+  const unresolvedMemberIds = compositeSlo.members
+    .filter((m) => !memberDefinitionMap.has(m.sloId))
+    .map((m) => m.sloId);
+
+  return {
+    memberSummaries,
+    unresolvedMemberIds,
+  };
+}
+
+export async function computeLiveCompositeSummary(
+  compositeSlo: CompositeSLODefinition,
+  dependencies: Dependencies
+) {
+  const { memberSummaries, unresolvedMemberIds } = await computeMemberSummaries(
+    compositeSlo,
+    dependencies
+  );
+  const { compositeSummary, members } = computeCompositeSummary(compositeSlo, memberSummaries);
+  return { compositeSummary, members, unresolvedMemberIds };
 }

@@ -12,9 +12,32 @@ import { getEuidSourceFields } from '@kbn/entity-store/common/domain/euid';
 import type { RelationshipIntegrationConfig, CompositeAfterKey, CompositeBucket } from './types';
 import { LOOKBACK_WINDOW, COMPOSITE_PAGE_SIZE } from './constants';
 
-// TODO(follow-up): actorEntityType is hardcoded to 'user' — add actorEntityType to
-// RelationshipIntegrationConfig to support host→host and service→* relationships.
+// TODO(#266748): actorEntityType is hardcoded to 'user' — add actorEntityType to
+// RelationshipIntegrationConfig to support host→host, host→service, and service→* relationships.
 const USER_IDENTITY_FIELDS = getEuidSourceFields('user').requiresOneOf;
+
+/**
+ * "At least one of these fields exists and is non-empty" DSL.
+ *
+ * Used as the base actor-presence filter when the config supplies its own
+ * `customActor.fields`. The default path (no `customActor`) keeps using
+ * `euid.dsl.getEuidDocumentsContainsIdFilter('user')`, which carries the
+ * full ECS user-EUID semantics (including the `event.outcome != "failure"`
+ * baseline) — that behaviour is unchanged here. This helper exists only so
+ * configs whose actor identity lives outside ECS `user.*` (e.g. Azure
+ * auditlogs `…initiated_by.user.userPrincipalName`) are not silently
+ * filtered out by an ECS-shape requirement they cannot satisfy.
+ */
+const buildAnyActorFieldNonEmptyDsl = (fields: string[]): QueryDslQueryContainer => ({
+  bool: {
+    should: fields.map((field) => ({
+      bool: {
+        must: [{ exists: { field } }, { bool: { must_not: { term: { [field]: '' } } } }],
+      },
+    })),
+    minimum_should_match: 1,
+  },
+});
 
 export const buildActorDiscoveryQuery = (
   config: RelationshipIntegrationConfig,
@@ -22,9 +45,18 @@ export const buildActorDiscoveryQuery = (
 ): Record<string, unknown> => {
   const actorFields = config.customActor?.fields ?? USER_IDENTITY_FIELDS;
 
+  // Step 1 runs for every kind, including `kind: 'override'`. Hardcoding the
+  // user-EUID DSL filter here would silently drop documents whose actor
+  // identity lives entirely in `customActor.fields` (Azure auditlogs is the
+  // canonical case), and Step 2 — including override Step 2s — would never
+  // see those actors. Match the gate to the actor-fields the config declares.
+  const actorPresenceFilter: QueryDslQueryContainer = config.customActor
+    ? buildAnyActorFieldNonEmptyDsl(config.customActor.fields)
+    : euid.dsl.getEuidDocumentsContainsIdFilter('user');
+
   const baseFilters: QueryDslQueryContainer[] = [
     { range: { '@timestamp': { gte: LOOKBACK_WINDOW, lt: 'now' } } },
-    euid.dsl.getEuidDocumentsContainsIdFilter('user'),
+    actorPresenceFilter,
   ];
 
   if (config.requireTargetEntityIdExists) {

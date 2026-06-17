@@ -126,7 +126,6 @@ export class EmbeddedLensExamplePlugin
           label: 'README',
           href: 'https://github.com/elastic/kibana/tree/main/x-pack/examples/third_party_vis_lens_example',
           iconType: 'logoGithub',
-          size: 's',
           target: '_blank',
         },
       ],

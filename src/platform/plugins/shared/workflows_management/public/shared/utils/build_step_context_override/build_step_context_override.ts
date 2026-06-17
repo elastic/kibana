@@ -12,7 +12,6 @@
 import { merge } from 'lodash';
 import type {
   EsWorkflowStepExecution,
-  LegacyWorkflowInput,
   StepContext,
   WorkflowExecutionDto,
   WorkflowStepExecutionDto,
@@ -29,6 +28,7 @@ import {
   normalizeFieldsToJsonSchema,
 } from '@kbn/workflows/spec/lib/field_conversion';
 import type { JsonModelSchemaType } from '@kbn/workflows/spec/schema/common/json_model_schema';
+import type { LegacyWorkflowInput } from '@kbn/workflows/spec/schema/triggers/manual_trigger_schema';
 import { z } from '@kbn/zod/v4';
 import { INPUT_STRING_PLACEHOLDER } from '../../../../common/consts/placeholders';
 

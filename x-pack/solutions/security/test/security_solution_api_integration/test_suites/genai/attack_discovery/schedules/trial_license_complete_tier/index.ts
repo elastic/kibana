@@ -19,6 +19,9 @@ export default function ({ loadTestFile, getService }: FtrProviderContext) {
     });
 
     loadTestFile(require.resolve('./create'));
+    loadTestFile(require.resolve('./bulk_enable'));
+    loadTestFile(require.resolve('./bulk_disable'));
+    loadTestFile(require.resolve('./bulk_delete'));
     loadTestFile(require.resolve('./delete'));
     loadTestFile(require.resolve('./disable'));
     loadTestFile(require.resolve('./enable'));

@@ -61,7 +61,6 @@ function LanguageSelectorUI({ security, core, closePopover }: Props) {
   return (
     <EuiContextMenuItem
       icon="globe"
-      size="s"
       onClick={() => {
         openModal();
         closePopover();

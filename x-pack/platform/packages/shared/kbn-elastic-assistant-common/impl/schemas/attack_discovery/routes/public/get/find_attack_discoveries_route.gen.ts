@@ -65,9 +65,13 @@ export const AttackDiscoveryFindRequestQuery = lazySchema(() =>
      */
     search: z.string().optional(),
     /**
-     * Whether to filter by shared visibility. If omitted, both shared and privately visible Attack discoveries are returned. Use `true` to return only shared discoveries, `false` to return only those visible to the current user.
+     * Whether to filter by shared visibility. If omitted, both shared and privately visible Attack discoveries are returned. Use `true` to return only shared discoveries, `false` to return only those visible to the current user. Mutually exclusive with `include_all_authors`.
      */
     shared: BooleanFromString.optional(),
+    /**
+     * If `true`, the response will include all attack discoveries matching other criteria regardless of who created them. Mutually exclusive with `shared`.
+     */
+    include_all_authors: BooleanFromString.optional(),
     /**
      * Whether to filter by scheduled or ad-hoc attack discoveries. If omitted, both types of attack discoveries are returned. Use `true` to return only scheduled discoveries or `false` to return only ad-hoc discoveries.
      */

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { fireEvent, render, waitFor } from '@testing-library/react';
+import { act, fireEvent, render, waitFor } from '@testing-library/react';
 import React from 'react';
 import type { useFetchAlertsIndexNamesQuery } from '@kbn/alerts-ui-shared';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -61,13 +61,13 @@ const baseWorkflowDefinition = {
 } as WorkflowYaml;
 
 // Mock the form components
-const mockWorkflowExecuteEventForm = jest.fn(() => null);
-jest.mock('./workflow_execute_event_form', () => ({
-  WorkflowExecuteEventForm: () => mockWorkflowExecuteEventForm(),
+const mockWorkflowExecuteAlertForm = jest.fn((_props?: Record<string, unknown>) => null);
+jest.mock('./workflow_execute_alert_form', () => ({
+  WorkflowExecuteAlertForm: (props: Record<string, unknown>) => mockWorkflowExecuteAlertForm(props),
 }));
-const mockWorkflowExecuteIndexForm = jest.fn(() => null);
+const mockWorkflowExecuteIndexForm = jest.fn((_props?: Record<string, unknown>) => null);
 jest.mock('./workflow_execute_index_form', () => ({
-  WorkflowExecuteIndexForm: () => mockWorkflowExecuteIndexForm(),
+  WorkflowExecuteIndexForm: (props: Record<string, unknown>) => mockWorkflowExecuteIndexForm(props),
 }));
 const mockWorkflowExecuteManualForm = jest.fn(() => null);
 jest.mock('./workflow_execute_manual_form', () => ({
@@ -76,6 +76,18 @@ jest.mock('./workflow_execute_manual_form', () => ({
 const mockWorkflowExecuteHistoricalForm = jest.fn(() => null);
 jest.mock('./workflow_execute_historical_form', () => ({
   WorkflowExecuteHistoricalForm: () => mockWorkflowExecuteHistoricalForm(),
+}));
+const mockWorkflowExecuteEventForm = jest.fn((_props?: Record<string, unknown>) => null);
+jest.mock('./workflow_execute_event_form', () => ({
+  WorkflowExecuteEventForm: (props: Record<string, unknown>) => mockWorkflowExecuteEventForm(props),
+}));
+
+jest.mock('../../workflow_list/ui/use_event_driven_execution_status', () => ({
+  useEventDrivenExecutionStatus: () => ({
+    eventDrivenExecutionEnabled: true,
+    isLoading: false,
+    error: false,
+  }),
 }));
 
 jest.mock('../../../entities/workflows/model/use_workflow_execution', () => ({
@@ -121,10 +133,11 @@ describe('WorkflowExecuteModal', () => {
     });
     mockOnClose = jest.fn();
     mockOnSubmit = jest.fn();
-    mockWorkflowExecuteEventForm.mockClear();
+    mockWorkflowExecuteAlertForm.mockClear();
     mockWorkflowExecuteIndexForm.mockClear();
     mockWorkflowExecuteManualForm.mockClear();
     mockWorkflowExecuteHistoricalForm.mockClear();
+    mockWorkflowExecuteEventForm.mockClear();
   });
 
   describe('Basic rendering', () => {
@@ -141,7 +154,7 @@ describe('WorkflowExecuteModal', () => {
       expect(getByText('Run Workflow')).toBeInTheDocument();
     });
 
-    it('renders all trigger type buttons', () => {
+    it('renders all trigger type buttons when the workflow definition is missing', () => {
       const { getByText } = renderWithProviders(
         <WorkflowExecuteModal
           isTestRun={false}
@@ -153,6 +166,45 @@ describe('WorkflowExecuteModal', () => {
 
       expect(getByText('Alert')).toBeInTheDocument();
       expect(getByText('Document')).toBeInTheDocument();
+      expect(getByText('Event')).toBeInTheDocument();
+      expect(getByText('Manual')).toBeInTheDocument();
+      expect(getByText('Historical')).toBeInTheDocument();
+    });
+
+    it('shows only tabs that match triggers declared in the workflow', () => {
+      const { getByText, queryByText } = renderWithProviders(
+        <WorkflowExecuteModal
+          isTestRun={false}
+          definition={{
+            ...baseWorkflowDefinition,
+            triggers: [{ type: 'alert' }],
+          }}
+          onClose={mockOnClose}
+          onSubmit={mockOnSubmit}
+        />
+      );
+
+      expect(getByText('Alert')).toBeInTheDocument();
+      expect(getByText('Manual')).toBeInTheDocument();
+      expect(getByText('Historical')).toBeInTheDocument();
+      expect(queryByText('Document')).not.toBeInTheDocument();
+      expect(queryByText('Event')).not.toBeInTheDocument();
+    });
+
+    it('uses the test run title and still exposes the full trigger tab set', () => {
+      const { getByText } = renderWithProviders(
+        <WorkflowExecuteModal
+          isTestRun={true}
+          definition={null}
+          onClose={mockOnClose}
+          onSubmit={mockOnSubmit}
+        />
+      );
+
+      expect(getByText('Test Workflow')).toBeInTheDocument();
+      expect(getByText('Alert')).toBeInTheDocument();
+      expect(getByText('Document')).toBeInTheDocument();
+      expect(getByText('Event')).toBeInTheDocument();
       expect(getByText('Manual')).toBeInTheDocument();
       expect(getByText('Historical')).toBeInTheDocument();
     });
@@ -288,6 +340,24 @@ describe('WorkflowExecuteModal', () => {
       expect(getByTestId('workflowExecuteModalTrigger-historical')).toBeDisabled();
     });
 
+    it('disables the event trigger when the user lacks Read Workflow Execution', () => {
+      mockUseWorkflowsCapabilities.mockReturnValue({
+        ...defaultWorkflowsCapabilities,
+        canReadWorkflowExecution: false,
+      });
+
+      const { getByTestId } = renderWithProviders(
+        <WorkflowExecuteModal
+          isTestRun={false}
+          definition={null}
+          onClose={mockOnClose}
+          onSubmit={mockOnSubmit}
+        />
+      );
+
+      expect(getByTestId('workflowExecuteModalTrigger-event')).toBeDisabled();
+    });
+
     it('renders trigger descriptions', () => {
       const { getByText } = renderWithProviders(
         <WorkflowExecuteModal
@@ -300,6 +370,9 @@ describe('WorkflowExecuteModal', () => {
 
       expect(getByText('Provide custom JSON data manually')).toBeInTheDocument();
       expect(getByText('Choose a document from Elasticsearch')).toBeInTheDocument();
+      expect(
+        getByText('Select one of possible events that you can use to run a workflow')
+      ).toBeInTheDocument();
       expect(getByText('Choose an existing alert directly')).toBeInTheDocument();
       expect(getByText('Reuse input data from previous executions')).toBeInTheDocument();
     });
@@ -391,7 +464,7 @@ describe('WorkflowExecuteModal', () => {
       );
 
       // Alert trigger is selected by default, so event form should be called
-      expect(mockWorkflowExecuteEventForm).toHaveBeenCalledTimes(1);
+      expect(mockWorkflowExecuteAlertForm).toHaveBeenCalledTimes(1);
       expect(mockWorkflowExecuteIndexForm).not.toHaveBeenCalled();
       expect(mockWorkflowExecuteManualForm).not.toHaveBeenCalled();
     });
@@ -407,7 +480,7 @@ describe('WorkflowExecuteModal', () => {
       );
 
       // Initially, event form should be called (alert is default)
-      expect(mockWorkflowExecuteEventForm).toHaveBeenCalledTimes(1);
+      expect(mockWorkflowExecuteAlertForm).toHaveBeenCalledTimes(1);
 
       // Click manual trigger
       const manualButton = getByText('Manual').closest('button');
@@ -416,7 +489,7 @@ describe('WorkflowExecuteModal', () => {
       await waitFor(() => {
         // Now manual form should be called
         expect(mockWorkflowExecuteManualForm).toHaveBeenCalledTimes(1);
-        expect(mockWorkflowExecuteEventForm).toHaveBeenCalledTimes(1); // Still called once from initial render
+        expect(mockWorkflowExecuteAlertForm).toHaveBeenCalledTimes(1); // Still called once from initial render
         expect(mockWorkflowExecuteIndexForm).not.toHaveBeenCalled();
       });
     });
@@ -432,7 +505,7 @@ describe('WorkflowExecuteModal', () => {
       );
 
       // Initially, event form should be called (alert is default)
-      expect(mockWorkflowExecuteEventForm).toHaveBeenCalledTimes(1);
+      expect(mockWorkflowExecuteAlertForm).toHaveBeenCalledTimes(1);
 
       // Click index (Document) trigger
       const indexButton = getByText('Document').closest('button');
@@ -441,7 +514,7 @@ describe('WorkflowExecuteModal', () => {
       await waitFor(() => {
         // Now index form should be called
         expect(mockWorkflowExecuteIndexForm).toHaveBeenCalledTimes(1);
-        expect(mockWorkflowExecuteEventForm).toHaveBeenCalledTimes(1); // Still called once from initial render
+        expect(mockWorkflowExecuteAlertForm).toHaveBeenCalledTimes(1); // Still called once from initial render
         expect(mockWorkflowExecuteManualForm).not.toHaveBeenCalled();
       });
     });
@@ -463,6 +536,37 @@ describe('WorkflowExecuteModal', () => {
 
       expect(mockOnSubmit).toHaveBeenCalledWith({}, 'manual');
       expect(mockOnClose).toHaveBeenCalled();
+    });
+
+    it('auto-runs only once when onSubmit and onClose change identity', () => {
+      const definition = {
+        ...baseWorkflowDefinition,
+        triggers: [{ type: 'manual' as const }],
+      };
+
+      const { rerender } = renderWithProviders(
+        <WorkflowExecuteModal
+          isTestRun={false}
+          definition={definition}
+          onClose={mockOnClose}
+          onSubmit={mockOnSubmit}
+        />
+      );
+
+      expect(mockOnSubmit).toHaveBeenCalledTimes(1);
+      expect(mockOnClose).toHaveBeenCalledTimes(1);
+
+      rerender(
+        <WorkflowExecuteModal
+          isTestRun={false}
+          definition={definition}
+          onClose={jest.fn()}
+          onSubmit={jest.fn()}
+        />
+      );
+
+      expect(mockOnSubmit).toHaveBeenCalledTimes(1);
+      expect(mockOnClose).toHaveBeenCalledTimes(1);
     });
 
     it('does not auto-run when workflow has alert triggers', () => {
@@ -490,7 +594,12 @@ describe('WorkflowExecuteModal', () => {
           definition={
             {
               ...baseWorkflowDefinition,
-              inputs: [{ name: 'test-input', type: 'string', required: true }],
+              triggers: [
+                {
+                  type: 'manual',
+                  inputs: [{ name: 'test-input', type: 'string', required: true }],
+                },
+              ],
             } as WorkflowYaml
           }
           onClose={mockOnClose}
@@ -532,8 +641,12 @@ describe('WorkflowExecuteModal', () => {
           definition={
             {
               ...baseWorkflowDefinition,
-              triggers: [{ type: 'manual' }],
-              inputs: [{ name: 'test-input', type: 'string', required: true }],
+              triggers: [
+                {
+                  type: 'manual',
+                  inputs: [{ name: 'test-input', type: 'string', required: true }],
+                },
+              ],
             } as WorkflowYaml
           }
           onClose={mockOnClose}
@@ -564,7 +677,11 @@ describe('WorkflowExecuteModal', () => {
       expect(executeButton).toBeInTheDocument();
     });
 
-    it('disables execute button when there are errors', () => {
+    it('disables execute button when the user cannot execute workflows', () => {
+      mockUseWorkflowsCapabilities.mockReturnValue({
+        ...defaultWorkflowsCapabilities,
+        canExecuteWorkflow: false,
+      });
       const { getByTestId } = renderWithProviders(
         <WorkflowExecuteModal
           isTestRun={false}
@@ -574,8 +691,290 @@ describe('WorkflowExecuteModal', () => {
         />
       );
 
+      expect(getByTestId('executeWorkflowButton')).toBeDisabled();
+    });
+
+    it('associates execute-forbidden tooltip with the Run button wrapper for screen readers', () => {
+      mockUseWorkflowsCapabilities.mockReturnValue({
+        ...defaultWorkflowsCapabilities,
+        canExecuteWorkflow: false,
+      });
+      const { getByTestId, getByText } = renderWithProviders(
+        <WorkflowExecuteModal
+          isTestRun={false}
+          definition={null}
+          onClose={mockOnClose}
+          onSubmit={mockOnSubmit}
+        />
+      );
+
+      const executeButton = getByTestId('executeWorkflowButton');
+      const tooltipWrapper = executeButton.parentElement;
+
+      expect(tooltipWrapper).toHaveAttribute('aria-disabled', 'true');
+      expect(tooltipWrapper).toHaveAttribute('tabIndex', '0');
+
+      const tooltipDescription = getByText(
+        'You need the Workflows Execute privilege to run this workflow.'
+      );
+      expect(tooltipWrapper).toHaveAttribute(
+        'aria-describedby',
+        tooltipDescription.getAttribute('id')
+      );
+    });
+
+    it('disables execute for test runs when the user cannot execute workflows', () => {
+      mockUseWorkflowsCapabilities.mockReturnValue({
+        ...defaultWorkflowsCapabilities,
+        canExecuteWorkflow: false,
+      });
+      const { getByTestId } = renderWithProviders(
+        <WorkflowExecuteModal
+          isTestRun={true}
+          definition={null}
+          onClose={mockOnClose}
+          onSubmit={mockOnSubmit}
+        />
+      );
+
+      expect(getByTestId('executeWorkflowButton')).toBeDisabled();
+    });
+
+    it('disables execute button when there are errors', () => {
+      const { getByTestId, getByText } = renderWithProviders(
+        <WorkflowExecuteModal
+          isTestRun={false}
+          definition={null}
+          onClose={mockOnClose}
+          onSubmit={mockOnSubmit}
+        />
+      );
+
+      fireEvent.click(getByText('Manual').closest('button')!);
+
       const executeButton = getByTestId('executeWorkflowButton');
       expect(executeButton).not.toBeDisabled();
+    });
+
+    it('disables execute button on the alert tab when no rows are selected', () => {
+      const { getByTestId } = renderWithProviders(
+        <WorkflowExecuteModal
+          isTestRun={false}
+          definition={null}
+          onClose={mockOnClose}
+          onSubmit={mockOnSubmit}
+        />
+      );
+
+      expect(getByTestId('executeWorkflowButton')).toBeDisabled();
+    });
+
+    it('enables execute button on the alert tab when rows are selected', () => {
+      const { getByTestId } = renderWithProviders(
+        <WorkflowExecuteModal
+          isTestRun={false}
+          definition={null}
+          onClose={mockOnClose}
+          onSubmit={mockOnSubmit}
+        />
+      );
+
+      const alertFormCalls = mockWorkflowExecuteAlertForm.mock.calls;
+      const lastAlertFormProps = alertFormCalls[alertFormCalls.length - 1]?.[0] as
+        | { setValue?: (value: string) => void }
+        | undefined;
+
+      act(() => {
+        lastAlertFormProps!.setValue!('{"event":{"alertIds":[]}}');
+      });
+
+      expect(getByTestId('executeWorkflowButton')).not.toBeDisabled();
+    });
+
+    it('disables execute button on the document tab when no rows are selected', () => {
+      const { getByTestId, getByText } = renderWithProviders(
+        <WorkflowExecuteModal
+          isTestRun={false}
+          definition={null}
+          onClose={mockOnClose}
+          onSubmit={mockOnSubmit}
+        />
+      );
+
+      fireEvent.click(getByText('Document').closest('button')!);
+
+      expect(getByTestId('executeWorkflowButton')).toBeDisabled();
+    });
+
+    it('enables execute button on the document tab when rows are selected', () => {
+      const { getByTestId, getByText } = renderWithProviders(
+        <WorkflowExecuteModal
+          isTestRun={false}
+          definition={null}
+          onClose={mockOnClose}
+          onSubmit={mockOnSubmit}
+        />
+      );
+
+      fireEvent.click(getByText('Document').closest('button')!);
+
+      const indexFormCalls = mockWorkflowExecuteIndexForm.mock.calls;
+      const lastIndexFormProps = indexFormCalls[indexFormCalls.length - 1]?.[0] as
+        | { setValue?: (value: string) => void }
+        | undefined;
+
+      act(() => {
+        lastIndexFormProps!.setValue!('{"event":{"documents":[]}}');
+      });
+
+      expect(getByTestId('executeWorkflowButton')).not.toBeDisabled();
+    });
+
+    it('disables execute button when the event trigger reports multiple table row selections', () => {
+      const { getByTestId, getByText } = renderWithProviders(
+        <WorkflowExecuteModal
+          isTestRun={false}
+          definition={null}
+          onClose={mockOnClose}
+          onSubmit={mockOnSubmit}
+        />
+      );
+
+      const eventTrigger = getByText('Event').closest('button');
+      fireEvent.click(eventTrigger!);
+
+      const eventFormCalls = mockWorkflowExecuteEventForm.mock.calls;
+      const lastEventFormProps = eventFormCalls[eventFormCalls.length - 1]?.[0] as
+        | { onTriggerEventTableSelectionCountChange?: (count: number) => void }
+        | undefined;
+      expect(lastEventFormProps?.onTriggerEventTableSelectionCountChange).toBeDefined();
+
+      act(() => {
+        lastEventFormProps!.onTriggerEventTableSelectionCountChange!(2);
+      });
+
+      const executeButton = getByTestId('executeWorkflowButton');
+      expect(executeButton).toBeDisabled();
+    });
+
+    it('hides trigger tabs and applies fullscreen modal class when the alert grid enters fullscreen', () => {
+      const { getByTestId, getByText, queryByTestId } = renderWithProviders(
+        <WorkflowExecuteModal
+          isTestRun={false}
+          definition={null}
+          onClose={mockOnClose}
+          onSubmit={mockOnSubmit}
+        />
+      );
+
+      fireEvent.click(getByText('Alert').closest('button')!);
+
+      const alertFormCalls = mockWorkflowExecuteAlertForm.mock.calls;
+      const lastAlertFormProps = alertFormCalls[alertFormCalls.length - 1]?.[0] as
+        | { onTableGridFullScreenChange?: (isFullScreen: boolean) => void }
+        | undefined;
+
+      expect(lastAlertFormProps?.onTableGridFullScreenChange).toBeDefined();
+
+      act(() => {
+        lastAlertFormProps!.onTableGridFullScreenChange!(true);
+      });
+
+      expect(queryByTestId('workflowExecuteModalTriggerTabs')).not.toBeInTheDocument();
+      expect(getByTestId('workflowExecuteModal').className).toContain(
+        'workflowExecuteModal--tableGridFullScreen'
+      );
+    });
+
+    it('exits table fullscreen instead of closing the modal when X is pressed', () => {
+      const { getByTestId, getByText, getByLabelText } = renderWithProviders(
+        <WorkflowExecuteModal
+          isTestRun={false}
+          definition={null}
+          onClose={mockOnClose}
+          onSubmit={mockOnSubmit}
+        />
+      );
+
+      fireEvent.click(getByText('Alert').closest('button')!);
+
+      const alertFormCalls = mockWorkflowExecuteAlertForm.mock.calls;
+      const lastAlertFormProps = alertFormCalls[alertFormCalls.length - 1]?.[0] as
+        | { onTableGridFullScreenChange?: (isFullScreen: boolean) => void }
+        | undefined;
+
+      act(() => {
+        lastAlertFormProps!.onTableGridFullScreenChange!(true);
+      });
+
+      expect(getByTestId('workflowExecuteModal').className).toContain(
+        'workflowExecuteModal--tableGridFullScreen'
+      );
+
+      act(() => {
+        fireEvent.click(getByLabelText('Closes this modal window'));
+      });
+
+      expect(mockOnClose).not.toHaveBeenCalled();
+      expect(getByTestId('workflowExecuteModal').className).not.toContain(
+        'workflowExecuteModal--tableGridFullScreen'
+      );
+      expect(getByTestId('workflowExecuteModalTriggerTabs')).toBeInTheDocument();
+    });
+
+    it('hides trigger tabs and applies fullscreen modal class when the event grid enters fullscreen', () => {
+      const { getByTestId, getByText, queryByTestId } = renderWithProviders(
+        <WorkflowExecuteModal
+          isTestRun={false}
+          definition={null}
+          onClose={mockOnClose}
+          onSubmit={mockOnSubmit}
+        />
+      );
+
+      fireEvent.click(getByText('Event').closest('button')!);
+
+      const eventFormCalls = mockWorkflowExecuteEventForm.mock.calls;
+      const lastEventFormProps = eventFormCalls[eventFormCalls.length - 1]?.[0] as
+        | { onTableGridFullScreenChange?: (isFullScreen: boolean) => void }
+        | undefined;
+
+      expect(lastEventFormProps?.onTableGridFullScreenChange).toBeDefined();
+
+      act(() => {
+        lastEventFormProps!.onTableGridFullScreenChange!(true);
+      });
+
+      expect(queryByTestId('workflowExecuteModalTriggerTabs')).not.toBeInTheDocument();
+      expect(getByTestId('workflowExecuteModal').className).toContain(
+        'workflowExecuteModal--tableGridFullScreen'
+      );
+    });
+
+    it('disables execute for test runs when the event trigger reports multiple table row selections', () => {
+      const { getByTestId, getByText } = renderWithProviders(
+        <WorkflowExecuteModal
+          isTestRun={true}
+          definition={null}
+          onClose={mockOnClose}
+          onSubmit={mockOnSubmit}
+        />
+      );
+
+      const eventTrigger = getByText('Event').closest('button');
+      fireEvent.click(eventTrigger!);
+
+      const eventFormCalls = mockWorkflowExecuteEventForm.mock.calls;
+      const lastEventFormProps = eventFormCalls[eventFormCalls.length - 1]?.[0] as
+        | { onTriggerEventTableSelectionCountChange?: (count: number) => void }
+        | undefined;
+      expect(lastEventFormProps?.onTriggerEventTableSelectionCountChange).toBeDefined();
+
+      act(() => {
+        lastEventFormProps!.onTriggerEventTableSelectionCountChange!(2);
+      });
+
+      expect(getByTestId('executeWorkflowButton')).toBeDisabled();
     });
   });
 

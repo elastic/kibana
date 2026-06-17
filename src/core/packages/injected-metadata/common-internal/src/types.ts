@@ -56,6 +56,7 @@ export interface InjectedMetadata {
   branch: string;
   basePath: string;
   serverBasePath: string;
+  spaceId: string;
   publicBaseUrl?: string;
   assetsHrefBase: string;
   clusterInfo: InjectedMetadataClusterInfo;
@@ -93,4 +94,7 @@ export interface InjectedMetadata {
     };
   };
   customBranding: Pick<CustomBranding, 'logo' | 'customizedLogo' | 'pageTitle'>;
+  userStorage: {
+    values: Record<string, unknown>;
+  };
 }

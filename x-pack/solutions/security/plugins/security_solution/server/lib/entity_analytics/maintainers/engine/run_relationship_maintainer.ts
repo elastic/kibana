@@ -15,7 +15,7 @@ import type {
   RelationshipIntegrationConfig,
   CompositeAfterKey,
   CompositeBucket,
-  ProcessedEngineRecord,
+  EntityRelationshipRecord,
 } from './types';
 import { buildActorDiscoveryQuery, buildActorPageFilter } from './build_actor_discovery_query';
 import { buildTargetsPerActorQuery } from './build_targets_per_actor_query';
@@ -163,7 +163,7 @@ async function runIntegration(
   let afterKey: CompositeAfterKey | undefined;
   let iterations = 0;
   let totalBuckets = 0;
-  const records: ProcessedEngineRecord[] = [];
+  const records: EntityRelationshipRecord[] = [];
   const transportOpts = abortController ? { signal: abortController.signal } : undefined;
 
   do {
@@ -224,7 +224,7 @@ async function runIntegration(
 }
 
 /**
- * Generic run loop for relationship maintainers.
+ * Run loop for relationship maintainers.
  * Iterates over the provided integration configs and runs the composite agg +
  * ES|QL pipeline for each, writing optimistic EUIDs directly to
  * `entity.relationships[relType].ids` after each integration completes.
@@ -238,8 +238,9 @@ async function runIntegration(
  * persists that integration's partial records (best-effort), then exits
  * the outer loop on the next iteration.
  */
-export const runGenericMaintainer = async ({
+export const runRelationshipMaintainer = async ({
   esClient,
+  cpsEsClient,
   logger,
   namespace,
   crudClient,
@@ -247,6 +248,7 @@ export const runGenericMaintainer = async ({
   abortController,
 }: {
   esClient: ElasticsearchClient;
+  cpsEsClient?: ElasticsearchClient;
   logger: Logger;
   namespace: string;
   crudClient: EntityUpdateClient;
@@ -273,6 +275,8 @@ export const runGenericMaintainer = async ({
   // is cheaper and stronger than trusting all callers.
   assertValidNamespace(namespace);
 
+  const readClient = cpsEsClient ?? esClient;
+
   let totalBuckets = 0;
   let totalRecords = 0;
   let totalWritten = 0;
@@ -281,13 +285,13 @@ export const runGenericMaintainer = async ({
 
   for (const config of integrations) {
     if (abortController?.signal.aborted) {
-      logger.info('Generic maintainer aborted, skipping remaining integrations');
+      logger.info('Relationship maintainer aborted, skipping remaining integrations');
       break;
     }
     logger.info(`[${config.id}] Processing integration: ${config.name}`);
     const { buckets, recordsCount, write } = await runIntegration(
       config,
-      esClient,
+      readClient,
       logger,
       namespace,
       crudClient,

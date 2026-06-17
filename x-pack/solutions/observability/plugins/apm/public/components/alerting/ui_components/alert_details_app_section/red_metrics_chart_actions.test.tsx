@@ -7,7 +7,8 @@
 
 import React from 'react';
 import { render, fireEvent } from '@testing-library/react';
-import { RED_METRICS_CHART_ELEMENT, RedMetricsChartActions } from './red_metrics_chart_actions';
+import { APM_CHART_EBT_ELEMENTS } from '../../../shared/charts/ebt_constants';
+import { RedMetricsChartActions } from './red_metrics_chart_actions';
 import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 import { DISCOVER_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import { APM_APP_LOCATOR_ID } from '../../../../locator/service_detail_locator';
@@ -38,7 +39,7 @@ const defaultProps = {
   },
   timeRange: { from: 'now-15m', to: 'now' },
   ruleTypeId: 'apm.transaction_duration',
-  element: RED_METRICS_CHART_ELEMENT.LATENCY,
+  element: APM_CHART_EBT_ELEMENTS.LATENCY,
 };
 
 const setupMocks = ({
@@ -143,7 +144,7 @@ describe('RedMetricsChartActions', () => {
         {...defaultProps}
         indexType="error"
         ruleTypeId="apm.error_rate"
-        element={RED_METRICS_CHART_ELEMENT.ERROR_COUNT}
+        element={APM_CHART_EBT_ELEMENTS.ERROR_COUNT}
         queryParams={{
           serviceName: 'testService',
           environment: 'testEnvironment',
@@ -202,7 +203,7 @@ describe('RedMetricsChartActions', () => {
           }}
           timeRange={{ from: 'now-15m', to: 'now' }}
           ruleTypeId="apm.transaction_duration"
-          element={RED_METRICS_CHART_ELEMENT.LATENCY}
+          element={APM_CHART_EBT_ELEMENTS.LATENCY}
         />
       );
 
@@ -226,7 +227,7 @@ describe('RedMetricsChartActions', () => {
           }}
           timeRange={{ from: 'now-15m', to: 'now' }}
           ruleTypeId="apm.error_rate"
-          element={RED_METRICS_CHART_ELEMENT.ERROR_COUNT}
+          element={APM_CHART_EBT_ELEMENTS.ERROR_COUNT}
         />
       );
 
@@ -250,7 +251,7 @@ describe('RedMetricsChartActions', () => {
           }}
           timeRange={{ from: 'now-15m', to: 'now' }}
           ruleTypeId="apm.error_rate"
-          element={RED_METRICS_CHART_ELEMENT.ERROR_COUNT}
+          element={APM_CHART_EBT_ELEMENTS.ERROR_COUNT}
         />
       );
 

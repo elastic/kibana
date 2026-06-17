@@ -385,9 +385,7 @@ describe('UpdateSLO', () => {
       const warnMessages = mockLogger.warn.mock.calls.map(([msg]) => String(msg));
       expect(warnMessages).toEqual(
         expect.arrayContaining([
-          expect.stringContaining(
-            `previous revision of SLO [id=${slo.id}, revision=${slo.revision}]`
-          ),
+          expect.stringContaining('Failed to clean up resources for previous SLO revision.'),
         ])
       );
     });

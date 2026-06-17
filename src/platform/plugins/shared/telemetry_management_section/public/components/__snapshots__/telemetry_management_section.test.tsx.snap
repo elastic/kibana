@@ -109,6 +109,7 @@ exports[`TelemetryManagementSectionComponent renders as expected 1`] = `
                   </p>
                 </React.Fragment>,
                 "displayName": "Share usage with Elastic",
+                "experimental": undefined,
                 "groupId": "Share usage with Elastic-group",
                 "id": "Usage collection",
                 "isCustom": true,
@@ -140,7 +141,9 @@ exports[`TelemetryManagementSectionComponent renders as expected 1`] = `
 </Fragment>
 `;
 
-exports[`TelemetryManagementSectionComponent renders null because allowChangingOptInStatus is false 1`] = `
+exports[
+  `TelemetryManagementSectionComponent renders null because allowChangingOptInStatus is false 1`
+] = `
 <TelemetryManagementSection
   docLinks={
     Object {
@@ -314,6 +317,7 @@ exports[`TelemetryManagementSectionComponent renders null because allowChangingO
         "patch": [MockFunction],
         "post": [MockFunction],
         "put": [MockFunction],
+        "spaceId": "default",
         "staticAssets": Object {
           "getPluginAssetHref": [MockFunction],
         },

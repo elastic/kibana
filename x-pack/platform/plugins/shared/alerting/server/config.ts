@@ -117,7 +117,7 @@ export type AlertingConfig = TypeOf<typeof configSchema>;
 export type RulesConfig = TypeOf<typeof rulesSchema>;
 export type AlertingRulesConfig = Pick<
   AlertingConfig['rules'],
-  'minimumScheduleInterval' | 'maxScheduledPerMinute' | 'run'
+  'minimumScheduleInterval' | 'maxScheduledPerMinute' | 'run' | 'apiKeyType'
 > & {
   isUsingSecurity: boolean;
 };

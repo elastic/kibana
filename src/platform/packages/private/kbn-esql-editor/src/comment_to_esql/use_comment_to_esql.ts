@@ -14,13 +14,9 @@ import type { MutableRefObject } from 'react';
 import { i18n } from '@kbn/i18n';
 import { NL_TO_ESQL_ROUTE } from '@kbn/esql-types';
 import type { HttpStart, NotificationsStart } from '@kbn/core/public';
+import { AiReviewAction, type ESQLEditorTelemetryService } from '../telemetry/telemetry_service';
 import { ReviewActionsWidget } from './review_actions_widget';
-import {
-  CODE_ADDED_CLASS,
-  GENERATING_HINT_CLASS,
-  LINE_REPLACED_CLASS,
-  useCommentToEsqlStyle,
-} from './comment_to_esql.styles';
+import { CODE_ADDED_CLASS, GENERATING_HINT_CLASS, LINE_REPLACED_CLASS } from '../editor_ai.styles';
 
 import {
   findTargetComment,
@@ -50,6 +46,7 @@ interface UseCommentToEsqlParams {
   // Hides any already-visible ghost-line hint so it doesn't overlap with the
   // "Generating..." decoration during the LLM call. Populated by useGhostLineHint.
   clearGhostHintRef?: MutableRefObject<() => void>;
+  telemetryService?: ESQLEditorTelemetryService;
 }
 
 export const useCommentToEsql = ({
@@ -59,9 +56,9 @@ export const useCommentToEsql = ({
   notifications,
   isEnabled,
   clearGhostHintRef,
+  telemetryService,
 }: UseCommentToEsqlParams) => {
   const { euiTheme } = useEuiTheme();
-  const commentToEsqlStyle = useCommentToEsqlStyle();
   const reviewStateRef = useRef<CommentReviewState | null>(null);
   const decorationsRef = useRef<monaco.editor.IEditorDecorationsCollection | undefined>(undefined);
   const widgetRef = useRef<ReviewActionsWidget | undefined>(undefined);
@@ -140,13 +137,17 @@ export const useCommentToEsql = ({
     const editor = editorRef.current;
     const model = editorModel.current;
     const state = reviewStateRef.current;
+    cleanup();
     if (!editor || !model || !state) {
-      cleanup();
       return;
     }
 
-    const { replacedLineNumber } = state;
-    cleanup();
+    const { replacedLineNumber, generatedLineStart, generatedLineEnd } = state;
+
+    telemetryService?.trackCommentToEsqlReviewed({
+      action: AiReviewAction.ACCEPT,
+      linesGenerated: generatedLineEnd - generatedLineStart + 1,
+    });
 
     if (replacedLineNumber) {
       const lineContent = model.getLineContent(replacedLineNumber);
@@ -163,7 +164,7 @@ export const useCommentToEsql = ({
         },
       ]);
     }
-  }, [editorRef, editorModel, cleanup]);
+  }, [editorRef, editorModel, cleanup, telemetryService]);
 
   const rejectChange = useCallback(() => {
     const editor = editorRef.current;
@@ -171,15 +172,21 @@ export const useCommentToEsql = ({
     const state = reviewStateRef.current;
     if (!editor || !model || !state) return;
 
+    const { generatedLineStart, generatedLineEnd } = state;
     cleanup();
+
+    telemetryService?.trackCommentToEsqlReviewed({
+      action: AiReviewAction.REJECT,
+      linesGenerated: generatedLineEnd - generatedLineStart + 1,
+    });
 
     editor.executeEdits('nl-to-esql-reject', [
       {
-        range: new monaco.Range(state.generatedLineStart, 1, state.generatedLineEnd + 1, 1),
+        range: new monaco.Range(generatedLineStart, 1, generatedLineEnd + 1, 1),
         text: null,
       },
     ]);
-  }, [editorRef, editorModel, cleanup]);
+  }, [editorRef, editorModel, cleanup, telemetryService]);
 
   const showReview = useCallback(
     (state: CommentReviewState) => {
@@ -284,6 +291,26 @@ export const useCommentToEsql = ({
     [http, notifications.toasts]
   );
 
+  const trackCommentResult = useCallback(
+    (
+      nlLength: number,
+      isCompletion: boolean,
+      contextQueryLength: number,
+      startTime: number,
+      success: boolean,
+      generatedLineCount?: number
+    ) =>
+      telemetryService?.trackCommentToEsqlSubmitted({
+        nlLength,
+        isCompletion,
+        contextQueryLength,
+        success,
+        durationMs: Date.now() - startTime,
+        ...(generatedLineCount !== undefined ? { generatedLineCount } : {}),
+      }),
+    [telemetryService]
+  );
+
   const generateFromComment = useCallback(async () => {
     if (!isEnabled) return;
     const editor = editorRef.current;
@@ -334,6 +361,7 @@ export const useCommentToEsql = ({
 
     const controller = new AbortController();
     abortControllerRef.current = controller;
+    const startTime = Date.now();
 
     // Ensures the generating flag and decoration are reset on every exit path,
     // even if a downstream step throws (e.g. executeEdits on a disposed model).
@@ -345,14 +373,34 @@ export const useCommentToEsql = ({
         controller.signal
       );
 
-      // Was aborted (retrigger / cleanup) or had no content.
-      if (controller.signal.aborted || !result) {
+      // Was aborted (retrigger / cleanup) — swallow and let the new run own the UX.
+      if (controller.signal.aborted) {
         if (abortControllerRef.current === controller) {
           abortControllerRef.current = undefined;
         }
         return;
       }
       abortControllerRef.current = undefined;
+
+      if (!result) {
+        trackCommentResult(
+          nlInstruction.length,
+          isCompletion,
+          nonCommentContent.length,
+          startTime,
+          false
+        );
+        return;
+      }
+
+      trackCommentResult(
+        nlInstruction.length,
+        isCompletion,
+        nonCommentContent.length,
+        startTime,
+        true,
+        result.content.trimEnd().split('\n').length
+      );
 
       const liveModel = editorModel.current;
       const anchorRanges = commentAnchorRef.current?.getRanges() ?? [];
@@ -393,10 +441,10 @@ export const useCommentToEsql = ({
     generateESQL,
     showReview,
     isEnabled,
+    trackCommentResult,
   ]);
 
   return {
-    commentToEsqlStyle,
     generateFromComment,
     isReviewActiveRef: reviewStateRef,
     isGeneratingRef,

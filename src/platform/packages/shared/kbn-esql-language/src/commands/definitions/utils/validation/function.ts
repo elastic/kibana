@@ -112,6 +112,14 @@ class FunctionValidator {
       return;
     }
 
+    // Return early so the source-incompatibility error takes priority over the generic
+    // "not allowed here" check below — the location may technically match, but the function
+    // is invalid regardless because the pipeline source is TS.
+    if (isTimeseriesSourceCommand(this.ast) && this.definition.tsdbCompatible === false) {
+      this.report(errors.tsdbIncompatibleFunction(this.fn));
+      return;
+    }
+
     if (!this.allowedHere) {
       this.report(errors.functionNotAllowedHere(this.fn, this.location.displayName));
     }
@@ -137,13 +145,14 @@ class FunctionValidator {
     return this.hintKindAt(position) === 'aggregation';
   }
 
-  private validateAggregationArg(arg: ESQLAstItem): void {
+  private validateAggregationArg(arg: ESQLAstItem, rawArg: ESQLAstItem): void {
     const isAggCall =
       isFunctionExpression(arg) &&
       getFunctionDefinition(arg.name)?.type === FunctionDefinitionTypes.AGG;
 
     if (!isAggCall) {
-      this.report(errors.expectedAggregationArgument(this.fn));
+      const location = Array.isArray(rawArg) ? this.fn.location : rawArg.location;
+      this.report(errors.expectedAggregationArgument(this.fn, location));
     }
 
     if (isFunctionExpression(arg)) {
@@ -235,10 +244,11 @@ class FunctionValidator {
 
     const flatArgs = this.fn.args.flat();
     for (let i = 0; i < flatArgs.length; i++) {
-      const arg = removeInlineCasts(flatArgs[i]);
+      const rawArg = flatArgs[i];
+      const arg = removeInlineCasts(rawArg);
 
       if (this.expectsAggregationAt(i)) {
-        this.validateAggregationArg(arg);
+        this.validateAggregationArg(arg, rawArg);
         continue;
       }
 

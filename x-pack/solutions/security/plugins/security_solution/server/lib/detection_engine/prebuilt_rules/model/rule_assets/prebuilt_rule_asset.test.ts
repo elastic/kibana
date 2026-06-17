@@ -17,7 +17,7 @@ describe('Prebuilt rule asset schema', () => {
     const result = PrebuiltRuleAsset.safeParse(payload);
     expectParseError(result);
     expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
-      `"name: Invalid input: expected string, received undefined, description: Invalid input: expected string, received undefined, risk_score: Invalid input: expected number, received undefined, severity: Invalid option: expected one of \\"low\\"|\\"medium\\"|\\"high\\"|\\"critical\\", type: Invalid input, and 2 more"`
+      `"name: Invalid input: expected string, received undefined, description: Invalid input: expected string, received undefined, risk_score: Invalid input: expected number, received undefined, severity: Invalid option: expected one of \\"low\\"|\\"medium\\"|\\"high\\"|\\"critical\\", type: Invalid discriminator value. Expected 'eql' | 'query' | 'saved_query' | 'threshold' | 'threat_match' | 'machine_learning' | 'new_terms' | 'esql', and 2 more"`
     );
   });
 
@@ -82,7 +82,7 @@ describe('Prebuilt rule asset schema', () => {
     const result = PrebuiltRuleAsset.safeParse(payload);
     expectParseError(result);
     expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
-      `"name: Invalid input: expected string, received undefined, description: Invalid input: expected string, received undefined, risk_score: Invalid input: expected number, received undefined, severity: Invalid option: expected one of \\"low\\"|\\"medium\\"|\\"high\\"|\\"critical\\", type: Invalid input, and 1 more"`
+      `"name: Invalid input: expected string, received undefined, description: Invalid input: expected string, received undefined, risk_score: Invalid input: expected number, received undefined, severity: Invalid option: expected one of \\"low\\"|\\"medium\\"|\\"high\\"|\\"critical\\", type: Invalid discriminator value. Expected 'eql' | 'query' | 'saved_query' | 'threshold' | 'threat_match' | 'machine_learning' | 'new_terms' | 'esql', and 1 more"`
     );
   });
 
