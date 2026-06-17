@@ -150,6 +150,8 @@ describe(`VegaParser._setDefaultColors`, () => {
         background: 'transparent',
         range: { category: { scheme: 'elastic' } },
         mark: { color: VegaThemeColors.borealis.light.default },
+        area: { fillOpacity: 0.2, line: true },
+        view: { stroke: null },
         style: {
           'group-title': {
             fill: VegaThemeColors.borealis.light.title,
@@ -181,7 +183,7 @@ describe(`VegaParser._setDefaultColors`, () => {
         background: 'transparent',
         range: { category: { scheme: 'elastic' } },
         arc: { fill: VegaThemeColors.borealis.light.default },
-        area: { fill: VegaThemeColors.borealis.light.default },
+        area: { fill: VegaThemeColors.borealis.light.default, fillOpacity: 0.2, line: true },
         line: { stroke: VegaThemeColors.borealis.light.default },
         path: { stroke: VegaThemeColors.borealis.light.default },
         rect: { fill: VegaThemeColors.borealis.light.default },
@@ -189,6 +191,7 @@ describe(`VegaParser._setDefaultColors`, () => {
         shape: { stroke: VegaThemeColors.borealis.light.default },
         symbol: { fill: VegaThemeColors.borealis.light.default },
         trail: { fill: VegaThemeColors.borealis.light.default },
+        view: { stroke: null },
         style: {
           'group-title': {
             fill: VegaThemeColors.borealis.light.title,

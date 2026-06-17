@@ -32,14 +32,14 @@ export const GettingStartedFooter = () => {
   const footerLinks: DocLinkItem[] = [
     {
       id: 'searchLabs',
-      title: i18n.translate('xpack.gettingStarted.searchLabs.title', {
+      title: i18n.translate('xpack.searchGettingStarted.searchLabs.title', {
         defaultMessage: 'Search Labs',
       }),
-      description: i18n.translate('xpack.gettingStarted.searchLabs.description', {
+      description: i18n.translate('xpack.searchGettingStarted.searchLabs.description', {
         defaultMessage:
           'Explore the latest articles and tutorials on using Elasticsearch for AI/ML-powered search experiences.',
       }),
-      buttonLabel: i18n.translate('xpack.gettingStarted.searchLabs.buttonText', {
+      buttonLabel: i18n.translate('xpack.searchGettingStarted.searchLabs.buttonText', {
         defaultMessage: 'Visit Elasticsearch Labs',
       }),
       buttonHref: docLinks.visitSearchLabs,
@@ -47,14 +47,14 @@ export const GettingStartedFooter = () => {
     },
     {
       id: 'elasticTraining',
-      title: i18n.translate('xpack.gettingStarted.elasticTraining.title', {
+      title: i18n.translate('xpack.searchGettingStarted.elasticTraining.title', {
         defaultMessage: 'Elastic training',
       }),
-      description: i18n.translate('xpack.gettingStarted.elasticTraining.description', {
+      description: i18n.translate('xpack.searchGettingStarted.elasticTraining.description', {
         defaultMessage:
           'Access expert-led trainings, interactive labs, comprehensive certification programs, and flexible self-paced learning courses.',
       }),
-      buttonLabel: i18n.translate('xpack.gettingStarted.elasticTraining.buttonText', {
+      buttonLabel: i18n.translate('xpack.searchGettingStarted.elasticTraining.buttonText', {
         defaultMessage: 'Learn Elasticsearch',
       }),
       buttonHref: docLinks.elasticTraining,
@@ -62,16 +62,22 @@ export const GettingStartedFooter = () => {
     },
     {
       id: 'elasticsearchDocs',
-      title: i18n.translate('xpack.gettingStarted.elasticsearchDocs.title', {
+      title: i18n.translate('xpack.searchGettingStarted.elasticsearchDocs.title', {
         defaultMessage: 'Elasticsearch documentation',
       }),
-      description: i18n.translate('xpack.gettingStarted.elasticsearchDocumentation.description', {
-        defaultMessage:
-          'Comprehensive reference material to help you learn, build, and deploy search solutions with Elasticsearch.',
-      }),
-      buttonLabel: i18n.translate('xpack.gettingStarted.elasticsearchDocumentation.buttonText', {
-        defaultMessage: 'View documentation',
-      }),
+      description: i18n.translate(
+        'xpack.searchGettingStarted.elasticsearchDocumentation.description',
+        {
+          defaultMessage:
+            'Comprehensive reference material to help you learn, build, and deploy search solutions with Elasticsearch.',
+        }
+      ),
+      buttonLabel: i18n.translate(
+        'xpack.searchGettingStarted.elasticsearchDocumentation.buttonText',
+        {
+          defaultMessage: 'View documentation',
+        }
+      ),
       buttonHref: docLinks.elasticsearchDocs,
       dataTestSubj: 'gettingStartedViewDocumentation',
     },

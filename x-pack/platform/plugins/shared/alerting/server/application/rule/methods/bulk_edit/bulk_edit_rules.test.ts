@@ -3678,5 +3678,93 @@ describe('bulkEdit()', () => {
       // Negative assertion is exercised at the helper level.
       expect(unsecuredSavedObjectsClient.bulkCreate).toHaveBeenCalled();
     });
+
+    test('logs action "rule_update_api_key" for a single apiKey operation', async () => {
+      const changeTrackingService = createChangeTrackingService();
+      const trackingClient = new RulesClient({ ...rulesClientParams, changeTrackingService });
+      setRuleType();
+      unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
+        saved_objects: [updatedRuleSO('1')],
+      });
+
+      await trackingClient.bulkEdit({
+        filter: '',
+        operations: [{ field: 'apiKey', operation: 'set' }],
+      });
+
+      expect(changeTrackingService.logBulk).toHaveBeenCalledWith(
+        expect.any(Array),
+        expect.objectContaining({ action: 'rule_update_api_key' })
+      );
+    });
+
+    test('logs action "rule_snooze" for a single snoozeSchedule set operation', async () => {
+      const changeTrackingService = createChangeTrackingService();
+      const trackingClient = new RulesClient({ ...rulesClientParams, changeTrackingService });
+      setRuleType();
+      unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
+        saved_objects: [updatedRuleSO('1')],
+      });
+
+      await trackingClient.bulkEdit({
+        filter: '',
+        operations: [
+          {
+            field: 'snoozeSchedule',
+            operation: 'set',
+            value: {
+              duration: 28800000,
+              rRule: { dtstart: '2010-09-19T11:49:59.329Z', count: 1, tzid: 'UTC' },
+            },
+          },
+        ],
+      });
+
+      expect(changeTrackingService.logBulk).toHaveBeenCalledWith(
+        expect.any(Array),
+        expect.objectContaining({ action: 'rule_snooze' })
+      );
+    });
+
+    test('logs action "rule_unsnooze" for a single snoozeSchedule delete operation', async () => {
+      const changeTrackingService = createChangeTrackingService();
+      const trackingClient = new RulesClient({ ...rulesClientParams, changeTrackingService });
+      setRuleType();
+      unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
+        saved_objects: [updatedRuleSO('1')],
+      });
+
+      await trackingClient.bulkEdit({
+        filter: '',
+        operations: [{ field: 'snoozeSchedule', operation: 'delete', value: [] }],
+      });
+
+      expect(changeTrackingService.logBulk).toHaveBeenCalledWith(
+        expect.any(Array),
+        expect.objectContaining({ action: 'rule_unsnooze' })
+      );
+    });
+
+    test('falls back to "rule_update" when multiple operations are provided', async () => {
+      const changeTrackingService = createChangeTrackingService();
+      const trackingClient = new RulesClient({ ...rulesClientParams, changeTrackingService });
+      setRuleType();
+      unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
+        saved_objects: [updatedRuleSO('1')],
+      });
+
+      await trackingClient.bulkEdit({
+        filter: '',
+        operations: [
+          { field: 'tags', operation: 'add', value: ['test-1'] },
+          { field: 'apiKey', operation: 'set' },
+        ],
+      });
+
+      expect(changeTrackingService.logBulk).toHaveBeenCalledWith(
+        expect.any(Array),
+        expect.objectContaining({ action: 'rule_update' })
+      );
+    });
   });
 });
