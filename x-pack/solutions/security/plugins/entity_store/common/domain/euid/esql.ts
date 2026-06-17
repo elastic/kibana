@@ -41,7 +41,7 @@ import {
 } from './field_evaluations';
 
 /** Collects unique identity fields across all ranking branches that need `_present` columns. */
-function collectRankingFields(branches: EuidRankingBranch[]): Set<string> {
+export function collectRankingFields(branches: EuidRankingBranch[]): Set<string> {
   const fields = new Set<string>();
   for (const { ranking } of branches) {
     if (ranking.length === 1 && ranking[0].length === 1 && isEuidField(ranking[0][0])) {
@@ -144,7 +144,7 @@ function sourceToEsqlExpression(source: FieldEvaluation['sources'][number]): str
  * Output shape: a bare column ref (single field), `CONCAT(...)` (composed field),
  * or `COALESCE(arm1, arm2, …)` (multiple ranked arms).
  */
-function buildRankingCaseEsql(
+export function buildRankingCaseEsql(
   ranking: EuidAttribute[][],
   presentOrNullAliases: ReadonlyMap<string, string>
 ): string {
@@ -192,7 +192,7 @@ function buildRankingCaseEsql(
 }
 
 /** Returns a COALESCE expression that picks the first non-null/non-empty source variable. */
-function buildSourcePickerEsql(sourceVariablesBaseName: string, count: number): string {
+export function buildSourcePickerEsql(sourceVariablesBaseName: string, count: number): string {
   const arms = Array.from({ length: count }, (_, i) => {
     const v = `${sourceVariablesBaseName}${i}`;
     return `CASE(${v} IS NOT NULL AND ${v} != "", ${v})`;
@@ -207,7 +207,7 @@ function buildSourcePickerEsql(sourceVariablesBaseName: string, count: number): 
  * With `whenClauses`: a COALESCE of mapped arms (sourceMatchesAny or condition-based),
  * a fallback arm, and a bare pass-through.
  */
-function buildDestinationFieldEsql(
+export function buildDestinationFieldEsql(
   effectiveSourceName: string,
   destBase: string,
   fallbackExpression: string,
@@ -248,7 +248,7 @@ function buildDestinationFieldEsql(
  * (e.g. `entity.namespace` derived from `event.module`).
  * May include intermediate source-picker and condition columns.
  */
-function buildOneFieldEvaluationEsql(evaluation: FieldEvaluation): string {
+export function buildOneFieldEvaluationEsql(evaluation: FieldEvaluation): string {
   const { destination, sources, fallbackValue, whenClauses } = evaluation;
   const sourceExpressions = sources.map((s) => sourceToEsqlExpression(s));
   const sourceVariablesBaseName = `_src_${destination.replace(/\./g, '_')}`;
