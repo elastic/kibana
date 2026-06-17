@@ -45,6 +45,7 @@ import {
   UpdatedAtField,
   FORBIDDEN_SEARCH_CHARS,
 } from './components';
+import { TABLE_LIST_VIEW_TITLE_COLUMN_TEST_SUBJ } from './components/restricted_table_layout.styles';
 import { useServices } from './services';
 import type { SavedObjectsFindOptionsReference } from './services';
 import { getReducer } from './reducer';
@@ -116,6 +117,12 @@ export interface TableListViewTableProps<
    * Name for the column containing the "title" value.
    */
   titleColumnName?: string;
+
+  /**
+   * Caps the title column width. When set, the column stops expanding beyond this
+   * value so trailing columns shift left on wide viewports.
+   */
+  titleColumnMaxWidth?: string;
 
   /**
    * This assumes the content is already wrapped in an outer PageTemplate component.
@@ -332,6 +339,7 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
   id: listingId = 'userContent',
   contentEditor = { enabled: false },
   titleColumnName,
+  titleColumnMaxWidth,
   withoutPageTemplateWrapper,
   onFetchSuccess,
   refreshListBouncer,
@@ -616,6 +624,10 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
           );
         },
         minWidth: '18em',
+        'data-test-subj': TABLE_LIST_VIEW_TITLE_COLUMN_TEST_SUBJ,
+        ...(titleColumnMaxWidth
+          ? { width: titleColumnMaxWidth, maxWidth: titleColumnMaxWidth }
+          : {}),
       },
     ];
 
@@ -735,6 +747,7 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
     return columns;
   }, [
     titleColumnName,
+    titleColumnMaxWidth,
     customTableColumn,
     hasUpdatedAtMetadata,
     hasCreatedByMetadata,
@@ -1198,6 +1211,7 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
           clearTagSelection={clearTagSelection}
           createdByEnabled={createdByEnabled}
           favoritesEnabled={favoritesEnabled}
+          titleColumnMaxWidth={titleColumnMaxWidth}
         />
 
         {/* Delete modal */}

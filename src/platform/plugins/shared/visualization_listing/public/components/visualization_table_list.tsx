@@ -268,6 +268,7 @@ export const VisualizationTableList = ({
           item.attributes.readOnly || item.error ? undefined : () => editItem(item)
         }
         tableCaption={visualizeLibraryTitle}
+        titleColumnMaxWidth={parentProps.titleColumnMaxWidth}
         rowItemActions={({ managed, attributes: { readOnly } }) =>
           !visualizeCapabilities.save || readOnly
             ? {

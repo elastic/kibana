@@ -25,6 +25,8 @@ export type DashboardListingTab = TableListTab & {
 
 export type DashboardListingTableLayout = 'fullWidth' | 'restricted';
 
+export const RESTRICTED_TABLE_TITLE_COLUMN_MAX_WIDTH = '1000px';
+
 export type DashboardListingProps = PropsWithChildren<{
   disableCreateDashboardButton?: boolean;
   initialFilter?: string;

@@ -19,7 +19,10 @@ export interface TableListBreadcrumb {
 }
 
 export type TableListTabParentProps<T extends UserContentCommonSchema = UserContentCommonSchema> =
-  Pick<TableListViewTableProps<T>, 'onFetchSuccess' | 'setPageDataTestSubject'> & {
+  Pick<
+    TableListViewTableProps<T>,
+    'onFetchSuccess' | 'setPageDataTestSubject' | 'titleColumnMaxWidth'
+  > & {
     getBreadcrumbs?: (appId: string) => TableListBreadcrumb[];
     showCreateButton?: boolean;
   };
@@ -43,6 +46,7 @@ type TabbedTableListViewProps = Pick<
   getBreadcrumbs?: TableListTabParentProps['getBreadcrumbs'];
   showCreateButton?: boolean;
   hideHeader?: boolean;
+  titleColumnMaxWidth?: TableListTabParentProps['titleColumnMaxWidth'];
 };
 
 export const TabbedTableListView = ({
@@ -56,6 +60,7 @@ export const TabbedTableListView = ({
   getBreadcrumbs,
   showCreateButton,
   hideHeader = false,
+  titleColumnMaxWidth,
 }: TabbedTableListViewProps) => {
   const [hasInitialFetchReturned, setHasInitialFetchReturned] = useState(false);
   const [pageDataTestSubject, setPageDataTestSubject] = useState<string>();
@@ -78,12 +83,21 @@ export const TabbedTableListView = ({
         setPageDataTestSubject,
         getBreadcrumbs,
         showCreateButton,
+        titleColumnMaxWidth,
       });
       setTableList(newTableList);
     }
 
     loadTableList();
-  }, [activeTabId, tabs, getActiveTab, onFetchSuccess, getBreadcrumbs, showCreateButton]);
+  }, [
+    activeTabId,
+    tabs,
+    getActiveTab,
+    onFetchSuccess,
+    getBreadcrumbs,
+    showCreateButton,
+    titleColumnMaxWidth,
+  ]);
 
   const showHeader = !hideHeader && (title || description || tabs.length > 0);
 

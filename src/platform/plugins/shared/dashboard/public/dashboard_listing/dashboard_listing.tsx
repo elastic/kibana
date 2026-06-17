@@ -25,6 +25,7 @@ import { DASHBOARD_APP_ID, LANDING_PAGE_PATH } from '../../common/page_bundle_co
 import { getDashboardListingTabs } from './get_dashboard_listing_tabs';
 import { DashboardListingTableLayoutSwitcher } from './dashboard_listing_table_layout_switcher';
 import type { DashboardListingProps, DashboardListingTab, DashboardListingTableLayout } from './types';
+import { RESTRICTED_TABLE_TITLE_COLUMN_MAX_WIDTH } from './types';
 
 export const DashboardListing = ({
   children,
@@ -46,6 +47,9 @@ export const DashboardListing = ({
   const onTableLayoutChange = useCallback((layout: DashboardListingTableLayout) => {
     setTableLayout(layout);
   }, []);
+
+  const titleColumnMaxWidth =
+    tableLayout === 'restricted' ? RESTRICTED_TABLE_TITLE_COLUMN_MAX_WIDTH : undefined;
 
   const tabs = useMemo(
     () =>
@@ -190,6 +194,7 @@ export const DashboardListing = ({
           changeActiveTab={changeActiveTab}
           showCreateButton={false}
           hideHeader
+          titleColumnMaxWidth={titleColumnMaxWidth}
         />
         <DashboardListingTableLayoutSwitcher
           layout={tableLayout}

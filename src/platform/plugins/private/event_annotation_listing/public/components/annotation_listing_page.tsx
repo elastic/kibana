@@ -73,7 +73,7 @@ export const EventAnnotationListingPage = ({
   const canSave = visualizeCapabilities.save === true;
   const canDelete = visualizeCapabilities.delete === true;
 
-  const { onFetchSuccess, setPageDataTestSubject } = parentProps;
+  const { onFetchSuccess, setPageDataTestSubject, titleColumnMaxWidth } = parentProps;
 
   // The legacy `TableListViewTable` set this to ``${entityName}LandingPage``
   // (rendered as `'annotation groupLandingPage'`, locale-dependent). Nothing in
@@ -142,7 +142,9 @@ export const EventAnnotationListingPage = ({
         savedObjectsTagging,
       }}
     >
-      <EventAnnotationListing {...{ onCreateAnnotation, dataViewNameMap }} />
+      <EventAnnotationListing
+        {...{ onCreateAnnotation, dataViewNameMap, titleColumnMaxWidth }}
+      />
       {groupToEditInfo ? (
         <GroupEditorFlyout
           group={groupToEditInfo.group}

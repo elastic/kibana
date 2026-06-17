@@ -92,6 +92,7 @@ const DashboardsTabContent = ({
       <TableListViewTable<DashboardSavedObjectUserContent>
         tableCaption={tableListViewTableProps.title}
         {...tableListViewTableProps}
+        titleColumnMaxWidth={parentProps.titleColumnMaxWidth}
         onFetchSuccess={parentProps.onFetchSuccess}
         setPageDataTestSubject={parentProps.setPageDataTestSubject}
       />

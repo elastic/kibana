@@ -34,6 +34,8 @@ export interface EventAnnotationListingProps {
   onCreateAnnotation: () => void;
   /** Lookup of `dataViewId` → display name, passed through to `DataViewCell`. */
   dataViewNameMap: Record<string, string>;
+  /** Caps the name column width when the listing uses restricted table layout. */
+  titleColumnMaxWidth?: string;
 }
 
 /**
@@ -48,6 +50,7 @@ export interface EventAnnotationListingProps {
 export const EventAnnotationListing = ({
   onCreateAnnotation,
   dataViewNameMap,
+  titleColumnMaxWidth,
 }: EventAnnotationListingProps) => {
   const { item: itemConfig } = useContentListConfig();
   const onEditItem = itemConfig?.actions?.edit?.onItemAction;
@@ -61,7 +64,14 @@ export const EventAnnotationListing = ({
     <ContentList emptyState={<EmptyPrompt onCreateClick={onCreateAnnotation} />}>
       <ContentListToolbar />
       <ContentListTable title={tableTitle}>
-        <Column.Name showDescription showTags onClick={onEditItem} />
+        <Column.Name
+          showDescription
+          showTags
+          onClick={onEditItem}
+          {...(titleColumnMaxWidth
+            ? { maxWidth: titleColumnMaxWidth, width: titleColumnMaxWidth }
+            : {})}
+        />
         <Column
           id="dataView"
           name={dataViewColumnName}
