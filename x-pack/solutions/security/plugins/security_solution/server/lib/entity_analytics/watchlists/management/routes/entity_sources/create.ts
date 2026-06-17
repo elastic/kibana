@@ -26,7 +26,6 @@ import {
   oktaLastFullSyncMarkersIndex,
 } from '../../../entity_sources/infra';
 import type { IntegrationType } from '../../../entity_sources/infra';
-import { validateIndexPermissions } from '../../../entity_sources/entity_source_api_key';
 
 export const createEntitySourceRoute = (
   router: EntityAnalyticsRoutesDeps['router'],
@@ -74,13 +73,6 @@ export const createEntitySourceRoute = (
               logger,
               hasEncryptionKey,
             });
-
-            if (monitoringSource.type === 'index' && monitoringSource.indexPattern) {
-              await validateIndexPermissions(
-                core.elasticsearch.client.asCurrentUser,
-                monitoringSource.indexPattern
-              );
-            }
 
             const body = await createSourceForType(client, monitoringSource, namespace, request);
 
