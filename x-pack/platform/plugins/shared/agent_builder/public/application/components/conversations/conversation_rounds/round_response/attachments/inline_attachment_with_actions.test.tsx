@@ -77,7 +77,11 @@ const mockAttachmentsService = {
 const createAttachment = (versionedValue: string, version: number): UnknownAttachment => ({
   id: 'attachment-1',
   type: 'test-attachment',
-  version,
+  versionData: {
+    version,
+    versionCount: 1,
+    createdAt: new Date().toISOString(),
+  },
   data: {
     value: versionedValue,
   },

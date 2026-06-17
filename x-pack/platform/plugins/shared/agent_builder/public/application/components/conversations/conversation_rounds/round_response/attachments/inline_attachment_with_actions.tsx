@@ -45,8 +45,8 @@ const areInlineAttachmentPropsEqual = (
   prevProps.isSidebar === nextProps.isSidebar &&
   prevProps.previewBadgeState === nextProps.previewBadgeState &&
   prevProps.screenContext === nextProps.screenContext &&
-  prevProps.attachment.version === nextProps.attachment.version &&
-  prevProps.attachment.versionCount === nextProps.attachment.versionCount;
+  prevProps.attachment.versionData?.version === nextProps.attachment.versionData?.version &&
+  prevProps.attachment.versionData?.versionCount === nextProps.attachment.versionData?.versionCount;
 
 /**
  * Component that renders an inline attachment with its action buttons.
