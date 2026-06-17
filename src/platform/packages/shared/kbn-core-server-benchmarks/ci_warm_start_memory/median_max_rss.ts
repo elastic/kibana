@@ -38,6 +38,15 @@ export const getMedianRssMetricBytes = (
   metricLabel: string,
   benchmarkName: string = WARM_START_BENCHMARK_NAME
 ): number => {
+  return median(getMemoryMetricValuesBytes(summary, metricKey, metricLabel, benchmarkName));
+};
+
+export const getMemoryMetricValuesBytes = (
+  summary: OnCompareContext['leftSummary'],
+  metricKey: string,
+  metricLabel: string,
+  benchmarkName: string = WARM_START_BENCHMARK_NAME
+): number[] => {
   const benchmark = summary.benchmarks.find(({ name }) => name === benchmarkName);
 
   if (!benchmark) {
@@ -51,7 +60,18 @@ export const getMedianRssMetricBytes = (
     throw new Error(`${metricLabel} metric is missing for benchmark "${benchmarkName}"`);
   }
 
-  return median(values);
+  return values;
+};
+
+export const getOptionalMemoryMetricValuesBytes = (
+  summary: OnCompareContext['leftSummary'],
+  metricKey: string,
+  benchmarkName: string = WARM_START_BENCHMARK_NAME
+): number[] | undefined => {
+  const benchmark = summary.benchmarks.find(({ name }) => name === benchmarkName);
+  const values = benchmark?.metrics[metricKey]?.summary?.values;
+
+  return values?.length ? values : undefined;
 };
 
 export const getOptionalMedianMemoryMetricBytes = (
@@ -59,8 +79,7 @@ export const getOptionalMedianMemoryMetricBytes = (
   metricKey: string,
   benchmarkName: string = WARM_START_BENCHMARK_NAME
 ): number | undefined => {
-  const benchmark = summary.benchmarks.find(({ name }) => name === benchmarkName);
-  const values = benchmark?.metrics[metricKey]?.summary?.values;
+  const values = getOptionalMemoryMetricValuesBytes(summary, metricKey, benchmarkName);
 
   return values?.length ? median(values) : undefined;
 };

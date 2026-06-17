@@ -9,13 +9,16 @@
 
 import type { OnCompareCallback } from '@kbn/bench';
 import {
-  getMedianMaxRssBytes,
-  getMedianTailRssBytes,
+  getMemoryMetricValuesBytes,
   getOptionalMedianMemoryMetricBytes,
+  getOptionalMemoryMetricValuesBytes,
+  median,
+  MAX_RSS_METRIC_KEY,
   TAIL_ARRAY_BUFFERS_METRIC_KEY,
   TAIL_EXTERNAL_MEMORY_METRIC_KEY,
   TAIL_HEAP_TOTAL_METRIC_KEY,
   TAIL_HEAP_USED_METRIC_KEY,
+  TAIL_RSS_METRIC_KEY,
 } from './median_max_rss';
 import {
   getAllowedRegressionDeltaBytes,
@@ -35,6 +38,10 @@ import {
 
 const formatBytes = (bytes: number): string => {
   return `${(bytes / (1024 * 1024)).toFixed(2)} MiB`;
+};
+
+const formatSampleValues = (values: readonly number[]): string => {
+  return `[${values.map(formatBytes).join(', ')}]`;
 };
 
 const DIAGNOSTIC_METRICS: Array<{
@@ -86,7 +93,9 @@ const formatRegressionMetricForError = (
     metric.deltaBytes
   )} (baseline: ${formatBytes(metric.baselineBytes)}, target: ${formatBytes(
     metric.targetBytes
-  )}, allowed: ${formatBytes(metric.allowedDeltaBytes)})`;
+  )}, allowed: ${formatBytes(metric.allowedDeltaBytes)}, baseline samples: ${formatSampleValues(
+    metric.baselineSampleBytes
+  )}, target samples: ${formatSampleValues(metric.targetSampleBytes)})`;
 };
 
 const buildRegressionErrorMessage = (
@@ -118,19 +127,55 @@ const buildRegressionErrorMessage = (
   ].join(' ');
 };
 
-export const compareWarmStartMemory: OnCompareCallback = async ({ leftSummary, rightSummary }) => {
-  const baselineMedianTailRssBytes = getMedianTailRssBytes(leftSummary);
-  const targetMedianTailRssBytes = getMedianTailRssBytes(rightSummary);
-  const baselineMedianMaxRssBytes = getMedianMaxRssBytes(leftSummary);
-  const targetMedianMaxRssBytes = getMedianMaxRssBytes(rightSummary);
-  const baselineMedianTailHeapUsedBytes = getOptionalMedianMemoryMetricBytes(
+const buildGateSampleLogMessage = (report: WarmStartMemoryRegressionReport): string => {
+  return `Warm-start memory gate samples: ${getRegressionMetricEntries(report)
+    .map(([metricName, metric]) => formatRegressionMetricForError(metricName, metric))
+    .join('; ')}`;
+};
+
+export const compareWarmStartMemory: OnCompareCallback = async ({
+  leftSummary,
+  rightSummary,
+  log,
+}) => {
+  const baselineTailRssSampleBytes = getMemoryMetricValuesBytes(
+    leftSummary,
+    TAIL_RSS_METRIC_KEY,
+    'Tail RSS'
+  );
+  const targetTailRssSampleBytes = getMemoryMetricValuesBytes(
+    rightSummary,
+    TAIL_RSS_METRIC_KEY,
+    'Tail RSS'
+  );
+  const baselineMaxRssSampleBytes = getMemoryMetricValuesBytes(
+    leftSummary,
+    MAX_RSS_METRIC_KEY,
+    'Max RSS'
+  );
+  const targetMaxRssSampleBytes = getMemoryMetricValuesBytes(
+    rightSummary,
+    MAX_RSS_METRIC_KEY,
+    'Max RSS'
+  );
+  const baselineTailHeapUsedSampleBytes = getOptionalMemoryMetricValuesBytes(
     leftSummary,
     TAIL_HEAP_USED_METRIC_KEY
   );
-  const targetMedianTailHeapUsedBytes = getOptionalMedianMemoryMetricBytes(
+  const targetTailHeapUsedSampleBytes = getOptionalMemoryMetricValuesBytes(
     rightSummary,
     TAIL_HEAP_USED_METRIC_KEY
   );
+  const baselineMedianTailRssBytes = median(baselineTailRssSampleBytes);
+  const targetMedianTailRssBytes = median(targetTailRssSampleBytes);
+  const baselineMedianMaxRssBytes = median(baselineMaxRssSampleBytes);
+  const targetMedianMaxRssBytes = median(targetMaxRssSampleBytes);
+  const baselineMedianTailHeapUsedBytes = baselineTailHeapUsedSampleBytes
+    ? median(baselineTailHeapUsedSampleBytes)
+    : undefined;
+  const targetMedianTailHeapUsedBytes = targetTailHeapUsedSampleBytes
+    ? median(targetTailHeapUsedSampleBytes)
+    : undefined;
 
   const allowedTailRssDeltaBytes = getAllowedRegressionDeltaBytes(
     baselineMedianTailRssBytes,
@@ -166,16 +211,6 @@ export const compareWarmStartMemory: OnCompareCallback = async ({ leftSummary, r
         )
       : false;
 
-  const triggeredMetrics: WarmStartMemoryRegressionMetricName[] = [
-    ...(tailRssRegressed ? (['tailRss'] as const) : []),
-    ...(maxRssRegressed ? (['maxRss'] as const) : []),
-    ...(tailHeapUsedRegressed ? (['tailHeapUsed'] as const) : []),
-  ];
-
-  if (!triggeredMetrics.length) {
-    return;
-  }
-
   const diagnosticMetrics = Object.fromEntries(
     DIAGNOSTIC_METRICS.flatMap(({ name, metricKey }) => {
       const baselineBytes = getOptionalMedianMemoryMetricBytes(leftSummary, metricKey);
@@ -194,22 +229,30 @@ export const compareWarmStartMemory: OnCompareCallback = async ({ leftSummary, r
       tailRss: {
         baselineBytes: baselineMedianTailRssBytes,
         targetBytes: targetMedianTailRssBytes,
+        baselineSampleBytes: baselineTailRssSampleBytes,
+        targetSampleBytes: targetTailRssSampleBytes,
         allowedDeltaBytes: allowedTailRssDeltaBytes,
         regressed: tailRssRegressed,
       },
       maxRss: {
         baselineBytes: baselineMedianMaxRssBytes,
         targetBytes: targetMedianMaxRssBytes,
+        baselineSampleBytes: baselineMaxRssSampleBytes,
+        targetSampleBytes: targetMaxRssSampleBytes,
         allowedDeltaBytes: allowedMaxRssDeltaBytes,
         regressed: maxRssRegressed,
       },
       ...(baselineMedianTailHeapUsedBytes !== undefined &&
       targetMedianTailHeapUsedBytes !== undefined &&
-      allowedTailHeapUsedDeltaBytes !== undefined
+      allowedTailHeapUsedDeltaBytes !== undefined &&
+      baselineTailHeapUsedSampleBytes &&
+      targetTailHeapUsedSampleBytes
         ? {
             tailHeapUsed: {
               baselineBytes: baselineMedianTailHeapUsedBytes,
               targetBytes: targetMedianTailHeapUsedBytes,
+              baselineSampleBytes: baselineTailHeapUsedSampleBytes,
+              targetSampleBytes: targetTailHeapUsedSampleBytes,
               allowedDeltaBytes: allowedTailHeapUsedDeltaBytes,
               regressed: tailHeapUsedRegressed,
             },
@@ -217,9 +260,19 @@ export const compareWarmStartMemory: OnCompareCallback = async ({ leftSummary, r
         : {}),
     },
     diagnosticMetrics,
-    triggeredMetrics,
+    triggeredMetrics: [
+      ...(tailRssRegressed ? (['tailRss'] as const) : []),
+      ...(maxRssRegressed ? (['maxRss'] as const) : []),
+      ...(tailHeapUsedRegressed ? (['tailHeapUsed'] as const) : []),
+    ],
     context: getWarmStartMemoryRegressionReportContextFromEnv(),
   });
+
+  log.info(buildGateSampleLogMessage(report));
+
+  if (!report.triggeredMetrics.length) {
+    return;
+  }
 
   const reportPath = await writeWarmStartMemoryRegressionReport(report);
 

@@ -30,6 +30,8 @@ export type WarmStartMemoryDiagnosticMetricName =
 export interface WarmStartMemoryRegressionMetricReport {
   readonly baselineBytes: number;
   readonly targetBytes: number;
+  readonly baselineSampleBytes: readonly number[];
+  readonly targetSampleBytes: readonly number[];
   readonly deltaBytes: number;
   readonly allowedDeltaBytes: number;
   readonly regressed: boolean;

@@ -55,8 +55,12 @@ describe('compareWarmStartMemory', () => {
       targetMaxRssValues: [targetMedianRssBytes, targetMedianRssBytes, targetMedianRssBytes],
       targetTailRssValues: [targetMedianRssBytes, targetMedianRssBytes, targetMedianRssBytes],
     });
+    const logInfoSpy = jest.spyOn(context.log, 'info');
 
     await expect(compareWarmStartMemory(context)).resolves.toBeUndefined();
+    expect(logInfoSpy).toHaveBeenCalledWith(
+      expect.stringContaining('Warm-start memory gate samples')
+    );
   });
 
   it('throws and writes a structured report when Tail RSS exceeds its threshold', async () => {
@@ -114,6 +118,12 @@ describe('compareWarmStartMemory', () => {
           tailRss: {
             baselineBytes: baselineMedianRssBytes,
             targetBytes: targetMedianRssBytes,
+            baselineSampleBytes: [
+              baselineMedianRssBytes,
+              baselineMedianRssBytes,
+              baselineMedianRssBytes,
+            ],
+            targetSampleBytes: [targetMedianRssBytes, targetMedianRssBytes, targetMedianRssBytes],
             deltaBytes: MIN_TAIL_RSS_REGRESSION_DELTA_BYTES + 1,
             allowedDeltaBytes: MIN_TAIL_RSS_REGRESSION_DELTA_BYTES,
             regressed: true,
@@ -121,6 +131,16 @@ describe('compareWarmStartMemory', () => {
           maxRss: {
             baselineBytes: baselineMedianRssBytes,
             targetBytes: baselineMedianRssBytes,
+            baselineSampleBytes: [
+              baselineMedianRssBytes,
+              baselineMedianRssBytes,
+              baselineMedianRssBytes,
+            ],
+            targetSampleBytes: [
+              baselineMedianRssBytes,
+              baselineMedianRssBytes,
+              baselineMedianRssBytes,
+            ],
             deltaBytes: 0,
             allowedDeltaBytes: MIN_MAX_RSS_REGRESSION_DELTA_BYTES,
             regressed: false,
@@ -128,6 +148,8 @@ describe('compareWarmStartMemory', () => {
           tailHeapUsed: {
             baselineBytes: 200,
             targetBytes: 250,
+            baselineSampleBytes: [100, 200, 300],
+            targetSampleBytes: [150, 250, 350],
             deltaBytes: 50,
             allowedDeltaBytes: MIN_TAIL_HEAP_USED_REGRESSION_DELTA_BYTES,
             regressed: false,
@@ -226,6 +248,8 @@ describe('compareWarmStartMemory', () => {
     }
 
     expect(rejection?.message).toContain('Threshold failure(s): Tail heap used delta');
+    expect(rejection?.message).toContain('baseline samples:');
+    expect(rejection?.message).toContain('target samples:');
     expect(rejection?.message).toContain('Metric context: Tail RSS delta');
     expect(rejection?.message).toContain('Triggered metric(s): tailHeapUsed');
     expect(rejection!.message.indexOf('Threshold failure(s): Tail heap used delta')).toBeLessThan(

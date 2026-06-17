@@ -23,18 +23,24 @@ describe('buildWarmStartMemoryRegressionReport', () => {
         tailRss: {
           baselineBytes: 1_000,
           targetBytes: 1_500,
+          baselineSampleBytes: [900, 1_000, 1_100],
+          targetSampleBytes: [1_400, 1_500, 1_600],
           allowedDeltaBytes: 200,
           regressed: true,
         },
         maxRss: {
           baselineBytes: 2_000,
           targetBytes: 2_100,
+          baselineSampleBytes: [1_900, 2_000, 2_100],
+          targetSampleBytes: [2_000, 2_100, 2_200],
           allowedDeltaBytes: 300,
           regressed: false,
         },
         tailHeapUsed: {
           baselineBytes: 400,
           targetBytes: 450,
+          baselineSampleBytes: [300, 400, 500],
+          targetSampleBytes: [350, 450, 550],
           allowedDeltaBytes: 100,
           regressed: true,
         },
@@ -57,6 +63,8 @@ describe('buildWarmStartMemoryRegressionReport', () => {
         tailRss: {
           baselineBytes: 1_000,
           targetBytes: 1_500,
+          baselineSampleBytes: [900, 1_000, 1_100],
+          targetSampleBytes: [1_400, 1_500, 1_600],
           deltaBytes: 500,
           allowedDeltaBytes: 200,
           regressed: true,
@@ -64,6 +72,8 @@ describe('buildWarmStartMemoryRegressionReport', () => {
         maxRss: {
           baselineBytes: 2_000,
           targetBytes: 2_100,
+          baselineSampleBytes: [1_900, 2_000, 2_100],
+          targetSampleBytes: [2_000, 2_100, 2_200],
           deltaBytes: 100,
           allowedDeltaBytes: 300,
           regressed: false,
@@ -71,6 +81,8 @@ describe('buildWarmStartMemoryRegressionReport', () => {
         tailHeapUsed: {
           baselineBytes: 400,
           targetBytes: 450,
+          baselineSampleBytes: [300, 400, 500],
+          targetSampleBytes: [350, 450, 550],
           deltaBytes: 50,
           allowedDeltaBytes: 100,
           regressed: true,
@@ -127,12 +139,16 @@ describe('writeWarmStartMemoryRegressionReport', () => {
           tailRss: {
             baselineBytes: 1_000,
             targetBytes: 2_000,
+            baselineSampleBytes: [900, 1_000, 1_100],
+            targetSampleBytes: [1_900, 2_000, 2_100],
             allowedDeltaBytes: 150,
             regressed: true,
           },
           maxRss: {
             baselineBytes: 1_500,
             targetBytes: 1_600,
+            baselineSampleBytes: [1_400, 1_500, 1_600],
+            targetSampleBytes: [1_500, 1_600, 1_700],
             allowedDeltaBytes: 300,
             regressed: false,
           },
