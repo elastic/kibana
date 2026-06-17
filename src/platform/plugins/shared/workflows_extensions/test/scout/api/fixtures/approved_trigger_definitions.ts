@@ -65,23 +65,23 @@ export const APPROVED_TRIGGER_DEFINITIONS: Array<{ id: string; schemaHash: strin
   },
   {
     id: 'cases.caseCreated',
-    schemaHash: '5b562db9463664a1e28ff2f3ee7edec229e83912569190cd8a83f53d38da9ed8',
+    schemaHash: 'b325010646fcad7129bd1258b469fd58ec4f59b5263bb9c92cec26ecf9e821b6',
   },
   {
     id: 'cases.caseUpdated',
-    schemaHash: 'bf936f051ec83ba5d4b6b7612879f3aeb7405c911504e157c6607d485ed650c1',
+    schemaHash: '2ca51f8c16151b4fc429ec57336576917eafb0b19bb24c04ea7bfb808be70b0e',
   },
   {
     id: 'cases.caseStatusUpdated',
-    schemaHash: '168673364f93e74cb472da685175d4acccc4b9a5bd851c2f9c62bbb8da15c7df',
+    schemaHash: 'b3d75b1aa9b2f68bfe7bded8b74c9629b30d4f83a01f8401f9a0b910dbaf0f5a',
   },
   {
     id: 'cases.attachmentsAdded',
-    schemaHash: 'e1d2dc5b465290cb4244976882e258c600c416ae496e1096312515dd174e6336',
+    schemaHash: 'f971dc82cbea674bf69d2d7bcbbe37de29041f4b3a539135667225b4db7f7228',
   },
   {
     id: 'cases.commentsAdded',
-    schemaHash: '673830c048cad59a5813d0c1a73f90c8ce0cd42eae9fa50a5df70db2fe6bc6de',
+    schemaHash: '69571f91dec792a9ca651fa5ef0210bb817704df163de0f200f88540e5729e6d',
   },
   {
     id: 'workflows.failed',
