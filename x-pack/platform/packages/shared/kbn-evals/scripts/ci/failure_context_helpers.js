@@ -21,20 +21,12 @@ const MAX_CONTEXT_JSON_BYTES = 30 * 1024;
 const DEFAULT_TRIAGE_JUDGE_ID = 'litellm-llm-gateway-gpt-4o';
 
 /**
- * @param {string} value
- * @returns {string}
- */
-function projectKeySafe(value) {
-  return suiteKeySafe(value);
-}
-
-/**
  * @param {string} suiteId
  * @param {string} project
  * @returns {string}
  */
 function failureLogMetadataKey(suiteId, project) {
-  return `kbn-evals:suite-failure-log:${suiteKeySafe(suiteId)}:${projectKeySafe(project)}`;
+  return `kbn-evals:suite-failure-log:${suiteKeySafe(suiteId)}:${suiteKeySafe(project)}`;
 }
 
 /**
@@ -491,120 +483,6 @@ function resolveTriageJudgeId(options = {}) {
   return DEFAULT_TRIAGE_JUDGE_ID;
 }
 
-/**
- * Credentials for direct EIS `/_inference/chat_completion` calls during CI triage.
- *
- * The API key must authenticate against the ES cluster being called, so pair it
- * to the URL source:
- * - A dedicated `EIS_INFERENCE_ES_URL` cluster uses `KIBANA_EIS_CCM_API_KEY`
- *   (falling back to `EVALUATIONS_ES_API_KEY`).
- * - The evaluations cluster (`EVALUATIONS_ES_URL`) uses its own client key
- *   `EVALUATIONS_ES_API_KEY`. The CCM key is the ES->EIS connected-mode key, not
- *   a client credential for the evaluations cluster, so it must not be used here.
- *
- * @returns {{ esUrl: string; apiKey: string }}
- */
-function resolveEisInferenceCredentials() {
-  const eisInferenceEsUrl = process.env.EIS_INFERENCE_ES_URL || '';
-  const evaluationsEsUrl = process.env.EVALUATIONS_ES_URL || '';
-  const ccmApiKey = process.env.KIBANA_EIS_CCM_API_KEY || '';
-  const evaluationsApiKey = process.env.EVALUATIONS_ES_API_KEY || '';
-
-  if (eisInferenceEsUrl) {
-    const apiKey = ccmApiKey || evaluationsApiKey;
-    if (!apiKey) {
-      throw new Error(
-        'KIBANA_EIS_CCM_API_KEY or EVALUATIONS_ES_API_KEY is required for EIS judge triage summaries'
-      );
-    }
-    return { esUrl: eisInferenceEsUrl, apiKey };
-  }
-
-  if (evaluationsEsUrl) {
-    if (!evaluationsApiKey) {
-      throw new Error(
-        'EVALUATIONS_ES_API_KEY is required for EIS judge triage against the evaluations cluster'
-      );
-    }
-    return { esUrl: evaluationsEsUrl, apiKey: evaluationsApiKey };
-  }
-
-  throw new Error(
-    'ES URL is required for EIS judge triage (set EIS_INFERENCE_ES_URL or EVALUATIONS_ES_URL)'
-  );
-}
-
-/**
- * @param {Record<string, unknown>} connector
- * @param {Array<{ role: string; content: string }>} messages
- * @param {string} esUrl
- * @param {string} apiKey
- * @returns {{ url: string; headers: Record<string, string>; body: Record<string, unknown> }}
- */
-function buildEisChatRequest(connector, messages, esUrl, apiKey) {
-  const config = connector.config && typeof connector.config === 'object' ? connector.config : {};
-  const inferenceId = typeof config.inferenceId === 'string' ? config.inferenceId : '';
-  if (!inferenceId) {
-    throw new Error('EIS connector is missing config.inferenceId');
-  }
-
-  const baseUrl = esUrl.replace(/\/$/, '');
-  return {
-    url: `${baseUrl}/_inference/chat_completion/${encodeURIComponent(inferenceId)}/_stream`,
-    headers: {
-      'content-type': 'application/json',
-      authorization: `ApiKey ${apiKey}`,
-    },
-    body: {
-      messages,
-    },
-  };
-}
-
-/**
- * @param {string} responseText
- * @returns {string}
- */
-function parseEisStreamResponse(responseText) {
-  const parts = [];
-  for (const line of responseText.split('\n')) {
-    const trimmed = line.trim();
-    if (!trimmed) {
-      continue;
-    }
-
-    let parsed;
-    try {
-      parsed = JSON.parse(trimmed);
-    } catch {
-      continue;
-    }
-
-    const choices = parsed?.choices;
-    if (!Array.isArray(choices)) {
-      continue;
-    }
-
-    for (const choice of choices) {
-      const deltaContent = choice?.delta?.content;
-      if (typeof deltaContent === 'string') {
-        parts.push(deltaContent);
-      }
-      const messageContent = choice?.message?.content;
-      if (typeof messageContent === 'string') {
-        parts.push(messageContent);
-      }
-    }
-  }
-
-  const content = parts.join('').trim();
-  if (!content) {
-    throw new Error('EIS stream response did not include message content');
-  }
-
-  return content;
-}
-
 function parseLitellmChatContent(responseJson) {
   if (!responseJson || typeof responseJson !== 'object') {
     throw new Error('LiteLLM response was not JSON');
@@ -631,7 +509,6 @@ module.exports = {
   decodeAiConnectors,
   listLitellmConnectorIds,
   resolveTriageJudgeId,
-  projectKeySafe,
   failureLogMetadataKey,
   buildFailureScoresQuery,
   truncateText,
@@ -647,8 +524,5 @@ module.exports = {
   evaluationConnectorMetadataKey,
   readBuildkiteMetadata,
   resolveEvaluationConnectorId,
-  resolveEisInferenceCredentials,
-  buildEisChatRequest,
-  parseEisStreamResponse,
   parseLitellmChatContent,
 };

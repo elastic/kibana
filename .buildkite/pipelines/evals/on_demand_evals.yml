@@ -1,8 +1,6 @@
 env:
   KBN_EVALS: '1'
   KBN_EVALS_ON_DEMAND: '1'
-  # TODO: revert before merge — notify testing only; no golden ES/trace writes (reads + GCS snapshots OK)
-  KBN_EVALS_SKIP_GOLDEN_EXPORT: '1'
 steps:
   - label: '👨‍🔧 Pre-Build'
     command: .buildkite/scripts/lifecycle/pre_build.sh

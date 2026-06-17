@@ -17,10 +17,7 @@ const {
   buildLitellmConnectorFromVault,
   evaluationConnectorMetadataKey,
   resolveEvaluationConnectorId,
-  buildEisChatRequest,
-  parseEisStreamResponse,
   parseLitellmChatContent,
-  resolveEisInferenceCredentials,
   resolveTriageJudgeId,
   listLitellmConnectorIds,
   DEFAULT_TRIAGE_JUDGE_ID,
@@ -288,104 +285,6 @@ describe('failure_context_helpers', () => {
     if (previousSuiteId) {
       process.env.EVAL_SUITE_ID = previousSuiteId;
     }
-  });
-
-  it('builds EIS chat request and parses stream chunks', () => {
-    const request = buildEisChatRequest(
-      {
-        config: { inferenceId: '.rainbow-elastic' },
-      },
-      [{ role: 'user', content: 'summarize failures' }],
-      'https://es.example:443',
-      'api-key'
-    );
-
-    expect(request.url).toContain('/_inference/chat_completion/.rainbow-elastic/_stream');
-    expect(request.headers.authorization).toBe('ApiKey api-key');
-
-    const summary = parseEisStreamResponse(
-      '{"choices":[{"delta":{"content":"Provider "}}]}\n{"choices":[{"delta":{"content":"timeout"}}]}\n'
-    );
-    expect(summary).toBe('Provider timeout');
-  });
-
-  describe('resolveEisInferenceCredentials', () => {
-    const ENV_KEYS = [
-      'EIS_INFERENCE_ES_URL',
-      'EVALUATIONS_ES_URL',
-      'KIBANA_EIS_CCM_API_KEY',
-      'EVALUATIONS_ES_API_KEY',
-    ];
-
-    let previousEnv;
-
-    beforeEach(() => {
-      previousEnv = {};
-      for (const key of ENV_KEYS) {
-        previousEnv[key] = process.env[key];
-        delete process.env[key];
-      }
-    });
-
-    afterEach(() => {
-      for (const key of ENV_KEYS) {
-        if (previousEnv[key] === undefined) {
-          delete process.env[key];
-        } else {
-          process.env[key] = previousEnv[key];
-        }
-      }
-    });
-
-    it('uses the evaluations client key for the evaluations cluster (not the CCM key)', () => {
-      process.env.EVALUATIONS_ES_URL = 'https://evals.es.example';
-      process.env.EVALUATIONS_ES_API_KEY = 'eval-key';
-      process.env.KIBANA_EIS_CCM_API_KEY = 'ccm-key';
-
-      expect(resolveEisInferenceCredentials()).toEqual({
-        esUrl: 'https://evals.es.example',
-        apiKey: 'eval-key',
-      });
-    });
-
-    it('uses the CCM key for a dedicated EIS inference cluster', () => {
-      process.env.EIS_INFERENCE_ES_URL = 'https://eis.es.example';
-      process.env.KIBANA_EIS_CCM_API_KEY = 'ccm-key';
-      process.env.EVALUATIONS_ES_API_KEY = 'eval-key';
-
-      expect(resolveEisInferenceCredentials()).toEqual({
-        esUrl: 'https://eis.es.example',
-        apiKey: 'ccm-key',
-      });
-    });
-
-    it('falls back to the evaluations key for a dedicated EIS cluster when CCM key is missing', () => {
-      process.env.EIS_INFERENCE_ES_URL = 'https://eis.es.example';
-      process.env.EVALUATIONS_ES_API_KEY = 'eval-key';
-
-      expect(resolveEisInferenceCredentials()).toEqual({
-        esUrl: 'https://eis.es.example',
-        apiKey: 'eval-key',
-      });
-    });
-
-    it('throws when no ES URL is configured', () => {
-      expect(() => resolveEisInferenceCredentials()).toThrow(/ES URL is required/);
-    });
-
-    it('throws when the evaluations cluster URL is set but its client key is missing', () => {
-      process.env.EVALUATIONS_ES_URL = 'https://evals.es.example';
-
-      expect(() => resolveEisInferenceCredentials()).toThrow(/EVALUATIONS_ES_API_KEY is required/);
-    });
-
-    it('throws when a dedicated EIS cluster URL is set but no key is available', () => {
-      process.env.EIS_INFERENCE_ES_URL = 'https://eis.es.example';
-
-      expect(() => resolveEisInferenceCredentials()).toThrow(
-        /KIBANA_EIS_CCM_API_KEY or EVALUATIONS_ES_API_KEY is required/
-      );
-    });
   });
 
   describe('resolveTriageJudgeId', () => {

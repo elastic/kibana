@@ -12,39 +12,19 @@ const {
   buildLitellmChatRequest,
   buildLitellmConnectorFromVault,
   resolveTriageJudgeId,
-  resolveEisInferenceCredentials,
-  buildEisChatRequest,
-  parseEisStreamResponse,
   parseLitellmChatContent,
+  decodeAiConnectors,
 } = require('./failure_context_helpers');
 
 const maxOutputChars = Number(process.env.EVAL_TRIAGE_MAX_CHARS || '1500');
 
 /**
- * @returns {Record<string, { config?: Record<string, unknown>; secrets?: Record<string, unknown> }>}
- */
-function decodeConnectors() {
-  const b64 = process.env.KIBANA_TESTING_AI_CONNECTORS || '';
-  if (!b64) {
-    return {};
-  }
-
-  try {
-    const parsed = JSON.parse(Buffer.from(b64, 'base64').toString('utf8'));
-    return parsed && typeof parsed === 'object' ? parsed : {};
-  } catch {
-    return {};
-  }
-}
-
-/**
  * @param {string} url
  * @param {Record<string, string>} headers
  * @param {Record<string, unknown>} body
- * @param {{ parseStream?: boolean }} [options]
  * @returns {Promise<string>}
  */
-async function postForContent(url, headers, body, options = {}) {
+async function postForContent(url, headers, body) {
   const response = await fetch(url, {
     method: 'POST',
     headers,
@@ -63,10 +43,6 @@ async function postForContent(url, headers, body, options = {}) {
       // keep text slice
     }
     throw new Error(`Inference request failed (${response.status}): ${detail}`);
-  }
-
-  if (options.parseStream) {
-    return parseEisStreamResponse(text);
   }
 
   let json = null;
@@ -94,7 +70,7 @@ async function summarizeFailuresWithJudge(contextPath) {
   const context = JSON.parse(readFileSync(contextPath, 'utf8'));
   const failingProjects = Array.isArray(context.failingProjects) ? context.failingProjects : [];
 
-  const connectors = decodeConnectors();
+  const connectors = decodeAiConnectors();
   let connector = connectors[evaluationConnectorId];
 
   if (!connector && evaluationConnectorId.startsWith('litellm-')) {
@@ -124,19 +100,12 @@ async function summarizeFailuresWithJudge(contextPath) {
     { role: 'user', content: userPrompt },
   ];
 
-  let summary;
-  if (evaluationConnectorId.startsWith('litellm-')) {
-    const request = buildLitellmChatRequest(connector, messages);
-    summary = await postForContent(request.url, request.headers, request.body);
-  } else if (evaluationConnectorId.startsWith('eis-')) {
-    const { esUrl, apiKey } = resolveEisInferenceCredentials();
-    const request = buildEisChatRequest(connector, messages, esUrl, apiKey);
-    summary = await postForContent(request.url, request.headers, request.body, {
-      parseStream: true,
-    });
-  } else {
+  if (!evaluationConnectorId.startsWith('litellm-')) {
     throw new Error(`Unsupported judge connector id for triage: ${evaluationConnectorId}`);
   }
+
+  const request = buildLitellmChatRequest(connector, messages);
+  let summary = await postForContent(request.url, request.headers, request.body);
 
   if (summary.length > maxOutputChars) {
     summary = `${summary.slice(0, maxOutputChars - 1)}…`;
