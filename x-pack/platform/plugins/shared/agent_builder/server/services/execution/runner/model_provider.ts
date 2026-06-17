@@ -20,6 +20,7 @@ import type {
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { SearchInferenceEndpointsPluginStart } from '@kbn/search-inference-endpoints/server';
 import { getConnectorProvider, getConnectorModel } from '@kbn/inference-common';
+import type { ConnectorTelemetryMetadata } from '@kbn/inference-common';
 import type { InferenceCompleteCallbackHandler } from '@kbn/inference-common/src/chat_complete';
 import { AGENT_BUILDER_FAST_INFERENCE_FEATURE_ID } from '@kbn/agent-builder-common/constants';
 import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
@@ -36,14 +37,15 @@ export interface CreateModelProviderOpts {
   savedObjects: SavedObjectsServiceStart;
   logger: Logger;
   searchInferenceEndpoints: SearchInferenceEndpointsPluginStart;
+  telemetryMetadata?: ConnectorTelemetryMetadata;
 }
 
 export type CreateModelProviderFactoryFn = (
-  opts: Omit<CreateModelProviderOpts, 'request' | 'defaultConnectorId'>
+  opts: Omit<CreateModelProviderOpts, 'request' | 'defaultConnectorId' | 'telemetryMetadata'>
 ) => ModelProviderFactoryFn;
 
 export type ModelProviderFactoryFn = (
-  opts: Pick<CreateModelProviderOpts, 'request' | 'defaultConnectorId'>
+  opts: Pick<CreateModelProviderOpts, 'request' | 'defaultConnectorId' | 'telemetryMetadata'>
 ) => ModelProvider;
 
 const memoizeAsync = <T>(fn: () => Promise<T>): (() => Promise<T>) => {
@@ -73,7 +75,9 @@ export const createModelProvider = ({
   savedObjects,
   searchInferenceEndpoints,
   logger,
+  telemetryMetadata,
 }: CreateModelProviderOpts): ModelProvider => {
+  const resolvedTelemetryMetadata = telemetryMetadata ?? MODEL_TELEMETRY_METADATA;
   const getDefaultConnectorId = memoizeAsync(async () => {
     const resolvedConnectorId = await resolveSelectedConnectorId({
       uiSettings,
@@ -175,13 +179,16 @@ export const createModelProvider = ({
         complete: [completionCallback],
       },
       chatModelOptions: {
-        telemetryMetadata: MODEL_TELEMETRY_METADATA,
+        telemetryMetadata: resolvedTelemetryMetadata,
       },
     });
 
     const inferenceClient = inference.getClient({
       request,
-      bindTo: { connectorId },
+      bindTo: {
+        connectorId,
+        ...(telemetryMetadata ? { metadata: { connectorTelemetry: telemetryMetadata } } : {}),
+      },
       callbacks: {
         complete: [completionCallback],
       },

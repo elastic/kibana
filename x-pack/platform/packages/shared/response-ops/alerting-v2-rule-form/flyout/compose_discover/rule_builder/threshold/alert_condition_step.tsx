@@ -135,13 +135,13 @@ export const RuleBuilderAlertConditionStep: React.FC<RuleBuilderStepProps> = ({
       setValue('query', {
         format: 'composed',
         base,
-        blocks: {
-          breach: alertBlock,
-          ...(recoveryBlock ? { recover: recoveryBlock } : {}),
+        breach: {
+          segment: alertBlock,
         },
+        ...(recoveryBlock ? { recovery: { segment: recoveryBlock } } : {}),
       });
     } else {
-      setValue('query', { format: 'standalone', breach: esqlQuery });
+      setValue('query', { format: 'standalone', breach: { query: esqlQuery } });
     }
     setValue('timeField', thresholdValues.timeField);
     if (thresholdValues.groupByFields.length > 0) {
@@ -318,6 +318,14 @@ export const RuleBuilderAlertConditionStep: React.FC<RuleBuilderStepProps> = ({
 
   return (
     <>
+      {/* ── Mode select ── */}
+      <ModeSelect
+        value={isAlert ? 'alert' : 'signal'}
+        onChange={handleModeChange}
+        compressed
+        data-test-subj="ruleBuilderModeSelect"
+      />
+      <EuiSpacer size="m" />
       {/* ── Header with preview icon ── */}
       <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" responsive={false}>
         <EuiFlexItem grow={false}>
@@ -834,15 +842,6 @@ export const RuleBuilderAlertConditionStep: React.FC<RuleBuilderStepProps> = ({
           defaultMessage="Add condition"
         />
       </EuiButtonEmpty>
-
-      {/* ── Mode select ── */}
-      <EuiSpacer size="m" />
-      <ModeSelect
-        value={isAlert ? 'alert' : 'signal'}
-        onChange={handleModeChange}
-        compressed
-        data-test-subj="ruleBuilderModeSelect"
-      />
 
       {/* ── Schedule and lookback ── */}
       <EuiSpacer size="m" />
