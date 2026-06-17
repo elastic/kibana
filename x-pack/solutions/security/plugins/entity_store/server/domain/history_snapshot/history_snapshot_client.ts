@@ -27,6 +27,7 @@ export interface RunHistorySnapshotOptions {
 export { HISTORY_SNAPSHOT_RESET_SCRIPT } from './constants';
 
 const POLL_INTERVAL_MS = 30 * 1000;
+const POLL_MIN_INTERVAL_MS = 5 * 1000;
 
 export interface HistorySnapshotClientDependencies {
   logger: Logger;
@@ -79,6 +80,7 @@ export class HistorySnapshotClient {
         signal: abortSignal,
         waitForTask: {
           logger: this.logger,
+          minTimeout: POLL_MIN_INTERVAL_MS,
           maxTimeout: POLL_INTERVAL_MS,
           forever: true,
         },
@@ -97,6 +99,7 @@ export class HistorySnapshotClient {
         signal: abortSignal,
         waitForTask: {
           logger: this.logger,
+          minTimeout: POLL_MIN_INTERVAL_MS,
           maxTimeout: POLL_INTERVAL_MS,
           forever: true,
         },
