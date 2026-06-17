@@ -1,0 +1,44 @@
+# KI Query Groundedness Sync Workflow
+#
+# Scheduled workflow that runs independently of extraction (it keeps running
+# when continuous KI extraction is paused). On each run it:
+#   1. Tombstones non-durable queries whose source features are gone
+#      (deleted, excluded, or expired).
+#   2. Deletes Streams-owned alerting rules whose backing query no longer
+#      exists (orphan-rule sweep, always global).
+
+version: "1"
+name: ".streams-ki-sync"
+enabled: true
+description: "This workflow is used by the system and should not be modified."
+tags:
+  - observability
+  - streams
+  - knowledge-indicators
+  - sync
+settings:
+  # Timeout is 5 minutes shorter than the schedule to avoid overlapping runs.
+  timeout: "55m"
+  # Only one instance runs at a time; overlapping scheduled triggers are dropped.
+  concurrency:
+    key: streams-ki-sync
+    strategy: drop
+    max: 1
+triggers:
+  - type: scheduled
+    with:
+      every: "1h"
+  - type: manual
+steps:
+  - name: sync
+    type: kibana.request
+    with:
+      method: POST
+      path: /internal/streams/_sync
+      headers:
+        x-elastic-internal-origin: "kibana"
+    on-failure:
+      retry:
+        max-attempts: 3
+        delay: "30s"
+        strategy: exponential

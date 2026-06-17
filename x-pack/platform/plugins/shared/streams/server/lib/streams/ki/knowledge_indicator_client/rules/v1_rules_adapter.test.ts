@@ -16,12 +16,13 @@ import {
 } from './rules_management_client';
 
 function makeRulesClient(): jest.Mocked<
-  Pick<RulesClient, 'create' | 'update' | 'bulkDeleteRules'>
+  Pick<RulesClient, 'create' | 'update' | 'bulkDeleteRules' | 'find'>
 > {
   return {
     create: jest.fn().mockResolvedValue({}),
     update: jest.fn().mockResolvedValue({}),
     bulkDeleteRules: jest.fn().mockResolvedValue({}),
+    find: jest.fn().mockResolvedValue({ data: [], total: 0, perPage: 1000, page: 1 }),
   };
 }
 
@@ -169,6 +170,70 @@ describe('V1RulesAdapter', () => {
       const adapter = new V1RulesAdapter(rc as unknown as RulesClient);
 
       await expect(adapter.bulkDeleteRules(['id-1'])).rejects.toThrow('storage failure');
+    });
+  });
+
+  describe('findStreamsOwnedRules', () => {
+    it('queries with ruleTypeIds and consumers scoped to Streams', async () => {
+      const rc = makeRulesClient();
+      rc.find.mockResolvedValue({ data: [], total: 0, perPage: 1000, page: 1 });
+      const adapter = new V1RulesAdapter(rc as unknown as RulesClient);
+
+      await adapter.findStreamsOwnedRules();
+
+      expect(rc.find).toHaveBeenCalledWith({
+        options: expect.objectContaining({
+          ruleTypeIds: [STREAMS_ESQL_RULE_TYPE_ID],
+          consumers: [STREAMS_RULE_CONSUMER],
+        }),
+      });
+    });
+
+    it('extracts id and stream name from v1 tags', async () => {
+      const rc = makeRulesClient();
+      rc.find.mockResolvedValue({
+        data: [
+          { id: 'rule-1', tags: ['streams', 'logs-app'] },
+          { id: 'rule-2', tags: ['streams', 'logs-infra'] },
+        ] as never[],
+        total: 2,
+        perPage: 1000,
+        page: 1,
+      });
+      const adapter = new V1RulesAdapter(rc as unknown as RulesClient);
+
+      const rules = await adapter.findStreamsOwnedRules();
+
+      expect(rules).toEqual([
+        { id: 'rule-1', streamName: 'logs-app' },
+        { id: 'rule-2', streamName: 'logs-infra' },
+      ]);
+      expect(rc.find).toHaveBeenCalledTimes(1);
+    });
+
+    it('skips rules with no recognisable stream tag', async () => {
+      const rc = makeRulesClient();
+      rc.find.mockResolvedValue({
+        data: [{ id: 'rule-bad', tags: ['streams'] }] as never[],
+        total: 1,
+        perPage: 1000,
+        page: 1,
+      });
+      const adapter = new V1RulesAdapter(rc as unknown as RulesClient);
+
+      const rules = await adapter.findStreamsOwnedRules();
+
+      expect(rules).toEqual([]);
+    });
+
+    it('returns empty array when no Streams rules exist', async () => {
+      const rc = makeRulesClient();
+      rc.find.mockResolvedValue({ data: [], total: 0, perPage: 1000, page: 1 });
+      const adapter = new V1RulesAdapter(rc as unknown as RulesClient);
+
+      const rules = await adapter.findStreamsOwnedRules();
+
+      expect(rules).toEqual([]);
     });
   });
 });

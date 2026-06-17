@@ -112,6 +112,7 @@ export const deleteFeatureRoute = createServerRoute({
     request,
     getScopedClients,
     server,
+    logger,
   }): Promise<{ acknowledged: boolean }> => {
     const { getKnowledgeIndicatorClient, licensing, uiSettingsClient, streamsClient } =
       await getScopedClients({
@@ -123,6 +124,17 @@ export const deleteFeatureRoute = createServerRoute({
 
     const kiClient = await getKnowledgeIndicatorClient();
     await kiClient.bulk(params.path.name, [{ delete: { type: 'feature', id: params.path.id } }]);
+
+    // Failures are logged; the scheduled sync workflow will retry.
+    try {
+      await kiClient.syncGroundedness([params.path.name]);
+    } catch (syncError) {
+      logger.warn(
+        `Groundedness sync failed for stream ${params.path.name}: ${
+          syncError instanceof Error ? syncError.message : String(syncError)
+        }`
+      );
+    }
 
     return { acknowledged: true };
   },
@@ -275,6 +287,7 @@ export const bulkFeaturesRoute = createServerRoute({
     request,
     getScopedClients,
     server,
+    logger,
   }): Promise<{ acknowledged: boolean }> => {
     const { getKnowledgeIndicatorClient, streamsClient, licensing, uiSettingsClient } =
       await getScopedClients({
@@ -295,6 +308,20 @@ export const bulkFeaturesRoute = createServerRoute({
       'delete' in op ? { delete: { type: 'feature' as const, id: op.delete.id } } : op
     );
     await kiClient.bulk(name, kiOps);
+
+    // index/restore ops don't remove grounding.
+    const hasRemovalOp = operations.some((op) => 'delete' in op || 'exclude' in op);
+    if (hasRemovalOp) {
+      try {
+        await kiClient.syncGroundedness([name]);
+      } catch (syncError) {
+        logger.warn(
+          `Groundedness sync failed for stream ${name}: ${
+            syncError instanceof Error ? syncError.message : String(syncError)
+          }`
+        );
+      }
+    }
 
     return { acknowledged: true };
   },
@@ -379,6 +406,8 @@ export const bulkFeaturesAcrossStreamsRoute = createServerRoute({
     let failed = 0;
     let skipped = skippedFromLookup;
 
+    const streamsWithRemovalOps = new Set<string>();
+
     for (const [streamName, ops] of Object.entries(byStream)) {
       try {
         const { applied, skipped: streamSkipped } = await kiClient.bulk(streamName, ops);
@@ -391,6 +420,21 @@ export const bulkFeaturesAcrossStreamsRoute = createServerRoute({
           }`
         );
         failed += ops.length;
+      }
+      if (ops.some((op) => 'delete' in op || 'exclude' in op)) {
+        streamsWithRemovalOps.add(streamName);
+      }
+    }
+
+    if (streamsWithRemovalOps.size > 0) {
+      try {
+        await kiClient.syncGroundedness(Array.from(streamsWithRemovalOps));
+      } catch (syncError) {
+        logger.warn(
+          `Groundedness sync failed for streams [${Array.from(streamsWithRemovalOps).join(
+            ', '
+          )}]: ${syncError instanceof Error ? syncError.message : String(syncError)}`
+        );
       }
     }
 

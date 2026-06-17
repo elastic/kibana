@@ -63,6 +63,12 @@ export class DualCleanupRulesAdapter implements IRulesManagementClient {
     }
   }
 
+  async findStreamsOwnedRules(): Promise<Array<{ id: string; streamName: string }>> {
+    // Enumerate from the primary only; the legacy side is being phased out and
+    // any orphaned legacy rules are cleaned up on each write via cleanupLegacyRule.
+    return this.primary.findStreamsOwnedRules();
+  }
+
   private async cleanupLegacyRule(id: string): Promise<void> {
     try {
       await this.legacy.bulkDeleteRules([id]);

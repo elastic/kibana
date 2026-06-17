@@ -11,7 +11,11 @@ import {
   KnowledgeIndicatorClient,
   type KnowledgeIndicatorClientDeps,
 } from './knowledge_indicator_client';
-import { type StoredFeatureKnowledgeIndicator, type StoredTombstone } from '../data_stream';
+import {
+  type StoredFeatureKnowledgeIndicator,
+  type StoredQueryKnowledgeIndicator,
+  type StoredTombstone,
+} from '../data_stream';
 import { KI_TYPE_FEATURE, KI_TYPE_QUERY } from '../fields';
 
 jest.mock('../../../sig_events/latest_source_query', () => {
@@ -85,6 +89,7 @@ function makeClient(): {
       createRule: jest.fn().mockResolvedValue(undefined),
       updateRule: jest.fn().mockResolvedValue(undefined),
       bulkDeleteRules: jest.fn().mockResolvedValue(undefined),
+      findStreamsOwnedRules: jest.fn().mockResolvedValue([] as Array<{ id: string; streamName: string }>),
     },
     soClient: {} as KnowledgeIndicatorClientDeps['soClient'],
     logger,
@@ -430,6 +435,7 @@ describe('KnowledgeIndicatorClient.findIndicators keyword search', () => {
         createRule: jest.fn().mockResolvedValue(undefined),
         updateRule: jest.fn().mockResolvedValue(undefined),
         bulkDeleteRules: jest.fn().mockResolvedValue(undefined),
+        findStreamsOwnedRules: jest.fn().mockResolvedValue([] as Array<{ id: string; streamName: string }>),
       },
       soClient: {} as KnowledgeIndicatorClientDeps['soClient'],
       logger,
@@ -584,5 +590,89 @@ describe('KnowledgeIndicatorClient.findIndicators keyword search', () => {
     });
 
     expect(hits).toHaveLength(0);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Helpers for query-link tests
+// ---------------------------------------------------------------------------
+
+const PAST_TIMESTAMP = '2020-01-01T00:00:00.000Z';
+
+function createQueryDoc(
+  overrides: Partial<StoredQueryKnowledgeIndicator> = {}
+): StoredQueryKnowledgeIndicator {
+  return {
+    '@timestamp': '2026-01-01T00:00:00.000Z',
+    id: 'q-1',
+    type: KI_TYPE_QUERY,
+    'stream.name': STREAM,
+    title: 'Error query',
+    description: 'desc',
+    query: {
+      esql: 'FROM logs | WHERE status:500',
+      query_type: 'match',
+      rule_backed: true,
+      rule_id: 'rule-1',
+    },
+    ...overrides,
+  };
+}
+
+describe('KnowledgeIndicatorClient.getQueryLinks — expiry filter', () => {
+  const printedQueryFor = (runEsql: jest.Mock): string => {
+    const query = runEsql.mock.calls[0][1] as { print: () => string };
+    return query.print();
+  };
+
+  it('excludes expired queries from the default read', async () => {
+    const { client, runEsql } = makeClient();
+    runEsql.mockResolvedValueOnce({ hits: [] });
+
+    await client.getQueryLinks([STREAM]);
+
+    expect(printedQueryFor(runEsql)).toContain('expires_at');
+  });
+
+  it('omits IS_NOT_EXPIRED when includeExpired is true', async () => {
+    const { client, runEsql } = makeClient();
+    runEsql.mockResolvedValueOnce({ hits: [] });
+
+    await client.getQueryLinks([STREAM], { includeExpired: true });
+
+    // The IS_NOT_EXPIRED clause must not constrain results
+    const printed = printedQueryFor(runEsql);
+    // The clause should be absent since includeExpired skips it
+    // (rule_backed filter is still present; we confirm `expires_at` constraint is gone)
+    // We check the absence by looking for the specific IS_NOT_EXPIRED pattern
+    expect(printed).not.toMatch(/expires_at.*IS NULL|expires_at.*>=/);
+  });
+
+  it('getStreamToQueryLinksMap includes IS_NOT_EXPIRED by default (user-facing reads exclude expired)', async () => {
+    const { client, runEsql } = makeClient();
+    runEsql.mockResolvedValueOnce({ hits: [] });
+
+    await client.getStreamToQueryLinksMap([STREAM]);
+
+    expect(printedQueryFor(runEsql)).toContain('expires_at');
+  });
+
+  it('getStreamToQueryLinksMap omits IS_NOT_EXPIRED when includeExpired:true', async () => {
+    const { client, runEsql } = makeClient();
+    runEsql.mockResolvedValueOnce({ hits: [] });
+
+    await client.getStreamToQueryLinksMap([STREAM], { includeExpired: true });
+
+    expect(printedQueryFor(runEsql)).not.toMatch(/expires_at.*IS NULL|expires_at.*>=/);
+  });
+
+  it('getPromotableUnbackedQueries includes IS_NOT_EXPIRED in the postGroupingWhere', async () => {
+    const { client, runEsql } = makeClient();
+    runEsql.mockResolvedValueOnce({ hits: [] });
+
+    await client.getPromotableUnbackedQueries();
+
+    const printed = printedQueryFor(runEsql);
+    expect(printed).toContain('expires_at');
   });
 });

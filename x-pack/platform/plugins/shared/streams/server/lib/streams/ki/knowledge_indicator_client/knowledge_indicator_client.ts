@@ -24,13 +24,14 @@ import { RevisionReader } from './revision_reader';
 import { IndicatorWriter } from './indicator_writer';
 import { IndicatorReader } from './indicator_reader';
 import { IndicatorSearcher } from './indicator_searcher';
-import { QueryRuleOrchestrator } from './query_rule_orchestrator';
+import { QueryRuleOrchestrator, type SyncGroundednessSummary } from './query_rule_orchestrator';
 
 export type {
   KIBulkOperation,
   KnowledgeIndicatorClientDeps,
   KnowledgeIndicatorDataStreamClient,
   RuleUnbackedFilter,
+  SyncGroundednessSummary,
 };
 
 export class KnowledgeIndicatorClient {
@@ -108,13 +109,17 @@ export class KnowledgeIndicatorClient {
       ruleUnbacked?: RuleUnbackedFilter;
       queryIds?: string[];
       minSeverityScore?: number;
+      includeExpired?: boolean;
     }
   ): Promise<QueryLink[]> {
     return this.reader.getQueryLinks(streamNames, filters);
   }
 
-  getStreamToQueryLinksMap(streamNames: string[]): Promise<Record<string, QueryLink[]>> {
-    return this.reader.getStreamToQueryLinksMap(streamNames);
+  getStreamToQueryLinksMap(
+    streamNames: string[],
+    options?: { includeExpired?: boolean }
+  ): Promise<Record<string, QueryLink[]>> {
+    return this.reader.getStreamToQueryLinksMap(streamNames, options);
   }
 
   bulkGetQueriesByIds(stream: string, ids: string[]): Promise<QueryLink[]> {
@@ -209,5 +214,9 @@ export class KnowledgeIndicatorClient {
     queryIds: string[]
   ): Promise<{ demoted: number }> {
     return this.orchestrator.demoteQueries(definition, queryIds);
+  }
+
+  syncGroundedness(streamNames?: string[]): Promise<SyncGroundednessSummary> {
+    return this.orchestrator.syncGroundedness(streamNames);
   }
 }

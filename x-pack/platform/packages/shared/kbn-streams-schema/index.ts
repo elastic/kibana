@@ -301,6 +301,7 @@ export {
   sigEventStatusSchema,
   sigEventImpactSchema,
   type SigEvent,
+  isDurable,
   type KnowledgeIndicator,
   type SigEventStatus,
   type SigEventImpact,

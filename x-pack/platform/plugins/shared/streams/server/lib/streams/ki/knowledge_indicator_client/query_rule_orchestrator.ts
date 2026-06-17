@@ -7,7 +7,7 @@
 
 import type { Logger } from '@kbn/core/server';
 import type { QueryLink, StreamQuery } from '@kbn/streams-schema';
-import { QUERY_TYPE_STATS, deriveQueryType, hasSameEsql } from '@kbn/streams-schema';
+import { isDurable, QUERY_TYPE_STATS, deriveQueryType, hasSameEsql } from '@kbn/streams-schema';
 import type { Streams } from '@kbn/streams-schema';
 import { computeRuleId } from '../helpers/compute_rule_id';
 import { installQueries, uninstallQueries } from './rule_orchestration';
@@ -16,6 +16,22 @@ import type { KIBulkOperation } from './types';
 import type { IRulesManagementClient } from './rules/rules_management_client';
 import type { IndicatorWriter } from './indicator_writer';
 import type { IndicatorReader } from './indicator_reader';
+
+function isUngrounded(link: QueryLink, liveFeatureIds: Set<string>): boolean {
+  if (!link.query.features?.length) return false;
+  if (isDurable(link)) return false;
+  return link.query.features.some((f) => !liveFeatureIds.has(f.id));
+}
+
+/** Structured result returned by {@link QueryRuleOrchestrator.syncGroundedness}. */
+export interface SyncGroundednessSummary {
+  /** Number of query links tombstoned because their source features are gone. */
+  tombstonedQueries: number;
+  /** Number of Streams-owned alerting rules deleted by the sweep (orphaned or backing an ungrounded query). */
+  sweptRules: number;
+  /** Per-stream or global errors collected during best-effort execution. */
+  errors: Array<{ stream: string; error: string }>;
+}
 
 export class QueryRuleOrchestrator {
   constructor(
@@ -40,7 +56,8 @@ export class QueryRuleOrchestrator {
     }
 
     const currentLinks =
-      options?.currentLinks ?? (await this.reader.getStreamToQueryLinksMap([stream]))[stream];
+      options?.currentLinks ??
+      (await this.reader.getStreamToQueryLinksMap([stream], { includeExpired: true }))[stream];
     const currentByQueryId = new Map(currentLinks.map((link) => [link.query.id, link]));
     const nextIds = new Set(queries.map((q) => q.id));
 
@@ -158,7 +175,9 @@ export class QueryRuleOrchestrator {
       return;
     }
 
-    const { [stream]: currentLinks } = await this.reader.getStreamToQueryLinksMap([stream]);
+    const { [stream]: currentLinks } = await this.reader.getStreamToQueryLinksMap([stream], {
+      includeExpired: true,
+    });
     const currentByQueryId = new Map(currentLinks.map((link) => [link.query.id, link]));
     const existing = currentByQueryId.get(query.id);
 
@@ -206,7 +225,10 @@ export class QueryRuleOrchestrator {
       return;
     }
 
-    const { [streamName]: currentLinks } = await this.reader.getStreamToQueryLinksMap([streamName]);
+    const { [streamName]: currentLinks } = await this.reader.getStreamToQueryLinksMap(
+      [streamName],
+      { includeExpired: true }
+    );
     const ruleBacked = currentLinks.filter((link) => link.rule_backed);
     if (ruleBacked.length > 0) {
       await uninstallQueries(this.rulesManagementClient, ruleBacked);
@@ -332,6 +354,238 @@ export class QueryRuleOrchestrator {
     }
 
     return { promoted, skipped_stats: skippedStats };
+  }
+
+  /**
+   * Three-step groundedness sweep, decoupled from individual query writes.
+   *
+   * Step 1 — rule-backed queries: enumerate Streams-owned rules, then per-stream
+   *   delete orphaned rules (no backing query) and tombstone + delete ungrounded
+   *   rule-backed queries (features gone).
+   * Step 2 — seam: tombstone rule-backed queries whose rule was deleted out of band
+   *   (invisible to step 1 because the rule no longer appears in enumeration).
+   * Step 3 — unbacked queries: tombstone ungrounded queries that have no alerting rule.
+   *
+   * All steps are best-effort: per-stream failures are collected in `errors` and
+   * do not abort subsequent work. Partial failures are retried on the next
+   * scheduled run.
+   */
+  async syncGroundedness(streamNames?: string[]): Promise<SyncGroundednessSummary> {
+    const summary: SyncGroundednessSummary = { tombstonedQueries: 0, sweptRules: 0, errors: [] };
+
+    if (!this.isSignificantEventsEnabled) {
+      this.logger.debug(
+        'Skipping syncGroundedness because significant events feature is disabled.'
+      );
+      return summary;
+    }
+
+    if (streamNames?.length === 0) {
+      return summary;
+    }
+
+    const liveRuleIds = await this.sweepRuleBackedQueries(streamNames, summary);
+    await this.tombstoneQueriesWithDeletedRules(liveRuleIds, streamNames, summary);
+    await this.sweepUnbackedQueries(streamNames, summary);
+
+    return summary;
+  }
+
+  /**
+   * Step 1 — enumerate every Streams-owned rule, then per-stream:
+   *   • rules with no backing KI query           → delete rule (orphan)
+   *   • rules whose query features are gone      → delete rule + tombstone query (ungrounded)
+   *
+   * Returns the set of rule IDs that exist in the alerting framework (used by step 2).
+   */
+  private async sweepRuleBackedQueries(
+    streamNames: string[] | undefined,
+    summary: SyncGroundednessSummary
+  ): Promise<Set<string>> {
+    const allRules = await this.rulesManagementClient.findStreamsOwnedRules();
+    const scopedRules = streamNames
+      ? allRules.filter((r) => streamNames.includes(r.streamName))
+      : allRules;
+
+    const liveRuleIds = new Set(scopedRules.map((r) => r.id));
+
+    const byStream = new Map<string, string[]>();
+    for (const { id, streamName } of scopedRules) {
+      const group = byStream.get(streamName) ?? [];
+      group.push(id);
+      byStream.set(streamName, group);
+    }
+
+    if (byStream.size === 0) return liveRuleIds;
+
+    const streamList = [...byStream.keys()];
+
+    const [backedLinks, { hits: liveFeatures }] = await Promise.all([
+      this.reader.getQueryLinks(streamList, { ruleUnbacked: 'exclude' }),
+      this.reader.getFeatures(streamList),
+    ]);
+
+    const queryByRuleIdPerStream = new Map<string, Map<string, QueryLink>>();
+    for (const link of backedLinks) {
+      const byRuleId = queryByRuleIdPerStream.get(link.stream_name) ?? new Map<string, QueryLink>();
+      byRuleId.set(link.rule_id, link);
+      queryByRuleIdPerStream.set(link.stream_name, byRuleId);
+    }
+
+    const liveFeatureIdsByStream = new Map<string, Set<string>>();
+    for (const feature of liveFeatures) {
+      const set = liveFeatureIdsByStream.get(feature.stream_name) ?? new Set<string>();
+      set.add(feature.id);
+      liveFeatureIdsByStream.set(feature.stream_name, set);
+    }
+
+    for (const [streamName, ruleIds] of byStream) {
+      try {
+        const queryByRuleId =
+          queryByRuleIdPerStream.get(streamName) ?? new Map<string, QueryLink>();
+        const liveFeatureIds = liveFeatureIdsByStream.get(streamName) ?? new Set<string>();
+
+        const orphanRuleIds: string[] = [];
+        const ungroundedLinks: QueryLink[] = [];
+
+        for (const ruleId of ruleIds) {
+          const link = queryByRuleId.get(ruleId);
+          if (!link) {
+            orphanRuleIds.push(ruleId);
+          } else if (isUngrounded(link, liveFeatureIds)) {
+            ungroundedLinks.push(link);
+          }
+        }
+
+        if (orphanRuleIds.length > 0) {
+          await this.rulesManagementClient.bulkDeleteRules(orphanRuleIds);
+          summary.sweptRules += orphanRuleIds.length;
+        }
+
+        if (ungroundedLinks.length > 0) {
+          // Rules come down before the tombstone so no evaluation window fires
+          // for a query that is about to disappear.
+          await this.rulesManagementClient.bulkDeleteRules(ungroundedLinks.map((l) => l.rule_id));
+          await this.writer.bulk(
+            streamName,
+            ungroundedLinks.map((l) => ({ delete: { type: KI_TYPE_QUERY, id: l.query.id } }))
+          );
+          summary.sweptRules += ungroundedLinks.length;
+          summary.tombstonedQueries += ungroundedLinks.length;
+        }
+      } catch (error) {
+        const message = error instanceof Error ? error.message : String(error);
+        this.logger.error(`syncGroundedness step 1: failed for stream "${streamName}": ${message}`);
+        summary.errors.push({ stream: streamName, error: message });
+      }
+    }
+
+    return liveRuleIds;
+  }
+
+  /**
+   * Step 2 — seam: find rule-backed KI queries whose rule_id is absent from the
+   * live rule set collected in step 1. These are rules deleted out of band —
+   * step 1 never sees them because they don't appear in enumeration. Tombstone
+   * the orphaned queries so the KI data stream stays consistent.
+   */
+  private async tombstoneQueriesWithDeletedRules(
+    liveRuleIds: Set<string>,
+    streamNames: string[] | undefined,
+    summary: SyncGroundednessSummary
+  ): Promise<void> {
+    try {
+      const backedLinks = await this.reader.getQueryLinks(streamNames ?? [], {
+        ruleUnbacked: 'exclude',
+      });
+      const stale = backedLinks.filter((l) => l.rule_id != null && !liveRuleIds.has(l.rule_id));
+      if (stale.length === 0) return;
+
+      const byStream = new Map<string, QueryLink[]>();
+      for (const link of stale) {
+        const group = byStream.get(link.stream_name) ?? [];
+        group.push(link);
+        byStream.set(link.stream_name, group);
+      }
+
+      for (const [streamName, links] of byStream) {
+        try {
+          await this.writer.bulk(
+            streamName,
+            links.map((l) => ({ delete: { type: KI_TYPE_QUERY, id: l.query.id } }))
+          );
+          summary.tombstonedQueries += links.length;
+        } catch (error) {
+          const message = error instanceof Error ? error.message : String(error);
+          this.logger.error(
+            `syncGroundedness step 2: failed for stream "${streamName}": ${message}`
+          );
+          summary.errors.push({ stream: streamName, error: message });
+        }
+      }
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      this.logger.error(`syncGroundedness step 2: failed to fetch query links: ${message}`);
+      summary.errors.push({ stream: '*', error: message });
+    }
+  }
+
+  /**
+   * Step 3 — tombstone ungrounded unbacked queries. Rule-backed queries were
+   * already handled in steps 1–2, so this step uses `ruleUnbacked: 'only'`.
+   */
+  private async sweepUnbackedQueries(
+    streamNames: string[] | undefined,
+    summary: SyncGroundednessSummary
+  ): Promise<void> {
+    try {
+      const unbackedLinks = await this.reader.getQueryLinks(streamNames ?? [], {
+        ruleUnbacked: 'only',
+      });
+      if (unbackedLinks.length === 0) return;
+
+      const streamsToFetch = [...new Set(unbackedLinks.map((l) => l.stream_name))];
+      const { hits: liveFeatures } = await this.reader.getFeatures(streamsToFetch);
+
+      const liveByStream = new Map<string, Set<string>>();
+      for (const feature of liveFeatures) {
+        const set = liveByStream.get(feature.stream_name) ?? new Set<string>();
+        set.add(feature.id);
+        liveByStream.set(feature.stream_name, set);
+      }
+
+      const ungrounded = unbackedLinks.filter((link) =>
+        isUngrounded(link, liveByStream.get(link.stream_name) ?? new Set())
+      );
+      if (ungrounded.length === 0) return;
+
+      const byStream = new Map<string, QueryLink[]>();
+      for (const link of ungrounded) {
+        const group = byStream.get(link.stream_name) ?? [];
+        group.push(link);
+        byStream.set(link.stream_name, group);
+      }
+
+      for (const [streamName, links] of byStream) {
+        try {
+          await this.writer.bulk(
+            streamName,
+            links.map((l) => ({ delete: { type: KI_TYPE_QUERY, id: l.query.id } }))
+          );
+          summary.tombstonedQueries += links.length;
+        } catch (error) {
+          const message = error instanceof Error ? error.message : String(error);
+          this.logger.error(
+            `syncGroundedness step 3: failed for stream "${streamName}": ${message}`
+          );
+          summary.errors.push({ stream: streamName, error: message });
+        }
+      }
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      this.logger.error(`syncGroundedness step 3: failed: ${message}`);
+      summary.errors.push({ stream: '*', error: message });
+    }
   }
 
   async demoteQueries(

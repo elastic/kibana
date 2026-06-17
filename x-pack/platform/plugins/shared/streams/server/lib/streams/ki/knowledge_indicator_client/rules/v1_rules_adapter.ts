@@ -72,4 +72,32 @@ export class V1RulesAdapter implements IRulesManagementClient {
         throw error;
       });
   }
+
+  async findStreamsOwnedRules(): Promise<Array<{ id: string; streamName: string }>> {
+    const perPage = 1000;
+    const rules: Array<{ id: string; streamName: string }> = [];
+    let page = 1;
+
+    while (true) {
+      const result = await this.rulesClient.find({
+        options: {
+          ruleTypeIds: [STREAMS_ESQL_RULE_TYPE_ID],
+          consumers: [STREAMS_RULE_CONSUMER],
+          perPage,
+          page,
+        },
+      });
+
+      for (const rule of result.data) {
+        // v1 tags: ['streams', '<streamName>']
+        const streamName = rule.tags.find((t: string) => t !== 'streams');
+        if (streamName) rules.push({ id: rule.id, streamName });
+      }
+
+      if (page * perPage >= result.total) break;
+      page++;
+    }
+
+    return rules;
+  }
 }
