@@ -39,7 +39,7 @@ import {
   deleteObservableStepCommonDefinition,
 } from './delete_observable';
 import { GetCasesStepTypeId, getCasesStepCommonDefinition } from './get_cases';
-import { PushCasesStepTypeId, pushCasesStepCommonDefinition } from './push_case';
+import { PushCasesStepTypeId, pushCasesStepCommonDefinition } from './push_cases';
 import {
   addAlertsInputFixture,
   addCategoryInputFixture,

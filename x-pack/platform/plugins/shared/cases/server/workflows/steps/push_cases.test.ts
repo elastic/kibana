@@ -6,7 +6,7 @@
  */
 
 import { createCaseResponseFixture } from '../../../common/fixtures/create_case';
-import { pushCasesStepDefinition } from './push_case';
+import { pushCasesStepDefinition } from './push_cases';
 import { createStepHandlerContext } from './test_utils';
 import type { CasesClient } from '../../client';
 

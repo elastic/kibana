@@ -7,13 +7,13 @@
 
 import type { KibanaRequest } from '@kbn/core/server';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
-import { pushCasesStepCommonDefinition } from '../../../common/workflows/steps/push_case';
+import { pushCasesStepCommonDefinition } from '../../../common/workflows/steps/push_cases';
 import type { CasesClient } from '../../client';
 import { getCasesClientFromStepsContext, safeParseCaseForWorkflowOutput } from './utils';
 
 const pushSingleCase = async (client: CasesClient, caseId: string) => {
   const theCase = await client.cases.get({ id: caseId, includeComments: false });
-  return client.cases.push({ caseId, connectorId: theCase.connector.id, pushType: 'manual' });
+  return client.cases.push({ caseId, connectorId: theCase.connector.id, pushType: 'automatic' });
 };
 
 export const pushCasesStepDefinition = (

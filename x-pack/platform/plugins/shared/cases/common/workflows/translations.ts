@@ -664,19 +664,19 @@ export const GET_CASES_STEP_DOCUMENTATION_DETAILS = i18n.translate(
   }
 );
 
-export const PUSH_CASE_STEP_LABEL = i18n.translate('xpack.cases.workflowSteps.pushCase.label', {
+export const PUSH_CASE_STEP_LABEL = i18n.translate('xpack.cases.workflowSteps.pushCases.label', {
   defaultMessage: 'Cases - Push cases',
 });
 
 export const PUSH_CASE_STEP_DESCRIPTION = i18n.translate(
-  'xpack.cases.workflowSteps.pushCase.description',
+  'xpack.cases.workflowSteps.pushCases.description',
   {
     defaultMessage: 'Pushes a case or multiple cases to their configured external connector',
   }
 );
 
 export const PUSH_CASE_STEP_DOCUMENTATION_DETAILS = i18n.translate(
-  'xpack.cases.workflowSteps.pushCase.documentation.details',
+  'xpack.cases.workflowSteps.pushCases.documentation.details',
   {
     defaultMessage:
       'This step pushes a case or multiple cases to their external connector. If no connector is configured on a case, the step will fail. The step returns the updated case objects after the push.',

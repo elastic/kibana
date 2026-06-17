@@ -10,12 +10,15 @@ import { StepCategory } from '@kbn/workflows';
 import type { CommonStepDefinition } from '@kbn/workflows-extensions/common';
 import { CaseResponseProperties as CaseResponsePropertiesSchema } from '../../bundled-types.gen';
 import * as i18n from '../translations';
-import { CasesStepBaseConfigSchema } from './shared';
+import { MAX_CASES_TO_UPDATE } from '../../constants';
 
 export const PushCasesStepTypeId = 'cases.pushCases';
 
 const InputSchema = z.object({
-  case_ids: z.array(z.string().min(1, 'case_ids values are required')).min(1),
+  case_ids: z
+    .array(z.string().min(1, 'case_ids values are required'))
+    .min(1)
+    .max(MAX_CASES_TO_UPDATE),
 });
 
 const OutputSchema = z.object({
@@ -59,5 +62,4 @@ export const pushCasesStepCommonDefinition: CommonStepDefinition<
   },
   inputSchema: InputSchema,
   outputSchema: OutputSchema,
-  configSchema: CasesStepBaseConfigSchema,
 };
