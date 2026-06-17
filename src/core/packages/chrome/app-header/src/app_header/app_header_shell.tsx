@@ -25,6 +25,7 @@ export interface AppHeaderShellProps {
   tabs?: ReactNode;
   sticky?: boolean;
   padding?: AppHeaderPadding;
+  borderless?: boolean;
 }
 
 const resolveLayoutProps = (
@@ -67,7 +68,8 @@ const useHeaderStyles = (
   padding: AppHeaderPadding | undefined,
   hasTabs: boolean,
   hasPrimaryContent: boolean,
-  hasMetadata: boolean
+  hasMetadata: boolean,
+  borderless: boolean
 ) => {
   const { euiTheme } = useEuiTheme();
 
@@ -102,8 +104,11 @@ const useHeaderStyles = (
         margin-top: -${bleedMargin};
       `}
       background: ${euiTheme.colors.backgroundBasePlain};
-      border-bottom: ${euiTheme.border.thin};
-      margin-bottom: -${euiTheme.border.width.thin};
+      ${!borderless &&
+      css`
+        border-bottom: ${euiTheme.border.thin};
+        margin-bottom: -${euiTheme.border.width.thin};
+      `}
 
       &:hover .titleActionsReveal,
       &:focus-within .titleActionsReveal {
@@ -206,7 +211,7 @@ const useHeaderStyles = (
       metadataRow,
       tabsRow,
     };
-  }, [sticky, padding, euiTheme, hasTabs, hasPrimaryContent, hasMetadata]);
+  }, [sticky, padding, euiTheme, hasTabs, hasPrimaryContent, hasMetadata, borderless]);
 };
 
 export const AppHeaderShell = React.memo<AppHeaderShellProps>(
@@ -220,9 +225,10 @@ export const AppHeaderShell = React.memo<AppHeaderShellProps>(
     tabs,
     sticky = true,
     padding,
+    borderless = false,
   }) => {
     const hasTitleAppend = titleAppend != null;
-    const styles = useHeaderStyles(sticky, padding, !!tabs, hasTitleAppend, !!metadata);
+    const styles = useHeaderStyles(sticky, padding, !!tabs, hasTitleAppend, !!metadata, borderless);
 
     return (
       <div css={styles.root} data-test-subj="appHeader">

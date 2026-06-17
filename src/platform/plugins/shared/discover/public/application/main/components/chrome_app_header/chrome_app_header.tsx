@@ -72,6 +72,8 @@ export const ChromeAppHeader = ({ menu, titleAppend, isCollapsed }: ChromeAppHea
         sticky={false}
         padding="m"
         titleAppend={titleAppend}
+        // the unified tabs content panel below owns the separating border so the active tab connects to it
+        borderless
       />
     </div>
   );
