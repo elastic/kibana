@@ -9,6 +9,7 @@ import { tags } from '@kbn/scout';
 import { evaluate } from '../../src/evaluate';
 import {
   SIEM_READINESS_INDICES,
+  SIEM_READINESS_PIPELINE_NAME,
   cleanupSiemReadinessData,
   seedSiemReadinessData,
 } from '../../src/data_generators/siem_readiness_data';
@@ -198,7 +199,7 @@ evaluate.describe('SIEM Readiness', { tag: tags.stateful.classic }, () => {
             output: {
               criteria: [
                 'Called the get_continuity tool.',
-                'The response identifies the failing pipeline as having a critical failure rate.',
+                `The response identifies the failing pipeline (${SIEM_READINESS_PIPELINE_NAME}) as having a critical failure rate.`,
                 'The response does NOT report the healthy pipeline as failing.',
                 'The pipeline finding includes Affected Platform, Affected Rules, and Affected Tactics sub-bullets.',
                 'The pipeline finding is labeled as critical or actionRequired.',
