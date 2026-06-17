@@ -37,6 +37,15 @@ export const getWorkflowExecutionsTableGridWrapperCss = (themeContext: UseEuiThe
       padding-block: ${euiTheme.size.m};
     }
 
+    .unifiedDataTable__inner .euiDataGridHeader,
+    .unifiedDataTable__inner .euiDataGridHeaderCell {
+      background-color: ${euiTheme.components.dataGridRowBackground} !important;
+    }
+
+    .unifiedDataTable__inner .euiDataGridHeader {
+      border-bottom: ${euiTheme.border.width.thick} solid ${euiTheme.colors.text} !important;
+    }
+
     .unifiedDataTable__inner
       .euiDataGridRowCell:not(.euiDataGridRowCell--controlColumn)
       .euiDataGridRowCell__content--defaultHeight {

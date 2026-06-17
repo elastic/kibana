@@ -59,7 +59,7 @@ const getMaxPageIndex = (itemsPerPage: number): number =>
 
 const gridStyleOverride = {
   border: 'horizontal' as const,
-  header: 'shade' as const,
+  header: 'underline' as const,
   stripes: false,
 };
 
@@ -354,7 +354,7 @@ export const WorkflowExecutionsTable = React.memo<WorkflowExecutionsTableProps>(
               services={services}
               setExpandedDoc={handleSetExpandedDoc}
               settings={gridSettings}
-              showColumnTokens
+              showColumnTokens={false}
               showTimeCol={false}
               sort={sort}
               totalHits={total}
