@@ -15,7 +15,7 @@ project:
   description: Moon project for @kbn/notification-center-plugin
   channel: ''
   owner: '@elastic/search-kibana'
-  sourceRoot: x-pack/platform/plugins/shared/notification-center
+  sourceRoot: x-pack/platform/plugins/shared/notification_center
 dependsOn:
   - '@kbn/core'
   - '@kbn/config-schema'
