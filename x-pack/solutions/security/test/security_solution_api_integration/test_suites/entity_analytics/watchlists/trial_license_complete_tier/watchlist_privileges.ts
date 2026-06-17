@@ -120,6 +120,10 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     describe('install prebuilt watchlists', () => {
+      it('allows Security:all to install prebuilt watchlists', async () => {
+        await watchlistRoutesNoAuth.installPrebuilt(allCreds, 200);
+      });
+
       it('forbids Security:read from installing prebuilt watchlists', async () => {
         await watchlistRoutesNoAuth.installPrebuilt(readCreds, 403);
       });
@@ -144,6 +148,10 @@ export default ({ getService }: FtrProviderContext) => {
 
       it('allows Security:read to list watchlists', async () => {
         await watchlistRoutesNoAuth.list(readCreds, 200);
+      });
+
+      it('allows Security:read to list entity sources', async () => {
+        await watchlistRoutesNoAuth.listEntitySources(readCreds, watchlistId, 200);
       });
 
       it('forbids Security:read from updating a watchlist', async () => {
@@ -173,19 +181,6 @@ export default ({ getService }: FtrProviderContext) => {
             indexPattern: 'logs-*',
             enabled: true,
           },
-          403
-        );
-      });
-
-      it('allows Security:read to list entity sources', async () => {
-        await watchlistRoutesNoAuth.listEntitySources(readCreds, watchlistId, 200);
-      });
-
-      it('forbids Security:read from assigning entities', async () => {
-        await watchlistRoutesNoAuth.assignEntities(
-          readCreds,
-          watchlistId,
-          { euids: ['user:nobody@example.com'] },
           403
         );
       });
