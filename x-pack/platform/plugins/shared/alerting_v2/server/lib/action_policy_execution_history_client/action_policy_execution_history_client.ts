@@ -161,12 +161,19 @@ export class ActionPolicyExecutionHistoryClient {
   private buildRuleIdsFilter(ids: string[]): string {
     return toKqlExpression(
       nodeBuilder.or(
-        ids.map((id) => nodeBuilder.is('id', nodeTypes.literal.buildNode(this.toSavedObjectIdFilterValue(id), true)))
+        ids.map((id) =>
+          nodeBuilder.is(
+            'id',
+            nodeTypes.literal.buildNode(this.toSavedObjectIdFilterValue(id), true)
+          )
+        )
       )
     );
   }
 
   private toSavedObjectIdFilterValue(ruleId: string): string {
-    return ruleId.startsWith(`${RULE_SAVED_OBJECT_TYPE}:`) ? ruleId : `${RULE_SAVED_OBJECT_TYPE}:${ruleId}`;
+    return ruleId.startsWith(`${RULE_SAVED_OBJECT_TYPE}:`)
+      ? ruleId
+      : `${RULE_SAVED_OBJECT_TYPE}:${ruleId}`;
   }
 }

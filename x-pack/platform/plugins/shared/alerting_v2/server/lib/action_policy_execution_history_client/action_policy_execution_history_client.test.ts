@@ -70,9 +70,7 @@ const createMocks = () => {
     getActionPolicies: jest.fn().mockResolvedValue([]),
   } as unknown as jest.Mocked<ActionPolicyClient>;
   const rulesClient = {
-    findRules: jest
-      .fn()
-      .mockResolvedValue({ items: [], total: 0, page: 1, perPage: 0 }),
+    findRules: jest.fn().mockResolvedValue({ items: [], total: 0, page: 1, perPage: 0 }),
   } as unknown as jest.Mocked<RulesClient>;
   const workflowsManagement = {
     getWorkflowsByIds: jest.fn().mockResolvedValue([]),
@@ -346,8 +344,12 @@ describe('ActionPolicyExecutionHistoryClient', () => {
         await client.listExecutionHistory({ request });
 
         expect(rulesClient.findRules).toHaveBeenCalledTimes(2);
-        expect((rulesClient.findRules as jest.Mock).mock.calls[0][0]).toMatchObject({ perPage: 100 });
-        expect((rulesClient.findRules as jest.Mock).mock.calls[1][0]).toMatchObject({ perPage: 50 });
+        expect((rulesClient.findRules as jest.Mock).mock.calls[0][0]).toMatchObject({
+          perPage: 100,
+        });
+        expect((rulesClient.findRules as jest.Mock).mock.calls[1][0]).toMatchObject({
+          perPage: 50,
+        });
       });
     });
   });
