@@ -11,10 +11,7 @@ import { isColumn } from '@elastic/esql';
 import { withAutoSuggest } from '../../definitions/utils/autocomplete/helpers';
 import type { ICommandCallbacks } from '../types';
 import { type ISuggestionItem, type ICommandContext } from '../types';
-import {
-  newLineAndPipeCompleteItems,
-  commaCompleteItem,
-} from '../complete_items';
+import { newLineAndPipeCompleteItems, commaCompleteItem } from '../complete_items';
 import { getLastNonWhitespaceChar } from '../../definitions/utils/autocomplete/helpers';
 import { endsWithWhitespace } from '../../definitions/utils/regex';
 
