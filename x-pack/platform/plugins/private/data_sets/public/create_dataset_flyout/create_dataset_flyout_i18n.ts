@@ -24,6 +24,11 @@ export const createDatasetFlyoutStrings = {
       defaultMessage: 'Name is required.',
     }),
 
+  nameAlreadyExists: () =>
+    i18n.translate('dataSets.createDatasetFlyout.nameAlreadyExists', {
+      defaultMessage: 'A data set with this name already exists.',
+    }),
+
   dataSourceRequired: () =>
     i18n.translate('dataSets.createDatasetFlyout.dataSourceRequired', {
       defaultMessage: 'Data source is required.',

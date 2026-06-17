@@ -43,6 +43,8 @@ export type { CreateDatasetFormValues } from './create_dataset_flyout_form_state
 export interface CreateDatasetFlyoutProps {
   /** When set, the flyout opens in edit mode for this data set. */
   initialDataSet?: DataSetWithName;
+  /** Existing names to prevent duplicates (create mode only). */
+  existingDataSetNames?: readonly string[];
   onClose: () => void;
   /**
    * Persist a data set (create or update). Resolve `null` on success, or an error message to show in the flyout.
@@ -59,6 +61,7 @@ const trimRequired =
 
 export const CreateDatasetFlyout: FunctionComponent<CreateDatasetFlyoutProps> = ({
   initialDataSet,
+  existingDataSetNames = [],
   onClose,
   onSave,
   dataSources,
@@ -93,7 +96,20 @@ export const CreateDatasetFlyout: FunctionComponent<CreateDatasetFlyoutProps> = 
     name: 'name',
     control,
     rules: {
-      validate: trimRequired(createDatasetFlyoutStrings.nameRequired()),
+      validate: (value: string) => {
+        const trimmed = value.trim();
+        if (!trimmed) {
+          return createDatasetFlyoutStrings.nameRequired();
+        }
+
+        if (isEditMode) {
+          return true;
+        }
+
+        const normalized = trimmed.toLowerCase();
+        const isDuplicate = existingDataSetNames.some((n) => n.trim().toLowerCase() === normalized);
+        return isDuplicate ? createDatasetFlyoutStrings.nameAlreadyExists() : true;
+      },
     },
   });
 

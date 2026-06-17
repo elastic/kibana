@@ -604,6 +604,7 @@ export const Main: FunctionComponent<MainProps> = ({ httpClient }) => {
         <CreateDatasetFlyout
           key={dataSetFlyout.kind === 'edit' ? dataSetFlyout.dataSet.name : 'create'}
           initialDataSet={dataSetFlyout.kind === 'edit' ? dataSetFlyout.dataSet : undefined}
+          existingDataSetNames={dataSetsRaw.map((ds) => ds.name)}
           dataSources={items}
           onClose={() => setDataSetFlyout({ kind: 'closed' })}
           onSave={handleDataSetSave}
