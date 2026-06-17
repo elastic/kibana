@@ -48,6 +48,10 @@ export const styles = (
     width: `calc(100% - ${INTERCEPT_ILLUSTRATION_WIDTH}px - ${euiTheme.size.base})`,
   }),
 
+  completionContentBox: css({
+    paddingInlineEnd: euiTheme.size.l,
+  }),
+
   stepFooterBox: css`
     border-top: ${euiTheme.border.thin};
   `,

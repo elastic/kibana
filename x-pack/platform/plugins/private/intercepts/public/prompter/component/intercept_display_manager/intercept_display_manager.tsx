@@ -200,7 +200,11 @@ function InterceptDisplayManager({
             data-test-subj={`intercept-${currentIntercept.id}`}
           >
             <EuiSplitPanel.Inner
-              css={css([styles.stepContentBox, isStartStep && styles.startIllustration])}
+              css={css([
+                styles.stepContentBox,
+                isStartStep && styles.startIllustration,
+                currentInterceptStep?.id === 'completion' && styles.completionContentBox,
+              ])}
               data-test-subj={`interceptStep-${currentInterceptStep.id}`}
             >
               <EuiFlexGroup
@@ -217,18 +221,19 @@ function InterceptDisplayManager({
                         <h2>{currentInterceptStep!.title}</h2>
                       </EuiTitle>
                     </EuiFlexItem>
-                    {currentStepIndex > 0 && !isLastStep && (
-                      <EuiFlexItem grow={false}>
-                        <EuiToolTip content="Close dialog" disableScreenReaderOutput>
-                          <EuiButtonIcon
-                            iconType="cross"
-                            aria-label="Close dialog"
-                            onClick={dismissProductIntercept}
-                            color="text"
-                          />
-                        </EuiToolTip>
-                      </EuiFlexItem>
-                    )}
+                    {currentStepIndex > 0 &&
+                      (!isLastStep || currentInterceptStep?.id === 'completion') && (
+                        <EuiFlexItem grow={false}>
+                          <EuiToolTip content="Close dialog" disableScreenReaderOutput>
+                            <EuiButtonIcon
+                              iconType="cross"
+                              aria-label="Close dialog"
+                              onClick={dismissProductIntercept}
+                              color="text"
+                            />
+                          </EuiToolTip>
+                        </EuiFlexItem>
+                      )}
                   </EuiFlexGroup>
                 </EuiFlexItem>
                 <EuiFlexItem>
@@ -249,7 +254,7 @@ function InterceptDisplayManager({
                     currentStep={currentStepIndex}
                   />
                 </EuiFlexItem>
-                {(isStartStep || isLastStep) && (
+                {(isStartStep || (isLastStep && currentInterceptStep?.id !== 'completion')) && (
                   <EuiFlexItem grow={false}>
                     <EuiFlexGroup gutterSize="xs">
                       {isStartStep && (

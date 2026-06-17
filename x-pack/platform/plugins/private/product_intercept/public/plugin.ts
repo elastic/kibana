@@ -48,40 +48,29 @@ export class ProductInterceptPublicPlugin implements Plugin {
     const productOffering =
       projectType === 'search' ? 'Elasticsearch' : `Elastic ${capitalize(projectType)}`.trim();
 
-    void (async () => {
-      const currentUser = await core.security.authc.getCurrentUser();
-
-      const surveyUrl = new URL('https://ela.st/kibana-product-survey');
-
-      surveyUrl.searchParams.set('uid', String(currentUser.profile_uid || null));
-      surveyUrl.searchParams.set('pid', String(cloud.serverless.projectId || null));
-      surveyUrl.searchParams.set('solution', String(cloud.serverless.projectType || null));
-
-      [
-        this.interceptSubscription,
-        this.trialInterceptSubscription,
-        this.upgradeInterceptSubscription,
-      ] = [
-        TRIGGER_DEF_ID,
-        `${TRIAL_TRIGGER_DEF_ID}:${this.buildVersion}`,
-        `${UPGRADE_TRIGGER_DEF_PREFIX_ID}:${this.buildVersion}`,
-      ].map((triggerId) =>
-        intercepts
-          .registerIntercept?.({
-            id: triggerId,
-            config: () =>
-              import('./intercept_registration_config').then(
-                ({ productInterceptRegistrationConfig: registrationConfig }) =>
-                  registrationConfig({
-                    productOffering,
-                    surveyUrl,
-                    eventReporter,
-                  })
-              ),
-          })
-          .subscribe()
-      );
-    })();
+    [
+      this.interceptSubscription,
+      this.trialInterceptSubscription,
+      this.upgradeInterceptSubscription,
+    ] = [
+      TRIGGER_DEF_ID,
+      `${TRIAL_TRIGGER_DEF_ID}:${this.buildVersion}`,
+      `${UPGRADE_TRIGGER_DEF_PREFIX_ID}:${this.buildVersion}`,
+    ].map((triggerId) =>
+      intercepts
+        .registerIntercept?.({
+          id: triggerId,
+          config: () =>
+            import('./intercept_registration_config').then(
+              ({ productInterceptRegistrationConfig: registrationConfig }) =>
+                registrationConfig({
+                  productOffering,
+                  eventReporter,
+                })
+            ),
+        })
+        .subscribe()
+    );
 
     return {};
   }

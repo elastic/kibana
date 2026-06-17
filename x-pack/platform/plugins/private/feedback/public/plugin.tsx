@@ -6,7 +6,15 @@
  */
 
 import React, { lazy, Suspense } from 'react';
-import { EuiModal } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiButtonEmpty,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+  EuiModal,
+  EuiText,
+} from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
@@ -16,6 +24,7 @@ import type { FeedbackRegistryEntry } from '@kbn/feedback-components';
 import { isNextChrome } from '@kbn/core-chrome-feature-flags';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import type { FeedbackFormData } from '../common';
 import { getAppDetails } from './src/utils';
 
@@ -95,7 +104,86 @@ export class FeedbackPlugin implements Plugin {
 
     const showToast = (title: string, color: 'success' | 'error') => {
       if (color === 'success') {
-        core.notifications.toasts.addSuccess({ title });
+        const toastRef: {
+          current: ReturnType<typeof core.notifications.toasts.add> | undefined;
+        } = { current: undefined };
+
+        const titleContent = toMountPoint(
+          core.rendering.addContext(
+            <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+              <EuiFlexItem grow={false}>
+                <EuiIcon type="checkInCircleFilled" color="success" size="m" aria-hidden />
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <FormattedMessage
+                  id="feedback.submissionSuccessToast.title"
+                  defaultMessage="Thanks for your feedback!"
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          ),
+          core
+        );
+
+        const textContent = toMountPoint(
+          core.rendering.addContext(
+            <EuiFlexGroup gutterSize="s" responsive={false}>
+              <EuiFlexItem grow={false}>
+                <EuiIcon type="empty" size="m" aria-hidden />
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <EuiFlexGroup direction="column" gutterSize="s">
+                  <EuiFlexItem>
+                    <EuiText>
+                      <FormattedMessage
+                        id="feedback.submissionSuccessToast.body"
+                        defaultMessage="Want to help shape the future of Elastic? Sign up to join our research panel!"
+                      />
+                    </EuiText>
+                  </EuiFlexItem>
+                  <EuiFlexItem>
+                    <EuiFlexGroup gutterSize="s" responsive={false}>
+                      <EuiFlexItem grow={false}>
+                        <EuiButton
+                          color="success"
+                          iconType="popout"
+                          iconSide="right"
+                          href="https://ela.st/user-interviews-opt-in"
+                          target="_blank"
+                        >
+                          <FormattedMessage
+                            id="feedback.submissionSuccessToast.participateButton"
+                            defaultMessage="Participate"
+                          />
+                        </EuiButton>
+                      </EuiFlexItem>
+                      <EuiFlexItem grow={false}>
+                        <EuiButtonEmpty
+                          color="success"
+                          onClick={() =>
+                            toastRef.current && core.notifications.toasts.remove(toastRef.current)
+                          }
+                        >
+                          <FormattedMessage
+                            id="feedback.submissionSuccessToast.maybeLaterButton"
+                            defaultMessage="Maybe later"
+                          />
+                        </EuiButtonEmpty>
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          ),
+          core
+        );
+
+        toastRef.current = core.notifications.toasts.add({
+          color: 'success',
+          title: titleContent,
+          text: textContent,
+        });
       }
       if (color === 'error') {
         core.notifications.toasts.addDanger({ title });
