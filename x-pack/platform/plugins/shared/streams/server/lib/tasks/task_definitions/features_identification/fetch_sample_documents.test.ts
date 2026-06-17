@@ -29,25 +29,23 @@ const createHit = (id: string): SearchHit<Record<string, unknown>> => ({
 
 const createFeature = ({
   id,
-  lastSeen,
+  updatedAt,
   field,
   value,
 }: {
   id: string;
-  lastSeen: string;
+  updatedAt: string;
   field: string;
   value: string;
 }): FeatureWithFilter =>
   ({
-    uuid: id,
     id,
     stream_name: 'logs.test-default',
     type: 'system',
     description: id,
     properties: {},
     confidence: 80,
-    status: 'active',
-    last_seen: lastSeen,
+    updated_at: updatedAt,
     filter: { field, eq: value },
   } as FeatureWithFilter);
 
@@ -127,13 +125,13 @@ describe('fetchSampleDocuments', () => {
     const features = [
       createFeature({
         id: 'older',
-        lastSeen: '2026-01-01T00:00:00.000Z',
+        updatedAt: '2026-01-01T00:00:00.000Z',
         field: 'host.name',
         value: 'host-a',
       }),
       createFeature({
         id: 'newer',
-        lastSeen: '2026-01-02T00:00:00.000Z',
+        updatedAt: '2026-01-02T00:00:00.000Z',
         field: 'service.name',
         value: 'checkout',
       }),
@@ -203,7 +201,7 @@ describe('fetchSampleDocuments', () => {
     const features = [
       createFeature({
         id: 'feature-1',
-        lastSeen: '2026-01-02T00:00:00.000Z',
+        updatedAt: '2026-01-02T00:00:00.000Z',
         field: 'service.name',
         value: 'checkout',
       }),
