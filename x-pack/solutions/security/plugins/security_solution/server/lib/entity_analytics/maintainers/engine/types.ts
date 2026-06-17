@@ -94,7 +94,7 @@ export interface CustomActorBinding {
  * whether the config uses the default ES|QL builder or supplies its own
  * override (Step 1 composite-agg discovery always uses these).
  */
-interface BaseRelationshipIntegrationFields {
+interface RelationshipIntegrationBase {
   /** Unique machine-readable identifier, e.g. 'elastic_defend'. */
   id: string;
   /** Human-readable name used in log messages. */
@@ -199,7 +199,7 @@ interface StandardBuilderFields {
  * is also the entity.relationships key the parser writes to.
  */
 export interface StandardRelationshipIntegrationConfig
-  extends BaseRelationshipIntegrationFields,
+  extends RelationshipIntegrationBase,
     StandardBuilderFields {
   kind: 'standard';
   relationshipKey: EntityRelationshipKey;
@@ -212,7 +212,7 @@ export interface StandardRelationshipIntegrationConfig
  * `relationshipKey` is required.
  */
 export interface BucketedRelationshipIntegrationConfig
-  extends BaseRelationshipIntegrationFields,
+  extends RelationshipIntegrationBase,
     StandardBuilderFields {
   kind: 'bucketed';
   bucketTargetByThreshold: BucketTargetByThresholdConfig;
@@ -239,7 +239,7 @@ export interface BucketedRelationshipIntegrationConfig
  * described at the top of this file (backticks for dotted-numeric or
  * reserved-word segments — see the Azure override for an example).
  */
-export interface OverrideRelationshipIntegrationConfig extends BaseRelationshipIntegrationFields {
+export interface OverrideRelationshipIntegrationConfig extends RelationshipIntegrationBase {
   kind: 'override';
   relationshipKey: EntityRelationshipKey;
   esqlQueryOverride: (namespace: string) => string;
