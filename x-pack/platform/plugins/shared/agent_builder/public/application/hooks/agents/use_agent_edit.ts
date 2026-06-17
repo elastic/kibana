@@ -9,6 +9,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { useMutation, useQueryClient } from '@kbn/react-query';
 import {
   type AgentDefinition,
+  type AgentAccessControlEntry,
   AgentAccessControlScope,
   type ToolSelection,
   defaultAgentToolIds,
@@ -51,6 +52,13 @@ const emptyState = (): AgentEditState => ({
   },
 });
 
+const accessControlEntriesSignature = (entries: AgentAccessControlEntry[] = []): string =>
+  JSON.stringify(
+    [...entries]
+      .map((entry) => ({ type: entry.type, name: entry.name, role: entry.role }))
+      .sort((a, b) => `${a.type}:${a.name}`.localeCompare(`${b.type}:${b.name}`))
+  );
+
 export function useAgentEdit({
   editingAgentId,
   onSaveSuccess,
@@ -76,10 +84,6 @@ export function useAgentEdit({
 
   const createMutation = useMutation({
     mutationFn: (data: AgentCreateRequest) => agentService.create(data),
-    onSuccess: (result) => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.agentProfiles.all });
-      onSaveSuccess(result);
-    },
     onError: (err: Error) => {
       onSaveError(err);
     },
@@ -92,9 +96,17 @@ export function useAgentEdit({
       }
       return agentService.update(agentId, data);
     },
-    onSuccess: (result) => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.agentProfiles.all });
-      onSaveSuccess(result);
+    onError: (err: Error) => {
+      onSaveError(err);
+    },
+  });
+
+  const updateAccessControlMutation = useMutation({
+    mutationFn: (entries: AgentAccessControlEntry[]) => {
+      if (!editingAgentId) {
+        throw new Error('Agent ID is required for access control update');
+      }
+      return agentService.updateAccessControl(agentId, { entries });
     },
     onError: (err: Error) => {
       onSaveError(err);
@@ -127,21 +139,54 @@ export function useAgentEdit({
 
       if (editingAgentId) {
         const { id, access_control, ...updatedAgent } = requestData;
-        await updateMutation.mutateAsync(
+        const result = await updateMutation.mutateAsync(
           access_control
             ? { ...updatedAgent, access_control: { scope: access_control.scope } }
             : updatedAgent
         );
+
+        const initialEntries = agent?.access_control?.entries;
+        const nextEntries = access_control?.entries;
+        const shouldUpdateAccessControl =
+          initialEntries !== undefined &&
+          nextEntries !== undefined &&
+          accessControlEntriesSignature(initialEntries) !==
+            accessControlEntriesSignature(nextEntries);
+
+        if (shouldUpdateAccessControl) {
+          await updateAccessControlMutation.mutateAsync(nextEntries);
+        }
+
+        queryClient.invalidateQueries({ queryKey: queryKeys.agentProfiles.all });
+        queryClient.invalidateQueries({ queryKey: queryKeys.agentProfiles.byId(agentId) });
+        if (shouldUpdateAccessControl) {
+          queryClient.invalidateQueries({
+            queryKey: queryKeys.agentProfiles.accessControl(agentId),
+          });
+        }
+        onSaveSuccess(result);
       } else {
         const { access_control, created_by, avatar_icon, ...createData } = requestData;
-        await createMutation.mutateAsync(
+        const result = await createMutation.mutateAsync(
           access_control
             ? { ...createData, access_control: { scope: access_control.scope } }
             : createData
         );
+        queryClient.invalidateQueries({ queryKey: queryKeys.agentProfiles.all });
+        onSaveSuccess(result);
       }
     },
-    [editingAgentId, createMutation, updateMutation, tools]
+    [
+      editingAgentId,
+      createMutation,
+      updateMutation,
+      updateAccessControlMutation,
+      tools,
+      agent?.access_control?.entries,
+      agentId,
+      queryClient,
+      onSaveSuccess,
+    ]
   );
 
   const isLoading = agentId
@@ -154,7 +199,8 @@ export function useAgentEdit({
   return {
     state,
     isLoading,
-    isSubmitting: createMutation.isLoading || updateMutation.isLoading,
+    isSubmitting:
+      createMutation.isLoading || updateMutation.isLoading || updateAccessControlMutation.isLoading,
     submit,
     tools,
     skills,

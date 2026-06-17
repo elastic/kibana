@@ -11,6 +11,8 @@ import { useAgentEdit, type AgentEditState } from './use_agent_edit';
 
 const mockCreate = jest.fn();
 const mockUpdate = jest.fn();
+const mockUpdateAccessControl = jest.fn();
+let mockAgent: AgentEditState | undefined;
 
 jest.mock('@kbn/react-query', () => ({
   // Run the mutationFn directly so the payload passed to the service is observable.
@@ -27,12 +29,16 @@ jest.mock('react-router-dom-v5-compat', () => ({
 
 jest.mock('../use_agent_builder_service', () => ({
   useAgentBuilderServices: () => ({
-    agentService: { create: mockCreate, update: mockUpdate },
+    agentService: {
+      create: mockCreate,
+      update: mockUpdate,
+      updateAccessControl: mockUpdateAccessControl,
+    },
   }),
 }));
 
 jest.mock('./use_agent_by_id', () => ({
-  useAgentBuilderAgentById: () => ({ agent: undefined, isLoading: false, error: undefined }),
+  useAgentBuilderAgentById: () => ({ agent: mockAgent, isLoading: false, error: undefined }),
 }));
 
 jest.mock('../tools/use_tools', () => ({
@@ -62,8 +68,13 @@ const baseConfiguration: AgentEditState['configuration'] = {
 describe('useAgentEdit submit (create/clone branch)', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockAgent = undefined;
     mockCreate.mockResolvedValue({ id: 'cloned-agent' });
     mockUpdate.mockResolvedValue({ id: 'existing-agent' });
+    mockUpdateAccessControl.mockResolvedValue({
+      scope: AgentAccessControlScope.Private,
+      entries: [],
+    });
   });
 
   it('strips access control entries, created_by and avatar_icon from the create payload when cloning', async () => {
@@ -169,5 +180,58 @@ describe('useAgentEdit submit (create/clone branch)', () => {
       access_control: { scope: AgentAccessControlScope.Shared },
     });
     expect(payload.access_control).not.toHaveProperty('entries');
+    expect(mockUpdateAccessControl).not.toHaveBeenCalled();
+  });
+
+  it('updates access control entries separately from regular update payloads', async () => {
+    mockAgent = {
+      id: 'existing-agent',
+      name: 'Existing Agent',
+      description: 'An existing agent',
+      access_control: {
+        scope: AgentAccessControlScope.Private,
+        entries: [
+          { type: 'user', name: 'bob', role: AgentAccessControlRole.User },
+          { type: 'user', name: 'alice', role: AgentAccessControlRole.Editor },
+        ],
+      },
+      labels: [],
+      avatar_color: '',
+      avatar_symbol: '',
+      configuration: baseConfiguration,
+    };
+
+    const updateData: AgentEditState = {
+      ...mockAgent,
+      access_control: {
+        scope: AgentAccessControlScope.Private,
+        entries: [{ type: 'user', name: 'alice', role: AgentAccessControlRole.Editor }],
+      },
+    };
+
+    const { result } = renderHook(() =>
+      useAgentEdit({
+        editingAgentId: 'existing-agent',
+        onSaveSuccess: jest.fn(),
+        onSaveError: jest.fn(),
+      })
+    );
+
+    await act(async () => {
+      await result.current.submit(updateData);
+    });
+
+    expect(mockUpdateAccessControl).toHaveBeenCalledTimes(1);
+    expect(mockUpdateAccessControl).toHaveBeenCalledWith('existing-agent', {
+      entries: [{ type: 'user', name: 'alice', role: AgentAccessControlRole.Editor }],
+    });
+    expect(mockUpdate).toHaveBeenCalledTimes(1);
+    expect(mockUpdate.mock.invocationCallOrder[0]).toBeLessThan(
+      mockUpdateAccessControl.mock.invocationCallOrder[0]
+    );
+    expect(mockUpdate.mock.calls[0][1].access_control).toEqual({
+      scope: AgentAccessControlScope.Private,
+    });
+    expect(mockUpdate.mock.calls[0][1].access_control).not.toHaveProperty('entries');
   });
 });
