@@ -8,6 +8,20 @@
 import { i18n } from '@kbn/i18n';
 import type { Detection, Discovery } from '@kbn/streams-schema';
 
+export const FIND_SIGNIFICANT_EVENTS_LABEL = i18n.translate(
+  'xpack.streams.significantEventsDiscovery.findSignificantEventsLabel',
+  {
+    defaultMessage: 'Find Significant Events',
+  }
+);
+
+export const CANCEL_DISCOVERY_LABEL = i18n.translate(
+  'xpack.streams.significantEventsDiscovery.cancelDiscoveryLabel',
+  {
+    defaultMessage: 'Cancel',
+  }
+);
+
 export const GENERATE_FEATURES_BUTTON_LABEL = i18n.translate(
   'xpack.streams.significantEventsDiscovery.streamsView.generateFeaturesButtonLabel',
   {
