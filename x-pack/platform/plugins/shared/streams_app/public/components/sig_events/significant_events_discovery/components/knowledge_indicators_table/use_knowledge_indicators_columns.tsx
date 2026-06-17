@@ -58,12 +58,17 @@ export const useKnowledgeIndicatorsColumns = ({
           return (
             <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
               <EuiFlexItem grow={false}>
-                <EuiButtonIcon
-                  data-test-subj="knowledgeIndicatorsDetailsButton"
-                  iconType={isExpanded ? 'minimize' : 'expand'}
-                  aria-label={isExpanded ? MINIMIZE_DETAILS_ARIA_LABEL : VIEW_DETAILS_ARIA_LABEL}
-                  onClick={() => toggleSelectedKnowledgeIndicator(ki)}
-                />
+                <EuiToolTip
+                  content={isExpanded ? MINIMIZE_DETAILS_ARIA_LABEL : VIEW_DETAILS_ARIA_LABEL}
+                  disableScreenReaderOutput
+                >
+                  <EuiButtonIcon
+                    data-test-subj="knowledgeIndicatorsDetailsButton"
+                    iconType={isExpanded ? 'minimize' : 'expand'}
+                    aria-label={isExpanded ? MINIMIZE_DETAILS_ARIA_LABEL : VIEW_DETAILS_ARIA_LABEL}
+                    onClick={() => toggleSelectedKnowledgeIndicator(ki)}
+                  />
+                </EuiToolTip>
               </EuiFlexItem>
               <EuiFlexItem>
                 <EuiLink onClick={() => toggleSelectedKnowledgeIndicator(ki)}>{title}</EuiLink>

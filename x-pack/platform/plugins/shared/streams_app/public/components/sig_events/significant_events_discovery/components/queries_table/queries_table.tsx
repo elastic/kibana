@@ -232,12 +232,14 @@ export function QueriesTable() {
         render: (_: unknown, item: SignificantEventQueryRow) => {
           const isSelected = selectedQuery?.query.id === item.query.id;
           return (
-            <EuiButtonIcon
-              data-test-subj="queriesDiscoveryDetailsButton"
-              iconType={isSelected ? 'minimize' : 'maximize'}
-              aria-label={DETAILS_BUTTON_ARIA_LABEL}
-              onClick={() => handleSelectQuery(item)}
-            />
+            <EuiToolTip content={DETAILS_BUTTON_ARIA_LABEL} disableScreenReaderOutput>
+              <EuiButtonIcon
+                data-test-subj="queriesDiscoveryDetailsButton"
+                iconType={isSelected ? 'minimize' : 'maximize'}
+                aria-label={DETAILS_BUTTON_ARIA_LABEL}
+                onClick={() => handleSelectQuery(item)}
+              />
+            </EuiToolTip>
           );
         },
       },
