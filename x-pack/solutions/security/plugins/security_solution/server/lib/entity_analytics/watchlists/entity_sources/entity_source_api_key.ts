@@ -31,22 +31,17 @@ export const grantEntitySourceApiKey = async (
     return user?.authentication_type === 'api_key';
   };
 
+  if (isApiKeyAuthentication()) {
+    throw Boom.forbidden(
+      'Entity source API key generation is not permitted when using API key authentication.'
+    );
+  }
+
   const keyName = sourceName ? `watchlist-entity-source:${sourceName}` : 'watchlist-entity-source';
   const metadata = {
     description: 'API key used to scope watchlist entity source index sync.',
     managed: true,
   };
-
-  // The grant endpoint only supports password/access_token auth and throws on API key auth
-  // (the case in serverless). Use cloneAsInternalUser when the request uses API key auth.
-  if (isApiKeyAuthentication()) {
-    const result = await securityService.authc.apiKeys.cloneAsInternalUser(request, {
-      name: keyName,
-      metadata,
-    });
-    if (!result) return;
-    return { apiKeyId: result.id, apiKey: result.api_key };
-  }
 
   const result = await securityService.authc.apiKeys.grantAsInternalUser(request, {
     name: keyName,

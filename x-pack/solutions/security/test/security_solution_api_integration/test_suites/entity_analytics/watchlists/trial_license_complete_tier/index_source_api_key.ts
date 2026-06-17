@@ -224,6 +224,43 @@ export default ({ getService }: FtrProviderContext) => {
       expect(keyResp.api_keys[0].invalidated).toBe(true);
     });
 
+    it('should return 403 when creating an entity source using API key authentication', async () => {
+      await utils.createSourceIndex(sourceIndexName);
+
+      const { body: watchlist } = await entityAnalyticsApi
+        .createWatchlist({
+          body: { name: 'api-key-auth-test', description: 'test', riskModifier: 1 },
+        })
+        .expect(200);
+
+      // Create a Kibana API key as superuser (inherits full ES + Kibana privileges)
+      const { body: createdApiKey } = await supertest
+        .post('/internal/security/api_key')
+        .set('kbn-xsrf', 'true')
+        .send({ name: 'entity-source-api-key-auth-test' })
+        .expect(200);
+
+      const response = await supertestWithoutAuth
+        .post(`/api/entity_analytics/watchlists/${watchlist.id}/entity_source`)
+        .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+        .set('Authorization', `ApiKey ${createdApiKey.encoded}`)
+        .send({
+          type: 'index',
+          name: 'api-key-auth-source',
+          indexPattern: sourceIndexName,
+          identifierField: 'user.name',
+          enabled: true,
+          range: { start: 'now-10d', end: 'now' },
+        });
+
+      expect(response.status).toBe(403);
+      expect(response.body.message).toContain(
+        'Entity source API key generation is not permitted when using API key authentication'
+      );
+    });
+
     it('should invalidate API keys when the watchlist is deleted', async () => {
       await utils.createSourceIndex(sourceIndexName);
       const { watchlistId, entitySourceId } = await utils.createWatchlistAndEntitySource(
