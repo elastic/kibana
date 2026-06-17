@@ -11,6 +11,7 @@ import { BehaviorSubject } from 'rxjs';
 import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
 import { initializeTrackPanel } from './track_panel';
 import type { DashboardChildren } from './layout_manager/types';
+import type { ViewMode } from '@kbn/presentation-publishing';
 
 const buildChild = (
   uuid: string,
@@ -25,9 +26,11 @@ const buildChild = (
 
 describe('track panel', () => {
   const mockChildrenSubject = new BehaviorSubject<DashboardChildren>({});
+  const mockViewMode = new BehaviorSubject<ViewMode>('edit');
   const { api, cleanup } = initializeTrackPanel(
     async (id: string) => undefined,
-    mockChildrenSubject
+    mockChildrenSubject,
+    mockViewMode
   );
   const {
     expandPanel,
@@ -213,7 +216,8 @@ describe('track panel', () => {
       const children$ = new BehaviorSubject<DashboardChildren>({});
       const { api: blurApi, cleanup: blurCleanup } = initializeTrackPanel(
         async () => undefined,
-        children$
+        children$,
+        mockViewMode
       );
       return { children$, blurApi, blurCleanup };
     };
