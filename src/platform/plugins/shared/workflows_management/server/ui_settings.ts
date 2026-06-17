@@ -65,7 +65,7 @@ export const registerUISettings = (
       schema: schema.boolean(),
       value: false,
       experimental: true,
-      requiresPageReload: false,
+      requiresPageReload: true,
       readonly: false,
     },
   });
