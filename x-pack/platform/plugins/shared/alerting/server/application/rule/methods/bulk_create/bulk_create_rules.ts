@@ -268,7 +268,7 @@ async function runBatch<Params extends RuleParams>({
 }: RunBatchArgs<Params>): Promise<BatchResult> {
   const { logger } = context;
 
-  // NOTE: the values below get mutated at different stages
+  // NOTE: values below get mutated at different stages
   // in the process (ie if we fail schedule creation).
   const preparedRules = new Map<string, PreparedRule>();
   const apiKeys = new Map<string, ApiKeyEntry>();
