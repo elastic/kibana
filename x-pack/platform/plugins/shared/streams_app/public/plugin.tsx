@@ -38,7 +38,8 @@ import {
   createDiscoverFlyoutStreamProcessingLink,
 } from './discover_features';
 import { StreamsTelemetryService } from './telemetry/service';
-import { registerSignificantEventAttachment } from './components/sig_events/significant_event_attachment';
+import { registerSignificantEventAttachment } from './components/sig_events/significant_event_attachment/significant_event_attachment';
+import { FocusedSignificantEventService } from './services/significant_events/focused_significant_event_service';
 import { StreamsAppLocatorDefinition } from '../common/locators';
 
 const StreamsApplication = dynamic(() =>
@@ -93,6 +94,8 @@ export class StreamsAppPlugin
 {
   logger: Logger;
   telemetry: StreamsTelemetryService = new StreamsTelemetryService();
+  private readonly focusedSignificantEventService = new FocusedSignificantEventService();
+  private cleanupSignificantEventAttachment?: () => void;
 
   private readonly version: string;
 
@@ -199,6 +202,7 @@ export class StreamsAppPlugin
           dataStreamsClient: new DataStreamsStatsService()
             .start({ http: coreStart.http })
             .getClient(),
+          focusedSignificantEventService: this.focusedSignificantEventService,
           telemetryClient: this.telemetry.getClient(),
           version: this.version,
         };
@@ -221,9 +225,13 @@ export class StreamsAppPlugin
     return {};
   }
 
-  start(_coreStart: CoreStart, pluginsStart: StreamsAppStartDependencies): StreamsAppPublicStart {
+  start(coreStart: CoreStart, pluginsStart: StreamsAppStartDependencies): StreamsAppPublicStart {
     if (pluginsStart.agentBuilder) {
-      registerSignificantEventAttachment({ agentBuilder: pluginsStart.agentBuilder });
+      this.cleanupSignificantEventAttachment = registerSignificantEventAttachment({
+        agentBuilder: pluginsStart.agentBuilder,
+        chrome: coreStart.chrome,
+        focusedSignificantEventService: this.focusedSignificantEventService,
+      });
     }
 
     const locator = pluginsStart.share.url.locators.create(new StreamsAppLocatorDefinition());
@@ -248,5 +256,9 @@ export class StreamsAppPlugin
     });
 
     return {};
+  }
+
+  stop() {
+    this.cleanupSignificantEventAttachment?.();
   }
 }
