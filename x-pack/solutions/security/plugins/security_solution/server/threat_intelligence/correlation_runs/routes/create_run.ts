@@ -11,17 +11,11 @@ import {
   CORRELATION_RUNS_API_PATH,
   CORRELATION_RUNS_MAX_CONCURRENT,
   THREAT_INTELLIGENCE_API_PRIVILEGES,
-  DIAMOND_CONNECTOR_SETTING_KEY,
-  TRIAGE_CONNECTOR_SETTING_KEY,
-  SYNTHESIS_CONNECTOR_SETTING_KEY,
-  TRIAGE_CONFIDENCE_FLOOR_SETTING_KEY,
-  TRIAGE_TOP_N_SETTING_KEY,
 } from '../../../../common/threat_intelligence/hub';
 import { createCorrelationRunRequestSchema } from '../../../../common/threat_intelligence/correlation_runs';
 import type { CorrelationRunResult } from '../../../../common/threat_intelligence/correlation_runs';
 import { correlateThreat } from '../../services/correlate_threat';
 import type { CorrelateThreatDepthResult } from '../../services/correlate_threat';
-import { resolveScopedModel } from '../../routes/lib/scoped_model';
 import { resolveCurrentSpaceId } from '../../lib/space_filter';
 import { createRunIndexService } from '../run_index_service';
 import { createRunDataClient } from '../run_data_client';
@@ -153,89 +147,6 @@ export const registerCreateCorrelationRunRoute = ({
           });
         }
 
-        // ---- Resolve models eagerly (fail fast before returning 202) ----
-        const readStr = async (key: string): Promise<string | undefined> => {
-          try {
-            const v = await uiSettingsClient.get<string>(key);
-            return v || undefined;
-          } catch {
-            return undefined;
-          }
-        };
-        const readNum = async (key: string, fallback: number): Promise<number> => {
-          try {
-            const v = await uiSettingsClient.get<number>(key);
-            return typeof v === 'number' && Number.isFinite(v) ? v : fallback;
-          } catch {
-            return fallback;
-          }
-        };
-
-        const [
-          diamondConnectorId,
-          triageConnectorId,
-          synthesisConnectorId,
-          triageFloor,
-          triageTopN,
-        ] = await Promise.all([
-          readStr(DIAMOND_CONNECTOR_SETTING_KEY),
-          readStr(TRIAGE_CONNECTOR_SETTING_KEY),
-          readStr(SYNTHESIS_CONNECTOR_SETTING_KEY),
-          readNum(TRIAGE_CONFIDENCE_FLOOR_SETTING_KEY, 0.65),
-          readNum(TRIAGE_TOP_N_SETTING_KEY, 75),
-        ]);
-
-        const extractionModelOutcome = await resolveScopedModel({
-          inference,
-          request,
-          uiSettingsClient,
-          connectorIdOverride: diamondConnectorId,
-          logger,
-        });
-
-        if (!extractionModelOutcome.ok && inputType === 'raw_text') {
-          return response.customError({
-            statusCode: extractionModelOutcome.reason === 'no_inference_plugin' ? 503 : 400,
-            body: { message: extractionModelOutcome.message },
-          });
-        }
-
-        const triageModelOutcome = await resolveScopedModel({
-          inference,
-          request,
-          uiSettingsClient,
-          connectorIdOverride: triageConnectorId,
-          logger,
-        });
-
-        if (!triageModelOutcome.ok) {
-          return response.customError({
-            statusCode: triageModelOutcome.reason === 'no_inference_plugin' ? 503 : 400,
-            body: { message: `Triage model unavailable: ${triageModelOutcome.message}` },
-          });
-        }
-
-        const synthesisModelOutcome = await resolveScopedModel({
-          inference,
-          request,
-          uiSettingsClient,
-          connectorIdOverride: synthesisConnectorId,
-          logger,
-        });
-
-        if (!synthesisModelOutcome.ok) {
-          return response.customError({
-            statusCode: synthesisModelOutcome.reason === 'no_inference_plugin' ? 503 : 400,
-            body: { message: `Synthesis model unavailable: ${synthesisModelOutcome.message}` },
-          });
-        }
-
-        const extractionModel = extractionModelOutcome.ok
-          ? extractionModelOutcome.model
-          : undefined;
-        const { model: triageModel } = triageModelOutcome;
-        const { model: synthesisModel } = synthesisModelOutcome;
-
         // ---- Build run record ----
         const runId = uuidv4();
         const now = new Date().toISOString();
@@ -276,6 +187,9 @@ export const registerCreateCorrelationRunRoute = ({
         }
 
         // ---- Spawn background pipeline ----
+        // inference, request, and uiSettingsClient are request-scoped but safe to capture
+        // post-202: KibanaRequest holds credentials in-memory and is not invalidated on
+        // response. esClient follows the same pattern and is already used post-202 here.
         void (async () => {
           await runDataClient.updateRun(runId, {
             status: 'running',
@@ -285,14 +199,12 @@ export const registerCreateCorrelationRunRoute = ({
           try {
             const depthResult = await correlateThreat({
               esClient,
-              extractionModel,
-              triageModel,
-              synthesisModel,
+              inference,
+              request,
+              uiSettingsClient,
               logger,
               spaceId,
               input,
-              triageFloor,
-              triageTopN,
               depth,
               onStage: async (stage) => {
                 await runDataClient.updateRun(runId, {

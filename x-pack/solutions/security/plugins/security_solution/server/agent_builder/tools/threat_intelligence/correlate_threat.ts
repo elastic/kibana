@@ -12,15 +12,9 @@ import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import type { Logger } from '@kbn/logging';
 import {
   CORRELATE_THREAT_API_PATH,
-  DIAMOND_CONNECTOR_SETTING_KEY,
-  TRIAGE_CONNECTOR_SETTING_KEY,
-  SYNTHESIS_CONNECTOR_SETTING_KEY,
-  TRIAGE_CONFIDENCE_FLOOR_SETTING_KEY,
-  TRIAGE_TOP_N_SETTING_KEY,
   THREAT_INTEL_TOOL_IDS,
 } from '../../../../common/threat_intelligence/hub';
 import { correlateThreat } from '../../../threat_intelligence/services';
-import { resolveScopedModel } from '../../../threat_intelligence/routes/lib/scoped_model';
 import type { SecuritySolutionPluginCoreSetupDependencies } from '../../../plugin_contract';
 
 /**
@@ -110,100 +104,6 @@ export const correlateThreatTool = (
     const inference = depsStart.inference;
     const uiSettingsClient = coreStart.uiSettings.asScopedToClient(savedObjectsClient);
 
-    const readStringSetting = async (key: string): Promise<string | undefined> => {
-      try {
-        const v = await uiSettingsClient.get<string>(key);
-        return v || undefined;
-      } catch {
-        return undefined;
-      }
-    };
-
-    const readNumberSetting = async (key: string, fallback: number): Promise<number> => {
-      try {
-        const v = await uiSettingsClient.get<number>(key);
-        return typeof v === 'number' && Number.isFinite(v) ? v : fallback;
-      } catch {
-        return fallback;
-      }
-    };
-
-    const [diamondConnectorId, triageConnectorId, synthesisConnectorId, triageFloor, triageTopN] =
-      await Promise.all([
-        readStringSetting(DIAMOND_CONNECTOR_SETTING_KEY),
-        readStringSetting(TRIAGE_CONNECTOR_SETTING_KEY),
-        readStringSetting(SYNTHESIS_CONNECTOR_SETTING_KEY),
-        readNumberSetting(TRIAGE_CONFIDENCE_FLOOR_SETTING_KEY, 0.65),
-        readNumberSetting(TRIAGE_TOP_N_SETTING_KEY, 75),
-      ]);
-
-    const { depth } = params;
-    const triageNeeded = depth === 'triage' || depth === 'full';
-    const synthesisNeeded = depth === 'full';
-
-    // Resolve the extraction model eagerly so misconfigured deployments fail fast.
-    // Required only for raw_text mode; !ok is treated as undefined for report_id.
-    const extractionModelOutcome = await resolveScopedModel({
-      inference,
-      request,
-      uiSettingsClient,
-      connectorIdOverride: diamondConnectorId,
-      logger,
-    });
-
-    if (!extractionModelOutcome.ok && params.raw_text) {
-      return {
-        results: [
-          {
-            type: ToolResultType.error,
-            data: { message: extractionModelOutcome.message },
-          },
-        ],
-      };
-    }
-
-    const triageModelOutcome = await resolveScopedModel({
-      inference,
-      request,
-      uiSettingsClient,
-      connectorIdOverride: triageConnectorId,
-      logger,
-    });
-
-    if (!triageModelOutcome.ok && triageNeeded) {
-      return {
-        results: [
-          {
-            type: ToolResultType.error,
-            data: { message: `Triage model unavailable: ${triageModelOutcome.message}` },
-          },
-        ],
-      };
-    }
-
-    const synthesisModelOutcome = await resolveScopedModel({
-      inference,
-      request,
-      uiSettingsClient,
-      connectorIdOverride: synthesisConnectorId,
-      logger,
-    });
-
-    if (!synthesisModelOutcome.ok && synthesisNeeded) {
-      return {
-        results: [
-          {
-            type: ToolResultType.error,
-            data: { message: `Synthesis model unavailable: ${synthesisModelOutcome.message}` },
-          },
-        ],
-      };
-    }
-
-    const extractionModel = extractionModelOutcome.ok ? extractionModelOutcome.model : undefined;
-    const triageModel = triageModelOutcome.ok ? triageModelOutcome.model : undefined;
-    const synthesisModel = synthesisModelOutcome.ok ? synthesisModelOutcome.model : undefined;
-
     if (!params.raw_text && !params.report_id) {
       return {
         results: [
@@ -222,15 +122,13 @@ export const correlateThreatTool = (
     try {
       const depthResult = await correlateThreat({
         esClient: esClient.asCurrentUser,
-        extractionModel,
-        triageModel,
-        synthesisModel,
+        inference,
+        request,
+        uiSettingsClient,
         logger,
         spaceId,
         input,
-        triageFloor,
-        triageTopN,
-        depth,
+        depth: params.depth,
       });
 
       return { results: [{ type: ToolResultType.other, data: depthResult }] };

@@ -5,10 +5,24 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type {
+  ElasticsearchClient,
+  IUiSettingsClient,
+  KibanaRequest,
+  Logger,
+} from '@kbn/core/server';
+import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { ScopedModel } from '@kbn/agent-builder-server';
 import { CostTraceBuilder } from '../routes/lib/cost_tracker';
-import { THREAT_REPORTS_INDEX_PATTERN } from '../../../common/threat_intelligence/hub';
+import {
+  DIAMOND_CONNECTOR_SETTING_KEY,
+  TRIAGE_CONNECTOR_SETTING_KEY,
+  SYNTHESIS_CONNECTOR_SETTING_KEY,
+  TRIAGE_CONFIDENCE_FLOOR_SETTING_KEY,
+  TRIAGE_TOP_N_SETTING_KEY,
+  THREAT_REPORTS_INDEX_PATTERN,
+} from '../../../common/threat_intelligence/hub';
+import { resolveScopedModel } from '../routes/lib/scoped_model';
 import type {
   CorrelationFindings,
   CostTrace,
@@ -46,17 +60,15 @@ export type CorrelateThreatInput =
 
 export interface CorrelateThreatParams {
   esClient: ElasticsearchClient;
-  /** Required for raw_text mode (extractDiamond LLM call). */
-  extractionModel: ScopedModel | undefined;
-  /** Sonnet-tier model for the triage pass. Required for depth ∈ {triage, full}; unused otherwise. */
-  triageModel: ScopedModel | undefined;
-  /** Opus-tier model for the §6 synthesis pass. Required for depth === 'full'; unused otherwise. */
-  synthesisModel: ScopedModel | undefined;
+  /** Inference plugin start contract — used to resolve ScopedModels internally. */
+  inference: InferenceServerStart | undefined;
+  /** Kibana request — passed to resolveScopedModel for connector auth. */
+  request: KibanaRequest;
+  /** UI settings client — used to read per-stage connector overrides and triage tuning. */
+  uiSettingsClient: IUiSettingsClient;
   logger: Logger;
   spaceId: string;
   input: CorrelateThreatInput;
-  triageFloor: number;
-  triageTopN: number;
   /**
    * Controls how far the pipeline runs before returning.
    * - `extract` — return after diamond extraction (or fetch for report_id mode).
@@ -370,20 +382,101 @@ const buildMergedCandidates = (
  * Pass `onStage` to receive progress notifications after each phase —
  * useful for background-run callers that persist stage to ES.
  */
+const readStr = async (
+  uiSettingsClient: IUiSettingsClient,
+  key: string
+): Promise<string | undefined> => {
+  try {
+    const v = await uiSettingsClient.get<string>(key);
+    return v || undefined;
+  } catch {
+    return undefined;
+  }
+};
+
+const readNum = async (
+  uiSettingsClient: IUiSettingsClient,
+  key: string,
+  fallback: number
+): Promise<number> => {
+  try {
+    const v = await uiSettingsClient.get<number>(key);
+    return typeof v === 'number' && Number.isFinite(v) ? v : fallback;
+  } catch {
+    return fallback;
+  }
+};
+
 export const correlateThreat = async ({
   esClient,
-  extractionModel,
-  triageModel,
-  synthesisModel,
+  inference,
+  request,
+  uiSettingsClient,
   logger,
   spaceId,
   input,
-  triageFloor,
-  triageTopN,
   depth = 'full',
   onStage,
 }: CorrelateThreatParams): Promise<CorrelateThreatDepthResult> => {
   const traceBuilder = new CostTraceBuilder();
+
+  // ---- Resolve settings and models for the depths that need them ----
+  const [diamondConnectorId, triageConnectorId, synthesisConnectorId, triageFloor, triageTopN] =
+    await Promise.all([
+      readStr(uiSettingsClient, DIAMOND_CONNECTOR_SETTING_KEY),
+      readStr(uiSettingsClient, TRIAGE_CONNECTOR_SETTING_KEY),
+      readStr(uiSettingsClient, SYNTHESIS_CONNECTOR_SETTING_KEY),
+      readNum(uiSettingsClient, TRIAGE_CONFIDENCE_FLOOR_SETTING_KEY, 0.65),
+      readNum(uiSettingsClient, TRIAGE_TOP_N_SETTING_KEY, 75),
+    ]);
+
+  const extractionOutcome = await resolveScopedModel({
+    inference,
+    request,
+    uiSettingsClient,
+    connectorIdOverride: diamondConnectorId,
+    logger,
+  });
+  if (!extractionOutcome.ok && input.mode === 'raw_text') {
+    throw new Error(`Extraction model unavailable: ${extractionOutcome.message}`);
+  }
+  const extractionModel: ScopedModel | undefined = extractionOutcome.ok
+    ? extractionOutcome.model
+    : undefined;
+
+  const triageModel: ScopedModel | undefined =
+    depth === 'triage' || depth === 'full'
+      ? await (async () => {
+          const triageOutcome = await resolveScopedModel({
+            inference,
+            request,
+            uiSettingsClient,
+            connectorIdOverride: triageConnectorId,
+            logger,
+          });
+          if (!triageOutcome.ok) {
+            throw new Error(`Triage model unavailable: ${triageOutcome.message}`);
+          }
+          return triageOutcome.model;
+        })()
+      : undefined;
+
+  const synthesisModel: ScopedModel | undefined =
+    depth === 'full'
+      ? await (async () => {
+          const synthesisOutcome = await resolveScopedModel({
+            inference,
+            request,
+            uiSettingsClient,
+            connectorIdOverride: synthesisConnectorId,
+            logger,
+          });
+          if (!synthesisOutcome.ok) {
+            throw new Error(`Synthesis model unavailable: ${synthesisOutcome.message}`);
+          }
+          return synthesisOutcome.model;
+        })()
+      : undefined;
 
   const notifyStage = async (stage: CorrelationRunStage): Promise<void> => {
     if (!onStage) return;

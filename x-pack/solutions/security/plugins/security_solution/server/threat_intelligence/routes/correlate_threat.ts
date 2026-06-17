@@ -9,14 +9,8 @@ import { schema } from '@kbn/config-schema';
 import {
   CORRELATE_THREAT_API_PATH,
   THREAT_INTELLIGENCE_API_PRIVILEGES,
-  DIAMOND_CONNECTOR_SETTING_KEY,
-  TRIAGE_CONNECTOR_SETTING_KEY,
-  SYNTHESIS_CONNECTOR_SETTING_KEY,
-  TRIAGE_CONFIDENCE_FLOOR_SETTING_KEY,
-  TRIAGE_TOP_N_SETTING_KEY,
 } from '../../../common/threat_intelligence/hub';
 import { correlateThreat } from '../services/correlate_threat';
-import { resolveScopedModel } from './lib/scoped_model';
 import { resolveCurrentSpaceId } from '../lib/space_filter';
 import type { RouteRegistrationDeps } from '.';
 
@@ -31,6 +25,14 @@ const correlateThreatBodySchema = schema.object(
     url: schema.maybe(schema.string({ minLength: 1 })),
     /** Phase 5 (Cases integration) — stub 400 for now. */
     case_id: schema.maybe(schema.string({ minLength: 1 })),
+    depth: schema.maybe(
+      schema.oneOf([
+        schema.literal('extract'),
+        schema.literal('knn'),
+        schema.literal('triage'),
+        schema.literal('full'),
+      ])
+    ),
   },
   {
     validate: (body) => {
@@ -81,7 +83,13 @@ export const registerCorrelateThreatRoute = ({
         validate: { request: { body: correlateThreatBodySchema } },
       },
       async (context, request, response) => {
-        const { url, case_id: caseId, raw_text: rawText, report_id: reportId } = request.body;
+        const {
+          url,
+          case_id: caseId,
+          raw_text: rawText,
+          report_id: reportId,
+          depth = 'full',
+        } = request.body;
 
         if (url) {
           return response.badRequest({
@@ -97,129 +105,32 @@ export const registerCorrelateThreatRoute = ({
         const core = await context.core;
         const spaceId = resolveCurrentSpaceId(getSpacesService(), request);
         const { client: uiSettingsClient } = core.uiSettings;
-
-        // Read per-stage connector overrides from advanced settings.
-        const readStringSetting = async (key: string): Promise<string | undefined> => {
-          try {
-            const v = await uiSettingsClient.get<string>(key);
-            return v || undefined;
-          } catch {
-            return undefined;
-          }
-        };
-        const readNumberSetting = async (key: string, fallback: number): Promise<number> => {
-          try {
-            const v = await uiSettingsClient.get<number>(key);
-            return typeof v === 'number' && Number.isFinite(v) ? v : fallback;
-          } catch {
-            return fallback;
-          }
-        };
-
-        const [
-          diamondConnectorId,
-          triageConnectorId,
-          synthesisConnectorId,
-          triageFloor,
-          triageTopN,
-        ] = await Promise.all([
-          readStringSetting(DIAMOND_CONNECTOR_SETTING_KEY),
-          readStringSetting(TRIAGE_CONNECTOR_SETTING_KEY),
-          readStringSetting(SYNTHESIS_CONNECTOR_SETTING_KEY),
-          readNumberSetting(TRIAGE_CONFIDENCE_FLOOR_SETTING_KEY, 0.65),
-          readNumberSetting(TRIAGE_TOP_N_SETTING_KEY, 75),
-        ]);
-
         const inference = getInference();
 
-        // Resolve the extraction model (diamond/raw_text). Required only for raw_text mode
-        // but resolved eagerly so misconfigured deployments fail fast.
-        const extractionModelOutcome = await resolveScopedModel({
-          inference,
-          request,
-          uiSettingsClient,
-          connectorIdOverride: diamondConnectorId,
-          logger,
-        });
+        const input = rawText
+          ? ({ mode: 'raw_text', text: rawText } as const)
+          : reportId
+          ? ({ mode: 'report_id', report_id: reportId } as const)
+          : null;
 
-        if (!extractionModelOutcome.ok && rawText) {
-          return response.customError({
-            statusCode: extractionModelOutcome.reason === 'no_inference_plugin' ? 503 : 400,
-            body: { message: extractionModelOutcome.message },
-          });
+        if (!input) {
+          // Schema validation guarantees one of the above is set — unreachable.
+          return response.badRequest({ body: { message: 'No valid input mode resolved' } });
         }
-
-        // Resolve the triage model (Sonnet-class, required for both input modes).
-        const triageModelOutcome = await resolveScopedModel({
-          inference,
-          request,
-          uiSettingsClient,
-          connectorIdOverride: triageConnectorId,
-          logger,
-        });
-
-        if (!triageModelOutcome.ok) {
-          return response.customError({
-            statusCode: triageModelOutcome.reason === 'no_inference_plugin' ? 503 : 400,
-            body: { message: `Triage model unavailable: ${triageModelOutcome.message}` },
-          });
-        }
-
-        // Resolve the synthesis model (Opus-tier, required for both input modes).
-        const synthesisModelOutcome = await resolveScopedModel({
-          inference,
-          request,
-          uiSettingsClient,
-          connectorIdOverride: synthesisConnectorId,
-          logger,
-        });
-
-        if (!synthesisModelOutcome.ok) {
-          return response.customError({
-            statusCode: synthesisModelOutcome.reason === 'no_inference_plugin' ? 503 : 400,
-            body: { message: `Synthesis model unavailable: ${synthesisModelOutcome.message}` },
-          });
-        }
-
-        const extractionModel = extractionModelOutcome.ok
-          ? extractionModelOutcome.model
-          : undefined;
-        const { model: triageModel } = triageModelOutcome;
-        const { model: synthesisModel } = synthesisModelOutcome;
 
         try {
-          const input = rawText
-            ? ({ mode: 'raw_text', text: rawText } as const)
-            : reportId
-            ? ({ mode: 'report_id', report_id: reportId } as const)
-            : null;
-
-          if (!input) {
-            // Schema validation guarantees one of the above is set — unreachable.
-            return response.badRequest({ body: { message: 'No valid input mode resolved' } });
-          }
-
           const depthResult = await correlateThreat({
             esClient: core.elasticsearch.client.asCurrentUser,
-            extractionModel,
-            triageModel,
-            synthesisModel,
+            inference,
+            request,
+            uiSettingsClient,
             logger,
             spaceId,
             input,
-            triageFloor,
-            triageTopN,
-            depth: 'full',
+            depth,
           });
 
-          if (depthResult.depth !== 'full') {
-            return response.customError({
-              statusCode: 500,
-              body: { message: 'Internal error: unexpected depth result from correlateThreat' },
-            });
-          }
-
-          return response.ok({ body: depthResult.findings });
+          return response.ok({ body: depthResult });
         } catch (err) {
           logger.warn(`correlate_threat failed: ${(err as Error).message}`);
           return response.customError({
