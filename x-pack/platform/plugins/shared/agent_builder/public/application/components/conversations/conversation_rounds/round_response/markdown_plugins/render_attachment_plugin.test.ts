@@ -6,6 +6,9 @@
  */
 
 import type { ReactElement } from 'react';
+import unified from 'unified';
+import remarkParse from 'remark-parse-no-trim';
+import type { Node, Parent } from 'unist';
 import type {
   AttachmentVersionRef,
   VersionedAttachment,
@@ -19,6 +22,35 @@ import {
 import { AttachmentLoadingSkeleton } from '../attachments/attachment_loading_skeleton';
 import { InlineAttachmentWithActions } from '../attachments/inline_attachment_with_actions';
 import { renderAttachmentElement } from '@kbn/agent-builder-common/tools/custom_rendering';
+import type { MutableNode } from './utils';
+
+/**
+ * Parses markdown the same way the chat renderer does (remark parser + the
+ * render_attachment tag parser transformer), so the test exercises the real
+ * mdast shapes produced by remark rather than hand-built trees.
+ */
+const parseMarkdown = (markdown: string): Node => {
+  const processor = unified().use(remarkParse).use(renderAttachmentTagParser);
+  const tree = processor.parse(markdown);
+  return processor.runSync(tree);
+};
+
+const collectNodesByType = (tree: Node, type: string): MutableNode[] => {
+  const found: MutableNode[] = [];
+  const walk = (node: Node) => {
+    if (node.type === type) {
+      found.push(node as MutableNode);
+    }
+    if ('children' in node) {
+      (node as Parent).children.forEach(walk);
+    }
+  };
+  walk(tree);
+  return found;
+};
+
+const collectTextValues = (tree: Node): string[] =>
+  collectNodesByType(tree, 'text').map((n) => n.value ?? '');
 
 const createMockAttachment = (
   id: string,
@@ -271,6 +303,52 @@ describe('renderAttachmentTagParser', () => {
       type: renderAttachmentElement.tagName,
       attachmentId: 'dash-1',
       attachmentVersion: '2',
+    });
+  });
+
+  describe('with markdown parsed by remark (real pipeline)', () => {
+    const tag = (id: string, version = '1') =>
+      `<${renderAttachmentElement.tagName} ${renderAttachmentElement.attributes.attachmentId}="${id}" ${renderAttachmentElement.attributes.version}="${version}"/>`;
+
+    it('parses a tag that stands alone in its own paragraph', () => {
+      const tree = parseMarkdown(tag('dash-1', '2'));
+
+      const nodes = collectNodesByType(tree, renderAttachmentElement.tagName);
+      expect(nodes).toHaveLength(1);
+      expect(nodes[0]).toMatchObject({
+        type: renderAttachmentElement.tagName,
+        attachmentId: 'dash-1',
+        attachmentVersion: '2',
+      });
+    });
+
+    it('parses a tag when text sits on the line directly above it (same paragraph)', () => {
+      const markdown = `Rule:\n${tag('rule-1')}\n\nPreview:\n${tag('preview-1')}`;
+
+      const tree = parseMarkdown(markdown);
+
+      const nodes = collectNodesByType(tree, renderAttachmentElement.tagName);
+      expect(nodes.map((n) => n.attachmentId)).toEqual(['rule-1', 'preview-1']);
+
+      // The literal tag markup must not survive as visible text.
+      const allText = collectTextValues(tree).join('');
+      expect(allText).not.toContain('render_attachment');
+      // Surrounding prose must be preserved.
+      expect(allText).toContain('Rule:');
+      expect(allText).toContain('Preview:');
+    });
+
+    it('parses a tag with trailing text on the same line', () => {
+      const markdown = `${tag('rule-1')} was generated.`;
+
+      const tree = parseMarkdown(markdown);
+
+      const nodes = collectNodesByType(tree, renderAttachmentElement.tagName);
+      expect(nodes.map((n) => n.attachmentId)).toEqual(['rule-1']);
+
+      const allText = collectTextValues(tree).join('');
+      expect(allText).not.toContain('render_attachment');
+      expect(allText).toContain('was generated.');
     });
   });
 });
