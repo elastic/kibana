@@ -17,7 +17,6 @@ import {
   EuiButtonEmpty,
   EuiButton,
   EuiText,
-  EuiCallOut,
 } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
@@ -40,6 +39,7 @@ import {
   QUERY_OVERRIDE_SCHEDULE_TOGGLE_DESCRIPTION,
   QUERY_OVERRIDE_SCHEDULE_TOGGLE_LABEL,
   QUERY_USING_PACK_SCHEDULE_LABEL,
+  SCHEDULE_ERRORS_TOAST_TITLE,
   TIMEOUT_RRULE_INHERIT_HELP,
 } from '../../components/schedule_section/translations';
 import { CodeEditorField } from '../../saved_queries/form/code_editor_field';
@@ -72,7 +72,12 @@ const QueryFlyoutComponent: React.FC<QueryFlyoutProps> = ({
   onClose,
   packSchedule,
 }) => {
-  const permissions = useKibana().services.application.capabilities.osquery;
+  const {
+    application: {
+      capabilities: { osquery: permissions },
+    },
+    notifications: { toasts },
+  } = useKibana().services;
   const [isEditMode] = useState(!!defaultValue);
   const isRruleSchedulingEnabled = ExperimentalFeaturesService.get().rruleScheduling;
   const { serializer, idSet, ...hooksForm } = usePackQueryForm({
@@ -176,16 +181,20 @@ const QueryFlyoutComponent: React.FC<QueryFlyoutProps> = ({
   );
 
   const handleSaveClick = useCallback(() => {
-    // Option-B gate (design D1/D2): when the override schedule is invalid the
-    // inline error region is already surfaced (rendered whenever
-    // `scheduleErrors` is non-empty) and the Save button is disabled. This
-    // guard is the keyboard/programmatic backstop — never save on error.
+    // Option-B gate (design D1/D2): when the override schedule is invalid,
+    // surface the cause as a danger toast and do NOT save. The inline field
+    // errors stay visible (ScheduleSection `showErrors`) for in-place context.
     if (scheduleErrors.length > 0) {
+      toasts.addDanger({
+        title: SCHEDULE_ERRORS_TOAST_TITLE,
+        text: scheduleErrors.join('\n'),
+      });
+
       return;
     }
 
     return handleSubmit(onSubmit)();
-  }, [scheduleErrors, handleSubmit, onSubmit]);
+  }, [scheduleErrors, toasts, handleSubmit, onSubmit]);
 
   const handleSetQueryValue = useCallback(
     (savedQuery: any) => {
@@ -266,30 +275,6 @@ const QueryFlyoutComponent: React.FC<QueryFlyoutProps> = ({
                       />
                     ) : null}
                   </ToggleableRow>
-                  {scheduleErrors.length > 0 ? (
-                    <>
-                      <EuiSpacer size="s" />
-                      <EuiCallOut
-                        announceOnMount
-                        size="s"
-                        color="danger"
-                        iconType="alert"
-                        title={
-                          <FormattedMessage
-                            id="xpack.osquery.queryFlyoutForm.scheduleErrorsTitle"
-                            defaultMessage="Fix the schedule before saving"
-                          />
-                        }
-                        data-test-subj="osquery-query-flyout-schedule-errors"
-                      >
-                        <ul>
-                          {scheduleErrors.map((error) => (
-                            <li key={error}>{error}</li>
-                          ))}
-                        </ul>
-                      </EuiCallOut>
-                    </>
-                  ) : null}
                   {!overridePackSchedule && packSchedule?.schedule_type ? (
                     <EuiText size="xs" color="subdued" data-test-subj="osquery-using-pack-schedule">
                       {QUERY_USING_PACK_SCHEDULE_LABEL}
@@ -364,7 +349,6 @@ const QueryFlyoutComponent: React.FC<QueryFlyoutProps> = ({
             <EuiButton
               data-test-subj="query-flyout-save-button"
               isLoading={isSubmitting}
-              isDisabled={scheduleErrors.length > 0}
               onClick={handleSaveClick}
               fill
             >

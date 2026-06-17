@@ -17,7 +17,6 @@ import {
   EuiBottomBar,
   EuiHorizontalRule,
   EuiAccordion,
-  EuiCallOut,
 } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -25,7 +24,7 @@ import deepEqual from 'fast-deep-equal';
 import { FormProvider, useForm as useHookForm } from 'react-hook-form';
 
 import { PackShardsField } from './shards/pack_shards_field';
-import { useRouterNavigate } from '../../common/lib/kibana';
+import { useKibana, useRouterNavigate } from '../../common/lib/kibana';
 import { ExperimentalFeaturesService } from '../../common/experimental_features_service';
 import { PolicyIdComboBoxField } from './policy_id_combobox_field';
 import { QueriesField } from './queries_field';
@@ -37,7 +36,10 @@ import { convertPackQueriesToSO, convertSOQueriesToPack } from './utils';
 import { deserializeSchedule, serializeSchedule } from './schedule_serializer';
 import { ScheduleSection } from '../../components/schedule_section';
 import { validateScheduleFormData } from '../../components/schedule_section/validation';
-import { PACK_QUERY_STALE_INTERVAL_ERROR } from '../../components/schedule_section/translations';
+import {
+  PACK_QUERY_STALE_INTERVAL_ERROR,
+  SCHEDULE_ERRORS_TOAST_TITLE,
+} from '../../components/schedule_section/translations';
 import type { ScheduleFormData } from '../../components/schedule_section/types';
 import type { PackItem } from '../types';
 import { NameField } from './name_field';
@@ -81,6 +83,10 @@ const PackFormComponent: React.FC<PackFormProps> = ({
   }, []);
   const [showConfirmationModal, setShowConfirmationModal] = useState(false);
   const handleHideConfirmationModal = useCallback(() => setShowConfirmationModal(false), []);
+
+  const {
+    notifications: { toasts },
+  } = useKibana().services;
 
   const { data: { agentPoliciesById } = {} } = useAgentPolicies();
 
@@ -178,7 +184,6 @@ const PackFormComponent: React.FC<PackFormProps> = ({
   }, [isRruleSchedulingEnabled, schedule, queries]);
 
   const [showScheduleErrors, setShowScheduleErrors] = useState(false);
-  const scheduleSectionRef = useRef<HTMLDivElement | null>(null);
 
   // Mirror the pack-level schedule into the legacy top-level fields so the
   // QueriesField → QueryFlyout path sees `schedule_type` / `interval` /
@@ -325,13 +330,12 @@ const PackFormComponent: React.FC<PackFormProps> = ({
       return;
     }
 
-    // RHF's `trigger()` cannot see the controlled
-    // `schedule` object, so the schedule is validated separately here. On error,
-    // do NOT open the confirmation modal or submit — surface the cause inline
-    // and scroll the schedule section into view instead.
     if (scheduleErrors.length > 0) {
       setShowScheduleErrors(true);
-      scheduleSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      toasts.addDanger({
+        title: SCHEDULE_ERRORS_TOAST_TITLE,
+        text: scheduleErrors.join('\n'),
+      });
 
       return;
     }
@@ -343,7 +347,7 @@ const PackFormComponent: React.FC<PackFormProps> = ({
     }
 
     handleSubmitForm();
-  }, [agentCount, handleSubmitForm, scheduleErrors, trigger]);
+  }, [agentCount, handleSubmitForm, scheduleErrors, toasts, trigger]);
 
   const handleConfirmConfirmationClick = useCallback(async () => {
     setShowConfirmationModal(false);
@@ -430,38 +434,12 @@ const PackFormComponent: React.FC<PackFormProps> = ({
           <>
             <EuiFlexGroup>
               <EuiFlexItem>
-                <div ref={scheduleSectionRef}>
-                  <ScheduleSection
-                    value={schedule}
-                    onChange={handleScheduleChange}
-                    disabled={isReadOnly}
-                    showErrors={showScheduleErrors || scheduleErrors.length > 0}
-                  />
-                  {scheduleErrors.length > 0 ? (
-                    <>
-                      <EuiSpacer size="s" />
-                      <EuiCallOut
-                        announceOnMount
-                        size="s"
-                        color="danger"
-                        iconType="alert"
-                        title={
-                          <FormattedMessage
-                            id="xpack.osquery.pack.form.scheduleErrorsTitle"
-                            defaultMessage="Fix the schedule before saving"
-                          />
-                        }
-                        data-test-subj="osquery-pack-schedule-errors"
-                      >
-                        <ul>
-                          {scheduleErrors.map((error) => (
-                            <li key={error}>{error}</li>
-                          ))}
-                        </ul>
-                      </EuiCallOut>
-                    </>
-                  ) : null}
-                </div>
+                <ScheduleSection
+                  value={schedule}
+                  onChange={handleScheduleChange}
+                  disabled={isReadOnly}
+                  showErrors={showScheduleErrors || scheduleErrors.length > 0}
+                />
               </EuiFlexItem>
             </EuiFlexGroup>
             <EuiSpacer size="m" />
@@ -492,7 +470,7 @@ const PackFormComponent: React.FC<PackFormProps> = ({
               <EuiFlexItem grow={false}>
                 <EuiButton
                   isLoading={isSubmitting}
-                  isDisabled={scheduleErrors.length > 0 || isReadOnly}
+                  isDisabled={isReadOnly}
                   color="primary"
                   fill
                   size="m"

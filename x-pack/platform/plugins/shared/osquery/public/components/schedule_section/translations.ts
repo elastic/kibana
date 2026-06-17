@@ -184,6 +184,13 @@ export const PACK_QUERY_STALE_INTERVAL_ERROR = i18n.translate(
   }
 );
 
+export const SCHEDULE_ERRORS_TOAST_TITLE = i18n.translate(
+  'xpack.osquery.scheduleSection.scheduleErrorsToastTitle',
+  {
+    defaultMessage: 'Fix the schedule before saving',
+  }
+);
+
 export const SPLAY_QUERY_STORM_WARNING = i18n.translate(
   'xpack.osquery.scheduleSection.splayQueryStormWarning',
   {

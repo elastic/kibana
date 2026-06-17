@@ -11,6 +11,7 @@ import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { EuiProvider } from '@elastic/eui';
 
 // --- Kibana services ---
+const mockAddDanger = jest.fn();
 jest.mock('../../common/lib/kibana', () => ({
   useKibana: () => ({
     services: {
@@ -24,6 +25,7 @@ jest.mock('../../common/lib/kibana', () => ({
           },
         },
       },
+      notifications: { toasts: { addDanger: mockAddDanger } },
     },
   }),
 }));
@@ -337,9 +339,9 @@ describe('QueryFlyout', () => {
       expect(onClose).not.toHaveBeenCalled();
     });
 
-    // Submit-gate UX: an invalid override disables the Save button and surfaces
-    // the inline flyout error region; a valid override saves.
-    it('disables the Save button and surfaces the error for an invalid override schedule', async () => {
+    // Submit-gate UX: an invalid override keeps the Save button enabled but
+    // clicking it fires a danger toast and never saves; a valid override saves.
+    it('shows a danger toast and blocks save for an invalid override schedule', async () => {
       const onSave = jest.fn().mockResolvedValue(undefined);
 
       renderFlyout({
@@ -359,17 +361,17 @@ describe('QueryFlyout', () => {
         fireEvent.click(screen.getByTestId('osquery-query-override-pack-schedule'));
       });
 
+      // The Save button stays enabled — the gate is a toast on click.
       await waitFor(() => {
-        expect(screen.getByTestId('query-flyout-save-button')).toBeDisabled();
-        expect(screen.getByTestId('osquery-query-flyout-schedule-errors')).toBeInTheDocument();
+        expect(screen.getByTestId('query-flyout-save-button')).not.toBeDisabled();
       });
 
       fireEvent.click(screen.getByTestId('query-flyout-save-button'));
-      await new Promise((resolve) => setTimeout(resolve, 0));
+      await waitFor(() => expect(mockAddDanger).toHaveBeenCalled());
       expect(onSave).not.toHaveBeenCalled();
     });
 
-    it('a valid override schedule keeps the Save button enabled and saves', async () => {
+    it('a valid override schedule saves with no error toast', async () => {
       const onSave = jest.fn().mockResolvedValue(undefined);
 
       renderFlyout({
@@ -391,13 +393,13 @@ describe('QueryFlyout', () => {
       fireEvent.change(idInput, { target: { value: 'valid-override-query' } });
 
       expect(screen.getByTestId('query-flyout-save-button')).not.toBeDisabled();
-      expect(screen.queryByTestId('osquery-query-flyout-schedule-errors')).not.toBeInTheDocument();
 
       fireEvent.click(screen.getByTestId('query-flyout-save-button'));
       await waitFor(() => expect(onSave).toHaveBeenCalled());
+      expect(mockAddDanger).not.toHaveBeenCalled();
     });
 
-    it('flag-off parity — no schedule gate, Save stays enabled', async () => {
+    it('flag-off parity — no schedule gate, save proceeds with no error toast', async () => {
       ExperimentalFeaturesService.init({
         experimentalFeatures: { ...allowedExperimentalValues, rruleScheduling: false },
       });
@@ -409,10 +411,10 @@ describe('QueryFlyout', () => {
       fireEvent.change(idInput, { target: { value: 'flag-off-query' } });
 
       expect(screen.getByTestId('query-flyout-save-button')).not.toBeDisabled();
-      expect(screen.queryByTestId('osquery-query-flyout-schedule-errors')).not.toBeInTheDocument();
 
       fireEvent.click(screen.getByTestId('query-flyout-save-button'));
       await waitFor(() => expect(onSave).toHaveBeenCalled());
+      expect(mockAddDanger).not.toHaveBeenCalled();
     });
 
     // Child mode resync: flipping the parent pack mode re-seeds an inherited

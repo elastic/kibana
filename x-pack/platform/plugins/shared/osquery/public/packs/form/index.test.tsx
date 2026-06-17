@@ -19,6 +19,7 @@ import { ExperimentalFeaturesService } from '../../common/experimental_features_
 import { allowedExperimentalValues } from '../../../common/experimental_features';
 
 const mockUseRouterNavigate = jest.fn();
+const mockAddDanger = jest.fn();
 
 // Mutable references so B-series tests can capture and assert on calls.
 let mockCreateAsync = jest.fn().mockResolvedValue({ data: { name: 'Test Pack' } });
@@ -40,6 +41,11 @@ jest.mock('../../common/lib/kibana', () => ({
       href: path,
     };
   },
+  useKibana: () => ({
+    services: {
+      notifications: { toasts: { addDanger: mockAddDanger } },
+    },
+  }),
 }));
 
 jest.mock('../../agent_policies', () => ({
@@ -551,10 +557,11 @@ describe('PackForm', () => {
   // Beyond "no save", assert the button is disabled, the confirmation modal
   // never opens, and the inline error region surfaces the cause.
   // ─────────────────────────────────────────────────────────────────────────
-  describe('schedule submit-gate UX (Option B)', () => {
+  describe('schedule submit-gate UX (Option B — toast on click)', () => {
     beforeEach(() => {
       mockCreateAsync = jest.fn().mockResolvedValue({ data: { name: 'Test Pack' } });
       mockUpdateAsync = jest.fn().mockResolvedValue({ data: { name: 'Test Pack' } });
+      mockAddDanger.mockClear();
       ExperimentalFeaturesService.init({
         experimentalFeatures: { ...allowedExperimentalValues, rruleScheduling: true },
       });
@@ -590,7 +597,7 @@ describe('PackForm', () => {
     // empty weekdays (custom WEEKLY with no byweekday). The deserializer
     // never emits an empty byweekday, so drive it through the UI: start from a
     // valid custom-weekly pack (MO-FR checked) and uncheck every day.
-    it('disables the button and surfaces an error when all weekdays are unchecked', async () => {
+    it('shows a danger toast and blocks save when all weekdays are unchecked', async () => {
       // FREQ=WEEKLY deserializes to the "custom" UI mode with the default
       // Mon-Fri selection — a valid starting point.
       const defaultValue = baseRrulePack({ rrule: 'FREQ=WEEKLY' });
@@ -599,7 +606,8 @@ describe('PackForm', () => {
         <PackForm editMode={true} defaultValue={defaultValue} packId="pack-gate-ux" />
       );
 
-      // Initially valid → enabled.
+      // The button stays enabled regardless of schedule validity — the gate is
+      // a toast on click, not a disabled button.
       expect(getByTestId('update-pack-button')).not.toBeDisabled();
 
       // Uncheck every selected weekday checkbox (ids end with the weekday token).
@@ -612,18 +620,16 @@ describe('PackForm', () => {
         }
       });
 
-      // Now invalid: button disabled and the cause surfaced inline. The
-      // confirmation modal can never open from a disabled button.
-      await waitFor(() => expect(getByTestId('update-pack-button')).toBeDisabled());
-      expect(getByTestId('osquery-pack-schedule-errors')).toBeInTheDocument();
-
+      // Now invalid: the button is still enabled, but clicking it fires a
+      // danger toast and never saves / opens the confirmation modal.
+      expect(getByTestId('update-pack-button')).not.toBeDisabled();
       fireEvent.click(getByTestId('update-pack-button'));
-      await new Promise((resolve) => setTimeout(resolve, 0));
+      await waitFor(() => expect(mockAddDanger).toHaveBeenCalled());
       expect(mockUpdateAsync).not.toHaveBeenCalled();
     });
 
     // stop date before start date.
-    it('disables the button and surfaces an error when the stop date precedes the start', async () => {
+    it('shows a danger toast and blocks save when the stop date precedes the start', async () => {
       const defaultValue = baseRrulePack({
         start_date: '2024-06-01T00:00:00.000Z',
         end_date: '2024-01-01T00:00:00.000Z',
@@ -633,65 +639,59 @@ describe('PackForm', () => {
         <PackForm editMode={true} defaultValue={defaultValue} packId="pack-gate-ux" />
       );
 
-      expect(getByTestId('update-pack-button')).toBeDisabled();
+      expect(getByTestId('update-pack-button')).not.toBeDisabled();
       fireEvent.click(getByTestId('update-pack-button'));
-      await new Promise((resolve) => setTimeout(resolve, 0));
-
-      expect(getByTestId('osquery-pack-schedule-errors')).toBeInTheDocument();
+      await waitFor(() => expect(mockAddDanger).toHaveBeenCalled());
       expect(mockUpdateAsync).not.toHaveBeenCalled();
     });
 
     // over-cap plain splay.
-    it('disables the button and surfaces an error for an over-cap splay', async () => {
+    it('shows a danger toast and blocks save for an over-cap splay', async () => {
       const defaultValue = baseRrulePack({ splay: '13h' });
 
       const { getByTestId } = renderWithContext(
         <PackForm editMode={true} defaultValue={defaultValue} packId="pack-gate-ux" />
       );
 
-      expect(getByTestId('update-pack-button')).toBeDisabled();
+      expect(getByTestId('update-pack-button')).not.toBeDisabled();
       fireEvent.click(getByTestId('update-pack-button'));
-      await new Promise((resolve) => setTimeout(resolve, 0));
-
-      expect(getByTestId('osquery-pack-schedule-errors')).toBeInTheDocument();
+      await waitFor(() => expect(mockAddDanger).toHaveBeenCalled());
       expect(mockUpdateAsync).not.toHaveBeenCalled();
     });
 
     // over-cap COMPOUND splay (distinct rawCompound branch).
-    it('disables the button for an over-cap compound splay (12h1m)', async () => {
+    it('shows a danger toast and blocks save for an over-cap compound splay (12h1m)', async () => {
       const defaultValue = baseRrulePack({ splay: '12h1m' });
 
       const { getByTestId } = renderWithContext(
         <PackForm editMode={true} defaultValue={defaultValue} packId="pack-gate-ux" />
       );
 
-      expect(getByTestId('update-pack-button')).toBeDisabled();
+      expect(getByTestId('update-pack-button')).not.toBeDisabled();
       fireEvent.click(getByTestId('update-pack-button'));
-      await new Promise((resolve) => setTimeout(resolve, 0));
-
-      expect(getByTestId('osquery-pack-schedule-errors')).toBeInTheDocument();
+      await waitFor(() => expect(mockAddDanger).toHaveBeenCalled());
       expect(mockUpdateAsync).not.toHaveBeenCalled();
     });
 
-    // happy path: valid schedule enables the button, no error region.
-    it('a valid rrule schedule enables the button and shows no error region', async () => {
+    // happy path: valid schedule saves with no error toast.
+    it('a valid rrule schedule saves with no error toast', async () => {
       const defaultValue = baseRrulePack({ splay: '5m' });
 
-      const { getByTestId, queryByTestId } = renderWithContext(
+      const { getByTestId } = renderWithContext(
         <PackForm editMode={true} defaultValue={defaultValue} packId="pack-gate-ux" />
       );
 
       expect(getByTestId('update-pack-button')).not.toBeDisabled();
-      expect(queryByTestId('osquery-pack-schedule-errors')).toBeNull();
 
       fireEvent.click(getByTestId('update-pack-button'));
       await waitFor(() => expect(mockUpdateAsync).toHaveBeenCalled());
+      expect(mockAddDanger).not.toHaveBeenCalled();
     });
 
     // mode switch Interval → rrule with a stale per-query interval
-    // override: the backstop error surfaces and submit is blocked. (The
-    // serializer-strip itself is unit-tested in use_pack_query_form.test.tsx.)
-    it('surfaces the backstop error when a query keeps an interval override on an rrule pack', async () => {
+    // override: the backstop error surfaces in the toast and submit is blocked.
+    // (The serializer-strip itself is unit-tested in use_pack_query_form.test.tsx.)
+    it('shows the backstop error in a toast when a query keeps an interval override on an rrule pack', async () => {
       const defaultValue = {
         id: 'pack-stale-q',
         saved_object_id: 'saved-stale-q',
@@ -725,32 +725,30 @@ describe('PackForm', () => {
         <PackForm editMode={true} defaultValue={defaultValue} packId="pack-stale-q" />
       );
 
-      expect(getByTestId('update-pack-button')).toBeDisabled();
+      expect(getByTestId('update-pack-button')).not.toBeDisabled();
       fireEvent.click(getByTestId('update-pack-button'));
-      await new Promise((resolve) => setTimeout(resolve, 0));
-
-      expect(getByTestId('osquery-pack-schedule-errors')).toBeInTheDocument();
+      await waitFor(() => expect(mockAddDanger).toHaveBeenCalled());
       expect(mockUpdateAsync).not.toHaveBeenCalled();
     });
 
-    // flag-off parity: the button is never schedule-disabled and the
-    // error region never renders (the memo is empty when the flag is off).
-    it('flag-off parity — button enabled and no schedule error region', async () => {
+    // flag-off parity: the gate never fires (the memo is empty when the flag is
+    // off), so a save proceeds with no error toast.
+    it('flag-off parity — no error toast, save proceeds', async () => {
       ExperimentalFeaturesService.init({
         experimentalFeatures: { ...allowedExperimentalValues, rruleScheduling: false },
       });
 
       const defaultValue = baseRrulePack({ rrule: 'FREQ=WEEKLY' }); // invalid IF rrule were on
 
-      const { getByTestId, queryByTestId } = renderWithContext(
+      const { getByTestId } = renderWithContext(
         <PackForm editMode={true} defaultValue={defaultValue} packId="pack-gate-ux" />
       );
 
       expect(getByTestId('update-pack-button')).not.toBeDisabled();
-      expect(queryByTestId('osquery-pack-schedule-errors')).toBeNull();
 
       fireEvent.click(getByTestId('update-pack-button'));
       await waitFor(() => expect(mockUpdateAsync).toHaveBeenCalled());
+      expect(mockAddDanger).not.toHaveBeenCalled();
     });
   });
 
