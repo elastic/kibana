@@ -10,6 +10,11 @@ import { manageRuleTool } from '../tools/manage_rule';
 import { manageActionPolicyTool } from '../tools/manage_action_policy';
 import type { ManageActionPolicyToolDeps } from '../tools/manage_action_policy';
 import { alertingTools } from '../common/constants';
+import {
+  generateRuleSchemaDoc,
+  generateRuleOperationsDoc,
+  generateActionPolicySchemaDoc,
+} from './schema_to_skill_docs';
 
 export const createRuleManagementSkill = (deps: ManageActionPolicyToolDeps) =>
   defineSkillType({
@@ -30,7 +35,7 @@ Rules declare a \`kind\` of \`alert\` or \`signal\`. This is the most important 
 
 ### Alert (\`kind: alert\`)
 - **Stateful alerting** with full episode lifecycle: pending, active, recovering, inactive.
-- Supports state transitions (\`consecutive_breaches\`), recovery detection, and notification dispatch.
+- Supports state transitions (\`pending_count\` / \`recovering_count\`), recovery detection, and notification dispatch.
 - Produces \`type: 'alert'\` events that participate in the dispatcher pipeline.
 - UI label: **"Alert"**.
 - Use when the user wants to be **notified**, needs **lifecycle tracking**, or wants **recovery detection**.
@@ -133,6 +138,21 @@ The end-to-end notification path:
 
 Signal rules (\`kind: signal\`) are excluded at step 2 — the dispatcher query only selects \`type == 'alert'\` events.`,
       },
+      {
+        name: 'rule-schema',
+        relativePath: './references',
+        content: generateRuleSchemaDoc(),
+      },
+      {
+        name: 'rule-operations-schema',
+        relativePath: './references',
+        content: generateRuleOperationsDoc(),
+      },
+      {
+        name: 'action-policy-schema',
+        relativePath: './references',
+        content: generateActionPolicySchemaDoc(),
+      },
     ],
     content: `## Domain Knowledge
 
@@ -178,6 +198,11 @@ For an existing rule, pass the \`ruleAttachmentId\` and only include the operati
 
 ## ES|QL Query Guidance
 
+- Every \`set_query\` call **must** include \`format: "composed"\` or \`format: "standalone"\`. Omitting \`format\` will fail validation.
+  - **Composed** shares a \`base\` query with appendable \`breach.segment\` and optional \`recovery.segment\`:
+    \`{ format: "composed", base: "FROM metrics-* | STATS avg_cpu = AVG(cpu) BY host.name", breach: { segment: "WHERE avg_cpu > 0.9" } }\`
+  - **Standalone** uses independent full queries:
+    \`{ format: "standalone", breach: { query: "FROM metrics-* | STATS avg_cpu = AVG(cpu) BY host.name | WHERE avg_cpu > 0.9" } }\`
 - The base query must be a valid ES|QL statement.
 - Do **not** include time range filters in the query — the lookback window is applied automatically.
 - The query must return rows for an alert to fire. Use \`| WHERE ...\` to filter for breach conditions.
@@ -192,39 +217,34 @@ For an existing rule, pass the \`ruleAttachmentId\` and only include the operati
 
 ## State Transition
 
-- \`set_state_transition\` with \`consecutive_breaches: N\` means the rule fires only after N consecutive evaluation cycles breach the threshold. Use this when the user wants to reduce noise.
+Use \`set_state_transition\` to delay alert firing until the threshold is breached N times in a row. This reduces noise from transient spikes.
+
+- \`pending_count: N\` — breaches required before transitioning from pending to active (e.g. \`pending_count: 3\` means 3 consecutive breach cycles).
+- \`pending_timeframe\` — optional time window for the pending evaluation (e.g. \`"15m"\`).
+- \`recovering_count: N\` — non-breach cycles required before transitioning from recovering to inactive.
+- \`recovering_timeframe\` — optional time window for the recovering evaluation.
+
+State transition is only allowed on \`kind: alert\` rules. Refer to the [rule-operations-schema reference](./references/rule-operations-schema.md) for the full field schema.
 
 ## Recovery Strategy
 
-\`recovery_strategy\` is a **top-level rule field** (not inside the query). It controls how episodes transition from active to recovering/inactive.
-
-| Value | Behaviour |
-|---|---|
-| \`'no_breach'\` | Recovers episodes automatically when a breaching group stops appearing in breach query results. **Default for most alert rules.** |
-| \`'query'\` | Runs a separate recovery query each cycle. Requires a \`recovery\` block inside \`set_query\` (\`{ segment }\` for composed, \`{ query }\` for standalone). Use when recovery needs different criteria than "not breaching". |
-| \`'none'\` | Disables recovery entirely — episodes never transition to recovering/inactive. Use only when lifecycle tracking is not needed. |
-
-Signal rules (\`kind: signal\`) cannot set \`recovery_strategy\`.
+\`recovery_strategy\` is a **top-level rule field** (not inside the query). It controls how episodes transition from active to recovering/inactive. Signal rules (\`kind: signal\`) cannot set \`recovery_strategy\`.
 
 When using \`recovery_strategy: 'query'\`, add a \`set_query\` operation that includes a \`recovery\` block alongside \`breach\`:
 - **Composed**: \`recovery: { segment: 'WHERE cpu < 0.5' }\`
 - **Standalone**: \`recovery: { query: 'FROM metrics-* | WHERE cpu < 0.5' }\`
 
+Refer to the [rule-schema reference](./references/rule-schema.md) for allowed values and constraints.
+
 ## No-Data Strategy
 
 \`no_data_strategy\` is a **top-level rule field** that controls behaviour when no data is present. Only meaningful for standalone queries with a \`no_data\` block.
-
-| Value | Behaviour |
-|---|---|
-| \`'none'\` | No-data situations are ignored (default). |
-| \`'emit'\` | Emits a \`no_data\` alert event when \`no_data\` query returns no rows. |
-| \`'last_known_status'\` | Holds the last known episode status when no data is present. |
-| \`'recover'\` | Forces recovery when no data is present. |
 
 When setting \`no_data_strategy\` to anything other than \`'none'\`, add a \`no_data\` block to the standalone query:
 \`no_data: { query: 'FROM heartbeat-* | STATS count = COUNT(*) BY host.name | WHERE count >= 1' }\`
 
 Signal rules cannot set \`no_data_strategy\`. Composed queries do not support \`no_data\`.
+Refer to the [rule-schema reference](./references/rule-schema.md) for allowed values and constraints.
 
 ## Final Validation
 
