@@ -39,7 +39,7 @@ export const createNavigationTree = ({
   isCasesAvailable?: boolean;
   showAiAssistant?: boolean;
   showAlertingV2?: boolean;
-}): NavigationTreeDefinition => {
+}) => {
   return {
     body: [
       {
@@ -662,5 +662,5 @@ export const createNavigationTree = ({
         ],
       },
     ],
-  };
+  } as const satisfies NavigationTreeDefinition;
 };

@@ -148,6 +148,7 @@ export class ServerlessSearchPlugin
         });
       })
     );
+
     serverless.initNavigation('es', navigationTree$, {
       [RECENT_DASHBOARDS_SLOT_ID]: createRecentItemsData$(
         core.chrome.recentlyAccessed,

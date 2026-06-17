@@ -33,7 +33,7 @@ export { RECENT_DASHBOARDS_SLOT_ID };
 export const createNavigationTree = async (
   services: Services,
   chatExperience: AIChatExperience = AIChatExperience.Classic
-): Promise<NavigationTreeDefinition> => {
+) => {
   const showAlertingV2 = Boolean(services.application.capabilities.alertingVTwo);
 
   const showAgentBuilder = chatExperience === AIChatExperience.Agent;
@@ -163,5 +163,5 @@ export const createNavigationTree = async (
       },
       createManagementFooterItemsTree(chatExperience, showAlertingV2),
     ],
-  };
+  } as const satisfies NavigationTreeDefinition;
 };

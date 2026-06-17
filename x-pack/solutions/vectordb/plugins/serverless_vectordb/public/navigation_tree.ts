@@ -61,7 +61,7 @@ export function createNavigationTree({
 }: ApplicationStart & {
   showAiAssistant?: boolean;
   showAlertingV2?: boolean;
-}): NavigationTreeDefinition {
+}) {
   return {
     body: [
       {
@@ -291,5 +291,5 @@ export function createNavigationTree({
         ],
       },
     ],
-  };
+  } as const satisfies NavigationTreeDefinition;
 }

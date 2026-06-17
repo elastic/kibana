@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 
 export const RECENT_DASHBOARDS_SLOT_ID = 'recentDashboards';
 
-export const createNavigationTree = (): NavigationTreeDefinition => {
+export const createNavigationTree = () => {
   return {
     body: [
       {
@@ -137,5 +137,5 @@ export const createNavigationTree = (): NavigationTreeDefinition => {
         ],
       },
     ],
-  };
+  } as const satisfies NavigationTreeDefinition;
 };

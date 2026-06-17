@@ -7,6 +7,12 @@
 
 import type { InternalChromeStart } from '@kbn/core-chrome-browser-internal';
 import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import type {
+  NavigationTreeDefinition,
+  SolutionId,
+  NavTreeExtensionSlotDataSources,
+} from '@kbn/core-chrome-browser';
+import type { Observable } from 'rxjs';
 import { from, map } from 'rxjs';
 import { generateManageOrgMembersNavCard, manageOrgMembersNavCardName } from './navigation';
 import type {
@@ -64,7 +70,11 @@ export class ServerlessPlugin
     });
 
     return {
-      initNavigation: (id, navigationTree$, slotDataSources) => {
+      initNavigation: <TTree extends NavigationTreeDefinition>(
+        id: SolutionId,
+        navigationTree$: Observable<TTree>,
+        slotDataSources?: NavTreeExtensionSlotDataSources<TTree>
+      ) => {
         project.initNavigation(id, navigationTree$, slotDataSources);
       },
       setBreadcrumbs: (breadcrumbs, params) => project.setBreadcrumbs(breadcrumbs, params),
