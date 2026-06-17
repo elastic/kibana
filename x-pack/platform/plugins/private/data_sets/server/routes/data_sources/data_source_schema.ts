@@ -29,6 +29,9 @@ const gcsSettingsWithSecretsSchema = schema.object({
   token_uri: optionalString,
   auth: optionalString,
   credentials: optionalString,
+  jwt_audience: optionalString,
+  sts_audience: optionalString,
+  service_account_impersonation_url: optionalString,
 });
 
 const azureSettingsWithSecretsSchema = schema.object({

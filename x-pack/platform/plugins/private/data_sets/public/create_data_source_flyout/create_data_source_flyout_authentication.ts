@@ -13,7 +13,7 @@ import type { DataSourceType, DataSourceWithSecrets } from '../../common/datasou
 export type S3AuthenticationMode = 'access_and_secret_keys' | 'federated_identity';
 
 /** GCS authentication modes (UI-only). */
-export type GcsAuthenticationMode = 'access_and_secret_keys';
+export type GcsAuthenticationMode = 'access_and_secret_keys' | 'federated_identity';
 
 /** Azure authentication modes (UI-only; `settings.auth` is never submitted). */
 export type AzureAuthenticationMode = 'credentials' | 'connection_string' | 'sas_token';
@@ -84,6 +84,23 @@ export const getCreateDataSourceAuthenticationOptions = (
     ];
   }
 
+  if (dataSourceType === 'gcs') {
+    return [
+      {
+        value: 'access_and_secret_keys',
+        text: i18n.translate('dataSets.createFlyout.authentication.accessAndSecretKeys', {
+          defaultMessage: 'Access and Secret Keys',
+        }),
+      },
+      {
+        value: 'federated_identity',
+        text: i18n.translate('dataSets.createFlyout.authentication.federatedIdentity', {
+          defaultMessage: 'Federated Identity',
+        }),
+      },
+    ];
+  }
+
   return [
     {
       value: 'access_and_secret_keys',
@@ -102,6 +119,9 @@ export const showsAuthenticationCredentialFields = (
     return mode === 'credentials' || mode === 'connection_string' || mode === 'sas_token';
   }
   if (dataSourceType === 's3') {
+    return mode === 'access_and_secret_keys' || mode === 'federated_identity';
+  }
+  if (dataSourceType === 'gcs') {
     return mode === 'access_and_secret_keys' || mode === 'federated_identity';
   }
   return mode === 'access_and_secret_keys';
@@ -156,16 +176,32 @@ export const applyAuthenticationModeToDataSource = (
       };
     }
     case 'gcs': {
-      const { credentials: _credentials, auth: _auth, ...rest } = data.settings;
+      const {
+        credentials: _credentials,
+        jwt_audience: _jwtAudience,
+        sts_audience: _stsAudience,
+        service_account_impersonation_url: _serviceAccountImpersonationUrl,
+        auth: _auth,
+        ...rest
+      } = data.settings;
       const credentialsText = data.settings.credentials?.trim();
+
+      let applied: Record<string, unknown> = {};
+      if (mode === 'access_and_secret_keys' && credentialsText) {
+        applied = { credentials: credentialsText };
+      } else if (mode === 'federated_identity') {
+        applied = {
+          jwt_audience: data.settings.jwt_audience,
+          sts_audience: data.settings.sts_audience,
+          service_account_impersonation_url: data.settings.service_account_impersonation_url,
+        };
+      }
       return {
         ...data,
         settings: {
           ...rest,
           ...authSettings,
-          ...(mode === 'access_and_secret_keys' && credentialsText
-            ? { credentials: credentialsText }
-            : {}),
+          ...applied,
         },
       };
     }

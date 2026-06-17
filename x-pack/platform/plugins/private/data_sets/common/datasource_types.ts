@@ -78,6 +78,9 @@ export interface GCSDataSourceSettings {
 
 export interface GCSDataSourceSettingsWithSecrets extends GCSDataSourceSettings {
   credentials?: string;
+  jwt_audience?: string;
+  sts_audience?: string;
+  service_account_impersonation_url?: string;
 }
 
 export type AzureDataSource = DataSourceCommon<'azure', AzureDataSourceSettings>;

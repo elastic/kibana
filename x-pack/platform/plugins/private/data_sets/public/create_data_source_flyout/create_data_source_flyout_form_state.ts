@@ -34,6 +34,9 @@ export interface CreateDataSourceFlyoutFormSettings {
     token_uri: string;
     auth: string;
     credentialsJson: string;
+    jwt_audience: string;
+    sts_audience: string;
+    service_account_impersonation_url: string;
   };
   azure: {
     endpoint: string;
@@ -76,7 +79,16 @@ export const emptyCreateDataSourceFormSettings = (): CreateDataSourceFlyoutFormS
     sts_endpoint: '',
     sts_region: '',
   },
-  gcs: { project_id: '', endpoint: '', token_uri: '', auth: '', credentialsJson: '' },
+  gcs: {
+    project_id: '',
+    endpoint: '',
+    token_uri: '',
+    auth: '',
+    credentialsJson: '',
+    jwt_audience: '',
+    sts_audience: '',
+    service_account_impersonation_url: '',
+  },
   azure: {
     endpoint: '',
     account: '',

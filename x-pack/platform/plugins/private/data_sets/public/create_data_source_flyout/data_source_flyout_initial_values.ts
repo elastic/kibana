@@ -87,6 +87,12 @@ export const authenticationModeFromDataSource = (
 
   if (data.type === 'gcs') {
     const { credentials } = settings;
+    const hasFederatedIdentity =
+      (typeof settings.jwt_audience === 'string' && settings.jwt_audience.trim() !== '') ||
+      (typeof settings.sts_audience === 'string' && settings.sts_audience.trim() !== '');
+    if (hasFederatedIdentity) {
+      return 'federated_identity';
+    }
     const hasCredentials =
       typeof credentials === 'string'
         ? credentials.trim() !== ''

@@ -18,7 +18,10 @@ import {
   type CreateDataSourceAuthenticationMode,
 } from './create_data_source_flyout_authentication';
 import { CreateDataSourceFlyoutTypeSettingsAzureAuthenticationFields } from './create_data_source_flyout_type_settings_azure';
-import { CreateDataSourceFlyoutTypeSettingsGcsCredentials } from './create_data_source_flyout_type_settings_gcs';
+import {
+  CreateDataSourceFlyoutTypeSettingsGcsCredentials,
+  CreateDataSourceFlyoutTypeSettingsGcsFederatedIdentity,
+} from './create_data_source_flyout_type_settings_gcs';
 import {
   CreateDataSourceFlyoutTypeSettingsS3Credentials,
   CreateDataSourceFlyoutTypeSettingsS3FederatedIdentity,
@@ -30,6 +33,7 @@ export function CreateDataSourceFlyoutAuthenticationFields({
   requireS3Credentials,
   requireS3FederatedIdentity,
   requireGcsCredentials,
+  requireGcsFederatedIdentity,
   requireAzureCredentials,
   control,
   unregister,
@@ -39,6 +43,7 @@ export function CreateDataSourceFlyoutAuthenticationFields({
   requireS3Credentials: boolean;
   requireS3FederatedIdentity: boolean;
   requireGcsCredentials: boolean;
+  requireGcsFederatedIdentity: boolean;
   requireAzureCredentials: boolean;
   control: Control<CreateDataSourceFlyoutFormValues, any>;
   unregister: UseFormUnregister<CreateDataSourceFlyoutFormValues>;
@@ -67,11 +72,18 @@ export function CreateDataSourceFlyoutAuthenticationFields({
           areFieldsRequired={requireS3FederatedIdentity}
         />
       ) : null}
-      {dataSourceType === 'gcs' ? (
+      {dataSourceType === 'gcs' && authenticationMode === 'access_and_secret_keys' ? (
         <CreateDataSourceFlyoutTypeSettingsGcsCredentials
           control={control}
           unregister={unregister}
           areCredentialsRequired={requireGcsCredentials}
+        />
+      ) : null}
+      {dataSourceType === 'gcs' && authenticationMode === 'federated_identity' ? (
+        <CreateDataSourceFlyoutTypeSettingsGcsFederatedIdentity
+          control={control}
+          unregister={unregister}
+          areFieldsRequired={requireGcsFederatedIdentity}
         />
       ) : null}
       {dataSourceType === 'azure' ? (
