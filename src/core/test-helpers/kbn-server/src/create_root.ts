@@ -98,7 +98,9 @@ export function createRootWithSettings(
     set(settings, 'xpack.security.fipsMode.enabled', true);
     // Keep oss=true to avoid loading all xpack plugins on startup — heavy plugins like
     // streams, fleet, and reporting do significant ES initialization that exhausts the
-    // test cluster. Instead, inject only the plugins required for FIPS security compliance.
+    // test cluster. Instead, inject only the minimal set of xpack plugins required for
+    // FIPS security compliance, including the full requiredBundles transitive closure for
+    // the security plugin (spaces, remoteClusters, indexManagement, runtimeFields).
     const existingPaths = Array.isArray(settings?.plugins?.paths)
       ? (settings.plugins.paths as string[])
       : [];
@@ -108,7 +110,17 @@ export function createRootWithSettings(
       join(REPO_ROOT, 'x-pack/platform/plugins/shared/features'),
       join(REPO_ROOT, 'x-pack/platform/plugins/shared/task_manager'),
       join(REPO_ROOT, 'x-pack/platform/plugins/shared/security'),
+      join(REPO_ROOT, 'x-pack/platform/plugins/shared/spaces'),
+      join(REPO_ROOT, 'x-pack/platform/plugins/private/remote_clusters'),
+      join(REPO_ROOT, 'x-pack/platform/plugins/shared/index_management'),
+      join(REPO_ROOT, 'x-pack/platform/plugins/private/runtime_fields'),
     ]);
+    if (cliArgs.serverless) {
+      // spaces config keys use schema.literal(false) with no defaultValue in serverless
+      // mode; set them explicitly since the spaces plugin is now loaded via plugins.paths.
+      set(settings, 'xpack.spaces.allowFeatureVisibility', false);
+      set(settings, 'xpack.spaces.allowSolutionVisibility', false);
+    }
   }
 
   const env = Env.createDefault(
