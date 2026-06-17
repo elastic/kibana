@@ -17,12 +17,35 @@ export interface WorkflowDocumentGetOptions {
   includeGlobal?: boolean;
 }
 
-export interface WriteWorkflowDocumentParams {
-  create?: boolean;
+interface WriteWorkflowDocumentCreateParams {
+  document: WorkflowProperties;
+}
+
+interface WriteWorkflowDocumentOptimisticParams {
+  document: WorkflowProperties;
+  ifSeqNo: number;
+  ifPrimaryTerm: number;
+}
+
+interface WriteWorkflowDocumentReadModifyWriteParams {
+  mutate: (existing: WorkflowProperties) => WorkflowProperties;
   maxRetries?: number;
   getOptions?: WorkflowDocumentGetOptions;
-  mutate: (existing: WorkflowProperties | undefined) => WorkflowProperties;
 }
+
+export type WriteWorkflowDocumentParams =
+  | WriteWorkflowDocumentCreateParams
+  | WriteWorkflowDocumentOptimisticParams
+  | WriteWorkflowDocumentReadModifyWriteParams;
+
+export const isWriteWorkflowDocumentCreateParams = (
+  params: WriteWorkflowDocumentParams
+): params is WriteWorkflowDocumentCreateParams => 'document' in params && !('ifSeqNo' in params);
+
+export const isWriteWorkflowDocumentOptimisticParams = (
+  params: WriteWorkflowDocumentParams
+): params is WriteWorkflowDocumentOptimisticParams =>
+  'document' in params && 'ifSeqNo' in params && 'ifPrimaryTerm' in params;
 
 export const createWorkflowOccWriter = ({
   crudService,
@@ -53,4 +76,17 @@ export const createWorkflowOccWriter = ({
       crudService.indexWorkflowDocument(id, document, { create, ifSeqNo, ifPrimaryTerm }),
     logger,
     maxRetries,
+  });
+
+export const createWorkflowIndexOccWriter = ({
+  crudService,
+  logger,
+}: {
+  crudService: WorkflowCrudService;
+  logger: Logger;
+}): OccWriter<WorkflowProperties> =>
+  new OccWriter<WorkflowProperties>({
+    index: async ({ id, document, create, ifSeqNo, ifPrimaryTerm }) =>
+      crudService.indexWorkflowDocument(id, document, { create, ifSeqNo, ifPrimaryTerm }),
+    logger,
   });

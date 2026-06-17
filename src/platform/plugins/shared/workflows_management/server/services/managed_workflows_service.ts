@@ -185,8 +185,7 @@ export class ManagedWorkflowsService {
         now,
       });
       await this.deps.crudService.writeWorkflowDocument(workflowDocumentId, spaceId, {
-        create: true,
-        mutate: () => document,
+        document,
       });
       return;
     }
@@ -225,8 +224,9 @@ export class ManagedWorkflowsService {
       createdAt: existing.created_at,
     });
     await this.deps.crudService.writeWorkflowDocument(workflowDocumentId, spaceId, {
-      maxRetries: 0,
-      mutate: () => document,
+      document,
+      ifSeqNo: existingDocument.seqNo,
+      ifPrimaryTerm: existingDocument.primaryTerm,
     });
   }
 

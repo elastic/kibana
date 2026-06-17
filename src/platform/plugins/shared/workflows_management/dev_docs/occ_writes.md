@@ -6,23 +6,33 @@ Platform primitives and bulk patterns: [`@kbn/occ` README](../../../../packages/
 
 ## Entry points
 
-| Path | Mechanism | Default retries |
-|------|-----------|-----------------|
-| `WorkflowCrudService.updateWorkflow` → `writeWorkflowDocument` | `OccWriter` (`workflow_occ_writer.ts`) | `3` (`DEFAULT_MAX_RETRIES`) |
-| `ManagedWorkflowsService.installManagedWorkflow` → `writeWorkflowDocument` | `OccWriter` with `maxRetries: 0` on **updates**; outer install loop retries | `0` on update; create uses `create: true` (no OCC retry) |
-| `disableAllWorkflows` | `bulkIndexWithOccRetry` (`bulk_occ_index.ts`) | `3` |
+| Path | `OccWriter` method | Reads before write? | Retries |
+|------|------------------|---------------------|---------|
+| `WorkflowCrudService.updateWorkflow` → `writeWorkflowDocument` (`readModifyWrite`) | `readModifyWrite` | Yes — inside helper, per attempt | `3` (`DEFAULT_MAX_RETRIES`) |
+| `ManagedWorkflowsService.installManagedWorkflow` **create** | `create` | No | Outer install loop on id collision |
+| `ManagedWorkflowsService.installManagedWorkflow` **update** | `write` (optimistic OCC) | No — install pre-read supplies `(ifSeqNo, ifPrimaryTerm)` | Outer install loop on 409 |
+| `disableAllWorkflows` | `bulkIndexWithOccRetry` | Per-page search only | `3` |
 
-## When to use `maxRetries: 0` vs default
+## `writeWorkflowDocument` params (discriminated)
 
-**Use default (`maxRetries` omitted → 3)** when `mutate` is a **pure merge** over the document `OccWriter` just read. On conflict, `OccWriter` re-reads and runs `mutate` again — that is the correct retry semantics.
+```typescript
+// Create (op_type: create)
+{ document }
 
-Example: `updateWorkflow` applies YAML/field patches inside `mutate` against `existingSource` from each fresh read.
+// Optimistic OCC — caller already read version metadata
+{ document, ifSeqNo, ifPrimaryTerm }
 
-**Use `maxRetries: 0`** when the caller already built a **full replacement document** outside `mutate` and passes `mutate: () => document`. An inner OCC retry would re-read but still apply the same stale snapshot, masking the conflict instead of reconciling.
+// Read-modify-write — merge inside mutate
+{ mutate: (existing) => merged, maxRetries?, getOptions? }
+```
 
-Managed workflow **updates** do this: `installManagedWorkflowOnce` prepares the document from the managed definition + existing state, then writes with `maxRetries: 0`. On `409`, `installManagedWorkflow` catches the conflict and re-runs the whole install (re-read, re-prepare, write). See `managed_workflows_service.ts`.
+## When to use which path
 
-Managed **creates** use `create: true`; `OccWriter` does not retry create conflicts regardless of `maxRetries`.
+**`readModifyWrite` (default for user updates)** when `mutate` is a **pure merge** over the document the helper just read. On conflict, `OccWriter` re-reads and runs `mutate` again.
+
+**`write` (optimistic)** when the caller already has the document to index and version metadata from a prior read. Managed workflow **updates** use this: `installManagedWorkflowOnce` reads once, prepares the document, then writes with the pre-read version metadata. On `409`, the outer `installManagedWorkflow` loop re-reads and re-prepares.
+
+**`create`** for managed **creates** (`op_type: create`). No retry on create conflicts inside `OccWriter`.
 
 ## Bulk writes and conflict refresh
 

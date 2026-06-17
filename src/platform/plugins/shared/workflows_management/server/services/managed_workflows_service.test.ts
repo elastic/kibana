@@ -23,6 +23,10 @@ import { WorkflowConflictError } from '@kbn/workflows-yaml';
 import { ManagedWorkflowsService } from './managed_workflows_service';
 import type { VersionedWorkflowDocument, WorkflowCrudService } from './workflow_crud_service';
 import type { WriteWorkflowDocumentParams } from './workflow_occ_writer';
+import {
+  isWriteWorkflowDocumentCreateParams,
+  isWriteWorkflowDocumentOptimisticParams,
+} from './workflow_occ_writer';
 import type { WorkflowProperties } from '../storage/workflow_storage';
 
 let mockManagedWorkflowDefinitions: ManagedWorkflowDefinition[] = [];
@@ -149,9 +153,15 @@ const createCrudServiceMock = () => {
     getWorkflowDocumentSource: jest.fn(),
     getManagedWorkflowDocumentsAllSpaces: jest.fn().mockResolvedValue([]),
     indexWorkflowDocument: jest.fn().mockResolvedValue({ seqNo: 1, primaryTerm: 1 }),
-    writeWorkflowDocument: jest.fn(async (_id, _spaceId, params) =>
-      params.mutate(params.create ? undefined : createWorkflowSource({}))
-    ),
+    writeWorkflowDocument: jest.fn(async (_id, _spaceId, params: WriteWorkflowDocumentParams) => {
+      if (isWriteWorkflowDocumentOptimisticParams(params)) {
+        return params.document;
+      }
+      if (isWriteWorkflowDocumentCreateParams(params)) {
+        return params.document;
+      }
+      return params.mutate(createWorkflowSource({}));
+    }),
     deleteWorkflows: jest.fn().mockResolvedValue(undefined),
     prepareWorkflowDocumentForStorage: jest.fn(
       async ({
@@ -197,12 +207,29 @@ const createCrudServiceMock = () => {
 
 const wireOccAwareWriteWorkflowDocument = (
   crudService: ReturnType<typeof createCrudServiceMock>,
-  logger: ReturnType<typeof loggerMock.create>,
-  options?: { mutateObservations?: boolean[] }
+  logger: ReturnType<typeof loggerMock.create>
 ) => {
+  const index = async ({
+    id: docId,
+    document,
+    create,
+    ifSeqNo,
+    ifPrimaryTerm,
+  }: {
+    id: string;
+    document: WorkflowProperties;
+    create?: boolean;
+    ifSeqNo?: number;
+    ifPrimaryTerm?: number;
+  }) => crudService.indexWorkflowDocument(docId, document, { create, ifSeqNo, ifPrimaryTerm });
+
   crudService.writeWorkflowDocument.mockImplementation(
     async (id: string, spaceId: string, params: WriteWorkflowDocumentParams) => {
-      const writer = new OccWriter<WorkflowProperties>({
+      const indexWriter = new OccWriter<WorkflowProperties>({
+        index,
+        logger,
+      });
+      const readModifyWriter = new OccWriter<WorkflowProperties>({
         get: async (docId) => {
           const document = await crudService.getWorkflowDocumentWithVersion(docId, spaceId);
           if (!document) {
@@ -214,27 +241,39 @@ const wireOccAwareWriteWorkflowDocument = (
             occ: { seqNo: document.seqNo, primaryTerm: document.primaryTerm },
           };
         },
-        index: async ({ id: docId, document, create, ifSeqNo, ifPrimaryTerm }) =>
-          crudService.indexWorkflowDocument(docId, document, { create, ifSeqNo, ifPrimaryTerm }),
-        logger,
-        maxRetries: params.maxRetries,
+        index,
+        maxRetries: 'maxRetries' in params ? params.maxRetries : undefined,
         retryDelayMs: 0,
+        logger,
       });
 
-      const recordingMutate = (existing: WorkflowProperties | undefined) => {
-        if (existing && options?.mutateObservations) {
-          options.mutateObservations.push(existing.enabled);
-        }
-        return params.mutate(existing);
-      };
-
       try {
-        const { document } = await writer.write({
-          id,
-          create: params.create,
-          mutate: recordingMutate,
-        });
-        return document;
+        if (isWriteWorkflowDocumentCreateParams(params)) {
+          return (
+            await indexWriter.create({
+              id,
+              document: params.document,
+            })
+          ).document;
+        }
+
+        if (isWriteWorkflowDocumentOptimisticParams(params)) {
+          return (
+            await indexWriter.write({
+              id,
+              document: params.document,
+              ifSeqNo: params.ifSeqNo,
+              ifPrimaryTerm: params.ifPrimaryTerm,
+            })
+          ).document;
+        }
+
+        return (
+          await readModifyWriter.readModifyWrite({
+            id,
+            mutate: params.mutate,
+          })
+        ).document;
       } catch (error) {
         if (isElasticsearchWriteConflict(error)) {
           throw new WorkflowConflictError(
@@ -280,11 +319,16 @@ const createService = () => {
 const getIndexedDocument = (
   crudService: ReturnType<typeof createCrudServiceMock>
 ): WorkflowProperties => {
-  const params = crudService.writeWorkflowDocument.mock.calls.at(-1)?.[2] as {
-    create?: boolean;
-    mutate: (existing: WorkflowProperties | undefined) => WorkflowProperties;
-  };
-  return params.mutate(params.create ? undefined : createWorkflowSource({}));
+  const params = crudService.writeWorkflowDocument.mock.calls.at(
+    -1
+  )?.[2] as WriteWorkflowDocumentParams;
+  if (isWriteWorkflowDocumentOptimisticParams(params)) {
+    return params.document;
+  }
+  if (isWriteWorkflowDocumentCreateParams(params)) {
+    return params.document;
+  }
+  return params.mutate(createWorkflowSource({}));
 };
 
 describe('ManagedWorkflowsService', () => {
@@ -310,7 +354,7 @@ describe('ManagedWorkflowsService', () => {
       expect(crudService.writeWorkflowDocument).toHaveBeenCalledWith(
         WORKFLOW_ID,
         SPACE_ID,
-        expect.objectContaining({ create: true })
+        expect.objectContaining({ document: expect.any(Object) })
       );
       const indexedDocument = getIndexedDocument(crudService);
       expect(indexedDocument).toEqual(
@@ -432,7 +476,9 @@ describe('ManagedWorkflowsService', () => {
         WORKFLOW_ID,
         SPACE_ID,
         expect.objectContaining({
-          mutate: expect.any(Function),
+          document: expect.any(Object),
+          ifSeqNo: expect.any(Number),
+          ifPrimaryTerm: expect.any(Number),
         })
       );
       const indexedDocument = getIndexedDocument(crudService);
@@ -484,7 +530,11 @@ describe('ManagedWorkflowsService', () => {
       expect(crudService.writeWorkflowDocument).toHaveBeenCalledWith(
         WORKFLOW_ID,
         SPACE_ID,
-        expect.objectContaining({ mutate: expect.any(Function) })
+        expect.objectContaining({
+          document: expect.any(Object),
+          ifSeqNo: expect.any(Number),
+          ifPrimaryTerm: expect.any(Number),
+        })
       );
     });
 
@@ -577,8 +627,6 @@ describe('ManagedWorkflowsService', () => {
 
       const versionedReads = [
         createVersionedDocument(existingEnabled, { seqNo: 1, primaryTerm: 1 }),
-        createVersionedDocument(existingEnabled, { seqNo: 1, primaryTerm: 1 }),
-        createVersionedDocument(existingDisabled, { seqNo: 2, primaryTerm: 1 }),
         createVersionedDocument(existingDisabled, { seqNo: 2, primaryTerm: 1 }),
       ];
       let readIndex = 0;
@@ -596,21 +644,20 @@ describe('ManagedWorkflowsService', () => {
       await service.pluginReady(definition.pluginId);
       await service.installManagedWorkflow(WORKFLOW_ID, { spaceId: SPACE_ID }, definition.pluginId);
 
-      expect(crudService.getWorkflowDocumentWithVersion).toHaveBeenCalledTimes(4);
+      expect(crudService.getWorkflowDocumentWithVersion).toHaveBeenCalledTimes(2);
       expect(crudService.writeWorkflowDocument).toHaveBeenCalledTimes(2);
       expect(crudService.indexWorkflowDocument).toHaveBeenCalledTimes(2);
       expect(getLastIndexedDocument(crudService).enabled).toBe(false);
     });
 
-    it('passes fresh existing into mutate on each OccWriter read during managed update', async () => {
+    it('uses optimistic OCC write with version metadata from the install pre-read', async () => {
       const definition = createDefinition({
         version: 2,
         yaml: workflowYaml({ name: 'Updated Managed Workflow' }),
       });
       mockManagedWorkflowDefinitions = [definition];
       const { crudService, logger, service } = createService();
-      const mutateObservations: boolean[] = [];
-      wireOccAwareWriteWorkflowDocument(crudService, logger, { mutateObservations });
+      wireOccAwareWriteWorkflowDocument(crudService, logger);
 
       const existingEnabled = createWorkflowSource({
         managedVersion: 1,
@@ -625,8 +672,6 @@ describe('ManagedWorkflowsService', () => {
 
       const versionedReads = [
         createVersionedDocument(existingEnabled, { seqNo: 1, primaryTerm: 1 }),
-        createVersionedDocument(existingEnabled, { seqNo: 1, primaryTerm: 1 }),
-        createVersionedDocument(existingDisabled, { seqNo: 2, primaryTerm: 1 }),
         createVersionedDocument(existingDisabled, { seqNo: 2, primaryTerm: 1 }),
       ];
       let readIndex = 0;
@@ -644,9 +689,17 @@ describe('ManagedWorkflowsService', () => {
       await service.pluginReady(definition.pluginId);
       await service.installManagedWorkflow(WORKFLOW_ID, { spaceId: SPACE_ID }, definition.pluginId);
 
-      expect(mutateObservations).toEqual([true, false]);
-      expect(crudService.writeWorkflowDocument.mock.calls[1]?.[2]).toEqual(
-        expect.objectContaining({ maxRetries: 0 })
+      expect(crudService.writeWorkflowDocument).toHaveBeenNthCalledWith(
+        1,
+        WORKFLOW_ID,
+        SPACE_ID,
+        expect.objectContaining({ ifSeqNo: 1, ifPrimaryTerm: 1 })
+      );
+      expect(crudService.writeWorkflowDocument).toHaveBeenNthCalledWith(
+        2,
+        WORKFLOW_ID,
+        SPACE_ID,
+        expect.objectContaining({ ifSeqNo: 2, ifPrimaryTerm: 1 })
       );
     });
   });
@@ -1002,7 +1055,11 @@ describe('ManagedWorkflowsService', () => {
       expect(crudService.writeWorkflowDocument).toHaveBeenCalledWith(
         definition.id,
         SPACE_ID,
-        expect.objectContaining({ mutate: expect.any(Function) })
+        expect.objectContaining({
+          document: expect.any(Object),
+          ifSeqNo: expect.any(Number),
+          ifPrimaryTerm: expect.any(Number),
+        })
       );
     });
 
@@ -1042,7 +1099,11 @@ describe('ManagedWorkflowsService', () => {
       expect(crudService.writeWorkflowDocument).toHaveBeenCalledWith(
         `${definition.id}-instance`,
         SPACE_ID,
-        expect.objectContaining({ mutate: expect.any(Function) })
+        expect.objectContaining({
+          document: expect.any(Object),
+          ifSeqNo: expect.any(Number),
+          ifPrimaryTerm: expect.any(Number),
+        })
       );
     });
 

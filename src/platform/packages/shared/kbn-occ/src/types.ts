@@ -20,9 +20,10 @@ export interface OccDocument<TSource> {
 
 export interface OccWriterDeps<TSource extends object> {
   /**
-   * Must return seq_no + primary_term (ES GET or search with seq_no_primary_term: true).
+   * Required for {@link OccWriter.readModifyWrite}. Must return seq_no + primary_term
+   * (ES GET or search with seq_no_primary_term: true).
    */
-  get: (id: string) => Promise<OccDocument<TSource> | null>;
+  get?: (id: string) => Promise<OccDocument<TSource> | null>;
   index: (params: {
     id: string;
     document: TSource;
@@ -38,10 +39,21 @@ export interface OccWriterDeps<TSource extends object> {
   };
 }
 
+export interface OccCreateParams<TSource extends object> {
+  id: string;
+  document: TSource;
+}
+
 export interface OccWriteParams<TSource extends object> {
   id: string;
-  create?: boolean;
-  mutate: (existing: TSource | undefined) => TSource;
+  document: TSource;
+  ifSeqNo: number;
+  ifPrimaryTerm: number;
+}
+
+export interface OccReadModifyWriteParams<TSource extends object> {
+  id: string;
+  mutate: (existing: TSource) => TSource;
 }
 
 export interface OccWriteResult<TSource> {

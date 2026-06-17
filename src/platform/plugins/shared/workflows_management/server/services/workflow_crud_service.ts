@@ -28,7 +28,10 @@ import { WorkflowConflictError } from '@kbn/workflows-yaml';
 import type { z } from '@kbn/zod/v4';
 import type { WorkflowCrudDeps } from './types';
 import {
+  createWorkflowIndexOccWriter,
   createWorkflowOccWriter,
+  isWriteWorkflowDocumentCreateParams,
+  isWriteWorkflowDocumentOptimisticParams,
   type WorkflowDocumentGetOptions,
   type WriteWorkflowDocumentParams,
 } from './workflow_occ_writer';
@@ -83,6 +86,7 @@ export class WorkflowCrudService {
     string,
     ReturnType<typeof createWorkflowOccWriter>
   >();
+  private indexOccWriter?: ReturnType<typeof createWorkflowIndexOccWriter>;
 
   constructor(private readonly deps: WorkflowCrudDeps) {}
 
@@ -159,7 +163,17 @@ export class WorkflowCrudService {
     return { seqNo: response._seq_no, primaryTerm: response._primary_term };
   }
 
-  private getOccWriter(
+  private getIndexOccWriter() {
+    if (!this.indexOccWriter) {
+      this.indexOccWriter = createWorkflowIndexOccWriter({
+        crudService: this,
+        logger: this.deps.logger,
+      });
+    }
+    return this.indexOccWriter;
+  }
+
+  private getReadModifyWriteOccWriter(
     spaceId: string,
     maxRetries?: number,
     getOptions?: WorkflowDocumentGetOptions
@@ -188,14 +202,33 @@ export class WorkflowCrudService {
     spaceId: string,
     params: WriteWorkflowDocumentParams
   ): Promise<WorkflowProperties> {
-    const writer = this.getOccWriter(spaceId, params.maxRetries, params.getOptions);
-
     try {
-      const { document } = await writer.write({
-        id,
-        create: params.create,
-        mutate: params.mutate,
-      });
+      let document: WorkflowProperties;
+
+      if (isWriteWorkflowDocumentOptimisticParams(params)) {
+        ({ document } = await this.getIndexOccWriter().write({
+          id,
+          document: params.document,
+          ifSeqNo: params.ifSeqNo,
+          ifPrimaryTerm: params.ifPrimaryTerm,
+        }));
+      } else if (isWriteWorkflowDocumentCreateParams(params)) {
+        ({ document } = await this.getIndexOccWriter().create({
+          id,
+          document: params.document,
+        }));
+      } else {
+        const writer = this.getReadModifyWriteOccWriter(
+          spaceId,
+          params.maxRetries,
+          params.getOptions
+        );
+        ({ document } = await writer.readModifyWrite({
+          id,
+          mutate: params.mutate,
+        }));
+      }
+
       return document;
     } catch (error) {
       if (isOccConflictError(error)) {
@@ -637,11 +670,7 @@ export class WorkflowCrudService {
 
       const finalData = await this.writeWorkflowDocument(id, spaceId, {
         getOptions: { includeDeleted: true, includeGlobal: true },
-        mutate: (existingSource) => {
-          if (!existingSource) {
-            throw new Error(`Workflow with id ${id} not found in space ${spaceId}`);
-          }
-
+        mutate: (existingSource: WorkflowProperties) => {
           let updatedData: Partial<WorkflowProperties> = {
             lastUpdatedBy: authenticatedUser,
             updated_at: now.toISOString(),

@@ -2,7 +2,15 @@
 
 Optimistic concurrency control (OCC) for Elasticsearch index documents.
 
-Domains that store entities in normal ES indices inject `get` and `index` functions. `OccWriter` performs read → `mutate` → write with `if_seq_no` / `if_primary_term`, retrying on `409` conflicts.
+Domains that store entities in normal ES indices inject `get` and `index` functions. `OccWriter` exposes three write paths (mirroring Saved Objects `create` / `update`):
+
+| Method | Read? | Retry on 409? | Use when |
+|--------|-------|---------------|----------|
+| `create` | No | No | New document (`op_type: create`) |
+| `write` | No | No | Caller supplies `document` + `(ifSeqNo, ifPrimaryTerm)` |
+| `readModifyWrite` | Yes | Yes (`maxRetries`) | Merge inside `mutate` against each fresh read |
+
+`create` and `write` are **optimistic** paths: no hidden read. `readModifyWrite` is read–modify–write with OCC on the index.
 
 ## When to use
 
@@ -41,10 +49,10 @@ const writer = new OccWriter<WorkflowProperties>({
 });
 
 // Merge runs inside mutate so retries re-read fresh state.
-await writer.write({
+await writer.readModifyWrite({
   id: workflowId,
   mutate: (existing) => ({
-    ...existing!,
+    ...existing,
     yaml: requestBody.yaml,
     lastUpdatedBy: user,
     updated_at: new Date().toISOString(),
@@ -57,10 +65,10 @@ await writer.write({
 Keep ES details in one place; call sites stay domain-focused (see `workflow_occ_writer.ts`).
 
 ```typescript
-export const createWorkflowOccWriter = ({ crudService, spaceId, logger }) =>
+export const createWorkflowOccWriter = ({ crudService, spaceId, logger, getOptions }) =>
   new OccWriter<WorkflowProperties>({
     get: async (id) => {
-      const doc = await crudService.getWorkflowDocumentWithVersion(id, spaceId);
+      const doc = await crudService.getWorkflowDocumentWithVersion(id, spaceId, getOptions);
       return doc ? { id, source: doc.source, occ: { seqNo: doc.seqNo, primaryTerm: doc.primaryTerm } } : null;
     },
     index: ({ id, document, create, ifSeqNo, ifPrimaryTerm }) =>
@@ -68,9 +76,21 @@ export const createWorkflowOccWriter = ({ crudService, spaceId, logger }) =>
     logger,
   });
 
-await createWorkflowOccWriter({ crudService, spaceId, logger }).write({
+// User update — merge against each fresh read
+await createWorkflowOccWriter({ crudService, spaceId, logger, getOptions }).readModifyWrite({
   id,
-  mutate: (existing) => mergeWorkflowUpdate(existing!, patch),
+  mutate: (existing) => mergeWorkflowUpdate(existing, patch),
+});
+
+// Managed create — op_type: create
+await indexOnlyWriter.create({ id, document: preparedDocument });
+
+// Managed update — caller already read version metadata
+await indexOnlyWriter.write({
+  id,
+  document: preparedDocument,
+  ifSeqNo: existing.seqNo,
+  ifPrimaryTerm: existing.primaryTerm,
 });
 ```
 
@@ -118,7 +138,7 @@ await statusClient.index({
 
 ### Bulk or multi-document writes
 
-`OccWriter.write()` handles **one `_id`**. For bulk you still need OCC per document — choose based on batch size and how much merge logic you have.
+`OccWriter.readModifyWrite()` handles **one `_id`** with an internal read. For bulk you still need OCC per document — choose based on batch size and how much merge logic you have.
 
 #### Option A — loop `OccWriter` (simplest)
 
@@ -127,7 +147,7 @@ Best for **small/medium** batches or when you already have a factory wired. Each
 ```typescript
 // ✅ Correct OCC; one ES round-trip per id (plus retries on conflict)
 await pMap(workflowIds, async (id) =>
-  writer.write({
+  writer.readModifyWrite({
     id,
     mutate: (existing) => ({
       ...existing!,
@@ -194,16 +214,15 @@ await esClient.bulk({
 });
 ```
 
-### Create races — `create: true` does not retry on 409
+### Create races — `create()` does not retry on 409
 
-Use `op_type: create` for “must not exist”, but handle TOCTOU separately (e.g. resolve a new id and retry).
+Use `create()` for “must not exist”, but handle TOCTOU separately (e.g. resolve a new id and retry).
 
 ```typescript
 // create path: single attempt; 409 means id already exists (not if_seq_no OCC)
-await writer.write({
+await writer.create({
   id: candidateId,
-  create: true,
-  mutate: () => buildNewWorkflowDocument(),
+  document: buildNewWorkflowDocument(),
 });
 
 // For id-collision races, catch OccConflictError at the call site — not retried inside OccWriter
@@ -224,7 +243,8 @@ await esClient.update({
 
 ## Design notes
 
-- On conflict, the **entire** `mutate` runs again against a fresh read — keep `mutate` pure with respect to the passed `existing` source.
+- On conflict, the **entire** `mutate` runs again against a fresh read in `readModifyWrite` — keep `mutate` pure with respect to the passed `existing` source.
+- `create` and `write` do **not** read or retry — the caller owns re-read + re-prepare on `OccConflictError`.
 - After retries are exhausted, `OccConflictError` (409) is thrown; map it to your domain error at the call site if needed.
 - Use `isOccConflictError` after `OccWriter` (strict `instanceof`). Use `isElasticsearchWriteConflict` for raw ES/client errors before wrapping.
 - Domain logic (validation, version counters, history logging) stays outside this package.
@@ -257,10 +277,10 @@ const writer = new OccWriter<MyDocument>({
   },
 });
 
-await writer.write({
+await writer.readModifyWrite({
   id: 'my-id',
   mutate: (existing) => ({
-    ...existing!,
+    ...existing,
     updated_at: new Date().toISOString(),
   }),
 });

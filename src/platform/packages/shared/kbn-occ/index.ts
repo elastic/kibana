@@ -16,8 +16,10 @@ export { delayMs } from './src/delay';
 export { OccConflictError, isElasticsearchWriteConflict, isOccConflictError } from './src/errors';
 export { OccWriter } from './src/occ_writer';
 export type {
+  OccCreateParams,
   OccDocument,
   OccMetadata,
+  OccReadModifyWriteParams,
   OccWriteParams,
   OccWriteResult,
   OccWriterDeps,
