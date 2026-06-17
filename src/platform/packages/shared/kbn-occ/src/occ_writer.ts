@@ -10,10 +10,16 @@
 import { DEFAULT_MAX_RETRIES, DEFAULT_RETRY_DELAY_MS } from './constants';
 import { delayMs } from './delay';
 import { OccConflictError, isElasticsearchWriteConflict } from './errors';
-import type { OccWriteParams, OccWriteResult, OccWriterDeps } from './types';
+import type {
+  OccCreateParams,
+  OccReadModifyWriteParams,
+  OccWriteParams,
+  OccWriteResult,
+  OccWriterDeps,
+} from './types';
 
 export class OccWriter<TSource extends object> {
-  private readonly get: OccWriterDeps<TSource>['get'];
+  private readonly get?: OccWriterDeps<TSource>['get'];
   private readonly index: OccWriterDeps<TSource>['index'];
   private readonly maxRetries: number;
   private readonly retryDelayMs: number;
@@ -27,23 +33,54 @@ export class OccWriter<TSource extends object> {
     this.logger = deps.logger;
   }
 
-  async write(params: OccWriteParams<TSource>): Promise<OccWriteResult<TSource>> {
-    const { id, create, mutate } = params;
+  /**
+   * Create — `op_type: create`; no read, no retry. 409 means the id already exists.
+   */
+  async create(params: OccCreateParams<TSource>): Promise<OccWriteResult<TSource>> {
+    const { id, document } = params;
 
-    if (create) {
-      const document = mutate(undefined);
-      try {
-        const occ = await this.index({ id, document, create: true });
-        return { document, occ };
-      } catch (error) {
-        // `op_type: create` returns 409 when the id already exists — not an if_seq_no OCC conflict.
-        if (isElasticsearchWriteConflict(error)) {
-          throw new OccConflictError(`Document "${id}" already exists; create was rejected`);
-        }
+    try {
+      const occ = await this.index({ id, document, create: true });
+      return { document, occ };
+    } catch (error) {
+      if (!isElasticsearchWriteConflict(error)) {
         throw error;
       }
+
+      throw new OccConflictError(`Document "${id}" already exists; create was rejected`);
+    }
+  }
+
+  /**
+   * Optimistic write — conditional index with caller-supplied OCC metadata; no read, no retry.
+   * 409 means version conflict.
+   */
+  async write(params: OccWriteParams<TSource>): Promise<OccWriteResult<TSource>> {
+    const { id, document, ifSeqNo, ifPrimaryTerm } = params;
+
+    try {
+      const occ = await this.index({ id, document, ifSeqNo, ifPrimaryTerm });
+      return { document, occ };
+    } catch (error) {
+      if (!isElasticsearchWriteConflict(error)) {
+        throw error;
+      }
+
+      throw new OccConflictError(`Version conflict for document "${id}"`);
+    }
+  }
+
+  /**
+   * Read → mutate → index with OCC, re-reading on conflict up to `maxRetries`.
+   */
+  async readModifyWrite(
+    params: OccReadModifyWriteParams<TSource>
+  ): Promise<OccWriteResult<TSource>> {
+    if (!this.get) {
+      throw new Error('OccWriter.readModifyWrite requires a get dependency');
     }
 
+    const { id, mutate } = params;
     const maxAttempts = 1 + this.maxRetries;
 
     for (let attempt = 1; attempt <= maxAttempts; attempt++) {
@@ -73,7 +110,7 @@ export class OccWriter<TSource extends object> {
         }
 
         this.logger?.debug(
-          `OCC write conflict for document "${id}", retrying (attempt ${attempt}/${maxAttempts})`
+          `OCC readModifyWrite conflict for document "${id}", retrying (attempt ${attempt}/${maxAttempts})`
         );
         await delayMs(this.retryDelayMs);
       }

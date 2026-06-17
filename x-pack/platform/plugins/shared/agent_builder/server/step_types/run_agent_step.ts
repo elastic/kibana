@@ -37,6 +37,8 @@ export const getRunAgentStepDefinition = (serviceManager: ServiceManager) => {
           'connector-id': connectorIdRaw,
           'inference-id': inferenceIdRaw,
           'create-conversation': createConversation,
+          'plugin-id': pluginId,
+          'aggregate-by': aggregateBy,
         } = context.config;
 
         context.logger.debug('ai.agent step started');
@@ -78,6 +80,7 @@ export const getRunAgentStepDefinition = (serviceManager: ServiceManager) => {
               message,
               attachments,
             },
+            ...(pluginId ? { telemetryMetadata: { pluginId, aggregateBy } } : {}),
           },
           // workflows already run as scheduled tasks
           useTaskManager: false,

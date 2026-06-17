@@ -10,9 +10,11 @@
 import type { KibanaRequest } from '@kbn/core/server';
 import { isNotFoundError } from '@kbn/es-errors';
 import {
+  DEFAULT_MAX_RETRIES,
   isElasticsearchWriteConflict,
   isOccConflictError,
   OCC_CONFLICT_STATUS_CODE,
+  OccWriter,
 } from '@kbn/occ';
 import type {
   CreateWorkflowCommand,
@@ -27,7 +29,13 @@ import type { WorkflowPartialDetailDto } from '@kbn/workflows/types/v1';
 import { WorkflowConflictError } from '@kbn/workflows-yaml';
 import type { z } from '@kbn/zod/v4';
 import type { WorkflowCrudDeps } from './types';
-import { createWorkflowOccWriter, type WriteWorkflowDocumentParams } from './workflow_occ_writer';
+import type {
+  IndexWorkflowDocumentOptions,
+  ReadModifyWriteWorkflowDocumentParams,
+  VersionedWorkflowDocument,
+  WorkflowDocumentGetOptions,
+  WriteWorkflowDocumentWithOccParams,
+} from './workflow_occ_types';
 import { getWorkflowZodSchema } from '../../common/schema';
 import { extractBulkItemError } from '../api/lib/bulk_response_helpers';
 import { deleteWorkflows } from '../api/lib/workflow_deletion';
@@ -64,23 +72,14 @@ import { syncSchedulerAfterSave } from '../task_defs/sync_scheduler_after_save';
 // this only bounds repeated round-trips when many concurrent writers share a base ID.
 const TOCTOU_MAX_RETRIES = 5;
 
-export interface VersionedWorkflowDocument {
-  source: WorkflowProperties;
-  seqNo: number;
-  primaryTerm: number;
-}
-
-export interface IndexWorkflowDocumentOptions {
-  create?: boolean;
-  ifPrimaryTerm?: number;
-  ifSeqNo?: number;
-}
+export type {
+  ReadModifyWriteWorkflowDocumentParams,
+  VersionedWorkflowDocument,
+  WriteWorkflowDocumentWithOccParams,
+} from './workflow_occ_types';
 
 export class WorkflowCrudService {
-  private readonly occWritersByCacheKey = new Map<
-    string,
-    ReturnType<typeof createWorkflowOccWriter>
-  >();
+  private indexOccWriter?: OccWriter<WorkflowProperties>;
 
   constructor(private readonly deps: WorkflowCrudDeps) {}
 
@@ -161,38 +160,49 @@ export class WorkflowCrudService {
     return { seqNo: response._seq_no, primaryTerm: response._primary_term };
   }
 
-  private getOccWriter(spaceId: string, maxRetries?: number) {
-    const cacheKey = `${spaceId}:${maxRetries ?? 'default'}`;
-    let writer = this.occWritersByCacheKey.get(cacheKey);
-    if (!writer) {
-      writer = createWorkflowOccWriter({
-        crudService: this,
-        spaceId,
+  private getIndexOccWriter(): OccWriter<WorkflowProperties> {
+    if (!this.indexOccWriter) {
+      this.indexOccWriter = new OccWriter<WorkflowProperties>({
+        index: async ({ id, document, create, ifSeqNo, ifPrimaryTerm }) =>
+          this.indexWorkflowDocument(id, document, { create, ifSeqNo, ifPrimaryTerm }),
         logger: this.deps.logger,
-        maxRetries,
       });
-      this.occWritersByCacheKey.set(cacheKey, writer);
     }
-    return writer;
+    return this.indexOccWriter;
   }
 
-  async writeWorkflowDocument(
-    id: string,
+  private getReadModifyWriteOccWriter(
     spaceId: string,
-    params: WriteWorkflowDocumentParams
-  ): Promise<WorkflowProperties> {
-    const writer = this.getOccWriter(spaceId, params.maxRetries);
-    const { mutate: callerMutate, create } = params;
-    const versioningEnabled = await this.isWorkflowVersioningEnabled();
+    maxRetries?: number,
+    getOptions?: WorkflowDocumentGetOptions
+  ): OccWriter<WorkflowProperties> {
+    const resolvedMaxRetries = maxRetries ?? DEFAULT_MAX_RETRIES;
+    return new OccWriter<WorkflowProperties>({
+      get: async (id) => {
+        const document = await this.getWorkflowDocumentWithVersion(id, spaceId, getOptions);
+        if (!document) {
+          return null;
+        }
+        return {
+          id,
+          source: document.source,
+          occ: { seqNo: document.seqNo, primaryTerm: document.primaryTerm },
+        };
+      },
+      index: async ({ id, document, create, ifSeqNo, ifPrimaryTerm }) =>
+        this.indexWorkflowDocument(id, document, { create, ifSeqNo, ifPrimaryTerm }),
+      logger: this.deps.logger,
+      maxRetries: resolvedMaxRetries,
+    });
+  }
 
+  private isWorkflowDocumentNotFoundError(error: unknown, id: string): boolean {
+    return error instanceof Error && error.message === `Document with id "${id}" not found`;
+  }
+
+  private async runOccWrite<T>(id: string, write: () => Promise<T>): Promise<T> {
     try {
-      const { document } = await writer.write({
-        id,
-        create,
-        mutate: (existing) =>
-          maybeApplyWorkflowVersion(callerMutate(existing), existing, versioningEnabled),
-      });
-      return document;
+      return await write();
     } catch (error) {
       if (isOccConflictError(error)) {
         throw new WorkflowConflictError(
@@ -200,8 +210,60 @@ export class WorkflowCrudService {
           id
         );
       }
+      if (this.isWorkflowDocumentNotFoundError(error, id)) {
+        throw new Error(`Workflow with id ${id} not found`);
+      }
       throw error;
     }
+  }
+
+  async createWorkflowDocument(
+    id: string,
+    spaceId: string,
+    document: WorkflowProperties
+  ): Promise<WorkflowProperties> {
+    return this.runOccWrite(id, async () => {
+      const { document: created } = await this.getIndexOccWriter().create({ id, document });
+      return created;
+    });
+  }
+
+  async writeWorkflowDocumentWithOcc(
+    id: string,
+    spaceId: string,
+    params: WriteWorkflowDocumentWithOccParams
+  ): Promise<WorkflowProperties> {
+    return this.runOccWrite(id, async () => {
+      const { document } = await this.getIndexOccWriter().write({
+        id,
+        document: params.document,
+        ifSeqNo: params.ifSeqNo,
+        ifPrimaryTerm: params.ifPrimaryTerm,
+      });
+      return document;
+    });
+  }
+
+  async readModifyWriteWorkflowDocument(
+    id: string,
+    spaceId: string,
+    params: ReadModifyWriteWorkflowDocumentParams
+  ): Promise<WorkflowProperties> {
+    const versioningEnabled = await this.isWorkflowVersioningEnabled();
+
+    return this.runOccWrite(id, async () => {
+      const writer = this.getReadModifyWriteOccWriter(
+        spaceId,
+        params.maxRetries,
+        params.getOptions
+      );
+      const { document } = await writer.readModifyWrite({
+        id,
+        mutate: (existing) =>
+          maybeApplyWorkflowVersion(params.mutate(existing), existing, versioningEnabled),
+      });
+      return document;
+    });
   }
 
   async prepareWorkflowDocumentForStorage(params: {
@@ -390,8 +452,8 @@ export class WorkflowCrudService {
     const authenticatedUser = getAuthenticatedUser(request, this.deps.getSecurity());
     const now = new Date();
     const triggerDefinitions = this.deps.workflowsExtensions?.getAllTriggerDefinitions() ?? [];
-
     const versioningEnabled = await this.isWorkflowVersioningEnabled();
+
     const {
       id: baseId,
       workflowData,
@@ -428,7 +490,7 @@ export class WorkflowCrudService {
       );
     }
 
-    id = await this.createWorkflowDocument({
+    id = await this.indexNewWorkflowDocument({
       initialId: id,
       baseId,
       isUserSupplied: Boolean(workflow.id),
@@ -467,7 +529,6 @@ export class WorkflowCrudService {
     const created: WorkflowDetailDto[] = [];
     const failed: BulkFailureEntry[] = [];
     const validWorkflows: BulkWorkflowEntry[] = [];
-
     const versioningEnabled = await this.isWorkflowVersioningEnabled();
 
     for (let i = 0; i < workflows.length; i++) {
@@ -638,19 +699,28 @@ export class WorkflowCrudService {
       const validationErrors: string[] = [];
       let shouldUpdateScheduler = false;
 
-      const zodSchema = workflow.yaml
+      const workflowYaml = workflow.yaml;
+      const zodSchema = workflowYaml
         ? await this.deps.validationService.getWorkflowZodSchema({ loose: false }, spaceId, request)
         : undefined;
-      const triggerDefinitions = workflow.yaml
+      const triggerDefinitions = workflowYaml
         ? this.deps.workflowsExtensions?.getAllTriggerDefinitions() ?? []
         : undefined;
+      const yamlResult =
+        workflowYaml && zodSchema && triggerDefinitions
+          ? {
+              workflowYaml,
+              ...applyYamlUpdate({
+                workflowYaml,
+                zodSchema,
+                triggerDefinitions,
+              }),
+            }
+          : undefined;
 
-      const finalData = await this.writeWorkflowDocument(id, spaceId, {
-        mutate: (existingSource) => {
-          if (!existingSource) {
-            throw new Error(`Workflow with id ${id} not found in space ${spaceId}`);
-          }
-
+      const finalData = await this.readModifyWriteWorkflowDocument(id, spaceId, {
+        getOptions: { includeDeleted: true, includeGlobal: true },
+        mutate: (existingSource: WorkflowProperties) => {
           let updatedData: Partial<WorkflowProperties> = {
             lastUpdatedBy: authenticatedUser,
             updated_at: now.toISOString(),
@@ -659,13 +729,12 @@ export class WorkflowCrudService {
           shouldUpdateScheduler =
             workflow.enabled !== undefined && workflow.enabled !== existingSource.enabled;
 
-          if (workflow.yaml && zodSchema && triggerDefinitions) {
-            const yamlResult = applyYamlUpdate({
-              workflowYaml: workflow.yaml,
-              zodSchema,
-              triggerDefinitions,
-            });
-            updatedData = { ...updatedData, yaml: workflow.yaml, ...yamlResult.updatedDataPatch };
+          if (yamlResult) {
+            updatedData = {
+              ...updatedData,
+              yaml: yamlResult.workflowYaml,
+              ...yamlResult.updatedDataPatch,
+            };
             validationErrors.length = 0;
             validationErrors.push(...yamlResult.validationErrors);
             shouldUpdateScheduler = shouldUpdateScheduler || yamlResult.shouldUpdateScheduler;
@@ -674,7 +743,7 @@ export class WorkflowCrudService {
               yamlResult.validationErrors.length === 0 &&
               yamlResult.updatedDataPatch.valid &&
               updatedData.definition &&
-              !workflowYamlDeclaresTopLevelEnabled(workflow.yaml)
+              !workflowYamlDeclaresTopLevelEnabled(yamlResult.workflowYaml)
             ) {
               const resolvedEnabled =
                 workflow.enabled !== undefined ? workflow.enabled : existingSource.enabled;
@@ -684,7 +753,7 @@ export class WorkflowCrudService {
                 updatedData.definition = { ...currentDefinition, enabled: resolvedEnabled };
               }
             }
-          } else if (!workflow.yaml) {
+          } else if (!workflowYaml) {
             const fieldResult = applyFieldUpdates(workflow, existingSource);
             updatedData = { ...updatedData, ...fieldResult.patch };
             validationErrors.length = 0;
@@ -840,7 +909,7 @@ export class WorkflowCrudService {
    *   The resolver picks the next available `baseId-N` candidate, so the human
    *   readability of the ID is preserved.
    */
-  private async createWorkflowDocument(params: {
+  private async indexNewWorkflowDocument(params: {
     initialId: string;
     baseId: string;
     isUserSupplied: boolean;

@@ -67,16 +67,15 @@ const disableAllParams = (overrides: Partial<Parameters<typeof disableAllWorkflo
 });
 
 describe('disableAllWorkflows', () => {
-  beforeEach(() => {
-    jest.clearAllMocks();
-  });
+  beforeEach(() => jest.clearAllMocks());
 
   it('returns zero counts when no enabled workflows exist', async () => {
     const { storage } = makeStorageClient([[]]);
 
     const result = await disableAllWorkflows({
-      ...disableAllParams(),
       storage,
+      taskScheduler: null,
+      logger,
     });
 
     expect(result).toEqual({ total: 0, disabled: 0, failures: [] });
@@ -86,8 +85,9 @@ describe('disableAllWorkflows', () => {
     const { storage, client } = makeStorageClient([[makeHit('wf-1'), makeHit('wf-2')]]);
 
     const result = await disableAllWorkflows({
-      ...disableAllParams(),
       storage,
+      taskScheduler: null,
+      logger,
     });
 
     expect(result.total).toBe(2);
@@ -99,7 +99,7 @@ describe('disableAllWorkflows', () => {
   it('requests seq_no_primary_term when searching', async () => {
     const { storage, client } = makeStorageClient([[makeHit('wf-1')]]);
 
-    await disableAllWorkflows({ ...disableAllParams(), storage });
+    await disableAllWorkflows({ storage, taskScheduler: null, logger });
 
     expect(client.search).toHaveBeenCalledWith(
       expect.objectContaining({ seq_no_primary_term: true })
@@ -109,7 +109,7 @@ describe('disableAllWorkflows', () => {
   it('bulk indexes with if_seq_no and if_primary_term', async () => {
     const { storage, client } = makeStorageClient([[makeHit('wf-1', true, 5)]]);
 
-    await disableAllWorkflows({ ...disableAllParams(), storage });
+    await disableAllWorkflows({ storage, taskScheduler: null, logger });
 
     const bulkOps = client.bulk.mock.calls[0][0].operations;
     expect(bulkOps[0].index).toEqual(
@@ -124,7 +124,7 @@ describe('disableAllWorkflows', () => {
   it('patches YAML to set enabled: false', async () => {
     const { storage, client } = makeStorageClient([[makeHit('wf-1')]]);
 
-    await disableAllWorkflows({ ...disableAllParams(), storage });
+    await disableAllWorkflows({ storage, taskScheduler: null, logger });
 
     const bulkOps = client.bulk.mock.calls[0][0].operations;
     const doc = bulkOps[0].index.document;
@@ -156,7 +156,7 @@ describe('disableAllWorkflows', () => {
         items: [{ index: { _id: 'wf-1', status: 200 } }],
       });
 
-    const result = await disableAllWorkflows({ ...disableAllParams(), storage });
+    const result = await disableAllWorkflows({ storage, taskScheduler: null, logger });
 
     expect(result.disabled).toBe(1);
     expect(result.failures).toEqual([]);
@@ -181,7 +181,7 @@ describe('disableAllWorkflows', () => {
       ],
     });
 
-    const result = await disableAllWorkflows({ ...disableAllParams(), storage });
+    const result = await disableAllWorkflows({ storage, taskScheduler: null, logger });
 
     expect(result.disabled).toBe(1);
     expect(result.failures).toHaveLength(1);
@@ -191,7 +191,7 @@ describe('disableAllWorkflows', () => {
   it('logs info message with counts', async () => {
     const { storage } = makeStorageClient([[makeHit('wf-1')]]);
 
-    await disableAllWorkflows({ ...disableAllParams(), storage });
+    await disableAllWorkflows({ storage, taskScheduler: null, logger });
 
     expect(logger.info).toHaveBeenCalledWith(expect.stringContaining('Disabled 1 workflows'));
     expect(logger.info).toHaveBeenCalledWith(expect.stringContaining('across all spaces'));
@@ -200,7 +200,7 @@ describe('disableAllWorkflows', () => {
   it('omits the spaceId filter from the query when no spaceId is provided', async () => {
     const { storage, client } = makeStorageClient([[]]);
 
-    await disableAllWorkflows({ ...disableAllParams(), storage });
+    await disableAllWorkflows({ storage, taskScheduler: null, logger });
 
     const searchQuery = client.search.mock.calls[0][0].query;
     expect(searchQuery.bool.must).toEqual([{ term: { enabled: true } }]);
@@ -209,7 +209,7 @@ describe('disableAllWorkflows', () => {
   it('scopes the query to the provided spaceId and reports it in the log message', async () => {
     const { storage, client } = makeStorageClient([[makeHit('wf-1')]]);
 
-    await disableAllWorkflows({ ...disableAllParams(), storage, spaceId: 'my-space' });
+    await disableAllWorkflows({ storage, taskScheduler: null, logger, spaceId: 'my-space' });
 
     const searchQuery = client.search.mock.calls[0][0].query;
     expect(searchQuery.bool.must).toEqual([
