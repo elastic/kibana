@@ -5,6 +5,17 @@
  * 2.0.
  */
 
+jest.mock('@kbn/domain-events', () => ({
+  domainEventBus: {
+    publish: jest.fn(),
+  },
+}));
+
+import { domainEventBus } from '@kbn/domain-events';
+import {
+  CASE_UPDATED_EVENT_TYPE,
+  CASE_STATUS_CHANGED_EVENT_TYPE,
+} from '@kbn/domain-events/events/cases';
 import { CustomFieldTypes, CaseStatuses } from '../../../common/types/domain';
 import {
   MAX_CATEGORY_LENGTH,
@@ -79,6 +90,15 @@ describe('update', () => {
     it('emits caseUpdated events for updated cases', async () => {
       await bulkUpdate(cases, clientArgs, casesClientMock);
 
+      expect(domainEventBus.publish).toHaveBeenCalledWith({
+        type: CASE_UPDATED_EVENT_TYPE,
+        payload: {
+          caseId: mockCases[0].id,
+          owner: mockCases[0].attributes.owner,
+          updatedFields: ['assignees'],
+        },
+        request: clientArgs.request,
+      });
       expect(clientArgs.casesEventBus.emitCaseUpdated).toHaveBeenCalledTimes(1);
       expect(clientArgs.casesEventBus.emitCaseUpdated).toHaveBeenCalledWith(
         clientArgs.request,
@@ -111,6 +131,25 @@ describe('update', () => {
         casesClientMock
       );
 
+      expect(domainEventBus.publish).toHaveBeenCalledWith({
+        type: CASE_UPDATED_EVENT_TYPE,
+        payload: {
+          caseId: mockCases[0].id,
+          owner: mockCases[0].attributes.owner,
+          updatedFields: ['status'],
+        },
+        request: clientArgs.request,
+      });
+      expect(domainEventBus.publish).toHaveBeenCalledWith({
+        type: CASE_STATUS_CHANGED_EVENT_TYPE,
+        payload: {
+          caseId: mockCases[0].id,
+          owner: mockCases[0].attributes.owner,
+          previousStatus: mockCases[0].attributes.status,
+          status: CaseStatuses.closed,
+        },
+        request: clientArgs.request,
+      });
       expect(clientArgs.casesEventBus.emitCaseUpdated).toHaveBeenCalledTimes(1);
       expect(clientArgs.casesEventBus.emitCaseUpdated).toHaveBeenCalledWith(
         clientArgs.request,

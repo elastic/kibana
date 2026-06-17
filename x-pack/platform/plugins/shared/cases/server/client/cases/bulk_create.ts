@@ -11,6 +11,7 @@ import { partition } from 'lodash';
 import type { SavedObject } from '@kbn/core/server';
 import { SavedObjectsUtils } from '@kbn/core/server';
 
+import { domainEventBus } from '@kbn/domain-events';
 import type { Case, CustomFieldsConfiguration, User } from '../../../common/types/domain';
 import { CaseSeverity, UserActionTypes } from '../../../common/types/domain';
 import { decodeWithExcessOrThrow, decodeOrThrow } from '../../common/runtime_types';
@@ -160,10 +161,18 @@ export const bulkCreate = async (
     const createdCasesResponse = decodeOrThrow(BulkCreateCasesResponseRt)({ cases: res });
 
     createdCasesResponse.cases.forEach((createdCase) => {
-      clientArgs.casesEventBus?.emitCaseCreated(clientArgs.request, {
-        caseId: createdCase.id,
-        owner: createdCase.owner as Owner,
+      domainEventBus.publish({
+        type: 'cases.caseCreated',
+        payload: {
+          caseId: createdCase.id,
+          owner: createdCase.owner as Owner,
+        },
+        request: clientArgs.request,
       });
+      // clientArgs.casesEventBus?.emitCaseCreated(clientArgs.request, {
+      //   caseId: createdCase.id,
+      //   owner: createdCase.owner as Owner,
+      // });
     });
 
     return createdCasesResponse;

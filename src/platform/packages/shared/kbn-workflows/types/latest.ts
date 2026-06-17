@@ -51,6 +51,7 @@ export type {
   // enums
   ExecutionStatusUnion,
   ExecutionTypeUnion,
+  TerminalExecutionStatus,
   // api types
   WorkflowsSearchParams,
   // connector types

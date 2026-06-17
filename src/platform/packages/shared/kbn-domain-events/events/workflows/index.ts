@@ -10,15 +10,18 @@
 import type { z } from '@kbn/zod/v4';
 import { WORKFLOW_STARTED_EVENT_TYPE, workflowStartedPayloadSchema } from './workflow_started';
 import type { WorkflowStartedDomainEventMap } from './workflow_started';
-import { WORKFLOW_FINISHED_EVENT_TYPE, workflowFinishedPayloadSchema } from './workflow_finished';
-import type { WorkflowFinishedDomainEventMap } from './workflow_finished';
+import {
+  WORKFLOW_TERMINATED_EVENT_TYPE,
+  workflowTerminatedPayloadSchema,
+} from './workflow_terminated';
+import type { WorkflowTerminatedDomainEventMap } from './workflow_terminated';
 import { STEP_STARTED_EVENT_TYPE, stepStartedPayloadSchema } from './step_started';
 import type { StepStartedDomainEventMap } from './step_started';
 import { STEP_FINISHED_EVENT_TYPE, stepFinishedPayloadSchema } from './step_finished';
 import type { StepFinishedDomainEventMap } from './step_finished';
 
 export type WorkflowsDomainEventMap = WorkflowStartedDomainEventMap &
-  WorkflowFinishedDomainEventMap &
+  WorkflowTerminatedDomainEventMap &
   StepStartedDomainEventMap &
   StepFinishedDomainEventMap;
 
@@ -33,11 +36,11 @@ export {
 } from './workflow_started';
 export type { WorkflowStartedPayload } from './workflow_started';
 export {
-  WORKFLOW_FINISHED_EVENT_TYPE,
-  workflowFinishedPayloadSchema,
-  isWorkflowFinishedPayload,
-} from './workflow_finished';
-export type { WorkflowFinishedPayload } from './workflow_finished';
+  WORKFLOW_TERMINATED_EVENT_TYPE,
+  workflowTerminatedPayloadSchema,
+  isWorkflowTerminatedPayload,
+} from './workflow_terminated';
+export type { WorkflowTerminatedPayload } from './workflow_terminated';
 export {
   STEP_STARTED_EVENT_TYPE,
   stepStartedPayloadSchema,
@@ -53,7 +56,7 @@ export type { StepFinishedPayload } from './step_finished';
 
 export const workflowsEventPayloadSchemas = {
   [WORKFLOW_STARTED_EVENT_TYPE]: workflowStartedPayloadSchema,
-  [WORKFLOW_FINISHED_EVENT_TYPE]: workflowFinishedPayloadSchema,
+  [WORKFLOW_TERMINATED_EVENT_TYPE]: workflowTerminatedPayloadSchema,
   [STEP_STARTED_EVENT_TYPE]: stepStartedPayloadSchema,
   [STEP_FINISHED_EVENT_TYPE]: stepFinishedPayloadSchema,
 } as const satisfies WorkflowsDomainEventMapSchemas;

@@ -10,6 +10,8 @@
 import agent from 'elastic-apm-node';
 import { addTransactionLabels } from '@kbn/apm-utils';
 import type { CoreStart } from '@kbn/core/server';
+import { domainEventBus } from '@kbn/domain-events';
+import { WORKFLOW_TERMINATED_EVENT_TYPE } from '@kbn/domain-events/events/workflows';
 import type { EsWorkflowExecution, StackFrame } from '@kbn/workflows';
 import {
   ExecutionStatus,
@@ -18,6 +20,7 @@ import {
 } from '@kbn/workflows';
 import type { GraphNodeUnion, WorkflowGraph } from '@kbn/workflows/graph';
 import { ExecutionError } from '@kbn/workflows/server';
+import { WORKFLOW_EXECUTION_FAILED_TRIGGER_ID } from '@kbn/workflows-extensions/server';
 import { getAlertingRuleId, getTraceId, setCurrentTransaction } from './apm_internal';
 import { buildWorkflowContext } from './build_workflow_context';
 import type { StepExecutionRuntimeFactory } from './step_execution_runtime_factory';
@@ -462,6 +465,7 @@ export class WorkflowExecutionRuntimeManager {
     this.workflowExecutionState.updateWorkflowExecution(updatedWorkflowExecution);
     this.logWorkflowStart();
     await this.stepIoService.flush();
+    this.publishWorkflowStartedDomainEvent();
   }
 
   public async resume(): Promise<void> {
@@ -502,6 +506,7 @@ export class WorkflowExecutionRuntimeManager {
         this.coreStart,
         this.dependencies
       );
+
       this.logWorkflowComplete(workflowExecutionUpdate.status === ExecutionStatus.COMPLETED);
 
       // Update the workflow transaction outcome when workflow completes
@@ -532,6 +537,57 @@ export class WorkflowExecutionRuntimeManager {
     }
 
     this.workflowExecutionState.updateWorkflowExecution(workflowExecutionUpdate);
+
+    if (workflowExecutionUpdate.status && isTerminalStatus(workflowExecutionUpdate.status)) {
+      this.publishWorkflowTerminalDomainEvent();
+    }
+  }
+
+  private publishWorkflowStartedDomainEvent(): void {
+    domainEventBus.publish({
+      type: 'workflows.workflowStarted',
+      payload: {
+        spaceId: this.workflowExecution.spaceId,
+        workflowId: this.workflowExecution.workflowId,
+        workflowRunId: this.workflowExecution.id,
+      },
+    });
+  }
+
+  private publishWorkflowTerminalDomainEvent(): void {
+    const execution = this.getWorkflowExecution();
+    if (!isTerminalStatus(execution.status)) {
+      return;
+    }
+
+    const failedStepContext = this.workflowExecutionState.getLastFailedStepContext();
+    const stepId = failedStepContext?.stepId;
+    const stepName = failedStepContext?.stepName || stepId;
+    const stepExecutionId = failedStepContext?.stepExecutionId;
+
+    domainEventBus.publish({
+      type: WORKFLOW_TERMINATED_EVENT_TYPE,
+      payload: {
+        status: execution.status,
+        workflow: {
+          id: execution.workflowId,
+          name: execution.workflowDefinition?.name ?? '',
+          spaceId: execution.spaceId ?? 'default',
+          isErrorHandler: execution.triggeredBy === WORKFLOW_EXECUTION_FAILED_TRIGGER_ID,
+        },
+        execution: {
+          id: execution.id,
+          startedAt: execution.startedAt ?? execution.createdAt,
+          failedAt: execution.finishedAt ?? new Date().toISOString(),
+        },
+        error: {
+          message: execution.error?.message ?? 'Unknown error',
+          ...(stepId && { stepId }),
+          ...(stepName && { stepName }),
+          ...(stepExecutionId && { stepExecutionId }),
+        },
+      },
+    });
   }
 
   private logWorkflowStart(): void {
