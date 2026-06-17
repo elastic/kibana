@@ -236,7 +236,7 @@ describe('validateAccessControlUpdateAccess', () => {
     expect(
       validateAccessControlUpdateAccess({
         source,
-        update: { access_control: { scope: AgentAccessControlScope.Public, entries: [] } },
+        update: { access_control: { scope: AgentAccessControlScope.Public } },
         user: nonOwnerUser,
         isAdmin: false,
       })
@@ -252,7 +252,7 @@ describe('validateAccessControlUpdateAccess', () => {
     expect(
       validateAccessControlUpdateAccess({
         source,
-        update: { access_control: { scope: AgentAccessControlScope.Private, entries: [] } },
+        update: { access_control: { scope: AgentAccessControlScope.Private } },
         user: ownerUser,
         isAdmin: false,
       })
@@ -268,7 +268,7 @@ describe('validateAccessControlUpdateAccess', () => {
     expect(
       validateAccessControlUpdateAccess({
         source,
-        update: { access_control: { scope: AgentAccessControlScope.Private, entries: [] } },
+        update: { access_control: { scope: AgentAccessControlScope.Private } },
         user: nonOwnerUser,
         isAdmin: true,
       })
@@ -284,7 +284,7 @@ describe('validateAccessControlUpdateAccess', () => {
     expect(
       validateAccessControlUpdateAccess({
         source,
-        update: { access_control: { scope: AgentAccessControlScope.Private, entries: [] } },
+        update: { access_control: { scope: AgentAccessControlScope.Private } },
         user: nonOwnerUser,
         isAdmin: false,
       })
@@ -302,7 +302,7 @@ describe('validateAccessControlUpdateAccess', () => {
     expect(
       validateAccessControlUpdateAccess({
         source,
-        update: { access_control: { scope: AgentAccessControlScope.Private, entries: [] } },
+        update: { access_control: { scope: AgentAccessControlScope.Private } },
         user: ownerUser,
         isAdmin: false,
       })
@@ -319,7 +319,7 @@ describe('validateAccessControlUpdateAccess', () => {
     expect(
       validateAccessControlUpdateAccess({
         source,
-        update: { access_control: { scope: AgentAccessControlScope.Shared, entries: [] } },
+        update: { access_control: { scope: AgentAccessControlScope.Shared } },
         user: nonOwnerUser,
         isAdmin: true,
       })
