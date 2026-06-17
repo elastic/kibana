@@ -40,6 +40,7 @@ import {
   buildPaginationSection,
   hasFieldEvaluations,
   mapPostAggFilterFieldsToRecentForEsql,
+  NULLIFY_UNMAPPED_FIELDS_SETTING,
 } from './query_builder_commons';
 
 export const HASHED_ID_FIELD = 'entity.hashedId';
@@ -81,6 +82,7 @@ export function buildRemainingLogsCountQuery(params: {
   logsPageCursorStart?: LogSlicePaginationParams;
 }): string {
   return (
+    `${NULLIFY_UNMAPPED_FIELDS_SETTING}\n` +
     buildLogPageProbeSourceClause(params) +
     `
   | STATS document_count = COUNT()`
@@ -102,6 +104,8 @@ export function buildLogsExtractionEsqlQuery({
   const { fields, type, entityTypeFallback } = entityDefinition;
 
   const parts = [];
+
+  parts.push(`${NULLIFY_UNMAPPED_FIELDS_SETTING}`);
 
   // FROM and WHERE
   parts.push(
@@ -128,7 +132,7 @@ export function buildLogsExtractionEsqlQuery({
 
   // Evaluation of the id without type so we can fallback to name
   parts.push(
-    `| EVAL ${recentData(ENGINE_METADATA_UNTYPED_ID_FIELD)} = ${getEuidEsqlEvaluation(type, {
+    `| EVAL ${getEuidEsqlEvaluation(type, recentData(ENGINE_METADATA_UNTYPED_ID_FIELD), {
       withTypeId: false,
     })}`
   );

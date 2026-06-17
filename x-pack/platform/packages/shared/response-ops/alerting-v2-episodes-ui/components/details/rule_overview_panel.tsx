@@ -12,13 +12,13 @@ import {
   EuiCodeBlock,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIcon,
   EuiPanel,
   EuiSpacer,
   EuiText,
   EuiTitle,
+  EuiToolTip,
 } from '@elastic/eui';
-import type { RuleResponse } from '@kbn/alerting-v2-schemas';
+import { getRootEsqlQuery, type RuleResponse } from '@kbn/alerting-v2-schemas';
 import * as i18n from './translations';
 
 export interface AlertEpisodeRuleOverviewPanelProps {
@@ -67,16 +67,17 @@ export const AlertEpisodeRuleOverviewPanel = ({
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
-            <EuiFlexItem grow={false}>
-              <EuiIcon type="bell" size="s" aria-hidden />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiText size="xs" color="subdued">
-                {ruleKindLabel}
-              </EuiText>
-            </EuiFlexItem>
-          </EuiFlexGroup>
+          <EuiToolTip content={i18n.RULE_OVERVIEW_KIND_TOOLTIP}>
+            <EuiBadge
+              color="hollow"
+              iconType={rule.kind === 'signal' ? 'radar' : 'bell'}
+              iconSide="left"
+              tabIndex={0}
+              data-test-subj="alertingV2EpisodeDetailsRuleKindBadge"
+            >
+              {ruleKindLabel}
+            </EuiBadge>
+          </EuiToolTip>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiText size="xs" color="subdued">
@@ -101,7 +102,7 @@ export const AlertEpisodeRuleOverviewPanel = ({
         overflowHeight={240}
         data-test-subj="alertingV2EpisodeDetailsRuleQueryCodeBlock"
       >
-        {rule.evaluation.query.base}
+        {getRootEsqlQuery(rule.query)}
       </EuiCodeBlock>
     </>
   );

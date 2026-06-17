@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import { sortBy } from 'lodash';
 import { emptyAssets } from '@kbn/streams-schema';
 import type { Streams } from '@kbn/streams-schema';
 import { v4 } from 'uuid';
@@ -119,7 +120,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       expect(updateStreamResponse).to.have.property('acknowledged', true);
 
       const getQueriesResponse = await getQueries(apiClient, STREAM_NAME);
-      expect(getQueriesResponse.queries).to.eql(queries);
+      expect(sortBy(getQueriesResponse.queries, 'id')).to.eql(sortBy(queries, 'id'));
 
       const rules = await alertingApi.searchRules(
         roleAuthc,

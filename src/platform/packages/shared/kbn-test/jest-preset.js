@@ -76,6 +76,7 @@ module.exports = {
 
   // A list of paths to modules that run some code to configure or set up the testing framework before each test
   setupFilesAfterEnv: [
+    '<rootDir>/src/platform/packages/shared/kbn-test/src/jest/setup/disallow_code_generation.js',
     '<rootDir>/src/platform/packages/shared/kbn-test/src/jest/setup/setup_test.js',
     '<rootDir>/src/platform/packages/shared/kbn-test/src/jest/setup/mocks.moment_timezone.js',
     '<rootDir>/src/platform/packages/shared/kbn-test/src/jest/setup/mocks.eui.js',
