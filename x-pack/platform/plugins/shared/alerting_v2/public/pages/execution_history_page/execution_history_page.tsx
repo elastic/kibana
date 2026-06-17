@@ -52,6 +52,16 @@ export const ExecutionHistoryPage = () => {
     // },
   ];
 
+  const handlePolicyClick = (policyId: string) => {
+    setRuleToViewId(null);
+    setPolicyToViewId(policyId);
+  }
+
+  const handleRuleClick = (ruleId: string) => {
+    setPolicyToViewId(null);
+    setRuleToViewId(ruleId);
+  }
+
   return (
     <>
       <EuiPageHeader
@@ -100,7 +110,7 @@ export const ExecutionHistoryPage = () => {
       </EuiTabs>
       <EuiSpacer size="m" />
       {selectedTabId === POLICIES_TAB_ID ? (
-        <PoliciesTabContent onPolicyClick={setPolicyToViewId} onRuleClick={setRuleToViewId} />
+        <PoliciesTabContent onPolicyClick={handlePolicyClick} onRuleClick={handleRuleClick} />
       ) : (
         <RulesPlaceholder />
       )}
