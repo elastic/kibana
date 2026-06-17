@@ -10,12 +10,22 @@ import { css } from '@emotion/react';
 import type { GutterOptions } from 'react-diff-view';
 import { EuiCallOut, EuiEmptyPrompt, EuiPanel, EuiSkeletonText, EuiSpacer } from '@elastic/eui';
 import { RuleChangeTrackingAction } from '@kbn/alerting-types';
+import { stableStringify } from '@kbn/std';
 import { SecurityRuleChangeTrackingAction } from '../../../../../common/detection_engine/rule_management/rule_change_tracking';
 import type { RuleHistoryItem } from '../../../../../common/api/detection_engine/rule_management';
-import { extractChangedFieldNames } from '../../utils/extract_changed_field_names';
+import {
+  extractChangedFieldNames,
+  IGNORED_DIFF_FIELDS,
+} from '../../utils/extract_changed_field_names';
 import { DiffView } from '../../../rule_management/components/rule_details/json_diff/diff_view';
-import { filterAndSort, reconstructBefore } from './utils';
+import { reconstructBefore } from './utils';
 import * as i18n from './translations';
+
+const EDIT_ACTIONS_REQUIRING_PRIOR_STATE: string[] = [
+  RuleChangeTrackingAction.ruleUpdate,
+  SecurityRuleChangeTrackingAction.ruleImport,
+  SecurityRuleChangeTrackingAction.ruleRevert,
+];
 
 interface ChangesPanelProps {
   item: RuleHistoryItem | undefined;
@@ -29,14 +39,16 @@ export function RuleChangesDiff({ item, isLoading }: ChangesPanelProps): JSX.Ele
     }
 
     const hasNoDiff = EDIT_ACTIONS_REQUIRING_PRIOR_STATE.includes(item.action) && !item.old_values;
-    const after = filterAndSort(item.rule);
+    const after = Object.fromEntries(
+      Object.entries(item.rule).filter(([k]) => !IGNORED_DIFF_FIELDS.has(k))
+    );
 
     // old_values is null for create/install actions — there is no previous state.
     // In that case show the full rule as a pure insertion.
     if (!item.old_values) {
       return {
         oldSource: '',
-        newSource: JSON.stringify(after, null, 2),
+        newSource: stableStringify(after, { space: 2 }),
         numOfChangedFields: 0,
         noDiffAvailable: hasNoDiff,
       };
@@ -48,11 +60,11 @@ export function RuleChangesDiff({ item, isLoading }: ChangesPanelProps): JSX.Ele
       return { oldSource: '', newSource: '', numOfChangedFields: 0, noDiffAvailable: hasNoDiff };
     }
 
-    const before = filterAndSort(reconstructBefore(after, item.old_values));
+    const before = reconstructBefore(after, item.old_values);
 
     return {
-      oldSource: JSON.stringify(before, null, 2),
-      newSource: JSON.stringify(after, null, 2),
+      oldSource: stableStringify(before, { space: 2 }),
+      newSource: stableStringify(after, { space: 2 }),
       numOfChangedFields: changedFields.length,
       noDiffAvailable: hasNoDiff,
     };
@@ -122,12 +134,6 @@ export function RuleChangesDiff({ item, isLoading }: ChangesPanelProps): JSX.Ele
     </EuiPanel>
   );
 }
-
-const EDIT_ACTIONS_REQUIRING_PRIOR_STATE: string[] = [
-  RuleChangeTrackingAction.ruleUpdate,
-  SecurityRuleChangeTrackingAction.ruleImport,
-  SecurityRuleChangeTrackingAction.ruleRevert,
-];
 
 const noInsertionHighlightCss = css`
   .rule-update-diff-code.diff-code-insert {

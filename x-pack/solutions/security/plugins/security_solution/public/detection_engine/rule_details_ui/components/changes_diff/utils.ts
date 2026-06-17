@@ -7,16 +7,6 @@
 
 import { IGNORED_DIFF_FIELDS } from '../../utils/extract_changed_field_names';
 
-export function filterAndSort(rule: Record<string, unknown>): Record<string, unknown> {
-  const result: Record<string, unknown> = {};
-  for (const key of Object.keys(rule).sort()) {
-    if (!IGNORED_DIFF_FIELDS.has(key)) {
-      result[key] = rule[key];
-    }
-  }
-  return result;
-}
-
 export function reconstructBefore(
   after: Record<string, unknown>,
   oldValues: Record<string, unknown>
