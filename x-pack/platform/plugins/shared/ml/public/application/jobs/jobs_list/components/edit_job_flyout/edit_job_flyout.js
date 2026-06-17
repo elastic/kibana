@@ -41,6 +41,7 @@ import { isManagedJob } from '../../../jobs_utils';
 import { ManagedJobsWarningCallout } from '../confirm_modals/managed_jobs_warning_callout';
 import { createJobActionFocusTrapProps } from '../../../../util/create_focus_trap_props';
 import { createJobActionFocusRestoration } from '../../../../util/create_focus_restoration';
+import { DEFAULT_ML_PROJECT_ROUTING } from '../../../../../../common/constants/cps';
 
 const { collapseLiteralStrings } = XJson;
 
@@ -192,8 +193,7 @@ export class EditJobFlyoutUI extends Component {
     this.extractInitialJobFormState(job, hasDatafeed);
     const datafeedRunning = hasDatafeed && job.datafeed_config.state !== DATAFEED_STATE.STOPPED;
     const jobClosed = job.state === JOB_STATE.CLOSED;
-    const cps = this.context.services.cps;
-    const defaultProjectRouting = cps?.cpsManager?.getDefaultProjectRouting();
+    const defaultProjectRouting = DEFAULT_ML_PROJECT_ROUTING;
 
     if (jobClosed && job.datafeed_config && job.data_counts) {
       this.estimateModelMemoryLimit({

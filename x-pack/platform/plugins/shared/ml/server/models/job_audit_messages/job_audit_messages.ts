@@ -16,6 +16,7 @@ import { MESSAGE_LEVEL } from '../../../common/constants/message_levels';
 import type { MLSavedObjectService } from '../../saved_objects';
 import type { MlClient } from '../../lib/ml_client';
 import type { ServerlessInfo } from '../../types';
+import { DEFAULT_ML_PROJECT_ROUTING } from '../../../common/constants/cps';
 
 const SIZE = 1000;
 const LEVEL = { system_info: -1, info: 0, warning: 1, error: 2 } as const;
@@ -160,7 +161,7 @@ export function jobAuditMessagesProvider(
         sort: [{ timestamp: { order: 'desc' } }, { job_id: { order: 'asc' } }],
         query,
         ...(serverless.isServerless && serverless.cpsEnabled
-          ? { project_routing: '_alias:_origin' }
+          ? { project_routing: DEFAULT_ML_PROJECT_ROUTING }
           : {}),
       },
       { maxRetries: 0 }
@@ -268,7 +269,7 @@ export function jobAuditMessagesProvider(
           },
         },
         ...(serverless.isServerless && serverless.cpsEnabled
-          ? { project_routing: '_alias:_origin' }
+          ? { project_routing: DEFAULT_ML_PROJECT_ROUTING }
           : {}),
       },
       { maxRetries: 0 }
@@ -411,7 +412,7 @@ export function jobAuditMessagesProvider(
             lang: 'painless',
           },
           ...(serverless.isServerless && serverless.cpsEnabled
-            ? { project_routing: '_alias:_origin' }
+            ? { project_routing: DEFAULT_ML_PROJECT_ROUTING }
             : {}),
         },
         { maxRetries: 0 }
@@ -423,7 +424,7 @@ export function jobAuditMessagesProvider(
             body: newClearedMessage,
             refresh: 'wait_for',
             ...(serverless.isServerless && serverless.cpsEnabled
-              ? { project_routing: '_alias:_origin' }
+              ? { project_routing: DEFAULT_ML_PROJECT_ROUTING }
               : {}),
           },
           { maxRetries: 0 }
@@ -487,7 +488,7 @@ export function jobAuditMessagesProvider(
           },
         },
         ...(serverless.isServerless && serverless.cpsEnabled
-          ? { project_routing: '_alias:_origin' }
+          ? { project_routing: DEFAULT_ML_PROJECT_ROUTING }
           : {}),
       },
       { maxRetries: 0 }

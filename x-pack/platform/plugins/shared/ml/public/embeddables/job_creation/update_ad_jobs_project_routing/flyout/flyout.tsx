@@ -31,7 +31,7 @@ import {
 import type { ProjectRouting } from '@kbn/es-query';
 import { useFetchProjects } from '@kbn/cps-utils';
 import { MlProjectPickerPanel } from '@kbn/ml-cps';
-
+import { DEFAULT_ML_PROJECT_ROUTING } from '../../../../../common/constants/cps';
 import { useMlKibana, useNotifications } from '../../../../application/contexts/kibana';
 import { useJobsApiService } from '../../../../application/services/ml_api_service/jobs';
 
@@ -40,8 +40,6 @@ interface Props {
   initialJobIds?: string[];
   allowScopeSelection?: boolean;
 }
-
-const DEFAULT_PROJECT_ROUTING = '_alias:_origin';
 
 export const UpdateADJobsProjectRoutingFlyout: FC<Props> = ({
   onClose,
@@ -62,8 +60,9 @@ export const UpdateADJobsProjectRoutingFlyout: FC<Props> = ({
   const [updateResults, setUpdateResults] = useState<Record<string, { success: boolean }> | null>(
     null
   );
-  const [selectedProjectRouting, setSelectedProjectRouting] =
-    useState<string>(DEFAULT_PROJECT_ROUTING);
+  const [selectedProjectRouting, setSelectedProjectRouting] = useState<string>(
+    DEFAULT_ML_PROJECT_ROUTING
+  );
 
   const fetchProjects = useCallback(
     (routing?: ProjectRouting) => {
@@ -220,7 +219,7 @@ export const UpdateADJobsProjectRoutingFlyout: FC<Props> = ({
                 projectRoutingValueTestSubj="mlUpdateAdJobsProjectRoutingValue"
               />
             </EuiFormRow>
-            {selectedProjectRouting !== DEFAULT_PROJECT_ROUTING ? (
+            {selectedProjectRouting !== DEFAULT_ML_PROJECT_ROUTING ? (
               <>
                 <EuiSpacer size="s" />
                 <EuiCallOut
@@ -237,7 +236,7 @@ export const UpdateADJobsProjectRoutingFlyout: FC<Props> = ({
                   <FormattedMessage
                     id="xpack.ml.embeddables.updateADJobsProjectRoutingFlyout.nonDefaultScopeWarning"
                     defaultMessage="Using a project routing scope other than {defaultScope} may negatively affect the job's anomaly detection results."
-                    values={{ defaultScope: DEFAULT_PROJECT_ROUTING }}
+                    values={{ defaultScope: DEFAULT_ML_PROJECT_ROUTING }}
                   />
                 </EuiCallOut>
               </>

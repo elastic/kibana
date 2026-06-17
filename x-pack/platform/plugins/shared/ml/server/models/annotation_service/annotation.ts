@@ -26,6 +26,7 @@ import {
   ML_ANNOTATIONS_INDEX_ALIAS_WRITE,
 } from '../../../common/constants/index_patterns';
 import { ANNOTATION_EVENT_USER, ANNOTATION_TYPE } from '../../../common/constants/annotations';
+import { DEFAULT_ML_PROJECT_ROUTING } from '../../../common/constants/cps';
 
 // TODO All of the following interface/type definitions should
 // eventually be replaced by the proper upstream definitions
@@ -117,7 +118,7 @@ export function annotationProvider(
       refresh: 'wait_for',
       require_alias: true,
       ...(serverless.isServerless && serverless.cpsEnabled
-        ? { project_routing: '_alias:_origin' }
+        ? { project_routing: DEFAULT_ML_PROJECT_ROUTING }
         : {}),
     };
 
@@ -302,7 +303,7 @@ export function annotationProvider(
         },
       },
       ...(serverless.isServerless && serverless.cpsEnabled
-        ? { project_routing: '_alias:_origin' }
+        ? { project_routing: DEFAULT_ML_PROJECT_ROUTING }
         : {}),
     };
 
@@ -396,7 +397,7 @@ export function annotationProvider(
         },
       },
       ...(serverless.isServerless && serverless.cpsEnabled
-        ? { project_routing: '_alias:_origin' }
+        ? { project_routing: DEFAULT_ML_PROJECT_ROUTING }
         : {}),
     };
 
@@ -420,7 +421,7 @@ export function annotationProvider(
       id,
       refresh: 'wait_for',
       ...(serverless.isServerless && serverless.cpsEnabled
-        ? { project_routing: '_alias:_origin' }
+        ? { project_routing: DEFAULT_ML_PROJECT_ROUTING }
         : {}),
     };
 

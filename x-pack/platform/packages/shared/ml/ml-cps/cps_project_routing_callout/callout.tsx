@@ -18,6 +18,8 @@ import { UPDATE_AD_JOBS_PROJECT_ROUTING_TRIGGER } from '@kbn/ui-actions-plugin/c
 /** Matches the update project routing flyout dry-run. */
 const BULK_UPDATE_PROJECT_ROUTING_PATH = '/internal/ml/jobs/bulk_update_project_routing' as const;
 
+const DEFAULT_ML_PROJECT_ROUTING = '_alias:_origin';
+
 export interface CpsProjectRoutingCalloutProps {
   http: HttpStart;
   uiActions: UiActionsStart;
@@ -54,7 +56,7 @@ export const CpsProjectRoutingCallout: FC<CpsProjectRoutingCalloutProps> = ({
     void http
       .post<BulkUpdateProjectRoutingResult>(BULK_UPDATE_PROJECT_ROUTING_PATH, {
         body: JSON.stringify({
-          projectRouting: '_alias:_origin',
+          projectRouting: DEFAULT_ML_PROJECT_ROUTING,
           simulate: true,
           auto: true,
           jobGroups: options?.filterJobGroups,
