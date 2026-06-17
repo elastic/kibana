@@ -31,6 +31,8 @@ function TraceMetricsGrid({
   renderToggleActions,
   chartToolbarCss,
   isComponentVisible,
+  breakdownField,
+  onBreakdownFieldChange,
 }: UnifiedMetricsGridProps) {
   const { query, dataView } = fetchParams;
   const esqlQuery = useEsqlQueryInfo({
@@ -87,6 +89,8 @@ function TraceMetricsGrid({
           discoverFetch$,
           actions,
           profileId,
+          breakdownField,
+          onBreakdownFieldChange,
         }}
       >
         <EuiPanel
