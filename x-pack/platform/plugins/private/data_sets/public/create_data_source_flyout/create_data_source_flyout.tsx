@@ -28,6 +28,7 @@ import { useController, useForm } from 'react-hook-form';
 import type { DataSource, DataSourceWithSecrets } from '../../common/datasource_types';
 import { ALL_DATA_SOURCE_TYPES } from '../../common';
 import type { DataSourceType } from '../../common/datasource_types';
+import { getFlyoutSaveErrorMessage } from '../get_flyout_save_error_message';
 import { createDataSourceFlyoutStrings } from './create_data_source_flyout_i18n';
 import {
   applyAuthenticationModeToDataSource,
@@ -71,14 +72,18 @@ export const CreateDataSourceFlyout: FunctionComponent<CreateDataSourceFlyoutPro
     [initialDataSource]
   );
 
-  const { handleSubmit, control, reset, unregister } = useForm<CreateDataSourceFlyoutFormValues>({
+  const {
+    handleSubmit,
+    control,
+    reset,
+    unregister,
+    formState: { errors },
+  } = useForm<CreateDataSourceFlyoutFormValues>({
     defaultValues: formDefaultValues,
   });
 
-  // todo make sure name isn't duplicated
-  const nameError: string | undefined = undefined;
-  const saveError: string | undefined = undefined;
-  const isSaving = false;
+  const [saveError, setSaveError] = useState<string | undefined>();
+  const [isSaving, setIsSaving] = useState(false);
 
   const [dataSourceType, setDataSourceType] = useState<DataSourceType>(
     initialDataSource?.type ?? 's3'
@@ -139,6 +144,21 @@ export const CreateDataSourceFlyout: FunctionComponent<CreateDataSourceFlyoutPro
       )
     );
 
+  const onSubmit = async (data: CreateDataSourceFlyoutFormValues) => {
+    setSaveError(undefined);
+    setIsSaving(true);
+    try {
+      const message = await handleSave(data);
+      if (message) {
+        setSaveError(message);
+      }
+    } catch (error) {
+      setSaveError(getFlyoutSaveErrorMessage(error));
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
   const flyoutTitle = isEditMode
     ? createDataSourceFlyoutStrings.editTitle()
     : createDataSourceFlyoutStrings.createTitle();
@@ -157,7 +177,7 @@ export const CreateDataSourceFlyout: FunctionComponent<CreateDataSourceFlyoutPro
         </EuiTitle>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
-        <EuiForm component="form" id="createDataSourceForm" onSubmit={handleSubmit(handleSave)}>
+        <EuiForm component="form" id="createDataSourceForm" onSubmit={handleSubmit(onSubmit)}>
           {saveError ? (
             <>
               <EuiText color="danger" size="s" data-test-subj="createDataSourceFlyoutSaveError">
@@ -179,12 +199,12 @@ export const CreateDataSourceFlyout: FunctionComponent<CreateDataSourceFlyoutPro
           </EuiFormRow>
           <EuiFormRow
             label={createDataSourceFlyoutStrings.nameLabel()}
-            isInvalid={Boolean(nameError)}
-            error={nameError}
+            isInvalid={Boolean(errors.name)}
+            error={errors.name?.message}
             fullWidth
           >
             <EuiFieldText
-              isInvalid={Boolean(nameError)}
+              isInvalid={Boolean(errors.name)}
               data-test-subj="createDataSourceFlyoutName"
               autoFocus={!isEditMode}
               fullWidth
@@ -232,7 +252,7 @@ export const CreateDataSourceFlyout: FunctionComponent<CreateDataSourceFlyoutPro
           fill
           type="submit"
           data-test-subj="createDataSourceFlyoutSubmit"
-          onClick={handleSubmit(handleSave)}
+          onClick={handleSubmit(onSubmit)}
           isLoading={isSaving}
           disabled={isSaving}
         >
