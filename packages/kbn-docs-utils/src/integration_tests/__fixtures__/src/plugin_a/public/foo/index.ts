@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 export const doTheFooFnThing = () => {};
@@ -11,3 +12,13 @@ export const doTheFooFnThing = () => {};
 export type FooType = () => 'foo';
 
 export type ImNotExportedFromIndex = () => { bar: string };
+
+// Expected issues:
+//   missing comments (2):
+//     line 10 - doTheFooFnThing
+//     line 12 - FooType
+//   missing returns (1):
+//     line 12 - FooType
+//   no references (2):
+//     line 10 - doTheFooFnThing
+//     line 12 - FooType

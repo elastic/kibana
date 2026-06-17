@@ -1,20 +1,23 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { buildkite, COMMIT_INFO_CTX, CommitWithStatuses, SELECTED_COMMIT_META_KEY } from './shared';
+import type { CommitWithStatuses } from './shared';
+import { buildkite, COMMIT_INFO_CTX, SELECTED_COMMIT_META_KEY } from './shared';
 import {
   getArtifactBuild,
   getOnMergePRBuild,
   getQAFBuildContainingCommit,
   makeCommitInfoWithBuildResultsHtml,
 } from './info_sections/build_info';
-import { getRecentCommits, GitCommitExtract } from './info_sections/commit_info';
-import { BuildkiteInputStep } from '#pipeline-utils';
+import type { GitCommitExtract } from './info_sections/commit_info';
+import { getRecentCommits } from './info_sections/commit_info';
+import type { BuildkiteInputStep } from '#pipeline-utils';
 
 async function main(commitCountArg: string) {
   console.log('--- Listing commits');

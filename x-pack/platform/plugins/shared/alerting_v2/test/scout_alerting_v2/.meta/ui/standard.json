@@ -1,0 +1,189 @@
+{
+  "sha1": "1f3aef384124e11508210d1af90ec1eee5ec9d2c",
+  "tests": [
+    {
+      "id": "a3a9f820a79c452-b8b452a1ef0f11e",
+      "title": "ComposeDiscoverFlyout — create and edit flows create flow: open flyout, define query, step through, and submit",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/ui/tests/compose_discover_flyout.spec.ts",
+        "line": 60,
+        "column": 9
+      }
+    },
+    {
+      "id": "a3a9f820a79c452-039ec3b1b89e8b7",
+      "title": "ComposeDiscoverFlyout — create and edit flows edit flow: pencil icon opens flyout with pre-populated name, save updates rule",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/ui/tests/compose_discover_flyout.spec.ts",
+        "line": 137,
+        "column": 9
+      }
+    },
+    {
+      "id": "a3a9f820a79c452-8c58be25f025b7d",
+      "title": "ComposeDiscoverFlyout — create and edit flows step validation: Next disabled without query, name validation blocks advancement",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/ui/tests/compose_discover_flyout.spec.ts",
+        "line": 202,
+        "column": 9
+      }
+    },
+    {
+      "id": "a3a9f820a79c452-db351a61fa1773d",
+      "title": "ComposeDiscoverFlyout — create and edit flows cancel: closing flyout via Cancel button dismisses without saving",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/ui/tests/compose_discover_flyout.spec.ts",
+        "line": 264,
+        "column": 9
+      }
+    },
+    {
+      "id": "a3a9f820a79c452-34e6c15d6389044",
+      "title": "ComposeDiscoverFlyout — create and edit flows sandbox: Apply commits query, closing without Apply discards changes",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/ui/tests/compose_discover_flyout.spec.ts",
+        "line": 278,
+        "column": 9
+      }
+    },
+    {
+      "id": "9034fd33949a2e3-4b8fd1fab72dd63",
+      "title": "Discover Alerts menu with alerting v2 should show Alerts menu with the v2 ES|QL rule row and hide v1 entries",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/ui/tests/discover_alerts_menu.spec.ts",
+        "line": 41,
+        "column": 9
+      }
+    },
+    {
+      "id": "db2a783d1c9ca06-9be44a4fb742275",
+      "title": "Discover query sync — Rule flyout flyout query updates when the Discover query changes",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/ui/tests/discover_query_sync.spec.ts",
+        "line": 44,
+        "column": 7
+      }
+    },
+    {
+      "id": "01469191962c32a-365fefaed06dbcf",
+      "title": "ES|QL rule flyout — ?param validation save button is enabled and no callout shown when query has no ?params",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/ui/tests/esql_rule_flyout_validation.spec.ts",
+        "line": 34,
+        "column": 7
+      }
+    },
+    {
+      "id": "01469191962c32a-cedbfc207920e04",
+      "title": "ES|QL rule flyout — ?param validation save button is disabled and callout lists unresolved ?param when no matching control exists",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/ui/tests/esql_rule_flyout_validation.spec.ts",
+        "line": 58,
+        "column": 7
+      }
+    },
+    {
+      "id": "885339228dd56a5-73c89e4070ac6f5",
+      "title": "Execution history — smoke loads the page and shows the empty state when there are no events",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/ui/tests/execution_history_smoke.spec.ts",
+        "line": 21,
+        "column": 7
+      }
+    },
+    {
+      "id": "7aeb81062562639-a7d0ae7c38928c4",
+      "title": "Rule name validation — Discover flyout opens rule form flyout and displays default placeholder name",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/ui/tests/rule_name_validation_flyout.spec.ts",
+        "line": 43,
+        "column": 7
+      }
+    },
+    {
+      "id": "7aeb81062562639-a47285aef34cc43",
+      "title": "Rule name validation — Discover flyout shows validation error when saving flyout with empty default name",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/ui/tests/rule_name_validation_flyout.spec.ts",
+        "line": 51,
+        "column": 7
+      }
+    },
+    {
+      "id": "7aeb81062562639-f42d35dffb1ebce",
+      "title": "Rule name validation — Discover flyout error callout scrolls into view in flyout on failed submission",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/ui/tests/rule_name_validation_flyout.spec.ts",
+        "line": 63,
+        "column": 7
+      }
+    },
+    {
+      "id": "fb0220bd6f2bd69-8ed8a0399e08cbb",
+      "title": "Rules list bulk actions respect active filters bulk disable applies only to rules matching the list filter, not the full space",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/ui/tests/rules_list_bulk_respects_filters.spec.ts",
+        "line": 47,
+        "column": 9
+      }
+    }
+  ]
+}

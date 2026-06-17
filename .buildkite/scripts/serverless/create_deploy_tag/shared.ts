@@ -1,16 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import axios from 'axios';
 
 import { getExec } from './mock_exec';
-import { GitCommitExtract } from './info_sections/commit_info';
-import { BuildkiteBuildExtract } from './info_sections/build_info';
+import type { GitCommitExtract } from './info_sections/commit_info';
+import type { BuildkiteBuildExtract } from './info_sections/build_info';
 import { BuildkiteClient, getGithubClient } from '#pipeline-utils';
 
 const SELECTED_COMMIT_META_KEY = 'selected-commit-hash';

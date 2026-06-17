@@ -1,17 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import Path from 'path';
 
-import loadJsonFile from 'load-json-file';
-
-import { ToolingLog } from '@kbn/tooling-log';
-import { Plugin } from './load_kibana_platform_plugin';
+import type { ToolingLog } from '@kbn/tooling-log';
+import { loadJsonFile } from '@kbn/utils';
+import type { Plugin } from './load_kibana_platform_plugin';
 
 export interface Config {
   skipInstallDependencies: boolean;
@@ -24,7 +24,11 @@ const isArrayOfStrings = (v: any): v is string[] =>
 export async function loadConfig(log: ToolingLog, plugin: Plugin): Promise<Config> {
   try {
     const path = Path.resolve(plugin.directory, '.kibana-plugin-helpers.json');
-    const file = await loadJsonFile(path);
+    const file = loadJsonFile<{
+      skipInstallDependencies: boolean;
+      buildSourcePatterns?: string[];
+      serverSourcePatterns?: string[];
+    }>(path);
 
     if (!(typeof file === 'object' && file && !Array.isArray(file))) {
       throw new TypeError(`expected config at [${path}] to be an object`);

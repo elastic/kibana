@@ -1,0 +1,45 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import { pick } from 'lodash';
+import type { CoreStart, CoreSetup, Plugin, PluginInitializerContext } from '@kbn/core/server';
+import type { ExpressionsServiceSetup, ExpressionsServiceStart } from '../common';
+import { ExpressionsService } from '../common';
+
+export type ExpressionsServerSetup = ExpressionsServiceSetup;
+
+export type ExpressionsServerStart = ExpressionsServiceStart;
+
+export class ExpressionsServerPlugin
+  implements Plugin<ExpressionsServerSetup, ExpressionsServerStart>
+{
+  readonly expressions: ExpressionsService;
+
+  constructor(context: PluginInitializerContext) {
+    this.expressions = new ExpressionsService({
+      logger: context.logger.get('expressions'),
+    });
+  }
+
+  public setup(core: CoreSetup): ExpressionsServerSetup {
+    const setup = this.expressions.setup(pick(core, 'getStartServices'));
+
+    return Object.freeze(setup);
+  }
+
+  public start(core: CoreStart): ExpressionsServerStart {
+    const start = this.expressions.start();
+
+    return Object.freeze(start);
+  }
+
+  public stop() {
+    this.expressions.stop();
+  }
+}

@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { readFile } from 'fs/promises';
@@ -275,6 +276,32 @@ describe('formatJS Runner', () => {
         `[Error: Error parsing file template_literal_var.ts: Error: Template literals with variable substitution is not supported. please pass variables via the 'values' object instead. Message  \`value passed into literal directly (e: \${e.message})\`]`
       );
     });
+
+    it('parses destructured standalone translate() calls', async () => {
+      const { extractedMessages } = await formatJsFixtureRunner('destructured_translate.ts');
+      expect(extractedMessages).toMatchInlineSnapshot(`
+        Map {
+          "destructured.with_value" => Object {
+            "defaultMessage": "Hello {name}!",
+            "end": -1,
+            "file": "destructured_translate.ts",
+            "hasValuesObject": true,
+            "id": "destructured.with_value",
+            "start": -1,
+            "valuesKeys": Array [
+              "name",
+            ],
+          },
+          "destructured.basic" => Object {
+            "defaultMessage": "Standalone translate is parsed!",
+            "end": -1,
+            "file": "destructured_translate.ts",
+            "id": "destructured.basic",
+            "start": -1,
+          },
+        }
+      `);
+    });
   });
 
   describe('extraction inside react components', () => {
@@ -284,28 +311,28 @@ describe('formatJS Runner', () => {
         Map {
           "home.tutorial.unexpectedStatusCheckStateErrorDescription" => Object {
             "defaultMessage": "Unexpected status check state {statusCheckState}",
-            "end": 663,
+            "end": 777,
             "file": "intl_prop.tsx",
             "hasValuesObject": true,
             "id": "home.tutorial.unexpectedStatusCheckStateErrorDescription",
-            "start": 499,
+            "start": 613,
             "valuesKeys": Array [
               "statusCheckState",
             ],
           },
           "message_with_no_values" => Object {
             "defaultMessage": "Pipeline batch delay",
-            "end": 904,
+            "end": 1018,
             "file": "intl_prop.tsx",
             "id": "message_with_no_values",
-            "start": 815,
+            "start": 929,
           },
           "messsage_inside_component" => Object {
             "defaultMessage": "Pipeline batch delay",
-            "end": 1125,
+            "end": 1239,
             "file": "intl_prop.tsx",
             "id": "messsage_inside_component",
-            "start": 1021,
+            "start": 1135,
           },
         }
       `);
@@ -317,28 +344,28 @@ describe('formatJS Runner', () => {
         Map {
           "home.tutorial.unexpectedStatusCheckStateErrorDescription" => Object {
             "defaultMessage": "Unexpected status check state {statusCheckState}",
-            "end": 663,
+            "end": 777,
             "file": "intl_prop.tsx",
             "hasValuesObject": true,
             "id": "home.tutorial.unexpectedStatusCheckStateErrorDescription",
-            "start": 499,
+            "start": 613,
             "valuesKeys": Array [
               "statusCheckState",
             ],
           },
           "message_with_no_values" => Object {
             "defaultMessage": "Pipeline batch delay",
-            "end": 904,
+            "end": 1018,
             "file": "intl_prop.tsx",
             "id": "message_with_no_values",
-            "start": 815,
+            "start": 929,
           },
           "messsage_inside_component" => Object {
             "defaultMessage": "Pipeline batch delay",
-            "end": 1125,
+            "end": 1239,
             "file": "intl_prop.tsx",
             "id": "messsage_inside_component",
-            "start": 1021,
+            "start": 1135,
           },
         }
       `);

@@ -20,14 +20,12 @@ spec:
     spec:
       env:
         SLACK_NOTIFICATIONS_CHANNEL: '#kibana-performance-alerts'
-        BAZEL_CACHE_MODE: none
-        ELASTIC_SLACK_NOTIFICATIONS_ENABLED: 'true'
+        KIBANA_SLACK_NOTIFICATIONS_ENABLED: 'true'
       allow_rebuilds: true
       branch_configuration: main
       default_branch: main
       repository: elastic/kibana
       pipeline_file: .buildkite/pipelines/scalability/daily.yml
-      skip_intermediate_builds: false
       provider_settings:
         trigger_mode: none
         build_branches: true
@@ -47,3 +45,5 @@ spec:
           cronline: 0 6 * * * Europe/Berlin
           message: Scalability daily benchmarking
           branch: main
+      tags:
+        - kibana

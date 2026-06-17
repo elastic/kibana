@@ -1,15 +1,22 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 type Snip = [start: number, end: number] | [start: number, end: number, replacement: string];
 
 /**
- * Replace or remove specific points of the source code
+ * Replaces or removes specific character ranges in a source string. Snips are
+ * applied in order and non-overlapping deletion snips are automatically merged.
+ * @param source - The source text to modify.
+ * @param snips - An array of `[start, end]` ranges to delete or `[start, end,
+ * replacement]` tuples to replace with `replacement`. Ranges must be
+ * non-reversed (`start <= end`), and replacement snips must not overlap.
+ * @returns The modified source text.
  */
 export function snip(source: string, snips: Snip[]) {
   const queue = snips

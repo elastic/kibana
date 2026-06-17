@@ -1,19 +1,32 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { readFile as readFileAsync } from 'fs/promises';
 import { extractI18nMessageDescriptors } from '../../extractors/formatjs';
 import { globNamespacePaths } from '../../utils';
+import { I18N_CALL_PATTERN } from '../../constants';
 
 const formatJsRunner = async (filePaths: string[]) => {
   const allNamespaceMessages = new Map();
-  for (const filePath of filePaths) {
-    const source = await readFileAsync(filePath, 'utf8');
+
+  const fileContents = await Promise.all(
+    filePaths.map(async (filePath) => ({
+      filePath,
+      source: await readFileAsync(filePath, 'utf8'),
+    }))
+  );
+
+  for (const { filePath, source } of fileContents) {
+    if (!I18N_CALL_PATTERN.test(source)) {
+      continue;
+    }
+
     const extractedMessages = await extractI18nMessageDescriptors(filePath, source);
 
     extractedMessages.forEach((extractedMessage) => {

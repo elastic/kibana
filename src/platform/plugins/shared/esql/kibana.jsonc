@@ -1,0 +1,34 @@
+{
+  "type": "plugin",
+  "id": "@kbn/esql",
+  "owner": "@elastic/kibana-esql",
+  "group": "platform",
+  "visibility": "shared",
+  "plugin": {
+    "id": "esql",
+    "server": true,
+    "browser": true,
+    "optionalPlugins": [
+      "cps",
+      "fieldsMetadata",
+      "usageCollection",
+      "licensing",
+      "searchInferenceEndpoints"
+    ],
+    "requiredPlugins": [
+      "data",
+      "dataViews",
+      "uiActions",
+      "contentManagement",
+      "share",
+      "fileUpload",
+      "fieldFormats",
+      "kql",
+      "inference"
+    ],
+    "requiredBundles": [
+      "kibanaReact",
+      "kibanaUtils"
+    ]
+  }
+}

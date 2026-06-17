@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import Fs from 'fs';
@@ -12,6 +13,9 @@ import * as Rx from 'rxjs';
 
 import { assertAbsolute, mkdirp, fsReadDir$ } from './fs';
 import { type DirRecord, type FileRecord, type Record, SomePath } from './fs_records';
+
+// Exclusive create + copy-on-write (reflink) when the filesystem supports it
+const COPY_FLAGS = Fs.constants.COPYFILE_EXCL + Fs.constants.COPYFILE_FICLONE;
 
 interface Options {
   /**
@@ -72,7 +76,7 @@ export async function scanCopy(options: Options) {
         }
 
         return Rx.of(rec);
-      })
+      }, 100)
     );
 
   const handleGenericRec = async (rec: Record) => {
@@ -94,7 +98,7 @@ export async function scanCopy(options: Options) {
       await handleGenericRec(rec);
     }).pipe(
       Rx.mergeMap(() => readDir$(rec)),
-      Rx.mergeMap((ent) => (ent.type === 'dir' ? handleDir$(ent) : handleFile$(ent)))
+      Rx.mergeMap((ent) => (ent.type === 'dir' ? handleDir$(ent) : handleFile$(ent)), 100)
     );
 
   const handleFile$ = (srcRec: FileRecord): Rx.Observable<unknown> =>
@@ -106,7 +110,7 @@ export async function scanCopy(options: Options) {
           flag: 'wx',
         });
       } else {
-        await Fsp.copyFile(rec.source.abs, rec.dest.abs, Fs.constants.COPYFILE_EXCL);
+        await Fsp.copyFile(rec.source.abs, rec.dest.abs, COPY_FLAGS);
       }
 
       await handleGenericRec(rec);

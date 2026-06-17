@@ -1,16 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { asyncForEachWithLimit } from '@kbn/std';
 import { snakeToCamel } from '../utils';
-import { PluginApi, ApiDeclaration } from '../types';
+import type { PluginApi, ApiDeclaration } from '../types';
 import { writePluginDoc } from './write_plugin_mdx_docs';
-import { WritePluginDocsOpts } from './types';
+import type { WritePluginDocsOpts } from './types';
 
 // There is no science behind this 10.
 // When it was first introduced, it was using synchronous APIs, so the concurrency was 1.

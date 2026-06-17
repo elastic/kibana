@@ -1,0 +1,50 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { initializeDataViews } from '../../tasks/login';
+import { getAdvancedButton } from '../../screens/integrations';
+import { navigateTo } from '../../tasks/navigation';
+import {
+  checkResults,
+  getOsqueryFieldTypes,
+  inputQuery,
+  selectAllAgents,
+  submitQuery,
+  typeInECSFieldInput,
+  typeInOsqueryFieldInput,
+} from '../../tasks/live_query';
+
+describe('EcsMapping', { tags: ['@ess', '@serverless', '@skipInServerlessMKI'] }, () => {
+  beforeEach(() => {
+    initializeDataViews();
+  });
+
+  it('should properly show static values in form and results', () => {
+    navigateTo('/app/osquery/new');
+    selectAllAgents();
+    inputQuery('select * from processes;');
+    getAdvancedButton().click();
+    typeInECSFieldInput('tags{downArrow}{enter}');
+    getOsqueryFieldTypes('Static value');
+    typeInOsqueryFieldInput('test1{enter}test2{enter}');
+    // Remove test1 to verify removal from multi-value field
+    cy.get(`[title="Remove test1 from selection in this group"]`).click();
+    // Add second ECS mapping with static value
+    typeInECSFieldInput('client.domain{downArrow}{enter}', 1);
+    getOsqueryFieldTypes('Static value', 1);
+    typeInOsqueryFieldInput('test3{enter}', 1);
+    // Submit once and verify all mappings in results (redirects to details after success)
+    submitQuery();
+    checkResults();
+    cy.contains('[ "test2" ]');
+    cy.contains('test3');
+  });
+
+  // Removed: 'should hide and show ecs mappings on Advanced accordion click'
+  // Migrated to Jest component test: public/live_queries/form/live_query_query_field.test.tsx
+  // Phase 2 migration — accordion toggle visibility is a UI-only assertion
+});

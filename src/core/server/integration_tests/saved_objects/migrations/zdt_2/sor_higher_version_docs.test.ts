@@ -1,17 +1,18 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { pick, range } from 'lodash';
 import Path from 'path';
 import '../jest_matchers';
-import { ISavedObjectsRepository } from '@kbn/core-saved-objects-api-server';
+import type { ISavedObjectsRepository } from '@kbn/core-saved-objects-api-server';
 import { createType } from '../test_utils';
-import { SavedObjectsBulkCreateObject } from '@kbn/core-saved-objects-api-server';
+import type { SavedObjectsBulkCreateObject } from '@kbn/core-saved-objects-api-server';
 import { createModelVersionTestBed } from '@kbn/core-test-helpers-model-versions';
 
 export const logFilePath = Path.join(__dirname, 'sor_higher.test.log');
@@ -25,7 +26,6 @@ describe('Higher version doc conversion', () => {
   const getTestType = () => {
     return createType({
       name: 'test-type',
-      switchToModelVersionAt: '8.0.0',
       modelVersions: {
         1: {
           changes: [],

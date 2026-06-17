@@ -1,0 +1,61 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import type { ExpressionValueVisDimension } from '@kbn/chart-expressions-common';
+import { getColumnByAccessor, getFormatByAccessor } from '@kbn/chart-expressions-common';
+import type { DatatableColumn, Datatable } from '@kbn/expressions-plugin/public';
+import type { BucketColumns } from '../../common/types';
+
+const getMetricColumn = (
+  metricAccessor: ExpressionValueVisDimension | string,
+  visData: Datatable
+) => {
+  return getColumnByAccessor(metricAccessor, visData.columns);
+};
+
+export const getColumns = (
+  dimensions: {
+    metric: string | ExpressionValueVisDimension | undefined;
+    buckets: Array<string | ExpressionValueVisDimension>;
+  },
+  visData: Datatable
+): {
+  metricColumn: DatatableColumn;
+  bucketColumns: Array<Partial<BucketColumns>>;
+} => {
+  const { metric, buckets } = dimensions;
+  if (buckets.length > 0) {
+    const bucketColumns: Array<Partial<BucketColumns>> = buckets.map((bucket) => {
+      const column = getColumnByAccessor(bucket, visData.columns);
+      return {
+        ...column,
+        format: getFormatByAccessor(bucket, visData.columns),
+      };
+    });
+
+    const lastBucketId = bucketColumns[bucketColumns.length - 1].id;
+    const matchingIndex = visData.columns.findIndex((col) => col.id === lastBucketId);
+
+    return {
+      bucketColumns,
+      metricColumn: getMetricColumn(
+        metric ?? { accessor: matchingIndex + 1, type: 'vis_dimension', format: {} },
+        visData
+      )!,
+    };
+  }
+  const metricColumn = getMetricColumn(
+    metric ?? { accessor: 0, type: 'vis_dimension', format: {} },
+    visData
+  )!;
+  return {
+    metricColumn,
+    bucketColumns: [{ name: metricColumn.name }],
+  };
+};

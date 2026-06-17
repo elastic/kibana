@@ -1,5 +1,0 @@
-{
-  "type": "shared-browser",
-  "id": "@kbn/core-mount-utils-browser",
-  "owner": "@elastic/kibana-core"
-}

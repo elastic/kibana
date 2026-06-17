@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 (() => {
@@ -27,9 +28,9 @@
   try {
     const argv = JSON.parse(rawArgv);
 
-    // allow dependencies to be installed with `yarn kbn bootstrap` or `bazel run @nodejs//:yarn` (called under the hood by bazel)
-    if (argv.cooked.includes('kbn') || !!process.env.BAZEL_YARN_INSTALL) {
-      // all good, trying to install deps using `kbn` or bazel directly
+    // allow dependencies to be installed with `yarn kbn bootstrap`
+    if (argv.cooked.includes('kbn')) {
+      // all good, trying to install deps using `kbn`
       return;
     }
 

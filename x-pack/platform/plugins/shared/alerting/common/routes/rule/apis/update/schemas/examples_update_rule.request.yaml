@@ -1,0 +1,28 @@
+summary: Index threshold rule
+description: Update an index threshold rule that uses a server log connector to send notifications when the threshold is met.
+value:
+  actions:
+    - frequency:
+        summary: false
+        notify_when: onActionGroupChange
+      group: threshold met
+      id: 96b668d0-a1b6-11ed-afdf-d39a49596974
+      params:
+        level: info
+        message: "Rule {{rule.name}} is active for group {{context.group}}:\n\n- Value: {{context.value}}\n- Conditions Met: {{context.conditions}} over {{rule.params.timeWindowSize}}{{rule.params.timeWindowUnit}}\n- Timestamp: {{context.date}}"
+  params:
+    aggField: sheet.version
+    aggType: avg
+    index: [".updated-index"]
+    groupBy: top
+    termField: name.keyword
+    termSize: 6
+    threshold: [1000]
+    thresholdComparator: ">"
+    timeField: "@timestamp"
+    timeWindowSize: 5
+    timeWindowUnit: m
+  name: new name
+  schedule:
+    interval: 1m
+  tags: []

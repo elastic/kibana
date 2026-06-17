@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { Jsonc } from '@kbn/repo-packages';
@@ -27,6 +28,16 @@ export function getCompilerOptions(ast: T.ObjectExpression) {
   return compilerOptions.value;
 }
 
+/**
+ * Sets a compiler option in a JSONC tsconfig source string. If the
+ * `compilerOptions` property does not exist, it is created. If the option
+ * already exists, its value is replaced.
+ * @param source - The JSONC tsconfig source text to modify.
+ * @param name - The compiler option name to set.
+ * @param value - The compiler option value. Intentionally typed as `any` because valid
+ * compiler option values include booleans, strings, numbers, arrays, and objects.
+ * @returns The modified JSONC source text.
+ */
 export function setCompilerOption(source: string, name: string, value: any) {
   const ast = getAst(source);
   if (!getProp(ast, 'compilerOptions')) {
@@ -77,6 +88,13 @@ export function setCompilerOption(source: string, name: string, value: any) {
   return left + `,\n    ${JSON.stringify(name)}: ${redentJson(value, '    ')}` + right;
 }
 
+/**
+ * Removes a compiler option from a JSONC tsconfig source string. Throws if the
+ * `compilerOptions` block or the named option does not exist.
+ * @param source - The JSONC tsconfig source text to modify.
+ * @param name - The compiler option name to remove.
+ * @returns The modified JSONC source text.
+ */
 export function removeCompilerOption(source: string, name: string) {
   const ast = getAst(source);
   const compilerOptions = getCompilerOptions(ast);

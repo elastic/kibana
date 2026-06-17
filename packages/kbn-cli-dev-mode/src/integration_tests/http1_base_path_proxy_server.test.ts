@@ -1,19 +1,21 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Server } from '@hapi/hapi';
+import type { Server } from '@hapi/hapi';
 import { EMPTY } from 'rxjs';
 import moment from 'moment';
 import supertest from 'supertest';
 import { getServerOptions, createServer, type IHttpConfig } from '@kbn/server-http-tools';
 import { ByteSizeValue } from '@kbn/config-schema';
 
-import { Http1BasePathProxyServer, BasePathProxyServerOptions } from '../base_path_proxy';
+import type { BasePathProxyServerOptions } from '../base_path_proxy';
+import { Http1BasePathProxyServer } from '../base_path_proxy';
 import { DevConfig } from '../config/dev_config';
 import { TestLog } from '../log';
 

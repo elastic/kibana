@@ -1,0 +1,65 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`ExplainCollectionEnabled should explain about xpack.monitoring.collection.enabled setting 1`] = `
+Array [
+  <h2
+    class="euiTitle emotion-euiTitle-l"
+  >
+    Monitoring is currently off
+  </h2>,
+  <span
+    class="emotion-euiTextColor-subdued"
+  >
+    <div
+      class="euiText emotion-euiText-m"
+    >
+      <p>
+        Monitoring provides insight to your hardware performance and load.
+      </p>
+    </div>
+  </span>,
+  <hr
+    class="euiHorizontalRule emotion-euiHorizontalRule-half-m"
+  />,
+  <div
+    class="euiText emotion-euiText-m"
+  >
+    <p>
+      We checked the cluster settings and found that 
+      <code>
+        xpack.monitoring.collection.enabled
+      </code>
+       is set to 
+      <code>
+        -1
+      </code>
+      .
+    </p>
+    <p>
+      Would you like to turn it on?
+    </p>
+  </div>,
+  <div
+    class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
+  />,
+  <div
+    class="euiFlexGroup emotion-euiFlexGroup-responsive-s-spaceAround-center-row"
+  >
+    <div
+      class="euiFlexItem emotion-euiFlexItem-growZero"
+    >
+      <button
+        class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-fill-primary"
+        data-test-subj="enableCollectionEnabled"
+        type="button"
+      >
+        <span
+          class="emotion-euiButtonDisplayContent"
+        >
+          Turn on monitoring
+        </span>
+      </button>
+    </div>
+  </div>,
+]
+`;

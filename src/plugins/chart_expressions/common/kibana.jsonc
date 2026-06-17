@@ -1,5 +1,0 @@
-{
-  "type": "shared-common",
-  "id": "@kbn/chart-expressions-common",
-  "owner": "@elastic/kibana-visualizations"
-}

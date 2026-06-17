@@ -1,42 +1,49 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import supertest from 'supertest';
 import { executionContextServiceMock } from '@kbn/core-execution-context-server-mocks';
+import { userActivityServiceMock } from '@kbn/core-user-activity-server-mocks';
 import { contextServiceMock } from '@kbn/core-http-context-server-mocks';
-import { createHttpService } from '@kbn/core-http-server-mocks';
+import { docLinksServiceMock } from '@kbn/core-doc-links-server-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-browser-mocks';
-import { Server } from '@hapi/hapi';
+import type { Server } from '@hapi/hapi';
 import { MetricsService } from '@kbn/core-metrics-server-internal';
 import { Env } from '@kbn/config';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { configServiceMock, getEnvOptions } from '@kbn/config-mocks';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import moment from 'moment';
+import { createInternalHttpService } from '../utilities';
 
 describe('GET /api/_elu_load', () => {
   let logger: ReturnType<typeof loggingSystemMock.create>;
-  let server: ReturnType<typeof createHttpService>;
+  let server: ReturnType<typeof createInternalHttpService>;
   let listener: Server['listener'];
   let service: MetricsService;
   beforeEach(async () => {
     logger = loggingSystemMock.create();
-    server = createHttpService({ logger });
+    server = createInternalHttpService({ logger });
     service = new MetricsService({
       coreId: Symbol('core'),
       env: Env.createDefault(REPO_ROOT, getEnvOptions()),
       logger: loggingSystemMock.create(),
       configService: configServiceMock.create({ atPath: { interval: moment.duration('1s') } }),
     });
-    await server.preboot({ context: contextServiceMock.createPrebootContract() });
+    await server.preboot({
+      context: contextServiceMock.createPrebootContract(),
+      docLinks: docLinksServiceMock.createSetupContract(),
+    });
     const httpSetup = await server.setup({
       context: contextServiceMock.createSetupContract(),
       executionContext: executionContextServiceMock.createInternalSetupContract(),
+      userActivity: userActivityServiceMock.createInternalSetupContract(),
     });
     listener = httpSetup.server.listener;
     await service.setup({

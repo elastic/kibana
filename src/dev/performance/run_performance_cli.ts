@@ -1,16 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { createFlagError } from '@kbn/dev-cli-errors';
 import { run } from '@kbn/dev-cli-runner';
-import { ProcRunner } from '@kbn/dev-proc-runner';
+import type { ProcRunner } from '@kbn/dev-proc-runner';
 import { REPO_ROOT } from '@kbn/repo-info';
-import { ToolingLog } from '@kbn/tooling-log';
+import type { ToolingLog } from '@kbn/tooling-log';
 import fs from 'fs';
 import path from 'path';
 
@@ -34,6 +35,63 @@ interface TestRunProps extends EsRunProps {
   kibanaInstallDir: string | undefined;
 }
 
+interface JourneyTargetGroups {
+  [key: string]: string[];
+}
+
+const journeyTargetGroups: JourneyTargetGroups = {
+  kibanaStartAndLoad: ['login'],
+  daily: [
+    'web_logs_dashboard_esql_long_running',
+    'web_logs_dashboard',
+    'data_stress_test_lens_esql',
+    'web_logs_dashboard_esql',
+    'many_fields_discover_esql',
+    'data_stress_test_lens',
+    'ecommerce_dashboard_map_only',
+    'ecommerce_dashboard_saved_search_only',
+    'ecommerce_dashboard_tsvb_gauge_only',
+    'many_fields_transform',
+    'tsdb_logs_data_visualizer',
+    'many_fields_esql_editor',
+    'metrics_experience_grid',
+  ],
+  crud: ['tags_listing_page', 'dashboard_listing_page'],
+  dashboard: [
+    'web_logs_dashboard',
+    'web_logs_dashboard_esql',
+    'web_logs_dashboard_esql_long_running',
+    'flight_dashboard',
+    'ecommerce_dashboard_map_only',
+    'ecommerce_dashboard_saved_search_only',
+    'ecommerce_dashboard_tsvb_gauge_only',
+    'promotion_tracking_dashboard',
+    'data_stress_test_lens',
+    'data_stress_test_lens_esql',
+  ],
+  discover: ['many_fields_discover', 'many_fields_discover_esql', 'many_fields_esql_editor'],
+  lens: ['many_fields_lens_editor', 'data_stress_test_lens', 'data_stress_test_lens_esql'],
+  esql: [
+    'many_fields_discover_esql',
+    'many_fields_esql_editor',
+    'web_logs_dashboard_esql',
+    'web_logs_dashboard_esql_long_running',
+    'data_stress_test_lens_esql',
+  ],
+  ml: ['aiops_log_rate_analysis', 'many_fields_transform', 'tsdb_logs_data_visualizer'],
+  observability: ['apm_service_inventory', 'infra_hosts_view_ecs', 'infra_hosts_view_semconv'],
+  security: ['cloud_security_dashboard'],
+  streams: [
+    'streams_listing_page',
+    'streams_data_quality',
+    'streams_processing_step',
+    'streams_retention',
+    'streams_field_mapping',
+    'streams_wired_hierarchy',
+  ],
+  metricsExperience: ['metrics_experience_grid'],
+};
+
 const readFilesRecursively = (dir: string, callback: Function) => {
   const files = fs.readdirSync(dir);
   files.forEach((file) => {
@@ -47,6 +105,44 @@ const readFilesRecursively = (dir: string, callback: Function) => {
   });
 };
 
+const getAllJourneys = (dir: string) => {
+  const journeys: Journey[] = [];
+
+  readFilesRecursively(dir, (filePath: string) =>
+    journeys.push({
+      name: path.parse(filePath).name,
+      path: path.resolve(dir, filePath),
+    })
+  );
+
+  return journeys;
+};
+
+const getJourneysToRun = ({ journeyPath, group }: { journeyPath?: string; group?: string }) => {
+  if (group && typeof group === 'string') {
+    if (!(group in journeyTargetGroups)) {
+      throw createFlagError(`Group '${group}' is not defined, try again`);
+    }
+
+    const fileNames = journeyTargetGroups[group];
+    const dir = path.resolve(REPO_ROOT, JOURNEY_BASE_PATH);
+
+    return getAllJourneys(dir).filter((journey) => fileNames.includes(journey.name));
+  }
+
+  if (journeyPath && !fs.existsSync(journeyPath)) {
+    throw createFlagError('--journey-path must be an existing path');
+  }
+
+  if (journeyPath && fs.statSync(journeyPath).isFile()) {
+    return [{ name: path.parse(journeyPath).name, path: journeyPath }];
+  } else {
+    // default dir is x-pack/performance/journeys_e2e
+    const dir = journeyPath ?? path.resolve(REPO_ROOT, JOURNEY_BASE_PATH);
+    return getAllJourneys(dir);
+  }
+};
+
 async function startEs(props: EsRunProps) {
   const { procRunner, log, logsDir } = props;
   await procRunner.run('es', {
@@ -55,7 +151,8 @@ async function startEs(props: EsRunProps) {
       'scripts/es',
       'snapshot',
       '--license=trial',
-      // Temporarily disabling APM
+      // Temporarily disabling APM because the token needs to be added to the keystore
+      // and cannot be set via command line
       // ...(JOURNEY_APM_CONFIG.active
       //   ? [
       //       '-E',
@@ -95,12 +192,6 @@ async function runFunctionalTest(props: TestRunProps) {
     cwd: REPO_ROOT,
     wait: true,
     env: {
-      // Reset all the ELASTIC APM env vars to undefined, FTR config might set it's own values.
-      ...Object.fromEntries(
-        Object.keys(process.env).flatMap((k) =>
-          k.startsWith('ELASTIC_APM_') ? [[k, undefined]] : []
-        )
-      ),
       TEST_PERFORMANCE_PHASE: phase,
       TEST_ES_URL: 'http://elastic:changeme@localhost:9200',
       TEST_ES_DISABLE_STARTUP: 'true',
@@ -109,34 +200,38 @@ async function runFunctionalTest(props: TestRunProps) {
   });
 }
 
+const cleanupAndExit = (procRunner: ProcRunner, eventName: string) => {
+  process.stdout.write(`\n--- Received ${eventName}, cleaning up...\n`);
+  procRunner
+    .stop('es')
+    .catch((e) => {
+      process.stderr.write(`\nError during cleanup: ${e}`);
+    })
+    .finally(() => {
+      process.exit(1);
+    });
+};
+
 run(
   async ({ log, flagsReader, procRunner }) => {
     const skipWarmup = flagsReader.boolean('skip-warmup');
     const kibanaInstallDir = flagsReader.path('kibana-install-dir');
     const journeyPath = flagsReader.path('journey-path');
+    const group = flagsReader.string('group');
+
+    if (group && journeyPath) {
+      throw createFlagError('--group and --journeyPath cannot be used simultaneously');
+    }
 
     if (kibanaInstallDir && !fs.existsSync(kibanaInstallDir)) {
       throw createFlagError('--kibana-install-dir must be an existing directory');
     }
 
-    if (journeyPath && !fs.existsSync(journeyPath)) {
-      throw createFlagError('--journey-path must be an existing path');
-    }
+    ['SIGINT', 'SIGTERM', 'SIGHUP', 'unhandledRejection', 'uncaughtException'].forEach((event) => {
+      process.on(event, () => cleanupAndExit(procRunner, event));
+    });
 
-    const journeys: Journey[] = [];
-
-    if (journeyPath && fs.statSync(journeyPath).isFile()) {
-      journeys.push({ name: path.parse(journeyPath).name, path: journeyPath });
-    } else {
-      // default dir is x-pack/performance/journeys_e2e
-      const dir = journeyPath ?? path.resolve(REPO_ROOT, JOURNEY_BASE_PATH);
-      readFilesRecursively(dir, (filePath: string) =>
-        journeys.push({
-          name: path.parse(filePath).name,
-          path: path.resolve(dir, filePath),
-        })
-      );
-    }
+    const journeys = getJourneysToRun({ journeyPath, group });
 
     if (journeys.length === 0) {
       throw new Error('No journeys found');
@@ -190,13 +285,14 @@ run(
   },
   {
     flags: {
-      string: ['kibana-install-dir', 'journey-path'],
+      string: ['kibana-install-dir', 'journey-path', 'group'],
       boolean: ['skip-warmup'],
       help: `
       --kibana-install-dir=dir      Run Kibana from existing install directory instead of from source
       --journey-path=path           Define path to performance journey or directory with multiple journeys
                                     that should be executed. '${JOURNEY_BASE_PATH}' is run by default
       --skip-warmup                 Journey will be executed without warmup (TEST phase only)
+      --group                       Run subset of journeys, defined in the specified group
     `,
     },
   }

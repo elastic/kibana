@@ -1,0 +1,22 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`TooltipRow should render label and value if both are specified 1`] = `
+<tr>
+  <td
+    css="unknown styles"
+  >
+    <div
+      css="unknown styles"
+    >
+      tooltip
+    </div>
+  </td>
+  <td>
+    <div
+      css="unknown styles"
+    >
+      0
+    </div>
+  </td>
+</tr>
+`;

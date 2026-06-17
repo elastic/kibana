@@ -1,0 +1,27 @@
+{
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+  },
+  "include": [
+    "public/**/*",
+    "server/**/*",
+    "common/**/*"
+  ],
+  "kbn_references": [
+    "@kbn/core",
+    "@kbn/cloud-plugin",
+    "@kbn/spaces-plugin",
+    "@kbn/telemetry-plugin",
+    "@kbn/config-schema",
+    "@kbn/feedback-registry",
+    "@kbn/feedback-components",
+    "@kbn/core-http-router-server-mocks",
+    "@kbn/core-chrome-feature-flags",
+    "@kbn/react-kibana-mount",
+    "@kbn/i18n"
+  ],
+  "exclude": [
+    "target/**/*",
+  ]
+}

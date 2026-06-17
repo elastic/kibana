@@ -1,13 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import Path from 'path';
-import { EventEmitter } from 'events';
+import type { EventEmitter } from 'events';
 
 import * as Rx from 'rxjs';
 import {
@@ -21,17 +22,18 @@ import {
   concatMap,
   takeUntil,
 } from 'rxjs';
-import { CliArgs } from '@kbn/config';
+import type { CliArgs } from '@kbn/config';
 import { CiStatsReporter } from '@kbn/ci-stats-reporter';
 import { REPO_ROOT } from '@kbn/repo-info';
 
-import { Log, CliLog } from './log';
+import type { Log } from './log';
+import { CliLog } from './log';
 import { Optimizer } from './optimizer';
 import { DevServer } from './dev_server';
 import { Watcher } from './watcher';
 import { getBasePathProxyServer, type BasePathProxyServer } from './base_path_proxy';
 import { shouldRedirectFromOldBasePath } from './should_redirect_from_old_base_path';
-import { CliDevConfig } from './config';
+import type { CliDevConfig } from './config';
 
 // signal that emits undefined once a termination signal has been sent
 const exitSignal$ = new Rx.ReplaySubject<undefined>(1);
@@ -148,6 +150,11 @@ export class CliDevMode {
           .split(`${this.basePathProxy.host}:${this.basePathProxy.targetPort}`)
           .join(`${this.basePathProxy.host}:${this.basePathProxy.port}`);
       },
+      proxyUrl: this.basePathProxy
+        ? `${config.http.ssl.enabled ? 'https' : 'http'}://${this.basePathProxy.host}:${
+            this.basePathProxy.port
+          }${this.basePathProxy.basePath ?? ''}`
+        : undefined,
     });
 
     this.optimizer = new Optimizer({
@@ -162,6 +169,7 @@ export class CliDevMode {
       watch: cliArgs.watch,
       pluginPaths: config.plugins.additionalPluginPaths,
       pluginScanDirs: config.plugins.pluginSearchPaths,
+      basePath: this.basePathProxy?.basePath,
     });
   }
 
@@ -243,8 +251,10 @@ export class CliDevMode {
     }
 
     this.subscription.add(
-      this.optimizer.run$
+      // the same pattern as: `kibana/packages/kbn-cli-dev-mode/src/dev_server.ts`
+      Rx.concat([undefined], this.watcher.optimizerShouldRestart$())
         .pipe(
+          switchMap(() => this.optimizer.run$),
           // stop the optimizer as soon as we get an exit signal
           takeUntil(exitSignal$)
         )

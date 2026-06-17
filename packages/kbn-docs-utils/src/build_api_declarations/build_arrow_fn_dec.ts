@@ -1,12 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
+import type {
   ArrowFunction,
   VariableDeclaration,
   PropertyDeclaration,
@@ -14,12 +15,13 @@ import {
   ShorthandPropertyAssignment,
   PropertyAssignment,
 } from 'ts-morph';
-import { ApiDeclaration, TypeKind } from '../types';
+import type { ApiDeclaration } from '../types';
+import { TypeKind } from '../types';
 import { buildApiDecsForParameters } from './build_parameter_decs';
 import { getSignature } from './get_signature';
-import { getJSDocReturnTagComment, getJSDocs } from './js_doc_utils';
+import { getJSDocReturnTagComment, getJSDocs, getPluginContextForNode } from './js_doc_utils';
 import { buildBasicApiDeclaration } from './build_basic_api_declaration';
-import { BuildApiDecOpts } from './types';
+import type { BuildApiDecOpts } from './types';
 
 /**
  * Arrow functions are handled differently than regular functions because you need the arrow function
@@ -36,12 +38,13 @@ export function getArrowFunctionDec(
   initializer: ArrowFunction,
   opts: BuildApiDecOpts
 ): ApiDeclaration {
+  const pluginContext = getPluginContextForNode(node, opts);
   return {
     ...buildBasicApiDeclaration(node, opts),
     type: TypeKind.FunctionKind,
     children: buildApiDecsForParameters(initializer.getParameters(), opts, getJSDocs(node)),
     // need to override the signature - use the initializer, not the node.
     signature: getSignature(initializer, opts.plugins, opts.log),
-    returnComment: getJSDocReturnTagComment(node),
+    returnComment: getJSDocReturnTagComment(node, pluginContext),
   };
 }

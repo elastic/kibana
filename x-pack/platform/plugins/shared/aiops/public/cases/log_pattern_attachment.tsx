@@ -1,0 +1,76 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import { memoize } from 'lodash';
+import React from 'react';
+import type { UnifiedValueAttachmentViewProps } from '@kbn/cases-plugin/public';
+import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
+import type { TimeRange } from '@kbn/es-query';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { EuiDescriptionList } from '@elastic/eui';
+import deepEqual from 'fast-deep-equal';
+import {
+  normalizePatternAnalysisLegacyFields,
+  toUiMinimumTimeRange,
+  type RawPatternAnalysisState,
+} from '../../common/embeddables/pattern_analysis/normalize_legacy_state';
+import type { PatternAnalysisAttachmentData } from '../../common/utils';
+import type {
+  PatternAnalysisProps,
+  PatternAnalysisSharedComponent,
+} from '../shared_components/pattern_analysis';
+
+// Pre-9.5 case attachments stored time_range as timeRange.
+type RawAttachmentState = RawPatternAnalysisState & { timeRange?: TimeRange };
+type PatternAnalysisViewProps = UnifiedValueAttachmentViewProps<PatternAnalysisAttachmentData>;
+
+export const initComponent = memoize(
+  (fieldFormats: FieldFormatsStart, PatternAnalysisComponent: PatternAnalysisSharedComponent) => {
+    return React.memo(
+      (props: PatternAnalysisViewProps) => {
+        const rawState = props.data.state as RawAttachmentState;
+
+        const dataFormatter = fieldFormats.deserialize({
+          id: FIELD_FORMAT_IDS.DATE,
+        });
+
+        const normalized = normalizePatternAnalysisLegacyFields(rawState);
+        const inputProps = {
+          dataViewId: normalized.data_view_id ?? '',
+          fieldName: normalized.field_name,
+          minimumTimeRangeOption: toUiMinimumTimeRange(normalized.minimum_time_range),
+          randomSamplerMode: normalized.random_sampler_mode,
+          randomSamplerProbability: normalized.random_sampler_probability,
+          timeRange: rawState.time_range ?? rawState.timeRange,
+        } as PatternAnalysisProps;
+
+        const listItems = [
+          {
+            title: (
+              <FormattedMessage
+                id="xpack.aiops.logPatternAnalysis.cases.timeRangeLabel"
+                defaultMessage="Time range"
+              />
+            ),
+            description: `${dataFormatter.convertToText(
+              inputProps.timeRange.from
+            )} - ${dataFormatter.convertToText(inputProps.timeRange.to)}`,
+          },
+        ];
+
+        return (
+          <>
+            <EuiDescriptionList compressed type={'inline'} listItems={listItems} />
+            <PatternAnalysisComponent {...inputProps} embeddingOrigin={'cases'} />
+          </>
+        );
+      },
+      (prevProps, nextProps) => deepEqual(prevProps.data.state, nextProps.data.state)
+    );
+  }
+);

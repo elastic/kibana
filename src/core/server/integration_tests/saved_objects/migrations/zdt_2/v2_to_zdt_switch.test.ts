@@ -1,23 +1,24 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import Path from 'path';
 import fs from 'fs/promises';
 import { range } from 'lodash';
 import { type TestElasticsearchUtils } from '@kbn/core-test-helpers-kbn-server';
-import { SavedObjectsBulkCreateObject } from '@kbn/core-saved-objects-api-server';
-import { IndexMappingMeta } from '@kbn/core-saved-objects-base-server-internal';
+import type { SavedObjectsBulkCreateObject } from '@kbn/core-saved-objects-api-server';
+import type { IndexMappingMeta } from '@kbn/core-saved-objects-base-server-internal';
 import '../jest_matchers';
 import {
   getKibanaMigratorTestKit,
   startElasticsearch,
   currentVersion,
-} from '../kibana_migrator_test_kit';
+} from '@kbn/migrator-test-kit';
 import { parseLogFile } from '../test_utils';
 import { getBaseMigratorParams, getSampleAType } from '../fixtures/zdt_base.fixtures';
 
@@ -117,13 +118,12 @@ describe('ZDT upgrades - switching from v2 algorithm', () => {
     it('fails and throws an explicit error', async () => {
       const { client } = await createBaseline({ kibanaVersion: '8.7.0' });
 
-      // even when specifying an older version, `indexTypeMap` and `mappingVersions` will be present on the index's meta,
-      // so we have to manually remove them.
+      // even when specifying an older version, `mappingVersions` will be present on the index's meta,
+      // so we have to manually remove it.
       const indices = await client.indices.get({
         index: '.kibana_8.7.0_001',
       });
       const meta = indices['.kibana_8.7.0_001'].mappings!._meta! as IndexMappingMeta;
-      delete meta.indexTypesMap;
       delete meta.mappingVersions;
       meta.migrationMappingPropertyHashes = {
         sample_a: 'sampleAHash',

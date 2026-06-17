@@ -1,0 +1,22 @@
+# EXP
+
+Returns the value of e raised to the power of the specified number.
+
+## Syntax
+
+`EXP(number)`
+
+### Parameters
+
+#### number
+
+Numeric expression to be used as the exponent. If the value is `null`, the function returns `null`.
+
+## Examples
+
+Calculates the exponential value of 5.0 (e^5.0) and stores it in a new column.
+
+```esql
+ROW d = 5.0
+| EVAL s = EXP(d)
+```

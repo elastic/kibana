@@ -1,0 +1,41 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { EuiIconTip } from '@elastic/eui';
+import React from 'react';
+
+import { FormattedMessage } from '@kbn/i18n-react';
+
+import type { Role } from '../../../../common';
+import { isRoleReserved } from '../../../../common';
+
+interface Props {
+  role: Role;
+}
+
+export const ReservedRoleBadge = (props: Props) => {
+  const { role } = props;
+
+  if (isRoleReserved(role)) {
+    return (
+      <EuiIconTip
+        data-test-subj="reservedRoleBadgeTooltip"
+        content={
+          <FormattedMessage
+            id="xpack.security.management.editRole.reversedRoleBadge.reservedRolesCanNotBeModifiedTooltip"
+            defaultMessage="Reserved roles are built-in and cannot be removed or modified."
+          />
+        }
+        iconProps={{
+          style: { verticalAlign: 'super' },
+        }}
+        type="lock"
+      />
+    );
+  }
+  return null;
+};

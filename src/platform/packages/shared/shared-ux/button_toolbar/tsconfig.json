@@ -1,0 +1,9 @@
+{
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
+  "compilerOptions": {
+    "outDir": "target/types"
+  },
+  "include": ["**/*.ts", "**/*.tsx"],
+  "kbn_references": ["@kbn/i18n", "@kbn/test-jest-helpers"],
+  "exclude": ["target/**/*"]
+}

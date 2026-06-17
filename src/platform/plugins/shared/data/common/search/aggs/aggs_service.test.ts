@@ -1,0 +1,214 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import type { AggsCommonSetupDependencies, AggsCommonStartDependencies } from './aggs_service';
+import { AggsCommonService } from './aggs_service';
+import { getAggTypes } from './agg_types';
+import type { BucketAggType } from './buckets/bucket_agg_type';
+import type { MetricAggType } from './metrics/metric_agg_type';
+
+describe('Aggs service', () => {
+  let service: AggsCommonService;
+  let setupDeps: AggsCommonSetupDependencies;
+  let startDeps: AggsCommonStartDependencies;
+
+  beforeEach(() => {
+    service = new AggsCommonService();
+    setupDeps = {
+      registerFunction: jest.fn(),
+    };
+    startDeps = {
+      getConfig: jest.fn(),
+      getIndexPattern: jest.fn(),
+    } as unknown as AggsCommonStartDependencies;
+  });
+
+  describe('setup()', () => {
+    test('exposes proper contract', () => {
+      const setup = service.setup(setupDeps);
+      expect(Object.keys(setup).length).toBe(1);
+      expect(setup).toHaveProperty('types');
+    });
+
+    test('instantiates a new registry', () => {
+      const a = new AggsCommonService();
+      const b = new AggsCommonService();
+      const bSetupDeps = {
+        registerFunction: jest.fn(),
+      };
+
+      const aSetup = a.setup(setupDeps);
+      aSetup.types.registerBucket(
+        'foo',
+        () => ({ name: 'foo', type: 'buckets' } as BucketAggType<any>)
+      );
+      const aStart = a.start(startDeps);
+      expect(aStart.types.getAll().buckets.map((t) => t.name)).toMatchInlineSnapshot(`
+        Array [
+          "date_histogram",
+          "histogram",
+          "range",
+          "date_range",
+          "ip_prefix",
+          "ip_range",
+          "terms",
+          "multi_terms",
+          "rare_terms",
+          "filter",
+          "filters",
+          "significant_terms",
+          "significant_text",
+          "geotile_grid",
+          "sampler",
+          "diversified_sampler",
+          "time_series",
+          "foo",
+        ]
+      `);
+      expect(aStart.types.getAll().metrics.map((t) => t.name)).toMatchInlineSnapshot(`
+        Array [
+          "count",
+          "avg",
+          "sum",
+          "median",
+          "single_percentile",
+          "single_percentile_rank",
+          "min",
+          "max",
+          "std_dev",
+          "cardinality",
+          "value_count",
+          "percentiles",
+          "percentile_ranks",
+          "rate",
+          "top_hits",
+          "top_metrics",
+          "derivative",
+          "cumulative_sum",
+          "moving_avg",
+          "serial_diff",
+          "avg_bucket",
+          "sum_bucket",
+          "min_bucket",
+          "max_bucket",
+          "filtered_metric",
+          "geo_bounds",
+          "geo_centroid",
+        ]
+      `);
+
+      b.setup(bSetupDeps);
+      const bStart = b.start(startDeps);
+      expect(bStart.types.getAll().buckets.map((t) => t.name)).toMatchInlineSnapshot(`
+        Array [
+          "date_histogram",
+          "histogram",
+          "range",
+          "date_range",
+          "ip_prefix",
+          "ip_range",
+          "terms",
+          "multi_terms",
+          "rare_terms",
+          "filter",
+          "filters",
+          "significant_terms",
+          "significant_text",
+          "geotile_grid",
+          "sampler",
+          "diversified_sampler",
+          "time_series",
+        ]
+      `);
+      expect(bStart.types.getAll().metrics.map((t) => t.name)).toMatchInlineSnapshot(`
+        Array [
+          "count",
+          "avg",
+          "sum",
+          "median",
+          "single_percentile",
+          "single_percentile_rank",
+          "min",
+          "max",
+          "std_dev",
+          "cardinality",
+          "value_count",
+          "percentiles",
+          "percentile_ranks",
+          "rate",
+          "top_hits",
+          "top_metrics",
+          "derivative",
+          "cumulative_sum",
+          "moving_avg",
+          "serial_diff",
+          "avg_bucket",
+          "sum_bucket",
+          "min_bucket",
+          "max_bucket",
+          "filtered_metric",
+          "geo_bounds",
+          "geo_centroid",
+        ]
+      `);
+    });
+
+    test('registers default agg types', () => {
+      service.setup(setupDeps);
+      const start = service.start(startDeps);
+
+      const aggTypes = getAggTypes();
+      expect(start.types.getAll().buckets.length).toBe(aggTypes.buckets.length);
+      expect(start.types.getAll().metrics.length).toBe(aggTypes.metrics.length);
+    });
+
+    test('merges default agg types with types registered during setup', () => {
+      const setup = service.setup(setupDeps);
+      setup.types.registerBucket(
+        'foo',
+        () => ({ name: 'foo', type: 'buckets' } as BucketAggType<any>)
+      );
+      setup.types.registerMetric(
+        'bar',
+        () => ({ name: 'bar', type: 'metrics' } as MetricAggType<any>)
+      );
+      const start = service.start(startDeps);
+
+      const aggTypes = getAggTypes();
+      expect(start.types.getAll().buckets.length).toBe(aggTypes.buckets.length + 1);
+      expect(start.types.getAll().buckets.some((t) => t.name === 'foo')).toBe(true);
+      expect(start.types.getAll().metrics.length).toBe(aggTypes.metrics.length + 1);
+      expect(start.types.getAll().metrics.some((t) => t.name === 'bar')).toBe(true);
+    });
+
+    test('registers all agg type expression functions', () => {
+      service.setup(setupDeps);
+      const aggTypes = getAggTypes();
+      expect(setupDeps.registerFunction).toHaveBeenCalledTimes(
+        aggTypes.buckets.length + aggTypes.metrics.length
+      );
+    });
+  });
+
+  describe('start()', () => {
+    test('exposes proper contract', () => {
+      const start = service.start(startDeps);
+      expect(Object.keys(start).length).toBe(3);
+      expect(start).toHaveProperty('calculateAutoTimeExpression');
+      expect(start).toHaveProperty('createAggConfigs');
+      expect(start).toHaveProperty('types');
+    });
+
+    test('types registry returns initialized type providers', () => {
+      service.setup(setupDeps);
+      const start = service.start(startDeps);
+      expect(start.types.get('terms')?.name).toBe('terms');
+    });
+  });
+});

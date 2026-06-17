@@ -7,6 +7,9 @@ for %%I in ("%SCRIPT_DIR%..") do set DIR=%%~dpfI
 
 set NODE=%DIR%\node\default\node.exe
 set NODE_ENV=production
+{{#rspack}}
+set KBN_USE_RSPACK=true
+{{/rspack}}
 
 If Not Exist "%NODE%" (
   Echo unable to find usable node.js executable.
@@ -30,10 +33,13 @@ IF EXIST "%CONFIG_DIR%\node.options" (
 
 :: Include pre-defined node option
 set "NODE_OPTIONS=--no-warnings --max-http-header-size=65536 %NODE_OPTIONS%"
+IF "%KBN_DISALLOW_CODE_GEN_FROM_STRINGS%"=="true" (
+  set "NODE_OPTIONS=--disallow-code-generation-from-strings %NODE_OPTIONS%"
+)
 
 :: This should run independently as the last instruction
 :: as we need NODE_OPTIONS previously set to expand
-"%NODE%" "%DIR%\src\cli\dist" %*
+"%NODE%" "%DIR%\src\cli\kibana\dist" %*
 
 :finally
 

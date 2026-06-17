@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import Path from 'path';
@@ -13,7 +14,8 @@ import { createAbsolutePathSerializer, createAnyInstanceSerializer } from '@kbn/
 import { REPO_ROOT } from '@kbn/repo-info';
 
 import { TestLog } from './log';
-import { CliDevMode, SomeCliArgs } from './cli_dev_mode';
+import type { SomeCliArgs } from './cli_dev_mode';
+import { CliDevMode } from './cli_dev_mode';
 import type { CliDevConfig } from './config';
 
 expect.addSnapshotSerializer(createAbsolutePathSerializer());
@@ -38,6 +40,8 @@ const { CiStatsReporter } = jest.requireMock('@kbn/ci-stats-reporter');
 const mockBasePathProxy = {
   targetPort: 9999,
   basePath: '/foo/bar',
+  host: 'localhost',
+  port: 5601,
   start: jest.fn(),
   stop: jest.fn(),
 };
@@ -76,7 +80,7 @@ const createDevConfig = (parts: Partial<CliDevConfig> = {}): CliDevConfig => ({
   dev: {
     basePathProxyTargetPort: 9000,
   },
-  http: {} as any,
+  http: { ssl: { enabled: false } } as any,
   ...parts,
 });
 
@@ -101,8 +105,10 @@ it('passes correct args to sub-classes', () => {
           "gracefulTimeout": 30000,
           "log": <TestLog>,
           "mapLogLine": [Function],
+          "proxyUrl": undefined,
           "script": <absolute path>/scripts/kibana,
           "watcher": Watcher {
+            "optimizerShouldRestart$": [MockFunction],
             "serverShouldRestart$": [MockFunction],
           },
         },
@@ -113,6 +119,7 @@ it('passes correct args to sub-classes', () => {
     Array [
       Array [
         Object {
+          "basePath": undefined,
           "cache": true,
           "dist": true,
           "enabled": true,
@@ -170,7 +177,11 @@ it('enables the basePath proxy', () => {
         "devConfig": Object {
           "basePathProxyTargetPort": 9000,
         },
-        "httpConfig": Object {},
+        "httpConfig": Object {
+          "ssl": Object {
+            "enabled": false,
+          },
+        },
         "log": <TestLog>,
       },
     ]
@@ -217,6 +228,7 @@ describe('#start()/#stop()', () => {
       watcherRun$ = new Rx.Subject();
       return {
         run$: watcherRun$,
+        optimizerShouldRestart$: jest.fn(() => Rx.NEVER),
       };
     });
     DevServer.mockImplementation(() => {

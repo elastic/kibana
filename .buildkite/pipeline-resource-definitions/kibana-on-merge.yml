@@ -20,12 +20,14 @@ spec:
     spec:
       env:
         SLACK_NOTIFICATIONS_CHANNEL: '#kibana-operations-alerts'
-        GITHUB_BUILD_COMMIT_STATUS_ENABLED: 'true'
+        KIBANA_GITHUB_BUILD_COMMIT_STATUS_ENABLED: 'true'
         GITHUB_COMMIT_STATUS_CONTEXT: buildkite/on-merge
         REPORT_FAILED_TESTS_TO_GITHUB: 'true'
-        ELASTIC_SLACK_NOTIFICATIONS_ENABLED: 'true'
+        KIBANA_SLACK_NOTIFICATIONS_ENABLED: 'true'
+        SLACK_NOTIFICATIONS_SKIP_FOR_RETRIES: 'true'
+        SCOUT_REPORTER_ENABLED: 'true'
       allow_rebuilds: true
-      branch_configuration: main 7.17 8.14 8.15
+      branch_configuration: main 9.4 9.3 8.19
       default_branch: main
       repository: elastic/kibana
       pipeline_file: .buildkite/pipelines/on_merge.yml
@@ -47,3 +49,6 @@ spec:
           access_level: MANAGE_BUILD_AND_READ
         kibana-tech-leads:
           access_level: MANAGE_BUILD_AND_READ
+      tags:
+        - kibana
+        - ':kibana: Kibana release path'

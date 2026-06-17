@@ -1,0 +1,31 @@
+{
+  "type": "plugin",
+  "id": "@kbn/expression-xy-plugin",
+  "owner": [
+    "@elastic/kibana-visualizations"
+  ],
+  "group": "platform",
+  "visibility": "shared",
+  "description": "Expression XY plugin adds a `xy` renderer and function to the expression plugin. The renderer will display the `xy` chart.",
+  "plugin": {
+    "id": "expressionXY",
+    "browser": true,
+    "server": true,
+    "requiredPlugins": [
+      "expressions",
+      "charts",
+      "data",
+      "fieldFormats",
+      "uiActions",
+      "eventAnnotation",
+      "visualizations"
+    ],
+    "optionalPlugins": [
+      "usageCollection"
+    ],
+    "requiredBundles": [],
+    "extraPublicDirs": [
+      "common",
+    ]
+  }
+}

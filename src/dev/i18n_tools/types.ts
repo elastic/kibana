@@ -1,12 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type { ListrTaskWrapper, DefaultRenderer, SimpleRenderer } from 'listr2';
+import type { TranslationInput } from '@kbn/i18n';
 import type { TaskReporter } from './utils/task_reporter';
 
 export interface MessageDescriptor {
@@ -24,6 +26,7 @@ export interface MessageDescriptor {
 export interface I18nCheckTaskContext {
   config?: I18nConfig;
   messages: Map<string, MessageDescriptor[]>;
+  localizedMessages?: TranslationInput;
   taskReporter: TaskReporter;
 }
 

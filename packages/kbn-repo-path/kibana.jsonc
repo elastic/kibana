@@ -1,6 +1,0 @@
-{
-  "type": "shared-common",
-  "id": "@kbn/repo-path",
-  "owner": "@elastic/kibana-operations",
-  "devOnly": true
-}

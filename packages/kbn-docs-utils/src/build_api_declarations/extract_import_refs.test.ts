@@ -1,16 +1,18 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { REPO_ROOT } from '@kbn/repo-info';
 import { ToolingLog } from '@kbn/tooling-log';
 import { getPluginApiDocId } from '../utils';
 import { extractImportReferences } from './extract_import_refs';
-import { ApiScope, PluginOrPackage, Reference } from '../types';
+import type { PluginOrPackage, Reference } from '../types';
+import { ApiScope } from '../types';
 import {
   getKibanaPlatformPackage,
   getKibanaPlatformPlugin,
@@ -108,14 +110,14 @@ it('test extractImportReference with unknown imports', () => {
 
 it('test full file imports with no matching plugin', () => {
   const refs = extractImportReferences(
-    `typeof import("${REPO_ROOT}/src/plugins/data/common/es_query/kuery/node_types/function")`,
+    `typeof import("${REPO_ROOT}/src/platform/plugins/shared/data/common/es_query/kuery/node_types/function")`,
     plugins,
     log
   );
   expect(refs).toMatchInlineSnapshot(`
     Array [
       "typeof ",
-      "src/plugins/data/common/es_query/kuery/node_types/function",
+      "src/platform/plugins/shared/data/common/es_query/kuery/node_types/function",
     ]
   `);
   expect(refs.length).toBe(2);
@@ -151,4 +153,18 @@ it('test single link', () => {
   );
   expect(results.length).toBe(1);
   expect((results[0] as Reference).text).toBe('FooFoo');
+});
+
+it('defaults to COMMON scope for paths outside standard plugin scopes', () => {
+  const testPlugin = getKibanaPlatformPlugin('pluginA');
+  // Path is in plugin directory but not under public/, server/, or common/.
+  const path = `${testPlugin.directory}/other/path.ts`;
+
+  const results = extractImportReferences(`import("${path}").SomeType`, [testPlugin], log);
+
+  expect(results.length).toBe(1);
+  const ref = results[0] as Reference;
+  expect(ref.text).toBe('SomeType');
+  // Paths outside standard scopes should default to COMMON.
+  expect(ref.scope).toBe(ApiScope.COMMON);
 });

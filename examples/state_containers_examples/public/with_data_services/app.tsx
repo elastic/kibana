@@ -1,13 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { useEffect, useMemo, useState } from 'react';
-import { History } from 'history';
+import type { History } from 'history';
 import { Router } from '@kbn/shared-ux-router';
 
 import {
@@ -18,25 +19,22 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import { Filter, FilterStateStore, Query } from '@kbn/es-query';
-import { CoreStart } from '@kbn/core/public';
-import { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
+import type { Filter, Query } from '@kbn/es-query';
+import { FilterStateStore } from '@kbn/es-query';
+import type { CoreStart } from '@kbn/core/public';
+import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
 
-import {
-  connectToQueryState,
-  DataPublicPluginStart,
-  QueryState,
-  syncQueryStateWithUrl,
-} from '@kbn/data-plugin/public';
+import type { DataPublicPluginStart, QueryState } from '@kbn/data-plugin/public';
+import { connectToQueryState, syncQueryStateWithUrl } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
+import type { BaseStateContainer, IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import {
-  BaseStateContainer,
   createStateContainer,
-  IKbnUrlStateStorage,
   syncState,
   useContainerState,
 } from '@kbn/kibana-utils-plugin/public';
-import { ExampleLink, StateContainersExamplesPage } from '../common/example_page';
+import type { ExampleLink } from '../common/example_page';
+import { StateContainersExamplesPage } from '../common/example_page';
 
 interface StateDemoAppDeps {
   navigateToApp: CoreStart['application']['navigateToApp'];
@@ -97,7 +95,7 @@ export const App = ({
             showSearchBar={true}
             indexPatterns={[dataView]}
             useDefaultBehaviors={true}
-            saveQueryMenuVisibility="allowed_by_app_privilege" // allowed only for this example app, use `globally_managed` by default
+            allowSavingQueries
           />
           <EuiPageTemplate.Section>
             <EuiText>

@@ -16,7 +16,7 @@ spec:
     kind: Pipeline
     metadata:
       name: kibana-tests
-      description: Pipeline that tests the service integration in various environments
+      description: Kibana serverless release quality gates
     spec:
       repository: elastic/kibana
       pipeline_file: ./.buildkite/pipelines/quality-gates/pipeline.kibana-tests.yaml
@@ -31,3 +31,6 @@ spec:
           access_level: BUILD_AND_READ
         everyone:
           access_level: READ_ONLY
+      tags:
+        - kibana
+        - ':kibana: Kibana release path'

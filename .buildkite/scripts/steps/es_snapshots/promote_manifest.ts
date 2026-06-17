@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import fs from 'fs';
@@ -26,7 +27,19 @@ import { BASE_BUCKET_DAILY, BASE_BUCKET_PERMANENT } from './bucket_config';
 
     const manifestJson = fs.readFileSync('manifest.json').toString();
     const manifest = JSON.parse(manifestJson);
-    const { id, bucket, version } = manifest;
+    const { id, bucket, version, sha } = manifest;
+    if (!/^\d+\.\d+\.\d+(-SNAPSHOT)?$/.test(version)) {
+      throw Error(`Invalid version format: ${version}`);
+    }
+    if (!/^[0-9a-f]{40}$/.test(sha)) {
+      throw Error(`Invalid sha format: ${sha}`);
+    }
+    if (!/^[\w./-]+$/.test(id)) {
+      throw Error(`Invalid id format: ${id}`);
+    }
+    if (!/^[\w./-]+$/.test(bucket)) {
+      throw Error(`Invalid bucket format: ${bucket}`);
+    }
 
     const manifestPermanentJson = manifestJson
       .split(BASE_BUCKET_DAILY)
@@ -49,6 +62,16 @@ import { BASE_BUCKET_DAILY, BASE_BUCKET_PERMANENT } from './bucket_config';
       gsutil -h "Cache-Control:no-cache, max-age=0, no-transform" cp manifest.json gs://${BASE_BUCKET_PERMANENT}/${version}/
     `,
       { shell: '/bin/bash' }
+    );
+
+    const registry = 'docker.elastic.co/kibana-ci/elasticsearch';
+    const sourceTag = `${version}-SNAPSHOT-${sha}`;
+    const targetTag = `${version}-SNAPSHOT`;
+
+    console.log(`Promoting docker image: ${registry}:${sourceTag} -> ${registry}:${targetTag}`);
+    execSync(
+      `docker buildx imagetools create -t ${registry}:${targetTag} ${registry}:${sourceTag}`,
+      { stdio: 'inherit' }
     );
   } catch (ex) {
     console.error(ex);

@@ -1,0 +1,21 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { LicenseType } from '@kbn/licensing-types';
+
+export interface FeaturesAvailability {
+  isAvailable: () => boolean;
+  license: {
+    getType: () => LicenseType | undefined;
+  };
+}
+export type GetLicense = () => Promise<FeaturesAvailability>;
+
+export { EventTracker } from './event_tracker';
+export { registerReportingEventTypes } from './register_event_types';
+export { registerReportingUsageCollector } from './reporting_usage_collector';
+export { initializeReportingTelemetryTask, scheduleReportingTelemetry } from './task';

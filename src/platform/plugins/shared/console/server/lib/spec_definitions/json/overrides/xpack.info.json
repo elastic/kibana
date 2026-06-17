@@ -1,0 +1,11 @@
+{
+  "xpack.info": {
+    "url_params": {
+      "categories": [
+        "build",
+        "license",
+        "features"
+      ]
+    }
+  }
+}

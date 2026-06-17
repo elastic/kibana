@@ -18,7 +18,7 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { CreateAlert } from './create_alert';
-import { AlertingExampleComponentParams } from '../application';
+import type { AlertingExampleComponentParams } from '../application';
 
 export const DocumentationPage = (
   deps: Pick<AlertingExampleComponentParams, 'triggersActionsUi'>

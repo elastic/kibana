@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { schema } from '@kbn/config-schema';
@@ -27,30 +28,59 @@ describe('request logging', () => {
 
   describe('http server response logging', () => {
     describe('configuration', () => {
+      let root: ReturnType<typeof createRoot>;
+
+      afterEach(async () => {
+        await root?.shutdown();
+      });
       it('does not log with a default config', async () => {
-        const root = createRoot({
+        root = createRoot({
           plugins: { initialize: false },
           elasticsearch: { skipStartupConnectionCheck: true },
+          server: { restrictInternalApis: false },
+          logging: {
+            appenders: {
+              'test-console': { type: 'console', layout: { type: 'json' } },
+            },
+            loggers: [
+              {
+                name: 'http.server.response',
+                appenders: ['test-console'],
+                level: 'off',
+              },
+            ],
+          },
         });
         await root.preboot();
         const { http } = await root.setup();
 
-        http
-          .createRouter('/')
-          .get(
-            { path: '/ping', validate: false, options: { authRequired: 'optional' } },
-            (context, req, res) => res.ok({ body: 'pong' })
-          );
+        http.createRouter('/').get(
+          {
+            path: '/ping',
+            security: {
+              authc: {
+                enabled: 'optional',
+                reason:
+                  'This route is part of an HTTP integration test and supports optional authentication.',
+              },
+              authz: {
+                enabled: false,
+                reason:
+                  'This route is part of an HTTP integration test and does not require authorization.',
+              },
+            },
+            validate: false,
+          },
+          (context, req, res) => res.ok({ body: 'pong' })
+        );
         await root.start();
 
         await request.get(root, '/ping').expect(200, 'pong');
         expect(mockConsoleLog).not.toHaveBeenCalled();
-
-        await root.shutdown();
       });
 
       it('logs at the correct level and with the correct context', async () => {
-        const root = createRoot({
+        root = createRoot({
           logging: {
             appenders: {
               'test-console': {
@@ -73,16 +103,30 @@ describe('request logging', () => {
             initialize: false,
           },
           elasticsearch: { skipStartupConnectionCheck: true },
+          server: { restrictInternalApis: false },
         });
         await root.preboot();
         const { http } = await root.setup();
 
-        http
-          .createRouter('/')
-          .get(
-            { path: '/ping', validate: false, options: { authRequired: 'optional' } },
-            (context, req, res) => res.ok({ body: 'pong' })
-          );
+        http.createRouter('/').get(
+          {
+            path: '/ping',
+            security: {
+              authc: {
+                enabled: 'optional',
+                reason:
+                  'This route is part of an HTTP integration test and supports optional authentication.',
+              },
+              authz: {
+                enabled: false,
+                reason:
+                  'This route is part of an HTTP integration test and does not require authorization.',
+              },
+            },
+            validate: false,
+          },
+          (context, req, res) => res.ok({ body: 'pong' })
+        );
         await root.start();
 
         await request.get(root, '/ping').expect(200, 'pong');
@@ -90,8 +134,6 @@ describe('request logging', () => {
         const [level, logger] = mockConsoleLog.mock.calls[0][0].split('|');
         expect(level).toBe('DEBUG');
         expect(logger).toBe('http.server.response');
-
-        await root.shutdown();
       });
     });
 
@@ -120,6 +162,7 @@ describe('request logging', () => {
           initialize: false,
         },
         elasticsearch: { skipStartupConnectionCheck: true },
+        server: { restrictInternalApis: false },
       };
 
       beforeEach(() => {
@@ -127,19 +170,32 @@ describe('request logging', () => {
       });
 
       afterEach(async () => {
-        await root.shutdown();
+        await root?.shutdown();
       });
 
       it('handles a GET request', async () => {
         await root.preboot();
         const { http } = await root.setup();
 
-        http
-          .createRouter('/')
-          .get(
-            { path: '/ping', validate: false, options: { authRequired: 'optional' } },
-            (context, req, res) => res.ok({ body: 'pong' })
-          );
+        http.createRouter('/').get(
+          {
+            path: '/ping',
+            security: {
+              authc: {
+                enabled: 'optional',
+                reason:
+                  'This route is part of an HTTP integration test and supports optional authentication.',
+              },
+              authz: {
+                enabled: false,
+                reason:
+                  'This route is part of an HTTP integration test and does not require authorization.',
+              },
+            },
+            validate: false,
+          },
+          (context, req, res) => res.ok({ body: 'pong' })
+        );
         await root.start();
 
         await request.get(root, '/ping').expect(200, 'pong');
@@ -160,11 +216,22 @@ describe('request logging', () => {
         http.createRouter('/').post(
           {
             path: '/ping',
+            security: {
+              authc: {
+                enabled: 'optional',
+                reason:
+                  'This route is part of an HTTP integration test and supports optional authentication.',
+              },
+              authz: {
+                enabled: false,
+                reason:
+                  'This route is part of an HTTP integration test and does not require authorization.',
+              },
+            },
             validate: {
               body: schema.object({ message: schema.string() }),
             },
             options: {
-              authRequired: 'optional',
               body: {
                 accepts: ['application/json'],
               },
@@ -189,12 +256,25 @@ describe('request logging', () => {
         await root.preboot();
         const { http } = await root.setup();
 
-        http
-          .createRouter('/')
-          .get(
-            { path: '/a', validate: false, options: { authRequired: 'optional' } },
-            (context, req, res) => res.ok({ body: 'pong' })
-          );
+        http.createRouter('/').get(
+          {
+            path: '/a',
+            security: {
+              authc: {
+                enabled: 'optional',
+                reason:
+                  'This route is part of an HTTP integration test and supports optional authentication.',
+              },
+              authz: {
+                enabled: false,
+                reason:
+                  'This route is part of an HTTP integration test and does not require authorization.',
+              },
+            },
+            validate: false,
+          },
+          (context, req, res) => res.ok({ body: 'pong' })
+        );
         await root.start();
 
         await request.get(root, '/b').expect(404);
@@ -210,12 +290,25 @@ describe('request logging', () => {
         await root.preboot();
         const { http } = await root.setup();
 
-        http
-          .createRouter('/')
-          .get(
-            { path: '/ping', validate: false, options: { authRequired: 'optional' } },
-            (context, req, res) => res.ok({ body: 'pong' })
-          );
+        http.createRouter('/').get(
+          {
+            path: '/ping',
+            security: {
+              authc: {
+                enabled: 'optional',
+                reason:
+                  'This route is part of an HTTP integration test and supports optional authentication.',
+              },
+              authz: {
+                enabled: false,
+                reason:
+                  'This route is part of an HTTP integration test and does not require authorization.',
+              },
+            },
+            validate: false,
+          },
+          (context, req, res) => res.ok({ body: 'pong' })
+        );
         await root.start();
 
         await request.get(root, '/ping').query({ hey: 'ya' }).expect(200, 'pong');
@@ -229,12 +322,25 @@ describe('request logging', () => {
         await root.preboot();
         const { http } = await root.setup();
 
-        http
-          .createRouter('/')
-          .get(
-            { path: '/ping', validate: false, options: { authRequired: 'optional' } },
-            (context, req, res) => res.ok({ body: 'pong' })
-          );
+        http.createRouter('/').get(
+          {
+            path: '/ping',
+            security: {
+              authc: {
+                enabled: 'optional',
+                reason:
+                  'This route is part of an HTTP integration test and supports optional authentication.',
+              },
+              authz: {
+                enabled: false,
+                reason:
+                  'This route is part of an HTTP integration test and does not require authorization.',
+              },
+            },
+            validate: false,
+          },
+          (context, req, res) => res.ok({ body: 'pong' })
+        );
         await root.start();
 
         const response = await request.get(root, '/ping').expect(200, 'pong');
@@ -248,12 +354,25 @@ describe('request logging', () => {
           await root.preboot();
           const { http } = await root.setup();
 
-          http
-            .createRouter('/')
-            .get(
-              { path: '/ping', validate: false, options: { authRequired: 'optional' } },
-              (context, req, res) => res.ok({ headers: { bar: 'world' }, body: 'pong' })
-            );
+          http.createRouter('/').get(
+            {
+              path: '/ping',
+              security: {
+                authc: {
+                  enabled: 'optional',
+                  reason:
+                    'This route is part of an HTTP integration test and supports optional authentication.',
+                },
+                authz: {
+                  enabled: false,
+                  reason:
+                    'This route is part of an HTTP integration test and does not require authorization.',
+                },
+              },
+              validate: false,
+            },
+            (context, req, res) => res.ok({ headers: { bar: 'world' }, body: 'pong' })
+          );
           await root.start();
 
           await request.get(root, '/ping').set('foo', 'hello').expect(200);
@@ -270,11 +389,22 @@ describe('request logging', () => {
           http.createRouter('/').post(
             {
               path: '/ping',
+              security: {
+                authc: {
+                  enabled: 'optional',
+                  reason:
+                    'This route is part of an HTTP integration test and supports optional authentication.',
+                },
+                authz: {
+                  enabled: false,
+                  reason:
+                    'This route is part of an HTTP integration test and does not require authorization.',
+                },
+              },
               validate: {
                 body: schema.object({ message: schema.string() }),
               },
               options: {
-                authRequired: 'optional',
                 body: {
                   accepts: ['application/json'],
                 },
@@ -331,6 +461,7 @@ describe('request logging', () => {
               initialize: false,
             },
             elasticsearch: { skipStartupConnectionCheck: true },
+            server: { restrictInternalApis: false },
           });
           await root.preboot();
           const { http } = await root.setup();
@@ -338,11 +469,22 @@ describe('request logging', () => {
           http.createRouter('/').post(
             {
               path: '/ping',
+              security: {
+                authc: {
+                  enabled: 'optional',
+                  reason:
+                    'This route is part of an HTTP integration test and supports optional authentication.',
+                },
+                authz: {
+                  enabled: false,
+                  reason:
+                    'This route is part of an HTTP integration test and does not require authorization.',
+                },
+              },
               validate: {
                 body: schema.object({ message: schema.string() }),
               },
               options: {
-                authRequired: 'optional',
                 body: {
                   accepts: ['application/json'],
                 },
@@ -371,11 +513,22 @@ describe('request logging', () => {
           http.createRouter('/').post(
             {
               path: '/ping',
+              security: {
+                authc: {
+                  enabled: 'optional',
+                  reason:
+                    'This route is part of an HTTP integration test and supports optional authentication.',
+                },
+                authz: {
+                  enabled: false,
+                  reason:
+                    'This route is part of an HTTP integration test and does not require authorization.',
+                },
+              },
               validate: {
                 body: schema.object({ message: schema.string() }),
               },
               options: {
-                authRequired: 'optional',
                 body: {
                   accepts: ['application/json'],
                 },
@@ -430,6 +583,7 @@ describe('request logging', () => {
               initialize: false,
             },
             elasticsearch: { skipStartupConnectionCheck: true },
+            server: { restrictInternalApis: false },
           });
           await root.preboot();
           const { http } = await root.setup();
@@ -437,11 +591,22 @@ describe('request logging', () => {
           http.createRouter('/').post(
             {
               path: '/ping',
+              security: {
+                authc: {
+                  enabled: 'optional',
+                  reason:
+                    'This route is part of an HTTP integration test and supports optional authentication.',
+                },
+                authz: {
+                  enabled: false,
+                  reason:
+                    'This route is part of an HTTP integration test and does not require authorization.',
+                },
+              },
               validate: {
                 body: schema.object({ message: schema.string() }),
               },
               options: {
-                authRequired: 'optional',
                 body: {
                   accepts: ['application/json'],
                 },
@@ -468,12 +633,25 @@ describe('request logging', () => {
         await root.preboot();
         const { http } = await root.setup();
 
-        http
-          .createRouter('/')
-          .get(
-            { path: '/ping', validate: false, options: { authRequired: 'optional' } },
-            (context, req, res) => res.ok({ body: 'pong' })
-          );
+        http.createRouter('/').get(
+          {
+            path: '/ping',
+            security: {
+              authc: {
+                enabled: 'optional',
+                reason:
+                  'This route is part of an HTTP integration test and supports optional authentication.',
+              },
+              authz: {
+                enabled: false,
+                reason:
+                  'This route is part of an HTTP integration test and does not require authorization.',
+              },
+            },
+            validate: false,
+          },
+          (context, req, res) => res.ok({ body: 'pong' })
+        );
         await root.start();
 
         await request.get(root, '/ping').set('user-agent', 'world').expect(200);

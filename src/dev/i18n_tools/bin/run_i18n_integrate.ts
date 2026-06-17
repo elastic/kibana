@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { Listr } from 'listr2';
@@ -11,12 +12,13 @@ import { run } from '@kbn/dev-cli-runner';
 import { ToolingLog } from '@kbn/tooling-log';
 import { getTimeReporter } from '@kbn/ci-stats-reporter';
 import { ErrorReporter } from '../utils';
-import { I18nCheckTaskContext, MessageDescriptor } from '../types';
+import type { I18nCheckTaskContext, MessageDescriptor } from '../types';
 import {
   checkConfigs,
   mergeConfigs,
   extractDefaultMessagesTask,
   integrateTranslations,
+  reportTranslationCoverage,
   validateTranslationFiles,
 } from '../tasks';
 import { flagFailError } from '../utils/verify_bin_flags';
@@ -32,7 +34,13 @@ const reportTime = getTimeReporter(toolingLog, 'scripts/i18n_check');
 
 run(
   async ({
-    flags: { source, target, 'include-config': includeConfig, 'dry-run': dryRun },
+    flags: {
+      source,
+      target,
+      'include-config': includeConfig,
+      'dry-run': dryRun,
+      'coverage-report': coverageReport,
+    },
     log,
   }) => {
     if (typeof source !== 'string' || typeof target !== 'string') {
@@ -45,6 +53,14 @@ run(
 
     if (typeof dryRun !== 'boolean') {
       throw flagFailError(`--dry-run can't have a value`);
+    }
+
+    if (typeof coverageReport === 'boolean') {
+      throw flagFailError(`--coverage-report requires a value`);
+    }
+
+    if (Array.isArray(coverageReport)) {
+      throw flagFailError(`--coverage-report can only be specified once`);
     }
 
     const list = new Listr<I18nCheckTaskContext>(
@@ -66,6 +82,14 @@ run(
         {
           title: 'Integrating Translation file',
           task: (context, task) => integrateTranslations(context, task, { source, target }),
+        },
+        {
+          title: 'Reporting translation coverage',
+          task: (context, task) =>
+            reportTranslationCoverage(context, task, {
+              source,
+              reportPath: coverageReport,
+            }),
         },
         {
           title: 'Validating translation files',

@@ -1,0 +1,25 @@
+type: object
+properties:
+  assignees:
+    $ref: 'assignees.yaml'
+  connector:
+    type: object
+    properties:
+      $ref: 'connector_properties.yaml'
+  description:
+    type: string
+  owner:
+    $ref: 'owner.yaml'
+  settings:
+    $ref: 'settings.yaml'
+  severity:
+    $ref: 'case_severity.yaml'
+  status:
+    $ref: 'case_status.yaml'
+  tags:
+    type: array
+    items:
+      type: string
+    example: ["tag-1"]
+  title:
+    type: string

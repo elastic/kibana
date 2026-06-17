@@ -1,16 +1,18 @@
 #!/usr/bin/env ts-node
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { getVersionsFile, BuildkiteTriggerStep } from '#pipeline-utils';
+import type { BuildkiteTriggerStep } from '#pipeline-utils';
+import { getVersionsFile } from '#pipeline-utils';
 
 const pipelineSets = {
-  'es-forward': 'kibana-es-forward-compatibility-testing',
+  'es-forward-9-dot-3': 'kibana-es-forward-compatibility-testing-9-dot-3',
   'artifacts-snapshot': 'kibana-artifacts-snapshot',
   'artifacts-staging': 'kibana-artifacts-staging',
   'artifacts-trigger': 'kibana-artifacts-trigger',
@@ -35,8 +37,8 @@ async function main() {
   }
 
   switch (pipelineSetName) {
-    case 'es-forward': {
-      pipelineSteps.push(...getESForwardPipelineTriggers());
+    case 'es-forward-9-dot-3': {
+      pipelineSteps.push(...getESForward9Dot3PipelineTriggers());
       break;
     }
     case 'artifacts-snapshot': {
@@ -60,22 +62,33 @@ async function main() {
 }
 
 /**
- * This pipeline is testing the forward compatibility of Kibana with different versions of Elasticsearch.
- * Should be triggered for combinations of (Kibana@7.17 + ES@8.x {current open branches on the same major})
+ * This pipeline is testing the forward compatibility of Kibana with different versions of Elasticsearch for 9.3.
+ * Should be triggered for combinations of (Kibana@8.19 + ES@9.x {current open branches on the same major})
  */
-export function getESForwardPipelineTriggers(): BuildkiteTriggerStep[] {
+export function getESForward9Dot3PipelineTriggers(): BuildkiteTriggerStep[] {
   const versions = getVersionsFile();
-  const kibanaPrevMajor = versions.prevMajors[0];
-  const targetESVersions = [versions.prevMinors, versions.current].flat();
+  const KIBANA_8_19 = versions.versions.find((v) => v.branch === '8.19');
+  if (!KIBANA_8_19) {
+    throw new Error('Update ES forward compatibility 9.3 pipeline to 8.19');
+  }
+  const targetESVersions = versions.versions.filter(
+    (v) =>
+      // 9.3+, 8.19 => 9.0 is not supported
+      (v.branch.startsWith('9.') &&
+        v.branch !== '9.0' &&
+        v.branch !== '9.1' &&
+        v.branch !== '9.2') ||
+      v.branch.includes('main')
+  );
 
   return targetESVersions.map(({ version }) => {
     return {
-      trigger: pipelineSets['es-forward'],
+      trigger: pipelineSets['es-forward-9-dot-3'],
       async: true,
-      label: `Triggering Kibana ${kibanaPrevMajor.version} + ES ${version} forward compatibility`,
+      label: `Triggering Kibana ${KIBANA_8_19.version} + ES ${version} forward compatibility`,
       build: {
         message: process.env.MESSAGE || `ES forward-compatibility test for ES ${version}`,
-        branch: kibanaPrevMajor.branch,
+        branch: KIBANA_8_19.branch,
         commit: 'HEAD',
         env: {
           ES_SNAPSHOT_MANIFEST: `https://storage.googleapis.com/kibana-ci-es-snapshots-daily/${version}/manifest-latest-verified.json`,
@@ -88,12 +101,12 @@ export function getESForwardPipelineTriggers(): BuildkiteTriggerStep[] {
 
 /**
  * This pipeline creates Kibana artifact snapshots for all open branches.
- * Should be triggered for all open branches in the versions.json: 7.x, 8.x
+ * Should be triggered for all open branches in the versions.json
  */
 export function getArtifactSnapshotPipelineTriggers() {
   // Trigger for all named branches
   const versions = getVersionsFile();
-  const targetVersions = [versions.prevMajors, versions.prevMinors, versions.current].flat();
+  const targetVersions = versions.versions;
 
   return targetVersions.map(({ branch }) => {
     return {
@@ -114,12 +127,14 @@ export function getArtifactSnapshotPipelineTriggers() {
 
 /**
  * This pipeline creates Kibana artifacts for branches that are not the current main.
- * Should be triggered for all open branches in the versions.json: 7.x, 8.x, but not main.
+ * Should be triggered for all open branches with a fixed version: not main and 8.x.
  */
 export function getArtifactStagingPipelineTriggers() {
   // Trigger for all branches, that are not current minor+major
   const versions = getVersionsFile();
-  const targetVersions = [versions.prevMajors, versions.prevMinors].flat();
+  const targetVersions = versions.versions.filter((version) =>
+    Boolean(version.branch.match(/[0-9]{1,2}\.[0-9]{1,2}/))
+  );
 
   return targetVersions.map(({ branch }) => {
     return {
@@ -141,13 +156,13 @@ export function getArtifactStagingPipelineTriggers() {
 /**
  * This pipeline checks if there are any changes in the incorporated $BEATS_MANIFEST_LATEST_URL (beats version)
  * and triggers a staging artifact build.
- * Should be triggered only for the active minor versions that are not `main` and not `7.17`.
+ * Should be triggered for all open branches with a fixed version excluding 7.17: 8.*, 9.* without main.
  *
  * TODO: we could basically do the check logic of .buildkite/scripts/steps/artifacts/trigger.sh in here, and remove kibana-artifacts-trigger
  */
 export function getArtifactBuildTriggers() {
   const versions = getVersionsFile();
-  const targetVersions = versions.prevMinors;
+  const targetVersions = versions.versions.filter((version) => version.branch !== 'main');
 
   return targetVersions.map(
     ({ branch }) =>

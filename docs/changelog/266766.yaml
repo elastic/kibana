@@ -1,0 +1,10 @@
+prs:
+- https://github.com/elastic/kibana/pull/266766
+issues:
+- https://github.com/elastic/search-team/issues/13171
+type: feature
+products:
+- product: cloud-serverless
+  target: 2026-05-14
+title: Add Outlook connector
+description: Adds an Outlook connector for searching and browsing email in Microsoft Outlook via the Microsoft Graph API, available in Agent Builder and workflows.

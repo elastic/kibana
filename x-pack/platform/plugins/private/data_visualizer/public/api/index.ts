@@ -1,0 +1,31 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { ResultLinks } from '@kbn/file-upload-common';
+import { lazyLoadModules } from '../lazy_load_bundle';
+import type { DataDriftSpec, IndexDataVisualizerSpec } from '../application';
+
+export interface SpecWithLinks<T> {
+  resultLinks: ResultLinks;
+  component: T;
+}
+
+export function getComponents(resultLinks: ResultLinks) {
+  async function getIndexDataVisualizerComponent(): Promise<() => IndexDataVisualizerSpec> {
+    const modules = await lazyLoadModules(resultLinks);
+    return () => modules.IndexDataVisualizer;
+  }
+
+  async function getDataDriftComponent(): Promise<() => DataDriftSpec> {
+    const modules = await lazyLoadModules(resultLinks);
+    return () => modules.DataDrift;
+  }
+  return {
+    getIndexDataVisualizerComponent,
+    getDataDriftComponent,
+  };
+}

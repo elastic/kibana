@@ -8,21 +8,23 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { Router, Routes, Route } from '@kbn/shared-ux-router';
-import { QueryClient } from '@tanstack/react-query';
+import { QueryClient } from '@kbn/react-query';
 import { EuiPage, EuiTitle, EuiText, EuiSpacer } from '@elastic/eui';
-import { AppMountParameters, CoreStart, ScopedHistory } from '@kbn/core/public';
-import { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
-import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
+import type { AppMountParameters, CoreStart, ScopedHistory } from '@kbn/core/public';
+import type { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { QueryClientProvider } from '@tanstack/react-query';
+import { QueryClientProvider } from '@kbn/react-query';
 import type { ChartsPluginSetup } from '@kbn/charts-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import { createRuleRoute, editRuleRoute, RuleForm } from '@kbn/alerts-ui-shared/src/rule_form';
-import { TriggersActionsUiExamplePublicStartDeps } from './plugin';
+import { CREATE_RULE_ROUTE, EDIT_RULE_ROUTE, RuleForm } from '@kbn/response-ops-rule-form';
+import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
+import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
+import type { TriggersActionsUiExamplePublicStartDeps } from './plugin';
 
 import { Page } from './components/page';
 import { Sidebar } from './components/sidebar';
@@ -37,17 +39,17 @@ import { RuleStatusDropdownSandbox } from './components/rule_status_dropdown_san
 import { RuleStatusFilterSandbox } from './components/rule_status_filter_sandbox';
 import { AlertsTableSandbox } from './components/alerts_table_sandbox';
 import { RulesSettingsLinkSandbox } from './components/rules_settings_link_sandbox';
-
-import { RuleActionsSandbox } from './components/rule_form/rule_actions_sandbox';
-import { RuleDetailsSandbox } from './components/rule_form/rule_details_sandbox';
+import { TaskWithApiKeySandbox } from './components/task_with_api_key_sandbox';
 
 export interface TriggersActionsUiExampleComponentParams {
   http: CoreStart['http'];
-  notification: CoreStart['notifications'];
+  notifications: CoreStart['notifications'];
   application: CoreStart['application'];
   docLinks: CoreStart['docLinks'];
   i18n: CoreStart['i18n'];
   theme: CoreStart['theme'];
+  userProfile: CoreStart['userProfile'];
+  settings: CoreStart['settings'];
   history: ScopedHistory;
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
   data: DataPublicPluginStart;
@@ -55,6 +57,9 @@ export interface TriggersActionsUiExampleComponentParams {
   dataViews: DataViewsPublicPluginStart;
   dataViewsEditor: DataViewEditorStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
+  fieldFormats: FieldFormatsStart;
+  licensing: LicensingPluginStart;
+  fieldsMetadata: FieldsMetadataPublicStart;
 }
 
 const TriggersActionsUiExampleApp = ({
@@ -62,14 +67,16 @@ const TriggersActionsUiExampleApp = ({
   triggersActionsUi,
   http,
   application,
-  notification,
+  notifications,
+  settings,
   docLinks,
-  i18n,
-  theme,
   data,
   charts,
   dataViews,
   unifiedSearch,
+  fieldFormats,
+  licensing,
+  ...startServices
 }: TriggersActionsUiExampleComponentParams) => {
   return (
     <Router history={history}>
@@ -170,7 +177,17 @@ const TriggersActionsUiExampleApp = ({
             path="/alerts_table"
             render={() => (
               <Page title="Alerts Table">
-                <AlertsTableSandbox triggersActionsUi={triggersActionsUi} />
+                <AlertsTableSandbox
+                  services={{
+                    data,
+                    http,
+                    notifications,
+                    fieldFormats,
+                    application,
+                    licensing,
+                    settings,
+                  }}
+                />
               </Page>
             )}
           />
@@ -185,67 +202,58 @@ const TriggersActionsUiExampleApp = ({
           />
           <Route
             exact
-            path={createRuleRoute}
+            path={CREATE_RULE_ROUTE}
             render={() => (
               <Page title="Rule Create">
                 <RuleForm
                   plugins={{
                     http,
                     application,
-                    notification,
+                    notifications,
                     docLinks,
-                    i18n,
-                    theme,
                     charts,
                     data,
                     dataViews,
                     unifiedSearch,
+                    settings,
                     ruleTypeRegistry: triggersActionsUi.ruleTypeRegistry,
+                    actionTypeRegistry: triggersActionsUi.actionTypeRegistry,
+                    ...startServices,
                   }}
-                  returnUrl={application.getUrlForApp('triggersActionsUiExample')}
                 />
               </Page>
             )}
           />
           <Route
             exact
-            path={editRuleRoute}
+            path={EDIT_RULE_ROUTE}
             render={() => (
               <Page title="Rule Edit">
                 <RuleForm
                   plugins={{
                     http,
                     application,
-                    notification,
+                    notifications,
                     docLinks,
-                    theme,
-                    i18n,
                     charts,
                     data,
                     dataViews,
                     unifiedSearch,
+                    settings,
                     ruleTypeRegistry: triggersActionsUi.ruleTypeRegistry,
+                    actionTypeRegistry: triggersActionsUi.actionTypeRegistry,
+                    ...startServices,
                   }}
-                  returnUrl={application.getUrlForApp('triggersActionsUiExample')}
                 />
               </Page>
             )}
           />
           <Route
             exact
-            path="/rule_actions"
+            path="/task_manager_with_api_key"
             render={() => (
-              <Page title="Rule Actions">
-                <RuleActionsSandbox />
-              </Page>
-            )}
-          />
-          <Route
-            exact
-            path="/rule_details"
-            render={() => (
-              <Page title="Rule Details">
-                <RuleDetailsSandbox />
+              <Page title="Task Manager with API Key">
+                <TaskWithApiKeySandbox http={http} />
               </Page>
             )}
           />
@@ -262,12 +270,11 @@ export const renderApp = (
   deps: TriggersActionsUiExamplePublicStartDeps,
   { appBasePath, element, history }: AppMountParameters
 ) => {
-  const { http, notifications, docLinks, application, i18n, theme } = core;
   const { triggersActionsUi } = deps;
   const { ruleTypeRegistry, actionTypeRegistry } = triggersActionsUi;
 
   ReactDOM.render(
-    <KibanaRenderContextProvider {...core}>
+    core.rendering.addContext(
       <KibanaContextProvider
         services={{
           ...core,
@@ -280,23 +287,21 @@ export const renderApp = (
           <IntlProvider locale="en">
             <TriggersActionsUiExampleApp
               history={history}
-              http={http}
-              notification={notifications}
-              application={application}
-              docLinks={docLinks}
-              i18n={i18n}
-              theme={theme}
               triggersActionsUi={deps.triggersActionsUi}
               data={deps.data}
               charts={deps.charts}
               dataViews={deps.dataViews}
               dataViewsEditor={deps.dataViewsEditor}
               unifiedSearch={deps.unifiedSearch}
+              fieldFormats={deps.fieldFormats}
+              licensing={deps.licensing}
+              fieldsMetadata={deps.fieldsMetadata}
+              {...core}
             />
           </IntlProvider>
         </QueryClientProvider>
       </KibanaContextProvider>
-    </KibanaRenderContextProvider>,
+    ),
     element
   );
 

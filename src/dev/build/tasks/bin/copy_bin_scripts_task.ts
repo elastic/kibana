@@ -1,16 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import Mustache from 'mustache';
 import { join } from 'path';
 import { readFileSync, writeFileSync, mkdirSync } from 'fs';
 import globby from 'globby';
-import { copyAll, Task } from '../../lib';
+import type { Task } from '../../lib';
 
 export const CopyBinScripts: Task = {
   description: 'Copying bin scripts into platform-specific build directory',
@@ -21,9 +22,20 @@ export const CopyBinScripts: Task = {
       const scriptsDest = build.resolvePathForPlatform(platform, 'bin');
       mkdirSync(scriptsDest, { recursive: true });
 
+      // [rspack-transition] When the legacy optimizer is removed, delete the rspack variable.
+      const templateVars = {
+        darwin: platform.isMac(),
+        linux: platform.isLinux(),
+        serverless: platform.isServerless(),
+        forcePointerCompression: Boolean(process.env.CI_FORCE_NODE_POINTER_COMPRESSION), // for .buildkite/pipeline-resource-definitions/kibana-pointer-compression.yml
+        rspack: process.env.KBN_USE_RSPACK === 'true' || process.env.KBN_USE_RSPACK === '1',
+      };
+
       if (platform.isWindows()) {
-        await copyAll(scriptsSrc, scriptsDest, {
-          select: ['*.bat'],
+        globby.sync(['*.bat'], { cwd: scriptsSrc }).forEach((script) => {
+          const template = readFileSync(join(scriptsSrc, script), { encoding: 'utf-8' });
+          const output = Mustache.render(template, templateVars);
+          writeFileSync(join(scriptsDest, script), output);
         });
       } else {
         globby
@@ -33,12 +45,7 @@ export const CopyBinScripts: Task = {
           })
           .forEach((script) => {
             const template = readFileSync(join(scriptsSrc, script), { encoding: 'utf-8' });
-            const output = Mustache.render(template, {
-              darwin: platform.isMac(),
-              linux: platform.isLinux(),
-              serverless: platform.isServerless(),
-              forcePointerCompression: Boolean(process.env.CI_FORCE_NODE_POINTER_COMPRESSION), // for .buildkite/pipeline-resource-definitions/kibana-pointer-compression.yml
-            });
+            const output = Mustache.render(template, templateVars);
             writeFileSync(join(scriptsDest, script), output, {
               mode: '0755',
             });

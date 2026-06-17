@@ -1,0 +1,61 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import type { FC, PropsWithChildren } from 'react';
+import React, { useContext } from 'react';
+
+import type {
+  Services,
+  NoDataCardServices,
+  NoDataCardKibanaDependencies,
+} from '@kbn/shared-ux-card-no-data-types';
+
+const Context = React.createContext<Services | null>(null);
+
+/**
+ * A Context Provider that provides services to the component and its dependencies.
+ */
+export const NoDataCardProvider: FC<PropsWithChildren<NoDataCardServices>> = ({
+  children,
+  ...services
+}) => {
+  const { addBasePath, canAccessFleet } = services;
+
+  return <Context.Provider value={{ addBasePath, canAccessFleet }}>{children}</Context.Provider>;
+};
+
+/**
+ * Kibana-specific Provider that maps dependencies to services.
+ */
+export const NoDataCardKibanaProvider: FC<PropsWithChildren<NoDataCardKibanaDependencies>> = ({
+  children,
+  ...dependencies
+}) => {
+  const value: Services = {
+    addBasePath: dependencies.coreStart.http.basePath.prepend,
+    canAccessFleet: dependencies.coreStart.application.capabilities.navLinks.integrations,
+  };
+
+  return <Context.Provider {...{ value }}>{children}</Context.Provider>;
+};
+
+/**
+ * React hook for accessing pre-wired services.
+ */
+export function useServices() {
+  const context = useContext(Context);
+
+  if (!context) {
+    throw new Error(
+      'NoDataCard Context is missing.  Ensure your component or React root is wrapped with NoDataCardContext.'
+    );
+  }
+
+  return context;
+}

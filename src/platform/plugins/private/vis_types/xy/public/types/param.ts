@@ -1,0 +1,144 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import type { Fit, Position } from '@elastic/charts';
+import type { PaletteOutput } from '@kbn/coloring';
+import type { Style, Labels } from '@kbn/charts-plugin/public';
+import type { SchemaConfig } from '@kbn/visualizations-plugin/public';
+import type {
+  DateHistogramParams,
+  HistogramParams,
+  FakeParams,
+  LegendSize,
+} from '@kbn/chart-expressions-common';
+import type { ChartType } from '../../common';
+
+import type {
+  ChartMode,
+  AxisMode,
+  AxisType,
+  InterpolationMode,
+  ScaleType,
+  ThresholdLineStyle,
+} from './constants';
+
+export interface Scale {
+  boundsMargin?: number | '';
+  defaultYExtents?: boolean;
+  max?: number | null;
+  min?: number | null;
+  mode?: AxisMode;
+  setYExtents?: boolean;
+  type: ScaleType;
+}
+
+export interface CategoryAxis {
+  id: string;
+  labels: Labels;
+  position: Position;
+  scale: Scale;
+  show: boolean;
+  title: {
+    text?: string;
+  };
+  type: AxisType;
+  /**
+   * Used only for heatmap, here for consistent types when used in vis_type_vislib
+   *
+   * remove with vis_type_vislib
+   * https://github.com/elastic/kibana/issues/56143
+   */
+  style?: Partial<Style>;
+}
+
+export interface ValueAxis extends CategoryAxis {
+  name: string;
+}
+
+export interface ThresholdLine {
+  show: boolean;
+  value: number | null;
+  width: number | null;
+  style: ThresholdLineStyle;
+  color: string;
+}
+
+export interface SeriesParam {
+  data: { label: string; id: string };
+  drawLinesBetweenPoints?: boolean;
+  interpolate?: InterpolationMode;
+  lineWidth?: number;
+  mode: ChartMode;
+  show: boolean;
+  showCircles: boolean;
+  circlesRadius: number;
+  type: ChartType;
+  valueAxis: string;
+}
+
+export interface Grid {
+  categoryLines: boolean;
+  valueAxis?: string;
+}
+
+export interface TimeMarker {
+  time: string;
+  class?: string;
+  color?: string;
+  opacity?: number;
+  width?: number;
+}
+
+export type Dimension = Omit<SchemaConfig, 'params'> & {
+  params: DateHistogramParams | HistogramParams | FakeParams | {};
+};
+
+export interface Dimensions {
+  x: Dimension | null;
+  y: Dimension[];
+  z?: Dimension[];
+  width?: Dimension[];
+  series?: Dimension[];
+  splitRow?: Dimension[];
+  splitColumn?: Dimension[];
+}
+
+export interface VisParams {
+  type: ChartType;
+  addLegend: boolean;
+  addTooltip: boolean;
+  legendPosition: Position;
+  addTimeMarker: boolean;
+  truncateLegend: boolean;
+  maxLegendLines: number;
+  legendSize?: LegendSize;
+  categoryAxes: CategoryAxis[];
+  orderBucketsBySum?: boolean;
+  labels: Labels;
+  thresholdLine: ThresholdLine;
+  valueAxes: ValueAxis[];
+  grid: Grid;
+  seriesParams: SeriesParam[];
+  dimensions: Dimensions;
+  radiusRatio: number;
+  times: TimeMarker[]; // For compatibility with vislib
+  /**
+   * flag to indicate old vislib visualizations
+   * used for backwards compatibility including colors
+   */
+  isVislibVis?: boolean;
+  /**
+   * Add for detailed tooltip option
+   */
+  detailedTooltip?: boolean;
+  palette: PaletteOutput;
+  fillOpacity?: number;
+  fittingFunction?: Exclude<Fit, 'explicit'>;
+  ariaLabel?: string;
+}

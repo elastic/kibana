@@ -1,8 +1,0 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
-
-exports[`embeddable factory migrateToLatest returns list of all migrations 1`] = `
-Object {
-  "7.11.0": [Function],
-  "7.12.0": [Function],
-}
-`;

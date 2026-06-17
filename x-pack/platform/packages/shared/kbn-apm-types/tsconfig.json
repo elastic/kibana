@@ -1,0 +1,25 @@
+{
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+    "types": [
+      "node"
+    ]
+  },
+  "include": [
+    "**/*.ts"
+  ],
+  "exclude": [
+    "target/**/*",
+  ],
+  "kbn_references": [
+    "@kbn/elastic-agent-utils",
+    "@kbn/i18n",
+    "@kbn/es-query",
+    "@kbn/io-ts-utils",
+    "@kbn/es-types",
+    "@kbn/apm-types-shared",
+    "@kbn/slo-schema",
+    "@kbn/rule-data-utils",
+  ]
+}

@@ -1,14 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import Path from 'path';
 import fs from 'fs/promises';
-import JSON5 from 'json5';
+import { parse } from 'hjson';
 import { kibanaPackageJson as pkg } from '@kbn/repo-info';
 import { retryAsync } from '@kbn/core-saved-objects-migration-server-mocks';
 import {
@@ -16,7 +17,7 @@ import {
   createTestServers,
   type TestElasticsearchUtils,
 } from '@kbn/core-test-helpers-kbn-server';
-import { Root } from '@kbn/core-root-server-internal';
+import type { Root } from '@kbn/core-root-server-internal';
 
 const logFilePath = Path.join(__dirname, 'wait_for_migration_completion.log');
 
@@ -34,12 +35,8 @@ describe('migration with waitForCompletion=true', () => {
   });
 
   afterAll(async () => {
-    if (root) {
-      await root.shutdown();
-    }
-    if (esServer) {
-      await esServer.stop();
-    }
+    await root?.shutdown();
+    await esServer?.stop();
   });
 
   it('waits for another instance to complete the migration', async () => {
@@ -67,7 +64,7 @@ describe('migration with waitForCompletion=true', () => {
         const records = logFileContent
           .split('\n')
           .filter(Boolean)
-          .map((str) => JSON5.parse(str)) as any[];
+          .map((str) => parse(str)) as any[];
 
         expect(
           records.find((rec) =>
@@ -104,7 +101,7 @@ describe('migration with waitForCompletion=true', () => {
         const records = logFileContent
           .split('\n')
           .filter(Boolean)
-          .map((str) => JSON5.parse(str)) as any[];
+          .map((str) => parse(str)) as any[];
 
         expect(
           records.find((rec) =>
@@ -126,6 +123,7 @@ function createRoot() {
     {
       migrations: {
         skip: false,
+        useCumulativeLogger: false,
       },
       node: {
         roles: ['background_tasks'],

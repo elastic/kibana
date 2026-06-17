@@ -1,16 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import Path from 'path';
 import { Project } from 'ts-morph';
 import { ToolingLog } from '@kbn/tooling-log';
 
-import { PluginApi, PluginOrPackage } from '../types';
+import type { PluginApi, PluginOrPackage } from '../types';
 import { getKibanaPlatformPlugin } from '../integration_tests/kibana_platform_plugin_mock';
 import { getPluginApi } from '../get_plugin_api';
 import { splitApisByFolder } from './write_plugin_split_by_folder';
@@ -37,11 +38,12 @@ beforeAll(() => {
   pluginA.manifest.serviceFolders = ['foo'];
   const plugins: PluginOrPackage[] = [pluginA];
 
-  doc = getPluginApi(project, plugins[0], plugins, log, false);
+  const { pluginApi } = getPluginApi(project, plugins[0], plugins, log, false);
+  doc = pluginApi;
 });
 
 test('foo service has all exports', () => {
-  expect(doc?.client.length).toBe(38);
+  expect(doc?.client.length).toBe(40);
   const split = splitApisByFolder(doc);
   expect(split.length).toBe(2);
 
@@ -50,5 +52,5 @@ test('foo service has all exports', () => {
 
   expect(fooDoc?.common.length).toBe(1);
   expect(fooDoc?.client.length).toBe(2);
-  expect(mainDoc?.client.length).toBe(36);
+  expect(mainDoc?.client.length).toBe(38);
 });

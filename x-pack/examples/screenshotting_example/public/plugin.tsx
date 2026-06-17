@@ -26,8 +26,8 @@ export class ScreenshottingExamplePlugin implements Plugin<void, void> {
       title: APPLICATION_NAME,
       visibleIn: [],
       mount: async ({ element }: AppMountParameters) => {
-        const [{ http, analytics, i18n, theme }] = await getStartServices();
-        const startServices = { analytics, http, i18n, theme };
+        const [{ http, analytics, i18n, theme, userProfile }] = await getStartServices();
+        const startServices = { analytics, http, i18n, theme, userProfile };
 
         ReactDOM.render(
           <AppContext.Provider value={startServices}>

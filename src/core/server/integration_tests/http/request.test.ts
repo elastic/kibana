@@ -1,11 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { setTimeout as timer } from 'timers/promises';
 jest.mock('uuid', () => ({
   v4: jest.fn().mockReturnValue('xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx'),
 }));
@@ -13,10 +15,12 @@ jest.mock('uuid', () => ({
 import supertest from 'supertest';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { executionContextServiceMock } from '@kbn/core-execution-context-server-mocks';
+import { userActivityServiceMock } from '@kbn/core-user-activity-server-mocks';
 import { contextServiceMock } from '@kbn/core-http-context-server-mocks';
-import type { HttpService } from '@kbn/core-http-server-internal';
-import { createHttpService } from '@kbn/core-http-server-mocks';
+import { docLinksServiceMock } from '@kbn/core-doc-links-server-mocks';
 import { schema } from '@kbn/config-schema';
+import type { HttpService } from '@kbn/core-http-server-internal';
+import { createInternalHttpService } from '../utilities';
 
 let server: HttpService;
 
@@ -26,20 +30,23 @@ const contextSetup = contextServiceMock.createSetupContract();
 const setupDeps = {
   context: contextSetup,
   executionContext: executionContextServiceMock.createInternalSetupContract(),
+  userActivity: userActivityServiceMock.createInternalSetupContract(),
 };
 
 beforeEach(async () => {
   logger = loggingSystemMock.create();
 
-  server = createHttpService({ logger });
-  await server.preboot({ context: contextServiceMock.createPrebootContract() });
+  server = createInternalHttpService({ logger });
+  await server.preboot({
+    context: contextServiceMock.createPrebootContract(),
+    docLinks: docLinksServiceMock.createSetupContract(),
+  });
 });
 
 afterEach(async () => {
   await server.stop();
 });
 
-const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 describe('KibanaRequest', () => {
   describe('auth', () => {
     describe('isAuthenticated', () => {
@@ -47,7 +54,11 @@ describe('KibanaRequest', () => {
         const { server: innerServer, createRouter } = await server.setup(setupDeps);
         const router = createRouter('/');
         router.get(
-          { path: '/', validate: false, options: { authRequired: true } },
+          {
+            path: '/',
+            security: { authz: { enabled: false, reason: '' } },
+            validate: false,
+          },
           (context, req, res) => res.ok({ body: { isAuthenticated: req.auth.isAuthenticated } })
         );
         await server.start();
@@ -61,7 +72,22 @@ describe('KibanaRequest', () => {
         const router = createRouter('/');
         registerAuth((req, res, toolkit) => toolkit.notHandled());
         router.get(
-          { path: '/', validate: false, options: { authRequired: 'optional' } },
+          {
+            path: '/',
+            security: {
+              authc: {
+                enabled: 'optional',
+                reason:
+                  'This route is part of an HTTP integration test and supports optional authentication.',
+              },
+              authz: {
+                enabled: false,
+                reason:
+                  'This route is part of an HTTP integration test and does not require authorization.',
+              },
+            },
+            validate: false,
+          },
           (context, req, res) => res.ok({ body: { isAuthenticated: req.auth.isAuthenticated } })
         );
         await server.start();
@@ -75,7 +101,22 @@ describe('KibanaRequest', () => {
         const router = createRouter('/');
         registerAuth((req, res, toolkit) => toolkit.redirected({ location: '/any' }));
         router.get(
-          { path: '/', validate: false, options: { authRequired: 'optional' } },
+          {
+            path: '/',
+            security: {
+              authc: {
+                enabled: 'optional',
+                reason:
+                  'This route is part of an HTTP integration test and supports optional authentication.',
+              },
+              authz: {
+                enabled: false,
+                reason:
+                  'This route is part of an HTTP integration test and does not require authorization.',
+              },
+            },
+            validate: false,
+          },
           (context, req, res) => res.ok({ body: { isAuthenticated: req.auth.isAuthenticated } })
         );
         await server.start();
@@ -89,7 +130,22 @@ describe('KibanaRequest', () => {
         const router = createRouter('/');
         registerAuth((req, res, toolkit) => toolkit.authenticated());
         router.get(
-          { path: '/', validate: false, options: { authRequired: 'optional' } },
+          {
+            path: '/',
+            security: {
+              authc: {
+                enabled: 'optional',
+                reason:
+                  'This route is part of an HTTP integration test and supports optional authentication.',
+              },
+              authz: {
+                enabled: false,
+                reason:
+                  'This route is part of an HTTP integration test and does not require authorization.',
+              },
+            },
+            validate: false,
+          },
           (context, req, res) => res.ok({ body: { isAuthenticated: req.auth.isAuthenticated } })
         );
         await server.start();
@@ -103,7 +159,11 @@ describe('KibanaRequest', () => {
         const router = createRouter('/');
         registerAuth((req, res, toolkit) => toolkit.authenticated());
         router.get(
-          { path: '/', validate: false, options: { authRequired: true } },
+          {
+            path: '/',
+            security: { authz: { enabled: false, reason: '' } },
+            validate: false,
+          },
           (context, req, res) => res.ok({ body: { isAuthenticated: req.auth.isAuthenticated } })
         );
         await server.start();
@@ -122,7 +182,22 @@ describe('KibanaRequest', () => {
         registerAuth((req, res, t) => t.authenticated());
         const router = createRouter('/');
         router.get(
-          { path: '/', validate: false, options: { authRequired: false } },
+          {
+            path: '/',
+            security: {
+              authc: {
+                enabled: false,
+                reason:
+                  'This route is part of an HTTP integration test and does not require authentication.',
+              },
+              authz: {
+                enabled: false,
+                reason:
+                  'This route is part of an HTTP integration test and does not require authorization.',
+              },
+            },
+            validate: false,
+          },
           (context, req, res) => res.ok({ body: { authRequired: req.route.options.authRequired } })
         );
         await server.start();
@@ -136,7 +211,22 @@ describe('KibanaRequest', () => {
         registerAuth((req, res, t) => t.authenticated());
         const router = createRouter('/');
         router.get(
-          { path: '/', validate: false, options: { authRequired: 'optional' } },
+          {
+            path: '/',
+            security: {
+              authc: {
+                enabled: 'optional',
+                reason:
+                  'This route is part of an HTTP integration test and supports optional authentication.',
+              },
+              authz: {
+                enabled: false,
+                reason:
+                  'This route is part of an HTTP integration test and does not require authorization.',
+              },
+            },
+            validate: false,
+          },
           (context, req, res) => res.ok({ body: { authRequired: req.route.options.authRequired } })
         );
         await server.start();
@@ -150,7 +240,11 @@ describe('KibanaRequest', () => {
         registerAuth((req, res, t) => t.authenticated());
         const router = createRouter('/');
         router.get(
-          { path: '/', validate: false, options: { authRequired: true } },
+          {
+            path: '/',
+            security: { authz: { enabled: false, reason: '' } },
+            validate: false,
+          },
           (context, req, res) => res.ok({ body: { authRequired: req.route.options.authRequired } })
         );
         await server.start();
@@ -172,16 +266,19 @@ describe('KibanaRequest', () => {
         const nextSpy = jest.fn();
 
         const done = new Promise<void>((resolve) => {
-          router.get({ path: '/', validate: false }, async (context, request, res) => {
-            request.events.aborted$.subscribe({
-              next: nextSpy,
-              complete: resolve,
-            });
+          router.get(
+            { path: '/', security: { authz: { enabled: false, reason: '' } }, validate: false },
+            async (context, request, res) => {
+              request.events.aborted$.subscribe({
+                next: nextSpy,
+                complete: resolve,
+              });
 
-            // prevents the server to respond
-            await delay(30000);
-            return res.ok({ body: 'ok' });
-          });
+              // prevents the server to respond
+              await timer(30_000);
+              return res.ok({ body: 'ok' });
+            }
+          );
         });
 
         await server.start();
@@ -205,7 +302,11 @@ describe('KibanaRequest', () => {
 
         const done = new Promise<void>((resolve) => {
           router.post(
-            { path: '/', validate: { body: schema.any() } },
+            {
+              path: '/',
+              security: { authz: { enabled: false, reason: '' } },
+              validate: { body: schema.any() },
+            },
             async (context, request, res) => {
               request.events.aborted$.subscribe({
                 next: nextSpy,
@@ -213,7 +314,7 @@ describe('KibanaRequest', () => {
               });
 
               // prevents the server to respond
-              await delay(30000);
+              await timer(30_000);
               return res.ok({ body: 'ok' });
             }
           );
@@ -238,14 +339,17 @@ describe('KibanaRequest', () => {
 
         const nextSpy = jest.fn();
         const completeSpy = jest.fn();
-        router.get({ path: '/', validate: false }, async (context, request, res) => {
-          request.events.aborted$.subscribe({
-            next: nextSpy,
-            complete: completeSpy,
-          });
+        router.get(
+          { path: '/', security: { authz: { enabled: false, reason: '' } }, validate: false },
+          async (context, request, res) => {
+            request.events.aborted$.subscribe({
+              next: nextSpy,
+              complete: completeSpy,
+            });
 
-          return res.ok({ body: 'ok' });
-        });
+            return res.ok({ body: 'ok' });
+          }
+        );
 
         await server.start();
 
@@ -261,14 +365,17 @@ describe('KibanaRequest', () => {
 
         const nextSpy = jest.fn();
         const completeSpy = jest.fn();
-        router.get({ path: '/', validate: false }, async (context, request, res) => {
-          request.events.aborted$.subscribe({
-            next: nextSpy,
-            complete: completeSpy,
-          });
+        router.get(
+          { path: '/', security: { authz: { enabled: false, reason: '' } }, validate: false },
+          async (context, request, res) => {
+            request.events.aborted$.subscribe({
+              next: nextSpy,
+              complete: completeSpy,
+            });
 
-          return res.badRequest();
-        });
+            return res.badRequest();
+          }
+        );
 
         await server.start();
 
@@ -298,7 +405,11 @@ describe('KibanaRequest', () => {
         });
 
         router.post(
-          { path: '/', validate: { body: schema.any() } },
+          {
+            path: '/',
+            security: { authz: { enabled: false, reason: '' } },
+            validate: { body: schema.any() },
+          },
           async (context, request, res) => {
             expect(completeSpy).not.toHaveBeenCalled();
             return res.ok({ body: 'ok' });
@@ -322,16 +433,19 @@ describe('KibanaRequest', () => {
         const nextSpy = jest.fn();
         const completeSpy = jest.fn();
 
-        router.get({ path: '/', validate: false }, async (context, req, res) => {
-          req.events.completed$.subscribe({
-            next: nextSpy,
-            complete: completeSpy,
-          });
+        router.get(
+          { path: '/', security: { authz: { enabled: false, reason: '' } }, validate: false },
+          async (context, req, res) => {
+            req.events.completed$.subscribe({
+              next: nextSpy,
+              complete: completeSpy,
+            });
 
-          expect(nextSpy).not.toHaveBeenCalled();
-          expect(completeSpy).not.toHaveBeenCalled();
-          return res.ok({ body: 'ok' });
-        });
+            expect(nextSpy).not.toHaveBeenCalled();
+            expect(completeSpy).not.toHaveBeenCalled();
+            return res.ok({ body: 'ok' });
+          }
+        );
 
         await server.start();
 
@@ -348,16 +462,19 @@ describe('KibanaRequest', () => {
         const nextSpy = jest.fn();
 
         const done = new Promise<void>((resolve) => {
-          router.get({ path: '/', validate: false }, async (context, req, res) => {
-            req.events.completed$.subscribe({
-              next: nextSpy,
-              complete: resolve,
-            });
+          router.get(
+            { path: '/', security: { authz: { enabled: false, reason: '' } }, validate: false },
+            async (context, req, res) => {
+              req.events.completed$.subscribe({
+                next: nextSpy,
+                complete: resolve,
+              });
 
-            expect(nextSpy).not.toHaveBeenCalled();
-            await delay(30000);
-            return res.ok({ body: 'ok' });
-          });
+              expect(nextSpy).not.toHaveBeenCalled();
+              await timer(30_000);
+              return res.ok({ body: 'ok' });
+            }
+          );
         });
 
         await server.start();
@@ -380,7 +497,11 @@ describe('KibanaRequest', () => {
 
         const done = new Promise<void>((resolve) => {
           router.post(
-            { path: '/', validate: { body: schema.any() } },
+            {
+              path: '/',
+              security: { authz: { enabled: false, reason: '' } },
+              validate: { body: schema.any() },
+            },
             async (context, req, res) => {
               req.events.completed$.subscribe({
                 next: nextSpy,
@@ -388,7 +509,7 @@ describe('KibanaRequest', () => {
               });
 
               expect(nextSpy).not.toHaveBeenCalled();
-              await delay(30000);
+              await timer(30_000);
               return res.ok({ body: 'ok' });
             }
           );
@@ -412,9 +533,12 @@ describe('KibanaRequest', () => {
     it('accepts x-opaque-id header case-insensitively', async () => {
       const { server: innerServer, createRouter } = await server.setup(setupDeps);
       const router = createRouter('/');
-      router.get({ path: '/', validate: false }, async (context, req, res) => {
-        return res.ok({ body: { requestId: req.id } });
-      });
+      router.get(
+        { path: '/', security: { authz: { enabled: false, reason: '' } }, validate: false },
+        async (context, req, res) => {
+          return res.ok({ body: { requestId: req.id } });
+        }
+      );
       await server.start();
 
       const st = supertest(innerServer.listener);
@@ -432,9 +556,12 @@ describe('KibanaRequest', () => {
     it('generates a UUID', async () => {
       const { server: innerServer, createRouter } = await server.setup(setupDeps);
       const router = createRouter('/');
-      router.get({ path: '/', validate: false }, async (context, req, res) => {
-        return res.ok({ body: { requestUuid: req.uuid } });
-      });
+      router.get(
+        { path: '/', security: { authz: { enabled: false, reason: '' } }, validate: false },
+        async (context, req, res) => {
+          return res.ok({ body: { requestUuid: req.uuid } });
+        }
+      );
       await server.start();
 
       const st = supertest(innerServer.listener);
@@ -448,9 +575,12 @@ describe('KibanaRequest', () => {
     it('returns the correct values', async () => {
       const { server: innerServer, createRouter } = await server.setup(setupDeps);
       const router = createRouter('/');
-      router.get({ path: '/', validate: false }, async (context, req, res) => {
-        return res.ok({ body: { httpVersion: req.httpVersion, protocol: req.protocol } });
-      });
+      router.get(
+        { path: '/', security: { authz: { enabled: false, reason: '' } }, validate: false },
+        async (context, req, res) => {
+          return res.ok({ body: { httpVersion: req.httpVersion, protocol: req.protocol } });
+        }
+      );
       await server.start();
 
       const st = supertest(innerServer.listener);

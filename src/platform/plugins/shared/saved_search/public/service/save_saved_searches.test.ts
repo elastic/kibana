@@ -1,0 +1,153 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
+
+import { saveSavedSearch } from './save_saved_searches';
+import type { SavedSearch } from './types';
+import type { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
+import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
+import { contentManagementMock } from '@kbn/content-management-plugin/public/mocks';
+
+describe('saveSavedSearch', () => {
+  let cmApi: ContentManagementPublicStart['client'];
+  let savedSearch: SavedSearch;
+
+  const expectedTabAttributes = {
+    breakdownField: undefined,
+    chartInterval: undefined,
+    columns: [],
+    controlGroupJson: undefined,
+    density: undefined,
+    grid: {},
+    hideAggregatedPreview: undefined,
+    hideChart: false,
+    hideTable: false,
+    isTextBasedQuery: false,
+    kibanaSavedObjectMeta: { searchSourceJSON: '{}' },
+    refreshInterval: undefined,
+    rowHeight: undefined,
+    headerRowHeight: undefined,
+    rowsPerPage: undefined,
+    sampleSize: undefined,
+    sort: [],
+    timeRange: undefined,
+    timeRestore: false,
+    usesAdHocDataView: undefined,
+    viewMode: undefined,
+    visContext: undefined,
+  };
+
+  const expectedData = {
+    title: 'title',
+    description: '',
+    tabs: [
+      {
+        id: expect.any(String),
+        label: 'Untitled',
+        attributes: expectedTabAttributes,
+      },
+    ],
+  };
+
+  beforeEach(() => {
+    cmApi = contentManagementMock.createStartContract().client;
+    const searchSource = dataPluginMock.createStartContract().search.searchSource.createEmpty();
+    savedSearch = {
+      id: 'id',
+      title: 'title',
+      searchSource: {
+        ...searchSource,
+        serialize: () => ({
+          searchSourceJSON: '{}',
+          references: [],
+        }),
+      },
+      sharingSavedObjectProps: {
+        outcome: 'aliasMatch',
+      },
+      managed: false,
+    } as SavedSearch;
+  });
+
+  test('should call savedObjectsClient.create for saving new search', async () => {
+    cmApi.search = jest.fn().mockReturnValue({
+      hits: [
+        {
+          attributes: {
+            title: 'title',
+          },
+        },
+      ],
+    });
+    cmApi.create = jest.fn().mockReturnValue({
+      item: {
+        id: 'id',
+      },
+    });
+
+    delete savedSearch.id;
+
+    await saveSavedSearch(savedSearch, {}, cmApi, undefined);
+
+    expect(cmApi.create).toHaveBeenCalledWith({
+      contentTypeId: 'search',
+      data: expectedData,
+      options: { references: [] },
+    });
+  });
+
+  test('should call savedObjectsClient.update for saving existing search', async () => {
+    cmApi.update = jest.fn().mockReturnValue({
+      item: {
+        id: 'id',
+      },
+    });
+
+    await saveSavedSearch(savedSearch, {}, cmApi, undefined);
+
+    expect(cmApi.update).toHaveBeenCalledWith({
+      contentTypeId: 'search',
+      data: expectedData,
+      id: 'id',
+      options: { references: [] },
+    });
+  });
+
+  test('should call savedObjectsTagging.ui.updateTagsReferences', async () => {
+    cmApi.update = jest.fn().mockReturnValue({
+      item: {
+        id: 'id',
+      },
+    });
+
+    const savedObjectsTagging = {
+      ui: {
+        updateTagsReferences: jest.fn((_, tags) => tags),
+      },
+    } as unknown as SavedObjectsTaggingApi;
+    await saveSavedSearch(
+      { ...savedSearch, tags: ['tag-1', 'tag-2'] },
+      {},
+      cmApi,
+      savedObjectsTagging
+    );
+
+    expect(savedObjectsTagging.ui.updateTagsReferences).toHaveBeenCalledWith(
+      [],
+      ['tag-1', 'tag-2']
+    );
+    expect(cmApi.update).toHaveBeenCalledWith({
+      contentTypeId: 'search',
+      data: expectedData,
+      id: 'id',
+      options: { references: ['tag-1', 'tag-2'] },
+    });
+  });
+});

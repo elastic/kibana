@@ -1,0 +1,12 @@
+{
+  "type": "doc",
+  "value": {
+    "id": "1",
+    "index": ".reindexed-v8-siem-signals-default-000001",
+    "source": {
+      "@timestamp": "2020-10-10T00:00:00.000Z",
+      "signal": {}
+    },
+    "type": "_doc"
+  }
+}

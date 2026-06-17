@@ -1,0 +1,512 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
+
+import { createAppContextStartContractMock } from '../../../mocks';
+import type { PackagePolicyAssetsMap, PackagePolicyInput } from '../../../../common/types';
+import { appContextService } from '../..';
+
+import { getTemplateInputs, templatePackagePolicyToFullInputStreams } from './get_template_inputs';
+import REDIS_1_18_0_PACKAGE_INFO from './__fixtures__/redis_1_18_0_package_info.json';
+import { getAgentTemplateAssetsMap, getPackageInfo } from './get';
+import { REDIS_ASSETS_MAP } from './__fixtures__/redis_1_18_0_streams_template';
+import { LOGS_2_3_0_ASSETS_MAP, LOGS_2_3_0_PACKAGE_INFO } from './__fixtures__/logs_2_3_0';
+import { DOCKER_2_11_0_PACKAGE_INFO, DOCKER_2_11_0_ASSETS_MAP } from './__fixtures__/docker_2_11_0';
+
+jest.mock('./get');
+
+const packageInfoCache = new Map();
+packageInfoCache.set('mock_package-0.0.0', {
+  name: 'mock_package',
+  version: '0.0.0',
+  policy_templates: [
+    {
+      multiple: true,
+    },
+  ],
+});
+packageInfoCache.set('limited_package-0.0.0', {
+  name: 'limited_package',
+  version: '0.0.0',
+  policy_templates: [
+    {
+      multiple: false,
+    },
+  ],
+});
+
+packageInfoCache.set('redis-1.18.0', REDIS_1_18_0_PACKAGE_INFO);
+packageInfoCache.set('log-2.3.0', LOGS_2_3_0_PACKAGE_INFO);
+packageInfoCache.set('docker-2.11.0', DOCKER_2_11_0_PACKAGE_INFO);
+
+describe('Fleet - templatePackagePolicyToFullInputStreams', () => {
+  const mockInput: PackagePolicyInput = {
+    type: 'test-logs',
+    enabled: true,
+    vars: {
+      inputVar: { value: 'input-value' },
+      inputVar2: { value: undefined },
+      inputVar3: {
+        type: 'yaml',
+        value: 'testField: test',
+      },
+      inputVar4: { value: '' },
+    },
+    streams: [
+      {
+        id: 'test-logs-foo',
+        enabled: true,
+        data_stream: { dataset: 'foo', type: 'logs' },
+        vars: {
+          fooVar: { value: 'foo-value' },
+          fooVar2: { value: [1, 2] },
+        },
+        compiled_stream: {
+          fooKey: 'fooValue1',
+          fooKey2: ['fooValue2'],
+        },
+      },
+      {
+        id: 'test-logs-bar',
+        enabled: true,
+        data_stream: { dataset: 'bar', type: 'logs' },
+        vars: {
+          barVar: { value: 'bar-value' },
+          barVar2: { value: [1, 2] },
+          barVar3: {
+            type: 'yaml',
+            value:
+              '- namespace: mockNamespace\n  #disabledProp: ["test"]\n  anotherProp: test\n- namespace: mockNamespace2\n  #disabledProp: ["test2"]\n  anotherProp: test2',
+          },
+          barVar4: {
+            type: 'yaml',
+            value: '',
+          },
+          barVar5: {
+            type: 'yaml',
+            value: 'testField: test\n invalidSpacing: foo',
+          },
+        },
+      },
+    ],
+  };
+
+  const mockInput2: PackagePolicyInput = {
+    type: 'test-metrics',
+    policy_template: 'some-template',
+    enabled: true,
+    vars: {
+      inputVar: { value: 'input-value' },
+      inputVar2: { value: undefined },
+      inputVar3: {
+        type: 'yaml',
+        value: 'testField: test',
+      },
+      inputVar4: { value: '' },
+    },
+    streams: [
+      {
+        id: 'test-metrics-foo',
+        enabled: true,
+        data_stream: { dataset: 'foo', type: 'metrics' },
+        vars: {
+          fooVar: { value: 'foo-value' },
+          fooVar2: { value: [1, 2] },
+        },
+        compiled_stream: {
+          fooKey: 'fooValue1',
+          fooKey2: ['fooValue2'],
+        },
+      },
+    ],
+  };
+
+  it('returns no inputs for package policy with no inputs', async () => {
+    expect(await templatePackagePolicyToFullInputStreams([])).toEqual([]);
+  });
+
+  it('returns inputs even when inputs where disabled', async () => {
+    expect(
+      await templatePackagePolicyToFullInputStreams([{ ...mockInput, enabled: false }])
+    ).toEqual([
+      {
+        id: 'test-logs',
+        type: 'test-logs',
+        streams: [
+          {
+            data_stream: {
+              dataset: 'foo',
+              type: 'logs',
+            },
+            fooKey: 'fooValue1',
+            fooKey2: ['fooValue2'],
+            id: 'test-logs-foo',
+          },
+          {
+            data_stream: {
+              dataset: 'bar',
+              type: 'logs',
+            },
+            id: 'test-logs-bar',
+          },
+        ],
+      },
+    ]);
+  });
+
+  it('returns agent inputs with streams', async () => {
+    expect(await templatePackagePolicyToFullInputStreams([mockInput])).toEqual([
+      {
+        id: 'test-logs',
+        type: 'test-logs',
+        streams: [
+          {
+            id: 'test-logs-foo',
+            data_stream: { dataset: 'foo', type: 'logs' },
+            fooKey: 'fooValue1',
+            fooKey2: ['fooValue2'],
+          },
+          {
+            id: 'test-logs-bar',
+            data_stream: { dataset: 'bar', type: 'logs' },
+          },
+        ],
+      },
+    ]);
+  });
+
+  it('returns unique agent inputs IDs, with policy template name if one exists for non-limited packages', async () => {
+    expect(await templatePackagePolicyToFullInputStreams([mockInput])).toEqual([
+      {
+        id: 'test-logs',
+        type: 'test-logs',
+        streams: [
+          {
+            id: 'test-logs-foo',
+            data_stream: { dataset: 'foo', type: 'logs' },
+            fooKey: 'fooValue1',
+            fooKey2: ['fooValue2'],
+          },
+          {
+            id: 'test-logs-bar',
+            data_stream: { dataset: 'bar', type: 'logs' },
+          },
+        ],
+      },
+    ]);
+  });
+
+  it('returns agent inputs without streams', async () => {
+    expect(await templatePackagePolicyToFullInputStreams([mockInput2])).toEqual([
+      {
+        id: 'some-template-test-metrics',
+        type: 'test-metrics',
+        streams: [
+          {
+            data_stream: {
+              dataset: 'foo',
+              type: 'metrics',
+            },
+            fooKey: 'fooValue1',
+            fooKey2: ['fooValue2'],
+            id: 'test-metrics-foo',
+          },
+        ],
+      },
+    ]);
+  });
+
+  it('uses getInputEffectiveName for template input id when name differs from type', async () => {
+    expect(
+      await templatePackagePolicyToFullInputStreams([
+        {
+          ...mockInput2,
+          name: 'custom-metrics',
+          type: 'test-metrics',
+        },
+      ])
+    ).toEqual([
+      {
+        id: 'some-template-custom-metrics',
+        type: 'test-metrics',
+        streams: [
+          {
+            data_stream: {
+              dataset: 'foo',
+              type: 'metrics',
+            },
+            fooKey: 'fooValue1',
+            fooKey2: ['fooValue2'],
+            id: 'test-metrics-foo',
+          },
+        ],
+      },
+    ]);
+  });
+
+  it('returns agent inputs without disabled streams', async () => {
+    expect(
+      await templatePackagePolicyToFullInputStreams([
+        {
+          ...mockInput,
+          streams: [{ ...mockInput.streams[0] }, { ...mockInput.streams[1], enabled: false }],
+        },
+      ])
+    ).toEqual([
+      {
+        id: 'test-logs',
+        type: 'test-logs',
+        streams: [
+          {
+            id: 'test-logs-foo',
+            data_stream: { dataset: 'foo', type: 'logs' },
+            fooKey: 'fooValue1',
+            fooKey2: ['fooValue2'],
+          },
+          {
+            data_stream: {
+              dataset: 'bar',
+              type: 'logs',
+            },
+            id: 'test-logs-bar',
+          },
+        ],
+      },
+    ]);
+  });
+
+  it('returns agent inputs with deeply merged config values', async () => {
+    expect(
+      await templatePackagePolicyToFullInputStreams([
+        {
+          ...mockInput,
+          compiled_input: {
+            agent_input_template_group1_vars: {
+              inputVar: 'input-value',
+            },
+            agent_input_template_group2_vars: {
+              inputVar3: {
+                testFieldGroup: {
+                  subField1: 'subfield1',
+                },
+                testField: 'test',
+              },
+            },
+          },
+          config: {
+            agent_input_template_group1_vars: {
+              value: {
+                inputVar2: {},
+              },
+            },
+            agent_input_template_group2_vars: {
+              value: {
+                inputVar3: {
+                  testFieldGroup: {
+                    subField2: 'subfield2',
+                  },
+                },
+                inputVar4: '',
+              },
+            },
+          },
+        },
+      ])
+    ).toEqual([
+      {
+        agent_input_template_group1_vars: {
+          inputVar: 'input-value',
+          inputVar2: {},
+        },
+        agent_input_template_group2_vars: {
+          inputVar3: {
+            testField: 'test',
+            testFieldGroup: {
+              subField1: 'subfield1',
+              subField2: 'subfield2',
+            },
+          },
+          inputVar4: '',
+        },
+        id: 'test-logs',
+        type: 'test-logs',
+        streams: [
+          {
+            id: 'test-logs-foo',
+            data_stream: { dataset: 'foo', type: 'logs' },
+            fooKey: 'fooValue1',
+            fooKey2: ['fooValue2'],
+          },
+          { id: 'test-logs-bar', data_stream: { dataset: 'bar', type: 'logs' } },
+        ],
+      },
+    ]);
+  });
+});
+
+describe('Fleet - getTemplateInputs', () => {
+  beforeEach(() => {
+    appContextService.start(createAppContextStartContractMock());
+    jest.mocked(getAgentTemplateAssetsMap).mockImplementation(async ({ packageInfo }) => {
+      if (packageInfo.name === 'redis' && packageInfo.version === '1.18.0') {
+        return REDIS_ASSETS_MAP as PackagePolicyAssetsMap;
+      }
+
+      if (packageInfo.name === 'log') {
+        return LOGS_2_3_0_ASSETS_MAP as PackagePolicyAssetsMap;
+      }
+      if (packageInfo.name === 'docker') {
+        return DOCKER_2_11_0_ASSETS_MAP as PackagePolicyAssetsMap;
+      }
+
+      return new Map() as PackagePolicyAssetsMap;
+    });
+    jest.mocked(getPackageInfo).mockImplementation(async ({ pkgName, pkgVersion }) => {
+      const pkgInfo = packageInfoCache.get(`${pkgName}-${pkgVersion}`);
+      if (!pkgInfo) {
+        throw new Error('package not mocked');
+      }
+
+      return pkgInfo;
+    });
+  });
+  it('should work for integration package', async () => {
+    const soMock = savedObjectsClientMock.create();
+    soMock.get.mockResolvedValue({ attributes: {} } as any);
+    const template = await getTemplateInputs(soMock, 'redis', '1.18.0', 'yml');
+
+    expect(template).toMatchSnapshot();
+  });
+
+  it('should work for package with dynamic ids', async () => {
+    const soMock = savedObjectsClientMock.create();
+    soMock.get.mockResolvedValue({ attributes: {} } as any);
+    const template = await getTemplateInputs(soMock, 'docker', '2.11.0', 'yml');
+
+    expect(template).toMatchSnapshot();
+  });
+
+  it('should work for input package', async () => {
+    const soMock = savedObjectsClientMock.create();
+    soMock.get.mockResolvedValue({ attributes: {} } as any);
+    const template = await getTemplateInputs(soMock, 'log', '2.3.0', 'yml');
+
+    expect(template).toMatchSnapshot();
+  });
+
+  it('should filter inputs when provided a filtering condition', async () => {
+    const soMock = savedObjectsClientMock.create();
+    soMock.get.mockResolvedValue({ attributes: {} } as any);
+    const template = await getTemplateInputs(
+      soMock,
+      'redis',
+      '1.18.0',
+      'json',
+      (input) => input.type !== 'redis/metrics'
+    );
+
+    expect(template).toMatchSnapshot();
+  });
+
+  it('should inject wired streams routing processor for log streams when enabled', async () => {
+    const soMock = savedObjectsClientMock.create();
+    soMock.get.mockResolvedValue({ attributes: {} } as any);
+    const template = await getTemplateInputs(
+      soMock,
+      'redis',
+      '1.18.0',
+      'json',
+      undefined,
+      undefined,
+      undefined,
+      true // injectWiredStreamsRouting
+    );
+
+    const logInput = template.inputs.find((input) => input.type === 'logfile');
+    expect(logInput).toBeDefined();
+    if (logInput && logInput.streams) {
+      for (const stream of logInput.streams as Array<{
+        data_stream?: { type?: string };
+        processors?: Array<{ add_fields?: { target: string; fields: { raw_index: string } } }>;
+      }>) {
+        if (stream.data_stream?.type === 'logs') {
+          expect(stream.processors).toBeDefined();
+          expect(stream.processors![0]).toEqual({
+            add_fields: {
+              target: '@metadata',
+              fields: { raw_index: 'logs.ecs' },
+            },
+          });
+        }
+      }
+    }
+  });
+
+  it('preserves multi-line strings as YAML literal block scalars in yml format output (#265122)', async () => {
+    const soMock = savedObjectsClientMock.create();
+    soMock.get.mockResolvedValue({ attributes: {} } as any);
+
+    // The exact two-line CEL comment from the bug report that triggered newline collapse.
+    // Redis has a `program` field in its CEL input streams — use its fixture but override
+    // the compiled stream to include the problematic multi-line content.
+    const template = await getTemplateInputs(soMock, 'redis', '1.18.0', 'yml');
+    const yamlStr = template as unknown as string;
+
+    // The yml output must not contain folded block scalars (>) or escaped newlines (\n)
+    // for any multi-line string values — the fix forces BLOCK_LITERAL style.
+    expect(yamlStr).not.toMatch(/: >\n/); // no folded block scalars
+    expect(yamlStr).not.toMatch(/\\n/); // no escaped newlines in double-quoted strings
+  });
+
+  it('should NOT inject wired streams routing processor when disabled', async () => {
+    const soMock = savedObjectsClientMock.create();
+    soMock.get.mockResolvedValue({ attributes: {} } as any);
+    const templateWithRouting = await getTemplateInputs(
+      soMock,
+      'redis',
+      '1.18.0',
+      'json',
+      undefined,
+      undefined,
+      undefined,
+      true
+    );
+    const templateWithoutRouting = await getTemplateInputs(
+      soMock,
+      'redis',
+      '1.18.0',
+      'json',
+      undefined,
+      undefined,
+      undefined,
+      false
+    );
+
+    // With routing should have the processor
+    const logInputWithRouting = templateWithRouting.inputs.find(
+      (input) => input.type === 'logfile'
+    );
+    const logInputWithoutRouting = templateWithoutRouting.inputs.find(
+      (input) => input.type === 'logfile'
+    );
+
+    if (logInputWithRouting?.streams && logInputWithoutRouting?.streams) {
+      const streamWithRouting = (
+        logInputWithRouting.streams as Array<{ processors?: unknown[] }>
+      )[0];
+      const streamWithoutRouting = (
+        logInputWithoutRouting.streams as Array<{ processors?: unknown[] }>
+      )[0];
+
+      const routingProcessorCount = streamWithRouting.processors?.length ?? 0;
+      const noRoutingProcessorCount = streamWithoutRouting.processors?.length ?? 0;
+
+      expect(routingProcessorCount).toBe(noRoutingProcessorCount + 1);
+    }
+  });
+});

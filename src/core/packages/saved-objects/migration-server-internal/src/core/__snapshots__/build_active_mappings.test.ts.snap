@@ -1,0 +1,156 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`buildActiveMappings combines all mappings and includes core mappings 1`] = `
+Object {
+  "dynamic": "strict",
+  "properties": Object {
+    "aaa": Object {
+      "type": "text",
+    },
+    "accessControl": Object {
+      "dynamic": "false",
+      "properties": Object {
+        "owner": Object {
+          "type": "keyword",
+        },
+      },
+    },
+    "bbb": Object {
+      "type": "long",
+    },
+    "coreMigrationVersion": Object {
+      "type": "keyword",
+    },
+    "created_at": Object {
+      "type": "date",
+    },
+    "created_by": Object {
+      "type": "keyword",
+    },
+    "managed": Object {
+      "type": "boolean",
+    },
+    "namespace": Object {
+      "type": "keyword",
+    },
+    "namespaces": Object {
+      "type": "keyword",
+    },
+    "originId": Object {
+      "type": "keyword",
+    },
+    "references": Object {
+      "properties": Object {
+        "id": Object {
+          "type": "keyword",
+        },
+        "name": Object {
+          "type": "keyword",
+        },
+        "type": Object {
+          "type": "keyword",
+        },
+      },
+      "type": "nested",
+    },
+    "type": Object {
+      "type": "keyword",
+    },
+    "typeMigrationVersion": Object {
+      "type": "version",
+    },
+    "updated_at": Object {
+      "type": "date",
+    },
+    "updated_by": Object {
+      "type": "keyword",
+    },
+  },
+}
+`;
+
+exports[`buildActiveMappings handles the \`dynamic\` property of types 1`] = `
+Object {
+  "dynamic": "strict",
+  "properties": Object {
+    "accessControl": Object {
+      "dynamic": "false",
+      "properties": Object {
+        "owner": Object {
+          "type": "keyword",
+        },
+      },
+    },
+    "coreMigrationVersion": Object {
+      "type": "keyword",
+    },
+    "created_at": Object {
+      "type": "date",
+    },
+    "created_by": Object {
+      "type": "keyword",
+    },
+    "firstType": Object {
+      "dynamic": "strict",
+      "properties": Object {
+        "field": Object {
+          "type": "keyword",
+        },
+      },
+    },
+    "managed": Object {
+      "type": "boolean",
+    },
+    "namespace": Object {
+      "type": "keyword",
+    },
+    "namespaces": Object {
+      "type": "keyword",
+    },
+    "originId": Object {
+      "type": "keyword",
+    },
+    "references": Object {
+      "properties": Object {
+        "id": Object {
+          "type": "keyword",
+        },
+        "name": Object {
+          "type": "keyword",
+        },
+        "type": Object {
+          "type": "keyword",
+        },
+      },
+      "type": "nested",
+    },
+    "secondType": Object {
+      "dynamic": false,
+      "properties": Object {
+        "field": Object {
+          "type": "long",
+        },
+      },
+    },
+    "thirdType": Object {
+      "properties": Object {
+        "field": Object {
+          "type": "text",
+        },
+      },
+    },
+    "type": Object {
+      "type": "keyword",
+    },
+    "typeMigrationVersion": Object {
+      "type": "version",
+    },
+    "updated_at": Object {
+      "type": "date",
+    },
+    "updated_by": Object {
+      "type": "keyword",
+    },
+  },
+}
+`;

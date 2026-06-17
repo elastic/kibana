@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 export interface PluginOrPackage {
@@ -46,6 +47,7 @@ export enum TypeKind {
    * Maps to the typescript syntax kind `TypeReferences`. For example,
    * export type FooFn = () => string will be a TypeKind, not a FunctionKind.
    */
+  // eslint-disable-next-line @typescript-eslint/no-shadow
   TypeKind = 'Type',
   /**
    * Uncategorized is used if a type is encountered that isn't handled.
@@ -167,6 +169,12 @@ export interface ApiDeclaration {
   returnComment?: TextWithLinks;
 
   /**
+   * For parameter declarations, indicates a named referenced type whose documentation
+   * should live on that type's own API declaration rather than being duplicated inline.
+   */
+  docsReferencedTypeName?: string;
+
+  /**
    * Will contain the tags on a comment, like `beta` or `deprecated`.
    * Won't include param or returns tags.
    */
@@ -183,6 +191,16 @@ export interface ApiDeclaration {
    * Used to create links to github to view the code for this API.
    */
   path: string;
+
+  /**
+   * Source position for easier navigation to the declaration.
+   */
+  lineNumber?: number;
+
+  /**
+   * Source position for easier navigation to the declaration.
+   */
+  columnNumber?: number;
 
   /**
    * Other plugins that reference this API item (along with SourceLink info for each reference).
@@ -281,6 +299,9 @@ export interface ApiStats {
   missingComments: ApiDeclaration[];
   isAnyType: ApiDeclaration[];
   noReferences: ApiDeclaration[];
+  paramDocMismatches: ApiDeclaration[];
+  missingComplexTypeInfo: ApiDeclaration[];
+  missingReturns: ApiDeclaration[];
   apiCount: number;
   missingExports: number;
   deprecatedAPIsReferencedCount: number;
@@ -294,6 +315,41 @@ export interface ApiStats {
    * Number of adoption-tracked APIs that are still not referenced.
    */
   adoptionTrackedAPIsUnreferencedCount: number;
+  /**
+   * Unnamed exports found in this plugin (e.g., JSDoc comments above non-declarations).
+   */
+  unnamedExports: UnnamedExport[];
+}
+
+/**
+ * Represents an exported declaration that has no identifiable name.
+ * This typically occurs with anonymous `export default` expressions (e.g.,
+ * `export default { ... }` or `export default function() { ... }`).
+ */
+export interface UnnamedExport {
+  pluginId: string;
+  scope: ApiScope;
+  path: string;
+  lineNumber: number;
+  textSnippet: string;
+}
+
+/**
+ * A mapping of plugin id to a list of unnamed exports found in that plugin.
+ */
+export interface UnnamedExportsByPlugin {
+  [pluginId: string]: UnnamedExport[];
+}
+
+/**
+ * Collections of issues and metadata indexed by plugin ID.
+ * Used by `collectApiStatsForPlugin` to gather stats for a specific plugin.
+ */
+export interface IssuesByPlugin {
+  missingApiItems: MissingApiItemMap;
+  referencedDeprecations: ReferencedDeprecationsByPlugin;
+  adoptionTrackedAPIs: AdoptionTrackedAPIsByPlugin;
+  unnamedExports?: UnnamedExportsByPlugin;
 }
 
 export type PluginMetaInfo = ApiStats & {

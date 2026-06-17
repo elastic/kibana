@@ -1,6 +1,0 @@
-{
-  "type": "shared-common",
-  "id": "@kbn/dev-cli-runner",
-  "devOnly": true,
-  "owner": "@elastic/kibana-operations"
-}

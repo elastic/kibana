@@ -1,0 +1,138 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+/**
+ * Referenced content for a skill.
+ */
+export interface SkillReferencedContent {
+  /** Display name for the referenced content. */
+  name: string;
+  /** Path relative to the skill (e.g. ./.cursor/skills/foo/SKILL.md). */
+  relativePath: string;
+  /** Raw content of the referenced file. */
+  content: string;
+}
+
+/**
+ * Public-facing skill definition exposed via API responses.
+ * Includes a `readonly` field to distinguish built-in from user-created skills.
+ */
+export interface PublicSkillDefinition {
+  /**
+   * Unique identifier for the skill.
+   */
+  id: string;
+  /**
+   * Name of the skill.
+   */
+  name: string;
+  /**
+   * Description of what the skill does.
+   */
+  description: string;
+  /**
+   * Skill instructions content (markdown).
+   */
+  content: string;
+  /**
+   * Optional referenced content.
+   */
+  referenced_content?: SkillReferencedContent[];
+  /**
+   * Tool IDs from the tool registry that this skill references.
+   * Only present for user-created skills.
+   */
+  tool_ids?: string[];
+  /**
+   * Whether this skill is built-in (readonly) or user-created.
+   */
+  readonly: boolean;
+  /**
+   * If this skill was installed from a plugin, the plugin name.
+   */
+  plugin_id?: string;
+  /**
+   * When true, this skill is only available when experimental features are enabled.
+   */
+  experimental: boolean;
+}
+
+/**
+ * Lightweight version of {@link PublicSkillDefinition} used for listing.
+ * Omits heavy `content` and `referenced_content` fields; carries only the count.
+ */
+export type PublicSkillSummary = Omit<PublicSkillDefinition, 'content' | 'referenced_content'> & {
+  referenced_content_count: number;
+};
+
+/**
+ * Shape for creating a persisted (user-created) skill.
+ */
+export interface PersistedSkillCreateRequest {
+  /**
+   * Unique identifier for the skill.
+   */
+  id: string;
+  /**
+   * Name of the skill.
+   */
+  name: string;
+  /**
+   * Base path for the skill (optional)
+   */
+  base_path?: string;
+  /**
+   * Description of what the skill does.
+   */
+  description: string;
+  /**
+   * Skill instructions content (markdown).
+   */
+  content: string;
+  /**
+   * Optional referenced content.
+   */
+  referenced_content?: SkillReferencedContent[];
+  /**
+   * Tool IDs from the tool registry.
+   */
+  tool_ids: string[];
+  /**
+   * If this skill is managed by a plugin, the plugin name.
+   */
+  plugin_id?: string;
+}
+
+/**
+ * Shape for updating a persisted (user-created) skill.
+ */
+export interface PersistedSkillUpdateRequest {
+  /**
+   * Updated name.
+   */
+  name?: string;
+  /**
+   * Base path for the skill (optional)
+   */
+  base_path?: string;
+  /**
+   * Updated description.
+   */
+  description?: string;
+  /**
+   * Updated skill instructions content.
+   */
+  content?: string;
+  /**
+   * Updated referenced content.
+   */
+  referenced_content?: SkillReferencedContent[];
+  /**
+   * Updated tool IDs.
+   */
+  tool_ids?: string[];
+}

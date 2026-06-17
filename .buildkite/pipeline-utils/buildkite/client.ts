@@ -1,21 +1,23 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import axios, { AxiosInstance } from 'axios';
-import { execSync, ExecSyncOptions } from 'child_process';
+import type { AxiosInstance } from 'axios';
+import axios from 'axios';
+import type { ExecSyncOptions } from 'child_process';
+import { execFileSync, execSync } from 'child_process';
 
-// eslint-disable-next-line @kbn/eslint/no_unsafe_js_yaml
-import { dump } from 'js-yaml';
+import { stringify } from 'yaml';
 
 import { parseLinkHeader } from './parse_link_header';
-import { Artifact } from './types/artifact';
-import { Build, BuildStatus } from './types/build';
-import { Job, JobState } from './types/job';
+import type { Artifact } from './types/artifact';
+import type { Build, BuildStatus } from './types/build';
+import type { Job, JobState } from './types/job';
 
 type ExecType =
   | ((command: string, execOpts: ExecSyncOptions) => Buffer | null)
@@ -27,16 +29,40 @@ export interface BuildkiteClientConfig {
   exec?: ExecType;
 }
 
-export interface BuildkiteGroup {
-  group: string;
-  steps: BuildkiteStep[];
-}
-
 export type BuildkiteStep =
+  | BuildkiteGroupStep
   | BuildkiteCommandStep
   | BuildkiteInputStep
   | BuildkiteTriggerStep
   | BuildkiteWaitStep;
+
+export interface BuildkiteAgentQueue {
+  queue: string;
+}
+
+export interface BuildkiteAgentTargetingRule {
+  provider?: string;
+  image?: string;
+  imageProject?: string;
+  machineType?: string;
+  minCpuPlatform?: string;
+  preemptible?: boolean;
+  diskSizeGb?: number;
+}
+
+export interface BuildkiteGroupStep {
+  group: string;
+  steps: BuildkiteStep[];
+  key?: string;
+  depends_on?: string | string[];
+  retry?: {
+    automatic: Array<{
+      exit_status: string;
+      limit: number;
+    }>;
+  };
+  env?: { [key: string]: string | number };
+}
 
 export interface BuildkiteCommandStep {
   command: string;
@@ -45,21 +71,9 @@ export interface BuildkiteCommandStep {
   concurrency?: number;
   concurrency_group?: string;
   concurrency_method?: 'eager' | 'ordered';
-  agents:
-    | {
-        queue: string;
-      }
-    | {
-        provider?: string;
-        image?: string;
-        imageProject?: string;
-        machineType?: string;
-        minCpuPlatform?: string;
-        preemptible?: boolean;
-      };
+  agents: BuildkiteAgentQueue | BuildkiteAgentTargetingRule;
   timeout_in_minutes?: number;
   key?: string;
-  cancel_on_build_failing?: boolean;
   depends_on?: string | string[];
   retry?: {
     automatic: Array<{
@@ -160,21 +174,23 @@ export interface BuildkiteWaitStep {
 export class BuildkiteClient {
   http: AxiosInstance;
   exec: ExecType;
+  baseUrl: string;
 
   constructor(config: BuildkiteClientConfig = {}) {
-    const BUILDKITE_BASE_URL =
-      config.baseUrl ?? process.env.BUILDKITE_BASE_URL ?? 'https://api.buildkite.com';
     const BUILDKITE_TOKEN = config.token ?? process.env.BUILDKITE_TOKEN;
+
+    this.baseUrl = config.baseUrl ?? process.env.BUILDKITE_BASE_URL ?? 'https://api.buildkite.com';
 
     // const BUILDKITE_AGENT_BASE_URL =
     //   process.env.BUILDKITE_AGENT_BASE_URL || 'https://agent.buildkite.com/v3';
     // const BUILDKITE_AGENT_TOKEN = process.env.BUILDKITE_AGENT_TOKEN;
 
     this.http = axios.create({
-      baseURL: BUILDKITE_BASE_URL,
+      baseURL: this.baseUrl,
       headers: {
         Authorization: `Bearer ${BUILDKITE_TOKEN}`,
       },
+      allowAbsoluteUrls: false,
     });
 
     this.exec = config.exec ?? execSync;
@@ -285,7 +301,7 @@ export class BuildkiteClient {
         hasRetries = true;
         const isPreemptionFailure =
           job.state === 'failed' &&
-          job.agent?.meta_data?.some((el) => ['spot=true', 'gcp:preemptible=true'].includes(el)) &&
+          job.agent_query_rules?.includes('preemptible=true') &&
           job.exit_status === -1;
 
         if (!isPreemptionFailure) {
@@ -325,10 +341,10 @@ export class BuildkiteClient {
       const resp = await this.http.get(link);
       link = '';
 
-      artifacts.push(await resp.data);
+      artifacts.push(resp.data);
 
       if (resp.headers.link) {
-        const result = parseLinkHeader(resp.headers.link as string);
+        const result = parseLinkHeader(resp.headers.link as string, this.baseUrl);
         if (result?.next) {
           link = result.next;
         }
@@ -361,8 +377,27 @@ export class BuildkiteClient {
     return (await this.http.post(url, options)).data;
   };
 
+  cancelStep = (stepIdOrKey: string): void => {
+    execFileSync('buildkite-agent', ['step', 'cancel', '--step', stepIdOrKey], {
+      stdio: ['pipe', 'inherit', 'inherit'],
+    });
+  };
+
+  getMetadataKeys = (): string[] => {
+    const stdout = execFileSync('buildkite-agent', ['meta-data', 'keys'], {
+      stdio: ['pipe', 'pipe', 'inherit'],
+    });
+
+    const output = stdout?.toString().trim() ?? '';
+    if (!output) {
+      return [];
+    }
+
+    return output.split('\n').filter(Boolean);
+  };
+
   setMetadata = (key: string, value: string) => {
-    this.exec(`buildkite-agent meta-data set '${key}'`, {
+    execFileSync('buildkite-agent', ['meta-data', 'set', key], {
       input: value,
       stdio: ['pipe', 'inherit', 'inherit'],
     });
@@ -370,7 +405,7 @@ export class BuildkiteClient {
 
   getMetadata(key: string, defaultValue: string | null = null): string | null {
     try {
-      const stdout = this.exec(`buildkite-agent meta-data get '${key}'`, {
+      const stdout = execFileSync('buildkite-agent', ['meta-data', 'get', key], {
         stdio: ['pipe'],
       });
       return stdout?.toString().trim() || defaultValue;
@@ -406,9 +441,9 @@ export class BuildkiteClient {
     });
   };
 
-  uploadSteps = (steps: Array<BuildkiteStep | BuildkiteGroup>) => {
+  uploadSteps = (steps: Array<BuildkiteStep>) => {
     this.exec(`buildkite-agent pipeline upload`, {
-      input: dump({ steps }),
+      input: stringify({ steps }),
       stdio: ['pipe', 'inherit', 'inherit'],
     });
   };

@@ -20,7 +20,9 @@ import {
   EuiIcon,
   EuiToolTip,
   EuiPopoverTitle,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';
 
 export type LensAttributesByType<VizType> = Extract<
@@ -144,13 +146,13 @@ export function OverrideSwitch({
           content={<CodeExample propName="overrides" code={JSON.stringify(override, null, 2)} />}
           position="right"
         >
-          <span>
-            {rowLabel} <EuiIcon type="questionInCircle" color="subdued" />
+          <span tabIndex={0}>
+            {rowLabel} <EuiIcon type="question" color="subdued" aria-hidden={true} />
           </span>
         </EuiToolTip>
       }
       helpText={helpText}
-      display="columnCompressedSwitch"
+      display="columnCompressed"
       hasChildLabel={false}
     >
       <EuiSwitch
@@ -195,11 +197,14 @@ export function AttributesMenu({
 
   return (
     <EuiPopover
+      aria-label={i18n.translate('testingEmbeddedLens.attributesMenu.ariaLabel', {
+        defaultMessage: 'Lens Attributes',
+      })}
       button={
         <EuiButton
           data-test-subj="lns-example-change-attributes"
           onClick={() => setAttributesPopoverOpen(!attributesPopoverOpen)}
-          iconType="arrowDown"
+          iconType="chevronSingleDown"
           iconSide="right"
           color="primary"
           isDisabled={!isSupportedChart(currentAttributes)}
@@ -249,7 +254,7 @@ export function AttributesMenu({
           </EuiFormRow>
         ) : null}
         {isPieChart(currentAttributes) ? (
-          <EuiFormRow label="Show values" display="columnCompressedSwitch">
+          <EuiFormRow label="Show values" display="columnCompressed">
             <EuiSwitch
               label="As percentage"
               name="switch"
@@ -269,7 +274,7 @@ export function AttributesMenu({
           </EuiFormRow>
         ) : null}
         {isHeatmapChart(currentAttributes) ? (
-          <EuiFormRow label="Show values" display="columnCompressedSwitch">
+          <EuiFormRow label="Show values" display="columnCompressed">
             <EuiSwitch
               label="As percentage"
               name="switch"
@@ -287,7 +292,7 @@ export function AttributesMenu({
           </EuiFormRow>
         ) : null}
         {isGaugeChart(currentAttributes) ? (
-          <EuiFormRow label="Ticks visibility" display="columnCompressedSwitch">
+          <EuiFormRow label="Ticks visibility" display="columnCompressed">
             <EuiSwitch
               label="Show ticks"
               name="switch"
@@ -344,14 +349,16 @@ export function OverridesMenu({
   setOverrides: (overrides: AllOverrides | undefined) => void;
 }) {
   const [overridesPopoverOpen, setOverridesPopoverOpen] = useState(false);
+  const overridesPopoverTitleId = useGeneratedHtmlId();
   const hasOverridesEnabled = Boolean(overrides) && !isDatatable(currentAttributes);
   return (
     <EuiPopover
+      aria-labelledby={overridesPopoverTitleId}
       button={
         <EuiButton
           data-test-subj="lns-example-change-overrides"
           onClick={() => setOverridesPopoverOpen(!overridesPopoverOpen)}
-          iconType="arrowDown"
+          iconType="chevronSingleDown"
           iconSide="right"
         >
           Overrides{' '}
@@ -364,7 +371,7 @@ export function OverridesMenu({
       closePopover={() => setOverridesPopoverOpen(false)}
     >
       <div style={{ width: 400 }}>
-        <EuiPopoverTitle>Overrides</EuiPopoverTitle>
+        <EuiPopoverTitle id={overridesPopoverTitleId}>Overrides</EuiPopoverTitle>
         <EuiText size="s">
           <p>
             Overrides are local to the Embeddable and forgotten when the visualization is open in
@@ -496,13 +503,15 @@ export function PanelMenu({
   setEnableExtraAction: (v: boolean) => void;
 }) {
   const [panelPopoverOpen, setPanelPopoverOpen] = useState(false);
+  const panelPopoverTitleId = useGeneratedHtmlId();
   return (
     <EuiPopover
+      aria-labelledby={panelPopoverTitleId}
       button={
         <EuiButton
           data-test-subj="lns-example-change-overrides"
           onClick={() => setPanelPopoverOpen(!panelPopoverOpen)}
-          iconType="arrowDown"
+          iconType="chevronSingleDown"
           iconSide="right"
         >
           Embeddable settings
@@ -512,7 +521,7 @@ export function PanelMenu({
       closePopover={() => setPanelPopoverOpen(false)}
     >
       <div style={{ width: 400 }}>
-        <EuiPopoverTitle>Embeddable settings</EuiPopoverTitle>
+        <EuiPopoverTitle id={panelPopoverTitleId}>Embeddable settings</EuiPopoverTitle>
         <EuiText size="s">
           <p>
             It is possible to control and customize how the Embeddables is shown, disabling the
@@ -522,7 +531,7 @@ export function PanelMenu({
         <EuiSpacer />
         <EuiFormRow
           label="Enable triggers"
-          display="columnCompressedSwitch"
+          display="columnCompressed"
           helpText="This setting controls the interactivity of the chart: when disabled the chart won't bubble any event on user action."
         >
           <EuiSwitch
@@ -538,7 +547,7 @@ export function PanelMenu({
         </EuiFormRow>
         <EuiFormRow
           label="Enable default action"
-          display="columnCompressedSwitch"
+          display="columnCompressed"
           helpText="When disabled the default panel actions (i.e. CSV download)"
         >
           <EuiSwitch
@@ -584,12 +593,12 @@ export function PanelMenu({
               }
               position="right"
             >
-              <span>
-                Show custom action <EuiIcon type="questionInCircle" color="subdued" />
+              <span tabIndex={0}>
+                Show custom action <EuiIcon type="question" color="subdued" aria-hidden={true} />
               </span>
             </EuiToolTip>
           }
-          display="columnCompressedSwitch"
+          display="columnCompressed"
           helpText="Pass a consumer defined action to show in the panel context menu."
         >
           <EuiSwitch

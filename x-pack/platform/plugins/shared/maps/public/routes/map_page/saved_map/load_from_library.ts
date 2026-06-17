@@ -1,0 +1,48 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type {
+  SavedObjectsResolveResponse,
+  SavedObjectReference,
+} from '@kbn/core-saved-objects-api-server';
+import type { MapAttributes } from '../../../../server';
+import { getMapClient } from '../../../content_management';
+
+export interface SharingSavedObjectProps {
+  outcome?: SavedObjectsResolveResponse['outcome'];
+  aliasTargetId?: SavedObjectsResolveResponse['alias_target_id'];
+  aliasPurpose?: SavedObjectsResolveResponse['alias_purpose'];
+  sourceId?: string;
+}
+
+export async function loadFromLibrary(savedObjectId: string): Promise<{
+  attributes: MapAttributes;
+  sharingSavedObjectProps: SharingSavedObjectProps;
+  managed: boolean;
+  references?: SavedObjectReference[];
+}> {
+  const {
+    item: savedObject,
+    meta: { outcome, aliasPurpose, aliasTargetId },
+  } = await getMapClient().get(savedObjectId);
+
+  if (savedObject.error) {
+    throw savedObject.error;
+  }
+
+  return {
+    attributes: savedObject.attributes,
+    sharingSavedObjectProps: {
+      aliasTargetId,
+      outcome,
+      aliasPurpose,
+      sourceId: savedObjectId,
+    },
+    managed: Boolean(savedObject.managed),
+    references: savedObject.references,
+  };
+}

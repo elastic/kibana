@@ -1,0 +1,106 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import React, { useEffect, useState, useMemo } from 'react';
+import styled from 'styled-components';
+import {
+  EuiCallOut,
+  EuiFlexGroup,
+  EuiPanel,
+  EuiSpacer,
+  EuiText,
+  EuiHorizontalRule,
+} from '@elastic/eui';
+import { WorkflowInsightType } from '../../../../../../../../common/endpoint/types/workflow_insights';
+
+import type { SecurityWorkflowInsight } from '../../../../../../../../common/endpoint/types/workflow_insights';
+import { WORKFLOW_INSIGHTS } from '../../../translations';
+import { WorkflowInsightsIncompatibleAntivirusResult } from './results/incompatible_antivirus';
+import { WorkflowInsightsPolicyResponseFailureResult } from './results/policy_response_failure';
+interface WorkflowInsightsResultsProps {
+  results?: SecurityWorkflowInsight[];
+  scanCompleted: boolean;
+  endpointId: string;
+}
+
+const CustomEuiCallOut = styled(EuiCallOut)`
+  & .euiButtonIcon {
+    margin-top: 5px; /* Lower the close button */
+  }
+`;
+
+const ScrollableContainer = styled(EuiPanel)`
+  max-height: 500px;
+  overflow-y: auto;
+  padding: 0;
+`;
+
+export const WorkflowInsightsResults = ({
+  results,
+  scanCompleted,
+  endpointId,
+}: WorkflowInsightsResultsProps) => {
+  const [showEmptyResultsCallout, setShowEmptyResultsCallout] = useState(false);
+  const hideEmptyStateCallout = () => setShowEmptyResultsCallout(false);
+
+  useEffect(() => {
+    setShowEmptyResultsCallout(results?.length === 0 && scanCompleted);
+  }, [results, scanCompleted]);
+
+  const insights = useMemo(() => {
+    if (showEmptyResultsCallout) {
+      return (
+        <CustomEuiCallOut
+          onDismiss={hideEmptyStateCallout}
+          color={'success'}
+          data-test-subj={'workflowInsightsEmptyResultsCallout'}
+        >
+          {WORKFLOW_INSIGHTS.issues.emptyResults}
+        </CustomEuiCallOut>
+      );
+    } else if (results?.length) {
+      return results.flatMap((insight, index) => {
+        switch (insight.type) {
+          case WorkflowInsightType.enum.incompatible_antivirus:
+            return (
+              <WorkflowInsightsIncompatibleAntivirusResult
+                insight={insight}
+                index={index}
+                endpointId={endpointId}
+              />
+            );
+          case WorkflowInsightType.enum.policy_response_failure:
+            return <WorkflowInsightsPolicyResponseFailureResult insight={insight} index={index} />;
+          default:
+            return null;
+        }
+      });
+    }
+    return null;
+  }, [endpointId, results, showEmptyResultsCallout]);
+
+  const showInsights = !!(showEmptyResultsCallout || results?.length);
+
+  return (
+    <>
+      {showInsights && (
+        <>
+          <EuiText size={'s'}>
+            <h4>{WORKFLOW_INSIGHTS.issues.title}</h4>
+          </EuiText>
+          <EuiSpacer size={'s'} />
+        </>
+      )}
+      <ScrollableContainer hasShadow={false}>
+        <EuiFlexGroup direction="column" gutterSize="s">
+          {insights}
+        </EuiFlexGroup>
+      </ScrollableContainer>
+      {showInsights && <EuiHorizontalRule />}
+    </>
+  );
+};

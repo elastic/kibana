@@ -1,6 +1,0 @@
-name: withMetrics
-in: query
-description: Return agent metrics, false by default
-required: false
-schema:
-  type: boolean

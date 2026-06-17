@@ -1,6 +1,0 @@
-name: page
-in: query
-required: false
-schema:
-  type: integer
-  default: 1

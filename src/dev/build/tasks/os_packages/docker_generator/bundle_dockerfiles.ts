@@ -1,22 +1,24 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { resolve } from 'path';
 import { readFileSync } from 'fs';
 import { copyFile } from 'fs/promises';
 
-import { ToolingLog } from '@kbn/tooling-log';
+import type { ToolingLog } from '@kbn/tooling-log';
 import { REPO_ROOT } from '@kbn/repo-info';
 import Mustache from 'mustache';
 
-import { compressTar, copyAll, mkdirp, write, Config } from '../../../lib';
+import type { Config } from '../../../lib';
+import { compressTar, copyAll, mkdirp, write } from '../../../lib';
 import { dockerfileTemplate } from './templates';
-import { TemplateContext } from './template_context';
+import type { TemplateContext } from './template_context';
 
 export async function bundleDockerFiles(config: Config, log: ToolingLog, scope: TemplateContext) {
   log.info(`Generating kibana${scope.imageFlavor} docker build context bundle`);
@@ -67,12 +69,7 @@ export async function bundleDockerFiles(config: Config, log: ToolingLog, scope: 
   await compressTar({
     source: dockerFilesBuildDir,
     destination: dockerFilesOutputDir,
-    archiverOptions: {
-      gzip: true,
-      gzipOptions: {
-        level: 9,
-      },
-    },
+    gzipLevel: config.isRelease ? 9 : 6,
     createRootDirectory: false,
   });
 }

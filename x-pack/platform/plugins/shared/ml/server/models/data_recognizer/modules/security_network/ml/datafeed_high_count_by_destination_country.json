@@ -1,0 +1,28 @@
+{
+  "job_id": "JOB_ID",
+  "indices": [
+    "INDEX_PATTERN_NAME"
+  ],
+  "max_empty_searches": 10,
+  "query": {
+    "bool": {
+      "filter": [
+        {
+          "term": {
+            "event.category": "network"
+          }
+        },
+        {
+          "exists": {
+            "field": "destination.geo.country_name"
+          }
+        }
+      ],
+      "must_not": {
+        "terms": {
+          "process.name": ["elastic-agent.exe", "elastic-agent", "metricbeat.exe", "metricbeat", "filebeat.exe", "filebeat", "packetbeat.exe", "packetbeat", "winlogbeat.exe", "winlogbeat"]
+        }
+      }
+    }
+  }
+}

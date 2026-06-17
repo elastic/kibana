@@ -1,0 +1,209 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import {
+  ELASTIC_HTTP_VERSION_HEADER,
+  X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
+} from '@kbn/core-http-common';
+import expect from '@kbn/expect';
+import type { FtrProviderContext } from '../ftr_provider_context';
+import { readLogFile, assertLogContains, isExecutionContextLog, ANY } from '../test_utils';
+
+function delay(ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+export default function ({ getService }: FtrProviderContext) {
+  const supertest = getService('supertest');
+  const log = getService('log');
+
+  async function waitForStatus(
+    id: string,
+    statuses: Set<string>,
+    waitMillis: number = 10000
+  ): Promise<Record<string, any>> {
+    if (waitMillis < 0) {
+      expect().fail(`waiting for alert ${id} statuses ${Array.from(statuses)} timed out`);
+    }
+
+    const response = await supertest.get(`/api/alerting/rule/${id}`);
+    expect(response.status).to.eql(200);
+    const { status } = response.body.execution_status;
+    if (statuses.has(status)) return response.body.execution_status;
+
+    log.debug(
+      `waitForStatus(${Array.from(statuses)} for id:${id}): got ${JSON.stringify(
+        response.body.execution_status
+      )}, retrying`
+    );
+
+    const WaitForStatusIncrement = 500;
+    await delay(WaitForStatusIncrement);
+    return await waitForStatus(id, statuses, waitMillis - WaitForStatusIncrement);
+  }
+
+  describe('Server-side apps', () => {
+    it('propagates context for Task and Alerts', async () => {
+      const { body: createdAlert } = await supertest
+        .post('/api/alerting/rule')
+        .set('kbn-xsrf', 'true')
+        .send({
+          enabled: true,
+          name: 'abc',
+          tags: ['foo'],
+          rule_type_id: 'test.executionContext',
+          consumer: 'fecAlertsTestPlugin',
+          schedule: { interval: '3s' },
+          throttle: '20s',
+          actions: [],
+          params: {},
+          notify_when: 'onThrottleInterval',
+        })
+        .expect(200);
+
+      const alertId = createdAlert.id;
+
+      await waitForStatus(alertId, new Set(['ok']), 90_000);
+      const logs = await readLogFile();
+
+      assertLogContains({
+        description:
+          'task manager execution context propagates to Elasticsearch via "x-opaque-id" header',
+        predicate: (record) =>
+          Boolean(
+            // exclude part with taskId
+            record.http?.request?.id?.includes(
+              `kibana:task%20manager:run%20alerting%3Atest.executionContext:`
+            )
+          ),
+        logs,
+      });
+
+      assertLogContains({
+        description:
+          'alerting execution context propagates to Elasticsearch via "x-opaque-id" header',
+        predicate: (record) =>
+          Boolean(
+            record.http?.request?.id?.includes(`alert:execute%20test.executionContext:${alertId}`)
+          ),
+        logs,
+      });
+
+      assertLogContains({
+        description: 'execution context propagates to Kibana logs',
+        predicate: (record) =>
+          isExecutionContextLog(record, {
+            type: 'task manager',
+            name: 'run alerting:test.executionContext',
+            // @ts-expect-error. it accepts strings only
+            id: ANY,
+            description: 'run task',
+            child: {
+              type: 'alert',
+              name: 'execute test.executionContext',
+              id: alertId,
+              description: 'execute [test.executionContext] with name [abc] in [default] namespace',
+            },
+          }),
+        logs,
+      });
+    });
+
+    it('propagates context for Telemetry collection', async () => {
+      await supertest
+        .post('/internal/telemetry/clusters/_stats')
+        .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '2')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+        .send({ unencrypted: false })
+        .expect(200);
+
+      const logs = await readLogFile();
+
+      await assertLogContains({
+        description:
+          'usage_collection execution context propagates to Elasticsearch via "x-opaque-id" header',
+        predicate: (record) =>
+          Boolean(
+            // exclude part with collector types
+            record.http?.request?.id?.includes(
+              `kibana:usage_collection:collector.fetch:application_usage`
+            )
+          ),
+        logs,
+      });
+
+      assertLogContains({
+        description: 'execution context propagates to Kibana logs',
+        predicate: (record) =>
+          isExecutionContextLog(record, {
+            type: 'usage_collection',
+            name: 'collector.fetch',
+            id: 'application_usage',
+            description: 'Fetch method in the Collector "application_usage"',
+          }),
+        logs,
+      });
+    });
+
+    it('logs contain the default space received in the execution context header', async () => {
+      const executionContext = {
+        type: 'test',
+        name: 'status check',
+        id: 'test-123',
+        space: 'default',
+      };
+
+      await supertest
+        .get('/api/status')
+        .set('x-kbn-context', encodeURIComponent(JSON.stringify(executionContext)))
+        .expect(200);
+
+      const logs = await readLogFile();
+
+      assertLogContains({
+        description: 'execution context includes space id in Kibana logs',
+        predicate: (record) =>
+          isExecutionContextLog(record, {
+            type: 'test',
+            name: 'status check',
+            id: 'test-123',
+            space: 'default',
+          }),
+        logs,
+      });
+    });
+
+    it('logs contain the myspace space received in the execution context header', async () => {
+      const executionContext = {
+        type: 'test',
+        name: 'api call',
+        id: 'test-456',
+        space: 'myspace',
+      };
+
+      await supertest
+        .get('/s/myspace/emit_log_with_trace_id')
+        .set('x-kbn-context', encodeURIComponent(JSON.stringify(executionContext)))
+        .expect(200);
+
+      const logs = await readLogFile();
+
+      assertLogContains({
+        description: 'execution context includes space id in Kibana logs',
+        predicate: (record) =>
+          isExecutionContextLog(record, {
+            type: 'test',
+            name: 'api call',
+            id: 'test-456',
+            space: 'myspace',
+          }),
+        logs,
+      });
+    });
+  });
+}

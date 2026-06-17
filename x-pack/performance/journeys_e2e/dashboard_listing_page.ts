@@ -10,7 +10,7 @@ import { subj } from '@kbn/test-subj-selector';
 import { v4 as uuidv4 } from 'uuid';
 
 export const journey = new Journey({
-  esArchives: ['x-pack/performance/es_archives/sample_data_flights'],
+  esArchives: ['x-pack/performance/es_archives/sample_data_flights_many_fields'],
   kbnArchives: [
     'x-pack/performance/kbn_archives/flights_no_map_dashboard',
     'x-pack/performance/kbn_archives/logs_no_map_dashboard',
@@ -37,7 +37,7 @@ export const journey = new Journey({
     await deletedDashboard.waitFor({ state: 'detached' });
   })
   .step('Add dashboard', async ({ page, inputDelays }) => {
-    await page.click(subj('newItemButton'));
+    await page.click(subj('dashboardListingCreateButton'));
     await page.click(subj('dashboardInteractiveSaveMenuItem'));
     await page.type(subj('savedObjectTitle'), `foobar dashboard ${uuidv4()}`, {
       delay: inputDelays.TYPING,

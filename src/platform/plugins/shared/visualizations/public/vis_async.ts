@@ -1,0 +1,36 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import { i18n } from '@kbn/i18n';
+import type { VisParams } from '@kbn/visualizations-common';
+import type { SerializedVis } from './vis';
+import { getTypes } from './services';
+
+export const createVisAsync = async <TVisParams extends VisParams = VisParams>(
+  visTypeName: string,
+  visState: SerializedVis<TVisParams> = {} as any
+) => {
+  const visType = await getTypes().get<TVisParams>(visTypeName);
+  if (!visType) {
+    throw new Error(
+      i18n.translate('visualizations.visualizationTypeInvalidMessage', {
+        defaultMessage: 'Invalid visualization type "{visType}"',
+        values: {
+          visType: visTypeName,
+        },
+      })
+    );
+  }
+
+  const { Vis } = await import('./vis');
+  const vis = new Vis(visType, visState);
+
+  await vis.setState(visState);
+  return vis;
+};

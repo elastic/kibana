@@ -1,12 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import React, { FunctionComponent, useState } from 'react';
-import { UserProfilesSelectable, UserProfileWithAvatar } from '@kbn/user-profile-components';
+
+import type { FunctionComponent } from 'react';
+import React, { useState } from 'react';
+import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
+import { UserProfilesSelectable } from '@kbn/user-profile-components';
 import { PanelWithCodeBlock } from './panel_with_code_block';
 
 export const SelectableDemo: FunctionComponent = () => {

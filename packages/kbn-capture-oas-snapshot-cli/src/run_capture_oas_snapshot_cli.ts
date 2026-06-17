@@ -1,15 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import path from 'node:path';
 import { run } from '@kbn/dev-cli-runner';
 import { REPO_ROOT } from '@kbn/repo-info';
-import chalk from 'chalk';
 import { captureOasSnapshot } from './capture_oas_snapshot';
 
 export const sortAndPrettyPrint = (object: object) => {
@@ -34,7 +34,6 @@ run(
       process.exit(1);
     }
 
-    const update = flagsReader.boolean('update');
     const pathStartsWith = flagsReader.arrayOfStrings('include-path');
     const excludePathsMatching = flagsReader.arrayOfStrings('exclude-path') ?? [];
 
@@ -45,7 +44,6 @@ run(
         buildFlavour: 'traditional',
         outputFile: path.resolve(OAS_OUTPUT_DIR, 'bundle.json'),
         filters: { pathStartsWith, excludePathsMatching },
-        update,
       });
       log.success('Captured OAS for traditional Kibana.');
     }
@@ -57,7 +55,6 @@ run(
         buildFlavour: 'serverless',
         outputFile: path.resolve(OAS_OUTPUT_DIR, 'bundle.serverless.json'),
         filters: { pathStartsWith, excludePathsMatching },
-        update,
       });
       log.success('Captured OAS for serverless Kibana.');
     }
@@ -77,7 +74,6 @@ run(
       help: `
         --include-path            Path to include. Path must start with provided value. Can be passed multiple times.
         --exclude-path            Path to exclude. Path must NOT start with provided value. Can be passed multiple times.
-        --update                  Write the current OAS bundles to ${chalk.cyan(OAS_OUTPUT_DIR)}.
         --no-serverless           Whether to skip OAS for serverless Kibana. Defaults to false.
         --no-traditional          Whether to skip OAS for traditional Kibana. Defaults to false.
       `,

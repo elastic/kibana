@@ -1,0 +1,22 @@
+{
+  "security.get_role_mapping": {
+    "url_params": {
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__"
+    },
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "_security/role_mapping/{name}",
+      "_security/role_mapping"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-security-get-role-mapping",
+    "availability": {
+      "stack": true,
+      "serverless": false
+    }
+  }
+}

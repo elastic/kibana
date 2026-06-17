@@ -1,12 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-const { Client, HttpConnection } = require('@elastic/elasticsearch');
+const { Client, HttpConnection } = require('elasticsearch-8.x'); // Switch to `@elastic/elasticsearch` when the CI cluster is upgraded.
 import { RESEARCH_CI_JOB_NAME } from './constants';
 import { whichIndex } from './ingest_helpers';
 import { fromNullable } from './either';
@@ -27,11 +28,11 @@ export const ingestList = (log) => async (xs) => {
   async function bulkIngest() {
     log.verbose(`\n${ccMark} Ingesting ${xs.length} docs at a time`);
 
-    const body = parseIndexes(xs);
+    const operations = parseIndexes(xs);
 
-    const bulkResponse = await client.bulk({ refresh: true, body });
+    const bulkResponse = await client.bulk({ refresh: true, operations });
 
-    handleErrors(body, bulkResponse)(log);
+    handleErrors(operations, bulkResponse)(log);
   }
 };
 

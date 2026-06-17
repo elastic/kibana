@@ -1,0 +1,13 @@
+{
+  "type": "plugin",
+  "id": "@kbn/interactive-setup-test-endpoints-plugin",
+  "owner": "@elastic/kibana-security",
+  "group": "platform",
+  "visibility": "private",
+  "plugin": {
+    "id": "interactiveSetupTestEndpoints",
+    "type": "preboot",
+    "server": true,
+    "browser": false
+  }
+}

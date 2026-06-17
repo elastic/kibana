@@ -1,11 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { TEST_SUITE_TYPES } from './constants';
 import { BuildkiteClient, getGithubClient } from '#pipeline-utils';
 
 interface TestSuiteResult {
@@ -27,7 +29,7 @@ async function main() {
   // Calculate success metrics
   const jobs = buildkiteBuild.jobs;
   const testSuiteRuns = jobs.filter((step) => {
-    return step.step_key?.includes('ftr-suite') || step.step_key?.includes('cypress-suite');
+    return TEST_SUITE_TYPES.some((testType) => step.step_key?.includes(testType));
   });
   const testSuiteGroups = groupBy('name', testSuiteRuns);
 

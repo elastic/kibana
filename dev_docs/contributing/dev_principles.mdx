@@ -85,6 +85,8 @@ When the use of an external dependency is necessary, ensure there is sufficient 
 
 Except in specific cases where widespread consensus was gained and clear ownership is established, third party dependencies should not be exposed directly as features of Kibana, whether it be through the UI, HTTP API, or programmatic interfaces.
 
+See the <DocLink id="kibThirdPartyDependencies" text="third-party dependencies guide" /> for more information.
+
 ## Don't share code prematurely
 
 There are many modules throughout Kibana's codebase where we have generic utilities that seem appropriate for use elsewhere in the codebase, but doing so is creating another public interface which has a cost in terms of maintenance, testing, documentation, and complexity that increases with each usage. Over the long term, shared utilities tend to accumulate additional complexity in order to be flexible enough for the various use cases of its consumers, particularly when they are shared across domain/plugin boundaries.

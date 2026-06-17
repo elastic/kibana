@@ -1,0 +1,44 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { NotificationsStart } from '@kbn/core/public';
+
+export class NotificationService {
+  constructor(private readonly _toasts: NotificationsStart['toasts']) {}
+
+  public get toasts() {
+    return this._toasts;
+  }
+
+  private addToasts = (
+    title: string,
+    type: 'danger' | 'warning' | 'success' | 'primary',
+    text?: string
+  ) => {
+    this._toasts.add({
+      title,
+      color: type,
+      text,
+    });
+  };
+
+  public showDangerToast(title: string, text?: string) {
+    this.addToasts(title, 'danger', text);
+  }
+
+  public showWarningToast(title: string, text?: string) {
+    this.addToasts(title, 'warning', text);
+  }
+
+  public showSuccessToast(title: string, text?: string) {
+    this.addToasts(title, 'success', text);
+  }
+
+  public showInfoToast(title: string, text?: string) {
+    this.addToasts(title, 'primary', text);
+  }
+}

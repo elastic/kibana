@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import fs from 'fs';
@@ -11,11 +12,11 @@ import { readFile, writeFile } from 'fs/promises';
 import { resolve } from 'path';
 
 import globby from 'globby';
-import yaml from 'js-yaml';
+import { parse, stringify } from 'yaml';
 
 import { run } from '@kbn/dev-cli-runner';
 import { REPO_ROOT } from '@kbn/repo-info';
-import { ToolingLog } from '@kbn/tooling-log';
+import type { ToolingLog } from '@kbn/tooling-log';
 
 interface BuildkiteStepFull {
   agents: { queue: string };
@@ -141,7 +142,7 @@ async function rewriteFile(ymlPath: string, log: ToolingLog) {
   let file = await readFile(resolve(REPO_ROOT, ymlPath), 'utf-8');
 
   log.info('Loading: ' + ymlPath);
-  const doc = yaml.safeLoad(file);
+  const doc = parse(file);
 
   if (!doc.steps) {
     log.info('No steps, skipping: ' + ymlPath);
@@ -152,7 +153,7 @@ async function rewriteFile(ymlPath: string, log: ToolingLog) {
     if (isQueueTargetingRule(step) && !step.agents.queue.startsWith('kb-static')) {
       log.info('Rewriting: ' + ymlPath, step);
       file = editYmlInPlace(file, ['agents:', `queue: ${step.agents.queue}`], () => {
-        return yaml.safeDump({ agents: getFullAgentTargetingRule(step.agents.queue) }).split('\n');
+        return stringify({ agents: getFullAgentTargetingRule(step.agents.queue) }).split('\n');
       });
     }
   }
@@ -209,7 +210,7 @@ function getFullAgentTargetingRule(queue: string): GobldGCPConfig {
 
   // Mapping based on expected fields in https://github.com/elastic/ci/blob/0df8430357109a19957dcfb1d867db9cfdd27937/docs/gobld/providers.mdx#L96
   return removeNullish({
-    image: 'family/kibana-ubuntu-2004',
+    image: 'family/kibana-ubuntu-2404',
     imageProject: 'elastic-images-prod',
     provider: 'gcp',
     assignExternalIP: agent.disableExternalIp === true ? false : undefined,

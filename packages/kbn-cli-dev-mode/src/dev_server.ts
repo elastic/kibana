@@ -1,18 +1,20 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import * as Rx from 'rxjs';
 import { map, tap, take, share, mergeMap, switchMap, scan, takeUntil, ignoreElements } from 'rxjs';
+import Chalk from 'chalk';
 import { observeLines } from '@kbn/stdio-dev-helpers';
 
 import { usingServerProcess } from './using_server_process';
-import { Watcher } from './watcher';
-import { Log } from './log';
+import type { Watcher } from './watcher';
+import type { Log } from './log';
 
 export interface Options {
   log: Log;
@@ -25,6 +27,7 @@ export interface Options {
   sigterm$?: Rx.Observable<void>;
   mapLogLine?: DevServer['mapLogLine'];
   forceColor?: boolean;
+  proxyUrl?: string;
 }
 
 export class DevServer {
@@ -42,6 +45,7 @@ export class DevServer {
   private readonly gracefulTimeout: number;
   private readonly mapLogLine?: (line: string) => string | null;
   private readonly forceColor: boolean;
+  private readonly proxyUrl?: string;
 
   constructor(options: Options) {
     this.log = options.log;
@@ -55,6 +59,7 @@ export class DevServer {
     this.sigterm$ = options.sigterm$ ?? Rx.fromEvent<void>(process, 'SIGTERM');
     this.mapLogLine = options.mapLogLine;
     this.forceColor = options.forceColor ?? !!process.stdout.isTTY;
+    this.proxyUrl = options.proxyUrl;
   }
 
   isReady$() {
@@ -150,7 +155,16 @@ export class DevServer {
           tap((observedLine) => {
             const line = this.mapLogLine ? this.mapLogLine(observedLine) : observedLine;
             if (line !== null) {
-              this.log.write(line);
+              if (line.includes('Kibana is now available')) {
+                this.log.write(Chalk.green.bold(line));
+                if (this.proxyUrl) {
+                  this.log.write(
+                    '  ' + Chalk.green.bold('→') + ' ' + Chalk.cyan.bold.underline(this.proxyUrl)
+                  );
+                }
+              } else {
+                this.log.write(line);
+              }
             }
           })
         );
@@ -194,16 +208,6 @@ export class DevServer {
             if (msg === 'SERVER_LISTENING') {
               this.phase$.next('listening');
               this.ready$.next(true);
-            }
-
-            // TODO: remove this once Pier is done migrating log rotation to KP
-            if (msg === 'RELOAD_LOGGING_CONFIG_FROM_SERVER_WORKER') {
-              // When receive that event from server worker
-              // forward a reloadLoggingConfig message to parent
-              // and child proc. This is only used by LogRotator service
-              // when the cluster mode is enabled
-              process.emit('message' as any, { reloadLoggingConfig: true } as any);
-              proc.send({ reloadLoggingConfig: true });
             }
           }),
           takeUntil(exit$)

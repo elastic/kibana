@@ -1,0 +1,652 @@
+openapi: 3.0.0
+info:
+  title: Common Conversation Attributes
+  version: 'not applicable'
+paths: {}
+components:
+  x-codegen-enabled: true
+  schemas:
+
+    TraceData:
+      type: object
+      description: Trace Data
+      properties:
+        transactionId:
+          type: string
+          description: Could be any string, not necessarily a UUID
+          example: 'a1234567-bc89-0def-1234-56789abcdef0'
+        traceId:
+          type: string
+          description: Could be any string, not necessarily a UUID
+          example: 'd9876543-f0a1-2345-6789-abcdef123456'
+
+    InterruptType:
+      type: string
+      description: The type of interrupt
+      enum: [SELECT_OPTION, INPUT_TEXT]
+
+    BaseInterruptValue:
+      type: object
+      description: The basis of an agent interrupt
+      required:
+        - 'type'
+        - 'threadId'
+      properties:
+        type:
+          $ref: '#/components/schemas/InterruptType'
+          description: Type of the interrupt
+          example: 'SELECT_OPTION'
+        expired:
+          type: boolean
+          description: Whether the interrupt has expired and can no longer be resumed.
+          example: false
+        threadId:
+          type: string
+          description: Thread ID of the graph execution that produced this message.
+          example: '<UUID>'
+
+    BaseInterruptResumeValue:
+      type: object
+      description: The basis of an interrupt resume value
+      required:
+        - 'type'
+      properties:
+        type:
+          $ref: '#/components/schemas/InterruptType'
+          description: Type of the resume value
+          example: 'SELECT_OPTION'
+
+    SelectOptionInterruptOption:
+      description: A request approval option
+      allOf:
+        - type: object
+          required:
+            - 'label'
+            - 'value'
+          properties:
+            label:
+              type: string
+              example: 'Option 1'
+            value:
+              type: string
+              example: 'option_1'
+            buttonColor:
+              type: string
+              enum: ["text", "accent", "accentSecondary", "primary", "success", "warning", "danger", "neutral", "risk"]
+              example: 'danger'
+
+    SelectOptionInterruptValue:
+      description: Interrupt that requests user to select one of the provided options
+      allOf:
+        - $ref: '#/components/schemas/BaseInterruptValue'
+        - type: object
+          required:
+            - 'type'
+            - 'description'
+            - 'options'
+          properties:
+            type:
+              type: string
+              enum: [SELECT_OPTION]
+              example: 'SELECT_OPTION'
+            description:
+              type: string
+              description: Description of action required
+              example: 'Select one of the options'
+            options:
+              type: array
+              description: List of actions to choose from
+              items:
+                $ref: '#/components/schemas/SelectOptionInterruptOption'
+              example:
+                - label: 'Option 1'
+                - label: 'Option 2'
+
+    SelectOptionInterruptResumeValue:
+      description: A request approval resume schema
+      allOf:
+        - $ref: '#/components/schemas/BaseInterruptResumeValue'
+        - type: object
+          required:
+            - 'value'
+            - 'type'
+          properties:
+            type:
+              type: string
+              enum: [SELECT_OPTION]
+              example: 'SELECT_OPTION'
+            value:
+              type: string
+              description: The value of the selected option to resume the graph execution with
+              example: 'option_1'
+
+    SelectOptionInterrupt:
+      description: A request approval interrupt
+      allOf:
+        - type: object
+          required:
+            - 'interruptValue'
+            - 'resumeValue'
+          properties:
+            interruptValue:
+              $ref: '#/components/schemas/SelectOptionInterruptValue'
+              description: The interrupt value
+            resumeValue:
+              $ref: '#/components/schemas/SelectOptionInterruptResumeValue'
+              description: The resume value
+
+
+    InputTextInterruptValue:
+      description: Interrupt that requests user to provide text input
+      allOf:
+        - $ref: '#/components/schemas/BaseInterruptValue'
+        - type: object
+          required:
+            - 'type'
+          properties:
+            type:
+              type: string
+              enum: [INPUT_TEXT]
+              example: 'INPUT_TEXT'
+            description:
+              type: string
+              description: Description of action required
+              example: 'What is the index you would like to use for the query.'
+            placeholder:
+              type: string
+              description: Placeholder text for the input field
+              example: 'Enter index pattern here...'
+
+    InputTextInterruptResumeValue:
+      description: A resume value for input text
+      allOf:
+        - $ref: '#/components/schemas/BaseInterruptResumeValue'
+        - type: object
+          required:
+            - 'value'
+            - 'type'
+          properties:
+            type:
+              type: string
+              enum: [INPUT_TEXT]
+              example: 'INPUT_TEXT'
+            value:
+              type: string
+              description: Text value used to resume the graph execution with.
+              example: '.logs*'
+
+    InputTextInterrupt:
+      description: A request text interrupt
+      allOf:
+        - type: object
+          required:
+            - 'interruptValue'
+            - 'resumeValue'
+          properties:
+            interruptValue:
+              $ref: '#/components/schemas/InputTextInterruptValue'
+              description: The interrupt value
+            resumeValue:
+              $ref: '#/components/schemas/InputTextInterruptResumeValue'
+              description: The resume value
+
+    InterruptValue:
+      description: Union of the interrupt values
+      oneOf:
+        - $ref: '#/components/schemas/SelectOptionInterruptValue'
+          additionalProperties: false
+        - $ref: '#/components/schemas/InputTextInterruptValue'
+          additionalProperties: false
+
+    InterruptResumeValue:
+      description: Union of the interrupt resume values
+      oneOf:
+        - $ref: '#/components/schemas/SelectOptionInterruptResumeValue'
+          additionalProperties: false
+        - $ref: '#/components/schemas/InputTextInterruptResumeValue'
+          additionalProperties: false
+
+    BaseContentReference:
+      type: object
+      description: The basis of a content reference
+      required:
+        - 'id'
+        - 'type'
+      properties:
+        id:
+          type: string
+          description: Id of the content reference
+          example: 'content123'
+        type:
+          type: string
+          description: Type of the content reference
+          example: 'SecurityAlert'
+
+    KnowledgeBaseEntryContentReference:
+      description: References a knowledge base entry
+      allOf:
+        - $ref: '#/components/schemas/BaseContentReference'
+        - type: object
+          required:
+            - 'type'
+            - 'knowledgeBaseEntryId'
+            - 'knowledgeBaseEntryName'
+          properties:
+            type:
+              type: string
+              enum: [KnowledgeBaseEntry]
+              example: 'KnowledgeBaseEntry'
+            knowledgeBaseEntryId:
+              description: Id of the Knowledge Base Entry
+              type: string
+              example: 'kbentry456'
+            knowledgeBaseEntryName:
+              description: Name of the knowledge base entry
+              type: string
+              example: 'Network Security Best Practices'
+
+    EsqlContentReference:
+      description: References an ESQL query
+      allOf:
+        - $ref: '#/components/schemas/BaseContentReference'
+        - type: object
+          required:
+            - 'type'
+            - 'query'
+            - 'label'
+          properties:
+            type:
+              type: string
+              enum: [EsqlQuery]
+              example: 'EsqlQuery'
+            query:
+              description: An ESQL query
+              type: string
+              example: 'SELECT * FROM alerts WHERE severity = "high"'
+            label:
+              description: Label of the query
+              type: string
+              example: 'High Severity Alerts'
+            timerange:
+              description: Time range to select in the time picker.
+              type: object
+              required:
+                - 'from'
+                - 'to'
+              properties:
+                from:
+                  type: string
+                  example: '2025-04-01T00:00:00Z'
+                to:
+                  type: string
+                  example: '2025-04-30T23:59:59Z'
+
+    SecurityAlertContentReference:
+      description: References a security alert
+      allOf:
+        - $ref: '#/components/schemas/BaseContentReference'
+        - type: object
+          required:
+            - 'type'
+            - 'alertId'
+          properties:
+            type:
+              type: string
+              enum: [SecurityAlert]
+              example: 'SecurityAlert'
+            alertId:
+              description: ID of the Alert
+              type: string
+              example: 'alert789'
+
+    HrefContentReference:
+      description: References an external URL
+      allOf:
+        - $ref: '#/components/schemas/BaseContentReference'
+        - type: object
+          required:
+            - 'type'
+            - 'href'
+          properties:
+            type:
+              type: string
+              enum: [Href]
+            label:
+              description: Label of the query
+              type: string
+            href:
+              description: URL to the external resource
+              type: string
+
+    SecurityAlertsPageContentReference:
+      description: References the security alerts page
+      allOf:
+        - $ref: '#/components/schemas/BaseContentReference'
+        - type: object
+          required:
+            - 'type'
+          properties:
+            type:
+              type: string
+              enum: [SecurityAlertsPage]
+              example: 'SecurityAlertsPage'
+
+    ProductDocumentationContentReference:
+      description: References the product documentation
+      allOf:
+        - $ref: '#/components/schemas/BaseContentReference'
+        - type: object
+          required:
+            - 'type'
+            - 'title'
+            - 'url'
+          properties:
+            type:
+              type: string
+              enum: [ProductDocumentation]
+              example: 'ProductDocumentation'
+            title:
+              description: Title of the documentation
+              type: string
+              example: 'Getting Started with Security AI Assistant'
+            url:
+              description: URL to the documentation
+              type: string
+              example: 'https://docs.example.com/security-ai-assistant'
+
+    ContentReference:
+      description: A content reference
+      oneOf:
+        - $ref: '#/components/schemas/KnowledgeBaseEntryContentReference'
+        - $ref: '#/components/schemas/SecurityAlertContentReference'
+        - $ref: '#/components/schemas/SecurityAlertsPageContentReference'
+        - $ref: '#/components/schemas/ProductDocumentationContentReference'
+        - $ref: '#/components/schemas/EsqlContentReference'
+        - $ref: '#/components/schemas/HrefContentReference'
+          additionalProperties: false
+
+    ContentReferences:
+      description: A union of all content reference types
+      additionalProperties:
+        oneOf:
+          - $ref: '#/components/schemas/KnowledgeBaseEntryContentReference'
+          - $ref: '#/components/schemas/SecurityAlertContentReference'
+          - $ref: '#/components/schemas/SecurityAlertsPageContentReference'
+          - $ref: '#/components/schemas/ProductDocumentationContentReference'
+          - $ref: '#/components/schemas/EsqlContentReference'
+          - $ref: '#/components/schemas/HrefContentReference'
+            additionalProperties: false
+      type: object
+
+    MessageMetadata:
+      type: object
+      description: Message metadata
+      properties:
+        contentReferences:
+          $ref: '#/components/schemas/ContentReferences'
+          description: Data referred to by the message content.
+        interruptValue:
+          $ref: '#/components/schemas/InterruptValue'
+          description: When the agent is interrupted (for example, when user input is required), this field is populated with the details of the interrupt. Messages containing interruptValues in the metadata are excluded from the LLM context.
+        interruptResumeValue:
+          $ref: '#/components/schemas/InterruptResumeValue'
+          description: When the agent is resumed after an interrupt, this field is populated with the details of the resume value.
+
+    Replacements:
+      type: object
+      additionalProperties:
+        type: string
+      description: Replacements object used to anonymize/deanonymize messages
+
+    Reader:
+      type: object
+      additionalProperties: true
+
+    Provider:
+      type: string
+      description: Provider
+      enum:
+        - OpenAI
+        - Azure OpenAI
+        - Other
+      example: 'OpenAI'
+
+    MessageRole:
+      type: string
+      description: Message role.
+      enum:
+        - system
+        - user
+        - assistant
+      example: 'assistant'
+
+    ConversationCategory:
+      type: string
+      description: The conversation category.
+      enum:
+        - assistant
+        - insights
+      example: 'assistant'
+
+    Message:
+      type: object
+      description: AI assistant conversation message.
+      required:
+        - 'timestamp'
+        - 'content'
+        - 'role'
+      properties:
+        id:
+          description: Message id
+          $ref: '../common_attributes.schema.yaml#/components/schemas/NonEmptyString'
+        content:
+          type: string
+          description: Message content.
+          example: 'Hello, how can I assist you today?'
+        refusal:
+          type: string
+          description: Refusal reason returned by the model when content is filtered.
+        reader:
+          $ref: '#/components/schemas/Reader'
+          description: Message content.
+        role:
+          $ref: '#/components/schemas/MessageRole'
+          description: Message role.
+          example: 'assistant'
+        user:
+          $ref: '../common_attributes.schema.yaml#/components/schemas/User'
+          description: The user who sent the message.
+        timestamp:
+          $ref: '../common_attributes.schema.yaml#/components/schemas/NonEmptyTimestamp'
+          description: The timestamp message was sent or received.
+          example: '2025-04-30T15:30:00Z'
+        isError:
+          type: boolean
+          description: Is error message.
+          example: false
+        traceData:
+          $ref: '#/components/schemas/TraceData'
+          description: Trace data
+        metadata:
+          $ref: '#/components/schemas/MessageMetadata'
+          description: Metadata
+
+    ApiConfig:
+      type: object
+      required:
+        - connectorId
+        - actionTypeId
+      properties:
+        connectorId:
+          type: string
+          description: Connector ID
+          example: 'connector123'
+        actionTypeId:
+          type: string
+          description: Action type ID
+          example: 'actionType456'
+        defaultSystemPromptId:
+          type: string
+          description: Default system prompt ID
+          example: 'systemPrompt001'
+        provider:
+          $ref: '#/components/schemas/Provider'
+          description: Provider
+          example: 'OpenAI'
+        model:
+          type: string
+          description: Model
+          example: 'gpt-4'
+
+    ErrorSchema:
+      type: object
+      required:
+        - error
+      additionalProperties: false
+      properties:
+        id:
+          $ref: '../common_attributes.schema.yaml#/components/schemas/NonEmptyString'
+        error:
+          type: object
+          required:
+            - status_code
+            - message
+          properties:
+            status_code:
+              type: integer
+              minimum: 400
+              example: 404
+            message:
+              type: string
+              example: 'Resource not found'
+
+    ConversationResponse:
+      type: object
+      required:
+        - id
+        - title
+        - createdAt
+        - createdBy
+        - users
+        - namespace
+        - category
+      properties:
+        id:
+          $ref: '../common_attributes.schema.yaml#/components/schemas/NonEmptyString'
+        title:
+          type: string
+          description: The conversation title.
+          example: 'Security AI Assistant Setup'
+        category:
+          $ref: '#/components/schemas/ConversationCategory'
+          description: The conversation category.
+          example: 'assistant'
+        timestamp:
+          $ref: '../common_attributes.schema.yaml#/components/schemas/NonEmptyTimestamp'
+        updatedAt:
+          description: The last time conversation was updated.
+          type: string
+          example: '2025-04-30T16:30:00Z'
+        createdAt:
+          description: The time conversation was created.
+          type: string
+          example: '2025-04-30T14:00:00Z'
+        replacements:
+          $ref: '#/components/schemas/Replacements'
+        createdBy:
+          $ref: '../common_attributes.schema.yaml#/components/schemas/User'
+          description: The user who created the conversation.
+        users:
+          type: array
+          items:
+            $ref: '../common_attributes.schema.yaml#/components/schemas/User'
+        messages:
+          type: array
+          items:
+            $ref: '#/components/schemas/Message'
+          description: The conversation messages.
+        apiConfig:
+          $ref: '#/components/schemas/ApiConfig'
+          description: LLM API configuration.
+        excludeFromLastConversationStorage:
+          description: Exclude from last conversation storage.
+          type: boolean
+        namespace:
+          type: string
+          description: Kibana space
+          example: 'default'
+
+    ConversationUpdateProps:
+      type: object
+      required:
+        - id
+      properties:
+        id:
+          $ref: '../common_attributes.schema.yaml#/components/schemas/NonEmptyString'
+        title:
+          type: string
+          description: The conversation title.
+          example: 'Updated Security AI Assistant Setup'
+        category:
+          $ref: '#/components/schemas/ConversationCategory'
+          description: The conversation category.
+          example: 'assistant'
+        messages:
+          type: array
+          items:
+            $ref: '#/components/schemas/Message'
+          description: The conversation messages.
+        apiConfig:
+          $ref: '#/components/schemas/ApiConfig'
+          description: LLM API configuration.
+        excludeFromLastConversationStorage:
+          description: Exclude from last conversation storage.
+          type: boolean
+        replacements:
+          $ref: '#/components/schemas/Replacements'
+        users:
+          type: array
+          items:
+            $ref: '../common_attributes.schema.yaml#/components/schemas/User'
+
+    ConversationCreateProps:
+      type: object
+      required:
+        - title
+      properties:
+        id:
+          type: string
+          description: The conversation id.
+          example: 'conversation123'
+        title:
+          type: string
+          description: The conversation title.
+          example: 'Security AI Assistant Setup'
+        category:
+          $ref: '#/components/schemas/ConversationCategory'
+          description: The conversation category.
+          example: 'assistant'
+        messages:
+          type: array
+          items:
+            $ref: '#/components/schemas/Message'
+          description: The conversation messages.
+        apiConfig:
+          $ref: '#/components/schemas/ApiConfig'
+          description: LLM API configuration.
+        excludeFromLastConversationStorage:
+          description: Exclude from last conversation storage.
+          type: boolean
+        replacements:
+          $ref: '#/components/schemas/Replacements'
+
+    ConversationMessageCreateProps:
+      type: object
+      required:
+        - messages
+      properties:
+        messages:
+          type: array
+          items:
+            $ref: '#/components/schemas/Message'
+          description: The conversation messages.

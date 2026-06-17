@@ -1,17 +1,20 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { AppMountParameters, CoreSetup, Plugin } from '@kbn/core/public';
-import { DashboardStart } from '@kbn/dashboard-plugin/public';
+import type { AppMountParameters, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import type { DashboardStart } from '@kbn/dashboard-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
-import { EmbeddableSetup } from '@kbn/embeddable-plugin/public';
+import type { EmbeddableSetup } from '@kbn/embeddable-plugin/public';
 import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
+import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import type { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
 import { FILTER_DEBUGGER_EMBEDDABLE_ID, PLUGIN_ID } from './constants';
 import img from './portable_dashboard_image.png';
 
@@ -24,6 +27,8 @@ export interface StartDeps {
   dashboard: DashboardStart;
   data: DataPublicPluginStart;
   navigation: NavigationPublicPluginStart;
+  uiActions: UiActionsStart;
+  presentationUtil: PresentationUtilPluginStart;
 }
 
 export class PortableDashboardsExamplePlugin implements Plugin<void, void, SetupDeps, StartDeps> {
@@ -33,9 +38,9 @@ export class PortableDashboardsExamplePlugin implements Plugin<void, void, Setup
       title: 'Portable dashboard examples',
       visibleIn: [],
       async mount(params: AppMountParameters) {
-        const [, depsStart] = await core.getStartServices();
+        const [coreStart, depsStart] = await core.getStartServices();
         const { renderApp } = await import('./app');
-        return renderApp(depsStart, params);
+        return renderApp(coreStart, depsStart, params);
       },
     });
 
@@ -46,13 +51,13 @@ export class PortableDashboardsExamplePlugin implements Plugin<void, void, Setup
       image: img,
     });
 
-    embeddable.registerReactEmbeddableFactory(FILTER_DEBUGGER_EMBEDDABLE_ID, async () => {
+    embeddable.registerEmbeddablePublicDefinition(FILTER_DEBUGGER_EMBEDDABLE_ID, async () => {
       const { factory } = await import('./filter_debugger_embeddable');
       return factory;
     });
   }
 
-  public async start() {}
+  public async start(core: CoreStart, deps: StartDeps) {}
 
   public stop() {}
 }

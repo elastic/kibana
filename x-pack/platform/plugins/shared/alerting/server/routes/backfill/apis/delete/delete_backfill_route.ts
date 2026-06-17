@@ -1,0 +1,91 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+import type { IRouter, RouteConfigOptions, RouteMethod } from '@kbn/core/server';
+import type { DeleteBackfillRequestParamsV1 } from '../../../../../common/routes/backfill/apis/delete';
+import { deleteParamsSchemaV1 } from '../../../../../common/routes/backfill/apis/delete';
+import type { ILicenseState } from '../../../../lib';
+import { verifyAccessAndContext } from '../../../lib';
+import type { AlertingRequestHandlerContext } from '../../../../types';
+import { INTERNAL_BASE_ALERTING_API_PATH, ALERTING_BACKFILL_API_PATH } from '../../../../types';
+import { DEFAULT_ALERTING_ROUTE_SECURITY } from '../../../constants';
+
+interface BuildDeleteBackfillRouteParams {
+  licenseState: ILicenseState;
+  path: string;
+  router: IRouter<AlertingRequestHandlerContext>;
+  options: RouteConfigOptions<RouteMethod>;
+}
+
+const buildDeleteBackfillRoute = ({
+  licenseState,
+  path,
+  router,
+  options,
+}: BuildDeleteBackfillRouteParams) => {
+  router.delete(
+    {
+      path,
+      security: DEFAULT_ALERTING_ROUTE_SECURITY,
+      options,
+      validate: {
+        request: {
+          params: deleteParamsSchemaV1,
+        },
+        response: {
+          204: {
+            description: 'Indicates a successful call.',
+          },
+          400: {
+            description: 'Indicates an invalid schema or parameters.',
+          },
+          403: {
+            description: 'Indicates that this call is forbidden.',
+          },
+          404: {
+            description: 'Indicates a backfill with the given ID does not exist.',
+          },
+        },
+      },
+    },
+    router.handleLegacyErrors(
+      verifyAccessAndContext(licenseState, async function (context, req, res) {
+        const alertingContext = await context.alerting;
+        const rulesClient = await alertingContext.getRulesClient();
+        const params: DeleteBackfillRequestParamsV1 = req.params;
+
+        await rulesClient.deleteBackfill(params.id);
+        return res.noContent();
+      })
+    )
+  );
+};
+
+export const deleteBackfillRoute = (
+  router: IRouter<AlertingRequestHandlerContext>,
+  licenseState: ILicenseState
+) =>
+  buildDeleteBackfillRoute({
+    licenseState,
+    path: `${INTERNAL_BASE_ALERTING_API_PATH}/rules/backfill/{id}`,
+    router,
+    options: { access: 'internal' },
+  });
+
+export const deleteBackfillPublicRoute = (
+  router: IRouter<AlertingRequestHandlerContext>,
+  licenseState: ILicenseState
+) =>
+  buildDeleteBackfillRoute({
+    licenseState,
+    path: `${ALERTING_BACKFILL_API_PATH}/{id}`,
+    router,
+    options: {
+      access: 'public',
+      summary: 'Delete a backfill by ID',
+      tags: ['oas-tag:alerting'],
+    },
+  });

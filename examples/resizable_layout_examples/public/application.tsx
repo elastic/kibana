@@ -1,15 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { CoreThemeProvider } from '@kbn/core-theme-browser-internal';
-import type { AppMountParameters } from '@kbn/core/public';
+import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
+import type { AppMountParameters, CoreStart } from '@kbn/core/public';
 import { I18nProvider } from '@kbn/i18n-react';
-import React, { ReactNode, useState } from 'react';
+import type { ReactNode } from 'react';
+import React, { useState } from 'react';
 import ReactDOM from 'react-dom';
 import { useIsWithinBreakpoints } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -40,7 +42,6 @@ const ResizableSection = ({
   flexPanelContent: ReactNode;
 }) => {
   const [fixedPanelSize, setFixedPanelSize] = useState(initialFixedPanelSize);
-  const [container, setContainer] = useState<HTMLDivElement | null>(null);
   const [fixedPanelNode] = useState(() =>
     createHtmlPortalNode({ attributes: { class: 'eui-fullHeight' } })
   );
@@ -75,7 +76,7 @@ const ResizableSection = ({
   `;
 
   return (
-    <div ref={setContainer} css={fullWidthAndHeightCss}>
+    <div css={fullWidthAndHeightCss}>
       <InPortal node={fixedPanelNode}>
         <div css={fixedPanelCss}>{fixedPanelContent}</div>
       </InPortal>
@@ -85,7 +86,6 @@ const ResizableSection = ({
       <ResizableLayout
         mode={layoutMode}
         direction={layoutDirection}
-        container={container}
         fixedPanelSize={fixedPanelSize}
         minFixedPanelSize={minFixedPanelSize}
         minFlexPanelSize={minFlexPanelSize}
@@ -97,10 +97,10 @@ const ResizableSection = ({
   );
 };
 
-export const renderApp = ({ element, theme$ }: AppMountParameters) => {
+export const renderApp = (coreStart: CoreStart, { element }: AppMountParameters) => {
   ReactDOM.render(
     <I18nProvider>
-      <CoreThemeProvider theme$={theme$}>
+      <KibanaThemeProvider {...coreStart}>
         <div
           css={css`
             height: calc(100vh - var(--euiFixedHeadersOffset, 0));
@@ -150,7 +150,7 @@ export const renderApp = ({ element, theme$ }: AppMountParameters) => {
             }
           />
         </div>
-      </CoreThemeProvider>
+      </KibanaThemeProvider>
     </I18nProvider>,
     element
   );

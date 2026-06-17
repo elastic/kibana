@@ -1,7 +1,4 @@
 #!/bin/bash
-#
-# ** THIS IS AN AUTO-GENERATED FILE **
-#
 
 # Run Kibana, using environment variables to set longopts defining Kibana's
 # configuration.
@@ -36,10 +33,14 @@ kibana_vars=(
     csp.font_src
     csp.frame_src
     csp.img_src
+    csp.object_src
+    csp.form_action
     csp.frame_ancestors
     csp.report_uri
     csp.report_to
     csp.report_only.form_action
+    csp.report_only.object_src
+    csp.report_only.connect_src
     permissionsPolicy.report_to
     data.autocomplete.valueSuggestions.terminateAfter
     data.autocomplete.valueSuggestions.timeout
@@ -64,6 +65,7 @@ kibana_vars=(
     elasticsearch.logQueries
     elasticsearch.password
     elasticsearch.pingTimeout
+    elasticsearch.publicBaseUrl
     elasticsearch.requestHeadersWhitelist
     elasticsearch.requestTimeout
     elasticsearch.serviceAccountToken
@@ -82,11 +84,11 @@ kibana_vars=(
     elasticsearch.ssl.truststore.path
     elasticsearch.ssl.verificationMode
     elasticsearch.username
-    enterpriseSearch.accessCheckTimeout
-    enterpriseSearch.accessCheckTimeoutWarning
-    enterpriseSearch.host
     externalUrl.policy
+    i18n.allowLocaleCookie
+    i18n.defaultLocale
     i18n.locale
+    i18n.locales
     interactiveSetup.enabled
     interactiveSetup.connectionCheck.interval
     kibana.autocompleteTerminateAfter
@@ -115,6 +117,7 @@ kibana_vars=(
     migrations.retryAttempts
     migrations.scrollDuration
     migrations.skip
+    migrations.useCumulativeLogger
     monitoring.cluster_alerts.email_notifications.email_address
     monitoring.kibana.collection.enabled
     monitoring.kibana.collection.interval
@@ -134,6 +137,7 @@ kibana_vars=(
     monitoring.ui.min_interval_seconds
     newsfeed.enabled
     node.roles
+    notifications.connectors.default.email
     ops.cGroupOverrides.cpuAcctPath
     ops.cGroupOverrides.cpuPath
     ops.interval
@@ -164,6 +168,7 @@ kibana_vars=(
     server.name
     server.port
     server.protocol
+    server.prototypeHardening
     server.publicBaseUrl
     server.requestId.allowFromAnyIp
     server.requestId.ipAllowlist
@@ -202,16 +207,29 @@ kibana_vars=(
     telemetry.optIn
     telemetry.sendUsageTo
     telemetry.sendUsageFrom
+    telemetry.metrics.enabled
+    telemetry.metrics.interval
+    telemetry.metrics.exporters # Allow specifying the array here or..
+    telemetry.metrics.exporters.grpc.url # ... or a single exporter by specifying these 2.
+    telemetry.metrics.exporters.grpc.headers
+    telemetry.metrics.exporters.grpc.exportIntervalMillis
+    telemetry.metrics.exporters.grpc.temporalityPreference
     tilemap.options.attribution
     tilemap.options.maxZoom
     tilemap.options.minZoom
     tilemap.options.subdomains
     tilemap.url
+    usageCollection.maxCollectorConcurrency
     vega.enableExternalUrls
     vis_type_vega.enableExternalUrls
     xpack.actions.allowedHosts
     xpack.actions.customHostSettings
     xpack.actions.email.domain_allowlist
+    xpack.actions.email.recipient_allowlist
+    xpack.actions.email.maximum_body_length
+    xpack.actions.email.services.ses.host
+    xpack.actions.email.services.ses.port
+    xpack.actions.email.services.enabled
     xpack.actions.enableFooterInEmail
     xpack.actions.enabledActionTypes
     xpack.actions.maxResponseContentLength
@@ -220,16 +238,14 @@ kibana_vars=(
     xpack.actions.proxyBypassHosts
     xpack.actions.proxyHeaders
     xpack.actions.proxyOnlyHosts
-    xpack.actions.proxyRejectUnauthorizedCertificates
     xpack.actions.proxyUrl
-    xpack.actions.rejectUnauthorized
     xpack.actions.responseTimeout
     xpack.actions.ssl.proxyVerificationMode
     xpack.actions.ssl.verificationMode
+    xpack.actions.webhook.ssl.pfx.enabled
     xpack.alerting.healthCheck.interval
     xpack.alerting.invalidateApiKeysTask.interval
     xpack.alerting.invalidateApiKeysTask.removalDelay
-    xpack.alerting.defaultRuleTaskTimeout
     xpack.alerting.rules.run.timeout
     xpack.alerting.rules.run.ruleTypeOverrides
     xpack.alerting.cancelAlertsOnRuleTimeout
@@ -238,9 +254,9 @@ kibana_vars=(
     xpack.alerting.rules.run.actions.max
     xpack.alerting.rules.run.alerts.max
     xpack.alerting.rules.run.actions.connectorTypeOverrides
-    xpack.alerts.healthCheck.interval
-    xpack.alerts.invalidateApiKeysTask.interval
-    xpack.alerts.invalidateApiKeysTask.removalDelay
+    xpack.alerting.rules.maxScheduledPerMinute
+    xpack.alerting.disabledRuleTypes
+    xpack.alerting.enabledRuleTypes
     xpack.apm.indices.error
     xpack.apm.indices.metric
     xpack.apm.indices.onboarding
@@ -260,8 +276,14 @@ kibana_vars=(
     xpack.banners.placement
     xpack.banners.textColor
     xpack.banners.textContent
+    xpack.cases.enabled
+    xpack.cases.analytics.index.enabled
+    xpack.cases.incrementalId.enabled
+    xpack.cases.incrementalId.taskIntervalMinutes
+    xpack.cases.incrementalId.taskStartDelayMinutes
     xpack.cases.files.allowedMimeTypes
     xpack.cases.files.maxSize
+    xpack.cases.stack.enabled
     xpack.code.disk.thresholdEnabled
     xpack.code.disk.watermarkLow
     xpack.code.indexRepoFrequencyMs
@@ -317,9 +339,9 @@ kibana_vars=(
     xpack.observability.unsafe.alertDetails.uptime.enabled
     xpack.observability.unsafe.alertDetails.observability.enabled
     xpack.observability.unsafe.thresholdRule.enabled
+    xpack.productDocBase.artifactRepositoryUrl
     xpack.reporting.capture.browser.autoDownload
     xpack.reporting.capture.browser.chromium.disableSandbox
-    xpack.reporting.capture.browser.chromium.inspect
     xpack.reporting.capture.browser.chromium.maxScreenshotDimension
     xpack.reporting.capture.browser.chromium.proxy.bypass
     xpack.reporting.capture.browser.chromium.proxy.enabled
@@ -346,6 +368,7 @@ kibana_vars=(
     xpack.reporting.csv.scroll.size
     xpack.reporting.csv.scroll.strategy
     xpack.reporting.csv.useByteOrderMarkEncoding
+    xpack.reporting.csv.maxRows
     xpack.reporting.enabled
     xpack.reporting.encryptionKey
     xpack.reporting.kibanaApp
@@ -380,6 +403,7 @@ kibana_vars=(
     xpack.security.audit.appender.strategy.type
     xpack.security.audit.appender.type
     xpack.security.audit.enabled
+    xpack.security.audit.include_saved_object_names
     xpack.security.audit.ignore_filters
     xpack.security.authc.http.autoSchemesEnabled
     xpack.security.authc.http.enabled
@@ -391,7 +415,7 @@ kibana_vars=(
     xpack.security.authc.selector.enabled
     xpack.security.cookieName
     xpack.security.encryptionKey
-    xpack.security.experimental.fipsMode.enabled
+    xpack.security.fipsMode.enabled
     xpack.security.loginAssistanceMessage
     xpack.security.loginHelp
     xpack.security.sameSiteCookies
@@ -412,7 +436,15 @@ kibana_vars=(
     xpack.securitySolution.packagerTaskInterval
     xpack.securitySolution.prebuiltRulesPackageVersion
     xpack.spaces.maxSpaces
+    xpack.spaces.defaultSolution
+    xpack.task_manager.capacity
     xpack.task_manager.claim_strategy
+    xpack.task_manager.auto_calculate_default_ech_capacity
+    xpack.task_manager.discovery.active_nodes_lookback
+    xpack.task_manager.discovery.interval
+    xpack.task_manager.invalidate_api_key_task.interval
+    xpack.task_manager.invalidate_api_key_task.removalDelay
+    xpack.task_manager.kibanas_per_partition
     xpack.task_manager.max_attempts
     xpack.task_manager.max_workers
     xpack.task_manager.monitored_aggregated_stats_refresh_rate

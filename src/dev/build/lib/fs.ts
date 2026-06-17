@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import fs from 'fs';
@@ -11,16 +12,17 @@ import Fsp from 'fs/promises';
 import * as Rx from 'rxjs';
 import { createHash } from 'crypto';
 import { pipeline } from 'stream/promises';
-import { resolve, dirname, isAbsolute, sep } from 'path';
-import { createGunzip } from 'zlib';
+import { resolve, dirname, isAbsolute, basename, sep } from 'path';
+import { createGunzip, createGzip } from 'zlib';
 import { inspect } from 'util';
 
 import archiver from 'archiver';
 import globby from 'globby';
 import cpy from 'cpy';
 import del from 'del';
-import tar, { ExtractOptions } from 'tar';
-import { ToolingLog } from '@kbn/tooling-log';
+import * as tar from 'tar';
+import { pack as tarFsPack } from 'tar-fs';
+import type { ToolingLog } from '@kbn/tooling-log';
 
 export function assertAbsolute(path: string) {
   if (!isAbsolute(path)) {
@@ -126,7 +128,21 @@ export async function deleteEmptyFolders(
         }
 
         return Rx.from(stats).pipe(
-          Rx.mergeMap((s) => (s.isDirectory() ? handleDir$(resolve(path, s.name)) : []))
+          Rx.mergeMap((s) => (s.isDirectory() ? handleDir$(resolve(path, s.name)) : [])),
+          Rx.toArray(),
+          Rx.mergeMap((deletedChildren) =>
+            fsReadDir$(path).pipe(
+              Rx.mergeMap((currentEntries) => {
+                if (currentEntries.length === 0) {
+                  return Rx.concat(
+                    Rx.from(deletedChildren),
+                    rmdir$(path, { maxRetries: 1 }).pipe(Rx.map(() => path))
+                  );
+                }
+                return Rx.from(deletedChildren);
+              })
+            )
+          )
         );
       })
     );
@@ -199,7 +215,7 @@ export async function getFileHash(path: string, algo: string) {
 export async function untar(
   source: string,
   destination: string,
-  extractOptions: ExtractOptions = {}
+  extractOptions: tar.TarOptionsWithAliasesAsyncNoFile = {}
 ) {
   assertAbsolute(source);
   assertAbsolute(destination);
@@ -230,29 +246,37 @@ interface CompressTarOptions {
   rootDirectoryName?: string;
   source: string;
   destination: string;
-  archiverOptions?: archiver.TarOptions & archiver.CoreOptions;
+  gzipLevel?: number;
 }
 export async function compressTar({
   source,
   destination,
-  archiverOptions,
+  gzipLevel = 9,
   createRootDirectory,
   rootDirectoryName,
-}: CompressTarOptions) {
-  const output = fs.createWriteStream(destination);
-  const archive = archiver('tar', archiverOptions);
-  const folder = rootDirectoryName ? rootDirectoryName : source.split(sep).slice(-1)[0];
-  const name = createRootDirectory ? folder : false;
-  archive.pipe(output);
+}: CompressTarOptions): Promise<number> {
+  assertAbsolute(source);
+  assertAbsolute(destination);
+
+  const folder = rootDirectoryName || basename(source);
 
   let fileCount = 0;
-  archive.on('entry', (entry) => {
-    if (entry.stats?.isFile()) {
-      fileCount += 1;
-    }
+  const packStream = tarFsPack(source, {
+    map(header) {
+      if (header.type === 'file') {
+        fileCount += 1;
+      }
+      if (createRootDirectory) {
+        header.name = folder + '/' + header.name;
+      }
+      return header;
+    },
   });
 
-  await archive.directory(source, name).finalize();
+  const gzip = createGzip({ level: gzipLevel });
+  const output = fs.createWriteStream(destination);
+
+  await pipeline(packStream, gzip, output);
 
   return fileCount;
 }
@@ -270,7 +294,10 @@ export async function compressZip({
   archiverOptions,
   createRootDirectory,
   rootDirectoryName,
-}: CompressZipOptions) {
+}: CompressZipOptions): Promise<number> {
+  assertAbsolute(source);
+  assertAbsolute(destination);
+
   const output = fs.createWriteStream(destination);
   const archive = archiver('zip', archiverOptions);
   const folder = rootDirectoryName ? rootDirectoryName : source.split(sep).slice(-1)[0];

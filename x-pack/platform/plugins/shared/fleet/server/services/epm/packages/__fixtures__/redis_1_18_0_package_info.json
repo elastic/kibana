@@ -1,0 +1,263 @@
+{
+  "name": "redis",
+  "title": "Redis",
+  "version": "1.18.0",
+  "release": "ga",
+  "description": "Collect logs and metrics from Redis servers with Elastic Agent.",
+  "type": "integration",
+  "download": "/epr/redis/redis-1.18.0.zip",
+  "path": "/package/redis/1.18.0",
+  "icons": [
+    {
+      "src": "/img/logo_redis.svg",
+      "path": "/package/redis/1.18.0/img/logo_redis.svg",
+      "title": "logo redis",
+      "size": "32x32",
+      "type": "image/svg+xml"
+    }
+  ],
+  "conditions": {
+    "kibana": {
+      "version": "^8.13.0"
+    },
+    "elastic": {
+      "subscription": "basic"
+    }
+  },
+  "owner": {
+    "type": "elastic",
+    "github": "elastic/obs-infraobs-integrations"
+  },
+  "categories": ["datastore", "observability"],
+  "signature_path": "/epr/redis/redis-1.18.0.zip.sig",
+  "format_version": "3.0.2",
+  "readme": "/package/redis/1.18.0/docs/README.md",
+  "license": "basic",
+  "screenshots": [
+    {
+      "src": "/img/kibana-redis.png",
+      "path": "/package/redis/1.18.0/img/kibana-redis.png",
+      "title": "kibana redis",
+      "size": "1124x1079",
+      "type": "image/png"
+    },
+    {
+      "src": "/img/metricbeat_redis_key_dashboard.png",
+      "path": "/package/redis/1.18.0/img/metricbeat_redis_key_dashboard.png",
+      "title": "metricbeat redis key dashboard",
+      "size": "1855x949",
+      "type": "image/png"
+    },
+    {
+      "src": "/img/metricbeat_redis_overview_dashboard.png",
+      "path": "/package/redis/1.18.0/img/metricbeat_redis_overview_dashboard.png",
+      "title": "metricbeat redis overview dashboard",
+      "size": "1855x949",
+      "type": "image/png"
+    }
+  ],
+  "assets": [
+    "/package/redis/1.18.0/LICENSE.txt",
+    "/package/redis/1.18.0/changelog.yml",
+    "/package/redis/1.18.0/manifest.yml",
+    "/package/redis/1.18.0/docs/README.md",
+    "/package/redis/1.18.0/img/kibana-redis.png",
+    "/package/redis/1.18.0/img/logo_redis.svg",
+    "/package/redis/1.18.0/img/metricbeat_redis_key_dashboard.png",
+    "/package/redis/1.18.0/img/metricbeat_redis_overview_dashboard.png",
+    "/package/redis/1.18.0/data_stream/info/manifest.yml",
+    "/package/redis/1.18.0/data_stream/info/sample_event.json",
+    "/package/redis/1.18.0/data_stream/key/manifest.yml",
+    "/package/redis/1.18.0/data_stream/key/sample_event.json",
+    "/package/redis/1.18.0/data_stream/keyspace/manifest.yml",
+    "/package/redis/1.18.0/data_stream/keyspace/sample_event.json",
+    "/package/redis/1.18.0/data_stream/log/manifest.yml",
+    "/package/redis/1.18.0/data_stream/slowlog/manifest.yml",
+    "/package/redis/1.18.0/kibana/dashboard/redis-28969190-0511-11e9-9c60-d582a238e2c5.json",
+    "/package/redis/1.18.0/kibana/dashboard/redis-7fea2930-478e-11e7-b1f0-cb29bac6bf8b.json",
+    "/package/redis/1.18.0/kibana/dashboard/redis-AV4YjZ5pux-M-tCAunxK.json",
+    "/package/redis/1.18.0/data_stream/info/fields/agent.yml",
+    "/package/redis/1.18.0/data_stream/info/fields/base-fields.yml",
+    "/package/redis/1.18.0/data_stream/info/fields/ecs.yml",
+    "/package/redis/1.18.0/data_stream/info/fields/fields.yml",
+    "/package/redis/1.18.0/data_stream/key/fields/agent.yml",
+    "/package/redis/1.18.0/data_stream/key/fields/base-fields.yml",
+    "/package/redis/1.18.0/data_stream/key/fields/ecs.yml",
+    "/package/redis/1.18.0/data_stream/key/fields/fields.yml",
+    "/package/redis/1.18.0/data_stream/keyspace/fields/agent.yml",
+    "/package/redis/1.18.0/data_stream/keyspace/fields/base-fields.yml",
+    "/package/redis/1.18.0/data_stream/keyspace/fields/ecs.yml",
+    "/package/redis/1.18.0/data_stream/keyspace/fields/fields.yml",
+    "/package/redis/1.18.0/data_stream/log/fields/agent.yml",
+    "/package/redis/1.18.0/data_stream/log/fields/base-fields.yml",
+    "/package/redis/1.18.0/data_stream/log/fields/fields.yml",
+    "/package/redis/1.18.0/data_stream/slowlog/fields/agent.yml",
+    "/package/redis/1.18.0/data_stream/slowlog/fields/base-fields.yml",
+    "/package/redis/1.18.0/data_stream/slowlog/fields/fields.yml",
+    "/package/redis/1.18.0/data_stream/info/agent/stream/stream.yml.hbs",
+    "/package/redis/1.18.0/data_stream/key/agent/stream/stream.yml.hbs",
+    "/package/redis/1.18.0/data_stream/keyspace/agent/stream/stream.yml.hbs",
+    "/package/redis/1.18.0/data_stream/log/agent/stream/stream.yml.hbs",
+    "/package/redis/1.18.0/data_stream/log/elasticsearch/ingest_pipeline/default.yml",
+    "/package/redis/1.18.0/data_stream/slowlog/agent/stream/stream.yml.hbs",
+    "/package/redis/1.18.0/data_stream/slowlog/elasticsearch/ingest_pipeline/default.json"
+  ],
+  "policy_templates": [
+    {
+      "name": "redis",
+      "title": "Redis logs and metrics",
+      "description": "Collect logs and metrics from Redis instances",
+      "inputs": [
+        {
+          "type": "logfile",
+          "title": "Collect Redis application logs",
+          "description": "Collecting application logs from Redis instances"
+        },
+        {
+          "type": "redis",
+          "title": "Collect Redis slow logs",
+          "description": "Collecting slow logs from Redis instances"
+        },
+        {
+          "type": "redis/metrics",
+          "vars": [
+            {
+              "name": "hosts",
+              "type": "text",
+              "title": "Hosts",
+              "multi": true,
+              "required": true,
+              "show_user": true,
+              "default": ["127.0.0.1:6379"]
+            },
+            {
+              "name": "idle_timeout",
+              "type": "text",
+              "title": "Idle Timeout",
+              "multi": false,
+              "required": false,
+              "show_user": false,
+              "default": "20s"
+            },
+            {
+              "name": "tags",
+              "type": "text",
+              "title": "Tags",
+              "multi": true,
+              "required": false,
+              "show_user": false,
+              "default": ""
+            },
+            {
+              "name": "maxconn",
+              "type": "integer",
+              "title": "Maxconn",
+              "multi": false,
+              "required": false,
+              "show_user": false,
+              "default": 10
+            },
+            {
+              "name": "network",
+              "type": "text",
+              "title": "Network",
+              "multi": false,
+              "required": false,
+              "show_user": false,
+              "default": "tcp"
+            },
+            {
+              "name": "username",
+              "type": "text",
+              "title": "Username",
+              "multi": false,
+              "required": false,
+              "show_user": false,
+              "default": ""
+            },
+            {
+              "name": "password",
+              "type": "password",
+              "title": "Password",
+              "multi": false,
+              "required": false,
+              "show_user": false,
+              "default": ""
+            },
+            {
+              "name": "ssl",
+              "type": "yaml",
+              "title": "SSL Configuration",
+              "description": "i.e. certificate_authorities, supported_protocols, verification_mode etc.",
+              "multi": false,
+              "required": false,
+              "show_user": false,
+              "default": "# ssl.certificate_authorities: |\n#   -----BEGIN CERTIFICATE-----\n#   MIID+jCCAuKgAwIBAgIGAJJMzlxLMA0GCSqGSIb3DQEBCwUAMHoxCzAJBgNVBAYT\n#   AlVTMQwwCgYDVQQKEwNJQk0xFjAUBgNVBAsTDURlZmF1bHROb2RlMDExFjAUBgNV\n#   BAsTDURlZmF1bHRDZWxsMDExGTAXBgNVBAsTEFJvb3QgQ2VydGlmaWNhdGUxEjAQ\n#   BgNVBAMTCWxvY2FsaG9zdDAeFw0yMTEyMTQyMjA3MTZaFw0yMjEyMTQyMjA3MTZa\n#   MF8xCzAJBgNVBAYTAlVTMQwwCgYDVQQKEwNJQk0xFjAUBgNVBAsTDURlZmF1bHRO\n#   b2RlMDExFjAUBgNVBAsTDURlZmF1bHRDZWxsMDExEjAQBgNVBAMTCWxvY2FsaG9z\n#   dDCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAMv5HCsJZIpI5zCy+jXV\n#   z6lmzNc9UcVSEEHn86h6zT6pxuY90TYeAhlZ9hZ+SCKn4OQ4GoDRZhLPTkYDt+wW\n#   CV3NTIy9uCGUSJ6xjCKoxClJmgSQdg5m4HzwfY4ofoEZ5iZQ0Zmt62jGRWc0zuxj\n#   hegnM+eO2reBJYu6Ypa9RPJdYJsmn1RNnC74IDY8Y95qn+WZj//UALCpYfX41hko\n#   i7TWD9GKQO8SBmAxhjCDifOxVBokoxYrNdzESl0LXvnzEadeZTd9BfUtTaBHhx6t\n#   njqqCPrbTY+3jAbZFd4RiERPnhLVKMytw5ot506BhPrUtpr2lusbN5svNXjuLeea\n#   MMUCAwEAAaOBoDCBnTATBgNVHSMEDDAKgAhOatpLwvJFqjAdBgNVHSUEFjAUBggr\n#   BgEFBQcDAQYIKwYBBQUHAwIwVAYDVR0RBE0wS4E+UHJvZmlsZVVVSUQ6QXBwU3J2\n#   MDEtQkFTRS05MDkzMzJjMC1iNmFiLTQ2OTMtYWI5NC01Mjc1ZDI1MmFmNDiCCWxv\n#   Y2FsaG9zdDARBgNVHQ4ECgQITzqhA5sO8O4wDQYJKoZIhvcNAQELBQADggEBAKR0\n#   gY/BM69S6BDyWp5dxcpmZ9FS783FBbdUXjVtTkQno+oYURDrhCdsfTLYtqUlP4J4\n#   CHoskP+MwJjRIoKhPVQMv14Q4VC2J9coYXnePhFjE+6MaZbTjq9WaekGrpKkMaQA\n#   iQt5b67jo7y63CZKIo9yBvs7sxODQzDn3wZwyux2vPegXSaTHR/rop/s/mPk3YTS\n#   hQprs/IVtPoWU4/TsDN3gIlrAYGbcs29CAt5q9MfzkMmKsuDkTZD0ry42VjxjAmk\n#   xw23l/k8RoD1wRWaDVbgpjwSzt+kl+vJE/ip2w3h69eEZ9wbo6scRO5lCO2JM4Pr\n#   7RhLQyWn2u00L7/9Omw=\n#   -----END CERTIFICATE-----\n"
+            }
+          ],
+          "title": "Collect Redis metrics",
+          "description": "Collecting info, key and keyspace metrics from Redis instances"
+        }
+      ],
+      "multiple": true
+    }
+  ],
+  "data_streams": [
+    {
+      "type": "metrics",
+      "dataset": "redis.key",
+      "title": "Redis key metrics",
+      "release": "ga",
+      "streams": [
+        {
+          "input": "redis/metrics",
+          "vars": [
+            {
+              "name": "tags_streams",
+              "type": "text",
+              "title": "Tags in streams",
+              "multi": true,
+              "required": false,
+              "show_user": false,
+              "default": ""
+            },
+            {
+              "name": "key.patterns",
+              "type": "yaml",
+              "title": "Key Patterns",
+              "multi": false,
+              "required": true,
+              "show_user": true,
+              "default": "- limit: 20\n  pattern: '*'\n"
+            },
+            {
+              "name": "period",
+              "type": "text",
+              "title": "Period",
+              "multi": false,
+              "required": true,
+              "show_user": true,
+              "default": "10s"
+            },
+            {
+              "name": "processors",
+              "type": "yaml",
+              "title": "Processors",
+              "description": "Processors are used to reduce the number of fields in the exported event or to enhance the event with metadata. This executes in the agent before the events are shipped. See [Processors](https://www.elastic.co/guide/en/fleet/current/elastic-agent-processor-configuration.html) for details.  \n",
+              "multi": false,
+              "required": false,
+              "show_user": false
+            }
+          ],
+          "template_path": "stream.yml.hbs",
+          "title": "Redis key metrics",
+          "description": "Collect Redis key metrics",
+          "enabled": true
+        }
+      ],
+      "package": "redis",
+      "elasticsearch": {},
+      "path": "key"
+    }
+  ]
+}

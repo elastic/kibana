@@ -1,0 +1,673 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`migrationsStateActionMachine logs state transitions, messages in state.logs and action responses when reaching DONE 1`] = `
+Object {
+  "debug": Array [
+    Array [
+      "[.my-so-index] INIT RESPONSE",
+    ],
+    Array [
+      "[.my-so-index] INIT -> WAIT_FOR_YELLOW_SOURCE. took: 0ms.",
+      Object {
+        "kibana": Object {
+          "migrations": Object {
+            "duration": 0,
+            "state": Object {
+              "batchSize": 1000,
+              "bulkOperationBatches": Array [
+                Array [],
+              ],
+              "controlState": "WAIT_FOR_YELLOW_SOURCE",
+              "currentAlias": ".my-so-index",
+              "discardCorruptObjects": false,
+              "discardUnknownObjects": false,
+              "esCapabilities": Object {
+                "serverless": false,
+              },
+              "excludeFromUpgradeFilterHooks": Object {},
+              "excludeOnUpgradeQuery": Object {
+                "bool": Object {
+                  "must_not": Array [
+                    Object {
+                      "term": Object {
+                        "type": "deprecated_type_1",
+                      },
+                    },
+                    Object {
+                      "term": Object {
+                        "type": "deprecatedType2",
+                      },
+                    },
+                    Object {
+                      "term": Object {
+                        "type": "deprecated-type-3",
+                      },
+                    },
+                  ],
+                },
+              },
+              "hashToVersionMap": Object {
+                "task|someHash": "10.1.0",
+                "typeA|someHash": "10.1.0",
+                "typeB|someHash": "10.1.0",
+                "typeC|someHash": "10.1.0",
+                "typeD|someHash": "10.1.0",
+                "typeE|someHash": "10.1.0",
+              },
+              "indexPrefix": ".my-so-index",
+              "indexTypes": Array [
+                "typeA",
+                "typeB",
+                "typeC",
+              ],
+              "kibanaVersion": "7.11.0",
+              "knownTypes": Array [],
+              "latestMappingsVersions": Object {},
+              "logs": Array [
+                Object {
+                  "level": "info",
+                  "message": "Log from WAIT_FOR_YELLOW_SOURCE control state",
+                },
+              ],
+              "maxBatchSize": 1000,
+              "maxBatchSizeBytes": 100000000,
+              "maxReadBatchSizeBytes": 536870888,
+              "migrationDocLinks": Object {
+                "clusterShardLimitExceeded": "https://www.elastic.co/docs/troubleshoot/kibana/migration-failures#cluster-shard-limit-exceeded",
+                "repeatedTimeoutRequests": "https://www.elastic.co/docs/troubleshoot/kibana/migration-failures#_repeated_time_out_requests_that_eventually_fail",
+                "resolveMigrationFailures": "https://www.elastic.co/docs/troubleshoot/kibana/migration-failures",
+                "routingAllocationDisabled": "https://www.elastic.co/docs/troubleshoot/kibana/migration-failures#routing-allocation-disabled",
+              },
+              "outdatedDocuments": Array [],
+              "outdatedDocumentsQuery": Object {
+                "bool": Object {
+                  "should": Array [],
+                },
+              },
+              "retryAttempts": 5,
+              "retryCount": 0,
+              "retryDelay": 0,
+              "skipRetryReset": false,
+              "targetIndexMappings": Object {
+                "properties": Object {},
+              },
+              "versionAlias": ".my-so-index_7.11.0",
+              "versionIndex": ".my-so-index_7.11.0_001",
+              "waitForMigrationCompletion": false,
+            },
+          },
+        },
+      },
+    ],
+    Array [
+      "[.my-so-index] WAIT_FOR_YELLOW_SOURCE RESPONSE",
+    ],
+    Array [
+      "[.my-so-index] WAIT_FOR_YELLOW_SOURCE -> UPDATE_SOURCE_MAPPINGS_PROPERTIES. took: 0ms.",
+      Object {
+        "kibana": Object {
+          "migrations": Object {
+            "duration": 0,
+            "state": Object {
+              "batchSize": 1000,
+              "bulkOperationBatches": Array [
+                Array [],
+              ],
+              "controlState": "UPDATE_SOURCE_MAPPINGS_PROPERTIES",
+              "currentAlias": ".my-so-index",
+              "discardCorruptObjects": false,
+              "discardUnknownObjects": false,
+              "esCapabilities": Object {
+                "serverless": false,
+              },
+              "excludeFromUpgradeFilterHooks": Object {},
+              "excludeOnUpgradeQuery": Object {
+                "bool": Object {
+                  "must_not": Array [
+                    Object {
+                      "term": Object {
+                        "type": "deprecated_type_1",
+                      },
+                    },
+                    Object {
+                      "term": Object {
+                        "type": "deprecatedType2",
+                      },
+                    },
+                    Object {
+                      "term": Object {
+                        "type": "deprecated-type-3",
+                      },
+                    },
+                  ],
+                },
+              },
+              "hashToVersionMap": Object {
+                "task|someHash": "10.1.0",
+                "typeA|someHash": "10.1.0",
+                "typeB|someHash": "10.1.0",
+                "typeC|someHash": "10.1.0",
+                "typeD|someHash": "10.1.0",
+                "typeE|someHash": "10.1.0",
+              },
+              "indexPrefix": ".my-so-index",
+              "indexTypes": Array [
+                "typeA",
+                "typeB",
+                "typeC",
+              ],
+              "kibanaVersion": "7.11.0",
+              "knownTypes": Array [],
+              "latestMappingsVersions": Object {},
+              "logs": Array [
+                Object {
+                  "level": "info",
+                  "message": "Log from WAIT_FOR_YELLOW_SOURCE control state",
+                },
+                Object {
+                  "level": "info",
+                  "message": "Log from UPDATE_SOURCE_MAPPINGS_PROPERTIES control state",
+                },
+              ],
+              "maxBatchSize": 1000,
+              "maxBatchSizeBytes": 100000000,
+              "maxReadBatchSizeBytes": 536870888,
+              "migrationDocLinks": Object {
+                "clusterShardLimitExceeded": "https://www.elastic.co/docs/troubleshoot/kibana/migration-failures#cluster-shard-limit-exceeded",
+                "repeatedTimeoutRequests": "https://www.elastic.co/docs/troubleshoot/kibana/migration-failures#_repeated_time_out_requests_that_eventually_fail",
+                "resolveMigrationFailures": "https://www.elastic.co/docs/troubleshoot/kibana/migration-failures",
+                "routingAllocationDisabled": "https://www.elastic.co/docs/troubleshoot/kibana/migration-failures#routing-allocation-disabled",
+              },
+              "outdatedDocuments": Array [],
+              "outdatedDocumentsQuery": Object {
+                "bool": Object {
+                  "should": Array [],
+                },
+              },
+              "retryAttempts": 5,
+              "retryCount": 0,
+              "retryDelay": 0,
+              "skipRetryReset": false,
+              "targetIndexMappings": Object {
+                "properties": Object {},
+              },
+              "versionAlias": ".my-so-index_7.11.0",
+              "versionIndex": ".my-so-index_7.11.0_001",
+              "waitForMigrationCompletion": false,
+            },
+          },
+        },
+      },
+    ],
+    Array [
+      "[.my-so-index] UPDATE_SOURCE_MAPPINGS_PROPERTIES RESPONSE",
+    ],
+    Array [
+      "[.my-so-index] UPDATE_SOURCE_MAPPINGS_PROPERTIES -> UPDATE_SOURCE_MAPPINGS_PROPERTIES. took: 0ms.",
+      Object {
+        "kibana": Object {
+          "migrations": Object {
+            "duration": 0,
+            "state": Object {
+              "batchSize": 1000,
+              "bulkOperationBatches": Array [
+                Array [],
+              ],
+              "controlState": "UPDATE_SOURCE_MAPPINGS_PROPERTIES",
+              "currentAlias": ".my-so-index",
+              "discardCorruptObjects": false,
+              "discardUnknownObjects": false,
+              "esCapabilities": Object {
+                "serverless": false,
+              },
+              "excludeFromUpgradeFilterHooks": Object {},
+              "excludeOnUpgradeQuery": Object {
+                "bool": Object {
+                  "must_not": Array [
+                    Object {
+                      "term": Object {
+                        "type": "deprecated_type_1",
+                      },
+                    },
+                    Object {
+                      "term": Object {
+                        "type": "deprecatedType2",
+                      },
+                    },
+                    Object {
+                      "term": Object {
+                        "type": "deprecated-type-3",
+                      },
+                    },
+                  ],
+                },
+              },
+              "hashToVersionMap": Object {
+                "task|someHash": "10.1.0",
+                "typeA|someHash": "10.1.0",
+                "typeB|someHash": "10.1.0",
+                "typeC|someHash": "10.1.0",
+                "typeD|someHash": "10.1.0",
+                "typeE|someHash": "10.1.0",
+              },
+              "indexPrefix": ".my-so-index",
+              "indexTypes": Array [
+                "typeA",
+                "typeB",
+                "typeC",
+              ],
+              "kibanaVersion": "7.11.0",
+              "knownTypes": Array [],
+              "latestMappingsVersions": Object {},
+              "logs": Array [
+                Object {
+                  "level": "info",
+                  "message": "Log from WAIT_FOR_YELLOW_SOURCE control state",
+                },
+                Object {
+                  "level": "info",
+                  "message": "Log from UPDATE_SOURCE_MAPPINGS_PROPERTIES control state",
+                },
+                Object {
+                  "level": "info",
+                  "message": "Log from UPDATE_SOURCE_MAPPINGS_PROPERTIES control state",
+                },
+              ],
+              "maxBatchSize": 1000,
+              "maxBatchSizeBytes": 100000000,
+              "maxReadBatchSizeBytes": 536870888,
+              "migrationDocLinks": Object {
+                "clusterShardLimitExceeded": "https://www.elastic.co/docs/troubleshoot/kibana/migration-failures#cluster-shard-limit-exceeded",
+                "repeatedTimeoutRequests": "https://www.elastic.co/docs/troubleshoot/kibana/migration-failures#_repeated_time_out_requests_that_eventually_fail",
+                "resolveMigrationFailures": "https://www.elastic.co/docs/troubleshoot/kibana/migration-failures",
+                "routingAllocationDisabled": "https://www.elastic.co/docs/troubleshoot/kibana/migration-failures#routing-allocation-disabled",
+              },
+              "outdatedDocuments": Array [],
+              "outdatedDocumentsQuery": Object {
+                "bool": Object {
+                  "should": Array [],
+                },
+              },
+              "retryAttempts": 5,
+              "retryCount": 0,
+              "retryDelay": 0,
+              "skipRetryReset": false,
+              "targetIndexMappings": Object {
+                "properties": Object {},
+              },
+              "versionAlias": ".my-so-index_7.11.0",
+              "versionIndex": ".my-so-index_7.11.0_001",
+              "waitForMigrationCompletion": false,
+            },
+          },
+        },
+      },
+    ],
+    Array [
+      "[.my-so-index] UPDATE_SOURCE_MAPPINGS_PROPERTIES RESPONSE",
+    ],
+    Array [
+      "[.my-so-index] UPDATE_SOURCE_MAPPINGS_PROPERTIES -> DONE. took: 0ms.",
+      Object {
+        "kibana": Object {
+          "migrations": Object {
+            "duration": 0,
+            "state": Object {
+              "batchSize": 1000,
+              "bulkOperationBatches": Array [
+                Array [],
+              ],
+              "controlState": "DONE",
+              "currentAlias": ".my-so-index",
+              "discardCorruptObjects": false,
+              "discardUnknownObjects": false,
+              "esCapabilities": Object {
+                "serverless": false,
+              },
+              "excludeFromUpgradeFilterHooks": Object {},
+              "excludeOnUpgradeQuery": Object {
+                "bool": Object {
+                  "must_not": Array [
+                    Object {
+                      "term": Object {
+                        "type": "deprecated_type_1",
+                      },
+                    },
+                    Object {
+                      "term": Object {
+                        "type": "deprecatedType2",
+                      },
+                    },
+                    Object {
+                      "term": Object {
+                        "type": "deprecated-type-3",
+                      },
+                    },
+                  ],
+                },
+              },
+              "hashToVersionMap": Object {
+                "task|someHash": "10.1.0",
+                "typeA|someHash": "10.1.0",
+                "typeB|someHash": "10.1.0",
+                "typeC|someHash": "10.1.0",
+                "typeD|someHash": "10.1.0",
+                "typeE|someHash": "10.1.0",
+              },
+              "indexPrefix": ".my-so-index",
+              "indexTypes": Array [
+                "typeA",
+                "typeB",
+                "typeC",
+              ],
+              "kibanaVersion": "7.11.0",
+              "knownTypes": Array [],
+              "latestMappingsVersions": Object {},
+              "logs": Array [
+                Object {
+                  "level": "info",
+                  "message": "Log from WAIT_FOR_YELLOW_SOURCE control state",
+                },
+                Object {
+                  "level": "info",
+                  "message": "Log from UPDATE_SOURCE_MAPPINGS_PROPERTIES control state",
+                },
+                Object {
+                  "level": "info",
+                  "message": "Log from UPDATE_SOURCE_MAPPINGS_PROPERTIES control state",
+                },
+                Object {
+                  "level": "info",
+                  "message": "Log from DONE control state",
+                },
+              ],
+              "maxBatchSize": 1000,
+              "maxBatchSizeBytes": 100000000,
+              "maxReadBatchSizeBytes": 536870888,
+              "migrationDocLinks": Object {
+                "clusterShardLimitExceeded": "https://www.elastic.co/docs/troubleshoot/kibana/migration-failures#cluster-shard-limit-exceeded",
+                "repeatedTimeoutRequests": "https://www.elastic.co/docs/troubleshoot/kibana/migration-failures#_repeated_time_out_requests_that_eventually_fail",
+                "resolveMigrationFailures": "https://www.elastic.co/docs/troubleshoot/kibana/migration-failures",
+                "routingAllocationDisabled": "https://www.elastic.co/docs/troubleshoot/kibana/migration-failures#routing-allocation-disabled",
+              },
+              "outdatedDocuments": Array [],
+              "outdatedDocumentsQuery": Object {
+                "bool": Object {
+                  "should": Array [],
+                },
+              },
+              "retryAttempts": 5,
+              "retryCount": 0,
+              "retryDelay": 0,
+              "skipRetryReset": false,
+              "targetIndexMappings": Object {
+                "properties": Object {},
+              },
+              "versionAlias": ".my-so-index_7.11.0",
+              "versionIndex": ".my-so-index_7.11.0_001",
+              "waitForMigrationCompletion": false,
+            },
+          },
+        },
+      },
+    ],
+  ],
+  "error": Array [],
+  "fatal": Array [],
+  "info": Array [
+    Array [
+      "[.my-so-index] Log from WAIT_FOR_YELLOW_SOURCE control state",
+    ],
+    Array [
+      "[.my-so-index] Log from UPDATE_SOURCE_MAPPINGS_PROPERTIES control state",
+    ],
+    Array [
+      "[.my-so-index] Log from UPDATE_SOURCE_MAPPINGS_PROPERTIES control state",
+    ],
+    Array [
+      "[.my-so-index] Log from DONE control state",
+    ],
+  ],
+  "log": Array [],
+  "trace": Array [],
+  "warn": Array [],
+}
+`;
+
+exports[`migrationsStateActionMachine logs state transitions, messages in state.logs and action responses when reaching FATAL 1`] = `
+Object {
+  "debug": Array [
+    Array [
+      "[.my-so-index] INIT RESPONSE",
+    ],
+    Array [
+      "[.my-so-index] INIT -> UPDATE_SOURCE_MAPPINGS_PROPERTIES. took: 0ms.",
+      Object {
+        "kibana": Object {
+          "migrations": Object {
+            "duration": 0,
+            "state": Object {
+              "batchSize": 1000,
+              "bulkOperationBatches": Array [
+                Array [
+                  Object {
+                    "index": Object {
+                      "_id": "1234",
+                    },
+                  },
+                ],
+              ],
+              "controlState": "UPDATE_SOURCE_MAPPINGS_PROPERTIES",
+              "currentAlias": ".my-so-index",
+              "discardCorruptObjects": false,
+              "discardUnknownObjects": false,
+              "esCapabilities": Object {
+                "serverless": false,
+              },
+              "excludeFromUpgradeFilterHooks": Object {},
+              "excludeOnUpgradeQuery": Object {
+                "bool": Object {
+                  "must_not": Array [
+                    Object {
+                      "term": Object {
+                        "type": "deprecated_type_1",
+                      },
+                    },
+                    Object {
+                      "term": Object {
+                        "type": "deprecatedType2",
+                      },
+                    },
+                    Object {
+                      "term": Object {
+                        "type": "deprecated-type-3",
+                      },
+                    },
+                  ],
+                },
+              },
+              "hashToVersionMap": Object {
+                "task|someHash": "10.1.0",
+                "typeA|someHash": "10.1.0",
+                "typeB|someHash": "10.1.0",
+                "typeC|someHash": "10.1.0",
+                "typeD|someHash": "10.1.0",
+                "typeE|someHash": "10.1.0",
+              },
+              "indexPrefix": ".my-so-index",
+              "indexTypes": Array [
+                "typeA",
+                "typeB",
+                "typeC",
+              ],
+              "kibanaVersion": "7.11.0",
+              "knownTypes": Array [],
+              "latestMappingsVersions": Object {},
+              "logs": Array [
+                Object {
+                  "level": "info",
+                  "message": "Log from UPDATE_SOURCE_MAPPINGS_PROPERTIES control state",
+                },
+              ],
+              "maxBatchSize": 1000,
+              "maxBatchSizeBytes": 100000000,
+              "maxReadBatchSizeBytes": 536870888,
+              "migrationDocLinks": Object {
+                "clusterShardLimitExceeded": "https://www.elastic.co/docs/troubleshoot/kibana/migration-failures#cluster-shard-limit-exceeded",
+                "repeatedTimeoutRequests": "https://www.elastic.co/docs/troubleshoot/kibana/migration-failures#_repeated_time_out_requests_that_eventually_fail",
+                "resolveMigrationFailures": "https://www.elastic.co/docs/troubleshoot/kibana/migration-failures",
+                "routingAllocationDisabled": "https://www.elastic.co/docs/troubleshoot/kibana/migration-failures#routing-allocation-disabled",
+              },
+              "outdatedDocuments": Array [
+                Object {
+                  "_id": "1234",
+                },
+              ],
+              "outdatedDocumentsQuery": Object {
+                "bool": Object {
+                  "should": Array [],
+                },
+              },
+              "reason": "the fatal reason",
+              "retryAttempts": 5,
+              "retryCount": 0,
+              "retryDelay": 0,
+              "skipRetryReset": false,
+              "targetIndexMappings": Object {
+                "properties": Object {},
+              },
+              "versionAlias": ".my-so-index_7.11.0",
+              "versionIndex": ".my-so-index_7.11.0_001",
+              "waitForMigrationCompletion": false,
+            },
+          },
+        },
+      },
+    ],
+    Array [
+      "[.my-so-index] UPDATE_SOURCE_MAPPINGS_PROPERTIES RESPONSE",
+    ],
+    Array [
+      "[.my-so-index] UPDATE_SOURCE_MAPPINGS_PROPERTIES -> FATAL. took: 0ms.",
+      Object {
+        "kibana": Object {
+          "migrations": Object {
+            "duration": 0,
+            "state": Object {
+              "batchSize": 1000,
+              "bulkOperationBatches": Array [
+                Array [
+                  Object {
+                    "index": Object {
+                      "_id": "1234",
+                    },
+                  },
+                ],
+              ],
+              "controlState": "FATAL",
+              "currentAlias": ".my-so-index",
+              "discardCorruptObjects": false,
+              "discardUnknownObjects": false,
+              "esCapabilities": Object {
+                "serverless": false,
+              },
+              "excludeFromUpgradeFilterHooks": Object {},
+              "excludeOnUpgradeQuery": Object {
+                "bool": Object {
+                  "must_not": Array [
+                    Object {
+                      "term": Object {
+                        "type": "deprecated_type_1",
+                      },
+                    },
+                    Object {
+                      "term": Object {
+                        "type": "deprecatedType2",
+                      },
+                    },
+                    Object {
+                      "term": Object {
+                        "type": "deprecated-type-3",
+                      },
+                    },
+                  ],
+                },
+              },
+              "hashToVersionMap": Object {
+                "task|someHash": "10.1.0",
+                "typeA|someHash": "10.1.0",
+                "typeB|someHash": "10.1.0",
+                "typeC|someHash": "10.1.0",
+                "typeD|someHash": "10.1.0",
+                "typeE|someHash": "10.1.0",
+              },
+              "indexPrefix": ".my-so-index",
+              "indexTypes": Array [
+                "typeA",
+                "typeB",
+                "typeC",
+              ],
+              "kibanaVersion": "7.11.0",
+              "knownTypes": Array [],
+              "latestMappingsVersions": Object {},
+              "logs": Array [
+                Object {
+                  "level": "info",
+                  "message": "Log from UPDATE_SOURCE_MAPPINGS_PROPERTIES control state",
+                },
+                Object {
+                  "level": "info",
+                  "message": "Log from FATAL control state",
+                },
+              ],
+              "maxBatchSize": 1000,
+              "maxBatchSizeBytes": 100000000,
+              "maxReadBatchSizeBytes": 536870888,
+              "migrationDocLinks": Object {
+                "clusterShardLimitExceeded": "https://www.elastic.co/docs/troubleshoot/kibana/migration-failures#cluster-shard-limit-exceeded",
+                "repeatedTimeoutRequests": "https://www.elastic.co/docs/troubleshoot/kibana/migration-failures#_repeated_time_out_requests_that_eventually_fail",
+                "resolveMigrationFailures": "https://www.elastic.co/docs/troubleshoot/kibana/migration-failures",
+                "routingAllocationDisabled": "https://www.elastic.co/docs/troubleshoot/kibana/migration-failures#routing-allocation-disabled",
+              },
+              "outdatedDocuments": Array [
+                Object {
+                  "_id": "1234",
+                },
+              ],
+              "outdatedDocumentsQuery": Object {
+                "bool": Object {
+                  "should": Array [],
+                },
+              },
+              "reason": "the fatal reason",
+              "retryAttempts": 5,
+              "retryCount": 0,
+              "retryDelay": 0,
+              "skipRetryReset": false,
+              "targetIndexMappings": Object {
+                "properties": Object {},
+              },
+              "versionAlias": ".my-so-index_7.11.0",
+              "versionIndex": ".my-so-index_7.11.0_001",
+              "waitForMigrationCompletion": false,
+            },
+          },
+        },
+      },
+    ],
+  ],
+  "error": Array [],
+  "fatal": Array [],
+  "info": Array [
+    Array [
+      "[.my-so-index] Log from UPDATE_SOURCE_MAPPINGS_PROPERTIES control state",
+    ],
+    Array [
+      "[.my-so-index] Log from FATAL control state",
+    ],
+  ],
+  "log": Array [],
+  "trace": Array [],
+  "warn": Array [],
+}
+`;

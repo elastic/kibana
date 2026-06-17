@@ -1,19 +1,21 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Plugin, CoreSetup, AppMountParameters } from '@kbn/core/public';
-import { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
-import { ExpressionsSetup, ExpressionsStart } from '@kbn/expressions-plugin/public';
-import { Setup as InspectorSetup, Start as InspectorStart } from '@kbn/inspector-plugin/public';
-import { UiActionsStart, UiActionsSetup } from '@kbn/ui-actions-plugin/public';
+import type { Plugin, CoreSetup, AppMountParameters } from '@kbn/core/public';
+import type { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
+import type { ExpressionsSetup, ExpressionsStart } from '@kbn/expressions-plugin/public';
+import type {
+  Setup as InspectorSetup,
+  Start as InspectorStart,
+} from '@kbn/inspector-plugin/public';
+import type { UiActionsStart, UiActionsSetup } from '@kbn/ui-actions-plugin/public';
 import { getExpressionsInspectorViewDescription } from './inspector';
-import { NAVIGATE_TRIGGER_ID, navigateTrigger } from './actions/navigate_trigger';
-import { ACTION_NAVIGATE, createNavigateAction } from './actions/navigate_action';
 import { getButtonRenderer } from './renderers/button';
 import { buttonFn } from './functions/button';
 
@@ -35,11 +37,6 @@ export class ExpressionsExplorerPlugin implements Plugin<void, void, SetupDeps, 
     // register custom inspector adapter & view
     deps.inspector.registerView(getExpressionsInspectorViewDescription());
 
-    // register custom actions
-    deps.uiActions.registerTrigger(navigateTrigger);
-    deps.uiActions.registerAction(createNavigateAction());
-    deps.uiActions.attachAction(NAVIGATE_TRIGGER_ID, ACTION_NAVIGATE);
-
     // register custom functions and renderers
     deps.expressions.registerRenderer(getButtonRenderer(core));
     deps.expressions.registerFunction(buttonFn);
@@ -57,6 +54,7 @@ export class ExpressionsExplorerPlugin implements Plugin<void, void, SetupDeps, 
             inspector: depsStart.inspector,
             actions: depsStart.uiActions,
             uiSettings: core.uiSettings,
+            userProfile: coreStart.userProfile,
             settings: core.settings,
             theme: coreStart.theme,
             i18n: coreStart.i18n,
@@ -73,9 +71,8 @@ export class ExpressionsExplorerPlugin implements Plugin<void, void, SetupDeps, 
       links: [
         {
           label: 'README',
-          href: 'https://github.com/elastic/kibana/blob/main/src/plugins/expressions/README.asciidoc',
+          href: 'https://github.com/elastic/kibana/blob/main/src/platform/plugins/shared/expressions/README.asciidoc',
           iconType: 'logoGithub',
-          size: 's',
           target: '_blank',
         },
       ],

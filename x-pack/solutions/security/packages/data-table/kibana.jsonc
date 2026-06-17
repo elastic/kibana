@@ -1,0 +1,9 @@
+{
+  "type": "shared-browser",
+  "id": "@kbn/securitysolution-data-table",
+  "owner": [
+    "@elastic/security-threat-hunting"
+  ],
+  "group": "security",
+  "visibility": "private"
+}

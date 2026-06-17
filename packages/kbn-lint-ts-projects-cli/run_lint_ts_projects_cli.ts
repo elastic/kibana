@@ -1,22 +1,24 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import Path from 'path';
 
 import { run } from '@kbn/dev-cli-runner';
 import { createFailError } from '@kbn/dev-cli-errors';
-import { RepoPath } from '@kbn/repo-path';
+import type { RepoPath } from '@kbn/repo-path';
 import { getRepoFiles } from '@kbn/get-repo-files';
-import { SomeDevLog } from '@kbn/some-dev-log';
+import type { SomeDevLog } from '@kbn/some-dev-log';
 import { PackageFileMap, TsProjectFileMap } from '@kbn/repo-file-maps';
 import { getPackages } from '@kbn/repo-packages';
 import { REPO_ROOT } from '@kbn/repo-info';
-import { TS_PROJECTS, TsProject } from '@kbn/ts-projects';
+import type { TsProject } from '@kbn/ts-projects';
+import { TS_PROJECTS } from '@kbn/ts-projects';
 import { runLintRules, TsProjectLintTarget } from '@kbn/repo-linter';
 
 import { RULES } from './rules';
@@ -159,13 +161,13 @@ run(
     }
   },
   {
-    usage: `node scripts/package_linter [...packages]`,
+    usage: `node scripts/lint_ts_projects [...packages]`,
     flags: {
       boolean: ['fix', 'refs-check', 'no-refs-check'],
       alias: { f: 'fix', R: 'no-refs-check' },
       default: { 'refs-check': true },
       help: `
-        --no-lint          Disables linting rules, only validting that every file is a member of just one project
+        --no-lint          Disables linting rules, only validating that every file is a member of just one project
         --fix              Automatically fix some issues in tsconfig.json files
         -R, --no-refs-check  Disables the reference checking rules, making the linting much faster, but less accruate
       `,

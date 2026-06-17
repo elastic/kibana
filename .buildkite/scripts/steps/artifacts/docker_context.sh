@@ -9,6 +9,9 @@ source .buildkite/scripts/steps/artifacts/env.sh
 
 KIBANA_DOCKER_CONTEXT="${KIBANA_DOCKER_CONTEXT:="default"}"
 
+echo "--- Clean up cached images to free up space"
+clean_cached_images
+
 echo "--- Create contexts"
 mkdir -p target
 node scripts/build --skip-initialize --skip-generic-folders --skip-platform-folders --skip-archives --skip-cdn-assets --docker-context-use-local-artifact "${BUILD_ARGS[@]}"
@@ -25,9 +28,6 @@ case $KIBANA_DOCKER_CONTEXT in
   ;;
   cloud)
     DOCKER_CONTEXT_FILE="kibana-cloud-$FULL_VERSION-docker-build-context.tar.gz"
-  ;;
-  ubi)
-    DOCKER_CONTEXT_FILE="kibana-ubi-$FULL_VERSION-docker-build-context.tar.gz"
   ;;
   ironbank)
     DOCKER_CONTEXT_FILE="kibana-ironbank-$FULL_VERSION-docker-build-context.tar.gz"

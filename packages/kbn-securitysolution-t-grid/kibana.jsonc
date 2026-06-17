@@ -1,5 +1,0 @@
-{
-  "type": "shared-common",
-  "id": "@kbn/securitysolution-t-grid",
-  "owner": "@elastic/security-detection-engine"
-}

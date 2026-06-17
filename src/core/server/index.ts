@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 /**
@@ -28,7 +29,8 @@
  * @packageDocumentation
  */
 
-import { Type } from '@kbn/config-schema';
+import 'reflect-metadata';
+import type { Type } from '@kbn/config-schema';
 import type { AppenderConfigType } from '@kbn/core-logging-server';
 import { appendersSchema } from '@kbn/core-logging-server-internal';
 import type {
@@ -70,6 +72,11 @@ export type {
 
 export type { KibanaExecutionContext } from '@kbn/core-execution-context-common';
 export type { IExecutionContextContainer } from '@kbn/core-execution-context-server';
+export type {
+  EvaluationContext,
+  FeatureFlagsStart,
+  FeatureFlagsSetup,
+} from '@kbn/core-feature-flags-server';
 export type { Capabilities } from '@kbn/core-capabilities-common';
 export type {
   CapabilitiesProvider,
@@ -104,6 +111,7 @@ export type {
   FakeRequest,
   ScopeableRequest,
   ElasticsearchClient,
+  ElasticsearchRequestLoggingOptions,
   IClusterClient,
   ICustomClusterClient,
   ElasticsearchClientConfig,
@@ -151,7 +159,7 @@ export type {
 } from '@kbn/core-user-profile-server';
 
 export { CspConfig } from '@kbn/core-http-server-internal';
-export { CoreKibanaRequest, kibanaResponseFactory } from '@kbn/core-http-router-server-internal';
+export { kibanaResponseFactory } from '@kbn/core-http-router-server-internal';
 
 export type {
   AuthenticationHandler,
@@ -194,7 +202,6 @@ export type {
   KibanaRequestRoute,
   KibanaRequestRouteOptions,
   IKibanaResponse,
-  LifecycleResponseFactory,
   KnownHeaders,
   ErrorHttpResponseOptions,
   IKibanaSocket,
@@ -219,6 +226,7 @@ export type {
   IStaticAssets,
   SessionStorage,
   SessionStorageCookieOptions,
+  SessionStorageSetOptions,
   SessionCookieValidationResult,
   SessionStorageFactory,
   GetAuthState,
@@ -236,7 +244,11 @@ export type {
 } from '@kbn/core-http-server';
 export type { IExternalUrlPolicy } from '@kbn/core-http-common';
 
-export { validBodyOutput } from '@kbn/core-http-server';
+export {
+  validBodyOutput,
+  OnPostAuthResultType,
+  ReservedPrivilegesSet,
+} from '@kbn/core-http-server';
 
 export type {
   HttpResourcesRenderOptions,
@@ -261,7 +273,6 @@ export { PluginType } from '@kbn/core-base-common';
 export type {
   PrebootPlugin,
   Plugin,
-  AsyncPlugin,
   PluginConfigDescriptor,
   PluginConfigSchema,
   PluginInitializer,
@@ -284,7 +295,6 @@ export type {
 
 export type { PluginName, DiscoveredPlugin } from '@kbn/core-base-common';
 
-export type { SavedObjectsStart } from '@kbn/core-saved-objects-browser';
 export type {
   SavedObjectsMigrationVersion,
   SavedObjectsImportConflictError,
@@ -356,6 +366,7 @@ export type {
 } from '@kbn/core-saved-objects-api-server';
 export type {
   SavedObject,
+  SavedObjectAccessControl,
   SavedObjectAttribute,
   SavedObjectAttributes,
   SavedObjectAttributeSingle,
@@ -599,3 +610,14 @@ export type {
 };
 
 export type { CustomBrandingSetup } from '@kbn/core-custom-branding-server';
+export type {
+  AuthzDisabled,
+  AuthzEnabled,
+  RouteAuthz,
+  RouteSecurity,
+  RouteSecurityGetter,
+  Privilege,
+  PrivilegeSet,
+  AllRequiredCondition,
+  AnyRequiredCondition,
+} from '@kbn/core-http-server';

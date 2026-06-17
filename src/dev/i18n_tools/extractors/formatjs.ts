@@ -1,20 +1,23 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
 import { transformWithTs } from '@formatjs/ts-transformer';
 
-import difference from 'lodash/difference';
+import { difference } from 'lodash';
 import * as icuParser from '@formatjs/icu-messageformat-parser';
 import type { MessageFormatElement } from '@formatjs/icu-messageformat-parser';
 
 import ts from 'typescript';
 type TypeScript = typeof ts;
 
-import { extractMessagesFromCallExpression, MessageDescriptor, ExtractorOpts } from './call_expt';
+import type { MessageDescriptor, ExtractorOpts } from './call_expt';
+import { extractMessagesFromCallExpression } from './call_expt';
 import { extractMessageFromJsxComponent } from './react';
 
 function getVisitor(

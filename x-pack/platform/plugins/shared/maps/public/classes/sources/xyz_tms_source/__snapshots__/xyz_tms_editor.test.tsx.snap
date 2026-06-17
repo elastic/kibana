@@ -1,0 +1,14 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`should render 1`] = `
+<EuiPanel>
+  <EuiFormRow
+    label="Url"
+  >
+    <EuiFieldText
+      onChange={[Function]}
+      placeholder="https://a.tile.openstreetmap.org/{z}/{x}/{y}.png"
+    />
+  </EuiFormRow>
+</EuiPanel>
+`;

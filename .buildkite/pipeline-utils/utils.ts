@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { execSync } from 'child_process';
@@ -42,6 +43,7 @@ const getVersionsFile = (() => {
     prevMinors: Version[];
     prevMajors: Version[];
     current: Version;
+    versions: Version[];
   };
   const versionsFileName = 'versions.json';
   try {
@@ -61,4 +63,51 @@ const getVersionsFile = (() => {
   return () => versions;
 })();
 
-export { getKibanaDir, getVersionsFile };
+const getRequiredEnv = (name: string) => {
+  const value = process.env[name];
+  if (typeof value !== 'string' || !value) {
+    throw new Error(`Missing required environment variable "${name}"`);
+  }
+  return value;
+};
+
+const getTrackedBranch = (): string => {
+  let pkg;
+  try {
+    pkg = JSON.parse(fs.readFileSync(path.join(getKibanaDir(), 'package.json'), 'utf8'));
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    throw new Error(`unable to read kibana's package.json file: ${message}`);
+  }
+
+  if (typeof pkg.branch !== 'string') {
+    throw new Error('missing `branch` field from package.json file');
+  }
+
+  return pkg.branch;
+};
+
+function runBatchedPromises<T>(
+  promiseCreators: Array<() => Promise<T>>,
+  maxParallel: number
+): Promise<T[]> {
+  const results: T[] = [];
+  let i = 0;
+
+  const next: () => Promise<any> = () => {
+    if (i >= promiseCreators.length) {
+      return Promise.resolve();
+    }
+
+    const promiseCreator = promiseCreators[i++];
+    return Promise.resolve(promiseCreator()).then((result) => {
+      results.push(result);
+      return next();
+    });
+  };
+
+  const tasks = Array.from({ length: maxParallel }, () => next());
+  return Promise.all(tasks).then(() => results);
+}
+
+export { getKibanaDir, getVersionsFile, getRequiredEnv, getTrackedBranch, runBatchedPromises };

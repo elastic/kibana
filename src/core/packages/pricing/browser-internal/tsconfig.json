@@ -1,0 +1,24 @@
+{
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+    "types": [
+      "jest",
+      "node"
+    ]
+  },
+  "include": [
+    "**/*.ts",
+    "**/*.tsx",
+  ],
+  "exclude": [
+    "target/**/*",
+  ],
+  "kbn_references": [
+    "@kbn/core-http-browser-internal",
+    "@kbn/core-pricing-browser",
+    "@kbn/core-pricing-common",
+    "@kbn/core-http-browser-mocks",
+    "@kbn/core-base-browser-internal",
+  ]
+}

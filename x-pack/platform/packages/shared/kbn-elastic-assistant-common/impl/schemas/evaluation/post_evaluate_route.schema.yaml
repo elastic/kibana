@@ -1,0 +1,119 @@
+openapi: 3.0.0
+info:
+  title: Post Evaluate API endpoint
+  version: "1"
+paths:
+  /internal/elastic_assistant/evaluate:
+    post:
+      x-codegen-enabled: true
+      x-codeSamples:
+        - lang: curl
+          label: Example request
+          source: |
+            curl \
+             --request POST 'http://localhost:5601/internal/elastic_assistant/evaluate' \
+             --header "Authorization: $API_KEY" \
+             --header "Content-Type: application/json" \
+             --data '{"graphs":["Default"],"datasetName":"my-evaluation-dataset","connectorIds":["my-connector-id"],"runName":"eval-run-1","alertsIndexPattern":".alerts-security.alerts-default","size":20}'
+      x-labels: [ess, serverless]
+      operationId: PostEvaluate
+      description: Perform an evaluation using sample data against a combination of Graphs and Connectors
+      summary: Performs an evaluation of the Elastic Assistant
+      tags:
+        - Evaluation API
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PostEvaluateBody"
+            examples:
+              graphs:
+                - "Default"
+              datasetName: "my-evaluation-dataset"
+              connectorIds:
+                - "my-connector-id"
+              runName: "eval-run-2024-01-15"
+              alertsIndexPattern: ".alerts-security.alerts-default"
+              size: 20
+      responses:
+        "200":
+          description: Indicates a successful call.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  evaluationId:
+                    type: string
+                  success:
+                    type: boolean
+                required:
+                  - evaluationId
+                  - success
+              examples:
+                PostEvaluateResponse200Example:
+                  summary: A successful response indicating the evaluation has started.
+                  value:
+                    evaluationId: "eval-run-abc123"
+                    success: true
+        "400":
+          description: Bad Request response.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  statusCode:
+                    type: number
+                  error:
+                    type: string
+                  message:
+                    type: string
+              examples:
+                PostEvaluateResponse400Example:
+                  summary: A bad request response.
+                  value:
+                    statusCode: 400
+                    error: Bad Request
+                    message: "graphs must contain exactly one element."
+components:
+  schemas:
+    PostEvaluateBody:
+      type: object
+      required:
+        - graphs
+        - datasetName
+        - connectorIds
+      properties:
+        graphs:
+          type: array
+          items:
+            type: string
+          minItems: 1
+          maxItems: 1
+        datasetName:
+          type: string
+        evaluatorConnectorId:
+          type: string
+        connectorIds:
+          type: array
+          items:
+            type: string
+        runName:
+          type: string
+        alertsIndexPattern:
+          type: string
+          default: ".alerts-security.alerts-default"
+        langSmithApiKey:
+          type: string
+        langSmithProject:
+          type: string
+        replacements:
+          $ref: "../conversations/common_attributes.schema.yaml#/components/schemas/Replacements"
+          default: {}
+        screenContext:
+          $ref: '../common_attributes.schema.yaml#/components/schemas/ScreenContext'
+        size:
+          type: number
+          default: 20

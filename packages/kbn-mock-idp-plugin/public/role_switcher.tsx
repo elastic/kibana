@@ -1,18 +1,22 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { EuiButton, EuiContextMenu, EuiPopover } from '@elastic/eui';
 import React, { useEffect, useState } from 'react';
-import { EuiButton, EuiPopover, EuiContextMenu } from '@elastic/eui';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { CoreStart } from '@kbn/core-lifecycle-browser';
 import useAsyncFn from 'react-use/lib/useAsyncFn';
-import type { AuthenticatedUser } from '@kbn/security-plugin-types-common';
+
+import type { CoreStart } from '@kbn/core-lifecycle-browser';
+import { i18n } from '@kbn/i18n';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { MOCK_IDP_REALM_NAME, MOCK_IDP_REALM_TYPE } from '@kbn/mock-idp-utils/src/constants';
+import type { AuthenticatedUser } from '@kbn/security-plugin-types-common';
+
 import { createReloadPageToast } from './reload_page_toast';
 import type { CreateSAMLResponseParams } from '../server';
 
@@ -25,19 +29,20 @@ export const useAuthenticator = (reloadPage = false) => {
   const { services } = useKibana<CoreStart>();
 
   return useAsyncFn(async (params: CreateSAMLResponseParams) => {
-    // Create SAML Response using Mock IDP
     const response = await services.http.post<Record<string, string>>('/mock_idp/saml_response', {
       body: JSON.stringify(params),
     });
 
-    // Authenticate user with SAML response
-    if (reloadPage) {
-      const form = createForm('/api/security/saml/callback', response);
+    const { acsUrl, ...samlFields } = response;
+    const formAction = acsUrl ?? services.http.basePath.prepend('/api/security/saml/callback');
+
+    if (reloadPage || acsUrl) {
+      const form = createForm(formAction, samlFields);
       form.submit();
-      await new Promise(() => {}); // Never resolve
+      await new Promise(() => {});
     } else {
       await services.http.post('/api/security/saml/callback', {
-        body: JSON.stringify(response),
+        body: JSON.stringify(samlFields),
         asResponse: true,
         rawResponse: true,
       });
@@ -66,6 +71,7 @@ export const RoleSwitcher = () => {
       services.notifications.toasts.add(
         createReloadPageToast({
           user: authenticateUserState.value,
+          userProfile: services.userProfile,
           theme: services.theme,
           i18n: services.i18n,
         })
@@ -89,7 +95,7 @@ export const RoleSwitcher = () => {
         <EuiButton
           color="text"
           size="s"
-          iconType="arrowDown"
+          iconType="chevronSingleDown"
           iconSide="right"
           minWidth={false}
           onClick={() => setIsOpen((toggle) => !toggle)}
@@ -105,6 +111,9 @@ export const RoleSwitcher = () => {
       repositionToCrossAxis={false}
       isOpen={isOpen}
       closePopover={() => setIsOpen(false)}
+      aria-label={i18n.translate('kbnMockIdpPlugin.roleSwitcher.popoverAriaLabel', {
+        defaultMessage: 'Switch role',
+      })}
     >
       <EuiContextMenu
         initialPanelId={0}
@@ -121,6 +130,7 @@ export const RoleSwitcher = () => {
                   full_name: currentUserState.value!.full_name,
                   email: currentUserState.value!.email,
                   roles: [role],
+                  url: window.location.href,
                 });
                 setIsOpen(false);
               },

@@ -1,0 +1,45 @@
+requestBody:
+  content:
+    application/json:
+      examples:
+        exportSavedObjectsRequest:
+          summary: Export a specific saved object
+          value:
+            objects:
+              - type: dashboard
+                id: example-dashboard-1
+            includeReferencesDeep: false
+            excludeExportDetails: true
+responses:
+  '200':
+    content:
+      application/x-ndjson:
+        examples:
+          exportSavedObjectsResponse:
+            summary: The export response contains an NDJSON record for each exported object
+            value: |
+              {"id":"example-dashboard-1","type":"dashboard","attributes":{"title":"Example dashboard 1"},"references":[],"managed":false}
+              {"exportedCount":1,"missingRefCount":0,"missingReferences":[]}
+  '400':
+    content:
+      application/json:
+        examples:
+          badRequestResponse:
+            summary: A bad request error
+            value:
+              statusCode: 400
+              error: Bad Request
+              message: 'Either `type` or `objects` are required.: Bad Request'
+x-codeSamples:
+  - lang: curl
+    source: |
+      curl \
+        -X POST "${KIBANA_URL}/api/saved_objects/_export" \
+        -H "Authorization: ApiKey ${API_KEY}" \
+        -H "kbn-xsrf: true" \
+        -H "Content-Type: application/json" \
+        -d '{"objects":[{"type":"dashboard","id":"example-dashboard-1"}],"includeReferencesDeep":false,"excludeExportDetails":true}'
+  - lang: Console
+    source: |
+      POST kbn://api/saved_objects/_export
+      {"objects":[{"type":"dashboard","id":"example-dashboard-1"}],"includeReferencesDeep":false,"excludeExportDetails":true}

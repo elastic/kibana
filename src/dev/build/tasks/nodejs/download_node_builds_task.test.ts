@@ -1,15 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { ToolingLog, ToolingLogCollectingWriter } from '@kbn/tooling-log';
 import { createAnyInstanceSerializer } from '@kbn/jest-serializers';
 
-import { Config, Platform } from '../../lib';
+import type { Platform } from '../../lib';
+import { Config } from '../../lib';
 import { DownloadNodeBuilds } from './download_node_builds_task';
 
 jest.mock('./node_shasums');
@@ -37,6 +39,7 @@ async function setup({ failOnUrl }: { failOnUrl?: string } = {}) {
     isRelease: true,
     targetAllPlatforms: true,
     targetServerlessPlatforms: false,
+    skipServerless: false,
     dockerContextUseLocalArtifact: false,
     dockerCrossCompile: false,
     dockerNamespace: null,
@@ -76,7 +79,7 @@ async function setup({ failOnUrl }: { failOnUrl?: string } = {}) {
 it('downloads node builds for each platform', async () => {
   const { config } = await setup();
 
-  await DownloadNodeBuilds.run(config, log, []);
+  await DownloadNodeBuilds.run(config, log);
 
   expect(downloadToDisk.mock.calls).toMatchInlineSnapshot(`
     Array [
@@ -118,7 +121,7 @@ it('downloads node builds for each platform', async () => {
 it('rejects if any download fails', async () => {
   const { config } = await setup({ failOnUrl: 'linux:url' });
 
-  await expect(DownloadNodeBuilds.run(config, log, [])).rejects.toMatchInlineSnapshot(
+  await expect(DownloadNodeBuilds.run(config, log)).rejects.toMatchInlineSnapshot(
     `[Error: Download failed for reasons]`
   );
   expect(testWriter.messages).toMatchInlineSnapshot(`Array []`);

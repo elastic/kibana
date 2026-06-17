@@ -1,0 +1,188 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { SavedObjectsModelVersionMap } from '@kbn/core-saved-objects-server';
+import {
+  rawRuleSchemaV1,
+  rawRuleSchemaV2,
+  rawRuleSchemaV3,
+  rawRuleSchemaV4,
+  rawRuleSchemaV5,
+  rawRuleSchemaV6,
+  rawRuleSchemaV7,
+  rawRuleSchemaV8,
+  rawRuleSchemaV9,
+  rawRuleSchemaV10,
+  rawRuleSchemaV11,
+  rawRuleSchemaV12,
+  rawRuleSchemaV13,
+} from '../schemas/raw_rule';
+
+export const ruleModelVersions: SavedObjectsModelVersionMap = {
+  '1': {
+    changes: [],
+    schemas: {
+      forwardCompatibility: rawRuleSchemaV1.extends({}, { unknowns: 'ignore' }),
+      create: rawRuleSchemaV1,
+    },
+  },
+  '2': {
+    changes: [],
+    schemas: {
+      forwardCompatibility: rawRuleSchemaV2.extends({}, { unknowns: 'ignore' }),
+      create: rawRuleSchemaV2,
+    },
+  },
+  '3': {
+    changes: [],
+    schemas: {
+      forwardCompatibility: rawRuleSchemaV3.extends({}, { unknowns: 'ignore' }),
+      create: rawRuleSchemaV3,
+    },
+  },
+  '4': {
+    changes: [],
+    schemas: {
+      forwardCompatibility: rawRuleSchemaV4.extends({}, { unknowns: 'ignore' }),
+      create: rawRuleSchemaV4,
+    },
+  },
+  '5': {
+    changes: [],
+    schemas: {
+      forwardCompatibility: rawRuleSchemaV5.extends({}, { unknowns: 'ignore' }),
+      create: rawRuleSchemaV5,
+    },
+  },
+  '6': {
+    changes: [
+      {
+        type: 'mappings_addition',
+        addedMappings: {
+          artifacts: {
+            properties: {
+              investigation_guide: {
+                properties: {
+                  blob: {
+                    type: 'text',
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    ],
+    schemas: {
+      forwardCompatibility: rawRuleSchemaV6.extends({}, { unknowns: 'ignore' }),
+      create: rawRuleSchemaV6,
+    },
+  },
+  '7': {
+    changes: [],
+    schemas: {
+      forwardCompatibility: rawRuleSchemaV7.extends({}, { unknowns: 'ignore' }),
+      create: rawRuleSchemaV7,
+    },
+  },
+  '8': {
+    changes: [
+      {
+        type: 'mappings_addition',
+        addedMappings: {
+          actions: {
+            properties: {
+              params: {
+                type: 'flattened',
+              },
+            },
+          },
+        },
+      },
+    ],
+    schemas: {
+      forwardCompatibility: rawRuleSchemaV8.extends({}, { unknowns: 'ignore' }),
+      create: rawRuleSchemaV8,
+    },
+  },
+  '9': {
+    changes: [
+      {
+        type: 'mappings_addition',
+        addedMappings: {
+          uiamApiKey: {
+            type: 'binary',
+          },
+        },
+      },
+    ],
+    schemas: {
+      forwardCompatibility: rawRuleSchemaV9.extends({}, { unknowns: 'ignore' }),
+      create: rawRuleSchemaV9,
+    },
+  },
+  '10': {
+    changes: [],
+    schemas: {
+      forwardCompatibility: rawRuleSchemaV10.extends({}, { unknowns: 'ignore' }),
+      create: rawRuleSchemaV10,
+    },
+  },
+  '11': {
+    changes: [],
+    schemas: {
+      forwardCompatibility: rawRuleSchemaV11.extends({}, { unknowns: 'ignore' }),
+      create: rawRuleSchemaV11,
+    },
+  },
+  '12': {
+    changes: [
+      {
+        type: 'mappings_addition',
+        addedMappings: {
+          snoozedInstances: {
+            type: 'nested',
+            properties: {
+              instanceId: {
+                type: 'keyword',
+              },
+              snoozeSnapshot: {
+                type: 'object',
+                dynamic: false,
+              },
+            },
+          },
+        },
+      },
+    ],
+    schemas: {
+      forwardCompatibility: rawRuleSchemaV12.extends({}, { unknowns: 'ignore' }),
+      create: rawRuleSchemaV12,
+    },
+  },
+  '13': {
+    changes: [
+      {
+        type: 'mappings_addition',
+        addedMappings: {
+          actions: {
+            properties: {
+              params: {
+                type: 'flattened',
+                ignore_above: 4096,
+              },
+            },
+          },
+        },
+      },
+    ],
+    schemas: {
+      forwardCompatibility: rawRuleSchemaV13.extends({}, { unknowns: 'ignore' }),
+      create: rawRuleSchemaV13,
+    },
+  },
+};

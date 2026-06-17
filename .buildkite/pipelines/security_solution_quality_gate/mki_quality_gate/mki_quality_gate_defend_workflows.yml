@@ -3,13 +3,12 @@ steps:
     label: 'Cypress MKI - Defend Workflows'
     key: test_defend_workflows
     agents:
-      image: family/kibana-ubuntu-2004
+      image: family/kibana-ubuntu-2404
       imageProject: elastic-images-prod
       provider: gcp
       enableNestedVirtualization: true
-      localSsds: 1
-      localSsdInterface: nvme
       machineType: n2-standard-4
+      diskSizeGb: 120
     timeout_in_minutes: 300
     parallelism: 1
     retry:

@@ -1,0 +1,31 @@
+summary: Resolve conflict errors
+description: >
+  The response for resolving conflict errors for a data view, visualization, and Canvas workpad by overwriting the existing saved objects.
+  The result indicates a successful copy and all four objects are created.
+value:
+  sales:
+    success: true
+    successCount: 4
+    successResults:
+      - id: my-pattern
+        type: index-pattern
+        meta:
+          icon: indexPatternApp
+          title: my-pattern-*
+      - id: my-vis
+        type: visualization
+        destinationId: another-vis
+        meta:
+          icon: visualizeApp
+          title: Look at my visualization
+      - id: my-canvas
+        type: canvas-workpad
+        destinationId: yet-another-canvas
+        meta:
+          icon: canvasApp
+          title: Look at my canvas
+      - id: my-dashboard
+        type: dashboard
+        meta:
+          icon: dashboardApp
+          title: Look at my dashboard

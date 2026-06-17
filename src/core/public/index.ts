@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 /**
@@ -24,9 +25,8 @@
  * @packageDocumentation
  */
 
+import 'reflect-metadata/lite';
 import './index.scss';
-
-import 'reflect-metadata';
 
 export type { DocLinksStart } from '@kbn/core-doc-links-browser';
 export type { HttpSetup, HttpStart } from '@kbn/core-http-browser';
@@ -34,16 +34,25 @@ export type { I18nStart } from '@kbn/core-i18n-browser';
 export type {
   FatalErrorsSetup,
   FatalErrorsStart,
-  FatalErrorInfo,
+  FatalError,
 } from '@kbn/core-fatal-errors-browser';
+export type {
+  EvaluationContext,
+  FeatureFlagsSetup,
+  FeatureFlagsStart,
+} from '@kbn/core-feature-flags-browser';
 export type {
   UiSettingsState,
   IUiSettingsClient,
   PublicUiSettingsParams,
 } from '@kbn/core-ui-settings-browser';
 export type { Capabilities } from '@kbn/core-capabilities-common';
-export type { SavedObjectsStart } from '@kbn/core-saved-objects-browser';
-export type { NotificationsSetup, NotificationsStart } from '@kbn/core-notifications-browser';
+export type {
+  NotificationsSetup,
+  NotificationsStart,
+  FeedbackStart,
+  ToursStart,
+} from '@kbn/core-notifications-browser';
 export type {
   ChromeBadge,
   ChromeBreadcrumb,
@@ -51,9 +60,7 @@ export type {
   ChromeHelpExtensionMenuLink,
   ChromeHelpExtensionLinkBase,
   ChromeHelpExtensionMenuCustomLink,
-  ChromeHelpExtensionMenuDiscussLink,
   ChromeHelpExtensionMenuDocumentationLink,
-  ChromeHelpExtensionMenuGitHubLink,
   ChromeNavControl,
   ChromeNavControls,
   ChromeNavLink,
@@ -63,7 +70,6 @@ export type {
   ChromeRecentlyAccessed,
   ChromeRecentlyAccessedHistoryItem,
   ChromeUserBanner,
-  ChromeHelpMenuActions,
 } from '@kbn/core-chrome-browser';
 export type {
   Plugin,
@@ -163,23 +169,7 @@ export type {
 } from '@kbn/core-application-browser';
 export { CoreScopedHistory } from '@kbn/core-application-browser-internal';
 
-export type {
-  SavedObjectsClientContract,
-  SimpleSavedObject,
-  SavedObjectsCreateOptions,
-  SavedObjectsDeleteOptions,
-  SavedObjectsBatchResponse,
-  SavedObjectsFindOptions,
-  SavedObjectsFindOptionsReference,
-  SavedObjectsUpdateOptions,
-  ResolvedSimpleSavedObject,
-  SavedObjectsBulkUpdateObject,
-  SavedObjectsFindResponse,
-  SavedObjectsBulkCreateOptions,
-  SavedObjectsBulkUpdateOptions,
-  SavedObjectsBulkResolveResponse,
-  SavedObjectsBulkCreateObject,
-} from '@kbn/core-saved-objects-api-browser';
+export type { SavedObjectsFindOptionsReference } from '@kbn/core-saved-objects-api-server';
 export type {
   SavedObject,
   SavedObjectTypeIdTuple,
@@ -195,6 +185,7 @@ export type {
   SavedObjectsImportAmbiguousConflictError,
   SavedObjectsImportUnsupportedTypeError,
   SavedObjectsImportMissingReferencesError,
+  SavedObjectsImportUnexpectedAccessControlMetadataError,
   SavedObjectsImportUnknownError,
   SavedObjectsImportFailure,
   SavedObjectsImportRetry,
@@ -275,6 +266,8 @@ export type {
   ErrorToastOptions,
 } from '@kbn/core-notifications-browser';
 
+export type { PricingServiceStart } from '@kbn/core-pricing-browser';
+
 export type { ToastsApi } from '@kbn/core-notifications-browser-internal';
 
 export type { CustomBrandingStart, CustomBrandingSetup } from '@kbn/core-custom-branding-browser';
@@ -287,8 +280,6 @@ export type {
 } from '@kbn/core-deprecations-browser';
 
 export type { MountPoint, UnmountCallback, OverlayRef } from '@kbn/core-mount-utils-browser';
-
-export { URL_MAX_LENGTH } from '@kbn/core-apps-browser-internal';
 
 export type { KibanaExecutionContext } from '@kbn/core-execution-context-common';
 

@@ -1,0 +1,240 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import type { TypeOf } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
+import { esqlColumnWithFormatSchema } from '../metric_ops';
+import { colorMappingSchema, staticColorSchema, autoColorSchema, AUTO_COLOR } from '../color';
+import { dataSourceSchema, dataSourceEsqlTableSchema } from '../data_source';
+
+import {
+  collapseBySchema,
+  dslOnlyPanelInfoSchema,
+  layerSettingsSchema,
+  sharedPanelInfoSchema,
+  legendTruncateAfterLinesSchema,
+  legendPositionSchema,
+} from '../shared';
+import type { PartitionMetric } from './partition_shared';
+import {
+  legendNestedSchema,
+  validateColoringAssignments,
+  valueDisplaySchema,
+} from './partition_shared';
+import {
+  legendSizeSchema,
+  legendVisibilitySchemaWithAuto,
+  mergeAllBucketsWithChartDimensionSchema,
+  mergeAllMetricsWithChartDimensionSchemaWithRefBasedOps,
+} from './shared';
+import { objectUnion } from './utils/object_union';
+import { groupIsNotCollapsed } from '../../utils';
+
+const treemapSharedConfigSchema = {
+  legend: schema.maybe(
+    schema.object(
+      {
+        nested: legendNestedSchema,
+        truncate_after_lines: legendTruncateAfterLinesSchema,
+        visibility: legendVisibilitySchemaWithAuto,
+        size: legendSizeSchema,
+        position: legendPositionSchema,
+      },
+      {
+        meta: {
+          id: 'treemapLegend',
+          title: 'Legend',
+          description: 'Configuration for the treemap chart legend appearance and behavior',
+        },
+      }
+    )
+  ),
+};
+
+const treemapStylingSchema = schema.object(
+  {
+    values: valueDisplaySchema,
+    /**
+     * Labels configuration
+     */
+    labels: schema.maybe(
+      schema.object(
+        {
+          visible: schema.maybe(schema.boolean({ meta: { description: 'Show category labels' } })),
+        },
+        { meta: { description: 'Labels configuration' } }
+      )
+    ),
+  },
+  {
+    meta: {
+      id: 'treemapStyling',
+      title: 'Treemap styling',
+      description: 'Visual chart styling options',
+    },
+  }
+);
+
+const partitionConfigPrimaryMetricOptionsSchema = {
+  /**
+   * Color configuration
+   */
+  color: schema.maybe(
+    schema.oneOf([staticColorSchema, autoColorSchema], {
+      defaultValue: AUTO_COLOR,
+    })
+  ),
+};
+
+const partitionConfigBreakdownByOptionsSchema = {
+  /**
+   * Color configuration: color mapping only
+   */
+  color: schema.maybe(colorMappingSchema),
+  /**
+   * Collapse by function. This parameter is used to collapse the
+   * metric chart when the number of columns is bigger than the
+   * number of columns specified in the columns parameter.
+   * Possible values:
+   * - 'avg': Collapse by average
+   * - 'sum': Collapse by sum
+   * - 'max': Collapse by max
+   * - 'min': Collapse by min
+   * - 'none': Do not collapse
+   */
+  collapse_by: schema.maybe(collapseBySchema),
+};
+
+function validateForMultipleMetrics({
+  metrics,
+  group_by,
+}: {
+  metrics: Array<PartitionMetric>;
+  group_by?: Array<{ collapse_by?: string }>;
+}) {
+  const groupByDimensionNumber = (group_by && group_by.filter(groupIsNotCollapsed).length) || 0;
+  if (metrics.length === 1) {
+    if (groupByDimensionNumber > 2) {
+      return 'The number of non-collapsed group_by dimensions must not exceed 2';
+    }
+  } else {
+    if (groupByDimensionNumber > 1) {
+      return 'When multiple metrics are defined, the number of non-collapsed group_by dimensions must not exceed 1';
+    }
+  }
+  return validateColoringAssignments({ metrics, group_by });
+}
+
+export const treemapConfigSchemaNoESQL = schema.object(
+  {
+    type: schema.literal('treemap'),
+    ...sharedPanelInfoSchema,
+    ...layerSettingsSchema,
+    ...dataSourceSchema,
+    ...dslOnlyPanelInfoSchema,
+    ...treemapSharedConfigSchema,
+    styling: schema.maybe(treemapStylingSchema),
+    /**
+     * Primary value configuration, must define operation. Supports field-based operations (count, unique count, metrics, sum, last value, percentile, percentile ranks), reference-based operations (differences, moving average, cumulative sum, counter rate), and formula-like operations (static value, formula).
+     */
+    metrics: schema.arrayOf(
+      mergeAllMetricsWithChartDimensionSchemaWithRefBasedOps(
+        partitionConfigPrimaryMetricOptionsSchema,
+        'treemapMetric'
+      ),
+      {
+        minSize: 1,
+        maxSize: 100,
+        meta: { description: 'Array of metric configurations (minimum 1)' },
+      }
+    ),
+    /**
+     * Configure how to break down the metric (e.g. show one metric per term). Supports date histogram, terms, histogram, ranges, and filters operations.
+     */
+    group_by: schema.maybe(
+      schema.arrayOf(
+        mergeAllBucketsWithChartDimensionSchema(
+          partitionConfigBreakdownByOptionsSchema,
+          'treemapGroupBy'
+        ),
+        {
+          minSize: 1,
+          maxSize: 100,
+          meta: { description: 'Array of breakdown dimensions (minimum 1)' },
+        }
+      )
+    ),
+  },
+  {
+    meta: {
+      id: 'treemapNoESQL',
+      title: 'Treemap Chart (DSL)',
+      description:
+        'Treemap chart configuration schema for data source queries (non-ES|QL mode), defining metrics and breakdown dimensions',
+    },
+    validate: validateForMultipleMetrics,
+  }
+);
+
+export const treemapConfigSchemaESQL = schema.object(
+  {
+    type: schema.literal('treemap'),
+    ...sharedPanelInfoSchema,
+    ...layerSettingsSchema,
+    ...dataSourceEsqlTableSchema,
+    ...treemapSharedConfigSchema,
+    styling: schema.maybe(treemapStylingSchema),
+    /**
+     * Primary value configuration, must define operation. In ES|QL mode, uses column-based configuration.
+     */
+    metrics: schema.arrayOf(
+      esqlColumnWithFormatSchema.extends(partitionConfigPrimaryMetricOptionsSchema),
+      {
+        minSize: 1,
+        maxSize: 100,
+        meta: { description: 'Array of metric configurations (minimum 1)' },
+      }
+    ),
+    /**
+     * Configure how to break down the metric (e.g. show one metric per term). In ES|QL mode, uses column-based configuration.
+     */
+    group_by: schema.maybe(
+      schema.arrayOf(esqlColumnWithFormatSchema.extends(partitionConfigBreakdownByOptionsSchema), {
+        minSize: 1,
+        maxSize: 100,
+        meta: { description: 'Array of breakdown dimensions (minimum 1)' },
+      })
+    ),
+  },
+  {
+    meta: {
+      id: 'treemapESQL',
+      title: 'Treemap Chart (ES|QL)',
+      description:
+        'Treemap chart configuration schema for ES|QL queries, defining metrics and breakdown dimensions using column-based configuration',
+    },
+    validate: validateForMultipleMetrics,
+  }
+);
+
+export const treemapConfigSchema = objectUnion(
+  [treemapConfigSchemaNoESQL, treemapConfigSchemaESQL],
+  {
+    meta: {
+      id: 'treemapChart',
+      title: 'Treemap Chart',
+      description:
+        'Treemap chart configuration schema supporting both data source queries (non-ES|QL) and ES|QL query modes',
+    },
+  }
+);
+
+export type TreemapConfig = TypeOf<typeof treemapConfigSchema>;
+export type TreemapConfigNoESQL = TypeOf<typeof treemapConfigSchemaNoESQL>;
+export type TreemapConfigESQL = TypeOf<typeof treemapConfigSchemaESQL>;

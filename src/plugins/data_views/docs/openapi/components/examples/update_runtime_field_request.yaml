@@ -1,9 +1,0 @@
-summary: Update an existing runtime field on a data view.
-value:
-  {
-     "runtimeField": {
-     "script": {
-        "source": 'emit(doc["bar"].value)'
-      }
-  }
-}

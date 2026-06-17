@@ -1,14 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
 import Path from 'path';
 import { REPO_ROOT } from '@kbn/repo-info';
-import { ParameterDeclaration, ClassMemberTypes, Node } from 'ts-morph';
-import { BuildApiDecOpts } from './types';
+import type { ParameterDeclaration, ClassMemberTypes } from 'ts-morph';
+import { Node } from 'ts-morph';
+import type { BuildApiDecOpts } from './types';
 import { isNamedNode } from '../tsmorph_utils';
 
 // Collect any paths encountered that are not in the correct scope folder.
@@ -34,6 +37,20 @@ export function getRelativePath(fullPath: string): string {
 export function getSourceForNode(node: Node): string {
   const path = getRelativePath(node.getSourceFile().getFilePath());
   return path;
+}
+
+export function getSourceLocationForNode(node: Node): {
+  path: string;
+  lineNumber: number;
+  columnNumber: number;
+} {
+  const path = getRelativePath(node.getSourceFile().getFilePath());
+  const { line, column } = node.getSourceFile().getLineAndColumnAtPos(node.getNonWhitespaceStart());
+  return {
+    path,
+    lineNumber: line,
+    columnNumber: column,
+  };
 }
 
 export function buildApiId(id: string, parentId?: string): string {

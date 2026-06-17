@@ -1,0 +1,184 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { MaybePromise } from '@kbn/utility-types';
+import type { z, ZodObject } from '@kbn/zod/v4';
+import type { IUiSettingsClient } from '@kbn/core-ui-settings-server';
+import type { ToolCallWithResult, ToolDefinition, ToolType } from '@kbn/agent-builder-common';
+import type { ToolResult } from '@kbn/agent-builder-common/tools/tool_result';
+import type { EsqlToolDefinition } from '@kbn/agent-builder-common/tools/types/esql';
+import type { IndexSearchToolDefinition } from '@kbn/agent-builder-common/tools/types/index_search';
+import type { WorkflowToolDefinition } from '@kbn/agent-builder-common/tools/types/workflow';
+import type { KibanaRequest } from '@kbn/core-http-server';
+import type { ConfirmPromptDefinition } from '@kbn/agent-builder-common/agents';
+import type { ToolHandlerFn } from './handler';
+
+/**
+ * Information exposed to the {@link ToolAvailabilityHandler}.
+ */
+export interface ToolAvailabilityContext {
+  request: KibanaRequest;
+  uiSettings: IUiSettingsClient;
+  spaceId: string;
+}
+
+/**
+ * Information exposed to the {@link ToolAvailabilityHandler}.
+ */
+export interface ToolAvailabilityResult {
+  /**
+   * Whether the tool is available or not.
+   */
+  status: 'available' | 'unavailable';
+  /**
+   * Optional reason for why the tool is unavailable.
+   */
+  reason?: string;
+}
+
+/**
+ * Availability handler for a tool.
+ */
+export type ToolAvailabilityHandler = (
+  context: ToolAvailabilityContext
+) => MaybePromise<ToolAvailabilityResult>;
+
+export interface ToolAvailabilityConfig {
+  /**
+   * handler which can be defined to add conditional availability of the tool.
+   *
+   * Note: this is meant to be used for tools that are gated behind a feature flag,
+   *       or tools which have some condition to be available.
+   *       it *IS NOT* meant to be used as a replacement for RBAC.
+   */
+  handler: ToolAvailabilityHandler;
+  /**
+   * Cache mode for the result
+   * - global: the result will be cached globally, for all spaces
+   * - space: the result will be cached per-space
+   * - none: the result shouldn't be cached (warning: this can lead to performance issues)
+   */
+  cacheMode: 'global' | 'space' | 'none';
+  /**
+   * Optional TTL for the cached result, *in seconds*.
+   * Default to 300 seconds (5 minutes).
+   */
+  cacheTtl?: number;
+}
+
+/**
+ * Controls how often the user is prompted for confirmation when the agent calls a tool.
+ *
+ * - once:   prompt once per tool type for the entire conversation. After the user
+ *           accepts (or rejects), all subsequent calls to the same tool reuse that
+ *           response — including retries after failures.
+ * - always: prompt on every individual tool call. Each invocation gets its own
+ *           confirmation, even if it targets the same tool type.
+ * - never:  skip confirmation entirely.
+ */
+export type ToolConfirmationPolicyMode = 'once' | 'always' | 'never';
+
+export type ToolPolicyConfirmationDefinition = Omit<ConfirmPromptDefinition, 'id'>;
+
+export interface ToolConfirmationPolicy<
+  TParams extends Record<string, unknown> = Record<string, unknown>
+> {
+  /**
+   * If true, will prompt the user for confirmation when the agent wants to execute the tool, before the actual execution.
+   */
+  askUser?: ToolConfirmationPolicyMode;
+  /**
+   * If set, will be used to get the confirmation
+   */
+  getConfirmation?: (opts: {
+    toolParams: TParams;
+  }) => MaybePromise<ToolPolicyConfirmationDefinition>;
+}
+
+export interface BuiltInToolSpecificConfig<
+  TParams extends Record<string, unknown> = Record<string, unknown>
+> {
+  /**
+   * Optional dynamic availability configuration.
+   * Refer to {@link ToolAvailabilityConfig}
+   */
+  availability?: ToolAvailabilityConfig;
+  /**
+   * When true, this tool is only available when experimental features are enabled.
+   * Defaults to false.
+   */
+  experimental?: boolean;
+  /**
+   * Optional tool call policy to control tool call confirmation behavior
+   */
+  confirmation?: ToolConfirmationPolicy<TParams>;
+  /**
+   * Optional function to summarize a tool return for conversation history.
+   * When provided, this function will be called when processing conversation history
+   * to replace large tool results with compact summaries.
+   * This helps prevent context bloat in long conversations.
+   */
+  summarizeToolReturn?: ToolReturnSummarizerFn;
+}
+
+/**
+ * Function to summarize a tool return for conversation history.
+ * Used to reduce context size by replacing large tool results with compact summaries.
+ *
+ * This function receives all results from a single tool call, allowing it to
+ * aggregate and summarize multiple results together (e.g., converting 10 search
+ * results into a single summary like "search returned 10 docs, ids are: ...").
+ *
+ * @param toolReturn - All results from a single tool call
+ * @returns The summarized results, or undefined if no summarization should be applied
+ */
+export type ToolReturnSummarizerFn = (
+  toolReturn: ToolCallWithResult
+) => ToolCallWithResult['results'] | undefined;
+
+/**
+ * Built-in tool, as registered as static tool.
+ */
+export interface BuiltinToolDefinition<
+  RunInput extends ZodObject<any> = ZodObject<any>,
+  TResult extends ToolResult = ToolResult
+> extends Omit<ToolDefinition, 'type' | 'readonly' | 'configuration' | 'experimental'>,
+    BuiltInToolSpecificConfig<z.infer<RunInput>> {
+  /**
+   * built-in tool types
+   */
+  type: ToolType.builtin;
+  /**
+   * Tool's input schema, defined as a zod schema.
+   */
+  schema: RunInput;
+  /**
+   * Handler to call to execute the tool.
+   */
+  handler: ToolHandlerFn<z.infer<RunInput>, TResult>;
+  /**
+   * Optional dynamic availability configuration.
+   * Refer to {@link ToolAvailabilityConfig}
+   */
+  availability?: ToolAvailabilityConfig;
+}
+
+type StaticToolRegistrationMixin<T extends ToolDefinition> = Omit<T, 'readonly' | 'experimental'> &
+  BuiltInToolSpecificConfig;
+
+export type StaticEsqlTool = StaticToolRegistrationMixin<EsqlToolDefinition>;
+export type StaticIndexSearchTool = StaticToolRegistrationMixin<IndexSearchToolDefinition>;
+export type StaticWorkflowTool = StaticToolRegistrationMixin<WorkflowToolDefinition>;
+
+export type StaticToolRegistration<
+  RunInput extends ZodObject<any> = ZodObject<any>,
+  TResult extends ToolResult = ToolResult
+> =
+  | BuiltinToolDefinition<RunInput, TResult>
+  | StaticEsqlTool
+  | StaticIndexSearchTool
+  | StaticWorkflowTool;

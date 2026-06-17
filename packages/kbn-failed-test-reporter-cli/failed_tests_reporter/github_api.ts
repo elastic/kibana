@@ -1,16 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import Url from 'url';
 
-import Axios, { AxiosRequestConfig, AxiosInstance, AxiosHeaders, AxiosHeaderValue } from 'axios';
-import { isAxiosResponseError, isAxiosRequestError } from '@kbn/dev-utils';
-import { ToolingLog } from '@kbn/tooling-log';
+import type { ToolingLog } from '@kbn/tooling-log';
 
 const BASE_URL = 'https://api.github.com/repos/elastic/kibana/';
 
@@ -33,17 +32,19 @@ export interface GithubIssueMini {
   node_id: GithubIssue['node_id'];
 }
 
-type RequestOptions = AxiosRequestConfig & {
+interface RequestOptions {
+  method: string;
+  url: string;
+  data?: unknown;
   safeForDryRun?: boolean;
   maxAttempts?: number;
-  attempt?: number;
-};
+}
 
 export class GithubApi {
   private readonly log: ToolingLog;
   private readonly token: string | undefined;
   private readonly dryRun: boolean;
-  private readonly x: AxiosInstance;
+  private readonly defaultHeaders: Record<string, string>;
   private requestCount: number = 0;
 
   /**
@@ -63,12 +64,10 @@ export class GithubApi {
       throw new TypeError('token parameter is required');
     }
 
-    this.x = Axios.create({
-      headers: {
-        ...(this.token ? { Authorization: `token ${this.token}` } : {}),
-        'User-Agent': 'elastic/kibana#failed_test_reporter',
-      },
-    });
+    this.defaultHeaders = {
+      ...(this.token ? { Authorization: `token ${this.token}` } : {}),
+      'User-Agent': 'elastic/kibana#failed_test_reporter',
+    };
   }
 
   getRequestCount() {
@@ -130,7 +129,7 @@ export class GithubApi {
   ): Promise<{
     status: number;
     statusText: string;
-    headers: Record<string, AxiosHeaderValue | undefined>;
+    headers: Headers;
     data: T;
   }> {
     const executeRequest = !this.dryRun || options.safeForDryRun;
@@ -145,40 +144,52 @@ export class GithubApi {
         return {
           status: 200,
           statusText: 'OK',
-          headers: new AxiosHeaders(),
+          headers: new Headers(),
           data: dryRunResponse,
         };
       }
 
+      this.requestCount += 1;
+
+      let response: Response;
       try {
-        this.requestCount += 1;
-        return await this.x.request<T>(options);
+        response = await fetch(options.url, {
+          method: options.method,
+          headers: {
+            ...this.defaultHeaders,
+            ...(options.data !== undefined ? { 'Content-Type': 'application/json' } : {}),
+          },
+          body: options.data !== undefined ? JSON.stringify(options.data) : undefined,
+        });
       } catch (error) {
-        const unableToReachGithub = isAxiosRequestError(error);
-        const githubApiFailed = isAxiosResponseError(error) && error.response.status >= 500;
-        const errorResponseLog =
-          isAxiosResponseError(error) &&
-          `[${error.config?.method} ${error.config?.url}] ${error.response.status} ${error.response.statusText} Error`;
-
-        if ((unableToReachGithub || githubApiFailed) && attempt < maxAttempts) {
+        // Network-level error (DNS, connection refused, etc.).
+        if (attempt < maxAttempts) {
           const waitMs = 1000 * attempt;
+          this.log.error(`Unable to reach github, waiting ${waitMs}ms to retry`);
+          await new Promise((resolve) => setTimeout(resolve, waitMs));
+          continue;
+        }
+        throw error;
+      }
 
-          if (errorResponseLog) {
-            this.log.error(`${errorResponseLog}: waiting ${waitMs}ms to retry`);
-          } else {
-            this.log.error(`Unable to reach github, waiting ${waitMs}ms to retry`);
-          }
-
+      if (!response.ok) {
+        const errorResponseLog = `[${options.method} ${options.url}] ${response.status} ${response.statusText} Error`;
+        if (response.status >= 500 && attempt < maxAttempts) {
+          const waitMs = 1000 * attempt;
+          this.log.error(`${errorResponseLog}: waiting ${waitMs}ms to retry`);
           await new Promise((resolve) => setTimeout(resolve, waitMs));
           continue;
         }
 
-        if (errorResponseLog) {
-          throw new Error(`${errorResponseLog}: ${JSON.stringify(error.response.data)}`);
-        }
-
-        throw error;
+        throw new Error(`${errorResponseLog}: ${await response.text()}`);
       }
+
+      return {
+        status: response.status,
+        statusText: response.statusText,
+        headers: response.headers,
+        data: (await response.json()) as T,
+      };
     }
   }
 }

@@ -1,0 +1,29 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { compose, withProps } from 'react-recompose';
+import { tagsRegistry } from '../../lib/tags_registry';
+import type { Props as ComponentProps } from './tag_list';
+import { TagList as Component } from './tag_list';
+import type { TagSpec } from '../../lib/tag';
+
+interface Props {
+  /**
+   * list of tags to display in the list
+   */
+  tags: string[];
+  /**
+   * choose EuiHealth or EuiBadge
+   */
+  tagType: 'health' | 'badge';
+}
+
+export const TagList = compose<ComponentProps, Props>(
+  withProps(() => ({
+    getTag: (tag: string): TagSpec => tagsRegistry.get(tag) || { name: tag, color: undefined },
+  }))
+)(Component);

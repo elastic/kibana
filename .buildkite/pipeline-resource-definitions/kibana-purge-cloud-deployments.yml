@@ -19,14 +19,13 @@ spec:
       description: Purge stale cloud deployments
     spec:
       env:
-        ELASTIC_SLACK_NOTIFICATIONS_ENABLED: 'false'
+        KIBANA_SLACK_NOTIFICATIONS_ENABLED: 'false'
         SLACK_NOTIFICATIONS_CHANNEL: '#kibana-operations-alerts'
       allow_rebuilds: false
       branch_configuration: main
       default_branch: main
       repository: elastic/kibana
       pipeline_file: .buildkite/pipelines/purge_cloud_deployments.yml
-      skip_intermediate_builds: false
       provider_settings:
         build_branches: false
         build_pull_requests: false
@@ -49,3 +48,5 @@ spec:
           access_level: MANAGE_BUILD_AND_READ
         everyone:
           access_level: BUILD_AND_READ
+      tags:
+        - kibana

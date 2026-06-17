@@ -1,0 +1,88 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import expect from '@kbn/expect';
+
+import type { FtrProviderContext } from '../../../ftr_provider_context';
+
+export default function ({ getService, getPageObjects }: FtrProviderContext) {
+  const { common, visualize, visEditor, header } = getPageObjects([
+    'common',
+    'visualize',
+    'visEditor',
+    'header',
+  ]);
+  const comboBox = getService('comboBox');
+
+  describe('dynamic options', () => {
+    before(async () => {
+      await visualize.initTests();
+    });
+
+    describe('without chained controls', () => {
+      beforeEach(async () => {
+        await common.navigateToApp('visualize');
+        await visualize.loadSavedVisualization('dynamic options input control', {
+          navigateToVisualize: false,
+        });
+      });
+
+      it('should fetch new options when string field is filtered', async () => {
+        const initialOptions = await comboBox.getOptionsList('listControlSelect0');
+        expect(initialOptions.trim().split('\n').join()).to.equal('BD,BR,CN,ID,IN,JP,NG,PK,RU');
+
+        await comboBox.filterOptionsList('listControlSelect0', 'R');
+        await header.waitUntilLoadingHasFinished();
+
+        const updatedOptions = await comboBox.getOptionsList('listControlSelect0');
+        expect(updatedOptions.trim().split('\n').join()).to.equal('AR,BR,FR,GR,IR,KR,RO,RU,RW');
+      });
+
+      it('should not fetch new options when non-string is filtered', async () => {
+        await comboBox.set('fieldSelect-0', 'clientip', { retryCount: 3 });
+        await visEditor.clickGo();
+
+        const initialOptions = await comboBox.getOptionsList('listControlSelect0');
+        expect(initialOptions.trim().split('\n').join()).to.equal(
+          '135.206.117.161,177.194.175.66,18.55.141.62,243.158.217.196,32.146.206.24'
+        );
+
+        await comboBox.filterOptionsList('listControlSelect0', '17');
+        await header.waitUntilLoadingHasFinished();
+
+        const updatedOptions = await comboBox.getOptionsList('listControlSelect0');
+        expect(updatedOptions.trim().split('\n').join()).to.equal(
+          '135.206.117.161,177.194.175.66,243.158.217.196'
+        );
+      });
+    });
+
+    describe('with chained controls', () => {
+      before(async () => {
+        await common.navigateToApp('visualize');
+        await visualize.loadSavedVisualization('chained input control with dynamic options', {
+          navigateToVisualize: false,
+        });
+        await header.waitUntilLoadingHasFinished();
+        await comboBox.set('listControlSelect0', 'win 7', { retryCount: 3 });
+      });
+
+      it('should fetch new options when string field is filtered', async () => {
+        const initialOptions = await comboBox.getOptionsList('listControlSelect1');
+        expect(initialOptions.trim().split('\n').join()).to.equal('BD,BR,CN,ID,IN,JP,MX,NG,PK');
+
+        await comboBox.filterOptionsList('listControlSelect1', 'R');
+        await header.waitUntilLoadingHasFinished();
+
+        const updatedOptions = await comboBox.getOptionsList('listControlSelect1');
+        expect(updatedOptions.trim().split('\n').join()).to.equal('AR,BR,FR,GR,IR,KR,RO,RS,RU');
+      });
+    });
+  });
+}

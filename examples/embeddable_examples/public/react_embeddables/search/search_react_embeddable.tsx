@@ -1,34 +1,35 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiBadge, EuiStat } from '@elastic/eui';
+import { EuiBadge, EuiStat, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { DataView } from '@kbn/data-views-plugin/common';
-import { ReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/common';
+import type { EmbeddablePublicDefinition } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
 import {
   fetch$,
-  initializeTimeRange,
+  initializeTimeRangeManager,
+  timeRangeComparators,
   useBatchedPublishingSubjects,
+  initializeStateApi,
 } from '@kbn/presentation-publishing';
-import { euiThemeVars } from '@kbn/ui-theme';
 import React, { useEffect } from 'react';
 import { BehaviorSubject, switchMap, tap } from 'rxjs';
-import { SEARCH_EMBEDDABLE_ID } from './constants';
+import { SEARCH_EMBEDDABLE_TYPE } from './constants';
 import { getCount } from './get_count';
-import { SearchApi, Services, SearchSerializedState, SearchRuntimeState } from './types';
+import type { SearchApi, Services, SearchSerializedState } from './types';
 
 export const getSearchEmbeddableFactory = (services: Services) => {
-  const factory: ReactEmbeddableFactory<SearchSerializedState, SearchRuntimeState, SearchApi> = {
-    type: SEARCH_EMBEDDABLE_ID,
-    deserializeState: (state) => state.rawState,
-    buildEmbeddable: async (state, buildApi, uuid, parentApi) => {
-      const timeRange = initializeTimeRange(state);
+  const factory: EmbeddablePublicDefinition<SearchSerializedState, SearchApi> = {
+    type: SEARCH_EMBEDDABLE_TYPE,
+    buildEmbeddable: async ({ initialState, finalizeApi, parentApi, uuid }) => {
+      const timeRangeManager = initializeTimeRangeManager(initialState);
       const defaultDataView = await services.dataViews.getDefaultDataView();
       const dataViews$ = new BehaviorSubject<DataView[] | undefined>(
         defaultDataView ? [defaultDataView] : undefined
@@ -46,25 +47,40 @@ export const getSearchEmbeddableFactory = (services: Services) => {
         );
       }
 
-      const api = buildApi(
-        {
-          ...timeRange.api,
-          blockingError: blockingError$,
-          dataViews: dataViews$,
-          dataLoading: dataLoading$,
-          serializeState: () => {
-            return {
-              rawState: {
-                ...timeRange.serialize(),
-              },
-              references: [],
-            };
-          },
+      const stateApi = initializeStateApi({
+        uuid,
+        parentApi,
+        serializeState: () => {
+          return {
+            ...timeRangeManager.getLatestState(),
+          };
         },
-        {
-          ...timeRange.comparators,
-        }
-      );
+        anyStateChange$: timeRangeManager.anyStateChange$,
+        getComparators: () => {
+          /**
+           * comparators are provided in a callback to allow embeddables to change how their state is compared based
+           * on the values of other state. For instance, if a saved object ID is present (by reference), the embeddable
+           * may want to skip comparison of certain state.
+           */
+          return timeRangeComparators;
+        },
+        applySerializedState: (nextState) => {
+          /**
+           * if this embeddable had a difference between its runtime and serialized state, we could run the 'deserializeState'
+           * function here before applying next state. Method can be async to support a potential async deserialize function.
+           */
+
+          timeRangeManager.reinitializeState(nextState);
+        },
+      });
+
+      const api = finalizeApi({
+        blockingError$,
+        dataViews$,
+        dataLoading$,
+        ...stateApi,
+        ...timeRangeManager.api,
+      });
 
       const count$ = new BehaviorSubject<number>(0);
       let prevRequestAbortController: AbortController | undefined;
@@ -123,6 +139,7 @@ export const getSearchEmbeddableFactory = (services: Services) => {
         api,
         Component: () => {
           const [count, error] = useBatchedPublishingSubjects(count$, blockingError$);
+          const { euiTheme } = useEuiTheme();
 
           useEffect(() => {
             return () => {
@@ -137,7 +154,7 @@ export const getSearchEmbeddableFactory = (services: Services) => {
             <div
               css={css`
                 width: 100%;
-                padding: ${euiThemeVars.euiSizeM};
+                padding: ${euiTheme.size.m};
               `}
             >
               <EuiStat
