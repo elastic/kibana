@@ -24,6 +24,7 @@ import {
   KnowledgeIndicatorsTable,
   KiGenerationProvider,
 } from './components/knowledge_indicators_table';
+import { SignificantEventsDiscoveryProvider } from './context/significant_events_discovery_context';
 import { ONBOARDING_FAILURE_TITLE } from './components/streams_view/translations';
 import { QueriesTable } from './components/queries_table/queries_table';
 import { StreamsView } from './components/streams_view/streams_view';
@@ -239,17 +240,19 @@ export function SignificantEventsDiscoveryPage() {
         tabs={tabs}
       />
       <KiGenerationProvider onFailed={onOnboardingFailed}>
-        <StreamsAppPageTemplate.Body grow>
-          {tab === 'streams' && <StreamsView />}
-          {tab === 'knowledge_indicators' && <KnowledgeIndicatorsTable />}
-          {tab === 'queries' && <QueriesTable />}
-          {tab === 'insights' && <InsightsTab />}
-          {tab === 'detections' && <DetectionsTab />}
-          {tab === 'discoveries' && <DiscoveriesTab />}
-          {tab === 'significant_events' && <SigEventsTab />}
-          {tab === 'memory' && isMemoryEnabled && <MemoryTab />}
-          {tab === 'settings' && <SettingsTab />}
-        </StreamsAppPageTemplate.Body>
+        <SignificantEventsDiscoveryProvider>
+          <StreamsAppPageTemplate.Body grow>
+            {tab === 'streams' && <StreamsView />}
+            {tab === 'knowledge_indicators' && <KnowledgeIndicatorsTable />}
+            {tab === 'queries' && <QueriesTable />}
+            {tab === 'insights' && <InsightsTab />}
+            {tab === 'detections' && <DetectionsTab />}
+            {tab === 'discoveries' && <DiscoveriesTab />}
+            {tab === 'significant_events' && <SigEventsTab />}
+            {tab === 'memory' && isMemoryEnabled && <MemoryTab />}
+            {tab === 'settings' && <SettingsTab />}
+          </StreamsAppPageTemplate.Body>
+        </SignificantEventsDiscoveryProvider>
       </KiGenerationProvider>
     </>
   );
