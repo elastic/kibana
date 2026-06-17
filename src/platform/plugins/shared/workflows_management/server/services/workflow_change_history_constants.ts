@@ -10,3 +10,12 @@
 export const WORKFLOW_CHANGE_HISTORY_MODULE = 'stack';
 export const WORKFLOW_CHANGE_HISTORY_DATASET = 'workflows';
 export const WORKFLOW_CHANGE_HISTORY_OBJECT_TYPE = 'workflow';
+
+export const WorkflowChangeHistoryAction = {
+  workflowCreate: 'create',
+  workflowUpdate: 'update',
+  workflowInstall: 'install',
+} as const;
+
+export type WorkflowChangeHistoryActionType =
+  (typeof WorkflowChangeHistoryAction)[keyof typeof WorkflowChangeHistoryAction];

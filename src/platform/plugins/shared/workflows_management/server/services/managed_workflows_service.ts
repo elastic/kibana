@@ -9,7 +9,6 @@
 
 import { createHash } from 'node:crypto';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
-import { isElasticsearchWriteConflict } from '@kbn/occ';
 import { pickManagedWorkflowFields } from '@kbn/workflows';
 import {
   getManagedWorkflowDefinition,
