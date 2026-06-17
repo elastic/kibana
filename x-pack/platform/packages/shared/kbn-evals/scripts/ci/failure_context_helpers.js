@@ -19,7 +19,7 @@ const MAX_CONTEXT_JSON_BYTES = 30 * 1024;
 // suite_owner_notify step has no ES cluster with EIS inference privileges, so EIS
 // models cannot be called there).
 // Used only as a last resort when no LiteLLM connectors can be discovered.
-const DEFAULT_TRIAGE_MODEL_ID = 'litellm-llm-gateway-gpt-4o';
+const DEFAULT_TRIAGE_MODEL_ID = 'litellm-llm-gateway-claude-haiku-4-5';
 
 /**
  * @param {string} suiteId
