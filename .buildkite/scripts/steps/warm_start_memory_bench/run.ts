@@ -50,8 +50,6 @@ export interface RunWarmStartMemoryBenchOptions {
   readonly runBench?: (args: {
     leftBuildDir: string;
     rightBuildDir: string;
-    leftCommitSha: string;
-    rightCommitSha: string;
     kibanaDir: string;
   }) => { status: number | null; error?: Error };
 }
@@ -64,14 +62,10 @@ const defaultAnnotate: AnnotateFn = (context, style, body) => {
 const defaultRunBench = ({
   leftBuildDir,
   rightBuildDir,
-  leftCommitSha,
-  rightCommitSha,
   kibanaDir,
 }: {
   leftBuildDir: string;
   rightBuildDir: string;
-  leftCommitSha: string;
-  rightCommitSha: string;
   kibanaDir: string;
 }) => {
   const result = spawnSync(
@@ -85,10 +79,6 @@ const defaultRunBench = ({
       leftBuildDir,
       '--right-build-dir',
       rightBuildDir,
-      '--left',
-      leftCommitSha,
-      '--right',
-      rightCommitSha,
     ],
     {
       cwd: kibanaDir,
@@ -173,8 +163,6 @@ export const runWarmStartMemoryBench = async ({
   const benchResult = runBench({
     leftBuildDir,
     rightBuildDir,
-    leftCommitSha: baselineResult.baselineCommitSha,
-    rightCommitSha: targetCommitSha,
     kibanaDir,
   });
 

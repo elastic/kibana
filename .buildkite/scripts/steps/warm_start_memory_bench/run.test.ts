@@ -125,8 +125,6 @@ describe('runWarmStartMemoryBench', () => {
     expect(runBench).toHaveBeenCalledWith({
       leftBuildDir: expect.stringContaining('/left'),
       rightBuildDir: expect.stringContaining('/right'),
-      leftCommitSha: BASELINE_SHA,
-      rightCommitSha: TARGET_SHA,
       kibanaDir: process.cwd(),
     });
     expect(annotate).not.toHaveBeenCalled();
