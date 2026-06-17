@@ -58,6 +58,10 @@ export const Main: FunctionComponent<MainProps> = ({ httpClient }) => {
   const [selectedItems, setSelectedItems] = useState<DataSource[]>([]);
   const [selectedDataSets, setSelectedDataSets] = useState<DataSetListRow[]>([]);
   const [dataSourceFilter, setDataSourceFilter] = useState<string>('');
+  const [hasLoadedDataSources, setHasLoadedDataSources] = useState(false);
+  const [hasLoadedDataSets, setHasLoadedDataSets] = useState(false);
+  const [selectedTabId, setSelectedTabId] = useState<'sets' | 'sources'>('sets');
+  const [hasUserSelectedTab, setHasUserSelectedTab] = useState(false);
   const [pendingDeleteDataSource, setPendingDeleteDataSource] = useState<DataSource | null>(null);
   const [isDeletingDataSource, setIsDeletingDataSource] = useState(false);
   const [deleteDataSourceError, setDeleteDataSourceError] = useState<string | null>(null);
@@ -73,9 +77,15 @@ export const Main: FunctionComponent<MainProps> = ({ httpClient }) => {
   useEffect(() => {
     let cancelled = false;
     void (async () => {
-      const nextItems = await dataClient.get();
-      if (!cancelled) {
-        setItems(nextItems);
+      try {
+        const nextItems = await dataClient.get();
+        if (!cancelled) {
+          setItems(nextItems);
+        }
+      } finally {
+        if (!cancelled) {
+          setHasLoadedDataSources(true);
+        }
       }
     })();
     return () => {
@@ -95,12 +105,32 @@ export const Main: FunctionComponent<MainProps> = ({ httpClient }) => {
         if (!cancelled) {
           setDataSetsRaw([]);
         }
+      } finally {
+        if (!cancelled) {
+          setHasLoadedDataSets(true);
+        }
       }
     })();
     return () => {
       cancelled = true;
     };
   }, [dataSetsClient]);
+
+  useEffect(() => {
+    if (hasUserSelectedTab || !hasLoadedDataSources || !hasLoadedDataSets) {
+      return;
+    }
+
+    if (items.length === 0 && dataSetsRaw.length === 0) {
+      setSelectedTabId('sources');
+    }
+  }, [
+    dataSetsRaw.length,
+    hasLoadedDataSets,
+    hasLoadedDataSources,
+    hasUserSelectedTab,
+    items.length,
+  ]);
 
   const dataSetItems: DataSetListRow[] = useMemo(() => {
     const sourceByName = new Map(items.map((ds) => [ds.name, ds] as const));
@@ -557,6 +587,11 @@ export const Main: FunctionComponent<MainProps> = ({ httpClient }) => {
     ]
   );
 
+  const selectedTab = useMemo(
+    () => tabs.find((tab) => tab.id === selectedTabId) ?? tabs[0],
+    [selectedTabId, tabs]
+  );
+
   return (
     <>
       <EuiPageSection paddingSize="m">
@@ -566,8 +601,12 @@ export const Main: FunctionComponent<MainProps> = ({ httpClient }) => {
         <EuiSpacer size="l" />
         <EuiTabbedContent
           tabs={tabs}
-          initialSelectedTab={tabs[0]}
-          autoFocus="selected"
+          selectedTab={selectedTab}
+          onTabClick={(tab) => {
+            setHasUserSelectedTab(true);
+            setSelectedTabId(tab.id === 'sources' ? 'sources' : 'sets');
+          }}
+          autoFocus="initial"
           data-test-subj="dataSetsTabs"
         />
       </EuiPageSection>
