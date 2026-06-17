@@ -76,9 +76,7 @@ const RuleAttributesAllowedForPartialUpdate = [
 ];
 
 // Painless script that atomically removes snoozed instance entries by ID.
-// Using removeIf avoids a full-array replacement and is safe to run concurrently
-// with user snooze API writes: entries added between SO load and post-run write
-// are preserved because only the specified IDs are removed, not the whole array.
+// Using removeIf avoids a full-array replacement
 const REMOVE_SNOOZED_INSTANCES_SCRIPT = `
   if (ctx._source.alert.snoozedInstances != null) {
     ctx._source.alert.snoozedInstances.removeIf(
@@ -88,8 +86,7 @@ const REMOVE_SNOOZED_INSTANCES_SCRIPT = `
 `;
 
 // Atomically removes per-alert snooze entries whose IDs are in expiredInstanceIds.
-// Uses retry_on_conflict instead of version-based OCC because the script is idempotent:
-// removing an already-absent entry is a no-op, so retrying on a version conflict is safe.
+// Uses retry_on_conflict - removing an already-absent entry is a no-op, retrying on a version conflict is safe.
 export async function atomicRemoveSnoozedInstancesWithEs(
   esClient: ElasticsearchClient,
   id: string,

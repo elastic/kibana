@@ -526,8 +526,7 @@ export class AlertsClient<
         { logger: this.options.logger }
       );
     } catch (err) {
-      // Swallow the error — clearing kibana.alert.snoozed is best-effort.
-      // A failure here must not interrupt rule execution or the SO update.
+      // Swallow the error
       this.options.logger.error(
         `Error clearing snoozed status for condition-expired alerts ${this.ruleInfoMessage}: ${err}`,
         this.logTags

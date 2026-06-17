@@ -2985,9 +2985,9 @@ describe('Alerts Service', () => {
                 {
                   _index: '.alerts-default',
                   _id: 'alert-1',
-                  fields: {
-                    'host.name': ['web-01'],
-                    'kibana.alert.severity': ['high'],
+                  _source: {
+                    'host.name': 'web-01',
+                    'kibana.alert.severity': 'high',
                   },
                 },
               ],
@@ -3022,8 +3022,7 @@ describe('Alerts Service', () => {
             index: ['.alerts-default'],
             allow_no_indices: true,
             size: 1,
-            fields: ['host.name', 'kibana.alert.severity'],
-            _source: false,
+            _source: ['host.name', 'kibana.alert.severity'],
             query: {
               bool: {
                 must: [

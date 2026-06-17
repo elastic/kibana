@@ -253,8 +253,6 @@ export class TaskRunner<
       );
       if (snoozedInstanceIdsToRemove?.length) {
         // Per-alert snooze expiry is applied via an atomic Painless script.
-        // This prevents the race condition where a user snooze added between SO load
-        // and post-run write would be silently overwritten.
         await atomicRemoveSnoozedInstancesWithEs(client, ruleId, snoozedInstanceIdsToRemove, {
           ignore404: true,
           refresh: false,

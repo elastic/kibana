@@ -39,7 +39,6 @@ export async function getAlertSnoozeSnapshot({
       index: indices,
       allow_no_indices: true,
       size: 1,
-      // Use _source with source filtering rather than the `fields` API.
       _source: fields,
       query: {
         bool: {
@@ -57,8 +56,7 @@ export async function getAlertSnoozeSnapshot({
       return null;
     }
 
-    // Alert documents use flat dot-notation keys in _source, so direct bracket
-    // access is correct here — no lodash path traversal needed.
+    // Alert documents use flat dot-notation keys in _source
     const source = (hit._source ?? {}) as Record<string, unknown>;
     return fields.reduce<Record<string, unknown>>((snapshot, field) => {
       const value = source[field];
