@@ -16,6 +16,7 @@ import type { MappingField } from '../mappings';
 import { flattenMapping, getIndexMappings } from '../mappings';
 import { processFieldCapsResponse } from '../field_caps';
 import { isCcsTarget, getFieldsFromFieldCaps } from '../ccs';
+import { listDatasets, getDatasetFields } from '../datasets';
 
 export interface ResolveResourceResponse {
   /** name of the resource */
@@ -126,6 +127,34 @@ export const resolveResource = async ({
  * Supports index patterns and comma-separated targets by using field_caps
  * when multiple resources are resolved. Multi-target results use {@link EsResourceType.indexPattern}.
  */
+/**
+ * Attempts to resolve a single external ES|QL dataset by name. Datasets are invisible to
+ * `_resolve/index`/`_field_caps`, so we look them up via `_query/dataset` and introspect their
+ * fields with `FROM <name> | LIMIT 0`. Returns undefined when no dataset matches the name.
+ */
+const tryResolveDataset = async ({
+  resourceName,
+  esClient,
+}: {
+  resourceName: string;
+  esClient: ElasticsearchClient;
+}): Promise<ResolveResourceResponse | undefined> => {
+  if (resourceName.includes(',') || resourceName.includes('*')) {
+    return undefined;
+  }
+  const datasets = await listDatasets({ esClient });
+  if (!datasets.some((dataset) => dataset.name === resourceName)) {
+    return undefined;
+  }
+  const fields = await getDatasetFields({ name: resourceName, esClient });
+  return {
+    name: resourceName,
+    type: EsResourceType.dataset,
+    fields,
+    isTsdb: false,
+  };
+};
+
 export const resolveResourceForEsql = async ({
   resourceName,
   esClient,
@@ -142,6 +171,11 @@ export const resolveResourceForEsql = async ({
     });
   } catch (e) {
     if (isNotFoundError(e)) {
+      // The name may be an external ES|QL dataset, which `_resolve/index` cannot see.
+      const dataset = await tryResolveDataset({ resourceName, esClient });
+      if (dataset) {
+        return dataset;
+      }
       throw new Error(`No resource found for '${resourceName}'`);
     }
     throw e;
@@ -151,6 +185,10 @@ export const resolveResourceForEsql = async ({
     resolveRes.indices.length + resolveRes.aliases.length + resolveRes.data_streams.length;
 
   if (resourceCount === 0) {
+    const dataset = await tryResolveDataset({ resourceName, esClient });
+    if (dataset) {
+      return dataset;
+    }
     throw new Error(`No resource found for pattern ${resourceName}`);
   }
 

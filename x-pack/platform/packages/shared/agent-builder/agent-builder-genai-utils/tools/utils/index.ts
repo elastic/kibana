@@ -6,6 +6,7 @@
  */
 
 export { esqlResponseToJson, extractEsqlQueries, executeEsql, interpolateEsqlQuery } from './esql';
+export { listDatasets, getDatasetFields, type DatasetInfo } from './datasets';
 export {
   flattenMapping,
   cleanupMapping,

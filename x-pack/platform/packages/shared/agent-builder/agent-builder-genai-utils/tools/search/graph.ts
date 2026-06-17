@@ -103,10 +103,14 @@ export const createSearchToolGraph = ({
         pattern: state.targetPattern,
         excludeIndicesRepresentedAsDatastream: true,
         excludeIndicesRepresentedAsAlias: false,
+        includeDatasets: true,
         esClient,
       });
       const matchedResourceCount =
-        sources.indices.length + sources.aliases.length + sources.data_streams.length;
+        sources.indices.length +
+        sources.aliases.length +
+        sources.data_streams.length +
+        sources.datasets.length;
 
       if (matchedResourceCount === 0) {
         return { error: `No resources found for pattern "${state.targetPattern}"` };
@@ -128,6 +132,9 @@ export const createSearchToolGraph = ({
 
     const resources = await gatherResourceDescriptors({
       indexPattern: state.targetPattern ?? '*',
+      // external ES|QL datasets are queryable via the natural_language_search (ES|QL) tool, so
+      // surface them to the dispatcher; the prompt routes them away from relevance (_search).
+      includeDatasets: true,
       esClient,
     });
 
