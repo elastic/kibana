@@ -5,14 +5,19 @@
  * 2.0.
  */
 
+import { chunk } from 'lodash';
+import pLimit from 'p-limit';
 import { inject, injectable } from 'inversify';
 import { PluginStart } from '@kbn/core-di';
 import type { KibanaRequest } from '@kbn/core/server';
 import type { IValidatedEvent } from '@kbn/event-log-plugin/server';
+import { nodeBuilder, nodeTypes, toKqlExpression } from '@kbn/es-query';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import {
+  MAX_BULK_ITEMS,
   POLICY_EXECUTION_HISTORY_MAX_PER_PAGE,
   type PolicyExecutionHistoryItem,
+  type RuleResponse,
 } from '@kbn/alerting-v2-schemas';
 import { ActionPolicyClient } from '../action_policy_client';
 import { RulesClient } from '../rules_client';
@@ -29,6 +34,7 @@ import { collectIdsFromEvents, denormalizeEvent, type NameMaps } from './denorma
 const TIME_WINDOW_HOURS = 24;
 const DEFAULT_PAGE = 1;
 const DEFAULT_PER_PAGE = POLICY_EXECUTION_HISTORY_MAX_PER_PAGE;
+const MAX_CONCURRENT_RULE_LOOKUPS = 5;
 
 export interface ListExecutionHistoryParams {
   request: KibanaRequest;
@@ -109,7 +115,7 @@ export class ActionPolicyExecutionHistoryClient {
 
     const [policiesRes, rulesRes, workflowsRes] = await Promise.allSettled([
       this.actionPolicyClient.getActionPolicies({ ids: policyIds }),
-      this.rulesClient.getRules(ruleIds),
+      this.lookupRulesByIds(ruleIds),
       this.workflowsManagement.getWorkflowsByIds(workflowIds, spaceId),
     ]);
 
@@ -129,5 +135,33 @@ export class ActionPolicyExecutionHistoryClient {
     const error = result.reason instanceof Error ? result.reason : new Error(String(result.reason));
     this.logger.error({ error, code });
     return [];
+  }
+
+  private async lookupRulesByIds(ruleIds: string[]): Promise<RuleResponse[]> {
+    if (ruleIds.length === 0) return [];
+
+    const idChunks = chunk(ruleIds, MAX_BULK_ITEMS);
+    const limiter = pLimit(MAX_CONCURRENT_RULE_LOOKUPS);
+
+    const responses = await Promise.all(
+      idChunks.map((idChunk) =>
+        limiter(() =>
+          this.rulesClient.findRules({
+            filter: this.buildRuleIdsFilter(idChunk),
+            perPage: idChunk.length,
+          })
+        )
+      )
+    );
+
+    return responses.flatMap((response) => response.items);
+  }
+
+  private buildRuleIdsFilter(ids: string[]): string {
+    return toKqlExpression(
+      nodeBuilder.or(
+        ids.map((id) => nodeBuilder.is('id', nodeTypes.literal.buildNode(id, true)))
+      )
+    );
   }
 }
