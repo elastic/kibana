@@ -72,32 +72,40 @@ export async function logRuleChanges({
       continue;
     }
 
-    // Store the snapshot as RuleDomain rather than raw SavedObject attributes.
-    // RawRule is coupled to the SO schema version at write time — if the SO
-    // schema evolves the stored document becomes unreadable without a migration.
-    // RuleDomain is a stable application-layer type: references are baked in,
-    // sensitive fields (apiKey, uiamApiKey) are retained for hashing but omitted
-    // from the public Rule shape at read time, and hydration on the read path
-    // reduces to date deserialisation + transformRuleDomainToRule.
-    const ruleDomain = transformRuleAttributesToRuleDomain(
-      ruleSO.attributes,
-      {
-        id: ruleSO.id,
-        logger,
-        ruleType,
-        references: ruleSO.references ?? [],
-      },
-      isSystemAction
-    );
-    const ruleSnapshot = serializeRuleDomain(ruleDomain);
+    try {
+      // Store the snapshot as RuleDomain rather than raw SavedObject attributes.
+      // RawRule is coupled to the SO schema version at write time — if the SO
+      // schema evolves the stored document becomes unreadable without a migration.
+      // RuleDomain is a stable application-layer type: references are baked in,
+      // sensitive fields (apiKey, uiamApiKey) are retained for hashing but omitted
+      // from the public Rule shape at read time, and hydration on the read path
+      // reduces to date deserialisation + transformRuleDomainToRule.
+      const ruleDomain = transformRuleAttributesToRuleDomain(
+        ruleSO.attributes,
+        {
+          id: ruleSO.id,
+          logger,
+          ruleType,
+          references: ruleSO.references ?? [],
+        },
+        isSystemAction
+      );
+      const ruleSnapshot = serializeRuleDomain(ruleDomain);
 
-    changes.push({
-      timestamp: new Date(timestamp).toISOString(),
-      objectId: ruleSO.id,
-      objectType: RULE_SAVED_OBJECT_TYPE,
-      module: ruleType.solution,
-      snapshot: ruleSnapshot,
-    });
+      changes.push({
+        timestamp: new Date(timestamp).toISOString(),
+        objectId: ruleSO.id,
+        objectType: RULE_SAVED_OBJECT_TYPE,
+        module: ruleType.solution,
+        snapshot: ruleSnapshot,
+      });
+    } catch (e) {
+      logger.debug(
+        `Unable to transform rule change SO "${JSON.stringify(
+          ruleSO.attributes
+        )}" to serializable format: ${e}`
+      );
+    }
   }
 
   if (!changes.length) {

@@ -25,7 +25,7 @@ describe('logBulkRuleChanges', () => {
     changeTrackingService = createMockChangeTrackingService();
   });
 
-  it('logs every successful saved object in a single bulk call', async () => {
+  it('logs every successful rule change in a single bulk call', async () => {
     const context = buildContext({ changeTrackingService });
     const ruleSOs = [buildRuleSO('rule-1'), buildRuleSO('rule-2')];
 
@@ -62,7 +62,7 @@ describe('logBulkRuleChanges', () => {
     });
   });
 
-  it('skips saved objects that have an error (e.g. partial bulk failures)', async () => {
+  it('skips rule change that have an error (e.g. partial bulk failures)', async () => {
     const context = buildContext({ changeTrackingService });
     const ruleSOs = [
       buildRuleSO('rule-1'),
@@ -134,7 +134,7 @@ describe('logBulkRuleChanges', () => {
     ]);
   });
 
-  it('does not call logBulk when every saved object failed', async () => {
+  it('does not call logBulk when every rule change failed', async () => {
     const context = buildContext({ changeTrackingService });
     const ruleSOs = [buildErroredRuleSO('rule-1'), buildErroredRuleSO('rule-2')];
 
@@ -199,7 +199,7 @@ describe('logBulkRuleChanges', () => {
     expect(changeTrackingService.logBulk).not.toHaveBeenCalled();
   });
 
-  it('succeeds when a saved object omits references (treats them as empty)', async () => {
+  it('succeeds when a rule saved object omits references (treats them as empty)', async () => {
     const context = buildContext({ changeTrackingService });
     const ruleSOWithoutRefs = buildRuleSO('rule-1');
     delete (ruleSOWithoutRefs as Partial<SavedObject<RawRule>>).references;
@@ -383,8 +383,8 @@ const buildRuleSO = (
   attributes: {
     alertTypeId,
     name: `rule ${id}`,
-    createdAt: '2019-01-01T00:00:00.000Z',
-    updatedAt: '2019-01-01T00:00:00.000Z',
+    createdAt: new Date().toDateString(),
+    updatedAt: new Date().toDateString(),
   } as RawRule,
   references: [],
   ...overrides,
