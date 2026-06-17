@@ -200,6 +200,39 @@ apiTest.describe(
           });
           expect(response).toHaveStatusCode(403);
         });
+
+        apiTest('cannot mute all alerts on a rule', async ({ apiClient }) => {
+          const rule = createdRules[0];
+          if (!rule) return;
+          const response = await apiClient.post(
+            `api/alerting/rule/${rule.ruleId}/_mute_all`,
+            { headers: { ...KIBANA_HEADERS, ...withPrivilegeCreds.apiKeyHeader } }
+          );
+          expect(response).toHaveStatusCode(403);
+        });
+
+        apiTest('cannot snooze a rule', async ({ apiClient }) => {
+          const rule = createdRules[0];
+          if (!rule) return;
+          const response = await apiClient.post(
+            `internal/alerting/rule/${rule.ruleId}/_snooze`,
+            {
+              headers: { ...KIBANA_HEADERS, ...withPrivilegeCreds.apiKeyHeader },
+              body: {
+                snooze_schedule: {
+                  duration: 3600000,
+                  rRule: {
+                    dtstart: new Date().toISOString(),
+                    tzid: 'UTC',
+                    count: 1,
+                  },
+                },
+              },
+              responseType: 'json',
+            }
+          );
+          expect(response).toHaveStatusCode(403);
+        });
       });
 
       apiTest.describe('per-alert mute/unmute', () => {
@@ -245,6 +278,15 @@ apiTest.describe(
             responseType: 'json',
           });
           expect(response).toHaveStatusCode(200);
+
+          const body = response.body as {
+            hits?: { total?: { value?: number }; hits?: Array<{ _source: Record<string, unknown> }> };
+          };
+          expect(body.hits?.total?.value).toBeGreaterThan(0);
+
+          const alert = body.hits!.hits![0]._source;
+          expect(alert['kibana.alert.rule.rule_type_id']).toBe('.es-query');
+          expect(alert['kibana.alert.status']).toBeDefined();
         });
       });
 
