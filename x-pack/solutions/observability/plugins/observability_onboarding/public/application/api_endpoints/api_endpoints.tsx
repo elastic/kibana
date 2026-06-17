@@ -6,6 +6,7 @@
  */
 
 import {
+  EuiButton,
   EuiButtonEmpty,
   EuiButtonIcon,
   EuiFlexGroup,
@@ -40,7 +41,7 @@ export const ApiEndpoints = () => {
     services: { share },
   } = useKibana<ObservabilityOnboardingAppServices>();
   const titleId = useGeneratedHtmlId({ prefix: 'apiEndpointsTitle' });
-  const isMobile = useIsWithinBreakpoints(['xs', 's']);
+  const isMobile = useIsWithinBreakpoints(['xs', 's', 'm']);
 
   const { endpoints, isLoading } = useApiEndpoints();
   const { encodedApiKeys, creatingEndpointId, createApiKey } = useApiKeys();
@@ -63,6 +64,10 @@ export const ApiEndpoints = () => {
   const toggleLabel = i18n.translate(
     'xpack.observability_onboarding.apiEndpoints.toggleAriaLabel',
     { defaultMessage: 'Toggle API endpoints' }
+  );
+  const openInApiKeysLabel = i18n.translate(
+    'xpack.observability_onboarding.apiEndpoints.openInApiKeys',
+    { defaultMessage: 'Open in API keys' }
   );
 
   return (
@@ -142,18 +147,17 @@ export const ApiEndpoints = () => {
                 </EuiFlexItem>
               </EuiFlexGroup>
             </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty
-                size="s"
-                href={apiKeysManagementUrl}
-                css={isMobile ? { width: '100%' } : undefined}
-                data-test-subj="observabilityOnboardingApiEndpointsOpenInApiKeys"
-              >
-                {i18n.translate('xpack.observability_onboarding.apiEndpoints.openInApiKeys', {
-                  defaultMessage: 'Open in API keys',
-                })}
-              </EuiButtonEmpty>
-            </EuiFlexItem>
+            {!isMobile && (
+              <EuiFlexItem grow={false}>
+                <EuiButtonEmpty
+                  size="s"
+                  href={apiKeysManagementUrl}
+                  data-test-subj="observabilityOnboardingApiEndpointsOpenInApiKeys"
+                >
+                  {openInApiKeysLabel}
+                </EuiButtonEmpty>
+              </EuiFlexItem>
+            )}
           </EuiFlexGroup>
           {isOpen && (
             <>
@@ -174,6 +178,19 @@ export const ApiEndpoints = () => {
                   />
                 </EuiFlexItem>
               </EuiFlexGroup>
+            </>
+          )}
+          {isMobile && (
+            <>
+              <EuiSpacer size="m" />
+              <EuiButton
+                size="s"
+                href={apiKeysManagementUrl}
+                fullWidth
+                data-test-subj="observabilityOnboardingApiEndpointsOpenInApiKeys"
+              >
+                {openInApiKeysLabel}
+              </EuiButton>
             </>
           )}
         </EuiPanel>
