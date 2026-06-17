@@ -65,6 +65,7 @@ export function useCustomCards(
     history,
     `/cloudforwarder/${location.search}`
   );
+  const { href: awsCloudwatchOtelUrl } = reactRouterNavigate(history, `/aws${location.search}`);
 
   const apmUrl = `${getUrlForApp?.('apm')}/${isServerless ? 'onboarding' : 'tutorial'}`;
   const otelApmUrl = isManagedOtlpServiceAvailable ? otelApmQuickstartUrl : apmUrl;
@@ -492,6 +493,33 @@ export function useCustomCards(
       integration: '',
       isCollectionCard: true,
       onCardClick: createCollectionCardHandler('gcp'),
+    },
+    {
+      id: 'aws-cloudwatch-otel-virtual',
+      name: 'aws-cloudwatch-otel',
+      type: 'virtual',
+      title: i18n.translate(
+        'xpack.observability_onboarding.useCustomCardsForCategory.awsCloudwatchOtelTitle',
+        { defaultMessage: 'Amazon CloudWatch' }
+      ),
+      description: i18n.translate(
+        'xpack.observability_onboarding.useCustomCardsForCategory.awsCloudwatchOtelDescription',
+        {
+          defaultMessage:
+            'Collect CloudWatch metrics and logs with the Elastic Distro for OpenTelemetry',
+        }
+      ),
+      categories: ['observability'],
+      icons: [
+        {
+          type: 'eui',
+          src: 'logoAWS',
+        },
+      ],
+      url: awsCloudwatchOtelUrl,
+      version: '',
+      integration: '',
+      isQuickstart: true,
     },
     {
       id: 'upload-file-virtual',

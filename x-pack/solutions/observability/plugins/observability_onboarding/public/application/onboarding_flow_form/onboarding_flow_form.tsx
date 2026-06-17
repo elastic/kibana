@@ -6,7 +6,7 @@
  */
 import { i18n } from '@kbn/i18n';
 
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { Suspense, useCallback, useEffect, useRef, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { FunctionComponent } from 'react';
 import {
@@ -27,6 +27,7 @@ import { css } from '@emotion/react';
 
 import { useSearchParams } from 'react-router-dom-v5-compat';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { LazyPackageCard } from '@kbn/fleet-plugin/public';
 import type { IntegrationCardItem } from '@kbn/fleet-plugin/public';
 import { usePerformanceContext } from '@kbn/ebt-tools';
 import { ObservabilityOnboardingPricingFeature } from '../../../common/pricing_features';
@@ -189,14 +190,17 @@ export const OnboardingFlowForm: FunctionComponent = () => {
     cloud: ['azure-logs-virtual', 'aws-logs-virtual', 'gcp-logs-virtual'],
   };
   const customCards = useCustomCards(createCollectionCardHandler);
+  const selectedCategory = searchParams.get('category') as Category;
+  const awsCloudwatchOtelCard =
+    selectedCategory === 'cloud'
+      ? customCards.find((card) => card.id === 'aws-cloudwatch-otel-virtual')
+      : undefined;
   const featuredCardsForCategory: IntegrationCardItem[] = customCards.filter((card) => {
-    const category = searchParams.get('category') as Category;
-
-    if (category === null) {
+    if (selectedCategory === null) {
       return false;
     }
 
-    const cardList = featuredCardsForCategoryMap[category] ?? [];
+    const cardList = featuredCardsForCategoryMap[selectedCategory] ?? [];
 
     return cardList.includes(card.id);
   });
@@ -283,7 +287,7 @@ export const OnboardingFlowForm: FunctionComponent = () => {
                   )}
                 </>
               }
-              checked={option.id === searchParams.get('category')}
+              checked={option.id === selectedCategory}
               /**
                * onKeyDown and onKeyUp handlers disable
                * scrolling to the category items when user
@@ -334,21 +338,21 @@ export const OnboardingFlowForm: FunctionComponent = () => {
         <div ref={suggestedPackagesRef}>
           <EuiTitle size="s" id={packageListTitleId}>
             <strong>
-              {searchParams.get('category') === 'kubernetes'
+              {selectedCategory === 'kubernetes'
                 ? i18n.translate(
                     'xpack.observability_onboarding.experimentalOnboardingFlow.kubernetesPackagesTitle',
                     {
                       defaultMessage: 'Monitor your Kubernetes cluster using:',
                     }
                   )
-                : searchParams.get('category') === 'application'
+                : selectedCategory === 'application'
                 ? i18n.translate(
                     'xpack.observability_onboarding.experimentalOnboardingFlow.applicationPackagesTitle',
                     {
                       defaultMessage: 'Monitor your Application using:',
                     }
                   )
-                : searchParams.get('category') === 'cloud'
+                : selectedCategory === 'cloud'
                 ? i18n.translate(
                     'xpack.observability_onboarding.experimentalOnboardingFlow.cloudPackagesTitle',
                     {
@@ -365,6 +369,34 @@ export const OnboardingFlowForm: FunctionComponent = () => {
           </EuiTitle>
           <EuiSpacer size="m" />
           <PackageList list={featuredCardsForCategory} showCardLabels={true} />
+          {awsCloudwatchOtelCard && (
+            <>
+              <EuiSpacer size="s" />
+              <EuiFlexGroup
+                justifyContent="center"
+                data-test-subj="observabilityOnboardingCloudExtraRow"
+              >
+                <EuiFlexItem
+                  grow={false}
+                  css={css`
+                    // Match the width of a single provider tile in the 3-column grid above.
+                    // That grid uses EuiFlexGrid gutterSize="m" (gap = euiTheme.size.base),
+                    // so a column is the full width minus two gutters, divided by three.
+                    width: calc((100% - ${euiTheme.size.base} * 2) / 3);
+                  `}
+                >
+                  {/*
+                   * Render the card directly instead of through PackageList, which wraps
+                   * a single card in a virtualized grid that adds trailing spacing and
+                   * reserved row height. This keeps the tile flush with the provider row.
+                   */}
+                  <Suspense fallback={null}>
+                    <LazyPackageCard {...awsCloudwatchOtelCard} showLabels={true} />
+                  </Suspense>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </>
+          )}
         </div>
       </div>
 
@@ -382,7 +414,7 @@ export const OnboardingFlowForm: FunctionComponent = () => {
         <PackageListSearchForm
           searchQuery={integrationSearch}
           setSearchQuery={setIntegrationSearch}
-          flowCategory={searchParams.get('category')}
+          flowCategory={selectedCategory}
           customCards={customCards.filter((card) => !card.isCollectionCard)}
           excludePackageIdList={searchExcludePackageIdList}
         />

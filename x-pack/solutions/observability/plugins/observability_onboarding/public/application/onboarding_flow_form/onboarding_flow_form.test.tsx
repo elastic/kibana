@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { render, screen, within } from '@testing-library/react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { IntegrationCardItem } from '@kbn/fleet-plugin/public';
 import { OnboardingFlowForm } from './onboarding_flow_form';
@@ -39,6 +39,12 @@ jest.mock('../package_list/package_list', () => ({
         </div>
       ))}
     </div>
+  ),
+}));
+
+jest.mock('@kbn/fleet-plugin/public', () => ({
+  LazyPackageCard: ({ id, title }: IntegrationCardItem) => (
+    <div data-test-subj={`package-card-${id}`}>{title}</div>
   ),
 }));
 
@@ -130,6 +136,29 @@ describe('OnboardingFlowForm', () => {
       expect(screen.queryByTestId('package-item-kubernetes-quick-start')).not.toBeInTheDocument();
       expect(screen.getByTestId('package-item-otel-kubernetes')).toBeInTheDocument();
     });
+
+    it('renders the AWS CloudWatch OTel tile in its own centered row under the cloud providers', () => {
+      mockUseCustomCards.mockReturnValue([
+        { id: 'azure-logs-virtual', title: 'Azure' } as IntegrationCardItem,
+        { id: 'aws-logs-virtual', title: 'AWS' } as IntegrationCardItem,
+        { id: 'gcp-logs-virtual', title: 'Google Cloud Platform' } as IntegrationCardItem,
+        { id: 'aws-cloudwatch-otel-virtual', title: 'AWS' } as IntegrationCardItem,
+      ]);
+
+      renderWithProviders(<OnboardingFlowForm />, ['/?category=cloud']);
+
+      const [featuredPackageList] = screen.getAllByTestId('package-list');
+      expect(
+        within(featuredPackageList).queryByTestId('package-item-aws-cloudwatch-otel-virtual')
+      ).not.toBeInTheDocument();
+      expect(within(featuredPackageList).getAllByTestId(/^package-item-/)).toHaveLength(3);
+
+      const extraRow = screen.getByTestId('observabilityOnboardingCloudExtraRow');
+      expect(extraRow).toBeInTheDocument();
+      expect(
+        within(extraRow).getByTestId('package-card-aws-cloudwatch-otel-virtual')
+      ).toBeInTheDocument();
+    });
   });
 
   describe('Logs-Essentials Tier (Metrics Onboarding Disabled)', () => {
@@ -167,6 +196,29 @@ describe('OnboardingFlowForm', () => {
 
       const grid = screen.getByTestId('observabilityOnboardingUseCaseGrid');
       expect(grid).toBeInTheDocument();
+    });
+
+    it('renders the AWS CloudWatch OTel tile in its own centered row under the cloud providers', () => {
+      mockUseCustomCards.mockReturnValue([
+        { id: 'azure-logs-virtual', title: 'Azure' } as IntegrationCardItem,
+        { id: 'aws-logs-virtual', title: 'AWS' } as IntegrationCardItem,
+        { id: 'gcp-logs-virtual', title: 'Google Cloud Platform' } as IntegrationCardItem,
+        { id: 'aws-cloudwatch-otel-virtual', title: 'AWS' } as IntegrationCardItem,
+      ]);
+
+      renderWithProviders(<OnboardingFlowForm />, ['/?category=cloud']);
+
+      const [featuredPackageList] = screen.getAllByTestId('package-list');
+      expect(
+        within(featuredPackageList).queryByTestId('package-item-aws-cloudwatch-otel-virtual')
+      ).not.toBeInTheDocument();
+      expect(within(featuredPackageList).getAllByTestId(/^package-item-/)).toHaveLength(3);
+
+      const extraRow = screen.getByTestId('observabilityOnboardingCloudExtraRow');
+      expect(extraRow).toBeInTheDocument();
+      expect(
+        within(extraRow).getByTestId('package-card-aws-cloudwatch-otel-virtual')
+      ).toBeInTheDocument();
     });
   });
 
