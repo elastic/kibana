@@ -50,7 +50,7 @@ test.describe('Data Views feature controls security', { tag: tags.stateful.class
   }) => {
     await browserAuth.loginWithCustomRole(getGlobalIndexPatternsAllRole());
     await page.goto(kbnUrl.get(DATA_VIEWS_MANAGEMENT_PATH));
-    await pageObjects.dataViewsManagement.waitForListingPage();
+    await pageObjects.dataViewsManagement.waitForEmptyListingPage();
     await expect(pageObjects.dataViewsManagement.createButton).toBeVisible();
     await expect(pageObjects.dataViewsManagement.createButton).toBeEnabled();
   });
@@ -63,7 +63,7 @@ test.describe('Data Views feature controls security', { tag: tags.stateful.class
   }) => {
     await browserAuth.loginWithCustomRole(getGlobalIndexPatternsAllRole());
     await page.goto(kbnUrl.get(DATA_VIEWS_MANAGEMENT_PATH));
-    await pageObjects.dataViewsManagement.waitForListingPage();
+    await pageObjects.dataViewsManagement.waitForEmptyListingPage();
     await expect(pageObjects.dataViewsManagement.headerBadge).toBeHidden();
   });
 
@@ -88,7 +88,7 @@ test.describe('Data Views feature controls security', { tag: tags.stateful.class
   }) => {
     await browserAuth.loginWithCustomRole(getGlobalIndexPatternsReadRole());
     await page.goto(kbnUrl.get(DATA_VIEWS_MANAGEMENT_PATH));
-    await pageObjects.dataViewsManagement.waitForListingPage();
+    await pageObjects.dataViewsManagement.waitForEmptyListingPage();
     await expect(pageObjects.dataViewsManagement.createButton).toBeVisible();
     await expect(pageObjects.dataViewsManagement.createButton).toBeDisabled();
   });
@@ -101,7 +101,7 @@ test.describe('Data Views feature controls security', { tag: tags.stateful.class
   }) => {
     await browserAuth.loginWithCustomRole(getGlobalIndexPatternsReadRole());
     await page.goto(kbnUrl.get(DATA_VIEWS_MANAGEMENT_PATH));
-    await pageObjects.dataViewsManagement.waitForListingPage();
+    await pageObjects.dataViewsManagement.waitForEmptyListingPage();
     await expect(pageObjects.dataViewsManagement.headerBadge).toBeVisible();
     await expect(pageObjects.dataViewsManagement.headerBadge).toHaveAttribute(
       'data-test-badge-label',

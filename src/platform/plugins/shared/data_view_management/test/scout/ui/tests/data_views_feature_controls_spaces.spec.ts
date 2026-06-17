@@ -57,7 +57,7 @@ test.describe('Data Views feature controls spaces', { tag: tags.stateful.classic
     await page.goto(
       kbnUrl.get(`/s/${FEATURE_CONTROLS_CUSTOM_SPACE.id}/app/management/kibana/dataViews`)
     );
-    await pageObjects.dataViewsManagement.waitForListingPage();
+    await pageObjects.dataViewsManagement.waitForEmptyListingPage();
     await expect(pageObjects.dataViewsManagement.createButton).toBeVisible();
     await expect(pageObjects.dataViewsManagement.createButton).toBeEnabled();
   });

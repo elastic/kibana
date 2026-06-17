@@ -14,13 +14,11 @@ export class DataViewsManagementPage {
   public readonly createButton: Locator;
   public readonly headerBadge: Locator;
   public readonly table: Locator;
-  private readonly noDataViewsPrompt: Locator;
 
   constructor(private readonly page: ScoutPage) {
     this.createButton = this.page.testSubj.locator('createDataViewButton');
     this.headerBadge = this.page.testSubj.locator('headerBadge');
     this.table = this.page.testSubj.locator('indexPatternTable');
-    this.noDataViewsPrompt = this.page.testSubj.locator('noDataViewsPrompt');
   }
 
   /** Navigates to the data views management page and waits for it to be ready. */
@@ -36,13 +34,30 @@ export class DataViewsManagementPage {
   }
 
   /** Waits for the empty-state prompt (no data views exist). */
-  async waitForListingPage() {
-    await this.noDataViewsPrompt.waitFor({ state: 'visible' });
+  async waitForEmptyListingPage() {
+    await this.page.testSubj
+      .locator('noDataViewsPrompt')
+      .waitFor({ state: 'visible', timeout: 30_000 });
+  }
+
+  /** Waits for the data views table to appear (at least one data view exists). */
+  async waitForNonEmptyListingPage() {
+    await this.table.waitFor({ state: 'visible', timeout: 30_000 });
   }
 
   /** Waits for the data views table to appear (at least one data view exists). */
   async waitForTableLoaded() {
-    await this.table.waitFor({ state: 'visible' });
+    await this.waitForNonEmptyListingPage();
+  }
+
+  async openDataViewDetails(title: string): Promise<void> {
+    await this.waitForNonEmptyListingPage();
+    await this.page.testSubj.click(`detail-link-${title}`);
+    await this.page.testSubj.locator('indexPatternTitle').waitFor({ state: 'visible' });
+  }
+
+  fieldsTabCountLocator(): Locator {
+    return this.page.testSubj.locator('tab-indexedFields');
   }
 
   /**
