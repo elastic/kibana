@@ -96,7 +96,7 @@ export function createCapacityScan(
 export function createPollIntervalScan(
   logger: Logger,
   startingPollInterval: number,
-  claimStrategy: string,
+  _claimStrategy: string,
   tmUtilizationQueue: (value?: number | undefined) => number[]
 ) {
   return scan(
@@ -141,10 +141,10 @@ export function createPollIntervalScan(
             newPollInterval = previousPollInterval;
           }
 
-          // If the task claim strategy is mget, increase the poll interval if the the avg used capacity over 15s is less than 25%.
+          // Increase the poll interval if the avg used capacity over 15s is less than 25%.
           const queue = tmUtilizationQueue(tmUtilization);
           avgTmUtilization = stats.mean(queue);
-          if (claimStrategy === CLAIM_STRATEGY_MGET && newPollInterval < DEFAULT_POLL_INTERVAL) {
+          if (newPollInterval < DEFAULT_POLL_INTERVAL) {
             updatedForCapacity = true;
             if (avgTmUtilization < 25) {
               newPollInterval = DEFAULT_POLL_INTERVAL;

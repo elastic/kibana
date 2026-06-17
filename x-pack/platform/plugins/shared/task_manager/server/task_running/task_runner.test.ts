@@ -43,7 +43,7 @@ import {
   TASK_MANAGER_TRANSACTION_TYPE_MARK_AS_RUNNING,
 } from './task_runner';
 import { schema } from '@kbn/config-schema';
-import { CLAIM_STRATEGY_MGET, CLAIM_STRATEGY_UPDATE_BY_QUERY } from '../config';
+import { CLAIM_STRATEGY_MGET } from '../config';
 import * as nextRunAtUtils from '../lib/get_next_run_at';
 import { configMock } from '../config.mock';
 import { EsApiKeyStrategy } from '../api_key_strategy';
@@ -3670,7 +3670,7 @@ describe('TaskManagerRunner', () => {
         },
       }),
       allowReadingInvalidState: opts.allowReadingInvalidState || false,
-      strategy: opts.strategy ?? CLAIM_STRATEGY_UPDATE_BY_QUERY,
+      strategy: opts.strategy ?? CLAIM_STRATEGY_MGET,
       getPollInterval: () => 500,
       apiKeyStrategy: new EsApiKeyStrategy(),
       eventLogger: eventLoggerMock,

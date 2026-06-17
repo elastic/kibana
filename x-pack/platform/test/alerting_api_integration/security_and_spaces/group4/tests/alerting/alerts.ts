@@ -365,7 +365,7 @@ instanceStateValue: true
           const reference = alertUtils.generateReference();
           const response = await alertUtils.createAlwaysFiringAction({
             reference,
-            overwrites: { throttle: null },
+            overwrites: { throttle: null, schedule: { interval: '3s' } },
           });
 
           // only need to test creation success paths
@@ -389,7 +389,7 @@ instanceStateValue: true
               name: 'def',
               tags: ['fee', 'fi', 'fo'],
               // This will cause the task to re-run on update
-              schedule: { interval: '59s' },
+              schedule: { interval: '3s' },
             },
           });
 
@@ -422,7 +422,7 @@ instanceStateValue: true
             enabled: true,
             notifyWhen: 'onActiveAlert',
             schedule: {
-              interval: '59s',
+              interval: '3s',
             },
             tags: ['fee', 'fi', 'fo'],
             throttle: '1m',

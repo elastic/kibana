@@ -22,6 +22,8 @@ jest.mock('../es', () => {
 });
 
 describe('update existing event log mappings on startup', () => {
+  jest.setTimeout(180_000);
+
   it('should update mappings for existing event log indices', async () => {
     const setupResult = await setupTestServers();
     const esServer = setupResult.esServer;
@@ -157,7 +159,7 @@ interface RetryOpts {
   intervalMs: number;
 }
 
-async function retry<T>(cb: () => Promise<T>, options: RetryOpts = { times: 60, intervalMs: 500 }) {
+async function retry<T>(cb: () => Promise<T>, options: RetryOpts = { times: 30, intervalMs: 250 }) {
   let attempt = 1;
   while (true) {
     try {

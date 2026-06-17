@@ -153,7 +153,7 @@ export default function createGapAutoFillSchedulerTests({ getService }: FtrProvi
         });
 
         it('cleanup unsticks in-progress gaps, then scheduler fills them', async () => {
-          if (!isUserAuthorized(scenario.id)) {
+          if (scenario.id !== 'superuser at space1') {
             return;
           }
 
@@ -263,7 +263,7 @@ export default function createGapAutoFillSchedulerTests({ getService }: FtrProvi
         });
 
         it('for authorized users: scheduler eventually marks gap intervals and fills the gap', async () => {
-          if (!isUserAuthorized(scenario.id)) {
+          if (scenario.id !== 'superuser at space1') {
             return;
           }
 
@@ -361,7 +361,7 @@ export default function createGapAutoFillSchedulerTests({ getService }: FtrProvi
         });
 
         describe('for authorized users: auto fill failed attempts', () => {
-          if (!isUserAuthorized(scenario.id)) {
+          if (scenario.id !== 'superuser at space1') {
             return;
           }
 

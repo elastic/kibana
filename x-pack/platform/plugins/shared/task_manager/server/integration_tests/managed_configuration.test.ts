@@ -379,7 +379,7 @@ describe('managed configuration', () => {
         'Capacity configuration changing from 10 to 8 after seeing 1 "too many request" and/or "execute [inline] script" error(s)'
       );
       expect(logger.debug).toHaveBeenCalledWith(
-        'Task pool now using 10 as the max worker value which is based on a capacity of 10'
+        'Task pool now using 20 as the max allowed cost which is based on a capacity of 10'
       );
     });
 
@@ -401,7 +401,7 @@ describe('managed configuration', () => {
         'Capacity configuration changing from 10 to 8 after seeing 1 "too many request" and/or "execute [inline] script" error(s)'
       );
       expect(logger.debug).toHaveBeenCalledWith(
-        'Task pool now using 10 as the max worker value which is based on a capacity of 10'
+        'Task pool now using 20 as the max allowed cost which is based on a capacity of 10'
       );
     });
   });

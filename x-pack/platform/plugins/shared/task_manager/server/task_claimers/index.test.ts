@@ -7,7 +7,6 @@
 
 import { getTaskClaimer, isTaskTypeExcluded } from '.';
 import { mockLogger } from '../test_utils';
-import { claimAvailableTasksUpdateByQuery } from './strategy_update_by_query';
 import { claimAvailableTasksMget } from './strategy_mget';
 
 const logger = mockLogger();
@@ -16,12 +15,6 @@ describe('task_claimers/index', () => {
   beforeEach(() => jest.resetAllMocks());
 
   describe('getTaskClaimer()', () => {
-    test('returns expected result for update_by_query', () => {
-      const taskClaimer = getTaskClaimer(logger, 'update_by_query');
-      expect(taskClaimer).toBe(claimAvailableTasksUpdateByQuery);
-      expect(logger.warn).not.toHaveBeenCalled();
-    });
-
     test('returns expected result for mget', () => {
       const taskClaimer = getTaskClaimer(logger, 'mget');
       expect(taskClaimer).toBe(claimAvailableTasksMget);
@@ -30,9 +23,9 @@ describe('task_claimers/index', () => {
 
     test('logs a warning for unsupported parameter', () => {
       const taskClaimer = getTaskClaimer(logger, 'not-supported');
-      expect(taskClaimer).toBe(claimAvailableTasksUpdateByQuery);
+      expect(taskClaimer).toBe(claimAvailableTasksMget);
       expect(logger.warn).toHaveBeenCalledWith(
-        'Unknown task claiming strategy "not-supported", falling back to update_by_query'
+        'xpack.task_manager.claim_strategy="not-supported" is no longer supported; using "mget". This setting is now a noop and will be removed in a future major release.'
       );
     });
   });

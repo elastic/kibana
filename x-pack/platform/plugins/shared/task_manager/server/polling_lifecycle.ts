@@ -17,10 +17,7 @@ import type { Logger, ExecutionContextStart } from '@kbn/core/server';
 import type { Result } from './lib/result_type';
 import { asErr, mapErr, asOk, map, mapOk, isOk } from './lib/result_type';
 import type { TaskManagerConfig } from './config';
-import {
-  CLAIM_STRATEGY_UPDATE_BY_QUERY,
-  WORKER_UTILIZATION_RUNNING_AVERAGE_WINDOW_SIZE_MS,
-} from './config';
+import { CLAIM_STRATEGY_MGET, WORKER_UTILIZATION_RUNNING_AVERAGE_WINDOW_SIZE_MS } from './config';
 
 import type {
   TaskMarkRunning,
@@ -50,7 +47,6 @@ import type { ApiKeyStrategy } from './api_key_strategy';
 import { identifyEsError, isEsCannotExecuteScriptError } from './lib/identify_es_error';
 import { BufferedTaskStore } from './buffered_task_store';
 import type { TaskTypeDictionary } from './task_type_dictionary';
-import { delayOnClaimConflicts } from './polling';
 import { TaskClaiming } from './queries/task_claiming';
 import type { ClaimOwnershipResult } from './task_claimers';
 import type { TaskPartitioner } from './lib/task_partitioner';
@@ -154,21 +150,27 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
     this.usageCounter = usageCounter;
     this.config = config;
     this.apiKeyStrategy = apiKeyStrategy;
-    const { poll_interval: pollInterval, claim_strategy: claimStrategy } = config;
+    const { poll_interval: pollInterval } = config;
     this.currentPollInterval = pollInterval;
     this.eventLogger = eventLogger;
+    const managedStrategyConfig = { ...config, claim_strategy: CLAIM_STRATEGY_MGET };
 
     const errorCheck$ = countErrors(taskStore.errors$, ADJUST_THROUGHPUT_INTERVAL);
     const window = WORKER_UTILIZATION_RUNNING_AVERAGE_WINDOW_SIZE_MS / this.currentPollInterval;
     const tmUtilizationQueue = createRunningAveragedStat<number>(window);
     this.capacityConfiguration$ = errorCheck$.pipe(
-      createCapacityScan(config, logger, startingCapacity),
+      createCapacityScan(managedStrategyConfig, logger, startingCapacity),
       startWith(startingCapacity),
       distinctUntilChanged()
     );
     this.pollIntervalConfiguration$ = errorCheck$.pipe(
       withLatestFrom(this.currentTmUtilization$),
-      createPollIntervalScan(logger, this.currentPollInterval, claimStrategy, tmUtilizationQueue),
+      createPollIntervalScan(
+        logger,
+        this.currentPollInterval,
+        CLAIM_STRATEGY_MGET,
+        tmUtilizationQueue
+      ),
       startWith(this.currentPollInterval),
       distinctUntilChanged()
     );
@@ -185,7 +187,7 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
 
     this.pool = new TaskPool({
       logger,
-      strategy: config.claim_strategy,
+      strategy: CLAIM_STRATEGY_MGET,
       capacity$: this.capacityConfiguration$,
       definitions: this.definitions,
     });
@@ -205,15 +207,6 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
     this.taskClaiming.events.subscribe(emitEvent);
 
     let pollIntervalDelay$: Observable<number> | undefined;
-    if (claimStrategy === CLAIM_STRATEGY_UPDATE_BY_QUERY) {
-      pollIntervalDelay$ = delayOnClaimConflicts(
-        this.capacityConfiguration$,
-        this.pollIntervalConfiguration$,
-        this.events$,
-        config.version_conflict_threshold,
-        config.monitored_stats_running_average_window
-      ).pipe(tap((delay) => emitEvent(asTaskManagerStatEvent('pollingDelay', asOk(delay)))));
-    }
 
     this.poller = createTaskPoller<string, TimedFillPoolResult>({
       logger,
@@ -277,7 +270,7 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
       usageCounter: this.usageCounter,
       config: this.config,
       allowReadingInvalidState: this.config.allow_reading_invalid_state,
-      strategy: this.config.claim_strategy,
+      strategy: CLAIM_STRATEGY_MGET,
       getPollInterval: () => this.currentPollInterval,
       apiKeyStrategy: this.apiKeyStrategy,
       eventLogger: this.eventLogger,

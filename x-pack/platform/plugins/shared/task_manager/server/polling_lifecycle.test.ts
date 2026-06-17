@@ -167,7 +167,7 @@ describe('TaskPollingLifecycle', () => {
       expect(mockTaskClaiming.claimAvailableTasksIfCapacityIsAvailable).toHaveBeenCalled();
     });
 
-    test('provides TaskClaiming with the capacity available when strategy = CLAIM_STRATEGY_UPDATE_BY_QUERY', () => {
+    test('provides TaskClaiming with mget-based capacity when strategy is non-mget', () => {
       const elasticsearchAndSOAvailability$ = new Subject<boolean>();
 
       new TaskPollingLifecycle({
@@ -178,9 +178,9 @@ describe('TaskPollingLifecycle', () => {
       const taskClaimingGetCapacity = (TaskClaiming as jest.Mock<TaskClaimingClass>).mock
         .calls[0][0].getAvailableCapacity;
 
-      expect(taskClaimingGetCapacity()).toEqual(40);
-      expect(taskClaimingGetCapacity('report')).toEqual(1);
-      expect(taskClaimingGetCapacity('quickReport')).toEqual(5);
+      expect(taskClaimingGetCapacity()).toEqual(80);
+      expect(taskClaimingGetCapacity('report')).toEqual(10);
+      expect(taskClaimingGetCapacity('quickReport')).toEqual(10);
     });
 
     test('provides TaskClaiming with the capacity available when strategy = CLAIM_STRATEGY_MGET', () => {
