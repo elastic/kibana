@@ -76,6 +76,23 @@ describe('TabbedTableListView', () => {
     expect(wrapper.find(KibanaPageTemplate.Header).prop('description')).toContain(description);
   });
 
+  it('should not render the page header when hideHeader is true', () => {
+    const wrapper = shallow(
+      <TabbedTableListView
+        title={title}
+        description={description}
+        headingId={headingId}
+        children={children}
+        tabs={tabs}
+        activeTabId={'tab-1'}
+        changeActiveTab={() => {}}
+        hideHeader
+      />
+    );
+
+    expect(wrapper.find(KibanaPageTemplate.Header)).toHaveLength(0);
+  });
+
   it('should render the correct number of tabs', () => {
     const wrapper = shallow(
       <TabbedTableListView

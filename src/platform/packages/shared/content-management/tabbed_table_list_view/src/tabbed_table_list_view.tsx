@@ -42,6 +42,7 @@ type TabbedTableListViewProps = Pick<
   changeActiveTab: (id: string) => void;
   getBreadcrumbs?: TableListTabParentProps['getBreadcrumbs'];
   showCreateButton?: boolean;
+  hideHeader?: boolean;
 };
 
 export const TabbedTableListView = ({
@@ -54,6 +55,7 @@ export const TabbedTableListView = ({
   changeActiveTab,
   getBreadcrumbs,
   showCreateButton,
+  hideHeader = false,
 }: TabbedTableListViewProps) => {
   const [hasInitialFetchReturned, setHasInitialFetchReturned] = useState(false);
   const [pageDataTestSubject, setPageDataTestSubject] = useState<string>();
@@ -83,18 +85,22 @@ export const TabbedTableListView = ({
     loadTableList();
   }, [activeTabId, tabs, getActiveTab, onFetchSuccess, getBreadcrumbs, showCreateButton]);
 
+  const showHeader = !hideHeader && (title || description || tabs.length > 0);
+
   return (
     <KibanaPageTemplate panelled data-test-subj={pageDataTestSubject}>
-      <KibanaPageTemplate.Header
-        pageTitle={title ? <span id={headingId}>{title}</span> : undefined}
-        description={description}
-        data-test-subj="top-nav"
-        tabs={tabs.map((tab) => ({
-          onClick: () => changeActiveTab(tab.id),
-          isSelected: tab.id === getActiveTab().id,
-          label: tab.title,
-        }))}
-      />
+      {showHeader && (
+        <KibanaPageTemplate.Header
+          pageTitle={title ? <span id={headingId}>{title}</span> : undefined}
+          description={description}
+          data-test-subj="top-nav"
+          tabs={tabs.map((tab) => ({
+            onClick: () => changeActiveTab(tab.id),
+            isSelected: tab.id === getActiveTab().id,
+            label: tab.title,
+          }))}
+        />
+      )}
       <KibanaPageTemplate.Section
         aria-labelledby={hasInitialFetchReturned && title ? headingId : undefined}
       >
