@@ -53,15 +53,9 @@ export function initializeTrackPanel(
     .pipe(
       // Get the relatedPanels$ subject of the focused panel and use it to determine blurred panels
       map(([children, focusedPanelId, relatedPanelsIndicatorId, viewMode]) => {
-        if (viewMode !== 'edit')
-          return of({
-            focusedChildId: '',
-            relatedPanels: [],
-            siblings: [],
-          });
         // To decide whether to blur a panel, a panel in focus takes precedence over something indicating related panels
         const idToCompareForBlur = focusedPanelId ?? relatedPanelsIndicatorId;
-        if (!idToCompareForBlur) {
+        if (!idToCompareForBlur || viewMode !== 'edit') {
           return of({
             focusedChildId: '',
             relatedPanels: [],
