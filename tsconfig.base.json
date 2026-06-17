@@ -1,6 +1,5 @@
 {
   "compilerOptions": {
-    "baseUrl": ".",
     "rootDir": ".",
     "paths": {
       // START AUTOMATED PACKAGE LISTING
@@ -2781,29 +2780,29 @@
       // END AUTOMATED PACKAGE LISTING
       // Map @elastic/kibana-d3-color to @types/d3-color for TypeScript compatibility.
       // Can be removed once we're able to update d3-color to the v3.1.0 ESM-only package.
-      "@elastic/kibana-d3-color": ["node_modules/@types/d3-color"],
+      "@elastic/kibana-d3-color": ["./node_modules/@types/d3-color"],
       // Allows for importing from `kibana` package for the exported types.
-      "@emotion/core": ["typings/@emotion"],
+      "@emotion/core": ["./typings/@emotion"],
       // We need the custom typings "proxy" because our current import-resolver doesn't support "exports" in package.json.
       // We should be able to remove this once we support cjs/esm interop.
       // Packages whose "exports" map lacks a "types" condition. Bundler
       // resolution can't find the types; redirect to the real .d.ts. Drop
       // these once each package ships proper exports.types.
-      "piscina": ["node_modules/piscina/dist/src/index.d.ts"],
-      "canvg": ["typings/canvg"],
-      "@typescript-eslint/parser": ["typings/@typescript-eslint/parser"],
-      "zod": ["node_modules/zod/v4/index.d.ts"],
-      "zod/v4": ["node_modules/zod/v4/index.d.ts"],
-      "zod/v4/core": ["node_modules/zod/v4/core/index.d.ts"],
-      "zod/v4/core/json-schema": ["node_modules/zod/v4/core/json-schema.d.ts"],
-      "@langchain/langgraph/prebuilt": ["node_modules/@langchain/langgraph/dist/prebuilt"],
-      "@langchain/classic/chains": ["node_modules/@langchain/classic/dist/chains"],
-      "@langchain/classic/evaluation": ["node_modules/@langchain/classic/dist/evaluation"],
+      "piscina": ["./node_modules/piscina/dist/src/index.d.ts"],
+      "canvg": ["./typings/canvg"],
+      "@typescript-eslint/parser": ["./typings/@typescript-eslint/parser"],
+      "zod": ["./node_modules/zod/v4/index.d.ts"],
+      "zod/v4": ["./node_modules/zod/v4/index.d.ts"],
+      "zod/v4/core": ["./node_modules/zod/v4/core/index.d.ts"],
+      "zod/v4/core/json-schema": ["./node_modules/zod/v4/core/json-schema.d.ts"],
+      "@langchain/langgraph/prebuilt": ["./node_modules/@langchain/langgraph/dist/prebuilt"],
+      "@langchain/classic/chains": ["./node_modules/@langchain/classic/dist/chains"],
+      "@langchain/classic/evaluation": ["./node_modules/@langchain/classic/dist/evaluation"],
       "@langchain/classic/document_loaders/fs/directory": [
-        "node_modules/@langchain/classic/dist/document_loaders/fs/directory"
+        "./node_modules/@langchain/classic/dist/document_loaders/fs/directory"
       ],
       "@langchain/classic/document_loaders/fs/text": [
-        "node_modules/@langchain/classic/dist/document_loaders/fs/text"
+        "./node_modules/@langchain/classic/dist/document_loaders/fs/text"
       ]
     },
     // Support .tsx files and transform JSX into calls to React.createElement
@@ -2852,10 +2851,6 @@
     // and is the replacement for the deprecated "node" (a.k.a. "node10")
     // strategy. Requires `module: "preserve"` or es2015+.
     "moduleResolution": "bundler",
-    // Silence the remaining TS 6.0 soft-deprecation diagnostic for baseUrl.
-    // baseUrl is removed in TS 7.0; we will normalize the paths map and drop
-    // this before that bump.
-    "ignoreDeprecations": "6.0",
     // "resolveJsonModule" allows for importing, extracting types from and generating .json files.
     "resolveJsonModule": true,
     // Disallow inconsistently-cased references to the same file.

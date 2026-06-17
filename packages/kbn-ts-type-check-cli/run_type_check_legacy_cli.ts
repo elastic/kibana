@@ -25,6 +25,7 @@ import { archiveTSBuildArtifacts } from './src/archive/archive_ts_build_artifact
 import { restoreTSBuildArtifacts } from './src/archive/restore_ts_build_artifacts';
 import { isCiEnvironment } from './src/archive/utils';
 import { normalizeProjectPath } from './src/normalize_project_path';
+import { resolveTypeCheckCompiler } from './src/resolve_compiler';
 
 /** Runs the legacy direct-target `scripts/type_check` CLI flow. */
 export const runLegacyTypeCheckCli = () => {
@@ -80,7 +81,7 @@ export const runLegacyTypeCheckCli = () => {
         );
 
         await procRunner.run(TSC_LABEL, {
-          cmd: Path.relative(REPO_ROOT, require.resolve('typescript/bin/tsc')),
+          cmd: Path.relative(REPO_ROOT, resolveTypeCheckCompiler()),
           args: [
             '-b',
             buildTarget,
