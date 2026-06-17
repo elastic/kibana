@@ -15,15 +15,19 @@ const { writeMinimalFailureContext, resolveTriageModelId } = require('./failure_
 const { summarizeFailuresWithModel } = require('./summarize_failures_with_model');
 
 const suiteId = process.argv[2] || process.env.EVAL_SUITE_ID || '';
-const outputPath = process.argv[3] || process.env.EVAL_TRIAGE_SUMMARY_PATH || '';
-const failingProjectsArg = process.argv[4] || process.env.EVAL_FAILING_PROJECTS || '';
+const failingProjectsArg = process.argv[3] || process.env.EVAL_FAILING_PROJECTS || '';
+
+// Output paths: write Slack-markdown and/or GitHub-markdown renderings of the
+// same triage. At least one must be provided.
+const slackOutputPath = process.env.EVAL_TRIAGE_SLACK_OUT || '';
+const githubOutputPath = process.env.EVAL_TRIAGE_GITHUB_OUT || '';
 
 // Notification mode controls the header/intro so on-demand and weekly per-suite
 // messages read differently even though they share this builder.
 // - 'on-demand': ad-hoc verification triggered by a person.
 // - 'weekly': scheduled run alert for the owning team.
 function resolveNotifyMode() {
-  const explicit = (process.argv[5] || process.env.EVAL_NOTIFY_MODE || '').toLowerCase();
+  const explicit = (process.argv[4] || process.env.EVAL_NOTIFY_MODE || '').toLowerCase();
   if (explicit === 'on-demand' || explicit === 'weekly') {
     return explicit;
   }
@@ -38,9 +42,10 @@ function resolveNotifyMode() {
 
 const notifyMode = resolveNotifyMode();
 
-if (!suiteId || !outputPath || !failingProjectsArg) {
+if (!suiteId || !failingProjectsArg || (!slackOutputPath && !githubOutputPath)) {
   console.error(
-    'Usage: build_suite_owner_slack_message.js <suiteId> <output.md> <comma-separated failing projects> [on-demand|weekly]'
+    'Usage: build_suite_owner_slack_message.js <suiteId> <comma-separated failing projects> [on-demand|weekly]\n' +
+      '  Set EVAL_TRIAGE_SLACK_OUT and/or EVAL_TRIAGE_GITHUB_OUT to choose output renderings.'
   );
   process.exit(1);
 }
@@ -62,28 +67,47 @@ const suite = suites.find((entry) => entry?.id === suiteId) ?? null;
 const suiteName = suite?.name ?? suiteId;
 const buildUrl = process.env.BUILDKITE_BUILD_URL || '';
 
-const header =
-  notifyMode === 'on-demand'
-    ? `:test_tube: *On-demand LLM eval* — ${suiteName} (\`${suiteId}\`) failed.`
-    : `:rotating_light: *Weekly LLM evals* — ${suiteName} (\`${suiteId}\`) failed.`;
+const headerLabel = notifyMode === 'on-demand' ? 'On-demand LLM eval' : 'Weekly LLM evals';
+const headerEmoji = notifyMode === 'on-demand' ? ':test_tube:' : ':rotating_light:';
 
-const lines = [
-  header,
-  '',
-  '*Failing models:*',
-  ...failingProjects.map((project) => `- \`${project}\``),
-];
-
-if (buildUrl) {
-  lines.push('', `<${buildUrl}|View build>`);
+/**
+ * Render the message in Slack mrkdwn (`*bold*`, `<url|text>`).
+ *
+ * @param {{ modelId: string; body: string }} triage
+ * @returns {string}
+ */
+function renderSlack(triage) {
+  const lines = [
+    `${headerEmoji} *${headerLabel}* — ${suiteName} (\`${suiteId}\`) failed.`,
+    '',
+    '*Failing models:*',
+    ...failingProjects.map((project) => `- \`${project}\``),
+  ];
+  if (buildUrl) {
+    lines.push('', `<${buildUrl}|View build>`);
+  }
+  lines.push('', `*Triage summary (model: \`${triage.modelId}\`):*`, triage.body);
+  return `${lines.join('\n')}\n`;
 }
 
 /**
- * @param {string} modelId
- * @param {string} body
+ * Render the message in GitHub-flavored markdown (`**bold**`, `[text](url)`).
+ *
+ * @param {{ modelId: string; body: string }} triage
+ * @returns {string}
  */
-function appendTriageSection(modelId, body) {
-  lines.push('', `*Triage summary (model: \`${modelId}\`):*`, body);
+function renderGithub(triage) {
+  const lines = [
+    `${headerEmoji} **${headerLabel}** — ${suiteName} (\`${suiteId}\`) failed.`,
+    '',
+    '**Failing models:**',
+    ...failingProjects.map((project) => `- \`${project}\``),
+  ];
+  if (buildUrl) {
+    lines.push('', `[View build](${buildUrl})`);
+  }
+  lines.push('', `**Triage summary (model: \`${triage.modelId}\`):**`, '', triage.body);
+  return `${lines.join('\n')}\n`;
 }
 
 /**
@@ -118,29 +142,37 @@ async function collectFailureContext(contextPath) {
 }
 
 async function main() {
-  const modelId = resolveTriageModelId() || 'unknown';
-  const tempDir = mkdtempSync(join(tmpdir(), 'kbn-evals-slack-'));
+  const fallbackModelId = resolveTriageModelId() || 'unknown';
+  const tempDir = mkdtempSync(join(tmpdir(), 'kbn-evals-triage-'));
   const contextPath = join(tempDir, 'failure-context.json');
 
+  // Single LLM call; both renderings reuse the same triage body (the prompt asks
+  // for portable markdown that renders in Slack and GitHub).
+  let triage = { modelId: fallbackModelId, body: '' };
   try {
     console.error('--- Collecting failure context for triage summary');
     await collectFailureContext(contextPath);
 
-    console.error(`--- Generating triage summary (model: ${modelId})`);
-    const { summary, modelId: resolvedModelId } = await summarizeFailuresWithModel(contextPath);
-    appendTriageSection(resolvedModelId, summary);
+    console.error(`--- Generating triage summary (model: ${fallbackModelId})`);
+    const { summary, modelId } = await summarizeFailuresWithModel(contextPath);
+    triage = { modelId, body: summary };
   } catch (error) {
     const message = formatTriageError(error);
     console.error(`--- Triage summary failed: ${message}`);
-    appendTriageSection(
-      modelId,
-      `_Triage summary could not be generated: ${message}. See the suite owner notify Buildkite step for details._`
-    );
+    triage = {
+      modelId: fallbackModelId,
+      body: `_Triage summary could not be generated: ${message}. See the suite owner notify Buildkite step for details._`,
+    };
   } finally {
     rmSync(tempDir, { recursive: true, force: true });
   }
 
-  writeFileSync(outputPath, `${lines.join('\n')}\n`, 'utf8');
+  if (slackOutputPath) {
+    writeFileSync(slackOutputPath, renderSlack(triage), 'utf8');
+  }
+  if (githubOutputPath) {
+    writeFileSync(githubOutputPath, renderGithub(triage), 'utf8');
+  }
 }
 
 main().catch((error) => {

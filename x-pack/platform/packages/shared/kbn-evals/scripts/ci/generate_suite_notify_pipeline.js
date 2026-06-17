@@ -10,9 +10,7 @@ const { readFileSync } = require('fs');
 const { stringify } = require('yaml');
 
 const summaryPath = process.argv[2] || process.env.EVAL_TRIAGE_SUMMARY_PATH || '';
-let slackChannel = process.argv[3] || process.env.EVAL_SUITE_SLACK_CHANNEL || '';
-// TODO: revert before merge, force all suite-owner notifications to a my slack user
-slackChannel = 'U07PJAGDAPP';
+const slackChannel = process.argv[3] || process.env.EVAL_SUITE_SLACK_CHANNEL || '';
 
 if (!summaryPath || !slackChannel) {
   console.error('Usage: generate_suite_notify_pipeline.js <summary.md> <slackChannel>');

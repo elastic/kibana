@@ -227,11 +227,28 @@ EOF
 EOF
       done <<<"$CONNECTOR_IDS"
 
+      # Resolve a PR number (if any) so triage can be posted as a PR comment:
+      # GITHUB_PR_NUMBER (PR-label CI) -> BUILDKITE_PULL_REQUEST -> refs/pull/<N>/head
+      # branch (how on-demand selects a PR via the New Build form).
+      resolved_pr_number=""
+      if [[ -n "${GITHUB_PR_NUMBER:-}" ]]; then
+        resolved_pr_number="${GITHUB_PR_NUMBER}"
+      elif [[ -n "${BUILDKITE_PULL_REQUEST:-}" && "${BUILDKITE_PULL_REQUEST}" != "false" ]]; then
+        resolved_pr_number="${BUILDKITE_PULL_REQUEST}"
+      elif [[ "${BUILDKITE_BRANCH:-}" =~ ^refs/pull/([0-9]+)/head$ ]]; then
+        resolved_pr_number="${BASH_REMATCH[1]}"
+      fi
+
+      # Enable the suite owner notify step when there is somewhere to send triage:
+      # - weekly: the suite's team channel
+      # - any run: a PR comment (PR context) or EVAL_SLACK_NOTIFICATION_CHANNEL
       enable_suite_owner_notify="false"
-      if [[ -n "${EVAL_SUITE_SLACK_CHANNEL:-}" ]]; then
-        if [[ "${KBN_EVALS_WEEKLY:-}" =~ ^(1|true)$ ]] || [[ "${KBN_EVALS_ON_DEMAND:-}" =~ ^(1|true)$ ]]; then
-          enable_suite_owner_notify="true"
-        fi
+      if [[ "${KBN_EVALS_WEEKLY:-}" =~ ^(1|true)$ ]] && [[ -n "${EVAL_SUITE_SLACK_CHANNEL:-}" ]]; then
+        enable_suite_owner_notify="true"
+      elif [[ -n "${resolved_pr_number}" ]]; then
+        enable_suite_owner_notify="true"
+      elif [[ -n "${EVAL_SLACK_NOTIFICATION_CHANNEL:-}" ]]; then
+        enable_suite_owner_notify="true"
       fi
 
       if [[ "${enable_suite_owner_notify}" == "true" ]]; then
@@ -245,6 +262,8 @@ EOF
           KBN_EVALS_ON_DEMAND: "${KBN_EVALS_ON_DEMAND:-}"
           EVAL_SUITE_ID: "${EVAL_SUITE_ID}"
           EVAL_SUITE_SLACK_CHANNEL: "${EVAL_SUITE_SLACK_CHANNEL:-}"
+          EVAL_SLACK_NOTIFICATION_CHANNEL: "${EVAL_SLACK_NOTIFICATION_CHANNEL:-}"
+          EVAL_PR_NUMBER: "${resolved_pr_number}"
           EVAL_SUITE_NAME: "${EVAL_SUITE_NAME:-}"
           EVALUATION_CONNECTOR_ID: "${EVALUATION_CONNECTOR_ID:-}"
           KBN_EVALS_SUITE_OWNER_NOTIFY: "1"

@@ -25,17 +25,42 @@ fi
 
 suite_name="${EVAL_SUITE_NAME:-$EVAL_SUITE_ID}"
 
-# Notification mode controls the Slack header (on-demand vs scheduled weekly run).
-if [[ "${KBN_EVALS_ON_DEMAND:-}" =~ ^(1|true)$ ]]; then
-  EVAL_NOTIFY_MODE="on-demand"
-else
+# Notification mode controls the triage header. Weekly is the scheduled run; any
+# other context (on-demand, PR CI) reads as an on-demand-style verification.
+if [[ "${KBN_EVALS_WEEKLY:-}" =~ ^(1|true)$ ]]; then
   EVAL_NOTIFY_MODE="weekly"
+else
+  EVAL_NOTIFY_MODE="on-demand"
 fi
 export EVAL_NOTIFY_MODE
 
+# --- Resolve destinations -------------------------------------------------
+# Slack: weekly -> the suite's team channel; otherwise -> EVAL_SLACK_NOTIFICATION_CHANNEL
+# (so on-demand/PR runs never auto-post to a team channel).
+slack_channel=""
+if [[ "${EVAL_NOTIFY_MODE}" == "weekly" ]]; then
+  slack_channel="${EVAL_SUITE_SLACK_CHANNEL:-}"
+  if [[ -z "${slack_channel}" ]]; then
+    suites_json="${KIBANA_DIR:-${BUILDKITE_BUILD_CHECKOUT_PATH:-$(pwd)}}/.buildkite/pipelines/evals/evals.suites.json"
+    slack_channel="$(
+      jq -r --arg id "$EVAL_SUITE_ID" '.suites[] | select(.id == $id) | .slackChannel // empty' "$suites_json" 2>/dev/null || true
+    )"
+  fi
+else
+  slack_channel="${EVAL_SLACK_NOTIFICATION_CHANNEL:-}"
+fi
+
+# PR: comment when a PR number was resolved (run_suite.sh derives it from
+# GITHUB_PR_NUMBER / BUILDKITE_PULL_REQUEST / refs/pull/<N>/head).
+pr_number="${EVAL_PR_NUMBER:-}"
+
+if [[ -z "${slack_channel}" && -z "${pr_number}" ]]; then
+  echo "No Slack channel and not a PR build; skipping triage for suite ${EVAL_SUITE_ID}"
+  exit 0
+fi
+
 echo "Suite failed: ${suite_name} (${EVAL_SUITE_ID})"
-echo ""
-echo "Failing connector projects:"
+echo "Destinations: slack='${slack_channel:-<none>}' pr='${pr_number:-<none>}'"
 mapfile -t failing_projects < <(
   while IFS= read -r key; do
     [[ -z "${key}" ]] && continue
@@ -44,24 +69,11 @@ mapfile -t failing_projects < <(
     printf '%s\n' "${value}"
   done <<<"${failure_keys}" | sort -u
 )
-for project in "${failing_projects[@]}"; do
-  printf -- '- %s\n' "${project}"
-done
-echo ""
-echo "Build: ${BUILDKITE_BUILD_URL:-}"
-
-EVAL_SUITE_SLACK_CHANNEL="${EVAL_SUITE_SLACK_CHANNEL:-}"
-if [[ -z "${EVAL_SUITE_SLACK_CHANNEL}" ]]; then
-  suites_json="${KIBANA_DIR:-${BUILDKITE_BUILD_CHECKOUT_PATH:-$(pwd)}}/.buildkite/pipelines/evals/evals.suites.json"
-  EVAL_SUITE_SLACK_CHANNEL="$(
-    jq -r --arg id "$EVAL_SUITE_ID" '.suites[] | select(.id == $id) | .slackChannel // empty' "$suites_json" 2>/dev/null || true
-  )"
-fi
 
 cd "${KIBANA_DIR:-${BUILDKITE_BUILD_CHECKOUT_PATH:-$(pwd)}}"
 
 if [[ ! -d node_modules/@elastic/elasticsearch ]] || ! node -e "require('@elastic/elasticsearch')" 2>/dev/null; then
-  echo "--- Bootstrap (required for suite owner Slack message)"
+  echo "--- Bootstrap (required for suite owner triage)"
   .buildkite/scripts/bootstrap.sh
 fi
 
@@ -74,42 +86,60 @@ else
   echo "WARNING: KBN_EVALS_CONFIG_B64 is not set; build_suite_owner_slack_message requires vault LiteLLM env vars"
 fi
 
-SUMMARY_FILE="$(mktemp -t kbn-evals-suite-summary.XXXXXX.md)"
 FAILING_PROJECTS_CSV="$(IFS=,; echo "${failing_projects[*]}")"
 
-echo "--- Building suite owner Slack message (static + model triage)"
-if ! node x-pack/platform/packages/shared/kbn-evals/scripts/ci/build_suite_owner_slack_message.js \
-  "$EVAL_SUITE_ID" "$SUMMARY_FILE" "$FAILING_PROJECTS_CSV" "$EVAL_NOTIFY_MODE"; then
-  echo "--- build_suite_owner_slack_message crashed; writing static summary with triage error note"
-  if [[ "${EVAL_NOTIFY_MODE}" == "on-demand" ]]; then
-    fallback_header=":test_tube: *On-demand LLM eval* — %s (\`%s\`) failed."
+# Build the renderings we actually need (one LLM call inside the builder).
+SLACK_FILE=""
+GITHUB_FILE=""
+if [[ -n "${slack_channel}" ]]; then
+  SLACK_FILE="$(mktemp -t kbn-evals-triage-slack.XXXXXX.md)"
+fi
+if [[ -n "${pr_number}" ]]; then
+  GITHUB_FILE="$(mktemp -t kbn-evals-triage-github.XXXXXX.md)"
+fi
+
+echo "--- Building suite triage message(s)"
+if ! EVAL_TRIAGE_SLACK_OUT="${SLACK_FILE}" EVAL_TRIAGE_GITHUB_OUT="${GITHUB_FILE}" \
+  node x-pack/platform/packages/shared/kbn-evals/scripts/ci/build_suite_owner_slack_message.js \
+  "$EVAL_SUITE_ID" "$FAILING_PROJECTS_CSV" "$EVAL_NOTIFY_MODE"; then
+  echo "--- build_suite_owner_slack_message crashed; writing static fallback summary"
+  if [[ "${EVAL_NOTIFY_MODE}" == "weekly" ]]; then
+    header_label="Weekly LLM evals"
   else
-    fallback_header=":rotating_light: *Weekly LLM evals* — %s (\`%s\`) failed."
+    header_label="On-demand LLM eval"
   fi
-  {
-    # shellcheck disable=SC2059
-    printf "${fallback_header}\n\n" "$suite_name" "$EVAL_SUITE_ID"
-    printf '*Failing models:*\n'
-    for project in "${failing_projects[@]}"; do
-      printf -- '- `%s`\n' "${project}"
-    done
-    if [[ -n "${BUILDKITE_BUILD_URL:-}" ]]; then
-      printf '\n<%s|View build>\n' "${BUILDKITE_BUILD_URL}"
-    fi
-    printf '\n*Triage summary (model unavailable):*\n'
-    printf '_Suite owner message builder failed. See the suite owner notify Buildkite step for details._\n'
-  } >"$SUMMARY_FILE"
+  if [[ -n "${SLACK_FILE}" ]]; then
+    {
+      printf ':rotating_light: *%s* — %s (`%s`) failed.\n\n' "$header_label" "$suite_name" "$EVAL_SUITE_ID"
+      printf '*Failing models:*\n'
+      for project in "${failing_projects[@]}"; do printf -- '- `%s`\n' "${project}"; done
+      [[ -n "${BUILDKITE_BUILD_URL:-}" ]] && printf '\n<%s|View build>\n' "${BUILDKITE_BUILD_URL}"
+      printf '\n*Triage summary (model unavailable):*\n'
+      printf '_Suite owner message builder failed. See the suite owner notify Buildkite step for details._\n'
+    } >"$SLACK_FILE"
+  fi
+  if [[ -n "${GITHUB_FILE}" ]]; then
+    {
+      printf ':rotating_light: **%s** — %s (`%s`) failed.\n\n' "$header_label" "$suite_name" "$EVAL_SUITE_ID"
+      printf '**Failing models:**\n'
+      for project in "${failing_projects[@]}"; do printf -- '- `%s`\n' "${project}"; done
+      [[ -n "${BUILDKITE_BUILD_URL:-}" ]] && printf '\n[View build](%s)\n' "${BUILDKITE_BUILD_URL}"
+      printf '\n**Triage summary (model unavailable):**\n\n'
+      printf '_Suite owner message builder failed. See the suite owner notify Buildkite step for details._\n'
+    } >"$GITHUB_FILE"
+  fi
 fi
 
-echo "--- Suite failure summary"
-cat "$SUMMARY_FILE"
-
-if ! grep -q 'Triage summary' "$SUMMARY_FILE"; then
-  echo "WARNING: Slack message is missing a triage section header"
+# Record the Slack body for the weekly aggregate + annotate the build for the record.
+ANNOTATION_FILE="${SLACK_FILE:-${GITHUB_FILE}}"
+if [[ -n "${SLACK_FILE}" && -f "${SLACK_FILE}" ]]; then
+  buildkite-agent meta-data set "kbn-evals:triage:${suite_key_safe}" "$(cat "$SLACK_FILE")" >/dev/null 2>&1 || true
 fi
-
-buildkite-agent meta-data set "kbn-evals:triage:${suite_key_safe}" "$(cat "$SUMMARY_FILE")" >/dev/null 2>&1 || true
-buildkite-agent annotate --context "kbn-evals-summary-${suite_key_safe}" --style 'error' "$(cat "$SUMMARY_FILE")" || true
+if [[ -n "${ANNOTATION_FILE}" && -f "${ANNOTATION_FILE}" ]]; then
+  echo "--- Suite failure summary"
+  cat "$ANNOTATION_FILE"
+  buildkite-agent annotate --context "kbn-evals-summary-${suite_key_safe}" --style 'error' "$(cat "$ANNOTATION_FILE")" || true
+fi
 
 # Record a per-suite job link so the weekly roll-up can deep-link to this suite's
 # triage job (instead of one link per failing model).
@@ -118,7 +148,8 @@ if [[ -n "${BUILDKITE_BUILD_URL:-}" && -n "${BUILDKITE_JOB_ID:-}" ]]; then
     "${BUILDKITE_BUILD_URL}#${BUILDKITE_JOB_ID}" >/dev/null 2>&1 || true
 fi
 
-if [[ -n "${EVAL_SUITE_SLACK_CHANNEL:-}" ]]; then
+# --- Post to Slack --------------------------------------------------------
+if [[ -n "${slack_channel}" && -n "${SLACK_FILE}" && -f "${SLACK_FILE}" ]]; then
   if ! node -e "require('yaml')" 2>/dev/null; then
     echo "--- Bootstrap (required for generate_suite_notify_pipeline.js)"
     .buildkite/scripts/bootstrap.sh
@@ -126,16 +157,27 @@ if [[ -n "${EVAL_SUITE_SLACK_CHANNEL:-}" ]]; then
 
   NOTIFY_PIPELINE_FILE="$(mktemp -t kbn-evals-notify-pipeline.XXXXXX.yml)"
   node x-pack/platform/packages/shared/kbn-evals/scripts/ci/generate_suite_notify_pipeline.js \
-    "$SUMMARY_FILE" "$EVAL_SUITE_SLACK_CHANNEL" >"$NOTIFY_PIPELINE_FILE"
+    "$SLACK_FILE" "$slack_channel" >"$NOTIFY_PIPELINE_FILE"
 
-  echo "--- Uploading suite owner Slack notify pipeline (channel: ${EVAL_SUITE_SLACK_CHANNEL})"
+  echo "--- Uploading suite owner Slack notify pipeline (channel: ${slack_channel})"
   cat "$NOTIFY_PIPELINE_FILE"
-  if ! buildkite-agent pipeline upload "$NOTIFY_PIPELINE_FILE"; then
-    rm -f "$NOTIFY_PIPELINE_FILE" "$SUMMARY_FILE"
-    exit 1
-  fi
+  buildkite-agent pipeline upload "$NOTIFY_PIPELINE_FILE" || echo "WARNING: failed to upload Slack notify pipeline"
   rm -f "$NOTIFY_PIPELINE_FILE"
 fi
 
-rm -f "$SUMMARY_FILE"
+# --- Post a PR comment ----------------------------------------------------
+if [[ -n "${pr_number}" && -n "${GITHUB_FILE}" && -f "${GITHUB_FILE}" ]]; then
+  echo "--- Posting triage as a PR comment (elastic/kibana#${pr_number})"
+  if ! ts-node .buildkite/scripts/lifecycle/comment_on_pr.ts \
+    --message "$(cat "$GITHUB_FILE")" \
+    --context "evals-triage-${suite_key_safe}" \
+    --clear-previous \
+    --issue-number "$pr_number" \
+    --repository-owner "elastic" \
+    --repository "kibana"; then
+    echo "WARNING: failed to post PR comment for suite ${EVAL_SUITE_ID}"
+  fi
+fi
+
+rm -f "${SLACK_FILE}" "${GITHUB_FILE}" 2>/dev/null || true
 exit 0

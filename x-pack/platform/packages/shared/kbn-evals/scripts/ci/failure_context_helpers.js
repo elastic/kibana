@@ -209,7 +209,7 @@ function buildTriageUserPrompt(context, header) {
     truncateContextJson(context),
     '',
     'Instructions:',
-    '- Use Slack-friendly markdown (short bullets, no code fences).',
+    '- Use plain, portable markdown so it renders in both Slack and GitHub: short bullets starting with "- ", and do not use bold, headings, links, or code fences.',
     '- Start with a one-line verdict that classifies the failure as one of: provider/infra issue (NOT actionable by the team, e.g. provider outage, 429/529 rate limits, gateway/timeout), eval-quality regression (action needed), or test/harness bug (action needed).',
     '- Explicitly state whether this looks like a transient model-provider issue or a real regression, and say which.',
     '- A clear signal of a real regression (not a provider issue) is the same failure across multiple unrelated providers/models; call this out when present.',
