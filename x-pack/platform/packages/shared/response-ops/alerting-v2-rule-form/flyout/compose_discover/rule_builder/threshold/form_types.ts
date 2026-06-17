@@ -154,6 +154,37 @@ export const shouldSyncConditionMetricOnLabelChange = (
   return owners.length === 1 && labels[index] === oldLabel;
 };
 
+export const syncConditionsForLabelChange = (
+  conditions: AlertCondition[],
+  labels: string[],
+  index: number,
+  oldLabel: string,
+  newLabel: string,
+  stats: StatDefinition[],
+  evaluations: EvaluationDefinition[]
+): AlertCondition[] => {
+  const synced = shouldSyncConditionMetricOnLabelChange(labels, index, oldLabel, newLabel)
+    ? conditions.map((c) => (c.metric === oldLabel ? { ...c, metric: newLabel } : c))
+    : conditions;
+  return reconcileAlertConditionMetrics(synced, stats, evaluations);
+};
+
+export const clearConditionsForRemovedMetric = (
+  conditions: AlertCondition[],
+  removedLabel: string,
+  remainingStats: StatDefinition[],
+  evaluations: EvaluationDefinition[]
+): AlertCondition[] => {
+  const remainingLabels = new Set([
+    ...remainingStats.filter((s) => s.label.trim()).map((s) => s.label),
+    ...evaluations.filter((e) => e.label.trim()).map((e) => e.label),
+  ]);
+  if (remainingLabels.has(removedLabel)) {
+    return conditions;
+  }
+  return conditions.map((c) => (c.metric === removedLabel ? { ...c, metric: '' } : c));
+};
+
 export const isStatLabelValid = (stat: StatDefinition): boolean => Boolean(stat.label.trim());
 
 export const isStatFieldValid = (stat: StatDefinition): boolean =>

@@ -51,7 +51,8 @@ import {
   nextEvalLabel,
   nextStatLabel,
   reconcileAlertConditionMetrics,
-  shouldSyncConditionMetricOnLabelChange,
+  syncConditionsForLabelChange,
+  clearConditionsForRemovedMetric,
   isStatLabelValid,
   isStatFieldValid,
   generateId,
@@ -128,7 +129,8 @@ export const RuleBuilderAlertConditionStep: React.FC<RuleBuilderStepProps> = ({
   const esqlQuery = useMemo(() => buildThresholdEsql(thresholdValues), [thresholdValues]);
   const recoveryBlock = useMemo(() => buildRecoveryBlock(thresholdValues), [thresholdValues]);
 
-  // Rebuild and commit ES|QL whenever form values change
+  // Rebuild and commit ES|QL whenever form values change. state.queryCommitted is read to
+  // invalidate when the derived query becomes empty; commit only when not yet committed.
   useEffect(() => {
     if (!esqlQuery) {
       if (state.queryCommitted) {
@@ -157,7 +159,9 @@ export const RuleBuilderAlertConditionStep: React.FC<RuleBuilderStepProps> = ({
       setValue('grouping', undefined);
     }
 
-    dispatch({ type: 'COMMIT_QUERY' });
+    if (!state.queryCommitted) {
+      dispatch({ type: 'COMMIT_QUERY' });
+    }
   }, [
     thresholdValues,
     esqlQuery,
@@ -167,24 +171,6 @@ export const RuleBuilderAlertConditionStep: React.FC<RuleBuilderStepProps> = ({
     dispatch,
     state.queryCommitted,
   ]);
-
-  const syncConditionsForLabelChange = useCallback(
-    (
-      conditions: AlertCondition[],
-      labels: string[],
-      index: number,
-      oldLabel: string,
-      newLabel: string,
-      stats: StatDefinition[],
-      evaluations: EvaluationDefinition[]
-    ): AlertCondition[] => {
-      const synced = shouldSyncConditionMetricOnLabelChange(labels, index, oldLabel, newLabel)
-        ? conditions.map((c) => (c.metric === oldLabel ? { ...c, metric: newLabel } : c))
-        : conditions;
-      return reconcileAlertConditionMetrics(synced, stats, evaluations);
-    },
-    []
-  );
 
   const update = useCallback(
     <K extends keyof ThresholdFormValues>(field: K, value: ThresholdFormValues[K]) => {
@@ -222,26 +208,7 @@ export const RuleBuilderAlertConditionStep: React.FC<RuleBuilderStepProps> = ({
         alertConditions: updatedConditions,
       });
     },
-    [thresholdValues, onThresholdValuesChange, syncConditionsForLabelChange]
-  );
-
-  const clearConditionsForRemovedMetric = useCallback(
-    (
-      conditions: AlertCondition[],
-      removedLabel: string,
-      remainingStats: StatDefinition[],
-      evaluations: EvaluationDefinition[]
-    ): AlertCondition[] => {
-      const remainingLabels = new Set([
-        ...remainingStats.filter((s) => s.label.trim()).map((s) => s.label),
-        ...evaluations.filter((e) => e.label.trim()).map((e) => e.label),
-      ]);
-      if (remainingLabels.has(removedLabel)) {
-        return conditions;
-      }
-      return conditions.map((c) => (c.metric === removedLabel ? { ...c, metric: '' } : c));
-    },
-    []
+    [thresholdValues, onThresholdValuesChange]
   );
 
   const addStat = useCallback(() => {
@@ -274,7 +241,7 @@ export const RuleBuilderAlertConditionStep: React.FC<RuleBuilderStepProps> = ({
         alertConditions: cleanedConditions,
       });
     },
-    [thresholdValues, onThresholdValuesChange, clearConditionsForRemovedMetric]
+    [thresholdValues, onThresholdValuesChange]
   );
 
   // ── Evaluation helpers ──
@@ -311,7 +278,7 @@ export const RuleBuilderAlertConditionStep: React.FC<RuleBuilderStepProps> = ({
         alertConditions: updatedConditions,
       });
     },
-    [thresholdValues, onThresholdValuesChange, syncConditionsForLabelChange]
+    [thresholdValues, onThresholdValuesChange]
   );
 
   const removeEvaluation = useCallback(
@@ -334,7 +301,7 @@ export const RuleBuilderAlertConditionStep: React.FC<RuleBuilderStepProps> = ({
         alertConditions: cleanedConditions,
       });
     },
-    [thresholdValues, onThresholdValuesChange, clearConditionsForRemovedMetric]
+    [thresholdValues, onThresholdValuesChange]
   );
 
   // ── Alert condition helpers ──
@@ -449,6 +416,8 @@ export const RuleBuilderAlertConditionStep: React.FC<RuleBuilderStepProps> = ({
           onChange={(opts) => update('indexPattern', opts[0]?.label ?? '')}
           customOptionText={i18n.translate('xpack.alertingV2.ruleBuilder.indexCustomOption', {
             defaultMessage: 'Use {searchValue} as an index pattern',
+            // EuiComboBox replaces {searchValue} at render time; pass the literal token through
+            // i18n so FormatJS does not treat it as an ICU variable without a value.
             values: { searchValue: '{searchValue}' },
           })}
           placeholder={i18n.translate('xpack.alertingV2.ruleBuilder.indexPlaceholder', {
@@ -632,6 +601,9 @@ export const RuleBuilderAlertConditionStep: React.FC<RuleBuilderStepProps> = ({
                   </EuiFlexItem>
                 )}
               </EuiFlexGroup>
+              {/* Errors live in a second row because EuiFormRow only renders error text when
+                  isInvalid is set, which would misalign sibling columns in the row above. Keep
+                  grow values in sync with the input row when changing this layout. */}
               {hasStatRowValidationError && (
                 <EuiFlexGroup gutterSize="s" responsive={false}>
                   <EuiFlexItem grow={2} />

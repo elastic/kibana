@@ -10,9 +10,21 @@ import {
   Comparator,
   isStatFieldValid,
   isStatLabelValid,
+  nextStatLabel,
   reconcileAlertConditionMetrics,
   shouldSyncConditionMetricOnLabelChange,
 } from './form_types';
+
+describe('nextStatLabel', () => {
+  it('returns the base label when it is not already used', () => {
+    expect(nextStatLabel([], Aggregation.COUNT)).toBe('count');
+  });
+
+  it('returns a suffixed label when the base label already exists', () => {
+    expect(nextStatLabel(['count'], Aggregation.COUNT)).toBe('count_2');
+    expect(nextStatLabel(['count', 'count_2'], Aggregation.COUNT)).toBe('count_3');
+  });
+});
 
 describe('shouldSyncConditionMetricOnLabelChange', () => {
   it('returns false when multiple items share the old label', () => {

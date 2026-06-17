@@ -78,6 +78,8 @@ const thresholdDefinition = defineBuilder<ThresholdFormValues>({
       dispatch: props.dispatch,
     }),
   validate: (_state, builderState) =>
+    // No builder state means the step cannot be valid yet (unlike ES|QL mode, which can proceed
+    // on queryCommitted alone before builder state is initialized).
     builderState ? isThresholdFormValid(getValidatedThresholdValues(builderState)) : false,
   parseState: parseThresholdEsql,
 });
