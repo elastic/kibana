@@ -9,6 +9,14 @@
 
 export const ES_ARCHIVE_LOGSTASH_FUNCTIONAL =
   'x-pack/platform/test/fixtures/es_archives/logstash_functional';
+export const ES_ARCHIVE_MAKELOGS = 'src/platform/test/functional/fixtures/es_archiver/makelogs';
+export const ES_ARCHIVE_FLIGHTS_DATA_VIEW =
+  'src/platform/test/functional/fixtures/es_archiver/kibana_sample_data_flights_index_pattern';
+export const KBN_ARCHIVE_FLIGHTS_DATA_VIEW =
+  'src/platform/test/functional/fixtures/kbn_archiver/kibana_sample_data_flights_index_pattern';
+export const KBN_ARCHIVE_DISCOVER = 'src/platform/test/functional/fixtures/kbn_archiver/discover';
+export const ES_ARCHIVE_BASIC_INDEX =
+  'src/platform/test/api_integration/fixtures/es_archiver/index_patterns/basic_index';
 
 export const DATA_VIEWS_MANAGEMENT_PATH = '/app/management/kibana/dataViews';
 
