@@ -14,7 +14,7 @@ export interface ElasticsearchAssets {
   dataStream: string;
 }
 
-export const elasticsearchAssetsSchema: z.Schema<ElasticsearchAssets> = z.object({
+export const elasticsearchAssetsSchema: z.Schema<ElasticsearchAssets> = z.strictObject({
   ingestPipeline: z.string().optional(),
   componentTemplates: z.array(z.string()),
   indexTemplate: z.string(),

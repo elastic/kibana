@@ -16,7 +16,7 @@ export interface EsqlQuery {
   query: string;
 }
 
-export const esqlQuerySchema: z.Schema<EsqlQuery> = z.object({
+export const esqlQuerySchema: z.Schema<EsqlQuery> = z.strictObject({
   query: z.string(),
 });
 
@@ -40,7 +40,7 @@ export const HIGH_SEVERITY_THRESHOLD = 60;
 
 export const queryTypeSchema = z.enum([QUERY_TYPE_MATCH, QUERY_TYPE_STATS]);
 
-export const queryFeatureSchema = z.object({
+export const queryFeatureSchema = z.strictObject({
   id: z.string(),
   run_id: z.string().optional(),
 });
@@ -56,7 +56,7 @@ export interface StreamQuery extends StreamQueryBase {
   features?: QueryFeature[];
 }
 
-const streamQueryBaseSchema = z.object({
+const streamQueryBaseSchema = z.strictObject({
   id: NonEmptyString,
   title: NonEmptyString,
   description: z.string(),
@@ -87,7 +87,7 @@ export const querySchema: z.ZodType<QueryDslQueryContainer> = z.lazy(() =>
  * omitted — the server derives it from the ES|QL content via `deriveQueryType`
  * on every write, so client-supplied values would be ignored.
  */
-export const upsertStreamQueryRequestSchema = z.object({
+export const upsertStreamQueryRequestSchema = z.strictObject({
   title: NonEmptyString,
   esql: esqlQuerySchema,
   severity_score: z.number().optional(),

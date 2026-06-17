@@ -27,7 +27,7 @@ import type {
   MappingWildcardProperty,
 } from '@elastic/elasticsearch/lib/api/types';
 import { z } from '@kbn/zod/v4';
-import { NonEmptyString } from '@kbn/zod-helpers/v4';
+import { DeepStrict, NonEmptyString } from '@kbn/zod-helpers/v4';
 
 import { recursiveRecord } from '../shared/record_types';
 
@@ -85,7 +85,7 @@ export type FieldDefinitionConfigAdvancedParameters = Omit<
   'type' | 'format' | 'description'
 >;
 
-export const fieldDefinitionConfigSchema = (
+export const fieldDefinitionConfigSchema = DeepStrict(
   z.intersection(
     recursiveRecord,
     z.union([
@@ -158,7 +158,7 @@ export type ClassicFieldDefinitionConfig =
       description?: string;
     };
 
-export const classicFieldDefinitionConfigSchema = (
+export const classicFieldDefinitionConfigSchema = DeepStrict(
   z.intersection(
     recursiveRecord,
     z.union([
@@ -195,12 +195,14 @@ export interface InheritedFieldDefinition {
 export const inheritedFieldDefinitionSchema: z.Schema<InheritedFieldDefinition> = z
   .record(
     z.string(),
-    z.intersection(
-      fieldDefinitionConfigSchema,
-      z.object({
-        from: NonEmptyString,
-        alias_for: z.optional(NonEmptyString),
-      })
+    DeepStrict(
+      z.intersection(
+        fieldDefinitionConfigSchema,
+        z.object({
+          from: NonEmptyString,
+          alias_for: z.optional(NonEmptyString),
+        })
+      )
     )
   )
   .meta({ id: 'InheritedFieldDefinition' });
@@ -209,10 +211,11 @@ export type NamedFieldDefinitionConfig = FieldDefinitionConfig & {
   name: string;
 };
 
-export const namedFieldDefinitionConfigSchema: z.Schema<NamedFieldDefinitionConfig> =
+export const namedFieldDefinitionConfigSchema: z.Schema<NamedFieldDefinitionConfig> = DeepStrict(
   z.intersection(
     fieldDefinitionConfigSchema,
     z.object({
       name: NonEmptyString,
     })
-  );
+  )
+);

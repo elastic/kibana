@@ -9,7 +9,7 @@ import { z } from '@kbn/zod/v4';
 import type { ChatCompletionTokenCount } from '@kbn/inference-common';
 import type { BaseFeature } from '../../feature';
 
-export const tokenCountSchema = z.object({
+export const tokenCountSchema = z.strictObject({
   prompt: z.number(),
   completion: z.number(),
   thinking: z.number().optional(),
@@ -17,12 +17,12 @@ export const tokenCountSchema = z.object({
   cached: z.number().optional(),
 });
 
-const featureSummarySchema = z.object({
+const featureSummarySchema = z.strictObject({
   id: z.string(),
   title: z.string(),
 });
 
-export const iterationResultSchema = z.object({
+export const iterationResultSchema = z.strictObject({
   runId: z.string(),
   iteration: z.number(),
   durationMs: z.number(),

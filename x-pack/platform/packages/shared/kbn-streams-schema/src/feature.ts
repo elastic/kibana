@@ -29,7 +29,7 @@ export const INFERRED_FEATURE_TYPES = [
   'schema',
 ] as const;
 
-export const baseFeatureSchema = z.object({
+export const baseFeatureSchema = z.strictObject({
   id: z.string(),
   stream_name: z.string(),
   type: z.string(),
@@ -51,7 +51,7 @@ export type BaseFeature = z.infer<typeof baseFeatureSchema>;
 export const identifiedFeatureSchema = baseFeatureSchema
   .omit({ subtype: true, title: true, evidence: true, tags: true })
   .and(
-    z.object({
+    z.strictObject({
       subtype: z.string(),
       title: z.string(),
       evidence: z.array(z.string()),
@@ -61,7 +61,7 @@ export const identifiedFeatureSchema = baseFeatureSchema
 
 export type IdentifiedFeature = z.infer<typeof identifiedFeatureSchema>;
 
-export const ignoredFeatureSchema = z.object({
+export const ignoredFeatureSchema = z.strictObject({
   feature_id: z.string(),
   feature_title: z.string(),
   excluded_feature_id: z.string(),
@@ -71,7 +71,7 @@ export const ignoredFeatureSchema = z.object({
 export type IgnoredFeature = z.infer<typeof ignoredFeatureSchema>;
 
 export const featureSchema = baseFeatureSchema.and(
-  z.object({
+  z.strictObject({
     run_id: z.string().optional(),
     excluded: z.boolean().optional(),
     updated_at: z.iso.datetime().optional(),

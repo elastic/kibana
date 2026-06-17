@@ -41,7 +41,7 @@ interface IngestWired {
 }
 
 const ingestWiredShape = {
-  wired: z.object({
+  wired: z.strictObject({
     fields: fieldDefinitionSchema,
     routing: routingDefinitionListSchema,
     draft: z.boolean().optional(),
@@ -50,7 +50,7 @@ const ingestWiredShape = {
 
 export type WiredIngest = IngestBase & IngestWired;
 
-const wiredIngestSchemaObject = z.object({
+const wiredIngestSchemaObject = z.strictObject({
   ...ingestBaseSchemaFields,
   ...ingestWiredShape,
 });
@@ -62,7 +62,7 @@ export const WiredIngest: Validation<IngestBase, WiredIngest> = validation(
 
 export type WiredIngestUpsertRequest = IngestBaseUpsertRequest & IngestWired;
 
-const wiredIngestUpsertSchemaObject = z.object({
+const wiredIngestUpsertSchemaObject = z.strictObject({
   ...ingestBaseUpsertSchemaFields,
   ...ingestWiredShape,
 });

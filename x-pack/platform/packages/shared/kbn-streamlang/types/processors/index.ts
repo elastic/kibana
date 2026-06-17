@@ -6,7 +6,7 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { createIsNarrowSchema, NonEmptyString } from '@kbn/zod-helpers/v4';
+import { createIsNarrowSchema, DeepStrict, NonEmptyString } from '@kbn/zod-helpers/v4';
 import type { Condition } from '../conditions';
 import { conditionSchema, isAlwaysCondition } from '../conditions';
 import {
@@ -35,7 +35,7 @@ export interface ProcessorBase {
 }
 
 const processorBaseSchema = z
-  .object({
+  .strictObject({
     customIdentifier: z
       .optional(NonEmptyString)
       .describe('Custom identifier to correlate this processor across outputs'),
@@ -640,7 +640,7 @@ export interface JsonExtraction {
 }
 
 const jsonExtractionSchema = z
-  .object({
+  .strictObject({
     selector: NonEmptyString.describe(
       'JSONPath-like selector to extract value (e.g., "user.id", "$.metadata.client.ip", "items[0].name")'
     ),
@@ -685,7 +685,7 @@ interface ConcatFromField {
   value: string;
 }
 
-const concatFromFieldSchema = z.object({
+const concatFromFieldSchema = z.strictObject({
   type: z.literal('field'),
   value: StreamlangSourceField,
 }) satisfies z.Schema<ConcatFromField>;
@@ -695,7 +695,7 @@ interface ConcatFromLiteral {
   value: string;
 }
 
-const concatFromLiteralSchema = z.object({
+const concatFromLiteralSchema = z.strictObject({
   type: z.literal('literal'),
   value: z.string(),
 }) satisfies z.Schema<ConcatFromLiteral>;
@@ -760,12 +760,14 @@ const networkDirectionCommonFieldsSchema = processorBaseWithWhereSchema.extend({
 export type NetworkDirectionProcessor = NetworkDirectionCommonFields &
   (NetworkDirectionWithInternalNetworks | NetworkDirectionWithInternalNetworksField);
 
-export const networkDirectionProcessorSchema = z.intersection(
-  networkDirectionCommonFieldsSchema,
-  z.union([
-    networkDirectionWithInternalNetworksSchema,
-    networkDirectionWithInternalNetworksFieldSchema,
-  ])
+export const networkDirectionProcessorSchema = DeepStrict(
+  z.intersection(
+    networkDirectionCommonFieldsSchema,
+    z.union([
+      networkDirectionWithInternalNetworksSchema,
+      networkDirectionWithInternalNetworksFieldSchema,
+    ])
+  )
 ) satisfies z.Schema<NetworkDirectionProcessor>;
 
 /**
@@ -989,6 +991,7 @@ interface ZodProcessorSchemaLike {
     schema?: ZodProcessorSchemaLike;
     left?: ZodProcessorSchemaLike;
     options?: ZodProcessorSchemaLike[];
+    out?: ZodProcessorSchemaLike;
   };
   shape?: { action?: { value?: ProcessorType } };
 }
@@ -1002,6 +1005,11 @@ export const processorTypes: ProcessorType[] = (
   // Handle ZodEffects (from .refine()) by unwrapping to get the base schema
   let baseSchema: ZodProcessorSchemaLike =
     '_def' in schema && schema._def && 'schema' in schema._def ? schema._def.schema! : schema;
+
+  // Handle ZodPipe (from z.pipe() / DeepStrict) by unwrapping the output schema
+  if ('_def' in baseSchema && baseSchema._def && 'out' in baseSchema._def) {
+    baseSchema = baseSchema._def.out!;
+  }
 
   // Handle ZodIntersection (from z.intersection()) by getting the left side which contains the action
   if ('_def' in baseSchema && baseSchema._def && 'left' in baseSchema._def) {

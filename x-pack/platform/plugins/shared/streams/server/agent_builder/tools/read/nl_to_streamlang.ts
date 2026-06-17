@@ -130,7 +130,7 @@ export const nlToStreamlang = async (
       const llmHints: string[] = Array.isArray(rawParsed.hints)
         ? rawParsed.hints.filter((h): h is string => typeof h === 'string')
         : [];
-      const parsed = normalizeConditionBlocks(rawParsed);
+      const parsed = normalizeConditionBlocks(rawParsed.steps);
 
       const validationResult = streamlangDSLSchema.safeParse(parsed);
 
@@ -699,11 +699,9 @@ const extractSimulationErrors = (simResult: ProcessingSimulationResponse): strin
  * Wrong:  { condition: { field, eq }, steps: [...] }
  * Right:  { condition: { field, eq, steps: [...] } }
  */
-const normalizeConditionBlocks = (obj: { steps: unknown[] }): { steps: unknown[] } => {
-  if (!obj.steps || !Array.isArray(obj.steps)) return obj;
+const normalizeConditionBlocks = (steps: unknown[]): { steps: unknown[] } => {
   return {
-    ...obj,
-    steps: obj.steps.map((step) => {
+    steps: steps.map((step) => {
       if (typeof step !== 'object' || step === null) return step;
       const s = step as Record<string, unknown>;
 
@@ -721,20 +719,10 @@ const normalizeConditionBlocks = (obj: { steps: unknown[] }): { steps: unknown[]
             condition: {
               ...cond,
               steps: Array.isArray(innerSteps)
-                ? innerSteps.map((inner) =>
-                    typeof inner === 'object' && inner !== null
-                      ? normalizeConditionBlocks({ steps: [inner] }).steps[0]
-                      : inner
-                  )
+                ? normalizeConditionBlocks(innerSteps).steps
                 : innerSteps,
               ...(s.else != null && {
-                else: Array.isArray(s.else)
-                  ? s.else.map((inner) =>
-                      typeof inner === 'object' && inner !== null
-                        ? normalizeConditionBlocks({ steps: [inner as unknown] }).steps[0]
-                        : inner
-                    )
-                  : s.else,
+                else: Array.isArray(s.else) ? normalizeConditionBlocks(s.else).steps : s.else,
               }),
             },
           };
@@ -750,19 +738,9 @@ const normalizeConditionBlocks = (obj: { steps: unknown[] }): { steps: unknown[]
             ...s,
             condition: {
               ...cond,
-              steps: (cond.steps as unknown[]).map((inner) =>
-                typeof inner === 'object' && inner !== null
-                  ? normalizeConditionBlocks({ steps: [inner] }).steps[0]
-                  : inner
-              ),
+              steps: normalizeConditionBlocks(cond.steps as unknown[]).steps,
               ...(cond.else != null && Array.isArray(cond.else)
-                ? {
-                    else: (cond.else as unknown[]).map((inner) =>
-                      typeof inner === 'object' && inner !== null
-                        ? normalizeConditionBlocks({ steps: [inner] }).steps[0]
-                        : inner
-                    ),
-                  }
+                ? { else: normalizeConditionBlocks(cond.else as unknown[]).steps }
                 : {}),
             },
           };

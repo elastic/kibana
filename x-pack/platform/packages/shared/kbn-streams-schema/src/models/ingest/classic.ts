@@ -39,14 +39,14 @@ export interface IngestClassic {
 }
 
 const ingestClassicShape = {
-  classic: z.object({
+  classic: z.strictObject({
     field_overrides: z.optional(classicFieldDefinitionSchema),
   }),
 };
 
 export type ClassicIngest = IngestBase & IngestClassic;
 
-const classicIngestSchemaObject = z.object({
+const classicIngestSchemaObject = z.strictObject({
   ...ingestBaseSchemaFields,
   ...ingestClassicShape,
 });
@@ -58,7 +58,7 @@ export const ClassicIngest: Validation<IngestBase, ClassicIngest> = validation(
 
 export type ClassicIngestUpsertRequest = IngestBaseUpsertRequest & IngestClassic;
 
-const classicIngestUpsertSchemaObject = z.object({
+const classicIngestUpsertSchemaObject = z.strictObject({
   ...ingestBaseUpsertSchemaFields,
   ...ingestClassicShape,
 });

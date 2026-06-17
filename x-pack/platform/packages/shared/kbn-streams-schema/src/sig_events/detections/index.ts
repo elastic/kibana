@@ -7,12 +7,12 @@
 
 import { z } from '@kbn/zod/v4';
 
-const detectionEvidenceSchema = z.object({
+const detectionEvidenceSchema = z.strictObject({
   change_point_type: z.string().optional(),
   p_value: z.number().optional(),
 });
 
-export const detectionSchema = z.object({
+export const detectionSchema = z.strictObject({
   '@timestamp': z.iso.datetime(),
   detected_at: z.iso.datetime().optional(),
   kind: z.enum(['detection', 'quiet', 'handled']),

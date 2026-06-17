@@ -22,7 +22,7 @@ export const SIG_EVENT_IMPACT_OPTIONS = ['critical', 'high', 'medium', 'low'] as
 export const sigEventImpactSchema = z.enum(SIG_EVENT_IMPACT_OPTIONS);
 export type SigEventImpact = z.infer<typeof sigEventImpactSchema>;
 
-export const sigEventSchema = z.object({
+export const sigEventSchema = z.strictObject({
   '@timestamp': z.iso.datetime({ offset: true }),
   created_at: z.iso.datetime({ offset: true }),
   event_id: z.string().max(255),

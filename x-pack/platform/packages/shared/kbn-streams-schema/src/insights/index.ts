@@ -28,7 +28,7 @@ export function getImpactLevel(impact: InsightImpactLevel): InsightImpactLevelNu
 }
 
 /** Evidence item supporting an insight (stream, query, event count). */
-export const insightEvidenceSchema = z.object({
+export const insightEvidenceSchema = z.strictObject({
   stream_name: z.string(),
   query_title: z.string(),
   event_count: z.number().int().nonnegative(),
@@ -43,7 +43,7 @@ export type InsightUserEvaluation = z.infer<typeof insightUserEvaluationSchema>;
  * Core insight schema for LLM output (and submit_insights tool);
  * includes field descriptions for LLM guidance. Excludes id, generatedAt, userEvaluation.
  */
-export const insightCoreSchema = z.object({
+export const insightCoreSchema = z.strictObject({
   title: z.string().describe('Short, actionable title summarizing the insight'),
   description: z.string().describe('Detailed explanation of what is happening and why it matters'),
   impact: insightImpactLevelSchema.describe(
@@ -61,7 +61,7 @@ export type InsightCore = z.infer<typeof insightCoreSchema>;
 /**
  * Meta fields for an insight (id, generatedAt, impactLevel, userEvaluation).
  */
-export const insightMetaSchema = z.object({
+export const insightMetaSchema = z.strictObject({
   id: z.string(),
   generated_at: z.string().datetime(),
   impact_level: insightImpactLevelNumericSchema,

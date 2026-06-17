@@ -1021,7 +1021,8 @@ export const getValidSteps = (
       return true;
     } else {
       // Action step: check schema validity
-      if (!isSchema(streamlangProcessorSchema, step)) {
+      const { parentId: _parentId, branch: _branch, ...stepWithoutUIAttrs } = step;
+      if (!isSchema(streamlangProcessorSchema, stepWithoutUIAttrs)) {
         return false;
       }
 

@@ -51,26 +51,26 @@ export namespace BaseStream {
   }
 }
 
-export const baseStreamDefinitionSchema = z.object({
+export const baseStreamDefinitionSchema = z.strictObject({
   name: z.string(),
   description: z.string(),
   updated_at: z.iso.datetime(),
   query_streams: z
     .array(
-      z.object({
+      z.strictObject({
         name: z.string(),
       })
     )
     .optional(),
 });
 
-export const baseStreamGetResponseSchema = z.object({
+export const baseStreamGetResponseSchema = z.strictObject({
   dashboards: z.array(z.string()),
   rules: z.array(z.string()),
   queries: z.array(streamQuerySchema),
 });
 
-export const baseStreamUpsertRequestSchema = z.object({
+export const baseStreamUpsertRequestSchema = z.strictObject({
   dashboards: z.array(z.string()),
   rules: z.array(z.string()),
   queries: z.array(streamQuerySchema),

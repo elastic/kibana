@@ -6,9 +6,17 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { isSchema, DeepStrict } from '@kbn/zod-helpers/v4';
+import { isSchema } from '@kbn/zod-helpers/v4';
 import type { Condition } from './conditions';
-import { conditionSchema } from './conditions';
+import {
+  alwaysConditionSchema,
+  neverConditionSchema,
+  andConditionSchema,
+  orConditionSchema,
+  notConditionSchema,
+  shorthandBinaryFilterConditionSchema,
+  shorthandUnaryFilterConditionSchema,
+} from './conditions';
 import type { StreamlangProcessorDefinition } from './processors';
 import { streamlangProcessorSchema } from './processors';
 import type { StreamlangStepWithUIAttributes } from './ui';
@@ -22,15 +30,21 @@ export type StreamType = 'wired' | 'classic';
 
 // Recursive schema for ConditionWithSteps
 export const conditionWithStepsSchema: z.ZodType<ConditionWithSteps> = z
-  .lazy(() =>
-    z.intersection(
-      conditionSchema,
-      z.object({
-        steps: z.array(streamlangStepSchema),
-        else: z.array(streamlangStepSchema).optional(),
-      })
-    )
-  )
+  .lazy(() => {
+    const stepsExtension = {
+      steps: z.array(streamlangStepSchema),
+      else: z.array(streamlangStepSchema).optional(),
+    };
+    return z.union([
+      alwaysConditionSchema.extend(stepsExtension),
+      neverConditionSchema.extend(stepsExtension),
+      andConditionSchema.extend(stepsExtension),
+      orConditionSchema.extend(stepsExtension),
+      notConditionSchema.extend(stepsExtension),
+      shorthandBinaryFilterConditionSchema.extend(stepsExtension),
+      shorthandUnaryFilterConditionSchema.extend(stepsExtension),
+    ]);
+  })
   .meta({ id: 'ConditionWithSteps' });
 
 export type ConditionWithSteps = Condition & { steps: StreamlangStep[]; else?: StreamlangStep[] };
@@ -47,7 +61,7 @@ export interface StreamlangConditionBlock {
  * Zod schema for a condition block
  */
 export const streamlangConditionBlockSchema: z.ZodType<StreamlangConditionBlock> = z
-  .object({
+  .strictObject({
     customIdentifier: z.string().optional(),
     condition: conditionWithStepsSchema,
   })
@@ -107,15 +121,10 @@ export type StreamlangDSLWithUpdatedAt = StreamlangDSL & {
 /**
  * Zod schema for the Streamlang DSL root
  */
-export const streamlangDSLSchema = z.object({
+export const streamlangDSLSchema = z.strictObject({
   steps: z.array(streamlangStepSchema),
+  updated_at: z.iso.datetime().optional(),
 });
-
-/**
- * Strict version of streamlangDSLSchema that rejects excess/unknown keys.
- * Pre-constructed for performance as DeepStrict creates proxy wrappers,
- */
-export const streamlangDSLSchemaStrict = DeepStrict(streamlangDSLSchema);
 
 export const isStreamlangDSLSchema = (obj: unknown): obj is StreamlangDSL => {
   return isSchema(streamlangDSLSchema, obj);

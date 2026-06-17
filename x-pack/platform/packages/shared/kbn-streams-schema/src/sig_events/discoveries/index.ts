@@ -20,7 +20,7 @@ import {
   MAX_TEXT_LENGTH,
 } from '../constants';
 
-const discoveryDetectionSchema = z.object({
+const discoveryDetectionSchema = z.strictObject({
   detection_id: z.string().max(MAX_ID_LENGTH).optional(),
   rule_name: z.string().max(MAX_RULE_NAME_LENGTH).optional(),
   rule_uuid: z.string().max(MAX_ID_LENGTH).optional(),
@@ -31,7 +31,7 @@ const discoveryDetectionSchema = z.object({
   detected_at: z.string().optional(),
 });
 
-export const discoverySchema = z.object({
+export const discoverySchema = z.strictObject({
   '@timestamp': z.iso.datetime(),
   kind: z.enum(['finding', 'clearance']),
   discovery_id: z.string().max(MAX_ID_LENGTH),

@@ -31,14 +31,14 @@ export interface QueryWithEsql extends Query {
 
 export const Query: Validation<unknown, Query> = validation(
   z.unknown(),
-  z.object({
+  z.strictObject({
     view: z.string(),
   })
 );
 
 export const QueryWithEsql: Validation<unknown, QueryWithEsql> = validation(
   z.unknown(),
-  z.object({
+  z.strictObject({
     view: z.string(),
     esql: z.string(),
   })

@@ -28,7 +28,7 @@ import {
 import { sanitiseForEditing } from '@kbn/streamlang-yaml-editor/src/utils/sanitise_for_editing';
 import {
   isStreamlangDSLSchema,
-  streamlangDSLSchemaStrict,
+  streamlangDSLSchema,
   type StreamlangDSL,
 } from '@kbn/streamlang/types/streamlang';
 import { isEqual } from 'lodash';
@@ -105,7 +105,7 @@ export const streamEnrichmentMachine = setup({
           ? context.nextStreamlangDSL.steps
           : [],
       };
-      const parseResult = streamlangDSLSchemaStrict.safeParse(dslForStrictValidation);
+      const parseResult = streamlangDSLSchema.safeParse(dslForStrictValidation);
       if (!parseResult.success) {
         const schemaErrors = parseResult.error.issues.map((issue) => {
           const path = issue.path.length > 0 ? issue.path.join('.') : 'root';

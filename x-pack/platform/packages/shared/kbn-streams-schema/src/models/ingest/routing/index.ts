@@ -20,7 +20,7 @@ export interface RoutingDefinition {
   draft?: boolean;
 }
 
-export const routingDefinitionSchema: z.Schema<RoutingDefinition> = z.object({
+export const routingDefinitionSchema: z.Schema<RoutingDefinition> = z.strictObject({
   destination: NonEmptyString,
   where: conditionSchema,
   status: routingStatus.optional(),

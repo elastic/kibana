@@ -12,7 +12,7 @@ import { streamlangDSLSchema, type StreamlangDSLWithUpdatedAt } from '@kbn/strea
 export type IngestStreamProcessing = StreamlangDSLWithUpdatedAt;
 
 export const ingestStreamProcessingSchema = streamlangDSLSchema.merge(
-  z.object({
+  z.strictObject({
     updated_at: z.iso.datetime(),
   })
 );
