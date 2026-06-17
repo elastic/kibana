@@ -16,7 +16,7 @@ export const PushCasesStepTypeId = 'cases.pushCases';
 
 const InputSchema = z.object({
   case_ids: z
-    .array(z.string().min(1, 'case_ids values are required'))
+    .array(z.string().min(1, 'case_ids values are required').max(1000))
     .min(1)
     .max(MAX_CASES_TO_UPDATE),
 });

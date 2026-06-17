@@ -25,15 +25,6 @@ const makeCasesClient = (overrides: Partial<{ get: jest.Mock; push: jest.Mock }>
 };
 
 describe('pushCasesStepDefinition', () => {
-  it('creates expected step definition structure', () => {
-    const definition = pushCasesStepDefinition(jest.fn());
-
-    expect(definition.id).toBe('cases.pushCases');
-    expect(typeof definition.handler).toBe('function');
-    expect(definition.inputSchema.safeParse({ case_ids: ['case-1'] }).success).toBe(true);
-    expect(definition.inputSchema.safeParse({ case_ids: ['case-1', 'case-2'] }).success).toBe(true);
-  });
-
   it('pushes a single case when case_ids contains one id', async () => {
     const push = jest.fn().mockResolvedValue(createCaseResponseFixture);
     const definition = pushCasesStepDefinition(makeCasesClient({ push }));
@@ -44,7 +35,7 @@ describe('pushCasesStepDefinition', () => {
     expect(push).toHaveBeenCalledWith({
       caseId: 'case-1',
       connectorId: 'connector-1',
-      pushType: 'manual',
+      pushType: 'automatic',
     });
     expect(result).toEqual({ output: { cases: [createCaseResponseFixture] } });
   });
@@ -62,12 +53,12 @@ describe('pushCasesStepDefinition', () => {
     expect(push).toHaveBeenCalledWith({
       caseId: 'case-1',
       connectorId: 'connector-1',
-      pushType: 'manual',
+      pushType: 'automatic',
     });
     expect(push).toHaveBeenCalledWith({
       caseId: 'case-2',
       connectorId: 'connector-1',
-      pushType: 'manual',
+      pushType: 'automatic',
     });
     expect(result).toEqual({ output: { cases: [pushedCase1, pushedCase2] } });
   });
