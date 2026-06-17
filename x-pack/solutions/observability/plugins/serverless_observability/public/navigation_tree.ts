@@ -43,7 +43,7 @@ export const createNavigationTree = ({
   genAiSettingsAvailable?: boolean;
   isCasesAvailable?: boolean;
   showAiAssistant?: boolean;
-}) => {
+}): NavigationTreeDefinition => {
   return {
     body: [
       ...filterForFeatureAvailability(
@@ -649,5 +649,5 @@ export const createNavigationTree = ({
         ],
       },
     ],
-  } as const satisfies NavigationTreeDefinition;
+  };
 };
