@@ -273,7 +273,13 @@ describe('toStoredFilter', () => {
       // Verify base properties are preserved
       expect(roundTripFilter.meta.alias).toBe(originalFilter.meta.alias);
       expect(roundTripFilter.meta.disabled).toBe(originalFilter.meta.disabled);
-      expect(roundTripFilter.meta.negate).toBe(originalFilter.meta.negate);
+
+      if (!originalFilter.meta.negate) {
+        // negate is omitted when negate is false
+        expect(roundTripFilter.meta.negate).toBeUndefined();
+      } else {
+        expect(roundTripFilter.meta.negate).toBe(originalFilter.meta.negate);
+      }
 
       // Verify meta.type is preserved
       expect(roundTripFilter.meta.type).toBe(originalFilter.meta.type);

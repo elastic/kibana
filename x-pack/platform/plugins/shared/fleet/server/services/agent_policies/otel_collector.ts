@@ -51,6 +51,7 @@ import { hasDynamicSignalTypes } from '../../../common/services';
 export function generateOtelcolConfig({
   inputs,
   dataOutput,
+  packageOutputs,
   packageInfoCache,
   proxy,
   logger,
@@ -58,11 +59,27 @@ export function generateOtelcolConfig({
 }: {
   inputs: FullAgentPolicyInput[] | TemplateAgentPolicyInput[];
   dataOutput?: Output;
+  /** Per-package-policy output overrides: maps package policy ID to its assigned Output. */
+  packageOutputs?: Map<string, Output>;
   packageInfoCache?: Map<string, PackageInfo>;
   proxy?: FleetProxy;
   logger?: Logger;
   defaultPackageInfo?: PackageInfo;
 }): OTelCollectorConfig {
+  // Pipeline IDs grouped by the output ID they route to. Built during the per-stream pass
+  // and consumed by attachOtelcolExporter to emit per-output fan-in pipelines. Sets dedupe
+  // namespace-keyed APM aggregated pipelines that are recorded once per package policy.
+  const pipelineIdsByOutputId = new Map<string, Set<OTelCollectorPipelineID>>();
+  const recordPipeline = (outputId: string, pipelineId: OTelCollectorPipelineID) => {
+    const set = pipelineIdsByOutputId.get(outputId);
+    if (set) {
+      set.add(pipelineId);
+    } else {
+      pipelineIdsByOutputId.set(outputId, new Set([pipelineId]));
+    }
+  };
+  const defaultOutputId = dataOutput ? getOutputIdForAgentPolicy(dataOutput) : undefined;
+
   const otelConfigs: OTelCollectorConfig[] = inputs
     .filter((input) => input.type === OTEL_COLLECTOR_INPUT_TYPE)
     .flatMap((input) => {
@@ -91,6 +108,11 @@ export function generateOtelcolConfig({
           })
         : false;
 
+      // Resolve which output this input's package policy routes to (override or policy default).
+      const packagePolicyId = (input as FullAgentPolicyInput).package_policy_id;
+      const override = packagePolicyId ? packageOutputs?.get(packagePolicyId) : undefined;
+      const resolvedOutputId = override ? getOutputIdForAgentPolicy(override) : defaultOutputId;
+
       const otelInputs: OTelCollectorConfig[] = (input?.streams ?? []).map((stream) => {
         // Avoid dots in keys, as they can create subobjects in agent config.
         const suffix = (input.id + '-' + stream.id).replaceAll('.', '-');
@@ -117,16 +139,62 @@ export function generateOtelcolConfig({
           signalTypes
         );
 
+        // Build the bare→suffixed map BEFORE suffixing keys, so we can rewrite
+        // auth.authenticator references inside component bodies that point to
+        // extensions declared in this stream.
+        const originalToSuffixedExtensionIds: Record<string, string> = Object.fromEntries(
+          Object.keys(stream?.extensions ?? {}).map((id) => [id, `${id}/${suffix}`])
+        );
+
+        const rewriteExtRefs = (components: any): any => {
+          if (!components || !Object.keys(originalToSuffixedExtensionIds).length) {
+            return components;
+          }
+          return Object.fromEntries(
+            Object.entries(components as Record<string, unknown>).map(([key, body]) => [
+              key,
+              rewriteOtelcolExtensionReferences(body, originalToSuffixedExtensionIds),
+            ])
+          );
+        };
+
         let otelConfig: OTelCollectorConfig = {
-          ...addSuffixToOtelcolComponentsConfig('extensions', suffix, stream?.extensions),
-          ...addSuffixToOtelcolComponentsConfig('receivers', suffix, stream?.receivers),
-          ...addSuffixToOtelcolComponentsConfig('processors', suffix, stream?.processors),
-          ...addSuffixToOtelcolComponentsConfig('connectors', suffix, stream?.connectors),
-          ...addSuffixToOtelcolComponentsConfig('exporters', suffix, stream?.exporters),
+          ...addSuffixToOtelcolComponentsConfig(
+            'extensions',
+            suffix,
+            rewriteExtRefs(stream?.extensions)
+          ),
+          ...addSuffixToOtelcolComponentsConfig(
+            'receivers',
+            suffix,
+            rewriteExtRefs(stream?.receivers)
+          ),
+          ...addSuffixToOtelcolComponentsConfig(
+            'processors',
+            suffix,
+            rewriteExtRefs(stream?.processors)
+          ),
+          ...addSuffixToOtelcolComponentsConfig(
+            'connectors',
+            suffix,
+            rewriteExtRefs(stream?.connectors)
+          ),
+          ...addSuffixToOtelcolComponentsConfig(
+            'exporters',
+            suffix,
+            rewriteExtRefs(stream?.exporters)
+          ),
           ...(stream?.service
             ? {
                 service: {
                   ...stream.service,
+                  ...(stream.service.extensions?.length
+                    ? {
+                        extensions: stream.service.extensions.map(
+                          (id: string) => originalToSuffixedExtensionIds[id] ?? id
+                        ),
+                      }
+                    : {}),
                   pipelines: conditionallyAddApmToPipelines(
                     addSuffixToOtelcolComponentsConfig(
                       'pipelines',
@@ -148,6 +216,12 @@ export function generateOtelcolConfig({
         // does not receive the per-stream routing transform.
         otelConfig = appendOtelComponents(otelConfig, 'processors', [attributesTransform]);
 
+        if (resolvedOutputId) {
+          for (const pipelineId of Object.keys(otelConfig.service?.pipelines ?? {})) {
+            recordPipeline(resolvedOutputId, pipelineId);
+          }
+        }
+
         if (shouldAddAPMConfig) {
           otelConfig.connectors ??= {};
           otelConfig.processors ??= {};
@@ -162,10 +236,17 @@ export function generateOtelcolConfig({
               },
             ],
           };
-          otelConfig.service.pipelines![`metrics/${namespace}-aggregated-apm-metrics`] = {
+          const apmPipelineId: OTelCollectorPipelineID = `metrics/${namespace}-aggregated-apm-metrics`;
+          otelConfig.service.pipelines![apmPipelineId] = {
             receivers: [`elasticapm/${namespace}`],
             processors: [`transform/${namespace}-apm-namespace-routing`],
           };
+          // APM aggregated pipelines are keyed by namespace (not by package policy), so they
+          // always route to the policy default output even if per-stream pipelines override it.
+          // Per-override aggregation would change APM semantics and is deferred.
+          if (defaultOutputId) {
+            recordPipeline(defaultOutputId, apmPipelineId);
+          }
         }
 
         return otelConfig;
@@ -179,7 +260,55 @@ export function generateOtelcolConfig({
   }
 
   const config = mergeOtelcolConfigs(otelConfigs);
-  return attachOtelcolExporter(config, dataOutput, proxy, logger);
+
+  // Templates (and other inputless paths) skip exporter attachment.
+  if (!dataOutput) {
+    return config;
+  }
+
+  const outputsById = resolveOutputsById({
+    referencedOutputIds: pipelineIdsByOutputId.keys(),
+    dataOutput,
+    defaultOutputId,
+    packageOutputs,
+  });
+
+  return attachOtelcolExporter(config, outputsById, pipelineIdsByOutputId, proxy, logger);
+}
+
+/**
+ * Resolve the set of Outputs referenced by the per-stream routing pass, keyed by the
+ * pipeline-suffix output ID used in the OTel config. The returned IDs are either the
+ * agent-policy default output alias (e.g. "default") or a raw `output.id`. Overrides
+ * on non-OTel package policies never appear in `referencedOutputIds`, so this does
+ * not need to prune.
+ */
+function resolveOutputsById({
+  referencedOutputIds,
+  dataOutput,
+  defaultOutputId,
+  packageOutputs,
+}: {
+  referencedOutputIds: Iterable<string>;
+  dataOutput: Output;
+  defaultOutputId: string | undefined;
+  packageOutputs?: Map<string, Output>;
+}): Map<string, Output> {
+  const outputsByRawId = new Map<string, Output>([[dataOutput.id, dataOutput]]);
+  if (packageOutputs) {
+    for (const output of packageOutputs.values()) {
+      outputsByRawId.set(output.id, output);
+    }
+  }
+
+  const outputsById = new Map<string, Output>();
+  for (const outputId of referencedOutputIds) {
+    const output = outputId === defaultOutputId ? dataOutput : outputsByRawId.get(outputId);
+    if (output) {
+      outputsById.set(outputId, output);
+    }
+  }
+  return outputsById;
 }
 
 function buildDataStreamStatements(type: string, dataset: string, namespace: string): string[] {
@@ -374,6 +503,36 @@ function alignPipelineSignalType(
   return { [newKey]: pipeline };
 }
 
+// Recursively walks a component config body and rewrites any string value that
+// exactly matches a declared extension ID to its suffixed form. This is
+// intentionally value-based rather than field-name-based: OTel contrib uses
+// many different field names to reference extensions (auth.authenticator,
+// credentials_provider, storage, sending_queue.storage, …) with no uniform
+// convention, so a field-name allow-list would need constant maintenance.
+// Exact whole-string matching keeps false-positive risk negligible — the
+// package author controls both the extension IDs and the component configs
+// within a stream, so an accidental collision is very rare.
+function rewriteOtelcolExtensionReferences(
+  value: unknown,
+  originalToSuffixedExtensionIds: Record<string, string>
+): unknown {
+  if (typeof value === 'string') {
+    return originalToSuffixedExtensionIds[value] ?? value;
+  }
+  if (Array.isArray(value)) {
+    return value.map((v) => rewriteOtelcolExtensionReferences(v, originalToSuffixedExtensionIds));
+  }
+  if (value !== null && typeof value === 'object') {
+    return Object.fromEntries(
+      Object.entries(value as Record<string, unknown>).map(([k, v]) => [
+        k,
+        rewriteOtelcolExtensionReferences(v, originalToSuffixedExtensionIds),
+      ])
+    );
+  }
+  return value;
+}
+
 function addSuffixToOtelcolPipelinesComponents(
   pipelines: any,
   suffix: string
@@ -440,83 +599,127 @@ function mergeOtelcolConfigs(otelConfigs: OTelCollectorConfig[]): OTelCollectorC
   });
 }
 
-function buildBeatsauthConfig(output: Output, proxy?: FleetProxy): Record<string, unknown> {
+function buildBeatsauthConfig(
+  output: Output,
+  proxy?: FleetProxy,
+  logger?: Logger
+): Record<string, unknown> {
+  // Start with any ssl/proxy/transport params from the Advanced YAML config_yaml field.
+  // Structured output fields (set via the form UI) take precedence over YAML values.
+  const yamlConfig = parseOutputConfigYaml(output.config_yaml);
+
   const config: Record<string, unknown> = {};
 
-  const ssl: Record<string, unknown> = {};
+  // Include timeout and idle_connection_timeout from YAML if present
+  if (yamlConfig.timeout !== undefined) config.timeout = yamlConfig.timeout;
+  if (yamlConfig.idle_connection_timeout !== undefined)
+    config.idle_connection_timeout = yamlConfig.idle_connection_timeout;
+
+  // Merge SSL: start from YAML, then overwrite with structured output fields
+  const yamlSsl =
+    yamlConfig.ssl !== null && typeof yamlConfig.ssl === 'object' && !Array.isArray(yamlConfig.ssl)
+      ? (yamlConfig.ssl as Record<string, unknown>)
+      : {};
+  const ssl: Record<string, unknown> = { ...yamlSsl };
+
   if (output.ca_trusted_fingerprint) ssl.ca_trusted_fingerprint = output.ca_trusted_fingerprint;
   if (output.ca_sha256) ssl.ca_sha256 = output.ca_sha256;
   if (output.ssl?.certificate_authorities?.length)
     ssl.certificate_authorities = output.ssl.certificate_authorities;
   if (output.ssl?.certificate) ssl.certificate = output.ssl.certificate;
-  // Prefer the secrets-stored key over the plain-text key, mirroring full_agent_policy.ts behaviour
-  if (output.ssl?.key && !output.secrets?.ssl?.key) ssl.key = output.ssl.key;
+
+  if (output.secrets?.ssl?.key) {
+    // Secret key takes highest precedence: remove any plain key that came from config_yaml or
+    // the structured ssl field, and store it under the secrets namespace instead.
+    delete ssl.key;
+    config.secrets = { ssl: { key: output.secrets.ssl.key } };
+  } else if (output.ssl?.key) {
+    // No secret — use the plain structured key (overwrites any key from config_yaml)
+    ssl.key = output.ssl.key;
+  }
+  // If neither is set, any ssl.key from config_yaml remains (user explicitly provided it)
+
   if (output.ssl?.verification_mode) ssl.verification_mode = output.ssl.verification_mode;
   if (Object.keys(ssl).length > 0) config.ssl = ssl;
 
-  // If the SSL key is stored as a Kibana secret, include it under the secrets namespace
-  if (output.secrets?.ssl?.key) {
-    config.secrets = { ssl: { key: output.secrets.ssl.key } };
-  }
-
+  // Merge proxy: structured FleetProxy takes precedence over YAML proxy fields
   if (proxy) {
     config.proxy_url = proxy.url;
     if (proxy.proxy_headers) config.proxy_headers = proxy.proxy_headers;
+  } else {
+    if (yamlConfig.proxy_url !== undefined) config.proxy_url = yamlConfig.proxy_url;
+    if (yamlConfig.proxy_headers !== undefined) config.proxy_headers = yamlConfig.proxy_headers;
   }
 
   return config;
 }
 
+function parseOutputConfigYaml(yaml: string | null | undefined): Record<string, unknown> {
+  if (!yaml) return {};
+  try {
+    const parsed = load(yaml);
+    if (parsed !== null && typeof parsed === 'object' && !Array.isArray(parsed)) {
+      return parsed as Record<string, unknown>;
+    }
+    return {};
+  } catch (e) {
+    throw new FleetError(`Failed to parse output config_yaml for beatsauth: ${e.message}`);
+  }
+}
+
 function attachOtelcolExporter(
   config: OTelCollectorConfig,
-  dataOutput?: Output,
+  outputsById: Map<string, Output>,
+  pipelineIdsByOutputId: Map<string, Set<OTelCollectorPipelineID>>,
   proxy?: FleetProxy,
   logger?: Logger
 ): OTelCollectorConfig {
-  if (!dataOutput) {
-    return config;
-  }
+  for (const [outputId, output] of outputsById) {
+    const { extensions, exporters } = generateOtelcolExporter(output, proxy, logger);
 
-  const { extensions, exporters } = generateOtelcolExporter(dataOutput, proxy, logger);
-  config.connectors = {
-    ...config.connectors,
-    forward: {},
-  };
-  if (Object.keys(extensions).length > 0) {
-    config.extensions = {
-      ...config.extensions,
-      ...extensions,
+    config.connectors = {
+      ...config.connectors,
+      [`forward/${outputId}`]: {},
     };
-  }
-  config.exporters = {
-    ...config.exporters,
-    ...exporters,
-  };
 
-  const extensionIDs = Object.keys(extensions);
-  if (extensionIDs.length > 0) {
-    config.service = {
-      ...config.service,
-      extensions: [...(config.service?.extensions ?? []), ...extensionIDs],
-    };
-  }
-
-  if (config.service?.pipelines) {
-    const signalTypes = new Set<string>();
-    Object.entries(config.service.pipelines).forEach(([id, pipeline]) => {
-      config.service!.pipelines![id] = {
-        ...pipeline,
-        exporters: [...(pipeline.exporters || []), 'forward'],
+    if (Object.keys(extensions).length > 0) {
+      config.extensions = {
+        ...config.extensions,
+        ...extensions,
       };
-      signalTypes.add(getSignalType(id));
-    });
+      config.service = {
+        ...config.service,
+        extensions: [...(config.service?.extensions ?? []), ...Object.keys(extensions)],
+      };
+    }
 
-    signalTypes.forEach((id) => {
-      config.service!.pipelines![id] = {
-        receivers: ['forward'],
+    config.exporters = {
+      ...config.exporters,
+      ...exporters,
+    };
+
+    const pipelineIds = pipelineIdsByOutputId.get(outputId);
+    if (!pipelineIds) continue;
+
+    // Route per-stream pipelines to this output's forward connector, then emit one fan-in
+    // pipeline per (signalType, outputId) pair.
+    const signalTypes = new Set<string>();
+    for (const pipelineId of pipelineIds) {
+      const pipeline = config.service?.pipelines?.[pipelineId];
+      if (pipeline) {
+        pipeline.exporters = [...(pipeline.exporters ?? []), `forward/${outputId}`];
+        signalTypes.add(getSignalType(pipelineId));
+      }
+    }
+
+    config.service ??= { pipelines: {} };
+    config.service.pipelines ??= {};
+    for (const signalType of signalTypes) {
+      config.service.pipelines[`${signalType}/${outputId}`] = {
+        receivers: [`forward/${outputId}`],
         exporters: Object.keys(exporters),
       };
-    });
+    }
   }
 
   return config;
@@ -555,15 +758,31 @@ function generateOtelcolExporter(
   exporters: Record<OTelCollectorComponentID, any>;
 } {
   switch (dataOutput.type) {
-    case outputType.Elasticsearch: {
+    case outputType.Elasticsearch:
+    case outputType.RemoteElasticsearch: {
       const outputID = getOutputIdForAgentPolicy(dataOutput);
-      const beatsauthConfig = buildBeatsauthConfig(dataOutput, proxy);
-      const hasBeatsauthConfig = Object.keys(beatsauthConfig).length > 0;
-      const beatsauthID = `beatsauth/${outputID}`;
       const extraExporterConfig = parseOtelExporterConfigYaml(
         dataOutput.otel_exporter_config_yaml,
         logger
       );
+
+      // When otel_disable_beatsauth is set, skip the beatsauth extension entirely and
+      // pass only the endpoint + any user-supplied exporter YAML to the ES exporter.
+      if (dataOutput.otel_disable_beatsauth) {
+        return {
+          extensions: {},
+          exporters: {
+            [`elasticsearch/${outputID}`]: {
+              ...extraExporterConfig,
+              endpoints: dataOutput.hosts,
+            },
+          },
+        };
+      }
+
+      const beatsauthConfig = buildBeatsauthConfig(dataOutput, proxy, logger);
+      const hasBeatsauthConfig = Object.keys(beatsauthConfig).length > 0;
+      const beatsauthID = `beatsauth/${outputID}`;
       return {
         extensions: hasBeatsauthConfig ? { [beatsauthID]: beatsauthConfig } : {},
         exporters: {

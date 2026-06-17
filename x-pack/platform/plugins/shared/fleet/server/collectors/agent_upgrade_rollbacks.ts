@@ -53,7 +53,7 @@ export async function getAgentUpgradeRollbacks(
     { ignore: [404] }
   );
 
-  const count = res.hits.hits.filter((hit) => hit._source?.data?.rollback === true).length;
+  const count = res?.hits?.hits.filter((hit) => hit._source?.data?.rollback === true).length ?? 0;
 
   return {
     agent_upgrade_rollbacks: count,

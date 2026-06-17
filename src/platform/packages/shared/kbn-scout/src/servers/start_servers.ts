@@ -40,6 +40,7 @@ export async function startServers(log: ToolingLog, options: StartServerOptions)
       config,
       log,
       esFrom: options.esFrom,
+      preserveEsData: options.preserveEsData,
       logsDir: options.logsDir,
     });
 
@@ -68,7 +69,7 @@ export async function startServers(log: ToolingLog, options: StartServerOptions)
       '\n\n' +
         dedent`
           Elasticsearch and Kibana are ready for functional testing.
-          Use 'npx playwright test --project local --grep ${pwGrepTag} --config <path_to_Playwright.config.ts>' to run tests'
+          Use 'node scripts/playwright test --project local --grep ${pwGrepTag} --config <path_to_Playwright.config.ts>' to run tests'
         ` +
         '\n\n'
     );

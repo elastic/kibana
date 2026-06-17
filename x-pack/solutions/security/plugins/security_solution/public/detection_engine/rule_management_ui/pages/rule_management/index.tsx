@@ -41,6 +41,7 @@ import {
 } from '../../../rule_gaps/context/gap_auto_fill_scheduler_context';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import { useAgentBuilderAvailability } from '../../../../agent_builder/hooks/use_agent_builder_availability';
+import { useEsqlAvailability } from '../../../../common/hooks/esql/use_esql_availability';
 import { CpsMlRuleCallout } from '../../components/cps_ml_rule_callout/callout';
 
 const RulesPageContent = () => {
@@ -54,6 +55,8 @@ const RulesPageContent = () => {
   const [{ loading: userInfoLoading, isSignalIndexExists, isAuthenticated, hasEncryptionKey }] =
     useUserData();
   const { edit: canEditRules, read: canReadRules } = useUserPrivileges().rulesPrivileges.rules;
+  const canEditRulesManagementSettings =
+    useUserPrivileges().rulesPrivileges.rulesManagementSettings?.edit ?? false;
   const {
     loading: listsConfigLoading,
     canWriteIndex: canWriteListsIndex,
@@ -61,11 +64,18 @@ const RulesPageContent = () => {
     needsIndex: needsListsIndex,
   } = useListsConfig();
   const loading = userInfoLoading || listsConfigLoading;
-  const { canAccessGapAutoFill } = useGapAutoFillSchedulerContext();
+  const { canEditGapAutoFill } = useGapAutoFillSchedulerContext();
+  const gapReasonDetectionEnabled = useIsExperimentalFeatureEnabled('gapReasonDetectionEnabled');
+  const canSaveAdvancedSettings = application.capabilities.advancedSettings?.save === true;
+  const canAccessRuleSettings =
+    canEditRulesManagementSettings &&
+    (canEditGapAutoFill || (gapReasonDetectionEnabled && canSaveAdvancedSettings));
 
   const aiRuleCreationEnabled = useIsExperimentalFeatureEnabled('aiRuleCreationEnabled');
   const { isAgentBuilderEnabled } = useAgentBuilderAvailability();
-  const isAiRuleCreationAvailable = aiRuleCreationEnabled && isAgentBuilderEnabled;
+  const { isEsqlRuleTypeEnabled } = useEsqlAvailability();
+  const isAiRuleCreationAvailable =
+    aiRuleCreationEnabled && isAgentBuilderEnabled && isEsqlRuleTypeEnabled;
   const deprecatedRulesCallout = useDeprecatedRulesTableCallout();
 
   if (
@@ -101,7 +111,7 @@ const RulesPageContent = () => {
         <SecuritySolutionPageWrapper>
           <HeaderPage title={i18n.PAGE_TITLE}>
             <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap={true}>
-              {canAccessGapAutoFill && (
+              {canAccessRuleSettings && (
                 <EuiButtonEmpty
                   data-test-subj="rules-settings-button"
                   iconType="gear"
@@ -153,7 +163,7 @@ const RulesPageContent = () => {
               </EuiFlexItem>
             </EuiFlexGroup>
           </HeaderPage>
-          {isRuleSettingsModalOpen && canAccessGapAutoFill && (
+          {isRuleSettingsModalOpen && canAccessRuleSettings && (
             <RuleSettingsModal isOpen={isRuleSettingsModalOpen} onClose={closeRuleSettingsModal} />
           )}
           <RuleUpdateCallouts shouldShowUpdateRulesCallout={canEditRules} />

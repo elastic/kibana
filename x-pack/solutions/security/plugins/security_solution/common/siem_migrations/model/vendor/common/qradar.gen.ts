@@ -14,23 +14,25 @@
  *   version: not applicable
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 /**
  * The type of the resource
  */
+export const QradarResourceType = lazySchema(() =>
+  z.enum([
+    'qidmap',
+    'reference_data_rules',
+    'sensordevicetype',
+    'sensordeviceprotocols',
+    'sensordevicecategory',
+    'ariel_property_expression',
+    'ariel_regex_property',
+    'reference_data',
+    'offense_type',
+    'lookup',
+  ])
+);
 export type QradarResourceType = z.infer<typeof QradarResourceType>;
-export const QradarResourceType = z.enum([
-  'qidmap',
-  'reference_data_rules',
-  'sensordevicetype',
-  'sensordeviceprotocols',
-  'sensordevicecategory',
-  'ariel_property_expression',
-  'ariel_regex_property',
-  'reference_data',
-  'offense_type',
-  'lookup',
-]);
 export type QradarResourceTypeEnum = typeof QradarResourceType.enum;
 export const QradarResourceTypeEnum = QradarResourceType.enum;

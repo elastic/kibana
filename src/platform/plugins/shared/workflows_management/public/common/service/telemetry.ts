@@ -92,6 +92,9 @@ export class WorkflowsBaseTelemetry {
       tagCount: metadata.tagCount,
       constCount: metadata.constCount,
       hasTriggerConditions: metadata.hasTriggerConditions,
+      hasTriggerWorkflowEventsIgnore: metadata.hasTriggerWorkflowEventsIgnore,
+      hasTriggerWorkflowEventsAllow: metadata.hasTriggerWorkflowEventsAllow,
+      hasTriggerWorkflowEventsAvoidLoop: metadata.hasTriggerWorkflowEventsAvoidLoop,
       ...this.getBaseResultParams(error),
     });
   };
@@ -159,6 +162,7 @@ export class WorkflowsBaseTelemetry {
     if (enabledChanged) {
       const enabledValue = workflowUpdate.enabled ?? workflowDefinition?.enabled;
       if (enabledValue !== undefined) {
+        const { hasCustomEventTrigger } = extractWorkflowMetadata(workflowDefinition);
         this.reportWorkflowEnabledStateChanged({
           workflowId,
           enabled: enabledValue,
@@ -169,6 +173,7 @@ export class WorkflowsBaseTelemetry {
             }),
           ...(finalEditorType && { editorType: finalEditorType }),
           ...(origin && { origin }),
+          hasCustomEventTrigger,
           error,
         });
         return;
@@ -238,12 +243,21 @@ export class WorkflowsBaseTelemetry {
     enabled: boolean;
     isBulkAction: boolean;
     bulkActionCount?: number;
+    hasCustomEventTrigger?: boolean;
     error?: Error;
     editorType?: WorkflowEditorType;
     origin?: WorkflowTelemetryOrigin;
   }) => {
-    const { workflowId, enabled, isBulkAction, bulkActionCount, error, editorType, origin } =
-      params;
+    const {
+      workflowId,
+      enabled,
+      isBulkAction,
+      bulkActionCount,
+      hasCustomEventTrigger,
+      error,
+      editorType,
+      origin,
+    } = params;
     this.telemetryService.reportEvent(WorkflowLifecycleEventTypes.WorkflowEnabledStateChanged, {
       eventName: workflowEventNames[WorkflowLifecycleEventTypes.WorkflowEnabledStateChanged],
       workflowId,
@@ -252,6 +266,7 @@ export class WorkflowsBaseTelemetry {
       ...(bulkActionCount !== undefined && {
         bulkActionCount,
       }),
+      ...(hasCustomEventTrigger !== undefined && { hasCustomEventTrigger }),
       ...(editorType && { editorType }),
       ...(origin && { origin }),
       ...this.getBaseResultParams(error),
@@ -345,8 +360,18 @@ export class WorkflowsBaseTelemetry {
     editorType?: WorkflowEditorType;
     origin?: WorkflowTelemetryOrigin;
     triggerTab?: WorkflowTriggerTab;
+    hasCustomEventTrigger?: boolean;
   }) => {
-    const { workflowId, hasInputs, inputCount, error, editorType, origin, triggerTab } = params;
+    const {
+      workflowId,
+      hasInputs,
+      inputCount,
+      error,
+      editorType,
+      origin,
+      triggerTab,
+      hasCustomEventTrigger,
+    } = params;
     this.telemetryService.reportEvent(WorkflowExecutionEventTypes.WorkflowTestRunInitiated, {
       eventName: workflowEventNames[WorkflowExecutionEventTypes.WorkflowTestRunInitiated],
       ...(workflowId && { workflowId }),
@@ -355,6 +380,7 @@ export class WorkflowsBaseTelemetry {
       ...(editorType && { editorType }),
       ...(origin && { origin }),
       ...(triggerTab && { triggerTab }),
+      ...(hasCustomEventTrigger !== undefined && { hasCustomEventTrigger }),
       ...this.getBaseResultParams(error),
     });
   };
@@ -406,8 +432,18 @@ export class WorkflowsBaseTelemetry {
     editorType?: WorkflowEditorType;
     origin?: WorkflowTelemetryOrigin;
     triggerTab?: WorkflowTriggerTab;
+    hasCustomEventTrigger?: boolean;
   }) => {
-    const { workflowId, hasInputs, inputCount, error, editorType, origin, triggerTab } = params;
+    const {
+      workflowId,
+      hasInputs,
+      inputCount,
+      error,
+      editorType,
+      origin,
+      triggerTab,
+      hasCustomEventTrigger,
+    } = params;
     this.telemetryService.reportEvent(WorkflowExecutionEventTypes.WorkflowRunInitiated, {
       eventName: workflowEventNames[WorkflowExecutionEventTypes.WorkflowRunInitiated],
       workflowId,
@@ -416,6 +452,7 @@ export class WorkflowsBaseTelemetry {
       ...(editorType && { editorType }),
       ...(origin && { origin }),
       ...(triggerTab && { triggerTab }),
+      ...(hasCustomEventTrigger !== undefined && { hasCustomEventTrigger }),
       ...this.getBaseResultParams(error),
     });
   };
@@ -455,6 +492,28 @@ export class WorkflowsBaseTelemetry {
       eventName: workflowEventNames[WorkflowExecutionEventTypes.WorkflowExecutionsCancelled],
       workflowId,
       ...(origin && { origin }),
+      ...this.getBaseResultParams(error),
+    });
+  };
+
+  /**
+   * Reports a HITL workflow execution resume attempt.
+   */
+  reportWorkflowRunResumed = (params: {
+    workflowExecutionId: string;
+    workflowId?: string;
+    timeInModalMs?: number;
+    timeSinceStepStartedMs?: number;
+    error?: Error;
+  }) => {
+    const { workflowExecutionId, workflowId, timeInModalMs, timeSinceStepStartedMs, error } =
+      params;
+    this.telemetryService.reportEvent(WorkflowExecutionEventTypes.WorkflowRunResumed, {
+      eventName: workflowEventNames[WorkflowExecutionEventTypes.WorkflowRunResumed],
+      workflowExecutionId,
+      ...(workflowId && { workflowId }),
+      ...(timeInModalMs !== undefined && { timeInModalMs }),
+      ...(timeSinceStepStartedMs !== undefined && { timeSinceStepStartedMs }),
       ...this.getBaseResultParams(error),
     });
   };
@@ -517,6 +576,24 @@ export class WorkflowsBaseTelemetry {
     this.telemetryService.reportEvent(WorkflowUIEventTypes.WorkflowCreateOpened, {
       eventName: workflowEventNames[WorkflowUIEventTypes.WorkflowCreateOpened],
       ...(params.editorType && { editorType: params.editorType }),
+    });
+  };
+
+  reportWorkflowAccessDeniedPrivileges = () => {
+    this.telemetryService.reportEvent(WorkflowUIEventTypes.WorkflowAccessDeniedPrivileges, {
+      eventName: workflowEventNames[WorkflowUIEventTypes.WorkflowAccessDeniedPrivileges],
+    });
+  };
+
+  reportWorkflowAccessDeniedLicense = () => {
+    this.telemetryService.reportEvent(WorkflowUIEventTypes.WorkflowAccessDeniedLicense, {
+      eventName: workflowEventNames[WorkflowUIEventTypes.WorkflowAccessDeniedLicense],
+    });
+  };
+
+  reportWorkflowAccessDeniedServerlessTier = () => {
+    this.telemetryService.reportEvent(WorkflowUIEventTypes.WorkflowAccessDeniedServerlessTier, {
+      eventName: workflowEventNames[WorkflowUIEventTypes.WorkflowAccessDeniedServerlessTier],
     });
   };
 

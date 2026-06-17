@@ -9,6 +9,7 @@
 
 import type { TransportRequestParams } from '@elastic/elasticsearch';
 import type { Logger } from '@kbn/logging';
+import { asSpaceId } from '@kbn/core-spaces-common';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { PROJECT_ROUTING_ORIGIN, getSpaceNPRE } from '@kbn/cps-server-utils';
 import { loggerMock } from '@kbn/logging-mocks';
@@ -41,16 +42,16 @@ describe('getRequestHandlerFactory', () => {
   });
 
   describe("projectRouting: 'space'", () => {
-    it('injects the space NPRE derived from a KibanaRequest', () => {
+    it('injects the space NPRE derived from request.spaceId', () => {
       const factory = getRequestHandlerFactory(true);
-      const request = httpServerMock.createKibanaRequest({ path: '/s/my-space/app/discover' });
+      const request = httpServerMock.createKibanaRequest({ spaceId: 'my-space' });
       const handler = factory({ projectRouting: 'space', request, logger: mockLogger });
       const params = makeSearchParams();
 
       handler({ scoped: true }, params, {}, mockLogger);
 
       expect((params.body as Record<string, unknown>).project_routing).toBe(
-        getSpaceNPRE('my-space')
+        getSpaceNPRE(asSpaceId('my-space'))
       );
     });
   });
@@ -71,7 +72,7 @@ describe('getRequestHandlerFactory', () => {
 
     it('sets timing context with kibanaRequest for scoped user', () => {
       const factory = getRequestHandlerFactory(true);
-      const request = httpServerMock.createKibanaRequest({ path: '/s/my-space/app/discover' });
+      const request = httpServerMock.createKibanaRequest({ spaceId: 'my-space' });
       const handler = factory({ projectRouting: 'space', request, logger: mockLogger });
       const params = makeSearchParams();
       const options = {};
@@ -86,7 +87,7 @@ describe('getRequestHandlerFactory', () => {
 
     it('sets both timing and CPS contexts', () => {
       const factory = getRequestHandlerFactory(true);
-      const request = httpServerMock.createKibanaRequest({ path: '/s/my-space/app/discover' });
+      const request = httpServerMock.createKibanaRequest({ spaceId: 'my-space' });
       const handler = factory({ projectRouting: 'space', request, logger: mockLogger });
       const params = makeSearchParams();
       const options = {};
@@ -99,7 +100,7 @@ describe('getRequestHandlerFactory', () => {
 
     it('does not set timing context when esTimingEnabled is false', () => {
       const factory = getRequestHandlerFactory(true, false);
-      const request = httpServerMock.createKibanaRequest({ path: '/s/my-space/app/discover' });
+      const request = httpServerMock.createKibanaRequest({ spaceId: 'my-space' });
       const handler = factory({ projectRouting: 'space', request, logger: mockLogger });
       const params = makeSearchParams();
       const options = {};

@@ -50,8 +50,12 @@ export interface EvaluateExpressionOptions {
  * Evaluate a template expression with filters using LiquidJS
  * This handles both simple paths and expressions with filters like "| json"
  * Also handles foreach.item by finding the current foreach step context
+ *
+ * Uses async evalValue so browser builds can run Web Crypto filters (sha256, hmac_sha256).
  */
-export function evaluateExpression(options: EvaluateExpressionOptions): JsonValue | undefined {
+export async function evaluateExpression(
+  options: EvaluateExpressionOptions
+): Promise<JsonValue | undefined> {
   const { expression, context, currentStepId } = options;
   try {
     // Build enhanced context with foreach if needed
@@ -59,7 +63,7 @@ export function evaluateExpression(options: EvaluateExpressionOptions): JsonValu
 
     // Use LiquidJS to evaluate the expression
     // This handles filters automatically (e.g., "steps.search.output | json")
-    const result = liquidEngine.evalValueSync(expression, enhancedContext);
+    const result = await liquidEngine.evalValue(expression, enhancedContext);
     return result as JsonValue;
   } catch (error) {
     // If liquid evaluation fails, try simple path resolution as fallback

@@ -33,6 +33,7 @@ import { useQuery } from '@kbn/react-query';
 import {
   DATASET_VAR_NAME,
   DATA_STREAM_TYPE_VAR_NAME,
+  GENERIC_DATASET_NAME,
   USE_APM_VAR_NAME,
 } from '../../../../../../../../../common/constants';
 
@@ -64,6 +65,9 @@ import { useIndexTemplateExists } from '../../datastream_hooks';
 import { shouldShowVar, isVarRequiredByVarGroup } from '../../../services/var_group_helpers';
 import { ExperimentalFeaturesService } from '../../../../../../services';
 
+import { useCreatePackagePolicyFormContext } from '../../../contexts/create_package_policy_form_context';
+
+import { PackagePolicyConditionField } from './package_policy_condition_field';
 import { PackagePolicyInputVarField } from './package_policy_input_var_field';
 import { useDataStreamId, useVarGroupSelections } from './hooks';
 import { sortDatastreamsByDataset } from './sort_datastreams';
@@ -84,8 +88,8 @@ interface Props {
   forceShowErrors?: boolean;
   isEditPage?: boolean;
   isUpgrade?: boolean;
-  totalStreams?: number;
-  showDescriptionColumn?: boolean;
+  showConditionField?: boolean;
+  hasStreamToggle?: boolean;
   varGroupSelections?: Record<string, string>;
   /** Parent input's `policy_template`; required for correct composable multi-template matching. */
   inputPolicyTemplate?: string;
@@ -101,13 +105,14 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
     forceShowErrors,
     isEditPage,
     isUpgrade,
-    totalStreams,
-    showDescriptionColumn = true,
+    showConditionField = false,
+    hasStreamToggle = true,
     varGroupSelections = {},
     inputPolicyTemplate,
   }) => {
     const { docLinks } = useStartServices();
     const { isAgentlessEnabled } = useAgentless();
+    const formContext = useCreatePackagePolicyFormContext();
     const { enableVarGroups } = ExperimentalFeaturesService.get();
 
     const pkgVarGroups =
@@ -126,9 +131,14 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
       !!packagePolicyInputStream.id &&
       packagePolicyInputStream.id === defaultDataStreamId;
     const isPackagePolicyEdit = !!packagePolicyId;
-    const shouldShowStreamsToggles = totalStreams ? totalStreams > 1 : true;
     const customDatasetVar = packagePolicyInputStream.vars?.[DATASET_VAR_NAME];
     const customDatasetVarValue = customDatasetVar?.value?.dataset || customDatasetVar?.value;
+
+    const isCustomDataset = useMemo(() => {
+      if (!customDatasetVarValue) return false;
+      if (packageInfo.type === 'input') return customDatasetVarValue !== GENERIC_DATASET_NAME;
+      return customDatasetVarValue !== packageInputStream.data_stream.dataset;
+    }, [customDatasetVarValue, packageInfo.type, packageInputStream.data_stream.dataset]);
 
     const customDataStreamTypeVar = packagePolicyInputStream.vars?.[DATA_STREAM_TYPE_VAR_NAME];
 
@@ -261,7 +271,7 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
     );
 
     const { data: dataStreamsData } = useQuery(['datastreams'], () => sendGetDataStreams(), {
-      enabled: packageInfo.type === 'input', // Only fetch datastream for input type package
+      enabled: !!customDatasetVar,
     });
     const datasetList = uniq(dataStreamsData?.data_streams) ?? [];
     const datastreams = sortDatastreamsByDataset(datasetList, packageInfo.name);
@@ -269,8 +279,12 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
     // Showing advanced options toggle state
     const [isShowingAdvanced, setIsShowingAdvanced] = useState<boolean>(isDefaultDatastream);
     const hasAdvancedOptions = useMemo(() => {
-      return advancedVars.length > 0 || (isPackagePolicyEdit && showPipelinesAndMappings);
-    }, [advancedVars.length, isPackagePolicyEdit, showPipelinesAndMappings]);
+      return (
+        showConditionField ||
+        advancedVars.length > 0 ||
+        (isPackagePolicyEdit && showPipelinesAndMappings)
+      );
+    }, [advancedVars.length, isPackagePolicyEdit, showConditionField, showPipelinesAndMappings]);
 
     const isBiggerScreen = useIsWithinMinBreakpoint('xxl');
     const flexWidth = isBiggerScreen ? 7 : 5;
@@ -299,7 +313,7 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
     return (
       <>
         <EuiFlexGrid
-          columns={showDescriptionColumn ? 2 : 1}
+          columns={2}
           data-test-subj={`streamOptions.inputStreams.${packageInputStream.data_stream.dataset}`}
         >
           <ScrollAnchor ref={containerRef} />
@@ -307,72 +321,72 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
             <EuiFlexGroup gutterSize="none" alignItems="flexStart">
               <EuiFlexItem grow={1} />
               <EuiFlexItem grow={flexWidth}>
-                <EuiFlexGroup
-                  gutterSize="none"
-                  alignItems="flexStart"
-                  justifyContent="spaceBetween"
-                >
-                  {packageInfo.type !== 'input' && shouldShowStreamsToggles && (
-                    <EuiFlexItem grow={false}>
-                      <EuiFlexGroup alignItems="center" gutterSize="s">
+                {hasStreamToggle && (
+                  <>
+                    <EuiFlexGroup
+                      gutterSize="none"
+                      alignItems="flexStart"
+                      justifyContent="spaceBetween"
+                    >
+                      <EuiFlexItem grow={false}>
+                        <EuiFlexGroup alignItems="center" gutterSize="s">
+                          <EuiFlexItem grow={false}>
+                            <EuiSwitch
+                              data-test-subj="streamOptions.switch"
+                              label={packageInputStream.title}
+                              disabled={packagePolicyInputStream.keep_enabled}
+                              checked={packagePolicyInputStream.enabled}
+                              onChange={(e) => {
+                                const enabled = e.target.checked;
+                                updatePackagePolicyInputStream({
+                                  enabled,
+                                });
+                              }}
+                            />
+                          </EuiFlexItem>
+                          {showStreamDeprecationIcon && (
+                            <EuiFlexItem grow={false}>
+                              <span data-test-subj="streamOptions.deprecatedIcon">
+                                <EuiIconTip
+                                  type="warning"
+                                  color="warning"
+                                  position="top"
+                                  content={streamDeprecationTooltip}
+                                />
+                              </span>
+                            </EuiFlexItem>
+                          )}
+                          {isUpgrade &&
+                            packagePolicyInputStream.migrate_from &&
+                            !showStreamDeprecationIcon && (
+                              <MigrationTooltip
+                                migrateFrom={packagePolicyInputStream.migrate_from}
+                                isStream
+                              />
+                            )}
+                        </EuiFlexGroup>
+                      </EuiFlexItem>
+                      {packageInputStream.data_stream.release &&
+                      packageInputStream.data_stream.release !== 'ga' ? (
                         <EuiFlexItem grow={false}>
-                          <EuiSwitch
-                            data-test-subj="streamOptions.switch"
-                            label={packageInputStream.title}
-                            disabled={packagePolicyInputStream.keep_enabled}
-                            checked={packagePolicyInputStream.enabled}
-                            onChange={(e) => {
-                              const enabled = e.target.checked;
-                              updatePackagePolicyInputStream({
-                                enabled,
-                              });
-                            }}
+                          <InlineReleaseBadge
+                            release={mapPackageReleaseToIntegrationCardRelease(
+                              packageInputStream.data_stream.release
+                            )}
                           />
                         </EuiFlexItem>
-                        {showStreamDeprecationIcon && (
-                          <EuiFlexItem grow={false}>
-                            <span data-test-subj="streamOptions.deprecatedIcon">
-                              <EuiIconTip
-                                type="warning"
-                                color="warning"
-                                position="top"
-                                content={streamDeprecationTooltip}
-                              />
-                            </span>
-                          </EuiFlexItem>
-                        )}
-                        {isUpgrade &&
-                          packagePolicyInputStream.migrate_from &&
-                          !showStreamDeprecationIcon && (
-                            <MigrationTooltip
-                              migrateFrom={packagePolicyInputStream.migrate_from}
-                              isStream
-                            />
-                          )}
-                      </EuiFlexGroup>
-                    </EuiFlexItem>
-                  )}
-                  {packageInputStream.data_stream.release &&
-                  packageInputStream.data_stream.release !== 'ga' ? (
-                    <EuiFlexItem grow={false}>
-                      <InlineReleaseBadge
-                        release={mapPackageReleaseToIntegrationCardRelease(
-                          packageInputStream.data_stream.release
-                        )}
-                      />
-                    </EuiFlexItem>
-                  ) : null}
-                </EuiFlexGroup>
-                {packageInfo.type !== 'input' &&
-                packageInputStream.description &&
-                shouldShowStreamsToggles ? (
-                  <>
-                    <EuiSpacer size="s" />
-                    <EuiText size="s" color="subdued">
-                      <ReactMarkdown>{packageInputStream.description}</ReactMarkdown>
-                    </EuiText>
+                      ) : null}
+                    </EuiFlexGroup>
+                    {packageInputStream.description ? (
+                      <>
+                        <EuiSpacer size="s" />
+                        <EuiText size="s" color="subdued">
+                          <ReactMarkdown>{packageInputStream.description}</ReactMarkdown>
+                        </EuiText>
+                      </>
+                    ) : null}
                   </>
-                ) : null}
+                )}
                 {hasRequiredVarGroupErrors && (
                   <>
                     <EuiSpacer size="m" />
@@ -460,7 +474,38 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
                       datastreams={datastreams}
                       isEditPage={isEditPage}
                       isRequiredByVarGroup={requiredByVarGroup}
+                      isUpgrade={isUpgrade}
                     />
+                    {varName === DATASET_VAR_NAME && isCustomDataset && !isEditPage && (
+                      <EuiFormRow
+                        fullWidth
+                        helpText={
+                          <FormattedMessage
+                            id="xpack.fleet.createPackagePolicy.stepConfigure.createDatasetTemplatesHelpText"
+                            defaultMessage="Creates a dedicated index template with proper mappings and settings for this custom dataset."
+                          />
+                        }
+                        label={
+                          <FormattedMessage
+                            id="xpack.fleet.createPackagePolicy.stepConfigure.createDatasetTemplatesLabel"
+                            defaultMessage="Create dedicated index template for custom dataset (recommended)"
+                          />
+                        }
+                      >
+                        <EuiSwitch
+                          label={
+                            <FormattedMessage
+                              id="xpack.fleet.createPackagePolicy.stepConfigure.createDatasetTemplatesLabel"
+                              defaultMessage="Create dedicated index template for custom dataset (recommended)"
+                            />
+                          }
+                          showLabel={false}
+                          checked={formContext?.createDatasetTemplates ?? true}
+                          onChange={(e) => formContext?.setCreateDatasetTemplates(e.target.checked)}
+                          data-test-subj="createDatasetTemplatesSwitch"
+                        />
+                      </EuiFormRow>
+                    )}
                   </EuiFlexItem>
                 );
               })}
@@ -557,6 +602,20 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
                           </EuiFormRow>
                         </EuiFlexItem>
                       )}
+                      {isShowingAdvanced && showConditionField && (
+                        <EuiFlexItem>
+                          <PackagePolicyConditionField
+                            value={packagePolicyInputStream.condition ?? ''}
+                            onChange={(v) => updatePackagePolicyInputStream({ condition: v })}
+                            isInvalid={
+                              Boolean(forceShowErrors) &&
+                              Boolean(inputStreamValidationResults?.condition)
+                            }
+                            errors={inputStreamValidationResults?.condition ?? null}
+                            dataTestSubj="packagePolicyStreamConditionInput"
+                          />
+                        </EuiFlexItem>
+                      )}
                       {advancedVars.map((varDef) => {
                         if (!packagePolicyInputStream.vars) return null;
                         const { name: varName, type: varType } = varDef;
@@ -590,6 +649,7 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
                               datastreams={datastreams}
                               isEditPage={isEditPage}
                               isRequiredByVarGroup={requiredByVarGroup}
+                              isUpgrade={isUpgrade}
                             />
                           </EuiFlexItem>
                         );

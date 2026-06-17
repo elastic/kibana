@@ -8,6 +8,11 @@ components:
     FindSavedQueryResponse:
         description: 'A paginated list of saved queries.'
         type: object
+        required:
+          - page
+          - per_page
+          - total
+          - data
         properties:
           page:
             description: 'The current page number.'
@@ -19,10 +24,58 @@ components:
             description: 'The total number of saved queries.'
             type: integer
           data:
-            description: 'The list of saved queries.'
+            description: 'An array of saved query objects.'
             type: array
             items:
               type: object
+              required:
+                - saved_object_id
+                - id
+              properties:
+                saved_object_id:
+                  type: string
+                id:
+                  $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/SavedQueryId'
+                description:
+                  $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/SavedQueryDescriptionOrUndefined'
+                query:
+                  $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/Query'
+                interval:
+                  oneOf:
+                    - type: integer
+                    - type: string
+                timeout:
+                  type: integer
+                snapshot:
+                  $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/SnapshotOrUndefined'
+                removed:
+                  $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/RemovedOrUndefined'
+                platform:
+                  $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/PlatformOrUndefined'
+                ecs_mapping:
+                  $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/ECSMappingOrUndefined'
+                created_at:
+                  type: string
+                  format: date-time
+                created_by:
+                  type: string
+                  nullable: true
+                created_by_profile_uid:
+                  type: string
+                updated_at:
+                  type: string
+                  format: date-time
+                updated_by:
+                  type: string
+                  nullable: true
+                updated_by_profile_uid:
+                  type: string
+                prebuilt:
+                  type: boolean
+                version:
+                  oneOf:
+                    - type: integer
+                    - type: string
         example:
           page: 1
           per_page: 100
@@ -35,91 +88,87 @@ components:
               platform: "linux,darwin"
               version: "2.8.0"
               interval: "60"
-              timeout: 120
-              snapshot: true
-              removed: false
               ecs_mapping:
                 host.uptime:
                   field: "total_seconds"
-              created_at: "2022-07-26T09:28:08.597Z"
               created_by: "elastic"
-              updated_at: "2022-07-26T09:28:08.597Z"
+              created_by_profile_uid: "u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0"
+              created_at: "2022-07-26T09:28:08.597Z"
               updated_by: "elastic"
+              updated_by_profile_uid: "u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0"
+              updated_at: "2022-07-26T09:28:08.597Z"
               prebuilt: false
 
     FindSavedQueryDetailResponse:
       description: 'The details of a single saved query.'
       type: object
+      required:
+        - data
       properties:
         data:
-          description: 'The saved query details.'
           type: object
+          required:
+            - saved_object_id
+            - id
           properties:
             saved_object_id:
-              description: 'The saved object ID.'
               type: string
             id:
-              description: 'The saved query ID.'
-              type: string
+              $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/SavedQueryId'
             description:
-              description: 'The saved query description.'
-              type: string
+              $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/SavedQueryDescriptionOrUndefined'
             query:
-              description: 'The SQL query.'
-              type: string
+              $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/Query'
             interval:
-              description: 'The query interval in seconds.'
-              type: string
+              oneOf:
+                - type: integer
+                - type: string
             timeout:
-              description: 'The query timeout in seconds.'
               type: integer
             snapshot:
-              description: 'Whether the query is a snapshot query.'
-              type: boolean
+              $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/SnapshotOrUndefined'
             removed:
-              description: 'Whether to include results for removed processes.'
-              type: boolean
+              $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/RemovedOrUndefined'
             platform:
-              description: 'The target platform(s).'
-              type: string
-            version:
-              description: 'The minimum osquery version.'
-              type: string
+              $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/PlatformOrUndefined'
             ecs_mapping:
-              description: 'The ECS mapping configuration.'
-              type: object
+              $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/ECSMappingOrUndefined'
             created_at:
-              description: 'The creation timestamp.'
               type: string
+              format: date-time
             created_by:
-              description: 'The user who created the saved query.'
+              type: string
+              nullable: true
+            created_by_profile_uid:
               type: string
             updated_at:
-              description: 'The last update timestamp.'
               type: string
+              format: date-time
             updated_by:
-              description: 'The user who last updated the saved query.'
+              type: string
+              nullable: true
+            updated_by_profile_uid:
               type: string
             prebuilt:
-              description: 'Whether this is a prebuilt saved query.'
               type: boolean
+            version:
+              oneOf:
+                - type: integer
+                - type: string
       example:
         data:
-          saved_object_id: "42ba9c50-0cc5-11ed-aa1d-2b27890bc90d"
+          saved_object_id: "3c42c847-eb30-4452-80e0-728584042334"
           id: "saved_query_id"
           description: "Saved query description"
           query: "select * from uptime;"
           platform: "linux,darwin"
           version: "2.8.0"
           interval: "60"
-          timeout: 120
-          snapshot: true
-          removed: false
           ecs_mapping:
             host.uptime:
               field: "total_seconds"
-          created_at: "2022-07-26T09:28:08.597Z"
           created_by: "elastic"
-          updated_at: "2022-07-26T09:28:08.597Z"
+          created_at: "2022-07-26T09:28:08.597Z"
           updated_by: "elastic"
+          updated_at: "2022-07-26T09:28:08.597Z"
           prebuilt: false

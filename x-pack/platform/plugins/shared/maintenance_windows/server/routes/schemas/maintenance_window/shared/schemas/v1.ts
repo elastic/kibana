@@ -15,7 +15,13 @@ export const maintenanceWindowCategoryIdsSchema = schema.maybe(
         schema.literal(maintenanceWindowCategoryIdTypes.OBSERVABILITY),
         schema.literal(maintenanceWindowCategoryIdTypes.SECURITY_SOLUTION),
         schema.literal(maintenanceWindowCategoryIdTypes.MANAGEMENT),
-      ])
+      ]),
+      {
+        meta: {
+          description:
+            'The category IDs for the maintenance window. It can be "observability", "securitySolution", or "management".',
+        },
+      }
     )
   )
 );

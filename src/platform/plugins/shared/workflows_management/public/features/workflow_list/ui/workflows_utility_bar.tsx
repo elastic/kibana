@@ -70,6 +70,7 @@ export const WorkflowsUtilityBar: React.FC<WorkflowsUtilityBarProps> = ({
         css={css`
           margin-top: ${euiTheme.size.l};
           padding-bottom: ${euiTheme.size.m};
+          height: ${euiTheme.size.l};
         `}
       >
         <EuiFlexItem grow={false}>
@@ -101,6 +102,12 @@ export const WorkflowsUtilityBar: React.FC<WorkflowsUtilityBarProps> = ({
                     </EuiFlexItem>
                     <EuiFlexItem grow={false}>
                       <EuiPopover
+                        aria-label={i18n.translate(
+                          'workflows.utilityBar.bulkActionsPopoverAriaLabel',
+                          {
+                            defaultMessage: 'Bulk actions',
+                          }
+                        )}
                         isOpen={isPopoverOpen}
                         closePopover={closePopover}
                         panelPaddingSize="none"

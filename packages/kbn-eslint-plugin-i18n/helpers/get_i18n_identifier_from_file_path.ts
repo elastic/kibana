@@ -13,7 +13,8 @@ import { join, parse, resolve } from 'path';
 export function getI18nIdentifierFromFilePath(fileName: string, cwd: string) {
   const { dir } = parse(fileName);
 
-  const relativePathToFile = dir.replace(cwd, '');
+  const repoRoot = resolve(join(__dirname, '../../../'));
+  const relativePathToFile = dir.replace(repoRoot, '');
 
   // We need to match the path of the file with entries in i18nrc.json files.
   // The two i18nrc files use different path formats:

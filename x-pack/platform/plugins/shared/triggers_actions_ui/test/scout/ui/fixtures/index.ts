@@ -36,3 +36,18 @@ export const test = baseTest.extend<ExtScoutTestFixtures, ScoutWorkerFixtures>({
 });
 
 export * as testData from './constants';
+export {
+  CONNECTORS_APP_PATH,
+  CONNECTORS_LIST_SELECTORS,
+  MAINTENANCE_WINDOWS_APP_PATH,
+} from './constants';
+export {
+  makeEsQueryRule,
+  makeIndexThresholdRule,
+  fillIndexThresholdForm,
+  defineIndexThresholdRule,
+  THRESHOLD_TEST_INDEX,
+  findRuleIdByName,
+  deleteRuleById,
+  deleteRulesByPrefix,
+} from './helpers';

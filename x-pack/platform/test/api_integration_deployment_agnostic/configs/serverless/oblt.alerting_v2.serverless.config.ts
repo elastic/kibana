@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import path from 'path';
-import { findTestPluginPaths } from '@kbn/test';
 import { createServerlessFeatureFlagTestConfig } from '../../default_configs/feature_flag.serverless.config.base';
 
 export default createServerlessFeatureFlagTestConfig({
@@ -14,7 +12,7 @@ export default createServerlessFeatureFlagTestConfig({
   testFiles: [require.resolve('./oblt.alerting_v2.index.ts')],
   kbnServerArgs: [
     '--xpack.alerting_v2.enabled=true',
-    ...findTestPluginPaths(path.resolve(__dirname, '../../plugins')),
+    '--migrations.allowWipTypes=["alerting_action_policy","alerting_api_key_pending_invalidation","alerting_rule"]',
   ],
   junit: {
     reportName: 'Serverless Observability - Deployment-agnostic Alerting V2 API Integration Tests',

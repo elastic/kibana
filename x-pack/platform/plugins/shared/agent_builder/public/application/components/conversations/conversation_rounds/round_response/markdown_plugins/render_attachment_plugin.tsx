@@ -19,6 +19,7 @@ import {
 import type { AttachmentsService } from '../../../../../../services';
 import { createTagParser } from './utils';
 import { InlineAttachmentWithActions } from '../attachments/inline_attachment_with_actions';
+import { AttachmentLoadingSkeleton } from '../attachments/attachment_loading_skeleton';
 
 interface ResolveAttachmentVersionParams {
   explicitVersion: string | number | undefined;
@@ -67,12 +68,6 @@ export const renderAttachmentTagParser = createTagParser({
     attachmentId: extractAttr(value, renderAttachmentElement.attributes.attachmentId),
     version: extractAttr(value, renderAttachmentElement.attributes.version),
   }),
-  assignAttributes: (node, attributes) => {
-    node.type = renderAttachmentElement.tagName;
-    node.attachmentId = attributes.attachmentId;
-    node.attachmentVersion = attributes.version;
-    delete node.value;
-  },
   createNode: (attributes, position) => ({
     type: renderAttachmentElement.tagName,
     attachmentId: attributes.attachmentId,
@@ -100,6 +95,7 @@ interface RenderAttachmentRendererProps {
   attachmentRefs?: AttachmentVersionRef[];
   conversationId?: string;
   isSidebar: boolean;
+  isStreaming: boolean;
 }
 /**
  * Creates a renderer for <render_attachment> tags.
@@ -110,6 +106,7 @@ export const createRenderAttachmentRenderer = ({
   attachmentRefs,
   conversationId,
   isSidebar,
+  isStreaming,
 }: RenderAttachmentRendererProps) => {
   const screenContext = getScreenContext(conversationAttachments);
 
@@ -122,8 +119,8 @@ export const createRenderAttachmentRenderer = ({
 
     const attachment = conversationAttachments?.find((att) => att.id === attachmentId);
 
-    if (!attachment) {
-      return null;
+    if (isStreaming || !attachment) {
+      return <AttachmentLoadingSkeleton />;
     }
 
     const versionToUse = resolveAttachmentVersion({
@@ -151,12 +148,13 @@ export const createRenderAttachmentRenderer = ({
           data: versionData.data,
           hidden: attachment.hidden,
           origin: attachment.origin,
+          version: versionToUse,
+          versionCount: attachment.versions.length,
         }}
         conversationId={conversationId}
         attachmentsService={attachmentsService}
         isSidebar={isSidebar}
         screenContext={screenContext}
-        version={versionToUse}
       />
     );
   };

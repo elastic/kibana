@@ -6,7 +6,7 @@
  */
 
 import { LENS_UNKNOWN_VIS } from '@kbn/lens-common';
-import type { LensConfigBuilder } from '@kbn/lens-embeddable-utils';
+import { isLensDSLConfig, type LensConfigBuilder } from '@kbn/lens-embeddable-utils';
 import { getMeta, type AsCodeMeta } from '@kbn/as-code-shared-schemas';
 
 import type { LensSavedObject, LensUpdateIn } from '../../../content_management';
@@ -44,11 +44,16 @@ export function getLensResponseItem(
     state: attributes.state!,
     visualizationType: attributes.visualizationType ?? LENS_UNKNOWN_VIS,
   });
-  return {
-    id,
-    data,
-    meta,
-  } satisfies LensResponseItem;
+
+  if (isLensDSLConfig(data)) {
+    return {
+      id,
+      data,
+      meta,
+    } satisfies LensResponseItem;
+  }
+
+  throw new Error('ES|QL charts are not supported in by-ref Lens');
 }
 
 /**

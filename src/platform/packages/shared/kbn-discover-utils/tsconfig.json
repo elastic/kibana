@@ -30,6 +30,9 @@
     "@kbn/apm-types",
     "@kbn/core-chrome-app-menu-components",
     "@kbn/core-http-browser",
-    "@kbn/esql-utils"
+    "@kbn/esql-utils",
+    "@kbn/kibana-utils-plugin",
+    "@kbn/resizable-layout",
+    "@kbn/search-errors"
   ]
 }

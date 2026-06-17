@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { cloudMock } from '@kbn/cloud-plugin/public/mocks';
 import { coreLifecycleMock } from '@kbn/core-lifecycle-browser-mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
@@ -16,12 +17,15 @@ import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { kqlPluginMock } from '@kbn/kql/public/mocks';
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 import { navigationPluginMock } from '@kbn/navigation-plugin/public/mocks';
+import { QueryClient } from '@kbn/react-query';
 import { serverlessMock } from '@kbn/serverless/public/mocks';
 import { spacesPluginMock } from '@kbn/spaces-plugin/public/mocks';
 import { triggersActionsUiMock } from '@kbn/triggers-actions-ui-plugin/public/mocks';
 import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
 import { workflowsExtensionsMock } from '@kbn/workflows-extensions/public/mocks';
-import type { WorkflowsServices } from './types';
+import { createAvailabilityServiceMock } from './common/lib/availability/mock';
+import type { WorkflowsBaseTelemetry } from './common/service/telemetry';
+import type { WorkflowsPublicPluginStart, WorkflowsServices } from './types';
 
 export const createStartServicesMock = () => ({
   ...coreLifecycleMock.createCoreStart(),
@@ -37,9 +41,14 @@ export const createStartServicesMock = () => ({
   triggersActionsUi: triggersActionsUiMock.createStart(),
   workflowsExtensions: workflowsExtensionsMock.createStart(),
   licensing: licensingMock.createStart(),
+  cloud: cloudMock.createStart(),
   workflowsManagement: {
     telemetry: {
       reportEvent: jest.fn(),
+    },
+    availability: createAvailabilityServiceMock(),
+    globalExecutionsView: {
+      enabled: false,
     },
   },
 });
@@ -64,4 +73,12 @@ export const createUseKibanaMockValue = (services?: StartServicesMock) => {
       openModal: jest.fn(),
     },
   } as unknown as KibanaReactContextValue<WorkflowsServices>;
+};
+
+export const workflowsManagementMocks = {
+  createStart: (): jest.Mocked<WorkflowsPublicPluginStart> => ({
+    setUnavailableInServerlessTier: jest.fn(),
+    getTelemetry: jest.fn(async () => ({} as WorkflowsBaseTelemetry)),
+    getQueryClient: jest.fn(async () => new QueryClient()),
+  }),
 };

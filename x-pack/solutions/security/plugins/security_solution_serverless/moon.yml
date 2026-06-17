@@ -55,6 +55,8 @@ dependsOn:
   - '@kbn/ai-assistant-common'
   - '@kbn/workflows'
   - '@kbn/usage-api-plugin'
+  - '@kbn/workflows-management-plugin'
+  - '@kbn/navigation-plugin'
 tags:
   - plugin
   - prod

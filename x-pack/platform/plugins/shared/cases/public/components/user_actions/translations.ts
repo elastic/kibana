@@ -29,58 +29,6 @@ export const MOVE_TO_ORIGINAL_COMMENT = i18n.translate('xpack.cases.caseView.mov
   defaultMessage: 'Highlight the referenced comment',
 });
 
-export const ALERT_COMMENT_LABEL_TITLE = i18n.translate(
-  'xpack.cases.caseView.alertCommentLabelTitle',
-  {
-    defaultMessage: 'added an alert from',
-  }
-);
-
-export const SHOW_EVENT_TOOLTIP = i18n.translate('xpack.cases.caseView.showEventTooltip', {
-  defaultMessage: 'Show event details',
-});
-
-export const MULTIPLE_ALERTS_COMMENT_LABEL_TITLE = (totalAlerts: number) =>
-  i18n.translate('xpack.cases.caseView.generatedAlertCommentLabelTitle', {
-    values: { totalAlerts },
-    defaultMessage: 'added {totalAlerts} alerts from',
-  });
-
-export const MULTIPLE_EVENTS_COMMENT_LABEL_TITLE = (totalEvents: number) =>
-  i18n.translate('xpack.cases.caseView.generatedEventCommentLabelTitle', {
-    values: { totalEvents },
-    defaultMessage: 'added {totalEvents} events',
-  });
-
-export const SHOW_ALERT_TOOLTIP = i18n.translate('xpack.cases.caseView.showAlertTooltip', {
-  defaultMessage: 'Show alert details',
-});
-
-export const SHOW_ALERT_TABLE_TOOLTIP = i18n.translate(
-  'xpack.cases.caseView.showAlertTableTooltip',
-  {
-    defaultMessage: 'Show alerts',
-  }
-);
-
-export const UNKNOWN_RULE = i18n.translate('xpack.cases.caseView.unknownRule.label', {
-  defaultMessage: 'Unknown rule',
-});
-
-export const ISOLATED_HOST = i18n.translate('xpack.cases.caseView.isolatedHost', {
-  defaultMessage: 'submitted isolate request on host',
-});
-
-export const RELEASED_HOST = i18n.translate('xpack.cases.caseView.releasedHost', {
-  defaultMessage: 'submitted release request on host',
-});
-
-export const OTHER_ENDPOINTS = (endpoints: number): string =>
-  i18n.translate('xpack.cases.caseView.otherEndpoints', {
-    values: { endpoints },
-    defaultMessage: ` and {endpoints} {endpoints, plural, =1 {other} other {others}}`,
-  });
-
 export const CANCEL_BUTTON = i18n.translate('xpack.cases.caseView.delete.cancel', {
   defaultMessage: 'Cancel',
 });
@@ -176,6 +124,20 @@ export const SET_TEMPLATE_FIELD_LABEL_PREFIX = (fieldName: string) =>
 export const EXTENDED_FIELDS = i18n.translate('xpack.cases.caseView.userActions.extendedFields', {
   defaultMessage: 'Template Fields',
 });
+
+export const APPLIED_TEMPLATE = i18n.translate('xpack.cases.caseView.userActions.appliedTemplate', {
+  defaultMessage: 'Applied Template',
+});
+
+export const APPLIED_TEMPLATE_LABEL = i18n.translate(
+  'xpack.cases.caseView.userActions.appliedTemplateLabel',
+  { defaultMessage: 'applied template' }
+);
+
+export const REMOVED_TEMPLATE_LABEL = i18n.translate(
+  'xpack.cases.caseView.userActions.removedTemplateLabel',
+  { defaultMessage: 'removed applied template' }
+);
 
 export const SYNCED_ALERTS_WITH_CLOSE_REASON = (count: number) =>
   i18n.translate('xpack.cases.caseView.userActions.status.syncedAlertsWithCloseReason', {

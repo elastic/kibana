@@ -11,7 +11,9 @@ import { ScoutTestTarget } from '@kbn/scout-info';
 
 export const stripRunCommand = (commandArgs: string[]): string => {
   if (!Array.isArray(commandArgs) || commandArgs.length < 3) {
-    throw new Error(`Invalid command arguments: must include at least 'npx playwright test'`);
+    throw new Error(
+      `Invalid command arguments: must include at least 'node scripts/playwright test'`
+    );
   }
 
   const isNodeCommand = commandArgs[0].endsWith('node');
@@ -25,7 +27,7 @@ export const stripRunCommand = (commandArgs: string[]): string => {
 
   const restArgs = commandArgs.slice(2);
   // Rebuild the command with only valid arguments
-  return `npx playwright ${restArgs.join(' ')}`;
+  return `node scripts/playwright ${restArgs.join(' ')}`;
 };
 
 /**

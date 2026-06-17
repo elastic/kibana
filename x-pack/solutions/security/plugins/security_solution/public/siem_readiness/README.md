@@ -1,6 +1,6 @@
 # SIEM Readiness
 
-The SIEM Readiness Dashboard is a **beta** feature that creates a centralized hub for users to identify gaps in their SIEM. It helps users better utilize Elastic tools to detect, respond, and close those gaps.
+The SIEM Readiness Dashboard is a **preview** feature that creates a centralized hub for users to identify gaps in their SIEM. It helps users better utilize Elastic tools to detect, respond, and close those gaps.
 
 ## Key Areas
 

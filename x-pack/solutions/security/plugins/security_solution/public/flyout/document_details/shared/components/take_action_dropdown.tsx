@@ -12,6 +12,9 @@ import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { getOr } from 'lodash/fp';
+import { buildDataTableRecord, getFieldValue } from '@kbn/discover-utils';
+import type { EsHitRecord } from '@kbn/discover-utils';
+import { isNonLocalIndexName } from '@kbn/es-query';
 import type { SearchHit } from '../../../../../common/search_strategy';
 import { useRunAlertWorkflowPanel } from '../../../../detections/components/alerts_table/timeline_actions/use_run_alert_workflow_panel';
 import { useRunDocumentWorkflowPanel } from '../../../../detections/components/alerts_table/timeline_actions/use_run_document_workflow_panel';
@@ -23,6 +26,7 @@ import { useInvestigateInTimeline } from '../../../../detections/components/aler
 import { useEventFilterAction } from '../../../../detections/components/alerts_table/timeline_actions/use_event_filter_action';
 import { useResponderActionItem } from '../../../../common/components/endpoint/responder';
 import { useHostIsolationAction } from '../../../../common/components/endpoint/host_isolation';
+import type { HostIsolationAction } from '../../../../common/components/endpoint/host_isolation/from_alerts/use_host_isolation_action';
 import type { Status } from '../../../../../common/api/detection_engine';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import { useAddToCaseActions } from '../../../../detections/components/alerts_table/timeline_actions/use_add_to_case_actions';
@@ -73,13 +77,9 @@ export interface TakeActionDropdownProps {
    */
   handleOnEventClosed: () => void;
   /**
-   * Callback to let the parent know if the isolation panel is opened or closed
-   */
-  isHostIsolationPanelOpen: boolean;
-  /**
    * Callback to let parent know when the user interacts with the exception panel
    */
-  onAddIsolationStatusClick: (action: 'isolateHost' | 'unisolateHost') => void;
+  onAddIsolationStatusClick: (action: HostIsolationAction) => void;
   /**
    * Callback to let parent know when the user interacts with event filter
    */
@@ -118,7 +118,6 @@ export const TakeActionDropdown = memo(
     dataFormattedForFieldBrowser,
     dataAsNestedObject,
     handleOnEventClosed,
-    isHostIsolationPanelOpen,
     onAddEventFilterClick,
     onAddExceptionTypeClick,
     onAddIsolationStatusClick,
@@ -165,6 +164,16 @@ export const TakeActionDropdown = memo(
       [dataFormattedForFieldBrowser]
     );
 
+    const hit = useMemo(
+      () => buildDataTableRecord(searchHit as unknown as EsHitRecord),
+      [searchHit]
+    );
+
+    const isRemoteDocument = useMemo(
+      () => isNonLocalIndexName(hit.raw._index ?? (getFieldValue(hit, '_index') as string) ?? ''),
+      [hit]
+    );
+
     const isEvent = alertSummaryData.eventKind === 'event';
     const isAlert = alertSummaryData.eventKind === 'signal';
 
@@ -182,7 +191,7 @@ export const TakeActionDropdown = memo(
 
     // host isolation interaction
     const handleOnAddIsolationStatusClick = useCallback(
-      (action: 'isolateHost' | 'unisolateHost') => {
+      (action: HostIsolationAction) => {
         onAddIsolationStatusClick(action);
         setIsPopoverOpen(false);
       },
@@ -192,7 +201,6 @@ export const TakeActionDropdown = memo(
       closePopover: closePopoverHandler,
       detailsData: dataFormattedForFieldBrowser,
       onAddIsolationStatusClick: handleOnAddIsolationStatusClick,
-      isHostIsolationPanelOpen,
     });
 
     // exception interaction
@@ -352,19 +360,23 @@ export const TakeActionDropdown = memo(
 
     // items to render in the dropdown
     const items: AlertTableContextMenuItem[] = useMemo(
-      () => [
-        ...addToCaseActionItems,
-        ...alertsActionItems,
-        ...(isAlert ? alertWorkflowMenuItem : documentWorkflowMenuItem),
-        ...hostIsolationActionItems,
-        ...endpointResponseActionsConsoleItems,
-        ...(osqueryAvailable ? [osqueryActionItem] : []),
-        ...investigateInTimelineActionItems,
-      ],
+      () =>
+        isRemoteDocument
+          ? [...investigateInTimelineActionItems]
+          : [
+              ...addToCaseActionItems,
+              ...alertsActionItems,
+              ...(isAlert ? alertWorkflowMenuItem : documentWorkflowMenuItem),
+              ...hostIsolationActionItems,
+              ...endpointResponseActionsConsoleItems,
+              ...(osqueryAvailable ? [osqueryActionItem] : []),
+              ...investigateInTimelineActionItems,
+            ],
       [
         addToCaseActionItems,
         alertsActionItems,
         isAlert,
+        isRemoteDocument,
         alertWorkflowMenuItem,
         documentWorkflowMenuItem,
         hostIsolationActionItems,
@@ -377,14 +389,11 @@ export const TakeActionDropdown = memo(
 
     // panels rendered in the context menu
     const panels = [
-      {
-        id: 0,
-        items,
-      },
-      ...alertTagsPanels,
-      ...(isAlert ? runAlertWorkflowPanel : runDocumentWorkflowPanel),
-      ...alertAssigneesPanels,
-      ...statusActionPanels,
+      { id: 0, items },
+      ...(!isRemoteDocument ? alertTagsPanels : []),
+      ...(!isRemoteDocument ? (isAlert ? runAlertWorkflowPanel : runDocumentWorkflowPanel) : []),
+      ...(!isRemoteDocument ? alertAssigneesPanels : []),
+      ...(!isRemoteDocument ? statusActionPanels : []),
     ];
 
     const takeActionButton = useMemo(
@@ -406,6 +415,7 @@ export const TakeActionDropdown = memo(
     return items.length && dataAsNestedObject ? (
       <EuiPopover
         id="AlertTakeActionPanel"
+        aria-label={TAKE_ACTION}
         button={takeActionButton}
         isOpen={isPopoverOpen}
         closePopover={closePopoverHandler}
@@ -413,12 +423,7 @@ export const TakeActionDropdown = memo(
         anchorPosition="downLeft"
         repositionOnScroll
       >
-        <EuiContextMenu
-          size="s"
-          initialPanelId={0}
-          panels={panels}
-          data-test-subj="takeActionPanelMenu"
-        />
+        <EuiContextMenu initialPanelId={0} panels={panels} data-test-subj="takeActionPanelMenu" />
       </EuiPopover>
     ) : null;
   }

@@ -54,6 +54,7 @@ describe('OAuthAuthorizationService', () => {
         tokenUrl: 'https://provider.example.com/token',
         clientId: 'secret-client-id',
         scope: 'openid email',
+        scopeParamName: undefined,
       });
       expect(mockActionsClient.get).toHaveBeenCalledWith({ id: 'connector-1' });
       expect(mockEncryptedSavedObjectsClient.getDecryptedAsInternalUser).toHaveBeenCalledWith(
@@ -61,6 +62,38 @@ describe('OAuthAuthorizationService', () => {
         'connector-1',
         { namespace: undefined }
       );
+    });
+
+    it('returns scopeParamName from decrypted secrets', async () => {
+      const service = createService();
+      const getResult = createMockConnector({
+        id: 'connector-1',
+        config: { authType: 'oauth_authorization_code' },
+      });
+      mockActionsClient.get.mockResolvedValue(getResult);
+      mockEncryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue({
+        attributes: {
+          secrets: {
+            authorizationUrl: 'https://slack.com/oauth/v2/authorize',
+            tokenUrl: 'https://slack.com/api/oauth.v2.access',
+            clientId: 'slack-client-id',
+            scope: 'channels:read',
+            scopeParamName: 'user_scope',
+          },
+          config: {},
+        },
+      });
+
+      const result = await service.getOAuthConfig('connector-1', undefined);
+
+      expect(result).toEqual({
+        authTypeId: 'oauth_authorization_code',
+        authorizationUrl: 'https://slack.com/oauth/v2/authorize',
+        tokenUrl: 'https://slack.com/api/oauth.v2.access',
+        clientId: 'slack-client-id',
+        scope: 'channels:read',
+        scopeParamName: 'user_scope',
+      });
     });
 
     it('falls back to config when secrets are missing fields', async () => {
@@ -96,8 +129,10 @@ describe('OAuthAuthorizationService', () => {
         tokenUrl: 'https://config-provider.example.com/token',
         clientId: 'config-client-id',
         scope: 'profile',
+        scopeParamName: undefined,
       });
     });
+
     it('passes namespace when provided', async () => {
       const service = createService();
       const getResult = createMockConnector({
@@ -179,6 +214,7 @@ describe('OAuthAuthorizationService', () => {
         tokenUrl: 'https://provider.example.com/token',
         clientId: 'client-id',
         scope: undefined,
+        scopeParamName: undefined,
       });
     });
 
@@ -306,6 +342,60 @@ describe('OAuthAuthorizationService', () => {
       const parsed = new URL(url);
       expect(parsed.searchParams.has('scope')).toBe(false);
       expect(parsed.searchParams.get('client_id')).toBe('my-client-id');
+    });
+
+    it('uses custom scopeParamName when provided', () => {
+      const service = createService();
+
+      const url = service.buildAuthorizationUrl({
+        baseAuthorizationUrl: 'https://slack.com/oauth/v2/authorize',
+        clientId: 'slack-client-id',
+        scope: 'channels:read chat:write',
+        scopeParamName: 'user_scope',
+        redirectUri: 'https://kibana.example.com/callback',
+        state: 'state-value',
+        codeChallenge: 'challenge-value',
+      });
+
+      const parsed = new URL(url);
+      expect(parsed.searchParams.has('scope')).toBe(false);
+      expect(parsed.searchParams.get('user_scope')).toBe('channels:read chat:write');
+    });
+
+    it.each(['client_id', 'response_type', 'redirect_uri', 'state', 'code_challenge'])(
+      'throws when scopeParamName is the reserved param "%s"',
+      (reserved) => {
+        const service = createService();
+
+        expect(() =>
+          service.buildAuthorizationUrl({
+            baseAuthorizationUrl: 'https://provider.example.com/authorize',
+            clientId: 'my-client-id',
+            scope: 'openid',
+            scopeParamName: reserved,
+            redirectUri: 'https://kibana.example.com/callback',
+            state: 'state-value',
+            codeChallenge: 'challenge-value',
+          })
+        ).toThrow(`scopeParamName "${reserved}" conflicts with a reserved OAuth parameter`);
+      }
+    );
+
+    it('defaults to scope param name when scopeParamName is undefined', () => {
+      const service = createService();
+
+      const url = service.buildAuthorizationUrl({
+        baseAuthorizationUrl: 'https://provider.example.com/authorize',
+        clientId: 'my-client-id',
+        scope: 'openid',
+        redirectUri: 'https://kibana.example.com/callback',
+        state: 'state-value',
+        codeChallenge: 'challenge-value',
+      });
+
+      const parsed = new URL(url);
+      expect(parsed.searchParams.get('scope')).toBe('openid');
+      expect(parsed.searchParams.has('user_scope')).toBe(false);
     });
   });
 });

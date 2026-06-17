@@ -21,6 +21,7 @@ dependsOn:
   - '@kbn/scout-info'
   - '@kbn/security-plugin'
   - '@kbn/ftr-common-functional-services'
+  - '@kbn/ftr-llm-proxy'
   - '@kbn/ml-plugin'
   - '@kbn/fleet-plugin'
   - '@kbn/logs-shared-plugin'
@@ -71,7 +72,6 @@ dependsOn:
   - '@kbn/slo-plugin'
   - '@kbn/slo-schema'
   - '@kbn/cases-plugin'
-  - '@kbn/infra-forge'
   - '@kbn/test-suites-src'
   - '@kbn/ftr-common-functional-ui-services'
   - '@kbn/config-schema'
@@ -88,8 +88,9 @@ dependsOn:
   - '@kbn/agent-builder-plugin'
   - '@kbn/aiops-log-rate-analysis'
   - '@kbn/observability-agent-builder-plugin'
-  - '@kbn/maintenance-windows-plugin'
   - '@kbn/product-doc-common'
+  - '@kbn/kbn-client'
+  - '@kbn/apm-types'
 tags:
   - test-helper
   - package

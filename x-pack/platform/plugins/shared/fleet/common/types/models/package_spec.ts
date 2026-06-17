@@ -9,6 +9,7 @@ import type {
   DeprecationInfo,
   RegistryElasticsearch,
   RegistryPolicyTemplate,
+  RegistrySection,
   RegistryVarsEntry,
 } from './epm';
 
@@ -63,6 +64,7 @@ export interface PackageSpecManifest {
   policy_templates?: RegistryPolicyTemplate[];
   vars?: RegistryVarsEntry[];
   var_groups?: RegistryVarGroup[];
+  sections?: RegistrySection[];
   owner: { github?: string; type?: 'elastic' | 'partner' | 'community' };
   elasticsearch?: Pick<
     RegistryElasticsearch,

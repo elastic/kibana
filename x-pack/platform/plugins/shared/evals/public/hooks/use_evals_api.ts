@@ -5,14 +5,17 @@
  * 2.0.
  */
 
+import { useCallback } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@kbn/react-query';
 import { isHttpFetchError } from '@kbn/core-http-browser';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import type { TraceFetcher, TraceSpan } from '@kbn/llm-trace-waterfall';
 import {
-  EVALS_RUNS_URL,
-  EVALS_RUN_URL,
-  EVALS_RUN_SCORES_URL,
-  EVALS_RUN_DATASET_EXAMPLES_URL,
+  EVALS_EXPERIMENTS_URL,
+  EVALS_EXPERIMENT_URL,
+  EVALS_EXPERIMENT_SCORES_URL,
+  EVALS_EXPERIMENT_DATASET_EXAMPLES_URL,
+  EVALS_EXPERIMENTS_COMPARE_URL,
   EVALS_EXAMPLE_SCORES_URL,
   EVALS_TRACE_URL,
   EVALS_TRACING_PROJECTS_URL,
@@ -34,14 +37,15 @@ import {
   type UpdateEvaluationDatasetExampleRequestBodyInput,
   type UpdateEvaluationDatasetExampleResponse,
   type DeleteEvaluationDatasetExampleResponse,
-  type GetEvaluationRunsResponse,
-  type GetEvaluationRunResponse,
-  type GetEvaluationRunScoresResponse,
-  type GetEvaluationRunDatasetExamplesResponse,
+  type GetEvaluationExperimentsResponse,
+  type GetEvaluationExperimentResponse,
+  type GetEvaluationExperimentScoresResponse,
+  type GetEvaluationExperimentDatasetExamplesResponse,
   type GetExampleScoresResponse,
   type GetTraceResponse,
   type GetTracingProjectsResponse,
   type GetProjectTracesResponse,
+  type CompareExperimentsResponse,
 } from '@kbn/evals-common';
 import { queryKeys } from '../query_keys';
 
@@ -59,10 +63,11 @@ export interface GetEvalsRemotesResponse {
   remotes: EvalsRemoteSummary[];
 }
 
-interface RunsListFilters {
+export interface ExperimentsListFilters {
   suiteId?: string;
   modelId?: string;
   branch?: string;
+  buildId?: string;
   datasetId?: string;
   page?: number;
   perPage?: number;
@@ -93,13 +98,17 @@ interface UpdateExampleVariables extends ExampleWithDatasetId {
   updates: UpdateEvaluationDatasetExampleRequestBodyInput;
 }
 
-const getDatasetUrl = (datasetId: string) => EVALS_DATASET_URL.replace('{datasetId}', datasetId);
+const getDatasetUrl = (datasetId: string) =>
+  EVALS_DATASET_URL.replace('{datasetId}', encodeURIComponent(datasetId));
 
 const getDatasetExamplesUrl = (datasetId: string) =>
-  EVALS_DATASET_EXAMPLES_URL.replace('{datasetId}', datasetId);
+  EVALS_DATASET_EXAMPLES_URL.replace('{datasetId}', encodeURIComponent(datasetId));
 
 const getDatasetExampleUrl = (datasetId: string, exampleId: string) =>
-  EVALS_DATASET_EXAMPLE_URL.replace('{datasetId}', datasetId).replace('{exampleId}', exampleId);
+  EVALS_DATASET_EXAMPLE_URL.replace('{datasetId}', encodeURIComponent(datasetId)).replace(
+    '{exampleId}',
+    encodeURIComponent(exampleId)
+  );
 
 export const useDatasets = (filters: DatasetsListFilters = {}) => {
   const { services } = useKibana();
@@ -368,21 +377,22 @@ export const useDeleteRemote = () => {
   });
 };
 
-export const useEvaluationRuns = (filters: RunsListFilters = {}) => {
+export const useEvaluationExperiments = (filters: ExperimentsListFilters = {}) => {
   const { services } = useKibana();
 
   return useQuery({
-    queryKey: queryKeys.runs.list(filters),
-    queryFn: async (): Promise<GetEvaluationRunsResponse> => {
+    queryKey: queryKeys.experiments.list(filters),
+    queryFn: async (): Promise<GetEvaluationExperimentsResponse> => {
       const query: Record<string, string | number> = {};
       if (filters.suiteId) query.suite_id = filters.suiteId;
       if (filters.modelId) query.model_id = filters.modelId;
       if (filters.branch) query.branch = filters.branch;
+      if (filters.buildId) query.build_id = filters.buildId;
       if (filters.datasetId) query.dataset_id = filters.datasetId;
       if (filters.page) query.page = filters.page;
       if (filters.perPage) query.per_page = filters.perPage;
 
-      return services.http!.get<GetEvaluationRunsResponse>(EVALS_RUNS_URL, {
+      return services.http!.get<GetEvaluationExperimentsResponse>(EVALS_EXPERIMENTS_URL, {
         query,
         version: API_VERSIONS.internal.v1,
       });
@@ -397,17 +407,23 @@ export const useEvaluationRuns = (filters: RunsListFilters = {}) => {
   });
 };
 
-export const useEvaluationRun = (runId: string) => {
+export const useEvaluationExperiment = (experimentId: string, executionId?: string) => {
   const { services } = useKibana();
 
   return useQuery({
-    queryKey: queryKeys.runs.detail(runId),
-    queryFn: async (): Promise<GetEvaluationRunResponse> => {
-      const url = EVALS_RUN_URL.replace('{runId}', runId);
-      return services.http!.get<GetEvaluationRunResponse>(url, {
+    queryKey: queryKeys.experiments.detail(experimentId, executionId),
+    queryFn: async (): Promise<GetEvaluationExperimentResponse> => {
+      const url = EVALS_EXPERIMENT_URL.replace('{experimentId}', encodeURIComponent(experimentId));
+      const query: Record<string, string> = {};
+      if (executionId) {
+        query.execution_id = executionId;
+      }
+      return services.http!.get<GetEvaluationExperimentResponse>(url, {
+        query,
         version: API_VERSIONS.internal.v1,
       });
     },
+    enabled: experimentId.length > 0,
     retry: (_failureCount, error) => {
       if (isHttpFetchError(error)) {
         return !error.response?.status || error.response.status >= 500;
@@ -418,35 +434,78 @@ export const useEvaluationRun = (runId: string) => {
   });
 };
 
-export const useEvaluationRunScores = (runId: string) => {
+export const useEvaluationExperimentScores = (experimentId: string, executionId?: string) => {
   const { services } = useKibana();
 
   return useQuery({
-    queryKey: queryKeys.runs.scores(runId),
-    queryFn: async (): Promise<GetEvaluationRunScoresResponse> => {
-      const url = EVALS_RUN_SCORES_URL.replace('{runId}', runId);
-      return services.http!.get<GetEvaluationRunScoresResponse>(url, {
+    queryKey: queryKeys.experiments.scores(experimentId, executionId),
+    queryFn: async (): Promise<GetEvaluationExperimentScoresResponse> => {
+      const url = EVALS_EXPERIMENT_SCORES_URL.replace(
+        '{experimentId}',
+        encodeURIComponent(experimentId)
+      );
+      const query: Record<string, string> = {};
+      if (executionId) {
+        query.execution_id = executionId;
+      }
+      return services.http!.get<GetEvaluationExperimentScoresResponse>(url, {
+        query,
         version: API_VERSIONS.internal.v1,
       });
     },
   });
 };
 
-export const useRunDatasetExamples = (runId: string, datasetId: string) => {
+export const useCompareExperiments = (
+  type: 'experiment' | 'execution',
+  baselineId: string,
+  targetId: string
+) => {
   const { services } = useKibana();
 
   return useQuery({
-    queryKey: queryKeys.runs.datasetExamples(runId, datasetId),
-    queryFn: async (): Promise<GetEvaluationRunDatasetExamplesResponse> => {
-      const url = EVALS_RUN_DATASET_EXAMPLES_URL.replace('{runId}', runId).replace(
-        '{datasetId}',
-        datasetId
-      );
-      return services.http!.get<GetEvaluationRunDatasetExamplesResponse>(url, {
+    queryKey: queryKeys.experiments.compare(type, baselineId, targetId),
+    queryFn: async (): Promise<CompareExperimentsResponse> => {
+      return services.http!.get<CompareExperimentsResponse>(EVALS_EXPERIMENTS_COMPARE_URL, {
+        query: { type, baseline_id: baselineId, target_id: targetId },
         version: API_VERSIONS.internal.v1,
       });
     },
-    enabled: runId.length > 0 && datasetId.length > 0,
+    enabled: baselineId.length > 0 && targetId.length > 0,
+    retry: (_failureCount, error) => {
+      if (isHttpFetchError(error)) {
+        return !error.response?.status || error.response.status >= 500;
+      }
+      return true;
+    },
+    refetchOnWindowFocus: false,
+  });
+};
+
+export const useExperimentDatasetExamples = (
+  experimentId: string,
+  datasetId: string,
+  executionId?: string
+) => {
+  const { services } = useKibana();
+
+  return useQuery({
+    queryKey: queryKeys.experiments.datasetExamples(experimentId, datasetId, executionId),
+    queryFn: async (): Promise<GetEvaluationExperimentDatasetExamplesResponse> => {
+      const url = EVALS_EXPERIMENT_DATASET_EXAMPLES_URL.replace(
+        '{experimentId}',
+        encodeURIComponent(experimentId)
+      ).replace('{datasetId}', encodeURIComponent(datasetId));
+      const query: Record<string, string> = {};
+      if (executionId) {
+        query.execution_id = executionId;
+      }
+      return services.http!.get<GetEvaluationExperimentDatasetExamplesResponse>(url, {
+        query,
+        version: API_VERSIONS.internal.v1,
+      });
+    },
+    enabled: experimentId.length > 0 && datasetId.length > 0,
   });
 };
 
@@ -456,7 +515,7 @@ export const useExampleScores = (exampleId: string) => {
   return useQuery({
     queryKey: queryKeys.examples.scores(exampleId),
     queryFn: async (): Promise<GetExampleScoresResponse> => {
-      const url = EVALS_EXAMPLE_SCORES_URL.replace('{exampleId}', exampleId);
+      const url = EVALS_EXAMPLE_SCORES_URL.replace('{exampleId}', encodeURIComponent(exampleId));
       return services.http!.get<GetExampleScoresResponse>(url, {
         version: API_VERSIONS.internal.v1,
       });
@@ -465,20 +524,25 @@ export const useExampleScores = (exampleId: string) => {
   });
 };
 
-export const useTrace = (traceId: string | null) => {
+export const useEvalsTraceFetcher = (): TraceFetcher => {
   const { services } = useKibana();
 
-  return useQuery({
-    queryKey: queryKeys.traces.detail(traceId ?? ''),
-    queryFn: async (): Promise<GetTraceResponse> => {
-      if (!traceId) throw new Error('traceId is required');
-      const url = EVALS_TRACE_URL.replace('{traceId}', traceId);
-      return services.http!.get<GetTraceResponse>(url, {
-        version: API_VERSIONS.internal.v1,
-      });
+  return useCallback(
+    async (traceId: string) => {
+      const trace = await services.http!.get<GetTraceResponse>(
+        EVALS_TRACE_URL.replace('{traceId}', encodeURIComponent(traceId)),
+        {
+          version: API_VERSIONS.internal.v1,
+        }
+      );
+
+      return {
+        spans: (trace.spans ?? []) as TraceSpan[],
+        durationMs: trace.duration_ms ?? 0,
+      };
     },
-    enabled: traceId != null,
-  });
+    [services.http]
+  );
 };
 
 interface TracingProjectsFilters {

@@ -5,21 +5,17 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const spacesService = getService('spaces');
   const securityService = getService('security');
-  const { common, header, dashboard, security, searchSessionsManagement } = getPageObjects([
+  const { common, header, dashboard, security } = getPageObjects([
     'common',
     'header',
     'dashboard',
     'security',
-    'searchSessionsManagement',
   ]);
-  const dashboardPanelActions = getService('dashboardPanelActions');
-  const browser = getService('browser');
   const searchSessions = getService('searchSessions');
   const kibanaServer = getService('kibanaServer');
   const toasts = getService('toasts');
@@ -37,31 +33,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await dashboard.waitForRenderComplete();
 
         await searchSessions.save({ withRefresh: true, isSubmitButton: true });
-        const savedSessionId = await dashboardPanelActions.getSearchSessionIdByTitle(
-          'A Pie in another space '
-        );
+        // Dismiss the "Background search created" toast
+        await toasts.dismissAll();
+        await searchSessions.openCompletedSearchFromToast();
 
-        // purge client side search cache
-        // https://github.com/elastic/kibana/issues/106074#issuecomment-920462094
-        await browser.refresh();
-
-        await searchSessions.openFlyout();
-        const searchSessionList = await searchSessionsManagement.getList();
-        const searchSessionItem = searchSessionList.find(
-          (session) => session.id === savedSessionId
-        );
-
-        if (!searchSessionItem) throw new Error(`Can\'t find session with id = ${savedSessionId}`);
-
-        // navigate to discover
-        await searchSessionItem.view();
-
+        // Wait for the dashboard to load
         await header.waitUntilLoadingHasFinished();
         await dashboard.waitForRenderComplete();
 
         // Check that session is restored
         await dashboardExpect.noErrorEmbeddablesPresent();
-        expect(await toasts.getCount()).to.be(0); // no session restoration related warnings
+        await searchSessions.expectNoErrorsOrWarnings();
       });
     });
     describe('Disabled storing search sessions', () => {

@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
+import path from 'node:path';
 import { z } from '@kbn/zod/v4';
 import type { IKibanaResponse } from '@kbn/core-http-server';
+import { buildStrictRouteValidationWithZod } from '../utils/build_strict_route_validation';
 import { API_VERSIONS, ENTITY_STORE_ROUTES } from '../../../../common';
 import { RESOLUTION_ENTITY_STORE_PERMISSIONS } from '../../constants';
 import type { EntityStorePluginRouter } from '../../../types';
@@ -16,7 +17,11 @@ import { enterpriseLicenseMiddleware } from '../../middleware/enterprise_license
 import { EntitiesNotFoundError } from '../../../domain/errors';
 
 const bodySchema = z.object({
-  entity_ids: z.array(z.string()).min(1).max(1000),
+  entity_ids: z
+    .array(z.string())
+    .min(1)
+    .max(1000)
+    .describe('Entity identifiers to unlink from their resolution group. Minimum 1, maximum 1000.'),
 });
 
 export function registerResolutionUnlink(router: EntityStorePluginRouter) {
@@ -24,6 +29,14 @@ export function registerResolutionUnlink(router: EntityStorePluginRouter) {
     .post({
       path: ENTITY_STORE_ROUTES.public.RESOLUTION_UNLINK,
       access: 'public',
+      summary: 'Unlink entities',
+      description:
+        'Remove one or more entities from their resolution group. Changes become ' +
+        'visible on subsequent reads after the next index refresh (typically <1s). ' +
+        'Requires an enterprise license.',
+      options: {
+        tags: ['oas-tag:Security entity store'],
+      },
       security: {
         authz: RESOLUTION_ENTITY_STORE_PERMISSIONS,
       },
@@ -34,8 +47,11 @@ export function registerResolutionUnlink(router: EntityStorePluginRouter) {
         version: API_VERSIONS.public.v1,
         validate: {
           request: {
-            body: buildRouteValidationWithZod(bodySchema),
+            body: buildStrictRouteValidationWithZod(bodySchema),
           },
+        },
+        options: {
+          oasOperationObject: () => path.join(__dirname, '../examples/resolution_unlink.yaml'),
         },
       },
       wrapMiddlewares(
@@ -45,7 +61,9 @@ export function registerResolutionUnlink(router: EntityStorePluginRouter) {
           logger.debug('Resolution Unlink API called');
 
           try {
-            const result = await resolutionClient.unlinkEntities(req.body.entity_ids);
+            const result = await resolutionClient.unlinkEntities(req.body.entity_ids, {
+              awaitVisibility: true,
+            });
 
             return res.ok({ body: result });
           } catch (error) {

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { isWorkflowValidationError, WorkflowValidationError } from '../../common/lib/errors';
+import { isWorkflowValidationError, WorkflowValidationError } from '@kbn/workflows-yaml';
 
 describe('WorkflowValidationError', () => {
   it('should create a validation error with proper properties', () => {

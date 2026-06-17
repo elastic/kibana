@@ -21,6 +21,8 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
+import { getEbtProps } from '@kbn/ebt-click';
 import { useNavigation } from '../../../hooks/use_navigation';
 import { LibraryToggleRow } from './library_toggle_row';
 import { LibrarySortFilterButton } from './library_sort_filter_button';
@@ -49,7 +51,6 @@ export interface LibraryPanelProps<T extends LibraryItem> {
   allItems: T[];
   activeItemIdSet: Set<string>;
   onToggleItem: (item: T, isActive: boolean) => void;
-  mutatingItemId: string | null;
   flyoutTitleId: string;
   libraryLabels: LibraryPanelLabels;
   manageLibraryPath: string;
@@ -58,6 +59,7 @@ export interface LibraryPanelProps<T extends LibraryItem> {
   disabledItemIdSet?: Set<string>;
   readOnlyItemIdSet?: Set<string>;
   callout?: React.ReactNode;
+  ebtEntityType?: string;
 }
 
 const defaultGetItemName = <T extends LibraryItem>(item: T): string => item.id;
@@ -67,7 +69,6 @@ export const LibraryPanel = <T extends LibraryItem>({
   allItems,
   activeItemIdSet,
   onToggleItem,
-  mutatingItemId,
   flyoutTitleId,
   libraryLabels,
   manageLibraryPath,
@@ -76,6 +77,7 @@ export const LibraryPanel = <T extends LibraryItem>({
   disabledItemIdSet,
   readOnlyItemIdSet,
   callout,
+  ebtEntityType,
 }: LibraryPanelProps<T>) => {
   const { createAgentBuilderUrl } = useNavigation();
   const manageLibraryUrl = createAgentBuilderUrl(manageLibraryPath);
@@ -120,6 +122,11 @@ export const LibraryPanel = <T extends LibraryItem>({
                 margin-top: ${euiTheme.size.m};
                 font-size: ${euiTheme.size.m};
               `}
+              {...getEbtProps({
+                element: AGENT_BUILDER_UI_EBT.element.flyout,
+                action: AGENT_BUILDER_UI_EBT.action.libraryPanel.MANAGE_ALL,
+                detail: ebtEntityType ?? '',
+              })}
             >
               {libraryLabels.manageLibraryLink}
             </EuiLink>
@@ -144,6 +151,7 @@ export const LibraryPanel = <T extends LibraryItem>({
               filterMode={filterMode}
               onFilterChange={setFilterMode}
               filterCounts={filterCounts}
+              ebtEntityType={ebtEntityType}
             />
           </EuiFlexItem>
         </EuiFlexGroup>
@@ -172,12 +180,12 @@ export const LibraryPanel = <T extends LibraryItem>({
                   description={item.description}
                   isActive={activeItemIdSet.has(item.id)}
                   onToggle={(checked) => onToggleItem(item, checked)}
-                  isMutating={mutatingItemId === item.id}
                   isDisabled={disabledItemIdSet?.has(item.id)}
                   isReadOnly={readOnlyItemIdSet?.has(item.id)}
                   disabledBadgeLabel={libraryLabels.disabledBadgeLabel}
                   disabledTooltipTitle={libraryLabels.disabledTooltipTitle}
                   disabledTooltipBody={libraryLabels.disabledTooltipBody}
+                  ebtEntityType={ebtEntityType}
                 />
                 <EuiHorizontalRule margin="m" />
               </EuiFlexItem>

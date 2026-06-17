@@ -24,6 +24,7 @@ import {
   EuiModalHeaderTitle,
   EuiSpacer,
   EuiText,
+  EuiToolTip,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -155,7 +156,12 @@ export const AddEndpointModal: React.FC<AddEndpointModalProps> = ({
     !isView && endpointId.trim().length > 0 && selectedTaskType.length > 0 && !endpointIdError;
 
   return (
-    <EuiModal onClose={onCancel} style={{ width: 640 }} aria-labelledby={modalTitleId}>
+    <EuiModal
+      onClose={onCancel}
+      style={{ width: 640 }}
+      aria-labelledby={modalTitleId}
+      data-test-subj="addEndpointModal"
+    >
       <EuiModalHeader>
         <EuiModalHeaderTitle id={modalTitleId}>
           {isView
@@ -176,20 +182,30 @@ export const AddEndpointModal: React.FC<AddEndpointModalProps> = ({
           fullWidth
         >
           <EuiFieldText
+            data-test-subj="searchInferenceEndpointsAddEndpointModalFieldText"
             value={modelId}
             readOnly
             fullWidth
             prepend={
-              <EuiButtonIcon
-                iconType="copyClipboard"
-                size="xs"
-                color="text"
-                aria-label={i18n.translate(
+              <EuiToolTip
+                content={i18n.translate(
                   'xpack.searchInferenceEndpoints.addEndpointModal.copyModelIdAriaLabel',
                   { defaultMessage: 'Copy model ID' }
                 )}
-                onClick={handleCopyModelId}
-              />
+                disableScreenReaderOutput
+              >
+                <EuiButtonIcon
+                  data-test-subj="searchInferenceEndpointsAddEndpointModalCopyModelIdButton"
+                  iconType="copyClipboard"
+                  size="xs"
+                  color="text"
+                  aria-label={i18n.translate(
+                    'xpack.searchInferenceEndpoints.addEndpointModal.copyModelIdAriaLabel',
+                    { defaultMessage: 'Copy model ID' }
+                  )}
+                  onClick={handleCopyModelId}
+                />
+              </EuiToolTip>
             }
           />
         </EuiFormRow>
@@ -272,17 +288,27 @@ export const AddEndpointModal: React.FC<AddEndpointModalProps> = ({
             onChange={handleEndpointIdChange}
             readOnly={isView}
             fullWidth
+            data-test-subj="addEndpointIdField"
             prepend={
-              <EuiButtonIcon
-                iconType="copyClipboard"
-                size="xs"
-                color="text"
-                aria-label={i18n.translate(
+              <EuiToolTip
+                content={i18n.translate(
                   'xpack.searchInferenceEndpoints.addEndpointModal.copyEndpointIdAriaLabel',
                   { defaultMessage: 'Copy endpoint ID' }
                 )}
-                onClick={handleCopyEndpointId}
-              />
+                disableScreenReaderOutput
+              >
+                <EuiButtonIcon
+                  data-test-subj="searchInferenceEndpointsAddEndpointModalCopyEndpointIdButton"
+                  iconType="copyClipboard"
+                  size="xs"
+                  color="text"
+                  aria-label={i18n.translate(
+                    'xpack.searchInferenceEndpoints.addEndpointModal.copyEndpointIdAriaLabel',
+                    { defaultMessage: 'Copy endpoint ID' }
+                  )}
+                  onClick={handleCopyEndpointId}
+                />
+              </EuiToolTip>
             }
           />
         </EuiFormRow>
@@ -290,14 +316,14 @@ export const AddEndpointModal: React.FC<AddEndpointModalProps> = ({
 
       <EuiModalFooter>
         {isView ? (
-          <EuiButton onClick={onCancel}>
+          <EuiButton onClick={onCancel} data-test-subj="addEndpointModalCloseButton">
             {i18n.translate('xpack.searchInferenceEndpoints.addEndpointModal.closeButton', {
               defaultMessage: 'Close',
             })}
           </EuiButton>
         ) : (
           <>
-            <EuiButtonEmpty onClick={onCancel}>
+            <EuiButtonEmpty onClick={onCancel} data-test-subj="addEndpointModalCancelButton">
               {i18n.translate('xpack.searchInferenceEndpoints.addEndpointModal.cancelButton', {
                 defaultMessage: 'Cancel',
               })}

@@ -69,27 +69,29 @@ export async function initializeIndexTemplate({
 
   logger.debug(`Putting index template: ${dataStream.name}.`);
   // Should be idempotent
-  await retryEs(() =>
-    elasticsearchClient.indices.putIndexTemplate({
-      name: dataStream.name,
-      priority: dataStream.template.priority,
-      index_patterns: [`${dataStream.name}*`],
-      composed_of: dataStream.template.composedOf,
-      data_stream: {
-        hidden: dataStream.hidden,
-      },
-      template: {
-        aliases: dataStream.template.aliases,
-        mappings: dataStream.template.mappings,
-        lifecycle: dataStream.template.lifecycle,
-        settings: dataStream.template.settings,
-      },
-      _meta: {
-        ...dataStream.template._meta,
-        version,
-        previousVersions,
-      },
-    })
+  await retryEs(
+    () =>
+      elasticsearchClient.indices.putIndexTemplate({
+        name: dataStream.name,
+        priority: dataStream.template.priority,
+        index_patterns: [`${dataStream.name}*`],
+        composed_of: dataStream.template.composedOf,
+        data_stream: {
+          hidden: dataStream.hidden,
+        },
+        template: {
+          aliases: dataStream.template.aliases,
+          mappings: dataStream.template.mappings,
+          lifecycle: dataStream.template.lifecycle,
+          settings: dataStream.template.settings,
+        },
+        _meta: {
+          ...dataStream.template._meta,
+          version,
+          previousVersions,
+        },
+      }),
+    { logger, dataStreamName: dataStream.name }
   );
 
   // index template updated

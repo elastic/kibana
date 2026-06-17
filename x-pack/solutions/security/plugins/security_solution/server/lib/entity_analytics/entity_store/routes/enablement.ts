@@ -16,9 +16,6 @@ import type { EntityAnalyticsRoutesDeps } from '../../types';
 import { checkAndInitAssetCriticalityResources } from '../../asset_criticality/check_and_init_asset_criticality_resources';
 import { InitEntityStoreRequestBody } from '../../../../../common/api/entity_analytics/entity_store/enable.gen';
 import { checkAndInitPrivilegeMonitoringResources } from '../../privilege_monitoring/check_and_init_privmon_resources';
-import { ensurePrebuiltWatchlists } from '../../watchlists/migrations/install_prebuilt_watchlists';
-import { WatchlistConfigClient } from '../../watchlists/management/watchlist_config';
-import { getRequestSavedObjectClient } from '../../watchlists/shared/utils';
 import type { ITelemetryEventsSender } from '../../../telemetry/sender';
 import { ENTITY_STORE_API_CALL_EVENT } from '../../../telemetry/event_based/events';
 
@@ -55,18 +52,6 @@ export const enableEntityStoreRoute = (
 
         await checkAndInitAssetCriticalityResources(context, logger);
         await checkAndInitPrivilegeMonitoringResources(context, logger);
-
-        const core = await context.core;
-        const namespace = secSol.getSpaceId();
-        const soClient = getRequestSavedObjectClient(core);
-        const watchlistClient = new WatchlistConfigClient({
-          namespace,
-          soClient,
-          esClient: core.elasticsearch.client.asCurrentUser,
-          logger,
-        });
-        await ensurePrebuiltWatchlists({ watchlistClient, soClient, namespace, logger });
-
         try {
           const body: InitEntityStoreResponse = await secSol
             .getEntityStoreDataClient()

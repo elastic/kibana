@@ -21,7 +21,9 @@ import type {
 import {
   createDataCollectionFailureNotifier,
   createDataCollectorActor,
+  createFetchMoreFailureNotifier,
 } from './data_collector_actor';
+import { createFetchMoreDocumentsActor } from './fetch_more_actor';
 import type { EnrichmentDataSourceWithUIAttributes } from '../../types';
 
 export type DataSourceActorRef = ActorRefFrom<typeof dataSourceMachine>;
@@ -37,9 +39,11 @@ export const dataSourceMachine = setup({
   },
   actors: {
     collectData: getPlaceholderFor(createDataCollectorActor),
+    fetchMoreDocuments: getPlaceholderFor(createFetchMoreDocumentsActor),
   },
   actions: {
     notifyDataCollectionFailure: getPlaceholderFor(createDataCollectionFailureNotifier),
+    notifyFetchMoreFailure: getPlaceholderFor(createFetchMoreFailureNotifier),
     restorePersistedCustomSamplesDocuments: assign(({ context }) => {
       if (context.dataSource.type === 'custom-samples' && context.dataSource.storageKey) {
         const dataSource = sessionStorage.getItem(context.dataSource.storageKey);
@@ -71,7 +75,15 @@ export const dataSourceMachine = setup({
         dataSource: { ...params.dataSource, id: context.dataSource.id },
       })
     ),
-    storeData: assign((_, params: { data: SampleDocument[] }) => ({ data: params.data })),
+    storeData: assign((_, params: { data: SampleDocument[] }) => ({
+      data: params.data,
+      isFetchingMore: false,
+    })),
+    setFetchingMore: assign({ isFetchingMore: true }),
+    storeFetchMoreData: assign((_, params: { data: SampleDocument[] }) => ({
+      data: params.data,
+      isFetchingMore: false,
+    })),
     toggleDataSourceActivity: assign(({ context }) => ({
       dataSource: { ...context.dataSource, enabled: !context.dataSource.enabled },
     })),
@@ -110,7 +122,9 @@ export const dataSourceMachine = setup({
     dataSource: input.dataSource,
     streamName: input.streamName,
     streamType: input.streamType,
-    simulationMode: getSimulationModeByDataSourceType(input.dataSource.type),
+    simulationMode: getSimulationModeByDataSourceType(input.dataSource.type, input.isDraft),
+    isDraft: input.isDraft,
+    isFetchingMore: false,
   }),
   initial: 'determining',
   states: {
@@ -130,6 +144,11 @@ export const dataSourceMachine = setup({
           ],
         },
         'dataSource.refresh': { target: '.loadingData', reenter: true },
+        'dataSource.fetchMore': {
+          target: '.fetchingMore',
+          reenter: true,
+          actions: [{ type: 'setFetchingMore' }],
+        },
         'dataSource.change': [
           // For custom samples with substantive changes, debounce before collecting
           {
@@ -176,6 +195,7 @@ export const dataSourceMachine = setup({
               dataSource: context.dataSource,
               streamName: context.streamName,
               streamType: context.streamType,
+              isDraft: context.isDraft,
             }),
             onSnapshot: {
               guard: {
@@ -198,6 +218,44 @@ export const dataSourceMachine = setup({
                 { type: 'notifyParent', params: { eventType: 'dataSource.dataChange' } },
                 { type: 'notifyDataCollectionFailure' },
               ],
+            },
+          },
+        },
+        fetchingMore: {
+          invoke: {
+            id: 'fetchMoreDocumentsActor',
+            src: 'fetchMoreDocuments',
+            input: ({ context, event }) => {
+              const fetchMoreEvent = event as Extract<
+                typeof event,
+                { type: 'dataSource.fetchMore' }
+              >;
+              return {
+                conditionEsql: fetchMoreEvent.conditionEsql,
+                processingSteps: fetchMoreEvent.processingSteps,
+                existingDocuments: context.data,
+                dataSource: context.dataSource,
+                streamName: context.streamName,
+                isDraft: context.isDraft,
+              };
+            },
+            onSnapshot: {
+              guard: {
+                type: 'isValidData',
+                params: ({ event }) => ({ data: event.snapshot.context }),
+              },
+              target: 'idle',
+              actions: [
+                {
+                  type: 'storeFetchMoreData',
+                  params: ({ event }) => ({ data: event.snapshot.context ?? [] }),
+                },
+                { type: 'notifyParent', params: { eventType: 'dataSource.dataChange' } },
+              ],
+            },
+            onError: {
+              target: 'idle',
+              actions: [{ type: 'notifyFetchMoreFailure' }],
             },
           },
         },
@@ -238,18 +296,31 @@ export const createDataSourceMachineImplementations = ({
   toasts,
   telemetryClient,
   streamsRepositoryClient,
+  uiSettings,
 }: DataSourceMachineDeps): MachineImplementationsFrom<typeof dataSourceMachine> => ({
   actors: {
-    collectData: createDataCollectorActor({ data, telemetryClient, streamsRepositoryClient }),
+    collectData: createDataCollectorActor({
+      data,
+      telemetryClient,
+      streamsRepositoryClient,
+      uiSettings,
+    }),
+    fetchMoreDocuments: createFetchMoreDocumentsActor({ data, streamsRepositoryClient }),
   },
   actions: {
     notifyDataCollectionFailure: createDataCollectionFailureNotifier({ toasts }),
+    notifyFetchMoreFailure: createFetchMoreFailureNotifier({ toasts }),
   },
 });
 
 const getSimulationModeByDataSourceType = (
-  dataSourceType: EnrichmentDataSourceWithUIAttributes['type']
+  dataSourceType: EnrichmentDataSourceWithUIAttributes['type'],
+  isDraft?: boolean
 ): DataSourceSimulationMode => {
+  // Draft streams have no ingest pipeline, so samples are always unprocessed.
+  // All processors must be included in the simulation regardless of data source type.
+  if (isDraft) return 'complete';
+
   switch (dataSourceType) {
     case 'latest-samples':
       return 'partial';

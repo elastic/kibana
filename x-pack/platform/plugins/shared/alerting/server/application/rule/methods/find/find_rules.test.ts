@@ -66,6 +66,7 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   minimumScheduleInterval: { value: '1m', enforce: false },
   getUserName: jest.fn(),
   createAPIKey: jest.fn(),
+  cloneAPIKey: jest.fn(),
   logger: loggingSystemMock.create().get(),
   internalSavedObjectsRepository,
   encryptedSavedObjectsClient: encryptedSavedObjects,
@@ -202,6 +203,7 @@ describe('find()', () => {
                 "uuid": 100,
               },
             ],
+            "activeSnoozes": undefined,
             "alertTypeId": "myType",
             "artifacts": Object {
               "dashboards": Array [],
@@ -215,6 +217,7 @@ describe('find()', () => {
               "status": "pending",
             },
             "id": "1",
+            "isSnoozedUntil": null,
             "name": "fakeRuleName",
             "notifyWhen": "onActiveAlert",
             "params": Object {
@@ -323,6 +326,7 @@ describe('find()', () => {
                 "uuid": undefined,
               },
             ],
+            "activeSnoozes": undefined,
             "alertTypeId": "myType",
             "artifacts": Object {
               "dashboards": Array [],
@@ -336,6 +340,7 @@ describe('find()', () => {
               "status": "pending",
             },
             "id": "1",
+            "isSnoozedUntil": null,
             "notifyWhen": "onActiveAlert",
             "params": Object {
               "bar": true,
@@ -434,6 +439,7 @@ describe('find()', () => {
                 "uuid": undefined,
               },
             ],
+            "activeSnoozes": undefined,
             "alertTypeId": "myType",
             "artifacts": Object {
               "dashboards": Array [],
@@ -447,6 +453,7 @@ describe('find()', () => {
               "status": "pending",
             },
             "id": "1",
+            "isSnoozedUntil": null,
             "notifyWhen": "onActiveAlert",
             "params": Object {
               "bar": true,
@@ -508,7 +515,6 @@ describe('find()', () => {
         searchFields: ['params.risk_score', 'params.severity'],
         filter: 'alert.attributes.params.risk_score > 50',
       },
-      excludeFromPublicApi: true,
     });
 
     const findCallParams = unsecuredSavedObjectsClient.find.mock.calls[0][0];
@@ -728,6 +734,7 @@ describe('find()', () => {
                 "uuid": undefined,
               },
             ],
+            "activeSnoozes": undefined,
             "alertTypeId": "myType",
             "artifacts": Object {
               "dashboards": Array [],
@@ -741,6 +748,7 @@ describe('find()', () => {
               "status": "pending",
             },
             "id": "1",
+            "isSnoozedUntil": null,
             "notifyWhen": "onActiveAlert",
             "params": Object {
               "bar": true,
@@ -764,6 +772,7 @@ describe('find()', () => {
                 "uuid": undefined,
               },
             ],
+            "activeSnoozes": undefined,
             "alertTypeId": "123",
             "artifacts": Object {
               "dashboards": Array [],
@@ -777,6 +786,7 @@ describe('find()', () => {
               "status": "pending",
             },
             "id": "2",
+            "isSnoozedUntil": null,
             "notifyWhen": "onActiveAlert",
             "params": Object {
               "bar": true,
@@ -1046,6 +1056,7 @@ describe('find()', () => {
           "data": Array [
             Object {
               "actions": Array [],
+              "activeSnoozes": undefined,
               "artifacts": Object {
                 "dashboards": Array [],
                 "investigation_guide": Object {
@@ -1053,6 +1064,7 @@ describe('find()', () => {
                 },
               },
               "id": "1",
+              "isSnoozedUntil": null,
               "notifyWhen": undefined,
               "params": undefined,
               "schedule": undefined,
@@ -1184,6 +1196,167 @@ describe('find()', () => {
     });
   });
 
+  describe('searchAfter and aggregations', () => {
+    const sampleSavedObjectHit = {
+      id: '1',
+      type: RULE_SAVED_OBJECT_TYPE,
+      attributes: {
+        name: 'fakeRuleName',
+        alertTypeId: 'myType',
+        schedule: { interval: '10s' },
+        params: {
+          bar: true,
+        },
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        executionStatus: {
+          status: 'pending',
+          lastExecutionDate: new Date('2019-02-12T21:01:22.479Z'),
+        },
+        notifyWhen: 'onActiveAlert',
+        actions: [
+          {
+            actionTypeId: 'test-action-id',
+            group: 'default',
+            actionRef: 'action_0',
+            params: {
+              foo: true,
+            },
+            uuid: 100,
+          },
+        ],
+      },
+      score: 1,
+      references: [
+        {
+          name: 'action_0',
+          type: 'action',
+          id: '1',
+        },
+      ],
+    };
+
+    test('forwards searchAfter and aggs to the saved objects client', async () => {
+      unsecuredSavedObjectsClient.find.mockReset();
+      unsecuredSavedObjectsClient.find.mockResolvedValueOnce({
+        total: 1,
+        per_page: 10,
+        page: 1,
+        saved_objects: [sampleSavedObjectHit],
+      });
+
+      const searchAfter = [123, 'rule-cursor'];
+      const aggs = {
+        facet_tags: { terms: { field: 'alert.attributes.tags', size: 10 } },
+      };
+
+      const rulesClient = new RulesClient(rulesClientParams);
+      await rulesClient.find({
+        options: {
+          searchAfter,
+          aggs,
+        },
+      });
+
+      expect(unsecuredSavedObjectsClient.find).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: RULE_SAVED_OBJECT_TYPE,
+          searchAfter,
+          aggs,
+        })
+      );
+    });
+
+    test('sets searchAfter from the last saved object sort values', async () => {
+      unsecuredSavedObjectsClient.find.mockReset();
+      unsecuredSavedObjectsClient.find.mockResolvedValueOnce({
+        total: 2,
+        per_page: 10,
+        page: 1,
+        saved_objects: [
+          { ...sampleSavedObjectHit, sort: ['first-page-cursor'] },
+          {
+            ...sampleSavedObjectHit,
+            id: '2',
+            sort: [1672531200000, 'id-2'],
+          },
+        ],
+      });
+
+      const rulesClient = new RulesClient(rulesClientParams);
+      const result = await rulesClient.find({ options: {} });
+
+      expect(result.searchAfter).toEqual([1672531200000, 'id-2']);
+    });
+
+    test('omits searchAfter when saved_objects is empty', async () => {
+      unsecuredSavedObjectsClient.find.mockReset();
+      unsecuredSavedObjectsClient.find.mockResolvedValueOnce({
+        total: 0,
+        per_page: 10,
+        page: 1,
+        saved_objects: [],
+      });
+
+      const rulesClient = new RulesClient(rulesClientParams);
+      const result = await rulesClient.find({ options: {} });
+
+      expect(result.data).toEqual([]);
+      expect(result).not.toHaveProperty('searchAfter');
+    });
+
+    test('omits searchAfter when the last hit has no sort property', async () => {
+      unsecuredSavedObjectsClient.find.mockReset();
+      unsecuredSavedObjectsClient.find.mockResolvedValueOnce({
+        total: 1,
+        per_page: 10,
+        page: 1,
+        saved_objects: [sampleSavedObjectHit],
+      });
+
+      const rulesClient = new RulesClient(rulesClientParams);
+      const result = await rulesClient.find({ options: {} });
+
+      expect(result).not.toHaveProperty('searchAfter');
+    });
+
+    test('passes aggregations through when returned by the saved objects client', async () => {
+      unsecuredSavedObjectsClient.find.mockReset();
+      const aggregations = {
+        facet_tags: {
+          buckets: [{ key: 'env', doc_count: 3 }],
+        },
+      };
+      unsecuredSavedObjectsClient.find.mockResolvedValueOnce({
+        total: 1,
+        per_page: 10,
+        page: 1,
+        aggregations,
+        saved_objects: [sampleSavedObjectHit],
+      });
+
+      const rulesClient = new RulesClient(rulesClientParams);
+      const result = await rulesClient.find({ options: {} });
+
+      expect(result.aggregations).toEqual(aggregations);
+    });
+
+    test('omits aggregations when the saved objects client returns none', async () => {
+      unsecuredSavedObjectsClient.find.mockReset();
+      unsecuredSavedObjectsClient.find.mockResolvedValueOnce({
+        total: 1,
+        per_page: 10,
+        page: 1,
+        saved_objects: [sampleSavedObjectHit],
+      });
+
+      const rulesClient = new RulesClient(rulesClientParams);
+      const result = await rulesClient.find({ options: {} });
+
+      expect(result).not.toHaveProperty('aggregations');
+    });
+  });
+
   describe('legacy actions migration for SIEM', () => {
     test('should call formatLegacyActions', async () => {
       const rulesClient = new RulesClient(rulesClientParams);
@@ -1298,6 +1471,7 @@ describe('find()', () => {
                   "uuid": 100,
                 },
               ],
+              "activeSnoozes": undefined,
               "alertTypeId": "myType",
               "artifacts": Object {
                 "dashboards": Array [
@@ -1315,6 +1489,7 @@ describe('find()', () => {
                 "status": "pending",
               },
               "id": "1",
+              "isSnoozedUntil": null,
               "name": "fakeRuleName",
               "notifyWhen": "onActiveAlert",
               "params": Object {

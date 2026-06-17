@@ -21,8 +21,7 @@ import {
   normalizeKeywordList,
 } from '../fixtures/helpers';
 
-// Failing: See https://github.com/elastic/kibana/issues/256862
-apiTest.describe.skip('Entity Store History Snapshot', { tag: ENTITY_STORE_TAGS }, () => {
+apiTest.describe('Entity Store History Snapshot', { tag: ENTITY_STORE_TAGS }, () => {
   let defaultHeaders: Record<string, string>;
   let internalHeaders: Record<string, string>;
 
@@ -141,11 +140,11 @@ apiTest.describe.skip('Entity Store History Snapshot', { tag: ENTITY_STORE_TAGS 
         expect(historyHit).toBeDefined();
         const historyEntity = historyHit!._source!.entity as Record<string, unknown>;
         const historyBehaviors = historyEntity.behaviors as Record<string, unknown> | undefined;
-        expect(normalizeKeywordList(historyBehaviors?.rule_names)).toStrictEqual(
-          expectedBehavior.rule_names
+        expect(normalizeKeywordList(historyBehaviors?.rule_names).sort()).toStrictEqual(
+          [...expectedBehavior.rule_names].sort()
         );
-        expect(normalizeKeywordList(historyBehaviors?.anomaly_job_ids)).toStrictEqual(
-          expectedBehavior.anomaly_job_ids
+        expect(normalizeKeywordList(historyBehaviors?.anomaly_job_ids).sort()).toStrictEqual(
+          [...expectedBehavior.anomaly_job_ids].sort()
         );
 
         const latestHit = latestHits.find(

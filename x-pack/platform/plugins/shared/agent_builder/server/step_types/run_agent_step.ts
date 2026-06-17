@@ -10,6 +10,7 @@ import {
   isConversationCreatedEvent,
   isConversationUpdatedEvent,
   isRoundCompleteEvent,
+  AgentExecutionMode,
 } from '@kbn/agent-builder-common';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import { firstValueFrom, toArray } from 'rxjs';
@@ -36,6 +37,8 @@ export const getRunAgentStepDefinition = (serviceManager: ServiceManager) => {
           'connector-id': connectorIdRaw,
           'inference-id': inferenceIdRaw,
           'create-conversation': createConversation,
+          'plugin-id': pluginId,
+          'aggregate-by': aggregateBy,
         } = context.config;
 
         context.logger.debug('ai.agent step started');
@@ -62,6 +65,7 @@ export const getRunAgentStepDefinition = (serviceManager: ServiceManager) => {
         });
 
         const { events$ } = await executionService.executeAgent({
+          mode: AgentExecutionMode.conversation,
           request,
           abortSignal: context.abortSignal,
           params: {
@@ -76,6 +80,7 @@ export const getRunAgentStepDefinition = (serviceManager: ServiceManager) => {
               message,
               attachments,
             },
+            ...(pluginId ? { telemetryMetadata: { pluginId, aggregateBy } } : {}),
           },
           // workflows already run as scheduled tasks
           useTaskManager: false,

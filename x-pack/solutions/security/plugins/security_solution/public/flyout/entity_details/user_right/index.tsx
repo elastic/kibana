@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { memo, useCallback, useMemo } from 'react';
 import type { FlyoutPanelProps } from '@kbn/expandable-flyout';
 import { useHasMisconfigurations } from '@kbn/cloud-security-posture/src/hooks/use_has_misconfigurations';
 import { TableId } from '@kbn/securitysolution-data-table';
 import { FF_ENABLE_ENTITY_STORE_V2, useEntityStoreEuidApi } from '@kbn/entity-store/public';
 import { EuiSpacer } from '@elastic/eui';
+import { useAssetCriticalityPrivileges } from '../../../entity_analytics/components/asset_criticality/use_asset_criticality';
 import { useUpdateAssetCriticality } from '../../../entity_analytics/api/hooks/use_update_asset_criticality';
 import { buildEuidCspPreviewOptions } from '../../../cloud_security_posture/utils/build_euid_csp_preview_options';
 import { buildUserNamesFilter, type RiskSeverity } from '../../../../common/search_strategy';
@@ -81,17 +82,17 @@ const FIRST_RECORD_PAGINATION = {
   querySize: 1,
 };
 
-export const UserPanel = ({
+export const UserPanel = memo(function UserPanel({
   contextID,
   scopeId,
   isPreviewMode = false,
   userName,
   entityId: entityIdProp,
-}: UserPanelProps) => {
+}: UserPanelProps) {
   const { uiSettings } = useKibana().services;
   const euidApi = useEntityStoreEuidApi();
   const assetInventoryEnabled = uiSettings.get(ENABLE_ASSET_INVENTORY_SETTING, true);
-  const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2, false);
+  const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2);
 
   const safeContextID = contextID ?? scopeId ?? 'user-panel';
 
@@ -138,6 +139,8 @@ export const UserPanel = ({
     [entityIdProp, entityStoreV2Enabled, observedUser.entityRecord?.entity?.id]
   );
 
+  const assetCriticalityPrivileges = useAssetCriticalityPrivileges(entityIdProp ?? userName);
+
   const riskScoreState = useRiskScore({
     riskEntity: EntityType.user,
     filterQuery: userNameFilterQuery,
@@ -179,6 +182,7 @@ export const UserPanel = ({
   const { hasNonClosedAlerts } = useNonClosedAlerts({
     identityFields: documentEntityIdentifiers,
     entityType: EntityType.user,
+    entityRecord: entityStoreV2Enabled ? entityFromStoreResult.entityRecord : undefined,
     to,
     from,
     queryId: `${DETECTION_RESPONSE_ALERTS_BY_STATUS_ID}USER_NAME_RIGHT`,
@@ -229,10 +233,11 @@ export const UserPanel = ({
 
   const effectiveRiskScoreState = riskScoreStateFromStore ?? riskScoreState;
 
-  const onCriticalitySave = entityFromStoreResult.entityRecord
-    ? (level: CriticalityLevelWithUnassigned) =>
-        updateAssetCriticalityLevel(level, entityFromStoreResult.entityRecord)
-    : undefined;
+  const onCriticalitySave =
+    !!assetCriticalityPrivileges.data?.has_write_permissions && entityFromStoreResult.entityRecord
+      ? (level: CriticalityLevelWithUnassigned) =>
+          updateAssetCriticalityLevel(level, entityFromStoreResult.entityRecord)
+      : undefined;
 
   const defaultTab = useMemo(() => {
     if (isRiskScoreExist) return EntityDetailsLeftPanelTab.RISK_INPUTS;
@@ -348,6 +353,6 @@ export const UserPanel = ({
       )}
     </>
   );
-};
+});
 
 UserPanel.displayName = 'UserPanel';

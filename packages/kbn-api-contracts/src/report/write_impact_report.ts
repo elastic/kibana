@@ -20,6 +20,8 @@ export const writeImpactReport = (
       path: impact.change.path,
       method: impact.change.method,
       reason: impact.change.reason,
+      oasdiffId: impact.change.oasdiffId,
+      source: impact.change.source,
       terraformResource: impact.terraformResource,
       owners: impact.owners,
     })),

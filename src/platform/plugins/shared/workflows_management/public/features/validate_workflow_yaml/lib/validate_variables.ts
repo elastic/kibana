@@ -15,7 +15,10 @@ import type { WorkflowYaml } from '@kbn/workflows';
 import type { WorkflowGraph } from '@kbn/workflows/graph';
 import { validateVariable } from './validate_variable';
 import { getContextSchemaWithTemplateLocals } from '../../workflow_context/lib/extend_context_with_template_locals';
-import { getContextSchemaForStep } from '../../workflow_context/lib/get_context_for_path';
+import {
+  extendWithPathSpecificContext,
+  getContextSchemaForStep,
+} from '../../workflow_context/lib/get_context_for_path';
 import { getNearestStepPath } from '../../workflow_context/lib/get_nearest_step_path';
 import { getWorkflowContextSchema } from '../../workflow_context/lib/get_workflow_context_schema';
 import type { VariableItem, YamlValidationResult } from '../model/types';
@@ -75,9 +78,18 @@ export function validateVariables(
         stepSchemaCache.set(cacheKey, stepSchema);
       }
 
+      stepSchema = nearestStepPath
+        ? extendWithPathSpecificContext(stepSchema, nearestStep, path.slice(nearestStepPath.length))
+        : stepSchema;
+
       const variableOffset = offset ?? fallbackForOffsetValue(variableItem, yamlDocument, model);
       if (yamlDocument != null && variableOffset !== undefined) {
-        context = getContextSchemaWithTemplateLocals(yamlDocument, variableOffset, stepSchema);
+        context = getContextSchemaWithTemplateLocals(
+          yamlDocument,
+          variableOffset,
+          stepSchema,
+          model?.getValue()
+        );
       } else {
         context = stepSchema;
       }

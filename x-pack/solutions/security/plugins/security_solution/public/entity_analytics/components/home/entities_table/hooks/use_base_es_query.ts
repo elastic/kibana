@@ -48,6 +48,9 @@ export const useBaseEsQuery = ({ filters = [], query, pageFilters = [] }: Entiti
     uiSettings,
   } = useKibana().services;
   const { dataView } = useContext(DataViewContext);
+  // The Entity Analytics home page intentionally hides the global date picker;
+  // the entities table shows all entities in the latest index regardless of
+  // time range. KQL and pinned filters from the global filter bar still apply.
   const { filterQuery: globalFilterQuery } = useGlobalFilterQuery();
   const allowLeadingWildcards = uiSettings.get('query:allowLeadingWildcards');
   const config: EsQueryConfig = useMemo(() => ({ allowLeadingWildcards }), [allowLeadingWildcards]);

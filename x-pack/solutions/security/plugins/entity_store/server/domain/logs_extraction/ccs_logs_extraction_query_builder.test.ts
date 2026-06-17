@@ -51,6 +51,28 @@ describe('buildCcsLogsExtractionEsqlQuery', () => {
     await expect(validateQuery(query)).resolves.toHaveProperty('errors', []);
   });
 
+  it('generates expected query with log-slice cursor bounds', async () => {
+    const query = buildCcsLogsExtractionEsqlQuery({
+      indexPatterns: ['remote:logs-*'],
+      entityDefinition: getEntityDefinition('host', 'default'),
+      fromDateISO: '2022-01-01T00:00:00.000Z',
+      toDateISO: '2022-01-01T23:59:59.999Z',
+      docsLimit: 10000,
+      logsPageCursorStart: {
+        timestampCursor: '2022-01-01T06:00:00.000Z',
+      },
+      logsPageCursorEnd: {
+        timestampCursor: '2022-01-01T12:00:00.000Z',
+      },
+    });
+    // Start filter: inclusive lower bound on @timestamp
+    expect(query).toContain('2022-01-01T06:00:00.000Z');
+    // End filter: inclusive upper bound on @timestamp
+    expect(query).toContain('2022-01-01T12:00:00.000Z');
+    expect(query).toMatchSnapshot();
+    await expect(validateQuery(query)).resolves.toHaveProperty('errors', []);
+  });
+
   it('inserts whenConditionTrueSetFieldsAfterStats EVAL after STATS and before KEEP without recent. prefix', () => {
     const base = getEntityDefinition('host', 'default');
     const query = buildCcsLogsExtractionEsqlQuery({

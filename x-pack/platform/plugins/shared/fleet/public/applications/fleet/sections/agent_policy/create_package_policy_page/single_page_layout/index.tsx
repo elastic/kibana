@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useCallback, useEffect, useMemo, useState, Suspense } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState, Suspense } from 'react';
 import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -42,6 +42,7 @@ import {
 } from '../../../../../../../common/services';
 import type { NewAgentPolicy, PackagePolicyEditExtensionComponentProps } from '../../../../types';
 import { SetupTechnology } from '../../../../types';
+import { getAgentlessRelease } from '../../../../../../../common/services/agentless_policy_helper';
 import {
   sendGetAgentStatus,
   useConfig,
@@ -81,10 +82,12 @@ import {
   computeDefaultVarGroupSelections,
   type VarGroupSelection,
 } from '../services/var_group_helpers';
+import { applyNamespaceCustomizationChange } from '../services/apply_namespace_customization';
 
 import { generateNewAgentPolicyWithDefaults } from '../../../../../../../common/services/generate_new_agent_policy';
 
 import { packageHasAtLeastOneSecret } from '../utils';
+import { CreatePackagePolicyFormProvider } from '../contexts/create_package_policy_form_context';
 
 import { SetupTechnologySelector } from '../../../../../../services/setup_technology_selector';
 
@@ -102,6 +105,7 @@ import { useAgentless } from './hooks/setup_technology';
 
 export const StepsWithLessPadding = styled(EuiSteps)`
   .euiStep__content {
+    padding-top: ${(props) => props.theme.eui.euiSizeXS};
     padding-bottom: ${(props) => props.theme.eui.euiSizeM};
   }
 
@@ -133,7 +137,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
   } = useConfig();
   const hasFleetAddAgentsPrivileges = useAuthz().fleet.addAgents;
   const fleetStatus = useFleetStatus();
-  const { docLinks } = useStartServices();
+  const { docLinks, notifications } = useStartServices();
   const spaceSettings = useSpaceSettingsContext();
   const [newAgentPolicy, setNewAgentPolicy] = useState<NewAgentPolicy>(
     generateNewAgentPolicyWithDefaults({
@@ -219,6 +223,8 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
     selectedSetupTechnology,
     defaultSetupTechnology,
     isAgentlessSelected,
+    createDatasetTemplates,
+    setCreateDatasetTemplates,
   } = useOnSubmit({
     agentCount,
     packageInfo,
@@ -287,6 +293,40 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
     },
     [setSelectedPolicyTab, setPolicyValidation, newAgentPolicy]
   );
+
+  // Namespace-level customization. Toggle state lives inside StepDefinePackagePolicy's hook;
+  // the parent only tracks the latest value via ref for the deferred post-save update.
+  const installedNamespaceCustomizationEnabledFor = useMemo(() => {
+    if (packageInfo && 'installationInfo' in packageInfo) {
+      return packageInfo.installationInfo?.namespace_customization_enabled_for ?? [];
+    }
+    return [];
+  }, [packageInfo]);
+  const namespaceCustomizationEnabledRef = useRef<boolean>(false);
+  const namespaceCustomizationAppliedRef = useRef<string | undefined>(undefined);
+
+  // After policy save: sync the package's namespace_customization_enabled_for list (deferred update).
+  useEffect(() => {
+    if (!savedPackagePolicy || !packageInfo) {
+      return;
+    }
+    if (namespaceCustomizationAppliedRef.current === savedPackagePolicy.id) {
+      return;
+    }
+    namespaceCustomizationAppliedRef.current = savedPackagePolicy.id;
+    // Capture and reset the toggle value so stale state doesn't carry over if the form is reused.
+    const wasEnabled = namespaceCustomizationEnabledRef.current;
+    namespaceCustomizationEnabledRef.current = false;
+    void applyNamespaceCustomizationChange(
+      packageInfo.name,
+      packageInfo.version,
+      savedPackagePolicy.namespace,
+      wasEnabled,
+      installedNamespaceCustomizationEnabledFor,
+      notifications,
+      packageInfo.title ?? packageInfo.name
+    );
+  }, [savedPackagePolicy, packageInfo, installedNamespaceCustomizationEnabledFor, notifications]);
 
   // Retrieve agent count
   const agentPolicyIds = agentPolicies.map((policy) => policy.id);
@@ -383,6 +423,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
     selectedPolicyTab,
     withSysMonitoring,
     packageInfo,
+    createDatasetTemplates,
   });
 
   const layoutProps = useMemo(
@@ -473,7 +514,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
       "'package-policy-create' and 'package-policy-replace-define-step' cannot both be registered as UI extensions"
     );
   }
-  const { getAgentlessStatusForPackage, isAgentlessDefault } = useAgentless();
+  const { getAgentlessStatusForPackage } = useAgentless();
   const { isAgentless, isDefaultDeploymentMode } = getAgentlessStatusForPackage(packageInfo);
   const enableSimplifiedAgentlessUX = ExperimentalFeaturesService.get().enableSimplifiedAgentlessUX;
 
@@ -506,6 +547,8 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
 
   const setupTechnologySelector = useMemo(() => {
     if (!addIntegrationFlyoutProps && isAgentless && packageInfo) {
+      const release = getAgentlessRelease(packageInfo, integrationToEnable);
+      const showBetaBadge = release !== undefined && release !== 'ga';
       return (
         <SetupTechnologySelector
           disabled={false}
@@ -514,7 +557,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
           setupTechnology={selectedSetupTechnology}
           onSetupTechnologyChange={handleSetupTechnologyChange}
           isAgentlessDefault={isDefaultDeploymentMode}
-          showBetaBadge={!isAgentlessDefault}
+          showBetaBadge={showBetaBadge}
           useDescribedFormGroup={!useCheckableCardsForSetupTechnologySelector}
           useCheckableCards={useCheckableCardsForSetupTechnologySelector}
           hideTitle={useCheckableCardsForSetupTechnologySelector}
@@ -526,11 +569,11 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
     useCheckableCardsForSetupTechnologySelector,
     isAgentless,
     isDefaultDeploymentMode,
+    integrationToEnable,
     addIntegrationFlyoutProps,
     allowedSetupTechnologies,
     selectedSetupTechnology,
     handleSetupTechnologyChange,
-    isAgentlessDefault,
     packageInfo,
   ]);
 
@@ -539,7 +582,9 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
       isPackageInfoLoading || !isInitialized ? (
         <Loading />
       ) : packageInfo ? (
-        <>
+        <CreatePackagePolicyFormProvider
+          value={{ createDatasetTemplates, setCreateDatasetTemplates }}
+        >
           <StepDefinePackagePolicy
             namespacePlaceholder={getInheritedNamespace(
               agentPolicies,
@@ -551,6 +596,10 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
             validationResults={validationResults}
             submitAttempted={formState === 'INVALID'}
             isAgentlessSelected={isAgentlessSelected}
+            agentPolicies={agentPolicies}
+            onNamespaceCustomizationEnabledChange={(enabled) => {
+              namespaceCustomizationEnabledRef.current = enabled;
+            }}
           />
 
           {/* Show SetupTechnologySelector for all agentless integrations, including extension views, if agentless is default display as a separate step  */}
@@ -579,7 +628,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
               />
             </ExtensionWrapper>
           )}
-        </>
+        </CreatePackagePolicyFormProvider>
       ) : (
         <div />
       ),
@@ -600,6 +649,8 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
       varGroupSelections,
       setupTechnologySelector,
       useCheckableCardsForSetupTechnologySelector,
+      createDatasetTemplates,
+      setCreateDatasetTemplates,
     ]
   );
 

@@ -34,7 +34,7 @@ describe('buildMetricsInfoQuery', () => {
 
   it('add WHERE dimension filter when multiple dimension names', () => {
     expect(buildMetricsInfoQuery('TS INDEX', ['environment', 'station.name'])).toBe(
-      `TS INDEX\n| WHERE \`environment\` IS NOT NULL AND \`station.name\` IS NOT NULL | METRICS_INFO`
+      `TS INDEX\n| WHERE TO_STRING(\`environment\`) IS NOT NULL AND TO_STRING(\`station.name\`) IS NOT NULL | METRICS_INFO`
     );
   });
 
@@ -42,7 +42,7 @@ describe('buildMetricsInfoQuery', () => {
     expect(
       buildMetricsInfoQuery('TS INDEX | WHERE region == eu', ['environment', 'station.name'])
     ).toBe(
-      'TS INDEX | WHERE region == eu\n| WHERE `environment` IS NOT NULL AND `station.name` IS NOT NULL | METRICS_INFO'
+      'TS INDEX | WHERE region == eu\n| WHERE TO_STRING(`environment`) IS NOT NULL AND TO_STRING(`station.name`) IS NOT NULL | METRICS_INFO'
     );
   });
 
@@ -75,7 +75,7 @@ describe('buildMetricsInfoQuery', () => {
         ['environment', 'station.name']
       )
     ).toBe(
-      `FROM metrics-* | WHERE timestamp > now - 1h\n| WHERE \`environment\` IS NOT NULL AND \`station.name\` IS NOT NULL | METRICS_INFO | LIMIT 100`
+      `FROM metrics-* | WHERE timestamp > now - 1h\n| WHERE TO_STRING(\`environment\`) IS NOT NULL AND TO_STRING(\`station.name\`) IS NOT NULL | METRICS_INFO | LIMIT 100`
     );
   });
 });

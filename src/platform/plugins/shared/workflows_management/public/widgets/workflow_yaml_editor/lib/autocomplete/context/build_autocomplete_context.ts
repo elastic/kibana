@@ -12,13 +12,15 @@ import { isScalar } from 'yaml';
 import type { monaco } from '@kbn/monaco';
 import type { WorkflowYaml } from '@kbn/workflows';
 import { DynamicStepContextSchema } from '@kbn/workflows';
+import { getPathAtOffset } from '@kbn/workflows/common/utils/yaml';
+import { getSchemaAtPath } from '@kbn/workflows/common/utils/zod/get_schema_at_path';
 import type { WorkflowGraph } from '@kbn/workflows/graph';
+import type { LineParseResult } from '@kbn/workflows-yaml';
+import { parseLineForCompletion } from '@kbn/workflows-yaml';
 import type { z } from '@kbn/zod/v4';
 import type { AutocompleteContext } from './autocomplete.types';
 import { getFocusedYamlPair } from './get_focused_yaml_pair';
 import { isInsideLiquidBlock } from './liquid_utils';
-import type { LineParseResult } from './parse_line_for_completion';
-import { parseLineForCompletion } from './parse_line_for_completion';
 import {
   getTriggerConditionBlockIndex,
   isInScheduledTriggerWithBlock,
@@ -27,10 +29,9 @@ import {
   isInWorkflowInputsByPosition,
   isInWorkflowInputsPath,
 } from './triggers_utils';
-import { getPathAtOffset } from '../../../../../../common/lib/yaml';
-import { getSchemaAtPath } from '../../../../../../common/lib/zod';
 import type { StepInfo, WorkflowDetailState } from '../../../../../entities/workflows/store';
 import { getContextSchemaForPath } from '../../../../../features/workflow_context/lib/get_context_for_path';
+import { findEsqlRegionContainingCursor } from '../../esql_validation/extract_esql_region';
 import { getRegisteredTriggerConditionDefinition } from '../get_registered_trigger_condition_definition';
 
 function buildCompletionInsertRange(
@@ -61,7 +62,8 @@ function resolveContextSchemaForAutocomplete(
   path: (string | number)[],
   yamlDocument: Document,
   absoluteOffset: number,
-  lineParseResult: LineParseResult | null
+  lineParseResult: LineParseResult | null,
+  yamlSource: string
 ): { contextSchema: z.ZodType; contextScopedToPath: string | null } {
   let contextSchema: z.ZodType = DynamicStepContextSchema;
   let contextScopedToPath: string | null = null;
@@ -72,7 +74,8 @@ function resolveContextSchemaForAutocomplete(
       workflowGraph,
       path,
       yamlDocument,
-      absoluteOffset
+      absoluteOffset,
+      yamlSource
     );
   }
 
@@ -148,13 +151,15 @@ export function buildAutocompleteContext({
   const lineUpToCursor = line.substring(0, position.column - 1);
   const parseResult = parseLineForCompletion(lineUpToCursor);
 
+  const yamlSource = model.getValue();
   const { contextSchema, contextScopedToPath } = resolveContextSchemaForAutocomplete(
     workflowDefinition,
     workflowGraph,
     path,
     yamlDocument,
     absoluteOffset,
-    parseResult
+    parseResult,
+    yamlSource
   );
 
   // Check if we're actually inside a liquid block
@@ -166,6 +171,10 @@ export function buildAutocompleteContext({
 
   const { isInTriggerConditionField, triggerConditionDefinition } =
     resolveTriggerConditionAutocomplete(path, yamlDocument);
+
+  const esqlRegion = findEsqlRegionContainingCursor(model.getValue(), absoluteOffset, path);
+  const esqlOffsetInQuery =
+    esqlRegion !== null ? absoluteOffset - esqlRegion.contentStartInFile : null;
 
   return {
     // what triggered the completion
@@ -200,6 +209,9 @@ export function buildAutocompleteContext({
     isInStepsContext: isInStepsContext(path),
     isInWorkflowInputsContext:
       isInWorkflowInputsPath(path) || isInWorkflowInputsByPosition(focusedStepInfo, absoluteOffset),
+    isInEsqlQueryField: esqlRegion !== null,
+    esqlRegion,
+    esqlOffsetInQuery,
 
     // dynamic connector types
     dynamicConnectorTypes: currentDynamicConnectorTypes ?? null,
@@ -208,6 +220,7 @@ export function buildAutocompleteContext({
       totalWorkflows: 0,
     },
     currentWorkflowId: editorState?.workflow?.id ?? null,
+    isCurrentWorkflowManaged: editorState?.workflow?.managed === true,
     workflowDefinition: workflowDefinition ?? null,
   };
 }

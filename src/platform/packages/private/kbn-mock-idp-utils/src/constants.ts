@@ -10,6 +10,12 @@
 export const MOCK_IDP_LOGIN_PATH = '/mock_idp/login';
 export const MOCK_IDP_LOGOUT_PATH = '/mock_idp/logout';
 
+// Fixed placeholder used as the SP entity ID / ACS / logout base URL in the ES SAML realm and
+// embedded in the IdP metadata + SAML response. The mock IdP plugin rewrites IdP-bound redirects
+// from this base to the actual Kibana URL at runtime (see `onPreResponse` in the plugin), so this
+// value does not need to match where Kibana is actually served from.
+export const MOCK_IDP_SP_BASE_URL = `http://localhost:5601`;
+
 // These are the values that dev UIAM service is configured with (openssl rand 32 | base64).
 export const MOCK_IDP_UIAM_SIGNING_SECRET = 'MnpT2a582F/LiRbocLHLnSF2SYElqTUdmQvBpVn+51Q=';
 export const MOCK_IDP_UIAM_SHARED_SECRET = 'Dw7eRt5yU2iO9pL3aS4dF6gH8jK0lZ1xC2vB3nM4qW5=';
@@ -56,6 +62,8 @@ export const MOCK_IDP_UIAM_SERVICE_INTERNAL_URL =
   process.env.MOCK_IDP_UIAM_SERVICE_INTERNAL_URL || 'https://uiam:8443';
 export const MOCK_IDP_UIAM_SERVICE_URL =
   process.env.MOCK_IDP_UIAM_SERVICE_URL || 'https://localhost:8443';
+export const MOCK_IDP_UIAM_OAUTH_BASE_URL =
+  process.env.MOCK_IDP_UIAM_OAUTH_BASE_URL || `https://localhost:8444/oauth2`;
 
 export const MOCK_IDP_REALM_NAME = 'cloud-saml-kibana';
 export const MOCK_IDP_REALM_TYPE = 'saml';

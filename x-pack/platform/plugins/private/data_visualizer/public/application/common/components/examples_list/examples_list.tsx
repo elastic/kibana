@@ -40,7 +40,6 @@ export const ExamplesList: FC<Props> = ({ examples }) => {
     examplesContent = examples.map((example, i) => {
       return (
         <EuiListGroupItem
-          size="xs"
           key={`example_${i}`}
           label={
             typeof example === 'string'
@@ -68,7 +67,7 @@ export const ExamplesList: FC<Props> = ({ examples }) => {
           }}
         />
       </ExpandedRowFieldHeader>
-      <EuiListGroup showToolTips={true} maxWidth={'s'} gutterSize={'none'} flush={true}>
+      <EuiListGroup showToolTips={true} maxWidth={'s'}>
         {examplesContent}
       </EuiListGroup>
     </ExpandedRowPanel>

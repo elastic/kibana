@@ -14,6 +14,7 @@ import {
   LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
   CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
+  CLOUD_ONBOARDING_DEPLOYMENT_SAVED_OBJECT_TYPE,
 } from '../../common/constants';
 
 import {
@@ -38,15 +39,21 @@ import {
   AgentPolicySchemaV3,
   AgentPolicySchemaV4,
   AgentPolicySchemaV5,
+  AgentPolicySchemaV6,
   EpmPackagesSchemaV6,
   EpmPackagesSchemaV7,
   EpmPackagesSchemaV8,
+  EpmPackagesSchemaV9,
+  EpmPackagesSchemaV10,
   SettingsSchemaV5,
   SettingsSchemaV6,
   SettingsSchemaV7,
   SettingsSchemaV8,
   PackagePolicySchemaV22,
+  PackagePolicySchemaV24,
+  PackagePolicySchemaV25,
   CloudConnectorSchemaV4,
+  CloudOnboardingDeploymentSchemaV1,
 } from '../types';
 
 import { migrateSyntheticsPackagePolicyToV8120 } from './migrations/synthetics/to_v8_12_0';
@@ -486,6 +493,18 @@ export const getSavedObjectTypes = (
             create: AgentPolicySchemaV5.extends({}, { unknowns: 'ignore' }),
           },
         },
+        '11': {
+          changes: [
+            {
+              type: 'mappings_addition',
+              addedMappings: {},
+            },
+          ],
+          schemas: {
+            forwardCompatibility: AgentPolicySchemaV6.extends({}, { unknowns: 'ignore' }),
+            create: AgentPolicySchemaV6.extends({}, { unknowns: 'ignore' }),
+          },
+        },
       },
     },
     [AGENT_POLICY_SAVED_OBJECT_TYPE]: {
@@ -603,6 +622,18 @@ export const getSavedObjectTypes = (
             create: AgentPolicySchemaV5.extends({}, { unknowns: 'ignore' }),
           },
         },
+        '6': {
+          changes: [
+            {
+              type: 'mappings_addition',
+              addedMappings: {},
+            },
+          ],
+          schemas: {
+            forwardCompatibility: AgentPolicySchemaV6.extends({}, { unknowns: 'ignore' }),
+            create: AgentPolicySchemaV6.extends({}, { unknowns: 'ignore' }),
+          },
+        },
       },
     },
     [OUTPUT_SAVED_OBJECT_TYPE]: {
@@ -628,6 +659,7 @@ export const getSavedObjectTypes = (
           config: { type: 'flattened' },
           config_yaml: { type: 'text' },
           otel_exporter_config_yaml: { type: 'text' },
+          otel_disable_beatsauth: { type: 'boolean' },
           is_preconfigured: { type: 'boolean', index: false },
           is_internal: { type: 'boolean', index: false },
           ssl: { type: 'binary' },
@@ -847,6 +879,26 @@ export const getSavedObjectTypes = (
           schemas: {
             forwardCompatibility: (unknownAttributes: unknown) => {
               const { otel_exporter_config_yaml: _, ...rest } = unknownAttributes as Record<
+                string,
+                unknown
+              >;
+              return rest;
+            },
+            create: schema.object({}, { unknowns: 'allow' }),
+          },
+        },
+        '10': {
+          changes: [
+            {
+              type: 'mappings_addition',
+              addedMappings: {
+                otel_disable_beatsauth: { type: 'boolean' },
+              },
+            },
+          ],
+          schemas: {
+            forwardCompatibility: (unknownAttributes: unknown) => {
+              const { otel_disable_beatsauth: _, ...rest } = unknownAttributes as Record<
                 string,
                 unknown
               >;
@@ -1137,6 +1189,20 @@ export const getSavedObjectTypes = (
             create: PackagePolicySchemaV22.extends({}, { unknowns: 'ignore' }),
           },
         },
+        '23': {
+          changes: [],
+          schemas: {
+            forwardCompatibility: PackagePolicySchemaV24.extends({}, { unknowns: 'ignore' }),
+            create: PackagePolicySchemaV24.extends({}, { unknowns: 'ignore' }),
+          },
+        },
+        '24': {
+          changes: [],
+          schemas: {
+            forwardCompatibility: PackagePolicySchemaV25.extends({}, { unknowns: 'ignore' }),
+            create: PackagePolicySchemaV25.extends({}, { unknowns: 'ignore' }),
+          },
+        },
       },
       migrations: {
         '7.10.0': migratePackagePolicyToV7100,
@@ -1290,6 +1356,25 @@ export const getSavedObjectTypes = (
             create: PackagePolicySchemaV22.extends({}, { unknowns: 'ignore' }),
           },
         },
+        '9': {
+          changes: [
+            {
+              type: 'mappings_addition',
+              addedMappings: {},
+            },
+          ],
+          schemas: {
+            forwardCompatibility: PackagePolicySchemaV24.extends({}, { unknowns: 'ignore' }),
+            create: PackagePolicySchemaV24.extends({}, { unknowns: 'ignore' }),
+          },
+        },
+        '10': {
+          changes: [],
+          schemas: {
+            forwardCompatibility: PackagePolicySchemaV25.extends({}, { unknowns: 'ignore' }),
+            create: PackagePolicySchemaV25.extends({}, { unknowns: 'ignore' }),
+          },
+        },
       },
     },
     [PACKAGES_SAVED_OBJECT_TYPE]: {
@@ -1321,6 +1406,7 @@ export const getSavedObjectTypes = (
           verification_status: { type: 'keyword' },
           verification_key_id: { type: 'keyword' },
           installed_es: {
+            dynamic: false,
             type: 'nested',
             properties: {
               id: { type: 'keyword' },
@@ -1370,6 +1456,10 @@ export const getSavedObjectTypes = (
           },
           previous_version: { type: 'keyword' },
           pending_upgrade_review: {
+            dynamic: false,
+            properties: {},
+          },
+          previous_dependency_versions: {
             dynamic: false,
             properties: {},
           },
@@ -1477,6 +1567,35 @@ export const getSavedObjectTypes = (
           schemas: {
             forwardCompatibility: EpmPackagesSchemaV8.extends({}, { unknowns: 'ignore' }),
             create: EpmPackagesSchemaV8,
+          },
+        },
+        '9': {
+          changes: [
+            {
+              type: 'mappings_addition',
+              addedMappings: {
+                previous_dependency_versions: {
+                  dynamic: false,
+                  properties: {},
+                },
+              },
+            },
+          ],
+          schemas: {
+            forwardCompatibility: EpmPackagesSchemaV9.extends({}, { unknowns: 'ignore' }),
+            create: EpmPackagesSchemaV9,
+          },
+        },
+        '10': {
+          changes: [
+            {
+              type: 'mappings_addition',
+              addedMappings: {}, // Empty to add dynamic:false on installed_es
+            },
+          ],
+          schemas: {
+            forwardCompatibility: EpmPackagesSchemaV10.extends({}, { unknowns: 'ignore' }),
+            create: EpmPackagesSchemaV10,
           },
         },
       },
@@ -1790,6 +1909,33 @@ export const getSavedObjectTypes = (
           schemas: {
             forwardCompatibility: CloudConnectorSchemaV4.extends({}, { unknowns: 'ignore' }),
             create: CloudConnectorSchemaV4,
+          },
+        },
+      },
+    },
+    [CLOUD_ONBOARDING_DEPLOYMENT_SAVED_OBJECT_TYPE]: {
+      name: CLOUD_ONBOARDING_DEPLOYMENT_SAVED_OBJECT_TYPE,
+      indexPattern: INGEST_SAVED_OBJECT_INDEX,
+      hidden: false,
+      namespaceType: 'multiple',
+      management: {
+        importableAndExportable: false,
+      },
+      mappings: {
+        dynamic: false,
+        properties: {
+          connectorId: { type: 'keyword', ignore_above: 1024 },
+        },
+      },
+      modelVersions: {
+        1: {
+          changes: [],
+          schemas: {
+            forwardCompatibility: CloudOnboardingDeploymentSchemaV1.extends(
+              {},
+              { unknowns: 'ignore' }
+            ),
+            create: CloudOnboardingDeploymentSchemaV1,
           },
         },
       },

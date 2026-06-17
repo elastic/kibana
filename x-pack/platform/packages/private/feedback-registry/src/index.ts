@@ -13,4 +13,4 @@ export {
   DEFAULT_GENERAL_QUESTION_ID,
 } from './constants';
 
-export type { FeedbackRegistryEntry, FeedbackRegistryEntryId, FeedbackRegistry } from './types';
+export type { FeedbackRegistryEntryId, FeedbackRegistry } from './types';

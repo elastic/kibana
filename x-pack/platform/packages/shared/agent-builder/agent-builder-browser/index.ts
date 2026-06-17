@@ -16,8 +16,34 @@ export type {
 } from './tools';
 export type { AgentsServiceStartContract } from './agents';
 export type { AttachmentUIDefinition, AttachmentServiceStartContract } from './attachments';
-export type { EventsServiceStartContract, BrowserChatEvent } from './events';
+export type {
+  EventsServiceStartContract,
+  ChatUiEventsContract,
+  BrowserChatEvent,
+  ActiveConversation,
+} from './events';
 export { WorkflowComboBox } from './workflow_combo_box';
 export type { WorkflowComboBoxProps, WorkflowComboBoxOption } from './workflow_combo_box';
+export { ConversationInputShell } from './conversation_input_shell';
+export type { ConversationInputShellProps } from './conversation_input_shell';
+export type {
+  AgentBuilderPluginSetup,
+  AgentBuilderPluginStart,
+  EmbeddableConversationProps,
+  PublicEmbeddableConversationProps,
+  OpenConversationSidebarOptions,
+  ConversationSidebarRef,
+  OpenConversationSidebarReturn,
+} from './plugin_contract';
 export { AgentBuilderAnnouncementModal } from './announcement_modal/agent_builder_announcement_modal';
-export type { AgentBuilderAnnouncementModalProps } from './announcement_modal/agent_builder_announcement_modal';
+export type {
+  AgentBuilderAnnouncementModalProps,
+  AgentBuilderAnnouncementVariant,
+} from './announcement_modal/agent_builder_announcement_modal';
+export { McpClientDetails, McpClientLogo } from './oauth_clients';
+export type {
+  McpClientDetailsProps,
+  McpClientDetailsData,
+  McpClientDetailsPresentation,
+  McpClientLogoProps,
+} from './oauth_clients';

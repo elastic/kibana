@@ -13,7 +13,7 @@ import { ES_FIELD_TYPES } from '@kbn/field-types';
 const mockMetric: ParsedMetricItem = {
   metricName: 'cpu.usage',
   fieldTypes: [ES_FIELD_TYPES.DOUBLE],
-  dataStream: 'metrics-*',
+  indexName: 'metrics-*',
   units: ['ms'],
   metricTypes: ['histogram'],
   dimensionFields: [
@@ -58,7 +58,7 @@ describe('createESQLQuery', () => {
     expect(query).toBe(
       `
 TS metrics-*
-  | STATS AVG(cpu.usage) BY BUCKET(@timestamp, 100, ?_tstart, ?_tend)
+  | STATS AVG(cpu.usage) BY TBUCKET(100)
 `.trim()
     );
   });
@@ -70,7 +70,7 @@ TS metrics-*
     expect(query).toBe(
       `
 TS metrics-*
-  | STATS SUM(RATE(requests.count)) BY BUCKET(@timestamp, 100, ?_tstart, ?_tend)
+  | STATS SUM(RATE(requests.count)) BY TBUCKET(100)
 `.trim()
     );
   });
@@ -82,7 +82,7 @@ TS metrics-*
     expect(query).toBe(
       `
 TS metrics-*
-  | STATS PERCENTILE(http.request.duration, 95) BY BUCKET(@timestamp, 100, ?_tstart, ?_tend)
+  | STATS PERCENTILE(http.request.duration, 95) BY TBUCKET(100)
 `.trim()
     );
   });
@@ -94,7 +94,7 @@ TS metrics-*
     expect(query).toBe(
       `
 TS metrics-*
-  | STATS PERCENTILE(http.request.duration, 95) BY BUCKET(@timestamp, 100, ?_tstart, ?_tend)
+  | STATS PERCENTILE(http.request.duration, 95) BY TBUCKET(100)
 `.trim()
     );
   });
@@ -106,7 +106,7 @@ TS metrics-*
     expect(query).toBe(
       `
 TS metrics-*
-  | STATS PERCENTILE(TO_TDIGEST(histogram.legacy), 95) BY BUCKET(@timestamp, 100, ?_tstart, ?_tend)
+  | STATS PERCENTILE(TO_TDIGEST(histogram.legacy), 95) BY TBUCKET(100)
 `.trim()
     );
   });
@@ -119,7 +119,7 @@ TS metrics-*
     expect(query).toBe(
       `
 TS metrics-*
-  | STATS PERCENTILE(TO_TDIGEST(histogram.legacy), 95) BY BUCKET(@timestamp, 100, ?_tstart, ?_tend), \`service.name\`, \`host.name\`
+  | STATS PERCENTILE(TO_TDIGEST(histogram.legacy), 95) BY TBUCKET(100), \`service.name\`, \`host.name\`
 `.trim()
     );
   });
@@ -132,7 +132,7 @@ TS metrics-*
     expect(query).toBe(
       `
 TS metrics-*
-  | STATS PERCENTILE(http.request.duration, 95) BY BUCKET(@timestamp, 100, ?_tstart, ?_tend), \`service.name\`
+  | STATS PERCENTILE(http.request.duration, 95) BY TBUCKET(100), \`service.name\`
 `.trim()
     );
   });
@@ -145,7 +145,7 @@ TS metrics-*
     expect(query).toBe(
       `
 TS metrics-*
-  | STATS PERCENTILE(http.request.duration, 95) BY BUCKET(@timestamp, 100, ?_tstart, ?_tend), \`service.name\`, \`host.name\`
+  | STATS PERCENTILE(http.request.duration, 95) BY TBUCKET(100), \`service.name\`, \`host.name\`
 `.trim()
     );
   });
@@ -158,7 +158,7 @@ TS metrics-*
     expect(query).toBe(
       `
 TS metrics-*
-  | STATS PERCENTILE(http.request.duration, 95) BY BUCKET(@timestamp, 100, ?_tstart, ?_tend), \`service.name\`
+  | STATS PERCENTILE(http.request.duration, 95) BY TBUCKET(100), \`service.name\`
 `.trim()
     );
   });
@@ -171,7 +171,7 @@ TS metrics-*
     expect(query).toBe(
       `
 TS metrics-*
-  | STATS PERCENTILE(http.request.duration, 95) BY BUCKET(@timestamp, 100, ?_tstart, ?_tend), \`service.name\`, \`host.name\`
+  | STATS PERCENTILE(http.request.duration, 95) BY TBUCKET(100), \`service.name\`, \`host.name\`
 `.trim()
     );
   });
@@ -184,7 +184,7 @@ TS metrics-*
     expect(query).toBe(
       `
 TS metrics-*
-  | STATS AVG(cpu.usage) BY BUCKET(@timestamp, 100, ?_tstart, ?_tend), \`host.name\`
+  | STATS AVG(cpu.usage) BY TBUCKET(100), \`host.name\`
 `.trim()
     );
   });
@@ -197,7 +197,7 @@ TS metrics-*
     expect(query).toBe(
       `
 TS metrics-*
-  | STATS AVG(cpu.usage) BY BUCKET(@timestamp, 100, ?_tstart, ?_tend), \`host.name\`, \`container.id\`
+  | STATS AVG(cpu.usage) BY TBUCKET(100), \`host.name\`, \`container.id\`
 `.trim()
     );
   });
@@ -210,7 +210,7 @@ TS metrics-*
     expect(query).toBe(
       `
 TS metrics-*
-  | STATS AVG(cpu.usage) BY BUCKET(@timestamp, 100, ?_tstart, ?_tend), \`host.ip\`, \`host.name\`
+  | STATS AVG(cpu.usage) BY TBUCKET(100), \`host.ip\`, \`host.name\`
 `.trim()
     );
   });
@@ -223,7 +223,7 @@ TS metrics-*
     expect(query).toBe(
       `
 TS metrics-*
-  | STATS AVG(cpu.usage) BY BUCKET(@timestamp, 100, ?_tstart, ?_tend), \`cpu.cores\`, \`host.name\`
+  | STATS AVG(cpu.usage) BY TBUCKET(100), \`cpu.cores\`, \`host.name\`
 `.trim()
     );
   });
@@ -236,19 +236,19 @@ TS metrics-*
     expect(query).toBe(
       `
 TS metrics-*
-  | STATS AVG(cpu.usage) BY BUCKET(@timestamp, 100, ?_tstart, ?_tend), \`host.ip\`, \`host.name\`, \`cpu.cores\`
+  | STATS AVG(cpu.usage) BY TBUCKET(100), \`host.ip\`, \`host.name\`, \`cpu.cores\`
 `.trim()
     );
   });
 
   it('should override index if provided in metric', () => {
     const query = createESQLQuery({
-      metricItem: { ...mockMetric, dataStream: 'custom-metrics-*' },
+      metricItem: { ...mockMetric, indexName: 'custom-metrics-*' },
     });
     expect(query).toBe(
       `
 TS custom-metrics-*
-  | STATS AVG(cpu.usage) BY BUCKET(@timestamp, 100, ?_tstart, ?_tend)
+  | STATS AVG(cpu.usage) BY TBUCKET(100)
 `.trim()
     );
   });
@@ -262,7 +262,7 @@ TS custom-metrics-*
     expect(query).toBe(
       `
 TS metrics-*
-  | STATS AVG(cpu.usage) BY BUCKET(@timestamp, 100, ?_tstart, ?_tend)
+  | STATS AVG(cpu.usage) BY TBUCKET(100)
 `.trim()
     );
   });
@@ -277,7 +277,7 @@ TS metrics-*
       `
 TS metrics-*
   | WHERE host.name == "host-01" AND system.cpu.user.pct IS NOT NULL
-  | STATS AVG(cpu.usage) BY BUCKET(@timestamp, 100, ?_tstart, ?_tend)
+  | STATS AVG(cpu.usage) BY TBUCKET(100)
 `.trim()
     );
   });
@@ -294,7 +294,7 @@ TS metrics-*
 TS metrics-*
   | WHERE host.name == "host-01"
   | WHERE cpu.cores > 4
-  | STATS AVG(cpu.usage) BY BUCKET(@timestamp, 100, ?_tstart, ?_tend), \`host.name\`
+  | STATS AVG(cpu.usage) BY TBUCKET(100), \`host.name\`
 `.trim()
     );
   });
@@ -308,7 +308,7 @@ TS metrics-*
     expect(query).toBe(
       `
 TS metrics-*
-  | STATS AVG(cpu.usage) BY BUCKET(@timestamp, 100, ?_tstart, ?_tend)
+  | STATS AVG(cpu.usage) BY TBUCKET(100)
 `.trim()
     );
   });
@@ -322,7 +322,7 @@ TS metrics-*
     expect(query).toBe(
       `
 TS metrics-*
-  | STATS AVG(cpu.usage) BY BUCKET(@timestamp, 100, ?_tstart, ?_tend)
+  | STATS AVG(cpu.usage) BY TBUCKET(100)
 `.trim()
     );
   });
@@ -336,7 +336,7 @@ TS metrics-*
     expect(query).toBe(
       `
 TS metrics-*
-  | STATS AVG(cpu.usage) BY BUCKET(@timestamp, 100, ?_tstart, ?_tend)
+  | STATS AVG(cpu.usage) BY TBUCKET(100)
 `.trim()
     );
   });
@@ -345,7 +345,7 @@ TS metrics-*
     const mockMetricWithSpecialChars: ParsedMetricItem = {
       metricName: 'cpu.usage',
       fieldTypes: [ES_FIELD_TYPES.LONG],
-      dataStream: 'metrics-*',
+      indexName: 'metrics-*',
       units: ['ms'],
       metricTypes: ['histogram'],
       dimensionFields: [{ name: 'service-name' }, { name: 'container-id' }, { name: 'host-ip' }],
@@ -359,7 +359,7 @@ TS metrics-*
       expect(query).toBe(
         `
 TS metrics-*
-  | STATS AVG(cpu.usage) BY BUCKET(@timestamp, 100, ?_tstart, ?_tend), \`service-name\`
+  | STATS AVG(cpu.usage) BY TBUCKET(100), \`service-name\`
 `.trim()
       );
     });
@@ -372,7 +372,7 @@ TS metrics-*
       expect(query).toBe(
         `
 TS metrics-*
-  | STATS AVG(cpu.usage) BY BUCKET(@timestamp, 100, ?_tstart, ?_tend), \`service-name\`, \`container-id\`
+  | STATS AVG(cpu.usage) BY TBUCKET(100), \`service-name\`, \`container-id\`
 `.trim()
       );
     });
@@ -385,7 +385,7 @@ TS metrics-*
       expect(query).toBe(
         `
 TS metrics-*
-  | STATS AVG(cpu.usage) BY BUCKET(@timestamp, 100, ?_tstart, ?_tend), \`host-ip\`, \`service-name\`
+  | STATS AVG(cpu.usage) BY TBUCKET(100), \`host-ip\`, \`service-name\`
 `.trim()
       );
     });
@@ -394,7 +394,7 @@ TS metrics-*
       const mockMetricWithBackticks: ParsedMetricItem = {
         metricName: 'cpu.usage',
         fieldTypes: [ES_FIELD_TYPES.DOUBLE],
-        dataStream: 'metrics-*',
+        indexName: 'metrics-*',
         units: ['ms'],
         metricTypes: ['histogram'],
         dimensionFields: [{ name: 'field`with`ticks' }],
@@ -407,7 +407,7 @@ TS metrics-*
       expect(query).toBe(
         `
 TS metrics-*
-  | STATS AVG(cpu.usage) BY BUCKET(@timestamp, 100, ?_tstart, ?_tend), \`field\`\`with\`\`ticks\`
+  | STATS AVG(cpu.usage) BY TBUCKET(100), \`field\`\`with\`\`ticks\`
 `.trim()
       );
     });
@@ -417,7 +417,7 @@ TS metrics-*
     const mockMetricWithConflictingTypes: ParsedMetricItem = {
       metricName: 'http.request.duration',
       fieldTypes: [ES_FIELD_TYPES.DOUBLE, ES_FIELD_TYPES.FLOAT],
-      dataStream: 'timeseries-rich-metrics-primary',
+      indexName: 'timeseries-rich-metrics-primary',
       units: ['ms'],
       metricTypes: ['gauge'],
       dimensionFields: [{ name: 'service.name' }],
@@ -430,7 +430,7 @@ TS metrics-*
       expect(query).toBe(
         `
 TS timeseries-rich-metrics-primary
-  | STATS AVG(TO_DOUBLE(http.request.duration)) BY BUCKET(@timestamp, 100, ?_tstart, ?_tend)
+  | STATS AVG(TO_DOUBLE(http.request.duration)) BY TBUCKET(100)
 `.trim()
       );
     });
@@ -443,7 +443,7 @@ TS timeseries-rich-metrics-primary
       expect(query).toBe(
         `
 TS timeseries-rich-metrics-primary
-  | STATS AVG(TO_DOUBLE(http.request.duration)) BY BUCKET(@timestamp, 100, ?_tstart, ?_tend), \`service.name\`
+  | STATS AVG(TO_DOUBLE(http.request.duration)) BY TBUCKET(100), \`service.name\`
 `.trim()
       );
     });
@@ -452,7 +452,7 @@ TS timeseries-rich-metrics-primary
       const mockMetricWithLongConflict: ParsedMetricItem = {
         metricName: 'requests.count',
         fieldTypes: [ES_FIELD_TYPES.LONG, ES_FIELD_TYPES.INTEGER],
-        dataStream: 'metrics-*',
+        indexName: 'metrics-*',
         units: ['count'],
         metricTypes: ['counter'],
         dimensionFields: [],
@@ -464,7 +464,7 @@ TS timeseries-rich-metrics-primary
       expect(query).toBe(
         `
 TS metrics-*
-  | STATS SUM(RATE(TO_LONG(requests.count))) BY BUCKET(@timestamp, 100, ?_tstart, ?_tend)
+  | STATS SUM(RATE(TO_LONG(requests.count))) BY TBUCKET(100)
 `.trim()
       );
     });
@@ -473,7 +473,7 @@ TS metrics-*
       const mockMetricMixedNumeric: ParsedMetricItem = {
         metricName: 'metric.value',
         fieldTypes: [ES_FIELD_TYPES.DOUBLE, ES_FIELD_TYPES.LONG],
-        dataStream: 'metrics-*',
+        indexName: 'metrics-*',
         units: ['count'],
         metricTypes: ['gauge'],
         dimensionFields: [],
@@ -485,7 +485,7 @@ TS metrics-*
       expect(query).toBe(
         `
 TS metrics-*
-  | STATS AVG(TO_DOUBLE(metric.value)) BY BUCKET(@timestamp, 100, ?_tstart, ?_tend)
+  | STATS AVG(TO_DOUBLE(metric.value)) BY TBUCKET(100)
 `.trim()
       );
     });
@@ -499,7 +499,7 @@ TS metrics-*
         `
 TS timeseries-rich-metrics-primary
   | WHERE service.name == "api-server"
-  | STATS AVG(TO_DOUBLE(http.request.duration)) BY BUCKET(@timestamp, 100, ?_tstart, ?_tend)
+  | STATS AVG(TO_DOUBLE(http.request.duration)) BY TBUCKET(100)
 `.trim()
       );
     });
@@ -508,7 +508,7 @@ TS timeseries-rich-metrics-primary
       const mockMetricSingleType: ParsedMetricItem = {
         metricName: 'cpu.usage',
         fieldTypes: [ES_FIELD_TYPES.DOUBLE, ES_FIELD_TYPES.DOUBLE],
-        dataStream: 'metrics-*',
+        indexName: 'metrics-*',
         units: ['percent'],
         metricTypes: ['gauge'],
         dimensionFields: [],
@@ -520,7 +520,7 @@ TS timeseries-rich-metrics-primary
       expect(query).toBe(
         `
 TS metrics-*
-  | STATS AVG(cpu.usage) BY BUCKET(@timestamp, 100, ?_tstart, ?_tend)
+  | STATS AVG(cpu.usage) BY TBUCKET(100)
 `.trim()
       );
     });
@@ -529,7 +529,7 @@ TS metrics-*
       const mockMetricWithConflictingHistogram: ParsedMetricItem = {
         metricName: 'request.duration',
         fieldTypes: [ES_FIELD_TYPES.EXPONENTIAL_HISTOGRAM, ES_FIELD_TYPES.TDIGEST],
-        dataStream: 'metrics-*',
+        indexName: 'metrics-*',
         units: ['ms'],
         metricTypes: ['histogram'],
         dimensionFields: [],
@@ -543,7 +543,86 @@ TS metrics-*
       expect(query).toBe(
         `
 TS metrics-*
-  | STATS PERCENTILE(request.duration, 95) BY BUCKET(@timestamp, 100, ?_tstart, ?_tend)
+  | STATS PERCENTILE(request.duration, 95) BY TBUCKET(100)
+`.trim()
+      );
+    });
+  });
+
+  describe('originalSource (issue #262360)', () => {
+    // METRICS_INFO returns the parent data stream name even when invoked against
+    // a backing index. Reusing that as the chart query source widens the scope
+    // back to the data stream and reintroduces cross-backing-index conflicts.
+    // Prefer the user's typed source when it is a single concrete index.
+    const mockMetricForBackingIndex: ParsedMetricItem = {
+      metricName: 'request_duration',
+      fieldTypes: [ES_FIELD_TYPES.LONG],
+      indexName: 'edge-case-gauge-to-counter',
+      units: ['ms'],
+      metricTypes: ['gauge'],
+      dimensionFields: [],
+    };
+
+    it('should use originalSource when it is a single concrete index', () => {
+      const query = createESQLQuery({
+        metricItem: mockMetricForBackingIndex,
+        originalSource: '.ds-edge-case-gauge-to-counter-2026.04.29-000001',
+      });
+      expect(query).toBe(
+        `
+TS .ds-edge-case-gauge-to-counter-2026.04.29-000001
+  | STATS AVG(request_duration) BY TBUCKET(100)
+`.trim()
+      );
+    });
+
+    it('should fall back to indexName when originalSource contains a glob', () => {
+      const query = createESQLQuery({
+        metricItem: mockMetricForBackingIndex,
+        originalSource: 'edge-case-*',
+      });
+      expect(query).toBe(
+        `
+TS edge-case-gauge-to-counter
+  | STATS AVG(request_duration) BY TBUCKET(100)
+`.trim()
+      );
+    });
+
+    it('should fall back to indexName when originalSource is a comma list', () => {
+      const query = createESQLQuery({
+        metricItem: mockMetricForBackingIndex,
+        originalSource: 'ds-a,ds-b',
+      });
+      expect(query).toBe(
+        `
+TS edge-case-gauge-to-counter
+  | STATS AVG(request_duration) BY TBUCKET(100)
+`.trim()
+      );
+    });
+
+    it('should fall back to indexName when originalSource is undefined', () => {
+      const query = createESQLQuery({
+        metricItem: mockMetricForBackingIndex,
+      });
+      expect(query).toBe(
+        `
+TS edge-case-gauge-to-counter
+  | STATS AVG(request_duration) BY TBUCKET(100)
+`.trim()
+      );
+    });
+
+    it('should fall back to indexName when originalSource is empty', () => {
+      const query = createESQLQuery({
+        metricItem: mockMetricForBackingIndex,
+        originalSource: '',
+      });
+      expect(query).toBe(
+        `
+TS edge-case-gauge-to-counter
+  | STATS AVG(request_duration) BY TBUCKET(100)
 `.trim()
       );
     });

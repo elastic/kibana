@@ -6,11 +6,9 @@
  */
 
 import React from 'react';
-import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
-import { act } from 'react-dom/test-utils';
+import { render, screen, waitFor } from '@testing-library/react';
 import PagerDutyActionConnectorFields from './pagerduty_connectors';
 import { ConnectorFormTestProvider } from '../lib/test_utils';
-import { render, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { createStartServicesMock } from '@kbn/triggers-actions-ui-plugin/public/common/lib/kibana/kibana_react.mock';
 
@@ -45,7 +43,7 @@ describe('PagerDutyActionConnectorFields renders', () => {
       isDeprecated: false,
     };
 
-    const wrapper = mountWithIntl(
+    render(
       <ConnectorFormTestProvider connector={actionConnector}>
         <PagerDutyActionConnectorFields
           readOnly={false}
@@ -55,16 +53,10 @@ describe('PagerDutyActionConnectorFields renders', () => {
       </ConnectorFormTestProvider>
     );
 
-    await act(async () => {
-      await nextTick();
-      wrapper.update();
-    });
-
-    expect(wrapper.find('[data-test-subj="pagerdutyApiUrlInput"]').length > 0).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="pagerdutyApiUrlInput"]').first().prop('value')).toBe(
-      'http://test.com'
-    );
-    expect(wrapper.find('[data-test-subj="pagerdutyRoutingKeyInput"]').length > 0).toBeTruthy();
+    const pagerdutyApiUrlInput = screen.getByTestId('pagerdutyApiUrlInput') as HTMLInputElement;
+    expect(pagerdutyApiUrlInput).toBeInTheDocument();
+    expect(pagerdutyApiUrlInput).toHaveValue('http://test.com');
+    expect(screen.getByTestId('pagerdutyRoutingKeyInput')).toBeInTheDocument();
   });
 
   describe('Validation', () => {

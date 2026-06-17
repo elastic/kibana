@@ -8,7 +8,7 @@
 import { z } from '@kbn/zod/v4';
 import type { CommonStepDefinition } from '@kbn/workflows-extensions/common';
 import { StepCategory } from '@kbn/workflows';
-import { JsonModelShapeSchema } from '@kbn/workflows/spec/schema/common/json_model_shape_schema';
+import { JsonModelSchema } from '@kbn/workflows/spec/schema/common/json_model_schema';
 import { i18n } from '@kbn/i18n';
 import {
   CONNECTOR_OR_INFERENCE_ID_CONFLICT_MESSAGE_WORKFLOW,
@@ -27,8 +27,7 @@ export const InputSchema = z.object({
   /**
    * output schema for the run agent step, if provided agent will return structured output
    */
-  // TODO: replace with proper JsonSchema7 zod schema when https://github.com/elastic/kibana/pull/244223 is merged and released
-  schema: JsonModelShapeSchema.optional().describe('The schema for the output of the agent.'),
+  schema: JsonModelSchema.optional().describe('The schema for the output of the agent.'),
   /**
    * The user input message to send to the agent.
    */
@@ -99,6 +98,13 @@ export const OutputSchema = z.object({
 });
 
 /**
+ * Validation message shown when `aggregate-by` is set without a `plugin-id`. The parent
+ * rollup id (`aggregateBy`) is only meaningful alongside the billing attribution id (`pluginId`).
+ */
+export const AGGREGATE_BY_REQUIRES_PLUGIN_ID_MESSAGE =
+  '`aggregate-by` can only be set when `plugin-id` is also set.';
+
+/**
  * Config schema for the run agent step.
  */
 export const ConfigSchema = z
@@ -136,6 +142,29 @@ export const ConfigSchema = z
       .boolean()
       .optional()
       .describe('When true, creates a conversation for the step.'),
+    /**
+     * Connector telemetry feature id used to attribute this step's LLM calls for billing
+     * (sets `metadata.connectorTelemetry.pluginId`). When omitted, the default Agent Builder
+     * attribution is used.
+     */
+    'plugin-id': z
+      .string()
+      .max(255)
+      .optional()
+      .describe(
+        "The feature id to attribute this step's LLM calls to for billing (connector telemetry pluginId)."
+      ),
+    /**
+     * Parent feature id used to roll up this step's LLM token usage under a parent feature
+     * (sets `metadata.connectorTelemetry.aggregateBy`). Only used when `plugin-id` is set.
+     */
+    'aggregate-by': z
+      .string()
+      .max(255)
+      .optional()
+      .describe(
+        "The parent feature id to group this step's LLM token usage under (connector telemetry aggregateBy)."
+      ),
   })
   .superRefine((cfg, ctx) => {
     const connector = normalizeOptionalConnectorOrInferenceParam(cfg['connector-id']);
@@ -145,6 +174,13 @@ export const ConfigSchema = z
         code: z.ZodIssueCode.custom,
         message: CONNECTOR_OR_INFERENCE_ID_CONFLICT_MESSAGE_WORKFLOW,
         path: ['connector-id'],
+      });
+    }
+    if (cfg['aggregate-by'] !== undefined && cfg['plugin-id'] === undefined) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: AGGREGATE_BY_REQUIRES_PLUGIN_ID_MESSAGE,
+        path: ['aggregate-by'],
       });
     }
   });

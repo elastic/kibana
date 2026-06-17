@@ -29,9 +29,7 @@ jest.mock('../components/rule_details/skeleton', () => ({
 }));
 
 jest.mock('../components/rule_details/rule_detail_page', () => ({
-  RuleDetailPage: ({ rule }: { rule: { id: string } }) => (
-    <div data-test-subj="ruleDetailPage">Rule: {rule.id}</div>
-  ),
+  RuleDetailPage: () => <div data-test-subj="ruleDetailPage">Rule detail page</div>,
 }));
 
 const renderRoute = (ruleId = 'rule-1') =>
@@ -80,7 +78,7 @@ describe('RuleDetailsRoute', () => {
       isError: false,
     });
     renderRoute();
-    expect(await screen.findByTestId('ruleDetailPage')).toHaveTextContent('Rule: rule-1');
+    expect(await screen.findByTestId('ruleDetailPage')).toBeInTheDocument();
   });
 
   it('passes the ruleId from URL params to useFetchRule', () => {

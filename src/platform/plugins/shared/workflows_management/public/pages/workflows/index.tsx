@@ -108,7 +108,11 @@ export function WorkflowsPage() {
   const shouldShowEmptyState = shouldShowWorkflowsEmptyState(workflows, search);
 
   return (
-    <EuiPageTemplate offset={0} css={{ backgroundColor: euiTheme.colors.backgroundBasePlain }}>
+    <EuiPageTemplate
+      offset={0}
+      css={{ backgroundColor: euiTheme.colors.backgroundBasePlain }}
+      data-test-subj="workflowsPage"
+    >
       {/* negative margin to compensate for header's bottom padding and reduce space between header and content */}
       <EuiPageTemplate.Header
         bottomBorder={false}
@@ -153,7 +157,7 @@ export function WorkflowsPage() {
                   >
                     <FormattedMessage
                       id="workflows.createWorkflowButton"
-                      defaultMessage="Create a new workflow"
+                      defaultMessage="Create workflow"
                       ignoreTag
                     />
                   </EuiButton>

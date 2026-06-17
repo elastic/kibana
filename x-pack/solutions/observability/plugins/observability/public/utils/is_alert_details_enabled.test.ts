@@ -99,8 +99,8 @@ describe('isAlertDetailsEnabled', () => {
       start: 1630587249674,
       lastUpdated: 1630588131750,
     } as unknown as TopAlert;
-    it('returns FALSE when the rule type IS NOT apm.transaction_duration', () => {
-      expect(isAlertDetailsEnabledPerApp(APMAlert, defaultConfig)).toBeFalsy();
+    it('returns TRUE when the rule type is apm.transaction_error_rate', () => {
+      expect(isAlertDetailsEnabledPerApp(APMAlert, defaultConfig)).toBeTruthy();
     });
 
     it('returns TRUE when rule type is apm.transaction_duration', () => {
