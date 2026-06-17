@@ -42,6 +42,12 @@ import {
   mapPostAggFilterFieldsToRecentForEsql,
   NULLIFY_UNMAPPED_FIELDS_SETTING,
 } from './query_builder_commons';
+import {
+  buildIdentityClassificationPrelude,
+  deriveKiClassifiedDefinition,
+  IDENTITY_CLASSIFICATION_METADATA_FIELDS,
+  type QueryIdentityClassification,
+} from './ki_identity_classification';
 
 export const HASHED_ID_FIELD = 'entity.hashedId';
 
@@ -72,6 +78,15 @@ interface LogsExtractionQueryParams {
   pagination?: PaginationParams;
   logsPageCursorStart?: LogSlicePaginationParams;
   logsPageCursorEnd?: LogSlicePaginationParams;
+  /**
+   * KI per-source identity classification (user engine, feature flag on). When
+   * defined, the rule-based namespace / idpGate / confidence logic of the
+   * definition is replaced by a `_index`-keyed classification prelude that
+   * stamps `entity.namespace` and `entity.confidence` per source. `undefined`
+   * keeps the legacy rule-based behavior. An empty array means "feature on, no
+   * classified sources" (all rows get `unknown` namespace / `null` confidence).
+   */
+  identityClassification?: QueryIdentityClassification[];
 }
 
 export function buildRemainingLogsCountQuery(params: {
@@ -100,8 +115,17 @@ export function buildLogsExtractionEsqlQuery({
   pagination,
   logsPageCursorStart,
   logsPageCursorEnd,
+  identityClassification,
 }: LogsExtractionQueryParams): string {
-  const { fields, type, entityTypeFallback } = entityDefinition;
+  // KI confidence-classification path: replace the rule-based namespace /
+  // idpGate / confidence logic with a per-source prelude. `user.ts` is left
+  // untouched — we extract from a derived copy.
+  const useIdentityClassification = identityClassification !== undefined;
+  const effectiveDefinition = useIdentityClassification
+    ? deriveKiClassifiedDefinition(entityDefinition)
+    : entityDefinition;
+
+  const { fields, type, entityTypeFallback } = effectiveDefinition;
 
   const parts = [];
 
@@ -116,16 +140,25 @@ export function buildLogsExtractionEsqlQuery({
       toDateISO,
       logsPageCursorStart,
       logsPageCursorEnd,
+      metadataFields: useIdentityClassification
+        ? IDENTITY_CLASSIFICATION_METADATA_FIELDS
+        : undefined,
     })
   );
 
-  // Special evaluations for entity id
-  if (hasFieldEvaluations(entityDefinition)) {
-    parts.push(buildFieldEvaluations(entityDefinition));
+  // KI classification prelude: stamp entity.namespace + entity.confidence per
+  // source, before the EUID evaluation that reads entity.namespace.
+  if (useIdentityClassification) {
+    parts.push(buildIdentityClassificationPrelude(identityClassification));
   }
 
-  if (entityDefinition.whenConditionTrueSetFieldsPreAgg?.length) {
-    for (const entry of entityDefinition.whenConditionTrueSetFieldsPreAgg) {
+  // Special evaluations for entity id
+  if (hasFieldEvaluations(effectiveDefinition)) {
+    parts.push(buildFieldEvaluations(effectiveDefinition));
+  }
+
+  if (effectiveDefinition.whenConditionTrueSetFieldsPreAgg?.length) {
+    for (const entry of effectiveDefinition.whenConditionTrueSetFieldsPreAgg) {
       parts.push(buildSetFieldsByCondition(entry));
     }
   }
@@ -146,7 +179,7 @@ export function buildLogsExtractionEsqlQuery({
 
   // If there is no post aggregation filter we can paginate before the lookup join
   // and save some performance
-  if (!entityDefinition.postAggFilter) {
+  if (!effectiveDefinition.postAggFilter) {
     parts.push(
       ...buildPaginationSection(
         fromDateISO,
@@ -161,7 +194,7 @@ export function buildLogsExtractionEsqlQuery({
   // Builds the main entity id
   parts.push(
     `| EVAL ${recentData(MAIN_ENTITY_ID_FIELD)} = ${getMainEntityIdFromUntypedEsql(
-      entityDefinition,
+      effectiveDefinition,
       recentData(ENGINE_METADATA_UNTYPED_ID_FIELD)
     )}`
   );
@@ -170,11 +203,14 @@ export function buildLogsExtractionEsqlQuery({
   parts.push(`| LOOKUP JOIN ${latestIndex}
       ON ${recentData(MAIN_ENTITY_ID_FIELD)} == ${MAIN_ENTITY_ID_FIELD}`);
 
-  if (entityDefinition.postAggFilter) {
+  if (effectiveDefinition.postAggFilter) {
     // If it has post aggregation filter, we filter it right after lookup join
     parts.push(
       buildPostAggFilter(
-        mapPostAggFilterFieldsToRecentForEsql(entityDefinition.postAggFilter, entityDefinition)
+        mapPostAggFilterFieldsToRecentForEsql(
+          effectiveDefinition.postAggFilter,
+          effectiveDefinition
+        )
       )
     );
     // then we can paginate after the post aggregation filter
@@ -189,8 +225,8 @@ export function buildLogsExtractionEsqlQuery({
     );
   }
 
-  if (entityDefinition.whenConditionTrueSetFieldsAfterStats?.length) {
-    for (const entry of entityDefinition.whenConditionTrueSetFieldsAfterStats) {
+  if (effectiveDefinition.whenConditionTrueSetFieldsAfterStats?.length) {
+    for (const entry of effectiveDefinition.whenConditionTrueSetFieldsAfterStats) {
       parts.push(
         buildSetFieldsByCondition(entry, {
           entityFields: fields,

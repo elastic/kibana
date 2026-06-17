@@ -22,10 +22,48 @@ export const LOG_EXTRACTION_MAX_TIME_WINDOW_SIZE_DEFAULT = '15m';
 export const LOG_EXTRACTION_MAX_LOGS_PER_WINDOW_DEFAULT = 100_000;
 export const LOG_EXTRACTION_CAP_BEHAVIOR_DEFAULT = 'drop' as const;
 
+// Default confidence floor for the KI confidence-classification channel's
+// `schema`-feature query. 0 = include every qualifying schema feature
+// regardless of confidence; operators can raise it. Source discovery uses
+// deterministic `dataset_analysis` features (always confidence 100) and does
+// not consult this floor.
+export const LOG_EXTRACTION_DISCOVERED_SOURCE_MIN_CONFIDENCE_DEFAULT = 0;
+
 export type LogExtractionConfig = z.infer<typeof LogExtractionConfig>;
 export const LogExtractionConfig = z.object({
   additionalIndexPatterns: z.array(z.string()).default([]),
   excludedIndexPatterns: z.array(z.string()).default([]),
+  /**
+   * POC feature flag (idea 01 re-scope): when true, each engine sources its
+   * `FROM` from KI-discovered, per-entity-type index patterns instead of the
+   * Security Solution data view. The data view is NOT used as a source while
+   * this is enabled (no silent fallback). Default `false` keeps behavior
+   * byte-identical to a deployment without this feature.
+   */
+  useDiscoveredIndexSource: z.boolean().default(false),
+  /**
+   * POC feature flag (idea 02 re-scope / POC 5): when true, the user engine
+   * derives `entity.namespace` and `entity.confidence` (high=IdP / medium=non-IdP)
+   * from KI `schema`-feature `identity_classification` instead of the hardcoded
+   * `idpGate` / namespace allowlist / confidence rules in `user.ts`. Composes
+   * with `useDiscoveredIndexSource` but is independent of it. Default `false`
+   * keeps behavior byte-identical. Only affects the `user` engine; when enabled
+   * but no source is classified, behavior stays rule-based for that run.
+   */
+  useDiscoveredConfidenceClassification: z.boolean().default(false),
+  /**
+   * Confidence floor (0–100) for the KI confidence-classification channel's
+   * `schema`-feature query. Only effective while
+   * `useDiscoveredConfidenceClassification` is on. Source discovery
+   * (`useDiscoveredIndexSource`) reads deterministic `dataset_analysis`
+   * features, which are always confidence 100 and do not consult this floor.
+   */
+  discoveredIndexSourceMinConfidence: z
+    .number()
+    .int()
+    .min(0)
+    .max(100)
+    .default(LOG_EXTRACTION_DISCOVERED_SOURCE_MIN_CONFIDENCE_DEFAULT),
   fieldHistoryLength: z.number().int().default(10),
   lookbackPeriod: z
     .string()

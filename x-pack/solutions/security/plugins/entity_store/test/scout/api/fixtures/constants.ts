@@ -57,6 +57,7 @@ export const ENTITY_STORE_ROUTES = {
   },
   internal: {
     CHECK_PRIVILEGES: `${INTERNAL_BASE}/check_privileges`,
+    DISCOVERED_SOURCES: `${INTERNAL_BASE}/discovered_sources`,
     FORCE_LOG_EXTRACTION: (entityType: string) =>
       `${INTERNAL_BASE}/${entityType}/force_log_extraction`,
     FORCE_CCS_EXTRACT_TO_UPDATES: (entityType: string) =>

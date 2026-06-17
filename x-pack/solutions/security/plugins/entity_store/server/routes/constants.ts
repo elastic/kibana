@@ -24,6 +24,9 @@ export const LogExtractionInstallParams = LogExtractionConfig.pick({
   fieldHistoryLength: true,
   additionalIndexPatterns: true,
   excludedIndexPatterns: true,
+  useDiscoveredIndexSource: true,
+  useDiscoveredConfidenceClassification: true,
+  discoveredIndexSourceMinConfidence: true,
   lookbackPeriod: true,
   frequency: true,
   delay: true,
@@ -40,6 +43,9 @@ export const LogExtractionUpdateParams = z.object({
   fieldHistoryLength: z.number().int().optional(),
   additionalIndexPatterns: z.array(z.string()).optional(),
   excludedIndexPatterns: z.array(z.string()).optional(),
+  useDiscoveredIndexSource: z.boolean().optional(),
+  useDiscoveredConfidenceClassification: z.boolean().optional(),
+  discoveredIndexSourceMinConfidence: z.number().int().min(0).max(100).optional(),
   lookbackPeriod: z
     .string()
     .regex(/[smdh]$/)

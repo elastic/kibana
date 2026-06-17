@@ -28,6 +28,7 @@ import type {
 import type { SpacesPluginSetup, SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { CoreSetup } from '@kbn/core/server';
 import type { ElasticsearchClient } from '@kbn/core/server';
+import type { StreamsPluginStart } from '@kbn/streams-plugin/server';
 import type { AssetManagerClient } from './domain/asset_manager';
 import type { EntityMaintainersClient } from './domain/entity_maintainers';
 import type { FeatureFlags } from './infra/feature_flags';
@@ -50,6 +51,13 @@ export interface EntityStoreStartPlugins {
   security: SecurityPluginStart;
   encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
   licensing: LicensingPluginStart;
+  /**
+   * Optional, declared in `kibana.jsonc` as `optionalPlugins.streams` so the
+   * entity store keeps working in deployments that don't have streams
+   * enabled. Consumers must guard against `undefined` at the call site (the
+   * no-op reader in `createKnowledgeIndicatorsReader` is the canonical fallback).
+   */
+  streams?: StreamsPluginStart;
 }
 
 export interface EntityStoreApiRequestHandlerContext {
@@ -64,6 +72,14 @@ export interface EntityStoreApiRequestHandlerContext {
   logsExtractionClient: LogsExtractionClient;
   historySnapshotClient: HistorySnapshotClient;
   security: SecurityPluginStart;
+  /**
+   * Optional streams plugin start, mirroring `EntityStoreStartPlugins.streams`.
+   * Exposed on the request context so route handlers that need a
+   * `StreamsKnowledgeIndicatorsReader` (e.g. the discovered-sources visibility
+   * route) can build one from a real `KibanaRequest`. `undefined` when streams
+   * is not enabled — consumers must guard at the call site.
+   */
+  streams?: StreamsPluginStart;
   namespace: string;
 }
 

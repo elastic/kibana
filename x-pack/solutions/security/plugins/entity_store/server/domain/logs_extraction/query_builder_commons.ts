@@ -74,6 +74,12 @@ export interface LogPageProbeSourceClauseParams {
   toDateISO: string;
   /** Inclusive lower bound on @timestamp for log-slice pagination within the time window. */
   logsPageCursorStart?: LogSlicePaginationParams;
+  /**
+   * Optional ESQL `METADATA` fields appended to the `FROM` clause (e.g. `_index`
+   * for the KI identity-classification prelude). Omitted by the probe / count
+   * queries, which do not need metadata columns.
+   */
+  metadataFields?: readonly string[];
 }
 
 /** Bounded extraction: same as probe plus optional inclusive upper bound on @timestamp. */
@@ -82,9 +88,12 @@ export type ExtractionSourceClauseParams = LogPageProbeSourceClauseParams & {
 };
 
 export function buildLogPageProbeSourceClause(params: LogPageProbeSourceClauseParams): string {
-  const { indexPatterns, type, fromDateISO, toDateISO, logsPageCursorStart } = params;
+  const { indexPatterns, type, fromDateISO, toDateISO, logsPageCursorStart, metadataFields } =
+    params;
 
-  const baseWhere = `FROM ${indexPatterns.join(', ')}
+  const metadataClause =
+    metadataFields && metadataFields.length > 0 ? ` METADATA ${metadataFields.join(', ')}` : '';
+  const baseWhere = `FROM ${indexPatterns.join(', ')}${metadataClause}
   | WHERE
       ${TIMESTAMP_FIELD} >= TO_DATETIME("${fromDateISO}")
       AND ${TIMESTAMP_FIELD} <= TO_DATETIME("${toDateISO}")

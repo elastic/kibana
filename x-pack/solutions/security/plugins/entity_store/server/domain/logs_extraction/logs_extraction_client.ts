@@ -10,6 +10,15 @@ import moment from 'moment';
 import { SavedObjectsErrorHelpers, type ElasticsearchClient } from '@kbn/core/server';
 import type { DataViewsService } from '@kbn/data-views-plugin/common';
 import { isNonLocalIndexName } from '@kbn/es-query';
+import type { StreamsKnowledgeIndicatorsReader } from '@kbn/streams-plugin/server';
+import {
+  loadPerTypeSourceIndices,
+  loadSourceIdentityClassification,
+  type IdentityClassificationProvenance,
+  type PerTypeSourceIndices,
+  type PerTypeSourceProvenance,
+} from '../streams_features';
+import type { QueryIdentityClassification } from './ki_identity_classification';
 import type {
   EntityType,
   ManagedEntityDefinition,
@@ -102,6 +111,13 @@ export interface LogsExtractionClientDependencies {
   engineDescriptorClient: EngineDescriptorClient;
   globalStateClient: EntityStoreGlobalStateClient;
   ccsLogsExtractionClient: CcsLogsExtractionClient;
+  /**
+   * Optional Knowledge Indicators reader used by the KI-discovered index source
+   * feature (`LogExtractionConfig.useDiscoveredIndexSource`). Absent / no-op
+   * when the streams plugin is not enabled, in which case the feature stays
+   * off regardless of the flag.
+   */
+  knowledgeIndicatorsReader?: StreamsKnowledgeIndicatorsReader;
 }
 
 export class LogsExtractionClient {
@@ -112,6 +128,7 @@ export class LogsExtractionClient {
   engineDescriptorClient: EngineDescriptorClient;
   globalStateClient: EntityStoreGlobalStateClient;
   ccsLogsExtractionClient: CcsLogsExtractionClient;
+  knowledgeIndicatorsReader?: StreamsKnowledgeIndicatorsReader;
 
   constructor({
     logger,
@@ -121,6 +138,7 @@ export class LogsExtractionClient {
     engineDescriptorClient,
     globalStateClient,
     ccsLogsExtractionClient,
+    knowledgeIndicatorsReader,
   }: LogsExtractionClientDependencies) {
     this.logger = logger;
     this.namespace = namespace;
@@ -129,6 +147,145 @@ export class LogsExtractionClient {
     this.engineDescriptorClient = engineDescriptorClient;
     this.globalStateClient = globalStateClient;
     this.ccsLogsExtractionClient = ccsLogsExtractionClient;
+    this.knowledgeIndicatorsReader = knowledgeIndicatorsReader;
+  }
+
+  /**
+   * Resolves the per-entity-type KI-discovered source index patterns for a run,
+   * or `undefined` when the feature is disabled (flag off or streams absent).
+   * `undefined` signals the index-pattern builders to keep the legacy
+   * Security-Solution-data-view source; a defined array (even empty) signals the
+   * data-view replacement path.
+   */
+  private async resolveDiscoveredSourcePatterns(
+    type: EntityType,
+    config: LogExtractionConfig
+  ): Promise<string[] | undefined> {
+    if (!config.useDiscoveredIndexSource || !this.knowledgeIndicatorsReader) {
+      return undefined;
+    }
+    const { sources } = await loadPerTypeSourceIndices(this.knowledgeIndicatorsReader, this.logger);
+    const patterns = sources[type];
+    this.logger.debug(
+      `[entity_store] KI-discovered index source for type "${type}": ${patterns.length} pattern(s)${
+        patterns.length ? ` (${patterns.join(', ')})` : ''
+      }`
+    );
+    return patterns;
+  }
+
+  /**
+   * Resolves the per-source KI identity classification for a run, or `undefined`
+   * when the feature does not apply (flag off, streams absent, or non-user
+   * engine — the high/medium gate only exists for the user engine).
+   *
+   * `undefined` signals the query builder to keep the rule-based namespace /
+   * idpGate / confidence logic. A defined array (the classified sources)
+   * activates the classification prelude. When the flag is on but no source is
+   * classified yet, this returns `undefined` so enabling the flag with no KI
+   * data is a no-op rather than wiping confidence off every user.
+   */
+  private async resolveIdentityClassification(
+    type: EntityType,
+    config: LogExtractionConfig
+  ): Promise<QueryIdentityClassification[] | undefined> {
+    if (
+      type !== 'user' ||
+      !config.useDiscoveredConfidenceClassification ||
+      !this.knowledgeIndicatorsReader
+    ) {
+      return undefined;
+    }
+    const { classifications } = await loadSourceIdentityClassification(
+      this.knowledgeIndicatorsReader,
+      { minConfidence: config.discoveredIndexSourceMinConfidence },
+      this.logger
+    );
+    if (classifications.length === 0) {
+      this.logger.debug(
+        '[entity_store] KI confidence classification enabled but no source classified; keeping rule-based behavior this run'
+      );
+      return undefined;
+    }
+    this.logger.debug(
+      `[entity_store] KI identity classification for user engine: ${classifications.length} classified source(s)`
+    );
+    return classifications.map(({ indexPatterns, namespace, tier }) => ({
+      indexPatterns,
+      namespace,
+      tier,
+    }));
+  }
+
+  /**
+   * Picks the effective source index patterns for a run. When the user-engine
+   * KI confidence classification is active (`identityClassification` defined),
+   * the `FROM` is scoped to the classified streams only — so unclassified
+   * sources never enter extraction and no `unknown`-namespace entities are
+   * produced. Otherwise the discovered-source patterns (or `undefined` for the
+   * legacy data-view source) are used unchanged.
+   */
+  private selectSourcePatterns(
+    discoveredSourcePatterns: string[] | undefined,
+    identityClassification: QueryIdentityClassification[] | undefined
+  ): string[] | undefined {
+    if (identityClassification !== undefined) {
+      return [...new Set(identityClassification.flatMap(({ indexPatterns }) => indexPatterns))];
+    }
+    return discoveredSourcePatterns;
+  }
+
+  /**
+   * Read-only visibility into what the entity store auto-derives from KI for
+   * each entity type: per-type source index patterns from deterministic
+   * `dataset_analysis` features (with provenance), plus the user-engine identity
+   * classification (tier + namespace) derived from `schema`-feature
+   * `identity_classification` (reflecting the configured confidence floor).
+   * Returns empty sources when the streams plugin is absent. Reports `enabled` /
+   * `confidenceClassificationEnabled` (the flag states) so operators can tell
+   * whether these are actually used for extraction or are merely a preview.
+   */
+  public async getDiscoveredSources(): Promise<{
+    enabled: boolean;
+    sources: PerTypeSourceIndices;
+    provenance: PerTypeSourceProvenance[];
+    /** Whether the KI confidence-classification feature (high/medium gate) is enabled. */
+    confidenceClassificationEnabled: boolean;
+    /** Per-source user identity classification (tier + namespace) the user engine would apply. */
+    identityClassification: IdentityClassificationProvenance[];
+  }> {
+    const globalState = await this.globalStateClient.findOrThrow();
+    const {
+      useDiscoveredIndexSource,
+      useDiscoveredConfidenceClassification,
+      discoveredIndexSourceMinConfidence,
+    } = globalState.logsExtraction;
+
+    if (!this.knowledgeIndicatorsReader) {
+      return {
+        enabled: useDiscoveredIndexSource,
+        sources: { user: [], host: [], service: [], generic: [] },
+        provenance: [],
+        confidenceClassificationEnabled: useDiscoveredConfidenceClassification,
+        identityClassification: [],
+      };
+    }
+
+    const [{ sources, provenance }, { classifications }] = await Promise.all([
+      loadPerTypeSourceIndices(this.knowledgeIndicatorsReader, this.logger),
+      loadSourceIdentityClassification(
+        this.knowledgeIndicatorsReader,
+        { minConfidence: discoveredIndexSourceMinConfidence },
+        this.logger
+      ),
+    ]);
+    return {
+      enabled: useDiscoveredIndexSource,
+      sources,
+      provenance,
+      confidenceClassificationEnabled: useDiscoveredConfidenceClassification,
+      identityClassification: classifications,
+    };
   }
 
   private async getLogExtractionConfigAndState(
@@ -218,9 +375,18 @@ export class LogsExtractionClient {
   public async getRemainingLogsCount(type: EntityType): Promise<number> {
     try {
       const { config, engineState } = await this.getLogExtractionConfigAndState(type);
+      const [discoveredSourcePatterns, identityClassification] = await Promise.all([
+        this.resolveDiscoveredSourcePatterns(type, config),
+        this.resolveIdentityClassification(type, config),
+      ]);
+      const sourcePatterns = this.selectSourcePatterns(
+        discoveredSourcePatterns,
+        identityClassification
+      );
       const indexPatterns = await this.getLocalIndexPatterns(
         config.additionalIndexPatterns,
-        config.excludedIndexPatterns
+        config.excludedIndexPatterns,
+        sourcePatterns
       );
       const { fromDateISO } = resolveMainExtractionWindow({ config, engineState });
       const toDateISO = moment().utc().toISOString();
@@ -272,9 +438,18 @@ export class LogsExtractionClient {
     logsCapApplied: boolean;
     logsProcessed: number;
   }> {
+    const [discoveredSourcePatterns, identityClassification] = await Promise.all([
+      this.resolveDiscoveredSourcePatterns(type, config),
+      this.resolveIdentityClassification(type, config),
+    ]);
+    const sourcePatterns = this.selectSourcePatterns(
+      discoveredSourcePatterns,
+      identityClassification
+    );
     const { localIndexPatterns, remoteIndexPatterns } = await this.getLocalAndRemoteIndexPatterns(
       config.additionalIndexPatterns,
-      config.excludedIndexPatterns
+      config.excludedIndexPatterns,
+      sourcePatterns
     );
     const latestIndex = getLatestEntitiesIndexName(this.namespace);
 
@@ -284,6 +459,7 @@ export class LogsExtractionClient {
       engineState,
       opts,
       entityDefinition,
+      identityClassification,
       indexPatterns: localIndexPatterns,
       latestIndex,
     });
@@ -332,6 +508,7 @@ export class LogsExtractionClient {
     engineState,
     opts,
     entityDefinition,
+    identityClassification,
     indexPatterns,
     latestIndex,
   }: {
@@ -340,6 +517,7 @@ export class LogsExtractionClient {
     engineState: EngineLogExtractionState;
     opts?: LogsExtractionOptions;
     entityDefinition: ManagedEntityDefinition;
+    identityClassification?: QueryIdentityClassification[];
     indexPatterns: string[];
     latestIndex: string;
   }): Promise<{
@@ -368,6 +546,7 @@ export class LogsExtractionClient {
         maxLogsPerPage,
         maxLogsPerWindow,
         entityDefinition,
+        identityClassification,
       });
       let { lastSearchTimestamp } = result;
       if (result.logsCapApplied) {
@@ -443,6 +622,7 @@ export class LogsExtractionClient {
         maxLogsPerPage,
         maxLogsPerWindow: remainingCap,
         entityDefinition,
+        identityClassification,
       });
 
       totalCount += subResult.count;
@@ -507,6 +687,7 @@ export class LogsExtractionClient {
     maxLogsPerPage,
     maxLogsPerWindow,
     entityDefinition,
+    identityClassification,
   }: {
     type: EntityType;
     engineState: EngineLogExtractionState;
@@ -519,6 +700,7 @@ export class LogsExtractionClient {
     maxLogsPerPage: number;
     maxLogsPerWindow: number;
     entityDefinition: ManagedEntityDefinition;
+    identityClassification?: QueryIdentityClassification[];
   }) {
     const effectiveMaxLogsPerPage = capAtMaxLogsPerWindow(maxLogsPerPage, maxLogsPerWindow);
     const effectiveDocsLimit = capAtMaxLogsPerWindow(docsLimit, maxLogsPerWindow);
@@ -590,6 +772,7 @@ export class LogsExtractionClient {
             indexPatterns,
             latestIndex,
             entityDefinition,
+            identityClassification,
             docsLimit: effectiveDocsLimit,
             fromDateISO,
             toDateISO,
@@ -704,6 +887,7 @@ export class LogsExtractionClient {
     indexPatterns,
     latestIndex,
     entityDefinition,
+    identityClassification,
     docsLimit,
     fromDateISO,
     toDateISO,
@@ -718,6 +902,7 @@ export class LogsExtractionClient {
     indexPatterns: string[];
     latestIndex: string;
     entityDefinition: ManagedEntityDefinition;
+    identityClassification?: QueryIdentityClassification[];
     docsLimit: number;
     fromDateISO: string;
     toDateISO: string;
@@ -743,6 +928,7 @@ export class LogsExtractionClient {
         indexPatterns,
         latestIndex,
         entityDefinition,
+        identityClassification,
         docsLimit,
         fromDateISO,
         toDateISO,
@@ -867,9 +1053,13 @@ export class LogsExtractionClient {
    */
   public async getLocalAndRemoteIndexPatterns(
     additionalIndexPatterns: string[] = [],
-    excludedIndexPatterns: string[] = []
+    excludedIndexPatterns: string[] = [],
+    discoveredSourcePatterns?: string[]
   ): Promise<{ localIndexPatterns: string[]; remoteIndexPatterns: string[] }> {
-    const all = await this.getAllIndexPatternsIncludingRemote(additionalIndexPatterns);
+    const all = await this.getAllIndexPatternsIncludingRemote(
+      additionalIndexPatterns,
+      discoveredSourcePatterns
+    );
     const alertsIndex = getAlertsIndexName(this.namespace);
     const withoutAlerts = all.filter((index) => index !== alertsIndex);
 
@@ -899,24 +1089,47 @@ export class LogsExtractionClient {
 
   public async getLocalIndexPatterns(
     additionalIndexPatterns: string[] = [],
-    excludedIndexPatterns: string[] = []
+    excludedIndexPatterns: string[] = [],
+    discoveredSourcePatterns?: string[]
   ): Promise<string[]> {
     const { localIndexPatterns } = await this.getLocalAndRemoteIndexPatterns(
       additionalIndexPatterns,
-      excludedIndexPatterns
+      excludedIndexPatterns,
+      discoveredSourcePatterns
     );
     return localIndexPatterns;
   }
 
   /**
-   * Builds the full list of index patterns (updates, additional, security data view)
-   * including CCS remote indices, without filtering by alerts or CCS.
+   * Builds the full list of source index patterns (including CCS remote indices,
+   * without filtering by alerts or CCS).
+   *
+   * Two mutually exclusive source models:
+   * - **KI-discovered (data-view replacement).** When `discoveredSourcePatterns`
+   *   is defined (the `useDiscoveredIndexSource` flag is on), the per-entity-type
+   *   KI-discovered patterns are the sole stream source. The Security Solution
+   *   data view is NOT queried and there is no `logs-*` fallback. An empty
+   *   discovered set means this engine sources only from `updates` + operator
+   *   `additionalIndexPatterns` (typically nothing new) — deliberate, so a type
+   *   with no qualifying dataset_analysis features does not silently fall back
+   *   to the coarse data view.
+   * - **Legacy (default).** When `discoveredSourcePatterns` is `undefined`, the
+   *   Security Solution data view is appended as before (`logs-*` on failure).
+   *
+   * `updates` and operator `additionalIndexPatterns` are a hard union in both
+   * models.
    */
   private async getAllIndexPatternsIncludingRemote(
-    additionalIndexPatterns: string[] = []
+    additionalIndexPatterns: string[] = [],
+    discoveredSourcePatterns?: string[]
   ): Promise<string[]> {
     const updatesDataStream = getUpdatesEntitiesDataStreamName(this.namespace);
     const indexPatterns: string[] = [updatesDataStream, ...additionalIndexPatterns];
+
+    if (discoveredSourcePatterns !== undefined) {
+      indexPatterns.push(...discoveredSourcePatterns);
+      return indexPatterns;
+    }
 
     try {
       const secSolDataView = await this.dataViewsService.get(
