@@ -15,5 +15,6 @@ export {
   withKibanaBabelRegister,
 } from './runner_utils';
 export { resolveSelector, type SelectorInput } from './locator_helper';
+export { scrollContainerUntilTargetIsVisible } from './scroll_container_until_target_is_visible';
 export { keyTo } from './a11y_utils';
 export { checkA11y, type RunA11yScanOptions } from './axe';
