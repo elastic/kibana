@@ -2312,6 +2312,7 @@ x-pack/platform/test/plugin_api_integration/test_suites/platform/ @elastic/kiban
 /x-pack/platform/test/api_integration/apis/kibana @elastic/kibana-core
 /src/platform/test/api_integration/fixtures/import.ndjson @elastic/kibana-core
 /x-pack/platform/test/localization/ @elastic/kibana-core # Assigned per https://github.com/elastic/kibana/pull/146704
+/x-pack/platform/test/localization/tests/lens/ @elastic/kibana-visualizations
 /src/platform/test/ui_capabilities/newsfeed_err @elastic/kibana-core # Assigned per https://github.com/elastic/kibana/pull/66562
 /src/platform/test/server_integration/services/types.d.ts @elastic/kibana-core # Assigned per https://github.com/elastic/kibana/pull/81140
 /src/platform/test/server_integration/http @elastic/kibana-core
