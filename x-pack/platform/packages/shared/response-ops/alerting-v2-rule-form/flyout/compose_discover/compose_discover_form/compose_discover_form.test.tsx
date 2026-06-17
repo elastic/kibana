@@ -30,7 +30,7 @@ const BASE_COMPOSE_VALUES: ComposeFormValues = {
   metadata: { name: 'Test rule', enabled: true },
   timeField: '@timestamp',
   schedule: { every: '1m', lookback: '5m' },
-  query: { format: 'composed', base: '', blocks: { breach: '' } },
+  query: { format: 'composed', base: '', breach: { segment: '' } },
   stateTransitionAlertDelayMode: 'immediate',
   stateTransitionRecoveryDelayMode: 'immediate',
   artifacts: [],
@@ -193,83 +193,58 @@ describe('step validation', () => {
   describe('notifications.validate', () => {
     const notificationsStep = getSteps(true).steps.find((s) => s.id === 'notifications')!;
 
-    const makeServices = (isValid?: (v: object) => boolean): RuleFormServices =>
-      ({ workflowForm: { isValid } } as unknown as RuleFormServices);
-
-    it('returns true in edit mode regardless of form state', async () => {
-      const state = createState({ mode: 'edit' });
-      const methods = {
-        getValues: jest.fn().mockReturnValue({ workflow: {} }),
-      } as unknown as UseFormReturn<ComposeFormValues>;
-      expect(
-        await notificationsStep.validate!(
-          methods,
-          state,
-          makeServices(() => false)
-        )
-      ).toBe(true);
-    });
-
     it('returns true when notifications are disabled', async () => {
       const state = createState({ mode: 'create' });
       const methods = {
         getValues: jest.fn().mockReturnValue(undefined),
       } as unknown as UseFormReturn<ComposeFormValues>;
-      expect(await notificationsStep.validate!(methods, state, makeServices())).toBe(true);
+      expect(await notificationsStep.validate!(methods, state)).toBe(true);
     });
 
-    it('returns false when notifications enabled and isValid returns false', async () => {
-      const state = createState({ mode: 'create' });
-      const methods = {
-        getValues: jest.fn().mockReturnValue({ workflow: { mode: 'existing', workflowId: null } }),
-      } as unknown as UseFormReturn<ComposeFormValues>;
-      expect(
-        await notificationsStep.validate!(
-          methods,
-          state,
-          makeServices(() => false)
-        )
-      ).toBe(false);
-    });
-
-    it('returns true when notifications enabled and isValid returns true (existing workflow)', async () => {
-      const state = createState({ mode: 'create' });
-      const methods = {
-        getValues: jest
-          .fn()
-          .mockReturnValue({ workflow: { mode: 'existing', workflowId: 'wf-1' } }),
-      } as unknown as UseFormReturn<ComposeFormValues>;
-      expect(
-        await notificationsStep.validate!(
-          methods,
-          state,
-          makeServices(() => true)
-        )
-      ).toBe(true);
-    });
-
-    it('returns false when notifications enabled and in create mode with no connector', async () => {
+    it('returns false when an existing-workflow action has no workflowId', async () => {
       const state = createState({ mode: 'create' });
       const methods = {
         getValues: jest.fn().mockReturnValue({
-          workflow: { mode: 'create', connectorId: null, typeId: 'email', params: '' },
+          workflows: [{ id: 'item-1', source: 'existing', workflowId: null }],
         }),
       } as unknown as UseFormReturn<ComposeFormValues>;
-      expect(
-        await notificationsStep.validate!(
-          methods,
-          state,
-          makeServices(() => false)
-        )
-      ).toBe(false);
+      expect(await notificationsStep.validate!(methods, state)).toBe(false);
     });
 
-    it('returns true when notifications enabled but services.workflowForm.isValid is absent', async () => {
+    it('returns true for a complete existing-workflow action', async () => {
       const state = createState({ mode: 'create' });
       const methods = {
-        getValues: jest.fn().mockReturnValue({ workflow: {} }),
+        getValues: jest.fn().mockReturnValue({
+          workflows: [{ id: 'item-1', source: 'existing', workflowId: 'wf-1' }],
+        }),
       } as unknown as UseFormReturn<ComposeFormValues>;
-      expect(await notificationsStep.validate!(methods, state, makeServices())).toBe(true);
+      expect(await notificationsStep.validate!(methods, state)).toBe(true);
+    });
+
+    it('returns false for an inline action with no connector', async () => {
+      const state = createState({ mode: 'create' });
+      const methods = {
+        getValues: jest.fn().mockReturnValue({
+          workflows: [
+            {
+              id: 'item-1',
+              source: 'inline',
+              stepType: 'email',
+              connectorId: null,
+              params: '',
+            },
+          ],
+        }),
+      } as unknown as UseFormReturn<ComposeFormValues>;
+      expect(await notificationsStep.validate!(methods, state)).toBe(false);
+    });
+
+    it('returns true when notifications.workflows is empty', async () => {
+      const state = createState({ mode: 'create' });
+      const methods = {
+        getValues: jest.fn().mockReturnValue({ workflows: [] }),
+      } as unknown as UseFormReturn<ComposeFormValues>;
+      expect(await notificationsStep.validate!(methods, state)).toBe(true);
     });
   });
 
