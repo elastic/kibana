@@ -14,7 +14,7 @@ import { FIELD_STATS_DATA_VIEW_REF_NAME } from './constants';
 import { normalizeFieldStatsLegacyFields, type RawFieldStatsState } from './normalize_legacy_state';
 
 export function transformOut(
-  storedState: object,
+  storedState: RawFieldStatsState,
   references?: Reference[]
 ): FieldStatsTableEmbeddableState {
   const state = flow(
