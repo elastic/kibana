@@ -212,6 +212,60 @@ describe('wired stream mode switching', () => {
   });
 });
 
+describe('wired stream reordering', () => {
+  const wiredDefinitionWithRouting = {
+    privileges: { manage: true, simulate: true },
+    inherited_fields: {},
+    stream: {
+      name: 'logs.otel',
+      ingest: {
+        wired: {
+          fields: {},
+          routing: [
+            { destination: 'logs.otel.a', where: ALWAYS_CONDITION, status: 'enabled' },
+            { destination: 'logs.otel.b', where: ALWAYS_CONDITION, status: 'enabled' },
+          ],
+        },
+      },
+    },
+  } as unknown as Streams.WiredStream.GetResponse;
+
+  const createActorWithRouting = () => {
+    const actor = createActor(
+      streamRoutingMachine.provide({
+        actors: {
+          routingSamplesMachine: stubRoutingSamplesMachine,
+        },
+      }),
+      { input: { definition: wiredDefinitionWithRouting } }
+    );
+    actor.start();
+    return actor;
+  };
+
+  it('returns to idle and re-enables creating a partition when a reorder restores the original order', () => {
+    const actor = createActorWithRouting();
+    expect(actor.getSnapshot().value).toEqual({ ready: { ingestMode: 'idle' } });
+
+    const originalRouting = actor.getSnapshot().context.routing;
+    expect(originalRouting).toHaveLength(2);
+
+    // Reordering the rules creates pending changes, so we move into the reordering state and
+    // creating a partition is blocked.
+    actor.send({ type: 'routingRule.reorder', routing: [originalRouting[1], originalRouting[0]] });
+    expect(actor.getSnapshot().value).toEqual({
+      ready: { ingestMode: { reorderingRules: 'reordering' } },
+    });
+    expect(actor.getSnapshot().can({ type: 'routingRule.create' })).toBe(false);
+
+    // Restoring the original order leaves no pending changes, so we return to idle and creating a
+    // partition is enabled again.
+    actor.send({ type: 'routingRule.reorder', routing: originalRouting });
+    expect(actor.getSnapshot().value).toEqual({ ready: { ingestMode: 'idle' } });
+    expect(actor.getSnapshot().can({ type: 'routingRule.create' })).toBe(true);
+  });
+});
+
 describe('getRuntimeMappings classic stream guard', () => {
   it('returns empty runtime_mappings for classic definitions even with a condition', () => {
     const result = buildDocumentCountProbabilitySearchParams({

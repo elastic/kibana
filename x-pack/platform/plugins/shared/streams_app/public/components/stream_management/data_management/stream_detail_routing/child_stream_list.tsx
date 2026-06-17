@@ -30,6 +30,7 @@ import { useScrollToActive } from '@kbn/ui-side-navigation/src/hooks/use_scroll_
 import type { DraggableProvided } from '@hello-pangea/dnd';
 import { useDiscardConfirm } from '../../../../hooks/use_discard_confirm';
 import { useStreamsPrivileges } from '../../../../hooks/use_streams_privileges';
+import { useKibana } from '../../../../hooks/use_kibana';
 import { NestedView } from '../../../nested_view';
 import { CurrentStreamEntry } from './current_stream_entry';
 import { NewRoutingStreamEntry } from './new_routing_stream_entry';
@@ -213,8 +214,17 @@ export function ChildStreamList({ availableStreams = [] }: { availableStreams?: 
   );
 }
 
+// Routing rules are reordered across two droppable zones so the draft-ordering invariant
+// (drafts must come after all materialized streams) can be enforced via drag-and-drop without
+// flicker. See handleDragStart for why the disabled zone is decided at drag start.
+const MATERIALIZED_DROPPABLE_ID = 'routing_children_materialized';
+const DRAFT_DROPPABLE_ID = 'routing_children_draft';
+
 function IngestModeChildrenList({ availableStreams }: { availableStreams: string[] }) {
   const { euiTheme } = useEuiTheme();
+  const {
+    core: { notifications },
+  } = useKibana();
   const { changeRule, createNewRule, editRule, reorderRules } = useStreamRoutingEvents();
   const aiFeatures = useAIFeatures();
   const { timeState } = useTimefilter();
@@ -237,6 +247,9 @@ function IngestModeChildrenList({ availableStreams }: { availableStreams: string
   } = useReviewSuggestionsForm();
 
   const [showBulkAcceptModal, setShowBulkAcceptModal] = React.useState(false);
+  // The zone (droppable) the active drag started from. Used to disable the opposite zone for the
+  // whole drag so the draft boundary can't be crossed. null when no drag is in progress.
+  const [draggingDroppableId, setDraggingDroppableId] = React.useState<string | null>(null);
   const { acknowledgeBulkFork } = useStreamRoutingEvents();
   const isBulkForkComplete = useStreamsRoutingSelector((snapshot) =>
     snapshot.matches({ ready: { ingestMode: { bulkForking: 'complete' } } })
@@ -278,11 +291,54 @@ function IngestModeChildrenList({ availableStreams }: { availableStreams: string
 
   const hasData = routing.length > 0 || (aiFeatures?.enabled && suggestions);
 
+  const newRule = routing.find((rule) => rule.isNew);
+  const persistedRules = useMemo(() => routing.filter((rule) => !rule.isNew), [routing]);
+  // Split the persisted rules into the two reorder zones. Materialized streams always precede
+  // drafts, so a valid full order can always be reconstructed by concatenating the two zones.
+  const materializedRules = useMemo(
+    () => persistedRules.filter((rule) => !rule.draft),
+    [persistedRules]
+  );
+  const draftRules = useMemo(() => persistedRules.filter((rule) => rule.draft), [persistedRules]);
+
+  // Decide which zone is locked for the whole drag based on where it started, rather than reacting
+  // to the live destination. Eeciding at drag start keeps it stable and lets the library play its
+  // smooth return-to-origin animation when the drop crosses the draft boundary.
+  const handleDragStart: DragDropContextProps['onDragStart'] = (start) => {
+    setDraggingDroppableId(start.source.droppableId);
+  };
+
   const handlerItemDrag: DragDropContextProps['onDragEnd'] = ({ source, destination }) => {
-    if (source && destination) {
-      const items = euiDragDropReorder(routing, source.index, destination.index);
-      reorderRules(items);
+    setDraggingDroppableId(null);
+
+    // No destination means the drop was rejected by the disabled opposite zone (a draft dropped
+    // among materialized streams, or vice versa) or released outside the list. The library
+    // animates the item back to its origin; warn only when the move crossed the draft boundary.
+    if (!destination) {
+      const draggedFromDraftZone = source.droppableId === DRAFT_DROPPABLE_ID;
+      const wouldCrossBoundary = draggedFromDraftZone
+        ? materializedRules.length > 0
+        : draftRules.length > 0;
+      if (wouldCrossBoundary) {
+        notifications.toasts.addWarning({
+          title: i18n.translate('xpack.streams.streamDetailRouting.invalidRoutingOrderTitle', {
+            defaultMessage: 'Invalid routing order',
+          }),
+          text: i18n.translate('xpack.streams.streamDetailRouting.invalidRoutingOrderDescription', {
+            defaultMessage: 'Draft streams must be placed after all materialized streams.',
+          }),
+        });
+      }
+      return;
     }
+
+    // Cross-zone drops are disabled, so a non-null destination is always within the source zone.
+    const isDraftZone = source.droppableId === DRAFT_DROPPABLE_ID;
+    const zone = isDraftZone ? draftRules : materializedRules;
+    const reorderedZone = euiDragDropReorder(zone, source.index, destination.index);
+    reorderRules(
+      isDraftZone ? [...materializedRules, ...reorderedZone] : [...reorderedZone, ...draftRules]
+    );
   };
 
   const getSuggestionsForStream = useCallback(
@@ -387,6 +443,45 @@ function IngestModeChildrenList({ availableStreams }: { availableStreams: string
     acknowledgeBulkFork,
   ]);
 
+  // Renders a single draggable rule. `indexWithinZone` is the draggable index inside its droppable;
+  // `globalIndex` positions it across both zones so the nested tree connectors stay continuous.
+  const renderRoutingRule = (
+    routingRule: RoutingDefinitionWithUIAttributes,
+    indexWithinZone: number,
+    globalIndex: number
+  ) => (
+    <EuiFlexItem key={routingRule.id} grow={false}>
+      <EuiDraggable
+        index={indexWithinZone}
+        isDragDisabled={!canReorderRoutingRules}
+        draggableId={routingRule.id}
+        hasInteractiveChildren={true}
+        customDragHandle={true}
+        spacing="none"
+      >
+        {(provided, snapshot) => (
+          <NestedView
+            last={globalIndex === routing.length - 1}
+            first={globalIndex === 0}
+            isBeingDragged={snapshot.isDragging}
+          >
+            {currentRuleId === routingRule.id ? (
+              <EditRoutingStreamEntry onChange={changeRule} routingRule={routingRule} />
+            ) : (
+              <IdleRoutingStreamEntryWithPermissions
+                availableStreams={availableStreams}
+                draggableProvided={provided}
+                onEditClick={editRule}
+                routingRule={routingRule}
+                canReorder={canReorderRoutingRules}
+              />
+            )}
+          </NestedView>
+        )}
+      </EuiDraggable>
+    </EuiFlexItem>
+  );
+
   return !hasData && !isLoadingSuggestions && !isRefreshing ? (
     <>
       <NoDataEmptyPrompt
@@ -434,48 +529,46 @@ function IngestModeChildrenList({ availableStreams }: { availableStreams: string
         `}
       >
         {routing.length > 0 && (
-          <EuiDragDropContext onDragEnd={handlerItemDrag}>
-            <EuiDroppable droppableId="routing_children_reordering" spacing="none">
-              <EuiFlexGroup direction="column" gutterSize="xs">
-                {routing.map((routingRule, pos) => (
-                  <EuiFlexItem key={routingRule.id} grow={false}>
-                    <EuiDraggable
-                      index={pos}
-                      isDragDisabled={!canReorderRoutingRules}
-                      draggableId={routingRule.id}
-                      hasInteractiveChildren={true}
-                      customDragHandle={true}
-                      spacing="none"
-                    >
-                      {(provided, snapshot) => (
-                        <NestedView
-                          last={pos === routing.length - 1}
-                          first={pos === 0}
-                          isBeingDragged={snapshot.isDragging}
-                        >
-                          {routingRule.isNew ? (
-                            <NewRoutingStreamEntry />
-                          ) : currentRuleId === routingRule.id ? (
-                            <EditRoutingStreamEntry
-                              onChange={changeRule}
-                              routingRule={routingRule}
-                            />
-                          ) : (
-                            <IdleRoutingStreamEntryWithPermissions
-                              availableStreams={availableStreams}
-                              draggableProvided={provided}
-                              onEditClick={editRule}
-                              routingRule={routingRule}
-                              canReorder={canReorderRoutingRules}
-                            />
-                          )}
-                        </NestedView>
+          <EuiDragDropContext onDragStart={handleDragStart} onDragEnd={handlerItemDrag}>
+            <EuiFlexGroup direction="column" gutterSize="xs">
+              {materializedRules.length > 0 && (
+                <EuiFlexItem grow={false}>
+                  <EuiDroppable
+                    droppableId={MATERIALIZED_DROPPABLE_ID}
+                    spacing="none"
+                    isDropDisabled={draggingDroppableId === DRAFT_DROPPABLE_ID}
+                  >
+                    <EuiFlexGroup direction="column" gutterSize="xs">
+                      {materializedRules.map((routingRule, pos) =>
+                        renderRoutingRule(routingRule, pos, pos)
                       )}
-                    </EuiDraggable>
-                  </EuiFlexItem>
-                ))}
-              </EuiFlexGroup>
-            </EuiDroppable>
+                    </EuiFlexGroup>
+                  </EuiDroppable>
+                </EuiFlexItem>
+              )}
+              {draftRules.length > 0 && (
+                <EuiFlexItem grow={false}>
+                  <EuiDroppable
+                    droppableId={DRAFT_DROPPABLE_ID}
+                    spacing="none"
+                    isDropDisabled={draggingDroppableId === MATERIALIZED_DROPPABLE_ID}
+                  >
+                    <EuiFlexGroup direction="column" gutterSize="xs">
+                      {draftRules.map((routingRule, pos) =>
+                        renderRoutingRule(routingRule, pos, materializedRules.length + pos)
+                      )}
+                    </EuiFlexGroup>
+                  </EuiDroppable>
+                </EuiFlexItem>
+              )}
+              {newRule && (
+                <EuiFlexItem grow={false}>
+                  <NestedView last first={routing.length === 1}>
+                    <NewRoutingStreamEntry />
+                  </NestedView>
+                </EuiFlexItem>
+              )}
+            </EuiFlexGroup>
           </EuiDragDropContext>
         )}
 
