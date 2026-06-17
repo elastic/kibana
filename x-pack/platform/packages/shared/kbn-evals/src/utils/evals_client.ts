@@ -15,10 +15,12 @@ import {
   EVALS_DATASET_URL,
   EVALS_EXPERIMENT_SCORES_URL,
   EVALS_EXPERIMENT_URL,
+  EVALS_EXPERIMENTS_URL,
   EVALS_SCORES_URL,
   GetEvaluationDatasetResponse,
   GetEvaluationExperimentResponse,
   GetEvaluationExperimentScoresResponse,
+  GetEvaluationExperimentsResponse,
   IngestScoresRequestBody,
   IngestScoresResponse,
   MAX_SCORES_PER_QUERY,
@@ -91,6 +93,13 @@ interface IngestScoresResult {
 export interface IngestScoresError extends Error {
   statusCode: 400 | 429 | 500;
   body: IngestScoresResult;
+}
+
+export interface BaselineExperiment {
+  executionId: string;
+  timestamp: string | undefined;
+  gitCommitSha: string | null;
+  gitBranch: string | null;
 }
 
 const EVALS_PLUGIN_DISABLED_MESSAGE =
@@ -279,6 +288,51 @@ export class EvalsClient {
         return null;
       }
       throw error;
+    }
+  }
+
+  async findLatestBaselineExperiment({
+    suiteId,
+    branch,
+    excludeExecutionId,
+  }: {
+    suiteId: string;
+    branch: string;
+    excludeExecutionId?: string;
+  }): Promise<BaselineExperiment | undefined> {
+    try {
+      const response = await this.kbnClient.request({
+        path: EVALS_EXPERIMENTS_URL,
+        method: 'GET',
+        query: {
+          suite_id: suiteId,
+          branch,
+          page: 1,
+          per_page: 5,
+        },
+        headers: VERSIONED_HEADERS,
+      });
+
+      const parsed = GetEvaluationExperimentsResponse.parse(getResponseData(response));
+      const match = parsed.experiments.find((exp) => exp.execution_id !== excludeExecutionId);
+
+      if (!match) {
+        return undefined;
+      }
+
+      return {
+        executionId: match.execution_id,
+        timestamp: match.timestamp,
+        gitCommitSha: match.git_commit_sha ?? null,
+        gitBranch: match.git_branch ?? null,
+      };
+    } catch (error: unknown) {
+      this.log.error(
+        `Failed to find baseline experiment for suite ${suiteId} on branch ${branch}: ${
+          error instanceof Error ? error.message : String(error)
+        }`
+      );
+      return undefined;
     }
   }
 

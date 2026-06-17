@@ -5,13 +5,16 @@
  * 2.0.
  */
 
+import Fs from 'fs';
 import { createFlagError } from '@kbn/dev-cli-errors';
 import type { Command } from '@kbn/dev-cli-runner';
 import { KbnClient } from '@kbn/kbn-client';
 import { computePairedTTestResults, pairScores } from '@kbn/evals-common';
+import type { BaselineExperiment } from '../../utils/evals_client';
 import { EvalsClient } from '../../utils/evals_client';
 import { getEvaluationsKbnClient } from '../../utils/evaluations_kbn_client';
 import { formatPairedTTestReport } from '../../utils/reporting/compare_report';
+import { formatMarkdownCompareReport } from '../../utils/reporting/compare_markdown_report';
 
 const DEFAULT_EVALUATIONS_KBN_URL = 'http://elastic:changeme@localhost:5601';
 
@@ -20,24 +23,44 @@ export const compareCmd: Command<void> = {
   description: `
   Compare two evaluation experiments using paired t-tests.
 
-  NOTE: The two experiments must use the same experiment orchestrator (e.g. Kibana or Phoenix), due to the different handling of the dataset/example IDs.
-  Scores are read from the evals plugin on the target Kibana.
-  Configure target/auth with EVALUATIONS_KBN_URL and EVALUATIONS_KBN_API_KEY.
+  Usage modes:
+    1. Direct comparison of two experiment IDs:
+       node scripts/evals compare <experiment-id-1> <experiment-id-2>
 
-  Example:
-    node scripts/evals compare <experiment-id-1> <experiment-id-2>
+    2. Auto-resolve baseline from a branch (for CI):
+       node scripts/evals compare <experiment-id> --baseline-branch main --suite <suite-id>
+
+  Options:
+    --baseline-branch  Branch to find the latest baseline experiment on (e.g. "main")
+    --suite            Suite ID filter for baseline lookup
+    --format           Output format: "terminal" (default) or "markdown"
+    --kibana-url       Kibana URL for generating compare page links in markdown
+    --output           Write markdown output to a file instead of stdout
+
+  Environment:
+    EVALUATIONS_KBN_URL      Target Kibana URL (defaults to localhost)
+    EVALUATIONS_KBN_API_KEY  API key for authenticating to the target Kibana
   `,
+  flags: {
+    string: ['baseline-branch', 'suite', 'format', 'kibana-url', 'output'],
+    help: `
+      --baseline-branch  Branch to find the latest baseline experiment on
+      --suite            Suite ID filter for baseline lookup
+      --format           Output format: "terminal" (default) or "markdown"
+      --kibana-url       Kibana URL for generating compare page links in markdown
+      --output           Write markdown output to a file instead of stdout
+    `,
+  },
   run: async ({ log, flagsReader }) => {
-    const [firstExperimentId, secondExperimentId, ...extraArgs] = flagsReader.getPositionals();
+    const positionals = flagsReader.getPositionals();
+    const baselineBranch = flagsReader.string('baseline-branch');
+    const suiteId = flagsReader.string('suite');
+    const format = flagsReader.string('format') ?? 'terminal';
+    const kibanaUrl = flagsReader.string('kibana-url');
+    const outputPath = flagsReader.string('output');
 
-    if (!firstExperimentId || !secondExperimentId) {
-      throw createFlagError(
-        'Two experiment IDs are required. Example: node scripts/evals compare <experiment-id-1> <experiment-id-2>. Configure target Kibana with EVALUATIONS_KBN_URL and EVALUATIONS_KBN_API_KEY.'
-      );
-    }
-
-    if (extraArgs.length > 0) {
-      throw createFlagError('Unexpected extra arguments. Provide exactly two experiment IDs.');
+    if (format !== 'terminal' && format !== 'markdown') {
+      throw createFlagError('--format must be "terminal" or "markdown".');
     }
 
     const evaluationsKbnUrl = process.env.EVALUATIONS_KBN_URL;
@@ -66,9 +89,60 @@ export const compareCmd: Command<void> = {
       );
     }
 
+    let firstExperimentId: string;
+    let secondExperimentId: string;
+    let baselineMetadata: BaselineExperiment | undefined;
+
+    if (baselineBranch) {
+      if (!suiteId) {
+        throw createFlagError('--suite is required when using --baseline-branch.');
+      }
+
+      firstExperimentId = positionals[0];
+      if (!firstExperimentId) {
+        throw createFlagError(
+          'One experiment ID is required with --baseline-branch. Example: node scripts/evals compare <experiment-id> --baseline-branch main --suite <suite-id>'
+        );
+      }
+
+      log.info(
+        `Looking up latest baseline experiment for suite "${suiteId}" on branch "${baselineBranch}"...`
+      );
+
+      baselineMetadata = await evalsClient.findLatestBaselineExperiment({
+        suiteId,
+        branch: baselineBranch,
+        excludeExecutionId: firstExperimentId,
+      });
+
+      if (!baselineMetadata) {
+        log.warning(
+          `No baseline experiment found for suite ${suiteId} on branch ${baselineBranch}. Nothing to compare.`
+        );
+        return;
+      }
+
+      secondExperimentId = baselineMetadata.executionId;
+      log.info(`Found baseline experiment: ${secondExperimentId}`);
+    } else {
+      [firstExperimentId, secondExperimentId] = positionals;
+      if (!firstExperimentId || !secondExperimentId) {
+        throw createFlagError(
+          'Two experiment IDs are required. Example: node scripts/evals compare <experiment-id-1> <experiment-id-2>. Configure target Kibana with EVALUATIONS_KBN_URL and EVALUATIONS_KBN_API_KEY.'
+        );
+      }
+
+      if (positionals.length > 2) {
+        throw createFlagError('Unexpected extra arguments. Provide exactly two experiment IDs.');
+      }
+    }
+
+    const executionIdFilter = suiteId ? { suiteId, executionId: firstExperimentId } : undefined;
+    const baselineFilter = suiteId ? { suiteId, executionId: secondExperimentId } : undefined;
+
     const [firstExperimentScores, secondExperimentScores] = await Promise.all([
-      evalsClient.getExperimentScores(firstExperimentId),
-      evalsClient.getExperimentScores(secondExperimentId),
+      evalsClient.getExperimentScores(firstExperimentId, executionIdFilter),
+      evalsClient.getExperimentScores(secondExperimentId, baselineFilter),
     ]);
 
     if (firstExperimentScores.length === 0) {
@@ -122,13 +196,40 @@ export const compareCmd: Command<void> = {
       return;
     }
 
-    const report = formatPairedTTestReport({
-      experimentIdA: firstExperimentId,
-      experimentIdB: secondExperimentId,
-      results,
-    });
+    if (format === 'markdown') {
+      let comparePageUrl: string | undefined;
+      const effectiveKibanaUrl = kibanaUrl ?? evaluationsKbnUrl;
+      if (effectiveKibanaUrl) {
+        const baseUrl = effectiveKibanaUrl.replace(/\/+$/, '');
+        comparePageUrl = `${baseUrl}/app/management/ai/evals/compare?runA=${encodeURIComponent(
+          firstExperimentId
+        )}&runB=${encodeURIComponent(secondExperimentId)}`;
+      }
 
-    log.info(`\n\n${report.header.join('\n')}`);
-    log.info(`\n${report.summary}\n${report.tableOutput}`);
+      const markdown = formatMarkdownCompareReport({
+        experimentIdA: firstExperimentId,
+        experimentIdB: secondExperimentId,
+        results,
+        comparePageUrl,
+        baselineTimestamp: baselineMetadata?.timestamp,
+        baselineCommitSha: baselineMetadata?.gitCommitSha ?? undefined,
+      });
+
+      if (outputPath) {
+        Fs.appendFileSync(outputPath, markdown + '\n\n');
+        log.info(`Markdown report appended to ${outputPath}`);
+      } else {
+        process.stdout.write(markdown + '\n');
+      }
+    } else {
+      const report = formatPairedTTestReport({
+        experimentIdA: firstExperimentId,
+        experimentIdB: secondExperimentId,
+        results,
+      });
+
+      log.info(`\n\n${report.header.join('\n')}`);
+      log.info(`\n${report.summary}\n${report.tableOutput}`);
+    }
   },
 };

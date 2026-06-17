@@ -110,10 +110,11 @@ export const registerDeleteExampleRoute = ({
             });
           }
 
-          logger.error(`Failed to delete evaluation dataset example: ${error}`);
+          const errorMessage = error instanceof Error ? error.message : String(error);
+          logger.error(`Failed to delete evaluation dataset example: ${errorMessage}`);
           return response.customError({
             statusCode: 500,
-            body: { message: 'Failed to delete evaluation dataset example' },
+            body: { message: `Failed to delete evaluation dataset example: ${errorMessage}` },
           });
         }
       }

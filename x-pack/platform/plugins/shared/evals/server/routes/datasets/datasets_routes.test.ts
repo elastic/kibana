@@ -168,7 +168,7 @@ describe('dataset routes', () => {
       const response = await handler(context as any, request, kibanaResponseFactory);
 
       expect(response.status).toBe(500);
-      expect(response.payload).toEqual({ message: 'Failed to list evaluation datasets' });
+      expect(response.payload).toEqual({ message: 'Failed to list evaluation datasets: failed' });
       expect(logger.error).toHaveBeenCalled();
     });
   });
@@ -240,7 +240,7 @@ describe('dataset routes', () => {
       const response = await handler(context as any, request, kibanaResponseFactory);
 
       expect(response.status).toBe(500);
-      expect(response.payload).toEqual({ message: 'Failed to create evaluation dataset' });
+      expect(response.payload).toEqual({ message: 'Failed to create evaluation dataset: boom' });
       expect(logger.error).toHaveBeenCalled();
     });
   });
@@ -303,7 +303,7 @@ describe('dataset routes', () => {
       const response = await handler(context as any, request, kibanaResponseFactory);
 
       expect(response.status).toBe(500);
-      expect(response.payload).toEqual({ message: 'Failed to get evaluation dataset' });
+      expect(response.payload).toEqual({ message: 'Failed to get evaluation dataset: failed' });
       expect(logger.error).toHaveBeenCalled();
     });
   });
@@ -378,7 +378,7 @@ describe('dataset routes', () => {
       const response = await handler(context as any, request, kibanaResponseFactory);
 
       expect(response.status).toBe(500);
-      expect(response.payload).toEqual({ message: 'Failed to update evaluation dataset' });
+      expect(response.payload).toEqual({ message: 'Failed to update evaluation dataset: failed' });
       expect(logger.error).toHaveBeenCalled();
     });
   });
@@ -441,7 +441,7 @@ describe('dataset routes', () => {
       const response = await handler(context as any, request, kibanaResponseFactory);
 
       expect(response.status).toBe(500);
-      expect(response.payload).toEqual({ message: 'Failed to delete evaluation dataset' });
+      expect(response.payload).toEqual({ message: 'Failed to delete evaluation dataset: failed' });
       expect(logger.error).toHaveBeenCalled();
     });
   });
@@ -913,7 +913,7 @@ describe('dataset routes', () => {
       const response = await handler(context as any, request, kibanaResponseFactory);
 
       expect(response.status).toBe(500);
-      expect(response.payload).toEqual({ message: 'Failed to upsert evaluation dataset' });
+      expect(response.payload).toEqual({ message: 'Failed to upsert evaluation dataset: failed' });
       expect(logger.error).toHaveBeenCalled();
     });
   });

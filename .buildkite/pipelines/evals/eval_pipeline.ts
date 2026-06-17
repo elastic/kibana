@@ -124,11 +124,13 @@ function buildEvalsYaml({
   resolveModelGroups,
   evaluationConnectorId,
   hasEisJudge,
+  isPrBuild,
 }: {
   selectedSuites: EvalsSuiteMetadataEntry[];
   resolveModelGroups: (suite: EvalsSuiteMetadataEntry) => string[];
   evaluationConnectorId: string | undefined;
   hasEisJudge: boolean;
+  isPrBuild: boolean;
 }): string {
   const suiteSteps = selectedSuites
     .map((suite) => {
@@ -180,6 +182,30 @@ function buildEvalsYaml({
     })
     .join('\n');
 
+  const suiteIds = selectedSuites.map((s) => s.id).join(',');
+  const suiteStepKeys = selectedSuites.map((s) => `kbn-evals-${normalizeBuildkiteKey(s.id)}`);
+
+  const postCompareStep = isPrBuild
+    ? [
+        `      - label: 'LLM Evals: Post Comparison'`,
+        `        key: kbn-evals-post-comparison`,
+        `        command: bash .buildkite/scripts/steps/evals/post_eval_comment.sh`,
+        `        env:`,
+        `          KBN_EVALS: '1'`,
+        `          EVAL_SUITE_IDS: '${suiteIds}'`,
+        `        depends_on:`,
+        ...suiteStepKeys.map((k) => `          - ${k}`),
+        `        allow_dependency_failure: true`,
+        `        timeout_in_minutes: 10`,
+        `        agents:`,
+        `          image: family/kibana-ubuntu-2404`,
+        `          imageProject: elastic-images-prod`,
+        `          provider: gcp`,
+        `          machineType: n2-standard-2`,
+        `          preemptible: true`,
+      ].join('\n')
+    : null;
+
   return [
     // NOTE: `getPipeline()` strips `steps:` from YAML fragments so they can be concatenated
     // under the single top-level `steps:` key. This must follow that convention.
@@ -189,6 +215,7 @@ function buildEvalsYaml({
     `      - build`,
     `    steps:`,
     suiteSteps,
+    ...(postCompareStep ? [postCompareStep] : []),
   ].join('\n');
 }
 
@@ -269,10 +296,14 @@ export function getEvalPipeline(githubPrLabels: string): string | null {
 
   const runnableSuites = hasGlobalModelSelection ? selectedEvalSuites : suitesWithDefaults;
 
+  const isPrBuild =
+    !!process.env.BUILDKITE_PULL_REQUEST && process.env.BUILDKITE_PULL_REQUEST !== 'false';
+
   return buildEvalsYaml({
     selectedSuites: runnableSuites,
     resolveModelGroups,
     evaluationConnectorId,
     hasEisJudge,
+    isPrBuild,
   });
 }
