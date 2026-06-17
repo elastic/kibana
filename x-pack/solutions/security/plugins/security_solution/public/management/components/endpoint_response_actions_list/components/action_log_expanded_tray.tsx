@@ -25,7 +25,7 @@ const customDescriptionListCss = ({ theme }: { theme: Theme }) => `
   &.euiDescriptionList {
     > .euiDescriptionList__title {
       color: ${theme.euiTheme.colors.textSubdued};
-      font-size: ${theme.euiTheme.size.xs};
+      font-size: ${theme.euiTheme.font.scale.xs}rem;
     }
 
     > .euiDescriptionList__title,
@@ -55,7 +55,7 @@ const StyledDescriptionListBase = styled(EuiDescriptionList)`
   ${customDescriptionListCss}
 `;
 const StyledDescriptionList = (props: ComponentProps<typeof EuiDescriptionList>) => (
-  <StyledDescriptionListBase compressed type="column" {...props} />
+  <StyledDescriptionListBase {...props} compressed type="column" />
 );
 
 const StyledEuiCodeBlockBase = styled(EuiCodeBlock)`
