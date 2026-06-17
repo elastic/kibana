@@ -113,7 +113,6 @@ dependsOn:
   - '@kbn/ml-category-validator'
   - '@kbn/response-ops-alerts-filters-form'
   - '@kbn/embeddable-alerts-table-plugin'
-  - '@kbn/synthtrace-client'
   - '@kbn/synthtrace'
   - '@kbn/streams-schema'
   - '@kbn/streams-plugin'
@@ -126,8 +125,6 @@ dependsOn:
   - '@kbn/data-visualizer-plugin'
   - '@kbn/cloud-integration-saml-provider-plugin'
   - '@kbn/ci-stats-reporter'
-  - '@kbn/usage-collection-plugin'
-  - '@kbn/core-deprecations-common'
   - '@kbn/gen-ai-functional-testing'
   - '@kbn/sse-utils-server'
   - '@kbn/inference-common'
@@ -147,7 +144,6 @@ dependsOn:
   - '@kbn/core-saved-objects-import-export-server-internal'
   - '@kbn/core-chrome-browser'
   - '@kbn/licensing-types'
-  - '@kbn/product-intercept-plugin'
   - '@kbn/reindex-service-plugin'
   - '@kbn/field-formats-common'
   - '@kbn/reporting-test-routes'
@@ -167,6 +163,10 @@ dependsOn:
   - '@kbn/product-doc-common'
   - '@kbn/alerting-v2-episodes-ui'
   - '@kbn/inbox-common'
+  - '@kbn/core-spaces-common'
+  - '@kbn/deeplinks-analytics'
+  - '@kbn/core-user-profile-common'
+  - '@kbn/synthtrace-client'
 tags:
   - test-helper
   - package
@@ -179,6 +179,7 @@ fileGroups:
     - '**/*'
     - ./api_integration/apis/telemetry/fixtures/*.json
     - ./monitoring_api_integration/fixtures/**/*.json
+    - ./plugin_api_integration/test_suites/event_log/fixtures/*.json
     - '!target/**/*'
     - '!*/plugins/**/*'
     - '!*/packages/**/*'

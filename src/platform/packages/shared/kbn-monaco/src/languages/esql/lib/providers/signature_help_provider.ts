@@ -9,7 +9,7 @@
 
 import { getSignatureHelp } from '@kbn/esql-language';
 import type { monaco } from '../../../../monaco_imports';
-import { createMonacoProvider } from './providers_factory';
+import { createCancellableCallbacks, createMonacoProvider } from './providers_factory';
 import { monacoPositionToOffset } from '../shared/utils';
 import type { ESQLDependencies } from './types';
 
@@ -21,14 +21,16 @@ export function getSignatureProvider(
     signatureHelpRetriggerCharacters: ['(', ','],
     async provideSignatureHelp(
       model: monaco.editor.ITextModel,
-      position: monaco.Position
+      position: monaco.Position,
+      token: monaco.CancellationToken
     ): Promise<monaco.languages.SignatureHelpResult | null> {
       return createMonacoProvider({
         model,
         run: async (safeModel) => {
           const fullText = safeModel.getValue();
           const offset = monacoPositionToOffset(fullText, position);
-          const signatureHelp = await getSignatureHelp(fullText, offset, deps);
+          const cancellableCallbacks = createCancellableCallbacks(deps, token);
+          const signatureHelp = await getSignatureHelp(fullText, offset, cancellableCallbacks);
 
           if (!signatureHelp) {
             return null;

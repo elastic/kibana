@@ -23,13 +23,15 @@ import { StreamDetailDataQuality } from '../../../stream_data_quality';
 import { StreamsAppPageTemplate } from '../../../streams_app_page_template';
 import { WiredStreamBadge } from '../../../stream_badges';
 import { StreamDetailAttachments } from '../../../stream_detail_attachments';
+import { useKibana } from '../../../../hooks/use_kibana';
+import { LifecycleTabLabel } from './lifecycle_tab_label_with_actions';
 
 const wiredStreamManagementSubTabs = [
   'overview',
   'partitioning',
   'processing',
   'schema',
-  'retention',
+  'lifecycle',
   'advanced',
   'significantEvents',
   'dataQuality',
@@ -40,7 +42,7 @@ type WiredStreamManagementSubTab = (typeof wiredStreamManagementSubTabs)[number]
 
 const tabRedirects: Record<string, { newTab: WiredStreamManagementSubTab }> = {
   schemaEditor: { newTab: 'schema' },
-  lifecycle: { newTab: 'retention' },
+  retention: { newTab: 'lifecycle' },
   route: { newTab: 'partitioning' },
   enrich: { newTab: 'processing' },
 };
@@ -55,6 +57,12 @@ export function WiredStreamDetailManagement({
   definition: Streams.WiredStream.GetResponse;
   refreshDefinition: () => void;
 }) {
+  const {
+    core: { notifications },
+    dependencies: {
+      start: { share },
+    },
+  } = useKibana();
   const {
     path: { key, tab },
   } = useStreamsAppParams('/{key}/management/{tab}');
@@ -166,7 +174,7 @@ export function WiredStreamDetailManagement({
     },
     ...(!isDraft
       ? {
-          retention: {
+          lifecycle: {
             content: (
               <StreamDetailLifecycle
                 definition={definition}
@@ -174,19 +182,13 @@ export function WiredStreamDetailManagement({
               />
             ),
             label: (
-              <EuiToolTip
-                position="top"
-                content={i18n.translate('xpack.streams.managementTab.lifecycle.tooltip', {
-                  defaultMessage:
-                    'Control how long data stays in this stream. Set a custom duration or apply a shared policy.',
-                })}
-              >
-                <span data-test-subj="retentionTab" tabIndex={0}>
-                  {i18n.translate('xpack.streams.streamDetailView.lifecycleTab', {
-                    defaultMessage: 'Retention',
-                  })}
-                </span>
-              </EuiToolTip>
+              <LifecycleTabLabel
+                definition={definition}
+                showActions={tab === 'lifecycle'}
+                indexTemplateName={`${definition.stream.name}@stream`}
+                notifications={notifications}
+                share={share}
+              />
             ),
           },
         }
@@ -272,7 +274,7 @@ export function WiredStreamDetailManagement({
     return <Wrapper tabs={tabs} streamId={key} tab={tab} />;
   }
 
-  if (isDraft && (tab === 'retention' || tab === 'dataQuality')) {
+  if (isDraft && (tab === 'lifecycle' || tab === 'dataQuality')) {
     return (
       <RedirectTo path="/{key}/management/{tab}" params={{ path: { key, tab: 'partitioning' } }} />
     );

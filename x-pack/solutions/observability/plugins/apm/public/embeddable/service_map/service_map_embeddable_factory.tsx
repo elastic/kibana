@@ -5,9 +5,11 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
+import React, { useCallback, useEffect, useMemo } from 'react';
+import { EuiLoadingSpinner } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
-import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
+import type { EmbeddablePublicDefinition } from '@kbn/embeddable-plugin/public';
 import type {
   HasEditCapabilities,
   PublishesBlockingError,
@@ -24,7 +26,7 @@ import {
   type StateComparators,
   type WithAllKeys,
 } from '@kbn/presentation-publishing';
-import { initializeUnsavedChanges } from '@kbn/presentation-publishing';
+import { initializeStateApi } from '@kbn/presentation-publishing';
 import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import { openLazyFlyout } from '@kbn/presentation-util';
 import { BehaviorSubject, combineLatest, map, merge } from 'rxjs';
@@ -36,21 +38,26 @@ import {
 import type {
   ServiceMapCustomState,
   ServiceMapEmbeddableState,
-} from '../../../server/lib/embeddables/service_map_embeddable_schema';
+} from '../../../common/embeddable/service_map_embeddable_schema';
 
 import type { EmbeddableDeps } from '../types';
 import { ApmEmbeddableContext } from '../embeddable_context';
+import type { ServiceMapViewFilters } from '../../components/app/service_map/apply_service_map_visibility';
 import { ServiceMapEmbeddable } from './service_map_embeddable';
 import { ServiceMapEditorFlyout } from './service_map_editor_flyout';
 import { APM_SERVICE_MAP_EMBEDDABLE } from './constants';
-
-const DEFAULT_TIME_RANGE: TimeRange = { from: 'now-15m', to: 'now' };
 
 const defaultCustomState: WithAllKeys<ServiceMapCustomState> = {
   environment: ENVIRONMENT_ALL.value,
   kuery: undefined,
   service_name: undefined,
   service_group_id: undefined,
+  map_orientation: 'horizontal',
+  sync_with_dashboard_filters: false,
+  alert_status_filter: undefined,
+  slo_status_filter: undefined,
+  connection_filter: undefined,
+  anomaly_severity_filter: undefined,
 };
 
 const customStateComparators: StateComparators<ServiceMapCustomState> = {
@@ -58,6 +65,13 @@ const customStateComparators: StateComparators<ServiceMapCustomState> = {
   kuery: 'referenceEquality',
   service_name: 'referenceEquality',
   service_group_id: 'referenceEquality',
+  map_orientation: 'referenceEquality',
+  sync_with_dashboard_filters: 'referenceEquality',
+  // Fresh arrays on every save would mark the panel dirty even without value changes.
+  alert_status_filter: 'deepEquality',
+  slo_status_filter: 'deepEquality',
+  connection_filter: 'deepEquality',
+  anomaly_severity_filter: 'deepEquality',
 };
 
 export type ServiceMapEmbeddableApi = DefaultEmbeddableApi<ServiceMapEmbeddableState> &
@@ -107,7 +121,7 @@ function buildQueryFromKuery(kuery: string | undefined): Query | undefined {
 }
 
 export const getServiceMapEmbeddableFactory = (deps: EmbeddableDeps) => {
-  const factory: EmbeddableFactory<ServiceMapEmbeddableState, ServiceMapEmbeddableApi> = {
+  const factory: EmbeddablePublicDefinition<ServiceMapEmbeddableState, ServiceMapEmbeddableApi> = {
     type: APM_SERVICE_MAP_EMBEDDABLE,
     buildEmbeddable: async ({ initialState, finalizeApi, uuid, parentApi }) => {
       const { coreStart } = deps;
@@ -115,7 +129,7 @@ export const getServiceMapEmbeddableFactory = (deps: EmbeddableDeps) => {
 
       const titleManager = initializeTitleManager(state);
       const timeRangeManager = initializeTimeRangeManager({
-        time_range: state.time_range ?? DEFAULT_TIME_RANGE,
+        time_range: state.time_range,
       });
 
       const customStateManager = initializeStateManager<ServiceMapCustomState>(
@@ -124,6 +138,12 @@ export const getServiceMapEmbeddableFactory = (deps: EmbeddableDeps) => {
           kuery: state.kuery,
           service_name: state.service_name,
           service_group_id: state.service_group_id,
+          map_orientation: state.map_orientation,
+          sync_with_dashboard_filters: state.sync_with_dashboard_filters,
+          alert_status_filter: state.alert_status_filter,
+          slo_status_filter: state.slo_status_filter,
+          connection_filter: state.connection_filter,
+          anomaly_severity_filter: state.anomaly_severity_filter,
         },
         defaultCustomState
       );
@@ -136,18 +156,14 @@ export const getServiceMapEmbeddableFactory = (deps: EmbeddableDeps) => {
       );
       const blockingError$ = new BehaviorSubject<Error | undefined>(undefined);
 
-      function serializeState(): ServiceMapEmbeddableState {
-        return {
+      const stateApi = initializeStateApi<ServiceMapEmbeddableState>({
+        parentApi,
+        uuid,
+        serializeState: () => ({
           ...titleManager.getLatestState(),
           ...timeRangeManager.getLatestState(),
           ...customStateManager.getLatestState(),
-        };
-      }
-
-      const unsavedChangesApi = initializeUnsavedChanges({
-        parentApi,
-        uuid,
-        serializeState,
+        }),
         anyStateChange$: merge(
           titleManager.anyStateChange$,
           timeRangeManager.anyStateChange$,
@@ -158,27 +174,25 @@ export const getServiceMapEmbeddableFactory = (deps: EmbeddableDeps) => {
           ...timeRangeComparators,
           ...customStateComparators,
         }),
-        onReset: (lastSaved) => {
-          titleManager.reinitializeState(lastSaved);
-          timeRangeManager.reinitializeState(
-            lastSaved?.time_range
-              ? { time_range: lastSaved.time_range }
-              : { time_range: DEFAULT_TIME_RANGE }
-          );
-          customStateManager.reinitializeState(lastSaved);
+        applySerializedState: (nextState) => {
+          titleManager.reinitializeState(nextState);
+          timeRangeManager.reinitializeState({ time_range: nextState.time_range });
+          customStateManager.reinitializeState(nextState);
         },
       });
 
       const api = finalizeApi({
         ...titleManager.api,
         ...timeRangeManager.api,
-        ...unsavedChangesApi,
-        serializeState,
+        ...stateApi,
         blockingError$,
         filters$,
         query$,
         canEditUnifiedSearch: () => true,
-        getTypeDisplayName: () => 'configuration',
+        getTypeDisplayName: () =>
+          i18n.translate('xpack.apm.serviceMap.embeddable.typeDisplayName', {
+            defaultMessage: 'configuration',
+          }),
         isEditingEnabled: () => true,
         onEdit: async () => {
           openLazyFlyout({
@@ -190,20 +204,34 @@ export const getServiceMapEmbeddableFactory = (deps: EmbeddableDeps) => {
               focusedPanelId: uuid,
             },
             loadContent: async ({ closeFlyout, ariaLabelledBy }) => {
+              const editorInitialState = stateApi.serializeState();
+              const applyCustomState = (newState: ServiceMapEmbeddableState) => {
+                if (newState.environment !== undefined) {
+                  customStateManager.api.setEnvironment(newState.environment);
+                }
+                customStateManager.api.setKuery(newState.kuery);
+                customStateManager.api.setServiceName(newState.service_name);
+                customStateManager.api.setMapOrientation(newState.map_orientation);
+                customStateManager.api.setSyncWithDashboardFilters(
+                  newState.sync_with_dashboard_filters
+                );
+                customStateManager.api.setAlertStatusFilter(newState.alert_status_filter);
+                customStateManager.api.setSloStatusFilter(newState.slo_status_filter);
+                customStateManager.api.setConnectionFilter(newState.connection_filter);
+                customStateManager.api.setAnomalySeverityFilter(newState.anomaly_severity_filter);
+              };
               return (
                 <ApmEmbeddableContext deps={deps}>
                   <ServiceMapEditorFlyout
                     ariaLabelledBy={ariaLabelledBy}
                     deps={deps}
                     timeRange={timeRangeManager.api.timeRange$.getValue()}
-                    initialState={serializeState()}
+                    initialState={editorInitialState}
                     onCancel={closeFlyout}
+                    onPreview={applyCustomState}
+                    onRevert={() => stateApi.applySerializedState(editorInitialState)}
                     onSave={(newState: ServiceMapEmbeddableState) => {
-                      if (newState.environment !== undefined) {
-                        customStateManager.api.setEnvironment(newState.environment);
-                      }
-                      customStateManager.api.setKuery(newState.kuery);
-                      customStateManager.api.setServiceName(newState.service_name);
+                      applyCustomState(newState);
                       closeFlyout();
                     }}
                   />
@@ -233,15 +261,77 @@ export const getServiceMapEmbeddableFactory = (deps: EmbeddableDeps) => {
             };
           }, []);
 
-          const [environment, kuery, serviceName, serviceGroupId] = useBatchedPublishingSubjects(
+          const [
+            environment,
+            kuery,
+            serviceName,
+            serviceGroupId,
+            mapOrientation,
+            syncWithDashboardFilters,
+            alertStatusFilter,
+            sloStatusFilter,
+            connectionFilter,
+            anomalySeverityFilter,
+          ] = useBatchedPublishingSubjects(
             customStateManager.api.environment$,
             customStateManager.api.kuery$,
             customStateManager.api.serviceName$,
-            customStateManager.api.serviceGroupId$
+            customStateManager.api.serviceGroupId$,
+            customStateManager.api.mapOrientation$,
+            customStateManager.api.syncWithDashboardFilters$,
+            customStateManager.api.alertStatusFilter$,
+            customStateManager.api.sloStatusFilter$,
+            customStateManager.api.connectionFilter$,
+            customStateManager.api.anomalySeverityFilter$
           );
 
-          const { timeRange } = useFetchContext(api);
-          const effectiveTimeRange = timeRange ?? DEFAULT_TIME_RANGE;
+          const viewFilters = useMemo(
+            () =>
+              ({
+                alertStatusFilter: alertStatusFilter ?? [],
+                sloStatusFilter: sloStatusFilter ?? [],
+                connectionFilter: connectionFilter ?? [],
+                anomalySeverityFilter: anomalySeverityFilter ?? [],
+              } as ServiceMapViewFilters),
+            [alertStatusFilter, sloStatusFilter, connectionFilter, anomalySeverityFilter]
+          );
+
+          const onViewFiltersChange = useCallback((next: ServiceMapViewFilters) => {
+            customStateManager.api.setAlertStatusFilter(
+              next.alertStatusFilter.length ? next.alertStatusFilter : undefined
+            );
+            customStateManager.api.setSloStatusFilter(
+              next.sloStatusFilter.length ? next.sloStatusFilter : undefined
+            );
+            customStateManager.api.setConnectionFilter(
+              next.connectionFilter.length ? next.connectionFilter : undefined
+            );
+            customStateManager.api.setAnomalySeverityFilter(
+              next.anomalySeverityFilter.length ? next.anomalySeverityFilter : undefined
+            );
+          }, []);
+
+          const fetchContext = useFetchContext(api);
+          const effectiveTimeRange = fetchContext.timeRange;
+          if (!effectiveTimeRange) {
+            return (
+              <div
+                style={{
+                  width: '100%',
+                  height: '100%',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}
+                data-test-subj="apmServiceMapEmbeddableWaitingForTimeRange"
+              >
+                <EuiLoadingSpinner size="xl" />
+              </div>
+            );
+          }
+
+          const parentFilters = syncWithDashboardFilters ? fetchContext.filters : undefined;
+          const parentQuery = syncWithDashboardFilters ? fetchContext.query : undefined;
 
           return (
             <div style={{ width: '100%', height: '100%', position: 'relative' }}>
@@ -260,6 +350,12 @@ export const getServiceMapEmbeddableFactory = (deps: EmbeddableDeps) => {
                   serviceGroupId={serviceGroupId ?? undefined}
                   core={deps.coreStart}
                   onBlockingError={(error) => blockingError$.next(error)}
+                  mapOrientation={mapOrientation ?? 'horizontal'}
+                  onMapOrientationChange={customStateManager.api.setMapOrientation}
+                  parentFilters={parentFilters}
+                  parentQuery={parentQuery}
+                  viewFilters={viewFilters}
+                  onViewFiltersChange={onViewFiltersChange}
                 />
               </ApmEmbeddableContext>
             </div>

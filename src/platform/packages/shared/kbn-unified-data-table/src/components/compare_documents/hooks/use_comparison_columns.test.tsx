@@ -40,7 +40,6 @@ const getComparisonColumn = ({
     additional.push({
       iconType: 'pin',
       label: 'Pin for comparison',
-      size: 'xs',
       onClick: expect.any(Function),
     });
   }
@@ -48,7 +47,6 @@ const getComparisonColumn = ({
     additional.push({
       iconType: 'cross',
       label: 'Remove from comparison',
-      size: 'xs',
       onClick: expect.any(Function),
     });
   }

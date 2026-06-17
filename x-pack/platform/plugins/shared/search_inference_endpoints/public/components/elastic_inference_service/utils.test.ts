@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { EisModelStatus, type EisInferenceEndpoint } from '../../../common/types';
 import {
   getModelName,
   getModelCreator,
@@ -15,7 +16,6 @@ import {
   TASK_TYPE_CATEGORY,
   TASK_TYPE_DISPLAY_NAME,
   TASK_TYPE_FILTERS,
-  type EisInferenceEndpoint,
   type GroupedModel,
   type TaskTypeCategory,
 } from '../../utils/eis_utils';
@@ -34,6 +34,7 @@ const makeGroupedModel = (overrides: Partial<GroupedModel> = {}): GroupedModel =
   service: 'elastic',
   modelName: '.multilingual-e5-small',
   modelCreator: 'Elastic',
+  modelStatus: EisModelStatus.GA,
   taskTypes: ['text_embedding'],
   categories: ['Embedding'],
   endpoints: [],

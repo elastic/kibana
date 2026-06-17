@@ -7,1141 +7,1036 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-const nextTick = () => new Promise((res) => process.nextTick(res));
-
-import lodash from 'lodash';
-import { render, screen } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
-jest.spyOn(lodash, 'debounce').mockImplementation((fn: any) => {
-  fn.cancel = jest.fn();
-  return fn;
-});
 import type { EuiSearchBarProps, IconType } from '@elastic/eui';
-import { EuiInMemoryTable, EuiLink, EuiText, EuiButton, Query } from '@elastic/eui';
-import { mount, shallow } from 'enzyme';
+import type { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
+import lodash from 'lodash';
 import React from 'react';
-import * as sinon from 'sinon';
+import userEvent from '@testing-library/user-event';
+import { act, screen, waitFor, within } from '@testing-library/react';
+import { contentManagementMock } from '@kbn/content-management-plugin/public/mocks';
+import { coreMock } from '@kbn/core/public/mocks';
+import { EuiButton, Query } from '@elastic/eui';
+import { renderWithI18n } from '@kbn/test-jest-helpers';
 import {
   SavedObjectFinderWithoutPersist as SavedObjectFinder,
   SavedObjectFinderUi,
 } from './saved_object_finder';
-import { contentManagementMock } from '@kbn/content-management-plugin/public/mocks';
-import { findTestSubject } from '@kbn/test-jest-helpers';
-import type { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
-import { coreMock } from '@kbn/core/public/mocks';
+
+type SavedObjectFinderProps = React.ComponentProps<typeof SavedObjectFinder>;
+
+type MockSearch = jest.MockedFunction<
+  (...args: Parameters<SavedObjectFinderProps['services']['contentClient']['mSearch']>) => Promise<{
+    hits: unknown[];
+  }>
+>;
+
+let capturedTableSearch: EuiSearchBarProps | undefined;
+
+jest.spyOn(lodash, 'debounce').mockImplementation((fn: any) => {
+  fn.cancel = jest.fn();
+
+  return fn;
+});
+
+jest.mock('@elastic/eui', () => {
+  const actual = jest.requireActual<typeof import('@elastic/eui')>('@elastic/eui');
+  const ActualEuiInMemoryTable = actual.EuiInMemoryTable;
+
+  const EuiInMemoryTable = (props: React.ComponentProps<typeof ActualEuiInMemoryTable>) => {
+    // Keep the real table rendering, but expose its search config for focused filter assertions.
+    capturedTableSearch = typeof props.search === 'object' ? props.search : undefined;
+
+    return <ActualEuiInMemoryTable {...props} />;
+  };
+
+  return {
+    ...actual,
+    EuiInMemoryTable,
+  };
+});
+
+const euiTableWidthWarning = 'Detected not recommended unit';
+
+const doc = {
+  id: '1',
+  type: 'search',
+  attributes: { title: 'Example title', description: 'example description' },
+};
+
+const doc2 = {
+  id: '2',
+  type: 'search',
+  attributes: { title: 'Another title', description: 'another description' },
+};
+
+const doc3 = { type: 'vis', id: '3', attributes: { title: 'Vis' } };
+
+const doc4 = { type: 'search', id: '4', attributes: { title: 'Search' } };
+
+const searchMetaData = [
+  {
+    defaultSearchField: 'name',
+    getIconForSavedObject: () => 'search' as IconType,
+    name: 'Search',
+    showSavedObject: () => true,
+    type: 'search',
+  },
+];
+
+const metaDataConfig = [
+  {
+    getIconForSavedObject: () => 'search' as IconType,
+    name: 'Search',
+    type: 'search',
+  },
+  {
+    getIconForSavedObject: () => 'document' as IconType,
+    name: 'Vis',
+    type: 'vis',
+  },
+];
+
+const baseProps = {
+  id: 'foo',
+  euiTablePersist: {
+    pageSize: 10,
+    onTableChange: () => {},
+    sorting: { sort: { direction: 'asc' as const, field: 'title' as const } },
+  },
+};
+
+const contentManagement = contentManagementMock.createStartContract();
+const contentClient = contentManagement.client;
+const mockSearch = contentClient.mSearch as unknown as MockSearch;
+
+const coreStart = coreMock.createStart();
+const uiSettings = coreStart.uiSettings;
+
+uiSettings.get.mockImplementation(() => 10);
+
+const savedObjectsTagging = {
+  ui: {
+    convertNameToReference: jest.fn((name: string) => ({ type: 'tag', id: name })),
+    getSearchBarFilter: jest.fn(() => ({
+      field: 'tag',
+      multiSelect: 'or',
+      name: 'Tags',
+      options: [],
+      type: 'field_value_selection',
+    })),
+    getTableColumnDefinition: jest.fn(() => ({
+      'data-test-subj': 'listingTableRowTags',
+      description: 'Tags associated with this saved object',
+      field: 'references',
+      name: 'Tags',
+      render: (_: any, item: any) => <span>{`tag-${item.id}`}</span>,
+      sortable: (item: any) => `tag-${item.id}`,
+    })),
+  },
+} as any as SavedObjectsTaggingApi;
+
+const getResultsTable = () => screen.getByTestId('savedObjectsFinderTable');
+
+const getTitleLinkTexts = () =>
+  within(getResultsTable())
+    .getAllByRole('row')
+    .slice(1)
+    .map((row) => within(row).getAllByRole('button')[0].textContent ?? '');
+
+const clickColumnSortButton = async (
+  columnName: string,
+  user: ReturnType<typeof userEvent.setup>
+) => {
+  const headerCell = within(getResultsTable()).getByRole('columnheader', {
+    name: new RegExp(columnName),
+  });
+
+  await user.click(within(headerCell).getByRole('button'));
+};
+
+const renderFinder = (
+  props: SavedObjectFinderProps,
+  Component: typeof SavedObjectFinder | typeof SavedObjectFinderUi = SavedObjectFinder
+) => renderWithI18n(<Component {...props} />);
+
+const waitForItemsLoaded = async (visibleTitle = doc.attributes.title) => {
+  await waitFor(() => {
+    expect(mockSearch).toHaveBeenCalled();
+  });
+
+  expect(await screen.findByText(visibleTitle)).toBeVisible();
+};
+
+const typeSearchQuery = async (value: string) => {
+  const user = userEvent.setup();
+
+  const input = await screen.findByRole('searchbox');
+
+  await user.clear(input);
+  await user.type(input, `${value}{enter}`);
+};
+
+const updateTableSearch = async (
+  search: Parameters<NonNullable<EuiSearchBarProps['onChange']>>[0]
+) => {
+  expect(capturedTableSearch?.onChange).toBeDefined();
+
+  await act(async () => {
+    capturedTableSearch?.onChange?.(search);
+    await Promise.resolve();
+  });
+};
 
 describe('SavedObjectsFinder', () => {
-  const doc = {
-    id: '1',
-    type: 'search',
-    attributes: { title: 'Example title', description: 'example description' },
-  };
+  let consoleWarnSpy: jest.SpyInstance;
 
-  const doc2 = {
-    id: '2',
-    type: 'search',
-    attributes: { title: 'Another title', description: 'another description' },
-  };
+  beforeAll(() => {
+    const originalConsoleWarn = globalThis.console.warn.bind(globalThis.console);
 
-  const doc3 = { type: 'vis', id: '3', attributes: { title: 'Vis' } };
+    consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation((...args) => {
+      if (typeof args[0] === 'string' && args[0].includes(euiTableWidthWarning)) return;
 
-  const doc4 = { type: 'search', id: '4', attributes: { title: 'Search' } };
-
-  const searchMetaData = [
-    {
-      type: 'search',
-      name: 'Search',
-      getIconForSavedObject: () => 'search' as IconType,
-      showSavedObject: () => true,
-      defaultSearchField: 'name',
-    },
-  ];
-
-  const metaDataConfig = [
-    {
-      type: 'search',
-      name: 'Search',
-      getIconForSavedObject: () => 'search' as IconType,
-    },
-    {
-      type: 'vis',
-      name: 'Vis',
-      getIconForSavedObject: () => 'document' as IconType,
-    },
-  ];
-
-  const baseProps = {
-    id: 'foo',
-    euiTablePersist: {
-      pageSize: 10,
-      onTableChange: () => {},
-      sorting: { sort: { direction: 'asc' as const, field: 'title' as const } },
-    },
-  };
-
-  const contentManagement = contentManagementMock.createStartContract();
-  const contentClient = contentManagement.client;
-  beforeEach(() => {
-    (contentClient.mSearch as any as jest.SpyInstance).mockClear();
+      originalConsoleWarn(...args);
+    });
   });
-  const coreStart = coreMock.createStart();
-  const uiSettings = coreStart.uiSettings;
-  uiSettings.get.mockImplementation(() => 10);
 
-  const savedObjectsTagging = {
-    ui: {
-      getTableColumnDefinition: jest.fn(() => ({
-        field: 'references',
-        name: 'Tags',
-        description: 'Tags associated with this saved object',
-        'data-test-subj': 'listingTableRowTags',
-        sortable: (item: any) => `tag-${item.id}`,
-        render: (_: any, item: any) => <span>{`tag-${item.id}`}</span>,
-      })),
-      getSearchBarFilter: jest.fn(() => ({
-        type: 'field_value_selection',
-        field: 'tag',
-        name: 'Tags',
-        multiSelect: 'or',
-        options: [],
-      })),
-      convertNameToReference: jest.fn((name: string) => ({ type: 'tag', id: name })),
-    },
-  } as any as SavedObjectsTaggingApi;
+  afterAll(() => {
+    consoleWarnSpy.mockRestore();
+  });
+
+  beforeEach(() => {
+    mockSearch.mockClear();
+    capturedTableSearch = undefined;
+  });
 
   it('should call API on startup', async () => {
-    (contentClient.mSearch as any as jest.SpyInstance).mockImplementation(() =>
-      Promise.resolve({ hits: [doc] })
-    );
+    mockSearch.mockImplementation(() => Promise.resolve({ hits: [doc] }));
 
-    const wrapper = shallow(
-      <SavedObjectFinder
-        {...baseProps}
-        services={{
-          uiSettings,
-          contentClient,
-          savedObjectsTagging,
-        }}
-        savedObjectMetaData={searchMetaData}
-      />
-    );
+    renderFinder({
+      ...baseProps,
+      savedObjectMetaData: searchMetaData,
+      services: {
+        contentClient,
+        savedObjectsTagging,
+        uiSettings,
+      },
+    });
 
-    wrapper.instance().componentDidMount!();
-    await nextTick();
-    expect(contentClient.mSearch).toHaveBeenCalledWith({
-      contentTypes: [{ contentTypeId: 'search' }],
-      query: { limit: 10 },
+    await waitFor(() => {
+      expect(mockSearch).toHaveBeenCalledWith({
+        contentTypes: [{ contentTypeId: 'search' }],
+        query: { limit: 10 },
+      });
     });
   });
 
   describe('render', () => {
     it('lists initial items', async () => {
-      (contentClient.mSearch as any as jest.SpyInstance).mockImplementation(() =>
-        Promise.resolve({ hits: [doc] })
-      );
+      mockSearch.mockImplementation(() => Promise.resolve({ hits: [doc] }));
 
-      const wrapper = shallow(
-        <SavedObjectFinder
-          {...baseProps}
-          services={{ uiSettings, contentClient, savedObjectsTagging }}
-          savedObjectMetaData={searchMetaData}
-        />
-      );
+      renderFinder({
+        ...baseProps,
+        savedObjectMetaData: searchMetaData,
+        services: { contentClient, savedObjectsTagging, uiSettings },
+      });
 
-      wrapper.instance().componentDidMount!();
-      await nextTick();
-      expect(
-        wrapper
-          .find(EuiInMemoryTable)
-          .prop('items')
-          .map((item: any) => item.attributes)
-      ).toEqual([doc.attributes]);
+      await waitFor(() => {
+        expect(screen.getByText(doc.attributes.title)).toBeVisible();
+      });
     });
 
     it('calls onChoose on item click', async () => {
-      const chooseStub = sinon.stub();
-      (contentClient.mSearch as any as jest.SpyInstance).mockImplementation(() =>
-        Promise.resolve({ hits: [doc] })
-      );
+      const onChoose = jest.fn();
+      mockSearch.mockImplementation(() => Promise.resolve({ hits: [doc] }));
 
-      const wrapper = mount(
-        <SavedObjectFinder
-          {...baseProps}
-          services={{ uiSettings, contentClient, savedObjectsTagging }}
-          onChoose={chooseStub}
-          savedObjectMetaData={searchMetaData}
-        />
-      );
+      const user = userEvent.setup();
+      renderFinder({
+        ...baseProps,
+        savedObjectMetaData: searchMetaData,
+        services: { contentClient, savedObjectsTagging, uiSettings },
+        onChoose,
+      });
 
-      wrapper.instance().componentDidMount!();
-      await nextTick();
-      wrapper.update();
-      findTestSubject(wrapper, 'savedObjectTitleExample-title').simulate('click');
-      expect(chooseStub.calledWith('1', 'search', `${doc.attributes.title} (Search)`, doc)).toEqual(
-        true
-      );
+      const titleLink = await screen.findByText(doc.attributes.title);
+
+      await user.click(titleLink);
+
+      expect(onChoose).toHaveBeenCalledWith('1', 'search', `${doc.attributes.title} (Search)`, doc);
     });
 
     it('with help text', async () => {
-      (contentClient.mSearch as any as jest.SpyInstance).mockImplementation(() =>
-        Promise.resolve({ hits: [doc] })
-      );
+      mockSearch.mockImplementation(() => Promise.resolve({ hits: [doc] }));
 
-      const wrapper = shallow(
-        <SavedObjectFinder
-          {...baseProps}
-          services={{ uiSettings, contentClient, savedObjectsTagging }}
-          savedObjectMetaData={searchMetaData}
-          helpText="This is some description about the action"
-        />
-      );
+      renderFinder({
+        ...baseProps,
+        helpText: 'This is some description about the action',
+        savedObjectMetaData: searchMetaData,
+        services: { contentClient, savedObjectsTagging, uiSettings },
+      });
 
-      wrapper.instance().componentDidMount!();
-      await nextTick();
-      expect(wrapper.find(EuiText).childAt(0).text()).toEqual(
-        'This is some description about the action'
-      );
+      await waitFor(() => {
+        expect(screen.getByText('This is some description about the action')).toBeVisible();
+      });
     });
 
     it('with left button', async () => {
-      (contentClient.mSearch as any as jest.SpyInstance).mockImplementation(() =>
-        Promise.resolve({ hits: [doc] })
-      );
-      const button = <EuiButton>Hello</EuiButton>;
-      const wrapper = shallow(
-        <SavedObjectFinder
-          {...baseProps}
-          services={{ uiSettings, contentClient, savedObjectsTagging }}
-          savedObjectMetaData={searchMetaData}
-          leftChildren={button}
-        />
-      );
+      mockSearch.mockImplementation(() => Promise.resolve({ hits: [doc] }));
 
-      wrapper.instance().componentDidMount!();
-      await nextTick();
-      const searchBar = wrapper.find(EuiInMemoryTable).prop('search') as EuiSearchBarProps;
-      const toolsLeft = searchBar!.toolsLeft;
-      expect(toolsLeft).toMatchInlineSnapshot(`
-        <React.Fragment>
-          <EuiButton>
-            Hello
-          </EuiButton>
-        </React.Fragment>
-      `);
+      const button = <EuiButton>Hello</EuiButton>;
+
+      renderFinder({
+        ...baseProps,
+        leftChildren: button,
+        savedObjectMetaData: searchMetaData,
+        services: { contentClient, savedObjectsTagging, uiSettings },
+      });
+
+      expect(await screen.findByText('Hello')).toBeVisible();
     });
 
     it('render description if provided', async () => {
-      (contentClient.mSearch as any as jest.SpyInstance).mockImplementation(() =>
-        Promise.resolve({ hits: [doc, doc2, doc4] })
-      );
+      mockSearch.mockImplementation(() => Promise.resolve({ hits: [doc, doc2, doc4] }));
 
-      const wrapper = shallow(
-        <SavedObjectFinder
-          {...baseProps}
-          services={{ uiSettings, contentClient, savedObjectsTagging }}
-          savedObjectMetaData={searchMetaData}
-        />
-      );
+      renderFinder({
+        ...baseProps,
+        savedObjectMetaData: searchMetaData,
+        services: { contentClient, savedObjectsTagging, uiSettings },
+      });
 
-      wrapper.instance().componentDidMount!();
-      await nextTick();
-      expect(
-        wrapper
-          .find(EuiInMemoryTable)
-          .prop('items')
-          .filter((item: any) => item.attributes.description)
-          .map((item: any) => item.attributes.description)
-      ).toEqual([doc.attributes.description, doc2.attributes.description]);
-    });
-
-    it('render extra items if provided', async () => {
-      (contentClient.mSearch as any as jest.SpyInstance).mockImplementation(() =>
-        Promise.resolve({ hits: [doc3] })
-      );
-      const wrapper = shallow(
-        <SavedObjectFinder
-          {...baseProps}
-          services={{ uiSettings, contentClient, savedObjectsTagging }}
-          savedObjectMetaData={[metaDataConfig[1]]}
-          extraItems={{ metaData: searchMetaData, get: jest.fn().mockResolvedValue([doc, doc2]) }}
-        />
-      );
-      wrapper.instance().componentDidMount!();
-      await nextTick();
-      const items: any[] = wrapper.find(EuiInMemoryTable).prop('items');
-      expect(items).toHaveLength(3);
-      expect(items[0].attributes.title).toBe(doc3.attributes.title);
-      expect(items[1].attributes.title).toBe(doc.attributes.title);
-      expect(items[2].attributes.title).toBe(doc2.attributes.title);
+      await waitFor(() => {
+        expect(screen.getByText(doc.attributes.description)).toBeVisible();
+        expect(screen.getByText(doc2.attributes.description)).toBeVisible();
+      });
     });
   });
 
   describe('sorting', () => {
     it('should list items by type ascending', async () => {
-      (contentClient.mSearch as any as jest.SpyInstance).mockImplementation(() =>
-        Promise.resolve({ hits: [doc, doc3, doc2] })
-      );
+      mockSearch.mockImplementation(() => Promise.resolve({ hits: [doc, doc3, doc2] }));
 
-      const wrapper = mount(
-        <SavedObjectFinder
-          {...baseProps}
-          services={{ uiSettings, contentClient, savedObjectsTagging }}
-          savedObjectMetaData={metaDataConfig}
-        />
-      );
+      const user = userEvent.setup();
 
-      wrapper.instance().componentDidMount!();
-      await nextTick();
-      findTestSubject(
-        findTestSubject(wrapper, 'tableHeaderCell_type_0'),
-        'tableHeaderSortButton'
-      ).simulate('click');
-      const titleLinks = wrapper.find(EuiLink);
-      expect(titleLinks.at(0).text()).toEqual(doc.attributes.title);
-      expect(titleLinks.at(1).text()).toEqual(doc2.attributes.title);
-      expect(titleLinks.at(2).text()).toEqual(doc3.attributes.title);
+      renderFinder({
+        ...baseProps,
+        savedObjectMetaData: metaDataConfig,
+        services: { contentClient, savedObjectsTagging, uiSettings },
+      });
+
+      await waitForItemsLoaded();
+      await clickColumnSortButton('Type', user);
+
+      expect(getTitleLinkTexts()).toEqual([
+        doc.attributes.title,
+        doc2.attributes.title,
+        doc3.attributes.title,
+      ]);
     });
 
     it('should list items by type descending', async () => {
-      (contentClient.mSearch as any as jest.SpyInstance).mockImplementation(() =>
-        Promise.resolve({ hits: [doc, doc3, doc2] })
-      );
+      mockSearch.mockImplementation(() => Promise.resolve({ hits: [doc, doc3, doc2] }));
 
-      const wrapper = mount(
-        <SavedObjectFinder
-          {...baseProps}
-          services={{ uiSettings, contentClient, savedObjectsTagging }}
-          savedObjectMetaData={metaDataConfig}
-        />
-      );
+      const user = userEvent.setup();
 
-      wrapper.instance().componentDidMount!();
-      await nextTick();
-      findTestSubject(
-        findTestSubject(wrapper, 'tableHeaderCell_type_0'),
-        'tableHeaderSortButton'
-      ).simulate('click');
-      findTestSubject(
-        findTestSubject(wrapper, 'tableHeaderCell_type_0'),
-        'tableHeaderSortButton'
-      ).simulate('click');
-      const titleLinks = wrapper.find(EuiLink);
-      expect(titleLinks.at(0).text()).toEqual(doc3.attributes.title);
-      expect(titleLinks.at(1).text()).toEqual(doc.attributes.title);
-      expect(titleLinks.at(2).text()).toEqual(doc2.attributes.title);
+      renderFinder({
+        ...baseProps,
+        savedObjectMetaData: metaDataConfig,
+        services: { contentClient, savedObjectsTagging, uiSettings },
+      });
+
+      await waitForItemsLoaded();
+      await clickColumnSortButton('Type', user);
+      await clickColumnSortButton('Type', user);
+
+      expect(getTitleLinkTexts()).toEqual([
+        doc3.attributes.title,
+        doc.attributes.title,
+        doc2.attributes.title,
+      ]);
     });
 
     it('should list items by title ascending', async () => {
-      (contentClient.mSearch as any as jest.SpyInstance).mockImplementation(() =>
-        Promise.resolve({ hits: [doc, doc2] })
-      );
+      mockSearch.mockImplementation(() => Promise.resolve({ hits: [doc, doc2] }));
 
-      const wrapper = mount(
-        <SavedObjectFinder
-          {...baseProps}
-          services={{ uiSettings, contentClient, savedObjectsTagging }}
-          savedObjectMetaData={searchMetaData}
-        />
-      );
+      renderFinder({
+        ...baseProps,
+        savedObjectMetaData: searchMetaData,
+        services: { contentClient, savedObjectsTagging, uiSettings },
+      });
 
-      wrapper.instance().componentDidMount!();
-      await nextTick();
-      wrapper.update();
-      const titleLinks = wrapper.find(EuiLink);
-      expect(titleLinks.at(0).text()).toEqual(doc2.attributes.title);
-      expect(titleLinks.at(1).text()).toEqual(doc.attributes.title);
+      await waitForItemsLoaded();
+
+      expect(getTitleLinkTexts()).toEqual([doc2.attributes.title, doc.attributes.title]);
     });
 
     it('should list items by title descending', async () => {
-      (contentClient.mSearch as any as jest.SpyInstance).mockImplementation(() =>
-        Promise.resolve({ hits: [doc, doc2] })
-      );
+      mockSearch.mockImplementation(() => Promise.resolve({ hits: [doc, doc2] }));
 
-      const wrapper = mount(
-        <SavedObjectFinder
-          {...baseProps}
-          services={{ uiSettings, contentClient, savedObjectsTagging }}
-          savedObjectMetaData={searchMetaData}
-        />
-      );
+      const user = userEvent.setup();
 
-      wrapper.instance().componentDidMount!();
-      await nextTick();
-      findTestSubject(
-        findTestSubject(wrapper, 'tableHeaderCell_title_0'),
-        'tableHeaderSortButton'
-      ).simulate('click');
-      const titleLinks = wrapper.find(EuiLink);
-      expect(titleLinks.at(0).text()).toEqual(doc.attributes.title);
-      expect(titleLinks.at(1).text()).toEqual(doc2.attributes.title);
+      renderFinder({
+        ...baseProps,
+        savedObjectMetaData: searchMetaData,
+        services: { contentClient, savedObjectsTagging, uiSettings },
+      });
+
+      await waitForItemsLoaded();
+      await clickColumnSortButton('Title', user);
+
+      expect(getTitleLinkTexts()).toEqual([doc.attributes.title, doc2.attributes.title]);
     });
 
     it('should list items by tag ascending', async () => {
-      (contentClient.mSearch as any as jest.SpyInstance).mockImplementation(() =>
-        Promise.resolve({ hits: [doc, doc3, doc2] })
-      );
+      mockSearch.mockImplementation(() => Promise.resolve({ hits: [doc, doc3, doc2] }));
 
-      const wrapper = mount(
-        <SavedObjectFinder
-          {...baseProps}
-          services={{ uiSettings, contentClient, savedObjectsTagging }}
-          savedObjectMetaData={metaDataConfig}
-        />
-      );
+      const user = userEvent.setup();
 
-      wrapper.instance().componentDidMount!();
-      await nextTick();
-      findTestSubject(
-        findTestSubject(wrapper, 'tableHeaderCell_references_2'),
-        'tableHeaderSortButton'
-      ).simulate('click');
-      const titleLinks = wrapper.find(EuiLink);
-      expect(titleLinks.at(0).text()).toEqual(doc.attributes.title);
-      expect(titleLinks.at(1).text()).toEqual(doc2.attributes.title);
-      expect(titleLinks.at(2).text()).toEqual(doc3.attributes.title);
+      renderFinder({
+        ...baseProps,
+        savedObjectMetaData: metaDataConfig,
+        services: { contentClient, savedObjectsTagging, uiSettings },
+      });
+
+      await waitForItemsLoaded();
+      await clickColumnSortButton('Tags', user);
+
+      expect(getTitleLinkTexts()).toEqual([
+        doc.attributes.title,
+        doc2.attributes.title,
+        doc3.attributes.title,
+      ]);
     });
 
     it('should list items by tag descending', async () => {
-      (contentClient.mSearch as any as jest.SpyInstance).mockImplementation(() =>
-        Promise.resolve({ hits: [doc, doc3, doc2] })
-      );
+      mockSearch.mockImplementation(() => Promise.resolve({ hits: [doc, doc3, doc2] }));
 
-      const wrapper = mount(
-        <SavedObjectFinder
-          {...baseProps}
-          services={{ uiSettings, contentClient, savedObjectsTagging }}
-          savedObjectMetaData={metaDataConfig}
-        />
-      );
+      const user = userEvent.setup();
 
-      wrapper.instance().componentDidMount!();
-      await nextTick();
-      findTestSubject(
-        findTestSubject(wrapper, 'tableHeaderCell_references_2'),
-        'tableHeaderSortButton'
-      ).simulate('click');
-      findTestSubject(
-        findTestSubject(wrapper, 'tableHeaderCell_references_2'),
-        'tableHeaderSortButton'
-      ).simulate('click');
-      const titleLinks = wrapper.find(EuiLink);
-      expect(titleLinks.at(0).text()).toEqual(doc3.attributes.title);
-      expect(titleLinks.at(1).text()).toEqual(doc2.attributes.title);
-      expect(titleLinks.at(2).text()).toEqual(doc.attributes.title);
+      renderFinder({
+        ...baseProps,
+        savedObjectMetaData: metaDataConfig,
+        services: { contentClient, savedObjectsTagging, uiSettings },
+      });
+
+      await waitForItemsLoaded();
+      await clickColumnSortButton('Tags', user);
+      await clickColumnSortButton('Tags', user);
+
+      expect(getTitleLinkTexts()).toEqual([
+        doc3.attributes.title,
+        doc2.attributes.title,
+        doc.attributes.title,
+      ]);
     });
   });
 
   it('should not show the saved objects which get filtered by showSavedObject', async () => {
-    (contentClient.mSearch as any as jest.SpyInstance).mockImplementation(() =>
-      Promise.resolve({ hits: [doc, doc2] })
-    );
+    mockSearch.mockImplementation(() => Promise.resolve({ hits: [doc, doc2] }));
 
-    const wrapper = shallow(
-      <SavedObjectFinder
-        {...baseProps}
-        services={{ uiSettings, contentClient, savedObjectsTagging }}
-        savedObjectMetaData={[
-          {
-            type: 'search',
-            name: 'Search',
-            getIconForSavedObject: () => 'search',
-            showSavedObject: ({ id }) => id !== '1',
-          },
-        ]}
-      />
-    );
+    renderFinder({
+      ...baseProps,
+      savedObjectMetaData: [
+        {
+          getIconForSavedObject: () => 'search',
+          name: 'Search',
+          showSavedObject: ({ id }) => id !== '1',
+          type: 'search',
+        },
+      ],
+      services: { contentClient, savedObjectsTagging, uiSettings },
+    });
 
-    wrapper.instance().componentDidMount!();
-    await nextTick();
-    const items: any[] = wrapper.find(EuiInMemoryTable).prop('items');
-    expect(items).toHaveLength(1);
-    expect(items[0].attributes.title).toBe(doc2.attributes.title);
+    await waitFor(() => {
+      expect(screen.getByText(doc2.attributes.title)).toBeVisible();
+    });
+    expect(screen.queryByText(doc.attributes.title)).not.toBeInTheDocument();
   });
 
   describe('search', () => {
     it('should request filtered list on search input', async () => {
-      (contentClient.mSearch as any as jest.SpyInstance).mockImplementation(() =>
-        Promise.resolve({ hits: [doc, doc2] })
-      );
+      mockSearch.mockImplementation(() => Promise.resolve({ hits: [doc, doc2] }));
 
-      const wrapper = mount(
-        <SavedObjectFinder
-          {...baseProps}
-          services={{ uiSettings, contentClient, savedObjectsTagging }}
-          savedObjectMetaData={searchMetaData}
-        />
-      );
+      renderFinder({
+        ...baseProps,
+        savedObjectMetaData: searchMetaData,
+        services: { contentClient, savedObjectsTagging, uiSettings },
+      });
 
-      wrapper.instance().componentDidMount!();
-      await nextTick();
-      wrapper
-        .find('[data-test-subj="savedObjectFinderSearchInput"] input')
-        .simulate('keyup', { key: 'Enter', target: { value: 'abc' } });
+      await waitForItemsLoaded();
+      await typeSearchQuery('abc');
 
-      expect(contentClient.mSearch).toHaveBeenCalledWith({
-        contentTypes: [
-          {
-            contentTypeId: 'search',
-          },
-        ],
-        query: { limit: 10, text: 'abc*' },
+      await waitFor(() => {
+        expect(mockSearch).toHaveBeenCalledWith({
+          contentTypes: [
+            {
+              contentTypeId: 'search',
+            },
+          ],
+          query: { limit: 10, text: 'abc*' },
+        });
       });
     });
 
     it('should respect response order on search input', async () => {
-      (contentClient.mSearch as any as jest.SpyInstance).mockImplementation(() =>
-        Promise.resolve({ hits: [doc, doc2] })
-      );
+      mockSearch.mockImplementation(() => Promise.resolve({ hits: [doc, doc2] }));
 
-      const wrapper = mount(
-        <SavedObjectFinder
-          {...baseProps}
-          services={{ uiSettings, contentClient, savedObjectsTagging }}
-          savedObjectMetaData={searchMetaData}
-        />
-      );
+      renderFinder({
+        ...baseProps,
+        savedObjectMetaData: searchMetaData,
+        services: { contentClient, savedObjectsTagging, uiSettings },
+      });
 
-      wrapper.instance().componentDidMount!();
-      await nextTick();
-      wrapper
-        .find('[data-test-subj="savedObjectFinderSearchInput"] input')
-        .simulate('keyup', { key: 'Enter', target: { value: 'abc' } });
-      const titleLinks = wrapper.find(EuiLink);
-      expect(titleLinks.at(0).text()).toEqual(doc.attributes.title);
-      expect(titleLinks.at(1).text()).toEqual(doc2.attributes.title);
+      await waitForItemsLoaded();
+      await typeSearchQuery('abc');
+
+      await waitFor(() => {
+        expect(getTitleLinkTexts()).toEqual([doc.attributes.title, doc2.attributes.title]);
+      });
     });
   });
 
   it('should request multiple saved object types at once', async () => {
-    (contentClient.mSearch as any as jest.SpyInstance).mockImplementation(() =>
-      Promise.resolve({ hits: [doc, doc2] })
-    );
+    mockSearch.mockImplementation(() => Promise.resolve({ hits: [doc, doc2] }));
 
-    const wrapper = shallow(
-      <SavedObjectFinder
-        {...baseProps}
-        services={{ uiSettings, contentClient, savedObjectsTagging }}
-        savedObjectMetaData={[
-          {
-            type: 'search',
-            name: 'Search',
-            getIconForSavedObject: () => 'search',
-          },
-          {
-            type: 'vis',
-            name: 'Vis',
-            getIconForSavedObject: () => 'chartLine',
-          },
-        ]}
-      />
-    );
-
-    wrapper.instance().componentDidMount!();
-
-    expect(contentClient.mSearch).toHaveBeenCalledWith({
-      contentTypes: [
+    renderFinder({
+      ...baseProps,
+      savedObjectMetaData: [
         {
-          contentTypeId: 'search',
+          getIconForSavedObject: () => 'search',
+          name: 'Search',
+          type: 'search',
         },
         {
-          contentTypeId: 'vis',
+          getIconForSavedObject: () => 'chartLine',
+          name: 'Vis',
+          type: 'vis',
         },
       ],
-      query: { limit: 10, text: undefined },
+      services: { contentClient, savedObjectsTagging, uiSettings },
+    });
+
+    await waitFor(() => {
+      expect(mockSearch).toHaveBeenCalledWith({
+        contentTypes: [
+          {
+            contentTypeId: 'search',
+          },
+          {
+            contentTypeId: 'vis',
+          },
+        ],
+        query: { limit: 10, text: undefined },
+      });
     });
   });
 
   describe('filter', () => {
     it('should render filter buttons if enabled', async () => {
-      (contentClient.mSearch as any as jest.SpyInstance).mockImplementation(() =>
-        Promise.resolve({ hits: [doc, doc2, doc3] })
-      );
+      mockSearch.mockImplementation(() => Promise.resolve({ hits: [doc, doc2, doc3] }));
 
-      const wrapper = mount(
-        <SavedObjectFinder
-          {...baseProps}
-          services={{ uiSettings, contentClient, savedObjectsTagging }}
-          showFilter={true}
-          savedObjectMetaData={metaDataConfig}
-        />
-      );
+      renderFinder({
+        ...baseProps,
+        savedObjectMetaData: metaDataConfig,
+        services: { contentClient, savedObjectsTagging, uiSettings },
+        showFilter: true,
+      });
 
-      wrapper.instance().componentDidMount!();
-      await nextTick();
-      expect(wrapper.find('button.euiFilterButton')).toHaveLength(2);
-      expect(wrapper.find('button.euiFilterButton span[data-text="Types"]')).toHaveLength(1);
-      expect(wrapper.find('button.euiFilterButton span[data-text="Tags"]')).toHaveLength(1);
+      await waitForItemsLoaded();
+
+      expect(screen.getByText('Types')).toBeVisible();
+      expect(screen.getByRole('button', { name: 'Tags Selection' })).toBeVisible();
     });
 
     it('should not render filter buttons if disabled', async () => {
-      (contentClient.mSearch as any as jest.SpyInstance).mockImplementation(() =>
-        Promise.resolve({ hits: [doc, doc2, doc3] })
-      );
+      mockSearch.mockImplementation(() => Promise.resolve({ hits: [doc, doc2, doc3] }));
 
-      const wrapper = mount(
-        <SavedObjectFinder
-          {...baseProps}
-          services={{ uiSettings, contentClient, savedObjectsTagging }}
-          showFilter={false}
-          savedObjectMetaData={metaDataConfig}
-        />
-      );
+      renderFinder({
+        ...baseProps,
+        savedObjectMetaData: metaDataConfig,
+        services: { contentClient, savedObjectsTagging, uiSettings },
+        showFilter: false,
+      });
 
-      wrapper.instance().componentDidMount!();
-      await nextTick();
-      expect(wrapper.find('button.euiFilterButton')).toHaveLength(0);
+      await waitForItemsLoaded();
+
+      expect(screen.queryByText('Types')).not.toBeInTheDocument();
+      expect(screen.queryByRole('button', { name: 'Tags Selection' })).not.toBeInTheDocument();
     });
 
     it('should not render types filter button if there is only one type in the metadata list', async () => {
-      (contentClient.mSearch as any as jest.SpyInstance).mockImplementation(() =>
-        Promise.resolve({ hits: [doc, doc2] })
-      );
+      mockSearch.mockImplementation(() => Promise.resolve({ hits: [doc, doc2] }));
 
-      const wrapper = mount(
-        <SavedObjectFinder
-          {...baseProps}
-          services={{ uiSettings, contentClient, savedObjectsTagging }}
-          showFilter={true}
-          savedObjectMetaData={searchMetaData}
-        />
-      );
+      renderFinder({
+        ...baseProps,
+        savedObjectMetaData: searchMetaData,
+        services: { contentClient, savedObjectsTagging, uiSettings },
+        showFilter: true,
+      });
 
-      wrapper.instance().componentDidMount!();
-      await nextTick();
-      expect(wrapper.find('button.euiFilterButton [data-text="Types"]')).toHaveLength(0);
-      expect(wrapper.find('button.euiFilterButton')).toHaveLength(1);
+      await waitForItemsLoaded();
+
+      expect(screen.queryByText('Types')).not.toBeInTheDocument();
+      expect(screen.getByRole('button', { name: 'Tags Selection' })).toBeVisible();
     });
 
     it('should not render tags filter button if savedObjectsTagging is undefined', async () => {
-      (contentClient.mSearch as any as jest.SpyInstance).mockImplementation(() =>
-        Promise.resolve({ hits: [doc, doc2, doc3] })
-      );
+      mockSearch.mockImplementation(() => Promise.resolve({ hits: [doc, doc2, doc3] }));
 
-      const wrapper = mount(
-        <SavedObjectFinder
-          {...baseProps}
-          services={{ uiSettings, contentClient, savedObjectsTagging: undefined }}
-          showFilter={true}
-          savedObjectMetaData={metaDataConfig}
-        />
-      );
+      renderFinder({
+        ...baseProps,
+        savedObjectMetaData: metaDataConfig,
+        services: { contentClient, savedObjectsTagging: undefined, uiSettings },
+        showFilter: true,
+      });
 
-      wrapper.instance().componentDidMount!();
-      await nextTick();
-      expect(wrapper.find('button.euiFilterButton [data-text="Tags"]')).toHaveLength(0);
-      expect(wrapper.find('button.euiFilterButton')).toHaveLength(1);
+      await waitForItemsLoaded();
+
+      expect(screen.getByText('Types')).toBeVisible();
+      expect(screen.queryByRole('button', { name: 'Tags Selection' })).not.toBeInTheDocument();
     });
 
     it('should apply types filter if selected', async () => {
-      (contentClient.mSearch as any as jest.SpyInstance).mockImplementation(() =>
-        Promise.resolve({ hits: [doc, doc2, doc3] })
-      );
+      mockSearch.mockImplementation(() => Promise.resolve({ hits: [doc, doc2, doc3] }));
 
-      const wrapper = mount(
-        <SavedObjectFinder
-          {...baseProps}
-          services={{ uiSettings, contentClient, savedObjectsTagging }}
-          showFilter={true}
-          savedObjectMetaData={metaDataConfig}
-        />
-      );
-
-      wrapper.instance().componentDidMount!();
-      await nextTick();
-      const table = wrapper.find<EuiInMemoryTable<any>>(EuiInMemoryTable);
-      const search = table.prop('search') as EuiSearchBarProps;
-      search.onChange?.({ query: Query.parse('type:(vis)'), queryText: '', error: null });
-      expect(contentClient.mSearch).toHaveBeenLastCalledWith({
-        contentTypes: [
-          {
-            contentTypeId: 'vis',
-          },
-        ],
-        query: { limit: 10, text: undefined },
+      renderFinder({
+        ...baseProps,
+        savedObjectMetaData: metaDataConfig,
+        services: { contentClient, savedObjectsTagging, uiSettings },
+        showFilter: true,
       });
-      search.onChange?.({ query: Query.parse('type:(search or vis)'), queryText: '', error: null });
-      expect(contentClient.mSearch).toHaveBeenLastCalledWith({
-        contentTypes: [
-          {
-            contentTypeId: 'search',
-          },
-          {
-            contentTypeId: 'vis',
-          },
-        ],
-        query: { limit: 10, text: undefined },
+
+      await waitForItemsLoaded();
+
+      await updateTableSearch({
+        error: null,
+        query: Query.parse('type:(vis)'),
+        queryText: '',
+      });
+
+      await waitFor(() => {
+        expect(mockSearch).toHaveBeenLastCalledWith({
+          contentTypes: [
+            {
+              contentTypeId: 'vis',
+            },
+          ],
+          query: { limit: 10, text: undefined },
+        });
+      });
+
+      await updateTableSearch({
+        query: Query.parse('type:(search or vis)'),
+        queryText: '',
+        error: null,
+      });
+
+      await waitFor(() => {
+        expect(mockSearch).toHaveBeenLastCalledWith({
+          contentTypes: [
+            {
+              contentTypeId: 'search',
+            },
+            {
+              contentTypeId: 'vis',
+            },
+          ],
+          query: { limit: 10, text: undefined },
+        });
       });
     });
 
     it('should apply tags filter if selected', async () => {
-      (contentClient.mSearch as any as jest.SpyInstance).mockImplementation(() =>
-        Promise.resolve({ hits: [doc, doc2, doc3] })
-      );
+      mockSearch.mockImplementation(() => Promise.resolve({ hits: [doc, doc2, doc3] }));
 
-      const wrapper = mount(
-        <SavedObjectFinder
-          {...baseProps}
-          services={{ uiSettings, contentClient, savedObjectsTagging }}
-          showFilter={true}
-          savedObjectMetaData={metaDataConfig}
-        />
-      );
-
-      wrapper.instance().componentDidMount!();
-      await nextTick();
-      const table = wrapper.find<EuiInMemoryTable<any>>(EuiInMemoryTable);
-      const search = table.prop('search') as EuiSearchBarProps;
-      search.onChange?.({ query: Query.parse('tag:(tag1)'), queryText: '', error: null });
-      expect(contentClient.mSearch).toHaveBeenLastCalledWith({
-        contentTypes: [
-          {
-            contentTypeId: 'search',
-          },
-          {
-            contentTypeId: 'vis',
-          },
-        ],
-        query: {
-          limit: 10,
-          text: undefined,
-          tags: {
-            included: ['tag1'],
-          },
-        },
+      renderFinder({
+        ...baseProps,
+        savedObjectMetaData: metaDataConfig,
+        services: { contentClient, savedObjectsTagging, uiSettings },
+        showFilter: true,
       });
-      search.onChange?.({ query: Query.parse('tag:(tag1 or tag2)'), queryText: '', error: null });
-      expect(contentClient.mSearch).toHaveBeenLastCalledWith({
-        contentTypes: [
-          {
-            contentTypeId: 'search',
-          },
-          {
-            contentTypeId: 'vis',
-          },
-        ],
-        query: {
-          limit: 10,
-          text: undefined,
-          tags: {
-            included: ['tag1', 'tag2'],
-          },
-        },
+
+      await waitForItemsLoaded();
+
+      await updateTableSearch({
+        error: null,
+        query: Query.parse('tag:(tag1)'),
+        queryText: '',
       });
-    });
 
-    it('should apply types filter to extra items, if provided', async () => {
-      (contentClient.mSearch as any as jest.SpyInstance).mockImplementation(() =>
-        Promise.resolve({ hits: [doc3] })
-      );
-      const wrapper = shallow(
-        <SavedObjectFinder
-          {...baseProps}
-          services={{ uiSettings, contentClient, savedObjectsTagging }}
-          showFilter={true}
-          savedObjectMetaData={[metaDataConfig[1]]}
-          extraItems={{ metaData: searchMetaData, get: jest.fn().mockResolvedValue([doc, doc2]) }}
-        />
-      );
-      wrapper.instance().componentDidMount!();
-      await nextTick();
+      await waitFor(() => {
+        expect(mockSearch).toHaveBeenLastCalledWith({
+          contentTypes: [
+            {
+              contentTypeId: 'search',
+            },
+            {
+              contentTypeId: 'vis',
+            },
+          ],
+          query: {
+            limit: 10,
+            text: undefined,
+            tags: {
+              included: ['tag1'],
+            },
+          },
+        });
+      });
 
-      const table = wrapper.find<EuiInMemoryTable<any>>(EuiInMemoryTable);
-      const search = table.prop('search') as EuiSearchBarProps;
-      search.onChange?.({ query: Query.parse('type:(vis)'), queryText: '', error: null });
-      expect(contentClient.mSearch).toBeCalled();
-      await nextTick();
-      let items: any[] = wrapper.find(EuiInMemoryTable).prop('items');
-      expect(items).toHaveLength(1);
-      expect(items[0].attributes.title).toBe(doc3.attributes.title);
+      await updateTableSearch({
+        error: null,
+        query: Query.parse('tag:(tag1 or tag2)'),
+        queryText: '',
+      });
 
-      (contentClient.mSearch as any as jest.SpyInstance).mockReset();
-      search.onChange?.({ query: Query.parse('type:(search)'), queryText: '', error: null });
-      expect(contentClient.mSearch).not.toBeCalled();
-      await nextTick();
-      items = wrapper.find(EuiInMemoryTable).prop('items');
-      expect(items).toHaveLength(2);
-      expect(items[0].attributes.title).toBe(doc.attributes.title);
-      expect(items[1].attributes.title).toBe(doc2.attributes.title);
+      await waitFor(() => {
+        expect(mockSearch).toHaveBeenLastCalledWith({
+          contentTypes: [
+            {
+              contentTypeId: 'search',
+            },
+            {
+              contentTypeId: 'vis',
+            },
+          ],
+          query: {
+            limit: 10,
+            text: undefined,
+            tags: {
+              included: ['tag1', 'tag2'],
+            },
+          },
+        });
+      });
     });
   });
 
   it('should display no items message if there are no items', async () => {
-    (contentClient.mSearch as any as jest.SpyInstance).mockImplementation(() =>
-      Promise.resolve({ hits: [] })
-    );
+    mockSearch.mockImplementation(() => Promise.resolve({ hits: [] }));
 
-    const noItemsMessage = <span id="myNoItemsMessage" />;
-    const wrapper = mount(
-      <SavedObjectFinder
-        {...baseProps}
-        services={{ uiSettings, contentClient, savedObjectsTagging }}
-        noItemsMessage={noItemsMessage}
-        savedObjectMetaData={searchMetaData}
-      />
-    );
+    const noItemsMessage = <span>No saved objects found</span>;
 
-    wrapper.instance().componentDidMount!();
-    await nextTick();
+    renderFinder({
+      ...baseProps,
+      noItemsMessage,
+      savedObjectMetaData: searchMetaData,
+      services: { contentClient, savedObjectsTagging, uiSettings },
+    });
 
-    expect(wrapper.find(EuiInMemoryTable).prop('noItemsMessage')).toEqual(noItemsMessage);
+    expect(await screen.findByText('No saved objects found')).toBeVisible();
   });
 
   describe('pagination', () => {
-    const longItemList = new Array(50).fill(undefined).map((_, i) => ({
-      id: String(i),
-      type: 'search',
-      attributes: {
-        title: `Title ${i < 10 ? '0' : ''}${i}`,
-      },
-    }));
+    const createItemList = (length: number) =>
+      new Array(length).fill(undefined).map((_, i) => ({
+        attributes: {
+          title: `Title ${i < 10 ? '0' : ''}${i}`,
+        },
+        id: String(i),
+        type: 'search',
+      }));
+    const pageSizeItemList = createItemList(16);
+    const paginatedItemList = createItemList(20);
+    const fixedPageSizeItemList = createItemList(15);
 
     it('should show a table pagination with initial per page', async () => {
-      (contentClient.mSearch as any as jest.SpyInstance).mockImplementation(() =>
-        Promise.resolve({ hits: longItemList })
-      );
+      mockSearch.mockImplementation(() => Promise.resolve({ hits: pageSizeItemList }));
 
-      const wrapper = mount(
-        <SavedObjectFinder
-          id="foo"
-          euiTablePersist={{
-            ...baseProps.euiTablePersist,
-            pageSize: 15,
-          }}
-          services={{ uiSettings, contentClient, savedObjectsTagging }}
-          initialPageSize={15}
-          savedObjectMetaData={searchMetaData}
-        />
-      );
+      renderFinder({
+        euiTablePersist: {
+          ...baseProps.euiTablePersist,
+          pageSize: 15,
+        },
+        id: 'foo',
+        initialPageSize: 15,
+        savedObjectMetaData: searchMetaData,
+        services: { contentClient, savedObjectsTagging, uiSettings },
+      });
 
-      wrapper.instance().componentDidMount!();
-      await nextTick();
-      wrapper.update();
-      const pagination = wrapper.find(EuiInMemoryTable).prop('pagination') as any;
-      expect(pagination.showPerPageOptions).toBe(true);
-      expect(pagination.initialPageSize).toEqual(15);
-      expect(wrapper.find(EuiInMemoryTable).find('tbody tr')).toHaveLength(15);
+      await waitForItemsLoaded('Title 00');
+
+      expect(screen.getByText(/Rows per page: 15/)).toBeVisible();
+      expect(getTitleLinkTexts()).toHaveLength(15);
     });
 
     it('should allow switching the page size', async () => {
-      (contentClient.mSearch as any as jest.SpyInstance).mockImplementation(() =>
-        Promise.resolve({ hits: longItemList })
-      );
+      mockSearch.mockImplementation(() => Promise.resolve({ hits: pageSizeItemList }));
 
-      const wrapper = mount(
-        <SavedObjectFinder
-          id="foo"
-          euiTablePersist={{
-            ...baseProps.euiTablePersist,
-            pageSize: 5,
-          }}
-          services={{ uiSettings, contentClient, savedObjectsTagging }}
-          initialPageSize={15}
-          savedObjectMetaData={searchMetaData}
-        />
-      );
+      const user = userEvent.setup();
 
-      wrapper.instance().componentDidMount!();
-      await nextTick();
-      const table = wrapper.find<EuiInMemoryTable<any>>(EuiInMemoryTable);
-      const sort = table.prop('sorting');
-      table.instance().onTableChange({
-        page: {
-          index: 0,
-          size: 5,
+      renderFinder({
+        euiTablePersist: {
+          ...baseProps.euiTablePersist,
+          pageSize: 5,
         },
-        sort: typeof sort === 'object' ? sort?.sort : undefined,
+        id: 'foo',
+        initialPageSize: 15,
+        savedObjectMetaData: searchMetaData,
+        services: { contentClient, savedObjectsTagging, uiSettings },
       });
-      wrapper.update();
-      expect(wrapper.find(EuiInMemoryTable).find('tbody tr')).toHaveLength(5);
+
+      await waitForItemsLoaded('Title 00');
+
+      await user.click(screen.getByTestId('tablePaginationPopoverButton'));
+      await user.click(screen.getByTestId('tablePagination-5-rows'));
+
+      await waitFor(() => {
+        expect(getTitleLinkTexts()).toHaveLength(5);
+      });
     });
 
     it('should switch page correctly', async () => {
-      (contentClient.mSearch as any as jest.SpyInstance).mockImplementation(() =>
-        Promise.resolve({ hits: longItemList })
-      );
+      mockSearch.mockImplementation(() => Promise.resolve({ hits: paginatedItemList }));
 
-      const wrapper = mount(
-        <SavedObjectFinderUi
-          id="foo"
-          services={{ uiSettings, contentClient, savedObjectsTagging }}
-          initialPageSize={15}
-          savedObjectMetaData={searchMetaData}
-        />
-      );
+      const user = userEvent.setup();
 
-      await nextTick();
-      wrapper.update();
-      expect(wrapper.find(EuiInMemoryTable).find('tbody tr')).toHaveLength(15);
-      const table = wrapper.find<EuiInMemoryTable<any>>(EuiInMemoryTable);
-      const pagination = table.prop('pagination') as any;
-      const sort = table.prop('sorting');
-      table.instance().onTableChange({
-        page: {
-          index: 3,
-          size: pagination.initialPageSize,
+      renderFinder(
+        {
+          euiTablePersist: baseProps.euiTablePersist,
+          id: 'foo',
+          initialPageSize: 15,
+          savedObjectMetaData: searchMetaData,
+          services: { contentClient, savedObjectsTagging, uiSettings },
         },
-        sort: typeof sort === 'object' ? sort?.sort : undefined,
+        SavedObjectFinderUi
+      );
+
+      await waitForItemsLoaded('Title 00');
+      expect(getTitleLinkTexts()).toHaveLength(15);
+
+      await user.click(screen.getByTestId('pagination-button-next'));
+
+      await waitFor(() => {
+        expect(getTitleLinkTexts()).toHaveLength(5);
       });
-      wrapper.update();
-      expect(wrapper.find(EuiInMemoryTable).find('tbody tr')).toHaveLength(5);
     });
 
     it('should show an ordinary pagination for fixed page sizes', async () => {
-      (contentClient.mSearch as any as jest.SpyInstance).mockImplementation(() =>
-        Promise.resolve({ hits: longItemList })
-      );
+      mockSearch.mockImplementation(() => Promise.resolve({ hits: fixedPageSizeItemList }));
 
-      const wrapper = mount(
-        <SavedObjectFinder
-          {...baseProps}
-          services={{ uiSettings, contentClient, savedObjectsTagging }}
-          fixedPageSize={33}
-          savedObjectMetaData={searchMetaData}
-        />
-      );
+      renderFinder({
+        ...baseProps,
+        fixedPageSize: 10,
+        savedObjectMetaData: searchMetaData,
+        services: { uiSettings, contentClient, savedObjectsTagging },
+      });
 
-      wrapper.instance().componentDidMount!();
-      await nextTick();
-      wrapper.update();
-      const pagination = wrapper.find(EuiInMemoryTable).prop('pagination') as any;
-      expect(pagination.showPerPageOptions).toBe(false);
-      expect(pagination.initialPageSize).toEqual(33);
-      expect(wrapper.find(EuiInMemoryTable).find('tbody tr')).toHaveLength(33);
+      await waitForItemsLoaded('Title 00');
+
+      expect(screen.queryByText(/Rows per page/)).not.toBeInTheDocument();
+      expect(getTitleLinkTexts()).toHaveLength(10);
     });
 
     it('should switch page correctly for fixed page sizes', async () => {
-      (contentClient.mSearch as any as jest.SpyInstance).mockImplementation(() =>
-        Promise.resolve({ hits: longItemList })
-      );
+      mockSearch.mockImplementation(() => Promise.resolve({ hits: fixedPageSizeItemList }));
 
-      const wrapper = mount(
-        <SavedObjectFinder
-          {...baseProps}
-          services={{ uiSettings, contentClient, savedObjectsTagging }}
-          fixedPageSize={33}
-          savedObjectMetaData={searchMetaData}
-        />
-      );
+      const user = userEvent.setup();
 
-      wrapper.instance().componentDidMount!();
-      await nextTick();
-      wrapper.update();
-      expect(wrapper.find(EuiInMemoryTable).find('tbody tr')).toHaveLength(33);
-      const table = wrapper.find<EuiInMemoryTable<any>>(EuiInMemoryTable);
-      const pagination = table.prop('pagination') as any;
-      const sort = table.prop('sorting');
-      table.instance().onTableChange({
-        page: {
-          index: 1,
-          size: pagination.initialPageSize,
-        },
-        sort: typeof sort === 'object' ? sort?.sort : undefined,
+      renderFinder({
+        ...baseProps,
+        fixedPageSize: 10,
+        savedObjectMetaData: searchMetaData,
+        services: { contentClient, savedObjectsTagging, uiSettings },
       });
-      wrapper.update();
-      expect(wrapper.find(EuiInMemoryTable).find('tbody tr')).toHaveLength(17);
+
+      await waitForItemsLoaded('Title 00');
+      expect(getTitleLinkTexts()).toHaveLength(10);
+
+      await user.click(screen.getByTestId('pagination-button-next'));
+
+      await waitFor(() => {
+        expect(getTitleLinkTexts()).toHaveLength(5);
+      });
     });
   });
 
   describe('loading state', () => {
     it('should display a loading indicator during initial loading', () => {
-      (contentClient.mSearch as any as jest.SpyInstance).mockResolvedValue({ hits: [] });
+      mockSearch.mockImplementation(() => new Promise(() => {}));
 
-      const wrapper = mount(
-        <SavedObjectFinder
-          {...baseProps}
-          services={{ uiSettings, contentClient, savedObjectsTagging }}
-          savedObjectMetaData={searchMetaData}
-        />
-      );
+      const { container } = renderFinder({
+        ...baseProps,
+        savedObjectMetaData: searchMetaData,
+        services: { contentClient, savedObjectsTagging, uiSettings },
+      });
 
-      expect(wrapper.find('.euiBasicTable-loading')).toHaveLength(1);
+      expect(container.querySelectorAll('.euiBasicTable-loading')).toHaveLength(1);
     });
 
     it('should hide the loading indicator if data is shown', async () => {
-      (contentClient.mSearch as any as jest.SpyInstance).mockResolvedValue({ hits: [doc] });
+      mockSearch.mockResolvedValue({ hits: [doc] });
 
-      const wrapper = mount(
-        <SavedObjectFinder
-          {...baseProps}
-          services={{ uiSettings, contentClient, savedObjectsTagging }}
-          savedObjectMetaData={[
-            {
-              type: 'search',
-              name: 'Search',
-              getIconForSavedObject: () => 'search',
-            },
-          ]}
-        />
-      );
+      const { container } = renderFinder({
+        ...baseProps,
+        savedObjectMetaData: [
+          {
+            getIconForSavedObject: () => 'search',
+            name: 'Search',
+            type: 'search',
+          },
+        ],
+        services: { contentClient, savedObjectsTagging, uiSettings },
+      });
 
-      wrapper.instance().componentDidMount!();
-      await nextTick();
-      wrapper.update();
-      expect(wrapper.find('.euiBasicTable-loading')).toHaveLength(0);
+      await waitFor(() => {
+        expect(screen.getByText(doc.attributes.title)).toBeInTheDocument();
+      });
+      expect(container.querySelectorAll('.euiBasicTable-loading')).toHaveLength(0);
     });
 
     it('should show the loading indicator if there are already items and the search is updated', async () => {
-      (contentClient.mSearch as any as jest.SpyInstance).mockResolvedValue({ hits: [doc] });
+      mockSearch
+        .mockResolvedValueOnce({ hits: [doc] })
+        .mockImplementation(() => new Promise(() => {}));
 
-      const wrapper = mount(
-        <SavedObjectFinder
-          {...baseProps}
-          services={{ uiSettings, contentClient, savedObjectsTagging }}
-          savedObjectMetaData={searchMetaData}
-        />
-      );
+      const { container } = renderFinder({
+        ...baseProps,
+        savedObjectMetaData: searchMetaData,
+        services: { contentClient, savedObjectsTagging, uiSettings },
+      });
 
-      wrapper.instance().componentDidMount!();
-      await nextTick();
-      wrapper.update();
-      expect(wrapper.find('.euiBasicTable-loading')).toHaveLength(0);
-      wrapper
-        .find('[data-test-subj="savedObjectFinderSearchInput"] input')
-        .simulate('keyup', { key: 'Enter', target: { value: 'abc' } });
-      wrapper.update();
-      expect(wrapper.find('.euiBasicTable-loading')).toHaveLength(1);
+      await waitFor(() => {
+        expect(screen.getByText(doc.attributes.title)).toBeVisible();
+      });
+      expect(container.querySelectorAll('.euiBasicTable-loading')).toHaveLength(0);
+
+      await typeSearchQuery('abc');
+
+      expect(container.querySelectorAll('.euiBasicTable-loading')).toHaveLength(1);
     });
   });
 
   it('should render with children', async () => {
-    (contentClient.mSearch as any as jest.SpyInstance).mockResolvedValue({ hits: [doc, doc2] });
+    mockSearch.mockImplementation(() => new Promise(() => {}));
 
-    const wrapper = mount(
-      <SavedObjectFinder
-        {...baseProps}
-        services={{ uiSettings, contentClient, savedObjectsTagging }}
-        savedObjectMetaData={[
-          {
-            type: 'search',
-            name: 'Search',
-            getIconForSavedObject: () => 'search',
-          },
-          {
-            type: 'vis',
-            name: 'Vis',
-            getIconForSavedObject: () => 'chartLine',
-          },
-        ]}
-      >
-        <button id="testChildButton">Dummy text</button>
-      </SavedObjectFinder>
-    );
-    expect(wrapper.exists('#testChildButton')).toBe(true);
+    renderFinder({
+      ...baseProps,
+      children: <button>Dummy text</button>,
+      savedObjectMetaData: [
+        {
+          getIconForSavedObject: () => 'search',
+          name: 'Search',
+          type: 'search',
+        },
+        {
+          getIconForSavedObject: () => 'chartLine',
+          name: 'Vis',
+          type: 'vis',
+        },
+      ],
+      services: { contentClient, savedObjectsTagging, uiSettings },
+    });
+
+    expect(screen.getByText('Dummy text')).toBeVisible();
   });
 
   describe('columns', () => {
     it('should show all columns', async () => {
-      (contentClient.mSearch as any as jest.SpyInstance).mockResolvedValue({
-        hits: [doc, doc2, doc3],
+      mockSearch.mockResolvedValue({
+        hits: [doc],
       });
 
-      const wrapper = mount(
-        <SavedObjectFinder
-          {...baseProps}
-          services={{ uiSettings, contentClient, savedObjectsTagging }}
-          savedObjectMetaData={metaDataConfig}
-        />
-      );
+      renderFinder({
+        ...baseProps,
+        savedObjectMetaData: metaDataConfig,
+        services: { contentClient, savedObjectsTagging, uiSettings },
+      });
 
-      wrapper.instance().componentDidMount!();
-      await nextTick();
-      wrapper.update();
-      expect(wrapper.find(EuiInMemoryTable).find('th')).toHaveLength(3);
-      expect(findTestSubject(wrapper, 'tableHeaderCell_type_0')).toHaveLength(1);
-      expect(findTestSubject(wrapper, 'tableHeaderCell_title_1')).toHaveLength(1);
-      expect(findTestSubject(wrapper, 'tableHeaderCell_references_2')).toHaveLength(1);
+      await waitForItemsLoaded();
+
+      const table = within(getResultsTable());
+      expect(table.getAllByRole('columnheader')).toHaveLength(3);
+      expect(table.getByRole('columnheader', { name: /Type/ })).toBeVisible();
+      expect(table.getByRole('columnheader', { name: /Title/ })).toBeVisible();
+      expect(table.getByRole('columnheader', { name: /Tags/ })).toBeVisible();
     });
 
     it('should hide the type column if there is only one type in the metadata list', async () => {
-      (contentClient.mSearch as any as jest.SpyInstance).mockResolvedValue({
-        hits: [doc, doc2],
+      mockSearch.mockResolvedValue({
+        hits: [doc],
       });
 
-      const wrapper = mount(
-        <SavedObjectFinder
-          {...baseProps}
-          services={{ uiSettings, savedObjectsTagging, contentClient }}
-          savedObjectMetaData={searchMetaData}
-        />
-      );
+      renderFinder({
+        ...baseProps,
+        savedObjectMetaData: searchMetaData,
+        services: { contentClient, savedObjectsTagging, uiSettings },
+      });
 
-      wrapper.instance().componentDidMount!();
-      await nextTick();
-      wrapper.update();
-      expect(wrapper.find(EuiInMemoryTable).find('th')).toHaveLength(2);
-      expect(findTestSubject(wrapper, 'tableHeaderCell_type_0')).toHaveLength(0);
-      expect(findTestSubject(wrapper, 'tableHeaderCell_title_0')).toHaveLength(1);
-      expect(findTestSubject(wrapper, 'tableHeaderCell_references_1')).toHaveLength(1);
+      await waitForItemsLoaded();
+
+      const table = within(getResultsTable());
+      expect(table.getAllByRole('columnheader')).toHaveLength(2);
+      expect(table.queryByRole('columnheader', { name: /Type/ })).not.toBeInTheDocument();
+      expect(table.getByRole('columnheader', { name: /Title/ })).toBeVisible();
+      expect(table.getByRole('columnheader', { name: /Tags/ })).toBeVisible();
     });
 
     it('should hide the tags column if savedObjectsTagging is undefined', async () => {
-      (contentClient.mSearch as any as jest.SpyInstance).mockResolvedValue({
-        hits: [doc, doc2, doc3],
+      mockSearch.mockResolvedValue({
+        hits: [doc],
       });
 
-      const wrapper = mount(
-        <SavedObjectFinder
-          {...baseProps}
-          services={{ uiSettings, contentClient, savedObjectsTagging: undefined }}
-          savedObjectMetaData={metaDataConfig}
-        />
-      );
+      renderFinder({
+        ...baseProps,
+        savedObjectMetaData: metaDataConfig,
+        services: { contentClient, savedObjectsTagging: undefined, uiSettings },
+      });
 
-      wrapper.instance().componentDidMount!();
-      await nextTick();
-      wrapper.update();
-      expect(wrapper.find(EuiInMemoryTable).find('th')).toHaveLength(2);
-      expect(findTestSubject(wrapper, 'tableHeaderCell_type_0')).toHaveLength(1);
-      expect(findTestSubject(wrapper, 'tableHeaderCell_title_1')).toHaveLength(1);
-      expect(findTestSubject(wrapper, 'tableHeaderCell_references_2')).toHaveLength(0);
+      await waitForItemsLoaded();
+
+      const table = within(getResultsTable());
+      expect(table.getAllByRole('columnheader')).toHaveLength(2);
+      expect(table.getByRole('columnheader', { name: /Type/ })).toBeVisible();
+      expect(table.getByRole('columnheader', { name: /Title/ })).toBeVisible();
+      expect(table.queryByRole('columnheader', { name: /Tags/ })).not.toBeInTheDocument();
     });
   });
 
   it('should add a tooltip when text is provided', async () => {
-    (contentClient.mSearch as any as jest.SpyInstance).mockResolvedValue({
+    mockSearch.mockResolvedValue({
       hits: [doc, doc2, doc3],
     });
 
     const tooltipText = 'This is a tooltip';
+    const user = userEvent.setup();
 
-    render(
-      <SavedObjectFinder
-        {...baseProps}
-        services={{ uiSettings, contentClient, savedObjectsTagging }}
-        savedObjectMetaData={metaDataConfig}
-        getTooltipText={(item) => (item.id === doc3.id ? tooltipText : undefined)}
-      />
-    );
+    renderFinder({
+      ...baseProps,
+      getTooltipText: (item) => (item.id === doc3.id ? tooltipText : undefined),
+      savedObjectMetaData: metaDataConfig,
+      services: { contentClient, savedObjectsTagging, uiSettings },
+    });
 
-    const assertTooltip = async (linkTitle: string, show: boolean) => {
-      const elem = await screen.findByText(linkTitle);
-      await userEvent.hover(elem);
+    const getTitleLink = (title: string) => screen.getByRole('button', { name: title });
+
+    const assertTooltip = async (title: string, show: boolean) => {
+      await user.hover(getTitleLink(title));
 
       const tooltip = screen.queryByText(tooltipText);
       if (show) {
-        expect(tooltip)?.toBeInTheDocument();
+        expect(tooltip).toBeVisible();
       } else {
-        expect(tooltip).toBeNull();
+        expect(tooltip).not.toBeInTheDocument();
       }
     };
 
-    assertTooltip(doc.attributes.title, false);
-    assertTooltip(doc2.attributes.title, false);
-    assertTooltip(doc3.attributes.title, true);
+    await waitForItemsLoaded();
+
+    await assertTooltip(doc.attributes.title, false);
+    await assertTooltip(doc3.attributes.title, true);
   });
+
   it('should focus the search input on render', async () => {
-    (contentClient.mSearch as any as jest.SpyInstance).mockResolvedValue({ hits: [doc] });
+    mockSearch.mockResolvedValue({ hits: [doc] });
 
-    render(
-      <SavedObjectFinder
-        {...baseProps}
-        services={{ uiSettings, contentClient, savedObjectsTagging }}
-        savedObjectMetaData={searchMetaData}
-      />
-    );
+    renderFinder({
+      ...baseProps,
+      savedObjectMetaData: searchMetaData,
+      services: { contentClient, savedObjectsTagging, uiSettings },
+    });
 
-    // 2. Grab the input directly and assert focus in one step
-    const input = await screen.findByTestId('savedObjectFinderSearchInput');
-    expect(input).toHaveFocus();
+    const input = await screen.findByRole('searchbox');
+    await waitFor(() => {
+      expect(input).toHaveFocus();
+    });
   });
 });

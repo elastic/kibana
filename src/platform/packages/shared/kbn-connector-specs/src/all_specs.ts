@@ -12,6 +12,7 @@ export * from './specs/alienvault_otx/alienvault_otx';
 export * from './specs/atlassian/jira-cloud/jira';
 export * from './specs/atlassian/confluence_cloud/confluence';
 export * from './specs/aws_lambda/aws_lambda';
+export * from './specs/bigquery/bigquery';
 export * from './specs/brave_search/brave_search';
 export * from './specs/gcp_cloud_functions/gcp_cloud_functions';
 export * from './specs/figma/figma';

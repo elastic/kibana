@@ -27,6 +27,9 @@ function createSetupMock(): jest.Mocked<CloudSetup> {
       url: undefined,
       secretToken: undefined,
     },
+    managedOtlp: {
+      url: undefined,
+    },
     onboarding: {},
     isServerlessEnabled: false,
     serverless: {

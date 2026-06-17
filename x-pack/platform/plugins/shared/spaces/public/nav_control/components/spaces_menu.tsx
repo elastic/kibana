@@ -25,13 +25,14 @@ import { css } from '@emotion/react';
 import React, { Component, Fragment, lazy, Suspense } from 'react';
 
 import type { ApplicationStart, Capabilities } from '@kbn/core/public';
+import { addSpaceIdToPath } from '@kbn/core-spaces-common';
 import { i18n } from '@kbn/i18n';
 import type { InjectedIntl } from '@kbn/i18n-react';
 import { FormattedMessage, injectI18n } from '@kbn/i18n-react';
 
 import { ManageSpacesButton } from './manage_spaces_button';
 import type { Space } from '../../../common';
-import { addSpaceIdToPath, ENTER_SPACE_PATH, SPACE_SEARCH_COUNT_THRESHOLD } from '../../../common';
+import { ENTER_SPACE_PATH, SPACE_SEARCH_COUNT_THRESHOLD } from '../../../common';
 import type { EventTracker } from '../../analytics';
 import { getSpaceAvatarComponent } from '../../space_avatar';
 import { SpaceSolutionBadge } from '../../space_solution_badge';
@@ -114,6 +115,7 @@ class SpacesMenuUI extends Component<Props & WithEuiThemeProps> {
             rowHeight: 40,
             showIcons: true,
             onFocusBadge: false,
+            paddingSize: 's',
           }}
           isLoading={this.props.isLoading}
           loadingMessage={i18n.translate('xpack.spaces.navControl.loadingMessage', {

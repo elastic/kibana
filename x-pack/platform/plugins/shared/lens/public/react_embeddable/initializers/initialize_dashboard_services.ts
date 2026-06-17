@@ -16,7 +16,7 @@ import type {
 import { titleComparators } from '@kbn/presentation-publishing';
 import { apiIsPresentationContainer, apiPublishesSettings } from '@kbn/presentation-publishing';
 import type { Observable } from 'rxjs';
-import { BehaviorSubject, map, merge } from 'rxjs';
+import { BehaviorSubject, map, merge, skip } from 'rxjs';
 import type {
   LensComponentProps,
   LensPanelProps,
@@ -129,9 +129,15 @@ export function initializeDashboardServices(
     },
     anyStateChange$: merge(
       titleManager.anyStateChange$,
-      internalApi.overrides$,
-      internalApi.disableTriggers$
-    ).pipe(map(() => undefined)),
+      internalApi.overrides$.pipe(
+        skip(1),
+        map(() => undefined)
+      ),
+      internalApi.disableTriggers$.pipe(
+        skip(1),
+        map(() => undefined)
+      )
+    ),
     getLatestState: () => {
       const { style, className } = apiHasLensComponentProps(parentApi)
         ? parentApi

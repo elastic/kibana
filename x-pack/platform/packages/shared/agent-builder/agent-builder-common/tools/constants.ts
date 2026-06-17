@@ -26,9 +26,11 @@ export const platformCoreTools = {
   generateEsql: platformCoreTool('generate_esql'),
   generateWorkflow: platformCoreTool('generate_workflow'),
   executeEsql: platformCoreTool('execute_esql'),
+  executeWorkflow: platformCoreTool('execute_workflow'),
   createVisualization: platformCoreTool('create_visualization'),
   getWorkflowExecutionStatus: platformCoreTool('get_workflow_execution_status'),
   resumeWorkflowExecution: platformCoreTool('resume_workflow_execution'),
+  listWorkflowExecutions: platformCoreTool('list_workflow_executions'),
   productDocumentation: platformCoreTool('product_documentation'),
   cases: platformCoreTool('cases'),
   integrationKnowledge: platformCoreTool('integration_knowledge'),
@@ -51,6 +53,9 @@ export const platformStreamsSigEventsTools = {
   searchKnowledgeIndicators: `${internalNamespaces.platformStreams}.sig_events.ki_search`,
   createFeatureKnowledgeIndicator: `${internalNamespaces.platformStreams}.sig_events.ki_feature_create`,
   createQueryKnowledgeIndicator: `${internalNamespaces.platformStreams}.sig_events.ki_query_create`,
+  searchEvent: `${internalNamespaces.platformStreams}.sig_events.event_search`,
+  createEvent: `${internalNamespaces.platformStreams}.sig_events.event_create`,
+  updateEventStatus: `${internalNamespaces.platformStreams}.sig_events.event_status_update`,
 } as const;
 
 export const attachmentTools = {
@@ -69,9 +74,11 @@ export const filestoreTools = {
 };
 
 export const internalTools = {
-  subAgentTool: 'run_subagent',
-  sleepTool: 'sleep',
-  writeTodosTool: 'write_todos',
+  runSubagent: 'run_subagent',
+  sleep: 'sleep',
+  writeTodos: 'write_todos',
+  loadSkill: 'load_skill',
+  askUserQuestion: 'ask_user_question',
 };
 
 export const isAttachmentTool = (toolName: string) =>
@@ -104,6 +111,7 @@ export const defaultAgentToolIds = [
   platformCoreTools.getDocumentById,
   platformCoreTools.getWorkflowExecutionStatus,
   platformCoreTools.resumeWorkflowExecution,
+  platformCoreTools.listWorkflowExecutions,
   platformCoreTools.smlSearch,
   platformCoreTools.smlAttach,
   platformCoreTools.executeConnectorSubAction,

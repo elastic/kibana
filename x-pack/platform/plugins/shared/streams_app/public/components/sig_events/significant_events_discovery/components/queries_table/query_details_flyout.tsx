@@ -135,7 +135,6 @@ export function QueryDetailsFlyout({
               anchorPosition="downRight"
             >
               <EuiContextMenuPanel
-                size="s"
                 items={[
                   <EuiContextMenuItem
                     key="delete"

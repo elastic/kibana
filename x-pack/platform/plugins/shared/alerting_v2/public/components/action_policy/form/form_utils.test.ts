@@ -26,7 +26,6 @@ describe('action policy form utils', () => {
       expect(toCreatePayload(state)).toEqual({
         name: 'Policy',
         description: 'Description',
-        type: 'global',
         groupingMode: 'per_episode',
         throttle: { strategy: 'on_status_change', interval: null },
         destinations: [{ type: 'workflow', id: 'workflow-1' }],
@@ -45,7 +44,6 @@ describe('action policy form utils', () => {
       expect(payload).toEqual({
         name: 'Policy',
         description: 'Description',
-        type: 'global',
         groupingMode: 'per_field',
         groupBy: ['host.name'],
         throttle: { strategy: 'time_interval', interval: '5m' },
@@ -122,8 +120,6 @@ describe('action policy form utils', () => {
       version: 'WzEsMV0=',
       name: 'Test Policy',
       description: 'A test policy',
-      type: 'global',
-      ruleId: null,
       enabled: true,
       matcher: 'data.severity : "critical"',
       groupBy: ['host.name'],
@@ -133,10 +129,8 @@ describe('action policy form utils', () => {
       snoozedUntil: null,
       destinations: [{ type: 'workflow', id: 'workflow-2' }],
       createdBy: 'elastic',
-      createdByUsername: 'elastic',
       createdAt: '2026-03-01T10:00:00.000Z',
       updatedBy: 'elastic',
-      updatedByUsername: 'elastic',
       updatedAt: '2026-03-01T10:00:00.000Z',
       auth: { owner: 'elastic', createdByUser: true },
     };

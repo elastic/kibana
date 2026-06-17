@@ -46,7 +46,7 @@
  * overridable via env vars. `TOO_LONG` triggers a warning annotation when exceeded.
  */
 export const MAX_MINUTES = {
-  JEST_UNIT_DEFAULT: 35, // env: JEST_UNIT_MAX_MINUTES
+  JEST_UNIT_DEFAULT: 30, // env: JEST_UNIT_MAX_MINUTES
   JEST_INTEGRATION_DEFAULT: 30, // env: JEST_INTEGRATION_MAX_MINUTES
   FUNCTIONAL_DEFAULT: 30, // env: FUNCTIONAL_MAX_MINUTES
   TOO_LONG: 27,

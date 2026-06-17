@@ -18,7 +18,6 @@ interface PipelineTreeNode {
 }
 
 apiTest.describe('Ingest pipelines structure tree API', { tag: tags.stateful.classic }, () => {
-  const createdPipelines: string[] = [];
   let adminCredentials: RoleApiCredentials;
 
   /**
@@ -52,7 +51,6 @@ apiTest.describe('Ingest pipelines structure tree API', { tag: tags.stateful.cla
     levels: number;
     childrenPerNode: number;
   }) => {
-    const treePipelines: string[] = [];
     const getPipelineIdFromPath = (path: number[]): string =>
       path.length === 0 ? 'treePipeline' : `treePipeline-${path.join('_')}`;
 
@@ -61,8 +59,12 @@ apiTest.describe('Ingest pipelines structure tree API', { tag: tags.stateful.cla
       const processors: IngestProcessorContainer[] = [{ set: { field: 'foo', value: 'bar' } }];
 
       if (currentLevel < levels) {
-        for (let index = 0; index < childrenPerNode; index++) {
-          const childId = await createNode(currentLevel + 1, [...path, index]);
+        const childIds = await Promise.all(
+          Array.from({ length: childrenPerNode }, (_, index) =>
+            createNode(currentLevel + 1, [...path, index])
+          )
+        );
+        for (const childId of childIds) {
           processors.push({ pipeline: { name: childId } });
         }
       }
@@ -75,26 +77,23 @@ apiTest.describe('Ingest pipelines structure tree API', { tag: tags.stateful.cla
         },
         processors,
       });
-      treePipelines.push(pipelineId);
       return pipelineId;
     };
 
     // Start with the root path []
     await createNode(1, []);
-    return treePipelines;
   };
 
   apiTest.beforeAll(async ({ esClient, requestAuth }) => {
     adminCredentials = await requestAuth.getApiKey('admin');
     // Create a complex tree of 7 levels and 3 children per node.
-    const treePipelines = await createComplexTree({ esClient, levels: 7, childrenPerNode: 3 });
-    createdPipelines.push(...treePipelines);
+    await createComplexTree({ esClient, levels: 7, childrenPerNode: 3 });
   });
 
   apiTest.afterAll(async ({ esClient, log }) => {
-    for (const pipelineId of createdPipelines) {
-      await deletePipeline({ esClient, pipelineName: pipelineId, log });
-    }
+    // All tree pipelines share the 'treePipeline' prefix — one wildcard call replaces
+    // the ~1000 serial deletes that were previously timing out the afterAll hook.
+    await deletePipeline({ esClient, pipelineName: 'treePipeline*', log });
   });
 
   apiTest('fetches a complex structure tree up to the fifth level', async ({ apiClient }) => {

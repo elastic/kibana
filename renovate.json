@@ -26,12 +26,20 @@
       "enabled": false
     },
     {
+      "groupName": "gh-aw",
+      "matchDepNames": ["github/gh-aw"],
+      "reviewers": ["team:kibana-operations"],
+      "matchBaseBranches": ["main"],
+      "labels": ["Team:Operations", "backport:skip", "release_note:skip"],
+      "minimumReleaseAge": "7 days",
+      "enabled": true
+    },
+    {
       "groupName": "webpack",
       "matchDepNames": [
         "autoprefixer",
         "clean-webpack-plugin",
         "css-loader",
-        "file-loader",
         "mini-css-extract-plugin",
         "sass-loader",
         "style-loader",
@@ -43,9 +51,7 @@
         "webpack-merge",
         "webpack-sources",
         "@statoscope/webpack-plugin",
-        "@types/webpack",
         "@types/webpack-bundle-analyzer",
-        "@types/webpack-env",
         "@types/webpack-sources"
       ],
       "reviewers": ["team:kibana-operations"],
@@ -121,7 +127,6 @@
         "@smithy/node-http-handler",
         "@smithy/types",
         "@types/aws4",
-        "ajv",
         "aws4",
         "eventsource-parser",
         "fast-glob",
@@ -168,7 +173,6 @@
         "@playwright/test",
         "playwright",
         "pngjs",
-        "qs",
         "rxjs-marbles",
         "sharp",
         "superagent",
@@ -232,7 +236,7 @@
     },
     {
       "groupName": "base64-js dependencies",
-      "matchDepNames": ["base64-js", "@types/base64-js"],
+      "matchDepNames": ["base64-js"],
       "reviewers": ["team:appex-sharedux"],
       "matchBaseBranches": ["main"],
       "addLabels": ["Team:SharedUX"],
@@ -249,7 +253,7 @@
     },
     {
       "groupName": "classnames dependencies",
-      "matchDepNames": ["classnames", "@types/classnames"],
+      "matchDepNames": ["classnames"],
       "reviewers": ["team:appex-sharedux"],
       "matchBaseBranches": ["main"],
       "addLabels": ["Team:SharedUX"],
@@ -267,7 +271,7 @@
     },
     {
       "groupName": "lz-string dependencies",
-      "matchDepNames": ["lz-string", "@types/lz-string"],
+      "matchDepNames": ["lz-string"],
       "reviewers": ["team:appex-sharedux"],
       "matchBaseBranches": ["main"],
       "addLabels": ["Team:SharedUX"],
@@ -560,7 +564,6 @@
         "reflect-metadata",
         "type-detect",
         "utility-types",
-        "@types/fetch-mock",
         "@types/getos",
         "@types/mock-fs",
         "@types/node-fetch",
@@ -683,8 +686,7 @@
       "reviewers": ["team:kibana-visualizations", "markov00", "nickofthyme"],
       "matchBaseBranches": ["main"],
       "labels": ["release_note:skip", "backport:skip", "Team:Visualizations"],
-      "enabled": true,
-      "minimumReleaseAge": "14 days"
+      "enabled": true
     },
     {
       "groupName": "@elastic/ecs",
@@ -820,6 +822,7 @@
         "@apidevtools/swagger-parser",
         "@redocly/cli",
         "openapi-types",
+        "ajv",
         "ajv-draft-04",
         "ajv-formats"
       ],
@@ -909,7 +912,7 @@
     },
     {
       "groupName": "micromatch/minimatch",
-      "matchDepNames": ["micromatch", "minimatch", "@types/micromatch", "@types/minimatch"],
+      "matchDepNames": ["micromatch", "minimatch", "@types/micromatch"],
       "reviewers": ["team:kibana-operations"],
       "matchBaseBranches": ["main"],
       "addLabels": ["Team:Operations"],
@@ -918,7 +921,7 @@
     },
     {
       "groupName": "nock",
-      "matchDepNames": ["nock", "@types/nock"],
+      "matchDepNames": ["nock"],
       "reviewers": ["team:kibana-operations"],
       "matchBaseBranches": ["main"],
       "addLabels": ["Team:Operations"],
@@ -974,15 +977,6 @@
       "enabled": true
     },
     {
-      "groupName": "cssstyle",
-      "matchDepNames": ["cssstyle", "@types/cssstyle"],
-      "reviewers": ["team:kibana-operations"],
-      "matchBaseBranches": ["main"],
-      "addLabels": ["Team:Operations"],
-      "minimumReleaseAge": "14 days",
-      "enabled": true
-    },
-    {
       "groupName": "execa",
       "matchDepNames": ["execa"],
       "reviewers": ["team:kibana-operations"],
@@ -1002,7 +996,7 @@
     },
     {
       "groupName": "polyfills",
-      "matchDepNames": ["blob-polyfill", "core-js"],
+      "matchDepNames": ["blob-polyfill", "core-js", "qs"],
       "matchDepPatterns": ["polyfill"],
       "reviewers": ["team:kibana-operations"],
       "matchBaseBranches": ["main"],
@@ -1163,7 +1157,7 @@
     },
     {
       "groupName": "source-map",
-      "matchDepNames": ["source-map", "source-map-support", "@types/source-map-support"],
+      "matchDepNames": ["source-map-support", "@types/source-map-support"],
       "reviewers": ["team:kibana-operations"],
       "matchBaseBranches": ["main"],
       "addLabels": ["Team:Operations"],
@@ -1543,7 +1537,7 @@
     },
     {
       "groupName": "reporting dependencies",
-      "matchDepNames": ["@types/extract-zip", "@types/pdfmake", "extract-zip", "pdfmake"],
+      "matchDepNames": ["@types/pdfmake", "extract-zip", "pdfmake"],
       "reviewers": ["team:response-ops"],
       "matchBaseBranches": ["main"],
       "addLabels": ["Team:Reporting Services", "Team:ResponseOps"],
@@ -1874,16 +1868,14 @@
     {
       "groupName": "platform security modules",
       "matchDepNames": [
-        "css.escape",
-        "dependency-check",
         "dependency-cruiser",
         "dompurify",
         "fast-deep-equal",
         "node-forge",
         "formik",
         "handlebars",
-        "js-sha256",
         "js-yaml",
+        "knip",
         "magic-bytes.js",
         "minimist",
         "object-hash",
@@ -1896,8 +1888,7 @@
         "@types/lodash",
         "@types/minimist",
         "@types/node-forge",
-        "@types/object-hash",
-        "@types/tough-cookie"
+        "@types/object-hash"
       ],
       "reviewers": ["team:kibana-security"],
       "matchBaseBranches": ["main"],
@@ -1966,11 +1957,7 @@
       "groupName": "minify",
       "matchDepNames": [
         "gulp-brotli",
-        "gulp-postcss",
-        "gulp-terser",
-        "terser",
-        "terser-webpack-plugin",
-        "@types/gulp"
+        "terser-webpack-plugin"
       ],
       "reviewers": ["team:kibana-operations"],
       "matchBaseBranches": ["main"],
@@ -2006,14 +1993,12 @@
         "expect",
         "jest",
         "jest-canvas-mock",
-        "jest-cli",
         "jest-config",
         "jest-diff",
         "jest-environment-jsdom",
         "jest-matcher-utils",
         "jest-mock",
         "jest-runtime",
-        "jest-specific-snapshot",
         "jest-snapshot",
         "jest-styled-components",
         "mutation-observer"
@@ -2156,12 +2141,10 @@
     {
       "groupName": "langchain",
       "matchDepNames": [
-        "langchain",
         "@langchain/aws",
         "@langchain/classic",
         "@langchain/core",
         "@langchain/google-common",
-        "@langchain/google-genai",
         "@langchain/google-vertexai",
         "@langchain/langgraph",
         "@langchain/langgraph-checkpoint",
@@ -2187,24 +2170,6 @@
       "reviewers": ["team:security-threat-hunting"],
       "matchBaseBranches": ["main"],
       "addLabels": ["Team:Threat Hunting"],
-      "minimumReleaseAge": "14 days",
-      "enabled": true
-    },
-    {
-      "groupName": "nunjucks",
-      "matchDepNames": ["@types/nunjucks", "nunjucks"],
-      "reviewers": ["team:integration-experience"],
-      "matchBaseBranches": ["main"],
-      "addLabels": ["Team:Integration-Experience"],
-      "minimumReleaseAge": "14 days",
-      "enabled": true
-    },
-    {
-      "groupName": "oas",
-      "matchDepNames": ["oas"],
-      "reviewers": ["team:integration-experience"],
-      "matchBaseBranches": ["main"],
-      "addLabels": ["Team:Integration-Experience"],
       "minimumReleaseAge": "14 days",
       "enabled": true
     },
@@ -2337,7 +2302,6 @@
         "@opentelemetry/instrumentation-undici",
         "@opentelemetry/otlp-exporter-base",
         "@opentelemetry/otlp-transformer",
-        "@opentelemetry/resources",
         "@opentelemetry/sdk-logs",
         "@opentelemetry/semantic-conventions"
       ],
@@ -2417,7 +2381,7 @@
     },
     {
       "groupName": "Kibana ES|QL Team",
-      "matchDepNames": ["recast", "tree-dump"],
+      "matchDepNames": ["recast"],
       "reviewers": ["team:kibana-esql"],
       "matchBaseBranches": ["main"],
       "addLabels": ["Team:ESQL"],
@@ -2435,7 +2399,7 @@
     {
       "groupName": "re2js",
       "matchDepNames": ["re2js"],
-      "reviewers": ["team:kibana-visualizations", "dej611"],
+      "reviewers": ["team:kibana-visualizations"],
       "matchBaseBranches": ["main"],
       "addLabels": ["Team:Visualizations"],
       "enabled": true,
@@ -2598,18 +2562,21 @@
       "addLabels": ["Team:EUI"],
       "minimumReleaseAge": "14 days",
       "enabled": true
-    },
-    {
-      "groupName": "patch-package",
-      "matchDepNames": ["patch-package"],
-      "reviewers": ["team:kibana-operations"],
-      "matchBaseBranches": ["main"],
-      "addLabels": ["Team:Operations"],
-      "minimumReleaseAge": "14 days",
-      "enabled": true
     }
   ],
   "customManagers": [
+    {
+      "description": "Update gh-aw CLI version used to validate generated agentic workflows",
+      "customType": "regex",
+      "fileMatch": ["^\\.github/workflows/validate-agentic-workflow-locks\\.yml$"],
+      "matchStrings": [
+        "GH_AW_VERSION:\\s(?<currentValue>v[0-9]+\\.[0-9]+\\.[0-9]+)"
+      ],
+      "depNameTemplate": "github/gh-aw",
+      "packageNameTemplate": "github/gh-aw",
+      "datasourceTemplate": "github-releases",
+      "versioningTemplate": "semver"
+    },
     {
       "description": "Update Wolfi base image",
       "customType": "regex",

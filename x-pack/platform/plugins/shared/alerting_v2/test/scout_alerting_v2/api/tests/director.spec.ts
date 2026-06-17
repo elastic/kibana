@@ -64,13 +64,15 @@ apiTest.describe('Director', { tag: tags.stateful.classic }, () => {
       buildCreateRuleData({
         kind: 'signal',
         metadata: { name: 'director-skip-signal' },
-        evaluation: {
-          query: {
-            base: `FROM ${SOURCE_INDEX} | WHERE host.name == "host-director-skip-signal" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
+        query: {
+          format: 'standalone',
+          breach: {
+            query: `FROM ${SOURCE_INDEX} | WHERE host.name == "host-director-skip-signal" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
           },
         },
         // state_transition is forbidden by the schema when kind is "signal".
         state_transition: undefined,
+        recovery_strategy: undefined,
       })
     );
 
@@ -105,9 +107,10 @@ apiTest.describe('Director', { tag: tags.stateful.classic }, () => {
       const rule = await apiServices.alertingV2.rules.create(
         buildCreateRuleData({
           metadata: { name: 'director-shape' },
-          evaluation: {
-            query: {
-              base: `FROM ${SOURCE_INDEX} | WHERE host.name == "host-director-shape" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
+          query: {
+            format: 'standalone',
+            breach: {
+              query: `FROM ${SOURCE_INDEX} | WHERE host.name == "host-director-shape" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
             },
           },
         })
@@ -151,9 +154,10 @@ apiTest.describe('Director', { tag: tags.stateful.classic }, () => {
       const rule = await apiServices.alertingV2.rules.create(
         buildCreateRuleData({
           metadata: { name: 'director-episode-id-stable' },
-          evaluation: {
-            query: {
-              base: `FROM ${SOURCE_INDEX} | WHERE host.name == "host-episode-id-stable" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
+          query: {
+            format: 'standalone',
+            breach: {
+              query: `FROM ${SOURCE_INDEX} | WHERE host.name == "host-episode-id-stable" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
             },
           },
           state_transition: { pending_count: 1, recovering_count: 1 },
@@ -210,9 +214,10 @@ apiTest.describe('Director', { tag: tags.stateful.classic }, () => {
       const rule = await apiServices.alertingV2.rules.create(
         buildCreateRuleData({
           metadata: { name: 'director-new-lifecycle' },
-          evaluation: {
-            query: {
-              base: `FROM ${SOURCE_INDEX} | WHERE host.name == "host-new-lifecycle" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
+          query: {
+            format: 'standalone',
+            breach: {
+              query: `FROM ${SOURCE_INDEX} | WHERE host.name == "host-new-lifecycle" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
             },
           },
         })
@@ -292,9 +297,10 @@ apiTest.describe('Director', { tag: tags.stateful.classic }, () => {
       const rule = await apiServices.alertingV2.rules.create(
         buildCreateRuleData({
           metadata: { name: 'director-basic-strategy' },
-          evaluation: {
-            query: {
-              base: `FROM ${SOURCE_INDEX} | WHERE host.name == "host-basic-strategy" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
+          query: {
+            format: 'standalone',
+            breach: {
+              query: `FROM ${SOURCE_INDEX} | WHERE host.name == "host-basic-strategy" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
             },
           },
           state_transition: null,
@@ -349,9 +355,10 @@ apiTest.describe('Director', { tag: tags.stateful.classic }, () => {
       const rule = await apiServices.alertingV2.rules.create(
         buildCreateRuleData({
           metadata: { name: 'director-count-increment' },
-          evaluation: {
-            query: {
-              base: `FROM ${SOURCE_INDEX} | WHERE host.name == "host-count-increment" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
+          query: {
+            format: 'standalone',
+            breach: {
+              query: `FROM ${SOURCE_INDEX} | WHERE host.name == "host-count-increment" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
             },
           },
           state_transition: { pending_count: 3 },
@@ -406,9 +413,10 @@ apiTest.describe('Director', { tag: tags.stateful.classic }, () => {
       const rule = await apiServices.alertingV2.rules.create(
         buildCreateRuleData({
           metadata: { name: 'director-pending-reset' },
-          evaluation: {
-            query: {
-              base: `FROM ${SOURCE_INDEX} | WHERE host.name == "host-pending-reset" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
+          query: {
+            format: 'standalone',
+            breach: {
+              query: `FROM ${SOURCE_INDEX} | WHERE host.name == "host-pending-reset" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
             },
           },
           state_transition: { pending_count: 10 },
@@ -489,9 +497,10 @@ apiTest.describe('Director', { tag: tags.stateful.classic }, () => {
     const rule = await apiServices.alertingV2.rules.create(
       buildCreateRuleData({
         metadata: { name: 'director-inactive-no-count' },
-        evaluation: {
-          query: {
-            base: `FROM ${SOURCE_INDEX} | WHERE host.name == "host-inactive-no-count" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
+        query: {
+          format: 'standalone',
+          breach: {
+            query: `FROM ${SOURCE_INDEX} | WHERE host.name == "host-inactive-no-count" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
           },
         },
       })
@@ -541,9 +550,10 @@ apiTest.describe('Director', { tag: tags.stateful.classic }, () => {
       const rule = await apiServices.alertingV2.rules.create(
         buildCreateRuleData({
           metadata: { name: 'director-recovering-threshold' },
-          evaluation: {
-            query: {
-              base: `FROM ${SOURCE_INDEX} | WHERE host.name == "host-recovering-threshold" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
+          query: {
+            format: 'standalone',
+            breach: {
+              query: `FROM ${SOURCE_INDEX} | WHERE host.name == "host-recovering-threshold" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
             },
           },
           state_transition: { pending_count: 0, recovering_count: 3 },
@@ -600,9 +610,10 @@ apiTest.describe('Director', { tag: tags.stateful.classic }, () => {
       const rule = await apiServices.alertingV2.rules.create(
         buildCreateRuleData({
           metadata: { name: 'director-skip-recovering' },
-          evaluation: {
-            query: {
-              base: `FROM ${SOURCE_INDEX} | WHERE host.name == "host-skip-recovering" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
+          query: {
+            format: 'standalone',
+            breach: {
+              query: `FROM ${SOURCE_INDEX} | WHERE host.name == "host-skip-recovering" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
             },
           },
         })
@@ -621,7 +632,7 @@ apiTest.describe('Director', { tag: tags.stateful.classic }, () => {
         episodeStatus: 'inactive',
       });
 
-      await apiServices.alertingV2.taskExecutions.waitForExecutorRuns({
+      await apiServices.alertingV2.ruleExecutions.waitForRuns({
         ruleId: rule.id,
         runs: 2,
       });
@@ -655,9 +666,10 @@ apiTest.describe('Director', { tag: tags.stateful.classic }, () => {
       const rule = await apiServices.alertingV2.rules.create(
         buildCreateRuleData({
           metadata: { name: 'director-skip-pending' },
-          evaluation: {
-            query: {
-              base: `FROM ${SOURCE_INDEX} | WHERE host.name == "host-skip-pending" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
+          query: {
+            format: 'standalone',
+            breach: {
+              query: `FROM ${SOURCE_INDEX} | WHERE host.name == "host-skip-pending" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
             },
           },
           state_transition: { pending_count: 0 },
@@ -668,7 +680,7 @@ apiTest.describe('Director', { tag: tags.stateful.classic }, () => {
         episodeStatus: 'active',
       });
 
-      await apiServices.alertingV2.taskExecutions.waitForExecutorRuns({
+      await apiServices.alertingV2.ruleExecutions.waitForRuns({
         ruleId: rule.id,
         runs: 2,
       });
@@ -702,9 +714,10 @@ apiTest.describe('Director', { tag: tags.stateful.classic }, () => {
       const rule = await apiServices.alertingV2.rules.create(
         buildCreateRuleData({
           metadata: { name: 'director-rebreach' },
-          evaluation: {
-            query: {
-              base: `FROM ${SOURCE_INDEX} | WHERE host.name == "host-rebreach" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
+          query: {
+            format: 'standalone',
+            breach: {
+              query: `FROM ${SOURCE_INDEX} | WHERE host.name == "host-rebreach" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
             },
           },
           state_transition: { pending_count: 0, recovering_count: 10 },
@@ -806,9 +819,10 @@ apiTest.describe('Director', { tag: tags.stateful.classic }, () => {
       const rule = await apiServices.alertingV2.rules.create(
         buildCreateRuleData({
           metadata: { name: 'director-pending-to-inactive' },
-          evaluation: {
-            query: {
-              base: `FROM ${SOURCE_INDEX} | WHERE host.name == "host-pending-to-inactive" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
+          query: {
+            format: 'standalone',
+            breach: {
+              query: `FROM ${SOURCE_INDEX} | WHERE host.name == "host-pending-to-inactive" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
             },
           },
           state_transition: { pending_count: 10 },
@@ -864,9 +878,10 @@ apiTest.describe('Director', { tag: tags.stateful.classic }, () => {
     const rule = await apiServices.alertingV2.rules.create(
       buildCreateRuleData({
         metadata: { name: 'director-multi-group' },
-        evaluation: {
-          query: {
-            base: `FROM ${SOURCE_INDEX} | WHERE host.name IN ("host-multi-group-a", "host-multi-group-b") | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
+        query: {
+          format: 'standalone',
+          breach: {
+            query: `FROM ${SOURCE_INDEX} | WHERE host.name IN ("host-multi-group-a", "host-multi-group-b") | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
           },
         },
         // pending_count is high so neither group transitions to active
@@ -966,9 +981,10 @@ apiTest.describe('Director', { tag: tags.stateful.classic }, () => {
       const rule = await apiServices.alertingV2.rules.create(
         buildCreateRuleData({
           metadata: { name: 'director-pending-timeframe' },
-          evaluation: {
-            query: {
-              base: `FROM ${SOURCE_INDEX} | WHERE host.name == "host-pending-timeframe" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
+          query: {
+            format: 'standalone',
+            breach: {
+              query: `FROM ${SOURCE_INDEX} | WHERE host.name == "host-pending-timeframe" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
             },
           },
           state_transition: {
@@ -1021,9 +1037,10 @@ apiTest.describe('Director', { tag: tags.stateful.classic }, () => {
       const rule = await apiServices.alertingV2.rules.create(
         buildCreateRuleData({
           metadata: { name: 'director-recovering-timeframe-or' },
-          evaluation: {
-            query: {
-              base: `FROM ${SOURCE_INDEX} | WHERE host.name == "host-recovering-timeframe-or" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
+          query: {
+            format: 'standalone',
+            breach: {
+              query: `FROM ${SOURCE_INDEX} | WHERE host.name == "host-recovering-timeframe-or" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
             },
           },
           state_transition: {
@@ -1089,9 +1106,10 @@ apiTest.describe('Director', { tag: tags.stateful.classic }, () => {
       const rule = await apiServices.alertingV2.rules.create(
         buildCreateRuleData({
           metadata: { name: 'director-recovering-timeframe-and' },
-          evaluation: {
-            query: {
-              base: `FROM ${SOURCE_INDEX} | WHERE host.name == "host-recovering-timeframe-and" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
+          query: {
+            format: 'standalone',
+            breach: {
+              query: `FROM ${SOURCE_INDEX} | WHERE host.name == "host-recovering-timeframe-and" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
             },
           },
           state_transition: {
@@ -1168,9 +1186,10 @@ apiTest.describe('Director', { tag: tags.stateful.classic }, () => {
       const rule = await apiServices.alertingV2.rules.create(
         buildCreateRuleData({
           metadata: { name: 'director-pending-timeframe-and' },
-          evaluation: {
-            query: {
-              base: `FROM ${SOURCE_INDEX} | WHERE host.name == "host-pending-timeframe-and" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
+          query: {
+            format: 'standalone',
+            breach: {
+              query: `FROM ${SOURCE_INDEX} | WHERE host.name == "host-pending-timeframe-and" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
             },
           },
           state_transition: {
@@ -1237,9 +1256,10 @@ apiTest.describe('Director', { tag: tags.stateful.classic }, () => {
       const rule = await apiServices.alertingV2.rules.create(
         buildCreateRuleData({
           metadata: { name: 'director-pending-and-success' },
-          evaluation: {
-            query: {
-              base: `FROM ${SOURCE_INDEX} | WHERE host.name == "host-pending-and-success" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
+          query: {
+            format: 'standalone',
+            breach: {
+              query: `FROM ${SOURCE_INDEX} | WHERE host.name == "host-pending-and-success" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
             },
           },
           state_transition: {

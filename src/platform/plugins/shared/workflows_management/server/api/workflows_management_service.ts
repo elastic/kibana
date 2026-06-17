@@ -26,12 +26,23 @@ import type {
   ValidateWorkflowResponseDto,
   WorkflowAggsDto,
   WorkflowDetailDto,
+  WorkflowExecutionCollapseField,
   WorkflowExecutionDto,
   WorkflowExecutionHistoryModel,
   WorkflowExecutionListDto,
+  WorkflowExecutionSortField,
+  WorkflowExecutionSortOrder,
   WorkflowListDto,
   WorkflowStatsDto,
 } from '@kbn/workflows';
+import type { ManagedWorkflowId } from '@kbn/workflows/managed';
+import type {
+  ExecuteManagedWorkflowOptions,
+  GetManagedWorkflowStatusOptions,
+  ManagedWorkflowOperationOptions,
+  ManagedWorkflowServiceInstallOptions,
+  ManagedWorkflowStatusReport,
+} from '@kbn/workflows/server/types';
 import type {
   ChildWorkflowExecutionItem,
   GetAvailableConnectorsResponse,
@@ -45,7 +56,10 @@ import type {
   ExecutionLogsParams,
   StepLogsParams,
 } from '@kbn/workflows-execution-engine/server/workflow_event_logger/types';
-import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extensions/server';
+import type {
+  ServerTriggerDefinition,
+  WorkflowsExtensionsServerPluginStart,
+} from '@kbn/workflows-extensions/server';
 import type { z } from '@kbn/zod/v4';
 
 import type { StepExecutionListResult } from './lib/search_step_executions';
@@ -53,28 +67,39 @@ import type { StepExecutionListResult } from './lib/search_step_executions';
 import type {
   DeleteWorkflowsResponse,
   GetStepExecutionParams,
+  GetWorkflowAggsOptions,
   GetWorkflowsParams,
   SearchStepExecutionsParams,
 } from './workflows_management_api';
 
 import type { BulkFailureEntry } from '../lib/bulk_id_helpers';
+import { ManagedWorkflowsService } from '../services/managed_workflows_service';
 import { WorkflowCrudService } from '../services/workflow_crud_service';
 import { WorkflowExecutionQueryService } from '../services/workflow_execution_query_service';
 import { WorkflowSearchService } from '../services/workflow_search_service';
 import { WorkflowValidationService } from '../services/workflow_validation_service';
-import type { WorkflowStorage } from '../storage/workflow_storage';
-import { createStorage } from '../storage/workflow_storage';
+import { createStorage, type WorkflowStorage } from '../storage/workflow_storage';
 import { WorkflowTaskScheduler } from '../tasks/workflow_task_scheduler';
 import type { WorkflowsServerPluginStartDeps } from '../types';
 
 export interface SearchWorkflowExecutionsParams {
-  workflowId: string;
+  workflowId?: string;
   statuses?: ExecutionStatus[];
   executionTypes?: ExecutionType[];
   executedBy?: string[];
+  concurrencyGroupKey?: string;
   omitStepRuns?: boolean;
+  finishedAfter?: string;
+  finishedBefore?: string;
+  collapse?: WorkflowExecutionCollapseField;
+  sortField?: WorkflowExecutionSortField;
+  sortOrder?: WorkflowExecutionSortOrder;
   page?: number;
   size?: number;
+  /** Datemath lower bound for filtering by startedAt. */
+  startedAfter?: string;
+  /** Datemath upper bound for filtering by startedAt. */
+  startedBefore?: string;
 }
 
 export class WorkflowsService {
@@ -90,6 +115,7 @@ export class WorkflowsService {
   private executionQueryService!: WorkflowExecutionQueryService;
   private searchService!: WorkflowSearchService;
   private crudService!: WorkflowCrudService;
+  private managedWorkflowsService!: ManagedWorkflowsService;
   private getActionsClient!: () => Promise<IUnsecuredActionsClient>;
   private getActionsClientWithRequest!: (
     request: KibanaRequest
@@ -154,6 +180,12 @@ export class WorkflowsService {
       getTaskScheduler: () => this.taskScheduler,
       executionQueryService: this.executionQueryService,
       validationService: this.validationService,
+    });
+
+    this.managedWorkflowsService = new ManagedWorkflowsService({
+      crudService: this.crudService,
+      workflowsExecutionEngine: this.workflowsExecutionEngine,
+      logger: this.logger,
     });
   }
 
@@ -285,9 +317,15 @@ export class WorkflowsService {
     return this.searchService.getWorkflowStats(spaceId, options);
   }
 
-  public async getWorkflowAggs(fields: string[], spaceId: string): Promise<WorkflowAggsDto> {
+  public async getWorkflowAggs(
+    fields: string[],
+    spaceId: string,
+    options?: GetWorkflowAggsOptions
+  ): Promise<WorkflowAggsDto> {
     await this.ensureInitialized();
-    return this.searchService.getWorkflowAggs(fields, spaceId);
+    return options
+      ? this.searchService.getWorkflowAggs(fields, spaceId, options)
+      : this.searchService.getWorkflowAggs(fields, spaceId);
   }
 
   public async getWorkflowExecution(
@@ -370,6 +408,11 @@ export class WorkflowsService {
     return this.validationService.getAvailableConnectors(spaceId, request);
   }
 
+  public async getRegisteredCustomTriggerDefinitions(): Promise<ServerTriggerDefinition[]> {
+    await this.ensureInitialized();
+    return this.validationService.getRegisteredCustomTriggerDefinitions();
+  }
+
   public async validateWorkflow(
     yaml: string,
     spaceId: string,
@@ -386,5 +429,57 @@ export class WorkflowsService {
   ): Promise<z.ZodType> {
     await this.ensureInitialized();
     return this.validationService.getWorkflowZodSchema(options, spaceId, request);
+  }
+
+  public async installManagedWorkflow(
+    id: ManagedWorkflowId,
+    options: ManagedWorkflowServiceInstallOptions,
+    registeredPluginId: string
+  ): Promise<void> {
+    await this.ensureInitialized();
+    return this.managedWorkflowsService.installManagedWorkflow(id, options, registeredPluginId);
+  }
+
+  public async uninstallManagedWorkflow(
+    id: ManagedWorkflowId,
+    options: ManagedWorkflowOperationOptions,
+    registeredPluginId: string
+  ): Promise<void> {
+    await this.ensureInitialized();
+    return this.managedWorkflowsService.uninstallManagedWorkflow(id, options, registeredPluginId);
+  }
+
+  public async getManagedWorkflowStatus(
+    id: ManagedWorkflowId,
+    options: GetManagedWorkflowStatusOptions,
+    registeredPluginId: string
+  ): Promise<ManagedWorkflowStatusReport> {
+    await this.ensureInitialized();
+    return this.managedWorkflowsService.getManagedWorkflowStatus(id, options, registeredPluginId);
+  }
+
+  public async executeManagedWorkflow(
+    id: ManagedWorkflowId,
+    request: KibanaRequest,
+    options: ExecuteManagedWorkflowOptions,
+    registeredPluginId: string
+  ): Promise<string> {
+    await this.ensureInitialized();
+    return this.managedWorkflowsService.executeManagedWorkflow(
+      id,
+      request,
+      options,
+      registeredPluginId
+    );
+  }
+
+  public async pluginReady(pluginId: string): Promise<void> {
+    await this.ensureInitialized();
+    return this.managedWorkflowsService.pluginReady(pluginId);
+  }
+
+  public async cleanupUnregisteredOrphans(registeredOwnerPluginIds: string[]): Promise<void> {
+    await this.ensureInitialized();
+    return this.managedWorkflowsService.cleanupUnregisteredOrphans(registeredOwnerPluginIds);
   }
 }

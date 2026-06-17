@@ -8,11 +8,15 @@
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { ChatCompletionTokenCount, InferenceClient } from '@kbn/inference-common';
 import type { GeneratedSignificantEventQuery, Streams } from '@kbn/streams-schema';
-import { QUERY_TYPE_STATS, ensureMetadata } from '@kbn/streams-schema';
+import {
+  QUERY_TYPE_STATS,
+  ensureMetadata,
+  STREAMS_SIG_EVENTS_KI_QUERY_GENERATION_INFERENCE_FEATURE_ID,
+  STREAMS_SIGNIFICANT_EVENTS_INFERENCE_PARENT_FEATURE_ID,
+} from '@kbn/streams-schema';
 import { generateSignificantEvents } from '@kbn/streams-ai';
 import type { SignificantEventsToolUsage } from '@kbn/streams-ai';
-import type { FeatureClient } from '../streams/feature/feature_client';
-import type { QueryClient } from '../streams/assets/query/query_client';
+import type { KnowledgeIndicatorClient } from '../streams/ki';
 import type { MemoryDiscoveryTools } from './memory_discovery_tools';
 
 interface Params {
@@ -24,8 +28,7 @@ interface Params {
 
 interface Dependencies {
   inferenceClient: InferenceClient;
-  featureClient: FeatureClient;
-  queryClient: QueryClient;
+  kiClient: KnowledgeIndicatorClient;
   logger: Logger;
   signal: AbortSignal;
   esClient: ElasticsearchClient;
@@ -41,10 +44,9 @@ export async function generateSignificantEventDefinitions(
   toolUsage: SignificantEventsToolUsage;
 }> {
   const { definition, connectorId, systemPrompt, maxExistingQueriesForContext } = params;
-  const { inferenceClient, featureClient, queryClient, logger, signal, esClient, memoryTools } =
-    dependencies;
+  const { inferenceClient, kiClient, logger, signal, esClient, memoryTools } = dependencies;
 
-  const { [definition.name]: existingLinks } = await queryClient.getStreamToQueryLinksMap([
+  const { [definition.name]: existingLinks } = await kiClient.getStreamToQueryLinksMap([
     definition.name,
   ]);
 
@@ -59,6 +61,12 @@ export async function generateSignificantEventDefinitions(
 
   const boundInferenceClient = inferenceClient.bindTo({
     connectorId,
+    metadata: {
+      connectorTelemetry: {
+        pluginId: STREAMS_SIG_EVENTS_KI_QUERY_GENERATION_INFERENCE_FEATURE_ID,
+        aggregateBy: STREAMS_SIGNIFICANT_EVENTS_INFERENCE_PARENT_FEATURE_ID,
+      },
+    },
   });
 
   const { queries, tokensUsed, toolUsage } = await generateSignificantEvents({
@@ -69,7 +77,7 @@ export async function generateSignificantEventDefinitions(
     signal,
     systemPrompt: memoryTools ? `${systemPrompt}\n${memoryTools.promptSnippet}` : systemPrompt,
     getFeatures: async (filters) => {
-      const response = await featureClient.getFeatures(definition.name, filters);
+      const response = await kiClient.getFeatures(definition.name, filters);
       return response.hits;
     },
     additionalTools: memoryTools?.tools,
@@ -89,6 +97,7 @@ export async function generateSignificantEventDefinitions(
       severity_score: query.severity_score,
       evidence: query.evidence,
       replaces: query.replaces,
+      features: query.features,
     })),
     tokensUsed,
     toolUsage,

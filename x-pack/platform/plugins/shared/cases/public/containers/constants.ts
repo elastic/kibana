@@ -45,8 +45,9 @@ export const casesQueriesKeys = {
   case: (id: string) => [...casesQueriesKeys.caseView(), id] as const,
   caseFiles: (id: string, params: unknown) =>
     [...casesQueriesKeys.case(id), 'files', params] as const,
+  caseFileStatsAll: (id: string) => [...casesQueriesKeys.case(id), 'files', 'stats'] as const,
   caseFileStats: (id: string, params?: unknown) =>
-    [...casesQueriesKeys.case(id), 'files', 'stats', params] as const,
+    [...casesQueriesKeys.caseFileStatsAll(id), params] as const,
   caseMetrics: (id: string, features: SingleCaseMetricsFeature[]) =>
     [...casesQueriesKeys.case(id), 'metrics', features] as const,
   caseConnectors: (id: string) => [...casesQueriesKeys.case(id), 'connectors'],
@@ -112,6 +113,7 @@ const DEFAULT_SEARCH_FIELDS = [
   'cases-comments.comment',
   'cases-comments.alertId',
   'cases-comments.eventId',
+  'cases.ef_all_values',
 ];
 
 export const DEFAULT_FROM_DATE = 'now-30d';

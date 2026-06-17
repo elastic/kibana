@@ -13,6 +13,8 @@ export const TIMEFIELD_ROUTE = '/internal/esql/get_timefield';
 export const VIEWS_ROUTE = '/internal/esql/views';
 export const DATASETS_ROUTE = '/internal/esql/datasets';
 export const NL_TO_ESQL_ROUTE = '/internal/esql/nl_to_esql';
+export const SUGGEST_FIX_ROUTE = '/internal/esql/suggest_fix';
+export const FIX_WITH_AI_COMMAND_ID = 'esql.fixWithAI';
 
 const LOOKUP_INDEX_ROUTE = '/internal/esql/lookup_index';
 export const LOOKUP_INDEX_CREATE_ROUTE = `${LOOKUP_INDEX_ROUTE}/create`;
@@ -30,4 +32,5 @@ export enum SOURCES_TYPES {
   LOOKUP = 'Lookup',
   WIRED_STREAM = 'Wired Stream',
   CLASSIC_STREAM = 'Classic Stream',
+  QUERY_STREAM = 'Query Stream',
 }

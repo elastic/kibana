@@ -188,9 +188,11 @@ export function SloStatusBadge({
         wrap={false}
         css={responsiveCompactRowStyles}
       >
-        <EuiFlexItem grow={false}>
-          <EuiIcon type="chartGauge" aria-hidden={true} />
-        </EuiFlexItem>
+        {sloStatus !== 'noSLOs' && (
+          <EuiFlexItem grow={false}>
+            <EuiIcon type="chartGauge" aria-hidden={true} />
+          </EuiFlexItem>
+        )}
         {useNarrowCompact ? (
           <>
             <EuiFlexItem grow={false} className="apmSloBadgeNarrowCount">

@@ -55,19 +55,27 @@ export const COMPOSITE_SUMMARY_MAPPINGS_TEMPLATE: ClusterPutComponentTemplateReq
             },
           },
         },
-        sliValue: { type: 'double' },
-        status: { type: 'keyword' },
-        errorBudgetInitial: { type: 'double' },
-        errorBudgetConsumed: { type: 'double' },
-        errorBudgetRemaining: { type: 'double' },
-        errorBudgetIsEstimated: { type: 'boolean' },
-        fiveMinuteBurnRate: { type: 'double' },
-        oneHourBurnRate: { type: 'double' },
-        oneDayBurnRate: { type: 'double' },
+        summary: {
+          properties: {
+            sliValue: { type: 'double' },
+            status: { type: 'keyword' },
+            errorBudget: {
+              properties: {
+                initial: { type: 'double' },
+                consumed: { type: 'double' },
+                remaining: { type: 'double' },
+                isEstimated: { type: 'boolean' },
+              },
+            },
+            fiveMinuteBurnRate: { type: 'double' },
+            oneHourBurnRate: { type: 'double' },
+            oneDayBurnRate: { type: 'double' },
+          },
+        },
         unresolvedMemberIds: { type: 'keyword' },
         members: {
           properties: {
-            id: { type: 'keyword' },
+            sloId: { type: 'keyword' },
             name: {
               type: 'text',
               fields: {
@@ -77,7 +85,6 @@ export const COMPOSITE_SUMMARY_MAPPINGS_TEMPLATE: ClusterPutComponentTemplateReq
             weight: { type: 'double' },
             normalisedWeight: { type: 'double' },
             sliValue: { type: 'double' },
-            contribution: { type: 'double' },
             status: { type: 'keyword' },
             instanceId: { type: 'keyword' },
           },

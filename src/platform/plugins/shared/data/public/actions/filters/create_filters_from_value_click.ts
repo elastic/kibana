@@ -156,7 +156,6 @@ const createFilterFromRawColumnsESQL = async (
   });
 
   // Prefer `sourceField` (index field name). Fall back to `column.name` when it is not a string
-  // (e.g. `column.name` is still the result column / display label in some cases).
   const sourceFieldName = column.meta?.sourceParams?.sourceField;
   const fieldName = typeof sourceFieldName === 'string' ? sourceFieldName : column.name;
 
@@ -164,6 +163,11 @@ const createFilterFromRawColumnsESQL = async (
 
   // Field should be present in the data view and filterable
   if (!field || !field.filterable) {
+    return [];
+  }
+
+  // Avoid index phrase filter when output column name collides with an index field
+  if (column.isComputedColumn === true && column.name === fieldName) {
     return [];
   }
 

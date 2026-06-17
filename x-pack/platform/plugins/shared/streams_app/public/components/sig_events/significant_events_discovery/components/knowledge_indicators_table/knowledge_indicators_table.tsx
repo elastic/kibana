@@ -19,8 +19,9 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { KnowledgeIndicator } from '@kbn/streams-ai';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useAIFeatures } from '../../../../../hooks/use_ai_features';
+import { getFeaturesFromKIs } from '../../../stream_detail_significant_events_view/utils/get_features_from_kis';
 import { AssetImage } from '../../../../asset_image';
 import { LoadingPanel } from '../../../../loading_panel';
 import { KnowledgeIndicatorDetailsFlyout } from '../../../stream_detail_significant_events_view/knowledge_indicator_details_flyout';
@@ -154,6 +155,8 @@ export function KnowledgeIndicatorsTable() {
       refetch();
     }
   }, [isGenerating, refetch]);
+
+  const features = useMemo(() => getFeaturesFromKIs(knowledgeIndicators), [knowledgeIndicators]);
 
   const columns = useKnowledgeIndicatorsColumns({
     occurrencesByQueryId,
@@ -298,11 +301,18 @@ export function KnowledgeIndicatorsTable() {
         <EuiInMemoryTable<KnowledgeIndicator>
           css={css`
             min-width: 700px;
+
+            & thead tr {
+              background-color: ${euiTheme.colors.backgroundBaseSubdued};
+            }
           `}
           items={filteredKnowledgeIndicators}
           itemId={getKnowledgeIndicatorItemId}
           columns={columns}
           loading={isOperationInProgress}
+          rowProps={(ki: KnowledgeIndicator) => ({
+            isSelected: selectedKnowledgeIndicatorId === getKnowledgeIndicatorItemId(ki),
+          })}
           selection={{
             selected: selectedKnowledgeIndicators,
             onSelectionChange: setSelectedKnowledgeIndicators,
@@ -322,6 +332,7 @@ export function KnowledgeIndicatorsTable() {
           knowledgeIndicator={selectedKnowledgeIndicator}
           occurrencesByQueryId={occurrencesByQueryId}
           onClose={closeFlyout}
+          features={features}
         />
       ) : null}
       {knowledgeIndicatorsToDelete.length > 0 ? (

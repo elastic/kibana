@@ -27,15 +27,15 @@ export type CloudbeatConfigKeyType =
   | 'cloudbeat/cis_azure';
 
 export interface CspmUsage {
-  indices: CspmIndicesStats;
-  resources_stats: CspmResourcesStats[];
-  accounts_stats: CspmAccountsStats[];
-  rules_stats: CspmRulesStats[];
-  installation_stats: CloudSecurityInstallationStats[];
-  alerts_stats: CloudSecurityAlertsStats[];
-  cloud_account_stats: CloudSecurityAccountsStats[];
-  muted_rules_stats: MutedRulesStats[];
-  cspm_cloud_connector_usage_stats: CloudSecurityCSPMCloudConnectorUsageStats[];
+  indices?: CspmIndicesStats;
+  resources_stats?: CspmResourcesStats[];
+  accounts_stats?: CspmAccountsStats[];
+  rules_stats?: CspmRulesStats[];
+  installation_stats?: CloudSecurityInstallationStats[];
+  alerts_stats?: CloudSecurityAlertsStats[];
+  cloud_account_stats?: CloudSecurityAccountsStats[];
+  muted_rules_stats?: MutedRulesStats[];
+  cspm_cloud_connector_usage_stats?: CloudSecurityCSPMCloudConnectorUsageStats[];
 }
 
 export interface PackageSetupStatus {

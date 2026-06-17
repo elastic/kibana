@@ -11,6 +11,7 @@ import type { ElasticsearchClient } from '@kbn/core/server';
 import type { ESQLSearchResponse } from '@kbn/es-types';
 import { dateRangeQuery } from '@kbn/es-query';
 import type { Logger } from '@kbn/logging';
+import { getEsqlColumnSchema } from '../../utils/get_esql_column_schema';
 import {
   buildPass1Query,
   buildPass2Query,
@@ -45,9 +46,8 @@ export async function getDiverseSampleDocuments({
   const filter = { bool: { filter: timeRangeFilter } };
   const indices = Array.isArray(index) ? index : [index];
 
-  // TODO: migrate this fieldCaps probe to ES|QL in https://github.com/elastic/streams-program/issues/1220.
   const [messageField, totalDocs] = await Promise.all([
-    detectMessageField({ esClient, index, timeRangeFilter }),
+    detectMessageField({ esClient, index, start, end }),
     runEsqlCount({ esClient, indices, filter }),
   ]);
 
@@ -133,27 +133,21 @@ export async function getDiverseSampleDocuments({
 async function detectMessageField({
   esClient,
   index,
-  timeRangeFilter,
+  start,
+  end,
 }: {
   esClient: ElasticsearchClient;
   index: string | string[];
-  timeRangeFilter: ReturnType<typeof dateRangeQuery>;
+  start: number;
+  end: number;
 }): Promise<string | undefined> {
-  const fieldCapsResponse = await esClient.fieldCaps({
-    index,
-    fields: MESSAGE_FIELD_CANDIDATES,
-    index_filter: {
-      bool: {
-        filter: timeRangeFilter,
-      },
-    },
-    types: ['text', 'match_only_text'],
-  });
-
-  const fieldsFound = Object.keys(fieldCapsResponse.fields);
+  const columns = await getEsqlColumnSchema({ esClient, index, start, end });
+  const textColumnNames = new Set(
+    columns.filter((column) => column.type === 'text').map((column) => column.name)
+  );
 
   for (const candidate of MESSAGE_FIELD_CANDIDATES) {
-    if (fieldsFound.includes(candidate)) {
+    if (textColumnNames.has(candidate)) {
       return candidate;
     }
   }
