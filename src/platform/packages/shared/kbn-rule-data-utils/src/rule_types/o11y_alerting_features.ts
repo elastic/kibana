@@ -30,8 +30,8 @@ export const buildAlertingFeatureEntries = (
   }));
 
 const SHARED_OBS_RULE_TYPE_IDS = [
-  OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
   ES_QUERY_ID,
+  OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
   ML_ANOMALY_DETECTION_RULE_TYPE_ID,
 ];
 
@@ -73,10 +73,10 @@ export const SYNTHETICS_ALERTING_FEATURES = buildAlertingFeatureEntries(
   [AlertConsumers.UPTIME]
 );
 
-export const SHARED_OBS_ALERTING_FEATURES = buildAlertingFeatureEntries(
-  SHARED_OBS_RULE_TYPE_IDS,
-  [AlertConsumers.INFRASTRUCTURE, AlertConsumers.LOGS]
-);
+export const SHARED_OBS_ALERTING_FEATURES = buildAlertingFeatureEntries(SHARED_OBS_RULE_TYPE_IDS, [
+  AlertConsumers.INFRASTRUCTURE,
+  AlertConsumers.LOGS,
+]);
 
 export const OBS_ALERTING_FEATURES = [
   ...APM_ALERTING_FEATURES,
