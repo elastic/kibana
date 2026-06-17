@@ -17,6 +17,7 @@ import {
   startService,
   stopService,
   connectorsHash,
+  scoutEnvHash,
   tailLog,
   isEdotDockerRunning,
 } from './services';
@@ -157,8 +158,18 @@ export const ensureEvalStack = async ({
   }
 
   // --- Step 2: Scout server ---
+  const scoutEnv: Record<string, string> = {};
+  if (profileEnvOverrides.GCS_CREDENTIALS) {
+    scoutEnv.GCS_CREDENTIALS = profileEnvOverrides.GCS_CREDENTIALS;
+  }
+  if (profileEnvOverrides.TRACING_EXPORTERS) {
+    scoutEnv.TRACING_EXPORTERS = profileEnvOverrides.TRACING_EXPORTERS;
+  }
+
   const scoutAlive = isServiceRunning(repoRoot, 'scout');
-  const staleCheck = scoutAlive ? isScoutStale(repoRoot, serverConfigSet) : { stale: false };
+  const staleCheck = scoutAlive
+    ? isScoutStale(repoRoot, serverConfigSet, scoutEnv)
+    : { stale: false };
 
   if (staleCheck.stale) {
     log.warning(`[2/3] Scout server is stale (${staleCheck.reason}). Restarting...`);
@@ -185,24 +196,6 @@ export const ensureEvalStack = async ({
     }
 
     log.info(`[2/3] Starting Scout server (backgrounded, stateful/classic, ${serverConfigSet})...`);
-    // Forward the env overrides that the Scout server config consumes
-    // when launching ES / Kibana. Notably:
-    //   - GCS_CREDENTIALS  -> ES gcs.client.default.credentials_file
-    //                        secure setting (snapshot restore from GCS)
-    //   - TRACING_EXPORTERS -> Kibana --telemetry.tracing.exporters
-    //                         (fan-out OTLP destinations from config.json)
-    // Without TRACING_EXPORTERS, Scout falls back to the localhost:4318
-    // + phoenix defaults in `classic.stateful.config.ts`, so any custom
-    // tracing destinations declared in the vault profile are silently
-    // dropped.
-    const scoutEnv: Record<string, string> = {};
-    if (profileEnvOverrides.GCS_CREDENTIALS) {
-      scoutEnv.GCS_CREDENTIALS = profileEnvOverrides.GCS_CREDENTIALS;
-    }
-    if (profileEnvOverrides.TRACING_EXPORTERS) {
-      scoutEnv.TRACING_EXPORTERS = profileEnvOverrides.TRACING_EXPORTERS;
-    }
-
     startService(
       repoRoot,
       'scout',
@@ -212,6 +205,7 @@ export const ensureEvalStack = async ({
       {
         connectorsHash: connectorsHash(),
         serverConfigSet,
+        envHash: scoutEnvHash(scoutEnv),
         env: Object.keys(scoutEnv).length > 0 ? scoutEnv : undefined,
       }
     );

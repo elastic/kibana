@@ -82,6 +82,11 @@ export const scoutEnvHash = (env: Record<string, string> | undefined): string =>
 export const edotEnvHash = (elasticsearchHost: string | undefined): string =>
   hashParts([elasticsearchHost]);
 
+export const scoutEnvHash = (env: Record<string, string> | undefined): string => {
+  const parts = [env?.TRACING_EXPORTERS ?? '', env?.GCS_CREDENTIALS ?? ''];
+  return createHash('sha256').update(parts.join('\0')).digest('hex').slice(0, 12);
+};
+
 export const isServiceRunning = (repoRoot: string, name: ServiceName): boolean => {
   const state = readState(repoRoot);
   const entry = state[name];
