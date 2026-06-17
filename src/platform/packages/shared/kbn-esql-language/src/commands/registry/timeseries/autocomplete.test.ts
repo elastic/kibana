@@ -137,9 +137,14 @@ describe('TS Autocomplete', () => {
     });
 
     test('on <kbd>SPACE</kbd> after "METADATA" column suggests command and pipe operators', async () => {
-      await tsExpectSuggestions('ts time_series_index metadata _index ', [',', '| ']);
-      await tsExpectSuggestions('ts time_series_index metadata _index, _source ', [',', '| ']);
+      await tsExpectSuggestions('ts time_series_index metadata _index ', ['\n', ',', '| ']);
+      await tsExpectSuggestions('ts time_series_index metadata _index, _source ', [
+        '\n',
+        ',',
+        '| ',
+      ]);
       await tsExpectSuggestions(`ts time_series_index metadata ${METADATA_FIELDS.join(', ')} `, [
+        '\n',
         '| ',
       ]);
     });
