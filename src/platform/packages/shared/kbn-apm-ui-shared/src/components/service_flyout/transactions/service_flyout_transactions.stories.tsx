@@ -81,7 +81,14 @@ const FIXTURE_GROUPS = [
 
 function makeHttp(): HttpStart {
   return {
-    get: () => Promise.resolve({ transactionGroups: FIXTURE_GROUPS, maxCountExceeded: false }),
+    get: (url: string) => {
+      if (url === '/internal/apm/time_range_metadata') {
+        return Promise.resolve({
+          sources: [{ documentType: 'transactionMetric', rollupInterval: '1m', hasDocs: true }],
+        });
+      }
+      return Promise.resolve({ transactionGroups: FIXTURE_GROUPS, maxCountExceeded: false });
+    },
   } as unknown as HttpStart;
 }
 
@@ -91,6 +98,10 @@ const mockLocators = {
   }),
 } as unknown as SharePluginStart['url']['locators'];
 
+const mockNotifications = {
+  toasts: { addDanger: () => {} },
+} as any;
+
 const BASE_PROPS = {
   serviceName: 'frontend-node',
   environment: 'production',
@@ -98,6 +109,7 @@ const BASE_PROPS = {
   end: END,
   transactionType: 'request',
   latencyAggregationType: LatencyAggregationType.p95,
+  notifications: mockNotifications,
 };
 
 export const Default: StoryFn = () => (
