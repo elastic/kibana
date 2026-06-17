@@ -24,16 +24,8 @@ jest.mock('../../hooks/use_workflow_url_state', () => ({
   useWorkflowUrlState: () => mockUseWorkflowUrlState(),
 }));
 
-jest.mock('@kbn/unified-data-table', () => {
-  const actual = jest.requireActual('@kbn/unified-data-table');
-  return {
-    ...actual,
-    UnifiedDataTable: () => <div data-test-subj="unifiedDataTableStub" />,
-  };
-});
-
-jest.mock('@kbn/cell-actions', () => ({
-  CellActionsProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+jest.mock('./workflow_executions_data_grid', () => ({
+  WorkflowExecutionsDataGrid: () => <div data-test-subj="workflowExecutionsDataGridStub" />,
 }));
 
 describe('WorkflowExecutionsTable', () => {
@@ -52,10 +44,10 @@ describe('WorkflowExecutionsTable', () => {
     const services = createStartServicesMock();
     const dataView = createWorkflowExecutionsDataView(services.fieldFormats);
     jest.mocked(services.http.get).mockResolvedValue({
-      hits: {
-        hits: [],
-        total: { value: 0, relation: 'eq' },
-      },
+      results: [],
+      page: 1,
+      size: 25,
+      total: 0,
     });
 
     render(
@@ -92,10 +84,10 @@ describe('WorkflowExecutionsTable', () => {
     const services = createStartServicesMock();
     const dataView = createWorkflowExecutionsDataView(services.fieldFormats);
     jest.mocked(services.http.get).mockResolvedValue({
-      hits: {
-        hits: [],
-        total: { value: 0, relation: 'eq' },
-      },
+      results: [],
+      page: 1,
+      size: 25,
+      total: 0,
     });
 
     render(
@@ -120,20 +112,22 @@ describe('WorkflowExecutionsTable', () => {
     const dataView = createWorkflowExecutionsDataView(services.fieldFormats);
 
     jest.mocked(services.http.get).mockResolvedValue({
-      hits: {
-        hits: [
-          {
-            _id: 'exec-1',
-            _source: {
-              id: 'exec-1',
-              workflowId: 'wf-1',
-              status: 'completed',
-              startedAt: '2024-01-01T10:00:00Z',
-            },
-          },
-        ],
-        total: { value: WORKFLOWS_EXECUTIONS_MAX_RESULT_WINDOW + 500, relation: 'eq' },
-      },
+      results: [
+        {
+          id: 'exec-1',
+          spaceId: 'default',
+          workflowId: 'wf-1',
+          status: 'completed',
+          isTestRun: false,
+          startedAt: '2024-01-01T10:00:00Z',
+          finishedAt: '2024-01-01T10:00:03Z',
+          duration: 3000,
+          error: null,
+        },
+      ],
+      page: 1,
+      size: 25,
+      total: WORKFLOWS_EXECUTIONS_MAX_RESULT_WINDOW + 500,
     });
 
     render(

@@ -106,6 +106,9 @@ export function registerSearchExecutionsRoute({ router, api, spaces }: RouteDepe
           if (error instanceof Error && error.message.startsWith('Invalid JSON in')) {
             return response.badRequest({ body: { message: error.message } });
           }
+          if (error instanceof Error && 'statusCode' in error && error.statusCode === 400) {
+            return response.badRequest({ body: { message: error.message } });
+          }
           return handleRouteError(response, error);
         }
       })

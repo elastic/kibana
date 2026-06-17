@@ -322,7 +322,10 @@ describe('Execution Routes', () => {
 
     it('should call api.searchExecutionsView with parsed query params and space id', async () => {
       mockApi.searchExecutionsView.mockResolvedValue({
-        hits: { hits: [], total: { value: 0, relation: 'eq' } },
+        results: [],
+        page: 1,
+        size: 25,
+        total: 0,
       });
       const h = handler('GET', path)!;
       const request = {
@@ -348,7 +351,7 @@ describe('Execution Routes', () => {
         'default'
       );
       expect(mockResponse.ok).toHaveBeenCalledWith({
-        body: { hits: { hits: [], total: { value: 0, relation: 'eq' } } },
+        body: { results: [], page: 1, size: 25, total: 0 },
       });
     });
 
@@ -366,6 +369,32 @@ describe('Execution Routes', () => {
         body: { message: 'Invalid JSON in query' },
       });
       expect(mockApi.searchExecutionsView).not.toHaveBeenCalled();
+    });
+
+    it('should return bad request when searchExecutionsView throws a query validation error', async () => {
+      mockApi.searchExecutionsView.mockRejectedValue(
+        Object.assign(new Error('failed to create query: For input string: "2s"'), {
+          statusCode: 400,
+        })
+      );
+      const h = handler('GET', path)!;
+      const request = {
+        query: {
+          query: JSON.stringify({
+            range: {
+              duration: {
+                gte: '2s',
+              },
+            },
+          }),
+        },
+      };
+
+      await h(mockContext, request as any, mockResponse as any);
+
+      expect(mockResponse.badRequest).toHaveBeenCalledWith({
+        body: { message: 'failed to create query: For input string: "2s"' },
+      });
     });
   });
 

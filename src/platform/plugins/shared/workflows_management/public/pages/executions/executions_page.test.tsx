@@ -18,16 +18,8 @@ jest.mock('@kbn/alerts-ui-shared/src/alert_filter_controls', () => ({
   AlertFilterControls: () => <div data-test-subj="alertFilterControlsStub" />,
 }));
 
-jest.mock('@kbn/unified-data-table', () => {
-  const actual = jest.requireActual('@kbn/unified-data-table');
-  return {
-    ...actual,
-    UnifiedDataTable: () => <div data-test-subj="unifiedDataTableStub" />,
-  };
-});
-
-jest.mock('@kbn/cell-actions', () => ({
-  CellActionsProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+jest.mock('./workflow_executions_data_grid', () => ({
+  WorkflowExecutionsDataGrid: () => <div data-test-subj="workflowExecutionsDataGridStub" />,
 }));
 
 jest.mock('./workflow_execution_detail_flyout', () => ({
@@ -60,7 +52,10 @@ describe('WorkflowExecutionsPage', () => {
     const SearchBarStub = () => <div data-test-subj="searchBarStub" />;
     services.unifiedSearch.ui.SearchBar = SearchBarStub;
     jest.mocked(services.http.get).mockResolvedValue({
-      hits: { hits: [], total: { value: 0, relation: 'eq' } },
+      results: [],
+      page: 1,
+      size: 25,
+      total: 0,
     });
 
     render(<WorkflowExecutionsPage />, { wrapper: getTestProvider({ services }) });
@@ -88,8 +83,11 @@ describe('WorkflowExecutionsPage', () => {
     services.spaces.getActiveSpace = jest.fn().mockResolvedValue({ id: 'default' });
     const SearchBarStub = () => <div data-test-subj="searchBarStub" />;
     services.unifiedSearch.ui.SearchBar = SearchBarStub;
-    jest.mocked(services.http.post).mockResolvedValue({
-      hits: { hits: [], total: { value: 0, relation: 'eq' } },
+    jest.mocked(services.http.get).mockResolvedValue({
+      results: [],
+      page: 1,
+      size: 25,
+      total: 0,
     });
 
     render(<WorkflowExecutionsPage />, { wrapper: getTestProvider({ services }) });

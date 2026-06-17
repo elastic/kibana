@@ -15,8 +15,13 @@ import type {
 } from '@kbn/controls-plugin/common/options_list/types';
 import type { OptionsListSelection } from '@kbn/controls-schemas';
 import { WORKFLOWS_EXECUTIONS_INDEX } from '../../../../common';
+import { normalizeWorkflowExecutionsDurationQuery } from '../../../../common/lib/normalize_workflow_executions_duration_query';
 import { buildWorkflowExecutionsSpaceFilter } from '../../lib/build_workflow_executions_search_query';
-import { isIndexNotFoundError } from '../../lib/es_error_helpers';
+import {
+  getElasticsearchErrorMessage,
+  isElasticsearchQueryError,
+  isIndexNotFoundError,
+} from '../../lib/es_error_helpers';
 import type { RouteDependencies } from '../types';
 import { INTERNAL_API_VERSION, MAX_EXECUTION_FIELD_NAME_LENGTH } from '../utils/route_constants';
 import { handleRouteError } from '../utils/route_error_handlers';
@@ -116,7 +121,9 @@ export function registerExecutionOptionsListRoute({ router, service, spaces }: R
           const optionsListRequest = request.body as OptionsListRequestBody;
 
           const searchFilter = getSearchFilter(optionsListRequest);
-          const optionsListFilters = optionsListRequest.filters ?? [];
+          const optionsListFilters = (optionsListRequest.filters ?? []).map(
+            normalizeWorkflowExecutionsDurationQuery
+          );
           const selectedOptions = optionsListRequest.selectedOptions ?? [];
           const shouldValidateSelections =
             !optionsListRequest.ignoreValidations && selectedOptions.length > 0;
@@ -190,6 +197,11 @@ export function registerExecutionOptionsListRoute({ router, service, spaces }: R
         } catch (error) {
           if (isIndexNotFoundError(error)) {
             return response.ok({ body: emptyOptionsListResponse() });
+          }
+
+          if (isElasticsearchQueryError(error)) {
+            const message = getElasticsearchErrorMessage(error) ?? 'Invalid search query';
+            return response.badRequest({ body: { message } });
           }
 
           return handleRouteError(response, error);

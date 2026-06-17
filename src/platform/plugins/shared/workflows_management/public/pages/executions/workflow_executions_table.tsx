@@ -17,60 +17,34 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { CellActionsProvider } from '@kbn/cell-actions';
 import type { DataView } from '@kbn/data-views-plugin/common';
-import { buildDataTableRecordList } from '@kbn/discover-utils';
-import type { DataTableRecord, EsHitRecord } from '@kbn/discover-utils/types';
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type {
-  SortOrder,
-  UnifiedDataTableRenderCustomToolbar,
-  UnifiedDataTableSettings,
-} from '@kbn/unified-data-table';
-import {
-  DataLoadingState,
-  getRenderCustomToolbarWithElements,
-  UnifiedDataTable,
-} from '@kbn/unified-data-table';
 import type { RerunWorkflowExecutionParams } from './build_replay_inputs_from_execution_context';
+import { useWorkflowExecutionsGridSelection } from './use_workflow_executions_grid_selection';
 import { useWorkflowExecutionsSearch } from './use_workflow_executions_search';
+import { WorkflowExecutionsDataGrid } from './workflow_executions_data_grid';
 import {
   EXECUTION_TABLE_DEFAULT_PAGE_SIZE,
   EXECUTION_TABLE_DEFAULT_SORT,
   EXECUTION_TABLE_PAGE_SIZE_OPTIONS,
+  type ExecutionTableSortOrder,
 } from './workflow_executions_page_constants';
 import { getWorkflowExecutionsFetchErrorMessage } from './workflow_executions_search_query';
-import { WorkflowExecutionsSelectionBar } from './workflow_executions_selection_bar';
-import { useWorkflowExecutionsTrailingControlColumns } from './workflow_executions_table_actions';
-import {
-  enrichWorkflowExecutionRowFlattenedValues,
-  getWorkflowExecutionId,
-} from './workflow_executions_table_cells';
 import {
   DEFAULT_WORKFLOW_EXECUTIONS_TABLE_COLUMNS,
-  useWorkflowExecutionsTableConfig,
-  WORKFLOW_EXECUTIONS_TABLE_COLUMNS_META,
   WORKFLOW_EXECUTIONS_TABLE_GRID_SETTINGS,
 } from './workflow_executions_table_config';
 import { getWorkflowExecutionsTableGridWrapperCss } from './workflow_executions_table_styles';
 import { WORKFLOWS_EXECUTIONS_MAX_RESULT_WINDOW } from '../../../common';
-import { useKibana } from '../../hooks/use_kibana';
 import { useSerialPolling } from '../../hooks/use_serial_polling';
 import { useWorkflowUrlState } from '../../hooks/use_workflow_url_state';
 
-const EXECUTION_TABLE_ROW_HEIGHT = 1;
 const PAGE_SIZE_OPTIONS = [...EXECUTION_TABLE_PAGE_SIZE_OPTIONS];
 
 const getMaxPageIndex = (itemsPerPage: number): number =>
   Math.max(0, Math.floor(WORKFLOWS_EXECUTIONS_MAX_RESULT_WINDOW / itemsPerPage) - 1);
-
-const gridStyleOverride = {
-  border: 'horizontal' as const,
-  header: 'underline' as const,
-  stripes: false,
-};
 
 const tableContainerCss = css`
   display: flex;
@@ -103,36 +77,28 @@ export const WorkflowExecutionsTable = React.memo<WorkflowExecutionsTableProps>(
     spaceId,
     timeRange,
   }) => {
-    const {
-      data: dataService,
-      fieldFormats,
-      notifications: { toasts },
-      storage,
-      theme,
-      uiActions,
-      uiSettings,
-    } = useKibana().services;
-
     const [visibleColumns, setVisibleColumns] = useState<string[]>([
       ...DEFAULT_WORKFLOW_EXECUTIONS_TABLE_COLUMNS,
     ]);
-    const [gridSettings, setGridSettings] = useState<UnifiedDataTableSettings>(
-      WORKFLOW_EXECUTIONS_TABLE_GRID_SETTINGS
+    const [columnWidths, setColumnWidths] = useState<Partial<Record<string, number>>>(() =>
+      Object.fromEntries(
+        Object.entries(WORKFLOW_EXECUTIONS_TABLE_GRID_SETTINGS.columns)
+          .filter(([, settings]) => settings.width != null)
+          .map(([columnId, settings]) => [columnId, settings.width as number])
+      )
     );
-    const [sort, setSort] = useState<SortOrder[]>(EXECUTION_TABLE_DEFAULT_SORT);
+    const [sort, setSort] = useState<ExecutionTableSortOrder>(EXECUTION_TABLE_DEFAULT_SORT);
     const [pageSize, setPageSize] = useState(EXECUTION_TABLE_DEFAULT_PAGE_SIZE);
     const [pageIndex, setPageIndex] = useState(0);
     const { selectedExecutionId, setSelectedExecution } = useWorkflowUrlState();
+
     const handleOpenExecution = useCallback(
-      (row: DataTableRecord) => {
-        const executionId = getWorkflowExecutionId(row);
-        if (executionId) {
-          setSelectedExecution(executionId);
-        }
+      (execution: { id: string }) => {
+        setSelectedExecution(execution.id);
       },
       [setSelectedExecution]
     );
-    const { externalCustomRenderers } = useWorkflowExecutionsTableConfig(handleOpenExecution);
+
     const maxPageIndex = useMemo(() => getMaxPageIndex(pageSize), [pageSize]);
 
     const searchCriteriaKey = useMemo(
@@ -141,7 +107,7 @@ export const WorkflowExecutionsTable = React.memo<WorkflowExecutionsTableProps>(
     );
 
     const {
-      data: rawResponse,
+      data: searchResponse,
       error,
       isLoading,
       refetch,
@@ -156,18 +122,14 @@ export const WorkflowExecutionsTable = React.memo<WorkflowExecutionsTableProps>(
       sort,
     });
 
-    const { hits, total } = useMemo(() => {
-      const responseHits = (rawResponse?.hits?.hits ?? []).filter(
-        (hit) => hit._source != null
-      ) as unknown as EsHitRecord[];
-      const totalHits = rawResponse?.hits?.total;
-      const totalCount =
-        typeof totalHits === 'number' ? totalHits : totalHits?.value ?? responseHits.length;
+    const executions = useMemo(() => searchResponse?.results ?? [], [searchResponse?.results]);
+    const total = searchResponse?.total ?? 0;
+    const visibleExecutionIds = useMemo(
+      () => executions.map((execution) => execution.id),
+      [executions]
+    );
+    const selectionState = useWorkflowExecutionsGridSelection(visibleExecutionIds);
 
-      return { hits: responseHits, total: totalCount };
-    }, [rawResponse]);
-
-    const loadingState = isLoading ? DataLoadingState.loading : DataLoadingState.loaded;
     const errorMessage = error ? getWorkflowExecutionsFetchErrorMessage() : null;
 
     useSerialPolling({
@@ -182,86 +144,23 @@ export const WorkflowExecutionsTable = React.memo<WorkflowExecutionsTableProps>(
       setPageIndex(0);
     }, [searchCriteriaKey]);
 
-    const rows = useMemo<DataTableRecord[]>(
-      () =>
-        buildDataTableRecordList({
-          records: hits,
-          dataView,
-          processRecord: enrichWorkflowExecutionRowFlattenedValues,
-        }),
-      [hits, dataView]
-    );
     const handleRetry = useCallback(() => {
       void refetch();
     }, [refetch]);
-    const trailingControlColumns = useWorkflowExecutionsTrailingControlColumns(
-      rows,
-      onViewAllExecutionsForWorkflow,
-      onReRunExecution
-    );
-
-    const expandedDoc = useMemo(() => {
-      if (!selectedExecutionId) {
-        return undefined;
-      }
-
-      return rows.find((row) => getWorkflowExecutionId(row) === selectedExecutionId);
-    }, [rows, selectedExecutionId]);
-
-    const handleSetExpandedDoc = useCallback(
-      (doc: DataTableRecord | undefined) => {
-        if (!doc) {
-          setSelectedExecution(null);
-          return;
-        }
-
-        const executionId = getWorkflowExecutionId(doc);
-        if (executionId) {
-          setSelectedExecution(executionId);
-        }
-      },
-      [setSelectedExecution]
-    );
-
-    const services = useMemo(
-      () => ({
-        theme,
-        fieldFormats,
-        uiSettings,
-        toastNotifications: toasts,
-        storage,
-        data: dataService,
-      }),
-      [dataService, fieldFormats, storage, theme, toasts, uiSettings]
-    );
 
     const handleSetColumns = useCallback((nextColumns: string[]) => {
       setVisibleColumns(nextColumns);
     }, []);
 
-    const handleSortWithPageReset = useCallback((nextSort: string[][]) => {
-      const parsedSort = nextSort.filter(
-        (value): value is SortOrder =>
-          Array.isArray(value) &&
-          value.length === 2 &&
-          typeof value[0] === 'string' &&
-          (value[1] === 'asc' || value[1] === 'desc')
-      );
-
-      setSort(parsedSort.length > 0 ? parsedSort : EXECUTION_TABLE_DEFAULT_SORT);
+    const handleSortWithPageReset = useCallback((nextSort: ExecutionTableSortOrder) => {
+      setSort(nextSort.length > 0 ? nextSort : EXECUTION_TABLE_DEFAULT_SORT);
       setPageIndex(0);
     }, []);
 
-    const handleResize = useCallback((resized: { columnId: string; width: number | undefined }) => {
-      setGridSettings((current) => ({
+    const handleColumnResize = useCallback((columnId: string, width: number | undefined) => {
+      setColumnWidths((current) => ({
         ...current,
-        columns: {
-          ...current.columns,
-          [resized.columnId]: {
-            ...current.columns?.[resized.columnId],
-            width: resized.width,
-          },
-        },
+        [columnId]: width,
       }));
     }, []);
 
@@ -286,32 +185,6 @@ export const WorkflowExecutionsTable = React.memo<WorkflowExecutionsTableProps>(
       [pageSize, total]
     );
     const isPaginationLimited = total > WORKFLOWS_EXECUTIONS_MAX_RESULT_WINDOW;
-
-    const baseToolbarRenderer = useMemo(
-      () =>
-        getRenderCustomToolbarWithElements({
-          leftSide: <></>,
-          bottomSection: <WorkflowExecutionsSelectionBar onRefresh={handleRetry} rows={rows} />,
-        }),
-      [handleRetry, rows]
-    );
-
-    const renderCustomToolbar = useMemo((): UnifiedDataTableRenderCustomToolbar => {
-      function renderExecutionsToolbar(
-        toolbarProps: Parameters<UnifiedDataTableRenderCustomToolbar>[0]
-      ) {
-        return baseToolbarRenderer({
-          ...toolbarProps,
-          gridProps: {
-            ...toolbarProps.gridProps,
-            additionalControls: null,
-          },
-        });
-      }
-
-      renderExecutionsToolbar.displayName = 'WorkflowExecutionsRenderCustomToolbar';
-      return renderExecutionsToolbar;
-    }, [baseToolbarRenderer]);
 
     if (errorMessage) {
       return (
@@ -340,7 +213,7 @@ export const WorkflowExecutionsTable = React.memo<WorkflowExecutionsTableProps>(
       );
     }
 
-    if (loadingState === DataLoadingState.loading && rows.length === 0) {
+    if (isLoading && executions.length === 0) {
       return (
         <EuiPanel hasShadow={false} hasBorder data-test-subj="workflowExecutionsTableLoading">
           <EuiSkeletonText lines={5} />
@@ -348,7 +221,7 @@ export const WorkflowExecutionsTable = React.memo<WorkflowExecutionsTableProps>(
       );
     }
 
-    if (rows.length === 0) {
+    if (executions.length === 0) {
       return (
         <EuiPanel hasShadow={false} hasBorder data-test-subj="workflowExecutionsTableEmpty">
           <EuiCallOut
@@ -365,39 +238,22 @@ export const WorkflowExecutionsTable = React.memo<WorkflowExecutionsTableProps>(
     return (
       <div css={tableContainerCss} data-test-subj="workflowExecutionsTable">
         <div css={gridWrapperCss}>
-          <CellActionsProvider getTriggerCompatibleActions={uiActions.getTriggerCompatibleActions}>
-            <UnifiedDataTable
-              ariaLabelledBy="workflowExecutionsTableLabel"
-              canDragAndDropColumns
-              configRowHeight={EXECUTION_TABLE_ROW_HEIGHT}
-              columns={visibleColumns}
-              columnsMeta={WORKFLOW_EXECUTIONS_TABLE_COLUMNS_META}
-              consumer="workflows"
-              dataView={dataView}
-              expandedDoc={expandedDoc}
-              externalCustomRenderers={externalCustomRenderers}
-              gridStyleOverride={gridStyleOverride}
-              isPaginationEnabled={false}
-              isSortEnabled
-              loadingState={loadingState}
-              onResize={handleResize}
-              onSetColumns={handleSetColumns}
-              onSort={handleSortWithPageReset}
-              rows={rows}
-              sampleSizeState={rows.length}
-              services={services}
-              setExpandedDoc={handleSetExpandedDoc}
-              settings={gridSettings}
-              showColumnTokens={false}
-              showTimeCol={false}
-              sort={sort}
-              totalHits={total}
-              trailingControlColumns={trailingControlColumns}
-              renderCustomToolbar={renderCustomToolbar}
-              enableComparisonMode={false}
-              hideFilteringOnComputedColumns
-            />
-          </CellActionsProvider>
+          <WorkflowExecutionsDataGrid
+            ariaLabelledBy="workflowExecutionsTableLabel"
+            executions={executions}
+            visibleColumns={visibleColumns}
+            columnWidths={columnWidths}
+            sort={sort}
+            selectedExecutionId={selectedExecutionId}
+            selectionState={selectionState}
+            onOpenExecution={handleOpenExecution}
+            onRefresh={handleRetry}
+            onSetColumns={handleSetColumns}
+            onSort={handleSortWithPageReset}
+            onColumnResize={handleColumnResize}
+            onReRunExecution={onReRunExecution}
+            onViewAllExecutionsForWorkflow={onViewAllExecutionsForWorkflow}
+          />
         </div>
         {isPaginationLimited && (
           <EuiCallOut

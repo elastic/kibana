@@ -5,38 +5,27 @@ responses:
       application/json:
         examples:
           searchExecutionsResponseExample:
-            description: 'Example Elasticsearch search response for workflow-level executions'
+            description: 'Example paginated list of workflow-level executions'
             value:
-              took: 5
-              timed_out: false
-              _shards:
-                total: 1
-                successful: 1
-                skipped: 0
-                failed: 0
-              hits:
-                total:
-                  value: 1
-                  relation: eq
-                max_score: 1.0
-                hits:
-                  - _index: .workflows-executions
-                    _id: exec-a1b2c3d4-e5f6-7890
-                    _score: 1.0
-                    _source:
-                      id: exec-a1b2c3d4-e5f6-7890
-                      spaceId: default
-                      status: completed
-                      isTestRun: false
-                      startedAt: '2025-11-20T12:00:00.000Z'
-                      finishedAt: '2025-11-20T12:00:03.000Z'
-                      duration: 3000
-                      workflowId: workflow-a1b2c3d4-e5f6-7890-abcd-ef1234567890
-                      workflowName: Example Workflow
-                      executedBy: elastic
-                      triggeredBy: manual
-                      tags:
-                        - reporting
+              results:
+                - spaceId: default
+                  id: exec-a1b2c3d4-e5f6-7890
+                  status: completed
+                  isTestRun: false
+                  startedAt: '2025-11-20T12:00:00.000Z'
+                  finishedAt: '2025-11-20T12:00:03.000Z'
+                  duration: 3000
+                  workflowId: workflow-a1b2c3d4-e5f6-7890-abcd-ef1234567890
+                  workflowName: Example Workflow
+                  tags:
+                    - reporting
+                  managed: false
+                  triggeredBy: manual
+                  executedBy: elastic
+                  error: null
+              page: 1
+              size: 25
+              total: 1
   400:
     description: 'Indicates a bad request, such as invalid JSON in query parameters'
     content:

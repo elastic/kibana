@@ -9,10 +9,11 @@
 
 import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
-import type { DataTableRecord, EsHitRecord } from '@kbn/discover-utils/types';
-import { type EsWorkflowExecution, ExecutionStatus } from '@kbn/workflows';
 import {
-  enrichWorkflowExecutionRowFlattenedValues,
+  type WorkflowExecutionListItemDto,
+  ExecutionStatus,
+} from '@kbn/workflows';
+import {
   WorkflowExecutionDurationCell,
   WorkflowExecutionStartedAtCell,
   WorkflowExecutionWorkflowCell,
@@ -27,43 +28,18 @@ jest.mock('../../shared/ui/use_formatted_date', () => ({
   useGetFormattedDateTime: () => (date: Date) => date.toISOString(),
 }));
 
-const createRow = (source: Partial<EsWorkflowExecution>): DataTableRecord => ({
-  id: source.id ?? 'exec-1',
-  raw: {
-    _id: source.id ?? 'exec-1',
-    _source: source,
-  } as EsHitRecord,
-  flattened: {},
-});
-
-describe('enrichWorkflowExecutionRowFlattenedValues', () => {
-  it('adds workflowId to flattened workflow column for copy support', () => {
-    const row = createRow({
-      id: 'exec-1',
-      workflowId: 'wf-123',
-    });
-
-    expect(enrichWorkflowExecutionRowFlattenedValues(row).flattened.workflow).toBe('wf-123');
-  });
-
-  it('adds formatted trigger label to flattened triggers column', () => {
-    const row = createRow({
-      id: 'exec-1',
-      triggeredBy: 'manual',
-    });
-
-    expect(enrichWorkflowExecutionRowFlattenedValues(row).flattened.triggers).toBe('Manual');
-  });
-
-  it('returns the original row when execution source is missing', () => {
-    const row: DataTableRecord = {
-      id: 'exec-1',
-      raw: { _id: 'exec-1' } as DataTableRecord['raw'],
-      flattened: {},
-    };
-
-    expect(enrichWorkflowExecutionRowFlattenedValues(row)).toBe(row);
-  });
+const createExecution = (
+  overrides: Partial<WorkflowExecutionListItemDto> = {}
+): WorkflowExecutionListItemDto => ({
+  spaceId: 'default',
+  id: 'exec-1',
+  status: ExecutionStatus.COMPLETED,
+  isTestRun: false,
+  startedAt: '2026-01-01T00:00:00Z',
+  finishedAt: '2026-01-01T00:00:03Z',
+  duration: 3000,
+  error: null,
+  ...overrides,
 });
 
 describe('WorkflowExecutionWorkflowCell', () => {
@@ -76,16 +52,9 @@ describe('WorkflowExecutionWorkflowCell', () => {
   it('renders workflow name as a link', () => {
     render(
       <WorkflowExecutionWorkflowCell
-        row={createRow({
-          id: 'exec-1',
+        execution={createExecution({
           status: ExecutionStatus.COMPLETED,
-          workflowDefinition: {
-            name: 'OpenAI entity extraction',
-            triggers: [],
-            version: '1',
-            enabled: false,
-            steps: [],
-          },
+          workflowName: 'OpenAI entity extraction',
         })}
         onOpen={onOpen}
       />,
@@ -98,39 +67,25 @@ describe('WorkflowExecutionWorkflowCell', () => {
   });
 
   it('opens execution details when workflow link is clicked', () => {
-    const row = createRow({
-      id: 'exec-1',
+    const execution = createExecution({
       status: ExecutionStatus.COMPLETED,
-      workflowDefinition: {
-        name: 'OpenAI entity extraction',
-        triggers: [],
-        version: '1',
-        enabled: false,
-        steps: [],
-      },
+      workflowName: 'OpenAI entity extraction',
     });
 
-    render(<WorkflowExecutionWorkflowCell row={row} onOpen={onOpen} />, {
+    render(<WorkflowExecutionWorkflowCell execution={execution} onOpen={onOpen} />, {
       wrapper: getTestProvider({}),
     });
 
     fireEvent.click(screen.getByTestId('workflowExecutionWorkflowLink'));
-    expect(onOpen).toHaveBeenCalledWith(row);
+    expect(onOpen).toHaveBeenCalledWith(execution);
   });
 
   it('renders action required badge when status is WAITING_FOR_INPUT', () => {
     render(
       <WorkflowExecutionWorkflowCell
-        row={createRow({
-          id: 'exec-1',
+        execution={createExecution({
           status: ExecutionStatus.WAITING_FOR_INPUT,
-          workflowDefinition: {
-            name: 'OpenAI entity extraction',
-            triggers: [],
-            version: '1',
-            enabled: false,
-            steps: [],
-          },
+          workflowName: 'OpenAI entity extraction',
         })}
         onOpen={onOpen}
       />,
@@ -146,16 +101,9 @@ describe('WorkflowExecutionWorkflowCell', () => {
   it('does not render action required badge for other statuses', () => {
     render(
       <WorkflowExecutionWorkflowCell
-        row={createRow({
-          id: 'exec-1',
+        execution={createExecution({
           status: ExecutionStatus.RUNNING,
-          workflowDefinition: {
-            name: 'OpenAI entity extraction',
-            triggers: [],
-            version: '1',
-            enabled: false,
-            steps: [],
-          },
+          workflowName: 'OpenAI entity extraction',
         })}
         onOpen={onOpen}
       />,
@@ -172,8 +120,7 @@ describe('WorkflowExecutionStartedAtCell', () => {
 
     render(
       <WorkflowExecutionStartedAtCell
-        row={createRow({
-          id: 'exec-1',
+        execution={createExecution({
           status: ExecutionStatus.COMPLETED,
           startedAt,
         })}
@@ -191,13 +138,10 @@ describe('WorkflowExecutionDurationCell', () => {
   it('renders formatted duration when available', () => {
     render(
       <WorkflowExecutionDurationCell
-        row={{
-          ...createRow({
-            id: 'exec-1',
-            status: ExecutionStatus.COMPLETED,
-          }),
-          flattened: { duration: 2200 },
-        }}
+        execution={createExecution({
+          status: ExecutionStatus.COMPLETED,
+          duration: 2200,
+        })}
       />,
       { wrapper: getTestProvider({}) }
     );
@@ -208,9 +152,9 @@ describe('WorkflowExecutionDurationCell', () => {
   it('renders in progress spinner when duration is missing and execution is not finished', () => {
     render(
       <WorkflowExecutionDurationCell
-        row={createRow({
-          id: 'exec-1',
+        execution={createExecution({
           status: ExecutionStatus.RUNNING,
+          duration: null,
         })}
       />,
       { wrapper: getTestProvider({}) }
@@ -223,9 +167,9 @@ describe('WorkflowExecutionDurationCell', () => {
   it('renders nothing when duration is missing and execution is finished', () => {
     const { container } = render(
       <WorkflowExecutionDurationCell
-        row={createRow({
-          id: 'exec-1',
+        execution={createExecution({
           status: ExecutionStatus.COMPLETED,
+          duration: null,
         })}
       />,
       { wrapper: getTestProvider({}) }

@@ -9,12 +9,11 @@
 
 import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
 import { useCallback, useMemo } from 'react';
-import type { DataTableRecord } from '@kbn/discover-utils/types';
 import { i18n } from '@kbn/i18n';
+import type { WorkflowExecutionListItemDto } from '@kbn/workflows';
 import { useRunWorkflow, useWorkflowsCapabilities } from '@kbn/workflows-ui';
 import { buildReplayInputsFromExecutionContext } from './build_replay_inputs_from_execution_context';
 import type { RerunWorkflowExecutionParams } from './build_replay_inputs_from_execution_context';
-import { getWorkflowExecutionSource } from './workflow_executions_table_cells';
 import { useKibana } from '../../hooks/use_kibana';
 
 export const useWorkflowExecutionRerun = ({
@@ -60,29 +59,28 @@ export const useWorkflowExecutionRerun = ({
 export const useWorkflowExecutionsBulkActions = ({
   onAction,
   onRefresh,
-  rows,
-  selectedDocIds,
+  executions,
+  selectedExecutionIds,
 }: {
   onAction: () => void;
   onRefresh: () => void;
-  rows: DataTableRecord[];
-  selectedDocIds: string[];
+  executions: WorkflowExecutionListItemDto[];
+  selectedExecutionIds: string[];
 }): { panels: EuiContextMenuPanelDescriptor[] } => {
   const { notifications } = useKibana().services;
   const { canExecuteWorkflow } = useWorkflowsCapabilities();
   const { mutateAsync: runWorkflow } = useRunWorkflow();
-  const rowsById = useMemo(() => new Map(rows.map((row) => [row.id, row])), [rows]);
+  const executionsById = useMemo(
+    () => new Map(executions.map((execution) => [execution.id, execution])),
+    [executions]
+  );
 
   const rerunSelectedExecutions = useCallback(
-    async (docIdsToRerun: string[]) => {
-      const executionsToRerun = docIdsToRerun.flatMap((docId) => {
-        const row = rowsById.get(docId);
-        if (!row) {
-          return [];
-        }
-        const source = getWorkflowExecutionSource(row);
-        return source?.workflowId
-          ? [{ workflowId: source.workflowId, context: source.context }]
+    async (executionIdsToRerun: string[]) => {
+      const executionsToRerun = executionIdsToRerun.flatMap((executionId) => {
+        const execution = executionsById.get(executionId);
+        return execution?.workflowId
+          ? [{ workflowId: execution.workflowId, context: execution.context }]
           : [];
       });
 
@@ -130,7 +128,7 @@ export const useWorkflowExecutionsBulkActions = ({
 
       onRefresh();
     },
-    [notifications.toasts, onRefresh, rowsById, runWorkflow]
+    [executionsById, notifications.toasts, onRefresh, runWorkflow]
   );
 
   return useMemo(() => {
@@ -155,12 +153,12 @@ export const useWorkflowExecutionsBulkActions = ({
               'data-test-subj': 'workflowExecutionsBulkActionReRun',
               onClick: () => {
                 onAction();
-                void rerunSelectedExecutions(selectedDocIds);
+                void rerunSelectedExecutions(selectedExecutionIds);
               },
             },
           ],
         },
       ],
     };
-  }, [canExecuteWorkflow, onAction, rerunSelectedExecutions, selectedDocIds]);
+  }, [canExecuteWorkflow, onAction, rerunSelectedExecutions, selectedExecutionIds]);
 };

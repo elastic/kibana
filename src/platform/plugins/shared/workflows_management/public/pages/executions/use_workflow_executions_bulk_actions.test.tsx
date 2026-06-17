@@ -8,8 +8,8 @@
  */
 
 import { act, renderHook } from '@testing-library/react';
-import type { DataTableRecord, EsHitRecord } from '@kbn/discover-utils/types';
-import { ExecutionStatus } from '@kbn/workflows';
+import type React from 'react';
+import { ExecutionStatus, type WorkflowExecutionListItemDto } from '@kbn/workflows';
 import {
   useWorkflowExecutionRerun,
   useWorkflowExecutionsBulkActions,
@@ -31,22 +31,21 @@ jest.mock('@kbn/workflows-ui', () => {
   };
 });
 
-const createRow = (
+const createExecution = (
   id: string,
   workflowId: string,
   context: Record<string, unknown> = {}
-): DataTableRecord => ({
+): WorkflowExecutionListItemDto => ({
+  spaceId: 'default',
   id,
-  raw: {
-    _id: id,
-    _source: {
-      id,
-      workflowId,
-      status: ExecutionStatus.COMPLETED,
-      context,
-    },
-  } as EsHitRecord,
-  flattened: { id },
+  workflowId,
+  status: ExecutionStatus.COMPLETED,
+  isTestRun: false,
+  startedAt: '2026-01-01T00:00:00Z',
+  finishedAt: '2026-01-01T00:00:03Z',
+  duration: 3000,
+  error: null,
+  context,
 });
 
 describe('useWorkflowExecutionsBulkActions', () => {
@@ -61,15 +60,15 @@ describe('useWorkflowExecutionsBulkActions', () => {
 
   it('includes bulk re-run when user can execute workflows', () => {
     const services = createStartServicesMock();
-    const rows = [createRow('exec-1', 'wf-1')];
+    const executions = [createExecution('exec-1', 'wf-1')];
 
     const { result } = renderHook(
       () =>
         useWorkflowExecutionsBulkActions({
           onRefresh,
           onAction,
-          rows,
-          selectedDocIds: ['exec-1'],
+          executions,
+          selectedExecutionIds: ['exec-1'],
         }),
       {
         wrapper: getTestProvider({ services }),
@@ -84,15 +83,15 @@ describe('useWorkflowExecutionsBulkActions', () => {
   it('omits bulk re-run when user cannot execute workflows', () => {
     mockUseWorkflowsCapabilities.mockReturnValue({ canExecuteWorkflow: false });
     const services = createStartServicesMock();
-    const rows = [createRow('exec-1', 'wf-1')];
+    const executions = [createExecution('exec-1', 'wf-1')];
 
     const { result } = renderHook(
       () =>
         useWorkflowExecutionsBulkActions({
           onRefresh,
           onAction,
-          rows,
-          selectedDocIds: ['exec-1'],
+          executions,
+          selectedExecutionIds: ['exec-1'],
         }),
       {
         wrapper: getTestProvider({ services }),
@@ -107,17 +106,17 @@ describe('useWorkflowExecutionsBulkActions', () => {
     const mockNavigateToApp = jest.fn();
     services.application.navigateToApp = mockNavigateToApp;
 
-    const rows = [
-      createRow('exec-1', 'wf-1', { inputs: { foo: 'bar' }, event: { type: 'alert' } }),
-      createRow('exec-2', 'wf-2', { inputs: { baz: 1 } }),
+    const executions = [
+      createExecution('exec-1', 'wf-1', { inputs: { foo: 'bar' }, event: { type: 'alert' } }),
+      createExecution('exec-2', 'wf-2', { inputs: { baz: 1 } }),
     ];
     const { result } = renderHook(
       () =>
         useWorkflowExecutionsBulkActions({
           onRefresh,
           onAction,
-          rows,
-          selectedDocIds: ['exec-1', 'exec-2'],
+          executions,
+          selectedExecutionIds: ['exec-1', 'exec-2'],
         }),
       {
         wrapper: getTestProvider({ services }),
@@ -127,8 +126,7 @@ describe('useWorkflowExecutionsBulkActions', () => {
     const reRunAction = result.current.panels[0]?.items?.find((item) => item.key === 'bulk-re-run');
 
     await act(async () => {
-      // EuiContextMenuItem onClick requires a MouseEvent; the handler ignores it.
-      reRunAction?.onClick?.({} as any);
+      reRunAction?.onClick?.({} as unknown as React.MouseEvent<HTMLHRElement>);
     });
 
     expect(onAction).toHaveBeenCalledTimes(1);

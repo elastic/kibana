@@ -9,8 +9,7 @@
 
 import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
-import type { DataTableRecord, EsHitRecord } from '@kbn/discover-utils/types';
-import { type EsWorkflowExecution, ExecutionStatus } from '@kbn/workflows';
+import { ExecutionStatus, type WorkflowExecutionListItemDto } from '@kbn/workflows';
 import {
   useWorkflowExecutionsTrailingControlColumns,
   WorkflowExecutionActionsMenu,
@@ -33,26 +32,31 @@ jest.mock('@kbn/workflows-ui', () => {
   };
 });
 
-const createRow = (source: Partial<EsWorkflowExecution>): DataTableRecord => ({
-  id: source.id ?? 'exec-1',
-  raw: {
-    _id: source.id ?? 'exec-1',
-    _source: source,
-  } as EsHitRecord,
-  flattened: {},
+const createExecution = (
+  overrides: Partial<WorkflowExecutionListItemDto> = {}
+): WorkflowExecutionListItemDto => ({
+  spaceId: 'default',
+  id: 'exec-1',
+  status: ExecutionStatus.COMPLETED,
+  isTestRun: false,
+  startedAt: '2026-01-01T00:00:00Z',
+  finishedAt: '2026-01-01T00:00:03Z',
+  duration: 3000,
+  error: null,
+  ...overrides,
 });
 
 const ActionsCellHarness = ({
   onReRunExecution,
   onViewAllExecutionsForWorkflow,
-  row,
+  execution,
 }: {
   onReRunExecution?: (params: { workflowId: string; context?: Record<string, unknown> }) => void;
   onViewAllExecutionsForWorkflow?: (workflowId: string) => void;
-  row: DataTableRecord;
+  execution: WorkflowExecutionListItemDto;
 }) => {
   const trailingControlColumns = useWorkflowExecutionsTrailingControlColumns(
-    [row],
+    [execution],
     onViewAllExecutionsForWorkflow,
     onReRunExecution
   );
@@ -88,7 +92,7 @@ describe('workflow executions actions column', () => {
     render(
       <ActionsCellHarness
         onViewAllExecutionsForWorkflow={jest.fn()}
-        row={createRow({
+        execution={createExecution({
           id: 'exec-1',
           workflowId: 'wf-1',
           status: ExecutionStatus.COMPLETED,
@@ -110,7 +114,7 @@ describe('workflow executions actions column', () => {
 
     render(
       <ActionsCellHarness
-        row={createRow({
+        execution={createExecution({
           id: 'exec-1',
           workflowId: 'wf-1',
           status: ExecutionStatus.COMPLETED,
@@ -133,7 +137,7 @@ describe('workflow executions actions column', () => {
     render(
       <ActionsCellHarness
         onViewAllExecutionsForWorkflow={onViewAllExecutionsForWorkflow}
-        row={createRow({
+        execution={createExecution({
           id: 'exec-1',
           workflowId: 'wf-1',
           status: ExecutionStatus.COMPLETED,
@@ -157,7 +161,7 @@ describe('workflow executions actions column', () => {
     render(
       <ActionsCellHarness
         onReRunExecution={onReRunExecution}
-        row={createRow({
+        execution={createExecution({
           id: 'exec-1',
           workflowId: 'wf-1',
           status: ExecutionStatus.COMPLETED,
@@ -210,7 +214,7 @@ describe('workflow executions actions column', () => {
 
     const { container } = render(
       <ActionsCellHarness
-        row={createRow({
+        execution={createExecution({
           id: 'exec-1',
           workflowId: 'wf-1',
           status: ExecutionStatus.COMPLETED,

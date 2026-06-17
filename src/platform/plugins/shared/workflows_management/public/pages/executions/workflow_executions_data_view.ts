@@ -60,7 +60,6 @@ const numberField = (name: string): FieldSpec => ({
   scripted: false,
 });
 
-/** Virtual table columns backed by `_source` and custom cell renderers. */
 export const WORKFLOW_EXECUTIONS_VIRTUAL_COLUMN_FIELD_SPECS: Record<string, FieldSpec> = {
   workflow: keywordField('workflow'),
   tags: keywordField('tags'),

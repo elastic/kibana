@@ -17,24 +17,24 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import React, { useCallback, useContext, useState } from 'react';
-import type { DataTableRecord } from '@kbn/discover-utils/types';
+import React, { useCallback, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { UnifiedDataTableContext } from '@kbn/unified-data-table/src/table_context';
+import type { WorkflowExecutionListItemDto } from '@kbn/workflows';
 import { useWorkflowExecutionsBulkActions } from './use_workflow_executions_bulk_actions';
+import { useWorkflowExecutionsGridContext } from './workflow_executions_grid_context';
 
 export interface WorkflowExecutionsSelectionBarProps {
   onRefresh: () => void;
-  rows: DataTableRecord[];
+  executions: WorkflowExecutionListItemDto[];
 }
 
 export const WorkflowExecutionsSelectionBar = ({
   onRefresh,
-  rows,
+  executions,
 }: WorkflowExecutionsSelectionBarProps) => {
   const { euiTheme } = useEuiTheme();
-  const { selectedDocsState } = useContext(UnifiedDataTableContext);
-  const { selectedDocsCount, docIdsInSelectionOrder, clearAllSelectedDocs } = selectedDocsState;
+  const { selectedExecutionIds, selectedExecutionsCount, clearAllSelectedExecutions } =
+    useWorkflowExecutionsGridContext();
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
   const togglePopover = useCallback(() => setIsPopoverOpen((isOpen) => !isOpen), []);
@@ -43,11 +43,11 @@ export const WorkflowExecutionsSelectionBar = ({
   const { panels } = useWorkflowExecutionsBulkActions({
     onRefresh,
     onAction: closePopover,
-    rows,
-    selectedDocIds: docIdsInSelectionOrder,
+    executions,
+    selectedExecutionIds,
   });
 
-  if (selectedDocsCount === 0 || panels.length === 0) {
+  if (selectedExecutionsCount === 0 || panels.length === 0) {
     return null;
   }
 
@@ -56,16 +56,19 @@ export const WorkflowExecutionsSelectionBar = ({
       alignItems="center"
       justifyContent="flexStart"
       gutterSize="s"
-      css={css`
-        padding: ${euiTheme.size.s} ${euiTheme.size.s} 0;
-      `}
+      responsive={false}
       data-test-subj="workflow-executions-table-utility-bar-actions"
+      css={css`
+        block-size: ${euiTheme.size.l};
+        min-block-size: ${euiTheme.size.l};
+        max-block-size: ${euiTheme.size.l};
+      `}
     >
       <EuiFlexItem data-test-subj="workflow-executions-table-selected-count" grow={false}>
-        <EuiText size="s" color="subdued">
+        <EuiText size="xs" color="subdued">
           {i18n.translate('workflowsManagement.executionsPage.utilityBar.selectedExecutions', {
             defaultMessage: '{count} selected',
-            values: { count: selectedDocsCount },
+            values: { count: selectedExecutionsCount },
           })}
         </EuiText>
       </EuiFlexItem>
@@ -84,7 +87,7 @@ export const WorkflowExecutionsSelectionBar = ({
           button={
             <EuiButtonEmpty
               onClick={togglePopover}
-              size="s"
+              size="xs"
               iconSide="right"
               iconType="chevronSingleDown"
               flush="left"
@@ -111,8 +114,8 @@ export const WorkflowExecutionsSelectionBar = ({
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiButtonEmpty
-          onClick={clearAllSelectedDocs}
-          size="s"
+          onClick={clearAllSelectedExecutions}
+          size="xs"
           iconSide="left"
           iconType="cross"
           flush="left"

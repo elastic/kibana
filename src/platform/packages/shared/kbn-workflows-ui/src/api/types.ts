@@ -73,6 +73,16 @@ export interface TestWorkflowParams {
   inputs: Record<string, unknown>;
 }
 
+export interface SearchExecutionsParams {
+  /** JSON-encoded Elasticsearch query DSL. */
+  query?: string;
+  /** JSON-encoded Elasticsearch sort definition. */
+  sort?: string;
+  from?: number;
+  size?: number;
+  trackTotalHits?: boolean;
+}
+
 export interface GetWorkflowExecutionsParams {
   statuses?: ExecutionStatus[];
   executionTypes?: ExecutionType[];

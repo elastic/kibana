@@ -431,4 +431,128 @@ describe('Internal Routes', () => {
     });
     expect(response.customError).not.toHaveBeenCalled();
   });
+
+  it('should normalize human-readable duration filters before search', async () => {
+    mockSearch.mockResolvedValue({
+      aggregations: {
+        suggestions: {
+          buckets: [{ key: 'completed', doc_count: 1 }],
+        },
+        totalCardinality: { value: 1 },
+      },
+    });
+
+    const response = httpServerMock.createResponseFactory();
+    const request = httpServerMock.createKibanaRequest({
+      method: 'post',
+      path: '/internal/workflows/executions/options_list',
+      body: {
+        size: 10,
+        fieldName: 'status',
+        filters: [
+          {
+            bool: {
+              should: [
+                {
+                  range: {
+                    duration: {
+                      gte: '2s',
+                    },
+                  },
+                },
+              ],
+              minimum_should_match: 1,
+            },
+          },
+        ],
+        selectedOptions: [],
+      },
+    });
+
+    await routeHandlers[`POST:/internal/workflows/executions/options_list`].handler(
+      mockContext,
+      request,
+      response
+    );
+
+    expect(mockSearch).toHaveBeenCalledWith(
+      expect.objectContaining({
+        query: {
+          bool: {
+            filter: expect.arrayContaining([
+              {
+                bool: {
+                  should: [
+                    {
+                      range: {
+                        duration: {
+                          gte: 2000,
+                        },
+                      },
+                    },
+                  ],
+                  minimum_should_match: 1,
+                },
+              },
+            ]),
+          },
+        },
+      })
+    );
+    expect(response.ok).toHaveBeenCalled();
+  });
+
+  it('should return bad request when options list search has invalid query DSL', async () => {
+    mockSearch.mockRejectedValue(
+      new errors.ResponseError({
+        statusCode: 400,
+        body: {
+          error: {
+            type: 'search_phase_execution_exception',
+            reason: 'all shards failed',
+            root_cause: [
+              {
+                type: 'query_shard_exception',
+                reason: 'failed to create query: For input string: "2s"',
+              },
+            ],
+          },
+        },
+        headers: {},
+        meta: {} as any,
+        warnings: [],
+      })
+    );
+
+    const response = httpServerMock.createResponseFactory();
+    const request = httpServerMock.createKibanaRequest({
+      method: 'post',
+      path: '/internal/workflows/executions/options_list',
+      body: {
+        size: 10,
+        fieldName: 'status',
+        filters: [
+          {
+            range: {
+              duration: {
+                gte: '2s',
+              },
+            },
+          },
+        ],
+        selectedOptions: [],
+      },
+    });
+
+    await routeHandlers[`POST:/internal/workflows/executions/options_list`].handler(
+      mockContext,
+      request,
+      response
+    );
+
+    expect(response.badRequest).toHaveBeenCalledWith({
+      body: { message: 'failed to create query: For input string: "2s"' },
+    });
+    expect(response.customError).not.toHaveBeenCalled();
+  });
 });

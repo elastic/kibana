@@ -21,9 +21,12 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { useCallback, useState } from 'react';
-import type { DataTableRecord } from '@kbn/discover-utils/types';
 import { i18n } from '@kbn/i18n';
-import { type EsWorkflowExecution, ExecutionStatus, isTerminalStatus } from '@kbn/workflows';
+import {
+  ExecutionStatus,
+  isTerminalStatus,
+  type WorkflowExecutionListItemDto,
+} from '@kbn/workflows';
 import { formatExecutionTriggerLabel } from './format_execution_table_values';
 import { formatDuration } from '../../shared/lib/format_duration';
 import {
@@ -52,43 +55,13 @@ const overflowPopoverStyle = css`
   overflow: auto;
 `;
 
-export const getWorkflowExecutionSource = (row: DataTableRecord): EsWorkflowExecution | undefined =>
-  row.raw._source as EsWorkflowExecution | undefined;
-
-export const getWorkflowExecutionId = (row: DataTableRecord): string | undefined => {
-  const { id } = row.flattened;
-  if (typeof id === 'string') {
-    return id;
-  }
-
-  return getWorkflowExecutionSource(row)?.id;
-};
-
-export const enrichWorkflowExecutionRowFlattenedValues = (
-  row: DataTableRecord
-): DataTableRecord => {
-  const execution = getWorkflowExecutionSource(row);
-
-  if (!execution) {
-    return row;
-  }
-
-  const flattened = { ...row.flattened };
-
-  if (execution.workflowId) {
-    flattened.workflow = execution.workflowId;
-  }
-
-  const triggerLabel = formatExecutionTriggerLabel(execution.triggeredBy);
-  if (triggerLabel) {
-    flattened.triggers = triggerLabel;
-  }
-
-  return {
-    ...row,
-    flattened,
-  };
-};
+export const getWorkflowExecutionActionContextFromDto = (
+  execution: WorkflowExecutionListItemDto
+) => ({
+  executionId: execution.id,
+  workflowId: execution.workflowId,
+  context: execution.context,
+});
 
 const workflowLinkCss = css`
   white-space: nowrap;
@@ -99,22 +72,21 @@ const workflowLinkCss = css`
 `;
 
 export const WorkflowExecutionWorkflowCell = ({
-  row,
+  execution,
   onOpen,
 }: {
-  row: DataTableRecord;
-  onOpen: (row: DataTableRecord) => void;
+  execution: WorkflowExecutionListItemDto;
+  onOpen: (execution: WorkflowExecutionListItemDto) => void;
 }) => {
   const { euiTheme } = useEuiTheme();
-  const execution = getWorkflowExecutionSource(row);
-  const name = execution?.workflowDefinition?.name ?? execution?.workflowId;
+  const name = execution.workflowName ?? execution.workflowId;
 
   const handleClick = useCallback(
     (event: React.MouseEvent) => {
       event.preventDefault();
-      onOpen(row);
+      onOpen(execution);
     },
-    [onOpen, row]
+    [execution, onOpen]
   );
 
   if (!name) {
@@ -129,7 +101,7 @@ export const WorkflowExecutionWorkflowCell = ({
       wrap={false}
       data-test-subj="workflowExecutionWorkflowCell"
     >
-      {execution?.status ? (
+      {execution.status ? (
         <EuiFlexItem grow={false}>{getExecutionStatusIcon(euiTheme, execution.status)}</EuiFlexItem>
       ) : null}
       <EuiFlexItem
@@ -150,7 +122,7 @@ export const WorkflowExecutionWorkflowCell = ({
           {name}
         </EuiLink>
       </EuiFlexItem>
-      {execution?.status === ExecutionStatus.WAITING_FOR_INPUT ? (
+      {execution.status === ExecutionStatus.WAITING_FOR_INPUT ? (
         <EuiFlexItem grow={false}>
           <EuiBadge color="warning" data-test-subj="workflowExecutionActionRequiredBadge">
             {i18n.translate('workflowsManagement.executionListItem.actionRequiredBadge', {
@@ -163,12 +135,14 @@ export const WorkflowExecutionWorkflowCell = ({
   );
 };
 
-export const WorkflowExecutionTagsCell = ({ row }: { row: DataTableRecord }) => {
-  const execution = getWorkflowExecutionSource(row);
-  const tags = execution?.workflowDefinition?.tags;
-  const isManaged = execution?.managed === true;
-
-  return <WorkflowExecutionTagsContent tags={tags} isManaged={isManaged} />;
+export const WorkflowExecutionTagsCell = ({
+  execution,
+}: {
+  execution: WorkflowExecutionListItemDto;
+}) => {
+  return (
+    <WorkflowExecutionTagsContent tags={execution.tags} isManaged={execution.managed === true} />
+  );
 };
 
 const WorkflowExecutionTagsContent = ({
@@ -257,9 +231,12 @@ const WorkflowExecutionTagsContent = ({
   );
 };
 
-export const WorkflowExecutionTriggersCell = ({ row }: { row: DataTableRecord }) => {
-  const execution = getWorkflowExecutionSource(row);
-  const label = formatExecutionTriggerLabel(execution?.triggeredBy);
+export const WorkflowExecutionTriggersCell = ({
+  execution,
+}: {
+  execution: WorkflowExecutionListItemDto;
+}) => {
+  const label = formatExecutionTriggerLabel(execution.triggeredBy);
 
   if (!label) {
     return null;
@@ -268,11 +245,13 @@ export const WorkflowExecutionTriggersCell = ({ row }: { row: DataTableRecord })
   return <span data-test-subj="workflowExecutionTriggerCell">{label}</span>;
 };
 
-export const WorkflowExecutionStartedAtCell = ({ row }: { row: DataTableRecord }) => {
+export const WorkflowExecutionStartedAtCell = ({
+  execution,
+}: {
+  execution: WorkflowExecutionListItemDto;
+}) => {
   const getFormattedDateTime = useGetFormattedDateTime();
-  const execution = getWorkflowExecutionSource(row);
-  const startedAt =
-    execution?.startedAt ?? (row.flattened.startedAt as string | number | undefined);
+  const startedAt = execution.startedAt;
 
   if (startedAt == null) {
     return null;
@@ -294,21 +273,18 @@ export const WorkflowExecutionStartedAtCell = ({ row }: { row: DataTableRecord }
   );
 };
 
-export const WorkflowExecutionDurationCell = ({ row }: { row: DataTableRecord }) => {
-  const execution = getWorkflowExecutionSource(row);
-  const duration = row.flattened.duration;
+export const WorkflowExecutionDurationCell = ({
+  execution,
+}: {
+  execution: WorkflowExecutionListItemDto;
+}) => {
+  const duration = execution.duration;
 
-  if (duration != null && duration !== '') {
-    const durationMs = typeof duration === 'number' ? duration : Number(duration);
-
-    if (!Number.isNaN(durationMs)) {
-      return (
-        <span data-test-subj="workflowExecutionDurationCell">{formatDuration(durationMs)}</span>
-      );
-    }
+  if (duration != null) {
+    return <span data-test-subj="workflowExecutionDurationCell">{formatDuration(duration)}</span>;
   }
 
-  if (execution?.status && !isTerminalStatus(execution.status)) {
+  if (execution.status && !isTerminalStatus(execution.status)) {
     return (
       <EuiLoadingSpinner
         size="m"
