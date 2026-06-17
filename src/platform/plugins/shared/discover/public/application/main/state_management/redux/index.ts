@@ -54,6 +54,7 @@ export const internalStateActions = {
 export {
   InternalStateProvider,
   useInternalStateDispatch,
+  useInternalStateStore,
   useInternalStateGetState,
   useInternalStateSubscribe,
   useInternalStateSelector,

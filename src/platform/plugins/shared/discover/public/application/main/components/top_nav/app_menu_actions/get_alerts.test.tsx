@@ -71,6 +71,7 @@ const getAlertsMenuItem = async ({
     services,
     tabId: currentTab.id,
     getState: toolkit.internalState.getState,
+    dispatch: toolkit.internalState.dispatch,
     showCreateRuleV2,
     subscribe: (listener) => toolkit.internalState.subscribe(listener),
     additionalLegacyRuleTypes,
@@ -230,7 +231,11 @@ describe('getAlertsAppMenuItem', () => {
     });
 
     it('should render CreateRuleOptionsFlyout with the current ES|QL query and subscribe handler', async () => {
-      const services = createDiscoverServicesMock();
+      const createRuleOptionsFlyoutMock = jest.fn(() => null);
+      const services = {
+        ...createDiscoverServicesMock(),
+        alertingVTwo: { CreateRuleOptionsFlyout: createRuleOptionsFlyoutMock },
+      } as DiscoverServices;
       const alertsMenuItem = await getAlertsMenuItem({
         services,
         showCreateRuleV2: true,
@@ -241,8 +246,7 @@ describe('getAlertsAppMenuItem', () => {
       const onFinishAction = jest.fn();
       const flyoutElement = alertsMenuItem.run!(createRunParams(onFinishAction)) as ReactElement;
 
-      expect(services.alertingVTwo!.CreateRuleOptionsFlyout).toBeDefined();
-      expect(flyoutElement.type).toBe(services.alertingVTwo!.CreateRuleOptionsFlyout);
+      expect(flyoutElement.type).toBe(createRuleOptionsFlyoutMock);
       expect(flyoutElement.props.initialQuery).toBe('FROM test-index | WHERE message != ""');
       expect(flyoutElement.props.onClose).toBe(onFinishAction);
       expect(flyoutElement.props.subscribe).toEqual(expect.any(Function));
@@ -322,6 +326,7 @@ describe('getAlertsAppMenuItem', () => {
         services,
         tabId: currentTab.id,
         getState: toolkit.internalState.getState,
+        dispatch: toolkit.internalState.dispatch,
         showCreateRuleV2: true,
         subscribe: (listener) => toolkit.internalState.subscribe(listener),
       });

@@ -24,6 +24,7 @@ import type {
   DiscoverAppMenuRunActionParams,
 } from '@kbn/discover-utils';
 import type { DiscoverServices } from '../../../../../build_services';
+import { InternalStateProvider, type InternalStateStore } from '../../../state_management/redux';
 
 const container = document.createElement('div');
 let isOpen = false;
@@ -46,6 +47,7 @@ export async function runAppMenuAction({
   appMenuItem,
   anchorElement,
   services,
+  internalStateStore,
   returnFocus,
 }: {
   appMenuItem:
@@ -54,6 +56,7 @@ export async function runAppMenuAction({
     | DiscoverAppMenuPopoverItem;
   anchorElement: HTMLElement;
   services: DiscoverServices;
+  internalStateStore?: InternalStateStore;
   returnFocus: () => void;
 }) {
   cleanup();
@@ -84,9 +87,14 @@ export async function runAppMenuAction({
   isOpen = true;
   document.body.appendChild(container);
 
+  const content = <KibanaContextProvider services={services}>{result}</KibanaContextProvider>;
   const element = (
     <KibanaRenderContextProvider {...services.core}>
-      <KibanaContextProvider services={services}>{result}</KibanaContextProvider>
+      {internalStateStore ? (
+        <InternalStateProvider store={internalStateStore}>{content}</InternalStateProvider>
+      ) : (
+        content
+      )}
     </KibanaRenderContextProvider>
   );
   ReactDOM.render(element, container);
@@ -116,9 +124,11 @@ type DiscoverAppMenuItem =
 export function enhanceAppMenuItemWithRunAction<T extends DiscoverAppMenuItem>({
   appMenuItem,
   services,
+  internalStateStore,
 }: {
   appMenuItem: T;
   services: DiscoverServices;
+  internalStateStore?: InternalStateStore;
 }): EnhancedAppMenuItem<T> {
   const enhancedRun = appMenuItem.run
     ? (params?: AppMenuRunActionParams) => {
@@ -127,6 +137,7 @@ export function enhanceAppMenuItemWithRunAction<T extends DiscoverAppMenuItem>({
             appMenuItem,
             anchorElement: params.triggerElement,
             services,
+            internalStateStore,
             returnFocus: params.returnFocus,
           });
         }
@@ -140,6 +151,7 @@ export function enhanceAppMenuItemWithRunAction<T extends DiscoverAppMenuItem>({
             enhanceAppMenuItemWithRunAction({
               appMenuItem: nestedItem,
               services,
+              internalStateStore,
             })
         )
       : undefined;

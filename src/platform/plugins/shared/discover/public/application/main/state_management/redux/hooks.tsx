@@ -47,6 +47,11 @@ export const useInternalStateDispatch = createDispatchHook(
   internalStateContext
 ) as () => InternalStateDispatch;
 
+export const useInternalStateStore = (): InternalStateStore => {
+  const { store } = useContext(internalStateContext);
+  return store as InternalStateStore;
+};
+
 export const useInternalStateGetState = (): (() => DiscoverInternalState) => {
   const { store } = useContext(internalStateContext);
   return store.getState as () => DiscoverInternalState;

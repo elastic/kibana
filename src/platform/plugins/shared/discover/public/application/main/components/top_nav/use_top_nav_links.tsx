@@ -48,6 +48,7 @@ import {
   useCurrentTabDataStateContainer,
   useInternalStateDispatch,
   useInternalStateGetState,
+  useInternalStateStore,
   useInternalStateSubscribe,
   useRuntimeStateManager,
 } from '../../state_management/redux';
@@ -89,6 +90,7 @@ export const useTopNavLinks = ({
   const intl = useI18n();
   const dispatch = useInternalStateDispatch();
   const getState = useInternalStateGetState();
+  const internalStateStore = useInternalStateStore();
   const subscribe = useInternalStateSubscribe();
 
   const runtimeStateManager = useRuntimeStateManager();
@@ -175,6 +177,7 @@ export const useTopNavLinks = ({
         services,
         tabId: currentTab.id,
         getState,
+        dispatch,
         showCreateRuleV2,
         subscribe,
         additionalLegacyRuleTypes,
@@ -440,14 +443,16 @@ export const useTopNavLinks = ({
         enhanceAppMenuItemWithRunAction({
           appMenuItem: item,
           services,
+          internalStateStore,
         })
       ),
       primaryActionItem: config.primaryActionItem
         ? enhanceAppMenuItemWithRunAction({
             appMenuItem: config.primaryActionItem,
             services,
+            internalStateStore,
           })
         : undefined,
     };
-  }, [appMenuRegistry, services]);
+  }, [appMenuRegistry, internalStateStore, services]);
 };

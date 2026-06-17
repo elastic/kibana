@@ -18,17 +18,12 @@ import { RuleFormFlyout } from '@kbn/response-ops-rule-form/flyout';
 import { isValidRuleFormPlugins } from '@kbn/response-ops-rule-form/lib';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import type { DiscoverAppMenuItemType, DiscoverAppMenuPopoverItem } from '@kbn/discover-utils';
-import type { CreateRuleOptionsFlyoutLegacyItem } from '@kbn/alerting-v2-plugin/public';
 import type { AlertsLegacyRuleType } from '../../../../../context_awareness/types';
 import type { AppMenuDiscoverParams } from './types';
 import type { DiscoverServices } from '../../../../../build_services';
 import { createSearchSource } from '../../../state_management/utils/create_search_source';
-import type { DiscoverInternalState } from '../../../state_management/redux';
-import {
-  internalStateActions,
-  selectTab,
-  useInternalStateDispatch,
-} from '../../../state_management/redux';
+import type { DiscoverInternalState, InternalStateDispatch } from '../../../state_management/redux';
+import { internalStateActions, selectTab } from '../../../state_management/redux';
 
 const EsQueryValidConsumer: RuleCreationValidConsumer[] = [
   AlertConsumers.INFRASTRUCTURE,
@@ -49,9 +44,9 @@ const CreateV1AlertFlyout: React.FC<{
   services: DiscoverServices;
   tabId: string;
   getState: () => DiscoverInternalState;
+  dispatch: InternalStateDispatch;
   onFinishAction: () => void;
-}> = ({ discoverParams, services, tabId, getState, onFinishAction = () => {} }) => {
-  const dispatch = useInternalStateDispatch();
+}> = ({ discoverParams, services, tabId, getState, dispatch, onFinishAction = () => {} }) => {
   const { dataView, isEsqlMode, adHocDataViews } = discoverParams;
   const {
     triggersActionsUi: { ruleTypeRegistry, actionTypeRegistry },
@@ -128,6 +123,7 @@ export const getAlertsAppMenuItem = ({
   services,
   tabId,
   getState,
+  dispatch,
   showCreateRuleV2,
   subscribe,
   additionalLegacyRuleTypes = [],
@@ -136,6 +132,7 @@ export const getAlertsAppMenuItem = ({
   services: DiscoverServices;
   tabId: string;
   getState: () => DiscoverInternalState;
+  dispatch: InternalStateDispatch;
   showCreateRuleV2?: boolean;
   subscribe: (listener: () => void) => () => void;
   additionalLegacyRuleTypes?: AlertsLegacyRuleType[];
@@ -146,7 +143,7 @@ export const getAlertsAppMenuItem = ({
 
   if (showCreateRuleV2) {
     const CreateRuleOptionsFlyout = services.alertingVTwo?.CreateRuleOptionsFlyout;
-    const legacyRuleTypes: CreateRuleOptionsFlyoutLegacyItem[] = [];
+    const legacyRuleTypes: AlertsLegacyRuleType[] = [];
 
     if (
       services.capabilities.management?.insightsAndAlerting?.triggersActions &&
@@ -165,6 +162,7 @@ export const getAlertsAppMenuItem = ({
             services={services}
             tabId={tabId}
             getState={getState}
+            dispatch={dispatch}
           />
         ),
       });
@@ -247,6 +245,7 @@ export const getAlertsAppMenuItem = ({
               services={services}
               tabId={tabId}
               getState={getState}
+              dispatch={dispatch}
             />
           );
         },

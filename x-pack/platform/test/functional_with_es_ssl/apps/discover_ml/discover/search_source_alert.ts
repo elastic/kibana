@@ -8,6 +8,7 @@
 import expect from '@kbn/expect';
 import { asyncForEach } from '@kbn/std';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
+import { openDiscoverSearchThresholdRuleFlyout } from '../../../../functional/apps/discover/open_search_threshold_rule_flyout';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const log = getService('log');
@@ -129,6 +130,20 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       .expect(200);
   };
 
+  const ensureDataViewsExist = async () => {
+    if (sourceDataViewId && outputDataViewId && otherDataViewId) {
+      return;
+    }
+
+    const sourceDataViewResponse = await createDataView(SOURCE_DATA_VIEW);
+    const outputDataViewResponse = await createDataView(OUTPUT_DATA_VIEW);
+    const otherDataViewResponse = await createDataView(OTHER_DATA_VIEW);
+
+    sourceDataViewId = sourceDataViewResponse.body.data_view.id;
+    outputDataViewId = outputDataViewResponse.body.data_view.id;
+    otherDataViewId = otherDataViewResponse.body.data_view.id;
+  };
+
   const deleteDataView = async (dataViewId: string) => {
     return await supertest
       .delete(`/api/data_views/data_view/${dataViewId}`)
@@ -199,9 +214,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   };
 
   const openDiscoverAlertFlyout = async () => {
-    await testSubjects.click('app-menu-overflow-button');
-    await testSubjects.click('discoverAlertsButton');
-    await testSubjects.click('discoverCreateAlertButton');
+    await openDiscoverSearchThresholdRuleFlyout({ testSubjects, retry });
   };
 
   const openManagementAlertFlyout = async () => {
@@ -366,6 +379,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       log.debug('create connector');
       connectorId = await createConnector();
+    });
+
+    beforeEach(async function () {
+      // Data views are created in the first test; ensure they exist when running a subset via --grep.
+      if (this.currentTest?.title !== 'should create an alert when there is no data view') {
+        await ensureDataViewsExist();
+      }
     });
 
     after(async () => {
