@@ -31,7 +31,7 @@ const DEFAULT_QUERY: Query = {
   language: 'kuery',
 };
 
-const DEFAULT_REFRESH_INTERVAL_MS = 60_000;
+const DEFAULT_REFRESH_INTERVAL_MS = 5_000;
 
 const clearSelectedExecutionIfChanged = (
   previousKeyRef: React.MutableRefObject<string | null>,
@@ -55,7 +55,7 @@ export const WorkflowExecutionsPageContent = React.memo(() => {
   const [timeRange, setTimeRange] = useState<TimeRange>(DEFAULT_TIME_RANGE);
   const [controlFilters, setControlFilters] = useState<Filter[]>([]);
   const [searchBarFilters, setSearchBarFilters] = useState<Filter[]>([]);
-  const [isRefreshPaused, setIsRefreshPaused] = useState(true);
+  const [isRefreshPaused, setIsRefreshPaused] = useState(false);
   const [refreshIntervalMs, setRefreshIntervalMs] = useState(DEFAULT_REFRESH_INTERVAL_MS);
   const { selectedExecutionId, setSelectedExecution } = useWorkflowUrlState();
   const { applyWorkflowIdFilter, controlsUrlState, onFilterGroupInit, setControlsUrlState } =
