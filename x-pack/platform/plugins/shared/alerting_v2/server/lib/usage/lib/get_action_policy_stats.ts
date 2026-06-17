@@ -65,10 +65,28 @@ export async function getActionPolicyStats(
           `,
         },
       },
+      ap_destination_id: {
+        type: 'keyword',
+        script: {
+          source: `
+            def ap = params._source['${ACTION_POLICY_SAVED_OBJECT_TYPE}'];
+            if (ap != null) {
+              def destinations = ap['destinations'];
+              if (destinations != null) {
+                for (dest in destinations) {
+                  if (dest != null && dest['id'] != null) {
+                    emit(dest['id']);
+                  }
+                }
+              }
+            }
+          `,
+        },
+      },
     },
     aggs: {
       unique_workflow_count: {
-        cardinality: { field: `${ACTION_POLICY_SAVED_OBJECT_TYPE}.destinations.id` },
+        cardinality: { field: 'ap_destination_id' },
       },
       count_with_matcher: {
         filter: { term: { ap_has_matcher: true } },

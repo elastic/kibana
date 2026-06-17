@@ -20,21 +20,11 @@ export const actionPolicyMappings: SavedObjectsTypeMappingDefinition = {
     enabled: { type: 'boolean' },
     groupBy: { type: 'keyword' },
     tags: { type: 'keyword' },
-    destinations: {
-      type: 'object',
-      properties: {
-        type: { type: 'keyword' },
-        id: { type: 'keyword' },
-      },
-    },
     auth: {
       type: 'object',
       properties: {
         apiKey: { type: 'binary' },
       },
     },
-    createdBy: { type: 'keyword' },
-    createdAt: { type: 'date' },
-    updatedAt: { type: 'date' },
   },
 };
