@@ -1,8 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[
-  `buildLogsExtractionEsqlQuery generates the expected query for generic entity description 1`
-] = `
+exports[`buildLogsExtractionEsqlQuery generates the expected query for generic entity description 1`] = `
 "SET unmapped_fields=\\"nullify\\";
 FROM test-index-*
   | WHERE
@@ -279,9 +277,7 @@ asset*,
 @timestamp"
 `;
 
-exports[
-  `buildLogsExtractionEsqlQuery generates the expected query for host entity description 1`
-] = `
+exports[`buildLogsExtractionEsqlQuery generates the expected query for host entity description 1`] = `
 "SET unmapped_fields=\\"nullify\\";
 FROM test-index-*
   | WHERE
@@ -296,9 +292,10 @@ FROM test-index-*
 | EVAL host_id_present = TO_STRING(host.id) IS NOT NULL AND TO_STRING(host.id) != \\"\\",
  host_name_present = TO_STRING(host.name) IS NOT NULL AND TO_STRING(host.name) != \\"\\",
  host_hostname_present = TO_STRING(host.hostname) IS NOT NULL AND TO_STRING(host.hostname) != \\"\\",
- recent.entity.EngineMetadata.UntypedId = CASE((host_id_present), TO_STRING(host.id),
-(host_name_present), TO_STRING(host.name),
-(host_hostname_present), TO_STRING(host.hostname), NULL)
+ host_id_present_or_null = CASE(host_id_present, TO_STRING(host.id)),
+ host_name_present_or_null = CASE(host_name_present, TO_STRING(host.name)),
+ host_hostname_present_or_null = CASE(host_hostname_present, TO_STRING(host.hostname)),
+ recent.entity.EngineMetadata.UntypedId = COALESCE(host_id_present_or_null, host_name_present_or_null, host_hostname_present_or_null)
 | STATS
     entity.EngineMetadata.FirstSeenLogInPage = MIN(@timestamp),
     recent.timestamp = MAX(@timestamp),
@@ -614,9 +611,10 @@ FROM test-index-*
 | EVAL host_id_present = TO_STRING(host.id) IS NOT NULL AND TO_STRING(host.id) != \\"\\",
  host_name_present = TO_STRING(host.name) IS NOT NULL AND TO_STRING(host.name) != \\"\\",
  host_hostname_present = TO_STRING(host.hostname) IS NOT NULL AND TO_STRING(host.hostname) != \\"\\",
- recent.entity.EngineMetadata.UntypedId = CASE((host_id_present), TO_STRING(host.id),
-(host_name_present), TO_STRING(host.name),
-(host_hostname_present), TO_STRING(host.hostname), NULL)
+ host_id_present_or_null = CASE(host_id_present, TO_STRING(host.id)),
+ host_name_present_or_null = CASE(host_name_present, TO_STRING(host.name)),
+ host_hostname_present_or_null = CASE(host_hostname_present, TO_STRING(host.hostname)),
+ recent.entity.EngineMetadata.UntypedId = COALESCE(host_id_present_or_null, host_name_present_or_null, host_hostname_present_or_null)
 | STATS
     entity.EngineMetadata.FirstSeenLogInPage = MIN(@timestamp),
     recent.timestamp = MAX(@timestamp),
@@ -935,9 +933,10 @@ FROM test-index-*
 | EVAL host_id_present = TO_STRING(host.id) IS NOT NULL AND TO_STRING(host.id) != \\"\\",
  host_name_present = TO_STRING(host.name) IS NOT NULL AND TO_STRING(host.name) != \\"\\",
  host_hostname_present = TO_STRING(host.hostname) IS NOT NULL AND TO_STRING(host.hostname) != \\"\\",
- recent.entity.EngineMetadata.UntypedId = CASE((host_id_present), TO_STRING(host.id),
-(host_name_present), TO_STRING(host.name),
-(host_hostname_present), TO_STRING(host.hostname), NULL)
+ host_id_present_or_null = CASE(host_id_present, TO_STRING(host.id)),
+ host_name_present_or_null = CASE(host_name_present, TO_STRING(host.name)),
+ host_hostname_present_or_null = CASE(host_hostname_present, TO_STRING(host.hostname)),
+ recent.entity.EngineMetadata.UntypedId = COALESCE(host_id_present_or_null, host_name_present_or_null, host_hostname_present_or_null)
 | STATS
     entity.EngineMetadata.FirstSeenLogInPage = MIN(@timestamp),
     recent.timestamp = MAX(@timestamp),
@@ -1241,9 +1240,7 @@ data_stream*,
 @timestamp"
 `;
 
-exports[
-  `buildLogsExtractionEsqlQuery generates the expected query for service entity description 1`
-] = `
+exports[`buildLogsExtractionEsqlQuery generates the expected query for service entity description 1`] = `
 "SET unmapped_fields=\\"nullify\\";
 FROM test-index-*
   | WHERE
@@ -1491,9 +1488,7 @@ data_stream*,
 @timestamp"
 `;
 
-exports[
-  `buildLogsExtractionEsqlQuery generates the expected query for user entity description 1`
-] = `
+exports[`buildLogsExtractionEsqlQuery generates the expected query for user entity description 1`] = `
 "SET unmapped_fields=\\"nullify\\";
 FROM test-index-*
   | WHERE
@@ -1515,11 +1510,14 @@ FROM test-index-*
  user_email_present = TO_STRING(user.email) IS NOT NULL AND TO_STRING(user.email) != \\"\\",
  user_id_present = TO_STRING(user.id) IS NOT NULL AND TO_STRING(user.id) != \\"\\",
  user_domain_present = TO_STRING(user.domain) IS NOT NULL AND TO_STRING(user.domain) != \\"\\",
- recent.entity.EngineMetadata.UntypedId = CASE((TO_STRING(entity.namespace) == \\"local\\"), CASE((user_name_present AND host_id_present AND entity_namespace_present), CONCAT(TO_STRING(user.name), \\"@\\", TO_STRING(host.id), \\"@\\", TO_STRING(entity.namespace)), NULL),
-true, CASE((user_email_present AND entity_namespace_present), CONCAT(TO_STRING(user.email), \\"@\\", TO_STRING(entity.namespace)),
-(user_id_present AND entity_namespace_present), CONCAT(TO_STRING(user.id), \\"@\\", TO_STRING(entity.namespace)),
-(user_name_present AND user_domain_present AND entity_namespace_present), CONCAT(TO_STRING(user.name), \\"@\\", TO_STRING(user.domain), \\"@\\", TO_STRING(entity.namespace)),
-(user_name_present AND entity_namespace_present), CONCAT(TO_STRING(user.name), \\"@\\", TO_STRING(entity.namespace)), NULL), NULL)
+ user_name_present_or_null = CASE(user_name_present, TO_STRING(user.name)),
+ host_id_present_or_null = CASE(host_id_present, TO_STRING(host.id)),
+ entity_namespace_present_or_null = CASE(entity_namespace_present, TO_STRING(entity.namespace)),
+ user_email_present_or_null = CASE(user_email_present, TO_STRING(user.email)),
+ user_id_present_or_null = CASE(user_id_present, TO_STRING(user.id)),
+ user_domain_present_or_null = CASE(user_domain_present, TO_STRING(user.domain)),
+ recent.entity.EngineMetadata.UntypedId = CASE((TO_STRING(entity.namespace) == \\"local\\"), CONCAT(user_name_present_or_null, \\"@\\", host_id_present_or_null, \\"@\\", entity_namespace_present_or_null),
+true, COALESCE(CONCAT(user_email_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_id_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", user_domain_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", entity_namespace_present_or_null)), NULL)
 | STATS
     entity.EngineMetadata.FirstSeenLogInPage = MIN(@timestamp),
     recent.timestamp = MAX(@timestamp),

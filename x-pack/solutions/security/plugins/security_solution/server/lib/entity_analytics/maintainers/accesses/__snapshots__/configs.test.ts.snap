@@ -1,8 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[
-  `ACCESSES_INTEGRATION_RELATIONSHIP_CONFIGS golden snapshots aws_cloudtrail: targets-per-actor ES|QL is locked 1`
-] = `
+exports[`ACCESSES_INTEGRATION_RELATIONSHIP_CONFIGS golden snapshots aws_cloudtrail: targets-per-actor ES|QL is locked 1`] = `
 "SET unmapped_fields=\\"nullify\\";
 FROM logs-aws.cloudtrail-__namespace__
 | WHERE event.module == \\"aws\\"
@@ -25,18 +23,22 @@ FROM logs-aws.cloudtrail-__namespace__
  user_email_present = TO_STRING(user.email) IS NOT NULL AND TO_STRING(user.email) != \\"\\",
  user_id_present = TO_STRING(user.id) IS NOT NULL AND TO_STRING(user.id) != \\"\\",
  user_domain_present = TO_STRING(user.domain) IS NOT NULL AND TO_STRING(user.domain) != \\"\\",
- actorUserId = CONCAT(\\"user:\\", CASE((TO_STRING(entity.namespace) == \\"local\\"), CASE((user_name_present AND host_id_present AND entity_namespace_present), CONCAT(TO_STRING(user.name), \\"@\\", TO_STRING(host.id), \\"@\\", TO_STRING(entity.namespace)), NULL),
-true, CASE((user_email_present AND entity_namespace_present), CONCAT(TO_STRING(user.email), \\"@\\", TO_STRING(entity.namespace)),
-(user_id_present AND entity_namespace_present), CONCAT(TO_STRING(user.id), \\"@\\", TO_STRING(entity.namespace)),
-(user_name_present AND user_domain_present AND entity_namespace_present), CONCAT(TO_STRING(user.name), \\"@\\", TO_STRING(user.domain), \\"@\\", TO_STRING(entity.namespace)),
-(user_name_present AND entity_namespace_present), CONCAT(TO_STRING(user.name), \\"@\\", TO_STRING(entity.namespace)), NULL), NULL))
+ user_name_present_or_null = CASE(user_name_present, TO_STRING(user.name)),
+ host_id_present_or_null = CASE(host_id_present, TO_STRING(host.id)),
+ entity_namespace_present_or_null = CASE(entity_namespace_present, TO_STRING(entity.namespace)),
+ user_email_present_or_null = CASE(user_email_present, TO_STRING(user.email)),
+ user_id_present_or_null = CASE(user_id_present, TO_STRING(user.id)),
+ user_domain_present_or_null = CASE(user_domain_present, TO_STRING(user.domain)),
+ actorUserId = CONCAT(\\"user:\\", CASE((TO_STRING(entity.namespace) == \\"local\\"), CONCAT(user_name_present_or_null, \\"@\\", host_id_present_or_null, \\"@\\", entity_namespace_present_or_null),
+true, COALESCE(CONCAT(user_email_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_id_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", user_domain_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", entity_namespace_present_or_null)), NULL))
 | WHERE COALESCE(actorUserId, \\"\\") != \\"\\"
 | EVAL host_id_present = TO_STRING(host.id) IS NOT NULL AND TO_STRING(host.id) != \\"\\",
  host_name_present = TO_STRING(host.name) IS NOT NULL AND TO_STRING(host.name) != \\"\\",
  host_hostname_present = TO_STRING(host.hostname) IS NOT NULL AND TO_STRING(host.hostname) != \\"\\",
- targetEntityId = CONCAT(\\"host:\\", CASE((host_id_present), TO_STRING(host.id),
-(host_name_present), TO_STRING(host.name),
-(host_hostname_present), TO_STRING(host.hostname), NULL))
+ host_id_present_or_null = CASE(host_id_present, TO_STRING(host.id)),
+ host_name_present_or_null = CASE(host_name_present, TO_STRING(host.name)),
+ host_hostname_present_or_null = CASE(host_hostname_present, TO_STRING(host.hostname)),
+ targetEntityId = CONCAT(\\"host:\\", COALESCE(host_id_present_or_null, host_name_present_or_null, host_hostname_present_or_null))
 | MV_EXPAND targetEntityId
 | WHERE COALESCE(targetEntityId, \\"\\") != \\"\\"
 | STATS access_count = COUNT(*) BY actorUserId, targetEntityId
@@ -52,9 +54,7 @@ true, CASE((user_email_present AND entity_namespace_present), CONCAT(TO_STRING(u
 | LIMIT 3500"
 `;
 
-exports[
-  `ACCESSES_INTEGRATION_RELATIONSHIP_CONFIGS golden snapshots elastic_defend: targets-per-actor ES|QL is locked 1`
-] = `
+exports[`ACCESSES_INTEGRATION_RELATIONSHIP_CONFIGS golden snapshots elastic_defend: targets-per-actor ES|QL is locked 1`] = `
 "SET unmapped_fields=\\"nullify\\";
 FROM logs-endpoint.events.security-__namespace__
 | WHERE event.action == \\"log_on\\"
@@ -77,18 +77,22 @@ FROM logs-endpoint.events.security-__namespace__
  user_email_present = TO_STRING(user.email) IS NOT NULL AND TO_STRING(user.email) != \\"\\",
  user_id_present = TO_STRING(user.id) IS NOT NULL AND TO_STRING(user.id) != \\"\\",
  user_domain_present = TO_STRING(user.domain) IS NOT NULL AND TO_STRING(user.domain) != \\"\\",
- actorUserId = CONCAT(\\"user:\\", CASE((TO_STRING(entity.namespace) == \\"local\\"), CASE((user_name_present AND host_id_present AND entity_namespace_present), CONCAT(TO_STRING(user.name), \\"@\\", TO_STRING(host.id), \\"@\\", TO_STRING(entity.namespace)), NULL),
-true, CASE((user_email_present AND entity_namespace_present), CONCAT(TO_STRING(user.email), \\"@\\", TO_STRING(entity.namespace)),
-(user_id_present AND entity_namespace_present), CONCAT(TO_STRING(user.id), \\"@\\", TO_STRING(entity.namespace)),
-(user_name_present AND user_domain_present AND entity_namespace_present), CONCAT(TO_STRING(user.name), \\"@\\", TO_STRING(user.domain), \\"@\\", TO_STRING(entity.namespace)),
-(user_name_present AND entity_namespace_present), CONCAT(TO_STRING(user.name), \\"@\\", TO_STRING(entity.namespace)), NULL), NULL))
+ user_name_present_or_null = CASE(user_name_present, TO_STRING(user.name)),
+ host_id_present_or_null = CASE(host_id_present, TO_STRING(host.id)),
+ entity_namespace_present_or_null = CASE(entity_namespace_present, TO_STRING(entity.namespace)),
+ user_email_present_or_null = CASE(user_email_present, TO_STRING(user.email)),
+ user_id_present_or_null = CASE(user_id_present, TO_STRING(user.id)),
+ user_domain_present_or_null = CASE(user_domain_present, TO_STRING(user.domain)),
+ actorUserId = CONCAT(\\"user:\\", CASE((TO_STRING(entity.namespace) == \\"local\\"), CONCAT(user_name_present_or_null, \\"@\\", host_id_present_or_null, \\"@\\", entity_namespace_present_or_null),
+true, COALESCE(CONCAT(user_email_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_id_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", user_domain_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", entity_namespace_present_or_null)), NULL))
 | WHERE COALESCE(actorUserId, \\"\\") != \\"\\"
 | EVAL host_id_present = TO_STRING(host.id) IS NOT NULL AND TO_STRING(host.id) != \\"\\",
  host_name_present = TO_STRING(host.name) IS NOT NULL AND TO_STRING(host.name) != \\"\\",
  host_hostname_present = TO_STRING(host.hostname) IS NOT NULL AND TO_STRING(host.hostname) != \\"\\",
- targetEntityId = CONCAT(\\"host:\\", CASE((host_id_present), TO_STRING(host.id),
-(host_name_present), TO_STRING(host.name),
-(host_hostname_present), TO_STRING(host.hostname), NULL))
+ host_id_present_or_null = CASE(host_id_present, TO_STRING(host.id)),
+ host_name_present_or_null = CASE(host_name_present, TO_STRING(host.name)),
+ host_hostname_present_or_null = CASE(host_hostname_present, TO_STRING(host.hostname)),
+ targetEntityId = CONCAT(\\"host:\\", COALESCE(host_id_present_or_null, host_name_present_or_null, host_hostname_present_or_null))
 | MV_EXPAND targetEntityId
 | WHERE COALESCE(targetEntityId, \\"\\") != \\"\\"
 | STATS access_count = COUNT(*) BY actorUserId, targetEntityId
@@ -104,9 +108,7 @@ true, CASE((user_email_present AND entity_namespace_present), CONCAT(TO_STRING(u
 | LIMIT 3500"
 `;
 
-exports[
-  `ACCESSES_INTEGRATION_RELATIONSHIP_CONFIGS golden snapshots system_auth: targets-per-actor ES|QL is locked 1`
-] = `
+exports[`ACCESSES_INTEGRATION_RELATIONSHIP_CONFIGS golden snapshots system_auth: targets-per-actor ES|QL is locked 1`] = `
 "SET unmapped_fields=\\"nullify\\";
 FROM logs-system.auth-__namespace__
 | WHERE event.category IN (\\"authentication\\", \\"session\\")
@@ -129,18 +131,22 @@ FROM logs-system.auth-__namespace__
  user_email_present = TO_STRING(user.email) IS NOT NULL AND TO_STRING(user.email) != \\"\\",
  user_id_present = TO_STRING(user.id) IS NOT NULL AND TO_STRING(user.id) != \\"\\",
  user_domain_present = TO_STRING(user.domain) IS NOT NULL AND TO_STRING(user.domain) != \\"\\",
- actorUserId = CONCAT(\\"user:\\", CASE((TO_STRING(entity.namespace) == \\"local\\"), CASE((user_name_present AND host_id_present AND entity_namespace_present), CONCAT(TO_STRING(user.name), \\"@\\", TO_STRING(host.id), \\"@\\", TO_STRING(entity.namespace)), NULL),
-true, CASE((user_email_present AND entity_namespace_present), CONCAT(TO_STRING(user.email), \\"@\\", TO_STRING(entity.namespace)),
-(user_id_present AND entity_namespace_present), CONCAT(TO_STRING(user.id), \\"@\\", TO_STRING(entity.namespace)),
-(user_name_present AND user_domain_present AND entity_namespace_present), CONCAT(TO_STRING(user.name), \\"@\\", TO_STRING(user.domain), \\"@\\", TO_STRING(entity.namespace)),
-(user_name_present AND entity_namespace_present), CONCAT(TO_STRING(user.name), \\"@\\", TO_STRING(entity.namespace)), NULL), NULL))
+ user_name_present_or_null = CASE(user_name_present, TO_STRING(user.name)),
+ host_id_present_or_null = CASE(host_id_present, TO_STRING(host.id)),
+ entity_namespace_present_or_null = CASE(entity_namespace_present, TO_STRING(entity.namespace)),
+ user_email_present_or_null = CASE(user_email_present, TO_STRING(user.email)),
+ user_id_present_or_null = CASE(user_id_present, TO_STRING(user.id)),
+ user_domain_present_or_null = CASE(user_domain_present, TO_STRING(user.domain)),
+ actorUserId = CONCAT(\\"user:\\", CASE((TO_STRING(entity.namespace) == \\"local\\"), CONCAT(user_name_present_or_null, \\"@\\", host_id_present_or_null, \\"@\\", entity_namespace_present_or_null),
+true, COALESCE(CONCAT(user_email_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_id_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", user_domain_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", entity_namespace_present_or_null)), NULL))
 | WHERE COALESCE(actorUserId, \\"\\") != \\"\\"
 | EVAL host_id_present = TO_STRING(host.id) IS NOT NULL AND TO_STRING(host.id) != \\"\\",
  host_name_present = TO_STRING(host.name) IS NOT NULL AND TO_STRING(host.name) != \\"\\",
  host_hostname_present = TO_STRING(host.hostname) IS NOT NULL AND TO_STRING(host.hostname) != \\"\\",
- targetEntityId = CONCAT(\\"host:\\", CASE((host_id_present), TO_STRING(host.id),
-(host_name_present), TO_STRING(host.name),
-(host_hostname_present), TO_STRING(host.hostname), NULL))
+ host_id_present_or_null = CASE(host_id_present, TO_STRING(host.id)),
+ host_name_present_or_null = CASE(host_name_present, TO_STRING(host.name)),
+ host_hostname_present_or_null = CASE(host_hostname_present, TO_STRING(host.hostname)),
+ targetEntityId = CONCAT(\\"host:\\", COALESCE(host_id_present_or_null, host_name_present_or_null, host_hostname_present_or_null))
 | MV_EXPAND targetEntityId
 | WHERE COALESCE(targetEntityId, \\"\\") != \\"\\"
 | STATS access_count = COUNT(*) BY actorUserId, targetEntityId
@@ -156,9 +162,7 @@ true, CASE((user_email_present AND entity_namespace_present), CONCAT(TO_STRING(u
 | LIMIT 3500"
 `;
 
-exports[
-  `ACCESSES_INTEGRATION_RELATIONSHIP_CONFIGS golden snapshots system_security: targets-per-actor ES|QL is locked 1`
-] = `
+exports[`ACCESSES_INTEGRATION_RELATIONSHIP_CONFIGS golden snapshots system_security: targets-per-actor ES|QL is locked 1`] = `
 "SET unmapped_fields=\\"nullify\\";
 FROM logs-system.security-__namespace__
 | WHERE event.action IN (\\"logged-in\\", \\"logged-in-explicit\\")
@@ -183,18 +187,22 @@ FROM logs-system.security-__namespace__
  user_email_present = TO_STRING(user.email) IS NOT NULL AND TO_STRING(user.email) != \\"\\",
  user_id_present = TO_STRING(user.id) IS NOT NULL AND TO_STRING(user.id) != \\"\\",
  user_domain_present = TO_STRING(user.domain) IS NOT NULL AND TO_STRING(user.domain) != \\"\\",
- actorUserId = CONCAT(\\"user:\\", CASE((TO_STRING(entity.namespace) == \\"local\\"), CASE((user_name_present AND host_id_present AND entity_namespace_present), CONCAT(TO_STRING(user.name), \\"@\\", TO_STRING(host.id), \\"@\\", TO_STRING(entity.namespace)), NULL),
-true, CASE((user_email_present AND entity_namespace_present), CONCAT(TO_STRING(user.email), \\"@\\", TO_STRING(entity.namespace)),
-(user_id_present AND entity_namespace_present), CONCAT(TO_STRING(user.id), \\"@\\", TO_STRING(entity.namespace)),
-(user_name_present AND user_domain_present AND entity_namespace_present), CONCAT(TO_STRING(user.name), \\"@\\", TO_STRING(user.domain), \\"@\\", TO_STRING(entity.namespace)),
-(user_name_present AND entity_namespace_present), CONCAT(TO_STRING(user.name), \\"@\\", TO_STRING(entity.namespace)), NULL), NULL))
+ user_name_present_or_null = CASE(user_name_present, TO_STRING(user.name)),
+ host_id_present_or_null = CASE(host_id_present, TO_STRING(host.id)),
+ entity_namespace_present_or_null = CASE(entity_namespace_present, TO_STRING(entity.namespace)),
+ user_email_present_or_null = CASE(user_email_present, TO_STRING(user.email)),
+ user_id_present_or_null = CASE(user_id_present, TO_STRING(user.id)),
+ user_domain_present_or_null = CASE(user_domain_present, TO_STRING(user.domain)),
+ actorUserId = CONCAT(\\"user:\\", CASE((TO_STRING(entity.namespace) == \\"local\\"), CONCAT(user_name_present_or_null, \\"@\\", host_id_present_or_null, \\"@\\", entity_namespace_present_or_null),
+true, COALESCE(CONCAT(user_email_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_id_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", user_domain_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", entity_namespace_present_or_null)), NULL))
 | WHERE COALESCE(actorUserId, \\"\\") != \\"\\"
 | EVAL host_id_present = TO_STRING(host.id) IS NOT NULL AND TO_STRING(host.id) != \\"\\",
  host_name_present = TO_STRING(host.name) IS NOT NULL AND TO_STRING(host.name) != \\"\\",
  host_hostname_present = TO_STRING(host.hostname) IS NOT NULL AND TO_STRING(host.hostname) != \\"\\",
- targetEntityId = CONCAT(\\"host:\\", CASE((host_id_present), TO_STRING(host.id),
-(host_name_present), TO_STRING(host.name),
-(host_hostname_present), TO_STRING(host.hostname), NULL))
+ host_id_present_or_null = CASE(host_id_present, TO_STRING(host.id)),
+ host_name_present_or_null = CASE(host_name_present, TO_STRING(host.name)),
+ host_hostname_present_or_null = CASE(host_hostname_present, TO_STRING(host.hostname)),
+ targetEntityId = CONCAT(\\"host:\\", COALESCE(host_id_present_or_null, host_name_present_or_null, host_hostname_present_or_null))
 | MV_EXPAND targetEntityId
 | WHERE COALESCE(targetEntityId, \\"\\") != \\"\\"
 | STATS access_count = COUNT(*) BY actorUserId, targetEntityId

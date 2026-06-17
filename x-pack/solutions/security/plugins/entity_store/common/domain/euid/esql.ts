@@ -16,7 +16,12 @@ import type {
 } from '../definitions/entity_schema';
 import { isSingleFieldIdentity } from '../definitions/entity_schema';
 import { getEntityDefinitionWithoutId } from '../definitions/registry';
-import { esqlIsNotNullOrEmpty, esqlIsNullOrEmpty, esqlPresentColumnName } from '../../esql/strings';
+import {
+  esqlIsNotNullOrEmpty,
+  esqlIsNullOrEmpty,
+  esqlPresentColumnName,
+  esqlPresentOrNullColumnName,
+} from '../../esql/strings';
 import {
   applyWhenConditionTrueSetFields,
   documentPassesCalculatedIdentityPipelineGate,
@@ -141,16 +146,23 @@ function sourceToEsqlExpression(source: FieldEvaluation['sources'][number]): str
 }
 
 /**
- * Builds an optimized ranking CASE expression where condition guards reference
- * pre-computed `<field>_present` boolean columns emitted by {@link buildPresentPrelude}.
- * The value expressions (TO_STRING / CONCAT) are unchanged — only conditions differ.
- * Used exclusively by {@link getEuidEsqlEvaluationParts}.
+ * Builds the optimised COALESCE(CONCAT) entity-id expression where each ranking arm
+ * references pre-computed `<field>_present_or_null` columns:
  *
- * @param presentAliases - Map from field name to its `_present` column name.
+ * - Single-field arm → bare `<field>_present_or_null` reference.
+ * - Composed (multi-field) arm → `CONCAT(<f1>_present_or_null, "sep", <f2>_present_or_null, …)`.
+ *   CONCAT propagates NULL, so the arm evaluates to NULL when any component is absent —
+ *   equivalent to the old all-`_present` boolean guard, without a per-row CASE condition.
+ * - Multiple arms → `COALESCE(arm1, arm2, …)`, preserving ranking order.
+ *
+ * Single-arm short-circuit (only one ranking entry with one field): returns a bare
+ * `_present_or_null` ref (no COALESCE wrapper needed for a single arm).
+ *
+ * @param presentOrNullAliases - Map from field name to its `_present_or_null` column name.
  */
 function buildRankingCaseEsql(
   ranking: EuidAttribute[][],
-  presentAliases: ReadonlyMap<string, string>
+  presentOrNullAliases: ReadonlyMap<string, string>
 ): string {
   if (ranking.length === 0) {
     throw new Error('No euid fields found, invalid euid logic definition');
@@ -163,40 +175,37 @@ function buildRankingCaseEsql(
       throw new Error('Separator found in single field, invalid euid logic definition');
     }
     if (comp.length === 1 && isEuidField(firstAttr)) {
-      return `TO_STRING(${(firstAttr as { field: string }).field})`;
+      // Single ranking, single field: bare _present_or_null ref (no COALESCE needed)
+      return presentOrNullAliases.get(firstAttr.field) ?? `TO_STRING(${firstAttr.field})`;
     }
   }
 
-  const euidLogic = ranking.map((composedField) => {
+  const arms = ranking.map((composedField) => {
     if (composedField.length === 1 && isEuidSeparator(composedField[0])) {
       throw new Error('Separator found in single field, invalid euid logic definition');
     }
-
-    const compositionConditions = composedField
-      .filter(isEuidField)
-      .map((f) => presentAliases.get(f.field) ?? esqlIsNotNullOrEmpty(f.field))
-      .join(' AND ');
-
     if (isEuidSeparator(composedField[0])) {
       throw new Error('The first field of a composed field cannot be a separator');
     }
 
     if (composedField.length === 1) {
-      return `(${compositionConditions}), TO_STRING(${
-        (composedField[0] as { field: string }).field
-      })`;
+      const f = composedField[0] as { field: string };
+      return presentOrNullAliases.get(f.field) ?? `TO_STRING(${f.field})`;
     }
 
-    const evaluations = composedField
+    // Composed arm: CONCAT over _present_or_null refs and literal separators.
+    // CONCAT propagates NULL — if any component is absent the whole arm is NULL.
+    const parts = composedField
       .map((attr) =>
-        isEuidField(attr) ? `TO_STRING(${attr.field})` : `"${escapeEsqlString(attr.sep)}"`
+        isEuidField(attr)
+          ? presentOrNullAliases.get(attr.field) ?? `TO_STRING(${attr.field})`
+          : `"${escapeEsqlString(attr.sep)}"`
       )
       .join(', ');
-
-    return `(${compositionConditions}), CONCAT(${evaluations})`;
+    return `CONCAT(${parts})`;
   });
 
-  return `CASE(${euidLogic.join(',\n')}, NULL)`;
+  return arms.length === 1 ? arms[0] : `COALESCE(${arms.join(', ')})`;
 }
 
 /**
@@ -368,7 +377,9 @@ export function getEuidEsqlEvaluation(
   const { euidRanking } = identityField;
   const branches = euidRanking.branches;
   const presentFields = collectRankingFields(branches);
-  const presentAliases = new Map([...presentFields].map((f) => [f, esqlPresentColumnName(f)]));
+  const presentOrNullAliases = new Map(
+    [...presentFields].map((f) => [f, esqlPresentOrNullColumnName(f)])
+  );
   const assignments: string[] = [];
 
   // Prepend identity-specific field evaluations (e.g. entity.namespace for user).
@@ -377,18 +388,26 @@ export function getEuidEsqlEvaluation(
   for (const evaluation of identityField.fieldEvaluations ?? []) {
     assignments.push(buildOneFieldEvaluationEsql(evaluation));
   }
+  // 1. Boolean presence flags (plain Attribute[boolean] refs → CaseEagerEvaluator)
   for (const f of presentFields) {
     assignments.push(`${esqlPresentColumnName(f)} = ${esqlIsNotNullOrEmpty(f)}`);
+  }
+  // 2. Nullable value aliases: value when present, NULL otherwise.
+  //    CONCAT over these propagates NULL → no per-arm guards needed.
+  for (const f of presentFields) {
+    assignments.push(
+      `${esqlPresentOrNullColumnName(f)} = CASE(${esqlPresentColumnName(f)}, TO_STRING(${f}))`
+    );
   }
 
   const hasConditionalBranch = branches.some((b) => b.when != null);
   let idLogic: string;
   if (!hasConditionalBranch && branches.length === 1) {
-    idLogic = buildRankingCaseEsql(branches[0].ranking, presentAliases);
+    idLogic = buildRankingCaseEsql(branches[0].ranking, presentOrNullAliases);
   } else {
     const branchCaseParts: string[] = [];
     for (const branch of branches) {
-      const rankingCase = buildRankingCaseEsql(branch.ranking, presentAliases);
+      const rankingCase = buildRankingCaseEsql(branch.ranking, presentOrNullAliases);
       branchCaseParts.push(
         branch.when ? `(${conditionToESQL(branch.when)}), ${rankingCase}` : `true, ${rankingCase}`
       );

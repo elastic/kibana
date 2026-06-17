@@ -15,9 +15,10 @@ FROM remote:metrics-*
 | EVAL host_id_present = TO_STRING(host.id) IS NOT NULL AND TO_STRING(host.id) != \\"\\",
  host_name_present = TO_STRING(host.name) IS NOT NULL AND TO_STRING(host.name) != \\"\\",
  host_hostname_present = TO_STRING(host.hostname) IS NOT NULL AND TO_STRING(host.hostname) != \\"\\",
- entity.id = CONCAT(\\"host:\\", CASE((host_id_present), TO_STRING(host.id),
-(host_name_present), TO_STRING(host.name),
-(host_hostname_present), TO_STRING(host.hostname), NULL))
+ host_id_present_or_null = CASE(host_id_present, TO_STRING(host.id)),
+ host_name_present_or_null = CASE(host_name_present, TO_STRING(host.name)),
+ host_hostname_present_or_null = CASE(host_hostname_present, TO_STRING(host.hostname)),
+ entity.id = CONCAT(\\"host:\\", COALESCE(host_id_present_or_null, host_name_present_or_null, host_hostname_present_or_null))
 | STATS
     @timestamp = MAX(@timestamp),
     entity.EngineMetadata.FirstSeenLogInPage = MIN(@timestamp),
@@ -171,9 +172,7 @@ data_stream*,
 | LIMIT 5000"
 `;
 
-exports[
-  `buildCcsLogsExtractionEsqlQuery generates expected query with log-slice cursor bounds 1`
-] = `
+exports[`buildCcsLogsExtractionEsqlQuery generates expected query with log-slice cursor bounds 1`] = `
 "SET unmapped_fields=\\"nullify\\";
 FROM remote:logs-*
   | WHERE
@@ -190,9 +189,10 @@ FROM remote:logs-*
 | EVAL host_id_present = TO_STRING(host.id) IS NOT NULL AND TO_STRING(host.id) != \\"\\",
  host_name_present = TO_STRING(host.name) IS NOT NULL AND TO_STRING(host.name) != \\"\\",
  host_hostname_present = TO_STRING(host.hostname) IS NOT NULL AND TO_STRING(host.hostname) != \\"\\",
- entity.id = CONCAT(\\"host:\\", CASE((host_id_present), TO_STRING(host.id),
-(host_name_present), TO_STRING(host.name),
-(host_hostname_present), TO_STRING(host.hostname), NULL))
+ host_id_present_or_null = CASE(host_id_present, TO_STRING(host.id)),
+ host_name_present_or_null = CASE(host_name_present, TO_STRING(host.name)),
+ host_hostname_present_or_null = CASE(host_hostname_present, TO_STRING(host.hostname)),
+ entity.id = CONCAT(\\"host:\\", COALESCE(host_id_present_or_null, host_name_present_or_null, host_hostname_present_or_null))
 | STATS
     @timestamp = MAX(@timestamp),
     entity.EngineMetadata.FirstSeenLogInPage = MIN(@timestamp),
@@ -368,11 +368,14 @@ FROM remote:logs-*
  user_email_present = TO_STRING(user.email) IS NOT NULL AND TO_STRING(user.email) != \\"\\",
  user_id_present = TO_STRING(user.id) IS NOT NULL AND TO_STRING(user.id) != \\"\\",
  user_domain_present = TO_STRING(user.domain) IS NOT NULL AND TO_STRING(user.domain) != \\"\\",
- entity.id = CONCAT(\\"user:\\", CASE((TO_STRING(entity.namespace) == \\"local\\"), CASE((user_name_present AND host_id_present AND entity_namespace_present), CONCAT(TO_STRING(user.name), \\"@\\", TO_STRING(host.id), \\"@\\", TO_STRING(entity.namespace)), NULL),
-true, CASE((user_email_present AND entity_namespace_present), CONCAT(TO_STRING(user.email), \\"@\\", TO_STRING(entity.namespace)),
-(user_id_present AND entity_namespace_present), CONCAT(TO_STRING(user.id), \\"@\\", TO_STRING(entity.namespace)),
-(user_name_present AND user_domain_present AND entity_namespace_present), CONCAT(TO_STRING(user.name), \\"@\\", TO_STRING(user.domain), \\"@\\", TO_STRING(entity.namespace)),
-(user_name_present AND entity_namespace_present), CONCAT(TO_STRING(user.name), \\"@\\", TO_STRING(entity.namespace)), NULL), NULL))
+ user_name_present_or_null = CASE(user_name_present, TO_STRING(user.name)),
+ host_id_present_or_null = CASE(host_id_present, TO_STRING(host.id)),
+ entity_namespace_present_or_null = CASE(entity_namespace_present, TO_STRING(entity.namespace)),
+ user_email_present_or_null = CASE(user_email_present, TO_STRING(user.email)),
+ user_id_present_or_null = CASE(user_id_present, TO_STRING(user.id)),
+ user_domain_present_or_null = CASE(user_domain_present, TO_STRING(user.domain)),
+ entity.id = CONCAT(\\"user:\\", CASE((TO_STRING(entity.namespace) == \\"local\\"), CONCAT(user_name_present_or_null, \\"@\\", host_id_present_or_null, \\"@\\", entity_namespace_present_or_null),
+true, COALESCE(CONCAT(user_email_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_id_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", user_domain_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", entity_namespace_present_or_null)), NULL))
 | STATS
     @timestamp = MAX(@timestamp),
     entity.EngineMetadata.FirstSeenLogInPage = MIN(@timestamp),
