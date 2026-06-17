@@ -421,12 +421,11 @@ describe('KnowledgeIndicatorClient.findIndicators keyword search', () => {
     });
     const dataStreamClient = {
       create,
-      search,
     } as unknown as KnowledgeIndicatorClientDeps['dataStreamClient'];
     const logger = loggerMock.create() as unknown as Logger;
     const deps: KnowledgeIndicatorClientDeps = {
       dataStreamClient,
-      esClient: {} as KnowledgeIndicatorClientDeps['esClient'],
+      esClient: { search } as unknown as KnowledgeIndicatorClientDeps['esClient'],
       rulesManagementClient: {
         createRule: jest.fn().mockResolvedValue(undefined),
         updateRule: jest.fn().mockResolvedValue(undefined),
