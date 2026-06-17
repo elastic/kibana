@@ -10,6 +10,38 @@
 import type { ScoutPage } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 
+export const openSaveSearchModal = async (page: ScoutPage) => {
+  const saveButton = page.testSubj.locator('discoverSaveButton');
+  if (await saveButton.isVisible()) {
+    await saveButton.click();
+    return;
+  }
+
+  const overflowButton = page.testSubj.locator('app-menu-overflow-button');
+  const popover = page.testSubj.locator('app-menu-popover');
+
+  if (await popover.isVisible()) {
+    await overflowButton.click();
+    await expect(popover).toBeHidden();
+  }
+
+  await expect(overflowButton).toBeVisible();
+  await overflowButton.click();
+
+  const popoverOpened = await popover
+    .waitFor({ state: 'visible', timeout: 2000 })
+    .then(() => true)
+    .catch(() => false);
+
+  if (!popoverOpened) {
+    await overflowButton.click();
+  }
+
+  await expect(popover).toBeVisible();
+  await expect(saveButton).toBeVisible();
+  await saveButton.click();
+};
+
 /**
  * Extended save that supports `saveAsNew` and `storeTimeRange` options.
  * The base `DiscoverApp.saveSearch` only handles the name.
@@ -19,7 +51,7 @@ export const saveSearchExtended = async (
   name: string,
   options?: { saveAsNew?: boolean; storeTimeRange?: boolean }
 ) => {
-  await page.testSubj.click('discoverSaveButton');
+  await openSaveSearchModal(page);
   await page.testSubj.fill('savedObjectTitle', name);
 
   if (options?.saveAsNew !== undefined) {
@@ -104,9 +136,9 @@ export const createDataViewFromSearchBar = async (
 export const selectDataViewMode = async (page: ScoutPage, options?: { discardModal?: boolean }) => {
   // Locate the active tab container and click its menu button directly, avoiding
   // brittle string extraction from data-test-subj.
-  const activeTabContainer = page
-    .locator('[data-test-subj^="unifiedTabs_tab_"]')
-    .filter({ has: page.locator('[data-test-subj^="unifiedTabs_selectTabBtn_"][aria-selected="true"]') });
+  const activeTabContainer = page.locator('[data-test-subj^="unifiedTabs_tab_"]').filter({
+    has: page.locator('[data-test-subj^="unifiedTabs_selectTabBtn_"][aria-selected="true"]'),
+  });
   await activeTabContainer.locator('[data-test-subj^="unifiedTabs_tabMenuBtn_"]').click();
   await page.testSubj.click('unifiedTabs_tabMenuItem_switchToClassic');
 

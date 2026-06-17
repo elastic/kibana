@@ -144,8 +144,12 @@ export class DiscoverApp {
     await this.page.testSubj.waitForSelector('loadingSpinner', { state: 'hidden' });
   }
 
+  async openSaveSearch({ isInOverflowMenu }: { isInOverflowMenu?: boolean } = {}) {
+    await this.clickAppMenuItem('discoverSaveButton', { isInOverflowMenu });
+  }
+
   async saveSearch(name: string) {
-    await this.page.testSubj.click('discoverSaveButton');
+    await this.openSaveSearch();
     await this.page.testSubj.fill('savedObjectTitle', name);
     await this.page.testSubj.click('confirmSaveSavedObjectButton');
     await this.page.testSubj.waitForSelector('savedObjectSaveModal', { state: 'hidden' });
@@ -598,7 +602,12 @@ export class DiscoverApp {
    * newly created tab to become the active one.
    */
   async createNewTab() {
+    const previousCount = await this.page.testSubj
+      .locator(UNIFIED_TABS_TEST_SUBJ.tabsBar)
+      .locator(`[data-test-subj^="${UNIFIED_TABS_TEST_SUBJ.selectTabBtnPrefix}"]`)
+      .count();
     await this.page.testSubj.click(UNIFIED_TABS_TEST_SUBJ.newTabBtn);
+    await this.waitForTabCount(previousCount + 1);
     await this.activeTabLocator.waitFor({ state: 'visible' });
   }
 
@@ -653,7 +662,7 @@ export class DiscoverApp {
    */
   async getTabLabels(): Promise<string[]> {
     const tabsBar = this.page.testSubj.locator(UNIFIED_TABS_TEST_SUBJ.tabsBar);
-    await expect(tabsBar).toBeVisible();
+    await tabsBar.waitFor({ state: 'visible' });
     const tabSelector = `[data-test-subj^="${UNIFIED_TABS_TEST_SUBJ.selectTabBtnPrefix}"]`;
     const tabs = await tabsBar.locator(tabSelector).all();
     const labels: string[] = [];
@@ -670,20 +679,52 @@ export class DiscoverApp {
     return labels;
   }
 
+  private async waitForTabCount(count: number) {
+    await this.page.waitForFunction(
+      ({ tabsBarSubj, tabPrefix, expectedCount }) => {
+        const tabsBar = document.querySelector(`[data-test-subj="${tabsBarSubj}"]`);
+        return (
+          tabsBar?.querySelectorAll(`[data-test-subj^="${tabPrefix}"]`).length === expectedCount
+        );
+      },
+      {
+        tabsBarSubj: UNIFIED_TABS_TEST_SUBJ.tabsBar,
+        tabPrefix: UNIFIED_TABS_TEST_SUBJ.selectTabBtnPrefix,
+        expectedCount: count,
+      },
+      { timeout: 10_000 }
+    );
+  }
+
+  private async waitForAtLeastTabCount(count: number) {
+    await this.page.waitForFunction(
+      ({ tabsBarSubj, tabPrefix, minimumCount }) => {
+        const tabsBar = document.querySelector(`[data-test-subj="${tabsBarSubj}"]`);
+        return (
+          (tabsBar?.querySelectorAll(`[data-test-subj^="${tabPrefix}"]`).length ?? 0) >=
+          minimumCount
+        );
+      },
+      {
+        tabsBarSubj: UNIFIED_TABS_TEST_SUBJ.tabsBar,
+        tabPrefix: UNIFIED_TABS_TEST_SUBJ.selectTabBtnPrefix,
+        minimumCount: count,
+      },
+      { timeout: 10_000 }
+    );
+  }
+
   /**
    * Resolves the tab element at the given zero-based index.
    * Waits for the tab bar to contain at least `index + 1` tabs.
    */
   private async getTabAtIndex(index: number) {
     const tabsBar = this.page.testSubj.locator(UNIFIED_TABS_TEST_SUBJ.tabsBar);
-    await expect(tabsBar).toBeVisible();
+    await tabsBar.waitFor({ state: 'visible' });
     const tabLocator = tabsBar.locator(
       `[data-test-subj^="${UNIFIED_TABS_TEST_SUBJ.selectTabBtnPrefix}"]`
     );
-    // Wait until enough tabs are present
-    await expect
-      .poll(async () => tabLocator.count(), { timeout: 10_000 })
-      .toBeGreaterThanOrEqual(index + 1);
+    await this.waitForAtLeastTabCount(index + 1);
     const tabs = await tabLocator.all();
     return tabs[index];
   }
@@ -695,8 +736,15 @@ export class DiscoverApp {
    */
   async selectTabByIndex(index: number) {
     const tab = await this.getTabAtIndex(index);
+    const testSubj = await tab.getAttribute('data-test-subj');
+    if (!testSubj) {
+      throw new Error(`Discover tab at index ${index} is missing a data-test-subj attribute`);
+    }
     await tab.click();
-    await expect(tab).toHaveAttribute('aria-selected', 'true');
+    await this.page.locator(`[data-test-subj="${testSubj}"][aria-selected="true"]`).waitFor({
+      state: 'visible',
+      timeout: 10_000,
+    });
     // Move mouse away from the tab bar to dismiss the tab preview popup
     await this.page.testSubj.hover('breadcrumbs');
   }
@@ -717,8 +765,20 @@ export class DiscoverApp {
     await this.page.keyboard.press('Enter');
 
     // Wait for the label to update
-    const fullText = tab.locator('[data-test-subj="fullText"]');
-    await expect(fullText).toHaveText(newLabel);
+    const testSubj = await tab.getAttribute('data-test-subj');
+    if (!testSubj) {
+      throw new Error(`Discover tab at index ${index} is missing a data-test-subj attribute`);
+    }
+    await this.page.waitForFunction(
+      ({ tabTestSubj, label }) => {
+        const tabButton = document.querySelector(`[data-test-subj="${tabTestSubj}"]`);
+        return (
+          tabButton?.querySelector('[data-test-subj="fullText"]')?.textContent?.trim() === label
+        );
+      },
+      { tabTestSubj: testSubj, label: newLabel },
+      { timeout: 10_000 }
+    );
   }
 
   async waitForDataGridRowWithRefresh(rowLocator: Locator, timeout = 30_000) {
