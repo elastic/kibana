@@ -7,27 +7,38 @@
 
 import React, { useMemo } from 'react';
 import {
-  EuiFlyout,
-  EuiFlyoutHeader,
-  EuiFlyoutBody,
-  EuiTitle,
-  EuiText,
-  EuiSpacer,
   EuiBadge,
+  EuiButtonIcon,
+  EuiDescriptionList,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiDescriptionList,
+  EuiFlyout,
+  EuiFlyoutBody,
+  EuiFlyoutHeader,
+  EuiHorizontalRule,
   EuiLoadingSpinner,
+  EuiSpacer,
+  EuiText,
   EuiTimeline,
   EuiTimelineItem,
+  EuiTitle,
+  EuiToolTip,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { Detection } from '@kbn/streams-schema';
+import { FlyoutMetadataCard } from '../../../../flyout_components/flyout_metadata_card';
+import { FlyoutToolbarHeader } from '../../../../flyout_components/flyout_toolbar_header';
+import { InfoPanel } from '../../../../info_panel';
+import { useFetchDetectionHistory } from '../../../../../hooks/sig_events/use_fetch_detections';
 import { formatTimestamp } from '../../../../../util/formatters';
 import { changeTypeLabel, DETECTION_KIND_LABELS } from '../shared/translations';
 import { DETECTION_KIND_COLORS } from '../shared/constants';
-import { useFetchDetectionHistory } from '../../../../../hooks/sig_events/use_fetch_detections';
+
+// Unhandled detections older than this window are outside the discovery lookback
+// and won't be picked up automatically by the discovery pipeline.
+const DISCOVERY_LOOKBACK_MS = 2 * 60 * 60 * 1000;
+
 const formatPValue = (pValue?: number | string): string => {
   if (pValue === undefined || pValue === null) return '-';
   const n = Number(pValue);
@@ -51,78 +62,127 @@ interface DetectionFlyoutProps {
 }
 
 export const DetectionFlyout = ({ detection, onClose }: DetectionFlyoutProps) => {
-  const titleId = useGeneratedHtmlId();
+  const flyoutTitleId = useGeneratedHtmlId({ prefix: 'detectionFlyoutTitle' });
   const { data: historyData, isLoading: isHistoryLoading } = useFetchDetectionHistory(
     detection.detection_id
   );
 
-  const diagnostics = useMemo(
-    () => [
+  const discoveryStatus = useMemo(() => {
+    if (detection.processed) {
+      return { label: DISCOVERY_PROCESSED_LABEL, color: 'success' as const };
+    }
+    const docAgeMs = Date.now() - new Date(detection['@timestamp']).getTime();
+    if (docAgeMs > DISCOVERY_LOOKBACK_MS) {
+      return { label: DISCOVERY_MISSED_LABEL, color: 'warning' as const };
+    }
+    return { label: DISCOVERY_PENDING_LABEL, color: 'hollow' as const };
+  }, [detection]);
+
+  const generalInfoItems = useMemo(() => {
+    const changeType = detection.detection_evidence?.change_point_type;
+    const pValue = detection.detection_evidence?.p_value;
+    const peakAlertCount = detection.peak_alert_count;
+
+    return [
       {
-        title: i18n.translate('xpack.streams.detectionFlyout.detectedAt', {
-          defaultMessage: 'Detected at',
-        }),
-        description: formatTimestamp(detection['@timestamp']),
+        title: TIMESTAMP_LABEL,
+        description: <EuiText size="s">{formatTimestamp(detection['@timestamp'])}</EuiText>,
       },
-      {
-        title: i18n.translate('xpack.streams.detectionFlyout.changeType', {
-          defaultMessage: 'Change type',
-        }),
-        description: changeTypeLabel(detection.detection_evidence?.change_point_type),
-      },
-      {
-        title: i18n.translate('xpack.streams.detectionFlyout.significance', {
-          defaultMessage: 'Statistical significance',
-        }),
-        description: formatPValue(detection.detection_evidence?.p_value),
-      },
-      {
-        title: i18n.translate('xpack.streams.detectionFlyout.peakAlerts', {
-          defaultMessage: 'Peak alerts',
-        }),
-        description: String(detection.peak_alert_count ?? '-'),
-      },
-      {
-        title: i18n.translate('xpack.streams.detectionFlyout.stream', {
-          defaultMessage: 'Stream',
-        }),
-        description: detection.stream_name ?? '-',
-      },
-    ],
-    [detection]
-  );
+      ...(changeType
+        ? [
+            {
+              title: CHANGE_LABEL,
+              description: <EuiBadge color="hollow">{changeTypeLabel(changeType)}</EuiBadge>,
+            },
+          ]
+        : []),
+      ...(pValue !== undefined
+        ? [
+            {
+              title: STATISTICAL_SIGNIFICANCE_LABEL,
+              description: <EuiText size="s">{formatPValue(pValue)}</EuiText>,
+            },
+          ]
+        : []),
+      ...(peakAlertCount !== undefined
+        ? [
+            {
+              title: PEAK_ALERTS_LABEL,
+              description: <EuiText size="s">{peakAlertCount}</EuiText>,
+            },
+          ]
+        : []),
+    ];
+  }, [detection]);
 
   return (
-    <EuiFlyout onClose={onClose} size="m" aria-labelledby={titleId}>
+    <EuiFlyout
+      onClose={onClose}
+      aria-labelledby={flyoutTitleId}
+      type="push"
+      ownFocus={false}
+      size="40%"
+      hideCloseButton
+    >
+      {/* First header: minimal toolbar with close button */}
+      <FlyoutToolbarHeader>
+        <EuiFlexItem grow={false}>
+          <EuiToolTip content={CLOSE_BUTTON_ARIA_LABEL} disableScreenReaderOutput>
+            <EuiButtonIcon
+              data-test-subj="detectionFlyoutCloseButton"
+              iconType="cross"
+              aria-label={CLOSE_BUTTON_ARIA_LABEL}
+              onClick={onClose}
+            />
+          </EuiToolTip>
+        </EuiFlexItem>
+      </FlyoutToolbarHeader>
+
+      {/* Second header: title and metadata cards */}
       <EuiFlyoutHeader hasBorder>
-        <EuiFlexGroup alignItems="center" gutterSize="s" wrap>
-          <EuiFlexItem grow={false}>
-            <EuiBadge color={DETECTION_KIND_COLORS[detection.kind] ?? 'default'}>
-              {DETECTION_KIND_LABELS[detection.kind] ?? detection.kind}
-            </EuiBadge>
+        <EuiTitle size="s">
+          <h2 id={flyoutTitleId}>{detection.rule_name}</h2>
+        </EuiTitle>
+        <EuiSpacer size="m" />
+        <EuiFlexGroup gutterSize="s" responsive={false} wrap>
+          <EuiFlexItem>
+            <FlyoutMetadataCard title={KIND_LABEL}>
+              <EuiBadge color={DETECTION_KIND_COLORS[detection.kind] ?? 'default'}>
+                {DETECTION_KIND_LABELS[detection.kind] ?? detection.kind}
+              </EuiBadge>
+            </FlyoutMetadataCard>
           </EuiFlexItem>
-          {detection.processed && (
-            <EuiFlexItem grow={false}>
-              <EuiBadge color="success">{DETECTION_KIND_LABELS.handled}</EuiBadge>
+          <EuiFlexItem>
+            <FlyoutMetadataCard title={DISCOVERY_LABEL}>
+              <EuiBadge color={discoveryStatus.color}>{discoveryStatus.label}</EuiBadge>
+            </FlyoutMetadataCard>
+          </EuiFlexItem>
+          {detection.stream_name && (
+            <EuiFlexItem>
+              <FlyoutMetadataCard title={STREAM_LABEL}>
+                <EuiBadge color="hollow" iconType="productStreamsClassic" iconSide="left">
+                  {detection.stream_name}
+                </EuiBadge>
+              </FlyoutMetadataCard>
             </EuiFlexItem>
           )}
         </EuiFlexGroup>
-        <EuiSpacer size="s" />
-        <EuiTitle size="m">
-          <h2 id={titleId}>{detection.rule_name}</h2>
-        </EuiTitle>
-        <EuiText size="s" color="subdued">
-          {detection.stream_name}
-        </EuiText>
       </EuiFlyoutHeader>
 
       <EuiFlyoutBody>
-        <EuiDescriptionList
-          type="column"
-          columnWidths={[1, 2]}
-          listItems={diagnostics}
-          compressed
-        />
+        <InfoPanel title={GENERAL_INFORMATION_TITLE}>
+          {generalInfoItems.map((listItem, index) => (
+            <React.Fragment key={listItem.title}>
+              <EuiDescriptionList
+                type="column"
+                columnWidths={[1, 2]}
+                compressed
+                listItems={[listItem]}
+              />
+              {index < generalInfoItems.length - 1 && <EuiHorizontalRule margin="m" />}
+            </React.Fragment>
+          ))}
+        </InfoPanel>
 
         <EuiSpacer size="l" />
 
@@ -177,3 +237,57 @@ export const DetectionFlyout = ({ detection, onClose }: DetectionFlyoutProps) =>
     </EuiFlyout>
   );
 };
+
+const CLOSE_BUTTON_ARIA_LABEL = i18n.translate(
+  'xpack.streams.detectionFlyout.closeButtonAriaLabel',
+  { defaultMessage: 'Close' }
+);
+
+const GENERAL_INFORMATION_TITLE = i18n.translate(
+  'xpack.streams.detectionFlyout.generalInformationTitle',
+  { defaultMessage: 'General information' }
+);
+
+const KIND_LABEL = i18n.translate('xpack.streams.detectionFlyout.kindLabel', {
+  defaultMessage: 'Kind',
+});
+
+const DISCOVERY_LABEL = i18n.translate('xpack.streams.detectionFlyout.discoveryLabel', {
+  defaultMessage: 'Discovery',
+});
+
+const STREAM_LABEL = i18n.translate('xpack.streams.detectionFlyout.streamLabel', {
+  defaultMessage: 'Stream',
+});
+
+const TIMESTAMP_LABEL = i18n.translate('xpack.streams.detectionFlyout.timestampLabel', {
+  defaultMessage: 'Timestamp',
+});
+
+const CHANGE_LABEL = i18n.translate('xpack.streams.detectionFlyout.changeLabel', {
+  defaultMessage: 'Change',
+});
+
+const STATISTICAL_SIGNIFICANCE_LABEL = i18n.translate(
+  'xpack.streams.detectionFlyout.statisticalSignificanceLabel',
+  { defaultMessage: 'Statistical significance' }
+);
+
+const PEAK_ALERTS_LABEL = i18n.translate('xpack.streams.detectionFlyout.peakAlertsLabel', {
+  defaultMessage: 'Peak alerts',
+});
+
+const DISCOVERY_PROCESSED_LABEL = i18n.translate(
+  'xpack.streams.detectionFlyout.discoveryStatus.processed',
+  { defaultMessage: 'Processed' }
+);
+
+const DISCOVERY_MISSED_LABEL = i18n.translate(
+  'xpack.streams.detectionFlyout.discoveryStatus.missed',
+  { defaultMessage: 'Missed' }
+);
+
+const DISCOVERY_PENDING_LABEL = i18n.translate(
+  'xpack.streams.detectionFlyout.discoveryStatus.pending',
+  { defaultMessage: 'Pending' }
+);
