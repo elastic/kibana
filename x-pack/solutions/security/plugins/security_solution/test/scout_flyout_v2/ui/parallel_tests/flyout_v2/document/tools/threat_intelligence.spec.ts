@@ -25,7 +25,7 @@ spaceTest.describe(
 
     spaceTest.afterEach(async ({ apiServices, scoutSpace }) => {
       await apiServices.detectionRule.deleteAll();
-      await apiServices.threatIntelligence.cleanupFileHashEnrichmentFixture(scoutSpace.id);
+      await apiServices.threatIntelligence.cleanupFileIndicatorFixture(scoutSpace.id);
       await apiServices.detectionAlerts.deleteAll();
     });
 
@@ -77,10 +77,9 @@ spaceTest.describe(
     spaceTest(
       'shows fields enriched with threat intelligence count in insights section',
       async ({ pageObjects, scoutSpace, apiServices }) => {
-        // Single-doc index with file.hash.sha256; the TI rule targets it exclusively so the
-        // flyout enriches the one resulting alert via investigation-time query against logs-ti_*.
-        const { sourceIndex } =
-          await apiServices.threatIntelligence.createFileHashEnrichmentFixture(scoutSpace.id);
+        const { sourceIndex } = await apiServices.threatIntelligence.createFileIndicatorFixture(
+          scoutSpace.id
+        );
 
         const tiRuleName = `TI Enrichment Test_${scoutSpace.id}_${Date.now()}`;
         await apiServices.detectionRule.createCustomQueryRule({

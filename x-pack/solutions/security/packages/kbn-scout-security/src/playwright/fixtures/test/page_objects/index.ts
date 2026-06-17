@@ -19,9 +19,11 @@ import { ThreatMatchRuleCreatePage } from './threat_match_rule_create_page';
 import { AttackDetailsRightPanelPage } from './attack_details_right_panel';
 import { ServerlessProjectChromePage } from './serverless_project_chrome_page';
 import { GraphFlyoutPage } from './graph_flyout_page';
+import { ThreatIntelligenceIndicatorsPage } from './threat_intelligence_indicators';
 import { DocumentFlyout } from './flyout_v2/document/main/document_flyout';
 import { RuleFlyout } from './flyout_v2/rule/rule_flyout';
 import { NetworkFlyout } from './flyout_v2/network/network_flyout';
+import { IOCFlyout } from './flyout_v2/ioc/ioc_flyout';
 import { ThreatIntelligenceTool } from './flyout_v2/document/tools/threat_intelligence_tool';
 import { CorrelationsTool } from './flyout_v2/document/tools/correlations_tool';
 import { PrevalenceTool } from './flyout_v2/document/tools/prevalence_tool';
@@ -46,12 +48,16 @@ export interface SecurityPageObjects extends PageObjects {
   serverlessProjectChromePage: ServerlessProjectChromePage;
   /** Graph Visualization tab inside the alert/event details left panel. */
   graphFlyoutPage: GraphFlyoutPage;
+  /** Threat Intelligence indicators page (table + KQL search bar); entry point to the IOC flyout. */
+  threatIntelligenceIndicatorsPage: ThreatIntelligenceIndicatorsPage;
   /** v2 document flyout (alert / event) — requires `newFlyoutSystemEnabled` experimental feature. */
   documentFlyout: DocumentFlyout;
   /** v2 rule flyout — opened from the alerts table rule column or the document flyout About section. */
   ruleFlyout: RuleFlyout;
   /** v2 network flyout — opened from an IP value (alerts table source.ip cell / document flyout IP field). */
   networkFlyout: NetworkFlyout;
+  /** v2 IOC (indicator) flyout — opened from the Threat Intelligence indicators table. */
+  iocFlyout: IOCFlyout;
   /** Threat intelligence tool overlay inside the flyout v2 document flyout. */
   threatIntelligenceTool: ThreatIntelligenceTool;
   /** Correlations tool overlay inside the flyout v2 document flyout. */
@@ -89,9 +95,11 @@ export function extendPageObjects(
     attackDetailsRightPanelPage: createLazyPageObject(AttackDetailsRightPanelPage, page),
     serverlessProjectChromePage: createLazyPageObject(ServerlessProjectChromePage, page),
     graphFlyoutPage: createLazyPageObject(GraphFlyoutPage, page),
+    threatIntelligenceIndicatorsPage: createLazyPageObject(ThreatIntelligenceIndicatorsPage, page),
     documentFlyout: createLazyPageObject(DocumentFlyout, page),
     ruleFlyout: createLazyPageObject(RuleFlyout, page),
     networkFlyout: createLazyPageObject(NetworkFlyout, page),
+    iocFlyout: createLazyPageObject(IOCFlyout, page),
     threatIntelligenceTool: createLazyPageObject(ThreatIntelligenceTool, page),
     correlationsTool: createLazyPageObject(CorrelationsTool, page),
     prevalenceTool: createLazyPageObject(PrevalenceTool, page),

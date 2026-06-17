@@ -11,121 +11,131 @@
  * Entry path: Security → Threat Intelligence → Indicators table →
  *   click `tiToggleIndicatorFlyoutButton` → IOC flyout opens.
  *
- * NOTE: These tests require threat-intelligence index data to be present.
- * They are tagged `stateful.classic` only since the Threat Intelligence page
- * is not available in all serverless security configurations.
+ * The indicators table queries the global `logs-ti_*` pattern (not space-scoped), so each test
+ * indexes a uniquely-named indicator and filters the table down to it via the KQL search bar
+ * before opening the flyout, keeping assertions deterministic across parallel workers.
+ *
+ * Tagged `stateful.classic` only, since the Threat Intelligence page is not available in all
+ * serverless security configurations.
  */
 
 import { spaceTest, tags } from '@kbn/scout-security';
 import { expect } from '@kbn/scout-security/ui';
 
-const THREAT_INTEL_PAGE = 'security/threat_intelligence';
-
 spaceTest.describe('IOC flyout v2', { tag: [...tags.stateful.classic] }, () => {
-  spaceTest.beforeEach(async ({ browserAuth }) => {
+  let indicatorName: string;
+
+  spaceTest.beforeEach(async ({ browserAuth, apiServices, scoutSpace }) => {
+    ({ indicatorName } = await apiServices.threatIntelligence.createFileIndicatorFixture(
+      scoutSpace.id
+    ));
     await browserAuth.loginAsPlatformEngineer();
   });
 
-  spaceTest(
-    'IOC flyout opens from indicators table and shows header, body, footer',
-    async ({ page, log }) => {
-      await page.gotoApp(THREAT_INTEL_PAGE);
-
-      const indicatorsTable = page.getByTestId('tiIndicatorsTable');
-      await indicatorsTable.waitFor({ state: 'visible', timeout: 30_000 });
-
-      // If no indicators are available, skip gracefully
-      const noDataMessage = page.getByText('No indicators found', { exact: false });
-      const hasNoData = await noDataMessage.isVisible().catch(() => false);
-      if (hasNoData) {
-        log.info('No threat intel data available');
-        spaceTest.skip(true, 'No threat intelligence indicators found in test environment');
-      }
-
-      // Click the open-flyout button on the first row
-      const flyoutButtons = await indicatorsTable
-        .getByTestId('tiToggleIndicatorFlyoutButton')
-        .all();
-      await flyoutButtons[0].click();
-
-      // IOC flyout title and body should be visible
-      await expect(page.getByTestId('securitySolutionFlyoutIOCDetailsTitle')).toBeVisible({
-        timeout: 10_000,
-      });
-      await expect(page.getByTestId('securitySolutionFlyoutIOCDetailsBody')).toBeVisible();
-
-      // Footer should render with Take action button
-      await expect(page.getByTestId('securitySolutionFlyoutIOCDetailsFooter')).toBeVisible();
-    }
-  );
-
-  spaceTest('IOC flyout has Overview and Table tabs', async ({ page, log }) => {
-    await page.gotoApp(THREAT_INTEL_PAGE);
-
-    const indicatorsTable = page.getByTestId('tiIndicatorsTable');
-    await indicatorsTable.waitFor({ state: 'visible', timeout: 30_000 });
-
-    const noDataMessage = page.getByText('No indicators found', { exact: false });
-    const hasNoData = await noDataMessage.isVisible().catch(() => false);
-    if (hasNoData) {
-      log.info('No threat intel data available');
-      spaceTest.skip(true, 'No threat intelligence indicators found in test environment');
-    }
-
-    const flyoutButtons = await indicatorsTable.getByTestId('tiToggleIndicatorFlyoutButton').all();
-    await flyoutButtons[0].click();
-
-    await expect(page.getByTestId('securitySolutionFlyoutIOCDetailsTitle')).toBeVisible({
-      timeout: 10_000,
-    });
-
-    // Both tabs should be present
-    await expect(page.getByTestId('securitySolutionFlyoutIOCDetailsOverviewTab')).toBeVisible();
-    await expect(page.getByTestId('securitySolutionFlyoutIOCDetailsTableTab')).toBeVisible();
-
-    // Switching to Table tab should work
-    await page.getByTestId('securitySolutionFlyoutIOCDetailsTableTab').click();
-    // The JSON tab is also available
-    await expect(page.getByTestId('securitySolutionFlyoutIOCDetailsJsonTab')).toBeVisible();
+  spaceTest.afterEach(async ({ apiServices, scoutSpace }) => {
+    await apiServices.threatIntelligence.cleanupFileIndicatorFixture(scoutSpace.id);
   });
 
   spaceTest(
-    'IOC flyout add-to-case action is accessible from the footer',
-    async ({ page, log }) => {
-      await page.gotoApp(THREAT_INTEL_PAGE);
+    'navigates between the Overview, Table and JSON tabs and the "View all fields in table" shortcut',
+    async ({ pageObjects }) => {
+      await pageObjects.threatIntelligenceIndicatorsPage.navigate();
+      await pageObjects.threatIntelligenceIndicatorsPage.openFlyoutForIndicator(indicatorName);
+      await pageObjects.iocFlyout.waitForFlyout();
 
-      const indicatorsTable = page.getByTestId('tiIndicatorsTable');
-      await indicatorsTable.waitFor({ state: 'visible', timeout: 30_000 });
-
-      const noDataMessage = page.getByText('No indicators found', { exact: false });
-      const hasNoData = await noDataMessage.isVisible().catch(() => false);
-      if (hasNoData) {
-        log.info('No threat intel data available');
-        spaceTest.skip(true, 'No threat intelligence indicators found in test environment');
-      }
-
-      const flyoutButtons = await indicatorsTable
-        .getByTestId('tiToggleIndicatorFlyoutButton')
-        .all();
-      await flyoutButtons[0].click();
-
-      await expect(page.getByTestId('securitySolutionFlyoutIOCDetailsTitle')).toBeVisible({
-        timeout: 10_000,
+      await spaceTest.step('Overview tab shows the highlighted fields table', async () => {
+        await expect(pageObjects.iocFlyout.overviewTable).toBeVisible();
       });
 
-      // The add-to-case context menu item verifies the IOC is case-compatible
-      const addToNewCase = indicatorsTable.getByTestId('tiIndicatorTableAddToNewCaseContextMenu');
+      await spaceTest.step('Table tab shows the all-fields table', async () => {
+        await pageObjects.iocFlyout.selectTableTab();
+        await expect(pageObjects.iocFlyout.fieldsTable).toBeVisible();
+      });
 
-      const isAddToCaseVisible = await addToNewCase
-        .isVisible({ timeout: 3_000 })
-        .catch(() => false);
-      if (!isAddToCaseVisible) {
-        return;
-      }
+      await spaceTest.step('JSON tab renders the indicator document as valid JSON', async () => {
+        await pageObjects.iocFlyout.selectJsonTab();
+        await expect(pageObjects.iocFlyout.jsonViewer).toBeVisible();
 
-      await addToNewCase.click();
-      await expect(page.getByRole('dialog').getByText('Create case')).toBeVisible({
-        timeout: 10_000,
+        // Read the editor model directly and confirm it is valid JSON for this indicator.
+        const rawJson = await pageObjects.iocFlyout.getJsonTabValue();
+        const parsed = JSON.parse(rawJson);
+        expect(parsed.fields['threat.indicator.name']).toContain(indicatorName);
+      });
+
+      await spaceTest.step('returning to the Overview tab restores its content', async () => {
+        await pageObjects.iocFlyout.selectOverviewTab();
+        await expect(pageObjects.iocFlyout.overviewTable).toBeVisible();
+      });
+
+      await spaceTest.step(
+        'the Overview tab "View all fields in table" button navigates to the Table tab',
+        async () => {
+          await pageObjects.iocFlyout.clickViewAllFieldsInTable();
+          await expect(pageObjects.iocFlyout.fieldsTable).toBeVisible();
+        }
+      );
+    }
+  );
+
+  spaceTest(
+    'the take action menu lists every action and Investigate in Timeline opens the timeline',
+    async ({ pageObjects }) => {
+      await pageObjects.threatIntelligenceIndicatorsPage.navigate();
+      await pageObjects.threatIntelligenceIndicatorsPage.openFlyoutForIndicator(indicatorName);
+      await pageObjects.iocFlyout.waitForFlyout();
+
+      await spaceTest.step('the take action menu lists the expected items', async () => {
+        await pageObjects.iocFlyout.openTakeActionMenu();
+        await expect(pageObjects.iocFlyout.investigateInTimelineItem).toBeVisible();
+        await expect(pageObjects.iocFlyout.addToExistingCaseItem).toBeVisible();
+        await expect(pageObjects.iocFlyout.addToNewCaseItem).toBeVisible();
+        await expect(pageObjects.iocFlyout.addToBlockListItem).toBeVisible();
+      });
+
+      await spaceTest.step('Investigate in Timeline opens the timeline', async () => {
+        await pageObjects.iocFlyout.investigateInTimelineItem.click();
+        await expect(pageObjects.timelinePage.panel).toBeVisible({ timeout: 15_000 });
+      });
+    }
+  );
+
+  spaceTest(
+    'take action → Add to block list opens the block list creation flyout',
+    async ({ pageObjects, page }) => {
+      await pageObjects.threatIntelligenceIndicatorsPage.navigate();
+      await pageObjects.threatIntelligenceIndicatorsPage.openFlyoutForIndicator(indicatorName);
+      await pageObjects.iocFlyout.waitForFlyout();
+
+      await pageObjects.iocFlyout.openTakeActionMenu();
+      await pageObjects.iocFlyout.addToBlockListItem.click();
+
+      await expect(page.testSubj.locator('blocklist-form-name-input')).toBeVisible({
+        timeout: 15_000,
+      });
+    }
+  );
+
+  spaceTest(
+    'take action → Add to case opens the existing-case modal and the new-case flyout',
+    async ({ pageObjects, page }) => {
+      await pageObjects.threatIntelligenceIndicatorsPage.navigate();
+      await pageObjects.threatIntelligenceIndicatorsPage.openFlyoutForIndicator(indicatorName);
+      await pageObjects.iocFlyout.waitForFlyout();
+
+      await spaceTest.step('Add to existing case opens the select-case modal', async () => {
+        await pageObjects.iocFlyout.openTakeActionMenu();
+        await pageObjects.iocFlyout.addToExistingCaseItem.click();
+        const modal = page.testSubj.locator('all-cases-modal');
+        await expect(modal).toBeVisible({ timeout: 15_000 });
+        // Dismiss the modal (no fields touched, so it closes cleanly) before the next action.
+        await page.keyboard.press('Escape');
+        await expect(modal).toBeHidden();
+      });
+
+      await spaceTest.step('Add to new case opens the create-case flyout', async () => {
+        await pageObjects.iocFlyout.openTakeActionMenu();
+        await pageObjects.iocFlyout.addToNewCaseItem.click();
+        await expect(page.testSubj.locator('create-case-submit')).toBeVisible({ timeout: 15_000 });
       });
     }
   );
