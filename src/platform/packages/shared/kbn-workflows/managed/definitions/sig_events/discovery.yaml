@@ -289,6 +289,8 @@ steps:
                         type: string
                       change_point_type:
                         type: string
+                      p_value:
+                        type: number
                       alert_count:
                         type: integer
                 dependency_edges:

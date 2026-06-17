@@ -46,7 +46,7 @@ const kindColor = (kind: Detection['kind']) => DETECTION_KIND_COLORS[kind] ?? 'd
 
 // Unhandled detections older than this window are outside the discovery lookback
 // and won't be picked up automatically by the discovery pipeline.
-const DISCOVERY_LOOKBACK_MS = 2 * 60 * 60 * 1000;
+const DISCOVERY_LOOKBACK_MS = 4 * 60 * 60 * 1000;
 
 const columns: Array<EuiBasicTableColumn<Detection>> = [
   {

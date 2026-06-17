@@ -317,6 +317,11 @@ steps:
                   range:
                     "@timestamp":
                       gte: "now-{{ consts.RECENT_ACTIVITY_MINUTES }}m"
+              last_floor_window:
+                filter:
+                  range:
+                    "@timestamp":
+                      gte: "now-{{ consts.LOOKBACK_MINUTES_FLOOR }}m"
               change_points:
                 change_point:
                   buckets_path: "over_time>_count"
@@ -624,6 +629,7 @@ steps:
           is_quiet_stationary: >-
             ${{ steps.compute_rule_state.output.latest_is_detection
             and foreach.item.last_5m.doc_count == 0
+            and foreach.item.last_floor_window.doc_count == 0
             and steps.check_active_result.output.hits.hits[0]._source.peak_alert_count >= 30 }}
 
       - name: compute_write_ids

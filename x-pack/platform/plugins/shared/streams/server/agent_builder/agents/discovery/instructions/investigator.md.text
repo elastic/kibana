@@ -365,7 +365,7 @@ Translate your investigation findings into this structured format. Output discip
   - **Prohibited patterns**: never write "queries show/confirm patterns", "consistent with the detection", "results indicate the presence of". State a direct hypothesis.
   - Scope to this discovery's rules only — do not incorporate co-located distinct failures.
 - `detections`:
-  - One entry per detection doc. Copy: `detection_id`, `kind`, `rule_name`, `rule_uuid`, `stream_name`, `detection_evidence.change_point_type` → `change_point_type`, `alert_count`. Always include `detection_id`, `kind`, `rule_name`, `rule_uuid`; include the rest when present in the source doc.
+  - One entry per detection doc. Copy: `detection_id`, `kind`, `rule_name`, `rule_uuid`, `stream_name`, `detection_evidence.change_point_type` → `change_point_type`, `detection_evidence.p_value` → `p_value`, `alert_count`. Always include `detection_id`, `kind`, `rule_name`, `rule_uuid`; include the rest when present in the source doc.
   - Dedup by `detection_id` — each must appear exactly once.
 - `discovery_slug`:
   - **Continuation**: reuse the candidate's `discovery_slug` verbatim — do not re-derive, do not append a suffix. Applies to active-rule continuations and all-quiet `kind:'clearance'` outputs (Step 5 match).
@@ -386,7 +386,7 @@ Translate your investigation findings into this structured format. Output discip
   - **Blast radius**: each `dependency_edges` entry with `exposure: "exposed"` raises the tier. ≥2 exposed downstream services → ≥76.
   - **Trend**: `change_point_occurrence: "recurring"` or failures spreading → escalate one tier.
   - Tiers: 76–100 (SEV-1/2: core journey broken or compliance violated), 51–75 (SEV-2/3: feature degraded), 31–50 (SEV-3/4: partial), 0–30 (SEV-4/5: noise).
-  - **No-evidence cap**: 0-row results or no evidence calls → cap at 50. **When uncertain, choose the higher tier.**
+  - **No-evidence cap**: 0-row results or no evidence calls → cap at 50. **When uncertain, choose `acknowledged` (51–75) over `promoted` (76+).**
 - `confidence`: How correct is your root-cause assessment — not how strong the anomaly is. `p_value` measures signal credibility; confidence measures assessment correctness.
   - **Refuted discoveries** (queries returned healthy/non-failure rows — `row_count > 0` but no error signature): confidence measures certainty the signal is a non-event. "No errors found" is a positive finding, not absence of finding. ≥1 evidence with `row_count > 0` and only healthy rows → 65–75. `change_point_type: stationary` (no change detected by the algorithm) + no confirming query available → 50–60; `stationary` is a statistical conclusion, not absence of one. Non-stationary + all evidences `row_count = 0` (no data at all) → 35–45. Do NOT apply the failure-hypothesis adjusters, hard caps, or ceiling below to refuted discoveries — the ranges above are self-contained.
   - **Base from p_value** (failure hypotheses): `≤ 0.01` → 55–65; `0.01–0.05` → 40–55; `0.05–0.1` → 25–40; `> 0.1` → below 25.

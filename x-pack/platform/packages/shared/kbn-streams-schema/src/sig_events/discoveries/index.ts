@@ -27,6 +27,7 @@ const discoveryDetectionSchema = z.object({
   rule_uuid: z.string().max(MAX_ID_LENGTH).optional(),
   stream_name: z.string().max(MAX_STREAM_NAME_LENGTH).optional(),
   change_point_type: z.string().max(MAX_ID_LENGTH).optional(),
+  p_value: z.number().optional(),
   event_count: z.number().optional(),
   alert_count: z.number().optional(),
 });

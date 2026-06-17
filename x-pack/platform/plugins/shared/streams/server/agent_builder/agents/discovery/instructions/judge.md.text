@@ -78,7 +78,7 @@ Window: `now-1h` for `stationary`/`non_stationary`, else `now-3h`. This is the o
 4. **Status consistency**: active failures confirmed by tools → status must be `promoted`. A status contradicting your evidence is a critical error — fix the status.
 5. **Freshness gate — hard stop** (`kind:discovery` only): if `collected_at` ≤10m AND `result: "found"` → stamp `confirmed: true` and move on. Do NOT call `execute_esql` for this entry. This gate does not apply to `kind:clearance` — see Critical Rule 7 and Step 4a.
 6. **Status decision gate — `kind:discovery` input:**
-   - `promoted`: requires immediate on-call response. ALL of: (1) credible signal — p_value ≤ 0.05 AND ≥1 evidence entry with `result: found`; (2) criticality ≥ 76; (3) at least one of: user task completion is blocked, OR confirmed live exposure of PII / credentials / secrets in log output. You do NOT need to personally re-confirm the discovery's evidence to promote — credible evidence plus the qualifying condition is sufficient to page. When uncertain between `promoted` and `acknowledged`, choose `promoted`: the cost of a missed SEV-1 outweighs the cost of a false page.
+   - `promoted`: requires immediate on-call response. ALL of: (1) credible signal — p_value ≤ 0.05 AND ≥1 evidence entry with `result: found`; (2) criticality ≥ 76; (3) at least one of: user task completion is blocked, OR confirmed live exposure of PII / credentials / secrets in log output. You do NOT need to personally re-confirm the discovery's evidence to promote — credible evidence plus the qualifying condition is sufficient to page. When uncertain between `promoted` and `acknowledged`, choose `acknowledged`: uncalibrated promotion causes alert fatigue, making future pages easier to ignore.
    - `acknowledged`: signal is real and credible (p_value ≤ 0.05) but impact is bounded — no exposed services, partial degradation, stable/recovering, or evidence credible but not strong enough to page. Criticality 31–75. Also use when signal quality is unclear but cannot be dismissed.
    - `demoted`: confirmed false alarm — p_value > 0.1 with no corroborating KI evidence, OR your current-state check shows the stream is alive and errors have cleared. Cap criticality at 30.
    - Never `resolved` from a `kind:discovery` input — `resolved` is only for `kind:clearance`.
@@ -125,7 +125,7 @@ Now read the discovery's `root_cause` and `summary`. Note whether your independe
 - Leaning demoted → `"Could be promoted because: ..."` — look for stale `collected_at` masking an active failure, `result: found` rows with error signatures that were underweighted, exposed `dependency_edges` entries not reflected in the criticality assessment, or sensitive data confirmed in query results.
 - Leaning resolved → `"Could be acknowledged because: ..."` — look for active failure evidence on re-verification, stale or contradicting `evidences[]`, or a telemetry gap with no corroboration. Do not challenge resolved solely because you lack multi-window alert history.
 
-The challenge is a quality gate, not a reversal mechanism. If the challenge surfaces a clear error in your lean, correct it. If you remain uncertain after the challenge, the uncertainty resolves toward the more cautious direction: `promoted` over `acknowledged`, `acknowledged` over `demoted`. Document the challenge and its resolution in `assessment_note`.
+The challenge is a quality gate, not a reversal mechanism. If the challenge surfaces a clear error in your lean, correct it. If you remain uncertain after the challenge, the uncertainty resolves toward the more conservative direction: `acknowledged` over `promoted`, `acknowledged` over `demoted`. Document the challenge and its resolution in `assessment_note`.
 
 **Execution model — do not make any tool calls until the pre-evaluation checkpoints and Steps 1–2 are complete for ALL items.**
 
@@ -179,7 +179,7 @@ Only when the rule-query re-verification returns 0 or stale rows: run one broad 
 
 ### Step 5: Correlation Quality
 
-- Were onset times within 2–3 minutes? Cross-check using `rules_activity` from `detections[]`.
+- Were onset times within 2–3 minutes? Cross-check using `@timestamp` across `detections[]` entries.
 - Do rules indicate shared infrastructure and plausible causal linkage?
 - Temporal overlap without shared cause is insufficient.
 
@@ -221,7 +221,7 @@ Output: single JSON `{ "significant_events": [...] }`. No preamble, summary, or 
 
 | Status | When to use |
 |---------|-------------|
-| `promoted` | Requires immediate on-call response. Credible discovery evidence (p_value ≤ 0.05, ≥1 `result: found`) + criticality ≥ 76 + at least one of: (a) user task completion is blocked; (b) confirmed live exposure of PII, credentials, or secrets in log output. Personal re-confirmation not required — credible discovery evidence is sufficient to page. When uncertain between `promoted` and `acknowledged`, choose `promoted`. `kind:discovery` only. |
+| `promoted` | Requires immediate on-call response. Credible discovery evidence (p_value ≤ 0.05, ≥1 `result: found`) + criticality ≥ 76 + at least one of: (a) user task completion is blocked; (b) confirmed live exposure of PII, credentials, or secrets in log output. Personal re-confirmation not required — credible discovery evidence is sufficient to page. When uncertain between `promoted` and `acknowledged`, choose `acknowledged`. `kind:discovery` only. |
 | `acknowledged` | Signal is real and credible but impact is bounded — no exposed services, partial degradation, stable/recovering, or evidence credible but below paging threshold. Criticality 31–75. Also the default when recovery is uncertain. |
 | `demoted` | Confirmed false alarm — p_value > 0.1 with no corroborating KI evidence, OR current-state check shows stream alive and errors cleared. `kind:discovery` only. |
 | `resolved` | Independent verification confirms recovery — clearance claim corroborated by `evidences[]` and/or re-verification with no active failure evidence. No multi-window duration requirement. `kind:clearance` inputs only. |

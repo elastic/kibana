@@ -7,6 +7,7 @@
 
 import {
   sigEventSchema,
+  type Detection,
   type SigEvent,
   type Discovery,
   type LifecycleDetection,
@@ -20,6 +21,10 @@ import { assertSignificantEventsAccess } from '../../../utils/assert_significant
 
 const toArray = (val: string | string[] | undefined): string[] | undefined =>
   val === undefined ? undefined : Array.isArray(val) ? val : [val];
+
+const isLifecycleDetection = (
+  hit: Detection
+): hit is Detection & { kind: LifecycleDetection['kind'] } => hit.kind !== 'handled';
 
 const collectEmbeddedDetections = (discoveries: Discovery[]) => {
   const seen = new Set<string>();
@@ -173,25 +178,32 @@ const eventsLifecycleRoute = createServerRoute({
     ]);
 
     const embedded = collectEmbeddedDetections(discoveries);
-    const detections: LifecycleDetection[] = (
-      await Promise.all(
-        embedded.map(async ({ detection_id, rule_name, stream_name, change_point_type }) => {
-          const { hits } = await getDetectionClient().findById(detection_id);
-          const relevant = hits.filter((d) => d.kind === 'detection' || d.kind === 'quiet');
-          if (relevant.length === 0) {
-            return [];
-          }
-          return relevant.map((d) => ({
+    const { hits: allDetectionHits } = await getDetectionClient().findByIds(
+      embedded.map((e) => e.detection_id).filter(Boolean)
+    );
+    const hitsByDetectionId = new Map(
+      allDetectionHits.filter(isLifecycleDetection).map((h) => [h.detection_id, h])
+    );
+
+    const detections: LifecycleDetection[] = embedded.flatMap(
+      ({ detection_id, rule_name, stream_name, change_point_type }) => {
+        const hit = hitsByDetectionId.get(detection_id);
+        if (!hit) {
+          return [];
+        }
+
+        return [
+          {
             detection_id,
-            rule_name: d.rule_name ?? rule_name,
-            stream_name: d.stream_name ?? stream_name,
+            rule_name: hit.rule_name ?? rule_name,
+            stream_name: hit.stream_name ?? stream_name,
             change_point_type,
-            kind: d.kind,
-            '@timestamp': d['@timestamp'],
-          }));
-        })
-      )
-    ).flat();
+            kind: hit.kind,
+            '@timestamp': hit['@timestamp'],
+          },
+        ];
+      }
+    );
 
     return { detections, discoveries, events };
   },

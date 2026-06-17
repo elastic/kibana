@@ -11,7 +11,7 @@ import { DiscoveryClient } from './discovery_client';
 
 type StoredRow = Partial<Discovery> & { '@timestamp': string };
 
-const createFinding = (overrides: StoredRow): Discovery =>
+const createDiscovery = (overrides: StoredRow): Discovery =>
   ({
     kind: 'discovery',
     discovery_id: overrides.discovery_id ?? 'discovery-1',
@@ -39,30 +39,30 @@ const countResponse = (total: number): ESQLSearchResponse =>
     values: [[total]],
   } as unknown as ESQLSearchResponse);
 
-// Mirrors the slug-keyed clearance derivation: one row per cleared discovery_slug.
-const clearedResponse = (slugs: string[]): ESQLSearchResponse =>
+// Mirrors the slug-keyed processed derivation: one row per processed discovery_slug.
+const processedResponse = (slugs: string[]): ESQLSearchResponse =>
   ({
     columns: [{ name: 'discovery_slug', type: 'keyword' }],
     values: slugs.map((s) => [s]),
   } as unknown as ESQLSearchResponse);
 
 interface MockResponses {
-  // Latest finding per group, as returned by the data query (already collapsed by groupBy).
-  findings: Discovery[];
-  // Slugs the clearance derivation reports as cleared.
-  clearedSlugs: string[];
+  // Latest discovery per group, as returned by the data query (already collapsed by groupBy).
+  discoveries: Discovery[];
+  // Slugs the processed derivation reports as processed.
+  processedSlugs: string[];
 }
 
 const createClient = (responses: MockResponses) => {
   const query = jest.fn(async (request: { query: string }) => {
     const q = request.query;
     if (q.includes('STATS total')) {
-      return countResponse(responses.findings.length);
+      return countResponse(responses.discoveries.length);
     }
     if (q.includes('max_state_ts')) {
-      return clearedResponse(responses.clearedSlugs);
+      return processedResponse(responses.processedSlugs);
     }
-    return sourceResponse(responses.findings);
+    return sourceResponse(responses.discoveries);
   });
 
   const esClient = { esql: { query } } as never;
@@ -79,15 +79,15 @@ const createClient = (responses: MockResponses) => {
 
 describe('DiscoveryClient', () => {
   describe('findLatestPaginated', () => {
-    it('collapses two findings sharing one slug (different ids) into a single hit', async () => {
+    it('collapses two discoveries sharing one slug (different ids) into a single hit', async () => {
       // The data query already collapses by groupBy; with slug grouping only the
-      // latest finding per slug is returned.
-      const latest = createFinding({
+      // latest discovery per slug is returned.
+      const latest = createDiscovery({
         '@timestamp': '2026-01-02T00:00:00.000Z',
         discovery_id: 'exec-2-svc__rule',
         discovery_slug: 'svc__rule',
       });
-      const { client } = createClient({ findings: [latest], clearedSlugs: [] });
+      const { client } = createClient({ discoveries: [latest], processedSlugs: [] });
 
       const result = await client.findLatestPaginated();
 
@@ -98,8 +98,8 @@ describe('DiscoveryClient', () => {
 
     it('groups by discovery_slug, not discovery_id', async () => {
       const { client, query } = createClient({
-        findings: [createFinding({ '@timestamp': '2026-01-02T00:00:00.000Z' })],
-        clearedSlugs: [],
+        discoveries: [createDiscovery({ '@timestamp': '2026-01-02T00:00:00.000Z' })],
+        processedSlugs: [],
       });
 
       await client.findLatestPaginated();
@@ -113,11 +113,11 @@ describe('DiscoveryClient', () => {
 
     it('keeps distinct slugs as separate hits', async () => {
       const { client } = createClient({
-        findings: [
-          createFinding({ '@timestamp': '2026-01-02T00:00:00.000Z', discovery_slug: 'svc__a' }),
-          createFinding({ '@timestamp': '2026-01-02T00:00:00.000Z', discovery_slug: 'svc__b' }),
+        discoveries: [
+          createDiscovery({ '@timestamp': '2026-01-02T00:00:00.000Z', discovery_slug: 'svc__a' }),
+          createDiscovery({ '@timestamp': '2026-01-02T00:00:00.000Z', discovery_slug: 'svc__b' }),
         ],
-        clearedSlugs: [],
+        processedSlugs: [],
       });
 
       const result = await client.findLatestPaginated();
@@ -125,12 +125,12 @@ describe('DiscoveryClient', () => {
       expect(result.hits.map((h) => h.discovery_slug).sort()).toEqual(['svc__a', 'svc__b']);
     });
 
-    it('marks a slug as cleared when a clearance is at least as recent as the latest finding', async () => {
-      const finding = createFinding({
+    it('marks a slug as processed when a handled doc is at least as recent as the latest discovery', async () => {
+      const discovery = createDiscovery({
         '@timestamp': '2026-01-01T00:00:00.000Z',
         discovery_slug: 'svc__rule',
       });
-      const { client } = createClient({ findings: [finding], clearedSlugs: ['svc__rule'] });
+      const { client } = createClient({ discoveries: [discovery], processedSlugs: ['svc__rule'] });
 
       const result = await client.findLatestPaginated();
 
@@ -138,16 +138,16 @@ describe('DiscoveryClient', () => {
       expect(result.hits[0].processed).toBe(true);
     });
 
-    it('does not clear a slug when a newer finding (regrow) follows the clearance', async () => {
-      // finding(old) -> clearance(old) -> finding(new) for the same slug.
-      // The timestamp guard means the slug is NOT reported cleared, so the newest
-      // finding stays visible.
-      const regrown = createFinding({
+    it('does not mark a slug processed when a newer discovery (regrow) follows the handled doc', async () => {
+      // discovery(old) -> handled(old) -> discovery(new) for the same slug.
+      // The timestamp guard means the slug is NOT reported processed, so the newest
+      // discovery stays visible.
+      const regrown = createDiscovery({
         '@timestamp': '2026-01-03T00:00:00.000Z',
         discovery_id: 'exec-3-svc__rule',
         discovery_slug: 'svc__rule',
       });
-      const { client } = createClient({ findings: [regrown], clearedSlugs: [] });
+      const { client } = createClient({ discoveries: [regrown], processedSlugs: [] });
 
       const result = await client.findLatestPaginated();
 
@@ -156,16 +156,16 @@ describe('DiscoveryClient', () => {
     });
   });
 
-  describe('getClearedSlugs (via findLatestPaginated)', () => {
-    it('keys the clearance derivation on discovery_slug', async () => {
-      const finding = createFinding({
+  describe('getProcessedSlugs (via findLatestPaginated)', () => {
+    it('keys the processed derivation on discovery_slug', async () => {
+      const discovery = createDiscovery({
         '@timestamp': '2026-01-01T00:00:00.000Z',
         discovery_id: 'exec-1-svc__rule',
         discovery_slug: 'svc__rule',
       });
       const { client, query } = createClient({
-        findings: [finding],
-        clearedSlugs: ['svc__rule'],
+        discoveries: [discovery],
+        processedSlugs: ['svc__rule'],
       });
 
       await client.findLatestPaginated();
