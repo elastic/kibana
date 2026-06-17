@@ -20,10 +20,13 @@ const metricSnapshotSchema = z.object({
   throughputRpm: z.number().optional(),
 });
 
+// Upper bound on free-form string inputs to avoid unbounded-string DoS (CodeQL).
+const MAX_LABEL_LENGTH = 1024;
+
 export const apmMetricsAttachmentDataSchema = z.object({
-  serviceName: z.string(),
-  environment: z.string().optional(),
-  title: z.string().optional(),
+  serviceName: z.string().max(MAX_LABEL_LENGTH),
+  environment: z.string().max(MAX_LABEL_LENGTH).optional(),
+  title: z.string().max(MAX_LABEL_LENGTH).optional(),
   current: metricSnapshotSchema,
   baseline: metricSnapshotSchema.optional(),
 });

@@ -20,17 +20,26 @@ import { getAgentBuilderResourceAvailability } from '../../utils/get_agent_build
 
 export const OBSERVABILITY_GET_APM_TIMESERIES_TOOL_ID = 'observability.get_apm_timeseries';
 
+// Upper bounds on string inputs to avoid unbounded-string DoS (CodeQL).
+const MAX_NAME_LENGTH = 1024;
+const MAX_KQL_LENGTH = 4096;
+
 const getApmTimeseriesSchema = z.object({
   ...timeRangeSchemaRequired,
-  serviceName: z.string().describe('The APM service name to plot the metric for.'),
+  serviceName: z
+    .string()
+    .max(MAX_NAME_LENGTH)
+    .describe('The APM service name to plot the metric for.'),
   environment: z
     .string()
+    .max(MAX_NAME_LENGTH)
     .optional()
     .describe(
       'Optional service environment (e.g. "production"). Omit to include all environments.'
     ),
   kqlFilter: z
     .string()
+    .max(MAX_KQL_LENGTH)
     .optional()
     .describe('Optional additional KQL filter, e.g. \'transaction.type: "request"\'.'),
   metric: z

@@ -9,19 +9,22 @@ import { z } from '@kbn/zod/v4';
 
 export const SERVICE_MAP_ATTACHMENT_TYPE = 'observability.service-map' as const;
 
+// Upper bound on free-form string inputs to avoid unbounded-string DoS (CodeQL).
+const MAX_LABEL_LENGTH = 1024;
+
 const serviceNodeSchema = z.object({
-  'service.name': z.string(),
-  'agent.name': z.string().optional(),
+  'service.name': z.string().max(MAX_LABEL_LENGTH),
+  'agent.name': z.string().max(MAX_LABEL_LENGTH).optional(),
 });
 
 const externalNodeSchema = z.object({
-  'span.destination.service.resource': z.string(),
+  'span.destination.service.resource': z.string().max(MAX_LABEL_LENGTH),
   // `span.type` and `span.subtype` are optional: real exit-span data frequently
   // omits the subtype (and occasionally the type). They only drive the dependency
   // node icon, so a missing value degrades gracefully. Keeping them required here
   // would reject the entire topology and prevent the map from rendering.
-  'span.type': z.string().optional(),
-  'span.subtype': z.string().optional(),
+  'span.type': z.string().max(MAX_LABEL_LENGTH).optional(),
+  'span.subtype': z.string().max(MAX_LABEL_LENGTH).optional(),
 });
 
 const nodeSchema = z.union([serviceNodeSchema, externalNodeSchema]);
@@ -63,9 +66,9 @@ export const serviceMapAttachmentDataSchema = z.object({
    * Separating this from the connection topology avoids duplicating per-service
    * state across every connection that service participates in.
    */
-  nodeMetadata: z.record(z.string(), serviceNodeMetadataSchema).optional(),
-  serviceName: z.string().optional(),
-  title: z.string().optional(),
+  nodeMetadata: z.record(z.string().max(MAX_LABEL_LENGTH), serviceNodeMetadataSchema).optional(),
+  serviceName: z.string().max(MAX_LABEL_LENGTH).optional(),
+  title: z.string().max(MAX_LABEL_LENGTH).optional(),
 });
 
 export type ServiceNodeMetadata = z.infer<typeof serviceNodeMetadataSchema>;

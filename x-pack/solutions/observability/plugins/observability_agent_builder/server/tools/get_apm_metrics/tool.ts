@@ -19,32 +19,50 @@ import { getAgentBuilderResourceAvailability } from '../../utils/get_agent_build
 
 export const OBSERVABILITY_GET_APM_METRICS_TOOL_ID = 'observability.get_apm_metrics';
 
+// Upper bounds on string inputs to avoid unbounded-string DoS (CodeQL).
+const MAX_NAME_LENGTH = 1024;
+const MAX_KQL_LENGTH = 4096;
+const MAX_DATEMATH_LENGTH = 64;
+
 const getApmMetricsSchema = z.object({
-  serviceName: z.string().describe('The APM service name to fetch metrics for.'),
+  serviceName: z
+    .string()
+    .max(MAX_NAME_LENGTH)
+    .describe('The APM service name to fetch metrics for.'),
   environment: z
     .string()
+    .max(MAX_NAME_LENGTH)
     .optional()
     .describe(
       'Optional service environment (e.g. "production"). Omit to include all environments.'
     ),
   kqlFilter: z
     .string()
+    .max(MAX_KQL_LENGTH)
     .optional()
     .describe('Optional additional KQL filter, e.g. \'transaction.type: "request"\'.'),
   latencyType: z
     .enum(['avg', 'p95', 'p99'])
     .default('avg')
     .describe('Aggregation type for latency.'),
-  start: z.string().describe('Start of the current/focused window (datemath, e.g. "now-15m").'),
-  end: z.string().describe('End of the current/focused window (datemath, e.g. "now").'),
+  start: z
+    .string()
+    .max(MAX_DATEMATH_LENGTH)
+    .describe('Start of the current/focused window (datemath, e.g. "now-15m").'),
+  end: z
+    .string()
+    .max(MAX_DATEMATH_LENGTH)
+    .describe('End of the current/focused window (datemath, e.g. "now").'),
   baselineStart: z
     .string()
+    .max(MAX_DATEMATH_LENGTH)
     .optional()
     .describe(
       'Start of the baseline window for comparison (datemath, e.g. "now-1h"). Provide together with baselineEnd to get delta badges.'
     ),
   baselineEnd: z
     .string()
+    .max(MAX_DATEMATH_LENGTH)
     .optional()
     .describe('End of the baseline window (datemath, e.g. "now-15m").'),
 });

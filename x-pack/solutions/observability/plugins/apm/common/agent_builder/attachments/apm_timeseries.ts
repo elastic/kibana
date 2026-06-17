@@ -24,9 +24,12 @@ const dataPointSchema = z.object({
     .transform((v) => v ?? null),
 });
 
+// Upper bound on free-form string inputs to avoid unbounded-string DoS (CodeQL).
+const MAX_LABEL_LENGTH = 1024;
+
 export const apmTimeseriesAttachmentDataSchema = z.object({
-  serviceName: z.string(),
-  title: z.string().optional(),
+  serviceName: z.string().max(MAX_LABEL_LENGTH),
+  title: z.string().max(MAX_LABEL_LENGTH).optional(),
   metric: z.enum(['latency', 'failedTransactionRate', 'throughput']),
   /**
    * Display unit for `dataPoints` values.
