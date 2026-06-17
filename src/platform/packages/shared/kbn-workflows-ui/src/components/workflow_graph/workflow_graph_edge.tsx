@@ -11,6 +11,7 @@ import { EuiToolTip } from '@elastic/eui';
 import type { EdgeProps } from '@xyflow/react';
 import { EdgeLabelRenderer, getSmoothStepPath, Position } from '@xyflow/react';
 import React, { memo } from 'react';
+import { STRAIGHT_X_THRESHOLD } from '@kbn/dag-layout';
 
 interface WorkflowEdgeData extends Record<string, unknown> {
   readonly label?: string;
@@ -222,7 +223,6 @@ function WorkflowGraphEdgeInner(props: EdgeProps) {
       // as a small horizontal jog just below the source. A real branch
       // diverges far more than this (a whole node width plus separation),
       // so the threshold can safely sit well above any drift we observe.
-      const STRAIGHT_X_THRESHOLD = 100;
       const allXs = [sourceX, targetX, ...middle.map((p) => p.x)];
       const xSpread = Math.max(...allXs) - Math.min(...allXs);
       if (xSpread < STRAIGHT_X_THRESHOLD) {

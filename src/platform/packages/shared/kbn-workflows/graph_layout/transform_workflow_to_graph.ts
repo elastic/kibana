@@ -147,7 +147,7 @@ function transformInternal(
       const inner = transformInternal([], childSteps, ids);
       foreachGroups.push({
         id,
-        innerNodes: inner.nodes.map((n) => ({ ...n, parentId: id, extent: 'parent' as const })),
+        innerNodes: inner.nodes,
         innerEdges: inner.edges,
       });
       foreachGroups.push(...inner.foreachGroups);

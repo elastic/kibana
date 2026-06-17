@@ -39,9 +39,9 @@ export interface PreLayoutNodeBase {
   id: string;
   type: 'step' | 'trigger' | 'foreachGroup';
   style: NodeStyle;
-  parentId?: string;
-  extent?: 'parent';
 }
+
+export type LayoutDirection = 'TB' | 'LR';
 
 export interface StepNodeData extends Record<string, unknown> {
   label: string;

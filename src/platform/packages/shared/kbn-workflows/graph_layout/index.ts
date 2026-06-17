@@ -16,8 +16,7 @@ export {
   type ForeachGroupNodeData,
   type GraphEdge,
   type HandleSide,
-  type LayoutedEdge,
-  type LayoutedNode,
+  type LayoutDirection,
   type NodeStyle,
   type PreLayoutNode,
   type PreLayoutStepNode,
@@ -27,9 +26,3 @@ export {
 } from './types';
 export { computeTopologyFingerprint } from './compute_topology_fingerprint';
 export { transformWorkflowToGraph, type TransformResult } from './transform_workflow_to_graph';
-export {
-  applyGraphLayout,
-  type ApplyLayoutOptions,
-  type ApplyLayoutResult,
-  type LayoutDirection,
-} from './apply_graph_layout';

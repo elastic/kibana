@@ -341,7 +341,7 @@ export const shiftEdgePointsInterpolated = ({
 };
 
 export const translateEdgePoints = (
-  points: Array<{ x: number; y: number }>,
+  points: ReadonlyArray<{ x: number; y: number }>,
   dx: number,
   dy: number
 ): Array<{ x: number; y: number }> => points.map((p) => ({ x: p.x + dx, y: p.y + dy }));
