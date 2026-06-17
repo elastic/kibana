@@ -5,29 +5,36 @@
  * 2.0.
  */
 
-import type { ComposeDiscoverMode, RuleFormServices } from '@kbn/alerting-v2-rule-form';
+import type {
+  ComposeDiscoverMode,
+  RuleFormServices,
+  BuilderState,
+} from '@kbn/alerting-v2-rule-form';
 import { ComposeDiscoverFlyout, RULE_BUILDER_REGISTRY } from '@kbn/alerting-v2-rule-form';
+import { getBreachEsqlQuery, getRecoverEsqlQuery } from '@kbn/alerting-v2-schemas';
 import { PluginStart } from '@kbn/core-di';
 import { CoreStart, useService } from '@kbn/core-di-browser';
+import type { CPSPluginStart } from '@kbn/cps/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { i18n } from '@kbn/i18n';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
 import React, { useCallback, useMemo, useState } from 'react';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
-import {
-  SingleStepWorkflowForm,
-  type SingleStepWorkflowFormValue,
-} from '../components/single_step_workflow_form';
+import type { DashboardStart } from '@kbn/dashboard-plugin/public';
 import type { RuleApiResponse } from '../services/rules_api';
 import { useCreateRule } from './use_create_rule';
 import { useSetupRuleNotifications } from './use_setup_rule_notifications';
 import { useUpdateRule } from './use_update_rule';
 
-const tryParseBuilderState = (type: string, query: string): unknown | null => {
+const tryParseBuilderState = (
+  type: string,
+  query: string,
+  recoveryQuery?: string
+): BuilderState | null => {
   const definition = RULE_BUILDER_REGISTRY[type];
   if (definition?.parseState) {
-    return definition.parseState(query);
+    return definition.parseState(query, recoveryQuery);
   }
   return null;
 };
@@ -46,17 +53,23 @@ export const useComposeDiscoverFlyout = ({
   const dataViews = useService(PluginStart('dataViews')) as DataViewsPublicPluginStart;
   const lens = useService(PluginStart('lens')) as LensPublicStart;
   const uiActions = useService(PluginStart('uiActions')) as UiActionsStart;
+  // `dashboard` is an optional plugin dependency; resolve it leniently so the
+  // flyout still mounts in environments where the dashboard plugin is disabled.
+  const dashboard = useService(PluginStart('dashboard'), { optional: true }) as
+    | DashboardStart
+    | undefined;
+  const cps = useService(PluginStart('cps'), { optional: true }) as CPSPluginStart | undefined;
 
   const [flyoutOpen, setFlyoutOpen] = useState(false);
   const [flyoutMode, setFlyoutMode] = useState<ComposeDiscoverMode>('create');
   const [targetRule, setTargetRule] = useState<RuleApiResponse | null>(null);
   const [builderType, setBuilderType] = useState<string | null>(null);
-  const [initialBuilderState, setInitialBuilderState] = useState<unknown>(undefined);
+  const [initialBuilderState, setInitialBuilderState] = useState<BuilderState>(undefined);
   const historyKey = useMemo(() => Symbol('ruleAuthoring'), []);
   const createRuleMutation = useCreateRule();
   const setupNotificationsMutation = useSetupRuleNotifications();
   const updateRuleMutation = useUpdateRule();
-  const ruleFormServices = useMemo<RuleFormServices<SingleStepWorkflowFormValue>>(
+  const ruleFormServices = useMemo<RuleFormServices>(
     () => ({
       http,
       data,
@@ -64,17 +77,11 @@ export const useComposeDiscoverFlyout = ({
       notifications,
       application,
       lens,
-      workflowForm: {
-        Component: SingleStepWorkflowForm,
-        defaultValue: () => ({ mode: 'existing', workflowId: null }),
-        isValid: (value: SingleStepWorkflowFormValue) => {
-          if (value.mode === 'existing') return Boolean(value.workflowId);
-          return Boolean(value.typeId) && value.connectorId !== null && value.params.trim() !== '';
-        },
-      },
       uiActions,
+      dashboard,
+      cps,
     }),
-    [http, data, dataViews, notifications, application, lens, uiActions]
+    [http, data, dataViews, notifications, application, lens, uiActions, dashboard, cps]
   );
 
   const closeFlyout = useCallback(() => {
@@ -131,8 +138,13 @@ export const useComposeDiscoverFlyout = ({
       setFlyoutMode(mode);
 
       if (rule.metadata.builder_type) {
-        const query = rule.evaluation?.query?.base;
-        const state = query ? tryParseBuilderState(rule.metadata.builder_type, query) : null;
+        const query = rule.query ? getBreachEsqlQuery(rule.query) : '';
+        const recoveryQuery = rule.query
+          ? getRecoverEsqlQuery(rule.query, rule.recovery_strategy)
+          : undefined;
+        const state = query
+          ? tryParseBuilderState(rule.metadata.builder_type, query, recoveryQuery)
+          : null;
         if (state && typeof state === 'object') {
           const stateWithTimeField = { ...state, timeField: rule.time_field ?? '@timestamp' };
           setBuilderType(rule.metadata.builder_type);
@@ -169,7 +181,7 @@ export const useComposeDiscoverFlyout = ({
   );
 
   const flyout = flyoutOpen ? (
-    <ComposeDiscoverFlyout<SingleStepWorkflowFormValue>
+    <ComposeDiscoverFlyout
       historyKey={historyKey}
       mode={flyoutMode}
       rule={targetRule ?? undefined}
@@ -181,9 +193,10 @@ export const useComposeDiscoverFlyout = ({
       onCreateRule={(payload, ruleNotifications) =>
         createRuleMutation.mutate(payload, {
           onSuccess: (rule) => {
-            if (ruleNotifications) {
+            const actions = ruleNotifications?.workflows ?? [];
+            if (actions.length > 0) {
               setupNotificationsMutation.mutate(
-                { rule, workflow: ruleNotifications.workflow },
+                { rule, actions },
                 { onSuccess: closeAndRedirect, onError: closeAndRedirect }
               );
             } else {

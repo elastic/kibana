@@ -56,14 +56,16 @@ describe('getEuidEsqlFilterBasedOnDocument', () => {
     it('returns filter with equality on host.name and null/empty check on host.id when host.id is missing', () => {
       const result = getEuidEsqlFilterBasedOnDocument('host', { host: { name: 'server1' } });
 
-      expect(result).toBe('((host.name == "server1") AND (host.id IS NULL OR host.id == ""))');
+      expect(result).toBe(
+        '((host.name == "server1") AND (TO_STRING(host.id) IS NULL OR TO_STRING(host.id) == ""))'
+      );
     });
 
     it('returns filter with equality on host.hostname and null/empty checks when only host.hostname is present', () => {
       const result = getEuidEsqlFilterBasedOnDocument('host', { host: { hostname: 'node-1' } });
 
       expect(result).toBe(
-        '((host.hostname == "node-1") AND (host.id IS NULL OR host.id == "") AND (host.name IS NULL OR host.name == ""))'
+        '((host.hostname == "node-1") AND (TO_STRING(host.id) IS NULL OR TO_STRING(host.id) == "") AND (TO_STRING(host.name) IS NULL OR TO_STRING(host.name) == ""))'
       );
     });
 
@@ -95,7 +97,7 @@ describe('getEuidEsqlFilterBasedOnDocument', () => {
       });
 
       expect(result).toBe(
-        '((user.email == "alice@example.com") AND ((event.module IS NULL OR event.module == "") AND (data_stream.dataset IS NULL OR data_stream.dataset == "")))'
+        '((user.email == "alice@example.com") AND ((TO_STRING(event.module) IS NULL OR TO_STRING(event.module) == "") AND (TO_STRING(data_stream.dataset) IS NULL OR TO_STRING(data_stream.dataset) == "")))'
       );
     });
 
@@ -106,7 +108,7 @@ describe('getEuidEsqlFilterBasedOnDocument', () => {
       });
 
       expect(result).toBe(
-        '((user.name == "alice") AND (user.email IS NULL OR user.email == "") AND (user.id IS NULL OR user.id == "") AND (user.domain IS NULL OR user.domain == "") AND (((event.module == "azure") OR STARTS_WITH(data_stream.dataset, "azure")) OR ((event.module == "entityanalytics_entra_id") OR STARTS_WITH(data_stream.dataset, "entityanalytics_entra_id"))))'
+        '((user.name == "alice") AND (TO_STRING(user.email) IS NULL OR TO_STRING(user.email) == "") AND (TO_STRING(user.id) IS NULL OR TO_STRING(user.id) == "") AND (TO_STRING(user.domain) IS NULL OR TO_STRING(user.domain) == "") AND (((event.module == "azure") OR STARTS_WITH(data_stream.dataset, "azure")) OR ((event.module == "entityanalytics_entra_id") OR STARTS_WITH(data_stream.dataset, "entityanalytics_entra_id"))))'
       );
     });
 
@@ -141,7 +143,7 @@ describe('getEuidEsqlFilterBasedOnDocument', () => {
       });
 
       expect(result).toBe(
-        '((user.name == "jane") AND (user.domain == "corp.com") AND (user.email IS NULL OR user.email == "") AND (user.id IS NULL OR user.id == "") AND ((event.module == "entityanalytics_ad") OR STARTS_WITH(data_stream.dataset, "entityanalytics_ad")))'
+        '((user.name == "jane") AND (user.domain == "corp.com") AND (TO_STRING(user.email) IS NULL OR TO_STRING(user.email) == "") AND (TO_STRING(user.id) IS NULL OR TO_STRING(user.id) == "") AND ((event.module == "entityanalytics_ad") OR STARTS_WITH(data_stream.dataset, "entityanalytics_ad")))'
       );
     });
 
@@ -200,14 +202,14 @@ describe('getEuidEsqlDocumentsContainsIdFilter', () => {
   it('returns single field condition for generic (one required field)', () => {
     const result = getEuidEsqlDocumentsContainsIdFilter('generic');
 
-    expect(result).toBe('(entity.id IS NOT NULL AND entity.id != "")');
+    expect(result).toBe('(TO_STRING(entity.id) IS NOT NULL AND TO_STRING(entity.id) != "")');
   });
 
   it('returns OR of required fields for host', () => {
     const result = getEuidEsqlDocumentsContainsIdFilter('host');
 
     const expected =
-      'NOT(`host.id` IS NULL) AND COALESCE(`host.id` != "", TRUE) OR NOT(`host.name` IS NULL) AND COALESCE(`host.name` != "", TRUE) OR NOT(`host.hostname` IS NULL) AND COALESCE(`host.hostname` != "", TRUE)';
+      'TO_STRING(host.id) IS NOT NULL AND TO_STRING(host.id) != "" OR TO_STRING(host.name) IS NOT NULL AND TO_STRING(host.name) != "" OR TO_STRING(host.hostname) IS NOT NULL AND TO_STRING(host.hostname) != ""';
     expect(result).toBe(expected);
   });
 
@@ -224,69 +226,81 @@ describe('getFieldEvaluationsEsql', () => {
     (entityType) => {
       const result = getFieldEvaluationsEsql(entityType);
 
-      expect(result).toContain('_src_entity_source0 = MV_FIRST(event.module)');
-      expect(result).toContain('_src_entity_source1 = MV_FIRST(event.dataset)');
-      expect(result).toContain('_src_entity_source2 = MV_FIRST(data_stream.dataset)');
+      expect(result).toContain('_src_entity_source0 = MV_FIRST(TO_STRING(event.module))');
+      expect(result).toContain('_src_entity_source1 = MV_FIRST(TO_STRING(event.dataset))');
+      expect(result).toContain('_src_entity_source2 = MV_FIRST(TO_STRING(data_stream.dataset))');
       expect(result).toContain('_src_entity_source = CASE(');
       expect(result).toContain('entity.source = CASE(');
       expect(result).toContain('NULL, _src_entity_source)');
     }
   );
 
-  it('returns EVAL fragment for user entity.namespace', () => {
+  it('returns only entity.source for user (entity.namespace is now in getEuidEsqlEvaluation)', () => {
     const result = getFieldEvaluationsEsqlFromDefinition(getEntityDefinition('user', 'default'));
-    const base = '_src_entity_namespace';
-    const v0 = `${base}0`;
-    const v1 = `${base}1`;
-    const namespacePart = [
-      `${v0} = MV_FIRST(event.module)`,
-      `${v1} = MV_FIRST(SPLIT(MV_FIRST(data_stream.dataset), "."))`,
-      `${base} = CASE((${v0} IS NOT NULL AND ${v0} != ""), ${v0}, (${v1} IS NOT NULL AND ${v1} != ""), ${v1}, NULL)`,
-    ].join(', ');
+
     expect(result).toBeDefined();
-    expect(result?.replace(/\s+/g, ' ').trim()).toContain(
-      namespacePart.replace(/\s+/g, ' ').trim()
-    );
-    expect(result).toContain('entity.namespace = CASE(');
-    expect(result).toContain(
-      '(_src_entity_namespace == "okta" OR _src_entity_namespace == "entityanalytics_okta")'
-    );
-    expect(result).toContain('"local"');
-    expect(result).toContain(
-      '(_src_entity_namespace IS NULL OR _src_entity_namespace == ""), "unknown"'
-    );
-    expect(result).not.toContain('_fe_inner_entity_namespace');
+    expect(result).toContain('entity.source = CASE(');
+    // entity.namespace is now emitted by getEuidEsqlEvaluation, not here
+    expect(result).not.toContain('entity.namespace');
     expect(result).not.toContain('entity.confidence');
-    expect(result).not.toContain('_src_entity_confidence');
+  });
+
+  it('getEuidEsqlEvaluation includes entity.namespace for user', () => {
+    const result = getEuidEsqlEvaluation('user', 'entity.id');
+
+    expect(result).toContain('entity.namespace = CASE(');
+    expect(result).toContain('_src_entity_namespace');
+    expect(result).toContain('"local"');
+    expect(result).toContain('"unknown"');
+    // namespace computed before the _present booleans that reference it
+    const namespacePos = result.indexOf('entity.namespace =');
+    const presentPos = result.indexOf('entity_namespace_present =');
+    expect(namespacePos).toBeLessThan(presentPos);
   });
 });
 
 describe('getEuidEsqlEvaluation', () => {
-  it('returns raw field for generic (skipTypePrepend: no type prefix)', () => {
-    const result = getEuidEsqlEvaluation('generic');
+  it('returns bare assignment for single-field identity (generic)', () => {
+    const result = getEuidEsqlEvaluation('generic', 'entity.id');
 
-    const expected = 'entity.id';
-    expect(normalize(result)).toBe(normalize(expected));
+    expect(normalize(result)).toBe('entity.id = TO_STRING(entity.id)');
   });
 
-  it('returns full CONCAT(type:, CASE(...), NULL) for calculated identity (host)', () => {
-    const result = getEuidEsqlEvaluation('host');
+  it('returns bare assignment for single-field identity (service)', () => {
+    const result = getEuidEsqlEvaluation('service', 'entity.id');
 
-    const expected = `CONCAT("host:", CASE((host.id IS NOT NULL AND host.id != ""), host.id,
-                      (host.name IS NOT NULL AND host.name != ""), host.name,
-                      (host.hostname IS NOT NULL AND host.hostname != ""), host.hostname, NULL))`;
-    expect(normalize(result)).toBe(normalize(expected));
+    expect(normalize(result)).toBe(`entity.id = CONCAT("service:", TO_STRING(service.name))`);
   });
 
-  it('returns conditional CASE for user: when local uses user.name@host.id@entity.namespace, else 4-option ranking', () => {
-    const result = getEuidEsqlEvaluation('user');
+  it('returns _present booleans followed by output assignment for host', () => {
+    const result = getEuidEsqlEvaluation('host', 'entity.id');
 
-    const expected = `CONCAT("user:", CASE((COALESCE(\`entity.namespace\` == "local", FALSE)), CASE((user.name IS NOT NULL AND user.name != "" AND host.id IS NOT NULL AND host.id != "" AND entity.namespace IS NOT NULL AND entity.namespace != ""), CONCAT(user.name, "@", host.id, "@", entity.namespace), NULL),
-true, CASE((user.email IS NOT NULL AND user.email != "" AND entity.namespace IS NOT NULL AND entity.namespace != ""), CONCAT(user.email, "@", entity.namespace),
-(user.id IS NOT NULL AND user.id != "" AND entity.namespace IS NOT NULL AND entity.namespace != ""), CONCAT(user.id, "@", entity.namespace),
-(user.name IS NOT NULL AND user.name != "" AND user.domain IS NOT NULL AND user.domain != "" AND entity.namespace IS NOT NULL AND entity.namespace != ""), CONCAT(user.name, "@", user.domain, "@", entity.namespace),
-(user.name IS NOT NULL AND user.name != "" AND entity.namespace IS NOT NULL AND entity.namespace != ""), CONCAT(user.name, "@", entity.namespace), NULL), NULL))`;
-    expect(normalize(result)).toBe(normalize(expected));
+    expect(result).toContain(
+      'host_id_present = TO_STRING(host.id) IS NOT NULL AND TO_STRING(host.id) != ""'
+    );
+    expect(result).toContain('host_name_present =');
+    expect(result).toContain('host_hostname_present =');
+    expect(result).toContain('host_id_present');
+    expect(result).not.toMatch(/entity\.id.*IS NOT NULL AND/);
+    expect(result).toContain('TO_STRING(host.id)');
+    expect(result).toMatch(/entity\.id\s*=\s*CONCAT/);
+  });
+
+  it('returns _present booleans for all user identity fields', () => {
+    const result = getEuidEsqlEvaluation('user', 'entity.id');
+
+    expect(result).toContain('entity_namespace_present =');
+    expect(result).toContain('user_email_present =');
+    expect(result).toContain('user_id_present =');
+    expect(result).toContain('user_name_present =');
+    expect(result).not.toMatch(/entity\.id.*IS NOT NULL AND/);
+  });
+
+  it('honours the outputColumn parameter', () => {
+    const result = getEuidEsqlEvaluation('host', 'my_custom_euid');
+
+    expect(result).toContain('my_custom_euid =');
+    expect(result).not.toContain('entity.id =');
   });
 });
 

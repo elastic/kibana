@@ -127,17 +127,27 @@ export const MetricItemIcon = ({
             <EuiFlexGroup>
               <EuiFlexItem grow>{testTime}</EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiButtonIcon
-                  data-test-subj="syntheticsMetricItemIconButton"
-                  iconType="cross"
-                  onClick={closePopover}
-                  aria-label={i18n.translate(
+                <EuiToolTip
+                  content={i18n.translate(
                     'xpack.synthetics.metricItemIcon.euiButtonIcon.closePopover',
                     {
                       defaultMessage: 'Close popover',
                     }
                   )}
-                />
+                  disableScreenReaderOutput
+                >
+                  <EuiButtonIcon
+                    data-test-subj="syntheticsMetricItemIconButton"
+                    iconType="cross"
+                    onClick={closePopover}
+                    aria-label={i18n.translate(
+                      'xpack.synthetics.metricItemIcon.euiButtonIcon.closePopover',
+                      {
+                        defaultMessage: 'Close popover',
+                      }
+                    )}
+                  />
+                </EuiToolTip>
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiPopoverTitle>
@@ -187,17 +197,21 @@ export const MetricItemIcon = ({
     if (monitor.urls) {
       return (
         <Container>
-          <EuiButtonIcon
-            title={monitor.urls}
-            color="text"
-            data-test-subj="syntheticsMetricItemIconButton"
-            href={monitor.urls}
-            iconType="link"
-            target="_blank"
-            aria-label={i18n.translate('xpack.synthetics.metricItemIcon.euiButtonIcon.monitorUrl', {
-              defaultMessage: 'Monitor url',
-            })}
-          />
+          <EuiToolTip content={monitor.urls} disableScreenReaderOutput>
+            <EuiButtonIcon
+              color="text"
+              data-test-subj="syntheticsMetricItemIconButton"
+              href={monitor.urls}
+              iconType="link"
+              target="_blank"
+              aria-label={i18n.translate(
+                'xpack.synthetics.metricItemIcon.euiButtonIcon.monitorUrl',
+                {
+                  defaultMessage: 'Monitor url',
+                }
+              )}
+            />
+          </EuiToolTip>
         </Container>
       );
     }

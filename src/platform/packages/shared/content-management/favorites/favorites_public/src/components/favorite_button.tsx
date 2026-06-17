@@ -10,7 +10,7 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import classNames from 'classnames';
-import { EuiButtonIcon } from '@elastic/eui';
+import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import { useAddFavorite, useFavorites, useRemoveFavorite } from '../favorites_query';
 import { useFavoritesClient } from '../favorites_context';
 import { StardustWrapper } from './stardust_wrapper';
@@ -48,30 +48,31 @@ export const FavoriteButton = ({ id, className }: FavoriteButtonProps) => {
       className={className}
       active={(isFavorite && addFavorite.isSuccess) || addFavorite.isLoading}
     >
-      <EuiButtonIcon
-        isLoading={removeFavorite.isLoading}
-        title={title}
-        aria-label={title}
-        iconType={isFavoriteOptimistic ? 'starFill' : 'star'}
-        onClick={() => {
-          if (addFavorite.isLoading || removeFavorite.isLoading) {
-            return;
-          }
+      <EuiToolTip content={title} disableScreenReaderOutput>
+        <EuiButtonIcon
+          isLoading={removeFavorite.isLoading}
+          aria-label={title}
+          iconType={isFavoriteOptimistic ? 'starFill' : 'star'}
+          onClick={() => {
+            if (addFavorite.isLoading || removeFavorite.isLoading) {
+              return;
+            }
 
-          if (isFavorite) {
-            favoritesClient?.reportRemoveFavoriteClick();
-            removeFavorite.mutate({ id });
-          } else {
-            favoritesClient?.reportAddFavoriteClick();
-            addFavorite.mutate({ id });
-          }
-        }}
-        className={classNames('cm-favorite-button', {
-          'cm-favorite-button--active': isFavorite && !removeFavorite.isLoading,
-          'cm-favorite-button--empty': !isFavorite && !addFavorite.isLoading,
-        })}
-        data-test-subj={isFavorite ? 'unfavoriteButton' : 'favoriteButton'}
-      />
+            if (isFavorite) {
+              favoritesClient?.reportRemoveFavoriteClick();
+              removeFavorite.mutate({ id });
+            } else {
+              favoritesClient?.reportAddFavoriteClick();
+              addFavorite.mutate({ id });
+            }
+          }}
+          className={classNames('cm-favorite-button', {
+            'cm-favorite-button--active': isFavorite && !removeFavorite.isLoading,
+            'cm-favorite-button--empty': !isFavorite && !addFavorite.isLoading,
+          })}
+          data-test-subj={isFavorite ? 'unfavoriteButton' : 'favoriteButton'}
+        />
+      </EuiToolTip>
     </StardustWrapper>
   );
 };

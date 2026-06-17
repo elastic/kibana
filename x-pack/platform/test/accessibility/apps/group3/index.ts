@@ -24,7 +24,6 @@ export default ({ loadTestFile }: FtrProviderContext): void => {
 
     loadTestFile(require.resolve('./license_management'));
     loadTestFile(require.resolve('./stack_monitoring'));
-    loadTestFile(require.resolve('./watcher'));
 
     // Deprecated features; scheduled for removal in v10
     loadTestFile(require.resolve('./rollup_jobs'));

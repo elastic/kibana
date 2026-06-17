@@ -40,20 +40,14 @@ const baseCreateData: CreateRuleParams['data'] = {
   metadata: { name: 'rule-1' },
   time_field: '@timestamp',
   schedule: { every: '1m', lookback: '1m' },
-  evaluation: {
-    query: {
-      base: 'FROM logs-* | LIMIT 1',
-    },
-  },
+  query: { format: 'standalone', breach: { query: 'FROM logs-* | LIMIT 1' } },
 };
 
 const baseSoAttrs = createRuleSoAttributes({
   metadata: { name: 'rule-1' },
   time_field: '@timestamp',
   schedule: { every: '1m', lookback: '1m' },
-  evaluation: {
-    query: { base: 'FROM logs-* | LIMIT 1' },
-  },
+  query: { format: 'standalone', breach: { query: 'FROM logs-* | LIMIT 1' } },
 });
 
 describe('RulesClient', () => {
@@ -111,10 +105,14 @@ describe('RulesClient', () => {
         .mockResolvedValue({ processed: 0, total: 0, errors: [] }),
     } as unknown as ActionPolicyClient;
 
-    return new RulesClient({
-      services: { request, rulesSavedObjectService, taskManager, userService, actionPolicyClient },
-      options: { spaceId: 'space-1' },
-    });
+    return new RulesClient(
+      request,
+      rulesSavedObjectService,
+      taskManager,
+      userService,
+      actionPolicyClient,
+      'space-1'
+    );
   }
 
   describe('createRule', () => {
@@ -244,9 +242,7 @@ describe('RulesClient', () => {
         client.createRule({
           data: {
             ...baseCreateData,
-            evaluation: {
-              query: { base: 'FROM |' },
-            },
+            query: { format: 'standalone', breach: { query: 'FROM |' } },
           },
           options: { id: 'rule-id-5' },
         })
@@ -486,6 +482,82 @@ describe('RulesClient', () => {
         }),
         { version: 'WzEsMV0=', mergeAttributes: false }
       );
+    });
+
+    it('uses the client-provided version when supplied', async () => {
+      const client = createClient();
+
+      mockSavedObjectsClient.get.mockResolvedValueOnce({
+        id: 'rule-id-occ',
+        attributes: baseSoAttrs,
+        version: 'WzSERVER=',
+        type: RULE_SAVED_OBJECT_TYPE,
+        references: [],
+      });
+
+      await client.updateRule({
+        id: 'rule-id-occ',
+        data: { metadata: { name: 'occ name' } },
+        options: { version: 'WzCLIENT=' },
+      });
+
+      expect(mockSavedObjectsClient.update).toHaveBeenCalledWith(
+        RULE_SAVED_OBJECT_TYPE,
+        'rule-id-occ',
+        expect.any(Object),
+        { version: 'WzCLIENT=', mergeAttributes: false }
+      );
+    });
+
+    it('falls back to the server-read version when client omits version', async () => {
+      const client = createClient();
+
+      mockSavedObjectsClient.get.mockResolvedValueOnce({
+        id: 'rule-id-fallback',
+        attributes: baseSoAttrs,
+        version: 'WzSERVER=',
+        type: RULE_SAVED_OBJECT_TYPE,
+        references: [],
+      });
+
+      await client.updateRule({
+        id: 'rule-id-fallback',
+        data: { metadata: { name: 'fallback name' } },
+      });
+
+      expect(mockSavedObjectsClient.update).toHaveBeenCalledWith(
+        RULE_SAVED_OBJECT_TYPE,
+        'rule-id-fallback',
+        expect.any(Object),
+        { version: 'WzSERVER=', mergeAttributes: false }
+      );
+    });
+
+    it('returns the new version from the SO update in the response', async () => {
+      const client = createClient();
+
+      mockSavedObjectsClient.get.mockResolvedValueOnce({
+        id: 'rule-id-new-ver',
+        attributes: baseSoAttrs,
+        version: 'WzOLD=',
+        type: RULE_SAVED_OBJECT_TYPE,
+        references: [],
+      });
+
+      mockSavedObjectsClient.update.mockResolvedValueOnce({
+        id: 'rule-id-new-ver',
+        type: RULE_SAVED_OBJECT_TYPE,
+        attributes: baseSoAttrs,
+        references: [],
+        version: 'WzNEW=',
+      });
+
+      const res = await client.updateRule({
+        id: 'rule-id-new-ver',
+        data: { metadata: { name: 'whatever' } },
+      });
+
+      expect(res.version).toBe('WzNEW=');
     });
   });
 
@@ -876,61 +948,106 @@ describe('RulesClient', () => {
       );
     });
 
-    it('excludes missing ids returned as bulk get errors', async () => {
+    it('returns rules in the same order as the requested ids, regardless of bulkGet response order', async () => {
       const client = createClient();
-      const soAttrs = createRuleSoAttributes({
-        metadata: { name: 'rule-get-many-success' },
+
+      // Request order: z, a, m. Mock returns in a different order.
+      mockSavedObjectsClient.bulkGet.mockResolvedValueOnce({
+        saved_objects: [
+          {
+            id: 'rule-a',
+            type: RULE_SAVED_OBJECT_TYPE,
+            attributes: createRuleSoAttributes({ metadata: { name: 'A' } }),
+            references: [],
+          },
+          {
+            id: 'rule-m',
+            type: RULE_SAVED_OBJECT_TYPE,
+            attributes: createRuleSoAttributes({ metadata: { name: 'M' } }),
+            references: [],
+          },
+          {
+            id: 'rule-z',
+            type: RULE_SAVED_OBJECT_TYPE,
+            attributes: createRuleSoAttributes({ metadata: { name: 'Z' } }),
+            references: [],
+          },
+        ],
       });
+
+      const res = await client.getRules(['rule-z', 'rule-a', 'rule-m']);
+
+      expect(res.map((r) => r.id)).toEqual(['rule-z', 'rule-a', 'rule-m']);
+    });
+
+    it('filters out ids absent from the bulkGet response', async () => {
+      const client = createClient();
 
       mockSavedObjectsClient.bulkGet.mockResolvedValueOnce({
         saved_objects: [
           {
-            id: 'rule-id-get-many-success',
+            id: 'rule-id-present',
             type: RULE_SAVED_OBJECT_TYPE,
-            attributes: soAttrs,
+            attributes: createRuleSoAttributes({ metadata: { name: 'present' } }),
+            references: [],
+          },
+        ],
+      });
+
+      const res = await client.getRules(['rule-id-present', 'rule-id-absent']);
+
+      expect(res).toHaveLength(1);
+      expect(res[0]).toEqual(
+        expect.objectContaining({
+          id: 'rule-id-present',
+          metadata: expect.objectContaining({ name: 'present' }),
+        })
+      );
+    });
+
+    it('throws with the SO error status when a requested id is missing', async () => {
+      const client = createClient();
+
+      mockSavedObjectsClient.bulkGet.mockResolvedValueOnce({
+        saved_objects: [
+          {
+            id: 'rule-id-present',
+            type: RULE_SAVED_OBJECT_TYPE,
+            attributes: createRuleSoAttributes({ metadata: { name: 'present' } }),
             references: [],
           },
           {
-            id: 'rule-id-get-many-missing',
+            id: 'rule-id-missing',
             type: RULE_SAVED_OBJECT_TYPE,
             attributes: {} as RuleSavedObjectAttributes,
             references: [],
             error: {
               statusCode: 404,
               error: 'Not Found',
-              message: 'Saved object [alerting-rule/rule-id-get-many-missing] not found',
+              message: 'Saved object [alerting-rule/rule-id-missing] not found',
             },
           },
         ],
       });
 
-      const res = await client.getRules(['rule-id-get-many-success', 'rule-id-get-many-missing']);
-
-      expect(res).toHaveLength(1);
-      expect(res[0]).toEqual(
-        expect.objectContaining({
-          id: 'rule-id-get-many-success',
-          metadata: expect.objectContaining({ name: 'rule-get-many-success' }),
-        })
-      );
+      await expect(client.getRules(['rule-id-present', 'rule-id-missing'])).rejects.toMatchObject({
+        output: { statusCode: 404 },
+      });
     });
 
-    it('ignores documents with non-404 errors and returns valid documents', async () => {
+    it('throws with the SO error status when bulkGet reports a non-404 error', async () => {
       const client = createClient();
-      const validAttrs = createRuleSoAttributes({
-        metadata: { name: 'rule-get-many-valid' },
-      });
 
       mockSavedObjectsClient.bulkGet.mockResolvedValueOnce({
         saved_objects: [
           {
-            id: 'rule-id-get-many-valid',
+            id: 'rule-id-valid',
             type: RULE_SAVED_OBJECT_TYPE,
-            attributes: validAttrs,
+            attributes: createRuleSoAttributes({ metadata: { name: 'valid' } }),
             references: [],
           },
           {
-            id: 'rule-id-get-many-failure',
+            id: 'rule-id-failure',
             type: RULE_SAVED_OBJECT_TYPE,
             attributes: {} as RuleSavedObjectAttributes,
             references: [],
@@ -943,15 +1060,47 @@ describe('RulesClient', () => {
         ],
       });
 
-      const res = await client.getRules(['rule-id-get-many-valid', 'rule-id-get-many-failure']);
+      await expect(client.getRules(['rule-id-valid', 'rule-id-failure'])).rejects.toMatchObject({
+        output: { statusCode: 500 },
+      });
+    });
 
-      expect(res).toHaveLength(1);
-      expect(res[0]).toEqual(
-        expect.objectContaining({
-          id: 'rule-id-get-many-valid',
-          metadata: expect.objectContaining({ name: 'rule-get-many-valid' }),
-        })
-      );
+    it('throws on the first encountered error', async () => {
+      const client = createClient();
+
+      mockSavedObjectsClient.bulkGet.mockResolvedValueOnce({
+        saved_objects: [
+          {
+            id: 'rule-id-first-missing',
+            type: RULE_SAVED_OBJECT_TYPE,
+            attributes: {} as RuleSavedObjectAttributes,
+            references: [],
+            error: {
+              statusCode: 404,
+              error: 'Not Found',
+              message: 'Saved object [alerting-rule/rule-id-first-missing] not found',
+            },
+          },
+          {
+            id: 'rule-id-second-failure',
+            type: RULE_SAVED_OBJECT_TYPE,
+            attributes: {} as RuleSavedObjectAttributes,
+            references: [],
+            error: {
+              statusCode: 500,
+              error: 'Internal Server Error',
+              message: 'bulk get failed',
+            },
+          },
+        ],
+      });
+
+      // 'first error wins': the 404 surfaces, not the later 500.
+      await expect(
+        client.getRules(['rule-id-first-missing', 'rule-id-second-failure'])
+      ).rejects.toMatchObject({
+        output: { statusCode: 404 },
+      });
     });
   });
 
@@ -1032,7 +1181,7 @@ describe('RulesClient', () => {
         type: RULE_SAVED_OBJECT_TYPE,
         page: 2,
         perPage: 50,
-        sortField: 'updatedAt',
+        sortField: 'updated_at',
         sortOrder: 'desc',
       });
 
@@ -1080,7 +1229,7 @@ describe('RulesClient', () => {
         type: RULE_SAVED_OBJECT_TYPE,
         page: 1,
         perPage: 20,
-        sortField: 'updatedAt',
+        sortField: 'updated_at',
         sortOrder: 'desc',
       });
       expect(mockSavedObjectsClient.bulkGet).not.toHaveBeenCalled();
@@ -1106,7 +1255,7 @@ describe('RulesClient', () => {
         type: RULE_SAVED_OBJECT_TYPE,
         page: 1,
         perPage: 20,
-        sortField: 'updatedAt',
+        sortField: 'updated_at',
         sortOrder: 'desc',
         filter: `${RULE_SAVED_OBJECT_TYPE}.attributes.enabled: true`,
       });
@@ -1128,7 +1277,7 @@ describe('RulesClient', () => {
         type: RULE_SAVED_OBJECT_TYPE,
         page: 2,
         perPage: 10,
-        sortField: 'updatedAt',
+        sortField: 'updated_at',
         sortOrder: 'desc',
         search: 'prod* alerts*',
         searchFields: ['metadata.name', 'metadata.description'],
@@ -1193,7 +1342,7 @@ describe('RulesClient', () => {
         type: RULE_SAVED_OBJECT_TYPE,
         page: 1,
         perPage: 20,
-        sortField: 'updatedAt',
+        sortField: 'updated_at',
         sortOrder: 'desc',
       });
     });
@@ -1234,6 +1383,53 @@ describe('RulesClient', () => {
         expect.objectContaining({
           sortField: 'enabled',
           sortOrder: 'desc',
+        })
+      );
+    });
+  });
+
+  describe('getTags', () => {
+    const findResponseWithTags = (tags: string[]) => ({
+      saved_objects: [],
+      total: 0,
+      page: 1,
+      per_page: 0,
+      aggregations: {
+        tags: { buckets: tags.map((key) => ({ key })) },
+      },
+    });
+
+    it('returns the aggregated tags without a filter', async () => {
+      const client = createClient();
+
+      mockSavedObjectsClient.find.mockResolvedValueOnce(findResponseWithTags(['cpu', 'memory']));
+
+      const tags = await client.getTags();
+
+      expect(tags).toEqual(['cpu', 'memory']);
+      expect(mockSavedObjectsClient.find).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: RULE_SAVED_OBJECT_TYPE,
+          perPage: 0,
+        })
+      );
+      expect(mockSavedObjectsClient.find).toHaveBeenCalledWith(
+        expect.not.objectContaining({ filter: expect.anything() })
+      );
+    });
+
+    it('translates a clean API filter to an SO filter before aggregating', async () => {
+      const client = createClient();
+
+      mockSavedObjectsClient.find.mockResolvedValueOnce(findResponseWithTags(['cpu']));
+
+      await client.getTags({ filter: 'kind:alert' });
+
+      expect(mockSavedObjectsClient.find).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: RULE_SAVED_OBJECT_TYPE,
+          perPage: 0,
+          filter: `${RULE_SAVED_OBJECT_TYPE}.attributes.kind: alert`,
         })
       );
     });

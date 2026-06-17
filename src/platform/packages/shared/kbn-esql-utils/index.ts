@@ -70,8 +70,16 @@ export {
   getProjectRoutingFromEsqlQuery,
   hasOnlySourceCommand,
   hasTimeseriesInfoCommand,
+  hasChangePointCommand,
+  getChangePointOutputColumnNames,
+  getChangePointSeriesColumns,
+  buildChangePointLineDataQuery,
+  appendEntityFiltersToChangePointLineEsql,
+  formatEsqlIdentifier,
+  formatEsqlLiteral,
   isComputedColumn,
   getQuerySummary,
+  getColumnsWithHighlights,
   buildRenameSourceFieldMap,
   getEsqlControls,
   getAllEsqlControls,
@@ -79,6 +87,9 @@ export {
   convertQueryToESQLExpression,
   injectWhereClauseAfterSourceCommand,
   type ESQLStatsQueryMeta,
+  getVariableNamePrefix,
+  type ESQLColumnsWithHighlights,
+  type ESQLHighlightTags,
 } from './src';
 
 export { ENABLE_ESQL, GROUP_NOT_SET_VALUE } from './constants';
