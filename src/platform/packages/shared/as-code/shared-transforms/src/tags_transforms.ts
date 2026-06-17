@@ -8,7 +8,8 @@
  */
 
 import type { Reference } from '@kbn/content-management-utils';
-import { tagSavedObjectTypeName } from '@kbn/saved-objects-tagging-plugin/common';
+
+const tagSavedObjectTypeName = 'tag'; // cannot import from plugin @kbn/saved-objects-tagging-plugin/common
 
 export function toAsCodeTags(references: Reference[] = []) {
   const tags: string[] = references
@@ -29,8 +30,7 @@ export function toStoredTags<State extends { tags?: string[] } = { tags?: string
   return {
     state: restOfState,
     references: Array.from(uniqueTagIds).map((tagId) => ({
-      type: 'tag',
-
+      type: tagSavedObjectTypeName,
       id: tagId,
       name: `tag-ref-${tagId}`,
     })),
