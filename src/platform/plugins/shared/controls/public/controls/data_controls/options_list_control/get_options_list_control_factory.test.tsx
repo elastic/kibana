@@ -15,7 +15,7 @@ import { waitFor } from '@testing-library/react';
 import { dataViewsService } from '../../../services/kibana_services';
 import { getMockedFinalizeApi } from '../../mocks/control_mocks';
 import { getOptionsListControlFactory } from './get_options_list_control_factory';
-import type { OptionsListDSLControlRuntimeState } from '@kbn/controls-schemas';
+import type { OptionsListDSLControlState } from '@kbn/controls-schemas';
 import { optionsListDSLControlSchema } from '@kbn/controls-schemas';
 import { firstValueFrom, of } from 'rxjs';
 import type { OptionsListControlApi } from './types';
@@ -76,7 +76,7 @@ describe('Options List Control Api', () => {
             ...DEFAULT_DSL_OPTIONS_LIST_STATE,
             data_view_id: 'myDataViewId',
             field_name: 'myFieldName',
-          } as OptionsListDSLControlRuntimeState,
+          } as OptionsListDSLControlState,
           finalizeApi,
           uuid,
           parentApi: {},
@@ -101,7 +101,7 @@ describe('Options List Control Api', () => {
             data_view_id: 'myDataViewId',
             field_name: 'myFieldName',
             selected_options: ['cool', 'test'],
-          } as OptionsListDSLControlRuntimeState,
+          } as OptionsListDSLControlState,
           finalizeApi,
           uuid,
           parentApi: {},
@@ -133,7 +133,7 @@ describe('Options List Control Api', () => {
           ...DEFAULT_DSL_OPTIONS_LIST_STATE,
           data_view_id: 'myDataViewId',
           field_name: 'myFieldName',
-        } as OptionsListDSLControlRuntimeState,
+        } as OptionsListDSLControlState,
         finalizeApi,
         uuid,
         parentApi: {},
@@ -149,7 +149,7 @@ describe('Options List Control Api', () => {
           data_view_id: 'myDataViewId',
           field_name: 'myFieldName',
           selected_options: ['cool', 'test'],
-        } as OptionsListDSLControlRuntimeState,
+        } as OptionsListDSLControlState,
         finalizeApi,
         uuid,
         parentApi: {},
@@ -192,7 +192,7 @@ describe('Options List Control Api', () => {
           data_view_id: 'myDataViewId',
           field_name: 'myFieldName',
           exists_selected: true,
-        } as OptionsListDSLControlRuntimeState,
+        } as OptionsListDSLControlState,
         finalizeApi,
         uuid,
         parentApi: {},
@@ -222,7 +222,7 @@ describe('Options List Control Api', () => {
           field_name: 'myFieldName',
           exists_selected: true,
           exclude: true,
-        } as OptionsListDSLControlRuntimeState,
+        } as OptionsListDSLControlState,
         finalizeApi,
         uuid,
         parentApi: {},
@@ -251,7 +251,7 @@ describe('Options List Control Api', () => {
           ...DEFAULT_DSL_OPTIONS_LIST_STATE,
           data_view_id: 'myDataViewId',
           field_name: 'myFieldName',
-        } as OptionsListDSLControlRuntimeState,
+        } as OptionsListDSLControlState,
         finalizeApi,
         uuid,
         parentApi: {},
@@ -283,7 +283,7 @@ describe('Options List Control Api', () => {
         ...lastSavedState,
         values_source: ControlValuesSource.FIELD,
         data_view_id: 'newDataViewId',
-      } as OptionsListDSLControlRuntimeState;
+      } as OptionsListDSLControlState;
       const embeddable = await factory.buildEmbeddable({
         initializeDrilldownsManager: jest.fn(),
         initialState,

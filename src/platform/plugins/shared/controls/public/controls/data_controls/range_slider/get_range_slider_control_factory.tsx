@@ -22,7 +22,7 @@ import {
 } from '@kbn/presentation-publishing';
 import { DEFAULT_RANGE_SLIDER_STATE, RANGE_SLIDER_CONTROL } from '@kbn/controls-constants';
 import type { EmbeddablePublicDefinition } from '@kbn/embeddable-plugin/public';
-import type { RangeSliderControlRuntimeState } from '@kbn/controls-schemas';
+import type { RangeSliderControlState } from '@kbn/controls-schemas';
 
 import { isCompressed } from '../../../control_group/utils/is_compressed';
 import {
@@ -40,7 +40,7 @@ import { buildFilter } from './utils/filter_utils';
 import { getPlacementHints, LAYOUT_CONSTRAINTS } from '../../constants';
 
 export const getRangesliderControlFactory = (): EmbeddablePublicDefinition<
-  RangeSliderControlRuntimeState,
+  RangeSliderControlState,
   RangeSliderControlApi
 > => {
   return {
@@ -56,7 +56,7 @@ export const getRangesliderControlFactory = (): EmbeddablePublicDefinition<
       const editorStateManager = initializeEditorStateManager(state);
 
       const dataControlManager = await initializeDataControlManager<
-        Pick<RangeSliderControlRuntimeState, 'step'>
+        Pick<RangeSliderControlState, 'step'>
       >({
         controlId: uuid,
         controlType: RANGE_SLIDER_CONTROL,
@@ -73,7 +73,7 @@ export const getRangesliderControlFactory = (): EmbeddablePublicDefinition<
         dataControlManager.internalApi.onSelectionChange
       );
 
-      const stateApi = initializeStateApi<RangeSliderControlRuntimeState>({
+      const stateApi = initializeStateApi<RangeSliderControlState>({
         uuid,
         parentApi,
         serializeState: () => ({

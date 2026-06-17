@@ -8,7 +8,7 @@
  */
 
 import { apiHasEditorConfig } from '@kbn/control-group-renderer';
-import type { DataControlRuntimeState } from '@kbn/controls-schemas';
+import type { DataControlState } from '@kbn/controls-schemas';
 import { i18n } from '@kbn/i18n';
 import {
   apiCanAddNewPanel,
@@ -69,9 +69,7 @@ export const createDataControlPanelAction = (): ActionDefinition<EmbeddableApiCo
     }),
 });
 
-export const createDataControlOfType = <
-  State extends DataControlRuntimeState = DataControlRuntimeState
->(
+export const createDataControlOfType = <State extends DataControlState = DataControlState>(
   type: string,
   { embeddable, state, controlId }: CreateControlTypeContext<State>
 ) => {

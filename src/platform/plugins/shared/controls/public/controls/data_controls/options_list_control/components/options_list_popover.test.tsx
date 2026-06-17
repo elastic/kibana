@@ -12,10 +12,7 @@ import { BehaviorSubject, first } from 'rxjs';
 
 import { EuiThemeProvider } from '@elastic/eui';
 import { ControlValuesSource, DEFAULT_DSL_OPTIONS_LIST_STATE } from '@kbn/controls-constants';
-import type {
-  OptionsListDisplaySettings,
-  OptionsListDSLControlRuntimeState,
-} from '@kbn/controls-schemas';
+import type { OptionsListDisplaySettings, OptionsListDSLControlState } from '@kbn/controls-schemas';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import { createStubDataView } from '@kbn/data-views-plugin/common/data_view.stub';
 import type { PublishingSubject } from '@kbn/presentation-publishing';
@@ -55,7 +52,7 @@ describe('Options list popover', () => {
     overwriteState,
   }: {
     uuid: string;
-    overwriteState?: Partial<OptionsListDSLControlRuntimeState>;
+    overwriteState?: Partial<OptionsListDSLControlState>;
   }): Promise<{
     componentApi: DSLOptionsListComponentApi;
     displaySettings: OptionsListDisplaySettings;
@@ -71,7 +68,7 @@ describe('Options list popover', () => {
         data_view_id: 'myDataViewId',
         field_name: 'myFieldName',
         ...overwriteState,
-      } as OptionsListDSLControlRuntimeState,
+      } as OptionsListDSLControlState,
       finalizeApi,
       uuid,
       parentApi: {},

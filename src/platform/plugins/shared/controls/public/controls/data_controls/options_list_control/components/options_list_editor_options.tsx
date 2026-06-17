@@ -11,10 +11,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 
 import { EuiFormRow, EuiRadioGroup, EuiSwitch } from '@elastic/eui';
 import { DEFAULT_DSL_OPTIONS_LIST_STATE } from '@kbn/controls-constants';
-import type {
-  OptionsListDSLControlRuntimeState,
-  OptionsListSearchTechnique,
-} from '@kbn/controls-schemas';
+import type { OptionsListDSLControlState, OptionsListSearchTechnique } from '@kbn/controls-schemas';
 
 import { getCompatibleSearchTechniques } from '../../../../../common/options_list/suggestions_searching';
 import { ControlSettingTooltipLabel } from '../../../../control_group/components/control_setting_tooltip_label';
@@ -72,7 +69,7 @@ export const OptionsListEditorOptions = ({
   initialState,
   field,
   updateState,
-}: CustomOptionsComponentProps<OptionsListDSLControlRuntimeState>) => {
+}: CustomOptionsComponentProps<OptionsListDSLControlState>) => {
   const [singleSelect, setSingleSelect] = useState<boolean>(initialState.single_select ?? false);
   const [runPastTimeout, setRunPastTimeout] = useState<boolean>(
     initialState.run_past_timeout ?? false

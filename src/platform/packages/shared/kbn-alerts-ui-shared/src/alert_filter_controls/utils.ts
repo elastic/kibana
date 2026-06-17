@@ -9,7 +9,7 @@
 
 import { isEmpty, isEqual, pick } from 'lodash';
 import type { ControlGroupRuntimeState } from '@kbn/control-group-renderer';
-import type { OptionsListDSLControlRuntimeState } from '@kbn/controls-schemas';
+import type { OptionsListDSLControlState } from '@kbn/controls-schemas';
 import { convertCamelCasedKeysToSnakeCase } from '@kbn/presentation-publishing';
 import type { FilterControlConfig } from './types';
 
@@ -19,9 +19,7 @@ export const getPanelsInOrderFromControlsState = (controlState: ControlGroupRunt
 };
 
 export const getFilterItemObjListFromControlState = (controlState: ControlGroupRuntimeState) => {
-  const panels = getPanelsInOrderFromControlsState(
-    controlState
-  ) as OptionsListDSLControlRuntimeState[];
+  const panels = getPanelsInOrderFromControlsState(controlState) as OptionsListDSLControlState[];
   return panels
     .filter((panel) => panel.field_name)
     .map((panel) => {

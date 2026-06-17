@@ -12,8 +12,8 @@ import type { Subject } from 'rxjs';
 import type {
   OptionsListSelection,
   OptionsListSortingType,
-  DataControlRuntimeState,
-  OptionsListDSLControlRuntimeState,
+  DataControlState,
+  OptionsListDSLControlState,
 } from '@kbn/controls-schemas';
 import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
 import type {
@@ -30,7 +30,7 @@ import type { SelectionsState } from './selections_manager';
 import type { TemporaryState } from './temporay_state_manager';
 import type { OptionsListPublishesOptions, OptionsListSelectionsApi } from '../../types';
 
-export type OptionsListControlApi = DefaultEmbeddableApi<OptionsListDSLControlRuntimeState> &
+export type OptionsListControlApi = DefaultEmbeddableApi<OptionsListDSLControlState> &
   DataControlApi &
   PublishesUnsavedChanges &
   PublishesRelatedPanels & {
@@ -44,7 +44,7 @@ export type OptionsListControlApi = DefaultEmbeddableApi<OptionsListDSLControlRu
  * and then passes to the UI component. Excludes any managed state properties that don't end up being used
  * by the component
  */
-export type OptionsListComponentState = Pick<DataControlRuntimeState, 'field_name'> &
+export type OptionsListComponentState = Pick<DataControlState, 'field_name'> &
   SelectionsState &
   EditorState &
   TemporaryState<OptionsListSelection> & {

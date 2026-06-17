@@ -13,8 +13,8 @@ import {
   rangeSliderControlSchema,
   type LegacyStoredDataControlState,
   type LegacyStoredRangeSliderExplicitInput,
-  type RangeSliderControlRuntimeState,
-  type StrictRangeSliderControlState,
+  type RangeSliderControlState,
+  type StrictDataControlState,
 } from '@kbn/controls-schemas';
 import type { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
 import { transformDataControlIn, transformDataControlOut } from './data_control_transforms';
@@ -30,9 +30,9 @@ export const registerRangeSliderControlTransforms = (embeddable: EmbeddableSetup
     title: 'Range slider control',
     getSchema: () => rangeSliderControlSchema,
     getTransforms: () => ({
-      transformIn: (state: StrictRangeSliderControlState) => {
+      transformIn: (state: RangeSliderControlState) => {
         const { state: dataControlState, references } = transformDataControlIn(
-          state,
+          state as StrictDataControlState,
           RANGE_SLIDER_REF_NAME
         );
         return {
@@ -42,17 +42,17 @@ export const registerRangeSliderControlTransforms = (embeddable: EmbeddableSetup
       },
       transformOut: <
         StoredStateType extends Partial<
-          LegacyStoredRangeSliderExplicitInput & RangeSliderControlRuntimeState
+          LegacyStoredRangeSliderExplicitInput & RangeSliderControlState
         >
       >(
         state: StoredStateType,
         panelReferences: Reference[] | undefined,
         containerReferences: Reference[] | undefined,
         id: string | undefined
-      ): Partial<RangeSliderControlRuntimeState> => {
+      ): Partial<RangeSliderControlState> => {
         const dataControlState = transformDataControlOut(
           id,
-          state as Partial<LegacyStoredDataControlState & StrictRangeSliderControlState>,
+          state as Partial<LegacyStoredDataControlState & StrictDataControlState>,
           RANGE_SLIDER_LEGACY_REF_NAMES,
           panelReferences,
           containerReferences

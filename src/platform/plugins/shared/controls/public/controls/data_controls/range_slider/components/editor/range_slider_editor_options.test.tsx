@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { RangeSliderControlRuntimeState } from '@kbn/controls-schemas';
+import type { RangeSliderControlState } from '@kbn/controls-schemas';
 import { fireEvent, render } from '@testing-library/react';
 import React from 'react';
 import { RangeSliderEditorOptions } from './range_slider_editor_options';
@@ -16,7 +16,7 @@ describe('RangeSliderEditorOptions', () => {
   test('defaults to step size of 1', async () => {
     const component = render(
       <RangeSliderEditorOptions
-        initialState={{} as RangeSliderControlRuntimeState}
+        initialState={{} as RangeSliderControlState}
         updateState={jest.fn()}
         setControlEditorValid={jest.fn()}
       />
@@ -30,7 +30,7 @@ describe('RangeSliderEditorOptions', () => {
     const setControlEditorValid = jest.fn();
     const component = render(
       <RangeSliderEditorOptions
-        initialState={{} as RangeSliderControlRuntimeState}
+        initialState={{} as RangeSliderControlState}
         updateState={jest.fn()}
         setControlEditorValid={setControlEditorValid}
       />

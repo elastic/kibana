@@ -16,7 +16,7 @@ import type { TimeRange } from '@kbn/es-query';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { RenderResult } from '@testing-library/react';
 import { act, fireEvent, render, waitFor } from '@testing-library/react';
-import type { DataControlRuntimeState } from '@kbn/controls-schemas';
+import type { DataControlState } from '@kbn/controls-schemas';
 import { ControlValuesSource } from '@kbn/controls-constants';
 import {
   getMockedOptionsListControlFactory,
@@ -96,7 +96,7 @@ describe('Data control editor', () => {
     controlType,
     initialDefaultPanelTitle,
   }: {
-    initialState?: Partial<DataControlRuntimeState>;
+    initialState?: Partial<DataControlState>;
     controlId?: string;
     controlType?: string;
     initialDefaultPanelTitle?: string;
@@ -118,7 +118,7 @@ describe('Data control editor', () => {
               values_source: ControlValuesSource.FIELD,
               data_view_id: mockDataView.id,
               ...initialState,
-            } as Partial<DataControlRuntimeState>
+            } as Partial<DataControlState>
           }
           controlId={controlId}
           controlType={controlType}

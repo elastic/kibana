@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { DEFAULT_RANGE_SLIDER_STATE, RANGE_SLIDER_CONTROL } from '@kbn/controls-constants';
-import type { RangeSliderControlRuntimeState } from '@kbn/controls-schemas';
+import type { RangeSliderControlState } from '@kbn/controls-schemas';
 import type { DataViewField } from '@kbn/data-views-plugin/common';
 import { i18n } from '@kbn/i18n';
 
@@ -22,7 +22,7 @@ const isFieldCompatible = (field: DataViewField) => {
 };
 
 export const createRangeSliderControlAction =
-  (): CreateControlTypeAction<RangeSliderControlRuntimeState> => {
+  (): CreateControlTypeAction<RangeSliderControlState> => {
     return {
       id: RANGE_SLIDER_ACTION,
       type: RANGE_SLIDER_CONTROL,

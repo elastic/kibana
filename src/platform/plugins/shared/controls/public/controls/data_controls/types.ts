@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DataControlRuntimeState } from '@kbn/controls-schemas';
+import type { DataControlState } from '@kbn/controls-schemas';
 import type { DataViewField } from '@kbn/data-views-plugin/common';
 import type { TextContextTypeConvert } from '@kbn/field-formats-plugin/common';
 import type { HasPanelCapabilities } from '@kbn/presentation-publishing';
@@ -31,7 +31,7 @@ export interface PublishesField {
   fieldFormatter: PublishingSubject<DataControlFieldFormatter>;
 }
 
-export type DataControlApi = StateManager<Omit<DataControlRuntimeState, 'title'>>['api'] &
+export type DataControlApi = StateManager<Omit<DataControlState, 'title'>>['api'] &
   Partial<HasCustomPrepend> &
   HasEditCapabilities &
   PublishesDataViews &
@@ -45,9 +45,7 @@ export type DataControlApi = StateManager<Omit<DataControlRuntimeState, 'title'>
     setBlockingError: (error: Error | undefined) => void;
   };
 
-export interface CustomOptionsComponentProps<
-  State extends DataControlRuntimeState = DataControlRuntimeState
-> {
+export interface CustomOptionsComponentProps<State extends DataControlState = DataControlState> {
   initialState: Partial<State>;
   field?: DataViewField;
   updateState: (newState: Partial<State>) => void;

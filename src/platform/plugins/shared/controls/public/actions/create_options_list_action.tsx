@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { DEFAULT_DSL_OPTIONS_LIST_STATE, OPTIONS_LIST_CONTROL } from '@kbn/controls-constants';
-import type { DataControlRuntimeState, OptionsListControlState } from '@kbn/controls-schemas';
+import type { DataControlState, OptionsListControlState } from '@kbn/controls-schemas';
 import type { DataViewField } from '@kbn/data-views-plugin/common';
 import { i18n } from '@kbn/i18n';
 
@@ -26,7 +26,7 @@ const isFieldCompatible = (field: DataViewField) => {
 };
 
 export const createOptionsListControlAction = (): CreateControlTypeAction<
-  OptionsListControlState & DataControlRuntimeState
+  OptionsListControlState & DataControlState
 > => {
   return {
     id: OPTIONS_LIST_ACTION,

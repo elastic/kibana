@@ -13,10 +13,10 @@ import type {
   PublishesUnsavedChanges,
   PublishingSubject,
 } from '@kbn/presentation-publishing';
-import type { RangeSliderControlRuntimeState } from '@kbn/controls-schemas';
+import type { RangeSliderControlState } from '@kbn/controls-schemas';
 import type { DataControlApi } from '../types';
 
-export type RangeSliderControlApi = DefaultEmbeddableApi<RangeSliderControlRuntimeState> &
+export type RangeSliderControlApi = DefaultEmbeddableApi<RangeSliderControlState> &
   DataControlApi &
   PublishesUnsavedChanges &
   PublishesRelatedPanels & {

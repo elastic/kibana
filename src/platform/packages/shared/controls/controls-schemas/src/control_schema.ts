@@ -64,14 +64,11 @@ export const dataControlFieldVariantProps = {
     minLength: 1,
     maxLength: 999,
   }),
-  esql_query: schema.never(),
 };
 
 export const dataControlEsqlVariantProps = {
   ...sharedDataControlProps,
   values_source: schema.literal(ControlValuesSource.ESQL),
-  data_view_id: schema.never(),
-  field_name: schema.never(),
   esql_query: schema.string({
     meta: { description: 'The ES|QL query that provides field options for this control' },
     minLength: 1,

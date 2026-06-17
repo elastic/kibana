@@ -15,7 +15,7 @@ import { dataViewsService } from '../../services/kibana_services';
 import { initializeDataControlManager } from './data_control_manager';
 import { initializeStateManager } from '@kbn/presentation-publishing';
 import { ControlValuesSource, DEFAULT_DATA_CONTROL_STATE } from '@kbn/controls-constants';
-import type { DataControlRuntimeState } from '@kbn/controls-schemas';
+import type { DataControlState } from '@kbn/controls-schemas';
 
 const mockGetESQLSingleColumnValues = jest.fn();
 jest.mock('../../../common/options_list/get_esql_single_column_values', () => {
@@ -34,7 +34,7 @@ jest.mock('../utils/get_data_view_id_from_esql_query', () => ({
 }));
 
 describe('initializeDataControlManager', () => {
-  const dataControlState: DataControlRuntimeState = {
+  const dataControlState: DataControlState = {
     ...DEFAULT_DATA_CONTROL_STATE,
     data_view_id: 'myDataViewId',
     field_name: 'myFieldName',
@@ -176,7 +176,7 @@ describe('initializeDataControlManager', () => {
   });
 
   describe('ESQL query subscription', () => {
-    const esqlState: DataControlRuntimeState = {
+    const esqlState: DataControlState = {
       ...dataControlState,
       values_source: ControlValuesSource.ESQL,
       esql_query: 'FROM logs | WHERE country == ?geo_dest | KEEP myFieldName',

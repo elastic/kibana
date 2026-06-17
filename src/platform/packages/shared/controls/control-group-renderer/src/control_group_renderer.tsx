@@ -21,11 +21,13 @@ import {
 } from 'rxjs';
 
 import { ControlsRenderer, type ControlsRendererParentApi } from '@kbn/controls-renderer';
+import type { TimeSlice } from '@kbn/controls-schemas';
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
+import type { ESQLControlVariable } from '@kbn/esql-types';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import type { PublishingSubject } from '@kbn/presentation-publishing';
 import {
   apiHasSerializableState,
+  PublishingSubject,
   useSearchApi,
   type EmbeddableApiContext,
   type ViewMode,
@@ -46,6 +48,8 @@ import { useChildrenApi } from './use_children_api';
 import { useInitialControlGroupState } from './use_initial_control_group_state';
 import { useLayoutApi } from './use_layout_api';
 import { usePropsApi } from './use_props_api';
+import { T } from 'lodash/fp';
+import { id } from 'zod/v4/locales';
 
 export interface ControlGroupRendererProps {
   onApiAvailable: (api: ControlGroupRendererApi) => void;

@@ -22,9 +22,9 @@ import {
 } from '@kbn/controls-constants';
 import type { ControlsLayout } from '@kbn/controls-renderer/src/types';
 import type {
-  DataControlRuntimeState,
-  OptionsListDSLControlRuntimeState,
-  RangeSliderControlRuntimeState,
+  DataControlState,
+  OptionsListDSLControlState,
+  RangeSliderControlState,
   PinnedControlState,
 } from '@kbn/controls-schemas';
 import { i18n } from '@kbn/i18n';
@@ -41,8 +41,8 @@ import type {
 export const controlGroupStateBuilder = {
   addDataControlFromField: async (
     controlGroupState: Partial<ControlGroupRuntimeState>,
-    controlState: Partial<Omit<DataControlRuntimeState & FlattenedPinnedControlState, 'type'>> &
-      Required<Pick<DataControlRuntimeState, 'data_view_id' | 'field_name'>>,
+    controlState: Partial<Omit<DataControlState & FlattenedPinnedControlState, 'type'>> &
+      Required<Pick<DataControlState, 'data_view_id' | 'field_name'>>,
     uiActionsService: UiActionsStart,
     controlId?: string
   ) => {
@@ -72,12 +72,12 @@ export const controlGroupStateBuilder = {
     controlGroupState: Partial<ControlGroupRuntimeState>,
     controlState: Partial<
       Omit<
-        Omit<PinnedControlState, keyof OptionsListDSLControlRuntimeState | 'config'> &
-          OptionsListDSLControlRuntimeState,
+        Omit<PinnedControlState, keyof OptionsListDSLControlState | 'config'> &
+          OptionsListDSLControlState,
         'type'
       >
     > &
-      Required<Pick<OptionsListDSLControlRuntimeState, 'data_view_id' | 'field_name'>>,
+      Required<Pick<OptionsListDSLControlState, 'data_view_id' | 'field_name'>>,
     controlId?: string
   ) => {
     controlGroupState.initialChildControlState = {
@@ -95,11 +95,10 @@ export const controlGroupStateBuilder = {
   addRangeSliderControl: (
     controlGroupState: Partial<ControlGroupRuntimeState>,
     controlState: Omit<
-      Omit<PinnedControlState, keyof RangeSliderControlRuntimeState> &
-        RangeSliderControlRuntimeState,
+      Omit<PinnedControlState, keyof RangeSliderControlState> & RangeSliderControlState,
       'type'
     > &
-      Required<Pick<RangeSliderControlRuntimeState, 'data_view_id' | 'field_name'>>,
+      Required<Pick<RangeSliderControlState, 'data_view_id' | 'field_name'>>,
     controlId?: string
   ) => {
     controlGroupState.initialChildControlState = {

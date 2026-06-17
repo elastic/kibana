@@ -8,16 +8,19 @@
  */
 
 import type { Reference } from '@kbn/content-management-utils';
-import type {
-  EsqlDataControlState,
-  FieldDataControlState,
-  LegacyStoredDataControlState,
-  StrictDataControlState,
-} from '@kbn/controls-schemas';
-import { isEsqlDataControl, isFieldDataControl } from '@kbn/controls-schemas';
+import type { LegacyStoredDataControlState, StrictDataControlState } from '@kbn/controls-schemas';
 import { ControlValuesSource, DEFAULT_DATA_CONTROL_STATE } from '@kbn/controls-constants';
 import { DATA_VIEW_SAVED_OBJECT_TYPE } from '@kbn/data-views-plugin/common';
 import { convertCamelCasedKeysToSnakeCase } from '@kbn/presentation-publishing';
+
+type FieldDataControlState = Extract<
+  StrictDataControlState,
+  { values_source: ControlValuesSource.FIELD }
+>;
+type EsqlDataControlState = Extract<
+  StrictDataControlState,
+  { values_source: ControlValuesSource.ESQL }
+>;
 
 type StoredFieldDataControlState = Omit<FieldDataControlState, 'data_view_id'> & {
   dataViewRefName: string;
@@ -30,24 +33,19 @@ export function transformDataControlIn(
   state: StoredFieldDataControlState | EsqlDataControlState;
   references?: Reference[];
 } {
-  if (isEsqlDataControl(state)) {
+  if (state.values_source === ControlValuesSource.ESQL) {
     const { data_view_id, field_name, ...rest } = state;
     return {
       state: rest as EsqlDataControlState,
     };
   }
 
-  if (!isFieldDataControl(state)) {
-    throw new Error('Invalid data control state');
-  }
-
   const { data_view_id, esql_query, ...rest } = state;
   return {
     state: {
       ...rest,
-      values_source: ControlValuesSource.FIELD,
       dataViewRefName: referenceName,
-    },
+    } as StoredFieldDataControlState,
     references: [
       {
         name: referenceName,
@@ -69,14 +67,14 @@ export function transformDataControlOut<
 ): StrictDataControlState {
   if (state.values_source === ControlValuesSource.ESQL) {
     const { title, esql_query, use_global_filters, ignore_validations } = state;
-    const convertedState: EsqlDataControlState = {
+    const convertedState = {
       ...DEFAULT_DATA_CONTROL_STATE,
       values_source: ControlValuesSource.ESQL,
       title,
       esql_query: esql_query ?? '',
       ...(typeof use_global_filters === 'boolean' && { use_global_filters }),
       ...(typeof ignore_validations === 'boolean' && { ignore_validations }),
-    };
+    } as EsqlDataControlState;
 
     ensureRequiredFields(convertedState);
     return convertedState;
@@ -107,7 +105,7 @@ export function transformDataControlOut<
     );
 
   const dataViewId = dataViewRef?.id ?? data_view_id ?? '';
-  const convertedState: FieldDataControlState = {
+  const convertedState = {
     ...DEFAULT_DATA_CONTROL_STATE,
     values_source: ControlValuesSource.FIELD,
     data_view_id: dataViewId,
@@ -115,7 +113,7 @@ export function transformDataControlOut<
     field_name: field_name ?? '',
     ...(typeof use_global_filters === 'boolean' && { use_global_filters }),
     ...(typeof ignore_validations === 'boolean' && { ignore_validations }),
-  };
+  } as FieldDataControlState;
 
   ensureRequiredFields(convertedState);
   return convertedState;
@@ -126,19 +124,17 @@ function getLegacyReferenceName(controlId: string, refName: string) {
 }
 
 const ensureRequiredFields = (state: StrictDataControlState) => {
-  if (isEsqlDataControl(state)) {
+  if (state.values_source === ControlValuesSource.ESQL) {
     if (!state.esql_query.length) {
       throw new Error('Must include a non-empty ES|QL query');
     }
     return;
   }
 
-  if (isFieldDataControl(state)) {
-    if (!state.data_view_id.length) {
-      throw new Error('Must include a non-empty data view ID');
-    }
-    if (!state.field_name.length) {
-      throw new Error('Must include a non-empty field name');
-    }
+  if (!state.data_view_id.length) {
+    throw new Error('Must include a non-empty data view ID');
+  }
+  if (!state.field_name.length) {
+    throw new Error('Must include a non-empty field name');
   }
 };

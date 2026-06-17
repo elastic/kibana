@@ -8,7 +8,7 @@
  */
 
 import type { ControlGroupRuntimeState } from '@kbn/control-group-renderer';
-import type { OptionsListDSLControlRuntimeState } from '@kbn/controls-schemas';
+import type { OptionsListDSLControlState } from '@kbn/controls-schemas';
 import type { Filter } from '@kbn/es-query';
 import { ALERT_DURATION, ALERT_RULE_NAME, ALERT_START, ALERT_STATUS } from '@kbn/rule-data-utils';
 import { ControlValuesSource, DEFAULT_DSL_OPTIONS_LIST_STATE } from '@kbn/controls-constants';
@@ -130,4 +130,4 @@ export const initialInputData = {
     ignoreTimerange: false,
     ignoreValidations: false,
   },
-} as unknown as ControlGroupRuntimeState<OptionsListDSLControlRuntimeState>;
+} as unknown as ControlGroupRuntimeState<OptionsListDSLControlState>;

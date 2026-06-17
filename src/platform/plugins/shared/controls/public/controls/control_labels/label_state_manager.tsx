@@ -10,7 +10,7 @@
 import deepEqual from 'fast-deep-equal';
 import { BehaviorSubject, combineLatest, distinctUntilChanged, map, skip } from 'rxjs';
 
-import type { DataControlRuntimeState } from '@kbn/controls-schemas';
+import type { DataControlState } from '@kbn/controls-schemas';
 import {
   titleComparators,
   type PublishingSubject,
@@ -24,9 +24,7 @@ import type { StateManager, SubjectsOf } from '@kbn/presentation-publishing/stat
  * the other properties (description, hide title, default title, etc.) are not applicable for controls.
  */
 
-export const defaultControlLabelComparators: StateComparators<
-  Pick<DataControlRuntimeState, 'title'>
-> = {
+export const defaultControlLabelComparators: StateComparators<Pick<DataControlState, 'title'>> = {
   title: titleComparators.title,
 };
 
