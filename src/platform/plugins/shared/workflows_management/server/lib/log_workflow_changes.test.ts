@@ -125,7 +125,7 @@ describe('logWorkflowChanges', () => {
           objectId: 'wf-1',
           objectType: WORKFLOW_CHANGE_HISTORY_OBJECT_TYPE,
           sequence: 7,
-          snapshot: expect.objectContaining({ version: 7 }),
+          snapshot: { yaml: 'name: Test workflow' },
         },
       ],
       {
@@ -229,13 +229,13 @@ describe('logWorkflowChanges', () => {
           objectId: 'wf-1',
           objectType: WORKFLOW_CHANGE_HISTORY_OBJECT_TYPE,
           sequence: 2,
-          snapshot: expect.objectContaining({ version: 2 }),
+          snapshot: { yaml: 'name: Test workflow' },
         },
         {
           timestamp: REFERENCE_TIMESTAMP_ISO,
           objectId: 'wf-2',
           objectType: WORKFLOW_CHANGE_HISTORY_OBJECT_TYPE,
-          snapshot: withoutVersion,
+          snapshot: { yaml: 'name: Test workflow' },
         },
       ],
       {

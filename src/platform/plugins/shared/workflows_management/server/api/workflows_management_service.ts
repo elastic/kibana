@@ -73,6 +73,8 @@ import type {
 } from './workflows_management_api';
 
 import type { BulkFailureEntry } from '../lib/bulk_id_helpers';
+import { getHistoryForWorkflow } from '../lib/get_workflow_change_history';
+import { isWorkflowVersioningEnabled } from '../lib/is_workflow_versioning_enabled';
 import { ManagedWorkflowsService } from '../services/managed_workflows_service';
 import { WorkflowChangeHistoryService } from '../services/workflow_change_history_service';
 import { WorkflowCrudService } from '../services/workflow_crud_service';
@@ -82,6 +84,7 @@ import { WorkflowValidationService } from '../services/workflow_validation_servi
 import { createStorage, type WorkflowStorage } from '../storage/workflow_storage';
 import { WorkflowTaskScheduler } from '../tasks/workflow_task_scheduler';
 import type { WorkflowsServerPluginStartDeps } from '../types';
+import type { WorkflowChangesHistoryResponse } from '../types/workflow_change_history';
 
 export interface SearchWorkflowExecutionsParams {
   workflowId?: string;
@@ -236,6 +239,22 @@ export class WorkflowsService {
   ): Promise<WorkflowDetailDto | null> {
     await this.ensureInitialized();
     return this.crudService.getWorkflow(id, spaceId, options);
+  }
+
+  public async getHistoryForWorkflow(
+    id: string,
+    spaceId: string,
+    options?: { page?: number; perPage?: number }
+  ): Promise<WorkflowChangesHistoryResponse> {
+    await this.ensureInitialized();
+    return getHistoryForWorkflow(
+      {
+        changeHistoryService: this.changeHistoryService,
+        getWorkflow: (workflowId, sid) => this.crudService.getWorkflow(workflowId, sid),
+        isWorkflowVersioningEnabled: () => isWorkflowVersioningEnabled(this.coreStart),
+      },
+      { workflowId: id, spaceId, ...options }
+    );
   }
 
   public async getWorkflowsByIds(

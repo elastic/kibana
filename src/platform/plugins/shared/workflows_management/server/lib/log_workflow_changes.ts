@@ -52,7 +52,7 @@ const toObjectChanges = (
       objectId: id,
       objectType: WORKFLOW_CHANGE_HISTORY_OBJECT_TYPE,
       ...(document.version != null ? { sequence: document.version } : {}),
-      snapshot: document,
+      snapshot: { yaml: document.yaml },
     };
   });
 };
