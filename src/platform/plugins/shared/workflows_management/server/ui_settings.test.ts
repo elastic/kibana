@@ -8,7 +8,10 @@
  */
 
 import { createCoreSetupMock } from '@kbn/core-lifecycle-server-mocks/src/core_setup.mock';
-import { WORKFLOWS_UI_SETTING_ID } from '@kbn/workflows';
+import {
+  WORKFLOWS_EXPERIMENTAL_FEATURES_SETTING_ID,
+  WORKFLOWS_UI_SETTING_ID,
+} from '@kbn/workflows';
 import type { WorkflowsServerPluginSetupDeps } from './types';
 import { registerUISettings } from './ui_settings';
 
@@ -32,6 +35,15 @@ describe('Workflows Management UI Settings', () => {
           readonly: false,
           requiresPageReload: true,
           category: expect.any(Array),
+        },
+        [WORKFLOWS_EXPERIMENTAL_FEATURES_SETTING_ID]: {
+          description: expect.any(String),
+          name: expect.any(String),
+          schema: expect.any(Object),
+          value: false,
+          experimental: true,
+          requiresPageReload: false,
+          readonly: false,
         },
       })
     );
