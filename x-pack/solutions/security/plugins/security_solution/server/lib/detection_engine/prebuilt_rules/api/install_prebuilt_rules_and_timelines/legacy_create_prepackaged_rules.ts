@@ -79,10 +79,18 @@ export const legacyCreatePrepackagedRules = async (
 
   const { result: timelinesResult } = await performTimelinesInstallation(context);
 
-  await applyPrebuiltRuleAssets({
+  const { errors: updateErrors } = await applyPrebuiltRuleAssets({
     assets: rulesToUpdate,
     deps: { actionsClient, rulesClient, mlAuthz, ruleAssetsClient },
   });
+
+  if (updateErrors.length > 0) {
+    logger.error(
+      `legacyCreatePrepackagedRules: ${updateErrors.length} rule(s) failed to update: ${updateErrors
+        .map(({ error }) => (error instanceof Error ? error.message : String(error)))
+        .join(', ')}`
+    );
+  }
 
   return {
     rules_installed: installedRules.length,
