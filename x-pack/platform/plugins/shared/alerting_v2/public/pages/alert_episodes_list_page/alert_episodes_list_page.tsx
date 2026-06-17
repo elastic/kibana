@@ -45,11 +45,14 @@ import {
   EpisodeRuleCell,
 } from '@kbn/alerting-v2-episodes-ui/components/episodes_table_cell_renderers';
 import { AlertEpisodeAssigneeCell } from '@kbn/alerting-v2-episodes-ui/components/assignee_cell';
+import { ExperimentalBadge } from '../../components/experimental_badge';
 import { paths } from '../../constants';
 import type { AlertEpisodesKibanaServices } from '../../episodes_kibana_services';
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import * as i18n from './translations';
 import { EpisodesFilterBar } from './components/episodes_filter_bar';
+import { EpisodesKpis } from './components/episodes_kpis';
+import { EpisodesHistogram } from './components/episodes_histogram';
 import { alertEpisodeToDataTableRecord } from './utils';
 import { dataTableRecordToEpisode } from './utils/data_table_record_to_episode';
 import { getDiscoverHrefForRuleAndEpisodeTimestamp } from '../../utils/discover_href_for_episode';
@@ -116,8 +119,14 @@ export const AlertEpisodesListPage = () => {
 
   useBreadcrumbs('episodes_list');
 
-  const { filterState, setFilterState, timeRange, handleTimeChange } =
-    useEpisodesListUrlState(timefilter);
+  const {
+    filterState,
+    setFilterState,
+    timeRange,
+    handleTimeChange,
+    histogramBreakdownField,
+    setHistogramBreakdownField,
+  } = useEpisodesListUrlState(timefilter);
   const [sortState, setSortState] = useState<EpisodesSortState>(DEFAULT_SORT);
   const [columns, setColumns] = useState<string[]>([
     'episode.status',
@@ -135,7 +144,6 @@ export const AlertEpisodesListPage = () => {
     data: episodesData,
     dataView,
     isLoading,
-    refetch,
   } = useFetchAlertingEpisodesQuery({
     pageSize: PAGE_SIZE,
     services,
@@ -149,19 +157,22 @@ export const AlertEpisodesListPage = () => {
     [sortState.sortField, sortState.sortDirection]
   );
 
-  const onSort = useCallback((nextSort: string[][]) => {
-    if (!nextSort.length) {
-      setSortState(DEFAULT_SORT);
-      return;
-    }
-    const [field, dir] = nextSort[nextSort.length - 1];
-    if (field != null && dir != null) {
-      setSortState({
-        sortField: String(field),
-        sortDirection: dir === 'asc' ? 'asc' : 'desc',
-      });
-    }
-  }, []);
+  const onSort = useCallback(
+    (nextSort: string[][]) => {
+      if (!nextSort.length) {
+        setSortState(DEFAULT_SORT);
+        return;
+      }
+      const [field, dir] = nextSort[nextSort.length - 1];
+      if (field != null && dir != null) {
+        setSortState({
+          sortField: String(field),
+          sortDirection: dir === 'asc' ? 'asc' : 'desc',
+        });
+      }
+    },
+    [setSortState]
+  );
 
   const ruleIds = useMemo(
     () => [...new Set(episodesData?.map((row) => row['rule.id']) ?? [])],
@@ -308,7 +319,16 @@ export const AlertEpisodesListPage = () => {
     >
       <EuiPageHeader
         bottomBorder
-        pageTitle={i18n.EPISODES_LIST_PAGE_TITLE}
+        pageTitle={
+          <EuiFlexGroup component="span" alignItems="center" gutterSize="s" responsive={false}>
+            <EuiFlexItem grow={false} component="span">
+              {i18n.EPISODES_LIST_PAGE_TITLE}
+            </EuiFlexItem>
+            <EuiFlexItem grow={false} component="span">
+              <ExperimentalBadge />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        }
         rightSideItems={[
           <EuiButton
             key="manage-rules"
@@ -339,11 +359,24 @@ export const AlertEpisodesListPage = () => {
             onTimeChange={handleTimeChange}
             ruleOptions={ruleOptions}
             assigneeUids={assigneeUids}
-            onRefresh={() => refetch()}
+            onRefresh={invalidateEpisodeQueries}
             isLoading={isLoading}
             services={services}
           />
-          <EuiSpacer size="s" />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EpisodesKpis services={services} filterState={filterState} timeRange={timeRange} />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EpisodesHistogram
+            services={services}
+            dataView={dataView}
+            filterState={filterState}
+            timeRange={timeRange}
+            onTimeRangeChange={handleTimeChange}
+            breakdownField={histogramBreakdownField}
+            onBreakdownFieldChange={setHistogramBreakdownField}
+          />
         </EuiFlexItem>
         <EuiFlexItem
           grow

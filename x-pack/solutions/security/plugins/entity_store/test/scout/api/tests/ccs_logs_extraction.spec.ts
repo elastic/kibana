@@ -15,6 +15,7 @@ import {
   ENTITY_STORE_ROUTES,
   ENTITY_STORE_TAGS,
   LATEST_ALIAS,
+  UPDATES_INDEX,
 } from '../fixtures/constants';
 import { FF_ENABLE_ENTITY_STORE_V2 } from '../../../../common';
 import { clearEntityStoreIndices } from '../fixtures/helpers';
@@ -136,11 +137,7 @@ apiTest.describe(
       await apiClient.post(ENTITY_STORE_ROUTES.public.UNINSTALL, {
         headers: defaultHeaders,
         responseType: 'json',
-        body: {
-          logExtraction: {
-            docsLimit: DOCS_LIMIT,
-          },
-        },
+        body: {},
       });
       await clearEntityStoreIndices(esClient);
     });
@@ -190,6 +187,7 @@ apiTest.describe(
         );
         expect(extractResponse.statusCode).toBe(200);
         expect(extractResponse.body).toMatchObject({ count: 4, pages: 2 });
+        await esClient.indices.refresh({ index: UPDATES_INDEX });
 
         const logExtractionResponse = await apiClient.post(
           ENTITY_STORE_ROUTES.internal.FORCE_LOG_EXTRACTION('host'),
@@ -329,6 +327,7 @@ apiTest.describe(
         );
         expect(extractResponse.statusCode).toBe(200);
         expect(extractResponse.body).toMatchObject({ count: 5, pages: 3 });
+        await esClient.indices.refresh({ index: UPDATES_INDEX });
 
         const logExtractionResponse = await apiClient.post(
           ENTITY_STORE_ROUTES.internal.FORCE_LOG_EXTRACTION('user'),
@@ -442,6 +441,7 @@ apiTest.describe(
         );
         expect(extractResponse.statusCode).toBe(200);
         expect(extractResponse.body).toMatchObject({ count: 2, pages: 1 });
+        await esClient.indices.refresh({ index: UPDATES_INDEX });
 
         const logExtractionResponse = await apiClient.post(
           ENTITY_STORE_ROUTES.internal.FORCE_LOG_EXTRACTION('service'),
@@ -517,6 +517,7 @@ apiTest.describe(
         );
         expect(extractResponse.statusCode).toBe(200);
         expect(extractResponse.body).toMatchObject({ count: 2, pages: 1 });
+        await esClient.indices.refresh({ index: UPDATES_INDEX });
 
         const logExtractionResponse = await apiClient.post(
           ENTITY_STORE_ROUTES.internal.FORCE_LOG_EXTRACTION('generic'),
@@ -615,6 +616,7 @@ apiTest.describe(
         );
         expect(extractResponse.statusCode).toBe(200);
         expect(extractResponse.body).toMatchObject({ count: 8, pages: 5 });
+        await esClient.indices.refresh({ index: UPDATES_INDEX });
 
         const logExtractionResponse = await apiClient.post(
           ENTITY_STORE_ROUTES.internal.FORCE_LOG_EXTRACTION('host'),

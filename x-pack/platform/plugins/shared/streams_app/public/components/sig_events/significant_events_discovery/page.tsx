@@ -15,13 +15,16 @@ import { useStreamsAppBreadcrumbs } from '../../../hooks/use_streams_app_breadcr
 import { useStreamsAppParams } from '../../../hooks/use_streams_app_params';
 import { useStreamsAppRouter } from '../../../hooks/use_streams_app_router';
 import { useStreamsPrivileges } from '../../../hooks/use_streams_privileges';
+import { useSignificantEventsAvailability } from '../../../hooks/sig_events/use_significant_events_availability';
 import { useDiscoverySettings } from './context';
 import { RedirectTo } from '../../redirect_to';
+import { SignificantEventsNotEnabledPrompt } from '../significant_events_not_enabled_prompt';
 import { StreamsAppPageTemplate } from '../../streams_app_page_template';
 import {
   KnowledgeIndicatorsTable,
   KiGenerationProvider,
 } from './components/knowledge_indicators_table';
+import { SignificantEventsDiscoveryProvider } from './context/significant_events_discovery_context';
 import { ONBOARDING_FAILURE_TITLE } from './components/streams_view/translations';
 import { QueriesTable } from './components/queries_table/queries_table';
 import { StreamsView } from './components/streams_view/streams_view';
@@ -30,7 +33,6 @@ import { SettingsTab } from './components/settings/tab';
 import { MemoryTab } from './components/memory/tab';
 import { DetectionsTab } from './components/detections_tab';
 import { DiscoveriesTab } from './components/discoveries_tab';
-import { VerdictsTab } from './components/verdicts_tab';
 import { SigEventsTab } from './components/sig_events_tab';
 
 const discoveryTabs = [
@@ -40,7 +42,6 @@ const discoveryTabs = [
   'insights',
   'detections',
   'discoveries',
-  'verdicts',
   'significant_events',
   'memory',
   'settings',
@@ -68,6 +69,8 @@ export function SignificantEventsDiscoveryPage() {
     features: { significantEventsDiscovery },
   } = useStreamsPrivileges();
   const { euiTheme } = useEuiTheme();
+
+  const { availability, isLoading: isAvailabilityLoading } = useSignificantEventsAvailability();
 
   const onOnboardingFailed = useCallback(
     (error: string) => {
@@ -135,14 +138,6 @@ export function SignificantEventsDiscoveryPage() {
         isSelected: tab === 'discoveries',
       },
       {
-        id: 'verdicts',
-        label: i18n.translate('xpack.streams.significantEventsDiscovery.verdictsTab', {
-          defaultMessage: 'Verdicts',
-        }),
-        href: router.link('/_discovery/{tab}', { path: { tab: 'verdicts' } }),
-        isSelected: tab === 'verdicts',
-      },
-      {
         id: 'significant_events',
         label: i18n.translate('xpack.streams.significantEventsDiscovery.significantEventsTab', {
           defaultMessage: 'Significant Events',
@@ -183,13 +178,21 @@ export function SignificantEventsDiscoveryPage() {
     return baseTabs;
   }, [tab, router, isMemoryEnabled]);
 
-  if (significantEventsDiscovery === undefined) {
-    // Waiting to load license
+  if (significantEventsDiscovery === undefined || isAvailabilityLoading) {
+    // Waiting to load license / availability
     return <EuiLoadingElastic size="xxl" />;
   }
 
   if (!significantEventsDiscovery.available || !significantEventsDiscovery.enabled) {
     return <RedirectTo path="/" />;
+  }
+
+  if (availability && !availability.available) {
+    return (
+      <StreamsAppPageTemplate.Body grow>
+        <SignificantEventsNotEnabledPrompt reason={availability.reason} />
+      </StreamsAppPageTemplate.Body>
+    );
   }
 
   if (!isValidDiscoveryTab(tab)) {
@@ -237,18 +240,19 @@ export function SignificantEventsDiscoveryPage() {
         tabs={tabs}
       />
       <KiGenerationProvider onFailed={onOnboardingFailed}>
-        <StreamsAppPageTemplate.Body grow>
-          {tab === 'streams' && <StreamsView />}
-          {tab === 'knowledge_indicators' && <KnowledgeIndicatorsTable />}
-          {tab === 'queries' && <QueriesTable />}
-          {tab === 'insights' && <InsightsTab />}
-          {tab === 'detections' && <DetectionsTab />}
-          {tab === 'discoveries' && <DiscoveriesTab />}
-          {tab === 'verdicts' && <VerdictsTab />}
-          {tab === 'significant_events' && <SigEventsTab />}
-          {tab === 'memory' && isMemoryEnabled && <MemoryTab />}
-          {tab === 'settings' && <SettingsTab />}
-        </StreamsAppPageTemplate.Body>
+        <SignificantEventsDiscoveryProvider>
+          <StreamsAppPageTemplate.Body grow>
+            {tab === 'streams' && <StreamsView />}
+            {tab === 'knowledge_indicators' && <KnowledgeIndicatorsTable />}
+            {tab === 'queries' && <QueriesTable />}
+            {tab === 'insights' && <InsightsTab />}
+            {tab === 'detections' && <DetectionsTab />}
+            {tab === 'discoveries' && <DiscoveriesTab />}
+            {tab === 'significant_events' && <SigEventsTab />}
+            {tab === 'memory' && isMemoryEnabled && <MemoryTab />}
+            {tab === 'settings' && <SettingsTab />}
+          </StreamsAppPageTemplate.Body>
+        </SignificantEventsDiscoveryProvider>
       </KiGenerationProvider>
     </>
   );

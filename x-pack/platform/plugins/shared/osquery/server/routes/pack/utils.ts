@@ -401,6 +401,7 @@ export const convertSOQueriesToPackConfig = (
             : {}),
           ...(platform === DEFAULT_PLATFORM || platform === undefined ? {} : { platform }),
           ...resultType,
+          ...(spaceId ? { space_id: spaceId } : {}),
         },
         isUndefined
       );

@@ -1,5 +1,5 @@
 {
-  "sha1": "d3ef12cc403ad05596804350d814d4222e6d68bd",
+  "sha1": "0763a0eb3c5c0e0e555dc0e23706c230ac7b92f8",
   "tests": [
     {
       "id": "9932666685095b3-d8099f4a61f66f4",
@@ -2639,7 +2639,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/update_action_policy.spec.ts",
-        "line": 44,
+        "line": 40,
         "column": 10
       }
     },
@@ -2652,7 +2652,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/update_action_policy.spec.ts",
-        "line": 85,
+        "line": 81,
         "column": 10
       }
     },
@@ -2665,7 +2665,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/update_action_policy.spec.ts",
-        "line": 116,
+        "line": 112,
         "column": 10
       }
     },
@@ -2678,7 +2678,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/update_action_policy.spec.ts",
-        "line": 147,
+        "line": 143,
         "column": 10
       }
     },
@@ -2691,7 +2691,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/update_action_policy.spec.ts",
-        "line": 183,
+        "line": 179,
         "column": 10
       }
     },
@@ -2704,7 +2704,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/update_action_policy.spec.ts",
-        "line": 217,
+        "line": 213,
         "column": 10
       }
     },
@@ -2717,7 +2717,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/update_action_policy.spec.ts",
-        "line": 249,
+        "line": 245,
         "column": 10
       }
     },
@@ -2730,7 +2730,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/update_action_policy.spec.ts",
-        "line": 282,
+        "line": 278,
         "column": 10
       }
     },
@@ -2743,7 +2743,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/update_action_policy.spec.ts",
-        "line": 313,
+        "line": 309,
         "column": 10
       }
     },
@@ -2756,7 +2756,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/update_action_policy.spec.ts",
-        "line": 348,
+        "line": 344,
         "column": 10
       }
     },
@@ -2769,7 +2769,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/update_action_policy.spec.ts",
-        "line": 371,
+        "line": 367,
         "column": 10
       }
     },
@@ -2782,7 +2782,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/update_action_policy.spec.ts",
-        "line": 385,
+        "line": 381,
         "column": 10
       }
     },
@@ -2795,7 +2795,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/update_action_policy.spec.ts",
-        "line": 398,
+        "line": 394,
         "column": 10
       }
     },
@@ -2808,7 +2808,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/update_action_policy.spec.ts",
-        "line": 411,
+        "line": 407,
         "column": 10
       }
     },
@@ -2821,7 +2821,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/update_action_policy.spec.ts",
-        "line": 424,
+        "line": 420,
         "column": 10
       }
     },
@@ -2834,7 +2834,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/update_action_policy.spec.ts",
-        "line": 443,
+        "line": 439,
         "column": 10
       }
     },
@@ -2847,7 +2847,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/update_action_policy.spec.ts",
-        "line": 459,
+        "line": 455,
         "column": 10
       }
     },
@@ -2860,7 +2860,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/update_action_policy.spec.ts",
-        "line": 478,
+        "line": 474,
         "column": 10
       }
     },
@@ -2873,7 +2873,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/update_action_policy.spec.ts",
-        "line": 494,
+        "line": 490,
         "column": 10
       }
     },
@@ -2886,7 +2886,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/update_action_policy.spec.ts",
-        "line": 510,
+        "line": 506,
         "column": 10
       }
     },
@@ -2899,7 +2899,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/update_action_policy.spec.ts",
-        "line": 526,
+        "line": 522,
         "column": 10
       }
     },
@@ -2912,7 +2912,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/update_action_policy.spec.ts",
-        "line": 538,
+        "line": 534,
         "column": 10
       }
     },
@@ -2925,7 +2925,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/update_action_policy.spec.ts",
-        "line": 555,
+        "line": 551,
         "column": 10
       }
     },
@@ -2938,7 +2938,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/update_action_policy.spec.ts",
-        "line": 574,
+        "line": 570,
         "column": 10
       }
     },
@@ -4412,6 +4412,175 @@
       }
     },
     {
+      "id": "a0345db0bf45ea2-64e3251c74944b7",
+      "title": "Count new action policy execution events API validation: rejects missing since",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/execution_history/count_new_execution_history_events.spec.ts",
+        "line": 36,
+        "column": 12
+      }
+    },
+    {
+      "id": "a0345db0bf45ea2-0e6cbf6c84c3db0",
+      "title": "Count new action policy execution events API authorization: 200 with alerting_v2_execution_history read privilege",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/execution_history/count_new_execution_history_events.spec.ts",
+        "line": 44,
+        "column": 12
+      }
+    },
+    {
+      "id": "a0345db0bf45ea2-b6eb46719bf8e7e",
+      "title": "Count new action policy execution events API authorization: 200 with alerting_v2_execution_history all privilege",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/execution_history/count_new_execution_history_events.spec.ts",
+        "line": 55,
+        "column": 12
+      }
+    },
+    {
+      "id": "a0345db0bf45ea2-d827b87a9dd2102",
+      "title": "Count new action policy execution events API authorization: 403 without any alerting_v2 privileges",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/execution_history/count_new_execution_history_events.spec.ts",
+        "line": 69,
+        "column": 12
+      }
+    },
+    {
+      "id": "1e38d3a6f95185b-36a81457fa3a0b8",
+      "title": "List action policy execution history API validation: rejects page=0",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/execution_history/list_execution_history.spec.ts",
+        "line": 35,
+        "column": 12
+      }
+    },
+    {
+      "id": "1e38d3a6f95185b-5ebd7738a8f9927",
+      "title": "List action policy execution history API validation: rejects perPage=0",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/execution_history/list_execution_history.spec.ts",
+        "line": 42,
+        "column": 12
+      }
+    },
+    {
+      "id": "1e38d3a6f95185b-d6dfb71cdafb301",
+      "title": "List action policy execution history API validation: accepts perPage at the maximum",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/execution_history/list_execution_history.spec.ts",
+        "line": 49,
+        "column": 12
+      }
+    },
+    {
+      "id": "1e38d3a6f95185b-fc55d016cdaa50f",
+      "title": "List action policy execution history API validation: rejects perPage above the maximum",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/execution_history/list_execution_history.spec.ts",
+        "line": 58,
+        "column": 12
+      }
+    },
+    {
+      "id": "1e38d3a6f95185b-6b910f3060af188",
+      "title": "List action policy execution history API validation: rejects non-numeric perPage",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/execution_history/list_execution_history.spec.ts",
+        "line": 66,
+        "column": 12
+      }
+    },
+    {
+      "id": "1e38d3a6f95185b-e8b3c545002c624",
+      "title": "List action policy execution history API validation: rejects non-numeric page",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/execution_history/list_execution_history.spec.ts",
+        "line": 74,
+        "column": 12
+      }
+    },
+    {
+      "id": "1e38d3a6f95185b-5b875229280a9b5",
+      "title": "List action policy execution history API authorization: 200 with alerting_v2_execution_history read privilege",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/execution_history/list_execution_history.spec.ts",
+        "line": 82,
+        "column": 12
+      }
+    },
+    {
+      "id": "1e38d3a6f95185b-ae43868df72210a",
+      "title": "List action policy execution history API authorization: 200 with alerting_v2_execution_history all privilege",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/execution_history/list_execution_history.spec.ts",
+        "line": 92,
+        "column": 12
+      }
+    },
+    {
+      "id": "1e38d3a6f95185b-151dcfebdcd6818",
+      "title": "List action policy execution history API authorization: 403 without any alerting_v2 privileges",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/execution_history/list_execution_history.spec.ts",
+        "line": 105,
+        "column": 12
+      }
+    },
+    {
       "id": "3c537100c859ff0-964a64d288ab43b",
       "title": "Bulk delete rules API delete: should delete rules by ids",
       "expectedStatus": "passed",
@@ -5681,7 +5850,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rules/get_rule_tags.spec.ts",
-        "line": 38,
+        "line": 47,
         "column": 10
       }
     },
@@ -5694,7 +5863,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rules/get_rule_tags.spec.ts",
-        "line": 47,
+        "line": 56,
         "column": 10
       }
     },
@@ -5707,7 +5876,33 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rules/get_rule_tags.spec.ts",
-        "line": 75,
+        "line": 84,
+        "column": 10
+      }
+    },
+    {
+      "id": "b7a922248ef62f9-fdaa3febd09601a",
+      "title": "Get rule tags API filter: should only return tags from rules matching the filter",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rules/get_rule_tags.spec.ts",
+        "line": 109,
+        "column": 10
+      }
+    },
+    {
+      "id": "b7a922248ef62f9-dc9caa1fe588586",
+      "title": "Get rule tags API filter: should return 400 for an invalid filter field",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rules/get_rule_tags.spec.ts",
+        "line": 145,
         "column": 10
       }
     },
@@ -5720,7 +5915,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rules/get_rule_tags.spec.ts",
-        "line": 100,
+        "line": 160,
         "column": 10
       }
     },
@@ -5733,7 +5928,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rules/get_rule_tags.spec.ts",
-        "line": 116,
+        "line": 176,
         "column": 10
       }
     },
@@ -5746,7 +5941,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rules/get_rule_tags.spec.ts",
-        "line": 135,
+        "line": 195,
         "column": 10
       }
     },
@@ -5829,8 +6024,21 @@
       }
     },
     {
-      "id": "2c8eab60b1651ac-53398d6314680b9",
-      "title": "Get rules bulk API bulk: should return the requested rules when given multiple ids",
+      "id": "2c8eab60b1651ac-5aeca6d425fd12b",
+      "title": "Bulk get rules API bulk-get: should return the requested rules when given multiple ids",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rules/get_rules_bulk.spec.ts",
+        "line": 38,
+        "column": 10
+      }
+    },
+    {
+      "id": "2c8eab60b1651ac-0a8b4119975d3a0",
+      "title": "Bulk get rules API bulk-get: should return rules in the exact order of the requested ids",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
@@ -5842,47 +6050,47 @@
       }
     },
     {
-      "id": "2c8eab60b1651ac-b72843b71714e5e",
-      "title": "Get rules bulk API bulk: should return a single rule when given a single id",
+      "id": "2c8eab60b1651ac-44ab7f668a12673",
+      "title": "Bulk get rules API bulk-get: should return a single rule when given a single id",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rules/get_rules_bulk.spec.ts",
-        "line": 94,
+        "line": 95,
         "column": 10
       }
     },
     {
-      "id": "2c8eab60b1651ac-ebf45a145d9e8f2",
-      "title": "Get rules bulk API bulk: should silently drop ids that do not exist",
+      "id": "2c8eab60b1651ac-5e10957aa7efecd",
+      "title": "Bulk get rules API bulk-get: should return 404 when one or more requested ids are missing",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rules/get_rules_bulk.spec.ts",
-        "line": 110,
+        "line": 113,
         "column": 10
       }
     },
     {
-      "id": "2c8eab60b1651ac-14f5325ae31d4cf",
-      "title": "Get rules bulk API bulk: should return an empty result set when none of the ids exist",
+      "id": "2c8eab60b1651ac-ff3689aedd0f8fa",
+      "title": "Bulk get rules API bulk-get: should return 404 when all requested ids are missing",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rules/get_rules_bulk.spec.ts",
-        "line": 125,
+        "line": 129,
         "column": 10
       }
     },
     {
-      "id": "2c8eab60b1651ac-818ddb5c34b7a1e",
-      "title": "Get rules bulk API bulk: should treat a missing ids query param as an empty request",
+      "id": "2c8eab60b1651ac-ee356fea37bbf27",
+      "title": "Bulk get rules API validation: should reject an empty ids array",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
@@ -5894,67 +6102,93 @@
       }
     },
     {
-      "id": "2c8eab60b1651ac-8b922406df2e346",
-      "title": "Get rules bulk API validation: should reject ids longer than ID_MAX_LENGTH",
+      "id": "2c8eab60b1651ac-b8dbc010733b069",
+      "title": "Bulk get rules API validation: should reject more than MAX_BULK_ITEMS ids",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rules/get_rules_bulk.spec.ts",
-        "line": 157,
+        "line": 149,
         "column": 10
       }
     },
     {
-      "id": "2c8eab60b1651ac-9ed6b487c7879a6",
-      "title": "Get rules bulk API bulk: documents that ids past the qs parameter limit are silently dropped",
+      "id": "2c8eab60b1651ac-3c91f3b5bed54f2",
+      "title": "Bulk get rules API validation: should reject ids longer than ID_MAX_LENGTH",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rules/get_rules_bulk.spec.ts",
-        "line": 165,
+        "line": 158,
         "column": 10
       }
     },
     {
-      "id": "2c8eab60b1651ac-512d8786a12e482",
-      "title": "Get rules bulk API authorization: should return 200 for a user with read-only alerting_v2 privileges",
+      "id": "2c8eab60b1651ac-3ac25f10e459df9",
+      "title": "Bulk get rules API validation: should reject an empty body",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rules/get_rules_bulk.spec.ts",
-        "line": 182,
+        "line": 167,
         "column": 10
       }
     },
     {
-      "id": "2c8eab60b1651ac-0933b784770b5bd",
-      "title": "Get rules bulk API authorization: should return 200 for a user with full alerting_v2 privileges",
+      "id": "2c8eab60b1651ac-e4c280fa294f026",
+      "title": "Bulk get rules API validation: should reject unknown top-level body fields (strict)",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rules/get_rules_bulk.spec.ts",
-        "line": 196,
+        "line": 175,
         "column": 10
       }
     },
     {
-      "id": "2c8eab60b1651ac-abb1ac85403c92c",
-      "title": "Get rules bulk API authorization: should return 403 for a user without alerting_v2 privileges",
+      "id": "2c8eab60b1651ac-dcdcdc9084bb133",
+      "title": "Bulk get rules API authorization: should return 200 for a user with read-only alerting_v2 privileges",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rules/get_rules_bulk.spec.ts",
-        "line": 213,
+        "line": 189,
+        "column": 10
+      }
+    },
+    {
+      "id": "2c8eab60b1651ac-5d3ff3a4895f19f",
+      "title": "Bulk get rules API authorization: should return 200 for a user with full alerting_v2 privileges",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rules/get_rules_bulk.spec.ts",
+        "line": 204,
+        "column": 10
+      }
+    },
+    {
+      "id": "2c8eab60b1651ac-edfc88feb5849a9",
+      "title": "Bulk get rules API authorization: should return 403 for a user without alerting_v2 privileges",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rules/get_rules_bulk.spec.ts",
+        "line": 222,
         "column": 10
       }
     },
@@ -6011,6 +6245,19 @@
       }
     },
     {
+      "id": "b6357d3d7fe0fc8-4e872c2d608da57",
+      "title": "Update rule API update: should return 409 when the request body version is stale",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rules/update_rule.spec.ts",
+        "line": 125,
+        "column": 10
+      }
+    },
+    {
       "id": "b6357d3d7fe0fc8-14064924f25bb18",
       "title": "Update rule API update: should clear an optional field when set to null",
       "expectedStatus": "passed",
@@ -6019,7 +6266,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rules/update_rule.spec.ts",
-        "line": 125,
+        "line": 146,
         "column": 10
       }
     },
@@ -6032,7 +6279,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rules/update_rule.spec.ts",
-        "line": 149,
+        "line": 170,
         "column": 10
       }
     },
@@ -6045,7 +6292,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rules/update_rule.spec.ts",
-        "line": 157,
+        "line": 178,
         "column": 10
       }
     },
@@ -6058,7 +6305,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rules/update_rule.spec.ts",
-        "line": 169,
+        "line": 190,
         "column": 10
       }
     },
@@ -6071,7 +6318,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rules/update_rule.spec.ts",
-        "line": 183,
+        "line": 204,
         "column": 10
       }
     },
@@ -6084,7 +6331,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rules/update_rule.spec.ts",
-        "line": 197,
+        "line": 218,
         "column": 10
       }
     },
@@ -6097,7 +6344,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rules/update_rule.spec.ts",
-        "line": 211,
+        "line": 232,
         "column": 10
       }
     },
@@ -6110,7 +6357,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rules/update_rule.spec.ts",
-        "line": 225,
+        "line": 246,
         "column": 10
       }
     },
@@ -6123,7 +6370,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rules/update_rule.spec.ts",
-        "line": 239,
+        "line": 260,
         "column": 10
       }
     },
@@ -6136,7 +6383,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rules/update_rule.spec.ts",
-        "line": 253,
+        "line": 274,
         "column": 10
       }
     },
@@ -6149,7 +6396,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rules/update_rule.spec.ts",
-        "line": 273,
+        "line": 294,
         "column": 10
       }
     },
@@ -6162,7 +6409,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rules/update_rule.spec.ts",
-        "line": 288,
+        "line": 309,
         "column": 10
       }
     },
@@ -6175,7 +6422,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rules/update_rule.spec.ts",
-        "line": 308,
+        "line": 329,
         "column": 10
       }
     },
