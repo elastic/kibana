@@ -200,6 +200,20 @@ export const attacksWorkflowRunTriggeredEvent: AttacksTelemetryEvent = {
   schema: actionSourceSchema,
 };
 
+export const attacksTypeFilterChangedEvent: AttacksTelemetryEvent = {
+  eventType: AttacksEventTypes.TypeFilterChanged,
+  schema: {
+    types: {
+      type: 'array',
+      items: {
+        type: 'keyword',
+        _meta: { description: 'A selected type', optional: false },
+      },
+      _meta: { description: 'The selected types in the type filter', optional: false },
+    },
+  },
+};
+
 export const attacksTelemetryEvents = [
   attacksTableSortChangedEvent,
   attacksViewOptionChangedEvent,
@@ -218,4 +232,5 @@ export const attacksTelemetryEvents = [
   attacksScheduleDetailsFlyoutOpenedEvent,
   attacksFeaturePromotionCalloutActionEvent,
   attacksWorkflowRunTriggeredEvent,
+  attacksTypeFilterChangedEvent,
 ];
