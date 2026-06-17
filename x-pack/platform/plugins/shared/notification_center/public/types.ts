@@ -5,4 +5,9 @@
  * 2.0.
  */
 
-export const getRequestSavedObjectClient = jest.fn(() => 'mock-so-client');
+/**
+ * UI plugin setup is gated on `notificationCenter.uiEnabled` feature flag
+ */
+export type NotificationCenterPublicSetup = Record<string, never>;
+
+export type NotificationCenterPublicStart = Record<string, never>;
