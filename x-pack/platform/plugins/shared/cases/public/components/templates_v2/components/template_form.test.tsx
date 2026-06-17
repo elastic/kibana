@@ -77,7 +77,7 @@ describe('TemplateFormFields', () => {
       </TestProviders>
     );
 
-    expect(screen.getByTitle('Template saved')).toBeInTheDocument();
+    expect(screen.getByTestId('template-saved-icon')).toBeInTheDocument();
   });
 
   it('calls useFieldNameValidation hook with editor and value', () => {
