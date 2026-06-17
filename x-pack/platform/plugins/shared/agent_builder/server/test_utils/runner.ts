@@ -131,6 +131,7 @@ export const createPromptManagerMock = (): PromptManagerMock => {
   return {
     set: jest.fn(),
     get: jest.fn(),
+    delete: jest.fn(),
     dump: jest.fn(),
     getConfirmationStatus: jest.fn(),
     getAuthorizationStatus: jest.fn(),
@@ -155,7 +156,7 @@ export const createToolManagerMock = (): ToolManagerMock => {
     list: jest.fn(),
     recordToolUse: jest.fn(),
     getToolIdMapping: jest.fn(),
-    getToolOrigin: jest.fn(),
+    getToolMeta: jest.fn(),
     getDynamicToolIds: jest.fn(),
     getSummarizer: jest.fn(),
   };
@@ -318,6 +319,7 @@ export const createAgentHandlerContextMock = (): AgentHandlerContextMock => {
       skills: false,
       subagents: false,
       todos: false,
+      askUserQuestion: false,
     },
     subAgentExecutor: {
       executeSubAgent: jest.fn(),

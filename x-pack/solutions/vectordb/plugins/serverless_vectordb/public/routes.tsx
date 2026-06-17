@@ -12,7 +12,7 @@ import { Route, Routes } from '@kbn/shared-ux-router';
 import {
   hasSeenOnboarding,
   IngestStep,
-  PathSelection,
+  OnboardingLandingPage,
   SearchStep,
   TutorialsPage,
 } from '@kbn/vectordb-onboarding';
@@ -34,7 +34,7 @@ const OnboardingRoutes = () => {
 
   return (
     <Routes>
-      <Route exact path="/onboarding" component={PathSelection} />
+      <Route exact path="/onboarding" component={OnboardingLandingPage} />
       <Route exact path="/onboarding/ingest" component={IngestStep} />
       <Route exact path="/onboarding/search" component={SearchStep} />
     </Routes>
