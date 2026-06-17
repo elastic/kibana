@@ -12,8 +12,6 @@ export interface LegacyFieldStatsFields {
   viewType?: FieldStatsTableEmbeddableState['view_type'];
   showDistributions?: boolean;
   dataViewId?: string;
-  timeRange?: { from: string; to: string; mode?: 'absolute' | 'relative' };
-  hidePanelTitles?: boolean;
 }
 
 type FieldStatsEsqlState = Extract<FieldStatsTableEmbeddableState, { view_type: 'esql' }>;
