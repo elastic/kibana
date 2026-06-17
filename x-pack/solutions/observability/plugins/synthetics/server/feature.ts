@@ -11,9 +11,7 @@ import type {
   SubFeaturePrivilegeGroupConfig,
   SubFeaturePrivilegeGroupType,
 } from '@kbn/features-plugin/common';
-import { ALERTING_FEATURE_ID } from '@kbn/alerting-plugin/common';
-import { DEPRECATED_ALERTING_CONSUMERS } from '@kbn/rule-data-utils';
-import { UPTIME_RULE_TYPE_IDS, SYNTHETICS_RULE_TYPE_IDS } from '@kbn/rule-data-utils';
+import { SYNTHETICS_ALERTING_FEATURES } from '@kbn/rule-data-utils';
 import {
   legacyPrivateLocationsSavedObjectName,
   privateLocationSavedObjectName,
@@ -33,12 +31,7 @@ import { syntheticsApiKeyObjectType } from './saved_objects/service_api_key';
 
 export const PRIVATE_LOCATION_WRITE_API = 'private-location-write';
 
-const ruleTypes = [...UPTIME_RULE_TYPE_IDS, ...SYNTHETICS_RULE_TYPE_IDS];
-
-const alertingFeatures = ruleTypes.map((ruleTypeId) => ({
-  ruleTypeId,
-  consumers: [PLUGIN.ID, ALERTING_FEATURE_ID, ...DEPRECATED_ALERTING_CONSUMERS],
-}));
+const alertingFeatures = SYNTHETICS_ALERTING_FEATURES;
 
 const elasticManagedLocationsEnabledPrivilege: SubFeaturePrivilegeGroupConfig = {
   groupType: 'independent' as SubFeaturePrivilegeGroupType,

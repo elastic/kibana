@@ -33,6 +33,8 @@ import { useAttackDiscoveryControls } from '../../../attack_discovery/pages/use_
 import { Actions } from '../../../attack_discovery/pages/header/actions';
 import { SCHEDULE_TAB_ID } from '../../../attack_discovery/pages/settings_flyout/constants';
 import { FilterByAssigneesPopover } from '../../../common/components/filter_by_assignees_popover/filter_by_assignees_popover';
+import { useLocalStorage } from '../../../common/components/local_storage';
+import { getSettingKey } from '../../../common/components/local_storage/helpers';
 import { PAGE_TITLE } from '../../pages/attacks/translations';
 import { HeaderPage } from '../../../common/components/header_page';
 import { IconSparkles } from '../../../common/icons/sparkles';
@@ -42,6 +44,7 @@ import { Display } from '../../../explore/hosts/pages/display';
 import { SearchBarSection } from './search_bar/search_bar_section';
 import { TableSection } from './table/table_section';
 import type { AssigneesIdsSelection } from '../../../common/components/assignees/types';
+import { TypeFilter } from './filters/type_filter';
 import { ConnectorFilter } from '../../../attack_discovery/pages/results/history/search_and_filter/connector_filter';
 
 import type { Status } from '../../../../common/api/detection_engine';
@@ -53,10 +56,17 @@ import type { SettingsOverrideOptions } from '../../../attack_discovery/pages/re
 export const CONTENT_TEST_ID = 'attacks-page-content';
 export const SECURITY_SOLUTION_PAGE_WRAPPER_TEST_ID = 'attacks-page-security-solution-page-wrapper';
 export const ATTACKS_PAGE_ACTIONS_TEST_ID = 'attacks-page-actions';
+export const ATTACKS_PAGE_TYPE_FILTER_TEST_ID = 'attacks-page-type-filter';
 export const ATTACKS_PAGE_ASSIGNEE_FILTER_TEST_ID = 'attacks-page-assignee-filter';
 export const ATTACKS_PAGE_CONNECTOR_FILTER_TEST_ID = 'attacks-page-connector-filter';
 export const ATTACKS_PAGE_STANDARD_FILTERS_TEST_ID = 'attacks-page-standard-filters';
 const FILTERS_SECTION_WIDTH = 480;
+
+const ATTACKS_PAGE = 'attacks';
+const FILTER_CATEGORY = 'filters';
+const TYPE_FILTER_SETTING_NAME = 'typeFilter';
+const ASSIGNEES_FILTER_SETTING_NAME = 'assigneesFilter';
+const CONNECTOR_FILTER_SETTING_NAME = 'connectorFilter';
 
 /**
  * Need a 100% height here to account for the graph/analyze tool, which sets no explicit height parameters, but fills the available space.
@@ -86,7 +96,24 @@ export const AttacksPageContent = React.memo(({ dataView }: AttacksPageContentPr
   const containerElement = useRef<HTMLDivElement | null>(null);
 
   const { globalFullScreen } = useGlobalFullScreen();
-  const [selectedConnectorNames, setSelectedConnectorNames] = useState<string[]>([]);
+  const [selectedTypes, setSelectedTypes] = useLocalStorage<string[]>({
+    key: getSettingKey({
+      category: FILTER_CATEGORY,
+      page: ATTACKS_PAGE,
+      setting: TYPE_FILTER_SETTING_NAME,
+    }),
+    defaultValue: [],
+    isInvalidDefault: (value) => !Array.isArray(value),
+  });
+  const [selectedConnectorNames, setSelectedConnectorNames] = useLocalStorage<string[]>({
+    key: getSettingKey({
+      category: FILTER_CATEGORY,
+      page: ATTACKS_PAGE,
+      setting: CONNECTOR_FILTER_SETTING_NAME,
+    }),
+    defaultValue: [],
+    isInvalidDefault: (value) => !Array.isArray(value),
+  });
   const {
     services: { settings, telemetry },
   } = useKibana();
@@ -140,7 +167,15 @@ export const AttacksPageContent = React.memo(({ dataView }: AttacksPageContentPr
     handleOpenFlyout(SCHEDULE_TAB_ID);
   }, [handleOpenFlyout]);
 
-  const [assignees, setAssignees] = useState<AssigneesIdsSelection[]>([]);
+  const [assignees, setAssignees] = useLocalStorage<AssigneesIdsSelection[]>({
+    key: getSettingKey({
+      category: FILTER_CATEGORY,
+      page: ATTACKS_PAGE,
+      setting: ASSIGNEES_FILTER_SETTING_NAME,
+    }),
+    defaultValue: [],
+    isInvalidDefault: (value) => !Array.isArray(value),
+  });
 
   const onAssigneesSelectionChange = useCallback(
     (newAssignees: AssigneesIdsSelection[]) => {
@@ -148,7 +183,7 @@ export const AttacksPageContent = React.memo(({ dataView }: AttacksPageContentPr
         setAssignees(newAssignees);
       }
     },
-    [assignees]
+    [assignees, setAssignees]
   );
   const [statusFilter, setStatusFilter] = useState<Status[]>([]);
   const [pageFilters, setPageFilters] = useState<Filter[]>();
@@ -206,6 +241,13 @@ export const AttacksPageContent = React.memo(({ dataView }: AttacksPageContentPr
           <EuiFlexGroup direction="row" responsive={false} wrap={true}>
             <EuiFlexItem grow={1} style={{ maxWidth: FILTERS_SECTION_WIDTH }}>
               <EuiFlexGroup direction="row" responsive={false}>
+                <EuiFlexItem grow={1} data-test-subj={ATTACKS_PAGE_TYPE_FILTER_TEST_ID}>
+                  <TypeFilter
+                    selectedTypes={selectedTypes}
+                    setSelectedTypes={setSelectedTypes}
+                    compressed={true}
+                  />
+                </EuiFlexItem>
                 <EuiFlexItem grow={1} data-test-subj={ATTACKS_PAGE_ASSIGNEE_FILTER_TEST_ID}>
                   <FilterByAssigneesPopover
                     selectedUserIds={assignees}
@@ -247,6 +289,7 @@ export const AttacksPageContent = React.memo(({ dataView }: AttacksPageContentPr
           pageFilters={pageFilters}
           assignees={assignees}
           selectedConnectorNames={selectedConnectorNames}
+          selectedTypes={selectedTypes}
           dataView={dataView}
         />
 
@@ -257,6 +300,7 @@ export const AttacksPageContent = React.memo(({ dataView }: AttacksPageContentPr
           pageFilters={pageFilters}
           assignees={assignees}
           selectedConnectorNames={selectedConnectorNames}
+          selectedTypes={selectedTypes}
           openSchedulesFlyout={openSchedulesFlyout}
         />
 
