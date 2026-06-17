@@ -82,10 +82,9 @@ describe('useAddToChatAction', () => {
 
   it('calls openAgentBuilderFlyout, reportAddToChat, and onMenuItemClick when the item is clicked', () => {
     const onMenuItemClick = jest.fn();
-    const { result } = renderHook(
-      () => useAddToChatAction({ ...defaultProps, onMenuItemClick }),
-      { wrapper: TestProviders }
-    );
+    const { result } = renderHook(() => useAddToChatAction({ ...defaultProps, onMenuItemClick }), {
+      wrapper: TestProviders,
+    });
 
     const item = result.current.addToChatActionItems[0];
     (item.onClick as () => void)();
