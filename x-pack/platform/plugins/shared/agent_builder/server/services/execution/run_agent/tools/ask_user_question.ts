@@ -12,52 +12,56 @@ import { AgentPromptType } from '@kbn/agent-builder-common/agents/prompts';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { createErrorResult } from '@kbn/agent-builder-server';
 
-export const AskUserQuestionToolName = internalTools.askUserQuestion;
-
 const optionSchema = z.object({
-  label: z.string().describe('Short label shown on the option button.'),
-  description: z.string().optional().describe('Optional longer description for the option.'),
+  label: z.string().describe('Short label for the option'),
+  description: z.string().optional().describe('Optional longer description'),
 });
 
 const questionSchema = z.object({
-  question: z.string().describe('The question text shown to the user.'),
-  options: z.array(optionSchema).describe('The selectable options. Provide 2 to 4 options.'),
-  multi_select: z.boolean().describe('When true the user can pick more than one option.'),
+  question: z.string().describe('The question text shown to the user'),
+  options: z.array(optionSchema).describe('The list of selectable options'),
+  multi_select: z
+    .boolean()
+    .default(false)
+    .describe('When true the user can pick more than one option'),
 });
 
 const schema = z.object({
-  questions: z
-    .array(questionSchema)
-    .describe(
-      '1 to 5 multi-choice questions to ask the user. The user may also skip a question, or pick "other" and enter free text.'
-    ),
+  questions: z.array(questionSchema).describe('List of questions to ask the user'),
 });
 
-const description = `Ask the user 1 to 5 multiple-choice clarifying questions and pause execution until they answer.
+const description = `Ask the user multiple-choice questions.
+
+## Overview
+
+Calling this tool will show a rich UI widget to the user to let them answer the questions, and pause the agent execution until they do.
+
+For each question, the user will be able to:
+1. select one (or multiple if 'multi_select' is true) of the options.
+2. enter a custom (free text) response.
+3. skip the question.
+
+Once the user has answered all questions, the execution will resume and the responses will appear as the result of the tool call.
 
 ## When to use
-- The user's request is ambiguous AND the missing information cannot be inferred from the conversation or other tools.
-- You need a small, bounded set of choices to disambiguate (NOT an open-ended brainstorm).
 
-## When NOT to use
-- The user already provided the information earlier in the conversation. Re-read instead of asking again.
-- You can answer the question yourself with the tools available.
-- The answer would require free-form text longer than a sentence. Use plain conversation for that.
+- When your current instructions (e.g. from active skills) are asking you to.
+- When the user's request is ambiguous AND the missing information cannot be inferred from the conversation or other tools.
 
-## Schema soft limits (enforced socially, not by the schema)
-- 1 to 5 questions per call.
-- 2 to 4 options per question.
+## Guideline
 
-## Call shape
-- Do NOT call this tool in parallel with itself.
-- Avoid calling it in parallel with other tools. If you must, the runner will still surface every HITL prompt at once, but a follow-up answer round will be required before the rest of the conversation can proceed.
+- There is no hard cap on the number of questions or options, but try to keep them to a reasonable number:
+  - 1 to 5 questions per call.
+  - 2 to 4 options per question.
 
-## Standalone runs
-- This tool is unavailable in standalone / sub-agent executions. It returns an error result there; do not retry.`;
+- Do **NOT** call this tool in parallel (with itself or other tools). The tool pauses the execution, and is meant to be called independently so the interrupt state is clean.
+
+- Using a description (in addition to the label) for each option is optional but recommended.
+`;
 
 export const createAskUserQuestionTool = (): BuiltinToolDefinition<typeof schema> => {
   return {
-    id: AskUserQuestionToolName,
+    id: internalTools.askUserQuestion,
     description,
     type: ToolType.builtin,
     schema,
@@ -73,11 +77,10 @@ export const createAskUserQuestionTool = (): BuiltinToolDefinition<typeof schema
         };
       }
 
-      const stepId = uuidv4();
       return {
         prompt: {
           type: AgentPromptType.ask_user_question,
-          id: stepId,
+          id: uuidv4(),
           questions,
         },
       };
