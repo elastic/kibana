@@ -10,6 +10,7 @@ import { z } from '@kbn/zod/v4';
 import {
   getStreamTypeFromDefinition,
   STREAMS_SIG_EVENTS_KI_EXTRACTION_INFERENCE_FEATURE_ID,
+  STREAMS_SIGNIFICANT_EVENTS_INFERENCE_PARENT_FEATURE_ID,
 } from '@kbn/streams-schema';
 import { isInferenceProviderError } from '@kbn/inference-common';
 import { createServerRoute } from '../../../create_server_route';
@@ -116,7 +117,15 @@ const identifyInferredFeaturesRoute = createServerRoute({
         esClient: scopedClusterClient.asCurrentUser,
         featureClient,
         soClient,
-        inferenceClient: inferenceClient.bindTo({ connectorId }),
+        inferenceClient: inferenceClient.bindTo({
+          connectorId,
+          metadata: {
+            connectorTelemetry: {
+              pluginId: STREAMS_SIG_EVENTS_KI_EXTRACTION_INFERENCE_FEATURE_ID,
+              aggregateBy: STREAMS_SIGNIFICANT_EVENTS_INFERENCE_PARENT_FEATURE_ID,
+            },
+          },
+        }),
         logger: routeLogger,
         signal: getRequestAbortSignal(request),
         streamName,
