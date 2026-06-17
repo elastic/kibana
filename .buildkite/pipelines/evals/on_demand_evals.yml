@@ -26,20 +26,20 @@ steps:
 
   - label: 'LLM Evals: On-demand'
     key: kbn-evals-on-demand
-    command: bash .buildkite/scripts/steps/evals/run_suite.sh
+    # Uploads one run_suite.sh step per suite (EVAL_SUITE_ID may be a single id or
+    # a comma-separated list). This step only generates pipeline steps, so it stays
+    # light; the per-suite steps it uploads do the bootstrap + per-model fanout.
+    command: bash .buildkite/scripts/steps/evals/on_demand.sh
     env:
       FTR_EIS_CCM: '1'
-      EVAL_FANOUT: '1'
-    timeout_in_minutes: 120
+    timeout_in_minutes: 15
     agents:
       image: family/kibana-ubuntu-2404
       imageProject: elastic-images-prod
       provider: gcp
-      machineType: n2-standard-8
+      machineType: n2-standard-2
       preemptible: true
     retry:
       automatic:
         - exit_status: '-1'
           limit: 3
-        - exit_status: '*'
-          limit: 1

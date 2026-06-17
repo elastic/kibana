@@ -212,7 +212,7 @@ Run a suite on any branch without a PR:
 
 | Variable                  | Required           | Description                                                                 |
 | ------------------------- | ------------------ | --------------------------------------------------------------------------- |
-| `EVAL_SUITE_ID`           | yes                | Suite id from `evals.suites.json`                                           |
+| `EVAL_SUITE_ID`           | yes                | Suite id from `evals.suites.json`. Comma-separate to run several suites     |
 | `EVAL_MODEL_GROUPS`       | yes                | Comma-separated model groups, e.g. `eis/openai-gpt-5.4,llm-gateway/gpt-5.2` |
 | `EVAL_INCLUDE_EIS_MODELS` | for `eis/*` models | Set to `1` when using EIS models or an EIS judge                            |
 | `EVALUATION_CONNECTOR_ID` | no                 | LLM-as-judge connector override                                             |
@@ -221,10 +221,18 @@ Run a suite on any branch without a PR:
 | `EVAL_GREP`               | no                 | Playwright test name filter (same as `node scripts/evals run --grep`)       |
 | `EVALUATION_REPETITIONS`  | no                 | Repeat each example N times (same as `--repetitions`)                       |
 
-Example:
+Example (single suite):
 
 ```text
 EVAL_SUITE_ID=agent-builder
+EVAL_MODEL_GROUPS=eis/openai-gpt-5.4
+EVAL_INCLUDE_EIS_MODELS=1
+```
+
+Example (multiple suites — one fanned-out step and Slack message per suite):
+
+```text
+EVAL_SUITE_ID=agent-builder,observability-ai,streams
 EVAL_MODEL_GROUPS=eis/openai-gpt-5.4
 EVAL_INCLUDE_EIS_MODELS=1
 ```
