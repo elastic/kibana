@@ -49,18 +49,31 @@ export const TimelineWrapper: React.FC<TimelineWrapperProps> = React.memo(
     // pressing the ESC key closes the timeline portal unless a flyout is opened on top of it
     const onKeyDown = useCallback(
       (ev: KeyboardEvent) => {
-        if (ev.key === keys.ESCAPE) {
-          const query = new URLSearchParams(window.location.search);
-          const timelineFlyoutOpen = isTimelineFlyoutOpen(query);
-
-          if (timelineFlyoutOpen) {
-            closeFlyout();
-            return;
-          }
-          handleClose();
+        if (ev.key !== keys.ESCAPE) {
+          return;
         }
+
+        const query = new URLSearchParams(window.location.search);
+        const timelineFlyoutOpen = isTimelineFlyoutOpen(query);
+
+        // While the Timeline modal is visible, keep this Esc keydown from reaching the
+        // window-level handler of the underlying expandable flyout (e.g. the graph
+        // investigation view), which would otherwise also close it. Both listeners are
+        // registered on `window`, so `stopImmediatePropagation` (not `stopPropagation`)
+        // is required to suppress the sibling listener. We skip this when the Timeline is
+        // not visible so Esc still closes flyouts on other pages.
+        if (show) {
+          ev.stopImmediatePropagation();
+          ev.preventDefault();
+        }
+
+        if (timelineFlyoutOpen) {
+          closeFlyout();
+          return;
+        }
+        handleClose();
       },
-      [closeFlyout, handleClose]
+      [show, closeFlyout, handleClose]
     );
 
     useTimelineSavePrompt(timelineId, onAppLeave);
