@@ -35,7 +35,7 @@ import { enrichFromEvidences } from '../utils';
 export type EventDataStreamClient = IDataStreamClient<typeof eventsMappings, StoredEvent>;
 
 export interface EventsFilterOptions {
-  verdict?: string[];
+  status?: string[];
   stream?: string[];
   search?: string;
 }
@@ -53,7 +53,7 @@ export class EventClient {
 
   private buildWhere(options: EventsFilterOptions): ESQLAstExpression | undefined {
     let where: ESQLAstExpression | undefined;
-    where = inFilter({ where, field: 'verdict', values: options.verdict });
+    where = inFilter({ where, field: 'status', values: options.status });
     where = inFilter({ where, field: 'stream_names', values: options.stream });
 
     if (options.search) {

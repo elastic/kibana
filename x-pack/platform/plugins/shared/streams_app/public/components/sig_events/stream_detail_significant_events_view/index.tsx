@@ -22,14 +22,18 @@ import { useDebouncedValue } from '@kbn/react-hooks';
 import { useQueryClient } from '@kbn/react-query';
 import {
   type Streams,
-  StreamsKIsOnboardingStatus,
+  SigEventsWorkflowStatus,
+  type SigEventsWorkflowStatusResult,
   type StreamsKIsOnboardingStatusResult,
 } from '@kbn/streams-schema';
 import type { KnowledgeIndicator } from '@kbn/streams-ai';
 import React, { useCallback, useMemo, useState } from 'react';
 import useInterval from 'react-use/lib/useInterval';
 import { DISCOVERY_QUERIES_QUERY_KEY } from '../../../hooks/sig_events/use_fetch_discovery_queries';
+import { RUNNING_POLL_INTERVAL_MS } from '../constants';
+import { useSignificantEventsAvailability } from '../../../hooks/sig_events/use_significant_events_availability';
 import { useKibana } from '../../../hooks/use_kibana';
+import { SignificantEventsNotEnabledPrompt } from '../significant_events_not_enabled_prompt';
 import { EmptyState } from './empty_state';
 import { useFetchKnowledgeIndicators } from './hooks/use_knowledge_indicators_data';
 import { KnowledgeIndicatorsTable } from './knowledge_indicators_table';
@@ -56,6 +60,11 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
     },
   } = useKibana();
   const queryClient = useQueryClient();
+  const { availability, isLoading: isAvailabilityLoading } = useSignificantEventsAvailability();
+  // Only fetch features and queries once availability has resolved and is not
+  // explicitly unavailable (stays fail-open while the probe result is unknown).
+  const shouldFetchKnowledgeIndicators =
+    !isAvailabilityLoading && availability?.available !== false;
   const [tableSearchValue, setTableSearchValue] = useState('');
   const debouncedTableSearchValue = useDebouncedValue(tableSearchValue, SEARCH_DEBOUNCE_MS)
     .trim()
@@ -85,12 +94,12 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
     isLoading: isKnowledgeIndicatorsLoading,
     isEmpty,
     refetch,
-  } = useFetchKnowledgeIndicators({ definition });
+  } = useFetchKnowledgeIndicators({ definition, enabled: shouldFetchKnowledgeIndicators });
   const onKnowledgeIndicatorsOnboardingComplete = useCallback(
     (
       completedState: Extract<
         StreamsKIsOnboardingStatusResult,
-        { status: StreamsKIsOnboardingStatus.Completed }
+        { status: SigEventsWorkflowStatus.Completed }
       >
     ) => {
       const { features, queries } = completedState;
@@ -127,8 +136,8 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
   const onKnowledgeIndicatorsOnboardingError = useCallback(
     (
       failedState: Extract<
-        StreamsKIsOnboardingStatusResult,
-        { status: StreamsKIsOnboardingStatus.Failed }
+        SigEventsWorkflowStatusResult,
+        { status: SigEventsWorkflowStatus.Failed }
       >
     ) => {
       toasts.addDanger({
@@ -152,8 +161,8 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
 
   useInterval(
     refetch,
-    knowledgeIndicatorsOnboardingState?.status === StreamsKIsOnboardingStatus.InProgress
-      ? 5000
+    knowledgeIndicatorsOnboardingState?.status === SigEventsWorkflowStatus.InProgress
+      ? RUNNING_POLL_INTERVAL_MS
       : null
   );
 
@@ -194,9 +203,17 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
     [typeFilterOptions]
   );
   const isKnowledgeIndicatorsGenerationCanceling =
-    knowledgeIndicatorsOnboardingState?.status === StreamsKIsOnboardingStatus.BeingCanceled;
+    knowledgeIndicatorsOnboardingState?.status === SigEventsWorkflowStatus.BeingCanceled;
   const isGenerateButtonDisabled =
     knowledgeIndicatorsOnboardingState === null || isKnowledgeIndicatorsGenerationPending;
+
+  if (isAvailabilityLoading) {
+    return <LoadingPanel size="xxl" />;
+  }
+
+  if (availability && !availability.available) {
+    return <SignificantEventsNotEnabledPrompt reason={availability.reason} />;
+  }
 
   if (isKnowledgeIndicatorsLoading) {
     return <LoadingPanel size="xxl" />;
