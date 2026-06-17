@@ -8,38 +8,44 @@
 import { i18n } from '@kbn/i18n';
 import { AgentAccessControlScope } from '@kbn/agent-builder-common';
 
-/** Shared visibility labels for list badge and settings form. */
-export const VISIBILITY_LABELS: Record<AgentAccessControlScope, string> = {
+/** Shared access-control scope labels for list badge and settings form. */
+export const ACCESS_CONTROL_SCOPE_LABELS: Record<AgentAccessControlScope, string> = {
   [AgentAccessControlScope.Private]: i18n.translate(
-    'xpack.agentBuilder.agents.visibility.private',
+    'xpack.agentBuilder.agents.accessControlScope.private',
     {
       defaultMessage: 'Private',
     }
   ),
-  [AgentAccessControlScope.Shared]: i18n.translate('xpack.agentBuilder.agents.visibility.shared', {
-    defaultMessage: 'Shared',
-  }),
-  [AgentAccessControlScope.Public]: i18n.translate('xpack.agentBuilder.agents.visibility.public', {
-    defaultMessage: 'Public',
-  }),
+  [AgentAccessControlScope.Shared]: i18n.translate(
+    'xpack.agentBuilder.agents.accessControlScope.shared',
+    {
+      defaultMessage: 'Shared',
+    }
+  ),
+  [AgentAccessControlScope.Public]: i18n.translate(
+    'xpack.agentBuilder.agents.accessControlScope.public',
+    {
+      defaultMessage: 'Public',
+    }
+  ),
 };
 
-/** Shared visibility tooltips for list badge. */
-export const VISIBILITY_TOOLTIPS: Record<AgentAccessControlScope, string> = {
+/** Shared access-control scope tooltips for list badge. */
+export const ACCESS_CONTROL_SCOPE_TOOLTIPS: Record<AgentAccessControlScope, string> = {
   [AgentAccessControlScope.Private]: i18n.translate(
-    'xpack.agentBuilder.agents.visibility.privateTooltip',
+    'xpack.agentBuilder.agents.accessControlScope.privateTooltip',
     {
       defaultMessage: 'Only the owner or an administrator can view and edit.',
     }
   ),
   [AgentAccessControlScope.Shared]: i18n.translate(
-    'xpack.agentBuilder.agents.visibility.sharedTooltip',
+    'xpack.agentBuilder.agents.accessControlScope.sharedTooltip',
     {
       defaultMessage: 'Anyone can view. Only the owner or an administrator can edit.',
     }
   ),
   [AgentAccessControlScope.Public]: i18n.translate(
-    'xpack.agentBuilder.agents.visibility.publicTooltip',
+    'xpack.agentBuilder.agents.accessControlScope.publicTooltip',
     {
       defaultMessage: 'Anyone can view and edit.',
     }

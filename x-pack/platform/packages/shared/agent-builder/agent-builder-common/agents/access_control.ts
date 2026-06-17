@@ -8,7 +8,7 @@
 import type { CurrentUser, UserIdAndName } from '../base/users';
 import type { AgentDefinition } from './definition';
 import { agentBuilderDefaultAgentId } from './definition';
-import { AgentAccessControlScope } from './visibility';
+import { AgentAccessControlScope } from './access_control_scope';
 import type { AgentAccessControl } from './acl';
 import { AgentAccessControlRole, accessControlRoleMeets, maxAccessControlRole } from './acl';
 

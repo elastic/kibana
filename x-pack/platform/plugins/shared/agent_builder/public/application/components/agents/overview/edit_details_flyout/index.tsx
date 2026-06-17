@@ -50,14 +50,14 @@ const { editDetails: flyoutLabels } = labels.agentOverview;
 interface EditDetailsFlyoutProps {
   agent: AgentDefinition;
   onClose: () => void;
-  canChangeVisibility: boolean;
+  canChangeAccessControlScope: boolean;
   showWorkflowSection: boolean;
 }
 
 export const EditDetailsFlyout: React.FC<EditDetailsFlyoutProps> = ({
   agent,
   onClose,
-  canChangeVisibility,
+  canChangeAccessControlScope,
   showWorkflowSection,
 }) => {
   const { euiTheme } = useEuiTheme();
@@ -162,7 +162,7 @@ export const EditDetailsFlyout: React.FC<EditDetailsFlyoutProps> = ({
             <IdentificationSection />
 
             <EuiHorizontalRule margin="xl" />
-            <AccessSection canChangeVisibility={canChangeVisibility} />
+            <AccessSection canChangeAccessControlScope={canChangeAccessControlScope} />
 
             <EuiHorizontalRule margin="xl" />
             <CustomizationSection showWorkflowSection={showWorkflowSection} />

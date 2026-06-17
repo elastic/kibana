@@ -12,7 +12,7 @@ import { registerAgentRoutes } from './agents';
 import type { RouteDependencies } from './types';
 import { publicApiPath } from '../../common/constants';
 
-describe('Agent Routes - experimental visibility gate', () => {
+describe('Agent Routes - experimental access-control gate', () => {
   const createPath = `${publicApiPath}/agents`;
   const updatePath = `${publicApiPath}/agents/{id}`;
   let routeHandlers: Record<
@@ -166,7 +166,7 @@ describe('Agent Routes - experimental visibility gate', () => {
       expect(result).toMatchObject({ type: 'ok', body: mockProfile });
     });
 
-    it('allows create without visibility when experimental setting is false', async () => {
+    it('allows create without access control when experimental setting is false', async () => {
       const handler = getCreateHandler();
       expect(handler).toBeDefined();
 
@@ -200,7 +200,7 @@ describe('Agent Routes - experimental visibility gate', () => {
       expect(result).toMatchObject({ type: 'ok', body: mockProfile });
     });
 
-    it('allows non-visibility updates when experimental setting is false', async () => {
+    it('allows non-access-control updates when experimental setting is false', async () => {
       const handler = getUpdateHandler();
       expect(handler).toBeDefined();
 

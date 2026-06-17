@@ -2649,16 +2649,21 @@ export const labels = {
         'xpack.agentBuilder.overview.editDetails.accessDescription',
         { defaultMessage: 'Control who can view and edit this agent.' }
       ),
-      visibilityLabel: i18n.translate('xpack.agentBuilder.overview.editDetails.visibilityLabel', {
-        defaultMessage: 'Visibility',
-      }),
-      visibilityDisabledReason: i18n.translate(
-        'xpack.agentBuilder.overview.editDetails.visibilityDisabledReason',
-        { defaultMessage: 'Only the owner or an administrator can change visibility.' }
+      accessControlScopeLabel: i18n.translate(
+        'xpack.agentBuilder.overview.editDetails.accessControlScopeLabel',
+        {
+          defaultMessage: 'Access',
+        }
       ),
-      visibilityAriaLabel: i18n.translate(
-        'xpack.agentBuilder.overview.editDetails.visibilityAriaLabel',
-        { defaultMessage: 'Agent visibility' }
+      accessControlScopeDisabledReason: i18n.translate(
+        'xpack.agentBuilder.overview.editDetails.accessControlScopeDisabledReason',
+        {
+          defaultMessage: 'Only the owner or an administrator can change the access-control scope.',
+        }
+      ),
+      accessControlScopeAriaLabel: i18n.translate(
+        'xpack.agentBuilder.overview.editDetails.accessControlScopeAriaLabel',
+        { defaultMessage: 'Agent access-control scope' }
       ),
       customizationTitle: i18n.translate(
         'xpack.agentBuilder.overview.editDetails.customizationTitle',

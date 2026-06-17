@@ -29,7 +29,7 @@ import type {
   AgentDefinition,
 } from '@kbn/agent-builder-common';
 import { AccessForm } from './access_form';
-import { VisibilityContextStrip } from './visibility_context_strip';
+import { AccessControlScopeContextStrip } from './access_control_scope_context_strip';
 import { useAgentAccessControl } from '../../../hooks/agents/use_agent_acl';
 import { useUpdateAgentAccessControl } from '../../../hooks/agents/use_update_agent_acl';
 import {
@@ -190,7 +190,7 @@ export const AccessFlyout: React.FC<AccessFlyoutProps> = ({ agent, onClose }) =>
       <EuiFlyoutBody
         banner={
           !isLoading && draft !== null && !isError && data?.can_manage_access_control ? (
-            <VisibilityContextStrip agent={agent} />
+            <AccessControlScopeContextStrip agent={agent} />
           ) : undefined
         }
       >

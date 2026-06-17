@@ -41,14 +41,14 @@ import { useCurrentUser } from '../../../hooks/agents/use_current_user';
 import { FilterOptionWithMatchesBadge } from '../../common/filter_option_with_matches_badge';
 import { Labels } from '../../common/labels';
 import { AgentAvatar } from '../../common/agent_avatar';
-import { AgentAccessControlScopeBadge } from './agent_visibility_badge';
+import { AgentAccessControlScopeBadge } from './agent_access_control_scope_badge';
 import { AccessFlyout } from '../access/access_flyout';
 import { accessSummaryManageButton } from '../access/access_i18n';
 
 const columnNames = {
   name: i18n.translate('xpack.agentBuilder.agents.nameColumn', { defaultMessage: 'Name' }),
-  visibility: i18n.translate('xpack.agentBuilder.agents.visibilityColumn', {
-    defaultMessage: 'Visibility',
+  accessControlScope: i18n.translate('xpack.agentBuilder.agents.accessControlScopeColumn', {
+    defaultMessage: 'Access',
   }),
   labels: i18n.translate('xpack.agentBuilder.agents.labelsColumn', { defaultMessage: 'Labels' }),
 };
@@ -176,11 +176,11 @@ export const AgentsList: React.FC = () => {
       'data-test-subj': 'agentBuilderAgentsListLabels',
     };
 
-    const agentVisibility: EuiTableComputedColumnType<AgentDefinition> = {
+    const agentAccessControlScope: EuiTableComputedColumnType<AgentDefinition> = {
       width: '135px',
-      name: columnNames.visibility,
+      name: columnNames.accessControlScope,
       render: (agent) => <AgentAccessControlScopeBadge agent={agent} />,
-      'data-test-subj': 'agentBuilderAgentsListVisibility',
+      'data-test-subj': 'agentBuilderAgentsListAccessControlScope',
     };
 
     const agentActions: EuiTableActionsColumnType<AgentDefinition> = {
@@ -260,7 +260,13 @@ export const AgentsList: React.FC = () => {
       ],
     };
 
-    return [agentAvatar, agentNameAndDescription, agentVisibility, agentLabels, agentActions];
+    return [
+      agentAvatar,
+      agentNameAndDescription,
+      agentAccessControlScope,
+      agentLabels,
+      agentActions,
+    ];
   }, [
     createAgentBuilderUrl,
     currentUser,

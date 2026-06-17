@@ -45,17 +45,17 @@ const ROLE_ORDER: AgentAccessControlRole[] = [
 ];
 
 /**
- * Roles that meaningfully grant something on top of a given visibility.
+ * Roles that meaningfully grant something on top of a given access-control scope.
  *
  * For Public/Shared agents the see/use baseline is already global, so a `User` entry
  * would be a no-op. We hide it in the role dropdown to prevent misleading rows.
  */
-export const selectableRolesForVisibility = (
-  visibility: AgentAccessControlScope | undefined
+export const selectableRolesForAccessControlScope = (
+  accessControlScope: AgentAccessControlScope | undefined
 ): AgentAccessControlRole[] => {
   if (
-    visibility === AgentAccessControlScope.Public ||
-    visibility === AgentAccessControlScope.Shared
+    accessControlScope === AgentAccessControlScope.Public ||
+    accessControlScope === AgentAccessControlScope.Shared
   ) {
     return [AgentAccessControlRole.Editor, AgentAccessControlRole.Manager];
   }

@@ -66,7 +66,7 @@ export const AgentOverview: React.FC = () => {
   const canEditAgent = useCanEditAgent({ agent });
   const { canManage: canManageAccess } = useCanManageAgentAccess(agent);
 
-  const canChangeVisibility = useMemo(() => {
+  const canChangeAccessControlScope = useMemo(() => {
     if (!isExperimentalFeaturesEnabled || !agent) return false;
     return canChangeAgentAccessControl({
       agentId: agent.id,
@@ -191,7 +191,7 @@ export const AgentOverview: React.FC = () => {
           <EditDetailsFlyout
             agent={agent}
             onClose={() => setIsEditFlyoutOpen(false)}
-            canChangeVisibility={canChangeVisibility}
+            canChangeAccessControlScope={canChangeAccessControlScope}
             showWorkflowSection={showWorkflowSection}
           />
         )}

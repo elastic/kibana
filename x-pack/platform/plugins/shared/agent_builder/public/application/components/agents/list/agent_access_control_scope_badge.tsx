@@ -14,7 +14,10 @@ import {
   type AgentDefinition,
 } from '@kbn/agent-builder-common';
 import React from 'react';
-import { VISIBILITY_LABELS, VISIBILITY_TOOLTIPS } from '../../../utils/visibility_i18n';
+import {
+  ACCESS_CONTROL_SCOPE_LABELS,
+  ACCESS_CONTROL_SCOPE_TOOLTIPS,
+} from '../../../utils/access_control_scope_i18n';
 import { accessFlyoutCustomBadge, accessFlyoutCustomBadgeWithCount } from '../access/access_i18n';
 
 export interface AgentAccessControlScopeBadgeProps {
@@ -30,16 +33,16 @@ export const AgentAccessControlScopeBadge: React.FC<AgentAccessControlScopeBadge
   if (agent.readonly) {
     return (
       <EuiToolTip
-        content={i18n.translate('xpack.agentBuilder.agents.visibility.readOnlyTooltip', {
+        content={i18n.translate('xpack.agentBuilder.agents.accessControlScope.readOnlyTooltip', {
           defaultMessage: 'Built-in agents are read-only.',
         })}
       >
         <EuiBadge
           tabIndex={0}
           color="accent"
-          data-test-subj="agentBuilderAgentsListVisibilityBuiltInBadge"
+          data-test-subj="agentBuilderAgentsListAccessControlScopeBuiltInBadge"
         >
-          {i18n.translate('xpack.agentBuilder.agents.visibility.builtIn', {
+          {i18n.translate('xpack.agentBuilder.agents.accessControlScope.builtIn', {
             defaultMessage: 'Read-only',
           })}
         </EuiBadge>
@@ -47,12 +50,14 @@ export const AgentAccessControlScopeBadge: React.FC<AgentAccessControlScopeBadge
     );
   }
 
-  const visibility = agent.accessControl?.scope ?? AgentAccessControlScope.Public;
+  const accessControlScope = agent.accessControl?.scope ?? AgentAccessControlScope.Public;
   const accessControlCount = accessControlEntryCount(agent);
   const tooltip =
     accessControlCount > 0
-      ? `${VISIBILITY_TOOLTIPS[visibility]} ${accessFlyoutCustomBadgeWithCount(accessControlCount)}`
-      : VISIBILITY_TOOLTIPS[visibility];
+      ? `${ACCESS_CONTROL_SCOPE_TOOLTIPS[accessControlScope]} ${accessFlyoutCustomBadgeWithCount(
+          accessControlCount
+        )}`
+      : ACCESS_CONTROL_SCOPE_TOOLTIPS[accessControlScope];
 
   return (
     <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
@@ -60,11 +65,11 @@ export const AgentAccessControlScopeBadge: React.FC<AgentAccessControlScopeBadge
         <EuiToolTip content={tooltip}>
           <EuiBadge
             tabIndex={0}
-            iconType={ACCESS_CONTROL_SCOPE_ICON[visibility]}
-            color={ACCESS_CONTROL_SCOPE_BADGE_COLOR[visibility]}
-            data-test-subj={`agentBuilderAgentsListVisibility-${visibility}`}
+            iconType={ACCESS_CONTROL_SCOPE_ICON[accessControlScope]}
+            color={ACCESS_CONTROL_SCOPE_BADGE_COLOR[accessControlScope]}
+            data-test-subj={`agentBuilderAgentsListAccessControlScope-${accessControlScope}`}
           >
-            {VISIBILITY_LABELS[visibility]}
+            {ACCESS_CONTROL_SCOPE_LABELS[accessControlScope]}
           </EuiBadge>
         </EuiToolTip>
       </EuiFlexItem>

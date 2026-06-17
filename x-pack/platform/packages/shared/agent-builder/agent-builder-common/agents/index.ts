@@ -19,7 +19,7 @@ export {
   ACCESS_CONTROL_SCOPE_ICON,
   ACCESS_CONTROL_SCOPE_BADGE_COLOR,
   AgentAccessControlScope,
-} from './visibility';
+} from './access_control_scope';
 export {
   canCurrentUserEditAgent,
   isAgentOwner,

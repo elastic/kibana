@@ -10,7 +10,7 @@ import { render, screen } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { AgentType, AgentAccessControlScope } from '@kbn/agent-builder-common';
 import type { AgentDefinition } from '@kbn/agent-builder-common';
-import { AgentAccessControlScopeBadge } from './agent_visibility_badge';
+import { AgentAccessControlScopeBadge } from './agent_access_control_scope_badge';
 
 const renderWithIntl = (ui: React.ReactElement) =>
   render(<IntlProvider locale="en">{ui}</IntlProvider>);
@@ -28,11 +28,13 @@ describe('AgentAccessControlScopeBadge', () => {
   it('shows Read-only badge when agent is readonly', () => {
     renderWithIntl(<AgentAccessControlScopeBadge agent={{ ...baseAgent, readonly: true }} />);
 
-    expect(screen.getByTestId('agentBuilderAgentsListVisibilityBuiltInBadge')).toBeInTheDocument();
+    expect(
+      screen.getByTestId('agentBuilderAgentsListAccessControlScopeBuiltInBadge')
+    ).toBeInTheDocument();
     expect(screen.getByText('Read-only')).toBeInTheDocument();
   });
 
-  it('shows Private visibility badge when visibility is private', () => {
+  it('shows Private access-control scope badge when scope is private', () => {
     renderWithIntl(
       <AgentAccessControlScopeBadge
         agent={{
@@ -42,11 +44,13 @@ describe('AgentAccessControlScopeBadge', () => {
       />
     );
 
-    expect(screen.getByTestId('agentBuilderAgentsListVisibility-private')).toBeInTheDocument();
+    expect(
+      screen.getByTestId('agentBuilderAgentsListAccessControlScope-private')
+    ).toBeInTheDocument();
     expect(screen.getByText('Private')).toBeInTheDocument();
   });
 
-  it('shows Shared visibility badge when visibility is shared', () => {
+  it('shows Shared access-control scope badge when scope is shared', () => {
     renderWithIntl(
       <AgentAccessControlScopeBadge
         agent={{
@@ -56,11 +60,13 @@ describe('AgentAccessControlScopeBadge', () => {
       />
     );
 
-    expect(screen.getByTestId('agentBuilderAgentsListVisibility-shared')).toBeInTheDocument();
+    expect(
+      screen.getByTestId('agentBuilderAgentsListAccessControlScope-shared')
+    ).toBeInTheDocument();
     expect(screen.getByText('Shared')).toBeInTheDocument();
   });
 
-  it('shows Public visibility badge when visibility is public', () => {
+  it('shows Public access-control scope badge when scope is public', () => {
     renderWithIntl(
       <AgentAccessControlScopeBadge
         agent={{
@@ -70,14 +76,18 @@ describe('AgentAccessControlScopeBadge', () => {
       />
     );
 
-    expect(screen.getByTestId('agentBuilderAgentsListVisibility-public')).toBeInTheDocument();
+    expect(
+      screen.getByTestId('agentBuilderAgentsListAccessControlScope-public')
+    ).toBeInTheDocument();
     expect(screen.getByText('Public')).toBeInTheDocument();
   });
 
-  it('defaults to Public when visibility is undefined', () => {
+  it('defaults to Public when access-control scope is undefined', () => {
     renderWithIntl(<AgentAccessControlScopeBadge agent={baseAgent} />);
 
-    expect(screen.getByTestId('agentBuilderAgentsListVisibility-public')).toBeInTheDocument();
+    expect(
+      screen.getByTestId('agentBuilderAgentsListAccessControlScope-public')
+    ).toBeInTheDocument();
     expect(screen.getByText('Public')).toBeInTheDocument();
   });
 });

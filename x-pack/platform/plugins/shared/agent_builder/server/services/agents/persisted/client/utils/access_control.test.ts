@@ -36,7 +36,7 @@ const nonOwnerUser = { id: 'user-2', username: 'other' };
 const ownerByUsernameOnly = { username: 'owner' };
 
 describe('hasReadAccess', () => {
-  it('returns true for users with visibility access override regardless of visibility', () => {
+  it('returns true for admins regardless of access-control scope', () => {
     const source = {
       ...baseSource,
       access_control: { scope: AgentAccessControlScope.Private, entries: [] },
@@ -45,7 +45,7 @@ describe('hasReadAccess', () => {
     expect(hasReadAccess({ source, user: nonOwnerUser, isAdmin: true })).toBe(true);
   });
 
-  it('returns true for owner regardless of visibility', () => {
+  it('returns true for owner regardless of access-control scope', () => {
     const source = {
       ...baseSource,
       access_control: { scope: AgentAccessControlScope.Private, entries: [] },
@@ -63,12 +63,12 @@ describe('hasReadAccess', () => {
     expect(hasReadAccess({ source, user: ownerByUsernameOnly, isAdmin: false })).toBe(true);
   });
 
-  it('returns true for non-owner when visibility is undefined (legacy agent treated as public)', () => {
+  it('returns true for non-owner when access-control scope is undefined (legacy agent treated as public)', () => {
     const source = { ...baseSource, created_by_name: 'owner' };
     expect(hasReadAccess({ source, user: nonOwnerUser, isAdmin: false })).toBe(true);
   });
 
-  it('returns true for non-owner when visibility is shared', () => {
+  it('returns true for non-owner when access-control scope is shared', () => {
     const source = {
       ...baseSource,
       access_control: { scope: AgentAccessControlScope.Shared, entries: [] },
@@ -77,7 +77,7 @@ describe('hasReadAccess', () => {
     expect(hasReadAccess({ source, user: nonOwnerUser, isAdmin: false })).toBe(true);
   });
 
-  it('returns false for non-owner when visibility is private', () => {
+  it('returns false for non-owner when access-control scope is private', () => {
     const source = {
       ...baseSource,
       access_control: { scope: AgentAccessControlScope.Private, entries: [] },
@@ -88,7 +88,7 @@ describe('hasReadAccess', () => {
 });
 
 describe('hasWriteAccess', () => {
-  it('returns true for users with visibility access override regardless of visibility', () => {
+  it('returns true for admins regardless of access-control scope', () => {
     const source = {
       ...baseSource,
       access_control: { scope: AgentAccessControlScope.Private, entries: [] },
@@ -97,7 +97,7 @@ describe('hasWriteAccess', () => {
     expect(hasWriteAccess({ source, user: nonOwnerUser, isAdmin: true })).toBe(true);
   });
 
-  it('returns true for owner regardless of visibility', () => {
+  it('returns true for owner regardless of access-control scope', () => {
     const source = {
       ...baseSource,
       access_control: { scope: AgentAccessControlScope.Private, entries: [] },
@@ -106,12 +106,12 @@ describe('hasWriteAccess', () => {
     expect(hasWriteAccess({ source, user: ownerUser, isAdmin: false })).toBe(true);
   });
 
-  it('returns true for non-owner when visibility is undefined (legacy agent treated as public)', () => {
+  it('returns true for non-owner when access-control scope is undefined (legacy agent treated as public)', () => {
     const source = { ...baseSource, created_by_name: 'owner' };
     expect(hasWriteAccess({ source, user: nonOwnerUser, isAdmin: false })).toBe(true);
   });
 
-  it('returns false for non-owner when visibility is shared', () => {
+  it('returns false for non-owner when access-control scope is shared', () => {
     const source = {
       ...baseSource,
       access_control: { scope: AgentAccessControlScope.Shared, entries: [] },
@@ -120,7 +120,7 @@ describe('hasWriteAccess', () => {
     expect(hasWriteAccess({ source, user: nonOwnerUser, isAdmin: false })).toBe(false);
   });
 
-  it('returns false for non-owner when visibility is private', () => {
+  it('returns false for non-owner when access-control scope is private', () => {
     const source = {
       ...baseSource,
       access_control: { scope: AgentAccessControlScope.Private, entries: [] },
@@ -131,7 +131,7 @@ describe('hasWriteAccess', () => {
 });
 
 describe('buildAccessControlReadFilter', () => {
-  it('includes owner clauses, the not-private visibility clause, and a nested user-ACL clause', () => {
+  it('includes owner clauses, the not-private access-control scope clause, and a nested user-ACL clause', () => {
     const filter = buildAccessControlReadFilter({ user: ownerUser });
     expect(filter).toEqual({
       bool: {
@@ -195,7 +195,7 @@ describe('buildAccessControlReadFilter', () => {
 });
 
 describe('validateAccessControlUpdateAccess', () => {
-  it('returns true when update does not change visibility', () => {
+  it('returns true when update does not change access-control scope', () => {
     const source = {
       ...baseSource,
       access_control: { scope: AgentAccessControlScope.Public, entries: [] },
@@ -211,7 +211,7 @@ describe('validateAccessControlUpdateAccess', () => {
     ).toBe(true);
   });
 
-  it('returns true when update.visibility is undefined', () => {
+  it('returns true when update access-control scope is undefined', () => {
     const source = {
       ...baseSource,
       access_control: { scope: AgentAccessControlScope.Private, entries: [] },
@@ -227,7 +227,7 @@ describe('validateAccessControlUpdateAccess', () => {
     ).toBe(true);
   });
 
-  it('returns true when visibility change is to same value (no actual change)', () => {
+  it('returns true when access-control scope change is to same value (no actual change)', () => {
     const source = {
       ...baseSource,
       access_control: { scope: AgentAccessControlScope.Public, entries: [] },
@@ -243,7 +243,7 @@ describe('validateAccessControlUpdateAccess', () => {
     ).toBe(true);
   });
 
-  it('returns true for owner changing visibility', () => {
+  it('returns true for owner changing access-control scope', () => {
     const source = {
       ...baseSource,
       access_control: { scope: AgentAccessControlScope.Public, entries: [] },
@@ -259,7 +259,7 @@ describe('validateAccessControlUpdateAccess', () => {
     ).toBe(true);
   });
 
-  it('returns true for users with visibility access override changing visibility', () => {
+  it('returns true for admins changing access-control scope', () => {
     const source = {
       ...baseSource,
       access_control: { scope: AgentAccessControlScope.Public, entries: [] },
@@ -275,7 +275,7 @@ describe('validateAccessControlUpdateAccess', () => {
     ).toBe(true);
   });
 
-  it('returns false for non-owner without visibility access override changing visibility', () => {
+  it('returns false for non-owner without access-control scope permission changing access-control scope', () => {
     const source = {
       ...baseSource,
       access_control: { scope: AgentAccessControlScope.Public, entries: [] },
@@ -291,7 +291,7 @@ describe('validateAccessControlUpdateAccess', () => {
     ).toBe(false);
   });
 
-  it('returns false when changing visibility of the default agent even for owner', () => {
+  it('returns false when changing access-control scope of the default agent even for owner', () => {
     const source = {
       ...baseSource,
       id: agentBuilderDefaultAgentId,
@@ -309,7 +309,7 @@ describe('validateAccessControlUpdateAccess', () => {
     ).toBe(false);
   });
 
-  it('returns false when changing visibility of the default agent even with override', () => {
+  it('returns false when changing access-control scope of the default agent even with override', () => {
     const source = {
       ...baseSource,
       id: agentBuilderDefaultAgentId,

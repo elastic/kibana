@@ -25,7 +25,7 @@ import { getEbtProps } from '@kbn/ebt-click';
 import { css } from '@emotion/react';
 import { labels } from '../../../utils/i18n';
 import { AgentAvatar } from '../../common/agent_avatar';
-import { AgentAccessControlScopeBadge } from '../list/agent_visibility_badge';
+import { AgentAccessControlScopeBadge } from '../list/agent_access_control_scope_badge';
 import { AgentDescription } from './agent_description';
 import { accessSummaryManageButton } from '../access/access_i18n';
 

@@ -18,7 +18,7 @@ apiTest.describe(
     const createdAgentIds: string[] = [];
 
     const mockAgent = {
-      id: 'test-agent-access-control scope',
+      id: 'test-agent-access-control-scope',
       name: 'Test Agent',
       description: 'A test agent for API testing',
       configuration: {

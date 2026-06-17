@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AgentAccessControlScope } from './visibility';
+import { AgentAccessControlScope } from './access_control_scope';
 
 /**
  * Hierarchical role granted to a principal on an individual agent.

@@ -49,7 +49,7 @@ import { useCurrentUser } from '../../../../hooks/agents/use_current_user';
 import { useUiPrivileges } from '../../../../hooks/use_ui_privileges';
 import { WorkflowPicker } from '../../../tools/form/components/workflow/workflow_picker';
 import { isPreExecutionWorkflowEnabled } from '../../../../utils/is_pre_execution_workflow_enabled';
-import { VISIBILITY_LABELS } from '../../../../utils/visibility_i18n';
+import { ACCESS_CONTROL_SCOPE_LABELS } from '../../../../utils/access_control_scope_i18n';
 import type { AgentFormData } from '../agent_form';
 import { truncateAvatarSymbol } from '../agent_form_validation';
 
@@ -78,15 +78,15 @@ export const AgentSettingsTab: React.FC<AgentSettingsTabProps> = ({
 
   const { currentUser } = useCurrentUser();
   const { isAdmin } = useUiPrivileges();
-  const currentVisibility = useWatch({ control, name: 'accessControl.scope' });
+  const currentAccessControlScope = useWatch({ control, name: 'accessControl.scope' });
   const currentEntries = useWatch({ control, name: 'accessControl.entries' }) ?? [];
 
-  const canChangeVisibility =
+  const canChangeAccessControlScope =
     isCreateMode ||
     canChangeAgentAccessControl({
       agentId,
       accessControl: {
-        scope: currentVisibility,
+        scope: currentAccessControlScope,
         entries: currentEntries,
       },
       owner,
@@ -99,9 +99,9 @@ export const AgentSettingsTab: React.FC<AgentSettingsTabProps> = ({
   // (seeded from the loaded agent in `useAgentEdit`), not from local state.
   const accessFormAgent = useMemo(
     () => ({
-      accessControl: { scope: currentVisibility, entries: [] },
+      accessControl: { scope: currentAccessControlScope, entries: [] },
     }),
-    [currentVisibility]
+    [currentAccessControlScope]
   );
 
   const showAgentWorkflowsSection = useMemo(() => {
@@ -112,7 +112,13 @@ export const AgentSettingsTab: React.FC<AgentSettingsTabProps> = ({
   const formFlexColumnStyles = css`
     min-width: 0;
   `;
-  const renderVisibilityOption = ({ icon, label }: { icon: EuiIconType; label: string }) => (
+  const renderAccessControlScopeOption = ({
+    icon,
+    label,
+  }: {
+    icon: EuiIconType;
+    label: string;
+  }) => (
     <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
       <EuiFlexItem grow={false}>
         <EuiIcon type={icon} aria-hidden={true} />
@@ -120,26 +126,26 @@ export const AgentSettingsTab: React.FC<AgentSettingsTabProps> = ({
       <EuiFlexItem>{label}</EuiFlexItem>
     </EuiFlexGroup>
   );
-  const visibilityOptions = [
+  const accessControlScopeOptions = [
     {
       value: AgentAccessControlScope.Public,
-      inputDisplay: renderVisibilityOption({
+      inputDisplay: renderAccessControlScopeOption({
         icon: ACCESS_CONTROL_SCOPE_ICON[AgentAccessControlScope.Public],
-        label: VISIBILITY_LABELS[AgentAccessControlScope.Public],
+        label: ACCESS_CONTROL_SCOPE_LABELS[AgentAccessControlScope.Public],
       }),
     },
     {
       value: AgentAccessControlScope.Shared,
-      inputDisplay: renderVisibilityOption({
+      inputDisplay: renderAccessControlScopeOption({
         icon: ACCESS_CONTROL_SCOPE_ICON[AgentAccessControlScope.Shared],
-        label: VISIBILITY_LABELS[AgentAccessControlScope.Shared],
+        label: ACCESS_CONTROL_SCOPE_LABELS[AgentAccessControlScope.Shared],
       }),
     },
     {
       value: AgentAccessControlScope.Private,
-      inputDisplay: renderVisibilityOption({
+      inputDisplay: renderAccessControlScopeOption({
         icon: ACCESS_CONTROL_SCOPE_ICON[AgentAccessControlScope.Private],
-        label: VISIBILITY_LABELS[AgentAccessControlScope.Private],
+        label: ACCESS_CONTROL_SCOPE_LABELS[AgentAccessControlScope.Private],
       }),
     },
   ];
@@ -394,9 +400,9 @@ export const AgentSettingsTab: React.FC<AgentSettingsTabProps> = ({
                 <EuiTitle size="xxs">
                   <span>
                     {i18n.translate(
-                      'xpack.agentBuilder.agents.form.settings.visibilityMeaningLabel',
+                      'xpack.agentBuilder.agents.form.settings.accessControlScopeMeaningLabel',
                       {
-                        defaultMessage: 'Visibility levels',
+                        defaultMessage: 'Access-control scopes',
                       }
                     )}
                   </span>
@@ -406,14 +412,14 @@ export const AgentSettingsTab: React.FC<AgentSettingsTabProps> = ({
                     <EuiText size="s" color="subdued">
                       <strong>
                         {i18n.translate(
-                          'xpack.agentBuilder.agents.form.settings.visibilityMeaningPublicLabel',
+                          'xpack.agentBuilder.agents.form.settings.accessControlScopeMeaningPublicLabel',
                           {
                             defaultMessage: 'Public:',
                           }
                         )}
                       </strong>{' '}
                       {i18n.translate(
-                        'xpack.agentBuilder.agents.form.settings.visibilityMeaningPublicDescription',
+                        'xpack.agentBuilder.agents.form.settings.accessControlScopeMeaningPublicDescription',
                         {
                           defaultMessage: 'Anyone can view and edit.',
                         }
@@ -424,14 +430,14 @@ export const AgentSettingsTab: React.FC<AgentSettingsTabProps> = ({
                     <EuiText size="s" color="subdued">
                       <strong>
                         {i18n.translate(
-                          'xpack.agentBuilder.agents.form.settings.visibilityMeaningSharedLabel',
+                          'xpack.agentBuilder.agents.form.settings.accessControlScopeMeaningSharedLabel',
                           {
                             defaultMessage: 'Shared:',
                           }
                         )}
                       </strong>{' '}
                       {i18n.translate(
-                        'xpack.agentBuilder.agents.form.settings.visibilityMeaningSharedDescription',
+                        'xpack.agentBuilder.agents.form.settings.accessControlScopeMeaningSharedDescription',
                         {
                           defaultMessage:
                             'Anyone can view. Only the owner, an administrator, or people you explicitly grant access to can edit.',
@@ -443,14 +449,14 @@ export const AgentSettingsTab: React.FC<AgentSettingsTabProps> = ({
                     <EuiText size="s" color="subdued">
                       <strong>
                         {i18n.translate(
-                          'xpack.agentBuilder.agents.form.settings.visibilityMeaningPrivateLabel',
+                          'xpack.agentBuilder.agents.form.settings.accessControlScopeMeaningPrivateLabel',
                           {
                             defaultMessage: 'Private:',
                           }
                         )}
                       </strong>{' '}
                       {i18n.translate(
-                        'xpack.agentBuilder.agents.form.settings.visibilityMeaningPrivateDescription',
+                        'xpack.agentBuilder.agents.form.settings.accessControlScopeMeaningPrivateDescription',
                         {
                           defaultMessage:
                             'Only the owner, an administrator, or people you explicitly grant access to can view and edit.',
@@ -508,18 +514,25 @@ export const AgentSettingsTab: React.FC<AgentSettingsTabProps> = ({
           </EuiFormRow>
 
           <EuiFormRow
-            label={i18n.translate('xpack.agentBuilder.agents.form.visibilityLabel', {
-              defaultMessage: 'Visibility',
+            label={i18n.translate('xpack.agentBuilder.agents.form.accessControlScopeLabel', {
+              defaultMessage: 'Access',
             })}
             helpText={
               agentId === agentBuilderDefaultAgentId
-                ? i18n.translate('xpack.agentBuilder.agents.form.visibilityDefaultAgentReason', {
-                    defaultMessage: 'The default agent is always visible to all users.',
-                  })
-                : !canChangeVisibility
-                ? i18n.translate('xpack.agentBuilder.agents.form.visibilityDisabledReason', {
-                    defaultMessage: 'Only the owner or an administrator can change visibility.',
-                  })
+                ? i18n.translate(
+                    'xpack.agentBuilder.agents.form.accessControlScopeDefaultAgentReason',
+                    {
+                      defaultMessage: 'The default agent is always accessible to all users.',
+                    }
+                  )
+                : !canChangeAccessControlScope
+                ? i18n.translate(
+                    'xpack.agentBuilder.agents.form.accessControlScopeDisabledReason',
+                    {
+                      defaultMessage:
+                        'Only the owner or an administrator can change the access-control scope.',
+                    }
+                  )
                 : undefined
             }
             isInvalid={!!formState.errors.accessControl?.scope}
@@ -531,14 +544,17 @@ export const AgentSettingsTab: React.FC<AgentSettingsTabProps> = ({
               render={({ field: { onChange, value } }) => (
                 <EuiSuperSelect
                   fullWidth
-                  options={visibilityOptions}
+                  options={accessControlScopeOptions}
                   valueOfSelected={value}
                   onChange={onChange}
-                  disabled={isFormDisabled || !canChangeVisibility}
-                  aria-label={i18n.translate('xpack.agentBuilder.agents.form.visibilityAriaLabel', {
-                    defaultMessage: 'Agent visibility',
-                  })}
-                  data-test-subj="agentSettingsVisibilitySelect"
+                  disabled={isFormDisabled || !canChangeAccessControlScope}
+                  aria-label={i18n.translate(
+                    'xpack.agentBuilder.agents.form.accessControlScopeAriaLabel',
+                    {
+                      defaultMessage: 'Agent access-control scope',
+                    }
+                  )}
+                  data-test-subj="agentSettingsAccessControlScopeSelect"
                 />
               )}
             />

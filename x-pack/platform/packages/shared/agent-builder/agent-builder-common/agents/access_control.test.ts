@@ -18,7 +18,7 @@ import {
 } from './access_control';
 import type { AgentConfiguration, AgentDefinition } from './definition';
 import { agentBuilderDefaultAgentId, AgentType } from './definition';
-import { AgentAccessControlScope } from './visibility';
+import { AgentAccessControlScope } from './access_control_scope';
 import { AgentAccessControlRole, type AgentAccessControl } from './acl';
 import type { CurrentUser, UserIdAndName } from '../base/users';
 
@@ -134,7 +134,7 @@ describe('canChangeAgentAccessControl', () => {
     ).toBe(false);
   });
 
-  test('returns false for the default agent even with visibility access override', () => {
+  test('returns false for the default agent even with access-control override', () => {
     expect(
       canChangeAgentAccessControl({
         agentId: agentBuilderDefaultAgentId,
@@ -173,7 +173,7 @@ describe('hasAgentReadAccess', () => {
     ).toBe(true);
   });
 
-  test('returns true when visibility is Public', () => {
+  test('returns true when access-control scope is Public', () => {
     expect(
       hasAgentReadAccess({
         ...baseArgs,
@@ -182,7 +182,7 @@ describe('hasAgentReadAccess', () => {
     ).toBe(true);
   });
 
-  test('returns true when visibility is Shared', () => {
+  test('returns true when access-control scope is Shared', () => {
     expect(
       hasAgentReadAccess({
         ...baseArgs,
@@ -191,7 +191,7 @@ describe('hasAgentReadAccess', () => {
     ).toBe(true);
   });
 
-  test('returns false when visibility is Private and user is not owner and no override', () => {
+  test('returns false when access-control scope is Private and user is not owner and no override', () => {
     expect(
       hasAgentReadAccess({
         ...baseArgs,
@@ -200,7 +200,7 @@ describe('hasAgentReadAccess', () => {
     ).toBe(false);
   });
 
-  test('when visibility is undefined (legacy agent), treats as Public so any user can read', () => {
+  test('when access-control scope is undefined (legacy agent), treats as Public so any user can read', () => {
     expect(
       hasAgentReadAccess({
         owner,
@@ -238,7 +238,7 @@ describe('hasAgentWriteAccess', () => {
     ).toBe(true);
   });
 
-  test('returns true when visibility is Public', () => {
+  test('returns true when access-control scope is Public', () => {
     expect(
       hasAgentWriteAccess({
         ...baseArgs,
@@ -247,7 +247,7 @@ describe('hasAgentWriteAccess', () => {
     ).toBe(true);
   });
 
-  test('returns false when visibility is Shared and user is not owner', () => {
+  test('returns false when access-control scope is Shared and user is not owner', () => {
     expect(
       hasAgentWriteAccess({
         ...baseArgs,
@@ -256,7 +256,7 @@ describe('hasAgentWriteAccess', () => {
     ).toBe(false);
   });
 
-  test('returns false when visibility is Private and user is not owner', () => {
+  test('returns false when access-control scope is Private and user is not owner', () => {
     expect(
       hasAgentWriteAccess({
         ...baseArgs,
@@ -265,7 +265,7 @@ describe('hasAgentWriteAccess', () => {
     ).toBe(false);
   });
 
-  test('when visibility is undefined (legacy agent), treats as Public so any user can write', () => {
+  test('when access-control scope is undefined (legacy agent), treats as Public so any user can write', () => {
     expect(
       hasAgentWriteAccess({
         owner,
@@ -477,7 +477,7 @@ describe('ACL-aware authorization', () => {
       ).toBe(AgentAccessControlRole.Manager);
     });
 
-    test('Public visibility grants Editor baseline to non-owners', () => {
+    test('Public access-control scope grants Editor baseline to non-owners', () => {
       expect(
         getEffectiveAgentRole({
           accessControl: accessControlWith(AgentAccessControlScope.Public),
@@ -488,7 +488,7 @@ describe('ACL-aware authorization', () => {
       ).toBe(AgentAccessControlRole.Editor);
     });
 
-    test('Shared visibility grants User baseline to non-owners', () => {
+    test('Shared access-control scope grants User baseline to non-owners', () => {
       expect(
         getEffectiveAgentRole({
           accessControl: accessControlWith(AgentAccessControlScope.Shared),
@@ -499,7 +499,7 @@ describe('ACL-aware authorization', () => {
       ).toBe(AgentAccessControlRole.User);
     });
 
-    test('ACL upgrades over visibility baseline', () => {
+    test('ACL upgrades over access-control scope baseline', () => {
       // Public alone gives Editor; ACL Manager wins.
       expect(
         getEffectiveAgentRole({
@@ -515,7 +515,7 @@ describe('ACL-aware authorization', () => {
       ).toBe(AgentAccessControlRole.Manager);
     });
 
-    test('legacy agent (no visibility, no ACL) treats as Public Editor', () => {
+    test('legacy agent (no access-control scope, no ACL) treats as Public Editor', () => {
       expect(
         getEffectiveAgentRole({
           owner: aliceOwner,
@@ -581,7 +581,7 @@ describe('ACL-aware authorization', () => {
       expect(canManageAgentAccessControl(args)).toBe(true);
     });
 
-    test('Public visibility does NOT silently grant Manager to all users', () => {
+    test('Public access-control scope does NOT silently grant Manager to all users', () => {
       // ACL Manager is granted to bob; carol gets only the Public baseline (Editor).
       const accessControl = accessControlWith(AgentAccessControlScope.Public, {
         type: 'user',
@@ -673,7 +673,7 @@ describe('ACL-aware authorization', () => {
       ).toBe(true);
     });
 
-    test('grants for any non-owner on a Public agent (visibility baseline = Editor)', () => {
+    test('grants for any non-owner on a Public agent (access-control scope baseline = Editor)', () => {
       expect(
         canManageAgentAccessControl({
           accessControl: accessControlWith(AgentAccessControlScope.Public),

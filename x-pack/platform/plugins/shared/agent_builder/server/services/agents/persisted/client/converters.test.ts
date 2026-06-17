@@ -135,7 +135,7 @@ describe('fromEs', () => {
     expect(definition.configuration.enable_elastic_capabilities).toBe(true);
   });
 
-  it('defaults ownership and visibility for legacy documents without new fields', () => {
+  it('defaults ownership and access control for legacy documents without new fields', () => {
     const document = getSampleDoc();
     // @ts-ignore simulating legacy document
     delete document._source.access_control;

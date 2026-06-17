@@ -21,13 +21,17 @@ import type {
   AgentAccessControlRole,
   AgentAccessControlScope,
 } from '@kbn/agent-builder-common';
-import { ROLE_DESCRIPTION, ROLE_LABEL, selectableRolesForVisibility } from './role_to_capabilities';
+import {
+  ROLE_DESCRIPTION,
+  ROLE_LABEL,
+  selectableRolesForAccessControlScope,
+} from './role_to_capabilities';
 import { accessFlyoutRemoveAriaLabel, accessFlyoutRoleAriaLabel } from './access_i18n';
 
 interface PrincipalRowProps {
   entry: AgentAccessControlEntry;
   /** Used to constrain the selectable roles for Public/Shared agents. */
-  visibility?: AgentAccessControlScope;
+  accessControlScope?: AgentAccessControlScope;
   isDisabled?: boolean;
   onChangeRole: (next: AgentAccessControlRole) => void;
   onRemove: () => void;
@@ -40,7 +44,7 @@ interface PrincipalRowProps {
  */
 export const PrincipalRow: React.FC<PrincipalRowProps> = ({
   entry,
-  visibility,
+  accessControlScope,
   isDisabled,
   onChangeRole,
   onRemove,
@@ -48,7 +52,7 @@ export const PrincipalRow: React.FC<PrincipalRowProps> = ({
   const { euiTheme } = useEuiTheme();
 
   const roleOptions = useMemo(() => {
-    const allowed = selectableRolesForVisibility(visibility);
+    const allowed = selectableRolesForAccessControlScope(accessControlScope);
     // Always include the entry's existing role even when not in the allowed list,
     // so admins can fix it without it disappearing from the select.
     const includeCurrent = allowed.includes(entry.role) ? allowed : [entry.role, ...allowed];
@@ -70,7 +74,7 @@ export const PrincipalRow: React.FC<PrincipalRowProps> = ({
         </EuiFlexGroup>
       ),
     }));
-  }, [entry.role, visibility]);
+  }, [entry.role, accessControlScope]);
 
   const avatarStyles = css`
     flex-shrink: 0;
