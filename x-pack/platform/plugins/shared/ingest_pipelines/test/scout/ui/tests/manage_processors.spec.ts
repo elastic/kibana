@@ -12,8 +12,8 @@ import { test, testData } from '../fixtures';
 
 test.describe('Ingest pipelines Manage Processors', { tag: tags.stateful.classic }, () => {
   // Poll ES directly until neither of our GeoIP databases exists. This absorbs the
-  // read-after-write lag between a UI/API delete and the cluster settling to zero
-  // databases (at which point ES starts returning 404 for the list endpoint). The
+  // read after write lag between a UI/API delete and the cluster settling to zero
+  // databases.. at which point ES starts returning 404 for the list endpoint. The
   // geoipEmptyListPrompt only renders when the UI's first GET returns an empty array,
   // so we must confirm the cleared state before loading the page.
   const expectDatabasesCleared = async (esClient: ScoutWorkerFixtures['esClient']) => {
@@ -28,7 +28,7 @@ test.describe('Ingest pipelines Manage Processors', { tag: tags.stateful.classic
             ids.includes(id)
           );
         } catch {
-          // ES returns 404 when there are no databases — none of ours remain
+          // ES returns 404 when there are no databases
           return false;
         }
       })

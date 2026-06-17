@@ -92,7 +92,7 @@ apiTest.describe('Ingest pipelines structure tree API', { tag: tags.stateful.cla
 
   apiTest.afterAll(async ({ esClient, log }) => {
     // All tree pipelines share the 'treePipeline' prefix — one wildcard call replaces
-    // the ~1093 serial deletes that were previously timing out the afterAll hook.
+    // the ~1000 serial deletes that were previously timing out the afterAll hook.
     await deletePipeline({ esClient, pipelineName: 'treePipeline*', log });
   });
 
