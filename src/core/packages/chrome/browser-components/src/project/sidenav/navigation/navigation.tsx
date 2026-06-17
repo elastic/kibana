@@ -20,6 +20,7 @@ import { useBasePath } from '../../../shared/chrome_hooks';
 import type { NavigationItems } from './to_navigation_items';
 import { toNavigationItems } from './to_navigation_items';
 import { PanelStateManager } from './panel_state_manager';
+import { useRenderNavExtensionPoint } from './navigation_extension_template_host';
 
 export interface ChromeNavigationProps {
   isCollapsed: boolean;
@@ -30,6 +31,7 @@ export interface ChromeNavigationProps {
 export const Navigation = (props: ChromeNavigationProps) => {
   const state = useNavigationItems();
   const isNextChrome = useIsNextChrome();
+  const renderExtensionPoint = useRenderNavExtensionPoint();
 
   if (!state) {
     return null;
@@ -47,6 +49,7 @@ export const Navigation = (props: ChromeNavigationProps) => {
         onToggleCollapsed={props.onToggleCollapsed}
         activeItemId={activeItemId}
         showTopSeparator={isNextChrome}
+        renderExtensionPoint={renderExtensionPoint}
         data-test-subj={classnames(`${solutionId}SideNav`, 'projectSideNav', 'projectSideNavV2')}
       />
     </KibanaSectionErrorBoundary>
