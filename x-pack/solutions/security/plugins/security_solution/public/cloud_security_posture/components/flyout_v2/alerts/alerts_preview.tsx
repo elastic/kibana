@@ -60,6 +60,13 @@ const AlertsCount = ({
   );
 };
 
+const SEVERITY_RANK: Record<string, number> = {
+  critical: 4,
+  high: 3,
+  medium: 2,
+  low: 1,
+};
+
 export const AlertsPreview = ({
   alertsData,
   openDetailsPanel,
@@ -69,31 +76,30 @@ export const AlertsPreview = ({
 }) => {
   const { euiTheme } = useEuiTheme();
 
-  const severityMap = new Map<string, number>();
-  const severityRank: Record<string, number> = {
-    critical: 4,
-    high: 3,
-    medium: 2,
-    low: 1,
-  };
+  const { alertStats, totalAlertsCount } = useMemo(() => {
+    const severityMap = new Map<string, number>();
 
-  (Object.keys(alertsData || {}) as AlertsByStatus[]).forEach((status) => {
-    if (alertsData?.[status]?.severities) {
-      alertsData?.[status]?.severities.forEach((severity) => {
-        const currentSeverity = severityMap.get(severity.key) || 0;
-        severityMap.set(severity.key, currentSeverity + severity.value);
-      });
-    }
-  });
+    (Object.keys(alertsData || {}) as AlertsByStatus[]).forEach((status) => {
+      if (alertsData?.[status]?.severities) {
+        alertsData?.[status]?.severities.forEach((severity) => {
+          const currentSeverity = severityMap.get(severity.key) || 0;
+          severityMap.set(severity.key, currentSeverity + severity.value);
+        });
+      }
+    });
 
-  const alertStats = Array.from(severityMap, ([key, count]: [string, number]) => ({
-    key: capitalize(key),
-    count,
-    color: getSeverityColor(key, euiTheme),
-    sort: severityRank[key.toLowerCase()] || 0,
-  })).sort((a, b) => b.sort - a.sort);
+    const stats = Array.from(severityMap, ([key, count]: [string, number]) => ({
+      key: capitalize(key),
+      count,
+      color: getSeverityColor(key, euiTheme),
+      sort: SEVERITY_RANK[key.toLowerCase()] || 0,
+    })).sort((a, b) => b.sort - a.sort);
 
-  const totalAlertsCount = alertStats.reduce((total, item) => total + item.count, 0);
+    return {
+      alertStats: stats,
+      totalAlertsCount: stats.reduce((total, item) => total + item.count, 0),
+    };
+  }, [alertsData, euiTheme]);
 
   const goToEntityInsightTab = useCallback(
     () =>

@@ -76,7 +76,7 @@ describe('AlertsDetailsTable (v2)', () => {
       </TestProviders>
     );
 
-    expect(getByTestId('securitySolutionFlyoutMisconfigurationFindingsTable')).toBeInTheDocument();
+    expect(getByTestId('securitySolutionFlyoutAlertsFindingsTable')).toBeInTheDocument();
   });
 
   it('accepts required onShowAlert callback without throwing', () => {

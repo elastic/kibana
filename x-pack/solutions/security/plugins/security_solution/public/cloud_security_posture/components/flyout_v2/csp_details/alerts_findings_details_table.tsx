@@ -426,7 +426,7 @@ export const AlertsDetailsTable = memo(
             columns={columns}
             pagination={pagination}
             onChange={onTableChange}
-            data-test-subj={'securitySolutionFlyoutMisconfigurationFindingsTable'}
+            data-test-subj={'securitySolutionFlyoutAlertsFindingsTable'}
             sorting={sorting}
             tableCaption={i18n.translate(
               'xpack.securitySolution.flyout.left.insights.alerts.tableCaption',

@@ -372,7 +372,7 @@ export const VulnerabilitiesFindingsDetailsTable = memo(
           </EuiText>
         ),
         name: i18n.translate(
-          'xpack.securitySolution.flyout.left.insights.vulnerability.table.ruleColumnName',
+          'xpack.securitySolution.flyout.left.insights.vulnerability.table.cvssColumnName',
           { defaultMessage: 'CVSS' }
         ),
         width: '10%',
@@ -415,7 +415,7 @@ export const VulnerabilitiesFindingsDetailsTable = memo(
           </>
         ),
         name: i18n.translate(
-          'xpack.securitySolution.flyout.left.insights.vulnerability.table.ruleColumnName',
+          'xpack.securitySolution.flyout.left.insights.vulnerability.table.severityColumnName',
           { defaultMessage: 'Severity' }
         ),
         width: '10%',
@@ -426,7 +426,7 @@ export const VulnerabilitiesFindingsDetailsTable = memo(
         render: (packageName: string, finding: VulnerabilitiesFindingDetailFields) =>
           renderMultiValueCell(VULNERABILITY_FINDING.PACKAGE_NAME, finding),
         name: i18n.translate(
-          'xpack.securitySolution.flyout.left.insights.vulnerability.table.ruleColumnName',
+          'xpack.securitySolution.flyout.left.insights.vulnerability.table.packageColumnName',
           { defaultMessage: 'Package' }
         ),
         width: '30%',

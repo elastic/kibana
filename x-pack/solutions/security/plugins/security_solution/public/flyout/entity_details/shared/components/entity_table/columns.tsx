@@ -22,6 +22,8 @@ export const getEntityTableColumns = <T extends BasicEntityData>(
   contextID: string,
   scopeId: string,
   data: T,
+  // Used only by the flyout_v2 host flyout; v2 components own the rendering contract
+  // but thread it here rather than duplicating the column config.
   linkRenderer?: EntityTableLinkRenderer
 ): EntityTableColumns<T> => [
   {
