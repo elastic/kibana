@@ -109,12 +109,17 @@ export const DetectionsTab = () => {
         render: (detection: Detection) => {
           const isExpanded = selectedDetectionId === getDetectionItemId(detection);
           return (
-            <EuiButtonIcon
-              data-test-subj="detectionsDetailsButton"
-              iconType={isExpanded ? 'minimize' : 'expand'}
-              aria-label={isExpanded ? MINIMIZE_DETAILS_ARIA_LABEL : VIEW_DETAILS_ARIA_LABEL}
-              onClick={() => toggleSelectedDetection(detection)}
-            />
+            <EuiToolTip
+              content={isExpanded ? MINIMIZE_DETAILS_ARIA_LABEL : VIEW_DETAILS_ARIA_LABEL}
+              disableScreenReaderOutput
+            >
+              <EuiButtonIcon
+                data-test-subj="detectionsDetailsButton"
+                iconType={isExpanded ? 'minimize' : 'expand'}
+                aria-label={isExpanded ? MINIMIZE_DETAILS_ARIA_LABEL : VIEW_DETAILS_ARIA_LABEL}
+                onClick={() => toggleSelectedDetection(detection)}
+              />
+            </EuiToolTip>
           );
         },
       },
