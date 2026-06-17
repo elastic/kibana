@@ -175,7 +175,6 @@ export const useTopNavLinks = ({
         services,
         tabId: currentTab.id,
         getState,
-        dispatch,
         showCreateRuleV2,
         subscribe,
         additionalLegacyRuleTypes,

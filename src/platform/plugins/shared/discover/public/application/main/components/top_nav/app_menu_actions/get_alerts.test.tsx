@@ -14,10 +14,15 @@ import { createDiscoverServicesMock } from '../../../../../__mocks__/services';
 import { dataViewWithTimefieldMock } from '../../../../../__mocks__/data_view_with_timefield';
 import { dataViewWithNoTimefieldMock } from '../../../../../__mocks__/data_view_no_timefield';
 import { getDiscoverInternalStateMock } from '../../../../../__mocks__/discover_state.mock';
-import type { AppMenuExtensionParams } from '../../../../../context_awareness';
+import type {
+  AlertsLegacyRuleType,
+  AppMenuExtensionParams,
+} from '../../../../../context_awareness';
 import type { DiscoverAppMenuItemType } from '@kbn/discover-utils';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { DiscoverServices } from '../../../../../build_services';
+import { internalStateActions } from '../../../state_management/redux';
+import type { ReactElement } from 'react';
 
 const getAlertsMenuItem = async ({
   dataView = dataViewMock,
@@ -25,16 +30,28 @@ const getAlertsMenuItem = async ({
   authorizedRuleTypeIds = [ES_QUERY_ID],
   services = createDiscoverServicesMock(),
   showCreateRuleV2,
+  esqlQuery = 'FROM logs-*',
+  additionalLegacyRuleTypes,
 }: {
   dataView?: DataView;
   isEsqlMode?: boolean;
   authorizedRuleTypeIds?: string[];
   services?: DiscoverServices;
   showCreateRuleV2?: boolean;
+  esqlQuery?: string;
+  additionalLegacyRuleTypes?: AlertsLegacyRuleType[];
 } = {}): Promise<DiscoverAppMenuItemType> => {
   const toolkit = getDiscoverInternalStateMock({ services });
 
   await toolkit.initializeTabs();
+
+  if (isEsqlMode) {
+    toolkit.internalState.dispatch(
+      toolkit.injectCurrentTab(internalStateActions.setAppState)({
+        appState: { query: { esql: esqlQuery } },
+      })
+    );
+  }
 
   await toolkit.initializeSingleTab({
     tabId: toolkit.getCurrentTab().id,
@@ -54,9 +71,9 @@ const getAlertsMenuItem = async ({
     services,
     tabId: currentTab.id,
     getState: toolkit.internalState.getState,
-    dispatch: toolkit.internalState.dispatch,
     showCreateRuleV2,
     subscribe: (listener) => toolkit.internalState.subscribe(listener),
+    additionalLegacyRuleTypes,
   });
 };
 
@@ -202,6 +219,124 @@ describe('getAlertsAppMenuItem', () => {
 
       expect(alertsMenuItem.items).toBeDefined();
       expect(alertsMenuItem.items!.length).toBeGreaterThan(0);
+    });
+  });
+
+  describe('alertsMenuItem.run', () => {
+    const createRunParams = (onFinishAction = jest.fn()) => ({
+      triggerElement: document.createElement('button'),
+      returnFocus: jest.fn(),
+      context: { onFinishAction },
+    });
+
+    it('should render CreateRuleOptionsFlyout with the current ES|QL query and subscribe handler', async () => {
+      const services = createDiscoverServicesMock();
+      const alertsMenuItem = await getAlertsMenuItem({
+        services,
+        showCreateRuleV2: true,
+        isEsqlMode: true,
+        esqlQuery: 'FROM test-index | WHERE message != ""',
+      });
+
+      const onFinishAction = jest.fn();
+      const flyoutElement = alertsMenuItem.run!(createRunParams(onFinishAction)) as ReactElement;
+
+      expect(services.alertingVTwo!.CreateRuleOptionsFlyout).toBeDefined();
+      expect(flyoutElement.type).toBe(services.alertingVTwo!.CreateRuleOptionsFlyout);
+      expect(flyoutElement.props.initialQuery).toBe('FROM test-index | WHERE message != ""');
+      expect(flyoutElement.props.onClose).toBe(onFinishAction);
+      expect(flyoutElement.props.subscribe).toEqual(expect.any(Function));
+      expect(flyoutElement.props.getQuery).toEqual(expect.any(Function));
+      expect(flyoutElement.props.getEsqlVariables).toEqual(expect.any(Function));
+      expect(flyoutElement.props.history).toBe(services.history);
+    });
+
+    it('should include the search threshold legacy rule when v1 rule creation is authorized', async () => {
+      const alertsMenuItem = await getAlertsMenuItem({
+        showCreateRuleV2: true,
+        isEsqlMode: true,
+        authorizedRuleTypeIds: [ES_QUERY_ID],
+      });
+
+      const flyoutElement = alertsMenuItem.run!(createRunParams()) as ReactElement;
+
+      expect(flyoutElement.props.legacyRuleTypes).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            id: 'search-threshold-rule',
+            label: 'Search threshold rule',
+            'data-test-subj': 'discoverLegacySearchThresholdRule',
+          }),
+        ])
+      );
+    });
+
+    it('should merge additional legacy rule types from profile extensions', async () => {
+      const profileLegacyRule: AlertsLegacyRuleType = {
+        id: 'custom-threshold-rule',
+        label: 'Create custom threshold rule',
+        render: jest.fn(() => null),
+      };
+
+      const alertsMenuItem = await getAlertsMenuItem({
+        showCreateRuleV2: true,
+        isEsqlMode: true,
+        additionalLegacyRuleTypes: [profileLegacyRule],
+      });
+
+      const flyoutElement = alertsMenuItem.run!(createRunParams()) as ReactElement;
+
+      expect(flyoutElement.props.legacyRuleTypes).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            id: 'custom-threshold-rule',
+            label: 'Create custom threshold rule',
+          }),
+        ])
+      );
+    });
+
+    it('should expose getQuery that reads the latest tab query when invoked', async () => {
+      const services = createDiscoverServicesMock();
+      const toolkit = getDiscoverInternalStateMock({ services });
+
+      await toolkit.initializeTabs();
+      await toolkit.initializeSingleTab({ tabId: toolkit.getCurrentTab().id });
+
+      const currentTab = toolkit.getCurrentTab();
+      const discoverParamsMock: AppMenuExtensionParams = {
+        dataView: dataViewMock,
+        adHocDataViews: [],
+        isEsqlMode: true,
+        authorizedRuleTypeIds: [ES_QUERY_ID],
+      };
+
+      toolkit.internalState.dispatch(
+        toolkit.injectCurrentTab(internalStateActions.setAppState)({
+          appState: { query: { esql: 'FROM initial-index' } },
+        })
+      );
+
+      const alertsMenuItem = getAlertsAppMenuItem({
+        discoverParams: discoverParamsMock,
+        services,
+        tabId: currentTab.id,
+        getState: toolkit.internalState.getState,
+        showCreateRuleV2: true,
+        subscribe: (listener) => toolkit.internalState.subscribe(listener),
+      });
+
+      const flyoutElement = alertsMenuItem.run!(createRunParams()) as ReactElement;
+
+      expect(flyoutElement.props.getQuery()).toBe('FROM initial-index');
+
+      toolkit.internalState.dispatch(
+        toolkit.injectCurrentTab(internalStateActions.setAppState)({
+          appState: { query: { esql: 'FROM updated-index | WHERE status == "open"' } },
+        })
+      );
+
+      expect(flyoutElement.props.getQuery()).toBe('FROM updated-index | WHERE status == "open"');
     });
   });
 });

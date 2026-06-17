@@ -21,6 +21,14 @@ import { internalStateActions } from '../../state_management/redux';
 import { ENABLE_ESQL } from '@kbn/esql-utils';
 import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
 import type { DiscoverServices } from '../../../../build_services';
+import type {
+  AlertsLegacyRuleType,
+  AppMenuExtension,
+  AppMenuExtensionParams,
+  Profile,
+} from '../../../../context_awareness/types';
+import { useProfileAccessor } from '../../../../context_awareness/hooks/use_profile_accessor';
+import * as getAlerts from './app_menu_actions/get_alerts';
 
 jest.mock('@kbn/alerts-ui-shared', () => ({
   ...jest.requireActual('@kbn/alerts-ui-shared'),
@@ -35,6 +43,12 @@ jest.mock('@kbn/alerts-ui-shared', () => ({
     ],
   })),
 }));
+
+jest.mock('../../../../context_awareness/hooks/use_profile_accessor', () => ({
+  useProfileAccessor: jest.fn((accessorId: string) => jest.fn((baseImpl) => baseImpl)),
+}));
+
+const mockUseProfileAccessor = useProfileAccessor as jest.MockedFunction<typeof useProfileAccessor>;
 
 const createTestServices = (overrides: Partial<DiscoverServices> = {}): DiscoverServices => {
   const services = createDiscoverServicesMock();
@@ -454,6 +468,63 @@ describe('useTopNavLinks', () => {
       expect(alertsItem).toBeDefined();
       expect(alertsItem?.items).toBeDefined();
       expect(alertsItem?.items!.length).toBeGreaterThan(0);
+    });
+
+    describe('getAlertsLegacyRuleTypes', () => {
+      const profileLegacyRule: AlertsLegacyRuleType = {
+        id: 'custom-threshold-rule',
+        label: 'Create custom threshold rule',
+        render: jest.fn(() => null),
+      };
+
+      beforeEach(() => {
+        mockUseProfileAccessor.mockImplementation((accessorId) => {
+          if (accessorId === 'getAppMenu') {
+            return jest.fn((baseImpl) => {
+              const getAppMenu = baseImpl as Profile['getAppMenu'];
+
+              return (params: AppMenuExtensionParams): AppMenuExtension => ({
+                ...getAppMenu(params),
+                getAlertsLegacyRuleTypes: () => [profileLegacyRule],
+              });
+            });
+          }
+
+          return jest.fn((baseImpl) => baseImpl);
+        });
+      });
+
+      afterEach(() => {
+        mockUseProfileAccessor.mockImplementation((accessorId) => jest.fn((baseImpl) => baseImpl));
+      });
+
+      it('should pass profile legacy rule types to getAlertsAppMenuItem in ES|QL mode', async () => {
+        const getAlertsSpy = jest.spyOn(getAlerts, 'getAlertsAppMenuItem');
+
+        await setupWithAlertingV2({ isEsqlMode: true }, true);
+
+        expect(getAlertsSpy).toHaveBeenCalledWith(
+          expect.objectContaining({
+            showCreateRuleV2: true,
+            additionalLegacyRuleTypes: expect.arrayContaining([
+              expect.objectContaining({
+                id: 'custom-threshold-rule',
+                label: 'Create custom threshold rule',
+              }),
+            ]),
+          })
+        );
+
+        getAlertsSpy.mockRestore();
+      });
+
+      it('should not expose getAlertsLegacyRuleTypes through the v2 flyout in classic mode', async () => {
+        const appMenuConfig = await setupWithAlertingV2({ isEsqlMode: false }, true);
+
+        const alertsItem = appMenuConfig.items?.find((item) => item.id === AppMenuActionId.alerts);
+        expect(alertsItem?.run).toBeUndefined();
+        expect(alertsItem?.items).toBeDefined();
+      });
     });
   });
 

@@ -22,10 +22,13 @@ import type { CreateRuleOptionsFlyoutLegacyItem } from '@kbn/alerting-v2-plugin/
 import type { AlertsLegacyRuleType } from '../../../../../context_awareness/types';
 import type { AppMenuDiscoverParams } from './types';
 import type { DiscoverServices } from '../../../../../build_services';
-import { internalStateActions } from '../../../state_management/redux';
 import { createSearchSource } from '../../../state_management/utils/create_search_source';
-import type { DiscoverInternalState, InternalStateDispatch } from '../../../state_management/redux';
-import { selectTab } from '../../../state_management/redux';
+import type { DiscoverInternalState } from '../../../state_management/redux';
+import {
+  internalStateActions,
+  selectTab,
+  useInternalStateDispatch,
+} from '../../../state_management/redux';
 
 const EsQueryValidConsumer: RuleCreationValidConsumer[] = [
   AlertConsumers.INFRASTRUCTURE,
@@ -46,9 +49,9 @@ const CreateV1AlertFlyout: React.FC<{
   services: DiscoverServices;
   tabId: string;
   getState: () => DiscoverInternalState;
-  dispatch: InternalStateDispatch;
   onFinishAction: () => void;
-}> = ({ discoverParams, services, tabId, getState, dispatch, onFinishAction = () => {} }) => {
+}> = ({ discoverParams, services, tabId, getState, onFinishAction = () => {} }) => {
+  const dispatch = useInternalStateDispatch();
   const { dataView, isEsqlMode, adHocDataViews } = discoverParams;
   const {
     triggersActionsUi: { ruleTypeRegistry, actionTypeRegistry },
@@ -59,6 +62,9 @@ const CreateV1AlertFlyout: React.FC<{
   const timeField = getTimeField(dataView);
   const { query, savedQuery: savedQueryId } = currentTab.appState;
 
+  /**
+   * Provides the default parameters used to initialize the new rule
+   */
   const getParams = useCallback(() => {
     if (isEsqlMode) {
       return {
@@ -122,7 +128,6 @@ export const getAlertsAppMenuItem = ({
   services,
   tabId,
   getState,
-  dispatch,
   showCreateRuleV2,
   subscribe,
   additionalLegacyRuleTypes = [],
@@ -131,7 +136,6 @@ export const getAlertsAppMenuItem = ({
   services: DiscoverServices;
   tabId: string;
   getState: () => DiscoverInternalState;
-  dispatch: InternalStateDispatch;
   showCreateRuleV2?: boolean;
   subscribe: (listener: () => void) => () => void;
   additionalLegacyRuleTypes?: AlertsLegacyRuleType[];
@@ -161,7 +165,6 @@ export const getAlertsAppMenuItem = ({
             services={services}
             tabId={tabId}
             getState={getState}
-            dispatch={dispatch}
           />
         ),
       });
@@ -244,7 +247,6 @@ export const getAlertsAppMenuItem = ({
               services={services}
               tabId={tabId}
               getState={getState}
-              dispatch={dispatch}
             />
           );
         },
