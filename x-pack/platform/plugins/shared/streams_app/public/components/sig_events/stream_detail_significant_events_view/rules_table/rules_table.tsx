@@ -7,8 +7,9 @@
 
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import {
-  EuiButtonEmpty,
+  type CriteriaWithPagination,
   EuiButtonIcon,
+  EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
@@ -16,7 +17,6 @@ import {
   EuiLink,
   EuiSpacer,
   EuiToolTip,
-  type CriteriaWithPagination,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { KnowledgeIndicator } from '@kbn/streams-ai';
@@ -247,7 +247,7 @@ export function RulesTable({
       <EuiHorizontalRule margin="none" style={{ height: 2 }} />
       <EuiInMemoryTable<KnowledgeIndicator>
         items={filteredRules}
-        itemId={(item) => (item.kind === 'query' ? item.query.id : item.feature.uuid)}
+        itemId={(item) => (item.kind === 'query' ? item.query.id : item.feature.id)}
         columns={columns}
         selection={{
           selected: selectedRules,

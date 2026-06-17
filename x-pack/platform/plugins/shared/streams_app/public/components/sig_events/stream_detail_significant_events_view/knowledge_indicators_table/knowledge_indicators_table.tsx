@@ -7,9 +7,10 @@
 
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import {
+  type CriteriaWithPagination,
   EuiBadge,
-  EuiButtonEmpty,
   EuiButtonIcon,
+  EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
@@ -17,7 +18,6 @@ import {
   EuiLink,
   EuiSpacer,
   EuiToolTip,
-  type CriteriaWithPagination,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { type Streams, QUERY_TYPE_STATS } from '@kbn/streams-schema';
@@ -72,9 +72,8 @@ export function KnowledgeIndicatorsTable({
     return knowledgeIndicators.filter((knowledgeIndicator) => {
       const matchesStatusFilter =
         statusFilter === 'active'
-          ? knowledgeIndicator.kind === 'query' || !knowledgeIndicator.feature.excluded_at
-          : knowledgeIndicator.kind === 'feature' &&
-            Boolean(knowledgeIndicator.feature.excluded_at);
+          ? knowledgeIndicator.kind === 'query' || !knowledgeIndicator.feature.excluded
+          : knowledgeIndicator.kind === 'feature' && Boolean(knowledgeIndicator.feature.excluded);
 
       if (!matchesStatusFilter) {
         return false;

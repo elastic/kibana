@@ -105,7 +105,7 @@ export function KnowledgeIndicatorDetailsFlyout({
     const computed = isComputedFeature(knowledgeIndicator.feature);
 
     if (!computed) {
-      if (knowledgeIndicator.feature.excluded_at) {
+      if (knowledgeIndicator.feature.excluded) {
         items.push(
           <EuiContextMenuItem
             key="feature-restore"
@@ -113,7 +113,7 @@ export function KnowledgeIndicatorDetailsFlyout({
             disabled={isMutating}
             onClick={() => {
               setIsActionsMenuOpen(false);
-              restoreFeature(knowledgeIndicator.feature.uuid);
+              restoreFeature(knowledgeIndicator.feature.id);
             }}
           >
             {RESTORE_LABEL}
@@ -127,7 +127,7 @@ export function KnowledgeIndicatorDetailsFlyout({
             disabled={isMutating}
             onClick={() => {
               setIsActionsMenuOpen(false);
-              excludeFeature(knowledgeIndicator.feature.uuid);
+              excludeFeature(knowledgeIndicator.feature.id);
             }}
           >
             {EXCLUDE_LABEL}
