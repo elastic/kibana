@@ -57,6 +57,12 @@ const ENTITY_AVATAR_ARIA = i18n.translate(
     defaultMessage: 'entity',
   }
 );
+const ENTITY_AVATAR_NAME = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.cases.entityAttachment.avatarNameLabel',
+  {
+    defaultMessage: 'entity',
+  }
+);
 const REMOVED_ENTITY_LABEL = i18n.translate(
   'xpack.securitySolution.entityAnalytics.cases.entityAttachment.removedLabel',
   {
@@ -88,7 +94,12 @@ export const getEntityAttachment = () =>
         />
       ),
       timelineAvatar: (
-        <EuiAvatar name="entity" color="subdued" iconType="user" aria-label={ENTITY_AVATAR_ARIA} />
+        <EuiAvatar
+          name={ENTITY_AVATAR_NAME}
+          color="subdued"
+          iconType="user"
+          aria-label={ENTITY_AVATAR_ARIA}
+        />
       ),
       children: EntityAttachmentChildrenLazy,
       deleteSuccessTitle: DELETE_ENTITY_SUCCESS_TITLE,

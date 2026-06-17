@@ -12,7 +12,7 @@ import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type {
   EntityURLStateResult,
   URLQuery,
-} from '../../../../../entity_analytics/components/home/entities_table';
+} from '../../../../entity_analytics/components/home/entities_table';
 
 type SortOrder = [string, string];
 
