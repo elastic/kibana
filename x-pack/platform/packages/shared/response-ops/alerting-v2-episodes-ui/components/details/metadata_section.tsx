@@ -8,6 +8,7 @@
 import React, { useCallback, useMemo } from 'react';
 import { EuiLoadingSpinner, EuiText } from '@elastic/eui';
 import { buildDataTableRecord } from '@kbn/discover-utils';
+import { getRootEsqlQuery } from '@kbn/alerting-v2-schemas';
 import { useFetchEpisodeQuery } from '../../hooks/use_fetch_episode_query';
 import { useFetchEpisodeEventDataQuery } from '../../hooks/use_fetch_episode_event_data_query';
 import { useFetchRule } from '../../hooks/use_fetch_rule';
@@ -57,7 +58,7 @@ export const AlertEpisodeMetadataSection = ({
   });
 
   const { value: dataView, loading: isDataViewLoading } = useAlertingEpisodeSourceDataView({
-    query: rule?.evaluation?.query?.base,
+    query: rule?.query ? getRootEsqlQuery(rule.query) : undefined,
     dataViews: services.dataViews,
     http: services.http,
   });
