@@ -172,7 +172,7 @@ const runLintTsProjects = async (
   fix: boolean
 ): Promise<{ passed: boolean; output: string }> => {
   const execa = (await import('execa')).default;
-  const args = ['scripts/lint_ts_projects', '--no-refs-check'];
+  const args = ['scripts/lint_ts_projects'];
   if (fix) args.push('--fix');
   args.push(...affectedSourceRoots);
 
@@ -380,6 +380,31 @@ run(
           );
           errors.push(error instanceof Error ? error : new Error(String(error)));
         }
+      }
+    }
+
+    // ── moon ───────────────────────────────────────────────────────────
+
+    {
+      const moonProgress = startProgress('moon');
+      try {
+        const result = await runMoonRegeneration();
+        if (result.passed) {
+          moonProgress.writeResult(
+            line('moon', '✓', 'projects regenerated', moonProgress.elapsed())
+          );
+        } else {
+          moonProgress.writeResult(line('moon', '✗', 'failed', moonProgress.elapsed()));
+          writeln('');
+          const excerpt = result.output.split('\n').slice(-15);
+          for (const l of excerpt) writeln(`    ${l}`);
+          writeln('    $ node scripts/regenerate_moon_projects.js --update');
+          writeln('');
+          errors.push(new Error('regenerate_moon_projects failed'));
+        }
+      } catch (error) {
+        moonProgress.writeResult(line('moon', '✗', 'failed', moonProgress.elapsed()));
+        errors.push(error instanceof Error ? error : new Error(String(error)));
       }
     }
 
@@ -624,31 +649,6 @@ run(
       }
     }
 
-    // ── moon ───────────────────────────────────────────────────────────
-
-    if (flagsReader.boolean('regenerate-moon')) {
-      const moonProgress = startProgress('moon');
-      try {
-        const result = await runMoonRegeneration();
-        if (result.passed) {
-          moonProgress.writeResult(
-            line('moon', '✓', 'projects regenerated', moonProgress.elapsed())
-          );
-        } else {
-          moonProgress.writeResult(line('moon', '✗', 'failed', moonProgress.elapsed()));
-          writeln('');
-          const excerpt = result.output.split('\n').slice(-15);
-          for (const l of excerpt) writeln(`    ${l}`);
-          writeln('    $ node scripts/regenerate_moon_projects.js --update');
-          writeln('');
-          errors.push(new Error('regenerate_moon_projects failed'));
-        }
-      } catch (error) {
-        moonProgress.writeResult(line('moon', '✗', 'failed', moonProgress.elapsed()));
-        errors.push(error instanceof Error ? error : new Error(String(error)));
-      }
-    }
-
     if (errors.length > 0) {
       process.exitCode = 1;
     }
@@ -666,19 +666,11 @@ run(
     `,
     flags: {
       string: [...VALIDATION_RUN_STRING_FLAGS],
-      boolean: ['fix', 'regenerate-moon'],
+      boolean: ['fix'],
       default: {
         fix: true,
-        'regenerate-moon': false,
       },
-      help: [
-        ...VALIDATION_RUN_HELP,
-        { flag: '--no-fix', description: 'Disable lint auto-fix' },
-        {
-          flag: '--regenerate-moon',
-          description: 'Run a full Moon project regeneration after the other checks',
-        },
-      ],
+      help: [...VALIDATION_RUN_HELP, { flag: '--no-fix', description: 'Disable lint auto-fix' }],
     },
   }
 );

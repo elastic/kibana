@@ -20,7 +20,7 @@ if is_pr && ! is_auto_commit_disabled; then
   FIX_FLAG="--fix"
 fi
 
-timeout 1200 node scripts/check --scope branch --regenerate-moon $FIX_FLAG || EXIT_CODE=$?
+timeout 1200 node scripts/check --scope branch $FIX_FLAG || EXIT_CODE=$?
 
 if [[ $EXIT_CODE -ne 0 && $EXIT_CODE -ne 124 ]]; then
   FAILED=true
@@ -33,10 +33,8 @@ if [[ "$FAILED" == "true" ]]; then
     ":warning: **\`node scripts/check.js\` failed.** Run \`node scripts/check.js\` locally before pushing to catch these issues early."
 fi
 
-# Single auto-commit at the end so both `scripts/check --fix` and moon
-# regeneration changes land in one commit on PR runs.
 if is_pr && ! is_auto_commit_disabled; then
-  check_for_changed_files "node scripts/check --regenerate-moon --fix" true
+  check_for_changed_files "node scripts/check --fix" true
 fi
 
 if [[ "$FAILED" == "true" ]]; then
