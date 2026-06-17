@@ -7,8 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { httpServerMock } from '@kbn/core/server/mocks';
 import { DomainEventBusImpl } from './domain_event_bus_impl';
 import type { DomainEvent } from './types';
+
+const request = httpServerMock.createKibanaRequest();
 
 interface FooEvent extends DomainEvent<'cases.caseCreated'> {
   readonly type: 'cases.caseCreated';
@@ -33,6 +36,7 @@ const fooEvent = (): FooEvent => ({
     caseId: 'case-1',
     owner: 'securitySolution',
   },
+  request,
 });
 
 const barEvent = (workflowRunId = 'run-1'): BarEvent => ({
@@ -42,6 +46,7 @@ const barEvent = (workflowRunId = 'run-1'): BarEvent => ({
     workflowId: 'workflow-1',
     workflowRunId,
   },
+  request,
 });
 
 const flushAsync = async (): Promise<void> => {

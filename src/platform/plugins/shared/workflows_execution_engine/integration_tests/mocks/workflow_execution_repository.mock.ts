@@ -9,7 +9,7 @@
 
 import type { estypes } from '@elastic/elasticsearch';
 import type { EsWorkflowExecution } from '@kbn/workflows';
-import { TerminalExecutionStatuses } from '@kbn/workflows';
+import { isTerminalStatus } from '@kbn/workflows';
 import type { WorkflowExecutionRepository as WorkflowExecutionRepositoryType } from '../../server/repositories/workflow_execution_repository';
 
 export class WorkflowExecutionRepositoryMock implements Required<WorkflowExecutionRepositoryType> {
@@ -131,7 +131,7 @@ export class WorkflowExecutionRepositoryMock implements Required<WorkflowExecuti
       (exec) =>
         exec.workflowId === workflowId &&
         exec.spaceId === spaceId &&
-        !TerminalExecutionStatuses.includes(exec.status)
+        !isTerminalStatus(exec.status)
     );
 
     if (triggeredBy) {
@@ -151,7 +151,7 @@ export class WorkflowExecutionRepositoryMock implements Required<WorkflowExecuti
       (exec) =>
         exec.workflowId === workflowId &&
         exec.spaceId === spaceId &&
-        !TerminalExecutionStatuses.includes(exec.status)
+        !isTerminalStatus(exec.status)
     );
 
     if (triggeredBy) {
@@ -186,7 +186,7 @@ export class WorkflowExecutionRepositoryMock implements Required<WorkflowExecuti
         (exec) =>
           exec.workflowId === workflowId &&
           exec.spaceId === spaceId &&
-          !TerminalExecutionStatuses.includes(exec.status)
+          !isTerminalStatus(exec.status)
       )
       .sort((a, b) => {
         const byCreated = a.createdAt.localeCompare(b.createdAt);
@@ -230,7 +230,7 @@ export class WorkflowExecutionRepositoryMock implements Required<WorkflowExecuti
         (exec) =>
           exec.concurrencyGroupKey === concurrencyGroupKey &&
           exec.spaceId === spaceId &&
-          !TerminalExecutionStatuses.includes(exec.status) &&
+          !isTerminalStatus(exec.status) &&
           (!excludeExecutionId || exec.id !== excludeExecutionId)
       )
       .sort((a, b) => {

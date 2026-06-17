@@ -17,6 +17,8 @@ import type {
   Plugin,
   PluginInitializerContext,
 } from '@kbn/core/server';
+import { domainEventBus } from '@kbn/domain-events';
+import { WORKFLOW_TERMINATED_EVENT_TYPE } from '@kbn/domain-events/events/workflows';
 import { ExecutionStatus, pickManagedWorkflowFields, WorkflowRepository } from '@kbn/workflows';
 import type {
   BulkScheduleWorkflowResult,
@@ -90,6 +92,7 @@ import {
 } from './workflow_task_manager/workflow_task_manager';
 import { createWorkflowTaskAbortController } from './workflow_task_shutdown';
 import { createIndexes } from '../common';
+import { WORKFLOW_EXECUTION_FAILED_TRIGGER_ID } from '@kbn/workflows-extensions/common';
 
 /**
  * Max Task Manager attempts for `workflow:run`.
@@ -1339,6 +1342,14 @@ export class WorkflowsExecutionEnginePlugin
         return querySearchTriggerEventLog(triggerEventsClient, params);
       },
     };
+
+    domainEventBus.subscribe(WORKFLOW_TERMINATED_EVENT_TYPE, (event) => {
+      triggerEvents.emitEvent({
+        triggerId: WORKFLOW_EXECUTION_FAILED_TRIGGER_ID,
+        payload: event.payload,
+        request: event.request,
+      });
+    });
 
     return {
       workflowEventLoggerService,

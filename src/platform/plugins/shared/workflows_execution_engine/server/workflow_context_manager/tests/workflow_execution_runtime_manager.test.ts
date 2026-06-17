@@ -9,6 +9,7 @@
 
 import agent from 'elastic-apm-node';
 import type { CoreStart } from '@kbn/core/server';
+import { httpServerMock } from '@kbn/core/server/mocks';
 import type {
   EsWorkflowExecution,
   EsWorkflowStepExecution,
@@ -137,6 +138,7 @@ describe('WorkflowExecutionRuntimeManager', () => {
       workflowLogger,
       workflowExecutionState,
       stepIoService,
+      request: httpServerMock.createKibanaRequest(),
       coreStart: fakeCoreStart as CoreStart,
       dependencies: fakeContextDependencies,
     });

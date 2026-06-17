@@ -15,7 +15,7 @@ export type { DomainEventMap, DomainEventType } from '../events';
 export interface DomainEvent<T extends DomainEventType = DomainEventType> {
   type: T;
   payload: DomainEventMap[T];
-  request?: KibanaRequest;
+  request: KibanaRequest;
 }
 
 export interface DomainEventBus {

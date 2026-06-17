@@ -9,9 +9,12 @@
 
 import agent from 'elastic-apm-node';
 import { addTransactionLabels } from '@kbn/apm-utils';
-import type { CoreStart } from '@kbn/core/server';
+import type { CoreStart, KibanaRequest } from '@kbn/core/server';
 import { domainEventBus } from '@kbn/domain-events';
-import { WORKFLOW_TERMINATED_EVENT_TYPE } from '@kbn/domain-events/events/workflows';
+import {
+  WORKFLOW_STARTED_EVENT_TYPE,
+  WORKFLOW_TERMINATED_EVENT_TYPE,
+} from '@kbn/domain-events/events/workflows';
 import type { EsWorkflowExecution, StackFrame } from '@kbn/workflows';
 import {
   ExecutionStatus,
@@ -38,6 +41,7 @@ interface WorkflowExecutionRuntimeManagerInit {
   workflowExecution: EsWorkflowExecution;
   workflowExecutionGraph: WorkflowGraph;
   workflowLogger: IWorkflowEventLogger;
+  request: KibanaRequest;
   coreStart?: CoreStart;
   dependencies?: ContextDependencies;
   telemetryClient?: WorkflowExecutionTelemetryClient;
@@ -75,6 +79,7 @@ export class WorkflowExecutionRuntimeManager {
   private coreStart?: CoreStart;
   private dependencies?: ContextDependencies;
   private telemetryClient?: WorkflowExecutionTelemetryClient;
+  private request: KibanaRequest;
   private telemetryReported: boolean = false;
   private get topologicalOrder(): string[] {
     return this.workflowGraph.topologicalOrder;
@@ -87,6 +92,7 @@ export class WorkflowExecutionRuntimeManager {
     this.workflowLogger = workflowExecutionRuntimeManagerInit.workflowLogger;
     this.workflowExecutionState = workflowExecutionRuntimeManagerInit.workflowExecutionState;
     this.stepIoService = workflowExecutionRuntimeManagerInit.stepIoService;
+    this.request = workflowExecutionRuntimeManagerInit.request;
     this.coreStart = workflowExecutionRuntimeManagerInit.coreStart;
     this.dependencies = workflowExecutionRuntimeManagerInit.dependencies;
     this.telemetryClient = workflowExecutionRuntimeManagerInit.telemetryClient;
@@ -545,18 +551,19 @@ export class WorkflowExecutionRuntimeManager {
 
   private publishWorkflowStartedDomainEvent(): void {
     domainEventBus.publish({
-      type: 'workflows.workflowStarted',
+      type: WORKFLOW_STARTED_EVENT_TYPE,
       payload: {
         spaceId: this.workflowExecution.spaceId,
         workflowId: this.workflowExecution.workflowId,
         workflowRunId: this.workflowExecution.id,
       },
+      request: this.request,
     });
   }
 
   private publishWorkflowTerminalDomainEvent(): void {
     const execution = this.getWorkflowExecution();
-    if (!isTerminalStatus(execution.status)) {
+    if (!isTerminalStatus(execution.status) || execution.isTestRun) {
       return;
     }
 
@@ -587,6 +594,7 @@ export class WorkflowExecutionRuntimeManager {
           ...(stepExecutionId && { stepExecutionId }),
         },
       },
+      request: this.request,
     });
   }
 
