@@ -41,7 +41,7 @@ const getComputedColumnFilterDisabledMessage = ({
   );
 };
 
-export function isComputedColumnNonFilterable(column: DatatableColumn): boolean {
+function isComputedColumnNonFilterable(column: DatatableColumn): boolean {
   if (column.isComputedColumn !== true) {
     return false;
   }
