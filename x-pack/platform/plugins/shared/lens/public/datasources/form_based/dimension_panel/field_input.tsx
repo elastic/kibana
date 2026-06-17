@@ -99,8 +99,8 @@ export function getErrorMessage(
   input: 'none' | 'field' | 'fullReference' | 'managedReference' | undefined,
   fieldInvalid: boolean
 ) {
-  if (selectedColumn && incompleteOperation) {
-    if (input === 'field') {
+  if (incompleteOperation) {
+    if (selectedColumn && input === 'field') {
       return i18n.translate('xpack.lens.indexPattern.invalidOperationLabel', {
         defaultMessage: 'This field does not work with the selected function.',
       });
