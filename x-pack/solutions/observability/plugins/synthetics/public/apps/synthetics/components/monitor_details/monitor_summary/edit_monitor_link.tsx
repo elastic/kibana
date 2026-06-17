@@ -14,6 +14,9 @@ import { useCanEditSynthetics } from '../../../../../hooks/use_capabilities';
 import { useSyntheticsSettingsContext } from '../../../contexts';
 import { NoPermissionsTooltip } from '../../common/components/permissions';
 import { useGetUrlParams } from '../../../hooks';
+import { isRemoteSyntheticsMonitor } from '../../../../../../common/runtime_types';
+import { createRemoteMonitorEditUrl } from '../../../utils/remote/remote_monitor_urls';
+import { useSelectedMonitor } from '../hooks/use_selected_monitor';
 
 export const EditMonitorLink = () => {
   const { basePath } = useSyntheticsSettingsContext();
@@ -48,11 +51,51 @@ export const EditMonitorLink = () => {
 export const EditMonitorContextItem = ({ isRemote = false }: { isRemote?: boolean }) => {
   const { basePath } = useSyntheticsSettingsContext();
   const { monitorId } = useParams<{ monitorId: string }>();
-  const { spaceId } = useGetUrlParams();
+  const { remoteName, spaceId } = useGetUrlParams();
   const canEditSynthetics = useCanEditSynthetics();
-  // Remote (CCS) monitors cannot be edited locally — there is no local saved
-  // object. Disable the item and surface the reason via the tooltip.
-  const isLinkDisabled = !canEditSynthetics || isRemote;
+  const { monitor } = useSelectedMonitor();
+
+  if (isRemote) {
+    // Three-state pattern modeled on SLO's `header_control.tsx`:
+    //   1. `kibanaUrl` known   → render as enabled, target=_blank, popout icon.
+    //   2. `kibanaUrl` missing → render disabled with the "undefined kibanaUrl"
+    //      tooltip so the user understands why we cannot deep-link.
+    // The synthesized `monitor.remote.kibanaUrl` already bakes in the
+    // `latestPing.kibanaUrl` fallback (see `use_remote_monitor.ts`), so it is
+    // the single source of truth for the deep link.
+    const remoteKibanaUrl = isRemoteSyntheticsMonitor(monitor)
+      ? monitor.remote.kibanaUrl
+      : undefined;
+    const remoteEditUrl = remoteName
+      ? createRemoteMonitorEditUrl({
+          monitor: {
+            configId: monitorId,
+            remote: { remoteName, ...(remoteKibanaUrl ? { kibanaUrl: remoteKibanaUrl } : {}) },
+          },
+          spaceId,
+        })
+      : undefined;
+    const hasUndefinedRemoteKibanaUrl = !remoteEditUrl;
+
+    // `EuiContextMenuItem` already renders a popout indicator automatically
+    // when `target="_blank"` is set, so we don't append our own icon.
+    return (
+      <EuiContextMenuItem
+        icon="pencil"
+        data-test-subj="syntheticsEditMonitorContextItem"
+        href={remoteEditUrl}
+        target={remoteEditUrl ? '_blank' : undefined}
+        disabled={hasUndefinedRemoteKibanaUrl}
+        toolTipContent={
+          hasUndefinedRemoteKibanaUrl ? NOT_AVAILABLE_FOR_UNDEFINED_REMOTE_KIBANA_URL : undefined
+        }
+      >
+        {EDIT_MONITOR}
+      </EuiContextMenuItem>
+    );
+  }
+
+  const isLinkDisabled = !canEditSynthetics;
   const linkProps = isLinkDisabled
     ? { disabled: true }
     : {
@@ -67,7 +110,6 @@ export const EditMonitorContextItem = ({ isRemote = false }: { isRemote?: boolea
       data-test-subj="syntheticsEditMonitorContextItem"
       {...linkProps}
       disabled={isLinkDisabled}
-      toolTipContent={isRemote ? NOT_AVAILABLE_FOR_REMOTE_MONITORS : undefined}
     >
       {EDIT_MONITOR}
     </EuiContextMenuItem>
@@ -78,9 +120,9 @@ const EDIT_MONITOR = i18n.translate('xpack.synthetics.monitorSummary.editMonitor
   defaultMessage: 'Edit monitor',
 });
 
-const NOT_AVAILABLE_FOR_REMOTE_MONITORS = i18n.translate(
-  'xpack.synthetics.monitorDetails.actions.notAvailableForRemote',
+const NOT_AVAILABLE_FOR_UNDEFINED_REMOTE_KIBANA_URL = i18n.translate(
+  'xpack.synthetics.monitorDetails.actions.remoteKibanaUrlUndefined',
   {
-    defaultMessage: 'This action is not available for remote monitors',
+    defaultMessage: 'This action is not available for remote monitors with undefined kibanaUrl',
   }
 );
