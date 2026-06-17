@@ -50,20 +50,18 @@ export class AgentService {
    * Create a new agent
    */
   async create(profile: AgentCreateRequest): Promise<AgentDefinition> {
-    const res = await this.http.post<CreateAgentResponse>(`${publicApiPath}/agents`, {
+    return await this.http.post<CreateAgentResponse>(`${publicApiPath}/agents`, {
       body: JSON.stringify(profile),
     });
-    return res;
   }
 
   /**
    * Update an existing agent
    */
   async update(id: string, update: AgentUpdateRequest): Promise<AgentDefinition> {
-    const res = await this.http.put<UpdateAgentResponse>(`${publicApiPath}/agents/${id}`, {
+    return await this.http.put<UpdateAgentResponse>(`${publicApiPath}/agents/${id}`, {
       body: JSON.stringify(update),
     });
-    return res;
   }
 
   /**
