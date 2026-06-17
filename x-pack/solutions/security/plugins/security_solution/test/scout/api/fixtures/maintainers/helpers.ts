@@ -5,11 +5,9 @@
  * 2.0.
  */
 
-import type { EsClient } from '@kbn/scout-security';
-import type { apiTest } from '@kbn/scout-security';
-import type { EntityStoreStatusResponseBody } from '../../../../server/routes/apis/status';
-import { hashEuid } from '../../../../common/domain/euid';
-import type { EntityType } from '../../../../common';
+import type { EsClient, apiTest } from '@kbn/scout-security';
+import { hashEuid } from '@kbn/entity-store/common/domain/euid';
+import type { EntityType } from '@kbn/entity-store/common';
 
 import {
   ENTITY_STORE_ROUTES,
@@ -21,7 +19,8 @@ import {
 
 type ApiWorkerFixtures = Parameters<Parameters<typeof apiTest>[2]>[0];
 type ApiClientFixture = ApiWorkerFixtures['apiClient'];
-type ApiClientResponse = Awaited<ReturnType<ApiClientFixture['get']>>; // ApiClientResponse is the same for all methods
+type ApiClientResponse = Awaited<ReturnType<ApiClientFixture['get']>>;
+
 /**
  * Normalizes values that may be stored as a single keyword or as keyword[] after
  * log extraction (e.g. `entity.relationships.*` bags).
@@ -70,7 +69,7 @@ export const ingestDoc = async (esClient: EsClient, body: Record<string, unknown
 
 export const searchDocById = async (esClient: EsClient, id: string) => {
   await esClient.indices.refresh({ index: LATEST_ALIAS });
-  return await esClient.search({
+  return esClient.search({
     index: LATEST_ALIAS,
     version: true,
     query: {
@@ -91,15 +90,6 @@ interface SeedUserEntityOptions {
   timestamp?: string;
 }
 
-/**
- * Seeds a user entity directly into the LATEST index with nested document
- * structure. Uses `pipeline: '_none'` to bypass the index's default ingest
- * pipeline (which may not exist in test environments).
- *
- * Uses esClient.index() instead of the CRUD API because the CRUD API nests
- * `entity` under `user.entity`, breaking automated resolution queries that
- * expect `entity.id` at the document root.
- */
 export const seedUserEntity = async (
   esClient: EsClient,
   { entityId, namespace, email, timestamp }: SeedUserEntityOptions
@@ -152,15 +142,6 @@ interface SeedHostEntityOptions {
   firstSeen?: string;
 }
 
-/**
- * Seeds a host entity directly into the LATEST index, optionally carrying a
- * relationship raw_identifier bag. Mirrors the post-extraction shape so a
- * raw_identifiers-based maintainer treats it like a real AD-derived host.
- *
- * Uses `pipeline: '_none'` to bypass the index default pipeline, and writes
- * `entity.id` at the document root (not nested under `host.entity`) so the
- * maintainer's Step 1 composite agg on `entity.id` and Step 2 ES|QL match.
- */
 export const seedHostEntity = async (
   esClient: EsClient,
   { entityId, hostName, relationship, lastSeen, firstSeen }: SeedHostEntityOptions
@@ -276,10 +257,6 @@ export const assertNoRelationshipId = async (
 
 const RESOLVED_TO_PATH = 'entity.relationships.resolution.resolved_to';
 
-/**
- * Polls the LATEST index until an entity's `resolved_to` field matches the
- * expected target, or until timeout. Returns the matching `_source`.
- */
 export const waitForResolution = async (
   esClient: EsClient,
   entityId: string,
@@ -300,7 +277,6 @@ export const waitForResolution = async (
     const source = response.hits.hits[0]?._source as Record<string, unknown> | undefined;
     lastSource = source;
     if (source) {
-      // Check both nested path and flat dotted key (ES update stores as flat key)
       const resolvedTo = getNestedValue(source, RESOLVED_TO_PATH) ?? source[RESOLVED_TO_PATH];
       if (resolvedTo === expectedTarget) {
         return source;
@@ -321,10 +297,6 @@ export const waitForResolution = async (
   );
 };
 
-/**
- * Polls the LATEST index and asserts that an entity does NOT gain a
- * `resolved_to` value within the given timeout (shorter default for negative tests).
- */
 export const assertNotResolved = async (
   esClient: EsClient,
   entityId: string,
@@ -342,7 +314,6 @@ export const assertNotResolved = async (
 
     const source = response.hits.hits[0]?._source as Record<string, unknown> | undefined;
     if (source) {
-      // Check both nested path and flat dotted key (ES update stores as flat key)
       const resolvedTo = getNestedValue(source, RESOLVED_TO_PATH) ?? source[RESOLVED_TO_PATH];
       if (resolvedTo != null) {
         throw new Error(
@@ -387,12 +358,11 @@ export const triggerMaintainerRun = async (
 
     const body = JSON.stringify(response.body);
 
-    if (response.statusCode === 500 && attempt < maxRetries) {
-      await new Promise((resolve) => setTimeout(resolve, retryDelayMs));
-      continue;
+    if (response.statusCode !== 500 || attempt >= maxRetries) {
+      throw new Error(`Failed to trigger maintainer run '${maintainerId}': ${body}`);
     }
 
-    throw new Error(`Failed to trigger maintainer run '${maintainerId}': ${body}`);
+    await new Promise((resolve) => setTimeout(resolve, retryDelayMs));
   }
 };
 
@@ -412,7 +382,7 @@ export const forceLogExtraction = async (
   fromDateISO: string,
   toDateISO: string
 ) =>
-  await apiClient.post(ENTITY_STORE_ROUTES.internal.FORCE_LOG_EXTRACTION(entityType), {
+  apiClient.post(ENTITY_STORE_ROUTES.internal.FORCE_LOG_EXTRACTION(entityType), {
     headers,
     responseType: 'json',
     body: { fromDateISO, toDateISO },
@@ -438,20 +408,11 @@ export const uninstallAllEntityTypes = (
     body: {},
   });
 
-export const getStatus = (
-  apiClient: ApiClientFixture,
-  headers: Record<string, string>,
-  { includeComponents = false } = {}
-): Promise<Omit<ApiClientResponse, 'body'> & { body: EntityStoreStatusResponseBody }> =>
-  apiClient.get(
-    includeComponents
-      ? `${ENTITY_STORE_ROUTES.public.STATUS}?include_components=true`
-      : ENTITY_STORE_ROUTES.public.STATUS,
-    {
-      headers,
-      responseType: 'json',
-    }
-  );
+export const getStatus = (apiClient: ApiClientFixture, headers: Record<string, string>) =>
+  apiClient.get(ENTITY_STORE_ROUTES.public.STATUS, {
+    headers,
+    responseType: 'json',
+  }) as Promise<ApiClientResponse>;
 
 export const startEntityTypes = (
   apiClient: ApiClientFixture,

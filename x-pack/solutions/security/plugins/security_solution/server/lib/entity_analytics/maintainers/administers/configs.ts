@@ -21,7 +21,7 @@ const RELATIONSHIP_KEY = 'administers';
  * AD populates raw_identifiers.host.name with the FQDN (a host EUID basis) and
  * raw_identifiers.host.id with the LDAP DN. Only host.name is listed here —
  * host.id (a DN) is NOT a valid host EUID and would resolve to a dangling
- * `host:CN=…` (it needs a LOOKUP JOIN, tracked as future work).
+ * `host:CN=…` (it needs a LOOKUP JOIN in the log index).
  */
 const AD_ADMINISTERS_RULES: DirectEuidRule[] = [{ field: 'host.name', euidType: 'host' }];
 
@@ -47,12 +47,11 @@ export function buildAdministersConfigs(
       // log-index assumption that would drop entities) and gate on last_seen instead.
       disableLookbackWindow: true,
       compositeAggAdditionalFilters: [
-        // Gate to entities with administers raw_identifiers. Match host.name OR
-        // host.id so an actor whose DN parsed an id but no CN is still surfaced
+        // Gate to entities with administers raw_identifiers.* match host.name
         // (Step 2 resolves from host.name only).
         buildRawIdentifiersExistenceGate({
           relationshipKey: RELATIONSHIP_KEY,
-          fields: ['host.name', 'host.id'],
+          fields: ['host.name'],
         }),
         // Watermark gate (last_seen, not @timestamp — see buildRawIdentifiersEsqlQuery).
         ...(lastProcessedTimestamp

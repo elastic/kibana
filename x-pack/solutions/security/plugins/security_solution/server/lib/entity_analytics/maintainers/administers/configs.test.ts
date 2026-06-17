@@ -129,7 +129,7 @@ describe('ADMINISTERS_INTEGRATION_RELATIONSHIP_CONFIGS', () => {
   });
 
   describe('actor existence gate', () => {
-    it('captures actors that carry administers raw_identifiers under host.name OR host.id', () => {
+    it('captures actors that carry administers raw_identifiers under host.name', () => {
       const config = buildAdministersConfigs()[0];
       const filters = config.compositeAggAdditionalFilters ?? [];
       const existenceGate = filters.find((f) =>
@@ -138,8 +138,7 @@ describe('ADMINISTERS_INTEGRATION_RELATIONSHIP_CONFIGS', () => {
       expect(existenceGate).toBeDefined();
       const serialized = JSON.stringify(existenceGate);
       expect(serialized).toContain('entity.relationships.administers.raw_identifiers.host.name');
-      expect(serialized).toContain('entity.relationships.administers.raw_identifiers.host.id');
-      expect(serialized).toContain('minimum_should_match');
+      expect(serialized).not.toContain('entity.relationships.administers.raw_identifiers.host.id');
     });
   });
 

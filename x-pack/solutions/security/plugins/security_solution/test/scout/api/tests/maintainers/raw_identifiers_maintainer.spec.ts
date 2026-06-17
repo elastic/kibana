@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { registerRawIdentifiersMaintainerSuite } from '../fixtures/raw_identifiers_maintainer_suite';
+import { registerRawIdentifiersMaintainerSuite } from '../../fixtures/maintainers/raw_identifiers_maintainer_suite';
 
 // Generic watermark coverage for raw_identifiers-based relationship maintainers.
 // Add a new entry here as each maintainer is onboarded (depends_on, supervises, …);

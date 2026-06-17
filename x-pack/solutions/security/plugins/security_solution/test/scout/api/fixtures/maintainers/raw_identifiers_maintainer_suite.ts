@@ -7,6 +7,7 @@
 
 import { apiTest } from '@kbn/scout-security';
 import { expect } from '@kbn/scout-security/api';
+import { FF_ENABLE_ENTITY_STORE_V2 } from '@kbn/entity-store/common';
 import {
   PUBLIC_HEADERS,
   INTERNAL_HEADERS,
@@ -16,7 +17,6 @@ import {
   LATEST_INDEX,
   UPDATES_INDEX,
 } from './constants';
-import { FF_ENABLE_ENTITY_STORE_V2 } from '../../../../common';
 import {
   clearEntityStoreIndices,
   seedHostEntity,
@@ -126,12 +126,8 @@ export const registerRawIdentifiersMaintainerSuite = (
           const tFqdn = targetFqdn('fresh');
           const target = targetId('fresh');
 
-          // Target host exists as its own entity (so the EUID resolves to a real entity).
           await seedHostEntity(esClient, { entityId: target, hostName: tFqdn });
 
-          // Actor host carries the relationship raw_identifier. On the first run the
-          // watermark (lastProcessedTimestamp) is undefined, so the maintainer does a
-          // full scan and picks up this actor regardless of its last_seen.
           await seedHostEntity(esClient, {
             entityId: actor,
             hostName: `${entityPrefix}-fresh.${domain}`,
@@ -147,12 +143,8 @@ export const registerRawIdentifiersMaintainerSuite = (
       apiTest(
         'skips an actor whose last_seen is older than the watermark, resolves a newer one',
         async ({ apiClient, esClient }) => {
-          // Step 1 — priming run. The maintainer's watermark (lastProcessedTimestamp)
-          // is undefined until a run completes, so we MUST run once first to set it.
-          // This run is synchronous (sync: true) so the watermark is persisted to the
-          // Task Manager task document BEFORE we proceed — the default async run
-          // returns before the state is written and would leave the watermark unset
-          // when we seed the stale/fresh actors below.
+          // Priming run: sets the watermark before we seed stale/fresh actors.
+          // Must be synchronous so the watermark is persisted before we proceed.
           const primingActor = actorId('prime');
           const primingTargetFqdn = targetFqdn('prime');
           const primingTarget = targetId('prime');
@@ -170,9 +162,8 @@ export const registerRawIdentifiersMaintainerSuite = (
           await triggerMaintainerRun(apiClient, internalHeaders, maintainerId, { sync: true });
           await waitForRelationshipIds(esClient, relationshipKey, primingActor, primingTarget);
 
-          // The watermark is now ~the priming run time. Seed two more actors:
-          //  - staleActor:  last_seen in the PAST   → at/older than watermark → skipped
-          //  - freshActor:  last_seen in the FUTURE → newer than watermark   → resolved
+          // staleActor: last_seen in the past → at/older than watermark → skipped
+          // freshActor: last_seen in the future → newer than watermark → resolved
           const staleTargetFqdn = targetFqdn('stale');
           const staleTarget = targetId('stale');
           const staleActor = actorId('stale');
@@ -184,7 +175,6 @@ export const registerRawIdentifiersMaintainerSuite = (
           const pastTs = new Date(Date.now() - 3_600_000).toISOString();
           const futureTs = new Date(Date.now() + 3_600_000).toISOString();
 
-          // Targets exist regardless of timestamp (they are not actors).
           await seedHostEntity(esClient, { entityId: staleTarget, hostName: staleTargetFqdn });
           await seedHostEntity(esClient, { entityId: freshTarget, hostName: freshTargetFqdn });
 
@@ -203,17 +193,9 @@ export const registerRawIdentifiersMaintainerSuite = (
             firstSeen: futureTs,
           });
 
-          // Second run, synchronous: against the watermark set by the priming run,
-          // it should process only freshActor (last_seen > watermark) and skip
-          // staleActor (last_seen <= watermark). Sync guarantees the run completes
-          // before we assert.
           await triggerMaintainerRun(apiClient, internalHeaders, maintainerId, { sync: true });
 
-          // Fresh actor (last_seen > watermark) is resolved.
           await waitForRelationshipIds(esClient, relationshipKey, freshActor, freshTarget);
-
-          // Stale actor (last_seen <= watermark) is NOT fetched, so its
-          // <relationshipKey>.ids never gains the target.
           await assertNoRelationshipId(esClient, relationshipKey, staleActor, staleTarget);
         }
       );
