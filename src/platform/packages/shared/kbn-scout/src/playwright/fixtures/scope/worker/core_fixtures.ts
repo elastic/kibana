@@ -16,11 +16,6 @@ import {
   getKbnClient,
   createScoutConfig,
   KibanaUrl,
-  createElasticsearchCustomRole,
-  createCustomRole,
-  ElasticsearchRoleDescriptor,
-  KibanaRole,
-  isElasticsearchRole,
 } from '../../../../common/services';
 import { ScoutLogger } from '../../../../common/services/logger';
 import type { ScoutTestOptions } from '../../../types';
