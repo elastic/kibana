@@ -47,7 +47,7 @@ export const WorkflowInsightsPolicyResponseFailureResult = ({
     >
       <EuiFlexGroup alignItems={'flexStart'} gutterSize={'m'}>
         <EuiFlexItem grow={false}>
-          <EuiIcon type="globe" size="l" color="warning" css={{ marginTop: '18px' }} />
+          <EuiIcon type="globe" size="l" color="warning" aria-hidden={true} css={{ marginTop: '18px' }} />
         </EuiFlexItem>
 
         <EuiFlexItem>
