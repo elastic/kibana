@@ -120,21 +120,12 @@ const investigationSynthesisAgent = {
   id: SIGEVENTS_INVESTIGATION_SYNTHESIS_AGENT_ID,
   name: 'Investigation Synthesis',
   description:
-    'Receives raw gather results for all hypotheses, compares evidence across them, ' +
-    'runs follow-up queries when needed, and produces the final root cause conclusion.',
+    'Ranks forwarded hypotheses, produces the final root cause and remediation options, ' +
+    'records discarded hypotheses, writes lessons to memory, returns InvestigationResult.',
   labels: ['observability', 'streams', 'significant-events', 'investigation', 'synthesis'],
   configuration: {
     skill_ids: ['significant-events-memory', 'significant-events-investigation-synthesis'],
-    tools: [
-      {
-        tool_ids: [
-          platformStreamsSigEventsTools.searchKnowledgeIndicators,
-          platformCoreTools.executeEsql,
-          platformCoreTools.generateEsql,
-          ...ALL_OBSERVABILITY_TOOL_IDS,
-        ],
-      },
-    ],
+    tools: [],
   },
 } as const satisfies BuiltInAgentDefinition;
 
