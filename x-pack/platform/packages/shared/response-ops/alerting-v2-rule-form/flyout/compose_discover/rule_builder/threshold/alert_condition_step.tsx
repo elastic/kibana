@@ -134,13 +134,13 @@ export const RuleBuilderAlertConditionStep: React.FC<RuleBuilderStepProps> = ({
       setValue('query', {
         format: 'composed',
         base,
-        blocks: {
-          breach: alertBlock,
-          ...(recoveryBlock ? { recover: recoveryBlock } : {}),
+        breach: {
+          segment: alertBlock,
         },
+        ...(recoveryBlock ? { recovery: { segment: recoveryBlock } } : {}),
       });
     } else {
-      setValue('query', { format: 'standalone', breach: esqlQuery });
+      setValue('query', { format: 'standalone', breach: { query: esqlQuery } });
     }
     setValue('timeField', thresholdValues.timeField);
     if (thresholdValues.groupByFields.length > 0) {
