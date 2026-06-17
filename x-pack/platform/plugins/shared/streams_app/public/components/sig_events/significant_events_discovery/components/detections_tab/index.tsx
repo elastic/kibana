@@ -5,9 +5,19 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import useInterval from 'react-use/lib/useInterval';
-import { EuiBasicTable, EuiBadge, EuiCallOut, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import {
+  EuiBasicTable,
+  EuiBadge,
+  EuiButtonIcon,
+  EuiCallOut,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLink,
+  EuiLoadingSpinner,
+  useEuiTheme,
+} from '@elastic/eui';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
@@ -35,6 +45,16 @@ const DISCOVERY_STATUS_LABELS = {
   }),
 };
 
+const VIEW_DETAILS_ARIA_LABEL = i18n.translate(
+  'xpack.streams.detectionsTab.viewDetailsAriaLabel',
+  { defaultMessage: 'View details' }
+);
+
+const MINIMIZE_DETAILS_ARIA_LABEL = i18n.translate(
+  'xpack.streams.detectionsTab.minimizeDetailsAriaLabel',
+  { defaultMessage: 'Collapse details' }
+);
+
 const kindLabel = (kind: Detection['kind']) => DETECTION_KIND_LABELS[kind] ?? kind;
 const kindColor = (kind: Detection['kind']) => DETECTION_KIND_COLORS[kind] ?? 'default';
 
@@ -42,67 +62,11 @@ const kindColor = (kind: Detection['kind']) => DETECTION_KIND_COLORS[kind] ?? 'd
 // and won't be picked up automatically by the discovery pipeline.
 const DISCOVERY_LOOKBACK_MS = 4 * 60 * 60 * 1000;
 
-const columns: Array<EuiBasicTableColumn<Detection>> = [
-  {
-    field: '@timestamp',
-    name: i18n.translate('xpack.streams.detectionsTab.timestampColumn', {
-      defaultMessage: 'Timestamp',
-    }),
-    width: '200px',
-    render: (timestamp: string) => formatTimestamp(timestamp),
-  },
-  {
-    field: 'kind',
-    name: i18n.translate('xpack.streams.detectionsTab.kindColumn', {
-      defaultMessage: 'Kind',
-    }),
-    width: '100px',
-    render: (kind: Detection['kind']) => (
-      <EuiBadge color={kindColor(kind)}>{kindLabel(kind)}</EuiBadge>
-    ),
-  },
-  {
-    field: 'rule_name',
-    name: i18n.translate('xpack.streams.detectionsTab.ruleColumn', {
-      defaultMessage: 'Rule',
-    }),
-  },
-  {
-    field: 'stream_name',
-    name: i18n.translate('xpack.streams.detectionsTab.streamColumn', {
-      defaultMessage: 'Stream',
-    }),
-    width: '140px',
-  },
-  {
-    name: i18n.translate('xpack.streams.detectionsTab.changeTypeColumn', {
-      defaultMessage: 'Change',
-    }),
-    width: '160px',
-    render: (detection: Detection) =>
-      CHANGE_TYPE_LABELS[detection.detection_evidence?.change_point_type ?? ''] ??
-      detection.detection_evidence?.change_point_type ??
-      '-',
-  },
-  {
-    name: i18n.translate('xpack.streams.detectionsTab.discoveryColumn', {
-      defaultMessage: 'Status',
-    }),
-    width: '110px',
-    render: (detection: Detection) => {
-      if (detection.processed) {
-        return <EuiBadge color="success">{DISCOVERY_STATUS_LABELS.processed}</EuiBadge>;
-      }
-      const docAgeMs = Date.now() - new Date(detection['@timestamp']).getTime();
-      if (docAgeMs > DISCOVERY_LOOKBACK_MS) {
-        return <EuiBadge color="warning">{DISCOVERY_STATUS_LABELS.missed}</EuiBadge>;
-      }
-      return <EuiBadge color="hollow">{DISCOVERY_STATUS_LABELS.pending}</EuiBadge>;
-    },
-  },
-];
+const getDetectionItemId = (detection: Detection) =>
+  detection.detection_id ?? `${detection.rule_uuid}-${detection['@timestamp']}`;
 
 export const DetectionsTab = () => {
+  const { euiTheme } = useEuiTheme();
   const { timeState } = useTimefilter();
 
   const { isRunning, isCanceling, handleRun, handleCancel } =
@@ -115,6 +79,17 @@ export const DetectionsTab = () => {
   useInterval(refetch, isRunning ? RUNNING_POLL_INTERVAL_MS : null);
 
   const [selectedDetection, setSelectedDetection] = useState<Detection | undefined>();
+  const selectedDetectionId = selectedDetection
+    ? getDetectionItemId(selectedDetection)
+    : undefined;
+
+  const toggleSelectedDetection = useCallback((detection: Detection) => {
+    setSelectedDetection((current) =>
+      current && getDetectionItemId(current) === getDetectionItemId(detection)
+        ? undefined
+        : detection
+    );
+  }, []);
 
   const onTableChange = ({ page }: { page?: { index: number; size: number } }) => {
     if (page) {
@@ -128,6 +103,107 @@ export const DetectionsTab = () => {
     totalItemCount: data?.total ?? 0,
     pageSizeOptions: [10, 25, 50],
   };
+
+  const columns: Array<EuiBasicTableColumn<Detection>> = useMemo(
+    () => [
+      {
+        name: '',
+        width: '40px',
+        render: (detection: Detection) => {
+          const isExpanded = selectedDetectionId === getDetectionItemId(detection);
+          return (
+            <EuiButtonIcon
+              data-test-subj="detectionsDetailsButton"
+              iconType={isExpanded ? 'minimize' : 'expand'}
+              aria-label={isExpanded ? MINIMIZE_DETAILS_ARIA_LABEL : VIEW_DETAILS_ARIA_LABEL}
+              onClick={() => toggleSelectedDetection(detection)}
+            />
+          );
+        },
+      },
+      {
+        field: 'rule_name',
+        name: i18n.translate('xpack.streams.detectionsTab.ruleColumn', {
+          defaultMessage: 'Rule',
+        }),
+        render: (_: unknown, detection: Detection) => (
+          <EuiLink onClick={() => toggleSelectedDetection(detection)}>
+            {detection.rule_name}
+          </EuiLink>
+        ),
+      },
+      {
+        name: i18n.translate('xpack.streams.detectionsTab.changeTypeColumn', {
+          defaultMessage: 'Change',
+        }),
+        width: '160px',
+        render: (detection: Detection) => {
+          const changeType = detection.detection_evidence?.change_point_type;
+          if (!changeType) {
+            return '-';
+          }
+          return <EuiBadge color="hollow">{CHANGE_TYPE_LABELS[changeType] ?? changeType}</EuiBadge>;
+        },
+      },
+      {
+        field: 'kind',
+        name: i18n.translate('xpack.streams.detectionsTab.kindColumn', {
+          defaultMessage: 'Kind',
+        }),
+        width: '120px',
+        render: (kind: Detection['kind']) => (
+          <EuiBadge color={kindColor(kind)}>{kindLabel(kind)}</EuiBadge>
+        ),
+      },
+      {
+        field: '@timestamp',
+        name: i18n.translate('xpack.streams.detectionsTab.timestampColumn', {
+          defaultMessage: 'Timestamp',
+        }),
+        width: '200px',
+        render: (timestamp: string) => formatTimestamp(timestamp),
+      },
+      {
+        field: 'stream_name',
+        name: i18n.translate('xpack.streams.detectionsTab.streamColumn', {
+          defaultMessage: 'Stream',
+        }),
+        width: '140px',
+        render: (streamName?: string) =>
+          streamName ? <EuiBadge color="hollow">{streamName}</EuiBadge> : null,
+      },
+      {
+        name: i18n.translate('xpack.streams.detectionsTab.discoveryColumn', {
+          defaultMessage: 'Discovery',
+        }),
+        width: '140px',
+        render: (detection: Detection) => {
+          if (detection.processed) {
+            return <EuiBadge color="success">{DISCOVERY_STATUS_LABELS.processed}</EuiBadge>;
+          }
+          const docAgeMs = Date.now() - new Date(detection['@timestamp']).getTime();
+          if (docAgeMs > DISCOVERY_LOOKBACK_MS) {
+            return <EuiBadge color="warning">{DISCOVERY_STATUS_LABELS.missed}</EuiBadge>;
+          }
+          return (
+            <EuiBadge color="hollow">
+              <span
+                css={css`
+                  display: inline-flex;
+                  align-items: center;
+                  gap: ${euiTheme.size.xs};
+                `}
+              >
+                <EuiLoadingSpinner size="s" />
+                {DISCOVERY_STATUS_LABELS.pending}
+              </span>
+            </EuiBadge>
+          );
+        },
+      },
+    ],
+    [selectedDetectionId, toggleSelectedDetection, euiTheme.size.xs]
+  );
 
   return (
     <EuiFlexGroup direction="column" gutterSize="s">
@@ -162,10 +238,16 @@ export const DetectionsTab = () => {
       )}
       <EuiFlexItem grow={false}>
         <EuiBasicTable
+          css={css`
+            & thead tr {
+              background-color: ${euiTheme.colors.backgroundBaseSubdued};
+            }
+          `}
           tableCaption={i18n.translate('xpack.streams.detectionsTab.tableCaption', {
             defaultMessage: 'Detections',
           })}
           items={data?.hits ?? []}
+          itemId={getDetectionItemId}
           columns={columns}
           pagination={euiPagination}
           onChange={onTableChange}
@@ -173,11 +255,8 @@ export const DetectionsTab = () => {
           noItemsMessage={i18n.translate('xpack.streams.detectionsTab.emptyBody', {
             defaultMessage: 'No detections found.',
           })}
-          rowProps={(item) => ({
-            onClick: () => setSelectedDetection(item),
-            css: css`
-              cursor: pointer;
-            `,
+          rowProps={(detection: Detection) => ({
+            isSelected: selectedDetectionId === getDetectionItemId(detection),
           })}
         />
       </EuiFlexItem>
