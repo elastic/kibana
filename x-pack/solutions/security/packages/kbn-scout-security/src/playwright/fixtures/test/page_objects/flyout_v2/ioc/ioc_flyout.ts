@@ -51,6 +51,14 @@ export class IOCFlyout {
   public readonly addToNewCaseItem: Locator;
   public readonly addToBlockListItem: Locator;
 
+  // Targets opened by the "Take action" items.
+  /** Name input of the block list creation flyout (Add to block list). */
+  public readonly blocklistFormNameInput: Locator;
+  /** "Add to existing case" case-selector modal. */
+  public readonly allCasesModal: Locator;
+  /** Submit button of the "Add to new case" creation flyout. */
+  public readonly createCaseSubmit: Locator;
+
   /** Wraps the Monaco editor that backs the JSON tab; reads its full model value. */
   private readonly codeEditor: KibanaCodeEditorWrapper;
 
@@ -81,6 +89,10 @@ export class IOCFlyout {
     );
     this.addToNewCaseItem = page.testSubj.locator('tiIndicatorFlyoutAddToNewCaseContextMenu');
     this.addToBlockListItem = page.testSubj.locator('tiIndicatorFlyoutAddToBlockListContextMenu');
+
+    this.blocklistFormNameInput = page.testSubj.locator('blocklist-form-name-input');
+    this.allCasesModal = page.testSubj.locator('all-cases-modal');
+    this.createCaseSubmit = page.testSubj.locator('create-case-submit');
   }
 
   /** Wait for the flyout to be visible and its title rendered. */

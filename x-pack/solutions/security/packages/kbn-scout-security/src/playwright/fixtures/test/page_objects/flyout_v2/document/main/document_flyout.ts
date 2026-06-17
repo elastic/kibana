@@ -127,6 +127,21 @@ export class DocumentFlyout {
   /** Avatars panel shown when at least one user is assigned. */
   public readonly assigneesAvatarsPanel: Locator;
 
+  /** Investigation guide container in the Investigation section. */
+  public readonly investigationGuide: Locator;
+  /** Workflow-status filter chip added to the page search bar by the status cell action. */
+  public readonly workflowStatusFilterBadge: Locator;
+  /** Tag-selection list inside the Take action "Apply alert tags" sub-panel. */
+  public readonly alertTagsSelectable: Locator;
+  /** User-selection list inside the Take action "Assign alert" sub-panel. */
+  public readonly alertAssigneesSelectable: Locator;
+  /** Workflow picker sub-panel opened by the Take action "Run workflow" item. */
+  public readonly alertWorkflowPanel: Locator;
+  /** "Add to existing case" case-selector modal. */
+  public readonly allCasesModal: Locator;
+  /** Heading of the "Add to new case" creation dialog. */
+  public readonly createCaseDialogTitle: Locator;
+
   private readonly page: ScoutPage;
   private readonly notesActionButton: Locator;
 
@@ -234,6 +249,22 @@ export class DocumentFlyout {
     this.assigneesSelectable = page.testSubj.locator('securitySolutionAssigneesSelectable');
     this.assigneesApplyButton = page.testSubj.locator('securitySolutionAssigneesApplyButton');
     this.assigneesAvatarsPanel = page.testSubj.locator('securitySolutionUsersAvatarsPanel');
+    this.investigationGuide = page.testSubj.locator('securitySolutionFlyoutInvestigationGuide');
+    // The status cell-action adds a filter whose test subject is `filter-key-<field>`; match the
+    // workflow_status field with the testSubj "contains word" (`~`) selector.
+    this.workflowStatusFilterBadge = page.testSubj.locator(
+      '~filter-key-kibana.alert.workflow_status'
+    );
+    this.alertTagsSelectable = page.testSubj.locator('alert-tags-selectable-menu');
+    this.alertAssigneesSelectable = page.testSubj.locator('alert-assignees-selectable-menu');
+    this.alertWorkflowPanel = this.takeActionMenu.locator(
+      '[data-test-subj="alert-workflow-context-menu-panel"]'
+    );
+    this.allCasesModal = page.testSubj.locator('all-cases-modal');
+    // The dialog renders the title both as a heading and on the submit button; scope to the heading.
+    this.createCaseDialogTitle = page
+      .getByRole('dialog')
+      .getByRole('heading', { name: 'Create case' });
   }
 
   /** Wait for the flyout to be visible and fully loaded. */
@@ -244,6 +275,12 @@ export class DocumentFlyout {
   /** Wait for the child document flyout (opened from a tools overlay) to be visible. */
   async waitForChildDocumentFlyout() {
     await this.childDocumentFlyout.waitFor({ state: 'visible', timeout: 15_000 });
+  }
+
+  /** Close the child document flyout and wait for it to be removed. */
+  async closeChildDocumentFlyout() {
+    await this.page.keyboard.press('Escape');
+    await this.childDocumentFlyout.waitFor({ state: 'hidden' });
   }
 
   /** Open the Take action popover and wait for the context menu to appear. */

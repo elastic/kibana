@@ -18,16 +18,10 @@ import {
   ClosingReasonOption,
   ADD_TO_NEW_CASE_TEST_SUBJ,
   ADD_TO_EXISTING_CASE_TEST_SUBJ,
-  CREATE_CASE_DIALOG_TITLE,
-  ALL_CASES_MODAL_TEST_SUBJ,
   ALERT_TAGS_MENU_ITEM_TEST_SUBJ,
-  ALERT_TAGS_SELECTABLE_TEST_SUBJ,
   ALERT_ASSIGNEES_MENU_ITEM_TEST_SUBJ,
-  ALERT_ASSIGNEES_SELECTABLE_TEST_SUBJ,
   RUN_ALERT_WORKFLOW_MENU_ITEM_TEST_SUBJ,
-  ALERT_WORKFLOW_PANEL_TEST_SUBJ,
   INVESTIGATE_IN_TIMELINE_MENU_ITEM_TEST_SUBJ,
-  TIMELINE_MODAL_HEADER_PANEL_TEST_SUBJ,
 } from '@kbn/scout-security';
 import { expect } from '@kbn/scout-security/ui';
 
@@ -76,25 +70,22 @@ spaceTest.describe(
       }
     );
 
-    spaceTest(
-      'apply alert tags — opens tag management sub-panel',
-      async ({ pageObjects, page }) => {
-        await pageObjects.alertsTablePage.navigate();
-        await pageObjects.alertsTablePage.waitForRuleAlert(ruleName);
-        await pageObjects.alertsTablePage.expandAlertDetailsFlyout(ruleName);
-        await pageObjects.documentFlyout.waitForAlertFlyout();
+    spaceTest('apply alert tags — opens tag management sub-panel', async ({ pageObjects }) => {
+      await pageObjects.alertsTablePage.navigate();
+      await pageObjects.alertsTablePage.waitForRuleAlert(ruleName);
+      await pageObjects.alertsTablePage.expandAlertDetailsFlyout(ruleName);
+      await pageObjects.documentFlyout.waitForAlertFlyout();
 
-        await pageObjects.documentFlyout.openTakeActionMenu();
-        await pageObjects.documentFlyout.clickTakeActionItem(ALERT_TAGS_MENU_ITEM_TEST_SUBJ);
+      await pageObjects.documentFlyout.openTakeActionMenu();
+      await pageObjects.documentFlyout.clickTakeActionItem(ALERT_TAGS_MENU_ITEM_TEST_SUBJ);
 
-        // Tag management sub-panel should appear inside the context menu
-        await expect(page.getByTestId(ALERT_TAGS_SELECTABLE_TEST_SUBJ)).toBeVisible({
-          timeout: 10_000,
-        });
-      }
-    );
+      // Tag management sub-panel should appear inside the context menu
+      await expect(pageObjects.documentFlyout.alertTagsSelectable).toBeVisible({
+        timeout: 10_000,
+      });
+    });
 
-    spaceTest('assign alert — opens assignees sub-panel', async ({ pageObjects, page }) => {
+    spaceTest('assign alert — opens assignees sub-panel', async ({ pageObjects }) => {
       await pageObjects.alertsTablePage.navigate();
       await pageObjects.alertsTablePage.waitForRuleAlert(ruleName);
       await pageObjects.alertsTablePage.expandAlertDetailsFlyout(ruleName);
@@ -104,12 +95,12 @@ spaceTest.describe(
       await pageObjects.documentFlyout.clickTakeActionItem(ALERT_ASSIGNEES_MENU_ITEM_TEST_SUBJ);
 
       // Assignees sub-panel should appear inside the context menu
-      await expect(page.getByTestId(ALERT_ASSIGNEES_SELECTABLE_TEST_SUBJ)).toBeVisible({
+      await expect(pageObjects.documentFlyout.alertAssigneesSelectable).toBeVisible({
         timeout: 10_000,
       });
     });
 
-    spaceTest('add to new case — opens case creation modal', async ({ pageObjects, page }) => {
+    spaceTest('add to new case — opens case creation modal', async ({ pageObjects }) => {
       await pageObjects.alertsTablePage.navigate();
       await pageObjects.alertsTablePage.waitForRuleAlert(ruleName);
       await pageObjects.alertsTablePage.expandAlertDetailsFlyout(ruleName);
@@ -118,13 +109,12 @@ spaceTest.describe(
       await pageObjects.documentFlyout.openTakeActionMenu();
       await pageObjects.documentFlyout.clickTakeActionItem(ADD_TO_NEW_CASE_TEST_SUBJ);
 
-      // Target the heading specifically to avoid matching the submit button label
-      await expect(
-        page.getByRole('dialog').getByRole('heading', { name: CREATE_CASE_DIALOG_TITLE })
-      ).toBeVisible({ timeout: 10_000 });
+      await expect(pageObjects.documentFlyout.createCaseDialogTitle).toBeVisible({
+        timeout: 10_000,
+      });
     });
 
-    spaceTest('add to existing case — opens case selector modal', async ({ pageObjects, page }) => {
+    spaceTest('add to existing case — opens case selector modal', async ({ pageObjects }) => {
       await pageObjects.alertsTablePage.navigate();
       await pageObjects.alertsTablePage.waitForRuleAlert(ruleName);
       await pageObjects.alertsTablePage.expandAlertDetailsFlyout(ruleName);
@@ -134,7 +124,7 @@ spaceTest.describe(
       await pageObjects.documentFlyout.clickTakeActionItem(ADD_TO_EXISTING_CASE_TEST_SUBJ);
 
       // Case selector (or empty-state) should appear
-      await expect(page.getByTestId(ALL_CASES_MODAL_TEST_SUBJ)).toBeVisible({ timeout: 10_000 });
+      await expect(pageObjects.documentFlyout.allCasesModal).toBeVisible({ timeout: 10_000 });
     });
 
     spaceTest('run alert workflow — opens workflow picker panel', async ({ pageObjects }) => {
@@ -147,30 +137,21 @@ spaceTest.describe(
       await pageObjects.documentFlyout.clickTakeActionItem(RUN_ALERT_WORKFLOW_MENU_ITEM_TEST_SUBJ);
 
       // Workflow sub-panel should open in the context menu
-      await expect(
-        pageObjects.documentFlyout.takeActionMenu.locator(
-          `[data-test-subj="${ALERT_WORKFLOW_PANEL_TEST_SUBJ}"]`
-        )
-      ).toBeVisible({ timeout: 10_000 });
+      await expect(pageObjects.documentFlyout.alertWorkflowPanel).toBeVisible({ timeout: 10_000 });
     });
 
-    spaceTest(
-      'investigate in timeline — opens Timeline with document',
-      async ({ pageObjects, page }) => {
-        await pageObjects.alertsTablePage.navigate();
-        await pageObjects.alertsTablePage.waitForRuleAlert(ruleName);
-        await pageObjects.alertsTablePage.expandAlertDetailsFlyout(ruleName);
-        await pageObjects.documentFlyout.waitForAlertFlyout();
+    spaceTest('investigate in timeline — opens Timeline with document', async ({ pageObjects }) => {
+      await pageObjects.alertsTablePage.navigate();
+      await pageObjects.alertsTablePage.waitForRuleAlert(ruleName);
+      await pageObjects.alertsTablePage.expandAlertDetailsFlyout(ruleName);
+      await pageObjects.documentFlyout.waitForAlertFlyout();
 
-        await pageObjects.documentFlyout.openTakeActionMenu();
-        await pageObjects.documentFlyout.clickTakeActionItem(
-          INVESTIGATE_IN_TIMELINE_MENU_ITEM_TEST_SUBJ
-        );
+      await pageObjects.documentFlyout.openTakeActionMenu();
+      await pageObjects.documentFlyout.clickTakeActionItem(
+        INVESTIGATE_IN_TIMELINE_MENU_ITEM_TEST_SUBJ
+      );
 
-        await expect(page.getByTestId(TIMELINE_MODAL_HEADER_PANEL_TEST_SUBJ)).toBeVisible({
-          timeout: 15_000,
-        });
-      }
-    );
+      await expect(pageObjects.timelinePage.panel).toBeVisible({ timeout: 15_000 });
+    });
   }
 );

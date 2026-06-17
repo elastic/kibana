@@ -14,7 +14,6 @@ import {
   CURRENT_USER_PROFILE_API_PATH,
   AlertWorkflowStatus,
   ALERT_CLOSE_MENU_ITEM_TEST_SUBJ,
-  WORKFLOW_STATUS_FILTER_KEY_TEST_SUBJ,
   ClosingReasonOption,
   closedAlertsToastText,
   addedToTimelineToastText,
@@ -52,21 +51,21 @@ spaceTest.describe(
         await pageObjects.documentFlyout.waitForAlertFlyout();
 
         // Header
-        await expect(pageObjects.documentFlyout.severity).toBeVisible();
-        await expect(pageObjects.documentFlyout.statusBadge).toBeVisible();
-        await expect(pageObjects.documentFlyout.riskScore).toBeVisible();
-        await expect(pageObjects.documentFlyout.assigneesTitle).toBeVisible();
-        await expect(pageObjects.documentFlyout.notesAddButton).toBeVisible();
+        await expect.soft(pageObjects.documentFlyout.severity).toBeVisible();
+        await expect.soft(pageObjects.documentFlyout.statusBadge).toBeVisible();
+        await expect.soft(pageObjects.documentFlyout.riskScore).toBeVisible();
+        await expect.soft(pageObjects.documentFlyout.assigneesTitle).toBeVisible();
+        await expect.soft(pageObjects.documentFlyout.notesAddButton).toBeVisible();
 
         // Body sections
-        await expect(pageObjects.documentFlyout.aboutSection).toBeVisible();
-        await expect(pageObjects.documentFlyout.investigationSection).toBeVisible();
-        await expect(pageObjects.documentFlyout.visualizationsSection).toBeVisible();
-        await expect(pageObjects.documentFlyout.insightsSection).toBeVisible();
-        await expect(pageObjects.documentFlyout.responseSection).toBeVisible();
+        await expect.soft(pageObjects.documentFlyout.aboutSection).toBeVisible();
+        await expect.soft(pageObjects.documentFlyout.investigationSection).toBeVisible();
+        await expect.soft(pageObjects.documentFlyout.visualizationsSection).toBeVisible();
+        await expect.soft(pageObjects.documentFlyout.insightsSection).toBeVisible();
+        await expect.soft(pageObjects.documentFlyout.responseSection).toBeVisible();
 
         // Footer
-        await expect(pageObjects.documentFlyout.takeActionButton).toBeVisible();
+        await expect.soft(pageObjects.documentFlyout.takeActionButton).toBeVisible();
       }
     );
 
@@ -117,7 +116,7 @@ spaceTest.describe(
 
     spaceTest(
       'status badge cell actions: filter-in and add-to-timeline buttons both work',
-      async ({ pageObjects, page }) => {
+      async ({ pageObjects }) => {
         await pageObjects.alertsTablePage.navigate();
         await pageObjects.alertsTablePage.waitForRuleAlert(ruleName);
         await pageObjects.alertsTablePage.expandAlertDetailsFlyout(ruleName);
@@ -140,9 +139,9 @@ spaceTest.describe(
 
         // Click "Filter for" — the flyout closes and a workflow-status filter chip appears
         await pageObjects.documentFlyout.cellActionsFilterInButton.click();
-        await expect(page.testSubj.locator(`~${WORKFLOW_STATUS_FILTER_KEY_TEST_SUBJ}`)).toBeVisible(
-          { timeout: 10_000 }
-        );
+        await expect(pageObjects.documentFlyout.workflowStatusFilterBadge).toBeVisible({
+          timeout: 10_000,
+        });
       }
     );
 

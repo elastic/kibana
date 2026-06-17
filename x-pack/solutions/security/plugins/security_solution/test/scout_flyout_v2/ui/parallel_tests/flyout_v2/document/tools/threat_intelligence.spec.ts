@@ -50,8 +50,8 @@ spaceTest.describe(
 
         // Clicking the header opens a child document flyout for the same alert
         await pageObjects.threatIntelligenceTool.toolsFlyoutTitle.click();
-        await pageObjects.documentFlyout.waitForAlertFlyout();
-        await expect(pageObjects.documentFlyout.title).toContainText(ruleName);
+        await pageObjects.documentFlyout.waitForChildDocumentFlyout();
+        await expect(pageObjects.documentFlyout.childDocumentAlertTitle).toContainText(ruleName);
       }
     );
 

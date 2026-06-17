@@ -33,23 +33,22 @@ export class ThreatIntelligenceIndicatorsPage {
   }
 
   /**
-   * Wait for the indicators data grid to render. The Threat Intelligence page intermittently
-   * gets stuck on its initial data view / indicators query (showing only a loading spinner, so
-   * neither the table nor the empty-state ever appears). A reload reliably recovers it, so retry
-   * navigation a few times before giving up.
+   * Wait for the indicators data grid to finish loading. The Threat Intelligence page is slow to
+   * mount and intermittently gets stuck on its initial data view / indicators query (showing only a
+   * loading spinner, so neither the table nor the empty-state ever appears).
+   *
+   * Give the load one generous, uninterrupted window first — re-navigating mid-load resets the
+   * query and can stop it from ever completing — then re-navigate once as a last-resort recovery.
    */
   async waitForTable() {
-    const maxAttempts = 4;
-    for (let attempt = 1; attempt <= maxAttempts; attempt++) {
-      try {
-        await this.table.waitFor({ state: 'visible', timeout: 20_000 });
-        return;
-      } catch (error) {
-        if (attempt === maxAttempts) {
-          throw error;
-        }
-        await this.page.reload({ waitUntil: 'domcontentloaded' });
-      }
+    // Either the populated table or the empty-state means loading has finished.
+    const ready = this.table.or(this.emptyState);
+    try {
+      await ready.waitFor({ state: 'visible', timeout: 60_000 });
+    } catch {
+      // Genuinely stuck: re-navigate once to restart the query, then wait again.
+      await this.navigate();
+      await ready.waitFor({ state: 'visible', timeout: 45_000 });
     }
   }
 

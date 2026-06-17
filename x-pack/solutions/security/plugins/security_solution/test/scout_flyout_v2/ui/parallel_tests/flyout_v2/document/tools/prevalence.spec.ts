@@ -5,14 +5,7 @@
  * 2.0.
  */
 
-import {
-  spaceTest,
-  tags,
-  CUSTOM_QUERY_RULE,
-  TIMELINE_MODAL_HEADER_PANEL_TEST_SUBJ,
-  TIMELINE_PROVIDER_BADGE_TEST_SUBJ,
-  PREVALENCE_SOURCE_IP,
-} from '@kbn/scout-security';
+import { spaceTest, tags, CUSTOM_QUERY_RULE, PREVALENCE_SOURCE_IP } from '@kbn/scout-security';
 import { expect } from '@kbn/scout-security/ui';
 
 spaceTest.describe(
@@ -98,7 +91,7 @@ spaceTest.describe(
 
     spaceTest(
       'clicking the alert count opens the timeline with a data provider for that field',
-      async ({ pageObjects, page }) => {
+      async ({ pageObjects }) => {
         await pageObjects.alertsTablePage.navigate();
         await pageObjects.alertsTablePage.waitForRuleAlert(ruleName);
         await pageObjects.alertsTablePage.expandAlertDetailsFlyout(ruleName);
@@ -115,12 +108,10 @@ spaceTest.describe(
         await pageObjects.prevalenceTool.firstAlertCountTimelineButton.click();
 
         // Timeline modal opens
-        await expect(page.getByTestId(TIMELINE_MODAL_HEADER_PANEL_TEST_SUBJ)).toBeVisible({
-          timeout: 15_000,
-        });
+        await expect(pageObjects.timelinePage.panel).toBeVisible({ timeout: 15_000 });
 
         // Data provider is set with the field-value pair from the row
-        await expect(page.getByTestId(TIMELINE_PROVIDER_BADGE_TEST_SUBJ)).toBeVisible();
+        await expect(pageObjects.timelinePage.providerBadge).toBeVisible();
       }
     );
 

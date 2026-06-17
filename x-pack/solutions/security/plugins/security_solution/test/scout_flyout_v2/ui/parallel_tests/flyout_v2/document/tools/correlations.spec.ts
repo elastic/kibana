@@ -5,13 +5,7 @@
  * 2.0.
  */
 
-import {
-  spaceTest,
-  tags,
-  CUSTOM_QUERY_RULE,
-  TIMELINE_MODAL_HEADER_PANEL_TEST_SUBJ,
-  TIMELINE_PROVIDER_BADGE_TEST_SUBJ,
-} from '@kbn/scout-security';
+import { spaceTest, tags, CUSTOM_QUERY_RULE } from '@kbn/scout-security';
 import { expect } from '@kbn/scout-security/ui';
 
 spaceTest.describe(
@@ -63,7 +57,7 @@ spaceTest.describe(
 
     spaceTest(
       'opens correlations tool overlay and section row expand opens the correct child flyout',
-      async ({ pageObjects, page }) => {
+      async ({ pageObjects }) => {
         await pageObjects.alertsTablePage.navigate();
         await pageObjects.alertsTablePage.waitForRuleAlert(ruleName);
         await pageObjects.alertsTablePage.expandAlertDetailsFlyout(ruleName);
@@ -84,7 +78,7 @@ spaceTest.describe(
         await expect(pageObjects.documentFlyout.childDocumentAlertTitle).toContainText(ruleName);
 
         // Close the child flyout
-        await page.keyboard.press('Escape');
+        await pageObjects.documentFlyout.closeChildDocumentFlyout();
 
         await expect(pageObjects.correlationsTool.sessionAlertsSectionTable).toBeVisible();
         await pageObjects.correlationsTool.sessionAlertsSectionFirstPreviewButton.click();
@@ -97,7 +91,7 @@ spaceTest.describe(
 
     spaceTest(
       'sameSource section Investigate in timeline button opens the timeline',
-      async ({ pageObjects, page }) => {
+      async ({ pageObjects }) => {
         await pageObjects.alertsTablePage.navigate();
         await pageObjects.alertsTablePage.waitForRuleAlert(ruleName);
         await pageObjects.alertsTablePage.expandAlertDetailsFlyout(ruleName);
@@ -117,12 +111,10 @@ spaceTest.describe(
           .getByRole('button')
           .click();
 
-        await expect(page.getByTestId(TIMELINE_MODAL_HEADER_PANEL_TEST_SUBJ)).toBeVisible({
-          timeout: 15_000,
-        });
+        await expect(pageObjects.timelinePage.panel).toBeVisible({ timeout: 15_000 });
 
-        await expect(page.getByTestId(TIMELINE_PROVIDER_BADGE_TEST_SUBJ)).toBeVisible();
-        await expect(page.getByTestId(TIMELINE_PROVIDER_BADGE_TEST_SUBJ)).toContainText('_id:');
+        await expect(pageObjects.timelinePage.providerBadge).toBeVisible();
+        await expect(pageObjects.timelinePage.providerBadge).toContainText('_id:');
       }
     );
   }

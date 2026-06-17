@@ -24,9 +24,16 @@ spaceTest.describe(
       await browserAuth.loginAsPlatformEngineer();
     });
 
-    spaceTest.afterEach(async ({ apiServices }) => {
+    spaceTest.afterEach(async ({ apiServices, kbnClient, scoutSpace }) => {
       await apiServices.detectionRule.deleteAll();
       await apiServices.detectionAlerts.deleteAll();
+      // Notes created by these tests are `siem-ui-timeline-note` saved objects, which detection
+      // cleanup and `cleanStandardList` don't cover — remove them so they don't leak into the
+      // worker's space.
+      await kbnClient.savedObjects.clean({
+        types: ['siem-ui-timeline-note'],
+        space: scoutSpace.id,
+      });
     });
 
     spaceTest(

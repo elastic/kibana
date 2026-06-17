@@ -38,7 +38,7 @@ spaceTest.describe(
 
     spaceTest(
       'investigation guide shows no-guide callout when rule has no guide',
-      async ({ pageObjects, page }) => {
+      async ({ pageObjects }) => {
         await pageObjects.alertsTablePage.navigate();
         await pageObjects.alertsTablePage.waitForRuleAlert(ruleName);
         await pageObjects.alertsTablePage.expandAlertDetailsFlyout(ruleName);
@@ -46,12 +46,12 @@ spaceTest.describe(
 
         // CUSTOM_QUERY_RULE has no investigation guide; the callout message should render
         // and the "Show investigation guide" button should be absent.
-        const guideContainer = page.getByTestId('securitySolutionFlyoutInvestigationGuide');
-        await guideContainer.waitFor({ state: 'visible' });
-        await expect(guideContainer).toContainText("There's no investigation guide for this rule.");
-        await expect(
-          page.getByTestId('securitySolutionFlyoutInvestigationGuideButton')
-        ).toBeHidden();
+        const { investigationGuide } = pageObjects.documentFlyout;
+        await investigationGuide.waitFor({ state: 'visible' });
+        await expect(investigationGuide).toContainText(
+          "There's no investigation guide for this rule."
+        );
+        await expect(pageObjects.documentFlyout.investigationGuideButton).toBeHidden();
       }
     );
 
