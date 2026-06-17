@@ -128,6 +128,12 @@ steps:
           - known_gaps
           - hypotheses
     on-failure:
+      # build_context is the only step whose failure aborts the whole investigation
+      # (continue: false). A single malformed tool call (e.g. occasional bad args for
+      # attachments_add) would otherwise nuke the run, so retry a few times first —
+      # a fresh agent invocation almost always produces valid tool calls.
+      retry:
+        max-attempts: 3
       continue: false
 
   # ── Step 2: Fan-out — launch all hypothesis sub-workflows in parallel ────────
