@@ -14,6 +14,7 @@ import { normalizeDatatable } from './datatable';
 import { normalizePartition } from './partition';
 import { normalizeTagcloud } from './tagcloud';
 import { normalizeRegionMap } from './region_map';
+import { normalizeLegacyMetric } from './legacy_metric';
 
 const chartNormalizers = {
   heatmap: normalizeHeatmap,
@@ -24,6 +25,7 @@ const chartNormalizers = {
   waffle: normalizePartition,
   tag_cloud: normalizeTagcloud,
   region_map: normalizeRegionMap,
+  legacy_metric: normalizeLegacyMetric,
 } satisfies Record<string, AttributesNormalizer<any>>;
 
 export function getChartNormalizer(
