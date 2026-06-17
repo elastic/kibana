@@ -11,14 +11,17 @@ import {
   EuiButton,
   EuiButtonEmpty,
   EuiFieldText,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiFlyout,
   EuiFlyoutBody,
   EuiFlyoutFooter,
   EuiFlyoutHeader,
   EuiForm,
   EuiFormRow,
-  EuiSelect,
+  EuiIcon,
   EuiSpacer,
+  EuiSuperSelect,
   EuiText,
   EuiTextArea,
   EuiTitle,
@@ -26,7 +29,7 @@ import {
 import { useController, useForm } from 'react-hook-form';
 
 import type { DataSource, DataSourceWithSecrets } from '../../common/datasource_types';
-import { ALL_DATA_SOURCE_TYPES } from '../../common';
+import { ALL_DATA_SOURCE_TYPES, DATA_SOURCE_TYPES_TO_ICONS } from '../../common';
 import type { DataSourceType } from '../../common/datasource_types';
 import { getFlyoutSaveErrorMessage } from '../get_flyout_save_error_message';
 import { createDataSourceFlyoutStrings } from './create_data_source_flyout_i18n';
@@ -121,10 +124,27 @@ export const CreateDataSourceFlyout: FunctionComponent<CreateDataSourceFlyoutPro
 
   const dataSourceTypeOptions = useMemo(
     () =>
-      ALL_DATA_SOURCE_TYPES.map((value) => ({
-        value,
-        text: getDataSourceTypeVerbose(value),
-      })).sort((a, b) => a.text.localeCompare(b.text)),
+      ALL_DATA_SOURCE_TYPES.map((value) => ({ value, label: getDataSourceTypeVerbose(value) }))
+        .sort((a, b) => a.label.localeCompare(b.label))
+        .map(({ value, label }) => {
+          const iconType = DATA_SOURCE_TYPES_TO_ICONS[value];
+          const display = iconType ? (
+            <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+              <EuiFlexItem grow={false}>
+                <EuiIcon type={iconType} size="m" aria-hidden={true} />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>{label}</EuiFlexItem>
+            </EuiFlexGroup>
+          ) : (
+            label
+          );
+
+          return {
+            value,
+            inputDisplay: display,
+            dropdownDisplay: display,
+          };
+        }),
     []
   );
 
@@ -205,13 +225,13 @@ export const CreateDataSourceFlyout: FunctionComponent<CreateDataSourceFlyoutPro
             </>
           ) : null}
           <EuiFormRow label={createDataSourceFlyoutStrings.typeLabel()} fullWidth>
-            <EuiSelect
+            <EuiSuperSelect
               options={dataSourceTypeOptions}
               data-test-subj="createDataSourceFlyoutType"
               fullWidth
               aria-label={createDataSourceFlyoutStrings.typeAriaLabel()}
-              value={dataSourceType}
-              onChange={(e) => setDataSourceType(e.target.value as DataSourceType)}
+              valueOfSelected={dataSourceType}
+              onChange={(value) => setDataSourceType(value as DataSourceType)}
               disabled={isEditMode}
             />
           </EuiFormRow>

@@ -45,6 +45,20 @@ export const ALL_DATA_SOURCE_TYPES: DataSourceType[] = [
   // 'flight',
 ];
 
+/**
+ * UI icon types for data source types (EUI icon names).
+ * Consumers should treat this as optional per type.
+ */
+
+export const DATA_SOURCE_TYPES_TO_ICONS: Record<DataSourceType, string> = {
+  s3: 'logoAWS',
+  gcs: 'logoGCP',
+  azure: 'logoAzure',
+  iceberg: 'logoIceberg',
+  jdbc: 'logoJdbc',
+  flight: 'logoFlight',
+} as const;
+
 export type S3DataSource = DataSourceCommon<'s3', S3DataSourceSettings>;
 
 export type S3DataSourceWithSecrets = DataSourceCommon<'s3', S3DataSourceSettingsWithSecrets>;
