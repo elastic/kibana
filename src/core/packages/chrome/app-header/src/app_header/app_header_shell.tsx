@@ -13,7 +13,10 @@ import { css } from '@emotion/react';
 import React, { useMemo } from 'react';
 import type { AppHeaderPadding } from '../types';
 
-export const APPLICATION_TOP_BAR_MIN_HEIGHT_PX = 48;
+// Single-row bar height, applied to every header (title, tabbed, or back-button-only) so the bar
+// stays a consistent 48px. The symmetric size.s padding leaves a 32px content area, enough for the
+// trailing controls (buttons) to fit without pushing the row past 48px.
+const APPLICATION_TOP_BAR_MIN_HEIGHT_PX = 48;
 
 export interface AppHeaderShellProps {
   title?: ReactNode;
@@ -28,7 +31,9 @@ export interface AppHeaderShellProps {
   borderless?: boolean;
 }
 
-const resolveLayoutProps = (
+// Resolves the horizontal-only padding contract. Vertical padding is standardized internally
+// (see `useHeaderStyles`) so the header keeps a consistent height regardless of this prop.
+const resolveHorizontalPadding = (
   sticky: boolean,
   padding: AppHeaderPadding | undefined,
   euiTheme: ReturnType<typeof useEuiTheme>['euiTheme']
@@ -36,49 +41,38 @@ const resolveLayoutProps = (
   const resolved = padding ?? (sticky ? 'm' : 'none');
 
   if (resolved === 'none') {
-    return { paddingInline: undefined, paddingBlock: undefined, bleedMargin: undefined };
+    return { paddingInline: undefined, bleedMargin: undefined };
   }
 
   if (resolved === 'm') {
-    return {
-      paddingInline: euiTheme.size.m,
-      paddingBlock: euiTheme.size.m,
-      bleedMargin: undefined,
-    };
+    return { paddingInline: euiTheme.size.m, bleedMargin: undefined };
   }
 
-  const bleedMargin = resolved.bleed === 'l' ? euiTheme.size.l : euiTheme.size.m;
-  const size = resolved.size ?? resolved.bleed;
-
-  let paddingInline: string | undefined;
-  let paddingBlock: string | undefined;
-  if (size === 'l') {
-    paddingInline = euiTheme.size.base;
-    paddingBlock = euiTheme.size.base;
-  } else if (size === 'm') {
-    paddingInline = euiTheme.size.m;
-    paddingBlock = euiTheme.size.m;
-  }
-
-  return { paddingInline, paddingBlock, bleedMargin };
+  // `{ bleed }`: pull the header out to its padded container's edges (negative margin) and
+  // re-inset the content by the same amount so it stays aligned with the page gutter.
+  const value = resolved.bleed === 'l' ? euiTheme.size.l : euiTheme.size.m;
+  return { paddingInline: value, bleedMargin: value };
 };
 
 const useHeaderStyles = (
   sticky: boolean,
   padding: AppHeaderPadding | undefined,
   hasTabs: boolean,
-  hasPrimaryContent: boolean,
+  hasTitleAppend: boolean,
   hasMetadata: boolean,
   borderless: boolean
 ) => {
   const { euiTheme } = useEuiTheme();
 
   return useMemo(() => {
-    const { paddingInline, paddingBlock, bleedMargin } = resolveLayoutProps(
-      sticky,
-      padding,
-      euiTheme
-    );
+    const { paddingInline, bleedMargin } = resolveHorizontalPadding(sticky, padding, euiTheme);
+
+    // Vertical padding is internal (independent of the `padding` prop). The primary row floors at a
+    // consistent 48px regardless of title size; content is centered within it.
+    const paddingBlock = euiTheme.size.s;
+    // A row followed by another collapses its bottom gap so the next row sits close (and tabs stay
+    // flush with the header's bottom border); otherwise it uses the symmetric vertical padding.
+    const bottomPad = (followed: boolean) => (followed ? euiTheme.size.xs : paddingBlock);
 
     const root = css`
       ${sticky &&
@@ -91,7 +85,6 @@ const useHeaderStyles = (
       display: flex;
       flex-direction: column;
       min-width: 0;
-      min-height: ${APPLICATION_TOP_BAR_MIN_HEIGHT_PX}px;
       box-sizing: border-box;
       padding: 0;
       ${paddingInline &&
@@ -122,17 +115,11 @@ const useHeaderStyles = (
       align-items: center;
       gap: ${euiTheme.size.m};
       min-width: 0;
-
-      // Sometimes the custom primary content needs to overflow the header
-      // to create a visual connection with the content below. e.g: Discover tabs.
-      overflow: ${hasPrimaryContent ? 'visible' : 'hidden'};
-
       min-height: ${APPLICATION_TOP_BAR_MIN_HEIGHT_PX}px;
-      ${paddingBlock &&
-      !hasPrimaryContent &&
+      ${!hasTitleAppend &&
       css`
         padding-block-start: ${paddingBlock};
-        padding-block-end: ${hasTabs || hasMetadata ? euiTheme.size.xs : paddingBlock};
+        padding-block-end: ${bottomPad(hasTabs || hasMetadata)};
       `}
     `;
 
@@ -141,7 +128,6 @@ const useHeaderStyles = (
       align-items: center;
       flex: 1;
       min-width: 0;
-      overflow: ${hasPrimaryContent ? 'visible' : 'hidden'};
     `;
 
     const titleGroup = css`
@@ -151,14 +137,14 @@ const useHeaderStyles = (
       flex: 0 1 auto;
       min-width: 0;
       max-width: 100%;
-      ${hasPrimaryContent &&
+      ${hasTitleAppend &&
       css`
         max-width: min(40%, 360px);
       `}
     `;
 
     const titleClusterSpacer = css`
-      flex: ${hasPrimaryContent ? '0 0 auto' : '1 1 auto'};
+      flex: ${hasTitleAppend ? '0 0 auto' : '1 1 auto'};
       min-width: 0;
     `;
 
@@ -186,10 +172,7 @@ const useHeaderStyles = (
       column-gap: ${euiTheme.size.m};
       row-gap: ${euiTheme.size.xs};
       min-width: 0;
-      ${paddingBlock &&
-      css`
-        padding-block-end: ${hasTabs ? euiTheme.size.xs : paddingBlock};
-      `}
+      padding-block-end: ${bottomPad(hasTabs)};
     `;
 
     const titleActionsReveal = css`
@@ -214,7 +197,7 @@ const useHeaderStyles = (
       metadataRow,
       tabsRow,
     };
-  }, [sticky, padding, euiTheme, hasTabs, hasPrimaryContent, hasMetadata, borderless]);
+  }, [sticky, padding, euiTheme, hasTabs, hasTitleAppend, hasMetadata, borderless]);
 };
 
 export const AppHeaderShell = React.memo<AppHeaderShellProps>(
