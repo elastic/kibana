@@ -57,8 +57,7 @@ import { KibanaServices } from '../../../../common/lib/kibana';
 import { TemplateFields } from '../../../case_view/components/template_fields';
 import { useStatusAction } from '../../../actions/status/use_status_action';
 import { useRefreshCaseViewPage } from '../../../case_view/use_on_refresh_case_view_page';
-
-const LOCALSTORAGE_SORT_ORDER_KEY = 'cases.userActivity.sortOrder';
+import { LOCAL_STORAGE_KEYS } from '../../../../../common/constants';
 
 export const CaseViewActivity = ({
   caseData,
@@ -68,7 +67,7 @@ export const CaseViewActivity = ({
   searchTerm?: string;
 }) => {
   const [sortOrder, setSortOrder] = useCasesLocalStorage<UserActivitySortOrder>(
-    LOCALSTORAGE_SORT_ORDER_KEY,
+    LOCAL_STORAGE_KEYS.userActivitySortOrder,
     'asc'
   );
 

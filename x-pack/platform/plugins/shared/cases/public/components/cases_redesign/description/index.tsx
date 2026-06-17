@@ -16,6 +16,7 @@ import {
 } from '@elastic/eui';
 
 import * as i18n from '../../user_actions/translations';
+import { DESCRIPTION_ID } from './constants';
 import { getDescriptionPreview, getDraftDescription } from './utils';
 import { useCasesContext } from '../../cases_context/use_cases_context';
 import { EditableMarkdown, ScrollableMarkdown } from '../../markdown_editor';
@@ -27,8 +28,6 @@ import { useLensDraftDescription } from './hooks/use_lens_draft_description';
 import { useDescriptionStyles } from './hooks/use_description_styles';
 
 export type { DescriptionMarkdownRefObject } from './types';
-
-const DESCRIPTION_ID = 'description';
 
 export interface DescriptionProps {
   caseData: CaseUI;
@@ -63,12 +62,19 @@ export const Description = ({
     [onUpdateField, setIsEditable]
   );
 
-  const toggleCollapse = () => setIsCollapsed((oldValue: boolean) => !oldValue);
+  const toggleCollapse = useCallback(() => setIsCollapsed((oldValue: boolean) => !oldValue), []);
 
-  const draftDescription = getDraftDescription(owner[0], caseData.id, DESCRIPTION_ID);
+  const draftDescription = useMemo(
+    () => getDraftDescription(owner[0], caseData.id, DESCRIPTION_ID),
+    [owner, caseData.id]
+  );
 
-  const hasUnsavedChanges = Boolean(
-    draftDescription && draftDescription !== caseData.description && !isLoadingDescription
+  const hasUnsavedChanges = useMemo(
+    () =>
+      Boolean(
+        draftDescription && draftDescription !== caseData.description && !isLoadingDescription
+      ),
+    [draftDescription, caseData.description, isLoadingDescription]
   );
 
   const styles = useDescriptionStyles();

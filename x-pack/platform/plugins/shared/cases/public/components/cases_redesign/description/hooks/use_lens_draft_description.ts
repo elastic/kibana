@@ -8,10 +8,9 @@
 import type { MutableRefObject } from 'react';
 import { useCallback, useEffect } from 'react';
 import { useLensDraftComment } from '../../../markdown_editor/plugins/lens/use_lens_draft_comment';
+import { DESCRIPTION_ID } from '../constants';
 import { isCommentRef } from '../utils';
 import type { DescriptionMarkdownRefObject } from '../types';
-
-const DESCRIPTION_ID = 'description';
 
 interface UseLensDraftDescriptionArgs {
   isEditable: boolean;

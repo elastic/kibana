@@ -5,21 +5,33 @@
  * 2.0.
  */
 
+import type { Node } from 'unist';
+import { parseCommentString } from '../../../../common/utils/markdown_plugins/utils';
 import { getMarkdownEditorStorageKey } from '../../markdown_editor/utils';
 import type { EditableMarkdownRefObject } from '../../markdown_editor';
+
+const collectTextNodes = (node: Node, parts: string[]): void => {
+  if (node.type === 'text' || node.type === 'inlineCode') {
+    parts.push((node as Node & { value: string }).value);
+    return;
+  }
+
+  if ('children' in node) {
+    for (const child of (node as Node & { children: Node[] }).children) {
+      collectTextNodes(child, parts);
+    }
+  }
+};
 
 export const getDescriptionPreview = (description: string): string => {
   if (!description) {
     return '';
   }
 
-  return description
-    .replace(/!\[.*?\]\(.*?\)/g, '')
-    .replace(/\[([^\]]*)\]\(.*?\)/g, '$1')
-    .replace(/#{1,6}\s+/g, '')
-    .replace(/[*_~`>]/g, '')
-    .replace(/\s+/g, ' ')
-    .trim();
+  const tree = parseCommentString(description);
+  const parts: string[] = [];
+  collectTextNodes(tree as unknown as Node, parts);
+  return parts.join(' ').replace(/\s+/g, ' ').trim();
 };
 
 export const getDraftDescription = (
