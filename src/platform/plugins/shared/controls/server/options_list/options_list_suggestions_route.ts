@@ -41,42 +41,36 @@ const selectedOptionsSchema = schema.maybe(
   ])
 );
 
-const dslFetchBodySchema = schema.object(
+const optionsListFetchBodyCommonSchema = schema.object(
   {
-    kind: schema.literal('dsl'),
-    index: schema.string({ maxLength: 1000 }),
-    size: schema.number(),
-    fieldName: schema.string({ maxLength: 1000 }),
-    sort: schema.maybe(schema.any()),
-    filters: schema.maybe(schema.any()),
-    fieldSpec: schema.maybe(schema.any()),
-    ignoreValidations: schema.maybe(schema.boolean()),
     searchString: schema.maybe(schema.string({ maxLength: 10000 })),
     searchTechnique: searchTechniqueSchema,
     selectedOptions: selectedOptionsSchema,
-    runtimeFieldMap: schema.maybe(schema.any()),
-    runPastTimeout: schema.maybe(schema.boolean()),
+    ignoreValidations: schema.maybe(schema.boolean()),
     isReload: schema.maybe(schema.boolean()),
+    sort: schema.maybe(schema.any()),
   },
   { unknowns: 'allow' }
 );
 
-const esqlFetchBodySchema = schema.object(
-  {
-    kind: schema.literal('esql'),
-    esql: schema.string({ maxLength: 1000000 }),
-    timeRange: schema.maybe(schema.any()),
-    filter: schema.maybe(schema.any()),
-    sort: schema.maybe(schema.any()),
-    esqlVariables: schema.maybe(schema.arrayOf(schema.any(), { maxSize: 1000 })),
-    searchString: schema.maybe(schema.string({ maxLength: 10000 })),
-    searchTechnique: searchTechniqueSchema,
-    selectedOptions: selectedOptionsSchema,
-    ignoreValidations: schema.maybe(schema.boolean()),
-    isReload: schema.maybe(schema.boolean()),
-  },
-  { unknowns: 'allow' }
-);
+const dslFetchBodySchema = optionsListFetchBodyCommonSchema.extends({
+  kind: schema.literal('dsl'),
+  index: schema.string({ maxLength: 1000 }),
+  size: schema.number(),
+  fieldName: schema.string({ maxLength: 1000 }),
+  filters: schema.maybe(schema.any()),
+  fieldSpec: schema.maybe(schema.any()),
+  runtimeFieldMap: schema.maybe(schema.any()),
+  runPastTimeout: schema.maybe(schema.boolean()),
+});
+
+const esqlFetchBodySchema = optionsListFetchBodyCommonSchema.extends({
+  kind: schema.literal('esql'),
+  esql: schema.string({ maxLength: 1000000 }),
+  timeRange: schema.maybe(schema.any()),
+  filter: schema.maybe(schema.any()),
+  esqlVariables: schema.maybe(schema.arrayOf(schema.any(), { maxSize: 1000 })),
+});
 
 export const setupOptionsListSuggestionsRoute = (
   core: CoreSetup<StartDeps>,

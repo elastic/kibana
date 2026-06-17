@@ -9,7 +9,7 @@
 
 import { schema } from '@kbn/config-schema';
 import { DEFAULT_RANGE_SLIDER_STATE } from '@kbn/controls-constants';
-import { extendDataControlSchema } from './control_schema';
+import { dataControlEsqlVariantProps, dataControlFieldVariantProps } from './control_schema';
 
 export const rangeValueSchema = schema.arrayOf(schema.string(), {
   minSize: 2,
@@ -20,25 +20,36 @@ export const rangeValueSchema = schema.arrayOf(schema.string(), {
   },
 });
 
-export const rangeSliderControlSchema = extendDataControlSchema(
-  {
-    value: schema.maybe(rangeValueSchema),
-    step: schema.number({
-      defaultValue: DEFAULT_RANGE_SLIDER_STATE.step,
-      min: 0,
+const rangeSliderExtras = {
+  value: schema.maybe(rangeValueSchema),
+  step: schema.number({
+    defaultValue: DEFAULT_RANGE_SLIDER_STATE.step,
+    min: 0,
+    meta: {
+      description: 'The step size between selectable range values.',
+    },
+  }),
+};
+
+export const rangeSliderControlSchema = schema.discriminatedUnion('values_source', [
+  schema.object(
+    { ...dataControlEsqlVariantProps, ...rangeSliderExtras },
+    {
       meta: {
-        description: 'The step size between selectable range values.',
+        id: 'kbn-controls-schemas-range-slider-control-schema-esql',
+        title: 'EsqlRangeSliderControl',
+        description: "A range slider control whose values come from an ES|QL query's results.",
       },
-    }),
-  },
-  {
-    fieldVariantId: 'kbn-controls-schemas-range-slider-control-schema-field',
-    esqlVariantId: 'kbn-controls-schemas-range-slider-control-schema-esql',
-    fieldVariantTitle: 'FieldRangeSliderControl',
-    esqlVariantTitle: 'EsqlRangeSliderControl',
-    fieldVariantDescription:
-      'A range slider control whose values come from a numeric data view field.',
-    esqlVariantDescription:
-      "A range slider control whose values come from an ES|QL query's results.",
-  }
-);
+    }
+  ),
+  schema.object(
+    { ...dataControlFieldVariantProps, ...rangeSliderExtras },
+    {
+      meta: {
+        id: 'kbn-controls-schemas-range-slider-control-schema-field',
+        title: 'FieldRangeSliderControl',
+        description: 'A range slider control whose values come from a numeric data view field.',
+      },
+    }
+  ),
+]);
