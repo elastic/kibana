@@ -189,7 +189,10 @@ export function MetricRowWithAgg({
           aria-labelledby={aggTypePopoverTitleId}
         >
           <div>
-            <ClosablePopoverTitle id={aggTypePopoverTitleId} onClose={() => setAggTypePopoverOpen(false)}>
+            <ClosablePopoverTitle
+              id={aggTypePopoverTitleId}
+              onClose={() => setAggTypePopoverOpen(false)}
+            >
               <FormattedMessage
                 id="xpack.observability.customThreshold.rule.alertFlyout.customEquationEditor.aggregationLabel"
                 defaultMessage="Aggregation {name}"
