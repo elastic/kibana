@@ -33,9 +33,6 @@ export const RuleSummaryFlyoutContainer = ({ ruleId, onClose, onEdit, onClone }:
   if (isLoading) {
     return (
       <LoadingFlyout
-        title={i18n.translate('xpack.alertingV2.rule.summaryFlyout.loadingTitle', {
-          defaultMessage: 'Rule',
-        })}
         onClose={onClose}
       />
     );
@@ -59,6 +56,9 @@ export const RuleSummaryFlyoutContainer = ({ ruleId, onClose, onEdit, onClone }:
     <>
       <RuleSummaryFlyout
         rule={rule}
+        hasAnimation={false}
+        ownFocus={false}
+        session='start'
         onClose={onClose}
         onEdit={onEdit}
         onClone={onClone}
