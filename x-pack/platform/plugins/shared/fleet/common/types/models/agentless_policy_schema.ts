@@ -56,6 +56,11 @@ export const AgentlessPolicySchema = schema.object(
     name: schema.string({
       meta: { description: 'Agentless policy name.' },
     }),
+    description: schema.maybe(
+      schema.string({
+        meta: { description: 'Agentless policy description.' },
+      })
+    ),
     namespace: schema.maybe(
       schema.string({
         meta: { description: 'Policy namespace. Defaults to the agent policy namespace.' },

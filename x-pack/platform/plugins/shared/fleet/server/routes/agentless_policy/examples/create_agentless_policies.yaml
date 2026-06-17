@@ -9,6 +9,7 @@ requestBody:
               name: ess_billing
               version: 1.6.0
             name: ess_billing-1
+            description: test
             namespace: default
             inputs:
               ESS Billing-cel:
@@ -35,6 +36,7 @@ requestBody:
               name: cloud_security_posture
               version: 3.1.1
             name: cspm-aws-policy
+            description: CSPM integration for AWS with cloud connector
             namespace: default
             cloud_connector:
               target_csp: aws
@@ -68,6 +70,7 @@ requestBody:
               name: cloud_security_posture
               version: 3.1.1
             name: cspm-azure-policy
+            description: CSPM integration for Azure with cloud connector
             namespace: default
             cloud_connector:
               target_csp: azure
@@ -102,6 +105,7 @@ requestBody:
               name: cloud_security_posture
               version: 3.1.1
             name: cspm-aws-reuse-policy
+            description: CSPM integration for AWS reusing existing cloud connector
             namespace: default
             cloud_connector:
               target_csp: aws
@@ -142,6 +146,7 @@ responses:
               item:
                 id: d52a7812-5736-4fdc-aed8-72152afa1ffa
                 name: ess_billing-1
+                description: test
                 namespace: default
                 package:
                   name: ess_billing
@@ -178,6 +183,7 @@ responses:
               item:
                 id: aws-policy-12345
                 name: cspm-aws-policy
+                description: CSPM integration for AWS with cloud connector
                 namespace: default
                 package:
                   name: cloud_security_posture
@@ -218,6 +224,7 @@ responses:
               item:
                 id: azure-policy-12345
                 name: cspm-azure-policy
+                description: CSPM integration for Azure with cloud connector
                 namespace: default
                 package:
                   name: cloud_security_posture

@@ -24,6 +24,7 @@ const validMinimalPolicy = {
 
 const validFullPolicy = {
   ...validMinimalPolicy,
+  description: 'My agentless policy description',
   namespace: 'production',
   package: {
     name: 'cloud_security_posture',
@@ -93,6 +94,22 @@ describe('AgentlessPolicySchema', () => {
     it('should reject a policy without inputs', () => {
       const { inputs: _, ...policy } = validMinimalPolicy;
       expect(() => AgentlessPolicySchema.validate(policy)).toThrow();
+    });
+  });
+
+  describe('description', () => {
+    it('should accept a policy with a description', () => {
+      expect(() =>
+        AgentlessPolicySchema.validate({
+          ...validMinimalPolicy,
+          description: 'Some description',
+        })
+      ).not.toThrow();
+    });
+
+    it('should accept a policy without a description', () => {
+      const { description: _, ...policyWithoutDescription } = validFullPolicy;
+      expect(() => AgentlessPolicySchema.validate(policyWithoutDescription)).not.toThrow();
     });
   });
 

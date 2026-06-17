@@ -17,7 +17,6 @@ export const CreateAgentlessPolicyRequestSchema = {
       policy_ids: undefined,
       supports_agentless: undefined,
       output_id: undefined,
-      description: undefined,
       var_group_selections: undefined,
       additional_datastreams_permissions: undefined,
       condition: undefined,

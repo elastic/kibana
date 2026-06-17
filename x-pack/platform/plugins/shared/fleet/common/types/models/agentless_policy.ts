@@ -34,6 +34,7 @@ export interface AgentlessPackage {
 export interface AgentlessPolicy {
   id: string;
   name: string;
+  description?: string;
   namespace?: string;
   vars?: SimplifiedVars;
   global_data_tags?: GlobalDataTag[];

@@ -179,7 +179,6 @@ async function savePackagePolicy(
         'inputs',
         'vars',
         'id',
-        'description',
         'var_group_selections',
         'additional_datastreams_permissions',
         'condition',

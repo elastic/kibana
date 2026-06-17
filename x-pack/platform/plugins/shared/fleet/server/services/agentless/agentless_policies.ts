@@ -99,6 +99,7 @@ export const packagePolicyToAgentlessPolicy = (packagePolicy: PackagePolicy): Ag
   return {
     id: packagePolicy.id,
     name: packagePolicy.name,
+    description: packagePolicy.description,
     namespace: packagePolicy.namespace,
     package: {
       name: packagePolicy.package.name,
