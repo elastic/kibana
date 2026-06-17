@@ -66,6 +66,7 @@ export interface StreamsServer {
   ensureMemorySkillRegistered?: () => void;
   workflowsManagement?: WorkflowsServerPluginSetup;
   workflowsExtensions?: WorkflowsExtensionsServerPluginStart;
+  agentBuilder?: AgentBuilderPluginStart;
   spaces?: SpacesPluginStart;
 }
 

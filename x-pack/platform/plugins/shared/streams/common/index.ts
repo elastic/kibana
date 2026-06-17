@@ -62,3 +62,10 @@ export {
 
 export type { StreamSummary } from './stream_summary';
 export type { PaginatedResponse } from './pagination';
+
+export { SIGNIFICANT_EVENTS_REQUIRED_PLUGINS } from './significant_events_availability';
+export type {
+  SignificantEventsRequiredPlugin,
+  SignificantEventsUnavailableReason,
+  SignificantEventsAvailabilityResponse,
+} from './significant_events_availability';

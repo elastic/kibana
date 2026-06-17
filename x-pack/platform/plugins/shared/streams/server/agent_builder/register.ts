@@ -94,19 +94,13 @@ export const registerStreamsAgentBuilder = async ({
 
   registerAgentBuilderAttachments({ agentBuilder, getScopedClients, logger });
   registerAgentBuilderSmlTypes({ agentContextLayer, getScopedClients });
-  await registerAgentBuilderTools({
-    agentBuilder,
-    getScopedClients,
-    server,
-    logger,
-    telemetry,
-  });
+  registerAgentBuilderTools({ agentBuilder, getScopedClients, server, logger, telemetry });
   registerAgentBuilderSkills({
     agentBuilder,
     telemetry,
     streamsKIsOnboardingClient,
   });
-  registerSignificantEventsDiscoveryAgents(agentBuilder);
+  registerSignificantEventsDiscoveryAgents({ agentBuilder, server });
   registerInvestigationAgents(agentBuilder);
 
   agentBuilder.agents.register(systemOnboardingAgent);

@@ -54,7 +54,7 @@ Always follow this workflow:
    - Use `ki_search` to collect related Feature and Query KIs.
    - Use `execute_esql` to confirm the issue and gather supporting facts.
 6. Create a new event with `event_create` using complete, high-quality event properties.
-7. After creating the event, attach the new event to the conversation and render the attachment inline.
+7. After creating the event, attach the new event to the conversation and always render the attachment inline — see <attachment_rendering_guidance>.
 
 Status update workflow:
 1. Gather evidence supporting the target event state.
@@ -69,19 +69,22 @@ Status update workflow:
 </required_workflow>
 
 <attachment_rendering_guidance>
-Use SigEvent attachments to keep important event context visible in the conversation.
+**Rendering rule: whenever a significant event is attached to the conversation — whether newly created or an existing one — you MUST render its attachment inline. Never attach an event without immediately rendering it.**
+
+The rendered card is a compact preview. It shows only the event title, a "Significant event" label, and an "Open" button. The full event details (summary, root cause, recommendations, affected streams, lifecycle) are shown only in an expanded canvas view that opens when the user clicks "Open". Because the card itself does not contain the details, always include a brief summary of the key findings in your message text alongside the rendered attachment.
 
 When a new event is created:
 1. Attach the newly created SigEvent to the conversation.
-2. Render the attachment inline using the attachment id and version returned by the attachment flow:
+2. Write a brief summary of the key findings in your message (what happened, root cause, impact).
+3. Render the attachment inline using the attachment id and version returned by the attachment flow:
    `<render_attachment id="{attachmentId}" version="{version}" />`
-3. Keep the surrounding message concise because the rendered card contains the event details.
 
 When an existing event is relevant:
-1. Attach the existing SigEvent instead of recreating it.
-2. Render the attachment inline using the attachment id and version returned by the attachment flow:
+1. Attach the existing SigEvent to the conversation instead of recreating it.
+2. Write a brief summary of why this event is relevant (how it matches the current signals).
+3. Render the attachment inline using the attachment id and version returned by the attachment flow:
    `<render_attachment id="{attachmentId}" version="{version}" />`
-3. If multiple events are plausible matches, ask the user to choose or attach only the clearly relevant event.
+4. If multiple events are plausible matches, ask the user to choose or attach only the clearly relevant event.
 
 Do not invent attachment ids or versions. Only render attachments that were actually attached to the conversation.
 </attachment_rendering_guidance>
@@ -111,7 +114,7 @@ Proactive pattern:
 2. Run `event_search` to check for similar existing events.
 3. If no similar event exists, recommend creating a new event and proceed with investigation/evidence collection.
 4. Use `event_create` with a complete payload.
-5. Attach and render the created event inline.
+5. Attach the created event to the conversation and always render it inline — see <attachment_rendering_guidance>.
 </proactive_behavior>
 
 <ki_and_evidence_guidance>
