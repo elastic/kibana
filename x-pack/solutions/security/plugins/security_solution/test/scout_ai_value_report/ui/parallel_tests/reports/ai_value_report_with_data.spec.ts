@@ -32,7 +32,7 @@ spaceTest.describe(
         await browserAuth.loginAsSecurityRole('soc_manager');
         await aiValueReportPage.navigate();
 
-        await expect(aiValueReportPage.page).toBeVisible({ timeout: 30000 });
+        await expect(aiValueReportPage.container).toBeVisible({ timeout: 30000 });
         await expect(aiValueReportPage.sampleBanner).toBeHidden();
         await expect(aiValueReportPage.sampleDataBadge).toBeHidden();
         await expect(aiValueReportPage.executiveSummary).toBeVisible({ timeout: 30000 });
@@ -65,7 +65,7 @@ spaceTest.describe(
           })
         );
 
-        await expect(aiValueReportPage.page).toBeVisible({ timeout: 30000 });
+        await expect(aiValueReportPage.container).toBeVisible({ timeout: 30000 });
         await expect(aiValueReportPage.noResultsEmptyState).toBeVisible({ timeout: 30000 });
         await expect(
           aiValueReportPage.noResultsEmptyState.getByText(

@@ -27,7 +27,7 @@ spaceTest.describe(
         await browserAuth.loginAsSecurityRole('soc_manager');
         await aiValueReportPage.navigate();
 
-        await expect(aiValueReportPage.page).toBeVisible({ timeout: 30000 });
+        await expect(aiValueReportPage.container).toBeVisible({ timeout: 30000 });
         await expect(aiValueReportPage.sampleBanner).toBeVisible({ timeout: 30000 });
         await expect(aiValueReportPage.sampleDataBadge).toBeVisible();
         await expect(aiValueReportPage.attackDiscoveryCtaButton).toBeVisible();
@@ -42,7 +42,7 @@ spaceTest.describe(
         await browserAuth.loginAsSecurityRole('soc_manager');
         await aiValueReportPage.navigate();
 
-        await expect(aiValueReportPage.page).toBeVisible({ timeout: 30000 });
+        await expect(aiValueReportPage.container).toBeVisible({ timeout: 30000 });
         await expect(aiValueReportPage.exportButton).toBeVisible();
         await expect(aiValueReportPage.exportButton).toBeDisabled();
       }
