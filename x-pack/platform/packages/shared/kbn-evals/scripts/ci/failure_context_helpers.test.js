@@ -12,6 +12,8 @@ const {
   expectedRunId,
   truncateContextJson,
   buildTriageUserPrompt,
+  buildWeeklyRollupUserPrompt,
+  extractSuiteRootCauseLine,
   buildLitellmChatRequest,
   connectorIdToLitellmModel,
   buildLitellmConnectorFromVault,
@@ -104,6 +106,99 @@ describe('failure_context_helpers', () => {
     expect(prompt).toContain('Agent Builder');
     expect(prompt).toContain('eis-gpt-4.1');
     expect(prompt).toContain('timeout');
+  });
+
+  it('asks the triage prompt to classify provider vs regression vs test bug', () => {
+    const prompt = buildTriageUserPrompt(
+      { models: {} },
+      { suiteName: 'Streams', suiteId: 'streams', failingProjects: ['eis-gpt-5.4'] }
+    );
+
+    expect(prompt).toContain('provider/infra issue');
+    expect(prompt).toContain('eval-quality regression');
+    expect(prompt).toContain('test/harness bug');
+    expect(prompt).toContain('multiple unrelated providers/models');
+  });
+
+  describe('extractSuiteRootCauseLine', () => {
+    it('returns the first meaningful triage line after the header', () => {
+      const triageBody = [
+        ':rotating_light: *Weekly LLM evals* — Streams (`streams`) failed.',
+        '',
+        '*Failing models:*',
+        '- `eis/openai-gpt-5.4`',
+        '',
+        '<https://buildkite.com/build/1|View build>',
+        '',
+        '*Triage summary (judge: `litellm-llm-gateway-gpt-4o`):*',
+        '• Likely provider issue (not actionable): gpt-5.4 returned 529 overloaded.',
+        '• Other models passed.',
+      ].join('\n');
+
+      expect(extractSuiteRootCauseLine(triageBody)).toBe(
+        'Likely provider issue (not actionable): gpt-5.4 returned 529 overloaded.'
+      );
+    });
+
+    it('skips headers and model bullets when there is no triage header', () => {
+      const triageBody = [
+        ':rotating_light: *Streams* failed.',
+        '*Failing models:*',
+        '- `eis/openai-gpt-5.4`',
+        'Eval regression: partition score dropped to 0.42.',
+      ].join('\n');
+
+      expect(extractSuiteRootCauseLine(triageBody)).toBe(
+        'Eval regression: partition score dropped to 0.42.'
+      );
+    });
+
+    it('returns an empty string for empty input', () => {
+      expect(extractSuiteRootCauseLine('')).toBe('');
+      expect(extractSuiteRootCauseLine(undefined)).toBe('');
+    });
+
+    it('truncates long root-cause lines', () => {
+      const line = `x`.repeat(500);
+      expect(extractSuiteRootCauseLine(line, 50).length).toBeLessThanOrEqual(50);
+    });
+  });
+
+  describe('buildWeeklyRollupUserPrompt', () => {
+    const suites = [
+      {
+        suiteId: 'streams',
+        suiteName: 'Streams',
+        failingProjects: ['eis-claude-4.6-sonnet', 'eis-gemini-3.1-pro'],
+        triageBody: 'Eval regression: partition score dropped.',
+      },
+      {
+        suiteId: 'observability-ai',
+        suiteName: 'Observability AI',
+        failingProjects: ['eis-gpt-5.4'],
+        triageBody: 'Provider issue: 529 overloaded.',
+      },
+    ];
+
+    it('includes each failing suite, its models, and its triage body', () => {
+      const prompt = buildWeeklyRollupUserPrompt(suites, {
+        buildUrl: 'https://buildkite.com/build/9',
+        totalSuites: 15,
+      });
+
+      expect(prompt).toContain('Failing suites: 2 of 15');
+      expect(prompt).toContain('Streams (streams)');
+      expect(prompt).toContain('eis-claude-4.6-sonnet, eis-gemini-3.1-pro');
+      expect(prompt).toContain('Observability AI (observability-ai)');
+      expect(prompt).toContain('Provider issue: 529 overloaded.');
+      expect(prompt).toContain('https://buildkite.com/build/9');
+    });
+
+    it('omits the total-suite count when not provided', () => {
+      const prompt = buildWeeklyRollupUserPrompt(suites);
+      expect(prompt).toContain('Failing suites: 2');
+      expect(prompt).not.toContain(' of ');
+    });
   });
 
   it('builds LiteLLM chat request from connector config', () => {

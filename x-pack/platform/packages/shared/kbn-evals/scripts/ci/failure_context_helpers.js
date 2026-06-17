@@ -209,11 +209,115 @@ function buildTriageUserPrompt(context, header) {
     '',
     'Instructions:',
     '- Use Slack-friendly markdown (short bullets, no code fences).',
-    '- Group by likely root cause (provider outage, rate limits, infra/timeout, eval quality regression, test bug).',
-    '- Call out per-model differences when relevant.',
-    '- If a model has log excerpt but no score data, say it likely failed before scores were exported.',
+    '- Start with a one-line verdict that classifies the failure as one of: provider/infra issue (NOT actionable by the team, e.g. provider outage, 429/529 rate limits, gateway/timeout), eval-quality regression (action needed), or test/harness bug (action needed).',
+    '- Explicitly state whether this looks like a transient model-provider issue or a real regression, and say which.',
+    '- A clear signal of a real regression (not a provider issue) is the same failure across multiple unrelated providers/models; call this out when present.',
+    '- Then add short bullets grouped by likely root cause, calling out per-model differences when relevant.',
+    '- If a model has a log excerpt but no score data, say it likely failed before scores were exported.',
     '- Keep the response under 1500 characters.',
     '- Do not invent failures not supported by the context.'
+  );
+
+  return lines.join('\n');
+}
+
+/**
+ * Extract a short, single-line root-cause summary from a per-suite triage body.
+ * The per-suite triage already leads with a one-line verdict, so we pull the
+ * first meaningful bullet/sentence and strip Slack markdown noise.
+ *
+ * @param {string | undefined | null} triageBody
+ * @param {number} [maxChars]
+ * @returns {string}
+ */
+function extractSuiteRootCauseLine(triageBody, maxChars = 160) {
+  const body = String(triageBody ?? '');
+  if (!body.trim()) {
+    return '';
+  }
+
+  // Prefer the first line after a "Triage summary" header, otherwise the first
+  // non-empty content line that is not the alert header or a metadata line.
+  const rawLines = body.split('\n').map((line) => line.trim());
+  const triageHeaderIndex = rawLines.findIndex((line) => /triage summary/i.test(line));
+  const candidateLines = triageHeaderIndex >= 0 ? rawLines.slice(triageHeaderIndex + 1) : rawLines;
+
+  for (const line of candidateLines) {
+    if (!line) {
+      continue;
+    }
+    if (/^:[a-z_]+:/i.test(line)) {
+      continue; // emoji alert header
+    }
+    if (/^\*.*\*$/.test(line)) {
+      continue; // bold section header like *Failing models:*
+    }
+    if (/^[-•]\s*`/.test(line)) {
+      continue; // bullet that is just a model id
+    }
+    if (/^<https?:\/\//.test(line)) {
+      continue; // build link line
+    }
+
+    const cleaned = line
+      .replace(/^[-•*]\s*/, '')
+      .replace(/[*_`]/g, '')
+      .trim();
+    if (cleaned) {
+      return truncateText(cleaned, maxChars);
+    }
+  }
+
+  return '';
+}
+
+/**
+ * Build the user prompt for the weekly cross-suite executive summary. Input is
+ * the set of failing suites with their per-suite triage bodies; output asks the
+ * judge for a short roll-up that separates non-actionable provider/infra noise
+ * from real regressions teams must fix.
+ *
+ * @param {Array<{ suiteId: string; suiteName?: string; failingProjects?: string[]; triageBody?: string }>} suites
+ * @param {{ buildUrl?: string; totalSuites?: number }} [meta]
+ * @returns {string}
+ */
+function buildWeeklyRollupUserPrompt(suites, meta = {}) {
+  const lines = [
+    'Write a short executive summary for a weekly LLM-evaluation CI run that had failing suites.',
+    'The audience is the evals maintainers in a shared Slack channel; the goal is to tell at a glance which failures are non-actionable provider/infra noise vs real eval regressions a team must fix.',
+    '',
+    `Failing suites: ${suites.length}${
+      typeof meta.totalSuites === 'number' ? ` of ${meta.totalSuites}` : ''
+    }`,
+  ];
+
+  if (meta.buildUrl) {
+    lines.push(`Build: ${meta.buildUrl}`);
+  }
+
+  lines.push('', 'Per-suite triage (already produced earlier in the run):');
+  for (const suite of suites) {
+    const failing =
+      Array.isArray(suite.failingProjects) && suite.failingProjects.length > 0
+        ? suite.failingProjects.join(', ')
+        : 'unknown';
+    lines.push(
+      '',
+      `### ${suite.suiteName || suite.suiteId} (${suite.suiteId})`,
+      `Failing models: ${failing}`,
+      truncateText(String(suite.triageBody ?? '').trim() || '(no per-suite triage available)', 1200)
+    );
+  }
+
+  lines.push(
+    '',
+    'Instructions:',
+    '- Use Slack-friendly markdown (3-5 short bullets, no code fences, no headers).',
+    '- Lead with counts: how many suites are non-actionable provider/infra issues vs real regressions/test bugs.',
+    '- Group suites by shared root cause (e.g. "3 suites failed from the same gpt-5.4 provider outage").',
+    '- Explicitly flag which suites need team action and which can simply be retried.',
+    '- Keep the whole response under 900 characters.',
+    '- Do not invent failures not supported by the per-suite triage.'
   );
 
   return lines.join('\n');
@@ -516,6 +620,8 @@ module.exports = {
   expectedRunId,
   truncateContextJson,
   buildTriageUserPrompt,
+  buildWeeklyRollupUserPrompt,
+  extractSuiteRootCauseLine,
   buildLitellmChatRequest,
   parseVaultConfig,
   connectorIdToLitellmModel,

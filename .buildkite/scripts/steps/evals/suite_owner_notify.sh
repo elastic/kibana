@@ -25,6 +25,14 @@ fi
 
 suite_name="${EVAL_SUITE_NAME:-$EVAL_SUITE_ID}"
 
+# Notification mode controls the Slack header (on-demand vs scheduled weekly run).
+if [[ "${KBN_EVALS_ON_DEMAND:-}" =~ ^(1|true)$ ]]; then
+  EVAL_NOTIFY_MODE="on-demand"
+else
+  EVAL_NOTIFY_MODE="weekly"
+fi
+export EVAL_NOTIFY_MODE
+
 echo "Suite failed: ${suite_name} (${EVAL_SUITE_ID})"
 echo ""
 echo "Failing connector projects:"
@@ -71,10 +79,16 @@ FAILING_PROJECTS_CSV="$(IFS=,; echo "${failing_projects[*]}")"
 
 echo "--- Building suite owner Slack message (static + judge triage)"
 if ! node x-pack/platform/packages/shared/kbn-evals/scripts/ci/build_suite_owner_slack_message.js \
-  "$EVAL_SUITE_ID" "$SUMMARY_FILE" "$FAILING_PROJECTS_CSV"; then
+  "$EVAL_SUITE_ID" "$SUMMARY_FILE" "$FAILING_PROJECTS_CSV" "$EVAL_NOTIFY_MODE"; then
   echo "--- build_suite_owner_slack_message crashed; writing static summary with triage error note"
+  if [[ "${EVAL_NOTIFY_MODE}" == "on-demand" ]]; then
+    fallback_header=":test_tube: *On-demand LLM eval* — %s (\`%s\`) failed."
+  else
+    fallback_header=":rotating_light: *Weekly LLM evals* — %s (\`%s\`) failed."
+  fi
   {
-    printf ':rotating_light: *%s* (`%s`) failed in LLM evals.\n\n' "$suite_name" "$EVAL_SUITE_ID"
+    # shellcheck disable=SC2059
+    printf "${fallback_header}\n\n" "$suite_name" "$EVAL_SUITE_ID"
     printf '*Failing models:*\n'
     for project in "${failing_projects[@]}"; do
       printf -- '- `%s`\n' "${project}"
@@ -96,6 +110,13 @@ fi
 
 buildkite-agent meta-data set "kbn-evals:triage:${suite_key_safe}" "$(cat "$SUMMARY_FILE")" >/dev/null 2>&1 || true
 buildkite-agent annotate --context "kbn-evals-summary-${suite_key_safe}" --style 'error' "$(cat "$SUMMARY_FILE")" || true
+
+# Record a per-suite job link so the weekly roll-up can deep-link to this suite's
+# triage job (instead of one link per failing model).
+if [[ -n "${BUILDKITE_BUILD_URL:-}" && -n "${BUILDKITE_JOB_ID:-}" ]]; then
+  buildkite-agent meta-data set "kbn-evals:suite-job-url:${suite_key_safe}" \
+    "${BUILDKITE_BUILD_URL}#${BUILDKITE_JOB_ID}" >/dev/null 2>&1 || true
+fi
 
 if [[ -n "${EVAL_SUITE_SLACK_CHANNEL:-}" ]]; then
   if ! node -e "require('yaml')" 2>/dev/null; then

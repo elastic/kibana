@@ -18,9 +18,29 @@ const suiteId = process.argv[2] || process.env.EVAL_SUITE_ID || '';
 const outputPath = process.argv[3] || process.env.EVAL_TRIAGE_SUMMARY_PATH || '';
 const failingProjectsArg = process.argv[4] || process.env.EVAL_FAILING_PROJECTS || '';
 
+// Notification mode controls the header/intro so on-demand and weekly per-suite
+// messages read differently even though they share this builder.
+// - 'on-demand': ad-hoc verification triggered by a person.
+// - 'weekly': scheduled run alert for the owning team.
+function resolveNotifyMode() {
+  const explicit = (process.argv[5] || process.env.EVAL_NOTIFY_MODE || '').toLowerCase();
+  if (explicit === 'on-demand' || explicit === 'weekly') {
+    return explicit;
+  }
+  if (/^(1|true)$/i.test(process.env.KBN_EVALS_ON_DEMAND || '')) {
+    return 'on-demand';
+  }
+  if (/^(1|true)$/i.test(process.env.KBN_EVALS_WEEKLY || '')) {
+    return 'weekly';
+  }
+  return 'weekly';
+}
+
+const notifyMode = resolveNotifyMode();
+
 if (!suiteId || !outputPath || !failingProjectsArg) {
   console.error(
-    'Usage: build_suite_owner_slack_message.js <suiteId> <output.md> <comma-separated failing projects>'
+    'Usage: build_suite_owner_slack_message.js <suiteId> <output.md> <comma-separated failing projects> [on-demand|weekly]'
   );
   process.exit(1);
 }
@@ -42,8 +62,13 @@ const suite = suites.find((entry) => entry?.id === suiteId) ?? null;
 const suiteName = suite?.name ?? suiteId;
 const buildUrl = process.env.BUILDKITE_BUILD_URL || '';
 
+const header =
+  notifyMode === 'on-demand'
+    ? `:test_tube: *On-demand LLM eval* — ${suiteName} (\`${suiteId}\`) failed.`
+    : `:rotating_light: *Weekly LLM evals* — ${suiteName} (\`${suiteId}\`) failed.`;
+
 const lines = [
-  `:rotating_light: *${suiteName}* (\`${suiteId}\`) failed in LLM evals.`,
+  header,
   '',
   '*Failing models:*',
   ...failingProjects.map((project) => `- \`${project}\``),
