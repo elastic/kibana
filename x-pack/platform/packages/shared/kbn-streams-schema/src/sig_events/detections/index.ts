@@ -6,6 +6,7 @@
  */
 
 import { z } from '@kbn/zod/v4';
+import { MAX_ID_LENGTH } from '../constants';
 
 const detectionEvidenceSchema = z.object({
   change_point_type: z.string().optional(),
@@ -16,7 +17,7 @@ export const detectionSchema = z.object({
   '@timestamp': z.iso.datetime(),
   kind: z.enum(['detection', 'quiet', 'handled']),
   processed: z.boolean(),
-  detection_id: z.string(),
+  detection_id: z.string().max(MAX_ID_LENGTH),
   rule_uuid: z.string(),
   rule_name: z.string(),
   stream_name: z.string().optional(),

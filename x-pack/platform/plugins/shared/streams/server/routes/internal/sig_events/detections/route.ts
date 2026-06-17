@@ -64,7 +64,7 @@ const detectionsHistoryRoute = createServerRoute({
   },
   params: z.object({
     path: z.object({
-      id: z.string(),
+      id: z.string().max(255),
     }),
   }),
   handler: async ({
