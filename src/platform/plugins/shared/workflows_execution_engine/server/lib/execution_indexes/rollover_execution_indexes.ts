@@ -10,10 +10,8 @@
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 
-import {
-  WORKFLOWS_EXECUTIONS_INDEX,
-  WORKFLOWS_STEP_EXECUTIONS_INDEX,
-} from '../../../common';
+import { WORKFLOWS_EXECUTIONS_INDEX, WORKFLOWS_STEP_EXECUTIONS_INDEX } from '../../../common';
+import { WORKFLOWS_EXECUTIONS_INDEX_MAPPINGS } from '../../../common/workflow_executions_index';
 
 export interface ExecutionIndexRolloverConditions {
   maxAge: string;
@@ -38,8 +36,8 @@ export const rolloverExecutionIndexIfRequired = async ({
   logger,
   signal,
 }: RolloverExecutionIndexIfRequiredParams): Promise<boolean> => {
-  const aliasExists = await esClient.indices.existsAlias({ name: aliasName }, { signal });
-  if (!aliasExists) {
+  const alias = await esClient.indices.getAlias({ name: aliasName }, { signal });
+  if (!alias) {
     logger.debug(`Alias ${aliasName} does not exist, skipping rollover`);
     return false;
   }
@@ -47,6 +45,7 @@ export const rolloverExecutionIndexIfRequired = async ({
   const response = await esClient.indices.rollover(
     {
       alias: aliasName,
+      dry_run: true,
       conditions: {
         max_age: conditions.maxAge,
         max_primary_shard_size: conditions.maxPrimaryShardSize,
@@ -55,9 +54,28 @@ export const rolloverExecutionIndexIfRequired = async ({
     { signal }
   );
 
-  if (response.rolled_over) {
-    logger.info(
-      `Rolled over alias ${aliasName} from ${response.old_index} to ${response.new_index}`
+  const conditionsMet = Object.entries(response.conditions)
+    .filter(([key, value]) => value)
+    .map(([key, value]) => ({
+      condition: key,
+      isMet: value,
+    }));
+
+  if (conditionsMet.length) {
+    await esClient.indices.create({
+      index: response.new_index,
+      mappings: WORKFLOWS_EXECUTIONS_INDEX_MAPPINGS,
+    });
+    await esClient.indices.updateAliases({
+      actions: [
+        { add: { index: response.new_index, alias: aliasName, is_write_index: true } },
+        { add: { index: response.old_index, alias: aliasName, is_write_index: false } },
+      ],
+    });
+    logger.debug(
+      `Rolled over alias ${aliasName} to ${response.new_index}. Conditions met: ${conditionsMet
+        .map(({ condition, isMet }) => `${condition}: ${isMet}`)
+        .join(', ')}`
     );
     return true;
   }
