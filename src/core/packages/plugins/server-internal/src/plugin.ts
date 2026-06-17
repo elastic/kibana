@@ -165,16 +165,41 @@ export class PluginWrapper<
     }
 
     this.container?.loadSync(createStartModule(startContext, plugins));
-    const contract = [
-      this.instance?.start(startContext, plugins),
-      this.container?.get<TStart>(Start),
-    ].find(Boolean)!;
 
-    if (isPromise(contract)) {
-      return contract.then((resolvedContract) => {
-        this.startDependencies$.next([startContext, plugins, resolvedContract]);
-        return resolvedContract!;
-      });
+    const instanceContract = this.instance?.start(startContext, plugins);
+    if (isPromise(instanceContract)) {
+      return instanceContract.then((contract) =>
+        this.bridgeStartContract(startContext, plugins, contract)
+      );
+    }
+
+    return this.bridgeStartContract(startContext, plugins, instanceContract);
+  }
+
+  /**
+   * Bridges the classic plugin `start()` contract into DI as {@link Start}
+   * before resolving it, so `OnStart` hooks and `provide(token, (start) => ...)`
+   * selectors observe the plugin's contract rather than the default. A pure-DI
+   * plugin (no classic instance) falls back to the contract bound by its module.
+   */
+  private bridgeStartContract(
+    startContext: CoreStart,
+    plugins: TPluginsStart,
+    instanceContract: TStart | undefined
+  ): TStart {
+    if (!this.container) {
+      this.startDependencies$.next([startContext, plugins, instanceContract!]);
+      return instanceContract!;
+    }
+
+    let contract: TStart;
+    if (instanceContract) {
+      this.container.rebindSync(Start).toConstantValue(instanceContract);
+      this.container.get(Start);
+      contract = instanceContract;
+    } else {
+      contract = this.container.get<TStart>(Start);
+      this.container.rebindSync(Start).toConstantValue(contract);
     }
 
     this.startDependencies$.next([startContext, plugins, contract]);
@@ -213,10 +238,13 @@ export class PluginWrapper<
     return config;
   }
 
-  protected async getPluginDefinition(): Promise<
-    PluginDefinition<TSetup, TStart, TPluginsSetup, TPluginsStart>
-  > {
-    return (await import(join(this.path, 'server'))) ?? {};
+  // Synchronous `require()` is intentional: server-side plugins are CommonJS
+  // modules, and synchronous loading allows `getConfigDescriptor()` and
+  // `init()` to avoid unnecessary async overhead.  The DI `module` export is
+  // available immediately after require, which simplifies container loading
+  // during `setup()`.
+  protected getPluginDefinition(): PluginDefinition<TSetup, TStart, TPluginsSetup, TPluginsStart> {
+    return require(join(this.path, 'server')) ?? {};
   }
 
   protected async createPluginInstance() {
