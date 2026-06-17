@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-type AgentWithConnectorIds = { configuration?: { connector_ids?: string[] | null } | null };
+interface AgentWithConnectorIds {
+  configuration?: { connector_ids?: string[] | null } | null;
+}
 
 /**
  * Returns true if the given connector is accessible to the agent.
