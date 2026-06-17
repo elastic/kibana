@@ -145,7 +145,7 @@ export const useTopNavLinks = ({
     [isEsqlMode, dataView, adHocDataViews, authorizedRuleTypes]
   );
 
-  const canCreateESQLRule = !!services.alertingVTwo;
+  const canCreateESQLRule = !!services.alertingVTwo && !!services.capabilities.alertingVTwo;
   const showCreateRuleV2 = isEsqlMode && canCreateESQLRule;
 
   const getAppMenuAccessor = useProfileAccessor('getAppMenu');

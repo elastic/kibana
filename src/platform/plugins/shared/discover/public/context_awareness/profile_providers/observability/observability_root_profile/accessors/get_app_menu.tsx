@@ -30,7 +30,7 @@ export const createGetAppMenu =
 
     return {
       getAlertsLegacyRuleTypes: showCreateRuleV2
-        ? () => getObservabilityAlertsLegacyRuleTypes(services, params)
+        ? () => getObservabilityAlertsClassicRuleTypes(services, params)
         : undefined,
       appMenuRegistry: (registry) => {
         registerDatasetQualityLink(registry, services);
@@ -47,23 +47,23 @@ export const createGetAppMenu =
     };
   };
 
-const getObservabilityAlertsLegacyRuleTypes = (
+const getObservabilityAlertsClassicRuleTypes = (
   services: ProfileProviderServices,
   params: AppMenuExtensionParams
 ): AlertsLegacyRuleType[] => {
-  const legacyRuleTypes: AlertsLegacyRuleType[] = [];
+  const classicRuleTypes: AlertsLegacyRuleType[] = [];
 
-  const customThresholdRule = buildCustomThresholdLegacyRuleType(services, params);
+  const customThresholdRule = buildCustomThresholdClassicRuleType(services, params);
   if (customThresholdRule) {
-    legacyRuleTypes.push(customThresholdRule);
+    classicRuleTypes.push(customThresholdRule);
   }
 
-  const createSloRule = buildCreateSloLegacyRuleType(services, params);
+  const createSloRule = buildCreateSloClassicRuleType(services, params);
   if (createSloRule) {
-    legacyRuleTypes.push(createSloRule);
+    classicRuleTypes.push(createSloRule);
   }
 
-  return legacyRuleTypes;
+  return classicRuleTypes;
 };
 
 const registerDatasetQualityLink = (
@@ -102,7 +102,7 @@ const registerDatasetQualityLink = (
   }
 };
 
-const buildCustomThresholdLegacyRuleType = (
+const buildCustomThresholdClassicRuleType = (
   {
     data,
     triggersActionsUi: { ruleTypeRegistry, actionTypeRegistry },
@@ -125,6 +125,9 @@ const buildCustomThresholdLegacyRuleType = (
       const { filters, query } = data.query.getState();
 
       const plugins = { ...services, data };
+      // Some of the rule form's required plugins are from x-pack, so make sure they're defined before
+      // rendering the flyout. The alerting plugin is also part of x-pack, so this check should probably never
+      // return false. This is mostly here because Typescript requires us to mark x-pack plugins as optional.
       if (!isValidRuleFormPlugins(plugins)) {
         return null;
       }
@@ -168,22 +171,22 @@ const registerCustomThresholdRuleAction = (
   services: ProfileProviderServices,
   params: AppMenuExtensionParams
 ) => {
-  const legacyRuleType = buildCustomThresholdLegacyRuleType(services, params);
-  if (!legacyRuleType) {
+  const classicRuleType = buildCustomThresholdClassicRuleType(services, params);
+  if (!classicRuleType) {
     return;
   }
 
   registry.registerPopoverItem(AppMenuActionId.alerts, {
-    id: legacyRuleType.id,
+    id: classicRuleType.id,
     order: 2,
     iconType: 'bell',
-    testId: legacyRuleType['data-test-subj'] ?? legacyRuleType.id,
-    label: legacyRuleType.label,
-    run: ({ context: { onFinishAction } }) => legacyRuleType.render(onFinishAction),
+    testId: classicRuleType['data-test-subj'] ?? classicRuleType.id,
+    label: classicRuleType.label,
+    run: ({ context: { onFinishAction } }) => classicRuleType.render(onFinishAction),
   });
 };
 
-const buildCreateSloLegacyRuleType = (
+const buildCreateSloClassicRuleType = (
   allServices: ProfileProviderServices,
   { dataView, isEsqlMode }: AppMenuExtensionParams
 ): AlertsLegacyRuleType | undefined => {
@@ -235,17 +238,17 @@ const registerCreateSLOAction = (
   services: ProfileProviderServices,
   params: AppMenuExtensionParams
 ) => {
-  const legacyRuleType = buildCreateSloLegacyRuleType(services, params);
-  if (!legacyRuleType) {
+  const classicRuleType = buildCreateSloClassicRuleType(services, params);
+  if (!classicRuleType) {
     return;
   }
 
   registry.registerPopoverItem(AppMenuActionId.alerts, {
-    id: legacyRuleType.id,
+    id: classicRuleType.id,
     order: 3,
     iconType: 'chartGauge',
-    testId: legacyRuleType['data-test-subj'] ?? legacyRuleType.id,
-    label: legacyRuleType.label,
-    run: ({ context: { onFinishAction } }) => legacyRuleType.render(onFinishAction),
+    testId: classicRuleType['data-test-subj'] ?? classicRuleType.id,
+    label: classicRuleType.label,
+    run: ({ context: { onFinishAction } }) => classicRuleType.render(onFinishAction),
   });
 };

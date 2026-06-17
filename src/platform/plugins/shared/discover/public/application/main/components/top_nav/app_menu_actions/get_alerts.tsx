@@ -133,7 +133,7 @@ export const getAlertsAppMenuItem = ({
   getState: () => DiscoverInternalState;
   dispatch: InternalStateDispatch;
   showCreateRuleV2?: boolean;
-  subscribe?: (listener: () => void) => () => void;
+  subscribe: (listener: () => void) => () => void;
   additionalLegacyRuleTypes?: AlertsLegacyRuleType[];
 }): DiscoverAppMenuItemType => {
   const { dataView, isEsqlMode } = discoverParams;

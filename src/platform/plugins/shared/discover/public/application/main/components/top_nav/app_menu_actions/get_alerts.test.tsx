@@ -56,6 +56,7 @@ const getAlertsMenuItem = async ({
     getState: toolkit.internalState.getState,
     dispatch: toolkit.internalState.dispatch,
     showCreateRuleV2,
+    subscribe: (listener) => toolkit.internalState.subscribe(listener),
   });
 };
 
