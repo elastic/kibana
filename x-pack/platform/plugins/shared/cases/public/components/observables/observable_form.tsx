@@ -104,11 +104,17 @@ export const ObservableForm: FC<ObservableFormProps> = ({
   onCancel,
 }) => {
   const { form } = useForm({
-    defaultValue: observable ?? {
-      typeKey: '',
-      value: '',
-      description: '',
-    },
+    defaultValue: observable
+      ? {
+          typeKey: observable.typeKey,
+          value: observable.value,
+          description: observable.description ?? '',
+        }
+      : {
+          typeKey: '',
+          value: '',
+          description: '',
+        },
     options: { stripEmptyFields: false },
   });
 
