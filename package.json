@@ -161,7 +161,7 @@
     "@hapi/h2o2": "10.0.4",
     "@hapi/hapi": "21.4.9",
     "@hapi/hoek": "11.0.7",
-    "@hapi/inert": "7.1.0",
+    "@hapi/inert": "7.1.1",
     "@hapi/wreck": "18.1.2",
     "@hello-pangea/dnd": "16.6.0",
     "@kbn/aad-fixtures-plugin": "link:x-pack/platform/test/alerting_api_integration/common/plugins/aad",
