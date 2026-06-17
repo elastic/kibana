@@ -23,6 +23,12 @@ import { LogoIcon } from '../shared/logo_icon';
 import { usePricingFeature } from '../quickstart_flows/shared/use_pricing_feature';
 import { useManagedOtlpServiceAvailability } from '../shared/use_managed_otlp_service_availability';
 
+/**
+ * Shared id for the Amazon CloudWatch quickstart card. Used both here (card definition)
+ * and in the onboarding form (to locate the card for its dedicated row), so keep them in sync.
+ */
+export const AWS_CLOUDWATCH_OTEL_CARD_ID = 'aws-cloudwatch-otel-virtual';
+
 export function useCustomCards(
   createCollectionCardHandler: (query: string) => () => void
 ): IntegrationCardItem[] {
@@ -65,7 +71,10 @@ export function useCustomCards(
     history,
     `/cloudforwarder/${location.search}`
   );
-  const { href: awsCloudwatchOtelUrl } = reactRouterNavigate(history, `/aws${location.search}`);
+  const { href: awsCloudwatchOtelUrl } = reactRouterNavigate(
+    history,
+    `/cloudwatch${location.search}`
+  );
 
   const apmUrl = `${getUrlForApp?.('apm')}/${isServerless ? 'onboarding' : 'tutorial'}`;
   const otelApmUrl = isManagedOtlpServiceAvailable ? otelApmQuickstartUrl : apmUrl;
@@ -495,7 +504,7 @@ export function useCustomCards(
       onCardClick: createCollectionCardHandler('gcp'),
     },
     {
-      id: 'aws-cloudwatch-otel-virtual',
+      id: AWS_CLOUDWATCH_OTEL_CARD_ID,
       name: 'aws-cloudwatch-otel',
       type: 'virtual',
       title: i18n.translate(
@@ -505,8 +514,7 @@ export function useCustomCards(
       description: i18n.translate(
         'xpack.observability_onboarding.useCustomCardsForCategory.awsCloudwatchOtelDescription',
         {
-          defaultMessage:
-            'Collect CloudWatch metrics and logs with the Elastic Distro for OpenTelemetry',
+          defaultMessage: 'Collect CloudWatch metrics with the Elastic Distro for OpenTelemetry',
         }
       ),
       categories: ['observability'],

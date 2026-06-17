@@ -28,6 +28,7 @@ const mockUseCustomCards = jest.fn<IntegrationCardItem[], []>(() => []);
 
 jest.mock('./use_custom_cards', () => ({
   useCustomCards: () => mockUseCustomCards(),
+  AWS_CLOUDWATCH_OTEL_CARD_ID: 'aws-cloudwatch-otel-virtual',
 }));
 
 jest.mock('../package_list/package_list', () => ({
@@ -256,6 +257,24 @@ describe('OnboardingFlowForm', () => {
       expect(mockPackageListSearchForm).toHaveBeenCalledWith(
         expect.objectContaining({ searchQuery: '' })
       );
+    });
+
+    it('excludes the AWS CloudWatch quickstart from the search results, since it has its own tile', () => {
+      mockUsePricingFeature.mockReturnValue(true);
+      mockUseCustomCards.mockReturnValue([
+        { id: 'azure-logs-virtual', title: 'Azure', isCollectionCard: true } as IntegrationCardItem,
+        { id: 'otel-logs', title: 'OpenTelemetry' } as IntegrationCardItem,
+        { id: 'aws-cloudwatch-otel-virtual', title: 'Amazon CloudWatch' } as IntegrationCardItem,
+      ]);
+
+      renderWithProviders(<OnboardingFlowForm />, ['/?category=cloud']);
+
+      const { customCards } = mockPackageListSearchForm.mock.calls[0][0] as unknown as {
+        customCards: IntegrationCardItem[];
+      };
+      const customCardIds = customCards.map((card) => card.id);
+      expect(customCardIds).toContain('otel-logs');
+      expect(customCardIds).not.toContain('aws-cloudwatch-otel-virtual');
     });
   });
 });

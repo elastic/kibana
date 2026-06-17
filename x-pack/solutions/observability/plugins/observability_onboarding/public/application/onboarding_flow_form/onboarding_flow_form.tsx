@@ -33,12 +33,17 @@ import { usePerformanceContext } from '@kbn/ebt-tools';
 import { ObservabilityOnboardingPricingFeature } from '../../../common/pricing_features';
 import { PackageListSearchForm } from '../package_list_search_form/package_list_search_form';
 import type { Category } from './types';
-import { useCustomCards } from './use_custom_cards';
+import { useCustomCards, AWS_CLOUDWATCH_OTEL_CARD_ID } from './use_custom_cards';
 import type { SupportedLogo } from '../shared/logo_icon';
 import { LogoIcon } from '../shared/logo_icon';
 import type { ObservabilityOnboardingAppServices } from '../..';
 import { PackageList } from '../package_list/package_list';
 import { usePricingFeature } from '../quickstart_flows/shared/use_pricing_feature';
+
+// Cloud provider tiles (Azure/AWS/GCP) are collection cards that render a "View collection"
+// footer, making them taller than PackageCard's 127px default. Pin the CloudWatch quickstart
+// tile to the same height so the extra row lines up visually with the provider row above.
+const CLOUD_PROVIDER_TILE_MIN_HEIGHT = 152;
 
 interface UseCaseOption {
   id: Category;
@@ -193,7 +198,7 @@ export const OnboardingFlowForm: FunctionComponent = () => {
   const selectedCategory = searchParams.get('category') as Category;
   const awsCloudwatchOtelCard =
     selectedCategory === 'cloud'
-      ? customCards.find((card) => card.id === 'aws-cloudwatch-otel-virtual')
+      ? customCards.find((card) => card.id === AWS_CLOUDWATCH_OTEL_CARD_ID)
       : undefined;
   const featuredCardsForCategory: IntegrationCardItem[] = customCards.filter((card) => {
     if (selectedCategory === null) {
@@ -391,7 +396,11 @@ export const OnboardingFlowForm: FunctionComponent = () => {
                    * reserved row height. This keeps the tile flush with the provider row.
                    */}
                   <Suspense fallback={null}>
-                    <LazyPackageCard {...awsCloudwatchOtelCard} showLabels={true} />
+                    <LazyPackageCard
+                      {...awsCloudwatchOtelCard}
+                      showLabels={true}
+                      minCardHeight={CLOUD_PROVIDER_TILE_MIN_HEIGHT}
+                    />
                   </Suspense>
                 </EuiFlexItem>
               </EuiFlexGroup>
@@ -415,7 +424,11 @@ export const OnboardingFlowForm: FunctionComponent = () => {
           searchQuery={integrationSearch}
           setSearchQuery={setIntegrationSearch}
           flowCategory={selectedCategory}
-          customCards={customCards.filter((card) => !card.isCollectionCard)}
+          customCards={customCards.filter(
+            // The CloudWatch quickstart has its own featured tile in the Cloud category, so keep
+            // it out of the search results to avoid showing the same tile twice.
+            (card) => !card.isCollectionCard && card.id !== AWS_CLOUDWATCH_OTEL_CARD_ID
+          )}
           excludePackageIdList={searchExcludePackageIdList}
         />
       </div>

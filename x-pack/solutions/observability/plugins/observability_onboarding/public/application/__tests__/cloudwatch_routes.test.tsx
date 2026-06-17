@@ -38,8 +38,8 @@ jest.mock('../pages/host', () => ({
   HostWindowsOtelPage: () => null,
 }));
 
-jest.mock('../aws_integration_redirect', () => ({
-  AwsIntegrationRedirect: () => <div data-test-subj="awsIntegrationRedirectStub" />,
+jest.mock('../cloudwatch_integration_redirect', () => ({
+  CloudwatchIntegrationRedirect: () => <div data-test-subj="cloudwatchIntegrationRedirectStub" />,
 }));
 
 jest.mock('../shared/use_flow_breadcrumbs', () => ({
@@ -109,16 +109,16 @@ const renderFlow = (flagEnabled: boolean, path: string) => {
   );
 };
 
-describe('AWS routes', () => {
-  it('renders AwsIntegrationRedirect at /aws', () => {
-    renderFlow(false, '/aws');
-    expect(screen.getByTestId('awsIntegrationRedirectStub')).toBeInTheDocument();
+describe('CloudWatch routes', () => {
+  it('renders CloudwatchIntegrationRedirect at /cloudwatch', () => {
+    renderFlow(false, '/cloudwatch');
+    expect(screen.getByTestId('cloudwatchIntegrationRedirectStub')).toBeInTheDocument();
     expect(screen.queryByTestId('landingPageStub')).toBeNull();
   });
 
-  it('renders AwsIntegrationRedirect at /aws when the add data page V2 flag is on', () => {
-    renderFlow(true, '/aws');
-    expect(screen.getByTestId('awsIntegrationRedirectStub')).toBeInTheDocument();
+  it('renders CloudwatchIntegrationRedirect at /cloudwatch when the add data page V2 flag is on', () => {
+    renderFlow(true, '/cloudwatch');
+    expect(screen.getByTestId('cloudwatchIntegrationRedirectStub')).toBeInTheDocument();
     expect(screen.queryByTestId('landingPageStub')).toBeNull();
   });
 });

@@ -30,7 +30,7 @@ import {
   HostWindowsOtelPage,
 } from './pages/host';
 import type { ObservabilityOnboardingAppServices } from '..';
-import { AwsIntegrationRedirect } from './aws_integration_redirect';
+import { CloudwatchIntegrationRedirect } from './cloudwatch_integration_redirect';
 import { IS_ADD_DATA_PAGE_V2_ENABLED } from '../../common/feature_flags';
 import { useFlowBreadcrumb } from './shared/use_flow_breadcrumbs';
 import { useManagedOtlpServiceAvailability } from './shared/use_managed_otlp_service_availability';
@@ -92,8 +92,8 @@ export function ObservabilityOnboardingFlow() {
         <Route path="/otel-kubernetes">
           <OtelKubernetesPage />
         </Route>
-        <Route key="aws-redirect" exact path="/aws">
-          <AwsIntegrationRedirect />
+        <Route key="cloudwatch-redirect" exact path="/cloudwatch">
+          <CloudwatchIntegrationRedirect />
         </Route>
         <Route path="/otel-logs">
           <OtelLogsPage />

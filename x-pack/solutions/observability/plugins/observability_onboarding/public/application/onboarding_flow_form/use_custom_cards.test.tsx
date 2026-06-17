@@ -94,7 +94,9 @@ describe('useCustomCards', () => {
       </MemoryRouter>
     );
 
-    expect(screen.getByTestId('card-url-otel-kubernetes')).toHaveTextContent(/^\/otel-kubernetes\/?$/);
+    expect(screen.getByTestId('card-url-otel-kubernetes')).toHaveTextContent(
+      /^\/otel-kubernetes\/?$/
+    );
   });
 
   it('exposes the AWS CloudWatch OTel quickstart card with expected metadata', () => {
@@ -114,9 +116,13 @@ describe('useCustomCards', () => {
       'Amazon CloudWatch'
     );
     expect(screen.getByTestId('card-description-aws-cloudwatch-otel-virtual')).toHaveTextContent(
-      'Collect CloudWatch metrics and logs with the Elastic Distro for OpenTelemetry'
+      'Collect CloudWatch metrics with the Elastic Distro for OpenTelemetry'
     );
-    expect(screen.getByTestId('card-icon-aws-cloudwatch-otel-virtual')).toHaveTextContent('logoAWS');
-    expect(screen.getByTestId('card-url-aws-cloudwatch-otel-virtual')).toHaveTextContent(/^\/aws$/);
+    expect(screen.getByTestId('card-icon-aws-cloudwatch-otel-virtual')).toHaveTextContent(
+      'logoAWS'
+    );
+    expect(screen.getByTestId('card-url-aws-cloudwatch-otel-virtual')).toHaveTextContent(
+      /^\/cloudwatch$/
+    );
   });
 });
