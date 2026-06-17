@@ -1418,6 +1418,8 @@ x-pack/platform/test/serverless/api_integration/test_suites/platform_security @e
 # Saved object fixtures
 /packages/kbn-check-saved-objects-cli/src/migrations/__fixtures__/action @elastic/response-ops
 /packages/kbn-check-saved-objects-cli/src/migrations/__fixtures__/alert @elastic/response-ops
+/packages/kbn-check-saved-objects-cli/src/migrations/__fixtures__/alerting_action_policy @elastic/rna-project-team
+/packages/kbn-check-saved-objects-cli/src/migrations/__fixtures__/alerting_rule @elastic/rna-project-team
 /packages/kbn-check-saved-objects-cli/src/migrations/__fixtures__/alerting_rule_template @elastic/response-ops
 /packages/kbn-check-saved-objects-cli/src/migrations/__fixtures__/api_key_pending_invalidation @elastic/response-ops
 /packages/kbn-check-saved-objects-cli/src/migrations/__fixtures__/api_key_to_invalidate @elastic/response-ops
