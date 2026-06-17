@@ -26,7 +26,6 @@ import { getAgentVersionInfo } from '../../lib/get_agent_version';
 import { createManagedOtlpServiceApiKey } from '../../lib/api_key/create_managed_otlp_service_api_key';
 import { getManagedOtlpServiceUrl } from '../../lib/get_managed_otlp_service_url';
 import { IS_MANAGED_OTLP_SERVICE_ENABLED } from '../../../common/feature_flags';
-import { normalizeKubernetesElasticsearchUrl } from './normalize_kubernetes_elasticsearch_url';
 
 export interface CreateKubernetesOnboardingFlowRouteResponse {
   apiKeyEncoded: string;
@@ -114,10 +113,7 @@ const createKubernetesOnboardingFlowRoute = createObservabilityOnboardingServerR
     return {
       onboardingId: uuidv4(),
       apiKeyEncoded,
-      elasticsearchUrl:
-        elasticsearchUrlList.length > 0
-          ? normalizeKubernetesElasticsearchUrl(elasticsearchUrlList[0])
-          : '',
+      elasticsearchUrl: elasticsearchUrlList.length > 0 ? elasticsearchUrlList[0] : '',
       elasticAgentVersionInfo,
       managedOtlpServiceUrl: getManagedOtlpServiceUrl(plugins),
     };
