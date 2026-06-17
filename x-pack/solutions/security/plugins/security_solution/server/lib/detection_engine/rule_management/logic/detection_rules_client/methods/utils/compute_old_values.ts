@@ -6,7 +6,7 @@
  */
 
 import { isEqual, isPlainObject } from 'lodash';
-import type { RuleResponse } from '../../../../../../common/api/detection_engine/model/rule_schema';
+import type { RuleResponse } from '../../../../../../../../common/api/detection_engine/model/rule_schema';
 
 /**
  * Compute `old_values` for a rule history item: the RFC 7396 merge patch
@@ -14,19 +14,21 @@ import type { RuleResponse } from '../../../../../../common/api/detection_engine
  * when there is no predecessor (creation event) and an empty object when
  * `current` and `previous` are deep-equal.
  */
-export const computeOldValues = (
+export function computeOldValues(
   current: RuleResponse,
   previous: RuleResponse | undefined
-): Record<string, unknown> | null => {
+): Record<string, unknown> | null {
   if (previous === undefined) {
     return null;
   }
   const patch = mergePatchFromTo(current, previous);
+
   if (patch === undefined) {
     return {};
   }
+
   return patch as Record<string, unknown>;
-};
+}
 
 /**
  * Compute an RFC 7396 JSON Merge Patch describing how to transform `current`
@@ -43,7 +45,7 @@ export const computeOldValues = (
  *  - Arrays and primitives are compared as whole values; if they differ, the
  *    `previous` value is emitted under the key.
  */
-const mergePatchFromTo = (current: unknown, previous: unknown): unknown | undefined => {
+function mergePatchFromTo(current: unknown, previous: unknown): unknown | undefined {
   if (Object.is(current, previous)) {
     return undefined;
   }
@@ -64,6 +66,7 @@ const mergePatchFromTo = (current: unknown, previous: unknown): unknown | undefi
         patch[key] = previousObject[key];
       } else {
         const sub = mergePatchFromTo(currentObject[key], previousObject[key]);
+
         if (sub !== undefined) {
           patch[key] = sub;
         }
@@ -73,6 +76,7 @@ const mergePatchFromTo = (current: unknown, previous: unknown): unknown | undefi
     if (Object.keys(patch).length === 0) {
       return undefined;
     }
+
     return patch;
   }
 
@@ -80,8 +84,9 @@ const mergePatchFromTo = (current: unknown, previous: unknown): unknown | undefi
     if (isEqual(current, previous)) {
       return undefined;
     }
+
     return previous;
   }
 
   return previous;
-};
+}

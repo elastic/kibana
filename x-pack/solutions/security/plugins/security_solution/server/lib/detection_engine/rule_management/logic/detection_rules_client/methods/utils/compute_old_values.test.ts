@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { RuleResponse } from '../../../../../../common/api/detection_engine/model/rule_schema';
+import type { RuleResponse } from '../../../../../../../../common/api/detection_engine/model/rule_schema';
 import { computeOldValues } from './compute_old_values';
 
 describe('computeOldValues', () => {

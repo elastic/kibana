@@ -11,7 +11,7 @@ import type {
   RuleChangesHistoryResponse,
   RuleHistoryItem,
 } from '../../../../../../../common/api/detection_engine/rule_management';
-import { mapRuleHistoryItem } from '../../history/map_rule_history_item';
+import { mapRuleHistoryItem } from './utils/map_rule_history_item';
 
 const DEFAULT_PAGE = 1;
 const DEFAULT_PER_PAGE = 20;
