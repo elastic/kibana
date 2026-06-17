@@ -20,6 +20,7 @@ import {
   Append,
   Attachment,
   Bytes,
+  Cef,
   Circle,
   CommunityId,
   Convert,
@@ -174,6 +175,24 @@ export const mapProcessorTypeToDescriptor = () => {
       getDefaultDescription: ({ field }) =>
         i18n.translate('xpack.ingestPipelines.processors.defaultDescription.bytes', {
           defaultMessage: 'Converts "{field}" to its value in bytes',
+          values: {
+            field,
+          },
+        }),
+    },
+    cef: {
+      category: processorCategories.DATA_TRANSFORMATION,
+      FieldsComponent: Cef,
+      docLinkPath: docLinks.links.ingest.cef,
+      label: i18n.translate('xpack.ingestPipelines.processors.label.cef', {
+        defaultMessage: 'CEF',
+      }),
+      typeDescription: i18n.translate('xpack.ingestPipelines.processors.description.cef', {
+        defaultMessage: 'Extracts fields from Common Event Format (CEF) message document.',
+      }),
+      getDefaultDescription: ({ field }) =>
+        i18n.translate('xpack.ingestPipelines.processors.defaultDescription.cef', {
+          defaultMessage: 'Extracts the CEF message from "{field}"',
           values: {
             field,
           },

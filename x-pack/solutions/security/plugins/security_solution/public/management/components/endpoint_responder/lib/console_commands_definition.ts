@@ -15,7 +15,7 @@ import type { SupportedHostOsType } from '../../../../../common/endpoint/constan
 import type { EndpointCommandDefinitionMeta } from '../types';
 import type { CustomScriptSelectorState } from '../../console_argument_selectors/custom_scripts_selector/custom_script_selector';
 import { CustomScriptSelector } from '../../console_argument_selectors/custom_scripts_selector/custom_script_selector';
-import { PendingActionsSelector } from '../../console_argument_selectors/pending_actions_selector/pending_actions_selector';
+import { CancelablePendingActionsSelector } from '../../console_argument_selectors/cancelable_pending_actions_selector/cancelable_pending_actions_selector';
 import type {
   EndpointRunScriptActionParameters,
   SentinelOneRunScriptActionParameters,
@@ -663,11 +663,12 @@ export const getEndpointConsoleCommands = ({
 
   if (microsoftDefenderEndpointCancelEnabled || responseActionsEndpointCancel) {
     const isSupported = canCancelForCurrentContext();
+
     consoleCommands.push({
       name: 'cancel',
       about: getCommandAboutInfo({
         aboutInfo: CONSOLE_COMMANDS.cancel.about,
-        isSupported,
+        isSupported: isSupported && doesEndpointSupportCommand('cancel'),
       }),
       RenderComponent: CancelActionResult,
       meta: commandMeta,
@@ -678,33 +679,41 @@ export const getEndpointConsoleCommands = ({
       ),
       mustHaveArgs: true,
       args: {
-        ...(isSupported
+        action: {
+          required: true,
+          allowMultiples: false,
+          about: i18n.translate(
+            'xpack.securitySolution.endpointConsoleCommands.cancel.action.about',
+            {
+              defaultMessage:
+                'The response action to cancel (selected from a popup that displays the list of pending actions for this host that can be canceled).',
+            }
+          ),
+          mustHaveValue: 'truthy',
+          SelectorComponent: CancelablePendingActionsSelector,
+        },
+        ...(agentType === 'endpoint'
           ? {
-              action: {
-                required: true,
+              force: {
+                required: false,
                 allowMultiples: false,
                 about: i18n.translate(
-                  'xpack.securitySolution.endpointConsoleCommands.cancel.action.about',
+                  'xpack.securitySolution.endpointConsoleCommands.cancel.force.about',
                   {
-                    defaultMessage: 'The response action to cancel',
+                    defaultMessage:
+                      'Forcefully cancel the action, even if it is already in progress.',
                   }
                 ),
-                mustHaveValue: 'truthy',
-                SelectorComponent: PendingActionsSelector,
+                mustHaveValue: false,
               },
             }
           : {}),
-        comment: {
-          required: false,
-          allowMultiples: false,
-          mustHaveValue: 'non-empty-string',
-          about: COMMENT_ARG_ABOUT,
-        },
+        ...commandCommentArgument(),
       },
       helpGroupLabel: HELP_GROUPS.responseActions.label,
       helpGroupPosition: HELP_GROUPS.responseActions.position,
       helpCommandPosition: 10,
-      helpDisabled: !isSupported,
+      helpDisabled: !isSupported || !doesEndpointSupportCommand('cancel'),
       helpHidden: !isSupported,
       validate: capabilitiesAndPrivilegesValidator(agentType),
     });

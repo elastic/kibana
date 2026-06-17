@@ -12,7 +12,6 @@ import type { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const dashboardAddPanel = getService('dashboardAddPanel');
-  const esArchiver = getService('esArchiver');
   const filterBar = getService('filterBar');
   const find = getService('find');
   const kibanaServer = getService('kibanaServer');
@@ -27,12 +26,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('Save Discover session to dashboard', () => {
     before(async () => {
-      await esArchiver.loadIfNeeded(
-        'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
-      );
-      await esArchiver.loadIfNeeded(
-        'src/platform/test/functional/fixtures/es_archiver/dashboard/current/data'
-      );
       await kibanaServer.savedObjects.cleanStandardList();
       await kibanaServer.importExport.load(
         'src/platform/test/functional/fixtures/kbn_archiver/dashboard/current/kibana'

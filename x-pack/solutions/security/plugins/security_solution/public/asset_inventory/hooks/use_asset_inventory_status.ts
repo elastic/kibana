@@ -84,7 +84,7 @@ export const useAssetInventoryStatus = () => {
   const isAssetInventoryEnabled = useUiSetting<boolean>(
     SECURITY_SOLUTION_ENABLE_ASSET_INVENTORY_SETTING
   );
-  const isEntityStoreV2UiSettingEnabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2, false);
+  const isEntityStoreV2UiSettingEnabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2);
   const isEntityStoreV2ExperimentalEnabled = useIsExperimentalFeatureEnabled(
     'entityAnalyticsEntityStoreV2'
   );

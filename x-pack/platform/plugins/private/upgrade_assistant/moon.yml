@@ -47,6 +47,7 @@ dependsOn:
   - '@kbn/upgrade-assistant-pkg-common'
   - '@kbn/reindex-service-plugin'
   - '@kbn/core-doc-links-browser-mocks'
+  - '@kbn/scout'
 tags:
   - plugin
   - prod
@@ -59,6 +60,8 @@ fileGroups:
     - common/**/*
     - public/**/*
     - server/**/*
+    - test/scout/**/*
+    - test/scout_upgrade_assistant_integration/**/*
     - public/**/*.json
     - server/**/*.json
     - '!target/**/*'

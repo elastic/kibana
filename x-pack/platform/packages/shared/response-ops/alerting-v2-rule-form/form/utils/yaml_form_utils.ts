@@ -7,16 +7,13 @@
 
 import { i18n } from '@kbn/i18n';
 import { dump, load } from 'js-yaml';
-import type { FormValues, RecoveryPolicy, StateTransition } from '../types';
+import type { FormValues, StateTransition } from '../types';
 import {
   deriveAlertDelayModeFromStateTransition,
   deriveRecoveryDelayModeFromStateTransition,
 } from './rule_request_mappers';
 
-export interface YamlParseResult {
-  values: FormValues | null;
-  error: string | null;
-}
+export type YamlParseResult = { values: FormValues; error: null } | { values: null; error: string };
 
 const parseArtifacts = (artifacts: unknown): FormValues['artifacts'] => {
   if (!Array.isArray(artifacts)) return undefined;
@@ -44,9 +41,9 @@ interface YamlStateTransition {
   recovering_timeframe?: string;
 }
 
-interface YamlRecoveryPolicy {
-  type: string;
-  query?: { base: string };
+interface YamlQuery {
+  format: 'standalone';
+  breach: { query: string };
 }
 
 interface YamlRuleObject {
@@ -54,12 +51,25 @@ interface YamlRuleObject {
   metadata: { name: string; description?: string; owner?: string; tags?: string[] };
   time_field: string;
   schedule: { every: string; lookback: string };
-  evaluation: { query: { base: string } };
+  query: YamlQuery;
   grouping?: { fields: string[] };
   state_transition?: YamlStateTransition;
-  recovery_policy?: YamlRecoveryPolicy;
   artifacts?: Array<{ id: string; type: string; value: string }>;
 }
+
+/**
+ * Lenient extractor for the YAML `query.breach` field. Accepts the canonical
+ * nested object (`{ query: '…' }`) as well as legacy/handwritten strings so
+ * that pasting an older payload doesn't blow up the parser.
+ */
+const extractBreachQuery = (value: unknown): string => {
+  if (typeof value === 'string') return value;
+  if (value && typeof value === 'object' && !Array.isArray(value)) {
+    const { query } = value as { query?: unknown };
+    if (typeof query === 'string') return query;
+  }
+  return '';
+};
 
 const serializeStateTransition = (st?: StateTransition): YamlStateTransition | undefined => {
   if (!st) return undefined;
@@ -69,15 +79,6 @@ const serializeStateTransition = (st?: StateTransition): YamlStateTransition | u
   if (st.recoveringCount != null) out.recovering_count = st.recoveringCount;
   if (st.recoveringTimeframe != null) out.recovering_timeframe = st.recoveringTimeframe;
   return Object.keys(out).length ? out : undefined;
-};
-
-const serializeRecoveryPolicy = (rp?: RecoveryPolicy): YamlRecoveryPolicy | undefined => {
-  if (!rp) return undefined;
-  const out: YamlRecoveryPolicy = { type: rp.type };
-  if (rp.type === 'query' && rp.query?.base) {
-    out.query = { base: rp.query.base };
-  }
-  return out;
 };
 
 /**
@@ -91,7 +92,6 @@ const serializeRecoveryPolicy = (rp?: RecoveryPolicy): YamlRecoveryPolicy | unde
  */
 export const formValuesToYamlObject = (values: FormValues): YamlRuleObject => {
   const st = serializeStateTransition(values.stateTransition);
-  const rp = serializeRecoveryPolicy(values.recoveryPolicy);
 
   return {
     kind: values.kind,
@@ -106,14 +106,12 @@ export const formValuesToYamlObject = (values: FormValues): YamlRuleObject => {
       every: values.schedule.every,
       lookback: values.schedule.lookback,
     },
-    evaluation: {
-      query: {
-        base: values.evaluation.query.base,
-      },
+    query: {
+      format: 'standalone',
+      breach: { query: values.query.breach },
     },
     ...(values.grouping?.fields?.length && { grouping: { fields: values.grouping.fields } }),
     ...(st && { state_transition: st }),
-    ...(rp && { recovery_policy: rp }),
     ...(values.artifacts?.length && { artifacts: values.artifacts }),
   };
 };
@@ -151,8 +149,7 @@ export const parseYamlToFormValues = (yamlString: string): YamlParseResult => {
   const obj = parsed as Record<string, unknown>;
   const metadata = obj.metadata as Record<string, unknown> | undefined;
   const schedule = obj.schedule as Record<string, unknown> | undefined;
-  const evaluation = obj.evaluation as Record<string, unknown> | undefined;
-  const evalQuery = evaluation?.query as Record<string, unknown> | undefined;
+  const queryObj = obj.query as Record<string, unknown> | undefined;
   const grouping = obj.grouping as Record<string, unknown> | undefined;
   const artifacts = parseArtifacts(obj.artifacts);
   const stateTransitionObj = obj.state_transition as Record<string, unknown> | undefined;
@@ -177,28 +174,6 @@ export const parseYamlToFormValues = (yamlString: string): YamlParseResult => {
       }
     : undefined;
 
-  const recoveryPolicyObj = obj.recovery_policy as Record<string, unknown> | undefined;
-  const recoveryPolicy: RecoveryPolicy | undefined = recoveryPolicyObj
-    ? {
-        type:
-          recoveryPolicyObj.type === 'query' || recoveryPolicyObj.type === 'no_breach'
-            ? recoveryPolicyObj.type
-            : 'no_breach',
-        ...(recoveryPolicyObj.type === 'query' &&
-        recoveryPolicyObj.query &&
-        typeof recoveryPolicyObj.query === 'object'
-          ? {
-              query: {
-                base:
-                  typeof (recoveryPolicyObj.query as Record<string, unknown>).base === 'string'
-                    ? ((recoveryPolicyObj.query as Record<string, unknown>).base as string)
-                    : undefined,
-              },
-            }
-          : {}),
-      }
-    : undefined;
-
   // Validate kind
   const kind = obj.kind;
   if (kind !== undefined && kind !== 'alert' && kind !== 'signal') {
@@ -211,7 +186,6 @@ export const parseYamlToFormValues = (yamlString: string): YamlParseResult => {
   }
 
   const name = metadata?.name;
-  const queryBase = evalQuery?.base;
 
   return {
     values: {
@@ -228,16 +202,13 @@ export const parseYamlToFormValues = (yamlString: string): YamlParseResult => {
         every: typeof schedule?.every === 'string' ? schedule.every : '5m',
         lookback: typeof schedule?.lookback === 'string' ? schedule.lookback : '1m',
       },
-      evaluation: {
-        query: {
-          base: typeof queryBase === 'string' ? queryBase : '',
-        },
+      query: {
+        breach: extractBreachQuery(queryObj?.breach),
       },
       grouping: Array.isArray(grouping?.fields)
         ? { fields: grouping.fields as string[] }
         : undefined,
       artifacts,
-      recoveryPolicy: recoveryPolicy ?? { type: 'no_breach' },
       stateTransition,
       stateTransitionAlertDelayMode: deriveAlertDelayModeFromStateTransition(stateTransition),
       stateTransitionRecoveryDelayMode: deriveRecoveryDelayModeFromStateTransition(stateTransition),

@@ -1,31 +1,42 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`ACCESSES_INTEGRATION_RELATIONSHIP_CONFIGS golden snapshots aws_cloudtrail: targets-per-actor ES|QL is locked 1`] = `
+exports[
+  `ACCESSES_INTEGRATION_RELATIONSHIP_CONFIGS golden snapshots aws_cloudtrail: targets-per-actor ES|QL is locked 1`
+] = `
 "SET unmapped_fields=\\"nullify\\";
 FROM logs-aws.cloudtrail-__namespace__
 | WHERE event.module == \\"aws\\"
     AND event.action IN (\\"StartSession\\", \\"SendSSHPublicKey\\")
     AND event.outcome == \\"success\\"
-    AND ((\`event.outcome\` IS NULL OR COALESCE(\`event.outcome\` != \\"failure\\", TRUE)) AND (NOT(\`user.email\` IS NULL) AND COALESCE(\`user.email\` != \\"\\", TRUE) OR NOT(\`user.id\` IS NULL) AND COALESCE(\`user.id\` != \\"\\", TRUE) OR NOT(\`user.name\` IS NULL) AND COALESCE(\`user.name\` != \\"\\", TRUE)))
-    AND (NOT(\`host.id\` IS NULL) AND COALESCE(\`host.id\` != \\"\\", TRUE) OR NOT(\`host.name\` IS NULL) AND COALESCE(\`host.name\` != \\"\\", TRUE) OR NOT(\`host.hostname\` IS NULL) AND COALESCE(\`host.hostname\` != \\"\\", TRUE))
-| EVAL _src_entity_source0 = MV_FIRST(event.module),
- _src_entity_source1 = MV_FIRST(event.dataset),
- _src_entity_source2 = MV_FIRST(data_stream.dataset),
+    AND ((TO_STRING(event.outcome) IS NULL OR TO_STRING(event.outcome) != \\"failure\\") AND (TO_STRING(user.email) IS NOT NULL AND TO_STRING(user.email) != \\"\\" OR TO_STRING(user.id) IS NOT NULL AND TO_STRING(user.id) != \\"\\" OR TO_STRING(user.name) IS NOT NULL AND TO_STRING(user.name) != \\"\\"))
+    AND (TO_STRING(host.id) IS NOT NULL AND TO_STRING(host.id) != \\"\\" OR TO_STRING(host.name) IS NOT NULL AND TO_STRING(host.name) != \\"\\" OR TO_STRING(host.hostname) IS NOT NULL AND TO_STRING(host.hostname) != \\"\\")
+| EVAL _src_entity_source0 = MV_FIRST(TO_STRING(event.module)),
+ _src_entity_source1 = MV_FIRST(TO_STRING(event.dataset)),
+ _src_entity_source2 = MV_FIRST(TO_STRING(data_stream.dataset)),
  _src_entity_source = CASE((_src_entity_source0 IS NOT NULL AND _src_entity_source0 != \\"\\"), _src_entity_source0, (_src_entity_source1 IS NOT NULL AND _src_entity_source1 != \\"\\"), _src_entity_source1, (_src_entity_source2 IS NOT NULL AND _src_entity_source2 != \\"\\"), _src_entity_source2, NULL),
- entity.source = CASE((_src_entity_source IS NULL OR _src_entity_source == \\"\\"), NULL, _src_entity_source),
- _src_entity_namespace0 = MV_FIRST(event.module),
- _src_entity_namespace1 = MV_FIRST(SPLIT(MV_FIRST(data_stream.dataset), \\".\\")),
+ entity.source = CASE((_src_entity_source IS NULL OR _src_entity_source == \\"\\"), NULL, _src_entity_source)
+| EVAL _src_entity_namespace0 = MV_FIRST(TO_STRING(event.module)),
+ _src_entity_namespace1 = MV_FIRST(SPLIT(MV_FIRST(TO_STRING(data_stream.dataset)), \\".\\")),
  _src_entity_namespace = CASE((_src_entity_namespace0 IS NOT NULL AND _src_entity_namespace0 != \\"\\"), _src_entity_namespace0, (_src_entity_namespace1 IS NOT NULL AND _src_entity_namespace1 != \\"\\"), _src_entity_namespace1, NULL),
- entity.namespace = CASE((NOT(\`user.name\` IS NULL) AND COALESCE(\`user.name\` != \\"\\", TRUE) AND NOT(\`host.id\` IS NULL) AND COALESCE(\`host.id\` != \\"\\", TRUE) AND NOT (COALESCE(\`user.name\` == \\"root\\", FALSE) OR COALESCE(\`user.name\` == \\"bin\\", FALSE) OR COALESCE(\`user.name\` == \\"daemon\\", FALSE) OR COALESCE(\`user.name\` == \\"sys\\", FALSE) OR COALESCE(\`user.name\` == \\"nobody\\", FALSE) OR COALESCE(\`user.name\` == \\"jenkins\\", FALSE) OR COALESCE(\`user.name\` == \\"ansible\\", FALSE) OR COALESCE(\`user.name\` == \\"deploy\\", FALSE) OR COALESCE(\`user.name\` == \\"terraform\\", FALSE) OR COALESCE(\`user.name\` == \\"gitlab-runner\\", FALSE) OR COALESCE(\`user.name\` == \\"postgres\\", FALSE) OR COALESCE(\`user.name\` == \\"mysql\\", FALSE) OR COALESCE(\`user.name\` == \\"redis\\", FALSE) OR COALESCE(\`user.name\` == \\"elasticsearch\\", FALSE) OR COALESCE(\`user.name\` == \\"kafka\\", FALSE) OR COALESCE(\`user.name\` == \\"admin\\", FALSE) OR COALESCE(\`user.name\` == \\"operator\\", FALSE) OR COALESCE(\`user.name\` == \\"service\\", FALSE)) AND (COALESCE(MV_CONTAINS(\`event.kind\`, \\"asset\\"), FALSE) OR NOT (COALESCE(MV_CONTAINS(\`event.kind\`, \\"asset\\"), FALSE) OR (COALESCE(\`event.kind\` != \\"enrichment\\", TRUE) OR \`event.kind\` IS NULL) AND COALESCE(MV_CONTAINS(\`event.category\`, \\"iam\\"), FALSE) AND (COALESCE(MV_CONTAINS(\`event.type\`, \\"user\\"), FALSE) OR COALESCE(MV_CONTAINS(\`event.type\`, \\"creation\\"), FALSE) OR COALESCE(MV_CONTAINS(\`event.type\`, \\"deletion\\"), FALSE) OR COALESCE(MV_CONTAINS(\`event.type\`, \\"group\\"), FALSE))))), \\"local\\", (_src_entity_namespace == \\"okta\\" OR _src_entity_namespace == \\"entityanalytics_okta\\"), \\"okta\\", (_src_entity_namespace == \\"azure\\" OR _src_entity_namespace == \\"entityanalytics_entra_id\\"), \\"entra_id\\", (_src_entity_namespace == \\"o365\\" OR _src_entity_namespace == \\"o365_metrics\\"), \\"microsoft_365\\", (_src_entity_namespace == \\"entityanalytics_ad\\"), \\"active_directory\\", (_src_entity_namespace IS NULL OR _src_entity_namespace == \\"\\"), \\"unknown\\", _src_entity_namespace)
-| EVAL actorUserId = CONCAT(\\"user:\\", CASE((COALESCE(\`entity.namespace\` == \\"local\\", FALSE)), CASE((user.name IS NOT NULL AND user.name != \\"\\" AND host.id IS NOT NULL AND host.id != \\"\\" AND entity.namespace IS NOT NULL AND entity.namespace != \\"\\"), CONCAT(user.name, \\"@\\", host.id, \\"@\\", entity.namespace), NULL),
-true, CASE((user.email IS NOT NULL AND user.email != \\"\\" AND entity.namespace IS NOT NULL AND entity.namespace != \\"\\"), CONCAT(user.email, \\"@\\", entity.namespace),
-(user.id IS NOT NULL AND user.id != \\"\\" AND entity.namespace IS NOT NULL AND entity.namespace != \\"\\"), CONCAT(user.id, \\"@\\", entity.namespace),
-(user.name IS NOT NULL AND user.name != \\"\\" AND user.domain IS NOT NULL AND user.domain != \\"\\" AND entity.namespace IS NOT NULL AND entity.namespace != \\"\\"), CONCAT(user.name, \\"@\\", user.domain, \\"@\\", entity.namespace),
-(user.name IS NOT NULL AND user.name != \\"\\" AND entity.namespace IS NOT NULL AND entity.namespace != \\"\\"), CONCAT(user.name, \\"@\\", entity.namespace), NULL), NULL))
+ entity.namespace = CASE((TO_STRING(user.name) IS NOT NULL AND TO_STRING(user.name) != \\"\\" AND TO_STRING(host.id) IS NOT NULL AND TO_STRING(host.id) != \\"\\" AND NOT (TO_STRING(user.name) IN (\\"root\\", \\"bin\\", \\"daemon\\", \\"sys\\", \\"nobody\\", \\"jenkins\\", \\"ansible\\", \\"deploy\\", \\"terraform\\", \\"gitlab-runner\\", \\"postgres\\", \\"mysql\\", \\"redis\\", \\"elasticsearch\\", \\"kafka\\", \\"admin\\", \\"operator\\", \\"service\\")) AND (MV_CONTAINS(TO_STRING(event.kind), \\"asset\\") OR NOT (MV_CONTAINS(TO_STRING(event.kind), \\"asset\\") OR (TO_STRING(event.kind) != \\"enrichment\\" OR TO_STRING(event.kind) IS NULL) AND MV_CONTAINS(TO_STRING(event.category), \\"iam\\") AND (MV_CONTAINS(TO_STRING(event.type), \\"user\\") OR MV_CONTAINS(TO_STRING(event.type), \\"creation\\") OR MV_CONTAINS(TO_STRING(event.type), \\"deletion\\") OR MV_CONTAINS(TO_STRING(event.type), \\"group\\"))))), \\"local\\", (_src_entity_namespace == \\"okta\\" OR _src_entity_namespace == \\"entityanalytics_okta\\"), \\"okta\\", (_src_entity_namespace == \\"azure\\" OR _src_entity_namespace == \\"entityanalytics_entra_id\\"), \\"entra_id\\", (_src_entity_namespace == \\"o365\\" OR _src_entity_namespace == \\"o365_metrics\\"), \\"microsoft_365\\", (_src_entity_namespace == \\"entityanalytics_ad\\"), \\"active_directory\\", (_src_entity_namespace IS NULL OR _src_entity_namespace == \\"\\"), \\"unknown\\", _src_entity_namespace),
+ user_name_present = TO_STRING(user.name) IS NOT NULL AND TO_STRING(user.name) != \\"\\",
+ host_id_present = TO_STRING(host.id) IS NOT NULL AND TO_STRING(host.id) != \\"\\",
+ entity_namespace_present = TO_STRING(entity.namespace) IS NOT NULL AND TO_STRING(entity.namespace) != \\"\\",
+ user_email_present = TO_STRING(user.email) IS NOT NULL AND TO_STRING(user.email) != \\"\\",
+ user_id_present = TO_STRING(user.id) IS NOT NULL AND TO_STRING(user.id) != \\"\\",
+ user_domain_present = TO_STRING(user.domain) IS NOT NULL AND TO_STRING(user.domain) != \\"\\",
+ actorUserId = CONCAT(\\"user:\\", CASE((TO_STRING(entity.namespace) == \\"local\\"), CASE((user_name_present AND host_id_present AND entity_namespace_present), CONCAT(TO_STRING(user.name), \\"@\\", TO_STRING(host.id), \\"@\\", TO_STRING(entity.namespace)), NULL),
+true, CASE((user_email_present AND entity_namespace_present), CONCAT(TO_STRING(user.email), \\"@\\", TO_STRING(entity.namespace)),
+(user_id_present AND entity_namespace_present), CONCAT(TO_STRING(user.id), \\"@\\", TO_STRING(entity.namespace)),
+(user_name_present AND user_domain_present AND entity_namespace_present), CONCAT(TO_STRING(user.name), \\"@\\", TO_STRING(user.domain), \\"@\\", TO_STRING(entity.namespace)),
+(user_name_present AND entity_namespace_present), CONCAT(TO_STRING(user.name), \\"@\\", TO_STRING(entity.namespace)), NULL), NULL))
 | WHERE COALESCE(actorUserId, \\"\\") != \\"\\"
-| EVAL targetEntityId = CONCAT(\\"host:\\", CASE((host.id IS NOT NULL AND host.id != \\"\\"), host.id,
-(host.name IS NOT NULL AND host.name != \\"\\"), host.name,
-(host.hostname IS NOT NULL AND host.hostname != \\"\\"), host.hostname, NULL))
+| EVAL host_id_present = TO_STRING(host.id) IS NOT NULL AND TO_STRING(host.id) != \\"\\",
+ host_name_present = TO_STRING(host.name) IS NOT NULL AND TO_STRING(host.name) != \\"\\",
+ host_hostname_present = TO_STRING(host.hostname) IS NOT NULL AND TO_STRING(host.hostname) != \\"\\",
+ targetEntityId = CONCAT(\\"host:\\", CASE((host_id_present), TO_STRING(host.id),
+(host_name_present), TO_STRING(host.name),
+(host_hostname_present), TO_STRING(host.hostname), NULL))
 | MV_EXPAND targetEntityId
 | WHERE COALESCE(targetEntityId, \\"\\") != \\"\\"
 | STATS access_count = COUNT(*) BY actorUserId, targetEntityId
@@ -41,32 +52,43 @@ true, CASE((user.email IS NOT NULL AND user.email != \\"\\" AND entity.namespace
 | LIMIT 3500"
 `;
 
-exports[`ACCESSES_INTEGRATION_RELATIONSHIP_CONFIGS golden snapshots elastic_defend: targets-per-actor ES|QL is locked 1`] = `
+exports[
+  `ACCESSES_INTEGRATION_RELATIONSHIP_CONFIGS golden snapshots elastic_defend: targets-per-actor ES|QL is locked 1`
+] = `
 "SET unmapped_fields=\\"nullify\\";
 FROM logs-endpoint.events.security-__namespace__
 | WHERE event.action == \\"log_on\\"
     AND process.Ext.session_info.logon_type IN (\\"RemoteInteractive\\", \\"Interactive\\", \\"Network\\")
     AND event.outcome == \\"success\\"
-    AND ((\`event.outcome\` IS NULL OR COALESCE(\`event.outcome\` != \\"failure\\", TRUE)) AND (NOT(\`user.email\` IS NULL) AND COALESCE(\`user.email\` != \\"\\", TRUE) OR NOT(\`user.id\` IS NULL) AND COALESCE(\`user.id\` != \\"\\", TRUE) OR NOT(\`user.name\` IS NULL) AND COALESCE(\`user.name\` != \\"\\", TRUE)))
-    AND (NOT(\`host.id\` IS NULL) AND COALESCE(\`host.id\` != \\"\\", TRUE) OR NOT(\`host.name\` IS NULL) AND COALESCE(\`host.name\` != \\"\\", TRUE) OR NOT(\`host.hostname\` IS NULL) AND COALESCE(\`host.hostname\` != \\"\\", TRUE))
-| EVAL _src_entity_source0 = MV_FIRST(event.module),
- _src_entity_source1 = MV_FIRST(event.dataset),
- _src_entity_source2 = MV_FIRST(data_stream.dataset),
+    AND ((TO_STRING(event.outcome) IS NULL OR TO_STRING(event.outcome) != \\"failure\\") AND (TO_STRING(user.email) IS NOT NULL AND TO_STRING(user.email) != \\"\\" OR TO_STRING(user.id) IS NOT NULL AND TO_STRING(user.id) != \\"\\" OR TO_STRING(user.name) IS NOT NULL AND TO_STRING(user.name) != \\"\\"))
+    AND (TO_STRING(host.id) IS NOT NULL AND TO_STRING(host.id) != \\"\\" OR TO_STRING(host.name) IS NOT NULL AND TO_STRING(host.name) != \\"\\" OR TO_STRING(host.hostname) IS NOT NULL AND TO_STRING(host.hostname) != \\"\\")
+| EVAL _src_entity_source0 = MV_FIRST(TO_STRING(event.module)),
+ _src_entity_source1 = MV_FIRST(TO_STRING(event.dataset)),
+ _src_entity_source2 = MV_FIRST(TO_STRING(data_stream.dataset)),
  _src_entity_source = CASE((_src_entity_source0 IS NOT NULL AND _src_entity_source0 != \\"\\"), _src_entity_source0, (_src_entity_source1 IS NOT NULL AND _src_entity_source1 != \\"\\"), _src_entity_source1, (_src_entity_source2 IS NOT NULL AND _src_entity_source2 != \\"\\"), _src_entity_source2, NULL),
- entity.source = CASE((_src_entity_source IS NULL OR _src_entity_source == \\"\\"), NULL, _src_entity_source),
- _src_entity_namespace0 = MV_FIRST(event.module),
- _src_entity_namespace1 = MV_FIRST(SPLIT(MV_FIRST(data_stream.dataset), \\".\\")),
+ entity.source = CASE((_src_entity_source IS NULL OR _src_entity_source == \\"\\"), NULL, _src_entity_source)
+| EVAL _src_entity_namespace0 = MV_FIRST(TO_STRING(event.module)),
+ _src_entity_namespace1 = MV_FIRST(SPLIT(MV_FIRST(TO_STRING(data_stream.dataset)), \\".\\")),
  _src_entity_namespace = CASE((_src_entity_namespace0 IS NOT NULL AND _src_entity_namespace0 != \\"\\"), _src_entity_namespace0, (_src_entity_namespace1 IS NOT NULL AND _src_entity_namespace1 != \\"\\"), _src_entity_namespace1, NULL),
- entity.namespace = CASE((NOT(\`user.name\` IS NULL) AND COALESCE(\`user.name\` != \\"\\", TRUE) AND NOT(\`host.id\` IS NULL) AND COALESCE(\`host.id\` != \\"\\", TRUE) AND NOT (COALESCE(\`user.name\` == \\"root\\", FALSE) OR COALESCE(\`user.name\` == \\"bin\\", FALSE) OR COALESCE(\`user.name\` == \\"daemon\\", FALSE) OR COALESCE(\`user.name\` == \\"sys\\", FALSE) OR COALESCE(\`user.name\` == \\"nobody\\", FALSE) OR COALESCE(\`user.name\` == \\"jenkins\\", FALSE) OR COALESCE(\`user.name\` == \\"ansible\\", FALSE) OR COALESCE(\`user.name\` == \\"deploy\\", FALSE) OR COALESCE(\`user.name\` == \\"terraform\\", FALSE) OR COALESCE(\`user.name\` == \\"gitlab-runner\\", FALSE) OR COALESCE(\`user.name\` == \\"postgres\\", FALSE) OR COALESCE(\`user.name\` == \\"mysql\\", FALSE) OR COALESCE(\`user.name\` == \\"redis\\", FALSE) OR COALESCE(\`user.name\` == \\"elasticsearch\\", FALSE) OR COALESCE(\`user.name\` == \\"kafka\\", FALSE) OR COALESCE(\`user.name\` == \\"admin\\", FALSE) OR COALESCE(\`user.name\` == \\"operator\\", FALSE) OR COALESCE(\`user.name\` == \\"service\\", FALSE)) AND (COALESCE(MV_CONTAINS(\`event.kind\`, \\"asset\\"), FALSE) OR NOT (COALESCE(MV_CONTAINS(\`event.kind\`, \\"asset\\"), FALSE) OR (COALESCE(\`event.kind\` != \\"enrichment\\", TRUE) OR \`event.kind\` IS NULL) AND COALESCE(MV_CONTAINS(\`event.category\`, \\"iam\\"), FALSE) AND (COALESCE(MV_CONTAINS(\`event.type\`, \\"user\\"), FALSE) OR COALESCE(MV_CONTAINS(\`event.type\`, \\"creation\\"), FALSE) OR COALESCE(MV_CONTAINS(\`event.type\`, \\"deletion\\"), FALSE) OR COALESCE(MV_CONTAINS(\`event.type\`, \\"group\\"), FALSE))))), \\"local\\", (_src_entity_namespace == \\"okta\\" OR _src_entity_namespace == \\"entityanalytics_okta\\"), \\"okta\\", (_src_entity_namespace == \\"azure\\" OR _src_entity_namespace == \\"entityanalytics_entra_id\\"), \\"entra_id\\", (_src_entity_namespace == \\"o365\\" OR _src_entity_namespace == \\"o365_metrics\\"), \\"microsoft_365\\", (_src_entity_namespace == \\"entityanalytics_ad\\"), \\"active_directory\\", (_src_entity_namespace IS NULL OR _src_entity_namespace == \\"\\"), \\"unknown\\", _src_entity_namespace)
-| EVAL actorUserId = CONCAT(\\"user:\\", CASE((COALESCE(\`entity.namespace\` == \\"local\\", FALSE)), CASE((user.name IS NOT NULL AND user.name != \\"\\" AND host.id IS NOT NULL AND host.id != \\"\\" AND entity.namespace IS NOT NULL AND entity.namespace != \\"\\"), CONCAT(user.name, \\"@\\", host.id, \\"@\\", entity.namespace), NULL),
-true, CASE((user.email IS NOT NULL AND user.email != \\"\\" AND entity.namespace IS NOT NULL AND entity.namespace != \\"\\"), CONCAT(user.email, \\"@\\", entity.namespace),
-(user.id IS NOT NULL AND user.id != \\"\\" AND entity.namespace IS NOT NULL AND entity.namespace != \\"\\"), CONCAT(user.id, \\"@\\", entity.namespace),
-(user.name IS NOT NULL AND user.name != \\"\\" AND user.domain IS NOT NULL AND user.domain != \\"\\" AND entity.namespace IS NOT NULL AND entity.namespace != \\"\\"), CONCAT(user.name, \\"@\\", user.domain, \\"@\\", entity.namespace),
-(user.name IS NOT NULL AND user.name != \\"\\" AND entity.namespace IS NOT NULL AND entity.namespace != \\"\\"), CONCAT(user.name, \\"@\\", entity.namespace), NULL), NULL))
+ entity.namespace = CASE((TO_STRING(user.name) IS NOT NULL AND TO_STRING(user.name) != \\"\\" AND TO_STRING(host.id) IS NOT NULL AND TO_STRING(host.id) != \\"\\" AND NOT (TO_STRING(user.name) IN (\\"root\\", \\"bin\\", \\"daemon\\", \\"sys\\", \\"nobody\\", \\"jenkins\\", \\"ansible\\", \\"deploy\\", \\"terraform\\", \\"gitlab-runner\\", \\"postgres\\", \\"mysql\\", \\"redis\\", \\"elasticsearch\\", \\"kafka\\", \\"admin\\", \\"operator\\", \\"service\\")) AND (MV_CONTAINS(TO_STRING(event.kind), \\"asset\\") OR NOT (MV_CONTAINS(TO_STRING(event.kind), \\"asset\\") OR (TO_STRING(event.kind) != \\"enrichment\\" OR TO_STRING(event.kind) IS NULL) AND MV_CONTAINS(TO_STRING(event.category), \\"iam\\") AND (MV_CONTAINS(TO_STRING(event.type), \\"user\\") OR MV_CONTAINS(TO_STRING(event.type), \\"creation\\") OR MV_CONTAINS(TO_STRING(event.type), \\"deletion\\") OR MV_CONTAINS(TO_STRING(event.type), \\"group\\"))))), \\"local\\", (_src_entity_namespace == \\"okta\\" OR _src_entity_namespace == \\"entityanalytics_okta\\"), \\"okta\\", (_src_entity_namespace == \\"azure\\" OR _src_entity_namespace == \\"entityanalytics_entra_id\\"), \\"entra_id\\", (_src_entity_namespace == \\"o365\\" OR _src_entity_namespace == \\"o365_metrics\\"), \\"microsoft_365\\", (_src_entity_namespace == \\"entityanalytics_ad\\"), \\"active_directory\\", (_src_entity_namespace IS NULL OR _src_entity_namespace == \\"\\"), \\"unknown\\", _src_entity_namespace),
+ user_name_present = TO_STRING(user.name) IS NOT NULL AND TO_STRING(user.name) != \\"\\",
+ host_id_present = TO_STRING(host.id) IS NOT NULL AND TO_STRING(host.id) != \\"\\",
+ entity_namespace_present = TO_STRING(entity.namespace) IS NOT NULL AND TO_STRING(entity.namespace) != \\"\\",
+ user_email_present = TO_STRING(user.email) IS NOT NULL AND TO_STRING(user.email) != \\"\\",
+ user_id_present = TO_STRING(user.id) IS NOT NULL AND TO_STRING(user.id) != \\"\\",
+ user_domain_present = TO_STRING(user.domain) IS NOT NULL AND TO_STRING(user.domain) != \\"\\",
+ actorUserId = CONCAT(\\"user:\\", CASE((TO_STRING(entity.namespace) == \\"local\\"), CASE((user_name_present AND host_id_present AND entity_namespace_present), CONCAT(TO_STRING(user.name), \\"@\\", TO_STRING(host.id), \\"@\\", TO_STRING(entity.namespace)), NULL),
+true, CASE((user_email_present AND entity_namespace_present), CONCAT(TO_STRING(user.email), \\"@\\", TO_STRING(entity.namespace)),
+(user_id_present AND entity_namespace_present), CONCAT(TO_STRING(user.id), \\"@\\", TO_STRING(entity.namespace)),
+(user_name_present AND user_domain_present AND entity_namespace_present), CONCAT(TO_STRING(user.name), \\"@\\", TO_STRING(user.domain), \\"@\\", TO_STRING(entity.namespace)),
+(user_name_present AND entity_namespace_present), CONCAT(TO_STRING(user.name), \\"@\\", TO_STRING(entity.namespace)), NULL), NULL))
 | WHERE COALESCE(actorUserId, \\"\\") != \\"\\"
-| EVAL targetEntityId = CONCAT(\\"host:\\", CASE((host.id IS NOT NULL AND host.id != \\"\\"), host.id,
-(host.name IS NOT NULL AND host.name != \\"\\"), host.name,
-(host.hostname IS NOT NULL AND host.hostname != \\"\\"), host.hostname, NULL))
+| EVAL host_id_present = TO_STRING(host.id) IS NOT NULL AND TO_STRING(host.id) != \\"\\",
+ host_name_present = TO_STRING(host.name) IS NOT NULL AND TO_STRING(host.name) != \\"\\",
+ host_hostname_present = TO_STRING(host.hostname) IS NOT NULL AND TO_STRING(host.hostname) != \\"\\",
+ targetEntityId = CONCAT(\\"host:\\", CASE((host_id_present), TO_STRING(host.id),
+(host_name_present), TO_STRING(host.name),
+(host_hostname_present), TO_STRING(host.hostname), NULL))
 | MV_EXPAND targetEntityId
 | WHERE COALESCE(targetEntityId, \\"\\") != \\"\\"
 | STATS access_count = COUNT(*) BY actorUserId, targetEntityId
@@ -82,32 +104,43 @@ true, CASE((user.email IS NOT NULL AND user.email != \\"\\" AND entity.namespace
 | LIMIT 3500"
 `;
 
-exports[`ACCESSES_INTEGRATION_RELATIONSHIP_CONFIGS golden snapshots system_auth: targets-per-actor ES|QL is locked 1`] = `
+exports[
+  `ACCESSES_INTEGRATION_RELATIONSHIP_CONFIGS golden snapshots system_auth: targets-per-actor ES|QL is locked 1`
+] = `
 "SET unmapped_fields=\\"nullify\\";
 FROM logs-system.auth-__namespace__
 | WHERE event.category IN (\\"authentication\\", \\"session\\")
     AND event.action == \\"ssh_login\\"
     AND event.outcome == \\"success\\"
-    AND ((\`event.outcome\` IS NULL OR COALESCE(\`event.outcome\` != \\"failure\\", TRUE)) AND (NOT(\`user.email\` IS NULL) AND COALESCE(\`user.email\` != \\"\\", TRUE) OR NOT(\`user.id\` IS NULL) AND COALESCE(\`user.id\` != \\"\\", TRUE) OR NOT(\`user.name\` IS NULL) AND COALESCE(\`user.name\` != \\"\\", TRUE)))
-    AND (NOT(\`host.id\` IS NULL) AND COALESCE(\`host.id\` != \\"\\", TRUE) OR NOT(\`host.name\` IS NULL) AND COALESCE(\`host.name\` != \\"\\", TRUE) OR NOT(\`host.hostname\` IS NULL) AND COALESCE(\`host.hostname\` != \\"\\", TRUE))
-| EVAL _src_entity_source0 = MV_FIRST(event.module),
- _src_entity_source1 = MV_FIRST(event.dataset),
- _src_entity_source2 = MV_FIRST(data_stream.dataset),
+    AND ((TO_STRING(event.outcome) IS NULL OR TO_STRING(event.outcome) != \\"failure\\") AND (TO_STRING(user.email) IS NOT NULL AND TO_STRING(user.email) != \\"\\" OR TO_STRING(user.id) IS NOT NULL AND TO_STRING(user.id) != \\"\\" OR TO_STRING(user.name) IS NOT NULL AND TO_STRING(user.name) != \\"\\"))
+    AND (TO_STRING(host.id) IS NOT NULL AND TO_STRING(host.id) != \\"\\" OR TO_STRING(host.name) IS NOT NULL AND TO_STRING(host.name) != \\"\\" OR TO_STRING(host.hostname) IS NOT NULL AND TO_STRING(host.hostname) != \\"\\")
+| EVAL _src_entity_source0 = MV_FIRST(TO_STRING(event.module)),
+ _src_entity_source1 = MV_FIRST(TO_STRING(event.dataset)),
+ _src_entity_source2 = MV_FIRST(TO_STRING(data_stream.dataset)),
  _src_entity_source = CASE((_src_entity_source0 IS NOT NULL AND _src_entity_source0 != \\"\\"), _src_entity_source0, (_src_entity_source1 IS NOT NULL AND _src_entity_source1 != \\"\\"), _src_entity_source1, (_src_entity_source2 IS NOT NULL AND _src_entity_source2 != \\"\\"), _src_entity_source2, NULL),
- entity.source = CASE((_src_entity_source IS NULL OR _src_entity_source == \\"\\"), NULL, _src_entity_source),
- _src_entity_namespace0 = MV_FIRST(event.module),
- _src_entity_namespace1 = MV_FIRST(SPLIT(MV_FIRST(data_stream.dataset), \\".\\")),
+ entity.source = CASE((_src_entity_source IS NULL OR _src_entity_source == \\"\\"), NULL, _src_entity_source)
+| EVAL _src_entity_namespace0 = MV_FIRST(TO_STRING(event.module)),
+ _src_entity_namespace1 = MV_FIRST(SPLIT(MV_FIRST(TO_STRING(data_stream.dataset)), \\".\\")),
  _src_entity_namespace = CASE((_src_entity_namespace0 IS NOT NULL AND _src_entity_namespace0 != \\"\\"), _src_entity_namespace0, (_src_entity_namespace1 IS NOT NULL AND _src_entity_namespace1 != \\"\\"), _src_entity_namespace1, NULL),
- entity.namespace = CASE((NOT(\`user.name\` IS NULL) AND COALESCE(\`user.name\` != \\"\\", TRUE) AND NOT(\`host.id\` IS NULL) AND COALESCE(\`host.id\` != \\"\\", TRUE) AND NOT (COALESCE(\`user.name\` == \\"root\\", FALSE) OR COALESCE(\`user.name\` == \\"bin\\", FALSE) OR COALESCE(\`user.name\` == \\"daemon\\", FALSE) OR COALESCE(\`user.name\` == \\"sys\\", FALSE) OR COALESCE(\`user.name\` == \\"nobody\\", FALSE) OR COALESCE(\`user.name\` == \\"jenkins\\", FALSE) OR COALESCE(\`user.name\` == \\"ansible\\", FALSE) OR COALESCE(\`user.name\` == \\"deploy\\", FALSE) OR COALESCE(\`user.name\` == \\"terraform\\", FALSE) OR COALESCE(\`user.name\` == \\"gitlab-runner\\", FALSE) OR COALESCE(\`user.name\` == \\"postgres\\", FALSE) OR COALESCE(\`user.name\` == \\"mysql\\", FALSE) OR COALESCE(\`user.name\` == \\"redis\\", FALSE) OR COALESCE(\`user.name\` == \\"elasticsearch\\", FALSE) OR COALESCE(\`user.name\` == \\"kafka\\", FALSE) OR COALESCE(\`user.name\` == \\"admin\\", FALSE) OR COALESCE(\`user.name\` == \\"operator\\", FALSE) OR COALESCE(\`user.name\` == \\"service\\", FALSE)) AND (COALESCE(MV_CONTAINS(\`event.kind\`, \\"asset\\"), FALSE) OR NOT (COALESCE(MV_CONTAINS(\`event.kind\`, \\"asset\\"), FALSE) OR (COALESCE(\`event.kind\` != \\"enrichment\\", TRUE) OR \`event.kind\` IS NULL) AND COALESCE(MV_CONTAINS(\`event.category\`, \\"iam\\"), FALSE) AND (COALESCE(MV_CONTAINS(\`event.type\`, \\"user\\"), FALSE) OR COALESCE(MV_CONTAINS(\`event.type\`, \\"creation\\"), FALSE) OR COALESCE(MV_CONTAINS(\`event.type\`, \\"deletion\\"), FALSE) OR COALESCE(MV_CONTAINS(\`event.type\`, \\"group\\"), FALSE))))), \\"local\\", (_src_entity_namespace == \\"okta\\" OR _src_entity_namespace == \\"entityanalytics_okta\\"), \\"okta\\", (_src_entity_namespace == \\"azure\\" OR _src_entity_namespace == \\"entityanalytics_entra_id\\"), \\"entra_id\\", (_src_entity_namespace == \\"o365\\" OR _src_entity_namespace == \\"o365_metrics\\"), \\"microsoft_365\\", (_src_entity_namespace == \\"entityanalytics_ad\\"), \\"active_directory\\", (_src_entity_namespace IS NULL OR _src_entity_namespace == \\"\\"), \\"unknown\\", _src_entity_namespace)
-| EVAL actorUserId = CONCAT(\\"user:\\", CASE((COALESCE(\`entity.namespace\` == \\"local\\", FALSE)), CASE((user.name IS NOT NULL AND user.name != \\"\\" AND host.id IS NOT NULL AND host.id != \\"\\" AND entity.namespace IS NOT NULL AND entity.namespace != \\"\\"), CONCAT(user.name, \\"@\\", host.id, \\"@\\", entity.namespace), NULL),
-true, CASE((user.email IS NOT NULL AND user.email != \\"\\" AND entity.namespace IS NOT NULL AND entity.namespace != \\"\\"), CONCAT(user.email, \\"@\\", entity.namespace),
-(user.id IS NOT NULL AND user.id != \\"\\" AND entity.namespace IS NOT NULL AND entity.namespace != \\"\\"), CONCAT(user.id, \\"@\\", entity.namespace),
-(user.name IS NOT NULL AND user.name != \\"\\" AND user.domain IS NOT NULL AND user.domain != \\"\\" AND entity.namespace IS NOT NULL AND entity.namespace != \\"\\"), CONCAT(user.name, \\"@\\", user.domain, \\"@\\", entity.namespace),
-(user.name IS NOT NULL AND user.name != \\"\\" AND entity.namespace IS NOT NULL AND entity.namespace != \\"\\"), CONCAT(user.name, \\"@\\", entity.namespace), NULL), NULL))
+ entity.namespace = CASE((TO_STRING(user.name) IS NOT NULL AND TO_STRING(user.name) != \\"\\" AND TO_STRING(host.id) IS NOT NULL AND TO_STRING(host.id) != \\"\\" AND NOT (TO_STRING(user.name) IN (\\"root\\", \\"bin\\", \\"daemon\\", \\"sys\\", \\"nobody\\", \\"jenkins\\", \\"ansible\\", \\"deploy\\", \\"terraform\\", \\"gitlab-runner\\", \\"postgres\\", \\"mysql\\", \\"redis\\", \\"elasticsearch\\", \\"kafka\\", \\"admin\\", \\"operator\\", \\"service\\")) AND (MV_CONTAINS(TO_STRING(event.kind), \\"asset\\") OR NOT (MV_CONTAINS(TO_STRING(event.kind), \\"asset\\") OR (TO_STRING(event.kind) != \\"enrichment\\" OR TO_STRING(event.kind) IS NULL) AND MV_CONTAINS(TO_STRING(event.category), \\"iam\\") AND (MV_CONTAINS(TO_STRING(event.type), \\"user\\") OR MV_CONTAINS(TO_STRING(event.type), \\"creation\\") OR MV_CONTAINS(TO_STRING(event.type), \\"deletion\\") OR MV_CONTAINS(TO_STRING(event.type), \\"group\\"))))), \\"local\\", (_src_entity_namespace == \\"okta\\" OR _src_entity_namespace == \\"entityanalytics_okta\\"), \\"okta\\", (_src_entity_namespace == \\"azure\\" OR _src_entity_namespace == \\"entityanalytics_entra_id\\"), \\"entra_id\\", (_src_entity_namespace == \\"o365\\" OR _src_entity_namespace == \\"o365_metrics\\"), \\"microsoft_365\\", (_src_entity_namespace == \\"entityanalytics_ad\\"), \\"active_directory\\", (_src_entity_namespace IS NULL OR _src_entity_namespace == \\"\\"), \\"unknown\\", _src_entity_namespace),
+ user_name_present = TO_STRING(user.name) IS NOT NULL AND TO_STRING(user.name) != \\"\\",
+ host_id_present = TO_STRING(host.id) IS NOT NULL AND TO_STRING(host.id) != \\"\\",
+ entity_namespace_present = TO_STRING(entity.namespace) IS NOT NULL AND TO_STRING(entity.namespace) != \\"\\",
+ user_email_present = TO_STRING(user.email) IS NOT NULL AND TO_STRING(user.email) != \\"\\",
+ user_id_present = TO_STRING(user.id) IS NOT NULL AND TO_STRING(user.id) != \\"\\",
+ user_domain_present = TO_STRING(user.domain) IS NOT NULL AND TO_STRING(user.domain) != \\"\\",
+ actorUserId = CONCAT(\\"user:\\", CASE((TO_STRING(entity.namespace) == \\"local\\"), CASE((user_name_present AND host_id_present AND entity_namespace_present), CONCAT(TO_STRING(user.name), \\"@\\", TO_STRING(host.id), \\"@\\", TO_STRING(entity.namespace)), NULL),
+true, CASE((user_email_present AND entity_namespace_present), CONCAT(TO_STRING(user.email), \\"@\\", TO_STRING(entity.namespace)),
+(user_id_present AND entity_namespace_present), CONCAT(TO_STRING(user.id), \\"@\\", TO_STRING(entity.namespace)),
+(user_name_present AND user_domain_present AND entity_namespace_present), CONCAT(TO_STRING(user.name), \\"@\\", TO_STRING(user.domain), \\"@\\", TO_STRING(entity.namespace)),
+(user_name_present AND entity_namespace_present), CONCAT(TO_STRING(user.name), \\"@\\", TO_STRING(entity.namespace)), NULL), NULL))
 | WHERE COALESCE(actorUserId, \\"\\") != \\"\\"
-| EVAL targetEntityId = CONCAT(\\"host:\\", CASE((host.id IS NOT NULL AND host.id != \\"\\"), host.id,
-(host.name IS NOT NULL AND host.name != \\"\\"), host.name,
-(host.hostname IS NOT NULL AND host.hostname != \\"\\"), host.hostname, NULL))
+| EVAL host_id_present = TO_STRING(host.id) IS NOT NULL AND TO_STRING(host.id) != \\"\\",
+ host_name_present = TO_STRING(host.name) IS NOT NULL AND TO_STRING(host.name) != \\"\\",
+ host_hostname_present = TO_STRING(host.hostname) IS NOT NULL AND TO_STRING(host.hostname) != \\"\\",
+ targetEntityId = CONCAT(\\"host:\\", CASE((host_id_present), TO_STRING(host.id),
+(host_name_present), TO_STRING(host.name),
+(host_hostname_present), TO_STRING(host.hostname), NULL))
 | MV_EXPAND targetEntityId
 | WHERE COALESCE(targetEntityId, \\"\\") != \\"\\"
 | STATS access_count = COUNT(*) BY actorUserId, targetEntityId
@@ -123,7 +156,9 @@ true, CASE((user.email IS NOT NULL AND user.email != \\"\\" AND entity.namespace
 | LIMIT 3500"
 `;
 
-exports[`ACCESSES_INTEGRATION_RELATIONSHIP_CONFIGS golden snapshots system_security: targets-per-actor ES|QL is locked 1`] = `
+exports[
+  `ACCESSES_INTEGRATION_RELATIONSHIP_CONFIGS golden snapshots system_security: targets-per-actor ES|QL is locked 1`
+] = `
 "SET unmapped_fields=\\"nullify\\";
 FROM logs-system.security-__namespace__
 | WHERE event.action IN (\\"logged-in\\", \\"logged-in-explicit\\")
@@ -131,26 +166,35 @@ FROM logs-system.security-__namespace__
     AND winlog.logon.type IN (\\"Interactive\\", \\"RemoteInteractive\\", \\"CachedInteractive\\")
     AND event.outcome == \\"success\\"
     AND NOT user.name IN (\\"SYSTEM\\", \\"LOCAL SERVICE\\", \\"NETWORK SERVICE\\", \\"ANONYMOUS LOGON\\")
-    AND ((\`event.outcome\` IS NULL OR COALESCE(\`event.outcome\` != \\"failure\\", TRUE)) AND (NOT(\`user.email\` IS NULL) AND COALESCE(\`user.email\` != \\"\\", TRUE) OR NOT(\`user.id\` IS NULL) AND COALESCE(\`user.id\` != \\"\\", TRUE) OR NOT(\`user.name\` IS NULL) AND COALESCE(\`user.name\` != \\"\\", TRUE)))
-    AND (NOT(\`host.id\` IS NULL) AND COALESCE(\`host.id\` != \\"\\", TRUE) OR NOT(\`host.name\` IS NULL) AND COALESCE(\`host.name\` != \\"\\", TRUE) OR NOT(\`host.hostname\` IS NULL) AND COALESCE(\`host.hostname\` != \\"\\", TRUE))
-| EVAL _src_entity_source0 = MV_FIRST(event.module),
- _src_entity_source1 = MV_FIRST(event.dataset),
- _src_entity_source2 = MV_FIRST(data_stream.dataset),
+    AND ((TO_STRING(event.outcome) IS NULL OR TO_STRING(event.outcome) != \\"failure\\") AND (TO_STRING(user.email) IS NOT NULL AND TO_STRING(user.email) != \\"\\" OR TO_STRING(user.id) IS NOT NULL AND TO_STRING(user.id) != \\"\\" OR TO_STRING(user.name) IS NOT NULL AND TO_STRING(user.name) != \\"\\"))
+    AND (TO_STRING(host.id) IS NOT NULL AND TO_STRING(host.id) != \\"\\" OR TO_STRING(host.name) IS NOT NULL AND TO_STRING(host.name) != \\"\\" OR TO_STRING(host.hostname) IS NOT NULL AND TO_STRING(host.hostname) != \\"\\")
+| EVAL _src_entity_source0 = MV_FIRST(TO_STRING(event.module)),
+ _src_entity_source1 = MV_FIRST(TO_STRING(event.dataset)),
+ _src_entity_source2 = MV_FIRST(TO_STRING(data_stream.dataset)),
  _src_entity_source = CASE((_src_entity_source0 IS NOT NULL AND _src_entity_source0 != \\"\\"), _src_entity_source0, (_src_entity_source1 IS NOT NULL AND _src_entity_source1 != \\"\\"), _src_entity_source1, (_src_entity_source2 IS NOT NULL AND _src_entity_source2 != \\"\\"), _src_entity_source2, NULL),
- entity.source = CASE((_src_entity_source IS NULL OR _src_entity_source == \\"\\"), NULL, _src_entity_source),
- _src_entity_namespace0 = MV_FIRST(event.module),
- _src_entity_namespace1 = MV_FIRST(SPLIT(MV_FIRST(data_stream.dataset), \\".\\")),
+ entity.source = CASE((_src_entity_source IS NULL OR _src_entity_source == \\"\\"), NULL, _src_entity_source)
+| EVAL _src_entity_namespace0 = MV_FIRST(TO_STRING(event.module)),
+ _src_entity_namespace1 = MV_FIRST(SPLIT(MV_FIRST(TO_STRING(data_stream.dataset)), \\".\\")),
  _src_entity_namespace = CASE((_src_entity_namespace0 IS NOT NULL AND _src_entity_namespace0 != \\"\\"), _src_entity_namespace0, (_src_entity_namespace1 IS NOT NULL AND _src_entity_namespace1 != \\"\\"), _src_entity_namespace1, NULL),
- entity.namespace = CASE((NOT(\`user.name\` IS NULL) AND COALESCE(\`user.name\` != \\"\\", TRUE) AND NOT(\`host.id\` IS NULL) AND COALESCE(\`host.id\` != \\"\\", TRUE) AND NOT (COALESCE(\`user.name\` == \\"root\\", FALSE) OR COALESCE(\`user.name\` == \\"bin\\", FALSE) OR COALESCE(\`user.name\` == \\"daemon\\", FALSE) OR COALESCE(\`user.name\` == \\"sys\\", FALSE) OR COALESCE(\`user.name\` == \\"nobody\\", FALSE) OR COALESCE(\`user.name\` == \\"jenkins\\", FALSE) OR COALESCE(\`user.name\` == \\"ansible\\", FALSE) OR COALESCE(\`user.name\` == \\"deploy\\", FALSE) OR COALESCE(\`user.name\` == \\"terraform\\", FALSE) OR COALESCE(\`user.name\` == \\"gitlab-runner\\", FALSE) OR COALESCE(\`user.name\` == \\"postgres\\", FALSE) OR COALESCE(\`user.name\` == \\"mysql\\", FALSE) OR COALESCE(\`user.name\` == \\"redis\\", FALSE) OR COALESCE(\`user.name\` == \\"elasticsearch\\", FALSE) OR COALESCE(\`user.name\` == \\"kafka\\", FALSE) OR COALESCE(\`user.name\` == \\"admin\\", FALSE) OR COALESCE(\`user.name\` == \\"operator\\", FALSE) OR COALESCE(\`user.name\` == \\"service\\", FALSE)) AND (COALESCE(MV_CONTAINS(\`event.kind\`, \\"asset\\"), FALSE) OR NOT (COALESCE(MV_CONTAINS(\`event.kind\`, \\"asset\\"), FALSE) OR (COALESCE(\`event.kind\` != \\"enrichment\\", TRUE) OR \`event.kind\` IS NULL) AND COALESCE(MV_CONTAINS(\`event.category\`, \\"iam\\"), FALSE) AND (COALESCE(MV_CONTAINS(\`event.type\`, \\"user\\"), FALSE) OR COALESCE(MV_CONTAINS(\`event.type\`, \\"creation\\"), FALSE) OR COALESCE(MV_CONTAINS(\`event.type\`, \\"deletion\\"), FALSE) OR COALESCE(MV_CONTAINS(\`event.type\`, \\"group\\"), FALSE))))), \\"local\\", (_src_entity_namespace == \\"okta\\" OR _src_entity_namespace == \\"entityanalytics_okta\\"), \\"okta\\", (_src_entity_namespace == \\"azure\\" OR _src_entity_namespace == \\"entityanalytics_entra_id\\"), \\"entra_id\\", (_src_entity_namespace == \\"o365\\" OR _src_entity_namespace == \\"o365_metrics\\"), \\"microsoft_365\\", (_src_entity_namespace == \\"entityanalytics_ad\\"), \\"active_directory\\", (_src_entity_namespace IS NULL OR _src_entity_namespace == \\"\\"), \\"unknown\\", _src_entity_namespace)
-| EVAL actorUserId = CONCAT(\\"user:\\", CASE((COALESCE(\`entity.namespace\` == \\"local\\", FALSE)), CASE((user.name IS NOT NULL AND user.name != \\"\\" AND host.id IS NOT NULL AND host.id != \\"\\" AND entity.namespace IS NOT NULL AND entity.namespace != \\"\\"), CONCAT(user.name, \\"@\\", host.id, \\"@\\", entity.namespace), NULL),
-true, CASE((user.email IS NOT NULL AND user.email != \\"\\" AND entity.namespace IS NOT NULL AND entity.namespace != \\"\\"), CONCAT(user.email, \\"@\\", entity.namespace),
-(user.id IS NOT NULL AND user.id != \\"\\" AND entity.namespace IS NOT NULL AND entity.namespace != \\"\\"), CONCAT(user.id, \\"@\\", entity.namespace),
-(user.name IS NOT NULL AND user.name != \\"\\" AND user.domain IS NOT NULL AND user.domain != \\"\\" AND entity.namespace IS NOT NULL AND entity.namespace != \\"\\"), CONCAT(user.name, \\"@\\", user.domain, \\"@\\", entity.namespace),
-(user.name IS NOT NULL AND user.name != \\"\\" AND entity.namespace IS NOT NULL AND entity.namespace != \\"\\"), CONCAT(user.name, \\"@\\", entity.namespace), NULL), NULL))
+ entity.namespace = CASE((TO_STRING(user.name) IS NOT NULL AND TO_STRING(user.name) != \\"\\" AND TO_STRING(host.id) IS NOT NULL AND TO_STRING(host.id) != \\"\\" AND NOT (TO_STRING(user.name) IN (\\"root\\", \\"bin\\", \\"daemon\\", \\"sys\\", \\"nobody\\", \\"jenkins\\", \\"ansible\\", \\"deploy\\", \\"terraform\\", \\"gitlab-runner\\", \\"postgres\\", \\"mysql\\", \\"redis\\", \\"elasticsearch\\", \\"kafka\\", \\"admin\\", \\"operator\\", \\"service\\")) AND (MV_CONTAINS(TO_STRING(event.kind), \\"asset\\") OR NOT (MV_CONTAINS(TO_STRING(event.kind), \\"asset\\") OR (TO_STRING(event.kind) != \\"enrichment\\" OR TO_STRING(event.kind) IS NULL) AND MV_CONTAINS(TO_STRING(event.category), \\"iam\\") AND (MV_CONTAINS(TO_STRING(event.type), \\"user\\") OR MV_CONTAINS(TO_STRING(event.type), \\"creation\\") OR MV_CONTAINS(TO_STRING(event.type), \\"deletion\\") OR MV_CONTAINS(TO_STRING(event.type), \\"group\\"))))), \\"local\\", (_src_entity_namespace == \\"okta\\" OR _src_entity_namespace == \\"entityanalytics_okta\\"), \\"okta\\", (_src_entity_namespace == \\"azure\\" OR _src_entity_namespace == \\"entityanalytics_entra_id\\"), \\"entra_id\\", (_src_entity_namespace == \\"o365\\" OR _src_entity_namespace == \\"o365_metrics\\"), \\"microsoft_365\\", (_src_entity_namespace == \\"entityanalytics_ad\\"), \\"active_directory\\", (_src_entity_namespace IS NULL OR _src_entity_namespace == \\"\\"), \\"unknown\\", _src_entity_namespace),
+ user_name_present = TO_STRING(user.name) IS NOT NULL AND TO_STRING(user.name) != \\"\\",
+ host_id_present = TO_STRING(host.id) IS NOT NULL AND TO_STRING(host.id) != \\"\\",
+ entity_namespace_present = TO_STRING(entity.namespace) IS NOT NULL AND TO_STRING(entity.namespace) != \\"\\",
+ user_email_present = TO_STRING(user.email) IS NOT NULL AND TO_STRING(user.email) != \\"\\",
+ user_id_present = TO_STRING(user.id) IS NOT NULL AND TO_STRING(user.id) != \\"\\",
+ user_domain_present = TO_STRING(user.domain) IS NOT NULL AND TO_STRING(user.domain) != \\"\\",
+ actorUserId = CONCAT(\\"user:\\", CASE((TO_STRING(entity.namespace) == \\"local\\"), CASE((user_name_present AND host_id_present AND entity_namespace_present), CONCAT(TO_STRING(user.name), \\"@\\", TO_STRING(host.id), \\"@\\", TO_STRING(entity.namespace)), NULL),
+true, CASE((user_email_present AND entity_namespace_present), CONCAT(TO_STRING(user.email), \\"@\\", TO_STRING(entity.namespace)),
+(user_id_present AND entity_namespace_present), CONCAT(TO_STRING(user.id), \\"@\\", TO_STRING(entity.namespace)),
+(user_name_present AND user_domain_present AND entity_namespace_present), CONCAT(TO_STRING(user.name), \\"@\\", TO_STRING(user.domain), \\"@\\", TO_STRING(entity.namespace)),
+(user_name_present AND entity_namespace_present), CONCAT(TO_STRING(user.name), \\"@\\", TO_STRING(entity.namespace)), NULL), NULL))
 | WHERE COALESCE(actorUserId, \\"\\") != \\"\\"
-| EVAL targetEntityId = CONCAT(\\"host:\\", CASE((host.id IS NOT NULL AND host.id != \\"\\"), host.id,
-(host.name IS NOT NULL AND host.name != \\"\\"), host.name,
-(host.hostname IS NOT NULL AND host.hostname != \\"\\"), host.hostname, NULL))
+| EVAL host_id_present = TO_STRING(host.id) IS NOT NULL AND TO_STRING(host.id) != \\"\\",
+ host_name_present = TO_STRING(host.name) IS NOT NULL AND TO_STRING(host.name) != \\"\\",
+ host_hostname_present = TO_STRING(host.hostname) IS NOT NULL AND TO_STRING(host.hostname) != \\"\\",
+ targetEntityId = CONCAT(\\"host:\\", CASE((host_id_present), TO_STRING(host.id),
+(host_name_present), TO_STRING(host.name),
+(host_hostname_present), TO_STRING(host.hostname), NULL))
 | MV_EXPAND targetEntityId
 | WHERE COALESCE(targetEntityId, \\"\\") != \\"\\"
 | STATS access_count = COUNT(*) BY actorUserId, targetEntityId

@@ -6,7 +6,8 @@
       "node",
       "cheerio",
       "@kbn/ambient-ui-types",
-      "@kbn/ambient-ftr-types"
+      "@kbn/ambient-ftr-types",
+      "@kbn/core-user-settings-types"
     ],
     // there is still a decent amount of JS in this plugin and we are taking
     // advantage of the fact that TS doesn't know the types of that code and
@@ -124,7 +125,6 @@
     "@kbn/ml-category-validator",
     "@kbn/response-ops-alerts-filters-form",
     "@kbn/embeddable-alerts-table-plugin",
-    "@kbn/synthtrace-client",
     "@kbn/synthtrace",
     "@kbn/streams-schema",
     "@kbn/streams-plugin",
@@ -137,8 +137,6 @@
     "@kbn/data-visualizer-plugin",
     "@kbn/cloud-integration-saml-provider-plugin",
     "@kbn/ci-stats-reporter",
-    "@kbn/usage-collection-plugin",
-    "@kbn/core-deprecations-common",
     "@kbn/gen-ai-functional-testing",
     "@kbn/sse-utils-server",
     "@kbn/inference-common",
@@ -158,7 +156,6 @@
     "@kbn/core-saved-objects-import-export-server-internal",
     "@kbn/core-chrome-browser",
     "@kbn/licensing-types",
-    "@kbn/product-intercept-plugin",
     "@kbn/reindex-service-plugin",
     "@kbn/field-formats-common",
     "@kbn/reporting-test-routes",
@@ -178,5 +175,9 @@
     "@kbn/product-doc-common",
     "@kbn/alerting-v2-episodes-ui",
     "@kbn/inbox-common",
+    "@kbn/core-spaces-common",
+    "@kbn/deeplinks-analytics",
+    "@kbn/core-user-profile-common",
+    "@kbn/synthtrace-client",
   ]
 }

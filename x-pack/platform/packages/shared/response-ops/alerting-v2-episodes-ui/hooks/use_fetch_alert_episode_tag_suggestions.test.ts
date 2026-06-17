@@ -11,13 +11,14 @@ import {
   type AlertActionTagSuggestionRow,
   fetchAlertActionTagSuggestions,
 } from '../apis/fetch_alert_action_tag_suggestions';
-import { createQueryClientWrapper, createTestQueryClient } from './test_utils';
+import { createMockSpaces, createQueryClientWrapper, createTestQueryClient } from './test_utils';
 import { useFetchAlertEpisodeTagSuggestions } from './use_fetch_alert_episode_tag_suggestions';
 
 jest.mock('../apis/fetch_alert_action_tag_suggestions');
 
 const fetchAlertActionTagSuggestionsMock = jest.mocked(fetchAlertActionTagSuggestions);
 const mockExpressions = {} as ExpressionsStart;
+const mockSpaces = createMockSpaces();
 
 const queryClient = createTestQueryClient();
 const wrapper = createQueryClientWrapper(queryClient);
@@ -36,7 +37,7 @@ describe('useFetchAlertEpisodeTagSuggestions', () => {
       () =>
         useFetchAlertEpisodeTagSuggestions({
           enabled: false,
-          services: { expressions: mockExpressions },
+          services: { expressions: mockExpressions, spaces: mockSpaces },
         }),
       { wrapper }
     );
@@ -50,7 +51,7 @@ describe('useFetchAlertEpisodeTagSuggestions', () => {
     const { result } = renderHook(
       () =>
         useFetchAlertEpisodeTagSuggestions({
-          services: { expressions: mockExpressions },
+          services: { expressions: mockExpressions, spaces: mockSpaces },
         }),
       { wrapper }
     );
@@ -67,7 +68,7 @@ describe('useFetchAlertEpisodeTagSuggestions', () => {
     const { result } = renderHook(
       () =>
         useFetchAlertEpisodeTagSuggestions({
-          services: { expressions: mockExpressions },
+          services: { expressions: mockExpressions, spaces: mockSpaces },
         }),
       { wrapper }
     );
@@ -83,7 +84,7 @@ describe('useFetchAlertEpisodeTagSuggestions', () => {
     const { result } = renderHook(
       () =>
         useFetchAlertEpisodeTagSuggestions({
-          services: { expressions: mockExpressions },
+          services: { expressions: mockExpressions, spaces: mockSpaces },
         }),
       { wrapper }
     );

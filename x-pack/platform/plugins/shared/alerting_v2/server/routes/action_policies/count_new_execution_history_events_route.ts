@@ -12,13 +12,13 @@ import { injectable, inject } from 'inversify';
 import {
   countPolicyExecutionEventsQuerySchema,
   countPolicyExecutionEventsResponseSchema,
+  errorResponseSchema,
 } from '@kbn/alerting-v2-schemas';
 import { ActionPolicyExecutionHistoryClient } from '../../lib/action_policy_execution_history_client';
 import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
 import { BaseAlertingRoute } from '../base_alerting_route';
 import { AlertingRouteContext } from '../alerting_route_context';
 import { ALERTING_V2_ACTION_POLICY_EXECUTION_HISTORY_COUNT_API_PATH } from '../constants';
-import { buildRouteValidationWithZod } from '../route_validation';
 
 @injectable()
 export class CountNewExecutionHistoryEventsRoute extends BaseAlertingRoute {
@@ -26,9 +26,7 @@ export class CountNewExecutionHistoryEventsRoute extends BaseAlertingRoute {
   static path = ALERTING_V2_ACTION_POLICY_EXECUTION_HISTORY_COUNT_API_PATH;
   static security: RouteSecurity = {
     authz: {
-      // TODO(rna-program#461): swap for the dedicated execution-history feature
-      // privilege once it lands. Until then we gate by actionPolicies.read.
-      requiredPrivileges: [ALERTING_V2_API_PRIVILEGES.actionPolicies.read],
+      requiredPrivileges: [ALERTING_V2_API_PRIVILEGES.executionHistory.read],
     },
   };
   static routeOptions = {
@@ -36,14 +34,18 @@ export class CountNewExecutionHistoryEventsRoute extends BaseAlertingRoute {
     description:
       'Returns the count of dispatcher summary events with @timestamp greater than the given ISO timestamp.',
   } as const;
-  static validate = {
+  static schemas = {
     request: {
-      query: buildRouteValidationWithZod(countPolicyExecutionEventsQuerySchema),
+      query: countPolicyExecutionEventsQuerySchema,
     },
     response: {
       200: {
         body: () => countPolicyExecutionEventsResponseSchema,
-        description: 'Indicates a successful call.',
+        description: 'Returns the count of new execution history events.',
+      },
+      400: {
+        body: () => errorResponseSchema,
+        description: 'Indicates invalid query parameters.',
       },
     },
   };
@@ -65,11 +67,13 @@ export class CountNewExecutionHistoryEventsRoute extends BaseAlertingRoute {
   }
 
   protected async execute() {
-    const { since } = this.request.query;
+    const { since, search, outcome } = this.request.query;
 
     const result = await this.executionHistoryClient.countNewEventsSince({
       request: this.request,
       since,
+      search,
+      outcome,
     });
 
     return this.ctx.response.ok({ body: result });

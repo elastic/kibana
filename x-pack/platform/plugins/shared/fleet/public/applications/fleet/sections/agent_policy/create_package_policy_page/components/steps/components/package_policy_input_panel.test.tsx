@@ -765,7 +765,7 @@ describe('PackagePolicyInputPanel', () => {
       });
     });
 
-    it('should render title without toggle switch when isSingleInputAndStreams is true', async () => {
+    it('should render toggle switch when isSingleInputAndStreams is true', async () => {
       const simpleStreams: RegistryStreamWithDataStream[] = [
         {
           input: 'logfile',
@@ -819,11 +819,8 @@ describe('PackagePolicyInputPanel', () => {
       );
       await waitFor(() => {
         expect(
-          renderResult.getByTestId('PackagePolicy.InputStreamConfig.title')
+          renderResult.getByTestId('PackagePolicy.InputStreamConfig.Switch')
         ).toBeInTheDocument();
-        expect(
-          renderResult.queryByTestId('PackagePolicy.InputStreamConfig.Switch')
-        ).not.toBeInTheDocument();
       });
     });
 
@@ -1079,7 +1076,7 @@ describe('PackagePolicyInputPanel', () => {
       streams: [packagePolicyInput.streams[0]],
     } as NewPackagePolicyInput;
 
-    it('should render title without toggle switch when isSingleInputAndStreams is true', async () => {
+    it('should render toggle switch when isSingleInputAndStreams is true', async () => {
       renderResult = testRenderer.render(
         <PackagePolicyInputPanel
           packageInfo={mockPackageInfo}
@@ -1093,11 +1090,8 @@ describe('PackagePolicyInputPanel', () => {
       );
       await waitFor(() => {
         expect(
-          renderResult.getByTestId('PackagePolicy.InputStreamConfig.title')
+          renderResult.getByTestId('PackagePolicy.InputStreamConfig.Switch')
         ).toBeInTheDocument();
-        expect(
-          renderResult.queryByTestId('PackagePolicy.InputStreamConfig.Switch')
-        ).not.toBeInTheDocument();
       });
     });
 
@@ -1159,6 +1153,38 @@ describe('PackagePolicyInputPanel', () => {
       await waitFor(() => {
         expect(renderResult.getByText('Processors')).toBeInTheDocument();
       });
+    });
+
+    it('should show input config panel when single-stream but input has vars', async () => {
+      const inputWithVars: RegistryInput = {
+        ...mockPackageInput,
+        vars: [
+          {
+            name: 'api_key',
+            type: 'text',
+            title: 'API Key',
+            required: true,
+            show_user: true,
+          },
+        ],
+      };
+
+      renderResult = testRenderer.render(
+        <PackagePolicyInputPanel
+          packageInfo={mockPackageInfo}
+          packageInput={inputWithVars}
+          packageInputStreams={singleStream}
+          packagePolicyInput={singleStreamPolicyInput}
+          updatePackagePolicyInput={mockUpdatePackagePolicyInput}
+          inputValidationResults={inputValidationResults}
+          isSingleInputAndStreams={true}
+        />
+      );
+
+      await waitFor(() => {
+        expect(renderResult.getByText('API Key')).toBeInTheDocument();
+      });
+      expect(renderResult.getAllByText('Advanced options')).toHaveLength(2);
     });
   });
 
@@ -1522,6 +1548,109 @@ describe('PackagePolicyInputPanel', () => {
         // stays at the stream row - no need to hoist.
         expect(renderResult.getAllByTestId('streamOptions.switch').length).toBeGreaterThan(0);
       });
+    });
+  });
+
+  describe('condition field gating', () => {
+    const minimalStream: RegistryStreamWithDataStream = {
+      input: 'logfile',
+      title: 'Test stream',
+      template_path: 'stream.yml.hbs',
+      vars: [],
+      description: 'Test stream',
+      data_stream: {
+        title: 'Test',
+        release: 'ga',
+        type: 'logs',
+        package: 'test',
+        dataset: 'test.test',
+        path: 'test',
+        elasticsearch: {},
+        ingest_pipeline: 'default',
+        streams: [],
+      },
+    };
+    const minimalValidationResults = { streams: { 'test.test': { vars: {} } } };
+
+    const renderCondition = (
+      inputOverrides: Partial<NewPackagePolicyInput> = {},
+      panelProps: Partial<{ isAgentless: boolean }> = {}
+    ) => {
+      const policyInput: NewPackagePolicyInput = {
+        type: 'logfile',
+        enabled: true,
+        streams: [{ data_stream: { type: 'logs', dataset: 'test.test' }, enabled: true, vars: {} }],
+        ...inputOverrides,
+      };
+      renderResult = testRenderer.render(
+        <PackagePolicyInputPanel
+          packageInfo={mockPackageInfo}
+          packageInput={mockPackageInput}
+          packageInputStreams={[minimalStream]}
+          packagePolicyInput={policyInput}
+          updatePackagePolicyInput={mockUpdatePackagePolicyInput}
+          inputValidationResults={minimalValidationResults}
+          {...panelProps}
+        />
+      );
+    };
+
+    beforeEach(() => {
+      useAgentlessMock.mockReturnValue({
+        isAgentlessEnabled: false,
+        isAgentlessDefault: false,
+        isAgentlessAgentPolicy: jest.fn(),
+        getAgentlessStatusForPackage: jest
+          .fn()
+          .mockReturnValue({ isAgentless: false, isDefaultDeploymentMode: false }),
+        isServerless: false,
+        isCloud: false,
+      });
+    });
+
+    it('shows condition field in advanced options for non-agentless non-otelcol enabled input', async () => {
+      renderCondition();
+      fireEvent.click(renderResult.getByText('Advanced options'));
+      await waitFor(() => {
+        expect(renderResult.getByTestId('packagePolicyInputConditionInput')).toBeInTheDocument();
+      });
+    });
+
+    it('hides condition field when isAgentless is true', async () => {
+      renderCondition({}, { isAgentless: true });
+      expect(
+        renderResult.queryByTestId('packagePolicyInputConditionInput')
+      ).not.toBeInTheDocument();
+    });
+
+    it('hides condition field when input type is otelcol', async () => {
+      const otelStream = { ...minimalStream, input: OTEL_COLLECTOR_INPUT_TYPE };
+      renderResult = testRenderer.render(
+        <PackagePolicyInputPanel
+          packageInfo={mockPackageInfo}
+          packageInput={{ ...mockPackageInput, type: OTEL_COLLECTOR_INPUT_TYPE }}
+          packageInputStreams={[otelStream]}
+          packagePolicyInput={{
+            type: OTEL_COLLECTOR_INPUT_TYPE,
+            enabled: true,
+            streams: [
+              { data_stream: { type: 'logs', dataset: 'test.test' }, enabled: true, vars: {} },
+            ],
+          }}
+          updatePackagePolicyInput={mockUpdatePackagePolicyInput}
+          inputValidationResults={minimalValidationResults}
+        />
+      );
+      expect(
+        renderResult.queryByTestId('packagePolicyInputConditionInput')
+      ).not.toBeInTheDocument();
+    });
+
+    it('hides condition field when input is disabled', async () => {
+      renderCondition({ enabled: false });
+      expect(
+        renderResult.queryByTestId('packagePolicyInputConditionInput')
+      ).not.toBeInTheDocument();
     });
   });
 });

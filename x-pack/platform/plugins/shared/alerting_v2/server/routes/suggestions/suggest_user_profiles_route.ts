@@ -6,7 +6,7 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
+import { errorResponseSchema } from '@kbn/alerting-v2-schemas';
 import { PluginStart } from '@kbn/core-di';
 import { Request } from '@kbn/core-di-server';
 import type { KibanaRequest, RouteSecurity } from '@kbn/core-http-server';
@@ -65,11 +65,17 @@ export class SuggestUserProfilesRoute extends BaseAlertingRoute {
     summary: 'Suggest user profiles',
     description: 'Suggest user profiles for assignee search in alert episodes.',
   } as const;
-  static validate = {
+  static schemas = {
     request: {
-      body: buildRouteValidationWithZod(suggestUserProfilesBodySchema),
+      body: suggestUserProfilesBodySchema,
     },
-  } as const;
+    response: {
+      400: {
+        body: () => errorResponseSchema,
+        description: 'Indicates an invalid schema or parameters.',
+      },
+    },
+  };
 
   protected readonly routeName = 'suggest user profiles';
 

@@ -11,14 +11,15 @@ import React, { useCallback, useState } from 'react';
 import styled from 'styled-components';
 
 import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiSpacer,
   EuiButton,
   EuiButtonIcon,
-  EuiPopover,
-  EuiContextMenuPanel,
   EuiContextMenuItem,
+  EuiContextMenuPanel,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPopover,
+  EuiSpacer,
+  EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
 
@@ -80,6 +81,7 @@ export interface PackageListGridProps {
   // Security Solution sends the id to determine which element to scroll when the user interacting with the package list
   scrollElementId?: string;
   onlyAgentlessFilter?: boolean;
+  backgroundColor?: 'plain' | 'transparent';
 }
 
 export const PackageListGrid: FunctionComponent<PackageListGridProps> = ({
@@ -108,6 +110,7 @@ export const PackageListGrid: FunctionComponent<PackageListGridProps> = ({
   showSearchTools = true,
   spacer = true,
   scrollElementId,
+  backgroundColor,
 }) => {
   const euiTheme = useEuiTheme();
   const localSearch = useLocalSearch(list, !!isLoading);
@@ -214,7 +217,10 @@ export const PackageListGrid: FunctionComponent<PackageListGridProps> = ({
         data-test-subj="epmList.mainColumn"
         style={{
           position: 'relative',
-          backgroundColor: euiTheme.euiTheme.colors.backgroundBasePlain,
+          backgroundColor:
+            backgroundColor === 'transparent'
+              ? 'transparent'
+              : euiTheme.euiTheme.colors.backgroundBasePlain,
           alignSelf: 'stretch',
         }}
       >
@@ -277,13 +283,15 @@ export const PackageListGrid: FunctionComponent<PackageListGridProps> = ({
                   data-test-subj="epmList.showMoreSubCategoriesButton"
                   id="moreSubCategories"
                   button={
-                    <EuiButtonIcon
-                      display="base"
-                      onClick={onButtonClick}
-                      iconType="boxesVertical"
-                      aria-label="Show more subcategories"
-                      size="s"
-                    />
+                    <EuiToolTip content="Show more subcategories" disableScreenReaderOutput>
+                      <EuiButtonIcon
+                        display="base"
+                        onClick={onButtonClick}
+                        iconType="boxesVertical"
+                        aria-label="Show more subcategories"
+                        size="s"
+                      />
+                    </EuiToolTip>
                   }
                   isOpen={isPopoverOpen}
                   closePopover={closePopover}

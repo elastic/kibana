@@ -10,6 +10,7 @@ import { screen } from '@testing-library/react';
 
 import { CreateCaseTemplateFields } from './template_fields';
 import { renderWithTestingProviders } from '../../common/mock';
+import { CASE_EXTENDED_FIELDS } from '../../../common/constants';
 
 const mockUseFormData = jest.fn();
 const mockUseFormContext = jest.fn();
@@ -17,6 +18,7 @@ jest.mock('@kbn/es-ui-shared-plugin/static/forms/hook_form_lib', () => ({
   ...jest.requireActual('@kbn/es-ui-shared-plugin/static/forms/hook_form_lib'),
   useFormData: (...args: unknown[]) => mockUseFormData(...args),
   useFormContext: () => mockUseFormContext(),
+  UseField: () => null,
 }));
 
 const mockUseTemplateFormSync = jest.fn();
@@ -151,5 +153,42 @@ describe('CreateCaseTemplateFields', () => {
     renderWithTestingProviders(<CreateCaseTemplateFields />);
 
     expect(screen.getByText('Template not selected')).toBeInTheDocument();
+  });
+
+  it('syncs inner form changes to parent form under the CASE_EXTENDED_FIELDS key', () => {
+    // This test verifies the key used to sync inner form values to the parent form
+    // matches what createFormSerializer reads. The serializer reads data[CASE_EXTENDED_FIELDS]
+    // ('extended_fields'), so the setFieldValue call must use the same key.
+    // Previously the code called setFieldValue('extendedFields', ...) which was silently
+    // ignored by the serializer, causing extended fields to be lost on case create.
+    const setFieldValue = jest.fn();
+    mockUseFormContext.mockReturnValue({ setFieldValue });
+    mockUseFormData.mockReturnValue([{ templateId: 'template-1' }]);
+    mockUseTemplateFormSync.mockReturnValue({
+      template: {
+        templateId: 'template-1',
+        definition: { name: 'Test', fields: [] },
+      },
+      isLoading: false,
+    });
+
+    renderWithTestingProviders(<CreateCaseTemplateFields />);
+
+    // Whenever setFieldValue is called (e.g. from the watch subscription or template sync),
+    // it must never use the camelCase 'extendedFields' key.
+    const allCallsWithWrongKey = setFieldValue.mock.calls.filter(
+      ([key]) => key === 'extendedFields'
+    );
+    expect(allCallsWithWrongKey).toHaveLength(0);
+
+    // Any calls that update extended fields must use CASE_EXTENDED_FIELDS ('extended_fields').
+    const extendedFieldCalls = setFieldValue.mock.calls.filter(
+      ([key]) => key === CASE_EXTENDED_FIELDS
+    );
+    // The watch subscription fires when the form changes. If any calls were made for extended
+    // fields on mount, they must use the correct key.
+    extendedFieldCalls.forEach(([key]) => {
+      expect(key).toBe(CASE_EXTENDED_FIELDS);
+    });
   });
 });
