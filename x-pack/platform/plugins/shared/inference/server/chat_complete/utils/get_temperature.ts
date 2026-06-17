@@ -9,6 +9,17 @@ import { InferenceConnectorType } from '@kbn/inference-common';
 
 const OPENAI_MODELS_WITHOUT_TEMPERATURE = ['o1', 'o3', 'gpt-5'];
 
+// Claude 4.7+ models on Bedrock deprecated the temperature parameter.
+// Model IDs follow the pattern claude-{variant}-{major}-{minor}-{date},
+// e.g. us.anthropic.claude-opus-4-8-20251101-v1:0
+const isBedRockClaudeWithoutTemperature = (modelId: string): boolean => {
+  const match = modelId.toLowerCase().match(/claude-[a-z][\w]*-(\d+)-(\d+)/);
+  if (!match) return false;
+  const major = parseInt(match[1], 10);
+  const minor = parseInt(match[2], 10);
+  return major > 4 || (major === 4 && minor >= 7);
+};
+
 export const getTemperatureIfValid = (
   temperature?: number,
   { connector, modelName }: { connector?: InferenceConnector; modelName?: string } = {}
@@ -44,6 +55,12 @@ export const getTemperatureIfValid = (
     if (shouldExcludeTemperature) {
       // Some models reject non-default temperature values (or reject the param entirely). Let the
       // provider default apply by omitting the parameter.
+      return {};
+    }
+  }
+
+  if (connector?.type === InferenceConnectorType.Bedrock && model) {
+    if (isBedRockClaudeWithoutTemperature(model)) {
       return {};
     }
   }

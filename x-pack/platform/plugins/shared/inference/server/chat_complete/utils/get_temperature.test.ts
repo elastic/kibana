@@ -10,6 +10,7 @@ import { InferenceConnectorType } from '@kbn/inference-common';
 
 const OPENAI_CONNECTOR = { type: InferenceConnectorType.OpenAI } as InferenceConnector;
 const GEMINI_CONNECTOR = { type: InferenceConnectorType.Gemini } as InferenceConnector;
+const BEDROCK_CONNECTOR = { type: InferenceConnectorType.Bedrock } as InferenceConnector;
 describe('getTemperatureIfValid', () => {
   it('returns an empty object if temperature is undefined', () => {
     expect(
@@ -96,6 +97,59 @@ describe('getTemperatureIfValid', () => {
       getTemperatureIfValid(undefined, { connector: connectorNonZero, modelName: 'gpt-4' })
     ).toEqual({
       temperature: 0.25,
+    });
+  });
+
+  describe('Bedrock Claude models without temperature support', () => {
+    it('returns temperature for Claude 4.x models that support it', () => {
+      [
+        'us.anthropic.claude-sonnet-4-5-20250929-v1:0',
+        'us.anthropic.claude-haiku-4-5-20251001-v1:0',
+        'anthropic.claude-sonnet-4-6-20251101-v1:0',
+        'us.anthropic.claude-opus-4-6-20251101-v1:0',
+      ].forEach((model) => {
+        expect(
+          getTemperatureIfValid(0.7, { connector: BEDROCK_CONNECTOR, modelName: model })
+        ).toEqual({ temperature: 0.7 });
+      });
+    });
+
+    it("returns an empty object for Bedrock Claude models that don't support temperature (4.7+)", () => {
+      [
+        'us.anthropic.claude-sonnet-4-7-20251101-v1:0',
+        'us.anthropic.claude-opus-4-8-20251101-v1:0',
+        'anthropic.claude-haiku-4-7-20251101-v1:0',
+        'us.anthropic.claude-opus-5-0-20260101-v1:0',
+      ].forEach((model) => {
+        expect(
+          getTemperatureIfValid(0.7, { connector: BEDROCK_CONNECTOR, modelName: model })
+        ).toEqual({});
+      });
+    });
+
+    it('returns temperature for Claude 3.x models (different ID format)', () => {
+      [
+        'us.anthropic.claude-3-5-sonnet-20241022-v2:0',
+        'us.anthropic.claude-3-7-sonnet-20250219-v1:0',
+      ].forEach((model) => {
+        expect(
+          getTemperatureIfValid(0.7, { connector: BEDROCK_CONNECTOR, modelName: model })
+        ).toEqual({ temperature: 0.7 });
+      });
+    });
+
+    it('keeps connector-config temperature even for Bedrock Claude 4.7+ models (escape hatch)', () => {
+      const connector = {
+        type: InferenceConnectorType.Bedrock,
+        config: { temperature: 0.5 },
+      } as unknown as InferenceConnector;
+
+      expect(
+        getTemperatureIfValid(0.7, {
+          connector,
+          modelName: 'us.anthropic.claude-opus-4-8-20251101-v1:0',
+        })
+      ).toEqual({ temperature: 0.5 });
     });
   });
 });
