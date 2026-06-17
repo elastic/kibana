@@ -33,9 +33,9 @@ test.describe(
       await navigateToDataViewsManagement(page);
     });
 
-    test.afterAll(async ({ apiServices, kbnClient }) => {
+    test.afterEach(async ({ apiServices, kbnClient }) => {
       await Promise.all(
-        createdDataViewIds.map((id) => apiServices.dataViews.delete(id).catch(() => {}))
+        createdDataViewIds.splice(0).map((id) => apiServices.dataViews.delete(id).catch(() => {}))
       );
       await kbnClient.savedObjects.cleanStandardList();
     });
