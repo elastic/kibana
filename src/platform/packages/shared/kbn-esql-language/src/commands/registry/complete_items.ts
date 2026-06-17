@@ -67,6 +67,11 @@ export const newLineCompleteItem: ISuggestionItem = withAutoSuggest({
   category: SuggestionCategory.NEW_LINE,
 });
 
+export const newLineAndPipeCompleteItems = (): ISuggestionItem[] => [
+  newLineCompleteItem,
+  pipeCompleteItem,
+];
+
 export const allStarConstant: ISuggestionItem = {
   label: i18n.translate('kbn-esql-language.esql.autocomplete.allStarConstantDoc', {
     defaultMessage: 'All (*)',

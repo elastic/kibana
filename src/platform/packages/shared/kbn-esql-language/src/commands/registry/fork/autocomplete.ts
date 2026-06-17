@@ -14,8 +14,7 @@ import type {
 } from '@elastic/esql/types';
 import { withAutoSuggest } from '../../definitions/utils/autocomplete/helpers';
 import {
-  newLineCompleteItem,
-  pipeCompleteItem,
+  newLineAndPipeCompleteItems,
   getCommandAutocompleteDefinitions,
 } from '../complete_items';
 import { pipePrecedesCurrentWord } from '../../definitions/utils/shared';
@@ -46,7 +45,7 @@ export async function autocomplete(
   if (!withinActiveBranch && /\)\s+$/i.test(innerText)) {
     const suggestions = [newBranchSuggestion];
     if (forkCommand.args.length > 0) {
-      suggestions.push(newLineCompleteItem, pipeCompleteItem);
+      suggestions.push(...newLineAndPipeCompleteItems());
     }
     return suggestions;
   }

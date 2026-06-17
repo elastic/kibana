@@ -20,8 +20,7 @@ import { suggestForExpression } from '../../definitions/utils';
 import type { MapParameters } from '../../definitions/utils/autocomplete/map_expression';
 import { getCommandMapExpressionSuggestions } from '../../definitions/utils/autocomplete/map_expression';
 import {
-  newLineCompleteItem,
-  pipeCompleteItem,
+  newLineAndPipeCompleteItems,
   assignCompletionItem,
   getNewUserDefinedColumnSuggestion,
   withCompleteItem,
@@ -239,7 +238,7 @@ export async function autocomplete(
       return getCommandMapExpressionSuggestions(innerText, availableParameters);
 
     case CompletionPosition.AFTER_COMMAND:
-      return [newLineCompleteItem, pipeCompleteItem];
+      return newLineAndPipeCompleteItems();
 
     default:
       return [];
