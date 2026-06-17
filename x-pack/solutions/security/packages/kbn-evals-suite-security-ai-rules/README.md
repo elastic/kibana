@@ -100,9 +100,9 @@ export const sampleRules: ReferenceRule[] = [
 ## Seeding data
 
 The rule-creation tool discovers a target index from the cluster using `indexExplorer`
-(`@kbn/agent-builder-genai-utils`). If no index matches a prompt's data source, generation fails with
-`Could not discover a suitable index`, and `evaluate_dataset.ts` marks those examples N/A
-(reported as "Skipped (no index)" in the run summary) so they don't penalize model-quality scores.
+(`@kbn/agent-builder-genai-utils`). If no index matches a prompt's data source, the tool returns a
+`NO_DATA` rejection, and `evaluate_dataset.ts` marks those examples N/A (reported as
+"Skipped — no data/index" in the run summary) so they don't penalize model-quality scores.
 
 To get real scores, seed representative security data so the index patterns referenced by the
 datasets exist. The patterns used across the datasets include:
@@ -116,12 +116,59 @@ datasets exist. The patterns used across the datasets include:
 
 Ways to seed (any one is enough to reduce "no index" skips):
 
+- **[security-documents-generator](https://github.com/elastic/security-documents-generator)
+  (recommended — deterministic).** Generate the same data on every machine by passing a fixed
+  `--seed`, so metrics are reproducible across runs and contributors (see
+  [Deterministic seeding](#deterministic-seeding-recommended) below).
 - Install Fleet integrations and load their sample data (Elastic Defend / Endpoint, plus the relevant
   cloud integrations) so `logs-*` data streams exist with realistic ECS fields.
 - Restore an `es_archiver` archive containing the relevant data streams.
-- Use the Security Solution document generator to populate `logs-endpoint.events.*`.
 
 The richer and more field-complete the data, the better the generated ES|QL can reference real fields.
+
+### Deterministic seeding (recommended)
+
+To keep eval metrics stable across machines, seed with a **fixed seed** using
+[`security-documents-generator`](https://github.com/elastic/security-documents-generator). The same
+seed produces the same documents, so "no data" skips and field-coverage scores are reproducible.
+
+```bash
+# 1. Clone + install the generator (sibling to the kibana repo).
+git clone https://github.com/elastic/security-documents-generator.git
+cd security-documents-generator
+nvm install && nvm use   # uses the Node version pinned in the generator's .nvmrc
+yarn
+
+# 2. Point it at your local stack with the tool's documented basic-auth config.json.
+cat > config.json <<'EOF'
+{
+  "elastic": { "node": "http://localhost:9200", "username": "elastic", "password": "changeme" },
+  "kibana":  { "node": "http://localhost:5601", "username": "elastic", "password": "changeme" },
+  "serverless": false,
+  "eventIndex": "logs-endpoint.events.process"
+}
+EOF
+
+# 3. Seed correlated multi-source data deterministically and fully non-interactively.
+#    The same --seed produces the same documents on every machine. Every prompt flag is
+#    supplied so the command never stops to ask a question.
+yarn start org-data \
+  --size medium \
+  --productivity-suite microsoft \
+  --detection-rules \
+  --integrations aws,azure,gcp,o365,okta,google_workspace \
+  --seed 1217
+```
+
+The fixed seed `1217` (the tracking issue number) is the convention for this suite — keep it constant
+so re-runs are comparable. Supplying every prompt flag (`--size`, `--productivity-suite`,
+`--detection-rules`) keeps the command fully non-interactive, so it can be handed to anyone to run
+against their own stack. After seeding, run the suite normally; examples whose data sources are now
+present will produce real scores instead of `NO_DATA` skips.
+
+> Optional: to also populate the most common endpoint pattern (`logs-endpoint.events.*`), run
+> `yarn start generate-events 5000` (it writes to the `eventIndex` configured above). This command
+> is not seed-based, so endpoint volumes are not deterministic.
 
 ### Example command
 
@@ -172,6 +219,13 @@ Three evaluators that compare the generated rule against the expected reference:
 - **Severity Match** (binary): 1 if the generated severity exactly matches the reference, else 0.
 - **Risk Score Match** (0, 0.5, or 1): Exact match = 1.0, within 10 points = 0.5, else 0.
 
+> Severity and risk score are now **model-inferred** from the rule's intent and threat context
+> ([#271787](https://github.com/elastic/kibana/pull/271787)) rather than hardcoded to `low` / `21`.
+> The graph maps severity to canonical risk-score buckets (`low=21`, `medium=47`, `high=73`,
+> `critical=99`, accepting model values within ±15 of the canonical), so these two reference-match
+> evaluators are now meaningful signals of how well the model gauges severity. The Risk Score Match
+> ±10 partial-credit band aligns with that bucketing.
+
 ### ES|QL functional equivalence (LLM-as-judge — binary: 0 or 1)
 
 Uses the built-in `createEsqlEquivalenceEvaluator` from `@kbn/evals` to assess whether the generated
@@ -183,7 +237,24 @@ compares against the translation. Returns N/A when no ES|QL ground truth is avai
 
 Scores whether the model correctly refused to generate a rule for a negative case (a prompt where the
 available data source cannot support the requested detection). Returns N/A for positive cases.
-Score: 1 (correctly refused) or 0 (incorrectly generated a rule).
+
+The rule-creation graph now surfaces a **structured rejection** instead of throwing or producing a
+malformed rule ([#270236](https://github.com/elastic/kibana/pull/270236)). On rejection the
+`security.create_detection_rule` tool returns `{ success: false, rejected: true, rejectionCode, message }`
+with one of these codes:
+
+| Code | Meaning | Eval treatment |
+| --- | --- | --- |
+| `NO_DATA` | No relevant index/data source found for the request | N/A (environment constraint — see [Seeding data](#seeding-data)) |
+| `INVALID_OUTPUT` | The assembled rule failed terminal schema validation | Scored as a model-quality failure (not skipped) |
+| `INCOHERENT` / `NOT_SECURITY_RELEVANT` | Reserved for a future pre-flight classifier (no node emits these yet) | Counted as a deliberate refusal |
+
+The `Rejection` evaluator credits a negative case only when the model emits a **deliberate** rejection
+(`NO_DATA`, `INCOHERENT`, or `NOT_SECURITY_RELEVANT`) — not merely the absence of a rule. An
+`INVALID_OUTPUT` or an uncoded agent crash is therefore not counted as a correct refusal. Score: 1
+(deliberately refused) or 0 (generated a rule, or failed without a deliberate rejection). Each negative
+dataset entry declares its `expectedRejectionCode` (currently `NO_DATA`), surfaced in the evaluator
+metadata for visibility.
 
 ### Rule Name / Rule Description (LLM-as-judge — disabled by default)
 
@@ -198,10 +269,14 @@ comparisons.
 Evaluators are composed with wrappers that return N/A instead of penalizing scores in situations
 where a comparison is not meaningful:
 
-- `skipNegativeCases` — N/A for negative test examples (applied to everything except `Rejection`).
-- `skipMissingIndexFailures` — N/A when the rule-creation tool failed because no matching index was
-  found (see [Seeding data](#seeding-data)).
-- `skipAgentErrors` — N/A when the agent call itself errored.
+- `skipNegativeCases` — N/A for negative test examples (applied outermost to everything except
+  `Rejection`).
+- `skipMissingIndexFailures` — N/A when the rule-creation tool reported a `NO_DATA` rejection (or the
+  legacy "could not discover a suitable index" message) because no matching data was found (see
+  [Seeding data](#seeding-data)).
+- `skipAgentErrors` — N/A only for **uncoded** agent/environment errors. Structured rejections that
+  carry a `rejectionCode` are deliberate decisions and are not skipped here (so `INVALID_OUTPUT` is
+  scored, and `NO_DATA` is handled by `skipMissingIndexFailures`).
 - `skipNonEsqlReferences` — applied to the ES|QL equivalence evaluator to avoid meaningless
   comparisons when no ES|QL ground truth exists.
 
@@ -213,10 +288,11 @@ Confirm the evals plugin is enabled (`xpack.evals.enabled: true`) and the Agent 
 (`/api/agent_builder/converse`) is reachable, then restart Kibana. The Scout-managed server enables
 these automatically; a self-managed dev server must set them in `config/kibana.dev.yml`.
 
-### Many examples skipped ("Could not discover a suitable index")
+### Many examples skipped (`NO_DATA` rejection)
 
-The required index for a prompt's data source does not exist, so those examples return N/A. Seed
-representative data (see [Seeding data](#seeding-data)) to get real scores.
+The required index for a prompt's data source does not exist, so the rule-creation tool returns a
+`NO_DATA` rejection and those examples return N/A (shown as "Skipped — no data/index" in the run
+summary). Seed representative data (see [Seeding data](#seeding-data)) to get real scores.
 
 ### Low scores on all evaluators
 

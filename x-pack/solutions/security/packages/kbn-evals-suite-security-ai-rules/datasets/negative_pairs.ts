@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { RejectionCode } from '../src/chat_client';
+
 /**
  * A negative test case: a prompt that should NOT produce a valid detection rule
  * given the stated available data source(s). The AI should instead explain why
@@ -18,6 +20,12 @@ export interface NegativePair {
   availableData: string;
   /** Human-readable explanation of why a valid rule cannot be produced. */
   reason: string;
+  /**
+   * The structured rejection code the rule-creation graph is expected to emit. All current
+   * cases describe a data-source mismatch, so the expected code is `NO_DATA`. Surfaced in the
+   * Rejection evaluator metadata for visibility; the evaluator credits any deliberate rejection.
+   */
+  expectedRejectionCode: RejectionCode;
   metadata: { testType: 'negative'; difficulty: string };
 }
 
@@ -36,6 +44,7 @@ export const negativePairs: NegativePair[] = [
     availableData: 'logs-network_traffic.*',
     reason:
       'PowerShell script block logging and command-line arguments come from Windows event logs or endpoint telemetry. Network traffic data does not contain process execution or script content.',
+    expectedRejectionCode: 'NO_DATA',
     metadata: { testType: 'negative', difficulty: 'medium' },
   },
 
@@ -47,6 +56,7 @@ export const negativePairs: NegativePair[] = [
     availableData: 'logs-endpoint.events.*',
     reason:
       'Okta authentication events, MFA challenges, and session activity are in Okta audit logs, not endpoint telemetry. Endpoint data has no visibility into the Okta identity plane.',
+    expectedRejectionCode: 'NO_DATA',
     metadata: { testType: 'negative', difficulty: 'medium' },
   },
 
@@ -58,6 +68,7 @@ export const negativePairs: NegativePair[] = [
     availableData: 'logs-network_traffic.*',
     reason:
       'Network flow data (netflow) does not contain file content or macro execution telemetry. The requested data source cannot support this detection.',
+    expectedRejectionCode: 'NO_DATA',
     metadata: { testType: 'negative', difficulty: 'medium' },
   },
 
@@ -68,6 +79,7 @@ export const negativePairs: NegativePair[] = [
     availableData: 'logs-endpoint.events.*',
     reason:
       'AWS S3 API activity comes from CloudTrail logs, not endpoint telemetry. The available data source does not contain AWS control plane events.',
+    expectedRejectionCode: 'NO_DATA',
     metadata: { testType: 'negative', difficulty: 'medium' },
   },
 
@@ -79,6 +91,7 @@ export const negativePairs: NegativePair[] = [
     availableData: 'logs-o365.audit-*',
     reason:
       'GCP IAM activity is in GCP audit logs (logs-gcp*), not O365 audit logs. O365 data has no visibility into the Google Cloud control plane.',
+    expectedRejectionCode: 'NO_DATA',
     metadata: { testType: 'negative', difficulty: 'medium' },
   },
 ];
