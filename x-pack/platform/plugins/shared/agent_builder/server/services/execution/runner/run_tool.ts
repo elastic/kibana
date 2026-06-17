@@ -36,6 +36,7 @@ import type {
 import { isToolHandlerStandardReturn } from '@kbn/agent-builder-server/tools';
 import { getToolResultId } from '@kbn/agent-builder-server/tools';
 import { ConfirmationStatus } from '@kbn/agent-builder-common/agents';
+import { addSpaceIdToPath } from '@kbn/spaces-utils';
 import { getCurrentSpaceId } from '../../../utils/spaces';
 import { ToolCallSource } from '../../../telemetry';
 import {
@@ -284,6 +285,12 @@ export const createToolHandlerContext = async <TParams = Record<string, unknown>
     toolManager,
   } = manager.deps;
   const spaceId = getCurrentSpaceId({ request, spaces });
+  // CPS space resolution reads url.pathname; TM fakeRequests set the space on basePath only,
+  // so round-trip the resolved spaceId through a synthetic URL.
+  const cpsScopedRequest = {
+    headers: request.headers,
+    url: new URL(addSpaceIdToPath('/', spaceId), 'http://localhost'),
+  };
 
   const callContext: ToolHandlerCallContext = {
     toolId,
@@ -296,7 +303,7 @@ export const createToolHandlerContext = async <TParams = Record<string, unknown>
     request,
     spaceId,
     logger,
-    esClient: elasticsearch.client.asScoped(request),
+    esClient: elasticsearch.client.asScoped(cpsScopedRequest, { projectRouting: 'space' }),
     savedObjectsClient: savedObjects.getScopedClient(request),
     modelProvider,
     runner: manager.getRunner(),

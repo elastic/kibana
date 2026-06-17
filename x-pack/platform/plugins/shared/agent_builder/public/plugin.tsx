@@ -20,6 +20,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import { dynamic } from '@kbn/shared-ux-utility';
+import { ProjectRoutingAccess } from '@kbn/cps-utils';
 import { registerLocators } from './locator/register_locators';
 import { buildAgentBuilderDeepLinks, registerAnalytics, registerApp } from './register';
 import { AgentBuilderNavControlInitiator } from './components/nav_control/lazy_agent_builder_nav_control';
@@ -150,6 +151,12 @@ export class AgentBuilderPlugin
   ): AgentBuilderPluginStart {
     const { http } = core;
     const { licensing, inference } = startDependencies;
+
+    // Tell CPS that Agent Builder uses space-default project routing (read-only)
+    startDependencies.cps?.cpsManager?.registerAppAccess(
+      'agentBuilder',
+      () => ProjectRoutingAccess.READONLY
+    );
 
     const agentService = new AgentService({ http });
     const attachmentsService = new AttachmentsService({ http });
