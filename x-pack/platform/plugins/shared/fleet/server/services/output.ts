@@ -1176,7 +1176,7 @@ class OutputService {
       }
     }
 
-    if (!data.preset && outputTypeSupportPresets(data.type)) {
+    if (!data.preset && data.type && outputTypeSupportPresets(data.type)) {
       updateData.preset = getDefaultPresetForEsOutput(data.config_yaml ?? '', parse);
     }
 
