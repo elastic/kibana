@@ -9,11 +9,12 @@
  * Lightweight `@kbn/entity-store/common` barrel (webpack `common` entry).
  * Keeps page-load size small: no euid / streamlang here — use `euid_helpers` or `loadEuidApi()`.
  *
+ * Public API for the entity_store plugin. Exports only constants and types needed
+ * on every load (including browser). For EUID translation helpers
+ * (DSL/ESQL/Painless, entity types), use common/euid_helpers.
+ *
  * @example
  * import { euid, type EntityType } from '@kbn/entity-store/common/euid_helpers';
- * Public API for the entity_store plugin.
- * Exports only constants and types needed on every load (including browser).
- * For EUID translation helpers (DSL/ESQL/Painless, entity types), use common/euid_helpers.
  */
 
 import { z } from '@kbn/zod/v4';
@@ -60,6 +61,9 @@ export const ENTITY_STORE_ROUTES = {
     RESOLUTION_LINK: `${PUBLIC_BASE_ROUTE}/resolution/link`,
     RESOLUTION_UNLINK: `${PUBLIC_BASE_ROUTE}/resolution/unlink`,
     RESOLUTION_GROUP: `${PUBLIC_BASE_ROUTE}/resolution/group`,
+    RESOLUTION_RULES_LIST: `${PUBLIC_BASE_ROUTE}/resolution/rules`,
+    RESOLUTION_RULES_ENABLE: `${PUBLIC_BASE_ROUTE}/resolution/rules/{id}/enable`,
+    RESOLUTION_RULES_DISABLE: `${PUBLIC_BASE_ROUTE}/resolution/rules/{id}/disable`,
   },
   internal: {
     CHECK_PRIVILEGES: `${INTERNAL_BASE_ROUTE}/check_privileges`,
@@ -79,6 +83,9 @@ export {
   EntityMaintainerResponseItem,
   GetEntityMaintainersResponse,
 } from './entity_maintainers';
+
+export { RESOLUTION_RULE_IDS } from './domain/resolution_rules/constants';
+export type { ResolutionRuleId } from './domain/resolution_rules/constants';
 
 export const getErrorMessage = (error: unknown): string => {
   if (error instanceof Error) {

@@ -15,7 +15,11 @@ import type {
 import { AssetManagerClient } from './domain/asset_manager';
 import { EntityMaintainersClient } from './domain/entity_maintainers';
 import { FeatureFlags } from './infra/feature_flags';
-import { EngineDescriptorClient, EntityStoreGlobalStateClient } from './domain/saved_objects';
+import {
+  EngineDescriptorClient,
+  EntityStoreGlobalStateClient,
+  ResolutionRuleOverridesClient,
+} from './domain/saved_objects';
 import { LogsExtractionClient } from './domain/logs_extraction';
 import { createRemoteLogsExtractionClient } from './domain/logs_extraction/remote';
 import { HistorySnapshotClient } from './domain/history_snapshot';
@@ -132,6 +136,11 @@ export async function createRequestHandlerContext({
       namespace,
     }),
     remoteLogsExtractionClient,
+    resolutionRuleOverridesClient: new ResolutionRuleOverridesClient(
+      core.savedObjects.client,
+      namespace,
+      logger
+    ),
     featureFlags: new FeatureFlags(core.uiSettings.client),
     logsExtractionClient,
     historySnapshotClient,

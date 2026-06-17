@@ -1,0 +1,35 @@
+responses:
+  200:
+    description: "Indicates a successful response."
+    content:
+      application/json:
+        examples:
+          listRulesExample:
+            summary: "Resolution rules listed"
+            description: "The out-of-the-box resolution rules and their enabled state."
+            value:
+              rules:
+                - id: "email_exact_match"
+                  description: "Email exact match across identity providers"
+                  enabled: true
+                  managed: true
+  403:
+    description: "Insufficient license."
+    content:
+      application/json:
+        examples:
+          licenseExample:
+            summary: "Enterprise license required"
+            description: "Entity resolution requires an Enterprise license."
+            value:
+              statusCode: 403
+              error: "Forbidden"
+              message: "Entity Resolution requires an Enterprise license"
+x-codeSamples:
+  - lang: curl
+    source: |
+      curl -X GET -H "kbn-xsrf: true" -H "Authorization: ApiKey ${API_KEY}" \
+        "${KIBANA_URL}/api/security/entity_store/resolution/rules"
+  - lang: Console
+    source: |
+      GET kbn://api/security/entity_store/resolution/rules
