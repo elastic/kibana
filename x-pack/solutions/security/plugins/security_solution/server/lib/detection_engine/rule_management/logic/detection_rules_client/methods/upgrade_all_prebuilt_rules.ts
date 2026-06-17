@@ -8,7 +8,6 @@
 import type { ActionsClient } from '@kbn/actions-plugin/server';
 import type { RulesClient } from '@kbn/alerting-plugin/server';
 import type {
-  RuleUpgradeSpecifier,
   PickVersionValues,
   UpgradeConflictResolutionStrategy,
 } from '../../../../../../../common/api/detection_engine/prebuilt_rules';
@@ -55,12 +54,14 @@ export async function upgradeAllPrebuiltRules({
       })
     : undefined;
   const allCurrentVersions = await ruleObjectsClient.fetchInstalledRuleVersions({ kqlFilter });
-  const upgradableRules = await getPossibleUpgrades(allCurrentVersions, latestVersionsMap, mlAuthz);
+  const ruleUpgradeSpecifiers = await getPossibleUpgrades(
+    allCurrentVersions,
+    latestVersionsMap,
+    mlAuthz
+  );
 
-  // RuleVersionSpecifier items have no revision — the revision check in upgradePrebuiltRules is
-  // skipped when revision is absent (undefined != null is false), which is correct for ALL_RULES.
   return upgradePrebuiltRules({
-    ruleSpecifiers: upgradableRules as unknown as RuleUpgradeSpecifier[],
+    ruleSpecifiers: ruleUpgradeSpecifiers,
     conflictResolutionStrategy,
     defaultPickVersion,
     isDryRun,

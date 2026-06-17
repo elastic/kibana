@@ -6,10 +6,11 @@
  */
 
 import type { Type } from '@kbn/securitysolution-io-ts-alerting-types';
+import type { RuleUpgradeSpecifier } from '../../../../../common/api/detection_engine/prebuilt_rules';
 import type { MlAuthz } from '../../../machine_learning/authz';
 import type { RuleAlertType } from '../../rule_schema';
-import type { RuleVersionSpecifier } from './rule_versions/rule_version_specifier';
 import type { BasicRuleInfo } from './basic_rule_info';
+import type { RuleSummary } from './rule_objects/prebuilt_rule_objects_client';
 
 /**
  * Converts an array of rules to a Map with rule IDs as keys
@@ -39,31 +40,42 @@ export async function excludeLicenseRestrictedRules<T extends { type: Type }>(
 }
 
 function getUpgradeTargets(
-  currentRules: RuleVersionSpecifier[],
+  currentRules: RuleSummary[],
   targetRulesMap: Map<string, BasicRuleInfo>
-): BasicRuleInfo[] {
-  return currentRules.reduce<BasicRuleInfo[]>((allUpgradableRules, currentRule) => {
+): RuleSummary[] {
+  return currentRules.filter((currentRule) => {
     const targetRule = targetRulesMap.get(currentRule.rule_id);
-    if (targetRule && currentRule.version < targetRule.version) {
-      allUpgradableRules.push(targetRule);
-    }
-    return allUpgradableRules;
-  }, []);
+    return targetRule !== undefined && currentRule.version < targetRule.version;
+  });
 }
 
 /**
- * Given current and a target rules, returns a list of possible upgrade targets.
+ * Given current and target rules, returns upgrade specifiers for rules that have a newer version
+ * available and are allowed under the current license.
  *
  * @param currentRules The list of rules currently installed.
  * @param targetRulesMap A map of the latest available rule versions, with rule_id as the key.
  * @param mlAuthz Machine Learning authorization object
- * @returns An array of target rule version specifiers.
+ * @returns An array of upgrade specifiers with the target version and current revision.
  */
-export function getPossibleUpgrades(
-  currentRules: RuleVersionSpecifier[],
+export async function getPossibleUpgrades(
+  currentRules: RuleSummary[],
   targetRulesMap: Map<string, BasicRuleInfo>,
   mlAuthz: MlAuthz
-): Promise<RuleVersionSpecifier[]> {
+): Promise<RuleUpgradeSpecifier[]> {
   const upgradeTargets = getUpgradeTargets(currentRules, targetRulesMap);
-  return excludeLicenseRestrictedRules(upgradeTargets, mlAuthz);
+  const targetInfos = upgradeTargets
+    .map((r) => targetRulesMap.get(r.rule_id))
+    .filter(Boolean) as BasicRuleInfo[];
+  const allowedTargetInfos = await excludeLicenseRestrictedRules(targetInfos, mlAuthz);
+  const allowedIds = new Set(allowedTargetInfos.map((t) => t.rule_id));
+
+  return upgradeTargets
+    .filter((r) => allowedIds.has(r.rule_id) && Boolean(targetRulesMap.get(r.rule_id)))
+    .map((r) => ({
+      rule_id: r.rule_id,
+      revision: r.revision,
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      version: targetRulesMap.get(r.rule_id)!.version,
+    }));
 }
