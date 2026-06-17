@@ -14,6 +14,7 @@ import {
   HookLifecycle,
 } from '@kbn/agent-builder-common';
 import {
+  createRequestAbortedError,
   createWorkflowAbortedError,
   createWorkflowExecutionError,
 } from '@kbn/agent-builder-common/base/errors';
@@ -65,6 +66,16 @@ describe('RoundError', () => {
 
     expect(screen.getByTestId('agentBuilderErrorWorkflow')).toBeInTheDocument();
     expect(screen.queryByTestId('reasoningErrorPanel')).not.toBeInTheDocument();
+  });
+
+  it('shows request aborted error inside the reasoning error panel', () => {
+    const error = createRequestAbortedError('Converse request was aborted');
+
+    renderWithIntl(<RoundError error={error} onRetry={onRetry} />);
+
+    expect(screen.getByTestId('agentBuilderRoundErrorRequestAborted')).toBeInTheDocument();
+    expect(screen.getByTestId('reasoningErrorPanel')).toBeInTheDocument();
+    expect(screen.queryByTestId('agentBuilderGenericRoundError')).not.toBeInTheDocument();
   });
 
   it('shows generic errors inside the reasoning error panel', () => {
