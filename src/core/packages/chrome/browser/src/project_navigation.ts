@@ -40,7 +40,7 @@ import type { DeepLinkId as AgentBuilderLink } from '@kbn/deeplinks-agent-builde
 import type { AppId as WorkflowsApp, DeepLinkId as WorkflowsLink } from '@kbn/deeplinks-workflows';
 import type { KibanaProject } from '@kbn/projects-solutions-groups';
 import type { BadgeType } from '@kbn/ui-side-navigation';
-import type { SerializableRecord } from '@kbn/utility-types';
+import type { Serializable } from '@kbn/utility-types';
 
 import type { NavExtensionId } from './nav_extensions';
 import type { ChromeNavLink } from './nav_links';
@@ -364,11 +364,14 @@ export type SolutionNavigationDefinitions = {
   [id in SolutionId]?: SolutionNavigationDefinition;
 };
 
+/** Value emitted by a slot data `Observable` (row object, row array, etc.). */
+export type NavExtensionSlotData = Serializable;
+
 /**
  * Runtime data sources powering extension slots, keyed by `slotId`. Supplied by a
  * solution at registration; the serializable tree only references slots by id.
  */
-export type SlotDataSources = Record<string, Observable<SerializableRecord>>;
+export type SlotDataSources = Record<string, Observable<NavExtensionSlotData>>;
 
 /**
  * Temporary helper interface while we have to maintain both the legacy side navigation

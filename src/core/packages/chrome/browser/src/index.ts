@@ -73,10 +73,15 @@ export type {
   SolutionNavigationDefinition,
   SolutionNavigationDefinitions,
   SlotDataSources,
-  NavExtensionActionEvent,
+  NavExtensionSlotData,
   EuiSideNavItemTypeEnhanced,
   RenderAs,
 } from './project_navigation';
+
+export {
+  type NavTreeExtensionSlotDataSources,
+  defineNavTreeExtensionSlotDataSources,
+} from './nav_extensions';
 
 export type {
   SidebarApp,

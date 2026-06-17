@@ -70,7 +70,8 @@ export type {
   SolutionNavigationDefinition,
   SolutionNavigationDefinitions,
   SlotDataSources,
-  NavExtensionActionEvent,
+  NavExtensionSlotData,
+  NavTreeExtensionSlotDataSources,
   NavExtensionRegistry,
   NavExtensionEntry,
   NavExtensionId,
@@ -87,3 +88,5 @@ export type {
   SidebarStart,
   GlobalSearchConfig,
 } from './src';
+
+export { defineNavTreeExtensionSlotDataSources } from './src';

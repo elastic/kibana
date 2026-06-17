@@ -25,12 +25,12 @@ import type {
   ChromeSetProjectBreadcrumbsParams,
   ChromeUserBanner,
   GlobalSearchConfig,
-  AppDeepLinkId,
   NavigationTreeDefinition,
   NavigationTreeDefinitionUI,
   CloudURLs,
   SolutionId,
   SlotDataSources,
+  NavTreeExtensionSlotDataSources,
   NavExtensionDefinitionMap,
 } from '@kbn/core-chrome-browser';
 
@@ -95,14 +95,10 @@ export interface InternalChromeStart extends ChromeStart {
     setKibanaName(kibanaName: string): void;
 
     /** Initialise project navigation from a definition tree. */
-    initNavigation<
-      LinkId extends AppDeepLinkId = AppDeepLinkId,
-      Id extends string = string,
-      ChildrenId extends string = Id
-    >(
+    initNavigation<TTree extends NavigationTreeDefinition>(
       id: SolutionId,
-      navigationTree$: Observable<NavigationTreeDefinition<LinkId, Id, ChildrenId>>,
-      slotDataSources?: SlotDataSources
+      navigationTree$: Observable<TTree>,
+      slotDataSources?: NavTreeExtensionSlotDataSources<TTree>
     ): void;
 
     /** Get an observable of the resolved project navigation tree and active nodes. */

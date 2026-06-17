@@ -7,6 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { Serializable } from '@kbn/utility-types';
+import type { Observable } from 'rxjs';
+import type { ExtensionPointNodeDefinition, NavigationTreeDefinition } from './project_navigation';
+
 /**
  * Augmentable registry of navigation extensions. Publisher plugins declare the extensions
  * they expose by merging entries into this interface, keyed by `extensionId`.
@@ -24,7 +28,7 @@
 export interface NavExtensionRegistry {}
 
 /** A registry entry declaring the row-data contract a slot's `data$` emits for an extension. */
-export interface NavExtensionEntry<Data = unknown> {
+export interface NavExtensionEntry<Data = Serializable> {
   /** Element type the slot's `data$` must emit. */
   data: Data;
 }
@@ -43,8 +47,52 @@ export type NavExtensionId = [keyof NavExtensionRegistry] extends [never]
 export type NavExtensionData<Id extends NavExtensionId> = Id extends keyof NavExtensionRegistry
   ? NavExtensionRegistry[Id] extends NavExtensionEntry<infer Data>
     ? Data
-    : unknown
-  : unknown;
+    : Serializable
+  : Serializable;
+
+type ExtensionSlotPairFromChild<Node> = Node extends ExtensionPointNodeDefinition
+  ? Node extends { slotId: infer S; extensionId: infer E }
+    ? S extends string
+      ? { slotId: S; extensionId: E }
+      : never
+    : never
+  : never;
+
+type ExtensionSlotPairsFromPanelOpenerChildren<Children extends readonly unknown[]> =
+  ExtensionSlotPairFromChild<Children[number]>;
+
+type ExtensionSlotPairsFromRoot<Node> = Node extends { children?: infer Children }
+  ? NonNullable<Children> extends readonly unknown[]
+    ? ExtensionSlotPairsFromPanelOpenerChildren<NonNullable<Children>>
+    : never
+  : never;
+
+type ExtensionSlotPairsFromNodes<Nodes extends readonly unknown[]> = ExtensionSlotPairsFromRoot<
+  Nodes[number]
+>;
+
+/** returns Union of every `{ slotId, extensionId }` placement used in a navigation tree. */
+type ExtractExtensionSlots<T extends NavigationTreeDefinition> =
+  | ExtensionSlotPairsFromNodes<T['body']>
+  | (T['footer'] extends readonly unknown[] ? ExtensionSlotPairsFromNodes<T['footer']> : never);
+
+/**
+ * The slot data-source map a solution must supply at registration: keyed by every
+ * `slotId` placed in the tree, each value an `Observable` emitting exactly the row
+ * type the referenced extension declared in `NavExtensionRegistry`.
+ */
+export type NavTreeExtensionSlotDataSources<T extends NavigationTreeDefinition> = {
+  [P in ExtractExtensionSlots<T> as P['slotId']]: Observable<NavExtensionData<P['extensionId']>>;
+};
+
+/**
+ * Helper to author a tree's slot data-source map with full type inference. Each key
+ * must be a `slotId` placed in the tree, and each value an `Observable` emitting the
+ * row type the referenced extension declared in `NavExtensionRegistry`.
+ */
+export const defineNavTreeExtensionSlotDataSources = <T extends NavigationTreeDefinition>(
+  slotDataSources: NavTreeExtensionSlotDataSources<T>
+): NavTreeExtensionSlotDataSources<T> => slotDataSources;
 
 /**
  * Runtime-erased definition transported through the chrome `project` API. Chrome and the side

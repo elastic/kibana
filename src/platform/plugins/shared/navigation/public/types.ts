@@ -14,6 +14,7 @@ import type {
   NavigationTreeDefinition,
   SolutionNavigationDefinition,
   NavExtensionId,
+  NavTreeExtensionSlotDataSources,
 } from '@kbn/core-chrome-browser';
 import type { NavExtensionDefinition } from '@kbn/shared-ux-navigation-extension-templates';
 import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
@@ -24,7 +25,7 @@ import type {
   createTopNav,
 } from './top_nav_menu';
 import type { RegisteredTopNavMenuData } from './top_nav_menu/top_nav_menu_data';
-import type { SlotDataSourcesFor } from './extension_points';
+
 export interface NavigationPublicSetup {
   /**
    * @deprecated Use AppMenu from "@kbn/core-chrome-app-menu" instead
@@ -39,15 +40,15 @@ export interface NavigationPublicSetup {
   ) => void;
 }
 
-export interface SolutionNavigation<T extends NavigationTreeDefinition = NavigationTreeDefinition>
+export interface SolutionNavigation<T extends NavigationTreeDefinition>
   extends Omit<SolutionNavigationDefinition, 'navigationTree$'> {
-  navigationTree$: Observable<NavigationTreeDefinition>;
+  navigationTree$: Observable<T>;
   /**
    * Observable data sources powering the tree's extension slots, keyed by `slotId`.
    * Typed from the tree so every placed slot must supply a `data$` emitting exactly
    * the row type the referenced extension declared in `NavExtensionRegistry`.
    */
-  slotDataSources?: SlotDataSourcesFor<T>;
+  slotDataSources?: NavTreeExtensionSlotDataSources<T>;
 }
 
 export type AddSolutionNavigationArg<
@@ -73,7 +74,7 @@ export interface NavigationPublicStart {
     ) => ReturnType<typeof createTopNav>;
   };
   /** Add a solution navigation to the header nav switcher. */
-  addSolutionNavigation: <T extends NavigationTreeDefinition = NavigationTreeDefinition>(
+  addSolutionNavigation: <T extends NavigationTreeDefinition>(
     solutionNavigationAgg: AddSolutionNavigationArg<T>
   ) => void;
   /** Flag to indicate if the solution navigation is enabled.*/

@@ -22,8 +22,6 @@ export type {
   AddSolutionNavigationArg,
 } from './types';
 
-export { defineSlotDataSources } from './extension_points';
-
 export { AGENT_BUILDER_NAV_AT_TOP_FLAG } from '../common';
 
 // Export plugin after all other imports

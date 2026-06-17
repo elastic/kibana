@@ -12,7 +12,7 @@ import { type Observable } from 'rxjs';
 import { useObservable } from '@kbn/use-observable';
 import { useChromeService } from '@kbn/core-chrome-browser-context';
 import type { NavExtensionRenderContext } from '@kbn/ui-side-navigation';
-import type { SerializableRecord } from '@kbn/utility-types';
+import type { NavExtensionSlotData } from '@kbn/core-chrome-browser';
 import type { NavExtensionRuntimeDefinition } from '@kbn/core-chrome-browser';
 import {
   TEMPLATES,
@@ -26,7 +26,7 @@ export interface NavExtensionTemplateHostProps {
   /** Resolved extension definition (template id + declarative config). */
   definition: NavExtensionRuntimeDefinition;
   /** Data source powering this slot, resolved by the framework from the active solution. */
-  data$: Observable<SerializableRecord>;
+  data$: Observable<NavExtensionSlotData>;
   /** Rendering context (surface, active item, slot/extension ids). */
   context: NavExtensionPointContext;
 }
