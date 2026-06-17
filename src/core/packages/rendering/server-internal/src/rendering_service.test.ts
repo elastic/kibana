@@ -859,15 +859,14 @@ describe('RenderingService', () => {
       expect(await renderAndReadUserStorage(content)).toEqual({ values: {} });
     });
 
-    it('renders with empty user storage when getForInjection() rejects', async () => {
+    it('throws when getForInjection() rejects', async () => {
       const { render } = await service.setup(mockRenderingSetupDeps);
 
       const getForInjection = jest.fn().mockRejectedValue(new Error('ES exploded'));
       const asScoped = jest.fn().mockReturnValue({ getForInjection });
       service.start({ ...mockRenderingStartDeps, userStorage: { asScoped } });
 
-      const content = await render(createKibanaRequest(), buildUiSettings());
-      expect(await renderAndReadUserStorage(content)).toEqual({ values: {} });
+      await expect(render(createKibanaRequest(), buildUiSettings())).rejects.toThrow('ES exploded');
     });
   });
 

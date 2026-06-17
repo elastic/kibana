@@ -443,7 +443,7 @@ export class RenderingService {
       }
 
       this.logger.error(`User storage preload failed: ${err.message}`);
-      return {};
+      throw err;
     }
   }
 }
