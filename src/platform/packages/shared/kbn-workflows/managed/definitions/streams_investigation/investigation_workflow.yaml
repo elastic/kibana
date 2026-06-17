@@ -41,9 +41,8 @@ steps:
         Discovery: {{ inputs.discovery_slug }}
 
         Data streams (use get_index_info to discover available fields in each):
-        - Logs:    {{ inputs.stream_names[0] }}
-        - Traces:  {{ inputs.stream_names[1] }}
-        - Metrics: {{ inputs.stream_names[2] }}
+        {% for stream in inputs.stream_names %}- {{ stream }}
+        {% endfor %}
         Event metadata: {{ inputs | json }}
 
         Investigate the root cause of this incident and return structured output with:
