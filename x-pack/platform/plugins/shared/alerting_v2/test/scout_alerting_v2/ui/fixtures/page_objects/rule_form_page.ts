@@ -14,13 +14,9 @@ const RULE_FORM_ID = 'ruleV2Form';
 export class RuleFormPage {
   public readonly nameInput: Locator;
   public readonly submitButton: Locator;
-  /**
-   * The primary "proceed" button in the compose flyout opened from Discover.
-   * On steps 0–N-1 this is the "Next" button; on the last step it is "Create
-   * rule". The validation tests use it to check whether the user can advance
-   * (ES|QL param errors disable it) or to trigger per-step validation (e.g.
-   * name validation on the Details step).
-   */
+  public readonly flyoutNextButton: Locator;
+  public readonly flyoutSubmitButton: Locator;
+  /** @deprecated Use {@link flyoutNextButton} or {@link flyoutSubmitButton}. */
   public readonly flyoutSaveButton: Locator;
   public readonly cancelButton: Locator;
   /**
@@ -40,17 +36,14 @@ export class RuleFormPage {
 
     this.nameInput = this.page.testSubj.locator('ruleNameInput');
     this.submitButton = this.page.testSubj.locator('ruleV2FormSubmitButton');
-    // In ComposeDiscoverFlyout the per-step advance button is "Next" on all
-    // intermediate steps and "Create rule" on the last step. For the Discover
-    // flyout tests the Next button doubles as the "proceed / save" gate.
-    this.flyoutSaveButton = this.page.testSubj.locator('composeDiscoverNext');
+    this.flyoutNextButton = this.page.testSubj.locator('composeDiscoverNext');
+    this.flyoutSubmitButton = this.page.testSubj.locator('composeDiscoverSubmit');
+    this.flyoutSaveButton = this.flyoutNextButton;
     this.cancelButton = this.page.testSubj.locator('composeDiscoverCancel');
     // The ComposeDiscoverFlyout title ID.
     this.flyout = this.page.locator('[aria-labelledby="composeDiscoverFlyoutTitle"]');
-    // Inline name validation error on the Details step (EuiFormRow invalid state).
-    this.nameFieldError = this.flyout
-      .locator('.euiFormRow-isInvalid')
-      .getByText(/Name is required/);
+    // EuiFormRow puts `id` on the label; the error text is a sibling, not a descendant.
+    this.nameFieldError = this.flyout.getByText(/Name is required/);
     this.flyoutValidationCallout = this.page.testSubj.locator('ruleV2FlyoutValidationErrors');
     this.form = this.page.locator(`#${RULE_FORM_ID}`);
     this.esqlModeButton = this.page.testSubj.locator('select-text-based-language-btn');
@@ -96,15 +89,21 @@ export class RuleFormPage {
   }
 
   async clickFlyoutSave() {
-    await this.waitForNextButtonEnabled();
-    await this.flyoutSaveButton.click();
+    await this.discoverAppMenu.dismissQuerySandboxIfOpen();
+    // Details step validates the name field via Next, not Submit.
+    if (await this.nameInput.isVisible()) {
+      await this.waitForProceedButtonEnabled();
+      await this.flyoutNextButton.click();
+      return;
+    }
+    await this.waitForProceedButtonEnabled();
+    await this.clickVisibleProceedButton();
   }
 
   /**
    * Advances through the ComposeDiscoverFlyout steps until the Details step
    * (where the rule name input appears). Assumes the flyout is already open
-   * with a pre-populated query (queryCommitted = true) so that the Next button
-   * is enabled from the very first step.
+   * with a pre-populated query so the alert-condition step can be skipped.
    */
   async navigateToDetailsStep() {
     await this.clickNextWhenEnabled();
@@ -112,20 +111,32 @@ export class RuleFormPage {
     await this.nameInput.waitFor({ state: 'visible' });
   }
 
-  private async waitForNextButtonEnabled() {
+  private async waitForProceedButtonEnabled() {
     await this.discoverAppMenu.dismissQuerySandboxIfOpen();
-    await this.flyoutSaveButton.waitFor({ state: 'visible' });
     await this.page.waitForFunction(() => {
-      const button = document.querySelector(
+      const next = document.querySelector(
         '[data-test-subj="composeDiscoverNext"]'
       ) as HTMLButtonElement | null;
+      const submit = document.querySelector(
+        '[data-test-subj="composeDiscoverSubmit"]'
+      ) as HTMLButtonElement | null;
+      const button = next ?? submit;
       return Boolean(button && !button.disabled);
     });
   }
 
+  private async clickVisibleProceedButton() {
+    if (await this.flyoutSubmitButton.isVisible()) {
+      await this.flyoutSubmitButton.click();
+      return;
+    }
+
+    await this.flyoutNextButton.click();
+  }
+
   private async clickNextWhenEnabled() {
-    await this.waitForNextButtonEnabled();
-    await this.flyoutSaveButton.click();
+    await this.waitForProceedButtonEnabled();
+    await this.clickVisibleProceedButton();
   }
 
   async switchToEsqlMode() {

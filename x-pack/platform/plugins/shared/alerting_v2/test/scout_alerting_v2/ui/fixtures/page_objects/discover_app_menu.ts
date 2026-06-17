@@ -101,7 +101,12 @@ export class DiscoverAppMenu {
     await this.page.locator('[aria-labelledby="composeDiscoverFlyoutTitle"]').waitFor({
       state: 'visible',
     });
-    await this.page.testSubj.locator('composeDiscoverNext').waitFor({ state: 'visible' });
+    await this.page.waitForFunction(() =>
+      Boolean(
+        document.querySelector('[data-test-subj="composeDiscoverNext"]') ||
+          document.querySelector('[data-test-subj="composeDiscoverSubmit"]')
+      )
+    );
     await this.dismissQuerySandboxIfOpen();
   }
 }
