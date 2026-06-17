@@ -15,7 +15,11 @@ import {
 } from '@kbn/agent-builder-genai-utils/langchain';
 import type { BrowserApiToolMetadata, ChatAgentEvent, RoundInput } from '@kbn/agent-builder-common';
 import { ToolOrigin } from '@kbn/agent-builder-common';
-import { ConversationRoundStatus, AgentExecutionMode } from '@kbn/agent-builder-common';
+import {
+  ConversationRoundStatus,
+  AgentExecutionMode,
+  isToolCallStep,
+} from '@kbn/agent-builder-common';
 import type { AgentEventEmitterFn, AgentHandlerContext } from '@kbn/agent-builder-server';
 import { HookLifecycle } from '@kbn/agent-builder-server';
 import type { ConversationInternalState, CompactionSummary } from '@kbn/agent-builder-common/chat';
@@ -36,7 +40,7 @@ import { registerInternalTools } from './tools/register_internal_tools';
 import { resolveCapabilities } from './utils/capabilities';
 import { resolveConfiguration } from './utils/configuration';
 import { ensureValidInput } from './utils/preflight_checks';
-import { roundToActions } from './utils/round_to_actions';
+import { buildPendingRoundActions } from './utils/build_pending_round_actions';
 import { computeContextBudget } from './utils/context_budget';
 import { compactConversation } from './utils/conversation_compactor';
 import { createAgentGraph } from './graph';
@@ -275,6 +279,8 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
       conversation: processedConversation,
       agentBuilderToLangchainIdMap: reverseMap(toolManager.getToolIdMapping()),
       cycleLimit: CYCLE_LIMIT,
+      promptManager,
+      eventEmitter: events.emit,
     }),
     {
       version: 'v2',
@@ -382,10 +388,14 @@ const createInitializerCommand = ({
   conversation,
   cycleLimit,
   agentBuilderToLangchainIdMap,
+  promptManager,
+  eventEmitter,
 }: {
   conversation: ProcessedConversation;
   cycleLimit: number;
   agentBuilderToLangchainIdMap: ToolIdMapping;
+  promptManager: PromptManager;
+  eventEmitter: AgentEventEmitterFn;
 }): Command => {
   const initialState: Partial<StateType> = { cycleLimit };
   let startAt = steps.init;
@@ -395,12 +405,23 @@ const createInitializerCommand = ({
     : undefined;
 
   if (lastRound?.status === ConversationRoundStatus.awaitingPrompt) {
-    initialState.mainActions = roundToActions({
+    const { actions, consumedPromptIds } = buildPendingRoundActions({
       round: lastRound,
+      promptState: promptManager.dump(),
       toolIdMapping: agentBuilderToLangchainIdMap,
+      eventEmitter,
     });
-
-    startAt = steps.executeTool;
+    initialState.mainActions = actions;
+    // on-resume cleanup: ask_user_question responses are consumed once per round.
+    for (const id of consumedPromptIds) {
+      promptManager.delete(id);
+    }
+    // If any tool-call step is still pending (empty results), executeTool must run it.
+    // Otherwise the only thing that was paused was ask_user_question - so we go straight to the agent loop
+    const hasPendingToolCall = lastRound.steps.some(
+      (step) => isToolCallStep(step) && step.results.length === 0
+    );
+    startAt = hasPendingToolCall ? steps.executeTool : steps.researchAgent;
   }
 
   if (lastRound?.state) {
