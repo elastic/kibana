@@ -10,10 +10,11 @@ import { useMemo } from 'react';
 import { isPending, useFetcher } from '../../hooks/use_fetcher';
 import { useManagedOtlpServiceAvailability } from '../shared/use_managed_otlp_service_availability';
 import type { SupportedLogo } from '../shared/logo_icon';
+import type { ApiEndpointId } from '../../../common/api_endpoints';
 import { API_ENDPOINTS, type ApiEndpointContext } from './endpoints_config';
 
 export interface ResolvedApiEndpoint {
-  id: string;
+  id: ApiEndpointId;
   label: string;
   logo?: SupportedLogo;
   euiIconType?: EuiIconType;

@@ -7,6 +7,7 @@
 
 import type { EuiIconType } from '@elastic/eui/src/components/icon/icon';
 import { i18n } from '@kbn/i18n';
+import { ApiEndpointId } from '../../../common/api_endpoints';
 import type { SupportedLogo } from '../shared/logo_icon';
 
 export interface ApiEndpointContext {
@@ -16,7 +17,7 @@ export interface ApiEndpointContext {
 }
 
 export interface ApiEndpointDefinition {
-  id: string;
+  id: ApiEndpointId;
   label: string;
   logo?: SupportedLogo;
   euiIconType?: EuiIconType;
@@ -28,7 +29,7 @@ const trimTrailingSlashes = (url: string): string => url.replace(/\/+$/, '');
 
 export const API_ENDPOINTS: readonly ApiEndpointDefinition[] = [
   {
-    id: 'prometheus',
+    id: ApiEndpointId.Prometheus,
     label: i18n.translate('xpack.observability_onboarding.apiEndpoints.prometheus.label', {
       defaultMessage: 'Prometheus',
     }),
@@ -45,7 +46,7 @@ export const API_ENDPOINTS: readonly ApiEndpointDefinition[] = [
     },
   },
   {
-    id: 'opentelemetry',
+    id: ApiEndpointId.OpenTelemetry,
     label: i18n.translate('xpack.observability_onboarding.apiEndpoints.openTelemetry.label', {
       defaultMessage: 'OpenTelemetry',
     }),
@@ -54,7 +55,7 @@ export const API_ENDPOINTS: readonly ApiEndpointDefinition[] = [
     getUrl: ({ managedOtlpServiceUrl }) => managedOtlpServiceUrl,
   },
   {
-    id: 'elasticsearch',
+    id: ApiEndpointId.Elasticsearch,
     label: i18n.translate('xpack.observability_onboarding.apiEndpoints.elasticsearch.label', {
       defaultMessage: 'Elasticsearch',
     }),

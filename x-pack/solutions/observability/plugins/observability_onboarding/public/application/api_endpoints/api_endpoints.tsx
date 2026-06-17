@@ -28,8 +28,10 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import React, { useEffect, useState } from 'react';
 import type { ObservabilityOnboardingAppServices } from '../..';
 import { LogoIcon } from '../shared/logo_icon';
+import { ApiKeyField } from './api_key_field';
 import { EndpointField } from './endpoint_field';
 import { useApiEndpoints } from './use_api_endpoints';
+import { useApiKeys } from './use_api_keys';
 
 const LEARN_MORE_LINK = 'https://ela.st/connect-deployment-endpoints';
 
@@ -41,6 +43,7 @@ export const ApiEndpoints = () => {
   const isMobile = useIsWithinBreakpoints(['xs', 's']);
 
   const { endpoints, isLoading } = useApiEndpoints();
+  const { encodedApiKeys, creatingEndpointId, createApiKey } = useApiKeys();
   const [isOpen, setIsOpen] = useState<boolean>(true);
   const [selectedEndpointId, setSelectedEndpointId] = useState<string | undefined>(undefined);
   const [apiKeysManagementUrl, setApiKeysManagementUrl] = useState<string | undefined>(undefined);
@@ -69,7 +72,7 @@ export const ApiEndpoints = () => {
         <EuiTitle size="s">
           <h3 id={titleId}>
             {i18n.translate('xpack.observability_onboarding.apiEndpoints.title', {
-              defaultMessage: 'Sending data from a custom app?',
+              defaultMessage: 'Connect directly to the endpoint',
             })}
           </h3>
         </EuiTitle>
@@ -78,7 +81,7 @@ export const ApiEndpoints = () => {
           <p>
             <FormattedMessage
               id="xpack.observability_onboarding.apiEndpoints.subtitle"
-              defaultMessage="Access your deployment's endpoints directly. {learnMoreLink}"
+              defaultMessage="Access your deployment's endpoints and API keys directly. {learnMoreLink}"
               values={{
                 learnMoreLink: (
                   <EuiLink
@@ -155,7 +158,22 @@ export const ApiEndpoints = () => {
           {isOpen && (
             <>
               <EuiSpacer size="m" />
-              <EndpointField url={selectedEndpoint.url} isLoading={isLoading} />
+              <EuiFlexGroup
+                direction={isMobile ? 'column' : 'row'}
+                gutterSize="m"
+                responsive={false}
+              >
+                <EuiFlexItem>
+                  <EndpointField url={selectedEndpoint.url} isLoading={isLoading} />
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  <ApiKeyField
+                    encodedApiKey={encodedApiKeys[selectedEndpoint.id]}
+                    isCreating={creatingEndpointId === selectedEndpoint.id}
+                    onCreate={() => createApiKey(selectedEndpoint.id)}
+                  />
+                </EuiFlexItem>
+              </EuiFlexGroup>
             </>
           )}
         </EuiPanel>

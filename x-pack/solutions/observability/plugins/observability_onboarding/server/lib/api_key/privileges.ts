@@ -23,3 +23,8 @@ export const INDEX_LOGS_METRICS_AND_TRACES: estypes.SecurityIndicesPrivileges = 
   names: ['logs-*-*', 'logs', 'logs.*', 'metrics-*-*', 'traces-*-*'],
   privileges: ['auto_configure', 'create_doc'],
 };
+
+export const INDEX_PROMETHEUS_REMOTE_WRITE: estypes.SecurityIndicesPrivileges = {
+  names: ['metrics-*.prometheus-*'],
+  privileges: ['auto_configure', 'create_doc'],
+};
