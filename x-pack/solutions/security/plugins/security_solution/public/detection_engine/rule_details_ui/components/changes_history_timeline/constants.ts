@@ -19,13 +19,6 @@ export const DATE_DISPLAY_FORMAT_WITH_SECONDS = 'MMM D, YYYY @ HH:mm:ss';
  */
 export const INLINE_CHANGED_FIELDS_LIMIT = 3;
 
-/**
- * Maximum number of overflowed field names listed inside the "+N" badge's
- * hover tooltip. Caps tooltip size for changes that touch large field sets
- * (full rule snapshots can have dozens of fields).
- */
-export const POPOVER_CHANGED_FIELDS_LIMIT = 30;
-
 export const DIFFABLE_CHANGE_ACTIONS: ReadonlyArray<string> = [
   RuleChangeTrackingAction.ruleUpdate,
   RuleChangeTrackingAction.ruleCreate,
