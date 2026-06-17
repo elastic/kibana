@@ -26,13 +26,13 @@ describe('createKnowledgeIndicatorsReaderFromStreamsStart', () => {
       logger,
     });
     expect(reader).toBe(__NO_OP_KI_READER_FOR_TESTING);
-    expect(await reader.listSchemaFeatures()).toEqual([]);
+    expect(await reader.listDatasetAnalysisFeatures()).toEqual([]);
     expect(await reader.resolveIndexPatterns('any')).toEqual([]);
     expect(logger.debug).toHaveBeenCalledTimes(1);
   });
 
   it('delegates to streams.getKnowledgeIndicatorsReader when streams is present', async () => {
-    const delegateReader = { listSchemaFeatures: jest.fn() };
+    const delegateReader = { listDatasetAnalysisFeatures: jest.fn() };
     const streams = {
       getKnowledgeIndicatorsReader: jest.fn(async () => delegateReader),
     } as unknown as StreamsPluginStart;

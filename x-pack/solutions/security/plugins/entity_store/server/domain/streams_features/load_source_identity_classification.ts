@@ -12,10 +12,7 @@ import {
   ENTITY_CONFIDENCE,
   type EntityConfidence,
 } from '../../../common/domain/definitions/user_entity_constants';
-import {
-  ENTITY_TYPE_IDENTITY_FIELDS,
-  deriveEntityFieldPresence,
-} from './load_per_type_source_indices';
+import { ENTITY_TYPE_IDENTITY_FIELDS } from './load_per_type_source_indices';
 
 /**
  * The per-source identity classification the entity store applies to user
@@ -104,9 +101,72 @@ const parseIdentityClassification = (
   return { namespace: namespace.trim(), tier: tier as EntityConfidence };
 };
 
+/** Union of every identity field across all entity types, used to scan a schema feature's properties/evidence. */
+const ALL_IDENTITY_FIELDS: readonly string[] = Array.from(
+  new Set(Object.values(ENTITY_TYPE_IDENTITY_FIELDS).flat())
+);
+
+/**
+ * Derives which ECS identity fields a `schema`-class feature surfaces for its
+ * stream. Three signals are combined (any hit counts as present):
+ *
+ * 1. `properties.entity_field_presence` — an explicit object the LLM may emit;
+ *    values are intersected with the known identity vocabulary so a
+ *    hallucinated field cannot qualify a stream.
+ * 2. `properties.ecs_identity_aliases` — its KEYS are ECS identity destinations
+ *    the stream can populate (the alias table).
+ * 3. `evidence` strings — deterministic fallback: any identity field name that
+ *    appears verbatim in an evidence string.
+ *
+ * This lives here (rather than in `load_per_type_source_indices`, which now
+ * derives presence from deterministic `dataset_analysis` features) because the
+ * confidence-classification channel reads LLM-emitted `schema` features.
+ */
+const deriveSchemaFeatureIdentityPresence = (feature: Feature): ReadonlySet<string> => {
+  const present = new Set<string>();
+  const properties =
+    feature.properties && typeof feature.properties === 'object'
+      ? (feature.properties as Record<string, unknown>)
+      : undefined;
+
+  const rawPresence = properties?.entity_field_presence;
+  if (rawPresence && typeof rawPresence === 'object' && !Array.isArray(rawPresence)) {
+    for (const value of Object.values(rawPresence as Record<string, unknown>)) {
+      if (!Array.isArray(value)) continue;
+      for (const field of value) {
+        if (typeof field === 'string' && ALL_IDENTITY_FIELDS.includes(field)) {
+          present.add(field);
+        }
+      }
+    }
+  }
+
+  const rawAliases = properties?.ecs_identity_aliases;
+  if (rawAliases && typeof rawAliases === 'object' && !Array.isArray(rawAliases)) {
+    for (const key of Object.keys(rawAliases as Record<string, unknown>)) {
+      if (ALL_IDENTITY_FIELDS.includes(key)) {
+        present.add(key);
+      }
+    }
+  }
+
+  if (Array.isArray(feature.evidence)) {
+    for (const line of feature.evidence) {
+      if (typeof line !== 'string') continue;
+      for (const field of ALL_IDENTITY_FIELDS) {
+        if (line.includes(field)) {
+          present.add(field);
+        }
+      }
+    }
+  }
+
+  return present;
+};
+
 /** True when the feature surfaces at least one user identity field (rubric eligibility, enforced defensively). */
 const carriesUserIdentity = (feature: Feature): boolean => {
-  const presence = deriveEntityFieldPresence(feature);
+  const presence = deriveSchemaFeatureIdentityPresence(feature);
   return USER_IDENTITY_FIELDS.some((field) => presence.has(field));
 };
 

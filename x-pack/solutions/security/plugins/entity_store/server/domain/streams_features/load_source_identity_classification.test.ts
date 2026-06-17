@@ -36,8 +36,7 @@ const makeReader = (
   features: Feature[],
   resolve: (streamName: string) => string[] = (streamName) => [streamName]
 ): StreamsKnowledgeIndicatorsReader => ({
-  listEntityFeatures: jest.fn(async () => []),
-  listDependencyFeatures: jest.fn(async () => []),
+  listDatasetAnalysisFeatures: jest.fn(async () => []),
   listSchemaFeatures: jest.fn(async () => features),
   resolveIndexPatterns: jest.fn(async (streamName: string) => resolve(streamName)),
 });

@@ -11,12 +11,11 @@ export {
 } from './knowledge_indicators_reader_factory';
 export {
   ENTITY_TYPE_IDENTITY_FIELDS,
-  deriveEntityFieldPresence,
+  deriveEntityFieldPresenceFromDatasetAnalysis,
   loadPerTypeSourceIndices,
 } from './load_per_type_source_indices';
 export type {
   EntityFieldPresence,
-  LoadPerTypeSourceIndicesOptions,
   PerTypeSourceIndices,
   PerTypeSourceProvenance,
 } from './load_per_type_source_indices';

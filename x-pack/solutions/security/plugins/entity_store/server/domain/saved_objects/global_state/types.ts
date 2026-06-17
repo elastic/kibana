@@ -123,7 +123,6 @@ const version3: SavedObjectsFullModelVersion = {
 
 const logExtractionSchemaV4 = logExtractionSchemaV3.extends({
   useDiscoveredIndexSource: schema.maybe(schema.boolean()),
-  discoveredIndexSourceMinConfidence: schema.maybe(schema.number()),
 });
 
 const globalStateSchemaV4 = globalStateSchemaV3.extends({
@@ -138,8 +137,6 @@ const version4: SavedObjectsFullModelVersion = {
         attributes: {
           logsExtraction: {
             useDiscoveredIndexSource: false,
-            discoveredIndexSourceMinConfidence:
-              LOG_EXTRACTION_DISCOVERED_SOURCE_MIN_CONFIDENCE_DEFAULT,
           },
         },
       }),
@@ -153,6 +150,7 @@ const version4: SavedObjectsFullModelVersion = {
 
 const logExtractionSchemaV5 = logExtractionSchemaV4.extends({
   useDiscoveredConfidenceClassification: schema.maybe(schema.boolean()),
+  discoveredIndexSourceMinConfidence: schema.maybe(schema.number()),
 });
 
 const globalStateSchemaV5 = globalStateSchemaV4.extends({
@@ -167,6 +165,8 @@ const version5: SavedObjectsFullModelVersion = {
         attributes: {
           logsExtraction: {
             useDiscoveredConfidenceClassification: false,
+            discoveredIndexSourceMinConfidence:
+              LOG_EXTRACTION_DISCOVERED_SOURCE_MIN_CONFIDENCE_DEFAULT,
           },
         },
       }),

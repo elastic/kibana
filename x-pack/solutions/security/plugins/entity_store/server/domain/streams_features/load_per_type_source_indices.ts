@@ -19,7 +19,7 @@ import type { EntityType } from '../../../common/domain/definitions/entity_schem
  * - `user`   → `euidRanking` / `documentsFilter` key off `user.{email,id,name,domain}`.
  * - `host`   → `host.{id,name,hostname}`.
  * - `service`→ `service.name`.
- * - `generic`→ `entity.id` (rarely surfaced by schema features; kept for completeness).
+ * - `generic`→ `entity.id` (rarely surfaced by dataset_analysis; kept for completeness).
  *
  * Keeping this list here (rather than deriving it from the `euidRanking`
  * branches at runtime) is deliberate: the ranking branches encode precedence
@@ -36,76 +36,78 @@ export const ENTITY_TYPE_IDENTITY_FIELDS = {
 
 const ENTITY_TYPES = Object.keys(ENTITY_TYPE_IDENTITY_FIELDS) as EntityType[];
 
-/** Union of every identity field across all entity types, used to scan evidence strings. */
+/** Union of every identity field across all entity types. */
 const ALL_IDENTITY_FIELDS: readonly string[] = Array.from(
   new Set(Object.values(ENTITY_TYPE_IDENTITY_FIELDS).flat())
 );
 
 /**
- * The set of ECS identity fields a schema feature surfaces for a stream.
- * Derived from the feature, never persisted — recomputed each run.
+ * The set of ECS identity fields a `dataset_analysis` feature surfaces for a
+ * stream at a safe ES type. Derived from the feature, never persisted —
+ * recomputed each run.
  */
 export type EntityFieldPresence = ReadonlySet<string>;
 
 /**
- * Derives which ECS identity fields a `schema`-class feature surfaces for its
- * stream. Three signals are combined (most authoritative first); any field
- * found by any signal counts as present:
- *
- * 1. `properties.entity_field_presence` — an explicit object the LLM may emit,
- *    keyed by entity type with arrays of identity field names. Values are
- *    intersected with the known identity vocabulary so a hallucinated field
- *    cannot qualify a stream.
- * 2. `properties.ecs_identity_aliases` — POC 3's alias table. Its KEYS are ECS
- *    identity destinations the stream can populate, so a present key means the
- *    stream carries that identity (via alias).
- * 3. `evidence` strings — deterministic fallback: any identity field name that
- *    appears verbatim as a token in an evidence string is treated as present.
- *    This is the floor that works even when the LLM emits neither structured
- *    property above.
+ * ES field types accepted as identity sources. `keyword` is exact-match and
+ * aggregatable, so it is safe to extract/group on; `text` / `match_only_text`
+ * and unmapped fields are intentionally excluded. Centralized so the safe set
+ * can be widened later (e.g. `ip`, `boolean`) without touching call sites.
  */
-export const deriveEntityFieldPresence = (feature: Feature): EntityFieldPresence => {
+const SAFE_IDENTITY_FIELD_TYPES = new Set<string>(['keyword']);
+
+/**
+ * Parses a `dataset_analysis` field key into its field name and ES type list.
+ *
+ * Keys are produced by `formatDocumentAnalysis`'s `getFieldKey`:
+ * - `"user.email (keyword)"`   → `{ name: 'user.email', types: ['keyword'] }`
+ * - `"x (text, keyword)"`      → `{ name: 'x', types: ['text', 'keyword'] }`
+ * - `"y (unmapped - no type)"` → `{ name: 'y', types: [] }`
+ *
+ * A key that does not match the `"<name> (<inner>)"` shape is treated as a
+ * bare field name with no known type (and therefore cannot qualify).
+ */
+const parseDatasetAnalysisFieldKey = (key: string): { name: string; types: string[] } => {
+  const match = key.match(/^(.*)\s\(([^)]*)\)$/);
+  if (!match) {
+    return { name: key, types: [] };
+  }
+  const [, name, inner] = match;
+  if (inner === 'unmapped - no type') {
+    return { name, types: [] };
+  }
+  return { name, types: inner.split(',').map((type) => type.trim()) };
+};
+
+/**
+ * Derives which ECS identity fields a `dataset_analysis` feature surfaces for
+ * its stream. The computed feature exposes `properties.analysis.fields`, an
+ * object keyed by `"<field.path> (<es_types>)"`. A field qualifies only when
+ * its name is a known identity field AND it is mapped at a safe type
+ * (`SAFE_IDENTITY_FIELD_TYPES`), so unsafe `text` / unmapped fields never
+ * promote a stream to a source.
+ */
+export const deriveEntityFieldPresenceFromDatasetAnalysis = (
+  feature: Feature
+): EntityFieldPresence => {
   const present = new Set<string>();
-  const properties =
-    feature.properties && typeof feature.properties === 'object'
-      ? (feature.properties as Record<string, unknown>)
+  const analysis = (feature.properties as Record<string, unknown> | undefined)?.analysis;
+  const fields =
+    analysis && typeof analysis === 'object'
+      ? (analysis as Record<string, unknown>).fields
       : undefined;
-
-  // Signal 1 — explicit entity_field_presence object.
-  const rawPresence = properties?.entity_field_presence;
-  if (rawPresence && typeof rawPresence === 'object' && !Array.isArray(rawPresence)) {
-    for (const value of Object.values(rawPresence as Record<string, unknown>)) {
-      if (!Array.isArray(value)) continue;
-      for (const field of value) {
-        if (typeof field === 'string' && ALL_IDENTITY_FIELDS.includes(field)) {
-          present.add(field);
-        }
-      }
+  if (!fields || typeof fields !== 'object') {
+    return present;
+  }
+  for (const key of Object.keys(fields as Record<string, unknown>)) {
+    const { name, types } = parseDatasetAnalysisFieldKey(key);
+    if (
+      ALL_IDENTITY_FIELDS.includes(name) &&
+      types.some((type) => SAFE_IDENTITY_FIELD_TYPES.has(type))
+    ) {
+      present.add(name);
     }
   }
-
-  // Signal 2 — ecs_identity_aliases keys (alias destinations the stream populates).
-  const rawAliases = properties?.ecs_identity_aliases;
-  if (rawAliases && typeof rawAliases === 'object' && !Array.isArray(rawAliases)) {
-    for (const key of Object.keys(rawAliases as Record<string, unknown>)) {
-      if (ALL_IDENTITY_FIELDS.includes(key)) {
-        present.add(key);
-      }
-    }
-  }
-
-  // Signal 3 — evidence-string scan (deterministic fallback).
-  if (Array.isArray(feature.evidence)) {
-    for (const line of feature.evidence) {
-      if (typeof line !== 'string') continue;
-      for (const field of ALL_IDENTITY_FIELDS) {
-        if (line.includes(field)) {
-          present.add(field);
-        }
-      }
-    }
-  }
-
   return present;
 };
 
@@ -123,15 +125,6 @@ export interface PerTypeSourceProvenance {
   matchedFields: string[];
 }
 
-export interface LoadPerTypeSourceIndicesOptions {
-  /**
-   * Confidence floor pushed into the schema-feature query. When `null` the
-   * loader short-circuits and returns empty sources WITHOUT any I/O — the
-   * "auto-discovery disabled" branch the config flag defaults to.
-   */
-  minConfidence: number | null;
-}
-
 const emptySources = (): PerTypeSourceIndices => ({
   user: [],
   host: [],
@@ -141,37 +134,34 @@ const emptySources = (): PerTypeSourceIndices => ({
 
 /**
  * Loads the per-entity-type extraction source index patterns for the current
- * run, derived automatically from whatever `schema`-class Knowledge Indicators
- * exist. There is no operator registry/toggle: every qualifying stream is
- * included for every type its identity fields satisfy.
+ * run, derived automatically from the deterministic `dataset_analysis`
+ * Knowledge Indicators that exist. There is no operator registry/toggle: every
+ * qualifying stream is included for every type its identity fields satisfy.
  *
  * Behavior:
- * - `minConfidence === null` → returns empty sources, no I/O (disabled branch).
- * - Otherwise lists schema features above threshold, resolves index patterns
- *   once per distinct stream, derives identity-field presence per feature, and
- *   assigns the stream's patterns to each entity type whose identity fields
- *   intersect that presence.
+ * - Lists `dataset_analysis` features, resolves index patterns once per
+ *   distinct stream, derives identity-field presence per feature (keyword-typed
+ *   identity fields only), and assigns the stream's patterns to each entity
+ *   type whose identity fields intersect that presence.
  * - Patterns are deduped per type. Streams that resolve to no index patterns
  *   (deleted / inaccessible) are skipped.
  *
- * Caching is the caller's responsibility — `LogsExtractionClient` calls this
- * once per extraction run and reuses the result across engine passes.
+ * Enable/disable gating lives in the callers (they skip this entirely when
+ * `useDiscoveredIndexSource` is off), so there is no disabled short-circuit
+ * here. Caching is the caller's responsibility — `LogsExtractionClient` calls
+ * this once per extraction run and reuses the result across engine passes.
  */
 export const loadPerTypeSourceIndices = async (
   reader: StreamsKnowledgeIndicatorsReader,
-  options: LoadPerTypeSourceIndicesOptions,
   logger: Logger
 ): Promise<{ sources: PerTypeSourceIndices; provenance: PerTypeSourceProvenance[] }> => {
-  if (options.minConfidence === null) {
-    return { sources: emptySources(), provenance: [] };
-  }
-
-  const features = await reader.listSchemaFeatures({ minConfidence: options.minConfidence });
+  const features = await reader.listDatasetAnalysisFeatures();
   if (features.length === 0) {
     return { sources: emptySources(), provenance: [] };
   }
 
-  // Resolve once per distinct stream — a stream may carry multiple schema features.
+  // Resolve once per distinct stream — dataset_analysis emits one feature per
+  // stream, but dedupe defensively in case of overlap.
   const indexPatternsByStream = new Map<string, string[]>();
   const distinctStreamNames = Array.from(new Set(features.map((feature) => feature.stream_name)));
   await Promise.all(
@@ -202,7 +192,7 @@ export const loadPerTypeSourceIndices = async (
     if (indexPatterns.length === 0) {
       continue;
     }
-    const presence = deriveEntityFieldPresence(feature);
+    const presence = deriveEntityFieldPresenceFromDatasetAnalysis(feature);
     if (presence.size === 0) {
       continue;
     }

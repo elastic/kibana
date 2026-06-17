@@ -22,8 +22,11 @@ export const LOG_EXTRACTION_MAX_TIME_WINDOW_SIZE_DEFAULT = '15m';
 export const LOG_EXTRACTION_MAX_LOGS_PER_WINDOW_DEFAULT = 100_000;
 export const LOG_EXTRACTION_CAP_BEHAVIOR_DEFAULT = 'drop' as const;
 
-// Default confidence floor for KI-discovered source streams. 0 = include every
-// qualifying schema feature regardless of confidence; operators can raise it.
+// Default confidence floor for the KI confidence-classification channel's
+// `schema`-feature query. 0 = include every qualifying schema feature
+// regardless of confidence; operators can raise it. Source discovery uses
+// deterministic `dataset_analysis` features (always confidence 100) and does
+// not consult this floor.
 export const LOG_EXTRACTION_DISCOVERED_SOURCE_MIN_CONFIDENCE_DEFAULT = 0;
 
 export type LogExtractionConfig = z.infer<typeof LogExtractionConfig>;
@@ -49,9 +52,11 @@ export const LogExtractionConfig = z.object({
    */
   useDiscoveredConfidenceClassification: z.boolean().default(false),
   /**
-   * Confidence floor (0–100) pushed into the schema-feature query when
-   * `useDiscoveredIndexSource` or `useDiscoveredConfidenceClassification` is
-   * enabled. Only effective while one of those flags is on.
+   * Confidence floor (0–100) for the KI confidence-classification channel's
+   * `schema`-feature query. Only effective while
+   * `useDiscoveredConfidenceClassification` is on. Source discovery
+   * (`useDiscoveredIndexSource`) reads deterministic `dataset_analysis`
+   * features, which are always confidence 100 and do not consult this floor.
    */
   discoveredIndexSourceMinConfidence: z
     .number()

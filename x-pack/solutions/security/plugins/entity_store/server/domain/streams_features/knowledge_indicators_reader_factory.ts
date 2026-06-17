@@ -24,8 +24,7 @@ import type { EntityStoreCoreSetup } from '../../types';
  * `[]` for missing streams.
  */
 const NO_OP_KI_READER: StreamsKnowledgeIndicatorsReader = {
-  listEntityFeatures: async () => [],
-  listDependencyFeatures: async () => [],
+  listDatasetAnalysisFeatures: async () => [],
   listSchemaFeatures: async () => [],
   resolveIndexPatterns: async () => [],
 };
