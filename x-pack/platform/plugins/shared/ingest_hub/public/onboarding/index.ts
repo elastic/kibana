@@ -6,4 +6,3 @@
  */
 
 export { registerOnboardingApp } from './register_onboarding_app';
-export { renderOnboardingApp } from './onboarding_app';

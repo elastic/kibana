@@ -26,7 +26,7 @@ export async function searchEventsToolHandler({
     perPage: params.per_page,
     search: params.query,
     stream: params.stream_name ? [params.stream_name] : undefined,
-    verdict: params.status,
+    status: params.status,
   });
 
   return {
