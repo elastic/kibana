@@ -214,12 +214,13 @@ describe('track panel', () => {
     // without other state leaking in from prior cases.
     const setupBlurTest = () => {
       const children$ = new BehaviorSubject<DashboardChildren>({});
+      const viewMode$ = new BehaviorSubject<ViewMode>('edit');
       const { api: blurApi, cleanup: blurCleanup } = initializeTrackPanel(
         async () => undefined,
         children$,
-        mockViewMode
+        viewMode$
       );
-      return { children$, blurApi, blurCleanup };
+      return { children$, blurApi, blurCleanup, viewMode$ };
     };
 
     it('starts with no blurred panels', () => {
@@ -241,6 +242,22 @@ describe('track panel', () => {
 
       // siblings minus focusedChildId minus relatedPanels = ['sparrow', 'salamander']
       expect(blurApi.blurredPanelIds$.value.sort()).toEqual(['salamander', 'sparrow']);
+      blurCleanup();
+    });
+
+    it('clears blurred panels when switching from edit to view mode', () => {
+      const { children$, blurApi, blurCleanup, viewMode$ } = setupBlurTest();
+      children$.next({
+        snake: buildChild('snake', ['lizard']),
+        lizard: buildChild('lizard'),
+        sparrow: buildChild('sparrow'),
+      });
+
+      blurApi.setFocusedPanelId('snake');
+      expect(blurApi.blurredPanelIds$.value).toEqual(['sparrow']);
+
+      viewMode$.next('view');
+      expect(blurApi.blurredPanelIds$.value).toEqual([]);
       blurCleanup();
     });
 

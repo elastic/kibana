@@ -22,9 +22,7 @@ export function initializeTrackOverlay({ setFocusedPanelId, setRelatedPanelsIndi
   function clearOverlays() {
     hasOverlays$.next(false);
     setFocusedPanelId(undefined);
-    // Clear related panels indicator ID when closing overlays as well. If the user is editing a panel
-    // and selects a control to indicate its related panels, then exits edit mode, they're probably thinking of
-    // the indication state to be part of the edit operation and expect it to clear
+    // Clear related panels indicator ID when closing overlays as well
     setRelatedPanelsIndicatorId(undefined);
     overlayRef?.close();
   }
