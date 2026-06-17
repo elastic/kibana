@@ -104,6 +104,8 @@ export interface ExperimentalFeatures {
   subagents: boolean;
   /** Whether the todo list tool and task-management prompt are enabled */
   todos: boolean;
+  /** Whether the ask_user_question HITL tool is enabled */
+  askUserQuestion: boolean;
 }
 
 export interface AgentHandlerContext {
