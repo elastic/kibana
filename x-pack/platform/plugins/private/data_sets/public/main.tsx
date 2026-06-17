@@ -595,6 +595,7 @@ export const Main: FunctionComponent<MainProps> = ({ httpClient }) => {
           initialDataSource={
             dataSourceFlyout.kind === 'edit' ? dataSourceFlyout.dataSource : undefined
           }
+          existingDataSourceNames={items.map((ds) => ds.name)}
           onClose={() => setDataSourceFlyout({ kind: 'closed' })}
           onSave={handleDataSourceSave}
         />

@@ -49,6 +49,8 @@ import type { CreateDataSourceFlyoutFormValues } from './create_data_source_flyo
 export interface CreateDataSourceFlyoutProps {
   /** When set, the flyout opens in edit mode for this data source. */
   initialDataSource?: DataSource;
+  /** Existing names to prevent duplicates (create mode only). */
+  existingDataSourceNames?: readonly string[];
   onClose: () => void;
   /**
    * Persist a data source (create or update). Resolve `null` on success, or an error message to show in the flyout.
@@ -58,6 +60,7 @@ export interface CreateDataSourceFlyoutProps {
 
 export const CreateDataSourceFlyout: FunctionComponent<CreateDataSourceFlyoutProps> = ({
   initialDataSource,
+  existingDataSourceNames = [],
   onClose,
   onSave,
 }) => {
@@ -93,7 +96,22 @@ export const CreateDataSourceFlyout: FunctionComponent<CreateDataSourceFlyoutPro
     name: 'name',
     control,
     rules: {
-      required: createDataSourceFlyoutStrings.nameRequired(),
+      validate: (value: string) => {
+        const trimmed = value.trim();
+        if (!trimmed) {
+          return createDataSourceFlyoutStrings.nameRequired();
+        }
+
+        if (isEditMode) {
+          return true;
+        }
+
+        const normalized = trimmed.toLowerCase();
+        const isDuplicate = existingDataSourceNames.some(
+          (n) => n.trim().toLowerCase() === normalized
+        );
+        return isDuplicate ? createDataSourceFlyoutStrings.nameAlreadyExists() : true;
+      },
     },
   });
   const { field: descriptionField } = useController({
