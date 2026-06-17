@@ -54,13 +54,13 @@ export const InvestigationVisualization = ({ investigation }: InvestigationVisua
 
       <EuiTitle size="xs">
         <h4>
-          {i18n.translate('xpack.streams.investigation.rootCauseLabel', {
-            defaultMessage: 'Root Cause',
+          {i18n.translate('xpack.streams.investigation.contributingFactorsLabel', {
+            defaultMessage: 'Contributing Factors',
           })}
         </h4>
       </EuiTitle>
       <EuiSpacer size="xs" />
-      <EuiText size="s">{investigation.root_cause}</EuiText>
+      <EuiText size="s">{investigation.contributing_factors}</EuiText>
 
       <EuiSpacer size="s" />
       <EuiText size="s" color="subdued">

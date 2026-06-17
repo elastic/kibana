@@ -27,7 +27,7 @@ const investigationAgent = {
   name: 'Significant Events Investigator',
   description:
     'Investigates a significant event by querying observability signals (logs, traces, metrics), ' +
-    'reasoning about causality direction, and producing a root cause conclusion with supporting evidence.',
+    'reasoning about causality direction, and producing a contributing-factors conclusion with supporting evidence.',
   labels: ['observability', 'streams', 'significant-events', 'investigation'],
   avatar_icon: 'logoElastic',
   configuration: {
