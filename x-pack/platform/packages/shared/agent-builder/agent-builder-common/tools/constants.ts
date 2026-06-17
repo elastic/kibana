@@ -78,6 +78,7 @@ export const internalTools = {
   sleep: 'sleep',
   writeTodos: 'write_todos',
   loadSkill: 'load_skill',
+  askUserQuestion: 'ask_user_question',
 };
 
 export const isAttachmentTool = (toolName: string) =>
