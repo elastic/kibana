@@ -145,7 +145,7 @@ async function preValidate<Params extends RuleParams>({
   const { logger } = context;
   const validated = new Map<string, { id: string; rule: BulkCreateRulesItem<Params> }>();
   const errors: BulkOperationError[] = [];
-  const authPairs = new Map<string, { ruleTypeId: string; consumer: string }>();
+  const authPairs = new Map<string, Set<string>>();
 
   // Phase A1: per-rule in-memory checks, sequential, cheapest-first.
   await withSpan({ name: 'preValidate.checkInMemory', type: 'rules' }, async () => {
@@ -184,10 +184,9 @@ async function preValidate<Params extends RuleParams>({
           );
         }
 
-        const authzKey = `${data.alertTypeId}::${data.consumer}`;
-        if (!authPairs.has(authzKey)) {
-          authPairs.set(authzKey, { ruleTypeId: data.alertTypeId, consumer: data.consumer });
-        }
+        const consumers = authPairs.get(data.alertTypeId) ?? new Set<string>();
+        consumers.add(data.consumer);
+        authPairs.set(data.alertTypeId, consumers);
 
         validated.set(id, { id, rule });
       } catch (err) {
@@ -210,16 +209,16 @@ async function preValidate<Params extends RuleParams>({
       // Runs after A1 intentionally. A1 removes invalid/unregistered ruleTypeIds,
       // so we only authorize pairs that survived schema + registry checks.
       await context.authorization.bulkEnsureAuthorized({
-        ruleTypeIdConsumersPairs: [...authPairs.values()].map(({ ruleTypeId, consumer }) => ({
+        ruleTypeIdConsumersPairs: [...authPairs.entries()].map(([ruleTypeId, consumers]) => ({
           ruleTypeId,
-          consumers: [consumer],
+          consumers: [...consumers],
         })),
         operation: WriteOperations.Create,
         entity: AlertingAuthorizationEntity.Rule,
       });
     } catch (authzError) {
       context.auditLogger?.log(
-        ruleAuditEvent({ action: RuleAuditAction.CREATE, error: authzError })
+        ruleAuditEvent({ action: RuleAuditAction.BULK_CREATE, error: authzError })
       );
       throw authzError;
     }
@@ -364,7 +363,7 @@ async function runBatch<Params extends RuleParams>({
   for (const prepared of preparedRules.values()) {
     context.auditLogger?.log(
       ruleAuditEvent({
-        action: RuleAuditAction.CREATE,
+        action: RuleAuditAction.BULK_CREATE,
         outcome: 'unknown',
         savedObject: { type: RULE_SAVED_OBJECT_TYPE, id: prepared.id, name: prepared.name },
       })

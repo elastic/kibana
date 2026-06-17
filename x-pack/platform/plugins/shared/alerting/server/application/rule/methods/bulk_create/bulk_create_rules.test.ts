@@ -476,8 +476,7 @@ describe('bulkCreateRules', () => {
         expect(authorization.bulkEnsureAuthorized).toHaveBeenCalledTimes(1);
         const callArg = (authorization.bulkEnsureAuthorized as jest.Mock).mock.calls[0][0];
         expect(callArg.ruleTypeIdConsumersPairs).toEqual([
-          { ruleTypeId: '123', consumers: ['bar'] },
-          { ruleTypeId: '123', consumers: ['other'] },
+          { ruleTypeId: '123', consumers: ['bar', 'other'] },
         ]);
       });
 
@@ -503,7 +502,7 @@ describe('bulkCreateRules', () => {
           .map(([event]) => event)
           .filter(
             (e: { event?: { action: string; outcome?: string } }) =>
-              e?.event?.action === RuleAuditAction.CREATE && e?.event?.outcome === 'failure'
+              e?.event?.action === RuleAuditAction.BULK_CREATE && e?.event?.outcome === 'failure'
           );
         expect(failAudits).toHaveLength(1);
         expect(failAudits[0].kibana?.saved_object).toBeUndefined();
@@ -912,7 +911,7 @@ describe('bulkCreateRules', () => {
       const actions = (auditLogger.log as jest.Mock).mock.calls
         .map(([event]) => event?.event?.action)
         .filter(Boolean);
-      expect(actions.filter((a) => a === RuleAuditAction.CREATE)).toHaveLength(2);
+      expect(actions.filter((a) => a === RuleAuditAction.BULK_CREATE)).toHaveLength(2);
       expect(actions.filter((a) => a === RuleAuditAction.ENABLE)).toHaveLength(0);
     });
   });
