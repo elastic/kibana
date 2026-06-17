@@ -8,7 +8,7 @@
 import { z } from '@kbn/zod/v4';
 import { QUERY_STATUSES } from '../../../common/queries';
 import type { QueryStatus } from '../../../common/queries';
-import type { RuleUnbackedFilter } from '../../lib/streams/assets/query/query_client';
+import type { RuleUnbackedFilter } from '../../lib/streams/ki';
 
 export const queryStatusSchema = z
   .preprocess((val) => (typeof val === 'string' ? [val] : val), z.array(z.enum(QUERY_STATUSES)))
