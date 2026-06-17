@@ -46,6 +46,7 @@ export const SIEM_READINESS_INDICES = {
 export const RETENTION_SHORT_DS = `logs-siem-readiness-eval-short-${RANDOM_PREFIX}`;
 export const RETENTION_LONG_DS = `logs-siem-readiness-eval-long-${RANDOM_PREFIX}`;
 const RETENTION_INDEX_TEMPLATE_NAME = `siem-readiness-eval-retention-${RANDOM_PREFIX}`;
+const CONTINUITY_BAD_TEMPLATE_NAME = `siem-readiness-eval-continuity-bad-${RANDOM_PREFIX}`;
 
 export const SIEM_READINESS_PIPELINE_NAME = `siem-readiness-eval-fail-${RANDOM_PREFIX}`;
 export const SIEM_READINESS_PIPELINE_OK_NAME = `siem-readiness-eval-ok-${RANDOM_PREFIX}`;
@@ -398,12 +399,25 @@ export const seedSiemReadinessData = async ({
     ],
   });
 
-  // Create the continuityBad index with the failing pipeline as default_pipeline.
-  // Index must match logs-* so fetch_pipelines discovers it via index settings.
-  await esClient.indices.create({
-    index: SIEM_READINESS_INDICES.continuityBad,
-    settings: { index: { default_pipeline: SIEM_READINESS_PIPELINE_NAME } },
+  // continuityBad must match logs-* (fetch_pipelines discovers pipelines via logs-* index settings).
+  // logs-* matches the Fleet data-stream-only template — indices.create is rejected.
+  // Create a dedicated template with default_pipeline set so the backing index has it,
+  // then create the data stream explicitly.
+  await esClient.indices.putIndexTemplate({
+    name: CONTINUITY_BAD_TEMPLATE_NAME,
+    index_patterns: [SIEM_READINESS_INDICES.continuityBad],
+    data_stream: {},
+    priority: 500,
+    template: {
+      settings: { index: { default_pipeline: SIEM_READINESS_PIPELINE_NAME } },
+      mappings: {
+        properties: {
+          '@timestamp': { type: 'date' },
+        },
+      },
+    },
   });
+  await esClient.indices.createDataStream({ name: SIEM_READINESS_INDICES.continuityBad });
 
   // Attach the healthy pipeline to the network index as default_pipeline.
   await esClient.indices.putSettings({
@@ -533,6 +547,17 @@ export const cleanupSiemReadinessData = async ({
   } catch (error) {
     log.warning(
       `[siem-readiness] Failed to delete index template ${RETENTION_INDEX_TEMPLATE_NAME}: ${
+        error instanceof Error ? error.message : String(error)
+      }`
+    );
+  }
+
+  try {
+    await esClient.indices.deleteIndexTemplate({ name: CONTINUITY_BAD_TEMPLATE_NAME });
+    log.info(`[siem-readiness] Deleted index template ${CONTINUITY_BAD_TEMPLATE_NAME}`);
+  } catch (error) {
+    log.warning(
+      `[siem-readiness] Failed to delete index template ${CONTINUITY_BAD_TEMPLATE_NAME}: ${
         error instanceof Error ? error.message : String(error)
       }`
     );
