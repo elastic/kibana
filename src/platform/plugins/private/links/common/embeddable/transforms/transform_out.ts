@@ -9,7 +9,7 @@
 
 import type { Reference } from '@kbn/content-management-utils';
 import { transformTitlesOut } from '@kbn/presentation-publishing';
-import type { LinksState } from '../../../server';
+import type { LinksByValueState } from '../../../server';
 import { LINKS_LIBRARY_TYPE } from '../../constants';
 import type { LinksEmbeddableState, StoredLinksEmbeddableState } from '../types';
 import { type StoredLinksByValueState910, isLegacyState, transformLegacyState } from './bwc';
@@ -50,6 +50,6 @@ export function transformOut(
     links: transformLinksOut(updatedLinks, references).map((link) => ({
       ...link,
       ...(link.options && { options: getOptions(link.type, link.options) }),
-    })) as LinksState['links'],
+    })) as LinksByValueState['links'],
   };
 }

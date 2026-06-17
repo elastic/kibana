@@ -12,7 +12,7 @@ import { PlacementStrategy } from '@kbn/embeddable-plugin/public';
 
 import type { LinksEmbeddableState } from '../../common';
 import { LINKS_HORIZONTAL_LAYOUT } from '../../common/constants';
-import type { LinksState } from '../../server';
+import type { LinksByValueState } from '../../server';
 import { loadFromLibrary } from '../links_client/load_from_library';
 
 export async function getPlacementHints(serializedState?: LinksEmbeddableState) {
@@ -22,7 +22,9 @@ export async function getPlacementHints(serializedState?: LinksEmbeddableState) 
   let numLinks = 1;
   try {
     const refId = (serializedState as { ref_id?: string }).ref_id;
-    const linksState = refId ? await loadFromLibrary(refId) : (serializedState as LinksState);
+    const linksState = refId
+      ? await loadFromLibrary(refId)
+      : (serializedState as LinksByValueState);
     if (linksState.layout) layout = linksState.layout;
     if (linksState.links) numLinks = linksState.links.length;
   } catch (error) {

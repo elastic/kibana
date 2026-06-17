@@ -18,7 +18,7 @@ export type {
   LinksByReferenceState,
   LinksByValueState,
   LinksEmbeddableState,
-  LinksState,
+  LinksApiState,
 } from './types';
 
 export const plugin = async () => {

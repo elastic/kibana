@@ -13,7 +13,7 @@ import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/common';
 import type { VisualizationClient } from '@kbn/visualizations-plugin/public';
 
 import { LINKS_API_PATH, LINKS_LIBRARY_TYPE, PUBLIC_API_VERSION } from '../../common/constants';
-import type { LinksState } from '../../server';
+import type { LinksByValueState } from '../../server';
 import type { LinksCreateRequestBody, LinksCreateResponseBody } from '../../server/api/create';
 import type { LinksReadResponseBody } from '../../server/api/read';
 import type { LinksSearchRequestParams, LinksSearchResponseBody } from '../../server/api/search';
@@ -68,10 +68,9 @@ export const linksClient = {
   },
 };
 
-export function getLinksClient<Attr extends LinksState = LinksState>(): VisualizationClient<
-  typeof LINKS_LIBRARY_TYPE,
-  Attr
-> {
+export function getLinksClient<
+  Attr extends LinksByValueState = LinksByValueState
+>(): VisualizationClient<typeof LINKS_LIBRARY_TYPE, Attr> {
   return {
     get: async (id: string) => {
       const result = await linksClient.get(id);

@@ -25,7 +25,7 @@ import type { VisualizationClient, VisualizationsSetup } from '@kbn/visualizatio
 
 import type { LinksEmbeddableState } from '../common';
 import { APP_ICON, APP_NAME, LINKS_EMBEDDABLE_TYPE, LINKS_LIBRARY_TYPE } from '../common';
-import type { LinksState } from '../server';
+import type { LinksByValueState } from '../server';
 import { ADD_LINKS_PANEL_ACTION_ID } from './actions/constants';
 import { setKibanaServices } from './services/kibana_services';
 
@@ -119,9 +119,9 @@ export class LinksPlugin
                 const { getLinksClient } = await import('./links_client');
                 return await getLinksClient().search(request);
               },
-            } as VisualizationClient<typeof LINKS_LIBRARY_TYPE, LinksState>),
+            } as VisualizationClient<typeof LINKS_LIBRARY_TYPE, LinksByValueState>),
           toListItem(
-            linkItem: Omit<SOWithMetadata<LinksState>, 'attributes'> & {
+            linkItem: Omit<SOWithMetadata<LinksByValueState>, 'attributes'> & {
               attributes: { title: string; description?: string };
             }
           ) {

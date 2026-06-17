@@ -11,11 +11,11 @@ import { schema } from '@kbn/config-schema';
 import {
   asCodeMetaSchema,
   asCodePaginationResponseMetaSchema,
-  asCodeSearchRequestQuerySchema,
+  asCodeSearchRequestSchema,
   PAGINATION_MAX_SIZE,
 } from '@kbn/as-code-shared-schemas';
 
-export const searchRequestQuerySchema = asCodeSearchRequestQuerySchema;
+export const searchRequestQuerySchema = asCodeSearchRequestSchema;
 
 export const searchResponseBodySchema = schema.object({
   data: schema.arrayOf(

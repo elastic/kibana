@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DashboardLink, ExternalLink, LinksState } from '../types';
+import type { DashboardLink, ExternalLink, LinksByValueState } from '../types';
 
 export type StoredLink = StoredDashboardLink | StoredExternalLink;
-export type StoredLinksState = Omit<LinksState, 'links'> & {
+export type StoredLinksState = Omit<LinksByValueState, 'links'> & {
   links?: StoredLink[];
 };
 export type StoredDashboardLink = Omit<DashboardLink, 'destination'> &

@@ -16,7 +16,7 @@ import { transforms } from '../common/embeddable/transforms/transforms';
 import { registerRoutes } from './api';
 import { linksEmbeddableSchema } from './api/schemas';
 import { linksSavedObjectDefinition } from './links_saved_object';
-import type { LinksState } from './types';
+import type { LinksByValueState } from './types';
 
 export class LinksServerPlugin implements Plugin<object, object> {
   constructor() {}
@@ -28,7 +28,7 @@ export class LinksServerPlugin implements Plugin<object, object> {
       embeddable: EmbeddableSetup;
     }
   ) {
-    core.savedObjects.registerType<LinksState>(linksSavedObjectDefinition);
+    core.savedObjects.registerType<LinksByValueState>(linksSavedObjectDefinition);
     plugins.embeddable.registerEmbeddableServerDefinition(LINKS_EMBEDDABLE_TYPE, {
       title: 'Links',
       getTransforms: () => transforms,

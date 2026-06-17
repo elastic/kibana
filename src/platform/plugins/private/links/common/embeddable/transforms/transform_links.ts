@@ -12,13 +12,13 @@ import { omit } from 'lodash';
 import { v4 as uuidv4 } from 'uuid';
 import type {
   ExternalLink,
-  LinksState,
+  LinksByValueState,
   StoredDashboardLink,
   StoredLinksState,
 } from '../../../server';
 import { DASHBOARD_LINK_TYPE } from '../../constants';
 
-export function transformLinksIn(links: LinksState['links']) {
+export function transformLinksIn(links: LinksByValueState['links']) {
   const extractedReferences: Reference[] = [];
 
   const newLinks = links.map((link) => {
@@ -43,7 +43,7 @@ export function transformLinksIn(links: LinksState['links']) {
 export function transformLinksOut(
   links: StoredLinksState['links'],
   references: Reference[] = []
-): LinksState['links'] {
+): LinksByValueState['links'] {
   return (links ?? []).map((link) => {
     const { destinationRefName, ...rest } = link as StoredDashboardLink;
     if (link.type !== DASHBOARD_LINK_TYPE || !destinationRefName) {

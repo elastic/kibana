@@ -12,10 +12,10 @@ import { toStoredTags } from '@kbn/as-code-shared-transforms';
 
 import type { StoredLinksState } from '../../../server';
 import { LINKS_LIBRARY_TYPE } from '../../constants';
-import type { LinksByReferenceState, LinksByValueState, LinksEmbeddableState } from '../types';
+import type { LinksByReferenceState, LinksByValueState, LinksApiState } from '../types';
 import { transformLinksIn } from './transform_links';
 
-export function transformIn(state: LinksEmbeddableState): {
+export function transformIn(state: LinksApiState): {
   state: StoredLinksState;
   references: Reference[];
 } {

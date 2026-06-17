@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { tagSavedObjectTypeName } from '@kbn/saved-objects-tagging-plugin/common';
 import type { Reference } from '@kbn/content-management-utils';
 
 export function toStoredTags<State extends { tags?: string[] } = { tags?: string[] }>(
@@ -22,7 +21,7 @@ export function toStoredTags<State extends { tags?: string[] } = { tags?: string
   return {
     state: restOfState,
     references: Array.from(uniqueTagIds).map((tagId) => ({
-      type: tagSavedObjectTypeName,
+      type: 'tag',
       id: tagId,
       name: `tag-ref-${tagId}`,
     })),

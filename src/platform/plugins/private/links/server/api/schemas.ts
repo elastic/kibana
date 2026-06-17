@@ -111,7 +111,6 @@ export const linksByValueSchema = serializedTitlesSchema.extends(
   {
     links: linksArraySchema,
     layout: layoutSchema,
-    tags: getAsCodeTagsSchema(),
   },
   { meta: BY_VALUE_SCHEMA_META }
 );
@@ -136,3 +135,5 @@ export const linksEmbeddableSchema = schema.oneOf([linksByValueSchema, linksByRe
     description: 'Links embeddable schema',
   },
 });
+
+export const linksApiStateSchema = linksByValueSchema.extends({ tags: getAsCodeTagsSchema() });

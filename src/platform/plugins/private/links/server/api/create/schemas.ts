@@ -9,10 +9,10 @@
 
 import { schema } from '@kbn/config-schema';
 import { asCodeMetaSchema, MAX_ID_LENGTH } from '@kbn/as-code-shared-schemas';
-import { linksByValueSchema } from '../schemas';
+import { linksApiStateSchema } from '../schemas';
 import { LINKS_ID_DESCRIPTION } from '../constants';
 
-export const createRequestBodySchema = linksByValueSchema;
+export const createRequestBodySchema = linksApiStateSchema;
 
 export const createResponseBodySchema = schema.object({
   id: schema.string({
@@ -21,6 +21,6 @@ export const createResponseBodySchema = schema.object({
       description: LINKS_ID_DESCRIPTION,
     },
   }),
-  data: linksByValueSchema,
+  data: linksApiStateSchema,
   meta: asCodeMetaSchema,
 });
