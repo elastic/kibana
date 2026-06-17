@@ -6,7 +6,7 @@
  */
 
 import { test as baseTest } from '@kbn/scout';
-import type { ScoutPage, ScoutTestFixtures, ScoutWorkerFixtures } from '@kbn/scout';
+import type { PageObjects, ScoutPage, ScoutTestFixtures, ScoutWorkerFixtures } from '@kbn/scout';
 
 import type { SnapshotRestorePageObjects } from './page_objects';
 import { extendPageObjects } from './page_objects';
@@ -17,7 +17,7 @@ export interface SnapshotRestoreTestFixtures extends ScoutTestFixtures {
 
 export const test = baseTest.extend<SnapshotRestoreTestFixtures, ScoutWorkerFixtures>({
   pageObjects: async (
-    { pageObjects, page }: { pageObjects: SnapshotRestorePageObjects; page: ScoutPage },
+    { pageObjects, page }: { pageObjects: PageObjects; page: ScoutPage },
     use: (pageObjects: SnapshotRestorePageObjects) => Promise<void>
   ) => {
     await use(extendPageObjects(pageObjects, page));

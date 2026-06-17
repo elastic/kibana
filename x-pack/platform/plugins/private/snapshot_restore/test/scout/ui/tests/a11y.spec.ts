@@ -60,21 +60,20 @@ test.describe('Snapshot & Restore — accessibility', { tag: tags.stateful.class
     esClient,
   }) => {
     const { snapshotRestore } = pageObjects;
-    const repoName = 'testrepo';
-    const snapshotName = `testsnapshot${Date.now()}`;
-
-    await esClient.snapshot.createRepository({
-      name: repoName,
-      verify: true,
-      repository: { type: 'fs', settings: { location: 'temp' } },
-    });
-    await esClient.snapshot.create({
-      repository: repoName,
-      snapshot: snapshotName,
-      wait_for_completion: true,
-    });
+    const repoName = `testrepo-${Date.now()}`;
+    const snapshotName = `testsnapshot-${Date.now()}`;
 
     try {
+      await esClient.snapshot.createRepository({
+        name: repoName,
+        verify: true,
+        repository: { type: 'fs', settings: { location: 'temp' } },
+      });
+      await esClient.snapshot.create({
+        repository: repoName,
+        snapshot: snapshotName,
+        wait_for_completion: true,
+      });
       await browserAuth.loginAsAdmin();
       await page.gotoApp('management/data/snapshot_restore');
       await snapshotRestore.waitForSnapshotsTab({ state: 'hasSnapshots' });
@@ -104,15 +103,16 @@ test.describe('Snapshot & Restore — accessibility', { tag: tags.stateful.class
     esClient,
   }) => {
     const { snapshotRestore } = pageObjects;
-    const repoName = 'policyrepo';
-
-    await esClient.snapshot.createRepository({
-      name: repoName,
-      verify: true,
-      repository: { type: 'fs', settings: { location: 'temp' } },
-    });
+    const repoName = `policyrepo-${Date.now()}`;
+    const policyName = `testpolicy-${Date.now()}`;
 
     try {
+      await esClient.snapshot.createRepository({
+        name: repoName,
+        verify: true,
+        repository: { type: 'fs', settings: { location: 'temp' } },
+      });
+
       await browserAuth.loginAsAdmin();
       await page.gotoApp('management/data/snapshot_restore');
       await snapshotRestore.waitForSnapshotsTab({ state: 'noSnapshots' });
@@ -120,7 +120,7 @@ test.describe('Snapshot & Restore — accessibility', { tag: tags.stateful.class
 
       await test.step('page one', async () => {
         await snapshotRestore.fillCreateNewPolicyPageOne(
-          'testpolicy',
+          policyName,
           '<daily-snap-{now/d}>',
           repoName
         );
@@ -153,7 +153,7 @@ test.describe('Snapshot & Restore — accessibility', { tag: tags.stateful.class
       });
     } finally {
       await esClient.snapshot.deleteRepository({ name: [repoName] }).catch(() => {});
-      await esClient.slm.deleteLifecycle({ policy_id: 'testpolicy' }).catch(() => {});
+      await esClient.slm.deleteLifecycle({ policy_id: policyName }).catch(() => {});
     }
   });
 });
