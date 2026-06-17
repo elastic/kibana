@@ -412,14 +412,12 @@ const createInitializerCommand = ({
       eventEmitter,
     });
     initialState.mainActions = actions;
-    // G20 cleanup: question-list responses are consumed once per round.
+    // on-resume cleanup: ask_user_question responses are consumed once per round.
     for (const id of consumedPromptIds) {
       promptManager.delete(id);
     }
-    // If any tool-call step is still pending (empty results), executeTool must
-    // run it. Otherwise the only thing that was paused was ask_user_question —
-    // the synthesized action pair is already "completed", so we go straight to
-    // researchAgent and let the agent continue with the new messages in context.
+    // If any tool-call step is still pending (empty results), executeTool must run it.
+    // Otherwise the only thing that was paused was ask_user_question - so we go straight to the agent loop
     const hasPendingToolCall = lastRound.steps.some(
       (step) => isToolCallStep(step) && step.results.length === 0
     );
