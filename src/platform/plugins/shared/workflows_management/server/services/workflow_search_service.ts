@@ -195,7 +195,7 @@ export class WorkflowSearchService {
 
   async getWorkflowStats(
     spaceId: string,
-    options?: { includeExecutionStats?: boolean }
+    options?: { includeExecutionStats?: boolean; includeManagedExecutionStats?: boolean }
   ): Promise<WorkflowStatsDto> {
     const statsFilter = buildWorkflowFilters({
       space: { id: spaceId, includeGlobal: true },
@@ -227,7 +227,9 @@ export class WorkflowSearchService {
     };
 
     if (options?.includeExecutionStats) {
-      workflowsStats.executions = await this.getExecutionHistoryStats(spaceId);
+      workflowsStats.executions = await this.getExecutionHistoryStats(spaceId, {
+        includeManagedExecutions: options.includeManagedExecutionStats === true,
+      });
     }
 
     return workflowsStats;
@@ -292,7 +294,10 @@ export class WorkflowSearchService {
     }
   }
 
-  private async getExecutionHistoryStats(spaceId: string) {
+  private async getExecutionHistoryStats(
+    spaceId: string,
+    options?: { includeManagedExecutions?: boolean }
+  ) {
     try {
       const thirtyDaysAgo = new Date();
       thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
@@ -306,6 +311,9 @@ export class WorkflowSearchService {
               { range: { createdAt: { gte: thirtyDaysAgo.toISOString() } } },
               { term: { spaceId } },
             ],
+            ...(options?.includeManagedExecutions
+              ? {}
+              : { must_not: [{ term: { managed: true } }] }),
           },
         },
         aggs: {

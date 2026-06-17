@@ -728,6 +728,7 @@ describe('Workflow routes', () => {
 
       expect(mockApi.getWorkflowStats).toHaveBeenCalledWith('default-space', {
         includeExecutionStats: false,
+        includeManagedExecutionStats: false,
       });
       expect(response.ok).toHaveBeenCalledWith({ body: stats });
     });
@@ -759,6 +760,27 @@ describe('Workflow routes', () => {
 
       expect(mockApi.getWorkflowStats).toHaveBeenCalledWith('default-space', {
         includeExecutionStats: true,
+        includeManagedExecutionStats: false,
+      });
+    });
+
+    it('should include managed execution stats when user has managed execution read privilege', async () => {
+      const stats = { total: 3 };
+      mockApi.getWorkflowStats.mockResolvedValue(stats);
+      const request = httpServerMock.createKibanaRequest();
+      (request as any).authzResult = {
+        [WorkflowsManagementApiActions.read]: true,
+        [WorkflowsManagementApiActions.readExecution]: true,
+        [WorkflowsManagementApiActions.readManagedExecution]: true,
+      };
+      const response = mockResponse();
+      const context = createLicensingContext() as any;
+
+      await routeHandlers[key].handler(context, request, response);
+
+      expect(mockApi.getWorkflowStats).toHaveBeenCalledWith('default-space', {
+        includeExecutionStats: true,
+        includeManagedExecutionStats: true,
       });
     });
   });

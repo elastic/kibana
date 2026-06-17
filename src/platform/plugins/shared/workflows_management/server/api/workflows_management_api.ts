@@ -866,7 +866,10 @@ export class WorkflowsManagementApi {
     return this.workflowsService.listWaitingForInputSteps(spaceId, params);
   }
 
-  public async getWorkflowStats(spaceId: string, options?: { includeExecutionStats?: boolean }) {
+  public async getWorkflowStats(
+    spaceId: string,
+    options?: { includeExecutionStats?: boolean; includeManagedExecutionStats?: boolean }
+  ) {
     return this.workflowsService.getWorkflowStats(spaceId, options);
   }
 

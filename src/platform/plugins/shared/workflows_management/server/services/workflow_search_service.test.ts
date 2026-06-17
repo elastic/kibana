@@ -298,6 +298,50 @@ describe('WorkflowSearchService', () => {
           cancelled: 0,
         },
       ]);
+      expect(esClient.search).toHaveBeenCalledWith(
+        expect.objectContaining({
+          query: {
+            bool: {
+              must: expect.any(Array),
+              must_not: [{ term: { managed: true } }],
+            },
+          },
+        })
+      );
+    });
+
+    it('includes managed executions in history stats when includeManagedExecutionStats=true', async () => {
+      const { deps, storageClient, esClient } = makeDeps();
+      storageClient.search.mockResolvedValue({
+        aggregations: {
+          enabled_count: { doc_count: 1 },
+          disabled_count: { doc_count: 0 },
+        },
+      });
+      esClient.search.mockResolvedValue({
+        aggregations: {
+          daily_stats: {
+            buckets: [],
+          },
+        },
+      } as any);
+
+      const service = new WorkflowSearchService(deps);
+      await service.getWorkflowStats('default', {
+        includeExecutionStats: true,
+        includeManagedExecutionStats: true,
+      });
+
+      expect(esClient.search).toHaveBeenCalledWith(
+        expect.objectContaining({
+          query: {
+            bool: {
+              must: expect.any(Array),
+            },
+          },
+        })
+      );
+      expect(esClient.search.mock.calls[0][0].query.bool.must_not).toBeUndefined();
     });
 
     it('returns an empty execution-history array when the executions index is missing', async () => {
@@ -356,6 +400,28 @@ describe('WorkflowSearchService', () => {
       // name → name.keyword, other fields pass through verbatim
       expect(requestedAggs.name.terms.field).toBe('name.keyword');
       expect(requestedAggs.enabled.terms.field).toBe('enabled');
+
+      const expectedDefaultFilter = buildWorkflowFilters({
+        space: { id: 'default', includeGlobal: true },
+        deleted: 'not_deleted',
+        managed: 'unmanaged',
+      });
+      expect(storageClient.search.mock.calls[0][0].query.bool).toEqual(expectedDefaultFilter);
+    });
+
+    it('passes managed filter into the aggregation query', async () => {
+      const { deps, storageClient } = makeDeps();
+      storageClient.search.mockResolvedValue({ aggregations: {} });
+
+      const service = new WorkflowSearchService(deps);
+      await service.getWorkflowAggs(['tags'], 'default', { managedFilter: 'all' });
+
+      const expectedFilter = buildWorkflowFilters({
+        space: { id: 'default', includeGlobal: true },
+        deleted: 'not_deleted',
+        managed: 'all',
+      });
+      expect(storageClient.search.mock.calls[0][0].query.bool).toEqual(expectedFilter);
     });
 
     it('returns an empty response when the workflow index is missing', async () => {
