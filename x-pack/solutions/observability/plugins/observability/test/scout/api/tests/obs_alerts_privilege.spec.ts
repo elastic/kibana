@@ -105,7 +105,9 @@ apiTest.describe(
         await retryForSuccess(
           async () => {
             const logResponse = await apiClient.get(
-              `internal/alerting/rule/${enabledRuleId}/_execution_log?date_start=${encodeURIComponent(new Date(Date.now() - 60_000).toISOString())}&per_page=10`,
+              `internal/alerting/rule/${enabledRuleId}/_execution_log?date_start=${encodeURIComponent(
+                new Date(Date.now() - 60_000).toISOString()
+              )}&per_page=10`,
               { headers: eventLogHeaders, responseType: 'json' }
             );
             const body = logResponse.body as { data: Array<{ status: string }> };
@@ -151,26 +153,23 @@ apiTest.describe(
     apiTest.describe('with observabilityAlerts privilege', () => {
       apiTest.describe('rule CRUD denial', () => {
         for (const spec of RULE_SPECS) {
-          apiTest(
-            `cannot create a ${spec.ruleTypeId} rule`,
-            async ({ apiClient }) => {
-              const response = await apiClient.post('api/alerting/rule', {
-                headers: { ...KIBANA_HEADERS, ...withPrivilegeCreds.apiKeyHeader },
-                body: {
-                  name: 'Should fail',
-                  rule_type_id: spec.ruleTypeId,
-                  consumer: spec.consumer,
-                  schedule: { interval: '1m' },
-                  enabled: false,
-                  params: spec.params,
-                  actions: [],
-                  tags: [],
-                },
-                responseType: 'json',
-              });
-              expect(response).toHaveStatusCode(403);
-            }
-          );
+          apiTest(`cannot create a ${spec.ruleTypeId} rule`, async ({ apiClient }) => {
+            const response = await apiClient.post('api/alerting/rule', {
+              headers: { ...KIBANA_HEADERS, ...withPrivilegeCreds.apiKeyHeader },
+              body: {
+                name: 'Should fail',
+                rule_type_id: spec.ruleTypeId,
+                consumer: spec.consumer,
+                schedule: { interval: '1m' },
+                enabled: false,
+                params: spec.params,
+                actions: [],
+                tags: [],
+              },
+              responseType: 'json',
+            });
+            expect(response).toHaveStatusCode(403);
+          });
         }
 
         apiTest('cannot update a rule', async ({ apiClient }) => {
@@ -204,64 +203,54 @@ apiTest.describe(
         apiTest('cannot mute all alerts on a rule', async ({ apiClient }) => {
           const rule = createdRules[0];
           if (!rule) return;
-          const response = await apiClient.post(
-            `api/alerting/rule/${rule.ruleId}/_mute_all`,
-            { headers: { ...KIBANA_HEADERS, ...withPrivilegeCreds.apiKeyHeader } }
-          );
+          const response = await apiClient.post(`api/alerting/rule/${rule.ruleId}/_mute_all`, {
+            headers: { ...KIBANA_HEADERS, ...withPrivilegeCreds.apiKeyHeader },
+          });
           expect(response).toHaveStatusCode(403);
         });
 
         apiTest('cannot snooze a rule', async ({ apiClient }) => {
           const rule = createdRules[0];
           if (!rule) return;
-          const response = await apiClient.post(
-            `internal/alerting/rule/${rule.ruleId}/_snooze`,
-            {
-              headers: { ...KIBANA_HEADERS, ...withPrivilegeCreds.apiKeyHeader },
-              body: {
-                snooze_schedule: {
-                  duration: 3600000,
-                  rRule: {
-                    dtstart: new Date().toISOString(),
-                    tzid: 'UTC',
-                    count: 1,
-                  },
+          const response = await apiClient.post(`internal/alerting/rule/${rule.ruleId}/_snooze`, {
+            headers: { ...KIBANA_HEADERS, ...withPrivilegeCreds.apiKeyHeader },
+            body: {
+              snooze_schedule: {
+                duration: 3600000,
+                rRule: {
+                  dtstart: new Date().toISOString(),
+                  tzid: 'UTC',
+                  count: 1,
                 },
               },
-              responseType: 'json',
-            }
-          );
+            },
+            responseType: 'json',
+          });
           expect(response).toHaveStatusCode(403);
         });
       });
 
       apiTest.describe('per-alert mute/unmute', () => {
         for (const spec of RULE_SPECS) {
-          apiTest(
-            `can mute an alert instance for ${spec.ruleTypeId}`,
-            async ({ apiClient }) => {
-              const rule = createdRules.find((r) => r.ruleTypeId === spec.ruleTypeId);
-              if (!rule) return;
-              const response = await apiClient.post(
-                `api/alerting/rule/${rule.ruleId}/alert/${FAKE_ALERT_INSTANCE_ID}/_mute?validate_alerts_existence=false`,
-                { headers: { ...KIBANA_HEADERS, ...withPrivilegeCreds.apiKeyHeader } }
-              );
-              expect(response).toHaveStatusCode(204);
-            }
-          );
+          apiTest(`can mute an alert instance for ${spec.ruleTypeId}`, async ({ apiClient }) => {
+            const rule = createdRules.find((r) => r.ruleTypeId === spec.ruleTypeId);
+            if (!rule) return;
+            const response = await apiClient.post(
+              `api/alerting/rule/${rule.ruleId}/alert/${FAKE_ALERT_INSTANCE_ID}/_mute?validate_alerts_existence=false`,
+              { headers: { ...KIBANA_HEADERS, ...withPrivilegeCreds.apiKeyHeader } }
+            );
+            expect(response).toHaveStatusCode(204);
+          });
 
-          apiTest(
-            `can unmute an alert instance for ${spec.ruleTypeId}`,
-            async ({ apiClient }) => {
-              const rule = createdRules.find((r) => r.ruleTypeId === spec.ruleTypeId);
-              if (!rule) return;
-              const response = await apiClient.post(
-                `api/alerting/rule/${rule.ruleId}/alert/${FAKE_ALERT_INSTANCE_ID}/_unmute?validate_alerts_existence=false`,
-                { headers: { ...KIBANA_HEADERS, ...withPrivilegeCreds.apiKeyHeader } }
-              );
-              expect(response).toHaveStatusCode(204);
-            }
-          );
+          apiTest(`can unmute an alert instance for ${spec.ruleTypeId}`, async ({ apiClient }) => {
+            const rule = createdRules.find((r) => r.ruleTypeId === spec.ruleTypeId);
+            if (!rule) return;
+            const response = await apiClient.post(
+              `api/alerting/rule/${rule.ruleId}/alert/${FAKE_ALERT_INSTANCE_ID}/_unmute?validate_alerts_existence=false`,
+              { headers: { ...KIBANA_HEADERS, ...withPrivilegeCreds.apiKeyHeader } }
+            );
+            expect(response).toHaveStatusCode(204);
+          });
         }
       });
 
@@ -280,7 +269,10 @@ apiTest.describe(
           expect(response).toHaveStatusCode(200);
 
           const body = response.body as {
-            hits?: { total?: { value?: number }; hits?: Array<{ _source: Record<string, unknown> }> };
+            hits?: {
+              total?: { value?: number };
+              hits?: Array<{ _source: Record<string, unknown> }>;
+            };
           };
           expect(body.hits?.total?.value).toBeGreaterThan(0);
 
@@ -312,18 +304,15 @@ apiTest.describe(
     apiTest.describe('without observabilityAlerts privilege', () => {
       apiTest.describe('per-alert mute/unmute denial', () => {
         for (const spec of RULE_SPECS) {
-          apiTest(
-            `cannot mute an alert instance for ${spec.ruleTypeId}`,
-            async ({ apiClient }) => {
-              const rule = createdRules.find((r) => r.ruleTypeId === spec.ruleTypeId);
-              if (!rule) return;
-              const response = await apiClient.post(
-                `api/alerting/rule/${rule.ruleId}/alert/${FAKE_ALERT_INSTANCE_ID}/_mute?validate_alerts_existence=false`,
-                { headers: { ...KIBANA_HEADERS, ...withoutPrivilegeCreds.apiKeyHeader } }
-              );
-              expect(response).toHaveStatusCode(403);
-            }
-          );
+          apiTest(`cannot mute an alert instance for ${spec.ruleTypeId}`, async ({ apiClient }) => {
+            const rule = createdRules.find((r) => r.ruleTypeId === spec.ruleTypeId);
+            if (!rule) return;
+            const response = await apiClient.post(
+              `api/alerting/rule/${rule.ruleId}/alert/${FAKE_ALERT_INSTANCE_ID}/_mute?validate_alerts_existence=false`,
+              { headers: { ...KIBANA_HEADERS, ...withoutPrivilegeCreds.apiKeyHeader } }
+            );
+            expect(response).toHaveStatusCode(403);
+          });
 
           apiTest(
             `cannot unmute an alert instance for ${spec.ruleTypeId}`,
