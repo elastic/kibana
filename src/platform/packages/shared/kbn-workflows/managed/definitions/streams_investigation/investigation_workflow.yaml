@@ -35,7 +35,10 @@ steps:
     with:
       timeout: 1800s
       message: |
-        {{ inputs.question }}
+        Investigate the root cause of this significant event: {{ inputs.title }}
+
+        Summary: {{ inputs.summary }}
+        Discovery: {{ inputs.discovery_slug }}
 
         Data streams (use get_index_info to discover available fields in each):
         - Logs:    {{ inputs.stream_names[0] }}
