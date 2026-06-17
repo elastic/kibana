@@ -24,7 +24,7 @@ import { getSpaceForPackagePolicy } from '../spaces/helpers';
 
 const TASK_TYPE = 'fleet:bump_agent_policies';
 
-export function registerBumpAgentPoliciesTask(taskManagerSetup: TaskManagerSetupContract) {
+export function registerBumpMigratedAgentPoliciesTask(taskManagerSetup: TaskManagerSetupContract) {
   taskManagerSetup.registerTaskDefinitions({
     [TASK_TYPE]: {
       title: 'Fleet Bump policies',
@@ -123,7 +123,9 @@ export async function _updatePackagePoliciesThatNeedBump(
   }
 }
 
-export async function scheduleBumpAgentPoliciesTask(taskManagerStart: TaskManagerStartContract) {
+export async function scheduleBumpMigratedAgentPoliciesTask(
+  taskManagerStart: TaskManagerStartContract
+) {
   await taskManagerStart.ensureScheduled({
     id: `${TASK_TYPE}:${uuidv4()}`,
     scope: ['fleet'],
