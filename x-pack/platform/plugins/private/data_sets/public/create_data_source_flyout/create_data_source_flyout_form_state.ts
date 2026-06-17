@@ -22,6 +22,11 @@ export interface CreateDataSourceFlyoutFormSettings {
     auth: string;
     access_key: string;
     secret_key: string;
+    role_arn: string;
+    jwt_audience: string;
+    role_session_name: string;
+    sts_endpoint: string;
+    sts_region: string;
   };
   gcs: {
     project_id: string;
@@ -59,7 +64,18 @@ export interface CreateDataSourceFlyoutFormSettings {
 }
 
 export const emptyCreateDataSourceFormSettings = (): CreateDataSourceFlyoutFormSettings => ({
-  s3: { region: '', endpoint: '', auth: '', access_key: '', secret_key: '' },
+  s3: {
+    region: '',
+    endpoint: '',
+    auth: '',
+    access_key: '',
+    secret_key: '',
+    role_arn: '',
+    jwt_audience: '',
+    role_session_name: '',
+    sts_endpoint: '',
+    sts_region: '',
+  },
   gcs: { project_id: '', endpoint: '', token_uri: '', auth: '', credentialsJson: '' },
   azure: {
     endpoint: '',

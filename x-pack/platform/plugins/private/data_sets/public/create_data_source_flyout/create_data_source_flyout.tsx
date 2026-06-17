@@ -259,6 +259,7 @@ export const CreateDataSourceFlyout: FunctionComponent<CreateDataSourceFlyoutPro
             control={control}
             dataSourceType={dataSourceType}
             requireS3Credentials={!isEditMode}
+            requireS3FederatedIdentity={!isEditMode}
             requireGcsCredentials={!isEditMode}
             requireAzureCredentials={!isEditMode}
             unregister={unregister}

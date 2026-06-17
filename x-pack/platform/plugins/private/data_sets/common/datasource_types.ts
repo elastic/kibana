@@ -58,6 +58,11 @@ export interface S3DataSourceSettings {
 export interface S3DataSourceSettingsWithSecrets extends S3DataSourceSettings {
   access_key?: string;
   secret_key?: string;
+  role_arn?: string;
+  jwt_audience?: string;
+  role_session_name?: string;
+  sts_endpoint?: string;
+  sts_region?: string;
 }
 
 export type GCSDataSource = DataSourceCommon<'gcs', GCSDataSourceSettings>;

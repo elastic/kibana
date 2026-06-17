@@ -99,6 +99,12 @@ export const authenticationModeFromDataSource = (
 
   if (data.type === 's3') {
     if (
+      (typeof settings.role_arn === 'string' && settings.role_arn.trim()) ||
+      (typeof settings.jwt_audience === 'string' && settings.jwt_audience.trim())
+    ) {
+      return 'federated_identity';
+    }
+    if (
       (typeof settings.access_key === 'string' && settings.access_key.trim()) ||
       (typeof settings.secret_key === 'string' && settings.secret_key.trim())
     ) {

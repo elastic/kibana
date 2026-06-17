@@ -16,6 +16,11 @@ const s3SettingsWithSecretsSchema = schema.object({
   auth: optionalString,
   access_key: optionalString,
   secret_key: optionalString,
+  role_arn: optionalString,
+  jwt_audience: optionalString,
+  role_session_name: optionalString,
+  sts_endpoint: optionalString,
+  sts_region: optionalString,
 });
 
 const gcsSettingsWithSecretsSchema = schema.object({

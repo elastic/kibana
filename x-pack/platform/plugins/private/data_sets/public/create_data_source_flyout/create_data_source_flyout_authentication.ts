@@ -9,13 +9,19 @@ import { i18n } from '@kbn/i18n';
 
 import type { DataSourceType, DataSourceWithSecrets } from '../../common/datasource_types';
 
-/** S3 / GCS authentication modes (UI-only). */
-export type S3GcsAuthenticationMode = 'access_and_secret_keys';
+/** S3 authentication modes (UI-only). */
+export type S3AuthenticationMode = 'access_and_secret_keys' | 'federated_identity';
+
+/** GCS authentication modes (UI-only). */
+export type GcsAuthenticationMode = 'access_and_secret_keys';
 
 /** Azure authentication modes (UI-only; `settings.auth` is never submitted). */
 export type AzureAuthenticationMode = 'credentials' | 'connection_string' | 'sas_token';
 
-export type CreateDataSourceAuthenticationMode = S3GcsAuthenticationMode | AzureAuthenticationMode;
+export type CreateDataSourceAuthenticationMode =
+  | S3AuthenticationMode
+  | GcsAuthenticationMode
+  | AzureAuthenticationMode;
 
 export const DATA_SOURCE_TYPES_WITH_AUTHENTICATION: ReadonlySet<DataSourceType> = new Set([
   's3',
@@ -61,6 +67,23 @@ export const getCreateDataSourceAuthenticationOptions = (
     ];
   }
 
+  if (dataSourceType === 's3') {
+    return [
+      {
+        value: 'access_and_secret_keys',
+        text: i18n.translate('dataSets.createFlyout.authentication.accessAndSecretKeys', {
+          defaultMessage: 'Access and Secret Keys',
+        }),
+      },
+      {
+        value: 'federated_identity',
+        text: i18n.translate('dataSets.createFlyout.authentication.federatedIdentity', {
+          defaultMessage: 'Federated Identity',
+        }),
+      },
+    ];
+  }
+
   return [
     {
       value: 'access_and_secret_keys',
@@ -77,6 +100,9 @@ export const showsAuthenticationCredentialFields = (
 ): boolean => {
   if (dataSourceType === 'azure') {
     return mode === 'credentials' || mode === 'connection_string' || mode === 'sas_token';
+  }
+  if (dataSourceType === 's3') {
+    return mode === 'access_and_secret_keys' || mode === 'federated_identity';
   }
   return mode === 'access_and_secret_keys';
 };
@@ -98,17 +124,34 @@ export const applyAuthenticationModeToDataSource = (
       const {
         access_key: _accessKey,
         secret_key: _secretKey,
+        role_arn: _roleArn,
+        jwt_audience: _jwtAudience,
+        role_session_name: _roleSessionName,
+        sts_endpoint: _stsEndpoint,
+        sts_region: _stsRegion,
         auth: _auth,
         ...rest
       } = data.settings;
+
+      let applied: Record<string, unknown> = {};
+      if (mode === 'access_and_secret_keys') {
+        applied = { access_key: data.settings.access_key, secret_key: data.settings.secret_key };
+      } else if (mode === 'federated_identity') {
+        applied = {
+          role_arn: data.settings.role_arn,
+          jwt_audience: data.settings.jwt_audience,
+          role_session_name: data.settings.role_session_name,
+          sts_endpoint: data.settings.sts_endpoint,
+          sts_region: data.settings.sts_region,
+        };
+      }
+
       return {
         ...data,
         settings: {
           ...rest,
           ...authSettings,
-          ...(mode === 'access_and_secret_keys'
-            ? { access_key: data.settings.access_key, secret_key: data.settings.secret_key }
-            : {}),
+          ...applied,
         },
       };
     }

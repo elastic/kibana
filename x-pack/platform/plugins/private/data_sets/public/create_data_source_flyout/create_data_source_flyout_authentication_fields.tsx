@@ -19,12 +19,16 @@ import {
 } from './create_data_source_flyout_authentication';
 import { CreateDataSourceFlyoutTypeSettingsAzureAuthenticationFields } from './create_data_source_flyout_type_settings_azure';
 import { CreateDataSourceFlyoutTypeSettingsGcsCredentials } from './create_data_source_flyout_type_settings_gcs';
-import { CreateDataSourceFlyoutTypeSettingsS3Credentials } from './create_data_source_flyout_type_settings_s3';
+import {
+  CreateDataSourceFlyoutTypeSettingsS3Credentials,
+  CreateDataSourceFlyoutTypeSettingsS3FederatedIdentity,
+} from './create_data_source_flyout_type_settings_s3';
 
 export function CreateDataSourceFlyoutAuthenticationFields({
   authenticationMode,
   dataSourceType,
   requireS3Credentials,
+  requireS3FederatedIdentity,
   requireGcsCredentials,
   requireAzureCredentials,
   control,
@@ -33,6 +37,7 @@ export function CreateDataSourceFlyoutAuthenticationFields({
   authenticationMode: CreateDataSourceAuthenticationMode;
   dataSourceType: DataSourceType;
   requireS3Credentials: boolean;
+  requireS3FederatedIdentity: boolean;
   requireGcsCredentials: boolean;
   requireAzureCredentials: boolean;
   control: Control<CreateDataSourceFlyoutFormValues, any>;
@@ -48,11 +53,18 @@ export function CreateDataSourceFlyoutAuthenticationFields({
   return (
     <>
       <EuiSpacer size="m" />
-      {dataSourceType === 's3' ? (
+      {dataSourceType === 's3' && authenticationMode === 'access_and_secret_keys' ? (
         <CreateDataSourceFlyoutTypeSettingsS3Credentials
           control={control}
           unregister={unregister}
           areCredentialsRequired={requireS3Credentials}
+        />
+      ) : null}
+      {dataSourceType === 's3' && authenticationMode === 'federated_identity' ? (
+        <CreateDataSourceFlyoutTypeSettingsS3FederatedIdentity
+          control={control}
+          unregister={unregister}
+          areFieldsRequired={requireS3FederatedIdentity}
         />
       ) : null}
       {dataSourceType === 'gcs' ? (
