@@ -255,10 +255,7 @@ enabled:
   - x-pack/platform/test/functional/apps/lens/group13/config.ts
   - x-pack/platform/test/functional/apps/lens/group14/config.ts
   - x-pack/platform/test/functional/apps/lens/group15/config.ts
-  - x-pack/platform/test/functional/apps/lens/open_in_lens/tsvb_1/config.ts
-  - x-pack/platform/test/functional/apps/lens/open_in_lens/tsvb_2/config.ts
-  - x-pack/platform/test/functional/apps/lens/open_in_lens/tsvb_3/config.ts
-  - x-pack/platform/test/functional/apps/lens/open_in_lens/tsvb_4/config.ts
+
   - x-pack/platform/test/functional/apps/lens/open_in_lens/agg_based_1/config.ts
   - x-pack/platform/test/functional/apps/lens/open_in_lens/agg_based_2/config.ts
   - x-pack/platform/test/functional/apps/lens/open_in_lens/agg_based_3/config.ts
