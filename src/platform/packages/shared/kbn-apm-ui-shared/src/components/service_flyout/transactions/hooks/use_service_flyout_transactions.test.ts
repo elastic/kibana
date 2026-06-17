@@ -11,6 +11,7 @@ import { renderHook, waitFor } from '@testing-library/react';
 import type { HttpStart } from '@kbn/core-http-browser';
 import { LatencyAggregationType } from '@kbn/apm-types';
 import { useServiceFlyoutTransactions } from './use_service_flyout_transactions';
+import { usePreferredTransactionDataSource } from './use_preferred_transaction_data_source';
 
 jest.mock('./use_preferred_transaction_data_source', () => ({
   usePreferredTransactionDataSource: jest.fn().mockReturnValue({
@@ -22,7 +23,10 @@ jest.mock('./use_preferred_transaction_data_source', () => ({
 const START = '2024-01-01T00:00:00.000Z';
 const END = '2024-01-01T01:00:00.000Z';
 
+const mockAddDanger = jest.fn();
+
 const BASE_PARAMS = {
+  notifications: { toasts: { addDanger: mockAddDanger } } as any,
   serviceName: 'my-service',
   environment: 'production',
   start: START,
@@ -40,7 +44,12 @@ function makeHttp(resolvedValue: object) {
   } as unknown as HttpStart;
 }
 
+const mockedUsePreferredTransactionDataSource = usePreferredTransactionDataSource as jest.Mock;
+
 describe('useServiceFlyoutTransactions', () => {
+  beforeEach(() => {
+    mockAddDanger.mockClear();
+  });
   it('calls http.get with the correct endpoint and params', async () => {
     const http = makeHttp(EMPTY_RESPONSE);
 
@@ -119,7 +128,6 @@ describe('useServiceFlyoutTransactions', () => {
     const { result } = renderHook(() => useServiceFlyoutTransactions({ http, ...BASE_PARAMS }));
 
     await waitFor(() => expect(result.current.items).toHaveLength(1));
-
     expect(result.current.items[0]).toEqual({
       name: 'GET /api/orders',
       transactionType: 'request',
@@ -252,5 +260,44 @@ describe('useServiceFlyoutTransactions', () => {
     resolveRequest(EMPTY_RESPONSE);
 
     await waitFor(() => expect(result.current.isLoading).toBe(false));
+  });
+
+  describe('when the data source fetch fails', () => {
+    const fetchError = new Error('network error');
+    const http = makeHttp(EMPTY_RESPONSE);
+
+    beforeAll(() => {
+      mockedUsePreferredTransactionDataSource.mockReturnValue({
+        dataSource: undefined,
+        isLoading: false,
+        error: fetchError,
+      });
+    });
+
+    afterAll(() => {
+      mockedUsePreferredTransactionDataSource.mockReturnValue({
+        dataSource: { documentType: 'transactionMetric', rollupInterval: '1m' },
+        isLoading: false,
+      });
+    });
+
+    it('returns the error in the hook result', async () => {
+      const { result } = renderHook(() => useServiceFlyoutTransactions({ http, ...BASE_PARAMS }));
+      await waitFor(() => expect(result.current.error).toBe(fetchError));
+    });
+
+    it('fires a danger toast with the error title', async () => {
+      renderHook(() => useServiceFlyoutTransactions({ http, ...BASE_PARAMS }));
+      await waitFor(() =>
+        expect(mockAddDanger).toHaveBeenCalledWith(
+          expect.objectContaining({ title: 'Failed to load transaction data' })
+        )
+      );
+    });
+
+    it('does not call http.get for the main statistics', () => {
+      renderHook(() => useServiceFlyoutTransactions({ http, ...BASE_PARAMS }));
+      expect(http.get).not.toHaveBeenCalled();
+    });
   });
 });

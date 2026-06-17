@@ -10,6 +10,7 @@
 import React, { useCallback, useState } from 'react';
 import { EuiLink, EuiText } from '@elastic/eui';
 import type { HttpStart } from '@kbn/core-http-browser';
+import type { NotificationsStart } from '@kbn/core/public';
 import type { LatencyAggregationType } from '@kbn/apm-types';
 import {
   SERVICE_ALERTS_LOCATOR_ID,
@@ -51,6 +52,7 @@ const MAX_GROUPS_TOOLTIP = (
 
 interface ServiceFlyoutTransactionsSectionProps {
   http: HttpStart;
+  notifications: NotificationsStart;
   serviceName: string;
   environment: string;
   start: string;
@@ -62,6 +64,7 @@ interface ServiceFlyoutTransactionsSectionProps {
 
 export function ServiceFlyoutTransactionsSection({
   http,
+  notifications,
   serviceName,
   environment,
   start,
@@ -72,16 +75,18 @@ export function ServiceFlyoutTransactionsSection({
 }: ServiceFlyoutTransactionsSectionProps) {
   const [searchQuery, setSearchQuery] = useState('');
 
-  const { items, isLoading, maxCountExceeded, hasActiveAlerts } = useServiceFlyoutTransactions({
-    http,
-    serviceName,
-    environment,
-    start,
-    end,
-    transactionType,
-    latencyAggregationType,
-    searchQuery,
-  });
+  const { items, isLoading, maxCountExceeded, hasActiveAlerts, error } =
+    useServiceFlyoutTransactions({
+      http,
+      notifications,
+      serviceName,
+      environment,
+      start,
+      end,
+      transactionType,
+      latencyAggregationType,
+      searchQuery,
+    });
 
   const openInTransactionsLocator = locators?.get<ServiceTransactionsLocatorParams>(
     SERVICE_TRANSACTIONS_LOCATOR_ID
@@ -125,6 +130,13 @@ export function ServiceFlyoutTransactionsSection({
 
   return (
     <TransactionsTable
+      errorMessage={
+        error
+          ? i18n.translate('apmUiShared.serviceFlyout.transactions.dataSourceError', {
+              defaultMessage: 'Failed to load transaction data',
+            })
+          : undefined
+      }
       items={items}
       isLoading={isLoading}
       maxCountExceeded={maxCountExceeded}

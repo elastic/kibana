@@ -7,9 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useMemo, useState } from 'react';
-import type { HttpStart } from '@kbn/core-http-browser';
+import { useEffect, useMemo, useState } from 'react';
+import type { HttpStart, IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser';
+import type { NotificationsStart } from '@kbn/core/public';
 import type { LatencyAggregationType } from '@kbn/apm-types';
+import { i18n } from '@kbn/i18n';
 import { useAbortableAsync } from '@kbn/react-hooks';
 import type { TransactionGroup } from '../../../transactions_table/types';
 import { usePreferredTransactionDataSource } from './use_preferred_transaction_data_source';
@@ -31,6 +33,7 @@ interface MainStatisticsResponse {
 
 export function useServiceFlyoutTransactions({
   http,
+  notifications,
   serviceName,
   environment,
   start,
@@ -40,6 +43,7 @@ export function useServiceFlyoutTransactions({
   searchQuery,
 }: {
   http: HttpStart;
+  notifications: NotificationsStart;
   serviceName: string;
   environment: string;
   start: string;
@@ -50,11 +54,40 @@ export function useServiceFlyoutTransactions({
 }) {
   const enabled = !!transactionType && !!latencyAggregationType;
 
-  const { dataSource, isLoading: isDataSourceLoading } = usePreferredTransactionDataSource({
+  const {
+    dataSource,
+    isLoading: isDataSourceLoading,
+    error: dataSourceError,
+  } = usePreferredTransactionDataSource({
     http,
     start,
     end,
   });
+
+  useEffect(() => {
+    if (
+      !dataSourceError ||
+      (dataSourceError instanceof Error && dataSourceError.name === 'AbortError')
+    )
+      return;
+    const err = dataSourceError as Error | IHttpFetchError<ResponseErrorBody>;
+    const toastMessage =
+      'response' in err
+        ? [
+            err.body?.message ?? err.response?.statusText,
+            err.response?.status != null ? `(${err.response.status})` : undefined,
+            err.response?.url,
+          ]
+            .filter(Boolean)
+            .join(' ')
+        : undefined;
+    notifications.toasts.addDanger({
+      title: i18n.translate('apmUiShared.serviceFlyout.transactions.dataSourceErrorToast', {
+        defaultMessage: 'Failed to load transaction data',
+      }),
+      text: toastMessage,
+    });
+  }, [dataSourceError, notifications.toasts]);
 
   const [maxCountExceeded, setMaxCountExceeded] = useState(false);
   const serverSearchQuery = maxCountExceeded ? searchQuery : '';
@@ -121,5 +154,6 @@ export function useServiceFlyoutTransactions({
     isLoading: isLoading || isDataSourceLoading,
     maxCountExceeded: response?.maxCountExceeded ?? false,
     hasActiveAlerts: response?.hasActiveAlerts ?? false,
+    error: dataSourceError,
   };
 }
