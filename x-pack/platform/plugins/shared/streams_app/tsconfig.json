@@ -119,5 +119,6 @@
     "@kbn/agent-builder-plugin",
     "@kbn/agent-builder-browser",
     "@kbn/agent-builder-common",
+    "@kbn/core-chrome-layout-constants",
   ]
 }
