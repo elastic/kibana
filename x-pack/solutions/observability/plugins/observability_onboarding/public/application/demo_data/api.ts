@@ -73,8 +73,92 @@ export const setupLogsAnalysisModule = (http: HttpStart): Promise<unknown> =>
 export const setupLogsCategoriesModule = (http: HttpStart): Promise<unknown> =>
   setupMlModule(http, 'logs_ui_categories', { indexPatternName: LOGS_INDEX_PATTERN });
 
-export const setupMetricsHostsModule = (http: HttpStart): Promise<unknown> =>
-  setupMlModule(http, 'metrics_ui_hosts', { indexPatternName: METRICS_INDEX_PATTERN });
+/**
+ * The `metrics_ui_hosts` module's network jobs query `system.network.in/out.bytes`
+ * (Metricbeat system module schema). Synthtrace emits host network throughput as
+ * the ECS fields `host.network.ingress/egress.bytes`, so without these overrides
+ * the network datafeeds match zero documents. We redirect their query + aggregation
+ * to the fields the demo data actually contains. The memory job already matches.
+ */
+const buildNetworkDatafeedOverride = (
+  jobId: 'hosts_network_in' | 'hosts_network_out',
+  field: string,
+  maxAggName: string,
+  derivativeAggName: string,
+  derivativeParam: string
+) => ({
+  job_id: jobId,
+  query: { bool: { must: [{ exists: { field } }] } },
+  aggregations: {
+    'host.name': {
+      terms: { field: 'host.name', size: 100 },
+      aggregations: {
+        buckets: {
+          date_histogram: { field: '@timestamp', fixed_interval: '5m' },
+          aggregations: {
+            '@timestamp': { max: { field: '@timestamp' } },
+            [maxAggName]: { max: { field } },
+            [derivativeAggName]: { derivative: { buckets_path: maxAggName } },
+            positive_only: {
+              bucket_script: {
+                buckets_path: { [derivativeParam]: `${derivativeAggName}.value` },
+                script: `params.${derivativeParam} > 0.0 ? params.${derivativeParam} : 0.0`,
+              },
+            },
+          },
+        },
+      },
+    },
+  },
+});
+
+const METRICS_HOSTS_DATAFEED_OVERRIDES = [
+  buildNetworkDatafeedOverride(
+    'hosts_network_in',
+    'host.network.ingress.bytes',
+    'bytes_in_max',
+    'bytes_in_derivative',
+    'in_derivative'
+  ),
+  buildNetworkDatafeedOverride(
+    'hosts_network_out',
+    'host.network.egress.bytes',
+    'bytes_out_max',
+    'bytes_out_derivative',
+    'out_derivative'
+  ),
+];
+
+/** Default infra metrics source id; part of the job-id prefix the Hosts UI expects. */
+const INFRA_METRICS_SOURCE_ID = 'default';
+
+/**
+ * Resolves the active Kibana space id so created job ids match what the
+ * Infrastructure UI looks for. Falls back to the default space on any error.
+ */
+const getActiveSpaceId = async (http: HttpStart): Promise<string> => {
+  try {
+    const space = await http.get<{ id?: string }>('/internal/spaces/_active_space');
+    return space?.id ?? 'default';
+  } catch {
+    return 'default';
+  }
+};
+
+/**
+ * Sets up the host metrics anomaly-detection jobs. We deliberately reuse the
+ * Infrastructure UI's job-id prefix (`kibana-metrics-ui-<space>-<source>-`) so
+ * the jobs are recognized on the Hosts page and surface there under "Anomaly
+ * detection", instead of being orphaned under a custom prefix.
+ */
+export const setupMetricsHostsModule = async (http: HttpStart): Promise<unknown> => {
+  const spaceId = await getActiveSpaceId(http);
+  return setupMlModule(http, 'metrics_ui_hosts', {
+    indexPatternName: METRICS_INDEX_PATTERN,
+    prefix: `kibana-metrics-ui-${spaceId}-${INFRA_METRICS_SOURCE_ID}-`,
+    datafeedOverrides: METRICS_HOSTS_DATAFEED_OVERRIDES,
+  });
+};
 
 export interface SynthtraceConnectionOverride {
   esUrl?: string;
