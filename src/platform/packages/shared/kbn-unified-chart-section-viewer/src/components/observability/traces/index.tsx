@@ -36,7 +36,7 @@ function TraceMetricsGrid({
   breakdownField,
   onBreakdownFieldChange,
 }: UnifiedMetricsGridProps) {
-  const { query, dataView } = fetchParams;
+  const { query, dataView, columns, isESQLQuery } = fetchParams;
   const esqlQuery = useEsqlQueryInfo({
     query: query && 'esql' in query ? query.esql : '',
   });
@@ -79,10 +79,18 @@ function TraceMetricsGrid({
           dataView={dataView}
           breakdown={{ field: breakdownDataViewField }}
           onBreakdownFieldChange={handleBreakdownFieldChange}
+          esqlColumns={isESQLQuery ? columns : undefined}
         />
       ) : undefined,
     }),
-    [renderToggleActions, dataView, breakdownDataViewField, handleBreakdownFieldChange]
+    [
+      renderToggleActions,
+      dataView,
+      breakdownDataViewField,
+      handleBreakdownFieldChange,
+      columns,
+      isESQLQuery,
+    ]
   );
 
   const indexPattern = dataView?.getIndexPattern();
