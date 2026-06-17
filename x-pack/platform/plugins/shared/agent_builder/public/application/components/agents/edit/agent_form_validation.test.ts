@@ -89,7 +89,7 @@ describe('agentFormSchema avatar_symbol', () => {
     id: 'my-agent',
     name: 'My Agent',
     description: 'A test agent',
-    accessControl: { scope: 'private' as const, entries: [] },
+    access_control: { scope: 'private' as const, entries: [] },
     configuration: { tools: [] },
   };
 

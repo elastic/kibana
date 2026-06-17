@@ -39,7 +39,7 @@ describe('AgentAccessControlScopeBadge', () => {
       <AgentAccessControlScopeBadge
         agent={{
           ...baseAgent,
-          accessControl: { scope: AgentAccessControlScope.Private, entries: [] },
+          access_control: { scope: AgentAccessControlScope.Private, entries: [] },
         }}
       />
     );
@@ -55,7 +55,7 @@ describe('AgentAccessControlScopeBadge', () => {
       <AgentAccessControlScopeBadge
         agent={{
           ...baseAgent,
-          accessControl: { scope: AgentAccessControlScope.Shared, entries: [] },
+          access_control: { scope: AgentAccessControlScope.Shared, entries: [] },
         }}
       />
     );
@@ -71,7 +71,7 @@ describe('AgentAccessControlScopeBadge', () => {
       <AgentAccessControlScopeBadge
         agent={{
           ...baseAgent,
-          accessControl: { scope: AgentAccessControlScope.Public, entries: [] },
+          access_control: { scope: AgentAccessControlScope.Public, entries: [] },
         }}
       />
     );

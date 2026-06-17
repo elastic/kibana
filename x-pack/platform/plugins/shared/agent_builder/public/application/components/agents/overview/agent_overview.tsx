@@ -70,7 +70,7 @@ export const AgentOverview: React.FC = () => {
     if (!isExperimentalFeaturesEnabled || !agent) return false;
     return canChangeAgentAccessControlScope({
       agentId: agent.id,
-      accessControl: agent.accessControl,
+      access_control: agent.access_control,
       owner: agent.created_by,
       currentUser: currentUser ?? undefined,
       isAdmin,

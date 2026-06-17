@@ -38,7 +38,7 @@ export const hasReadAccess = ({
   isAdmin: boolean;
 }): boolean =>
   hasAgentReadAccess({
-    accessControl: sourceToAccessControl(source),
+    access_control: sourceToAccessControl(source),
     owner: sourceToOwner(source),
     currentUser: user,
     isAdmin,
@@ -54,7 +54,7 @@ export const hasUseAccess = ({
   isAdmin: boolean;
 }): boolean =>
   hasAgentUseAccess({
-    accessControl: sourceToAccessControl(source),
+    access_control: sourceToAccessControl(source),
     owner: sourceToOwner(source),
     currentUser: user,
     isAdmin,
@@ -70,7 +70,7 @@ export const hasWriteAccess = ({
   isAdmin: boolean;
 }): boolean =>
   hasAgentWriteAccess({
-    accessControl: sourceToAccessControl(source),
+    access_control: sourceToAccessControl(source),
     owner: sourceToOwner(source),
     currentUser: user,
     isAdmin,
@@ -86,7 +86,7 @@ export const hasDeleteAccess = ({
   isAdmin: boolean;
 }): boolean =>
   canDeleteAgent({
-    accessControl: sourceToAccessControl(source),
+    access_control: sourceToAccessControl(source),
     owner: sourceToOwner(source),
     currentUser: user,
     isAdmin,
@@ -103,17 +103,17 @@ export const hasManageAccessControlAccess = ({
 }): boolean =>
   canManageAgentAccessControl({
     agentId: source.id,
-    accessControl: sourceToAccessControl(source),
+    access_control: sourceToAccessControl(source),
     owner: sourceToOwner(source),
     currentUser: user,
     isAdmin,
   });
 
 /**
- * Strips `accessControl.entries` from a returned agent definition when the caller is not allowed
+ * Strips `access_control.entries` from a returned agent definition when the caller is not allowed
  * to manage the agent access control.
  */
-export const redactAccessControlForCaller = <T extends { accessControl?: AgentAccessControl }>({
+export const redactAccessControlForCaller = <T extends { access_control?: AgentAccessControl }>({
   definition,
   source,
   user,
@@ -124,14 +124,14 @@ export const redactAccessControlForCaller = <T extends { accessControl?: AgentAc
   user: CurrentUser;
   isAdmin: boolean;
 }): T => {
-  if (!definition.accessControl || definition.accessControl.entries.length === 0) {
+  if (!definition.access_control || definition.access_control.entries.length === 0) {
     return definition;
   }
   const canManage = hasManageAccessControlAccess({ source, user, isAdmin });
   if (canManage) {
     return definition;
   }
-  return { ...definition, accessControl: { ...definition.accessControl, entries: [] } };
+  return { ...definition, access_control: { ...definition.access_control, entries: [] } };
 };
 
 /**
@@ -202,14 +202,14 @@ export const validateAccessControlUpdateAccess = ({
   isAdmin: boolean;
 }): boolean => {
   const currentScope = source.access_control?.scope ?? AgentAccessControlScope.Public;
-  const nextScope = update.accessControl?.scope;
+  const nextScope = update.access_control?.scope;
   const isScopeChange = nextScope !== undefined && nextScope !== currentScope;
 
   return (
     !isScopeChange ||
     canChangeAgentAccessControlScope({
       agentId: source.id,
-      accessControl: sourceToAccessControl(source),
+      access_control: sourceToAccessControl(source),
       owner: sourceToOwner(source),
       currentUser: user,
       isAdmin,

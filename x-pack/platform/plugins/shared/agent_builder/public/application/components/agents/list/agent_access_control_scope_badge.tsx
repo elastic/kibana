@@ -25,7 +25,7 @@ export interface AgentAccessControlScopeBadgeProps {
 }
 
 const accessControlEntryCount = (agent: AgentDefinition): number =>
-  agent.accessControl?.entries?.length ?? 0;
+  agent.access_control?.entries?.length ?? 0;
 
 export const AgentAccessControlScopeBadge: React.FC<AgentAccessControlScopeBadgeProps> = ({
   agent,
@@ -50,7 +50,7 @@ export const AgentAccessControlScopeBadge: React.FC<AgentAccessControlScopeBadge
     );
   }
 
-  const accessControlScope = agent.accessControl?.scope ?? AgentAccessControlScope.Public;
+  const accessControlScope = agent.access_control?.scope ?? AgentAccessControlScope.Public;
   const accessControlCount = accessControlEntryCount(agent);
   const tooltip =
     accessControlCount > 0

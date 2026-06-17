@@ -37,7 +37,7 @@ export const createMockedAgent = (parts: Partial<AgentDefinition> = {}): MockedA
     configuration: {
       tools: [],
     },
-    accessControl: { scope: AgentAccessControlScope.Public, entries: [] },
+    access_control: { scope: AgentAccessControlScope.Public, entries: [] },
     created_by: { username: 'test-user' },
     readonly: false,
     ...parts,
@@ -55,7 +55,7 @@ export const createMockedInternalAgent = (
     configuration: {
       tools: [],
     },
-    accessControl: { scope: AgentAccessControlScope.Public, entries: [] },
+    access_control: { scope: AgentAccessControlScope.Public, entries: [] },
     created_by: { username: 'test-user' },
     readonly: false,
     isAvailable: jest.fn() as any,

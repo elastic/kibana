@@ -11,19 +11,15 @@ import type {
   AgentDefinition,
 } from '@kbn/agent-builder-common';
 
-export type AgentResponse = Omit<AgentDefinition, 'accessControl'> & {
-  access_control?: AgentAccessControl;
-};
-
-export type GetAgentResponse = AgentResponse;
+export type GetAgentResponse = AgentDefinition;
 
 export interface ListAgentResponse {
-  results: AgentResponse[];
+  results: AgentDefinition[];
 }
 
-export type UpdateAgentResponse = AgentResponse;
+export type UpdateAgentResponse = AgentDefinition;
 
-export type CreateAgentResponse = AgentResponse;
+export type CreateAgentResponse = AgentDefinition;
 
 export interface DeleteAgentResponse {
   success: boolean;

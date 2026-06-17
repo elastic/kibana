@@ -73,7 +73,7 @@ export const EditDetailsFlyout: React.FC<EditDetailsFlyoutProps> = ({
       avatar_symbol: agent.avatar_symbol ?? '',
       avatar_color: agent.avatar_color ?? '',
       labels: agent.labels ?? [],
-      accessControl: agent.accessControl ?? {
+      access_control: agent.access_control ?? {
         scope: AgentAccessControlScope.Private,
         entries: [],
       },
@@ -96,7 +96,7 @@ export const EditDetailsFlyout: React.FC<EditDetailsFlyoutProps> = ({
         avatar_symbol: data.avatar_symbol || undefined,
         avatar_color: data.avatar_color || undefined,
         labels: data.labels,
-        accessControl: data.accessControl,
+        access_control: data.access_control,
         configuration: {
           enable_elastic_capabilities: data.configuration.enable_elastic_capabilities,
           workflow_ids: data.configuration.workflow_ids,
@@ -114,7 +114,7 @@ export const EditDetailsFlyout: React.FC<EditDetailsFlyoutProps> = ({
     },
   });
 
-  const isShared = agent.accessControl?.scope === AgentAccessControlScope.Shared;
+  const isShared = agent.access_control?.scope === AgentAccessControlScope.Shared;
 
   const contentPadding = css`
     padding: ${euiTheme.size.s};

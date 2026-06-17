@@ -20,7 +20,7 @@ import {
 export type EffectiveAgentRole = AgentAccessControlRole | 'owner' | 'admin';
 
 export interface AgentAuthzArgs {
-  accessControl?: AgentAccessControl;
+  access_control?: AgentAccessControl;
   owner?: UserIdAndName;
   currentUser?: CurrentUser | null;
   isAdmin: boolean;
@@ -62,16 +62,16 @@ const accessControlScopeRole = (
 };
 
 const accessControlRoleForUser = (
-  accessControl: AgentAccessControl | undefined,
+  access_control: AgentAccessControl | undefined,
   currentUser?: CurrentUser | null
 ): AgentAccessControlRole | undefined => {
-  if (!accessControl || !currentUser) {
+  if (!access_control || !currentUser) {
     return undefined;
   }
   // V1: only user-type entries. Role-type grants land in V2; see the stash branch
   // `ab/poc-agent-acl-with-roles` for the full implementation.
   let best: AgentAccessControlRole | undefined;
-  for (const entry of accessControl.entries) {
+  for (const entry of access_control.entries) {
     if (entry.type === 'user' && currentUser.username && entry.name === currentUser.username) {
       best = maxAccessControlRole(best, entry.role);
     }
@@ -90,7 +90,7 @@ const accessControlRoleForUser = (
  *   4. access-control scope baseline (Public→Editor, Shared→User, Private→nothing)
  */
 export const getEffectiveAgentRole = ({
-  accessControl,
+  access_control,
   owner,
   currentUser,
   isAdmin,
@@ -101,8 +101,8 @@ export const getEffectiveAgentRole = ({
   if (isAgentOwner({ owner, currentUser })) {
     return 'owner';
   }
-  const entryRole = accessControlRoleForUser(accessControl, currentUser);
-  const baseline = accessControlScopeRole(accessControl?.scope);
+  const entryRole = accessControlRoleForUser(access_control, currentUser);
+  const baseline = accessControlScopeRole(access_control?.scope);
   return maxAccessControlRole(entryRole, baseline);
 };
 
@@ -210,7 +210,7 @@ export const canCurrentUserEditAgent = ({
   }
 
   return hasAgentWriteAccess({
-    accessControl: agent.accessControl,
+    access_control: agent.access_control,
     owner: agent.created_by,
     currentUser,
     isAdmin,

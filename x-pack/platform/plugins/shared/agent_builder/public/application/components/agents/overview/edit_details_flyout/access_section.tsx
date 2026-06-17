@@ -128,12 +128,12 @@ export const AccessSection: React.FC<AccessSectionProps> = ({ canChangeAccessCon
         helpText={
           !canChangeAccessControlScope ? flyoutLabels.accessControlScopeDisabledReason : undefined
         }
-        isInvalid={!!formState.errors.accessControl?.scope}
-        error={formState.errors.accessControl?.scope?.message}
+        isInvalid={!!formState.errors.access_control?.scope}
+        error={formState.errors.access_control?.scope?.message}
         fullWidth
       >
         <Controller
-          name="accessControl.scope"
+          name="access_control.scope"
           control={control}
           render={({ field: { onChange, value } }) => (
             <EuiSuperSelect

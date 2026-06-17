@@ -65,7 +65,7 @@ describe('fromEs', () => {
       labels: ['foo', 'bar'],
       avatar_color: 'blue',
       avatar_symbol: 'star',
-      accessControl: { scope: AgentAccessControlScope.Shared, entries: [] },
+      access_control: { scope: AgentAccessControlScope.Shared, entries: [] },
       created_by: { id: 'user-id-1', username: 'test-user' },
     });
   });
@@ -97,7 +97,7 @@ describe('fromEs', () => {
       labels: ['foo', 'bar'],
       avatar_color: 'blue',
       avatar_symbol: 'star',
-      accessControl: { scope: AgentAccessControlScope.Shared, entries: [] },
+      access_control: { scope: AgentAccessControlScope.Shared, entries: [] },
       created_by: { id: 'user-id-1', username: 'test-user' },
     });
   });
@@ -146,7 +146,7 @@ describe('fromEs', () => {
 
     const definition = fromEs(document);
 
-    expect(definition.accessControl).toEqual({
+    expect(definition.access_control).toEqual({
       scope: AgentAccessControlScope.Public,
       entries: [],
     });

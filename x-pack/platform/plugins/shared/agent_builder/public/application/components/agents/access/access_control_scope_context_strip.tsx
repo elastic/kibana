@@ -18,7 +18,7 @@ interface AccessControlScopeContextStripProps {
 export const AccessControlScopeContextStrip: React.FC<AccessControlScopeContextStripProps> = ({
   agent,
 }) => {
-  const accessControlScope = agent.accessControl?.scope ?? AgentAccessControlScope.Public;
+  const accessControlScope = agent.access_control?.scope ?? AgentAccessControlScope.Public;
   const label = ACCESS_CONTROL_SCOPE_LABELS[accessControlScope];
   const messages = accessControlScopeContextMessage(label);
 

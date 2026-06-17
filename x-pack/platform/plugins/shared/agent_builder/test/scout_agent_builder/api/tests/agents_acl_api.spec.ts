@@ -274,7 +274,7 @@ apiTest.describe(
     // ── access control redaction on agent read paths ───────────────────────────────────
 
     apiTest(
-      'GET /agents/{id} redacts accessControl.entries for non-managers',
+      'GET /agents/{id} redacts access_control.entries for non-managers',
       async ({ apiClient }) => {
         const agentId = `${ACCESS_CONTROL_TEST_PREFIX}-redact-${randomUUID()}`;
         await createAgentAs(apiClient, alice, mockAgent(agentId, AgentAccessControlScope.Private));

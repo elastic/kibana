@@ -34,7 +34,7 @@ import {
 } from './access_i18n';
 
 interface AccessFormProps {
-  agent: Pick<AgentDefinition, 'accessControl'>;
+  agent: Pick<AgentDefinition, 'access_control'>;
   entries: AgentAccessControlEntry[];
   ownerName?: string;
   isDisabled?: boolean;
@@ -93,7 +93,7 @@ export const AccessForm: React.FC<AccessFormProps> = ({
   onChange,
 }) => {
   const { euiTheme } = useEuiTheme();
-  const accessControlScope = agent.accessControl?.scope;
+  const accessControlScope = agent.access_control?.scope;
 
   const defaultRole = useMemo(() => {
     const allowed = selectableRolesForAccessControlScope(accessControlScope);

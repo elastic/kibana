@@ -24,7 +24,7 @@ export interface GetAgentOptions {
 
 export interface AgentAccessControlResult {
   canManage: boolean;
-  accessControl: AgentAccessControl;
+  access_control: AgentAccessControl;
 }
 
 export interface ReadonlyAgentProvider {

@@ -58,7 +58,7 @@ describe('Agent Routes - experimental access-control gate', () => {
     name: 'Test Agent',
     description: 'Test',
     configuration: { tools: [] },
-    accessControl: { scope: AgentAccessControlScope.Public, entries: [] },
+    access_control: { scope: AgentAccessControlScope.Public, entries: [] },
   };
 
   beforeEach(() => {
@@ -161,7 +161,7 @@ describe('Agent Routes - experimental access-control gate', () => {
 
       expect(mockCreate).toHaveBeenCalledWith({
         ...createBody,
-        accessControl: { scope: AgentAccessControlScope.Shared, entries: [] },
+        access_control: { scope: AgentAccessControlScope.Shared, entries: [] },
       });
       expect(result).toMatchObject({ type: 'ok', body: mockProfile });
     });
@@ -195,7 +195,7 @@ describe('Agent Routes - experimental access-control gate', () => {
 
       expect(mockUpdate).toHaveBeenCalledWith('agent-1', {
         name: 'Updated',
-        accessControl: { scope: AgentAccessControlScope.Private, entries: [] },
+        access_control: { scope: AgentAccessControlScope.Private, entries: [] },
       });
       expect(result).toMatchObject({ type: 'ok', body: mockProfile });
     });

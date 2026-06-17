@@ -14,7 +14,6 @@ import type {
   AgentUpdateRequest,
 } from '../../../common/agents';
 import type {
-  AgentResponse,
   CreateAgentResponse,
   DeleteAgentResponse,
   GetAgentAccessControlResponse,
@@ -24,14 +23,6 @@ import type {
   UpdateAgentResponse,
 } from '../../../common/http_api/agents';
 import { publicApiPath } from '../../../common/constants';
-
-const agentFromHttpResponse = ({
-  access_control: accessControl,
-  ...agent
-}: AgentResponse): AgentDefinition => ({
-  ...agent,
-  accessControl,
-});
 
 export class AgentService {
   private readonly http: HttpSetup;
@@ -45,37 +36,34 @@ export class AgentService {
    */
   async list(options?: AgentListOptions): Promise<AgentDefinition[]> {
     const res = await this.http.get<ListAgentResponse>(`${publicApiPath}/agents`);
-    return res.results.map(agentFromHttpResponse);
+    return res.results;
   }
 
   /**
    * Get a single agent by id
    */
   async get(id: string): Promise<AgentDefinition> {
-    const res = await this.http.get<GetAgentResponse>(`${publicApiPath}/agents/${id}`);
-    return agentFromHttpResponse(res);
+    return await this.http.get<GetAgentResponse>(`${publicApiPath}/agents/${id}`);
   }
 
   /**
    * Create a new agent
    */
   async create(profile: AgentCreateRequest): Promise<AgentDefinition> {
-    const { accessControl, ...restProfile } = profile;
     const res = await this.http.post<CreateAgentResponse>(`${publicApiPath}/agents`, {
-      body: JSON.stringify({ ...restProfile, access_control: accessControl }),
+      body: JSON.stringify(profile),
     });
-    return agentFromHttpResponse(res);
+    return res;
   }
 
   /**
    * Update an existing agent
    */
   async update(id: string, update: AgentUpdateRequest): Promise<AgentDefinition> {
-    const { accessControl, ...restUpdate } = update;
     const res = await this.http.put<UpdateAgentResponse>(`${publicApiPath}/agents/${id}`, {
-      body: JSON.stringify({ ...restUpdate, access_control: accessControl }),
+      body: JSON.stringify(update),
     });
-    return agentFromHttpResponse(res);
+    return res;
   }
 
   /**

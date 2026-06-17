@@ -37,7 +37,7 @@ const emptyState = (): AgentEditState => ({
   id: '',
   name: '',
   description: '',
-  accessControl: { scope: AgentAccessControlScope.Public, entries: [] },
+  access_control: { scope: AgentAccessControlScope.Public, entries: [] },
   labels: [],
   avatar_color: '',
   avatar_symbol: '',
@@ -109,7 +109,7 @@ export function useAgentEdit({
 
     if (agent) {
       const { type, ...agentState } = agent;
-      agentState.accessControl = agentState.accessControl ?? {
+      agentState.access_control = agentState.access_control ?? {
         scope: AgentAccessControlScope.Public,
         entries: [],
       };

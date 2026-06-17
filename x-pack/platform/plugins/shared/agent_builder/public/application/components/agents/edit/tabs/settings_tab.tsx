@@ -78,14 +78,14 @@ export const AgentSettingsTab: React.FC<AgentSettingsTabProps> = ({
 
   const { currentUser } = useCurrentUser();
   const { isAdmin } = useUiPrivileges();
-  const currentAccessControlScope = useWatch({ control, name: 'accessControl.scope' });
-  const currentEntries = useWatch({ control, name: 'accessControl.entries' }) ?? [];
+  const currentAccessControlScope = useWatch({ control, name: 'access_control.scope' });
+  const currentEntries = useWatch({ control, name: 'access_control.entries' }) ?? [];
 
   const canChangeAccessControlScope =
     isCreateMode ||
     canChangeAgentAccessControlScope({
       agentId,
-      accessControl: {
+      access_control: {
         scope: currentAccessControlScope,
         entries: currentEntries,
       },
@@ -95,11 +95,11 @@ export const AgentSettingsTab: React.FC<AgentSettingsTabProps> = ({
     });
 
   // Lightweight projection used only by AccessForm to filter selectable access-control roles.
-  // The real entries come from the form's `accessControl.entries` field via Controller
+  // The real entries come from the form's `access_control.entries` field via Controller
   // (seeded from the loaded agent in `useAgentEdit`), not from local state.
   const accessFormAgent = useMemo(
     () => ({
-      accessControl: { scope: currentAccessControlScope, entries: [] },
+      access_control: { scope: currentAccessControlScope, entries: [] },
     }),
     [currentAccessControlScope]
   );
@@ -535,11 +535,11 @@ export const AgentSettingsTab: React.FC<AgentSettingsTabProps> = ({
                   )
                 : undefined
             }
-            isInvalid={!!formState.errors.accessControl?.scope}
-            error={formState.errors.accessControl?.scope?.message}
+            isInvalid={!!formState.errors.access_control?.scope}
+            error={formState.errors.access_control?.scope?.message}
           >
             <Controller
-              name="accessControl.scope"
+              name="access_control.scope"
               control={control}
               render={({ field: { onChange, value } }) => (
                 <EuiSuperSelect
@@ -564,7 +564,7 @@ export const AgentSettingsTab: React.FC<AgentSettingsTabProps> = ({
             <>
               <EuiSpacer size="m" />
               <Controller
-                name="accessControl.entries"
+                name="access_control.entries"
                 control={control}
                 render={({ field }) => (
                   <AccessForm

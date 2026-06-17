@@ -69,7 +69,7 @@ export interface GetAgentAccessControlResult {
   /** True when the caller is allowed to read the principal list. */
   canManage: boolean;
   /** Always present; entries[] may be empty for default agents. */
-  accessControl: AgentAccessControl;
+  access_control: AgentAccessControl;
 }
 
 export interface AgentClient {
@@ -401,7 +401,7 @@ class AgentClientImpl implements AgentClient {
       isAdmin: this.isAdmin,
     });
     const accessControl = source.access_control ?? getDefaultAgentAccessControl();
-    return { canManage, accessControl };
+    return { canManage, access_control: accessControl };
   }
 
   async updateAccessControl(
@@ -429,7 +429,7 @@ class AgentClientImpl implements AgentClient {
 
     const next = accessControlUpdateToEs({
       currentProps: source,
-      accessControl: nextAccessControl,
+      access_control: nextAccessControl,
       updateDate: new Date(),
     });
 

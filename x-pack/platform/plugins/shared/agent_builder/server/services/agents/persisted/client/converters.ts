@@ -39,7 +39,7 @@ export const fromEs = (document: Document): PersistedAgentDefinition => {
     labels: document._source.labels,
     avatar_color: document._source.avatar_color,
     avatar_symbol: document._source.avatar_symbol,
-    accessControl: normalizeAccessControl(document._source.access_control),
+    access_control: normalizeAccessControl(document._source.access_control),
     created_by:
       document._source.created_by_id || document._source.created_by_name
         ? {
@@ -83,7 +83,7 @@ export const createRequestToEs = ({
     avatar_symbol: profile.avatar_symbol,
     created_by_id: user.id,
     created_by_name: user.username,
-    access_control: profile.accessControl ?? getDefaultAgentAccessControl(),
+    access_control: profile.access_control ?? getDefaultAgentAccessControl(),
     config: {
       instructions: profile.configuration.instructions,
       tools: profile.configuration.tools,
@@ -110,13 +110,13 @@ export const updateRequestToEs = ({
   updateDate: Date;
 }): AgentProperties => {
   const currentConfig = currentProps.configuration ?? currentProps.config;
-  const { configuration, accessControl, ...restUpdate } = update;
+  const { configuration, access_control, ...restUpdate } = update;
 
   const updated: AgentProperties = {
     ...currentProps,
     ...restUpdate,
     id: agentId,
-    access_control: accessControl ?? currentProps.access_control,
+    access_control: access_control ?? currentProps.access_control,
     // Explicitly omit configuration to ensure migration
     configuration: undefined,
     config: {
@@ -130,27 +130,27 @@ export const updateRequestToEs = ({
 };
 
 const normalizeAccessControl = (
-  accessControl: AgentAccessControl | undefined
+  access_control: AgentAccessControl | undefined
 ): AgentAccessControl => {
-  if (!accessControl) return getDefaultAgentAccessControl();
+  if (!access_control) return getDefaultAgentAccessControl();
   return {
-    scope: accessControl.scope,
-    entries: accessControl.entries,
+    scope: access_control.scope,
+    entries: access_control.entries,
   };
 };
 
 export const accessControlUpdateToEs = ({
   currentProps,
-  accessControl,
+  access_control,
   updateDate,
 }: {
   currentProps: AgentProperties;
-  accessControl: AgentAccessControl;
+  access_control: AgentAccessControl;
   updateDate: Date;
 }): AgentProperties => {
   return {
     ...currentProps,
-    access_control: accessControl,
+    access_control,
     updated_at: updateDate.toISOString(),
   };
 };

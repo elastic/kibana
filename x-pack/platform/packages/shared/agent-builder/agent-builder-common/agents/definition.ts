@@ -50,7 +50,7 @@ export interface AgentDefinition {
   /**
    * Access control controls who can read, run, write, delete, and manage this agent.
    */
-  accessControl?: AgentAccessControl;
+  access_control?: AgentAccessControl;
   /**
    * Agent owner metadata.
    */

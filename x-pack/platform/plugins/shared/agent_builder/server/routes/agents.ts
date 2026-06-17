@@ -7,17 +7,12 @@
 
 import { schema } from '@kbn/config-schema';
 import path from 'node:path';
-import {
-  AgentAccessControlRole,
-  AgentAccessControlScope,
-  type AgentDefinition,
-} from '@kbn/agent-builder-common';
+import { AgentAccessControlRole, AgentAccessControlScope } from '@kbn/agent-builder-common';
 import type { RouteDependencies } from './types';
 import { getHandlerWrapper } from './wrap_handler';
 import { publicApiPath } from '../../common/constants';
 import { AGENT_BUILDER_READ_SECURITY, AGENTS_WRITE_SECURITY } from './route_security';
 import type {
-  AgentResponse,
   GetAgentResponse,
   CreateAgentResponse,
   UpdateAgentResponse,
@@ -28,11 +23,6 @@ import type {
   UpdateAgentAccessControlResponse,
 } from '../../common/http_api/agents';
 import { asError } from '../utils/as_error';
-
-const agentToHttpResponse = ({ accessControl, ...agent }: AgentDefinition): AgentResponse => ({
-  ...agent,
-  access_control: accessControl,
-});
 
 const TOOL_SELECTION_SCHEMA = schema.arrayOf(
   schema.object(
@@ -171,7 +161,7 @@ export function registerAgentRoutes({
         const service = await agentsService.getRegistry({ request });
         const agents = await service.list();
         return response.ok<ListAgentResponse>({
-          body: { results: agents.map(agentToHttpResponse) },
+          body: { results: agents },
         });
       })
     );
@@ -213,7 +203,7 @@ export function registerAgentRoutes({
         const service = await agents.getRegistry({ request });
 
         const profile = await service.get(request.params.id);
-        return response.ok<GetAgentResponse>({ body: agentToHttpResponse(profile) });
+        return response.ok<GetAgentResponse>({ body: profile });
       })
     );
 
@@ -320,8 +310,7 @@ export function registerAgentRoutes({
         const service = await agents.getRegistry({ request });
 
         try {
-          const { access_control: accessControl, ...profile } = request.body;
-          const createdProfile = await service.create({ ...profile, accessControl });
+          const createdProfile = await service.create(request.body);
           analyticsService?.reportAgentCreated({
             agentId: request.body.id,
             toolSelection: request.body.configuration.tools,
@@ -330,7 +319,7 @@ export function registerAgentRoutes({
             agentId: createdProfile.id,
             agentName: createdProfile.name,
           });
-          return response.ok<CreateAgentResponse>({ body: agentToHttpResponse(createdProfile) });
+          return response.ok<CreateAgentResponse>({ body: createdProfile });
         } catch (error) {
           auditLogService.logAgentCreated(request, {
             agentId: request.body.id,
@@ -452,11 +441,7 @@ export function registerAgentRoutes({
         const service = await agents.getRegistry({ request });
 
         try {
-          const { access_control: accessControl, ...agentUpdate } = request.body;
-          const profile = await service.update(request.params.id, {
-            ...agentUpdate,
-            accessControl,
-          });
+          const profile = await service.update(request.params.id, request.body);
           analyticsService?.reportAgentUpdated({
             agentId: profile.id,
             toolSelection: profile.configuration.tools,
@@ -465,7 +450,7 @@ export function registerAgentRoutes({
             agentId: profile.id,
             agentName: profile.name,
           });
-          return response.ok<UpdateAgentResponse>({ body: agentToHttpResponse(profile) });
+          return response.ok<UpdateAgentResponse>({ body: profile });
         } catch (error) {
           auditLogService.logAgentUpdated(request, {
             agentId: request.params.id,
@@ -578,8 +563,8 @@ export function registerAgentRoutes({
         const body: GetAgentAccessControlResponse = {
           can_manage_access_control: result.canManage,
           access_control: result.canManage
-            ? result.accessControl
-            : { ...result.accessControl, entries: [] },
+            ? result.access_control
+            : { ...result.access_control, entries: [] },
         };
         return response.ok<GetAgentAccessControlResponse>({ body });
       })

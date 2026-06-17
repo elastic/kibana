@@ -82,7 +82,7 @@ export const toInternalDefinition = async ({
       enable_elastic_capabilities: configuration.enable_elastic_capabilities ?? true,
     },
     type: AgentType.chat,
-    accessControl: undefined,
+    access_control: undefined,
     created_by: undefined,
     readonly: true,
     isAvailable: async (ctx) => {

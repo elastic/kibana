@@ -20,7 +20,7 @@ const editModeState: AgentEditState = {
   id: 'test-agent-id',
   name: 'Test Agent',
   description: 'Test description',
-  accessControl: { scope: AgentAccessControlScope.Public, entries: [] },
+  access_control: { scope: AgentAccessControlScope.Public, entries: [] },
   labels: [],
   avatar_color: '',
   avatar_symbol: '',

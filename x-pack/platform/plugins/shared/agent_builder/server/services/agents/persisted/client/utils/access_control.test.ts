@@ -184,7 +184,7 @@ describe('buildAccessControlReadFilter', () => {
     });
   });
 
-  it('only emits user-type nested accessControl clauses (V1)', () => {
+  it('only emits user-type nested access_control clauses (V1)', () => {
     const filter = buildAccessControlReadFilter({ user: ownerUser });
     const types = (filter.bool.should as Array<Record<string, any>>)
       .flatMap((clause) => clause.nested?.query?.bool?.filter ?? [])
@@ -236,7 +236,7 @@ describe('validateAccessControlUpdateAccess', () => {
     expect(
       validateAccessControlUpdateAccess({
         source,
-        update: { accessControl: { scope: AgentAccessControlScope.Public, entries: [] } },
+        update: { access_control: { scope: AgentAccessControlScope.Public, entries: [] } },
         user: nonOwnerUser,
         isAdmin: false,
       })
@@ -252,7 +252,7 @@ describe('validateAccessControlUpdateAccess', () => {
     expect(
       validateAccessControlUpdateAccess({
         source,
-        update: { accessControl: { scope: AgentAccessControlScope.Private, entries: [] } },
+        update: { access_control: { scope: AgentAccessControlScope.Private, entries: [] } },
         user: ownerUser,
         isAdmin: false,
       })
@@ -268,7 +268,7 @@ describe('validateAccessControlUpdateAccess', () => {
     expect(
       validateAccessControlUpdateAccess({
         source,
-        update: { accessControl: { scope: AgentAccessControlScope.Private, entries: [] } },
+        update: { access_control: { scope: AgentAccessControlScope.Private, entries: [] } },
         user: nonOwnerUser,
         isAdmin: true,
       })
@@ -284,7 +284,7 @@ describe('validateAccessControlUpdateAccess', () => {
     expect(
       validateAccessControlUpdateAccess({
         source,
-        update: { accessControl: { scope: AgentAccessControlScope.Private, entries: [] } },
+        update: { access_control: { scope: AgentAccessControlScope.Private, entries: [] } },
         user: nonOwnerUser,
         isAdmin: false,
       })
@@ -302,7 +302,7 @@ describe('validateAccessControlUpdateAccess', () => {
     expect(
       validateAccessControlUpdateAccess({
         source,
-        update: { accessControl: { scope: AgentAccessControlScope.Private, entries: [] } },
+        update: { access_control: { scope: AgentAccessControlScope.Private, entries: [] } },
         user: ownerUser,
         isAdmin: false,
       })
@@ -319,7 +319,7 @@ describe('validateAccessControlUpdateAccess', () => {
     expect(
       validateAccessControlUpdateAccess({
         source,
-        update: { accessControl: { scope: AgentAccessControlScope.Shared, entries: [] } },
+        update: { access_control: { scope: AgentAccessControlScope.Shared, entries: [] } },
         user: nonOwnerUser,
         isAdmin: true,
       })
@@ -340,8 +340,8 @@ describe('redactAccessControlForCaller', () => {
     created_by_name: 'owner',
   };
 
-  it('returns the definition unchanged when there is no accessControl', () => {
-    const definition = { id: 'a', accessControl: undefined };
+  it('returns the definition unchanged when there is no access_control', () => {
+    const definition = { id: 'a', access_control: undefined };
     const result = redactAccessControlForCaller({
       definition,
       source: baseSource,
@@ -351,10 +351,10 @@ describe('redactAccessControlForCaller', () => {
     expect(result).toBe(definition);
   });
 
-  it('returns the definition unchanged when accessControl entries are empty', () => {
+  it('returns the definition unchanged when access_control entries are empty', () => {
     const definition = {
       id: 'a',
-      accessControl: { scope: AgentAccessControlScope.Private, entries: [] },
+      access_control: { scope: AgentAccessControlScope.Private, entries: [] },
     };
     const result = redactAccessControlForCaller({
       definition,
@@ -371,7 +371,7 @@ describe('redactAccessControlForCaller', () => {
   it('returns the full entries list for the agent owner', () => {
     const definition = {
       id: 'a',
-      accessControl: {
+      access_control: {
         scope: AgentAccessControlScope.Private,
         entries: [aliceEntry, bobEntry],
       },
@@ -382,13 +382,13 @@ describe('redactAccessControlForCaller', () => {
       user: ownerUser,
       isAdmin: false,
     });
-    expect(result.accessControl?.entries).toEqual([aliceEntry, bobEntry]);
+    expect(result.access_control?.entries).toEqual([aliceEntry, bobEntry]);
   });
 
   it('returns the full entries list for a cluster admin', () => {
     const definition = {
       id: 'a',
-      accessControl: {
+      access_control: {
         scope: AgentAccessControlScope.Private,
         entries: [aliceEntry, bobEntry],
       },
@@ -399,15 +399,15 @@ describe('redactAccessControlForCaller', () => {
       user: nonOwnerUser,
       isAdmin: true,
     });
-    expect(result.accessControl?.entries).toEqual([aliceEntry, bobEntry]);
+    expect(result.access_control?.entries).toEqual([aliceEntry, bobEntry]);
   });
 
   it('redacts entries to [] for a user without manage rights', () => {
-    // Bob has User access via the accessControl (User < Editor threshold) so he cannot manage.
+    // Bob has User access via the access_control (User < Editor threshold) so he cannot manage.
     const bobUser = { username: 'bob' };
     const definition = {
       id: 'a',
-      accessControl: {
+      access_control: {
         scope: AgentAccessControlScope.Private,
         entries: [aliceEntry, bobEntry],
       },
@@ -418,17 +418,17 @@ describe('redactAccessControlForCaller', () => {
       user: bobUser,
       isAdmin: false,
     });
-    expect(result.accessControl?.entries).toEqual([]);
+    expect(result.access_control?.entries).toEqual([]);
     // Shallow-copy: the original definition is untouched.
-    expect(definition.accessControl?.entries).toEqual([aliceEntry, bobEntry]);
+    expect(definition.access_control?.entries).toEqual([aliceEntry, bobEntry]);
   });
 
-  it('returns the full entries list for a user with Editor or higher via the accessControl', () => {
-    // Alice has Editor via the accessControl, which meets the manage-ACL threshold.
+  it('returns the full entries list for a user with Editor or higher via the access_control', () => {
+    // Alice has Editor via the access_control, which meets the manage-ACL threshold.
     const aliceUser = { username: 'alice' };
     const definition = {
       id: 'a',
-      accessControl: {
+      access_control: {
         scope: AgentAccessControlScope.Private,
         entries: [aliceEntry, bobEntry],
       },
@@ -439,14 +439,14 @@ describe('redactAccessControlForCaller', () => {
       user: aliceUser,
       isAdmin: false,
     });
-    expect(result.accessControl?.entries).toEqual([aliceEntry, bobEntry]);
+    expect(result.access_control?.entries).toEqual([aliceEntry, bobEntry]);
   });
 
   it('redacts entries on the default agent even for the owner', () => {
-    // Default agent never accepts accessControl management — even the owner gets [] back.
+    // Default agent never accepts access_control management — even the owner gets [] back.
     const definition = {
       id: agentBuilderDefaultAgentId,
-      accessControl: { scope: AgentAccessControlScope.Private, entries: [aliceEntry] },
+      access_control: { scope: AgentAccessControlScope.Private, entries: [aliceEntry] },
     };
     const result = redactAccessControlForCaller({
       definition,
@@ -459,6 +459,6 @@ describe('redactAccessControlForCaller', () => {
       user: ownerUser,
       isAdmin: false,
     });
-    expect(result.accessControl?.entries).toEqual([]);
+    expect(result.access_control?.entries).toEqual([]);
   });
 });
