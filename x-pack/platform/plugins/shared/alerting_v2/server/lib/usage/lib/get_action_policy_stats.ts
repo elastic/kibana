@@ -95,7 +95,7 @@ export async function getActionPolicyStats(
         terms: { field: 'ap_throttle_interval', size: TERMS_SIZE },
       },
       count_with_group_by: {
-        filter: { exists: { field: `${ACTION_POLICY_SAVED_OBJECT_TYPE}.groupBy` } },
+        filter: { range: { ap_group_by_count: { gt: 0 } } },
       },
       avg_group_by_fields_count: {
         avg: { field: 'ap_group_by_count' },

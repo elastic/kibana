@@ -18,13 +18,19 @@ export const actionPolicyMappings: SavedObjectsTypeMappingDefinition = {
     name: { type: 'text', fields: { keyword: { type: 'keyword', ignore_above: 256 } } },
     description: { type: 'text' },
     enabled: { type: 'boolean' },
-    groupBy: { type: 'keyword' },
     tags: { type: 'keyword' },
-    auth: {
-      type: 'object',
-      properties: {
-        apiKey: { type: 'binary' },
-      },
-    },
+    // NO NEED TO BE INDEXED
+    // groupBy is only read from _source. The count_with_group_by telemetry
+    // aggregation runs on the `ap_group_by_count` runtime mapping in
+    // server/lib/usage/lib/get_action_policy_stats.ts.
+    // groupBy: { type: 'keyword' },
+    // auth.apiKey is an ESO-encrypted attribute. ESO decrypts from _source,
+    // so the ciphertext never needs to be indexed.
+    // auth: {
+    //   type: 'object',
+    //   properties: {
+    //     apiKey: { type: 'binary' },
+    //   },
+    // },
   },
 };
