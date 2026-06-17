@@ -25,32 +25,14 @@ export const formatInvestigationAsText = (result: InvestigationResult): string =
     `Investigation Result`,
     `Root Cause: ${result.root_cause}`,
     `Confidence: ${Math.round(result.confidence * 100)}%`,
-    `Impact: ${result.impact}`,
-    `Complete: ${result.investigation_complete ? 'Yes' : 'No — access gaps present'}`,
+    `Mechanism: ${result.mechanism}`,
+    `Evidence: ${result.evidence_summary}`,
   ];
 
-  if (result.ranked_hypotheses.length > 0) {
-    lines.push('', 'Ranked Hypotheses:');
-    for (const hyp of result.ranked_hypotheses) {
-      lines.push(
-        `  #${hyp.rank} [${hyp.verdict}] ${hyp.statement} (confidence: ${Math.round(
-          hyp.posterior_confidence * 100
-        )}%)`
-      );
-    }
-  }
-
-  if (result.discarded_hypotheses.length > 0) {
-    lines.push('', 'Discarded Hypotheses:');
-    for (const hyp of result.discarded_hypotheses) {
-      lines.push(`  [discarded] ${hyp.statement}: ${hyp.discard_reason}`);
-    }
-  }
-
-  if (result.remediation_options.length > 0) {
-    lines.push('', 'Remediation Options:');
-    for (const opt of result.remediation_options) {
-      lines.push(`  #${opt.rank} [${opt.risk_level} risk] ${opt.action}`);
+  if (result.alternatives_ruled_out.length > 0) {
+    lines.push('', 'Alternatives Ruled Out:');
+    for (const alt of result.alternatives_ruled_out) {
+      lines.push(`  - ${alt.candidate}: ${alt.reason}`);
     }
   }
 
@@ -143,7 +125,7 @@ export const createInvestigationAttachmentType = ({
       }),
     }),
     getAgentDescription: () =>
-      'An investigation attachment shows the results of a root cause analysis investigation for a significant event. It displays ranked hypotheses with their verdicts, confidence scores, remediation options, and any access gaps that limited the investigation. Use it to share investigation results inline in the conversation.',
+      'An investigation attachment shows the results of a root cause analysis for a significant event. It displays the root cause conclusion, confidence, supporting evidence, the mechanism, alternatives the agent ruled out, and any access gaps. Use it to share investigation results inline in the conversation.',
     getTools: () => [],
   };
 };

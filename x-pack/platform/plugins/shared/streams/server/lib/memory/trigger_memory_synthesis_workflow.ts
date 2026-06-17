@@ -18,11 +18,10 @@ import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
  */
 export interface MemorySynthesisInputs {
   user_feedback?: {
-    aspect: 'root_cause' | 'hypothesis' | 'remediation';
-    feedback: 'correct' | 'incorrect' | 'helpful' | 'not_helpful';
+    aspect: 'root_cause' | 'alternative';
+    feedback: 'correct' | 'incorrect';
     discovery_id: string;
-    hypothesis_id?: string;
-    remediation_rank?: number;
+    alternative_candidate?: string;
   };
 }
 

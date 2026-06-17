@@ -34,36 +34,15 @@ export const discoveriesMappings = {
         workflow_execution_id: { type: 'keyword' as const },
         root_cause: { type: 'text' as const },
         confidence: { type: 'float' as const },
-        impact: { type: 'text' as const },
-        investigation_complete: { type: 'boolean' as const },
-        ranked_hypotheses: mappings.object({
+        evidence_summary: { type: 'text' as const },
+        mechanism: { type: 'text' as const },
+        alternatives_ruled_out: mappings.object({
           properties: {
-            rank: { type: 'integer' as const },
-            hypothesis_id: { type: 'keyword' as const },
-            statement: { type: 'text' as const },
-            verdict: { type: 'keyword' as const },
-            prior_confidence: { type: 'float' as const },
-            posterior_confidence: { type: 'float' as const },
-            evidence_summary: { type: 'text' as const },
-          },
-        }),
-        discarded_hypotheses: mappings.object({
-          properties: {
-            hypothesis_id: { type: 'keyword' as const },
-            statement: { type: 'text' as const },
-            discard_reason: { type: 'text' as const },
-          },
-        }),
-        remediation_options: mappings.object({
-          properties: {
-            rank: { type: 'integer' as const },
-            action: { type: 'text' as const },
-            rationale: { type: 'text' as const },
-            risk_level: { type: 'keyword' as const },
+            candidate: { type: 'keyword' as const },
+            reason: { type: 'text' as const },
           },
         }),
         gaps_found: { type: 'keyword' as const },
-        memory_pages_written: { type: 'keyword' as const },
       },
     }),
   },

@@ -494,32 +494,23 @@ const streamsInvestigationFeedbackSchema: RootSchema<StreamsInvestigationFeedbac
   feedback: {
     type: 'keyword',
     _meta: {
-      description:
-        'Whether the investigation aspect was correct, incorrect, helpful, or not_helpful',
+      description: 'Whether the investigation aspect was correct or incorrect',
     },
   },
   aspect: {
     type: 'keyword',
     _meta: {
-      description:
-        'Which part of the investigation was rated: root_cause, hypothesis, or remediation',
+      description: 'Which part of the investigation was rated: root_cause or alternative',
     },
   },
   discovery_id: {
     type: 'keyword',
     _meta: { description: 'The ID of the discovery this investigation belongs to' },
   },
-  hypothesis_id: {
+  alternative_candidate: {
     type: 'keyword',
     _meta: {
-      description: 'The ID of the hypothesis being rated (only for aspect=hypothesis)',
-      optional: true,
-    },
-  },
-  remediation_rank: {
-    type: 'long',
-    _meta: {
-      description: 'The rank of the remediation option being rated (only for aspect=remediation)',
+      description: 'The candidate name being rated (only for aspect=alternative)',
       optional: true,
     },
   },

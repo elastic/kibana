@@ -151,15 +151,14 @@ interface StreamsInsightFeedbackProps {
   insight_impact: InsightImpactLevel;
 }
 
-type InvestigationFeedbackAspect = 'root_cause' | 'hypothesis' | 'remediation';
-type InvestigationFeedbackValue = 'correct' | 'incorrect' | 'helpful' | 'not_helpful';
+type InvestigationFeedbackAspect = 'root_cause' | 'alternative';
+type InvestigationFeedbackValue = 'correct' | 'incorrect';
 
 interface StreamsInvestigationFeedbackProps {
   feedback: InvestigationFeedbackValue;
   aspect: InvestigationFeedbackAspect;
   discovery_id: string;
-  hypothesis_id?: string;
-  remediation_rank?: number;
+  alternative_candidate?: string;
 }
 
 interface StreamsTabVisitedProps {

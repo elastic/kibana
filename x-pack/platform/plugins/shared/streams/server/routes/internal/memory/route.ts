@@ -511,11 +511,10 @@ const consolidateMemoryRoute = createWorkflowTriggerRoute(
 );
 
 const investigationFeedbackSchema = z.object({
-  aspect: z.enum(['root_cause', 'hypothesis', 'remediation']),
-  feedback: z.enum(['correct', 'incorrect', 'helpful', 'not_helpful']),
+  aspect: z.enum(['root_cause', 'alternative']),
+  feedback: z.enum(['correct', 'incorrect']),
   discovery_id: z.string(),
-  hypothesis_id: z.string().optional(),
-  remediation_rank: z.number().optional(),
+  alternative_candidate: z.string().optional(),
 });
 
 const synthesizeMemoryRoute = createServerRoute({
