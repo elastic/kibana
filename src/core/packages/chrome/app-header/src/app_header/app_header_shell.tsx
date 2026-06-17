@@ -122,8 +122,11 @@ const useHeaderStyles = (
       align-items: center;
       gap: ${euiTheme.size.m};
       min-width: 0;
-      // inline tabs need to reach the bottom border, so don't clip them or pad them off the edge
+
+      // Sometimes the custom primary content needs to overflow the header
+      // to create a visual connection with the content below. e.g: Discover tabs.
       overflow: ${hasPrimaryContent ? 'visible' : 'hidden'};
+
       min-height: ${APPLICATION_TOP_BAR_MIN_HEIGHT_PX}px;
       ${paddingBlock &&
       !hasPrimaryContent &&
