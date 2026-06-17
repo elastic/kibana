@@ -886,7 +886,7 @@
     "@kbn/nightshift": "link:x-pack/solutions/observability/packages/kbn-nightshift",
     "@kbn/no-data-page-plugin": "link:src/platform/plugins/shared/no_data_page",
     "@kbn/node-libs-browser-webpack-plugin": "link:src/platform/packages/private/kbn-node-libs-browser-webpack-plugin",
-    "@kbn/notification-center-plugin": "link:x-pack/platform/plugins/shared/notification-center",
+    "@kbn/notification-center-plugin": "link:x-pack/platform/plugins/shared/notification_center",
     "@kbn/notifications-plugin": "link:x-pack/platform/plugins/shared/notifications",
     "@kbn/object-utils": "link:src/platform/packages/shared/kbn-object-utils",
     "@kbn/object-versioning": "link:src/platform/packages/shared/kbn-object-versioning",

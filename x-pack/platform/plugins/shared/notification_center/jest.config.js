@@ -9,13 +9,13 @@ module.exports = {
   preset: '@kbn/test',
   rootDir: '../../../../..',
   roots: [
-    '<rootDir>/x-pack/platform/plugins/shared/notification-center/public',
-    '<rootDir>/x-pack/platform/plugins/shared/notification-center/server',
-    '<rootDir>/x-pack/platform/plugins/shared/notification-center/common',
+    '<rootDir>/x-pack/platform/plugins/shared/notification_center/public',
+    '<rootDir>/x-pack/platform/plugins/shared/notification_center/server',
+    '<rootDir>/x-pack/platform/plugins/shared/notification_center/common',
   ],
   collectCoverage: true,
   collectCoverageFrom: [
-    '<rootDir>/x-pack/platform/plugins/shared/notification-center/{public,server,common}/**/*.{js,ts,tsx}',
+    '<rootDir>/x-pack/platform/plugins/shared/notification_center/{public,server,common}/**/*.{js,ts,tsx}',
   ],
   coverageReporters: ['html'],
 };

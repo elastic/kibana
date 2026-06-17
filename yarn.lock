@@ -7994,7 +7994,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/notification-center-plugin@link:x-pack/platform/plugins/shared/notification-center":
+"@kbn/notification-center-plugin@link:x-pack/platform/plugins/shared/notification_center":
   version "0.0.0"
   uid ""
 
