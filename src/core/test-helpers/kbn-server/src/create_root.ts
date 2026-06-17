@@ -93,17 +93,22 @@ export function createRootWithSettings(
    * Most of these integration tests expect OSS to default to true, but FIPS
    * requires the security plugin to be enabled
    */
-  let oss = true;
+  const oss = true;
   if (getFips() === 1) {
     set(settings, 'xpack.security.fipsMode.enabled', true);
-    oss = false;
-    delete cliArgs.oss;
-    if (cliArgs.serverless) {
-      // In serverless mode, spaces config keys use schema.literal(false) with no defaultValue.
-      // They are only validated when the spaces plugin loads (oss=false), so set them explicitly.
-      set(settings, 'xpack.spaces.allowFeatureVisibility', false);
-      set(settings, 'xpack.spaces.allowSolutionVisibility', false);
-    }
+    // Keep oss=true to avoid loading all xpack plugins on startup — heavy plugins like
+    // streams, fleet, and reporting do significant ES initialization that exhausts the
+    // test cluster. Instead, inject only the plugins required for FIPS security compliance.
+    const existingPaths = Array.isArray(settings?.plugins?.paths)
+      ? (settings.plugins.paths as string[])
+      : [];
+    set(settings, 'plugins.paths', [
+      ...existingPaths,
+      join(REPO_ROOT, 'x-pack/platform/plugins/shared/licensing'),
+      join(REPO_ROOT, 'x-pack/platform/plugins/shared/features'),
+      join(REPO_ROOT, 'x-pack/platform/plugins/shared/task_manager'),
+      join(REPO_ROOT, 'x-pack/platform/plugins/shared/security'),
+    ]);
   }
 
   const env = Env.createDefault(
