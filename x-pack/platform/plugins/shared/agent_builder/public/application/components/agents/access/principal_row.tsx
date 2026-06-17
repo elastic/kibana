@@ -14,6 +14,7 @@ import {
   EuiFlexItem,
   EuiSuperSelect,
   EuiText,
+  EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
 import type {
