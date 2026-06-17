@@ -1,5 +1,5 @@
 {
-  "sha1": "3a5a7658c10a681793439254b4b222631d40ef0b",
+  "sha1": "dc96f680abbb685e6d1c4e51fda21b58e6281a93",
   "tests": [
     {
       "id": "50b3a018a3d8e65-f2cd2d3cdc77643",
@@ -397,7 +397,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/hosts/hosts_page_table.spec.ts",
-        "line": 95,
+        "line": 96,
         "column": 9
       }
     },
@@ -413,7 +413,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/hosts/hosts_page_table.spec.ts",
-        "line": 117,
+        "line": 118,
         "column": 9
       }
     },
@@ -429,7 +429,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/hosts/hosts_page_table.spec.ts",
-        "line": 131,
+        "line": 132,
         "column": 9
       }
     },
@@ -445,7 +445,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/hosts/hosts_page_table.spec.ts",
-        "line": 145,
+        "line": 146,
         "column": 9
       }
     },
@@ -461,7 +461,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/hosts/hosts_page_table.spec.ts",
-        "line": 161,
+        "line": 162,
         "column": 9
       }
     },
@@ -477,7 +477,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/hosts/hosts_page_table.spec.ts",
-        "line": 178,
+        "line": 179,
         "column": 9
       }
     },
@@ -493,13 +493,13 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/hosts/hosts_page_table.spec.ts",
-        "line": 194,
+        "line": 195,
         "column": 9
       }
     },
     {
-      "id": "980bc31656c0913-53b83a080853869",
-      "title": "Hosts Page - Time Drift KPIs never show N/A when clock drifts past the data window",
+      "id": "980bc31656c0913-8a36bba6cac15d0",
+      "title": "Hosts Page - Time Drift keeps KPIs consistent with the table (no N/A) when the clock drifts within range",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -509,13 +509,13 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/hosts/hosts_page_time_drift.spec.ts",
-        "line": 22,
+        "line": 29,
         "column": 9
       }
     },
     {
-      "id": "980bc31656c0913-9919678377c0d77",
-      "title": "Hosts Page - Time Drift KPIs remain stable through incremental clock drift with repeated refreshes",
+      "id": "980bc31656c0913-150581c0817bba5",
+      "title": "Hosts Page - Time Drift keeps KPIs stable (no N/A) through incremental clock drift with repeated refreshes",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -525,7 +525,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/hosts/hosts_page_time_drift.spec.ts",
-        "line": 66,
+        "line": 78,
         "column": 9
       }
     },
