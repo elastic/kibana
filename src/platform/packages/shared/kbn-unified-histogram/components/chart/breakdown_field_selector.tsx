@@ -26,7 +26,14 @@ import {
   ToolbarSelector,
   type SelectableEntry,
 } from '@kbn/shared-ux-toolbar-selector';
+import { getEbtProps } from '@kbn/ebt-click';
 import type { UnifiedHistogramBreakdownContext } from '../../types';
+import { EBT_BREAKDOWN_SELECTOR_ACTION, EBT_BREAKDOWN_SELECTOR_ELEMENT } from './ebt_constants';
+
+const EBT_SELECT_BREAKDOWN_PROPS = getEbtProps({
+  action: EBT_BREAKDOWN_SELECTOR_ACTION,
+  element: EBT_BREAKDOWN_SELECTOR_ELEMENT,
+});
 
 export interface BreakdownFieldSelectorProps {
   dataView: DataView;
@@ -77,6 +84,7 @@ export const BreakdownFieldSelector = ({
             <FieldIcon {...getFieldIconProps(field)} />
           </span>
         ),
+        ...EBT_SELECT_BREAKDOWN_PROPS,
       }))
       .sort((a, b) => a.label.toLowerCase().localeCompare(b.label.toLowerCase()));
 
@@ -87,6 +95,7 @@ export const BreakdownFieldSelector = ({
         defaultMessage: 'No breakdown',
       }),
       checked: !breakdown?.field ? ('on' as EuiSelectableOption['checked']) : undefined,
+      ...EBT_SELECT_BREAKDOWN_PROPS,
     });
 
     return options;
