@@ -28,8 +28,6 @@
     "@kbn/core-plugins-browser",
     "@kbn/config",
     "@kbn/scout",
-    "@kbn/usage-collection-plugin",
-    "@kbn/analytics",
   ],
   "exclude": [
     "target/**/*",

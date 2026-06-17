@@ -9,7 +9,6 @@ import { fireEvent, render } from '@testing-library/react';
 import React, { type FC, type PropsWithChildren } from 'react';
 
 import { EuiProvider } from '@elastic/eui';
-import { METRIC_TYPE } from '@kbn/analytics';
 
 import { LanguageModal } from './language_modal';
 import { useLanguage } from './use_language_hook';
@@ -35,12 +34,12 @@ jest.mock('@kbn/i18n', () => {
 describe('LanguageModal', () => {
   const closeModal = jest.fn();
   let onChangeMock: jest.Mock;
-  let reportUiCounterMock: jest.Mock;
+  let reportEventMock: jest.Mock;
 
   beforeEach(() => {
     jest.clearAllMocks();
     onChangeMock = jest.fn();
-    reportUiCounterMock = jest.fn();
+    reportEventMock = jest.fn();
 
     (useLanguage as jest.Mock).mockReturnValue({
       value: 'en',
@@ -51,8 +50,8 @@ describe('LanguageModal', () => {
     });
   });
 
-  const renderModal = (usageCollection?: { reportUiCounter: jest.Mock }) =>
-    render(<LanguageModal closeModal={closeModal} usageCollection={usageCollection as any} />, {
+  const renderModal = (analytics?: { reportEvent: jest.Mock }) =>
+    render(<LanguageModal closeModal={closeModal} analytics={analytics as any} />, {
       wrapper: Wrapper,
     });
 
@@ -63,7 +62,7 @@ describe('LanguageModal', () => {
     expect(select.options).toHaveLength(3);
   });
 
-  it('saves and calls reportUiCounter with the selected locale when locale changed', () => {
+  it('saves and reports display_language_changed event when locale changed', () => {
     (useLanguage as jest.Mock).mockReturnValue({
       value: 'fr-FR',
       initialValue: 'en',
@@ -72,29 +71,29 @@ describe('LanguageModal', () => {
       onChange: onChangeMock,
     });
 
-    const { getByTestId } = renderModal({ reportUiCounter: reportUiCounterMock });
+    const { getByTestId } = renderModal({ reportEvent: reportEventMock });
 
     fireEvent.click(getByTestId('languageModalSaveButton'));
 
     expect(onChangeMock).toHaveBeenCalledWith('fr-FR', true);
-    expect(reportUiCounterMock).toHaveBeenCalledWith('display_language', METRIC_TYPE.COUNT, [
-      'language_changed_from_en',
-      'language_changed_to_fr-FR',
-    ]);
+    expect(reportEventMock).toHaveBeenCalledWith('display_language_changed', {
+      from: 'en',
+      to: 'fr-FR',
+    });
     expect(closeModal).toHaveBeenCalled();
   });
 
-  it('does not call reportUiCounter when locale is unchanged', () => {
-    const { getByTestId } = renderModal({ reportUiCounter: reportUiCounterMock });
+  it('does not report event when locale is unchanged', () => {
+    const { getByTestId } = renderModal({ reportEvent: reportEventMock });
 
     fireEvent.click(getByTestId('languageModalSaveButton'));
 
     expect(onChangeMock).not.toHaveBeenCalled();
-    expect(reportUiCounterMock).not.toHaveBeenCalled();
+    expect(reportEventMock).not.toHaveBeenCalled();
     expect(closeModal).toHaveBeenCalled();
   });
 
-  it('does not call reportUiCounter when usageCollection is not provided', () => {
+  it('does not report event when analytics is not provided', () => {
     (useLanguage as jest.Mock).mockReturnValue({
       value: 'ja-JP',
       initialValue: 'en',
@@ -120,11 +119,11 @@ describe('LanguageModal', () => {
       onChange: onChangeMock,
     });
 
-    const { getByTestId } = renderModal({ reportUiCounter: reportUiCounterMock });
+    const { getByTestId } = renderModal({ reportEvent: reportEventMock });
 
     fireEvent.click(getByTestId('languageModalDiscardButton'));
 
-    expect(reportUiCounterMock).not.toHaveBeenCalled();
+    expect(reportEventMock).not.toHaveBeenCalled();
     expect(closeModal).toHaveBeenCalled();
   });
 });

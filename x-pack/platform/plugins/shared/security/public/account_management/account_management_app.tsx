@@ -21,7 +21,6 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import type { AuthenticationServiceSetup } from '@kbn/security-plugin-types-public';
 import { Router } from '@kbn/shared-ux-router';
-import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import { UserProfilesKibanaProvider } from '@kbn/user-profile-components';
 
 import type { SecurityApiClients } from '../components';
@@ -48,7 +47,7 @@ export const accountManagementApp = Object.freeze({
       visibleIn: [],
       appRoute: '/security/account',
       async mount({ element, history }: AppMountParameters) {
-        const [[coreStart, { usageCollection }], { AccountManagementPage }] = await Promise.all([
+        const [[coreStart], { AccountManagementPage }] = await Promise.all([
           getStartServices(),
           import('./account_management_page'),
         ]);
@@ -60,7 +59,6 @@ export const accountManagementApp = Object.freeze({
               history={history}
               authc={authc}
               securityApiClients={securityApiClients}
-              usageCollection={usageCollection}
             >
               <AccountManagementPage />
             </Providers>
@@ -78,7 +76,6 @@ export interface ProvidersProps {
   services: CoreStart;
   history: History;
   authc: AuthenticationServiceSetup;
-  usageCollection?: UsageCollectionStart;
   securityApiClients: SecurityApiClients;
   onChange?: BreadcrumbsChangeHandler;
 }
@@ -87,12 +84,11 @@ export const Providers: FC<PropsWithChildren<ProvidersProps>> = ({
   services,
   history,
   authc,
-  usageCollection,
   securityApiClients,
   onChange,
   children,
 }) => (
-  <KibanaContextProvider services={{ ...services, usageCollection }}>
+  <KibanaContextProvider services={services}>
     <AuthenticationProvider authc={authc}>
       <SecurityApiClientsProvider {...securityApiClients}>
         <Router history={history}>

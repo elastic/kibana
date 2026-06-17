@@ -33,8 +33,6 @@ dependsOn:
   - '@kbn/core-plugins-browser'
   - '@kbn/config'
   - '@kbn/scout'
-  - '@kbn/usage-collection-plugin'
-  - '@kbn/analytics'
 tags:
   - plugin
   - prod

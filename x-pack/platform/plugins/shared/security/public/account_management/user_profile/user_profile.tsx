@@ -35,7 +35,6 @@ import type { FunctionComponent } from 'react';
 import React, { useRef, useState } from 'react';
 import useUpdateEffect from 'react-use/lib/useUpdateEffect';
 
-import { METRIC_TYPE } from '@kbn/analytics';
 import type { CoreStart, IUiSettingsClient, ThemeServiceStart } from '@kbn/core/public';
 import { getAvailableLocales, i18n, toCanonicalLocaleId } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -53,7 +52,6 @@ import {
   useFormChangesContext,
 } from '@kbn/security-form-components';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
-import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import {
   type ContrastModeValue,
   type DarkModeValue,
@@ -945,7 +943,7 @@ export const UserProfile: FunctionComponent<UserProfileProps> = ({ user, data })
 };
 
 export function useUserProfileForm({ user, data }: UserProfileProps) {
-  const { services } = useKibana<CoreStart & { usageCollection?: UsageCollectionStart }>();
+  const { services } = useKibana<CoreStart>();
   const { users } = useSecurityApiClients();
 
   const { update, showSuccessNotification } = useUpdateUserProfile({
@@ -1035,10 +1033,10 @@ export function useUserProfileForm({ user, data }: UserProfileProps) {
         values.data &&
         initialValues.data?.userSettings.locale !== values.data.userSettings.locale
       ) {
-        services.usageCollection?.reportUiCounter('display_language', METRIC_TYPE.COUNT, [
-          `language_changed_from_${initialValues.data?.userSettings.locale}`,
-          `language_changed_to_${values.data.userSettings.locale}`,
-        ]);
+        services.analytics.reportEvent('display_language_changed', {
+          from: initialValues.data?.userSettings.locale ?? '',
+          to: values.data.userSettings.locale,
+        });
       }
 
       showSuccessNotification({ isRefreshRequired });

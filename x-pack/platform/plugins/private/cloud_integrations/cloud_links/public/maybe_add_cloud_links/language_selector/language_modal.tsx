@@ -23,10 +23,9 @@ import {
 } from '@elastic/eui';
 import type { Theme } from '@emotion/react';
 import { css } from '@emotion/react';
-import { METRIC_TYPE } from '@kbn/analytics';
+import type { AnalyticsServiceStart } from '@kbn/core/public';
 import { i18n, getAvailableLocales } from '@kbn/i18n';
 import type { LocaleValue } from '@kbn/user-profile-components';
-import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 
 import { useLanguage } from './use_language_hook';
 
@@ -38,10 +37,10 @@ const betaBadgeStyle = ({ euiTheme }: Theme) => css`
 
 interface Props {
   closeModal: () => void;
-  usageCollection?: UsageCollectionStart;
+  analytics?: AnalyticsServiceStart;
 }
 
-export const LanguageModal: FC<Props> = ({ closeModal, usageCollection }) => {
+export const LanguageModal: FC<Props> = ({ closeModal, analytics }) => {
   const modalTitleId = useGeneratedHtmlId();
   const selectId = useGeneratedHtmlId();
 
@@ -119,10 +118,10 @@ export const LanguageModal: FC<Props> = ({ closeModal, usageCollection }) => {
           onClick={() => {
             if (locale !== initialLocaleValue) {
               onChange(locale, true);
-              usageCollection?.reportUiCounter('display_language', METRIC_TYPE.COUNT, [
-                `language_changed_from_${initialLocaleValue}`,
-                `language_changed_to_${locale}`,
-              ]);
+              analytics?.reportEvent('display_language_changed', {
+                from: initialLocaleValue,
+                to: locale,
+              });
             }
             closeModal();
           }}
