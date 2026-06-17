@@ -10,7 +10,7 @@
         "@cloud-stateful-classic"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/agents_acl_api.spec.ts",
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/agents_access_control_api.spec.ts",
         "line": 223,
         "column": 10
       }
@@ -24,7 +24,7 @@
         "@cloud-stateful-classic"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/agents_acl_api.spec.ts",
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/agents_access_control_api.spec.ts",
         "line": 264,
         "column": 10
       }
@@ -38,7 +38,7 @@
         "@cloud-stateful-classic"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/agents_acl_api.spec.ts",
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/agents_access_control_api.spec.ts",
         "line": 292,
         "column": 10
       }
@@ -52,7 +52,7 @@
         "@cloud-stateful-classic"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/agents_acl_api.spec.ts",
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/agents_access_control_api.spec.ts",
         "line": 322,
         "column": 10
       }
@@ -66,7 +66,7 @@
         "@cloud-stateful-classic"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/agents_acl_api.spec.ts",
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/agents_access_control_api.spec.ts",
         "line": 344,
         "column": 10
       }
@@ -80,7 +80,7 @@
         "@cloud-stateful-classic"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/agents_acl_api.spec.ts",
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/agents_access_control_api.spec.ts",
         "line": 357,
         "column": 10
       }
@@ -94,7 +94,7 @@
         "@cloud-stateful-classic"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/agents_acl_api.spec.ts",
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/agents_access_control_api.spec.ts",
         "line": 371,
         "column": 10
       }
@@ -108,7 +108,7 @@
         "@cloud-stateful-classic"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/agents_acl_api.spec.ts",
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/agents_access_control_api.spec.ts",
         "line": 386,
         "column": 10
       }
