@@ -164,7 +164,7 @@ export const ElbLogsPanel: React.FC<ElbLogsPanelProps> = ({ http }) => {
               <EuiFormRow
                 label={i18n.translate(
                   'xpack.observability_onboarding.fleetIntegration.elbLogs.s3BucketNameLabel',
-                  { defaultMessage: 'S3 Bucket Name' }
+                  { defaultMessage: 'S3 bucket name' }
                 )}
                 isInvalid={isBucketNameInvalid}
                 error={
@@ -204,7 +204,7 @@ export const ElbLogsPanel: React.FC<ElbLogsPanelProps> = ({ http }) => {
                   >
                     {i18n.translate(
                       'xpack.observability_onboarding.fleetIntegration.elbLogs.launchStackButtonLabel',
-                      { defaultMessage: 'Launch Stack in AWS' }
+                      { defaultMessage: 'Launch stack in AWS' }
                     )}
                   </EuiButton>
                 </EuiFlexItem>
