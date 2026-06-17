@@ -10,7 +10,7 @@ import { merge } from 'lodash';
 import { dump } from 'js-yaml';
 import yamlDoc from 'yaml';
 
-import { getNormalizedInputs, isIntegrationPolicyTemplate } from '../../../../common/services';
+import { getNormalizedInputs, getPolicyTemplateDataStreamPaths } from '../../../../common/services';
 
 import {
   getStreamsForInputType,
