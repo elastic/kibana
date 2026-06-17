@@ -62,8 +62,8 @@ import {
   redactAccessControlForCaller,
   validateAccessControlUpdateAccess,
 } from './utils/access_control';
+import { validateAccessControlUpdate } from './utils/access_control_update_validation';
 import { hasRequiredDocumentFields } from './utils/helper';
-import { validateAccessControlUpdate } from './utils/acl';
 
 export interface GetAgentAccessControlResult {
   /** True when the caller is allowed to read the principal list. */

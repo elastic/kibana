@@ -10,7 +10,7 @@ import {
   AgentAccessControlRole,
   type AgentAccessControlEntry,
 } from '@kbn/agent-builder-common';
-import { validateAccessControlUpdate } from './acl';
+import { validateAccessControlUpdate } from './access_control_update_validation';
 
 const entry = (over: Partial<AgentAccessControlEntry> = {}): AgentAccessControlEntry => ({
   type: 'user',

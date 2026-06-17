@@ -13,7 +13,7 @@ import {
 } from '@kbn/agent-builder-common';
 
 /**
- * Validates the entries provided in an ACL update. Returns a string describing the first
+ * Validates the entries provided in an access control update. Returns a string describing the first
  * error encountered, or `undefined` when the input is valid.
  */
 export const validateAccessControlUpdate = (
