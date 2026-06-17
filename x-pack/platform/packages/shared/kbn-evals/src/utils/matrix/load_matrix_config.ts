@@ -9,6 +9,15 @@ import Fs from 'fs';
 import { schema, type TypeOf } from '@kbn/config-schema';
 
 /**
+ * Upper bounds for schema fields. The config is a static repo-controlled JSON
+ * file (not request input), so these exist to satisfy bounded-input validation
+ * rather than to mitigate a real DoS vector; the limits are generous enough that
+ * any realistic matrix config stays well within them.
+ */
+const MAX_STRING_LENGTH = 1024;
+const MAX_ARRAY_SIZE = 1000;
+
+/**
  * Schema for the LLM performance matrix configuration file.
  *
  * The matrix engine is domain-agnostic: a config file maps human-facing matrix
@@ -19,15 +28,26 @@ import { schema, type TypeOf } from '@kbn/config-schema';
  */
 const columnSchema = schema.object({
   /** Stable identifier for the column (used as the CSV/JSON key). */
-  id: schema.string({ minLength: 1 }),
+  id: schema.string({ minLength: 1, maxLength: MAX_STRING_LENGTH }),
   /** Human-facing column header (e.g. "Alert Triage"). */
-  label: schema.string({ minLength: 1 }),
+  label: schema.string({ minLength: 1, maxLength: MAX_STRING_LENGTH }),
   /** `suite.id` values whose scores contribute to this column. */
-  suites: schema.arrayOf(schema.string({ minLength: 1 }), { minSize: 1 }),
+  suites: schema.arrayOf(schema.string({ minLength: 1, maxLength: MAX_STRING_LENGTH }), {
+    minSize: 1,
+    maxSize: MAX_ARRAY_SIZE,
+  }),
   /** Optional restriction to specific `example.dataset.id` values. */
-  datasetIds: schema.maybe(schema.arrayOf(schema.string({ minLength: 1 }))),
+  datasetIds: schema.maybe(
+    schema.arrayOf(schema.string({ minLength: 1, maxLength: MAX_STRING_LENGTH }), {
+      maxSize: MAX_ARRAY_SIZE,
+    })
+  ),
   /** Optional restriction to specific `evaluator.name` values. */
-  evaluators: schema.maybe(schema.arrayOf(schema.string({ minLength: 1 }))),
+  evaluators: schema.maybe(
+    schema.arrayOf(schema.string({ minLength: 1, maxLength: MAX_STRING_LENGTH }), {
+      maxSize: MAX_ARRAY_SIZE,
+    })
+  ),
   /**
    * Multiplier applied to the (weighted) mean evaluator score before rounding.
    * Defaults to `defaultScale` (10) so 0-1 evaluator scores map onto the 0-10
@@ -40,11 +60,15 @@ const columnSchema = schema.object({
 
 const modelSchema = schema.object({
   /** Primary `task.model.id` value to match against. */
-  id: schema.string({ minLength: 1 }),
+  id: schema.string({ minLength: 1, maxLength: MAX_STRING_LENGTH }),
   /** Display name shown in the published matrix (e.g. "Claude Sonnet 4"). */
-  label: schema.string({ minLength: 1 }),
+  label: schema.string({ minLength: 1, maxLength: MAX_STRING_LENGTH }),
   /** Additional `task.model.id` values that should map to the same row. */
-  matchIds: schema.maybe(schema.arrayOf(schema.string({ minLength: 1 }))),
+  matchIds: schema.maybe(
+    schema.arrayOf(schema.string({ minLength: 1, maxLength: MAX_STRING_LENGTH }), {
+      maxSize: MAX_ARRAY_SIZE,
+    })
+  ),
   /** Renders the model under the "Open-source models" table when true. */
   openSource: schema.boolean({ defaultValue: false }),
 });
@@ -73,9 +97,9 @@ export const DEFAULT_EXCLUDED_EVALUATORS: readonly string[] = [
 
 export const matrixConfigSchema = schema.object({
   /** Page/table title (informational; used in the markdown artifact). */
-  title: schema.string({ defaultValue: 'LLM performance matrix' }),
+  title: schema.string({ defaultValue: 'LLM performance matrix', maxLength: MAX_STRING_LENGTH }),
   /** Default git branch to pull experiments from (CLI `--branch` overrides). */
-  branch: schema.string({ defaultValue: 'main' }),
+  branch: schema.string({ defaultValue: 'main', maxLength: MAX_STRING_LENGTH }),
   /** Only consider experiments newer than `now-<lookbackDays>d`. */
   lookbackDays: schema.number({ defaultValue: 45, min: 1 }),
   /** Default multiplier applied to evaluator means when a column omits `scale`. */
@@ -85,7 +109,10 @@ export const matrixConfigSchema = schema.object({
   /** Cells at/under this value (after scaling) render as `notRecommendedLabel`. */
   notRecommendedBelow: schema.number({ defaultValue: 0, min: 0 }),
   /** Text rendered when a model fails / lacks data for a column. */
-  notRecommendedLabel: schema.string({ defaultValue: 'Not recommended' }),
+  notRecommendedLabel: schema.string({
+    defaultValue: 'Not recommended',
+    maxLength: MAX_STRING_LENGTH,
+  }),
   /**
    * When true, "Not recommended" cells count as 0 in the Overall score (matches
    * the published matrix behavior where failures drag the average down).
@@ -96,17 +123,18 @@ export const matrixConfigSchema = schema.object({
    * aggregation. Defaults to the observability-tier evaluators, which emit raw
    * magnitudes rather than 0-1 quality scores. Set to `[]` to include everything.
    */
-  excludeEvaluators: schema.arrayOf(schema.string({ minLength: 1 }), {
+  excludeEvaluators: schema.arrayOf(schema.string({ minLength: 1, maxLength: MAX_STRING_LENGTH }), {
     defaultValue: [...DEFAULT_EXCLUDED_EVALUATORS],
+    maxSize: MAX_ARRAY_SIZE,
   }),
   overall: schema.object({
-    label: schema.string({ defaultValue: 'Overall' }),
+    label: schema.string({ defaultValue: 'Overall', maxLength: MAX_STRING_LENGTH }),
     mode: schema.oneOf([schema.literal('weighted'), schema.literal('mean')], {
       defaultValue: 'weighted',
     }),
   }),
-  columns: schema.arrayOf(columnSchema, { minSize: 1 }),
-  models: schema.arrayOf(modelSchema, { minSize: 1 }),
+  columns: schema.arrayOf(columnSchema, { minSize: 1, maxSize: MAX_ARRAY_SIZE }),
+  models: schema.arrayOf(modelSchema, { minSize: 1, maxSize: MAX_ARRAY_SIZE }),
 });
 
 export type MatrixConfig = TypeOf<typeof matrixConfigSchema>;
