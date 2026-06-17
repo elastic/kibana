@@ -352,6 +352,7 @@ function createSyntheticsServices(
       method: 'GET',
     });
     for (const connector of data as any[]) {
+      if (connector.is_preconfigured) continue;
       await kbnClient.request({
         path: `/api/actions/connector/${connector.id}`,
         method: 'DELETE',
