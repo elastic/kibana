@@ -83,7 +83,6 @@ export const DASHBOARD_SAVED_SEARCH_ARCHIVE =
   'src/platform/test/functional/fixtures/kbn_archiver/dashboard/current/kibana';
 export const DASHBOARD_DEFAULT_INDEX_TITLE = 'logstash-*';
 export const FEW_PANELS_DASHBOARD_TITLE = 'few panels';
-export const FEW_PANELS_DASHBOARD_ID = '33bb8ad0-3dd4-11e8-b2b9-5d5dc1715159';
 
 export const MIGRATION_SMOKE_EXPORTS_DIR =
   'src/platform/plugins/shared/dashboard/test/scout/ui/parallel_tests/migration_smoke_tests/exports';
