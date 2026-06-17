@@ -8,7 +8,9 @@
  */
 import { EuiFlexGrid, EuiFlexItem, EuiPanel, euiPaletteColorBlind } from '@elastic/eui';
 import { css } from '@emotion/react';
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
+import type { DataViewField } from '@kbn/data-views-plugin/common';
+import { UnifiedBreakdownFieldSelector } from '@kbn/unified-histogram';
 import { TraceMetricsProvider } from './context/trace_metrics_context';
 import { useEsqlQueryInfo } from '../../../hooks/use_esql_query_info';
 import { ErrorRateChart } from './error_rate';
@@ -57,11 +59,30 @@ function TraceMetricsGrid({
     });
   }, [esqlQuery.metadataFields, filters]);
 
+  const breakdownDataViewField = useMemo(
+    () => (breakdownField && dataView ? dataView.getFieldByName(breakdownField) : undefined),
+    [breakdownField, dataView]
+  );
+
+  const handleBreakdownFieldChange = useCallback(
+    (field: DataViewField | undefined) => {
+      onBreakdownFieldChange?.(field?.name);
+    },
+    [onBreakdownFieldChange]
+  );
+
   const toolbar = useMemo(
     () => ({
       toggleActions: renderToggleActions(),
+      leftSide: dataView ? (
+        <UnifiedBreakdownFieldSelector
+          dataView={dataView}
+          breakdown={{ field: breakdownDataViewField }}
+          onBreakdownFieldChange={handleBreakdownFieldChange}
+        />
+      ) : undefined,
     }),
-    [renderToggleActions]
+    [renderToggleActions, dataView, breakdownDataViewField, handleBreakdownFieldChange]
   );
 
   const indexPattern = dataView?.getIndexPattern();
