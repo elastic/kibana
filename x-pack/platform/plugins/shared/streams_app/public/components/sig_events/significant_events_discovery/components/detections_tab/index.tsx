@@ -45,10 +45,9 @@ const DISCOVERY_STATUS_LABELS = {
   }),
 };
 
-const VIEW_DETAILS_ARIA_LABEL = i18n.translate(
-  'xpack.streams.detectionsTab.viewDetailsAriaLabel',
-  { defaultMessage: 'View details' }
-);
+const VIEW_DETAILS_ARIA_LABEL = i18n.translate('xpack.streams.detectionsTab.viewDetailsAriaLabel', {
+  defaultMessage: 'View details',
+});
 
 const MINIMIZE_DETAILS_ARIA_LABEL = i18n.translate(
   'xpack.streams.detectionsTab.minimizeDetailsAriaLabel',
@@ -79,9 +78,7 @@ export const DetectionsTab = () => {
   useInterval(refetch, isRunning ? RUNNING_POLL_INTERVAL_MS : null);
 
   const [selectedDetection, setSelectedDetection] = useState<Detection | undefined>();
-  const selectedDetectionId = selectedDetection
-    ? getDetectionItemId(selectedDetection)
-    : undefined;
+  const selectedDetectionId = selectedDetection ? getDetectionItemId(selectedDetection) : undefined;
 
   const toggleSelectedDetection = useCallback((detection: Detection) => {
     setSelectedDetection((current) =>
