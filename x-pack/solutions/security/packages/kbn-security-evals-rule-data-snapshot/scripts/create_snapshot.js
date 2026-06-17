@@ -19,12 +19,10 @@
  */
 
 /* eslint-disable no-console */
-/* eslint-disable import/no-dynamic-require */
-/* eslint-disable no-process-exit */
 
 const { Client } = require('@elastic/elasticsearch');
 
-// Load kbn-es-snapshot-loader via Node resolution from repo root
+// eslint-disable-next-line import/no-dynamic-require
 const esSnapshotLoader = require(require.resolve('@kbn/es-snapshot-loader', {
   paths: [process.cwd()],
 }));
@@ -33,8 +31,7 @@ const { createGcsRepository, createSnapshot } = esSnapshotLoader;
 
 const gcsCreds = process.env.GCS_CREDENTIALS;
 if (!gcsCreds) {
-  console.error('ERROR: GCS_CREDENTIALS env var is required');
-  process.exit(1);
+  throw new Error('GCS_CREDENTIALS env var is required');
 }
 
 const BUCKET = process.env.SNAPSHOT_BUCKET ?? 'security-ai-datasets';
@@ -60,10 +57,9 @@ async function main() {
     .count({ index: 'logs-o365.audit-default' })
     .catch(() => ({ count: 0 }));
   if (o365Count === 0) {
-    console.error(
-      'ERROR: No data found in logs-o365.audit-default. Seed data first (e.g. run eval setup).'
+    throw new Error(
+      'No data found in logs-o365.audit-default. Seed data first (e.g. run eval setup).'
     );
-    process.exit(1);
   }
 
   console.log(
@@ -103,8 +99,7 @@ async function main() {
   });
 
   if (!result.success) {
-    console.error(`[create-snapshot] failed: ${result.errors.join('; ')}`);
-    process.exit(1);
+    throw new Error(`Snapshot creation failed: ${result.errors.join('; ')}`);
   }
 
   console.log(
@@ -118,5 +113,5 @@ async function main() {
 
 main().catch((err) => {
   console.error(err);
-  process.exit(1);
+  process.exitCode = 1;
 });

@@ -14,237 +14,154 @@ import type {
   MitreTechnique,
 } from '../../../../../../common/detection_engine/mitre/types';
 
+const MIN_KEYWORD_LENGTH = 3;
+
 /**
- * Terms that appear in nearly every detection request and should not be
- * treated as meaningful keywords.
+ * Maximum fraction of techniques a word can appear in before it is
+ * considered too generic to be useful for tactic filtering.
+ * Words appearing in more than 15% of technique names are skipped.
  */
-const STOPWORDS = new Set([
-  'detect',
-  'detection',
-  'detections',
-  'rule',
-  'rules',
-  'alert',
-  'alerts',
-  'attack',
-  'threat',
-  'anomaly',
-  'suspicious',
-  'malicious',
-  'indicator',
-  'behavior',
-  'activity',
-  'events',
-  'event',
-  'log',
-  'logs',
-  'query',
-  'monitor',
-  'monitoring',
-  'observed',
-  'create',
-  'creation',
-  'generate',
-  'generating',
-  'identify',
-  'identifying',
-  'find',
-  'finding',
-  'look',
-  'looking',
-  'search',
-  'searching',
-  'when',
-  'where',
-  'how',
-  'what',
-  'which',
-  'the',
-  'a',
-  'an',
-  'is',
-  'are',
-  'was',
-  'were',
-  'be',
-  'been',
-  'being',
-  'have',
-  'has',
-  'had',
-  'do',
-  'does',
-  'did',
-  'will',
-  'would',
-  'could',
-  'should',
-  'may',
-  'might',
-  'must',
-  'can',
-  'shall',
-  'need',
-  'used',
-  'using',
-  'use',
-  'via',
-  'from',
-  'for',
-  'with',
-  'by',
-  'to',
-  'of',
-  'in',
-  'on',
-  'at',
-  'as',
-  'or',
-  'and',
-  'but',
-  'not',
-  'no',
-  'that',
-  'this',
-  'these',
-  'those',
-  'it',
-  'its',
-  'they',
-  'them',
-  'their',
-  'we',
-  'our',
-  'you',
-  'your',
-  'i',
-  'my',
-  'me',
-]);
+const MAX_TECHNIQUE_FREQUENCY_RATIO = 0.15;
 
 /**
- * Maps query-side security keywords to relevant MITRE ATT&CK tactic IDs.
- * When a user query contains keywords matching a category, only tactics
- * relevant to that category are included in the generated catalog.
+ * Normalize a tactic value for comparison: lowercase + strip dashes.
+ * Technique tactic values use kebab-case (e.g. "credential-access")
+ * while tactic values use camelCase (e.g. "credentialAccess").
  */
-const KEYWORD_TO_TACTIC_IDS: Record<string, string[]> = {
-  // Windows / Endpoint / Host-based
-  powershell: ['TA0002', 'TA0005', 'TA0006'],
-  sysmon: ['TA0002', 'TA0004', 'TA0005', 'TA0006', 'TA0007'],
-  windows: ['TA0002', 'TA0003', 'TA0004', 'TA0005', 'TA0006', 'TA0007'],
-  endpoint: ['TA0002', 'TA0003', 'TA0004', 'TA0005', 'TA0006', 'TA0007'],
-  uac: ['TA0004', 'TA0005'],
-  privilege: ['TA0004', 'TA0005', 'TA0006'],
-  dcsync: ['TA0006', 'TA0004'],
-  kerberoast: ['TA0006', 'TA0004'],
-  lsass: ['TA0006'],
-  credential: ['TA0006', 'TA0004', 'TA0005'],
-  malware: ['TA0002', 'TA0005', 'TA0040'],
-  ransomware: ['TA0040', 'TA0005', 'TA0002'],
-  'defense evasion': ['TA0005'],
-  'privilege escalation': ['TA0004', 'TA0005'],
-
-  // Cloud / AWS
-  aws: ['TA0001', 'TA0004', 'TA0005', 'TA0011'],
-  cloudtrail: ['TA0001', 'TA0004', 'TA0005', 'TA0011'],
-  iam: ['TA0001', 'TA0004', 'TA0006'],
-  s3: ['TA0001', 'TA0010'],
-  ec2: ['TA0001', 'TA0004', 'TA0011'],
-  lambda: ['TA0002', 'TA0004'],
-  'amazon web services': ['TA0001', 'TA0004', 'TA0005', 'TA0011'],
-
-  // Identity / Okta
-  okta: ['TA0001', 'TA0006', 'TA0004'],
-  mfa: ['TA0001', 'TA0006'],
-  auth: ['TA0001', 'TA0006', 'TA0004'],
-  authentication: ['TA0001', 'TA0006', 'TA0004'],
-  sso: ['TA0001', 'TA0006'],
-
-  // GCP / Google
-  gcp: ['TA0001', 'TA0004', 'TA0005', 'TA0011'],
-  'google cloud': ['TA0001', 'TA0004', 'TA0005', 'TA0011'],
-  google_workspace: ['TA0009', 'TA0010'],
-  gmail: ['TA0009', 'TA0010'],
-  gsuite: ['TA0009', 'TA0010'],
-
-  // Kubernetes / Container
-  kubernetes: ['TA0002', 'TA0004', 'TA0011'],
-  k8s: ['TA0002', 'TA0004', 'TA0011'],
-  container: ['TA0002', 'TA0004', 'TA0011'],
-  pod: ['TA0002', 'TA0004', 'TA0011'],
-  escape: ['TA0004', 'TA0005'],
-
-  // Network / Firewall / Lateral
-  network: ['TA0008', 'TA0010', 'TA0011'],
-  firewall: ['TA0011', 'TA0008'],
-  vpn: ['TA0008', 'TA0011'],
-  lateral: ['TA0008', 'TA0011'],
-  'lateral movement': ['TA0008', 'TA0011'],
-  panw: ['TA0011', 'TA0008'],
-  fortinet: ['TA0011', 'TA0008'],
-  cisco: ['TA0011', 'TA0008'],
-  ssh: ['TA0008'],
-  rdp: ['TA0008'],
-
-  // Email / Phishing / Initial Access
-  email: ['TA0001', 'TA0009', 'TA0010'],
-  phishing: ['TA0001'],
-  spearphishing: ['TA0001'],
-  'initial access': ['TA0001'],
-
-  // Exfiltration / Collection
-  exfiltration: ['TA0010', 'TA0009'],
-  'data theft': ['TA0010', 'TA0009'],
-  collection: ['TA0009'],
-  archive: ['TA0009'],
-
-  // Reconnaissance / Discovery
-  reconnaissance: ['TA0007', 'TA0001'],
-  discovery: ['TA0007'],
-  enumeration: ['TA0007'],
-  scanning: ['TA0007', 'TA0001'],
-
-  // Command and Control
-  beacon: ['TA0011'],
-  beaconing: ['TA0011'],
-  c2: ['TA0011'],
-  'command and control': ['TA0011'],
-  cnc: ['TA0011'],
-
-  // Impact
-  impact: ['TA0040'],
-  encryption: ['TA0040', 'TA0005'],
-  'data encrypted': ['TA0040'],
-  destruction: ['TA0040'],
-
-  // Threat Intel
-  ioc: ['TA0001', 'TA0011'],
-  'threat intel': ['TA0001', 'TA0011'],
-  indicator: ['TA0001', 'TA0011'],
-};
+function normalizeTacticValue(value: string): string {
+  return value.toLowerCase().replace(/-/g, '');
+}
 
 /**
- * Tokenize a user query into lowercase keywords, filtering out stopwords.
+ * Build the tactic lookup: maps normalized tactic value → tactic ID.
+ * Computed once at module load.
+ */
+function buildTacticValueToId(allTactics: MitreTactic[]): Map<string, string> {
+  const map = new Map<string, string>();
+  for (const tactic of allTactics) {
+    map.set(normalizeTacticValue(tactic.value), tactic.id);
+  }
+  return map;
+}
+
+/**
+ * Extract meaningful lowercase tokens from a string.
+ * Filters out tokens shorter than MIN_KEYWORD_LENGTH.
+ */
+function extractTokens(text: string): string[] {
+  return text
+    .toLowerCase()
+    .split(/[^a-z0-9]+/)
+    .filter((w) => w.length >= MIN_KEYWORD_LENGTH);
+}
+
+/**
+ * Auto-derive keyword → tactic ID mapping from the MITRE catalog.
+ *
+ * For each technique, meaningful words from its name are mapped to
+ * the tactic IDs that technique belongs to. Words that appear in
+ * more than MAX_TECHNIQUE_FREQUENCY_RATIO of all techniques are
+ * discarded as too generic (e.g., "data", "system", "service").
+ *
+ * A small curated set of domain abbreviations and synonyms that
+ * don't appear in MITRE technique names is merged in last.
+ */
+function buildKeywordToTacticIds(
+  allTactics: MitreTactic[],
+  allTechniques: MitreTechnique[]
+): Map<string, Set<string>> {
+  const tacticValueToId = buildTacticValueToId(allTactics);
+  const wordToTactics = new Map<string, Set<string>>();
+  const wordTechniqueCount = new Map<string, number>();
+
+  for (const tech of allTechniques) {
+    const tacticIds = tech.tactics
+      .map((tv) => tacticValueToId.get(normalizeTacticValue(tv)))
+      .filter((id): id is string => id != null);
+
+    const words = new Set(extractTokens(tech.name));
+    for (const word of words) {
+      wordTechniqueCount.set(word, (wordTechniqueCount.get(word) ?? 0) + 1);
+      const existing = wordToTactics.get(word) ?? new Set<string>();
+      tacticIds.forEach((id) => existing.add(id));
+      wordToTactics.set(word, existing);
+    }
+  }
+
+  // Also index tactic names so "execution", "exfiltration", etc. map directly
+  for (const tactic of allTactics) {
+    for (const word of extractTokens(tactic.name)) {
+      const existing = wordToTactics.get(word) ?? new Set<string>();
+      existing.add(tactic.id);
+      wordToTactics.set(word, existing);
+    }
+  }
+
+  // Filter out overly generic words
+  const maxCount = Math.ceil(allTechniques.length * MAX_TECHNIQUE_FREQUENCY_RATIO);
+  for (const [word, count] of wordTechniqueCount) {
+    if (count > maxCount) {
+      wordToTactics.delete(word);
+    }
+  }
+
+  // Domain abbreviations / synonyms not present in MITRE technique names
+  const DOMAIN_SYNONYMS: Record<string, string[]> = {
+    aws: ['TA0001', 'TA0004', 'TA0005', 'TA0011'],
+    cloudtrail: ['TA0001', 'TA0004', 'TA0005', 'TA0011'],
+    gcp: ['TA0001', 'TA0004', 'TA0005', 'TA0011'],
+    k8s: ['TA0002', 'TA0004', 'TA0011'],
+    okta: ['TA0001', 'TA0006', 'TA0004'],
+    sso: ['TA0001', 'TA0006'],
+    mfa: ['TA0001', 'TA0006'],
+    rdp: ['TA0008'],
+    ssh: ['TA0008'],
+    vpn: ['TA0008', 'TA0011'],
+    c2: ['TA0011'],
+    cnc: ['TA0011'],
+    ioc: ['TA0001', 'TA0011'],
+    lsass: ['TA0006'],
+    uac: ['TA0004', 'TA0005'],
+    powershell: ['TA0002', 'TA0005', 'TA0006'],
+    sysmon: ['TA0002', 'TA0004', 'TA0005', 'TA0006', 'TA0007'],
+  };
+
+  for (const [keyword, ids] of Object.entries(DOMAIN_SYNONYMS)) {
+    const existing = wordToTactics.get(keyword) ?? new Set<string>();
+    ids.forEach((id) => existing.add(id));
+    wordToTactics.set(keyword, existing);
+  }
+
+  return wordToTactics;
+}
+
+// Module-level caches (computed once on first import)
+const keywordToTacticIds = buildKeywordToTacticIds(tactics, techniques);
+
+/**
+ * Tokenize a user query into lowercase keywords, filtering out
+ * words shorter than MIN_KEYWORD_LENGTH (generic function words).
+ * Short tokens (< MIN_KEYWORD_LENGTH) are still included when they
+ * appear in the keyword map (e.g. domain abbreviations like "c2").
  */
 function tokenizeQuery(query: string): Set<string> {
   const tokens = new Set<string>();
-  const words = query.toLowerCase().split(/[^a-z0-9_\-]+/);
+  const words = query.toLowerCase().split(/[^a-z0-9_-]+/);
 
   for (let i = 0; i < words.length; i++) {
     const word = words[i].trim();
-    if (word.length > 1 && !STOPWORDS.has(word)) {
+    if (word.length >= MIN_KEYWORD_LENGTH || keywordToTacticIds.has(word)) {
       tokens.add(word);
     }
-    // Check for multi-word phrases (2-3 words)
     if (i + 1 < words.length) {
       const twoWord = `${word} ${words[i + 1]}`.trim();
-      if (!STOPWORDS.has(twoWord) && twoWord.length > 3) {
+      if (twoWord.length > MIN_KEYWORD_LENGTH) {
         tokens.add(twoWord);
       }
     }
     if (i + 2 < words.length) {
       const threeWord = `${word} ${words[i + 1]} ${words[i + 2]}`.trim();
-      if (!STOPWORDS.has(threeWord) && threeWord.length > 5) {
+      if (threeWord.length > MIN_KEYWORD_LENGTH + 2) {
         tokens.add(threeWord);
       }
     }
@@ -254,20 +171,19 @@ function tokenizeQuery(query: string): Set<string> {
 }
 
 /**
- * Given a set of query tokens, return relevant MITRE tactic IDs.
- * Falls back to ALL tactics if no specific category is detected.
+ * Given a set of query tokens, return relevant MITRE tactic IDs
+ * by matching against the auto-derived keyword map.
  */
 function getRelevantTacticIds(tokens: Set<string>): string[] {
   const relevantIds = new Set<string>();
 
-  for (const token of Array.from(tokens)) {
-    const tacticIds = KEYWORD_TO_TACTIC_IDS[token];
+  for (const token of tokens) {
+    const tacticIds = keywordToTacticIds.get(token);
     if (tacticIds) {
       tacticIds.forEach((id) => relevantIds.add(id));
     }
   }
 
-  // If no keywords matched, return empty (caller should use full catalog)
   return Array.from(relevantIds);
 }
 
@@ -291,14 +207,11 @@ function buildCatalogText(
   const techniquesByTactic = new Map<string, MitreTechnique[]>();
   allTechniques.forEach((tech) => {
     tech.tactics.forEach((tacticValue) => {
-      const normalizedTacticValue = tacticValue.toLowerCase().replace(/-/g, '');
-      const tactic = allTactics.find(
-        (t) => t.value.toLowerCase().replace(/-/g, '') === normalizedTacticValue
-      );
-      if (tactic) {
-        const existing = techniquesByTactic.get(tactic.id) ?? [];
+      const tacticId = buildTacticValueToId(allTactics).get(normalizeTacticValue(tacticValue));
+      if (tacticId) {
+        const existing = techniquesByTactic.get(tacticId) ?? [];
         existing.push(tech);
-        techniquesByTactic.set(tactic.id, existing);
+        techniquesByTactic.set(tacticId, existing);
       }
     });
   });
@@ -324,8 +237,9 @@ function buildCatalogText(
  *
  * Techniques are sourced from the autogenerated `mitre_tactics_techniques.ts`
  * (run `yarn extract-mitre-attacks` to refresh from upstream MITRE CTI).
- * This means every technique in the current ATT&CK version is available —
- * no manual allowlist maintenance is required when MITRE publishes updates.
+ * Keyword-to-tactic mapping is derived automatically from technique and
+ * tactic names, supplemented by a small set of domain abbreviations.
+ * No hand-maintained allowlists or stopword lists are required.
  *
  * Token-budget control is achieved by tactic-level filtering: when the user
  * query matches known security keywords, only techniques belonging to the

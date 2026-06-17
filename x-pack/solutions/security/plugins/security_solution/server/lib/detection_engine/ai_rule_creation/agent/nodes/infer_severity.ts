@@ -21,35 +21,46 @@ interface InferSeverityNodeParams {
   events?: ToolEventEmitter;
 }
 
-const SEVERITY_TO_RISK_SCORE: Record<string, number> = {
-  low: 21,
-  medium: 47,
-  high: 73,
-  critical: 99,
+/**
+ * Valid risk_score ranges per severity level.
+ * When the LLM returns a risk_score within the range, we keep it;
+ * when it falls outside, we clamp to the default for that severity.
+ */
+const SEVERITY_RISK_SCORE_RANGES: Record<
+  string,
+  { min: number; max: number; default: number }
+> = {
+  low: { min: 0, max: 46, default: 21 },
+  medium: { min: 47, max: 72, default: 47 },
+  high: { min: 73, max: 98, default: 73 },
+  critical: { min: 99, max: 100, default: 99 },
 };
 
 /**
- * Validates that inferred severity maps to the correct risk score.
- * Always enforces the canonical risk score for the severity to ensure
- * consistency with eval expectations and Elastic Security conventions.
+ * Validates that the inferred severity/risk_score pair is consistent.
+ * If the LLM's risk_score falls within the valid range for the severity
+ * level, it is preserved. Otherwise the canonical default is used.
  */
 const validateSeverityMapping = (
   response: SeverityInferenceResponse
 ): SeverityInferenceResponse => {
   const normalizedSeverity = response.severity?.toLowerCase();
-  const expectedRiskScore = SEVERITY_TO_RISK_SCORE[normalizedSeverity];
+  const range = SEVERITY_RISK_SCORE_RANGES[normalizedSeverity];
 
-  if (!expectedRiskScore) {
-    // Invalid severity — default to low
-    return { severity: 'low', risk_score: 21 };
+  if (!range) {
+    return { severity: 'low', risk_score: SEVERITY_RISK_SCORE_RANGES.low.default };
   }
 
-  // Always use the canonical risk score for the severity level.
-  // The model may hallucinate arbitrary risk scores; we enforce the
-  // exact mapping: low=21, medium=47, high=73, critical=99.
+  const riskScore =
+    typeof response.risk_score === 'number' &&
+    response.risk_score >= range.min &&
+    response.risk_score <= range.max
+      ? response.risk_score
+      : range.default;
+
   return {
     severity: normalizedSeverity as SeverityInferenceResponse['severity'],
-    risk_score: expectedRiskScore,
+    risk_score: riskScore,
   };
 };
 

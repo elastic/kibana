@@ -51,50 +51,95 @@ const baseState: RuleCreationState = {
 };
 
 describe('inferSeverityNode', () => {
-  describe('canonical severity-to-risk_score mapping', () => {
+  describe('risk_score range validation', () => {
     it.each([
-      { severity: 'low', expectedRiskScore: 21 },
-      { severity: 'medium', expectedRiskScore: 47 },
-      { severity: 'high', expectedRiskScore: 73 },
-      { severity: 'critical', expectedRiskScore: 99 },
+      { severity: 'low', riskScore: 21, expected: 21 },
+      { severity: 'low', riskScore: 0, expected: 0 },
+      { severity: 'low', riskScore: 46, expected: 46 },
+      { severity: 'medium', riskScore: 47, expected: 47 },
+      { severity: 'medium', riskScore: 60, expected: 60 },
+      { severity: 'medium', riskScore: 72, expected: 72 },
+      { severity: 'high', riskScore: 73, expected: 73 },
+      { severity: 'high', riskScore: 85, expected: 85 },
+      { severity: 'high', riskScore: 98, expected: 98 },
+      { severity: 'critical', riskScore: 99, expected: 99 },
+      { severity: 'critical', riskScore: 100, expected: 100 },
     ])(
-      'should map $severity to risk_score $expectedRiskScore',
-      async ({ severity, expectedRiskScore }) => {
-        const model = createMockModel({ severity, risk_score: 999 });
+      'should keep risk_score $riskScore for $severity (within valid range)',
+      async ({ severity, riskScore, expected }) => {
+        const model = createMockModel({ severity, risk_score: riskScore });
+        const node = inferSeverityNode({ model });
+
+        const result = await node(baseState);
+
+        expect(result.rule?.severity).toBe(severity);
+        expect(result.rule?.risk_score).toBe(expected);
+      }
+    );
+
+    it.each([
+      { severity: 'low', riskScore: 47, expectedDefault: 21 },
+      { severity: 'low', riskScore: 99, expectedDefault: 21 },
+      { severity: 'medium', riskScore: 20, expectedDefault: 47 },
+      { severity: 'medium', riskScore: 73, expectedDefault: 47 },
+      { severity: 'high', riskScore: 50, expectedDefault: 73 },
+      { severity: 'high', riskScore: 99, expectedDefault: 73 },
+      { severity: 'critical', riskScore: 50, expectedDefault: 99 },
+      { severity: 'critical', riskScore: 98, expectedDefault: 99 },
+    ])(
+      'should clamp to default $expectedDefault when $severity risk_score $riskScore is out of range',
+      async ({ severity, riskScore, expectedDefault }) => {
+        const model = createMockModel({ severity, risk_score: riskScore });
+        const node = inferSeverityNode({ model });
+
+        const result = await node(baseState);
+
+        expect(result.rule?.severity).toBe(severity);
+        expect(result.rule?.risk_score).toBe(expectedDefault);
+      }
+    );
+  });
+
+  describe('default risk_score per severity', () => {
+    it.each([
+      { severity: 'low', expectedDefault: 21 },
+      { severity: 'medium', expectedDefault: 47 },
+      { severity: 'high', expectedDefault: 73 },
+      { severity: 'critical', expectedDefault: 99 },
+    ])(
+      'should use default $expectedDefault for $severity when risk_score is non-numeric',
+      async ({ severity, expectedDefault }) => {
+        const model = createMockModel({ severity, risk_score: 'invalid' });
         const events = createMockEvents();
         const node = inferSeverityNode({ model, events });
 
         const result = await node(baseState);
 
         expect(result.rule?.severity).toBe(severity);
-        expect(result.rule?.risk_score).toBe(expectedRiskScore);
+        expect(result.rule?.risk_score).toBe(expectedDefault);
       }
     );
-
-    it('should enforce canonical risk_score even when model returns wrong value', () => {
-      // The model may hallucinate arbitrary risk scores; the node enforces the canonical mapping
-    });
   });
 
   describe('case normalization', () => {
     it('should normalize uppercase severity to lowercase', async () => {
-      const model = createMockModel({ severity: 'HIGH', risk_score: 50 });
+      const model = createMockModel({ severity: 'HIGH', risk_score: 85 });
       const node = inferSeverityNode({ model });
 
       const result = await node(baseState);
 
       expect(result.rule?.severity).toBe('high');
-      expect(result.rule?.risk_score).toBe(73);
+      expect(result.rule?.risk_score).toBe(85);
     });
 
     it('should normalize mixed-case severity', async () => {
-      const model = createMockModel({ severity: 'Medium', risk_score: 0 });
+      const model = createMockModel({ severity: 'Medium', risk_score: 60 });
       const node = inferSeverityNode({ model });
 
       const result = await node(baseState);
 
       expect(result.rule?.severity).toBe('medium');
-      expect(result.rule?.risk_score).toBe(47);
+      expect(result.rule?.risk_score).toBe(60);
     });
   });
 

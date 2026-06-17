@@ -63,6 +63,73 @@ kbn-evals-suite-security-ai-rules/
     └── helpers.test.ts           # Unit tests for helpers
 ```
 
+## Quick Start for Reviewers
+
+Follow these steps to run the eval suite locally and validate the PR changes end-to-end.
+
+### 1. Start Elasticsearch and Kibana
+
+```bash
+# Terminal 1: start ES
+yarn es snapshot
+
+# Terminal 2: start Kibana with feature flag
+yarn start --no-base-path
+```
+
+Make sure `config/kibana.dev.yml` contains:
+
+```yaml
+xpack.securitySolution.enableExperimental:
+  - aiRuleCreationEnabled
+```
+
+### 2. Configure an AI connector
+
+Add a connector in `config/kibana.dev.yml` (or create one in the UI at **Stack Management > Connectors**). Example for OpenAI:
+
+```yaml
+xpack.actions.preconfigured:
+  gpt-4o:
+    name: 'GPT-4o'
+    actionTypeId: .gen-ai
+    config:
+      apiProvider: OpenAI
+      apiUrl: https://api.openai.com/v1/chat/completions
+      defaultModel: gpt-4o
+    secrets:
+      apiKey: ${OPENAI_API_KEY}
+```
+
+### 3. Enable AI Agent chat experience
+
+Navigate to **Stack Management > AI > GenAI Settings** (`app/management/ai/genAiSettings`) and select **AI agent (Beta)** in Chat Experience. This enables the Agent Builder API (`POST /api/agent_builder/converse`) used by the suite.
+
+### 4. Run the eval suite
+
+```bash
+EVALUATION_CONNECTOR_ID=gpt-4o \
+  node scripts/evals run --suite security-ai-rules
+```
+
+That's it. Results are stored in Elasticsearch and a summary table is printed at the end.
+
+### 5. Run unit tests for product code changes
+
+```bash
+# infer_severity
+yarn test:jest x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/ai_rule_creation/agent/nodes/infer_severity.test.ts
+
+# mitre_catalog_builder
+yarn test:jest x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/ai_rule_creation/agent/nodes/mitre_catalog_builder.test.ts
+
+# generate_esql_query
+yarn test:jest x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/ai_rule_creation/agent/sub_graphs/esql_with_tool/nodes/generate_esql_query.test.ts
+
+# eval suite helpers
+yarn test:jest x-pack/solutions/security/packages/kbn-evals-suite-security-ai-rules/src/helpers.test.ts
+```
+
 ## Prerequisites
 
 1. **Elasticsearch running locally**:

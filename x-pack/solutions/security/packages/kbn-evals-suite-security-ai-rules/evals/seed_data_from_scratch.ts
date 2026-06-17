@@ -15,10 +15,7 @@
  */
 
 /* eslint-disable import/no-nodejs-modules */
-/* eslint-disable no-bitwise */
-/* eslint-disable no-continue */
 /* eslint-disable @kbn/eslint/require_kbn_fs */
-/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import type { Client } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/tooling-log';
@@ -135,8 +132,10 @@ const USER_POOL = [
 export const djb2 = (str: string): number => {
   let h = 5381;
   for (let i = 0; i < str.length; i++) {
+    // eslint-disable-next-line no-bitwise
     h = ((h << 5) + h + str.charCodeAt(i)) & 0xffffffff;
   }
+  // eslint-disable-next-line no-bitwise
   return h >>> 0;
 };
 
@@ -371,16 +370,20 @@ const loadEndpointSamples = async (
   ];
 
   for (const fp of episodeFiles) {
-    if (!existsSync(fp)) continue;
+    if (!existsSync(fp)) {
+      // eslint-disable-next-line no-continue
+      continue;
+    }
     const docs = await readEpisodeSample(fp, sampleCount);
     for (const doc of docs) {
       const ds: string | undefined =
         ((doc.data_stream as Record<string, unknown>)?.dataset as string) ??
         ((doc.event as Record<string, unknown>)?.dataset as string);
-      if (!ds) continue;
-      result[ds] = result[ds] ?? [];
-      if (result[ds].length < sampleCount) {
-        result[ds].push(doc);
+      if (ds) {
+        result[ds] = result[ds] ?? [];
+        if (result[ds].length < sampleCount) {
+          result[ds].push(doc);
+        }
       }
     }
   }
@@ -403,7 +406,9 @@ const bulkIndex = async (
     const body = slice.flatMap((doc) => [{ create: { _index: index } }, doc]);
     const resp = await esClient.bulk({ refresh: false, body });
     if (resp.errors) {
-      const firstErr = resp.items?.find((it: any) => it.create?.error)?.create?.error;
+      const firstErr = resp.items?.find(
+        (it: Record<string, Record<string, unknown>>) => it.create?.error
+      )?.create?.error as Record<string, string> | undefined;
       if (log && firstErr) {
         log.warning(
           `[security-ai-rules eval setup] bulk errors into ${index}: ${firstErr.type}: ${firstErr.reason}`
