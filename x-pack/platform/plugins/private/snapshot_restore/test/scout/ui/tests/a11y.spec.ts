@@ -31,25 +31,25 @@ test.describe('Snapshot & Restore — accessibility', { tag: tags.stateful.class
 
     await test.step('snapshots tab (empty)', async () => {
       const { violations } = await page.checkA11y({ include: A11Y_SELECTORS });
-      expect(violations).toHaveLength(0);
+      expect(violations).toStrictEqual([]);
     });
 
     await test.step('repositories tab (empty)', async () => {
       await snapshotRestore.navToRepositories();
       const { violations } = await page.checkA11y({ include: A11Y_SELECTORS });
-      expect(violations).toHaveLength(0);
+      expect(violations).toStrictEqual([]);
     });
 
     await test.step('policies tab (empty)', async () => {
       await snapshotRestore.navToPolicies();
       const { violations } = await page.checkA11y({ include: A11Y_SELECTORS });
-      expect(violations).toHaveLength(0);
+      expect(violations).toStrictEqual([]);
     });
 
     await test.step('restore status tab (empty)', async () => {
       await snapshotRestore.navToRestoreStatus();
       const { violations } = await page.checkA11y({ include: A11Y_SELECTORS });
-      expect(violations).toHaveLength(0);
+      expect(violations).toStrictEqual([]);
     });
   });
 
@@ -81,13 +81,13 @@ test.describe('Snapshot & Restore — accessibility', { tag: tags.stateful.class
 
       await test.step('snapshots table with data', async () => {
         const { violations } = await page.checkA11y({ include: A11Y_SELECTORS });
-        expect(violations).toHaveLength(0);
+        expect(violations).toStrictEqual([]);
       });
 
       await test.step('repositories table with data', async () => {
         await snapshotRestore.navToRepositories();
         const { violations } = await page.checkA11y({ include: A11Y_SELECTORS });
-        expect(violations).toHaveLength(0);
+        expect(violations).toStrictEqual([]);
       });
     } finally {
       await esClient.snapshot
@@ -125,31 +125,31 @@ test.describe('Snapshot & Restore — accessibility', { tag: tags.stateful.class
           repoName
         );
         const { violations } = await page.checkA11y({ include: A11Y_SELECTORS });
-        expect(violations).toHaveLength(0);
+        expect(violations).toStrictEqual([]);
       });
 
       await test.step('page two', async () => {
         await snapshotRestore.fillCreateNewPolicyPageTwo();
         const { violations } = await page.checkA11y({ include: A11Y_SELECTORS });
-        expect(violations).toHaveLength(0);
+        expect(violations).toStrictEqual([]);
       });
 
       await test.step('page three', async () => {
         await snapshotRestore.fillCreateNewPolicyPageThree();
         const { violations } = await page.checkA11y({ include: A11Y_SELECTORS });
-        expect(violations).toHaveLength(0);
+        expect(violations).toStrictEqual([]);
       });
 
       await test.step('submit and view flyout', async () => {
         await snapshotRestore.submitNewPolicy();
         const { violations } = await page.checkA11y({ include: A11Y_SELECTORS });
-        expect(violations).toHaveLength(0);
+        expect(violations).toStrictEqual([]);
       });
 
       await test.step('policy table with data', async () => {
         await snapshotRestore.closeFlyout();
         const { violations } = await page.checkA11y({ include: A11Y_SELECTORS });
-        expect(violations).toHaveLength(0);
+        expect(violations).toStrictEqual([]);
       });
     } finally {
       await esClient.snapshot.deleteRepository({ name: [repoName] }).catch(() => {});

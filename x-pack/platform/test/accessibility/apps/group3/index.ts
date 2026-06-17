@@ -15,10 +15,7 @@ export default ({ loadTestFile }: FtrProviderContext): void => {
     loadTestFile(require.resolve('./graph'));
     loadTestFile(require.resolve('./ml_embeddables_in_dashboard'));
     loadTestFile(require.resolve('./rules_connectors'));
-    // Please make sure that the remote clusters and CCR tests stay in that order.
-    // Their execution fails if rearranged.
     loadTestFile(require.resolve('./remote_clusters'));
-    loadTestFile(require.resolve('./cross_cluster_replication'));
     loadTestFile(require.resolve('./reporting'));
     loadTestFile(require.resolve('./search_sessions'));
 
