@@ -368,7 +368,7 @@ export const OBSERVABILITY_ONBOARDING_WIRED_STREAMS_AUTO_ENABLED_EVENT: EventTyp
       type: 'keyword',
       _meta: {
         description:
-          'The onboarding flow type where auto-enable was triggered (otel_host, otel_kubernetes, auto_detect)',
+          'The onboarding flow type where auto-enable was triggered (otel_host, otel_kubernetes, elastic_agent_kubernetes, auto_detect)',
       },
     },
     success: {

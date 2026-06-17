@@ -11,9 +11,9 @@ import { OBSERVABILITY_ONBOARDING_FLOW_PROGRESS_TELEMETRY_EVENT } from '../../..
 import type { ObservabilityOnboardingAppServices } from '../../..';
 import { useFetcher } from '../../../hooks/use_fetcher';
 
-export type KubernetesOnboardingFlowType = 'kubernetes' | 'kubernetes_otel';
-
-export function useKubernetesFlow(onboardingFlowType: KubernetesOnboardingFlowType) {
+export function useKubernetesFlow(
+  onboardingFlowType: 'kubernetes_otel' | 'kubernetes' = 'kubernetes'
+) {
   const {
     services: { analytics },
   } = useKibana<ObservabilityOnboardingAppServices>();

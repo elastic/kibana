@@ -9,7 +9,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from './use_kibana';
 
-export type FlowType = 'otel_host' | 'otel_kubernetes' | 'auto_detect';
+export type FlowType = 'otel_host' | 'otel_kubernetes' | 'elastic_agent_kubernetes' | 'auto_detect';
 
 export interface UseWiredStreamsStatusResult {
   isEnabled: boolean;

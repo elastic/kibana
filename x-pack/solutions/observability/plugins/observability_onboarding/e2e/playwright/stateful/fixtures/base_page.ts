@@ -9,7 +9,9 @@ import { test as base } from '@playwright/test';
 import { HeaderBar } from '../pom/components/header_bar.component';
 import { OnboardingHomePage } from '../pom/pages/onboarding_home.page';
 import { SpaceSelector } from '../pom/components/space_selector.component';
+import { KubernetesOverviewDashboardPage } from '../pom/pages/kubernetes_overview_dashboard.page';
 import { AutoDetectFlowPage } from '../pom/pages/auto_detect_flow.page';
+import { KubernetesEAFlowPage } from '../pom/pages/kubernetes_ea_flow.page';
 import { OtelKubernetesFlowPage } from '../pom/pages/otel_kubernetes_flow.page';
 import { OtelKubernetesOverviewDashboardPage } from '../pom/pages/otel_kubernetes_overview_dashboard.page';
 import { OtelHostFlowPage } from '../pom/pages/otel_host_flow.page';
@@ -24,7 +26,9 @@ export const test = base.extend<{
   onboardingHomePage: OnboardingHomePage;
   wiredStreamsSelector: WiredStreamsSelector;
   autoDetectFlowPage: AutoDetectFlowPage;
+  kubernetesEAFlowPage: KubernetesEAFlowPage;
   otelKubernetesFlowPage: OtelKubernetesFlowPage;
+  kubernetesOverviewDashboardPage: KubernetesOverviewDashboardPage;
   otelKubernetesOverviewDashboardPage: OtelKubernetesOverviewDashboardPage;
   otelHostFlowPage: OtelHostFlowPage;
   hostsOverviewPage: HostsOverviewPage;
@@ -51,8 +55,16 @@ export const test = base.extend<{
     await use(new AutoDetectFlowPage(page));
   },
 
+  kubernetesEAFlowPage: async ({ page }, use) => {
+    await use(new KubernetesEAFlowPage(page));
+  },
+
   otelKubernetesFlowPage: async ({ page, context }, use) => {
     await use(new OtelKubernetesFlowPage(page, context));
+  },
+
+  kubernetesOverviewDashboardPage: async ({ page }, use) => {
+    await use(new KubernetesOverviewDashboardPage(page));
   },
 
   otelKubernetesOverviewDashboardPage: async ({ page }, use) => {
