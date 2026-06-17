@@ -231,4 +231,17 @@ describe('groupSteps', () => {
       { kind: 'group', steps: [c, d] },
     ]);
   });
+
+  it('a solo tool call (no group_id) between two batches merges into the preceding batch, not the following one', () => {
+    const a = toolStep('a', 'grp-1');
+    const solo = toolStep('solo');
+    const c = toolStep('c', 'grp-2');
+
+    const result = groupSteps([a, solo, c]);
+
+    expect(result).toEqual([
+      { kind: 'group', steps: [a, solo] },
+      { kind: 'group', steps: [c] },
+    ]);
+  });
 });

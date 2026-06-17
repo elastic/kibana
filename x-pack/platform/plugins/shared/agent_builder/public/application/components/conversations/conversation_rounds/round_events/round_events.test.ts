@@ -81,8 +81,7 @@ describe('groupSteps — RoundEvents contract', () => {
     expect(items[2]).toMatchObject({ kind: 'group', steps: [b] });
   });
 
-  it('tool_call_group_id has no effect on grouping — consecutiveness is the only criterion', () => {
-    // Two tool calls with the same group_id but separated by a reasoning step → two groups
+  it('ReasoningStep overrides tool_call_group_id — same group_id on both sides still produces two groups', () => {
     const r = makeReasoningStep('thinking…');
     const a = createToolCallStep({
       tool_call_id: 'tc-1',
