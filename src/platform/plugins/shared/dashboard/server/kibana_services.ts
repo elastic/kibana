@@ -14,7 +14,7 @@ import type { StartDeps } from './plugin';
 export let embeddableService: EmbeddableStart;
 export let logger: Logger;
 
-export const setKibanaServices = (deps: StartDeps, _logger: Logger) => {
+export const setKibanaServices = (deps: Pick<StartDeps, 'embeddable'>, _logger: Logger) => {
   embeddableService = deps.embeddable;
   logger = _logger;
 };
