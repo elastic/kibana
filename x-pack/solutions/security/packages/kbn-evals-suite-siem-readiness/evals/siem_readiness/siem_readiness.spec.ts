@@ -14,17 +14,22 @@ import {
   seedSiemReadinessData,
 } from '../../src/data_generators/siem_readiness_data';
 
+const createdRuleIds: string[] = [];
+
 evaluate.describe('SIEM Readiness', { tag: tags.stateful.classic }, () => {
   evaluate.beforeAll(async ({ internalEsClient, chatClient, fetch, log }) => {
     await seedSiemReadinessData({ esClient: internalEsClient, log });
 
     // Create detection rules for blast-radius testing
     // Rule 1: maps to endpoint index, MITRE Initial Access
-    await fetch('/api/detection_engine/rules', {
+    const rule1 = (await fetch('/api/detection_engine/rules', {
       method: 'POST',
       version: '2023-10-31',
       body: JSON.stringify({
         name: 'Eval Rule - Endpoint Process',
+        description: 'SIEM readiness eval rule for endpoint process events',
+        risk_score: 47,
+        severity: 'medium',
         type: 'query',
         language: 'kuery',
         query: 'event.category: process',
@@ -42,14 +47,18 @@ evaluate.describe('SIEM Readiness', { tag: tags.stateful.classic }, () => {
           },
         ],
       }),
-    });
+    })) as unknown as { id: string };
+    createdRuleIds.push(rule1.id);
 
     // Rule 2: maps to identity index, MITRE Credential Access
-    await fetch('/api/detection_engine/rules', {
+    const rule2 = (await fetch('/api/detection_engine/rules', {
       method: 'POST',
       version: '2023-10-31',
       body: JSON.stringify({
         name: 'Eval Rule - Identity Auth',
+        description: 'SIEM readiness eval rule for identity authentication events',
+        risk_score: 47,
+        severity: 'medium',
         type: 'query',
         language: 'kuery',
         query: 'event.category: authentication',
@@ -67,7 +76,8 @@ evaluate.describe('SIEM Readiness', { tag: tags.stateful.classic }, () => {
           },
         ],
       }),
-    });
+    })) as unknown as { id: string };
+    createdRuleIds.push(rule2.id);
 
     // Warmup
     try {
@@ -77,8 +87,20 @@ evaluate.describe('SIEM Readiness', { tag: tags.stateful.classic }, () => {
     }
   });
 
-  evaluate.afterAll(async ({ internalEsClient, log }) => {
+  evaluate.afterAll(async ({ internalEsClient, fetch, log }) => {
     await cleanupSiemReadinessData({ esClient: internalEsClient, log });
+    if (createdRuleIds.length > 0) {
+      try {
+        await fetch('/api/detection_engine/rules/_bulk_action', {
+          method: 'POST',
+          version: '2023-10-31',
+          body: JSON.stringify({ ids: createdRuleIds, action: 'delete' }),
+        });
+        createdRuleIds.length = 0;
+      } catch (e) {
+        log.warning(`Failed to delete eval detection rules: ${e}`);
+      }
+    }
   });
 
   // ---------------------------------------------------------------------------
