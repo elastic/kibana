@@ -62,8 +62,9 @@ export interface StreamsServer {
   isServerless: boolean;
   taskManager: TaskManagerStartContract;
   searchInferenceEndpoints?: SearchInferenceEndpointsPluginStart;
-  workflowsManagement?: WorkflowsServerPluginSetup;
   workflowsExtensions?: WorkflowsExtensionsServerPluginStart;
+  workflowsManagement?: WorkflowsServerPluginSetup;
+  agentBuilder?: AgentBuilderPluginStart;
   spaces?: SpacesPluginStart;
 }
 

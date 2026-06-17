@@ -125,6 +125,7 @@ pageLoadAssetSize:
   navigation: 11814
   newsfeed: 11110
   noDataPage: 1749
+  notificationCenter: 1791
   observability: 107797
   observabilityAgentBuilder: 10178
   observabilityAIAssistant: 67295
@@ -166,7 +167,7 @@ pageLoadAssetSize:
   searchSynonyms: 6371
   security: 79627
   securitySolution: 171101
-  securitySolutionEss: 38689
+  securitySolutionEss: 42592
   securitySolutionServerless: 52082
   serverless: 7412
   serverlessObservability: 21437
@@ -205,7 +206,7 @@ pageLoadAssetSize:
   visTypeTable: 18999
   visTypeTagcloud: 7876
   visTypeTimelion: 12512
-  visTypeTimeseries: 20000
+  visTypeTimeseries: 21819
   visTypeVega: 11562
   visTypeVislib: 14679
   visTypeXy: 32342
