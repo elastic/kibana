@@ -53,6 +53,7 @@ export const ListTemplateRobustUsage: StoryObj<typeof ListTemplate<ListTemplateD
           onClick: action('copyAction'),
         },
       ],
+      emptyMessage: 'No items yet',
       item: {
         idField: 'id',
         labelField: 'label',

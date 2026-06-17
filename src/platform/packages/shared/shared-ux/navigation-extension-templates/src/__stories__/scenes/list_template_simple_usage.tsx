@@ -35,6 +35,7 @@ export const ListTemplateUsage: StoryObj<typeof ListTemplate<ListTemplateData>> 
         hrefField: 'href',
       },
       max: 5,
+      emptyMessage: 'No items yet',
     },
     context: {
       slotId: 'slotId',

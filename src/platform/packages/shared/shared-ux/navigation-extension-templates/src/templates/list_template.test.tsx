@@ -40,6 +40,7 @@ const defaultConfig: ListTemplateConfig<TestRow> = {
     labelField: 'label',
     hrefField: 'href',
   },
+  emptyMessage: 'No dashboards yet',
 };
 
 const testRows: TestRow[] = [
@@ -226,6 +227,7 @@ describe('ListTemplate', () => {
           hrefField: 'href',
           iconField: 'iconType',
         },
+        emptyMessage: 'No dashboards yet',
       },
     });
 

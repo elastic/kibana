@@ -63,7 +63,7 @@ export type ListTemplateConfig<Data = SerializableRecord> = {
   /** Optional section-level actions. */
   actions?: NavTemplateActionConfig<Data>[];
   /** Message shown when the data source emits no rows. */
-  emptyMessage?: string;
+  emptyMessage: string;
   /** Cap the number of rows rendered to this value. */
   max?: number;
 } & (
@@ -193,27 +193,6 @@ export function ListTemplate<Data = SerializableRecord>({
     ) : null;
   }, [context.extensionId, context.slotId, listConfig?.actions, popoverRowData]);
 
-  const wrapperStyles = css`
-    list-style: none;
-  `;
-
-  if (rows.size === 0) {
-    if (listConfig.emptyMessage) {
-      return (
-        <li css={wrapperStyles}>
-          <EuiText
-            size="s"
-            color="subdued"
-            data-test-subj={`nav-extension-${context.slotId}-empty`}
-          >
-            {listConfig.emptyMessage}
-          </EuiText>
-        </li>
-      );
-    }
-    return null;
-  }
-
   return (
     <>
       {renderRowActionPopover()}
@@ -259,6 +238,7 @@ export function ListTemplate<Data = SerializableRecord>({
                             iconType="search"
                             aria-labelledby="toggle-search-field-button"
                             onClick={onSearchButtonClick}
+                            disabled={data?.length === 0}
                           />
                         </EuiToolTip>
                       )}
@@ -290,33 +270,37 @@ export function ListTemplate<Data = SerializableRecord>({
         <EuiFlexItem>
           <EuiFlexGroup direction="column" gutterSize="s">
             <EuiListGroup maxWidth={false}>
-              {filteredRows.map((row) => (
-                <EuiListGroupItem
-                  key={row.id}
-                  label={row.label}
-                  href={row.href}
-                  iconType={row.iconType}
-                  extraAction={
-                    (listConfig?.actions?.length ?? 0) > 0
-                      ? {
-                          iconType: 'boxesVertical',
-                          onClick: (evt) => {
-                            evt.preventDefault();
-                            popoverRef.current = evt.currentTarget;
-                            setPopoverRowData(data[row.index]);
-                          },
-                          ['data-test-subj']: `nav-extension-${context.slotId}-action-menu-${row.id}`,
-                          ['aria-label']: i18n.translate(
-                            'sharedUXPackages.navigationExtensionTemplates.listTemplate.actionButtonAriaLabel',
-                            {
-                              defaultMessage: 'Open actions menu',
-                            }
-                          ),
-                        }
-                      : undefined
-                  }
-                />
-              ))}
+              {rows.size === 0 ? (
+                <EuiListGroupItem label={listConfig.emptyMessage} />
+              ) : (
+                filteredRows.map((row) => (
+                  <EuiListGroupItem
+                    key={row.id}
+                    label={row.label}
+                    href={row.href}
+                    iconType={row.iconType}
+                    extraAction={
+                      (listConfig?.actions?.length ?? 0) > 0
+                        ? {
+                            iconType: 'boxesVertical',
+                            onClick: (evt) => {
+                              evt.preventDefault();
+                              popoverRef.current = evt.currentTarget;
+                              setPopoverRowData(data[row.index]);
+                            },
+                            ['data-test-subj']: `nav-extension-${context.slotId}-action-menu-${row.id}`,
+                            ['aria-label']: i18n.translate(
+                              'sharedUXPackages.navigationExtensionTemplates.listTemplate.actionButtonAriaLabel',
+                              {
+                                defaultMessage: 'Open actions menu',
+                              }
+                            ),
+                          }
+                        : undefined
+                    }
+                  />
+                ))
+              )}
             </EuiListGroup>
           </EuiFlexGroup>
         </EuiFlexItem>
