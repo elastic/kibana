@@ -2927,6 +2927,9 @@ x-pack/solutions/security/test/security_solution_api_integration/test_suites/sou
 /x-pack/solutions/security/plugins/security_solution/public/common/components/navigation @elastic/security-pds-deployment
 /x-pack/solutions/security/plugins/security_solution/public/onboarding @elastic/security-pds-deployment
 /x-pack/solutions/security/plugins/security_solution/public/reports @elastic/security-pds-deployment
+/x-pack/solutions/security/plugins/security_solution/test/scout/ui/parallel_tests/reports/ @elastic/security-pds-deployment
+/x-pack/solutions/security/plugins/security_solution/test/scout/ui/parallel_tests/navigation/serverless_ai_value_report* @elastic/security-pds-deployment
+/x-pack/solutions/security/plugins/security_solution/test/scout_ai_value_report/ @elastic/security-pds-deployment
 x-pack/solutions/security/plugins/security_solution/common/trial_companion/ @elastic/security-pds-deployment
 x-pack/solutions/security/plugins/security_solution/public/trial_companion/ @elastic/security-pds-deployment
 x-pack/solutions/security/plugins/security_solution/server/lib/trial_companion/ @elastic/security-pds-deployment

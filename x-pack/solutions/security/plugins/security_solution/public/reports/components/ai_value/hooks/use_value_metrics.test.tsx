@@ -8,19 +8,19 @@
 import { renderHook } from '@testing-library/react';
 import { useValueMetrics } from './use_value_metrics';
 
-import { useSignalIndex } from '../../detections/containers/detection_engine/alerts/use_signal_index';
-import { useFindAttackDiscoveries } from '../../attack_discovery/pages/use_find_attack_discoveries';
-import { useKibana as mockUseKibana } from '../../common/lib/kibana/__mocks__';
-import { useAlertCountQuery } from './use_alert_count_query';
+import { useSignalIndex } from '../../../../detections/containers/detection_engine/alerts/use_signal_index';
+import { useFindAttackDiscoveries } from '../../../../attack_discovery/pages/use_find_attack_discoveries';
+import { useKibana as mockUseKibana } from '../../../../common/lib/kibana/__mocks__';
+import { useAlertCountQuery } from '../../../hooks/use_alert_count_query';
 
 const mockedUseKibana = {
   ...mockUseKibana(),
 };
 
-jest.mock('./use_alert_count_query');
-jest.mock('../../attack_discovery/pages/use_find_attack_discoveries');
-jest.mock('../../detections/containers/detection_engine/alerts/use_signal_index');
-jest.mock('../../common/lib/kibana', () => {
+jest.mock('../../../hooks/use_alert_count_query');
+jest.mock('../../../../attack_discovery/pages/use_find_attack_discoveries');
+jest.mock('../../../../detections/containers/detection_engine/alerts/use_signal_index');
+jest.mock('../../../../common/lib/kibana', () => {
   return {
     useKibana: () => mockedUseKibana,
   };
@@ -100,5 +100,50 @@ describe('useValueMetrics', () => {
       totalAlerts: 10,
       costSavings: 166.66666666666669,
     });
+  });
+
+  it('hasNoCurrentDiscoveries is false when there are discoveries', () => {
+    const { result } = renderHook(() =>
+      useValueMetrics({
+        analystHourlyRate: 100,
+        from: '2025-07-22T15:16:31.006Z',
+        to: '2025-07-23T15:16:31.006Z',
+        minutesPerAlert: 10,
+      })
+    );
+    expect(result.current.hasNoCurrentDiscoveries).toBe(false);
+  });
+
+  it('hasNoCurrentDiscoveries is true when loaded and discovery count is zero', () => {
+    (useFindAttackDiscoveries as jest.Mock).mockReturnValue({
+      data: { unique_alert_ids: [], total: 0 },
+      isLoading: false,
+    });
+    const { result } = renderHook(() =>
+      useValueMetrics({
+        analystHourlyRate: 100,
+        from: '2025-07-22T15:16:31.006Z',
+        to: '2025-07-23T15:16:31.006Z',
+        minutesPerAlert: 10,
+      })
+    );
+    expect(result.current.hasNoCurrentDiscoveries).toBe(true);
+  });
+
+  it('hasNoCurrentDiscoveries is false while still loading', () => {
+    (useFindAttackDiscoveries as jest.Mock).mockReturnValue({
+      data: { unique_alert_ids: [], total: 0 },
+      isLoading: true,
+    });
+    (useAlertCountQuery as jest.Mock).mockReturnValue({ alertCount: 0, isLoading: true });
+    const { result } = renderHook(() =>
+      useValueMetrics({
+        analystHourlyRate: 100,
+        from: '2025-07-22T15:16:31.006Z',
+        to: '2025-07-23T15:16:31.006Z',
+        minutesPerAlert: 10,
+      })
+    );
+    expect(result.current.hasNoCurrentDiscoveries).toBe(false);
   });
 });
