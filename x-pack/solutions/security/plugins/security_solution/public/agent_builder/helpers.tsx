@@ -26,7 +26,8 @@ export const hashIds = (ids: string[]): number => {
       0
     );
   // Convert signed 32-bit to unsigned without the >>> bitwise operator (banned by no-bitwise).
-  return signed < 0 ? signed + 4294967296 : signed;
+  const uint32Max = 2 ** 32;
+  return signed < 0 ? signed + uint32Max : signed;
 };
 
 const chunkAlerts = (alertItems: TimelineItem[]): BulkAlertsAttachmentInput[] => {
