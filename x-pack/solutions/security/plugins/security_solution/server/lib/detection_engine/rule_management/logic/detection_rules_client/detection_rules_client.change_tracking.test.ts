@@ -32,11 +32,13 @@ import { getRuleByRuleId } from './methods/get_rule_by_rule_id';
 import { checkRuleExceptionReferences } from '../import/check_rule_exception_references';
 import { ruleSourceImporterMock } from '../import/rule_source_importer/rule_source_importer.mock';
 import { getMockRulesAuthz } from '../../__mocks__/authz';
+import { findRules } from '../search/find_rules';
 
 jest.mock('../../../../machine_learning/authz');
 jest.mock('../../../../machine_learning/validation');
 jest.mock('./methods/get_rule_by_rule_id');
 jest.mock('../import/check_rule_exception_references');
+jest.mock('../search/find_rules');
 
 describe('DetectionRulesClient change tracking', () => {
   let rulesClient: ReturnType<typeof rulesClientMock.create>;
@@ -58,9 +60,15 @@ describe('DetectionRulesClient change tracking', () => {
       total: 1,
       taskIdsFailedToBeDeleted: [],
     });
+    rulesClient.bulkCreateRules.mockResolvedValue({
+      successfulIds: [],
+      errors: [],
+      total: 0,
+    });
 
     (getRuleByRuleId as jest.Mock).mockResolvedValue(null);
     (checkRuleExceptionReferences as jest.Mock).mockReturnValue([[], []]);
+    (findRules as jest.Mock).mockResolvedValue({ data: [] });
 
     detectionRulesClient = createDetectionRulesClient({
       actionsClient,
@@ -210,6 +218,46 @@ describe('DetectionRulesClient change tracking', () => {
       });
     });
 
+    it('bulkCreatePrebuiltRules uses ruleInstall action', async () => {
+      const ruleAsset: PrebuiltRuleAsset = {
+        ...getCreateRulesSchemaMock(),
+        version: 1,
+        rule_id: 'rule-1',
+      };
+
+      await detectionRulesClient.bulkCreatePrebuiltRules({ rules: [ruleAsset] });
+
+      expect(rulesClient.bulkCreateRules).toHaveBeenCalledWith(
+        expect.objectContaining({
+          changeTracking: expect.objectContaining({
+            action: SecurityRuleChangeTrackingAction.ruleInstall,
+          }),
+        })
+      );
+    });
+
+    it('bulkImportRules uses ruleImport action on the bulk-create branch', async () => {
+      const mockRuleSourceImporter = ruleSourceImporterMock.create();
+      mockRuleSourceImporter.calculateRuleSource.mockReturnValue({
+        ruleSource: { type: 'internal' },
+        immutable: false,
+      });
+
+      await detectionRulesClient.bulkImportRules({
+        rules: [getImportRulesSchemaMock()],
+        overwriteRules: false,
+        ruleSourceImporter: mockRuleSourceImporter,
+      });
+
+      expect(rulesClient.bulkCreateRules).toHaveBeenCalledWith(
+        expect.objectContaining({
+          changeTracking: expect.objectContaining({
+            action: SecurityRuleChangeTrackingAction.ruleImport,
+          }),
+        })
+      );
+    });
+
     it('revertPrebuiltRule uses ruleRevert action', async () => {
       const existingRule = getRulesEqlSchemaMock();
       const ruleAsset: PrebuiltRuleAsset = {
@@ -256,6 +304,50 @@ describe('DetectionRulesClient change tracking', () => {
       expect(rulesClient.bulkDeleteRules).toHaveBeenCalledWith(
         expect.objectContaining({
           changeTracking: expect.objectContaining({ metadata: { bulkCount: ruleIds.length } }),
+        })
+      );
+    });
+
+    it('bulkCreatePrebuiltRules computes bulkCount from rules.length', async () => {
+      const ruleAssets: PrebuiltRuleAsset[] = [
+        { ...getCreateRulesSchemaMock(), version: 1, rule_id: 'rule-1' },
+        { ...getCreateRulesSchemaMock(), version: 1, rule_id: 'rule-2' },
+        { ...getCreateRulesSchemaMock(), version: 1, rule_id: 'rule-3' },
+      ];
+
+      await detectionRulesClient.bulkCreatePrebuiltRules({ rules: ruleAssets });
+
+      expect(rulesClient.bulkCreateRules).toHaveBeenCalledWith(
+        expect.objectContaining({
+          changeTracking: expect.objectContaining({
+            metadata: { bulkCount: ruleAssets.length },
+          }),
+        })
+      );
+    });
+
+    it('bulkImportRules computes bulkCount from rules.length on the bulk-create branch', async () => {
+      const mockRuleSourceImporter = ruleSourceImporterMock.create();
+      mockRuleSourceImporter.calculateRuleSource.mockReturnValue({
+        ruleSource: { type: 'internal' },
+        immutable: false,
+      });
+      const rules = [
+        { ...getImportRulesSchemaMock(), rule_id: 'rule-1' },
+        { ...getImportRulesSchemaMock(), rule_id: 'rule-2' },
+      ];
+
+      await detectionRulesClient.bulkImportRules({
+        rules,
+        overwriteRules: false,
+        ruleSourceImporter: mockRuleSourceImporter,
+      });
+
+      expect(rulesClient.bulkCreateRules).toHaveBeenCalledWith(
+        expect.objectContaining({
+          changeTracking: expect.objectContaining({
+            metadata: { bulkCount: rules.length },
+          }),
         })
       );
     });

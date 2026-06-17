@@ -117,23 +117,35 @@ export const performRuleInstallationHandler = async (
       },
     };
 
-    while (ruleInstallQueue.length > 0) {
-      const rulesToInstall = ruleInstallQueue.splice(0, PREBUILT_RULE_BATCH_SIZE);
-      const { assets: ruleAssets } = await ruleAssetsClient.fetchAssetsByVersion(rulesToInstall);
-
-      const { results, errors } = await createPrebuiltRules(
-        detectionRulesClient,
-        ruleAssets,
-        changeTracking,
-        logger
+    const { bulkCreateRulesEnabled } = ctx.securitySolution.getConfig().experimentalFeatures;
+    if (bulkCreateRulesEnabled) {
+      const ruleAssets = await ruleAssetsClient.fetchAssetsByVersion(ruleInstallQueue);
+      const { results, errors } = await detectionRulesClient.bulkCreatePrebuiltRules({
+        rules: ruleAssets.assets,
+      });
+      installedRules.push(
+        ...results.map(({ result: rule }) => pick(rule, ['id', 'rule_id', 'version']))
       );
-
-      const batchInstalledRules = results.map(({ result: rule }) =>
-        pick(rule, ['id', 'rule_id', 'version'])
-      );
-
-      installedRules.push(...batchInstalledRules);
       ruleErrors.push(...errors);
+    } else {
+      while (ruleInstallQueue.length > 0) {
+        const rulesToInstall = ruleInstallQueue.splice(0, PREBUILT_RULE_BATCH_SIZE);
+        const { assets: ruleAssets } = await ruleAssetsClient.fetchAssetsByVersion(rulesToInstall);
+
+        const { results, errors } = await createPrebuiltRules(
+          detectionRulesClient,
+          ruleAssets,
+          changeTracking,
+          logger
+        );
+
+        const batchInstalledRules = results.map(({ result: rule }) =>
+          pick(rule, ['id', 'rule_id', 'version'])
+        );
+
+        installedRules.push(...batchInstalledRules);
+        ruleErrors.push(...errors);
+      }
     }
 
     const { error: timelineInstallationError } = await performTimelinesInstallation(

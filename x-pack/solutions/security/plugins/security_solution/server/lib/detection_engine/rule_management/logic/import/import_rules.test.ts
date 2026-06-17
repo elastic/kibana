@@ -215,4 +215,64 @@ describe('importRules', () => {
       { rule_id: successfulRuleId, status_code: 200 },
     ]);
   });
+
+  describe('bulk path (bulkCreateRulesEnabled)', () => {
+    const experimentalFeatures = { bulkCreateRulesEnabled: true } as never;
+
+    it('flattens all chunks into a single bulkImportRules call (no skipTaskEnabling, no bulkEnableTasks follow-up)', async () => {
+      const r1 = { ...ruleToImport, rule_id: 'r1' };
+      const r2 = { ...ruleToImport, rule_id: 'r2' };
+      const r3 = { ...ruleToImport, rule_id: 'r3' };
+
+      detectionRulesClient.bulkImportRules.mockResolvedValueOnce({
+        responses: [{ rule_id: 'r1' }, { rule_id: 'r2' }, { rule_id: 'r3' }],
+      });
+
+      const result = await importRules({
+        ruleChunks: [[r1, r2], [r3]],
+        overwriteRules: false,
+        detectionRulesClient,
+        ruleSourceImporter: mockRuleSourceImporter,
+        experimentalFeatures,
+      });
+
+      expect(detectionRulesClient.bulkImportRules).toHaveBeenCalledTimes(1);
+      const args = detectionRulesClient.bulkImportRules.mock.calls[0][0];
+      expect(args).not.toHaveProperty('skipTaskEnabling');
+      expect(args.rules.map((r) => r.rule_id)).toEqual(['r1', 'r2', 'r3']);
+      expect(result).toEqual([
+        { rule_id: 'r1', status_code: 200 },
+        { rule_id: 'r2', status_code: 200 },
+        { rule_id: 'r3', status_code: 200 },
+      ]);
+    });
+
+    it('maps per-rule errors from bulkImportRules to 4xx import responses', async () => {
+      detectionRulesClient.bulkImportRules.mockResolvedValueOnce({
+        responses: [
+          createRuleImportErrorObject({ ruleId: 'rule-a', message: 'boom' }),
+          { rule_id: 'rule-b' },
+          createRuleImportErrorObject({
+            ruleId: 'rule-c',
+            message: 'conflict',
+            type: 'conflict',
+          }),
+        ],
+      });
+
+      const result = await importRules({
+        ruleChunks: [[ruleToImport]],
+        overwriteRules: false,
+        detectionRulesClient,
+        ruleSourceImporter: mockRuleSourceImporter,
+        experimentalFeatures,
+      });
+
+      expect(result).toEqual([
+        { error: { message: 'boom', status_code: 400 }, rule_id: 'rule-a' },
+        { rule_id: 'rule-b', status_code: 200 },
+        { error: { message: 'conflict', status_code: 409 }, rule_id: 'rule-c' },
+      ]);
+    });
+  });
 });
