@@ -65,6 +65,15 @@ export const lensFeatureFlags = {
     type: 'boolean',
     fallback: false as boolean,
   },
+  /**
+   * Enables the schema-driven flyout editor powered by @kbn/config-schema
+   * and react-hook-form, replacing per-visualization FlyoutToolbarComponent implementations.
+   */
+  schemaFlyoutEditor: {
+    id: 'lens.schemaFlyoutEditor',
+    type: 'boolean',
+    fallback: false as boolean,
+  },
 } satisfies Record<string, LensFeatureFlag>;
 
 export type LensFeatureFlags = GetFlagTypes<typeof lensFeatureFlags>;

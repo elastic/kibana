@@ -312,6 +312,51 @@ export function fromAPItoLensState(config: GaugeConfig): GaugeAttributesWithoutF
   };
 }
 
+/**
+ * Convert gauge visualization state to API styling format.
+ * Used by the schema-driven flyout editor.
+ */
+export function convertGaugeStylingToAPIFormat(
+  state: GaugeVisualizationState
+): Pick<GaugeConfig, 'styling'> {
+  return {
+    styling: stripUndefined({
+      shape:
+        state.shape === 'horizontalBullet'
+          ? { type: 'bullet' as const, orientation: 'horizontal' as const }
+          : state.shape === 'verticalBullet'
+          ? { type: 'bullet' as const, orientation: 'vertical' as const }
+          : {
+              type: (state.shape === 'semiCircle' ? 'semi_circle' : state.shape) as
+                | 'circle'
+                | 'semi_circle'
+                | 'arc',
+            },
+    }),
+  };
+}
+
+/**
+ * Convert API styling config to gauge visualization state properties.
+ * Used by the schema-driven flyout editor.
+ */
+export function buildGaugeStylingState(
+  config: Pick<GaugeConfig, 'styling'>
+): Partial<GaugeVisualizationState> {
+  const shape = config.styling?.shape;
+  if (!shape) return {};
+  return {
+    shape:
+      shape.type === 'bullet'
+        ? shape.orientation === 'horizontal'
+          ? 'horizontalBullet'
+          : 'verticalBullet'
+        : shape.type === 'semi_circle'
+        ? 'semiCircle'
+        : shape.type,
+  };
+}
+
 export function fromLensStateToAPI(
   config: LensAttributes
 ): Extract<LensApiConfig, { type: 'gauge' }> {

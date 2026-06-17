@@ -5,8 +5,11 @@
  * 2.0.
  */
 
-import { memo, useCallback } from 'react';
+import React, { memo, useCallback, useMemo } from 'react';
 import type { FramePublicAPI } from '@kbn/lens-common';
+import type { VisualizationToolbarProps } from '@kbn/lens-common';
+import { QueryClientProvider } from '@kbn/react-query';
+import { lensQueryClient } from '../../query_client';
 import {
   useLensDispatch,
   updateVisualizationState,
@@ -15,6 +18,12 @@ import {
   selectVisualization,
 } from '../../state_management';
 import { useEditorFrameService } from '../editor_frame_service_context';
+import { getLensFeatureFlags } from '../../get_feature_flags';
+import {
+  SchemaFlyoutEditor,
+  hasSchemaForVisualization,
+} from '../../shared_components/schema_flyout';
+import { FlyoutToolbar } from '../../shared_components/flyout_toolbar';
 
 export const VisualizationToolbarWrapper = memo(function VisualizationToolbar({
   framePublicAPI,
@@ -50,6 +59,31 @@ export const VisualizationToolbarWrapper = memo(function VisualizationToolbar({
 
   if (!activeVisualization || !visualizationState) {
     return null;
+  }
+
+  const { schemaFlyoutEditor: schemaFlyoutEditorEnabled } = getLensFeatureFlags();
+
+  // eslint-disable-next-line react-hooks/rules-of-hooks
+  const SchemaStyleContent = useMemo(() => {
+    const vizId = activeVisualization.id;
+    const Content = (props: VisualizationToolbarProps<unknown>) => (
+      <SchemaFlyoutEditor visualizationId={vizId} state={props.state} setState={props.setState} />
+    );
+    return Content;
+  }, [activeVisualization.id]);
+
+  if (schemaFlyoutEditorEnabled && hasSchemaForVisualization(activeVisualization.id)) {
+    return (
+      <QueryClientProvider client={lensQueryClient}>
+        <FlyoutToolbar<unknown>
+          frame={framePublicAPI}
+          state={visualizationState.state}
+          setState={setVisualizationState}
+          isInlineEditing={isInlineEditing}
+          contentMap={{ style: SchemaStyleContent }}
+        />
+      </QueryClientProvider>
+    );
   }
 
   const { FlyoutToolbarComponent } = activeVisualization;

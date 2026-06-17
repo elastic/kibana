@@ -49,3 +49,24 @@ export {
 } from './utils';
 
 export * from './schema';
+
+export { buildStylingState as buildDatatableStylingState } from './transforms/charts/datatable/to_state/styling';
+export { convertStylingToAPIFormat as convertDatatableStylingToAPIFormat } from './transforms/charts/datatable/to_api/styling';
+export {
+  convertLegendToAPIFormat as convertXYLegendToAPIFormat,
+  convertLegendToStateFormat as convertXYLegendToStateFormat,
+} from './transforms/charts/xy/legend';
+export {
+  convertStylingToAPIFormat as convertXYStylingToAPIFormat,
+  convertStylingToStateFormat as convertXYStylingToStateFormat,
+} from './transforms/charts/xy/appearances';
+export type { ColumnIdMapping as DatatableColumnIdMapping } from './transforms/charts/datatable/to_api/columns';
+export {
+  convertMetricStylingToAPIFormat,
+  buildMetricStylingState,
+} from './transforms/charts/metric';
+export { convertGaugeStylingToAPIFormat, buildGaugeStylingState } from './transforms/charts/gauge';
+export {
+  convertTagcloudStylingToAPIFormat,
+  buildTagcloudStylingState,
+} from './transforms/charts/tagcloud';
