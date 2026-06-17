@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-// Serverless test (remove during Scout migration): x-pack/solutions/observability/test/serverless/functional/test_suites/discover/context_awareness/_get_pagination_config.ts
 import expect from '@kbn/expect';
 import kbnRison from '@kbn/rison';
 import type { FtrProviderContext } from '../../ftr_provider_context';
