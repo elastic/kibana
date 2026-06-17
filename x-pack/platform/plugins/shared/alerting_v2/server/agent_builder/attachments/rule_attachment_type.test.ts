@@ -31,7 +31,10 @@ const baseRuleData: RuleAttachmentData = {
   },
   time_field: '@timestamp',
   schedule: { every: '5m', lookback: '15m' },
-  evaluation: { query: { base: 'FROM metrics-* | STATS avg_cpu = AVG(cpu) BY host.name' } },
+  query: {
+    format: 'standalone',
+    breach: { query: 'FROM metrics-* | STATS avg_cpu = AVG(cpu) BY host.name' },
+  },
   state_transition: null,
   createdBy: 'elastic',
   createdAt: '2026-04-01T00:00:00.000Z',
@@ -98,7 +101,7 @@ describe('createRuleAttachmentType', () => {
         metadata: { name: 'New', owner: 'observability' },
         time_field: '@timestamp',
         schedule: { every: '1m' },
-        evaluation: { query: { base: 'FROM logs-*' } },
+        query: { format: 'standalone', breach: { query: 'FROM logs-*' } },
       };
       const result = await definition.validate(proposed);
       expect(result.valid).toBe(true);
