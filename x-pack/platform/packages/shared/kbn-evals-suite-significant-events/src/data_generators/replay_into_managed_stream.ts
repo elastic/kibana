@@ -488,7 +488,6 @@ export async function replayIntoManagedStream(
     });
     const { writeIndexName, previousDefaultPipeline } = await getWriteIndexInfo({ esClient, log });
     artifacts.writeIndexName = writeIndexName;
-    artifacts.previousDefaultPipeline = previousDefaultPipeline;
 
     const chainedPipelineName = await getReplayChainPipeline({
       esClient,
