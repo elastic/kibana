@@ -526,20 +526,6 @@ export const cleanupSiemReadinessData = async ({
 }): Promise<void> => {
   log.info('[siem-readiness] Cleaning up SIEM readiness eval data');
 
-  // Delete ingest pipelines
-  for (const pipelineName of [SIEM_READINESS_PIPELINE_NAME, SIEM_READINESS_PIPELINE_OK_NAME]) {
-    try {
-      await esClient.ingest.deletePipeline({ id: pipelineName });
-      log.info(`[siem-readiness] Deleted pipeline ${pipelineName}`);
-    } catch (error) {
-      log.warning(
-        `[siem-readiness] Failed to delete pipeline ${pipelineName}: ${
-          error instanceof Error ? error.message : String(error)
-        }`
-      );
-    }
-  }
-
   // Delete retention index template
   try {
     await esClient.indices.deleteIndexTemplate({ name: RETENTION_INDEX_TEMPLATE_NAME });
@@ -577,7 +563,8 @@ export const cleanupSiemReadinessData = async ({
     }
   }
 
-  // Delete coverage + continuity indices
+  // Delete coverage + continuity indices (must happen before pipeline deletion —
+  // ES rejects deletePipeline if an index still references it as default_pipeline)
   const categoryIndices = Object.values(SIEM_READINESS_INDICES);
   for (const index of categoryIndices) {
     try {
@@ -593,6 +580,20 @@ export const cleanupSiemReadinessData = async ({
           }`
         );
       }
+    }
+  }
+
+  // Delete ingest pipelines — after indices so no index still references them
+  for (const pipelineName of [SIEM_READINESS_PIPELINE_NAME, SIEM_READINESS_PIPELINE_OK_NAME]) {
+    try {
+      await esClient.ingest.deletePipeline({ id: pipelineName });
+      log.info(`[siem-readiness] Deleted pipeline ${pipelineName}`);
+    } catch (error) {
+      log.warning(
+        `[siem-readiness] Failed to delete pipeline ${pipelineName}: ${
+          error instanceof Error ? error.message : String(error)
+        }`
+      );
     }
   }
 
