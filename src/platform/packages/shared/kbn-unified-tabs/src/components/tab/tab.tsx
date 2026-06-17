@@ -236,7 +236,7 @@ export const Tab: React.FC<TabProps> = (props) => {
               {isLoading && (
                 <EuiProgress
                   size="xs"
-                  color="accent"
+                  color="primary"
                   position="absolute"
                   css={css`
                     // we can't simply use overflow: hidden; because then curved notches are not visible
