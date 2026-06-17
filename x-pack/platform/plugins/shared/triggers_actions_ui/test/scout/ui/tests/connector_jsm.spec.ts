@@ -5,13 +5,6 @@
  * 2.0.
  */
 
-// Migrated from:
-//   x-pack/platform/test/functional_with_es_ssl/apps/triggers_actions_ui/connectors/jsm.ts
-//
-// All 19 tests migrated. Nested describes are flattened (max describe depth = 1).
-// `jsm-subActionSelect` and `jsm-prioritySelect` are native <select> elements.
-// Monaco JSON editor is driven via MonacoEnvironment.monaco.editor API.
-
 import { v4 as uuidv4 } from 'uuid';
 import type { ScoutPage } from '@kbn/scout';
 import { tags } from '@kbn/scout';

@@ -5,13 +5,6 @@
  * 2.0.
  */
 
-// Migrated from:
-//   x-pack/platform/test/functional_with_es_ssl/apps/triggers_actions_ui/connectors/general.ts
-//
-// 11 of 13 tests migrated here; 2 preconfigured-connector tests moved to
-// test/scout_triggers_actions_ui/ui/tests/connector_preconfigured.spec.ts
-// because they require the triggers_actions_ui kbn-scout config set.
-
 import { v4 as uuidv4 } from 'uuid';
 import type { ScoutPage } from '@kbn/scout';
 import { tags } from '@kbn/scout';
