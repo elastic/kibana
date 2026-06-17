@@ -115,7 +115,16 @@ const meetsThreshold = (
   return accessControlRoleMeets(effective, threshold);
 };
 
-export const canChangeAgentAccessControl = (
+/**
+ * Whether the current user may change the agent's access-control scope
+ * (`Public`, `Shared`, or `Private`).
+ *
+ * Scope changes alter the baseline access for everyone in the workspace, so they are
+ * stricter than editing access-control entries. Only admins, owners, and Manager
+ * grantees may change the scope. The default agent is excluded because its scope is
+ * system-owned and must remain Public.
+ */
+export const canChangeAgentAccessControlScope = (
   args: AgentAuthzArgs & { agentId?: string }
 ): boolean => {
   if (args.agentId === agentBuilderDefaultAgentId) {
@@ -150,12 +159,16 @@ export const canDeleteAgent = (args: AgentAuthzArgs): boolean =>
   meetsThreshold(getEffectiveAgentRole(args), AgentAccessControlRole.Manager);
 
 /**
- * Whether the current user may view/edit the agent's access control.
+ * Whether the current user may view/edit the agent's access-control entries.
  *
- * ACL management is bundled into write access on the agent: if you can write to the agent,
- * you can write to its ACL. That covers owner, effective ACL Editor/Manager grantees, and
- * (for Public agents) anyone holding the `manageAgents` Kibana sub-feature privilege.
- * Cluster admin bypasses via the `isAdmin` path in {@link hasAgentWriteAccess}.
+ * Entry management is bundled into write access on the agent: if you can write to the
+ * agent, you can grant or remove explicit access-control entries. That covers owner,
+ * effective ACL Editor/Manager grantees, and (for Public agents) anyone holding the
+ * `manageAgents` Kibana sub-feature privilege. Cluster admin bypasses via the `isAdmin`
+ * path in {@link hasAgentWriteAccess}.
+ *
+ * This does not imply permission to change the access-control scope; use
+ * {@link canChangeAgentAccessControlScope} for that stricter check.
  *
  * The default agent is excluded — it is system-owned, always Public, and must remain
  * reachable for everyone in the workspace.

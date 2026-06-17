@@ -33,7 +33,7 @@ import {
   AgentAccessControlScope,
   AGENT_BUILDER_UI_EBT,
   ACCESS_CONTROL_SCOPE_ICON,
-  canChangeAgentAccessControl,
+  canChangeAgentAccessControlScope,
   type UserIdAndName,
 } from '@kbn/agent-builder-common';
 import { getEbtProps } from '@kbn/ebt-click';
@@ -83,7 +83,7 @@ export const AgentSettingsTab: React.FC<AgentSettingsTabProps> = ({
 
   const canChangeAccessControlScope =
     isCreateMode ||
-    canChangeAgentAccessControl({
+    canChangeAgentAccessControlScope({
       agentId,
       accessControl: {
         scope: currentAccessControlScope,

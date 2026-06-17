@@ -15,7 +15,7 @@ import {
   hasAgentWriteAccess,
   canDeleteAgent,
   canManageAgentAccessControl,
-  canChangeAgentAccessControl,
+  canChangeAgentAccessControlScope,
 } from '@kbn/agent-builder-common';
 import type { AgentUpdateRequest } from '../../../../../../common/agents';
 import type { AgentProperties } from '../storage';
@@ -207,7 +207,7 @@ export const validateAccessControlUpdateAccess = ({
 
   return (
     !isScopeChange ||
-    canChangeAgentAccessControl({
+    canChangeAgentAccessControlScope({
       agentId: source.id,
       accessControl: sourceToAccessControl(source),
       owner: sourceToOwner(source),

@@ -110,7 +110,7 @@ export {
   ACCESS_CONTROL_SCOPE_BADGE_COLOR,
   AgentExecutionErrorCode,
   isAgentOwner,
-  canChangeAgentAccessControl,
+  canChangeAgentAccessControlScope,
   hasAgentReadAccess,
   hasAgentUseAccess,
   hasAgentWriteAccess,

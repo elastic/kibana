@@ -23,7 +23,7 @@ export {
 export {
   canCurrentUserEditAgent,
   isAgentOwner,
-  canChangeAgentAccessControl,
+  canChangeAgentAccessControlScope,
   hasAgentReadAccess,
   hasAgentUseAccess,
   hasAgentWriteAccess,
