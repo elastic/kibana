@@ -38,7 +38,7 @@ import {
   LEGACY_LIGHT_THEME,
 } from '@elastic/charts';
 import { partition } from 'lodash';
-import type { IconType, UseEuiTheme } from '@elastic/eui';
+import { euiFontSize, type IconType, type UseEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import type { PaletteRegistry } from '@kbn/coloring';
@@ -201,11 +201,11 @@ function getIconForSeriesType(layer: CommonXYDataLayerConfig): IconType {
 }
 
 const chartTooltipFooterMessageStyles = {
-  root: ({ euiTheme }: UseEuiTheme) =>
+  root: (euiThemeContext: UseEuiTheme) =>
     css`
-      color: ${euiTheme.colors.textSubdued};
-      font-size: ${euiTheme.size.m};
-      font-weight: ${euiTheme.font.weight.regular};
+      color: ${euiThemeContext.euiTheme.colors.textSubdued};
+      ${euiFontSize(euiThemeContext, 'xs', { unit: 'px' })};
+      font-weight: ${euiThemeContext.euiTheme.font.weight.regular};
     `,
 };
 
