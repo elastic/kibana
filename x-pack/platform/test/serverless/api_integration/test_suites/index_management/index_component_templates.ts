@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
+import expect from '@kbn/expect/expect';
 
 import type { FtrProviderContext } from '../../ftr_provider_context';
 import type { RoleCredentials } from '../../../shared/services';
@@ -83,6 +83,7 @@ export default function ({ getService }: FtrProviderContext) {
             isDeprecated: false,
             hasMappings: true,
             hasAliases: false,
+            hasFrozenOrDeletePhase: false,
           });
         });
       });

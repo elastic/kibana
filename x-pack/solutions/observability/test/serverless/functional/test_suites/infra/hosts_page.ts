@@ -6,7 +6,7 @@
  */
 
 import moment from 'moment';
-import expect from '@kbn/expect';
+import expect from '@kbn/expect/expect';
 import type { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 
@@ -40,8 +40,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         (await pageObjects.infraHostsView.isKPIChartsLoaded())
     );
 
-  // Failing: See https://github.com/elastic/kibana/issues/257431
-  describe.skip('Hosts Page', function () {
+  describe('Hosts Page', function () {
     before(async () => {
       await esArchiver.load(
         'x-pack/solutions/observability/test/fixtures/es_archives/infra/metrics_and_logs'
@@ -74,9 +73,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         });
 
         after(async () => {
-          await retry.try(async () => {
-            await pageObjects.infraHome.clickCloseFlyoutButton();
-          });
+          await pageObjects.infraHome.closeFlyoutWithEscape();
         });
 
         describe('Overview Tab', () => {

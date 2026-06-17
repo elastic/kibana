@@ -42,10 +42,11 @@ export const useFetchDiscoveryQueries = (
     page: number;
     perPage: number;
     status?: QueryStatus[];
+    enabled?: boolean;
   },
   deps: unknown[] = []
 ) => {
-  const { name, query, page, perPage, status } = options;
+  const { name, query, page, perPage, status, enabled = true } = options;
   const {
     dependencies: {
       start: {
@@ -136,5 +137,6 @@ export const useFetchDiscoveryQueries = (
     queryFn: fetchDiscoveryQueries,
     onError: showFetchErrorToast,
     keepPreviousData: true,
+    enabled,
   });
 };
