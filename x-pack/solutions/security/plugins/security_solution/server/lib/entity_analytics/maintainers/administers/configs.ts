@@ -15,14 +15,7 @@ import {
 
 const RELATIONSHIP_KEY = 'administers';
 
-/**
- * Active Directory's directly-constructible administers identifiers.
- *
- * AD populates raw_identifiers.host.name with the FQDN (a host EUID basis) and
- * raw_identifiers.host.id with the LDAP DN. Only host.name is listed here —
- * host.id (a DN) is NOT a valid host EUID and would resolve to a dangling
- * `host:CN=…` (it needs a LOOKUP JOIN in the log index).
- */
+// host.id carries an LDAP DN, not a valid EUID basis — only host.name (FQDN) is directly resolvable.
 const AD_ADMINISTERS_RULES: DirectEuidRule[] = [{ field: 'host.name', euidType: 'host' }];
 
 export function buildAdministersConfigs(
@@ -53,7 +46,6 @@ export function buildAdministersConfigs(
           relationshipKey: RELATIONSHIP_KEY,
           fields: ['host.name'],
         }),
-        // Watermark gate (last_seen, not @timestamp — see buildRawIdentifiersEsqlQuery).
         ...(lastProcessedTimestamp
           ? [{ range: { 'entity.lifecycle.last_seen': { gt: lastProcessedTimestamp } } }]
           : []),
