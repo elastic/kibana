@@ -12,7 +12,11 @@ import type { DataTableColumnsMeta, DataTableRecord } from '@kbn/discover-utils/
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { css } from '@emotion/react';
-import type { CustomCellRenderer, CustomGridColumnsConfiguration } from '@kbn/unified-data-table';
+import type {
+  CustomCellRenderer,
+  CustomGridColumnsConfiguration,
+  SortOrder,
+} from '@kbn/unified-data-table';
 import {
   DataLoadingState,
   UnifiedDataTable,
@@ -136,6 +140,13 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
       // make a call to update the doc with the new value
       indexUpdateService.updateDoc(docId, update);
       // update rows to reflect the change
+    },
+    [indexUpdateService]
+  );
+
+  const onSort = useCallback(
+    (sort: SortOrder[]) => {
+      indexUpdateService.setSort(sort);
     },
     [indexUpdateService]
   );
@@ -269,7 +280,7 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
       onSetColumns={setActiveColumns}
       onUpdateRowsPerPage={setRowsPerPage}
       sort={sortOrder}
-      onSort={(sort) => indexUpdateService.setSort(sort)}
+      onSort={onSort}
       ariaLabelledBy="lookupIndexDataGrid"
       maxDocFieldsDisplayed={100}
       showFullScreenButton={false}
