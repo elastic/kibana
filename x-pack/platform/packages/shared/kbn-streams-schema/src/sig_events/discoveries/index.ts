@@ -58,6 +58,7 @@ export const discoverySchema = z.object({
   workflow_execution_id: z.string().max(MAX_ID_LENGTH).optional(),
   conversation_id: z.string().max(MAX_ID_LENGTH).optional(),
   closed_by_execution_id: z.string().max(MAX_ID_LENGTH).optional(),
+  processed: z.boolean(),
 });
 
 export type Discovery = z.infer<typeof discoverySchema>;

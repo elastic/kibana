@@ -39,10 +39,10 @@ const countResponse = (total: number): ESQLSearchResponse =>
     values: [[total]],
   } as unknown as ESQLSearchResponse);
 
-// Mirrors the slug-keyed clearance derivation: one row per cleared `unified_id` (slug).
+// Mirrors the slug-keyed clearance derivation: one row per cleared discovery_slug.
 const clearedResponse = (slugs: string[]): ESQLSearchResponse =>
   ({
-    columns: [{ name: 'unified_id', type: 'keyword' }],
+    columns: [{ name: 'discovery_slug', type: 'keyword' }],
     values: slugs.map((s) => [s]),
   } as unknown as ESQLSearchResponse);
 
@@ -59,7 +59,7 @@ const createClient = (responses: MockResponses) => {
     if (q.includes('STATS total')) {
       return countResponse(responses.findings.length);
     }
-    if (q.includes('unified_id')) {
+    if (q.includes('max_state_ts')) {
       return clearedResponse(responses.clearedSlugs);
     }
     return sourceResponse(responses.findings);
@@ -135,7 +135,7 @@ describe('DiscoveryClient', () => {
       const result = await client.findLatestPaginated();
 
       expect(result.hits).toHaveLength(1);
-      expect(result.hits[0].kind).toBe('clearance');
+      expect(result.hits[0].processed).toBe(true);
     });
 
     it('does not clear a slug when a newer finding (regrow) follows the clearance', async () => {
@@ -172,7 +172,7 @@ describe('DiscoveryClient', () => {
 
       const clearanceQuery = query.mock.calls
         .map((c) => (c[0] as { query: string }).query)
-        .find((q) => q.includes('unified_id'));
+        .find((q) => q.includes('max_state_ts'));
       expect(clearanceQuery).toContain('discovery_slug');
     });
   });

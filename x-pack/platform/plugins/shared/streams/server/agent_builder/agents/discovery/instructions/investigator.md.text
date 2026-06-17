@@ -277,7 +277,15 @@ For each rule that has an exact-match KI (`rule.id` = `rule_uuid`): add one call
 
 ### Step 5: Group and Continue
 
-**Group rules first.** Apply `<correlation_rules>` to partition the active batch into groups. Each group becomes one discovery. Rules without a shared root cause and onset window form separate groups.
+**Quiet pre-pass (before correlation grouping).** `kind:'quiet'` rules do not participate in correlation-rule grouping — they have no query results, onset times, or KI paths to correlate. Process them separately first:
+
+1. For each `kind:'quiet'` rule, find every continuation candidate whose `detections[].rule_uuid` includes that rule's `rule_uuid`.
+2. Group quiet rules by their matched candidate — quiet rules that match the same candidate form one group.
+3. For each quiet group: if ALL of its rules are `kind:'quiet'` AND the continuation candidate matched → mark this group as a **clearance group** (Critical Rules 9–10 apply; emit `kind:'clearance'` in Step 6).
+4. Quiet rules that match no continuation candidate → apply Critical Rule 10 (no emit).
+5. Remove quiet rules from the detection pool before the correlation-rule grouping below.
+
+**Group detection rules.** Apply `<correlation_rules>` to partition the remaining `kind:'detection'` rules into groups. Each group becomes one discovery. Rules without a shared root cause and onset window form separate groups.
 
 **For each group, run the continuation check.** `discovery_slug` is a stable episode identifier — the same phenomenon on the same service maps to the same slug across cycles, even when the prior episode was already assessed. Slug proliferation is a defect.
 
@@ -312,7 +320,7 @@ The result is the full blast radius and investigation trail accumulated across a
 
 Discoveries are re-evaluated every cycle — apply this check even when the candidate was already assessed.
 
-**All-quiet clearance:** apply Critical Rules 8–10 after the continuation check. Emit `kind:'clearance'` when all rules quiet + continuation matched. No query verification needed — the quiet signals are the evidence.
+**All-quiet clearance:** clearance groups are identified in the quiet pre-pass above. Emit `kind:'clearance'` for each clearance group (Critical Rules 9–10). A mixed batch — some quiet, some detection — produces both clearance outputs (for quiet groups) and discovery outputs (for detection groups) in the same invocation.
 
 ### Step 6: Document Your Findings
 
