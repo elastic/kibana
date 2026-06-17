@@ -17,11 +17,15 @@ import type {
   CompositeBucket,
   EntityRelationshipRecord,
 } from './types';
-import { buildActorDiscoveryQuery, buildActorPageFilter } from './build_actor_discovery_query';
+import {
+  buildActorDiscoveryQuery,
+  buildActorPageFilter,
+  buildLookbackFilter,
+} from './build_actor_discovery_query';
 import { buildTargetsPerActorQuery } from './build_targets_per_actor_query';
 import { parseTargetsPerActorRows } from './parse_targets_per_actor_rows';
 import { writeEntityIds, type WriteEntityIdsResult } from './update_entities';
-import { LOOKBACK_WINDOW, MAX_ITERATIONS } from './constants';
+import { MAX_ITERATIONS } from './constants';
 import { assertValidNamespace } from './validate_namespace';
 
 interface CompositeAggregations {
@@ -101,17 +105,9 @@ async function fetchTargetsForActors(
   transportOpts: { signal: AbortSignal } | undefined,
   abortController: AbortController | undefined
 ): Promise<EsqlQueryResult | null> {
-  // The @timestamp lookback is a log-index assumption; entity-index configs
-  // opt out via `disableLookbackWindow` (see its docs in types.ts) and gate
-  // freshness on `entity.lifecycle.last_seen` in their override query instead.
   const esqlFilter = {
     bool: {
-      filter: [
-        ...(config.disableLookbackWindow
-          ? []
-          : [{ range: { '@timestamp': { gte: LOOKBACK_WINDOW, lt: 'now' } } }]),
-        buildActorPageFilter(config, buckets),
-      ],
+      filter: [...buildLookbackFilter(config), buildActorPageFilter(config, buckets)],
     },
   };
   try {

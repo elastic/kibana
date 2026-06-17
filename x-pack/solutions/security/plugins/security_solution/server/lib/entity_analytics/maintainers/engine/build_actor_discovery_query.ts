@@ -12,6 +12,19 @@ import { getEuidSourceFields } from '@kbn/entity-store/common/domain/euid';
 import type { RelationshipIntegrationConfig, CompositeAfterKey, CompositeBucket } from './types';
 import { LOOKBACK_WINDOW, COMPOSITE_PAGE_SIZE } from './constants';
 
+/**
+ * Returns the @timestamp lookback filter when the config does not opt out, or
+ * an empty array when it does. Applied identically to Step 1 (DSL composite
+ * agg) and Step 2 (ES|QL wrapper filter) so the two query stages narrow on the
+ * same time range.
+ */
+export const buildLookbackFilter = (
+  config: RelationshipIntegrationConfig
+): QueryDslQueryContainer[] =>
+  config.disableLookbackWindow
+    ? []
+    : [{ range: { '@timestamp': { gte: LOOKBACK_WINDOW, lt: 'now' } } }];
+
 // TODO(#266748): actorEntityType is hardcoded to 'user' — add actorEntityType to
 // RelationshipIntegrationConfig to support host→host, host→service, and service→* relationships.
 const USER_IDENTITY_FIELDS = getEuidSourceFields('user').requiresOneOf;
@@ -58,9 +71,7 @@ export const buildActorDiscoveryQuery = (
   // (e.g. administers) opt out via `disableLookbackWindow` and gate freshness
   // on `entity.lifecycle.last_seen` instead. See `disableLookbackWindow` docs.
   const baseFilters: QueryDslQueryContainer[] = [
-    ...(config.disableLookbackWindow
-      ? []
-      : [{ range: { '@timestamp': { gte: LOOKBACK_WINDOW, lt: 'now' } } }]),
+    ...buildLookbackFilter(config),
     actorPresenceFilter,
   ];
 
