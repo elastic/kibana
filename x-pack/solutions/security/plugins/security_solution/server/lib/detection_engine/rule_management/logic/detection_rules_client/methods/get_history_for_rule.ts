@@ -41,15 +41,13 @@ export const getHistoryForRule = async ({
       size: perPage + 1,
       sort: [{ '@timestamp': { order: 'desc' } }],
     }),
-    page === 1
-      ? rulesClient.getHistory({
-          module: 'security',
-          ruleId,
-          from: 0,
-          size: 1,
-          sort: [{ '@timestamp': { order: 'asc' } }],
-        })
-      : Promise.resolve(undefined),
+    rulesClient.getHistory({
+      module: 'security',
+      ruleId,
+      from: 0,
+      size: 1,
+      sort: [{ '@timestamp': { order: 'asc' } }],
+    }),
   ]);
 
   const fetchedItems = result.items;
@@ -63,7 +61,7 @@ export const getHistoryForRule = async ({
     page,
     perPage,
     total: result.total,
-    tracking_started_at: oldestResult?.items[0]?.['@timestamp'],
+    tracking_started_at: oldestResult.items[0]?.['@timestamp'],
     items: resultItems,
   };
 };
