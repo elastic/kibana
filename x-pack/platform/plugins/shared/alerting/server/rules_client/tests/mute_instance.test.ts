@@ -221,7 +221,7 @@ describe('muteInstance()', () => {
         query: { validateAlertsExistence: false },
       });
 
-      expect(actionsAuthorization.ensureAuthorized).toHaveBeenCalledWith({ operation: 'execute' });
+      expect(actionsAuthorization.ensureAuthorized).not.toHaveBeenCalled();
       expect(authorization.ensureAuthorized).toHaveBeenCalledWith({
         entity: 'rule',
         consumer: 'myApp',
