@@ -2643,7 +2643,7 @@ export const labels = {
         { defaultMessage: 'Enter a color hex code' }
       ),
       accessTitle: i18n.translate('xpack.agentBuilder.overview.editDetails.accessTitle', {
-        defaultMessage: 'Access',
+        defaultMessage: 'Access control',
       }),
       accessDescription: i18n.translate(
         'xpack.agentBuilder.overview.editDetails.accessDescription',
@@ -2652,7 +2652,7 @@ export const labels = {
       accessControlScopeLabel: i18n.translate(
         'xpack.agentBuilder.overview.editDetails.accessControlScopeLabel',
         {
-          defaultMessage: 'Access',
+          defaultMessage: 'Access control',
         }
       ),
       accessControlScopeDisabledReason: i18n.translate(

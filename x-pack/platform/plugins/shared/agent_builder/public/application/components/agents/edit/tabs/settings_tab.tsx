@@ -402,7 +402,7 @@ export const AgentSettingsTab: React.FC<AgentSettingsTabProps> = ({
                     {i18n.translate(
                       'xpack.agentBuilder.agents.form.settings.accessControlScopeMeaningLabel',
                       {
-                        defaultMessage: 'Access-control scopes',
+                        defaultMessage: 'Access control levels',
                       }
                     )}
                   </span>
@@ -515,7 +515,7 @@ export const AgentSettingsTab: React.FC<AgentSettingsTabProps> = ({
 
           <EuiFormRow
             label={i18n.translate('xpack.agentBuilder.agents.form.accessControlScopeLabel', {
-              defaultMessage: 'Access',
+              defaultMessage: 'Access control',
             })}
             helpText={
               agentId === agentBuilderDefaultAgentId
