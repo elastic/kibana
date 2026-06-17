@@ -32,9 +32,10 @@ triggers:
   - type: manual
 \`\`\`
 
-**Defining inputs:** A manual trigger can declare runtime inputs the caller must
-provide when launching the workflow. Inputs are defined with **JSON Schema**,
-directly under the trigger:
+**Defining inputs:** A manual trigger declares the runtime inputs the caller
+provides when launching the workflow. Any input a step references with
+\`{{ inputs.<name> }}\` MUST be declared here. Inputs are defined with **JSON
+Schema**, directly under the trigger:
 
 \`\`\`yaml
 triggers:
@@ -127,11 +128,24 @@ triggers:
 
 ## Data Flow
 
-### Accessing Step Outputs
+### A Complete Example
 
-Each step's output is accessible to subsequent steps:
+Note how every \`{{ inputs.* }}\` reference has a matching declaration under the
+\`manual\` trigger, and each step's output is accessible to subsequent steps:
 
 \`\`\`yaml
+name: Fetch and log user
+triggers:
+  - type: manual
+    inputs:
+      properties:
+        user_id:
+          type: string
+          description: The ID of the user to fetch
+      required:
+        - user_id
+consts:
+  api: "https://api.example.com"
 steps:
   - name: fetch_user
     type: http
