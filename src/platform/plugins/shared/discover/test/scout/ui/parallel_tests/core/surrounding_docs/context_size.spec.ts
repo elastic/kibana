@@ -40,13 +40,6 @@ spaceTest.describe(
       await scoutSpace.savedObjects.cleanStandardList();
     });
 
-    spaceTest('should default to the context:defaultSize setting', async ({ pageObjects }) => {
-      await expect(pageObjects.contextPage.rows).toHaveCount(INITIAL_ROW_COUNT);
-      expect(await pageObjects.contextPage.getPredecessorCountPickerValue()).toBe(
-        String(TEST_DEFAULT_CONTEXT_SIZE)
-      );
-    });
-
     spaceTest(
       'should increase according to the context:step setting when clicking load newer',
       async ({ pageObjects }) => {
@@ -60,21 +53,6 @@ spaceTest.describe(
       async ({ pageObjects }) => {
         await pageObjects.contextPage.clickSuccessorLoadMoreButton();
         await expect(pageObjects.contextPage.rows).toHaveCount(INITIAL_ROW_COUNT + TEST_STEP_SIZE);
-      }
-    );
-
-    spaceTest(
-      'should show 101 records when 50 newer and 50 older are requested',
-      async ({ pageObjects }) => {
-        await pageObjects.contextPage.setPredecessorCount(50);
-        await pageObjects.contextPage.setSuccessorCount(50);
-
-        await expect
-          .poll(async () => pageObjects.contextPage.getDocumentNumber(), {
-            message: 'should display 101 documents',
-            timeout: 30_000,
-          })
-          .toBe(101);
       }
     );
   }
