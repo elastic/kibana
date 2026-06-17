@@ -1,5 +1,5 @@
 {
-  "sha1": "75ff7c8572e489cf0172ce90f59e50591b818b28",
+  "sha1": "84c702d3c396a5f964d3709df375c4c7484f83bb",
   "tests": [
     {
       "id": "0a576b0cda5a405-282e3c031fd66fd",
@@ -11,7 +11,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_view_management/test/scout/ui/tests/data_views/data_view_create_delete_stateful.spec.ts",
-        "line": 28,
+        "line": 36,
         "column": 7
       }
     },
@@ -25,7 +25,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_view_management/test/scout/ui/tests/data_views/data_view_create_delete_stateful.spec.ts",
-        "line": 37,
+        "line": 45,
         "column": 7
       }
     },
@@ -39,7 +39,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_view_management/test/scout/ui/tests/data_views/data_view_create_delete_stateful.spec.ts",
-        "line": 43,
+        "line": 51,
         "column": 7
       }
     },
@@ -120,6 +120,102 @@
       "location": {
         "file": "src/platform/plugins/shared/data_view_management/test/scout/ui/tests/data_views/data_view_create_delete.spec.ts",
         "line": 72,
+        "column": 9
+      }
+    },
+    {
+      "id": "aa7e302b65a5444-467817719edc51b",
+      "title": "Data view editing an existing data view shows the expected fields table headers",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data_view_management/test/scout/ui/tests/data_views/data_view_edit.spec.ts",
+        "line": 41,
+        "column": 9
+      }
+    },
+    {
+      "id": "aa7e302b65a5444-999265242195d66",
+      "title": "Data view editing an existing data view edits the display name",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data_view_management/test/scout/ui/tests/data_views/data_view_edit.spec.ts",
+        "line": 53,
+        "column": 9
+      }
+    },
+    {
+      "id": "aa7e302b65a5444-e9fb5d93751ad20",
+      "title": "Data view editing an existing data view saves with the same name when the pattern changes",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data_view_management/test/scout/ui/tests/data_views/data_view_edit.spec.ts",
+        "line": 58,
+        "column": 9
+      }
+    },
+    {
+      "id": "aa7e302b65a5444-ceef5b56a16927d",
+      "title": "Data view editing an existing data view shows the edit confirm modal and updates the title",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data_view_management/test/scout/ui/tests/data_views/data_view_edit.spec.ts",
+        "line": 66,
+        "column": 9
+      }
+    },
+    {
+      "id": "aa7e302b65a5444-993d6ab3ee349ca",
+      "title": "Data view editing an existing data view prefills the editor with previously saved values",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data_view_management/test/scout/ui/tests/data_views/data_view_edit.spec.ts",
+        "line": 75,
+        "column": 9
+      }
+    },
+    {
+      "id": "aa7e302b65a5444-60942a12c552dbc",
+      "title": "Data view editing an existing data view returns to the listing after deletion",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data_view_management/test/scout/ui/tests/data_views/data_view_edit.spec.ts",
+        "line": 85,
         "column": 9
       }
     },

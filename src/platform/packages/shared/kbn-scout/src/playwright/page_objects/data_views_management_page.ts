@@ -56,8 +56,76 @@ export class DataViewsManagementPage {
     await this.page.testSubj.locator('indexPatternTitle').waitFor({ state: 'visible' });
   }
 
+  /** Navigates straight to a data view's detail page by id and waits for it to be ready. */
+  async gotoDataViewById(id: string): Promise<void> {
+    await this.page.gotoApp(`management/kibana/dataViews/dataView/${id}`);
+    await this.page.testSubj.locator('editIndexPatternButton').waitFor({ state: 'visible' });
+  }
+
+  /** Opens the edit flyout for the currently open data view. */
+  async openEditor(): Promise<void> {
+    await this.page.testSubj.click('editIndexPatternButton');
+    await this.page.testSubj.locator('indexPatternEditorFlyout').waitFor({ state: 'visible' });
+  }
+
+  /**
+   * Edits the currently open data view via the edit flyout. Changing the index pattern (title)
+   * of a saved data view surfaces a confirmation modal, which is accepted automatically; editing
+   * only the display name saves directly. Returns whether the modal was shown.
+   */
+  async editDataView({
+    title,
+    name,
+  }: {
+    title?: string;
+    name?: string;
+  }): Promise<{ confirmed: boolean }> {
+    await this.openEditor();
+
+    if (name !== undefined) {
+      await this.page.testSubj.fill('createIndexPatternNameInput', name);
+    }
+    if (title !== undefined) {
+      await this.page.testSubj.fill('createIndexPatternTitleInput', title);
+      // Wait for async title validation to settle so the save button becomes enabled.
+      await this.page.testSubj
+        .locator('indexPatternEditorForm')
+        .and(this.page.locator('[data-validation-error="0"]'))
+        .waitFor({ state: 'visible' });
+    }
+
+    await this.page.testSubj.click('saveIndexPatternButton');
+
+    // The confirmation modal (shown only when the index pattern changes) renders client-side
+    // right after saving, so a short wait reliably distinguishes "modal" from "no modal".
+    const confirmButton = this.page.testSubj.locator('confirmModalConfirmButton');
+    const confirmed = await confirmButton
+      .waitFor({ state: 'visible', timeout: 5_000 })
+      .then(() => true)
+      .catch(() => false);
+    if (confirmed) {
+      await confirmButton.click();
+    }
+
+    await this.page.testSubj.locator('indexPatternEditorFlyout').waitFor({ state: 'hidden' });
+    return { confirmed };
+  }
+
+  /** Deletes the currently open data view through the "more actions" menu and delete flyout. */
+  async deleteDataView(): Promise<void> {
+    await this.page.testSubj.click('moreActionsButton');
+    await this.page.testSubj.click('deleteIndexPatternButton');
+    await this.page.testSubj.locator('deleteDataViewFlyoutHeader').waitFor({ state: 'visible' });
+    await this.page.testSubj.click('confirmFlyoutConfirmButton');
+  }
+
   fieldsTabCountLocator(): Locator {
     return this.page.testSubj.locator('tab-indexedFields');
+  }
+
+  /** Header cell of the indexed-fields table on the data view detail page. */
+  fieldsTableHeader(field: string, index: number): Locator {
+    return this.page.testSubj.locator(`tableHeaderCell_${field}_${index}`);
   }
 
   /**
