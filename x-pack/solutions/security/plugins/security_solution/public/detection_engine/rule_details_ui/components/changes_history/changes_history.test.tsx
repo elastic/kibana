@@ -43,7 +43,7 @@ describe('RuleChangesHistory', () => {
   });
 
   it('selects the first active item of the new rule when ruleId changes', async () => {
-    mockUseParams.mockReturnValue({ detailName: 'rule-1' });
+    mockUseParams.mockReturnValue({ ruleId: 'rule-1' });
     mockUseInfiniteChangeHistory.mockImplementation(({ ruleId }: { ruleId: string }) =>
       mockUseInfiniteQueryResult([
         ruleId === 'rule-1' ? MOCK_RULE_1_HISTORY_ITEM : MOCK_RULE_2_HISTORY_ITEM,
@@ -63,7 +63,7 @@ describe('RuleChangesHistory', () => {
     });
 
     // Navigate to a different rule.
-    mockUseParams.mockReturnValue({ detailName: 'rule-2' });
+    mockUseParams.mockReturnValue({ ruleId: 'rule-2' });
     rerender(
       <TestProviders>
         <RuleChangesHistory header={<span />} />

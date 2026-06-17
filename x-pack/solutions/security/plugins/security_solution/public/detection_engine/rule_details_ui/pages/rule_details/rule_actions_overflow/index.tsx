@@ -118,7 +118,7 @@ const RuleActionsOverflowComponent = ({
                     onClick={() => {
                       closePopover();
                       navigateToApp(APP_UI_ID, {
-                        deepLinkId: SecurityPageName.rulesChangesHistory,
+                        deepLinkId: SecurityPageName.rules,
                         path: getRuleChangesHistoryUrl(rule.id),
                       });
                     }}

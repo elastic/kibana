@@ -45,7 +45,7 @@ export const RuleChangesHistory = memo(function RuleChangesHistory({
   header,
 }: RuleChangesHistoryProps): JSX.Element {
   const { euiTheme } = useEuiTheme();
-  const { detailName: ruleId } = useParams<{ detailName: string }>();
+  const { ruleId } = useParams<{ ruleId: string }>();
   const {
     application: { navigateToApp },
   } = useKibana().services;

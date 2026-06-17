@@ -32,7 +32,11 @@ export const RuleChangesHistoryPage = memo(function RuleChangesHistoryPage(): JS
       >
         <RuleChangesHistory header={<RuleChangesHistoryPageHeader rule={rule} />} />
       </SecuritySolutionPageWrapper>
-      <SpyRoute pageName={SecurityPageName.rulesChangesHistory} state={{ ruleName: rule?.name }} />
+      <SpyRoute
+        pageName={SecurityPageName.rules}
+        state={{ ruleName: rule?.name }}
+        detailName={ruleId}
+      />
     </>
   );
 });
