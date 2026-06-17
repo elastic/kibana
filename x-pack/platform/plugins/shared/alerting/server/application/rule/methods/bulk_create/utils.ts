@@ -37,6 +37,7 @@ export const prepareRule = async <Params extends RuleParams>({
   id,
   rule,
   apiKeys,
+  invalidKeys,
 }: PrepareRuleArgs<Params>): Promise<{ prepared?: PreparedRule; error?: BulkOperationError }> => {
   const { allowMissingConnectorSecrets } = rule;
 
@@ -149,7 +150,11 @@ export const prepareRule = async <Params extends RuleParams>({
     };
     return { prepared };
   } catch (err) {
-    apiKeys.delete(id);
+    const orphaned = apiKeys.get(id);
+    if (orphaned) {
+      invalidKeys.push(orphaned);
+      apiKeys.delete(id);
+    }
     const error = {
       message: err.message,
       status: err.output?.statusCode,

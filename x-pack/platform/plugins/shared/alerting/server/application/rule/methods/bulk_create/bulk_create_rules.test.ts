@@ -620,7 +620,7 @@ describe('bulkCreateRules', () => {
         expect(result.errors[0].message).toContain('keys disabled');
       });
 
-      test('prepareRule failure after API key creation removes key from map (no dangling keys)', async () => {
+      test('prepareRule failure after API key creation invalidates the orphaned key', async () => {
         let getCalls = 0;
         ruleTypeRegistry.get.mockImplementation((typeId: string) => {
           getCalls += 1;
@@ -670,7 +670,12 @@ describe('bulkCreateRules', () => {
         expect(result.errors[0].rule.name).toBe('key-then-fail');
         expect(result.errors[0].message).toContain('extractReferences boom');
         expect(result.successfulIds).toEqual(['mock-id-2']);
-        expect(bulkMarkApiKeysForInvalidation).not.toHaveBeenCalled();
+        expect(bulkMarkApiKeysForInvalidation).toHaveBeenCalledTimes(1);
+        expect(bulkMarkApiKeysForInvalidation).toHaveBeenCalledWith(
+          { apiKeys: expect.arrayContaining([expect.any(String)]) },
+          expect.anything(),
+          expect.anything()
+        );
       });
 
       test('validateActions failure: rule with invalid actions excluded, other rules persist', async () => {

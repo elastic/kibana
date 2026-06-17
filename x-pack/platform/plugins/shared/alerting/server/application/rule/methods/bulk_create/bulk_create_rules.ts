@@ -273,6 +273,7 @@ async function runBatch<Params extends RuleParams>({
   // in the process (ie if we fail schedule creation).
   const preparedRules = new Map<string, PreparedRule>();
   const apiKeys = new Map<string, ApiKeyEntry>();
+  const invalidKeys: ApiKeyEntry[] = [];
   const errors: BulkOperationError[] = [];
 
   // Phase B1: per-rule prepare (high latency validation + API key generation).
@@ -287,6 +288,7 @@ async function runBatch<Params extends RuleParams>({
           id,
           rule,
           apiKeys,
+          invalidKeys,
         });
         if (prepared) preparedRules.set(id, prepared);
         else if (error) errors.push(error);
@@ -294,6 +296,8 @@ async function runBatch<Params extends RuleParams>({
       { concurrency: API_KEY_GENERATE_CONCURRENCY }
     )
   );
+
+  await invalidateKeys(invalidKeys.splice(0), context);
 
   if (strict && errors.length > 0) {
     await invalidateKeys(apiKeys.values(), context);
@@ -310,7 +314,6 @@ async function runBatch<Params extends RuleParams>({
   const taskIds = new Set<string>();
 
   if (enabledRules.length > 0) {
-    const invalidApiKeys: ApiKeyEntry[] = [];
     try {
       const scheduledTasks = await bulkScheduleTask(context, enabledRules);
       scheduledTasks.forEach((t) => taskIds.add(t.id));
@@ -324,7 +327,7 @@ async function runBatch<Params extends RuleParams>({
         for (const { id, name } of skipped) {
           const apiKey = apiKeys.get(id);
           if (apiKey) {
-            invalidApiKeys.push(apiKey);
+            invalidKeys.push(apiKey);
             apiKeys.delete(id);
           }
           preparedRules.delete(id);
@@ -339,14 +342,14 @@ async function runBatch<Params extends RuleParams>({
       for (const { id, name } of enabledRules) {
         const apiKey = apiKeys.get(id);
         if (apiKey) {
-          invalidApiKeys.push(apiKey);
+          invalidKeys.push(apiKey);
           apiKeys.delete(id);
         }
         preparedRules.delete(id);
         errors.push({ message, status, rule: { id, name } });
       }
     }
-    await invalidateKeys(invalidApiKeys, context);
+    await invalidateKeys(invalidKeys.splice(0), context);
   }
 
   if (strict && errors.length > 0) {
@@ -415,7 +418,6 @@ async function runBatch<Params extends RuleParams>({
   const taskIdsToCleanUp: string[] = [];
   const successfulSavedObjects: Array<SavedObject<RawRule>> = [];
 
-  const failedEntries: ApiKeyEntry[] = [];
   for (const so of bulkResponse.saved_objects) {
     if (so.error) {
       errors.push({
@@ -426,7 +428,7 @@ async function runBatch<Params extends RuleParams>({
 
       const apiKey = apiKeys.get(so.id);
       if (apiKey) {
-        failedEntries.push(apiKey);
+        invalidKeys.push(apiKey);
       }
 
       // Only ids we scheduled in Phase B2. Skipping caller-supplied id collisions
@@ -454,7 +456,7 @@ async function runBatch<Params extends RuleParams>({
     }
   }
 
-  await invalidateKeys(failedEntries, context);
+  await invalidateKeys(invalidKeys.splice(0), context);
 
   // Per-rule change-history entries for SOs that actually persisted.
   if (successfulSavedObjects.length > 0) {
