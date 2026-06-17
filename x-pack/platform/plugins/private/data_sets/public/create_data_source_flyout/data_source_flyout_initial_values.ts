@@ -70,6 +70,13 @@ export const authenticationModeFromDataSource = (
   const settings = asSettingsRecord(data.settings);
 
   if (data.type === 'azure') {
+    const hasFederatedIdentity =
+      (typeof settings.tenant_id === 'string' && settings.tenant_id.trim() !== '') ||
+      (typeof settings.client_id === 'string' && settings.client_id.trim() !== '') ||
+      (typeof settings.jwt_audience === 'string' && settings.jwt_audience.trim() !== '');
+    if (hasFederatedIdentity) {
+      return 'federated_identity';
+    }
     if (typeof settings.connection_string === 'string' && settings.connection_string.trim()) {
       return 'connection_string';
     }

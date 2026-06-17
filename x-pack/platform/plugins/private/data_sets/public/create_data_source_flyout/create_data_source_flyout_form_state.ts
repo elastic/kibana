@@ -45,6 +45,9 @@ export interface CreateDataSourceFlyoutFormSettings {
     connection_string: string;
     key: string;
     sas_token: string;
+    tenant_id: string;
+    client_id: string;
+    jwt_audience: string;
   };
   iceberg: {
     region: string;
@@ -96,6 +99,9 @@ export const emptyCreateDataSourceFormSettings = (): CreateDataSourceFlyoutFormS
     connection_string: '',
     key: '',
     sas_token: '',
+    tenant_id: '',
+    client_id: '',
+    jwt_audience: '',
   },
   iceberg: { region: '', endpoint: '', access_key: '', secret_key: '' },
   jdbc: { host: '', port: '', database: '', ssl: false, username: '', password: '' },

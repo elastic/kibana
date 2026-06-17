@@ -41,6 +41,9 @@ const azureSettingsWithSecretsSchema = schema.object({
   connection_string: optionalString,
   key: optionalString,
   sas_token: optionalString,
+  tenant_id: optionalString,
+  client_id: optionalString,
+  jwt_audience: optionalString,
 });
 
 const icebergSettingsWithSecretsSchema = schema.object({

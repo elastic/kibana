@@ -100,6 +100,9 @@ export interface AzureDataSourceSettingsWithSecrets extends AzureDataSourceSetti
   connection_string?: string;
   key?: string;
   sas_token?: string;
+  tenant_id?: string;
+  client_id?: string;
+  jwt_audience?: string;
 }
 
 export type IcebergDataSource = DataSourceCommon<'iceberg', IcebergDataSourceSettings>;

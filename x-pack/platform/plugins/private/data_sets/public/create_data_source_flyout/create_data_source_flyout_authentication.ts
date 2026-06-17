@@ -16,7 +16,11 @@ export type S3AuthenticationMode = 'access_and_secret_keys' | 'federated_identit
 export type GcsAuthenticationMode = 'access_and_secret_keys' | 'federated_identity';
 
 /** Azure authentication modes (UI-only; `settings.auth` is never submitted). */
-export type AzureAuthenticationMode = 'credentials' | 'connection_string' | 'sas_token';
+export type AzureAuthenticationMode =
+  | 'credentials'
+  | 'connection_string'
+  | 'sas_token'
+  | 'federated_identity';
 
 export type CreateDataSourceAuthenticationMode =
   | S3AuthenticationMode
@@ -62,6 +66,12 @@ export const getCreateDataSourceAuthenticationOptions = (
         value: 'sas_token',
         text: i18n.translate('dataSets.createFlyout.authentication.azure.sasToken', {
           defaultMessage: 'SAS Token',
+        }),
+      },
+      {
+        value: 'federated_identity',
+        text: i18n.translate('dataSets.createFlyout.authentication.federatedIdentity', {
+          defaultMessage: 'Federated Identity',
         }),
       },
     ];
@@ -116,7 +126,12 @@ export const showsAuthenticationCredentialFields = (
   dataSourceType: DataSourceType
 ): boolean => {
   if (dataSourceType === 'azure') {
-    return mode === 'credentials' || mode === 'connection_string' || mode === 'sas_token';
+    return (
+      mode === 'credentials' ||
+      mode === 'connection_string' ||
+      mode === 'sas_token' ||
+      mode === 'federated_identity'
+    );
   }
   if (dataSourceType === 's3') {
     return mode === 'access_and_secret_keys' || mode === 'federated_identity';
@@ -211,6 +226,9 @@ export const applyAuthenticationModeToDataSource = (
         connection_string: _connectionString,
         key: _key,
         sas_token: _sasToken,
+        tenant_id: _tenantId,
+        client_id: _clientId,
+        jwt_audience: _jwtAudience,
         auth: _auth,
         ...rest
       } = data.settings;
@@ -242,6 +260,17 @@ export const applyAuthenticationModeToDataSource = (
           settings: {
             ...base,
             sas_token: data.settings.sas_token,
+          },
+        };
+      }
+      if (mode === 'federated_identity') {
+        return {
+          ...data,
+          settings: {
+            ...base,
+            tenant_id: data.settings.tenant_id,
+            client_id: data.settings.client_id,
+            jwt_audience: data.settings.jwt_audience,
           },
         };
       }
