@@ -170,12 +170,18 @@ const serializer = (
     return base;
   }
 
-  // Same-mode constraint (D11): when the pack has a schedule_type, the
+  // Same-mode constraint: when the pack has a schedule_type, the
   // query's override schedule_type MUST match. The UI locks the selector via
   // `lockedScheduleType` so this is normally a no-op; the guard catches
   // programmatic mutation.
   const serialized = serializeSchedule(schedule);
   if (packSchedule?.schedule_type && serialized.schedule_type !== packSchedule.schedule_type) {
+    if (packSchedule.schedule_type === 'rrule') {
+      const { interval: _interval, timeout: _timeout, ...stripped } = base;
+
+      return stripped as PackSOQueryFormData;
+    }
+
     return base;
   }
 

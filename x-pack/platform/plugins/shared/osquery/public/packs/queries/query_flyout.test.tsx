@@ -337,8 +337,169 @@ describe('QueryFlyout', () => {
       expect(onClose).not.toHaveBeenCalled();
     });
 
-    // E6 ────────────────────────────────────────────────────────────────────
-    it('E6: disables the TimeoutField when inheriting an rrule pack schedule (review #6)', () => {
+    // Submit-gate UX: an invalid override disables the Save button and surfaces
+    // the inline flyout error region; a valid override saves.
+    it('disables the Save button and surfaces the error for an invalid override schedule', async () => {
+      const onSave = jest.fn().mockResolvedValue(undefined);
+
+      renderFlyout({
+        onSave,
+        packSchedule: {
+          schedule_type: 'rrule',
+          rrule_schedule: {
+            rrule: 'FREQ=DAILY',
+            start_date: '2024-01-01T00:00:00.000Z',
+            splay: '13h', // over-cap
+          },
+        },
+      });
+
+      // Turn the override on so the (invalid) schedule is gated.
+      act(() => {
+        fireEvent.click(screen.getByTestId('osquery-query-override-pack-schedule'));
+      });
+
+      await waitFor(() => {
+        expect(screen.getByTestId('query-flyout-save-button')).toBeDisabled();
+        expect(screen.getByTestId('osquery-query-flyout-schedule-errors')).toBeInTheDocument();
+      });
+
+      fireEvent.click(screen.getByTestId('query-flyout-save-button'));
+      await new Promise((resolve) => setTimeout(resolve, 0));
+      expect(onSave).not.toHaveBeenCalled();
+    });
+
+    it('a valid override schedule keeps the Save button enabled and saves', async () => {
+      const onSave = jest.fn().mockResolvedValue(undefined);
+
+      renderFlyout({
+        onSave,
+        packSchedule: {
+          schedule_type: 'rrule',
+          rrule_schedule: {
+            rrule: 'FREQ=DAILY',
+            start_date: '2024-01-01T00:00:00.000Z',
+          },
+        },
+      });
+
+      act(() => {
+        fireEvent.click(screen.getByTestId('osquery-query-override-pack-schedule'));
+      });
+
+      const idInput = screen.getByRole('textbox', { name: /ID/i });
+      fireEvent.change(idInput, { target: { value: 'valid-override-query' } });
+
+      expect(screen.getByTestId('query-flyout-save-button')).not.toBeDisabled();
+      expect(screen.queryByTestId('osquery-query-flyout-schedule-errors')).not.toBeInTheDocument();
+
+      fireEvent.click(screen.getByTestId('query-flyout-save-button'));
+      await waitFor(() => expect(onSave).toHaveBeenCalled());
+    });
+
+    it('flag-off parity — no schedule gate, Save stays enabled', async () => {
+      ExperimentalFeaturesService.init({
+        experimentalFeatures: { ...allowedExperimentalValues, rruleScheduling: false },
+      });
+      const onSave = jest.fn().mockResolvedValue(undefined);
+
+      renderFlyout({ onSave });
+
+      const idInput = screen.getByRole('textbox', { name: /ID/i });
+      fireEvent.change(idInput, { target: { value: 'flag-off-query' } });
+
+      expect(screen.getByTestId('query-flyout-save-button')).not.toBeDisabled();
+      expect(screen.queryByTestId('osquery-query-flyout-schedule-errors')).not.toBeInTheDocument();
+
+      fireEvent.click(screen.getByTestId('query-flyout-save-button'));
+      await waitFor(() => expect(onSave).toHaveBeenCalled());
+    });
+
+    // Child mode resync: flipping the parent pack mode re-seeds an inherited
+    // (override-off) flyout's displayed schedule to the new mode; an active
+    // override edit is preserved; no render loop (effect keyed on incoming mode).
+    it('re-seeds an inherited flyout schedule when the pack mode flips', async () => {
+      const { rerender } = renderFlyout({
+        packSchedule: { schedule_type: 'interval', interval: 3600 },
+      });
+
+      // Inherited (override-off): the ScheduleSection is hidden inside the
+      // collapsed ToggleableRow.
+      expect(screen.queryByTestId('mocked-schedule-section')).not.toBeInTheDocument();
+
+      // Flip the pack mode to rrule (simulates the pack form switching modes
+      // while the flyout is open). The guarded effect re-seeds the hidden
+      // inherited schedule to the new mode.
+      rerender(
+        <EuiProvider>
+          <IntlProvider locale="en">
+            <QueryFlyout
+              uniqueQueryIds={[]}
+              onSave={jest.fn()}
+              onClose={jest.fn()}
+              packSchedule={{
+                schedule_type: 'rrule',
+                rrule_schedule: {
+                  rrule: 'FREQ=DAILY',
+                  start_date: '2024-01-01T00:00:00.000Z',
+                },
+              }}
+            />
+          </IntlProvider>
+        </EuiProvider>
+      );
+
+      // Reveal the re-seeded schedule by turning the override on; it now
+      // reflects the new pack mode (rrule), proving the re-seed fired.
+      act(() => {
+        fireEvent.click(screen.getByTestId('osquery-query-override-pack-schedule'));
+      });
+
+      await waitFor(() => {
+        expect(screen.getByTestId('mocked-schedule-section')).toHaveTextContent('rrule');
+      });
+    });
+
+    it('preserves an active override edit when the pack mode flips', async () => {
+      const { rerender } = renderFlyout({
+        packSchedule: {
+          schedule_type: 'rrule',
+          rrule_schedule: {
+            rrule: 'FREQ=DAILY',
+            start_date: '2024-01-01T00:00:00.000Z',
+          },
+        },
+      });
+
+      // Turn the override on — now the user is actively editing the override.
+      act(() => {
+        fireEvent.click(screen.getByTestId('osquery-query-override-pack-schedule'));
+      });
+      await waitFor(() =>
+        expect(screen.getByTestId('mocked-schedule-section')).toBeInTheDocument()
+      );
+
+      // Flip the pack mode. The active override must NOT be re-seeded.
+      rerender(
+        <EuiProvider>
+          <IntlProvider locale="en">
+            <QueryFlyout
+              uniqueQueryIds={[]}
+              onSave={jest.fn()}
+              onClose={jest.fn()}
+              packSchedule={{ schedule_type: 'interval', interval: 3600 }}
+            />
+          </IntlProvider>
+        </EuiProvider>
+      );
+
+      // The override schedule stays in its edited (rrule) mode — not reset to
+      // the new pack mode.
+      await new Promise((resolve) => setTimeout(resolve, 0));
+      expect(screen.getByTestId('mocked-schedule-section')).toHaveTextContent('rrule');
+    });
+
+    it('disables the TimeoutField when inheriting an rrule pack schedule (review #6)', () => {
       renderFlyout({
         packSchedule: {
           schedule_type: 'rrule',

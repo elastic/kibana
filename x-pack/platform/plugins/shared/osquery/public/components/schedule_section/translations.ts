@@ -176,6 +176,14 @@ export const SPLAY_MAX_ERROR = i18n.translate('xpack.osquery.scheduleSection.spl
   defaultMessage: 'Splay must be a positive integer no greater than 12 hours.',
 });
 
+export const PACK_QUERY_STALE_INTERVAL_ERROR = i18n.translate(
+  'xpack.osquery.scheduleSection.packQueryStaleIntervalError',
+  {
+    defaultMessage:
+      'One or more queries still use an interval schedule. Per-query intervals do not apply while the pack uses a date & time schedule and will not be saved.',
+  }
+);
+
 export const SPLAY_QUERY_STORM_WARNING = i18n.translate(
   'xpack.osquery.scheduleSection.splayQueryStormWarning',
   {

@@ -17,8 +17,9 @@ import {
   EuiButtonEmpty,
   EuiButton,
   EuiText,
+  EuiCallOut,
 } from '@elastic/eui';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { FormProvider } from 'react-hook-form';
@@ -50,6 +51,7 @@ import type {
   PackSOQueryFormData,
 } from './use_pack_query_form';
 import { usePackQueryForm } from './use_pack_query_form';
+import { deserializeSchedule } from '../form/schedule_serializer';
 import { SavedQueriesDropdown } from '../../saved_queries/saved_queries_dropdown';
 import { ECSMappingEditorField } from './lazy_ecs_mapping_editor_field';
 import { useKibana } from '../../common/lib/kibana';
@@ -90,6 +92,50 @@ const QueryFlyoutComponent: React.FC<QueryFlyoutProps> = ({
   const overridePackSchedule = watch('override_pack_schedule');
   const schedule = watch('schedule');
 
+  // Single source of truth for the override schedule. Only an
+  // active override has a schedule to validate — an inherited query defers to
+  // the pack. Empty when the flag is off (schedule is undefined).
+  const scheduleErrors = useMemo(
+    () =>
+      isRruleSchedulingEnabled && overridePackSchedule && schedule
+        ? validateScheduleFormData(schedule)
+        : [],
+    [isRruleSchedulingEnabled, overridePackSchedule, schedule]
+  );
+
+  const incomingPackMode = packSchedule?.schedule_type;
+  const seededPackModeRef = useRef(incomingPackMode);
+  useEffect(() => {
+    if (!isRruleSchedulingEnabled || overridePackSchedule) {
+      seededPackModeRef.current = incomingPackMode;
+
+      return;
+    }
+
+    if (seededPackModeRef.current === incomingPackMode) {
+      return;
+    }
+
+    seededPackModeRef.current = incomingPackMode;
+    setValue(
+      'schedule',
+      deserializeSchedule({
+        schedule_type: packSchedule?.schedule_type,
+        interval: packSchedule?.interval,
+        rrule_schedule: packSchedule?.rrule_schedule,
+      }),
+      { shouldDirty: false }
+    );
+  }, [
+    isRruleSchedulingEnabled,
+    overridePackSchedule,
+    incomingPackMode,
+    packSchedule?.schedule_type,
+    packSchedule?.interval,
+    packSchedule?.rrule_schedule,
+    setValue,
+  ]);
+
   const isTimeoutInherited =
     isRruleSchedulingEnabled && !overridePackSchedule && packSchedule?.schedule_type === 'rrule';
   const timeoutFieldProps = useMemo(
@@ -111,18 +157,35 @@ const QueryFlyoutComponent: React.FC<QueryFlyoutProps> = ({
     },
     [setValue]
   );
-  const onSubmit = async (payload: PackQueryFormData) => {
-    if (payload.override_pack_schedule && payload.schedule) {
-      const scheduleErrors = validateScheduleFormData(payload.schedule);
-      if (scheduleErrors.length > 0) {
-        return;
+  const onSubmit = useCallback(
+    async (payload: PackQueryFormData) => {
+      // Final guard (§11.1): the controlled schedule object doesn't register
+      // with RHF, so re-validate here and abort on error.
+      if (payload.override_pack_schedule && payload.schedule) {
+        const errors = validateScheduleFormData(payload.schedule);
+        if (errors.length > 0) {
+          return;
+        }
       }
+
+      const serializedData: PackSOQueryFormData = serializer(payload);
+      await onSave(serializedData);
+      onClose();
+    },
+    [serializer, onSave, onClose]
+  );
+
+  const handleSaveClick = useCallback(() => {
+    // Option-B gate (design D1/D2): when the override schedule is invalid the
+    // inline error region is already surfaced (rendered whenever
+    // `scheduleErrors` is non-empty) and the Save button is disabled. This
+    // guard is the keyboard/programmatic backstop — never save on error.
+    if (scheduleErrors.length > 0) {
+      return;
     }
 
-    const serializedData: PackSOQueryFormData = serializer(payload);
-    await onSave(serializedData);
-    onClose();
-  };
+    return handleSubmit(onSubmit)();
+  }, [scheduleErrors, handleSubmit, onSubmit]);
 
   const handleSetQueryValue = useCallback(
     (savedQuery: any) => {
@@ -199,9 +262,34 @@ const QueryFlyoutComponent: React.FC<QueryFlyoutProps> = ({
                         onChange={handleScheduleChange}
                         lockedScheduleType={packSchedule?.schedule_type}
                         title={null}
+                        showErrors={scheduleErrors.length > 0}
                       />
                     ) : null}
                   </ToggleableRow>
+                  {scheduleErrors.length > 0 ? (
+                    <>
+                      <EuiSpacer size="s" />
+                      <EuiCallOut
+                        announceOnMount
+                        size="s"
+                        color="danger"
+                        iconType="alert"
+                        title={
+                          <FormattedMessage
+                            id="xpack.osquery.queryFlyoutForm.scheduleErrorsTitle"
+                            defaultMessage="Fix the schedule before saving"
+                          />
+                        }
+                        data-test-subj="osquery-query-flyout-schedule-errors"
+                      >
+                        <ul>
+                          {scheduleErrors.map((error) => (
+                            <li key={error}>{error}</li>
+                          ))}
+                        </ul>
+                      </EuiCallOut>
+                    </>
+                  ) : null}
                   {!overridePackSchedule && packSchedule?.schedule_type ? (
                     <EuiText size="xs" color="subdued" data-test-subj="osquery-using-pack-schedule">
                       {QUERY_USING_PACK_SCHEDULE_LABEL}
@@ -276,7 +364,8 @@ const QueryFlyoutComponent: React.FC<QueryFlyoutProps> = ({
             <EuiButton
               data-test-subj="query-flyout-save-button"
               isLoading={isSubmitting}
-              onClick={handleSubmit(onSubmit)}
+              isDisabled={scheduleErrors.length > 0}
+              onClick={handleSaveClick}
               fill
             >
               <FormattedMessage

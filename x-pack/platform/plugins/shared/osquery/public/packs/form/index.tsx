@@ -17,6 +17,7 @@ import {
   EuiBottomBar,
   EuiHorizontalRule,
   EuiAccordion,
+  EuiCallOut,
 } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -36,6 +37,7 @@ import { convertPackQueriesToSO, convertSOQueriesToPack } from './utils';
 import { deserializeSchedule, serializeSchedule } from './schedule_serializer';
 import { ScheduleSection } from '../../components/schedule_section';
 import { validateScheduleFormData } from '../../components/schedule_section/validation';
+import { PACK_QUERY_STALE_INTERVAL_ERROR } from '../../components/schedule_section/translations';
 import type { ScheduleFormData } from '../../components/schedule_section/types';
 import type { PackItem } from '../types';
 import { NameField } from './name_field';
@@ -156,7 +158,27 @@ const PackFormComponent: React.FC<PackFormProps> = ({
     setValue,
     formState: { isSubmitting, isDirty },
   } = hooksForm;
-  const { policy_ids: policyIds, shards, pack_type: packType, schedule } = watch();
+  const { policy_ids: policyIds, shards, pack_type: packType, schedule, queries } = watch();
+
+  const scheduleErrors = useMemo(() => {
+    if (!isRruleSchedulingEnabled || !schedule) {
+      return [];
+    }
+
+    const errors = validateScheduleFormData(schedule);
+
+    if (
+      schedule.scheduleType === 'rrule' &&
+      queries?.some((query) => query.schedule_type === 'interval')
+    ) {
+      errors.push(PACK_QUERY_STALE_INTERVAL_ERROR);
+    }
+
+    return errors;
+  }, [isRruleSchedulingEnabled, schedule, queries]);
+
+  const [showScheduleErrors, setShowScheduleErrors] = useState(false);
+  const scheduleSectionRef = useRef<HTMLDivElement | null>(null);
 
   // Mirror the pack-level schedule into the legacy top-level fields so the
   // QueriesField → QueryFlyout path sees `schedule_type` / `interval` /
@@ -212,13 +234,13 @@ const PackFormComponent: React.FC<PackFormProps> = ({
 
   const onSubmit = useCallback(
     async (values: PackFormData) => {
-      // Submit-boundary gate (review #4): a controlled ScheduleSection object
+      // Submit-boundary gate: a controlled ScheduleSection object
       // doesn't `register` cleanly with RHF, so the inline field errors are not
       // enough to block submit. Re-validate the whole schedule here and abort
       // when it fails — the inline errors already do the visual work.
       if (isRruleSchedulingEnabled && values.schedule) {
-        const scheduleErrors = validateScheduleFormData(values.schedule);
-        if (scheduleErrors.length > 0) {
+        const submitScheduleErrors = validateScheduleFormData(values.schedule);
+        if (submitScheduleErrors.length > 0) {
           return;
         }
       }
@@ -228,8 +250,8 @@ const PackFormComponent: React.FC<PackFormProps> = ({
         pack_type: __,
         schedule: scheduleFormState,
         policy_ids: payloadAgentPolicyIds,
-        queries,
-        // Flag-off leak fix (review #3): peel the rrule-era schedule fields off
+        queries: payloadQueries,
+        // Flag-off leak fix: peel the rrule-era schedule fields off
         // `restPayload` so a flag-off submit never spreads `schedule_type` /
         // pack-level `interval` / `rrule_schedule`. When the flag is on,
         // `scheduleFields` below re-adds the correct values from the form state.
@@ -255,7 +277,7 @@ const PackFormComponent: React.FC<PackFormProps> = ({
         return {
           ...restPayload,
           policy_ids: policies ?? [],
-          queries: convertSOQueriesToPack(queries),
+          queries: convertSOQueriesToPack(payloadQueries),
           shards: getShards() ?? {},
           ...scheduleFields,
         };
@@ -303,6 +325,17 @@ const PackFormComponent: React.FC<PackFormProps> = ({
       return;
     }
 
+    // RHF's `trigger()` cannot see the controlled
+    // `schedule` object, so the schedule is validated separately here. On error,
+    // do NOT open the confirmation modal or submit — surface the cause inline
+    // and scroll the schedule section into view instead.
+    if (scheduleErrors.length > 0) {
+      setShowScheduleErrors(true);
+      scheduleSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+      return;
+    }
+
     if (agentCount) {
       setShowConfirmationModal(true);
 
@@ -310,7 +343,7 @@ const PackFormComponent: React.FC<PackFormProps> = ({
     }
 
     handleSubmitForm();
-  }, [agentCount, handleSubmitForm, trigger]);
+  }, [agentCount, handleSubmitForm, scheduleErrors, trigger]);
 
   const handleConfirmConfirmationClick = useCallback(async () => {
     setShowConfirmationModal(false);
@@ -397,11 +430,38 @@ const PackFormComponent: React.FC<PackFormProps> = ({
           <>
             <EuiFlexGroup>
               <EuiFlexItem>
-                <ScheduleSection
-                  value={schedule}
-                  onChange={handleScheduleChange}
-                  disabled={isReadOnly}
-                />
+                <div ref={scheduleSectionRef}>
+                  <ScheduleSection
+                    value={schedule}
+                    onChange={handleScheduleChange}
+                    disabled={isReadOnly}
+                    showErrors={showScheduleErrors || scheduleErrors.length > 0}
+                  />
+                  {scheduleErrors.length > 0 ? (
+                    <>
+                      <EuiSpacer size="s" />
+                      <EuiCallOut
+                        announceOnMount
+                        size="s"
+                        color="danger"
+                        iconType="alert"
+                        title={
+                          <FormattedMessage
+                            id="xpack.osquery.pack.form.scheduleErrorsTitle"
+                            defaultMessage="Fix the schedule before saving"
+                          />
+                        }
+                        data-test-subj="osquery-pack-schedule-errors"
+                      >
+                        <ul>
+                          {scheduleErrors.map((error) => (
+                            <li key={error}>{error}</li>
+                          ))}
+                        </ul>
+                      </EuiCallOut>
+                    </>
+                  ) : null}
+                </div>
               </EuiFlexItem>
             </EuiFlexGroup>
             <EuiSpacer size="m" />
@@ -432,6 +492,7 @@ const PackFormComponent: React.FC<PackFormProps> = ({
               <EuiFlexItem grow={false}>
                 <EuiButton
                   isLoading={isSubmitting}
+                  isDisabled={scheduleErrors.length > 0 || isReadOnly}
                   color="primary"
                   fill
                   size="m"

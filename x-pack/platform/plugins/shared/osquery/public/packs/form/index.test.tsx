@@ -547,7 +547,214 @@ describe('PackForm', () => {
     });
   });
 
-  // 11.2.5: rollback-style flag-off leak. Mount in edit mode with an RRULE SO
+  // ─────────────────────────────────────────────────────────────────────────
+  // Beyond "no save", assert the button is disabled, the confirmation modal
+  // never opens, and the inline error region surfaces the cause.
+  // ─────────────────────────────────────────────────────────────────────────
+  describe('schedule submit-gate UX (Option B)', () => {
+    beforeEach(() => {
+      mockCreateAsync = jest.fn().mockResolvedValue({ data: { name: 'Test Pack' } });
+      mockUpdateAsync = jest.fn().mockResolvedValue({ data: { name: 'Test Pack' } });
+      ExperimentalFeaturesService.init({
+        experimentalFeatures: { ...allowedExperimentalValues, rruleScheduling: true },
+      });
+    });
+
+    afterEach(() => {
+      ExperimentalFeaturesService.init({
+        experimentalFeatures: { ...allowedExperimentalValues, rruleScheduling: false },
+      });
+    });
+
+    const baseRrulePack = (overrides: Record<string, unknown>) => ({
+      id: 'pack-gate-ux',
+      saved_object_id: 'saved-gate-ux',
+      name: 'gate-ux-pack',
+      description: '',
+      enabled: true,
+      queries: {},
+      created_at: '2024-01-01',
+      created_by: 'test-user',
+      updated_at: '2024-01-01',
+      updated_by: 'test-user',
+      policy_ids: [],
+      references: [],
+      schedule_type: 'rrule' as const,
+      rrule_schedule: {
+        rrule: 'FREQ=DAILY',
+        start_date: '2024-01-01T00:00:00.000Z',
+        ...overrides,
+      },
+    });
+
+    // empty weekdays (custom WEEKLY with no byweekday). The deserializer
+    // never emits an empty byweekday, so drive it through the UI: start from a
+    // valid custom-weekly pack (MO-FR checked) and uncheck every day.
+    it('disables the button and surfaces an error when all weekdays are unchecked', async () => {
+      // FREQ=WEEKLY deserializes to the "custom" UI mode with the default
+      // Mon-Fri selection — a valid starting point.
+      const defaultValue = baseRrulePack({ rrule: 'FREQ=WEEKLY' });
+
+      const { getByTestId, container } = renderWithContext(
+        <PackForm editMode={true} defaultValue={defaultValue} packId="pack-gate-ux" />
+      );
+
+      // Initially valid → enabled.
+      expect(getByTestId('update-pack-button')).not.toBeDisabled();
+
+      // Uncheck every selected weekday checkbox (ids end with the weekday token).
+      ['MO', 'TU', 'WE', 'TH', 'FR', 'SA', 'SU'].forEach((token) => {
+        const checkbox = container.querySelector(
+          `input[id$="-${token}"]`
+        ) as HTMLInputElement | null;
+        if (checkbox && checkbox.checked) {
+          fireEvent.click(checkbox);
+        }
+      });
+
+      // Now invalid: button disabled and the cause surfaced inline. The
+      // confirmation modal can never open from a disabled button.
+      await waitFor(() => expect(getByTestId('update-pack-button')).toBeDisabled());
+      expect(getByTestId('osquery-pack-schedule-errors')).toBeInTheDocument();
+
+      fireEvent.click(getByTestId('update-pack-button'));
+      await new Promise((resolve) => setTimeout(resolve, 0));
+      expect(mockUpdateAsync).not.toHaveBeenCalled();
+    });
+
+    // stop date before start date.
+    it('disables the button and surfaces an error when the stop date precedes the start', async () => {
+      const defaultValue = baseRrulePack({
+        start_date: '2024-06-01T00:00:00.000Z',
+        end_date: '2024-01-01T00:00:00.000Z',
+      });
+
+      const { getByTestId } = renderWithContext(
+        <PackForm editMode={true} defaultValue={defaultValue} packId="pack-gate-ux" />
+      );
+
+      expect(getByTestId('update-pack-button')).toBeDisabled();
+      fireEvent.click(getByTestId('update-pack-button'));
+      await new Promise((resolve) => setTimeout(resolve, 0));
+
+      expect(getByTestId('osquery-pack-schedule-errors')).toBeInTheDocument();
+      expect(mockUpdateAsync).not.toHaveBeenCalled();
+    });
+
+    // over-cap plain splay.
+    it('disables the button and surfaces an error for an over-cap splay', async () => {
+      const defaultValue = baseRrulePack({ splay: '13h' });
+
+      const { getByTestId } = renderWithContext(
+        <PackForm editMode={true} defaultValue={defaultValue} packId="pack-gate-ux" />
+      );
+
+      expect(getByTestId('update-pack-button')).toBeDisabled();
+      fireEvent.click(getByTestId('update-pack-button'));
+      await new Promise((resolve) => setTimeout(resolve, 0));
+
+      expect(getByTestId('osquery-pack-schedule-errors')).toBeInTheDocument();
+      expect(mockUpdateAsync).not.toHaveBeenCalled();
+    });
+
+    // over-cap COMPOUND splay (distinct rawCompound branch).
+    it('disables the button for an over-cap compound splay (12h1m)', async () => {
+      const defaultValue = baseRrulePack({ splay: '12h1m' });
+
+      const { getByTestId } = renderWithContext(
+        <PackForm editMode={true} defaultValue={defaultValue} packId="pack-gate-ux" />
+      );
+
+      expect(getByTestId('update-pack-button')).toBeDisabled();
+      fireEvent.click(getByTestId('update-pack-button'));
+      await new Promise((resolve) => setTimeout(resolve, 0));
+
+      expect(getByTestId('osquery-pack-schedule-errors')).toBeInTheDocument();
+      expect(mockUpdateAsync).not.toHaveBeenCalled();
+    });
+
+    // happy path: valid schedule enables the button, no error region.
+    it('a valid rrule schedule enables the button and shows no error region', async () => {
+      const defaultValue = baseRrulePack({ splay: '5m' });
+
+      const { getByTestId, queryByTestId } = renderWithContext(
+        <PackForm editMode={true} defaultValue={defaultValue} packId="pack-gate-ux" />
+      );
+
+      expect(getByTestId('update-pack-button')).not.toBeDisabled();
+      expect(queryByTestId('osquery-pack-schedule-errors')).toBeNull();
+
+      fireEvent.click(getByTestId('update-pack-button'));
+      await waitFor(() => expect(mockUpdateAsync).toHaveBeenCalled());
+    });
+
+    // mode switch Interval → rrule with a stale per-query interval
+    // override: the backstop error surfaces and submit is blocked. (The
+    // serializer-strip itself is unit-tested in use_pack_query_form.test.tsx.)
+    it('surfaces the backstop error when a query keeps an interval override on an rrule pack', async () => {
+      const defaultValue = {
+        id: 'pack-stale-q',
+        saved_object_id: 'saved-stale-q',
+        name: 'stale-query-pack',
+        description: '',
+        enabled: true,
+        // A query that still carries an interval-mode override while the pack
+        // is now rrule — the mixed-mode case the backend would 400 on.
+        queries: {
+          'q-stale': {
+            query: 'SELECT 1;',
+            interval: 3600,
+            ecs_mapping: {},
+            schedule_type: 'interval' as const,
+          },
+        },
+        created_at: '2024-01-01',
+        created_by: 'test-user',
+        updated_at: '2024-01-01',
+        updated_by: 'test-user',
+        policy_ids: [],
+        references: [],
+        schedule_type: 'rrule' as const,
+        rrule_schedule: {
+          rrule: 'FREQ=DAILY',
+          start_date: '2024-01-01T00:00:00.000Z',
+        },
+      };
+
+      const { getByTestId } = renderWithContext(
+        <PackForm editMode={true} defaultValue={defaultValue} packId="pack-stale-q" />
+      );
+
+      expect(getByTestId('update-pack-button')).toBeDisabled();
+      fireEvent.click(getByTestId('update-pack-button'));
+      await new Promise((resolve) => setTimeout(resolve, 0));
+
+      expect(getByTestId('osquery-pack-schedule-errors')).toBeInTheDocument();
+      expect(mockUpdateAsync).not.toHaveBeenCalled();
+    });
+
+    // flag-off parity: the button is never schedule-disabled and the
+    // error region never renders (the memo is empty when the flag is off).
+    it('flag-off parity — button enabled and no schedule error region', async () => {
+      ExperimentalFeaturesService.init({
+        experimentalFeatures: { ...allowedExperimentalValues, rruleScheduling: false },
+      });
+
+      const defaultValue = baseRrulePack({ rrule: 'FREQ=WEEKLY' }); // invalid IF rrule were on
+
+      const { getByTestId, queryByTestId } = renderWithContext(
+        <PackForm editMode={true} defaultValue={defaultValue} packId="pack-gate-ux" />
+      );
+
+      expect(getByTestId('update-pack-button')).not.toBeDisabled();
+      expect(queryByTestId('osquery-pack-schedule-errors')).toBeNull();
+
+      fireEvent.click(getByTestId('update-pack-button'));
+      await waitFor(() => expect(mockUpdateAsync).toHaveBeenCalled());
+    });
+  });
+
+  // rollback-style flag-off leak. Mount in edit mode with an RRULE SO
   // and the flag OFF; the submit payload must be byte-identical to the legacy
   // shape (no schedule_type / interval / rrule_schedule).
   describe('flag-off leak (review #3)', () => {
