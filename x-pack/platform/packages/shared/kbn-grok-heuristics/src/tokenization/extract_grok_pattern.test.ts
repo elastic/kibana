@@ -6,9 +6,6 @@
  */
 
 import { extractGrokPatternDangerouslySlow } from './extract_grok_pattern';
-import { ToolingLog } from '@kbn/tooling-log';
-import type { StreamLogGenerator } from '@kbn/sample-log-parser';
-import { SampleParserClient } from '@kbn/sample-log-parser';
 import { isNamedField } from '../utils';
 import type { GrokPatternNode } from '../types';
 
@@ -218,51 +215,59 @@ describe('extractTokensDangerouslySlow', () => {
   });
 
   describe('with LogHub sample data', () => {
-    const client = new SampleParserClient({
-      logger: new ToolingLog({
-        level: 'silent',
-        writeTo: process.stdout,
-      }),
-    });
+    // Real LogHub log lines (timestamps normalized to 2025-05-01), captured once from
+    // @kbn/sample-log-parser and trimmed to the smallest set that still produces the same grok
+    // structure as the full corpus. They used to be fetched at runtime, but that cloned the
+    // external logpai/loghub repo on every run and made this suite flaky on any network hiccup
+    // (https://github.com/elastic/kibana/issues/234038). When a heuristic change alters the
+    // expected output, just update the expectations below; the sample lines only need
+    // regenerating if the LogHub corpus or the list of systems changes.
+    const LOGHUB_SAMPLES: Record<string, string[]> = {
+      HealthApp: [
+        '20250501-00:00:16:418|Step_SPUtils|30002312| getDiffTotalSteps= 1513958400215##0',
+        '20250501-00:00:21:521|HiH_HiSyncControl|30002312|checkCurrentDay a new day comes , reset basicSyncCondition, currentDay is 20171224 oldDay is 20171223',
+      ],
+      Android: [
+        '05-01 00:00:17.471 28601 28601 I AudioManager: abandonAudioFocus',
+        '05-01 00:00:25.856  1702  2639 E ActivityManager: applyOptionsLocked: Unknown animationType=0',
+      ],
+      Thunderbird: [
+        '- 1746057617 2005.11.09 tbird-admin1 Nov 9 12:10:43 local@tbird-admin1 scsi0 : LSI Logic MegaRAID driver',
+        '- 1746057625 2005.11.09 en14 Nov 9 12:15:06 en14/en14 smartd[1971]: Device: /dev/sda, Temperature changed -2 Celsius to 26 Celsius since last report',
+      ],
+      Zookeeper: [
+        '2025-05-01 00:00:01,958 - INFO  [ProcessThread(sid:2 cport:-1)::PrepRequestProcessor@476] - Processed session termination for sessionid: 0x34ed9ac1c1e005e',
+        '2025-05-01 00:00:02,084 - INFO  [NIOServerCxn.Factory:0.0.0.0/0.0.0.0:2181:NIOServerCnxn@1001] - Closed socket connection for client /10.10.34.11:41160 which had sessionid 0x34ed9ac1c1e00a9',
+        '2025-05-01 00:00:04,177 - INFO  [QuorumPeer[myid=3]/0:0:0:0:0:0:0:0:2181:Environment@100] - Server environment:java.home=/usr/lib/jvm/java-7-openjdk-amd64/jre',
+      ],
+      Mac: [
+        'May 1 00:00:19 calvisitor-10-105-162-178 com.apple.xpc.launchd[1] (com.apple.xpc.launchd.domain.user.501): Service "com.apple.xpc.launchd.unmanaged.loginwindow.94" tried to hijack endpoint "com.apple.tsm.uiserver" from owner: com.apple.SystemUIServer.agent',
+        'May 1 00:00:25 authorMacBook-Pro Mail[11203]: Unrecognized XSSimpleTypeDefinition: OneOff',
+        'May 1 00:00:26 calvisitor-10-105-162-124 WeChat[24144]:     Arranged view frame: {{0, 0}, {260, 877}}',
+      ],
+      OpenStack: [
+        'nova-compute.log.1.2017-05-16_13:55:31 2025-05-01 00:00:25.997 2931 INFO nova.virt.libvirt.driver [-] [instance: faf974ea-cba5-4e1b-93f4-3a3bc606006f] Instance spawned successfully.',
+        'nova-compute.log.1.2017-05-16_13:55:31 2025-05-01 00:00:26.245 2931 INFO nova.compute.manager [req-699eeadf-6db8-44a4-8521-1ab4e8a53b53 113d3a99c3da401fbd62cc2caa5b96d2 54fadb412c4e40cdbaed9335e4c35a9e - - -] [instance: faf974ea-cba5-4e1b-93f4-3a3bc606006f] Terminating instance',
+        'nova-api.log.1.2017-05-16_13:53:08 2025-05-01 00:00:26.252 25746 INFO nova.osapi_compute.wsgi.server [req-dd237280-5bc8-41cb-a035-26c8e64d49fc 113d3a99c3da401fbd62cc2caa5b96d2 54fadb412c4e40cdbaed9335e4c35a9e - - -] 10.11.10.1 "GET /v2/54fadb412c4e40cdbaed9335e4c35a9e/servers/detail HTTP/1.1" status: 200 len: 1916 time: 0.2717581',
+      ],
+      Proxifier: [
+        '[05.01 00:00:00] git-remote-https.exe - proxy.cse.cuhk.edu.hk:5070 close, 877 bytes sent, 3806 bytes (3.71 KB) received, lifetime 00:01',
+        '[05.01 00:00:26] chrome.exe *64 - mhfm9.us.cdndm5.com:80 close, 0 bytes sent, 0 bytes received, lifetime 00:12',
+      ],
+    };
 
-    let generators: StreamLogGenerator[];
+    function getLogsFrom(name: string): string[] {
+      const messages = LOGHUB_SAMPLES[name];
 
-    beforeAll(async () => {
-      generators = await client.getLogGenerators({
-        rpm: 16 * 2000,
-        distribution: 'uniform',
-        systems: {
-          loghub: [
-            'HealthApp',
-            'Android',
-            'Thunderbird',
-            'Zookeeper',
-            'Mac',
-            'OpenStack',
-            'Proxifier',
-          ],
-        },
-      });
-    }, 60_000); // Ensure there's enough time to gather sample logs
-
-    async function getLogsFrom(name: string) {
-      const generator = generators.find((gen) => gen.name === name);
-
-      if (!generator) {
-        throw new Error(`Could not find generator for ${name}`);
+      if (!messages) {
+        throw new Error(`Could not find samples for ${name}`);
       }
 
-      const start = new Date('2025-05-01T00:00:00.000Z').getTime();
-      const end = new Date('2025-05-01T00:01:00.000Z').getTime() - 1;
-
-      const docs = await generator.next(start);
-      docs.push(...(await generator.next(end)));
-
-      return docs.map((doc) => doc.message);
+      return messages;
     }
 
     it('processes HealthApp logs correctly', async () => {
-      const healthAppLogs = await getLogsFrom('HealthApp');
+      const healthAppLogs = getLogsFrom('HealthApp');
       const nodes = await extractGrokPatternDangerouslySlow(healthAppLogs);
 
       // 20250501-00:00:00:000|Step_LSC|30002312|onExtend:1514038530000 14 0 4
@@ -292,7 +297,7 @@ describe('extractTokensDangerouslySlow', () => {
     });
 
     it('processes android logs correctly', async () => {
-      const androidLogs = await getLogsFrom('Android');
+      const androidLogs = getLogsFrom('Android');
       const nodes = await extractGrokPatternDangerouslySlow(androidLogs);
 
       // 03-17 16:13:38.819  1702  8671 D PowerManagerService: acquire lock=233570404, flags=0x1, tag="View Lock", name=com.android.systemui, ws=null, uid=10037, pid=2227
@@ -324,7 +329,7 @@ describe('extractTokensDangerouslySlow', () => {
     });
 
     it('processes thunderbird logs correctly', async () => {
-      const thunderbirdLogs = await getLogsFrom('Thunderbird');
+      const thunderbirdLogs = getLogsFrom('Thunderbird');
       const nodes = await extractGrokPatternDangerouslySlow(thunderbirdLogs);
 
       // - 1131566461 2005.11.09 dn228 Nov 9 12:01:01 dn228/dn228 crond(pam_unix)[2915]: session closed for user root
@@ -351,7 +356,7 @@ describe('extractTokensDangerouslySlow', () => {
     });
 
     it('processes zookeeper logs correctly', async () => {
-      const zookeeperLogs = await getLogsFrom('Zookeeper');
+      const zookeeperLogs = getLogsFrom('Zookeeper');
       const nodes = await extractGrokPatternDangerouslySlow(zookeeperLogs);
 
       // 2015-07-29 17:41:44,747 - INFO  [QuorumPeer[myid=1]/0:0:0:0:0:0:0:0:2181:FastLeaderElection@774] - Notification time out: 3200
@@ -376,7 +381,7 @@ describe('extractTokensDangerouslySlow', () => {
     });
 
     it('processes mac logs correctly', async () => {
-      const macLogs = await getLogsFrom('Mac');
+      const macLogs = getLogsFrom('Mac');
       const nodes = await extractGrokPatternDangerouslySlow(macLogs);
 
       // Jul  8 07:29:50 authorMacBook-Pro Dock[307]: -[UABestAppSuggestionManager notifyBestAppChanged:type:options:bundleIdentifier:activityType:dynamicIdentifier:when:confidence:deviceName:deviceIdentifier:deviceType:] (null) UASuggestedActionType=0 (null)/(null) opts=(null) when=2017-07-08 14:29:50 +0000 confidence=1 from=(null)/(null) (UABestAppSuggestionManager.m #319)
@@ -394,7 +399,7 @@ describe('extractTokensDangerouslySlow', () => {
     });
 
     it('processes OpenStack logs correctly', async () => {
-      const openstackLogs = await getLogsFrom('OpenStack');
+      const openstackLogs = getLogsFrom('OpenStack');
       const nodes = await extractGrokPatternDangerouslySlow(openstackLogs);
 
       // nova-api.log.1.2017-05-16_13:53:08 2025-05-01 00:00:00.000 25746 INFO nova.osapi_compute.wsgi.server [req-38101a0b-2096-447d-96ea-a692162415ae 113d3a99c3da401fbd62cc2caa5b96d2 54fadb412c4e40cdbaed9335e4c35a9e - - -] 10.11.10.1 "GET /v2/54fadb412c4e40cdbaed9335e4c35a9e/servers/detail HTTP/1.1" status: 200 len: 1893 time: 0.2477829
@@ -439,7 +444,7 @@ describe('extractTokensDangerouslySlow', () => {
     });
 
     it('processes Proxifier logs correctly', async () => {
-      const proxifierLogs = await getLogsFrom('Proxifier');
+      const proxifierLogs = getLogsFrom('Proxifier');
       const nodes = await extractGrokPatternDangerouslySlow(proxifierLogs);
 
       // [07.26 13:59:44] chrome.exe *64 - www.google.com.hk:443 open through proxy proxy.cse.cuhk.edu.hk:5070 HTTPS
