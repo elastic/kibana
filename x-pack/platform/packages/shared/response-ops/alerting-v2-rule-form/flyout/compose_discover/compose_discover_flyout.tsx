@@ -31,13 +31,11 @@ import { mergeArtifactsByType, splitArtifactsByType } from '../../form/utils/art
 import { parseYamlToFormValues, serializeFormToYaml } from '../../form/utils/yaml_form_utils';
 import { ComposeDiscoverForm, getSteps } from './compose_discover_form';
 import type { ComposeFormValues, RuleQuery } from './compose_form_types';
-import { getBreachQuery } from './compose_form_types';
+import { getBreachQuery, getRecoverQuery } from './compose_form_types';
 import {
   composeFormToCreateRequest,
   composeFormToUpdateRequest,
   mapRuleToComposeFormValues,
-  transformQueryIn,
-  transformQueryOut,
 } from './compose_mappers';
 import { HorizontalMinimalStepper, type MinimalStep } from './horizontal_minimal_stepper';
 import { QuerySandboxFlyout } from './query_sandbox_flyout';
@@ -126,7 +124,7 @@ const getFlyoutTitle = (mode: ComposeDiscoverMode): string => {
 // These hooks live in the plugin, not the package — imported via the plugin's hook layer
 // when this flyout is rendered in the rules list page.
 // For now they are passed as props to keep the package boundary clean.
-export interface ComposeDiscoverFlyoutProps<TWorkflow extends object = object> {
+export interface ComposeDiscoverFlyoutProps {
   historyKey: symbol;
   mode?: ComposeDiscoverMode;
   /** The existing rule — provided when mode === 'edit'. Used to seed the RHF form. */
@@ -134,16 +132,15 @@ export interface ComposeDiscoverFlyoutProps<TWorkflow extends object = object> {
   /** The ID of the rule being edited. Required when mode === 'edit'. */
   ruleId?: string;
   onClose: () => void;
-  services: RuleFormServices<TWorkflow>;
+  services: RuleFormServices;
   /**
    * Called with the create payload when the user submits in create mode. When the user
-   * enables the notifications step, `notifications` carries the captured workflow value;
-   * otherwise it is `undefined`. The cast to `RuleNotificationsValue<TWorkflow>` is safe
-   * because the workflow value was seeded by `services.workflowForm.defaultValue()`.
+   * enables the notifications step, `notifications` carries the captured action draft list;
+   * otherwise it is `undefined`.
    */
   onCreateRule: (
     payload: ReturnType<typeof composeFormToCreateRequest>,
-    notifications?: RuleNotificationsValue<TWorkflow>
+    notifications?: RuleNotificationsValue
   ) => void;
   /** Called with id + update payload when the user submits in edit mode. */
   onUpdateRule?: (id: string, payload: ReturnType<typeof composeFormToUpdateRequest>) => void;
@@ -162,28 +159,17 @@ const getStepStatus = (currentStep: number, stepIndex: number): MinimalStep['sta
   return 'incomplete';
 };
 
-/** Bridge YAML parse (FormValues) into compose form shape until yaml_form_utils adopts ComposeFormValues. */
+/** Bridge YAML parse (FormValues) into compose form shape. */
 const formValuesFromYamlToCompose = (parsed: FormValues): ComposeFormValues => ({
   kind: parsed.kind,
   metadata: parsed.metadata,
   timeField: parsed.timeField,
   schedule: parsed.schedule,
-  query: transformQueryIn({
-    kind: parsed.kind,
-    evaluation: parsed.evaluation,
-    ...(parsed.recoveryPolicy?.type === 'query' &&
-    parsed.recoveryPolicy.query?.base !== undefined &&
-    parsed.recoveryPolicy.query?.base !== null
-      ? {
-          recovery_policy: {
-            type: parsed.recoveryPolicy.type,
-            query: {
-              base: parsed.recoveryPolicy.query.base ?? '',
-            },
-          },
-        }
-      : {}),
-  }),
+  query: {
+    format: 'standalone',
+    breach: { query: parsed.query.breach },
+    ...(parsed.query.recover ? { recovery: { query: parsed.query.recover } } : {}),
+  },
   grouping: parsed.grouping,
   stateTransition: parsed.stateTransition,
   stateTransitionAlertDelayMode: parsed.stateTransitionAlertDelayMode,
@@ -191,18 +177,18 @@ const formValuesFromYamlToCompose = (parsed: FormValues): ComposeFormValues => (
   ...splitArtifactsByType(parsed.artifacts),
 });
 
-/** Compose form → legacy FormValues for YAML serialization via yaml_form_utils. */
+/** Compose form → FormValues for YAML serialization via yaml_form_utils. */
 const composeFormValuesForYamlSerialize = (compose: ComposeFormValues): FormValues => {
-  const { evaluation, recovery_policy } = transformQueryOut(compose.query, compose.kind);
+  const breach = getBreachQuery(compose.query);
+  const recover = getRecoverQuery(compose.query) || undefined;
 
   return {
     kind: compose.kind,
     metadata: compose.metadata,
     timeField: compose.timeField,
     schedule: compose.schedule,
-    evaluation,
+    query: { breach, ...(recover ? { recover } : {}) },
     grouping: compose.grouping,
-    ...(recovery_policy ? { recoveryPolicy: recovery_policy } : {}),
     stateTransition: compose.stateTransition,
     stateTransitionAlertDelayMode: compose.stateTransitionAlertDelayMode,
     stateTransitionRecoveryDelayMode: compose.stateTransitionRecoveryDelayMode,
@@ -215,7 +201,7 @@ const EMPTY_FORM_VALUES: ComposeFormValues = {
   metadata: { name: '', enabled: true, description: '', tags: [] },
   timeField: '@timestamp',
   schedule: { every: '1m', lookback: '5m' },
-  query: { format: 'composed', base: '', blocks: { breach: '' } },
+  query: { format: 'composed', base: '', breach: { segment: '' } },
   grouping: undefined,
   stateTransition: undefined,
   stateTransitionAlertDelayMode: 'immediate',
@@ -225,7 +211,7 @@ const EMPTY_FORM_VALUES: ComposeFormValues = {
   dashboardArtifacts: [],
 };
 
-export function ComposeDiscoverFlyout<TWorkflow extends object = object>({
+export function ComposeDiscoverFlyout({
   historyKey,
   mode = 'create',
   rule,
@@ -237,7 +223,7 @@ export function ComposeDiscoverFlyout<TWorkflow extends object = object>({
   isSaving = false,
   builderType,
   initialBuilderState,
-}: ComposeDiscoverFlyoutProps<TWorkflow>): React.ReactElement | null {
+}: ComposeDiscoverFlyoutProps): React.ReactElement | null {
   const isBuilderMode = Boolean(builderType);
   /*
    * ── UI state (step navigation, sandbox open/close, tab selection, etc.) ──
@@ -246,15 +232,13 @@ export function ComposeDiscoverFlyout<TWorkflow extends object = object>({
    * When the persisted rule has a custom recovery query, the initial state
    * infers that tracking was active and reconstructs the split.
    */
-  // Internal alias: typed-down to the base `RuleFormServices` for sub-components that
-  // don't need the concrete `TWorkflow`. The typed boundary lives in `onCreateRule`.
-  const baseServices = services as unknown as RuleFormServices;
+  const baseServices = services;
 
   const initialMapped =
     (mode === 'edit' || mode === 'clone') && rule ? mapRuleToComposeFormValues(rule) : undefined;
   const initialKind = initialMapped?.kind ?? 'alert';
   const hasInitialCustomRecovery =
-    initialMapped?.query?.format === 'composed' && !!initialMapped.query.blocks.recover?.trim();
+    initialMapped?.query?.format === 'composed' && !!initialMapped.query.recovery?.segment?.trim();
   const [uiState, dispatch] = useComposeDiscoverState({
     mode: mode === 'clone' ? 'edit' : mode,
     initialKind,
@@ -402,13 +386,20 @@ export function ComposeDiscoverFlyout<TWorkflow extends object = object>({
       if (kind === 'alert') {
         const full = getBreachQuery(methods.getValues('query'));
         const { base, alertBlock } = splitQuery(full);
-        const composed: RuleQuery = { format: 'composed', base, blocks: { breach: alertBlock } };
+        const composed: RuleQuery = {
+          format: 'composed',
+          base,
+          breach: { segment: alertBlock },
+        };
         setSandboxQuery(composed);
         methods.setValue('query', composed, { shouldDirty: true });
       } else {
         // Assemble from committed query — discards any unapplied sandbox edits cleanly.
         const assembled = getBreachQuery(methods.getValues('query'));
-        const standalone: RuleQuery = { format: 'standalone', breach: assembled };
+        const standalone: RuleQuery = {
+          format: 'standalone',
+          breach: { query: assembled },
+        };
         setSandboxQuery(standalone);
         methods.setValue('query', standalone, { shouldDirty: true });
       }
@@ -432,47 +423,43 @@ export function ComposeDiscoverFlyout<TWorkflow extends object = object>({
       if (type === 'custom') {
         setSandboxQuery((q) => {
           if (q.format !== 'composed') return q;
-          const current = q.blocks.recover ?? '';
+          const current = q.recovery?.segment ?? '';
           if (current.trim()) return q;
           if (isBuilderMode) {
             const formQuery = methods.getValues('query');
             const builderRecover =
-              formQuery.format === 'composed' ? formQuery.blocks.recover ?? '' : '';
+              formQuery.format === 'composed' ? formQuery.recovery?.segment ?? '' : '';
             if (builderRecover.trim()) {
-              return { ...q, blocks: { ...q.blocks, recover: builderRecover } };
+              return { ...q, recovery: { segment: builderRecover } };
             }
           }
           return {
             ...q,
-            blocks: {
-              ...q.blocks,
-              recover: guessRecoveryBlock(q.blocks.breach),
+            recovery: {
+              segment: guessRecoveryBlock(q.breach.segment),
             },
           };
         });
       } else {
-        // (a) Clear recover from sandbox regardless of mode — prevents stale recovery
+        // (a) Clear recovery from sandbox regardless of mode — prevents stale recovery
         // query from surviving a type change even when the sandbox is still open.
-        setSandboxQuery((q) =>
-          q.format === 'composed'
-            ? { ...q, blocks: { breach: q.blocks.breach } }
-            : { ...q, recover: undefined }
-        );
-        // Clear recover from committed RHF state too.
+        setSandboxQuery((q) => {
+          if (q.format === 'composed') {
+            const { recovery: _recovery, ...rest } = q;
+            return rest;
+          }
+          const { recovery: _recovery, ...rest } = q;
+          return rest;
+        });
+        // Clear recovery from committed RHF state too.
         if (uiState.queryCommitted) {
           const current = methods.getValues('query');
-          if (current.format === 'composed' && current.blocks.recover) {
-            methods.setValue(
-              'query',
-              { ...current, blocks: { breach: current.blocks.breach } },
-              { shouldDirty: true }
-            );
-          } else if (current.format === 'standalone' && current.recover) {
-            methods.setValue(
-              'query',
-              { format: 'standalone', breach: current.breach },
-              { shouldDirty: true }
-            );
+          if (current.format === 'composed' && current.recovery) {
+            const { recovery: _recovery, ...rest } = current;
+            methods.setValue('query', rest, { shouldDirty: true });
+          } else if (current.format === 'standalone' && current.recovery) {
+            const { recovery: _recovery, ...rest } = current;
+            methods.setValue('query', rest, { shouldDirty: true });
           }
         }
         if (isBuilderMode && builderState) {
@@ -482,7 +469,7 @@ export function ComposeDiscoverFlyout<TWorkflow extends object = object>({
         // (b) Close sandbox in non-YAML mode — prevents a pending Apply from
         // overwriting the recovery type change by writing the stale sandboxQuery back.
         // Skip syncSandbox here: (a) already set the clean state directly, and
-        // calling syncSandbox when !queryCommitted could re-introduce a stale recover.
+        // calling syncSandbox when !queryCommitted could re-introduce a stale recovery.
         if (uiState.childOpen && !uiState.yamlMode) {
           dispatch({ type: 'CLOSE_CHILD' });
         }
@@ -517,7 +504,10 @@ export function ComposeDiscoverFlyout<TWorkflow extends object = object>({
   const { run: runYamlParse, cancel: cancelYamlParse } = useDebounceFn((yaml: string) => {
     const result = parseYamlToFormValues(yaml);
     if (result.values) {
-      methods.reset(formValuesFromYamlToCompose(result.values));
+      methods.reset({
+        ...formValuesFromYamlToCompose(result.values),
+        notifications: methods.getValues('notifications'),
+      });
       syncSandbox();
     }
   }, YAML_PARSE_DEBOUNCE_OPTIONS);
@@ -554,7 +544,10 @@ export function ComposeDiscoverFlyout<TWorkflow extends object = object>({
         cancelYamlParse();
         const result = parseYamlToFormValues(yamlText);
         if (result.values) {
-          const composed = formValuesFromYamlToCompose(result.values);
+          const composed = {
+            ...formValuesFromYamlToCompose(result.values),
+            notifications: methods.getValues('notifications'),
+          };
           methods.reset(composed);
           syncSandbox();
           if (getBreachQuery(composed.query).trim()) {
@@ -594,10 +587,7 @@ export function ComposeDiscoverFlyout<TWorkflow extends object = object>({
       }
     }
     if (isCreate) {
-      onCreateRule(
-        composeFormToCreateRequest(values, builderType),
-        values.notifications as RuleNotificationsValue<TWorkflow> | undefined
-      );
+      onCreateRule(composeFormToCreateRequest(values, builderType), values.notifications);
     } else if (ruleId && onUpdateRule) {
       onUpdateRule(ruleId, composeFormToUpdateRequest(values, builderType));
     }

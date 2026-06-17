@@ -15,24 +15,32 @@ import {
   compositeMethodSchema,
 } from '../../../schema/composite_slo';
 
+const updateCompositeSLOBodySchema = z.object({
+  name: z.string().optional(),
+  description: z.string().optional(),
+  members: compositeSloMembersSchema.optional(),
+  compositeMethod: compositeMethodSchema.optional(),
+  timeWindow: compositeRollingTimeWindowSchema.optional(),
+  budgetingMethod: compositeOccurrencesBudgetingMethodSchema.optional(),
+  objective: compositeTargetSchema.optional(),
+  tags: compositeTagsSchema.optional(),
+  enabled: z.boolean().optional(),
+});
+
 const updateCompositeSLOParamsSchema = z.object({
   path: z.object({
     id: compositeSloIdSchema,
   }),
-  body: z.object({
-    name: z.string().optional(),
-    description: z.string().optional(),
-    members: compositeSloMembersSchema.optional(),
-    compositeMethod: compositeMethodSchema.optional(),
-    timeWindow: compositeRollingTimeWindowSchema.optional(),
-    budgetingMethod: compositeOccurrencesBudgetingMethodSchema.optional(),
-    objective: compositeTargetSchema.optional(),
-    tags: compositeTagsSchema.optional(),
-    enabled: z.boolean().optional(),
-  }),
+  body: updateCompositeSLOBodySchema,
 });
 
-type UpdateCompositeSLOInput = z.input<typeof updateCompositeSLOParamsSchema.shape.body>;
+const updateCompositeSLOInputSchema = updateCompositeSLOBodySchema.extend({
+  id: compositeSloIdSchema,
+  spaceId: z.string(),
+  userId: z.string(),
+});
 
-export { updateCompositeSLOParamsSchema };
+type UpdateCompositeSLOInput = z.input<typeof updateCompositeSLOInputSchema>;
+
 export type { UpdateCompositeSLOInput };
+export { updateCompositeSLOParamsSchema };

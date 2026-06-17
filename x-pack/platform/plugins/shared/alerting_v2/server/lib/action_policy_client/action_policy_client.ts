@@ -40,6 +40,7 @@ import {
   LoggerServiceToken,
   type LoggerServiceContract,
 } from '../services/logger_service/logger_service';
+import { buildSoSearch } from '../build_so_search';
 import type { RulesSavedObjectServiceContract } from '../services/rules_saved_object_service/rules_saved_object_service';
 import { RulesSavedObjectServiceScopedToken } from '../services/rules_saved_object_service/tokens';
 import type { UserServiceContract } from '../services/user_service/user_service';
@@ -315,10 +316,12 @@ export class ActionPolicyClient {
     const filter = this.buildFindFilter(params);
     const sortField = this.mapSortField(params.sortField);
 
+    const search = buildSoSearch(params.search);
+
     const res = await this.actionPolicySavedObjectService.find({
       page,
       perPage,
-      search: params.search,
+      search,
       filter,
       sortField,
       sortOrder: params.sortOrder,
@@ -341,16 +344,17 @@ export class ActionPolicyClient {
   public async matchActionPoliciesForRule(
     params: MatchActionPoliciesForRuleParams
   ): Promise<MatchActionPoliciesForRuleResponse> {
-    const { ruleId, ruleName: ruleNameParam, ruleTags: ruleTagsParam } = params;
+    const { ruleId, ruleName, ruleTags } = params;
 
-    let resolvedName = ruleNameParam ?? '';
-    let resolvedTags = ruleTagsParam ?? [];
+    let resolvedName = ruleName ?? '';
+    let resolvedTags = ruleTags ?? [];
 
-    if (ruleId && (ruleNameParam === undefined || ruleTagsParam === undefined)) {
+    // If ruleId is provided but not name or tags, fetch the rule from the DB to get the current name and tags
+    if (ruleId && (ruleName === undefined || ruleTags === undefined)) {
       try {
         const rule = await this.rulesSavedObjectService.get(ruleId);
-        resolvedName = ruleNameParam ?? rule.attributes.metadata.name;
-        resolvedTags = ruleTagsParam ?? rule.attributes.metadata.tags ?? [];
+        resolvedName = ruleName ?? rule.attributes.metadata.name;
+        resolvedTags = ruleTags ?? rule.attributes.metadata.tags ?? [];
       } catch (e) {
         if (SavedObjectsErrorHelpers.isNotFoundError(e)) {
           return { items: [] };
