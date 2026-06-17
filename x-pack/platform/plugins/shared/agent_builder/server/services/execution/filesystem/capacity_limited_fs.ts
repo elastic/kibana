@@ -8,10 +8,8 @@
 import type { IFileSystem } from 'just-bash';
 import { PassthroughFs } from './passthrough_fs';
 
-const encoder = new TextEncoder();
-
 const byteLengthOf = (content: string | Uint8Array): number =>
-  typeof content === 'string' ? encoder.encode(content).length : content.byteLength;
+  typeof content === 'string' ? Buffer.byteLength(content, 'utf8') : content.byteLength;
 
 const enospc = (op: string, path: string, limit: number) =>
   new Error(

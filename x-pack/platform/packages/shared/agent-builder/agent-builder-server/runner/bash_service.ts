@@ -17,6 +17,6 @@ export interface BashExecResult {
  */
 export interface IBashService {
   exec(command: string): Promise<BashExecResult>;
-  getOrCreateWorkspaceId(existingId?: string): string;
+  getOrCreateWorkspaceId(): string;
   getWorkspaceId(): string | undefined;
 }

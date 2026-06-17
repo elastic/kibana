@@ -359,9 +359,13 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
   });
 
   const round = await extractRound(events$);
+
   // Persist filesystem state for this round (today: the workspace volume).
-  // No-op when nothing changed.
-  await context.filesystemService.flush();
+  try {
+    await context.filesystemService.flush();
+  } catch (err) {
+    logger.error(`Failed to flush filesystem state after round: ${err.message ?? err}`);
+  }
   return {
     round,
   };
