@@ -55,7 +55,7 @@ describe('DELETE entity source route - deleteEntitySourceRoute', () => {
     const mockSecurity = { authc: { apiKeys: { invalidateAsInternalUser: jest.fn() } } };
     mockGetStartServices.mockResolvedValue([{ security: mockSecurity }]);
 
-    deleteEntitySourceRoute(server.router, logger, mockGetStartServices);
+    deleteEntitySourceRoute(server.router, logger, mockGetStartServices, true);
   });
 
   afterEach(() => {

@@ -51,7 +51,7 @@ describe('DELETE /api/entity_analytics/watchlists/{id} - deleteWatchlistRoute', 
     const mockSecurity = { authc: { apiKeys: { invalidateAsInternalUser: jest.fn() } } };
     mockGetStartServices.mockResolvedValue([{ security: mockSecurity }]);
 
-    deleteWatchlistRoute(server.router, logger, mockGetStartServices);
+    deleteWatchlistRoute(server.router, logger, mockGetStartServices, true);
   });
 
   afterEach(() => {

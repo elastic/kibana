@@ -117,6 +117,7 @@ describe('createEntitySourcesService', () => {
       logger,
       namespace,
       getStartServices: mockGetStartServices as never,
+      hasEncryptionKey: true,
     });
 
     await service.syncWatchlist('watchlist-1');
@@ -183,6 +184,7 @@ describe('createEntitySourcesService', () => {
       logger,
       namespace,
       getStartServices: getStartServices as never,
+      hasEncryptionKey: true,
     });
 
     await service.syncWatchlist('watchlist-1');
@@ -211,6 +213,7 @@ describe('createEntitySourcesService', () => {
         logger,
         namespace,
         getStartServices: mockGetStartServices as never,
+        hasEncryptionKey: true,
       });
 
     it('syncs each watchlist returned by list', async () => {
@@ -398,6 +401,7 @@ describe('createEntitySourcesService', () => {
         logger,
         namespace,
         getStartServices: mockGetStartServices as never,
+        hasEncryptionKey: true,
       });
 
     it('skips cleanup when abort signal fires after plainIndexSync', async () => {
