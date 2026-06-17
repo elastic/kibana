@@ -25,9 +25,10 @@ import type { TimeSlice } from '@kbn/controls-schemas';
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import type { ESQLControlVariable } from '@kbn/esql-types';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import type {
+  PublishingSubject} from '@kbn/presentation-publishing';
 import {
   apiHasSerializableState,
-  PublishingSubject,
   useSearchApi,
   type EmbeddableApiContext,
   type ViewMode,
