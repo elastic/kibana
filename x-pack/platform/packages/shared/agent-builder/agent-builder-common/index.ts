@@ -179,6 +179,7 @@ export {
   carriedOverTodos,
   ChatEventType,
   ConversationRoundStatus,
+  ConversationDisplayStatus,
   type ChatEventBase,
   type ChatEvent,
   type ConversationAction,
@@ -235,6 +236,18 @@ export {
   isTodosUpdatedEvent,
   TODOS_UPDATED_UI_EVENT,
   type TodosUpdatedUiEventData,
+  type AskUserQuestionStep,
+  type AskUserQuestionStepData,
+  createAskUserQuestionStep,
+  isAskUserQuestionStep,
+  type UserQuestionAskedEvent,
+  type UserQuestionAskedEventData,
+  type UserQuestionAnsweredEvent,
+  type UserQuestionAnsweredEventData,
+  isUserQuestionAskedEvent,
+  isUserQuestionAnsweredEvent,
+  createUserQuestionAskedEvent,
+  createUserQuestionAnsweredEvent,
   type ConversationListOptions,
 } from './chat';
 export {
@@ -284,3 +297,4 @@ export {
   type OAuthClientConnectionsSummary,
   OAuthClientType,
 } from './oauth_clients';
+export { MCP_SERVER_PATH } from './mcp';

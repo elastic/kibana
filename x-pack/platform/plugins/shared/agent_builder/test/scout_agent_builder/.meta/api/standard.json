@@ -1,5 +1,5 @@
 {
-  "sha1": "71ba3fa688e7fbaaf8d43d40df826a2fc1807b2f",
+  "sha1": "dd314c748e3fce5aa782de0bca383531025b046e",
   "tests": [
     {
       "id": "23fa02f46a56f43-4512d1a251a937e",
@@ -1379,13 +1379,13 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/sml_api.spec.ts",
-        "line": 89,
+        "line": 90,
         "column": 10
       }
     },
     {
-      "id": "1b65711126013c6-97dacc2fc7b0e11",
-      "title": "Agent Builder — SML internal API POST /internal/agent_builder/sml/_search wildcard returns expected item fields",
+      "id": "1b65711126013c6-db0d1ab812dd7f2",
+      "title": "Agent Builder — SML internal API POST /internal/agent_builder/sml/_search wildcard returns item fields",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -1394,20 +1394,6 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/sml_api.spec.ts",
         "line": 105,
-        "column": 10
-      }
-    },
-    {
-      "id": "1b65711126013c6-730fa95c6745993",
-      "title": "Agent Builder — SML internal API POST /internal/agent_builder/sml/_search omits content when skip_content is true",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/sml_api.spec.ts",
-        "line": 128,
         "column": 10
       }
     },
@@ -1421,7 +1407,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/sml_api.spec.ts",
-        "line": 145,
+        "line": 125,
         "column": 10
       }
     },
@@ -1435,7 +1421,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/sml_api.spec.ts",
-        "line": 154,
+        "line": 134,
         "column": 10
       }
     },
@@ -1449,7 +1435,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/sml_api.spec.ts",
-        "line": 174,
+        "line": 154,
         "column": 10
       }
     },

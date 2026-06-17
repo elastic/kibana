@@ -36,7 +36,7 @@ export const SearchGettingStartedHeader: React.FC = () => {
         <EuiFlexItem>
           <EuiTitle size="l">
             <h1>
-              {i18n.translate('xpack.search.gettingStarted.page.title', {
+              {i18n.translate('xpack.searchGettingStarted.page.title', {
                 defaultMessage: 'Get started with Elasticsearch.',
               })}
             </h1>
@@ -44,7 +44,7 @@ export const SearchGettingStartedHeader: React.FC = () => {
           <EuiSpacer size="s" />
           <EuiText grow={false} color="subdued" size="m">
             <p>
-              {i18n.translate('xpack.search.gettingStarted.page.description', {
+              {i18n.translate('xpack.searchGettingStarted.page.description', {
                 defaultMessage:
                   'Connect your deployment and start building modern search for products, docs, chatbots, recommenders, and more.',
               })}

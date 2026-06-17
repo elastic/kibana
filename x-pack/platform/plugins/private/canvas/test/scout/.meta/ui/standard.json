@@ -1,0 +1,369 @@
+{
+  "sha1": "836b13057f8884c9852a87ed07f11ce0a77062a7",
+  "tests": [
+    {
+      "id": "bfb8ac80f27f146-bee78e25e125aa4",
+      "title": "Canvas custom elements create → add → edit → delete a custom element",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/canvas/test/scout/ui/tests/custom_elements.spec.ts",
+        "line": 55,
+        "column": 7
+      }
+    },
+    {
+      "id": "40a0ccc674ec4ab-a18dd5675796db5",
+      "title": "Canvas datasource sidebar shows esdocs settings and expression updates after datasource change",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/canvas/test/scout/ui/tests/datasource.spec.ts",
+        "line": 46,
+        "column": 7
+      }
+    },
+    {
+      "id": "2c04a9f049c2d8b-e14f757f74488b3",
+      "title": "Canvas lens embeddable creates a by-value Lens XY panel via the editor menu",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/canvas/test/scout/ui/tests/embeddables/lens.spec.ts",
+        "line": 62,
+        "column": 7
+      }
+    },
+    {
+      "id": "2c04a9f049c2d8b-f4807f4640a8569",
+      "title": "Canvas lens embeddable adds a by-reference Lens visualization from the library and renders it",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/canvas/test/scout/ui/tests/embeddables/lens.spec.ts",
+        "line": 88,
+        "column": 7
+      }
+    },
+    {
+      "id": "2c04a9f049c2d8b-38a2bb126bc66d3",
+      "title": "Canvas lens embeddable keeps rendering a savedLens element after switching workpad pages",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/canvas/test/scout/ui/tests/embeddables/lens.spec.ts",
+        "line": 106,
+        "column": 7
+      }
+    },
+    {
+      "id": "5abd81a75758be5-5cce3593c95c9a6",
+      "title": "Canvas maps embeddable creates a by-value map panel via the editor menu",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/canvas/test/scout/ui/tests/embeddables/maps.spec.ts",
+        "line": 45,
+        "column": 7
+      }
+    },
+    {
+      "id": "d407190ecca37c0-4749189919205c7",
+      "title": "Canvas saved search embeddable adds a by-reference saved search from the library and renders it",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/canvas/test/scout/ui/tests/embeddables/saved_search.spec.ts",
+        "line": 44,
+        "column": 7
+      }
+    },
+    {
+      "id": "d407190ecca37c0-6aca3362e929e1f",
+      "title": "Canvas saved search embeddable routes the saved search into Discover from the panel edit action",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/canvas/test/scout/ui/tests/embeddables/saved_search.spec.ts",
+        "line": 53,
+        "column": 7
+      }
+    },
+    {
+      "id": "ab58e95611b8fe2-3f08228c0253788",
+      "title": "Canvas visualization embeddable adds a by-reference visualization from the library and renders it",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/canvas/test/scout/ui/tests/embeddables/visualization.spec.ts",
+        "line": 46,
+        "column": 7
+      }
+    },
+    {
+      "id": "ab58e95611b8fe2-ac7e05c13dfb1d8",
+      "title": "Canvas visualization embeddable creates a by-value Vega panel via the editor menu",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/canvas/test/scout/ui/tests/embeddables/visualization.spec.ts",
+        "line": 55,
+        "column": 7
+      }
+    },
+    {
+      "id": "0fceea3231f3a6e-d945f3dd4d9442c",
+      "title": "Canvas expression editor sidebar Monaco editor syncs to expression editor; autocomplete works",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/canvas/test/scout/ui/tests/expression_editor.spec.ts",
+        "line": 46,
+        "column": 7
+      }
+    },
+    {
+      "id": "aad463c4a082e73-d16a695cd96e8c8",
+      "title": "Canvas security — canvas:all privileges shows Canvas in the navigation",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/canvas/test/scout/ui/tests/feature_controls/security_canvas_all.spec.ts",
+        "line": 42,
+        "column": 9
+      }
+    },
+    {
+      "id": "aad463c4a082e73-3cf01e8050bc5d1",
+      "title": "Canvas security — canvas:all privileges Canvas listing page",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/canvas/test/scout/ui/tests/feature_controls/security_canvas_all.spec.ts",
+        "line": 55,
+        "column": 9
+      }
+    },
+    {
+      "id": "aad463c4a082e73-6d1ea31f4435a1a",
+      "title": "Canvas security — canvas:all privileges allows an existing workpad to be opened and edited",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/canvas/test/scout/ui/tests/feature_controls/security_canvas_all.spec.ts",
+        "line": 72,
+        "column": 9
+      }
+    },
+    {
+      "id": "db747a8fe25ab62-cb3a9250238931a",
+      "title": "Canvas security — canvas:read privileges shows Canvas in the navigation",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/canvas/test/scout/ui/tests/feature_controls/security_canvas_read.spec.ts",
+        "line": 43,
+        "column": 9
+      }
+    },
+    {
+      "id": "db747a8fe25ab62-89254d7d712c4bf",
+      "title": "Canvas security — canvas:read privileges Canvas listing page",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/canvas/test/scout/ui/tests/feature_controls/security_canvas_read.spec.ts",
+        "line": 56,
+        "column": 9
+      }
+    },
+    {
+      "id": "db747a8fe25ab62-eaf79c2520b112d",
+      "title": "Canvas security — canvas:read privileges navigating to workpad/create redirects back to listing with button disabled",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/canvas/test/scout/ui/tests/feature_controls/security_canvas_read.spec.ts",
+        "line": 69,
+        "column": 9
+      }
+    },
+    {
+      "id": "db747a8fe25ab62-869d9eeec971cf4",
+      "title": "Canvas security — canvas:read privileges workpad does not show add-element button (view-only mode)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/canvas/test/scout/ui/tests/feature_controls/security_canvas_read.spec.ts",
+        "line": 79,
+        "column": 9
+      }
+    },
+    {
+      "id": "7dccdba9c84aa1a-14624fd1d5801be",
+      "title": "Canvas spaces — Canvas disabled in custom space Canvas navlink is hidden when Canvas is disabled in the space",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/canvas/test/scout/ui/tests/feature_controls/spaces_canvas_disabled.spec.ts",
+        "line": 48,
+        "column": 9
+      }
+    },
+    {
+      "id": "a740eff81048245-710d9a1e864b56c",
+      "title": "Canvas spaces — Canvas enabled in custom space Canvas appears in the navigation of the custom space",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/canvas/test/scout/ui/tests/feature_controls/spaces_canvas_enabled.spec.ts",
+        "line": 63,
+        "column": 9
+      }
+    },
+    {
+      "id": "a740eff81048245-e352a6f5cc0bea1",
+      "title": "Canvas spaces — Canvas enabled in custom space Canvas listing page",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/canvas/test/scout/ui/tests/feature_controls/spaces_canvas_enabled.spec.ts",
+        "line": 76,
+        "column": 9
+      }
+    },
+    {
+      "id": "a740eff81048245-3d66cbbe0e69a72",
+      "title": "Canvas spaces — Canvas enabled in custom space allows an existing workpad to be opened for editing",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/canvas/test/scout/ui/tests/feature_controls/spaces_canvas_enabled.spec.ts",
+        "line": 89,
+        "column": 9
+      }
+    },
+    {
+      "id": "abea880c49c91ad-c72b36794cb307f",
+      "title": "Canvas filters filter updates when dropdown is changed",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/canvas/test/scout/ui/tests/filters.spec.ts",
+        "line": 41,
+        "column": 7
+      }
+    },
+    {
+      "id": "abea880c49c91ad-e51070dc7568fe5",
+      "title": "Canvas filters filter updates when time range is changed",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/canvas/test/scout/ui/tests/filters.spec.ts",
+        "line": 67,
+        "column": 7
+      }
+    },
+    {
+      "id": "1ae5881a0ba6e1d-2f3345ddaf837e0",
+      "title": "Canvas reports share menu exposes a PDF reports item with a Generate button",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/canvas/test/scout/ui/tests/reports_share_menu.spec.ts",
+        "line": 35,
+        "column": 7
+      }
+    },
+    {
+      "id": "99a446bd4c76df6-050d2117b5a6d1b",
+      "title": "Canvas saved object resolve redirects an alias match to the new workpad URL",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/canvas/test/scout/ui/tests/saved_object_resolve.spec.ts",
+        "line": 103,
+        "column": 7
+      }
+    },
+    {
+      "id": "99a446bd4c76df6-35b8d98f7dc6cea",
+      "title": "Canvas saved object resolve handles a conflict match via the \"go to other\" button",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/canvas/test/scout/ui/tests/saved_object_resolve.spec.ts",
+        "line": 127,
+        "column": 7
+      }
+    },
+    {
+      "id": "e1f3997f03ad5cf-ff225ad17ea1e89",
+      "title": "Canvas smoke test loads workpad list, opens workpad, and renders 4 elements",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/canvas/test/scout/ui/tests/smoke.spec.ts",
+        "line": 40,
+        "column": 7
+      }
+    }
+  ]
+}

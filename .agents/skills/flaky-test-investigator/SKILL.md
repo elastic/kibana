@@ -42,8 +42,6 @@ For every failure, try to retrieve:
 - **Server logs** (`kibana.log`, `elasticsearch.log` when present). Cross-reference the failure timestamp with any errors in the logs — a server-side 500 or unexpected warning is strong evidence the failure is a product bug, not a test bug.
 - **Full session trace** when the framework supports it (Scout / Playwright). Lets you scrub through every step, locator query, network call, and DOM snapshot.
 
-How to actually find and download each artifact type is framework-specific — see "Retrieve failure artifacts" below.
-
 Things to specifically check in the artifacts before forming a root-cause hypothesis:
 
 - **Did the expected element render at all?** If yes and the selector missed it → flaky selector (Tier 2 fix territory). If no → real rendering / race / data issue (Tier 1 territory).
@@ -53,27 +51,9 @@ Things to specifically check in the artifacts before forming a root-cause hypoth
 
 If artifacts are not available (expired, not uploaded, no `read_artifacts` token), say so in the report rather than fabricating a hypothesis. "Screenshot would have resolved this; not available" is a valid open question.
 
-### Retrieve failure artifacts
+### List failure artifacts
 
-The standard recipe is **list → filter by path → download by ID**, always scoped to the failed job's UUID. Two Buildkite gotchas to know about first:
-
-- **Failed-attempt jobs are hidden by default.** `/builds/<n>` returns only the latest attempt; append `?include_retried_jobs=true` to find the original failing job (the one cited in `failed-test` comments). `retried` and `retried_in_job_id` link the two.
-- **Per-job artifacts use a different endpoint than build-wide artifacts.** If a build retried to green, failure artifacts only live on the failed job's listing (`bk artifacts list <build> -p <pipeline> --job-uuid <jobId>`). Don't conclude "no screenshot uploaded" until you've checked there.
-
-**Scout** (`@kbn/scout-reporting`, not standard Playwright output — `playwright-report/`, `trace.zip`, and video are NOT published):
-
-- `.scout/reports/scout-playwright-test-failures-<runId>/test-failures-summary.json` — maps test name → HTML report. Start here.
-- `.scout/reports/scout-playwright-test-failures-<runId>/<testId>.html` — self-contained: error, stdout, embedded screenshot. Usually sufficient on its own.
-- `.scout/reports/scout-playwright-test-failures-<runId>/scout-failures-<runId>.ndjson` — one record per failure (`id` = `<testId>`, `owner`, `location`, `error.*`) for programmatic use.
-- `**/.scout/test-artifacts/<test-slug>/test-failed-<N>.png` — plain Playwright screenshot; the PNG doesn't carry `<testId>`, so correlate via spec path.
-
-**FTR** (a single content `<hash>` links every artifact for one failure):
-
-- `target/test_failures/<jobId>_<hash>.{json,log,html}` — `.json` is source of truth; full Kibana/ES stdout lives in `system-out` (there is no separate `kibana.log`). Pull this first.
-- `<test-root>/screenshots/failure/*-<hash>.png` and `<test-root>/failure_debug/html/*-<hash>.html` — UI tests only; fetch only when the failure is UI-side.
-- `.es/*.log` — transport/cluster-shaped failures.
-
-`target/test_failures/` is shared with Scout; filter by `.jobName` (e.g. `FTR Configs #90` vs `Scout Lane #12`) to keep only FTR. On Cloud FTR pipelines the layout differs: one self-contained HTML per failure at `<config-path-with-underscores>-<unix-timestamp>/html/<contentHash>.html` — no `target/test_failures/`, screenshot, or DOM artifacts.
+`bk artifacts list <build> -p <pipeline> --job-uuid <jobId> --json` returns a JSON listing of every artifact uploaded for the failing job. Pass `--job-uuid <jobId>` for the failed attempt (without it, `bk` only returns the latest attempt and hides retried failures). If a build retried to green, failure artifacts only live on the failed job's listing; don't conclude "no screenshot" until you've scoped to the right job UUID.
 
 ### Understand the scope
 

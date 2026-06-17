@@ -9,9 +9,11 @@
 
 import { registerDisableAllWorkflowsRoute } from './disable';
 import { registerGetConfigRoute } from './get_config';
+import { registerTriggerEventsLogRoutes } from './trigger_events_log';
 import type { RouteDependencies } from '../types';
 
 export function registerInternalRoutes(deps: RouteDependencies) {
   registerGetConfigRoute(deps);
   registerDisableAllWorkflowsRoute(deps);
+  registerTriggerEventsLogRoutes(deps);
 }

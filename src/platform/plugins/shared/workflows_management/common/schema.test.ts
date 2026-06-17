@@ -30,6 +30,29 @@ describe('schema', () => {
       const schema = getWorkflowZodSchema({});
       expect(schema).toBeDefined();
     });
+    it('should allow unknown steps and settings in lightweight mode', () => {
+      const schema = getWorkflowZodSchema({}, [], { lightweight: true });
+      const result = parseWorkflowYamlToJSON(
+        [
+          'name: Lightweight workflow',
+          'enabled: true',
+          'triggers:',
+          '  - type: manual',
+          'settings:',
+          '  unknown_setting:',
+          '    nested: true',
+          'steps:',
+          '  - name: custom-step',
+          '    type: custom.step',
+          '    with:',
+          '      arbitrary: true',
+        ].join('\n'),
+        schema
+      );
+
+      expect(result.error).toBeUndefined();
+      expect(result.success).toBe(true);
+    });
     examples.forEach((example) => {
       it(`should parse ${example.name} with zod schema`, () => {
         const schema = getWorkflowZodSchema({});
