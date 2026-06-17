@@ -20,5 +20,6 @@
     "@kbn/deeplinks-observability",
     "@kbn/share-plugin",
     "@kbn/react-hooks",
+    "@kbn/core",
   ]
 }
