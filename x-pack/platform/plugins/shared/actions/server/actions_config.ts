@@ -48,6 +48,7 @@ export interface ActionsConfigurationUtilities {
   ensureUriAllowed: (uri: string) => void;
   ensureActionTypeEnabled: (actionType: string) => void;
   getSSLSettings: () => SSLSettings;
+  getEARSSSLSettings: () => SSLSettings;
   getProxySettings: () => undefined | ProxySettings;
   getResponseSettings: () => ResponseSettings;
   getCustomHostSettings: (targetUrl: string) => CustomHostSettings | undefined;
@@ -215,10 +216,14 @@ export function getActionsConfigurationUtilities(
     isActionTypeEnabled,
     getProxySettings: () => getProxySettingsFromConfig(config),
     getResponseSettings: () => getResponseSettingsFromConfig(config),
-    getSSLSettings: () => ({
-      ...getSSLSettingsFromConfig(config.ssl?.verificationMode),
-      cert: config.ssl?.certificate ? readFileSync(config.ssl.certificate) : undefined,
-      key: config.ssl?.key ? readFileSync(config.ssl.key) : undefined,
+    getSSLSettings: () => getSSLSettingsFromConfig(config.ssl?.verificationMode),
+    getEARSSSLSettings: () => ({
+      // do we really need this to be configurable, or can we hardcode it to 'full' always?
+      ...getSSLSettingsFromConfig(config.auth.ears?.ssl?.verificationMode),
+      cert: config.auth.ears?.ssl?.certificate
+        ? readFileSync(config.auth.ears.ssl.certificate)
+        : undefined,
+      key: config.auth.ears?.ssl?.key ? readFileSync(config.auth.ears.ssl.key) : undefined,
     }),
     ensureUriAllowed(uri: string) {
       if (!isUriAllowed(uri)) {

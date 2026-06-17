@@ -249,9 +249,11 @@ xpack.actions.run.maxAttempts: 10
 xpack.actions.queued.max: 10000
 
 # for deploying a test project to CFT region
-xpack.actions.auth.ears.enabled: true
-xpack.actions.ssl.certificate: /mnt/elastic-internal/http-certs/tls.crt
-xpack.actions.ssl.key: /mnt/elastic-internal/http-certs/tls.key
+xpack.actions.auth.ears:
+  enabled: true
+  ssl:
+    certificate: /mnt/elastic-internal/http-certs/tls.crt
+    key: /mnt/elastic-internal/http-certs/tls.key
 
 uiSettings:
   overrides:

@@ -493,21 +493,46 @@ describe('getSSLSettings', () => {
     sslSettings = getActionsConfigurationUtilities(configFalse).getSSLSettings();
     expect(sslSettings.verificationMode).toBe('none');
   });
+});
 
-  test('reads cert and key buffers from configured file paths', () => {
+describe('getEARSSSLSettings', () => {
+  beforeEach(() => {
+    mockReadFileSync.mockClear();
+  });
+
+  const configWithEarsSsl = (ssl: NonNullable<NonNullable<ActionsConfig['auth']['ears']>['ssl']>) =>
+    ({
+      ...defaultActionsConfig,
+      auth: {
+        ...defaultActionsConfig.auth,
+        ears: { enabled: true, enableExperimental: false, ssl },
+      },
+    } as ActionsConfig);
+
+  test('returns verificationMode from the EARS ssl configuration', () => {
+    let sslSettings = getActionsConfigurationUtilities(
+      configWithEarsSsl({ verificationMode: 'full' })
+    ).getEARSSSLSettings();
+    expect(sslSettings.verificationMode).toBe('full');
+
+    sslSettings = getActionsConfigurationUtilities(
+      configWithEarsSsl({ verificationMode: 'none' })
+    ).getEARSSSLSettings();
+    expect(sslSettings.verificationMode).toBe('none');
+  });
+
+  test('reads cert and key buffers from configured EARS ssl file paths', () => {
     mockReadFileSync
       .mockReturnValueOnce(Buffer.from('cert-pem'))
       .mockReturnValueOnce(Buffer.from('key-pem'));
 
-    const config: ActionsConfig = {
-      ...defaultActionsConfig,
-      ssl: {
+    const sslSettings = getActionsConfigurationUtilities(
+      configWithEarsSsl({
         verificationMode: 'full',
         certificate: '/path/to/cert.pem',
         key: '/path/to/key.pem',
-      },
-    };
-    const sslSettings = getActionsConfigurationUtilities(config).getSSLSettings();
+      })
+    ).getEARSSSLSettings();
 
     expect(sslSettings.cert).toEqual(Buffer.from('cert-pem'));
     expect(sslSettings.key).toEqual(Buffer.from('key-pem'));
@@ -515,12 +540,8 @@ describe('getSSLSettings', () => {
     expect(mockReadFileSync).toHaveBeenNthCalledWith(2, '/path/to/key.pem');
   });
 
-  test('returns undefined cert and key when ssl paths are not configured', () => {
-    const config: ActionsConfig = {
-      ...defaultActionsConfig,
-      ssl: { verificationMode: 'full' },
-    };
-    const sslSettings = getActionsConfigurationUtilities(config).getSSLSettings();
+  test('returns undefined cert and key when EARS ssl paths are not configured', () => {
+    const sslSettings = getActionsConfigurationUtilities(defaultActionsConfig).getEARSSSLSettings();
 
     expect(sslSettings.cert).toBeUndefined();
     expect(sslSettings.key).toBeUndefined();

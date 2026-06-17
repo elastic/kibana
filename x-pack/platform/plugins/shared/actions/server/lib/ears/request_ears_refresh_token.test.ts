@@ -51,9 +51,9 @@ describe('requestEarsRefreshToken', () => {
     } as unknown as AxiosResponse);
   });
 
-  it('passes sslOverrides from getSSLSettings to the request call', async () => {
+  it('passes sslOverrides from getEARSSSLSettings to the request call', async () => {
     const sslSettings: SSLSettings = { verificationMode: 'full', cert: Buffer.from('cert') };
-    configurationUtilities.getSSLSettings.mockReturnValue(sslSettings);
+    configurationUtilities.getEARSSSLSettings.mockReturnValue(sslSettings);
 
     await requestEarsRefreshToken(
       'my-provider',
