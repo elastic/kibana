@@ -25,6 +25,14 @@ test.describe('Data view create/delete stateful coverage', { tag: tags.stateful.
     await navigateToDataViewsManagement(page);
   });
 
+  test.afterAll(async ({ esClient, kbnClient }) => {
+    // Remove the data views created across these tests and the hidden index created below.
+    await kbnClient.savedObjects.cleanStandardList();
+    await esClient.indices
+      .delete({ index: 'logstash-hidden-1', ignore_unavailable: true })
+      .catch(() => {});
+  });
+
   test('resets time field after changing to index without timestamp', async ({ page }) => {
     await page.testSubj.click('createDataViewButton');
     await page.testSubj.fill('createIndexPatternTitleInput', 'without-timefield');

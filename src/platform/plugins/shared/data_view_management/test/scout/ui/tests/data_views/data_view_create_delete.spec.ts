@@ -69,7 +69,7 @@ test.describe(
       await expect(createDataViewErrorLocator(page)).toContainText('doesn');
     });
 
-    test('creates logstash data view and edits its title', async ({ page }) => {
+    test('creates logstash data view and edits its title', async ({ page, pageObjects }) => {
       await page.testSubj.click('createDataViewButton');
       await page.testSubj.fill('createIndexPatternTitleInput', 'logstash-*');
       await page.testSubj.click('saveIndexPatternButton');
@@ -77,15 +77,11 @@ test.describe(
       await expect(page.testSubj.locator('indexPatternTitle')).toContainText('logstash-*');
       expect(page.url()).toContain('/management/kibana/dataViews/');
 
-      await page.testSubj.click('editIndexPatternButton');
-      await expect(page.testSubj.locator('createIndexPatternTitleInput')).toBeVisible();
+      await pageObjects.dataViewsManagement.editDataView({ name: 'Logstash Star' });
+      await expect(page.testSubj.locator('indexPatternTitle')).toContainText('Logstash Star');
     });
 
-    // Follow-up: restoring the legacy "kibana_sample_data_flights" field-list swap
-    // assertion requires a Scout-safe sample-data setup without importing restricted
-    // Kibana index docs from legacy archives.
-
-    // Follow-up: the legacy "save disabled while confirmation modal is open" path
-    // depends on an edit flow whose controls differ in Scout and needs a dedicated PO.
+    // The legacy "field-list swap" and "save disabled while the confirm modal is open" cases
+    // are covered in data_view_edit.spec.ts.
   }
 );
