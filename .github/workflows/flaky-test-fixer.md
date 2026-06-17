@@ -1,6 +1,6 @@
 ---
 name: Flaky Test Fixer
-description: Open a draft fix PR for a `failed-test` issue that has been labeled `ai:auto-flaky-fix`.
+description: Open a draft fix PR for a `failed-test` issue that has been labeled `ai:fix-flaky`.
 on:
   issues:
     types: [labeled]
@@ -19,7 +19,7 @@ permissions:
   checks: read
   models: read
 
-if: "${{ (github.event_name == 'workflow_dispatch' && github.event.inputs.issue_number != '') || (github.event_name == 'issues' && github.event.action == 'labeled' && github.event.label.name == 'ai:auto-flaky-fix' && !github.event.issue.pull_request) }}"
+if: "${{ (github.event_name == 'workflow_dispatch' && github.event.inputs.issue_number != '') || (github.event_name == 'issues' && github.event.action == 'labeled' && github.event.label.name == 'ai:fix-flaky' && !github.event.issue.pull_request) }}"
 
 concurrency:
   group: 'flaky-test-fixer-${{ github.event.issue.number || github.event.inputs.issue_number }}'
@@ -30,16 +30,17 @@ env:
 
 engine:
   id: claude
-  version: '2.1.111'
+  version: '2.1.165'
   model: opus
   max-turns: 200
   env:
     ANTHROPIC_API_KEY: ${{ secrets.LITELLM_API_KEY }}
     ANTHROPIC_BASE_URL: https://elastic.litellm-prod.ai
     ENABLE_PROMPT_CACHING_1H: '1'
-    ANTHROPIC_DEFAULT_OPUS_MODEL: llm-gateway/claude-opus-4-7[1m]
+    ANTHROPIC_DEFAULT_OPUS_MODEL: llm-gateway/claude-opus-4-8[1m]
     ANTHROPIC_DEFAULT_HAIKU_MODEL: llm-gateway/claude-haiku-4-5
     ANTHROPIC_DEFAULT_SONNET_MODEL: llm-gateway/claude-sonnet-4-6
+    CLAUDE_CODE_EFFORT_LEVEL: high
     CLAUDE_CODE_SUBAGENT_MODEL: opus[1m]
 
 tools:
@@ -82,7 +83,6 @@ sandbox:
   agent: awf
 
 safe-outputs:
-  staged: true
   activation-comments: false
   report-failure-as-issue: false
   add-comment:
@@ -92,11 +92,15 @@ safe-outputs:
   create-pull-request:
     draft: true
     max: 1
-    labels: [ai:flaky-fix-ready]
+    labels: [auto-flaky-fix]
     base-branch: main
-    allowed-base-branches: [main]
+    allowed-base-branches: ['main', '9.*', '8.*', '7.*']
     if-no-changes: 'ignore'
     protected-files: fallback-to-issue
+    # Use git format-patch / `git am --3way` instead of a git bundle. The bundle
+    # transport makes the shallow safe_outputs checkout run `git fetch --unshallow`,
+    # which on a repo Kibana's size cannot finish within the 15m job timeout.
+    patch-format: am
 
 strict: false
 timeout-minutes: 90
@@ -104,7 +108,7 @@ timeout-minutes: 90
 
 # Flaky Test Fixer
 
-Open one draft PR with the smallest test-side fix for this flaky-test issue. If you cannot find a credible fix, stop without opening a PR.
+Open a single draft PR with the smallest possible test-side fix for this flaky-test issue. Do not open a PR if either of the following is true: you find an existing open PR with an identical or similar fix (search PRs for ones that reference this issue number in their body, or check the issue timeline for PRs that reference it), or you cannot identify a credible fix.
 
 ## Steps
 
