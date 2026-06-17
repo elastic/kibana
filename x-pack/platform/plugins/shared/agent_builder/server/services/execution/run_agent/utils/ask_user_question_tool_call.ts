@@ -12,20 +12,6 @@ import type {
   AskUserQuestionItem,
 } from '@kbn/agent-builder-common/agents/prompts';
 
-/**
- * Canonical wire shape of an "answered ask_user_question" tool call.
- *
- * Two call sites synthesize a tool-call / tool-response pair for an answered
- * ask_user_question step:
- *  - `pending_ask_user_question_steps_to_actions.ts` wraps the parts in
- *    `toolCallAction` + `executeToolAction` (action layer, current-round resume).
- *  - `to_langchain_messages.ts` wraps the parts in `AIMessage` + `ToolMessage`
- *    (message layer, prior-round conversion).
- *
- * Both layers see identical fields: tool name, args, serialized content,
- * artifact. This helper centralizes that shape so renames or field changes
- * touch one place.
- */
 export interface AskUserQuestionToolCallParts {
   toolCallId: string;
   toolName: string;
@@ -33,6 +19,13 @@ export interface AskUserQuestionToolCallParts {
   artifact: { answers: AskUserQuestionAnswer[] };
   /** what the LLM reads as the tool result. */
   content: string;
+}
+
+export interface DenormalizedAnswer {
+  question: string;
+  selected_options: string[];
+  custom?: string;
+  skipped?: boolean;
 }
 
 export const materializeAskUserQuestionToolCall = ({
@@ -45,6 +38,33 @@ export const materializeAskUserQuestionToolCall = ({
   toolCallId: uuidv4(),
   toolName: internalTools.askUserQuestion,
   args: { questions },
-  content: JSON.stringify({ answers }),
+  content: JSON.stringify({ answers: denormalizeAnswers(questions, answers) }),
   artifact: { answers },
 });
+
+/**
+ * Denormalize answer shape rendered into the tool-result content so the LLM sees a self-contained result
+ */
+const denormalizeAnswers = (
+  questions: AskUserQuestionItem[],
+  answers: AskUserQuestionAnswer[]
+): DenormalizedAnswer[] => {
+  return answers.map((answer, idx) => {
+    const question = questions[idx];
+    const selectedOptions =
+      answer.choice
+        ?.map((choiceIdx) => question.options[choiceIdx]?.label)
+        .filter((label): label is string => label != null) ?? [];
+    const out: DenormalizedAnswer = {
+      question: question.question,
+      selected_options: selectedOptions,
+    };
+    if (answer.custom != null && answer.custom !== '') {
+      out.custom = answer.custom;
+    }
+    if (answer.skipped === true) {
+      out.skipped = true;
+    }
+    return out;
+  });
+};

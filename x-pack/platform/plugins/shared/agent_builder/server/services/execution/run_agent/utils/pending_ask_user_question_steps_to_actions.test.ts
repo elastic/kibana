@@ -17,6 +17,7 @@ import {
   type PromptStorageState,
 } from '@kbn/agent-builder-common/agents/prompts';
 import { pendingAskUserQuestionStepsToActions } from './pending_ask_user_question_steps_to_actions';
+import { materializeAskUserQuestionToolCall } from './ask_user_question_tool_call';
 import { AgentActionType } from '../actions';
 
 const sampleQuestion: AskUserQuestionItem = {
@@ -62,9 +63,12 @@ describe('pendingAskUserQuestionStepsToActions', () => {
     expect(toolCallAction.tool_calls[0].toolName).toBe('ask_user_question');
     expect(toolCallAction.tool_calls[0].args).toEqual({ questions: [sampleQuestion] });
     expect(executeToolAction.type).toBe(AgentActionType.ExecuteTool);
-    expect(executeToolAction.tool_results[0].content).toEqual(
-      JSON.stringify({ answers: [{ choice: [0] }] })
-    );
+    const expected = materializeAskUserQuestionToolCall({
+      questions: [sampleQuestion],
+      answers: [{ choice: [0] }],
+    });
+    expect(executeToolAction.tool_results[0].content).toEqual(expected.content);
+    expect(executeToolAction.tool_results[0].artifact).toEqual(expected.artifact);
     expect(toolCallAction.tool_calls[0].toolCallId).toBe(
       executeToolAction.tool_results[0].toolCallId
     );
@@ -126,7 +130,9 @@ describe('pendingAskUserQuestionStepsToActions', () => {
       eventEmitter: jest.fn(),
     });
 
-    expect((result.actions[1] as any).tool_results[0].content).toContain('"skipped":true');
+    expect((result.actions[1] as any).tool_results[0].artifact).toEqual({
+      answers: [{ skipped: true }],
+    });
   });
 
   describe('validation', () => {
