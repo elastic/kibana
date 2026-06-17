@@ -71,6 +71,8 @@ export const createAgentHandlerContext = async <TParams = Record<string, unknown
     skills: true,
     subagents: isExperimentalEnabled,
     todos: isExperimentalEnabled,
+    // forcefully disabled until the UI is implemented
+    askUserQuestion: false, // isExperimentalEnabled,
   };
 
   return {
