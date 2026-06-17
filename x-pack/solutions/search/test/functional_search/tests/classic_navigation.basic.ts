@@ -12,6 +12,7 @@ export default function searchClassicNavigationTests({
   getService,
 }: FtrProviderContext) {
   const { common, searchClassicNavigation } = getPageObjects(['common', 'searchClassicNavigation']);
+  const browser = getService('browser');
   const searchSpace = getService('searchSpace');
   const testSubjects = getService('testSubjects');
 
@@ -22,6 +23,8 @@ export default function searchClassicNavigationTests({
     let spaceCreated: { id: string } = { id: '' };
 
     before(async () => {
+      await browser.setWindowSize(1600, 1200);
+
       ({ cleanUp, spaceCreated } = await searchSpace.createTestSpace(
         'search-classic-ftr',
         'classic'
