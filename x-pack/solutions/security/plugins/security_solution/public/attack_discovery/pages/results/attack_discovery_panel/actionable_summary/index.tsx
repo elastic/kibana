@@ -16,6 +16,7 @@ import React, { useMemo } from 'react';
 import { SECURITY_FEATURE_ID } from '../../../../../../common';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { AttackDiscoveryMarkdownFormatter } from '../../attack_discovery_markdown_formatter';
+import { getOriginalAlertIds } from '../../../../helpers';
 import { ViewInAiAssistant } from '../view_in_ai_assistant';
 import { useAgentBuilderAvailability } from '../../../../../agent_builder/hooks/use_agent_builder_availability';
 import { NewAgentBuilderAttachment } from '../../../../../agent_builder/components/new_agent_builder_attachment';
@@ -75,6 +76,11 @@ const ActionableSummaryComponent: React.FC<Props> = ({
 
   const openAgentBuilderFlyout = useAttackDiscoveryAttachment(attackDiscovery, replacements);
 
+  const originalAlertIds = useMemo(
+    () => getOriginalAlertIds(attackDiscovery.alertIds, replacements),
+    [attackDiscovery.alertIds, replacements]
+  );
+
   return (
     <EuiPanel color="subdued" data-test-subj="actionableSummary">
       <EuiFlexGroup alignItems="center" gutterSize="none" justifyContent="spaceBetween">
@@ -82,6 +88,7 @@ const ActionableSummaryComponent: React.FC<Props> = ({
           <AttackDiscoveryMarkdownFormatter
             disableActions={disabledActions}
             markdown={entitySummaryOrTitle}
+            alertIds={originalAlertIds}
           />
         </EuiFlexItem>
 
