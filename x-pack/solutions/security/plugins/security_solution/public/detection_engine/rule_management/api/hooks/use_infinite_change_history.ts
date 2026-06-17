@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { useInfiniteQuery } from '@kbn/react-query';
+import { useInfiniteQuery, useQueryClient } from '@kbn/react-query';
+import { useCallback } from 'react';
 import type { RuleChangesHistoryResponse } from '../../../../../common/api/detection_engine/rule_management';
 import { RULE_HISTORY_URL } from '../../../../../common/api/detection_engine/rule_management';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
@@ -14,6 +15,17 @@ import * as i18n from './translations';
 
 const RULE_CHANGE_HISTORY_QUERY_KEY = ['GET', RULE_HISTORY_URL];
 const PER_PAGE = 20;
+const ONE_MINUTE = 60000;
+
+export const useInvalidateChangeHistory = () => {
+  const queryClient = useQueryClient();
+
+  return useCallback(() => {
+    queryClient.invalidateQueries(RULE_CHANGE_HISTORY_QUERY_KEY, {
+      refetchType: 'active',
+    });
+  }, [queryClient]);
+};
 
 export interface UseInfiniteChangeHistoryArgs {
   ruleId: string;
@@ -27,7 +39,7 @@ export function useInfiniteChangeHistory({ ruleId }: UseInfiniteChangeHistoryArg
     ({ signal, pageParam = 1 }) =>
       fetchRuleChangeHistoryById({ signal, ruleId, page: pageParam as number, perPage: PER_PAGE }),
     {
-      staleTime: 0,
+      staleTime: ONE_MINUTE,
       getNextPageParam: (lastPage) => {
         const totalLoaded = lastPage.page * lastPage.perPage;
         return totalLoaded < lastPage.total ? lastPage.page + 1 : undefined;
