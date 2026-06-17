@@ -19,6 +19,7 @@ import {
   isReasoningStep,
   isToolCallStep,
   isBackgroundAgentCompleteStep,
+  isAskUserQuestionStep,
 } from '@kbn/agent-builder-common';
 import {
   createAIMessage,
@@ -33,6 +34,7 @@ import { formatSystemNotice } from '../prompts/utils/actions';
 import type { ProcessedConversation, ProcessedConversationRound } from './prepare_conversation';
 import type { ToolCallResultTransformer } from './create_result_transformer';
 import { serializeCompactionSummary } from './conversation_compactor';
+import { materializeAskUserQuestionToolCall } from './ask_user_question_tool_call';
 
 export interface ConversationToLangchainOptions {
   conversation: ProcessedConversation;
@@ -118,6 +120,7 @@ export const roundToLangchain = async (
         messages.push(createUserMessage(formatSystemNotice(step)));
       } else if (isToolCallStep(step)) {
         // Only process when we hit the first tool call of a group
+        // Other tool calls in the same group are handled by createGroupedToolCallMessages
         const group = groups[groupIndex];
         if (group && group[0] === step) {
           messages.push(
@@ -125,7 +128,19 @@ export const roundToLangchain = async (
           );
           groupIndex++;
         }
-        // Other tool calls in the same group are handled by createGroupedToolCallMessages
+      } else if (isAskUserQuestionStep(step) && step.answers !== undefined) {
+        // Render answered ask_user_question steps as a tool-call / tool-response pair.
+        const { toolCallId, toolName, args, content } = materializeAskUserQuestionToolCall({
+          questions: step.questions,
+          answers: step.answers,
+        });
+        messages.push(
+          new AIMessage({
+            content: '',
+            tool_calls: [{ id: toolCallId, name: toolName, args }],
+          })
+        );
+        messages.push(new ToolMessage({ tool_call_id: toolCallId, content }));
       }
       // Reasoning steps are handled inside createGroupedToolCallMessages via reasoningSteps param
     }
