@@ -76,31 +76,6 @@ export const everyFieldMatches = async (
 };
 
 /**
- * Asserts that both the pinned geo.src filter and the extension=png filter are present,
- * and that every data grid row matches both (mirrors FTR's expectFiltersToExist closure).
- */
-export const expectFiltersToExist = async (pageObjects: ContextPageObjects): Promise<void> => {
-  expect(await pageObjects.filterBar.getFilterCount()).toBe(2);
-  expect(
-    await pageObjects.filterBar.hasFilter({
-      field: FILTER_FIELD_GEO_SRC,
-      value: FILTER_VALUE_GEO_SRC_IN,
-      enabled: true,
-      pinned: true,
-    })
-  ).toBe(true);
-  expect(
-    await pageObjects.filterBar.hasFilter({ field: 'extension', value: 'png', enabled: true })
-  ).toBe(true);
-  expect(
-    await everyFieldMatches(
-      pageObjects,
-      (row) => row[1] === 'png' && row[2] === FILTER_VALUE_GEO_SRC_IN
-    )
-  ).toBe(true);
-};
-
-/**
  * Finds the data view ID from an array of imported saved objects by matching the title.
  * Falls back to the title itself if no matching object is found.
  */
