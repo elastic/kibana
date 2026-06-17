@@ -57,7 +57,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/tests/tabs/save_and_load_multi_tab.spec.ts",
-        "line": 101,
+        "line": 105,
         "column": 7
       }
     },
@@ -77,7 +77,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/tests/tabs/save_and_load_multi_tab.spec.ts",
-        "line": 244,
+        "line": 248,
         "column": 7
       }
     },
@@ -97,7 +97,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/tests/tabs/save_and_load_multi_tab.spec.ts",
-        "line": 296,
+        "line": 300,
         "column": 7
       }
     },
@@ -117,7 +117,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/tests/tabs/save_and_load_multi_tab.spec.ts",
-        "line": 409,
+        "line": 413,
         "column": 7
       }
     },
@@ -137,27 +137,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/tests/tabs/save_and_load_multi_tab.spec.ts",
-        "line": 442,
-        "column": 7
-      }
-    },
-    {
-      "id": "08b5e8544d8d2ca-c7810e10a977936",
-      "title": "tabs - time based save behavior setup: create persisted data view without time field",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-stateful-search",
-        "@cloud-stateful-search",
-        "@local-stateful-observability_complete",
-        "@cloud-stateful-observability_complete",
-        "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete"
-      ],
-      "location": {
-        "file": "src/platform/plugins/shared/discover/test/scout/ui/tests/tabs/save_and_load_time_based.spec.ts",
-        "line": 57,
+        "line": 446,
         "column": 7
       }
     },
@@ -177,7 +157,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/tests/tabs/save_and_load_time_based.spec.ts",
-        "line": 66,
+        "line": 61,
         "column": 7
       }
     },
@@ -197,7 +177,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/tests/tabs/save_and_load_time_based.spec.ts",
-        "line": 184,
+        "line": 179,
         "column": 7
       }
     }
