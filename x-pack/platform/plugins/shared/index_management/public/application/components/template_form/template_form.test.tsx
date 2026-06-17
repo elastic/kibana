@@ -13,6 +13,8 @@ import type { TemplateDeserialized } from '../../../../common';
 import { Forms, GlobalFlyout } from '../../../shared_imports';
 import type { WizardContent } from './template_form';
 import { TemplateForm } from './template_form';
+import { AppContextProvider } from '../../app_context';
+import type { AppDependencies } from '../../app_context';
 
 jest.mock('@kbn/code-editor');
 
@@ -155,6 +157,10 @@ jest.mock('../index_templates', () => ({
 
 const { GlobalFlyoutProvider } = GlobalFlyout;
 
+const appCtx = {
+  config: { enableIndexMode: true },
+} as unknown as AppDependencies;
+
 const renderTemplateForm = (props: Partial<React.ComponentProps<typeof TemplateForm>> = {}) => {
   const defaultProps: React.ComponentProps<typeof TemplateForm> = {
     title: props.title ?? 'Test Form',
@@ -169,9 +175,11 @@ const renderTemplateForm = (props: Partial<React.ComponentProps<typeof TemplateF
 
   return render(
     <I18nProvider>
-      <GlobalFlyoutProvider>
-        <TemplateForm {...defaultProps} />
-      </GlobalFlyoutProvider>
+      <AppContextProvider value={appCtx}>
+        <GlobalFlyoutProvider>
+          <TemplateForm {...defaultProps} />
+        </GlobalFlyoutProvider>
+      </AppContextProvider>
     </I18nProvider>
   );
 };

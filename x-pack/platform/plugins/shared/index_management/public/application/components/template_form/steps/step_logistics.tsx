@@ -42,8 +42,10 @@ import {
   TIME_SERIES_MODE,
   LOGSDB_INDEX_MODE,
   LOOKUP_INDEX_MODE,
+  VECTOR_DB_INDEX_MODE,
 } from '../../../../../common/constants';
 import { indexModeLabels, indexModeDescriptions } from '../../../lib/index_mode_labels';
+import { useAppContext } from '../../../app_context';
 
 // Create or Form components with partial props that are common to all instances
 const UseField = getUseField({ component: Field });
@@ -151,12 +153,25 @@ function getFieldsMeta(esDocsBase: string) {
         {
           value: LOOKUP_INDEX_MODE,
           inputDisplay: indexModeLabels[LOOKUP_INDEX_MODE],
-          'data-test-subj': 'index_mode_logsdb',
+          'data-test-subj': 'index_mode_lookup',
           dropdownDisplay: (
             <Fragment>
               <strong>{indexModeLabels[LOOKUP_INDEX_MODE]}</strong>
               <EuiText size="s" color="subdued">
                 <p>{indexModeDescriptions[LOOKUP_INDEX_MODE]}</p>
+              </EuiText>
+            </Fragment>
+          ),
+        },
+        {
+          value: VECTOR_DB_INDEX_MODE,
+          inputDisplay: indexModeLabels[VECTOR_DB_INDEX_MODE],
+          'data-test-subj': 'index_mode_vector_db',
+          dropdownDisplay: (
+            <Fragment>
+              <strong>{indexModeLabels[VECTOR_DB_INDEX_MODE]}</strong>
+              <EuiText size="s" color="subdued">
+                <p>{indexModeDescriptions[VECTOR_DB_INDEX_MODE]}</p>
               </EuiText>
             </Fragment>
           ),
@@ -266,6 +281,9 @@ function getformSerializer(initialTemplateData: LogisticsForm = {}) {
 
 export const StepLogistics: React.FunctionComponent<Props> = React.memo(
   ({ defaultValue, isEditing = false, onChange, isLegacy = false }) => {
+    const {
+      config: { enableIndexMode },
+    } = useAppContext();
     const { form } = useForm({
       schema: schemas.logistics,
       defaultValue,
@@ -482,42 +500,44 @@ export const StepLogistics: React.FunctionComponent<Props> = React.memo(
           )}
 
           {/* Index mode */}
-          <FormRow
-            title={indexMode.title}
-            description={
-              <>
-                {indexMode.description}
-                <EuiSpacer size="m" />
+          {enableIndexMode && (
+            <FormRow
+              title={indexMode.title}
+              description={
+                <>
+                  {indexMode.description}
+                  <EuiSpacer size="m" />
+                  <UseField
+                    path="setIndexMode"
+                    component={ToggleField}
+                    componentProps={{
+                      'data-test-subj': 'toggleIndexMode',
+                      euiFieldProps: {
+                        label: i18n.translate(
+                          'xpack.idxMgmt.templateForm.stepLogistics.toggleIndexModeLabel',
+                          {
+                            defaultMessage: 'Set index mode',
+                          }
+                        ),
+                      },
+                    }}
+                  />
+                </>
+              }
+            >
+              {setIndexMode && (
                 <UseField
-                  path="setIndexMode"
-                  component={ToggleField}
+                  path="indexMode"
                   componentProps={{
-                    'data-test-subj': 'toggleIndexMode',
                     euiFieldProps: {
-                      label: i18n.translate(
-                        'xpack.idxMgmt.templateForm.stepLogistics.toggleIndexModeLabel',
-                        {
-                          defaultMessage: 'Set index mode',
-                        }
-                      ),
+                      'data-test-subj': indexMode.testSubject,
+                      options: indexMode.options,
                     },
                   }}
                 />
-              </>
-            }
-          >
-            {setIndexMode && (
-              <UseField
-                path="indexMode"
-                componentProps={{
-                  euiFieldProps: {
-                    'data-test-subj': indexMode.testSubject,
-                    options: indexMode.options,
-                  },
-                }}
-              />
-            )}
-          </FormRow>
+              )}
+            </FormRow>
+          )}
 
           {/* Order */}
           {isLegacy && (

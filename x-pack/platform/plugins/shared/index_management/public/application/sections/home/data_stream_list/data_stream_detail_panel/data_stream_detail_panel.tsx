@@ -371,17 +371,21 @@ export const DataStreamDetailPanel: React.FunctionComponent<Props> = ({
         ),
         dataTestSubj: 'indexTemplateDetail',
       },
-      {
-        name: i18n.translate('xpack.idxMgmt.dataStreamDetailPanel.indexModeTitle', {
-          defaultMessage: 'Index mode',
-        }),
-        toolTip: i18n.translate('xpack.idxMgmt.dataStreamDetailPanel.indexModeToolTip', {
-          defaultMessage:
-            "The index mode applied to the data stream's backing indices, as defined in its associated index template.",
-        }),
-        content: indexModeLabels[indexMode],
-        dataTestSubj: 'indexModeDetail',
-      },
+      ...(config.enableIndexMode
+        ? [
+            {
+              name: i18n.translate('xpack.idxMgmt.dataStreamDetailPanel.indexModeTitle', {
+                defaultMessage: 'Index mode',
+              }),
+              toolTip: i18n.translate('xpack.idxMgmt.dataStreamDetailPanel.indexModeToolTip', {
+                defaultMessage:
+                  "The index mode applied to the data stream's backing indices, as defined in its associated index template.",
+              }),
+              content: indexModeLabels[indexMode],
+              dataTestSubj: 'indexModeDetail',
+            },
+          ]
+        : []),
       {
         name: i18n.translate('xpack.idxMgmt.dataStreamDetailPanel.dataRetentionTitle', {
           defaultMessage: 'Effective data retention',

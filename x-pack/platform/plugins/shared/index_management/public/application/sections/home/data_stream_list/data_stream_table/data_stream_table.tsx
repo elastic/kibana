@@ -217,16 +217,18 @@ export const DataStreamTable: React.FunctionComponent<Props> = ({
     ),
   });
 
-  columns.push({
-    field: 'indexMode',
-    name: i18n.translate('xpack.idxMgmt.dataStreamList.table.indexModeColumnTitle', {
-      defaultMessage: 'Index mode',
-    }),
-    sortable: true,
-    render: (indexMode: DataStream['indexMode']) => indexModeLabels[indexMode],
-    width: '7.5em',
-    minWidth: '7.5em',
-  });
+  if (config.enableIndexMode) {
+    columns.push({
+      field: 'indexMode',
+      name: i18n.translate('xpack.idxMgmt.dataStreamList.table.indexModeColumnTitle', {
+        defaultMessage: 'Index mode',
+      }),
+      sortable: true,
+      render: (indexMode: DataStream['indexMode']) => indexModeLabels[indexMode],
+      width: '7.5em',
+      minWidth: '7.5em',
+    });
+  }
 
   columns.push({
     field: 'lifecycle',
