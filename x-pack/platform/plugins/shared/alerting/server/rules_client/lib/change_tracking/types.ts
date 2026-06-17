@@ -19,6 +19,12 @@ import type {
 } from '@kbn/change-history';
 import type { RuleDomain } from '../../../application/rule/types';
 
+/**
+ * The rule state captured at each change event. Contains only user-controlled configuration
+ * fields from {@link RuleDomain} — runtime fields (execution status, scheduling state, snooze,
+ * monitoring) are excluded because they change autonomously and do not represent user intent.
+ * `createdAt`/`updatedAt` are re-typed as `string` for serialization stability.
+ */
 export type RuleChangeHistorySnapshot = Omit<
   RuleDomain,
   | 'monitoring'
