@@ -110,7 +110,7 @@ export const APPROVED_STEP_DEFINITIONS: Array<{ id: string; definitionHash: stri
   },
   {
     id: 'cases.removeTags',
-    definitionHash: '1704c6d46ccb5432e1df6c24f7ebde8d4b1686c007dcaf6a5c5cac02b0222e3e',
+    definitionHash: '0df093a53dcd3b3a2c0f8ad9c12b78e2efbb94821dd3560bab0028ae2f1f94a1',
   },
   {
     id: 'cases.setCategory',
