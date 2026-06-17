@@ -36,7 +36,11 @@ export const StatusBadge: React.FC<StatusBadgeProps> = React.memo(
         <EuiToolTip content={i18n.RULE_STATUS_INSTALLED}>
           <EuiFlexGroup gutterSize="xs" alignItems="center">
             <EuiFlexItem grow={false}>
-              <EuiIcon type="check" color={colors[MigrationTranslationResult.FULL]} aria-hidden={true} />
+              <EuiIcon
+                type="check"
+                color={colors[MigrationTranslationResult.FULL]}
+                aria-hidden={true}
+              />
             </EuiFlexItem>
             <EuiFlexItem data-test-subj={dataTestSubj} grow={false}>
               {i18n.RULE_STATUS_INSTALLED}

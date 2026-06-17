@@ -42,7 +42,11 @@ export const StatusBadge: React.FC<StatusBadgeProps> = React.memo(
         >
           <EuiFlexGroup gutterSize="xs" alignItems="center">
             <EuiFlexItem grow={false}>
-              <EuiIcon type="check" color={colors[MigrationTranslationResult.FULL]} aria-hidden={true} />
+              <EuiIcon
+                type="check"
+                color={colors[MigrationTranslationResult.FULL]}
+                aria-hidden={true}
+              />
             </EuiFlexItem>
             <EuiFlexItem data-test-subj={dataTestSubj} grow={false}>
               {i18n.DASHBOARD_STATUS_INSTALLED}

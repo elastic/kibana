@@ -118,7 +118,7 @@ export const ConnectorSelectorPanel = React.memo<ConnectorSelectorPanelProps>(
                       size="xxl"
                       color="text"
                       type={actionTypeRegistry.get(selectedConnector.actionTypeId).iconClass}
-            aria-hidden={true}
+                      aria-hidden={true}
                     />
                   </EuiFlexItem>
                 )}
