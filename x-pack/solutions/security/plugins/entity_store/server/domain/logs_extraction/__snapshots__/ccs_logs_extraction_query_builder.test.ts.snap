@@ -12,9 +12,12 @@ FROM remote:metrics-*
  _src_entity_source2 = MV_FIRST(TO_STRING(data_stream.dataset)),
  _src_entity_source = CASE((_src_entity_source0 IS NOT NULL AND _src_entity_source0 != \\"\\"), _src_entity_source0, (_src_entity_source1 IS NOT NULL AND _src_entity_source1 != \\"\\"), _src_entity_source1, (_src_entity_source2 IS NOT NULL AND _src_entity_source2 != \\"\\"), _src_entity_source2, NULL),
  entity.source = CASE((_src_entity_source IS NULL OR _src_entity_source == \\"\\"), NULL, _src_entity_source)
-| EVAL entity.id = CONCAT(\\"host:\\", CASE((TO_STRING(host.id) IS NOT NULL AND TO_STRING(host.id) != \\"\\"), TO_STRING(host.id),
-(TO_STRING(host.name) IS NOT NULL AND TO_STRING(host.name) != \\"\\"), TO_STRING(host.name),
-(TO_STRING(host.hostname) IS NOT NULL AND TO_STRING(host.hostname) != \\"\\"), TO_STRING(host.hostname), NULL))
+| EVAL host_id_present = TO_STRING(host.id) IS NOT NULL AND TO_STRING(host.id) != \\"\\",
+ host_name_present = TO_STRING(host.name) IS NOT NULL AND TO_STRING(host.name) != \\"\\",
+ host_hostname_present = TO_STRING(host.hostname) IS NOT NULL AND TO_STRING(host.hostname) != \\"\\",
+ entity.id = CONCAT(\\"host:\\", CASE((host_id_present), TO_STRING(host.id),
+(host_name_present), TO_STRING(host.name),
+(host_hostname_present), TO_STRING(host.hostname), NULL))
 | STATS
     @timestamp = MAX(@timestamp),
     entity.EngineMetadata.FirstSeenLogInPage = MIN(@timestamp),
@@ -168,7 +171,9 @@ data_stream*,
 | LIMIT 5000"
 `;
 
-exports[`buildCcsLogsExtractionEsqlQuery generates expected query with log-slice cursor bounds 1`] = `
+exports[
+  `buildCcsLogsExtractionEsqlQuery generates expected query with log-slice cursor bounds 1`
+] = `
 "SET unmapped_fields=\\"nullify\\";
 FROM remote:logs-*
   | WHERE
@@ -182,9 +187,12 @@ FROM remote:logs-*
  _src_entity_source2 = MV_FIRST(TO_STRING(data_stream.dataset)),
  _src_entity_source = CASE((_src_entity_source0 IS NOT NULL AND _src_entity_source0 != \\"\\"), _src_entity_source0, (_src_entity_source1 IS NOT NULL AND _src_entity_source1 != \\"\\"), _src_entity_source1, (_src_entity_source2 IS NOT NULL AND _src_entity_source2 != \\"\\"), _src_entity_source2, NULL),
  entity.source = CASE((_src_entity_source IS NULL OR _src_entity_source == \\"\\"), NULL, _src_entity_source)
-| EVAL entity.id = CONCAT(\\"host:\\", CASE((TO_STRING(host.id) IS NOT NULL AND TO_STRING(host.id) != \\"\\"), TO_STRING(host.id),
-(TO_STRING(host.name) IS NOT NULL AND TO_STRING(host.name) != \\"\\"), TO_STRING(host.name),
-(TO_STRING(host.hostname) IS NOT NULL AND TO_STRING(host.hostname) != \\"\\"), TO_STRING(host.hostname), NULL))
+| EVAL host_id_present = TO_STRING(host.id) IS NOT NULL AND TO_STRING(host.id) != \\"\\",
+ host_name_present = TO_STRING(host.name) IS NOT NULL AND TO_STRING(host.name) != \\"\\",
+ host_hostname_present = TO_STRING(host.hostname) IS NOT NULL AND TO_STRING(host.hostname) != \\"\\",
+ entity.id = CONCAT(\\"host:\\", CASE((host_id_present), TO_STRING(host.id),
+(host_name_present), TO_STRING(host.name),
+(host_hostname_present), TO_STRING(host.hostname), NULL))
 | STATS
     @timestamp = MAX(@timestamp),
     entity.EngineMetadata.FirstSeenLogInPage = MIN(@timestamp),
@@ -349,16 +357,22 @@ FROM remote:logs-*
  _src_entity_source1 = MV_FIRST(TO_STRING(event.dataset)),
  _src_entity_source2 = MV_FIRST(TO_STRING(data_stream.dataset)),
  _src_entity_source = CASE((_src_entity_source0 IS NOT NULL AND _src_entity_source0 != \\"\\"), _src_entity_source0, (_src_entity_source1 IS NOT NULL AND _src_entity_source1 != \\"\\"), _src_entity_source1, (_src_entity_source2 IS NOT NULL AND _src_entity_source2 != \\"\\"), _src_entity_source2, NULL),
- entity.source = CASE((_src_entity_source IS NULL OR _src_entity_source == \\"\\"), NULL, _src_entity_source),
- _src_entity_namespace0 = MV_FIRST(TO_STRING(event.module)),
+ entity.source = CASE((_src_entity_source IS NULL OR _src_entity_source == \\"\\"), NULL, _src_entity_source)
+| EVAL _src_entity_namespace0 = MV_FIRST(TO_STRING(event.module)),
  _src_entity_namespace1 = MV_FIRST(SPLIT(MV_FIRST(TO_STRING(data_stream.dataset)), \\".\\")),
  _src_entity_namespace = CASE((_src_entity_namespace0 IS NOT NULL AND _src_entity_namespace0 != \\"\\"), _src_entity_namespace0, (_src_entity_namespace1 IS NOT NULL AND _src_entity_namespace1 != \\"\\"), _src_entity_namespace1, NULL),
- entity.namespace = CASE((TO_STRING(user.name) IS NOT NULL AND TO_STRING(user.name) != \\"\\" AND TO_STRING(host.id) IS NOT NULL AND TO_STRING(host.id) != \\"\\" AND NOT (TO_STRING(user.name) IN (\\"root\\", \\"bin\\", \\"daemon\\", \\"sys\\", \\"nobody\\", \\"jenkins\\", \\"ansible\\", \\"deploy\\", \\"terraform\\", \\"gitlab-runner\\", \\"postgres\\", \\"mysql\\", \\"redis\\", \\"elasticsearch\\", \\"kafka\\", \\"admin\\", \\"operator\\", \\"service\\")) AND (MV_CONTAINS(TO_STRING(event.kind), \\"asset\\") OR NOT (MV_CONTAINS(TO_STRING(event.kind), \\"asset\\") OR (TO_STRING(event.kind) != \\"enrichment\\" OR TO_STRING(event.kind) IS NULL) AND MV_CONTAINS(TO_STRING(event.category), \\"iam\\") AND (MV_CONTAINS(TO_STRING(event.type), \\"user\\") OR MV_CONTAINS(TO_STRING(event.type), \\"creation\\") OR MV_CONTAINS(TO_STRING(event.type), \\"deletion\\") OR MV_CONTAINS(TO_STRING(event.type), \\"group\\"))))), \\"local\\", (_src_entity_namespace == \\"okta\\" OR _src_entity_namespace == \\"entityanalytics_okta\\"), \\"okta\\", (_src_entity_namespace == \\"azure\\" OR _src_entity_namespace == \\"entityanalytics_entra_id\\"), \\"entra_id\\", (_src_entity_namespace == \\"o365\\" OR _src_entity_namespace == \\"o365_metrics\\"), \\"microsoft_365\\", (_src_entity_namespace == \\"entityanalytics_ad\\"), \\"active_directory\\", (_src_entity_namespace IS NULL OR _src_entity_namespace == \\"\\"), \\"unknown\\", _src_entity_namespace)
-| EVAL entity.id = CONCAT(\\"user:\\", CASE((TO_STRING(entity.namespace) == \\"local\\"), CASE((TO_STRING(user.name) IS NOT NULL AND TO_STRING(user.name) != \\"\\" AND TO_STRING(host.id) IS NOT NULL AND TO_STRING(host.id) != \\"\\" AND TO_STRING(entity.namespace) IS NOT NULL AND TO_STRING(entity.namespace) != \\"\\"), CONCAT(TO_STRING(user.name), \\"@\\", TO_STRING(host.id), \\"@\\", TO_STRING(entity.namespace)), NULL),
-true, CASE((TO_STRING(user.email) IS NOT NULL AND TO_STRING(user.email) != \\"\\" AND TO_STRING(entity.namespace) IS NOT NULL AND TO_STRING(entity.namespace) != \\"\\"), CONCAT(TO_STRING(user.email), \\"@\\", TO_STRING(entity.namespace)),
-(TO_STRING(user.id) IS NOT NULL AND TO_STRING(user.id) != \\"\\" AND TO_STRING(entity.namespace) IS NOT NULL AND TO_STRING(entity.namespace) != \\"\\"), CONCAT(TO_STRING(user.id), \\"@\\", TO_STRING(entity.namespace)),
-(TO_STRING(user.name) IS NOT NULL AND TO_STRING(user.name) != \\"\\" AND TO_STRING(user.domain) IS NOT NULL AND TO_STRING(user.domain) != \\"\\" AND TO_STRING(entity.namespace) IS NOT NULL AND TO_STRING(entity.namespace) != \\"\\"), CONCAT(TO_STRING(user.name), \\"@\\", TO_STRING(user.domain), \\"@\\", TO_STRING(entity.namespace)),
-(TO_STRING(user.name) IS NOT NULL AND TO_STRING(user.name) != \\"\\" AND TO_STRING(entity.namespace) IS NOT NULL AND TO_STRING(entity.namespace) != \\"\\"), CONCAT(TO_STRING(user.name), \\"@\\", TO_STRING(entity.namespace)), NULL), NULL))
+ entity.namespace = CASE((TO_STRING(user.name) IS NOT NULL AND TO_STRING(user.name) != \\"\\" AND TO_STRING(host.id) IS NOT NULL AND TO_STRING(host.id) != \\"\\" AND NOT (TO_STRING(user.name) IN (\\"root\\", \\"bin\\", \\"daemon\\", \\"sys\\", \\"nobody\\", \\"jenkins\\", \\"ansible\\", \\"deploy\\", \\"terraform\\", \\"gitlab-runner\\", \\"postgres\\", \\"mysql\\", \\"redis\\", \\"elasticsearch\\", \\"kafka\\", \\"admin\\", \\"operator\\", \\"service\\")) AND (MV_CONTAINS(TO_STRING(event.kind), \\"asset\\") OR NOT (MV_CONTAINS(TO_STRING(event.kind), \\"asset\\") OR (TO_STRING(event.kind) != \\"enrichment\\" OR TO_STRING(event.kind) IS NULL) AND MV_CONTAINS(TO_STRING(event.category), \\"iam\\") AND (MV_CONTAINS(TO_STRING(event.type), \\"user\\") OR MV_CONTAINS(TO_STRING(event.type), \\"creation\\") OR MV_CONTAINS(TO_STRING(event.type), \\"deletion\\") OR MV_CONTAINS(TO_STRING(event.type), \\"group\\"))))), \\"local\\", (_src_entity_namespace == \\"okta\\" OR _src_entity_namespace == \\"entityanalytics_okta\\"), \\"okta\\", (_src_entity_namespace == \\"azure\\" OR _src_entity_namespace == \\"entityanalytics_entra_id\\"), \\"entra_id\\", (_src_entity_namespace == \\"o365\\" OR _src_entity_namespace == \\"o365_metrics\\"), \\"microsoft_365\\", (_src_entity_namespace == \\"entityanalytics_ad\\"), \\"active_directory\\", (_src_entity_namespace IS NULL OR _src_entity_namespace == \\"\\"), \\"unknown\\", _src_entity_namespace),
+ user_name_present = TO_STRING(user.name) IS NOT NULL AND TO_STRING(user.name) != \\"\\",
+ host_id_present = TO_STRING(host.id) IS NOT NULL AND TO_STRING(host.id) != \\"\\",
+ entity_namespace_present = TO_STRING(entity.namespace) IS NOT NULL AND TO_STRING(entity.namespace) != \\"\\",
+ user_email_present = TO_STRING(user.email) IS NOT NULL AND TO_STRING(user.email) != \\"\\",
+ user_id_present = TO_STRING(user.id) IS NOT NULL AND TO_STRING(user.id) != \\"\\",
+ user_domain_present = TO_STRING(user.domain) IS NOT NULL AND TO_STRING(user.domain) != \\"\\",
+ entity.id = CONCAT(\\"user:\\", CASE((TO_STRING(entity.namespace) == \\"local\\"), CASE((user_name_present AND host_id_present AND entity_namespace_present), CONCAT(TO_STRING(user.name), \\"@\\", TO_STRING(host.id), \\"@\\", TO_STRING(entity.namespace)), NULL),
+true, CASE((user_email_present AND entity_namespace_present), CONCAT(TO_STRING(user.email), \\"@\\", TO_STRING(entity.namespace)),
+(user_id_present AND entity_namespace_present), CONCAT(TO_STRING(user.id), \\"@\\", TO_STRING(entity.namespace)),
+(user_name_present AND user_domain_present AND entity_namespace_present), CONCAT(TO_STRING(user.name), \\"@\\", TO_STRING(user.domain), \\"@\\", TO_STRING(entity.namespace)),
+(user_name_present AND entity_namespace_present), CONCAT(TO_STRING(user.name), \\"@\\", TO_STRING(entity.namespace)), NULL), NULL))
 | STATS
     @timestamp = MAX(@timestamp),
     entity.EngineMetadata.FirstSeenLogInPage = MIN(@timestamp),
@@ -506,7 +520,7 @@ FROM remote_cluster:logs-*
  _src_entity_source2 = MV_FIRST(TO_STRING(data_stream.dataset)),
  _src_entity_source = CASE((_src_entity_source0 IS NOT NULL AND _src_entity_source0 != \\"\\"), _src_entity_source0, (_src_entity_source1 IS NOT NULL AND _src_entity_source1 != \\"\\"), _src_entity_source1, (_src_entity_source2 IS NOT NULL AND _src_entity_source2 != \\"\\"), _src_entity_source2, NULL),
  entity.source = CASE((_src_entity_source IS NULL OR _src_entity_source == \\"\\"), NULL, _src_entity_source)
-| EVAL entity.id = entity.id
+| EVAL entity.id = TO_STRING(entity.id)
 | STATS
     @timestamp = MAX(@timestamp),
     entity.EngineMetadata.FirstSeenLogInPage = MIN(@timestamp),
