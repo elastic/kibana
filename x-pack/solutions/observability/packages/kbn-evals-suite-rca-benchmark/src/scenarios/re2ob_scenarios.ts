@@ -33,7 +33,10 @@ function scenario(service: string, faultType: string): RcaScenario {
  * include a scenario in CI. Local runs only need RCAEVAL_DATA_DIR to point at the
  * extracted RE2-OB directory.
  */
-export const RE2OB_SCENARIOS: RcaScenario[] = [
+
+// Original 6-scenario set used for the first round of evals (kept for reference /
+// reproducibility of earlier score tables).
+export const RE2OB_SCENARIOS_V1: RcaScenario[] = [
   scenario('currencyservice', 'loss'),
   scenario('checkoutservice', 'delay'),
   scenario('checkoutservice', 'mem'),
@@ -41,3 +44,32 @@ export const RE2OB_SCENARIOS: RcaScenario[] = [
   scenario('productcatalogservice', 'cpu'),
   scenario('recommendationservice', 'socket'),
 ];
+
+// Expanded 20-scenario set (distinct service×fault combos, none overlapping V1),
+// balanced ~4 per service and covering all 6 fault types — including `disk`, which
+// V1 never exercised. Instance "1" of each combo is extracted under RCAEVAL_DATA_DIR.
+export const RE2OB_SCENARIOS_V2: RcaScenario[] = [
+  scenario('checkoutservice', 'cpu'),
+  scenario('checkoutservice', 'disk'),
+  scenario('checkoutservice', 'loss'),
+  scenario('checkoutservice', 'socket'),
+  scenario('currencyservice', 'cpu'),
+  scenario('currencyservice', 'delay'),
+  scenario('currencyservice', 'disk'),
+  scenario('currencyservice', 'socket'),
+  scenario('emailservice', 'delay'),
+  scenario('emailservice', 'disk'),
+  scenario('emailservice', 'loss'),
+  scenario('emailservice', 'mem'),
+  scenario('productcatalogservice', 'delay'),
+  scenario('productcatalogservice', 'disk'),
+  scenario('productcatalogservice', 'mem'),
+  scenario('productcatalogservice', 'socket'),
+  scenario('recommendationservice', 'cpu'),
+  scenario('recommendationservice', 'delay'),
+  scenario('recommendationservice', 'disk'),
+  scenario('recommendationservice', 'mem'),
+];
+
+// Active set for the current eval run.
+export const RE2OB_SCENARIOS: RcaScenario[] = RE2OB_SCENARIOS_V2;

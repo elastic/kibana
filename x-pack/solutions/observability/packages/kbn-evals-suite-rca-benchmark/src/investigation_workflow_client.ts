@@ -8,7 +8,7 @@
 import { randomUUID } from 'crypto';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { HttpHandler } from '@kbn/core/public';
-import type { ConverseResponse } from './agent_builder_client';
+import type { ConverseResponse, ConverseUsage } from './agent_builder_client';
 
 const INVESTIGATION_WORKFLOW_ID = 'system-streams-sigevents-investigation';
 const TERMINAL_STATUSES = new Set(['completed', 'failed', 'cancelled', 'timed_out', 'skipped']);
@@ -37,10 +37,16 @@ interface SynthesisOutput {
   investigation_complete: boolean;
 }
 
+interface StepUsage {
+  input_tokens?: number;
+  output_tokens?: number;
+  llm_calls?: number;
+}
+
 interface StepExecution {
   stepId?: string;
   status: string;
-  output?: unknown;
+  output?: { usage?: StepUsage; [key: string]: unknown } | null;
 }
 
 interface WorkflowExecution {
@@ -56,6 +62,7 @@ export interface InvestigationInput {
   scenarioTitle: string;
   service: string;
   faultType: string;
+  connectorId?: string;
 }
 
 function formatSynthesisAsMessage(synthesis: SynthesisOutput): string {
@@ -99,7 +106,7 @@ export class InvestigationWorkflowClient {
   ) {}
 
   async run(input: InvestigationInput): Promise<ConverseResponse> {
-    const { streamNames, scenarioId, service, faultType } = input;
+    const { streamNames, scenarioId, service, faultType, connectorId } = input;
     const opaqueId = randomUUID();
     const discoveryId = `eval-${opaqueId}`;
 
@@ -128,6 +135,7 @@ export class InvestigationWorkflowClient {
             stream_names: streamNames,
             cause_kis: [],
             evidences: [],
+            ...(connectorId ? { connector_id: connectorId } : {}),
           },
         }),
       }
@@ -209,6 +217,21 @@ export class InvestigationWorkflowClient {
       messageContent = 'Investigation workflow did not produce a synthesis result.';
     }
 
+    // Aggregate token usage from all ai.agent step outputs.
+    // The ai.agent step handler populates step.output.usage since the token-tracking fix.
+    const usage: ConverseUsage = { input_tokens: 0, output_tokens: 0, llm_calls: 0 };
+    for (const step of execution.stepExecutions ?? []) {
+      const stepUsage = step.output?.usage;
+      if (stepUsage) {
+        usage.input_tokens += stepUsage.input_tokens ?? 0;
+        usage.output_tokens += stepUsage.output_tokens ?? 0;
+        usage.llm_calls += stepUsage.llm_calls ?? 0;
+      }
+    }
+    this.log.info(
+      `[investigation-workflow] ${scenarioId} usage: ${usage.input_tokens} in / ${usage.output_tokens} out / ${usage.llm_calls} LLM calls`
+    );
+
     const promptMessage =
       `A microservice system in Online Boutique is experiencing a fault. ` +
       `Fault details — service: ${service}, type: ${faultType}. ` +
@@ -220,6 +243,7 @@ export class InvestigationWorkflowClient {
       messages: [{ content: promptMessage }, { content: messageContent }],
       steps: [],
       errors,
+      usage,
     };
   }
 }

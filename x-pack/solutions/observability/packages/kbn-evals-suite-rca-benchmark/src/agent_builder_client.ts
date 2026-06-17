@@ -17,12 +17,19 @@ export interface ConverseAttachment {
   hidden?: boolean;
 }
 
+export interface ConverseUsage {
+  input_tokens: number;
+  output_tokens: number;
+  llm_calls: number;
+}
+
 export interface ConverseResponse {
   conversationId?: string;
   traceId?: string;
   messages: Array<{ content: string }>;
   steps?: any[];
   errors: unknown[];
+  usage?: ConverseUsage;
 }
 
 export class AgentBuilderClient {

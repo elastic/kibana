@@ -43,22 +43,23 @@ steps:
         Data streams (use get_index_info to discover available fields in each):
         - Logs:    {{ inputs.stream_names[0] }}
         - Traces:  {{ inputs.stream_names[1] }}
-        - Metrics: {{ inputs.stream_names[2] }} (infrastructure signals: CPU, memory, network, latency)
+        - Metrics: {{ inputs.stream_names[2] }}
         Event metadata: {{ inputs | json }}
 
-        Investigate the root cause of this incident. Use all available observability tools:
-        - get_service_topology to map the call graph (mandatory — required to distinguish root cause from victim)
-        - get_services and get_trace_metrics to identify which services are anomalous
-        - get_log_change_points and get_metric_change_points to find what changed and when
-        - ES|QL STATS queries scoped to the indices above for detailed metrics
+        Investigate the root cause of this incident. Start with memory — prior incidents or system
+        context may already point at the likely cause. Then use whatever signals and tools are
+        available: service topology and trace data if present, metric and log change points,
+        ES|QL queries, code or deployment signals. Not all signals will exist — use what's there.
 
-        Key principles:
-        - A service that appears degraded may be a downstream victim of a dependency that's failing.
-          Use the call graph to trace causality direction.
-        - The service that degraded FIRST is a stronger root cause candidate.
-        - A heavily-called central service always shows high load during any fault — don't attribute
-          root cause based solely on high absolute load without confirming an independent fault.
-        - Infrastructure faults (CPU stress, memory, socket exhaustion) appear in metrics, not APM.
+        General root-cause principles (do not presuppose a particular kind of fault):
+        - A component that looks degraded may be a downstream victim of a failing dependency.
+          Use the call graph to trace the direction of causality, not just where symptoms are loudest.
+        - The component that deviated from its baseline FIRST is a stronger root-cause candidate.
+        - Separate an independent fault from load amplification: something can look worse simply
+          because a neighbor changed, not because it is itself the cause.
+        - The cause may appear in any signal (logs, traces, or metrics) and may be of any kind —
+          a code or config change, a dependency failure, a resource problem, bad data, etc.
+          Follow the evidence rather than assuming the failure mode in advance.
 
         Return your findings as structured output.
       schema:
@@ -96,24 +97,29 @@ steps:
     with:
       timeout: 300s
       message: |
-        You are a skeptical reviewer of a root cause analysis. Your job is to find flaws.
+        You are a skeptical reviewer of a root cause analysis. Your job is to find flaws that
+        would change the conclusion — not to demand exhaustive verification of every detail.
 
         The investigator concluded: {{ steps.investigate_r1.output.structured_output | json }}
 
-        Try to disprove this conclusion. Specifically check:
-        1. Is the identified service actually a downstream victim? Could it be degraded because
-           something it calls is failing, not because it itself has a fault?
-        2. Is there a service that showed anomalies EARLIER than the identified service?
-           That earlier service is a stronger root cause candidate.
-        3. Is the identified service a heavily-used central hub that would naturally show elevated
-           load during ANY fault? If so, is there evidence of an independent fault (not just load)?
-        4. Does the failure mechanism described match the evidence? Are there alternative mechanisms
-           that better explain what was observed?
+        Try to disprove the conclusion. Check the things most likely to make it wrong:
+        1. Could the identified component be a downstream victim rather than the cause — degraded
+           because a dependency it relies on is failing?
+        2. Did another component deviate from its baseline EARLIER? An earlier deviation is a
+           stronger root-cause candidate.
+        3. Is the conclusion based on load amplification rather than an independent fault (i.e. the
+           component looks busy/worse only because a neighbor changed)?
+        4. Does the stated mechanism actually fit the evidence, or does an alternative explain it better?
 
         Data context: {{ inputs | json }}
 
-        If you find significant flaws, return satisfied=false with specific critique.
-        If the conclusion is well-supported and you cannot find significant flaws, return satisfied=true.
+        Decide satisfied:
+        - Return satisfied=false ONLY for a flaw that would change the conclusion or materially change
+          its confidence — wrong component, reversed causality, an unsupported mechanism, or a
+          contradicted fact. Give a specific, actionable critique.
+        - Return satisfied=true if the conclusion is well-supported and its main claims hold, EVEN IF
+          minor details could be checked further. Do not withhold approval over nitpicks or
+          additional verification that would not change the answer.
       schema:
         type: object
         properties:
@@ -215,10 +221,17 @@ steps:
         Original critique: {{ steps.critique_r1.output.structured_output.critique }}
         Revised conclusion: {{ steps.investigate_r2.output.structured_output | json }}
 
-        Is the revised analysis convincing? Does it adequately address your previous concerns?
-        Apply the same critical checks: victim vs root cause, temporal ordering, hub-service bias.
+        Does the revised analysis adequately address your previous concerns? Apply the same
+        checks: victim vs root cause, temporal ordering, and load amplification vs an independent fault.
 
         Data context: {{ inputs | json }}
+
+        Decide satisfied:
+        - Return satisfied=false ONLY for a flaw that would change the conclusion or materially change
+          its confidence. Give a specific, actionable critique.
+        - Return satisfied=true if the revised conclusion is well-supported and its main claims hold,
+          EVEN IF minor details could be checked further. Do not withhold approval over nitpicks —
+          especially once your earlier concerns have been addressed.
       schema:
         type: object
         properties:
@@ -242,8 +255,11 @@ steps:
     type: data.set
     if: "${{ steps.check_done_r1.output.done == false }}"
     with:
-      done: "${{ steps.critique_r2.output.structured_output.satisfied == true || steps.check_done_r1.output.done == true }}"
-      final_result: "${{ steps.check_done_r1.output.done == true ? steps.check_done_r1.output.final_result : steps.investigate_r2.output.structured_output }}"
+      # This step only runs when round 1 was NOT done (see `if` above). So done/
+      # final_result reflect round 2 directly — no need to fold round 1 back in
+      # (the liquid expression engine has no ternary / `||`, only filters).
+      done: "${{ steps.critique_r2.output.structured_output.satisfied == true }}"
+      final_result: "${{ steps.investigate_r2.output.structured_output }}"
       round: 2
 
   # ── Round 3 (last resort if still not satisfied) ──────────────────────────────
@@ -312,16 +328,10 @@ steps:
   - name: emit_result
     type: workflow.output
     with:
-      result: |
-        ${{
-          steps.investigate_r3.output != null
-            ? steps.investigate_r3.output.structured_output
-            : (steps.check_done_r2.output.done == true
-                ? steps.check_done_r2.output.final_result
-                : steps.check_done_r1.output.final_result)
-        }}
-      rounds_used: |
-        ${{
-          steps.investigate_r3.output != null ? 3
-            : (steps.investigate_r2.output != null ? 2 : 1)
-        }}
+      # Pick the last round that actually ran. Skipped steps render as nil, so the
+      # `default` filter chain falls through to the most recent completed round
+      # (r3 → r2 → r1). The liquid engine has no ternary / null-check operators,
+      # only filters, so `default` is the idiom for fallback selection.
+      # Named `structured_output` so the eval client extracts it the same way it
+      # does the single-agent agent step output.
+      structured_output: "${{ steps.investigate_r3.output.structured_output | default: steps.check_done_r2.output.final_result | default: steps.check_done_r1.output.final_result }}"

@@ -71,8 +71,10 @@ evaluate.describe(
   'RE2-OB RCA Benchmark (investigation workflow)',
   { tag: tags.serverless.observability.complete },
   () => {
-    // Each workflow run takes ~20-30 minutes; 6 scenarios sequential = ~2h total.
-    evaluate.setTimeout(180 * 60_000);
+    // Each multi-agent workflow run takes ~20-30 minutes; 20 scenarios sequential
+    // (concurrency:1) can run ~8-10h. Give the single test a 12h ceiling so it never
+    // times out mid-suite; it exits as soon as the last scenario completes.
+    evaluate.setTimeout(720 * 60_000);
 
     const scenariosToRun: ScenarioToRun[] = [];
 

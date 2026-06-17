@@ -18,7 +18,7 @@ export const STREAMS_INVESTIGATION_WORKFLOW_ID = 'system-streams-sigevents-inves
 export const STREAMS_INVESTIGATION_WORKFLOW = {
   id: STREAMS_INVESTIGATION_WORKFLOW_ID,
   pluginId: 'streams',
-  version: 16,
+  version: 17,
   yaml: INVESTIGATION_WORKFLOW_YAML,
   management: {
     lifecycle: 'static',
@@ -48,7 +48,7 @@ export const STREAMS_INVESTIGATION_SINGLE_AGENT_WORKFLOW_ID =
 export const STREAMS_INVESTIGATION_SINGLE_AGENT_WORKFLOW = {
   id: STREAMS_INVESTIGATION_SINGLE_AGENT_WORKFLOW_ID,
   pluginId: 'streams',
-  version: 1,
+  version: 2,
   yaml: INVESTIGATION_SINGLE_AGENT_WORKFLOW_YAML,
   management: {
     lifecycle: 'static',
@@ -63,7 +63,7 @@ export const STREAMS_INVESTIGATION_ADVERSARIAL_WORKFLOW_ID =
 export const STREAMS_INVESTIGATION_ADVERSARIAL_WORKFLOW = {
   id: STREAMS_INVESTIGATION_ADVERSARIAL_WORKFLOW_ID,
   pluginId: 'streams',
-  version: 1,
+  version: 2,
   yaml: INVESTIGATION_ADVERSARIAL_WORKFLOW_YAML,
   management: {
     lifecycle: 'static',

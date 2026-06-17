@@ -56,6 +56,11 @@ const RCAEVAL_MAX_SCENARIOS = process.env.RCAEVAL_MAX_SCENARIOS
 const SINGLE_AGENT_WORKFLOW_ID = 'system-streams-sigevents-investigation-single';
 const ADVERSARIAL_WORKFLOW_ID = 'system-streams-sigevents-investigation-adversarial';
 
+// Optional override for the workflow's agent model (an ES inference endpoint id, e.g.
+// `.anthropic-claude-4.6-sonnet-chat_completion`). When unset, the workflow uses its
+// YAML default connector (Haiku). Lets us run the same workflow on Sonnet for comparison.
+const WORKFLOW_AGENT_CONNECTOR_ID = process.env.WORKFLOW_AGENT_CONNECTOR_ID;
+
 interface ScenarioToRun {
   scenario: RcaScenario;
   caseDir: string;
@@ -75,10 +80,10 @@ function createUsageEvaluator(name: string, field: keyof ConverseUsage): Evaluat
 
 function buildRcaCriteria(scenario: RcaScenario): string[] {
   return [
-    `Identifies "${scenario.service}" (or a recognizable variant of the name) as the root cause component`,
-    `Does NOT attribute the root cause solely to a frontend or gateway service unless that is the actual fault location`,
+    `The final conclusion identifies "${scenario.service}" (or a recognizable variant of the name) as the PRIMARY root cause component — FAIL if the service appears only as a downstream victim of another service, only in a hypothesis that is explicitly refuted or ranked below another conclusion, or if the output concludes that no fault was detected`,
+    `Does NOT name a frontend or gateway service (e.g. "frontend", "ingress", "API gateway") as the primary root cause — mentions of such services purely as downstream victims of a cascading failure do NOT violate this criterion`,
     `Cites at least one concrete piece of evidence (error log, anomalous trace latency, error rate spike, or specific tool output)`,
-    `Describes the failure mode consistent with: ${scenario.faultDescription}`,
+    `The failure mechanism described in the final conclusion is specifically consistent with "${scenario.faultDescription}" — a conclusion of "no fault detected" automatically FAILS; a description of an unrelated resource class (e.g. CPU/memory pressure when the fault is socket exhaustion, or resource exhaustion when the fault is packet loss) also FAILS`,
   ];
 }
 
@@ -123,6 +128,7 @@ function createWorkflowExperiment(
               scenarioTitle: `${scenario.service} / ${scenario.faultType}`,
               service: scenario.service,
               faultType: scenario.faultType,
+              connectorId: WORKFLOW_AGENT_CONNECTOR_ID,
             });
             return {
               errors: response.errors,
@@ -150,7 +156,10 @@ evaluate.describe(
   'RE2-OB RCA Benchmark (simple workflows)',
   { tag: tags.serverless.observability.complete },
   () => {
-    evaluate.setTimeout(180 * 60_000);
+    // 20 scenarios run sequentially (concurrency:1). Single-agent runs are faster than
+    // the multi-agent workflow, but give the single test a 12h ceiling to be safe; it
+    // exits as soon as the last scenario completes.
+    evaluate.setTimeout(720 * 60_000);
 
     const scenariosToRun: ScenarioToRun[] = [];
 

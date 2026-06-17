@@ -70,8 +70,23 @@ steps:
           Don't presuppose the failure mode; follow the evidence.
 
         Generate up to 5 targeted hypotheses ordered by prior confidence (highest first).
-        Each hypothesis should name a specific service AND a specific mechanism.
-        Fewer strong hypotheses beat many weak ones.
+        Each hypothesis must identify a specific, testable cause with a concrete mechanism. Usually
+        that is a particular service and what is wrong with it, but the root cause does NOT have to
+        be a single service — it can be a shared dependency (datastore, queue, cache), infrastructure
+        (a node/host, network fabric, DNS), a platform / cloud-provider or AZ outage, or a recent
+        deploy or config change. Name whatever the evidence points to, as long as it is specific and
+        falsifiable.
+        Make the set DIVERSE — each hypothesis is investigated independently in parallel, so they
+        must cover genuinely different candidate causes, not minor variations of one explanation. Do
+        NOT submit multiple hypotheses that point at the SAME cause and differ only in the precise
+        mechanism — that collapses the parallel investigation into one. Unless the evidence is
+        overwhelming, cover at least 2-3 different candidate causes across your hypotheses (different
+        services, or a mix of service-level and shared/infrastructure/external causes), and ALWAYS
+        include at least one hypothesis proposing a different cause than your leading candidate. This
+        matters most when one high-traffic service shows the loudest symptoms — it is often a victim,
+        so include a competing hypothesis for an independent/upstream service or a shared cause. Each
+        hypothesis must still be plausible and falsifiable; don't pad with junk, but prefer broad
+        coverage of the likely causes over concentrating confidence on one.
       schema:
         type: object
         properties:
