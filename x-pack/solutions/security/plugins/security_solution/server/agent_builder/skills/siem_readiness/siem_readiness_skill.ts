@@ -96,18 +96,78 @@ Rules:
 - Skip categories within a dimension that have no findings.
 - Never list a finding without its category prefix.
 
-Full example:
+### Blast Radius (mandatory for every actionable finding)
+
+Every \`actionableFinding\` includes pre-computed blast radius fields. These MUST be shown for every finding — do not omit them even if the user does not ask:
+
+- \`affectedPlatform\`: the platform derived from ECS fields in the actual data (e.g. "AWS account 123456789012", "Windows Endpoints", "Okta (Identity)"). Show as **Affected Platform**.
+- \`affectedRules\`: array of \`{ id, name }\` — the detection rules that monitor this index. Show as **Affected Rules** (list rule names).
+- \`affectedTactics\`: array of \`{ id, name, totalRules, affectedRulesCount }\` — MITRE ATT&CK tactics exposed. Show as **Affected Tactics** (list tactic names with rule counts).
+- \`blastRadiusStatus\`: reliability signal for the blast radius fields:
+  - \`'healthy'\`: blast radius is complete and trustworthy.
+  - \`'unavailable'\`: a required data lookup failed. The \`affectedRules\`, \`affectedTactics\`, and \`affectedPlatform\` fields are intentionally absent. You MUST show "unavailable (lookup failed)" for all three — NEVER show "none", which would imply there genuinely are no affected rules.
+  - \`'partial'\`: at least one rule's index resolution failed, so the lists may be undercounted. Show the lists but append "(may be incomplete)" after the label.
+
+Required format per finding:
+
+\`\`\`
+- **[Category]**: \`[resource]\` — [what is wrong]
+  - **Affected Platform**: [platform or "—" if unknown]
+  - **Affected Rules**: [rule names, comma-separated, or "none" if empty]
+  - **Affected Tactics**: [tactic names with rule counts, or "none" if empty]
+\`\`\`
+
+Rules:
+- Always show all three blast radius fields for every finding, even if some are empty ("—" or "none").
+- Do NOT merge the blast radius into prose — keep it as explicit labeled sub-bullets.
+- If \`affectedPlatform\` is undefined in the data, show "—".
+- If \`blastRadiusStatus === 'unavailable'\`, show "unavailable (lookup failed)" for all three fields — never "none".
+- If \`blastRadiusStatus === 'partial'\`, append "(may be incomplete)" to Affected Rules and Affected Tactics labels.
+
+Full example (complete blast radius):
 
 \`\`\`
 ### Coverage
 - **Coverage**: No detection rules are enabled
+  - **Affected Platform**: —
+  - **Affected Rules**: none
+  - **Affected Tactics**: none
 
 ### Quality
-- **Cloud**: \`logs-cloud_asset_inventory.asset_inventory-default\` — 2 incompatible ECS fields
+- **Cloud**: \`logs-aws.cloudtrail-default\` — 1 incompatible ECS field
+  - **Affected Platform**: AWS account 123456789012
+  - **Affected Rules**: AWS CloudTrail Suspicious Activity
+  - **Affected Tactics**: Initial Access (1 of 2 rules affected)
 
 ### Retention
 - **Cloud**: \`logs-cloud_security_posture.findings-default\` — 180d retention, below 365d FedRAMP threshold
+  - **Affected Platform**: AWS account 123456789012
+  - **Affected Rules**: AWS CloudTrail Suspicious Activity
+  - **Affected Tactics**: Initial Access (1 of 2 rules affected)
 - **Network**: \`logs-network.dns-default\` — 30d retention, below 365d FedRAMP threshold
+  - **Affected Platform**: Palo Alto (Network)
+  - **Affected Rules**: Test Rule - Network Events, Blast Test - Threat Match Rule
+  - **Affected Tactics**: Command and Control (1/1), Reconnaissance (1/1), Initial Access (1/2)
+\`\`\`
+
+Example when \`blastRadiusStatus === 'unavailable'\` (pipeline map failed — continuity finding):
+
+\`\`\`
+### Continuity
+- **Network**: pipeline \`logs-network@custom\` — 4.2% failure rate
+  - **Affected Platform**: unavailable (lookup failed)
+  - **Affected Rules**: unavailable (lookup failed)
+  - **Affected Tactics**: unavailable (lookup failed)
+\`\`\`
+
+Example when \`blastRadiusStatus === 'partial'\` (some rules' index resolution failed):
+
+\`\`\`
+### Quality
+- **Cloud**: \`logs-aws.cloudtrail-default\` — 1 incompatible ECS field
+  - **Affected Platform**: AWS account 123456789012
+  - **Affected Rules (may be incomplete)**: AWS CloudTrail Suspicious Activity
+  - **Affected Tactics (may be incomplete)**: Initial Access (1 of 2 rules affected)
 \`\`\`
 
 ---

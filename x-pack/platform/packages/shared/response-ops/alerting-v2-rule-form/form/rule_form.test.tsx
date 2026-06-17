@@ -315,7 +315,7 @@ describe('RuleForm', () => {
             type="button"
             data-test-subj="testSetQuery"
             onClick={() =>
-              setValue('evaluation.query.base', 'FROM other-index | LIMIT 1', {
+              setValue('query.breach', 'FROM other-index | LIMIT 1', {
                 shouldDirty: true,
               })
             }
@@ -385,9 +385,9 @@ describe('RuleForm', () => {
         'schedule:',
         '  every: 5m',
         '  lookback: 1m',
-        'evaluation:',
-        '  query:',
-        '    base: FROM logs-*',
+        'query:',
+        '  format: standalone',
+        '  breach: FROM logs-*',
         '',
       ].join('\n');
       await user.clear(editor);

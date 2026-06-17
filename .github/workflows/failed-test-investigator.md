@@ -19,7 +19,7 @@ permissions:
   checks: read
   models: read
 
-if: "${{ (github.event_name == 'workflow_dispatch' && github.event.inputs.issue_number != '') || (github.event_name == 'issues' && !github.event.issue.pull_request && contains(github.event.issue.labels.*.name, 'failed-test')) }}"
+if: "${{ (github.event_name == 'workflow_dispatch' && github.event.inputs.issue_number != '') || (github.event_name == 'issues' && !github.event.issue.pull_request && contains(github.event.issue.labels.*.name, 'failed-test') && (github.event.action != 'labeled' || github.event.label.name == 'failed-test')) }}"
 
 concurrency:
   group: 'failed-test-investigator-${{ github.event.issue.number || github.event.inputs.issue_number }}'
@@ -114,6 +114,16 @@ safe-outputs:
     max: 1
     target: *issue_number
     hide-older-comments: true
+  add-labels:
+    allowed:
+      - failure:ai-fixable
+      - failure:test-design
+      - failure:test-environment
+      - failure:application
+      - failure:ci-environment
+      - failure:inconclusive
+    max: 2
+    target: *issue_number
 
 strict: false
 timeout-minutes: 20
@@ -138,15 +148,13 @@ Every conclusion must cite specific evidence. Do not guess.
 
 Set `classification` based on where the evidence points:
 
-- **`test-design`**: issue lives in the test code — timing/waits, selectors, fixtures, helpers, setup/teardown, assertion shape.
-- **`test-environment`**: test code is fine, but its surroundings are wrong — leaked state from prior tests, flaky fixture init, missing `data-test-subj` the test relies on, parallel-slot interference.
-- **`application`**: real product bug exposed by the test — race, regression, broken contract, feature-flag bug.
-- **`external`**: outside test + app — CI agent, downed dependency (e.g., ES failed to start), network, credentials, registry. Failures on `local-*` targets are less likely to be external; weigh that when classifying.
+- **`test-design`**: issue lives in the test code (e.g., timing/waits, selectors, fixtures, helpers, setup/teardown, assertion shape).
+- **`test-environment`**: test code is fine, but its surroundings are problematic (e.g., leaked state from prior tests, flaky fixture init, missing `data-test-subj` the test relies on, parallel-slot interference).
+- **`application`**: real product bug exposed by the test (e.g., race, regression, broken contract, feature-flag bug).
+- **`ci-environment`**: outside test + app — CI agent, downed dependency (e.g., ES failed to start), network, credentials, registry.
 - **`inconclusive`**: evidence does not support a defensible call.
 
 Set `confidence` to `high` (direct evidence pins the cause), `medium` (strong inference from converging signals), or `low` (plausible but underspecified).
-
-No other side-effects beyond posting the comment.
 
 ## Fix proposal
 
@@ -155,6 +163,22 @@ No other side-effects beyond posting the comment.
 - For test fixes: name the assertion, wait, fixture, setup/teardown, or helper to change.
 - For code fixes: name the module, API, or behavior that looks wrong and why.
 - If you cannot justify a concrete fix, say what additional evidence would change the conclusion.
+
+## Labels
+
+### Classification label
+
+Add exactly one classification label to the issue that matches the chosen `classification`:
+
+- `failure:test-design`: when `classification` is `test-design`
+- `failure:test-environment`: when `classification` is `test-environment`
+- `failure:application`: when `classification` is `application`
+- `failure:ci-environment`: when `classification` is `ci-environment`
+- `failure:inconclusive`: when `classification` is `inconclusive`
+
+### "Is the issue fixable?" label
+
+Add `failure:ai-fixable` to the issue if we are confident that a fix is available (it would imply opening a PR against the codebase).
 
 ## Attribution
 
@@ -175,7 +199,18 @@ Post exactly one comment on the issue. Keep the content concise and actionable.
 
 Follow the format below exactly. Do not create standalone sections for "what the test does" "evidence," "where the test ran," or "failure screenshot". Integrate these details seamlessly into the sections below if they add value.
 
-The comment has two parts: a compact header that stays visible on the issue page (one `####` headline + metadata + summary), and a `<details>` block that hides everything else. **Inside the `<details>` block, every section starts with `#### Section name` on its own line** (e.g., `#### Proposed fix`, `#### Root cause & evidence`).
+The comment has different parts: a compact header that stays visible on the issue page (one `####` headline + metadata + summary), and a `<details>` block that hides everything else, as well as a comment to label the issue to trigger the flaky test fixer workflow (it is only posted under certain conditions, more info below).
+
+**Inside the `<details>` block, every section starts with `#### Section name` on its own line** (e.g., `#### Proposed fix`, `#### Root cause & evidence`).
+
+Add the following snippet of Markdown right after (and outside) the `<details>` block only if a fix is needed and available.
+
+```markdown
+> [!TIP]
+> Label this issue `ai:fix-flaky` and an agent will **open a fix PR** for you. This usually takes 15–20 minutes, and the PR will appear below this comment. Share early feedback in #appex-qa.
+```
+
+If a fix PR is already up (in draft or in review) in the Kibana repository, mention the PR link in the same tip block (instead of suggesting to add the label).
 
 ### 1. Visible header (required)
 
@@ -235,3 +270,12 @@ Include the following only if they provide high-value, actionable signal:
 - **Ruled out:** a brief note on alternative hypotheses that were investigated and dismissed.
 - **Verification:** specific steps to reproduce the failure or confirm the fix.
 - **Open questions:** unresolved design or environmental issues blocking a definitive fix ("a screenshot would have helped troubleshoot this" is a valid open question).
+
+#### Data collection issues (troubleshooting)
+
+If you couldn't retrieve evidence such as screenshots or logs because of an error, document each failure here so the workflow itself can be debugged. For each one, include:
+
+- the command you ran
+- the URL (if applicable)
+- the resulting error message
+- any other detail that could be useful for the investigation
