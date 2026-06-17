@@ -70,11 +70,16 @@ steps:
           Don't presuppose the failure mode; follow the evidence.
 
         After investigating, decide: direct conclusion or hypothesis fan-out?
-        - If the evidence is overwhelming and unambiguous for ONE root cause (confidence ≥ 0.90)
+        - If the evidence is overwhelming and unambiguous for ONE root cause (confidence ≥ 0.95)
           with no plausible competing explanations — set direct_conclusion and leave hypotheses
           empty. Synthesis will use it directly, skipping the gather/review phase.
         - Otherwise — any uncertainty, multiple candidates, or indirect evidence — generate
           2-5 hypotheses below. The gather/review phase exists to resolve that uncertainty.
+
+        IMPORTANT: You MUST produce either direct_conclusion OR at least 1 hypothesis.
+        An empty hypotheses array without direct_conclusion set is not valid — if you are
+        uncertain and cannot form a confident direct conclusion, always produce at least one
+        hypothesis, even with low prior confidence.
 
         Generate 2-5 targeted hypotheses ordered by prior confidence (highest first).
         (Only when not using direct_conclusion.)
@@ -100,6 +105,7 @@ steps:
         properties:
           context_summary:
             type: string
+            minLength: 1
           memory_context:
             type: string
           known_gaps:
@@ -134,7 +140,7 @@ steps:
             type: object
             description: >
               Set ONLY when the investigation produced overwhelming, unambiguous evidence for one
-              root cause (confidence ≥ 0.90) and there are no plausible competing explanations
+              root cause (confidence ≥ 0.95) and there are no plausible competing explanations
               worth testing. Setting this skips the gather/review fan-out entirely — synthesis
               will use it directly. Leave unset whenever there is any genuine uncertainty; in
               that case propose 1-5 hypotheses as normal.
