@@ -140,8 +140,12 @@ spaceTest.describe(
       async ({ pageObjects, page, kbnUrl }) => {
         await pageObjects.documentFlyout.openForRule(ruleName);
 
-        // Resolve the logged-in user's username to build the right selectable option selector
-        const meResponse = await page.request.get(kbnUrl.get(CURRENT_USER_PROFILE_API_PATH));
+        // Resolve the logged-in user's username to build the right selectable option selector.
+        // The 'x-elastic-internal-origin' header is required in serverless where
+        // server.restrictInternalApis=true blocks internal routes without it.
+        const meResponse = await page.request.get(kbnUrl.get(CURRENT_USER_PROFILE_API_PATH), {
+          headers: { 'x-elastic-internal-origin': 'Kibana' },
+        });
         const { username } = await meResponse.json();
 
         await pageObjects.documentFlyout.openAssigneesPanel();
