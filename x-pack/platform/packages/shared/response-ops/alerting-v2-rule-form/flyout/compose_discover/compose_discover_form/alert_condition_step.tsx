@@ -56,8 +56,8 @@ export function AlertConditionStep({
   const query = watch('query');
 
   const baseQuery = query.format === 'composed' ? query.base : '';
-  const alertBlock = query.format === 'composed' ? query.blocks.breach : '';
-  const fullQuery = query.format === 'standalone' ? query.breach : '';
+  const alertBlock = query.format === 'composed' ? query.breach.segment : '';
+  const fullQuery = query.format === 'standalone' ? query.breach.query : '';
 
   // Use the base query for field lookup when tracking is on; fall back to full breach query.
   const committedQuery = useMemo(() => {
