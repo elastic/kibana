@@ -103,16 +103,3 @@ export const WithMultipleTabs: StoryObj<TabbedContentProps> = {
     ],
   },
 };
-
-export const WithSelectedTab: StoryObj<TabbedContentProps> = {
-  render: TabbedContentTemplate,
-
-  args: {
-    items: [
-      { id: '1', label: 'First tab name' },
-      { id: '2', label: 'Second tab name' },
-      { id: '3', label: 'Third tab name' },
-    ],
-    selectedItemId: '1',
-  },
-};
