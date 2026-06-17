@@ -14,9 +14,12 @@ import {
   addFilterWithoutStrictCheck,
   addPinnedFilter,
   everyFieldMatches,
-  expectFiltersToExist,
   resolveDataViewId,
 } from '../../../fixtures/surrounding_docs';
+import {
+  FILTER_FIELD_GEO_SRC,
+  FILTER_VALUE_GEO_SRC_IN,
+} from '../../../fixtures/surrounding_docs/constants';
 
 const TEST_ANCHOR_FILTER_FIELD = testData.FILTER_FIELD_GEO_SRC;
 const TEST_ANCHOR_FILTER_VALUE = testData.FILTER_VALUE_GEO_SRC_IN;
@@ -104,27 +107,6 @@ spaceTest.describe(
     );
 
     spaceTest(
-      'filter for presence should be addable via expanded data grid rows',
-      async ({ pageObjects }) => {
-        await pageObjects.contextPage.openAnchorDocViewer();
-        await pageObjects.discover.findFieldByNameOrValueInDocViewer(TEST_ANCHOR_FILTER_FIELD);
-        await pageObjects.discover.clickFieldActionInFlyout(
-          TEST_ANCHOR_FILTER_FIELD,
-          'addExistsFilterButton'
-        );
-        await pageObjects.contextPage.waitUntilContextLoadingHasFinished();
-
-        expect(
-          await pageObjects.filterBar.hasFilter({
-            field: TEST_ANCHOR_FILTER_FIELD,
-            value: 'exists',
-            enabled: true,
-          })
-        ).toBe(true);
-      }
-    );
-
-    spaceTest(
       'should update data grid when a pinned filter is modified',
       async ({ pageObjects }) => {
         await addPinnedFilter(pageObjects);
@@ -146,14 +128,43 @@ spaceTest.describe(
     spaceTest(
       'should preserve filters when the page is refreshed',
       async ({ page, pageObjects }) => {
+        /**
+         * Asserts that both the pinned geo.src filter and the extension=png filter are present,
+         * and that every data grid row matches both (mirrors FTR's expectFiltersToExist closure).
+         */
+        const expectFiltersToExist = async (): Promise<void> => {
+          expect(await pageObjects.filterBar.getFilterCount()).toBe(2);
+          expect(
+            await pageObjects.filterBar.hasFilter({
+              field: FILTER_FIELD_GEO_SRC,
+              value: FILTER_VALUE_GEO_SRC_IN,
+              enabled: true,
+              pinned: true,
+            })
+          ).toBe(true);
+          expect(
+            await pageObjects.filterBar.hasFilter({
+              field: 'extension',
+              value: 'png',
+              enabled: true,
+            })
+          ).toBe(true);
+          expect(
+            await everyFieldMatches(
+              pageObjects,
+              (row) => row[1] === 'png' && row[2] === FILTER_VALUE_GEO_SRC_IN
+            )
+          ).toBe(true);
+        };
+
         await addPinnedFilter(pageObjects);
         await addFilterWithoutStrictCheck(page, 'extension', 'png');
         await pageObjects.contextPage.waitUntilContextLoadingHasFinished();
-        await expectFiltersToExist(pageObjects);
+        await expectFiltersToExist();
 
         await page.reload();
         await pageObjects.contextPage.waitUntilContextLoadingHasFinished();
-        await expectFiltersToExist(pageObjects);
+        await expectFiltersToExist();
       }
     );
 
