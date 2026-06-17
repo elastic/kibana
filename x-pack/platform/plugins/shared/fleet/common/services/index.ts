@@ -62,6 +62,7 @@ export {
   isIntegrationPolicyTemplate,
   getNormalizedInputs,
   getNormalizedDataStreams,
+  getPolicyTemplateDataStreamPaths,
   filterPolicyTemplatesTiles,
   hasMultipleEnabledPolicyTemplates,
   getPolicyTemplateInputDefinition,
