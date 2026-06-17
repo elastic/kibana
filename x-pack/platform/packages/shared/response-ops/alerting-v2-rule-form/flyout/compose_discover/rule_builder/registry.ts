@@ -9,9 +9,11 @@ import React from 'react';
 import type { RuleBuilderDefinition } from './types';
 import type { ThresholdFormValues } from './threshold/form_types';
 import {
-  AGGREGATIONS_REQUIRING_FIELD,
   DEFAULT_THRESHOLD_FORM_VALUES,
   generateId,
+  isStatFieldValid,
+  isStatLabelValid,
+  reconcileAlertConditionMetrics,
 } from './threshold/form_types';
 import { RuleBuilderAlertConditionStep } from './threshold/alert_condition_step';
 import { BuilderRecoveryForm } from './threshold/recovery_condition_step';
@@ -24,9 +26,7 @@ const defineBuilder = <TState>(def: RuleBuilderDefinition<TState>): RuleBuilderD
 const isThresholdFormValid = (values: ThresholdFormValues): boolean => {
   if (!values.indexPattern.trim()) return false;
 
-  const hasValidStat = values.stats.some(
-    (s) => s.label.trim() && (!AGGREGATIONS_REQUIRING_FIELD.includes(s.aggregation) || s.field)
-  );
+  const hasValidStat = values.stats.some((s) => isStatLabelValid(s) && isStatFieldValid(s));
   if (!hasValidStat) return false;
 
   const hasValidCondition = values.alertConditions.some(
@@ -43,6 +43,15 @@ const isThresholdFormValid = (values: ThresholdFormValues): boolean => {
 
   return true;
 };
+
+const getValidatedThresholdValues = (values: ThresholdFormValues): ThresholdFormValues => ({
+  ...values,
+  alertConditions: reconcileAlertConditionMetrics(
+    values.alertConditions,
+    values.stats,
+    values.evaluations
+  ),
+});
 
 const thresholdDefinition = defineBuilder<ThresholdFormValues>({
   type: 'threshold',
@@ -68,8 +77,8 @@ const thresholdDefinition = defineBuilder<ThresholdFormValues>({
       state: props.state,
       dispatch: props.dispatch,
     }),
-  validate: (state, builderState) =>
-    state.queryCommitted && (builderState ? isThresholdFormValid(builderState) : true),
+  validate: (_state, builderState) =>
+    builderState ? isThresholdFormValid(getValidatedThresholdValues(builderState)) : false,
   parseState: parseThresholdEsql,
 });
 
