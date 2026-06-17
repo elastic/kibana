@@ -18,8 +18,14 @@ import type {
 import { groupSteps } from './group_steps';
 import { ExecutionStatus } from '@kbn/agent-builder-common';
 
-const toolStep = (id: string): ToolCallStep =>
-  createToolCallStep({ tool_call_id: id, tool_id: `tool-${id}`, params: {}, results: [] });
+const toolStep = (id: string, groupId?: string): ToolCallStep =>
+  createToolCallStep({
+    tool_call_id: id,
+    tool_id: `tool-${id}`,
+    params: {},
+    results: [],
+    ...(groupId !== undefined ? { tool_call_group_id: groupId } : {}),
+  });
 
 const reasoningStep = (text = 'thinking…') => createReasoningStep({ reasoning: text });
 
@@ -209,6 +215,20 @@ describe('groupSteps', () => {
       { kind: 'step', step: r1, index: 0 },
       { kind: 'step', step: compact, index: 1 },
       { kind: 'step', step: r2, index: 2 },
+    ]);
+  });
+
+  it('splits consecutive parallel batches with different group IDs into separate groups even without a reasoning step between them', () => {
+    const a = toolStep('a', 'grp-1');
+    const b = toolStep('b', 'grp-1');
+    const c = toolStep('c', 'grp-2');
+    const d = toolStep('d', 'grp-2');
+
+    const result = groupSteps([a, b, c, d]);
+
+    expect(result).toEqual([
+      { kind: 'group', steps: [a, b] },
+      { kind: 'group', steps: [c, d] },
     ]);
   });
 });
