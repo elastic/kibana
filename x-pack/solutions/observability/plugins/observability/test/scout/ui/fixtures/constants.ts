@@ -79,6 +79,7 @@ export const CUSTOM_THRESHOLD_RULE_TEST_SUBJECTS = {
   // Rule Form
   RULE_FORM: 'ruleForm',
   RULE_NAME_INPUT: 'ruleDetailsNameInput',
+  RULE_DETAILS_TAGS_INPUT: 'ruleDetailsTagsInput',
 
   // Data View Selection
   DATA_VIEW_EXPRESSION: 'selectDataViewExpression',
@@ -116,6 +117,9 @@ export const CUSTOM_THRESHOLD_RULE_TEST_SUBJECTS = {
   // KQL Filter
   KQL_SEARCH_FIELD: 'o11ySearchField',
   KQL_SUGGESTIONS_PANEL: 'o11ySuggestionsPanel',
+
+  // Preview chart
+  PREVIEW_CHART: 'thresholdRulePreviewChart',
 
   // Rule Save
   RULE_SAVE_BUTTON: 'rulePageFooterSaveButton',
