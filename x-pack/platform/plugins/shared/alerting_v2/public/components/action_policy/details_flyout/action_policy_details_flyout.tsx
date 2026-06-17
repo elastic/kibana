@@ -16,6 +16,7 @@ import {
   EuiFlyout,
   EuiFlyoutBody,
   EuiFlyoutFooter,
+  EuiFlyoutProps,
   EuiHorizontalRule,
   EuiPanel,
   EuiSpacer,
@@ -51,6 +52,9 @@ interface Props {
   onCancelSnooze: (id: string) => void;
   onUpdateApiKey: (id: string) => void;
   isStateLoading?: boolean;
+  session: EuiFlyoutProps['session'];
+  ownFocus: EuiFlyoutProps['ownFocus'];
+  hasAnimation: EuiFlyoutProps['hasAnimation'];
 }
 
 export const ActionPolicyDetailsFlyout = ({
@@ -65,6 +69,9 @@ export const ActionPolicyDetailsFlyout = ({
   onCancelSnooze,
   onUpdateApiKey,
   isStateLoading = false,
+  session,
+  ownFocus = true,
+  hasAnimation = true,
 }: Props) => {
   const settings = useService(CoreStart('settings'));
   const dateTimeFormat = settings.client.get<string>('dateFormat');
@@ -126,9 +133,10 @@ export const ActionPolicyDetailsFlyout = ({
   return (
     <EuiFlyout
       type="push"
-      hasAnimation
+      hasAnimation={hasAnimation}
       size="s"
-      ownFocus
+      ownFocus={ownFocus}
+      session={session}
       hideCloseButton
       paddingSize="none"
       onClose={onClose}
