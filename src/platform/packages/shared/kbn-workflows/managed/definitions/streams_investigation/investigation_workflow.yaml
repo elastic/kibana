@@ -448,41 +448,51 @@ steps:
     with:
       timeout: 180s
       message: |
-        Synthesise the investigation results.
+        You are the final investigator. You have raw evidence gathered for each hypothesis
+        in parallel. Your job is to compare that evidence across all hypotheses, do follow-up
+        queries if needed, and produce the final root cause conclusion. There is no pre-filtering
+        or pre-judgment — you see everything and make the call yourself.
 
-        IMPORTANT — check the context first:
-        If context.direct_conclusion is set, the context agent concluded the investigation
-        directly without a hypothesis fan-out because the evidence was unambiguous. In that
-        case, use direct_conclusion as the root cause. Format it as a single ranked_hypothesis
-        with verdict=supported, prior_confidence=direct_conclusion.confidence,
-        posterior_confidence=direct_conclusion.confidence, and evidence_summary from
-        direct_conclusion.evidence_summary. Set investigation_complete=true and skip
-        remediation unless you can ground it in the direct evidence. Do not treat missing
-        branch results as a problem — they were intentionally skipped.
+        STEP 1 — Check for direct conclusion (short-circuit path):
+        If context.direct_conclusion is set, the context agent already concluded with high
+        confidence. Verify it briefly (one or two targeted queries if anything seems off),
+        then accept it or correct it. Format it as a single ranked_hypothesis with
+        verdict=supported and posterior_confidence=direct_conclusion.confidence.
 
-        Otherwise (normal path):
-        The branch results contain both gather and review outputs per hypothesis.
-        For ranking and remediation, use ONLY entries where review.decision === 'forward'.
-        Record entries where review.decision === 'discard' in discarded_hypotheses
-        (copy their hypothesis_id, statement, and discard_reason — do not rank them).
-        Produce a root cause statement only if at least one forwarded hypothesis was
-        'supported' — otherwise use "Undetermined". Only propose remediation options
-        grounded in the evidence; leave the array empty rather than offering generic advice.
-        Write lessons learned to memory. Set investigation_complete to false if all
-        forwarded hypotheses were out_of_reach or no hypotheses were forwarded at all.
-        If investigation_complete is false, provide lessons_for_next_round with specific,
-        actionable guidance on what different angles or services to investigate in round 2.
+        STEP 2 — Compare gather results across all hypotheses (normal path):
+        For each hypothesis branch_result that has gather data:
+        - What does the evidence say? supporting / refuting / inconclusive?
+        - How does it compare to the other hypotheses? Is one clearly stronger?
+        - Are there contradictions between hypotheses that help rule one out?
+        - Look for the hypothesis whose evidence is most specific and direct — caller-side
+          latency is weak evidence; a metric spike on the service itself is strong evidence.
 
-        Additional synthesis rules:
-        - When the same evidence is consistent with multiple causes, report all plausible
-          ones in ranked_hypotheses rather than collapsing to one.
-        - Match claims to evidence depth. Evidence from a caller's view of a dependency
-          call is not direct evidence about the dependency's internal state.
-        - A service showing errors is a symptom until proven otherwise — ensure root_cause
-          names the mechanism, not just the affected component.
-        - Be skeptical of hypotheses that name a broad, unspecified cause (shared
-          infrastructure, external dependency) without a specific named component — rank them
-          below hypotheses with a named, testable cause even if their posterior is higher.
+        STEP 3 — Follow up if needed:
+        If the gather results leave you genuinely uncertain between two hypotheses, run
+        additional targeted queries using your observability tools (executeEsql,
+        get_metric_change_points, get_trace_metrics, etc.) to resolve the ambiguity.
+        Keep it focused — 2-4 queries max. Don't re-run what gather already ran.
+        The stream names are in the context: {{ inputs.stream_names | json }}
+
+        STEP 4 — Produce the conclusion:
+        - root_cause: name the specific component and the mechanism. Not just "ServiceX was slow"
+          but "ServiceX experienced Y because of Z."
+        - ranked_hypotheses: ALL branches that had gather data, ranked best-to-worst by how well
+          the evidence supports them. Verdicts: supported / refuted / inconclusive / out_of_reach.
+          Include prior_confidence (from context hypotheses) and your assessed posterior_confidence.
+        - discarded_hypotheses: only if a branch had NO gather data at all (gather failed entirely).
+        - Set investigation_complete=false only if every hypothesis was out_of_reach.
+        - Write lessons to memory.
+
+        Reasoning principles:
+        - Absence of evidence for a hypothesis is inconclusive, not refuted. Only mark refuted
+          when you have positive contradicting evidence.
+        - A service that looks degraded from the caller's perspective may be a victim, not the
+          cause. Prefer evidence that is internal to the service (its own resource metrics, its
+          own error logs) over caller-side observations.
+        - Be skeptical of broad unfalsifiable conclusions ("shared infrastructure failure") — only
+          use them if no specific component can be identified. Name the most specific cause the
+          evidence actually supports.
 
         Context: {{ steps.build_context.output.structured_output | json }}
         Branch results: {{ steps.collect_results.output | json }}
