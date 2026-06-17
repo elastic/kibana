@@ -134,7 +134,7 @@ describe('<HighlighedFieldsModal />', () => {
     });
 
     await act(async () => {
-      getByTestId(HIGHLIGHTED_FIELDS_MODAL_SAVE_BUTTON_TEST_ID).click();
+      fireEvent.click(getByTestId(HIGHLIGHTED_FIELDS_MODAL_SAVE_BUTTON_TEST_ID));
     });
 
     expect(mockUpdateRule).toHaveBeenCalledWith({
