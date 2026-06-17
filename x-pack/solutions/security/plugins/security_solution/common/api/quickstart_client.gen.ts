@@ -380,6 +380,10 @@ import type {
   PreviewRiskScoreResponse,
 } from './entity_analytics/risk_engine/preview_route.gen';
 import type {
+  GetRiskScoreHistoryRequestQueryInput,
+  GetRiskScoreHistoryResponse,
+} from './entity_analytics/risk_engine/risk_score_history_route.gen';
+import type {
   UploadWatchlistCsvRequestParamsInput,
   UploadWatchlistCsvResponse,
 } from './entity_analytics/watchlists/csv_upload/csv_upload.gen';
@@ -2132,6 +2136,23 @@ Requires the **Timeline and Notes** read privilege (`notes_read`).
           [ELASTIC_HTTP_VERSION_HEADER]: '1',
         },
         method: 'GET',
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
+   * Returns time-ordered historical risk score entries from the risk score time-series index for a given entity.
+   */
+  async getRiskScoreHistory(props: GetRiskScoreHistoryProps) {
+    this.log.info(`${new Date().toISOString()} Calling API GetRiskScoreHistory`);
+    return this.kbnClient
+      .request<GetRiskScoreHistoryResponse>({
+        path: '/api/risk_score/history',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        },
+        method: 'GET',
+
+        query: props.query,
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
@@ -4072,6 +4093,9 @@ export interface GetPolicyResponseProps {
 }
 export interface GetProtectionUpdatesNoteProps {
   params: GetProtectionUpdatesNoteRequestParamsInput;
+}
+export interface GetRiskScoreHistoryProps {
+  query: GetRiskScoreHistoryRequestQueryInput;
 }
 export interface GetRuleMigrationProps {
   params: GetRuleMigrationRequestParamsInput;
