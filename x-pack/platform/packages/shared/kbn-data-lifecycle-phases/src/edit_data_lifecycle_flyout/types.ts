@@ -11,30 +11,37 @@ export type DataLifecycleMethod = 'dlm' | 'ilm';
 
 export type DataLifecycleApplyPayload =
   | { inheritLifecycle: true }
-  | { inheritLifecycle: false; method: 'dlm' }
+  | { inheritLifecycle: false; method: 'dlm'; frozenAfter?: string; dataRetention?: string }
   | { inheritLifecycle: false; method: 'ilm'; ilmPolicyName: string };
 
 export interface BuildDataLifecycleApplyPayloadArgs {
   inheritLifecycle: boolean;
   method: DataLifecycleMethod;
   ilmPolicyName?: string;
+  /** Serialized frozen phase duration (e.g. `'30d'`). Only used when `method === 'dlm'`. */
+  frozenAfter?: string;
+  /** Serialized delete phase retention (e.g. `'60d'`). Only used when `method === 'dlm'`. */
+  dataRetention?: string;
 }
 
 /**
- * Builds the minimal "apply" payload consumers typically need.
+ * Builds the "apply" payload consumers need to persist a lifecycle change.
  *
- * - When inheriting, the upstream source is the source of truth, so no additional
- *   details are returned.
- * - When using DLM, Streams saves "infinite retention" so no policy info is needed.
+ * - When inheriting, the upstream source is the source of truth.
+ * - When using DLM, the serialized phase durations are forwarded so callers
+ *   have everything they need in `onApply` without a separate `onChange` subscription.
  * - When using ILM, the selected policy name is required.
  */
 export const buildDataLifecycleApplyPayload = ({
   inheritLifecycle,
   method,
   ilmPolicyName,
+  frozenAfter,
+  dataRetention,
 }: BuildDataLifecycleApplyPayloadArgs): DataLifecycleApplyPayload | undefined => {
   if (inheritLifecycle) return { inheritLifecycle: true };
-  if (method === 'dlm') return { inheritLifecycle: false, method: 'dlm' };
+  if (method === 'dlm')
+    return { inheritLifecycle: false, method: 'dlm', frozenAfter, dataRetention };
   if (!ilmPolicyName) return undefined;
   return { inheritLifecycle: false, method: 'ilm', ilmPolicyName };
 };
