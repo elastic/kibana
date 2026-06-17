@@ -23,14 +23,10 @@ const InvestigationInlineContent = ({ attachment }: { attachment: InvestigationA
 );
 
 export const investigationAttachmentDefinition: AttachmentUIDefinition<InvestigationAttachment> = {
-  getLabel: (attachment) =>
-    attachment.data.investigation_complete
-      ? i18n.translate('xpack.streams.investigationAttachment.labelComplete', {
-          defaultMessage: 'Investigation complete',
-        })
-      : i18n.translate('xpack.streams.investigationAttachment.labelIncomplete', {
-          defaultMessage: 'Investigation (incomplete)',
-        }),
+  getLabel: () =>
+    i18n.translate('xpack.streams.investigationAttachment.label', {
+      defaultMessage: 'Investigation',
+    }),
   getIcon: () => 'inspect',
   getHeader: ({ attachment }) => ({
     icon: 'inspect',
@@ -43,16 +39,17 @@ export const investigationAttachmentDefinition: AttachmentUIDefinition<Investiga
         }),
         color: attachment.data.confidence >= 0.7 ? 'success' : 'warning',
       },
-      ...(attachment.data.investigation_complete
-        ? []
-        : [
+      ...(attachment.data.gaps_found.length > 0
+        ? [
             {
-              label: i18n.translate('xpack.streams.investigationAttachment.incompleteBadge', {
-                defaultMessage: 'Incomplete',
+              label: i18n.translate('xpack.streams.investigationAttachment.gapsBadge', {
+                defaultMessage: '{count} gap(s)',
+                values: { count: attachment.data.gaps_found.length },
               }),
               color: 'warning' as const,
             },
-          ]),
+          ]
+        : []),
     ],
   }),
   renderInlineContent: ({ attachment }) => <InvestigationInlineContent attachment={attachment} />,

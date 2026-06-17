@@ -21,33 +21,19 @@ import {
 } from './investigation_attachment_type';
 
 const investigation: InvestigationResult = {
-  root_cause: 'Payment gateway timeout caused by connection pool exhaustion.',
+  root_cause: 'payments-svc connection pool exhausted after a bad deploy at 14:23.',
   confidence: 0.85,
-  impact: 'Critical — checkout flow unavailable for 12 minutes.',
-  ranked_hypotheses: [
+  evidence_summary:
+    'ES|QL query confirmed a spike in DB latency starting at 14:23, matching the deploy timestamp. Connection pool metrics hit 100% utilisation within 30 seconds.',
+  mechanism:
+    'Deploy introduced a blocking DB query that held connections, exhausting the pool and causing downstream timeouts.',
+  alternatives_ruled_out: [
     {
-      rank: 1,
-      hypothesis_id: 'dep-rollout',
-      statement: 'Bad deploy to payments-svc at 14:23 introduced a blocking DB query.',
-      verdict: 'supported',
-      prior_confidence: 0.7,
-      posterior_confidence: 0.9,
-      evidence_summary: 'ES|QL query confirmed spike in DB latency at 14:23, matching deploy time.',
-    },
-  ],
-  discarded_hypotheses: [],
-  remediation_options: [
-    {
-      rank: 1,
-      action: 'Roll back payments-svc to the previous version.',
-      rationale:
-        'Deploy at 14:23 correlates with latency spike — rollback should restore normal latency.',
-      risk_level: 'medium',
+      candidate: 'payments-gateway (external)',
+      reason: 'Gateway metrics were normal throughout the incident window.',
     },
   ],
   gaps_found: [],
-  investigation_complete: true,
-  memory_pages_written: ['payments-svc/incidents/2026-06-13'],
 };
 
 const createContext = (): AttachmentResolveContext => ({

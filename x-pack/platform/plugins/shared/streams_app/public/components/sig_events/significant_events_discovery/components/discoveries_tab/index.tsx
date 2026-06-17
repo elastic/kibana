@@ -106,20 +106,16 @@ const columns: Array<EuiBasicTableColumn<Discovery>> = [
     width: '120px',
     render: (discovery: Discovery) => {
       if (!discovery.investigation) return null;
-      if (discovery.investigation.investigation_complete) {
-        return (
-          <EuiBadge color="success">
-            {i18n.translate('xpack.streams.discoveriesTab.investigationComplete', {
-              defaultMessage: 'Complete',
-            })}
-          </EuiBadge>
-        );
-      }
+      const hasGaps = (discovery.investigation.gaps_found ?? []).length > 0;
       return (
-        <EuiBadge color="warning">
-          {i18n.translate('xpack.streams.discoveriesTab.investigationIncomplete', {
-            defaultMessage: 'Incomplete',
-          })}
+        <EuiBadge color={hasGaps ? 'warning' : 'success'}>
+          {hasGaps
+            ? i18n.translate('xpack.streams.discoveriesTab.investigationWithGaps', {
+                defaultMessage: 'Done (gaps)',
+              })
+            : i18n.translate('xpack.streams.discoveriesTab.investigationDone', {
+                defaultMessage: 'Done',
+              })}
         </EuiBadge>
       );
     },

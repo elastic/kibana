@@ -130,18 +130,17 @@ export function createShowInvestigationTool({
                 discovery_id,
                 root_cause: investigation.root_cause,
                 confidence: investigation.confidence,
-                investigation_complete: investigation.investigation_complete,
-                hypothesis_count: investigation.ranked_hypotheses.length,
+                alternatives_ruled_out_count: investigation.alternatives_ruled_out.length,
                 message: i18n.translate(
                   'xpack.streams.agentBuilder.tools.showInvestigation.success',
                   {
                     defaultMessage:
-                      'Investigation results loaded for "{title}". Root cause: {rootCause} (confidence: {confidence}%). {hypothesisCount} hypothesis/hypotheses investigated.',
+                      'Investigation results loaded for "{title}". Root cause: {rootCause} (confidence: {confidence}%). {alternativeCount} alternative(s) ruled out.',
                     values: {
                       title: latest.title,
                       rootCause: investigation.root_cause,
                       confidence: Math.round(investigation.confidence * 100),
-                      hypothesisCount: investigation.ranked_hypotheses.length,
+                      alternativeCount: investigation.alternatives_ruled_out.length,
                     },
                   }
                 ),
