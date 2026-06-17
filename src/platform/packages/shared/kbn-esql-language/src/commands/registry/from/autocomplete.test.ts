@@ -275,15 +275,15 @@ describe('FROM Autocomplete', () => {
     });
 
     test('on <kbd>SPACE</kbd> after "METADATA" column suggests command and pipe operators', async () => {
-      await fromExpectSuggestions('from a, b metadata _index ', [',', '| '], mockCallbacks);
+      await fromExpectSuggestions('from a, b metadata _index ', ['\n', ',', '| '], mockCallbacks);
       await fromExpectSuggestions(
         'from a, b metadata _index, _source ',
-        [',', '| '],
+        ['\n', ',', '| '],
         mockCallbacks
       );
       await fromExpectSuggestions(
         `from a, b metadata ${METADATA_FIELDS.join(', ')} `,
-        ['| '],
+        ['\n', '| '],
         mockCallbacks
       );
     });
