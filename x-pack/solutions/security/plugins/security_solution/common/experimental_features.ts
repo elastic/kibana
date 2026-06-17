@@ -294,6 +294,11 @@ export const allowedExperimentalValues = Object.freeze({
    * Enabled by default;
    */
   newTermsEsqlApproachEnabled: true,
+  
+   /**
+   * Enables the risk score history API endpoint for Entity Analytics.
+   */
+  riskScoreHistoryEnabled: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;
