@@ -149,7 +149,7 @@ export const legendTruncateAfterLinesSchema = z.number().min(1).max(10).default(
   id: 'legendTruncateAfterLines',
 });
 
-export const legendPositionSchema = positionSchema.default('right').meta({
+export const legendPositionSchema = positionSchema.default('right').optional().meta({
   id: 'legendPosition',
   title: 'Legend Position',
   description: 'Legend Position.',
