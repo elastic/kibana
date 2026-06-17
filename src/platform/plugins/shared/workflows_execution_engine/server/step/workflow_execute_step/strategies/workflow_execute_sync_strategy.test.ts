@@ -405,6 +405,87 @@ describe('WorkflowExecuteSyncStrategy', () => {
       mockStepRuntime.getCurrentStepState.mockReturnValue(waitState);
     });
 
+    it('should fail when execution is not found', async () => {
+      mockExecRepo.getWorkflowExecutionById.mockResolvedValue(null);
+
+      const result = await strategy.execute(createMockWorkflow(), {}, 'default', mockRequest, 0);
+
+      expect(result.status).toBe('failed');
+      expect(result.error!.message).toContain('not found');
+    });
+
+    it('should fail when execution repo throws', async () => {
+      mockExecRepo.getWorkflowExecutionById.mockRejectedValue(new Error('ES unavailable'));
+
+      const result = await strategy.execute(createMockWorkflow(), {}, 'default', mockRequest, 0);
+
+      expect(result).toEqual({
+        status: 'failed',
+        error: expect.objectContaining({ message: 'ES unavailable' }),
+      });
+    });
+
+    it('should use workflow.output from context when available', async () => {
+      mockExecRepo.getWorkflowExecutionById.mockResolvedValue({
+        id: 'child-exec-1',
+        status: ExecutionStatus.COMPLETED,
+        context: { output: { message: 'from workflow.output' } },
+      } as any);
+
+      const result = await strategy.execute(createMockWorkflow(), {}, 'default', mockRequest, 0);
+
+      expect(result).toEqual({
+        status: 'completed',
+        output: { message: 'from workflow.output' },
+      });
+      expect(mockStepRepo.getStepExecutionsByWorkflowExecution).not.toHaveBeenCalled();
+    });
+
+    it('should fall back to step executions when no context output', async () => {
+      mockExecRepo.getWorkflowExecutionById.mockResolvedValue({
+        id: 'child-exec-1',
+        status: ExecutionStatus.COMPLETED,
+        context: {},
+        stepExecutionIds: ['step-1'],
+      } as any);
+
+      mockStepRepo.getStepExecutionsByWorkflowExecution.mockResolvedValue([
+        {
+          id: 'step-1',
+          stepId: 'step1',
+          spaceId: 'default',
+          scopeStack: [],
+          output: { data: 'from last step' },
+        },
+      ] as any);
+
+      const result = await strategy.execute(createMockWorkflow(), {}, 'default', mockRequest, 0);
+
+      expect(result.status).toBe('completed');
+      expect(result.output).toEqual({ data: 'from last step' });
+      expect(mockStepRepo.getStepExecutionsByWorkflowExecution).toHaveBeenCalledWith(
+        'child-exec-1',
+        undefined,
+        ['step-1']
+      );
+    });
+
+    it('should return null output when no step executions exist', async () => {
+      mockExecRepo.getWorkflowExecutionById.mockResolvedValue({
+        id: 'child-exec-1',
+        status: ExecutionStatus.COMPLETED,
+        context: {},
+        stepExecutionIds: [],
+      } as any);
+
+      mockStepRepo.getStepExecutionsByWorkflowExecution.mockResolvedValue([]);
+
+      const result = await strategy.execute(createMockWorkflow(), {}, 'default', mockRequest, 0);
+
+      expect(result.status).toBe('completed');
+      expect(result.output).toBeUndefined();
+    });
+
     it('should return the last step output at top level', async () => {
       mockExecRepo.getWorkflowExecutionById.mockResolvedValue({
         id: 'child-exec-1',

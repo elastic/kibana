@@ -8,7 +8,6 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
-import { v4 as generateUuid } from 'uuid';
 import type {
   CoreSetup,
   CoreStart,
@@ -28,6 +27,7 @@ import {
   WorkflowExecutionInvalidStatusError,
   WorkflowExecutionNotFoundError,
 } from '@kbn/workflows/common/errors';
+import { generateEncodedWorkflowExecutionId } from '@kbn/workflows/server/utils';
 import { ConcurrencyManager } from './concurrency/concurrency_manager';
 import type { WorkflowsExecutionEngineConfig } from './config';
 import {
@@ -90,6 +90,7 @@ import {
 } from './workflow_task_manager/workflow_task_manager';
 import { createWorkflowTaskAbortController } from './workflow_task_shutdown';
 import { createIndexes } from '../common';
+import { WORKFLOWS_EXECUTIONS_INDEX_PATTERN } from '../common/workflow_executions_index';
 
 /**
  * Max Task Manager attempts for `workflow:run`.
@@ -532,8 +533,16 @@ export class WorkflowsExecutionEnginePlugin
               );
               span?.end();
 
+              const [resolvedStepExecutionsIndex, resolvedExecutionsIndex] = await Promise.all([
+                stepExecutionRepository.resolveWriteIndex(),
+                workflowExecutionRepository.resolveWriteIndex(),
+              ]);
+
               const workflowExecution: Partial<EsWorkflowExecution> = {
-                id: generateUuid(),
+                id: generateEncodedWorkflowExecutionId({
+                  indexName: resolvedExecutionsIndex,
+                  indexPattern: WORKFLOWS_EXECUTIONS_INDEX_PATTERN,
+                }),
                 spaceId,
                 workflowId: workflow.id,
                 ...pickManagedWorkflowFields(workflow),
@@ -549,6 +558,8 @@ export class WorkflowsExecutionEnginePlugin
                 createdAt: workflowCreatedAt.toISOString(),
                 executedBy,
                 triggeredBy: 'scheduled',
+                stepExecutionsIndex: resolvedStepExecutionsIndex,
+                executionsIndex: resolvedExecutionsIndex,
                 // Store queue delay metrics for observability (only if enabled in config)
                 ...(this.config.collectQueueMetrics
                   ? {
@@ -634,6 +645,7 @@ export class WorkflowsExecutionEnginePlugin
     // Initialize ConcurrencyManager with dependencies
     const workflowTaskManager = new WorkflowTaskManager(plugins.taskManager);
     const workflowExecutionRepository = new WorkflowExecutionRepository(esClient);
+    const stepExecutionRepo = new StepExecutionRepository(esClient);
     const workflowRepository = new WorkflowRepository({ esClient, logger: this.logger });
     this.concurrencyManager = new ConcurrencyManager(
       workflowTaskManager,
@@ -670,16 +682,26 @@ export class WorkflowsExecutionEnginePlugin
 
     // Builds an execution document without persisting it. Shared by the
     // single-item persist helper and the bulk scheduling path.
-    const buildWorkflowExecutionDocument = (args: {
+    const buildWorkflowExecutionDocument = async (args: {
       workflow: WorkflowExecutionEngineModel;
       context: Record<string, unknown>;
       defaultTriggeredBy: string;
       authenticatedUser: string;
       now: Date;
-    }): WorkflowExecutionForInputRendering => {
-      const { workflow, context, defaultTriggeredBy, authenticatedUser, now } = args;
+      resolvedIndexes?: {
+        stepExecutionsIndex: string;
+        executionsIndex: string;
+      };
+    }): Promise<WorkflowExecutionForInputRendering> => {
+      const { workflow, context, defaultTriggeredBy, authenticatedUser, now, resolvedIndexes } = args;
       const triggeredBy = (context.triggeredBy as string | undefined) || defaultTriggeredBy;
       const spaceId = (context.spaceId as string | undefined) || 'default';
+      const [resolvedStepExecutionsIndex, resolvedExecutionsIndex] = resolvedIndexes
+        ? [resolvedIndexes.stepExecutionsIndex, resolvedIndexes.executionsIndex]
+        : await Promise.all([
+            stepExecutionRepo.resolveWriteIndex(),
+            workflowExecutionRepository.resolveWriteIndex(),
+          ]);
       const metadata = context.metadata as Record<string, unknown> | undefined;
       const eventPayload = context.event as Record<string, unknown> | undefined;
       let rootEventChainDepth: number | undefined;
@@ -700,8 +722,13 @@ export class WorkflowsExecutionEnginePlugin
       );
       const dispatchEventId =
         typeof metadata?.eventId === 'string' ? metadata.eventId.trim() || undefined : undefined;
-      const workflowExecution: WorkflowExecutionForInputRendering = {
-        id: generateUuid(),
+      const workflowExecution: Partial<EsWorkflowExecution> = {
+        id: generateEncodedWorkflowExecutionId({
+          indexName: resolvedExecutionsIndex,
+          indexPattern: WORKFLOWS_EXECUTIONS_INDEX_PATTERN,
+        }),
+        stepExecutionsIndex: resolvedStepExecutionsIndex,
+        executionsIndex: resolvedExecutionsIndex,
         spaceId,
         workflowId: workflow.id,
         ...pickManagedWorkflowFields(workflow),
@@ -752,7 +779,7 @@ export class WorkflowsExecutionEnginePlugin
         coreStart.elasticsearch.client
       );
 
-      const workflowExecution = buildWorkflowExecutionDocument({
+      const workflowExecution = await buildWorkflowExecutionDocument({
         workflow,
         context,
         defaultTriggeredBy,
@@ -969,6 +996,11 @@ export class WorkflowsExecutionEnginePlugin
       }
       const prepared: PreparedItem[] = [];
 
+      const [bulkStepExecutionsIndex, bulkExecutionsIndex] = await Promise.all([
+        stepExecutionRepo.resolveWriteIndex(),
+        workflowExecutionRepository.resolveWriteIndex(),
+      ]);
+
       for (let idx = 0; idx < items.length; idx++) {
         const item = items[idx];
         try {
@@ -981,12 +1013,16 @@ export class WorkflowsExecutionEnginePlugin
               );
             }
           }
-          const workflowExecution = buildWorkflowExecutionDocument({
+          const workflowExecution = await buildWorkflowExecutionDocument({
             workflow: item.workflow,
             context: item.context,
             defaultTriggeredBy: 'alert',
             authenticatedUser,
             now,
+            resolvedIndexes: {
+              stepExecutionsIndex: bulkStepExecutionsIndex,
+              executionsIndex: bulkExecutionsIndex,
+            },
           });
           prepared.push({ idx, workflowExecution });
         } catch (err) {
@@ -1113,8 +1149,15 @@ export class WorkflowsExecutionEnginePlugin
         coreStart.security,
         coreStart.elasticsearch.client
       );
-      const workflowExecution = {
-        id: generateUuid(),
+      const [resolvedStepExecutionsIndex, resolvedExecutionsIndex] = await Promise.all([
+        stepExecutionRepo.resolveWriteIndex(),
+        workflowExecutionRepository.resolveWriteIndex(),
+      ]);
+      const workflowExecution: Partial<EsWorkflowExecution> = {
+        id: generateEncodedWorkflowExecutionId({
+          indexName: resolvedExecutionsIndex,
+          indexPattern: WORKFLOWS_EXECUTIONS_INDEX_PATTERN,
+        }),
         spaceId: workflow.spaceId,
         stepId,
         workflowId: workflow.id,
@@ -1127,6 +1170,8 @@ export class WorkflowsExecutionEnginePlugin
         createdAt: workflowCreatedAt.toISOString(),
         executedBy,
         triggeredBy,
+        stepExecutionsIndex: resolvedStepExecutionsIndex,
+        executionsIndex: resolvedExecutionsIndex,
       };
 
       await workflowExecutionRepository.createWorkflowExecution(workflowExecution);
@@ -1363,6 +1408,8 @@ export class WorkflowsExecutionEnginePlugin
       // gets a fresh `createIndexes` invocation.
       const attempt = createIndexes({
         esClient: coreStart.elasticsearch.client.asInternalUser,
+        rolloverMaxAge: this.config.rolloverMaxAge,
+        rolloverMaxDocs: this.config.rolloverMaxDocs,
         logger: this.logger,
       });
       this.initializePromise = attempt;

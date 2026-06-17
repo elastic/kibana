@@ -11,12 +11,31 @@ import type { estypes } from '@elastic/elasticsearch';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { EsWorkflowExecution } from '@kbn/workflows';
 import { NonTerminalExecutionStatuses } from '@kbn/workflows';
+import { decodeEncodedWorkflowExecutionId, resolveIndex } from '@kbn/workflows/server/utils';
 import { WORKFLOWS_EXECUTIONS_INDEX } from '../../common';
+import { WORKFLOWS_EXECUTIONS_INDEX_PATTERN } from '../../common/workflow_executions_index';
 
 export class WorkflowExecutionRepository {
   private indexName = WORKFLOWS_EXECUTIONS_INDEX;
 
   constructor(private esClient: ElasticsearchClient) {}
+
+  /**
+   * Resolves the current write index backing the workflow executions alias.
+   * Called once when a workflow execution starts so the backing index name
+   * can be pinned on the execution document, ensuring all updates for that
+   * execution target the same backing index even if ILM rolls over mid-execution.
+   */
+  public async resolveWriteIndex(): Promise<string> {
+    const aliasInfo = await this.esClient.indices.getAlias({ name: this.indexName });
+    for (const [name, indexAliases] of Object.entries(aliasInfo)) {
+      const alias = indexAliases.aliases[this.indexName];
+      if (alias?.is_write_index) {
+        return name;
+      }
+    }
+    return this.indexName;
+  }
 
   /**
    * Retrieves a workflow execution by its ID from Elasticsearch.
@@ -33,8 +52,15 @@ export class WorkflowExecutionRepository {
     spaceId: string
   ): Promise<EsWorkflowExecution | null> {
     try {
+      const result = decodeEncodedWorkflowExecutionId(workflowExecutionId);
+
+      if (!result.success) {
+        throw new Error(`Failed to decode workflow execution ID: ${result.error}`);
+      }
+
+      const { indexSuffix } = result;
       const response = await this.esClient.get<EsWorkflowExecution>({
-        index: this.indexName,
+        index: resolveIndex({ indexSuffix, indexPattern: WORKFLOWS_EXECUTIONS_INDEX_PATTERN }),
         id: workflowExecutionId,
       });
 
@@ -134,6 +160,11 @@ export class WorkflowExecutionRepository {
    * @throws {Error} If the `id` property is not provided in the `workflowExecution` object.
    * @returns A promise that resolves when the update operation is complete.
    */
+  /**
+   * @param targetIndex When provided, the update targets this specific backing
+   *   index instead of the alias. Used to pin updates to the backing index that
+   *   was current when the execution was created.
+   */
   public async updateWorkflowExecution(
     workflowExecution: Partial<EsWorkflowExecution>
   ): Promise<void> {
@@ -141,8 +172,17 @@ export class WorkflowExecutionRepository {
       throw new Error('Workflow execution ID is required for update');
     }
 
+    const result = decodeEncodedWorkflowExecutionId(workflowExecution.id);
+
+    if (!result.success) {
+      throw new Error(`Failed to decode workflow execution ID: ${result.error}`);
+    }
+
     await this.esClient.update<Partial<EsWorkflowExecution>>({
-      index: this.indexName,
+      index: resolveIndex({
+        indexSuffix: result.indexSuffix,
+        indexPattern: WORKFLOWS_EXECUTIONS_INDEX_PATTERN,
+      }),
       id: workflowExecution.id,
       refresh: false,
       doc: workflowExecution,
@@ -164,16 +204,27 @@ export class WorkflowExecutionRepository {
       return;
     }
 
-    updates.forEach((update) => {
+    const operations = updates.flatMap((update) => {
       if (!update.id) {
         throw new Error('Workflow execution ID is required for bulk update');
       }
+
+      const result = decodeEncodedWorkflowExecutionId(update.id);
+      if (!result.success) {
+        throw new Error(`Failed to decode workflow execution ID: ${result.error}`);
+      }
+
+      const index = resolveIndex({
+        indexSuffix: result.indexSuffix,
+        indexPattern: WORKFLOWS_EXECUTIONS_INDEX_PATTERN,
+      });
+
+      return [{ update: { _index: index, _id: update.id } }, { doc: update }];
     });
 
     const bulkResponse = await this.esClient.bulk({
       refresh: true,
-      index: this.indexName,
-      body: updates.flatMap((update) => [{ update: { _id: update.id } }, { doc: update }]),
+      operations,
     });
 
     if (bulkResponse.errors) {

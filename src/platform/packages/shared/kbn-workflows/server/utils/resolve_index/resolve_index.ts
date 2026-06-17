@@ -7,6 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { WORKFLOWS_STEP_EXECUTIONS_INDEX } from './step_executions_index';
-export { WORKFLOWS_EXECUTIONS_INDEX } from './workflow_executions_index';
-export { createIndexes } from './create_indexes';
+export function resolveIndex({
+  indexSuffix,
+  indexPattern,
+}: {
+  indexSuffix: string;
+  indexPattern: string;
+}): string {
+  if (!indexPattern.endsWith('*')) {
+    throw new Error('indexPattern must end with *');
+  }
+  return `${indexPattern.slice(0, -1)}${indexSuffix}`;
+}

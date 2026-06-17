@@ -16,6 +16,11 @@ import type {
 
 export class StepExecutionRepositoryMock implements Required<StepExecutionRepository> {
   public stepExecutions = new Map<string, EsWorkflowStepExecution>();
+
+  public resolveWriteIndex(): Promise<string> {
+    return Promise.resolve('.workflows-step-executions-000001');
+  }
+
   public searchStepExecutionsByExecutionId(
     executionId: string
   ): Promise<EsWorkflowStepExecution[]> {
@@ -27,7 +32,8 @@ export class StepExecutionRepositoryMock implements Required<StepExecutionReposi
   public getStepExecutionsByIds(
     stepExecutionIds: string[],
     sourceIncludes?: StepExecutionField[],
-    sourceExcludes?: StepExecutionField[]
+    sourceExcludes?: StepExecutionField[],
+    _stepsExecutionIndex?: string
   ): Promise<EsWorkflowStepExecution[]> {
     const results = stepExecutionIds
       .map((id) => this.stepExecutions.get(id) || null)
@@ -47,6 +53,9 @@ export class StepExecutionRepositoryMock implements Required<StepExecutionReposi
             delete (filtered as Record<string, unknown>)[field];
           }
         }
+        if (sourceIncludes?.includes('output' as StepExecutionField) && filtered.output === undefined) {
+          filtered.output = null;
+        }
         return filtered;
       });
     return Promise.resolve(results);
@@ -54,6 +63,7 @@ export class StepExecutionRepositoryMock implements Required<StepExecutionReposi
 
   public getStepExecutionsByWorkflowExecution(
     workflowExecutionId: string,
+    _stepsExecutionWriteIndex?: string,
     _stepExecutionIds?: string[]
   ): Promise<EsWorkflowStepExecution[]> {
     return this.searchStepExecutionsByExecutionId(workflowExecutionId);
@@ -61,7 +71,8 @@ export class StepExecutionRepositoryMock implements Required<StepExecutionReposi
 
   public async markNonTerminalStepsFailed(
     workflowExecutionId: string,
-    error: SerializedError
+    error: SerializedError,
+    stepsExecutionIndex?: string
   ): Promise<void> {
     const stepExecutions = await this.searchStepExecutionsByExecutionId(workflowExecutionId);
     const nonTerminalSteps = stepExecutions.filter((step) => !isTerminalStatus(step.status));
@@ -77,11 +88,15 @@ export class StepExecutionRepositoryMock implements Required<StepExecutionReposi
         status: ExecutionStatus.FAILED,
         error,
         finishedAt,
-      }))
+      })),
+      stepsExecutionIndex
     );
   }
 
-  public bulkUpsert(stepExecutions: Partial<EsWorkflowStepExecution>[]): Promise<void> {
+  public bulkUpsert(
+    stepExecutions: Partial<EsWorkflowStepExecution>[],
+    _targetIndex?: string
+  ): Promise<void> {
     for (const stepExecution of stepExecutions) {
       if (!stepExecution.id) {
         throw new Error('Step execution ID is required for upsert');

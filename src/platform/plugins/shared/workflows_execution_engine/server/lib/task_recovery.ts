@@ -84,6 +84,7 @@ export async function resolveInterruptedWorkflowRunTask({
     workflowRunId,
     {
       message: taskRecoveryMessages.workflowRunInterrupted,
+      stepsExecutionIndex: execution.stepExecutionsIndex,
     }
   );
 
@@ -149,6 +150,7 @@ export async function resolveInterruptedWorkflowResumeTask({
     workflowRunId,
     {
       message: taskRecoveryMessages.workflowResumeInterrupted,
+      stepsExecutionIndex: execution.stepExecutionsIndex,
     }
   );
 
@@ -166,9 +168,11 @@ export async function markExecutionFailedTaskRecovery(
   {
     message,
     type = TASK_RECOVERY_ERROR_TYPE,
+    stepsExecutionIndex,
   }: {
     message: string;
     type?: typeof TASK_RECOVERY_ERROR_TYPE | 'TaskAttemptsExhaustedError';
+    stepsExecutionIndex?: string;
   }
 ): Promise<void> {
   const error = { type, message };
@@ -181,7 +185,11 @@ export async function markExecutionFailedTaskRecovery(
     finishedAt,
   });
 
-  await stepExecutionRepository.markNonTerminalStepsFailed(executionId, error);
+  await stepExecutionRepository.markNonTerminalStepsFailed(
+    executionId,
+    error,
+    stepsExecutionIndex
+  );
 }
 
 /**
@@ -228,6 +236,7 @@ export async function resolveExhaustedWorkflowRunTask({
         {
           type: 'TaskAttemptsExhaustedError',
           message: buildTaskAttemptsExhaustedMessage(lastMessage),
+          stepsExecutionIndex: execution.stepExecutionsIndex,
         }
       );
     }
