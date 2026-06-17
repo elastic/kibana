@@ -192,7 +192,7 @@ export const useSynthesizeMemory = () => {
 };
 
 export interface InvestigationFeedbackPayload {
-  aspect: 'root_cause' | 'alternative';
+  aspect: 'contributing_factors' | 'alternative';
   feedback: 'correct' | 'incorrect';
   discovery_id: string;
   alternative_candidate?: string;

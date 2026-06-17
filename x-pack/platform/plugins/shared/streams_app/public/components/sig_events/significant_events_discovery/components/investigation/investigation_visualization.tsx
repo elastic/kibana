@@ -118,8 +118,8 @@ export const InvestigationVisualization = ({
         <EuiFlexItem>
           <EuiTitle size="xs">
             <h4>
-              {i18n.translate('xpack.streams.investigation.rootCauseLabel', {
-                defaultMessage: 'Root Cause',
+              {i18n.translate('xpack.streams.investigation.contributingFactorsLabel', {
+                defaultMessage: 'Contributing Factors',
               })}
             </h4>
           </EuiTitle>
@@ -128,17 +128,17 @@ export const InvestigationVisualization = ({
           <EuiFlexItem grow={false}>
             <FeedbackButtons
               onThumbsUp={() =>
-                sendFeedback({ aspect: 'root_cause', feedback: 'correct', discovery_id: discoveryId })
+                sendFeedback({ aspect: 'contributing_factors', feedback: 'correct', discovery_id: discoveryId })
               }
               onThumbsDown={() =>
-                sendFeedback({ aspect: 'root_cause', feedback: 'incorrect', discovery_id: discoveryId })
+                sendFeedback({ aspect: 'contributing_factors', feedback: 'incorrect', discovery_id: discoveryId })
               }
             />
           </EuiFlexItem>
         )}
       </EuiFlexGroup>
       <EuiSpacer size="xs" />
-      <EuiText size="s">{investigation.root_cause}</EuiText>
+      <EuiText size="s">{investigation.contributing_factors}</EuiText>
 
       <EuiSpacer size="s" />
       <EuiText size="s" color="subdued">

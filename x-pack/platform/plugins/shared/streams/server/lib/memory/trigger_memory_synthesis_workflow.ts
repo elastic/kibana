@@ -18,7 +18,7 @@ import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
  */
 export interface MemorySynthesisInputs {
   user_feedback?: {
-    aspect: 'root_cause' | 'alternative';
+    aspect: 'contributing_factors' | 'alternative';
     feedback: 'correct' | 'incorrect';
     discovery_id: string;
     alternative_candidate?: string;

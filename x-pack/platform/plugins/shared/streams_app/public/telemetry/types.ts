@@ -151,7 +151,7 @@ interface StreamsInsightFeedbackProps {
   insight_impact: InsightImpactLevel;
 }
 
-type InvestigationFeedbackAspect = 'root_cause' | 'alternative';
+type InvestigationFeedbackAspect = 'contributing_factors' | 'alternative';
 type InvestigationFeedbackValue = 'correct' | 'incorrect';
 
 interface StreamsInvestigationFeedbackProps {

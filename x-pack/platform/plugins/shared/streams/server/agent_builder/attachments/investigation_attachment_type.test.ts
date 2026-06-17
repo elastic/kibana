@@ -21,7 +21,7 @@ import {
 } from './investigation_attachment_type';
 
 const investigation: InvestigationResult = {
-  root_cause: 'payments-svc connection pool exhausted after a bad deploy at 14:23.',
+  contributing_factors: 'payments-svc connection pool exhausted after a bad deploy at 14:23.',
   confidence: 0.85,
   evidence_summary:
     'ES|QL query confirmed a spike in DB latency starting at 14:23, matching the deploy timestamp. Connection pool metrics hit 100% utilisation within 30 seconds.',
@@ -57,7 +57,7 @@ const createGetScopedClients = (
               stream_names: ['logs.payment'],
               title: 'Payment outage',
               summary: 'Payments failing.',
-              root_cause: 'Unknown.',
+              contributing_factors: 'Unknown.',
               criticality: 90,
               confidence: 0.8,
               impact: 'high',
@@ -118,7 +118,7 @@ describe('createInvestigationAttachmentType', () => {
     });
 
     const resolved = await type.resolve?.('disc-1', createContext());
-    expect(resolved).toMatchObject({ root_cause: investigation.root_cause });
+    expect(resolved).toMatchObject({ root_cause: investigation.contributing_factors });
   });
 
   it('returns undefined when the discovery has no investigation', async () => {

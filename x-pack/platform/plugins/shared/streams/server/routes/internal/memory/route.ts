@@ -511,7 +511,7 @@ const consolidateMemoryRoute = createWorkflowTriggerRoute(
 );
 
 const investigationFeedbackSchema = z.object({
-  aspect: z.enum(['root_cause', 'alternative']),
+  aspect: z.enum(['contributing_factors', 'alternative']),
   feedback: z.enum(['correct', 'incorrect']),
   discovery_id: z.string(),
   alternative_candidate: z.string().optional(),

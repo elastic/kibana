@@ -500,7 +500,7 @@ const streamsInvestigationFeedbackSchema: RootSchema<StreamsInvestigationFeedbac
   aspect: {
     type: 'keyword',
     _meta: {
-      description: 'Which part of the investigation was rated: root_cause or alternative',
+      description: 'Which part of the investigation was rated: contributing_factors or alternative',
     },
   },
   discovery_id: {

@@ -23,7 +23,7 @@ interface CreateInvestigationAttachmentTypeOptions {
 export const formatInvestigationAsText = (result: InvestigationResult): string => {
   const lines = [
     `Investigation Result`,
-    `Root Cause: ${result.root_cause}`,
+    `Contributing Factors: ${result.contributing_factors}`,
     `Confidence: ${Math.round(result.confidence * 100)}%`,
     `Mechanism: ${result.mechanism}`,
     `Evidence: ${result.evidence_summary}`,
@@ -125,7 +125,7 @@ export const createInvestigationAttachmentType = ({
       }),
     }),
     getAgentDescription: () =>
-      'An investigation attachment shows the results of a root cause analysis for a significant event. It displays the root cause conclusion, confidence, supporting evidence, the mechanism, alternatives the agent ruled out, and any access gaps. Use it to share investigation results inline in the conversation.',
+      'An investigation attachment shows the results of a contributing-factors analysis for a significant event. It displays the contributing factors, confidence, supporting evidence, the mechanism, alternatives the agent ruled out, and any access gaps. Use it to share investigation results inline in the conversation.',
     getTools: () => [],
   };
 };
