@@ -25,9 +25,6 @@ const sourceToOwner = (source: AgentProperties): UserIdAndName | undefined =>
     ? { id: source.created_by_id, username: source.created_by_name }
     : undefined;
 
-const sourceToAccessControl = (source: AgentProperties): AgentAccessControl | undefined =>
-  source.access_control;
-
 export const hasReadAccess = ({
   source,
   user,
@@ -38,7 +35,7 @@ export const hasReadAccess = ({
   isAdmin: boolean;
 }): boolean =>
   hasAgentReadAccess({
-    access_control: sourceToAccessControl(source),
+    access_control: source.access_control,
     owner: sourceToOwner(source),
     currentUser: user,
     isAdmin,
@@ -54,7 +51,7 @@ export const hasUseAccess = ({
   isAdmin: boolean;
 }): boolean =>
   hasAgentUseAccess({
-    access_control: sourceToAccessControl(source),
+    access_control: source.access_control,
     owner: sourceToOwner(source),
     currentUser: user,
     isAdmin,
@@ -70,7 +67,7 @@ export const hasWriteAccess = ({
   isAdmin: boolean;
 }): boolean =>
   hasAgentWriteAccess({
-    access_control: sourceToAccessControl(source),
+    access_control: source.access_control,
     owner: sourceToOwner(source),
     currentUser: user,
     isAdmin,
@@ -86,7 +83,7 @@ export const hasDeleteAccess = ({
   isAdmin: boolean;
 }): boolean =>
   canDeleteAgent({
-    access_control: sourceToAccessControl(source),
+    access_control: source.access_control,
     owner: sourceToOwner(source),
     currentUser: user,
     isAdmin,
@@ -103,7 +100,7 @@ export const hasManageAccessControlAccess = ({
 }): boolean =>
   canManageAgentAccessControl({
     agentId: source.id,
-    access_control: sourceToAccessControl(source),
+    access_control: source.access_control,
     owner: sourceToOwner(source),
     currentUser: user,
     isAdmin,
@@ -209,7 +206,7 @@ export const validateAccessControlUpdateAccess = ({
     !isScopeChange ||
     canChangeAgentAccessControlScope({
       agentId: source.id,
-      access_control: sourceToAccessControl(source),
+      access_control: source.access_control,
       owner: sourceToOwner(source),
       currentUser: user,
       isAdmin,
