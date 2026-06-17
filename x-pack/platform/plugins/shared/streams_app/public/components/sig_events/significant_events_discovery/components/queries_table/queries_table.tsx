@@ -17,6 +17,7 @@ import {
   EuiPanel,
   EuiText,
   EuiTitle,
+  EuiToolTip,
   useEuiTheme,
   type CriteriaWithPagination,
   type EuiBasicTableColumn,
