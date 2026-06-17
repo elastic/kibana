@@ -151,7 +151,7 @@ const eventsBulkCreateRoute = createServerRoute({
         const space = server.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
 
         for (const event of params.body) {
-          if (event.verdict === 'promoted' && event.discovery_id) {
+          if (event.status === 'promoted' && event.discovery_id) {
             void investigationService
               .triggerForEvent({ event, request, space })
               .catch((err) =>
