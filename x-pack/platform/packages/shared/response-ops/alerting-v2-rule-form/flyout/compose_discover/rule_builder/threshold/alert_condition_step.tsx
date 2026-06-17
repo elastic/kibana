@@ -22,15 +22,17 @@ import {
   EuiPanel,
   EuiSelect,
   EuiSpacer,
-  EuiSwitch,
   EuiText,
   EuiTitle,
   EuiToolTip,
 } from '@elastic/eui';
 import type { ComposeFormValues } from '../../compose_form_types';
 import { useDataFields } from '../../../../form/hooks/use_data_fields';
+import { useIndexSources } from '../../../../form/hooks/use_index_sources';
 import { ScheduleField } from '../../../../form/fields/schedule_field';
 import { LookbackWindowField } from '../../../../form/fields/lookback_window_field';
+import { AlertDelayField } from '../../../../form/fields/alert_delay_field';
+import { ModeSelect } from '../../../../form/fields/mode_select';
 import type { RuleBuilderStepProps } from '../types';
 import { useBuilderState } from '../builder_state_context';
 import type {
@@ -49,7 +51,7 @@ import {
   nextEvalLabel,
   generateId,
 } from './form_types';
-import { buildThresholdEsql } from './build_esql';
+import { buildThresholdEsql, buildRecoveryBlock } from './build_esql';
 import { splitQuery } from '../../use_heuristic_split';
 import {
   AGGREGATION_OPTIONS,
@@ -66,6 +68,11 @@ export const RuleBuilderAlertConditionStep: React.FC<RuleBuilderStepProps> = ({
     useBuilderState<ThresholdFormValues>();
   const { setValue, watch } = useFormContext<ComposeFormValues>();
   const isAlert = watch('kind') === 'alert';
+
+  const { data: indexOptions, isLoading: isLoadingIndices } = useIndexSources({
+    http: services.http,
+    application: services.application,
+  });
 
   const fromQuery = thresholdValues.indexPattern ? `FROM ${thresholdValues.indexPattern}` : '';
 
@@ -101,12 +108,18 @@ export const RuleBuilderAlertConditionStep: React.FC<RuleBuilderStepProps> = ({
       .filter((f) => f.type === 'date')
       .map((f) => f.name)
       .sort();
-    if (!dates.includes('@timestamp')) dates.unshift('@timestamp');
+    if (dates.length === 0) return ['@timestamp'];
     return dates;
   }, [fieldMap]);
 
+  useEffect(() => {
+    if (dateFields.length > 0 && !dateFields.includes(thresholdValues.timeField)) {
+      onThresholdValuesChange({ ...thresholdValues, timeField: dateFields[0] });
+    }
+  }, [dateFields, thresholdValues, onThresholdValuesChange]);
+
   const esqlQuery = useMemo(() => buildThresholdEsql(thresholdValues), [thresholdValues]);
-  const hasValidQuery = Boolean(esqlQuery);
+  const recoveryBlock = useMemo(() => buildRecoveryBlock(thresholdValues), [thresholdValues]);
 
   // Rebuild and commit ES|QL whenever form values change
   useEffect(() => {
@@ -119,9 +132,16 @@ export const RuleBuilderAlertConditionStep: React.FC<RuleBuilderStepProps> = ({
 
     if (isAlert) {
       const { base, alertBlock } = splitQuery(esqlQuery);
-      setValue('query', { format: 'composed', base, blocks: { breach: alertBlock } });
+      setValue('query', {
+        format: 'composed',
+        base,
+        breach: {
+          segment: alertBlock,
+        },
+        ...(recoveryBlock ? { recovery: { segment: recoveryBlock } } : {}),
+      });
     } else {
-      setValue('query', { format: 'standalone', breach: esqlQuery });
+      setValue('query', { format: 'standalone', breach: { query: esqlQuery } });
     }
     setValue('timeField', thresholdValues.timeField);
     if (thresholdValues.groupByFields.length > 0) {
@@ -133,7 +153,15 @@ export const RuleBuilderAlertConditionStep: React.FC<RuleBuilderStepProps> = ({
     if (!state.queryCommitted) {
       dispatch({ type: 'COMMIT_QUERY' });
     }
-  }, [thresholdValues, esqlQuery, isAlert, setValue, dispatch, state.queryCommitted]);
+  }, [
+    thresholdValues,
+    esqlQuery,
+    recoveryBlock,
+    isAlert,
+    setValue,
+    dispatch,
+    state.queryCommitted,
+  ]);
 
   const update = useCallback(
     <K extends keyof ThresholdFormValues>(field: K, value: ThresholdFormValues[K]) => {
@@ -281,12 +309,23 @@ export const RuleBuilderAlertConditionStep: React.FC<RuleBuilderStepProps> = ({
     [thresholdValues, onThresholdValuesChange]
   );
 
-  const handleTrackingToggle = useCallback(() => {
-    setValue('kind', isAlert ? 'signal' : 'alert');
-  }, [isAlert, setValue]);
+  const handleModeChange = useCallback(
+    (kind: 'signal' | 'alert') => {
+      setValue('kind', kind);
+    },
+    [setValue]
+  );
 
   return (
     <>
+      {/* ── Mode select ── */}
+      <ModeSelect
+        value={isAlert ? 'alert' : 'signal'}
+        onChange={handleModeChange}
+        compressed
+        data-test-subj="ruleBuilderModeSelect"
+      />
+      <EuiSpacer size="m" />
       {/* ── Header with preview icon ── */}
       <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" responsive={false}>
         <EuiFlexItem grow={false}>
@@ -311,7 +350,7 @@ export const RuleBuilderAlertConditionStep: React.FC<RuleBuilderStepProps> = ({
                 'xpack.alertingV2.ruleBuilder.alertCondition.previewAriaLabel',
                 { defaultMessage: 'Preview results' }
               )}
-              isDisabled={!hasValidQuery || state.childOpen}
+              isDisabled={state.childOpen}
               onClick={() => dispatch({ type: 'OPEN_CHILD_FOR_STEP', step: state.step, isAlert })}
               data-test-subj="ruleBuilderOpenPreview"
             />
@@ -331,11 +370,19 @@ export const RuleBuilderAlertConditionStep: React.FC<RuleBuilderStepProps> = ({
           fullWidth
           compressed
           singleSelection={{ asPlainText: true }}
+          isLoading={isLoadingIndices}
+          options={indexOptions}
           selectedOptions={
             thresholdValues.indexPattern ? [{ label: thresholdValues.indexPattern }] : []
           }
-          onCreateOption={(val) => update('indexPattern', val)}
+          onCreateOption={(val) => {
+            update('indexPattern', val);
+            return true;
+          }}
           onChange={(opts) => update('indexPattern', opts[0]?.label ?? '')}
+          customOptionText={i18n.translate('xpack.alertingV2.ruleBuilder.indexCustomOption', {
+            defaultMessage: 'Use {searchValue} as an index pattern',
+          })}
           placeholder={i18n.translate('xpack.alertingV2.ruleBuilder.indexPlaceholder', {
             defaultMessage: 'Enter index pattern (e.g. logs-*)',
           })}
@@ -796,17 +843,12 @@ export const RuleBuilderAlertConditionStep: React.FC<RuleBuilderStepProps> = ({
         />
       </EuiButtonEmpty>
 
-      {/* ── Tracking toggle ── */}
-      <EuiSpacer size="m" />
-      <EuiSwitch
-        compressed
-        label={i18n.translate('xpack.alertingV2.ruleBuilder.trackingToggleLabel', {
-          defaultMessage: 'Track active and recovered state over time',
-        })}
-        checked={isAlert}
-        onChange={handleTrackingToggle}
-        data-test-subj="ruleBuilderTrackingToggle"
-      />
+      {isAlert && (
+        <>
+          <EuiSpacer size="m" />
+          <AlertDelayField />
+        </>
+      )}
 
       {/* ── Schedule and lookback ── */}
       <EuiSpacer size="m" />

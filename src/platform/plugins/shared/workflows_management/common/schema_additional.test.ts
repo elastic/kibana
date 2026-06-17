@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { getWorkflowJsonSchema, StepCategory } from '@kbn/workflows';
+import { getWorkflowJsonSchema, isDynamicConnector, StepCategory } from '@kbn/workflows';
 import { z } from '@kbn/zod/v4';
 import {
   createMockConnectorInstance,
@@ -249,6 +249,7 @@ describe('schema - additional coverage', () => {
       const contracts = convertDynamicConnectorsToContracts(types);
       expect(contracts).toHaveLength(1);
       expect(contracts[0].type).toBe('simple-action');
+      expect(contracts[0]).toHaveProperty('displayName', 'Simple Action');
       expect(contracts[0].summary).toBe('Simple Action');
       expect(contracts[0].description).toBe('Simple Action connector');
     });
@@ -273,6 +274,9 @@ describe('schema - additional coverage', () => {
         'inference.rerank',
         'inference.textEmbedding',
       ]);
+      const dynamicContracts = contracts.filter(isDynamicConnector);
+      expect(dynamicContracts).toHaveLength(3);
+      expect(dynamicContracts.every((contract) => contract.displayName === 'Inference')).toBe(true);
     });
 
     it('should skip disabled connectors', () => {

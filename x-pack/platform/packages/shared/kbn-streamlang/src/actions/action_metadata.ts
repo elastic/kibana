@@ -127,6 +127,7 @@ export const ACTION_METADATA_MAP: Record<ProcessorType, ActionMetadata> = {
     usage: i18n.translate('xpack.streamlang.actionMetadata.uriParts.usage', {
       defaultMessage:
         'Provide `from` for the field containing the URI string. Optionally set `to` to choose the target prefix (defaults to `url`). Extracted components become `<prefix>.scheme`, `<prefix>.domain`, `<prefix>.path`, `<prefix>.port`, etc.',
+      ignoreTag: true,
     }),
     examples: [
       {
@@ -160,6 +161,7 @@ export const ACTION_METADATA_MAP: Record<ProcessorType, ActionMetadata> = {
       i18n.translate('xpack.streamlang.actionMetadata.uriParts.tips.keepOriginal', {
         defaultMessage:
           'By default `keep_original: true` preserves the source URI at `<prefix>.original`. Combine with `remove_if_successful: true` to drop the source field only when parsing succeeds.',
+        ignoreTag: true,
       }),
     ],
   },
@@ -940,6 +942,53 @@ export const ACTION_METADATA_MAP: Record<ProcessorType, ActionMetadata> = {
     tips: [
       i18n.translate('xpack.streamlang.actionMetadata.enrich.tips.ignoreMissing', {
         defaultMessage: 'Ignore missing fields by setting ignore_missing to true',
+      }),
+    ],
+  },
+
+  user_agent: {
+    name: i18n.translate('xpack.streamlang.actionMetadata.userAgent.name', {
+      defaultMessage: 'User Agent',
+    }),
+    description: i18n.translate('xpack.streamlang.actionMetadata.userAgent.description', {
+      defaultMessage: 'Extract details from browser user agent strings',
+    }),
+    usage: i18n.translate('xpack.streamlang.actionMetadata.userAgent.usage', {
+      defaultMessage:
+        'Provide `from` for the field containing the user agent string. Optionally specify `to` for the target field (defaults to user_agent) and `properties` to limit which details are extracted.',
+    }),
+    examples: [
+      {
+        description: i18n.translate('xpack.streamlang.actionMetadata.userAgent.examples.basic', {
+          defaultMessage: 'Extract user agent details from a header field',
+        }),
+        yaml: `- action: user_agent
+  from: http.request.headers.user-agent
+  to: user_agent`,
+      },
+      {
+        description: i18n.translate(
+          'xpack.streamlang.actionMetadata.userAgent.examples.properties',
+          {
+            defaultMessage: 'Extract only specific properties',
+          }
+        ),
+        yaml: `- action: user_agent
+  from: attributes.user_agent_string
+  to: attributes.browser
+  properties:
+    - name
+    - version
+    - os`,
+      },
+    ],
+    tips: [
+      i18n.translate('xpack.streamlang.actionMetadata.userAgent.tips.properties', {
+        defaultMessage: 'Available properties: name, os, device, original, version',
+      }),
+      i18n.translate('xpack.streamlang.actionMetadata.userAgent.tips.deviceType', {
+        defaultMessage:
+          'Use extract_device_type to identify device type from the user agent string on a best-effort basis',
       }),
     ],
   },

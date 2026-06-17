@@ -28,6 +28,8 @@ import {
   type StatDefinition,
   type EvaluationDefinition,
   type AlertCondition,
+  type RecoveryCondition,
+  type RecoveryConfig,
   type ConditionOperator,
 } from './form_types';
 
@@ -298,6 +300,39 @@ const flattenBooleanTree = (node: ESQLFunction, expectedOp: string): ESQLSingleA
   return result;
 };
 
+export const parseRecoveryBlock = (
+  recoveryBlock: string
+): { conditions: RecoveryCondition[]; conditionOperator: ConditionOperator } | null => {
+  if (!recoveryBlock.trim()) return null;
+
+  const src = `ROW x = 1 ${recoveryBlock}`;
+  const { root, errors } = Parser.parse(src);
+  if (errors.length > 0) return null;
+
+  const whereCmd = root.commands.find((c) => c.name === 'where');
+  if (!whereCmd) return null;
+
+  const result = parseAlertConditions(whereCmd);
+  if (!result) return null;
+
+  return {
+    conditions: result.conditions,
+    conditionOperator: result.operator,
+  };
+};
+
+export const extractRecoveryBlock = (fullRecoveryQuery: string): string | undefined => {
+  if (!fullRecoveryQuery.trim()) return undefined;
+  const { root, errors } = Parser.parse(fullRecoveryQuery);
+  if (errors.length === 0) {
+    const lastCmd = root.commands[root.commands.length - 1];
+    if (lastCmd?.name === 'where') {
+      return `| ${BasicPrettyPrinter.command(lastCmd)}`;
+    }
+  }
+  return undefined;
+};
+
 /**
  * Attempts to parse an ES|QL query string back into ThresholdFormValues.
  * Returns null if the query doesn't match the expected builder structure,
@@ -306,7 +341,10 @@ const flattenBooleanTree = (node: ESQLFunction, expectedOp: string): ESQLSingleA
  * Expected command sequence:
  *   FROM <index> [| WHERE <filter>] | STATS ... [BY ...] [| EVAL ...]* [| WHERE <conditions>]
  */
-export const parseThresholdEsql = (query: string): ThresholdFormValues | null => {
+export const parseThresholdEsql = (
+  query: string,
+  recoveryQuery?: string
+): ThresholdFormValues | null => {
   if (!query.trim()) return null;
 
   const { root, errors } = Parser.parse(query);
@@ -366,6 +404,20 @@ export const parseThresholdEsql = (query: string): ThresholdFormValues | null =>
   // If there are remaining unparsed commands, the query doesn't match our structure
   if (idx !== commands.length) return null;
 
+  let recovery: RecoveryConfig | undefined;
+  if (recoveryQuery?.trim()) {
+    const block = extractRecoveryBlock(recoveryQuery);
+    if (block) {
+      const parsed = parseRecoveryBlock(block);
+      if (parsed) {
+        recovery = {
+          conditions: parsed.conditions,
+          conditionOperator: parsed.conditionOperator,
+        };
+      }
+    }
+  }
+
   return {
     indexPattern,
     timeField: '@timestamp',
@@ -375,5 +427,6 @@ export const parseThresholdEsql = (query: string): ThresholdFormValues | null =>
     alertConditions,
     conditionOperator,
     groupByFields: statsResult.groupByFields,
+    ...(recovery ? { recovery } : {}),
   };
 };
