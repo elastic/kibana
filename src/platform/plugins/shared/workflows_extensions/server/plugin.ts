@@ -74,7 +74,7 @@ export class WorkflowsExtensionsServerPlugin
 
     const router = core.http.createRouter();
 
-    registerGetStepDefinitionsRoute(router, this.stepRegistry);
+    registerGetStepDefinitionsRoute(router, this.stepRegistry, this.logger);
     registerGetTriggerDefinitionsRoute(router, this.triggerRegistry);
 
     registerInternalStepDefinitions(this.stepRegistry);
