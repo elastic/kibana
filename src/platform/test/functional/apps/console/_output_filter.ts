@@ -13,7 +13,7 @@ import type { FtrProviderContext } from '../../ftr_provider_context';
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const log = getService('log');
   const retry = getService('retry');
-  const PageObjects = getPageObjects(['common', 'console', 'header']);
+  const PageObjects = getPageObjects(['common', 'console']);
 
   describe('console output filter', function () {
     before(async () => {
@@ -25,8 +25,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     beforeEach(async () => {
       await PageObjects.console.clearEditorText();
       await PageObjects.console.enterText('GET /_search?pretty');
-      await PageObjects.console.clickPlay();
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.console.clickPlayAndWaitForResults();
       // Ensure the filter row is collapsed before each test so toggle state is predictable
       if (await PageObjects.console.isOutputFilterRowVisible()) {
         await PageObjects.console.clickOutputFilterButton();

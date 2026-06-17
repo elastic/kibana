@@ -128,7 +128,7 @@ export const OutputFilterRow = () => {
               value={draftExpression}
               onChange={(e) => handleExpressionChange(e.target.value)}
               onKeyDown={(e) => {
-                if (e.key === 'Enter') handleApply();
+                if (e.key === 'Enter' && !isInvalid) handleApply();
               }}
               isInvalid={isInvalid}
               placeholder={
@@ -172,6 +172,7 @@ export const OutputFilterRow = () => {
             iconType="returnKey"
             iconSide="left"
             onClick={handleApply}
+            isDisabled={isInvalid}
             data-test-subj="consoleOutputFilterApply"
           >
             {i18n.translate('console.outputFilter.applyButton', { defaultMessage: 'Apply' })}
