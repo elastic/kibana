@@ -28,6 +28,7 @@ dependsOn:
   - '@kbn/saved-objects-plugin'
   - '@kbn/core-saved-objects-server'
   - '@kbn/saved-objects-plugin'
+  - '@kbn/saved-objects-tagging-oss-plugin'
   - '@kbn/ui-actions-plugin'
   - '@kbn/ui-actions-plugin'
   - '@kbn/analytics'
@@ -46,6 +47,7 @@ dependsOn:
   - '@kbn/core-http-browser'
   - '@kbn/core-http-server'
   - '@kbn/as-code-shared-schemas'
+  - '@kbn/as-code-shared-transforms'
 tags:
   - plugin
   - prod
