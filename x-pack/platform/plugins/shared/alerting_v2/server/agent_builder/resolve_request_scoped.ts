@@ -6,7 +6,7 @@
  */
 
 import type { CoreDiServiceStart } from '@kbn/core-di';
-import { Global } from '@kbn/core-di-internal';
+import { ProvidedService } from '@kbn/core-di-internal';
 import { Request } from '@kbn/core-di-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { ServiceIdentifier } from 'inversify';
@@ -32,6 +32,6 @@ export const resolveRequestScoped = <T>(
 ): T => {
   const scope = injection.fork();
   scope.bind(Request).toConstantValue(request);
-  scope.bind(Global).toConstantValue(Request);
+  scope.bind(ProvidedService).toConstantValue(Request);
   return scope.get(token);
 };
