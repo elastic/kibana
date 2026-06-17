@@ -252,8 +252,10 @@ export class TaskScheduling {
 
   /**
    * Bulk updates schedules for tasks by ids.
-   * Only tasks with `idle` status will be updated, as for the tasks which have `running` status,
-   * `schedule` and `runAt` will be recalculated after task run finishes
+   * Only tasks with `idle` status will be updated for schedule-only changes, as for tasks which
+   * have `running` status, `schedule` and `runAt` will be recalculated after the task run finishes.
+   * When `regenerateApiKey` is requested, the task is updated regardless of status so the stored
+   * execution credentials are refreshed.
    *
    * @param {string[]} taskIds  - list of task ids
    * @param {IntervalSchedule | RruleSchedule} schedule  - new schedule
@@ -271,10 +273,10 @@ export class TaskScheduling {
       store: this.store,
       getTasks: async (ids) => await this.bulkGetTasksHelper(ids),
       filter: (task) =>
-        task.status === TaskStatus.Idle &&
-        (shouldRegenerateApiKey || !isEqual(task.schedule, schedule)),
+        shouldRegenerateApiKey ||
+        (task.status === TaskStatus.Idle && !isEqual(task.schedule, schedule)),
       map: (task) => {
-        if (isEqual(task.schedule, schedule)) {
+        if (task.status !== TaskStatus.Idle || isEqual(task.schedule, schedule)) {
           return task;
         }
 
