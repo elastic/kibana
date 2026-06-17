@@ -39,7 +39,7 @@ const BASE_COMPOSE_VALUES: ComposeFormValues = {
   metadata: { name: 'Test rule', enabled: true },
   timeField: '@timestamp',
   schedule: { every: '1m', lookback: '5m' },
-  query: { format: 'composed', base: 'FROM logs-*', blocks: { breach: '| WHERE count > 100' } },
+  query: { format: 'composed', base: 'FROM logs-*', breach: { segment: 'WHERE count > 100' } },
   stateTransitionAlertDelayMode: 'immediate',
   stateTransitionRecoveryDelayMode: 'immediate',
   artifacts: [],
@@ -111,7 +111,7 @@ describe('RuleBuilderAlertConditionStep - alert delay', () => {
     renderStep({
       formValueOverrides: {
         kind: 'signal',
-        query: { format: 'standalone', breach: 'FROM logs-* | WHERE count > 100' },
+        query: { format: 'standalone', breach: { query: 'FROM logs-* | WHERE count > 100' } },
       },
     });
 
