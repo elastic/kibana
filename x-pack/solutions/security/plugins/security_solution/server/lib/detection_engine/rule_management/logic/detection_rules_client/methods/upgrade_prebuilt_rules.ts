@@ -104,7 +104,7 @@ export async function upgradePrebuiltRules({
       if (!currentVersion) {
         errors.push({
           error: new Error(
-            `Rule with rule_id "${targetRule.rule_id}" and version "${targetRule.version}" not found`
+            `Currently installed rule with rule_id "${targetRule.rule_id}" not found`
           ),
           item: { rule_id: targetRule.rule_id },
         });
