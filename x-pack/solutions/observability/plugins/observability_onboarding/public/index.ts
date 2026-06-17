@@ -13,6 +13,7 @@ import type {
   DocLinksStart,
   FeatureFlagsStart,
   HttpStart,
+  IUiSettingsClient,
   NotificationsStart,
   PluginInitializer,
   PluginInitializerContext,
@@ -57,6 +58,7 @@ export interface ObservabilityOnboardingAppServices {
   docLinks: DocLinksStart;
   chrome: ChromeStart;
   featureFlags: FeatureFlagsStart;
+  uiSettings: IUiSettingsClient;
   observability: ObservabilityPublicStart;
   cloud?: CloudStart;
   streams?: StreamsPluginStart;

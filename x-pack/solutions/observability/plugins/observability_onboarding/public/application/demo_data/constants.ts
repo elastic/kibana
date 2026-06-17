@@ -1,0 +1,39 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+/**
+ * Paths exposed by the dev-only `observabilityDemoData` plugin. They are
+ * duplicated here as plain strings on purpose: that plugin is `devOnly` and
+ * therefore must not be imported from this production plugin. Availability is
+ * feature-detected at runtime via the status endpoint.
+ */
+export const SYNTHTRACE_STATUS_API_PATH = '/internal/observability_demo_data/synthtrace/status';
+export const SYNTHTRACE_RUN_API_PATH = '/internal/observability_demo_data/synthtrace/run';
+
+export const APM_ANOMALY_DETECTION_ENVIRONMENTS_API_PATH =
+  '/internal/apm/settings/anomaly-detection/environments';
+export const APM_ANOMALY_DETECTION_JOBS_API_PATH = '/internal/apm/settings/anomaly-detection/jobs';
+
+export const ALERTING_RULE_API_PATH = '/api/alerting/rule';
+export const SLO_API_PATH = '/api/observability/slos';
+export const SLO_API_VERSION = '2023-10-31';
+
+/** Default APM metrics index used by APM SLO indicators. */
+export const APM_METRICS_INDEX = 'metrics-apm*';
+
+/** Tag applied to every resource created by the demo data section. */
+export const DEMO_DATA_TAG = 'observability-demo-data';
+
+/** ML modules setup API (POST /internal/ml/modules/setup/{moduleId}). */
+export const ML_MODULE_SETUP_API_PATH = '/internal/ml/modules/setup';
+export const ML_MODULE_API_VERSION = '1';
+
+/** Stable job-id prefix for demo ML module setup — re-runs target the same job names. */
+export const DEMO_ML_JOB_PREFIX = 'demo-obs-';
+
+export const LOGS_INDEX_PATTERN = 'logs-*';
+export const METRICS_INDEX_PATTERN = 'metrics-*';

@@ -1,0 +1,22 @@
+{
+  "type": "plugin",
+  "id": "@kbn/observability-demo-data-plugin",
+  "owner": [
+    "@elastic/obs-presentation-team"
+  ],
+  "group": "observability",
+  "visibility": "private",
+  "devOnly": true,
+  "description": "Dev-only plugin that ingests synthtrace demo data on demand via an internal HTTP route. Excluded from production builds.",
+  "plugin": {
+    "id": "observabilityDemoData",
+    "browser": false,
+    "server": true,
+    "configPath": [
+      "xpack",
+      "observability_demo_data"
+    ],
+    "requiredPlugins": [],
+    "optionalPlugins": []
+  }
+}

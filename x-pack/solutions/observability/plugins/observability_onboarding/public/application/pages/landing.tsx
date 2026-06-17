@@ -10,6 +10,8 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import React from 'react';
 import type { ObservabilityOnboardingAppServices } from '../..';
 import { IS_ADD_DATA_PAGE_V2_ENABLED } from '../../../common/feature_flags';
+import { DEMO_DATA_BOOTSTRAPPING_SETTING_ID } from '../../../common/ui_settings';
+import { DemoDataSection } from '../demo_data';
 import { LandingHeader } from '../header';
 import { IntegrationsGrid } from '../integrations_grid/integrations_grid';
 import { OnboardingFlowForm } from '../onboarding_flow_form/onboarding_flow_form';
@@ -17,15 +19,17 @@ import { PageTemplate } from './template';
 
 export const LandingPage = () => {
   const {
-    services: { featureFlags },
+    services: { featureFlags, uiSettings },
   } = useKibana<ObservabilityOnboardingAppServices>();
   const isAddDataPageV2Enabled = featureFlags.getBooleanValue(IS_ADD_DATA_PAGE_V2_ENABLED, false);
+  const isDemoDataEnabled = uiSettings.get<boolean>(DEMO_DATA_BOOTSTRAPPING_SETTING_ID, false);
 
   if (isAddDataPageV2Enabled) {
     return (
       <EuiPageTemplate paddingSize="none" data-test-subj="addDataPageV2">
         <LandingHeader />
         <EuiPageTemplate.Section paddingSize="xl" restrictWidth>
+          {isDemoDataEnabled && <DemoDataSection />}
           <IntegrationsGrid />
         </EuiPageTemplate.Section>
       </EuiPageTemplate>
@@ -34,6 +38,7 @@ export const LandingPage = () => {
 
   return (
     <PageTemplate>
+      {isDemoDataEnabled && <DemoDataSection />}
       <OnboardingFlowForm />
     </PageTemplate>
   );

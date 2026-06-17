@@ -29,6 +29,7 @@ import { EsLegacyConfigService } from './services/es_legacy_config_service';
 import type { ObservabilityOnboardingConfig } from './config';
 import { OBSERVABILITY_ONBOARDING_TELEMETRY_EVENT } from '../common/telemetry_events';
 import { ObservabilityOnboardingPricingFeature } from '../common/pricing_features';
+import { uiSettings } from './ui_settings';
 
 export class ObservabilityOnboardingPlugin
   implements
@@ -57,6 +58,8 @@ export class ObservabilityOnboardingPlugin
     plugins: ObservabilityOnboardingPluginSetupDependencies
   ) {
     this.esLegacyConfigService.setup(core.elasticsearch.legacy.config$);
+
+    core.uiSettings.register(uiSettings);
 
     core.savedObjects.registerType(observabilityOnboardingFlow);
 
