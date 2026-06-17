@@ -56,8 +56,8 @@ export function AlertConditionStep({
   const query = watch('query');
 
   const baseQuery = query.format === 'composed' ? query.base : '';
-  const alertBlock = query.format === 'composed' ? query.blocks.breach : '';
-  const fullQuery = query.format === 'standalone' ? query.breach : '';
+  const alertBlock = query.format === 'composed' ? query.breach.segment : '';
+  const fullQuery = query.format === 'standalone' ? query.breach.query : '';
 
   // Use the base query for field lookup when tracking is on; fall back to full breach query.
   const committedQuery = useMemo(() => {
@@ -131,6 +131,14 @@ export function AlertConditionStep({
 
   return (
     <>
+      <ModeSelect
+        value={isAlert ? 'alert' : 'signal'}
+        onChange={onKindChange}
+        disabled={!state.queryCommitted || isEditing}
+        compressed
+        data-test-subj="composeDiscoverModeSelect"
+      />
+      <EuiSpacer size="m" />
       <EuiTitle size="xs">
         <h3>
           <FormattedMessage
@@ -267,7 +275,7 @@ export function AlertConditionStep({
           fullWidth
           options={timeFieldOptions}
           value={timeField}
-          onChange={(e) => setValue('timeField', e.target.value)}
+          onChange={(e) => setValue('timeField', e.target.value, { shouldDirty: true })}
           disabled={state.childOpen}
           data-test-subj="composeDiscoverTimeField"
         />
@@ -284,9 +292,13 @@ export function AlertConditionStep({
           options={outputColumns.map((name) => ({ label: name }))}
           selectedOptions={groupFields.map((f) => ({ label: f }))}
           onChange={(opts) =>
-            setValue('grouping', opts.length ? { fields: opts.map((o) => o.label) } : undefined)
+            setValue('grouping', opts.length ? { fields: opts.map((o) => o.label) } : undefined, {
+              shouldDirty: true,
+            })
           }
-          onCreateOption={(val) => setValue('grouping', { fields: [...groupFields, val] })}
+          onCreateOption={(val) =>
+            setValue('grouping', { fields: [...groupFields, val] }, { shouldDirty: true })
+          }
           placeholder={i18n.translate(
             'xpack.alertingV2.composeDiscover.alertCondition.groupFieldsPlaceholder',
             { defaultMessage: 'Add group fields' }
@@ -294,15 +306,6 @@ export function AlertConditionStep({
           data-test-subj="composeDiscoverGroupFields"
         />
       </EuiFormRow>
-
-      <EuiSpacer size="m" />
-      <ModeSelect
-        value={isAlert ? 'alert' : 'signal'}
-        onChange={onKindChange}
-        disabled={!state.queryCommitted || isEditing}
-        compressed
-        data-test-subj="composeDiscoverModeSelect"
-      />
 
       {isAlert && (
         <>

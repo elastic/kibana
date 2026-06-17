@@ -26,9 +26,6 @@ import {
 import enterpriseGatingModalIllustration from './enterprise_gating_modal.svg';
 import { enterpriseGatingModalStrings, getPrimaryActionLabel } from './strings';
 
-const CLOUD_SUBSCRIPTION_FEATURES_URL = 'https://www.elastic.co/subscriptions/cloud';
-const SELF_MANAGED_SUBSCRIPTION_FEATURES_URL = 'https://www.elastic.co/subscriptions';
-
 export type EnterpriseGatingModalEnvironment = 'cloud' | 'selfManaged';
 export type EnterpriseGatingModalTrialStatus = 'notStarted' | 'expired';
 export type EnterpriseGatingModalPrimaryAction = 'startTrial' | 'upgrade' | 'contactUs';
@@ -38,9 +35,14 @@ export interface EnterpriseGatingModalProps {
   isOpen?: boolean;
   trialStatus?: EnterpriseGatingModalTrialStatus;
   hasManageSubscriptionPermission?: boolean;
-  subscriptionFeaturesUrl?: string;
-  onCancel: () => void;
+  subscriptionFeaturesUrl: string;
+  /**
+   * Called when the primary action button is clicked. Receives the resolved
+   * action type so the consumer can navigate, track analytics, or open a modal.
+   * When omitted, the primary action button is not rendered.
+   */
   onPrimaryAction?: (action: EnterpriseGatingModalPrimaryAction) => void;
+  onCancel: () => void;
   'data-test-subj'?: string;
 }
 
@@ -72,41 +74,18 @@ export const EnterpriseGatingModal = ({
   trialStatus = 'notStarted',
   hasManageSubscriptionPermission = false,
   subscriptionFeaturesUrl,
-  onCancel,
   onPrimaryAction,
+  onCancel,
   'data-test-subj': dataTestSubj = 'enterpriseGatingModal',
 }: EnterpriseGatingModalProps) => {
   const modalTitleId = useGeneratedHtmlId({ prefix: 'enterpriseGatingModalTitle' });
   const { euiTheme } = useEuiTheme();
-
-  const resolvedSubscriptionFeaturesUrl =
-    subscriptionFeaturesUrl ??
-    (environment === 'cloud'
-      ? CLOUD_SUBSCRIPTION_FEATURES_URL
-      : SELF_MANAGED_SUBSCRIPTION_FEATURES_URL);
 
   const primaryAction = getPrimaryAction({
     environment,
     hasManageSubscriptionPermission,
     trialStatus,
   });
-
-  const hasWarnedMissingPrimaryActionHandlerRef = React.useRef(false);
-  React.useEffect(() => {
-    if (process.env.NODE_ENV !== 'development') {
-      return;
-    }
-
-    if (!primaryAction || onPrimaryAction || hasWarnedMissingPrimaryActionHandlerRef.current) {
-      return;
-    }
-
-    hasWarnedMissingPrimaryActionHandlerRef.current = true;
-    // eslint-disable-next-line no-console
-    console.warn(
-      `[EnterpriseGatingModal] Resolved primary action "${primaryAction}" but "onPrimaryAction" was not provided; primary action button will not render.`
-    );
-  }, [onPrimaryAction, primaryAction]);
 
   if (!isOpen) {
     return null;
@@ -180,7 +159,7 @@ export const EnterpriseGatingModal = ({
               <EuiFlexItem grow={false}>
                 <EuiLink
                   data-test-subj={`${dataTestSubj}ReviewSubscriptionFeaturesButton`}
-                  href={resolvedSubscriptionFeaturesUrl}
+                  href={subscriptionFeaturesUrl}
                   target="_blank"
                 >
                   {enterpriseGatingModalStrings.reviewSubscriptionFeaturesButtonLabel}

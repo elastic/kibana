@@ -14,7 +14,8 @@ import { render, screen } from '@testing-library/react';
 import React from 'react';
 
 import { TestProviders } from '../../../../../common/mock';
-import { getFieldMarkdownRenderer } from '../field_markdown_renderer';
+import { FieldMarkdownRenderer } from '../field_markdown_renderer';
+import { MarkdownFormatterContext } from '../context';
 import { AttackDiscoveryMarkdownParser } from '.';
 
 describe('AttackDiscoveryMarkdownParser', () => {
@@ -36,19 +37,21 @@ This appears to be a malware attack delivered via spearphishing, likely exploiti
     `;
 
     const processingPluginList = getDefaultEuiMarkdownProcessingPlugins();
-    processingPluginList[1][1].components.fieldPlugin = getFieldMarkdownRenderer(false);
+    processingPluginList[1][1].components.fieldPlugin = FieldMarkdownRenderer;
 
     render(
       <TestProviders>
-        <EuiMarkdownFormat
-          color="subdued"
-          data-test-subj="attackDiscoveryMarkdownFormatter"
-          parsingPluginList={attackDiscoveryParsingPluginList}
-          processingPluginList={processingPluginList}
-          textSize="xs"
-        >
-          {markdownWithValidFields}
-        </EuiMarkdownFormat>
+        <MarkdownFormatterContext.Provider value={{ disableActions: false }}>
+          <EuiMarkdownFormat
+            color="subdued"
+            data-test-subj="attackDiscoveryMarkdownFormatter"
+            parsingPluginList={attackDiscoveryParsingPluginList}
+            processingPluginList={processingPluginList}
+            textSize="xs"
+          >
+            {markdownWithValidFields}
+          </EuiMarkdownFormat>
+        </MarkdownFormatterContext.Provider>
       </TestProviders>
     );
 
@@ -77,19 +80,21 @@ This appears to be a malware attack delivered via spearphishing, likely exploiti
     `;
 
     const processingPluginList = getDefaultEuiMarkdownProcessingPlugins();
-    processingPluginList[1][1].components.fieldPlugin = getFieldMarkdownRenderer(false);
+    processingPluginList[1][1].components.fieldPlugin = FieldMarkdownRenderer;
 
     render(
       <TestProviders>
-        <EuiMarkdownFormat
-          color="subdued"
-          data-test-subj="attackDiscoveryMarkdownFormatter"
-          parsingPluginList={attackDiscoveryParsingPluginList}
-          processingPluginList={processingPluginList}
-          textSize="xs"
-        >
-          {markdownWithInvalidFields}
-        </EuiMarkdownFormat>
+        <MarkdownFormatterContext.Provider value={{ disableActions: false }}>
+          <EuiMarkdownFormat
+            color="subdued"
+            data-test-subj="attackDiscoveryMarkdownFormatter"
+            parsingPluginList={attackDiscoveryParsingPluginList}
+            processingPluginList={processingPluginList}
+            textSize="xs"
+          >
+            {markdownWithInvalidFields}
+          </EuiMarkdownFormat>
+        </MarkdownFormatterContext.Provider>
       </TestProviders>
     );
 

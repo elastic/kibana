@@ -52,7 +52,7 @@ describe('GroupFieldSelect', () => {
 
   it('renders with label', () => {
     render(<GroupFieldSelect />, {
-      wrapper: createFormWrapper({ evaluation: { query: { base: defaultQuery } } }, mockServices),
+      wrapper: createFormWrapper({ query: { breach: defaultQuery } }, mockServices),
     });
 
     expect(screen.getByText('Group Fields')).toBeInTheDocument();
@@ -74,7 +74,7 @@ describe('GroupFieldSelect', () => {
     } as any);
 
     render(<GroupFieldSelect />, {
-      wrapper: createFormWrapper({ evaluation: { query: { base: defaultQuery } } }, mockServices),
+      wrapper: createFormWrapper({ query: { breach: defaultQuery } }, mockServices),
     });
 
     // Click to open the combo box
@@ -106,7 +106,7 @@ describe('GroupFieldSelect', () => {
     render(<GroupFieldSelect />, {
       wrapper: createFormWrapper(
         {
-          evaluation: { query: { base: defaultQuery } },
+          query: { breach: defaultQuery },
           grouping: { fields: ['host.name'] },
         },
         mockServices
@@ -121,10 +121,8 @@ describe('GroupFieldSelect', () => {
     render(<GroupFieldSelect />, {
       wrapper: createFormWrapper(
         {
-          evaluation: {
-            query: {
-              base: 'FROM metrics-* | STATS avg(value) BY region',
-            },
+          query: {
+            breach: 'FROM metrics-* | STATS avg(value) BY region',
           },
         },
         mockServices
@@ -154,7 +152,7 @@ describe('GroupFieldSelect', () => {
     } as any);
 
     render(<GroupFieldSelect />, {
-      wrapper: createFormWrapper({ evaluation: { query: { base: defaultQuery } } }, mockServices),
+      wrapper: createFormWrapper({ query: { breach: defaultQuery } }, mockServices),
     });
 
     // Click to open the combo box
@@ -175,7 +173,7 @@ describe('GroupFieldSelect', () => {
 
   it('renders correctly in flyout layout', () => {
     render(<GroupFieldSelect />, {
-      wrapper: createFormWrapper({ evaluation: { query: { base: defaultQuery } } }, mockServices, {
+      wrapper: createFormWrapper({ query: { breach: defaultQuery } }, mockServices, {
         layout: 'flyout',
       }),
     });
@@ -196,7 +194,7 @@ describe('GroupFieldSelect', () => {
     } as any);
 
     render(<GroupFieldSelect />, {
-      wrapper: createFormWrapper({ evaluation: { query: { base: defaultQuery } } }, mockServices),
+      wrapper: createFormWrapper({ query: { breach: defaultQuery } }, mockServices),
     });
 
     // Component should still render, just with no options
@@ -206,9 +204,7 @@ describe('GroupFieldSelect', () => {
   describe('auto-populate from query BY clause', () => {
     const QueryChanger = ({ newQuery }: { newQuery: string }) => {
       const { setValue } = useFormContext<FormValues>();
-      return (
-        <button onClick={() => setValue('evaluation.query.base', newQuery)}>Change Query</button>
-      );
+      return <button onClick={() => setValue('query.breach', newQuery)}>Change Query</button>;
     };
 
     const renderWithQueryChanger = (
@@ -223,7 +219,7 @@ describe('GroupFieldSelect', () => {
         const form = useForm<FormValues>({
           defaultValues: {
             ...defaultTestFormValues,
-            evaluation: { query: { base: initialQuery } },
+            query: { breach: initialQuery },
             grouping: initialGroupingFields ? { fields: initialGroupingFields } : undefined,
           },
         });
