@@ -33,7 +33,9 @@ const today = new Date().toISOString().slice(0, 10);
 // Group → paths resolution
 // ---------------------------------------------------------------------------
 
-const PLATFORM_PATHS = [
+// Search roots that contain properly structured packages (each subdirectory has
+// a kibana.jsonc). discoverPackages() recurses into these to find the packages.
+const PLATFORM_SEARCH_PATHS = [
   // x-pack/platform
   'x-pack/platform/plugins/shared',
   'x-pack/platform/plugins/private',
@@ -49,16 +51,29 @@ const PLATFORM_PATHS = [
   // src/platform/kbn-ui — platform UI packages outside the plugins/packages subdirs
   'src/platform/kbn-ui',
   // Root-level packages/ — all carry group "platform" in their kibana.jsonc.
-  // Note: src/dev and src/cli are excluded because they lack kibana.jsonc manifests.
   'packages',
   // src/core has kibana.jsonc at its root, so discoverPackages() would short-circuit
   // there and never recurse into the 247 individual sub-packages. We point directly at
   // src/core/packages to get granular per-package data instead of one monolithic entry.
   'src/core/packages',
+  // Single platform package without a grouping parent directory
+  'src/setup_node_env',
 ];
 
+// Directories indexed as a whole unit — they contain platform code but have no
+// kibana.jsonc, so discoverPackages() cannot find them via the normal traversal.
+// buildDocsForPackage() handles a missing manifest gracefully (nulls for metadata fields).
+const PLATFORM_RAW_PATHS = ['src/cli', 'src/dev'];
+
+// resolveGroupPaths returns fully-resolved package paths (not search roots), so the
+// caller does not need to run discoverPackages() again.
 function resolveGroupPaths(group: string): string[] {
-  if (group === 'platform') return PLATFORM_PATHS;
+  if (group === 'platform') {
+    return [
+      ...PLATFORM_SEARCH_PATHS.flatMap((p) => discoverPackages(p)),
+      ...PLATFORM_RAW_PATHS.filter((p) => existsSync(nodePath.join(REPO_ROOT, p))),
+    ];
+  }
 
   if (group === 'solutions') {
     const solutionsDir = nodePath.join(REPO_ROOT, 'x-pack/solutions');
@@ -68,7 +83,8 @@ function resolveGroupPaths(group: string): string[] {
         ['plugins', 'packages']
           .map((sub) => `x-pack/solutions/${name}/${sub}`)
           .filter((p) => existsSync(nodePath.join(REPO_ROOT, p)))
-      );
+      )
+      .flatMap((p) => discoverPackages(p));
   }
 
   throw new Error(`Unknown group '${group}'. Use 'platform', 'solutions', or --paths.`);
@@ -173,9 +189,6 @@ yargs(process.argv.slice(2))
       };
 
       try {
-        // 1. Resolve paths from --group or --paths
-        const searchPaths = argv.group ? resolveGroupPaths(argv.group) : (argv.paths as string[]);
-
         // 2. Optionally set up the ES index template
         if (!opts.dryRun && argv['setup-template']) {
           console.error(chalk.cyan('Putting index template…'));
@@ -193,10 +206,12 @@ yargs(process.argv.slice(2))
           console.error(chalk.gray(`Excluding deps matching: ${excludePatterns.join(', ')}`));
         }
 
-        // 4. Discover all packages under the resolved search paths, then
-        //    cruise each package individually, accumulating docs and flushing
-        //    a single bulk request to ES every `batchSize` packages.
-        const packages = searchPaths.flatMap((p) => discoverPackages(p));
+        // 4. Resolve packages:
+        //    --group  → resolveGroupPaths() returns fully-resolved package paths (raw dirs included)
+        //    --paths  → user-supplied search roots, run through discoverPackages() as before
+        const packages = argv.group
+          ? resolveGroupPaths(argv.group)
+          : (argv.paths as string[]).flatMap((p) => discoverPackages(p));
         if (packages.length === 0) {
           console.error(chalk.red('No packages found under the given paths.'));
           process.exit(1);
