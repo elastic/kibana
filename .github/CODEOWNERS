@@ -920,7 +920,6 @@ src/platform/test/plugin_functional/plugins/data_search @elastic/kibana-data-dis
 src/platform/test/plugin_functional/plugins/elasticsearch_client_plugin @elastic/kibana-core
 src/platform/test/plugin_functional/plugins/hardening @elastic/kibana-security
 src/platform/test/plugin_functional/plugins/index_patterns @elastic/kibana-data-discovery
-src/platform/test/plugin_functional/plugins/kbn_sample_panel_action @elastic/appex-sharedux
 src/platform/test/plugin_functional/plugins/kbn_top_nav @elastic/kibana-core
 src/platform/test/plugin_functional/plugins/kbn_tp_custom_visualizations @elastic/kibana-visualizations
 src/platform/test/plugin_functional/plugins/management_test_plugin @elastic/kibana-management
@@ -1420,6 +1419,7 @@ x-pack/platform/test/serverless/api_integration/test_suites/platform_security @e
 /packages/kbn-check-saved-objects-cli/src/migrations/__fixtures__/action @elastic/response-ops
 /packages/kbn-check-saved-objects-cli/src/migrations/__fixtures__/alert @elastic/response-ops
 /packages/kbn-check-saved-objects-cli/src/migrations/__fixtures__/alerting_action_policy @elastic/rna-project-team
+/packages/kbn-check-saved-objects-cli/src/migrations/__fixtures__/alerting_rule @elastic/rna-project-team
 /packages/kbn-check-saved-objects-cli/src/migrations/__fixtures__/alerting_rule_template @elastic/response-ops
 /packages/kbn-check-saved-objects-cli/src/migrations/__fixtures__/api_key_pending_invalidation @elastic/response-ops
 /packages/kbn-check-saved-objects-cli/src/migrations/__fixtures__/api_key_to_invalidate @elastic/response-ops
@@ -1920,7 +1920,6 @@ x-pack/platform/plugins/shared/streams/common/sig_events_tuning_config.ts @elast
 /x-pack/solutions/observability/test/functional/services/observability @elastic/actionable-obs-team
 /x-pack/solutions/observability/test/accessibility/apps/observability.ts @elastic/actionable-obs-team
 /x-pack/solutions/observability/test/functional/services/slo/ @elastic/actionable-obs-team
-/x-pack/solutions/observability/test/observability_functional @elastic/actionable-obs-team
 /x-pack/solutions/observability/plugins/infra/public/alerting @elastic/actionable-obs-team
 /x-pack/solutions/observability/plugins/infra/server/lib/alerting @elastic/actionable-obs-team
 /x-pack/solutions/observability/test/common/utils/ @elastic/actionable-obs-team
@@ -1980,7 +1979,6 @@ x-pack/platform/plugins/shared/streams/common/sig_events_tuning_config.ts @elast
 /x-pack/solutions/observability/test/fixtures/es_archives/uptime @elastic/actionable-obs-team
 /x-pack/solutions/observability/test/functional/services/uptime @elastic/actionable-obs-team
 /x-pack/solutions/observability/test/api_integration/apis/uptime @elastic/actionable-obs-team
-/x-pack/solutions/observability/test/api_integration/apis/synthetics @elastic/actionable-obs-team
 /x-pack/solutions/observability/test/serverless/api_integration/test_suites/synthetics @elastic/actionable-obs-team
 
 # Observability-ui folder level permissions (need to be before individual files inside the folder)
@@ -2079,7 +2077,6 @@ x-pack/platform/plugins/shared/streams/common/sig_events_tuning_config.ts @elast
 /src/platform/test/functional/services/dashboard/  @elastic/kibana-presentation
 /x-pack/platform/test/functional/apps/canvas/ @elastic/kibana-presentation
 /x-pack/solutions/search/test/serverless/functional/test_suites/dashboards/ @elastic/kibana-presentation
-/src/platform/test/plugin_functional/test_suites/panel_actions @elastic/kibana-presentation
 /x-pack/platform/test/fixtures/es_archives/canvas/logstash_lens @elastic/kibana-presentation
 #CC# /src/plugins/kibana_react/public/code_editor/ @elastic/kibana-presentation
 /x-pack/platform/test/upgrade/services/maps_upgrade_services.ts @elastic/kibana-presentation
@@ -3427,7 +3424,6 @@ x-pack/solutions/observability/plugins/observability_shared/public/components/pr
 /src/platform/test/functional/services/monaco_editor.ts @elastic/appex-sharedux
 /src/platform/test/api_integration/fixtures/unused_urls_task @elastic/appex-sharedux
 /src/platform/test/plugin_functional/test_suites/shared_ux @elastic/appex-sharedux
-/src/platform/test/plugin_functional/plugins/kbn_sample_panel_action @elastic/appex-sharedux
 /src/platform/test/plugin_functional/plugins/eui_provider_dev_warning @elastic/appex-sharedux
 /src/platform/test/functional/page_objects/settings_page.ts @elastic/appex-sharedux
 /src/platform/test/examples/ui_actions/*.ts @elastic/appex-sharedux

@@ -5,56 +5,47 @@
  * 2.0.
  */
 
-import type { RuleKind, RecoveryPolicyType } from '@kbn/alerting-v2-schemas';
+import type { RuleKind } from '@kbn/alerting-v2-schemas';
 import type { RuleNotificationsValue } from '../../form/types';
 
 // ---------------------------------------------------------------------------
-// RuleQuery — the new composed/standalone query schema (#268984).
+// RuleQuery — the composed/standalone query schema.
 //
 // This is the canonical query shape for the Compose Discover flyout.
-// When the old standalone form is deleted, these types move to form/types.ts
-// and replace evaluation + recoveryPolicy entirely.
 // ---------------------------------------------------------------------------
 
 export interface ComposedQuery {
   format: 'composed';
   base: string;
-  blocks: {
-    breach: string;
-    recover?: string;
-  };
+  breach: { segment: string };
+  recovery?: { segment: string };
 }
 
 export interface StandaloneQuery {
   format: 'standalone';
-  /** Corollary of `base` in `ComposedQuery` — the "no data" base query. Maps to `evaluation.query.no_data` in the API schema. */
-  no_data?: string;
-  breach: string;
-  recover?: string;
+  /** Corollary of `base` in `ComposedQuery` — the "no data" base query. Maps to `query.no_data` in the API schema. */
+  no_data?: { query: string };
+  breach: { query: string };
+  recovery?: { query: string };
 }
 
 export type RuleQuery = ComposedQuery | StandaloneQuery;
 
 export function getBreachQuery(query: RuleQuery | undefined): string {
   if (!query) return '';
-  if (query.format === 'standalone') return query.breach;
-  return [query.base, query.blocks.breach].filter(Boolean).join('\n');
+  if (query.format === 'standalone') return query.breach.query;
+  return [query.base, query.breach.segment].filter(Boolean).join('\n| ');
 }
 
 export function getRecoverQuery(query: RuleQuery | undefined): string {
   if (!query) return '';
-  if (query.format === 'standalone') return query.recover ?? '';
-  if (!query.blocks.recover) return '';
-  return [query.base, query.blocks.recover].filter(Boolean).join('\n');
+  if (query.format === 'standalone') return query.recovery?.query ?? '';
+  if (!query.recovery?.segment) return '';
+  return [query.base, query.recovery.segment].filter(Boolean).join('\n| ');
 }
 
 // ---------------------------------------------------------------------------
 // ComposeFormValues — the form shape used by the Compose Discover flyout.
-//
-// Copied from form/types.ts FormValues with evaluation + recoveryPolicy
-// replaced by query: RuleQuery. Shared field types (RuleMetadata, etc.)
-// are inlined here so this file is fully self-contained and the old form
-// types can be deleted without touching this file.
 // ---------------------------------------------------------------------------
 
 export interface ComposeRuleArtifact {
@@ -94,4 +85,4 @@ export interface ComposeFormValues {
 }
 
 // Re-export for use by compose mappers
-export type { RuleKind, RecoveryPolicyType };
+export type { RuleKind };
