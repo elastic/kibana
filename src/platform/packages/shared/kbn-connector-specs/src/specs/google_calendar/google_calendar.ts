@@ -53,9 +53,6 @@ export const GoogleCalendar: ConnectorSpec = {
     types: [
       {
         type: 'ears',
-        label: i18n.translate('core.kibanaConnectorSpecs.googleCalendar.auth.ears.label', {
-          defaultMessage: 'Quick Connect OAuth 2.0',
-        }),
         isExperimental: true,
         overrides: {
           meta: { scope: { disabled: true } },

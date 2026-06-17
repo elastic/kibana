@@ -74,9 +74,7 @@ describe('MicrosoftTeams', () => {
         (t) => typeof t === 'string' || !(t as AuthTypeDef).hidden
       );
       expect(visibleTypes).toHaveLength(4);
-      expect(visibleTypes?.[0]).toEqual(
-        expect.objectContaining({ type: 'ears', label: 'Quick Connect OAuth 2.0' })
-      );
+      expect(visibleTypes?.[0]).toEqual(expect.objectContaining({ type: 'ears' }));
       expect(visibleTypes?.[1]).toEqual(
         expect.objectContaining({ type: 'oauth_authorization_code' })
       );

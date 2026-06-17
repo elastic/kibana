@@ -36,13 +36,11 @@ describe('GoogleCalendar', () => {
     expect(GoogleCalendar.metadata.supportedFeatureIds).toContain('workflows');
   });
 
-  it('should support ears auth type as first visible option with Quick Connect label', () => {
+  it('should support ears auth type as first visible option', () => {
     const visibleTypes = GoogleCalendar.auth?.types.filter(
       (t) => typeof t === 'string' || !(t as AuthTypeDef).hidden
     );
-    expect(visibleTypes?.[0]).toEqual(
-      expect.objectContaining({ type: 'ears', label: 'Quick Connect OAuth 2.0' })
-    );
+    expect(visibleTypes?.[0]).toEqual(expect.objectContaining({ type: 'ears' }));
   });
 
   it('bearer auth is hidden (not shown in picker) but retained for existing connectors', () => {

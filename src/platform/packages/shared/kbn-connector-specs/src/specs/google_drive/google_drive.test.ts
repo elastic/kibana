@@ -31,13 +31,11 @@ describe('GoogleDriveConnector', () => {
   });
 
   describe('auth', () => {
-    it('supports ears auth type as first visible option with Quick Connect label', () => {
+    it('supports ears auth type as first visible option', () => {
       const visibleTypes = GoogleDriveConnector.auth?.types.filter(
         (t) => typeof t === 'string' || !(t as AuthTypeDef).hidden
       );
-      expect(visibleTypes?.[0]).toEqual(
-        expect.objectContaining({ type: 'ears', label: 'Quick Connect OAuth 2.0' })
-      );
+      expect(visibleTypes?.[0]).toEqual(expect.objectContaining({ type: 'ears' }));
     });
 
     it('bearer auth is hidden (not shown in picker) but retained for existing connectors', () => {

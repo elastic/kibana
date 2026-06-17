@@ -192,9 +192,6 @@ export const Slack: ConnectorSpec = {
     types: [
       {
         type: 'ears',
-        label: i18n.translate('core.kibanaConnectorSpecs.slack.auth.ears.label', {
-          defaultMessage: 'Quick Connect OAuth 2.0',
-        }),
         overrides: {
           meta: { scope: { disabled: true } },
         },
