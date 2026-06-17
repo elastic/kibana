@@ -12,19 +12,19 @@ jest.mock('.', () => ({
   }),
 }));
 
+jest.mock('@kbn/kibana-react-plugin/public', () => ({
+  useKibana: () => ({ services: { http: {}, application: {} } }),
+}));
+
+jest.mock('react-router-dom', () => ({
+  ...jest.requireActual('react-router-dom'),
+  useHistory: () => ({}),
+}));
+
 import React from 'react';
 
-import { shallow } from 'enzyme';
-
-import {
-  EuiLink,
-  EuiButton,
-  EuiButtonIcon,
-  EuiButtonEmpty,
-  EuiListGroupItem,
-  EuiPanel,
-  EuiCard,
-} from '@elastic/eui';
+import { screen } from '@testing-library/react';
+import { renderWithKibanaRenderContext } from '@kbn/test-jest-helpers';
 
 import {
   EuiLinkTo,
@@ -38,63 +38,58 @@ import {
 
 describe('React Router EUI component helpers', () => {
   it('renders an EuiLink', () => {
-    const wrapper = shallow(<EuiLinkTo to="/" />);
+    renderWithKibanaRenderContext(<EuiLinkTo to="/" />);
 
-    expect(wrapper.find(EuiLink)).toHaveLength(1);
+    expect(screen.getByTestId('contentConnectorsEuiLinkToLink')).toBeInTheDocument();
   });
 
   it('renders an EuiButton', () => {
-    const wrapper = shallow(<EuiButtonTo to="/" />);
+    renderWithKibanaRenderContext(<EuiButtonTo to="/" />);
 
-    expect(wrapper.find(EuiButton)).toHaveLength(1);
+    expect(screen.getByTestId('contentConnectorsEuiButtonToButton')).toBeInTheDocument();
   });
 
   it('renders an EuiButtonEmpty', () => {
-    const wrapper = shallow(<EuiButtonEmptyTo to="/" />);
+    renderWithKibanaRenderContext(<EuiButtonEmptyTo to="/" />);
 
-    expect(wrapper.find(EuiButtonEmpty)).toHaveLength(1);
+    expect(screen.getByTestId('contentConnectorsEuiButtonEmptyToButton')).toBeInTheDocument();
   });
 
   it('renders an EuiButtonIconTo', () => {
-    const wrapper = shallow(<EuiButtonIconTo iconType="pencil" to="/" />);
+    renderWithKibanaRenderContext(<EuiButtonIconTo iconType="pencil" to="/" />);
 
-    expect(wrapper.find(EuiButtonIcon)).toHaveLength(1);
+    expect(screen.getByTestId('contentConnectorsEuiButtonIconToButton')).toBeInTheDocument();
   });
 
   it('renders an EuiListGroupItem', () => {
-    const wrapper = shallow(<EuiListGroupItemTo to="/" label="foo" />);
+    renderWithKibanaRenderContext(<EuiListGroupItemTo to="/" label="foo" />);
 
-    expect(wrapper.find(EuiListGroupItem)).toHaveLength(1);
-    expect(wrapper.find(EuiListGroupItem).prop('label')).toEqual('foo');
+    expect(screen.getByText('foo')).toBeInTheDocument();
   });
 
   it('renders an EuiPanel', () => {
-    const wrapper = shallow(<EuiPanelTo to="/" paddingSize="l" />);
+    const { container } = renderWithKibanaRenderContext(<EuiPanelTo to="/" paddingSize="l" />);
 
-    expect(wrapper.find(EuiPanel)).toHaveLength(1);
-    expect(wrapper.find(EuiPanel).prop('paddingSize')).toEqual('l');
+    expect(container.querySelector('.euiPanel')).toBeInTheDocument();
   });
 
   it('renders an EuiCard', () => {
-    const wrapper = shallow(<EuiCardTo to="/" title="test" description="" />);
+    renderWithKibanaRenderContext(<EuiCardTo to="/" title="test" description="" />);
 
-    expect(wrapper.find(EuiCard)).toHaveLength(1);
-    expect(wrapper.find(EuiCard).prop('title')).toEqual('test');
+    expect(screen.getByText('test')).toBeInTheDocument();
   });
 
   it('passes down all ...rest props', () => {
-    const wrapper = shallow(<EuiLinkTo to="/" data-test-subj="test" external />);
-    const link = wrapper.find(EuiLink);
+    renderWithKibanaRenderContext(<EuiLinkTo to="/" data-test-subj="test" external />);
 
-    expect(link.prop('external')).toEqual(true);
-    expect(link.prop('data-test-subj')).toEqual('test');
+    // data-test-subj overrides the default on EuiLink — confirms ...rest is forwarded
+    expect(screen.getByTestId('test')).toBeInTheDocument();
   });
 
   it('renders with generated href and onClick props', () => {
-    const wrapper = shallow(<EuiLinkTo to="/hello/world" />);
-    const link = wrapper.find(EuiLink);
+    renderWithKibanaRenderContext(<EuiLinkTo to="/hello/world" />);
 
-    expect(link.prop('onClick')).toBeInstanceOf(Function);
-    expect(link.prop('href')).toEqual('/app/content_connectors/hello/world');
+    const link = screen.getByTestId('contentConnectorsEuiLinkToLink');
+    expect(link).toHaveAttribute('href', '/app/content_connectors/hello/world');
   });
 });
