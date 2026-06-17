@@ -44,6 +44,7 @@ const validFullPolicy = {
     },
   },
   vars: { some_var: 'some_value' },
+  additional_datastreams_permissions: ['logs-test-default', 'metrics-test-default'],
   global_data_tags: [
     { name: 'team', value: 'cloud-security' },
     { name: 'priority', value: 1 },
@@ -110,6 +111,22 @@ describe('AgentlessPolicySchema', () => {
     it('should accept a policy without a description', () => {
       const { description: _, ...policyWithoutDescription } = validFullPolicy;
       expect(() => AgentlessPolicySchema.validate(policyWithoutDescription)).not.toThrow();
+    });
+  });
+
+  describe('additional_datastreams_permissions', () => {
+    it('should accept a policy with additional_datastreams_permissions', () => {
+      expect(() =>
+        AgentlessPolicySchema.validate({
+          ...validMinimalPolicy,
+          additional_datastreams_permissions: ['logs-test-default'],
+        })
+      ).not.toThrow();
+    });
+
+    it('should accept a policy without additional_datastreams_permissions', () => {
+      const { additional_datastreams_permissions: _, ...policy } = validFullPolicy;
+      expect(() => AgentlessPolicySchema.validate(policy)).not.toThrow();
     });
   });
 

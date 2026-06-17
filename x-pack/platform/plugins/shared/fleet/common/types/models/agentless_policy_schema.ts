@@ -67,6 +67,14 @@ export const AgentlessPolicySchema = schema.object(
       })
     ),
     vars: schema.maybe(SimplifiedVarsSchema),
+    additional_datastreams_permissions: schema.maybe(
+      schema.arrayOf(schema.string(), {
+        maxSize: 1000,
+        meta: {
+          description: 'Additional data stream permissions granted to the agentless agent policy.',
+        },
+      })
+    ),
     global_data_tags: schema.maybe(
       schema.arrayOf(GlobalDataTagSchema, {
         maxSize: 100,

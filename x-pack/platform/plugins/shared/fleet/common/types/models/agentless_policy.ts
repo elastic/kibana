@@ -37,6 +37,7 @@ export interface AgentlessPolicy {
   description?: string;
   namespace?: string;
   vars?: SimplifiedVars;
+  additional_datastreams_permissions?: string[];
   global_data_tags?: GlobalDataTag[];
   cloud_connector?: AgentlessCloudConnector | null;
   package: AgentlessPackage;

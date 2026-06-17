@@ -108,6 +108,7 @@ export const packagePolicyToAgentlessPolicy = (packagePolicy: PackagePolicy): Ag
     },
     inputs: formatInputs(packagePolicy.inputs, supportsAgentless) ?? {},
     vars: formatVars(packagePolicy.vars),
+    additional_datastreams_permissions: packagePolicy.additional_datastreams_permissions,
     global_data_tags: packagePolicy.global_data_tags,
     cloud_connector: packagePolicy.cloud_connector_id
       ? { enabled: true, cloud_connector_id: packagePolicy.cloud_connector_id }

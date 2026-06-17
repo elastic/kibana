@@ -90,7 +90,6 @@ export function generateCreateAgentlessPolicyDevToolsRequest(
       'vars',
       'id',
       'var_group_selections',
-      'additional_datastreams_permissions',
       'condition',
       'supports_agentless',
       'supports_cloud_connector',
