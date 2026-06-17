@@ -28822,10 +28822,10 @@ node-stdlib-browser@1.3.1:
     util "^0.12.4"
     vm-browserify "^1.0.1"
 
-nodemailer@8.0.7:
-  version "8.0.7"
-  resolved "https://registry.yarnpkg.com/nodemailer/-/nodemailer-8.0.7.tgz#538729a79444e538331bca8a6fc3e5c034eaebc6"
-  integrity sha512-pkjE4mkBzQjdJT4/UmlKl3pX0rC9fZmjh7c6C9o7lv66Ac6w9WCnzPzhbPNxwZAzlF4mdq4CSWB5+FbK6FWCow==
+nodemailer@8.0.8:
+  version "8.0.8"
+  resolved "https://registry.yarnpkg.com/nodemailer/-/nodemailer-8.0.8.tgz#23ff12bebfaed142fbf126c4db3a7a8ed68be031"
+  integrity sha512-p+XsnzXGdtIHXUu2ugxdfG+eX2nehsGhMjW9h0CWj1BhE30hrFz0kh0yIM0/VjUgVsRrDj+80ZO+I1nSkGE4tA==
 
 nopt@^4.0.1:
   version "4.0.3"

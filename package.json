@@ -1476,7 +1476,7 @@
     "node-diff3": "3.1.2",
     "node-fetch": "2.7.0",
     "node-forge": "1.4.0",
-    "nodemailer": "8.0.7",
+    "nodemailer": "8.0.8",
     "normalize-path": "3.0.0",
     "object-hash": "3.0.0",
     "object-path-immutable": "4.1.2",
