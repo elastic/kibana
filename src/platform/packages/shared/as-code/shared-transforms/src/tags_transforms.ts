@@ -8,6 +8,14 @@
  */
 
 import type { Reference } from '@kbn/content-management-utils';
+import { tagSavedObjectTypeName } from '@kbn/saved-objects-tagging-plugin/common';
+
+export function toAsCodeTags(references: Reference[] = []) {
+  const tags: string[] = references
+    ? references.filter(({ type }) => type === tagSavedObjectTypeName).map(({ id }) => id)
+    : [];
+  return { tags };
+}
 
 export function toStoredTags<State extends { tags?: string[] } = { tags?: string[] }>(
   state: State
@@ -22,6 +30,7 @@ export function toStoredTags<State extends { tags?: string[] } = { tags?: string
     state: restOfState,
     references: Array.from(uniqueTagIds).map((tagId) => ({
       type: 'tag',
+
       id: tagId,
       name: `tag-ref-${tagId}`,
     })),

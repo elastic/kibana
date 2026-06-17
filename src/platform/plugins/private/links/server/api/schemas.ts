@@ -124,7 +124,6 @@ export const linksByReferenceSchema = serializedTitlesSchema.extends(
         description: 'The unique identifier of the links library item.',
       },
     }),
-    tags: getAsCodeTagsSchema(),
   },
   { meta: BY_REF_SCHEMA_META }
 );
