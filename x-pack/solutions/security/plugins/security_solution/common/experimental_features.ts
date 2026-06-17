@@ -23,6 +23,16 @@ export const allowedExperimentalValues = Object.freeze({
   previewTelemetryUrlEnabled: false,
 
   /**
+   * When enabled, prebuilt rule installation (POST .../prebuilt_rules/installation/_perform)
+   * and rule import (POST .../rules/_import) use the new alerting `rulesClient.bulkCreateRules`
+   * path, which handles both disabled and enabled rules (API key minting + task scheduling)
+   * in a single bulk call instead of the per-rule create loop.
+   *
+   * Release: TBD
+   */
+  bulkCreateRulesEnabled: false,
+
+  /**
    * Enables extended rule execution logging to Event Log. When this setting is enabled:
    * - Rules write their console error, info, debug, and trace messages to Event Log,
    *   in addition to other events they log there (status changes and execution metrics).

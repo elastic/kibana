@@ -13,3 +13,6 @@ export const RULE_MANAGEMENT_BULK_ACTION_SOCKET_TIMEOUT_MS = 3600000 as const;
  * 1 hour = 3600000 ms = 60 minutes * 60 seconds * 1000 ms
  */
 export const RULE_MANAGEMENT_IMPORT_EXPORT_SOCKET_TIMEOUT_MS = 3600000 as const;
+
+/** Cap concurrent rule imports at 1 to bound heap; mirrors PREBUILT_RULES_OPERATION_CONCURRENCY. */
+export const RULE_MANAGEMENT_IMPORT_CONCURRENCY = 1;
