@@ -48,6 +48,7 @@ network:
 checkout:
   fetch-depth: 0
 safe-outputs:
+  report-failure-as-issue: false
   staged: true
   create-pull-request:
     max: 1
