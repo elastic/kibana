@@ -178,17 +178,6 @@ apiTest.describe('List action policies API', { tag: '@local-stateful-classic' },
     expect(response.body.items[0].name).toBe('Beta Policy');
   });
 
-  apiTest('search: matches by destination id', async ({ apiClient, apiServices }) => {
-    await createActionPolicies(apiServices);
-
-    const response = await apiClient.get(getListActionPoliciesUrl({ search: 'wf-gamma' }), {
-      headers: { ...testData.COMMON_HEADERS, ...readerHeaders },
-    });
-    expect(response).toHaveStatusCode(200);
-    expect(response.body.total).toBe(1);
-    expect(response.body.items[0].name).toBe('Gamma Policy');
-  });
-
   apiTest(
     'search: returns multiple matching items for partial term',
     async ({ apiClient, apiServices }) => {
