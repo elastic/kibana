@@ -30,7 +30,7 @@ export const investigationAttachmentDefinition: AttachmentUIDefinition<Investiga
   getIcon: () => 'inspect',
   getHeader: ({ attachment }) => ({
     icon: 'inspect',
-    subtitle: attachment.data.root_cause.slice(0, 80),
+    subtitle: attachment.data.contributing_factors.slice(0, 80),
     badges: [
       {
         label: i18n.translate('xpack.streams.investigationAttachment.confidenceBadge', {
