@@ -106,6 +106,8 @@ export interface ExperimentalFeatures {
   todos: boolean;
   /** Whether external ES|QL datasets are surfaced to data-source tools */
   datasets: boolean;
+  /** Whether the ask_user_question HITL tool is enabled */
+  askUserQuestion: boolean;
 }
 
 export interface AgentHandlerContext {

@@ -6,7 +6,7 @@
  */
 
 import React, { Suspense, lazy } from 'react';
-import { EuiAvatar } from '@elastic/eui';
+import { EuiAvatar, EuiLoadingSpinner } from '@elastic/eui';
 import { defineAttachment } from '@kbn/cases-plugin/public';
 import { SECURITY_TIMELINE_ATTACHMENT_TYPE } from '@kbn/cases-plugin/common';
 import { TimelineAttachmentPayloadSchema } from '../../../../common/cases/attachments/timeline';
@@ -18,6 +18,21 @@ const LazyTimelineLink = lazy(async () => {
   const { TimelineLink: Component } = await import('./timeline_link');
   return { default: Component };
 });
+
+// Single chunk for the attachment-tab timelines table; loaded only when the tab is opened.
+const LazyCaseViewTimelines = lazy(async () => {
+  const { CaseViewTimelines: Component } = await import('./case_view_timelines');
+  return { default: Component };
+});
+
+const CaseViewTimelinesTab: React.FC<React.ComponentProps<typeof LazyCaseViewTimelines>> = (
+  props
+) => (
+  <Suspense fallback={<EuiLoadingSpinner />}>
+    <LazyCaseViewTimelines {...props} />
+  </Suspense>
+);
+CaseViewTimelinesTab.displayName = 'CaseViewTimelinesTab';
 
 /**
  * Defines the `security.timeline` cases attachment registered with the cases attachment framework.
@@ -57,4 +72,5 @@ export const getTimelineAttachment = () =>
     getAttachmentRemovalObject: () => ({
       event: i18n.REMOVED_TIMELINE_LABEL,
     }),
+    getAttachmentTabViewObject: () => ({ children: CaseViewTimelinesTab }),
   });

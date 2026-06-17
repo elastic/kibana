@@ -13,6 +13,7 @@ import type { SavedObjectsServiceStart } from '@kbn/core-saved-objects-server';
 import type { UiSettingsServiceStart } from '@kbn/core-ui-settings-server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
+import type { ConnectorTelemetryMetadata } from '@kbn/inference-common';
 import type { AgentConfiguration, Conversation, ConverseInput } from '@kbn/agent-builder-common';
 import {
   AgentExecutionMode,
@@ -203,6 +204,7 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
   const createScopedRunnerWithDeps = async ({
     request,
     defaultConnectorId,
+    telemetryMetadata,
     conversation,
     nextInput,
     promptState,
@@ -211,6 +213,7 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
   }: {
     request: KibanaRequest;
     defaultConnectorId?: string;
+    telemetryMetadata?: ConnectorTelemetryMetadata;
     conversation?: Conversation;
     nextInput?: ConverseInput;
     promptState?: PromptStorageState;
@@ -229,7 +232,7 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
     const promptManager = createPromptManager({ state: promptState });
     const toolManager = createToolManager();
 
-    const modelProvider = modelProviderFactory({ request, defaultConnectorId });
+    const modelProvider = modelProviderFactory({ request, defaultConnectorId, telemetryMetadata });
 
     const subAgentExecutor = createSubAgentExecutor({ request, getExecutionService });
 
@@ -243,6 +246,8 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
       subagents: experimentalEnabled,
       todos: experimentalEnabled,
       datasets: experimentalEnabled,
+      // forcefully disabled until the UI is implemented
+      askUserQuestion: false, // isExperimentalEnabled,
     };
 
     const allDeps = {
@@ -297,6 +302,7 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
       const {
         request,
         defaultConnectorId,
+        telemetryMetadata,
         abortSignal,
         executionMode = AgentExecutionMode.conversation,
         ...otherParams
@@ -305,6 +311,7 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
       const runner = await createScopedRunnerWithDeps({
         request,
         defaultConnectorId,
+        telemetryMetadata,
         conversation,
         nextInput,
         abortSignal,

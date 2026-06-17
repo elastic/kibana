@@ -131,6 +131,7 @@ export const createPromptManagerMock = (): PromptManagerMock => {
   return {
     set: jest.fn(),
     get: jest.fn(),
+    delete: jest.fn(),
     dump: jest.fn(),
     getConfirmationStatus: jest.fn(),
     getAuthorizationStatus: jest.fn(),
@@ -319,6 +320,7 @@ export const createAgentHandlerContextMock = (): AgentHandlerContextMock => {
       subagents: false,
       todos: false,
       datasets: false,
+      askUserQuestion: false,
     },
     subAgentExecutor: {
       executeSubAgent: jest.fn(),
@@ -375,6 +377,7 @@ export const createToolHandlerContextMock = (): ToolHandlerContextMock => {
       subagents: false,
       todos: false,
       datasets: false,
+      askUserQuestion: false,
     },
   };
 };
@@ -424,6 +427,7 @@ export const createScopedRunnerDepsMock = (): CreateScopedRunnerDepsMock => {
       subagents: false,
       todos: false,
       datasets: false,
+      askUserQuestion: false,
     },
     subAgentExecutor: {
       executeSubAgent: jest.fn(),
