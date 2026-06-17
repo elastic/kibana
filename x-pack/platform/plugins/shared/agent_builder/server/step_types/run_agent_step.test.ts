@@ -8,7 +8,10 @@
 import type { KibanaRequest } from '@kbn/core-http-server';
 import { of, throwError } from 'rxjs';
 import { ChatEventType, createRequestAbortedError } from '@kbn/agent-builder-common';
-import { ConfigSchema } from '../../common/step_types/run_agent_step';
+import {
+  AGGREGATE_BY_REQUIRES_PLUGIN_ID_MESSAGE,
+  ConfigSchema,
+} from '../../common/step_types/run_agent_step';
 import { CONNECTOR_OR_INFERENCE_ID_CONFLICT_MESSAGE_WORKFLOW } from '../../common/resolve_connector_or_inference_id';
 import { getRunAgentStepDefinition } from './run_agent_step';
 import type { StepHandlerContext } from '@kbn/workflows-extensions/server';
@@ -389,6 +392,77 @@ describe('ai.agent workflow step (Agent Builder)', () => {
           params: expect.objectContaining({ connectorId: 'inf-1' }),
         })
       );
+    });
+  });
+
+  describe('telemetry attribution (plugin-id / aggregate-by)', () => {
+    const roundCompleteEvents = () =>
+      of({
+        type: ChatEventType.roundComplete,
+        data: {
+          round: {
+            id: 'r-1',
+            response: { message: 'ok' },
+          },
+        },
+      });
+
+    it('ConfigSchema rejects aggregate-by without plugin-id', () => {
+      const parsed = ConfigSchema.safeParse({ 'aggregate-by': 'streams_significant_events' });
+      expect(parsed.success).toBe(false);
+      if (!parsed.success) {
+        expect(parsed.error.issues[0].message).toBe(AGGREGATE_BY_REQUIRES_PLUGIN_ID_MESSAGE);
+      }
+    });
+
+    it('ConfigSchema accepts plugin-id with aggregate-by, and plugin-id alone', () => {
+      expect(
+        ConfigSchema.safeParse({
+          'plugin-id': 'streams_sig_events_discovery',
+          'aggregate-by': 'streams_significant_events',
+        }).success
+      ).toBe(true);
+      expect(ConfigSchema.safeParse({ 'plugin-id': 'streams_sig_events_discovery' }).success).toBe(
+        true
+      );
+    });
+
+    it('forwards plugin-id and aggregate-by as telemetryMetadata to executeAgent', async () => {
+      const execution = createExecutionMock(roundCompleteEvents());
+      const serviceManager = { internalStart: { execution } } as any;
+      const step = getRunAgentStepDefinition(serviceManager);
+
+      await step.handler(
+        createContext({
+          input: { message: 'hello' },
+          config: {
+            'plugin-id': 'streams_sig_events_discovery',
+            'aggregate-by': 'streams_significant_events',
+          },
+        })
+      );
+
+      expect(execution.executeAgent).toHaveBeenCalledWith(
+        expect.objectContaining({
+          params: expect.objectContaining({
+            telemetryMetadata: {
+              pluginId: 'streams_sig_events_discovery',
+              aggregateBy: 'streams_significant_events',
+            },
+          }),
+        })
+      );
+    });
+
+    it('omits telemetryMetadata when no plugin-id is configured', async () => {
+      const execution = createExecutionMock(roundCompleteEvents());
+      const serviceManager = { internalStart: { execution } } as any;
+      const step = getRunAgentStepDefinition(serviceManager);
+
+      await step.handler(createContext({ input: { message: 'hello' } }));
+
+      const callArg = execution.executeAgent.mock.calls[0][0];
+      expect(callArg.params).not.toHaveProperty('telemetryMetadata');
     });
   });
 });
