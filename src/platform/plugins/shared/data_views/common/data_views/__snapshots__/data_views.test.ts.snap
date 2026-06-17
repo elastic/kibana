@@ -53,6 +53,8 @@ exports[`IndexPatterns savedObjectToSpec 1`] = `
 Object {
   "allowHidden": undefined,
   "allowNoIndex": undefined,
+  "createdAt": "2026-06-04T14:55:23.000Z",
+  "createdBy": "user1",
   "fieldAttrs": Object {
     "aRuntimeField": Object {
       "count": 5,
@@ -96,6 +98,8 @@ Object {
   "title": "kibana-*",
   "type": "",
   "typeMeta": Object {},
+  "updatedAt": "2026-06-05T10:00:00.000Z",
+  "updatedBy": "user2",
   "version": "version",
 }
 `;

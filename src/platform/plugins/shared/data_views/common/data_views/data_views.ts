@@ -834,6 +834,10 @@ export class DataViewsService {
         allowHidden,
       },
       managed,
+      created_at,
+      created_by,
+      updated_at,
+      updated_by,
     } = savedObject;
 
     const parsedSourceFilters = sourceFilters ? JSON.parse(sourceFilters) : undefined;
@@ -872,6 +876,10 @@ export class DataViewsService {
       name,
       allowHidden,
       managed,
+      createdAt: created_at,
+      createdBy: created_by,
+      updatedAt: updated_at,
+      updatedBy: updated_by,
     };
   };
 
