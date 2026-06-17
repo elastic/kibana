@@ -234,6 +234,12 @@ export const allowedExperimentalValues = Object.freeze({
   pciComplianceAgentBuilder: true,
 
   /**
+   * Enables the find-security-rules Agent Builder skill.
+   * Part of the DEX AI skills family (`dexAiSkill*`).
+   */
+  dexAiSkillFindRules: false,
+
+  /**
    * Enables the new flyout using the EUI flyout system
    */
   newFlyoutSystemEnabled: false,
@@ -273,6 +279,18 @@ export const allowedExperimentalValues = Object.freeze({
    * (`/api/detection_engine/attacks/*`).
    */
   publicAttacksApiEnabled: false,
+
+  /**
+   * Enables the agent builder `run_rule_preview` tool and the `security.rule.preview`
+   * attachment (server type + client renderer). Gates registration so the feature can
+   * ship dark and be enabled per environment.
+   */
+  rulePreviewAttachmentEnabled: false,
+
+  /**
+   * Enables the risk score history API endpoint for Entity Analytics.
+   */
+  riskScoreHistoryEnabled: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;

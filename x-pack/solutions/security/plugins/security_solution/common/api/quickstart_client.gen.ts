@@ -28,6 +28,10 @@ import type {
   SetAlertTagsRequestBodyInput,
   SetAlertTagsResponse,
 } from './detection_engine/alert_tags/set_alert_tags/set_alert_tags.gen';
+import type {
+  SearchAttacksRequestBodyInput,
+  SearchAttacksResponse,
+} from './detection_engine/attacks/search/search_route.gen';
 import type { CreateAlertsIndexResponse } from './detection_engine/index_management/create_index/create_index.gen';
 import type { DeleteAlertsIndexResponse } from './detection_engine/index_management/delete_index/delete_index.gen';
 import type { ReadAlertsIndexResponse } from './detection_engine/index_management/read_index/read_index.gen';
@@ -375,6 +379,10 @@ import type {
   PreviewRiskScoreRequestBodyInput,
   PreviewRiskScoreResponse,
 } from './entity_analytics/risk_engine/preview_route.gen';
+import type {
+  GetRiskScoreHistoryRequestQueryInput,
+  GetRiskScoreHistoryResponse,
+} from './entity_analytics/risk_engine/risk_score_history_route.gen';
 import type {
   UploadWatchlistCsvRequestParamsInput,
   UploadWatchlistCsvResponse,
@@ -2132,6 +2140,23 @@ Requires the **Timeline and Notes** read privilege (`notes_read`).
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
+   * Returns time-ordered historical risk score entries from the risk score time-series index for a given entity.
+   */
+  async getRiskScoreHistory(props: GetRiskScoreHistoryProps) {
+    this.log.info(`${new Date().toISOString()} Calling API GetRiskScoreHistory`);
+    return this.kbnClient
+      .request<GetRiskScoreHistoryResponse>({
+        path: '/api/risk_score/history',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        },
+        method: 'GET',
+
+        query: props.query,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
    * Retrieves the rule migration document stored in the system given the rule migration id
    */
   async getRuleMigration(props: GetRuleMigrationProps) {
@@ -3231,6 +3256,22 @@ matching documents, and inspect execution logs. Pair `invocationCount` and `time
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  /**
+   * Find and/or aggregate attack discovery alerts that match the given query. Searches scheduled and ad hoc attack discovery alert indices for the active space only.
+   */
+  async searchAttacks(props: SearchAttacksProps) {
+    this.log.info(`${new Date().toISOString()} Calling API SearchAttacks`);
+    return this.kbnClient
+      .request<SearchAttacksResponse>({
+        path: '/api/detection_engine/attacks/search',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        },
+        method: 'POST',
+        body: props.body,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
   async searchPrivilegesIndices(props: SearchPrivilegesIndicesProps) {
     this.log.info(`${new Date().toISOString()} Calling API SearchPrivilegesIndices`);
     return this.kbnClient
@@ -4053,6 +4094,9 @@ export interface GetPolicyResponseProps {
 export interface GetProtectionUpdatesNoteProps {
   params: GetProtectionUpdatesNoteRequestParamsInput;
 }
+export interface GetRiskScoreHistoryProps {
+  query: GetRiskScoreHistoryRequestQueryInput;
+}
 export interface GetRuleMigrationProps {
   params: GetRuleMigrationRequestParamsInput;
 }
@@ -4196,6 +4240,9 @@ export interface ScheduleRiskEngineNowProps {
 }
 export interface SearchAlertsProps {
   body: SearchAlertsRequestBodyInput;
+}
+export interface SearchAttacksProps {
+  body: SearchAttacksRequestBodyInput;
 }
 export interface SearchPrivilegesIndicesProps {
   query: SearchPrivilegesIndicesRequestQueryInput;
