@@ -12,10 +12,9 @@ import {
   DEFAULT_DSL_OPTIONS_LIST_STATE,
   DEFAULT_ESQL_OPTIONS_LIST_STATE,
   MAX_OPTIONS_LIST_REQUEST_SIZE,
+  SELECTIONS_MAX,
 } from '@kbn/controls-constants';
 import { controlTitleSchema, extendDataControlSchema } from './control_schema';
-
-const SELECTIONS_MAX = 10000;
 
 export const optionsListDisplaySettingsSchema = schema.object({
   placeholder: schema.maybe(

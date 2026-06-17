@@ -16,6 +16,7 @@ import { UI_SETTINGS } from '@kbn/data-plugin/common';
 import { getKbnServerError, reportServerError } from '@kbn/kibana-utils-plugin/server';
 import type { PluginSetup as KqlPluginSetup } from '@kbn/kql/server';
 
+import { SELECTIONS_MAX } from '@kbn/controls-constants';
 import type { StartDeps } from '../plugin';
 
 import { getESQLSingleColumnValues } from '../../common/options_list/get_esql_single_column_values';
@@ -35,22 +36,22 @@ const searchTechniqueSchema = schema.maybe(
 
 const selectedOptionsSchema = schema.maybe(
   schema.oneOf([
-    schema.arrayOf(schema.string({ maxLength: 999 }), { maxSize: 999 }), // maxSize for DoS prevention
-    schema.arrayOf(schema.number(), { maxSize: 999 }),
+    schema.arrayOf(schema.string({ maxLength: 1000 }), { maxSize: SELECTIONS_MAX }), // maxSize for DoS prevention
+    schema.arrayOf(schema.number(), { maxSize: SELECTIONS_MAX }),
   ])
 );
 
 const dslFetchBodySchema = schema.object(
   {
     kind: schema.literal('dsl'),
-    index: schema.string({ maxLength: 999 }),
+    index: schema.string({ maxLength: 1000 }),
     size: schema.number(),
-    fieldName: schema.string({ maxLength: 999 }),
+    fieldName: schema.string({ maxLength: 1000 }),
     sort: schema.maybe(schema.any()),
     filters: schema.maybe(schema.any()),
     fieldSpec: schema.maybe(schema.any()),
     ignoreValidations: schema.maybe(schema.boolean()),
-    searchString: schema.maybe(schema.string({ maxLength: 999 })),
+    searchString: schema.maybe(schema.string({ maxLength: 10000 })),
     searchTechnique: searchTechniqueSchema,
     selectedOptions: selectedOptionsSchema,
     runtimeFieldMap: schema.maybe(schema.any()),
@@ -63,12 +64,12 @@ const dslFetchBodySchema = schema.object(
 const esqlFetchBodySchema = schema.object(
   {
     kind: schema.literal('esql'),
-    esql: schema.string({ maxLength: 999 }),
+    esql: schema.string({ maxLength: 1000000 }),
     timeRange: schema.maybe(schema.any()),
     filter: schema.maybe(schema.any()),
     sort: schema.maybe(schema.any()),
-    esqlVariables: schema.maybe(schema.arrayOf(schema.any(), { maxSize: 999 })),
-    searchString: schema.maybe(schema.string({ maxLength: 999 })),
+    esqlVariables: schema.maybe(schema.arrayOf(schema.any(), { maxSize: 1000 })),
+    searchString: schema.maybe(schema.string({ maxLength: 10000 })),
     searchTechnique: searchTechniqueSchema,
     selectedOptions: selectedOptionsSchema,
     ignoreValidations: schema.maybe(schema.boolean()),

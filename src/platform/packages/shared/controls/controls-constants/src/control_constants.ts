@@ -23,3 +23,4 @@ export enum ControlValuesSource {
   ESQL = 'esql',
 }
 export const DEFAULT_CONTROL_VALUES_SOURCE = ControlValuesSource.FIELD;
+export const SELECTIONS_MAX = 10000;

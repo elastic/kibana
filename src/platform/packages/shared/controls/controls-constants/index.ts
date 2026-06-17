@@ -24,6 +24,7 @@ export {
   DEFAULT_DATA_CONTROL_STATE,
   DEFAULT_CONTROL_VALUES_SOURCE,
   ControlValuesSource,
+  SELECTIONS_MAX,
 } from './src/control_constants';
 export {
   DEFAULT_DSL_OPTIONS_LIST_STATE,

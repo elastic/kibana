@@ -103,8 +103,7 @@ export const getESQLSingleColumnValues = async ({
 getESQLSingleColumnValues.isSuccess = (
   result: unknown
 ): result is GetESQLSingleColumnValuesSuccess =>
-  'values' in (result as GetESQLSingleColumnValuesSuccess) &&
-  'column' in (result as GetESQLSingleColumnValuesSuccess);
+  typeof result === 'object' && result !== null && 'values' in result && 'column' in result;
 
 getESQLSingleColumnValues.isNumericResult = (
   result: unknown
@@ -119,5 +118,4 @@ getESQLSingleColumnValues.isMultiColumnError = (
 getESQLSingleColumnValues.hasNoResults = (
   result: unknown
 ): result is GetESQLSingleColumnValuesSuccessNoResults =>
-  getESQLSingleColumnValues.isSuccess(result) &&
-  !(result as GetESQLSingleColumnValuesSuccessNoResults).values.length;
+  getESQLSingleColumnValues.isSuccess(result) && !result.values.length;
