@@ -15,7 +15,7 @@ spaceTest.describe(
   'GenAI Settings - Page Display without AI Assistants Privileges',
   {
     tag: [
-      '@local-stateful-classic',
+      ...tags.stateful.classic,
       ...tags.serverless.observability.complete,
       ...tags.serverless.security.complete,
       ...tags.serverless.search,

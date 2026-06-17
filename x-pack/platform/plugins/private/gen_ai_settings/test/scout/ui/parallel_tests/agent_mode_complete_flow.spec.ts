@@ -15,7 +15,7 @@ spaceTest.describe(
   'GenAI Settings - Agent Mode Complete Flow',
   {
     tag: [
-      '@local-stateful-classic',
+      ...tags.stateful.classic,
       ...tags.serverless.observability.complete,
       ...tags.serverless.security.complete,
     ],
