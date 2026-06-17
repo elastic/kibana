@@ -25,7 +25,6 @@ import { fetchDocuments } from './fetch_documents';
 import { fetchEsql } from './fetch_esql';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import { dataViewMock, esHitsMockWithSort } from '@kbn/discover-utils/src/__mocks__';
-import { searchResponseIncompleteWarningLocalCluster } from '@kbn/search-response-warnings/src/__mocks__/search_response_warnings';
 import { getDiscoverInternalStateMock } from '../../../__mocks__/discover_state.mock';
 import { internalStateActions, selectTabRuntimeState } from '../state_management/redux';
 import type { DataView } from '@kbn/data-views-plugin/common';
@@ -284,15 +283,33 @@ describe('test fetchAll', () => {
     const initialRecords = [records[0], records[1]];
     const moreRecords = [records[2], records[3]];
 
-    const interceptedWarnings = [searchResponseIncompleteWarningLocalCluster];
-
     test('should add more records', async () => {
       const collectDocuments = subjectCollector(subjects.documents$);
       const collectMain = subjectCollector(subjects.main$);
-      mockFetchDocuments.mockResolvedValue({ records: moreRecords, interceptedWarnings });
+
+      const nextPagination = {
+        hasNextPage: false,
+        nextPage: jest.fn(),
+        getAllPages: jest.fn(),
+      };
+
+      const mockPagination = {
+        hasNextPage: true,
+        nextPage: jest.fn().mockResolvedValue({
+          rawResponse: {
+            hits: {
+              hits: esHitsMockWithSort.slice(2, 4),
+            },
+          },
+          pagination: nextPagination,
+        }),
+        getAllPages: jest.fn(),
+      };
+
       subjects.documents$.next({
         fetchStatus: FetchStatus.COMPLETE,
         result: initialRecords,
+        pagination: mockPagination,
       });
       fetchMoreDocuments(deps);
       await waitForNextTick();
@@ -302,15 +319,18 @@ describe('test fetchAll', () => {
         {
           fetchStatus: FetchStatus.COMPLETE,
           result: initialRecords,
+          pagination: mockPagination,
         },
         {
           fetchStatus: FetchStatus.LOADING_MORE,
           result: initialRecords,
+          pagination: mockPagination,
         },
         {
           fetchStatus: FetchStatus.COMPLETE,
           result: [...initialRecords, ...moreRecords],
-          interceptedWarnings,
+          interceptedWarnings: [],
+          pagination: nextPagination,
         },
       ]);
       expect(await collectMain()).toEqual([
@@ -323,10 +343,17 @@ describe('test fetchAll', () => {
     test('should handle exceptions', async () => {
       const collectDocuments = subjectCollector(subjects.documents$);
       const collectMain = subjectCollector(subjects.main$);
-      mockFetchDocuments.mockRejectedValue({ msg: 'This query failed' });
+
+      const mockPagination = {
+        hasNextPage: true,
+        nextPage: jest.fn().mockRejectedValue({ msg: 'This query failed' }),
+        getAllPages: jest.fn(),
+      };
+
       subjects.documents$.next({
         fetchStatus: FetchStatus.COMPLETE,
         result: initialRecords,
+        pagination: mockPagination,
       });
       fetchMoreDocuments(deps);
       await waitForNextTick();
@@ -336,14 +363,18 @@ describe('test fetchAll', () => {
         {
           fetchStatus: FetchStatus.COMPLETE,
           result: initialRecords,
+          pagination: mockPagination,
         },
         {
           fetchStatus: FetchStatus.LOADING_MORE,
           result: initialRecords,
+          pagination: mockPagination,
         },
         {
           fetchStatus: FetchStatus.COMPLETE,
           result: initialRecords,
+          interceptedWarnings: undefined,
+          pagination: mockPagination,
         },
       ]);
       expect(await collectMain()).toEqual([

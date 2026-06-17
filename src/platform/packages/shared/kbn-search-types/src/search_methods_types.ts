@@ -12,7 +12,7 @@ import type { KibanaExecutionContext } from '@kbn/core/public';
 import type { AbstractDataView } from '@kbn/data-views-plugin/common';
 import type { ProjectRouting } from '@kbn/es-query';
 import type { ESQLSearchParams } from '@kbn/es-types';
-import type { SanitizedConnectionRequestParams } from './types';
+import type { RequestAdapter, RequestStatistics } from '@kbn/inspector-plugin/common';
 
 /**
  * Base options shared across all typed search methods
@@ -37,6 +37,16 @@ export interface IBaseSearchOptions {
    * Project routing configuration for cross-project search (CPS).
    */
   projectRouting?: ProjectRouting;
+
+  /**
+   * Inspector integration options for tracking requests
+   */
+  inspector?: {
+    adapter?: RequestAdapter;
+    title: string;
+    description?: string;
+    id?: string;
+  };
 }
 
 // ============================================================================
@@ -106,11 +116,19 @@ export interface IDslSearchOptions extends IBaseSearchOptions {
    * Control total hits counting precision
    */
   trackTotalHits?: boolean | number;
+
+  /**
+   * Callback to provide pre-request metadata stats (e.g., index pattern name)
+   */
+  getRequestMetadata?: () => RequestStatistics;
 }
 
 export type IDslPaginatedSearchParams = IDslSearchParams & Required<Pick<IDslSearchParams, 'sort'>>;
 
-export type IDslPaginatedSearchOptions = Omit<IDslSearchOptions, 'trackTotalHits'>;
+export type IDslPaginatedSearchOptions = Omit<
+  IDslSearchOptions,
+  'trackTotalHits' | 'getRequestMetadata'
+>;
 
 /**
  * Pagination helpers for DSL search results
@@ -124,7 +142,14 @@ export interface IDslPagination {
   /**
    * Fetch the next page of results using search_after
    */
-  nextPage: () => Promise<IDslPaginatedSearchResult | null>;
+  nextPage: (options?: {
+    abortSignal?: AbortSignal;
+    executionContext?: KibanaExecutionContext;
+    /** Override the inspector title for this pagination request */
+    inspectorTitle?: string;
+    /** Override the inspector description for this pagination request */
+    inspectorDescription?: string;
+  }) => Promise<IDslPaginatedSearchResult | null>;
 }
 
 /**
@@ -135,10 +160,6 @@ export interface IDslSearchResult {
    * Raw Elasticsearch search response
    */
   rawResponse: estypes.SearchResponse;
-  /**
-   * Request parameters for inspector
-   */
-  requestParams?: SanitizedConnectionRequestParams;
 }
 
 /**
@@ -149,10 +170,6 @@ export interface IDslPaginatedSearchResult {
    * Raw Elasticsearch search response
    */
   rawResponse: estypes.SearchResponse;
-  /**
-   * Request parameters for inspector
-   */
-  requestParams?: SanitizedConnectionRequestParams;
   /**
    * Pagination helpers for navigating through result pages
    */
@@ -216,10 +233,6 @@ export interface IEsqlSearchResult {
    * Raw Elasticsearch ES|QL async query response
    */
   rawResponse: estypes.EsqlAsyncQueryResponse;
-  /**
-   * Request parameters for inspector
-   */
-  requestParams?: SanitizedConnectionRequestParams;
 }
 
 // ============================================================================
@@ -279,6 +292,11 @@ export interface IEqlSearchOptions extends IBaseSearchOptions {
    * Field to use for tiebreaking
    */
   tiebreakerField?: string;
+
+  /**
+   * Callback to provide pre-request metadata stats (e.g., index pattern name)
+   */
+  getRequestMetadata?: () => RequestStatistics;
 }
 
 /**
@@ -289,10 +307,6 @@ export interface IEqlSearchResult {
    * Raw Elasticsearch EQL search response
    */
   rawResponse: estypes.EqlSearchResponse;
-  /**
-   * Request parameters for inspector
-   */
-  requestParams?: SanitizedConnectionRequestParams;
 }
 
 // ============================================================================
@@ -347,11 +361,6 @@ export interface ISqlSearchResult {
    * Time in milliseconds the search took to execute
    */
   took: number;
-
-  /**
-   * Request parameters for inspector
-   */
-  requestParams?: SanitizedConnectionRequestParams;
 }
 
 // ============================================================================

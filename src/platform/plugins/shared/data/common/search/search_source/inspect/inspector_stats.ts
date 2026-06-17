@@ -138,3 +138,51 @@ export function getResponseInspectorStats(
 
   return stats;
 }
+
+/** @public */
+export function getEsqlInspectorStats(resp?: estypes.EsqlAsyncQueryResponse): RequestStatistics {
+  const stats: RequestStatistics = {};
+
+  if (resp?.values) {
+    stats.hits = {
+      label: i18n.translate('data.search.esql.hitsLabel', {
+        defaultMessage: 'Hits',
+      }),
+      value: `${resp.values.length}`,
+      description: i18n.translate('data.search.esql.hitsDescription', {
+        defaultMessage: 'The number of documents returned by the query.',
+      }),
+    };
+  }
+
+  if (resp?.took) {
+    stats.queryTime = {
+      label: i18n.translate('data.search.esql.queryTimeLabel', {
+        defaultMessage: 'Query time',
+      }),
+      value: i18n.translate('data.search.esql.queryTimeValue', {
+        defaultMessage: '{queryTime}ms',
+        values: { queryTime: resp.took },
+      }),
+      description: i18n.translate('data.search.esql.queryTimeDescription', {
+        defaultMessage:
+          'The time it took to process the query. ' +
+          'Does not include the time to send the request or parse it in the browser.',
+      }),
+    };
+  }
+
+  if (resp && 'documents_found' in resp) {
+    stats.documentsProcessed = {
+      label: i18n.translate('data.search.es_search.documentsProcessedLabel', {
+        defaultMessage: 'Documents processed',
+      }),
+      value: `${resp.documents_found}`,
+      description: i18n.translate('data.search.es_search.documentsProcessedDescription', {
+        defaultMessage: 'The number of documents processed by the query.',
+      }),
+    };
+  }
+
+  return stats;
+}

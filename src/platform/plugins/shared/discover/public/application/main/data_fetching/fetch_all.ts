@@ -14,6 +14,10 @@ import type { BehaviorSubject } from 'rxjs';
 import { combineLatest, distinctUntilChanged, filter, firstValueFrom, race, switchMap } from 'rxjs';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import { getTimeDifferenceInSeconds } from '@kbn/timerange';
+import { buildDataTableRecordList } from '@kbn/discover-utils';
+import type { EsHitRecord } from '@kbn/discover-utils/types';
+import { i18n } from '@kbn/i18n';
+import type { SearchResponseWarning } from '@kbn/search-response-warnings';
 import { updateVolatileSearchSource } from './update_search_source';
 import {
   checkHitCount,
@@ -136,68 +140,77 @@ export function fetchAll(
 
     // Handle results of the individual queries and forward the results to the corresponding dataSubjects
     response
-      .then(({ records, esqlQueryColumns, interceptedWarnings = [], esqlHeaderWarning }) => {
-        fetchAllRequestOnlyTracker.reportEvent(
-          {
-            queryRangeSeconds,
-            requests: params.inspectorAdapters.requests?.getRequestsSince(
-              fetchAllRequestOnlyTracker.startTime
-            ),
-          },
-          {
-            meta: {
-              fetchType,
+      .then(
+        ({
+          records,
+          esqlQueryColumns,
+          interceptedWarnings = [],
+          esqlHeaderWarning,
+          pagination,
+        }) => {
+          fetchAllRequestOnlyTracker.reportEvent(
+            {
+              queryRangeSeconds,
+              requests: params.inspectorAdapters.requests?.getRequestsSince(
+                fetchAllRequestOnlyTracker.startTime
+              ),
             },
-          }
-        );
+            {
+              meta: {
+                fetchType,
+              },
+            }
+          );
 
-        if (isEsqlQuery) {
-          const fetchStatus =
-            interceptedWarnings.filter(({ type }) => type === 'incomplete').length > 0
-              ? FetchStatus.ERROR
-              : FetchStatus.COMPLETE;
-          dataSubjects.totalHits$.next({
-            fetchStatus,
-            result: records.length,
-          });
-        } else {
-          const currentTotalHits = dataSubjects.totalHits$.getValue();
-          // If the total hits (or chart) query is still loading, emit a partial
-          // hit count that's at least our retrieved document count
-          if (currentTotalHits.fetchStatus === FetchStatus.LOADING && !currentTotalHits.result) {
-            // trigger `partial` only for the first request (if no total hits value yet)
+          if (isEsqlQuery) {
+            const fetchStatus =
+              interceptedWarnings.filter(({ type }) => type === 'incomplete').length > 0
+                ? FetchStatus.ERROR
+                : FetchStatus.COMPLETE;
             dataSubjects.totalHits$.next({
-              fetchStatus: FetchStatus.PARTIAL,
+              fetchStatus,
               result: records.length,
             });
+          } else {
+            const currentTotalHits = dataSubjects.totalHits$.getValue();
+            // If the total hits (or chart) query is still loading, emit a partial
+            // hit count that's at least our retrieved document count
+            if (currentTotalHits.fetchStatus === FetchStatus.LOADING && !currentTotalHits.result) {
+              // trigger `partial` only for the first request (if no total hits value yet)
+              dataSubjects.totalHits$.next({
+                fetchStatus: FetchStatus.PARTIAL,
+                result: records.length,
+              });
+            }
           }
+
+          /**
+           * Determine the appropriate fetch status
+           *
+           * The partial state for ES|QL mode is necessary to limit data table renders.
+           * Depending on the type of query new columns can be added to AppState to ensure the data table
+           * shows the updated columns. The partial state was introduced to prevent
+           * too frequent state changes that cause the table to re-render too often, which can cause
+           * race conditions, poor user experience, and potential test flakiness.
+           *
+           * For non-ES|QL queries, we always use COMPLETE status as they don't require this
+           * special handling.
+           */
+          const fetchStatus = isEsqlQuery ? FetchStatus.PARTIAL : FetchStatus.COMPLETE;
+
+          dataSubjects.documents$.next({
+            fetchStatus,
+            result: records,
+            esqlQueryColumns,
+            esqlHeaderWarning,
+            interceptedWarnings,
+            query,
+            pagination,
+          });
+
+          checkHitCount(dataSubjects.main$, records.length);
         }
-
-        /**
-         * Determine the appropriate fetch status
-         *
-         * The partial state for ES|QL mode is necessary to limit data table renders.
-         * Depending on the type of query new columns can be added to AppState to ensure the data table
-         * shows the updated columns. The partial state was introduced to prevent
-         * too frequent state changes that cause the table to re-render too often, which can cause
-         * race conditions, poor user experience, and potential test flakiness.
-         *
-         * For non-ES|QL queries, we always use COMPLETE status as they don't require this
-         * special handling.
-         */
-        const fetchStatus = isEsqlQuery ? FetchStatus.PARTIAL : FetchStatus.COMPLETE;
-
-        dataSubjects.documents$.next({
-          fetchStatus,
-          result: records,
-          esqlQueryColumns,
-          esqlHeaderWarning,
-          interceptedWarnings,
-          query,
-        });
-
-        checkHitCount(dataSubjects.main$, records.length);
-      })
+      )
       // In the case that the request was aborted (e.g. a refresh), swallow the abort error
       .catch((e) => {
         if (!abortController.signal.aborted) throw e;
@@ -238,12 +251,11 @@ export function fetchAll(
 }
 
 export async function fetchMoreDocuments(params: CommonFetchParams): Promise<void> {
-  const { dataSubjects, services, searchSource: originalSearchSource, getCurrentTab } = params;
+  const { dataSubjects, searchSource, getCurrentTab, scopedProfilesManager, abortController } =
+    params;
 
   try {
-    const searchSource = originalSearchSource.createChild();
-    const dataView = searchSource.getField('index')!;
-    const { query, sort } = getCurrentTab().appState;
+    const { query } = getCurrentTab().appState;
     const isEsqlQuery = isOfAggregateQueryType(query);
 
     if (isEsqlQuery) {
@@ -251,37 +263,61 @@ export async function fetchMoreDocuments(params: CommonFetchParams): Promise<voi
       return;
     }
 
-    const lastDocuments = dataSubjects.documents$.getValue().result || [];
-    const lastDocumentSort = lastDocuments[lastDocuments.length - 1]?.raw?.sort;
+    const currentDocs = dataSubjects.documents$.getValue();
+    const pagination = currentDocs.pagination;
 
-    if (!lastDocumentSort) {
-      return;
+    if (!pagination?.hasNextPage) {
+      return; // No more pages available
     }
-
-    searchSource.setField('searchAfter', lastDocumentSort);
 
     // Mark as loading
     sendLoadingMoreMsg(dataSubjects.documents$);
 
-    // Update the searchSource
-    updateVolatileSearchSource(searchSource, {
-      dataView,
-      services,
-      sort: sort as SortOrder[],
+    const nextPageResult = await pagination.nextPage({
+      abortSignal: abortController.signal,
+      executionContext: { description: 'fetch more documents' },
+      inspectorTitle: i18n.translate('discover.inspectorRequestDataTitleMoreDocuments', {
+        defaultMessage: 'More documents',
+      }),
     });
 
-    // Fetch more documents
-    const { records, interceptedWarnings } = await fetchDocuments(searchSource, params);
+    if (!nextPageResult) {
+      sendLoadingMoreFinishedMsg(dataSubjects.documents$, {
+        moreRecords: [],
+        interceptedWarnings: undefined,
+      });
+      return;
+    }
+
+    const dataView = searchSource.getField('index')!;
+    const moreRecords = buildDataTableRecordList({
+      records: nextPageResult.rawResponse.hits.hits as unknown as EsHitRecord[],
+      dataView,
+      processRecord: (record) => scopedProfilesManager.resolveDocumentProfile({ record }),
+    });
+
+    // Intercept warnings from pagination request
+    const adapter = params.inspectorAdapters.requests;
+    const interceptedWarnings: SearchResponseWarning[] = [];
+    if (adapter) {
+      params.services.data.search.showWarnings(adapter, (warning) => {
+        interceptedWarnings.push(warning);
+        return true; // suppress the default behaviour
+      });
+    }
 
     // Update the state and finish the loading state
     sendLoadingMoreFinishedMsg(dataSubjects.documents$, {
-      moreRecords: records,
+      moreRecords,
       interceptedWarnings,
+      pagination: nextPageResult.pagination,
     });
   } catch (error) {
+    const currentDocs = dataSubjects.documents$.getValue();
     sendLoadingMoreFinishedMsg(dataSubjects.documents$, {
       moreRecords: [],
       interceptedWarnings: undefined,
+      pagination: currentDocs.pagination,
     });
     sendErrorTo(dataSubjects.main$)(error);
   }

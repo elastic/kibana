@@ -26,6 +26,7 @@ import type { AggregateQuery, Query } from '@kbn/es-query';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import type { SearchResponseWarning } from '@kbn/search-response-warnings';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
+import type { IDslPagination } from '@kbn/search-types';
 import {
   DEFAULT_COLUMNS_SETTING,
   SEARCH_ON_PAGE_LOAD_SETTING,
@@ -79,6 +80,7 @@ export interface DataDocumentsMsg extends DataMsg {
   esqlQueryColumns?: DatatableColumn[]; // columns from ES|QL request
   esqlHeaderWarning?: string;
   interceptedWarnings?: SearchResponseWarning[]; // warnings (like shard failures)
+  pagination?: IDslPagination;
 }
 
 export interface DataTotalHitsMsg extends DataMsg {
@@ -258,7 +260,12 @@ export function getDataStateContainer({
     searchSessionManager,
   }).pipe(
     filter(() => validateTimeRange(timefilter.getTime(), toastNotifications)),
-    tap(() => inspectorAdapters.requests.reset()),
+    tap((val) => {
+      // Don't reset inspector on pagination requests to preserve initial request
+      if (val !== 'fetch_more') {
+        inspectorAdapters.requests.reset();
+      }
+    }),
     map((val) => ({
       options: {
         reset: val === 'reset',

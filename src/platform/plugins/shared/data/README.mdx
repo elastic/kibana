@@ -220,6 +220,46 @@ console.log(result.rawResponse.rows);
 console.log(result.took); // Elasticsearch query execution time in ms
 ```
 
+### Inspector Integration
+
+The search methods support integration with the Inspector for debugging and monitoring search requests. This feature is **only available on the client-side**.
+
+To enable Inspector integration, pass an `inspector` object with your search request options. The inspector object accepts the following properties:
+
+- `adapter` (optional): A `RequestAdapter` instance from `@kbn/inspector-plugin/common`. If not provided, a new adapter will be created.
+- `title`: The title displayed in the Inspector UI for this request.
+- `description` (optional): Additional description shown in the Inspector.
+- `id` (optional): A unique identifier for the request.
+
+#### Example: ES|QL Search with Inspector
+
+```.ts
+import { RequestAdapter } from '@kbn/inspector-plugin/common';
+
+// Create a RequestAdapter to collect request information
+const requestAdapter = new RequestAdapter();
+
+const result = await data.search.esql(
+  {
+    query: 'FROM logs-* | WHERE status >= 400 | STATS count = COUNT(*) BY status',
+    timeZone: 'America/New_York'
+  },
+  {
+    inspector: {
+      adapter: requestAdapter,
+      title: 'Error Log Analysis',
+      description: 'Count of HTTP errors by status code',
+      id: 'error-logs-query'
+    }
+  }
+);
+
+// The request details are now available in the Inspector UI
+console.log(result.rawResponse.values);
+```
+
+The `RequestAdapter` captures request details, timing information, and responses, making them available in the Inspector panel for debugging and performance analysis.
+
 ### SearchSource
 
 The `SearchSource` API is a convenient way to construct and run an Elasticsearch search query.

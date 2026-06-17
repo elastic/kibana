@@ -28,8 +28,14 @@ describe('Document view mode toggle component', () => {
     useDataViewWithTextFields = true,
   } = {}) => {
     const services = createDiscoverServicesMock();
+    const originalGet = services.uiSettings.get;
 
-    services.uiSettings.get = jest.fn().mockReturnValue(showFieldStatistics);
+    services.uiSettings.get = jest.fn().mockImplementation((key: string) => {
+      if (key === 'discover:showFieldStatistics') {
+        return showFieldStatistics;
+      }
+      return originalGet?.(key);
+    });
     services.aiops!.getPatternAnalysisAvailable = jest
       .fn()
       .mockResolvedValue(jest.fn(() => useDataViewWithTextFields));

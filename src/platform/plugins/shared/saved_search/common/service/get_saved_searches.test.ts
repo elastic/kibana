@@ -107,6 +107,7 @@ describe('getSavedSearch', () => {
         "rowsPerPage": undefined,
         "sampleSize": 100,
         "searchSource": Object {
+          "build": [MockFunction],
           "create": [MockFunction],
           "createChild": [MockFunction],
           "createCopy": [MockFunction],
@@ -260,6 +261,7 @@ describe('getSavedSearch', () => {
         "rowsPerPage": undefined,
         "sampleSize": undefined,
         "searchSource": Object {
+          "build": [MockFunction],
           "create": [MockFunction],
           "createChild": [MockFunction],
           "createCopy": [MockFunction],
