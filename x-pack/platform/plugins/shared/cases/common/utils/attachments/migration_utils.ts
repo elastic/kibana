@@ -25,9 +25,14 @@ export const isMigratedAttachmentType = (type: string, owner: string): boolean =
 };
 
 /**
- * Returns true when the attachment type is a unified-only type (no legacy
- * counterpart). These attachments can only be persisted/read in the unified
- * shape and must not be coerced through the legacy decode path.
+ * True only for migrated attachment types that have no legacy (v1) equivalent.
+ *
+ * The incoming `type` may be legacy (`alert`/`event`) or unified, so we first
+ * normalize via `toUnifiedAttachmentType(type, owner ?? '')`. A type is treated
+ * as unified-only when it:
+ *  1) is in `MIGRATED_ATTACHMENT_TYPES`,
+ *  2) has no entry in `UNIFIED_TO_LEGACY_MAP`, and
+ *  3) is not a persistable-state subtype (handled separately).
  */
 export const isUnifiedOnlyAttachmentType = (type: string, owner?: string): boolean => {
   const unifiedType = toUnifiedAttachmentType(type, owner ?? '');
