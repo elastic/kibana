@@ -42,4 +42,6 @@ export const EBT_CLICK_ACTIONS = {
   VIEW_ERROR: 'viewError',
   /** Navigates to the APM app. Use when the user explicitly chooses to open something in APM. */
   OPEN_IN_APM: 'openInApm',
+  /** User sets a breakdown field on a chart. */
+  SET_BREAKDOWN: 'setBreakdown',
 } as const;

@@ -18,10 +18,12 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { EBT_CLICK_ACTIONS, getEbtProps } from '@kbn/ebt-click';
 import { FieldDescription, FieldIcon, getFieldIconProps } from '@kbn/field-utils';
 import type { DataViewField } from '@kbn/data-views-plugin/common';
 import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 import type { AddFieldFilterHandler, GetCustomFieldType } from '../../types';
+import { EBT_FIELD_POPOVER_BREAKDOWN_ELEMENT } from './ebt_constants';
 
 export interface FieldPopoverHeaderProps {
   field: DataViewField;
@@ -138,6 +140,10 @@ export const FieldPopoverHeader: React.FC<FieldPopoverHeaderProps> = ({
                   closePopover();
                   onAddBreakdownField(field);
                 }}
+                {...getEbtProps({
+                  action: EBT_CLICK_ACTIONS.SET_BREAKDOWN,
+                  element: EBT_FIELD_POPOVER_BREAKDOWN_ELEMENT,
+                })}
               />
             </EuiToolTip>
           </EuiFlexItem>
