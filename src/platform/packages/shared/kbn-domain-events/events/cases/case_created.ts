@@ -8,14 +8,15 @@
  */
 
 import { z } from '@kbn/zod/v4';
+import { casesOwnerSchema } from './cases_owner';
 
 export const CASE_CREATED_EVENT_TYPE = 'cases.caseCreated' as const;
 
+/** Matches `CaseCreatedEventPayload` in x-pack/platform/plugins/shared/cases/server/events/types.ts */
 export const caseCreatedPayloadSchema = z
   .object({
     caseId: z.string(),
-    owner: z.string(),
-    title: z.string(),
+    owner: casesOwnerSchema,
   })
   .strict();
 

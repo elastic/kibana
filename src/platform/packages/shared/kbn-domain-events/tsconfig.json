@@ -15,8 +15,6 @@
   ],
   "kbn_references": [
     "@kbn/core",
-    "@kbn/logging",
-    "@kbn/logging-mocks",
     "@kbn/zod"
   ]
 }

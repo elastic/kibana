@@ -12,13 +12,25 @@ import { CASE_CREATED_EVENT_TYPE, caseCreatedPayloadSchema } from './case_create
 import type { CaseCreatedDomainEventMap } from './case_created';
 import { CASE_UPDATED_EVENT_TYPE, caseUpdatedPayloadSchema } from './case_updated';
 import type { CaseUpdatedDomainEventMap } from './case_updated';
+import {
+  CASE_STATUS_CHANGED_EVENT_TYPE,
+  caseStatusChangedPayloadSchema,
+} from './case_status_changed';
+import type { CaseStatusChangedDomainEventMap } from './case_status_changed';
+import { ATTACHMENTS_ADDED_EVENT_TYPE, attachmentsAddedPayloadSchema } from './attachments_added';
+import type { AttachmentsAddedDomainEventMap } from './attachments_added';
 
-export type CasesDomainEventMap = CaseCreatedDomainEventMap & CaseUpdatedDomainEventMap;
+export type CasesDomainEventMap = CaseCreatedDomainEventMap &
+  CaseUpdatedDomainEventMap &
+  CaseStatusChangedDomainEventMap &
+  AttachmentsAddedDomainEventMap;
 
 type CasesDomainEventMapSchemas = {
   [K in keyof CasesDomainEventMap]: z.ZodType<CasesDomainEventMap[K]>;
 };
 
+export { casesOwnerSchema } from './cases_owner';
+export type { CasesOwner } from './cases_owner';
 export {
   CASE_CREATED_EVENT_TYPE,
   caseCreatedPayloadSchema,
@@ -31,8 +43,22 @@ export {
   isCaseUpdatedPayload,
 } from './case_updated';
 export type { CaseUpdatedPayload } from './case_updated';
+export {
+  CASE_STATUS_CHANGED_EVENT_TYPE,
+  caseStatusChangedPayloadSchema,
+  isCaseStatusChangedPayload,
+} from './case_status_changed';
+export type { CaseStatusChangedPayload } from './case_status_changed';
+export {
+  ATTACHMENTS_ADDED_EVENT_TYPE,
+  attachmentsAddedPayloadSchema,
+  isAttachmentsAddedPayload,
+} from './attachments_added';
+export type { AttachmentsAddedPayload } from './attachments_added';
 
 export const casesEventPayloadSchemas = {
   [CASE_CREATED_EVENT_TYPE]: caseCreatedPayloadSchema,
   [CASE_UPDATED_EVENT_TYPE]: caseUpdatedPayloadSchema,
+  [CASE_STATUS_CHANGED_EVENT_TYPE]: caseStatusChangedPayloadSchema,
+  [ATTACHMENTS_ADDED_EVENT_TYPE]: attachmentsAddedPayloadSchema,
 } as const satisfies CasesDomainEventMapSchemas;

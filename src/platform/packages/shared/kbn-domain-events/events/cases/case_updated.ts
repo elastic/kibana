@@ -8,13 +8,16 @@
  */
 
 import { z } from '@kbn/zod/v4';
+import { casesOwnerSchema } from './cases_owner';
 
 export const CASE_UPDATED_EVENT_TYPE = 'cases.caseUpdated' as const;
 
+/** Matches `CaseUpdatedEventPayload` in x-pack/platform/plugins/shared/cases/server/events/types.ts */
 export const caseUpdatedPayloadSchema = z
   .object({
     caseId: z.string(),
-    updatedFields: z.record(z.string(), z.unknown()),
+    owner: casesOwnerSchema,
+    updatedFields: z.array(z.string()).optional(),
   })
   .strict();
 

@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { loggerMock } from '@kbn/logging-mocks';
 import { DomainEventBusImpl } from './domain_event_bus_impl';
 import type { DomainEvent } from './types';
 
@@ -15,8 +14,7 @@ interface FooEvent extends DomainEvent<'cases.caseCreated'> {
   readonly type: 'cases.caseCreated';
   readonly payload: {
     caseId: string;
-    owner: string;
-    title: string;
+    owner: 'securitySolution';
   };
 }
 
@@ -29,14 +27,11 @@ interface BarEvent extends DomainEvent<'workflows.workflowStarted'> {
   };
 }
 
-type TestEvent = FooEvent | BarEvent;
-
-const fooEvent = (title = 'hello'): FooEvent => ({
+const fooEvent = (): FooEvent => ({
   type: 'cases.caseCreated',
   payload: {
     caseId: 'case-1',
     owner: 'securitySolution',
-    title,
   },
 });
 
@@ -55,22 +50,18 @@ const flushAsync = async (): Promise<void> => {
 };
 
 describe('DomainEventBusImpl', () => {
-  let mockLogger: ReturnType<typeof loggerMock.create>;
   let bus: DomainEventBusImpl;
 
   beforeEach(() => {
-    mockLogger = loggerMock.create();
-    bus = new DomainEventBusImpl(mockLogger);
+    bus = new DomainEventBusImpl();
   });
 
   describe('publish / subscribe', () => {
-    const reservedTypes = ['error', 'newListener', 'removeListener'] as const;
-
     it('invokes the subscribed handler when a matching event is published', async () => {
       const handler = jest.fn();
       bus.subscribe('cases.caseCreated', handler);
 
-      const event = fooEvent('world');
+      const event = fooEvent();
       bus.publish(event);
 
       await flushAsync();
@@ -134,7 +125,6 @@ describe('DomainEventBusImpl', () => {
       await flushAsync();
 
       expect(handler).toHaveBeenCalledTimes(1);
-      expect(mockLogger.error).not.toHaveBeenCalled();
     });
 
     it('routes each event only to handlers of its own type even with multiple types in flight', async () => {
@@ -143,7 +133,7 @@ describe('DomainEventBusImpl', () => {
       bus.subscribe('cases.caseCreated', fooHandler);
       bus.subscribe('workflows.workflowStarted', barHandler);
 
-      const foo = fooEvent('one');
+      const foo = fooEvent();
       const bar = barEvent('run-7');
       bus.publish(foo);
       bus.publish(bar);
@@ -156,19 +146,6 @@ describe('DomainEventBusImpl', () => {
       expect(barHandler).toHaveBeenCalledWith(bar);
     });
 
-    it.each(reservedTypes)(
-      'refuses to publish events typed "%s", logs a single warn, and does not dispatch to handlers',
-      async (reservedType) => {
-        const handler = jest.fn();
-        bus.subscribe(reservedType as TestEvent['type'], handler);
-        bus.publish({ type: reservedType } as unknown as TestEvent);
-
-        await flushAsync();
-
-        expect(handler).not.toHaveBeenCalled();
-        expect(mockLogger.warn).toHaveBeenCalledTimes(1);
-      }
-    );
   });
 
   describe('error isolation', () => {
