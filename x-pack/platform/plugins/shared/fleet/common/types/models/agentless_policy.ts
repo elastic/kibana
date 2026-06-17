@@ -5,45 +5,14 @@
  * 2.0.
  */
 
-import type {
-  SimplifiedInputs,
-  SimplifiedVars,
-} from '../../services/simplified_package_policy_helper';
+import type { TypeOf } from '@kbn/config-schema';
 
-import type { GlobalDataTag } from './agent_policy';
-
-/** Cloud connector as returned in an agentless policy response (always resolved to an id). */
-export interface AgentlessCloudConnector {
-  enabled: boolean;
-  cloud_connector_id: string;
-}
-
-/** Integration package as returned in an agentless policy response. */
-export interface AgentlessPackage {
-  name: string;
-  title: string;
-  version: string;
-}
+import type { AgentlessPolicySchema } from './agentless_policy_schema';
 
 /**
  * Response DTO returned by the agentless policies API.
  *
- * This models the response only; the create-request contract is derived from the
- * route schema, see `NewAgentlessPolicy` in `../rest_spec/agentless_policy`.
+ * Derived from the route schema so the type and the schema can never diverge.
+ * See `NewAgentlessPolicy` in `../rest_spec/agentless_policy` for the request contract.
  */
-export interface AgentlessPolicy {
-  id: string;
-  name: string;
-  description?: string;
-  namespace?: string;
-  vars?: SimplifiedVars;
-  additional_datastreams_permissions?: string[];
-  global_data_tags?: GlobalDataTag[];
-  cloud_connector?: AgentlessCloudConnector | null;
-  package: AgentlessPackage;
-  inputs: SimplifiedInputs;
-  created_at: string;
-  created_by: string;
-  updated_at: string;
-  updated_by: string;
-}
+export type AgentlessPolicy = TypeOf<typeof AgentlessPolicySchema>;
