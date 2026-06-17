@@ -8,10 +8,11 @@
 import type { ConversationWithoutRounds } from '@kbn/agent-builder-common';
 import { QueryClient } from '@kbn/react-query';
 
+import type { ConversationsService } from '../../services/conversations/conversations_service';
 import { queryKeys } from '../query_keys';
 import {
   insertSidebarConversationListRow,
-  patchSidebarConversationListTitle,
+  patchConversationList,
   removeSidebarConversationListRow,
 } from './conversation_sidebar_list_cache';
 
@@ -24,34 +25,62 @@ const buildRow = (id: string, agent_id = 'ag', title = 't'): ConversationWithout
   updated_at: '2020-01-01T00:00:00.000Z',
 });
 
+const buildConversationsService = (list: ConversationWithoutRounds[] = []) =>
+  ({
+    list: jest.fn().mockResolvedValue(list),
+  } as unknown as ConversationsService);
+
 describe('conversation_sidebar_list_cache', () => {
   const agentId = 'ag';
   const listKey = queryKeys.conversations.byAgent(agentId);
 
   describe('insertSidebarConversationListRow', () => {
-    it('prepends a new row and returns true', async () => {
+    it('prefetches the server list when the cache is empty, then prepends', async () => {
       const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+      const existing = [buildRow('existing-1'), buildRow('existing-2')];
+      const conversationsService = buildConversationsService(existing);
 
       const inserted = await insertSidebarConversationListRow({
         queryClient,
+        conversationsService,
         agentId,
         conversationId: 'c1',
         title: 'New conversation',
       });
 
       expect(inserted).toBe(true);
-      expect(queryClient.getQueryData<ConversationWithoutRounds[]>(listKey)?.[0]).toMatchObject({
-        id: 'c1',
+      expect(conversationsService.list).toHaveBeenCalledWith({ agentId });
+      const cached = queryClient.getQueryData<ConversationWithoutRounds[]>(listKey);
+      expect(cached?.map((c) => c.id)).toEqual(['c1', 'existing-1', 'existing-2']);
+    });
+
+    it('does not prefetch when the cache already has data', async () => {
+      const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+      queryClient.setQueryData<ConversationWithoutRounds[]>(listKey, [buildRow('existing-1')]);
+      const conversationsService = buildConversationsService();
+
+      const inserted = await insertSidebarConversationListRow({
+        queryClient,
+        conversationsService,
+        agentId,
+        conversationId: 'c1',
         title: 'New conversation',
       });
+
+      expect(inserted).toBe(true);
+      expect(conversationsService.list).not.toHaveBeenCalled();
+      const cached = queryClient.getQueryData<ConversationWithoutRounds[]>(listKey);
+      expect(cached?.map((c) => c.id)).toEqual(['c1', 'existing-1']);
     });
 
     it('does not duplicate an existing row and returns false', async () => {
       const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
       queryClient.setQueryData<ConversationWithoutRounds[]>(listKey, [buildRow('c1')]);
+      const conversationsService = buildConversationsService();
 
       const inserted = await insertSidebarConversationListRow({
         queryClient,
+        conversationsService,
         agentId,
         conversationId: 'c1',
         title: 'placeholder',
@@ -59,6 +88,25 @@ describe('conversation_sidebar_list_cache', () => {
 
       expect(inserted).toBe(false);
       expect(queryClient.getQueryData<ConversationWithoutRounds[]>(listKey)).toHaveLength(1);
+    });
+
+    it('still inserts when the prefetch fails', async () => {
+      const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+      const conversationsService = {
+        list: jest.fn().mockRejectedValue(new Error('network')),
+      } as unknown as ConversationsService;
+
+      const inserted = await insertSidebarConversationListRow({
+        queryClient,
+        conversationsService,
+        agentId,
+        conversationId: 'c1',
+        title: 'New conversation',
+      });
+
+      expect(inserted).toBe(true);
+      const cached = queryClient.getQueryData<ConversationWithoutRounds[]>(listKey);
+      expect(cached?.map((c) => c.id)).toEqual(['c1']);
     });
   });
 
@@ -84,7 +132,7 @@ describe('conversation_sidebar_list_cache', () => {
     });
   });
 
-  describe('patchSidebarConversationListTitle', () => {
+  describe('patchConversationList', () => {
     it('updates the title of the matching row, leaves other rows alone', () => {
       const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
       queryClient.setQueryData<ConversationWithoutRounds[]>(listKey, [
@@ -92,11 +140,11 @@ describe('conversation_sidebar_list_cache', () => {
         buildRow('B', agentId, 'unrelated'),
       ]);
 
-      patchSidebarConversationListTitle({
+      patchConversationList({
         queryClient,
         agentId,
         conversationId: 'A',
-        title: 'Real title from server',
+        values: { title: 'Real title from server' },
       });
 
       const result = queryClient.getQueryData<ConversationWithoutRounds[]>(listKey);
@@ -109,28 +157,28 @@ describe('conversation_sidebar_list_cache', () => {
       queryClient.setQueryData<ConversationWithoutRounds[]>(listKey, [buildRow('A')]);
       const before = queryClient.getQueryData<ConversationWithoutRounds[]>(listKey);
 
-      patchSidebarConversationListTitle({
+      patchConversationList({
         queryClient,
         agentId,
         conversationId: 'C',
-        title: 'whatever',
+        values: { title: 'whatever' },
       });
 
       expect(queryClient.getQueryData<ConversationWithoutRounds[]>(listKey)).toBe(before);
     });
 
-    it('is a no-op when the title is already up to date (preserves reference)', () => {
+    it('is a no-op when the props are already up to date (preserves reference)', () => {
       const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
       queryClient.setQueryData<ConversationWithoutRounds[]>(listKey, [
         buildRow('A', agentId, 'already-final'),
       ]);
       const before = queryClient.getQueryData<ConversationWithoutRounds[]>(listKey);
 
-      patchSidebarConversationListTitle({
+      patchConversationList({
         queryClient,
         agentId,
         conversationId: 'A',
-        title: 'already-final',
+        values: { title: 'already-final' },
       });
 
       expect(queryClient.getQueryData<ConversationWithoutRounds[]>(listKey)).toBe(before);
@@ -138,11 +186,11 @@ describe('conversation_sidebar_list_cache', () => {
 
     it('is a no-op when the list cache is empty / undefined', () => {
       const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
-      patchSidebarConversationListTitle({
+      patchConversationList({
         queryClient,
         agentId,
         conversationId: 'A',
-        title: 'whatever',
+        values: { title: 'whatever' },
       });
       expect(queryClient.getQueryData<ConversationWithoutRounds[]>(listKey)).toBeUndefined();
     });
