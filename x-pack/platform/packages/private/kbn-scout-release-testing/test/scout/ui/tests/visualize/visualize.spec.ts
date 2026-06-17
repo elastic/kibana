@@ -11,11 +11,6 @@ import fs from 'fs';
 import os from 'os';
 import { SavedObjectsTracker, cleanupDownloadedFile } from '../../helpers';
 
-const defaultSettings = {
-  defaultIndex: 'kibana_sample_data_logs',
-  'dateFormat:tz': 'UTC',
-};
-
 const SAMPLE_DASHBOARD = '[Logs] Web Traffic';
 const SAMPLE_DASHBOARD_PANEL_COUNT = 12;
 

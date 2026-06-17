@@ -11,11 +11,6 @@ import fs from 'fs';
 import os from 'os';
 import { SavedObjectsTracker, cleanupDownloadedFile } from '../../helpers';
 
-const defaultSettings = {
-  defaultIndex: 'kibana_sample_data_logs',
-  'dateFormat:tz': 'UTC',
-};
-
 const tracker = new SavedObjectsTracker();
 let downloadedFilePath: string | null = null;
 
@@ -221,6 +216,7 @@ test.describe('Dashboard app', { tag: tags.stateful.classic }, () => {
       await pageObjects.dashboard.exitFullscreen();
     });
 
+    await page.testSubj.click('app-menu-overflow-button');
     await expect(page.testSubj.locator('dashboardFullScreenMode')).toBeVisible();
   });
 
