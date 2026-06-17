@@ -24,6 +24,7 @@ dependsOn:
   - '@kbn/config-schema'
   - '@kbn/kibana-utils-plugin'
   - '@kbn/as-code-shared-schemas'
+  - '@kbn/zod'
 tags:
   - plugin
   - prod

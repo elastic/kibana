@@ -19,10 +19,9 @@ project:
 dependsOn:
   - '@kbn/aiops-change-point-detection'
   - '@kbn/aiops-log-pattern-analysis'
-  - '@kbn/config-schema'
+  - '@kbn/zod'
   - '@kbn/ml-random-sampler-utils'
   - '@kbn/presentation-publishing-schemas'
-  - '@kbn/zod'
 tags:
   - shared-server
   - package
