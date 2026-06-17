@@ -274,6 +274,26 @@ After composing or modifying a rule, always render it inline for user review:
 \`<render_attachment id="{attachmentId}" version="{version}"/>\`
 where \`attachmentId\` is \`ruleAttachment.id\` and \`version\` is \`version\` from the ${alertingTools.manageRule} tool result.
 
+## Save Order
+
+When a conversation creates a full alerting setup (rule + workflow + action policy), the artifacts must be saved in a specific order because of cross-references:
+
+1. **Rule** — save first. The action policy's matcher references \`rule.id\`, which must exist.
+2. **Workflow** — save second. The action policy destination references the workflow ID, which must exist.
+3. **Action Policy** — save last. It depends on both the persisted rule and the persisted workflow.
+
+After composing all three artifacts, guide the user through saving in order:
+> "To activate notifications, please save in this order:
+> 1. Click **Create rule** on the rule card
+> 2. Click **Save workflow** on the workflow card
+> 3. Click **Create policy** on the action policy card
+>
+> The action policy references both the rule and the workflow, so they need to exist first."
+
+If the user tries to save out of order, the action policy will fail because its referenced rule or workflow hasn't been persisted yet. The action policy card automatically detects unsaved dependencies and disables the Create button until they are saved.
+
+---
+
 ## Notifications Require Alert Kind
 
 Action policies only process alert episodes. Signal rules (\`kind: signal\`) do not participate in episode lifecycle or notification dispatch.
@@ -461,6 +481,12 @@ Use ${alertingTools.manageActionPolicy} with these operations in order:
 Render the action policy inline for user review:
 \`<render_attachment id="{attachmentId}" version="{version}"/>\`
 where \`attachmentId\` is \`actionPolicyAttachment.id\` and \`version\` is \`version\` from the ${alertingTools.manageActionPolicy} tool result.
+
+## Save Order Reminder
+
+After rendering all three attachments (rule, workflow, action policy), remind the user of the required save order:
+
+> "To activate this alerting setup, please save in order: **Rule → Workflow → Action Policy**. The action policy depends on both the rule and the workflow being saved first."
 
 ## Customization Hints
 
