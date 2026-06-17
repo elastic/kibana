@@ -70,8 +70,11 @@ export function createChromeApi({
   const project: InternalChromeStart['project'] = {
     setCloudUrls: projectNavigation.setCloudUrls.bind(projectNavigation),
     setKibanaName: projectNavigation.setKibanaName.bind(projectNavigation),
-    initNavigation: (id, navigationTree$) => {
+    initNavigation: (id, navigationTree$, slotDataSources) => {
       validateProjectStyle();
+      if (slotDataSources) {
+        projectNavigation.setSlotDataSources(id, slotDataSources);
+      }
       projectNavigation.initNavigation(id, navigationTree$);
     },
     getNavigation$: () => projectNavigation.getNavigation$(),
@@ -79,6 +82,9 @@ export function createChromeApi({
       projectNavigation.setProjectBreadcrumbs(breadcrumbs, params),
     getBreadcrumbs$: () => projectNavigation.getProjectBreadcrumbs$(),
     getProjectHome$: () => projectNavigation.getProjectHome$(),
+    getActiveSlotDataSources$: () => projectNavigation.getActiveSlotDataSources$(),
+    setExtensionRegistry: (registry) => projectNavigation.setExtensionRegistry(registry),
+    getExtensionRegistry$: () => projectNavigation.getExtensionRegistry$(),
   };
 
   let appHeaderRegistrationId = 0;
