@@ -15,9 +15,9 @@ interface EarsSecrets {
   provider?: string;
 }
 
-// Slack signals auth failures on HTTP 200 with ok:false rather than HTTP 401.
-const SLACK_AUTH_ERRORS = ['token_expired', 'invalid_auth', 'token_revoked', 'not_authed'] as const;
-type SlackAuthError = (typeof SLACK_AUTH_ERRORS)[number];
+// Slack signals a stale token via HTTP 200 + ok:false + error:"token_expired".
+// Only that case is recoverable via refresh; other ok:false errors (invalid_auth,
+// token_revoked, not_authed, …) indicate permanent auth failures and pass through.
 
 export class EarsStrategy implements AxiosAuthStrategy {
   private async refreshAndRetry(
@@ -79,7 +79,7 @@ export class EarsStrategy implements AxiosAuthStrategy {
         if ((secrets as EarsSecrets).provider !== 'slack') return response;
         const body = response.data as { ok?: boolean; error?: string } | undefined;
         if (body?.ok !== false) return response;
-        if (!SLACK_AUTH_ERRORS.includes(body.error as SlackAuthError)) return response;
+        if (body.error !== 'token_expired') return response;
         // If we already retried after a refresh, let the response through so the
         // spec handler can throw its formatted error rather than looping forever.
         if ((response.config as { _retry?: boolean })._retry) return response;
