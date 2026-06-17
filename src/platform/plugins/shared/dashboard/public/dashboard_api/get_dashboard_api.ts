@@ -178,7 +178,7 @@ export function getDashboardApi({
     } satisfies DashboardState;
   }
 
-  const trackOverlayApi = initializeTrackOverlay(trackPanel.api.setFocusedPanelId);
+  const trackOverlayApi = initializeTrackOverlay(trackPanel.api);
 
   const pauseFetchManager = initializePauseFetchManager(filtersManager);
 
