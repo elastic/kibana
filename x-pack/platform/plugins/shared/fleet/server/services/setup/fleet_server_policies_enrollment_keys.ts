@@ -13,7 +13,6 @@ import { ensureDefaultEnrollmentAPIKeyForAgentPolicy } from '../api_keys';
 import { SO_SEARCH_LIMIT, MAX_CONCURRENT_AGENT_POLICIES_OPERATIONS_20 } from '../../constants';
 import { appContextService } from '../app_context';
 import { scheduleDeployAgentPoliciesTask } from '../agent_policies/deploy_agent_policies_task';
-import { scheduleBumpAgentPoliciesTask } from '../agent_policies/bump_agent_policies_task';
 
 export async function ensureAgentPoliciesFleetServerKeysAndPolicies({
   logger,
@@ -62,8 +61,6 @@ export async function ensureAgentPoliciesFleetServerKeysAndPolicies({
       concurrency: MAX_CONCURRENT_AGENT_POLICIES_OPERATIONS_20,
     }
   );
-
-  await scheduleBumpAgentPoliciesTask(appContextService.getTaskManagerStart()!);
 
   if (!outdatedAgentPolicyIds.length) {
     return;

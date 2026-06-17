@@ -29,7 +29,7 @@ import {
   type EuiBasicTableColumn,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { BULK_FILTER_MAX_RULES } from '@kbn/alerting-v2-schemas';
+import { BULK_FILTER_MAX_RULES, getRootEsqlQuery } from '@kbn/alerting-v2-schemas';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
@@ -244,14 +244,16 @@ export const RulesListTable: React.FC<RulesListTableProps> = ({
         ),
       },
       {
-        field: 'evaluation',
+        field: 'query',
         name: (
           <FormattedMessage id="xpack.alertingV2.rulesList.column.source" defaultMessage="Source" />
         ),
         width: '18%',
         truncateText: true,
-        render: (evaluation: RuleApiResponse['evaluation']) => {
-          const source = getIndexPatternFromESQLQuery(evaluation?.query?.base) || undefined;
+        render: (query: RuleApiResponse['query']) => {
+          const source = query
+            ? getIndexPatternFromESQLQuery(getRootEsqlQuery(query)) || undefined
+            : undefined;
           return source ? (
             <EuiBadge color="hollow">{source}</EuiBadge>
           ) : (
