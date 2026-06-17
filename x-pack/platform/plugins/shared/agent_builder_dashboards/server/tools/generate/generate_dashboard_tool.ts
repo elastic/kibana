@@ -33,6 +33,7 @@ const newDashboardMetadataErrorMessage =
 const generateDashboardSchema = z.object({
   dashboardAttachmentId: z
     .string()
+    .max(256)
     .optional()
     .describe(
       '(optional) The id of the dashboard attachment to update. Omit to create a new dashboard. The tool reads the current dashboard payload from this reference, so you never have to pass the full payload back in.'

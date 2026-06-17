@@ -20,11 +20,12 @@ export const panelConfigPanelInputSchema = z.object({
   kind: z.literal('panelConfig'),
   type: z
     .string()
+    .max(256)
     .describe(
       `Embeddable type for the panel (e.g. the ${LENS_EMBEDDABLE_TYPE} embeddable type for a visualization).`
     ),
   config: z
-    .record(z.string(), z.unknown())
+    .record(z.string().max(256), z.unknown())
     .describe(
       'Already-resolved panel configuration. Supply the config of an existing visualization (e.g. read from a visualization attachment) rather than an attachment ID. The generation tool does not read any attachment store.'
     ),
