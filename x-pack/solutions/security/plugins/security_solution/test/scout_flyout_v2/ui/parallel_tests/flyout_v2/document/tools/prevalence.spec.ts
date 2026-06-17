@@ -112,6 +112,12 @@ spaceTest.describe(
         await pageObjects.documentFlyout.openForRule(ruleName);
 
         await expect(pageObjects.documentFlyout.insightsSection).toBeVisible();
+        // Guard against the race: rule must be loaded before clicking so the overlay gets investigation_fields=['source.ip'].
+        await expect(
+          pageObjects.documentFlyout.highlightedFieldsTable
+            .locator('tr')
+            .filter({ hasText: 'source.ip' })
+        ).toBeVisible({ timeout: 15_000 });
         await pageObjects.prevalenceTool.titleLink.click();
 
         await expect(pageObjects.prevalenceTool.toolsFlyoutHeader).toBeVisible({
