@@ -401,31 +401,44 @@ function resolveEvaluationConnectorId(options = {}) {
 
 /**
  * Credentials for direct EIS `/_inference/chat_completion` calls during CI triage.
- * Prefer KIBANA_EIS_CCM_API_KEY (same as eval runs) over evaluations export keys.
+ *
+ * The API key must authenticate against the ES cluster being called, so pair it
+ * to the URL source:
+ * - A dedicated `EIS_INFERENCE_ES_URL` cluster uses `KIBANA_EIS_CCM_API_KEY`
+ *   (falling back to `EVALUATIONS_ES_API_KEY`).
+ * - The evaluations cluster (`EVALUATIONS_ES_URL`) uses its own client key
+ *   `EVALUATIONS_ES_API_KEY`. The CCM key is the ES->EIS connected-mode key, not
+ *   a client credential for the evaluations cluster, so it must not be used here.
  *
  * @returns {{ esUrl: string; apiKey: string }}
  */
 function resolveEisInferenceCredentials() {
-  const esUrl = process.env.EIS_INFERENCE_ES_URL || process.env.EVALUATIONS_ES_URL || '';
+  const eisInferenceEsUrl = process.env.EIS_INFERENCE_ES_URL || '';
+  const evaluationsEsUrl = process.env.EVALUATIONS_ES_URL || '';
   const ccmApiKey = process.env.KIBANA_EIS_CCM_API_KEY || '';
   const evaluationsApiKey = process.env.EVALUATIONS_ES_API_KEY || '';
 
-  if (!esUrl) {
-    throw new Error(
-      'ES URL is required for EIS judge triage (set EIS_INFERENCE_ES_URL or EVALUATIONS_ES_URL)'
-    );
+  if (eisInferenceEsUrl) {
+    const apiKey = ccmApiKey || evaluationsApiKey;
+    if (!apiKey) {
+      throw new Error(
+        'KIBANA_EIS_CCM_API_KEY or EVALUATIONS_ES_API_KEY is required for EIS judge triage summaries'
+      );
+    }
+    return { esUrl: eisInferenceEsUrl, apiKey };
   }
 
-  if (ccmApiKey) {
-    return { esUrl, apiKey: ccmApiKey };
-  }
-
-  if (evaluationsApiKey) {
-    return { esUrl, apiKey: evaluationsApiKey };
+  if (evaluationsEsUrl) {
+    if (!evaluationsApiKey) {
+      throw new Error(
+        'EVALUATIONS_ES_API_KEY is required for EIS judge triage against the evaluations cluster'
+      );
+    }
+    return { esUrl: evaluationsEsUrl, apiKey: evaluationsApiKey };
   }
 
   throw new Error(
-    'KIBANA_EIS_CCM_API_KEY or EVALUATIONS_ES_API_KEY is required for EIS judge triage summaries'
+    'ES URL is required for EIS judge triage (set EIS_INFERENCE_ES_URL or EVALUATIONS_ES_URL)'
   );
 }
 
