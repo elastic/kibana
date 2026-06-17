@@ -1,0 +1,134 @@
+{
+  "sha1": "75ff7c8572e489cf0172ce90f59e50591b818b28",
+  "tests": [
+    {
+      "id": "b67022d9b012554-bc6dd49bd3b00ac",
+      "title": "Setup shared data views archives",
+      "expectedStatus": "passed",
+      "tags": [],
+      "location": {
+        "file": "src/platform/plugins/shared/data_view_management/test/scout/ui/parallel_tests/global.setup.ts",
+        "line": 13,
+        "column": 16
+      }
+    },
+    {
+      "id": "618d5fca2d0771a-57ee6cd2e580202",
+      "title": "Data view cache advanced setting (serverless) does not show data_views:cache_max_age setting",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data_view_management/test/scout/ui/parallel_tests/data_views/cache_serverless.spec.ts",
+        "line": 38,
+        "column": 9
+      }
+    },
+    {
+      "id": "01eaaf6e2830825-a6a00632de0ce6e",
+      "title": "Data view cache advanced setting (stateful) shows data_views:cache_max_age setting",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data_view_management/test/scout/ui/parallel_tests/data_views/cache_stateful.spec.ts",
+        "line": 28,
+        "column": 7
+      }
+    },
+    {
+      "id": "0d904628d58aed4-6b74bcb2edaa36c",
+      "title": "Data view field format preview shows indexed fields for data-view-edit-field",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data_view_management/test/scout/ui/parallel_tests/data_views/edit_field.spec.ts",
+        "line": 54,
+        "column": 9
+      }
+    },
+    {
+      "id": "56e0b508186c7dd-c87d2c1c50e6915",
+      "title": "Data view exclusion patterns creates a data view that excludes index-b fields",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data_view_management/test/scout/ui/parallel_tests/data_views/exclude_index_pattern.spec.ts",
+        "line": 52,
+        "column": 9
+      }
+    },
+    {
+      "id": "e3ae941e46c16c3-9a13c204e0c986c",
+      "title": "Data views serverless constraints hides scripted fields tab in data view details",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data_view_management/test/scout/ui/parallel_tests/data_views/serverless_constraints.spec.ts",
+        "line": 42,
+        "column": 9
+      }
+    },
+    {
+      "id": "e3ae941e46c16c3-164bdcf8492fa18",
+      "title": "Data views serverless constraints hides rollup tags in listing and details",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data_view_management/test/scout/ui/parallel_tests/data_views/serverless_constraints.spec.ts",
+        "line": 51,
+        "column": 9
+      }
+    },
+    {
+      "id": "e3ae941e46c16c3-195ed2d6dcc66fe",
+      "title": "Data views serverless constraints shows spaces column in listing",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data_view_management/test/scout/ui/parallel_tests/data_views/serverless_constraints.spec.ts",
+        "line": 63,
+        "column": 9
+      }
+    }
+  ]
+}

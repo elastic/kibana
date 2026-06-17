@@ -24,20 +24,19 @@ test.describe(
   () => {
     const createdDataViewIds: string[] = [];
 
-    test.beforeAll(async ({ kbnClient }) => {
-      await kbnClient.savedObjects.cleanStandardList();
-    });
-
     test.beforeEach(async ({ browserAuth, page }) => {
       await browserAuth.loginAsAdmin();
       await navigateToDataViewsManagement(page);
     });
 
-    test.afterEach(async ({ apiServices, kbnClient }) => {
+    // Only remove the data views this spec created. A global `cleanStandardList()` here
+    // would delete data views that sibling specs (e.g. exclude_index_pattern, edit_field)
+    // create concurrently in the same space, since this parallel config shares one space
+    // across workers.
+    test.afterEach(async ({ apiServices }) => {
       await Promise.all(
         createdDataViewIds.splice(0).map((id) => apiServices.dataViews.delete(id).catch(() => {}))
       );
-      await kbnClient.savedObjects.cleanStandardList();
     });
 
     test('hides scripted fields tab in data view details', async ({ apiServices, page }) => {

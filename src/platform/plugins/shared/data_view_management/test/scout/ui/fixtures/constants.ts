@@ -20,6 +20,13 @@ export const ES_ARCHIVE_BASIC_INDEX =
 
 export const DATA_VIEWS_MANAGEMENT_PATH = '/app/management/kibana/dataViews';
 
+export const ADVANCED_SETTINGS_APP_PATH = 'management/kibana/settings';
+/** Search bar rendered on the advanced settings page; used as a "page loaded" anchor. */
+export const ADVANCED_SETTINGS_SEARCH_BAR_SUBJ = 'settingsSearchBar';
+/** The actual editable field for the `data_views:cache_max_age` advanced setting. */
+export const DATA_VIEWS_CACHE_MAX_AGE_SETTING_SUBJ =
+  'management-settings-editField-data_views:cache_max_age';
+
 export const FEATURE_CONTROLS_CUSTOM_SPACE = {
   id: 'dv_feature_controls_space',
   name: 'dv_feature_controls_space',

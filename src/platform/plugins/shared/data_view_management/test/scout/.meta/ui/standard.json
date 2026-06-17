@@ -1,6 +1,176 @@
 {
-  "sha1": "e62501d0bfed5ec7e2269cc6b3f211a9fa39dde2",
+  "sha1": "75ff7c8572e489cf0172ce90f59e50591b818b28",
   "tests": [
+    {
+      "id": "0a576b0cda5a405-282e3c031fd66fd",
+      "title": "Data view create/delete stateful coverage resets time field after changing to index without timestamp",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data_view_management/test/scout/ui/tests/data_views/data_view_create_delete_stateful.spec.ts",
+        "line": 28,
+        "column": 7
+      }
+    },
+    {
+      "id": "0a576b0cda5a405-fc8ca2759e333d0",
+      "title": "Data view create/delete stateful coverage supports unmatched index pattern segments",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data_view_management/test/scout/ui/tests/data_views/data_view_create_delete_stateful.spec.ts",
+        "line": 37,
+        "column": 7
+      }
+    },
+    {
+      "id": "0a576b0cda5a405-25e8fbd4e18ac65",
+      "title": "Data view create/delete stateful coverage creates data view against hidden indices and persists allow hidden toggle",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data_view_management/test/scout/ui/tests/data_views/data_view_create_delete_stateful.spec.ts",
+        "line": 43,
+        "column": 7
+      }
+    },
+    {
+      "id": "2071ad00be90adb-4b14c3e7150a707",
+      "title": "Data view create/edit/delete opens and closes create editor without saving",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data_view_management/test/scout/ui/tests/data_views/data_view_create_delete.spec.ts",
+        "line": 36,
+        "column": 9
+      }
+    },
+    {
+      "id": "2071ad00be90adb-8cc097cee767af4",
+      "title": "Data view create/edit/delete shows validation errors and allows fixing before save",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data_view_management/test/scout/ui/tests/data_views/data_view_create_delete.spec.ts",
+        "line": 43,
+        "column": 9
+      }
+    },
+    {
+      "id": "2071ad00be90adb-e51fbac3fddce76",
+      "title": "Data view create/edit/delete validates timestamp options when index pattern changes",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data_view_management/test/scout/ui/tests/data_views/data_view_create_delete.spec.ts",
+        "line": 53,
+        "column": 9
+      }
+    },
+    {
+      "id": "2071ad00be90adb-407c29e7b9bd99e",
+      "title": "Data view create/edit/delete handles special characters in template input",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data_view_management/test/scout/ui/tests/data_views/data_view_create_delete.spec.ts",
+        "line": 65,
+        "column": 9
+      }
+    },
+    {
+      "id": "2071ad00be90adb-fde43b2388d7383",
+      "title": "Data view create/edit/delete creates logstash data view and edits its title",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data_view_management/test/scout/ui/tests/data_views/data_view_create_delete.spec.ts",
+        "line": 72,
+        "column": 9
+      }
+    },
+    {
+      "id": "f9c155aadc6d022-431899aa0301614",
+      "title": "Data view field filters shows indexed fields listing for the selected data view",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data_view_management/test/scout/ui/tests/data_views/index_pattern_filter.spec.ts",
+        "line": 48,
+        "column": 9
+      }
+    },
+    {
+      "id": "803d4b3fda80f74-963f79ffc93b5c8",
+      "title": "Composite runtime fields opens composite runtime field editor form",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data_view_management/test/scout/ui/tests/data_views/runtime_fields_composite.spec.ts",
+        "line": 38,
+        "column": 9
+      }
+    },
+    {
+      "id": "e8b95da9c12d5ec-030b1becee4890e",
+      "title": "Runtime fields opens runtime field editor form",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data_view_management/test/scout/ui/tests/data_views/runtime_fields.spec.ts",
+        "line": 38,
+        "column": 9
+      }
+    },
     {
       "id": "be66c17a1888746-11e36bad76c85ff",
       "title": "Data Views feature controls security global indexPatterns all privileges - shows management navlink",

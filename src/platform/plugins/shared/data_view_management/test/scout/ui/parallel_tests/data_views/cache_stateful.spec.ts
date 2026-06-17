@@ -9,14 +9,23 @@
 
 import { test, tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
+import {
+  ADVANCED_SETTINGS_APP_PATH,
+  ADVANCED_SETTINGS_SEARCH_BAR_SUBJ,
+  DATA_VIEWS_CACHE_MAX_AGE_SETTING_SUBJ,
+} from '../../fixtures/constants';
 
 test.describe('Data view cache advanced setting (stateful)', { tag: tags.stateful.classic }, () => {
   test.beforeEach(async ({ browserAuth, page }) => {
     await browserAuth.loginAsAdmin();
-    await page.gotoApp('management/kibana/settings');
+    await page.gotoApp(ADVANCED_SETTINGS_APP_PATH);
+    // Wait for the settings page itself to render before asserting on a setting.
+    await expect(page.testSubj.locator(ADVANCED_SETTINGS_SEARCH_BAR_SUBJ)).toBeVisible({
+      timeout: 30_000,
+    });
   });
 
   test('shows data_views:cache_max_age setting', async ({ page }) => {
-    await expect(page).toHaveURL(/\/app\/management\/kibana\/settings/);
+    await expect(page.testSubj.locator(DATA_VIEWS_CACHE_MAX_AGE_SETTING_SUBJ)).toBeVisible();
   });
 });
