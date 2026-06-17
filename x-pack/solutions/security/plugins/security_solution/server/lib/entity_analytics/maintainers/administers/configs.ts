@@ -41,6 +41,9 @@ export function buildAdministersConfigs(
       // log-index assumption that would drop entities) and gate on last_seen instead.
       disableLookbackWindow: true,
       compositeAggAdditionalFilters: [
+        // Scope to AD-sourced entities. entity.source is a single value per entity, so
+        // each integration's maintainer processes a disjoint actor set — no cross-maintainer
+        // overwrite risk even though the ids write is a replace, not a union.
         { term: { 'entity.source': AD_ENTITY_SOURCE } },
         buildRawIdentifiersExistenceGate({
           relationshipKey: RELATIONSHIP_KEY,
