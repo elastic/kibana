@@ -304,9 +304,8 @@ For an existing policy, pass the \`actionPolicyAttachmentId\` and only include t
    - For \`per_episode\` grouping: \`on_status_change\`, \`per_status_interval\`, \`every_time\`.
    - For \`all\` / \`per_field\` grouping: \`time_interval\`, \`every_time\`.
    - \`per_status_interval\` and \`time_interval\` require an \`interval\` value (e.g. \`"5m"\`, \`"1h"\`).
-6. **\`set_type\`** — set the policy type and optional \`ruleId\`:
-   - \`type: "single_rule"\` with \`ruleId\`: scopes the policy to a single rule. This is the **default** for new policies created alongside a rule. No matcher is needed for rule scoping.
-   - \`type: "global"\`: matches alerts from any rule in the space. Use when the user explicitly wants a cross-rule or shared policy.
+
+Action policies are always space-wide: they match alerts from any rule in the space unless the matcher narrows them. To scope a policy to a single rule, set a matcher of \`rule.id: "<ruleId>"\` via \`set_matcher\`.
 
 ### Throttle / Grouping Compatibility
 
@@ -432,10 +431,10 @@ Use ${alertingTools.manageActionPolicy} with these operations in order:
 1. \`set_metadata\`: name = \`"Notify on <rule-name>"\`, description = \`"Default notification for <rule-name>"\`
 2. \`set_destinations\`: \`[{ type: "workflow", id: "<workflowId-from-step-1>" }]\`
    - **IMPORTANT**: Use the \`workflowId\` you generated in step 3 (passed to \`generate_workflow\`), NOT the \`attachmentId\`. The \`workflowId\` is the stable workflow ID used for persistence and cross-references. Using the attachment ID will cause a validation error.
-3. \`set_type\`: \`{ type: "single_rule", ruleId: "<ruleId>" }\`
-   - Use the \`ruleId\` value from the \`manage_rule\` tool result. This ID is pre-assigned when the rule attachment is created and will become the saved-object ID when the user clicks "Create rule".
+3. \`set_matcher\`: \`rule.id: "<ruleId>"\`
+   - Use the \`ruleId\` value from the \`manage_rule\` tool result to scope this policy to the new rule. This ID is pre-assigned when the rule attachment is created and will become the saved-object ID when the user clicks "Create rule".
    - The \`ruleId\` is always available — even for unsaved/proposed rules — so you never need to ask the user to save the rule first.
-   - If the user explicitly requests a cross-rule or shared policy, use \`set_type: { type: "global" }\` with \`set_matcher\` instead.
+   - If the user explicitly requests a cross-rule or shared policy, omit the \`rule.id\` matcher (or use a broader matcher) so it matches alerts from any rule in the space.
 4. \`set_grouping\`: \`per_episode\`
 5. \`set_throttle\`: \`{ strategy: "on_status_change" }\`
 
@@ -448,6 +447,6 @@ where \`attachmentId\` is \`actionPolicyAttachment.id\` and \`version\` is \`ver
 After creating the defaults, briefly mention:
 - They can use a different connector type (Slack, PagerDuty, etc.) — offer to use \`platform.workflows.get_connectors\` to explore.
 - They can change the throttle strategy — \`on_status_change\` (default) only notifies on transitions, \`every_time\` notifies on every evaluation cycle.
-- They can switch to a global policy (\`set_type: { type: "global" }\`) with a matcher to cover multiple rules.`,
+- They can broaden the policy to cover multiple rules by removing the \`rule.id\` matcher or replacing it with a broader matcher.`,
     getInlineTools: () => [manageRuleTool(), manageActionPolicyTool(deps)],
   });
