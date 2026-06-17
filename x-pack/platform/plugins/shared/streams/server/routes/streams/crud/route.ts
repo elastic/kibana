@@ -71,15 +71,15 @@ export const readStreamRoute = createServerRoute({
     server,
     logger,
   }): Promise<Streams.all.GetResponse> => {
-    const { getQueryClient, attachmentClient, streamsClient, scopedClusterClient } =
+    const { getKnowledgeIndicatorClient, attachmentClient, streamsClient, scopedClusterClient } =
       await getScopedClients({
         request,
       });
 
-    const queryClient = await getQueryClient();
+    const kiClient = await getKnowledgeIndicatorClient();
     const body = await readStream({
       name: params.path.name,
-      queryClient,
+      queryClient: kiClient,
       attachmentClient,
       scopedClusterClient,
       streamsClient,
