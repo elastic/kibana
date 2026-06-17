@@ -28,6 +28,14 @@ export type {
 } from './types';
 
 export type { AlertAiInsightProps, ErrorSampleAiInsightProps } from './components/insights';
+export type { ChartDescriptionButtonProps } from './components/chart_description/chart_description_button';
+export { ChartDescriptionButton } from './components/chart_description/chart_description_button';
+export {
+  buildDeterministicChartSummary,
+  type BuildDeterministicChartSummaryParams,
+  type ChartDescriptionPoint,
+  type ChartDescriptionSeries,
+} from '../common';
 
 export const plugin = (initializerContext: PluginInitializerContext) =>
   new ObservabilityAgentBuilderPlugin(initializerContext);

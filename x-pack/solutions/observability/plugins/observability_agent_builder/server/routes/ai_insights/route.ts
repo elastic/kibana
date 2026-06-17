@@ -27,6 +27,7 @@ import {
   getAlertAiInsight,
   type AlertDocForInsight,
 } from './alert_ai_insights/generate_alert_ai_insight';
+import { generateChartAiInsight } from './chart/generate_chart_ai_insight';
 import { OBSERVABILITY_AI_INSIGHTS_SUBFEATURE_ID } from '../../../common/constants';
 import { resolveConnectorForFeature } from '../../utils/resolve_connector_for_feature';
 
@@ -338,9 +339,84 @@ export function getObservabilityAgentBuilderAiInsightsRouteRepository(): ServerR
     },
   });
 
+  const chartDescriptionPointRt = t.type({
+    x: t.number,
+    y: t.union([t.number, t.null]),
+  });
+
+  const chartDescriptionSeriesRt = t.type({
+    title: t.string,
+    data: t.array(chartDescriptionPointRt),
+  });
+
+  const chartAiInsightsRoute = createObservabilityAgentBuilderServerRoute({
+    endpoint: 'POST /internal/observability_agent_builder/ai_insights/chart',
+    options: {
+      access: 'internal',
+    },
+    security: {
+      authz: {
+        requiredPrivileges: [apiPrivileges.readAgentBuilder],
+      },
+    },
+    params: t.type({
+      body: t.type({
+        chartTitle: t.string,
+        series: t.array(chartDescriptionSeriesRt),
+        start: t.union([t.string, t.undefined]),
+        end: t.union([t.string, t.undefined]),
+      }),
+    }),
+    handler: async ({ request, core, params, response, logger, plugins }) => {
+      const { chartTitle, series, start, end } = params.body;
+      const isCloudEnabled = Boolean(plugins.cloud?.isCloudEnabled);
+
+      const [, startDeps] = await core.getStartServices();
+      const { inference, searchInferenceEndpoints } = startDeps;
+
+      try {
+        const { connectorId, connector } = await resolveConnectorForFeature({
+          searchInferenceEndpoints,
+          featureId: OBSERVABILITY_AI_INSIGHTS_SUBFEATURE_ID,
+          request,
+          logger,
+        });
+
+        const inferenceClient = inference.getClient({ request, bindTo: { connectorId } });
+
+        const result = generateChartAiInsight({
+          chartTitle,
+          series,
+          start,
+          end,
+          inferenceClient,
+          connector,
+        });
+
+        return response.ok({
+          headers: getSSEResponseHeaders(isCloudEnabled),
+          body: observableIntoEventSourceStream(result.events$, {
+            logger,
+            signal: getRequestAbortedSignal(request),
+          }),
+        });
+      } catch (error) {
+        logger.error(error);
+        return routeAiInsightError({
+          error,
+          response,
+          isCloudEnabled,
+          logger,
+          request,
+        });
+      }
+    },
+  });
+
   return {
     ...logAiInsightsRoute,
     ...errorAiInsightsRoute,
     ...getAlertAiInsightRoute,
+    ...chartAiInsightsRoute,
   };
 }
