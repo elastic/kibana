@@ -42,11 +42,18 @@ export class RemoteLogExtractionStateClient {
           this.logger.debug(
             `${RemoteLogExtractionStateTypeName}: migrating legacy remote state for ${entityType}`
           );
-          await this.soClient.create<RemoteLogExtractionState>(
-            RemoteLogExtractionStateTypeName,
-            legacyState,
-            { id }
-          );
+          try {
+            await this.soClient.create<RemoteLogExtractionState>(
+              RemoteLogExtractionStateTypeName,
+              legacyState,
+              { id }
+            );
+          } catch (createErr) {
+            // A concurrent findOrInit already migrated the legacy row — treat as success.
+            if (!SavedObjectsErrorHelpers.isConflictError(createErr)) {
+              throw createErr;
+            }
+          }
           await deleteLegacyCcsLogExtractionState(this.soClient, entityType, this.namespace);
           return legacyState;
         }
