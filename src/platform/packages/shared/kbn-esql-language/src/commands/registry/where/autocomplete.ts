@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import type { ESQLAstAllCommands, ESQLSingleAstItem } from '@elastic/esql/types';
-import { newLineAndPipeCompleteItems } from '../complete_items';
+import { getNewLineAndPipeCompleteItems } from '../complete_items';
 import { suggestForExpression } from '../../definitions/utils';
 import type { ICommandCallbacks } from '../types';
 import { type ISuggestionItem, type ICommandContext, Location } from '../types';
@@ -42,7 +42,7 @@ export async function autocomplete(
   const { expressionType, isComplete, insideFunction } = computed;
 
   if (expressionType === 'boolean' && isComplete && !insideFunction) {
-    suggestions.push(...newLineAndPipeCompleteItems());
+    suggestions.push(...getNewLineAndPipeCompleteItems());
   }
 
   return suggestions;

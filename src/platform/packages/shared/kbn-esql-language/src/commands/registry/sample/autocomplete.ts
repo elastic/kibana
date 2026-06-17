@@ -9,7 +9,7 @@
 import type { ESQLAstAllCommands } from '@elastic/esql/types';
 import type { ICommandCallbacks } from '../types';
 import { type ISuggestionItem, type ICommandContext } from '../types';
-import { newLineAndPipeCompleteItems } from '../complete_items';
+import { getNewLineAndPipeCompleteItems } from '../complete_items';
 import { buildConstantsDefinitions } from '../../definitions/utils/literals';
 
 export async function autocomplete(
@@ -22,7 +22,7 @@ export async function autocomplete(
   const innerText = query.substring(0, cursorPosition);
   // test for a number and at least one whitespace char at the end of the query
   if (/[0-9]\s+$/.test(innerText)) {
-    return newLineAndPipeCompleteItems();
+    return getNewLineAndPipeCompleteItems();
   }
 
   return buildConstantsDefinitions(['.1', '.01', '.001'], '', {

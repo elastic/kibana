@@ -11,7 +11,7 @@ import type { ESQLAstAllCommands, ESQLAstField } from '@elastic/esql/types';
 import type { ICommandCallbacks } from '../types';
 import { Location, type ISuggestionItem, type ICommandContext } from '../types';
 import {
-  newLineAndPipeCompleteItems,
+  getNewLineAndPipeCompleteItems,
   byCompleteItem,
   defaultLimitValueSuggestions,
 } from '../complete_items';
@@ -37,7 +37,7 @@ export async function autocomplete(
     }
 
     case 'after_value': {
-      return [byCompleteItem, ...newLineAndPipeCompleteItems()];
+      return [byCompleteItem, ...getNewLineAndPipeCompleteItems()];
     }
 
     case 'grouping_expression': {

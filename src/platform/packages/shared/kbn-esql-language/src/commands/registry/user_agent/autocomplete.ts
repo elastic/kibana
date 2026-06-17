@@ -18,7 +18,7 @@ import {
   assignCompletionItem,
   buildAddValuePlaceholder,
   buildMapValueCompleteItem,
-  newLineAndPipeCompleteItems,
+  getNewLineAndPipeCompleteItems,
   withCompleteItem,
 } from '../complete_items';
 import type { ICommandCallbacks, ICommandContext, ISuggestionItem } from '../types';
@@ -74,7 +74,7 @@ export async function autocomplete(
     }
 
     case UserAgentPosition.AFTER_EXPRESSION:
-      return [withCompleteItem, ...newLineAndPipeCompleteItems()];
+      return [withCompleteItem, ...getNewLineAndPipeCompleteItems()];
 
     case UserAgentPosition.AFTER_WITH_KEYWORD:
       return [buildAddValuePlaceholder('config')];
@@ -123,7 +123,7 @@ export async function autocomplete(
     }
 
     case UserAgentPosition.AFTER_COMMAND:
-      return newLineAndPipeCompleteItems();
+      return getNewLineAndPipeCompleteItems();
 
     default:
       return [];

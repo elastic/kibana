@@ -11,7 +11,7 @@ import type { ESQLAstAllCommands } from '@elastic/esql/types';
 import { isSubQuery, isSource } from '@elastic/esql';
 import {
   newLineCompleteItem,
-  newLineAndPipeCompleteItems,
+  getNewLineAndPipeCompleteItems,
   commaCompleteItem,
   buildSubqueryCompleteItems,
 } from '../complete_items';
@@ -175,7 +175,7 @@ async function suggestNextActions(
   callbacks: ICommandCallbacks | undefined
 ): Promise<ISuggestionItem[]> {
   const suggestions: ISuggestionItem[] = [
-    ...newLineAndPipeCompleteItems(),
+    ...getNewLineAndPipeCompleteItems(),
     commaCompleteItem,
     metadataSuggestion,
   ];

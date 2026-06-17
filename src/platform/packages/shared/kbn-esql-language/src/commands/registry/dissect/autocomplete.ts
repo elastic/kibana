@@ -11,7 +11,7 @@ import type { ESQLAstAllCommands } from '@elastic/esql/types';
 import { withAutoSuggest } from '../../definitions/utils/autocomplete/helpers';
 import type { ICommandCallbacks } from '../types';
 import {
-  newLineAndPipeCompleteItems,
+  getNewLineAndPipeCompleteItems,
   colonCompleteItem,
   semiColonCompleteItem,
 } from '../complete_items';
@@ -62,7 +62,7 @@ export async function autocomplete(
   }
   // DISSECT field pattern /
   else if (commandArgs.length === 2) {
-    return [...newLineAndPipeCompleteItems(), appendSeparatorCompletionItem];
+    return [...getNewLineAndPipeCompleteItems(), appendSeparatorCompletionItem];
   }
   // DISSECT field APPEND_SEPARATOR = /
   else if (/append_separator\s*=\s*$/i.test(innerText)) {
@@ -70,7 +70,7 @@ export async function autocomplete(
   }
   // DISSECT field APPEND_SEPARATOR = ":" /
   else if (commandArgs.some((arg) => !Array.isArray(arg) && arg.type === 'option')) {
-    return newLineAndPipeCompleteItems();
+    return getNewLineAndPipeCompleteItems();
   }
 
   // DISSECT /
