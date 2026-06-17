@@ -113,12 +113,9 @@ export const MonitorRemoteCallout = () => {
   );
 };
 
-const REMOTE_MONITOR_TITLE = i18n.translate(
-  'xpack.synthetics.monitorDetails.remoteCallout.title',
-  {
-    defaultMessage: 'Remote monitor',
-  }
-);
+const REMOTE_MONITOR_TITLE = i18n.translate('xpack.synthetics.monitorDetails.remoteCallout.title', {
+  defaultMessage: 'Remote monitor',
+});
 
 const VIEW_ON_REMOTE_CLUSTER_LABEL = i18n.translate(
   'xpack.synthetics.monitorDetails.remoteCallout.viewOnRemoteCluster',
