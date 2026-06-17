@@ -116,7 +116,9 @@ export function canUseMultipleAgentPolicies() {
 
 export async function canUseOutputForIntegration(
   soClient: SavedObjectsClientContract,
-  packagePolicy: Pick<PackagePolicy, 'output_id' | 'package' | 'supports_agentless'>
+  packagePolicy: Pick<PackagePolicy, 'output_id' | 'package' | 'supports_agentless'> & {
+    inputs?: Array<{ type: string; enabled: boolean }>;
+  }
 ) {
   const outputId = packagePolicy.output_id;
   const packageName = packagePolicy.package?.name;

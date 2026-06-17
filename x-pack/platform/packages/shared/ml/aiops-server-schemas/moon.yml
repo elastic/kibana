@@ -18,6 +18,9 @@ project:
   sourceRoot: x-pack/platform/packages/shared/ml/aiops-server-schemas
 dependsOn:
   - '@kbn/aiops-change-point-detection'
+  - '@kbn/aiops-log-pattern-analysis'
+  - '@kbn/config-schema'
+  - '@kbn/ml-random-sampler-utils'
   - '@kbn/presentation-publishing-schemas'
   - '@kbn/zod'
 tags:

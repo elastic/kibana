@@ -6,146 +6,48 @@
  */
 
 import { z } from '@kbn/zod';
-import { refreshIntervalSchema } from '@kbn/data-service-server';
-import { storedFilterSchema, querySchema } from '@kbn/es-query-server';
 import {
   serializedTimeRangeSchema,
   serializedTitlesSchema,
 } from '@kbn/presentation-publishing-schemas';
 
-export const swimlaneTypeSchema = z.union([z.literal('overall'), z.literal('viewBy')]);
+const baseProps = {
+  ...serializedTitlesSchema.shape,
+  ...serializedTimeRangeSchema.shape,
+  job_ids: z.array(z.string().min(1).max(1000)).min(1).max(10000).meta({
+    description:
+      'IDs of the anomaly detection jobs or groups whose results are shown in the swim lane.',
+  }),
+  per_page: z.number().min(1).optional().meta({
+    description:
+      'Number of rows to display per page in a view-by swim lane. Ignored for overall swim lanes.',
+  }),
+};
 
-export type SwimlaneType = z.output<typeof swimlaneTypeSchema>;
-
-const commonUserInputProps = z
+const anomalySwimLaneOverallSchema = z
   .object({
-    jobIds: z.array(z.string()).max(10000),
+    ...baseProps,
+    swimlane_type: z.literal('overall'),
   })
   .strict();
 
-const anomalySwimlaneOverallSchema = z
+const anomalySwimLaneViewBySchema = z
   .object({
-    swimlaneType: z.literal('overall'),
-    ...commonUserInputProps.shape,
+    ...baseProps,
+    swimlane_type: z.literal('viewBy'),
+    view_by: z.string().min(1).max(1000).meta({
+      description: 'Field name used to split anomalies into a view-by swim lane.',
+    }),
   })
   .strict();
 
-const anomalySwimlaneViewBySchema = z
-  .object({
-    swimlaneType: z.literal('viewBy'),
-    viewBy: z.string(),
-    ...commonUserInputProps.shape,
-  })
-  .strict();
-
-const anomalySwimlaneEmbeddableCustomInputCommonSchema = z
-  .object({
-    ...serializedTimeRangeSchema.shape,
-    id: z.string().optional(),
-    perPage: z.number().optional(),
-    filters: z.array(storedFilterSchema).max(10000).optional(),
-    query: querySchema.optional(),
-    refreshConfig: refreshIntervalSchema.optional(),
-  })
-  .strict();
-
-export const anomalySwimlaneEmbeddableCustomInputViewBySchema = z
-  .object({
-    ...anomalySwimlaneViewBySchema.shape,
-    ...anomalySwimlaneEmbeddableCustomInputCommonSchema.shape,
-  })
-  .strict();
-
-export type AnomalySwimlaneEmbeddableCustomInputViewBy = z.output<
-  typeof anomalySwimlaneEmbeddableCustomInputViewBySchema
->;
-
-export const anomalySwimlaneEmbeddableCustomInputOverallSchema = z
-  .object({
-    ...anomalySwimlaneOverallSchema.shape,
-    ...anomalySwimlaneEmbeddableCustomInputCommonSchema.shape,
-  })
-  .strict();
-
-export type AnomalySwimlaneEmbeddableCustomInputOverall = z.output<
-  typeof anomalySwimlaneEmbeddableCustomInputOverallSchema
->;
-
-export const anomalySwimlaneEmbeddableCustomInputSchema = z.union([
-  anomalySwimlaneEmbeddableCustomInputViewBySchema,
-  anomalySwimlaneEmbeddableCustomInputOverallSchema,
-]);
-
-export type AnomalySwimlaneEmbeddableCustomInput = z.output<
-  typeof anomalySwimlaneEmbeddableCustomInputSchema
->;
-
-export const anomalySwimlaneEmbeddableUserInputSchema = z
-  .object({
-    jobIds: z.array(z.string()).max(10000),
-    swimlaneType: swimlaneTypeSchema,
-    viewBy: z.string().optional(),
-    panelTitle: z.string().optional(),
-  })
-  .strict();
-
-export type AnomalySwimlaneEmbeddableUserInput = z.output<
-  typeof anomalySwimlaneEmbeddableUserInputSchema
->;
-
-export const anomalySwimlanePropsSchema = z
-  .object({
-    ...anomalySwimlaneEmbeddableCustomInputCommonSchema.shape,
-    ...anomalySwimlaneEmbeddableUserInputSchema.shape,
-  })
-  .strict();
-
-export type AnomalySwimlaneProps = z.output<typeof anomalySwimlanePropsSchema>;
-
-export const anomalySwimlaneInitialInputSchema = z
-  .object({
-    jobIds: z.array(z.string()).max(10000).optional(),
-    swimlaneType: swimlaneTypeSchema.optional(),
-    viewBy: z.string().optional(),
-    title: z.string().optional(),
-    perPage: z.number().optional(),
-  })
-  .strict();
-
-export type AnomalySwimlaneInitialInput = z.output<typeof anomalySwimlaneInitialInputSchema>;
-
-export const anomalySwimLaneControlsStateSchema = z
-  .object({
-    jobIds: z.array(z.string()).max(10000),
-    swimlaneType: swimlaneTypeSchema,
-    viewBy: z.string().optional(),
-    perPage: z.number().optional(),
-  })
-  .strict();
-
-export type AnomalySwimLaneControlsState = z.output<typeof anomalySwimLaneControlsStateSchema>;
-
-export const anomalySwimlaneEmbeddableStateViewBySchema = z
-  .object({
-    ...serializedTitlesSchema.shape,
-    ...anomalySwimlaneEmbeddableCustomInputViewBySchema.shape,
-  })
-  .strict();
-
-export type AnomalySwimlaneEmbeddableStateViewBy = z.output<
-  typeof anomalySwimlaneEmbeddableStateViewBySchema
->;
-
-const anomalySwimlaneEmbeddableStateOverallSchema = z
-  .object({
-    ...serializedTitlesSchema.shape,
-    ...anomalySwimlaneEmbeddableCustomInputOverallSchema.shape,
-  })
-  .strict();
-
-export const anomalySwimLaneEmbeddableStateSchema = z.union([
-  anomalySwimlaneEmbeddableStateViewBySchema,
-  anomalySwimlaneEmbeddableStateOverallSchema,
-]);
+export const anomalySwimLaneEmbeddableStateSchema = z
+  .union([anomalySwimLaneOverallSchema, anomalySwimLaneViewBySchema])
+  .meta({
+    id: 'ml_anomaly_swimlane',
+    description: 'Anomaly Swim Lane embeddable',
+  });
 
 export type AnomalySwimLaneEmbeddableState = z.output<typeof anomalySwimLaneEmbeddableStateSchema>;
+
+export type SwimlaneType = AnomalySwimLaneEmbeddableState['swimlane_type'];

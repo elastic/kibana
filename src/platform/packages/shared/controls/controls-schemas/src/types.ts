@@ -8,6 +8,7 @@
  */
 
 import type React from 'react';
+import type { BehaviorSubject } from 'rxjs';
 
 import type { z } from '@kbn/zod';
 import type { controlTitleSchema, dataControlSchema } from './control_schema';
@@ -58,3 +59,9 @@ export type TimeSliderControlState = z.output<typeof timeSliderControlSchema>;
 export interface HasCustomPrepend {
   CustomPrependComponent: React.FC<{}>;
 }
+export interface PublishesTooltipLabel {
+  tooltipLabel$: BehaviorSubject<string>;
+}
+
+export const apiPublishesTooltipLabel = (api: unknown): api is PublishesTooltipLabel =>
+  Boolean((api as PublishesTooltipLabel)?.tooltipLabel$);

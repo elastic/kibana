@@ -16,6 +16,7 @@ import {
   LENS_IGNORE_GLOBAL_FILTERS_DEFAULT_VALUE,
 } from './constants';
 import { filterSchema } from './filter';
+import { positionSchema } from './alignments';
 
 export const labelSharedSchema = z
   .object({
@@ -146,4 +147,10 @@ export const axisTitleSchema = z
 export const legendTruncateAfterLinesSchema = z.number().min(1).max(10).default(1).optional().meta({
   description: 'Number of lines before legend items are truncated.',
   id: 'legendTruncateAfterLines',
+});
+
+export const legendPositionSchema = positionSchema.default('right').meta({
+  id: 'legendPosition',
+  title: 'Legend Position',
+  description: 'Legend Position.',
 });

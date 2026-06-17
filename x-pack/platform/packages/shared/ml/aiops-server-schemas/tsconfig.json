@@ -16,7 +16,9 @@
   ],
   "kbn_references": [
     "@kbn/aiops-change-point-detection",
-    "@kbn/presentation-publishing-schemas",
-    "@kbn/zod"
+    "@kbn/aiops-log-pattern-analysis",
+    "@kbn/zod",
+    "@kbn/ml-random-sampler-utils",
+    "@kbn/presentation-publishing-schemas"
   ]
 }
