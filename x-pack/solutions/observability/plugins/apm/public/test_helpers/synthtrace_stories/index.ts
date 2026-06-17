@@ -23,3 +23,5 @@
 export { opbeansScenario, SCENARIO_START, SCENARIO_END } from './scenarios/opbeans';
 export { toServiceMapResponse } from './selectors/service_map';
 export { toLatencyChartResponse } from './selectors/latency_chart';
+export { toThroughputChartResponse } from './selectors/throughput_chart';
+export { toErrorRateChartResponse } from './selectors/error_rate_chart';

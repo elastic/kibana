@@ -11,7 +11,7 @@ import { MlLocatorDefinition } from '@kbn/ml-plugin/public';
 import { enableInspectEsQueries } from '@kbn/observability-plugin/common';
 import { UI_SETTINGS } from '@kbn/observability-shared-plugin/public/hooks/use_kibana_ui_settings';
 import { UrlService } from '@kbn/share-plugin/common/url_service';
-import type { Router } from '@kbn/typed-react-router-config';
+import { PerformanceContextProvider } from '@kbn/ebt-tools';
 import { RouterProvider } from '@kbn/typed-react-router-config';
 import { createMemoryHistory } from 'history';
 import { merge, noop } from 'lodash';
@@ -20,6 +20,8 @@ import React from 'react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { PerformanceContext } from '@kbn/ebt-tools';
 import { Observable, of } from 'rxjs';
+import { getMockApiCache } from '../../services/rest/call_apm_api_spy';
+import { apmRouter } from '../../components/routing/apm_route_config';
 import type { ITelemetryClient } from '../../services/telemetry/types';
 import { createCallApmApi } from '../../services/rest/create_call_apm_api';
 import { storybookMockHttp } from '../../services/rest/storybook_mock_http';
@@ -31,10 +33,40 @@ import { ChartPointerEventContextProvider } from '../chart_pointer_event/chart_p
 import type { ApmPluginContextValue } from './apm_plugin_context';
 import { ApmPluginContext } from './apm_plugin_context';
 
-const mockPerformanceApi = {
-  onPageReady: () => {},
-  onPageRefreshStart: () => {},
-};
+/**
+ * Routes a real HTTP call (pathname + method) to the matching registered
+ * mockApmApiCallResponse entry.  Needed because webpack live-binding means
+ * the spyObj-based spy never intercepts useFetcher calls in the browser;
+ * intercepting at the core.http level is the only reliable hook.
+ *
+ * Cache keys look like:
+ *   "GET /internal/apm/services/{serviceName}/transactions/charts/latency"
+ *   "GET /api/apm/services/{serviceName}/annotation/search 2023-10-31"
+ *
+ * We take parts[1] as the URL template (strips optional trailing version date),
+ * convert {param} segments to [^/]+ and test against the actual pathname.
+ */
+function findMockHandler(httpMethod: string, pathname: string): Function | undefined {
+  const cache = getMockApiCache();
+  for (const key of Object.keys(cache)) {
+    const parts = key.split(' ');
+    if (parts[0].toUpperCase() !== httpMethod.toUpperCase()) continue;
+    const urlTemplate = parts[1]; // e.g. /internal/apm/services/{serviceName}/...
+    const regexStr = '^' + urlTemplate.replace(/\{[^}]+\}/g, '[^/]+') + '$';
+    if (new RegExp(regexStr).test(pathname)) return cache[key];
+  }
+  return undefined;
+}
+
+function makeMockHttpMethod(httpMethod: string) {
+  return async (pathname: string, options?: Record<string, unknown>) => {
+    const handler = findMockHandler(httpMethod, pathname);
+    if (handler) {
+      return handler({ params: { query: options?.query, body: options?.body } });
+    }
+    return undefined;
+  };
+}
 
 const uiSettings: Record<string, unknown> = {
   [UI_SETTINGS.TIMEPICKER_QUICK_RANGES]: [
@@ -118,7 +150,18 @@ export const mockCore = {
       security: { apiKeyServiceSettings: '' },
     },
   },
-  http: storybookMockHttp,
+  http: {
+    basePath: {
+      prepend: (path: string) => `/basepath${path}`,
+      get: () => '/basepath',
+    },
+    get: makeMockHttpMethod('GET'),
+    post: makeMockHttpMethod('POST'),
+    put: makeMockHttpMethod('PUT'),
+    delete: makeMockHttpMethod('DELETE'),
+    patch: makeMockHttpMethod('PATCH'),
+    fetch: async () => undefined,
+  },
   i18n: {
     Context: ({ children }: { children: ReactNode }) => children,
   },
@@ -200,17 +243,10 @@ export function MockApmPluginStorybook({
   children,
   apmContext = {} as ApmPluginContextValue,
   routePath,
-  router,
   serviceContextValue = {} as APMServiceContextValue,
 }: {
   children?: ReactNode;
   routePath?: string;
-  /**
-   * The typed router to provide. Callers must pass `apmRouter` (or another router) explicitly:
-   * importing `apmRouter` here would eagerly load the full route tree, which breaks per-test
-   * `jest.mock()` of any module reachable from a route component.
-   */
-  router: Router<any>;
   apmContext?: ApmPluginContextValue;
   serviceContextValue?: APMServiceContextValue;
 }) {
@@ -247,19 +283,17 @@ export function MockApmPluginStorybook({
       <EuiThemeProvider darkMode={false}>
         <KibanaReactContext.Provider>
           <ApmPluginContext.Provider value={contextMock}>
-            <PerformanceContext.Provider value={mockPerformanceApi}>
-              <APMServiceContext.Provider value={serviceContextValue}>
-                <RouterProvider router={router} history={history}>
+            <APMServiceContext.Provider value={serviceContextValue}>
+              <RouterProvider router={apmRouter as any} history={history}>
+                <PerformanceContextProvider>
                   <MockTimeRangeContextProvider>
                     <ApmTimeRangeMetadataContextProvider>
-                      <ChartPointerEventContextProvider>
-                        {children}
-                      </ChartPointerEventContextProvider>
+                      {children}
                     </ApmTimeRangeMetadataContextProvider>
                   </MockTimeRangeContextProvider>
-                </RouterProvider>
-              </APMServiceContext.Provider>
-            </PerformanceContext.Provider>
+                </PerformanceContextProvider>
+              </RouterProvider>
+            </APMServiceContext.Provider>
           </ApmPluginContext.Provider>
         </KibanaReactContext.Provider>
       </EuiThemeProvider>
