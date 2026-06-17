@@ -7,12 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { tagIdsToReferences } from './tags_transforms';
+import { toStoredTags } from './tags_transforms';
 
 describe('transformTagsIn', () => {
   test('Should exclude duplicate tags', () => {
-    const tagRefs = tagIdsToReferences(['tag2', 'tag2']);
+    const { state, references: tagRefs } = toStoredTags({ tags: ['tag2', 'tag2'] });
 
+    expect(state).toMatchInlineSnapshot(`Object {}`);
     expect(tagRefs).toMatchInlineSnapshot(`
       Array [
         Object {
