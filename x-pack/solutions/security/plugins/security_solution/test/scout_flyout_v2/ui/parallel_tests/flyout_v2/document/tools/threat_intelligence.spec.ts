@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { spaceTest, tags, CUSTOM_QUERY_RULE } from '@kbn/scout-security';
+import { spaceTest, tags, CUSTOM_QUERY_RULE, THREAT_FEED_NAME } from '@kbn/scout-security';
 import { expect } from '@kbn/scout-security/ui';
 
 spaceTest.describe(
@@ -32,10 +32,7 @@ spaceTest.describe(
     spaceTest(
       'tools flyout header shows rule name with alert icon and opens child document flyout on click',
       async ({ pageObjects }) => {
-        await pageObjects.alertsTablePage.navigate();
-        await pageObjects.alertsTablePage.waitForRuleAlert(ruleName);
-        await pageObjects.alertsTablePage.expandAlertDetailsFlyout(ruleName);
-        await pageObjects.documentFlyout.waitForAlertFlyout();
+        await pageObjects.documentFlyout.openForRule(ruleName);
 
         await expect(pageObjects.documentFlyout.insightsSection).toBeVisible();
         await pageObjects.threatIntelligenceTool.titleLink.click();
@@ -58,10 +55,7 @@ spaceTest.describe(
     spaceTest(
       'shows no-enrichment message when alert has no threat intelligence',
       async ({ pageObjects }) => {
-        await pageObjects.alertsTablePage.navigate();
-        await pageObjects.alertsTablePage.waitForRuleAlert(ruleName);
-        await pageObjects.alertsTablePage.expandAlertDetailsFlyout(ruleName);
-        await pageObjects.documentFlyout.waitForAlertFlyout();
+        await pageObjects.documentFlyout.openForRule(ruleName);
 
         await expect(pageObjects.documentFlyout.insightsSection).toBeVisible();
         await pageObjects.threatIntelligenceTool.titleLink.click();
@@ -89,10 +83,7 @@ spaceTest.describe(
           index: [sourceIndex],
         });
 
-        await pageObjects.alertsTablePage.navigate();
-        await pageObjects.alertsTablePage.waitForRuleAlert(tiRuleName);
-        await pageObjects.alertsTablePage.expandAlertDetailsFlyout(tiRuleName);
-        await pageObjects.documentFlyout.waitForAlertFlyout();
+        await pageObjects.documentFlyout.openForRule(tiRuleName);
 
         await expect(pageObjects.documentFlyout.insightsSection).toBeVisible();
 
@@ -125,7 +116,7 @@ spaceTest.describe(
 
         // Feed name from the fixture indicator is displayed in the accordion
         await expect(pageObjects.threatIntelligenceTool.detailsAccordionTable(0)).toContainText(
-          'Scout Test Feed'
+          THREAT_FEED_NAME
         );
       }
     );

@@ -35,10 +35,7 @@ spaceTest.describe(
     spaceTest(
       'shows the no-data empty state with a header that opens the child document flyout',
       async ({ pageObjects }) => {
-        await pageObjects.alertsTablePage.navigate();
-        await pageObjects.alertsTablePage.waitForRuleAlert(ruleName);
-        await pageObjects.alertsTablePage.expandAlertDetailsFlyout(ruleName);
-        await pageObjects.documentFlyout.waitForAlertFlyout();
+        await pageObjects.documentFlyout.openForRule(ruleName);
 
         // The Response section is collapsed by default; expand it to reveal the details button.
         await pageObjects.documentFlyout.responseSection.click();
@@ -69,10 +66,7 @@ spaceTest.describe(
         const alertId = await apiServices.detectionAlerts.getAlertId(ruleName, 60_000);
         await apiServices.responseActions.seedAutomatedEndpointAction({ alertId, ruleName });
 
-        await pageObjects.alertsTablePage.navigate();
-        await pageObjects.alertsTablePage.waitForRuleAlert(ruleName);
-        await pageObjects.alertsTablePage.expandAlertDetailsFlyout(ruleName);
-        await pageObjects.documentFlyout.waitForAlertFlyout();
+        await pageObjects.documentFlyout.openForRule(ruleName);
 
         // The Response section is collapsed by default; expand it to reveal the details button.
         await pageObjects.documentFlyout.responseSection.click();

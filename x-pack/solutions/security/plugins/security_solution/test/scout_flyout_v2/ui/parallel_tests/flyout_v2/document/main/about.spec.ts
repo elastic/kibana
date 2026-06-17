@@ -32,10 +32,7 @@ spaceTest.describe(
     spaceTest(
       'rule description: "Show rule summary" opens the rule summary as a child flyout',
       async ({ pageObjects }) => {
-        await pageObjects.alertsTablePage.navigate();
-        await pageObjects.alertsTablePage.waitForRuleAlert(ruleName);
-        await pageObjects.alertsTablePage.expandAlertDetailsFlyout(ruleName);
-        await pageObjects.documentFlyout.waitForAlertFlyout();
+        await pageObjects.documentFlyout.openForRule(ruleName);
 
         // The About section and its "Show rule summary" button render for a readable rule.
         await expect(pageObjects.documentFlyout.aboutSection).toBeVisible();
@@ -53,10 +50,7 @@ spaceTest.describe(
     spaceTest(
       'alert reason: "Show full reason" popover key-value pairs expose working cell actions on hover',
       async ({ pageObjects }) => {
-        await pageObjects.alertsTablePage.navigate();
-        await pageObjects.alertsTablePage.waitForRuleAlert(ruleName);
-        await pageObjects.alertsTablePage.expandAlertDetailsFlyout(ruleName);
-        await pageObjects.documentFlyout.waitForAlertFlyout();
+        await pageObjects.documentFlyout.openForRule(ruleName);
 
         await expect(pageObjects.documentFlyout.aboutSection).toBeVisible();
 

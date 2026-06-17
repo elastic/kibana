@@ -58,7 +58,7 @@ export const getResponseActionsApiService = ({
 
           // Mirrors the document shape the endpoint response actions client writes for an
           // automated action, which the response flyout knows how to render.
-          await esClient.index(
+          const indexResponse = await esClient.index(
             {
               index: ENDPOINT_ACTIONS_INDEX,
               refresh: true,
@@ -87,6 +87,13 @@ export const getResponseActionsApiService = ({
             },
             FLEET_HEADERS
           );
+
+          // Guardrail: the flyout renders nothing if the action document never landed.
+          if (indexResponse.result !== 'created') {
+            throw new Error(
+              `Failed to seed response action ${actionId}: unexpected index result "${indexResponse.result}"`
+            );
+          }
 
           return { actionId };
         }

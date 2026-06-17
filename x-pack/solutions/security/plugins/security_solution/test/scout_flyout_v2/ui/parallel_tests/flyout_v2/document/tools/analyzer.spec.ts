@@ -43,10 +43,7 @@ spaceTest.describe(
     spaceTest(
       'tools flyout header shows rule name with alert icon and opens child document flyout on click',
       async ({ pageObjects }) => {
-        await pageObjects.alertsTablePage.navigate();
-        await pageObjects.alertsTablePage.waitForRuleAlert(ruleName);
-        await pageObjects.alertsTablePage.expandAlertDetailsFlyout(ruleName);
-        await pageObjects.documentFlyout.waitForAlertFlyout();
+        await pageObjects.documentFlyout.openForRule(ruleName);
 
         await pageObjects.documentFlyout.visualizationsSection.click();
         await pageObjects.analyzerTool.titleLink.click();
@@ -63,10 +60,7 @@ spaceTest.describe(
     spaceTest(
       'opens analyzer tool overlay and renders the resolver process tree',
       async ({ pageObjects }) => {
-        await pageObjects.alertsTablePage.navigate();
-        await pageObjects.alertsTablePage.waitForRuleAlert(ruleName);
-        await pageObjects.alertsTablePage.expandAlertDetailsFlyout(ruleName);
-        await pageObjects.documentFlyout.waitForAlertFlyout();
+        await pageObjects.documentFlyout.openForRule(ruleName);
 
         await pageObjects.documentFlyout.visualizationsSection.click();
         await pageObjects.analyzerTool.titleLink.click();
@@ -87,10 +81,7 @@ spaceTest.describe(
     spaceTest(
       'clicking an analyzed process node opens its document in a child flyout',
       async ({ pageObjects }) => {
-        await pageObjects.alertsTablePage.navigate();
-        await pageObjects.alertsTablePage.waitForRuleAlert(ruleName);
-        await pageObjects.alertsTablePage.expandAlertDetailsFlyout(ruleName);
-        await pageObjects.documentFlyout.waitForAlertFlyout();
+        await pageObjects.documentFlyout.openForRule(ruleName);
 
         await pageObjects.documentFlyout.visualizationsSection.click();
         await pageObjects.analyzerTool.titleLink.click();
@@ -112,10 +103,7 @@ spaceTest.describe(
     spaceTest(
       'drills an analyzed node down to its alert event type and opens the corresponding rule',
       async ({ pageObjects }) => {
-        await pageObjects.alertsTablePage.navigate();
-        await pageObjects.alertsTablePage.waitForRuleAlert(ruleName);
-        await pageObjects.alertsTablePage.expandAlertDetailsFlyout(ruleName);
-        await pageObjects.documentFlyout.waitForAlertFlyout();
+        await pageObjects.documentFlyout.openForRule(ruleName);
 
         await pageObjects.documentFlyout.visualizationsSection.click();
         await pageObjects.analyzerTool.titleLink.click();

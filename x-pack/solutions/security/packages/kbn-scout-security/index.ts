@@ -13,6 +13,7 @@ export { CUSTOM_QUERY_RULE } from './src/playwright/constants/detection_rules';
 export { PREVALENCE_SOURCE_IP } from './src/playwright/fixtures/worker/apis/prevalence';
 export { ANALYZER_ORIGIN_PROCESS_NAME } from './src/playwright/fixtures/worker/apis/analyzer';
 export { NETWORK_SOURCE_IP } from './src/playwright/fixtures/worker/apis/network';
+export { THREAT_FEED_NAME } from './src/playwright/fixtures/worker/apis/threat_intelligence';
 export {
   SIGNALS_STATUS_API_PATH,
   ALERT_ASSIGNEES_API_PATH,

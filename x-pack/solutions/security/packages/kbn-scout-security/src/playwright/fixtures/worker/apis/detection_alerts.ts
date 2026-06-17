@@ -32,15 +32,21 @@ export const getDetectionAlertsApiService = ({
   log: ScoutLogger;
   scoutSpace?: ScoutParallelWorkerFixtures['scoutSpace'];
 }): DetectionAlertsApiService => {
-  const space = scoutSpace?.id ? scoutSpace?.id : 'default';
+  const space = scoutSpace?.id ?? 'default';
 
   return {
     deleteAll: async () => {
       await measurePerformanceAsync(log, 'security.detectionAlerts.deleteAll', async () => {
-        await esClient.indices.refresh({ index: `${DEFAULT_ALERTS_INDEX_PATTERN}${space}` });
+        const index = `${DEFAULT_ALERTS_INDEX_PATTERN}${space}`;
+
+        // The alerts index is created lazily by the detection engine, so it may not exist yet when
+        // cleanup runs (e.g. defensive `beforeAll` before any alert was generated). `ignore_unavailable`
+        // keeps `deleteAll()` idempotent so callers never need a try/catch around it.
+        await esClient.indices.refresh({ index, ignore_unavailable: true });
 
         await esClient.deleteByQuery({
-          index: `${DEFAULT_ALERTS_INDEX_PATTERN}${space}`,
+          index,
+          ignore_unavailable: true,
           query: {
             match_all: {},
           },

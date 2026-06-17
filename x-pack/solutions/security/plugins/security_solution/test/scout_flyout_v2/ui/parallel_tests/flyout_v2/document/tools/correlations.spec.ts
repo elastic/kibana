@@ -37,10 +37,7 @@ spaceTest.describe(
     spaceTest(
       'tools flyout header shows rule name with alert icon and opens child document flyout on click',
       async ({ pageObjects }) => {
-        await pageObjects.alertsTablePage.navigate();
-        await pageObjects.alertsTablePage.waitForRuleAlert(ruleName);
-        await pageObjects.alertsTablePage.expandAlertDetailsFlyout(ruleName);
-        await pageObjects.documentFlyout.waitForAlertFlyout();
+        await pageObjects.documentFlyout.openForRule(ruleName);
 
         await expect(pageObjects.documentFlyout.insightsSection).toBeVisible();
         await pageObjects.correlationsTool.titleLink.click();
@@ -58,10 +55,7 @@ spaceTest.describe(
     spaceTest(
       'opens correlations tool overlay and section row expand opens the correct child flyout',
       async ({ pageObjects }) => {
-        await pageObjects.alertsTablePage.navigate();
-        await pageObjects.alertsTablePage.waitForRuleAlert(ruleName);
-        await pageObjects.alertsTablePage.expandAlertDetailsFlyout(ruleName);
-        await pageObjects.documentFlyout.waitForAlertFlyout();
+        await pageObjects.documentFlyout.openForRule(ruleName);
 
         await expect(pageObjects.documentFlyout.insightsSection).toBeVisible();
 
@@ -92,10 +86,7 @@ spaceTest.describe(
     spaceTest(
       'sameSource section Investigate in timeline button opens the timeline',
       async ({ pageObjects }) => {
-        await pageObjects.alertsTablePage.navigate();
-        await pageObjects.alertsTablePage.waitForRuleAlert(ruleName);
-        await pageObjects.alertsTablePage.expandAlertDetailsFlyout(ruleName);
-        await pageObjects.documentFlyout.waitForAlertFlyout();
+        await pageObjects.documentFlyout.openForRule(ruleName);
 
         await expect(pageObjects.documentFlyout.insightsSection).toBeVisible();
 
@@ -107,9 +98,7 @@ spaceTest.describe(
         });
 
         await expect(pageObjects.correlationsTool.sameSourceAlertsSectionTable).toBeVisible();
-        await pageObjects.correlationsTool.sameSourceAlertsSectionInvestigateInTimeline
-          .getByRole('button')
-          .click();
+        await pageObjects.correlationsTool.clickSameSourceInvestigateInTimeline();
 
         await expect(pageObjects.timelinePage.panel).toBeVisible({ timeout: 15_000 });
 

@@ -39,10 +39,7 @@ spaceTest.describe(
     spaceTest(
       'investigation guide shows no-guide callout when rule has no guide',
       async ({ pageObjects }) => {
-        await pageObjects.alertsTablePage.navigate();
-        await pageObjects.alertsTablePage.waitForRuleAlert(ruleName);
-        await pageObjects.alertsTablePage.expandAlertDetailsFlyout(ruleName);
-        await pageObjects.documentFlyout.waitForAlertFlyout();
+        await pageObjects.documentFlyout.openForRule(ruleName);
 
         // CUSTOM_QUERY_RULE has no investigation guide; the callout message should render
         // and the "Show investigation guide" button should be absent.
@@ -58,10 +55,7 @@ spaceTest.describe(
     spaceTest(
       'highlighted fields: clicking the source.ip value opens the network details child flyout',
       async ({ pageObjects }) => {
-        await pageObjects.alertsTablePage.navigate();
-        await pageObjects.alertsTablePage.waitForRuleAlert(ruleName);
-        await pageObjects.alertsTablePage.expandAlertDetailsFlyout(ruleName);
-        await pageObjects.documentFlyout.waitForAlertFlyout();
+        await pageObjects.documentFlyout.openForRule(ruleName);
 
         await expect(pageObjects.documentFlyout.investigationSection).toBeVisible();
         await expect(pageObjects.documentFlyout.highlightedFieldsTable).toBeVisible();

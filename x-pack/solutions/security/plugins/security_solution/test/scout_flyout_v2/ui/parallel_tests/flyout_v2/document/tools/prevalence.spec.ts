@@ -36,10 +36,7 @@ spaceTest.describe(
     spaceTest(
       'tools flyout header shows rule name with alert icon and opens child document flyout on click',
       async ({ pageObjects }) => {
-        await pageObjects.alertsTablePage.navigate();
-        await pageObjects.alertsTablePage.waitForRuleAlert(ruleName);
-        await pageObjects.alertsTablePage.expandAlertDetailsFlyout(ruleName);
-        await pageObjects.documentFlyout.waitForAlertFlyout();
+        await pageObjects.documentFlyout.openForRule(ruleName);
 
         await expect(pageObjects.documentFlyout.insightsSection).toBeVisible();
         await pageObjects.prevalenceTool.titleLink.click();
@@ -57,10 +54,7 @@ spaceTest.describe(
     spaceTest(
       'hovering a value shows filter-in option which adds a filter badge to the page',
       async ({ pageObjects }) => {
-        await pageObjects.alertsTablePage.navigate();
-        await pageObjects.alertsTablePage.waitForRuleAlert(ruleName);
-        await pageObjects.alertsTablePage.expandAlertDetailsFlyout(ruleName);
-        await pageObjects.documentFlyout.waitForAlertFlyout();
+        await pageObjects.documentFlyout.openForRule(ruleName);
 
         await expect(pageObjects.documentFlyout.insightsSection).toBeVisible();
         await pageObjects.prevalenceTool.titleLink.click();
@@ -92,10 +86,7 @@ spaceTest.describe(
     spaceTest(
       'clicking the alert count opens the timeline with a data provider for that field',
       async ({ pageObjects }) => {
-        await pageObjects.alertsTablePage.navigate();
-        await pageObjects.alertsTablePage.waitForRuleAlert(ruleName);
-        await pageObjects.alertsTablePage.expandAlertDetailsFlyout(ruleName);
-        await pageObjects.documentFlyout.waitForAlertFlyout();
+        await pageObjects.documentFlyout.openForRule(ruleName);
 
         await expect(pageObjects.documentFlyout.insightsSection).toBeVisible();
         await pageObjects.prevalenceTool.titleLink.click();
@@ -118,10 +109,7 @@ spaceTest.describe(
     spaceTest(
       'source.ip value in prevalence table is clickable and opens the network details flyout',
       async ({ pageObjects }) => {
-        await pageObjects.alertsTablePage.navigate();
-        await pageObjects.alertsTablePage.waitForRuleAlert(ruleName);
-        await pageObjects.alertsTablePage.expandAlertDetailsFlyout(ruleName);
-        await pageObjects.documentFlyout.waitForAlertFlyout();
+        await pageObjects.documentFlyout.openForRule(ruleName);
 
         await expect(pageObjects.documentFlyout.insightsSection).toBeVisible();
         await pageObjects.prevalenceTool.titleLink.click();

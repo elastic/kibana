@@ -44,11 +44,7 @@ spaceTest.describe(
     spaceTest(
       'smoke — flyout opens with header, all body sections, and footer',
       async ({ pageObjects }) => {
-        await pageObjects.alertsTablePage.navigate();
-        await pageObjects.alertsTablePage.waitForRuleAlert(ruleName);
-        await pageObjects.alertsTablePage.expandAlertDetailsFlyout(ruleName);
-
-        await pageObjects.documentFlyout.waitForAlertFlyout();
+        await pageObjects.documentFlyout.openForRule(ruleName);
 
         // Header
         await expect.soft(pageObjects.documentFlyout.severity).toBeVisible();
@@ -72,10 +68,7 @@ spaceTest.describe(
     spaceTest(
       'header status badge: closing with reason updates badge and sends reason in API request',
       async ({ pageObjects, page }) => {
-        await pageObjects.alertsTablePage.navigate();
-        await pageObjects.alertsTablePage.waitForRuleAlert(ruleName);
-        await pageObjects.alertsTablePage.expandAlertDetailsFlyout(ruleName);
-        await pageObjects.documentFlyout.waitForAlertFlyout();
+        await pageObjects.documentFlyout.openForRule(ruleName);
 
         // Navigate to the closing reason sub-panel
         await pageObjects.documentFlyout.openStatusPopover();
@@ -117,10 +110,7 @@ spaceTest.describe(
     spaceTest(
       'status badge cell actions: filter-in and add-to-timeline buttons both work',
       async ({ pageObjects }) => {
-        await pageObjects.alertsTablePage.navigate();
-        await pageObjects.alertsTablePage.waitForRuleAlert(ruleName);
-        await pageObjects.alertsTablePage.expandAlertDetailsFlyout(ruleName);
-        await pageObjects.documentFlyout.waitForAlertFlyout();
+        await pageObjects.documentFlyout.openForRule(ruleName);
 
         // Hover the status badge — both cell-action buttons must be visible
         await pageObjects.documentFlyout.hoverStatusBadge();
@@ -148,10 +138,7 @@ spaceTest.describe(
     spaceTest(
       'assignees: assigning the current user shows avatar and sends user id in API request',
       async ({ pageObjects, page, kbnUrl }) => {
-        await pageObjects.alertsTablePage.navigate();
-        await pageObjects.alertsTablePage.waitForRuleAlert(ruleName);
-        await pageObjects.alertsTablePage.expandAlertDetailsFlyout(ruleName);
-        await pageObjects.documentFlyout.waitForAlertFlyout();
+        await pageObjects.documentFlyout.openForRule(ruleName);
 
         // Resolve the logged-in user's username to build the right selectable option selector
         const meResponse = await page.request.get(kbnUrl.get(CURRENT_USER_PROFILE_API_PATH));

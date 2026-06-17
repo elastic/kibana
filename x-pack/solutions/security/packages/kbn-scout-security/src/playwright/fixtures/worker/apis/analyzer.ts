@@ -114,11 +114,23 @@ export const getAnalyzerApiService = ({
           },
         ];
 
-        await esClient.bulk({
+        const bulkResponse = await esClient.bulk({
           index: sourceIndex,
           refresh: true,
           operations: documents.flatMap((document) => [{ create: {} }, document]),
         });
+
+        // `bulk` returns HTTP 200 even when individual items fail (e.g. a mapping conflict), which
+        // would leave the resolver without data and surface later as a confusing UI assertion
+        // failure. Fail fast here with the first item error instead.
+        if (bulkResponse.errors) {
+          const firstError = bulkResponse.items.find((item) => item.create?.error)?.create?.error;
+          throw new Error(
+            `Failed to index analyzer process tree into "${sourceIndex}": ${JSON.stringify(
+              firstError
+            )}`
+          );
+        }
       });
 
       return { sourceIndex };

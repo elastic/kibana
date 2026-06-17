@@ -61,5 +61,4 @@ export const STATUS_ADD_TO_TIMELINE_BUTTON_TEST_SUBJ =
   'actionItem-security-default-cellActions-addToTimeline';
 
 /** Returns the success toast title produced when a value is added to Timeline. */
-export const addedToTimelineToastText = (value: string): string =>
-  `Added ${value} to Timeline`;
+export const addedToTimelineToastText = (value: string): string => `Added ${value} to Timeline`;

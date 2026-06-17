@@ -6,6 +6,7 @@
  */
 
 import type { ScoutPage, Locator } from '@kbn/scout';
+import { AlertsTablePage } from '../../../alerts_table';
 
 /**
  * Page object for the flyout_v2 document flyout (alert / event) opened via
@@ -272,6 +273,20 @@ export class DocumentFlyout {
     await this.title.waitFor({ state: 'visible', timeout: 15_000 });
   }
 
+  /**
+   * Open the document flyout for the alert produced by `ruleName`: navigate to the alerts table,
+   * wait for the alert to appear, expand its row, and wait for the flyout to load. The flyout is
+   * always reached from the alerts table in these suites, so this composes AlertsTablePage to give
+   * specs a single entry point instead of repeating the four-step preamble.
+   */
+  async openForRule(ruleName: string) {
+    const alertsTable = new AlertsTablePage(this.page);
+    await alertsTable.navigate();
+    await alertsTable.waitForRuleAlert(ruleName);
+    await alertsTable.expandAlertDetailsFlyout(ruleName);
+    await this.waitForAlertFlyout();
+  }
+
   /** Wait for the child document flyout (opened from a tools overlay) to be visible. */
   async waitForChildDocumentFlyout() {
     await this.childDocumentFlyout.waitFor({ state: 'visible', timeout: 15_000 });
@@ -360,10 +375,9 @@ export class DocumentFlyout {
 
   /** Click the user option for the given username in the assignees selectable. */
   async selectAssignee(username: string) {
-    await this.page.testSubj
-      .locator(`userProfileSelectableOption-${username}`)
-      .waitFor({ state: 'visible' });
-    await this.page.testSubj.locator(`userProfileSelectableOption-${username}`).click();
+    const option = this.page.testSubj.locator(`userProfileSelectableOption-${username}`);
+    await option.waitFor({ state: 'visible' });
+    await option.click();
   }
 
   /** Click the "Apply" button in the assignees panel. */

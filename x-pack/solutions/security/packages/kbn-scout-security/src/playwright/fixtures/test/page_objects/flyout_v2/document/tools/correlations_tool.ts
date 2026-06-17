@@ -57,4 +57,12 @@ export class CorrelationsTool {
       'securitySolutionFlyoutCorrelationsDetailsAlertsBySessionSectionAlertPreviewButton'
     );
   }
+
+  /**
+   * Click the "Investigate in timeline" button in the sameSource section header. The test-subj
+   * wraps the button, so scope to the inner button role rather than exposing the chain in the spec.
+   */
+  async clickSameSourceInvestigateInTimeline() {
+    await this.sameSourceAlertsSectionInvestigateInTimeline.getByRole('button').click();
+  }
 }

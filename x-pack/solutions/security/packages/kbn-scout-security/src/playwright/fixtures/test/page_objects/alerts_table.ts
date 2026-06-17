@@ -81,14 +81,10 @@ export class AlertsTablePage {
 
   async clickRuleName(ruleName: string) {
     await this.alertsTable.waitFor({ state: 'visible' });
-    // The rule column renders the rule name as a link (data-test-subj="ruleName").
+    // The rule column renders the rule name as a link (data-test-subj="ruleName"); filtered by the
+    // (unique) rule name, so the link resolves to a single row.
     const ruleNameLink = this.alertsTable.getByTestId('ruleName').filter({ hasText: ruleName });
-
-    await expect(
-      ruleNameLink,
-      `Alert with rule '${ruleName}' is not displayed in the alerts table`
-    ).toHaveCount(1);
-
+    await ruleNameLink.waitFor({ state: 'visible' });
     await ruleNameLink.click();
   }
 
@@ -96,7 +92,10 @@ export class AlertsTablePage {
     await this.alertsTable.waitFor({ state: 'visible' });
     // The source.ip / destination.ip columns sit at the far right of the grid and are
     // column-virtualized, so their cells are not in the DOM until scrolled into view. Scroll the
-    // virtualized body fully right to mount them before clicking.
+    // virtualized body fully right to mount them before clicking. EUI's react-window scroll
+    // container exposes no stable data-test-subj, so the `.euiDataGrid__virtualized` class is a
+    // deliberate, documented exception (a stable test-subj on this container would be a good
+    // follow-up in EUI/Kibana).
     await this.alertsTable
       .locator('.euiDataGrid__virtualized')
       .evaluate((el) => el.scrollTo({ left: el.scrollWidth }));

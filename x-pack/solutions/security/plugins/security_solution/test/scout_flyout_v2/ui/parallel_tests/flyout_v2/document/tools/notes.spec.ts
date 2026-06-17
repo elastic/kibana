@@ -39,10 +39,7 @@ spaceTest.describe(
     spaceTest(
       'shows the no-notes empty state and a header that opens the child document flyout',
       async ({ pageObjects }) => {
-        await pageObjects.alertsTablePage.navigate();
-        await pageObjects.alertsTablePage.waitForRuleAlert(ruleName);
-        await pageObjects.alertsTablePage.expandAlertDetailsFlyout(ruleName);
-        await pageObjects.documentFlyout.waitForAlertFlyout();
+        await pageObjects.documentFlyout.openForRule(ruleName);
 
         await pageObjects.documentFlyout.openNotes();
         await expect(pageObjects.notesTool.content).toBeVisible({ timeout: 10_000 });
@@ -67,10 +64,7 @@ spaceTest.describe(
       async ({ pageObjects }) => {
         const noteText = `Scout note ${Date.now()}`;
 
-        await pageObjects.alertsTablePage.navigate();
-        await pageObjects.alertsTablePage.waitForRuleAlert(ruleName);
-        await pageObjects.alertsTablePage.expandAlertDetailsFlyout(ruleName);
-        await pageObjects.documentFlyout.waitForAlertFlyout();
+        await pageObjects.documentFlyout.openForRule(ruleName);
 
         await pageObjects.documentFlyout.openNotes();
         await expect(pageObjects.notesTool.content).toBeVisible({ timeout: 10_000 });
@@ -93,10 +87,7 @@ spaceTest.describe(
       async ({ pageObjects }) => {
         const now = Date.now();
 
-        await pageObjects.alertsTablePage.navigate();
-        await pageObjects.alertsTablePage.waitForRuleAlert(ruleName);
-        await pageObjects.alertsTablePage.expandAlertDetailsFlyout(ruleName);
-        await pageObjects.documentFlyout.waitForAlertFlyout();
+        await pageObjects.documentFlyout.openForRule(ruleName);
 
         await pageObjects.documentFlyout.openNotes();
         await expect(pageObjects.notesTool.content).toBeVisible({ timeout: 10_000 });

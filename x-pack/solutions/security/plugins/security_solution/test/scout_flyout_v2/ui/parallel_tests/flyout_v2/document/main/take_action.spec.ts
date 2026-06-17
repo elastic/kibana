@@ -49,10 +49,7 @@ spaceTest.describe(
     spaceTest(
       'status change: mark alert as closed with a closing reason',
       async ({ pageObjects }) => {
-        await pageObjects.alertsTablePage.navigate();
-        await pageObjects.alertsTablePage.waitForRuleAlert(ruleName);
-        await pageObjects.alertsTablePage.expandAlertDetailsFlyout(ruleName);
-        await pageObjects.documentFlyout.waitForAlertFlyout();
+        await pageObjects.documentFlyout.openForRule(ruleName);
 
         await pageObjects.documentFlyout.openTakeActionMenu();
         await pageObjects.documentFlyout.clickTakeActionItem(ALERT_CLOSE_MENU_ITEM_TEST_SUBJ);
@@ -71,10 +68,7 @@ spaceTest.describe(
     );
 
     spaceTest('apply alert tags — opens tag management sub-panel', async ({ pageObjects }) => {
-      await pageObjects.alertsTablePage.navigate();
-      await pageObjects.alertsTablePage.waitForRuleAlert(ruleName);
-      await pageObjects.alertsTablePage.expandAlertDetailsFlyout(ruleName);
-      await pageObjects.documentFlyout.waitForAlertFlyout();
+      await pageObjects.documentFlyout.openForRule(ruleName);
 
       await pageObjects.documentFlyout.openTakeActionMenu();
       await pageObjects.documentFlyout.clickTakeActionItem(ALERT_TAGS_MENU_ITEM_TEST_SUBJ);
@@ -86,10 +80,7 @@ spaceTest.describe(
     });
 
     spaceTest('assign alert — opens assignees sub-panel', async ({ pageObjects }) => {
-      await pageObjects.alertsTablePage.navigate();
-      await pageObjects.alertsTablePage.waitForRuleAlert(ruleName);
-      await pageObjects.alertsTablePage.expandAlertDetailsFlyout(ruleName);
-      await pageObjects.documentFlyout.waitForAlertFlyout();
+      await pageObjects.documentFlyout.openForRule(ruleName);
 
       await pageObjects.documentFlyout.openTakeActionMenu();
       await pageObjects.documentFlyout.clickTakeActionItem(ALERT_ASSIGNEES_MENU_ITEM_TEST_SUBJ);
@@ -101,10 +92,7 @@ spaceTest.describe(
     });
 
     spaceTest('add to new case — opens case creation modal', async ({ pageObjects }) => {
-      await pageObjects.alertsTablePage.navigate();
-      await pageObjects.alertsTablePage.waitForRuleAlert(ruleName);
-      await pageObjects.alertsTablePage.expandAlertDetailsFlyout(ruleName);
-      await pageObjects.documentFlyout.waitForAlertFlyout();
+      await pageObjects.documentFlyout.openForRule(ruleName);
 
       await pageObjects.documentFlyout.openTakeActionMenu();
       await pageObjects.documentFlyout.clickTakeActionItem(ADD_TO_NEW_CASE_TEST_SUBJ);
@@ -115,10 +103,7 @@ spaceTest.describe(
     });
 
     spaceTest('add to existing case — opens case selector modal', async ({ pageObjects }) => {
-      await pageObjects.alertsTablePage.navigate();
-      await pageObjects.alertsTablePage.waitForRuleAlert(ruleName);
-      await pageObjects.alertsTablePage.expandAlertDetailsFlyout(ruleName);
-      await pageObjects.documentFlyout.waitForAlertFlyout();
+      await pageObjects.documentFlyout.openForRule(ruleName);
 
       await pageObjects.documentFlyout.openTakeActionMenu();
       await pageObjects.documentFlyout.clickTakeActionItem(ADD_TO_EXISTING_CASE_TEST_SUBJ);
@@ -128,10 +113,7 @@ spaceTest.describe(
     });
 
     spaceTest('run alert workflow — opens workflow picker panel', async ({ pageObjects }) => {
-      await pageObjects.alertsTablePage.navigate();
-      await pageObjects.alertsTablePage.waitForRuleAlert(ruleName);
-      await pageObjects.alertsTablePage.expandAlertDetailsFlyout(ruleName);
-      await pageObjects.documentFlyout.waitForAlertFlyout();
+      await pageObjects.documentFlyout.openForRule(ruleName);
 
       await pageObjects.documentFlyout.openTakeActionMenu();
       await pageObjects.documentFlyout.clickTakeActionItem(RUN_ALERT_WORKFLOW_MENU_ITEM_TEST_SUBJ);
@@ -141,10 +123,7 @@ spaceTest.describe(
     });
 
     spaceTest('investigate in timeline — opens Timeline with document', async ({ pageObjects }) => {
-      await pageObjects.alertsTablePage.navigate();
-      await pageObjects.alertsTablePage.waitForRuleAlert(ruleName);
-      await pageObjects.alertsTablePage.expandAlertDetailsFlyout(ruleName);
-      await pageObjects.documentFlyout.waitForAlertFlyout();
+      await pageObjects.documentFlyout.openForRule(ruleName);
 
       await pageObjects.documentFlyout.openTakeActionMenu();
       await pageObjects.documentFlyout.clickTakeActionItem(

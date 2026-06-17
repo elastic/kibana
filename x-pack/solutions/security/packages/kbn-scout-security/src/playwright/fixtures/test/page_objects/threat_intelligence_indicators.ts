@@ -6,7 +6,6 @@
  */
 
 import type { ScoutPage, Locator } from '@kbn/scout';
-import { expect } from '../../../../../ui';
 
 const PAGE_URL = 'security/threat_intelligence/indicators';
 
@@ -55,7 +54,12 @@ export class ThreatIntelligenceIndicatorsPage {
   /** Enter a KQL query in the global search bar and submit it. */
   async filterByQuery(kql: string) {
     await this.queryInput.waitFor({ state: 'visible' });
-    await this.queryInput.fill(kql);
+    await this.queryInput.click();
+    await this.queryInput.clear();
+    // The unified search bar is a QueryStringInput: it submits this.props.query (React prop), not
+    // the DOM value. pressSequentially types character-by-character so React can sync props before
+    // the submit fires.
+    await this.queryInput.pressSequentially(kql);
     await this.querySubmitButton.click();
   }
 
@@ -68,18 +72,11 @@ export class ThreatIntelligenceIndicatorsPage {
     await this.waitForTable();
     await this.filterByQuery(`threat.indicator.name: "${indicatorName}"`);
 
-    // The name cell carries the indicator name; climb to its data grid row, then click the
-    // row's "open flyout" toggle button.
-    const nameCell = this.table
-      .locator('[data-gridcell-column-id="threat.indicator.name"]')
-      .filter({ hasText: indicatorName });
-    // Filtering triggers a re-fetch; give the narrowed grid time to settle to the single row.
-    await expect(
-      nameCell,
-      `Indicator '${indicatorName}' is not displayed in the indicators table`
-    ).toHaveCount(1, { timeout: 30_000 });
-
-    const row = nameCell.locator('xpath=ancestor::div[contains(@class,"euiDataGridRow")]');
+    // Filtering narrows the grid to the single matching row; scope to that row by its unique
+    // indicator name (via the ARIA row role, avoiding brittle EUI-internal class / XPath ancestor
+    // climbs) and click its "open flyout" toggle. The re-fetch can be slow, so wait generously.
+    const row = this.table.getByRole('row').filter({ hasText: indicatorName });
+    await row.waitFor({ state: 'visible', timeout: 30_000 });
     await row.getByTestId('tiToggleIndicatorFlyoutButton').click();
   }
 }

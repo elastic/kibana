@@ -8,6 +8,9 @@
 import type { EsClient, ScoutLogger } from '@kbn/scout';
 import { measurePerformanceAsync } from '@kbn/scout';
 
+/** Threat feed name written by the indicator fixture; asserted by the TI/IOC specs. */
+export const THREAT_FEED_NAME = 'Scout Test Feed' as const;
+
 export interface FileIndicatorFixture {
   /** Index containing the source event; pass as a detection rule's target index for enrichment. */
   sourceIndex: string;
@@ -95,13 +98,13 @@ export const getThreatIntelligenceApiService = ({
         'security.threatIntelligence.indexFileIndicator',
         async () => {
           const now = new Date().toISOString();
-          await esClient.index({
+          const indexResponse = await esClient.index({
             index,
             document: {
               '@timestamp': now,
               event: { kind: 'enrichment', category: 'threat', type: 'indicator' },
               threat: {
-                feed: { name: 'Scout Test Feed' },
+                feed: { name: THREAT_FEED_NAME },
                 indicator: {
                   type: 'file',
                   // `name` is what the table column and flyout title display; `name_origin`
@@ -125,6 +128,13 @@ export const getThreatIntelligenceApiService = ({
             },
             refresh: true,
           });
+
+          // Guardrail: the indicators table and IOC flyout render nothing if the doc never landed.
+          if (indexResponse.result !== 'created') {
+            throw new Error(
+              `Failed to index threat indicator "${sha256}" into "${index}": unexpected index result "${indexResponse.result}"`
+            );
+          }
         }
       );
     },
