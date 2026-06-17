@@ -8,6 +8,7 @@
  */
 
 import { expect } from '@kbn/scout/ui';
+import { tags } from '@kbn/scout';
 import type { ContextTestFixtures } from '../../../fixtures/surrounding_docs';
 import {
   spaceTest,
@@ -34,109 +35,102 @@ const checkMainViewFilters = async (pageObjects: ContextTestFixtures['pageObject
   expect(timeRange.end).toContain('2015-09-23');
 };
 
-spaceTest.describe(
-  'Discover context - back navigation',
-  { tag: testData.CONTEXT_DEPLOYMENT_AGNOSTIC_TAGS },
-  () => {
-    spaceTest.beforeAll(async ({ scoutSpace }) => {
-      await scoutSpace.savedObjects.load(testData.KBN_ARCHIVE_VISUALIZE);
-      await scoutSpace.uiSettings.setDefaultIndex(testData.LOGSTASH_DATA_VIEW);
-      await scoutSpace.uiSettings.setDefaultTime(testData.DEFAULT_TIME_RANGE);
-    });
+spaceTest.describe('Discover context - back navigation', { tag: tags.deploymentAgnostic }, () => {
+  spaceTest.beforeAll(async ({ scoutSpace }) => {
+    await scoutSpace.savedObjects.load(testData.KBN_ARCHIVE_VISUALIZE);
+    await scoutSpace.uiSettings.setDefaultIndex(testData.LOGSTASH_DATA_VIEW);
+    await scoutSpace.uiSettings.setDefaultTime(testData.DEFAULT_TIME_RANGE);
+  });
 
-    let initialHitCount: number;
+  let initialHitCount: number;
 
-    spaceTest.beforeEach(async ({ browserAuth, page, pageObjects }) => {
-      await loginAndGoToDiscover({ browserAuth, pageObjects });
+  spaceTest.beforeEach(async ({ browserAuth, page, pageObjects }) => {
+    await loginAndGoToDiscover({ browserAuth, pageObjects });
 
-      await addFilters(page, TEST_FILTER_COLUMN_NAMES);
-      await pageObjects.discover.waitUntilSearchingHasFinished();
+    await addFilters(page, TEST_FILTER_COLUMN_NAMES);
+    await pageObjects.discover.waitUntilSearchingHasFinished();
 
-      initialHitCount = await pageObjects.discover.getHitCountInt();
+    initialHitCount = await pageObjects.discover.getHitCountInt();
 
-      await navigateToFirstDocContext(pageObjects);
-    });
+    await navigateToFirstDocContext(pageObjects);
+  });
 
-    spaceTest.afterAll(async ({ scoutSpace }) => {
-      await scoutSpace.uiSettings.unset('defaultIndex', 'timepicker:timeDefaults');
-      await scoutSpace.savedObjects.cleanStandardList();
-    });
+  spaceTest.afterAll(async ({ scoutSpace }) => {
+    await scoutSpace.uiSettings.unset('defaultIndex', 'timepicker:timeDefaults');
+    await scoutSpace.savedObjects.cleanStandardList();
+  });
 
-    spaceTest(
-      'should go back after loading more in context view',
-      async ({ page, pageObjects }) => {
-        await pageObjects.contextPage.clickSuccessorLoadMoreButton();
-        await pageObjects.contextPage.clickSuccessorLoadMoreButton();
-        await pageObjects.contextPage.clickSuccessorLoadMoreButton();
+  spaceTest('should go back after loading more in context view', async ({ page, pageObjects }) => {
+    await pageObjects.contextPage.clickSuccessorLoadMoreButton();
+    await pageObjects.contextPage.clickSuccessorLoadMoreButton();
+    await pageObjects.contextPage.clickSuccessorLoadMoreButton();
 
-        await page.goBack();
-        await pageObjects.discover.waitUntilSearchingHasFinished();
-        await pageObjects.discover.waitForDocTableRendered();
+    await page.goBack();
+    await pageObjects.discover.waitUntilSearchingHasFinished();
+    await pageObjects.discover.waitForDocTableRendered();
 
-        const hitCount = await pageObjects.discover.getHitCountInt();
-        expect(hitCount).toBe(initialHitCount);
-      }
-    );
+    const hitCount = await pageObjects.discover.getHitCountInt();
+    expect(hitCount).toBe(initialHitCount);
+  });
 
-    spaceTest('should go back via breadcrumbs with preserved state', async ({ pageObjects }) => {
+  spaceTest('should go back via breadcrumbs with preserved state', async ({ pageObjects }) => {
+    await pageObjects.contextPage.goBackToDiscover();
+    await checkMainViewFilters(pageObjects);
+  });
+
+  spaceTest(
+    'should go back via breadcrumbs with preserved state after page refresh',
+    async ({ page, pageObjects }) => {
+      await page.reload();
+      await pageObjects.contextPage.waitUntilContextLoadingHasFinished();
+
       await pageObjects.contextPage.goBackToDiscover();
       await checkMainViewFilters(pageObjects);
-    });
+    }
+  );
 
-    spaceTest(
-      'should go back via breadcrumbs with preserved state after page refresh',
-      async ({ page, pageObjects }) => {
-        await page.reload();
+  spaceTest(
+    'should preserve state when navigating back after URL state changes',
+    async ({ page, pageObjects }) => {
+      await spaceTest.step('remove a filter in context view to change URL state', async () => {
+        await pageObjects.filterBar.removeFilter('agent');
+        await pageObjects.contextPage.waitUntilContextLoadingHasFinished();
+      });
+
+      await spaceTest.step(
+        'navigate to discover via breadcrumbs and verify original filters',
+        async () => {
+          await pageObjects.contextPage.goBackToDiscover();
+
+          expect(await pageObjects.filterBar.getFilterCount()).toBe(2);
+          await checkMainViewFilters(pageObjects);
+        }
+      );
+
+      await spaceTest.step('go back to context and verify modified filter state', async () => {
+        await page.goBack();
         await pageObjects.contextPage.waitUntilContextLoadingHasFinished();
 
-        await pageObjects.contextPage.goBackToDiscover();
-        await checkMainViewFilters(pageObjects);
-      }
-    );
+        expect(await pageObjects.filterBar.getFilterCount()).toBe(1);
+        const [, extensionValue] = TEST_FILTER_COLUMN_NAMES[1];
+        expect(
+          await pageObjects.filterBar.hasFilter({
+            field: 'extension',
+            value: extensionValue,
+            enabled: false,
+          })
+        ).toBe(true);
+      });
 
-    spaceTest(
-      'should preserve state when navigating back after URL state changes',
-      async ({ page, pageObjects }) => {
-        await spaceTest.step('remove a filter in context view to change URL state', async () => {
-          await pageObjects.filterBar.removeFilter('agent');
-          await pageObjects.contextPage.waitUntilContextLoadingHasFinished();
-        });
+      await spaceTest.step(
+        'return to discover and verify original filters are restored',
+        async () => {
+          await pageObjects.contextPage.goBackToDiscover();
 
-        await spaceTest.step(
-          'navigate to discover via breadcrumbs and verify original filters',
-          async () => {
-            await pageObjects.contextPage.goBackToDiscover();
-
-            expect(await pageObjects.filterBar.getFilterCount()).toBe(2);
-            await checkMainViewFilters(pageObjects);
-          }
-        );
-
-        await spaceTest.step('go back to context and verify modified filter state', async () => {
-          await page.goBack();
-          await pageObjects.contextPage.waitUntilContextLoadingHasFinished();
-
-          expect(await pageObjects.filterBar.getFilterCount()).toBe(1);
-          const [, extensionValue] = TEST_FILTER_COLUMN_NAMES[1];
-          expect(
-            await pageObjects.filterBar.hasFilter({
-              field: 'extension',
-              value: extensionValue,
-              enabled: false,
-            })
-          ).toBe(true);
-        });
-
-        await spaceTest.step(
-          'return to discover and verify original filters are restored',
-          async () => {
-            await pageObjects.contextPage.goBackToDiscover();
-
-            expect(await pageObjects.filterBar.getFilterCount()).toBe(2);
-            await checkMainViewFilters(pageObjects);
-          }
-        );
-      }
-    );
-  }
-);
+          expect(await pageObjects.filterBar.getFilterCount()).toBe(2);
+          await checkMainViewFilters(pageObjects);
+        }
+      );
+    }
+  );
+});

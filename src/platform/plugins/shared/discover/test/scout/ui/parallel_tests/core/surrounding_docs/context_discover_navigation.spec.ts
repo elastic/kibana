@@ -8,6 +8,7 @@
  */
 
 import { expect } from '@kbn/scout/ui';
+import { tags } from '@kbn/scout';
 import {
   spaceTest,
   testData,
@@ -24,7 +25,7 @@ const TEST_FILTER_COLUMN_NAMES: Array<[string, string]> = [
 
 spaceTest.describe(
   'Discover context - navigation from Discover',
-  { tag: testData.CONTEXT_DEPLOYMENT_AGNOSTIC_TAGS },
+  { tag: tags.deploymentAgnostic },
   () => {
     spaceTest.beforeAll(async ({ scoutSpace }) => {
       await scoutSpace.savedObjects.load(testData.KBN_ARCHIVE_VISUALIZE);

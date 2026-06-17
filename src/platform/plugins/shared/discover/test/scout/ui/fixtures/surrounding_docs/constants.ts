@@ -7,12 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { tags } from '@kbn/scout';
-
-export const CONTEXT_DEPLOYMENT_AGNOSTIC_TAGS = tags.deploymentAgnostic;
-
-export const CONTEXT_STATEFUL_TAGS = [...tags.stateful.classic];
-
 export const LOGSTASH_DATA_VIEW = 'logstash-*';
 
 export const LOGSTASH_ANCHOR_ID = 'AU_x3_BrGFA8no6QjjaI';

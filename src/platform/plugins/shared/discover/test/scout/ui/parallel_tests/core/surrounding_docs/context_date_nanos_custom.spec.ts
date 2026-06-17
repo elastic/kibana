@@ -8,6 +8,7 @@
  */
 
 import { expect } from '@kbn/scout/ui';
+import { tags } from '@kbn/scout';
 import { spaceTest, testData, resolveDataViewId } from '../../../fixtures/surrounding_docs';
 
 const TEST_DEFAULT_CONTEXT_SIZE = 1;
@@ -15,7 +16,7 @@ const TEST_STEP_SIZE = 3;
 
 spaceTest.describe(
   'Discover context - date_nanos custom timestamp',
-  { tag: testData.CONTEXT_STATEFUL_TAGS },
+  { tag: tags.stateful.classic },
   () => {
     let dataViewId: string;
 

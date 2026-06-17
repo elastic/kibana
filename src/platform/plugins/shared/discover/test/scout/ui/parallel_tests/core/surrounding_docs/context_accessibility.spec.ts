@@ -8,6 +8,7 @@
  */
 
 import { expect } from '@kbn/scout/ui';
+import { tags } from '@kbn/scout';
 import {
   spaceTest,
   testData,
@@ -15,38 +16,34 @@ import {
   navigateToFirstDocContext,
 } from '../../../fixtures/surrounding_docs';
 
-spaceTest.describe(
-  'Discover context - accessibility',
-  { tag: testData.CONTEXT_STATEFUL_TAGS },
-  () => {
-    spaceTest.beforeAll(async ({ scoutSpace }) => {
-      await scoutSpace.savedObjects.load(testData.KBN_ARCHIVE_VISUALIZE);
-      await scoutSpace.uiSettings.setDefaultIndex(testData.LOGSTASH_DATA_VIEW);
-      await scoutSpace.uiSettings.setDefaultTime(testData.DEFAULT_TIME_RANGE);
-    });
+spaceTest.describe('Discover context - accessibility', { tag: tags.stateful.classic }, () => {
+  spaceTest.beforeAll(async ({ scoutSpace }) => {
+    await scoutSpace.savedObjects.load(testData.KBN_ARCHIVE_VISUALIZE);
+    await scoutSpace.uiSettings.setDefaultIndex(testData.LOGSTASH_DATA_VIEW);
+    await scoutSpace.uiSettings.setDefaultTime(testData.DEFAULT_TIME_RANGE);
+  });
 
-    spaceTest.beforeEach(async ({ browserAuth, pageObjects }) => {
-      await loginAndGoToDiscover({ browserAuth, pageObjects });
-    });
+  spaceTest.beforeEach(async ({ browserAuth, pageObjects }) => {
+    await loginAndGoToDiscover({ browserAuth, pageObjects });
+  });
 
-    spaceTest.afterAll(async ({ scoutSpace }) => {
-      await scoutSpace.uiSettings.unset('defaultIndex', 'timepicker:timeDefaults');
-      await scoutSpace.savedObjects.cleanStandardList();
-    });
+  spaceTest.afterAll(async ({ scoutSpace }) => {
+    await scoutSpace.uiSettings.unset('defaultIndex', 'timepicker:timeDefaults');
+    await scoutSpace.savedObjects.cleanStandardList();
+  });
 
-    spaceTest(
-      'should give focus to the Load link when Tab is pressed',
-      async ({ page, pageObjects }) => {
-        await navigateToFirstDocContext(pageObjects);
+  spaceTest(
+    'should give focus to the Load link when Tab is pressed',
+    async ({ page, pageObjects }) => {
+      await navigateToFirstDocContext(pageObjects);
 
-        // Skip to main content via Tab + Enter, then Tab to first focusable element
-        await page.keyboard.press('Tab');
-        await page.keyboard.press('Enter');
-        await page.keyboard.press('Tab');
+      // Skip to main content via Tab + Enter, then Tab to first focusable element
+      await page.keyboard.press('Tab');
+      await page.keyboard.press('Enter');
+      await page.keyboard.press('Tab');
 
-        const activeElement = page.locator(':focus');
-        await expect(activeElement).toHaveAttribute('data-test-subj', /predecessorsLoadMoreButton/);
-      }
-    );
-  }
-);
+      const activeElement = page.locator(':focus');
+      await expect(activeElement).toHaveAttribute('data-test-subj', /predecessorsLoadMoreButton/);
+    }
+  );
+});
