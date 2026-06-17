@@ -16,6 +16,5 @@ export const AI_CLASSIFY_FEATURE_ID = 'ai_classify';
  */
 export const WORKFLOWS_AI_RECOMMENDED_ENDPOINTS = [
   '.anthropic-claude-4.6-sonnet-chat_completion',
-  '.anthropic-claude-4.6-opus-chat_completion',
   '.openai-gpt-5.2-chat_completion',
 ];

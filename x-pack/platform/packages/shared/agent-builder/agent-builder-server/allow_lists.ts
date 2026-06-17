@@ -65,6 +65,7 @@ export const AGENT_BUILDER_BUILTIN_TOOLS = [
   `${internalNamespaces.streams}.update_stream`,
   `${internalNamespaces.streams}.create_partition`,
   `${internalNamespaces.streams}.delete_stream`,
+  `${internalNamespaces.streams}.memory.write_page`,
 
   // Workflows
   `${internalNamespaces.workflows}.validate_workflow`,
@@ -86,8 +87,11 @@ export type AgentBuilderBuiltinTool = (typeof AGENT_BUILDER_BUILTIN_TOOLS)[numbe
 export const AGENT_BUILDER_BUILTIN_AGENTS = [
   `${internalNamespaces.search}.agent`,
   `${internalNamespaces.security}.agent`,
+  'sigevents.memory.system-onboarding',
+  'sigevents.memory.gap-detector',
   `${internalNamespaces.streams}.significant-events.discovery.investigator`,
   `${internalNamespaces.streams}.significant-events.discovery.judge`,
+  `${internalNamespaces.streams}.significant-events.investigation`,
 ] as const;
 
 export type AgentBuilderBuiltinAgent = (typeof AGENT_BUILDER_BUILTIN_AGENTS)[number];
@@ -125,6 +129,11 @@ export const AGENT_BUILDER_BUILTIN_SKILLS = [
   'significant-events-management',
   'knowledge-indicators-management',
   'ki-identification-management',
+  'streams-memory-synthesis',
+  'streams-memory-consolidation',
+  'streams-conversation-scraper',
+  'significant-events-onboarding',
+  'streams-gap-detection',
 
   // Platform – Workflows
   'workflow-authoring',

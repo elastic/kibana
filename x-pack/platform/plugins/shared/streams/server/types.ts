@@ -56,14 +56,16 @@ export interface StreamsServer {
   logger: Logger;
   security: SecurityPluginStart;
   actions: ActionsPluginStart;
+  agentContextLayer?: AgentContextLayerPluginStart;
   encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
   inference: InferenceServerStart;
   licensing: LicensingPluginStart;
   isServerless: boolean;
   taskManager: TaskManagerStartContract;
   searchInferenceEndpoints?: SearchInferenceEndpointsPluginStart;
-  workflowsExtensions?: WorkflowsExtensionsServerPluginStart;
+  ensureMemorySkillRegistered?: () => void;
   workflowsManagement?: WorkflowsServerPluginSetup;
+  workflowsExtensions?: WorkflowsExtensionsServerPluginStart;
   agentBuilder?: AgentBuilderPluginStart;
   spaces?: SpacesPluginStart;
 }
@@ -91,6 +93,7 @@ export interface StreamsPluginSetupDependencies {
 
 export interface StreamsPluginStartDependencies {
   actions: ActionsPluginStart;
+  agentContextLayer?: AgentContextLayerPluginStart;
   security: SecurityPluginStart;
   encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
   licensing: LicensingPluginStart;
@@ -102,7 +105,6 @@ export interface StreamsPluginStartDependencies {
   fieldsMetadata: FieldsMetadataServerStart;
   console: ConsoleServerStart;
   agentBuilder?: AgentBuilderPluginStart;
-  agentContextLayer?: AgentContextLayerPluginStart;
   spaces?: SpacesPluginStart;
   searchInferenceEndpoints?: SearchInferenceEndpointsPluginStart;
   workflowsExtensions?: WorkflowsExtensionsServerPluginStart;

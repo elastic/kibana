@@ -104,6 +104,27 @@ const columns: Array<EuiBasicTableColumn<Discovery>> = [
     width: '100px',
     render: (value: number | undefined) => (value != null ? `${value}%` : '-'),
   },
+  {
+    name: i18n.translate('xpack.streams.discoveriesTab.investigationColumn', {
+      defaultMessage: 'Investigation',
+    }),
+    width: '120px',
+    render: (discovery: Discovery) => {
+      if (!discovery.investigation) return null;
+      const hasGaps = (discovery.investigation.gaps_found ?? []).length > 0;
+      return (
+        <EuiBadge color={hasGaps ? 'warning' : 'success'}>
+          {hasGaps
+            ? i18n.translate('xpack.streams.discoveriesTab.investigationWithGaps', {
+                defaultMessage: 'Done (gaps)',
+              })
+            : i18n.translate('xpack.streams.discoveriesTab.investigationDone', {
+                defaultMessage: 'Done',
+              })}
+        </EuiBadge>
+      );
+    },
+  },
 ];
 
 const DEFAULT_DISCOVERIES_RANGE = { from: 'now-7d', to: 'now' };

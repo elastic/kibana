@@ -16,18 +16,30 @@ import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
  * Returns the execution id when started, or undefined when workflows are unavailable
  * or the managed workflow has not been installed yet.
  */
+export interface MemorySynthesisInputs {
+  user_feedback?: {
+    aspect: 'root_cause' | 'hypothesis' | 'remediation';
+    feedback: 'correct' | 'incorrect' | 'helpful' | 'not_helpful';
+    discovery_id: string;
+    hypothesis_id?: string;
+    remediation_rank?: number;
+  };
+}
+
 export const triggerMemorySynthesisWorkflow = async ({
   workflowsManagement,
   spaces,
   request,
   logger,
   triggeredBy = 'sigevents-memory-synthesis',
+  inputs = {},
 }: {
   workflowsManagement?: WorkflowsServerPluginSetup;
   spaces?: SpacesPluginStart;
   request: KibanaRequest;
   logger: Logger;
   triggeredBy?: string;
+  inputs?: MemorySynthesisInputs;
 }): Promise<string | undefined> => {
   if (!workflowsManagement) {
     logger.debug('Workflows management not available, skipping memory synthesis trigger');
@@ -50,7 +62,7 @@ export const triggerMemorySynthesisWorkflow = async ({
   const executionId = await workflowsManagement.management.runWorkflow(
     { ...workflow, definition: workflow.definition },
     spaceId,
-    {},
+    inputs,
     request,
     triggeredBy
   );

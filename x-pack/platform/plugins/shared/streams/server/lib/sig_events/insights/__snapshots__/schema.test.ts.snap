@@ -37,7 +37,7 @@ Object {
         "additionalProperties": false,
         "properties": Object {
           "description": Object {
-            "description": "Detailed explanation of what is happening and why it matters",
+            "description": "What is happening, the hypothesized root cause (why), and why it matters — grounded in evidence and any memory/connector context",
             "type": "string",
           },
           "evidence": Object {
@@ -58,7 +58,7 @@ Object {
             "type": "string",
           },
           "recommendations": Object {
-            "description": "Actionable steps to investigate or resolve the issue",
+            "description": "Mitigation and investigation steps derived from the hypothesized root cause — concrete actions, not generic monitoring advice",
             "items": Object {
               "$ref": "#/$defs/__schema1",
             },

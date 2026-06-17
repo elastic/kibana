@@ -6,6 +6,7 @@
  */
 
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiLoadingElastic, useEuiTheme } from '@elastic/eui';
+import { AiButton } from '@kbn/shared-ux-ai-components';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useMemo } from 'react';
@@ -52,6 +53,17 @@ function isValidDiscoveryTab(value: string): value is DiscoveryTab {
   return discoveryTabs.includes(value as DiscoveryTab);
 }
 
+const SYSTEM_ONBOARDING_AGENT_ID = 'sigevents.memory.system-onboarding';
+const SYSTEM_ONBOARDING_SESSION_TAG = 'streams-significant-events-onboarding';
+
+const systemOnboardingInitialMessage = i18n.translate(
+  'xpack.streams.significantEventsDiscovery.systemOnboardingInitialMessage',
+  {
+    defaultMessage:
+      'Help me document my system for significant events analysis — architecture, deployment, infrastructure, and operational context.',
+  }
+);
+
 export function SignificantEventsDiscoveryPage() {
   const {
     path: { tab },
@@ -62,6 +74,9 @@ export function SignificantEventsDiscoveryPage() {
     core: {
       application: { getUrlForApp },
       notifications: { toasts },
+    },
+    dependencies: {
+      start: { agentBuilder },
     },
   } = useKibana();
 
@@ -82,6 +97,16 @@ export function SignificantEventsDiscoveryPage() {
   );
 
   const { isMemoryEnabled } = useDiscoverySettings();
+
+  const handleOpenSystemOnboarding = useCallback(() => {
+    agentBuilder?.openChat({
+      newConversation: true,
+      sessionTag: SYSTEM_ONBOARDING_SESSION_TAG,
+      agentId: SYSTEM_ONBOARDING_AGENT_ID,
+      initialMessage: systemOnboardingInitialMessage,
+      autoSendInitialMessage: true,
+    });
+  }, [agentBuilder]);
 
   useStreamsAppBreadcrumbs(() => {
     return [
@@ -235,6 +260,20 @@ export function SignificantEventsDiscoveryPage() {
                 })}
               </EuiButton>
             </EuiFlexItem>
+            {isMemoryEnabled && agentBuilder && (
+              <EuiFlexItem grow={false}>
+                <AiButton
+                  iconType="sparkles"
+                  onClick={handleOpenSystemOnboarding}
+                  data-test-subj="significantEventsSystemOnboardingButton"
+                >
+                  {i18n.translate(
+                    'xpack.streams.significantEventsDiscovery.systemOnboardingButton',
+                    { defaultMessage: 'Tell us about your system' }
+                  )}
+                </AiButton>
+              </EuiFlexItem>
+            )}
           </EuiFlexGroup>
         }
         tabs={tabs}

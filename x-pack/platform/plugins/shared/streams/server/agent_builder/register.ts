@@ -15,10 +15,37 @@ import type { StreamsKIsOnboardingClient } from '../lib/workflows/onboarding_wor
 import { MemoryServiceImpl } from '../lib/memory';
 import type { MemoryToolsOptions } from './tools/memory';
 import { registerAgentBuilderTools } from './tools/register_tools';
+import { createSigEventsMemorySkill } from './skills/sig_events_memory_skill';
+import { createSigEventsOnboardingSkill } from './skills/sigevents_onboarding_skill';
 import { registerAgentBuilderSkills } from './skills/register_skills';
 import { registerAgentBuilderAttachments } from './attachments/register_attachments';
 import { registerAgentBuilderSmlTypes } from './sml/register_sml_types';
 import { registerSignificantEventsDiscoveryAgents } from './agents/discovery';
+import { registerInvestigationAgents } from './agents/investigation';
+
+type AgentDefinition = Parameters<AgentBuilderPluginSetup['agents']['register']>[0];
+
+const systemOnboardingAgent: AgentDefinition = {
+  id: 'sigevents.memory.system-onboarding',
+  name: 'System Onboarding',
+  description:
+    'Interviews the user to build a mental model of their system and stores operational context in the sigevents memory knowledge base.',
+  configuration: {
+    skill_ids: ['significant-events-onboarding'],
+    tools: [],
+  },
+};
+
+const gapDetectorAgent: AgentDefinition = {
+  id: 'sigevents.memory.gap-detector',
+  name: 'Gap Detector',
+  description:
+    'Audits the sigevents memory knowledge base against 11 required knowledge dimensions and writes a structured gaps page listing everything that is unknown, ambiguous, or missing.',
+  configuration: {
+    skill_ids: ['streams-gap-detection'],
+    tools: [],
+  },
+};
 
 export const createMemoryToolsOptions = ({
   getScopedClients,
@@ -51,6 +78,7 @@ export const registerStreamsAgentBuilder = async ({
   server,
   logger,
   telemetry,
+  isMemoryEnabled,
   streamsKIsOnboardingClient,
 }: {
   agentBuilder: AgentBuilderPluginSetup;
@@ -59,11 +87,52 @@ export const registerStreamsAgentBuilder = async ({
   server: StreamsServer;
   logger: Logger;
   telemetry: EbtTelemetryClient;
+  isMemoryEnabled: () => Promise<boolean>;
   streamsKIsOnboardingClient?: StreamsKIsOnboardingClient;
-}): Promise<void> => {
+}) => {
+  const memoryToolsOptions = createMemoryToolsOptions({ getScopedClients, server, logger });
+
   registerAgentBuilderAttachments({ agentBuilder, getScopedClients, logger });
   registerAgentBuilderSmlTypes({ agentContextLayer, getScopedClients });
   registerAgentBuilderTools({ agentBuilder, getScopedClients, server, logger, telemetry });
-  registerAgentBuilderSkills({ agentBuilder, telemetry, streamsKIsOnboardingClient });
+  registerAgentBuilderSkills({
+    agentBuilder,
+    telemetry,
+    streamsKIsOnboardingClient,
+  });
   registerSignificantEventsDiscoveryAgents({ agentBuilder, server });
+  registerInvestigationAgents(agentBuilder);
+
+  agentBuilder.agents.register(systemOnboardingAgent);
+  agentBuilder.agents.register(gapDetectorAgent);
+  logger.info('sigevents memory agents registered');
+
+  let memorySkillRegistered = false;
+
+  const ensureMemorySkillRegistered = () => {
+    if (memorySkillRegistered) {
+      return;
+    }
+    memorySkillRegistered = true;
+    agentBuilder.skills.register(createSigEventsMemorySkill(memoryToolsOptions));
+    agentBuilder.skills.register(createSigEventsOnboardingSkill(memoryToolsOptions));
+    logger.info(
+      'Memory skill registered (streams.significantEventsMemoryEnabled feature flag is enabled)'
+    );
+  };
+
+  if (await isMemoryEnabled()) {
+    ensureMemorySkillRegistered();
+  }
+
+  server.ensureMemorySkillRegistered = ensureMemorySkillRegistered;
+
+  return {
+    ensureMemorySkillRegistered,
+    onMemorySettingChanged: async () => {
+      if (await isMemoryEnabled()) {
+        ensureMemorySkillRegistered();
+      }
+    },
+  };
 };

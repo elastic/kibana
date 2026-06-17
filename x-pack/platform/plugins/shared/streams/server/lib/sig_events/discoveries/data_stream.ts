@@ -28,6 +28,23 @@ export const discoveriesMappings = {
         rule_uuid: { type: 'keyword' as const },
       },
     }),
+    investigation: mappings.object({
+      properties: {
+        completed_at: { type: 'date' as const },
+        workflow_execution_id: { type: 'keyword' as const },
+        contributing_factors: { type: 'text' as const },
+        confidence: { type: 'float' as const },
+        evidence_summary: { type: 'text' as const },
+        mechanism: { type: 'text' as const },
+        alternatives_ruled_out: mappings.object({
+          properties: {
+            candidate: { type: 'keyword' as const },
+            reason: { type: 'text' as const },
+          },
+        }),
+        gaps_found: { type: 'keyword' as const },
+      },
+    }),
   },
 } satisfies MappingsDefinition;
 
@@ -39,7 +56,7 @@ export const discoveriesDataStream: DataStreamDefinition<
   StoredDiscovery
 > = {
   name: DISCOVERIES_DATA_STREAM,
-  version: 3,
+  version: 4,
   hidden: true,
   template: {
     priority: 500,

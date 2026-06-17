@@ -20,6 +20,7 @@ import {
   EuiHorizontalRule,
   EuiText,
   EuiTitle,
+  EuiToolTip,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -28,6 +29,7 @@ import { InfoPanel } from '../../../../info_panel';
 import { useKibana } from '../../../../../hooks/use_kibana';
 import { impactBadgeColors, impactLabels } from './insight_constants';
 import { FeedbackButtons } from './feedback_buttons';
+import { DiscussWithAgentButton, formatInsightChatMessage } from '../sig_event_agent_chat';
 import { formatGeneratedAt } from './utils';
 
 interface InsightFlyoutProps {
@@ -92,14 +94,21 @@ export const InsightFlyout = ({ insight, onClose }: InsightFlyoutProps) => {
             </EuiTitle>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButtonIcon
-              data-test-subj="streamsInsightFlyoutCloseButton"
-              iconType="cross"
-              aria-label={i18n.translate('xpack.streams.insightFlyout.closeButtonAriaLabel', {
+            <EuiToolTip
+              content={i18n.translate('xpack.streams.insightFlyout.closeButtonAriaLabel', {
                 defaultMessage: 'Close',
               })}
-              onClick={onClose}
-            />
+              disableScreenReaderOutput
+            >
+              <EuiButtonIcon
+                data-test-subj="streamsInsightFlyoutCloseButton"
+                iconType="cross"
+                aria-label={i18n.translate('xpack.streams.insightFlyout.closeButtonAriaLabel', {
+                  defaultMessage: 'Close',
+                })}
+                onClick={onClose}
+              />
+            </EuiToolTip>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlyoutHeader>
@@ -196,7 +205,17 @@ export const InsightFlyout = ({ insight, onClose }: InsightFlyoutProps) => {
       </EuiFlyoutBody>
 
       <EuiFlyoutFooter>
-        <FeedbackButtons key={insight.id} onFeedback={handleFeedback} />
+        <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" responsive={false}>
+          <EuiFlexItem grow={false}>
+            <FeedbackButtons key={insight.id} onFeedback={handleFeedback} />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <DiscussWithAgentButton
+              initialMessage={formatInsightChatMessage(insight)}
+              dataTestSubj="streamsInsightFlyoutDiscussWithAgentButton"
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiFlyoutFooter>
     </EuiFlyout>
   );

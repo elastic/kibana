@@ -70,8 +70,7 @@ import {
 } from './lib/sig_events/significant_events_clients';
 import { baseFields } from './lib/streams/component_templates/logs_layer';
 import { ecsBaseFields } from './lib/streams/component_templates/logs_ecs_layer';
-import { createMemoryToolsOptions, registerStreamsAgentBuilder } from './agent_builder/register';
-import { registerStreamsMemoryAgentBuilder } from './agent_builder/skills/register_memory_skills';
+import { registerStreamsAgentBuilder } from './agent_builder/register';
 import { registerSignificantEventsInferenceFeatures } from './register_significant_events_inference_features';
 import { registerSuggestionsInferenceFeatures } from './register_suggestions_inference_features';
 import { PatternExtractionService } from './lib/pattern_extraction/pattern_extraction_service';
@@ -325,6 +324,14 @@ export class StreamsPlugin
         logger: this.logger,
         telemetry: telemetryClient,
         streamsKIsOnboardingClient,
+        isMemoryEnabled: async () => {
+          try {
+            const [coreStart] = await core.getStartServices();
+            return await isSignificantEventsMemoryEnabled(coreStart.featureFlags);
+          } catch {
+            return false;
+          }
+        },
       }).catch((err) => {
         this.logger.error(`Failed to register agent builder: ${err.message}`);
       });
@@ -572,8 +579,9 @@ export class StreamsPlugin
       this.server.licensing = plugins.licensing;
       this.server.taskManager = plugins.taskManager;
       this.server.searchInferenceEndpoints = plugins.searchInferenceEndpoints;
-      this.server.spaces = plugins.spaces;
       this.server.workflowsExtensions = plugins.workflowsExtensions;
+      this.server.spaces = plugins.spaces;
+      this.server.agentContextLayer = plugins.agentContextLayer;
       this.server.agentBuilder = plugins.agentBuilder;
     }
 
@@ -636,29 +644,10 @@ export class StreamsPlugin
       });
     }
 
-    if (plugins.agentBuilder && this.server && this.streamsGetScopedClients) {
-      const isMemoryEnabled = () => isSignificantEventsMemoryEnabled(core.featureFlags);
-
-      const memoryToolsOptions = createMemoryToolsOptions({
-        getScopedClients: this.streamsGetScopedClients,
-        server: this.server,
-        logger: this.logger,
+    if (this.server?.ensureMemorySkillRegistered) {
+      memoryEnabled$.subscribe(() => {
+        this.server?.ensureMemorySkillRegistered?.();
       });
-
-      registerStreamsMemoryAgentBuilder({
-        agentBuilder: plugins.agentBuilder,
-        memoryToolsOptions,
-        logger: this.logger,
-        isMemoryEnabled,
-      })
-        .then(({ onMemoryEnabled }) => {
-          memoryEnabled$.subscribe(() => {
-            void onMemoryEnabled();
-          });
-        })
-        .catch((err) => {
-          this.logger.error(`Failed to register streams memory skills: ${err.message}`);
-        });
     }
 
     this.processorSuggestionsService.setConsoleStart(plugins.console);

@@ -95,13 +95,13 @@ dependsOn:
   - '@kbn/core-security-server'
   - '@kbn/workflows-management-plugin'
   - '@kbn/workflows'
+  - '@kbn/workflows-extensions'
   - '@kbn/agent-builder-plugin'
   - '@kbn/data-streams'
   - '@kbn/es-mappings'
   - '@kbn/core-spaces-common'
   - '@kbn/elastic-agent-utils'
   - '@kbn/sample-log-parser'
-  - '@kbn/workflows-extensions'
   - '@kbn/agent-context-layer-plugin'
 tags:
   - plugin

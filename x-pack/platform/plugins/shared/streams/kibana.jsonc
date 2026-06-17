@@ -38,8 +38,8 @@
       "globalSearch",
       "searchInferenceEndpoints",
       "spaces",
-      "workflowsExtensions",
-      "workflowsManagement"
+      "workflowsManagement",
+      "workflowsExtensions"
     ],
     "requiredBundles": [],
     "extraPublicDirs": [

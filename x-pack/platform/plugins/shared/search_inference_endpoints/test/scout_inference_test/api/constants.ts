@@ -58,7 +58,7 @@ export const SAMPLE_FEATURES = {
   },
   agentBuilderClaudeOpus: {
     feature_id: 'agent_builder',
-    endpoints: [{ id: '.anthropic-claude-4.6-opus' }],
+    endpoints: [{ id: '.anthropic-claude-4.6-sonnet-chat_completion' }],
   },
   attackDiscoveryClaude: {
     feature_id: 'attack_discovery',

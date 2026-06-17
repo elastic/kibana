@@ -13,10 +13,13 @@ import {
   type EventLifecycleResponse,
 } from '@kbn/streams-schema';
 import { z } from '@kbn/zod/v4';
+import { OBSERVABILITY_STREAMS_ENABLE_INVESTIGATION } from '@kbn/management-settings-ids';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
 import type { PaginatedResponse } from '../../../../lib/sig_events/query_utils';
 import { createServerRoute } from '../../../create_server_route';
 import { assertSignificantEventsAccess } from '../../../utils/assert_significant_events_access';
+import { InvestigationService } from '../../../../lib/sig_events/investigations/investigation_service';
 
 const toArray = (val: string | string[] | undefined): string[] | undefined =>
   val === undefined ? undefined : Array.isArray(val) ? val : [val];
@@ -133,7 +136,35 @@ const eventsBulkCreateRoute = createServerRoute({
 
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
 
-    return getEventClient().bulkCreate(params.body);
+    const result = await getEventClient().bulkCreate(params.body);
+
+    if (server.workflowsExtensions) {
+      const isInvestigationEnabled = await uiSettingsClient
+        .get<boolean>(OBSERVABILITY_STREAMS_ENABLE_INVESTIGATION)
+        .catch(() => false);
+
+      if (isInvestigationEnabled) {
+        const investigationService = new InvestigationService(
+          server.workflowsExtensions,
+          server.logger
+        );
+        const space = server.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
+
+        for (const event of params.body) {
+          if (event.status === 'promoted' && event.discovery_id) {
+            void investigationService
+              .triggerForEvent({ event, request, space })
+              .catch((err) =>
+                server.logger.warn(
+                  `Investigation trigger failed for event ${event.event_id}: ${err}`
+                )
+              );
+          }
+        }
+      }
+    }
+
+    return result;
   },
 });
 

@@ -21,6 +21,26 @@ tags:
 triggers:
   - type: manual
 
+inputs:
+  type: object
+  properties:
+    user_feedback:
+      type: object
+      description: Optional user feedback from an investigation result that should inform this synthesis run.
+      properties:
+        aspect:
+          type: string
+          enum: [root_cause, hypothesis, remediation]
+        feedback:
+          type: string
+          enum: [correct, incorrect, helpful, not_helpful]
+        discovery_id:
+          type: string
+        hypothesis_id:
+          type: string
+        remediation_rank:
+          type: number
+
 steps:
   - name: synthesize_memory
     type: ai.agent
@@ -31,6 +51,17 @@ steps:
       message: |
         First, call the load_skill tool with skill path skills/platform/streams/streams-memory-synthesis.
         Wait for the skill to load before calling any other tools.
+
+        {% if inputs.user_feedback %}
+        A user has provided feedback on a recent investigation result:
+        - Aspect: {{ inputs.user_feedback.aspect }}
+        - Feedback: {{ inputs.user_feedback.feedback }}
+        - Discovery ID: {{ inputs.user_feedback.discovery_id }}
+        {% if inputs.user_feedback.hypothesis_id %}- Hypothesis ID: {{ inputs.user_feedback.hypothesis_id }}{% endif %}
+        {% if inputs.user_feedback.remediation_rank %}- Remediation rank: {{ inputs.user_feedback.remediation_rank }}{% endif %}
+
+        Use this feedback to guide the synthesis: if the feedback marks something as incorrect, update the relevant memory pages to reflect what was wrong or what should be corrected. Prioritise pages related to the discovery or hypothesis that was flagged.
+        {% endif %}
 
         Then review the current state of the memory wiki and the latest significant events insights, and synthesize new or updated wiki pages.
       schema:

@@ -1,0 +1,57 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
+import type { BuiltInAgentDefinition } from '@kbn/agent-builder-server/agents';
+import { platformCoreTools, platformStreamsSigEventsTools } from '@kbn/agent-builder-common/tools';
+import instructions from './instructions/investigator.md.text';
+import {
+  OBSERVABILITY_GET_LOGS_TOOL_ID,
+  OBSERVABILITY_GET_INDEX_INFO_TOOL_ID,
+  OBSERVABILITY_GET_SERVICE_TOPOLOGY_TOOL_ID,
+  OBSERVABILITY_GET_TRACE_METRICS_TOOL_ID,
+  OBSERVABILITY_GET_LOG_CHANGE_POINTS_TOOL_ID,
+  OBSERVABILITY_GET_METRIC_CHANGE_POINTS_TOOL_ID,
+  OBSERVABILITY_GET_SERVICES_TOOL_ID,
+  OBSERVABILITY_GET_TRACES_TOOL_ID,
+} from '../discovery/constants';
+
+export const SIGEVENTS_INVESTIGATION_AGENT_ID = 'platform.streams.significant-events.investigation';
+
+const investigationAgent = {
+  id: SIGEVENTS_INVESTIGATION_AGENT_ID,
+  name: 'Significant Events Investigator',
+  description:
+    'Investigates a significant event by querying observability signals (logs, traces, metrics), ' +
+    'reasoning about causality direction, and producing a contributing-factors conclusion with supporting evidence.',
+  labels: ['observability', 'streams', 'significant-events', 'investigation'],
+  avatar_icon: 'logoElastic',
+  configuration: {
+    instructions,
+    tools: [
+      {
+        tool_ids: [
+          platformStreamsSigEventsTools.searchKnowledgeIndicators,
+          platformCoreTools.executeEsql,
+          platformCoreTools.generateEsql,
+          OBSERVABILITY_GET_LOGS_TOOL_ID,
+          OBSERVABILITY_GET_INDEX_INFO_TOOL_ID,
+          OBSERVABILITY_GET_SERVICE_TOPOLOGY_TOOL_ID,
+          OBSERVABILITY_GET_TRACE_METRICS_TOOL_ID,
+          OBSERVABILITY_GET_LOG_CHANGE_POINTS_TOOL_ID,
+          OBSERVABILITY_GET_METRIC_CHANGE_POINTS_TOOL_ID,
+          OBSERVABILITY_GET_SERVICES_TOOL_ID,
+          OBSERVABILITY_GET_TRACES_TOOL_ID,
+        ],
+      },
+    ],
+  },
+} as const satisfies BuiltInAgentDefinition;
+
+export const registerInvestigationAgents = (agentBuilder: AgentBuilderPluginSetup): void => {
+  agentBuilder.agents.register(investigationAgent);
+};

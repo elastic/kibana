@@ -35,6 +35,7 @@ export const createMemoryHistoryStorage = ({
   esClient,
 }: {
   esClient: ElasticsearchClient;
+  logger?: unknown;
 }): MemoryHistoryStorage => {
   const client: HistoryClient = {
     async index({ document }) {

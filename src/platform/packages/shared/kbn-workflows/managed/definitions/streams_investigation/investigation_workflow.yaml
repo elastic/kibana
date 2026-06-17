@@ -1,0 +1,165 @@
+version: "1"
+name: Investigation
+description: >
+  Root cause analysis for a promoted Significant Event. One agent investigates
+  using all available observability signals — logs, traces, metrics, topology,
+  and memory — then produces a structured root cause conclusion.
+enabled: true
+settings:
+  timeout: "60m"
+  concurrency:
+    key: "streams-sigevents-investigation-{{ inputs.discovery_id }}"
+    strategy: cancel-in-progress
+    max: 1
+tags:
+  - observability
+  - streams
+  - sigevents
+  - investigation
+
+triggers:
+  - type: manual
+    inputs:
+      properties:
+        connector_id:
+          type: string
+          default: ".anthropic-claude-4.6-sonnet-chat_completion"
+
+steps:
+
+  - name: investigate
+    type: ai.agent
+    agent-id: platform.streams.significant-events.investigation
+    connector-id: '{{ inputs.connector_id }}'
+    create-conversation: true
+    with:
+      timeout: 1800s
+      message: |
+        Investigate the root cause of this significant event: {{ inputs.title }}
+
+        Summary: {{ inputs.summary }}
+        Discovery: {{ inputs.discovery_slug }}
+
+        Data streams (use get_index_info to discover available fields in each):
+        {% for stream in inputs.stream_names %}- {{ stream }}
+        {% endfor %}
+        Event metadata: {{ inputs | json }}
+
+        Investigate the root cause of this incident and return structured output with:
+        - contributing_factors: what contributed to the incident (component, mechanism, or factors) — not just "ServiceX was slow"
+          but "ServiceX experienced Y because of Z"
+        - confidence: 0–1
+        - evidence_summary: key evidence supporting your conclusion
+        - mechanism: the specific failure mode (describe what actually happened)
+        - alternatives_ruled_out: other candidates you investigated and eliminated, each with
+          a brief reason (e.g. "currencyservice — CPU was flat throughout the incident period").
+          Include anything you actively checked and rejected; omit candidates you never
+          investigated at all.
+        - gaps_found: signals you wished you had but couldn't access
+      schema:
+        type: object
+        properties:
+          contributing_factors:
+            type: string
+          confidence:
+            type: number
+            minimum: 0
+            maximum: 1
+          evidence_summary:
+            type: string
+          mechanism:
+            type: string
+          alternatives_ruled_out:
+            type: array
+            items:
+              type: object
+              properties:
+                candidate:
+                  type: string
+                reason:
+                  type: string
+              required:
+                - candidate
+                - reason
+          gaps_found:
+            type: array
+            items:
+              type: string
+        required:
+          - contributing_factors
+          - confidence
+          - evidence_summary
+          - mechanism
+          - alternatives_ruled_out
+    on-failure:
+      continue: false
+
+  # ── Step 2: Fetch current discovery doc to preserve all existing fields ───────
+  - name: fetch_discovery
+    type: elasticsearch.request
+    with:
+      method: POST
+      path: '/.significant_events-discoveries/_search?ignore_unavailable=true'
+      body:
+        size: 1
+        sort:
+          - "@timestamp":
+              order: desc
+        query:
+          bool:
+            filter:
+              - term:
+                  discovery_id: "{{ inputs.discovery_id }}"
+    on-failure:
+      continue: false
+
+  # ── Step 3: Write investigation results back to the discoveries data stream ────
+  # Skipped if fetch_discovery returned no document (discovery deleted or index
+  # unavailable). All discovery fields are carried from fetch_discovery._source (not
+  # from inputs) to avoid silently erasing optional structural fields.
+  - name: write_back
+    if: "${{ steps.fetch_discovery.output.hits.total.value > 0 }}"
+    type: elasticsearch.request
+    with:
+      method: POST
+      path: "/.significant_events-discoveries/_doc"
+      body:
+        "@timestamp": "{{ 'now' | date: '%Y-%m-%dT%H:%M:%S%:z' }}"
+        kibana:
+          space_ids: "${{ steps.fetch_discovery.output.hits.hits[0]._source.kibana.space_ids }}"
+        kind: "${{ steps.fetch_discovery.output.hits.hits[0]._source.kind | default: 'finding' }}"
+        discovery_id: "{{ steps.fetch_discovery.output.hits.hits[0]._source.discovery_id }}"
+        discovery_slug: "{{ steps.fetch_discovery.output.hits.hits[0]._source.discovery_slug }}"
+        rule_names: "${{ steps.fetch_discovery.output.hits.hits[0]._source.rule_names | default: [] }}"
+        stream_names: "${{ steps.fetch_discovery.output.hits.hits[0]._source.stream_names | default: [] }}"
+        title: "{{ steps.fetch_discovery.output.hits.hits[0]._source.title }}"
+        summary: "{{ steps.fetch_discovery.output.hits.hits[0]._source.summary }}"
+        root_cause: "{{ steps.fetch_discovery.output.hits.hits[0]._source.root_cause }}"
+        criticality: "${{ steps.fetch_discovery.output.hits.hits[0]._source.criticality | default: 0 }}"
+        confidence: "${{ steps.fetch_discovery.output.hits.hits[0]._source.confidence | default: 0 }}"
+        impact: "{{ steps.fetch_discovery.output.hits.hits[0]._source.impact }}"
+        detections: "${{ steps.fetch_discovery.output.hits.hits[0]._source.detections | default: [] }}"
+        cause_kis: "${{ steps.fetch_discovery.output.hits.hits[0]._source.cause_kis }}"
+        evidences: "${{ steps.fetch_discovery.output.hits.hits[0]._source.evidences }}"
+        dependency_edges: "${{ steps.fetch_discovery.output.hits.hits[0]._source.dependency_edges }}"
+        infra_components: "${{ steps.fetch_discovery.output.hits.hits[0]._source.infra_components }}"
+        grouped_discovery_ids: "${{ steps.fetch_discovery.output.hits.hits[0]._source.grouped_discovery_ids }}"
+        closes_discovery_id: "{{ steps.fetch_discovery.output.hits.hits[0]._source.closes_discovery_id }}"
+        closed_by_execution_id: "{{ steps.fetch_discovery.output.hits.hits[0]._source.closed_by_execution_id }}"
+        grouping_rationale: "{{ steps.fetch_discovery.output.hits.hits[0]._source.grouping_rationale }}"
+        previous_discovery_id: "{{ steps.fetch_discovery.output.hits.hits[0]._source.previous_discovery_id }}"
+        discovered_at: "{{ steps.fetch_discovery.output.hits.hits[0]._source.discovered_at }}"
+        change_point_occurrence: "{{ steps.fetch_discovery.output.hits.hits[0]._source.change_point_occurrence }}"
+        conversation_id: "{{ steps.fetch_discovery.output.hits.hits[0]._source.conversation_id }}"
+        workflow_execution_id: "{{ execution.id }}"
+        investigation:
+          completed_at: "{{ 'now' | date: '%Y-%m-%dT%H:%M:%S%:z' }}"
+          workflow_execution_id: "{{ execution.id }}"
+          contributing_factors: "{{ steps.investigate.output.structured_output.contributing_factors }}"
+          confidence: "${{ steps.investigate.output.structured_output.confidence }}"
+          evidence_summary: "{{ steps.investigate.output.structured_output.evidence_summary }}"
+          mechanism: "{{ steps.investigate.output.structured_output.mechanism }}"
+          alternatives_ruled_out: "${{ steps.investigate.output.structured_output.alternatives_ruled_out }}"
+          gaps_found: "${{ steps.investigate.output.structured_output.gaps_found }}"
+    on-failure:
+      continue: true

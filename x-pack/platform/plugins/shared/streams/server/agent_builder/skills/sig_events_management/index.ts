@@ -9,7 +9,9 @@ import { defineSkillType } from '@kbn/agent-builder-server/skills/type_definitio
 import {
   STREAMS_CREATE_EVENT_TOOL_ID,
   STREAMS_EVENT_STATUS_UPDATE_TOOL_ID,
+  STREAMS_RUN_INVESTIGATION_TOOL_ID,
   STREAMS_SEARCH_EVENTS_TOOL_ID,
+  STREAMS_SHOW_INVESTIGATION_TOOL_ID,
 } from '../../tools/register_tools';
 import description from './description.text';
 import content from './skill.md.text';
@@ -24,5 +26,7 @@ export const sigEventsManagementSkill = defineSkillType({
     STREAMS_SEARCH_EVENTS_TOOL_ID,
     STREAMS_CREATE_EVENT_TOOL_ID,
     STREAMS_EVENT_STATUS_UPDATE_TOOL_ID,
+    STREAMS_RUN_INVESTIGATION_TOOL_ID,
+    STREAMS_SHOW_INVESTIGATION_TOOL_ID,
   ],
 });

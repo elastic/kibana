@@ -39,6 +39,7 @@ import {
 } from './discover_features';
 import { StreamsTelemetryService } from './telemetry/service';
 import { registerSignificantEventAttachment } from './components/sig_events/significant_event_attachment/significant_event_attachment';
+import { registerInvestigationAttachment } from './components/sig_events/investigation_attachment';
 import { FocusedSignificantEventService } from './services/significant_events/focused_significant_event_service';
 import { StreamsAppLocatorDefinition } from '../common/locators';
 
@@ -232,6 +233,7 @@ export class StreamsAppPlugin
         chrome: coreStart.chrome,
         focusedSignificantEventService: this.focusedSignificantEventService,
       });
+      registerInvestigationAttachment({ agentBuilder: pluginsStart.agentBuilder });
     }
 
     const locator = pluginsStart.share.url.locators.create(new StreamsAppLocatorDefinition());

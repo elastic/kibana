@@ -18,7 +18,7 @@ For each insight:
 
 1. **title**: A short, actionable title summarizing the system-level issue
 
-2. **description**: Explain the cross-stream pattern and its implications
+2. **description**: Explain the cross-stream pattern, the hypothesized system-level root cause (why), and its implications
 
 3. **impact**: The severity level considering the system-wide effect:
    - "critical": Multiple services affected, major outage
@@ -28,7 +28,7 @@ For each insight:
 
 4. **evidence**: Reference insights from multiple streams that support this finding
 
-5. **recommendations**: System-level remediation steps
+5. **recommendations**: System-level mitigation steps derived from the hypothesized root cause — not generic monitoring advice
 
 Focus on correlations and patterns that span multiple streams.
 If the stream insights are unrelated, you may return fewer or no system-level insights.

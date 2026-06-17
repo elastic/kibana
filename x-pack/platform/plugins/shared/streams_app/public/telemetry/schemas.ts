@@ -8,6 +8,7 @@
 import type { RootSchema, SchemaObject } from '@elastic/ebt';
 import type { AttachmentType } from '@kbn/streams-plugin/server/lib/streams/attachments/types';
 import type {
+  StreamsInvestigationFeedbackProps,
   StreamsAIGrokSuggestionAcceptedProps,
   StreamsAIDissectSuggestionAcceptedProps,
   StreamsAttachmentClickEventProps,
@@ -489,6 +490,41 @@ const streamsTabVisitedSchema: RootSchema<StreamsTabVisitedProps> = {
   },
 };
 
+const streamsInvestigationFeedbackSchema: RootSchema<StreamsInvestigationFeedbackProps> = {
+  feedback: {
+    type: 'keyword',
+    _meta: {
+      description:
+        'Whether the investigation aspect was correct, incorrect, helpful, or not_helpful',
+    },
+  },
+  aspect: {
+    type: 'keyword',
+    _meta: {
+      description:
+        'Which part of the investigation was rated: root_cause, hypothesis, or remediation',
+    },
+  },
+  discovery_id: {
+    type: 'keyword',
+    _meta: { description: 'The ID of the discovery this investigation belongs to' },
+  },
+  hypothesis_id: {
+    type: 'keyword',
+    _meta: {
+      description: 'The ID of the hypothesis being rated (only for aspect=hypothesis)',
+      optional: true,
+    },
+  },
+  remediation_rank: {
+    type: 'long',
+    _meta: {
+      description: 'The rank of the remediation option being rated (only for aspect=remediation)',
+      optional: true,
+    },
+  },
+};
+
 const streamsInsightFeedbackSchema: RootSchema<StreamsInsightFeedbackProps> = {
   feedback: {
     type: 'keyword',
@@ -517,6 +553,7 @@ const streamsInsightFeedbackSchema: RootSchema<StreamsInsightFeedbackProps> = {
 };
 
 export {
+  streamsInvestigationFeedbackSchema,
   streamsAttachmentCountSchema,
   streamsAttachmentClickEventSchema,
   streamsAttachmentLinkChangedSchema,
