@@ -524,7 +524,7 @@ describe('Route privilege/ES-operation consistency', () => {
     };
 
     const startServices = jest.fn().mockResolvedValue([mockCoreStart, mockPluginsStart]) as any;
-    const service = new WorkflowsService(startServices, mockLogger);
+    const service = new WorkflowsService(startServices, mockLogger, '9.0.0');
     await new Promise((resolve) => setTimeout(resolve, 0));
 
     // ── WorkflowsManagementApi ──

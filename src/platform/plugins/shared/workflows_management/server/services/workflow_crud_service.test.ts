@@ -13,19 +13,28 @@ import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 
 import type { WorkflowCrudDeps } from './types';
+import { WorkflowChangeHistoryAction } from './workflow_change_history_constants';
 import { WorkflowCrudService } from './workflow_crud_service';
 import type { WorkflowExecutionQueryService } from './workflow_execution_query_service';
 import type { WorkflowValidationService } from './workflow_validation_service';
-import { isWorkflowVersioningEnabled } from '../lib/is_workflow_versioning_enabled';
 import * as workflowPrepare from '../api/lib/workflow_prepare';
+import { isWorkflowVersioningEnabled } from '../lib/is_workflow_versioning_enabled';
+import { logWorkflowChanges } from '../lib/log_workflow_changes';
 import type { WorkflowProperties } from '../storage/workflow_storage';
 
 jest.mock('../lib/is_workflow_versioning_enabled', () => ({
   isWorkflowVersioningEnabled: jest.fn().mockResolvedValue(true),
 }));
 
+jest.mock('../lib/log_workflow_changes', () => ({
+  logWorkflowChanges: jest.fn().mockResolvedValue(undefined),
+}));
+
 const mockedIsWorkflowVersioningEnabled = isWorkflowVersioningEnabled as jest.MockedFunction<
   typeof isWorkflowVersioningEnabled
+>;
+const mockedLogWorkflowChanges = logWorkflowChanges as jest.MockedFunction<
+  typeof logWorkflowChanges
 >;
 
 const makeSource = (overrides?: Partial<WorkflowProperties>): WorkflowProperties => ({
@@ -82,6 +91,11 @@ const makeDeps = (
     executionQueryService,
     validationService,
     getCoreStart: () => ({} as CoreStart),
+    changeHistoryService: {
+      isInitialized: () => false,
+      asScoped: jest.fn(),
+      asSystemUser: jest.fn(),
+    } as any,
   };
   return { deps, client };
 };
@@ -379,6 +393,33 @@ describe('WorkflowCrudService', () => {
             name: 'My Workflow',
             spaceId: 'default',
           }),
+        })
+      );
+    });
+
+    it('logs workflow create to change history after a successful index', async () => {
+      const scopedChangeHistory = { logBulk: jest.fn() };
+      const changeHistoryService = {
+        isInitialized: () => true,
+        asScoped: jest.fn().mockReturnValue(scopedChangeHistory),
+      };
+      const { deps, client } = makeDeps();
+      deps.changeHistoryService = changeHistoryService as any;
+      client.search.mockResolvedValue({ hits: { hits: [] } });
+
+      const service = new WorkflowCrudService(deps);
+      await service.createWorkflow({ yaml: validYaml }, 'default', request);
+
+      expect(mockedLogWorkflowChanges).toHaveBeenCalledWith(
+        expect.objectContaining({
+          action: WorkflowChangeHistoryAction.workflowCreate,
+          spaceId: 'default',
+          scopedChangeHistory,
+          workflows: [
+            expect.objectContaining({
+              document: expect.objectContaining({ name: 'My Workflow' }),
+            }),
+          ],
         })
       );
     });
@@ -1160,6 +1201,45 @@ describe('WorkflowCrudService', () => {
             tags: ['t1', 't2'],
             lastUpdatedBy: 'alice',
           }),
+        })
+      );
+    });
+
+    it('logs workflow update to change history after a successful write', async () => {
+      const scopedChangeHistory = { logBulk: jest.fn() };
+      const changeHistoryService = {
+        isInitialized: () => true,
+        asScoped: jest.fn().mockReturnValue(scopedChangeHistory),
+      };
+      const { deps, client } = makeDeps();
+      deps.changeHistoryService = changeHistoryService as any;
+      client.search.mockResolvedValue({
+        hits: {
+          hits: [
+            {
+              _id: 'wf-1',
+              _source: makeSource({ name: 'Before', enabled: true, tags: ['t1'], version: 4 }),
+              _seq_no: 5,
+              _primary_term: 1,
+            },
+          ],
+        },
+      });
+
+      const service = new WorkflowCrudService(deps);
+      await service.updateWorkflow('wf-1', { tags: ['t1', 't2'] } as any, 'default', request);
+
+      expect(mockedLogWorkflowChanges).toHaveBeenCalledWith(
+        expect.objectContaining({
+          action: WorkflowChangeHistoryAction.workflowUpdate,
+          spaceId: 'default',
+          scopedChangeHistory,
+          workflows: [
+            expect.objectContaining({
+              id: 'wf-1',
+              document: expect.objectContaining({ tags: ['t1', 't2'], version: 5 }),
+            }),
+          ],
         })
       );
     });

@@ -101,6 +101,18 @@ describe('logWorkflowChanges', () => {
     expect(scopedChangeHistory.logBulk).not.toHaveBeenCalled();
   });
 
+  it('does not call logBulk when change history service is missing', async () => {
+    await logChanges({ changeHistoryService: undefined });
+
+    expect(scopedChangeHistory.logBulk).not.toHaveBeenCalled();
+  });
+
+  it('does not call logBulk when workflows is empty', async () => {
+    await logChanges({ workflows: [] });
+
+    expect(scopedChangeHistory.logBulk).not.toHaveBeenCalled();
+  });
+
   it('logs changes with sequence from document.version', async () => {
     await logChanges({
       workflows: [{ id: 'wf-1', document: makeDocument({ version: 7 }) }],
@@ -123,6 +135,20 @@ describe('logWorkflowChanges', () => {
     );
   });
 
+  it('normalizes a string timestamp to ISO format', async () => {
+    await logChanges({ timestamp: REFERENCE_TIMESTAMP_ISO });
+
+    expect(scopedChangeHistory.logBulk).toHaveBeenCalledWith(
+      [
+        expect.objectContaining({
+          timestamp: REFERENCE_TIMESTAMP_ISO,
+          objectId: 'wf-1',
+        }),
+      ],
+      expect.any(Object)
+    );
+  });
+
   it('retries transient failures and succeeds on the third attempt', async () => {
     scopedChangeHistory.logBulk
       .mockRejectedValueOnce({ statusCode: 503 })
@@ -134,6 +160,21 @@ describe('logWorkflowChanges', () => {
     expect(scopedChangeHistory.logBulk).toHaveBeenCalledTimes(3);
     expect(delayMs).toHaveBeenCalledTimes(2);
     expect(delayMs).toHaveBeenCalledWith(25);
+    expect(logger.error).not.toHaveBeenCalled();
+  });
+
+  it('logs debug when retrying a transient failure', async () => {
+    scopedChangeHistory.logBulk
+      .mockRejectedValueOnce({ statusCode: 503 })
+      .mockResolvedValueOnce(undefined);
+
+    await logChanges({ maxRetries: 2, retryDelayMs: 10 });
+
+    expect(logger.debug).toHaveBeenCalledWith(
+      expect.stringContaining(
+        `Change-history write failed for action "${WorkflowChangeHistoryAction.workflowUpdate}", retrying (attempt 1/3)`
+      )
+    );
     expect(logger.error).not.toHaveBeenCalled();
   });
 

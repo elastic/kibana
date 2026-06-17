@@ -154,15 +154,21 @@ export const bulkIndexWithOccRetry = async ({
   retryDelayMs?: number;
   refresh?: boolean;
   versioningEnabled?: boolean;
-}): Promise<{ successIds: string[]; failures: Array<{ id: string; error: string }> }> => {
+}): Promise<{
+  successIds: string[];
+  successfulDocuments: Array<{ id: string; document: WorkflowProperties }>;
+  failures: Array<{ id: string; error: string }>;
+}> => {
   const successIds: string[] = [];
+  const successfulDocuments: Array<{ id: string; document: WorkflowProperties }> = [];
   const failures: Array<{ id: string; error: string }> = [];
   let pendingHits = hits;
   const maxAttempts = 1 + maxRetries;
 
   for (let attempt = 1; attempt <= maxAttempts && pendingHits.length > 0; attempt++) {
+    const operations = buildBulkIndexOperations(pendingHits, mutate, versioningEnabled);
     const bulkResponse = await client.bulk({
-      operations: buildBulkIndexOperations(pendingHits, mutate, versioningEnabled),
+      operations,
       refresh,
     });
 
@@ -170,12 +176,14 @@ export const bulkIndexWithOccRetry = async ({
 
     for (let itemIndex = 0; itemIndex < bulkResponse.items.length; itemIndex++) {
       const operation = getBulkIndexOperation(bulkResponse.items[itemIndex]);
+      const bulkOperation = operations[itemIndex]?.index;
       const hit = pendingHits[itemIndex];
 
-      if (operation && hit) {
+      if (operation && hit && bulkOperation?.document) {
         if (!operation.error) {
           if (operation._id) {
             successIds.push(operation._id);
+            successfulDocuments.push({ id: operation._id, document: bulkOperation.document });
           }
         } else if (operation.status === OCC_CONFLICT_STATUS_CODE && attempt < maxAttempts) {
           conflictIds.push(hit._id);
@@ -218,7 +226,7 @@ export const bulkIndexWithOccRetry = async ({
     pendingHits = refreshedHits;
   }
 
-  return { successIds, failures };
+  return { successIds, successfulDocuments, failures };
 };
 
 export { toOccHit };

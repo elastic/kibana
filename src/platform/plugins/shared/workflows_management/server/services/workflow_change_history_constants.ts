@@ -10,6 +10,7 @@
 export const WORKFLOW_CHANGE_HISTORY_MODULE = 'stack';
 export const WORKFLOW_CHANGE_HISTORY_DATASET = 'workflows';
 export const WORKFLOW_CHANGE_HISTORY_OBJECT_TYPE = 'workflow';
+export const WORKFLOW_CHANGE_HISTORY_SYSTEM_USER = 'elastic/kibana';
 
 export const WorkflowChangeHistoryAction = {
   workflowCreate: 'create',

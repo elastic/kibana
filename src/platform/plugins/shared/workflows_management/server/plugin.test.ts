@@ -11,36 +11,29 @@ jest.mock('./api/routes', () => ({ defineRoutes: jest.fn() }));
 jest.mock('./api/workflows_management_api', () => ({
   WorkflowsManagementApi: jest.fn().mockImplementation(() => ({})),
 }));
-jest.mock('./api/workflows_management_service', () => ({
-  WorkflowsService: jest.fn().mockImplementation(() => ({
-    getCoreStart: jest.fn().mockResolvedValue({ security: { authc: {} } }),
-    cleanupUnregisteredOrphans: jest.fn().mockResolvedValue(undefined),
-  })),
-}));
-jest.mock('./services/workflow_change_history_service');
+jest.mock('./api/workflows_management_service');
 
 import { coreMock } from '@kbn/core/server/mocks';
 import { workflowsExtensionsMock } from '@kbn/workflows-extensions/server/mocks';
 
+import { WorkflowsService } from './api/workflows_management_service';
 import { WorkflowsPlugin } from './plugin';
-import { WorkflowChangeHistoryService } from './services/workflow_change_history_service';
 
-const MockedWorkflowChangeHistoryService = WorkflowChangeHistoryService as jest.MockedClass<
-  typeof WorkflowChangeHistoryService
->;
+const MockedWorkflowsService = WorkflowsService as jest.MockedClass<typeof WorkflowsService>;
 
-describe('WorkflowsPlugin change history', () => {
-  let changeHistoryInstance: { initialize: jest.Mock };
-
+describe('WorkflowsPlugin', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    changeHistoryInstance = { initialize: jest.fn() };
-    MockedWorkflowChangeHistoryService.mockImplementation(
-      () => changeHistoryInstance as unknown as WorkflowChangeHistoryService
+    MockedWorkflowsService.mockImplementation(
+      () =>
+        ({
+          getCoreStart: jest.fn().mockResolvedValue({ security: { authc: {} } }),
+          cleanupUnregisteredOrphans: jest.fn().mockResolvedValue(undefined),
+        } as unknown as WorkflowsService)
     );
   });
 
-  it('exposes change history on start and initializes the service', () => {
+  it('returns an empty start contract', () => {
     const initializerContext = coreMock.createPluginInitializerContext({
       enabled: true,
       logging: { console: false },
@@ -50,16 +43,13 @@ describe('WorkflowsPlugin change history', () => {
 
     const plugin = new WorkflowsPlugin(initializerContext);
     const coreSetup = coreMock.createSetup();
-    const spacesMock = { spacesService: { getActiveSpace: jest.fn() } };
 
     plugin.setup(coreSetup, {
-      spaces: spacesMock as any,
+      spaces: { spacesService: { getActiveSpace: jest.fn() } } as any,
       workflowsExtensions: workflowsExtensionsMock.createSetup(),
     });
 
-    const coreStart = coreMock.createStart();
-
-    const start = plugin.start(coreStart, {
+    const start = plugin.start(coreMock.createStart(), {
       taskManager: {} as any,
       workflowsExecutionEngine: {} as any,
       actions: {} as any,
@@ -68,10 +58,6 @@ describe('WorkflowsPlugin change history', () => {
       licensing: {} as any,
     });
 
-    expect(start.changeHistory).toBe(changeHistoryInstance);
-    expect(changeHistoryInstance.initialize).toHaveBeenCalledWith({
-      elasticsearchClient: coreStart.elasticsearch.client.asInternalUser,
-      authService: coreStart.security.authc,
-    });
+    expect(start).toEqual({});
   });
 });

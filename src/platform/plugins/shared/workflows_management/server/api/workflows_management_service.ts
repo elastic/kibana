@@ -74,6 +74,7 @@ import type {
 
 import type { BulkFailureEntry } from '../lib/bulk_id_helpers';
 import { ManagedWorkflowsService } from '../services/managed_workflows_service';
+import { WorkflowChangeHistoryService } from '../services/workflow_change_history_service';
 import { WorkflowCrudService } from '../services/workflow_crud_service';
 import { WorkflowExecutionQueryService } from '../services/workflow_execution_query_service';
 import { WorkflowSearchService } from '../services/workflow_search_service';
@@ -116,6 +117,7 @@ export class WorkflowsService {
   private searchService!: WorkflowSearchService;
   private crudService!: WorkflowCrudService;
   private managedWorkflowsService!: ManagedWorkflowsService;
+  private readonly changeHistoryService: WorkflowChangeHistoryService;
   private getActionsClient!: () => Promise<IUnsecuredActionsClient>;
   private getActionsClientWithRequest!: (
     request: KibanaRequest
@@ -125,13 +127,27 @@ export class WorkflowsService {
 
   constructor(
     startServices: StartServicesAccessor<WorkflowsServerPluginStartDeps>,
-    private readonly logger: Logger
+    private readonly logger: Logger,
+    kibanaVersion: string
   ) {
+    this.changeHistoryService = new WorkflowChangeHistoryService(logger, kibanaVersion);
     this.initPromise = this.initialize(startServices);
   }
 
   private async ensureInitialized(): Promise<void> {
     await this.initPromise;
+  }
+
+  private initializeChangeHistoryService(coreStart: CoreStart): void {
+    if (coreStart.security) {
+      this.changeHistoryService.initialize({
+        elasticsearchClient: coreStart.elasticsearch.client.asInternalUser,
+        authService: coreStart.security.authc,
+      });
+      return;
+    }
+
+    this.logger.warn('Workflows Management: workflow change history is not initialized');
   }
 
   private async initialize(startServices: StartServicesAccessor<WorkflowsServerPluginStartDeps>) {
@@ -171,6 +187,8 @@ export class WorkflowsService {
       esClient: this.esClient,
     });
 
+    this.initializeChangeHistoryService(coreStart);
+
     this.crudService = new WorkflowCrudService({
       logger: this.logger,
       esClient: this.esClient,
@@ -181,6 +199,7 @@ export class WorkflowsService {
       executionQueryService: this.executionQueryService,
       validationService: this.validationService,
       getCoreStart: () => this.coreStart,
+      changeHistoryService: this.changeHistoryService,
     });
 
     this.managedWorkflowsService = new ManagedWorkflowsService({

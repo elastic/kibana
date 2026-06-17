@@ -16,6 +16,7 @@ import {
   WORKFLOW_CHANGE_HISTORY_DATASET,
   WORKFLOW_CHANGE_HISTORY_MODULE,
   WORKFLOW_CHANGE_HISTORY_OBJECT_TYPE,
+  WORKFLOW_CHANGE_HISTORY_SYSTEM_USER,
 } from './workflow_change_history_constants';
 import type {
   IScopedWorkflowChangeHistoryService,
@@ -66,9 +67,23 @@ export class WorkflowChangeHistoryService implements IWorkflowChangeHistoryServi
     }
 
     const user = this.authService.getCurrentUser(request);
-    const username = user?.username ?? '';
-    const userProfileId = user?.profile_uid;
+    return this.createScopedClient({
+      username: user?.username ?? '',
+      userProfileId: user?.profile_uid,
+    });
+  }
 
+  asSystemUser(): IScopedWorkflowChangeHistoryService {
+    return this.createScopedClient({ username: WORKFLOW_CHANGE_HISTORY_SYSTEM_USER });
+  }
+
+  private createScopedClient({
+    username,
+    userProfileId,
+  }: {
+    username: string;
+    userProfileId?: string;
+  }): IScopedWorkflowChangeHistoryService {
     return {
       log: async (change, opts) =>
         this.client.log(change, {

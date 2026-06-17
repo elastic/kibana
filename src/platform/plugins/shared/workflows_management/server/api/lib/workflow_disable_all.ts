@@ -41,12 +41,14 @@ export const disableAllWorkflows = async (params: {
   total: number;
   disabled: number;
   failures: Array<{ id: string; error: string }>;
+  disabledWorkflows: Array<{ id: string; document: WorkflowProperties }>;
 }> => {
   const { storage, taskScheduler, logger, spaceId, versioningEnabled = false } = params;
   const client = storage.getClient();
   const pageSize = 1000;
   const failures: Array<{ id: string; error: string }> = [];
   const disabledIds: string[] = [];
+  const disabledWorkflows: Array<{ id: string; document: WorkflowProperties }> = [];
 
   const query = {
     bool: {
@@ -75,7 +77,11 @@ export const disableAllWorkflows = async (params: {
     async (hits) => {
       try {
         const occHits = hits.map((hit) => toOccHit(hit));
-        const { successIds, failures: bulkFailures } = await bulkIndexWithOccRetry({
+        const {
+          successIds,
+          successfulDocuments,
+          failures: bulkFailures,
+        } = await bulkIndexWithOccRetry({
           client,
           hits: occHits,
           mutate: mutateWorkflowToDisabled,
@@ -86,6 +92,7 @@ export const disableAllWorkflows = async (params: {
         failures.push(...bulkFailures);
 
         if (successIds.length > 0) {
+          disabledWorkflows.push(...successfulDocuments);
           disabledIds.push(...successIds);
           await unscheduleWorkflowTasks(successIds, taskScheduler);
         }
@@ -110,5 +117,6 @@ export const disableAllWorkflows = async (params: {
     total: totalProcessed,
     disabled: disabledIds.length,
     failures,
+    disabledWorkflows,
   };
 };

@@ -27,11 +27,18 @@ import { loggerMock } from '@kbn/logging-mocks';
 import { workflowsExecutionEngineMock } from '@kbn/workflows-execution-engine/server/mocks';
 
 import { WorkflowsService } from './workflows_management_service';
+import { WorkflowChangeHistoryService } from '../services/workflow_change_history_service';
 import { WorkflowCrudService } from '../services/workflow_crud_service';
 import { WorkflowExecutionQueryService } from '../services/workflow_execution_query_service';
 import { WorkflowSearchService } from '../services/workflow_search_service';
 import { WorkflowValidationService } from '../services/workflow_validation_service';
 import type { WorkflowsServerPluginStartDeps } from '../types';
+
+jest.mock('../services/workflow_change_history_service');
+
+const MockedWorkflowChangeHistoryService = WorkflowChangeHistoryService as jest.MockedClass<
+  typeof WorkflowChangeHistoryService
+>;
 
 type PrototypeSpies = Record<string, jest.SpyInstance>;
 
@@ -102,7 +109,7 @@ describe('WorkflowsService (facade)', () => {
   const buildService = async (): Promise<WorkflowsService> => {
     const coreStart = makeCoreStart(makeEsClient());
     const startServices = jest.fn().mockResolvedValue([coreStart, makePluginsStart()]);
-    const service = new WorkflowsService(startServices as any, loggerMock.create());
+    const service = new WorkflowsService(startServices as any, loggerMock.create(), '9.0.0');
     // Wait a tick so initialize() completes.
     await Promise.resolve();
     await Promise.resolve();
@@ -110,6 +117,13 @@ describe('WorkflowsService (facade)', () => {
   };
 
   beforeEach(() => {
+    MockedWorkflowChangeHistoryService.mockImplementation(
+      () =>
+        ({
+          initialize: jest.fn(),
+          isInitialized: jest.fn().mockReturnValue(true),
+        } as unknown as WorkflowChangeHistoryService)
+    );
     crudSpies = spyPrototype(WorkflowCrudService, [
       'getWorkflow',
       'getWorkflowsByIds',
@@ -149,6 +163,33 @@ describe('WorkflowsService (facade)', () => {
   });
 
   describe('initialization', () => {
+    it('initializes change history when core start services resolve', async () => {
+      const changeHistoryInstance = {
+        initialize: jest.fn(),
+        isInitialized: jest.fn().mockReturnValue(true),
+      };
+      MockedWorkflowChangeHistoryService.mockImplementation(
+        () => changeHistoryInstance as unknown as WorkflowChangeHistoryService
+      );
+
+      const esClient = makeEsClient();
+      const coreStart = makeCoreStart(esClient);
+      const service = await (async () => {
+        const startServices = jest.fn().mockResolvedValue([coreStart, makePluginsStart()]);
+        const svc = new WorkflowsService(startServices as any, loggerMock.create(), '9.0.0');
+        await Promise.resolve();
+        await Promise.resolve();
+        return svc;
+      })();
+
+      await service.getWorkflow('wf-1', 'default');
+
+      expect(changeHistoryInstance.initialize).toHaveBeenCalledWith({
+        elasticsearchClient: esClient,
+        authService: coreStart.security!.authc,
+      });
+    });
+
     it('awaits initPromise before delegating to a sub-service', async () => {
       let releaseStartServices: (value: [CoreStart, WorkflowsServerPluginStartDeps]) => void = () =>
         undefined;
@@ -159,7 +200,7 @@ describe('WorkflowsService (facade)', () => {
       );
 
       const startServices = jest.fn().mockReturnValue(startServicesPromise);
-      const service = new WorkflowsService(startServices as any, loggerMock.create());
+      const service = new WorkflowsService(startServices as any, loggerMock.create(), '9.0.0');
 
       const call = service.getWorkflow('wf-1', 'default');
       // Give the microtask queue a chance to run — the call must still be pending.

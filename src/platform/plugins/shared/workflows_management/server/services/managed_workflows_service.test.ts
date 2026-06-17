@@ -21,6 +21,7 @@ import type {
 import type { WorkflowsExecutionEnginePluginStart } from '@kbn/workflows-execution-engine/server';
 import { WorkflowConflictError } from '@kbn/workflows-yaml';
 import { ManagedWorkflowsService } from './managed_workflows_service';
+import { WorkflowChangeHistoryAction } from './workflow_change_history_constants';
 import type { VersionedWorkflowDocument, WorkflowCrudService } from './workflow_crud_service';
 import type {
   ReadModifyWriteWorkflowDocumentParams,
@@ -163,6 +164,7 @@ const createCrudServiceMock = () => {
         params.mutate(createWorkflowSource({}))
     ),
     deleteWorkflows: jest.fn().mockResolvedValue(undefined),
+    logWorkflowChangesAfterWrite: jest.fn().mockResolvedValue(undefined),
     prepareWorkflowDocumentForStorage: jest.fn(
       async ({
         id,
@@ -378,6 +380,28 @@ describe('ManagedWorkflowsService', () => {
           lifecycle: 'static',
           managedVersion: 1,
           definitionHash: definitionHash(definition.yaml),
+        })
+      );
+    });
+
+    it('logs workflow install to change history after creating a managed workflow', async () => {
+      const definition = createDefinition();
+      mockManagedWorkflowDefinitions = [definition];
+      const { crudService, service } = createService();
+      crudService.getWorkflowDocumentWithVersion.mockResolvedValue(null);
+
+      await service.installManagedWorkflow(WORKFLOW_ID, { spaceId: SPACE_ID }, definition.pluginId);
+
+      expect(crudService.logWorkflowChangesAfterWrite).toHaveBeenCalledWith(
+        expect.objectContaining({
+          action: WorkflowChangeHistoryAction.workflowInstall,
+          spaceId: SPACE_ID,
+          workflows: [
+            expect.objectContaining({
+              id: WORKFLOW_ID,
+              document: expect.objectContaining({ managed: true }),
+            }),
+          ],
         })
       );
     });

@@ -38,15 +38,13 @@ import type {
   WorkflowsExtensionsServerPluginStart,
 } from '@kbn/workflows-extensions/server';
 import type { WorkflowsManagementApi } from './api/workflows_management_api';
-import type { WorkflowChangeHistoryService } from './services/workflow_change_history_service';
 
 export interface WorkflowsServerPluginSetup {
   management: WorkflowsManagementApi;
 }
 
-export interface WorkflowsServerPluginStart {
-  changeHistory: WorkflowChangeHistoryService;
-}
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface WorkflowsServerPluginStart {}
 
 export interface WorkflowsServerPluginSetupDeps {
   features?: FeaturesPluginSetup;

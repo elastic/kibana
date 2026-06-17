@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { randomBytes } from 'node:crypto';
+
 import type { KibanaRequest } from '@kbn/core/server';
 import { isNotFoundError } from '@kbn/es-errors';
 import {
@@ -29,6 +31,7 @@ import type { WorkflowPartialDetailDto } from '@kbn/workflows/types/v1';
 import { WorkflowConflictError } from '@kbn/workflows-yaml';
 import type { z } from '@kbn/zod/v4';
 import type { WorkflowCrudDeps } from './types';
+import { WorkflowChangeHistoryAction } from './workflow_change_history_constants';
 import type {
   IndexWorkflowDocumentOptions,
   ReadModifyWriteWorkflowDocumentParams,
@@ -60,6 +63,7 @@ import {
 } from '../lib/bulk_id_helpers';
 import { getAuthenticatedUser } from '../lib/get_user';
 import { isWorkflowVersioningEnabled } from '../lib/is_workflow_versioning_enabled';
+import { logWorkflowChanges } from '../lib/log_workflow_changes';
 import { resolveUniqueWorkflowIds, validateWorkflowId } from '../lib/workflow_id_resolver';
 import { maybeApplyWorkflowVersion } from '../lib/workflow_version';
 import type { WorkflowProperties } from '../storage/workflow_storage';
@@ -85,6 +89,32 @@ export class WorkflowCrudService {
 
   isWorkflowVersioningEnabled(): Promise<boolean> {
     return isWorkflowVersioningEnabled(this.deps.getCoreStart());
+  }
+
+  async logWorkflowChangesAfterWrite(params: {
+    workflows: Array<{ id: string; document: WorkflowProperties }>;
+    action: string;
+    spaceId: string;
+    timestamp: string | Date;
+    request?: KibanaRequest;
+    correlationId?: string;
+  }): Promise<void> {
+    const changeHistoryService = this.deps.changeHistoryService;
+    const scopedChangeHistory = params.request
+      ? changeHistoryService.asScoped(params.request)
+      : changeHistoryService.asSystemUser();
+
+    await logWorkflowChanges({
+      workflows: params.workflows,
+      changeHistoryService,
+      scopedChangeHistory,
+      isWorkflowVersioningEnabled: () => this.isWorkflowVersioningEnabled(),
+      action: params.action,
+      spaceId: params.spaceId,
+      timestamp: params.timestamp,
+      correlationId: params.correlationId,
+      logger: this.deps.logger,
+    });
   }
 
   async getWorkflowDocumentSource(
@@ -497,6 +527,14 @@ export class WorkflowCrudService {
       document: workflowData,
     });
 
+    await this.logWorkflowChangesAfterWrite({
+      workflows: [{ id, document: workflowData }],
+      action: WorkflowChangeHistoryAction.workflowCreate,
+      spaceId,
+      timestamp: now,
+      request,
+    });
+
     await scheduleWorkflowTriggers({
       workflowId: id,
       definition,
@@ -684,6 +722,22 @@ export class WorkflowCrudService {
       );
     }
 
+    if (successfullyWritten.length > 0) {
+      await this.logWorkflowChangesAfterWrite({
+        workflows: successfullyWritten.map((entry) => ({
+          id: entry.id,
+          document: entry.workflowData,
+        })),
+        action: overwrite
+          ? WorkflowChangeHistoryAction.workflowUpdate
+          : WorkflowChangeHistoryAction.workflowCreate,
+        spaceId,
+        timestamp: now,
+        request,
+        correlationId: randomBytes(16).toString('hex'),
+      });
+    }
+
     return { created, failed };
   }
 
@@ -780,6 +834,14 @@ export class WorkflowCrudService {
         });
       }
 
+      await this.logWorkflowChangesAfterWrite({
+        workflows: [{ id, document: finalData }],
+        action: WorkflowChangeHistoryAction.workflowUpdate,
+        spaceId,
+        timestamp: now,
+        request,
+      });
+
       return {
         id,
         lastUpdatedAt: finalData.updated_at,
@@ -819,13 +881,30 @@ export class WorkflowCrudService {
     disabled: number;
     failures: Array<{ id: string; error: string }>;
   }> {
-    return disableAllWorkflows({
+    const versioningEnabled = spaceId ? await this.isWorkflowVersioningEnabled() : false;
+    const result = await disableAllWorkflows({
       storage: this.deps.workflowStorage,
       taskScheduler: this.deps.getTaskScheduler(),
       logger: this.deps.logger,
       spaceId,
-      versioningEnabled: spaceId ? await this.isWorkflowVersioningEnabled() : false,
+      versioningEnabled,
     });
+
+    if (spaceId && result.disabledWorkflows.length > 0) {
+      await this.logWorkflowChangesAfterWrite({
+        workflows: result.disabledWorkflows,
+        action: WorkflowChangeHistoryAction.workflowUpdate,
+        spaceId,
+        timestamp: new Date(),
+        correlationId: randomBytes(16).toString('hex'),
+      });
+    }
+
+    return {
+      total: result.total,
+      disabled: result.disabled,
+      failures: result.failures,
+    };
   }
 
   private async getEsWorkflowForScheduler(id: string, spaceId: string): Promise<EsWorkflow | null> {

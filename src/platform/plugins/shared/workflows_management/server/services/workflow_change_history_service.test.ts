@@ -15,6 +15,7 @@ import {
   WORKFLOW_CHANGE_HISTORY_DATASET,
   WORKFLOW_CHANGE_HISTORY_MODULE,
   WORKFLOW_CHANGE_HISTORY_OBJECT_TYPE,
+  WORKFLOW_CHANGE_HISTORY_SYSTEM_USER,
 } from './workflow_change_history_constants';
 import { WorkflowChangeHistoryService } from './workflow_change_history_service';
 
@@ -129,6 +130,31 @@ describe('WorkflowChangeHistoryService', () => {
         username: 'alice',
         userProfileId: 'profile-1',
       }
+    );
+  });
+
+  it('asSystemUser injects the system username', async () => {
+    const service = new WorkflowChangeHistoryService(logger, '9.0.0');
+
+    const scoped = service.asSystemUser();
+    await scoped.logBulk(
+      [
+        {
+          objectId: 'wf-1',
+          objectType: WORKFLOW_CHANGE_HISTORY_OBJECT_TYPE,
+          snapshot: { name: 'A' },
+        },
+      ],
+      { action: 'install', spaceId: 'default' }
+    );
+
+    expect(clientMock.logBulk).toHaveBeenCalledWith(
+      expect.any(Array),
+      expect.objectContaining({
+        action: 'install',
+        spaceId: 'default',
+        username: WORKFLOW_CHANGE_HISTORY_SYSTEM_USER,
+      })
     );
   });
 
