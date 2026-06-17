@@ -370,19 +370,17 @@ const loadEndpointSamples = async (
   ];
 
   for (const fp of episodeFiles) {
-    if (!existsSync(fp)) {
-      // eslint-disable-next-line no-continue
-      continue;
-    }
-    const docs = await readEpisodeSample(fp, sampleCount);
-    for (const doc of docs) {
-      const ds: string | undefined =
-        ((doc.data_stream as Record<string, unknown>)?.dataset as string) ??
-        ((doc.event as Record<string, unknown>)?.dataset as string);
-      if (ds) {
-        result[ds] = result[ds] ?? [];
-        if (result[ds].length < sampleCount) {
-          result[ds].push(doc);
+    if (existsSync(fp)) {
+      const docs = await readEpisodeSample(fp, sampleCount);
+      for (const doc of docs) {
+        const ds: string | undefined =
+          ((doc.data_stream as Record<string, unknown>)?.dataset as string) ??
+          ((doc.event as Record<string, unknown>)?.dataset as string);
+        if (ds) {
+          result[ds] = result[ds] ?? [];
+          if (result[ds].length < sampleCount) {
+            result[ds].push(doc);
+          }
         }
       }
     }
@@ -406,9 +404,7 @@ const bulkIndex = async (
     const body = slice.flatMap((doc) => [{ create: { _index: index } }, doc]);
     const resp = await esClient.bulk({ refresh: false, body });
     if (resp.errors) {
-      const firstErr = resp.items?.find(
-        (it: Record<string, Record<string, unknown>>) => it.create?.error
-      )?.create?.error as Record<string, string> | undefined;
+      const firstErr = resp.items?.find((it) => it.create?.error)?.create?.error;
       if (log && firstErr) {
         log.warning(
           `[security-ai-rules eval setup] bulk errors into ${index}: ${firstErr.type}: ${firstErr.reason}`
@@ -462,17 +458,17 @@ export const seedDataFromScratch = async ({
       const originals = endpointSamples[dataset];
       if (!originals || originals.length === 0) {
         log.warning(`[security-ai-rules eval setup] no endpoint samples for ${dataset}`);
-        continue;
+      } else {
+        const clones: Record<string, unknown>[] = [];
+        for (let i = 0; i < EPISODE_SAMPLE_SIZE; i++) {
+          const base = originals[i % originals.length];
+          clones.push(variate(base, i, baseTimeMs, timeSpreadMs));
+        }
+        await bulkIndex(esClient, index, clones, 500, log);
+        log.info(
+          `[security-ai-rules eval setup] indexed ${clones.length} endpoint docs into ${index}`
+        );
       }
-      const clones: Record<string, unknown>[] = [];
-      for (let i = 0; i < EPISODE_SAMPLE_SIZE; i++) {
-        const base = originals[i % originals.length];
-        clones.push(variate(base, i, baseTimeMs, timeSpreadMs));
-      }
-      await bulkIndex(esClient, index, clones, 500, log);
-      log.info(
-        `[security-ai-rules eval setup] indexed ${clones.length} endpoint docs into ${index}`
-      );
     }
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
