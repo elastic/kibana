@@ -90,8 +90,9 @@ const eligibleStreamsRoute = createServerRoute({
     request,
     getScopedClients,
     server,
-    streamsKIsOnboardingClient,
+    workflowClients,
   }): Promise<EligibleStreamsResponse> => {
+    const { streamsKIsOnboardingClient } = workflowClients;
     if (!streamsKIsOnboardingClient) {
       throw new FeatureNotEnabledError('Workflows management is not available');
     }

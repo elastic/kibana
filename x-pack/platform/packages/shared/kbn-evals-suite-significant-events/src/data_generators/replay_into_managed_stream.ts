@@ -18,6 +18,8 @@ const REPLAY_TEMP_PREFIX = 'sigevents-replay-temp-';
 const REINDEX_REQUEST_TIMEOUT_MS = 30 * 60 * 1000;
 const MAX_LOGGED_REINDEX_FAILURES = 5;
 
+const replayTempPrefix = (runId: number): string => `${REPLAY_TEMP_PREFIX}${runId}-`;
+
 const TIMESTAMP_TRANSFORM_SCRIPT = `
   // Reset the _id field to null to avoid conflicts with subsequent reindex operations
   ctx._id = null;
@@ -37,6 +39,8 @@ export interface ReplayStats {
 }
 
 interface ReplayArtifacts {
+  runId: number;
+  tempPrefix: string;
   repoName: string;
   pipelineName: string;
   tempIndices: string[];
@@ -51,6 +55,8 @@ interface LogsDataStream {
 const createReplayArtifacts = (): ReplayArtifacts => {
   const runId = Date.now();
   return {
+    runId,
+    tempPrefix: replayTempPrefix(runId),
     repoName: `sigevents-replay-${runId}`,
     pipelineName: `sigevents-ts-transform-${runId}`,
     tempIndices: [],
@@ -91,12 +97,14 @@ const restoreLogsIndicesToTemp = async ({
   repoName,
   snapshotName,
   logsIndices,
+  tempPrefix,
   log,
 }: {
   esClient: Client;
   repoName: string;
   snapshotName: string;
   logsIndices: string[];
+  tempPrefix: string;
   log: ToolingLog;
 }): Promise<string[]> => {
   log.debug(`Restoring ${logsIndices.length} indices to temp location`);
@@ -108,10 +116,10 @@ const restoreLogsIndicesToTemp = async ({
     indices: logsIndices.join(','),
     include_global_state: false,
     rename_pattern: '(.+)',
-    rename_replacement: `${REPLAY_TEMP_PREFIX}$1`,
+    rename_replacement: `${tempPrefix}$1`,
   });
 
-  return logsIndices.map((indexName) => `${REPLAY_TEMP_PREFIX}${indexName}`);
+  return logsIndices.map((indexName) => `${tempPrefix}${indexName}`);
 };
 
 const getMaxTimestampFromTempIndices = async ({
@@ -338,17 +346,19 @@ const cleanupReplayArtifacts = async ({
   log: ToolingLog;
   artifacts: ReplayArtifacts;
 }): Promise<void> => {
-  const { writeIndexName, previousDefaultPipeline, tempIndices, pipelineName, repoName } =
-    artifacts;
+  const { writeIndexName, tempIndices, pipelineName, repoName } = artifacts;
 
-  if (writeIndexName && previousDefaultPipeline !== undefined) {
+  if (writeIndexName) {
     try {
+      // Reset to _none rather than restoring the streams pipeline so that
+      // streams.disable() can delete the pipeline without ES rejecting it due
+      // to an active index reference. streams.enable() will re-apply it.
       await esClient.indices.putSettings({
         index: writeIndexName,
-        settings: { 'index.default_pipeline': previousDefaultPipeline },
+        settings: { 'index.default_pipeline': '_none' },
       });
     } catch {
-      log.debug('Failed to restore default_pipeline');
+      log.warning('Failed to clear default_pipeline on write index');
     }
   }
 
@@ -356,20 +366,49 @@ const cleanupReplayArtifacts = async ({
     try {
       await esClient.indices.delete({ index: indexName, ignore_unavailable: true });
     } catch {
-      log.debug(`Failed to delete temp index: ${indexName}`);
+      log.warning(`Failed to delete temp index: ${indexName}`);
     }
   }
 
   try {
     await esClient.ingest.deletePipeline({ id: pipelineName });
   } catch {
-    log.debug('Failed to delete timestamp pipeline');
+    log.warning('Failed to delete timestamp pipeline');
   }
 
   try {
     await esClient.snapshot.deleteRepository({ name: repoName });
   } catch {
-    log.debug('Failed to delete snapshot repository');
+    log.warning('Failed to delete snapshot repository');
+  }
+};
+
+export const deleteTemporaryReplayIndices = async (
+  esClient: Client,
+  log: ToolingLog,
+  prefix: string = REPLAY_TEMP_PREFIX
+): Promise<void> => {
+  try {
+    const resolved = await esClient.indices.get({
+      index: `${prefix}*`,
+      expand_wildcards: 'all',
+      ignore_unavailable: true,
+      allow_no_indices: true,
+    });
+    const indexNames = Object.keys(resolved);
+    if (indexNames.length === 0) return;
+    await esClient.indices.delete({
+      index: indexNames,
+      expand_wildcards: 'all',
+      ignore_unavailable: true,
+    });
+    log.debug(`Deleted ${indexNames.length} temporary replay indices`);
+  } catch (error) {
+    log.warning(
+      `Failed to delete temporary replay indices: ${
+        error instanceof Error ? error.message : String(error)
+      }`
+    );
   }
 };
 
@@ -403,6 +442,11 @@ export async function replayIntoManagedStream(
     await repository.register({ esClient, log, repoName: artifacts.repoName });
 
     log.info('Step 2/4: Restoring logs snapshot indices into temporary indices...');
+    // A previously killed run may have left temp indices behind (the cleanup
+    // `finally` never ran), which would collide with `restore` ("an open index
+    // with same name already exists"). Delete any stale temp indices first.
+    await deleteTemporaryReplayIndices(esClient, log);
+
     const logsIndices = await getLogsIndicesFromSnapshot({
       esClient,
       repoName: artifacts.repoName,
@@ -413,8 +457,28 @@ export async function replayIntoManagedStream(
       repoName: artifacts.repoName,
       snapshotName,
       logsIndices,
+      tempPrefix: artifacts.tempPrefix,
       log,
     });
+
+    // Temp indices inherit default_pipeline from the snapshot, which points to the
+    // Streams ingest pipeline. Clear it now so streams.disable() can delete that
+    // pipeline without ES rejecting it due to an active index reference.
+    if (artifacts.tempIndices.length > 0) {
+      try {
+        await esClient.indices.putSettings({
+          index: artifacts.tempIndices,
+          settings: { 'index.default_pipeline': '_none' },
+        });
+        log.debug('Cleared default_pipeline on temporary replay indices');
+      } catch (clearError) {
+        log.warning(
+          `Failed to clear default_pipeline on temp indices: ${
+            clearError instanceof Error ? clearError.message : String(clearError)
+          }`
+        );
+      }
+    }
 
     log.info('Step 3/4: Preparing replay pipeline and managed stream write index...');
     const maxTimestamp = await getMaxTimestampFromTempIndices({
@@ -424,7 +488,6 @@ export async function replayIntoManagedStream(
     });
     const { writeIndexName, previousDefaultPipeline } = await getWriteIndexInfo({ esClient, log });
     artifacts.writeIndexName = writeIndexName;
-    artifacts.previousDefaultPipeline = previousDefaultPipeline;
 
     const chainedPipelineName = await getReplayChainPipeline({
       esClient,

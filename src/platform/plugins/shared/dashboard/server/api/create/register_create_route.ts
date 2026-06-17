@@ -39,7 +39,7 @@ export function registerCreateRoute(
   // Route is registered during setup and before all plugins have registered embeddable schemas.
   // Instead, use once to only call getDashboardStateSchema the first time a route handler is executed.
   const getCachedDashboardStateSchema = once(() => {
-    return getDashboardStateSchema(isDashboardAppRequest);
+    return getDashboardStateSchema(false);
   });
 
   createRoute.addVersion(
