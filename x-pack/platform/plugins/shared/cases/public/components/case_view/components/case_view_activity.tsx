@@ -54,7 +54,8 @@ import { parseCaseUsers } from '../../utils';
 import { CustomFields } from './custom_fields';
 import { useReplaceCustomField } from '../../../containers/use_replace_custom_field';
 import { KibanaServices } from '../../../common/lib/kibana';
-import { GlobalCaseFields, TemplateFields } from './template_fields';
+import { TemplateFields } from './template_fields';
+import { GlobalCaseFields } from './global_case_fields';
 import { useStatusAction } from '../../actions/status/use_status_action';
 import { useRefreshCaseViewPage } from '../use_on_refresh_case_view_page';
 
@@ -349,10 +350,10 @@ export const CaseViewActivity = ({
             onSubmit={onSubmitCustomField}
           />
           {isTemplatesV2Enabled && (
-            <div>
+            <EuiFlexItem grow={false}>
               <TemplateFields caseData={caseData} onUpdateField={onUpdateField} />
               <GlobalCaseFields caseData={caseData} onUpdateField={onUpdateField} />
-            </div>
+            </EuiFlexItem>
           )}
         </EuiFlexGroup>
       </EuiFlexItem>

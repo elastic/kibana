@@ -47,6 +47,8 @@ import { isLegacyAttachmentRequest } from '../../../../common/utils/attachments'
 
 jest.mock('./template_fields', () => ({
   TemplateFields: () => <div data-test-subj="case-view-template-fields" />,
+}));
+jest.mock('./global_case_fields', () => ({
   GlobalCaseFields: () => null,
 }));
 

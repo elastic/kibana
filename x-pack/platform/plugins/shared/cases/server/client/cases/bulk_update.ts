@@ -584,11 +584,10 @@ export const bulkUpdate = async (
 
     // Pre-resolve global fields once per owner to avoid N SO queries inside Promise.all.
     const uniqueOwnersWithExtendedFields = [
-      ...new Set(
-        casesToUpdate
-          .filter(({ updateReq }) => !!updateReq.extended_fields)
-          .map(({ originalCase }) => originalCase.attributes.owner)
-      ),
+      ...casesToUpdate.reduce((owners, { updateReq, originalCase }) => {
+        if (updateReq.extended_fields) owners.add(originalCase.attributes.owner);
+        return owners;
+      }, new Set<string>()),
     ];
     const globalFieldsByOwner = new Map(
       await Promise.all(
