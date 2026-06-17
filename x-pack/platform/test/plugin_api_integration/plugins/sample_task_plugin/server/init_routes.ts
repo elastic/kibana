@@ -66,8 +66,9 @@ const taskSchema = schema.object({
     state: schema.recordOf(schema.string(), schema.any(), { defaultValue: {} }),
     id: schema.maybe(schema.string()),
     timeoutOverride: schema.maybe(schema.string()),
-    cost: schema.maybe(
-      schema.oneOf([schema.literal('tiny'), schema.literal('normal'), schema.literal('extralarge')])
+    cost: schema.maybe(schema.string()),
+    priority: schema.maybe(
+      schema.oneOf([schema.literal(1), schema.literal(40), schema.literal(50)])
     ),
   }),
 });
@@ -178,7 +179,6 @@ export function initRoutes(
         headers: {
           authorization: `ApiKey ${apiKeyCreateResult?.api_key}`,
         },
-        path: '/',
       };
       const fakeRequest = kibanaRequestFactory(fakeRawRequest);
       const task = {
@@ -288,7 +288,6 @@ export function initRoutes(
           headers: {
             authorization: `ApiKey ${apiKeyCreateResult?.api_key}`,
           },
-          path: '/',
         };
         const fakeRequest = kibanaRequestFactory(fakeRawRequest);
         return res.ok({

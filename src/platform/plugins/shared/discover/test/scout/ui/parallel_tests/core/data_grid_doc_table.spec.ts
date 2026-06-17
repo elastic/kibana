@@ -11,7 +11,7 @@
  * Data-grid rendering and sidebar column management.
  */
 
-import { spaceTest } from '@kbn/scout';
+import { spaceTest, tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import type { ScoutPage } from '@kbn/scout';
 import { testData } from '../../fixtures/common';
@@ -28,7 +28,7 @@ const addColumnFromSidebar = async (page: ScoutPage, column: string) => {
   await page.testSubj.click(`fieldToggle-${column}`);
 };
 
-spaceTest.describe('Discover data grid - doc table', { tag: testData.DISCOVER_CORE_TAGS }, () => {
+spaceTest.describe('Discover data grid - doc table', { tag: tags.stateful.all }, () => {
   spaceTest.beforeAll(async ({ scoutSpace }) => {
     await scoutSpace.savedObjects.load(testData.DISCOVER_KBN_ARCHIVE);
     await scoutSpace.uiSettings.setDefaultIndex(testData.DEFAULT_DATA_VIEW);
@@ -39,6 +39,7 @@ spaceTest.describe('Discover data grid - doc table', { tag: testData.DISCOVER_CO
   spaceTest.beforeEach(async ({ browserAuth, pageObjects }) => {
     // Viewer is sufficient for read-only grid interactions.
     await browserAuth.loginAsViewer();
+    await pageObjects.discover.setQueryMode('classic');
     await pageObjects.discover.goto();
     await pageObjects.discover.waitUntilSearchingHasFinished();
     // Search can finish before the grid leaves "Loading documents" (histogram may

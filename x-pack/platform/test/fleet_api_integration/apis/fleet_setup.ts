@@ -104,8 +104,14 @@ export default function (providerContext: FtrProviderContext) {
               namespaces: ['default'],
               [PACKAGE_POLICY_SAVED_OBJECT_TYPE]: {
                 name: `test-${index}`,
+                enabled: true,
                 policy_ids: [agentPolicyRes.item.id],
                 inputs: [],
+                revision: 1,
+                created_at: new Date().toISOString(),
+                created_by: 'system',
+                updated_at: new Date().toISOString(),
+                updated_by: 'system',
                 package: {
                   name: 'synthetics',
                   version: '1.2.1',
@@ -205,7 +211,7 @@ export default function (providerContext: FtrProviderContext) {
         name: '*@package',
       });
       const ilms = Object.entries(componentTemplates.component_templates).map(
-        ([name, componentTemplate]) => {
+        ([, componentTemplate]) => {
           const settings = componentTemplate.component_template.template.settings || {};
           return settings.index?.lifecycle?.name;
         }

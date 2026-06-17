@@ -11,6 +11,7 @@ export {
   protectedNamespaces as toolReservedNamespaces,
   isInProtectedNamespace,
 } from './base/namespaces';
+export { DOT_INDEX_ALLOW_LIST_PATTERNS, isVisibleSearchSource } from './base/dot_index_allow_list';
 export {
   ToolType,
   ToolOrigin,
@@ -98,7 +99,7 @@ export {
   createHooksExecutionError,
 } from './base/errors';
 export { HookLifecycle, HookExecutionMode } from './hooks/lifecycle';
-export { type UserIdAndName } from './base/users';
+export { type UserIdAndName, type CurrentUser } from './base/users';
 export { EsResourceType } from './base/resources';
 export type { TimeRange } from './attachments';
 export {
@@ -111,8 +112,24 @@ export {
   isAgentOwner,
   canChangeAgentVisibility,
   hasAgentReadAccess,
+  hasAgentUseAccess,
   hasAgentWriteAccess,
+  canDeleteAgent,
+  canManageAgentAcl,
+  getEffectiveAgentRole,
+  type EffectiveAgentRole,
+  type AgentAuthzArgs,
   canCurrentUserEditAgent,
+  AgentAclRole,
+  AGENT_ACL_MAX_ENTRIES,
+  AGENT_ACL_PRINCIPAL_NAME_MAX_LENGTH,
+  isAgentAclRole,
+  aclRoleMeets,
+  maxAclRole,
+  getEmptyAgentAcl,
+  type AgentAcl,
+  type AgentAclEntry,
+  type AgentAclPrincipalType,
   type AgentDefinition,
   type AgentConfiguration,
   type AgentConfigurationOverrides,
@@ -126,6 +143,10 @@ export {
   SubagentExecutionMode,
   ExecutionStatus,
   type SerializedExecutionError,
+  type AgentListOptions,
+  type AgentCreateRequest,
+  type AgentUpdateRequest,
+  type AgentDeleteRequest,
 } from './agents';
 export {
   type RoundInput,
@@ -152,8 +173,13 @@ export {
   isCompactionStep,
   isBackgroundAgentCompleteStep,
   type BackgroundAgentCompleteStep,
+  isTodosStep,
+  findTodosStep,
+  type TodosStep,
+  carriedOverTodos,
   ChatEventType,
   ConversationRoundStatus,
+  ConversationDisplayStatus,
   type ChatEventBase,
   type ChatEvent,
   type ConversationAction,
@@ -207,6 +233,10 @@ export {
   type BackgroundAgentCompleteEvent,
   type BackgroundAgentCompleteEventData,
   isBackgroundAgentCompleteEvent,
+  isTodosUpdatedEvent,
+  TODOS_UPDATED_UI_EVENT,
+  type TodosUpdatedUiEventData,
+  type ConversationListOptions,
 } from './chat';
 export {
   type PublicSkillDefinition,
@@ -249,3 +279,10 @@ export {
   type PluginDefinition,
 } from './plugins';
 export { EffortLevels, type EffortLevel } from './model_provider';
+export {
+  type OAuthClient,
+  type OAuthClientLogo,
+  type OAuthClientConnectionsSummary,
+  OAuthClientType,
+} from './oauth_clients';
+export { MCP_SERVER_PATH } from './mcp';

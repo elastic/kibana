@@ -8,6 +8,7 @@
 import type { BaseMessageLike } from '@langchain/core/messages';
 import type { SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
 import { getChartTypeConfigPromptContent } from './chart_type_guidance';
+import { getColorPalettesPromptContent } from './color_palettes';
 
 export const createGenerateConfigPrompt = ({
   nlQuery,
@@ -27,6 +28,8 @@ export const createGenerateConfigPrompt = ({
   additionalContext?: string;
 }): BaseMessageLike[] => {
   const chartTypeConfigPromptContent = getChartTypeConfigPromptContent(chartType);
+  const colorPalettesPromptContent = getColorPalettesPromptContent(chartType);
+  const esqlQueryJson = JSON.stringify(esqlQuery);
 
   return [
     [
@@ -49,7 +52,7 @@ ${
 }
 
 DATASET RULES:
-1. The 'dataset' field must contain: { type: "esql", query: "${esqlQuery}" }
+1. The 'dataset' field must contain: { type: "esql", query: ${esqlQueryJson} }
 2. For ES|QL column bindings use { column: '<esql column name>', ...other options }
 3. All field names must match those available in the ES|QL query result
 4. Follow the schema definition strictly
@@ -68,6 +71,7 @@ NUMBER FORMAT RULES:
 - When column names or the user query hint at a unit (e.g. "cpu", "percent", "bytes_in", "disk_used", "latency_ms"), infer the correct format even if the user did not explicitly ask for it.
 - Do NOT apply a format when the metric is a plain count, rate, or when the unit is ambiguous.
 
+${colorPalettesPromptContent ? `${colorPalettesPromptContent}\n` : ''}
 ${chartTypeConfigPromptContent ? `${chartTypeConfigPromptContent}` : ''}
 
 ${additionalChartConfigInstructions ?? ''}
@@ -112,6 +116,8 @@ Do not hardcode absolute times or now()-based ranges.
 
 ## Time Bucketing
 
+### FROM
+
 For time series charts, use auto buckets: \`BUCKET(<time field>, 75, ?_tstart, ?_tend)\` or \`TBUCKET(75, ?_tstart, ?_tend)\`, not hardcoded intervals like \`DATE_TRUNC(1 hour, <time field>)\`.
 Omit \`LIMIT\`; the bucket range already bounds the results.
 
@@ -121,9 +127,17 @@ e.g. with for a normal index with FROM and BUCKET:
 FROM logs | STATS count = COUNT() BY bucket = BUCKET(timestamp, 75, ?_tstart, ?_tend)
 \`\`\`
 
-or for a time-series datastream with TS and TBUCKET:
+### TS
+
+The visualization framework automatically adds the correct time range to the query for time series when using TS,
+meaning you **do not need** to filter using TRANGE manually.
+
+The only exception when you should use the variables to manually filter the timeframe with TS is for TBUCKET,
+
+e.g.
 
 \`\`\`esql
 TS logs-tsds | STATS count = COUNT() BY bucket = TBUCKET(75, ?_tstart, ?_tend)
 \`\`\`
-`;
+
+Also omit \`LIMIT\` (same reasons as with FROM).`;

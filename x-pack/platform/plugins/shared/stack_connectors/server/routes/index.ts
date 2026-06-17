@@ -7,3 +7,4 @@
 
 export { getWellKnownEmailServiceRoute } from './get_well_known_email_service';
 export { getWebhookSecretHeadersKeyRoute } from './get_webhook_secret_headers_key';
+export { getHttpSecretQueryParamsKeyRoute } from './get_http_secret_query_params_key';

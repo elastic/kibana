@@ -7,7 +7,6 @@
 
 export const PAGE_TITLE = '[data-test-subj="entityAnalyticsHomePage"]';
 /** Shown on entity_analytics_home_page while data view / page deps resolve (EuiLoadingSpinner) */
-export const ENTITY_ANALYTICS_HOME_PAGE_LOADER = '[data-test-subj="entityAnalyticsHomePageLoader"]';
 export const COMBINED_RISK_DONUT_CHART = '[data-test-subj="risk-score-donut-chart"]';
 export const ANOMALIES_PLACEHOLDER_PANEL = '[data-test-subj="recent-anomalies-panel"]';
 
@@ -19,6 +18,9 @@ export const ENTITY_STORE_DISABLED_EMPTY_PROMPT =
 export const DATAGRID_HEADER = '[data-test-subj="dataGridHeader"]';
 export const DATAGRID_COLUMN_SELECTOR = '[data-test-subj="dataGridColumnSelectorButton"]';
 export const DATAGRID_SORTING_SELECTOR = '[data-test-subj="dataGridColumnSortingButton"]';
+export const DATA_GRID_ROW_CELL = '[data-test-subj="dataGridRowCell"]';
+export const dataGridRowCellByColumn = (columnId: string) =>
+  `${DATA_GRID_ROW_CELL}[data-gridcell-column-id="${columnId}"]`;
 
 export const EXPAND_ROW_BUTTON = '[data-test-subj="docTableExpandToggleColumn"]';
 
@@ -31,13 +33,11 @@ export const FIELDS_SELECTOR_CLOSE = '[data-test-subj="entityAnalyticsFieldsSele
 
 export const LAST_UPDATED = '[data-test-subj="entity-analytics-toolbar-updated-at"]';
 
-export const GROUPING_SELECTOR = '[data-test-subj="entity-analytics-grouping"]';
-export const GROUPING_COUNTER = '[data-test-subj="entity-analytics-grouping-counter"]';
-
 export const FLYOUT_RIGHT_PANEL = '[data-test-subj="rightSection"]';
-
-export const ALERTS_DISTRIBUTION_BAR =
-  '[data-test-subj="entity-analytics-alerts-distribution-bar"]';
+export const FLYOUT_TITLE_TEXT = '[data-test-subj="flyoutTitleText"]';
+/** Resolution group header — opens the primary (target) entity flyout */
+export const GROUP_HEADER_OPEN_ENTITY_FLYOUT_BUTTON =
+  '[data-test-subj="entity-analytics-resolution-group-open-flyout"]';
 
 // Grouping selectors (from @kbn/grouping)
 export const GROUP_SELECTOR_DROPDOWN = '[data-test-subj="group-selector-dropdown"]';

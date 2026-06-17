@@ -9,45 +9,50 @@ import Boom from '@hapi/boom';
 import {
   BULK_FILTER_MAX_RULES,
   createRuleDataSchema,
+  isStateTransitionAllowed,
   updateRuleDataSchema,
 } from '@kbn/alerting-v2-schemas';
 import { PluginStart } from '@kbn/core-di';
-import { CoreStart, Request } from '@kbn/core-di-server';
-import type { HttpServiceStart, KibanaRequest } from '@kbn/core-http-server';
+import { Request } from '@kbn/core-di-server';
+import type { KibanaRequest } from '@kbn/core-http-server';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import type { KibanaRequest as CoreKibanaRequest } from '@kbn/core/server';
-import { getSpaceIdFromPath } from '@kbn/spaces-utils';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import { stringifyZodError } from '@kbn/zod-helpers/v4';
+import { treeifyError, type z } from '@kbn/zod/v4';
 import { inject, injectable } from 'inversify';
-
 import { type RuleSavedObjectAttributes } from '../../saved_objects';
+import { ActionPolicyClient } from '../action_policy_client';
+import { withApm as withApmDecorator } from '../apm/with_apm_decorator';
+import { ALERTING_V2_ERROR_CODES } from '../errors/error_codes';
 import { ALERTING_RULE_EXECUTOR_TASK_TYPE } from '../rule_executor';
 import { ensureRuleExecutorTaskScheduled, getRuleExecutorTaskId } from '../rule_executor/schedule';
 import type { RuleExecutorTaskParams } from '../rule_executor/types';
 import type { RulesSavedObjectServiceContract } from '../services/rules_saved_object_service/rules_saved_object_service';
 import { RulesSavedObjectServiceScopedToken } from '../services/rules_saved_object_service/tokens';
+import { RequestSpaceIdToken } from '../services/spaces_service/tokens';
 import type { UserServiceContract } from '../services/user_service/user_service';
 import { UserService } from '../services/user_service/user_service';
+import { buildRuleSoFilter } from './build_rule_filter';
+import { buildSoSearch, RULE_SEARCH_FIELDS } from './build_so_search';
 import type {
   BulkOperationError,
   BulkOperationResponse,
   BulkRulesParams,
+  CreateRuleData,
   CreateRuleParams,
-  FindRulesSortField,
   FindRulesParams,
   FindRulesResponse,
+  FindRulesSortField,
   RuleResponse,
-  UpdateRuleData,
+  UpdateRuleParams,
 } from './types';
 import {
+  assertImmutableUnchanged,
+  buildUpdateRuleAttributes,
   transformCreateRuleBodyToRuleSoAttributes,
   transformRuleSoAttributesToRuleApiResponse,
-  buildUpdateRuleAttributes,
 } from './utils';
-import { buildRuleSoFilter } from './build_rule_filter';
-import { buildSoSearch, RULE_SEARCH_FIELDS } from './build_so_search';
-import { withApm as withApmDecorator } from '../apm/with_apm_decorator';
 
 const withApm = withApmDecorator('RulesClient');
 
@@ -80,292 +85,308 @@ const mapSortField = (sortField?: FindRulesSortField): string | undefined => {
 export class RulesClient {
   constructor(
     @inject(Request) private readonly request: KibanaRequest,
-    @inject(CoreStart('http')) private readonly http: HttpServiceStart,
     @inject(RulesSavedObjectServiceScopedToken)
     private readonly rulesSavedObjectService: RulesSavedObjectServiceContract,
-    @inject(PluginStart('taskManager')) private readonly taskManager: TaskManagerStartContract,
-    @inject(UserService) private readonly userService: UserServiceContract
+    @inject(PluginStart<TaskManagerStartContract>('taskManager'))
+    private readonly taskManager: TaskManagerStartContract,
+    @inject(UserService) private readonly userService: UserServiceContract,
+    @inject(ActionPolicyClient) private readonly actionPolicyClient: ActionPolicyClient,
+    @inject(RequestSpaceIdToken) private readonly spaceId: string
   ) {}
 
   private getSpaceContext(): { spaceId: string } {
-    const requestBasePath = this.http.basePath.get(this.request);
-    const space = getSpaceIdFromPath(requestBasePath, this.http.basePath.serverBasePath);
-    const spaceId = space?.spaceId || 'default';
-    return { spaceId };
+    return { spaceId: this.spaceId };
+  }
+
+  private parseRuleData<T>(
+    schema: z.ZodType<T>,
+    data: unknown,
+    context: 'create' | 'update' | 'upsert'
+  ): T {
+    const parsed = schema.safeParse(data);
+    if (!parsed.success) {
+      throw Boom.badRequest(
+        `Error validating ${context} rule data - ${stringifyZodError(parsed.error)}`,
+        {
+          code: ALERTING_V2_ERROR_CODES.INVALID_RULE_DATA,
+          details: { context, errors: treeifyError(parsed.error) },
+        }
+      );
+    }
+    return parsed.data;
+  }
+
+  private async getExistingRule(
+    id: string
+  ): Promise<{ attrs: RuleSavedObjectAttributes; version: string | undefined }> {
+    try {
+      const doc = await this.rulesSavedObjectService.get(id);
+      return { attrs: doc.attributes, version: doc.version };
+    } catch (e) {
+      if (SavedObjectsErrorHelpers.isNotFoundError(e)) {
+        throw Boom.notFound(`Rule with id "${id}" not found`, {
+          code: ALERTING_V2_ERROR_CODES.RULE_NOT_FOUND,
+          details: { rule_id: id },
+        });
+      }
+      throw e;
+    }
+  }
+
+  private async scheduleRuleExecutorTask({
+    ruleId,
+    spaceId,
+    scheduleEvery,
+  }: {
+    ruleId: string;
+    spaceId: string;
+    scheduleEvery: string;
+  }): Promise<void> {
+    await ensureRuleExecutorTaskScheduled({
+      services: { taskManager: this.taskManager },
+      input: {
+        ruleId,
+        spaceId,
+        schedule: { interval: scheduleEvery },
+        request: this.request as unknown as CoreKibanaRequest,
+      },
+    });
+  }
+
+  private async writeRuleAttrs({
+    id,
+    attrs,
+    version,
+  }: {
+    id: string;
+    attrs: RuleSavedObjectAttributes;
+    version?: string;
+  }): Promise<{ id: string; version?: string }> {
+    try {
+      return await this.rulesSavedObjectService.update({ id, attrs, version });
+    } catch (e) {
+      if (SavedObjectsErrorHelpers.isConflictError(e)) {
+        throw Boom.conflict(`Rule with id "${id}" has already been updated by another user`, {
+          code: ALERTING_V2_ERROR_CODES.RULE_VERSION_CONFLICT,
+          details: { rule_id: id },
+        });
+      }
+      throw e;
+    }
   }
 
   @withApm
   public async createRule(params: CreateRuleParams): Promise<RuleResponse> {
     const { spaceId } = this.getSpaceContext();
+    const parsed = this.parseRuleData(createRuleDataSchema, params.data, 'create');
 
-    const parsed = createRuleDataSchema.safeParse(params.data);
-    if (!parsed.success) {
-      throw Boom.badRequest(
-        `Error validating create rule data - ${stringifyZodError(parsed.error)}`
-      );
-    }
+    const userProfileUid = await this.userService.getCurrentUserProfileUid();
 
-    const username = await this.userService.getCurrentUsername();
     const nowIso = new Date().toISOString();
 
-    const ruleAttributes = transformCreateRuleBodyToRuleSoAttributes(parsed.data, {
+    const ruleAttributes = transformCreateRuleBodyToRuleSoAttributes(parsed, {
       enabled: true,
-      createdBy: username,
+      createdBy: userProfileUid,
       createdAt: nowIso,
-      updatedBy: username,
+      updatedBy: userProfileUid,
       updatedAt: nowIso,
     });
 
-    let id: string;
+    let created: { id: string; version?: string };
     try {
-      id = await this.rulesSavedObjectService.create({
+      created = await this.rulesSavedObjectService.create({
         attrs: ruleAttributes,
         id: params.options?.id,
       });
     } catch (e) {
       if (SavedObjectsErrorHelpers.isConflictError(e)) {
         const conflictId = params.options?.id ?? 'unknown';
-        throw Boom.conflict(`Rule with id "${conflictId}" already exists`);
+        throw Boom.conflict(`Rule with id "${conflictId}" already exists`, {
+          code: ALERTING_V2_ERROR_CODES.RULE_ALREADY_EXISTS,
+          details: { rule_id: conflictId },
+        });
       }
       throw e;
     }
 
+    const { id, version } = created;
+
     try {
-      await ensureRuleExecutorTaskScheduled({
-        services: { taskManager: this.taskManager },
-        input: {
-          ruleId: id,
-          spaceId,
-          schedule: { interval: ruleAttributes.schedule.every },
-          request: this.request as unknown as CoreKibanaRequest,
-        },
+      await this.scheduleRuleExecutorTask({
+        ruleId: id,
+        spaceId,
+        scheduleEvery: ruleAttributes.schedule.every,
       });
     } catch (e) {
       await this.rulesSavedObjectService.delete({ id }).catch(() => {});
       throw e;
     }
 
-    return transformRuleSoAttributesToRuleApiResponse(id, ruleAttributes);
+    return transformRuleSoAttributesToRuleApiResponse(id, ruleAttributes, version);
   }
 
   @withApm
-  public async updateRule({
-    id,
-    data,
-  }: {
-    id: string;
-    data: UpdateRuleData;
-  }): Promise<RuleResponse> {
+  public async updateRule({ id, data, options }: UpdateRuleParams): Promise<RuleResponse> {
     const { spaceId } = this.getSpaceContext();
+    const parsed = this.parseRuleData(updateRuleDataSchema, data, 'update');
 
-    const parsed = updateRuleDataSchema.safeParse(data);
-    if (!parsed.success) {
-      throw Boom.badRequest(
-        `Error validating update rule data - ${stringifyZodError(parsed.error)}`
-      );
-    }
-
-    const username = await this.userService.getCurrentUsername();
+    const userProfileUid = await this.userService.getCurrentUserProfileUid();
     const nowIso = new Date().toISOString();
 
-    let existingAttrs: RuleSavedObjectAttributes;
-    let existingVersion: string | undefined;
-    try {
-      const doc = await this.rulesSavedObjectService.get(id);
-      existingAttrs = doc.attributes;
-      existingVersion = doc.version;
-    } catch (e) {
-      if (SavedObjectsErrorHelpers.isNotFoundError(e)) {
-        throw Boom.notFound(`Rule with id "${id}" not found`);
-      }
-      throw e;
+    const { attrs: existingAttrs, version: existingVersion } = await this.getExistingRule(id);
+
+    if (
+      !isStateTransitionAllowed({
+        kind: existingAttrs.kind,
+        state_transition: parsed.state_transition,
+      })
+    ) {
+      throw Boom.badRequest('stateTransition is only allowed for rules of kind "alert".', {
+        code: ALERTING_V2_ERROR_CODES.INVALID_STATE_TRANSITION,
+        details: { rule_id: id, rule_kind: existingAttrs.kind },
+      });
     }
 
-    if (existingAttrs.kind !== 'alert' && parsed.data.state_transition != null) {
-      throw Boom.badRequest('stateTransition is only allowed for rules of kind "alert".');
-    }
-
-    const nextAttrs = buildUpdateRuleAttributes(existingAttrs, parsed.data, {
-      updatedBy: username,
+    const nextAttrs = buildUpdateRuleAttributes(existingAttrs, parsed, {
+      updatedBy: userProfileUid,
       updatedAt: nowIso,
     });
 
-    // Ensure the task schedule is up-to-date.
-    await ensureRuleExecutorTaskScheduled({
-      services: { taskManager: this.taskManager },
-      input: {
-        ruleId: id,
-        spaceId,
-        schedule: { interval: nextAttrs.schedule.every },
-        request: this.request as unknown as CoreKibanaRequest,
-      },
+    await this.scheduleRuleExecutorTask({
+      ruleId: id,
+      spaceId,
+      scheduleEvery: nextAttrs.schedule.every,
     });
 
-    try {
-      await this.rulesSavedObjectService.update({
-        id,
-        attrs: nextAttrs,
-        version: existingVersion,
-      });
-    } catch (e) {
-      if (SavedObjectsErrorHelpers.isConflictError(e)) {
-        throw Boom.conflict(`Rule with id "${id}" has already been updated by another user`);
-      }
-      throw e;
-    }
+    const { version: newVersion } = await this.writeRuleAttrs({
+      id,
+      attrs: nextAttrs,
+      version: options?.version ?? existingVersion,
+    });
 
-    return transformRuleSoAttributesToRuleApiResponse(id, nextAttrs);
+    return transformRuleSoAttributesToRuleApiResponse(id, nextAttrs, newVersion);
   }
 
   @withApm
   public async getRule({ id }: { id: string }): Promise<RuleResponse> {
-    try {
-      const doc = await this.rulesSavedObjectService.get(id);
-      return transformRuleSoAttributesToRuleApiResponse(id, doc.attributes);
-    } catch (e) {
-      if (SavedObjectsErrorHelpers.isNotFoundError(e)) {
-        throw Boom.notFound(`Rule with id "${id}" not found`);
-      }
-      throw e;
-    }
+    const { attrs, version } = await this.getExistingRule(id);
+    return transformRuleSoAttributesToRuleApiResponse(id, attrs, version);
   }
 
   @withApm
   public async getRules(ids: string[]): Promise<RuleResponse[]> {
     const result = await this.rulesSavedObjectService.bulkGetByIds(ids);
 
-    return result.flatMap((doc) => {
-      if ('error' in doc) {
-        return [];
-      }
+    const rulesById = new Map<string, RuleResponse>();
 
-      return [transformRuleSoAttributesToRuleApiResponse(doc.id, doc.attributes)];
-    });
+    for (const doc of result) {
+      if ('error' in doc) {
+        throw new Boom.Boom(doc.error.message, { statusCode: doc.error.statusCode });
+      }
+      rulesById.set(doc.id, transformRuleSoAttributesToRuleApiResponse(doc.id, doc.attributes));
+    }
+
+    return ids.map((id) => rulesById.get(id)!).filter(Boolean);
+  }
+
+  @withApm
+  public async ruleExists({ id }: { id: string }): Promise<boolean> {
+    try {
+      await this.getExistingRule(id);
+      return true;
+    } catch (e) {
+      if (Boom.isBoom(e) && e.output.statusCode === 404) {
+        return false;
+      }
+      throw e;
+    }
   }
 
   @withApm
   public async deleteRule({ id }: { id: string }): Promise<void> {
     const { spaceId } = this.getSpaceContext();
 
-    try {
-      await this.rulesSavedObjectService.get(id);
-    } catch (e) {
-      if (SavedObjectsErrorHelpers.isNotFoundError(e)) {
-        throw Boom.notFound(`Rule with id "${id}" not found`);
-      }
-      throw e;
+    if (!(await this.ruleExists({ id }))) {
+      throw Boom.notFound(`Rule with id "${id}" not found`, {
+        code: ALERTING_V2_ERROR_CODES.RULE_NOT_FOUND,
+        details: { rule_id: id },
+      });
     }
 
     const taskId = getRuleExecutorTaskId({ ruleId: id, spaceId });
     await this.taskManager.removeIfExists(taskId);
 
     await this.rulesSavedObjectService.delete({ id });
+
+    await this.actionPolicyClient.deleteActionPoliciesByFilter({
+      type: 'single_rule',
+      ruleId: id,
+    });
   }
 
   @withApm
   public async enableRule({ id }: { id: string }): Promise<RuleResponse> {
     const { spaceId } = this.getSpaceContext();
 
-    const username = await this.userService.getCurrentUsername();
+    const userProfileUid = await this.userService.getCurrentUserProfileUid();
     const nowIso = new Date().toISOString();
 
-    let existingAttrs: RuleSavedObjectAttributes;
-    let existingVersion: string | undefined;
-    try {
-      const doc = await this.rulesSavedObjectService.get(id);
-      existingAttrs = doc.attributes;
-      existingVersion = doc.version;
-    } catch (e) {
-      if (SavedObjectsErrorHelpers.isNotFoundError(e)) {
-        throw Boom.notFound(`Rule with id "${id}" not found`);
-      }
-      throw e;
-    }
+    const { attrs: existingAttrs, version: existingVersion } = await this.getExistingRule(id);
 
     const nextAttrs: RuleSavedObjectAttributes = {
       ...existingAttrs,
       enabled: true,
-      updatedBy: username,
+      updatedBy: userProfileUid,
       updatedAt: nowIso,
     };
 
-    // Ensure the task schedule is up-to-date.
-    await ensureRuleExecutorTaskScheduled({
-      services: { taskManager: this.taskManager },
-      input: {
-        ruleId: id,
-        spaceId,
-        schedule: { interval: nextAttrs.schedule.every },
-        request: this.request as unknown as CoreKibanaRequest,
-      },
+    await this.scheduleRuleExecutorTask({
+      ruleId: id,
+      spaceId,
+      scheduleEvery: nextAttrs.schedule.every,
     });
 
-    try {
-      await this.rulesSavedObjectService.update({
-        id,
-        attrs: nextAttrs,
-        version: existingVersion,
-      });
-    } catch (e) {
-      if (SavedObjectsErrorHelpers.isConflictError(e)) {
-        throw Boom.conflict(`Rule with id "${id}" has already been updated by another user`);
-      }
-      throw e;
-    }
+    const { version: newVersion } = await this.writeRuleAttrs({
+      id,
+      attrs: nextAttrs,
+      version: existingVersion,
+    });
 
-    return transformRuleSoAttributesToRuleApiResponse(id, nextAttrs);
+    return transformRuleSoAttributesToRuleApiResponse(id, nextAttrs, newVersion);
   }
 
   @withApm
   public async disableRule({ id }: { id: string }): Promise<RuleResponse> {
     const { spaceId } = this.getSpaceContext();
 
-    const username = await this.userService.getCurrentUsername();
+    const userProfileUid = await this.userService.getCurrentUserProfileUid();
     const nowIso = new Date().toISOString();
 
-    let existingAttrs: RuleSavedObjectAttributes;
-    let existingVersion: string | undefined;
-    try {
-      const doc = await this.rulesSavedObjectService.get(id);
-      existingAttrs = doc.attributes;
-      existingVersion = doc.version;
-    } catch (e) {
-      if (SavedObjectsErrorHelpers.isNotFoundError(e)) {
-        throw Boom.notFound(`Rule with id "${id}" not found`);
-      }
-      throw e;
-    }
+    const { attrs: existingAttrs, version: existingVersion } = await this.getExistingRule(id);
 
     const nextAttrs: RuleSavedObjectAttributes = {
       ...existingAttrs,
       enabled: false,
-      updatedBy: username,
+      updatedBy: userProfileUid,
       updatedAt: nowIso,
     };
 
-    // When disabling, remove the task.
     const taskId = getRuleExecutorTaskId({ ruleId: id, spaceId });
     await this.taskManager.removeIfExists(taskId);
 
-    try {
-      await this.rulesSavedObjectService.update({
-        id,
-        attrs: nextAttrs,
-        version: existingVersion,
-      });
-    } catch (e) {
-      if (SavedObjectsErrorHelpers.isConflictError(e)) {
-        throw Boom.conflict(`Rule with id "${id}" has already been updated by another user`);
-      }
-      throw e;
-    }
+    const { version: newVersion } = await this.writeRuleAttrs({
+      id,
+      attrs: nextAttrs,
+      version: existingVersion,
+    });
 
-    return transformRuleSoAttributesToRuleApiResponse(id, nextAttrs);
+    return transformRuleSoAttributesToRuleApiResponse(id, nextAttrs, newVersion);
   }
 
   @withApm
-  public async getTags(): Promise<string[]> {
-    return this.rulesSavedObjectService.findTags();
+  public async getTags(params: { filter?: string } = {}): Promise<string[]> {
+    const soFilter = params.filter ? buildRuleSoFilter(params.filter) : undefined;
+    return this.rulesSavedObjectService.findTags({ filter: soFilter });
   }
 
   @withApm
@@ -388,7 +409,7 @@ export class RulesClient {
 
     return {
       items: res.saved_objects.map((so) =>
-        transformRuleSoAttributesToRuleApiResponse(so.id, so.attributes)
+        transformRuleSoAttributesToRuleApiResponse(so.id, so.attributes, so.version)
       ),
       total: res.total,
       page,
@@ -403,7 +424,9 @@ export class RulesClient {
    */
   private async resolveRuleIds(params: BulkRulesParams): Promise<ResolveRuleIdsResult> {
     if (params.ids && (params.filter || params.search)) {
-      throw Boom.badRequest('ids cannot be combined with filter or search');
+      throw Boom.badRequest('ids cannot be combined with filter or search', {
+        code: ALERTING_V2_ERROR_CODES.INVALID_BULK_PARAMS,
+      });
     }
 
     if (params.ids) {
@@ -535,7 +558,7 @@ export class RulesClient {
 
       if (doc.attributes.enabled) {
         // Already enabled — include in response without updating
-        rules.push(transformRuleSoAttributesToRuleApiResponse(doc.id, doc.attributes));
+        rules.push(transformRuleSoAttributesToRuleApiResponse(doc.id, doc.attributes, doc.version));
         continue;
       }
 
@@ -638,7 +661,7 @@ export class RulesClient {
 
       if (!doc.attributes.enabled) {
         // Already disabled — include in response without updating
-        rules.push(transformRuleSoAttributesToRuleApiResponse(doc.id, doc.attributes));
+        rules.push(transformRuleSoAttributesToRuleApiResponse(doc.id, doc.attributes, doc.version));
         continue;
       }
 
@@ -688,5 +711,56 @@ export class RulesClient {
     }
 
     return { rules, errors, ...this.bulkFilterResponseFields(resolution) };
+  }
+
+  @withApm
+  public async upsertRule({
+    id,
+    data,
+  }: {
+    id: string;
+    data: CreateRuleData;
+  }): Promise<{ rule: RuleResponse; created: boolean }> {
+    const parsed = this.parseRuleData(createRuleDataSchema, data, 'upsert');
+
+    const exists = await this.ruleExists({ id });
+
+    if (!exists) {
+      const rule = await this.createRule({ data, options: { id } });
+      return { rule, created: true };
+    }
+
+    const { spaceId } = this.getSpaceContext();
+    const userProfileUid = await this.userService.getCurrentUserProfileUid();
+    const nowIso = new Date().toISOString();
+
+    const { attrs: existingAttrs, version: existingVersion } = await this.getExistingRule(id);
+
+    assertImmutableUnchanged(parsed, existingAttrs);
+
+    const nextAttrs = transformCreateRuleBodyToRuleSoAttributes(parsed, {
+      enabled: existingAttrs.enabled,
+      createdBy: existingAttrs.createdBy,
+      createdAt: existingAttrs.createdAt,
+      updatedBy: userProfileUid,
+      updatedAt: nowIso,
+    });
+
+    await this.scheduleRuleExecutorTask({
+      ruleId: id,
+      spaceId,
+      scheduleEvery: nextAttrs.schedule.every,
+    });
+
+    const { version: newVersion } = await this.writeRuleAttrs({
+      id,
+      attrs: nextAttrs,
+      version: existingVersion,
+    });
+
+    return {
+      rule: transformRuleSoAttributesToRuleApiResponse(id, nextAttrs, newVersion),
+      created: false,
+    };
   }
 }

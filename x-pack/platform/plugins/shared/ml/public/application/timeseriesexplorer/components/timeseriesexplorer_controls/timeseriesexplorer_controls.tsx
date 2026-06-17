@@ -16,15 +16,13 @@ import {
   EuiFlexItem,
   EuiFormRow,
   EuiPopover,
+  EuiToolTip,
   htmlIdGenerator,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { SaveModalDashboardProps } from '@kbn/presentation-util-plugin/public';
-import {
-  LazySavedObjectSaveModalDashboard,
-  withSuspense,
-} from '@kbn/presentation-util-plugin/public';
+import { SavedObjectSaveModalDashboard } from '@kbn/presentation-util-plugin/public';
 import { useTimeRangeUpdates } from '@kbn/ml-date-picker';
 import type { MlJobState } from '@elastic/elasticsearch/lib/api/types';
 import type { SingleMetricViewerEmbeddableState } from '@kbn/ml-server-schemas/embeddables/single_metric_viewer';
@@ -64,8 +62,6 @@ interface Props {
   earliestRecordTimestamp: number;
   latestRecordTimestamp: number;
 }
-
-const SavedObjectSaveModalDashboard = withSuspense(LazySavedObjectSaveModalDashboard);
 
 function getDefaultEmbeddablePanelConfig(jobId: JobId, queryString?: string) {
   return {
@@ -283,23 +279,39 @@ export const TimeSeriesExplorerControls: FC<Props> = ({
             <EuiFormRow hasEmptyLabelSpace>
               <EuiPopover
                 button={
-                  <EuiButtonIcon
-                    aria-label={i18n.translate('xpack.ml.explorer.swimlaneActions', {
+                  <EuiToolTip
+                    content={i18n.translate('xpack.ml.timeSeriesExplorer.controlsActionsTooltip', {
                       defaultMessage: 'Actions',
                     })}
-                    color="text"
-                    display="base"
-                    isSelected={isMenuOpen}
-                    iconType="boxesVertical"
-                    onClick={setIsMenuOpen.bind(null, !isMenuOpen)}
-                    data-test-subj="mlAnomalyTimelinePanelMenu"
-                    size="m"
-                  />
+                    disableScreenReaderOutput
+                  >
+                    <EuiButtonIcon
+                      aria-label={i18n.translate(
+                        'xpack.ml.timeSeriesExplorer.controlsActionsAriaLabel',
+                        {
+                          defaultMessage: 'Actions',
+                        }
+                      )}
+                      color="text"
+                      display="base"
+                      isSelected={isMenuOpen}
+                      iconType="boxesVertical"
+                      onClick={setIsMenuOpen.bind(null, !isMenuOpen)}
+                      data-test-subj="mlTimeSeriesExplorerActionsMenu"
+                      size="m"
+                    />
+                  </EuiToolTip>
                 }
                 isOpen={isMenuOpen}
                 closePopover={setIsMenuOpen.bind(null, false)}
                 panelPaddingSize="none"
                 anchorPosition="downLeft"
+                aria-label={i18n.translate(
+                  'xpack.ml.timeSeriesExplorer.controls.popoverAriaLabel',
+                  {
+                    defaultMessage: 'Single metric viewer actions',
+                  }
+                )}
               >
                 <EuiContextMenu initialPanelId={0} panels={menuPanels} />
               </EuiPopover>

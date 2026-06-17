@@ -77,7 +77,7 @@ describe('DynamicRiskLevelPanel', () => {
     });
   });
 
-  it('renders the entity risk levels title when no watchlist is selected', () => {
+  it('renders the entity risk levels title', () => {
     mockUseKibana.mockReturnValue(buildKibanaServices(jest.fn(), false));
 
     render(
@@ -89,16 +89,16 @@ describe('DynamicRiskLevelPanel', () => {
     expect(screen.getByText('Entity risk levels')).toBeInTheDocument();
   });
 
-  it('renders the watchlist-scoped title when a watchlist is selected', () => {
+  it('renders the entity risk levels title when a watchlist is selected', () => {
     mockUseKibana.mockReturnValue(buildKibanaServices(jest.fn(), true));
 
     render(
       <TestProviders>
-        <DynamicRiskLevelPanel watchlistId="wl-1" watchlistName="VIP users" />
+        <DynamicRiskLevelPanel watchlistId="wl-1" />
       </TestProviders>
     );
 
-    expect(screen.getByText('VIP users risk levels')).toBeInTheDocument();
+    expect(screen.getByText('Entity risk levels')).toBeInTheDocument();
   });
 
   it('renders the inspect button', () => {
@@ -138,6 +138,44 @@ describe('DynamicRiskLevelPanel', () => {
           negate: false,
         },
         query: { match_phrase: { [ENTITY_RISK_LEVEL_FIELD]: RiskSeverity.Critical } },
+      },
+    ]);
+  });
+
+  it('applies custom filter for Unknown entity.risk.calculated_level', () => {
+    const addFilters = jest.fn();
+    mockUseKibana.mockReturnValue(buildKibanaServices(addFilters, false));
+
+    render(
+      <TestProviders>
+        <DynamicRiskLevelPanel />
+      </TestProviders>
+    );
+
+    expect(mockRiskScoreDonutChart).toHaveBeenCalled();
+    const donutProps = mockRiskScoreDonutChart.mock.calls[0][0];
+    expect(typeof donutProps.onPartitionClick).toBe('function');
+
+    donutProps.onPartitionClick(RiskSeverity.Unknown);
+
+    expect(addFilters).toHaveBeenCalledTimes(1);
+    expect(addFilters).toHaveBeenCalledWith([
+      {
+        meta: {
+          alias: 'Risk level: Unknown',
+          disabled: false,
+          negate: false,
+          key: 'entity.risk.calculated_level',
+        },
+        query: {
+          bool: {
+            should: [
+              { match_phrase: { [ENTITY_RISK_LEVEL_FIELD]: 'Unknown' } },
+              { bool: { must_not: { exists: { field: ENTITY_RISK_LEVEL_FIELD } } } },
+            ],
+            minimum_should_match: 1,
+          },
+        },
       },
     ]);
   });

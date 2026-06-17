@@ -7,7 +7,6 @@
 
 import { type KibanaExecutionContext } from '@kbn/core/public';
 import { apiPublishesESQLVariables } from '@kbn/esql-types';
-import type { DefaultInspectorAdapters } from '@kbn/expressions-plugin/common';
 import type {
   GetStateType,
   LensInternalApi,
@@ -50,7 +49,13 @@ import {
   updateAttributesWithAnnotation,
 } from './helper';
 import { addLog } from './logger';
-import { apiHasLensComponentCallbacks, apiHasUserMessages } from './type_guards';
+import {
+  apiHasLensComponentCallbacks,
+  apiHasUserMessages,
+  hasTablesAdapter,
+  isPartialInspectorAdapters,
+  type OnDataCallback,
+} from './type_guards';
 import type { LensEmbeddableStartServices } from './types';
 import { buildUserMessagesHelpers } from './user_messages/api';
 
@@ -196,16 +201,22 @@ export function loadEmbeddableData(
       }
     };
 
-    const onDataCallback = (adapters: Partial<DefaultInspectorAdapters> | undefined) => {
+    // _data (expression result) is unused — Lens only needs the inspector adapters.
+    // The signature OnDataCallback is used for consistency with the expressions plugin.
+    const onDataCallback: OnDataCallback = (_data, adapters) => {
       internalApi.updateVisualizationContext({
-        activeData: adapters?.tables?.tables,
+        activeData: hasTablesAdapter(adapters) ? adapters.tables?.tables : undefined,
       });
 
       // data has loaded
       internalApi.updateDataLoading(false);
       // The third argument here is an observable to let the
       // consumer to be notified on data change
-      onLoad?.(false, adapters, api.dataLoading$);
+      onLoad?.(
+        false,
+        isPartialInspectorAdapters(adapters) ? adapters : undefined,
+        api.dataLoading$
+      );
 
       api.loadViewUnderlyingData();
 
@@ -337,11 +348,12 @@ export function loadEmbeddableData(
         const transaction = apm.getCurrentTransaction();
         if (transaction) {
           const span = transaction.startSpan('lens-chart-error', 'lens-embeddable');
+
           if (span) {
             span.addLabels({
-              kibana_meta_lens_metric_type: currentState.attributes?.visualizationType ?? 'unknown',
-              kibana_meta_lens_profile_id: meta?.profile_id ?? 'unknown',
-              kibana_meta_lens_metric_id: meta?.metric_id ?? 'unknown',
+              kibana_meta_metric_type: currentState.attributes?.visualizationType ?? 'unknown',
+              kibana_meta_profile_id: meta?.profile_id ?? 'unknown',
+              kibana_meta_metric_id: meta?.metric_id ?? 'unknown',
             });
             apm.captureError(error);
             // @ts-expect-error RUM types don't include outcome

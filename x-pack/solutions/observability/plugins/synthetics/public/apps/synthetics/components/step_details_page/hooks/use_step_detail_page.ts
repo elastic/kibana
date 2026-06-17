@@ -10,6 +10,8 @@ import { useMemo } from 'react';
 import { useSelectedLocation } from '../../monitor_details/hooks/use_selected_location';
 import { useSyntheticsSettingsContext } from '../../../contexts';
 import { useJourneySteps } from '../../monitor_details/hooks/use_journey_steps';
+import { useGetUrlParams } from '../../../hooks';
+import { useUrlSpaceId } from '../../../hooks/use_url_space_id';
 
 export const useStepDetailPage = () => {
   const {
@@ -25,6 +27,8 @@ export const useStepDetailPage = () => {
   const stepIndex = Number(stepIndexString);
 
   const selectedLocation = useSelectedLocation();
+  const spaceId = useUrlSpaceId();
+  const { remoteName } = useGetUrlParams();
 
   const { data: journey, stepEnds } = useJourneySteps(checkGroupId);
 
@@ -44,6 +48,8 @@ export const useStepDetailPage = () => {
       checkGroupId,
       stepIndex: stepNo,
       locationId: selectedLocation?.id,
+      spaceId,
+      remoteName,
     });
 
   return {
@@ -70,6 +76,8 @@ export const useStepDetailLink = ({
   }>();
 
   const selectedLocation = useSelectedLocation();
+  const spaceId = useUrlSpaceId();
+  const { remoteName } = useGetUrlParams();
 
   if (!checkGroupId) {
     return '';
@@ -81,21 +89,34 @@ export const useStepDetailLink = ({
     monitorId,
     checkGroupId,
     locationId: selectedLocation?.id,
+    spaceId,
+    remoteName,
   });
 };
 
-const getStepDetailLink = ({
+export const getStepDetailLink = ({
   checkGroupId,
   stepIndex,
   basePath,
   monitorId,
   locationId,
+  spaceId,
+  remoteName,
 }: {
   checkGroupId: string;
   locationId?: string;
   stepIndex: number | string;
   basePath: string;
   monitorId: string;
+  spaceId?: string;
+  remoteName?: string;
 }) => {
-  return `${basePath}/app/synthetics/monitor/${monitorId}/test-run/${checkGroupId}/step/${stepIndex}?locationId=${locationId}`;
+  const params = new URLSearchParams();
+  if (locationId) params.set('locationId', locationId);
+  if (spaceId) params.set('spaceId', spaceId);
+  if (remoteName) params.set('remoteName', remoteName);
+  const search = params.toString();
+  return `${basePath}/app/synthetics/monitor/${monitorId}/test-run/${checkGroupId}/step/${stepIndex}${
+    search ? `?${search}` : ''
+  }`;
 };

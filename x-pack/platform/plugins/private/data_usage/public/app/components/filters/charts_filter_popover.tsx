@@ -7,6 +7,7 @@
 
 import React, { memo, useMemo } from 'react';
 import { EuiFilterButton, EuiPopover, useGeneratedHtmlId } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
 import { type FilterName } from '../../hooks/use_charts_filter';
 import { FILTER_NAMES } from '../../../translations';
@@ -66,6 +67,10 @@ export const ChartsFilterPopover = memo(
 
     return (
       <EuiPopover
+        aria-label={i18n.translate('xpack.dataUsage.chartsFilterPopover.ariaLabel', {
+          defaultMessage: 'Filter by {filterName}',
+          values: { filterName: FILTER_NAMES[filterName] },
+        })}
         button={button}
         closePopover={closePopover}
         id={filterGroupPopoverId}

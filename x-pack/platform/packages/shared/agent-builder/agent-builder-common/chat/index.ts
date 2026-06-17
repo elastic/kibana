@@ -7,6 +7,7 @@
 
 export {
   ConversationRoundStatus,
+  ConversationDisplayStatus,
   type ConversationAction,
   type RoundInput,
   type ConverseInput,
@@ -15,10 +16,17 @@ export {
   type ConversationRound,
   type Conversation,
   type ConversationInternalState,
+  type TodoItem,
+  type TodoStatus,
   type BackgroundExecutionState,
   type BackgroundExecutionCompletedAt,
   type BackgroundAgentCompleteStep,
   isBackgroundAgentCompleteStep,
+  type TodosStep,
+  type TodosStepData,
+  isTodosStep,
+  findTodosStep,
+  carriedOverTodos,
   type ConversationWithoutRounds,
   type ConversationRoundStepMixin,
   type ToolCallStep,
@@ -94,5 +102,9 @@ export {
   type BackgroundAgentCompleteEvent,
   type BackgroundAgentCompleteEventData,
   isBackgroundAgentCompleteEvent,
+  isTodosUpdatedEvent,
+  TODOS_UPDATED_UI_EVENT,
+  type TodosUpdatedUiEventData,
 } from './events';
 export type { RoundState } from './round_state';
+export type { ConversationListOptions } from './conversation_list';

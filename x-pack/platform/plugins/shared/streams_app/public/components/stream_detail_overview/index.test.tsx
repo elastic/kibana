@@ -20,10 +20,6 @@ jest.mock('../../hooks/use_stream_detail', () => ({
   useStreamDetail: () => mockUseStreamDetail(),
 }));
 
-jest.mock('./overview_time_filter', () => ({
-  OverviewTimeFilter: () => <div data-test-subj="mockOverviewTimeFilter">Time filter</div>,
-}));
-
 jest.mock('./data_quality_card', () => ({
   DataQualityCard: () => <div data-test-subj="mockDataQualityCard">Dataset quality</div>,
 }));
@@ -51,7 +47,6 @@ describe('StreamOverview', () => {
     renderWithI18n(<StreamOverview />);
 
     expect(screen.getByText('About this stream')).toBeInTheDocument();
-    expect(screen.getByTestId('mockOverviewTimeFilter')).toBeInTheDocument();
   });
 
   it('renders chart and dataset quality card only for ingest stream', () => {
@@ -79,6 +74,29 @@ describe('StreamOverview', () => {
     mockUseStreamDetail.mockReturnValue({
       definition: createMockQueryStreamDefinition(),
     });
+
+    renderWithI18n(<StreamOverview />);
+
+    expect(screen.queryByText('Dataset quality')).not.toBeInTheDocument();
+    expect(screen.getByTestId('mockIngestRateChart')).toBeInTheDocument();
+  });
+
+  it('does not render dataset quality card for draft stream', () => {
+    const baseDefinition = createMockWiredStreamDefinition();
+    const definition = createMockWiredStreamDefinition({
+      stream: {
+        ...baseDefinition.stream,
+        ingest: {
+          ...baseDefinition.stream.ingest,
+          wired: {
+            ...baseDefinition.stream.ingest.wired,
+            draft: true,
+          },
+        },
+      },
+    });
+
+    mockUseStreamDetail.mockReturnValue({ definition });
 
     renderWithI18n(<StreamOverview />);
 

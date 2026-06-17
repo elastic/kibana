@@ -10,8 +10,40 @@ import { stableStringify } from '@kbn/std';
 
 import type { EsqlQueryResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { RuleResponse } from '@kbn/alerting-v2-schemas';
-import type { AlertEvent } from '../../resources/datastreams/alert_events';
+import type { AlertEvent, AlertEventSeverity } from '../../resources/datastreams/alert_events';
+import { alertEventSeverity } from '../../resources/datastreams/alert_events';
 import type { ActiveAlertGroupHash } from './queries';
+
+const SEVERITY_COLUMN = 'severity';
+const SUPPORTED_SEVERITIES = new Set<AlertEventSeverity>(
+  Object.values(alertEventSeverity) as AlertEventSeverity[]
+);
+
+/**
+ * Best-effort severity extraction for breached alert events.
+ *
+ * The framework supports a fixed set of severity values. Users map their
+ * source data severities into these values via the rule's ES|QL query,
+ * which may emit a `severity` column. This helper:
+ *
+ * - returns `undefined` when the column is missing or not a string
+ * - lowercases the value before comparing against the supported set
+ * - returns the matching {@link AlertEventSeverity} or `undefined`
+ *
+ * Recovered and no-data events do not carry severity, so this is only
+ * applied to breached events.
+ */
+function extractSeverity(rowDoc: Record<string, unknown>): AlertEventSeverity | undefined {
+  const raw = rowDoc[SEVERITY_COLUMN];
+
+  if (typeof raw !== 'string') {
+    return undefined;
+  }
+
+  const normalized = raw.toLowerCase() as AlertEventSeverity;
+
+  return SUPPORTED_SEVERITIES.has(normalized) ? normalized : undefined;
+}
 
 function sha256(value: string) {
   return createHash('sha256').update(value).digest('hex');
@@ -63,6 +95,7 @@ export function createAlertEventsBatchBuilder({
   // Timestamp when the alert event is written to the index.
   const wroteAt = new Date().toISOString();
   const source = 'internal';
+  const groupingFields = ruleAttributes.grouping?.fields ?? [];
   let index = 0;
 
   return (batch: Array<Record<string, unknown>>): AlertEvent[] => {
@@ -71,7 +104,7 @@ export function createAlertEventsBatchBuilder({
     for (const rowDoc of batch) {
       const groupHash = buildGroupHash({
         rowDoc,
-        groupKeyFields: ruleAttributes.grouping?.fields ?? [],
+        groupKeyFields: groupingFields,
         get fallbackSeed(): string {
           return `${executionUuid}|row:${index}|${stableStringify(rowDoc)}`;
         },
@@ -91,6 +124,11 @@ export function createAlertEventsBatchBuilder({
         type: 'signal',
         space_id: spaceId,
       };
+
+      const severity = extractSeverity(rowDoc);
+      if (severity !== undefined) {
+        doc.severity = severity;
+      }
 
       index++;
       alertEventsBatch.push(doc);
@@ -113,7 +151,7 @@ export interface BuildRecoveryAlertEventsOpts {
  * Creates `recovered` alert events for groups that were previously in a non-inactive
  * episode state but are no longer present in the current breached set.
  *
- * Used when `recovery_policy.type` is `no_breach` or unset.
+ * Used when no recover query is configured on the rule.
  */
 export function buildRecoveryAlertEvents({
   ruleId,
@@ -160,12 +198,11 @@ export interface BuildQueryRecoveryAlertEventsOpts {
   esqlResponse: EsqlQueryResponse;
   scheduledTimestamp: string;
 }
-
 /**
  * Creates `recovered` alert events by running a custom recovery query.
  *
  * Active groups whose group hash matches a row in the recovery query results
- * are considered recovered. Used when `recovery_policy.type` is `query`.
+ * are considered recovered. Used when the rule has a recover query configured.
  */
 export function buildQueryRecoveryAlertEvents({
   ruleId,
@@ -184,6 +221,7 @@ export function buildQueryRecoveryAlertEvents({
   }
 
   const executionUuid = sha256(`${ruleId}|${spaceId}|${scheduledTimestamp}|recovery`);
+  const groupingFields = ruleAttributes.grouping?.fields ?? [];
   const activeGroupHashSet = new Set(activeGroupHashes.map(({ group_hash }) => group_hash));
 
   // Keep the first matching row's data per group hash.
@@ -193,7 +231,7 @@ export function buildQueryRecoveryAlertEvents({
     const rowDoc = rowToDocument(columns, values[i]);
     const groupHash = buildGroupHash({
       rowDoc,
-      groupKeyFields: ruleAttributes.grouping?.fields ?? [],
+      groupKeyFields: groupingFields,
       get fallbackSeed(): string {
         return `${executionUuid}|row:${i}|${stableStringify(rowDoc)}`;
       },

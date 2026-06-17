@@ -50,6 +50,7 @@ import type { CasesPublicSetup, CasesPublicStart } from '@kbn/cases-plugin/publi
 import type { SavedSearchPublicPluginStart } from '@kbn/saved-search-plugin/public';
 import type { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
 import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
+import type { DataViewFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
 import type { FieldFormatsRegistry } from '@kbn/field-formats-plugin/common';
 import { ENABLE_ESQL } from '@kbn/esql-utils';
 import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
@@ -93,6 +94,7 @@ export interface MlStartDependencies {
   dashboard: DashboardStart;
   data: DataPublicPluginStart;
   dataViewEditor: DataViewEditorStart;
+  dataViewFieldEditor: DataViewFieldEditorStart;
   dataVisualizer: DataVisualizerPluginStart;
   embeddable: EmbeddableStart;
   fieldFormats: FieldFormatsRegistry;
@@ -206,6 +208,7 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
             dashboard: pluginsStart.dashboard,
             data: pluginsStart.data,
             dataViewEditor: pluginsStart.dataViewEditor,
+            dataViewFieldEditor: pluginsStart.dataViewFieldEditor,
             dataVisualizer: pluginsStart.dataVisualizer,
             embeddable: { ...pluginsSetup.embeddable, ...pluginsStart.embeddable },
             fieldFormats: pluginsStart.fieldFormats,
@@ -243,6 +246,11 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
       this.managementLocator = new MlManagementLocatorInternal(pluginsSetup.share);
     }
 
+    if (this.enabledFeatures.ad) {
+      registerEmbeddables(pluginsSetup.embeddable, core, pluginsSetup.usageCollection);
+    }
+    registerMlUiActions(pluginsSetup.uiActions, core);
+
     const licensing = pluginsSetup.licensing.license$.pipe(take(1));
     licensing
       .pipe(
@@ -274,14 +282,6 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
                 this.experimentalFeatures,
                 mlCapabilities
               );
-            }
-
-            if (fullLicense && mlCapabilities.canGetMlInfo && this.enabledFeatures.ad) {
-              registerEmbeddables(pluginsSetup.embeddable, core, pluginsSetup.usageCollection);
-            }
-
-            if (fullLicense && mlCapabilities.canGetMlInfo) {
-              registerMlUiActions(pluginsSetup.uiActions, core);
             }
 
             const { registerSearchLinks, registerCasesAttachments } = await import(

@@ -49,7 +49,7 @@ export function datatableToCSV(
   // Convert the array of row objects to an array of row arrays
   const csvRows = rows.map((row) => {
     return sortedColumnIds.map((id) =>
-      escapeValues(raw ? row[id] : formatters[id].convert(row[id]))
+      escapeValues(raw ? row[id] : formatters[id].convertToText(row[id]))
     );
   });
 

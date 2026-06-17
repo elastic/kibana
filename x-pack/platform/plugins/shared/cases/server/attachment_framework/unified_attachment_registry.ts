@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { identity } from 'lodash';
 import { AttachmentTypeRegistry } from '../../common/registry';
 import type { UnifiedAttachmentType, UnifiedAttachmentTypeSetup } from './types';
 
@@ -17,10 +16,9 @@ export class UnifiedAttachmentTypeRegistry extends AttachmentTypeRegistry<Unifie
   public register(attachmentType: UnifiedAttachmentTypeSetup): void {
     const item: UnifiedAttachmentType = {
       id: attachmentType.id,
+      schema: attachmentType.schema,
       schemaValidator: attachmentType.schemaValidator,
       telemetry: attachmentType.telemetry || ((state, stats) => stats),
-      inject: attachmentType.inject || identity,
-      extract: attachmentType.extract || ((state) => ({ state, references: [] })),
     };
 
     super.register(item);

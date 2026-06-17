@@ -9,6 +9,7 @@ import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import { apiTest } from '../fixtures';
 import { COMMON_HEADERS, TEST_TASK_TYPE } from '../fixtures/constants';
+import { deleteTaskManagerTaskSilently, readTaskAttributes, taskDocId } from '../lib/helpers';
 
 apiTest.describe('Task Manager API Keys', { tag: tags.serverless.observability.complete }, () => {
   let createdTaskId: string | undefined;
@@ -39,24 +40,13 @@ apiTest.describe('Task Manager API Keys', { tag: tags.serverless.observability.c
     // Safety-net cleanup: remove the task in case a test failed before it got deleted.
     if (createdTaskId) {
       const { cookieHeader } = await samlAuth.asInteractiveUser('admin');
-      await apiClient
-        .delete(`internal/task_manager/tasks/${createdTaskId}`, {
-          headers: { ...COMMON_HEADERS, ...cookieHeader },
-        })
-        .catch(() => {});
+      await deleteTaskManagerTaskSilently(apiClient, cookieHeader, createdTaskId);
     }
     await kbnClient.savedObjects.clean({ types: ['api_key_to_invalidate'] });
   });
 
   apiTest('scheduled task has both apiKey and uiamApiKey', async ({ esClient }) => {
-    const { _source } = await esClient.get({
-      index: '.kibana_task_manager',
-      id: `task:${createdTaskId}`,
-    });
-
-    expect(_source).toBeDefined();
-    const taskAttrs = (_source as Record<string, unknown>)?.task as Record<string, unknown>;
-    expect(taskAttrs).toBeDefined();
+    const taskAttrs = await readTaskAttributes(esClient, taskDocId(createdTaskId!));
     expect(taskAttrs.apiKey).toBeDefined();
     expect(taskAttrs.uiamApiKey).toBeDefined();
   });

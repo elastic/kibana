@@ -61,7 +61,7 @@ describe('useColumns', () => {
         wrapper: createWrapper(),
       });
 
-      // Actions column is omitted because no onEdit/onDelete is configured.
+      // Actions column is omitted because no edit/delete handlers are configured.
       expect(result.current).toHaveLength(2);
       expect(result.current[0].column).toMatchObject({
         field: 'title',
@@ -78,7 +78,14 @@ describe('useColumns', () => {
     it('includes Actions column when item config has edit/delete handlers', () => {
       const onEdit = jest.fn();
       const onDelete = jest.fn();
-      const wrapper = createWrapper({ item: { onEdit, onDelete } });
+      const wrapper = createWrapper({
+        item: {
+          actions: {
+            edit: { onItemAction: onEdit },
+            delete: { onBulkAction: onDelete },
+          },
+        },
+      });
 
       const { result } = renderHook(() => useColumns(undefined, onDelete), {
         wrapper,
@@ -90,9 +97,28 @@ describe('useColumns', () => {
       expect(result.current[2].column).toMatchObject({ name: 'Actions' });
     });
 
-    it('includes only Edit action when only onEdit is configured', () => {
+    it('includes only Edit action when only `actions.edit.onItemAction` is configured', () => {
       const onEdit = jest.fn();
-      const wrapper = createWrapper({ item: { onEdit } });
+      const wrapper = createWrapper({
+        item: { actions: { edit: { onItemAction: onEdit } } },
+      });
+
+      const { result } = renderHook(() => useColumns(undefined), {
+        wrapper,
+      });
+
+      expect(result.current).toHaveLength(3);
+      const actionsColumn = result.current[2].column;
+      expect(actionsColumn).toMatchObject({ name: 'Actions' });
+      expect((actionsColumn as { actions: unknown[] }).actions).toHaveLength(1);
+    });
+
+    it('includes only Edit action when only `actions.edit.getItemActionHref` is configured', () => {
+      const wrapper = createWrapper({
+        item: {
+          actions: { edit: { getItemActionHref: (i) => `/edit/${i.id}` } },
+        },
+      });
 
       const { result } = renderHook(() => useColumns(undefined), {
         wrapper,
@@ -107,7 +133,15 @@ describe('useColumns', () => {
     it('omits Actions column in read-only mode even with handlers', () => {
       const onEdit = jest.fn();
       const onDelete = jest.fn();
-      const wrapper = createWrapper({ isReadOnly: true, item: { onEdit, onDelete } });
+      const wrapper = createWrapper({
+        isReadOnly: true,
+        item: {
+          actions: {
+            edit: { onItemAction: onEdit },
+            delete: { onBulkAction: onDelete },
+          },
+        },
+      });
 
       const { result } = renderHook(() => useColumns(undefined, onDelete), {
         wrapper,

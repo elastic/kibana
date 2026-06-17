@@ -8,17 +8,23 @@
 import React, { forwardRef, useCallback, useMemo } from 'react';
 import { css } from '@emotion/react';
 import { EuiHighlight, useEuiTheme } from '@elastic/eui';
-import { useSmlSearch } from '../../../../../../../hooks/sml/use_sml_search';
+import { useSmlAutocomplete } from '../../../../../../../hooks/sml/use_sml_autocomplete';
+import { useAgentId } from '../../../../../../../hooks/use_conversation';
+import { useAgentBuilderAgentById } from '../../../../../../../hooks/agents/use_agent_by_id';
 import type { CommandMenuComponentProps, CommandMenuHandle } from '../../types';
 import { CommandId } from '../../types';
 import { getSmlMenuHighlightSearchStrings } from '../../utils/sml_command_menu_highlight';
+import { buildSmlScopingFromAgent } from '../../utils/sml_filters';
 import { CommandMenuList } from '../components/command_menu_list';
 import type { CommandMenuListOption } from '../components/command_menu_list';
 
 export const Sml = forwardRef<CommandMenuHandle, CommandMenuComponentProps>(
   ({ query, onSelect }, ref) => {
+    const agentId = useAgentId();
+    const { agent } = useAgentBuilderAgentById(agentId);
+    const constraints = useMemo(() => buildSmlScopingFromAgent(agent), [agent]);
     const { euiTheme } = useEuiTheme();
-    const { results, isLoading } = useSmlSearch(query, { skipContent: true });
+    const { results, isLoading } = useSmlAutocomplete(query, { constraints });
     const { type, title } = useMemo(() => getSmlMenuHighlightSearchStrings(query), [query]);
 
     const smlMenuLabelStyles = useMemo(
@@ -50,7 +56,6 @@ export const Sml = forwardRef<CommandMenuHandle, CommandMenuComponentProps>(
                   </EuiHighlight>
                 </span>
                 <span>/</span>
-
                 <EuiHighlight strict={false} search={title}>
                   {titlePlain}
                 </EuiHighlight>

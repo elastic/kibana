@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-plugin/server/types';
 import type { Logger } from '@kbn/core/server';
+import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
 import type { EbtTelemetryClient } from '../../lib/telemetry/ebt';
 import type { GetScopedClients } from '../../routes/types';
 import type { StreamsServer } from '../../types';
@@ -22,15 +22,21 @@ import { createInspectStreamsTool } from './read/inspect_streams';
 import { createDiagnoseStreamTool } from './read/diagnose_stream';
 import { createQueryDocumentsTool } from './read/query_documents';
 import { createDesignPipelineTool } from './read/design_pipeline';
+import { createListIlmPoliciesTool } from './read/list_ilm_policies';
 import {
   createSearchKnowledgeIndicatorsTool,
   STREAMS_SEARCH_KNOWLEDGE_INDICATORS_TOOL_ID,
 } from './search_knowledge_indicators/tool';
+import { createSearchEventsTool, STREAMS_SEARCH_EVENTS_TOOL_ID } from './event_search/tool';
+import { createEventTool, STREAMS_CREATE_EVENT_TOOL_ID } from './event_create/tool';
+import {
+  createEventStatusUpdateTool,
+  STREAMS_EVENT_STATUS_UPDATE_TOOL_ID,
+} from './event_status_update/tool';
 import { createUpdateStreamTool } from './write/update_stream';
 import { createCreatePartitionTool } from './write/create_partition';
 import { createDeleteStreamTool } from './write/delete_stream';
 import { StreamsWriteQueue } from '../utils/write_queue';
-
 export {
   STREAMS_READ_TOOL_IDS,
   STREAMS_WRITE_TOOL_IDS,
@@ -38,6 +44,7 @@ export {
   STREAMS_DIAGNOSE_STREAM_TOOL_ID,
   STREAMS_QUERY_DOCUMENTS_TOOL_ID,
   STREAMS_DESIGN_PIPELINE_TOOL_ID,
+  STREAMS_LIST_ILM_POLICIES_TOOL_ID,
   STREAMS_UPDATE_STREAM_TOOL_ID,
   STREAMS_CREATE_PARTITION_TOOL_ID,
   STREAMS_DELETE_STREAM_TOOL_ID,
@@ -47,6 +54,9 @@ export {
   STREAMS_CREATE_FEATURE_KNOWLEDGE_INDICATOR_TOOL_ID,
   STREAMS_CREATE_QUERY_KNOWLEDGE_INDICATOR_TOOL_ID,
   STREAMS_SEARCH_KNOWLEDGE_INDICATORS_TOOL_ID,
+  STREAMS_SEARCH_EVENTS_TOOL_ID,
+  STREAMS_CREATE_EVENT_TOOL_ID,
+  STREAMS_EVENT_STATUS_UPDATE_TOOL_ID,
 };
 
 export function registerAgentBuilderTools({
@@ -78,6 +88,7 @@ export function registerAgentBuilderTools({
     }),
     createQueryDocumentsTool({ getScopedClients }),
     createDesignPipelineTool({ getScopedClients }),
+    createListIlmPoliciesTool({ getScopedClients, isServerless: server.isServerless }),
 
     // Write tools
     createUpdateStreamTool({ getScopedClients, writeQueue }),
@@ -100,6 +111,23 @@ export function registerAgentBuilderTools({
       getScopedClients,
       server,
       logger: logger.get('ki_query_create_tool'),
+      telemetry,
+    }),
+    createSearchEventsTool({
+      getScopedClients,
+      server,
+      logger: logger.get('event_search_tool'),
+    }),
+    createEventTool({
+      getScopedClients,
+      server,
+      logger: logger.get('event_create_tool'),
+      telemetry,
+    }),
+    createEventStatusUpdateTool({
+      getScopedClients,
+      server,
+      logger: logger.get('event_status_update_tool'),
       telemetry,
     }),
   ];

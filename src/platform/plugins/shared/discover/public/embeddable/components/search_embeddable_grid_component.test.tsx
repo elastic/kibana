@@ -19,6 +19,7 @@ import type { SavedSearch, DiscoverGridSettings, VIEW_MODE } from '@kbn/saved-se
 import type { DataTableColumnsMeta, SortOrder, DataGridDensity } from '@kbn/unified-data-table';
 import type { SearchResponseIncompleteWarning } from '@kbn/search-response-warnings/src/types';
 import type { FetchContext } from '@kbn/presentation-publishing';
+import type { DocViewerApi } from '@kbn/unified-doc-viewer';
 import { createDiscoverServicesMock } from '../../__mocks__/services';
 import { DiscoverTestProvider } from '../../__mocks__/test_provider';
 import type { SearchEmbeddableApi, SearchEmbeddableStateManager } from '../types';
@@ -97,6 +98,7 @@ describe('SearchEmbeddableGridComponent', () => {
     const savedSearch = createSavedSearch(isEsql);
     const api = createApi(savedSearch);
     const stateManager = createStateManager();
+    const docViewerRef = React.createRef<DocViewerApi>();
     stateManager.rows.next(rows);
     stateManager.totalHitCount.next(rows.length);
 
@@ -113,6 +115,9 @@ describe('SearchEmbeddableGridComponent', () => {
             onApply: jest.fn(),
             onCancel: jest.fn(),
           }}
+          docViewerRef={docViewerRef}
+          expandedDoc={undefined}
+          initialDocViewerTabId={undefined}
         />
       </DiscoverTestProvider>
     );

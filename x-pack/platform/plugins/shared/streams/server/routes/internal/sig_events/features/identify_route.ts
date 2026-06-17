@@ -10,6 +10,7 @@ import { z } from '@kbn/zod/v4';
 import {
   getStreamTypeFromDefinition,
   STREAMS_SIG_EVENTS_KI_EXTRACTION_INFERENCE_FEATURE_ID,
+  STREAMS_SIGNIFICANT_EVENTS_INFERENCE_PARENT_FEATURE_ID,
 } from '@kbn/streams-schema';
 import { isInferenceProviderError } from '@kbn/inference-common';
 import { createServerRoute } from '../../../create_server_route';
@@ -24,7 +25,7 @@ import {
   identifyInferredFeatures,
   identifyComputedFeatures,
 } from '../../../../lib/sig_events/features';
-import { areFeaturesRecent } from '../../../../lib/sig_events/features/are_features_recent';
+import { shouldIdentifyFeatures } from '../../../../lib/sig_events/features/should_identify_features';
 
 // ---------------------------------------------------------------------------
 // Route 1: Identify inferred features (one iteration: sample + infer + reconcile)
@@ -116,7 +117,15 @@ const identifyInferredFeaturesRoute = createServerRoute({
         esClient: scopedClusterClient.asCurrentUser,
         featureClient,
         soClient,
-        inferenceClient: inferenceClient.bindTo({ connectorId }),
+        inferenceClient: inferenceClient.bindTo({
+          connectorId,
+          metadata: {
+            connectorTelemetry: {
+              pluginId: STREAMS_SIG_EVENTS_KI_EXTRACTION_INFERENCE_FEATURE_ID,
+              aggregateBy: STREAMS_SIGNIFICANT_EVENTS_INFERENCE_PARENT_FEATURE_ID,
+            },
+          },
+        }),
         logger: routeLogger,
         signal: getRequestAbortSignal(request),
         streamName,
@@ -260,14 +269,14 @@ const identifyComputedFeaturesRoute = createServerRoute({
 });
 
 // ---------------------------------------------------------------------------
-// Route 3: Check features recency
+// Route 3: Check whether features identification should run
 // ---------------------------------------------------------------------------
 
-const featuresRecencyRoute = createServerRoute({
-  endpoint: 'GET /internal/streams/{streamName}/features/_recency',
+const shouldIdentifyRoute = createServerRoute({
+  endpoint: 'GET /internal/streams/{streamName}/features/_should_identify',
   options: {
     access: 'internal',
-    summary: 'Check whether KI features for a stream were identified recently',
+    summary: 'Check whether KI features identification should run for a stream',
   },
   security: {
     authz: {
@@ -286,7 +295,7 @@ const featuresRecencyRoute = createServerRoute({
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
 
     const featureClient = await getFeatureClient();
-    return areFeaturesRecent({
+    return shouldIdentifyFeatures({
       featureClient,
       streamName: params.path.streamName,
       thresholdHours: params.query.thresholdHours,
@@ -301,5 +310,5 @@ const featuresRecencyRoute = createServerRoute({
 export const identifyFeaturesRoutes = {
   ...identifyInferredFeaturesRoute,
   ...identifyComputedFeaturesRoute,
-  ...featuresRecencyRoute,
+  ...shouldIdentifyRoute,
 };

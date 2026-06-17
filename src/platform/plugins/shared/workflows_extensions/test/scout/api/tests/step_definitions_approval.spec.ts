@@ -22,6 +22,7 @@ apiTest.describe(
       ...tags.serverless.security.complete,
       ...tags.serverless.observability.complete,
       ...tags.serverless.workplaceai,
+      ...tags.serverless.vectordb,
     ],
   },
   () => {
@@ -46,19 +47,19 @@ apiTest.describe(
         expect(response.body.steps).toBeDefined();
         expect(Array.isArray(response.body.steps)).toBe(true);
 
-        const stepEntriesToUpdate: Array<{ id: string; handlerHash: string }> = [];
+        const stepEntriesToUpdate: Array<{ id: string; definitionHash: string }> = [];
         const issues = response.body.steps.reduce(
-          (acc: string[], step: { id: string; handlerHash: string }) => {
+          (acc: string[], step: { id: string; definitionHash: string }) => {
             const approvedStep = APPROVED_STEP_DEFINITIONS.find(({ id }) => id === step.id);
 
             if (!approvedStep) {
               acc.push(`Step "${step.id}" is not in the approved list.`);
-              stepEntriesToUpdate.push({ id: step.id, handlerHash: step.handlerHash });
-            } else if (step.handlerHash !== approvedStep.handlerHash) {
+              stepEntriesToUpdate.push({ id: step.id, definitionHash: step.definitionHash });
+            } else if (step.definitionHash !== approvedStep.definitionHash) {
               acc.push(
-                `Step "${step.id}" has an invalid handler hash (expected "${approvedStep.handlerHash}", got "${step.handlerHash}").`
+                `Step "${step.id}" has an invalid definition hash (expected "${approvedStep.definitionHash}", got "${step.definitionHash}").`
               );
-              stepEntriesToUpdate.push({ id: step.id, handlerHash: step.handlerHash });
+              stepEntriesToUpdate.push({ id: step.id, definitionHash: step.definitionHash });
             }
             return acc;
           },

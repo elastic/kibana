@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
 
@@ -160,6 +160,27 @@ export function useDowloadSourceFlyoutForm(onSuccess: () => void, downloadSource
 
   const hasChanged = Object.values(inputs).some((input) => input.hasChanged);
 
+  const { setErrors: setUsernameErrors } = usernameInput;
+  const { setErrors: setPasswordErrors } = passwordInput;
+  const { cancelEdit: cancelPasswordSecretEdit } = passwordSecretInput;
+  const { setErrors: setApiKeyErrors } = apiKeyInput;
+  const { cancelEdit: cancelApiKeySecretEdit } = apiKeySecretInput;
+
+  useEffect(() => {
+    setUsernameErrors(undefined);
+    setPasswordErrors(undefined);
+    cancelPasswordSecretEdit();
+    setApiKeyErrors(undefined);
+    cancelApiKeySecretEdit();
+  }, [
+    authTypeInput.value,
+    setUsernameErrors,
+    setPasswordErrors,
+    cancelPasswordSecretEdit,
+    setApiKeyErrors,
+    cancelApiKeySecretEdit,
+  ]);
+
   const validate = useCallback(() => {
     const nameInputValid = nameInput.validate();
     const hostValid = hostInput.validate();
@@ -181,7 +202,7 @@ export function useDowloadSourceFlyoutForm(onSuccess: () => void, downloadSource
     let authValid = true;
     if (authType === 'username_password') {
       // Username & password tab: require both username and password
-      const hasUsername = !!usernameInput.value;
+      const hasUsername = !!usernameInput.value.trim();
       const hasPassword = !!passwordInput.value || !!passwordSecretInput.value;
       if (!hasUsername) {
         usernameInput.setErrors([
@@ -258,7 +279,7 @@ export function useDowloadSourceFlyoutForm(onSuccess: () => void, downloadSource
       let auth: PostDownloadSourceRequest['body']['auth'] | null;
 
       const filteredHeaders = headersInput.value.filter(
-        (header) => header.key !== '' || header.value !== ''
+        (header) => header.key.trim() !== '' || header.value.trim() !== ''
       );
       const hasHeaders = filteredHeaders.length > 0;
 
@@ -369,7 +390,7 @@ export function useDowloadSourceFlyoutForm(onSuccess: () => void, downloadSource
   const authType = authTypeInput.value as AuthType;
   const isAuthMissing =
     (authType === 'username_password' &&
-      (!usernameInput.value || (!passwordInput.value && !passwordSecretInput.value))) ||
+      (!usernameInput.value.trim() || (!passwordInput.value && !passwordSecretInput.value))) ||
     (authType === 'api_key' && !apiKeyInput.value && !apiKeySecretInput.value);
 
   return {
@@ -437,8 +458,8 @@ export function validateDownloadSourceHeaders(
   pairs.forEach((pair, index) => {
     const { key, value } = pair;
 
-    const hasKey = !!key;
-    const hasValue = !!value;
+    const hasKey = key.trim() !== '';
+    const hasValue = value.trim() !== '';
 
     if (hasKey && !hasValue) {
       errors.push({

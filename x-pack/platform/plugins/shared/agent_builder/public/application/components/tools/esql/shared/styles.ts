@@ -8,18 +8,32 @@
 import { css } from '@emotion/react';
 import type { UseEuiTheme } from '@elastic/eui';
 
+export const visualizationActionsClassName = 'agentBuilderVisualizationActions';
+export const visualizationTimePickerContainerClassName =
+  'agentBuilderVisualizationTimePickerContainer';
+
 export const visualizationWrapperStyles = ({ euiTheme }: UseEuiTheme) =>
   css({
     position: 'relative',
     overflow: 'visible',
     display: 'flex',
     flexDirection: 'column',
+    [`.${visualizationActionsClassName} + .${visualizationTimePickerContainerClassName}`]: {
+      width: `calc(100% - ${euiTheme.base * 4}px)`,
+    },
     '.echChart ul': {
       marginInlineStart: 0,
     },
 
+    '.echMetricText__subtitle': {
+      margin: 0,
+    },
+
     '.expExpressionRenderer__expression': {
       padding: `${euiTheme.size.s} 0`,
+      '[class*="datatableContainerStyles"]': {
+        padding: `${euiTheme.size.s} ${euiTheme.size.s}`,
+      },
     },
   });
 
@@ -43,9 +57,10 @@ export const visualizationEmbeddableStyles = (height: number) =>
     height,
   });
 
-export const actionsContainerStyles = () =>
+export const actionsContainerStyles = ({ euiTheme }: UseEuiTheme) =>
   css({
-    flex: '0 0 auto',
-    display: 'inline-flex',
-    gap: 0,
+    position: 'absolute',
+    top: euiTheme.size.base,
+    right: euiTheme.size.base,
+    zIndex: euiTheme.levels.flyout,
   });

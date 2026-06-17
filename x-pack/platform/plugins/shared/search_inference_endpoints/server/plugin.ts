@@ -34,6 +34,7 @@ import {
   ELASTIC_INFERENCE_SERVICE_APP_ID,
   INFERENCE_ENDPOINTS_APP_ID,
   INFERENCE_SETTINGS_SO_TYPE,
+  INFERENCE_UI_CAPABILITIES,
   MODEL_SETTINGS_APP_ID,
   PLUGIN_ID,
   PLUGIN_NAME,
@@ -75,9 +76,9 @@ export class SearchInferenceEndpointsPlugin
 
     const getForFeature = async (featureId: string, request: KibanaRequest) => {
       const [coreStart, pluginsStart] = await core.getStartServices();
-      const soClient = coreStart.savedObjects.createInternalRepository([
-        INFERENCE_SETTINGS_SO_TYPE,
-      ]);
+      const soClient = coreStart.savedObjects.getScopedClient(request, {
+        includedHiddenTypes: [INFERENCE_SETTINGS_SO_TYPE],
+      });
       const getConnectorById = (id: string) => pluginsStart.inference.getConnectorById(id, request);
       return getForFeatureFn(featureRegistry, soClient, getConnectorById, featureId, this.logger);
     };
@@ -119,7 +120,7 @@ export class SearchInferenceEndpointsPlugin
       privileges: {
         all: {
           app: [],
-          api: [ApiPrivileges.manage(PLUGIN_ID)],
+          api: [ApiPrivileges.manage(PLUGIN_ID), ApiPrivileges.read(PLUGIN_ID)],
           catalogue: [],
           management: {
             modelManagement: [
@@ -132,15 +133,24 @@ export class SearchInferenceEndpointsPlugin
             all: [INFERENCE_SETTINGS_SO_TYPE],
             read: [],
           },
-          ui: [],
+          ui: [INFERENCE_UI_CAPABILITIES.show, INFERENCE_UI_CAPABILITIES.manage],
         },
         read: {
-          disabled: true,
+          app: [],
+          api: [ApiPrivileges.read(PLUGIN_ID)],
+          catalogue: [],
+          management: {
+            modelManagement: [
+              ELASTIC_INFERENCE_SERVICE_APP_ID,
+              INFERENCE_ENDPOINTS_APP_ID,
+              MODEL_SETTINGS_APP_ID,
+            ],
+          },
           savedObject: {
             all: [],
-            read: [],
+            read: [INFERENCE_SETTINGS_SO_TYPE],
           },
-          ui: [],
+          ui: [INFERENCE_UI_CAPABILITIES.show],
         },
       },
     });
@@ -179,7 +189,9 @@ export class SearchInferenceEndpointsPlugin
       },
       endpoints: {
         getForFeature: async (featureId: string, request: KibanaRequest) => {
-          const soClient = core.savedObjects.createInternalRepository([INFERENCE_SETTINGS_SO_TYPE]);
+          const soClient = core.savedObjects.getScopedClient(request, {
+            includedHiddenTypes: [INFERENCE_SETTINGS_SO_TYPE],
+          });
           const uiSettingsClient = core.uiSettings.asScopedToClient(
             core.savedObjects.getScopedClient(request)
           );
@@ -187,6 +199,7 @@ export class SearchInferenceEndpointsPlugin
           const resolveFeatureEndpoints = (fId: string) =>
             getForFeatureFn(featureRegistry, soClient, getConnectorById, fId, this.logger);
           const getConnectorList = () => plugins.inference.getConnectorList(request);
+          const feature = featureRegistry.get(featureId);
 
           const result = await resolveModelsForFeature({
             getForFeature: resolveFeatureEndpoints,
@@ -194,6 +207,7 @@ export class SearchInferenceEndpointsPlugin
             getConnectorById,
             uiSettingsClient,
             featureId,
+            ignoreGlobalDefault: feature?.ignoreGlobalDefault ?? false,
             logger: this.logger,
           });
 

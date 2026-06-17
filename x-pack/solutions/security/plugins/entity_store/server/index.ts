@@ -19,6 +19,9 @@ export { getLatestEntitiesIndexName, getEntitiesAlias, ENTITY_LATEST } from '../
 export { getHistorySnapshotIndexPattern } from './domain/asset_manager/history_snapshot_index';
 export { ENGINE_METADATA_TYPE_FIELD } from './domain/logs_extraction/query_builder_commons';
 export { getFieldValue } from '../common/domain/euid/commons';
+export { EngineDescriptorTypeName } from './domain/saved_objects/engine_descriptor/types';
+export { EntityStoreGlobalStateTypeName } from './domain/saved_objects/global_state/types';
+export { enterpriseLicenseMiddleware } from './routes/middleware/enterprise_license';
 
 export async function plugin(initializerContext: PluginInitializerContext) {
   const { EntityStorePlugin } = await import('./plugin');

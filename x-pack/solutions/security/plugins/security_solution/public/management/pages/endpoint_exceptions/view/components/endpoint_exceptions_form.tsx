@@ -18,6 +18,7 @@ import {
   EuiText,
   EuiHorizontalRule,
   EuiTextArea,
+  EuiFlexGroup,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -30,16 +31,19 @@ import type {
 import {
   hasWrongOperatorWithWildcard,
   hasPartialCodeSignatureEntry,
+  hasEscaping,
 } from '@kbn/securitysolution-list-utils';
 import {
   WildCardWithWrongOperatorCallout,
   PartialCodeSignatureCallout,
+  UnnecessaryEscapingCallout,
 } from '@kbn/securitysolution-exception-list-components';
 import { OperatingSystem } from '@kbn/securitysolution-utils';
 
 import { getExceptionBuilderComponentLazy } from '@kbn/lists-plugin/public';
 import type { OnChangeProps } from '@kbn/lists-plugin/public';
 import type { ValueSuggestionsGetFn } from '@kbn/kql/public/autocomplete/providers/value_suggestion_provider';
+import { CONFIRM_WARNING_MODAL_LABELS } from '../../../../components/artifact_list_page/components/artifact_confirm_modal';
 import { useGetEndpointExceptionsPerPolicyOptIn } from '../../../../hooks/artifacts/use_endpoint_per_policy_opt_in';
 import type { EffectedPolicySelectProps } from '../../../../components/effected_policy_select';
 import { EffectedPolicySelect } from '../../../../components/effected_policy_select';
@@ -65,11 +69,7 @@ import {
   DESCRIPTION_LABEL,
   OS_LABEL,
 } from '../../translations';
-import {
-  OS_TITLES,
-  CONFIRM_WARNING_MODAL_LABELS,
-  OPERATING_SYSTEM_WINDOWS_AND_MAC,
-} from '../../../../common/translations';
+import { OS_TITLES, OPERATING_SYSTEM_WINDOWS_AND_MAC } from '../../../../common/translations';
 import { ENDPOINT_EXCEPTIONS_LIST_DEFINITION } from '../../constants';
 
 import { ExceptionItemComments } from '../../../../../detection_engine/rule_exceptions/components/item_comments';
@@ -129,7 +129,10 @@ export const EndpointExceptionsForm: React.FC<EndpointExceptionsFormProps> = mem
     error: submitError,
   }) => {
     const getTestId = useTestIdGenerator('endpointExceptions-form');
-    const { http } = useKibana().services;
+    const {
+      http,
+      docLinks: { links },
+    } = useKibana().services;
 
     const getSuggestionsFn = useCallback<ValueSuggestionsGetFn>(
       ({ field, query }) => {
@@ -149,6 +152,9 @@ export const EndpointExceptionsForm: React.FC<EndpointExceptionsFormProps> = mem
     const [hasDuplicateFields, setHasDuplicateFields] = useState<boolean>(false);
     const [hasWildcardWithWrongOperator, setHasWildcardWithWrongOperator] = useState<boolean>(
       hasWrongOperatorWithWildcard([exception])
+    );
+    const [hasUnnecessaryEscaping, setHasUnnecessaryEscaping] = useState<boolean>(
+      hasEscaping([exception], exception.os_types)
     );
     const [hasPartialCodeSignatureWarning, setHasPartialCodeSignatureWarning] = useState<boolean>(
       hasPartialCodeSignatureEntry([exception])
@@ -204,16 +210,22 @@ export const EndpointExceptionsForm: React.FC<EndpointExceptionsFormProps> = mem
           item,
           additionalEntries: addEntries,
           isValid: isFormValid && areConditionsValid && hasFormChanged,
-          confirmModalLabels: hasWildcardWithWrongOperator
-            ? CONFIRM_WARNING_MODAL_LABELS(
-                i18n.translate(
-                  'xpack.securitySolution.endpointException.flyoutForm.confirmModal.name',
+          confirmModalLabels:
+            hasWildcardWithWrongOperator || hasUnnecessaryEscaping
+              ? CONFIRM_WARNING_MODAL_LABELS(
+                  i18n.translate(
+                    'xpack.securitySolution.endpointException.flyoutForm.confirmModal.name',
+                    {
+                      defaultMessage: 'endpoint exception',
+                    }
+                  ),
                   {
-                    defaultMessage: 'endpoint exception',
-                  }
+                    hasWildcardWithWrongOperator,
+                    hasUnnecessaryEscaping,
+                  },
+                  links
                 )
-              )
-            : undefined,
+              : undefined,
         });
       },
       [
@@ -224,6 +236,8 @@ export const EndpointExceptionsForm: React.FC<EndpointExceptionsFormProps> = mem
         areConditionsValid,
         hasFormChanged,
         hasWildcardWithWrongOperator,
+        hasUnnecessaryEscaping,
+        links,
       ]
     );
 
@@ -310,13 +324,22 @@ export const EndpointExceptionsForm: React.FC<EndpointExceptionsFormProps> = mem
     const handleOnOsChange = useCallback(
       (os: OsTypeArray) => {
         if (!exception) return;
+        setHasUnnecessaryEscaping(
+          hasEscaping(
+            [
+              exception,
+              ...(additionalEntries ? additionalEntries.map((e) => ({ entries: e })) : []),
+            ],
+            os
+          )
+        );
         processChanged({
           os_types: os,
           entries: exception.entries,
         });
         if (!hasFormChanged) setHasFormChanged(true);
       },
-      [exception, hasFormChanged, processChanged]
+      [additionalEntries, exception, hasFormChanged, processChanged]
     );
 
     const osInputMemo = useMemo(
@@ -435,8 +458,8 @@ export const EndpointExceptionsForm: React.FC<EndpointExceptionsFormProps> = mem
           setHasDuplicateFields(false);
         }
 
-        // handle wildcard with wrong operator case
         setHasWildcardWithWrongOperator(hasWrongOperatorWithWildcard(arg.exceptionItems));
+        setHasUnnecessaryEscaping(hasEscaping(arg.exceptionItems, exception.os_types));
         setHasPartialCodeSignatureWarning(hasPartialCodeSignatureEntry(arg.exceptionItems));
 
         const updatedItem: Partial<ArtifactFormComponentProps['item']> =
@@ -583,9 +606,12 @@ export const EndpointExceptionsForm: React.FC<EndpointExceptionsFormProps> = mem
         {detailsSection}
         <EuiHorizontalRule />
         {criteriaSection}
-        {hasWildcardWithWrongOperator && <WildCardWithWrongOperatorCallout />}
-        {hasWildcardWithWrongOperator && hasPartialCodeSignatureWarning && <EuiSpacer size="xs" />}
-        {hasPartialCodeSignatureWarning && <PartialCodeSignatureCallout />}
+        <EuiFlexGroup direction="column" gutterSize="s">
+          {hasWildcardWithWrongOperator && <WildCardWithWrongOperatorCallout />}
+          {hasUnnecessaryEscaping && <UnnecessaryEscapingCallout />}
+          {hasPartialCodeSignatureWarning && <PartialCodeSignatureCallout />}
+        </EuiFlexGroup>
+
         {hasDuplicateFields && (
           <>
             <EuiSpacer size="xs" />

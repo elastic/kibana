@@ -20,6 +20,7 @@ import {
   EuiPopover,
   EuiSearchBar,
   EuiTitle,
+  EuiToolTip,
 } from '@elastic/eui';
 import type { ListingPageUrlState } from '@kbn/ml-url-state';
 import {
@@ -278,26 +279,40 @@ export const TransformList: FC<TransformListProps> = ({
 
   const renderToolsLeft = () => {
     const buttonIcon = (
-      <EuiButtonIcon
-        size="s"
-        iconType="gear"
-        color="text"
-        onClick={() => {
-          setIsActionsMenuOpen(true);
-        }}
-        aria-label={i18n.translate(
+      <EuiToolTip
+        content={i18n.translate(
           'xpack.transform.multiTransformActionsMenu.managementActionsAriaLabel',
           {
             defaultMessage: 'Management actions',
           }
         )}
-      />
+        disableScreenReaderOutput
+      >
+        <EuiButtonIcon
+          size="s"
+          iconType="gear"
+          color="text"
+          onClick={() => {
+            setIsActionsMenuOpen(true);
+          }}
+          aria-label={i18n.translate(
+            'xpack.transform.multiTransformActionsMenu.managementActionsAriaLabel',
+            {
+              defaultMessage: 'Management actions',
+            }
+          )}
+        />
+      </EuiToolTip>
     );
 
     const bulkActionIcon = (
       <EuiPopover
         key="bulkActionIcon"
         id="transformBulkActionsMenu"
+        aria-label={i18n.translate(
+          'xpack.transform.multiTransformActionsMenu.bulkActionsPopoverAriaLabel',
+          { defaultMessage: 'Bulk actions' }
+        )}
         button={buttonIcon}
         isOpen={isActionsMenuOpen}
         closePopover={() => setIsActionsMenuOpen(false)}

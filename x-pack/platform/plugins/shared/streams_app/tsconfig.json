@@ -42,7 +42,7 @@
     "@kbn/streams-plugin",
     "@kbn/search-types",
     "@kbn/xstate-utils",
-    "@kbn/datemath",
+    "@kbn/data-lifecycle-phases",
     "@kbn/index-lifecycle-management-common-shared",
     "@kbn/charts-theme",
     "@kbn/index-management-shared-types",
@@ -52,7 +52,6 @@
     "@kbn/deeplinks-analytics",
     "@kbn/calculate-auto",
     "@kbn/deeplinks-observability",
-    "@kbn/ui-theme",
     "@kbn/test",
     "@kbn/discover-utils",
     "@kbn/discover-shared-plugin",
@@ -117,5 +116,8 @@
     "@kbn/core-ui-settings-browser",
     "@kbn/inference-connectors",
     "@kbn/safer-lodash-set",
+    "@kbn/agent-builder-plugin",
+    "@kbn/agent-builder-browser",
+    "@kbn/agent-builder-common",
   ]
 }

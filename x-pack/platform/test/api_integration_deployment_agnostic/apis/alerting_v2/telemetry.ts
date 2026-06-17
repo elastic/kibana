@@ -14,7 +14,7 @@ const RULE_API_PATH = '/api/alerting/v2/rules';
 const ACTION_POLICY_API_PATH = '/api/alerting/v2/action_policies';
 const RULE_SO_TYPE = 'alerting_rule';
 const ACTION_POLICY_SO_TYPE = 'alerting_action_policy';
-const TELEMETRY_TASK_ID = 'AlertingV2-alerting_v2_telemetry';
+const TELEMETRY_TASK_ID = 'AlertingV2-alerting_v2:telemetry';
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const samlAuth = getService('samlAuth');
@@ -45,9 +45,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             metadata: { name: 'alert-rule-1' },
             time_field: '@timestamp',
             schedule: { every: '1m', lookback: '5m' },
-            evaluation: {
-              query: { base: 'FROM metrics-* | LIMIT 10' },
-            },
+            query: { format: 'standalone', breach: { query: 'FROM metrics-* | LIMIT 10' } },
             grouping: { fields: ['host.name', 'service.name'] },
             no_data: { behavior: 'last_status', timeframe: '10m' },
           }),
@@ -61,10 +59,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             metadata: { name: 'signal-rule-1' },
             time_field: '@timestamp',
             schedule: { every: '5m' },
-            evaluation: {
-              query: { base: 'FROM logs-* | LIMIT 10' },
-            },
-            recovery_policy: { type: 'no_breach' },
+            query: { format: 'standalone', breach: { query: 'FROM logs-* | LIMIT 10' } },
           }),
         // Rule 3: alert kind, 5m schedule, disabled
         supertestWithoutAuth
@@ -76,13 +71,12 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             metadata: { name: 'alert-rule-2' },
             time_field: '@timestamp',
             schedule: { every: '5m', lookback: '10m' },
-            evaluation: { query: { base: 'FROM metrics-* | LIMIT 5' } },
-            no_data: { behavior: 'recover', timeframe: '15m' },
+            query: { format: 'standalone', breach: { query: 'FROM metrics-* | LIMIT 5' } },
           }),
       ]);
 
       for (const result of ruleResults) {
-        expect(result.status).to.be(200);
+        expect(result.status).to.be(201);
       }
 
       // Disable rule 3
@@ -123,7 +117,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       ]);
 
       for (const result of policyResults) {
-        expect(result.status).to.be(200);
+        expect(result.status).to.be(201);
       }
     });
 
@@ -181,20 +175,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           { name: '10m', value: 1 },
           { name: '5m', value: 1 },
         ]);
-        expect(parsedState.count_with_recovery_policy).to.be(1);
-        expect(parsedState.count_by_recovery_policy_type).to.eql({ no_breach: 1 });
         expect(parsedState.count_with_grouping).to.be(1);
         expect(parsedState.avg_grouping_fields_count).to.be(2);
-        expect(parsedState.count_with_no_data).to.be(2);
-        expect(parsedState.count_by_no_data_behavior).to.eql({ recover: 1, last_status: 1 });
-        expect(
-          [...parsedState.count_by_no_data_timeframe].sort(
-            (a: { name: string }, b: { name: string }) => a.name.localeCompare(b.name)
-          )
-        ).to.eql([
-          { name: '10m', value: 1 },
-          { name: '15m', value: 1 },
-        ]);
         expect(parsedState.min_created_at).to.be.a('string');
 
         // Execution stats

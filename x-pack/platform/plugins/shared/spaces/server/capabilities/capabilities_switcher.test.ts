@@ -12,8 +12,8 @@ import { featuresPluginMock } from '@kbn/features-plugin/server/mocks';
 
 import { setupCapabilitiesSwitcher } from './capabilities_switcher';
 import type { Space } from '../../common';
-import type { PluginsStart } from '../plugin';
 import { spacesServiceMock } from '../spaces_service/spaces_service.mock';
+import type { SpacesPluginStartDeps } from '../types';
 
 const features = [
   {
@@ -168,7 +168,7 @@ const setup = (space: Space) => {
   const logger = loggingSystemMock.createLogger();
 
   const switcher = setupCapabilitiesSwitcher(
-    coreSetup as unknown as CoreSetup<PluginsStart>,
+    coreSetup as unknown as CoreSetup<SpacesPluginStartDeps>,
     () => spacesService,
     logger
   );

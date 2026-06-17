@@ -216,6 +216,12 @@ export interface DeploymentsModesDefault {
   is_default?: boolean;
 }
 
+// Ordering should be from least to most mature
+export enum AgentlessDeploymentReleaseStatus {
+  Beta = 'beta',
+  GA = 'ga',
+}
+
 export interface DeploymentsModesAgentless extends DeploymentsModesDefault {
   organization?: string;
   division?: string;
@@ -227,6 +233,7 @@ export interface DeploymentsModesAgentless extends DeploymentsModesDefault {
       memory: string;
     };
   };
+  release?: AgentlessDeploymentReleaseStatus;
 }
 export interface DeploymentsModes {
   agentless: DeploymentsModesAgentless;
@@ -316,7 +323,6 @@ export enum RegistryInputKeys {
   description = 'description',
   template_path = 'template_path',
   template_paths = 'template_paths',
-  condition = 'condition',
   input_group = 'input_group',
   required_vars = 'required_vars',
   vars = 'vars',
@@ -340,7 +346,6 @@ export interface RegistryInput {
   [RegistryInputKeys.description]: string;
   [RegistryInputKeys.template_path]?: string;
   [RegistryInputKeys.template_paths]?: string[];
-  [RegistryInputKeys.condition]?: string;
   [RegistryInputKeys.input_group]?: RegistryInputGroup;
   [RegistryInputKeys.required_vars]?: RegistryRequiredVars;
   [RegistryInputKeys.vars]?: RegistryVarsEntry[];
@@ -614,8 +619,31 @@ export interface RegistryVarsEntry {
   [RegistryVarsEntryKeys.max_duration]?: string;
   [RegistryVarsEntryKeys.url_allowed_schemes]?: string[];
   [RegistryVarsEntryKeys.deprecated]?: DeprecationInfo;
-  [RegistryVarsEntryKeys.migrate_from]?: string;
+  // Accepts either the current object form or, for backwards compatibility, the original
+  // string-shorthand form that named only the previous variable. The string form is treated
+  // as `{ name: <string> }` at read time. New manifests should use the object form.
+  [RegistryVarsEntryKeys.migrate_from]?: RegistryVarsMigrateFrom | string;
   [RegistryVarsEntryKeys.section]?: string;
+}
+
+/**
+ * Declares that a variable was previously named differently or defined at a different scope.
+ * At least one of `name` or `scope` must be set; both may be set together when a variable was
+ * both renamed and moved between scopes.
+ */
+export interface RegistryVarsMigrateFrom {
+  /** Previous name of the variable. Set when the variable was renamed between package versions. */
+  name?: string;
+  /**
+   * The scope where this variable previously lived. Set when the variable moved between
+   * input-level and stream-level within the same input type.
+   */
+  scope?: 'input' | 'stream';
+  /**
+   * Dataset name of the source stream when `scope` is "stream". Required when the source input
+   * has more than one stream; may be omitted when the source input has exactly one stream.
+   */
+  stream?: string;
 }
 
 // Deprecated as part of the removing public references to saved object schemas
@@ -807,6 +835,8 @@ export interface Installation {
   is_dependency_of?: IsDependencyOf | null;
   /** Whether the package was installed as a dependency (not manually by a user) */
   installed_as_dependency?: boolean;
+  /** Namespaces opted in for namespace-level customization for this package. */
+  namespace_customization_enabled_for?: string[];
   /** Snapshot of dependency version changes made when this (composable) package was last installed/upgraded; used for rollback */
   previous_dependency_versions?: Array<{ name: string; previous_version: string | null }> | null;
 }
@@ -859,6 +889,8 @@ export interface EsAssetReference {
   id: string;
   type: ElasticsearchAssetType;
   deferred?: boolean;
+  customDataStreamOriginDataset?: string;
+  customDataStreamOriginType?: string;
 }
 
 export interface PackageAssetReference {

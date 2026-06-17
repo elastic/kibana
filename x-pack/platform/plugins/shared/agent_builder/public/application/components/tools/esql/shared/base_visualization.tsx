@@ -5,20 +5,47 @@
  * 2.0.
  */
 
-import { EuiLoadingSpinner, EuiSuperDatePicker } from '@elastic/eui';
+import { EuiLoadingSpinner } from '@elastic/eui';
 import type { InlineEditLensEmbeddableContext, LensPublicStart } from '@kbn/lens-plugin/public';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';
 import {
+  ActionButtonType,
+  type ActionButton,
+  type InlineRenderCallbacks,
+} from '@kbn/agent-builder-browser/attachments';
+import { i18n } from '@kbn/i18n';
+import {
   visualizationEmbeddableStyles,
+  visualizationTimePickerContainerClassName,
   visualizationHeaderStyles,
-  visualizationWrapperStyles,
 } from './styles';
-import { VisualizationActions } from './visualization_actions';
-import { useTimeRange } from './use_time_range';
+import { DEFAULT_VISUALIZATION_HEIGHT } from './get_visualization_dimensions';
+import { useKibana } from '../../../../hooks/use_kibana';
+import { useVisPreviewUnifiedSearch } from './use_vis_preview_unified_search';
 
-const VISUALIZATION_HEIGHT = 240;
+const saveButtonLabel = i18n.translate(
+  'xpack.agentBuilder.conversation.visualization.saveToDashboard',
+  {
+    defaultMessage: 'Save to dashboard',
+  }
+);
+
+const dashboardWriteControlsDisabledReason = i18n.translate(
+  'xpack.agentBuilder.conversation.visualization.dashboardWriteControlsDisabledReason',
+  {
+    defaultMessage:
+      'You need dashboard write permissions to edit visualizations or save them to a dashboard.',
+  }
+);
+
+const viewConfigurationLabel = i18n.translate(
+  'xpack.agentBuilder.conversation.visualization.edit',
+  {
+    defaultMessage: 'View configuration',
+  }
+);
 
 interface BaseVisualizationProps {
   lens: LensPublicStart;
@@ -26,6 +53,8 @@ interface BaseVisualizationProps {
   lensInput: TypedLensByValueInput | undefined;
   setLensInput: (input: TypedLensByValueInput) => void;
   isLoading: boolean;
+  registerActionButtons: InlineRenderCallbacks['registerActionButtons'];
+  height?: number;
 }
 
 export function BaseVisualization({
@@ -34,18 +63,28 @@ export function BaseVisualization({
   lensInput,
   setLensInput,
   isLoading,
+  registerActionButtons,
+  height = DEFAULT_VISUALIZATION_HEIGHT,
 }: BaseVisualizationProps) {
   const [isSaveModalOpen, setIsSaveModalOpen] = useState(false);
   const [lensLoadEvent, setLensLoadEvent] = useState<
     InlineEditLensEmbeddableContext['lensEvent'] | null
   >(null);
 
-  const timeRangeControl = useTimeRange({ timeRange: lensInput?.timeRange });
-  const selectedTimeRange = timeRangeControl?.selectedTimeRange;
+  const {
+    services: { application, plugins },
+  } = useKibana();
+  const SearchBar = plugins.unifiedSearch.ui.SearchBar;
+  const canWriteDashboards = application?.capabilities.dashboard_v2?.showWriteControls === true;
+
+  const { searchBarProps, effectiveTimeRange, onBrushEnd } = useVisPreviewUnifiedSearch({
+    lensTimeRange: lensInput?.timeRange,
+  });
+
   const lensInputWithTimeRange = useMemo(
     () =>
-      lensInput && selectedTimeRange ? { ...lensInput, timeRange: selectedTimeRange } : lensInput,
-    [lensInput, selectedTimeRange]
+      lensInput && effectiveTimeRange ? { ...lensInput, timeRange: effectiveTimeRange } : lensInput,
+    [lensInput, effectiveTimeRange]
   );
 
   const onLoad = useCallback(
@@ -63,48 +102,81 @@ export function BaseVisualization({
 
   const onOpenSave = useCallback(() => setIsSaveModalOpen(true), []);
   const onCloseSave = useCallback(() => setIsSaveModalOpen(false), []);
+  const saveToDashboard = useCallback(() => {
+    if (canWriteDashboards) {
+      onOpenSave();
+    }
+  }, [canWriteDashboards, onOpenSave]);
+  const viewConfiguration = useCallback(() => {
+    if (!canWriteDashboards || !lensInput?.attributes) {
+      return;
+    }
+
+    uiActions.executeTriggerActions('IN_APP_EMBEDDABLE_EDIT_TRIGGER', {
+      applyButtonLabel: saveButtonLabel,
+      attributes: lensInput.attributes,
+      lensEvent: lensLoadEvent ?? { adapters: {} },
+      onUpdate: (attrs: TypedLensByValueInput['attributes']) =>
+        setLensInput({ ...lensInput, attributes: attrs }),
+      onApply: onOpenSave,
+      onCancel: () => {},
+      container: null,
+    });
+  }, [canWriteDashboards, lensInput, lensLoadEvent, onOpenSave, setLensInput, uiActions]);
+
+  const visualizationActionButtons = useMemo<ActionButton[]>(() => {
+    const disabledReason = canWriteDashboards ? undefined : dashboardWriteControlsDisabledReason;
+
+    return [
+      {
+        label: viewConfigurationLabel,
+        icon: 'pencil',
+        type: ActionButtonType.SECONDARY,
+        disabled: !canWriteDashboards,
+        disabledReason,
+        handler: viewConfiguration,
+      },
+      {
+        label: saveButtonLabel,
+        icon: 'save',
+        type: ActionButtonType.PRIMARY,
+        disabled: !canWriteDashboards,
+        disabledReason,
+        handler: saveToDashboard,
+      },
+    ];
+  }, [canWriteDashboards, saveToDashboard, viewConfiguration]);
+
+  useEffect(() => {
+    if (isLoading || !lensInput) {
+      registerActionButtons([]);
+      return;
+    }
+
+    registerActionButtons(visualizationActionButtons);
+
+    return () => registerActionButtons([]);
+  }, [isLoading, lensInput, registerActionButtons, visualizationActionButtons]);
 
   return (
     <>
-      <div data-test-subj="lensVisualization" css={visualizationWrapperStyles}>
-        <div css={visualizationHeaderStyles}>
-          {timeRangeControl && (
-            <EuiSuperDatePicker
-              data-test-subj="agentBuilderVisualizeLensTimeRangePicker"
-              start={timeRangeControl.selectedTimeRange.from}
-              end={timeRangeControl.selectedTimeRange.to}
-              onTimeChange={timeRangeControl.onTimeChange}
-              onRefresh={() => undefined}
-              showUpdateButton={false}
-              compressed
-              width="auto"
-            />
-          )}
-          {!isLoading && lensInput && (
-            <VisualizationActions
-              onSave={onOpenSave}
-              uiActions={uiActions}
-              lensInput={lensInput}
-              lensLoadEvent={lensLoadEvent}
-              setLensInput={setLensInput}
-            />
-          )}
-        </div>
+      <div css={visualizationHeaderStyles} className={visualizationTimePickerContainerClassName}>
+        <SearchBar {...searchBarProps} />
+      </div>
 
-        <div css={visualizationEmbeddableStyles(VISUALIZATION_HEIGHT)}>
-          {isLoading ? (
-            <EuiLoadingSpinner />
-          ) : (
-            lensInputWithTimeRange && (
-              <lens.EmbeddableComponent
-                {...lensInputWithTimeRange}
-                style={{ height: '100%' }}
-                onBrushEnd={timeRangeControl?.onBrushEnd}
-                onLoad={onLoad}
-              />
-            )
-          )}
-        </div>
+      <div css={visualizationEmbeddableStyles(height)}>
+        {isLoading ? (
+          <EuiLoadingSpinner />
+        ) : (
+          lensInputWithTimeRange && (
+            <lens.EmbeddableComponent
+              {...lensInputWithTimeRange}
+              style={{ height: '100%' }}
+              onBrushEnd={onBrushEnd}
+              onLoad={onLoad}
+            />
+          )
+        )}
       </div>
       {isSaveModalOpen && lensInputWithTimeRange && (
         <lens.SaveModalComponent

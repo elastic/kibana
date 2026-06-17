@@ -47,7 +47,6 @@ export const ExtendedFieldsColumnCell: React.FC<ExtendedFieldsColumnCellProps> =
     <EuiToolTip
       content={listContent}
       data-test-subj="case-table-column-extended-fields-tooltip"
-      delay="regular"
       position="left"
     >
       <span
