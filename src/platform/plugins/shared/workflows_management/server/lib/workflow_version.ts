@@ -23,3 +23,20 @@ export const applyWorkflowVersion = (
   ...document,
   version: getNextWorkflowVersion(existing),
 });
+
+/** Bump version only when workflow versioning is enabled; otherwise preserve existing version if present. */
+export const maybeApplyWorkflowVersion = (
+  document: WorkflowProperties,
+  existing: WorkflowProperties | undefined,
+  versioningEnabled: boolean
+): WorkflowProperties => {
+  if (versioningEnabled) {
+    return applyWorkflowVersion(document, existing);
+  }
+
+  if (existing?.version != null) {
+    return { ...document, version: existing.version };
+  }
+
+  return document;
+};

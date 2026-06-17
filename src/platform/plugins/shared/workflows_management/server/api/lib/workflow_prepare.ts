@@ -49,6 +49,7 @@ export const prepareWorkflowDocumentFromYaml = (params: {
   now: Date;
   spaceId: string;
   triggerDefinitions?: Array<{ id: string; eventSchema: z.ZodType }>;
+  versioningEnabled?: boolean;
 }): { id: string; workflowData: WorkflowProperties; definition?: WorkflowYaml } => {
   const {
     id: providedId,
@@ -58,6 +59,7 @@ export const prepareWorkflowDocumentFromYaml = (params: {
     now,
     spaceId,
     triggerDefinitions,
+    versioningEnabled = false,
   } = params;
 
   let workflowToCreate: EsWorkflowCreate = {
@@ -98,7 +100,7 @@ export const prepareWorkflowDocumentFromYaml = (params: {
     lifecycle: null,
     valid: workflowToCreate.valid,
     deleted_at: null,
-    version: INITIAL_WORKFLOW_VERSION,
+    ...(versioningEnabled ? { version: INITIAL_WORKFLOW_VERSION } : {}),
     created_at: now.toISOString(),
     updated_at: now.toISOString(),
   };

@@ -23,6 +23,7 @@ import { WorkflowConflictError } from '@kbn/workflows-yaml';
 import { ManagedWorkflowsService } from './managed_workflows_service';
 import type { VersionedWorkflowDocument, WorkflowCrudService } from './workflow_crud_service';
 import type { WriteWorkflowDocumentParams } from './workflow_occ_writer';
+import { maybeApplyWorkflowVersion } from '../lib/workflow_version';
 import type { WorkflowProperties } from '../storage/workflow_storage';
 
 let mockManagedWorkflowDefinitions: ManagedWorkflowDefinition[] = [];
@@ -148,6 +149,7 @@ const createCrudServiceMock = () => {
     getWorkflowDocumentWithVersion: jest.fn(),
     getWorkflowDocumentSource: jest.fn(),
     getManagedWorkflowDocumentsAllSpaces: jest.fn().mockResolvedValue([]),
+    isWorkflowVersioningEnabled: jest.fn().mockResolvedValue(true),
     indexWorkflowDocument: jest.fn().mockResolvedValue({ seqNo: 1, primaryTerm: 1 }),
     writeWorkflowDocument: jest.fn(async (_id, _spaceId, params) =>
       params.mutate(params.create ? undefined : createWorkflowSource({}))
@@ -229,10 +231,12 @@ const wireOccAwareWriteWorkflowDocument = (
       };
 
       try {
+        const versioningEnabled = await crudService.isWorkflowVersioningEnabled();
         const { document } = await writer.write({
           id,
           create: params.create,
-          mutate: recordingMutate,
+          mutate: (existing) =>
+            maybeApplyWorkflowVersion(recordingMutate(existing), existing, versioningEnabled),
         });
         return document;
       } catch (error) {

@@ -180,6 +180,7 @@ export class WorkflowsService {
       getTaskScheduler: () => this.taskScheduler,
       executionQueryService: this.executionQueryService,
       validationService: this.validationService,
+      getCoreStart: () => this.coreStart,
     });
 
     this.managedWorkflowsService = new ManagedWorkflowsService({

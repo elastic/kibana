@@ -30,6 +30,7 @@ import {
 } from './connectors/workflows';
 import { WorkflowsManagementFeatureConfig } from './features';
 import { createWorkflowsInboxProvider } from './inbox/workflows_inbox_provider';
+import { WorkflowChangeHistoryService } from './services/workflow_change_history_service';
 import type {
   WorkflowsRequestHandlerContext,
   WorkflowsServerPluginSetup,
@@ -51,13 +52,17 @@ export class WorkflowsPlugin
 {
   private readonly logger: Logger;
   private config: WorkflowsManagementConfig;
+  private readonly kibanaVersion: string;
   private availabilityUpdater: AvailabilityUpdater | null = null;
   private api: WorkflowsManagementApi | null = null;
   private workflowsService: WorkflowsService | null = null;
+  private readonly changeHistoryService: WorkflowChangeHistoryService;
 
   constructor(initializerContext: PluginInitializerContext<WorkflowsManagementConfig>) {
     this.logger = initializerContext.logger.get();
     this.config = initializerContext.config.get<WorkflowsManagementConfig>();
+    this.kibanaVersion = initializerContext.env.packageInfo.version;
+    this.changeHistoryService = new WorkflowChangeHistoryService(this.logger, this.kibanaVersion);
   }
 
   public setup(
@@ -136,7 +141,19 @@ export class WorkflowsPlugin
     }
 
     this.logger.debug('Workflows Management: Started');
-    return {};
+
+    if (core.security) {
+      this.changeHistoryService.initialize({
+        elasticsearchClient: core.elasticsearch.client.asInternalUser,
+        authService: core.security.authc,
+      });
+    } else {
+      this.logger.warn('Workflows Management: workflow change history is not initialized');
+    }
+
+    return {
+      changeHistory: this.changeHistoryService,
+    };
   }
 
   private async runGlobalOrphanCleanup(registeredOwnerPluginIds: string[]): Promise<void> {

@@ -8,6 +8,7 @@
  */
 
 import { errors } from '@elastic/elasticsearch';
+import type { CoreStart } from '@kbn/core/server';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 
@@ -15,7 +16,16 @@ import type { WorkflowCrudDeps } from './types';
 import { WorkflowCrudService } from './workflow_crud_service';
 import type { WorkflowExecutionQueryService } from './workflow_execution_query_service';
 import type { WorkflowValidationService } from './workflow_validation_service';
+import { isWorkflowVersioningEnabled } from '../lib/is_workflow_versioning_enabled';
 import type { WorkflowProperties } from '../storage/workflow_storage';
+
+jest.mock('../lib/is_workflow_versioning_enabled', () => ({
+  isWorkflowVersioningEnabled: jest.fn().mockResolvedValue(true),
+}));
+
+const mockedIsWorkflowVersioningEnabled = isWorkflowVersioningEnabled as jest.MockedFunction<
+  typeof isWorkflowVersioningEnabled
+>;
 
 const makeSource = (overrides?: Partial<WorkflowProperties>): WorkflowProperties => ({
   name: 'Test Workflow',
@@ -70,6 +80,7 @@ const makeDeps = (
     getTaskScheduler: () => null,
     executionQueryService,
     validationService,
+    getCoreStart: () => ({} as CoreStart),
   };
   return { deps, client };
 };
@@ -87,6 +98,10 @@ const lightweightWorkflowYaml = [
 ].join('\n');
 
 describe('WorkflowCrudService', () => {
+  beforeEach(() => {
+    mockedIsWorkflowVersioningEnabled.mockResolvedValue(true);
+  });
+
   describe('prepareWorkflowDocumentForStorage', () => {
     it('uses lightweight validation only when explicitly requested', async () => {
       const { deps } = makeDeps();
@@ -1270,6 +1285,32 @@ describe('WorkflowCrudService', () => {
       expect(client.index).toHaveBeenCalledWith(
         expect.objectContaining({
           document: expect.objectContaining({ version: 13, enabled: false }),
+        })
+      );
+    });
+
+    it('does not increment version when workflow versioning uiSetting is disabled', async () => {
+      const { deps, client } = makeDeps();
+      mockedIsWorkflowVersioningEnabled.mockResolvedValue(false);
+      client.search.mockResolvedValue({
+        hits: {
+          hits: [
+            {
+              _id: 'wf-1',
+              _source: makeSource({ version: 12 }),
+              _seq_no: 2,
+              _primary_term: 1,
+            },
+          ],
+        },
+      });
+
+      const service = new WorkflowCrudService(deps);
+      await service.updateWorkflow('wf-1', { enabled: false }, 'default', request);
+
+      expect(client.index).toHaveBeenCalledWith(
+        expect.objectContaining({
+          document: expect.objectContaining({ version: 12, enabled: false }),
         })
       );
     });

@@ -17,7 +17,7 @@ import {
 } from '@kbn/occ';
 
 import { extractBulkItemError } from './bulk_response_helpers';
-import { applyWorkflowVersion } from '../../lib/workflow_version';
+import { maybeApplyWorkflowVersion } from '../../lib/workflow_version';
 import type { WorkflowProperties, WorkflowStorage } from '../../storage/workflow_storage';
 
 export interface OccWorkflowHit {
@@ -53,14 +53,15 @@ const toOccHit = (hit: {
 
 const buildBulkIndexOperations = (
   hits: OccWorkflowHit[],
-  mutate: (source: WorkflowProperties) => WorkflowProperties
+  mutate: (source: WorkflowProperties) => WorkflowProperties,
+  versioningEnabled: boolean
 ) =>
   hits.map((hit) => ({
     index: {
       _id: hit._id,
       if_seq_no: hit.seqNo,
       if_primary_term: hit.primaryTerm,
-      document: applyWorkflowVersion(mutate(hit._source), hit._source),
+      document: maybeApplyWorkflowVersion(mutate(hit._source), hit._source, versioningEnabled),
     },
   }));
 
@@ -122,6 +123,7 @@ export const bulkIndexWithOccRetry = async ({
   maxRetries = DEFAULT_MAX_RETRIES,
   retryDelayMs = DEFAULT_RETRY_DELAY_MS,
   refresh = true,
+  versioningEnabled = true,
 }: {
   client: WorkflowStorageClient;
   hits: OccWorkflowHit[];
@@ -130,6 +132,7 @@ export const bulkIndexWithOccRetry = async ({
   maxRetries?: number;
   retryDelayMs?: number;
   refresh?: boolean;
+  versioningEnabled?: boolean;
 }): Promise<{ successIds: string[]; failures: Array<{ id: string; error: string }> }> => {
   const successIds: string[] = [];
   const failures: Array<{ id: string; error: string }> = [];
@@ -138,7 +141,7 @@ export const bulkIndexWithOccRetry = async ({
 
   for (let attempt = 1; attempt <= maxAttempts && pendingHits.length > 0; attempt++) {
     const bulkResponse = await client.bulk({
-      operations: buildBulkIndexOperations(pendingHits, mutate),
+      operations: buildBulkIndexOperations(pendingHits, mutate, versioningEnabled),
       refresh,
     });
 

@@ -51,8 +51,9 @@ import {
   removeConflictingIds,
 } from '../lib/bulk_id_helpers';
 import { getAuthenticatedUser } from '../lib/get_user';
+import { isWorkflowVersioningEnabled } from '../lib/is_workflow_versioning_enabled';
 import { resolveUniqueWorkflowIds, validateWorkflowId } from '../lib/workflow_id_resolver';
-import { applyWorkflowVersion } from '../lib/workflow_version';
+import { maybeApplyWorkflowVersion } from '../lib/workflow_version';
 import type { WorkflowProperties } from '../storage/workflow_storage';
 import { scheduleWorkflowTriggers } from '../task_defs/schedule_workflow_triggers';
 import { syncSchedulerAfterSave } from '../task_defs/sync_scheduler_after_save';
@@ -82,6 +83,10 @@ export class WorkflowCrudService {
   >();
 
   constructor(private readonly deps: WorkflowCrudDeps) {}
+
+  isWorkflowVersioningEnabled(): Promise<boolean> {
+    return isWorkflowVersioningEnabled(this.deps.getCoreStart());
+  }
 
   async getWorkflowDocumentSource(
     id: string,
@@ -178,12 +183,14 @@ export class WorkflowCrudService {
   ): Promise<WorkflowProperties> {
     const writer = this.getOccWriter(spaceId, params.maxRetries);
     const { mutate: callerMutate, create } = params;
+    const versioningEnabled = await this.isWorkflowVersioningEnabled();
 
     try {
       const { document } = await writer.write({
         id,
         create,
-        mutate: (existing) => applyWorkflowVersion(callerMutate(existing), existing),
+        mutate: (existing) =>
+          maybeApplyWorkflowVersion(callerMutate(existing), existing, versioningEnabled),
       });
       return document;
     } catch (error) {
@@ -232,6 +239,7 @@ export class WorkflowCrudService {
       now: params.now,
       spaceId: params.spaceId,
       triggerDefinitions,
+      versioningEnabled: await this.isWorkflowVersioningEnabled(),
     });
   }
 
@@ -383,6 +391,7 @@ export class WorkflowCrudService {
     const now = new Date();
     const triggerDefinitions = this.deps.workflowsExtensions?.getAllTriggerDefinitions() ?? [];
 
+    const versioningEnabled = await this.isWorkflowVersioningEnabled();
     const {
       id: baseId,
       workflowData,
@@ -395,6 +404,7 @@ export class WorkflowCrudService {
       now,
       spaceId,
       triggerDefinitions,
+      versioningEnabled,
     });
 
     let id = baseId;
@@ -458,6 +468,8 @@ export class WorkflowCrudService {
     const failed: BulkFailureEntry[] = [];
     const validWorkflows: BulkWorkflowEntry[] = [];
 
+    const versioningEnabled = await this.isWorkflowVersioningEnabled();
+
     for (let i = 0; i < workflows.length; i++) {
       try {
         const customId = workflows[i].id;
@@ -472,6 +484,7 @@ export class WorkflowCrudService {
           now,
           spaceId,
           triggerDefinitions,
+          versioningEnabled,
         });
 
         validWorkflows.push({
@@ -514,7 +527,11 @@ export class WorkflowCrudService {
               const existing = await this.getWorkflowDocumentSource(entry.id, spaceId);
               return {
                 ...entry,
-                workflowData: applyWorkflowVersion(entry.workflowData, existing ?? undefined),
+                workflowData: maybeApplyWorkflowVersion(
+                  entry.workflowData,
+                  existing ?? undefined,
+                  versioningEnabled
+                ),
               };
             })
           )
@@ -738,6 +755,7 @@ export class WorkflowCrudService {
       taskScheduler: this.deps.getTaskScheduler(),
       logger: this.deps.logger,
       spaceId,
+      versioningEnabled: spaceId ? await this.isWorkflowVersioningEnabled() : false,
     });
   }
 

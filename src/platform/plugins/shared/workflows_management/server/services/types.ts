@@ -9,6 +9,7 @@
 
 import type { ActionsClient, IUnsecuredActionsClient } from '@kbn/actions-plugin/server';
 import type {
+  CoreStart,
   ElasticsearchClient,
   KibanaRequest,
   Logger,
@@ -37,6 +38,7 @@ export interface WorkflowCrudDeps extends WorkflowStorageDeps {
   getTaskScheduler: () => WorkflowTaskScheduler | null;
   executionQueryService: WorkflowExecutionQueryService;
   validationService: WorkflowValidationService;
+  getCoreStart: () => CoreStart;
 }
 
 /** Deps for WorkflowSearchService. */

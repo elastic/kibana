@@ -27,22 +27,22 @@ const mutateWorkflowToDisabled = (source: WorkflowProperties): WorkflowPropertie
 
 /**
  * Disables all enabled workflows. When `spaceId` is set, scopes the operation
- * to that space; otherwise operates across all spaces. Sets `enabled: false`,
- * patches YAML accordingly, and unschedules any scheduled tasks.
- * Used when a user opts out of workflows by toggling the per-space UI setting off,
- * or when availability (license / config) requires a global bulk disable.
+ * to that space (user-initiated opt-out); otherwise operates across all spaces
+ * for system availability (license / config). Sets `enabled: false`, patches
+ * YAML accordingly, and unschedules any scheduled tasks.
  */
 export const disableAllWorkflows = async (params: {
   storage: WorkflowStorage;
   taskScheduler: WorkflowTaskScheduler | null;
   logger: Logger;
   spaceId?: string;
+  versioningEnabled?: boolean;
 }): Promise<{
   total: number;
   disabled: number;
   failures: Array<{ id: string; error: string }>;
 }> => {
-  const { storage, taskScheduler, logger, spaceId } = params;
+  const { storage, taskScheduler, logger, spaceId, versioningEnabled = false } = params;
   const client = storage.getClient();
   const pageSize = 1000;
   const failures: Array<{ id: string; error: string }> = [];
@@ -80,6 +80,7 @@ export const disableAllWorkflows = async (params: {
           hits: occHits,
           mutate: mutateWorkflowToDisabled,
           logger,
+          versioningEnabled,
         });
 
         failures.push(...bulkFailures);
