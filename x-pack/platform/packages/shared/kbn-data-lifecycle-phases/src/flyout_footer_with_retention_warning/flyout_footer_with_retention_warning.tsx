@@ -99,7 +99,7 @@ export const FlyoutFooterWithRetentionWarning = ({
           <EuiButtonEmpty
             onClick={onCancel}
             flush="left"
-            data-test-subj="streamsEditDataLifecycleFlyoutCancelButton"
+            data-test-subj="dataLifecycleFlyoutCancelButton"
           >
             {cancelLabel}
           </EuiButtonEmpty>
@@ -110,7 +110,7 @@ export const FlyoutFooterWithRetentionWarning = ({
             fill
             onClick={onApply}
             disabled={isApplyDisabled}
-            data-test-subj="streamsEditDataLifecycleFlyoutApplyButton"
+            data-test-subj="dataLifecycleFlyoutApplyButton"
           >
             {applyLabel}
           </EuiButton>

@@ -26,10 +26,8 @@ export const getIlmPolicySummaryStats = (phases: PhasesForStats): IlmPolicySumma
 
   // Downsampling is only supported in the hot/warm/cold phases (not frozen).
   const downsampleStepCount = (['hot', 'warm', 'cold'] as const).reduce((count, phase) => {
-    const downsample = phases[phase]?.actions?.downsample;
-    if (!downsample || typeof downsample !== 'object') return count;
-    const fixedInterval = (downsample as { fixed_interval?: unknown }).fixed_interval;
-    return typeof fixedInterval === 'string' && fixedInterval.trim() ? count + 1 : count;
+    const fixedInterval = phases[phase]?.actions?.downsample?.fixed_interval;
+    return fixedInterval?.trim() ? count + 1 : count;
   }, 0);
 
   return { deleteAfter, phaseCount, downsampleStepCount };

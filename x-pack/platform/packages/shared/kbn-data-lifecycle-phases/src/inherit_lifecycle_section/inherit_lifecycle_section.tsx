@@ -30,7 +30,7 @@ export const InheritLifecycleSection = ({
           checked={value}
           label={label}
           onChange={(e) => onChange(e.target.checked)}
-          data-test-subj="streamsEditDataLifecycleInheritCheckbox"
+          data-test-subj="dataLifecycleInheritCheckbox"
         />
       </EuiFlexItem>
 
