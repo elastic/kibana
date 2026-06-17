@@ -5,10 +5,8 @@
  * 2.0.
  */
 
-import { v4 as uuidv4 } from 'uuid';
 import {
   createUserQuestionAnsweredEvent,
-  internalTools,
   isAskUserQuestionStep,
   type AskUserQuestionStep,
   type ChatAgentEvent,
@@ -24,6 +22,7 @@ import {
 import { toolCallAction, executeToolAction } from '../actions';
 import type { ResearchAgentAction } from '../actions';
 import type { ProcessedConversationRound } from './prepare_conversation';
+import { materializeAskUserQuestionToolCall } from './ask_user_question_tool_call';
 
 /**
  * Convert the pending ask_user_question step + corresponding response to list of actions + emit the event to be collected
@@ -55,29 +54,12 @@ export const pendingAskUserQuestionStepsToActions = ({
 
     validateResponse({ step, response });
 
-    const toolCallId = uuidv4();
-    actions.push(
-      toolCallAction({
-        toolCalls: [
-          {
-            toolName: internalTools.askUserQuestion,
-            toolCallId,
-            args: { questions: step.questions },
-          },
-        ],
-      })
-    );
-    actions.push(
-      executeToolAction({
-        toolResults: [
-          {
-            toolCallId,
-            content: JSON.stringify({ answers: response.answers }),
-            artifact: { answers: response.answers },
-          },
-        ],
-      })
-    );
+    const { toolCallId, toolName, args, content, artifact } = materializeAskUserQuestionToolCall({
+      questions: step.questions,
+      answers: response.answers,
+    });
+    actions.push(toolCallAction({ toolCalls: [{ toolName, toolCallId, args }] }));
+    actions.push(executeToolAction({ toolResults: [{ toolCallId, content, artifact }] }));
 
     eventEmitter(
       createUserQuestionAnsweredEvent({

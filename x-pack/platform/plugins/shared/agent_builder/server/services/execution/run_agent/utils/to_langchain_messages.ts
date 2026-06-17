@@ -14,10 +14,8 @@ import type {
   ToolCallStep,
   ToolCallWithResult,
 } from '@kbn/agent-builder-common';
-import { v4 as uuidv4 } from 'uuid';
 import {
   ConversationRoundStatus,
-  internalTools,
   isReasoningStep,
   isToolCallStep,
   isBackgroundAgentCompleteStep,
@@ -36,6 +34,7 @@ import { formatSystemNotice } from '../prompts/utils/actions';
 import type { ProcessedConversation, ProcessedConversationRound } from './prepare_conversation';
 import type { ToolCallResultTransformer } from './create_result_transformer';
 import { serializeCompactionSummary } from './conversation_compactor';
+import { materializeAskUserQuestionToolCall } from './ask_user_question_tool_call';
 
 export interface ConversationToLangchainOptions {
   conversation: ProcessedConversation;
@@ -131,27 +130,17 @@ export const roundToLangchain = async (
         }
       } else if (isAskUserQuestionStep(step) && step.answers !== undefined) {
         // Render answered ask_user_question steps as a tool-call / tool-response pair.
-        // A fresh tool_call_id binds the two messages within this LangChain conversation;
-        // the original pause-time tool_call_id is not persisted (see spec G7).
-        const toolCallId = uuidv4();
+        const { toolCallId, toolName, args, content } = materializeAskUserQuestionToolCall({
+          questions: step.questions,
+          answers: step.answers,
+        });
         messages.push(
           new AIMessage({
             content: '',
-            tool_calls: [
-              {
-                id: toolCallId,
-                name: internalTools.askUserQuestion,
-                args: { questions: step.questions },
-              },
-            ],
+            tool_calls: [{ id: toolCallId, name: toolName, args }],
           })
         );
-        messages.push(
-          new ToolMessage({
-            tool_call_id: toolCallId,
-            content: JSON.stringify({ answers: step.answers }),
-          })
-        );
+        messages.push(new ToolMessage({ tool_call_id: toolCallId, content }));
       }
       // Reasoning steps are handled inside createGroupedToolCallMessages via reasoningSteps param
     }
