@@ -156,9 +156,9 @@ describe('createInvestigationAttachmentType', () => {
   it('formats useful LLM text', () => {
     const text = formatInvestigationAsText(investigation);
 
-    expect(text).toContain('Payment gateway timeout');
-    expect(text).toContain('Bad deploy to payments-svc');
-    expect(text).toContain('Roll back payments-svc');
+    expect(text).toContain('payments-svc connection pool exhausted');
+    expect(text).toContain('payments-gateway (external)');
+    expect(text).toContain('Gateway metrics were normal throughout the incident window.');
   });
 
   it('exposes correct metadata', () => {
