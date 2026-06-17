@@ -11,8 +11,8 @@ FROM test-index-*
  _src_entity_source1 = MV_FIRST(TO_STRING(event.dataset)),
  _src_entity_source2 = MV_FIRST(TO_STRING(data_stream.dataset)),
  _src_entity_source = COALESCE(CASE(_src_entity_source0 IS NOT NULL AND _src_entity_source0 != \\"\\", _src_entity_source0), CASE(_src_entity_source1 IS NOT NULL AND _src_entity_source1 != \\"\\", _src_entity_source1), CASE(_src_entity_source2 IS NOT NULL AND _src_entity_source2 != \\"\\", _src_entity_source2)),
- entity.source = CASE(_src_entity_source IS NULL OR _src_entity_source == \\"\\", NULL, _src_entity_source)
-| EVAL recent.entity.EngineMetadata.UntypedId = TO_STRING(entity.id)
+ entity.source = CASE(_src_entity_source IS NULL OR _src_entity_source == \\"\\", NULL, _src_entity_source),
+ recent.entity.EngineMetadata.UntypedId = TO_STRING(entity.id)
 | STATS
     entity.EngineMetadata.FirstSeenLogInPage = MIN(@timestamp),
     recent.timestamp = MAX(@timestamp),
@@ -288,8 +288,8 @@ FROM test-index-*
  _src_entity_source1 = MV_FIRST(TO_STRING(event.dataset)),
  _src_entity_source2 = MV_FIRST(TO_STRING(data_stream.dataset)),
  _src_entity_source = COALESCE(CASE(_src_entity_source0 IS NOT NULL AND _src_entity_source0 != \\"\\", _src_entity_source0), CASE(_src_entity_source1 IS NOT NULL AND _src_entity_source1 != \\"\\", _src_entity_source1), CASE(_src_entity_source2 IS NOT NULL AND _src_entity_source2 != \\"\\", _src_entity_source2)),
- entity.source = CASE(_src_entity_source IS NULL OR _src_entity_source == \\"\\", NULL, _src_entity_source)
-| EVAL host_id_present = TO_STRING(host.id) IS NOT NULL AND TO_STRING(host.id) != \\"\\",
+ entity.source = CASE(_src_entity_source IS NULL OR _src_entity_source == \\"\\", NULL, _src_entity_source),
+ host_id_present = TO_STRING(host.id) IS NOT NULL AND TO_STRING(host.id) != \\"\\",
  host_name_present = TO_STRING(host.name) IS NOT NULL AND TO_STRING(host.name) != \\"\\",
  host_hostname_present = TO_STRING(host.hostname) IS NOT NULL AND TO_STRING(host.hostname) != \\"\\",
  host_id_present_or_null = CASE(host_id_present, TO_STRING(host.id)),
@@ -607,8 +607,8 @@ FROM test-index-*
  _src_entity_source1 = MV_FIRST(TO_STRING(event.dataset)),
  _src_entity_source2 = MV_FIRST(TO_STRING(data_stream.dataset)),
  _src_entity_source = COALESCE(CASE(_src_entity_source0 IS NOT NULL AND _src_entity_source0 != \\"\\", _src_entity_source0), CASE(_src_entity_source1 IS NOT NULL AND _src_entity_source1 != \\"\\", _src_entity_source1), CASE(_src_entity_source2 IS NOT NULL AND _src_entity_source2 != \\"\\", _src_entity_source2)),
- entity.source = CASE(_src_entity_source IS NULL OR _src_entity_source == \\"\\", NULL, _src_entity_source)
-| EVAL host_id_present = TO_STRING(host.id) IS NOT NULL AND TO_STRING(host.id) != \\"\\",
+ entity.source = CASE(_src_entity_source IS NULL OR _src_entity_source == \\"\\", NULL, _src_entity_source),
+ host_id_present = TO_STRING(host.id) IS NOT NULL AND TO_STRING(host.id) != \\"\\",
  host_name_present = TO_STRING(host.name) IS NOT NULL AND TO_STRING(host.name) != \\"\\",
  host_hostname_present = TO_STRING(host.hostname) IS NOT NULL AND TO_STRING(host.hostname) != \\"\\",
  host_id_present_or_null = CASE(host_id_present, TO_STRING(host.id)),
@@ -929,8 +929,8 @@ FROM test-index-*
  _src_entity_source1 = MV_FIRST(TO_STRING(event.dataset)),
  _src_entity_source2 = MV_FIRST(TO_STRING(data_stream.dataset)),
  _src_entity_source = COALESCE(CASE(_src_entity_source0 IS NOT NULL AND _src_entity_source0 != \\"\\", _src_entity_source0), CASE(_src_entity_source1 IS NOT NULL AND _src_entity_source1 != \\"\\", _src_entity_source1), CASE(_src_entity_source2 IS NOT NULL AND _src_entity_source2 != \\"\\", _src_entity_source2)),
- entity.source = CASE(_src_entity_source IS NULL OR _src_entity_source == \\"\\", NULL, _src_entity_source)
-| EVAL host_id_present = TO_STRING(host.id) IS NOT NULL AND TO_STRING(host.id) != \\"\\",
+ entity.source = CASE(_src_entity_source IS NULL OR _src_entity_source == \\"\\", NULL, _src_entity_source),
+ host_id_present = TO_STRING(host.id) IS NOT NULL AND TO_STRING(host.id) != \\"\\",
  host_name_present = TO_STRING(host.name) IS NOT NULL AND TO_STRING(host.name) != \\"\\",
  host_hostname_present = TO_STRING(host.hostname) IS NOT NULL AND TO_STRING(host.hostname) != \\"\\",
  host_id_present_or_null = CASE(host_id_present, TO_STRING(host.id)),
@@ -1251,8 +1251,8 @@ FROM test-index-*
  _src_entity_source1 = MV_FIRST(TO_STRING(event.dataset)),
  _src_entity_source2 = MV_FIRST(TO_STRING(data_stream.dataset)),
  _src_entity_source = COALESCE(CASE(_src_entity_source0 IS NOT NULL AND _src_entity_source0 != \\"\\", _src_entity_source0), CASE(_src_entity_source1 IS NOT NULL AND _src_entity_source1 != \\"\\", _src_entity_source1), CASE(_src_entity_source2 IS NOT NULL AND _src_entity_source2 != \\"\\", _src_entity_source2)),
- entity.source = CASE(_src_entity_source IS NULL OR _src_entity_source == \\"\\", NULL, _src_entity_source)
-| EVAL recent.entity.EngineMetadata.UntypedId = TO_STRING(service.name)
+ entity.source = CASE(_src_entity_source IS NULL OR _src_entity_source == \\"\\", NULL, _src_entity_source),
+ recent.entity.EngineMetadata.UntypedId = TO_STRING(service.name)
 | STATS
     entity.EngineMetadata.FirstSeenLogInPage = MIN(@timestamp),
     recent.timestamp = MAX(@timestamp),
@@ -1499,8 +1499,8 @@ FROM test-index-*
  _src_entity_source1 = MV_FIRST(TO_STRING(event.dataset)),
  _src_entity_source2 = MV_FIRST(TO_STRING(data_stream.dataset)),
  _src_entity_source = COALESCE(CASE(_src_entity_source0 IS NOT NULL AND _src_entity_source0 != \\"\\", _src_entity_source0), CASE(_src_entity_source1 IS NOT NULL AND _src_entity_source1 != \\"\\", _src_entity_source1), CASE(_src_entity_source2 IS NOT NULL AND _src_entity_source2 != \\"\\", _src_entity_source2)),
- entity.source = CASE(_src_entity_source IS NULL OR _src_entity_source == \\"\\", NULL, _src_entity_source)
-| EVAL _src_entity_namespace0 = MV_FIRST(TO_STRING(event.module)),
+ entity.source = CASE(_src_entity_source IS NULL OR _src_entity_source == \\"\\", NULL, _src_entity_source),
+ _src_entity_namespace0 = MV_FIRST(TO_STRING(event.module)),
  _src_entity_namespace1 = MV_FIRST(SPLIT(MV_FIRST(TO_STRING(data_stream.dataset)), \\".\\")),
  _src_entity_namespace = COALESCE(CASE(_src_entity_namespace0 IS NOT NULL AND _src_entity_namespace0 != \\"\\", _src_entity_namespace0), CASE(_src_entity_namespace1 IS NOT NULL AND _src_entity_namespace1 != \\"\\", _src_entity_namespace1)),
  _eval_entity_namespace_arm0 = (TO_STRING(user.name) IS NOT NULL AND TO_STRING(user.name) != \\"\\" AND TO_STRING(host.id) IS NOT NULL AND TO_STRING(host.id) != \\"\\" AND NOT (TO_STRING(user.name) IN (\\"root\\", \\"bin\\", \\"daemon\\", \\"sys\\", \\"nobody\\", \\"jenkins\\", \\"ansible\\", \\"deploy\\", \\"terraform\\", \\"gitlab-runner\\", \\"postgres\\", \\"mysql\\", \\"redis\\", \\"elasticsearch\\", \\"kafka\\", \\"admin\\", \\"operator\\", \\"service\\")) AND (MV_CONTAINS(TO_STRING(event.kind), \\"asset\\") OR NOT (MV_CONTAINS(TO_STRING(event.kind), \\"asset\\") OR (TO_STRING(event.kind) != \\"enrichment\\" OR TO_STRING(event.kind) IS NULL) AND MV_CONTAINS(TO_STRING(event.category), \\"iam\\") AND (MV_CONTAINS(TO_STRING(event.type), \\"user\\") OR MV_CONTAINS(TO_STRING(event.type), \\"creation\\") OR MV_CONTAINS(TO_STRING(event.type), \\"deletion\\") OR MV_CONTAINS(TO_STRING(event.type), \\"group\\"))))),
@@ -1644,11 +1644,11 @@ TRUE, _euid_branch_1_formula, NULL)
 | WHERE TO_STRING(entity.id) IS NOT NULL OR TO_STRING(recent.entity.namespace) == \\"local\\" OR MV_CONTAINS(TO_STRING(recent.event.kind), \\"asset\\") OR (TO_STRING(recent.event.kind) != \\"enrichment\\" OR TO_STRING(recent.event.kind) IS NULL) AND MV_CONTAINS(TO_STRING(recent.event.category), \\"iam\\") AND (MV_CONTAINS(TO_STRING(recent.event.type), \\"user\\") OR MV_CONTAINS(TO_STRING(recent.event.type), \\"creation\\") OR MV_CONTAINS(TO_STRING(recent.event.type), \\"deletion\\") OR MV_CONTAINS(TO_STRING(recent.event.type), \\"group\\")) 
 | SORT entity.EngineMetadata.FirstSeenLogInPage ASC, recent.entity.EngineMetadata.UntypedId ASC
 | LIMIT 10000
-| EVAL recent.entity.name = CASE((TO_STRING(recent.entity.namespace) == \\"local\\" AND TO_STRING(recent.host.name) IS NOT NULL AND TO_STRING(recent.host.name) != \\"\\"), CONCAT(TO_STRING(recent.user.name), \\"@\\", TO_STRING(recent.host.name)), recent.entity.name)
-| EVAL recent.entity.name = CASE((TO_STRING(recent.entity.namespace) == \\"local\\" AND NOT (TO_STRING(recent.host.name) IS NOT NULL AND TO_STRING(recent.host.name) != \\"\\")), TO_STRING(recent.user.name), recent.entity.name)
-| EVAL recent.entity.name = CASE((TO_STRING(recent.entity.namespace) != \\"local\\"), TO_STRING(recent.user.name), recent.entity.name),
-    recent.entity.confidence = CASE((TO_STRING(recent.entity.namespace) != \\"local\\"), \\"high\\", recent.entity.confidence)
-| EVAL recent.entity.confidence = CASE((TO_STRING(recent.entity.namespace) == \\"local\\"), \\"medium\\", recent.entity.confidence)
+| EVAL recent.entity.name = CASE((TO_STRING(recent.entity.namespace) == \\"local\\" AND TO_STRING(recent.host.name) IS NOT NULL AND TO_STRING(recent.host.name) != \\"\\"), CONCAT(TO_STRING(recent.user.name), \\"@\\", TO_STRING(recent.host.name)), recent.entity.name),
+    recent.entity.name = CASE((TO_STRING(recent.entity.namespace) == \\"local\\" AND NOT (TO_STRING(recent.host.name) IS NOT NULL AND TO_STRING(recent.host.name) != \\"\\")), TO_STRING(recent.user.name), recent.entity.name),
+    recent.entity.name = CASE((TO_STRING(recent.entity.namespace) != \\"local\\"), TO_STRING(recent.user.name), recent.entity.name),
+    recent.entity.confidence = CASE((TO_STRING(recent.entity.namespace) != \\"local\\"), \\"high\\", recent.entity.confidence),
+    recent.entity.confidence = CASE((TO_STRING(recent.entity.namespace) == \\"local\\"), \\"medium\\", recent.entity.confidence)
 | EVAL entity.name = COALESCE(recent.entity.name, entity.name),
  event.kind = MV_SLICE(MV_UNION(recent.event.kind, event.kind), 0, 49),
  event.category = MV_SLICE(MV_UNION(recent.event.category, event.category), 0, 49),

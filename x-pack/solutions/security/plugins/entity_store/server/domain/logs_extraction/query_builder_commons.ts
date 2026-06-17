@@ -226,7 +226,11 @@ export interface BuildSetFieldsByConditionPostStatsContext {
  * Builds ESQL EVAL CASE fragments for when-condition field overrides (pre-STATS by default).
  * Pass `postStats` for after-STATS rows in logs extraction (main vs CCS differs by `useRecentDataPrefix`).
  */
-export function buildSetFieldsByCondition(
+/**
+ * Returns the raw EVAL assignment strings for a set-fields-by-condition entry (no `| EVAL` prefix).
+ * Use this when merging multiple entries into a single `| EVAL` stage.
+ */
+export function buildSetFieldsByConditionAssignments(
   setFieldsByCondition: SetFieldsByCondition,
   postStats?: BuildSetFieldsByConditionPostStatsContext
 ): string {
@@ -240,24 +244,33 @@ export function buildSetFieldsByCondition(
     const resolveColumn = (logical: string) => logicalToColumn.get(logical) ?? logical;
     const remappedCondition = mapConditionFieldsForPostStats(condition, resolveColumn);
     const conditionEsql = conditionToESQL(remappedCondition);
-    const evals = Object.entries(overrideFields).map(([field, value]) => {
-      const targetCol = resolveColumn(field);
-      const valueExpr = fieldValueToEsqlExpressionAfterStats(
-        value,
-        postStats.entityFields,
-        logicalToColumn
-      );
-      return `${targetCol} = CASE((${conditionEsql}), ${valueExpr}, ${targetCol})`;
-    });
-    return `| EVAL ${evals.join(',\n    ')}`;
+    return Object.entries(overrideFields)
+      .map(([field, value]) => {
+        const targetCol = resolveColumn(field);
+        const valueExpr = fieldValueToEsqlExpressionAfterStats(
+          value,
+          postStats.entityFields,
+          logicalToColumn
+        );
+        return `${targetCol} = CASE((${conditionEsql}), ${valueExpr}, ${targetCol})`;
+      })
+      .join(',\n    ');
   }
 
   const conditionEsql = conditionToESQL(condition);
-  const evals = Object.entries(overrideFields).map(([field, value]) => {
-    const valueExpr = fieldValueToEsqlExpression(value);
-    return `${field} = CASE((${conditionEsql}), ${valueExpr}, ${castField(field)})`;
-  });
-  return `| EVAL ${evals.join(',\n    ')}`;
+  return Object.entries(overrideFields)
+    .map(([field, value]) => {
+      const valueExpr = fieldValueToEsqlExpression(value);
+      return `${field} = CASE((${conditionEsql}), ${valueExpr}, ${castField(field)})`;
+    })
+    .join(',\n    ');
+}
+
+export function buildSetFieldsByCondition(
+  setFieldsByCondition: SetFieldsByCondition,
+  postStats?: BuildSetFieldsByConditionPostStatsContext
+): string {
+  return `| EVAL ${buildSetFieldsByConditionAssignments(setFieldsByCondition, postStats)}`;
 }
 
 /**
