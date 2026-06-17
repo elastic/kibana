@@ -170,7 +170,7 @@ interface NodeDefinitionCommon<LinkId extends AppDeepLinkId, Id extends string> 
  * in the slot data-source map at registration.
  */
 export interface ExtensionPointNodeDefinition<Id extends string = string>
-  extends NodeDefinitionCommon<AppDeepLinkId, Id> {
+  extends Omit<NodeDefinitionCommon<AppDeepLinkId, Id>, 'cloudLink'> {
   renderAs: ExtensionPointRenderAs;
   slotId: string;
   extensionId: NavExtensionId;
@@ -182,8 +182,8 @@ export interface ExtensionPointNodeDefinition<Id extends string = string>
 
 /** Standard nav node used outside panel-opener section lists. */
 export type StandardNodeDefinition<
-  LinkId extends AppDeepLinkId,
-  Id extends string,
+  LinkId extends AppDeepLinkId = AppDeepLinkId,
+  Id extends string = string,
   ChildrenId extends string = Id
 > = NodeDefinitionCommon<LinkId, Id> & {
   renderAs?: RenderAs;
@@ -194,7 +194,10 @@ export type StandardNodeDefinition<
 };
 
 /** Allowed only under `panelOpener.children`. */
-export type PanelOpenerChildDefinition<LinkId extends AppDeepLinkId, Id extends string = string> =
+export type PanelOpenerChildDefinition<
+  LinkId extends AppDeepLinkId = AppDeepLinkId,
+  Id extends string = string
+> =
   | ExtensionPointNodeDefinition<Id>
   | StandardNodeDefinition<LinkId, Id, Id>
   | (NodeDefinitionCommon<LinkId, Id> & {
@@ -215,23 +218,14 @@ export type RootNodeDefinition<
 > =
   | (NodeDefinitionCommon<LinkId, Id> & {
       renderAs: 'home';
-      slotId?: never;
-      extensionId?: never;
-      popoverOnly?: never;
       children?: never;
     })
   | (NodeDefinitionCommon<LinkId, Id> & {
       renderAs: 'panelOpener';
-      slotId?: never;
-      extensionId?: never;
-      popoverOnly?: never;
       children?: Array<PanelOpenerChildDefinition<LinkId, ChildrenId>>;
     })
   | (NodeDefinitionCommon<LinkId, Id> & {
       renderAs?: never;
-      slotId?: never;
-      extensionId?: never;
-      popoverOnly?: never;
       children?: Array<StandardNodeDefinition<LinkId, ChildrenId, ChildrenId>>;
     });
 
