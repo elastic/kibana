@@ -46,7 +46,9 @@ describe('OnboardingRouter', () => {
     jest.clearAllMocks();
     (useSyncUrlDetails as jest.Mock).mockReturnValue({ isLoading: false });
     (useOnboardingContext as jest.Mock).mockReturnValue({
-      config: new Map([[OnboardingTopicId.siemMigrations, { id: OnboardingTopicId.siemMigrations }]]),
+      config: new Map([
+        [OnboardingTopicId.siemMigrations, { id: OnboardingTopicId.siemMigrations }],
+      ]),
     });
   });
 
