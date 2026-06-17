@@ -45,6 +45,7 @@ export const SIEM_READINESS_INDICES = {
 // Retention data stream names — must match logs-* for DSL to apply
 export const RETENTION_SHORT_DS = `logs-siem-readiness-eval-short-${RANDOM_PREFIX}`;
 export const RETENTION_LONG_DS = `logs-siem-readiness-eval-long-${RANDOM_PREFIX}`;
+const RETENTION_INDEX_TEMPLATE_NAME = `siem-readiness-eval-retention-${RANDOM_PREFIX}`;
 
 export const SIEM_READINESS_PIPELINE_NAME = `siem-readiness-eval-fail-${RANDOM_PREFIX}`;
 export const SIEM_READINESS_PIPELINE_OK_NAME = `siem-readiness-eval-ok-${RANDOM_PREFIX}`;
@@ -454,8 +455,26 @@ export const seedSiemReadinessData = async ({
   // ------------------------------------------------------------------
   log.info('[siem-readiness] Setting up retention data streams');
 
-  // Create data streams by indexing a doc — the index template for logs-* should
-  // handle data stream creation automatically in stateful Kibana.
+  // Create a dedicated index template so the data streams can be created
+  // independently of the Fleet logs-* template (which may not be present in
+  // all test cluster configurations).
+  await esClient.indices.putIndexTemplate({
+    name: RETENTION_INDEX_TEMPLATE_NAME,
+    index_patterns: [RETENTION_SHORT_DS, RETENTION_LONG_DS],
+    data_stream: {},
+    priority: 500,
+    template: {
+      mappings: {
+        properties: {
+          '@timestamp': { type: 'date' },
+          event: { properties: { category: { type: 'keyword' } } },
+          cloud: { properties: { provider: { type: 'keyword' } } },
+        },
+      },
+    },
+  });
+  await esClient.indices.createDataStream({ name: RETENTION_SHORT_DS });
+  await esClient.indices.createDataStream({ name: RETENTION_LONG_DS });
   await bulkIndex(esClient, RETENTION_SHORT_DS, buildRetentionDocs(5));
   await bulkIndex(esClient, RETENTION_LONG_DS, buildRetentionDocs(5));
 
@@ -504,6 +523,18 @@ export const cleanupSiemReadinessData = async ({
         }`
       );
     }
+  }
+
+  // Delete retention index template
+  try {
+    await esClient.indices.deleteIndexTemplate({ name: RETENTION_INDEX_TEMPLATE_NAME });
+    log.info(`[siem-readiness] Deleted index template ${RETENTION_INDEX_TEMPLATE_NAME}`);
+  } catch (error) {
+    log.warning(
+      `[siem-readiness] Failed to delete index template ${RETENTION_INDEX_TEMPLATE_NAME}: ${
+        error instanceof Error ? error.message : String(error)
+      }`
+    );
   }
 
   // Delete retention data streams
