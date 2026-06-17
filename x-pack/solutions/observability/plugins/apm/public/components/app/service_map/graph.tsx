@@ -13,6 +13,7 @@ import {
   useNodesState,
   useEdgesState,
   useReactFlow,
+  useStore as useReactFlowStore,
   ReactFlowProvider,
   type NodeTypes,
   type EdgeTypes,
@@ -26,6 +27,7 @@ import {
   EuiScreenReaderLive,
   EuiFlexGroup,
   EuiButtonIcon,
+  EuiEmptyPrompt,
   EuiPanel,
   EuiToolTip,
   useGeneratedHtmlId,
@@ -37,8 +39,15 @@ import '@xyflow/react/dist/style.css';
 import { css } from '@emotion/react';
 import type { ApmPluginStartDeps, ApmServices } from '../../../plugin';
 import { getDagreLayoutFailureDiagnostics } from './dagre_layout_failure_diagnostics';
-import { applyDagreLayout } from '../../shared/service_map/layout';
-import { FIT_VIEW_PADDING, FIT_VIEW_DURATION, FIT_VIEW_DEFER_MS } from './constants';
+import { applyServiceMapLayout } from '../../shared/service_map/layout';
+import {
+  FIT_VIEW_PADDING,
+  FIT_VIEW_DURATION,
+  FIT_VIEW_DEFER_MS,
+  MIN_ZOOM,
+  MAX_ZOOM,
+} from './constants';
+import { getServiceMapViewTarget } from './get_service_map_view_target';
 import { ServiceNode } from '../../shared/service_map/service_node';
 import { DependencyNode } from '../../shared/service_map/dependency_node';
 import { GroupedResourcesNode } from '../../shared/service_map/grouped_resources_node';
@@ -54,7 +63,7 @@ import {
 } from './apply_service_map_visibility';
 import { useServiceMapFilterState } from './use_service_map_filter_state';
 import { focusServiceMapFindInput } from './service_map_find_in_page';
-import { ServiceMapSearchProvider } from '../../shared/service_map/service_map_search_context';
+import { ServiceMapHighlightProvider } from '../../shared/service_map/service_map_search_context';
 import { ServiceMapAlertsNavigateProvider } from '../../shared/service_map/service_map_alerts_navigate_context';
 import { useServiceMapAlertsNavigateFactory } from './use_service_map_alerts_tab_href';
 import {
@@ -116,10 +125,6 @@ interface GraphProps {
   viewFilters?: ServiceMapViewFilters;
   /** Called when view filters change in the options panel. */
   onViewFiltersChange?: (next: ServiceMapViewFilters) => void;
-  /** Controlled find-in-page query when supplied (e.g. embeddable hydrating from persisted state). */
-  searchQuery?: string;
-  /** Called when the user edits the find-in-page search field. */
-  onSearchQueryChange?: (next: string) => void;
   /** Optional service group filter — forwarded to the "Add to dashboard" panel state. */
   serviceGroupId?: string;
   /**
@@ -153,8 +158,6 @@ function GraphInner({
   onMapOrientationChange,
   viewFilters: controlledViewFilters,
   onViewFiltersChange,
-  searchQuery: controlledSearchQuery,
-  onSearchQueryChange,
   serviceGroupId,
   rangeFrom,
   rangeTo,
@@ -162,7 +165,10 @@ function GraphInner({
   const { services } = useKibana<ApmPluginStartDeps & ApmServices>();
   const { telemetry } = services;
   const { euiTheme } = useEuiTheme();
-  const { fitView, zoomIn, zoomOut } = useReactFlow();
+  const { fitView, zoomIn, zoomOut, setCenter, getNodes, getNodesBounds } =
+    useReactFlow<ServiceMapNode>();
+  const viewportWidth = useReactFlowStore((state) => state.width);
+  const viewportHeight = useReactFlowStore((state) => state.height);
   const makeAlertsNavigateHandler = useServiceMapAlertsNavigateFactory();
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
   const [selectedNodeForPopover, setSelectedNodeForPopover] = useState<ServiceMapNode | null>(null);
@@ -194,15 +200,9 @@ function GraphInner({
     },
     [onViewFiltersChange]
   );
-  const [internalSearchQuery, setInternalSearchQuery] = useState(controlledSearchQuery ?? '');
-  const searchQuery = controlledSearchQuery ?? internalSearchQuery;
-  const setSearchQuery = useCallback(
-    (next: string) => {
-      setInternalSearchQuery(next);
-      onSearchQueryChange?.(next);
-    },
-    [onSearchQueryChange]
-  );
+  // Find-in-page is a standalone-only affordance (the options panel that hosts it never renders
+  // when embedded), so the search query is purely internal state.
+  const [searchQuery, setSearchQuery] = useState('');
   // Used to badge the controls toggle when the panel is collapsed but state is non-default.
   // Persisted view filters / search query keep the map "the same view" — but the options panel
   // itself stays closed on the dashboard (product feedback: it's an authoring affordance).
@@ -235,12 +235,51 @@ function GraphInner({
 
   const { getAnimationDuration } = useReducedMotion();
   const getFitViewOptions = useCallback(
-    (): FitViewOptions => ({
+    (animate = true): FitViewOptions<ServiceMapNode> => ({
       padding: FIT_VIEW_PADDING,
-      duration: getAnimationDuration(FIT_VIEW_DURATION),
+      duration: animate ? getAnimationDuration(FIT_VIEW_DURATION) : 0,
     }),
     [getAnimationDuration]
   );
+
+  // Camera placement used for both initial load and the "fit view" control. Most maps use fitView;
+  // very large, sprawling maps center on the median node so the user lands on content rather than the
+  // empty middle of the bounding box.
+  const handleFitView = useCallback(
+    (animate = true) => {
+      const visibleNodes = getNodes().filter((node) => !node.hidden);
+      const target = getServiceMapViewTarget({
+        visibleNodes,
+        bounds: getNodesBounds(visibleNodes),
+        viewportWidth,
+        viewportHeight,
+      });
+
+      if (target.kind === 'center') {
+        setCenter(target.x, target.y, {
+          zoom: MIN_ZOOM,
+          duration: animate ? getAnimationDuration(FIT_VIEW_DURATION) : 0,
+        });
+        return;
+      }
+
+      fitView(getFitViewOptions(animate));
+    },
+    [
+      getNodes,
+      getNodesBounds,
+      viewportWidth,
+      viewportHeight,
+      setCenter,
+      getAnimationDuration,
+      fitView,
+      getFitViewOptions,
+    ]
+  );
+
+  // The first time nodes appear we place the viewport without animation to avoid the visible
+  // "hunt for center" caused by multiple animated fits on mount. Subsequent fits animate.
+  const hasPerformedInitialFitRef = useRef(false);
 
   // EBT + console fire once per failed layout computation (each useMemo re-run that throws),
   // not strictly once per page visit—intentional for measuring failure frequency.
@@ -254,7 +293,7 @@ function GraphInner({
 
   const layoutedNodes = useMemo(
     () =>
-      applyDagreLayout(
+      applyServiceMapLayout(
         initialNodes,
         initialEdges,
         {
@@ -311,7 +350,9 @@ function GraphInner({
     setEdges(edgesWithContextHighlight as ServiceMapEdgeType[]);
 
     if (nodesAfterFilters.length > 0) {
-      const timer = setTimeout(() => fitView(getFitViewOptions()), FIT_VIEW_DEFER_MS);
+      const isInitialFit = !hasPerformedInitialFitRef.current;
+      hasPerformedInitialFitRef.current = true;
+      const timer = setTimeout(() => handleFitView(!isInitialFit), FIT_VIEW_DEFER_MS);
       return () => clearTimeout(timer);
     }
   }, [
@@ -319,9 +360,8 @@ function GraphInner({
     edgesAfterFilters,
     setNodes,
     setEdges,
-    fitView,
+    handleFitView,
     applyEdgeHighlighting,
-    getFitViewOptions,
     nodesAfterFilters.length,
     highlightedServiceName,
   ]);
@@ -392,6 +432,11 @@ function GraphInner({
   }, [nodesAfterFilters, selectedNodeId, handlePopoverClose]);
 
   useEffect(() => {
+    // Find-in-page (and its Cmd/Ctrl+K shortcut) only exists in the standalone view; when
+    // embedded the search box isn't rendered, so the shortcut would be a silent no-op.
+    if (isEmbedded) {
+      return;
+    }
     const onKeyDown = (e: KeyboardEvent) => {
       const mod = e.metaKey || e.ctrlKey;
       if (!mod || e.key.toLowerCase() !== 'k') {
@@ -422,7 +467,7 @@ function GraphInner({
     };
     window.addEventListener('keydown', onKeyDown, true);
     return () => window.removeEventListener('keydown', onKeyDown, true);
-  }, []);
+  }, [isEmbedded]);
 
   // Close popover when user starts dragging (map panning or node dragging)
   const handleDragStart = useCallback(() => {
@@ -584,12 +629,6 @@ function GraphInner({
     [euiTheme]
   );
 
-  const onInit = useCallback(() => {
-    if (layoutedNodes.length > 0) {
-      fitView(getFitViewOptions());
-    }
-  }, [fitView, layoutedNodes.length, getFitViewOptions]);
-
   const screenReaderInstructions = i18n.translate('xpack.apm.serviceMap.screenReaderInstructions', {
     defaultMessage:
       'This is an interactive service map showing application services and their dependencies. ' +
@@ -601,7 +640,7 @@ function GraphInner({
   });
 
   return (
-    <ServiceMapSearchProvider>
+    <ServiceMapHighlightProvider>
       <ServiceMapAlertsNavigateProvider makeAlertsNavigateHandler={makeAlertsNavigateHandler}>
         <div
           ref={mapRegionRef}
@@ -631,11 +670,8 @@ function GraphInner({
             onPaneClick={handlePaneClick}
             onMoveStart={handleDragStart}
             onNodeDragStart={handleDragStart}
-            onInit={onInit}
-            fitView
-            fitViewOptions={getFitViewOptions()}
-            minZoom={0.2}
-            maxZoom={3}
+            minZoom={MIN_ZOOM}
+            maxZoom={MAX_ZOOM}
             proOptions={{ hideAttribution: true }}
             nodesDraggable
             nodesConnectable={false}
@@ -643,6 +679,30 @@ function GraphInner({
             edgesFocusable={false}
           >
             <Background gap={24} size={1} color={euiTheme.colors.lightShade} />
+            {initialNodes.length > 0 && nodes.length === 0 && (
+              <Panel position="top-center">
+                <EuiEmptyPrompt
+                  iconType="filter"
+                  titleSize="xs"
+                  title={
+                    <h2>
+                      {i18n.translate('xpack.apm.serviceMap.noNodesMatchFiltersTitle', {
+                        defaultMessage: 'No services match these filters',
+                      })}
+                    </h2>
+                  }
+                  body={
+                    <p>
+                      {i18n.translate('xpack.apm.serviceMap.noNodesMatchFiltersBody', {
+                        defaultMessage:
+                          'Try removing or changing the view filters to see services again.',
+                      })}
+                    </p>
+                  }
+                  data-test-subj="serviceMapNoNodesMatchFilters"
+                />
+              </Panel>
+            )}
             <Panel position="top-left" css={topLeftToolbarStyles}>
               <div css={topLeftToolbarColumnStyles}>
                 {!isEmbedded && (
@@ -699,7 +759,7 @@ function GraphInner({
                         color="text"
                         size="s"
                         iconType="crosshair"
-                        onClick={() => fitView(getFitViewOptions())}
+                        onClick={() => handleFitView()}
                         aria-label={fitViewLabel}
                         data-test-subj="serviceMapFitViewButton"
                         css={mapToolbarControlIconCss}
@@ -769,7 +829,6 @@ function GraphInner({
                   onMapOrientationChange={setMapOrientation}
                   searchQuery={searchQuery}
                   onSearchQueryChange={setSearchQuery}
-                  layoutControlsOnly={isEmbedded}
                 />
               )}
             </Panel>
@@ -793,7 +852,6 @@ function GraphInner({
                     serviceGroupId={serviceGroupId}
                     mapOrientation={mapOrientation}
                     viewFilters={viewFilters}
-                    searchQuery={searchQuery}
                     controlIconCss={mapToolbarControlIconCss}
                   />
                 </EuiPanel>
@@ -817,7 +875,7 @@ function GraphInner({
           />
         </div>
       </ServiceMapAlertsNavigateProvider>
-    </ServiceMapSearchProvider>
+    </ServiceMapHighlightProvider>
   );
 }
 
