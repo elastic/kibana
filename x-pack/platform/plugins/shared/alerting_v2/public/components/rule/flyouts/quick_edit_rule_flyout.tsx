@@ -39,7 +39,6 @@ import {
   RuleExecutionFieldGroup,
   AlertConditionsFieldGroup,
   KindField,
-  NOOP_WORKFLOW_FORM,
   mapRuleResponseToFormValues,
   mapFormValuesToUpdateRequest,
 } from '@kbn/alerting-v2-rule-form';
@@ -70,7 +69,6 @@ export const QuickEditRuleFlyout = ({ rule, onClose }: QuickEditRuleFlyoutProps)
       notifications,
       application,
       lens,
-      workflowForm: NOOP_WORKFLOW_FORM,
     }),
     [http, data, dataViews, notifications, application, lens]
   );
@@ -91,13 +89,8 @@ export const QuickEditRuleFlyout = ({ rule, onClose }: QuickEditRuleFlyoutProps)
         every: mapped.schedule?.every ?? '1m',
         lookback: mapped.schedule?.lookback ?? '5m',
       },
-      evaluation: {
-        query: {
-          base: mapped.evaluation?.query?.base ?? '',
-        },
-      },
+      query: mapped.query ?? { breach: '' },
       grouping: mapped.grouping,
-      recoveryPolicy: mapped.recoveryPolicy ?? { type: 'no_breach' },
       stateTransition: mapped.stateTransition,
       stateTransitionAlertDelayMode: mapped.stateTransitionAlertDelayMode ?? 'immediate',
       stateTransitionRecoveryDelayMode: mapped.stateTransitionRecoveryDelayMode ?? 'immediate',

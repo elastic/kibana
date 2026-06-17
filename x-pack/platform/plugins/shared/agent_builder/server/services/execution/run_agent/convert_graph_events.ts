@@ -31,6 +31,9 @@ import {
 } from '@kbn/agent-builder-genai-utils/langchain';
 import type { Logger } from '@kbn/logging';
 import { AgentPromptRequestSourceType } from '@kbn/agent-builder-common/agents';
+import { isAskUserQuestionPrompt } from '@kbn/agent-builder-common/agents/prompts';
+import { createUserQuestionAskedEvent } from '@kbn/agent-builder-common/chat';
+import { internalTools } from '@kbn/agent-builder-common';
 import type { ToolManager } from '@kbn/agent-builder-server/runner';
 import type { StateType } from './state';
 import { BROWSER_TOOL_PREFIX, steps, tags } from './constants';
@@ -46,6 +49,13 @@ import type { InternalEvent } from './events';
 import { createFinalStateEvent } from './events';
 
 export type ConvertedEvents = ChatAgentEvent | InternalEvent;
+
+/**
+ * Tools that have their own dedicated step lifecycle event and therefore should NOT produce a default `toolCallEvent`.
+ */
+const TOOLS_WITH_DEDICATED_STEP_LIFECYCLE: ReadonlySet<string> = new Set([
+  internalTools.askUserQuestion,
+]);
 
 export const convertGraphEvents = ({
   graphName,
@@ -149,14 +159,16 @@ export const convertGraphEvents = ({
                       params: toolCallArgs,
                     })
                   );
-                } else {
+                } else if (!TOOLS_WITH_DEDICATED_STEP_LIFECYCLE.has(toolId)) {
+                  const { origin: toolOrigin, type: toolType } = toolManager.getToolMeta(toolId);
                   events.push(
                     createToolCallEvent({
                       toolId,
                       toolCallId,
                       params: toolCallArgs,
                       toolCallGroupId,
-                      toolOrigin: toolManager.getToolOrigin(toolId),
+                      toolOrigin,
+                      toolType,
                     })
                   );
                 }
@@ -221,6 +233,15 @@ export const convertGraphEvents = ({
                     },
                   })
                 );
+
+                if (isAskUserQuestionPrompt(prompt)) {
+                  resultEvents.push(
+                    createUserQuestionAskedEvent({
+                      prompt_id: prompt.id,
+                      questions: prompt.questions,
+                    })
+                  );
+                }
               }
             }
           }

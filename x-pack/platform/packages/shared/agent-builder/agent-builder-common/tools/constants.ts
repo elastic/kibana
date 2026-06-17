@@ -26,6 +26,7 @@ export const platformCoreTools = {
   generateEsql: platformCoreTool('generate_esql'),
   generateWorkflow: platformCoreTool('generate_workflow'),
   executeEsql: platformCoreTool('execute_esql'),
+  executeWorkflow: platformCoreTool('execute_workflow'),
   createVisualization: platformCoreTool('create_visualization'),
   getWorkflowExecutionStatus: platformCoreTool('get_workflow_execution_status'),
   resumeWorkflowExecution: platformCoreTool('resume_workflow_execution'),
@@ -77,6 +78,7 @@ export const internalTools = {
   sleep: 'sleep',
   writeTodos: 'write_todos',
   loadSkill: 'load_skill',
+  askUserQuestion: 'ask_user_question',
 };
 
 export const isAttachmentTool = (toolName: string) =>
