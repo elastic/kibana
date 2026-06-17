@@ -248,36 +248,30 @@ export class ConsolePageObject extends FtrService {
   }
 
   public async clickPlayAndWaitForResults() {
-    const hadStatusBadge = await this.testSubjects.exists('consoleResponseStatusBadge');
-    const initialStatusText = hadStatusBadge
-      ? await this.testSubjects.getVisibleText('consoleResponseStatusBadge')
-      : '';
-    const hadOutput = await this.testSubjects.exists('consoleMonacoOutput');
-    const initialOutputText = hadOutput ? await this.getOutputText() : '';
-
     await this.clickPlay();
 
-    // Wait for the UI to reflect request progress or completion.
-    // We capture state before clicking to correctly detect "already done" results.
-    await this.retry.try(async () => {
-      const loadingIndicatorsVisible =
-        (await this.testSubjects.exists('consoleEditorContentSpinner')) ||
-        (await this.testSubjects.exists('consoleRequestInProgressBadge'));
-      const hasStatusBadge = await this.testSubjects.exists('consoleResponseStatusBadge');
-      const currentStatusText = hasStatusBadge
-        ? await this.testSubjects.getVisibleText('consoleResponseStatusBadge')
-        : '';
-      const statusChanged = currentStatusText !== initialStatusText;
-      const hasOutput = await this.testSubjects.exists('consoleMonacoOutput');
-      const currentOutputText = hasOutput ? await this.getOutputText() : '';
-      const outputChanged = currentOutputText !== initialOutputText;
+    // Try to catch the in-flight loading state. Fast requests (or identical repeated requests)
+    // may complete before we poll, so we tolerate never seeing the loading indicators — as long
+    // as output and a status badge are present when we check.
+    await this.retry
+      .tryForTime(5000, async () => {
+        const inFlight =
+          (await this.testSubjects.exists('consoleEditorContentSpinner')) ||
+          (await this.testSubjects.exists('consoleRequestInProgressBadge'));
+        if (!inFlight) throw new Error('Waiting for request to start');
+      })
+      .catch(async () => {
+        // We didn't catch the in-progress state — verify that output is already available,
+        // which means the request completed before we could observe it loading.
+        if (
+          !(await this.testSubjects.exists('consoleMonacoOutput')) ||
+          !(await this.testSubjects.exists('consoleResponseStatusBadge'))
+        ) {
+          throw new Error('Console request did not start or produce output');
+        }
+      });
 
-      if (!loadingIndicatorsVisible && !statusChanged && !outputChanged) {
-        throw new Error('Expected console request to update the UI');
-      }
-    });
-
-    // Wait for the request to finish: loading indicators go away and output/status are present.
+    // Wait for loading indicators to clear and output to be present.
     await this.waitForRequestToComplete();
   }
 
