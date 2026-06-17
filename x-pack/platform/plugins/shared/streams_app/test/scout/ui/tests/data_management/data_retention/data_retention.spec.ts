@@ -5,18 +5,23 @@
  * 2.0.
  */
 
+/* Some tests assert via shared retention helpers (verifyRetentionDisplay, etc.). */
+/* eslint-disable playwright/expect-expect */
+
 import { type EsClient, tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { omit } from 'lodash';
 import { test } from '../../../fixtures';
 import { generateLogsData } from '../../../fixtures/generators';
 import {
-  openRetentionModal,
+  ensureDslLifecycle,
+  openLifecycleMethodFlyout,
+  removeDeletePhase,
   saveRetentionChanges,
   setCustomRetention,
   toggleInheritSwitch,
   verifyRetentionDisplay,
-} from '../../../fixtures/retention_helpers';
+} from '../../../fixtures/data_lifecycle_helpers';
 
 async function createTsdbIndexTemplate({
   esClient,
@@ -126,26 +131,18 @@ test.describe(
     // Detailed retention value tests (7d, 30d, 90d, hours, etc.) are covered by API tests
     // in test/scout/api/tests/lifecycle_retention.spec.ts
     test('should set and reset retention policy', async ({ page }) => {
-      // Set a specific retention policy
-      await openRetentionModal(page);
-      await toggleInheritSwitch(page, false);
+      // Set a specific retention period (DSL delete phase)
       await setCustomRetention(page, '7', 'd');
-      await saveRetentionChanges(page);
       await verifyRetentionDisplay(page, '7 days');
 
-      // Reset to inherit
-      await openRetentionModal(page);
-      await toggleInheritSwitch(page, true);
-      await saveRetentionChanges(page);
+      // Reset to indefinite retention by removing the delete phase
+      await removeDeletePhase(page);
       await verifyRetentionDisplay(page, '∞');
     });
 
     // Smoke test: Verifies persistence across page refresh (UI-specific behavior)
     test('should persist retention value across page refresh', async ({ page, pageObjects }) => {
-      await openRetentionModal(page);
-      await toggleInheritSwitch(page, false);
       await setCustomRetention(page, '30', 'd');
-      await saveRetentionChanges(page);
       await verifyRetentionDisplay(page, '30 days');
 
       // Refresh the page
@@ -166,11 +163,24 @@ test.describe(
       await apiServices.streams.clearStreamProcessors('logs-generic-default');
       await pageObjects.streams.gotoDataRetentionTab('logs-generic-default');
 
-      await openRetentionModal(page);
-      await toggleInheritSwitch(page, false);
+      // Classic streams inherit their lifecycle from the backing index template,
+      // which may resolve to ILM. Switch to DSL so a custom delete phase can be set.
+      await ensureDslLifecycle(page);
+
       await setCustomRetention(page, '7', 'd');
-      await saveRetentionChanges(page);
       await verifyRetentionDisplay(page, '7 days');
+    });
+
+    // Verifies the inherit lifecycle flyout flow
+    test('should switch lifecycle to inherit from parent', async ({ page }) => {
+      await setCustomRetention(page, '7', 'd');
+      await verifyRetentionDisplay(page, '7 days');
+
+      // Switch to inherit via the lifecycle method flyout
+      await openLifecycleMethodFlyout(page);
+      await toggleInheritSwitch(page, true);
+      await saveRetentionChanges(page);
+      await verifyRetentionDisplay(page, '∞');
     });
 
     test('should open DSL lifecycle phase popup and display phase details', async ({
@@ -178,10 +188,7 @@ test.describe(
       config,
     }) => {
       // Set a custom retention to have a DSL lifecycle with a delete phase
-      await openRetentionModal(page);
-      await toggleInheritSwitch(page, false);
       await setCustomRetention(page, '30', 'd');
-      await saveRetentionChanges(page);
 
       // DSL phase label differs: 'Hot' in stateful, 'Successful ingest' in serverless
       // Click on the phase button using test ID

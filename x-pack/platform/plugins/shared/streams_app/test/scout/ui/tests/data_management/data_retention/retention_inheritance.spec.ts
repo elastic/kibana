@@ -5,20 +5,23 @@
  * 2.0.
  */
 
+/* Some tests assert via shared retention helpers (verifyRetentionDisplay, verifyInheritSwitchVisible). */
+/* eslint-disable playwright/expect-expect */
+
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { omit } from 'lodash';
 import { test } from '../../../fixtures';
 import {
   closeToastsIfPresent,
-  openRetentionModal,
+  openLifecycleMethodFlyout,
   saveRetentionChanges,
   setCustomRetention,
   toggleInheritSwitch,
   verifyRetentionDisplay,
   verifyInheritSwitchVisible,
   RETENTION_TEST_IDS,
-} from '../../../fixtures/retention_helpers';
+} from '../../../fixtures/data_lifecycle_helpers';
 
 test.describe(
   'Stream data retention - inheritance',
@@ -64,7 +67,7 @@ test.describe(
       await verifyRetentionDisplay(page, '∞');
 
       // Should have inherit toggle
-      await openRetentionModal(page);
+      await openLifecycleMethodFlyout(page);
       await verifyInheritSwitchVisible(page);
       const inheritSwitch = page.getByTestId(RETENTION_TEST_IDS.inheritSwitch);
       await expect(inheritSwitch).toBeChecked();
@@ -77,15 +80,12 @@ test.describe(
       });
       await pageObjects.streams.gotoDataRetentionTab('logs.otel.nginx');
 
-      // Disable inherit - set custom
-      await openRetentionModal(page);
-      await toggleInheritSwitch(page, false);
+      // Disable inherit - set custom retention (delete phase overrides inherited lifecycle)
       await setCustomRetention(page, '7', 'd');
-      await saveRetentionChanges(page);
       await verifyRetentionDisplay(page, '7 days');
 
       // Re-enable inherit
-      await openRetentionModal(page);
+      await openLifecycleMethodFlyout(page);
       await toggleInheritSwitch(page, true);
       await saveRetentionChanges(page);
       await verifyRetentionDisplay(page, '∞');
@@ -112,7 +112,7 @@ test.describe(
       await verifyRetentionDisplay(page, '∞');
 
       // Should have inherit toggle
-      await openRetentionModal(page);
+      await openLifecycleMethodFlyout(page);
       await verifyInheritSwitchVisible(page);
     });
 
@@ -132,11 +132,8 @@ test.describe(
 
       await pageObjects.streams.gotoDataRetentionTab('logs.otel.nginx.access');
 
-      // Override retention
-      await openRetentionModal(page);
-      await toggleInheritSwitch(page, false);
+      // Override retention (delete phase overrides inherited lifecycle)
       await setCustomRetention(page, '14', 'd');
-      await saveRetentionChanges(page);
       await verifyRetentionDisplay(page, '14 days');
     });
 
@@ -174,9 +171,7 @@ test.describe(
 
       // Set parent retention
       await pageObjects.streams.gotoDataRetentionTab('logs.otel');
-      await openRetentionModal(page);
       await setCustomRetention(page, '30', 'd');
-      await saveRetentionChanges(page);
 
       // Check child inherits the value
       await pageObjects.streams.gotoDataRetentionTab('logs.otel.nginx');
