@@ -41,5 +41,4 @@ export const parseDuration = (duration: string): number => {
   return total;
 };
 
-export const isDurationValue = (value: string): boolean =>
-  /^(?:\d+(?:ms|s|m|h|d|w))+$/.test(value);
+export const isDurationValue = (value: string): boolean => /^(?:\d+(?:ms|s|m|h|d|w))+$/.test(value);
