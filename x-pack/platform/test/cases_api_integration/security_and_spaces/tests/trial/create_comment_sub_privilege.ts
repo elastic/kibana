@@ -5,16 +5,21 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
+import expect from '@kbn/expect/expect';
 
-import type { ExternalReferenceSOAttachmentPayload } from '@kbn/cases-plugin/common/types/domain';
+import type {
+  ExternalReferenceSOAttachmentPayload,
+  UnifiedReferenceAttachmentPayload,
+} from '@kbn/cases-plugin/common/types/domain';
 import { AttachmentType } from '@kbn/cases-plugin/common/types/domain';
+import { SECURITY_ENTITY_ATTACHMENT_TYPE } from '@kbn/cases-plugin/common/constants';
 import type { FtrProviderContext } from '../../../common/ftr_provider_context';
 import {
   fileAttachmentMetadata,
   getFilesAttachmentReq,
   getPostCaseRequest,
   postCommentAlertMultipleIdsReq,
+  postCommentEntityReq,
   postCommentUserReq,
 } from '../../../common/lib/mock';
 import {
@@ -27,6 +32,8 @@ import {
 } from '../../../common/lib/api';
 import {
   superUser,
+  secOnly,
+  obsOnly,
   secOnlyNoCreateComment,
   secOnlyReadCreateComment,
   secOnlyCreateComment,
@@ -362,6 +369,137 @@ export default ({ getService }: FtrProviderContext): void => {
           });
         });
       }
+    });
+
+    describe('entities', () => {
+      it('should not attach an entity to the case', async () => {
+        // No privileges
+        const postedCase = await createCase(
+          supertestWithoutAuth,
+          getPostCaseRequest({ owner: 'securitySolutionFixture' }),
+          200,
+          {
+            user: superUser,
+            space: 'space1',
+          }
+        );
+
+        await createComment({
+          supertest: supertestWithoutAuth,
+          caseId: postedCase.id,
+          params: postCommentEntityReq,
+          auth: { user: secOnlyNoCreateComment, space: 'space1' },
+          expectedHttpCode: 403,
+        });
+      });
+
+      // Create
+      for (const scenario of [
+        { user: secOnlyCreateComment, space: 'space1' },
+        { user: secOnlyReadCreateComment, space: 'space1' },
+      ]) {
+        it(`User ${scenario.user.username} with role(s) ${scenario.user.roles.join()} and space ${
+          scenario.space
+        } - should attach an entity`, async () => {
+          const postedCase = await createCase(
+            supertestWithoutAuth,
+            getPostCaseRequest({ owner: 'securitySolutionFixture' }),
+            200,
+            {
+              user: superUser,
+              space: 'space1',
+            }
+          );
+
+          const caseWithAttachments = await createComment({
+            supertest: supertestWithoutAuth,
+            caseId: postedCase.id,
+            params: postCommentEntityReq,
+            auth: scenario,
+            expectedHttpCode: 200,
+          });
+
+          expect(caseWithAttachments.totalComment).to.be(1);
+        });
+      }
+
+      describe('owner authorization', () => {
+        it('should not attach an entity when the user does not have permissions for that owner', async () => {
+          const postedCase = await createCase(
+            supertestWithoutAuth,
+            getPostCaseRequest({ owner: 'observabilityFixture' }),
+            200,
+            { user: obsOnly, space: 'space1' }
+          );
+
+          await createComment({
+            supertest: supertestWithoutAuth,
+            caseId: postedCase.id,
+            params: { ...postCommentEntityReq, owner: 'observabilityFixture' },
+            auth: { user: secOnly, space: 'space1' },
+            expectedHttpCode: 403,
+          });
+        });
+
+        it('should attach an entity when the user has permissions for that owner', async () => {
+          const postedCase = await createCase(
+            supertestWithoutAuth,
+            getPostCaseRequest({ owner: 'securitySolutionFixture' }),
+            200,
+            { user: secOnly, space: 'space1' }
+          );
+
+          await createComment({
+            supertest: supertestWithoutAuth,
+            caseId: postedCase.id,
+            params: postCommentEntityReq,
+            auth: { user: secOnly, space: 'space1' },
+            expectedHttpCode: 200,
+          });
+        });
+      });
+
+      describe('schema validation', () => {
+        it('should reject an entity payload with an extra field without leaking schema internals', async () => {
+          const postedCase = await createCase(
+            supertestWithoutAuth,
+            getPostCaseRequest({ owner: 'securitySolutionFixture' }),
+            200,
+            {
+              user: superUser,
+              space: 'space1',
+            }
+          );
+
+          const response = (await createComment({
+            supertest: supertestWithoutAuth,
+            caseId: postedCase.id,
+            params: {
+              ...postCommentEntityReq,
+              metadata: {
+                ...postCommentEntityReq.metadata,
+                extraField: 'not-allowed',
+              },
+            } as UnifiedReferenceAttachmentPayload,
+            auth: { user: superUser, space: 'space1' },
+            expectedHttpCode: 400,
+          })) as unknown as {
+            statusCode: number;
+            error: string;
+            message: string;
+            stack?: string;
+          };
+
+          expect(response.statusCode).to.be(400);
+          expect(response.error).to.be('Bad Request');
+          expect(response.message).to.contain(
+            `Invalid attachment payload for type '${SECURITY_ENTITY_ATTACHMENT_TYPE}'`
+          );
+          // The error must be a human-readable summary, not a raw zod/schema dump.
+          expect(response.message).not.to.contain('ZodError');
+          expect(response.stack).to.be(undefined);
+        });
+      });
     });
   });
 };
