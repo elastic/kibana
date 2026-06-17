@@ -24,8 +24,16 @@ const ThroughputChartContent = ({
   color,
   title,
 }: ThroughputChartContentProps) => {
-  const { services, fetchParams, discoverFetch$, onBrushEnd, onFilter, actions, profileId } =
-    useTraceMetricsContext();
+  const {
+    services,
+    fetchParams,
+    discoverFetch$,
+    onBrushEnd,
+    onFilter,
+    actions,
+    profileId,
+    breakdownField,
+  } = useTraceMetricsContext();
 
   const chartLayers = useChartLayers({
     metricItem: {
@@ -37,6 +45,7 @@ const ThroughputChartContent = ({
     color,
     seriesType,
     customFunction: 'COUNT',
+    dimensions: breakdownField ? [{ name: breakdownField }] : [],
   });
 
   return (
@@ -61,11 +70,12 @@ const ThroughputChartContent = ({
 };
 
 export const ThroughputChart = () => {
-  const { filters, indexes, metadataFields } = useTraceMetricsContext();
+  const { filters, indexes, metadataFields, breakdownField } = useTraceMetricsContext();
   const throughputChart = getThroughputChart({
     indexes,
     filters,
     metadataFields,
+    breakdownField,
   });
 
   if (!throughputChart) {
