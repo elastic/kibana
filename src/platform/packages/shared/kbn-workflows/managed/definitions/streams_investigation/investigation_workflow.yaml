@@ -69,7 +69,15 @@ steps:
           a dependency failure, a resource problem, bad data, etc.
           Don't presuppose the failure mode; follow the evidence.
 
+        After investigating, decide: direct conclusion or hypothesis fan-out?
+        - If the evidence is overwhelming and unambiguous for ONE root cause (confidence ≥ 0.90)
+          with no plausible competing explanations — set direct_conclusion and leave hypotheses
+          empty. Synthesis will use it directly, skipping the gather/review phase.
+        - Otherwise — any uncertainty, multiple candidates, or indirect evidence — generate
+          2-5 hypotheses below. The gather/review phase exists to resolve that uncertainty.
+
         Generate 2-5 targeted hypotheses ordered by prior confidence (highest first).
+        (Only when not using direct_conclusion.)
         Each hypothesis must identify a specific, testable cause with a concrete mechanism. Usually
         that is a particular service and what is wrong with it, but the root cause does NOT have to
         be a single service — it can be a shared dependency (datastore, queue, cache), infrastructure
@@ -100,7 +108,7 @@ steps:
               type: string
           hypotheses:
             type: array
-            minItems: 1
+            minItems: 0
             maxItems: 5
             items:
               type: object
@@ -122,6 +130,30 @@ steps:
                 - statement
                 - prior_confidence
                 - suggested_queries
+          direct_conclusion:
+            type: object
+            description: >
+              Set ONLY when the investigation produced overwhelming, unambiguous evidence for one
+              root cause (confidence ≥ 0.90) and there are no plausible competing explanations
+              worth testing. Setting this skips the gather/review fan-out entirely — synthesis
+              will use it directly. Leave unset whenever there is any genuine uncertainty; in
+              that case propose 1-5 hypotheses as normal.
+            properties:
+              root_cause:
+                type: string
+              confidence:
+                type: number
+                minimum: 0
+                maximum: 1
+              evidence_summary:
+                type: string
+              mechanism:
+                type: string
+            required:
+              - root_cause
+              - confidence
+              - evidence_summary
+              - mechanism
         required:
           - context_summary
           - memory_context
@@ -417,6 +449,18 @@ steps:
       timeout: 180s
       message: |
         Synthesise the investigation results.
+
+        IMPORTANT — check the context first:
+        If context.direct_conclusion is set, the context agent concluded the investigation
+        directly without a hypothesis fan-out because the evidence was unambiguous. In that
+        case, use direct_conclusion as the root cause. Format it as a single ranked_hypothesis
+        with verdict=supported, prior_confidence=direct_conclusion.confidence,
+        posterior_confidence=direct_conclusion.confidence, and evidence_summary from
+        direct_conclusion.evidence_summary. Set investigation_complete=true and skip
+        remediation unless you can ground it in the direct evidence. Do not treat missing
+        branch results as a problem — they were intentionally skipped.
+
+        Otherwise (normal path):
         The branch results contain both gather and review outputs per hypothesis.
         For ranking and remediation, use ONLY entries where review.decision === 'forward'.
         Record entries where review.decision === 'discard' in discarded_hypotheses
@@ -429,16 +473,16 @@ steps:
         If investigation_complete is false, provide lessons_for_next_round with specific,
         actionable guidance on what different angles or services to investigate in round 2.
 
-        Additional synthesis rules from observability investigation practice:
+        Additional synthesis rules:
         - When the same evidence is consistent with multiple causes, report all plausible
-          ones in ranked_hypotheses rather than collapsing to one — the evidence does not
-          distinguish between them, and picking the most familiar match is the most common
-          way investigations go wrong.
+          ones in ranked_hypotheses rather than collapsing to one.
         - Match claims to evidence depth. Evidence from a caller's view of a dependency
-          call is not direct evidence about the dependency's internal state. State claims
-          at the abstraction level the evidence actually supports.
+          call is not direct evidence about the dependency's internal state.
         - A service showing errors is a symptom until proven otherwise — ensure root_cause
           names the mechanism, not just the affected component.
+        - Be skeptical of hypotheses that name a broad, unspecified cause (shared
+          infrastructure, external dependency) without a specific named component — rank them
+          below hypotheses with a named, testable cause even if their posterior is higher.
 
         Context: {{ steps.build_context.output.structured_output | json }}
         Branch results: {{ steps.collect_results.output | json }}
