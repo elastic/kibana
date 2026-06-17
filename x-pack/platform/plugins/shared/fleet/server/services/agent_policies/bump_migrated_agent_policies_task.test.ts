@@ -12,7 +12,7 @@ import { agentPolicyService } from '../agent_policy';
 import { appContextService } from '..';
 import { getPackagePolicySavedObjectType } from '../package_policy';
 
-import { _updatePackagePoliciesThatNeedBump } from './bump_agent_policies_task';
+import { _updatePackagePoliciesThatNeedBump } from './bump_migrated_agent_policies_task';
 
 jest.mock('../app_context');
 jest.mock('../agent_policy');
