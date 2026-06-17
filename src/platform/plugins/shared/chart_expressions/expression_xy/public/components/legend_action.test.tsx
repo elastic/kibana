@@ -266,6 +266,7 @@ describe('getLegendAction', () => {
     const Component = buildComponent(sampleLayer);
     renderWithKibanaRenderContext(<Component {...makeSeriesProps("Women's Accessories")} />);
     expect(screen.getByRole('button', { name: /legend actions/i })).toBeInTheDocument();
+    expect(screen.getByTestId("legend-Women's Accessories - Label B")).toBeInTheDocument();
   });
 
   it('shows cell value actions in the popover', async () => {
