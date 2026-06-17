@@ -71,15 +71,15 @@ steps:
 
         After investigating, decide: direct conclusion or hypothesis fan-out?
         - If the evidence is overwhelming and unambiguous for ONE root cause (confidence ≥ 0.95)
-          with no plausible competing explanations — set direct_conclusion and leave hypotheses
-          empty. Synthesis will use it directly, skipping the gather/review phase.
+          with no plausible competing explanations — set direct_conclusion AND a single
+          hypothesis capturing that conclusion. Synthesis will use direct_conclusion directly;
+          the one hypothesis is a fallback that ensures the schema is always satisfied.
         - Otherwise — any uncertainty, multiple candidates, or indirect evidence — generate
-          2-5 hypotheses below. The gather/review phase exists to resolve that uncertainty.
+          2-5 hypotheses (do not set direct_conclusion). The gather/review phase exists to
+          resolve that uncertainty.
 
-        IMPORTANT: You MUST produce either direct_conclusion OR at least 1 hypothesis.
-        An empty hypotheses array without direct_conclusion set is not valid — if you are
-        uncertain and cannot form a confident direct conclusion, always produce at least one
-        hypothesis, even with low prior confidence.
+        You MUST always produce at least 1 hypothesis regardless of whether direct_conclusion
+        is set. Never return an empty hypotheses array.
 
         Generate 2-5 targeted hypotheses ordered by prior confidence (highest first).
         (Only when not using direct_conclusion.)
@@ -114,7 +114,7 @@ steps:
               type: string
           hypotheses:
             type: array
-            minItems: 0
+            minItems: 1
             maxItems: 5
             items:
               type: object
