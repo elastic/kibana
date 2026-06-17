@@ -7,8 +7,8 @@
     "outDir": "target/types",
     "types": ["node", "jest"],
     "paths": {
-      "#pipeline-utils": [".buildkite/pipeline-utils/index.ts"],
-      "#pipeline-utils/*": [".buildkite/pipeline-utils/*"]
+      "#pipeline-utils": ["./pipeline-utils/index.ts"],
+      "#pipeline-utils/*": ["./pipeline-utils/*"]
     }
   },
   "include": [
