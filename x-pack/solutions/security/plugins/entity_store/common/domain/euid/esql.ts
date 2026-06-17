@@ -193,6 +193,9 @@ export function buildRankingCaseEsql(
 
 /** Returns a COALESCE expression that picks the first non-null/non-empty source variable. */
 export function buildSourcePickerEsql(sourceVariablesBaseName: string, count: number): string {
+  if (count < 1) {
+    throw new Error('buildSourcePickerEsql requires at least one source variable');
+  }
   const arms = Array.from({ length: count }, (_, i) => {
     const v = `${sourceVariablesBaseName}${i}`;
     return `CASE(${v} IS NOT NULL AND ${v} != "", ${v})`;
@@ -256,6 +259,12 @@ export function buildOneFieldEvaluationEsql(evaluation: FieldEvaluation): string
   const fallbackExpression =
     fallbackValue === null ? 'NULL' : `"${escapeEsqlString(fallbackValue)}"`;
   const destBase = `_eval_${destination.replace(/\./g, '_')}`;
+
+  if (sourceExpressions.length === 0) {
+    throw new Error(
+      `buildOneFieldEvaluationEsql: field evaluation "${destination}" has no sources`
+    );
+  }
 
   const assignments: string[] = [];
 

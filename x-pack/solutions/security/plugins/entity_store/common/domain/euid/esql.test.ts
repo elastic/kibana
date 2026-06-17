@@ -471,6 +471,12 @@ describe('buildSourcePickerEsql', () => {
       'COALESCE(CASE(_src0 IS NOT NULL AND _src0 != "", _src0))'
     );
   });
+
+  it('throws for count=0 (would produce invalid COALESCE())', () => {
+    expect(() => buildSourcePickerEsql('_src', 0)).toThrow(
+      'buildSourcePickerEsql requires at least one source variable'
+    );
+  });
 });
 
 describe('buildDestinationFieldEsql', () => {
@@ -581,5 +587,18 @@ describe('buildOneFieldEvaluationEsql', () => {
 
     expect(precomputePos).toBeGreaterThan(-1);
     expect(destinationPos).toBeGreaterThan(precomputePos);
+  });
+
+  it('throws when sources is empty', () => {
+    const evaluation: FieldEvaluation = {
+      destination: 'entity.source',
+      sources: [],
+      fallbackValue: null,
+      whenClauses: [],
+    };
+
+    expect(() => buildOneFieldEvaluationEsql(evaluation)).toThrow(
+      'buildOneFieldEvaluationEsql: field evaluation "entity.source" has no sources'
+    );
   });
 });

@@ -232,6 +232,10 @@ export function buildSetFieldsByConditionAssignments(
 ): string {
   const { condition, fields: overrideFields } = setFieldsByCondition;
 
+  if (Object.keys(overrideFields).length === 0) {
+    throw new Error('buildSetFieldsByConditionAssignments: fields must not be empty');
+  }
+
   if (postStats) {
     const logicalToColumn = buildPostStatsLogicalToColumnMap(
       postStats.entityFields,
