@@ -286,7 +286,7 @@ export const PackagePolicyDeleteProvider: React.FunctionComponent<Props> = ({
             >
               <FormattedMessage
                 id="xpack.fleet.deletePackagePolicy.confirmModal.fleetServerWarningMessage"
-                defaultMessage="If any Fleet Servers are running this policy, removing the Fleet Server integration will stop them. Agents that rely on those Fleet Servers will lose their connection to Fleet and can no longer be managed or receive policy updates. This cannot be undone without re-enrolling your agents."
+                defaultMessage="If any Fleet Servers are running this policy, removing the Fleet Server integration will stop them. Agents that rely on those Fleet Servers will lose their connection to Fleet and can no longer be managed or receive policy updates. Reconnecting them requires re-enrolling each agent."
               />
             </EuiCallOut>
             <EuiSpacer size="m" />
