@@ -244,7 +244,6 @@ export function QueriesTable() {
       {
         field: 'query.title',
         name: TITLE_COLUMN,
-        truncateText: true,
         render: (_: unknown, item: SignificantEventQueryRow) => (
           <EuiLink onClick={() => handleSelectQuery(item)}>{item.query.title}</EuiLink>
         ),
@@ -260,7 +259,7 @@ export function QueriesTable() {
       {
         field: 'occurrences',
         name: LAST_OCCURRED_COLUMN,
-        width: '240px',
+        width: '180px',
         render: (_: unknown, item: SignificantEventQueryRow) => {
           if (item.query.type === QUERY_TYPE_STATS && !item.rule_backed) {
             return (
@@ -275,8 +274,7 @@ export function QueriesTable() {
       {
         field: 'occurrences',
         name: OCCURRENCES_COLUMN,
-        width: '160px',
-        align: 'center',
+        width: '120px',
         render: (_: unknown, item: SignificantEventQueryRow) => {
           return (
             <SparkPlot
