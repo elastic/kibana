@@ -13,7 +13,6 @@ import { DocumentDetailsContext } from '../shared/context';
 import { FLYOUT_FOOTER_TEST_ID } from './test_ids';
 import { FLYOUT_FOOTER_DROPDOWN_BUTTON_TEST_ID } from '../shared/components/test_ids';
 import { useKibana } from '../../../common/lib/kibana';
-import { useAlertExceptionActions } from '../../../detections/components/alerts_table/timeline_actions/use_add_exception_actions';
 import { useInvestigateInTimeline } from '../../../detections/components/alerts_table/timeline_actions/use_investigate_in_timeline';
 import { useAddToCaseActions } from '../../../detections/components/alerts_table/timeline_actions/use_add_to_case_actions';
 import { FooterAiActions } from '../../../flyout_v2/document/main/components/footer_ai_actions';
@@ -29,11 +28,15 @@ jest.mock('react-router-dom', () => {
     useLocation: jest.fn().mockReturnValue({ search: '' }),
   };
 });
-jest.mock('../../../detections/components/alerts_table/timeline_actions/use_add_exception_actions');
 jest.mock(
   '../../../detections/components/alerts_table/timeline_actions/use_investigate_in_timeline'
 );
 jest.mock('../../../detections/components/alerts_table/timeline_actions/use_add_to_case_actions');
+jest.mock('../shared/components/take_action_button', () => ({
+  TakeActionButton: () => (
+    <button data-test-subj="securitySolutionFlyoutFooterDropdownButton" type="button" />
+  ),
+}));
 
 const renderPanelFooter = (isPreview: boolean) =>
   render(
@@ -62,7 +65,6 @@ describe('PanelFooter', () => {
         cases: { hooks: { useIsAddToCaseOpen: jest.fn().mockReturnValue(false) } },
       },
     });
-    (useAlertExceptionActions as jest.Mock).mockReturnValue({ exceptionActionItems: [] });
     (useInvestigateInTimeline as jest.Mock).mockReturnValue({
       investigateInTimelineActionItems: [{ name: 'test', onClick: jest.fn() }],
     });
