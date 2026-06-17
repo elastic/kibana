@@ -26,6 +26,20 @@ import type { PartitionVisParams } from '../../common/types';
 import type { CellValueAction, ColumnCellValueActions, FilterEvent } from '../types';
 import { getSeriesValueColumnIndex, getFilterPopoverTitle } from './filter_helpers';
 
+const filterForValueLabel = i18n.translate(
+  'expressionPartitionVis.legend.filterForValueButtonAriaLabel',
+  {
+    defaultMessage: 'Filter for',
+  }
+);
+
+const filterOutValueLabel = i18n.translate(
+  'expressionPartitionVis.legend.filterOutValueButtonAriaLabel',
+  {
+    defaultMessage: 'Filter out',
+  }
+);
+
 const hasFilterCellAction = (actions: CellValueAction[]) => {
   return actions.some(({ type }) => type === FILTER_CELL_ACTION_TYPE);
 };
@@ -108,18 +122,14 @@ export const getLegendActions = (
       // Show disabled filter items with a warning message for ES|QL computed columns
       panelItems.push(
         {
-          name: i18n.translate('expressionPartitionVis.legend.filterForValueButtonAriaLabel', {
-            defaultMessage: 'Filter for',
-          }),
+          name: filterForValueLabel,
           'data-test-subj': `legend-${title}-filterIn`,
           icon: <EuiIcon type="plusCircle" size="m" aria-hidden={true} />,
           disabled: true,
           onClick: () => {},
         },
         {
-          name: i18n.translate('expressionPartitionVis.legend.filterOutValueButtonAriaLabel', {
-            defaultMessage: 'Filter out',
-          }),
+          name: filterOutValueLabel,
           'data-test-subj': `legend-${title}-filterOut`,
           icon: <EuiIcon type="minusCircle" size="m" aria-hidden={true} />,
           disabled: true,
@@ -133,9 +143,7 @@ export const getLegendActions = (
     } else if (!hasFilterCellAction(compatibleCellActions) && isFilterable && filterData) {
       panelItems.push(
         {
-          name: i18n.translate('expressionPartitionVis.legend.filterForValueButtonAriaLabel', {
-            defaultMessage: 'Filter for',
-          }),
+          name: filterForValueLabel,
           'data-test-subj': `legend-${title}-filterIn`,
           icon: <EuiIcon type="plusCircle" size="m" aria-hidden={true} />,
           onClick: () => {
@@ -144,9 +152,7 @@ export const getLegendActions = (
           },
         },
         {
-          name: i18n.translate('expressionPartitionVis.legend.filterOutValueButtonAriaLabel', {
-            defaultMessage: 'Filter out',
-          }),
+          name: filterOutValueLabel,
           'data-test-subj': `legend-${title}-filterOut`,
           icon: <EuiIcon type="minusCircle" size="m" aria-hidden={true} />,
           onClick: () => {
