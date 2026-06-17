@@ -39,6 +39,14 @@ const mockContainerModuleCallback: jest.MockedFunction<
   ConstructorParameters<typeof ContainerModule>[0]
 > = jest.fn();
 const pluginModule = new ContainerModule(mockContainerModuleCallback);
+const mockServicesModuleCallback: jest.MockedFunction<
+  ConstructorParameters<typeof ContainerModule>[0]
+> = jest.fn();
+const servicesModule = new ContainerModule(mockServicesModuleCallback);
+const mockLegacyModuleCallback: jest.MockedFunction<
+  ConstructorParameters<typeof ContainerModule>[0]
+> = jest.fn();
+const legacyModule = new ContainerModule(mockLegacyModuleCallback);
 const logger = loggingSystemMock.create();
 jest.doMock(
   join('plugin-with-initializer-path', 'server'),
@@ -57,6 +65,11 @@ jest.doMock(join('plugin-with-module', 'server'), () => ({ module: pluginModule 
 jest.doMock(
   join('plugin-with-instance-and-module', 'server'),
   () => ({ plugin: mockPluginInitializer, module: pluginModule }),
+  { virtual: true }
+);
+jest.doMock(
+  join('plugin-with-services-and-module', 'server'),
+  () => ({ services: servicesModule, module: legacyModule }),
   { virtual: true }
 );
 
@@ -359,6 +372,41 @@ test('`setup` initializes the plugin container module', async () => {
   expect(container.get(PluginInitializer('opaqueId'))).toBe(opaqueId);
   expect(container.get(CoreSetup('injection'))).toBeDefined();
   expect(container.get(PluginSetup('some-required-dep'))).toEqual({ contract: 'no' });
+});
+
+test('`setup` prefers `services` over `module` when both are exported', async () => {
+  const manifest = createPluginManifest();
+  const opaqueId = Symbol();
+  const plugin = new PluginWrapper({
+    path: 'plugin-with-services-and-module',
+    manifest,
+    opaqueId,
+    initializerContext: createPluginInitializerContext({
+      coreContext,
+      opaqueId,
+      manifest,
+      instanceInfo,
+      nodeInfo,
+    }),
+  });
+  const setupContext = createPluginSetupContext({
+    deps: coreInternalLifecycleMock.createInternalSetup(),
+    plugin,
+    runtimeResolver,
+  });
+
+  mockServicesModuleCallback.mockImplementationOnce(({ bind }) => {
+    bind(Setup).toConstantValue({ from: 'services' });
+  });
+  mockLegacyModuleCallback.mockImplementationOnce(({ bind }) => {
+    bind(Setup).toConstantValue({ from: 'module' });
+  });
+
+  await plugin.init();
+
+  expect(plugin.setup(setupContext, {} as any)).toEqual({ from: 'services' });
+  expect(mockServicesModuleCallback).toHaveBeenCalledTimes(1);
+  expect(mockLegacyModuleCallback).not.toHaveBeenCalled();
 });
 
 test('`start` fails if setup is not called first', () => {

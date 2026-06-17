@@ -129,6 +129,10 @@ export class PluginsService
   }
 
   public async start(deps: PluginsServiceStartDeps): Promise<InternalPluginsServiceStart> {
+    // Validate cross-plugin DI contracts from the manifests before any plugin
+    // starts, mirroring the server ordering.
+    validateGlobalTokens(this.injectedPlugins);
+
     // Setup each plugin with required and optional plugin contracts
     const contracts = new Map<string, unknown>();
     for (const [pluginName, plugin] of this.plugins.entries()) {
@@ -158,8 +162,6 @@ export class PluginsService
     }
 
     this.runtimeResolver.resolveStartRequests(contracts);
-
-    validateGlobalTokens(this.injectedPlugins);
 
     return { contracts };
   }

@@ -82,13 +82,13 @@ services bound in the request scope can still inject request-scope dependencies.
 ## Usage
 ### Get Started
 To get started, create an empty plugin and declare a named export called
-`module` in your `index.ts`. The plugin-author guide for the PoC lives in
+`services` in your `index.ts`. The plugin-author guide for the PoC lives in
 [`@kbn/plugin-di/GETTING_STARTED.md`](../plugin/GETTING_STARTED.md).
 
 The short version is:
 
 - define cross-plugin tokens with `createTokenFactory('myPlugin')`
-- author your plugin's `module` export with `declare(({ bind, provide, host, contribute }) => ...)`
+- author a plugin `services` module with `declare(({ bind, provide, host, contribute }) => ...)`
 
 ```ts
 import { declare } from '@kbn/plugin-di';
@@ -101,7 +101,7 @@ export class Greeting {
   }
 }
 
-export const module = declare(({ bind }) => {
+export const services = declare(({ bind }) => {
   bind(Greeting).toSelf();
 });
 ```
@@ -122,16 +122,12 @@ class HelloWorld {
   }
 }
 
-export const module = declare(({ bind }) => {
+export const services = declare(({ bind }) => {
   bind(HelloWorld).toSelf();
 });
 ```
 
-> **Note:** The `module` export can be either a plain Inversify `ContainerModule`
-> (`export const module = new ContainerModule(...)`) or the `declare(...)` form
-> from `@kbn/plugin-di`. `declare(...)` is the blessed authoring path in this
-> PoC; it returns a `ContainerModule`, so both are interchangeable from the
-> platform's perspective.
+> **Note:** Plugins may also export a `module` named export (`export const module = new ContainerModule(...)`) when they want to author bindings directly with plain Inversify. The `services = declare(...)` form is the blessed `@kbn/plugin-di` authoring path in this PoC; if both are present, `services` wins.
 
 ### Exposing Contracts
 In order to expose services to already existing plugins, they should be returned as part of the contract via the `Setup` or `Start` services.
@@ -499,10 +495,11 @@ Cross-plugin DI introduces two explicit runtime patterns:
 - **Extension points** for one-host, many-contributor contracts resolved with
   `getExtensions(...)`, `useExtensions(...)`, and `injectExtensions(...)`
 
-Those patterns are part of the runtime subsystem documented here. The
-plugin-author workflow for defining tokens and declaring providers, hosts, and
-contributions lives in
-[`@kbn/plugin-di/GETTING_STARTED.md`](../plugin/GETTING_STARTED.md).
+Those patterns are part of the runtime subsystem documented here. Plugins record
+the contracts they provide, host, contribute, and consume in `plugin.globals`,
+and the platform validates those declarations at startup. The plugin-author
+workflow for defining tokens and declaring providers, hosts, and contributions
+lives in [`@kbn/plugin-di/GETTING_STARTED.md`](../plugin/GETTING_STARTED.md).
 
 ## Testing
 
