@@ -7,12 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useMemo, useRef } from 'react';
 import ReactDOM from 'react-dom';
 import type { RouteComponentProps } from 'react-router-dom';
 import { Redirect } from 'react-router-dom';
 import { HashRouter as Router, Routes, Route } from '@kbn/shared-ux-router';
-import { EuiTab, EuiTabs, EuiToolTip, EuiBetaBadge, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import type {
@@ -21,8 +20,10 @@ import type {
   ScopedHistory,
   ExecutionContextStart,
 } from '@kbn/core/public';
-import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
+import type { RenderingService } from '@kbn/core-rendering-browser';
 import { css } from '@emotion/react';
+import { AppHeader } from '@kbn/app-header';
+import type { AppHeaderBadge, AppHeaderTab } from '@kbn/app-header';
 import type { DocTitleService, BreadcrumbService } from './services';
 
 import type { DevToolApp } from './dev_tool';
@@ -41,6 +42,7 @@ interface DevToolsWrapperProps {
   appServices: AppServices;
   location: RouteComponentProps['location'];
   startServices: DevToolsStartServices;
+  badges?: AppHeaderBadge[];
 }
 
 interface MountedDevToolDescriptor {
@@ -63,21 +65,6 @@ export const staticStyles = {
   devAppContainer: devAppContainerStyles,
 
   devApp: devAppContainerStyles,
-
-  devAppTabBeta: css`
-    vertical-align: middle;
-  `,
-};
-
-const useStyles = () => {
-  const { euiTheme } = useEuiTheme();
-
-  return {
-    ...staticStyles,
-    tabs: css`
-      padding-left: ${euiTheme.size.s};
-    `,
-  };
 };
 
 function DevToolsWrapper({
@@ -87,8 +74,8 @@ function DevToolsWrapper({
   appServices,
   location,
   startServices,
+  badges,
 }: DevToolsWrapperProps) {
-  const styles = useStyles();
   const { docTitleService, breadcrumbService } = appServices;
   const mountedTool = useRef<MountedDevToolDescriptor | null>(null);
 
@@ -106,39 +93,32 @@ function DevToolsWrapper({
     breadcrumbService.setBreadcrumbs(activeDevTool.title);
   }, [activeDevTool, docTitleService, breadcrumbService]);
 
+  const headerTabs = useMemo<AppHeaderTab[]>(
+    () =>
+      devTools.map((currentDevTool) => ({
+        id: currentDevTool.id,
+        label: currentDevTool.title,
+        isSelected: currentDevTool === activeDevTool,
+        disabled: currentDevTool.isDisabled(),
+        tooltipContent: currentDevTool.tooltipContent,
+        onClick: () => {
+          if (!currentDevTool.isDisabled()) {
+            history.push(`/${currentDevTool.id}`);
+          }
+        },
+      })),
+    [devTools, activeDevTool, history]
+  );
+
   return (
-    <main css={styles.devApp}>
-      <EuiTabs css={styles.tabs}>
-        {devTools.map((currentDevTool) => (
-          <EuiTab
-            key={currentDevTool.id}
-            disabled={currentDevTool.isDisabled()}
-            isSelected={currentDevTool === activeDevTool}
-            onClick={() => {
-              if (!currentDevTool.isDisabled()) {
-                history.push(`/${currentDevTool.id}`);
-              }
-            }}
-          >
-            <EuiToolTip content={currentDevTool.tooltipContent}>
-              <span tabIndex={0}>
-                {currentDevTool.title}{' '}
-                {currentDevTool.isBeta && (
-                  <EuiBetaBadge
-                    size="s"
-                    css={styles.devAppTabBeta}
-                    label={i18n.translate('devTools.badge.betaLabel', {
-                      defaultMessage: 'Beta',
-                    })}
-                  />
-                )}
-              </span>
-            </EuiToolTip>
-          </EuiTab>
-        ))}
-      </EuiTabs>
+    <main css={staticStyles.devApp}>
+      <AppHeader
+        title={i18n.translate('devTools.appHeader.title', { defaultMessage: 'Developer tools' })}
+        tabs={headerTabs}
+        badges={badges}
+      />
       <div
-        css={styles.devAppContainer}
+        css={staticStyles.devAppContainer}
         role="tabpanel"
         data-test-subj={activeDevTool.id}
         ref={async (element) => {
@@ -181,20 +161,21 @@ function redirectOnMissingCapabilities(application: ApplicationStart) {
   return false;
 }
 
-function setBadge(application: ApplicationStart, chrome: ChromeStart) {
+function getBadges(application: ApplicationStart): AppHeaderBadge[] | undefined {
   if (application.capabilities.dev_tools.save) {
-    return;
+    return undefined;
   }
 
-  chrome.setBadge({
-    text: i18n.translate('devTools.badge.readOnly.text', {
-      defaultMessage: 'Read only',
-    }),
-    tooltip: i18n.translate('devTools.badge.readOnly.tooltip', {
-      defaultMessage: 'Unable to save',
-    }),
-    iconType: 'readOnly',
-  });
+  return [
+    {
+      label: i18n.translate('devTools.badge.readOnly.text', {
+        defaultMessage: 'Read only',
+      }),
+      tooltip: i18n.translate('devTools.badge.readOnly.tooltip', {
+        defaultMessage: 'Unable to save',
+      }),
+    },
+  ];
 }
 
 export function renderApp(
@@ -204,16 +185,17 @@ export function renderApp(
   history: ScopedHistory,
   devTools: readonly DevToolApp[],
   appServices: AppServices,
-  startServices: DevToolsStartServices
+  startServices: DevToolsStartServices,
+  rendering: RenderingService
 ) {
   if (redirectOnMissingCapabilities(application)) {
     return () => {};
   }
 
-  setBadge(application, chrome);
+  const badges = getBadges(application);
 
   ReactDOM.render(
-    <KibanaRenderContextProvider {...startServices}>
+    rendering.addContext(
       <Router>
         <Routes>
           {devTools
@@ -232,6 +214,7 @@ export function renderApp(
                     devTools={devTools}
                     appServices={appServices}
                     startServices={startServices}
+                    badges={badges}
                   />
                 )}
               />
@@ -241,7 +224,7 @@ export function renderApp(
           </Route>
         </Routes>
       </Router>
-    </KibanaRenderContextProvider>,
+    ),
     element
   );
 
