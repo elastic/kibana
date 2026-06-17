@@ -183,6 +183,7 @@ describe('ConnectorExecutor', () => {
           to: ['ops@example.com'],
           subject: 'Daily CSV report',
           message: 'Attached is the generated report.',
+          messageHTML: '<p>Attached is the generated report.</p>',
           attachments: [{ filename: 'report.csv', content: 'host,risk\nhost-1,high\n' }],
         },
         abortController,
@@ -191,6 +192,7 @@ describe('ConnectorExecutor', () => {
       expect(mockActionsClient.execute).toHaveBeenCalledWith({
         actionId: connectorId,
         params: expect.objectContaining({
+          messageHTML: '<p>Attached is the generated report.</p>',
           attachments: [{ filename: 'report.csv', content: 'host,risk\nhost-1,high\n' }],
         }),
         signal: abortController.signal,

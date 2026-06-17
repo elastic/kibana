@@ -124,17 +124,19 @@ describe('ConnectorStepImpl', () => {
       data: undefined,
     });
 
+    const withInputs = {
+      to: ['ops@example.com'],
+      subject: 'Daily CSV report',
+      message: 'Attached is the generated report.',
+      attachments,
+    };
+
     const step = {
       name: 'send-report',
       stepId: 'send-report',
       type: 'email',
       'connector-id': 'stakeholder-email',
-      with: {
-        to: ['ops@example.com'],
-        subject: 'Daily CSV report',
-        message: 'Attached is the generated report.',
-        attachments,
-      },
+      with: withInputs,
     };
 
     const impl = new ConnectorStepImpl(
@@ -144,13 +146,6 @@ describe('ConnectorStepImpl', () => {
       workflowRuntime as any,
       workflowLogger as any
     );
-
-    const withInputs = {
-      to: ['ops@example.com'],
-      subject: 'Daily CSV report',
-      message: 'Attached is the generated report.',
-      attachments,
-    };
 
     const result = await (impl as any)._run(withInputs);
 

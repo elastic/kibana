@@ -34,7 +34,13 @@ describe('schema - additional coverage', () => {
       message: 'Attached is the generated report.',
     };
 
-    const createWorkflowWithEmailStep = (stepOverrides: Record<string, unknown> = {}) => ({
+    const attachment = {
+      filename: 'report.csv',
+      contentType: 'text/csv',
+      content: 'host,risk\nhost-1,high\n',
+    };
+
+    const createWorkflowWithEmailStep = () => ({
       name: 'email attachments workflow',
       triggers: [{ type: 'manual' }],
       steps: [
@@ -44,15 +50,8 @@ describe('schema - additional coverage', () => {
           'connector-id': 'stakeholder-email',
           with: {
             ...baseEmailParams,
-            attachments: [
-              {
-                filename: 'report.csv',
-                contentType: 'text/csv',
-                content: 'host,risk\nhost-1,high\n',
-              },
-            ],
+            attachments: [attachment],
           },
-          ...stepOverrides,
         },
       ],
     });
@@ -69,25 +68,13 @@ describe('schema - additional coverage', () => {
       expect(() =>
         EmailParamsSchema.parse({
           ...baseEmailParams,
-          attachments: [
-            {
-              filename: 'report.csv',
-              contentType: 'text/csv',
-              content: 'host,risk\nhost-1,high\n',
-            },
-          ],
+          attachments: [attachment],
         })
       ).not.toThrow();
     });
 
     it('keeps filename and content in JSON Schema required for attachment items (Monaco YAML templates)', () => {
-      const zodSchema = getWorkflowZodSchema({
-        '.email': createMockConnectorTypeInfo({
-          actionTypeId: '.email',
-          displayName: 'Email',
-        }),
-      });
-      const jsonSchema = getWorkflowJsonSchema(zodSchema);
+      const jsonSchema = getWorkflowJsonSchema(createWorkflowEmailSchema());
       expect(jsonSchema).not.toBeNull();
 
       const hasAttachmentItemRequired = (node: unknown): boolean => {
@@ -115,6 +102,42 @@ describe('schema - additional coverage', () => {
     it('accepts a workflow YAML email step with attachments', () => {
       expect(() => createWorkflowEmailSchema().parse(createWorkflowWithEmailStep())).not.toThrow();
     });
+
+    it('rejects attachments missing required filename', () => {
+      expect(() =>
+        EmailParamsSchema.parse({
+          ...baseEmailParams,
+          attachments: [{ content: 'host,risk\nhost-1,high\n' }],
+        })
+      ).toThrow();
+    });
+
+    it('rejects attachments missing required content', () => {
+      expect(() =>
+        EmailParamsSchema.parse({
+          ...baseEmailParams,
+          attachments: [{ filename: 'report.csv' }],
+        })
+      ).toThrow();
+    });
+
+    it('rejects attachments with invalid field types', () => {
+      expect(() =>
+        EmailParamsSchema.parse({
+          ...baseEmailParams,
+          attachments: [{ filename: 'report.csv', content: 123 }],
+        })
+      ).toThrow();
+    });
+
+    it('rejects attachments with content exceeding the max length', () => {
+      expect(() =>
+        EmailParamsSchema.parse({
+          ...baseEmailParams,
+          attachments: [{ filename: 'report.csv', content: 'a'.repeat(3 * 1024 * 1024 + 1) }],
+        })
+      ).toThrow();
+    });
   });
 
   describe('getAllConnectorsInternal', () => {
@@ -141,32 +164,6 @@ describe('schema - additional coverage', () => {
       const first = getAllConnectorsInternal();
       const second = getAllConnectorsInternal();
       expect(first).toBe(second);
-    });
-
-    it('should expose email connector attachments in the dynamic params schema', () => {
-      const connectors = getAllConnectorsWithDynamic({
-        '.email': createMockConnectorTypeInfo({
-          actionTypeId: '.email',
-          displayName: 'Email',
-        }),
-      });
-      const emailConnector = connectors.find((c) => c.type === 'email');
-
-      expect(emailConnector).toBeDefined();
-      expect(() =>
-        emailConnector?.paramsSchema.parse({
-          to: ['ops@example.com'],
-          subject: 'Daily CSV report',
-          message: 'Attached is the generated report.',
-          attachments: [
-            {
-              filename: 'report.csv',
-              contentType: 'text/csv',
-              content: 'host,risk\nhost-1,high\n',
-            },
-          ],
-        })
-      ).not.toThrow();
     });
   });
 

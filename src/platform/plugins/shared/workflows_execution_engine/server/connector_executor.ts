@@ -8,28 +8,21 @@
  */
 
 import type { ActionTypeExecutorResult } from '@kbn/actions-plugin/common';
+import { asNotificationExecutionSource } from '@kbn/actions-plugin/server';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
 import type { ConnectorWithExtraFindData } from '@kbn/actions-plugin/server/application/connector/types';
 
-type ConnectorExecutionSource = Parameters<ActionsClient['execute']>[0]['source'];
-
 const WORKFLOWS_NOTIFICATION_REQUESTER_ID = 'workflows';
 
-function getWorkflowConnectorExecutionSource(
-  actionTypeId: string,
-  actionId: string
-): ConnectorExecutionSource | undefined {
+function getWorkflowConnectorExecutionSource(actionTypeId: string, actionId: string) {
   if (actionTypeId.replace(/^\./, '') !== 'email') {
     return undefined;
   }
 
-  return {
-    type: 'NOTIFICATION',
-    source: {
-      requesterId: WORKFLOWS_NOTIFICATION_REQUESTER_ID,
-      connectorId: actionId,
-    },
-  } as ConnectorExecutionSource;
+  return asNotificationExecutionSource({
+    requesterId: WORKFLOWS_NOTIFICATION_REQUESTER_ID,
+    connectorId: actionId,
+  });
 }
 
 export class ConnectorExecutor {
