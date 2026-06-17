@@ -30,7 +30,6 @@ import {
   ROOT_STREAM_NAMES,
 } from '@kbn/streams-schema';
 import type { StreamSummary } from '../../../common';
-import type { QueryClient } from './assets/query/query_client';
 import type { AttachmentClient } from './attachments/attachment_client';
 import {
   DefinitionNotFoundError,
@@ -45,7 +44,7 @@ import type { StreamsStorageClient } from './storage/streams_storage_client';
 import { checkAccess, checkAccessBulk } from './stream_crud';
 import { upsertDataStream } from './data_streams/manage_data_streams';
 import { shouldExcludeFromStreamsList } from './data_streams/should_exclude_from_streams_list';
-import type { FeatureClient } from './feature';
+import type { KnowledgeIndicatorClient } from './ki';
 
 interface AcknowledgeResponse<TResult extends Result> {
   acknowledged: true;
@@ -81,8 +80,7 @@ export class StreamsClient {
       esClientAsInternalUser: ElasticsearchClient;
       esClient: ElasticsearchClient;
       attachmentClient: AttachmentClient;
-      getQueryClient?: () => Promise<QueryClient>;
-      getFeatureClient?: () => Promise<FeatureClient>;
+      getKnowledgeIndicatorClient?: () => Promise<KnowledgeIndicatorClient>;
       storageClient: StreamsStorageClient;
       logger: Logger;
       isServerless: boolean;
@@ -373,13 +371,8 @@ export class StreamsClient {
         }
       );
 
-      const { attachmentClient, getQueryClient, storageClient } = this.dependencies;
-      const cleanOps: Array<Promise<unknown>> = [attachmentClient.clean(), storageClient.clean()];
-      if (getQueryClient) {
-        const queryClient = await getQueryClient();
-        cleanOps.push(queryClient.clean());
-      }
-      await Promise.all(cleanOps);
+      const { attachmentClient, storageClient } = this.dependencies;
+      await Promise.all([attachmentClient.clean(), storageClient.clean()]);
     }
 
     // Disable in Elasticsearch (parallel calls)
@@ -1116,10 +1109,10 @@ export class StreamsClient {
       ),
     ];
 
-    if (this.dependencies.getQueryClient) {
-      const queryClient = await this.dependencies.getQueryClient();
+    if (this.dependencies.getKnowledgeIndicatorClient) {
+      const kiClient = await this.dependencies.getKnowledgeIndicatorClient();
       ops.push(
-        queryClient.syncQueries(
+        kiClient.syncQueries(
           definition,
           queries.map((q) => ({ ...q, type: deriveQueryType(q.esql.query) }))
         )
