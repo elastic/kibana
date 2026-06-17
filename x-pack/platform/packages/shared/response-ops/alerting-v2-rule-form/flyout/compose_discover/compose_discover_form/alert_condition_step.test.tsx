@@ -54,7 +54,7 @@ const BASE_COMPOSE_VALUES: ComposeFormValues = {
   query: {
     format: 'composed',
     base: BASE_QUERY,
-    blocks: { breach: ALERT_BLOCK },
+    breach: { segment: ALERT_BLOCK },
   },
   stateTransitionAlertDelayMode: 'immediate',
   stateTransitionRecoveryDelayMode: 'immediate',
@@ -126,19 +126,19 @@ const renderStep = (
 
 const STANDALONE_QUERY: RuleQuery = {
   format: 'standalone',
-  breach: 'FROM logs-* | LIMIT 10',
+  breach: { query: 'FROM logs-* | LIMIT 10' },
 };
 
 const COMPOSED_QUERY: RuleQuery = {
   format: 'composed',
   base: 'FROM logs-* | STATS count = COUNT(*) BY host.name',
-  blocks: { breach: '| WHERE count > 100' },
+  breach: { segment: '| WHERE count > 100' },
 };
 
 const COMPOSED_QUERY_EMPTY_BASE: RuleQuery = {
   format: 'composed',
   base: '',
-  blocks: { breach: '| WHERE count > 100' },
+  breach: { segment: '| WHERE count > 100' },
 };
 
 describe('AlertConditionStep', () => {
@@ -312,7 +312,7 @@ describe('AlertConditionStep', () => {
         {
           formValueOverrides: {
             kind: 'signal',
-            query: { format: 'standalone', breach: `${BASE_QUERY}\n${ALERT_BLOCK}` },
+            query: { format: 'standalone', breach: { query: `${BASE_QUERY}\n${ALERT_BLOCK}` } },
           },
         }
       );
@@ -430,7 +430,7 @@ describe('AlertConditionStep', () => {
             query: {
               format: 'composed',
               base: 'FROM logs-*\n| STATS count = COUNT(*) BY host.name',
-              blocks: { breach: '| WHERE count > 100' },
+              breach: { segment: '| WHERE count > 100' },
             },
           },
         }
@@ -449,7 +449,7 @@ describe('AlertConditionStep', () => {
             query: {
               format: 'composed',
               base: 'FROM kibana_sample_data_ecommerce\n| STATS total = SUM(taxful_total_price) BY customer_gender, day_of_week',
-              blocks: { breach: '| WHERE total > 1000' },
+              breach: { segment: '| WHERE total > 1000' },
             },
           },
         }
@@ -469,7 +469,7 @@ describe('AlertConditionStep', () => {
             query: {
               format: 'composed',
               base: 'FROM logs-*\n| STATS count = COUNT(*)',
-              blocks: { breach: '| WHERE count > 100' },
+              breach: { segment: '| WHERE count > 100' },
             },
           },
         }
