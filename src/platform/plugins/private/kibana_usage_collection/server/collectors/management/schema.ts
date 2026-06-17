@@ -548,7 +548,9 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
   },
   'workflows:experimentalFeatures': {
     type: 'boolean',
-    _meta: { description: 'Non-default value of setting.' },
+    _meta: {
+      description: 'Whether experimental features for Elastic Workflows are enabled.',
+    },
   },
   'workflows:ui:enabled': {
     type: 'boolean',
