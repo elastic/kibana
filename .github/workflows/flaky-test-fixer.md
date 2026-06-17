@@ -1,6 +1,6 @@
 ---
 name: Flaky Test Fixer
-description: Open a draft fix PR for a `failed-test` issue that has been labeled `ai:auto-flaky-fix`.
+description: Open a draft fix PR for a `failed-test` issue that has been labeled `ai:fix-flaky`.
 on:
   issues:
     types: [labeled]
@@ -19,7 +19,7 @@ permissions:
   checks: read
   models: read
 
-if: "${{ (github.event_name == 'workflow_dispatch' && github.event.inputs.issue_number != '') || (github.event_name == 'issues' && github.event.action == 'labeled' && github.event.label.name == 'ai:auto-flaky-fix' && !github.event.issue.pull_request) }}"
+if: "${{ (github.event_name == 'workflow_dispatch' && github.event.inputs.issue_number != '') || (github.event_name == 'issues' && github.event.action == 'labeled' && github.event.label.name == 'ai:fix-flaky' && !github.event.issue.pull_request) }}"
 
 concurrency:
   group: 'flaky-test-fixer-${{ github.event.issue.number || github.event.inputs.issue_number }}'
@@ -92,9 +92,9 @@ safe-outputs:
   create-pull-request:
     draft: true
     max: 1
-    labels: [ai:flaky-fix-pr]
+    labels: [auto-flaky-fix]
     base-branch: main
-    allowed-base-branches: [main]
+    allowed-base-branches: ['main', '9.*', '8.*', '7.*']
     if-no-changes: 'ignore'
     protected-files: fallback-to-issue
 

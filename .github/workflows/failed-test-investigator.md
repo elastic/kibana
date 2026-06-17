@@ -207,7 +207,7 @@ Add the following snippet of Markdown right after (and outside) the `<details>` 
 
 ```markdown
 > [!TIP]
-> Label this issue `ai:auto-flaky-fix` and we'll **open a fix PR** (share early feedback in #appex-qa).
+> Label this issue `ai:fix-flaky` and we'll **open a fix PR** (share early feedback in #appex-qa).
 ```
 
 If a fix PR is already up (in draft or in review) in the Kibana repository, mention the PR link in the same tip block (instead of suggesting to add the label).
@@ -270,3 +270,12 @@ Include the following only if they provide high-value, actionable signal:
 - **Ruled out:** a brief note on alternative hypotheses that were investigated and dismissed.
 - **Verification:** specific steps to reproduce the failure or confirm the fix.
 - **Open questions:** unresolved design or environmental issues blocking a definitive fix ("a screenshot would have helped troubleshoot this" is a valid open question).
+
+#### Data collection issues (troubleshooting)
+
+If you couldn't retrieve evidence such as screenshots or logs because of an error, document each failure here so the workflow itself can be debugged. For each one, include:
+
+- the command you ran
+- the URL (if applicable)
+- the resulting error message
+- any other detail that could be useful for the investigation
