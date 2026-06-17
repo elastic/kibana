@@ -11,7 +11,7 @@ import { schema } from '@kbn/config-schema';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { updateApmOssIndexPaths } from './migrations/update_apm_oss_index_paths';
-import type { APMIndices } from '../../common/config_schema';
+import { APM_INDEX_PATTERN_MAX_LENGTH, type APMIndices } from '../../common/config_schema';
 
 export const APM_INDEX_SETTINGS_SAVED_OBJECT_TYPE = 'apm-indices';
 export const APM_INDEX_SETTINGS_SAVED_OBJECT_ID = 'apm-indices';
@@ -51,11 +51,11 @@ export const apmIndicesSavedObjectDefinition: SavedObjectsType = {
         create: schema.object({
           apmIndices: schema.maybe(
             schema.object({
-              error: schema.maybe(schema.string()),
-              onboarding: schema.maybe(schema.string()),
-              span: schema.maybe(schema.string()),
-              transaction: schema.maybe(schema.string()),
-              metric: schema.maybe(schema.string()),
+              error: schema.maybe(schema.string({ maxLength: APM_INDEX_PATTERN_MAX_LENGTH })),
+              onboarding: schema.maybe(schema.string({ maxLength: APM_INDEX_PATTERN_MAX_LENGTH })),
+              span: schema.maybe(schema.string({ maxLength: APM_INDEX_PATTERN_MAX_LENGTH })),
+              transaction: schema.maybe(schema.string({ maxLength: APM_INDEX_PATTERN_MAX_LENGTH })),
+              metric: schema.maybe(schema.string({ maxLength: APM_INDEX_PATTERN_MAX_LENGTH })),
             })
           ),
           isSpaceAware: schema.maybe(schema.boolean()),

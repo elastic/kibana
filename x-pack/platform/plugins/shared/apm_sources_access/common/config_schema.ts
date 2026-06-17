@@ -7,16 +7,32 @@
 
 import { type TypeOf, schema } from '@kbn/config-schema';
 
+// APM settings store comma-separated index-pattern expressions, so keep their bound
+// aligned with Kibana's broader index-pattern (index_management) `maxLength` adoption.
+export const APM_INDEX_PATTERN_MAX_LENGTH = 1000;
+
 /**
  * Schema for APM indices
  */
 export const indicesSchema = schema.object({
-  transaction: schema.string({ defaultValue: 'traces-apm*,apm-*,traces-*.otel-*' }), // TODO: remove apm-* pattern in 9.0
-  span: schema.string({ defaultValue: 'traces-apm*,apm-*,traces-*.otel-*' }),
-  error: schema.string({ defaultValue: 'logs-apm*,apm-*,logs-*.otel-*' }),
-  metric: schema.string({ defaultValue: 'metrics-apm*,apm-*,metrics-*.otel-*' }),
-  onboarding: schema.string({ defaultValue: 'apm-*' }), // Unused: to be deleted
-  sourcemap: schema.string({ defaultValue: 'apm-*' }), // Unused: to be deleted
+  transaction: schema.string({
+    defaultValue: 'traces-apm*,apm-*,traces-*.otel-*',
+    maxLength: APM_INDEX_PATTERN_MAX_LENGTH,
+  }), // TODO: remove apm-* pattern in 9.0
+  span: schema.string({
+    defaultValue: 'traces-apm*,apm-*,traces-*.otel-*',
+    maxLength: APM_INDEX_PATTERN_MAX_LENGTH,
+  }),
+  error: schema.string({
+    defaultValue: 'logs-apm*,apm-*,logs-*.otel-*',
+    maxLength: APM_INDEX_PATTERN_MAX_LENGTH,
+  }),
+  metric: schema.string({
+    defaultValue: 'metrics-apm*,apm-*,metrics-*.otel-*',
+    maxLength: APM_INDEX_PATTERN_MAX_LENGTH,
+  }),
+  onboarding: schema.string({ defaultValue: 'apm-*', maxLength: APM_INDEX_PATTERN_MAX_LENGTH }), // Unused: to be deleted
+  sourcemap: schema.string({ defaultValue: 'apm-*', maxLength: APM_INDEX_PATTERN_MAX_LENGTH }), // Unused: to be deleted
 });
 
 /**
