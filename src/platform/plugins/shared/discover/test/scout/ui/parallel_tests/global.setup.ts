@@ -24,14 +24,6 @@ import {
 globalSetupHook(
   'Setup Discover tests data',
   async ({ esClient, esArchiver, apiServices, config, log, kbnUrl }) => {
-    // Turn "isEsqlDefault" off by default for all tests
-    log.debug('[setup:discover] turning off isEsqlDefault by default for all tests');
-    await apiServices.core.settings({
-      'feature_flags.overrides': {
-        'discover.isEsqlDefault': false,
-      },
-    });
-
     // Logstash data for flyout stability tests
     log.debug(
       '[setup:logstash] loading logstash_functional ES data (only if it does not exist)...'
@@ -44,6 +36,26 @@ globalSetupHook(
     log.debug('[setup:hamlet] loading hamlet ES data (only if it does not exist)...');
     await esArchiver.loadIfNeeded('src/platform/test/functional/fixtures/es_archiver/hamlet');
     log.debug('[setup:hamlet] hamlet ES data ready');
+
+    // Unmapped fields test data
+    log.debug(
+      '[setup:unmapped_fields] loading unmapped_fields ES data (only if it does not exist)...'
+    );
+    await esArchiver.loadIfNeeded(
+      'src/platform/test/functional/fixtures/es_archiver/unmapped_fields'
+    );
+    log.debug('[setup:unmapped_fields] unmapped_fields ES data ready');
+
+    // Index pattern without timefield test data
+    log.debug(
+      '[setup:index_pattern_without_timefield] loading index_pattern_without_timefield ES data (only if it does not exist)...'
+    );
+    await esArchiver.loadIfNeeded(
+      'src/platform/test/functional/fixtures/es_archiver/index_pattern_without_timefield'
+    );
+    log.debug(
+      '[setup:index_pattern_without_timefield] index_pattern_without_timefield ES data ready'
+    );
 
     // Metrics Experience setup
     log.debug('[setup:metrics] creating metrics test index (only if it does not exist)...');

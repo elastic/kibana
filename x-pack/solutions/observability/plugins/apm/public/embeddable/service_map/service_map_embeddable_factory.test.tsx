@@ -397,7 +397,7 @@ describe('getServiceMapEmbeddableFactory', () => {
     expect(setTimeRangeMock).toHaveBeenCalledWith(undefined);
   });
 
-  it('falls back to default time range when fetch context returns undefined', async () => {
+  it('waits (renders a spinner) instead of querying a guessed window when fetch context has no time range', async () => {
     mockUseFetchContext.mockReturnValue({ timeRange: undefined });
     mockUseBatchedPublishingSubjects.mockReturnValue([
       ENVIRONMENT_ALL.value,
@@ -418,14 +418,13 @@ describe('getServiceMapEmbeddableFactory', () => {
       initializeDrilldownsManager: jest.fn(),
     } as never);
 
-    render(<embeddable.Component />);
+    const { container } = render(<embeddable.Component />);
 
-    expect(mockServiceMapEmbeddable).toHaveBeenCalledWith(
-      expect.objectContaining({
-        rangeFrom: 'now-15m',
-        rangeTo: 'now',
-      })
-    );
+    // Don't render the map (which would query a guessed time window) — show a wait state instead.
+    expect(mockServiceMapEmbeddable).not.toHaveBeenCalled();
+    expect(
+      container.querySelector('[data-test-subj="apmServiceMapEmbeddableWaitingForTimeRange"]')
+    ).not.toBeNull();
   });
 
   describe('filter notification api', () => {

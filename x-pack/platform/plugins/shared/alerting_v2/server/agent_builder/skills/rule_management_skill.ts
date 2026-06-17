@@ -190,10 +190,41 @@ For an existing rule, pass the \`ruleAttachmentId\` and only include the operati
 - If grouping fields are set after a query, they are validated against the query's
   output columns. Use fields that appear in the query results.
 
-## State Transition and Recovery
+## State Transition
 
 - \`set_state_transition\` with \`consecutive_breaches: N\` means the rule fires only after N consecutive evaluation cycles breach the threshold. Use this when the user wants to reduce noise.
-- \`set_recovery_policy\` with \`type: "no_breach"\` recovers when a cycle produces no rows. Use \`type: "query"\` with a separate recovery query when the user needs explicit recovery detection.
+
+## Recovery Strategy
+
+\`recovery_strategy\` is a **top-level rule field** (not inside the query). It controls how episodes transition from active to recovering/inactive.
+
+| Value | Behaviour |
+|---|---|
+| \`'no_breach'\` | Recovers episodes automatically when a breaching group stops appearing in breach query results. **Default for most alert rules.** |
+| \`'query'\` | Runs a separate recovery query each cycle. Requires a \`recovery\` block inside \`set_query\` (\`{ segment }\` for composed, \`{ query }\` for standalone). Use when recovery needs different criteria than "not breaching". |
+| \`'none'\` | Disables recovery entirely — episodes never transition to recovering/inactive. Use only when lifecycle tracking is not needed. |
+
+Signal rules (\`kind: signal\`) cannot set \`recovery_strategy\`.
+
+When using \`recovery_strategy: 'query'\`, add a \`set_query\` operation that includes a \`recovery\` block alongside \`breach\`:
+- **Composed**: \`recovery: { segment: 'WHERE cpu < 0.5' }\`
+- **Standalone**: \`recovery: { query: 'FROM metrics-* | WHERE cpu < 0.5' }\`
+
+## No-Data Strategy
+
+\`no_data_strategy\` is a **top-level rule field** that controls behaviour when no data is present. Only meaningful for standalone queries with a \`no_data\` block.
+
+| Value | Behaviour |
+|---|---|
+| \`'none'\` | No-data situations are ignored (default). |
+| \`'emit'\` | Emits a \`no_data\` alert event when \`no_data\` query returns no rows. |
+| \`'last_known_status'\` | Holds the last known episode status when no data is present. |
+| \`'recover'\` | Forces recovery when no data is present. |
+
+When setting \`no_data_strategy\` to anything other than \`'none'\`, add a \`no_data\` block to the standalone query:
+\`no_data: { query: 'FROM heartbeat-* | STATS count = COUNT(*) BY host.name | WHERE count >= 1' }\`
+
+Signal rules cannot set \`no_data_strategy\`. Composed queries do not support \`no_data\`.
 
 ## Final Validation
 
@@ -273,9 +304,8 @@ For an existing policy, pass the \`actionPolicyAttachmentId\` and only include t
    - For \`per_episode\` grouping: \`on_status_change\`, \`per_status_interval\`, \`every_time\`.
    - For \`all\` / \`per_field\` grouping: \`time_interval\`, \`every_time\`.
    - \`per_status_interval\` and \`time_interval\` require an \`interval\` value (e.g. \`"5m"\`, \`"1h"\`).
-6. **\`set_type\`** — set the policy type and optional \`ruleId\`:
-   - \`type: "single_rule"\` with \`ruleId\`: scopes the policy to a single rule. This is the **default** for new policies created alongside a rule. No matcher is needed for rule scoping.
-   - \`type: "global"\`: matches alerts from any rule in the space. Use when the user explicitly wants a cross-rule or shared policy.
+
+Action policies are always space-wide: they match alerts from any rule in the space unless the matcher narrows them. To scope a policy to a single rule, set a matcher of \`rule.id: "<ruleId>"\` via \`set_matcher\`.
 
 ### Throttle / Grouping Compatibility
 
@@ -342,11 +372,11 @@ steps:
     with:
       to:
         - <user-provided-email>
-      subject: "Alert: <rule-name> — {{ inputs.episodes | size }} episode(s)"
+      subject: "Alert: <rule-name> — {{ inputs.payload.episodes | size }} episode(s)"
       message: >
-        Rule "<rule-name>" triggered {{ inputs.episodes | size }} alert episode(s).
+        Rule "<rule-name>" triggered {{ inputs.payload.episodes | size }} alert episode(s).
 
-        {% for ep in inputs.episodes %}
+        {% for ep in inputs.payload.episodes %}
         - Host: {{ ep.data.host.name | default: "unknown" }}
           Errors: {{ ep.data.error_count | default: "n/a" }}
           Status: {{ ep.episode_status }}
@@ -373,14 +403,14 @@ steps:
 
 | Variable | Description |
 |---|---|
-| \`inputs.episodes\` | Array of alert episodes |
-| \`inputs.episodes[].episode_status\` | \`active\`, \`pending\`, \`recovering\`, or \`inactive\` |
-| \`inputs.episodes[].rule_id\` | The rule's saved object ID |
-| \`inputs.episodes[].episode_id\` | The episode UUID |
-| \`inputs.episodes[].data.*\` | ES|QL output row fields (populated for active/pending) |
-| \`inputs.policyId\` | The action policy ID |
-| \`inputs.id\` | The action group ID |
-| \`inputs.groupKey\` | The grouping key object |
+| \`inputs.payload.episodes\` | Array of alert episodes |
+| \`inputs.payload.episodes[].episode_status\` | \`active\`, \`pending\`, \`recovering\`, or \`inactive\` |
+| \`inputs.payload.episodes[].rule_id\` | The rule's saved object ID |
+| \`inputs.payload.episodes[].episode_id\` | The episode UUID |
+| \`inputs.payload.episodes[].data.*\` | ES|QL output row fields (populated for active/pending) |
+| \`inputs.payload.policyId\` | The action policy ID |
+| \`inputs.payload.id\` | The action group ID |
+| \`inputs.payload.groupKey\` | The grouping key object |
 | \`triggeredBy\` | Always \`"action_policy"\` |
 | \`spaceId\` | The Kibana space |
 | \`execution.url\` | Direct link to the workflow execution in Kibana |
@@ -401,10 +431,10 @@ Use ${alertingTools.manageActionPolicy} with these operations in order:
 1. \`set_metadata\`: name = \`"Notify on <rule-name>"\`, description = \`"Default notification for <rule-name>"\`
 2. \`set_destinations\`: \`[{ type: "workflow", id: "<workflowId-from-step-1>" }]\`
    - **IMPORTANT**: Use the \`workflowId\` you generated in step 3 (passed to \`generate_workflow\`), NOT the \`attachmentId\`. The \`workflowId\` is the stable workflow ID used for persistence and cross-references. Using the attachment ID will cause a validation error.
-3. \`set_type\`: \`{ type: "single_rule", ruleId: "<ruleId>" }\`
-   - Use the \`ruleId\` value from the \`manage_rule\` tool result. This ID is pre-assigned when the rule attachment is created and will become the saved-object ID when the user clicks "Create rule".
+3. \`set_matcher\`: \`rule.id: "<ruleId>"\`
+   - Use the \`ruleId\` value from the \`manage_rule\` tool result to scope this policy to the new rule. This ID is pre-assigned when the rule attachment is created and will become the saved-object ID when the user clicks "Create rule".
    - The \`ruleId\` is always available — even for unsaved/proposed rules — so you never need to ask the user to save the rule first.
-   - If the user explicitly requests a cross-rule or shared policy, use \`set_type: { type: "global" }\` with \`set_matcher\` instead.
+   - If the user explicitly requests a cross-rule or shared policy, omit the \`rule.id\` matcher (or use a broader matcher) so it matches alerts from any rule in the space.
 4. \`set_grouping\`: \`per_episode\`
 5. \`set_throttle\`: \`{ strategy: "on_status_change" }\`
 
@@ -417,6 +447,6 @@ where \`attachmentId\` is \`actionPolicyAttachment.id\` and \`version\` is \`ver
 After creating the defaults, briefly mention:
 - They can use a different connector type (Slack, PagerDuty, etc.) — offer to use \`platform.workflows.get_connectors\` to explore.
 - They can change the throttle strategy — \`on_status_change\` (default) only notifies on transitions, \`every_time\` notifies on every evaluation cycle.
-- They can switch to a global policy (\`set_type: { type: "global" }\`) with a matcher to cover multiple rules.`,
+- They can broaden the policy to cover multiple rules by removing the \`rule.id\` matcher or replacing it with a broader matcher.`,
     getInlineTools: () => [manageRuleTool(), manageActionPolicyTool(deps)],
   });
