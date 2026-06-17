@@ -21,10 +21,13 @@ import {
 } from '@kbn/esql-types';
 import {
   apiHasPinnedPanels,
+  apiPublishesChildren,
+  apiPublishesESQLQuery,
   initializeRelatedPanels,
   initializeStateApi,
   type StateComparators,
 } from '@kbn/presentation-publishing';
+import { getESQLQueryVariables } from '@kbn/esql-utils';
 
 import { uiActionsService } from '../../services/kibana_services';
 import { defaultControlLabelComparators, initializeLabelManager } from '../control_labels';
@@ -142,9 +145,37 @@ export const getESQLControlFactory = <
             selections.reinitializeState(updatedState);
             labelManager.reinitializeState(updatedState);
           };
+
+          /** For static ??field or ??function controls, we need to know which query to pull suggestions from */
+          let relatedQuery;
+          if (isStaticESQLControl(nextState)) {
+            const variableKey = selections.api.esqlVariable$.getValue().key; // key of variable to search for
+            const getRelatedQuery = (_api: unknown) => {
+              const query = apiPublishesESQLQuery(_api) ? _api.query$.getValue().esql : undefined;
+              return query && getESQLQueryVariables(query).includes(variableKey)
+                ? query
+                : undefined;
+            };
+
+            relatedQuery = getRelatedQuery(parentApi); // check if parent API publishes a related query
+            if (!relatedQuery && apiPublishesChildren(parentApi)) {
+              // the parent API does not publish a related query, so check all children
+              for (const panel of relatedPanelsApi.relatedPanels$.getValue()) {
+                const child = parentApi.children$.getValue()[panel];
+                const childQuery = getRelatedQuery(child);
+                if (childQuery) {
+                  // found a child with a query that references this variable, so break out of loop;
+                  // only one query can be used to build suggestions
+                  relatedQuery = childQuery;
+                  break;
+                }
+              }
+            }
+          }
+
           try {
             await uiActionsService.executeTriggerActions('ESQL_CONTROL_TRIGGER', {
-              queryString: isStaticESQLControl(nextState) ? '' : nextState.esql_query,
+              queryString: isStaticESQLControl(nextState) ? relatedQuery : nextState.esql_query,
               variableType: nextState.variable_type,
               controlType: nextState.control_type,
               esqlVariables: variablesInParent,
