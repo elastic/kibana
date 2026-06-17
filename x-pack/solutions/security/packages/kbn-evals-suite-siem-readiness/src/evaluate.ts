@@ -28,14 +28,12 @@ export const evaluate = base.extend<
     { scope: 'worker' },
   ],
   evaluateDataset: [
-    ({ chatClient, evaluators, executorClient, traceEsClient, log }, use) => {
+    ({ chatClient, evaluators, executorClient }, use) => {
       use(
         createEvaluateSiemReadinessDataset({
           chatClient,
           evaluators,
           executorClient,
-          traceEsClient,
-          log,
         })
       );
     },

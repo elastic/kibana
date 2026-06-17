@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import type { Client as EsClient } from '@elastic/elasticsearch';
-import type { ToolingLog } from '@kbn/tooling-log';
 import type {
   DefaultEvaluators,
   EvaluationDataset,
@@ -14,7 +12,6 @@ import type {
   EvalsExecutorClient,
   Example,
 } from '@kbn/evals';
-import { createSkillInvocationEvaluator } from '@kbn/evals';
 import type { SiemReadinessEvalChatClient } from './chat_client';
 
 export interface SiemReadinessDatasetExample extends Example {
@@ -82,14 +79,10 @@ export function createEvaluateSiemReadinessDataset({
   evaluators,
   executorClient,
   chatClient,
-  traceEsClient,
-  log,
 }: {
   evaluators: DefaultEvaluators;
   executorClient: EvalsExecutorClient;
   chatClient: SiemReadinessEvalChatClient;
-  traceEsClient: EsClient;
-  log: ToolingLog;
 }): EvaluateSiemReadinessDataset {
   return async function evaluateSiemReadinessDataset({
     dataset: { name, description, examples },
@@ -120,14 +113,7 @@ export function createEvaluateSiemReadinessDataset({
           };
         },
       },
-      [
-        createSiemReadinessCriteriaEvaluator({ evaluators }),
-        createSkillInvocationEvaluator({
-          traceEsClient,
-          log,
-          skillName: 'siem-readiness',
-        }),
-      ]
+      [createSiemReadinessCriteriaEvaluator({ evaluators })]
     );
   };
 }
