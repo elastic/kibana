@@ -18,6 +18,7 @@ import {
   andWhere,
   runLatestSourceEsqlQuery,
   runPaginatedLatestSourceEsqlQuery,
+  runFindByIdEsqlQuery,
   queryEsql,
   esqlToObjects,
 } from '../latest_source_query';
@@ -97,6 +98,7 @@ export class DetectionClient {
       const idLiterals = batch.map((id) => esql.str(id));
       const kindState = [esql.str('detection'), esql.str(KIND_QUIET)];
       const allKinds = [...kindState, esql.str(KIND_HANDLED)];
+
       const query = esql`FROM ${DETECTIONS_DATA_STREAM}
         | WHERE kibana.space_ids == ${esql.str(this.clients.space)} OR kibana.space_ids IS NULL
         | WHERE kind IN (${allKinds})
@@ -108,16 +110,23 @@ export class DetectionClient {
         | KEEP detection_id`;
 
       const response = await queryEsql({ esClient: this.clients.esClient, query });
-      const rows = esqlToObjects<{ detection_id?: string }>(response);
-      for (const r of rows) {
-        if (r.detection_id) processed.add(r.detection_id);
+      const rows = esqlToObjects<{ detection_id: string }>(response);
+
+      for (const { detection_id } of rows) {
+        processed.add(detection_id);
       }
     }
     return processed;
   }
 
-  private toDetection(raw: RawDetection, processed: boolean): Detection {
-    return { ...raw, processed };
+  async findById(detectionId: string): Promise<{ hits: Detection[] }> {
+    return runFindByIdEsqlQuery<Detection>({
+      esClient: this.clients.esClient,
+      space: this.clients.space,
+      index: DETECTIONS_DATA_STREAM,
+      idField: FIELD_DETECTION_ID,
+      idValue: detectionId,
+    });
   }
 
   async findLatest(options: DetectionsSearchOptions = {}): Promise<{ hits: Detection[] }> {
@@ -133,8 +142,8 @@ export class DetectionClient {
       result.hits.map((h) => h.detection_id).filter((id): id is string => Boolean(id))
     );
     return {
-      hits: result.hits.map((raw) =>
-        this.toDetection(raw, processedIds.has(raw.detection_id ?? ''))
+      hits: result.hits.map(
+        (raw) => ({ ...raw, processed: processedIds.has(raw.detection_id ?? '') } as Detection)
       ),
     };
   }
@@ -157,9 +166,7 @@ export class DetectionClient {
     );
     return {
       ...result,
-      hits: result.hits.map((raw) =>
-        this.toDetection(raw, processedIds.has(raw.detection_id ?? ''))
-      ),
+      hits: result.hits.map((raw) => ({ ...raw, processed: processedIds.has(raw.detection_id) })),
     };
   }
 }

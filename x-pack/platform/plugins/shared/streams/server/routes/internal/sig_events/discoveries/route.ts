@@ -38,37 +38,11 @@ const discoveriesSearchRoute = createServerRoute({
     getScopedClients,
     server,
   }): Promise<PaginatedResponse<Discovery>> => {
-    const { getDiscoveryClient, getEventClient, licensing, uiSettingsClient } =
-      await getScopedClients({ request });
+    const { getDiscoveryClient, licensing, uiSettingsClient } = await getScopedClients({ request });
 
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
 
-    const result = await getDiscoveryClient().findLatestPaginated(params.query);
-    const slugs = result.hits.map((h) => h.discovery_slug).filter(Boolean);
-    const eventsBySlug = await getEventClient().findLatestBySlugs(slugs);
-
-    return {
-      ...result,
-      hits: result.hits.map((h) => {
-        const latestEvent = eventsBySlug.get(h.discovery_slug);
-        // Cleared discoveries (kind === 'clearance'): the resolved event carries
-        // discovery_id "original-clearance" (from the clearance doc), not "original",
-        // so the id check would always fail. For cleared slugs there is no recurrence
-        // risk — a new occurrence unmarks the slug as cleared — so show the latest
-        // event status directly.
-        // Active discoveries: require discovery_id match so a stale resolved event
-        // from a previous occurrence does not bleed onto a new pending occurrence.
-        return {
-          ...h,
-          event_status:
-            h.kind === 'clearance'
-              ? latestEvent?.status
-              : latestEvent?.discovery_id === h.discovery_id
-              ? latestEvent.status
-              : undefined,
-        };
-      }),
-    };
+    return getDiscoveryClient().findLatestPaginated(params.query);
   },
 });
 
@@ -100,7 +74,7 @@ const discoveriesHistoryRoute = createServerRoute({
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
 
     const result = await getDiscoveryClient().findBySlug(params.path.id);
-    return { hits: result.hits.filter((d) => d.kind !== 'handled') };
+    return { hits: result.hits };
   },
 });
 

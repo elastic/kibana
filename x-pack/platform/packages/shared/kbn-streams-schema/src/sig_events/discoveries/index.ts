@@ -21,6 +21,7 @@ import {
 } from '../constants';
 
 const discoveryDetectionSchema = z.object({
+  kind: z.enum(['detection', 'quiet', 'handled']),
   detection_id: z.string().max(MAX_ID_LENGTH).optional(),
   rule_name: z.string().max(MAX_RULE_NAME_LENGTH).optional(),
   rule_uuid: z.string().max(MAX_ID_LENGTH).optional(),
@@ -28,7 +29,6 @@ const discoveryDetectionSchema = z.object({
   change_point_type: z.string().max(MAX_ID_LENGTH).optional(),
   event_count: z.number().optional(),
   alert_count: z.number().optional(),
-  detected_at: z.string().optional(),
 });
 
 export const discoverySchema = z.object({
@@ -58,7 +58,6 @@ export const discoverySchema = z.object({
   workflow_execution_id: z.string().max(MAX_ID_LENGTH).optional(),
   conversation_id: z.string().max(MAX_ID_LENGTH).optional(),
   closed_by_execution_id: z.string().max(MAX_ID_LENGTH).optional(),
-  event_status: z.enum(['promoted', 'acknowledged', 'demoted', 'resolved']).optional(),
 });
 
 export type Discovery = z.infer<typeof discoverySchema>;

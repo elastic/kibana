@@ -118,7 +118,7 @@ const columns: Array<EuiBasicTableColumn<Discovery>> = [
     }),
     width: '130px',
     render: (discovery: Discovery) =>
-      discovery.event_status ? (
+      discovery.processed ? (
         <EuiBadge color="success">{EVENT_PROCESSED_LABEL}</EuiBadge>
       ) : (
         <EuiBadge color="hollow">{EVENT_PENDING_LABEL}</EuiBadge>

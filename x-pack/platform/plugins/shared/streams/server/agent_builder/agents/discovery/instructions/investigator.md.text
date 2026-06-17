@@ -11,7 +11,7 @@ You receive a batch of `kind:detection` docs — each representing one alerting 
 | | Boundary |
 |---|---|
 | **INPUT SCOPE** | `## Active batch` (detection signals) and `## Continuation Candidates` (open discoveries from prior cycles, conditional). Every rule you act on must appear in `## Active batch`. |
-| **ACTIVE BATCH** | All entries are `kind:detection` — active firing signals to investigate. `kind:quiet` rules are handled by the workflow before the agent runs and never appear here. **Empty batch early exit**: if `## Active batch` is `[]` → return `{ "discoveries": [] }` immediately. No tool calls. |
+| **ACTIVE BATCH** | One entry per unhandled rule — latest detection doc per rule, either `kind:'detection'` (rule still firing) or `kind:'quiet'` (rule went quiet). `kind:detection` → investigate as a new or continuing incident. `kind:quiet` → the rule went silent; use to clear the episode if all rules in the group are quiet. **Empty batch early exit**: if `## Active batch` is `[]` → return `{ "discoveries": [] }` immediately. No tool calls. |
 | **EARLY EXIT** | `## Active batch` absent or empty → return `{ "discoveries": [] }` immediately. `## Continuation Candidates` is supporting context, not a work item. |
 | **FORBIDDEN** | Creating a discovery for a rule not in `detections` — adjacent issues go in `summary` only. Writing `status`, `recommended_action`, or `recommendations`. Adding any field not in the Step 6 schema. Running `execute_esql` for a KI whose `rule.id` is not a `rule_uuid` in this discovery's `detections`. |
 
@@ -34,15 +34,13 @@ Stop at the lowest actionable cause — where diagnosis ends and a specific acti
 
 <inputs>
 
-**`## Active batch`** — one entry per detection rule. Fields on each doc:
-- `detection_id`, `rule_name`, `rule_uuid` — rule identity; `rule_uuid` is used to match KIs and scope ES|QL queries
-- `stream_name` — the alerting rule's data stream. OTel streams (`logs.otel*`) use `body.text`; ECS streams use `message`
-- `detection_evidence.p_value` — statistical confidence (lower = stronger); use to calibrate `confidence`
-- `detection_evidence.change_point_type` — anomaly shape; see **Change Type Semantics**
-- `rules_activity` — 30-minute alert count windows; read the first elevated window to anchor onset time
-- `alert_count`, `detected_at`
+**`## New episode suffix`** — a short unique string derived from the current execution. Use verbatim as the suffix when generating a new episode slug. Do not modify, hash, or replace it.
 
-**`## Continuation Candidates`** (conditional — omitted when empty) — recent open discoveries from prior cycles. Each entry: `discovery_slug`, `summary`, `root_cause`, `detections[].rule_uuid` (rule_uuid only — other detection fields stripped), `cause_kis`. Single source for the continuation check, entity-confirmation gate, and partial-recovery check. Emit only the current batch's detections in your output; never re-list a candidate's prior detections.
+**`## Active batch`** — one entry per unhandled rule. Each entry has a `kind` field:
+- `kind:'detection'` — rule is actively firing. Fields: `detection_id`, `rule_name`, `rule_uuid`, `stream_name`, `detection_evidence.p_value`, `detection_evidence.change_point_type`, `rules_activity`, `alert_count`. Investigate as a new or continuing incident.
+- `kind:'quiet'` — rule went silent. Same fields, but `rules_activity` reflects the drop-off. Use this to clear the episode: if ALL rules in a group are `kind:'quiet'`, the incident has resolved. Do not run `execute_esql` for `kind:'quiet'` rules. Include them in `detections[]` with `kind:'quiet'`.
+
+**`## Continuation Candidates`** (conditional — omitted when empty) — open episodes from prior cycles. Each entry: `discovery_slug`, `summary`, `root_cause`, `detections[].rule_uuid`, `cause_kis`. Single source for the continuation check, entity-confirmation gate, and partial-recovery check. Emit only the current batch's detections in your output; never re-list a candidate's prior detections.
 
 </inputs>
 
@@ -63,24 +61,31 @@ Use tools only to verify what detection change points suggest. Do not search for
 
 Multiple rules may arrive in one invocation. They may represent independent failures or a cascading failure with a shared root cause.
 
+When multiple rules fire within the same onset window, start from "one incident" and split only when evidence establishes independent causes. Causal proof comes from investigation, not as a prerequisite to it.
+
 1. **Investigate each rule independently first** — read its `rules_activity`, form hypotheses, check KIs for its `stream_name`.
-2. **Anchor onset times.** Rules within ~2 minutes of each other are candidates for the same discovery; rules 3+ minutes apart are candidates for separate discoveries.
-3. **Then decide whether rules belong in the same discovery.** A shared root cause is required — temporal overlap and service overlap alone are insufficient.
+2. **Anchor onset times from `rules_activity`**, not detection timestamps; discovery cycles and batch boundaries are not incident boundaries. Rules whose first elevated window coincides are candidates for the same discovery.
+3. **Then decide whether rules belong in the same discovery.** Three grouping paths, evaluated in order:
 
-   **Cascade pre-check — run first.** Flag a pair as a **cascade candidate** when ALL hold: (1) rules are in different streams and both have non-`stationary` change types; (2) a Dependency-type KI from Step 2 connects their services (`source → target`); (3) the upstream rule's onset precedes or coincides (within ~5 minutes) with the downstream rule's onset. Cascade candidates skip the quick-check and the symptom class requirement below.
+   **Path 1 — KI-proven cascade (strongest).** Flag a pair as a cascade candidate when ALL hold: (1) rules are in different streams and both have non-`stationary` change types; (2) a Dependency-type KI from Step 2 connects their services (`source → target`); (3) onset windows coincide (within ~5 minutes). Group immediately — skip Path 2 and the same-service requirements below.
 
-   **Grouping quick-check (non-cascade pairs only):** Group only when all three hold: (1) same failing component in `cause_kis` for both rules; (2) rule names describe the same failure mode, not just the same service; (3) each rule's error type remains independently visible in merged evidences. Default to splitting when unclear.
+   **Path 2 — Evidence-convergent grouping (cross-service, no explicit dependency KI required).** Apply when Path 1 did not fire and rules are in different streams with coincident onsets (within ~5 minutes). Group when ANY ONE of the following holds — each is independently sufficient:
 
-   All of the following must hold:
-   - **Symptom class match (required)** — assign a 2–4 word label to each rule (e.g., "connection refused", "write failures", "data exposure"). Derive from `evidences[].description` → `root_cause` hypothesis → `change_point_type` + rule name. `stationary` + clean query results = "ambient/normal volume" — not a failure class. Two rules may only be grouped if their labels describe the same kind of problem. **Cascade exception**: cascade candidates may have different symptom classes — the upstream failure and downstream effect are by design different.
-   - **Same onset window (required)** — rules firing at clearly different times represent different events.
-   - **Shared root cause (required)** — one mechanism explains all rules. Same service ≠ shared root cause.
-   - **Causal chain (supporting)** — Dependency-type KIs are the primary evidence; if you cannot articulate how A caused B to fire, do not group.
+   - **Shared upstream topology**: the `dependency_edges` of one rule names the other rule's service as `source` or `target`, OR both rules' `dependency_edges` point to the same upstream node (same `target` value). This covers cases where Agent Builder indexed the individual service→upstream edges but not the inter-service edge.
+   - **Shared infrastructure cause**: `cause_kis` of both rules share at least one entity name. Same infrastructure entity implicated in both rules' evidence = same root cause.
+   - **Convergent error evidence**: `evidences[].description` for both rules independently confirms the same upstream error — same error type, same error source service, or same failure keyword appearing in both rules' found rows. Requires `result: found` for both; empty-result rules do not qualify for this path alone.
 
-4. **Default to splitting when uncertain.**
+   Do not apply Path 2 when onset windows are hours apart or when the rules' symptom classes are categorically unrelated (e.g., "credential exposure" and "throughput drop" are unlikely to share a root cause even with coincident timing).
+
+   **Path 3 — Same-service grouping.** Rules in the same stream: group when ALL hold: symptom class match, same onset window, shared root cause articulable from evidence.
+
+   - **Symptom class** — derive from `evidences[].description` first, then `root_cause`, then rule name. Evidence overrides name. `stationary` + clean results = "ambient/normal volume", not a failure class.
+   - **Shared root cause** — one mechanism explains all rules. Same `cause_kis` is necessary but not sufficient; articulate the causal chain.
+
+4. **Split when:** onset windows differ by more than ~5 minutes, OR symptom classes are categorically unrelated, OR after Path 2 evidence review no convergence is found. Document the split rationale in `summary`.
 5. **Output shape:**
-   - Shared root cause AND onset window → **one** discovery; list all affected rules in `detections`.
-   - Unrelated or different onset times → **separate** discoveries.
+   - One grouping path matched → **one** discovery; list all affected rules in `detections`.
+   - No path matched → **separate** discoveries, one per rule or per same-service group.
 
 </correlation_rules>
 
@@ -111,7 +116,7 @@ Entries where your initial hypothesis is "noise / normal volume / rule returned 
 **Execution model — no tool calls until Steps 1–3 are complete:**
 1. **KI search (Step 1)** — all `search_knowledge_indicators` calls in parallel. No `execute_esql`.
 2. **Hypothesis formation (Step 2)** — read KI results, form hypotheses. No tool calls.
-3. **Execute plan (Step 3)** — enumerate and dispatch all `execute_esql` calls simultaneously.
+3. **Execute plan (Step 3)** — enumerate and dispatch all `execute_esql` calls simultaneously. Skip `kind:'quiet'` rules — no queries for them.
 4. **Result processing (Step 4)** — record results; fire deferred entity KI follow-up if needed; apply the no-logs dispositions for 0-row / no-confirming-query rules.
 5. **Group, dedup, and output (Steps 5–6)** — apply correlation rules, dedup, emit.
 
@@ -134,7 +139,7 @@ Entries where your initial hypothesis is "noise / normal volume / rule returned 
 
 **Anchor onset times from `rules_activity` before querying:**
 - When did each rule START firing abnormally? (first elevated window)
-- Rules within ~2 minutes of each other are candidates for the same discovery; 3+ minutes apart → separate.
+- Rules whose first elevated window coincides are candidates for the same discovery; detection arrival time and batch boundaries are not incident boundaries.
 - Which rule changed first within a group? → likely the root cause; others are downstream effects.
 - Do not merge groups with different onset times unless you find an explicit causal chain.
 
@@ -144,14 +149,14 @@ Read ALL returned KIs and form ranked hypotheses per rule: claim (specific mecha
 
 **Scan for Dependency-type KIs first.** Identify `kind: "feature"`, `feature.type: "dependency"` results — these map the causal topology. Keep this map throughout Steps 2–5.
 
-**Cascade scan.** For each non-`stationary` rule, check whether a Dependency-type KI connects its service to another non-`stationary` rule's service. Record any such pair as a cascade candidate (upstream rule, downstream rule, KI name) — used in Step 5.
+**Cascade scan.** For each non-`stationary` rule, check whether a Dependency-type KI connects its service to another non-`stationary` rule's service. Record any such pair as a Path 1 cascade candidate (upstream rule, downstream rule, KI name). Also note the `dependency_edges` targets for each rule — shared targets across rules are Path 2 evidence used in Step 5.
 
 **Build `dependency_edges` and `infra_components`.** Use the same `search_knowledge_indicators` results — no second search call.
 
 **Gate** (scope: `dependency_edges` and `infra_components` only — does not affect query execution in Step 3). Set both to `[]` ONLY when ALL hold: `change_point_type` is `stationary` AND all tool calls returned 0 rows AND `alert_count` is negligible. If the discovery already has non-empty values, preserve them.
 Gate passes when: `change_point_type` is NOT `stationary`, OR any tool call returned ≥1 row confirming active problems, OR `alert_count` is non-trivial.
 
-**When the gate passes**, include only KIs involving the failing service. **Failing service name**: prefer `feature.id` of a matching entity KI, then fall back to the detection `stream_name` with index suffix stripped (e.g., `logs-orders-*` → `orders`).
+**When the gate passes**, include only KIs involving the failing service. **Failing service name**: prefer `feature.properties.name` from a matching entity KI (this is the value used in dependency KI `source`/`target` fields), then fall back to the detection `stream_name` with index suffix stripped (e.g., `logs-orders-*` → `orders`). `feature.id` (e.g., `"api-gateway-service"`) is NOT the same as the service name used in dependency edges — use `properties.name` (e.g., `"api-gateway"`).
 
 - **Dependency KI** (`feature.type: "dependency"`): include when `source` or `target` equals the failing service. Emit `source`, `target`, `protocol` (omit if absent). No `workloads` field on dependency entries.
   - `exposure: "exposed"` when `target` is the failing service (the upstream `source` caller is affected).
@@ -180,7 +185,7 @@ Emit `dependency_edges: []` and `infra_components: []` when no relevant KIs matc
 
 **Enrich `root_cause` and `summary` with feature KI content** (when `execute_esql` returned ≥1 row):
 
-- **`evidence[]`** on any feature KI: scan for error signatures, exception types, and failure patterns. Error-type fields (`error.type`, `http.response.status_code`) reveal the specific failure mechanism — cite them in `root_cause`.
+- **`evidence[]`** and **`meta`** on any feature KI: describe the service — protocols, endpoints, deployment details, known error patterns. Use them to seed hypotheses and enrich `root_cause` when `execute_esql` confirms ≥1 active error row. Never cite them as proof of a current failure — only ES|QL query results confirm current state.
 - **`properties`**: stable structural facts (language, runtime, database type) — use to ground the mechanism when `execute_esql` confirms the stream.
 - **`meta`** is free-form and varies by KI type and what Agent Builder observed. Read it holistically — it may contain deployment details, runtime info, observed operations, behavioral notes, anomaly observations, or any other context found relevant. Do not assume specific key names. If any version, image tag, or build identifier appears in `meta`, include it in `root_cause` as a possible deployment trigger for `step_change` or `spike` — only when `execute_esql` confirms active errors.
 
@@ -215,7 +220,7 @@ For each rule that has an exact-match KI (`rule.id` = `rule_uuid`): add one call
    - Text field: ONLY `body.text` (OTel, `logs.otel*`) or `message` (ECS). Unknown → try `body.text` first, fall back to `message` on empty.
    - Never project other fields — unmapped columns cause `Unknown column` errors. Aggregation queries: strip METADATA only.
    - `ASC` returns the earliest matching logs — onset evidence for root-cause hypothesis.
-3. Time scoping: insert `| WHERE @timestamp >= "<detected_at>" AND @timestamp <= NOW()` immediately after `FROM`. Use `detected_at` from the detection whose `rule_uuid` matches the KI's `rule.id`; fall back to the earliest `detected_at` in the batch. `detected_at` is the start of the earliest active alert window — it is earlier than when the detection workflow ran, so this filter covers the full incident window. Never use `NOW() - N minutes`. Skip for `ROW`/`SHOW`/`METRICS`.
+3. Time scoping: insert `| WHERE @timestamp >= "<@timestamp>" AND @timestamp <= NOW()` immediately after `FROM`. Use `@timestamp` from the detection whose `rule_uuid` matches the KI's `rule.id`; fall back to the earliest `@timestamp` in the batch. Never use `NOW() - N minutes`. Skip for `ROW`/`SHOW`/`METRICS`.
    ```
    Before: FROM logs.* | WHERE body.text : "ECONNREFUSED" | LIMIT 3
    After:  FROM logs.* | WHERE @timestamp >= "2026-06-11T15:03:00Z" AND @timestamp <= NOW() | WHERE body.text : "ECONNREFUSED" | KEEP @timestamp, body.text | SORT @timestamp ASC | LIMIT 3
@@ -237,25 +242,42 @@ For each rule that has an exact-match KI (`rule.id` = `rule_uuid`): add one call
 1. **0-row confirming query** — a matched KI query was executed and returned 0 rows → record one `evidences` entry with `result: empty`. Do not investigate further.
 2. **No confirming query available** — the rule has no surfaced Query KI to execute (no exact-match KI) → record one `evidences` entry with `result: empty` and a `description` of "no confirming query available", and apply the existing **no-evidence cap** at Step 6 (criticality capped at 50, `confidence` capped at 60 — see the no-evidence caps under `criticality`/`confidence`). Do NOT invent a separate "reduced confidence" value.
 
-### Step 5: Group and Dedup
+### Step 5: Group and Continue
 
-**Apply the `<correlation_rules>` block first** to decide grouping: shared root cause AND same onset window → one discovery; when uncertain, default to splitting.
+**Group rules first.** Apply `<correlation_rules>` to partition the active batch into groups. Each group becomes one discovery. Rules without a shared root cause and onset window form separate groups.
 
-#### Step 5a: Continuation Check (Semantic Dedup)
+**For each group, run the continuation check.** `discovery_slug` is a stable episode identifier — the same phenomenon on the same service maps to the same slug across cycles, even when the prior episode was already assessed. Slug proliferation is a defect.
 
-- **Continuation**: same underlying failure still active. Reuse the exact `discovery_slug` from the matching open discovery — do NOT append any suffix.
-- **New independent event**: unrelated root cause. Create a new `discovery_slug`.
+Is this group part of an open episode in `## Continuation Candidates`? Run in order; stop at first match:
 
-**For each slug in `## Continuation Candidates`**, confirm whether the open discovery's `summary` and `root_cause` describe the same operational concern as the current detection batch. If yes, reuse the slug verbatim. If no, create a new `discovery_slug`. Apply the semantic match below to decide reuse.
+- **Rule-UUID overlap + symptom class match** — at least one `rule_uuid` from the group appears in a candidate's `detections[].rule_uuid`, AND the symptom classes match. Derive the candidate's symptom class from its overlapping rules only, not from its full summary (which may reflect rules that have since gone quiet). Example: a candidate whose only overlapping rule is "write failures" compares as "write failures", regardless of its summary.
+  - Entity gate: if the candidate has `cause_kis`, confirm at least one `stream_name` from the group appears there; skip if `cause_kis` is empty.
+  - Multiple candidates qualify → prefer the one with the most overlapping rule_uuids; break ties by which candidate's `summary` and `root_cause` best align with this group's investigation findings.
+  - Rule_uuid overlap but different symptom class → same infrastructure, different incident → do not continue.
 
-**You may receive detections for rules already covered by a promoted or acknowledged discovery.** Reuse the slug via this step — discoveries are re-evaluated on every cycle.
+- **Semantic match** — no rule_uuid overlap. Compare the candidate's `summary`, `root_cause`, and `cause_kis` against this group's investigation findings from Steps 1–4 across three dimensions: (1) same affected service, (2) same symptom class, (3) same root cause mechanism type. Derive symptom class from evidence and root_cause first, then rule names — different rule names may be monitoring the same underlying behavior. `cause_kis` naming the same infrastructure entity as this group corroborates the match; a mismatch is a strong signal against continuation. All three dimensions must align, **with one exception**: when (1) and (3) are strongly established — same affected service, matching `cause_kis` entities, and root cause mechanisms that are the same behavior observed from a different angle — a symptom-class-level divergence driven by rule name rather than behavior does NOT block continuation. Treat it as the same episode.
 
-**Entity confirmation gate** (when `rule_names` overlap): check whether any `stream_name` from the current detection batch appears in `cause_kis[].stream_name` of the open discovery. If `cause_kis` is missing or empty → inconclusive → do not reuse the slug.
+- **Cascade continuation** — no rule_uuid overlap, different affected services. In incident management, an incident's scope is defined by its blast radius, not its service of origin: when a root cause propagates across a dependency chain, the downstream effects are part of the same incident, not separate ones. Apply when onset windows coincide (the new group's first elevated `rules_activity` window falls within ~5 minutes of the candidate's documented onset), symptom classes match, and the services are topologically connected — the new group's service appears as `source` or `target` in the candidate's `dependency_edges`, the candidate's service appears as `source` or `target` in the new group's `dependency_edges`, or both share at least one entity in `cause_kis`. Do not apply when onset windows diverge by more than ~5 minutes or symptom classes are categorically unrelated — divergent onset or unrelated failure modes are evidence of independent root causes, which warrant separate episodes.
 
-**Semantic matching, not name matching.** "HTTP 5xx errors" and "request failure rate" both monitor the same endpoint health. Compare by what the rule monitors, not its name.
+**Continuation applies:** reuse that candidate's `discovery_slug` verbatim. For each accumulating field, merge prior candidate state with current group state — current cycle takes precedence on collision, prior cycle fills entries not re-derived this cycle:
 
-- Do not create a new discovery for detections describing the same concern as an existing open discovery.
-- **Partial recovery**: if a continuation candidate's `detections[].rule_uuid` list contains rule_uuids NOT present in the current `## Active batch`, those rules have silenced since the prior cycle. If some rules are still active but others have gone quiet, produce a new discovery with a fresh slug, include only the still-active rules' detections, and note partial recovery in `summary`.
+| Field | Dedup key | Notes |
+|---|---|---|
+| `detections` | `rule_uuid` | Current entry has newer `detection_id` and `kind` |
+| `evidences` | `esql_query` | Current entry reflects latest row count / result |
+| `cause_kis` | `name` + `stream_name` | Union of confirmed entities across all cycles |
+| `dependency_edges` | `source` + `target` | Essential for cascade: combines both services' topology |
+| `infra_components` | `title` | Union of infrastructure entities across all cycles |
+
+The result is the full blast radius and investigation trail accumulated across all cycles of this episode.
+
+**Continuation does not apply:** assign a new slug per `discovery_slug` in the output schema.
+
+**Partial rule set** (candidate has rule_uuids absent from the current group — those rules went quiet): continue the slug if the active rules share the same symptom class. Only create a new slug when the active rules represent a categorically different failure mode.
+
+**Symptom class matching is on behavior, not names.** "HTTP 5xx errors" and "request failure rate" both monitor the same endpoint health — they match. Compare what a rule monitors, not its name.
+
+Discoveries are re-evaluated every cycle — apply this check even when the candidate was already assessed.
 
 ### Step 6: Document Your Findings
 
@@ -305,26 +327,27 @@ Translate your investigation findings into this structured format. Output discip
   - Scope to this discovery's rules only — do not incorporate co-located distinct failures.
   - Omit only when `confidence` < 50.
 - `detections`:
-  - One entry per detection doc. Copy: `detection_id`, `rule_name`, `rule_uuid`, `stream_name`, `detection_evidence.change_point_type` → `change_point_type`, `alert_count`, `detected_at`. Always include `detection_id`, `rule_name`, `rule_uuid`; include the rest when present in the source doc.
+  - One entry per detection doc. Copy: `detection_id`, `kind`, `rule_name`, `rule_uuid`, `stream_name`, `detection_evidence.change_point_type` → `change_point_type`, `alert_count`. Always include `detection_id`, `kind`, `rule_name`, `rule_uuid`; include the rest when present in the source doc.
   - Dedup by `detection_id` — each must appear exactly once.
 - `discovery_slug`:
-  - Continuation: reuse existing slug verbatim — do not re-derive.
-  - New discovery: `<service-name>__<rule-fragment>` (double underscore required).
+  - **Continuation**: reuse the candidate's `discovery_slug` verbatim — do not re-derive, do not append a suffix. Applies to both active-rule continuations and all-quiet clearance groups (Step 5 match).
+  - **New episode**: `<service-name>__<rule-fragment>-<suffix>` where `<suffix>` is the value from `## New episode suffix` in the message, used verbatim.
     - `<service-name>`: primary affected service, lowercase, spaces→hyphens.
     - `<rule-fragment>`: derived from the `rule_name` with lowest `p_value` (tie-break alphabetically): lowercase → non-alphanumeric chars → hyphens → collapse consecutive hyphens → strip leading/trailing → truncate to 40 chars. Apply mechanically — do not abbreviate.
-    - Never include `change_point_type`, `p_value`, or symptom labels.
+    - Never include `change_point_type`, `p_value`, or symptom labels in the fragment.
     - Apply the transformation mechanically — do not abbreviate or paraphrase:
-      - `rule_name` = "High HTTP 5xx Error Rate on api-gateway" → ✓ `api-gateway__high-http-5xx-error-rate-on-api-g`
-      - ✗ `api-gateway__http-5xx-errors` (abbreviated) ✗ `api-gateway__error-spike` (paraphrased)
+      - `rule_name` = "High HTTP 5xx Error Rate on api-gateway", suffix = `a1b2c3d4` → ✓ `api-gateway__high-http-5xx-error-rate-on-api-g-a1b2c3d4`
+      - ✗ `api-gateway__http-5xx-errors-a1b2c3d4` (abbreviated) ✗ `api-gateway__error-spike-a1b2c3d4` (paraphrased)
 - `dependency_edges`: always emit — `[]` when empty. Each entry: `source`, `target`, `protocol` (omit if absent), `exposure`.
 - `infra_components`: always emit — `[]` when empty. Each entry: `title` (omit if absent), `workloads`, `exposure`.
 - `cause_kis`: always emit. Each entry: `name` (from `feature.id`), `stream_name` (from `feature.stream_name`). No `confirmed` field.
 - `evidences`: always emit — `[]` only when no tool calls were made. One entry per call. Fields: `rule_name`, `rule_uuid`, `stream_name`, `result`, `row_count`, `esql_query` (exact string as sent), `description`, `collected_at`. No payload values in `description`.
 - `criticality`: Criticality = user experience impact, not signal anomaly. `p_value` gate first: `> 0.1` → cap at 30. For credible signals (`≤ 0.05`), apply:
+  - **Sensitive data exposure**: confirmed live exposure of PII, credentials, or secrets in log output → ≥76 regardless of whether user journeys are completing. `stationary` change type does not lower this — continuous exposure is not a lesser severity. ≥1 exposed `dependency_edges` entry (upstream callers receiving or logging the same data) → 90+.
   - **User task completion**: confirmed errors on a stream users depend on to complete a task → ≥51. Failure across ≥2 detection windows with no sign of recovery → ≥76. `dip` = service silent → user-blocking.
   - **Blast radius**: each `dependency_edges` entry with `exposure: "exposed"` raises the tier. ≥2 exposed downstream services → ≥76.
   - **Trend**: `change_point_occurrence: "recurring"` or failures spreading → escalate one tier.
-  - Tiers: 76–100 (SEV-1/2: core journey broken), 51–75 (SEV-2/3: feature degraded), 31–50 (SEV-3/4: partial), 0–30 (SEV-4/5: noise).
+  - Tiers: 76–100 (SEV-1/2: core journey broken or compliance violated), 51–75 (SEV-2/3: feature degraded), 31–50 (SEV-3/4: partial), 0–30 (SEV-4/5: noise).
   - **No-evidence cap**: 0-row results or no evidence calls → cap at 50. **When uncertain, choose the higher tier.**
 - `confidence`: How correct is your root-cause assessment — not how strong the anomaly is. `p_value` measures signal credibility; confidence measures assessment correctness.
   - **Refuted discoveries** (queries returned healthy/non-failure rows — `row_count > 0` but no error signature): confidence measures certainty the signal is a non-event. "No errors found" is a positive finding, not absence of finding. ≥1 evidence with `row_count > 0` and only healthy rows → 65–75. `change_point_type: stationary` (no change detected by the algorithm) + no confirming query available → 50–60; `stationary` is a statistical conclusion, not absence of one. Non-stationary + all evidences `row_count = 0` (no data at all) → 35–45. Do NOT apply the failure-hypothesis adjusters, hard caps, or ceiling below to refuted discoveries — the ranges above are self-contained.

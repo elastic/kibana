@@ -95,7 +95,8 @@ interface LifecycleDetection {
   rule_name?: string;
   stream_name?: string;
   change_point_type?: string;
-  detected_at: string;
+  kind: string;
+  '@timestamp': string;
 }
 
 interface EventLifecycleResponse {

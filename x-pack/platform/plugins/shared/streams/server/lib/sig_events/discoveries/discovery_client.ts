@@ -8,6 +8,7 @@
 import { esql } from '@elastic/esql';
 import type { IDataStreamClient } from '@kbn/data-streams';
 import type { ElasticsearchClient } from '@kbn/core/server';
+import type { ESQLAstExpression } from '@elastic/esql/types';
 import {
   type CommonSearchOptions,
   type PaginatedSearchOptions,
@@ -29,12 +30,15 @@ import {
 } from './data_stream';
 import { FIELD_DISCOVERY_ID, FIELD_DISCOVERY_SLUG } from '../field_names';
 
-const CLEARED_IDS_CHUNK_SIZE = 250;
+const PROCESSED_IDS_CHUNK_SIZE = 250;
 
 export type DiscoveryDataStreamClient = IDataStreamClient<
   typeof discoveriesMappings,
   StoredDiscovery
 >;
+
+const KIND_HANDLED = 'handled' satisfies Discovery['kind'];
+const KIND_CLEARANCE = 'clearance' satisfies Discovery['kind'];
 
 export class DiscoveryClient {
   constructor(
@@ -52,14 +56,31 @@ export class DiscoveryClient {
     });
   }
 
+  private buildWhere(): ESQLAstExpression {
+    const where: ESQLAstExpression = esql.exp`${esql.col('kind')} != ${esql.str(KIND_HANDLED)}`;
+
+    return where;
+  }
+
   async findLatest(options: CommonSearchOptions = {}): Promise<{ hits: Discovery[] }> {
-    return runLatestSourceEsqlQuery<Discovery>({
+    const result = await runLatestSourceEsqlQuery<Discovery>({
       esClient: this.clients.esClient,
       space: this.clients.space,
       options,
       index: DISCOVERIES_DATA_STREAM,
+      where: this.buildWhere(),
       groupBy: FIELD_DISCOVERY_SLUG,
     });
+
+    const processedIds = await this.getProcessedSlugs(
+      result.hits.map((h) => h.discovery_slug).filter((slug): slug is string => Boolean(slug))
+    );
+    return {
+      hits: result.hits.map((raw) => ({
+        ...raw,
+        processed: processedIds.has(raw.discovery_slug ?? ''),
+      })),
+    };
   }
 
   async findLatestPaginated(
@@ -70,23 +91,21 @@ export class DiscoveryClient {
       space: this.clients.space,
       options,
       index: DISCOVERIES_DATA_STREAM,
+      where: this.buildWhere(),
       groupBy: FIELD_DISCOVERY_SLUG,
-      where: esql.exp`${esql.col('kind')} == ${esql.str('discovery')}`,
     });
 
     if (!result.hits.length) return result;
 
-    const slugs = result.hits
-      .map((h) => h.discovery_slug)
-      .filter((slug): slug is string => Boolean(slug));
-
-    const clearedSlugs = await this.getClearedSlugs(slugs);
+    const processedSlugs = await this.getProcessedSlugs(
+      result.hits.map((h) => h.discovery_slug).filter((slug): slug is string => Boolean(slug))
+    );
 
     return {
       ...result,
-      hits: result.hits.map((h) => ({
-        ...h,
-        kind: clearedSlugs.has(h.discovery_slug ?? '') ? ('clearance' as const) : h.kind,
+      hits: result.hits.map((raw) => ({
+        ...raw,
+        processed: processedSlugs.has(raw.discovery_slug),
       })),
     };
   }
@@ -99,39 +118,34 @@ export class DiscoveryClient {
   // clearance doc timestamp is on or after the latest finding doc timestamp, so a slug that
   // regrows after a clearance (newer finding, no newer clearance) is not reported as cleared.
   // Chunked at CLEARED_IDS_CHUNK_SIZE to match the getProcessedIds IN-clause guard.
-  private async getClearedSlugs(slugs: string[]): Promise<Set<string>> {
+  private async getProcessedSlugs(slugs: string[]): Promise<Set<string>> {
     if (!slugs.length) return new Set();
 
-    const cleared = new Set<string>();
-    for (let i = 0; i < slugs.length; i += CLEARED_IDS_CHUNK_SIZE) {
-      const batch = slugs.slice(i, i + CLEARED_IDS_CHUNK_SIZE);
+    const processed = new Set<string>();
+    for (let i = 0; i < slugs.length; i += PROCESSED_IDS_CHUNK_SIZE) {
+      const batch = slugs.slice(i, i + PROCESSED_IDS_CHUNK_SIZE);
       const slugLiterals = batch.map((slug) => esql.str(slug));
-      const kindFinding = esql.str('discovery');
-      const kindClearance = esql.str('clearance');
-      // Group both doc kinds by `discovery_slug` (the incident identity under A1):
-      // finding docs and clearance docs both carry the slug for the incident they belong to.
+
+      const kindState = [esql.str('discovery'), esql.str(KIND_CLEARANCE)];
+      const allKinds = [...kindState, esql.str(KIND_HANDLED)];
+
       const query = esql`FROM ${DISCOVERIES_DATA_STREAM}
-        | WHERE ${esql.col('kibana.space_ids')} == ${esql.str(this.clients.space)} OR ${esql.col(
-        'kibana.space_ids'
-      )} IS NULL
-        | WHERE ${esql.col('kind')} IN (${[kindFinding, kindClearance]})
-        | WHERE ${esql.col('discovery_slug')} IN (${slugLiterals})
-        | EVAL unified_id = ${esql.col('discovery_slug')}
-        | STATS max_finding_ts = MAX(CASE(${esql.col('kind')} == ${kindFinding}, @timestamp, null)),
-                max_clearance_ts = MAX(CASE(${esql.col(
-                  'kind'
-                )} == ${kindClearance}, @timestamp, null))
-          BY unified_id
-        | WHERE max_clearance_ts >= max_finding_ts OR max_finding_ts IS NULL
-        | WHERE unified_id IS NOT NULL
-        | KEEP unified_id`;
+        | WHERE kibana.space_ids == ${esql.str(this.clients.space)} OR kibana.space_ids IS NULL
+        | WHERE kind IN (${allKinds})
+        | WHERE discovery_slug IN (${slugLiterals})
+        | STATS max_state_ts = MAX(CASE(kind IN (${kindState}), @timestamp, null)),
+                max_clearance_ts = MAX(CASE(kind == ${esql.str(KIND_HANDLED)}, @timestamp, null))
+          BY discovery_slug
+        | WHERE max_clearance_ts >= max_state_ts OR max_state_ts IS NULL
+        | KEEP discovery_slug`;
       const response = await queryEsql({ esClient: this.clients.esClient, query });
-      const rows = esqlToObjects<{ unified_id: string }>(response);
-      for (const r of rows) {
-        if (r.unified_id) cleared.add(r.unified_id);
+      const rows = esqlToObjects<{ discovery_slug: string }>(response);
+
+      for (const { discovery_slug } of rows) {
+        processed.add(discovery_slug);
       }
     }
-    return cleared;
+    return processed;
   }
 
   async findById(discoveryId: string): Promise<{ hits: Discovery[] }> {

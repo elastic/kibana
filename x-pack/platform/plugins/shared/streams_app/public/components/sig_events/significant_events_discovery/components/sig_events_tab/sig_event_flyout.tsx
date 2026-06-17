@@ -27,7 +27,7 @@ import type { SigEvent } from '@kbn/streams-schema';
 import { useFetchEventLifecycle } from '../../../../../hooks/sig_events/use_fetch_sig_events';
 import { useKibana } from '../../../../../hooks/use_kibana';
 import { LifecycleTimeline } from './lifecycle_timeline';
-import { getStatusColor } from '../../utils/event_status_color';
+import { getSigEventStatusColor } from '../shared/status_display';
 import { formatTimestamp } from '../../../../../util/formatters';
 import { SigEventDetails } from '../../../sig_event_details/sig_event_details';
 
@@ -78,7 +78,7 @@ export const SigEventFlyout = ({ event, onClose }: SigEventFlyoutProps) => {
         <EuiFlexGroup direction="column" gutterSize="s">
           <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
             <EuiFlexItem grow={false}>
-              <EuiBadge color={getStatusColor(event.status)}>{event.status}</EuiBadge>
+              <EuiBadge color={getSigEventStatusColor(event.status)}>{event.status}</EuiBadge>
             </EuiFlexItem>
           </EuiFlexGroup>
           <EuiTitle size="m">

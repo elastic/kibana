@@ -188,7 +188,6 @@ export const DiscoveryFlyout = ({
                 </EuiText>
                 <EuiText size="xs" color="subdued">
                   {[
-                    det.detected_at ? formatTimestamp(det.detected_at) : null,
                     det.stream_name,
                     det.alert_count != null
                       ? i18n.translate('xpack.streams.discoveryFlyout.alertCount', {

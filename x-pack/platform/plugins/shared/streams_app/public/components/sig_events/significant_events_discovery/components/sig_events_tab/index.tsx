@@ -34,7 +34,7 @@ import { SigEventFlyout } from './sig_event_flyout';
 import { FindSignificantEventsButton } from '../streams_view/find_significant_events_button';
 import { formatTimestamp } from '../../../../../util/formatters';
 import { FilterPopover } from './filter_popover';
-import { getStatusColor } from '../../utils/event_status_color';
+import { getSigEventStatusColor } from '../shared/status_display';
 import { SIG_EVENT_STATUS_LABELS } from '../shared/translations';
 
 const MAX_VISIBLE_STREAMS = 3;
@@ -87,7 +87,7 @@ const columns: Array<EuiBasicTableColumn<SigEvent>> = [
     }),
     width: '100px',
     render: (status: SigEventStatus) => (
-      <EuiBadge color={getStatusColor(status)}>{SIG_EVENT_STATUS_LABELS[status]}</EuiBadge>
+      <EuiBadge color={getSigEventStatusColor(status)}>{SIG_EVENT_STATUS_LABELS[status]}</EuiBadge>
     ),
   },
   {

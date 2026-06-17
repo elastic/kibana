@@ -149,7 +149,6 @@ steps:
 
   - name: get_stale_candidate_docs
     # WITHOUT lte — reveals quiet docs outside the lte window.
-    # Prevents ~1,440 redundant writes/day per resolved rule on the 1m cron.
     type: elasticsearch.request
     if: "${{ steps.get_stale_candidates.error == null and steps.get_stale_candidates.output.hits.total.value > 0 }}"
     with:
@@ -258,7 +257,6 @@ steps:
             detection_evidence:
               change_point_type: '{{ consts.CP_TYPE_STATIONARY }}'
               p_value: 0
-            detected_at: "{{ foreach.item._source.detected_at | default: foreach.item._source['@timestamp'] }}"
             detection_id: "{{ foreach.item._source.detection_id }}"
             resolution_lookback_minutes: "${{ foreach.item._source.resolution_lookback_minutes | default: 30 | plus: 0 }}"
             rule_name: "{{ foreach.item._source.rule_name }}"
@@ -632,12 +630,10 @@ steps:
         # detection_id: carry over only when the episode is still open (most recent doc is kind:detection).
         #   A kind:quiet or kind:handled doc after the detection means the episode closed; a re-fire
         #   must start a fresh episode with a new id even if the change-point type differs.
-        # detected_at: same carry-over guard as detection_id.
         # quiet_p_value: source differs by recovery type.
         type: data.set
         with:
-          detection_id: "{% if steps.compute_event_signals.output.is_type_changed and steps.check_recent_active.output.hits.total.value > 0 and steps.check_recent_clearance.output.hits.hits[0]._source.kind == consts.KIND_DETECTION %}{{ steps.check_recent_active.output.hits.hits[0]._source.detection_id }}{% else %}{{ foreach.item.key }}-{{ 'now' | date: '%Y%m%dT%H%M' }}{% endif %}"
-          detected_at: "{% if steps.compute_event_signals.output.is_type_changed and steps.check_recent_active.output.hits.total.value > 0 and steps.check_recent_clearance.output.hits.hits[0]._source.kind == consts.KIND_DETECTION %}{{ steps.check_recent_active.output.hits.hits[0]._source.detected_at | default: steps.check_recent_active.output.hits.hits[0]._source['@timestamp'] }}{% elsif steps.get_rule_activity.output.aggregations.activity_windows.buckets[0].doc_count > 0 %}{{ steps.get_rule_activity.output.aggregations.activity_windows.buckets[0].key_as_string }}{% elsif steps.get_rule_activity.output.aggregations.activity_windows.buckets[1].doc_count > 0 %}{{ steps.get_rule_activity.output.aggregations.activity_windows.buckets[1].key_as_string }}{% else %}{{ 'now' | date: '%Y-%m-%dT%H:%M:%S%:z' }}{% endif %}"
+          detection_id: "{% if steps.compute_event_signals.output.is_type_changed and steps.check_recent_active.output.hits.total.value > 0 and steps.check_recent_clearance.output.hits.hits[0]._source.kind == consts.KIND_DETECTION %}{{ steps.check_recent_active.output.hits.hits[0]._source.detection_id }}{% else %}{{ foreach.item.key }}-{{ execution.id }}{% endif %}"
           quiet_p_value: "{% if steps.compute_write_signals.output.is_quick_recovery %}{{ steps.get_quick_recovery_change_point.output.aggregations.change_points.type.stationary.p_value | default: 0 }}{% elsif steps.compute_write_signals.output.is_stationary_recovery %}{{ foreach.item.change_points.type.stationary.p_value | default: 0 }}{% else %}0{% endif %}"
 
       - name: write_detection_doc
@@ -667,7 +663,6 @@ steps:
             detection_evidence:
               change_point_type: "{{ steps.compute_rule_context.output.change_point_type }}"
               p_value: "${{ steps.compute_change_point_type.output.detection_p_value }}"
-            detected_at: "{{ steps.compute_write_ids.output.detected_at }}"
             detection_id: "{{ steps.compute_write_ids.output.detection_id }}"
             peak_alert_count: "${{ steps.compute_write_signals.output.peak_alert_count }}"
             resolution_lookback_minutes: "${{ steps.compute_write_signals.output.resolution_lookback_minutes | plus: 0 }}"
@@ -698,7 +693,6 @@ steps:
             detection_evidence:
               change_point_type: '{{ consts.CP_TYPE_STATIONARY }}'
               p_value: "${{ steps.compute_write_ids.output.quiet_p_value }}"
-            detected_at: "{{ steps.check_active_result.output.hits.hits[0]._source.detected_at | default: steps.check_active_result.output.hits.hits[0]._source['@timestamp'] }}"
             detection_id: "{{ steps.check_active_result.output.hits.hits[0]._source.detection_id }}"
             resolution_lookback_minutes: "${{ steps.compute_write_signals.output.resolution_lookback_minutes | plus: 0 }}"
             rule_name: "{{ foreach.item.rule_name.top[0].metrics | entries | map: 'value' | first | default: 'unknown' }}"

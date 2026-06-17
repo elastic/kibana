@@ -20,6 +20,7 @@ export const SIG_EVENT_STATUS_OPTIONS = [
   'demoted',
   'resolved',
 ] as const;
+
 export const sigEventStatusSchema = z.enum(SIG_EVENT_STATUS_OPTIONS);
 export type SigEventStatus = z.infer<typeof sigEventStatusSchema>;
 

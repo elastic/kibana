@@ -50,7 +50,7 @@ const DISCOVERY_LOOKBACK_MS = 2 * 60 * 60 * 1000;
 
 const columns: Array<EuiBasicTableColumn<Detection>> = [
   {
-    field: 'detected_at',
+    field: '@timestamp',
     name: i18n.translate('xpack.streams.detectionsTab.timestampColumn', {
       defaultMessage: 'Timestamp',
     }),
@@ -99,8 +99,7 @@ const columns: Array<EuiBasicTableColumn<Detection>> = [
       if (detection.processed) {
         return <EuiBadge color="success">{DISCOVERY_STATUS_LABELS.processed}</EuiBadge>;
       }
-      const docAgeMs =
-        Date.now() - new Date(detection.detected_at ?? detection['@timestamp']).getTime();
+      const docAgeMs = Date.now() - new Date(detection['@timestamp']).getTime();
       if (docAgeMs > DISCOVERY_LOOKBACK_MS) {
         return <EuiBadge color="warning">{DISCOVERY_STATUS_LABELS.missed}</EuiBadge>;
       }
