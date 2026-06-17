@@ -16,7 +16,6 @@ import {
   commaCompleteItem,
   getNewUserDefinedColumnSuggestion,
   getNewLineAndPipeCompleteItems,
-  pipeCompleteItem,
 } from '../complete_items';
 import type { ESQLColumnData, ESQLPolicy, ICommandCallbacks } from '../types';
 import { Location, type ICommandContext, type ISuggestionItem } from '../types';
@@ -150,7 +149,7 @@ export async function autocomplete(
     }
 
     case Position.WITH_AFTER_COMPLETE_CLAUSE: {
-      return [pipeCompleteItem, withAutoSuggest(commaCompleteItem)];
+      return [...getNewLineAndPipeCompleteItems(), withAutoSuggest(commaCompleteItem)];
     }
 
     default:

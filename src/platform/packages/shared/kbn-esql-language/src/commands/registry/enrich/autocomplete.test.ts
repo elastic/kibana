@@ -170,10 +170,12 @@ describe('ENRICH Autocomplete', () => {
     test('after complete clause', async () => {
       // works with escaped field names
       await enrichExpectSuggestions(`from a | enrich policy on b with col0 = \`otherField\` `, [
+        '\n',
         ',',
         '| ',
       ]);
       await enrichExpectSuggestions(`from a | enrich policy on b with col0=otherField `, [
+        '\n',
         ',',
         '| ',
       ]);
