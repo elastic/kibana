@@ -110,14 +110,6 @@ export class DiscoveryClient {
     };
   }
 
-  // Returns the set of discovery slugs that have been cleared.
-  // Identity is slug-stable (A1): an incident is one `discovery_slug`, so clearance is
-  // derived per slug rather than per ephemeral `discovery_id`. Both finding and clearance
-  // docs carry `discovery_slug`, so we group both kinds by it directly.
-  // Mirrors getProcessedIds in detection_client: a slug is cleared only when the latest
-  // clearance doc timestamp is on or after the latest finding doc timestamp, so a slug that
-  // regrows after a clearance (newer finding, no newer clearance) is not reported as cleared.
-  // Chunked at CLEARED_IDS_CHUNK_SIZE to match the getProcessedIds IN-clause guard.
   private async getProcessedSlugs(slugs: string[]): Promise<Set<string>> {
     if (!slugs.length) return new Set();
 

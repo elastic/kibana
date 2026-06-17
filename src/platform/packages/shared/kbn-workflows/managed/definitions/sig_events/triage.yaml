@@ -279,14 +279,14 @@ steps:
             conversation_id: '{{ steps.store_significant_events.output.conversation_id }}'
             workflow_execution_id: '{{ execution.id }}'
         on-failure:
-          continue: true
+          continue: false
 
       # Write kind:handled to the discoveries index after write_event_doc succeeds.
       # Carries the full discovery payload plus event_id lineage pointer.
       # This closes the slug for re-assessment by the next triage run.
       - name: write_handled_discovery
         type: elasticsearch.request
-        if: '${{ steps.write_event_doc.error == null }}'
+        if: '${{ steps.compute_write_gate.output.should_write and steps.write_event_doc.error == null }}'
         with:
           method: POST
           path: '/{{ consts.DISCOVERIES_INDEX }}/_doc'

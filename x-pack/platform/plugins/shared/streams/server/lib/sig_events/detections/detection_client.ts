@@ -86,9 +86,6 @@ export class DetectionClient {
     return where;
   }
 
-  // Returns detection_ids where the latest kind:handled timestamp is on or after the latest
-  // kind:detection OR kind:quiet timestamp, or where only handled docs exist.
-  // Chunked to avoid oversized ES|QL IN clauses when many detections are on screen.
   private async getProcessedIds(detectionIds: string[]): Promise<Set<string>> {
     if (!detectionIds.length) return new Set();
 

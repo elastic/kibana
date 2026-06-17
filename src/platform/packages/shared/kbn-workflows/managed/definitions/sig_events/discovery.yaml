@@ -258,6 +258,13 @@ steps:
                   type: integer
                   minimum: 0
                   maximum: 100
+                kind:
+                  type: string
+                  enum: [discovery, clearance]
+                  description: "discovery: open or continuing incident. clearance: all rules in the group are quiet and an open episode was matched — episode resolved."
+                parent_discovery_id:
+                  type: string
+                  description: "Required when kind is clearance — discovery_id of the open episode being closed (from the matched continuation candidate)."
                 detections:
                   type: array
                   minItems: 1
@@ -358,6 +365,7 @@ steps:
                   pattern: "^[a-z0-9-]+__[a-z0-9-]+$"
                   description: "Format: '<service>__<rule-fragment>-<suffix>' for new episodes (suffix verbatim from '## New episode suffix'); verbatim from continuation candidate when continuing. Pattern: service and rule-fragment are lowercase alphanumeric with hyphens; double underscore separator."
               required:
+                - kind
                 - title
                 - summary
                 - criticality
@@ -394,7 +402,7 @@ steps:
           discovery_slug: "{{ foreach.item.discovery_slug }}"
 
       - name: check_recent_discoveries
-        if: "${{ foreach.item.detections != null and foreach.item.detections.size > 0 }}"
+        if: "${{ foreach.item.kind == 'discovery' and foreach.item.detections != null and foreach.item.detections.size > 0 }}"
         type: elasticsearch.request
         with:
           method: POST
@@ -455,7 +463,8 @@ steps:
         type: data.set
         with:
           needs_new_discovery: >-
-            ${{ steps.check_recent_discoveries.error != null
+            ${{ foreach.item.kind == 'clearance'
+            or steps.check_recent_discoveries.error != null
             or steps.check_recent_discoveries.output.hits.total.value == 0
             or steps.check_recent_discoveries_processed.error == null
             and steps.check_recent_discoveries_processed.output.count > 0 }}
@@ -471,7 +480,7 @@ steps:
             kibana:
               space_ids:
                 - "{{ variables.spaceId }}"
-            kind: "{{ consts.KIND_DISCOVERY }}"
+            kind: "{{ foreach.item.kind }}"
             cause_kis: "${{ foreach.item.cause_kis }}"
             confidence: "${{ foreach.item.confidence }}"
             conversation_id: "{{ steps.snapshot_discoveries.output.conversation_id }}"
@@ -486,10 +495,11 @@ steps:
             rule_names: "${{ foreach.item.detections | map: 'rule_name' | compact | uniq | default: [] }}"
             stream_names: "${{ foreach.item.detections | map: 'stream_name' | compact | uniq | default: [] }}"
             summary: "{{ foreach.item.summary }}"
+            parent_discovery_id: "{{ foreach.item.parent_discovery_id }}"
             title: "{{ foreach.item.title }}"
             workflow_execution_id: "{{ execution.id }}"
         on-failure:
-          continue: true
+          continue: false
 
   - name: get_unhandled_state_docs
     # Skip handled-stamping if the agent failed, so its detections are retried next cycle.

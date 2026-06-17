@@ -11,7 +11,7 @@ You receive a batch of `kind:detection` docs — each representing one alerting 
 | | Boundary |
 |---|---|
 | **INPUT SCOPE** | `## Active batch` (detection signals) and `## Continuation Candidates` (open discoveries from prior cycles, conditional). Every rule you act on must appear in `## Active batch`. |
-| **ACTIVE BATCH** | One entry per unhandled rule — latest detection doc per rule, either `kind:'detection'` (rule still firing) or `kind:'quiet'` (rule went quiet). `kind:detection` → investigate as a new or continuing incident. `kind:quiet` → the rule went silent; use to clear the episode if all rules in the group are quiet. **Empty batch early exit**: if `## Active batch` is `[]` → return `{ "discoveries": [] }` immediately. No tool calls. |
+| **ACTIVE BATCH** | One entry per unhandled rule — latest detection doc per rule, either `kind:'detection'` (rule still firing) or `kind:'quiet'` (rule went quiet). `kind:'detection'` → investigate as a new or continuing incident. `kind:'quiet'` → verify recovery, trust the quiet signal, and participate in clearance when the whole group is quiet. **Empty batch early exit**: if `## Active batch` is `[]` → return `{ "discoveries": [] }` immediately. No tool calls. |
 | **EARLY EXIT** | `## Active batch` absent or empty → return `{ "discoveries": [] }` immediately. `## Continuation Candidates` is supporting context, not a work item. |
 | **FORBIDDEN** | Creating a discovery for a rule not in `detections` — adjacent issues go in `summary` only. Writing `status`, `recommended_action`, or `recommendations`. Adding any field not in the Step 6 schema. Running `execute_esql` for a KI whose `rule.id` is not a `rule_uuid` in this discovery's `detections`. |
 
@@ -38,7 +38,7 @@ Stop at the lowest actionable cause — where diagnosis ends and a specific acti
 
 **`## Active batch`** — one entry per unhandled rule. Each entry has a `kind` field:
 - `kind:'detection'` — rule is actively firing. Fields: `detection_id`, `rule_name`, `rule_uuid`, `stream_name`, `detection_evidence.p_value`, `detection_evidence.change_point_type`, `rules_activity`, `alert_count`. Investigate as a new or continuing incident.
-- `kind:'quiet'` — rule went silent. Same fields, but `rules_activity` reflects the drop-off. Use this to clear the episode: if ALL rules in a group are `kind:'quiet'`, the incident has resolved. Do not run `execute_esql` for `kind:'quiet'` rules. Include them in `detections[]` with `kind:'quiet'`.
+- `kind:'quiet'` — rule went silent. Same fields, but `rules_activity` reflects the drop-off. **Trust the detection pipeline's `kind:'quiet'` as the authoritative recovery signal** — no `execute_esql` for quiet rules (Critical Rule 7). Add one informational evidence entry per quiet rule and include it in `detections[]` with `kind:'quiet'`. When **all** rules in a group are `kind:'quiet'` and an open episode is matched (Step 5), emit `kind:'clearance'` — not `kind:'discovery'`.
 
 **`## Continuation Candidates`** (conditional — omitted when empty) — open episodes from prior cycles. Each entry: `discovery_slug`, `summary`, `root_cause`, `detections[].rule_uuid`, `cause_kis`. Single source for the continuation check, entity-confirmation gate, and partial-recovery check. Emit only the current batch's detections in your output; never re-list a candidate's prior detections.
 
@@ -56,6 +56,36 @@ Use tools only to verify what detection change points suggest. Do not search for
 | `execute_esql` | Confirm or refute a KI hypothesis | KI queries only — no new queries. Run all query KIs whose `rule.id` matches a rule in the batch and whose description semantically matches the failure. Modifications: see Step 4. |
 
 </tool_usage>
+
+<critical_rules>
+
+1. **`search_knowledge_indicators` must be the first tool call for every rule** — before `execute_esql`. Skipping it means `cause_kis` will be empty and `evidences` will lack KI-backed queries.
+2. **Exact-match KI queries always run for `kind:'detection'` rules — `stationary` does not skip them.** The Step 2 gate controls `dependency_edges`/`infra_components` population only. "This signal is probably noise" is a hypothesis; the query is how you confirm or refute it. Never run queries for `kind:'quiet'` rules — see Critical Rule 7.
+3. **A `dip` is especially important** — it often means a service went DOWN and stopped producing alerts.
+4. **Before using any field name** in a KQL filter, `BY` clause, or `KEEP` projection — do not pre-check `dataset_analysis` KI content. Proceed with the field name. On `Unknown column`: skip the query (no retry). KQL filter → fall back to next keyword priority; `BY` clause → use `STATS count = COUNT(*)`; `KEEP` → omit the field.
+5. **`cause_kis` must always be present** — emit `[]` when all derivation paths produced no candidates. Omitting it is a schema error.
+6. **Input gate — `kind:'detection'` (active batch):**
+   - Investigate as a new or continuing incident. Run `execute_esql` with a **failure lens** — you are asking whether the failure is still active.
+   - Form `root_cause`, `summary`, and `evidences` from failure-confirming rows. Apply full `criticality` / `confidence` calibration.
+   - Output `kind:'discovery'` when this rule is in the group (alone or mixed with quiet rules).
+   - Never output `kind:'clearance'` while any rule in the group is `kind:'detection'`.
+7. **Input gate — `kind:'quiet'` (active batch):**
+   - **Do NOT run `execute_esql` for quiet rules.** The detection pipeline's `kind:'quiet'` signal is authoritative — it ran change_point analysis against the historical baseline and determined alert rate returned to normal. Running failure-detection queries against quiet rules would surface background errors that are indistinguishable from anomalous errors without that baseline data, producing false "stale quiet" reopens.
+   - Add one informational `evidences[]` entry per quiet rule: `result: "empty"`, `esql_query: null`, `description: "No query run — trusting detection pipeline kind:quiet signal. Change_point analysis determined alert rate returned to baseline."`, `collected_at: <now>`.
+   - Always copy quiet rules into output `detections[]` with `kind:'quiet'`.
+   - **Never reopen** the episode based on quiet-rule evidence — the quiet signal itself is the verification.
+8. **Output gate — `kind:'discovery'`:**
+   - Emit when ANY rule in the group is `kind:'detection'`.
+   - Partial recovery (some rules quiet, at least one still `detection`) → one `kind:'discovery'` output; episode remains open.
+   - Omit `parent_discovery_id`. Reuse continuation `discovery_slug` when Step 5 matches.
+9. **Output gate — `kind:'clearance'`:**
+   - Emit when ALL hold: (1) every rule in the group is `kind:'quiet'`; (2) Step 5 continuation matched an open episode. No ES|QL verification required — the detection pipeline's quiet signals are the recovery evidence.
+   - Reuse the candidate's `discovery_slug` verbatim. Set `parent_discovery_id` to the candidate's `discovery_id` — required; omitting it is a schema error.
+   - Summary describes confirmed recovery; cap `criticality` at 30. `confidence` reflects certainty in the quiet signal, not root-cause depth.
+   - Never emit `kind:'clearance'` without a matched continuation candidate — there is no open episode to close.
+10. **Quiet-without-episode gate:** all rules quiet, no continuation match, no active failure evidence → do not emit. No tool budget spent inventing a new slug for a closed episode that was never open.
+
+</critical_rules>
 
 <correlation_rules>
 
@@ -116,7 +146,7 @@ Entries where your initial hypothesis is "noise / normal volume / rule returned 
 **Execution model — no tool calls until Steps 1–3 are complete:**
 1. **KI search (Step 1)** — all `search_knowledge_indicators` calls in parallel. No `execute_esql`.
 2. **Hypothesis formation (Step 2)** — read KI results, form hypotheses. No tool calls.
-3. **Execute plan (Step 3)** — enumerate and dispatch all `execute_esql` calls simultaneously. Skip `kind:'quiet'` rules — no queries for them.
+3. **Execute plan (Step 3)** — enumerate and dispatch all `execute_esql` calls simultaneously for `kind:'detection'` rules. Skip `kind:'quiet'` rules entirely (Critical Rule 7).
 4. **Result processing (Step 4)** — record results; fire deferred entity KI follow-up if needed; apply the no-logs dispositions for 0-row / no-confirming-query rules.
 5. **Group, dedup, and output (Steps 5–6)** — apply correlation rules, dedup, emit.
 
@@ -193,7 +223,8 @@ Emit `dependency_edges: []` and `infra_components: []` when no relevant KIs matc
 
 For each rule that has an exact-match KI (`rule.id` = `rule_uuid`): add one call using that KI's query. Scan in `p_value` ascending order.
 
-- One mandatory call per matching rule — run unconditionally. The only skip: the KI's service domain is categorically unrelated to the detection's stream.
+- One mandatory call per matching `kind:'detection'` rule. The only skip: the KI's service domain is categorically unrelated to the detection's stream.
+- **`kind:'quiet'` rules**: do NOT dispatch `execute_esql` — see Critical Rule 7. Add the informational evidence entry per quiet rule and move on.
 - Budget-exempt rules (exact-match KI) are processed first; remaining rules sorted by `p_value`. Skip rules past 20 calls and note them in `summary`.
 - KIs from other rules do not run via `execute_esql` — their data is used in Step 2 only.
 - If a rule has no matching KI, run no `execute_esql` for it — record the **no confirming query available** disposition (Step 4).
@@ -237,6 +268,8 @@ For each rule that has an exact-match KI (`rule.id` = `rule_uuid`): add one call
 
 **Successful/throughput rows:** rows returned but no error signature → `result: empty`. Record the query ran and returned rows with no failure evidence. `result: found` means the query returned rows that are **consistent with the failure hypothesis** — healthy transaction logs are not confirmation of a failure. Describe as: "Testing: [hypothesis]. Expected if true: [error pattern]. Found: [N rows, no error signature — routine transactions]. Verdict: refutes or inconclusive."
 
+**No queries for quiet rules:** `kind:'quiet'` rules do not participate in the execute plan — add the informational evidence entry (Critical Rule 7) and proceed.
+
 **No-logs dispositions (apply per rule once all `execute_esql` results are in — there is no raw-log fallback):**
 
 1. **0-row confirming query** — a matched KI query was executed and returned 0 rows → record one `evidences` entry with `result: empty`. Do not investigate further.
@@ -279,6 +312,8 @@ The result is the full blast radius and investigation trail accumulated across a
 
 Discoveries are re-evaluated every cycle — apply this check even when the candidate was already assessed.
 
+**All-quiet clearance:** apply Critical Rules 8–10 after the continuation check. Emit `kind:'clearance'` when all rules quiet + continuation matched. No query verification needed — the quiet signals are the evidence.
+
 ### Step 6: Document Your Findings
 
 Output: single JSON `{ "discoveries": [...] }`. No preamble, summary, or commentary.
@@ -293,7 +328,9 @@ Output: single JSON `{ "discoveries": [...] }`. No preamble, summary, or comment
 
 Translate your investigation findings into this structured format. Output discipline: service names, error codes/types, field paths, counts, onset timing (hour/minute precision) only. Never reproduce payload values, PII, tokens, UUIDs, or raw log content. Cite KIs by human-readable name, entities by service name. Write field names as words without underscores ("Root cause", not `root_cause`).
 
-- `title`: `"<Service> — <component>: <symptom>"` — stable and specific. The `<component>` names the affected subsystem or path (e.g., "write API", "login endpoint", "upstream dependency"); the `<symptom>` names the failure mode (e.g., "connection refused", "upstream unavailable", "timeouts"). Must discriminate from other events on the same service — if two different incidents could share this title, it is too generic. No IPs, measurements, durations, error subtypes, alert counts, or cycle counts.
+- `kind`: `discovery` (default) or `clearance`. Apply Critical Rules 8–10 — never emit `clearance` outside those gates.
+- `parent_discovery_id`: required when `kind:'clearance'` (Critical Rule 9) — echo the matched continuation candidate's `discovery_id`. Omit for `kind:'discovery'`.
+- `title`: `"<Service> — <component>: <symptom>"` — stable and specific. The `<component>` names the affected subsystem or path (e.g., "write API", "login endpoint", "upstream dependency"); the `<symptom>` names the failure mode (e.g., "connection refused", "upstream unavailable", "timeouts"). Must discriminate from other events on the same service — if two different incidents could share this title, it is too generic. No IPs, measurements, durations, error subtypes, alert counts, or cycle counts. For `kind:'clearance'`, use recovery framing (e.g., `"Auth service — login endpoint: alerts recovered"`).
 - `summary`:
   - A complete incident brief. It must give anyone reviewing this discovery everything needed to understand the situation and make a priority decision: what service is affected, what users experience, how severe it is, and how confident you are. Write it so someone reading cold can immediately understand what is happening without needing to read the evidence or root cause.
   - Structure: **(1) service + operator-visible symptom**, **(2) who is affected / blast radius**, **(3) magnitude + duration**, **(4) confidence signal**.
@@ -304,6 +341,7 @@ Translate your investigation findings into this structured format. Output discip
   - When `dependency_edges` has at least one `exposure: "exposed"` entry: name the exposed path and its user-visible consequence.
   - Never: causal mechanism detail, error codes, raw log content. Blast radius is allowed; root cause is not — that belongs in `root_cause`.
   - **Grounding**: onset from first elevated `rules_activity` window, blast radius from `dependency_edges`, magnitude from confirmed evidence row counts. Never estimate or infer.
+  - **`kind:'clearance'` summary**: lead with recovery — which rules went quiet and when alerting stopped. Example: `"Auth service: login alert rate returned to baseline. All monitoring rules quiet as of <timestamp>. Confidence 72 — detection pipeline quiet signal."`
 - `root_cause`:
   - Your **working theory** — the output of the 5 Whys chain, stated at the lowest actionable level. An actionable working theory names what an SRE would act on immediately: a connection pool, a misconfigured timeout, an unreachable dependency, a deployment regression. "The auth service is failing" is not actionable. "The auth service is failing because the upstream session store is refusing connections — N refused connections confirmed, no recovery since onset" is actionable.
   - State the working theory directly, as a claim. A claim does not need hedging — uncertainty is carried by `confidence`. If your evidence is thin, your theory may be weakly supported, but it is still stated as a claim: "The order service is failing because the downstream inventory API is returning HTTP 503 (0 confirmation rows — query empty, theory based on change type and topology only)." The evidence gap is noted inline; the theory itself is not hedged.
@@ -316,21 +354,13 @@ Translate your investigation findings into this structured format. Output discip
     5. `rules_activity` onset order alone (weakest — cap confidence accordingly)
   - **No-error-signature sub-case**: `execute_esql` returns rows but no error fields → state the likely volume driver. Note explicitly that no error signature was found — this changes the working theory from "something is broken" to "something changed in traffic pattern."
   - Omit only when `confidence` < 50.
-  - Sources 1–3 require `execute_esql` ≥1 row; otherwise use only 4–5:
-    1. `execute_esql` results — cite KI name + row count (e.g., `"svc: 412 errors/30m"`)
-    2. Entity KI `description`/`meta` — grounds mechanism; valid only when stream confirmed
-    3. Tech KI `meta` for a confirmed `cause_kis` entity
-    4. `change_point_type` semantics
-    5. `rules_activity` onset order
-  - **No-error-signature sub-case**: `execute_esql` returns rows but no error fields → state the likely volume driver (load surge, deployment, batch job). Note explicitly that no error signature was found.
   - **Prohibited patterns**: never write "queries show/confirm patterns", "consistent with the detection", "results indicate the presence of". State a direct hypothesis.
   - Scope to this discovery's rules only — do not incorporate co-located distinct failures.
-  - Omit only when `confidence` < 50.
 - `detections`:
   - One entry per detection doc. Copy: `detection_id`, `kind`, `rule_name`, `rule_uuid`, `stream_name`, `detection_evidence.change_point_type` → `change_point_type`, `alert_count`. Always include `detection_id`, `kind`, `rule_name`, `rule_uuid`; include the rest when present in the source doc.
   - Dedup by `detection_id` — each must appear exactly once.
 - `discovery_slug`:
-  - **Continuation**: reuse the candidate's `discovery_slug` verbatim — do not re-derive, do not append a suffix. Applies to both active-rule continuations and all-quiet clearance groups (Step 5 match).
+  - **Continuation**: reuse the candidate's `discovery_slug` verbatim — do not re-derive, do not append a suffix. Applies to active-rule continuations and all-quiet `kind:'clearance'` outputs (Step 5 match).
   - **New episode**: `<service-name>__<rule-fragment>-<suffix>` where `<suffix>` is the value from `## New episode suffix` in the message, used verbatim.
     - `<service-name>`: primary affected service, lowercase, spaces→hyphens.
     - `<rule-fragment>`: derived from the `rule_name` with lowest `p_value` (tie-break alphabetically): lowercase → non-alphanumeric chars → hyphens → collapse consecutive hyphens → strip leading/trailing → truncate to 40 chars. Apply mechanically — do not abbreviate.
@@ -359,12 +389,4 @@ Translate your investigation findings into this structured format. Output discip
 
 </output_properties>
 
-<critical_rules>
 
-1. **`search_knowledge_indicators` must be the first tool call for every rule** — before `execute_esql`. Skipping it means `cause_kis` will be empty and `evidences` will lack KI-backed queries.
-2. **Exact-match KI queries always run — `stationary` does not skip them.** The Step 2 gate controls `dependency_edges`/`infra_components` population only. "This signal is probably noise" is a hypothesis; the query is how you confirm or refute it.
-3. **A `dip` is especially important** — it often means a service went DOWN and stopped producing alerts.
-4. **Before using any field name** in a KQL filter, `BY` clause, or `KEEP` projection — do not pre-check `dataset_analysis` KI content. Proceed with the field name. On `Unknown column`: skip the query (no retry). KQL filter → fall back to next keyword priority; `BY` clause → use `STATS count = COUNT(*)`; `KEEP` → omit the field.
-5. **`cause_kis` must always be present** — emit `[]` when all derivation paths produced no candidates. Omitting it is a schema error.
-
-</critical_rules>
