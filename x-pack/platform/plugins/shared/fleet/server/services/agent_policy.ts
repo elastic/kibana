@@ -28,8 +28,7 @@ import { SavedObjectsUtils } from '@kbn/core/server';
 
 import type { estypes } from '@elastic/elasticsearch';
 
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
-
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { SavedObjectError } from '@kbn/core-saved-objects-common';
 
 import { withSpan } from '@kbn/apm-utils';
@@ -51,6 +50,7 @@ import {
 } from '../../common/services';
 
 import {
+  BUMP_AGENT_POLICIES_BATCH_SIZE,
   LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE,
   AGENTS_PREFIX,
   FLEET_AGENT_POLICIES_SCHEMA_VERSION,
@@ -149,6 +149,7 @@ import { bulkInstallPackages, getPackageInfo } from './epm/packages';
 import { ensureInstalledPackage } from './epm/packages/install';
 import { getAgentsByKuery, unenrollForAgentPolicyId } from './agents';
 import {
+  buildCurrentRevisionFilter,
   getCompiledVersionsForAgentPolicy,
   getPackagePolicySavedObjectType,
   packagePolicyService,
@@ -171,6 +172,7 @@ import { validatePolicyNamespaceForSpace } from './spaces/policy_namespaces';
 import { isSpaceAwarenessEnabled } from './spaces/helpers';
 import { agentlessAgentService } from './agents/agentless_agent';
 import { scheduleDeployAgentPoliciesTask } from './agent_policies/deploy_agent_policies_task';
+import { scheduleBumpAgentPoliciesByIdTask } from './agent_policies/bump_agent_policies_by_id_task';
 import { getSpaceForAgentPolicy, getSpaceForAgentPolicySO } from './spaces/helpers';
 import {
   getVersionSpecificPolicies,
@@ -204,6 +206,8 @@ export async function getAgentPolicySavedObjectType() {
     : LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE;
 }
 
+// Above this number of agent policies, `_bumpPoliciesOrScheduleAsync` offloads the revision bump to a
+// background Task Manager task instead of blocking the request thread with the bulk Saved Objects updates.
 class AgentPolicyService {
   protected getLogger(...childContextPaths: string[]): Logger {
     return appContextService.getLogger().get('AgentPolicyService', ...childContextPaths);
@@ -537,10 +541,14 @@ class AgentPolicyService {
         )
       );
 
-    await appContextService
-      .getUninstallTokenService()
-      ?.scoped(soClient.getCurrentNamespace())
-      ?.generateTokenForPolicyId(newSo.id);
+    if (!agentPolicy.supports_agentless) {
+      await appContextService
+        .getUninstallTokenService()
+        ?.scoped(soClient.getCurrentNamespace())
+        ?.generateTokenForPolicyId(newSo.id);
+    } else {
+      logger.debug('Skipping uninstall token generation for agentless policy');
+    }
     await this.triggerAgentPolicyUpdatedEvent(esClient, 'created', newSo.id, {
       skipDeploy: options.skipDeploy,
       spaceId: soClient.getCurrentNamespace(),
@@ -1095,10 +1103,15 @@ class AgentPolicyService {
     }
 
     const { space_ids: _, ...preparedAgentPolicySo } = agentPolicy;
+    const { hasAgentVersionConditions, minAgentVersion, packageAgentVersionConditions } =
+      await this.computeMinAgentVersionData(soClient, id);
     return this._update(soClient, esClient, id, { ...preparedAgentPolicySo }, options?.user, {
       bumpRevision: options?.bumpRevision ?? true,
       removeProtection: false,
       skipValidation: options?.skipValidation ?? false,
+      hasAgentVersionConditions,
+      minAgentVersion: minAgentVersion ?? null,
+      packageAgentVersionConditions: packageAgentVersionConditions ?? null,
     })
       .then((updatedAgentPolicy) => {
         return this.runExternalCallbacks(
@@ -1255,11 +1268,10 @@ class AgentPolicyService {
       removeProtection?: boolean;
       asyncDeploy?: boolean;
       skipValidation?: boolean;
-      hasAgentVersionConditions?: boolean;
     }
   ): Promise<void> {
     return withSpan('bump_agent_policy_revision', async () => {
-      const { minAgentVersion, packageAgentVersionConditions } =
+      const { hasAgentVersionConditions, minAgentVersion, packageAgentVersionConditions } =
         await this.computeMinAgentVersionData(soClient, id);
       await this._update(soClient, esClient, id, {}, options?.user, {
         bumpRevision: true,
@@ -1267,7 +1279,7 @@ class AgentPolicyService {
         skipValidation: options?.skipValidation ?? true,
         returnUpdatedPolicy: false,
         asyncDeploy: options?.asyncDeploy,
-        hasAgentVersionConditions: options?.hasAgentVersionConditions,
+        hasAgentVersionConditions,
         minAgentVersion: minAgentVersion ?? null,
         packageAgentVersionConditions: packageAgentVersionConditions ?? null,
       });
@@ -1278,6 +1290,7 @@ class AgentPolicyService {
     soClient: SavedObjectsClientContract,
     policyId: string
   ): Promise<{
+    hasAgentVersionConditions: boolean;
     minAgentVersion: string | undefined;
     packageAgentVersionConditions: AgentPolicyAgentVersionCondition[] | undefined;
   }> {
@@ -1312,8 +1325,35 @@ class AgentPolicyService {
       }
     }
 
+    // inputs_for_versions is stripped from the PackagePolicy type but is the only reliable
+    // indicator of template-level version conditions (HBS templates referencing _meta.agent.version).
+    // compilePackagePolicyForVersions only populates it when hasAgentVersionConditionInInputTemplate
+    // is true, so its presence means the policy requires version-specific behaviour.
+    const savedObjectType = await getPackagePolicySavedObjectType();
+    const rawResult = await Promise.resolve(
+      soClient.find<PackagePolicySOAttributes>({
+        type: savedObjectType,
+        filter: buildCurrentRevisionFilter(
+          savedObjectType,
+          `${savedObjectType}.attributes.policy_ids:${escapeSearchQueryPhrase(policyId)}`
+        ),
+        perPage: SO_SEARCH_LIMIT,
+      })
+    ).catch(() => undefined);
+    const hasTemplateConditions = (rawResult?.saved_objects ?? []).some(
+      (so) =>
+        so.attributes.inputs_for_versions &&
+        Object.keys(so.attributes.inputs_for_versions).length > 0
+    );
+
+    const hasAgentVersionConditions = conditions.length > 0 || hasTemplateConditions;
+
     if (conditions.length === 0) {
-      return { minAgentVersion: undefined, packageAgentVersionConditions: undefined };
+      return {
+        hasAgentVersionConditions,
+        minAgentVersion: undefined,
+        packageAgentVersionConditions: undefined,
+      };
     }
 
     let highestMinVersion: string | undefined;
@@ -1329,6 +1369,7 @@ class AgentPolicyService {
     }
 
     return {
+      hasAgentVersionConditions,
       minAgentVersion: highestMinVersion,
       packageAgentVersionConditions: conditions,
     };
@@ -1450,6 +1491,37 @@ class AgentPolicyService {
         }
       );
     }
+  }
+
+  // Bumps the given policies inline, or offloads to a Task Manager task above the threshold so
+  // the bulk Saved Objects updates don't block the request thread. The task re-fetches by id and
+  // bumps synchronously via `bumpAgentPoliciesByIds`.
+  private async _bumpPoliciesOrScheduleAsync(
+    internalSoClientWithoutSpaceExtension: SavedObjectsClientContract,
+    savedObjectsResults: Array<SavedObject<AgentPolicySOAttributes>>,
+    options?: { user?: AuthenticatedUser }
+  ): Promise<SavedObjectsBulkUpdateResponse<AgentPolicy>> {
+    if (savedObjectsResults.length <= BUMP_AGENT_POLICIES_BATCH_SIZE) {
+      return this._bumpPolicies(
+        internalSoClientWithoutSpaceExtension,
+        savedObjectsResults,
+        options
+      );
+    }
+
+    this.getLogger('_bumpPoliciesOrScheduleAsync').debug(
+      `Scheduling background task to bump revision of ${savedObjectsResults.length} agent policies`
+    );
+
+    await scheduleBumpAgentPoliciesByIdTask(
+      appContextService.getTaskManagerStart()!,
+      savedObjectsResults.map((policy) => ({
+        id: policy.id,
+        spaceId: getSpaceForAgentPolicySO(policy),
+      })),
+      options?.user
+    );
+    return { saved_objects: [] };
   }
 
   private async _bumpPolicies(
@@ -1574,7 +1646,7 @@ class AgentPolicyService {
         }))
       );
 
-    return this._bumpPolicies(
+    return this._bumpPoliciesOrScheduleAsync(
       internalSoClientWithoutSpaceExtension,
       [
         ...agentPoliciesUsingOutput.saved_objects,
@@ -2238,7 +2310,7 @@ class AgentPolicyService {
         namespaces: ['*'],
       });
 
-    return this._bumpPolicies(
+    return this._bumpPoliciesOrScheduleAsync(
       internalSoClientWithoutSpaceExtension,
       currentPolicies.saved_objects,
       options
@@ -2269,7 +2341,7 @@ class AgentPolicyService {
         namespaces: ['*'],
       });
 
-    return this._bumpPolicies(
+    return this._bumpPoliciesOrScheduleAsync(
       internalSoClientWithoutSpaceExtension,
       currentPolicies.saved_objects,
       options

@@ -51,6 +51,14 @@ const listQueriesRoute = createServerRoute({
       since: '9.1.0',
       stability: 'experimental',
     },
+    deprecated: {
+      documentationUrl:
+        'https://www.elastic.co/docs/api/doc/serverless/operation/operation-get-streams-name-queries',
+      severity: 'warning',
+      message:
+        'This experimental Significant Events endpoint is deprecated and will be removed in a future release.',
+      reason: { type: 'remove' },
+    },
     oasOperationObject: () => ({
       requestBody: {
         content: {
@@ -84,9 +92,10 @@ const listQueriesRoute = createServerRoute({
     },
   },
   async handler({ params, request, getScopedClients, server }): Promise<ListQueriesResponse> {
-    const { getQueryClient, streamsClient, licensing, uiSettingsClient } = await getScopedClients({
-      request,
-    });
+    const { getKnowledgeIndicatorClient, streamsClient, licensing, uiSettingsClient } =
+      await getScopedClients({
+        request,
+      });
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
     await streamsClient.ensureStream(params.path.name);
 
@@ -94,8 +103,8 @@ const listQueriesRoute = createServerRoute({
       path: { name: streamName },
     } = params;
 
-    const queryClient = await getQueryClient();
-    const { [streamName]: queryLinks } = await queryClient.getStreamToQueryLinksMap([streamName]);
+    const kiClient = await getKnowledgeIndicatorClient();
+    const { [streamName]: queryLinks } = await kiClient.getStreamToQueryLinksMap([streamName]);
 
     return {
       queries: queryLinks.map((queryLink) => queryLink.query),
@@ -112,6 +121,14 @@ const upsertQueryRoute = createServerRoute({
     availability: {
       since: '9.1.0',
       stability: 'experimental',
+    },
+    deprecated: {
+      documentationUrl:
+        'https://www.elastic.co/docs/api/doc/serverless/operation/operation-put-streams-name-queries-queryid',
+      severity: 'warning',
+      message:
+        'This experimental Significant Events endpoint is deprecated and will be removed in a future release.',
+      reason: { type: 'remove' },
     },
     oasOperationObject: () => ({
       requestBody: {
@@ -143,9 +160,10 @@ const upsertQueryRoute = createServerRoute({
     body: upsertStreamQueryRequestSchema,
   }),
   handler: async ({ params, request, getScopedClients, server }): Promise<UpsertQueryResponse> => {
-    const { streamsClient, getQueryClient, licensing, uiSettingsClient } = await getScopedClients({
-      request,
-    });
+    const { streamsClient, getKnowledgeIndicatorClient, licensing, uiSettingsClient } =
+      await getScopedClients({
+        request,
+      });
     const {
       path: { name: streamName, queryId },
       body,
@@ -159,8 +177,8 @@ const upsertQueryRoute = createServerRoute({
       stream: definition,
     });
 
-    const queryClient = await getQueryClient();
-    await queryClient.upsert(definition, {
+    const kiClient = await getKnowledgeIndicatorClient();
+    await kiClient.upsertQuery(definition, {
       id: queryId,
       type: deriveQueryType(body.esql.query),
       title: body.title,
@@ -185,6 +203,14 @@ const deleteQueryRoute = createServerRoute({
     availability: {
       since: '9.1.0',
       stability: 'experimental',
+    },
+    deprecated: {
+      documentationUrl:
+        'https://www.elastic.co/docs/api/doc/serverless/operation/operation-delete-streams-name-queries-queryid',
+      severity: 'warning',
+      message:
+        'This experimental Significant Events endpoint is deprecated and will be removed in a future release.',
+      reason: { type: 'remove' },
     },
     oasOperationObject: () => ({
       requestBody: {
@@ -219,9 +245,10 @@ const deleteQueryRoute = createServerRoute({
     logger,
     server,
   }): Promise<DeleteQueryResponse> => {
-    const { streamsClient, getQueryClient, licensing, uiSettingsClient } = await getScopedClients({
-      request,
-    });
+    const { streamsClient, getKnowledgeIndicatorClient, licensing, uiSettingsClient } =
+      await getScopedClients({
+        request,
+      });
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
 
     const {
@@ -230,13 +257,13 @@ const deleteQueryRoute = createServerRoute({
 
     const definition = await streamsClient.getStream(streamName);
 
-    const queryClient = await getQueryClient();
-    const queryLink = await queryClient.bulkGetByIds(streamName, [queryId]);
+    const kiClient = await getKnowledgeIndicatorClient();
+    const queryLink = await kiClient.bulkGetQueriesByIds(streamName, [queryId]);
     if (queryLink.length === 0) {
       throw new QueryNotFoundError(`Query [${queryId}] not found in stream [${streamName}]`);
     }
 
-    await queryClient.delete(definition, queryId);
+    await kiClient.deleteQuery(definition, queryId);
 
     logger.get('significant_events').debug(`Deleting query ${queryId} for stream ${streamName}`);
 
@@ -255,6 +282,14 @@ const bulkQueriesRoute = createServerRoute({
     availability: {
       since: '9.1.0',
       stability: 'experimental',
+    },
+    deprecated: {
+      documentationUrl:
+        'https://www.elastic.co/docs/api/doc/serverless/operation/operation-post-streams-name-queries-bulk',
+      severity: 'warning',
+      message:
+        'This experimental Significant Events endpoint is deprecated and will be removed in a future release.',
+      reason: { type: 'remove' },
     },
     oasOperationObject: () => ({
       requestBody: {
@@ -302,9 +337,10 @@ const bulkQueriesRoute = createServerRoute({
     logger,
     server,
   }): Promise<BulkUpdateAssetsResponse> => {
-    const { streamsClient, getQueryClient, licensing, uiSettingsClient } = await getScopedClients({
-      request,
-    });
+    const { streamsClient, getKnowledgeIndicatorClient, licensing, uiSettingsClient } =
+      await getScopedClients({
+        request,
+      });
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
 
     const {
@@ -316,7 +352,7 @@ const bulkQueriesRoute = createServerRoute({
 
     // Validation is all-or-nothing: if any index operation fails validation,
     // the entire batch is rejected. Operations that pass validation are
-    // collected in typedOperations and applied atomically via queryClient.bulk.
+    // collected in typedOperations and applied atomically via kiClient.syncQueries.
     const validationErrors: Array<{ id: string; message: string }> = [];
     const typedOperations: Array<{ index?: StreamQuery; delete?: { id: string } }> = [];
 
@@ -352,8 +388,20 @@ const bulkQueriesRoute = createServerRoute({
       });
     }
 
-    const queryClient = await getQueryClient();
-    await queryClient.bulk(definition, typedOperations);
+    const kiClient = await getKnowledgeIndicatorClient();
+    const deleteIds = new Set(typedOperations.flatMap((op) => (op.delete ? [op.delete.id] : [])));
+    const indexQueriesById = new Map(
+      typedOperations.flatMap((op) => (op.index ? [[op.index.id, op.index] as const] : []))
+    );
+    const { [streamName]: currentLinks } = await kiClient.getStreamToQueryLinksMap([streamName]);
+    const currentIds = new Set(currentLinks.map((l) => l.query.id));
+    const nextQueries: StreamQuery[] = [
+      ...currentLinks
+        .filter((l) => !deleteIds.has(l.query.id))
+        .map((l) => indexQueriesById.get(l.query.id) ?? l.query),
+      ...Array.from(indexQueriesById.values()).filter((q) => !currentIds.has(q.id)),
+    ];
+    await kiClient.syncQueries(definition, nextQueries, { currentLinks });
 
     logger
       .get('significant_events')

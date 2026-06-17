@@ -37,7 +37,7 @@ export default function ({ getService }: FtrProviderContext) {
         await ml.dataVisualizer.navigateToDataViewSelection();
 
         await ml.testExecution.logTestStep('loads the index data visualizer page');
-        await ml.jobSourceSelection.selectSourceForIndexBasedDataVisualizer(savedSearch);
+        await ml.jobSourceSelection.selectSourceForIndexBasedDataVisualizer(savedSearch, true);
       });
 
       it('navigates to Discover page', async () => {

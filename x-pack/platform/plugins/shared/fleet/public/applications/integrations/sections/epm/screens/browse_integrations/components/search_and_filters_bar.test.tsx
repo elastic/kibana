@@ -157,6 +157,78 @@ describe('SearchAndFiltersBar', () => {
     });
   });
 
+  describe('Content Filter', () => {
+    it('renders the content filter button', () => {
+      const { getByTestId } = renderSearchAndFiltersBar();
+      expect(getByTestId('browseIntegrations.searchBar.contentBtn')).toBeInTheDocument();
+    });
+
+    it('does not show active filter indicator when showContent is not set', () => {
+      mockUseUrlFilters.mockReturnValue({
+        q: undefined,
+        sort: undefined,
+        status: undefined,
+        showContent: undefined,
+      });
+
+      const { getByTestId } = renderSearchAndFiltersBar();
+      const button = getByTestId('browseIntegrations.searchBar.contentBtn');
+
+      expect(button).not.toHaveClass('euiFilterButton-hasActiveFilters');
+    });
+
+    it('shows active filter indicator when showContent is true', () => {
+      mockUseUrlFilters.mockReturnValue({
+        q: undefined,
+        sort: undefined,
+        status: undefined,
+        showContent: true,
+      });
+
+      const { getByTestId } = renderSearchAndFiltersBar();
+      const button = getByTestId('browseIntegrations.searchBar.contentBtn');
+
+      expect(button).toHaveClass('euiFilterButton-hasActiveFilters');
+
+      const badge = button.querySelector('.euiNotificationBadge');
+      expect(badge).toBeInTheDocument();
+      expect(badge).toHaveTextContent('1');
+    });
+
+    it('calls addUrlFilters with showContent: true when option is checked', async () => {
+      const { getByTestId } = renderSearchAndFiltersBar();
+
+      fireEvent.click(getByTestId('browseIntegrations.searchBar.contentBtn'));
+
+      const showOption = getByTestId('browseIntegrations.searchBar.contentShowContentPacksOption');
+      fireEvent.click(showOption);
+
+      await waitFor(() => {
+        expect(mockAddUrlFilters).toHaveBeenCalledWith({ showContent: true });
+      });
+    });
+
+    it('calls addUrlFilters with showContent: undefined when option is unchecked', async () => {
+      mockUseUrlFilters.mockReturnValue({
+        q: undefined,
+        sort: undefined,
+        status: undefined,
+        showContent: true,
+      });
+
+      const { getByTestId } = renderSearchAndFiltersBar();
+
+      fireEvent.click(getByTestId('browseIntegrations.searchBar.contentBtn'));
+
+      const showOption = getByTestId('browseIntegrations.searchBar.contentShowContentPacksOption');
+      fireEvent.click(showOption);
+
+      await waitFor(() => {
+        expect(mockAddUrlFilters).toHaveBeenCalledWith({ showContent: undefined });
+      });
+    });
+  });
+
   describe('Integration Tests', () => {
     it('all filter components work together', async () => {
       mockUseUrlFilters.mockReturnValue({

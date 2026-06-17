@@ -32,14 +32,14 @@ Rules declare a \`kind\` of \`alert\` or \`signal\`. This is the most important 
 - **Stateful alerting** with full episode lifecycle: pending, active, recovering, inactive.
 - Supports state transitions (\`consecutive_breaches\`), recovery detection, and notification dispatch.
 - Produces \`type: 'alert'\` events that participate in the dispatcher pipeline.
-- UI label: **"Alerting"**.
+- UI label: **"Alert"**.
 - Use when the user wants to be **notified**, needs **lifecycle tracking**, or wants **recovery detection**.
 
 ### Signal (\`kind: signal\`)
 - **Stateless detection** (observation-only).
 - Produces \`type: 'signal'\` events but **skips** episode lifecycle and dispatcher processing entirely.
 - No notifications, no recovery, no state transitions.
-- UI label: **"Detect only"**.
+- UI label: **"Signal"**.
 - Use for logging or detection without automated action.
 
 ### Immutability
@@ -83,9 +83,7 @@ When the dispatcher evaluates a policy's KQL matcher, these fields are available
 | \`last_event_timestamp\` | Timestamp of the most recent event |
 | \`rule.id\` | The rule's saved object ID |
 | \`rule.name\` | The rule's display name |
-| \`rule.description\` | The rule's description |
 | \`rule.tags\` | The rule's tags array |
-| \`rule.enabled\` | Whether the rule is enabled |
 | \`data.*\` | Rule-specific ES|QL output columns (e.g. \`data.host.name\`, \`data.error_count\`) |
 
 ### Grouping Modes
@@ -192,10 +190,41 @@ For an existing rule, pass the \`ruleAttachmentId\` and only include the operati
 - If grouping fields are set after a query, they are validated against the query's
   output columns. Use fields that appear in the query results.
 
-## State Transition and Recovery
+## State Transition
 
 - \`set_state_transition\` with \`consecutive_breaches: N\` means the rule fires only after N consecutive evaluation cycles breach the threshold. Use this when the user wants to reduce noise.
-- \`set_recovery_policy\` with \`type: "no_breach"\` recovers when a cycle produces no rows. Use \`type: "query"\` with a separate recovery query when the user needs explicit recovery detection.
+
+## Recovery Strategy
+
+\`recovery_strategy\` is a **top-level rule field** (not inside the query). It controls how episodes transition from active to recovering/inactive.
+
+| Value | Behaviour |
+|---|---|
+| \`'no_breach'\` | Recovers episodes automatically when a breaching group stops appearing in breach query results. **Default for most alert rules.** |
+| \`'query'\` | Runs a separate recovery query each cycle. Requires a \`recovery\` block inside \`set_query\` (\`{ segment }\` for composed, \`{ query }\` for standalone). Use when recovery needs different criteria than "not breaching". |
+| \`'none'\` | Disables recovery entirely — episodes never transition to recovering/inactive. Use only when lifecycle tracking is not needed. |
+
+Signal rules (\`kind: signal\`) cannot set \`recovery_strategy\`.
+
+When using \`recovery_strategy: 'query'\`, add a \`set_query\` operation that includes a \`recovery\` block alongside \`breach\`:
+- **Composed**: \`recovery: { segment: 'WHERE cpu < 0.5' }\`
+- **Standalone**: \`recovery: { query: 'FROM metrics-* | WHERE cpu < 0.5' }\`
+
+## No-Data Strategy
+
+\`no_data_strategy\` is a **top-level rule field** that controls behaviour when no data is present. Only meaningful for standalone queries with a \`no_data\` block.
+
+| Value | Behaviour |
+|---|---|
+| \`'none'\` | No-data situations are ignored (default). |
+| \`'emit'\` | Emits a \`no_data\` alert event when \`no_data\` query returns no rows. |
+| \`'last_known_status'\` | Holds the last known episode status when no data is present. |
+| \`'recover'\` | Forces recovery when no data is present. |
+
+When setting \`no_data_strategy\` to anything other than \`'none'\`, add a \`no_data\` block to the standalone query:
+\`no_data: { query: 'FROM heartbeat-* | STATS count = COUNT(*) BY host.name | WHERE count >= 1' }\`
+
+Signal rules cannot set \`no_data_strategy\`. Composed queries do not support \`no_data\`.
 
 ## Final Validation
 
@@ -231,7 +260,7 @@ Action policies only process alert episodes. Signal rules (\`kind: signal\`) do 
 
 When a user asks for notifications on a rule that is currently \`kind: signal\` (or when composing a new rule where the user wants notifications):
 
-1. **Explain the difference**: signal rules are observation-only ("Detect only") and do not trigger notifications. Alert rules ("Alerting") track episode lifecycle and can dispatch to action policies.
+1. **Explain the difference**: signal rules are observation-only ("Signal") and do not trigger notifications. Alert rules ("Alert") track episode lifecycle and can dispatch to action policies.
 2. If the rule is a **draft (in-memory)**: use \`set_kind\` to change it to \`alert\`, then proceed with notification setup (Part 3).
 3. If the rule is **persisted**: \`kind\` is immutable after creation. Inform the user that the existing signal rule cannot be converted. Offer to create a new alert rule with the same query and schedule, then set up notifications on the new rule.
 4. After ensuring the rule is \`kind: alert\`, proceed with the notification setup flow (Part 3).
@@ -265,7 +294,7 @@ For an existing policy, pass the \`actionPolicyAttachmentId\` and only include t
 3. **\`set_matcher\`** — set a KQL query to filter which alert episodes trigger this policy. Set to \`null\` for a catch-all that matches all episodes. Available matcher fields:
    - \`episode_id\`, \`episode_status\` (inactive | pending | active | recovering)
    - \`group_hash\`, \`last_event_timestamp\`
-   - \`rule.id\`, \`rule.name\`, \`rule.description\`, \`rule.tags\`, \`rule.enabled\`
+   - \`rule.id\`, \`rule.name\`, \`rule.tags\`
    - \`data.*\` (rule-specific fields)
 4. **\`set_grouping\`** — set \`groupingMode\` and optionally \`groupBy\` fields:
    - \`per_episode\` (default): one notification per alert episode lifecycle.
@@ -344,11 +373,11 @@ steps:
     with:
       to:
         - <user-provided-email>
-      subject: "Alert: <rule-name> — {{ inputs.episodes | size }} episode(s)"
+      subject: "Alert: <rule-name> — {{ inputs.payload.episodes | size }} episode(s)"
       message: >
-        Rule "<rule-name>" triggered {{ inputs.episodes | size }} alert episode(s).
+        Rule "<rule-name>" triggered {{ inputs.payload.episodes | size }} alert episode(s).
 
-        {% for ep in inputs.episodes %}
+        {% for ep in inputs.payload.episodes %}
         - Host: {{ ep.data.host.name | default: "unknown" }}
           Errors: {{ ep.data.error_count | default: "n/a" }}
           Status: {{ ep.episode_status }}
@@ -375,14 +404,14 @@ steps:
 
 | Variable | Description |
 |---|---|
-| \`inputs.episodes\` | Array of alert episodes |
-| \`inputs.episodes[].episode_status\` | \`active\`, \`pending\`, \`recovering\`, or \`inactive\` |
-| \`inputs.episodes[].rule_id\` | The rule's saved object ID |
-| \`inputs.episodes[].episode_id\` | The episode UUID |
-| \`inputs.episodes[].data.*\` | ES|QL output row fields (populated for active/pending) |
-| \`inputs.policyId\` | The action policy ID |
-| \`inputs.id\` | The action group ID |
-| \`inputs.groupKey\` | The grouping key object |
+| \`inputs.payload.episodes\` | Array of alert episodes |
+| \`inputs.payload.episodes[].episode_status\` | \`active\`, \`pending\`, \`recovering\`, or \`inactive\` |
+| \`inputs.payload.episodes[].rule_id\` | The rule's saved object ID |
+| \`inputs.payload.episodes[].episode_id\` | The episode UUID |
+| \`inputs.payload.episodes[].data.*\` | ES|QL output row fields (populated for active/pending) |
+| \`inputs.payload.policyId\` | The action policy ID |
+| \`inputs.payload.id\` | The action group ID |
+| \`inputs.payload.groupKey\` | The grouping key object |
 | \`triggeredBy\` | Always \`"action_policy"\` |
 | \`spaceId\` | The Kibana space |
 | \`execution.url\` | Direct link to the workflow execution in Kibana |
