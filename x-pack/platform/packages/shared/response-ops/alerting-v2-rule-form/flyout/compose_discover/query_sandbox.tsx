@@ -34,6 +34,7 @@ import { useQueryExecution } from './use_query_execution';
 import { ComposeDiscoverChart } from './compose_discover_chart';
 import { ComposeDiscoverTabs, TAB_DEFINITIONS } from './compose_discover_tabs';
 import type { QueryTab } from './types';
+import { CpsPicker } from './cps_picker';
 
 /**
  * Self-contained ES|QL sandbox that handles data fetching and renders the full
@@ -226,6 +227,7 @@ export const QuerySandbox: React.FC<QuerySandboxProps> = ({
   return (
     <div data-test-subj="querySandbox">
       <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap={false}>
+        <CpsPicker />
         <EuiFlexItem grow={false} style={{ width: 200, minWidth: 0 }}>
           <EuiSelect
             options={timeFieldOptions}
