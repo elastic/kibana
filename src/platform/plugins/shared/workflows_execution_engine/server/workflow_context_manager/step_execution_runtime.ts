@@ -205,15 +205,8 @@ export class StepExecutionRuntime {
    * scopeStack / timing go through state, the FAILED-step `output: null`
    * sentinel goes through the IO service. Atomicity is preserved because
    * the two writes share a synchronous tick.
-   *
-   * @param error - The error that caused the step to fail.
-   * @param partialOutput - Optional partial output to persist alongside the
-   *   failure (e.g. token-usage metadata accumulated before the stream
-   *   errored). When provided, it is stored via the IO service instead of
-   *   the usual `null` sentinel so that downstream steps can still read
-   *   `steps.x.output.metadata.usage`.
    */
-  public failStep(error: Error, partialOutput?: unknown): void {
+  public failStep(error: Error): void {
     const executionError = ExecutionError.fromError(error);
     const serializedError = executionError.toSerializableObject();
 
@@ -242,15 +235,9 @@ export class StepExecutionRuntime {
       error: serializedError,
       ...(executionTimeMs !== undefined ? { executionTimeMs } : {}),
     });
-    // When partial output is provided (e.g. token-usage metadata accumulated
-    // before a stream error), persist it so it remains reachable via
-    // `steps.x.output`. Otherwise write the `null` FAILED-step sentinel —
-    // distinct from `undefined` (evicted) so the eviction predicate can tell
-    // them apart.
-    this.stepIoService.setStepOutput(
-      this.stepExecutionId,
-      partialOutput !== undefined ? (partialOutput as JsonValue) : null
-    );
+    // `null` is the FAILED-step sentinel — distinct from `undefined`
+    // (evicted) so the eviction predicate can keep them apart.
+    this.stepIoService.setStepOutput(this.stepExecutionId, null);
     this.logStepFail(executionError);
   }
 

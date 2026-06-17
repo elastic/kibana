@@ -13,7 +13,7 @@ import {
   AgentExecutionMode,
 } from '@kbn/agent-builder-common';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
-import { firstValueFrom, tap, toArray } from 'rxjs';
+import { firstValueFrom, toArray } from 'rxjs';
 import type { ServiceManager } from '../services';
 import {
   CONNECTOR_OR_INFERENCE_ID_CONFLICT_MESSAGE_WORKFLOW,
@@ -29,10 +29,6 @@ export const getRunAgentStepDefinition = (serviceManager: ServiceManager) => {
   return createServerStepDefinition({
     ...runAgentStepCommonDefinition,
     handler: async (context) => {
-      // Accumulate token usage outside the try/catch so partial counts are
-      // preserved even if the event stream errors mid-execution.
-      const usage = { inputTokens: 0, outputTokens: 0, totalTokens: 0 };
-
       try {
         const { schema, message, conversation_id: conversationId, attachments } = context.input;
 
@@ -90,32 +86,16 @@ export const getRunAgentStepDefinition = (serviceManager: ServiceManager) => {
           useTaskManager: false,
         });
 
-        const events = await firstValueFrom(
-          events$.pipe(
-            tap((event) => {
-              if (isRoundCompleteEvent(event)) {
-                const { model_usage: modelUsage } = event.data.round;
-                if (modelUsage) {
-                  usage.inputTokens += modelUsage.input_tokens;
-                  usage.outputTokens += modelUsage.output_tokens;
-                  usage.totalTokens += modelUsage.input_tokens + modelUsage.output_tokens;
-                }
-              }
-            }),
-            toArray()
-          )
-        );
-
-        const roundEvents = events.filter(isRoundCompleteEvent);
-        if (roundEvents.length === 0) {
+        const events = await firstValueFrom(events$.pipe(toArray()));
+        const roundEvent = events.find(isRoundCompleteEvent);
+        if (!roundEvent) {
           throw new Error('No round_complete event received from execution service');
         }
 
-        // Use the last round's response as the step output (final agent reply)
-        const lastRound = roundEvents[roundEvents.length - 1].data.round;
+        const round = roundEvent.data.round;
         const outputMessage = schema
-          ? JSON.stringify(lastRound.response.structured_output)
-          : lastRound.response.message;
+          ? JSON.stringify(round.response.structured_output)
+          : round.response.message;
 
         let outputConversationId: string | undefined;
         if (storeConversation) {
@@ -131,9 +111,8 @@ export const getRunAgentStepDefinition = (serviceManager: ServiceManager) => {
         return {
           output: {
             message: outputMessage,
-            structured_output: lastRound.response.structured_output,
+            structured_output: round.response.structured_output,
             ...(outputConversationId && { conversation_id: outputConversationId }),
-            metadata: { usage },
           },
         };
       } catch (error) {
@@ -142,7 +121,6 @@ export const getRunAgentStepDefinition = (serviceManager: ServiceManager) => {
           error instanceof Error ? error : new Error(String(error))
         );
         return {
-          output: { message: '', metadata: { usage } },
           error: error instanceof Error ? error : new Error(String(error)),
         };
       }
