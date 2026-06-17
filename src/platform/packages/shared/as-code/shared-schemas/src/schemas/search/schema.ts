@@ -9,6 +9,7 @@
 
 import { schema, type Type, type TypeOf } from '@kbn/config-schema';
 import { asCodePaginationParamsSchema } from '../pagination';
+import { MAX_TAG_C0UNT, MAX_TAG_LENGTH } from '../tags/schema';
 
 type PaginationParamsSchema = ReturnType<typeof asCodePaginationParamsSchema.getPropSchemas>;
 type PartialPaginationParamsSchema = {
@@ -26,20 +27,32 @@ export const asCodeSearchRequestSchema = schema.object({
     })
   ),
   tags: schema.maybe(
-    schema.oneOf([schema.string(), schema.arrayOf(schema.string(), { maxSize: 100 })], {
-      meta: {
-        description:
-          'A tag ID to include. Accepts a single tag ID or multiple tag IDs. When multiple are specified, library items matching any of the tag IDs are included.',
-      },
-    })
+    schema.oneOf(
+      [
+        schema.string({ maxLength: MAX_TAG_LENGTH }),
+        schema.arrayOf(schema.string({ maxLength: MAX_TAG_LENGTH }), { maxSize: MAX_TAG_C0UNT }),
+      ],
+      {
+        meta: {
+          description:
+            'A tag ID to include. Accepts a single tag ID or multiple tag IDs. When multiple are specified, library items matching any of the tag IDs are included.',
+        },
+      }
+    )
   ),
   excluded_tags: schema.maybe(
-    schema.oneOf([schema.string(), schema.arrayOf(schema.string(), { maxSize: 100 })], {
-      meta: {
-        description:
-          'A tag ID to exclude. Accepts a single tag ID or multiple tag IDs. When multiple are specified, library items matching any of the tag IDs are excluded.',
-      },
-    })
+    schema.oneOf(
+      [
+        schema.string({ maxLength: MAX_TAG_LENGTH }),
+        schema.arrayOf(schema.string({ maxLength: MAX_TAG_LENGTH }), { maxSize: MAX_TAG_C0UNT }),
+      ],
+      {
+        meta: {
+          description:
+            'A tag ID to exclude. Accepts a single tag ID or multiple tag IDs. When multiple are specified, library items matching any of the tag IDs are excluded.',
+        },
+      }
+    )
   ),
   ...(Object.entries(asCodePaginationParamsSchema.getPropSchemas()).reduce(
     (prev, [key, prop]) => ({
