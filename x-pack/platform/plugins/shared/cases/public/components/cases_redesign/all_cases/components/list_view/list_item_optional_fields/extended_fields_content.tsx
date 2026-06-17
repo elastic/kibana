@@ -23,7 +23,6 @@ export const ExtendedFieldsListItemContent: React.FC<ExtendedFieldsListItemConte
 }) => {
   const { euiTheme } = useEuiTheme();
   const labels = getExtendedFieldDisplayLabels(extendedFields, extendedFieldsLabels);
-  const count = labels.length;
 
   const styles = useMemo(
     () => ({
@@ -54,7 +53,7 @@ export const ExtendedFieldsListItemContent: React.FC<ExtendedFieldsListItemConte
         data-test-subj="cases-list-item-field-extended-fields-tooltip-anchor"
         tabIndex={0}
       >
-        {count}
+        {labels.length}
       </span>
     </EuiToolTip>
   );

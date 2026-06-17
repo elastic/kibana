@@ -345,43 +345,47 @@ export const useCasesColumns = ({
     [assignCaseAction, casesColumnsConfig, connectors, isSelectorView, userProfiles, disabledCases]
   );
 
-  // we need to extend the columnsDict with the columns of
-  // the customFields
-  customFields.forEach(({ key, type, label }) => {
-    if (type in customFieldsBuilderMap) {
-      const columnDefinition = customFieldsBuilderMap[type]().getEuiTableColumn({ label });
+  const allColumnsDict = useMemo(() => {
+    const dict = { ...columnsDict };
 
-      columnsDict[key] = {
-        ...columnDefinition,
-        render: (theCase: CaseUI) => {
-          const customField = theCase.customFields.find(
-            (element) => element.key === key && element.value !== null
-          );
+    customFields.forEach(({ key, type, label }) => {
+      if (type in customFieldsBuilderMap) {
+        const columnDefinition = customFieldsBuilderMap[type]().getEuiTableColumn({ label });
 
-          if (!customField) {
-            return getEmptyCellValue();
-          }
+        dict[key] = {
+          ...columnDefinition,
+          render: (theCase: CaseUI) => {
+            const customField = theCase.customFields.find(
+              (element) => element.key === key && element.value !== null
+            );
 
-          return columnDefinition.render(customField);
-        },
-      };
-    }
-  });
+            if (!customField) {
+              return getEmptyCellValue();
+            }
+
+            return columnDefinition.render(customField);
+          },
+        };
+      }
+    });
+
+    return dict;
+  }, [columnsDict, customFields]);
 
   const columns: CasesColumns[] = [];
 
   selectedColumns.forEach(({ field, isChecked }) => {
     if (
-      field in columnsDict &&
+      field in allColumnsDict &&
       (isChecked || isSelectorView) &&
       casesColumnsConfig[field].canDisplay
     ) {
-      columns.push(columnsDict[field]);
+      columns.push(allColumnsDict[field]);
     }
   });
 
   if (isSelectorView) {
-    columns.push(columnsDict.assignCaseAction);
+    columns.push(allColumnsDict.assignCaseAction);
   } else if (actions) {
     columns.push(actions);
   }

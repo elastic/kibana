@@ -31,26 +31,18 @@ import { ActionColumnComponent as ActionColumn } from '../../../../all_cases/use
 import { severities } from '../../../../severity/config';
 import * as i18n from '../../translations';
 
-/**
- * Fields rendered directly in every list item (title row + meta row).
- * The Fields popover excludes these so users only toggle optional extras.
- */
-export const LIST_ALWAYS_VISIBLE_FIELDS = [
-  'title',
-  'assignees',
-  'createdBy',
-  'updatedAt',
-  'status',
-  'severity',
-];
-
 const LIST_ITEM_HEIGHT = 80;
 const MAX_VISIBLE_ASSIGNEES = 3;
 
-const useStyles = () => {
+export const CaseListItem: React.FC<{
+  theCase: CaseUI;
+  userProfiles: Map<string, UserProfileWithAvatar>;
+  disableActions: boolean;
+  selectedFields: CasesColumnSelection[];
+}> = React.memo(({ theCase, userProfiles, disableActions, selectedFields }) => {
   const { euiTheme } = useEuiTheme();
 
-  return useMemo(
+  const styles = useMemo(
     () => ({
       mainFlexGroup: css`
         height: 100%;
@@ -81,16 +73,6 @@ const useStyles = () => {
     }),
     [euiTheme]
   );
-};
-
-export const CaseListItem: React.FC<{
-  theCase: CaseUI;
-  userProfiles: Map<string, UserProfileWithAvatar>;
-  disableActions: boolean;
-  selectedFields: CasesColumnSelection[];
-}> = React.memo(({ theCase, userProfiles, disableActions, selectedFields }) => {
-  const { euiTheme } = useEuiTheme();
-  const styles = useStyles();
 
   const { allAssignees } = useAssignees({
     caseAssignees: theCase.assignees,

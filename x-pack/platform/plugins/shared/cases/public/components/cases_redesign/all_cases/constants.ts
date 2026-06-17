@@ -21,3 +21,16 @@ export const VIEW_TOGGLE_LIST_ID = 'list' as const;
 export const VIEW_TOGGLE_TABLE_ID = 'table' as const;
 
 export type ViewToggleId = typeof VIEW_TOGGLE_LIST_ID | typeof VIEW_TOGGLE_TABLE_ID;
+
+/**
+ * Fields rendered directly in every list item (title row + meta row).
+ * The Fields popover excludes these so users only toggle optional extras.
+ */
+export const LIST_ALWAYS_VISIBLE_FIELDS = [
+  'title',
+  'assignees',
+  'createdBy',
+  'updatedAt',
+  'status',
+  'severity',
+];

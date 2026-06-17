@@ -15,7 +15,7 @@ import type { CasesColumnsConfiguration } from '../../../all_cases/use_cases_col
 import { useCasesColumnsConfiguration } from '../../../all_cases/use_cases_columns_configuration';
 import { mergeSelectedColumnsWithConfiguration } from '../../../all_cases/utils/merge_selected_columns_with_configuration';
 import { useCasesLocalStorage } from '../../../../common/use_cases_local_storage';
-import { LIST_ALWAYS_VISIBLE_FIELDS } from '../components/list_view/case_list_item';
+import { LIST_ALWAYS_VISIBLE_FIELDS } from '../constants';
 
 const getListFieldsConfiguration = (
   casesColumnsConfig: CasesColumnsConfiguration

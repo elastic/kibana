@@ -22,7 +22,7 @@ import {
 } from '@elastic/eui';
 import * as i18n from '../translations';
 import type { CasesUI } from '../../../../../common/ui/types';
-import { MAX_DOCS_PER_PAGE } from '../../../../../common/constants';
+import { MAX_DOCS_PER_PAGE, LOCAL_STORAGE_KEYS } from '../../../../../common/constants';
 import { useRefreshCases } from '../../../all_cases/use_on_refresh_cases';
 import { useBulkActions } from '../../../all_cases/use_bulk_actions';
 import { useCasesContext } from '../../../cases_context/use_cases_context';
@@ -54,9 +54,8 @@ export const CasesTableUtilityBar: FunctionComponent<Props> = React.memo(
 
     const [isPopoverOpen, setIsPopoverOpen] = useState(false);
     const [isMessageDismissed, setIsMessageDismissed] = useState(false);
-    const localStorageKey = `cases.utilityBar.hideMaxLimitWarning`;
     const [doNotShowAgain, setDoNotShowAgain] = useCasesLocalStorage<boolean>(
-      localStorageKey,
+      LOCAL_STORAGE_KEYS.casesUtilityBarHideMaxLimitWarning,
       false
     );
 
