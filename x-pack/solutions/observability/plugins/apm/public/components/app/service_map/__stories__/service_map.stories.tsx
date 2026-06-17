@@ -32,6 +32,7 @@ import {
 } from './generate_elements';
 import { transformToReactFlow } from '../../../../../common/service_map/transform_to_react_flow';
 import type { ServiceMapResponse } from '../../../../../common/service_map';
+import { opbeansScenario, toServiceMapResponse } from '../../../../test_helpers/synthtrace_stories';
 
 function getHeight() {
   return window.innerHeight - 50;
@@ -85,6 +86,58 @@ export const SimpleExample: Story = {
         kuery=""
         start={defaultTimeRange.start}
         end={defaultTimeRange.end}
+      />
+    );
+  },
+};
+
+/**
+ * **Synthtrace-generated story** — demonstrates the scenario-driven pattern.
+ *
+ * Data comes from the shared `opbeansScenario()` in
+ * `test_helpers/synthtrace_stories/`, not from a hand-crafted fixture or a
+ * random generator. Any APM story can import the same scenario and run it
+ * through a component-specific selector:
+ *
+ * ```
+ * scenario()              ─→  flat ApmFields[]
+ *   └── toServiceMapResponse()  ─→  ServiceMapResponse
+ *         └── transformToReactFlow()  ─→  { nodes, edges }
+ *               └── <ServiceMapGraph nodes edges />
+ * ```
+ *
+ * The `toServiceMapResponse` selector is the in-memory analog of the server's
+ * `fetch_exit_span_samples.ts` — it reconstructs service→service connections
+ * from exit spans and their downstream transaction's `parent.id`, then feeds
+ * the result to the production `transformToReactFlow` function unchanged.
+ *
+ * This story is tagged `autodocs` so the Docs panel shows the component API
+ * and this description together.
+ */
+export const SynthtraceGenerated: Story = {
+  tags: ['autodocs'],
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'Rendered from in-memory synthtrace data (opbeans scenario). ' +
+          'No Elasticsearch involved — the scenario generates raw APM documents, ' +
+          'a selector reconstructs the service-map connection shape, and the ' +
+          'production `transformToReactFlow` function converts it to React Flow nodes/edges.',
+      },
+    },
+  },
+  render: () => {
+    const { nodes, edges } = transformToReactFlow(toServiceMapResponse(opbeansScenario()));
+    return (
+      <ServiceMapGraph
+        height={getHeight()}
+        nodes={nodes}
+        edges={edges}
+        environment={defaultEnvironment}
+        kuery=""
+        start={new Date('2024-01-15T12:00:00.000Z').toISOString()}
+        end={new Date('2024-01-15T12:15:00.000Z').toISOString()}
       />
     );
   },
