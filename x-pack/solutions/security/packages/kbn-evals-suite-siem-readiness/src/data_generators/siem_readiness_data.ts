@@ -43,8 +43,8 @@ export const SIEM_READINESS_INDICES = {
 } as const;
 
 // Retention data stream names — must match logs-* for DSL to apply
-const RETENTION_SHORT_DS = `logs-siem-readiness-eval-short-${RANDOM_PREFIX}`;
-const RETENTION_LONG_DS = `logs-siem-readiness-eval-long-${RANDOM_PREFIX}`;
+export const RETENTION_SHORT_DS = `logs-siem-readiness-eval-short-${RANDOM_PREFIX}`;
+export const RETENTION_LONG_DS = `logs-siem-readiness-eval-long-${RANDOM_PREFIX}`;
 
 export const SIEM_READINESS_PIPELINE_NAME = `siem-readiness-eval-fail-${RANDOM_PREFIX}`;
 export const SIEM_READINESS_PIPELINE_OK_NAME = `siem-readiness-eval-ok-${RANDOM_PREFIX}`;
@@ -400,27 +400,15 @@ export const seedSiemReadinessData = async ({
 
   // Create the continuityBad index with the failing pipeline as default_pipeline.
   // Index must match logs-* so fetch_pipelines discovers it via index settings.
-  // Using putIndexTemplate + createDataStream is the typed approach for default_pipeline
-  // on data streams; for a plain index we use putSettings with the flat dotted key form.
   await esClient.indices.create({
     index: SIEM_READINESS_INDICES.continuityBad,
-  });
-
-  await esClient.indices.putSettings({
-    index: SIEM_READINESS_INDICES.continuityBad,
-    settings: { 'index.default_pipeline': SIEM_READINESS_PIPELINE_NAME } as Record<
-      string,
-      string
-    >,
+    settings: { index: { default_pipeline: SIEM_READINESS_PIPELINE_NAME } },
   });
 
   // Attach the healthy pipeline to the network index as default_pipeline.
   await esClient.indices.putSettings({
     index: SIEM_READINESS_INDICES.network,
-    settings: { 'index.default_pipeline': SIEM_READINESS_PIPELINE_OK_NAME } as Record<
-      string,
-      string
-    >,
+    settings: { index: { default_pipeline: SIEM_READINESS_PIPELINE_OK_NAME } },
   });
 
   // Index 100 normal docs through the failing pipeline — these succeed.
@@ -449,9 +437,8 @@ export const seedSiemReadinessData = async ({
       pipeline: SIEM_READINESS_PIPELINE_NAME,
       operations: failOperations,
     });
-  } catch {
-    // Expected — the fail processor rejects these docs, which is exactly what we want.
-    // The pipeline's node stats will accumulate the failed count.
+  } catch (err) {
+    log.debug(`fail-docs bulk rejected as expected (pipeline fail processor fired): ${err instanceof Error ? err.message : String(err)}`);
   }
 
   log.info(
