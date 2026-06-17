@@ -11,7 +11,9 @@ import {
   getAllowedRegressionDeltaBytes,
   isMemoryRegression,
   MAX_RSS_REGRESSION_THRESHOLD_POLICY,
+  TAIL_HEAP_USED_REGRESSION_THRESHOLD_POLICY,
   MIN_MAX_RSS_REGRESSION_DELTA_BYTES,
+  MIN_TAIL_HEAP_USED_REGRESSION_DELTA_BYTES,
   MIN_TAIL_RSS_REGRESSION_DELTA_BYTES,
 } from './memory_regression_threshold';
 
@@ -38,6 +40,17 @@ describe('getAllowedRegressionDeltaBytes', () => {
     expect(
       getAllowedRegressionDeltaBytes(baselineMedianRssBytes, MAX_RSS_REGRESSION_THRESHOLD_POLICY)
     ).toBe(MIN_MAX_RSS_REGRESSION_DELTA_BYTES);
+  });
+
+  it('supports the Tail heap used threshold policy', () => {
+    const baselineMedianHeapUsedBytes = 500 * 1024 * 1024;
+
+    expect(
+      getAllowedRegressionDeltaBytes(
+        baselineMedianHeapUsedBytes,
+        TAIL_HEAP_USED_REGRESSION_THRESHOLD_POLICY
+      )
+    ).toBe(MIN_TAIL_HEAP_USED_REGRESSION_DELTA_BYTES);
   });
 });
 
