@@ -62,7 +62,7 @@ apiTest.describe(
       const response = await asAdmin.put(
         `${API_AGENT_BUILDER}/agents/${encodeURIComponent(agentId)}`,
         {
-          body: { access_control: { scope: AgentAccessControlScope.Shared, entries: [] } },
+          body: { access_control: { scope: AgentAccessControlScope.Shared } },
           responseType: 'json',
         }
       );
@@ -85,7 +85,7 @@ apiTest.describe(
         const response = await asAdmin.put(
           `${API_AGENT_BUILDER}/agents/${encodeURIComponent(agentBuilderDefaultAgentId)}`,
           {
-            body: { access_control: { scope: AgentAccessControlScope.Private, entries: [] } },
+            body: { access_control: { scope: AgentAccessControlScope.Private } },
             responseType: 'json',
           }
         );

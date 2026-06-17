@@ -119,12 +119,7 @@ const ACCESS_CONTROL_ENTRIES_SCHEMA = schema.arrayOf(
   }
 );
 
-const ACCESS_CONTROL_SCHEMA = schema.object({
-  scope: ACCESS_CONTROL_SCOPE_SCHEMA,
-  entries: ACCESS_CONTROL_ENTRIES_SCHEMA,
-});
-
-const ACCESS_CONTROL_CREATE_SCHEMA = schema.object({
+const ACCESS_CONTROL_SCOPE_ONLY_SCHEMA = schema.object({
   scope: ACCESS_CONTROL_SCOPE_SCHEMA,
 });
 
@@ -264,7 +259,7 @@ export function registerAgentRoutes({
                   }
                 )
               ),
-              access_control: schema.maybe(ACCESS_CONTROL_CREATE_SCHEMA),
+              access_control: schema.maybe(ACCESS_CONTROL_SCOPE_ONLY_SCHEMA),
               configuration: schema.object(
                 {
                   instructions: schema.maybe(
@@ -392,7 +387,7 @@ export function registerAgentRoutes({
                   }
                 )
               ),
-              access_control: schema.maybe(ACCESS_CONTROL_SCHEMA),
+              access_control: schema.maybe(ACCESS_CONTROL_SCOPE_ONLY_SCHEMA),
               configuration: schema.maybe(
                 schema.object(
                   {

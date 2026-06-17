@@ -50,7 +50,7 @@ describe('Agent Routes - experimental access-control gate', () => {
 
   const updateBodyWithAccessControl = {
     name: 'Updated',
-    access_control: { scope: AgentAccessControlScope.Private, entries: [] },
+    access_control: { scope: AgentAccessControlScope.Private },
   };
 
   const mockProfile = {
@@ -181,7 +181,7 @@ describe('Agent Routes - experimental access-control gate', () => {
   });
 
   describe('PUT /agents/{id} (update)', () => {
-    it('allows update and calls service.update when access control is provided', async () => {
+    it('allows update and calls service.update when access-control scope is provided', async () => {
       const handler = getUpdateHandler();
       expect(handler).toBeDefined();
 
@@ -195,7 +195,7 @@ describe('Agent Routes - experimental access-control gate', () => {
 
       expect(mockUpdate).toHaveBeenCalledWith('agent-1', {
         name: 'Updated',
-        access_control: { scope: AgentAccessControlScope.Private, entries: [] },
+        access_control: { scope: AgentAccessControlScope.Private },
       });
       expect(result).toMatchObject({ type: 'ok', body: mockProfile });
     });

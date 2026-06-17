@@ -24,7 +24,7 @@ export type AgentCreateRequest = Omit<
 export type AgentUpdateRequest = Partial<
   Pick<AgentDefinition, 'name' | 'description' | 'labels' | 'avatar_color' | 'avatar_symbol'>
 > & {
-  access_control?: AgentAccessControl;
+  access_control?: Pick<AgentAccessControl, 'scope'>;
   configuration?: Partial<AgentConfiguration>;
 };
 

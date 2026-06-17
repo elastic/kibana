@@ -63,6 +63,7 @@ describe('useAgentEdit submit (create/clone branch)', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockCreate.mockResolvedValue({ id: 'cloned-agent' });
+    mockUpdate.mockResolvedValue({ id: 'existing-agent' });
   });
 
   it('strips access-control entries, created_by and avatar_icon from the create payload when cloning', async () => {
@@ -133,5 +134,40 @@ describe('useAgentEdit submit (create/clone branch)', () => {
       access_control: { scope: AgentAccessControlScope.Private },
     });
     expect(mockCreate.mock.calls[0][0].access_control).not.toHaveProperty('entries');
+  });
+
+  it('strips access-control entries from regular update payloads', async () => {
+    const updateData: AgentEditState = {
+      id: 'existing-agent',
+      name: 'Existing Agent',
+      description: 'An existing agent',
+      access_control: {
+        scope: AgentAccessControlScope.Shared,
+        entries: [{ type: 'user', name: 'alice', role: AgentAccessControlRole.Editor }],
+      },
+      labels: [],
+      avatar_color: '',
+      avatar_symbol: '',
+      configuration: baseConfiguration,
+    };
+
+    const { result } = renderHook(() =>
+      useAgentEdit({
+        editingAgentId: 'existing-agent',
+        onSaveSuccess: jest.fn(),
+        onSaveError: jest.fn(),
+      })
+    );
+
+    await act(async () => {
+      await result.current.submit(updateData);
+    });
+
+    expect(mockUpdate).toHaveBeenCalledTimes(1);
+    const payload = mockUpdate.mock.calls[0][1];
+    expect(payload).toMatchObject({
+      access_control: { scope: AgentAccessControlScope.Shared },
+    });
+    expect(payload.access_control).not.toHaveProperty('entries');
   });
 });

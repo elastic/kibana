@@ -475,4 +475,43 @@ describe('updateRequestToEs', () => {
     expect(docProperties.config!.enable_elastic_capabilities).toBe(true);
     expect(docProperties.config!.instructions).toBe('instructions');
   });
+
+  it('updates access-control scope without changing entries', () => {
+    const newUpdateDate = new Date();
+    const entries = [{ type: 'user' as const, name: 'alice', role: AgentAccessControlRole.Editor }];
+
+    const agentProps: AgentProperties = {
+      id: 'id',
+      type: AgentType.chat,
+      name: 'name',
+      description: 'description',
+      space: 'space',
+      config: {
+        instructions: 'instructions',
+        tools: [],
+      },
+      labels: [],
+      access_control: { scope: AgentAccessControlScope.Private, entries },
+      created_by_id: 'test-user-id',
+      created_by_name: 'test-user',
+      created_at: creationDate,
+      updated_at: updateDate,
+    };
+
+    const updateRequest: AgentUpdateRequest = {
+      access_control: { scope: AgentAccessControlScope.Shared },
+    };
+
+    const docProperties = updateRequestToEs({
+      agentId: 'id',
+      currentProps: agentProps,
+      update: updateRequest,
+      updateDate: newUpdateDate,
+    });
+
+    expect(docProperties.access_control).toEqual({
+      scope: AgentAccessControlScope.Shared,
+      entries,
+    });
+  });
 });

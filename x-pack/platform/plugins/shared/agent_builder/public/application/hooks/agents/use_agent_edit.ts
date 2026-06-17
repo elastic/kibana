@@ -14,7 +14,7 @@ import {
   defaultAgentToolIds,
 } from '@kbn/agent-builder-common';
 import { useSearchParams } from 'react-router-dom-v5-compat';
-import type { AgentCreateRequest } from '../../../../common/agents';
+import type { AgentCreateRequest, AgentUpdateRequest } from '../../../../common/agents';
 import { useAgentBuilderServices } from '../use_agent_builder_service';
 import { useAgentBuilderAgentById } from './use_agent_by_id';
 import { useToolsService } from '../tools/use_tools';
@@ -86,7 +86,7 @@ export function useAgentEdit({
   });
 
   const updateMutation = useMutation({
-    mutationFn: (data: Omit<AgentEditState, 'id'>) => {
+    mutationFn: (data: AgentUpdateRequest) => {
       if (!editingAgentId) {
         throw new Error('Agent ID is required for update');
       }
@@ -126,8 +126,12 @@ export function useAgentEdit({
       const requestData = cleanInvalidToolReferences(data, tools);
 
       if (editingAgentId) {
-        const { id, ...updatedAgent } = requestData;
-        await updateMutation.mutateAsync(updatedAgent);
+        const { id, access_control, ...updatedAgent } = requestData;
+        await updateMutation.mutateAsync(
+          access_control
+            ? { ...updatedAgent, access_control: { scope: access_control.scope } }
+            : updatedAgent
+        );
       } else {
         const { access_control, created_by, avatar_icon, ...createData } = requestData;
         await createMutation.mutateAsync(

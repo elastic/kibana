@@ -113,12 +113,15 @@ export const updateRequestToEs = ({
 }): AgentProperties => {
   const currentConfig = currentProps.configuration ?? currentProps.config;
   const { configuration, access_control, ...restUpdate } = update;
+  const currentAccessControl = normalizeAccessControl(currentProps.access_control);
 
   const updated: AgentProperties = {
     ...currentProps,
     ...restUpdate,
     id: agentId,
-    access_control: access_control ?? currentProps.access_control,
+    access_control: access_control
+      ? { ...currentAccessControl, scope: access_control.scope }
+      : currentProps.access_control,
     // Explicitly omit configuration to ensure migration
     configuration: undefined,
     config: {
