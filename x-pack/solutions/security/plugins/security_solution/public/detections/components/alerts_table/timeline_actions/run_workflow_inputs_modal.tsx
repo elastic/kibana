@@ -55,6 +55,7 @@ export const RunWorkflowInputsModal = ({
       initialcontextOverride={contextOverride}
       onSubmit={({ stepInputs }) => onSubmit(stepInputs)}
       onClose={onCancel}
+      useRunButton
     />
   );
 };

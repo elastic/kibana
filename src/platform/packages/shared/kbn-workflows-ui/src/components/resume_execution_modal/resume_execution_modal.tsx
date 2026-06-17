@@ -70,6 +70,8 @@ export interface ResumeExecutionModalProps {
   initialcontextOverride?: ContextOverrideData;
   onSubmit?: (params: { stepInputs: Record<string, unknown> }) => void;
   onClose: () => void;
+  /** When true, renders the submit button as a "Run" button (success color, play icon) instead of "Resume" */
+  useRunButton?: boolean;
 }
 
 export const ResumeExecutionModal: React.FC<ResumeExecutionModalProps> = ({
@@ -77,6 +79,7 @@ export const ResumeExecutionModal: React.FC<ResumeExecutionModalProps> = ({
   initialcontextOverride,
   onSubmit,
   onClose,
+  useRunButton = false,
 }) => {
   useWorkflowsMonacoTheme();
   const euiThemeContext = useEuiTheme();
@@ -230,15 +233,22 @@ export const ResumeExecutionModal: React.FC<ResumeExecutionModalProps> = ({
         <EuiButton
           onClick={handleSubmit}
           disabled={!isResumePayloadValid}
-          color="warning"
-          iconType="check"
+          color={useRunButton ? 'success' : 'warning'}
+          iconType={useRunButton ? 'play' : 'check'}
           size="s"
           data-test-subj="workflowSubmitResume"
         >
-          <FormattedMessage
-            id="workflowsManagement.resumeExecutionModal.resumeBtn"
-            defaultMessage="Resume"
-          />
+          {useRunButton ? (
+            <FormattedMessage
+              id="workflowsManagement.resumeExecutionModal.runBtn"
+              defaultMessage="Run"
+            />
+          ) : (
+            <FormattedMessage
+              id="workflowsManagement.resumeExecutionModal.resumeBtn"
+              defaultMessage="Resume"
+            />
+          )}
         </EuiButton>
       </EuiModalFooter>
     </EuiModal>
