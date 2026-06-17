@@ -166,7 +166,7 @@ function getFieldsMeta(esDocsBase: string) {
         {
           value: VECTOR_DB_INDEX_MODE,
           inputDisplay: indexModeLabels[VECTOR_DB_INDEX_MODE],
-          'data-test-subj': 'index_mode_vector_db',
+          'data-test-subj': 'index_mode_vectordb_document',
           dropdownDisplay: (
             <Fragment>
               <strong>{indexModeLabels[VECTOR_DB_INDEX_MODE]}</strong>

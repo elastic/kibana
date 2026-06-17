@@ -250,7 +250,7 @@ export const CreateIndexModal = ({ closeModal, loadIndices }: CreateIndexModalPr
                       {
                         value: VECTOR_DB_INDEX_MODE,
                         inputDisplay: indexModeLabels[VECTOR_DB_INDEX_MODE],
-                        'data-test-subj': 'indexModeVectorDbOption',
+                        'data-test-subj': 'indexModeVectordbDocumentOption',
                         dropdownDisplay: (
                           <Fragment>
                             <strong>{indexModeLabels[VECTOR_DB_INDEX_MODE]}</strong>
