@@ -11744,7 +11744,7 @@
         "workflows:experimentalFeatures": {
           "type": "boolean",
           "_meta": {
-            "description": "Non-default value of setting."
+            "description": "Whether experimental features for Elastic Workflows are enabled."
           }
         },
         "workflows:ui:enabled": {
