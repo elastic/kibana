@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 
 export const mainTranslations = {
   pageTitle: i18n.translate('dataSets.pageTitle', {
-    defaultMessage: 'External data sets',
+    defaultMessage: 'ES|QL Data Federation',
   }),
 
   columns: {

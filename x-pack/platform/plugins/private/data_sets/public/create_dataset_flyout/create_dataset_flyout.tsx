@@ -203,7 +203,7 @@ export const CreateDatasetFlyout: FunctionComponent<CreateDatasetFlyoutProps> = 
             <EuiTextArea
               data-test-subj="createDatasetFlyoutDescription"
               fullWidth
-              rows={4}
+              rows={1}
               value={descriptionField.value}
               onChange={(e) => descriptionField.onChange(e.target.value)}
               name={descriptionField.name}
