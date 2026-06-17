@@ -84,6 +84,7 @@
     "@kbn/shared-ux-link-redirect-app",
     "@kbn/expressions-plugin",
     "@kbn/ui-actions-plugin",
+    "@kbn/dashboard-plugin",
     "@kbn/field-formats-plugin",
     "@kbn/charts-plugin",
     "@kbn/unified-data-table",
@@ -98,6 +99,9 @@
     "@kbn/deeplinks-analytics",
     "@kbn/deeplinks-agent-builder",
     "@kbn/unified-doc-viewer-plugin",
+    "@kbn/core-user-profile-browser",
+    "@kbn/datemath",
+    "@kbn/rison",
     "@kbn/maintenance-windows-plugin",
     "@kbn/esql-types",
     "@kbn/agent-builder-plugin",
@@ -108,12 +112,11 @@
     "@kbn/core-saved-objects-api-server",
     "@kbn/core-elasticsearch-server",
     "@kbn/core-user-profile-browser",
-    "@kbn/code-editor",
-    "@kbn/workflows-yaml",
     "@kbn/workflows-ui",
+    "@kbn/core-spaces-common",
     "@kbn/datemath",
-    "@kbn/triggers-actions-ui-plugin",
-    "@kbn/css-utils"
+    "@kbn/css-utils",
+    "@kbn/cps"
   ],
   "exclude": ["target/**/*", ".storybook/**/*.js"]
 }

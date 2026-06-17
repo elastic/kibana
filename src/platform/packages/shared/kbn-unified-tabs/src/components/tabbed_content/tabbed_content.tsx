@@ -56,7 +56,12 @@ export interface TabbedContentProps
   services: TabsServices;
   hideTabsBar?: boolean;
   renderContent?: (selectedItem: TabItem) => React.ReactNode;
-  renderTabsBar?: (tabsBar: React.ReactNode) => React.ReactNode;
+  /**
+   * Optional wrapper for the tabs bar. Receives the tabs bar node
+   * and returns a node to render in its place.
+   * When omitted, the default tabs bar is rendered as-is.
+   */
+  wrapTabsBar?: (tabsBar: React.ReactNode) => React.ReactNode;
   createItem: () => TabItem;
   customNewTabButton?: React.ReactElement;
   onChanged: (state: TabbedContentState) => void;
@@ -100,7 +105,7 @@ export const TabbedContent: React.FC<TabbedContentProps> = ({
   services,
   hideTabsBar = false,
   renderContent,
-  renderTabsBar,
+  wrapTabsBar,
   createItem,
   onChanged,
   tabContentIdOverride,
@@ -496,7 +501,7 @@ export const TabbedContent: React.FC<TabbedContentProps> = ({
   );
 
   const renderedTabsBar = hideTabsBar ? null : tabsBar;
-  const tabsBarContent = renderTabsBar ? renderTabsBar(renderedTabsBar) : renderedTabsBar;
+  const tabsBarContent = wrapTabsBar ? wrapTabsBar(renderedTabsBar) : renderedTabsBar;
 
   // The separating line between tabs and content
   const tabsBarSeparatorCss = css`

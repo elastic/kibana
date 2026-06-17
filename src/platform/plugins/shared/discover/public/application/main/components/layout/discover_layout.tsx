@@ -15,6 +15,8 @@ import {
   EuiProgress,
   EuiDelayRender,
   useEuiBreakpoint,
+  useEuiTheme,
+  mathWithUnits,
   type UseEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -71,8 +73,6 @@ import { useScopedServices } from '../../../../components/scoped_services_provid
 
 const queryClient = new QueryClient();
 const SidebarMemoized = React.memo(DiscoverSidebarResponsive);
-const DISCOVER_TOP_NAV_HEIGHT_OFFSET = '40px';
-const DISCOVER_INLINE_APP_HEADER_HEIGHT_OFFSET = '120px';
 
 const TopNavMemoized = React.memo((props: DiscoverTopNavProps) => (
   // QueryClientProvider is used to allow querying the authorized rules api hook
@@ -103,6 +103,7 @@ export function DiscoverLayout() {
   const dispatch = useInternalStateDispatch();
   const updateAppState = useCurrentTabAction(internalStateActions.updateAppState);
   const styles = useMemoCss(componentStyles);
+  const { euiTheme } = useEuiTheme();
   const globalQueryState = data.query.getState();
   const dataStateContainer = useCurrentTabDataStateContainer();
   const { main$ } = dataStateContainer.data$;
@@ -359,15 +360,14 @@ export function DiscoverLayout() {
     [dispatch, onDataViewCreatedAction]
   );
 
-  const fullBodyHeightOffset = useMemo(
-    () =>
-      customizationContext.displayMode === 'standalone' &&
-      chrome.next.isEnabled &&
-      chrome.getChromeStyle() === 'project'
-        ? DISCOVER_INLINE_APP_HEADER_HEIGHT_OFFSET
-        : DISCOVER_TOP_NAV_HEIGHT_OFFSET,
-    [customizationContext.displayMode, chrome]
-  );
+  const fullBodyHeightOffset = useMemo(() => {
+    const isChromeNext = chrome.next.isEnabled && chrome.getChromeStyle() === 'project';
+    const isStandalone = customizationContext.displayMode === 'standalone';
+    if (isChromeNext && isStandalone) {
+      return mathWithUnits(euiTheme.size.xxl, (x) => x * 3);
+    }
+    return euiTheme.size.xxl;
+  }, [chrome, customizationContext.displayMode, euiTheme.size.xxl]);
 
   return (
     <EuiPage

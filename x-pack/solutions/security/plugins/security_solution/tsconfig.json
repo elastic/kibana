@@ -50,6 +50,7 @@
     "@kbn/session-view-plugin",
     "@kbn/security-plugin",
     "@kbn/spaces-plugin",
+    "@kbn/core-spaces-common",
     "@kbn/timelines-plugin",
     "@kbn/es-query",
     "@kbn/as-code-shared-transforms",

@@ -5,29 +5,13 @@
  * 2.0.
  */
 
-import type { IlmPolicy } from '@elastic/elasticsearch/lib/api/types';
 import type { MappingsDefinition } from '@kbn/es-mappings';
 import { z } from '@kbn/zod/v4';
 import type { ResourceDefinition } from './types';
 
 export const ALERT_ACTIONS_DATA_STREAM = '.alert-actions';
-export const ALERT_ACTIONS_DATA_STREAM_VERSION = 2;
+export const ALERT_ACTIONS_DATA_STREAM_VERSION = 3;
 export const ALERT_ACTIONS_BACKING_INDEX = '.ds-.alert-actions-*';
-export const ALERT_ACTIONS_ILM_POLICY_NAME = '.alert-actions-ilm-policy';
-
-export const ALERT_ACTIONS_ILM_POLICY: IlmPolicy = {
-  _meta: { managed: true },
-  phases: {
-    hot: {
-      actions: {
-        rollover: {
-          max_age: '30d',
-          max_primary_shard_size: '50gb',
-        },
-      },
-    },
-  },
-};
 
 const mappings: MappingsDefinition = {
   dynamic: false,
@@ -75,5 +59,5 @@ export const getAlertActionsResourceDefinition = (): ResourceDefinition => ({
   dataStreamName: ALERT_ACTIONS_DATA_STREAM,
   version: ALERT_ACTIONS_DATA_STREAM_VERSION,
   mappings,
-  ilmPolicy: { name: ALERT_ACTIONS_ILM_POLICY_NAME, policy: ALERT_ACTIONS_ILM_POLICY },
+  lifecycle: {},
 });

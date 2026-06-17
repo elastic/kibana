@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo, useRef } from 'react';
+import React, { useEffect, useMemo, useRef } from 'react';
 import { useFormContext } from 'react-hook-form';
 import { Parser, isColumn } from '@elastic/esql';
 import { useQuery } from '@kbn/react-query';
@@ -20,7 +20,6 @@ import {
   EuiPanel,
   EuiSelect,
   EuiSpacer,
-  EuiSwitch,
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
@@ -32,6 +31,7 @@ import { useDataFields } from '../../../form/hooks/use_data_fields';
 import { ScheduleField } from '../../../form/fields/schedule_field';
 import { LookbackWindowField } from '../../../form/fields/lookback_window_field';
 import { AlertDelayField } from '../../../form/fields/alert_delay_field';
+import { ModeSelect } from '../../../form/fields/mode_select';
 
 interface AlertConditionStepProps {
   state: ComposeDiscoverState;
@@ -56,8 +56,8 @@ export function AlertConditionStep({
   const query = watch('query');
 
   const baseQuery = query.format === 'composed' ? query.base : '';
-  const alertBlock = query.format === 'composed' ? query.blocks.breach : '';
-  const fullQuery = query.format === 'standalone' ? query.breach : '';
+  const alertBlock = query.format === 'composed' ? query.breach.segment : '';
+  const fullQuery = query.format === 'standalone' ? query.breach.query : '';
 
   // Use the base query for field lookup when tracking is on; fall back to full breach query.
   const committedQuery = useMemo(() => {
@@ -124,10 +124,6 @@ export function AlertConditionStep({
     }
   }, [state.queryCommitted, committedQuery, setValue]);
 
-  const handleTrackingToggle = useCallback(() => {
-    onKindChange(isAlert ? 'signal' : 'alert');
-  }, [isAlert, onKindChange]);
-
   // Callout when the heuristic split couldn't find a clear split point.
   // Only relevant after Apply (when the committed query is in composed format).
   const splitFailed =
@@ -135,6 +131,14 @@ export function AlertConditionStep({
 
   return (
     <>
+      <ModeSelect
+        value={isAlert ? 'alert' : 'signal'}
+        onChange={onKindChange}
+        disabled={!state.queryCommitted || isEditing}
+        compressed
+        data-test-subj="composeDiscoverModeSelect"
+      />
+      <EuiSpacer size="m" />
       <EuiTitle size="xs">
         <h3>
           <FormattedMessage
@@ -271,7 +275,7 @@ export function AlertConditionStep({
           fullWidth
           options={timeFieldOptions}
           value={timeField}
-          onChange={(e) => setValue('timeField', e.target.value)}
+          onChange={(e) => setValue('timeField', e.target.value, { shouldDirty: true })}
           disabled={state.childOpen}
           data-test-subj="composeDiscoverTimeField"
         />
@@ -288,9 +292,13 @@ export function AlertConditionStep({
           options={outputColumns.map((name) => ({ label: name }))}
           selectedOptions={groupFields.map((f) => ({ label: f }))}
           onChange={(opts) =>
-            setValue('grouping', opts.length ? { fields: opts.map((o) => o.label) } : undefined)
+            setValue('grouping', opts.length ? { fields: opts.map((o) => o.label) } : undefined, {
+              shouldDirty: true,
+            })
           }
-          onCreateOption={(val) => setValue('grouping', { fields: [...groupFields, val] })}
+          onCreateOption={(val) =>
+            setValue('grouping', { fields: [...groupFields, val] }, { shouldDirty: true })
+          }
           placeholder={i18n.translate(
             'xpack.alertingV2.composeDiscover.alertCondition.groupFieldsPlaceholder',
             { defaultMessage: 'Add group fields' }
@@ -298,18 +306,6 @@ export function AlertConditionStep({
           data-test-subj="composeDiscoverGroupFields"
         />
       </EuiFormRow>
-
-      <EuiSpacer size="m" />
-      <EuiSwitch
-        label={i18n.translate(
-          'xpack.alertingV2.composeDiscover.alertCondition.trackingToggleLabel',
-          { defaultMessage: 'Track active and recovered state over time' }
-        )}
-        checked={isAlert}
-        onChange={handleTrackingToggle}
-        disabled={!state.queryCommitted || isEditing}
-        data-test-subj="composeDiscoverTrackingToggle"
-      />
 
       {isAlert && (
         <>
