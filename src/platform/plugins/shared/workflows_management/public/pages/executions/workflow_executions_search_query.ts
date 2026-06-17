@@ -10,19 +10,6 @@
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { Filter, TimeRange } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
-
-interface ElasticsearchErrorBody {
-  error?: {
-    type?: string;
-  };
-}
-
-const isElasticsearchResponseError = (error: unknown): error is { body: ElasticsearchErrorBody } =>
-  typeof error === 'object' &&
-  error !== null &&
-  'body' in error &&
-  typeof (error as { body?: unknown }).body === 'object';
-
 const buildSpaceFilterQuery = (spaceId: string): QueryDslQueryContainer => ({
   bool: {
     should: [{ term: { spaceId } }, { bool: { must_not: { exists: { field: 'spaceId' } } } }],
@@ -73,9 +60,6 @@ export const buildWorkflowExecutionsSearchFilters = ({
   },
   buildTimeRangeFilter(timeRange, timeField),
 ];
-
-export const isWorkflowExecutionsIndexNotFoundError = (error: unknown): boolean =>
-  isElasticsearchResponseError(error) && error.body.error?.type === 'index_not_found_exception';
 
 export const getWorkflowExecutionsFetchErrorMessage = (): string =>
   i18n.translate('workflowsManagement.executionsPage.fetchError', {

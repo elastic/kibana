@@ -7,10 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import '@testing-library/jest-dom';
 import { render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
-import { of } from 'rxjs';
-import { searchSourceInstanceMock } from '@kbn/data-plugin/common/search/search_source/mocks';
 import { WorkflowExecutionsPage } from './executions_page';
 import { createStartServicesMock } from '../../mocks';
 import { getTestProvider } from '../../shared/mocks/test_providers';
@@ -19,36 +18,45 @@ jest.mock('@kbn/alerts-ui-shared/src/alert_filter_controls', () => ({
   AlertFilterControls: () => <div data-test-subj="alertFilterControlsStub" />,
 }));
 
-jest.mock('@kbn/unified-data-table', () => {
-  const actual = jest.requireActual('@kbn/unified-data-table');
-  return {
-    ...actual,
-    UnifiedDataTable: () => <div data-test-subj="unifiedDataTableStub" />,
-  };
-});
+jest.mock('./workflow_executions_data_grid', () => ({
+  WorkflowExecutionsDataGrid: () => <div data-test-subj="workflowExecutionsDataGridStub" />,
+}));
 
-jest.mock('@kbn/cell-actions', () => ({
-  CellActionsProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+jest.mock('./workflow_execution_detail_flyout', () => ({
+  WorkflowExecutionDetailFlyout: ({ executionId }: { executionId: string }) => (
+    <div data-test-subj="workflowExecutionDetailFlyout">{executionId}</div>
+  ),
+}));
+
+const mockSetSelectedExecution = jest.fn();
+const mockUseWorkflowUrlState = jest.fn(() => ({
+  selectedExecutionId: undefined as string | undefined,
+  setSelectedExecution: mockSetSelectedExecution,
+}));
+jest.mock('../../hooks/use_workflow_url_state', () => ({
+  useWorkflowUrlState: () => mockUseWorkflowUrlState(),
 }));
 
 describe('WorkflowExecutionsPage', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockUseWorkflowUrlState.mockReturnValue({
+      selectedExecutionId: undefined,
+      setSelectedExecution: mockSetSelectedExecution,
+    });
+  });
   it('renders the executions page with search, filters, and table', async () => {
     const services = createStartServicesMock();
     services.workflowsManagement.globalExecutionsView.enabled = true;
     services.spaces.getActiveSpace = jest.fn().mockResolvedValue({ id: 'default' });
     const SearchBarStub = () => <div data-test-subj="searchBarStub" />;
     services.unifiedSearch.ui.SearchBar = SearchBarStub;
-
-    jest.mocked(searchSourceInstanceMock.fetch$).mockReturnValue(
-      of({
-        rawResponse: {
-          hits: {
-            hits: [],
-            total: { value: 0, relation: 'eq' },
-          },
-        },
-      }) as unknown as ReturnType<typeof searchSourceInstanceMock.fetch$>
-    );
+    jest.mocked(services.http.get).mockResolvedValue({
+      results: [],
+      page: 1,
+      size: 25,
+      total: 0,
+    });
 
     render(<WorkflowExecutionsPage />, { wrapper: getTestProvider({ services }) });
 
@@ -62,5 +70,32 @@ describe('WorkflowExecutionsPage', () => {
     await waitFor(() => {
       expect(screen.getByTestId('workflowExecutionsTableEmpty')).toBeInTheDocument();
     });
+  });
+
+  it('opens execution flyout when executionId is present in the URL', async () => {
+    mockUseWorkflowUrlState.mockReturnValue({
+      selectedExecutionId: 'exec-1',
+      setSelectedExecution: mockSetSelectedExecution,
+    });
+
+    const services = createStartServicesMock();
+    services.workflowsManagement.globalExecutionsView.enabled = true;
+    services.spaces.getActiveSpace = jest.fn().mockResolvedValue({ id: 'default' });
+    const SearchBarStub = () => <div data-test-subj="searchBarStub" />;
+    services.unifiedSearch.ui.SearchBar = SearchBarStub;
+    jest.mocked(services.http.get).mockResolvedValue({
+      results: [],
+      page: 1,
+      size: 25,
+      total: 0,
+    });
+
+    render(<WorkflowExecutionsPage />, { wrapper: getTestProvider({ services }) });
+
+    await waitFor(() => {
+      expect(screen.getByTestId('workflowExecutionsPageContent')).toBeInTheDocument();
+    });
+    expect(screen.getByTestId('workflowExecutionDetailFlyout')).toHaveTextContent('exec-1');
+    expect(mockSetSelectedExecution).not.toHaveBeenCalled();
   });
 });

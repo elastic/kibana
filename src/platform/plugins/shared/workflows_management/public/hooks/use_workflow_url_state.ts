@@ -19,6 +19,7 @@ export interface WorkflowUrlState {
   stepExecutionId?: string;
   stepId?: string;
   resume?: boolean;
+  replayExecutionId?: string;
 }
 
 export function useWorkflowUrlState() {
@@ -33,6 +34,7 @@ export function useWorkflowUrlState() {
       stepExecutionId: params.stepExecutionId as string | undefined,
       stepId: params.stepId as string | undefined,
       shouldAutoResume: params.resume === 'true',
+      replayExecutionId: params.replayExecutionId as string | undefined,
     };
   }, [location.search]);
 
@@ -56,12 +58,15 @@ export function useWorkflowUrlState() {
 
       // Update the URL without causing a full page reload
       const newSearch = stringify(cleanParams, { encode: false });
-      const newLocation = {
-        ...history.location,
-        search: newSearch ? `?${newSearch}` : '',
-      };
+      const nextSearch = newSearch ? `?${newSearch}` : '';
+      if (nextSearch === history.location.search) {
+        return;
+      }
 
-      history.replace(newLocation);
+      history.replace({
+        ...history.location,
+        search: nextSearch,
+      });
     },
     [history]
   );
@@ -113,6 +118,10 @@ export function useWorkflowUrlState() {
     updateUrlState({ resume: undefined });
   }, [updateUrlState]);
 
+  const clearReplayExecutionId = useCallback(() => {
+    updateUrlState({ replayExecutionId: undefined });
+  }, [updateUrlState]);
+
   return {
     // Current state
     activeTab: urlState.tab,
@@ -120,6 +129,7 @@ export function useWorkflowUrlState() {
     selectedStepExecutionId: urlState.stepExecutionId,
     selectedStepId: urlState.stepId,
     shouldAutoResume: urlState.shouldAutoResume,
+    replayExecutionId: urlState.replayExecutionId,
 
     // State setters
     setActiveTab,
@@ -128,5 +138,6 @@ export function useWorkflowUrlState() {
     setSelectedStep,
     updateUrlState,
     clearResumeParam,
+    clearReplayExecutionId,
   };
 }

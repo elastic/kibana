@@ -50,27 +50,48 @@ const booleanField = (name: string): FieldSpec => ({
   scripted: false,
 });
 
-export function createWorkflowExecutionsDataView(fieldFormats: FieldFormatsStart): DataView {
-  const fields: Record<string, FieldSpec> = {
-    startedAt: dateField('startedAt'),
-    createdAt: dateField('createdAt'),
-    finishedAt: dateField('finishedAt'),
-    id: keywordField('id'),
-    workflowId: keywordField('workflowId'),
-    status: keywordField('status'),
-    triggeredBy: keywordField('triggeredBy'),
-    executedBy: keywordField('executedBy'),
-    createdBy: keywordField('createdBy'),
-    isTestRun: booleanField('isTestRun'),
-    spaceId: keywordField('spaceId'),
-  };
+const numberField = (name: string): FieldSpec => ({
+  name,
+  type: 'number',
+  esTypes: ['long'],
+  searchable: true,
+  aggregatable: true,
+  readFromDocValues: true,
+  scripted: false,
+});
 
+export const WORKFLOW_EXECUTIONS_VIRTUAL_COLUMN_FIELD_SPECS: Record<string, FieldSpec> = {
+  workflow: keywordField('workflow'),
+  tags: keywordField('tags'),
+  triggers: keywordField('triggers'),
+};
+
+export const WORKFLOW_EXECUTIONS_FIELD_SPECS: Record<string, FieldSpec> = {
+  ...WORKFLOW_EXECUTIONS_VIRTUAL_COLUMN_FIELD_SPECS,
+  startedAt: dateField('startedAt'),
+  createdAt: dateField('createdAt'),
+  finishedAt: dateField('finishedAt'),
+  id: keywordField('id'),
+  workflowId: keywordField('workflowId'),
+  status: keywordField('status'),
+  triggeredBy: keywordField('triggeredBy'),
+  executedBy: keywordField('executedBy'),
+  createdBy: keywordField('createdBy'),
+  isTestRun: booleanField('isTestRun'),
+  managed: booleanField('managed'),
+  spaceId: keywordField('spaceId'),
+  duration: numberField('duration'),
+};
+
+export const WORKFLOW_EXECUTIONS_DATA_VIEW_CREATE_SPEC: DataViewSpec = {
+  ...WORKFLOW_EXECUTIONS_DATA_VIEW_SPEC,
+  allowNoIndex: true,
+  fields: WORKFLOW_EXECUTIONS_FIELD_SPECS,
+};
+
+export function createWorkflowExecutionsDataView(fieldFormats: FieldFormatsStart): DataView {
   return new DataView({
-    spec: {
-      ...WORKFLOW_EXECUTIONS_DATA_VIEW_SPEC,
-      allowNoIndex: true,
-      fields,
-    },
+    spec: WORKFLOW_EXECUTIONS_DATA_VIEW_CREATE_SPEC,
     fieldFormats,
     metaFields: ['_id', '_type', '_source'],
   });

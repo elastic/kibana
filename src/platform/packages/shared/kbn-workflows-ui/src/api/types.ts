@@ -15,6 +15,7 @@ import type {
   WorkflowExecutionSortField,
   WorkflowExecutionSortOrder,
   WorkflowsEventsLogDocumentSource,
+  WorkflowsSearchParams,
 } from '@kbn/workflows';
 
 export interface BulkCreateWorkflowsParams {
@@ -54,6 +55,7 @@ export interface ExportWorkflowsResponse {
 
 export interface GetAggsParams {
   fields: string[];
+  managed?: WorkflowsSearchParams['managed'];
 }
 
 export interface GetSchemaParams {
@@ -69,6 +71,16 @@ export interface TestWorkflowParams {
   workflowId?: string;
   workflowYaml?: string;
   inputs: Record<string, unknown>;
+}
+
+export interface SearchExecutionsParams {
+  /** JSON-encoded Elasticsearch query DSL. */
+  query?: string;
+  /** JSON-encoded Elasticsearch sort definition. */
+  sort?: string;
+  from?: number;
+  size?: number;
+  trackTotalHits?: boolean;
 }
 
 export interface GetWorkflowExecutionsParams {

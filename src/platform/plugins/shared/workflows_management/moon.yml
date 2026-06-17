@@ -61,7 +61,6 @@ dependsOn:
   - '@kbn/core-i18n-browser-mocks'
   - '@kbn/core-lifecycle-browser-mocks'
   - '@kbn/serverless'
-  - '@kbn/field-types'
   - '@kbn/data-views-plugin'
   - '@kbn/kql'
   - '@kbn/field-formats-plugin'
@@ -112,8 +111,10 @@ dependsOn:
   - '@kbn/esql-utils'
   - '@kbn/inbox-plugin'
   - '@kbn/inbox-common'
-  - '@kbn/datemath'
   - '@kbn/presentation-publishing'
+  - '@kbn/datemath'
+  - '@kbn/controls-plugin'
+  - '@kbn/controls-schemas'
 tags:
   - plugin
   - prod

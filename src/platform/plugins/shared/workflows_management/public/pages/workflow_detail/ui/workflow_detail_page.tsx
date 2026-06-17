@@ -25,9 +25,16 @@ import { WorkflowDetailTestStepModal } from './workflow_detail_test_step_modal';
 import { WorkflowNotFoundPage } from './workflow_not_found_page';
 import { PLUGIN_ID } from '../../../../common';
 import type { WorkflowDetailTab } from '../../../common/lib/telemetry/events/workflows/ui/types';
-import { setActiveTab, setExecution, setYamlString } from '../../../entities/workflows/store';
+import {
+  setActiveTab,
+  setExecution,
+  setIsTestModalOpen,
+  setReplayExecutionId,
+  setYamlString,
+} from '../../../entities/workflows/store';
 import {
   selectActiveTab,
+  selectWorkflowDefinition,
   selectWorkflowId,
   selectWorkflowName,
 } from '../../../entities/workflows/store/workflow_detail/selectors';
@@ -64,15 +71,18 @@ export function WorkflowDetailPage({ id }: { id?: string }) {
   const activeTabInStore = useSelector(selectActiveTab);
   const workflowId = useSelector(selectWorkflowId);
   const workflowName = useSelector(selectWorkflowName);
+  const workflowDefinition = useSelector(selectWorkflowDefinition);
 
   useWorkflowsBreadcrumbs(workflowName);
 
-  const { canReadWorkflowExecution } = useWorkflowsCapabilities();
+  const { canExecuteWorkflow, canReadWorkflowExecution } = useWorkflowsCapabilities();
   const {
     activeTab,
     selectedExecutionId,
     setSelectedExecution,
     setActiveTab: setUrlTab,
+    replayExecutionId,
+    clearReplayExecutionId,
   } = useWorkflowUrlState();
 
   useEffect(() => {
@@ -119,6 +129,32 @@ export function WorkflowDetailPage({ id }: { id?: string }) {
       dispatch(setActiveTab(activeTab));
     }
   }, [activeTab, activeTabInStore, dispatch]);
+
+  useEffect(() => {
+    if (
+      !isReady ||
+      !replayExecutionId ||
+      !canExecuteWorkflow ||
+      !workflowDefinition ||
+      !id ||
+      workflowId !== id
+    ) {
+      return;
+    }
+
+    dispatch(setReplayExecutionId(replayExecutionId));
+    dispatch(setIsTestModalOpen(true));
+    clearReplayExecutionId();
+  }, [
+    canExecuteWorkflow,
+    clearReplayExecutionId,
+    dispatch,
+    id,
+    isReady,
+    replayExecutionId,
+    workflowDefinition,
+    workflowId,
+  ]);
 
   // Load execution when selectedExecutionId changes
   useEffect(() => {

@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { estypes } from '@elastic/elasticsearch';
 import type { ActionsClient, IUnsecuredActionsClient } from '@kbn/actions-plugin/server';
 import type {
   CoreStart,
@@ -67,6 +68,7 @@ import type { StepExecutionListResult } from './lib/search_step_executions';
 import type {
   DeleteWorkflowsResponse,
   GetStepExecutionParams,
+  GetWorkflowAggsOptions,
   GetWorkflowsParams,
   SearchStepExecutionsParams,
 } from './workflows_management_api';
@@ -80,6 +82,14 @@ import { WorkflowValidationService } from '../services/workflow_validation_servi
 import { createStorage, type WorkflowStorage } from '../storage/workflow_storage';
 import { WorkflowTaskScheduler } from '../tasks/workflow_task_scheduler';
 import type { WorkflowsServerPluginStartDeps } from '../types';
+
+export interface SearchExecutionsViewParams {
+  query?: estypes.QueryDslQueryContainer;
+  sort?: estypes.SortCombinations;
+  from?: number;
+  size?: number;
+  trackTotalHits?: boolean;
+}
 
 export interface SearchWorkflowExecutionsParams {
   workflowId?: string;
@@ -316,9 +326,15 @@ export class WorkflowsService {
     return this.searchService.getWorkflowStats(spaceId, options);
   }
 
-  public async getWorkflowAggs(fields: string[], spaceId: string): Promise<WorkflowAggsDto> {
+  public async getWorkflowAggs(
+    fields: string[],
+    spaceId: string,
+    options?: GetWorkflowAggsOptions
+  ): Promise<WorkflowAggsDto> {
     await this.ensureInitialized();
-    return this.searchService.getWorkflowAggs(fields, spaceId);
+    return options
+      ? this.searchService.getWorkflowAggs(fields, spaceId, options)
+      : this.searchService.getWorkflowAggs(fields, spaceId);
   }
 
   public async getWorkflowExecution(
@@ -344,6 +360,14 @@ export class WorkflowsService {
   ): Promise<WorkflowExecutionListDto> {
     await this.ensureInitialized();
     return this.executionQueryService.getWorkflowExecutions(params, spaceId);
+  }
+
+  public async searchExecutionsView(
+    params: SearchExecutionsViewParams,
+    spaceId: string
+  ): Promise<WorkflowExecutionListDto> {
+    await this.ensureInitialized();
+    return this.executionQueryService.searchExecutionsView(params, spaceId);
   }
 
   public async listWaitingForInputSteps(

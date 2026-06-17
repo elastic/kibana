@@ -10,8 +10,20 @@
 import type { FilterControlConfig } from '@kbn/alerts-ui-shared/src/alert_filter_controls/types';
 import { i18n } from '@kbn/i18n';
 
+export type ExecutionTableSortOrder = ReadonlyArray<readonly [string, 'asc' | 'desc']>;
+
 export const EXECUTION_FILTERS_URL_PARAM_KEY = 'workflowsExecutionsPageFilters' as const;
 export const EXECUTION_FILTERS_STORAGE_KEY = 'workflows.executions.pageFilters' as const;
+export const EXECUTION_TABLE_DEFAULT_PAGE_SIZE = 25;
+export const EXECUTION_TABLE_PAGE_SIZE_OPTIONS = [10, 25, 50, 100] as const;
+export const EXECUTION_TABLE_DEFAULT_SORT: ExecutionTableSortOrder = [['startedAt', 'desc']];
+
+export const EXECUTION_TABLE_SORT_FIELD_MAP: Record<string, string> = {
+  workflow: 'workflowId',
+  triggers: 'triggeredBy',
+  startedAt: 'startedAt',
+  duration: 'duration',
+};
 
 export const DEFAULT_EXECUTION_PAGE_FILTERS: FilterControlConfig[] = [
   {

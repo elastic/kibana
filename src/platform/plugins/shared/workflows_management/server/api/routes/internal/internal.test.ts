@@ -7,11 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { errors } from '@elastic/elasticsearch';
 import type { Logger } from '@kbn/core/server';
 import { httpServerMock } from '@kbn/core/server/mocks';
 import { KQLSyntaxError } from '@kbn/es-query';
 import type { SearchTriggerEventLogResult } from '@kbn/workflows-ui';
 import { registerInternalRoutes } from '.';
+import { WORKFLOWS_EXECUTIONS_INDEX } from '../../../../common';
 import type { RouteDependencies } from '../types';
 
 describe('Internal Routes', () => {
@@ -34,6 +36,7 @@ describe('Internal Routes', () => {
   let routeHandlers: Record<string, { handler: MockRouteHandler }>;
   let mockApi: { disableAllWorkflows: jest.MockedFunction<(spaceId: string) => Promise<unknown>> };
   let mockTriggerEventsIsEnabled: boolean;
+  let mockSearch: jest.Mock;
   const mockSearchTriggerEventLog = jest.fn<
     Promise<SearchTriggerEventLogResult>,
     [TriggerEventLogSearchCall]
@@ -71,6 +74,9 @@ describe('Internal Routes', () => {
       size: 10,
     });
     mockApi = { disableAllWorkflows: jest.fn() };
+    mockSearch = jest.fn().mockResolvedValue({
+      hits: { hits: [], total: { value: 0, relation: 'eq' } },
+    });
 
     const mockWorkflowsService = {
       getWorkflowsExecutionEngine: jest.fn().mockImplementation(async () => ({
@@ -79,6 +85,15 @@ describe('Internal Routes', () => {
           searchTriggerEventLog: mockSearchTriggerEventLog,
         },
       })),
+      getCoreStart: jest.fn().mockResolvedValue({
+        elasticsearch: {
+          client: {
+            asInternalUser: {
+              search: mockSearch,
+            },
+          },
+        },
+      }),
     };
 
     const createVersionedRoute = (method: string, path: string) => ({
@@ -156,6 +171,20 @@ describe('Internal Routes', () => {
   it('should register the disable route handler', () => {
     expect(routeHandlers[`POST:/internal/workflows/disable`]).toBeDefined();
     expect(routeHandlers[`POST:/internal/workflows/disable`].handler).toEqual(expect.any(Function));
+  });
+
+  it('should register the executions options list route handler', () => {
+    expect(routeHandlers[`POST:/internal/workflows/executions/options_list`]).toBeDefined();
+    expect(routeHandlers[`POST:/internal/workflows/executions/options_list`].handler).toEqual(
+      expect.any(Function)
+    );
+  });
+
+  it('should register the executions fields route handler', () => {
+    expect(routeHandlers[`GET:/internal/workflows/executions/fields`]).toBeDefined();
+    expect(routeHandlers[`GET:/internal/workflows/executions/fields`].handler).toEqual(
+      expect.any(Function)
+    );
   });
 
   it('should register trigger event log search routes', () => {
@@ -247,5 +276,283 @@ describe('Internal Routes', () => {
     expect(response.ok).toHaveBeenCalledWith({
       body: { total: 3, disabled: 3, failures: [] },
     });
+  });
+
+  it('should execute options list search with enforced space and step filters', async () => {
+    mockSearch.mockResolvedValue({
+      aggregations: {
+        suggestions: {
+          buckets: [{ key: 'completed', doc_count: 4 }],
+        },
+        totalCardinality: { value: 1 },
+        validation: {
+          buckets: {
+            completed: { doc_count: 4 },
+          },
+        },
+      },
+    });
+
+    const response = httpServerMock.createResponseFactory();
+    const request = httpServerMock.createKibanaRequest({
+      method: 'post',
+      path: '/internal/workflows/executions/options_list',
+      body: {
+        size: 10,
+        fieldName: 'status',
+        filters: [{ term: { workflowId: 'wf-1' } }],
+        selectedOptions: ['completed'],
+      },
+    });
+
+    await routeHandlers[`POST:/internal/workflows/executions/options_list`].handler(
+      mockContext,
+      request,
+      response
+    );
+
+    expect(mockSearch).toHaveBeenCalledWith(
+      expect.objectContaining({
+        index: WORKFLOWS_EXECUTIONS_INDEX,
+        query: {
+          bool: {
+            filter: expect.arrayContaining([
+              { term: { workflowId: 'wf-1' } },
+              {
+                bool: {
+                  should: [
+                    { term: { spaceId: 'default' } },
+                    { bool: { must_not: { exists: { field: 'spaceId' } } } },
+                  ],
+                  minimum_should_match: 1,
+                },
+              },
+              { bool: { must_not: { exists: { field: 'stepId' } } } },
+            ]),
+          },
+        },
+      })
+    );
+
+    expect(response.ok).toHaveBeenCalledWith({
+      body: {
+        suggestions: [{ value: 'completed', docCount: 4 }],
+        totalCardinality: 1,
+        invalidSelections: [],
+      },
+    });
+  });
+
+  it('should skip validation aggregation when selected options are empty', async () => {
+    mockSearch.mockResolvedValue({
+      aggregations: {
+        suggestions: {
+          buckets: [{ key: 'completed', doc_count: 4 }],
+        },
+        totalCardinality: { value: 1 },
+      },
+    });
+
+    const response = httpServerMock.createResponseFactory();
+    const request = httpServerMock.createKibanaRequest({
+      method: 'post',
+      path: '/internal/workflows/executions/options_list',
+      body: {
+        size: 10,
+        fieldName: 'status',
+        filters: [],
+        selectedOptions: [],
+      },
+    });
+
+    await routeHandlers[`POST:/internal/workflows/executions/options_list`].handler(
+      mockContext,
+      request,
+      response
+    );
+
+    expect(mockSearch).toHaveBeenCalledWith(
+      expect.objectContaining({
+        aggs: expect.not.objectContaining({
+          validation: expect.anything(),
+        }),
+      })
+    );
+
+    expect(response.ok).toHaveBeenCalledWith({
+      body: {
+        suggestions: [{ value: 'completed', docCount: 4 }],
+        totalCardinality: 1,
+        invalidSelections: [],
+      },
+    });
+  });
+
+  it('should return empty options list when executions index does not exist', async () => {
+    mockSearch.mockRejectedValue(
+      new errors.ResponseError({
+        statusCode: 404,
+        body: {
+          error: {
+            type: 'index_not_found_exception',
+            reason: 'no such index [.workflows-executions]',
+          },
+        },
+        headers: {},
+        meta: {} as any,
+        warnings: [],
+      })
+    );
+
+    const response = httpServerMock.createResponseFactory();
+    const request = httpServerMock.createKibanaRequest({
+      method: 'post',
+      path: '/internal/workflows/executions/options_list',
+      body: {
+        size: 10,
+        fieldName: 'status',
+        filters: [],
+        selectedOptions: ['completed'],
+      },
+    });
+
+    await routeHandlers[`POST:/internal/workflows/executions/options_list`].handler(
+      mockContext,
+      request,
+      response
+    );
+
+    expect(response.ok).toHaveBeenCalledWith({
+      body: {
+        suggestions: [],
+        totalCardinality: 0,
+        invalidSelections: [],
+      },
+    });
+    expect(response.customError).not.toHaveBeenCalled();
+  });
+
+  it('should normalize human-readable duration filters before search', async () => {
+    mockSearch.mockResolvedValue({
+      aggregations: {
+        suggestions: {
+          buckets: [{ key: 'completed', doc_count: 1 }],
+        },
+        totalCardinality: { value: 1 },
+      },
+    });
+
+    const response = httpServerMock.createResponseFactory();
+    const request = httpServerMock.createKibanaRequest({
+      method: 'post',
+      path: '/internal/workflows/executions/options_list',
+      body: {
+        size: 10,
+        fieldName: 'status',
+        filters: [
+          {
+            bool: {
+              should: [
+                {
+                  range: {
+                    duration: {
+                      gte: '2s',
+                    },
+                  },
+                },
+              ],
+              minimum_should_match: 1,
+            },
+          },
+        ],
+        selectedOptions: [],
+      },
+    });
+
+    await routeHandlers[`POST:/internal/workflows/executions/options_list`].handler(
+      mockContext,
+      request,
+      response
+    );
+
+    expect(mockSearch).toHaveBeenCalledWith(
+      expect.objectContaining({
+        query: {
+          bool: {
+            filter: expect.arrayContaining([
+              {
+                bool: {
+                  should: [
+                    {
+                      range: {
+                        duration: {
+                          gte: 2000,
+                        },
+                      },
+                    },
+                  ],
+                  minimum_should_match: 1,
+                },
+              },
+            ]),
+          },
+        },
+      })
+    );
+    expect(response.ok).toHaveBeenCalled();
+  });
+
+  it('should return bad request when options list search has invalid query DSL', async () => {
+    mockSearch.mockRejectedValue(
+      new errors.ResponseError({
+        statusCode: 400,
+        body: {
+          error: {
+            type: 'search_phase_execution_exception',
+            reason: 'all shards failed',
+            root_cause: [
+              {
+                type: 'query_shard_exception',
+                reason: 'failed to create query: For input string: "2s"',
+              },
+            ],
+          },
+        },
+        headers: {},
+        meta: {} as any,
+        warnings: [],
+      })
+    );
+
+    const response = httpServerMock.createResponseFactory();
+    const request = httpServerMock.createKibanaRequest({
+      method: 'post',
+      path: '/internal/workflows/executions/options_list',
+      body: {
+        size: 10,
+        fieldName: 'status',
+        filters: [
+          {
+            range: {
+              duration: {
+                gte: '2s',
+              },
+            },
+          },
+        ],
+        selectedOptions: [],
+      },
+    });
+
+    await routeHandlers[`POST:/internal/workflows/executions/options_list`].handler(
+      mockContext,
+      request,
+      response
+    );
+
+    expect(response.badRequest).toHaveBeenCalledWith({
+      body: { message: 'failed to create query: For input string: "2s"' },
+    });
+    expect(response.customError).not.toHaveBeenCalled();
   });
 });

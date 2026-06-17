@@ -44,6 +44,7 @@ import type {
   MgetWorkflowsParams,
   ResumeExecutionParams,
   RunWorkflowOptions,
+  SearchExecutionsParams,
   SearchTriggerEventLogParams,
   SearchTriggerEventLogResult,
   TestWorkflowParams,
@@ -160,9 +161,9 @@ export class WorkflowApi {
     });
   }
 
-  async getAggs({ fields }: GetAggsParams): Promise<WorkflowAggsDto> {
+  async getAggs({ fields, managed }: GetAggsParams): Promise<WorkflowAggsDto> {
     return this.http.get(`${BASE}/aggs`, {
-      query: { fields },
+      query: { fields, ...(managed ? { managed } : {}) },
       version: API_VERSION,
     });
   }
@@ -204,6 +205,13 @@ export class WorkflowApi {
   async testStep(params: RunStepCommand): Promise<TestWorkflowResponseDto> {
     return this.http.post(`${BASE}/step/test`, {
       body: JSON.stringify(params),
+      version: API_VERSION,
+    });
+  }
+
+  async searchExecutions(params?: SearchExecutionsParams): Promise<WorkflowExecutionListDto> {
+    return this.http.get(`${BASE}/executions`, {
+      query: params as HttpFetchQuery,
       version: API_VERSION,
     });
   }

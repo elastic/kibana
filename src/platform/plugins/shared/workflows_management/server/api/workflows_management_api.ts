@@ -58,6 +58,7 @@ import type { StepExecutionListResult } from './lib/search_step_executions';
 import { ManagedWorkflowDeleteForbiddenError } from './managed_workflow_delete_error';
 import { ManagedWorkflowUpdateForbiddenError } from './managed_workflow_errors';
 import type {
+  SearchExecutionsViewParams,
   SearchWorkflowExecutionsParams,
   WorkflowsService,
 } from './workflows_management_service';
@@ -80,6 +81,10 @@ export interface GetWorkflowsParams {
   query?: string;
   managedFilter?: 'all' | 'managed' | 'unmanaged';
   _full?: boolean;
+}
+
+export interface GetWorkflowAggsOptions {
+  managedFilter?: GetWorkflowsParams['managedFilter'];
 }
 
 export interface DeleteWorkflowsResponse {
@@ -740,6 +745,13 @@ export class WorkflowsManagementApi {
     return this.workflowsService.getWorkflowExecutions(params, spaceId);
   }
 
+  public async searchExecutionsView(
+    params: SearchExecutionsViewParams,
+    spaceId: string
+  ): Promise<WorkflowExecutionListDto> {
+    return this.workflowsService.searchExecutionsView(params, spaceId);
+  }
+
   public async getWorkflowExecution(
     workflowExecutionId: string,
     spaceId: string,
@@ -866,8 +878,14 @@ export class WorkflowsManagementApi {
     return this.workflowsService.getWorkflowStats(spaceId, options);
   }
 
-  public async getWorkflowAggs(fields: string[] = [], spaceId: string) {
-    return this.workflowsService.getWorkflowAggs(fields, spaceId);
+  public async getWorkflowAggs(
+    fields: string[] = [],
+    spaceId: string,
+    options?: GetWorkflowAggsOptions
+  ) {
+    return options
+      ? this.workflowsService.getWorkflowAggs(fields, spaceId, options)
+      : this.workflowsService.getWorkflowAggs(fields, spaceId);
   }
 
   public async getAvailableConnectors(

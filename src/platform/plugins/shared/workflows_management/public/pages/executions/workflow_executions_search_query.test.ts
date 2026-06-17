@@ -10,7 +10,6 @@
 import {
   buildWorkflowExecutionsSearchFilters,
   getWorkflowExecutionsFetchErrorMessage,
-  isWorkflowExecutionsIndexNotFoundError,
 } from './workflow_executions_search_query';
 
 describe('workflow_executions_search_query', () => {
@@ -55,20 +54,6 @@ describe('workflow_executions_search_query', () => {
           },
         },
       });
-    });
-  });
-
-  describe('isWorkflowExecutionsIndexNotFoundError', () => {
-    it('returns true for index_not_found_exception', () => {
-      const error = {
-        body: { error: { type: 'index_not_found_exception', reason: 'missing' } },
-      };
-
-      expect(isWorkflowExecutionsIndexNotFoundError(error)).toBe(true);
-    });
-
-    it('returns false for other errors', () => {
-      expect(isWorkflowExecutionsIndexNotFoundError(new Error('other'))).toBe(false);
     });
   });
 

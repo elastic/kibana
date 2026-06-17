@@ -265,7 +265,10 @@ export interface WorkflowExecutionDto {
 export type WorkflowExecutionListItemDto = Omit<
   WorkflowExecutionDto,
   'stepExecutions' | 'yaml' | 'workflowDefinition'
->;
+> & {
+  tags?: string[];
+  managed?: boolean;
+};
 
 export interface WorkflowExecutionListDto {
   results: WorkflowExecutionListItemDto[];
@@ -552,6 +555,8 @@ export interface BaseConnectorContract {
 export interface DynamicConnectorContract extends BaseConnectorContract {
   /** Action type ID from Kibana actions plugin */
   actionTypeId: string;
+  /** User-facing connector type name from the actions plugin */
+  displayName: string;
   /** Available connector instances */
   instances: ConnectorInstance[];
   /** Whether this connector type is enabled */
