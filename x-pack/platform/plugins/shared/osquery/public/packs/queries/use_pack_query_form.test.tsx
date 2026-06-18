@@ -232,7 +232,7 @@ describe('usePackQueryForm', () => {
       expect(result.interval).toBe('3600');
     });
 
-    it('should strip both interval and rrule_schedule when pack is interval-scheduled and override is off', () => {
+    it('should strip interval (inherited) but preserve timeout when pack is interval-scheduled and override is off', () => {
       const serialize = getSerializer({
         uniqueQueryIds: [],
         packSchedule: {
@@ -243,17 +243,21 @@ describe('usePackQueryForm', () => {
 
       const payload = makeBasePayload({
         interval: 7200,
+        timeout: 90,
         override_pack_schedule: false,
         schedule: makeIntervalSchedule(7200),
       });
 
       const result = serialize(payload) as PackSOQueryFormData;
 
-      // Query should emit no schedule fields when pack owns the schedule.
+      // Query inherits the pack-level interval, so the per-query interval and
+      // schedule discriminator are stripped...
       expect(result).not.toHaveProperty('interval');
-      expect(result).not.toHaveProperty('timeout');
       expect(result).not.toHaveProperty('schedule_type');
       expect(result).not.toHaveProperty('rrule_schedule');
+      // ...but `timeout` is an independent per-query field (beats reads
+      // `Query.timeout` in interval mode) and MUST be preserved.
+      expect(result.timeout).toBe(90);
     });
 
     it('should emit rrule_schedule with RFC 3339 start_date when override is on with rrule mode', () => {

@@ -192,16 +192,19 @@ describe(
         cy.contains('Create pack');
         const queries = {
           Query1: {
+            timeout: 601,
             query: 'select * from uptime;',
             removed: true,
             snapshot: false,
           },
           Query2: {
+            timeout: 602,
             query: 'select * from uptime;',
             removed: false,
             snapshot: false,
           },
           Query3: {
+            timeout: 603,
             query: 'select * from uptime;',
           },
         };

@@ -154,15 +154,15 @@ const serializer = (
     }
   );
 
-  // When the pack drives the schedule (either mode) and the query is NOT
-  // overriding, the query SHALL emit no schedule fields. This prevents
-  // prebuilt / uploaded queries that ship their own `interval` from leaking
-  // a mixed-mode pack — the server rejects with "Query carries interval but
-  // the pack uses schedule_type 'rrule'". Stripping `timeout` too because for
-  // RRULE-scheduled queries beats reads only `rrule_schedule.timeout` (D17).
   if (!overridePackSchedule || !schedule) {
-    if (packSchedule?.schedule_type) {
+    if (packSchedule?.schedule_type === 'rrule') {
       const { interval: _interval, timeout: _timeout, ...stripped } = base;
+
+      return stripped as PackSOQueryFormData;
+    }
+
+    if (packSchedule?.schedule_type === 'interval') {
+      const { interval: _interval, ...stripped } = base;
 
       return stripped as PackSOQueryFormData;
     }
