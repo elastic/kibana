@@ -468,13 +468,11 @@ export const UserDetails: React.FC<UserDetailsProps> = ({
           entityType={EntityType.user}
           queryId={`${USER_DETAILS_INSIGHTS_ID}-alerts-by-status`}
           direction="column"
-          openDetailsPanel={openDetailsPanel}
           data-test-subj={USER_DETAILS_ALERT_COUNT_TEST_ID}
         />
         <MisconfigurationsInsight
           identityFields={userIdentityFields ?? {}}
           direction="column"
-          openDetailsPanel={openDetailsPanel}
           data-test-subj={USER_DETAILS_MISCONFIGURATIONS_TEST_ID}
           telemetryKey={MISCONFIGURATION_INSIGHT_USER_DETAILS}
         />

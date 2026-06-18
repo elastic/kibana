@@ -209,7 +209,6 @@ export const UserEntityOverview: React.FC<UserEntityOverviewProps> = ({
   const userCspIdentityDoc = entityRecord ?? userIdentityFields;
   const { hasMisconfigurationFindings } = useHasMisconfigurations(
     buildEuidCspPreviewOptions('user', userCspIdentityDoc, euidApi, {
-      entityStoreV2Enabled,
       legacyIdentityFields: userIdentityFields,
     })
   );

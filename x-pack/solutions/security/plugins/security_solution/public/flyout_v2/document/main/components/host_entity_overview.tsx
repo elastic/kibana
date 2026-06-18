@@ -226,13 +226,11 @@ export const HostEntityOverview: React.FC<HostEntityOverviewProps> = ({
   const hostCspIdentityDoc = entityRecord ?? hostIdentityFields;
   const { hasMisconfigurationFindings } = useHasMisconfigurations(
     buildEuidCspPreviewOptions('host', hostCspIdentityDoc, euidApi, {
-      entityStoreV2Enabled,
       legacyIdentityFields: hostIdentityFields,
     })
   );
   const { hasVulnerabilitiesFindings } = useHasVulnerabilities(
     buildEuidCspPreviewOptions('host', hostCspIdentityDoc, euidApi, {
-      entityStoreV2Enabled,
       legacyIdentityFields: hostIdentityFields,
     })
   );
