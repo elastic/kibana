@@ -40,22 +40,47 @@ const resolveDatasetOffset = (): number | undefined => {
   return Math.max(0, Math.floor(parsed));
 };
 
+const GOLDEN_CLUSTER_KBN_URL_MARKERS = ['kbn-evals-serverless', 'gcp.elastic.cloud'] as const;
+
 /**
- * When ATTACK_DISCOVERY_DATASET_JSONL_PATH is set, load from local JSONL.
- * Otherwise, resolve the dataset by name from the golden cluster.
+ * Use golden-cluster upstream resolution when explicitly named or when
+ * EVALUATIONS_KBN_URL points at the managed evals cluster (CI / dev-vault).
+ * Local Scout runs default to the checked-in reference JSONL instead.
  */
-const useLocalJsonl = (): boolean => Boolean(process.env.ATTACK_DISCOVERY_DATASET_JSONL_PATH);
+const shouldResolveFromGoldenCluster = (): boolean => {
+  if (process.env.ATTACK_DISCOVERY_DATASET_NAME) {
+    return true;
+  }
+
+  const evaluationsKbnUrl = process.env.EVALUATIONS_KBN_URL ?? '';
+  return GOLDEN_CLUSTER_KBN_URL_MARKERS.some((marker) => evaluationsKbnUrl.includes(marker));
+};
 
 evaluate.describe('Attack Discovery', { tag: tags.stateful.classic }, () => {
+  /**
+   * Full dataset evaluation — three modes (priority order):
+   *
+   * 1. **Explicit JSONL path** (`ATTACK_DISCOVERY_DATASET_JSONL_PATH`)
+   * 2. **Golden cluster** (`ATTACK_DISCOVERY_DATASET_NAME` or golden `EVALUATIONS_KBN_URL`)
+   * 3. **Bundled reference JSONL** at `data/eval_dataset_attack_discovery_all_scenarios.jsonl`
+   */
   evaluate('bundled alerts (jsonl)', async ({ evaluateDataset }) => {
-    if (useLocalJsonl()) {
+    const jsonlPath = process.env.ATTACK_DISCOVERY_DATASET_JSONL_PATH;
+    const jsonlOptions = {
+      offset: resolveDatasetOffset(),
+      limit: resolveDatasetLimit(),
+    };
+
+    if (jsonlPath) {
       const dataset = await loadAttackDiscoveryBundledAlertsJsonlDataset({
-        jsonlPath: process.env.ATTACK_DISCOVERY_DATASET_JSONL_PATH,
-        offset: resolveDatasetOffset(),
-        limit: resolveDatasetLimit(),
+        jsonlPath,
+        ...jsonlOptions,
       });
       await evaluateDataset({ dataset });
-    } else {
+      return;
+    }
+
+    if (shouldResolveFromGoldenCluster()) {
       await evaluateDataset({
         dataset: {
           name: resolveDatasetName(),
@@ -64,7 +89,11 @@ evaluate.describe('Attack Discovery', { tag: tags.stateful.classic }, () => {
         },
         trustUpstreamDataset: true,
       });
+      return;
     }
+
+    const dataset = await loadAttackDiscoveryBundledAlertsJsonlDataset(jsonlOptions);
+    await evaluateDataset({ dataset });
   });
 
   evaluate.describe('modes smoke', () => {

@@ -6,7 +6,13 @@
  */
 
 import type { BoundInferenceClient } from '@kbn/inference-common';
-import type { EvalsExecutorClient, EvaluationDataset, Evaluator } from '@kbn/evals';
+import type {
+  DefaultEvaluators,
+  EvalsExecutorClient,
+  EvaluationDataset,
+  Evaluator,
+  TaskOutput,
+} from '@kbn/evals';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { LeadGenerationClient } from './clients/lead_generation_client';
 import type { LeadGenerationDatasetExample, LeadGenerationTaskOutput } from './types';
@@ -44,12 +50,14 @@ export type EvaluateLeadGenerationDataset = (options: {
 }) => Promise<void>;
 
 const configureExperiment = ({
+  evaluators,
   leadGenerationClient,
   inferenceClient,
   evaluationInferenceClient,
   connectorId,
   log,
 }: {
+  evaluators: DefaultEvaluators;
   leadGenerationClient: LeadGenerationClient;
   inferenceClient: BoundInferenceClient;
   evaluationInferenceClient: BoundInferenceClient;
@@ -60,7 +68,11 @@ const configureExperiment = ({
     input: LeadGenerationDatasetExample['input'];
   }) => Promise<LeadGenerationTaskOutput>;
   evaluators: Array<Evaluator<LeadGenerationDatasetExample, LeadGenerationTaskOutput>>;
-} => ({
+} => {
+  const { inputTokens, outputTokens, cachedTokens, toolCalls, latency } =
+    evaluators.traceBasedEvaluators;
+
+  return {
   task: async ({ input }) => {
     if (!input) {
       return { leads: null, errors: ['Missing input'] };
@@ -76,10 +88,17 @@ const configureExperiment = ({
   evaluators: [
     createLeadGenerationBasicEvaluator(),
     createLeadGenerationRubricEvaluator({ inferenceClient: evaluationInferenceClient, log }),
+    toolCalls as Evaluator<LeadGenerationDatasetExample, TaskOutput>,
+    latency as Evaluator<LeadGenerationDatasetExample, TaskOutput>,
+    inputTokens as Evaluator<LeadGenerationDatasetExample, TaskOutput>,
+    outputTokens as Evaluator<LeadGenerationDatasetExample, TaskOutput>,
+    cachedTokens as Evaluator<LeadGenerationDatasetExample, TaskOutput>,
   ],
-});
+  };
+};
 
 export const createEvaluateLeadGenerationDataset = ({
+  evaluators,
   leadGenerationClient,
   executorClient,
   inferenceClient,
@@ -87,6 +106,7 @@ export const createEvaluateLeadGenerationDataset = ({
   evaluationConnectorId,
   log,
 }: {
+  evaluators: DefaultEvaluators;
   leadGenerationClient: LeadGenerationClient;
   executorClient: EvalsExecutorClient;
   inferenceClient: BoundInferenceClient;
@@ -108,7 +128,8 @@ export const createEvaluateLeadGenerationDataset = ({
       connectorId: evaluationConnectorId,
     });
 
-    const { task, evaluators } = configureExperiment({
+    const { task, evaluators: experimentEvaluators } = configureExperiment({
+      evaluators,
       leadGenerationClient,
       inferenceClient,
       evaluationInferenceClient,
@@ -123,7 +144,7 @@ export const createEvaluateLeadGenerationDataset = ({
         concurrency: resolveConcurrency(),
         trustUpstreamDataset,
       },
-      evaluators
+      experimentEvaluators
     );
   };
 

@@ -23,6 +23,27 @@ import type {
 
 type WorkflowExample = WorkflowEditExample | WorkflowCreateExample;
 
+/**
+ * OTel trace-based observability evaluators (input/output/cached tokens, tool-call
+ * count, end-to-end latency). Requires `traceId` on the task output from converse.
+ */
+export function createTraceBasedObservabilityEvaluators<TExample extends Example>({
+  evaluators,
+}: {
+  evaluators: DefaultEvaluators;
+}): Array<Evaluator<TExample, WorkflowTaskOutput>> {
+  const { inputTokens, outputTokens, cachedTokens, toolCalls, latency } =
+    evaluators.traceBasedEvaluators;
+
+  return [
+    inputTokens as Evaluator<TExample, WorkflowTaskOutput>,
+    outputTokens as Evaluator<TExample, WorkflowTaskOutput>,
+    cachedTokens as Evaluator<TExample, WorkflowTaskOutput>,
+    toolCalls as Evaluator<TExample, WorkflowTaskOutput>,
+    latency as Evaluator<TExample, WorkflowTaskOutput>,
+  ];
+}
+
 const INFRA_ERROR_NA = {
   score: null as null,
   label: 'N/A' as const,

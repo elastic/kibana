@@ -22,6 +22,7 @@ import {
   createEfficiencyEvaluator,
   createToolTrajectoryEvaluator,
   createLatencyEvaluator,
+  createTraceBasedObservabilityEvaluators,
   skipInfraErrors,
   skipNegativeCases,
   extractResultYaml,
@@ -56,6 +57,7 @@ const evaluate = base.extend<
                 messages: response.messages,
                 steps: response.steps,
                 errors: response.errors,
+                traceId: response.traceId,
               };
 
               let resultYaml = extractResultYaml(taskOutput);
@@ -83,6 +85,7 @@ const evaluate = base.extend<
             skip(createLatencyEvaluator()),
             skipInfraErrors(createCriteriaEvaluator({ evaluators })),
             skipInfraErrors(createRejectionEvaluator()),
+            ...createTraceBasedObservabilityEvaluators<WorkflowCreateExample>({ evaluators }),
           ])
         );
       });

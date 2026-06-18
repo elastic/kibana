@@ -47,7 +47,9 @@ import { runConfigInit, runConnectorSetup, ensureVaultAuth, ensureLocalConfig } 
 
 const SCOUT_LOCAL_CONFIG = '.scout/servers/local.json';
 const SCOUT_READY_POLL_INTERVAL_MS = 3000;
-const SCOUT_READY_TIMEOUT_MS = 180_000;
+const SCOUT_READY_TIMEOUT_MS = process.env.SCOUT_READY_TIMEOUT_MS
+  ? parseInt(process.env.SCOUT_READY_TIMEOUT_MS, 10)
+  : 600_000;
 
 const waitForScoutReady = async (repoRoot: string, log: ToolingLog): Promise<void> => {
   const configPath = Path.join(repoRoot, SCOUT_LOCAL_CONFIG);

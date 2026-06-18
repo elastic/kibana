@@ -11,6 +11,7 @@ import type {
   Evaluator,
   EvalsExecutorClient,
   Example,
+  TaskOutput,
 } from '@kbn/evals';
 import type { SiemReadinessEvalChatClient } from './chat_client';
 
@@ -99,6 +100,9 @@ export function createEvaluateSiemReadinessDataset({
       examples,
     } satisfies EvaluationDataset;
 
+    const { inputTokens, outputTokens, cachedTokens, toolCalls, latency } =
+      evaluators.traceBasedEvaluators;
+
     await executorClient.runExperiment(
       {
         datasets: [dataset],
@@ -113,7 +117,14 @@ export function createEvaluateSiemReadinessDataset({
           };
         },
       },
-      [createSiemReadinessCriteriaEvaluator({ evaluators })]
+      [
+        createSiemReadinessCriteriaEvaluator({ evaluators }),
+        toolCalls as Evaluator<SiemReadinessDatasetExample, TaskOutput>,
+        latency as Evaluator<SiemReadinessDatasetExample, TaskOutput>,
+        inputTokens as Evaluator<SiemReadinessDatasetExample, TaskOutput>,
+        outputTokens as Evaluator<SiemReadinessDatasetExample, TaskOutput>,
+        cachedTokens as Evaluator<SiemReadinessDatasetExample, TaskOutput>,
+      ]
     );
   };
 }

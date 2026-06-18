@@ -11,6 +11,7 @@ import type {
   Evaluator,
   EvalsExecutorClient,
   Example,
+  TaskOutput,
 } from '@kbn/evals';
 import type { SecurityEvalChatClient } from './chat_client';
 
@@ -70,6 +71,9 @@ export function createEvaluateSecurityDataset({
       examples,
     } satisfies EvaluationDataset;
 
+    const { inputTokens, outputTokens, cachedTokens, toolCalls, latency } =
+      evaluators.traceBasedEvaluators;
+
     await executorClient.runExperiment(
       {
         datasets: [dataset],
@@ -84,7 +88,14 @@ export function createEvaluateSecurityDataset({
           };
         },
       },
-      [createEndpointCriteriaEvaluator({ evaluators })]
+      [
+        createEndpointCriteriaEvaluator({ evaluators }),
+        toolCalls as Evaluator<SecurityDatasetExample, TaskOutput>,
+        latency as Evaluator<SecurityDatasetExample, TaskOutput>,
+        inputTokens as Evaluator<SecurityDatasetExample, TaskOutput>,
+        outputTokens as Evaluator<SecurityDatasetExample, TaskOutput>,
+        cachedTokens as Evaluator<SecurityDatasetExample, TaskOutput>,
+      ]
     );
   };
 }

@@ -16,6 +16,7 @@ import {
   type EvaluationResult,
   type Evaluator,
   type Example,
+  type TaskOutput,
 } from '@kbn/evals';
 import type {
   EvaluationChatClient,
@@ -258,6 +259,9 @@ export function createEvaluateDataset({
   }: EvaluateDatasetOpts) {
     const dataset = { name, description, examples } satisfies EvaluationDataset;
 
+    const { inputTokens, outputTokens, cachedTokens, toolCalls: traceToolCalls, latency } =
+      evaluators.traceBasedEvaluators;
+
     await executorClient.runExperiment(
       {
         datasets: [dataset],
@@ -318,6 +322,11 @@ export function createEvaluateDataset({
             // ground truth text, so quantitative correctness comparison produces noise (low scores).
           ),
         ]),
+        traceToolCalls as Evaluator<DatasetExample, TaskOutput>,
+        latency as Evaluator<DatasetExample, TaskOutput>,
+        inputTokens as Evaluator<DatasetExample, TaskOutput>,
+        outputTokens as Evaluator<DatasetExample, TaskOutput>,
+        cachedTokens as Evaluator<DatasetExample, TaskOutput>,
       ]
     );
   };

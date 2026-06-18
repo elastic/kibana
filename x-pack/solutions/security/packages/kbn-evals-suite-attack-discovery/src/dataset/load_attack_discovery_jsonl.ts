@@ -11,9 +11,9 @@ import Fs from 'fs/promises';
 import Path from 'path';
 import type { AttackDiscoveryDatasetExample, AnonymizedAlert } from '../types';
 
-const DEFAULT_DATASET_NAME = 'attack_discovery: bundled alerts (jsonl)';
+const DEFAULT_DATASET_NAME = 'Attack Discovery All Scenarios';
 const DEFAULT_DATASET_DESCRIPTION =
-  'Attack Discovery evaluation dataset loaded from eval_dataset_attack_discovery_all_scenarios.jsonl';
+  'Attack Discovery evaluation dataset (reference scenarios). Loaded from eval_dataset_attack_discovery_all_scenarios.jsonl';
 
 const resolveJsonlPath = (): string => {
   // __dirname is: .../src/dataset

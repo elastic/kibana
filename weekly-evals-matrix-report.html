@@ -1,0 +1,1183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="color-scheme" content="dark">
+  <title>Security Weekly LLM Evals Matrix — Build #20</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #0e1014;
+      --surface: #16181d;
+      --surface-elev: #1d2026;
+      --border: #2a2e36;
+      --border-strong: #3a3f49;
+      --text: #e8e6e3;
+      --text-muted: #a0a09c;
+      --text-soft: #6e7079;
+      --accent: #e8845c;
+      --accent-soft: #3a201a;
+      --good: #6fb87f;
+      --good-soft: #1a2e21;
+      --warn: #d4a93f;
+      --warn-soft: #2e2614;
+      --bad: #e07575;
+      --bad-soft: #3a1d1d;
+      --info: #6fa6e0;
+      --info-soft: #1a2436;
+      --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+      --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, Roboto, sans-serif;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: var(--sans);
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 2.5rem 2rem 4rem;
+    }
+
+    /* Header */
+    header {
+      margin-bottom: 2.5rem;
+      padding-bottom: 2rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .build-badge {
+      display: inline-block;
+      font-family: var(--mono);
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: var(--accent);
+      background: var(--accent-soft);
+      border: 1px solid rgba(232, 132, 92, 0.3);
+      padding: 0.25rem 0.75rem;
+      border-radius: 4px;
+      margin-bottom: 1rem;
+    }
+
+    h1 {
+      font-size: 1.85rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      margin-bottom: 0.5rem;
+      line-height: 1.25;
+    }
+
+    .subtitle {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .source {
+      font-size: 0.85rem;
+      color: var(--text-soft);
+      font-family: var(--mono);
+    }
+
+    .source a {
+      color: var(--info);
+      text-decoration: none;
+    }
+
+    .source a:hover { text-decoration: underline; }
+
+    /* Sections */
+    section {
+      margin-bottom: 3rem;
+    }
+
+    h2 {
+      font-size: 1.25rem;
+      font-weight: 600;
+      margin-bottom: 1.25rem;
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+    }
+
+    h2 .section-num {
+      font-family: var(--mono);
+      font-size: 0.7rem;
+      font-weight: 600;
+      color: var(--accent);
+      background: var(--accent-soft);
+      padding: 0.15rem 0.5rem;
+      border-radius: 3px;
+      letter-spacing: 0.05em;
+    }
+
+    h3 {
+      font-size: 1rem;
+      font-weight: 600;
+      margin-bottom: 0.75rem;
+    }
+
+    /* Executive summary cards */
+    .card-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .stat-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1.25rem 1.5rem;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .stat-card:hover {
+      border-color: var(--border-strong);
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+    }
+
+    .stat-card .label {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-bottom: 0.5rem;
+    }
+
+    .stat-card .value {
+      font-size: 1.75rem;
+      font-weight: 700;
+      line-height: 1.2;
+    }
+
+    .stat-card .detail {
+      font-size: 0.85rem;
+      color: var(--text-soft);
+      margin-top: 0.35rem;
+    }
+
+    .badge {
+      display: inline-block;
+      font-size: 0.75rem;
+      font-weight: 600;
+      padding: 0.2rem 0.6rem;
+      border-radius: 4px;
+      letter-spacing: 0.02em;
+    }
+
+    .badge-good {
+      color: var(--good);
+      background: var(--good-soft);
+      border: 1px solid rgba(111, 184, 127, 0.35);
+    }
+
+    .badge-warn {
+      color: var(--warn);
+      background: var(--warn-soft);
+      border: 1px solid rgba(212, 169, 63, 0.35);
+    }
+
+    .badge-bad {
+      color: var(--bad);
+      background: var(--bad-soft);
+      border: 1px solid rgba(224, 117, 117, 0.35);
+    }
+
+    .badge-info {
+      color: var(--info);
+      background: var(--info-soft);
+      border: 1px solid rgba(111, 166, 224, 0.35);
+    }
+
+    /* Concern links */
+    .concern-links {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1.25rem 1.5rem;
+    }
+
+    .concern-links h3 {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 0.75rem;
+    }
+
+    .concern-links ul {
+      list-style: none;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    .concern-links a {
+      display: inline-block;
+      font-size: 0.82rem;
+      color: var(--text);
+      background: var(--surface-elev);
+      border: 1px solid var(--border);
+      padding: 0.35rem 0.75rem;
+      border-radius: 6px;
+      text-decoration: none;
+      transition: border-color 0.15s, background 0.15s;
+    }
+
+    .concern-links a:hover {
+      border-color: var(--accent);
+      background: var(--accent-soft);
+      color: var(--accent);
+    }
+
+    /* Tables */
+    .table-wrap {
+      overflow-x: auto;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: var(--surface);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.875rem;
+    }
+
+    thead th {
+      background: var(--surface-elev);
+      color: var(--text-muted);
+      font-weight: 600;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      padding: 0.85rem 1rem;
+      text-align: left;
+      border-bottom: 1px solid var(--border-strong);
+      white-space: nowrap;
+    }
+
+    tbody td {
+      padding: 0.75rem 1rem;
+      border-bottom: 1px solid var(--border);
+      vertical-align: middle;
+    }
+
+    tbody tr:last-child td { border-bottom: none; }
+
+    tbody tr {
+      transition: background 0.15s;
+    }
+
+    tbody tr:hover {
+      background: rgba(29, 32, 38, 0.6);
+    }
+
+    .suite-name {
+      font-family: var(--mono);
+      font-size: 0.8rem;
+      color: var(--text);
+      white-space: nowrap;
+    }
+
+    .score {
+      font-family: var(--mono);
+      font-weight: 600;
+      padding: 0.15rem 0.45rem;
+      border-radius: 4px;
+      display: inline-block;
+      min-width: 2.5rem;
+      text-align: center;
+    }
+
+    .score-good { color: var(--good); background: var(--good-soft); }
+    .score-warn { color: var(--warn); background: var(--warn-soft); }
+    .score-bad  { color: var(--bad);  background: var(--bad-soft); }
+    .score-miss { color: var(--text-soft); }
+
+    .status-pass {
+      color: var(--good);
+      font-weight: 600;
+      font-size: 0.8rem;
+      letter-spacing: 0.04em;
+    }
+
+    .latency {
+      font-family: var(--mono);
+      color: var(--text-muted);
+      font-size: 0.82rem;
+    }
+
+    .quality-label {
+      font-size: 0.72rem;
+      color: var(--text-soft);
+      display: block;
+      margin-bottom: 0.1rem;
+    }
+
+    /* Heatmap */
+    .heatmap td, .heatmap th {
+      text-align: center;
+      padding: 0.65rem 0.75rem;
+    }
+
+    .heatmap .suite-name { text-align: left; }
+
+    .hm-yes { color: var(--good); font-size: 1.1rem; }
+    .hm-no  { color: var(--text-soft); font-size: 1.1rem; }
+    .hm-warn { color: var(--warn); font-size: 1.1rem; }
+
+    /* Detail cards */
+    .detail-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 0.65rem;
+    }
+
+    details.suite-detail {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      overflow: hidden;
+      transition: border-color 0.2s;
+    }
+
+    details.suite-detail:hover {
+      border-color: var(--border-strong);
+    }
+
+    details.suite-detail[open] {
+      border-color: var(--border-strong);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35);
+    }
+
+    details.suite-detail summary {
+      padding: 1rem 1.25rem;
+      cursor: pointer;
+      list-style: none;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      font-weight: 600;
+      font-size: 0.9rem;
+      user-select: none;
+      transition: background 0.15s;
+    }
+
+    details.suite-detail summary::-webkit-details-marker { display: none; }
+
+    details.suite-detail summary::after {
+      content: "▸";
+      color: var(--text-soft);
+      font-size: 0.85rem;
+      transition: transform 0.2s;
+      flex-shrink: 0;
+    }
+
+    details.suite-detail[open] summary::after {
+      transform: rotate(90deg);
+      color: var(--accent);
+    }
+
+    details.suite-detail summary:hover {
+      background: var(--surface-elev);
+    }
+
+    .summary-left {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      min-width: 0;
+    }
+
+    .summary-left .suite-name {
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .eval-count {
+      font-size: 0.75rem;
+      color: var(--text-soft);
+      font-weight: 400;
+      white-space: nowrap;
+    }
+
+    .detail-body {
+      padding: 0 1.25rem 1.25rem;
+      border-top: 1px solid var(--border);
+    }
+
+    .eval-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 0.5rem;
+      padding-top: 1rem;
+    }
+
+    .eval-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.55rem 0.85rem;
+      background: var(--surface-elev);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      font-size: 0.82rem;
+      gap: 0.75rem;
+    }
+
+    .eval-item .eval-name {
+      color: var(--text-muted);
+      flex: 1;
+      min-width: 0;
+    }
+
+    .eval-item .eval-value {
+      font-family: var(--mono);
+      font-weight: 600;
+      flex-shrink: 0;
+    }
+
+    /* Callouts */
+    .callout-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 0.85rem;
+    }
+
+    .callout {
+      padding: 1.1rem 1.35rem;
+      border-radius: 10px;
+      border-left: 4px solid;
+      background: var(--surface);
+      border-top: 1px solid var(--border);
+      border-right: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .callout h4 {
+      font-size: 0.9rem;
+      font-weight: 600;
+      margin-bottom: 0.4rem;
+    }
+
+    .callout p {
+      font-size: 0.875rem;
+      color: var(--text-muted);
+      line-height: 1.55;
+    }
+
+    .callout-bad  { border-left-color: var(--bad);  background: linear-gradient(90deg, var(--bad-soft) 0%, var(--surface) 12%); }
+    .callout-warn { border-left-color: var(--warn); background: linear-gradient(90deg, var(--warn-soft) 0%, var(--surface) 12%); }
+    .callout-info { border-left-color: var(--info); background: linear-gradient(90deg, var(--info-soft) 0%, var(--surface) 12%); }
+
+    /* Fixes list */
+    .fixes-list {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1.25rem 1.5rem;
+    }
+
+    .fixes-list ul {
+      list-style: none;
+    }
+
+    .fixes-list li {
+      position: relative;
+      padding: 0.65rem 0 0.65rem 1.5rem;
+      border-bottom: 1px solid var(--border);
+      font-size: 0.9rem;
+      color: var(--text-muted);
+    }
+
+    .fixes-list li:last-child { border-bottom: none; }
+
+    .fixes-list li::before {
+      content: "✓";
+      position: absolute;
+      left: 0;
+      color: var(--good);
+      font-weight: 700;
+    }
+
+    .fixes-list code, .fixes-list .pr {
+      font-family: var(--mono);
+      font-size: 0.82rem;
+      color: var(--info);
+      background: var(--info-soft);
+      padding: 0.1rem 0.4rem;
+      border-radius: 3px;
+    }
+
+    /* Footer */
+    footer {
+      margin-top: 3rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid var(--border);
+      text-align: center;
+      font-size: 0.78rem;
+      color: var(--text-soft);
+    }
+
+    @media (max-width: 768px) {
+      .container { padding: 1.5rem 1rem 3rem; }
+      h1 { font-size: 1.4rem; }
+      .eval-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+
+    <header>
+      <div class="build-badge">Build #20</div>
+      <h1>Security Weekly LLM Evals Matrix</h1>
+      <p class="subtitle">Subject model: Claude 4.5 Haiku &nbsp;|&nbsp; Judge model: Claude 4.6 Opus &nbsp;|&nbsp; Date: June 18, 2026</p>
+      <p class="source">Source: Local runs from <code>kibana.worktrees/weekly-evals-matrix</code> — consolidated fixes from PRs <span class="pr">#273704</span>, <span class="pr">#273707</span>, <span class="pr">#273735</span></p>
+    </header>
+
+    <!-- Section 1: Executive Summary -->
+    <section id="executive-summary">
+      <h2><span class="section-num">01</span> Executive Summary</h2>
+
+      <div class="card-row">
+        <div class="stat-card">
+          <div class="label">Suites Run</div>
+          <div class="value">12</div>
+          <div class="detail"><span class="badge badge-good">12 passed</span></div>
+        </div>
+        <div class="stat-card">
+          <div class="label">Pass Rate</div>
+          <div class="value" style="color: var(--good);">100%</div>
+          <div class="detail">All executed suites met thresholds</div>
+        </div>
+        <div class="stat-card">
+          <div class="label">Deferred</div>
+          <div class="value" style="color: var(--warn);">1</div>
+          <div class="detail"><span class="badge badge-warn">attack-discovery</span> — needs golden cluster auth</div>
+        </div>
+        <div class="stat-card">
+          <div class="label">L4 Coverage</div>
+          <div class="value" style="color: var(--bad);">0%</div>
+          <div class="detail">toolSelection &amp; schemaCompliance absent</div>
+        </div>
+      </div>
+
+      <div class="concern-links">
+        <h3>Key Concern Areas</h3>
+        <ul>
+          <li><a href="#concern-l4">L4 Gap</a></li>
+          <li><a href="#concern-l1">L1 Skill Invoked = 0</a></li>
+          <li><a href="#concern-mitre">Low MITRE Accuracy</a></li>
+          <li><a href="#concern-factuality">Low Factuality</a></li>
+          <li><a href="#concern-esql-equiv">ES|QL Equivalence</a></li>
+          <li><a href="#concern-migrations">Migration Fidelity</a></li>
+          <li><a href="#concern-tokens">Token Data Missing</a></li>
+          <li><a href="#concern-deferred">attack-discovery Deferred</a></li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- Section 2: Full Matrix Table -->
+    <section id="matrix-table">
+      <h2><span class="section-num">02</span> Full Matrix Table</h2>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Suite</th>
+              <th>Tests</th>
+              <th>L1 Skill Invoked</th>
+              <th>L2 Trajectory</th>
+              <th>L3 Tool Calls</th>
+              <th>L3 Latency</th>
+              <th>L5 Primary Quality</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="suite-name">security-esql-generation-regression</td>
+              <td>1</td>
+              <td><span class="score score-miss">—</span></td>
+              <td><span class="score score-miss">—</span></td>
+              <td><span class="score score-good">0</span></td>
+              <td class="latency">0.90s</td>
+              <td><span class="quality-label">Validity</span><span class="score score-warn">0.81</span></td>
+              <td><span class="status-pass">PASS</span></td>
+            </tr>
+            <tr>
+              <td class="suite-name">security-alerts-rag-regression</td>
+              <td>4</td>
+              <td><span class="score score-bad">0</span></td>
+              <td><span class="score score-bad">0.50</span></td>
+              <td><span class="score score-good">0</span></td>
+              <td class="latency">29.28s</td>
+              <td><span class="quality-label">Groundedness</span><span class="score score-warn">0.88</span></td>
+              <td><span class="status-pass">PASS</span></td>
+            </tr>
+            <tr>
+              <td class="suite-name">pci-compliance</td>
+              <td><span class="score score-miss">—</span></td>
+              <td><span class="score score-bad">0</span></td>
+              <td><span class="score score-miss">—</span></td>
+              <td><span class="score score-miss">—</span></td>
+              <td><span class="score score-miss">—</span></td>
+              <td><span class="quality-label">Criteria</span><span class="score score-good">0.92</span></td>
+              <td><span class="status-pass">PASS</span></td>
+            </tr>
+            <tr>
+              <td class="suite-name">security-ai-rules</td>
+              <td><span class="score score-miss">—</span></td>
+              <td><span class="score score-miss">—</span></td>
+              <td><span class="score score-miss">—</span></td>
+              <td><span class="score score-miss">—</span></td>
+              <td><span class="score score-miss">—</span></td>
+              <td><span class="quality-label">Syntax</span><span class="score score-good">1.00</span></td>
+              <td><span class="status-pass">PASS</span></td>
+            </tr>
+            <tr>
+              <td class="suite-name">entity-analytics-v2</td>
+              <td><span class="score score-miss">—</span></td>
+              <td><span class="score score-miss">—</span></td>
+              <td><span class="score score-good">1.00</span></td>
+              <td><span class="score score-warn">0.86</span></td>
+              <td><span class="score score-miss">—</span></td>
+              <td><span class="quality-label">Criteria</span><span class="score score-good">0.98</span></td>
+              <td><span class="status-pass">PASS</span></td>
+            </tr>
+            <tr>
+              <td class="suite-name">siem-readiness</td>
+              <td><span class="score score-miss">—</span></td>
+              <td><span class="score score-miss">—</span></td>
+              <td><span class="score score-miss">—</span></td>
+              <td><span class="score score-miss">—</span></td>
+              <td><span class="score score-miss">—</span></td>
+              <td><span class="quality-label">Criteria</span><span class="score score-good">0.91</span></td>
+              <td><span class="status-pass">PASS</span></td>
+            </tr>
+            <tr>
+              <td class="suite-name">security-alert-triage</td>
+              <td><span class="score score-miss">—</span></td>
+              <td><span class="score score-miss">—</span></td>
+              <td><span class="score score-miss">—</span></td>
+              <td><span class="score score-good">0</span></td>
+              <td class="latency">0.52s</td>
+              <td><span class="quality-label">Criteria</span><span class="score score-good">0.92</span></td>
+              <td><span class="status-pass">PASS</span></td>
+            </tr>
+            <tr>
+              <td class="suite-name">lead-generation</td>
+              <td><span class="score score-miss">—</span></td>
+              <td><span class="score score-miss">—</span></td>
+              <td><span class="score score-miss">—</span></td>
+              <td><span class="score score-miss">—</span></td>
+              <td><span class="score score-miss">—</span></td>
+              <td><span class="quality-label">Basic</span><span class="score score-warn">0.89</span></td>
+              <td><span class="status-pass">PASS</span></td>
+            </tr>
+            <tr>
+              <td class="suite-name">agent-builder</td>
+              <td>14</td>
+              <td><span class="score score-bad">0</span></td>
+              <td><span class="score score-good">1.00</span></td>
+              <td><span class="score score-good">0</span></td>
+              <td><span class="score score-miss">—</span></td>
+              <td><span class="quality-label">Groundedness</span><span class="score score-warn">0.79</span></td>
+              <td><span class="status-pass">PASS</span></td>
+            </tr>
+            <tr>
+              <td class="suite-name">workflows</td>
+              <td>31</td>
+              <td><span class="score score-miss">—</span></td>
+              <td><span class="score score-good">0.97</span></td>
+              <td><span class="score score-miss">—</span></td>
+              <td class="latency">0.99s</td>
+              <td><span class="quality-label">Criteria</span><span class="score score-good">0.94</span></td>
+              <td><span class="status-pass">PASS</span></td>
+            </tr>
+            <tr>
+              <td class="suite-name">security-automatic-migrations</td>
+              <td>3</td>
+              <td><span class="score score-miss">—</span></td>
+              <td><span class="score score-miss">—</span></td>
+              <td><span class="score score-miss">—</span></td>
+              <td><span class="score score-miss">—</span></td>
+              <td><span class="quality-label">ES|QL Compl.</span><span class="score score-warn">0.89</span></td>
+              <td><span class="status-pass">PASS</span></td>
+            </tr>
+            <tr>
+              <td class="suite-name">endpoint</td>
+              <td>15</td>
+              <td><span class="score score-miss">—</span></td>
+              <td><span class="score score-miss">—</span></td>
+              <td><span class="score score-miss">—</span></td>
+              <td><span class="score score-miss">—</span></td>
+              <td><span class="quality-label">Criteria</span><span class="score score-warn">0.77</span></td>
+              <td><span class="status-pass">PASS</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Section 3: Suite Detail Cards -->
+    <section id="suite-details">
+      <h2><span class="section-num">03</span> Suite Detail Cards</h2>
+
+      <div class="detail-grid">
+
+        <details class="suite-detail" id="detail-esql-generation">
+          <summary>
+            <span class="summary-left">
+              <span class="suite-name">security-esql-generation-regression</span>
+              <span class="badge badge-good">PASS</span>
+            </span>
+            <span class="eval-count">6 evaluators</span>
+          </summary>
+          <div class="detail-body">
+            <div class="eval-grid">
+              <div class="eval-item"><span class="eval-name">ES|QL Execution Validity</span><span class="eval-value score score-bad">0.61</span></div>
+              <div class="eval-item"><span class="eval-name">ES|QL Functional Equivalence</span><span class="eval-value score score-bad">0.05</span></div>
+              <div class="eval-item"><span class="eval-name">ES|QL Result Equivalence</span><span class="eval-value score score-bad">0.23</span></div>
+              <div class="eval-item"><span class="eval-name">ES|QL Validity</span><span class="eval-value score score-warn">0.81</span></div>
+              <div class="eval-item"><span class="eval-name">Latency</span><span class="eval-value latency">0.90s</span></div>
+              <div class="eval-item"><span class="eval-name">Tool Calls</span><span class="eval-value score score-good">0</span></div>
+            </div>
+          </div>
+        </details>
+
+        <details class="suite-detail" id="detail-alerts-rag">
+          <summary>
+            <span class="summary-left">
+              <span class="suite-name">security-alerts-rag-regression</span>
+              <span class="badge badge-good">PASS</span>
+            </span>
+            <span class="eval-count">8 evaluators</span>
+          </summary>
+          <div class="detail-body">
+            <div class="eval-grid">
+              <div class="eval-item"><span class="eval-name">Skill Invoked</span><span class="eval-value score score-bad">0</span></div>
+              <div class="eval-item"><span class="eval-name">Trajectory</span><span class="eval-value score score-bad">0.50</span></div>
+              <div class="eval-item"><span class="eval-name">Sequence Accuracy</span><span class="eval-value score score-good">1.00</span></div>
+              <div class="eval-item"><span class="eval-name">Factuality</span><span class="eval-value score score-bad">0.12</span></div>
+              <div class="eval-item"><span class="eval-name">Groundedness</span><span class="eval-value score score-warn">0.88</span></div>
+              <div class="eval-item"><span class="eval-name">Relevance</span><span class="eval-value score score-bad">0.51</span></div>
+              <div class="eval-item"><span class="eval-name">Tool Calls</span><span class="eval-value score score-good">0</span></div>
+              <div class="eval-item"><span class="eval-name">Latency</span><span class="eval-value latency">29.28s</span></div>
+            </div>
+          </div>
+        </details>
+
+        <details class="suite-detail" id="detail-pci">
+          <summary>
+            <span class="summary-left">
+              <span class="suite-name">pci-compliance</span>
+              <span class="badge badge-good">PASS</span>
+            </span>
+            <span class="eval-count">2 evaluators</span>
+          </summary>
+          <div class="detail-body">
+            <div class="eval-grid">
+              <div class="eval-item"><span class="eval-name">Skill Invoked</span><span class="eval-value score score-bad">0</span></div>
+              <div class="eval-item"><span class="eval-name">PCI Criteria</span><span class="eval-value score score-good">0.92</span></div>
+            </div>
+          </div>
+        </details>
+
+        <details class="suite-detail" id="detail-ai-rules">
+          <summary>
+            <span class="summary-left">
+              <span class="suite-name">security-ai-rules</span>
+              <span class="badge badge-good">PASS</span>
+            </span>
+            <span class="eval-count">12 evaluators</span>
+          </summary>
+          <div class="detail-body">
+            <div class="eval-grid">
+              <div class="eval-item"><span class="eval-name">ES|QL Functional Equivalence</span><span class="eval-value score score-bad">0</span></div>
+              <div class="eval-item"><span class="eval-name">Field Coverage</span><span class="eval-value score score-good">1.00</span></div>
+              <div class="eval-item"><span class="eval-name">Rejection</span><span class="eval-value score score-bad">0</span></div>
+              <div class="eval-item"><span class="eval-name">Query Syntax Validity</span><span class="eval-value score score-good">1.00</span></div>
+              <div class="eval-item"><span class="eval-name">MITRE Accuracy</span><span class="eval-value score score-bad">0.32</span></div>
+              <div class="eval-item"><span class="eval-name">Rule Type &amp; Language</span><span class="eval-value score score-good">1.00</span></div>
+              <div class="eval-item"><span class="eval-name">Severity Match</span><span class="eval-value score score-bad">0.13</span></div>
+              <div class="eval-item"><span class="eval-name">Severity Validity</span><span class="eval-value score score-good">1.00</span></div>
+              <div class="eval-item"><span class="eval-name">Risk Score Match</span><span class="eval-value score score-bad">0.13</span></div>
+              <div class="eval-item"><span class="eval-name">Risk Score Validity</span><span class="eval-value score score-good">1.00</span></div>
+              <div class="eval-item"><span class="eval-name">Interval Format</span><span class="eval-value score score-good">1.00</span></div>
+              <div class="eval-item"><span class="eval-name">Lookback Gap</span><span class="eval-value score score-good">1.00</span></div>
+            </div>
+          </div>
+        </details>
+
+        <details class="suite-detail" id="detail-entity-analytics">
+          <summary>
+            <span class="summary-left">
+              <span class="suite-name">entity-analytics-v2</span>
+              <span class="badge badge-good">PASS</span>
+            </span>
+            <span class="eval-count">5 evaluators</span>
+          </summary>
+          <div class="detail-body">
+            <div class="eval-grid">
+              <div class="eval-item"><span class="eval-name">Sequence Accuracy</span><span class="eval-value score score-good">1.00</span></div>
+              <div class="eval-item"><span class="eval-name">Tool Calls</span><span class="eval-value score score-warn">0.86</span></div>
+              <div class="eval-item"><span class="eval-name">Criteria</span><span class="eval-value score score-good">0.98</span></div>
+              <div class="eval-item"><span class="eval-name">Groundedness</span><span class="eval-value score score-warn">0.77</span></div>
+              <div class="eval-item"><span class="eval-name">Attachments</span><span class="eval-value score score-good">0.95</span></div>
+            </div>
+          </div>
+        </details>
+
+        <details class="suite-detail" id="detail-siem-readiness">
+          <summary>
+            <span class="summary-left">
+              <span class="suite-name">siem-readiness</span>
+              <span class="badge badge-good">PASS</span>
+            </span>
+            <span class="eval-count">1 evaluator</span>
+          </summary>
+          <div class="detail-body">
+            <div class="eval-grid">
+              <div class="eval-item"><span class="eval-name">SIEM Readiness Criteria</span><span class="eval-value score score-good">0.91</span></div>
+            </div>
+          </div>
+        </details>
+
+        <details class="suite-detail" id="detail-alert-triage">
+          <summary>
+            <span class="summary-left">
+              <span class="suite-name">security-alert-triage</span>
+              <span class="badge badge-good">PASS</span>
+            </span>
+            <span class="eval-count">4 evaluators</span>
+          </summary>
+          <div class="detail-body">
+            <div class="eval-grid">
+              <div class="eval-item"><span class="eval-name">Criteria</span><span class="eval-value score score-good">0.92</span></div>
+              <div class="eval-item"><span class="eval-name">AttachmentReadCompliance</span><span class="eval-value score score-good">1.00</span></div>
+              <div class="eval-item"><span class="eval-name">Tool Calls</span><span class="eval-value score score-good">0</span></div>
+              <div class="eval-item"><span class="eval-name">Latency</span><span class="eval-value latency">0.52s</span></div>
+            </div>
+          </div>
+        </details>
+
+        <details class="suite-detail" id="detail-lead-generation">
+          <summary>
+            <span class="summary-left">
+              <span class="suite-name">lead-generation</span>
+              <span class="badge badge-good">PASS</span>
+            </span>
+            <span class="eval-count">4 evaluators</span>
+          </summary>
+          <div class="detail-body">
+            <div class="eval-grid">
+              <div class="eval-item"><span class="eval-name">LeadGenerationBasic</span><span class="eval-value score score-warn">0.89</span></div>
+              <div class="eval-item"><span class="eval-name">LeadGenerationRubric</span><span class="eval-value score score-warn">0.89</span></div>
+              <div class="eval-item"><span class="eval-name">Ran</span><span class="eval-value score score-good">1.00</span></div>
+              <div class="eval-item"><span class="eval-name">StatusMatchesExecution</span><span class="eval-value score score-good">1.00</span></div>
+            </div>
+          </div>
+        </details>
+
+        <details class="suite-detail" id="detail-agent-builder">
+          <summary>
+            <span class="summary-left">
+              <span class="suite-name">agent-builder</span>
+              <span class="badge badge-good">PASS</span>
+            </span>
+            <span class="eval-count">10 evaluators</span>
+          </summary>
+          <div class="detail-body">
+            <div class="eval-grid">
+              <div class="eval-item"><span class="eval-name">DocVersionReleaseDate</span><span class="eval-value score score-good">0.99</span></div>
+              <div class="eval-item"><span class="eval-name">ExpectedSkillInvocation</span><span class="eval-value score score-bad">0.59</span></div>
+              <div class="eval-item"><span class="eval-name">ExpectedToolCalled</span><span class="eval-value score score-good">1.00</span></div>
+              <div class="eval-item"><span class="eval-name">Factuality</span><span class="eval-value score score-bad">0.09</span></div>
+              <div class="eval-item"><span class="eval-name">Groundedness</span><span class="eval-value score score-warn">0.79</span></div>
+              <div class="eval-item"><span class="eval-name">Relevance</span><span class="eval-value score score-bad">0.58</span></div>
+              <div class="eval-item"><span class="eval-name">Sequence Accuracy</span><span class="eval-value score score-good">1.00</span></div>
+              <div class="eval-item"><span class="eval-name">Skill Invoked</span><span class="eval-value score score-bad">0</span></div>
+              <div class="eval-item"><span class="eval-name">Tool Calls</span><span class="eval-value score score-good">0</span></div>
+              <div class="eval-item"><span class="eval-name">ToolUsageOnly</span><span class="eval-value score score-good">0.92</span></div>
+            </div>
+          </div>
+        </details>
+
+        <details class="suite-detail" id="detail-workflows">
+          <summary>
+            <span class="summary-left">
+              <span class="suite-name">workflows</span>
+              <span class="badge badge-good">PASS</span>
+            </span>
+            <span class="eval-count">11 evaluators</span>
+          </summary>
+          <div class="detail-body">
+            <div class="eval-grid">
+              <div class="eval-item"><span class="eval-name">Criteria</span><span class="eval-value score score-good">0.94</span></div>
+              <div class="eval-item"><span class="eval-name">EditPreservation</span><span class="eval-value score score-warn">0.88</span></div>
+              <div class="eval-item"><span class="eval-name">EditToolSuccess</span><span class="eval-value score score-good">1.00</span></div>
+              <div class="eval-item"><span class="eval-name">Efficiency</span><span class="eval-value score score-good">1.00</span></div>
+              <div class="eval-item"><span class="eval-name">Latency</span><span class="eval-value latency">0.99s</span></div>
+              <div class="eval-item"><span class="eval-name">NoErrors</span><span class="eval-value score score-good">1.00</span></div>
+              <div class="eval-item"><span class="eval-name">Rejection</span><span class="eval-value score score-good">1.00</span></div>
+              <div class="eval-item"><span class="eval-name">StructuralCorrectness</span><span class="eval-value score score-good">0.96</span></div>
+              <div class="eval-item"><span class="eval-name">UsedExpectedTools</span><span class="eval-value score score-good">1.00</span></div>
+              <div class="eval-item"><span class="eval-name">ValidationPass</span><span class="eval-value score score-bad">0</span></div>
+              <div class="eval-item"><span class="eval-name">trajectory</span><span class="eval-value score score-good">0.97</span></div>
+            </div>
+          </div>
+        </details>
+
+        <details class="suite-detail" id="detail-auto-migrations">
+          <summary>
+            <span class="summary-left">
+              <span class="suite-name">security-automatic-migrations</span>
+              <span class="badge badge-good">PASS</span>
+            </span>
+            <span class="eval-count">10 evaluators</span>
+          </summary>
+          <div class="detail-body">
+            <div class="eval-grid">
+              <div class="eval-item"><span class="eval-name">ES|QL Completeness</span><span class="eval-value score score-warn">0.89</span></div>
+              <div class="eval-item"><span class="eval-name">translation_fidelity</span><span class="eval-value score score-bad">0.25</span></div>
+              <div class="eval-item"><span class="eval-name">Markdown Error Detection</span><span class="eval-value score score-good">1.00</span></div>
+              <div class="eval-item"><span class="eval-name">Panel Count Preservation</span><span class="eval-value score score-bad">0</span></div>
+              <div class="eval-item"><span class="eval-name">Translation Completeness</span><span class="eval-value score score-bad">0.40</span></div>
+              <div class="eval-item"><span class="eval-name">Translated ESQL Validity</span><span class="eval-value score score-bad">0</span></div>
+              <div class="eval-item"><span class="eval-name">Prebuilt Rule Match</span><span class="eval-value score score-good">1.00</span></div>
+              <div class="eval-item"><span class="eval-name">LOOKUP JOIN Preservation</span><span class="eval-value score score-bad">0.67</span></div>
+              <div class="eval-item"><span class="eval-name">Unsupported Pattern Detection</span><span class="eval-value score score-bad">0</span></div>
+              <div class="eval-item"><span class="eval-name">Translation Result</span><span class="eval-value score score-bad">0</span></div>
+            </div>
+          </div>
+        </details>
+
+        <details class="suite-detail" id="detail-endpoint">
+          <summary>
+            <span class="summary-left">
+              <span class="suite-name">endpoint</span>
+              <span class="badge badge-good">PASS</span>
+            </span>
+            <span class="eval-count">1 evaluator</span>
+          </summary>
+          <div class="detail-body">
+            <div class="eval-grid">
+              <div class="eval-item"><span class="eval-name">Criteria</span><span class="eval-value score score-warn">0.77</span></div>
+            </div>
+          </div>
+        </details>
+
+      </div>
+    </section>
+
+    <!-- Section 4: L1-L5 Coverage Heatmap -->
+    <section id="coverage-heatmap">
+      <h2><span class="section-num">04</span> L1–L5 Coverage Heatmap</h2>
+
+      <div class="table-wrap">
+        <table class="heatmap">
+          <thead>
+            <tr>
+              <th>Suite</th>
+              <th>L1</th>
+              <th>L2</th>
+              <th>L3</th>
+              <th>L4</th>
+              <th>L5</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="suite-name">security-esql-generation-regression</td>
+              <td class="hm-no" title="Missing">❌</td>
+              <td class="hm-no" title="Missing">❌</td>
+              <td class="hm-yes" title="Present">✅</td>
+              <td class="hm-no" title="Missing">❌</td>
+              <td class="hm-yes" title="Present">✅</td>
+            </tr>
+            <tr>
+              <td class="suite-name">security-alerts-rag-regression</td>
+              <td class="hm-warn" title="Present, score 0">⚠️</td>
+              <td class="hm-yes" title="Present">✅</td>
+              <td class="hm-yes" title="Present">✅</td>
+              <td class="hm-no" title="Missing">❌</td>
+              <td class="hm-yes" title="Present">✅</td>
+            </tr>
+            <tr>
+              <td class="suite-name">pci-compliance</td>
+              <td class="hm-warn" title="Present, score 0">⚠️</td>
+              <td class="hm-no" title="Missing">❌</td>
+              <td class="hm-no" title="Missing">❌</td>
+              <td class="hm-no" title="Missing">❌</td>
+              <td class="hm-yes" title="Present">✅</td>
+            </tr>
+            <tr>
+              <td class="suite-name">security-ai-rules</td>
+              <td class="hm-no" title="Missing">❌</td>
+              <td class="hm-no" title="Missing">❌</td>
+              <td class="hm-no" title="Missing">❌</td>
+              <td class="hm-no" title="Missing">❌</td>
+              <td class="hm-yes" title="Present">✅</td>
+            </tr>
+            <tr>
+              <td class="suite-name">entity-analytics-v2</td>
+              <td class="hm-no" title="Missing">❌</td>
+              <td class="hm-yes" title="Present">✅</td>
+              <td class="hm-yes" title="Present">✅</td>
+              <td class="hm-no" title="Missing">❌</td>
+              <td class="hm-yes" title="Present">✅</td>
+            </tr>
+            <tr>
+              <td class="suite-name">siem-readiness</td>
+              <td class="hm-no" title="Missing">❌</td>
+              <td class="hm-no" title="Missing">❌</td>
+              <td class="hm-no" title="Missing">❌</td>
+              <td class="hm-no" title="Missing">❌</td>
+              <td class="hm-yes" title="Present">✅</td>
+            </tr>
+            <tr>
+              <td class="suite-name">security-alert-triage</td>
+              <td class="hm-no" title="Missing">❌</td>
+              <td class="hm-no" title="Missing">❌</td>
+              <td class="hm-yes" title="Present">✅</td>
+              <td class="hm-no" title="Missing">❌</td>
+              <td class="hm-yes" title="Present">✅</td>
+            </tr>
+            <tr>
+              <td class="suite-name">lead-generation</td>
+              <td class="hm-no" title="Missing">❌</td>
+              <td class="hm-no" title="Missing">❌</td>
+              <td class="hm-no" title="Missing">❌</td>
+              <td class="hm-no" title="Missing">❌</td>
+              <td class="hm-yes" title="Present">✅</td>
+            </tr>
+            <tr>
+              <td class="suite-name">agent-builder</td>
+              <td class="hm-warn" title="Present, score 0">⚠️</td>
+              <td class="hm-yes" title="Present">✅</td>
+              <td class="hm-yes" title="Present">✅</td>
+              <td class="hm-no" title="Missing">❌</td>
+              <td class="hm-yes" title="Present">✅</td>
+            </tr>
+            <tr>
+              <td class="suite-name">workflows</td>
+              <td class="hm-no" title="Missing">❌</td>
+              <td class="hm-yes" title="Present">✅</td>
+              <td class="hm-yes" title="Present">✅</td>
+              <td class="hm-no" title="Missing">❌</td>
+              <td class="hm-yes" title="Present">✅</td>
+            </tr>
+            <tr>
+              <td class="suite-name">security-automatic-migrations</td>
+              <td class="hm-no" title="Missing">❌</td>
+              <td class="hm-no" title="Missing">❌</td>
+              <td class="hm-no" title="Missing">❌</td>
+              <td class="hm-no" title="Missing">❌</td>
+              <td class="hm-yes" title="Present">✅</td>
+            </tr>
+            <tr>
+              <td class="suite-name">endpoint</td>
+              <td class="hm-no" title="Missing">❌</td>
+              <td class="hm-no" title="Missing">❌</td>
+              <td class="hm-no" title="Missing">❌</td>
+              <td class="hm-no" title="Missing">❌</td>
+              <td class="hm-yes" title="Present">✅</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p style="margin-top: 0.85rem; font-size: 0.82rem; color: var(--text-soft);">
+        <span class="hm-yes" style="font-size: 0.9rem;">✅</span> evaluator present &amp; reporting &nbsp;&nbsp;
+        <span class="hm-warn" style="font-size: 0.9rem;">⚠️</span> evaluator present but score is 0 &nbsp;&nbsp;
+        <span class="hm-no" style="font-size: 0.9rem;">❌</span> evaluator missing
+      </p>
+    </section>
+
+    <!-- Section 5: Concerns & Action Items -->
+    <section id="concerns">
+      <h2><span class="section-num">05</span> Concerns &amp; Action Items</h2>
+
+      <div class="callout-grid">
+        <div class="callout callout-bad" id="concern-l4">
+          <h4>L4 Gap (All Suites)</h4>
+          <p><code>toolSelection</code> and <code>schemaCompliance</code> evaluators are absent from all 12 suites. No tool-use quality data is available at the L4 tier.</p>
+        </div>
+
+        <div class="callout callout-warn" id="concern-l1">
+          <h4>L1 Skill Invoked = 0</h4>
+          <p>alerts-rag, pci-compliance, and agent-builder have the Skill Invoked evaluator wired but skills didn't load in traces. Likely trace ingestion failures from Kibana crashes during the run window.</p>
+        </div>
+
+        <div class="callout callout-warn" id="concern-mitre">
+          <h4>Low MITRE Accuracy (0.32) — security-ai-rules</h4>
+          <p>Rule creation struggles with correct ATT&amp;CK technique mapping. Syntax and schema validity pass, but semantic technique selection is unreliable.</p>
+        </div>
+
+        <div class="callout callout-bad" id="concern-factuality">
+          <h4>Low Factuality</h4>
+          <p>alerts-rag scores 0.12 and agent-builder scores 0.09 on Factuality — responses contain claims not grounded in retrieved context despite passing primary quality thresholds.</p>
+        </div>
+
+        <div class="callout callout-bad" id="concern-esql-equiv">
+          <h4>ES|QL Functional Equivalence Near Zero</h4>
+          <p>esql-generation (0.05) and security-ai-rules (0) produce syntactically valid but functionally incorrect queries. Validity passes; equivalence does not.</p>
+        </div>
+
+        <div class="callout callout-warn" id="concern-migrations">
+          <h4>Auto-migrations Translation Fidelity (0.25)</h4>
+          <p>Dashboard migration quality is low across the board. Panel Count Preservation at 0; Translation Result and Translated ESQL Validity also at 0.</p>
+        </div>
+
+        <div class="callout callout-info" id="concern-tokens">
+          <h4>Token Usage Data Missing</h4>
+          <p>Evaluators ran but token scores weren't exported due to Kibana crashes during score ingestion. Re-run with stable cluster to capture L3 input/output/cached token metrics.</p>
+        </div>
+
+        <div class="callout callout-info" id="concern-deferred">
+          <h4>attack-discovery Deferred</h4>
+          <p>Suite requires golden cluster vault auth to restore dataset JSONL. Blocked on <code>deployment ensure-golden-evals</code> credential provisioning.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 6: Fixes Applied -->
+    <section id="fixes">
+      <h2><span class="section-num">06</span> Fixes Applied</h2>
+
+      <div class="fixes-list">
+        <ul>
+          <li><span class="pr">PR #273704</span>: entity-analytics switched to V2 APIs (Entity Store V2 deprecation)</li>
+          <li><span class="pr">PR #273707</span>: added siem-readiness eval suite</li>
+          <li><span class="pr">PR #273735</span>: fixed security-ai-rules agent ID (<code>security.agent</code> → <code>elastic-ai-agent</code>), added snapshot restore</li>
+          <li>Judge model switched from Gemini to Claude 4.6 Opus (workaround for GPT-5.4 empty <code>toolCallId</code> bug)</li>
+          <li>agent-builder <code>find_rules</code> multi-turn assertion relaxed (flaky content matching)</li>
+          <li>endpoint package install timeout increased to 5 minutes</li>
+        </ul>
+      </div>
+    </section>
+
+    <footer>
+      Security Weekly LLM Evals Matrix &mdash; Build #20 &mdash; Generated June 18, 2026<br>
+      Subject: Claude 4.5 Haiku &nbsp;|&nbsp; Judge: Claude 4.6 Opus &nbsp;|&nbsp; Worktree: weekly-evals-matrix
+    </footer>
+
+  </div>
+</body>
+</html>

@@ -11,6 +11,7 @@ import type {
   EvaluationDataset,
   Example,
   EvalsExecutorClient,
+  TaskOutput,
 } from '@kbn/evals';
 import { createEsqlEquivalenceEvaluator } from '@kbn/evals';
 import type { BoundInferenceClient } from '@kbn/inference-common';
@@ -32,6 +33,12 @@ import {
 export interface RuleGenerationTaskOutput {
   generatedRule?: Partial<ReferenceRule>;
   error?: string;
+  traceId?: string;
+  steps?: Array<{
+    type: string;
+    tool_id?: string;
+    results?: unknown[];
+  }>;
 }
 
 // ---------------------------------------------------------------------------
@@ -470,6 +477,9 @@ export function createEvaluateDataset({
   const skip = (e: Evaluator<RuleExample, RuleGenerationTaskOutput>) =>
     skipAgentErrors(skipMissingIndexFailures(e));
 
+  const { inputTokens, outputTokens, cachedTokens, toolCalls, latency } =
+    evaluators.traceBasedEvaluators;
+
   const allEvaluators: Array<Evaluator<RuleExample, RuleGenerationTaskOutput>> = [
     // CODE — deterministic
     skip(skipNegativeCases(createQuerySyntaxValidityEvaluator())),
@@ -490,6 +500,11 @@ export function createEvaluateDataset({
     // skip(skipNegativeCases(createRuleDescriptionEvaluator(evaluators))),
     // Rejection — scores 1 when model correctly refuses a negative case, N/A otherwise
     skip(createRejectionEvaluator()),
+    toolCalls as Evaluator<RuleExample, TaskOutput>,
+    latency as Evaluator<RuleExample, TaskOutput>,
+    inputTokens as Evaluator<RuleExample, TaskOutput>,
+    outputTokens as Evaluator<RuleExample, TaskOutput>,
+    cachedTokens as Evaluator<RuleExample, TaskOutput>,
   ];
 
   return async function evaluateDataset({
@@ -531,7 +546,7 @@ export function createEvaluateDataset({
                 succeeded++;
                 negativeSucceeded++;
                 log.info('[Task] Negative case: model refused to generate a rule (expected)');
-                return {};
+                return { traceId: taskResult.traceId, steps: taskResult.steps };
               }
 
               const isMissingIndex =
@@ -546,7 +561,11 @@ export function createEvaluateDataset({
                 otherFailureReasons.push(truncate(taskResult.error ?? 'No rule returned'));
                 log.warning(`[Task] No rule generated. Error: ${taskResult.error}`);
               }
-              return { error: taskResult.error || 'No rule returned from agent' };
+              return {
+                error: taskResult.error || 'No rule returned from agent',
+                traceId: taskResult.traceId,
+                steps: taskResult.steps,
+              };
             }
 
             if (isNegative) {

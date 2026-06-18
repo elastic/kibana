@@ -6,7 +6,8 @@
  */
 
 import { createWithActiveSpan, type WithActiveSpanOptions } from '@kbn/tracing-utils';
-import { ROOT_CONTEXT, context, propagation, trace } from '@opentelemetry/api';
+import { ROOT_CONTEXT, context, propagation, trace, isValidTraceId } from '@opentelemetry/api';
+import type { TaskOutput } from '../types';
 
 const EVALS_TRACER = trace.getTracer('@kbn/evals');
 const withActiveEvalsSpan = createWithActiveSpan({
@@ -58,6 +59,44 @@ export function withEvaluatorSpan(name: string, opts: WithActiveSpanOptions, cb:
       cb
     )
   );
+}
+
+function normalizeTraceIdCandidate(candidate: unknown): string | null {
+  if (typeof candidate === 'string' && isValidTraceId(candidate)) {
+    return candidate;
+  }
+
+  if (Array.isArray(candidate) && candidate.length > 0) {
+    const first = candidate[0];
+    if (typeof first === 'string' && isValidTraceId(first)) {
+      return first;
+    }
+  }
+
+  return null;
+}
+
+/**
+ * Prefer the Kibana-side trace ID captured by the task (e.g. Agent Builder
+ * `converse` response `trace_id`) over the Playwright worker trace ID. Token
+ * and other trace-based evaluators query `traces-*` for inference spans that
+ * live on the server trace, not the eval runner's HTTP client span.
+ */
+export function resolveEvaluationTraceId(
+  taskOutput: TaskOutput,
+  workerTraceId: string | null
+): string | null {
+  const output = taskOutput as Record<string, unknown> | null | undefined;
+  if (output) {
+    const serverTrace =
+      normalizeTraceIdCandidate(output.traceId) ??
+      normalizeTraceIdCandidate(output.serverTraceId);
+    if (serverTrace) {
+      return serverTrace;
+    }
+  }
+
+  return workerTraceId;
 }
 
 export function getCurrentTraceId(): string | null {
