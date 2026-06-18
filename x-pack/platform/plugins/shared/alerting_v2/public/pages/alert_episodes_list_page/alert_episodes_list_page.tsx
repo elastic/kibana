@@ -179,11 +179,7 @@ export const AlertEpisodesListPage = () => {
     [episodesData]
   );
 
-  const {
-    rulesCache,
-    missingRuleIds,
-    loading: isLoadingRules,
-  } = useAlertingRulesCache({
+  const { rulesCache, loading: isLoadingRules } = useAlertingRulesCache({
     ruleIds,
     services,
   });
@@ -296,7 +292,6 @@ export const AlertEpisodesListPage = () => {
         <EpisodeRuleCell
           {...props}
           rulesCache={rulesCache}
-          missingRuleIds={missingRuleIds}
           isLoadingRules={isLoadingRules}
           rowHeight={rowHeight}
         />
@@ -308,7 +303,7 @@ export const AlertEpisodesListPage = () => {
         );
       },
     }),
-    [rulesCache, missingRuleIds, isLoadingRules, rowHeight, services.userProfile]
+    [rulesCache, isLoadingRules, rowHeight, services.userProfile]
   );
 
   return (

@@ -6,9 +6,10 @@
  */
 
 import React from 'react';
-import { EuiCallOut, EuiLoadingSpinner, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiLoadingSpinner, EuiText } from '@elastic/eui';
 import { useFetchEpisodeQuery } from '../../hooks/use_fetch_episode_query';
 import { useFetchRule } from '../../hooks/use_fetch_rule';
+import { isRuleError, isRuleLoaded } from '../../types/rule_state';
 import { useFetchEpisodeActions } from '../../hooks/use_fetch_episode_actions';
 import { useFetchGroupActions } from '../../hooks/use_fetch_group_actions';
 import { parseEpisodeDataJson } from '../../utils/episode_grouping_data';
@@ -40,7 +41,7 @@ export const AlertEpisodeOverviewListSection = ({
   const triggeredAt = episode?.triggered_at;
   const durationMs = episode?.duration;
 
-  const { rule, isRuleNotFound, isRuleError } = useFetchRule({ id: ruleId, http: services.http });
+  const { ruleState } = useFetchRule({ id: ruleId, http: services.http });
 
   const {
     data: episodeActionsMap,
@@ -57,7 +58,7 @@ export const AlertEpisodeOverviewListSection = ({
     services,
   });
 
-  if (isEpisodeError || isRuleError || isEpisodeActionsError || isGroupActionsError) {
+  if (isEpisodeError || isRuleError(ruleState) || isEpisodeActionsError || isGroupActionsError) {
     return (
       <EuiText size="s" color="danger" data-test-subj="alertingV2EpisodeOverviewListSectionError">
         {i18n.OVERVIEW_LIST_SECTION_LOAD_ERROR}
@@ -71,38 +72,23 @@ export const AlertEpisodeOverviewListSection = ({
     );
   }
 
-  const groupingFields = isRuleNotFound ? [] : rule?.grouping?.fields ?? [];
+  const groupingFields = isRuleLoaded(ruleState) ? ruleState.rule.grouping?.fields ?? [] : [];
   const groupingData = parseEpisodeDataJson(episode?.episode_data);
   const assigneeUid = episode?.last_assignee_uid ?? undefined;
   const episodeAction = episodeActionsMap?.get(episodeId);
   const groupAction = groupHash ? groupActionsMap?.get(groupHash) : undefined;
 
   return (
-    <>
-      {isRuleNotFound ? (
-        <>
-          <EuiCallOut
-            announceOnMount
-            size="s"
-            title={i18n.OVERVIEW_LIST_SECTION_RULE_DELETED_CALLOUT}
-            color="warning"
-            iconType="warning"
-            data-test-subj="alertingV2EpisodeOverviewListSectionRuleDeletedCallout"
-          />
-          <EuiSpacer size="m" />
-        </>
-      ) : null}
-      <AlertEpisodeOverviewList
-        groupingFields={groupingFields}
-        groupingData={groupingData}
-        triggeredAt={triggeredAt}
-        durationMs={durationMs}
-        assigneeUid={assigneeUid}
-        episodeAction={episodeAction}
-        groupAction={groupAction}
-        userProfile={services.userProfile}
-        dateFormat={services.uiSettings.get('dateFormat') ?? undefined}
-      />
-    </>
+    <AlertEpisodeOverviewList
+      groupingFields={groupingFields}
+      groupingData={groupingData}
+      triggeredAt={triggeredAt}
+      durationMs={durationMs}
+      assigneeUid={assigneeUid}
+      episodeAction={episodeAction}
+      groupAction={groupAction}
+      userProfile={services.userProfile}
+      dateFormat={services.uiSettings.get('dateFormat') ?? undefined}
+    />
   );
 };

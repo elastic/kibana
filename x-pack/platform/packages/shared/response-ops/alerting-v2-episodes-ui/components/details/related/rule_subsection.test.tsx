@@ -9,7 +9,7 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { AlertEpisode } from '../../../queries/episodes_query';
-import type { RuleResponse } from '@kbn/alerting-v2-schemas';
+import { RuleStateStatus } from '../../../types/rule_state';
 import { RelatedEpisodesRuleSubsection } from './rule_subsection';
 import { useFetchSameRuleEpisodesQuery } from '../../../hooks/use_fetch_same_rule_episodes_query';
 
@@ -40,9 +40,11 @@ jest.mock('./related_list', () => ({
 const mockUseFetch = jest.mocked(useFetchSameRuleEpisodesQuery);
 
 const mockRuleProps = {
-  ruleId: 'rule-1',
-  rule: { id: 'rule-1', metadata: { name: 'Test Rule' } } as RuleResponse,
-  isRuleNotFound: false,
+  ruleState: {
+    status: RuleStateStatus.loaded,
+    ruleId: 'rule-1',
+    rule: { id: 'rule-1', metadata: { name: 'Test Rule' } },
+  },
 };
 const mockGetEpisodeDetailsHref = (id: string) => `/base/${id}`;
 

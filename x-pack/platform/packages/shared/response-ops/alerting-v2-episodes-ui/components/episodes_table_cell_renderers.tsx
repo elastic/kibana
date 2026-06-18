@@ -26,7 +26,6 @@ import { parseEpisodeDataJson } from '../utils/episode_grouping_data';
 import { AlertingEpisodeGroupingTags } from './grouping/alerting_episode_grouping_tags';
 import { AlertEpisodeStatusBadges } from './status/status_badges';
 import { AlertEpisodeTags } from './actions/tags';
-import * as i18n from './translations';
 
 type Rule = FindRulesResponse['items'][number];
 type CellRendererProps = Parameters<CustomCellRenderer[string]>[0];
@@ -71,7 +70,6 @@ export const EpisodeTagsCell = ({ row }: CellRendererProps) => {
 
 export interface EpisodeRuleCellProps extends CellRendererProps {
   rulesCache: Record<string, Rule>;
-  missingRuleIds: ReadonlySet<string>;
   isLoadingRules: boolean;
   rowHeight: number;
 }
@@ -80,7 +78,6 @@ export const EpisodeRuleCell = ({
   row,
   columnId,
   rulesCache,
-  missingRuleIds,
   isLoadingRules,
   rowHeight,
 }: EpisodeRuleCellProps) => {
@@ -94,20 +91,6 @@ export const EpisodeRuleCell = ({
   }
 
   if (!rule) {
-    if (missingRuleIds.has(ruleId)) {
-      return (
-        <EuiText
-          size="s"
-          color="subdued"
-          data-test-subj="episodeRuleCellDeletedRule"
-          css={css`
-            font-style: italic;
-          `}
-        >
-          {i18n.EPISODES_TABLE_DELETED_RULE_LABEL}
-        </EuiText>
-      );
-    }
     return <>{ruleId}</>;
   }
   const ruleName = (

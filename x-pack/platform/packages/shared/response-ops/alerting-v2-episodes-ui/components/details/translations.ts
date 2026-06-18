@@ -15,14 +15,6 @@ export const OVERVIEW_LIST_SECTION_LOAD_ERROR = i18n.translate(
   }
 );
 
-export const OVERVIEW_LIST_SECTION_RULE_DELETED_CALLOUT = i18n.translate(
-  'xpack.alertingV2EpisodesUi.details.overviewListSection.ruleDeletedCallout',
-  {
-    defaultMessage:
-      'The rule that created this episode is no longer available. Grouping field labels may be missing.',
-  }
-);
-
 export const ACTIONS_OVERVIEW_ACKNOWLEDGED_BY = i18n.translate(
   'xpack.alertingV2EpisodesUi.details.actionsOverview.acknowledgedBy',
   {
@@ -106,32 +98,10 @@ export const HEADER_LOADING_TITLE = i18n.translate(
   }
 );
 
-export const HEADER_DELETED_RULE_TITLE = i18n.translate(
-  'xpack.alertingV2EpisodesUi.details.header.deletedRuleTitle',
-  {
-    defaultMessage: 'Deleted rule',
-  }
-);
-
 export const HEADER_EPISODE_TITLE_FALLBACK = i18n.translate(
   'xpack.alertingV2EpisodesUi.details.header.episodeTitleFallback',
   {
-    defaultMessage: 'Episode',
-  }
-);
-
-/** --- Deleted rule callout (shared across episode details surfaces) --- */
-export const RULE_NOT_FOUND_CALLOUT_TITLE = i18n.translate(
-  'xpack.alertingV2EpisodesUi.details.ruleNotFound.calloutTitle',
-  {
-    defaultMessage: 'Rule not found',
-  }
-);
-
-export const RULE_NOT_FOUND_CALLOUT_BODY = i18n.translate(
-  'xpack.alertingV2EpisodesUi.details.ruleNotFound.calloutBody',
-  {
-    defaultMessage: 'The rule may have been deleted or you may not have access to it.',
+    defaultMessage: 'Alert episode',
   }
 );
 
@@ -353,20 +323,6 @@ export const RULE_OVERVIEW_PANEL_SECTION_ERROR_TITLE = i18n.translate(
   }
 );
 
-export const RULE_OVERVIEW_PANEL_SECTION_DELETED_TITLE = i18n.translate(
-  'xpack.alertingV2EpisodesUi.details.ruleOverviewPanelSection.deletedTitle',
-  {
-    defaultMessage: 'Rule was deleted',
-  }
-);
-
-export const RULE_OVERVIEW_PANEL_SECTION_DELETED_BODY = i18n.translate(
-  'xpack.alertingV2EpisodesUi.details.ruleOverviewPanelSection.deletedBody',
-  {
-    defaultMessage: 'The rule that created this episode is no longer available.',
-  }
-);
-
 /** --- Runbook --- */
 export const RUNBOOK_EMPTY = i18n.translate('xpack.alertingV2EpisodesUi.details.runbook.empty', {
   defaultMessage: 'No runbook available for this rule.',
@@ -380,18 +336,4 @@ export const RUNBOOK_SECTION_LOAD_ERROR = i18n.translate(
   }
 );
 
-export const RUNBOOK_SECTION_RULE_DELETED = i18n.translate(
-  'xpack.alertingV2EpisodesUi.details.runbookSection.ruleDeleted',
-  {
-    defaultMessage: 'The runbook is unavailable because the rule was deleted.',
-  }
-);
-
 /** --- Metadata section --- */
-export const METADATA_SECTION_RULE_DELETED = i18n.translate(
-  'xpack.alertingV2EpisodesUi.details.metadataSection.ruleDeleted',
-  {
-    defaultMessage:
-      'Evaluation metadata is unavailable because the rule was deleted or is no longer accessible.',
-  }
-);

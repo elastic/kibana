@@ -12,6 +12,7 @@ import type { RuleResponse } from '@kbn/alerting-v2-schemas';
 import { ALERTING_V2_RULE_API_PATH } from '@kbn/alerting-v2-constants';
 import { createQueryClientWrapper, createTestQueryClient } from './test_utils';
 import { useFetchRule } from './use_fetch_rule';
+import { RuleStateStatus } from '../types/rule_state';
 
 const mockRule = { id: 'r1', metadata: { name: 'Rule 1' } } as unknown as RuleResponse;
 
@@ -34,9 +35,11 @@ describe('useFetchRule', () => {
       signal: expect.any(AbortSignal),
     });
     expect(result.current.data).toEqual(mockRule);
-    expect(result.current.rule).toEqual(mockRule);
-    expect(result.current.isRuleNotFound).toBe(false);
-    expect(result.current.isRuleError).toBe(false);
+    expect(result.current.ruleState).toEqual({
+      status: RuleStateStatus.loaded,
+      ruleId: 'r1',
+      rule: mockRule,
+    });
   });
 
   it('does not fetch when id is undefined', () => {
@@ -44,9 +47,7 @@ describe('useFetchRule', () => {
     const { result } = renderHook(() => useFetchRule({ id: undefined, http }), { wrapper });
     expect(http.get).not.toHaveBeenCalled();
     expect(result.current.fetchStatus).toBe('idle');
-    expect(result.current.isRuleLoading).toBe(false);
-    expect(result.current.isRuleNotFound).toBe(false);
-    expect(result.current.isRuleError).toBe(false);
+    expect(result.current.ruleState).toEqual({ status: RuleStateStatus.idle });
   });
 
   it('does not show a toast when the rule is not found', async () => {
@@ -63,9 +64,10 @@ describe('useFetchRule', () => {
 
     await waitFor(() => expect(result.current.isError).toBe(true));
     expect(notifications.toasts.addDanger).not.toHaveBeenCalled();
-    expect(result.current.rule).toBeUndefined();
-    expect(result.current.isRuleNotFound).toBe(true);
-    expect(result.current.isRuleError).toBe(false);
+    expect(result.current.ruleState).toEqual({
+      status: RuleStateStatus.not_found,
+      ruleId: 'missing-rule',
+    });
   });
 
   it('shows a toast for non-404 rule fetch failures', async () => {
@@ -82,7 +84,9 @@ describe('useFetchRule', () => {
 
     await waitFor(() => expect(result.current.isError).toBe(true));
     expect(notifications.toasts.addDanger).toHaveBeenCalledTimes(1);
-    expect(result.current.isRuleNotFound).toBe(false);
-    expect(result.current.isRuleError).toBe(true);
+    expect(result.current.ruleState.status).toBe(RuleStateStatus.error);
+    if (result.current.ruleState.status === RuleStateStatus.error) {
+      expect(result.current.ruleState.ruleId).toBe('r1');
+    }
   });
 });

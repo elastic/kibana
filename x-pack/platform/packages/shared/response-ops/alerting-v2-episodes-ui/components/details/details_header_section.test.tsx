@@ -101,7 +101,7 @@ describe('AlertEpisodeDetailsHeaderSection', () => {
     expect(screen.getByTestId('alertingV2EpisodeDetailsHeaderTitle')).toHaveTextContent('Loading…');
   });
 
-  it('renders the deleted rule title when the rule fetch returns 404', async () => {
+  it('renders the episode fallback title when the rule fetch returns 404', async () => {
     runEsqlAsyncSearchMock.mockResolvedValue({
       columns: [
         { name: '@timestamp', type: 'date' },
@@ -127,11 +127,11 @@ describe('AlertEpisodeDetailsHeaderSection', () => {
 
     await waitFor(() =>
       expect(screen.getByTestId('alertingV2EpisodeDetailsHeaderTitle')).toHaveTextContent(
-        'Deleted rule'
+        'Alert episode'
       )
     );
-    expect(screen.getByTestId('alertingV2EpisodeDetailsHeaderDeletedRuleId')).toHaveTextContent(
-      'deleted-rule'
-    );
+    expect(
+      screen.queryByTestId('alertingV2EpisodeDetailsHeaderDeletedRuleId')
+    ).not.toBeInTheDocument();
   });
 });

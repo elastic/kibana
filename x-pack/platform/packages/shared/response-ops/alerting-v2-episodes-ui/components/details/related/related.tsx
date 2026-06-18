@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { EuiSpacer, EuiTitle } from '@elastic/eui';
-import type { RuleResponse } from '@kbn/alerting-v2-schemas';
+import { getRuleIdFromRuleState, type RuleState } from '../../../types/rule_state';
 import { RelatedEpisodesRuleSubsection } from './rule_subsection';
 import { RelatedEpisodesGroupSubsection } from './group_subsection';
 import * as i18n from './translations';
@@ -15,9 +15,7 @@ import * as i18n from './translations';
 export interface AlertEpisodesRelatedProps {
   currentEpisodeId: string | undefined;
   groupHash: string | undefined;
-  ruleId: string;
-  rule: RuleResponse | undefined;
-  isRuleNotFound: boolean;
+  ruleState: RuleState;
   getEpisodeDetailsHref: (episodeId: string) => string;
   /**
    * Whether to render the "Related episodes" section heading. Defaults to `true`.
@@ -36,13 +34,17 @@ export interface AlertEpisodesRelatedProps {
 export function AlertEpisodesRelated({
   currentEpisodeId,
   groupHash,
-  ruleId,
-  rule,
-  isRuleNotFound,
+  ruleState,
   getEpisodeDetailsHref,
   showHeading = true,
   compressed = false,
 }: AlertEpisodesRelatedProps) {
+  const ruleId = getRuleIdFromRuleState(ruleState);
+
+  if (!ruleId) {
+    return null;
+  }
+
   return (
     <>
       {showHeading ? (
@@ -58,9 +60,7 @@ export function AlertEpisodesRelated({
           <RelatedEpisodesGroupSubsection
             currentEpisodeId={currentEpisodeId}
             groupHash={groupHash}
-            ruleId={ruleId}
-            rule={rule}
-            isRuleNotFound={isRuleNotFound}
+            ruleState={ruleState}
             getEpisodeDetailsHref={getEpisodeDetailsHref}
             compressed={compressed}
           />
@@ -70,9 +70,7 @@ export function AlertEpisodesRelated({
       <RelatedEpisodesRuleSubsection
         currentEpisodeId={currentEpisodeId}
         currentGroupHash={groupHash}
-        ruleId={ruleId}
-        rule={rule}
-        isRuleNotFound={isRuleNotFound}
+        ruleState={ruleState}
         getEpisodeDetailsHref={getEpisodeDetailsHref}
         compressed={compressed}
       />

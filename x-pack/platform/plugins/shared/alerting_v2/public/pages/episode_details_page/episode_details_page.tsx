@@ -9,7 +9,6 @@ import React, { useMemo, useState } from 'react';
 import {
   EuiButton,
   EuiButtonGroup,
-  EuiCallOut,
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
@@ -27,11 +26,7 @@ import { useQueryClient } from '@kbn/react-query';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useFetchEpisodeQuery } from '@kbn/alerting-v2-episodes-ui/hooks/use_fetch_episode_query';
 import { useFetchRule } from '@kbn/alerting-v2-episodes-ui/hooks/use_fetch_rule';
-import {
-  HEADER_DELETED_RULE_TITLE,
-  RULE_NOT_FOUND_CALLOUT_BODY,
-  RULE_NOT_FOUND_CALLOUT_TITLE,
-} from '@kbn/alerting-v2-episodes-ui/components/details/translations';
+import { isRuleLoaded } from '@kbn/alerting-v2-episodes-ui/types/rule_state';
 import { useInvalidateEpisodeQueries } from '@kbn/alerting-v2-episodes-ui/hooks/use_invalidate_episode_queries';
 import { createEpisodeActions, type EpisodeAction } from '@kbn/alerting-v2-episodes-ui/actions';
 import { EpisodeActionsBar } from '@kbn/alerting-v2-episodes-ui/components/episode_actions_bar';
@@ -87,16 +82,21 @@ export function EpisodeDetailsPage() {
   const ruleId = episode?.['rule.id'];
   const groupHash = episode?.group_hash;
 
-  const { rule, isRuleNotFound } = useFetchRule({ id: ruleId, http });
+  const { ruleState } = useFetchRule({ id: ruleId, http });
+  const showRuleDependentUi = isRuleLoaded(ruleState);
 
   const episodeBreadcrumbTitle =
-    rule?.metadata.name != null && rule.metadata.name.length > 0
-      ? rule.metadata.name
-      : isRuleNotFound
-      ? HEADER_DELETED_RULE_TITLE
+    showRuleDependentUi && ruleState.rule.metadata.name
+      ? ruleState.rule.metadata.name
       : i18n.EPISODE_DETAILS_BREADCRUMB_FALLBACK;
 
   useBreadcrumbs('episode_details', { ruleName: episodeBreadcrumbTitle });
+
+  const actualMainPanel: EpisodeDetailsMainPanel =
+    mainPanel === 'metadata' && !showRuleDependentUi ? 'overview' : mainPanel;
+
+  const actualSidebarPanel: EpisodeDetailsSidebarPanel =
+    sidebarPanel === 'runbook' && !showRuleDependentUi ? 'episode_details' : sidebarPanel;
 
   const detailsServices = useMemo(
     () => ({
@@ -144,11 +144,11 @@ export function EpisodeDetailsPage() {
             share: services.share,
             capabilities: services.application.capabilities,
             uiSettings: services.uiSettings,
-            ruleEsql: rule?.evaluation?.query?.base,
+            ruleEsql: showRuleDependentUi ? ruleState.rule.evaluation?.query?.base : undefined,
             episodeIsoTimestamp: ts,
           }),
       }),
-    [services, queryClient, rule]
+    [services, queryClient, showRuleDependentUi, ruleState]
   );
 
   const applicableActions = useMemo(
@@ -185,9 +185,9 @@ export function EpisodeDetailsPage() {
   }
 
   const sidebarHeaderTitle =
-    sidebarPanel === 'episode_details'
-      ? i18n.SIDEBAR_TITLE_EPISODE_DETAILS
-      : i18n.SIDEBAR_TITLE_RUNBOOK;
+    actualSidebarPanel === 'runbook'
+      ? i18n.SIDEBAR_TITLE_RUNBOOK
+      : i18n.SIDEBAR_TITLE_EPISODE_DETAILS;
 
   const sidebar = (
     <>
@@ -208,27 +208,29 @@ export function EpisodeDetailsPage() {
             <h2 data-test-subj="alertingV2EpisodeDetailsSidebarTitle">{sidebarHeaderTitle}</h2>
           </EuiTitle>
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiButtonGroup
-            legend={i18n.SIDEBAR_VIEW_LEGEND}
-            type="single"
-            buttonSize="compressed"
-            idSelected={sidebarPanel}
-            onChange={(id) => setSidebarPanel(id as EpisodeDetailsSidebarPanel)}
-            options={[
-              {
-                id: 'episode_details',
-                'data-test-subj': 'alertingV2EpisodeDetailsSidebarTabEpisodeDetails',
-                label: i18n.SIDEBAR_TAB_TITLE_DETAILS,
-              },
-              {
-                id: 'runbook',
-                'data-test-subj': 'alertingV2EpisodeDetailsSidebarTabRunbook',
-                label: i18n.SIDEBAR_TITLE_RUNBOOK,
-              },
-            ]}
-          />
-        </EuiFlexItem>
+        {showRuleDependentUi ? (
+          <EuiFlexItem grow={false}>
+            <EuiButtonGroup
+              legend={i18n.SIDEBAR_VIEW_LEGEND}
+              type="single"
+              buttonSize="compressed"
+              idSelected={actualSidebarPanel}
+              onChange={(id) => setSidebarPanel(id as EpisodeDetailsSidebarPanel)}
+              options={[
+                {
+                  id: 'episode_details',
+                  'data-test-subj': 'alertingV2EpisodeDetailsSidebarTabEpisodeDetails',
+                  label: i18n.SIDEBAR_TAB_TITLE_DETAILS,
+                },
+                {
+                  id: 'runbook',
+                  'data-test-subj': 'alertingV2EpisodeDetailsSidebarTabRunbook',
+                  label: i18n.SIDEBAR_TITLE_RUNBOOK,
+                },
+              ]}
+            />
+          </EuiFlexItem>
+        ) : null}
       </EuiFlexGroup>
       <EuiHorizontalRule
         css={css`
@@ -251,7 +253,9 @@ export function EpisodeDetailsPage() {
         `}
         data-test-subj="alertingV2EpisodeDetailsSidebarBody"
       >
-        {sidebarPanel === 'episode_details' ? (
+        {actualSidebarPanel === 'runbook' ? (
+          <AlertEpisodeRunbookSection episodeId={episodeId} services={detailsServices} />
+        ) : (
           <>
             <AlertEpisodeOverviewListSection
               episodeId={episodeId}
@@ -264,8 +268,6 @@ export function EpisodeDetailsPage() {
               services={detailsServices}
             />
           </>
-        ) : (
-          <AlertEpisodeRunbookSection episodeId={episodeId} services={detailsServices} />
         )}
       </div>
     </>
@@ -329,16 +331,20 @@ export function EpisodeDetailsPage() {
             id: 'overview',
             'data-test-subj': 'alertingV2EpisodeDetailsMainTabOverview',
             label: i18n.OVERVIEW_TAB_TITLE,
-            isSelected: mainPanel === 'overview',
+            isSelected: actualMainPanel === 'overview',
             onClick: () => setMainPanel('overview'),
           },
-          {
-            id: 'metadata',
-            'data-test-subj': 'alertingV2EpisodeDetailsMainTabMetadata',
-            label: i18n.METADATA_TAB_TITLE,
-            isSelected: mainPanel === 'metadata',
-            onClick: () => setMainPanel('metadata'),
-          },
+          ...(showRuleDependentUi
+            ? [
+                {
+                  id: 'metadata',
+                  'data-test-subj': 'alertingV2EpisodeDetailsMainTabMetadata',
+                  label: i18n.METADATA_TAB_TITLE,
+                  isSelected: actualMainPanel === 'metadata',
+                  onClick: () => setMainPanel('metadata'),
+                },
+              ]
+            : []),
         ],
       }}
     >
@@ -361,21 +367,6 @@ export function EpisodeDetailsPage() {
             `,
           }}
         >
-          {isRuleNotFound ? (
-            <>
-              <EuiSpacer size="l" />
-              <EuiCallOut
-                announceOnMount
-                title={RULE_NOT_FOUND_CALLOUT_TITLE}
-                color="warning"
-                iconType="warning"
-                data-test-subj="alertingV2EpisodeDetailsRuleNotFoundCallout"
-              >
-                <p>{RULE_NOT_FOUND_CALLOUT_BODY}</p>
-              </EuiCallOut>
-              <EuiSpacer size="l" />
-            </>
-          ) : null}
           <EuiSplitPanel.Outer
             direction="row"
             hasBorder={false}
@@ -412,7 +403,7 @@ export function EpisodeDetailsPage() {
                 }
               `}
             >
-              {mainPanel === 'metadata' ? (
+              {actualMainPanel === 'metadata' ? (
                 <AlertEpisodeMetadataSection episodeId={episodeId} services={metadataServices} />
               ) : (
                 <EuiPanel

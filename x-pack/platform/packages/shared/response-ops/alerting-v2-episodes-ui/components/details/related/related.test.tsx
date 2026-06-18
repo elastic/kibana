@@ -9,12 +9,19 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { RuleResponse } from '@kbn/alerting-v2-schemas';
+import { RuleStateStatus } from '../../../types/rule_state';
 import { AlertEpisodesRelated } from './related';
 
 const mockRule = {
   id: 'rule-1',
   metadata: { name: 'Test Rule' },
 } as RuleResponse;
+
+const loadedRuleState = {
+  status: RuleStateStatus.loaded,
+  ruleId: 'rule-1',
+  rule: mockRule,
+} as const;
 
 jest.mock('./group_subsection', () => ({
   RelatedEpisodesGroupSubsection: () => <div data-test-subj="mockGroupSubsection" />,
@@ -31,9 +38,7 @@ describe('AlertEpisodesRelated', () => {
         <AlertEpisodesRelated
           currentEpisodeId="ep-1"
           groupHash={undefined}
-          ruleId="rule-1"
-          rule={mockRule}
-          isRuleNotFound={false}
+          ruleState={loadedRuleState}
           getEpisodeDetailsHref={(id) => `/base/${id}`}
         />
       </I18nProvider>
@@ -51,9 +56,7 @@ describe('AlertEpisodesRelated', () => {
         <AlertEpisodesRelated
           currentEpisodeId="ep-1"
           groupHash="gh-1"
-          ruleId="rule-1"
-          rule={mockRule}
-          isRuleNotFound={false}
+          ruleState={loadedRuleState}
           getEpisodeDetailsHref={(id) => `/base/${id}`}
         />
       </I18nProvider>

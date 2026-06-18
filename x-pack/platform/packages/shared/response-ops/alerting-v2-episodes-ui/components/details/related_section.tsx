@@ -9,6 +9,7 @@ import React, { useCallback } from 'react';
 import { EuiLoadingSpinner, EuiText } from '@elastic/eui';
 import { useFetchEpisodeQuery } from '../../hooks/use_fetch_episode_query';
 import { useFetchRule } from '../../hooks/use_fetch_rule';
+import { isRuleLoading } from '../../types/rule_state';
 import { getAlertEpisodeDetailsPath } from '../../constants';
 import { AlertEpisodesRelated } from './related/related';
 import type { AlertEpisodeDetailsServices } from './types';
@@ -40,9 +41,9 @@ export const AlertEpisodesRelatedSection = ({
   const ruleId = episode?.['rule.id'];
   const groupHash = episode?.group_hash;
 
-  const { rule, isRuleLoading, isRuleNotFound } = useFetchRule({ id: ruleId, http: services.http });
+  const { ruleState } = useFetchRule({ id: ruleId, http: services.http });
 
-  if (isLoadingEpisode || (ruleId && isRuleLoading)) {
+  if (isLoadingEpisode || (ruleId && isRuleLoading(ruleState))) {
     return <EuiLoadingSpinner size="m" data-test-subj="alertingV2EpisodesRelatedSectionLoading" />;
   }
 
@@ -58,9 +59,7 @@ export const AlertEpisodesRelatedSection = ({
     <AlertEpisodesRelated
       currentEpisodeId={episodeId}
       groupHash={groupHash}
-      ruleId={ruleId} // needed in case the rule was deleted
-      rule={rule}
-      isRuleNotFound={isRuleNotFound}
+      ruleState={ruleState}
       getEpisodeDetailsHref={getEpisodeDetailsHref}
       showHeading={showHeading}
       compressed={compressed}

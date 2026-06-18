@@ -8,18 +8,16 @@
 import React from 'react';
 import type { EuiTitleSize } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
-import type { AlertEpisodeStatus, RuleResponse } from '@kbn/alerting-v2-schemas';
+import type { AlertEpisodeStatus } from '@kbn/alerting-v2-schemas';
 import { AlertEpisodeStatusBadges } from '../status/status_badges';
 import { AlertEpisodeTags } from '../actions/tags';
 import type { EpisodeActionState, AlertEpisodeGroupAction } from '../../types/action';
+import { isRuleLoaded, isRuleLoading, type RuleState } from '../../types/rule_state';
 import * as i18n from './translations';
 
 export interface AlertEpisodeDetailsHeaderProps {
   isLoadingEpisode: boolean;
-  isRuleLoading: boolean;
-  isRuleNotFound: boolean;
-  ruleId: string | undefined;
-  rule: RuleResponse | undefined;
+  ruleState: RuleState;
   tags: string[];
   status: AlertEpisodeStatus | undefined;
   episodeAction: EpisodeActionState | undefined;
@@ -29,23 +27,20 @@ export interface AlertEpisodeDetailsHeaderProps {
 
 export const AlertEpisodeDetailsHeader = ({
   isLoadingEpisode,
-  isRuleLoading,
-  isRuleNotFound,
-  ruleId,
-  rule,
+  ruleState,
   tags,
   status,
   episodeAction,
   groupAction,
   titleSize = 'l',
 }: AlertEpisodeDetailsHeaderProps) => {
-  const isLoading = isLoadingEpisode || (Boolean(ruleId) && isRuleLoading);
+  const isLoading = isLoadingEpisode || isRuleLoading(ruleState);
   const titleContent = isLoading
     ? i18n.HEADER_LOADING_TITLE
-    : isRuleNotFound
-    ? i18n.HEADER_DELETED_RULE_TITLE
-    : rule?.metadata.name ?? i18n.HEADER_EPISODE_TITLE_FALLBACK;
-  const description = rule?.metadata.description;
+    : isRuleLoaded(ruleState)
+    ? ruleState.rule.metadata.name
+    : i18n.HEADER_EPISODE_TITLE_FALLBACK;
+  const description = isRuleLoaded(ruleState) ? ruleState.rule.metadata.description : undefined;
   const showTags = tags.length > 0;
 
   return (
@@ -66,18 +61,6 @@ export const AlertEpisodeDetailsHeader = ({
           </EuiFlexItem>
         ) : null}
       </EuiFlexGroup>
-      {isRuleNotFound && ruleId ? (
-        <>
-          <EuiSpacer size="xs" />
-          <EuiText
-            size="xs"
-            color="subdued"
-            data-test-subj="alertingV2EpisodeDetailsHeaderDeletedRuleId"
-          >
-            {ruleId}
-          </EuiText>
-        </>
-      ) : null}
       {description ? (
         <>
           <EuiSpacer size="s" />

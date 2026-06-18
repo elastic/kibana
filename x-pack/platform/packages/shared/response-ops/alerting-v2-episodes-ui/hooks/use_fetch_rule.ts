@@ -14,6 +14,17 @@ import { ALERTING_V2_RULE_API_PATH } from '@kbn/alerting-v2-constants';
 import { isRuleNotFoundError } from '../utils/is_rule_not_found_error';
 import { FETCH_RULE_ERROR } from '../components/translations';
 import { queryKeys } from '../query_keys';
+import { toRuleState } from '../types/rule_state';
+
+export type { RuleState, LoadedRuleState } from '../types/rule_state';
+export {
+  getRuleIdFromRuleState,
+  isRuleError,
+  isRuleLoaded,
+  isRuleLoading,
+  isRuleNotFound,
+  RuleStateStatus,
+} from '../types/rule_state';
 
 export interface UseFetchRuleOptions {
   id: string | undefined;
@@ -40,14 +51,8 @@ export const useFetchRule = ({ id, http, notifications }: UseFetchRuleOptions) =
     },
   });
 
-  const isRuleNotFound = query.isError && isRuleNotFoundError(query.error);
-  const isRuleError = query.isError && !isRuleNotFoundError(query.error);
-
   return {
     ...query,
-    rule: query.data,
-    isRuleLoading: Boolean(id) && query.isLoading,
-    isRuleNotFound,
-    isRuleError,
+    ruleState: toRuleState(id, query),
   };
 };

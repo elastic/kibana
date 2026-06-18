@@ -42,7 +42,7 @@ export const AlertEpisodeDetailsHeaderSection = ({
     groupHashes: groupHash ? [groupHash] : [],
     services,
   });
-  const { rule, isRuleLoading, isRuleNotFound } = useFetchRule({ id: ruleId, http: services.http });
+  const { ruleState } = useFetchRule({ id: ruleId, http: services.http });
 
   const episodeAction = episodeActionsMap?.get(episodeId);
   const groupAction = groupHash ? groupActionsMap?.get(groupHash) : undefined;
@@ -51,10 +51,7 @@ export const AlertEpisodeDetailsHeaderSection = ({
   return (
     <AlertEpisodeDetailsHeader
       isLoadingEpisode={isLoadingEpisode}
-      isRuleLoading={isRuleLoading}
-      isRuleNotFound={isRuleNotFound}
-      ruleId={ruleId}
-      rule={rule}
+      ruleState={ruleState}
       tags={tags}
       status={lastStatus}
       episodeAction={episodeAction}

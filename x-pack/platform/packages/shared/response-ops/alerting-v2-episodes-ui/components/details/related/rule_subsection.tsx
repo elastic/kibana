@@ -19,9 +19,9 @@ import {
 import type { CoreStart } from '@kbn/core/public';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
-import type { RuleResponse } from '@kbn/alerting-v2-schemas';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { css } from '@emotion/react';
+import { getRuleIdFromRuleState, type RuleState } from '../../../types/rule_state';
 import { RELATED_ALERT_EPISODES_PAGE_SIZE } from '../../../constants';
 import { useFetchEpisodeActions } from '../../../hooks/use_fetch_episode_actions';
 import { useFetchGroupActions } from '../../../hooks/use_fetch_group_actions';
@@ -38,9 +38,7 @@ interface RelatedEpisodesRuleSubsectionServices {
 export interface RelatedEpisodesRuleSubsectionProps {
   currentEpisodeId: string | undefined;
   currentGroupHash: string | undefined;
-  ruleId: string;
-  rule: RuleResponse | undefined;
-  isRuleNotFound: boolean;
+  ruleState: RuleState;
   getEpisodeDetailsHref: (episodeId: string) => string;
   /**
    * When `true`, drop the inner horizontal padding so the subsection sits
@@ -56,9 +54,7 @@ export interface RelatedEpisodesRuleSubsectionProps {
 export function RelatedEpisodesRuleSubsection({
   currentEpisodeId,
   currentGroupHash,
-  ruleId,
-  rule,
-  isRuleNotFound,
+  ruleState,
   getEpisodeDetailsHref,
   compressed = false,
 }: RelatedEpisodesRuleSubsectionProps) {
@@ -72,6 +68,8 @@ export function RelatedEpisodesRuleSubsection({
     },
     [notifications]
   );
+
+  const ruleId = getRuleIdFromRuleState(ruleState);
 
   const { data: otherGroupRows = [], isLoading: isLoadingOtherGroupRows } =
     useFetchSameRuleEpisodesQuery({
@@ -106,6 +104,10 @@ export function RelatedEpisodesRuleSubsection({
     groupHashes: otherGroupHashes,
     services: { expressions, spaces },
   });
+
+  if (!ruleId) {
+    return null;
+  }
 
   return (
     <div
@@ -156,8 +158,7 @@ export function RelatedEpisodesRuleSubsection({
       ) : (
         <RelatedAlertEpisodesList
           rows={otherGroupRows}
-          rule={rule}
-          isRuleNotFound={isRuleNotFound}
+          ruleState={ruleState}
           getEpisodeAction={(id) => otherEpisodeActionsMap?.get(id)}
           getGroupAction={(gh) => otherGroupActionsMap?.get(gh)}
           getEpisodeDetailsHref={getEpisodeDetailsHref}

@@ -10,6 +10,7 @@ import { render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { RuleResponse } from '@kbn/alerting-v2-schemas';
 import type { AlertEpisode } from '../../../queries/episodes_query';
+import { RuleStateStatus } from '../../../types/rule_state';
 import { RelatedAlertEpisodesList } from './related_list';
 
 jest.mock('../../related/related_alert_episode', () => ({
@@ -22,6 +23,12 @@ const mockRule = {
   id: 'rule-1',
   metadata: { name: 'Test Rule' },
 } as RuleResponse;
+
+const loadedRuleState = {
+  status: RuleStateStatus.loaded,
+  ruleId: 'rule-1',
+  rule: mockRule,
+} as const;
 
 const makeRow = (id: string): AlertEpisode =>
   ({
@@ -41,8 +48,7 @@ describe('RelatedAlertEpisodesList', () => {
       <I18nProvider>
         <RelatedAlertEpisodesList
           rows={[makeRow('ep-1'), makeRow('ep-2')]}
-          rule={mockRule}
-          isRuleNotFound={false}
+          ruleState={loadedRuleState}
           getEpisodeAction={() => undefined}
           getGroupAction={() => undefined}
           getEpisodeDetailsHref={(id) => `/base/${id}`}
@@ -62,8 +68,7 @@ describe('RelatedAlertEpisodesList', () => {
       <I18nProvider>
         <RelatedAlertEpisodesList
           rows={[]}
-          rule={mockRule}
-          isRuleNotFound={false}
+          ruleState={loadedRuleState}
           getEpisodeAction={() => undefined}
           getGroupAction={() => undefined}
           getEpisodeDetailsHref={(id) => `/base/${id}`}

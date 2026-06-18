@@ -10,6 +10,7 @@ import { render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { ALERT_EPISODE_STATUS } from '@kbn/alerting-v2-schemas';
 import type { RuleResponse } from '@kbn/alerting-v2-schemas';
+import { RuleStateStatus } from '../../types/rule_state';
 import { AlertEpisodeDetailsHeader } from './details_header';
 
 const mockRule = {
@@ -19,10 +20,11 @@ const mockRule = {
 
 const defaultProps = {
   isLoadingEpisode: false,
-  isRuleLoading: false,
-  isRuleNotFound: false,
-  ruleId: 'rule-1',
-  rule: mockRule,
+  ruleState: {
+    status: RuleStateStatus.loaded,
+    ruleId: 'rule-1',
+    rule: mockRule,
+  },
   tags: [] as string[],
   status: undefined,
   episodeAction: undefined,
@@ -52,40 +54,39 @@ describe('AlertEpisodeDetailsHeader', () => {
         <AlertEpisodeDetailsHeader
           {...defaultProps}
           isLoadingEpisode={true}
-          rule={undefined}
-          ruleId={undefined}
+          ruleState={{ status: RuleStateStatus.idle }}
         />
       </I18nProvider>
     );
     expect(screen.getByTestId('alertingV2EpisodeDetailsHeaderTitle')).toHaveTextContent('Loading…');
   });
 
-  it('renders the deleted rule title and rule id when the rule was not found', () => {
+  it('renders the episode fallback title when the rule was not found', () => {
     render(
       <I18nProvider>
         <AlertEpisodeDetailsHeader
           {...defaultProps}
-          isRuleNotFound={true}
-          ruleId="deleted-rule-id"
-          rule={undefined}
+          ruleState={{ status: RuleStateStatus.not_found, ruleId: 'deleted-rule-id' }}
           status={ALERT_EPISODE_STATUS.ACTIVE}
         />
       </I18nProvider>
     );
     expect(screen.getByTestId('alertingV2EpisodeDetailsHeaderTitle')).toHaveTextContent(
-      'Deleted rule'
+      'Alert episode'
     );
-    expect(screen.getByTestId('alertingV2EpisodeDetailsHeaderDeletedRuleId')).toHaveTextContent(
-      'deleted-rule-id'
-    );
+    expect(
+      screen.queryByTestId('alertingV2EpisodeDetailsHeaderDeletedRuleId')
+    ).not.toBeInTheDocument();
   });
 
-  it('renders the episode fallback title when the rule has no name', () => {
+  it('renders the episode fallback title when the rule is idle', () => {
     render(
       <I18nProvider>
-        <AlertEpisodeDetailsHeader {...defaultProps} ruleId={undefined} rule={undefined} />
+        <AlertEpisodeDetailsHeader {...defaultProps} ruleState={{ status: RuleStateStatus.idle }} />
       </I18nProvider>
     );
-    expect(screen.getByTestId('alertingV2EpisodeDetailsHeaderTitle')).toHaveTextContent('Episode');
+    expect(screen.getByTestId('alertingV2EpisodeDetailsHeaderTitle')).toHaveTextContent(
+      'Alert episode'
+    );
   });
 });

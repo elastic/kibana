@@ -18,6 +18,7 @@ import {
   createTestQueryClient,
 } from '../../hooks/test_utils';
 import { AlertEpisodesRelatedSection } from './related_section';
+import { RuleStateStatus } from '../../types/rule_state';
 
 jest.mock('../../utils/run_esql_async_search');
 
@@ -76,9 +77,11 @@ describe('AlertEpisodesRelatedSection', () => {
       expect.objectContaining({
         currentEpisodeId: 'ep-1',
         groupHash: 'gh-1',
-        ruleId: 'rule-1',
-        rule: mockRule,
-        isRuleNotFound: false,
+        ruleState: {
+          status: RuleStateStatus.loaded,
+          ruleId: 'rule-1',
+          rule: mockRule,
+        },
         getEpisodeDetailsHref: expect.any(Function),
       }),
       expect.anything()
@@ -103,9 +106,7 @@ describe('AlertEpisodesRelatedSection', () => {
 
     expect(AlertEpisodesRelated).toHaveBeenCalledWith(
       expect.objectContaining({
-        ruleId: 'rule-1',
-        rule: undefined,
-        isRuleNotFound: true,
+        ruleState: { status: RuleStateStatus.not_found, ruleId: 'rule-1' },
       }),
       expect.anything()
     );

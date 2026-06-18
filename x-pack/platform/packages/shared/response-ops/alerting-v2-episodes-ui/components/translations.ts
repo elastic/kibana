@@ -32,14 +32,6 @@ export const ASSIGNEE_CELL_UNKNOWN_USER = i18n.translate(
   }
 );
 
-/** --- Episodes table --- */
-export const EPISODES_TABLE_DELETED_RULE_LABEL = i18n.translate(
-  'xpack.alertingV2EpisodesUi.episodesTable.deletedRuleLabel',
-  {
-    defaultMessage: 'Deleted rule',
-  }
-);
-
 /** --- Rule fetch hook --- */
 export const FETCH_RULE_ERROR = i18n.translate(
   'xpack.alertingV2EpisodesUi.hooks.useFetchRule.errorMessage',

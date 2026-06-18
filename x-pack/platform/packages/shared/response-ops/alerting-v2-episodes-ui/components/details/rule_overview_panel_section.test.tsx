@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { ALERT_EPISODE_STATUS } from '@kbn/alerting-v2-schemas';
@@ -103,7 +103,7 @@ describe('AlertEpisodeRuleOverviewPanelSection', () => {
     ).toBeInTheDocument();
   });
 
-  it('renders a deleted rule state when the rule returns 404', async () => {
+  it('renders nothing when the rule returns 404', async () => {
     runEsqlAsyncSearchMock.mockResolvedValue({
       columns: [
         { name: '@timestamp', type: 'date' },
@@ -125,8 +125,13 @@ describe('AlertEpisodeRuleOverviewPanelSection', () => {
       { wrapper }
     );
 
-    expect(
-      await screen.findByTestId('alertingV2EpisodeRuleOverviewPanelSectionDeleted')
-    ).toBeInTheDocument();
+    await waitFor(() => {
+      expect(
+        screen.queryByTestId('alertingV2EpisodeRuleOverviewPanelSectionDeleted')
+      ).not.toBeInTheDocument();
+      expect(
+        screen.queryByTestId('alertingV2EpisodeDetailsRuleOverviewPanel')
+      ).not.toBeInTheDocument();
+    });
   });
 });

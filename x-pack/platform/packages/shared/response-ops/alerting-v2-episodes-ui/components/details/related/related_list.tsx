@@ -7,18 +7,16 @@
 
 import React from 'react';
 import { EuiFlexGroup } from '@elastic/eui';
-import type { RuleResponse } from '@kbn/alerting-v2-schemas';
 import {
   RelatedAlertEpisode,
   type RelatedAlertEpisodeProps,
 } from '../../related/related_alert_episode';
 import type { AlertEpisode } from '../../../queries/episodes_query';
-import { HEADER_DELETED_RULE_TITLE } from '../translations';
+import { isRuleLoaded, type RuleState } from '../../../types/rule_state';
 
 export interface RelatedAlertEpisodesListProps {
   rows: AlertEpisode[];
-  rule: RuleResponse | undefined;
-  isRuleNotFound: boolean;
+  ruleState: RuleState;
   getEpisodeAction: (episodeId: string) => RelatedAlertEpisodeProps['episodeAction'];
   getGroupAction: (groupHash: string) => RelatedAlertEpisodeProps['groupAction'];
   getEpisodeDetailsHref: (episodeId: string) => string;
@@ -29,17 +27,26 @@ export interface RelatedAlertEpisodesListProps {
   compressed?: boolean;
 }
 
+const getRuleDisplayFromState = (ruleState: RuleState) => {
+  if (isRuleLoaded(ruleState)) {
+    return {
+      ruleName: ruleState.rule.metadata.name,
+      groupingFields: ruleState.rule.grouping?.fields ?? [],
+    };
+  }
+
+  return { ruleName: '', groupingFields: [] };
+};
+
 export function RelatedAlertEpisodesList({
   rows,
-  rule,
-  isRuleNotFound,
+  ruleState,
   getEpisodeAction,
   getGroupAction,
   getEpisodeDetailsHref,
   compressed = false,
 }: RelatedAlertEpisodesListProps) {
-  const ruleName = rule?.metadata.name ?? (isRuleNotFound ? HEADER_DELETED_RULE_TITLE : '');
-  const groupingFields = rule?.grouping?.fields ?? [];
+  const { ruleName, groupingFields } = getRuleDisplayFromState(ruleState);
 
   return (
     <EuiFlexGroup direction="column" gutterSize="s" data-test-subj="alertingV2RelatedEpisodesList">

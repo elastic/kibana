@@ -34,7 +34,6 @@ export const AlertEpisodeOverviewSection = ({
     />
     <EuiSpacer size="l" />
     <AlertEpisodeLifecycleHeatmapSection episodeId={episodeId} services={services} />
-    <EuiSpacer size="l" />
     <AlertEpisodeRuleOverviewPanelSection episodeId={episodeId} services={services} />
   </>
 );
