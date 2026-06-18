@@ -234,31 +234,6 @@ export const isTodosStep = (step: ConversationRoundStep): step is TodosStep => {
 
 // ask_user_question step
 
-export interface AskUserQuestionStepData {
-  /** Id of the prompt that produced this step. Matches the entry in `state.prompt.responses` and the prompt request's `id`. */
-  prompt_id: string;
-  /** The questions presented to the user. */
-  questions: AskUserQuestionItem[];
-  /** Undefined while the step is pending; populated on resume back-fill. */
-  answers?: AskUserQuestionAnswer[];
-}
-
-export type AskUserQuestionStep = ConversationRoundStepMixin<
-  ConversationRoundStepType.askUserQuestion,
-  AskUserQuestionStepData
->;
-
-export const createAskUserQuestionStep = (data: AskUserQuestionStepData): AskUserQuestionStep => {
-  return {
-    type: ConversationRoundStepType.askUserQuestion,
-    ...data,
-  };
-};
-
-export const isAskUserQuestionStep = (step: ConversationRoundStep): step is AskUserQuestionStep => {
-  return step.type === ConversationRoundStepType.askUserQuestion;
-};
-
 /**
  * Returns the (single) todos step from a list of steps, if present.
  * A round only ever has at most one todos step, which is updated in place.
