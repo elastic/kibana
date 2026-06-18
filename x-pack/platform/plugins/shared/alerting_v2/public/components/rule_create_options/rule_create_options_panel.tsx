@@ -26,11 +26,19 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import rulesListEmptyIllustration from '../../assets/illustration-results-128.svg';
 
+export interface LegacyRuleTypeItem {
+  id: string;
+  label: string;
+  onClick: () => void;
+  'data-test-subj'?: string;
+}
+
 interface RuleCreateOptionsPanelProps {
   onCreateEsqlRule: () => void;
   layout?: 'vertical' | 'horizontal';
   onCreateWithAgent: () => void;
   onCreateThresholdAlert?: () => void;
+  legacyRuleTypes?: LegacyRuleTypeItem[];
 }
 
 /** Fits the two primary option descriptions on one line; threshold description may wrap. */
@@ -152,8 +160,8 @@ const RuleBuilderSectionDivider: React.FC = () => (
       <EuiFlexItem grow={false}>
         <EuiText size="s" color="subdued">
           <FormattedMessage
-            id="xpack.alertingV2.ruleCreateOptionsPanel.listEmptyStateBuilderDivider"
-            defaultMessage="Or start from a builder"
+            id="xpack.alertingV2.ruleCreateOptionsPanel.orStartFromBuilderLabel"
+            defaultMessage="or start from a builder"
           />
         </EuiText>
       </EuiFlexItem>
@@ -253,11 +261,55 @@ const RuleCreateOptionsListEmptyState: React.FC<RuleCreateOptionsPanelProps> = (
   );
 };
 
+const LegacyRuleTypesSection: React.FC<{ items: LegacyRuleTypeItem[] }> = ({ items }) => {
+  if (items.length === 0) return null;
+
+  return (
+    <>
+      <EuiSpacer size="l" />
+      <EuiTitle size="xs">
+        <h3>
+          <FormattedMessage
+            id="xpack.alertingV2.ruleCreateOptionsPanel.legacyRuleTypesTitle"
+            defaultMessage="Classic rule types"
+          />
+        </h3>
+      </EuiTitle>
+      <EuiSpacer size="m" />
+      <EuiFlexGroup direction="column" gutterSize="s">
+        {items.map((item) => (
+          <EuiFlexItem key={item.id} grow={false}>
+            <EuiPanel
+              element="button"
+              hasBorder={false}
+              hasShadow={false}
+              color="transparent"
+              paddingSize="xs"
+              onClick={item.onClick}
+              data-test-subj={item['data-test-subj']}
+            >
+              <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+                <EuiFlexItem grow={false}>
+                  <EuiIcon type="bell" size="m" color="subdued" aria-hidden={true} />
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiText size="s">{item.label}</EuiText>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiPanel>
+          </EuiFlexItem>
+        ))}
+      </EuiFlexGroup>
+    </>
+  );
+};
+
 /** Create-rule flyout — original card layout (unchanged). */
 const RuleCreateOptionsFlyoutPanel: React.FC<RuleCreateOptionsPanelProps> = ({
   onCreateEsqlRule,
   onCreateWithAgent,
   onCreateThresholdAlert,
+  legacyRuleTypes,
 }) => {
   return (
     <>
@@ -290,33 +342,7 @@ const RuleCreateOptionsFlyoutPanel: React.FC<RuleCreateOptionsPanelProps> = ({
           />
         </EuiFlexItem>
       </EuiFlexGroup>
-      <EuiSpacer size="s" />
-      <EuiFlexGroup alignItems="center" gutterSize="m">
-        <EuiFlexItem>
-          <EuiHorizontalRule margin="none" />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiText size="s" color="subdued">
-            <FormattedMessage
-              id="xpack.alertingV2.ruleCreateOptionsPanel.orDividerLabel"
-              defaultMessage="or"
-            />
-          </EuiText>
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiHorizontalRule margin="none" />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-      <EuiSpacer size="s" />
-      <EuiTitle size="xs">
-        <h3>
-          <FormattedMessage
-            id="xpack.alertingV2.ruleCreateOptionsPanel.ruleBuilderSectionTitle"
-            defaultMessage="Start from a rule builder"
-          />
-        </h3>
-      </EuiTitle>
-      <EuiSpacer size="l" />
+      <RuleBuilderSectionDivider />
       <EuiCard
         layout="horizontal"
         display="plain"
@@ -328,6 +354,7 @@ const RuleCreateOptionsFlyoutPanel: React.FC<RuleCreateOptionsPanelProps> = ({
         onClick={onCreateThresholdAlert ?? noop}
         icon={<EuiIcon type="chartThreshold" color="text" size="l" aria-hidden={true} />}
       />
+      {legacyRuleTypes && <LegacyRuleTypesSection items={legacyRuleTypes} />}
     </>
   );
 };
