@@ -31,7 +31,7 @@ import {
   isExportProfileImplicitLocal,
 } from '../profiles';
 import { readCachedEisConnectors } from '../eis_connectors_cache';
-import { ensureEvalStack } from '../ensure_eval_stack';
+import { ensureEvalStack } from '../eval_stack';
 import { runConfigInit, runConnectorSetup, ensureVaultAuth, ensureLocalConfig } from './init';
 
 const shellQuote = (value: string): string => {

@@ -23,7 +23,16 @@
 
 // CLI tools
 export * as cli from './src/cli';
-export { ensureEvalStack, type EnsureEvalStackOptions } from './src/cli/ensure_eval_stack';
+export {
+  ensureEvalStack,
+  ensureEdot,
+  ensureScout,
+  ensureEisCcm,
+  type EnsureEvalStackOptions,
+  type EnsureEdotOptions,
+  type EnsureScoutOptions,
+  type EnsureEisCcmOptions,
+} from './src/cli/eval_stack';
 
 export {
   resolveEvalSuites,
