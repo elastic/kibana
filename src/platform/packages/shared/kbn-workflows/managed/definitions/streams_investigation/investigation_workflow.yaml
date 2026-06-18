@@ -81,3 +81,73 @@ steps:
           - alternatives_ruled_out
     on-failure:
       continue: false
+
+  # ── Step 2: Fetch current discovery doc to preserve all existing fields ───────
+  - name: fetch_discovery
+    type: elasticsearch.request
+    with:
+      method: POST
+      path: '/.significant_events-discoveries/_search?ignore_unavailable=true'
+      body:
+        size: 1
+        sort:
+          - "@timestamp":
+              order: desc
+        query:
+          bool:
+            filter:
+              - term:
+                  discovery_id: "{{ inputs.discovery_id }}"
+    on-failure:
+      continue: false
+
+  # ── Step 3: Write investigation results back to the discoveries data stream ────
+  # Skipped if fetch_discovery returned no document (discovery deleted or index
+  # unavailable). All discovery fields are carried from fetch_discovery._source (not
+  # from inputs) to avoid silently erasing optional structural fields.
+  - name: write_back
+    if: "${{ steps.fetch_discovery.output.hits.total.value > 0 }}"
+    type: elasticsearch.request
+    with:
+      method: POST
+      path: "/.significant_events-discoveries/_doc"
+      body:
+        "@timestamp": "{{ 'now' | date: '%Y-%m-%dT%H:%M:%S%:z' }}"
+        kibana:
+          space_ids: "${{ steps.fetch_discovery.output.hits.hits[0]._source.kibana.space_ids }}"
+        kind: "${{ steps.fetch_discovery.output.hits.hits[0]._source.kind | default: 'finding' }}"
+        discovery_id: "{{ steps.fetch_discovery.output.hits.hits[0]._source.discovery_id }}"
+        discovery_slug: "{{ steps.fetch_discovery.output.hits.hits[0]._source.discovery_slug }}"
+        rule_names: "${{ steps.fetch_discovery.output.hits.hits[0]._source.rule_names | default: [] }}"
+        stream_names: "${{ steps.fetch_discovery.output.hits.hits[0]._source.stream_names | default: [] }}"
+        title: "{{ steps.fetch_discovery.output.hits.hits[0]._source.title }}"
+        summary: "{{ steps.fetch_discovery.output.hits.hits[0]._source.summary }}"
+        root_cause: "{{ steps.fetch_discovery.output.hits.hits[0]._source.root_cause }}"
+        criticality: "${{ steps.fetch_discovery.output.hits.hits[0]._source.criticality | default: 0 }}"
+        confidence: "${{ steps.fetch_discovery.output.hits.hits[0]._source.confidence | default: 0 }}"
+        impact: "{{ steps.fetch_discovery.output.hits.hits[0]._source.impact }}"
+        detections: "${{ steps.fetch_discovery.output.hits.hits[0]._source.detections | default: [] }}"
+        cause_kis: "${{ steps.fetch_discovery.output.hits.hits[0]._source.cause_kis }}"
+        evidences: "${{ steps.fetch_discovery.output.hits.hits[0]._source.evidences }}"
+        dependency_edges: "${{ steps.fetch_discovery.output.hits.hits[0]._source.dependency_edges }}"
+        infra_components: "${{ steps.fetch_discovery.output.hits.hits[0]._source.infra_components }}"
+        grouped_discovery_ids: "${{ steps.fetch_discovery.output.hits.hits[0]._source.grouped_discovery_ids }}"
+        closes_discovery_id: "{{ steps.fetch_discovery.output.hits.hits[0]._source.closes_discovery_id }}"
+        closed_by_execution_id: "{{ steps.fetch_discovery.output.hits.hits[0]._source.closed_by_execution_id }}"
+        grouping_rationale: "{{ steps.fetch_discovery.output.hits.hits[0]._source.grouping_rationale }}"
+        previous_discovery_id: "{{ steps.fetch_discovery.output.hits.hits[0]._source.previous_discovery_id }}"
+        discovered_at: "{{ steps.fetch_discovery.output.hits.hits[0]._source.discovered_at }}"
+        change_point_occurrence: "{{ steps.fetch_discovery.output.hits.hits[0]._source.change_point_occurrence }}"
+        conversation_id: "{{ steps.fetch_discovery.output.hits.hits[0]._source.conversation_id }}"
+        workflow_execution_id: "{{ execution.id }}"
+        investigation:
+          completed_at: "{{ 'now' | date: '%Y-%m-%dT%H:%M:%S%:z' }}"
+          workflow_execution_id: "{{ execution.id }}"
+          contributing_factors: "{{ steps.investigate.output.structured_output.contributing_factors }}"
+          confidence: "${{ steps.investigate.output.structured_output.confidence }}"
+          evidence_summary: "{{ steps.investigate.output.structured_output.evidence_summary }}"
+          mechanism: "{{ steps.investigate.output.structured_output.mechanism }}"
+          alternatives_ruled_out: "${{ steps.investigate.output.structured_output.alternatives_ruled_out }}"
+          gaps_found: "${{ steps.investigate.output.structured_output.gaps_found }}"
+    on-failure:
+      continue: true
