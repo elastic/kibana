@@ -146,7 +146,7 @@ export class SmlCrawlerImpl implements SmlCrawler {
   /** Returns true when the index was dropped due to a mapping update failure. */
   private async applyMappingsOrRebuild({ storage }: { storage: SmlStorage }): Promise<boolean> {
     try {
-      await storage.updateMappingsIfNeeded();
+      await storage.getClient().reconcileMappings();
       return false;
     } catch (error) {
       if (!isResponseError(error)) throw error;

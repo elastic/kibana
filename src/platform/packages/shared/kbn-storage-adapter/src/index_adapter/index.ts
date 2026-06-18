@@ -371,7 +371,7 @@ export class StorageIndexAdapter<
   }
 
   /** Applies any pending mapping changes to the current write index via putMapping. */
-  public async updateMappingsIfNeeded(): Promise<void> {
+  private async updateMappingsIfNeeded(): Promise<void> {
     const expectedSchemaVersion = getSchemaVersion(this.storage);
 
     const writeIndex = await this.getCurrentWriteIndex();
@@ -824,6 +824,7 @@ export class StorageIndexAdapter<
       get: this.get,
       existsIndex: this.existsIndex,
       esql: this.esql,
+      reconcileMappings: () => this.updateMappingsIfNeeded(),
     };
   }
 }

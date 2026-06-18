@@ -57,6 +57,7 @@ const mockUpdateMappingsIfNeeded = jest.fn();
 const mockSmlClient = {
   clean: jest.fn().mockResolvedValue({ acknowledged: true }),
   existsIndex: jest.fn().mockResolvedValue(false),
+  reconcileMappings: mockUpdateMappingsIfNeeded,
 };
 
 const getMockSmlClient = () => mockSmlClient;
@@ -134,7 +135,6 @@ describe('SmlCrawlerImpl', () => {
     mockUpdateMappingsIfNeeded.mockResolvedValue(undefined);
     (createSmlStorage as jest.Mock).mockReturnValue({
       getClient: jest.fn().mockReturnValue(getMockSmlClient()),
-      updateMappingsIfNeeded: mockUpdateMappingsIfNeeded,
     });
   });
 
