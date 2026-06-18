@@ -110,11 +110,11 @@ export class FeedbackPlugin implements Plugin {
 
         const titleContent = toMountPoint(
           core.rendering.addContext(
-            <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-              <EuiFlexItem grow={false}>
+            <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} component="span">
+              <EuiFlexItem grow={false} component="span">
                 <EuiIcon type="checkInCircleFilled" color="success" size="m" aria-hidden />
               </EuiFlexItem>
-              <EuiFlexItem>
+              <EuiFlexItem component="span">
                 <FormattedMessage
                   id="feedback.submissionSuccessToast.title"
                   defaultMessage="Thanks for your feedback!"
@@ -183,6 +183,7 @@ export class FeedbackPlugin implements Plugin {
           color: 'success',
           title: titleContent,
           text: textContent,
+          toastLifeTimeMs: 60_000,
         });
       }
       if (color === 'error') {

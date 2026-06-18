@@ -114,11 +114,11 @@ export const productInterceptRegistrationConfig = ({
   const completionInterceptStep = {
     id: 'completion',
     title: (
-      <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-        <EuiFlexItem grow={false}>
+      <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} component="span">
+        <EuiFlexItem grow={false} component="span">
           <EuiIcon type="checkInCircleFilled" color="success" size="m" aria-hidden />
         </EuiFlexItem>
-        <EuiFlexItem>
+        <EuiFlexItem component="span">
           <FormattedMessage
             id="productIntercept.prompter.step.completion.title"
             defaultMessage="Thanks for the feedback!"

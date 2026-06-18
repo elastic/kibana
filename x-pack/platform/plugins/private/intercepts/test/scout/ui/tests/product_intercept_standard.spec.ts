@@ -36,12 +36,16 @@ test.describe('Standard Product intercept', { tag: '@local-stateful-classic' }, 
     await pageObjects.intercepts.clickProgressionButton();
 
     let completionStepVisible = false;
+    const maxAttempts = 10;
+    let attempts = 0;
 
     // Loop through survey responses until the completion step is reached
     do {
+      expect(attempts).toBeLessThan(maxAttempts);
       // Randomly select one of the NPS buttons (1-5)
       await pageObjects.intercepts.clickRandomNpsButton();
       completionStepVisible = await pageObjects.intercepts.isCompletionStepVisible();
+      attempts++;
     } while (!completionStepVisible);
 
     const interceptText = await pageObjects.intercepts.getInterceptText(TRIGGER_DEF_ID);
