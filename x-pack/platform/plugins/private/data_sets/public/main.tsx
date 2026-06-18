@@ -20,7 +20,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
-import type { HttpSetup } from '@kbn/core/public';
+import type { HttpSetup, ToastsStart } from '@kbn/core/public';
 import type { DataSetWithName, DataSourceWithSecrets, DataSource } from '../common';
 import { CreateDatasetFlyout } from './create_dataset_flyout';
 import { dataSetFromListItem } from './create_dataset_flyout/dataset_flyout_initial_values';
@@ -49,9 +49,10 @@ type DataSetFlyoutState =
 
 export interface MainProps {
   httpClient: HttpSetup;
+  toasts: ToastsStart;
 }
 
-export const Main: FunctionComponent<MainProps> = ({ httpClient }) => {
+export const Main: FunctionComponent<MainProps> = ({ httpClient, toasts }) => {
   const dataClient = useMemo(() => new DataSourcesClient(httpClient), [httpClient]);
   const dataSetsClient = useMemo(() => new DatasetsClient(httpClient), [httpClient]);
   const [items, setItems] = useState<DataSource[]>([]);
@@ -634,6 +635,8 @@ export const Main: FunctionComponent<MainProps> = ({ httpClient }) => {
           initialDataSource={
             dataSourceFlyout.kind === 'edit' ? dataSourceFlyout.dataSource : undefined
           }
+          dataSourcesClient={dataClient}
+          toasts={toasts}
           existingDataSourceNames={items.map((ds) => ds.name)}
           onClose={() => setDataSourceFlyout({ kind: 'closed' })}
           onSave={handleDataSourceSave}

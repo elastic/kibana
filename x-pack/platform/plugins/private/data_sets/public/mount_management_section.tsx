@@ -16,7 +16,12 @@ export const mountManagementSection = (
   coreStart: CoreStart,
   { element }: ManagementAppMountParams
 ) => {
-  ReactDOM.render(coreStart.rendering.addContext(<Main httpClient={coreStart.http} />), element);
+  ReactDOM.render(
+    coreStart.rendering.addContext(
+      <Main httpClient={coreStart.http} toasts={coreStart.notifications.toasts} />
+    ),
+    element
+  );
 
   return () => {
     ReactDOM.unmountComponentAtNode(element);

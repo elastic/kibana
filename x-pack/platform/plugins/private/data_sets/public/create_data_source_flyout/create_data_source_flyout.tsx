@@ -6,7 +6,7 @@
  */
 
 import type { FunctionComponent } from 'react';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -27,6 +27,7 @@ import {
   EuiTextArea,
   EuiTitle,
 } from '@elastic/eui';
+import type { ToastsStart } from '@kbn/core/public';
 import { useController, useForm } from 'react-hook-form';
 
 import type { DataSource, DataSourceWithSecrets } from '../../common/datasource_types';
@@ -34,6 +35,7 @@ import { ALL_DATA_SOURCE_TYPES, DATA_SOURCE_TYPES_TO_ICONS } from '../../common'
 import type { DataSourceType } from '../../common/datasource_types';
 import { getFlyoutSaveErrorMessage } from '../get_flyout_save_error_message';
 import { createDataSourceFlyoutStrings } from './create_data_source_flyout_i18n';
+import type { DataSourcesClient } from '../data_sources_client';
 import {
   applyAuthenticationModeToDataSource,
   getDefaultAuthenticationMode,
@@ -55,6 +57,8 @@ export interface CreateDataSourceFlyoutProps {
   initialDataSource?: DataSource;
   /** Existing names to prevent duplicates (create mode only). */
   existingDataSourceNames?: readonly string[];
+  dataSourcesClient: DataSourcesClient;
+  toasts: ToastsStart;
   onClose: () => void;
   /**
    * Persist a data source (create or update). Resolve `null` on success, or an error message to show in the flyout.
@@ -65,6 +69,8 @@ export interface CreateDataSourceFlyoutProps {
 export const CreateDataSourceFlyout: FunctionComponent<CreateDataSourceFlyoutProps> = ({
   initialDataSource,
   existingDataSourceNames = [],
+  dataSourcesClient,
+  toasts,
   onClose,
   onSave,
 }) => {
@@ -91,6 +97,7 @@ export const CreateDataSourceFlyout: FunctionComponent<CreateDataSourceFlyoutPro
 
   const [saveError, setSaveError] = useState<string | undefined>();
   const [isSaving, setIsSaving] = useState(false);
+  const [isTestingConnection, setIsTestingConnection] = useState(false);
 
   const [dataSourceType, setDataSourceType] = useState<DataSourceType>(
     initialDataSource?.type ?? 's3'
@@ -183,6 +190,45 @@ export const CreateDataSourceFlyout: FunctionComponent<CreateDataSourceFlyoutPro
       )
     );
 
+  const onTestConnection = useCallback(
+    async (data: CreateDataSourceFlyoutFormValues) => {
+      setIsTestingConnection(true);
+
+      const baseName = data.name.trim();
+      const testName = `${baseName}_test`;
+
+      const payload = applyAuthenticationModeToDataSource(
+        { ...data, name: testName, type: dataSourceType } as DataSourceWithSecrets,
+        authenticationMode
+      );
+
+      try {
+        await dataSourcesClient.add(payload);
+
+        try {
+          await dataSourcesClient.getById(testName);
+          toasts.addSuccess(createDataSourceFlyoutStrings.testConnectionSuccess());
+        } catch (e) {
+          toasts.addDanger(
+            createDataSourceFlyoutStrings.testConnectionFailed(getFlyoutSaveErrorMessage(e))
+          );
+        }
+      } catch (e) {
+        toasts.addDanger(
+          createDataSourceFlyoutStrings.testConnectionFailed(getFlyoutSaveErrorMessage(e))
+        );
+      } finally {
+        try {
+          await dataSourcesClient.delete(testName);
+        } catch {
+          // Ignore deletion errors; test data sources are best-effort cleanup.
+        }
+        setIsTestingConnection(false);
+      }
+    },
+    [authenticationMode, dataSourceType, dataSourcesClient, toasts]
+  );
+
   const onSubmit = async (data: CreateDataSourceFlyoutFormValues) => {
     setSaveError(undefined);
     setIsSaving(true);
@@ -207,7 +253,7 @@ export const CreateDataSourceFlyout: FunctionComponent<CreateDataSourceFlyoutPro
       ownFocus
       onClose={onClose}
       aria-labelledby="createDataSourceFlyoutTitle"
-      size="l"
+      size="m"
       data-test-subj={isEditMode ? 'editDataSourceFlyout' : 'createDataSourceFlyout'}
     >
       <EuiFlyoutHeader hasBorder>
@@ -290,19 +336,42 @@ export const CreateDataSourceFlyout: FunctionComponent<CreateDataSourceFlyoutPro
         </EuiForm>
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
-        <EuiButtonEmpty data-test-subj="createDataSourceFlyoutCancel" onClick={onClose}>
-          {createDataSourceFlyoutStrings.cancelButton()}
-        </EuiButtonEmpty>
-        <EuiButton
-          fill
-          type="submit"
-          data-test-subj="createDataSourceFlyoutSubmit"
-          onClick={handleSubmit(onSubmit)}
-          isLoading={isSaving}
-          disabled={isSaving}
-        >
-          {createDataSourceFlyoutStrings.saveButton()}
-        </EuiButton>
+        <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" responsive={false}>
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty data-test-subj="createDataSourceFlyoutCancel" onClick={onClose}>
+              {createDataSourceFlyoutStrings.cancelButton()}
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+              <EuiFlexItem grow={false}>
+                <EuiButton
+                  data-test-subj="createDataSourceFlyoutTestConnection"
+                  iconType="play"
+                  iconSide="left"
+                  type="button"
+                  onClick={handleSubmit(onTestConnection)}
+                  isLoading={isTestingConnection}
+                  disabled={isSaving || isTestingConnection}
+                >
+                  {createDataSourceFlyoutStrings.testConnectionButton()}
+                </EuiButton>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiButton
+                  fill
+                  type="submit"
+                  data-test-subj="createDataSourceFlyoutSubmit"
+                  onClick={handleSubmit(onSubmit)}
+                  isLoading={isSaving}
+                  disabled={isSaving || isTestingConnection}
+                >
+                  {createDataSourceFlyoutStrings.saveButton()}
+                </EuiButton>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiFlyoutFooter>
     </EuiFlyout>
   );

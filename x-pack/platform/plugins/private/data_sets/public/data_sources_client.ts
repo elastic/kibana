@@ -39,6 +39,19 @@ export class DataSourcesClient {
     return body.data_sources;
   }
 
+  public async getById(id: string): Promise<DataSource> {
+    const trimmed = id.trim();
+    if (!trimmed) {
+      throw new Error(
+        i18n.translate('dataSets.errors.idRequired', {
+          defaultMessage: 'Name is required.',
+        })
+      );
+    }
+
+    return await this.http.get<DataSource>(getDataSourceByIdApiPath(trimmed));
+  }
+
   // todo also have update method
   public async add(dataSource: DataSourceWithSecrets): Promise<void> {
     const { name } = dataSource;
@@ -84,4 +97,3 @@ export class DataSourcesClient {
     await Promise.all(list.map((name) => this.http.delete(getDataSourceByIdApiPath(name))));
   }
 }
-
