@@ -66,6 +66,7 @@ import type {
   WorkflowsService,
 } from './workflows_management_service';
 import { connectorParamsSchemaResolver } from '../../common/lib/connector_params_schema_resolver';
+import type { WorkflowChangesHistoryResponse } from '../types/workflow_change_history';
 
 export type SmlIndexAttachmentFn = (params: SmlIndexAttachmentParams) => Promise<void>;
 
@@ -282,6 +283,14 @@ export class WorkflowsManagementApi {
 
   public async getWorkflow(id: string, spaceId: string): Promise<WorkflowDetailDto | null> {
     return this.workflowsService.getWorkflow(id, spaceId);
+  }
+
+  public async getHistoryForWorkflow(
+    id: string,
+    spaceId: string,
+    options?: { page?: number; perPage?: number }
+  ): Promise<WorkflowChangesHistoryResponse> {
+    return this.workflowsService.getHistoryForWorkflow(id, spaceId, options);
   }
 
   public async getWorkflowsByIds(ids: string[], spaceId: string): Promise<WorkflowDetailDto[]> {
