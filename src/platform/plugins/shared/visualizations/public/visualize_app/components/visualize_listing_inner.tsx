@@ -20,6 +20,7 @@ import { useContentListConfig } from '@kbn/content-list-provider';
 import { getCustomColumn, getNoItemsMessage } from '@kbn/visualization-listing-components';
 import type { VisualizationListItem } from '@kbn/visualization-listing-components';
 import { DashboardFlowCallout } from './dashboard_flow_callout';
+import { VisualizeTypeFilter } from './visualize_type_filter';
 
 const { Column, Action } = ContentListTable;
 const { Filters } = ContentListToolbar;
@@ -65,6 +66,7 @@ export const VisualizeListingInner = ({ onCreateNewVis }: VisualizeListingInnerP
         <ContentListToolbar>
           <Filters>
             <Filters.Tags />
+            <VisualizeTypeFilter />
             <Filters.Sort />
           </Filters>
         </ContentListToolbar>
