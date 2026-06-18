@@ -10,7 +10,7 @@ import { merge } from 'lodash';
 import { dump } from 'js-yaml';
 import yamlDoc from 'yaml';
 
-import { getNormalizedInputs, isIntegrationPolicyTemplate } from '../../../../common/services';
+import { getNormalizedInputs, getPolicyTemplateDataStreamPaths } from '../../../../common/services';
 
 import {
   getStreamsForInputType,
@@ -246,9 +246,7 @@ function buildIndexedPackage(packageInfo: PackageInfo): PackageWithInputAndStrea
           const streams = getStreamsForInputType(
             packageInput.type,
             packageInfo,
-            isIntegrationPolicyTemplate(policyTemplate) && policyTemplate.data_streams
-              ? policyTemplate.data_streams
-              : []
+            getPolicyTemplateDataStreamPaths(packageInfo, policyTemplate)
           ).reduce<
             Record<
               string,
