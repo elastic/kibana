@@ -2416,8 +2416,9 @@ describe('RulesClient', () => {
       metadata: { name: 'rule-1', tags: workflowRuleTags },
       time_field: '@timestamp',
       schedule: { every: '1m', lookback: '1m' },
-      evaluation: {
-        query: { base: 'FROM logs-* | LIMIT 1' },
+      query: {
+        format: 'standalone',
+        breach: { query: 'FROM logs-* | LIMIT 1' },
       },
     });
     const workflowCreateData: CreateRuleParams['data'] = {

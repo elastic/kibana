@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { RuleResponse } from '@kbn/alerting-v2-schemas';
+import { getRootEsqlQuery, type RuleResponse } from '@kbn/alerting-v2-schemas';
 import type { RuleSnapshot } from './schemas';
 
 export const buildRuleSnapshot = (rule: RuleResponse, spaceId: string): RuleSnapshot => ({
@@ -13,7 +13,7 @@ export const buildRuleSnapshot = (rule: RuleResponse, spaceId: string): RuleSnap
   spaceId,
   name: rule.metadata.name,
   kind: rule.kind,
-  query: rule.evaluation.query.base,
+  query: getRootEsqlQuery(rule.query),
   enabled: rule.enabled,
   tags: rule.metadata.tags ?? [],
 });
