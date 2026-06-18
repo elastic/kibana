@@ -91,8 +91,11 @@ describe('BashService', () => {
 
   it('returns exit_code 124 on wall-clock timeout', async () => {
     const { fsService, workspaceVolume } = await makeFixture();
-    const bash = makeBash(fsService, workspaceVolume, { timeoutMs: 100 });
-    const result = await bash.exec('sleep 5');
+    const execToolFn = jest.fn(
+      () => new Promise((resolve) => setTimeout(() => resolve({ ok: true }), 500))
+    );
+    const bash = makeBash(fsService, workspaceVolume, { timeoutMs: 50, execToolFn });
+    const result = await bash.exec('exec_tool slow.tool');
     expect(result.exit_code).toBe(124);
     expect(result.stderr).toMatch(/timeout/i);
   });
