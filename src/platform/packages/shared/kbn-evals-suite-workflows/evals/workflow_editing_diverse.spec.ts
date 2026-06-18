@@ -132,42 +132,50 @@ evaluate.describe(
   'Diverse edits on automated_triaging baseline (15 steps, alert trigger)',
   { tag: tags.serverless.observability.complete },
   () => {
-    evaluate('removes the endpoint isolation step', async ({ evaluateDiverseEditDataset }) => {
-      await evaluateDiverseEditDataset({
-        dataset: {
-          name: 'workflow-editing-diverse: triaging-remove-isolation',
-          description: 'Delete a specific step from a deeply-nested 15-step workflow',
-          examples: [
-            {
-              input: {
-                initialYaml: automatedTriagingYaml,
-                instruction:
-                  "Remove the endpoint isolation step — we don't want automated host isolation without manual review.",
+    evaluate(
+      'removes both host-isolation and AI-summary steps without breaking downstream Liquid',
+      async ({ evaluateDiverseEditDataset }) => {
+        await evaluateDiverseEditDataset({
+          dataset: {
+            name: 'workflow-editing-diverse: triaging-remove-isolation',
+            description:
+              'Delete two non-adjacent steps from a 15-step nested workflow. ' +
+              'Tests multi-step removal AND that any downstream Liquid references ' +
+              'to the removed steps are also fixed up, not left dangling.',
+            examples: [
+              {
+                input: {
+                  initialYaml: automatedTriagingYaml,
+                  instruction:
+                    "Drop two things: (1) the endpoint isolation step — we don't want auto-isolation without manual review; and (2) the AI summary step — the model output is too unreliable. Anything that referenced those steps elsewhere should be cleaned up too.",
+                },
+                output: {
+                  criteria: [
+                    'The isolate_host step has been removed.',
+                    'The ai_summary step has been removed.',
+                    'No remaining step contains a Liquid reference to steps.isolate_host.* or steps.ai_summary.*.',
+                    'Any case-comment step that previously embedded the AI summary has been either removed OR rewritten so it no longer references ai_summary output.',
+                    'All other top-level and nested steps (for_each_discovery, create_case, foreach_alert_in_ad, get_details, add_to_case) are preserved byte-identically.',
+                    'The trigger type is still alert.',
+                    'No new steps were introduced as a side effect of the removals.',
+                  ],
+                  preservedStepNames: [
+                    'for_each_discovery',
+                    'create_case',
+                    'foreach_alert_in_ad',
+                    'get_details',
+                    'add_to_case',
+                  ],
+                  expectedMaxToolCalls: 3,
+                  expectedToolSequence: ['platform.core.generate_workflow'],
+                },
+                metadata: { category: 'diverse-edit-delete' },
               },
-              output: {
-                criteria: [
-                  'The isolate_host step has been removed.',
-                  'All other steps (create_case, foreach loops, ES search, AI summary, comment additions) are preserved.',
-                  'The trigger type is still alert.',
-                ],
-                preservedStepNames: [
-                  'for_each_discovery',
-                  'create_case',
-                  'foreach_alert_in_ad',
-                  'get_details',
-                  'add_to_case',
-                  'add_analysis_to_case',
-                  'ai_summary',
-                ],
-                expectedMaxToolCalls: 4,
-                expectedToolSequence: ['platform.core.generate_workflow'],
-              },
-              metadata: { category: 'diverse-edit-delete' },
-            },
-          ],
-        },
-      });
-    });
+            ],
+          },
+        });
+      }
+    );
 
     evaluate(
       'modifies a deeply nested step in the foreach',

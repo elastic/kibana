@@ -189,12 +189,15 @@ evaluate.describe(
                   'The search queries the logs-* index.',
                   'The query filters for level: error (the turn-2 filter was preserved).',
                   'The time range now covers roughly the last three weeks (e.g. now-21d, now-3w, or an explicit start ~21 days ago); it is NOT still 24h and NOT unbounded.',
+                  'The time range is bounded — there is both a lower bound (~21 days ago) AND an upper bound (now/today); it is NOT an open-ended gte query.',
                   'The agent acknowledged in chat that the new time window REPLACES the prior 24-hour filter (it must explain it noticed the conflict between turn 2 and turn 3, not silently overwrite).',
+                  'The agent did NOT add a new step in turn 3 — the existing search step was modified in place.',
+                  'No reference to the old 24h literal remains anywhere in the workflow (no leftover comment, no commented-out clause, no consts.window = 24h).',
                 ],
                 expectedStepCount: 4,
                 expectedStepTypes: ['elasticsearch.search'],
                 preservedStepNames: ['log_start', 'fetch_data', 'log_end'],
-                expectedMaxToolCalls: 5,
+                expectedMaxToolCalls: 4,
               },
               metadata: { category: 'multi-turn-three-turn' },
             },
@@ -210,9 +213,9 @@ evaluate.describe(
           dataset: {
             name: 'workflow-editing-multiturn: mixed-operations',
             description:
-              'Insert + delete + modify across three turns, then a fourth turn whose request ' +
-              'requires the agent to figure out WHICH steps to remove without being told by name. ' +
-              'Tests edit-type breadth + identifying targets from a class description.',
+              'Five-turn conversation: insert + delete + modify, then a class-based cleanup, ' +
+              'then a turn that reintroduces something previously deleted in a different ' +
+              'position. Tests memory of earlier state + spatial reasoning across turns.',
             examples: [
               {
                 input: {
@@ -231,19 +234,23 @@ evaluate.describe(
                       instruction:
                         "Actually the workflow's pretty chatty in our logs — strip out anything that's just logging to the console. Keep only the actual HTTP work.",
                     },
+                    {
+                      instruction:
+                        'On second thought we DO need an audit trail — add back a console log at the end recording the HTTP response status, similar to what log_end used to do but with the new POST response.',
+                    },
                   ],
                 },
                 output: {
                   criteria: [
-                    'The final workflow contains exactly one step.',
-                    'That step is the modified fetch_data (type http, method POST, with a JSON body).',
-                    'Both console steps from the original (log_start) and from turn 1 ("Starting pipeline") are gone.',
-                    'The log_end step is also gone (already removed in turn 2; not reintroduced).',
-                    'The agent identified BOTH console steps by their type, not by names the user mentioned — its chat response should reference removing the console-type steps as a class, not picking a single named one.',
+                    'The final workflow contains exactly two steps.',
+                    'The first step is the modified fetch_data (type http, method POST, with a JSON body).',
+                    'The second step is a console step that runs AFTER fetch_data (not before, not in parallel) and logs the HTTP response status via a Liquid reference to steps.fetch_data.output.',
+                    'No remnants of the original log_start step or the turn-1 "Starting pipeline" console step exist (those were removed in turn 4 and not reintroduced).',
+                    "The new audit step references steps.fetch_data.output (not foreach.item, not a hardcoded string) — proving the agent threaded turn 3's POST output through to turn 5's logging.",
                   ],
-                  expectedStepCount: { min: 1, max: 1 },
+                  expectedStepCount: { min: 2, max: 2 },
                   preservedStepNames: [],
-                  expectedMaxToolCalls: 8,
+                  expectedMaxToolCalls: 9,
                 },
                 metadata: { category: 'multi-turn-mixed' },
               },
