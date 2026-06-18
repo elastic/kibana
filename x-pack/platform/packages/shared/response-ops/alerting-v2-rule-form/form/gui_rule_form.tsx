@@ -30,7 +30,7 @@ export interface GuiRuleFormProps {
  *
  * This component renders the visual form interface with field groups for:
  * - Rule details (name, tags, description — no wrapper panel)
- * - Rule evaluation (full ES|QL query)
+ * - Alert condition (breach ES|QL query)
  * - Rule execution settings (schedule, lookback)
  * - Rule kind (alert vs monitor)
  * - Alert conditions (alert delay, recovery policy, recovery delay)

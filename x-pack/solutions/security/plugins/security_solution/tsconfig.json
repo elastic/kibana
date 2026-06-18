@@ -9,6 +9,7 @@
     "server/**/*",
     "scripts/**/*",
     "test/scout/**/*",
+    "test/scout_ai_value_report/**/*",
     "test/scout_cps_local/**/*",
     "test/scout_security_attacks_alignment/**/*",
     // have to declare *.json explicitly due to https://github.com/microsoft/TypeScript/issues/25636
@@ -94,6 +95,7 @@
     "@kbn/securitysolution-exception-list-components",
     "@kbn/securitysolution-exceptions-common",
     "@kbn/rison",
+    "@kbn/announcement-banner",
     "@kbn/shared-ux-page-kibana-template",
     "@kbn/securitysolution-hook-utils",
     "@kbn/test-jest-helpers",
@@ -295,6 +297,7 @@
     "@kbn/anonymization-common",
     "@kbn/workflows-extensions",
     "@kbn/shared-ux-ai-components",
+    "@kbn/shared-ux-markdown",
     "@kbn/controls-schemas",
     "@kbn/search-inference-endpoints",
     "@kbn/evals-plugin",

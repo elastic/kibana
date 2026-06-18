@@ -21,9 +21,9 @@ interface UseFormDefaultsProps {
  * This hook extracts:
  * - groupingKey: columns from the STATS ... BY clause
  *
- * The full query is used as-is for `evaluation.query.base` — it is no longer
- * split into base + condition because the framework executor only uses the
- * base query field.
+ * The full query is used as-is for `query.breach` — the form authors rules
+ * in the API's `standalone` format, so the query maps directly to the
+ * standalone breach query.
  *
  * Note: timeField defaults to '@timestamp' which is the most common time field.
  * TimeFieldSelect may update this if @timestamp is not available in the query results.
@@ -44,19 +44,14 @@ export const useFormDefaults = ({ query }: UseFormDefaultsProps): FormValues => 
         every: '1m',
         lookback: '5m',
       },
-      evaluation: {
-        query: {
-          base: query,
-        },
+      query: {
+        breach: query,
       },
       grouping: defaultGroupBy.length
         ? {
             fields: defaultGroupBy,
           }
         : undefined,
-      recoveryPolicy: {
-        type: 'no_breach',
-      },
       stateTransitionAlertDelayMode: DELAY_MODE.immediate,
       stateTransitionRecoveryDelayMode: DELAY_MODE.immediate,
     }),

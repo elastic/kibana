@@ -35,6 +35,7 @@ import { useOptionsListContext } from '../options_list_context_provider';
 import { OptionsListStrings } from '../options_list_strings';
 import type { DSLOptionsListComponentApi } from '../types';
 import { OptionsListPopover } from './options_list_popover';
+import type { ESQLOptionsListComponentApi } from '../../../esql_control/types';
 
 const optionListControlStyles = {
   selectionWrapper: css({ overflow: 'hidden !important' }),
@@ -101,7 +102,8 @@ export const OptionsListControl = ({
     PublishingSubject<boolean>,
     PublishingSubject<boolean>,
     DSLOptionsListComponentApi['field$'] | PublishingSubject<undefined>,
-    DSLOptionsListComponentApi['fieldFormatter'] | PublishingSubject<undefined>
+    DSLOptionsListComponentApi['fieldFormatter'] | PublishingSubject<undefined>,
+    ESQLOptionsListComponentApi['tooltipLabel$'] | PublishingSubject<undefined>
   ] = useMemo(() => {
     const isDSLControl = isDSLOptionsListApi(componentApi);
     return [
@@ -109,6 +111,7 @@ export const OptionsListControl = ({
       isDSLControl ? componentApi.existsSelected$ : new BehaviorSubject(false),
       isDSLControl ? componentApi.field$ : new BehaviorSubject(undefined),
       isDSLControl ? componentApi.fieldFormatter : new BehaviorSubject(undefined),
+      !isDSLControl ? componentApi.tooltipLabel$ : new BehaviorSubject(undefined),
     ];
   }, [componentApi]);
 
@@ -121,6 +124,7 @@ export const OptionsListControl = ({
     existsSelected,
     field,
     fieldFormatter,
+    tooltipLabel,
   ] = useBatchedPublishingSubjects(
     componentApi.selectedOptions$,
     componentApi.invalidSelections$,
@@ -241,7 +245,12 @@ export const OptionsListControl = ({
   );
 
   return (
-    <ConditionalLabelWrapper label={label} isPinned={isPinned}>
+    <ConditionalLabelWrapper
+      label={label}
+      isPinned={isPinned}
+      tooltipLabel={tooltipLabel}
+      api={componentApi}
+    >
       <div
         className={'kbnGridLayout--hideDragHandle'}
         css={optionListControlStyles.filterGroup}

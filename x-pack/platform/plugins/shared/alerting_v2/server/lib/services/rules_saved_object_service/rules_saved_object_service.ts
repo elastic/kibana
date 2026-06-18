@@ -246,7 +246,7 @@ export class RulesSavedObjectService implements RulesSavedObjectServiceContract 
     filter,
     search,
     searchFields,
-    sortField = 'updatedAt',
+    sortField = 'updated_at',
     sortOrder = 'desc',
   }: {
     page: number;

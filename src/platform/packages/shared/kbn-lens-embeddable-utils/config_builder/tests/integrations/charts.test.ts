@@ -22,7 +22,7 @@ const panels = JSON.parse(files || '[]') as Record<string, LensAttributes>[];
 
 const builder = new LensConfigBuilder(undefined, true);
 
-const stableChartTypes = new Set(['lnsHeatmap', 'lnsDatatable', 'lnsPie']);
+const stableChartTypes = new Set(['lnsHeatmap', 'lnsDatatable', 'lnsPie', 'lnsTagcloud']);
 
 // These need special attention to be sure they are correctly handled in the transformations
 const skipList: Record<string, string[]> = {

@@ -5,114 +5,13 @@
  * 2.0.
  */
 
-import type { RuleResponse, CreateRuleData, UpdateRuleData } from '@kbn/alerting-v2-schemas';
+import type { RuleResponse, CreateRuleData, UpdateRuleData, Query } from '@kbn/alerting-v2-schemas';
 import {
   mapArtifacts,
   mergeArtifactsByType,
   splitArtifactsByType,
 } from '../../form/utils/artifact_mappers';
-import type {
-  ComposeFormValues,
-  RuleQuery,
-  RuleKind,
-  RecoveryPolicyType,
-} from './compose_form_types';
-import { splitQuery } from './use_heuristic_split';
-
-// ---------------------------------------------------------------------------
-// Schema bridge: RuleQuery <-> old API fields
-//
-// TEMPORARY — remove when #268984 merges and the API natively uses the
-// composed/standalone query schema.
-// ---------------------------------------------------------------------------
-
-/**
- * Converts old API response fields into a `RuleQuery`.
- *
- * Uses `splitQuery()` to re-derive the base/block split from the stored
- * single query string. Lossy if the user hand-edited the split, but acceptable
- * during active dev — the new schema stores the split natively.
- */
-export function transformQueryIn(rule: {
-  kind: RuleKind;
-  evaluation: { query: { base: string; no_data?: string } };
-  recovery_policy?: { type: string; query?: { base?: string } } | null;
-}): RuleQuery {
-  const fullQuery = rule.evaluation.query.base;
-
-  if (rule.kind === 'signal') {
-    return {
-      format: 'standalone',
-      breach: fullQuery,
-      ...(rule.evaluation.query.no_data ? { no_data: rule.evaluation.query.no_data } : {}),
-    };
-  }
-
-  const { base, alertBlock: block } = splitQuery(fullQuery);
-
-  let recover: string | undefined;
-  if (rule.recovery_policy?.type === 'query' && rule.recovery_policy.query?.base) {
-    const { alertBlock: recoveryBlock } = splitQuery(rule.recovery_policy.query.base);
-    recover = recoveryBlock || undefined;
-  }
-
-  return {
-    format: 'composed',
-    base,
-    blocks: {
-      breach: block,
-      ...(recover ? { recover } : {}),
-    },
-  };
-}
-
-interface RecoveryPolicyOut {
-  type: RecoveryPolicyType;
-  query?: { base: string };
-}
-
-export interface TransformQueryOutResult {
-  evaluation: { query: { base: string } };
-  recovery_policy?: RecoveryPolicyOut;
-}
-
-/**
- * Converts a `RuleQuery` back into the old API fields.
- */
-export function transformQueryOut(query: RuleQuery, kind?: RuleKind): TransformQueryOutResult {
-  if (query.format === 'standalone') {
-    const evaluation = {
-      query: {
-        base: query.breach,
-        ...(query.no_data ? { no_data: query.no_data } : {}),
-      },
-    };
-    const recoverStr = query.recover?.trim();
-    if (recoverStr) {
-      return {
-        evaluation,
-        recovery_policy: { type: 'query', query: { base: recoverStr } },
-      };
-    }
-    if (kind === 'alert') {
-      return { evaluation, recovery_policy: { type: 'no_breach' } };
-    }
-    return { evaluation };
-  }
-
-  const evalQuery = [query.base, query.blocks.breach].filter(Boolean).join('\n');
-
-  const result: TransformQueryOutResult = { evaluation: { query: { base: evalQuery } } };
-
-  if (query.blocks.recover?.trim()) {
-    const recoveryQuery = [query.base, query.blocks.recover].filter(Boolean).join('\n');
-    result.recovery_policy = { type: 'query', query: { base: recoveryQuery } };
-  } else {
-    result.recovery_policy = { type: 'no_breach' };
-  }
-
-  return result;
-}
+import type { ComposeFormValues } from './compose_form_types';
 
 const DELAY_IMMEDIATE = 'immediate';
 const DELAY_BREACHES = 'breaches';
@@ -151,12 +50,33 @@ const mapStateTransition = (formValues: ComposeFormValues) => {
   return Object.keys(out).length ? out : undefined;
 };
 
+/**
+ * Maps the compose form query to the API query shape. Recovery strategy is
+ * inferred from presence of the recovery block and set as a top-level field
+ * in `composeFormToCreateRequest`.
+ */
+const composeQueryToApiQuery = (q: ComposeFormValues['query']): Query => {
+  if (q.format === 'composed') {
+    return {
+      format: 'composed',
+      base: q.base,
+      breach: { segment: q.breach.segment },
+      ...(q.recovery ? { recovery: { segment: q.recovery.segment } } : {}),
+    };
+  }
+  return {
+    format: 'standalone',
+    breach: { query: q.breach.query },
+    ...(q.recovery ? { recovery: { query: q.recovery.query } } : {}),
+  };
+};
+
 export const composeFormToCreateRequest = (
   formValues: ComposeFormValues,
   builderType?: string
 ): CreateRuleData => {
-  const { evaluation, recovery_policy } = transformQueryOut(formValues.query, formValues.kind);
   const artifacts = mapArtifacts(mergeArtifactsByType(formValues));
+  const hasRecovery = formValues.query.recovery != null;
 
   return {
     kind: formValues.kind,
@@ -169,11 +89,11 @@ export const composeFormToCreateRequest = (
     },
     time_field: formValues.timeField,
     schedule: { every: formValues.schedule.every, lookback: formValues.schedule.lookback },
-    evaluation,
+    query: composeQueryToApiQuery(formValues.query),
+    ...(hasRecovery ? { recovery_strategy: 'query' as const } : {}),
     grouping: formValues.grouping?.fields?.length
       ? { fields: formValues.grouping.fields }
       : undefined,
-    recovery_policy,
     state_transition: mapStateTransition(formValues),
     ...(artifacts ? { artifacts } : {}),
   };
@@ -184,7 +104,7 @@ export const composeFormToUpdateRequest = (
   builderType?: string
 ): UpdateRuleData => {
   const { kind, ...request } = composeFormToCreateRequest(formValues, builderType);
-  const { grouping, recovery_policy, state_transition, artifacts, metadata, ...rest } = request;
+  const { grouping, state_transition, artifacts, metadata, ...rest } = request;
   return {
     ...rest,
     metadata: {
@@ -192,7 +112,6 @@ export const composeFormToUpdateRequest = (
       builder_type: metadata.builder_type ?? null,
     },
     grouping: grouping ?? null,
-    recovery_policy: recovery_policy ?? null,
     state_transition: state_transition ?? null,
     artifacts: artifacts ?? null,
   };
@@ -201,6 +120,34 @@ export const composeFormToUpdateRequest = (
 // ---------------------------------------------------------------------------
 // API response → ComposeFormValues
 // ---------------------------------------------------------------------------
+
+/**
+ * Maps the API query shape to the compose form's narrower shape. A
+ * `recovery_strategy` of `'no_breach'` (or absent) is not surfaced by this
+ * form — only `'query'` maps a recovery block onto the form.
+ */
+const apiQueryToRuleQuery = (
+  q: RuleResponse['query'],
+  recoveryStrategy?: RuleResponse['recovery_strategy']
+): ComposeFormValues['query'] => {
+  if (q.format === 'composed') {
+    return {
+      format: 'composed',
+      base: q.base,
+      breach: { segment: q.breach.segment },
+      ...(recoveryStrategy === 'query' && q.recovery
+        ? { recovery: { segment: q.recovery.segment } }
+        : {}),
+    };
+  }
+  return {
+    format: 'standalone',
+    breach: { query: q.breach.query },
+    ...(recoveryStrategy === 'query' && q.recovery
+      ? { recovery: { query: q.recovery.query } }
+      : {}),
+  };
+};
 
 const deriveAlertDelayMode = (
   st?: ComposeFormValues['stateTransition']
@@ -242,7 +189,7 @@ export const mapRuleToComposeFormValues = (rule: RuleResponse): ComposeFormValue
       every: rule.schedule.every,
       lookback: rule.schedule.lookback ?? '1m',
     },
-    query: transformQueryIn(rule),
+    query: apiQueryToRuleQuery(rule.query, rule.recovery_strategy),
     ...(rule.grouping ? { grouping: { fields: rule.grouping.fields } } : {}),
     stateTransition,
     stateTransitionAlertDelayMode: deriveAlertDelayMode(stateTransition),

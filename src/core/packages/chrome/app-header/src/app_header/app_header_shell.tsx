@@ -22,6 +22,7 @@ export interface AppHeaderShellProps {
   title?: ReactNode;
   badges?: ReactNode;
   titleActions?: ReactNode;
+  titleAppend?: ReactNode;
   trailing?: ReactNode;
   metadata?: ReactNode;
   tabs?: ReactNode;
@@ -56,6 +57,7 @@ const useHeaderStyles = (
   sticky: boolean,
   padding: AppHeaderPadding | undefined,
   hasTabs: boolean,
+  hasTitleAppend: boolean,
   hasMetadata: boolean
 ) => {
   const { euiTheme } = useEuiTheme();
@@ -127,11 +129,27 @@ const useHeaderStyles = (
       flex: 0 1 auto;
       min-width: 0;
       max-width: 100%;
+      ${hasTitleAppend &&
+      css`
+        max-width: min(40%, 360px);
+      `}
     `;
 
     const titleClusterSpacer = css`
-      flex: 1 1 auto;
+      flex: ${hasTitleAppend ? '0 0 auto' : '1 1 auto'};
       min-width: 0;
+    `;
+
+    const titleAppend = css`
+      display: flex;
+      align-items: center;
+      flex: 1 1 0;
+      min-width: 0;
+      overflow: hidden;
+    `;
+
+    const trailingSlot = css`
+      flex-shrink: 0;
     `;
 
     const tabsRow = css`
@@ -165,16 +183,29 @@ const useHeaderStyles = (
       titleCluster,
       titleGroup,
       titleClusterSpacer,
+      titleAppend,
+      trailingSlot,
       titleActionsReveal,
       metadataRow,
       tabsRow,
     };
-  }, [euiTheme, sticky, padding, hasTabs, hasMetadata]);
+  }, [sticky, padding, euiTheme, hasTabs, hasTitleAppend, hasMetadata]);
 };
 
 export const AppHeaderShell = React.memo<AppHeaderShellProps>(
-  ({ title, badges, titleActions, trailing, metadata, tabs, sticky = true, padding }) => {
-    const styles = useHeaderStyles(sticky, padding, !!tabs, !!metadata);
+  ({
+    title,
+    badges,
+    titleActions,
+    titleAppend,
+    metadata,
+    trailing,
+    tabs,
+    sticky = true,
+    padding,
+  }) => {
+    const hasTitleAppend = titleAppend != null;
+    const styles = useHeaderStyles(sticky, padding, !!tabs, hasTitleAppend, !!metadata);
 
     return (
       <div css={styles.root} data-test-subj="appHeader">
@@ -189,9 +220,10 @@ export const AppHeaderShell = React.memo<AppHeaderShellProps>(
                 </div>
               )}
             </div>
+            {hasTitleAppend && <div css={styles.titleAppend}>{titleAppend}</div>}
             <div css={styles.titleClusterSpacer} aria-hidden />
           </div>
-          {trailing}
+          {trailing && <div css={styles.trailingSlot}>{trailing}</div>}
         </div>
         {metadata && (
           <div css={styles.metadataRow} data-test-subj="appHeaderMetadata">

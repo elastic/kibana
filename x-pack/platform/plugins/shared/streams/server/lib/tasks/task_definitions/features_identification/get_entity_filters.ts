@@ -14,7 +14,7 @@ export function getEntityFilters(features: FeatureWithFilter[], maxFilters: numb
   }
 
   const capped = [...features]
-    .sort((a, b) => b.last_seen.localeCompare(a.last_seen))
+    .sort((a, b) => (b.updated_at ?? '').localeCompare(a.updated_at ?? ''))
     .slice(0, maxFilters);
   return capped.map(({ filter }) => filter);
 }

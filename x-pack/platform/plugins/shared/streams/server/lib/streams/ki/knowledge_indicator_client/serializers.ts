@@ -137,10 +137,6 @@ export function fromStoredFeature(doc: StoredFeatureKnowledgeIndicator): Feature
     excluded: doc.excluded,
     updated_at: doc['@timestamp'],
     expires_at: doc.expires_at,
-    uuid: doc.id,
-    status: doc.excluded ? 'stale' : 'active',
-    last_seen: doc['@timestamp'],
-    excluded_at: doc.excluded ? doc['@timestamp'] : undefined,
   };
 }
 
@@ -156,9 +152,6 @@ export function fromStoredQuery(doc: StoredQueryKnowledgeIndicator): QueryLink {
   const ruleBacked = type === QUERY_TYPE_STATS ? false : rule_backed;
 
   return {
-    'asset.uuid': doc.id,
-    'asset.type': 'query',
-    'asset.id': doc.id,
     stream_name: doc['stream.name'],
     rule_backed: ruleBacked,
     rule_id,

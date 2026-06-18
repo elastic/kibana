@@ -11,8 +11,7 @@ import type { ESQLSearchResponse } from '@kbn/es-types';
 import { ALERT_RULE_UUID } from '@kbn/rule-data-utils';
 import { isEsqlUnknownIndexError } from '@kbn/storage-adapter';
 import { omit } from 'lodash';
-import type { InsightCore } from '@kbn/streams-schema';
-import type { Query } from '../../../../common/queries';
+import type { InsightCore, QueryLink } from '@kbn/streams-schema';
 import { parseError } from '../../streams/errors/parse_error';
 import { SecurityError } from '../../streams/errors/security_error';
 import { getColumnIndex, getSourceColumnIndex, toEsqlRequest } from '../../streams/helpers/esql';
@@ -64,7 +63,7 @@ export async function collectQueryData({
   query,
   esClient,
 }: {
-  query: Query;
+  query: QueryLink;
   esClient: ElasticsearchClient;
 }): Promise<QueryData | undefined> {
   const { rule_id: ruleId } = query;

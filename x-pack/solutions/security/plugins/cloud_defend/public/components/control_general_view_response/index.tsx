@@ -299,12 +299,14 @@ export const ControlGeneralViewResponse = ({
           <EuiFlexItem>
             <EuiPopover
               button={
-                <EuiButtonIcon
-                  iconType="boxesHorizontal"
-                  onClick={onTogglePopover}
-                  aria-label="Response options"
-                  data-test-subj="cloud-defend-btnresponsepopover"
-                />
+                <EuiToolTip content="Response options" disableScreenReaderOutput>
+                  <EuiButtonIcon
+                    iconType="boxesHorizontal"
+                    onClick={onTogglePopover}
+                    aria-label="Response options"
+                    data-test-subj="cloud-defend-btnresponsepopover"
+                  />
+                </EuiToolTip>
               }
               isOpen={isPopoverOpen}
               closePopover={closePopover}

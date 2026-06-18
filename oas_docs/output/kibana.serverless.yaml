@@ -2758,6 +2758,9 @@ paths:
                 conversation_id:
                   description: Optional existing conversation ID to continue a previous conversation.
                   type: string
+                execution_id:
+                  description: Optional client-generated execution ID. Provide it to address this execution later (for example, to abort it). Must be unique; defaults to a server-generated ID.
+                  type: string
                 inference_id:
                   description: Optional inference endpoint ID for model routing (public alias for the same internal identifier as `connector_id`). Mutually exclusive with `connector_id`.
                   nullable: true
@@ -2782,7 +2785,30 @@ paths:
                             type: boolean
                         required:
                           - authorized
-                  description: Use this field to respond to a confirmation or authorization prompt. Send an `allow` boolean to answer a confirmation prompt, or an `authorized` boolean to answer an authorization prompt.
+                      - additionalProperties: false
+                        type: object
+                        properties:
+                          answers:
+                            items:
+                              additionalProperties: false
+                              type: object
+                              properties:
+                                choice:
+                                  items:
+                                    type: number
+                                  maxItems: 100
+                                  type: array
+                                custom:
+                                  maxLength: 20000
+                                  minLength: 1
+                                  type: string
+                                skipped:
+                                  type: boolean
+                            maxItems: 100
+                            type: array
+                        required:
+                          - answers
+                  description: Use this field to respond to a confirmation, authorization, or ask_user_question prompt. Send `allow` for confirmation, `authorized` for authorization, or `answers` (array of `{ choice?, custom?, skipped? }`) for ask_user_question.
                   type: object
       responses:
         '200':
@@ -3157,6 +3183,9 @@ paths:
                 conversation_id:
                   description: Optional existing conversation ID to continue a previous conversation.
                   type: string
+                execution_id:
+                  description: Optional client-generated execution ID. Provide it to address this execution later (for example, to abort it). Must be unique; defaults to a server-generated ID.
+                  type: string
                 inference_id:
                   description: Optional inference endpoint ID for model routing (public alias for the same internal identifier as `connector_id`). Mutually exclusive with `connector_id`.
                   nullable: true
@@ -3181,7 +3210,30 @@ paths:
                             type: boolean
                         required:
                           - authorized
-                  description: Use this field to respond to a confirmation or authorization prompt. Send an `allow` boolean to answer a confirmation prompt, or an `authorized` boolean to answer an authorization prompt.
+                      - additionalProperties: false
+                        type: object
+                        properties:
+                          answers:
+                            items:
+                              additionalProperties: false
+                              type: object
+                              properties:
+                                choice:
+                                  items:
+                                    type: number
+                                  maxItems: 100
+                                  type: array
+                                custom:
+                                  maxLength: 20000
+                                  minLength: 1
+                                  type: string
+                                skipped:
+                                  type: boolean
+                            maxItems: 100
+                            type: array
+                        required:
+                          - answers
+                  description: Use this field to respond to a confirmation, authorization, or ask_user_question prompt. Send `allow` for confirmation, `authorized` for authorization, or `answers` (array of `{ choice?, custom?, skipped? }`) for ask_user_question.
                   type: object
       responses:
         '200':
@@ -30676,160 +30728,6 @@ paths:
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
-  /api/fleet/agents/collector_groups:
-    get:
-      description: |-
-        **Spaces method and path for this operation:**
-
-        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/fleet/agents/collector_groups</span></div>
-
-        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
-
-        Get OpAMP collectors grouped by elastic.collector.group with cursor-based pagination.<br/><br/>[Required authorization] Route required privileges: fleet-agents-read.
-      operationId: get-fleet-agents-collector-groups
-      parameters:
-        - description: Field to group collectors by
-          in: query
-          name: groupBy
-          required: false
-          schema:
-            default: collector.group
-            enum:
-              - collector.group
-              - config.name
-            type: string
-        - description: A KQL query string to filter collectors before grouping
-          in: query
-          name: kuery
-          required: false
-          schema:
-            maxLength: 4096
-            type: string
-        - description: Number of groups per page
-          in: query
-          name: perPage
-          required: false
-          schema:
-            default: 20
-            maximum: 1000
-            minimum: 1
-            type: number
-        - description: After key is used for cursor-based pagination, use it to get the next page of results
-          in: query
-          name: afterKey
-          required: false
-          schema:
-            maxLength: 2048
-            type: string
-        - description: When true, include inactive collectors in the results
-          in: query
-          name: showInactive
-          required: false
-          schema:
-            default: false
-            type: boolean
-      responses:
-        '200':
-          content:
-            application/json:
-              examples:
-                getCollectorGroupsExample:
-                  description: Collector groups
-                  value:
-                    afterKey: '{"collector.group":"database-servers"}'
-                    items:
-                      - docCount: 5
-                        group: web-servers
-                        groupDisplayName: web-servers
-                        isUngrouped: false
-                        signals:
-                          - logs
-                          - metrics
-                      - docCount: 3
-                        group: database-servers
-                        groupDisplayName: database-servers
-                        signals:
-                          - metrics
-                          - traces
-              schema:
-                additionalProperties: false
-                type: object
-                properties:
-                  afterKey:
-                    maxLength: 2048
-                    type: string
-                  items:
-                    items:
-                      additionalProperties: false
-                      type: object
-                      properties:
-                        docCount:
-                          description: Number of collectors in this group
-                          type: number
-                        group:
-                          description: Group key value
-                          maxLength: 1024
-                          type: string
-                        groupDisplayName:
-                          description: Human-readable display name for the group
-                          maxLength: 1024
-                          type: string
-                        isUngrouped:
-                          description: True when the collectors in this bucket have no value for the group-by field
-                          type: boolean
-                        signals:
-                          description: Signal types present in this group (for example, logs, metrics, traces)
-                          items:
-                            maxLength: 64
-                            type: string
-                          maxItems: 10
-                          type: array
-                      required:
-                        - group
-                        - groupDisplayName
-                        - docCount
-                        - signals
-                    maxItems: 1000
-                    type: array
-                required:
-                  - items
-          description: Successful response
-        '400':
-          content:
-            application/json:
-              examples:
-                genericErrorResponseExample:
-                  description: Example of a generic error response
-                  value:
-                    error: Bad Request
-                    message: An error message describing what went wrong
-                    statusCode: 400
-              schema:
-                additionalProperties: false
-                description: Generic Error
-                type: object
-                properties:
-                  attributes:
-                    nullable: true
-                  error:
-                    type: string
-                  errorType:
-                    type: string
-                  message:
-                    type: string
-                  statusCode:
-                    type: number
-                required:
-                  - message
-                  - attributes
-          description: Bad Request
-      summary: Get collector groups
-      tags:
-        - Elastic Agents
-      x-state: Experimental
-      x-metaTags:
-        - content: Kibana, Elastic Cloud Serverless
-          name: product_name
   /api/fleet/agents/files/{fileId}:
     delete:
       description: |-
@@ -46046,6 +45944,95 @@ paths:
                 $ref: '#/components/schemas/Security_Entity_Analytics_API_RiskEngineScheduleNowErrorResponse'
           description: Unexpected error
       summary: Run the risk scoring engine
+      tags:
+        - Security Entity Analytics API
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
+  /api/risk_score/history:
+    get:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/risk_score/history</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Returns time-ordered historical risk score entries from the risk score time-series index for a given entity.
+      operationId: GetRiskScoreHistory
+      parameters:
+        - description: The type of entity to retrieve history for.
+          in: query
+          name: entity_type
+          required: true
+          schema:
+            $ref: '#/components/schemas/Security_Entity_Analytics_API_IdentifierType'
+        - description: The identifier of the entity to retrieve history for.
+          in: query
+          name: entity_id
+          required: true
+          schema:
+            maxLength: 1000
+            type: string
+        - description: Start of the time range, in date-math syntax. Defaults to 90 days ago.
+          in: query
+          name: from
+          required: false
+          schema:
+            default: now-90d
+            maxLength: 100
+            type: string
+        - description: End of the time range, in date-math syntax. Defaults to now.
+          in: query
+          name: to
+          required: false
+          schema:
+            default: now
+            maxLength: 100
+            type: string
+        - description: Filter entries by the type of score recorded (`base`, `propagated`, or `resolution`).
+          in: query
+          name: score_type
+          required: false
+          schema:
+            enum:
+              - base
+              - propagated
+              - resolution
+            type: string
+        - description: Maximum number of history entries to return per request.
+          in: query
+          name: page_size
+          required: false
+          schema:
+            default: 100
+            maximum: 1000
+            minimum: 1
+            type: integer
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                riskScoreHistory:
+                  summary: Risk score history for a user
+                  value:
+                    entity_id: alice
+                    entity_type: user
+                    entries:
+                      - '@timestamp': '2026-05-20T12:00:00.000Z'
+                        calculated_level: High
+                        calculated_score: 145.2
+                        calculated_score_norm: 72.4
+                        category_1_count: 18
+                        category_1_score: 102
+                        score_type: base
+              schema:
+                $ref: '#/components/schemas/Security_Entity_Analytics_API_RiskScoreHistoryResponse'
+          description: Successful response
+        '400':
+          description: Invalid request
+      summary: Get risk score history for an entity
       tags:
         - Security Entity Analytics API
       x-metaTags:
@@ -69146,15 +69133,14 @@ components:
           type: string
         environment:
           default: ENVIRONMENT_ALL
-          type: string
-        find_query:
-          maxLength: 2048
+          maxLength: 1024
           type: string
         hide_border:
           type: boolean
         hide_title:
           type: boolean
         kuery:
+          maxLength: 2048
           type: string
         map_orientation:
           enum:
@@ -69162,8 +69148,10 @@ components:
             - vertical
           type: string
         service_group_id:
+          maxLength: 1024
           type: string
         service_name:
+          maxLength: 1024
           type: string
         slo_status_filter:
           items:
@@ -79807,7 +79795,7 @@ components:
                   - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-time_slider_control'
                   - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-vis'
               - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-section'
-          maxItems: 100
+          maxItems: 1000
           type: array
         pinned_panels:
           default: []
@@ -81601,7 +81589,7 @@ components:
               - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-synthetics_stats_overview'
               - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-time_slider_control'
               - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-vis'
-          maxItems: 100
+          maxItems: 1000
           type: array
         title:
           description: The title of the section.
@@ -118353,6 +118341,13 @@ components:
             - name
       required:
         - entity
+    Security_Entity_Analytics_API_IdentifierType:
+      enum:
+        - host
+        - user
+        - service
+        - generic
+      type: string
     Security_Entity_Analytics_API_IdField:
       enum:
         - host.name
@@ -118516,6 +118511,11 @@ components:
         - $ref: '#/components/schemas/Security_Entity_Analytics_API_MonitoringEntitySourceProperties'
         - type: object
           properties:
+            apiKeyId:
+              description: ID of the API key used for scoped reads from the source index. Only present for index-type sources.
+              maxLength: 64
+              nullable: true
+              type: string
             id:
               type: string
           required:
@@ -118597,6 +118597,54 @@ components:
       properties:
         success:
           type: boolean
+    Security_Entity_Analytics_API_RiskScoreHistoryEntry:
+      type: object
+      properties:
+        '@timestamp':
+          format: date-time
+          maxLength: 33
+          type: string
+        calculated_level:
+          $ref: '#/components/schemas/Security_Entity_Analytics_API_EntityRiskLevels'
+        calculated_score:
+          format: double
+          type: number
+        calculated_score_norm:
+          format: double
+          maximum: 100
+          minimum: 0
+          type: number
+        category_1_count:
+          type: integer
+        category_1_score:
+          format: double
+          type: number
+        score_type:
+          enum:
+            - base
+            - propagated
+            - resolution
+          type: string
+      required:
+        - '@timestamp'
+        - calculated_score_norm
+        - calculated_level
+    Security_Entity_Analytics_API_RiskScoreHistoryResponse:
+      type: object
+      properties:
+        entity_id:
+          maxLength: 1000
+          type: string
+        entity_type:
+          $ref: '#/components/schemas/Security_Entity_Analytics_API_IdentifierType'
+        entries:
+          items:
+            $ref: '#/components/schemas/Security_Entity_Analytics_API_RiskScoreHistoryEntry'
+          type: array
+      required:
+        - entity_id
+        - entity_type
+        - entries
     Security_Entity_Analytics_API_RiskScoreInput:
       description: A generic representation of a document contributing to a Risk Score.
       type: object

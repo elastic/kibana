@@ -44,8 +44,6 @@ export const ALERTING_V2_ERROR_CODES = {
   ACTION_POLICY_VERSION_CONFLICT: 'ACTION_POLICY_VERSION_CONFLICT',
   /** The submitted action policy body failed schema validation. */
   INVALID_ACTION_POLICY_DATA: 'INVALID_ACTION_POLICY_DATA',
-  /** A `single_rule` action policy referenced a rule that does not exist. */
-  RULE_NOT_FOUND_FOR_POLICY: 'RULE_NOT_FOUND_FOR_POLICY',
   /** A user-supplied date string failed ISO-8601 parsing. */
   INVALID_DATE_STRING: 'INVALID_DATE_STRING',
 

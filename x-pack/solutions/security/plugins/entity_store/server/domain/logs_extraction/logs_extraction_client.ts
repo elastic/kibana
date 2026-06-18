@@ -847,8 +847,6 @@ export class LogsExtractionClient {
   }
 
   private async handleError(error: any, type: EntityType): Promise<ExtractedLogsSummary> {
-    this.logger.error(error);
-
     if (
       SavedObjectsErrorHelpers.isNotFoundError(error) ||
       error instanceof EntityStoreNotRunningError

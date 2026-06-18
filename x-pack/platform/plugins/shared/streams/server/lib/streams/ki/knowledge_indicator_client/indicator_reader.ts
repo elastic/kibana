@@ -226,4 +226,14 @@ export class IndicatorReader {
     const docs = await this.revisionReader.fetchLatestRevisions(where, postGroupingWhere);
     return docs.filter(isStoredQueryKnowledgeIndicator).map(fromStoredQuery);
   }
+
+  async findFeaturesByIds(ids: string[]): Promise<Array<{ id: string; stream_name: string }>> {
+    if (ids.length === 0) return [];
+    const where = combineWhere(inPredicate(TYPE, [KI_TYPE_FEATURE]), inPredicate(ID, ids));
+    const docs = await this.revisionReader.fetchLatestRevisions(where, IS_NOT_DELETED);
+    return docs.filter(isStoredFeatureKnowledgeIndicator).map((doc) => ({
+      id: doc.id,
+      stream_name: doc['stream.name'],
+    }));
+  }
 }

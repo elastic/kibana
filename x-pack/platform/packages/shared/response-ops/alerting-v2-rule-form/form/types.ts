@@ -6,7 +6,7 @@
  */
 
 // Import and re-export RuleKind and RecoveryPolicyType from schema
-import type { RuleKind, RecoveryPolicyType } from '@kbn/alerting-v2-schemas';
+import type { RuleKind } from '@kbn/alerting-v2-schemas';
 import type { ActionFormValue } from '../actions_form';
 
 /** Alert / recovery delay segment control (matches `AlertDelayField` / `RecoveryDelayField`). */
@@ -34,21 +34,19 @@ export interface RuleSchedule {
   every: string;
   lookback: string;
 }
-export interface RuleEvaluation {
-  query: {
-    base: string;
-  };
+
+/**
+ * The form represents the rule's detection query in the API's `standalone`
+ * format. `breach` is required; `recover` is optional and set by the compose
+ * discover flow when the user configures a custom recovery condition.
+ */
+export interface RuleQuery {
+  breach: string;
+  recover?: string;
 }
 
 export interface RuleGrouping {
   fields: string[];
-}
-
-export interface RecoveryPolicy {
-  type: RecoveryPolicyType;
-  query?: {
-    base?: string | null;
-  };
 }
 
 export interface RuleArtifact {
@@ -81,9 +79,8 @@ export interface FormValues {
   metadata: RuleMetadata;
   timeField: string;
   schedule: RuleSchedule;
-  evaluation: RuleEvaluation;
+  query: RuleQuery;
   grouping?: RuleGrouping;
-  recoveryPolicy?: RecoveryPolicy;
   stateTransition?: StateTransition;
   stateTransitionAlertDelayMode: StateTransitionDelayMode;
   stateTransitionRecoveryDelayMode: StateTransitionDelayMode;

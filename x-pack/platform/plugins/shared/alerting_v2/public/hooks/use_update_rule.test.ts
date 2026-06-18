@@ -30,7 +30,7 @@ const mockRuleResponse: RuleResponse = {
   },
   time_field: '@timestamp',
   schedule: { every: '1m', lookback: '5m' },
-  evaluation: { query: { base: 'FROM logs-*' } },
+  query: { format: 'standalone', breach: { query: 'FROM logs-*' } },
   createdBy: 'test-user',
   createdAt: '2026-01-01T00:00:00.000Z',
   updatedBy: 'test-user',

@@ -224,10 +224,8 @@ describe('DynamicRuleForm', () => {
           metadata: expect.objectContaining({
             name: 'Test Rule',
           }),
-          evaluation: expect.objectContaining({
-            query: expect.objectContaining({
-              base: 'FROM logs-* | STATS count = COUNT(*)',
-            }),
+          query: expect.objectContaining({
+            breach: 'FROM logs-* | STATS count = COUNT(*)',
           }),
         }),
         expect.anything()

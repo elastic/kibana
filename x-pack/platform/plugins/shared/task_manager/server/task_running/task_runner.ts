@@ -45,7 +45,7 @@ import {
   asTaskMarkRunningEvent,
   asTaskRunEvent,
   asTaskManagerStatEvent,
-  startTaskTimerWithEventLoopMonitoring,
+  startEventLoopMonitoring,
   TaskPersistence,
 } from '../task_events';
 import { intervalFromDate, parseIntervalAsMillisecond } from '../lib/intervals';
@@ -375,6 +375,12 @@ export class TaskManagerRunner implements TaskRunner {
         }`
       );
     }
+    // Capture startedAt while TypeScript knows this.instance is ReadyToRunTask
+    // (ConcreteTaskInstanceWithStartedAt guarantees startedAt: Date, not null).
+    // We extract it here because the narrowing is lost inside the async closure below
+    // since this.instance is a mutable class property.
+    const { startedAt } = this.instance.task;
+
     this.logger.debug(`Running task ${this}`, { tags: ['task:start', this.id, this.taskType] });
 
     return withActiveSpan(
@@ -391,7 +397,13 @@ export class TaskManagerRunner implements TaskRunner {
         const apmTrans = apm.startTransaction(this.taskType, TASK_MANAGER_RUN_TRANSACTION_TYPE, {
           childOf: this.instance.task.traceparent,
         });
-        const stopTaskTimer = startTaskTimerWithEventLoopMonitoring(this.config.event_loop_delay);
+        const stopEventLoopMonitoring = startEventLoopMonitoring(this.config.event_loop_delay);
+        const makeTaskTiming = (): TaskTiming => ({
+          start: startedAt.getTime(),
+          stop: Date.now(),
+          eventLoopBlockMs: stopEventLoopMonitoring(),
+        });
+        this.logTaskRunStartEvent(this.instance.task, startedAt);
 
         // Validate state
         const stateValidationResult = this.validateTaskState(this.instance.task);
@@ -406,7 +418,7 @@ export class TaskManagerRunner implements TaskRunner {
                   state: stateValidationResult.taskInstance.state,
                   shouldValidate: false,
                 }),
-                stopTaskTimer()
+                makeTaskTiming()
               )
           );
           if (apmTrans) apmTrans.end('failure');
@@ -453,7 +465,7 @@ export class TaskManagerRunner implements TaskRunner {
 
           const logCancelEvent = () => {
             this.isCancelled = true;
-            this.logTaskCancelEvent(this.instance.task, stopTaskTimer());
+            this.logTaskCancelEvent(this.instance.task, makeTaskTiming());
           };
           this.task.cancel = async function () {
             abortController.abort();
@@ -483,7 +495,7 @@ export class TaskManagerRunner implements TaskRunner {
           const validatedResult = this.validateResult(result);
           const processedResult = await withSpan(
             { name: 'process result', type: 'task manager' },
-            () => this.processResult(validatedResult, stopTaskTimer())
+            () => this.processResult(validatedResult, makeTaskTiming())
           );
           if (apmTrans) apmTrans.end('success');
           return processedResult;
@@ -508,7 +520,7 @@ export class TaskManagerRunner implements TaskRunner {
             () =>
               this.processResult(
                 asErr({ error: err, state: modifiedContext.taskInstance.state }),
-                stopTaskTimer()
+                makeTaskTiming()
               )
           );
           if (apmTrans) apmTrans.end('failure');
@@ -1096,6 +1108,27 @@ export class TaskManagerRunner implements TaskRunner {
     return stop;
   }
 
+  private logTaskRunStartEvent(task: ConcreteTaskInstance, startedAt: Date): void {
+    const scheduleDelayNs = task.scheduledAt
+      ? millisToNanos(startedAt.getTime() - task.scheduledAt.getTime())
+      : undefined;
+    this.eventLogger.logEvent({
+      event: {
+        action: EVENT_LOG_ACTIONS.taskRunStart,
+        start: startedAt.toISOString(),
+      },
+      kibana: {
+        task: {
+          id: this.id,
+          type: this.taskType,
+          scheduled: task.scheduledAt.toISOString(),
+          ...(scheduleDelayNs != null ? { schedule_delay: scheduleDelayNs } : {}),
+        },
+      },
+      message: `Task ${this.taskType} "${this.id}" started.`,
+    });
+  }
+
   private logTaskRunEvent(
     task: ConcreteTaskInstance,
     taskTiming: TaskTiming,
@@ -1104,10 +1137,7 @@ export class TaskManagerRunner implements TaskRunner {
     error?: Error | DecoratedError
   ): void {
     const runDurationNs = millisToNanos(taskTiming.stop - taskTiming.start);
-    const scheduleDelayNs =
-      task.startedAt && task.scheduledAt
-        ? millisToNanos(task.startedAt.getTime() - task.scheduledAt.getTime())
-        : undefined;
+    const scheduleDelayNs = millisToNanos(taskTiming.start - task.scheduledAt.getTime());
     const errorDetails = error
       ? {
           message: error.message,
@@ -1128,7 +1158,7 @@ export class TaskManagerRunner implements TaskRunner {
           id: this.id,
           type: this.taskType,
           scheduled: task.scheduledAt.toISOString(),
-          ...(scheduleDelayNs != null ? { schedule_delay: scheduleDelayNs } : {}),
+          schedule_delay: scheduleDelayNs,
         },
       },
       message,

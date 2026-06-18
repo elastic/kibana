@@ -103,6 +103,11 @@ components:
           properties:
             id:
               type: string
+            apiKeyId:
+              type: string
+              nullable: true
+              maxLength: 64
+              description: ID of the API key used for scoped reads from the source index. Only present for index-type sources.
 
     DateRange:
       description: Defines the lookback period for filtering source data by timestamp.

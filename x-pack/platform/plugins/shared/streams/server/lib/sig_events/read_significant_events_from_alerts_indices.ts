@@ -13,7 +13,8 @@ import { MS_PER_UNIT } from '@kbn/streams-schema';
 import { isEsqlUnknownIndexError } from '@kbn/storage-adapter';
 import { isEmpty, keyBy } from 'lodash';
 import type { QueryLink, SearchMode } from '../../../common/queries';
-import type { QueryClient, QueryLinkFilters } from '../streams/assets/query/query_client';
+import type { KnowledgeIndicatorClient } from '../streams/ki';
+import type { RuleUnbackedFilter } from '../streams/ki';
 import { parseError } from '../streams/errors/parse_error';
 import { SecurityError } from '../streams/errors/security_error';
 import { getColumnIndex, toEsqlRequest } from '../streams/helpers/esql';
@@ -40,21 +41,21 @@ export async function readSignificantEventsFromAlertsIndices(
     to: Date;
     bucketSize: string;
     query?: string;
-    filters?: QueryLinkFilters;
+    filters?: { ruleUnbacked?: RuleUnbackedFilter; queryIds?: string[]; minSeverityScore?: number };
     searchMode?: SearchMode;
     alertsSource?: AlertsSource;
   },
   dependencies: {
-    queryClient: QueryClient;
+    kiClient: KnowledgeIndicatorClient;
     scopedClusterClient: IScopedClusterClient;
   }
 ): Promise<SignificantEventsGetResponse> {
-  const { queryClient, scopedClusterClient } = dependencies;
+  const { kiClient, scopedClusterClient } = dependencies;
   const { streamNames = [], from, to, bucketSize, query, filters, searchMode } = params;
 
   const queryLinks = query
-    ? await queryClient.findQueries(streamNames, query, filters, searchMode)
-    : await queryClient.getQueryLinks(streamNames, filters);
+    ? await kiClient.findQueries(streamNames, query, filters, searchMode)
+    : await kiClient.getQueryLinks(streamNames, filters);
 
   if (isEmpty(queryLinks)) {
     return { significant_events: [], aggregated_occurrences: [] };

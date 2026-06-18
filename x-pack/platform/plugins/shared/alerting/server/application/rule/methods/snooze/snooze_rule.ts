@@ -71,10 +71,6 @@ async function snoozeWithOCC<Params extends RuleParams = never>(
       operation: WriteOperations.Snooze,
       entity: AlertingAuthorizationEntity.Rule,
     });
-
-    if (attributes.actions.length) {
-      await context.actionsAuthorization.ensureAuthorized({ operation: 'execute' });
-    }
   } catch (error) {
     context.auditLogger?.log(
       ruleAuditEvent({

@@ -16,6 +16,7 @@ import {
   EuiHorizontalRule,
   EuiLoadingSpinner,
   EuiText,
+  EuiToolTip,
 } from '@elastic/eui';
 import type { FormHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import {
@@ -171,12 +172,14 @@ const EditComponent: CustomFieldType<CaseCustomFieldText>['Edit'] = ({
         )}
         {!isLoading && canUpdate && (
           <EuiFlexItem grow={false}>
-            <EuiButtonIcon
-              data-test-subj={`case-text-custom-field-edit-button-${customFieldConfiguration.key}`}
-              aria-label={EDIT_CUSTOM_FIELDS_ARIA_LABEL(title)}
-              iconType={'pencil'}
-              onClick={onEdit}
-            />
+            <EuiToolTip content={EDIT_CUSTOM_FIELDS_ARIA_LABEL(title)} disableScreenReaderOutput>
+              <EuiButtonIcon
+                data-test-subj={`case-text-custom-field-edit-button-${customFieldConfiguration.key}`}
+                aria-label={EDIT_CUSTOM_FIELDS_ARIA_LABEL(title)}
+                iconType={'pencil'}
+                onClick={onEdit}
+              />
+            </EuiToolTip>
           </EuiFlexItem>
         )}
       </EuiFlexGroup>

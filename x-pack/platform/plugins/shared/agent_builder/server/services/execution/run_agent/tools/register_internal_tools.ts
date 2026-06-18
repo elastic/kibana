@@ -16,6 +16,7 @@ import { ToolManagerToolType } from '@kbn/agent-builder-server/runner';
 import { createSubagentTool } from './run_subagent';
 import { createSleepTool } from './sleep';
 import { createLoadSkillTool } from './load_skill';
+import { createAskUserQuestionTool } from './ask_user_question';
 import { builtinToolToExecutable } from '../utils/select_tools';
 import type { BackgroundExecutionService } from '../background_execution_service';
 
@@ -54,7 +55,6 @@ export const registerInternalTools = async ({
   } = context;
 
   // Sub-agent and sleep tools — experimental, and not available in standalone mode
-  // because standalone runs are non-interactive (HITL disabled).
   if (experimentalFeatures.subagents && executionMode !== AgentExecutionMode.standalone) {
     const subagentTool = createSubagentTool({
       agentId: agentId ?? agentBuilderDefaultAgentId,
@@ -82,8 +82,22 @@ export const registerInternalTools = async ({
     });
   }
 
-  // load_skill — gated on the skills feature only. Not restricted to non-standalone
-  // because skills must be loadable in standalone runs too.
+  // ask_user_question — experimental, and not available in standalone mode
+  if (experimentalFeatures.askUserQuestion && executionMode !== AgentExecutionMode.standalone) {
+    const askUserQuestionTool = createAskUserQuestionTool();
+    await toolManager.addTools({
+      type: ToolManagerToolType.executable,
+      tools: [
+        {
+          ...builtinToolToExecutable({ tool: askUserQuestionTool, runner }),
+          origin: ToolOrigin.internal,
+        },
+      ],
+      logger,
+    });
+  }
+
+  // load_skill — gated on the skills feature only.
   if (experimentalFeatures.skills) {
     const loadSkillTool = createLoadSkillTool({ analyticsService, trackingService });
     await toolManager.addTools({

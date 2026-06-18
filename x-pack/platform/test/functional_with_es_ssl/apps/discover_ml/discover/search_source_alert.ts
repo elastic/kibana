@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+// Serverless test (remove during Scout migration): x-pack/platform/test/serverless/functional/test_suites/discover_ml_uptime/discover/search_source_alert.ts
 import expect from '@kbn/expect';
 import { asyncForEach } from '@kbn/std';
 import type { FtrProviderContext } from '../../../ftr_provider_context';

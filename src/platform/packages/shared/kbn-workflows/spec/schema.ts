@@ -243,6 +243,12 @@ export const FetcherConfigSchema = z
   .meta({ $id: 'fetcher', description: 'Fetcher configuration for HTTP request customization' })
   .optional();
 
+// Single source of truth for the kibana.request HTTP method enum (mirrors the `http` step's
+// valid values). Reused by the connector schema (editor + validation) and the runtime guard so
+// the editor and runtime can never accept/reject different methods.
+export const KibanaHttpMethods = ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'] as const;
+export const KibanaHttpMethodSchema = z.enum(KibanaHttpMethods);
+
 export const ElasticsearchStepInputSchema = z.union([
   // Raw API format - like Dev Console
   z.object({
@@ -298,7 +304,7 @@ export const KibanaStepInputSchema = z.union([
   // Raw API format - direct HTTP API calls
   z.object({
     request: z.object({
-      method: z.enum(['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'HEAD']).optional().default('GET'),
+      method: KibanaHttpMethodSchema.optional().default('GET'),
       path: z.string().min(1),
       body: z.any().optional(),
       headers: z.record(z.string(), z.string()).optional(),

@@ -22,9 +22,6 @@ const makeEsError = (status: number, type: string, reason: string) =>
 
 const makeQuery = (overrides: Partial<Query> = {}): Query =>
   ({
-    'asset.uuid': 'uuid-q1',
-    'asset.type': 'query',
-    'asset.id': 'q1',
     query: {
       id: 'q1',
       type: 'match',

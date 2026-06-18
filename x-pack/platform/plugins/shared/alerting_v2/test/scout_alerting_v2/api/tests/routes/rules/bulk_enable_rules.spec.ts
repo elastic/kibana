@@ -160,6 +160,11 @@ apiTest.describe('Bulk enable rules API', { tag: '@local-stateful-classic' }, ()
         buildCreateRuleData({
           kind: 'signal',
           state_transition: undefined,
+          recovery_strategy: undefined,
+          query: {
+            format: 'standalone',
+            breach: { query: 'FROM logs-* | LIMIT 10' },
+          },
           metadata: { name: 'signal-rule' },
         })
       );

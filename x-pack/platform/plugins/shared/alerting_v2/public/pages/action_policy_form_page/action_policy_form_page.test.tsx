@@ -130,8 +130,6 @@ const EXISTING_POLICY: ActionPolicyResponse = {
   version: 'WzEsMV0=',
   name: 'Critical production alerts',
   description: 'Routes critical alerts',
-  type: 'global',
-  ruleId: null,
   enabled: true,
   matcher: 'data.severity : "critical"',
   groupBy: ['host.name', 'service.name'],
@@ -205,7 +203,6 @@ describe('ActionPolicyFormPage', () => {
           {
             name: 'Policy from test',
             description: 'Description from test',
-            type: 'global',
             groupingMode: 'per_episode',
             throttle: { strategy: 'on_status_change', interval: null },
             destinations: [{ type: 'workflow', id: 'workflow-1' }],

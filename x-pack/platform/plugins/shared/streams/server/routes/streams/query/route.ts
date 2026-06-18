@@ -144,9 +144,11 @@ const upsertQueryStreamRoute = createServerRoute({
     }),
   }),
   handler: async ({ params, request, getScopedClients, context, logger }) => {
-    const { streamsClient, getQueryClient, attachmentClient } = await getScopedClients({
-      request,
-    });
+    const { streamsClient, getKnowledgeIndicatorClient, attachmentClient } = await getScopedClients(
+      {
+        request,
+      }
+    );
 
     const core = await context.core;
     const queryStreamsEnabled = await core.uiSettings.client.get(
@@ -196,10 +198,10 @@ const upsertQueryStreamRoute = createServerRoute({
       throw badData(`The stream "${name}" already exists and is not a query stream.`);
     }
 
-    const queryClient = await getQueryClient();
+    const kiClient = await getKnowledgeIndicatorClient();
     const { dashboards, queries, rules } = await getStreamAssets({
       name,
-      queryClient,
+      kiClient,
       attachmentClient,
     });
 

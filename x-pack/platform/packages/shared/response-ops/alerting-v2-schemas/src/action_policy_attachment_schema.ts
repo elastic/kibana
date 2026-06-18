@@ -35,8 +35,6 @@ export const actionPolicyAttachmentDataSchema = actionPolicyResponseSchema
   .pick({
     id: true,
     version: true,
-    type: true,
-    ruleId: true,
     name: true,
     description: true,
     destinations: true,

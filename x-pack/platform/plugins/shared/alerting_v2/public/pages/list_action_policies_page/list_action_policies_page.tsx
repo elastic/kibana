@@ -131,7 +131,6 @@ export const ListActionPoliciesPage = () => {
     const data: CreateActionPolicyData = {
       name: `${name} [clone]`,
       description,
-      type: 'global',
       destinations,
       groupingMode: groupingMode ?? 'per_episode',
       ...(tags != null && { tags }),

@@ -70,7 +70,6 @@ backwards compatible. Renaming or removing a code is a breaking change.
 | `ACTION_POLICY_ALREADY_EXISTS`    | 409    | `createActionPolicy` collides with an existing id                   | `{ action_policy_id }` |
 | `ACTION_POLICY_VERSION_CONFLICT`  | 409    | An update / delete races another writer                             | `{ action_policy_id }` |
 | `INVALID_ACTION_POLICY_DATA`      | 400    | The submitted body fails the domain-level schema check              | `{ context, errors }`  |
-| `RULE_NOT_FOUND_FOR_POLICY`       | 400    | A `single_rule` action policy references a non-existent rule        | `{ rule_id }`          |
 | `INVALID_DATE_STRING`             | 400    | A user-supplied date (e.g. `snoozed_until`) fails ISO-8601 parsing  | `{ value }`            |
 
 ### Alert actions (`server/lib/alert_actions_client/`)

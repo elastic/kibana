@@ -5,6 +5,4 @@
  * 2.0.
  */
 
-export const ALERTING_V2_EXPERIMENTAL_FEATURES_SETTING_ID = 'alerting:v2:experimentalFeatures';
-
 export const ALERTING_V2_DISPATCHER_ENABLED_SETTING_ID = 'observability:alerting:dispatcherEnabled';

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+// Original test (remove during Scout migration): x-pack/platform/test/functional_with_es_ssl/apps/discover_ml/discover/search_source_alert.ts
 import expect from '@kbn/expect';
 import { asyncForEach } from '@kbn/std';
 import type { FtrProviderContext } from '../../../ftr_provider_context';

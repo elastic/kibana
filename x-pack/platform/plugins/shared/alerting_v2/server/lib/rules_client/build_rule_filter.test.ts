@@ -45,12 +45,6 @@ describe('buildRuleSoFilter', () => {
       );
     });
 
-    it('maps metadata.owner to SO attributes path', () => {
-      expect(buildRuleSoFilter('metadata.owner: "team-a"')).toBe(
-        'alerting_rule.attributes.metadata.owner: "team-a"'
-      );
-    });
-
     it('maps metadata.description to SO attributes path', () => {
       expect(buildRuleSoFilter('metadata.description: "high cpu"')).toBe(
         'alerting_rule.attributes.metadata.description: "high cpu"'
@@ -60,12 +54,6 @@ describe('buildRuleSoFilter', () => {
     it('maps metadata.tags to SO attributes path', () => {
       expect(buildRuleSoFilter('metadata.tags: "production"')).toBe(
         'alerting_rule.attributes.metadata.tags: "production"'
-      );
-    });
-
-    it('maps grouping.fields to SO attributes path', () => {
-      expect(buildRuleSoFilter('grouping.fields: "host.name"')).toBe(
-        'alerting_rule.attributes.grouping.fields: "host.name"'
       );
     });
   });
@@ -102,6 +90,18 @@ describe('buildRuleSoFilter', () => {
     it('rejects unknown fields', () => {
       expect(() => buildRuleSoFilter('unknown_field: value')).toThrow(
         'Invalid filter field "unknown_field"'
+      );
+    });
+
+    it('rejects metadata.owner (not an indexed field)', () => {
+      expect(() => buildRuleSoFilter('metadata.owner: "team-a"')).toThrow(
+        'Invalid filter field "metadata.owner"'
+      );
+    });
+
+    it('rejects grouping.fields (not an indexed field)', () => {
+      expect(() => buildRuleSoFilter('grouping.fields: "host.name"')).toThrow(
+        'Invalid filter field "grouping.fields"'
       );
     });
 

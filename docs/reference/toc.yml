@@ -21,7 +21,10 @@ toc:
       - file: configuration-reference/monitoring-settings.md
       - file: configuration-reference/product-intercept-settings.md
       - file: configuration-reference/reporting-settings.md
+      - file: configuration-reference/automatic-import-settings.md
+      - file: configuration-reference/profiling-settings.md
       - file: configuration-reference/security-settings.md
+      - file: configuration-reference/security-solution-settings.md
       - file: configuration-reference/share-settings.md
       - file: configuration-reference/spaces-settings.md
       - file: configuration-reference/task-manager-settings.md

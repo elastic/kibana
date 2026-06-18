@@ -59,6 +59,21 @@ describe('GcpCloudFunctionsConnector', () => {
       expect(GcpCloudFunctionsConnector.metadata.supportedFeatureIds).toContain('agentBuilder');
       expect(GcpCloudFunctionsConnector.auth?.types).toEqual(['gcp_service_account']);
     });
+
+    it('should describe all agent-facing actions', () => {
+      const toolActions = Object.entries(GcpCloudFunctionsConnector.actions).filter(
+        ([, action]) => action.isTool
+      );
+
+      expect(toolActions.map(([actionName]) => actionName)).toEqual([
+        'invoke',
+        'listFunctions',
+        'getFunction',
+      ]);
+      toolActions.forEach(([, action]) => {
+        expect(action.description?.trim().length).toBeGreaterThan(0);
+      });
+    });
   });
 
   describe('schema', () => {

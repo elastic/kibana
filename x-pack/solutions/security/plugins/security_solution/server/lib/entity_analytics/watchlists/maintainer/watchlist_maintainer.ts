@@ -14,6 +14,7 @@ import { createEntitySourcesService } from '../entity_sources/entity_sources_ser
 export interface WatchlistMaintainerDeps {
   getStartServices: EntityAnalyticsRoutesDeps['getStartServices'];
   logger: Logger;
+  hasEncryptionKey: EntityAnalyticsRoutesDeps['hasEncryptionKey'];
 }
 
 type WatchlistMaintainerConfig = Pick<RegisterEntityMaintainerConfig, 'setup' | 'run'>;
@@ -21,6 +22,7 @@ type WatchlistMaintainerConfig = Pick<RegisterEntityMaintainerConfig, 'setup' | 
 export const createWatchlistMaintainer = ({
   getStartServices,
   logger,
+  hasEncryptionKey,
 }: WatchlistMaintainerDeps): WatchlistMaintainerConfig => ({
   setup: async ({ status }) => {
     const namespace = status.metadata.namespace;
@@ -54,6 +56,8 @@ export const createWatchlistMaintainer = ({
       soClient,
       logger,
       namespace,
+      getStartServices,
+      hasEncryptionKey,
     });
 
     await entitySourcesService.syncAllWatchlists({ abortSignal: abortController.signal });

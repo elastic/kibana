@@ -113,6 +113,14 @@ describe('AppHeaderView', () => {
     expect(await screen.findByTestId('app-menu')).toBeInTheDocument();
   });
 
+  it('renders when the only content is a title appendix', () => {
+    renderAppHeader(
+      <AppHeaderView titleAppend={<div data-test-subj="titleAppend">Title append</div>} />
+    );
+
+    expect(screen.getByTestId('titleAppend')).toBeInTheDocument();
+  });
+
   it('renders legacy badge fallback content', () => {
     const chrome = chromeServiceMock.createStartContract();
     chrome.getBadge$.mockReturnValue(

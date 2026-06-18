@@ -236,6 +236,18 @@ export {
   isTodosUpdatedEvent,
   TODOS_UPDATED_UI_EVENT,
   type TodosUpdatedUiEventData,
+  type AskUserQuestionStep,
+  type AskUserQuestionStepData,
+  createAskUserQuestionStep,
+  isAskUserQuestionStep,
+  type UserQuestionAskedEvent,
+  type UserQuestionAskedEventData,
+  type UserQuestionAnsweredEvent,
+  type UserQuestionAnsweredEventData,
+  isUserQuestionAskedEvent,
+  isUserQuestionAnsweredEvent,
+  createUserQuestionAskedEvent,
+  createUserQuestionAnsweredEvent,
   type ConversationListOptions,
 } from './chat';
 export {

@@ -9,8 +9,7 @@
 
 import { pick } from 'lodash';
 import React, { useEffect } from 'react';
-import { BehaviorSubject, merge } from 'rxjs';
-
+import { BehaviorSubject, combineLatest, map, merge } from 'rxjs';
 import { ESQL_CONTROL } from '@kbn/controls-constants';
 import type { OptionsListESQLControlState } from '@kbn/controls-schemas';
 import type { EmbeddablePublicDefinition } from '@kbn/embeddable-plugin/public';
@@ -22,6 +21,7 @@ import {
 } from '@kbn/esql-types';
 import {
   apiHasPinnedPanels,
+  initializeRelatedPanels,
   initializeStateApi,
   type StateComparators,
 } from '@kbn/presentation-publishing';
@@ -31,12 +31,14 @@ import { defaultControlLabelComparators, initializeLabelManager } from '../contr
 import { OptionsListControl } from '../data_controls/options_list_control/components/options_list_control';
 import { OptionsListControlContext } from '../data_controls/options_list_control/options_list_context_provider';
 import { VariableControlsStrings } from './constants';
+import { panelIsRelatedByEsqlVariable } from './panel_is_related_by_esql_variable';
 import { getSelectionComparators, initializeESQLControlManager } from './esql_control_manager';
-import type {
-  ESQLControlApi,
-  ESQLOptionsListComponentApi,
-  ESQLOptionsListRuntimeState,
+import {
+  type ESQLControlApi,
+  type ESQLOptionsListComponentApi,
+  type ESQLOptionsListRuntimeState,
 } from './types';
+import { getTooltipTitle } from './utils/get_tooltip_title';
 import { getPlacementHints, LAYOUT_CONSTRAINTS } from '../constants';
 
 export const getESQLControlFactory = <
@@ -61,6 +63,18 @@ export const getESQLControlFactory = <
         selections.internalApi,
         'variableName'
       );
+
+      const tooltipLabel$ = new BehaviorSubject<string>(state.title ?? '');
+      const tooltipLabelSubscription = combineLatest([
+        selections.api.esqlVariable$,
+        labelManager.api.label$,
+      ])
+        .pipe(
+          map(([{ key: variableName, type: variableType }, label]) => {
+            return getTooltipTitle(variableName, variableType, label);
+          })
+        )
+        .subscribe((next) => tooltipLabel$.next(next));
 
       const stateApi = initializeStateApi<typeof initialState>({
         uuid,
@@ -87,10 +101,19 @@ export const getESQLControlFactory = <
         },
       });
 
+      const relatedPanelsApi = initializeRelatedPanels({
+        uuid,
+        parentApi,
+        ...panelIsRelatedByEsqlVariable({
+          esqlVariable$: selections.api.esqlVariable$,
+        }),
+      });
+
       const api = finalizeApi({
         ...stateApi,
         ...selections.api,
         ...labelManager.api,
+        ...relatedPanelsApi,
         dataLoading$,
         isExpandable: false,
         isCustomizable: false,
@@ -103,6 +126,8 @@ export const getESQLControlFactory = <
          */
         isDuplicable: false,
         isPinnable: true,
+        canIndicateRelatedSiblings: true,
+        tooltipLabel$,
         isEditingEnabled: () => true,
         getTypeDisplayName: () => VariableControlsStrings.displayName,
         onEdit: async () => {
@@ -136,7 +161,15 @@ export const getESQLControlFactory = <
       }) as ESQLControlApi<State>;
 
       const componentApi: ESQLOptionsListComponentApi = {
-        ...pick(api, ['dataLoading$', 'label$', 'type']),
+        ...pick(api, [
+          'dataLoading$',
+          'label$',
+          'type',
+          'parentApi',
+          'tooltipLabel$',
+          'relatedPanels$',
+          'canIndicateRelatedSiblings',
+        ]),
         ...selections.internalApi,
         uuid,
         setDataLoading,
@@ -193,6 +226,7 @@ export const getESQLControlFactory = <
             return () => {
               selections.cleanup();
               labelManager.cleanup();
+              tooltipLabelSubscription.unsubscribe();
             };
           }, []);
 

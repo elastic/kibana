@@ -16,6 +16,7 @@ import {
   EuiLink,
   EuiSpacer,
   EuiText,
+  EuiToolTip,
   EuiWrappingPopover,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -96,17 +97,24 @@ export const TagOptions: React.FC<Props> = ({ tagName, isTagHovered, onTagsUpdat
   return (
     <>
       {tagMenuButtonVisible && (
-        <EuiButtonIcon
-          iconType="boxesVertical"
-          aria-label={i18n.translate('xpack.fleet.tagOptions.tagOptionsToggleButtonLabel', {
+        <EuiToolTip
+          content={i18n.translate('xpack.fleet.tagOptions.tagOptionsToggleButtonLabel', {
             defaultMessage: 'Tag Options',
           })}
-          color="text"
-          onClick={(event: MouseEvent<HTMLButtonElement>) => {
-            setTagOptionsButton(event.currentTarget);
-            setTagOptionsVisible(!tagOptionsVisible);
-          }}
-        />
+          disableScreenReaderOutput
+        >
+          <EuiButtonIcon
+            iconType="boxesVertical"
+            aria-label={i18n.translate('xpack.fleet.tagOptions.tagOptionsToggleButtonLabel', {
+              defaultMessage: 'Tag Options',
+            })}
+            color="text"
+            onClick={(event: MouseEvent<HTMLButtonElement>) => {
+              setTagOptionsButton(event.currentTarget);
+              setTagOptionsVisible(!tagOptionsVisible);
+            }}
+          />
+        </EuiToolTip>
       )}
       {tagOptionsVisible && (
         <EuiWrappingPopover

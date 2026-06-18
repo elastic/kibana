@@ -6,56 +6,66 @@
  */
 
 import React from 'react';
-import { render } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import {
   SECURITY_SOLUTION_DEFAULT_VALUE_REPORT_MINUTES,
   SECURITY_SOLUTION_DEFAULT_VALUE_REPORT_RATE,
 } from '@kbn/management-settings-ids';
-import { AIValueMetrics } from '.';
+import { AIValueReport } from '.';
 import { useKibana } from '../../../common/lib/kibana';
-import { useValueMetrics } from '../../hooks/use_value_metrics';
-import { ExecutiveSummary } from './executive_summary';
-import { AlertProcessing } from './alert_processing';
-import { CostSavingsTrend } from './cost_savings_trend';
-import { ValueReportSettings } from './value_report_settings';
+import { useValueMetrics } from './hooks/use_value_metrics';
+import { useHasEverUsedAttackDiscovery } from './hooks/use_has_ever_used_attack_discovery';
+import { AIValueReportLayout } from './ai_value_report_layout';
+import { SAMPLE_VALUE_METRICS, SAMPLE_VALUE_METRICS_COMPARE } from './sample_data';
 import type { StartServices } from '../../../types';
 import { useAIValueExportContext } from '../../providers/ai_value/export_provider';
 
-// Mock dependencies
 jest.mock('../../../common/lib/kibana', () => ({
   useKibana: jest.fn(),
 }));
 
-jest.mock('../../hooks/use_value_metrics', () => ({
+jest.mock('./hooks/use_value_metrics', () => ({
   useValueMetrics: jest.fn(),
 }));
 
-jest.mock('./executive_summary', () => ({
-  ExecutiveSummary: jest.fn(() => <div data-test-subj="mock-executive-summary" />),
+jest.mock('./hooks/use_has_ever_used_attack_discovery', () => ({
+  useHasEverUsedAttackDiscovery: jest.fn(),
 }));
 
-jest.mock('./alert_processing', () => ({
-  AlertProcessing: jest.fn(() => <div data-test-subj="mock-alert-processing" />),
+jest.mock('./ai_value_report_layout', () => ({
+  AIValueReportLayout: jest.fn(() => <div data-test-subj="mock-ai-value-report-layout" />),
 }));
 
-jest.mock('./cost_savings_trend', () => ({
-  CostSavingsTrend: jest.fn(() => <div data-test-subj="mock-cost-savings-trend" />),
-}));
-
-jest.mock('./value_report_settings', () => ({
-  ValueReportSettings: jest.fn(() => <div data-test-subj="mock-value-report-settings" />),
+jest.mock('../../../common/components/page_loader', () => ({
+  PageLoader: () => <div data-test-subj="mock-page-loader" />,
 }));
 
 jest.mock('../../providers/ai_value/export_provider', () => ({
   useAIValueExportContext: jest.fn(),
 }));
 
+jest.mock('../../../common/components/links', () => ({
+  useSecuritySolutionLinkProps: jest.fn(() => ({
+    href: '/mock-attack-discovery',
+    onClick: jest.fn(),
+  })),
+}));
+
 const mockUseKibana = useKibana as jest.Mock;
 const mockUseValueMetrics = useValueMetrics as jest.MockedFunction<typeof useValueMetrics>;
+const mockuseHasEverUsedAttackDiscovery = useHasEverUsedAttackDiscovery as jest.MockedFunction<
+  typeof useHasEverUsedAttackDiscovery
+>;
+const mockAIValueReportLayout = AIValueReportLayout as jest.MockedFunction<
+  typeof AIValueReportLayout
+>;
 const useAIValueExportContextMock = useAIValueExportContext as jest.Mock;
 
 const defaultProps = {
-  setHasAttackDiscoveries: jest.fn(),
+  setHasReportData: jest.fn(),
+  setIsDatePickerDisabled: jest.fn(),
+  setIsSampleMode: jest.fn(),
+  isSourcererLoading: false,
   from: '2023-01-01T00:00:00.000Z',
   to: '2023-01-31T23:59:59.999Z',
 };
@@ -80,49 +90,55 @@ const mockValueMetricsCompare = {
   costSavings: 12000,
 };
 
-describe('AIValueMetrics', () => {
+describe('AIValueReport', () => {
   const createMockKibanaServices = (overrides: Partial<StartServices> = {}) =>
     ({
       services: {
-        uiSettings: {
-          get: jest.fn((key: string) => {
-            if (key === SECURITY_SOLUTION_DEFAULT_VALUE_REPORT_MINUTES) return 10;
-            if (key === SECURITY_SOLUTION_DEFAULT_VALUE_REPORT_RATE) return 50;
-            return null;
-          }),
+        settings: {
+          client: {
+            get: jest.fn((key: string) => {
+              if (key === SECURITY_SOLUTION_DEFAULT_VALUE_REPORT_MINUTES) return 10;
+              if (key === SECURITY_SOLUTION_DEFAULT_VALUE_REPORT_RATE) return 50;
+              return null;
+            }),
+            set: jest.fn(),
+          },
         },
         ...overrides,
       },
     } as Partial<StartServices>);
 
   beforeEach(() => {
-    jest.resetAllMocks();
+    jest.clearAllMocks();
+    mockAIValueReportLayout.mockImplementation(() => (
+      <div data-test-subj="mock-ai-value-report-layout" />
+    ));
     useAIValueExportContextMock.mockReturnValue(undefined);
     mockUseKibana.mockReturnValue(createMockKibanaServices());
 
     mockUseValueMetrics.mockReturnValue({
       attackAlertIds: ['alert-1', 'alert-2'],
+      hasNoCurrentDiscoveries: false,
       isLoading: false,
       valueMetrics: mockValueMetrics,
       valueMetricsCompare: mockValueMetricsCompare,
+    });
+
+    mockuseHasEverUsedAttackDiscovery.mockReturnValue({
+      hasEverUsedAttackDiscovery: true,
+      isLoading: false,
     });
   });
 
-  it('renders all components when loaded with attack discoveries', () => {
-    mockUseValueMetrics.mockReturnValue({
-      attackAlertIds: ['alert-1', 'alert-2'],
-      isLoading: false,
-      valueMetrics: mockValueMetrics,
-      valueMetricsCompare: mockValueMetricsCompare,
-    });
+  it('renders the layout with live data when there are attack discoveries', () => {
+    render(<AIValueReport {...defaultProps} />);
 
-    render(<AIValueMetrics {...defaultProps} />);
-
-    expect(ExecutiveSummary).toHaveBeenCalledWith(
+    expect(screen.getByTestId('mock-ai-value-report-layout')).toBeInTheDocument();
+    expect(mockAIValueReportLayout).toHaveBeenCalledWith(
       expect.objectContaining({
         attackAlertIds: ['alert-1', 'alert-2'],
         analystHourlyRate: 50,
-        hasAttackDiscoveries: true,
+        isSample: false,
         minutesPerAlert: 10,
         from: defaultProps.from,
         to: defaultProps.to,
@@ -131,38 +147,13 @@ describe('AIValueMetrics', () => {
       }),
       {}
     );
-
-    expect(AlertProcessing).toHaveBeenCalledWith(
-      expect.objectContaining({
-        attackAlertIds: ['alert-1', 'alert-2'],
-        valueMetrics: mockValueMetrics,
-        from: defaultProps.from,
-        to: defaultProps.to,
-      }),
-      {}
-    );
-
-    expect(CostSavingsTrend).toHaveBeenCalledWith(
-      expect.objectContaining({
-        analystHourlyRate: 50,
-        minutesPerAlert: 10,
-        from: defaultProps.from,
-        to: defaultProps.to,
-      }),
-      {}
-    );
-
-    expect(ValueReportSettings).toHaveBeenCalledWith(
-      expect.objectContaining({
-        analystHourlyRate: 50,
-        minutesPerAlert: 10,
-      }),
-      {}
-    );
+    expect(defaultProps.setHasReportData).toHaveBeenCalledWith(true);
+    expect(defaultProps.setIsDatePickerDisabled).toHaveBeenCalledWith(false);
+    expect(defaultProps.setIsSampleMode).toHaveBeenCalledWith(false);
   });
 
-  it('handles hook calls and parameter passing correctly', () => {
-    render(<AIValueMetrics {...defaultProps} />);
+  it('passes the resolved date range and settings to useValueMetrics', () => {
+    render(<AIValueReport {...defaultProps} />);
 
     expect(mockUseValueMetrics).toHaveBeenCalledWith({
       from: defaultProps.from,
@@ -170,13 +161,12 @@ describe('AIValueMetrics', () => {
       minutesPerAlert: 10,
       analystHourlyRate: 50,
     });
-
-    expect(defaultProps.setHasAttackDiscoveries).toHaveBeenCalledWith(true);
   });
 
-  it('handles no attack discoveries correctly', () => {
+  it('renders the sample layout when the user has never used Attack Discovery and there are no discoveries', () => {
     mockUseValueMetrics.mockReturnValue({
       attackAlertIds: [],
+      hasNoCurrentDiscoveries: true,
       isLoading: false,
       valueMetrics: {
         ...mockValueMetrics,
@@ -184,23 +174,82 @@ describe('AIValueMetrics', () => {
       },
       valueMetricsCompare: mockValueMetricsCompare,
     });
+    mockuseHasEverUsedAttackDiscovery.mockReturnValue({
+      hasEverUsedAttackDiscovery: false,
+      isLoading: false,
+    });
 
-    render(<AIValueMetrics {...defaultProps} />);
+    render(<AIValueReport {...defaultProps} />);
 
-    expect(defaultProps.setHasAttackDiscoveries).toHaveBeenCalledWith(false);
-    expect(AlertProcessing).not.toHaveBeenCalled();
-    expect(CostSavingsTrend).not.toHaveBeenCalled();
+    expect(screen.getByTestId('aiValueSampleAttackDiscoveryBanner')).toBeInTheDocument();
+    expect(mockAIValueReportLayout).toHaveBeenCalledWith(
+      expect.objectContaining({
+        isSample: true,
+        from: defaultProps.from,
+        to: defaultProps.to,
+        valueMetrics: SAMPLE_VALUE_METRICS,
+        valueMetricsCompare: SAMPLE_VALUE_METRICS_COMPARE,
+      }),
+      {}
+    );
+    expect(defaultProps.setHasReportData).toHaveBeenCalledWith(false);
+    expect(defaultProps.setIsDatePickerDisabled).toHaveBeenCalledWith(true);
+    expect(defaultProps.setIsSampleMode).toHaveBeenCalledWith(true);
   });
 
-  it('passes correct parameters to useValueMetrics hook', () => {
-    render(<AIValueMetrics {...defaultProps} />);
-
-    expect(mockUseValueMetrics).toHaveBeenCalledWith({
-      from: defaultProps.from,
-      to: defaultProps.to,
-      minutesPerAlert: 10,
-      analystHourlyRate: 50,
+  it('renders the empty state when the feature was used before but the window has no discoveries', () => {
+    mockUseValueMetrics.mockReturnValue({
+      attackAlertIds: [],
+      hasNoCurrentDiscoveries: true,
+      isLoading: false,
+      valueMetrics: {
+        ...mockValueMetrics,
+        attackDiscoveryCount: 0,
+      },
+      valueMetricsCompare: mockValueMetricsCompare,
     });
+    mockuseHasEverUsedAttackDiscovery.mockReturnValue({
+      hasEverUsedAttackDiscovery: true,
+      isLoading: false,
+    });
+
+    render(<AIValueReport {...defaultProps} />);
+
+    expect(screen.queryByTestId('mock-ai-value-report-layout')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('aiValueSampleAttackDiscoveryBanner')).not.toBeInTheDocument();
+    expect(screen.getByText('No results for the selected time range')).toBeInTheDocument();
+    expect(defaultProps.setHasReportData).toHaveBeenCalledWith(false);
+    expect(defaultProps.setIsDatePickerDisabled).toHaveBeenCalledWith(false);
+    expect(defaultProps.setIsSampleMode).toHaveBeenCalledWith(false);
+  });
+
+  it('renders the page loader while data or sourcerer is loading', () => {
+    mockUseValueMetrics.mockReturnValue({
+      attackAlertIds: [],
+      hasNoCurrentDiscoveries: false,
+      isLoading: true,
+      valueMetrics: mockValueMetrics,
+      valueMetricsCompare: mockValueMetricsCompare,
+    });
+
+    render(<AIValueReport {...defaultProps} />);
+
+    expect(screen.getByTestId('mock-page-loader')).toBeInTheDocument();
+    expect(mockAIValueReportLayout).not.toHaveBeenCalled();
+    expect(defaultProps.setIsDatePickerDisabled).toHaveBeenCalledWith(true);
+    expect(defaultProps.setIsSampleMode).toHaveBeenCalledWith(false);
+  });
+
+  it('renders the page loader and skips data hooks when sourcerer is still loading', () => {
+    render(<AIValueReport {...defaultProps} isSourcererLoading={true} />);
+
+    expect(screen.getByTestId('mock-page-loader')).toBeInTheDocument();
+    expect(mockAIValueReportLayout).not.toHaveBeenCalled();
+    expect(mockUseValueMetrics).not.toHaveBeenCalled();
+    expect(mockuseHasEverUsedAttackDiscovery).not.toHaveBeenCalled();
+    expect(defaultProps.setHasReportData).toHaveBeenCalledWith(false);
+    expect(defaultProps.setIsDatePickerDisabled).toHaveBeenCalledWith(true);
+    expect(defaultProps.setIsSampleMode).toHaveBeenCalledWith(false);
   });
 
   it('uses the specified timerange when exporting the report', () => {
@@ -214,7 +263,7 @@ describe('AIValueMetrics', () => {
       },
     });
 
-    render(<AIValueMetrics {...defaultProps} />);
+    render(<AIValueReport {...defaultProps} />);
 
     expect(mockUseValueMetrics).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -246,7 +295,7 @@ describe('AIValueMetrics', () => {
     });
 
     it('returns an absolute time range for useValueMetrics', () => {
-      render(<AIValueMetrics {...defaultProps} />);
+      render(<AIValueReport {...defaultProps} />);
 
       expect(mockUseValueMetrics).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -257,13 +306,13 @@ describe('AIValueMetrics', () => {
     });
   });
 
-  it('should set the report input in the export context when the data is loaded', () => {
+  it('sets the report input in the export context when live data is loaded', () => {
     const setReportInputMock = jest.fn();
     useAIValueExportContextMock.mockReturnValue({
       setReportInput: setReportInputMock,
     });
 
-    render(<AIValueMetrics {...defaultProps} />);
+    render(<AIValueReport {...defaultProps} />);
 
     expect(setReportInputMock).toHaveBeenCalledWith({
       attackAlertIds: ['alert-1', 'alert-2'],
@@ -274,21 +323,48 @@ describe('AIValueMetrics', () => {
     });
   });
 
-  it('handles different uiSettings values correctly', () => {
+  it('does not set the report input in the export context in sample mode', () => {
+    const setReportInputMock = jest.fn();
+    useAIValueExportContextMock.mockReturnValue({
+      setReportInput: setReportInputMock,
+    });
+    mockUseValueMetrics.mockReturnValue({
+      attackAlertIds: [],
+      hasNoCurrentDiscoveries: true,
+      isLoading: false,
+      valueMetrics: {
+        ...mockValueMetrics,
+        attackDiscoveryCount: 0,
+      },
+      valueMetricsCompare: mockValueMetricsCompare,
+    });
+    mockuseHasEverUsedAttackDiscovery.mockReturnValue({
+      hasEverUsedAttackDiscovery: false,
+      isLoading: false,
+    });
+
+    render(<AIValueReport {...defaultProps} />);
+
+    expect(setReportInputMock).not.toHaveBeenCalled();
+  });
+
+  it('handles different settings values correctly', () => {
     mockUseKibana.mockReturnValue(
       createMockKibanaServices({
-        uiSettings: {
-          // @ts-ignore
-          get: jest.fn((key: string) => {
-            if (key === SECURITY_SOLUTION_DEFAULT_VALUE_REPORT_MINUTES) return 5;
-            if (key === SECURITY_SOLUTION_DEFAULT_VALUE_REPORT_RATE) return 75;
-            return null;
-          }),
-        },
+        settings: {
+          client: {
+            get: jest.fn((key: string) => {
+              if (key === SECURITY_SOLUTION_DEFAULT_VALUE_REPORT_MINUTES) return 5;
+              if (key === SECURITY_SOLUTION_DEFAULT_VALUE_REPORT_RATE) return 75;
+              return null;
+            }),
+            set: jest.fn(),
+          },
+        } as unknown as StartServices['settings'],
       })
     );
 
-    render(<AIValueMetrics {...defaultProps} />);
+    render(<AIValueReport {...defaultProps} />);
 
     expect(mockUseValueMetrics).toHaveBeenCalledWith({
       from: defaultProps.from,

@@ -51,10 +51,8 @@ const mockDataView = {
 const defaultFormValues = {
   timeField: '@timestamp',
   schedule: { every: '5m', lookback: '5m' },
-  evaluation: {
-    query: {
-      base: 'FROM logs-*',
-    },
+  query: {
+    breach: 'FROM logs-*',
   },
 };
 

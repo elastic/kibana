@@ -25,7 +25,7 @@ export const getContinuity = async ({
   const actionableFindings: ActionableFinding[] = pipelines
     .filter((p) => p.statsAvailable && isCriticalFailureRate(p.failedDocsCount, p.docsCount))
     .map((p) => ({
-      severity: 'critical' as const,
+      severity: 'CRITICAL' as const,
       message: `Pipeline ${p.name} has a critical document failure rate (${p.failedDocsCount} of ${p.docsCount} failed)`,
       resource: p.name,
     }));

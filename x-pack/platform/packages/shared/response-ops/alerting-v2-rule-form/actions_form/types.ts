@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { parse } from 'yaml';
+
 export type InlineActionStepType = 'slack' | 'email';
 export type ActionSource = 'existing' | 'inline';
 
@@ -33,7 +35,43 @@ export const getActionTemplateKey = (template: ActionTemplate): string =>
 
 export type ActionFormValue = ActionDraft[];
 
+/**
+ * A value is considered "filled" when it carries user-provided content. Empty
+ * strings, empty arrays, and null/undefined (the placeholders shipped in the
+ * param templates) are not filled. Objects/arrays are checked recursively.
+ */
+const isFilledValue = (value: unknown): boolean => {
+  if (value === null || value === undefined) return false;
+  if (typeof value === 'string') return value.trim() !== '';
+  if (Array.isArray(value)) return value.length > 0 && value.every(isFilledValue);
+  if (typeof value === 'object') {
+    const values = Object.values(value);
+    return values.length > 0 && values.every(isFilledValue);
+  }
+  return true;
+};
+
+/**
+ * Validates the inline-action params YAML by parsing it (so both quoted and
+ * unquoted scalars are handled) and requiring every field to be filled in.
+ */
+const areInlineParamsFilled = (params: string): boolean => {
+  if (params.trim() === '') return false;
+
+  let parsed: unknown;
+  try {
+    parsed = parse(params);
+  } catch {
+    return false;
+  }
+
+  if (parsed === null || typeof parsed !== 'object' || Array.isArray(parsed)) return false;
+
+  const values = Object.values(parsed as Record<string, unknown>);
+  return values.length > 0 && values.every(isFilledValue);
+};
+
 export const isActionValid = (action: ActionDraft): boolean =>
   action.source === 'existing'
     ? Boolean(action.workflowId)
-    : action.connectorId !== null && action.params.trim() !== '';
+    : action.connectorId !== null && areInlineParamsFilled(action.params);

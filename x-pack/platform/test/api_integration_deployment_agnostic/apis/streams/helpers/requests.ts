@@ -549,7 +549,7 @@ export async function upsertFeature(
   streamName: string,
   feature: BaseFeature,
   expectedStatusCode = 200
-): Promise<{ uuid: string }> {
+): Promise<{ id: string }> {
   await client
     .fetch('POST /internal/streams/{name}/features', {
       params: {
@@ -566,7 +566,7 @@ export async function upsertFeature(
     throw new Error(`Feature with id "${feature.id}" not found after upsert`);
   }
 
-  return { uuid: created.uuid };
+  return { id: created.id };
 }
 
 export async function listFeatures(
@@ -611,13 +611,13 @@ export async function bulkFeatures(
 export async function deleteFeature(
   client: StreamsSupertestRepositoryClient,
   streamName: string,
-  uuid: string,
+  id: string,
   expectedStatusCode = 200
 ) {
   return client
-    .fetch('DELETE /internal/streams/{name}/features/{uuid}', {
+    .fetch('DELETE /internal/streams/{name}/features/{id}', {
       params: {
-        path: { name: streamName, uuid },
+        path: { name: streamName, id },
       },
     })
     .expect(expectedStatusCode)

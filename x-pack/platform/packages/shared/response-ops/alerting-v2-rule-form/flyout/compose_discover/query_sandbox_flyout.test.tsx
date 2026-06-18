@@ -62,7 +62,7 @@ const mockField = (name: string, type: string) =>
 
 const standaloneQuery = (breach = 'FROM test-index | LIMIT 10'): RuleQuery => ({
   format: 'standalone',
-  breach,
+  breach: { query: breach },
 });
 
 const defaultProps: QuerySandboxFlyoutProps = {

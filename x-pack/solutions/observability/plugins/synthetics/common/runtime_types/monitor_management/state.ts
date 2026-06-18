@@ -23,6 +23,7 @@ const FetchMonitorQueryArgsCommon = {
   monitorTypes: t.array(t.string),
   projects: t.array(t.string),
   schedules: t.array(t.string),
+  remoteNames: t.array(t.string),
   monitorQueryIds: t.array(t.string),
   configIds: t.array(t.string),
   sortField: t.string,

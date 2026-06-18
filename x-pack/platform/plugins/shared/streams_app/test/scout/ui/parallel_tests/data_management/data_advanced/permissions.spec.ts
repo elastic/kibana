@@ -33,7 +33,6 @@ test.describe(
       pageObjects,
       page,
     }) => {
-      await pageObjects.streams.gotoDataRetentionTab(CLASSIC_STREAM);
       await browserAuth.loginAsViewer();
       await pageObjects.streams.gotoDataRetentionTab(CLASSIC_STREAM);
 
@@ -45,7 +44,6 @@ test.describe(
       pageObjects,
       page,
     }) => {
-      await pageObjects.streams.gotoDataRetentionTab(CLASSIC_STREAM);
       await browserAuth.loginAs('editor');
       await pageObjects.streams.gotoDataRetentionTab(CLASSIC_STREAM);
 
@@ -57,7 +55,6 @@ test.describe(
       page,
       pageObjects,
     }) => {
-      await pageObjects.streams.gotoDataRetentionTab(CLASSIC_STREAM);
       await browserAuth.loginAsAdmin();
       await pageObjects.streams.gotoDataRetentionTab(CLASSIC_STREAM);
 
@@ -71,7 +68,6 @@ test.describe(
       page,
       pageObjects,
     }) => {
-      await pageObjects.streams.gotoDataRetentionTab(WIRED_STREAM);
       await browserAuth.loginAsViewer();
       await pageObjects.streams.gotoDataRetentionTab(WIRED_STREAM);
 
@@ -83,7 +79,6 @@ test.describe(
       page,
       pageObjects,
     }) => {
-      await pageObjects.streams.gotoDataRetentionTab(WIRED_STREAM);
       await browserAuth.loginAs('editor');
       await pageObjects.streams.gotoDataRetentionTab(WIRED_STREAM);
 
@@ -95,7 +90,6 @@ test.describe(
       page,
       pageObjects,
     }) => {
-      await pageObjects.streams.gotoDataRetentionTab(WIRED_STREAM);
       await browserAuth.loginAsAdmin();
       await pageObjects.streams.gotoDataRetentionTab(WIRED_STREAM);
 

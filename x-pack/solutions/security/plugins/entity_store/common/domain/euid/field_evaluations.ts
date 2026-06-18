@@ -176,15 +176,32 @@ export function applyFieldEvaluations(
   return result;
 }
 
+/**
+ * Returns the top-level (shared) field evaluations for an entity definition —
+ * e.g. `entity.source`, which applies to all entity types regardless of identity.
+ * These are NOT identity-specific: they do not feed directly into the EUID expression.
+ *
+ * For identity-specific evaluations (e.g. `entity.namespace` for user), use
+ * {@link getIdentityFieldEvaluationsFromDefinition}.
+ */
 export function getFieldEvaluationsFromDefinition(
   entityDefinition: Pick<EntityDefinitionWithoutId, 'fieldEvaluations' | 'identityField'>
 ): FieldEvaluation[] {
-  const sharedEvaluations = entityDefinition.fieldEvaluations ?? [];
-  if (isSingleFieldIdentity(entityDefinition.identityField)) {
-    return sharedEvaluations;
-  }
+  return entityDefinition.fieldEvaluations ?? [];
+}
 
-  return [...sharedEvaluations, ...(entityDefinition.identityField.fieldEvaluations ?? [])];
+/**
+ * Returns the identity-specific field evaluations from `identityField.fieldEvaluations` —
+ * e.g. `entity.namespace` for user, which is a direct prerequisite of the EUID expression.
+ * Returns an empty array for single-field identities (generic, service, host).
+ */
+export function getIdentityFieldEvaluationsFromDefinition(
+  entityDefinition: Pick<EntityDefinitionWithoutId, 'identityField'>
+): FieldEvaluation[] {
+  if (isSingleFieldIdentity(entityDefinition.identityField)) {
+    return [];
+  }
+  return entityDefinition.identityField.fieldEvaluations ?? [];
 }
 
 function isNotEmpty(value: string): boolean {

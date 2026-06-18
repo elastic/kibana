@@ -128,8 +128,7 @@ describe('useSetupRuleNotifications', () => {
         expect(mockCreateActionPolicy).toHaveBeenCalledWith(
           expect.objectContaining({
             name: 'My Test Rule notifications',
-            type: 'single_rule',
-            ruleId: 'rule-1',
+            matcher: 'rule.id: "rule-1"',
             destinations: [{ type: 'workflow', id: 'workflow-new-1' }],
           })
         );

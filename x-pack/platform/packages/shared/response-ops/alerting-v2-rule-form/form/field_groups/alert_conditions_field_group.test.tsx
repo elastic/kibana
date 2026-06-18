@@ -11,16 +11,6 @@ import { AlertConditionsFieldGroup } from './alert_conditions_field_group';
 import { createFormWrapper } from '../../test_utils';
 
 // Mock the child field components
-jest.mock('../fields/recovery_type_field', () => ({
-  RecoveryTypeField: () => <div data-test-subj="mockRecoveryTypeField">Recovery Type Field</div>,
-}));
-
-jest.mock('../fields/recovery_base_query_only_field', () => ({
-  RecoveryBaseQueryOnlyField: () => (
-    <div data-test-subj="mockRecoveryBaseQueryOnlyField">Recovery Base Query Only Field</div>
-  ),
-}));
-
 jest.mock('../fields/alert_delay_field', () => ({
   AlertDelayField: () => <div data-test-subj="mockAlertDelayField">Alert Delay Field</div>,
 }));
@@ -76,63 +66,5 @@ describe('AlertConditionsFieldGroup', () => {
     );
 
     expect(screen.getByTestId('mockRecoveryDelayField')).toBeInTheDocument();
-  });
-
-  it('renders the recovery type field', () => {
-    const Wrapper = createFormWrapper({ kind: 'alert' });
-
-    render(
-      <Wrapper>
-        <AlertConditionsFieldGroup />
-      </Wrapper>
-    );
-
-    expect(screen.getByTestId('mockRecoveryTypeField')).toBeInTheDocument();
-  });
-
-  it('does not render recovery fields when type is no_breach', () => {
-    const Wrapper = createFormWrapper({
-      kind: 'alert',
-      recoveryPolicy: { type: 'no_breach' },
-    });
-
-    render(
-      <Wrapper>
-        <AlertConditionsFieldGroup />
-      </Wrapper>
-    );
-
-    expect(screen.queryByTestId('mockRecoveryBaseQueryOnlyField')).not.toBeInTheDocument();
-  });
-
-  it('renders RecoveryBaseQueryOnlyField when type is query', () => {
-    const Wrapper = createFormWrapper({
-      kind: 'alert',
-      recoveryPolicy: { type: 'query' },
-      evaluation: { query: { base: 'FROM logs | STATS count() BY host' } },
-    });
-
-    render(
-      <Wrapper>
-        <AlertConditionsFieldGroup />
-      </Wrapper>
-    );
-
-    expect(screen.getByTestId('mockRecoveryBaseQueryOnlyField')).toBeInTheDocument();
-  });
-
-  it('always renders recovery type field regardless of type', () => {
-    const Wrapper = createFormWrapper({
-      kind: 'alert',
-      recoveryPolicy: { type: 'query' },
-    });
-
-    render(
-      <Wrapper>
-        <AlertConditionsFieldGroup />
-      </Wrapper>
-    );
-
-    expect(screen.getByTestId('mockRecoveryTypeField')).toBeInTheDocument();
   });
 });

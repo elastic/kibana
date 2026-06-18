@@ -22,9 +22,9 @@ import type { SchemasSettings } from 'monaco-yaml';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import type YAML from 'yaml';
+import { monaco, YAML_LANG_ID } from '@kbn/code-editor';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { monaco, YAML_LANG_ID } from '@kbn/monaco';
 import { isTriggerType } from '@kbn/workflows';
 import { useWorkflowsMonacoTheme, WORKFLOWS_MONACO_EDITOR_THEME } from '@kbn/workflows-ui';
 import type { z } from '@kbn/zod/v4';
@@ -98,6 +98,7 @@ import { setStabilityBadgeThemeContext } from '../lib/get_stability_note';
 import { interceptMonacoYamlHoverProvider } from '../lib/hover/intercept_monaco_yaml_hover_provider';
 import {
   ElasticsearchMonacoConnectorHandler,
+  FlowControlMonacoStepHandler,
   GenericMonacoConnectorHandler,
   HttpMonacoConnectorStepHandler,
   KibanaMonacoConnectorHandler,
@@ -443,6 +444,9 @@ export const WorkflowYAMLEditor = ({
 
         const workflowExecuteHandler = new WorkflowExecuteMonacoConnectorHandler();
         registerMonacoConnectorHandler(workflowExecuteHandler);
+
+        const flowControlHandler = new FlowControlMonacoStepHandler();
+        registerMonacoConnectorHandler(flowControlHandler);
 
         const customHandler = new CustomMonacoStepHandler();
         registerMonacoConnectorHandler(customHandler);

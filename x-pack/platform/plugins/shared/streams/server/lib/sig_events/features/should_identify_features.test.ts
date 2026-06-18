@@ -5,29 +5,23 @@
  * 2.0.
  */
 
-import { INFERRED_FEATURE_TYPES } from '@kbn/streams-schema';
-import type { FeatureClient } from '../../streams/feature/feature_client';
+import type { KnowledgeIndicatorClient } from '../../streams/ki';
 import { shouldIdentifyFeatures } from './should_identify_features';
 
-const createMockFeatureClient = (
-  response: { hits: Array<{ type: string; last_seen: string }>; total: number } = {
-    hits: [],
-    total: 0,
-  }
-) =>
+const createMockKiClient = (response: { '@timestamp': string } | null = null) =>
   ({
-    getFeatures: jest.fn().mockResolvedValue(response),
-  } as unknown as FeatureClient);
+    getLatestRevisionTimestamp: jest.fn().mockResolvedValue(response),
+  } as unknown as KnowledgeIndicatorClient);
 
 describe('shouldIdentifyFeatures', () => {
   const streamName = 'test-stream';
   const thresholdHours = 12;
 
   it('returns shouldIdentify: true when no inferred features exist', async () => {
-    const featureClient = createMockFeatureClient({ hits: [], total: 0 });
+    const kiClient = createMockKiClient(null);
 
     const result = await shouldIdentifyFeatures({
-      featureClient,
+      kiClient,
       streamName,
       thresholdHours,
     });
@@ -35,31 +29,27 @@ describe('shouldIdentifyFeatures', () => {
     expect(result).toEqual({ shouldIdentify: true });
   });
 
-  it('passes INFERRED_FEATURE_TYPES as type filter with limit 1', async () => {
-    const featureClient = createMockFeatureClient({ hits: [], total: 0 });
+  it('passes INFERRED_FEATURE_TYPES as types filter', async () => {
+    const kiClient = createMockKiClient(null);
 
     await shouldIdentifyFeatures({
-      featureClient,
+      kiClient,
       streamName,
       thresholdHours,
     });
 
-    expect(featureClient.getFeatures).toHaveBeenCalledWith(streamName, {
-      type: [...INFERRED_FEATURE_TYPES],
-      limit: 1,
-      sortBy: 'lastSeen',
-    });
+    expect(kiClient.getLatestRevisionTimestamp).toHaveBeenCalledWith(
+      streamName,
+      expect.objectContaining({ types: expect.any(Array) })
+    );
   });
 
   it('returns shouldIdentify: false when newest inferred feature is within threshold', async () => {
     const recentDate = new Date(Date.now() - 1 * 3_600_000).toISOString();
-    const featureClient = createMockFeatureClient({
-      hits: [{ type: 'entity', last_seen: recentDate }],
-      total: 1,
-    });
+    const kiClient = createMockKiClient({ '@timestamp': recentDate });
 
     const result = await shouldIdentifyFeatures({
-      featureClient,
+      kiClient,
       streamName,
       thresholdHours,
     });
@@ -69,13 +59,10 @@ describe('shouldIdentifyFeatures', () => {
 
   it('returns shouldIdentify: true when newest inferred feature exceeds threshold', async () => {
     const oldDate = new Date(Date.now() - 24 * 3_600_000).toISOString();
-    const featureClient = createMockFeatureClient({
-      hits: [{ type: 'schema', last_seen: oldDate }],
-      total: 1,
-    });
+    const kiClient = createMockKiClient({ '@timestamp': oldDate });
 
     const result = await shouldIdentifyFeatures({
-      featureClient,
+      kiClient,
       streamName,
       thresholdHours,
     });
@@ -84,13 +71,10 @@ describe('shouldIdentifyFeatures', () => {
   });
 
   it('returns shouldIdentify: true for invalid timestamps', async () => {
-    const featureClient = createMockFeatureClient({
-      hits: [{ type: 'entity', last_seen: 'not-a-date' }],
-      total: 1,
-    });
+    const kiClient = createMockKiClient({ '@timestamp': 'not-a-date' });
 
     const result = await shouldIdentifyFeatures({
-      featureClient,
+      kiClient,
       streamName,
       thresholdHours,
     });
@@ -102,13 +86,10 @@ describe('shouldIdentifyFeatures', () => {
     const justWithinThreshold = new Date(
       Date.now() - thresholdHours * 3_600_000 + 1000
     ).toISOString();
-    const featureClient = createMockFeatureClient({
-      hits: [{ type: 'entity', last_seen: justWithinThreshold }],
-      total: 1,
-    });
+    const kiClient = createMockKiClient({ '@timestamp': justWithinThreshold });
 
     const result = await shouldIdentifyFeatures({
-      featureClient,
+      kiClient,
       streamName,
       thresholdHours,
     });

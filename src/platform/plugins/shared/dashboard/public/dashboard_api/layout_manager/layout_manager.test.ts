@@ -42,7 +42,7 @@ jest.mock('rxjs', () => ({
 const trackPanelMock = {
   setScrollToPanelId: jest.fn(),
   setHighlightPanelId: jest.fn(),
-} as unknown as ReturnType<typeof initializeTrackPanel>;
+} as unknown as ReturnType<typeof initializeTrackPanel>['api'];
 
 const viewModeManagerMock = { api: { viewMode$: new BehaviorSubject('view') } } as ReturnType<
   typeof initializeViewModeManager

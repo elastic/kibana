@@ -125,20 +125,32 @@ export function getDataViewsMetadata(
 }
 
 /**
+ * A metric column with its assigned accessor id.
+ */
+interface MetricColumnWithId {
+  column: AnyMetricLensStateColumn;
+  id: string;
+}
+
+/**
  * Processes converted metric columns and their optional reference columns,
  * assigning IDs.
  */
-export function processMetricColumnsWithReferences<T extends AnyMetricLensStateColumn>(
-  convertedMetrics: T[][],
+export function processMetricColumnsWithReferences(
+  convertedMetrics: AnyMetricLensStateColumn[][],
   getAccessorName: (index: number) => string,
   getRefAccessorName: (index: number) => string
-): Array<{ column: T; id: string }> {
-  const result: Array<{ column: T; id: string }> = [];
+): {
+  metricColumns: MetricColumnWithId[];
+  referencesColumns: MetricColumnWithId[];
+} {
+  const metricColumns: MetricColumnWithId[] = [];
+  const referencesColumns: MetricColumnWithId[] = [];
 
   for (const [index, convertedColumns] of Object.entries(convertedMetrics)) {
     const [mainMetric, refMetric] = convertedColumns;
     const id = getAccessorName(Number(index));
-    result.push({ column: mainMetric, id });
+    metricColumns.push({ column: mainMetric, id });
 
     if (refMetric) {
       // Use a different format for reference column ids
@@ -148,11 +160,11 @@ export function processMetricColumnsWithReferences<T extends AnyMetricLensStateC
       if ('references' in mainMetric && Array.isArray(mainMetric.references)) {
         mainMetric.references = [refId];
       }
-      result.push({ column: refMetric, id: refId });
+      referencesColumns.push({ column: refMetric, id: refId });
     }
   }
 
-  return result;
+  return { metricColumns, referencesColumns };
 }
 
 type LegendTruncateAfterLines = TypeOf<typeof legendTruncateAfterLinesSchema>;
