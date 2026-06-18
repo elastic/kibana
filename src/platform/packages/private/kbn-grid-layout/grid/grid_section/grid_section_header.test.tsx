@@ -112,7 +112,7 @@ describe('GridSectionHeader', () => {
     ).toBe(false);
 
     mouseStartDragging(header, { clientX: 0, clientY: 0 });
-    mouseMoveTo({ clientX: 4, clientY: 0 });
+    mouseMoveTo({ clientX: 8, clientY: 0 });
 
     expect(header).toHaveClass('kbnGridSectionHeader--active');
     expect(
