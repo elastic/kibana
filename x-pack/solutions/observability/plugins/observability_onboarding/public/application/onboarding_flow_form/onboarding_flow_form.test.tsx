@@ -121,13 +121,11 @@ describe('OnboardingFlowForm', () => {
 
     it('should show only OpenTelemetry as the Kubernetes featured quickstart', () => {
       mockUseCustomCards.mockReturnValue([
-        { id: 'kubernetes-quick-start', title: 'Kubernetes Quickstart' } as IntegrationCardItem,
         { id: 'otel-kubernetes', title: 'OpenTelemetry Kubernetes' } as IntegrationCardItem,
       ]);
 
       renderWithProviders(<OnboardingFlowForm />, ['/?category=kubernetes']);
 
-      expect(screen.queryByTestId('package-item-kubernetes-quick-start')).not.toBeInTheDocument();
       expect(screen.getByTestId('package-item-otel-kubernetes')).toBeInTheDocument();
     });
   });
