@@ -698,9 +698,6 @@ describe('SmlCrawlerImpl', () => {
     });
 
     it('index does not exist: updateMappingsIfNeeded resolves cleanly, crawl proceeds without cleaning', async () => {
-      // When no write index exists, getCurrentWriteIndex() returns undefined and
-      // updateMappingsIfNeeded() returns early — no error thrown, no wipe needed.
-      // mockUpdateMappingsIfNeeded resolves by default, so no override needed.
       const items = [{ id: 'a', updatedAt: '2024-01-01', spaces: ['default'] }];
       const definition = createMockDefinition({
         list: jest.fn().mockReturnValue(yieldPages(items)),
@@ -715,7 +712,6 @@ describe('SmlCrawlerImpl', () => {
     });
 
     it('404 from mapping update: race condition treated as no-op, does not clean', async () => {
-      // 404 here means the index was deleted between getCurrentWriteIndex() and putMapping().
       mockUpdateMappingsIfNeeded.mockRejectedValueOnce({ statusCode: 404 });
 
       const items = [{ id: 'a', updatedAt: '2024-01-01', spaces: ['default'] }];
