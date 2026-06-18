@@ -25,7 +25,7 @@ export const DEFAULT_TIME_RANGE = {
 };
 
 export const INDEX_PATTERN_WITHOUT_TIMEFIELD_ARCHIVE =
-  'src/platform/test/functional/fixtures/es_archiver/index_pattern_without_timefield';
+  'src/platform/test/functional/fixtures/kbn_archiver/index_pattern_without_timefield';
 
 export const KIBANA_SAMPLE_DATA_FLIGHTS_ARCHIVE =
   'src/platform/test/functional/fixtures/es_archiver/kibana_sample_data_flights';
