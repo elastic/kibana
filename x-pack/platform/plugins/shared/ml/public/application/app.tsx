@@ -131,7 +131,7 @@ export const App: FC<AppProps> = ({
 
   if (!licenseReady || !mlCapabilities) return null;
 
-  const startServices = pick(coreStart, 'analytics', 'i18n', 'theme', 'userProfile');
+  const startServices = pick(coreStart, 'analytics', 'i18n', 'theme', 'userProfile', 'chrome');
   const datePickerDeps: DatePickerDependencies = {
     ...pick(services, [
       'data',
