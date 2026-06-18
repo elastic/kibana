@@ -23,7 +23,7 @@ type ResearchAgentPromptParams = PromptFactoryParams & ResearchAgentPromptRuntim
 export const getResearchAgentPrompt = async (
   params: ResearchAgentPromptParams
 ): Promise<BaseMessageLike[]> => {
-  const { actions, cycleLimit, processedConversation, resultTransformer } = params;
+  const { actions, cycleLimit, processedConversation, resultTransformer, toolManager } = params;
 
   // Generate messages from the conversation's rounds, optionally
   // injecting a compaction summary for older compacted rounds.
@@ -38,7 +38,12 @@ export const getResearchAgentPrompt = async (
   return [
     ['system', await getAgentSystemMessage(params)],
     ...previousRoundsAsMessages,
-    ...formatResearcherActionHistory({ actions, cycleLimit }),
+    ...(await formatResearcherActionHistory({
+      actions,
+      cycleLimit,
+      resultTransformer,
+      toolManager,
+    })),
   ];
 };
 
