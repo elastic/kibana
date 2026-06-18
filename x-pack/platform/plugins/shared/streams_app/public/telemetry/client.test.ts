@@ -11,7 +11,6 @@ import { StreamsTelemetryClient } from './client';
 
 describe('StreamsTelemetryClient', () => {
   let analyticsService: jest.Mocked<AnalyticsServiceSetup>;
-  let client: StreamsTelemetryClient;
 
   beforeEach(() => {
     analyticsService = {

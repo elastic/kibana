@@ -332,7 +332,7 @@ export class StreamsPlugin
       continuousKiOnboardingWorkflowService = createContinuousKiOnboardingWorkflowService({
         logger: this.logger,
         managementApi: plugins.workflowsManagement.management,
-        streamsKIsOnboardingClient: workflowClients.streamsKIsOnboardingClient,
+        streamsKIsOnboardingClient,
       });
     }
 
