@@ -15,6 +15,7 @@ import {
   THREAT_INTEL_TOOL_IDS,
 } from '../../../../common/threat_intelligence/hub';
 import { correlateThreat } from '../../../threat_intelligence/services';
+import { SYNTHESIS_GUIDANCE } from '../../../threat_intelligence/services/synthesis_guidance';
 import type { SecuritySolutionPluginCoreSetupDependencies } from '../../../plugin_contract';
 
 /**
@@ -96,7 +97,11 @@ export const correlateThreatTool = (
     'Use extract/knn/triage for retrieval-only or cost-sensitive callers. ' +
     `Wraps POST ${CORRELATE_THREAT_API_PATH}, runs in-process (no route timeout). ` +
     'Call `search_by_anchors`, `search_by_diamond`, or `extract_diamond` individually only when ' +
-    'you need intermediate results for step-by-step reasoning.',
+    'you need intermediate results for step-by-step reasoning. ' +
+    'For triage/knn depth, results include a `synthesis_guidance` block (relationship taxonomy, ' +
+    'confidence calibration, evidence weighting + recommended output schema) — follow it when ' +
+    'synthesizing the correlation yourself. (A structurally-blinded candidate surface for ' +
+    'independent judging is provided separately by `correlate_synthesis_pack`.)',
   schema: correlateThreatSchema,
   tags: ['threat-intel', 'correlation'],
   handler: async (params, { esClient, spaceId, request, savedObjectsClient }) => {
@@ -131,7 +136,12 @@ export const correlateThreatTool = (
         depth: params.depth,
       });
 
-      return { results: [{ type: ToolResultType.other, data: depthResult }] };
+      const data =
+        depthResult.depth === 'triage' || depthResult.depth === 'knn'
+          ? { ...depthResult, synthesis_guidance: SYNTHESIS_GUIDANCE }
+          : depthResult;
+
+      return { results: [{ type: ToolResultType.other, data }] };
     } catch (err) {
       logger.warn(`correlate_threat tool failed: ${(err as Error).message}`);
       return {

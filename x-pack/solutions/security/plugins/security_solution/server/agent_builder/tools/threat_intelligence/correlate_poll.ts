@@ -15,6 +15,7 @@ import {
   CORRELATION_RUN_STALE_MS,
 } from '../../../../common/threat_intelligence/hub';
 import { createRunDataClient } from '../../../threat_intelligence/correlation_runs/run_data_client';
+import { SYNTHESIS_GUIDANCE } from '../../../threat_intelligence/services/synthesis_guidance';
 
 const correlatePollSchema = z.object({
   runId: z.string().min(1).describe('The runId returned by `correlate_start`.'),
@@ -39,7 +40,11 @@ export const correlatePollTool = (
     '`partials.triage` (scored picks), `partials.synthesize` (findings) — ' +
     'so you can surface intermediate output before the run finishes. ' +
     '`result` holds the final depth-tagged output once status is "succeeded". ' +
-    '`error` is set when status is "failed".',
+    '`error` is set when status is "failed". ' +
+    'For triage/knn depth, results include a `synthesis_guidance` block (relationship taxonomy, ' +
+    'confidence calibration, evidence weighting + recommended output schema) — follow it when ' +
+    'synthesizing the correlation yourself. (A structurally-blinded candidate surface for ' +
+    'independent judging is provided separately by `correlate_synthesis_pack`.)',
   schema: correlatePollSchema,
   tags: ['threat-intel', 'correlation'],
   handler: async (params, { esClient, spaceId }) => {
@@ -71,6 +76,10 @@ export const correlatePollTool = (
         }
       }
 
+      const resultDepth = run.result?.depth;
+      const synthesisGuidance =
+        resultDepth === 'triage' || resultDepth === 'knn' ? SYNTHESIS_GUIDANCE : undefined;
+
       return {
         results: [
           {
@@ -81,6 +90,7 @@ export const correlatePollTool = (
               partials: run.partials,
               result: run.result,
               error: effectiveError,
+              ...(synthesisGuidance !== undefined ? { synthesis_guidance: synthesisGuidance } : {}),
             },
           },
         ],
