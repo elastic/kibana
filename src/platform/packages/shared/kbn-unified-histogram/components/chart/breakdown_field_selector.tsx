@@ -30,6 +30,7 @@ import {
 import {
   EBT_CLICK_ACTIONS,
   getEbtProps,
+  NONE_EBT_DETAIL,
   NON_ECS_FIELD_EBT_DETAIL,
   useEcsFieldNames,
 } from '@kbn/ebt-click';
@@ -83,7 +84,7 @@ export const BreakdownFieldSelector = ({
         defaultMessage: 'No breakdown',
       }),
       checked: !breakdown?.field ? ('on' as EuiSelectableOption['checked']) : undefined,
-      ...getEbtProps(BREAKDOWN_EBT_BASE),
+      ...getEbtProps({ ...BREAKDOWN_EBT_BASE, detail: NONE_EBT_DETAIL }),
     };
 
     const toOption = (field: DataViewField): SelectableEntry => ({

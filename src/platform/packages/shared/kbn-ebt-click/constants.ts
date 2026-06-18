@@ -56,3 +56,5 @@ export const EBT_CLICK_ACTIONS = {
  * @see https://github.com/elastic/kibana/blob/main/src/platform/plugins/shared/discover/public/ebt_manager/scoped_discover_ebt_manager.ts
  */
 export const NON_ECS_FIELD_EBT_DETAIL = '<non-ecs>';
+
+export const NONE_EBT_DETAIL = '<none>';
