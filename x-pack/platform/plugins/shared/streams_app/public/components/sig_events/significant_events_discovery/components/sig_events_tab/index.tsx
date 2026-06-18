@@ -281,7 +281,6 @@ export const SigEventsTab = () => {
               isRunning={isRunning}
               isCanceling={isCanceling}
               isDisabled={isRunning}
-              size="s"
             />
           </EuiFlexItem>
         </EuiFlexGroup>

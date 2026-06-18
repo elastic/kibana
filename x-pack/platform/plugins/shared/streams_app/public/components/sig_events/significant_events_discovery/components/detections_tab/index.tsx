@@ -144,7 +144,6 @@ export const DetectionsTab = () => {
               isRunning={isRunning}
               isCanceling={isCanceling}
               isDisabled={isRunning}
-              size="s"
             />
           </EuiFlexItem>
         </EuiFlexGroup>

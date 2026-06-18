@@ -146,7 +146,6 @@ export const DiscoveriesTab = () => {
               isRunning={isRunning}
               isCanceling={isCanceling}
               isDisabled={isRunning}
-              size="s"
             />
           </EuiFlexItem>
         </EuiFlexGroup>
