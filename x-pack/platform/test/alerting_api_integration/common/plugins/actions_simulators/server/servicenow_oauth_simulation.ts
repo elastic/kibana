@@ -17,18 +17,87 @@ import type {
 /** Auth code sent by tests that need a token with `expires_in: 1` to exercise refresh flows. */
 export const SHORT_EXPIRY_AUTH_CODE = 'fake-auth-code-short-expiry';
 
+/** Scope value sent by tests that want the `client_credentials` branch to issue a token with `expires_in: 1`. */
+export const SHORT_EXPIRY_CLIENT_CREDENTIALS_SCOPE = 'short-lived';
+
+/** RFC 7521/7523 §2.2 — must match `CLIENT_ASSERTION_TYPE` exported from `@kbn/connector-specs`. */
+const CLIENT_ASSERTION_TYPE = 'urn:ietf:params:oauth:client-assertion-type:jwt-bearer';
+const SUPPORTED_JWT_ALGORITHMS = new Set(['PS256', 'RS256', 'ES256']);
+
 const TOKEN_EXPIRES_IN_SEC = 3660;
 
 let authorizationCodeExchangeSeq = 0;
 let refreshTokenExchangeSeq = 0;
+let clientCredentialsJwtExchangeSeq = 0;
 
-type OAuthGrantType = 'authorization_code' | 'refresh_token';
+type OAuthGrantType = 'authorization_code' | 'refresh_token' | 'client_credentials';
 
 function toOAuthGrantType(value: string | undefined): OAuthGrantType | undefined {
-  if (value === 'authorization_code' || value === 'refresh_token') {
+  if (
+    value === 'authorization_code' ||
+    value === 'refresh_token' ||
+    value === 'client_credentials'
+  ) {
     return value;
   }
   return undefined;
+}
+
+function decodeJwtSegment(segment: string): Record<string, unknown> | null {
+  // base64url -> base64 -> JSON; the simulator does not verify signatures, only structure.
+  const padded = segment
+    .replace(/-/g, '+')
+    .replace(/_/g, '/')
+    .padEnd(segment.length + ((4 - (segment.length % 4)) % 4), '=');
+  try {
+    const json = Buffer.from(padded, 'base64').toString('utf8');
+    const parsed = JSON.parse(json);
+    return parsed && typeof parsed === 'object' ? (parsed as Record<string, unknown>) : null;
+  } catch {
+    return null;
+  }
+}
+
+interface JwtAssertionValidationError {
+  error: string;
+  error_description: string;
+}
+
+function validateClientAssertion(
+  assertion: string,
+  expectedClientId: string
+): JwtAssertionValidationError | null {
+  const parts = assertion.split('.');
+  if (parts.length !== 3) {
+    return { error: 'invalid_client', error_description: 'client_assertion is not a JWT' };
+  }
+  const header = decodeJwtSegment(parts[0]);
+  const payload = decodeJwtSegment(parts[1]);
+  if (!header || !payload) {
+    return {
+      error: 'invalid_client',
+      error_description: 'client_assertion header/payload undecodable',
+    };
+  }
+  if (typeof header.alg !== 'string' || !SUPPORTED_JWT_ALGORITHMS.has(header.alg)) {
+    return { error: 'invalid_client', error_description: `Unsupported alg "${header.alg}"` };
+  }
+  // The provider binding is one of `kid` | `x5t#S256` | `x5c`; structural presence is enough for the simulator.
+  const hasBinding = ['kid', 'x5t#S256', 'x5c'].some((k) => header[k] !== undefined);
+  if (!hasBinding) {
+    return {
+      error: 'invalid_client',
+      error_description: 'JWT header missing kid/x5t#S256/x5c binding',
+    };
+  }
+  if (payload.iss !== expectedClientId || payload.sub !== expectedClientId) {
+    return { error: 'invalid_client', error_description: 'JWT iss/sub does not match client_id' };
+  }
+  const nowSec = Math.floor(Date.now() / 1000);
+  if (typeof payload.exp !== 'number' || payload.exp <= nowSec) {
+    return { error: 'invalid_client', error_description: 'JWT is expired or missing exp' };
+  }
+  return null;
 }
 
 // URL-encoded bodies are usually parsed to objects before this runs; Buffer/string paths cover odd content-types or raw bodies.
@@ -143,7 +212,34 @@ export function initPlugin(router: IRouter, path: string) {
         });
       }
 
-      // Grant types we do not branch on (e.g. JWT bearer) keep the legacy fixed token response.
+      if (grantType === 'client_credentials') {
+        if (fields.client_assertion_type !== CLIENT_ASSERTION_TYPE) {
+          return jsonResponse(res, 400, {
+            error: 'invalid_request',
+            error_description: `Expected client_assertion_type=${CLIENT_ASSERTION_TYPE}`,
+          });
+        }
+        if (!fields.client_assertion) {
+          return jsonResponse(res, 400, {
+            error: 'invalid_request',
+            error_description: 'Missing client_assertion',
+          });
+        }
+        const assertionError = validateClientAssertion(fields.client_assertion, fields.client_id);
+        if (assertionError) {
+          return jsonResponse(res, 400, { ...assertionError });
+        }
+        clientCredentialsJwtExchangeSeq += 1;
+        const seq = clientCredentialsJwtExchangeSeq;
+        const shortLived = fields.scope === SHORT_EXPIRY_CLIENT_CREDENTIALS_SCOPE;
+        return jsonResponse(res, 200, {
+          access_token: `sim-oauth-jwt-access-${seq}`,
+          expires_in: shortLived ? 1 : TOKEN_EXPIRES_IN_SEC,
+          token_type: 'Bearer',
+        });
+      }
+
+      // Grant types we do not branch on keep the legacy fixed token response.
       return jsonResponse(res, 200, {
         access_token: 'tokentokentoken',
         expires_in: TOKEN_EXPIRES_IN_SEC,

@@ -6,6 +6,8 @@ Extended templates and patterns that are too long to fit in `SKILL.md`. Read thi
 
 A minimal end-to-end step ("process a message") across the common, server, and public layers. Copy and rename for a real step.
 
+> **Key casing:** workflow-owned config keys are kebab-case (`connector-id`); workflow-owned input keys under `with:` are kebab-case or snake_case (`max_count`, `dry-run`) — **never camelCase** (`maxCount`). Only inherited OpenAPI/connector shapes keep their original case. See SKILL.md → [Workflow YAML naming conventions](SKILL.md#workflow-yaml-naming-conventions-read-first).
+
 ### `common/step_types/process_message.ts`
 
 ```ts
