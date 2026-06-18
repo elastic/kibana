@@ -10,7 +10,6 @@ import { EuiEmptyPrompt, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type * as estypes from '@elastic/elasticsearch/lib/api/types';
 import type { CommonAttachmentTabViewProps } from '@kbn/cases-plugin/public';
-import type { EntityType } from '../../../../../common/entity_analytics/types';
 import {
   ENTITY_TAB_EMPTY_TEST_ID,
   ENTITY_TAB_NO_PRIVILEGES_TEST_ID,
@@ -29,13 +28,7 @@ import { CallOut } from '../../../../common/components/callouts';
 import { EntityStoreDisabledEmptyPromptBody } from '../../../../entity_analytics/pages/entity_store_disabled_empty_prompt';
 import { useSpaceId } from '../../../../common/hooks/use_space_id';
 import { useEntityLocalTableState } from '../hooks/use_entity_local_table_state';
-import {
-  isEntityAttachment,
-  matchesSearchTerm,
-  CANDIDATE_FIELDS_BY_TYPE,
-  CASE_ATTACHMENT_TABLE_CONFIG,
-  type AttachedEntity,
-} from '../utils';
+import { isEntityAttachment, matchesSearchTerm, CASE_ATTACHMENT_TABLE_CONFIG } from '../utils';
 
 /**
  * Renders the "Entities" accordion body in the case Attachments tab.
@@ -47,20 +40,17 @@ export const EntityTabContent: React.FC<CommonAttachmentTabViewProps> = ({
   searchTerm,
 }) => {
   // Filter in-memory first to avoid firing an ES query when no attachments match the search.
-  const attachedEntities = useMemo<AttachedEntity[]>(() => {
-    const items: AttachedEntity[] = [];
-    for (const comment of caseData.comments) {
-      if (!isEntityAttachment(comment)) continue;
-      if (searchTerm && !matchesSearchTerm(comment.metadata, searchTerm)) continue;
-      items.push({
-        attachmentId: comment.attachmentId,
-        entityType: comment.metadata.entityType,
-      });
-    }
-    return items;
-  }, [caseData.comments, searchTerm]);
+  // `attachmentId` holds the canonical entity.id (EUID), so we only need the ids here.
+  const entityIds = useMemo<string[]>(
+    () =>
+      caseData.comments
+        .filter(isEntityAttachment)
+        .filter((comment) => !searchTerm || matchesSearchTerm(comment.metadata, searchTerm))
+        .map((comment) => comment.attachmentId),
+    [caseData.comments, searchTerm]
+  );
 
-  if (attachedEntities.length === 0) {
+  if (entityIds.length === 0) {
     return (
       <EuiEmptyPrompt
         data-test-subj={ENTITY_TAB_EMPTY_TEST_ID}
@@ -86,11 +76,11 @@ export const EntityTabContent: React.FC<CommonAttachmentTabViewProps> = ({
     );
   }
 
-  return <EntityTabTable attachedEntities={attachedEntities} />;
+  return <EntityTabTable entityIds={entityIds} />;
 };
 
 /** Deferred inner component — keeps entity store hooks from running on cases with no entity attachments. */
-const EntityTabTable = ({ attachedEntities }: { attachedEntities: AttachedEntity[] }) => {
+const EntityTabTable = ({ entityIds }: { entityIds: string[] }) => {
   const spaceId = useSpaceId();
   const { data: entityStoreStatusData, isLoading: isStatusLoading } = useEntityStoreStatus();
   const { dataView, isLoading: isDataViewLoading } = useEntityStoreDataView(spaceId);
@@ -112,26 +102,12 @@ const EntityTabTable = ({ attachedEntities }: { attachedEntities: AttachedEntity
   // to avoid hiding the table on transient failures.
   const hasNoReadPrivileges = !isPrivilegesError && !privileges?.has_read_permissions;
 
-  // `attachmentId` may be captured in different ECS fields (e.g. `user.name` vs
-  // `user.email`), so build a `bool.should` over all candidates per type.
-  // Per-type grouping prevents cross-type collisions (e.g. user vs host "alice").
-  const pinnedFilter = useMemo<estypes.QueryDslQueryContainer>(() => {
-    const idsByType = new Map<EntityType, string[]>();
-    for (const { attachmentId, entityType } of attachedEntities) {
-      const existing = idsByType.get(entityType as EntityType) ?? [];
-      existing.push(attachmentId);
-      idsByType.set(entityType as EntityType, existing);
-    }
-    const should: estypes.QueryDslQueryContainer[] = [];
-    for (const [type, ids] of idsByType) {
-      const fields = CANDIDATE_FIELDS_BY_TYPE[type];
-      if (!fields) continue;
-      for (const field of fields) {
-        should.push({ terms: { [field]: ids } });
-      }
-    }
-    return { bool: { should, minimum_should_match: 1 } };
-  }, [attachedEntities]);
+  // `attachmentId` holds the canonical entity.id (EUID), so a single `terms`
+  // query on `entity.id` resolves every attached entity unambiguously.
+  const pinnedFilter = useMemo<estypes.QueryDslQueryContainer>(
+    () => ({ terms: { 'entity.id': entityIds } }),
+    [entityIds]
+  );
 
   const state = useEntityLocalTableState({ pinnedFilter });
 

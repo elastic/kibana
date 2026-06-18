@@ -51,11 +51,18 @@ export const UserPanelFooter = ({
   const { cases } = useKibana().services;
   const attachmentsEnabled = cases.config.attachmentsEnabled;
 
+  // Canonical entity.id (EUID) from the store record. The case attachment is
+  // resolved by querying `entity.id` directly, so we attach this rather than the
+  // raw user.name — without it the attachment cannot be matched back to a store row.
+  const entityStoreId = entity?.entity?.id;
+
   const additionalItems = useCallback(
     (closePopover: () => void) => {
-      if (!entityAttachmentsEnabled || !attachmentsEnabled || !userName) return [];
+      if (!entityAttachmentsEnabled || !attachmentsEnabled || !userName || !entityStoreId) {
+        return [];
+      }
       const entityToAttach = {
-        id: userName,
+        id: entityStoreId,
         name: userName,
         type: 'user' as const,
         riskLevel,
@@ -75,7 +82,7 @@ export const UserPanelFooter = ({
         />,
       ];
     },
-    [attachmentsEnabled, entityAttachmentsEnabled, userName, riskLevel]
+    [attachmentsEnabled, entityAttachmentsEnabled, userName, entityStoreId, riskLevel]
   );
 
   return (

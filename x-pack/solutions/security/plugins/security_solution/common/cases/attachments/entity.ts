@@ -30,7 +30,12 @@ export const EntityAttachmentPayloadSchema = z
   .object({
     type: z.literal(SECURITY_ENTITY_ATTACHMENT_TYPE),
     owner: z.string(),
-    /** The entity identifier (e.g. the user name, host name, or IP). */
+    /**
+     * The canonical entity id (EUID) from the entity store, e.g.
+     * `user:alice@host@namespace`. Stored verbatim so the attachment view can
+     * resolve the entity with a single `terms` query on `entity.id` instead of
+     * OR-ing a raw identity value across every candidate ECS field.
+     */
     attachmentId: z.string(),
     metadata: EntityAttachmentMetadataSchema,
   })

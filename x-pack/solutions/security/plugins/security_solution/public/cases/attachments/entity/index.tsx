@@ -27,7 +27,7 @@ export type { EntityAttachmentMetadata };
  * entry points can be wired in from any surface (flyout, table, etc.).
  */
 export interface EntityToAttach {
-  /** The entity identifier (e.g. user name, host name, or IP). Stored as `attachmentId`. */
+  /** The canonical entity id (EUID) from the entity store. Stored as `attachmentId`. */
   id: string;
   /** Human-readable entity name. */
   name: string;
