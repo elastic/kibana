@@ -34,7 +34,7 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import type { NavigationItemInfo } from '../types';
 import { DraggableItem } from './draggable_item';
 import { EmptyDropPlaceholder } from './empty_drop_placeholder';
-import { PrimaryNavLabelsKeyPadMenu } from './primary_nav_labels_keypad_menu';
+import { PrimaryNavLabelsSelector } from './primary_nav_labels_selector';
 import { useItemList, HIDDEN_DROPPABLE_ID, VISIBLE_DROPPABLE_ID } from './use_item_list';
 
 const modalCss = css`
@@ -136,26 +136,40 @@ export const CustomizeNavigationModal = ({
         }}
       />
       <EuiModalHeader css={headerCss(euiTheme)}>
-        <EuiFlexGroup direction="column" gutterSize="s">
-          <EuiModalHeaderTitle id={modalTitleId}>
-            <FormattedMessage
-              id="navigationCustomizationComponents.modalTitle"
-              defaultMessage="Customize navigation"
-            />
-          </EuiModalHeaderTitle>
-          <PrimaryNavLabelsKeyPadMenu
-            hidePrimaryLabels={hidePrimaryLabels}
-            onChange={handleHidePrimaryLabelsChange}
+        <EuiModalHeaderTitle id={modalTitleId}>
+          <FormattedMessage
+            id="navigationCustomizationComponents.modalTitle"
+            defaultMessage="Customize navigation"
           />
-          <EuiText size="s" color="subdued">
-            <FormattedMessage
-              id="navigationCustomizationComponents.spaceDescription"
-              defaultMessage="Reorder or hide apps in this space without affecting other users."
-            />
-          </EuiText>
-        </EuiFlexGroup>
+        </EuiModalHeaderTitle>
       </EuiModalHeader>
       <EuiModalBody css={modalBodyCss(euiTheme)}>
+        <PrimaryNavLabelsSelector
+          hidePrimaryLabels={hidePrimaryLabels}
+          onChange={handleHidePrimaryLabelsChange}
+        />
+        <EuiSpacer size="l" />
+        <EuiFlexGroup direction="column" gutterSize="s">
+          <EuiFlexItem grow={false}>
+            <EuiTitle size="xs">
+              <h4>
+                <FormattedMessage
+                  id="navigationCustomizationComponents.orderAndVisibilityTitle"
+                  defaultMessage="Order and visibility"
+                />
+              </h4>
+            </EuiTitle>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiText size="s" color="subdued">
+              <FormattedMessage
+                id="navigationCustomizationComponents.spaceDescription"
+                defaultMessage="Reorder or hide apps in this space without affecting other users."
+              />
+            </EuiText>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+        <EuiSpacer size="m" />
         <EuiDragDropContext onDragEnd={handleDragEnd}>
           <EuiDroppable droppableId={VISIBLE_DROPPABLE_ID} spacing="none">
             {visibleItems.length > 0 ? (

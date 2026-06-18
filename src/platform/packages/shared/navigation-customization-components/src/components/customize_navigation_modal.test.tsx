@@ -74,6 +74,11 @@ describe('CustomizeNavigationModal', () => {
     expect(screen.getByText('Reset to default')).toBeInTheDocument();
   });
 
+  it('should show the order and visibility section header', () => {
+    renderWithI18n(<CustomizeNavigationModal {...defaultProps} />);
+    expect(screen.getByText('Order and visibility')).toBeInTheDocument();
+  });
+
   it('should show the space description', () => {
     renderWithI18n(<CustomizeNavigationModal {...defaultProps} />);
     expect(
@@ -81,14 +86,14 @@ describe('CustomizeNavigationModal', () => {
     ).toBeInTheDocument();
   });
 
-  it('should render the primary nav labels keypad menu', () => {
+  it('should render the primary nav labels selector', () => {
     renderWithI18n(<CustomizeNavigationModal {...defaultProps} />);
-    expect(screen.getByTestId('primaryNavLabelsKeyPadMenu')).toBeInTheDocument();
-    expect(screen.getByText('Show labels')).toBeInTheDocument();
-    expect(screen.getByText('Hide labels')).toBeInTheDocument();
+    expect(screen.getByTestId('primaryNavLabelsSelector')).toBeInTheDocument();
+    expect(screen.getByText('Icons and text')).toBeInTheDocument();
+    expect(screen.getByText('Icons only')).toBeInTheDocument();
   });
 
-  it('should call onHidePrimaryLabelsChange when Hide labels is selected', async () => {
+  it('should call onHidePrimaryLabelsChange when Icons only is selected', async () => {
     renderWithI18n(<CustomizeNavigationModal {...defaultProps} />);
     const hideLabelsItem = screen.getByTestId('primaryNavLabelsHide');
     await userEvent.click(within(hideLabelsItem).getByRole('radio'));
