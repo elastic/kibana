@@ -274,7 +274,7 @@ describe('PackagePolicyDeleteProvider', () => {
       packagePolicyIds: ['integration-0001'],
       packagePolicyPackage: { name: 'fleet_server' } as PackagePolicyPackage,
     });
-    const button = utils.getByTestId('deleteIntegrationBtn');
+    const button = utils.getByRole('button');
     fireEvent.click(button);
 
     await waitFor(() => {
@@ -295,12 +295,14 @@ describe('PackagePolicyDeleteProvider', () => {
       packagePolicyIds: ['integration-0001'],
       packagePolicyPackage: { name: 'fleet_server' } as PackagePolicyPackage,
     });
-    const button = utils.getByTestId('deleteIntegrationBtn');
+    const button = utils.getByRole('button');
     fireEvent.click(button);
 
     await waitFor(() => {
       expect(utils.getByTestId('fleetServerDeleteCallOut')).toBeInTheDocument();
-      expect(utils.getByTestId('sharedAgentPolicyCallOut')).toBeInTheDocument();
+      expect(
+        utils.getByText('This integration is shared by multiple agent policies.')
+      ).toBeInTheDocument();
     });
   });
 
@@ -315,7 +317,7 @@ describe('PackagePolicyDeleteProvider', () => {
       packagePolicyIds: ['integration-0001'],
       packagePolicyPackage: { name: 'nginx' } as PackagePolicyPackage,
     });
-    const button = utils.getByTestId('deleteIntegrationBtn');
+    const button = utils.getByRole('button');
     fireEvent.click(button);
 
     await waitFor(() => {
