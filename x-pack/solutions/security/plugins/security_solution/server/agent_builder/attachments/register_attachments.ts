@@ -34,7 +34,9 @@ export const registerAttachments = async (
   agentBuilder.attachments.registerType(createBulkAlertsAttachmentType(core, logger));
   agentBuilder.attachments.registerType(createEntityAttachmentType());
   agentBuilder.attachments.registerType(createEntityAnalyticsDashboardAttachmentType());
-  agentBuilder.attachments.registerType(createRuleAttachmentType());
+  agentBuilder.attachments.registerType(
+    createRuleAttachmentType({ getStartServices: core.getStartServices })
+  );
   agentBuilder.attachments.registerType(createSiemReadinessAttachmentType());
 
   if (experimentalFeatures.rulePreviewAttachmentEnabled) {
