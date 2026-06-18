@@ -42,7 +42,6 @@ export class FilesystemService implements IFilesystemService {
 
   async init(): Promise<void> {
     if (this.initialised) return;
-    this.initialised = true;
 
     const baseRaw = new InMemoryFs();
     await baseRaw.mkdir('/tmp', { recursive: true });
@@ -68,6 +67,8 @@ export class FilesystemService implements IFilesystemService {
         { mountPoint: MOUNT_POINTS.skills, filesystem: skillsFs },
       ],
     });
+
+    this.initialised = true;
   }
 
   getFilesystem(): IFileSystem {

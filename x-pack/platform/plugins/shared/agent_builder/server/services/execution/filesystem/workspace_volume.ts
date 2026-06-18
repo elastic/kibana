@@ -72,27 +72,35 @@ export class WorkspaceVolume {
    */
   async load(): Promise<void> {
     if (this.loaded) return;
-    this.loaded = true;
-    if (!this.workspaceId) return;
-    const doc = await this.deps.workspaceClient.load(this.workspaceId);
-    if (!doc) return;
-
-    for (const [absolutePath, file] of Object.entries(doc.files)) {
-      // Document keys carry the `/workspace` prefix; we're mounted at /workspace,
-      // so strip it before writing in.
-      const relativePath = absolutePath.startsWith(`${WORKSPACE_PREFIX}/`)
-        ? absolutePath.slice(WORKSPACE_PREFIX.length)
-        : absolutePath;
-      const dirPath = relativePath.substring(0, relativePath.lastIndexOf('/')) || '/';
-      if (dirPath !== '/') {
-        await this.fs.mkdir(dirPath, { recursive: true });
-      }
-      const buf = Buffer.from(file.content, 'base64');
-      await this.fs.writeFile(
-        relativePath,
-        new Uint8Array(buf.buffer, buf.byteOffset, buf.byteLength)
-      );
+    if (!this.workspaceId) {
+      this.loaded = true;
+      return;
     }
+    // Mark loaded only after the read + hydration succeed.
+    const doc = await this.deps.workspaceClient.load(this.workspaceId);
+    if (doc) {
+      for (const [absolutePath, file] of Object.entries(doc.files)) {
+        // Document keys carry the `/workspace` prefix; we're mounted at /workspace,
+        // so strip it before writing in.
+        const relativePath = absolutePath.startsWith(`${WORKSPACE_PREFIX}/`)
+          ? absolutePath.slice(WORKSPACE_PREFIX.length)
+          : absolutePath;
+        const dirPath = relativePath.substring(0, relativePath.lastIndexOf('/')) || '/';
+        if (dirPath !== '/') {
+          await this.fs.mkdir(dirPath, { recursive: true });
+        }
+        const buf = Buffer.from(file.content, 'base64');
+        await this.fs.writeFile(
+          relativePath,
+          new Uint8Array(buf.buffer, buf.byteOffset, buf.byteLength)
+        );
+        // Restore persisted metadata
+        await this.fs.chmod(relativePath, file.mode);
+        const mtime = new Date(file.mtime);
+        await this.fs.utimes(relativePath, mtime, mtime);
+      }
+    }
+    this.loaded = true;
   }
 
   /**
