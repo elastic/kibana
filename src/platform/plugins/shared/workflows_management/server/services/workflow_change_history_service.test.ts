@@ -68,10 +68,37 @@ describe('WorkflowChangeHistoryService', () => {
       getCurrentUser: jest.fn().mockReturnValue({ username: 'alice', profile_uid: 'profile-1' }),
     };
 
-    service.initialize({ elasticsearchClient, authService: authService as any });
-    await Promise.resolve();
+    await service.initialize({ elasticsearchClient, authService: authService as any });
 
     expect(clientMock.initialize).toHaveBeenCalledWith(elasticsearchClient);
+  });
+
+  it('initialize resolves after client initialization completes', async () => {
+    let resolveInitialize: () => void = () => undefined;
+    const initializePromise = new Promise<void>((resolve) => {
+      resolveInitialize = resolve;
+    });
+    clientMock.initialize.mockReturnValue(initializePromise);
+
+    const service = new WorkflowChangeHistoryService(logger, '9.0.0');
+    const elasticsearchClient = elasticsearchServiceMock.createElasticsearchClient();
+    const authService = {
+      getCurrentUser: jest.fn().mockReturnValue({ username: 'alice', profile_uid: 'profile-1' }),
+    };
+
+    let ready = false;
+    const initializeCall = service
+      .initialize({ elasticsearchClient, authService: authService as any })
+      .then(() => {
+        ready = true;
+      });
+
+    await Promise.resolve();
+    expect(ready).toBe(false);
+
+    resolveInitialize();
+    await initializeCall;
+    expect(ready).toBe(true);
   });
 
   it('reports initialized state from the underlying client', () => {

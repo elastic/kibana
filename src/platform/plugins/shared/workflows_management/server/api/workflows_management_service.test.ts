@@ -120,7 +120,7 @@ describe('WorkflowsService (facade)', () => {
     MockedWorkflowChangeHistoryService.mockImplementation(
       () =>
         ({
-          initialize: jest.fn(),
+          initialize: jest.fn().mockResolvedValue(undefined),
           isInitialized: jest.fn().mockReturnValue(true),
         } as unknown as WorkflowChangeHistoryService)
     );
@@ -165,7 +165,7 @@ describe('WorkflowsService (facade)', () => {
   describe('initialization', () => {
     it('initializes change history when core start services resolve', async () => {
       const changeHistoryInstance = {
-        initialize: jest.fn(),
+        initialize: jest.fn().mockResolvedValue(undefined),
         isInitialized: jest.fn().mockReturnValue(true),
       };
       MockedWorkflowChangeHistoryService.mockImplementation(

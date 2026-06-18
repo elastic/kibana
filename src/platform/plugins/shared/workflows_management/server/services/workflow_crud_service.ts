@@ -31,7 +31,10 @@ import type { WorkflowPartialDetailDto } from '@kbn/workflows/types/v1';
 import { WorkflowConflictError } from '@kbn/workflows-yaml';
 import type { z } from '@kbn/zod/v4';
 import type { WorkflowCrudDeps } from './types';
-import { WorkflowChangeHistoryAction } from './workflow_change_history_constants';
+import {
+  WorkflowChangeHistoryAction,
+  type WorkflowChangeHistoryActionType,
+} from './workflow_change_history_constants';
 import type {
   IndexWorkflowDocumentOptions,
   ReadModifyWriteWorkflowDocumentParams,
@@ -93,7 +96,7 @@ export class WorkflowCrudService {
 
   async logWorkflowChangesAfterWrite(params: {
     workflows: Array<{ id: string; document: WorkflowProperties }>;
-    action: string;
+    action: WorkflowChangeHistoryActionType;
     spaceId: string;
     timestamp: string | Date;
     request?: KibanaRequest;

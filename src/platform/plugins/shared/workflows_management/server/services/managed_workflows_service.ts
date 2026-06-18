@@ -30,6 +30,7 @@ import type { WorkflowsExecutionEnginePluginStart } from '@kbn/workflows-executi
 import { updateYamlField } from '@kbn/workflows-yaml';
 import { WorkflowChangeHistoryAction } from './workflow_change_history_constants';
 import type { WorkflowCrudService } from './workflow_crud_service';
+import { maybeApplyWorkflowVersion } from '../lib/workflow_version';
 import { isRetryableWorkflowWriteConflict } from '../lib/workflow_write_conflicts';
 import type { WorkflowProperties } from '../storage/workflow_storage';
 
@@ -232,11 +233,13 @@ export class ManagedWorkflowsService {
       enabled,
       createdAt: existing.created_at,
     });
+    const versioningEnabled = await this.deps.crudService.isWorkflowVersioningEnabled();
+    const documentWithVersion = maybeApplyWorkflowVersion(document, existing, versioningEnabled);
     const savedDocument = await this.deps.crudService.writeWorkflowDocumentWithOcc(
       workflowDocumentId,
       spaceId,
       {
-        document,
+        document: documentWithVersion,
         ifSeqNo: existingDocument.seqNo,
         ifPrimaryTerm: existingDocument.primaryTerm,
       }

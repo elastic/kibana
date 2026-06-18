@@ -141,9 +141,9 @@ export class WorkflowsService {
     await this.initPromise;
   }
 
-  private initializeChangeHistoryService(coreStart: CoreStart): void {
+  private async initializeChangeHistoryService(coreStart: CoreStart): Promise<void> {
     if (coreStart.security) {
-      this.changeHistoryService.initialize({
+      await this.changeHistoryService.initialize({
         elasticsearchClient: coreStart.elasticsearch.client.asInternalUser,
         authService: coreStart.security.authc,
       });
@@ -190,7 +190,7 @@ export class WorkflowsService {
       esClient: this.esClient,
     });
 
-    this.initializeChangeHistoryService(coreStart);
+    await this.initializeChangeHistoryService(coreStart);
 
     this.crudService = new WorkflowCrudService({
       logger: this.logger,

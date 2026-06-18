@@ -12,7 +12,10 @@ import type { Logger } from '@kbn/core/server';
 import { DEFAULT_MAX_RETRIES, DEFAULT_RETRY_DELAY_MS, delayMs } from '@kbn/occ';
 
 import { isRetryableChangeHistoryError } from './is_retryable_change_history_error';
-import { WORKFLOW_CHANGE_HISTORY_OBJECT_TYPE } from '../services/workflow_change_history_constants';
+import {
+  WORKFLOW_CHANGE_HISTORY_OBJECT_TYPE,
+  type WorkflowChangeHistoryActionType,
+} from '../services/workflow_change_history_constants';
 import type {
   IScopedWorkflowChangeHistoryService,
   IWorkflowChangeHistoryService,
@@ -24,7 +27,7 @@ export interface LogWorkflowChangesParams {
   changeHistoryService: Pick<IWorkflowChangeHistoryService, 'isInitialized'> | undefined;
   scopedChangeHistory: IScopedWorkflowChangeHistoryService | undefined;
   isWorkflowVersioningEnabled: () => Promise<boolean>;
-  action: string;
+  action: WorkflowChangeHistoryActionType;
   spaceId: string;
   timestamp: string | Date;
   correlationId?: string;

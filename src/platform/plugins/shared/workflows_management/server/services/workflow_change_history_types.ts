@@ -26,7 +26,7 @@ export interface WorkflowChangeHistoryServiceInitializeParams {
 
 export interface IWorkflowChangeHistoryService {
   isInitialized(): boolean;
-  initialize(params: WorkflowChangeHistoryServiceInitializeParams): void;
+  initialize(params: WorkflowChangeHistoryServiceInitializeParams): Promise<void>;
   asScoped(request: KibanaRequest): IScopedWorkflowChangeHistoryService;
   asSystemUser(): IScopedWorkflowChangeHistoryService;
   getHistory(

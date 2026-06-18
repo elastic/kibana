@@ -144,7 +144,7 @@ export const bulkIndexWithOccRetry = async ({
   maxRetries = DEFAULT_MAX_RETRIES,
   retryDelayMs = DEFAULT_RETRY_DELAY_MS,
   refresh = true,
-  versioningEnabled = true,
+  versioningEnabled = false,
 }: {
   client: BulkOccIndexClient;
   hits: OccWorkflowHit[];
