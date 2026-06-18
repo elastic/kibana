@@ -6,8 +6,10 @@
  */
 
 import { SmithyMessageDecoderStream } from '@smithy/eventstream-codec';
-import { DEFAULT_TOKEN_LIMIT } from '@kbn/connector-schemas/bedrock';
+import { DEFAULT_TOKEN_LIMIT, claudeModelSupportsTemperature } from '@kbn/connector-schemas/bedrock';
 import type { BedrockMessage, BedrockToolChoice } from '@kbn/connector-schemas/bedrock';
+
+export { claudeModelSupportsTemperature };
 
 export const formatBedrockBody = ({
   messages,
@@ -35,25 +37,6 @@ export const formatBedrockBody = ({
   tools,
   tool_choice: toolChoice,
 });
-
-/**
- * Claude 4.7+ models on Bedrock deprecated the temperature parameter.
- * This checks the model ID (e.g. us.anthropic.claude-opus-4-8-20251101-v1:0) to
- * determine whether temperature should be sent in the request.
- *
- * Claude 4.x model IDs follow the pattern claude-{variant}-{major}-{minor}-{date},
- * while Claude 3.x IDs follow claude-{major}-{minor}-{variant}-{date}.
- * The regex matches only the 4.x format (where variant is non-numeric), so Claude 3.x
- * models correctly default to supported.
- */
-export const claudeModelSupportsTemperature = (modelId?: string): boolean => {
-  if (!modelId) return true;
-  const match = modelId.toLowerCase().match(/claude-[a-z][\w]*-(\d+)-(\d+)/);
-  if (!match) return true;
-  const major = parseInt(match[1], 10);
-  const minor = parseInt(match[2], 10);
-  return !(major > 4 || (major === 4 && minor >= 7));
-};
 
 interface FormattedBedrockMessage {
   role: string;

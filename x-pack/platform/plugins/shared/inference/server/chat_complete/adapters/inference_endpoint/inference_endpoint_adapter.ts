@@ -30,7 +30,7 @@ import {
 } from '../../simulated_function_calling';
 import type { InferenceEndpointExecutor } from '../../utils/inference_endpoint_executor';
 import type { OpenAIRequest } from '../openai/types';
-import { isClaudeWithoutTemperature } from '../../utils/get_temperature';
+import { claudeModelSupportsTemperature } from '@kbn/connector-schemas/bedrock';
 
 export interface InferenceEndpointAdapterChatCompleteOptions {
   executor: InferenceEndpointExecutor;
@@ -112,7 +112,7 @@ const createEndpointRequest = ({
   temperature?: number;
   modelName?: string;
 }): OpenAIRequest => {
-  const supportsTemperature = !modelName || !isClaudeWithoutTemperature(modelName);
+  const supportsTemperature = claudeModelSupportsTemperature(modelName);
   const temperatureSpread =
     supportsTemperature && temperature >= 0 ? { temperature } : {};
 

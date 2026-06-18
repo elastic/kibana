@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { getTemperatureIfValid, isClaudeWithoutTemperature } from './get_temperature';
+import { getTemperatureIfValid } from './get_temperature';
 import type { InferenceConnector } from '@kbn/inference-common';
 import { InferenceConnectorType } from '@kbn/inference-common';
 
@@ -198,33 +198,3 @@ describe('getTemperatureIfValid', () => {
   });
 });
 
-describe('isClaudeWithoutTemperature', () => {
-  it('returns false for Claude 3.x models (different ID format)', () => {
-    [
-      'us.anthropic.claude-3-5-sonnet-20241022-v2:0',
-      'us.anthropic.claude-3-7-sonnet-20250219-v1:0',
-    ].forEach((model) => {
-      expect(isClaudeWithoutTemperature(model)).toBe(false);
-    });
-  });
-
-  it('returns false for Claude 4.x models that support temperature (< 4.7)', () => {
-    [
-      'us.anthropic.claude-sonnet-4-5-20250929-v1:0',
-      'us.anthropic.claude-haiku-4-5-20251001-v1:0',
-      'anthropic.claude-opus-4-6-20251101-v1:0',
-    ].forEach((model) => {
-      expect(isClaudeWithoutTemperature(model)).toBe(false);
-    });
-  });
-
-  it('returns true for Claude 4.7+ models where temperature is deprecated', () => {
-    [
-      'us.anthropic.claude-sonnet-4-7-20251101-v1:0',
-      'us.anthropic.claude-opus-4-8-20251101-v1:0',
-      'us.anthropic.claude-opus-5-0-20260101-v1:0',
-    ].forEach((model) => {
-      expect(isClaudeWithoutTemperature(model)).toBe(true);
-    });
-  });
-});
