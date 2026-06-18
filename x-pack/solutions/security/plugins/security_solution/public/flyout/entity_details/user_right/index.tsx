@@ -19,10 +19,8 @@ import { useUiSetting, useKibana } from '../../../common/lib/kibana';
 import { useNonClosedAlerts } from '../../../cloud_security_posture/hooks/use_non_closed_alerts';
 import { useRefetchQueryById } from '../../../entity_analytics/api/hooks/use_refetch_query_by_id';
 import type { Refetch } from '../../../common/types';
-import { RISK_INPUTS_TAB_QUERY_ID } from '../../../entity_analytics/components/entity_details_flyout/tabs/risk_inputs/risk_inputs_tab';
-import { useCalculateEntityRiskScore } from '../../../entity_analytics/api/hooks/use_calculate_entity_risk_score';
 import { useRiskScore } from '../../../entity_analytics/api/hooks/use_risk_score';
-import { useEntityRiskScores } from '../../../entity_analytics/api/hooks/use_entity_risk_scores';
+import { useEntityRiskScoreRecalculation } from '../../../entity_analytics/api/hooks/use_entity_risk_score_recalculation';
 import { ManagedUserDatasetKey } from '../../../../common/search_strategy/security_solution/users/managed_details';
 import { useManagedUser } from '../shared/hooks/use_managed_user';
 import { useQueryInspector } from '../../../common/components/page/manage_query';
@@ -136,11 +134,6 @@ export const UserPanel = memo(function UserPanel({
     entityStoreV2Enabled ? entityFromStoreResult : undefined
   );
 
-  const entityRiskScores = useEntityRiskScores(
-    EntityType.user,
-    entityStoreV2Enabled ? observedUser.entityRecord?.entity?.id : undefined
-  );
-
   const panelDisplayEntityId = useMemo(
     () => (entityStoreV2Enabled ? observedUser.entityRecord?.entity?.id : entityIdProp),
     [entityIdProp, entityStoreV2Enabled, observedUser.entityRecord?.entity?.id]
@@ -162,33 +155,22 @@ export const UserPanel = memo(function UserPanel({
   const { data: userRisk } = riskScoreState;
   const userRiskData = userRisk && userRisk.length > 0 ? userRisk[0] : undefined;
 
-  const refetchRiskInputsTab = useRefetchQueryById(RISK_INPUTS_TAB_QUERY_ID);
   const refetchEntitiesTable = useRefetchQueryById(ENTITY_ANALYTICS_TABLE_ID);
 
-  const onRiskScoreUpdated = useCallback(() => {
-    if (entityStoreV2Enabled) {
-      entityFromStoreResult.refetch();
-    } else {
-      riskScoreState.refetch();
-    }
-    entityRiskScores.refetch();
-    (refetchRiskInputsTab as Refetch | null)?.();
+  const onRecalculation = useCallback(() => {
     (refetchEntitiesTable as Refetch | null)?.();
-  }, [
-    riskScoreState,
-    entityFromStoreResult,
-    entityRiskScores,
-    refetchRiskInputsTab,
-    refetchEntitiesTable,
-    entityStoreV2Enabled,
-  ]);
+  }, [refetchEntitiesTable]);
 
-  const { isLoading: recalculatingScore, calculateEntityRiskScore } = useCalculateEntityRiskScore({
-    identifierType: EntityType.user,
-    identifier: userName,
-    entityId: entityStoreV2Enabled ? observedUser.entityRecord?.entity?.id : undefined,
-    onSuccess: onRiskScoreUpdated,
-  });
+  const { entityRiskScores, recalculatingScore, calculateEntityRiskScore } =
+    useEntityRiskScoreRecalculation({
+      entityType: EntityType.user,
+      identifier: userName,
+      entityId: entityStoreV2Enabled ? observedUser.entityRecord?.entity?.id : undefined,
+      entityStoreV2Enabled,
+      entityFromStoreResult,
+      riskScoreState,
+      onRecalculation,
+    });
 
   const onAssetCriticalityChanged = useCallback(() => {
     (refetchEntitiesTable as Refetch | null)?.();

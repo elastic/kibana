@@ -18,11 +18,9 @@ import { buildEuidCspPreviewOptions } from '../../../cloud_security_posture/util
 import { useNonClosedAlerts } from '../../../cloud_security_posture/hooks/use_non_closed_alerts';
 import { DETECTION_RESPONSE_ALERTS_BY_STATUS_ID } from '../../../overview/components/detection_response/alerts_by_status/types';
 import { useRefetchQueryById } from '../../../entity_analytics/api/hooks/use_refetch_query_by_id';
-import { RISK_INPUTS_TAB_QUERY_ID } from '../../../entity_analytics/components/entity_details_flyout/tabs/risk_inputs/risk_inputs_tab';
 import type { Refetch } from '../../../common/types';
-import { useCalculateEntityRiskScore } from '../../../entity_analytics/api/hooks/use_calculate_entity_risk_score';
 import { useRiskScore } from '../../../entity_analytics/api/hooks/use_risk_score';
-import { useEntityRiskScores } from '../../../entity_analytics/api/hooks/use_entity_risk_scores';
+import { useEntityRiskScoreRecalculation } from '../../../entity_analytics/api/hooks/use_entity_risk_score_recalculation';
 import { useQueryInspector } from '../../../common/components/page/manage_query';
 import { useGlobalTime } from '../../../common/containers/use_global_time';
 import { buildHostNamesFilter, type RiskSeverity } from '../../../../common/search_strategy';
@@ -146,43 +144,27 @@ export const HostPanel = memo(function HostPanel({
     entityStoreV2Enabled ? entityFromStoreResult : undefined
   );
 
-  const entityRiskScores = useEntityRiskScores(
-    EntityType.host,
-    entityStoreV2Enabled ? observedHost.entityRecord?.entity.id : undefined
-  );
-
   const panelDisplayEntityId = useMemo(
     () => (entityStoreV2Enabled ? observedHost.entityRecord?.entity?.id : entityId),
     [entityId, entityStoreV2Enabled, observedHost.entityRecord?.entity?.id]
   );
 
-  const refetchRiskInputsTab = useRefetchQueryById(RISK_INPUTS_TAB_QUERY_ID);
   const refetchEntitiesTable = useRefetchQueryById(ENTITY_ANALYTICS_TABLE_ID);
 
-  const onRiskScoreUpdated = useCallback(() => {
-    if (entityStoreV2Enabled) {
-      entityFromStoreResult.refetch();
-    } else {
-      riskScoreState.refetch();
-    }
-    entityRiskScores.refetch();
-    (refetchRiskInputsTab as Refetch | null)?.();
+  const onRecalculation = useCallback(() => {
     (refetchEntitiesTable as Refetch | null)?.();
-  }, [
-    riskScoreState,
-    entityFromStoreResult,
-    entityRiskScores,
-    refetchRiskInputsTab,
-    refetchEntitiesTable,
-    entityStoreV2Enabled,
-  ]);
+  }, [refetchEntitiesTable]);
 
-  const { isLoading: recalculatingScore, calculateEntityRiskScore } = useCalculateEntityRiskScore({
-    identifierType: EntityType.host,
-    identifier: hostName,
-    entityId: entityStoreV2Enabled ? observedHost.entityRecord?.entity.id : undefined,
-    onSuccess: onRiskScoreUpdated,
-  });
+  const { entityRiskScores, recalculatingScore, calculateEntityRiskScore } =
+    useEntityRiskScoreRecalculation({
+      entityType: EntityType.host,
+      identifier: hostName,
+      entityId: entityStoreV2Enabled ? observedHost.entityRecord?.entity.id : undefined,
+      entityStoreV2Enabled,
+      entityFromStoreResult,
+      riskScoreState,
+      onRecalculation,
+    });
 
   const onAssetCriticalityChanged = useCallback(() => {
     (refetchEntitiesTable as Refetch | null)?.();

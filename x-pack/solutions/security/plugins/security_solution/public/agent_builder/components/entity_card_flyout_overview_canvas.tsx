@@ -13,16 +13,11 @@ import { FF_ENABLE_ENTITY_STORE_V2, useEntityStoreEuidApi } from '@kbn/entity-st
 import { useHasMisconfigurations } from '@kbn/cloud-security-posture/src/hooks/use_has_misconfigurations';
 import { useHasVulnerabilities } from '@kbn/cloud-security-posture/src/hooks/use_has_vulnerabilities';
 import { EuiSpacer } from '@elastic/eui';
-import { noop } from 'lodash/fp';
 import { useUpdateAssetCriticality } from '../../entity_analytics/api/hooks/use_update_asset_criticality';
 import { buildEuidCspPreviewOptions } from '../../cloud_security_posture/utils/build_euid_csp_preview_options';
 import { useNonClosedAlerts } from '../../cloud_security_posture/hooks/use_non_closed_alerts';
 import { DETECTION_RESPONSE_ALERTS_BY_STATUS_ID } from '../../overview/components/detection_response/alerts_by_status/types';
-import { useRefetchQueryById } from '../../entity_analytics/api/hooks/use_refetch_query_by_id';
-import { RISK_INPUTS_TAB_QUERY_ID } from '../../entity_analytics/components/entity_details_flyout/tabs/risk_inputs/risk_inputs_tab';
-import type { Refetch } from '../../common/types';
-import { useCalculateEntityRiskScore } from '../../entity_analytics/api/hooks/use_calculate_entity_risk_score';
-import { useEntityRiskScores } from '../../entity_analytics/api/hooks/use_entity_risk_scores';
+import { useEntityRiskScoreRecalculation } from '../../entity_analytics/api/hooks/use_entity_risk_score_recalculation';
 import { useRiskScore } from '../../entity_analytics/api/hooks/use_risk_score';
 import { useQueryInspector } from '../../common/components/page/manage_query';
 import { useGlobalTime } from '../../common/containers/use_global_time';
@@ -332,35 +327,18 @@ const HostEntityFlyoutOverviewCanvas: React.FC<{
     [entityId, entityStoreV2Enabled, observedHost.entityRecord?.entity?.id]
   );
 
-  const entityRiskScores = useEntityRiskScores(
-    EntityType.host,
-    entityStoreV2Enabled ? observedHost.entityRecord?.entity.id : undefined
-  );
+  const onRecalculation = useCallback(() => entityAttachmentQueryClient.invalidateQueries(), []);
 
-  const refetchRiskInputsTab = useRefetchQueryById(RISK_INPUTS_TAB_QUERY_ID);
-  const onRiskScoreUpdated = useCallback(() => {
-    if (entityStoreV2Enabled) {
-      entityFromStoreResult.refetch();
-    } else {
-      riskScoreState.refetch();
-    }
-    entityRiskScores.refetch();
-    (refetchRiskInputsTab as Refetch | null)?.();
-    entityAttachmentQueryClient.invalidateQueries();
-  }, [
-    entityStoreV2Enabled,
-    entityFromStoreResult,
-    riskScoreState,
-    entityRiskScores,
-    refetchRiskInputsTab,
-  ]);
-
-  const { isLoading: recalculatingScore, calculateEntityRiskScore } = useCalculateEntityRiskScore({
-    identifierType: EntityType.host,
-    identifier: hostName,
-    entityId: entityStoreV2Enabled ? observedHost.entityRecord?.entity.id : undefined,
-    onSuccess: onRiskScoreUpdated,
-  });
+  const { entityRiskScores, recalculatingScore, calculateEntityRiskScore } =
+    useEntityRiskScoreRecalculation({
+      entityType: EntityType.host,
+      identifier: hostName,
+      entityId: entityStoreV2Enabled ? observedHost.entityRecord?.entity.id : undefined,
+      entityStoreV2Enabled,
+      entityFromStoreResult,
+      riskScoreState,
+      onRecalculation,
+    });
 
   const { updateAssetCriticalityLevel } = useUpdateAssetCriticality('host', {
     onSuccess: calculateEntityRiskScore,
@@ -712,35 +690,18 @@ const UserEntityFlyoutOverviewCanvas: React.FC<{
 
   const userRiskData = userRisk && userRisk.length > 0 ? userRisk[0] : undefined;
 
-  const entityRiskScores = useEntityRiskScores(
-    EntityType.user,
-    entityStoreV2Enabled ? observedUser.entityRecord?.entity?.id : undefined
-  );
+  const onRecalculation = useCallback(() => entityAttachmentQueryClient.invalidateQueries(), []);
 
-  const refetchRiskInputsTab = useRefetchQueryById(RISK_INPUTS_TAB_QUERY_ID);
-  const onRiskScoreUpdated = useCallback(() => {
-    if (entityStoreV2Enabled) {
-      entityFromStoreResult.refetch();
-    } else {
-      riskScoreState.refetch();
-    }
-    entityRiskScores.refetch();
-    (refetchRiskInputsTab as Refetch | null)?.();
-    entityAttachmentQueryClient.invalidateQueries();
-  }, [
-    entityStoreV2Enabled,
-    entityFromStoreResult,
-    riskScoreState,
-    entityRiskScores,
-    refetchRiskInputsTab,
-  ]);
-
-  const { isLoading: recalculatingScore, calculateEntityRiskScore } = useCalculateEntityRiskScore({
-    identifierType: EntityType.user,
-    identifier: userName,
-    entityId: entityStoreV2Enabled ? observedUser.entityRecord?.entity?.id : undefined,
-    onSuccess: onRiskScoreUpdated,
-  });
+  const { entityRiskScores, recalculatingScore, calculateEntityRiskScore } =
+    useEntityRiskScoreRecalculation({
+      entityType: EntityType.user,
+      identifier: userName,
+      entityId: entityStoreV2Enabled ? observedUser.entityRecord?.entity?.id : undefined,
+      entityStoreV2Enabled,
+      entityFromStoreResult,
+      riskScoreState,
+      onRecalculation,
+    });
 
   const { updateAssetCriticalityLevel } = useUpdateAssetCriticality('user', {
     onSuccess: calculateEntityRiskScore,
@@ -1091,35 +1052,18 @@ const ServiceEntityFlyoutOverviewCanvas: React.FC<{
   const effectiveRiskScoreState = riskScoreStateFromAttachment ?? riskScoreState;
   const isRiskScoreExist = riskScoreStateFromAttachment != null || !!serviceRiskData?.service.risk;
 
-  const entityRiskScores = useEntityRiskScores(
-    EntityType.service,
-    entityFromStoreResult.entityRecord?.entity?.id
-  );
+  const onRecalculation = useCallback(() => entityAttachmentQueryClient.invalidateQueries(), []);
 
-  const refetchRiskInputsTab = useRefetchQueryById(RISK_INPUTS_TAB_QUERY_ID) ?? noop;
-  const onRiskScoreUpdated = useCallback(() => {
-    if (entityStoreV2Enabled) {
-      entityFromStoreResult.refetch();
-    } else {
-      riskScoreState.refetch();
-    }
-    entityRiskScores.refetch();
-    (refetchRiskInputsTab as Refetch | null)?.();
-    entityAttachmentQueryClient.invalidateQueries();
-  }, [
-    entityStoreV2Enabled,
-    entityFromStoreResult,
-    riskScoreState,
-    entityRiskScores,
-    refetchRiskInputsTab,
-  ]);
-
-  const { isLoading: recalculatingScore, calculateEntityRiskScore } = useCalculateEntityRiskScore({
-    identifierType: EntityType.service,
-    identifier: serviceName,
-    entityId: entityFromStoreResult.entityRecord?.entity?.id,
-    onSuccess: onRiskScoreUpdated,
-  });
+  const { entityRiskScores, recalculatingScore, calculateEntityRiskScore } =
+    useEntityRiskScoreRecalculation({
+      entityType: EntityType.service,
+      identifier: serviceName,
+      entityId: entityFromStoreResult.entityRecord?.entity?.id,
+      entityStoreV2Enabled,
+      entityFromStoreResult,
+      riskScoreState,
+      onRecalculation,
+    });
 
   const { updateAssetCriticalityLevel } = useUpdateAssetCriticality('service', {
     onSuccess: calculateEntityRiskScore,
