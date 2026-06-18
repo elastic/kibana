@@ -35,6 +35,7 @@ paths:
           required: true
           schema:
             type: string
+            maxLength: 256
       responses:
         "200":
           description: Entity source details retrieved
@@ -53,6 +54,7 @@ paths:
           required: true
           schema:
             type: string
+            maxLength: 256
       requestBody:
         required: true
         content:
@@ -77,6 +79,7 @@ paths:
           required: true
           schema:
             type: string
+            maxLength: 256
       responses:
         "200":
           description: Entity source deleted successfully
@@ -91,6 +94,7 @@ paths:
           in: query
           schema:
             type: string
+            maxLength: 256
         - name: managed
           in: query
           schema:
@@ -99,6 +103,28 @@ paths:
           in: query
           schema:
             type: string
+            maxLength: 256
+        - name: page
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+        - name: per_page
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 10000
+        - name: sort_field
+          in: query
+          schema:
+            type: string
+            maxLength: 256
+        - name: sort_order
+          in: query
+          schema:
+            type: string
+            enum: [asc, desc]
 
       responses:
         "200":
@@ -203,18 +229,22 @@ components:
       properties:
         name:
           type: string
+          maxLength: 256
         type:
           type: string
         managed:
           type: boolean
         indexPattern:
           type: string
+          maxLength: 1000
         integrationName:
           type: string
+          maxLength: 256
         enabled:
           type: boolean
         matchers:
           type: array
+          maxItems: 100
           items:
             $ref: '#/components/schemas/Matcher'
         filter:
@@ -235,12 +265,35 @@ components:
       properties:
         fields:
           type: array
+          maxItems: 100
           items:
             type: string
+            maxLength: 256
         values:
-          type: array
-          items:
-            type: string
+          description: >
+            Matcher values. Must be either an array of strings
+            (e.g. group or role names) or an array of booleans
+            (e.g. integration-derived flags like privileged_group_member).
+            Mixed types are intentionally not supported for simplicity and predictability.
+          oneOf:
+            - type: array
+              maxItems: 1000
+              items:
+                type: string
+                maxLength: 256
+            - type: array
+              maxItems: 1000
+              items:
+                type: boolean
+    Filter:
+      type: object
+      properties:
+        kuery:
+          oneOf:
+            - type: string
+              maxLength: 4096
+            - type: object
+              additionalProperties: false
 
     MonitoringEntitySourceNoId:
       allOf:
@@ -257,11 +310,12 @@ components:
           id:
             type: string
 
-    Integrations: 
+    Integrations:
       type: object
       properties:
-        syncMarkerIndex: 
+        syncMarkerIndex:
           type: string
+          maxLength: 1000
           description: Index to read latest sync markers from
         syncData: 
           type: object

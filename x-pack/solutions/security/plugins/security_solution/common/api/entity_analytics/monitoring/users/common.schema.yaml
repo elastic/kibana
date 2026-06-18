@@ -14,6 +14,7 @@ components:
           properties:
             name:
               type: string
+              maxLength: 512
               description: The name of the user.
 
     MonitoredUserUpdateDoc:
@@ -21,11 +22,13 @@ components:
       properties:
         id:
           type: string
+          maxLength: 256
         user:
           type: object
           properties:
             name:
               type: string
+              maxLength: 512
             is_privileged:
               type: boolean
               description: Indicates if the user is privileged.
@@ -34,6 +37,7 @@ components:
           properties:
             sources:
               type: array
+              maxItems: 100
               items:
                 enum:
                   - csv
@@ -41,12 +45,16 @@ components:
                   - api
             source_ids:
               type: array
+              maxItems: 100
               items:
                 type: string
+                maxLength: 256
             source_integrations:
               type: array
+              maxItems: 100
               items:
                 type: string
+                maxLength: 256
         entity_analytics_monitoring:
           type: object
           properties:
@@ -64,8 +72,10 @@ components:
       properties:
         field:
           type: string
+          maxLength: 256
         value:
           type: string
+          maxLength: 256
         source:
           type: string
     MonitoredUserDoc:

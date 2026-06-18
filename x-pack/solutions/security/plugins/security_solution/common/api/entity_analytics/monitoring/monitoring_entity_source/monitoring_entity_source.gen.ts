@@ -17,12 +17,27 @@
 import { z } from '@kbn/zod';
 import { BooleanFromString } from '@kbn/zod-helpers';
 
+export type Filter = z.infer<typeof Filter>;
+export const Filter = z.object({
+  kuery: z.union([z.string().max(4096), z.object({}).strict()]).optional(),
+});
+
+export type Matcher = z.infer<typeof Matcher>;
+export const Matcher = z.object({
+  fields: z.array(z.string().max(256)).max(100),
+  /**
+      * Matcher values. Must be either an array of strings (e.g. group or role names) or an array of booleans (e.g. integration-derived flags like privileged_group_member). Mixed types are intentionally not supported for simplicity and predictability.
+
+      */
+  values: z.union([z.array(z.string().max(256)).max(1000), z.array(z.boolean()).max(1000)]),
+});
+
 export type Integrations = z.infer<typeof Integrations>;
 export const Integrations = z.object({
   /**
    * Index to read latest sync markers from
    */
-  syncMarkerIndex: z.string().optional(),
+  syncMarkerIndex: z.string().max(1000).optional(),
   /**
    * integrations latest full sync and update syncData
    */
@@ -43,73 +58,41 @@ export const Integrations = z.object({
 export type CreateMonitoringEntitySource = z.infer<typeof CreateMonitoringEntitySource>;
 export const CreateMonitoringEntitySource = z.object({
   type: z.string(),
-  name: z.string(),
+  name: z.string().max(256),
   managed: z.boolean().optional(),
-  indexPattern: z.string().optional(),
+  indexPattern: z.string().max(1000).optional(),
   enabled: z.boolean().optional(),
   error: z.string().optional(),
-  integrationName: z.string().optional(),
-  matchers: z
-    .array(
-      z.object({
-        fields: z.array(z.string()),
-        values: z.array(z.string()),
-      })
-    )
-    .optional(),
-  filter: z
-    .object({
-      kuery: z.union([z.string(), z.object({})]).optional(),
-    })
-    .optional(),
+  integrationName: z.string().max(256).optional(),
+  matchers: z.array(Matcher).max(100).optional(),
+  filter: Filter.optional(),
   integrations: Integrations.optional(),
 });
 
 export type UpdatedMonitoringEntitySource = z.infer<typeof UpdatedMonitoringEntitySource>;
 export const UpdatedMonitoringEntitySource = z.object({
   type: z.string().optional(),
-  name: z.string().optional(),
+  name: z.string().max(256).optional(),
   managed: z.boolean().optional(),
-  indexPattern: z.string().optional(),
+  indexPattern: z.string().max(1000).optional(),
   enabled: z.boolean().optional(),
   error: z.string().optional(),
-  integrationName: z.string().optional(),
-  matchers: z
-    .array(
-      z.object({
-        fields: z.array(z.string()),
-        values: z.array(z.string()),
-      })
-    )
-    .optional(),
-  filter: z
-    .object({
-      kuery: z.union([z.string(), z.object({})]).optional(),
-    })
-    .optional(),
+  integrationName: z.string().max(256).optional(),
+  matchers: z.array(Matcher).max(100).optional(),
+  filter: Filter.optional(),
   integrations: Integrations.optional(),
-});
-
-export type Matcher = z.infer<typeof Matcher>;
-export const Matcher = z.object({
-  fields: z.array(z.string()),
-  values: z.array(z.string()),
 });
 
 export type MonitoringEntitySourceProperties = z.infer<typeof MonitoringEntitySourceProperties>;
 export const MonitoringEntitySourceProperties = z.object({
-  name: z.string().optional(),
+  name: z.string().max(256).optional(),
   type: z.string().optional(),
   managed: z.boolean().optional(),
-  indexPattern: z.string().optional(),
-  integrationName: z.string().optional(),
+  indexPattern: z.string().max(1000).optional(),
+  integrationName: z.string().max(256).optional(),
   enabled: z.boolean().optional(),
-  matchers: z.array(Matcher).optional(),
-  filter: z
-    .object({
-      kuery: z.union([z.string(), z.object({})]).optional(),
-    })
-    .optional(),
+  matchers: z.array(Matcher).max(100).optional(),
+  filter: Filter.optional(),
   integrations: Integrations.optional(),
 });
 
@@ -132,13 +115,13 @@ export const CreateEntitySourceResponse = MonitoringEntitySource;
 
 export type DeleteEntitySourceRequestParams = z.infer<typeof DeleteEntitySourceRequestParams>;
 export const DeleteEntitySourceRequestParams = z.object({
-  id: z.string(),
+  id: z.string().max(256),
 });
 export type DeleteEntitySourceRequestParamsInput = z.input<typeof DeleteEntitySourceRequestParams>;
 
 export type GetEntitySourceRequestParams = z.infer<typeof GetEntitySourceRequestParams>;
 export const GetEntitySourceRequestParams = z.object({
-  id: z.string(),
+  id: z.string().max(256),
 });
 export type GetEntitySourceRequestParamsInput = z.input<typeof GetEntitySourceRequestParams>;
 
@@ -146,9 +129,13 @@ export type GetEntitySourceResponse = z.infer<typeof GetEntitySourceResponse>;
 export const GetEntitySourceResponse = MonitoringEntitySource;
 export type ListEntitySourcesRequestQuery = z.infer<typeof ListEntitySourcesRequestQuery>;
 export const ListEntitySourcesRequestQuery = z.object({
-  type: z.string().optional(),
+  type: z.string().max(256).optional(),
   managed: BooleanFromString.optional(),
-  name: z.string().optional(),
+  name: z.string().max(256).optional(),
+  page: z.coerce.number().int().min(1).optional(),
+  per_page: z.coerce.number().int().min(1).max(10000).optional(),
+  sort_field: z.string().max(256).optional(),
+  sort_order: z.enum(['asc', 'desc']).optional(),
 });
 export type ListEntitySourcesRequestQueryInput = z.input<typeof ListEntitySourcesRequestQuery>;
 
@@ -157,7 +144,7 @@ export const ListEntitySourcesResponse = z.array(MonitoringEntitySource);
 
 export type UpdateEntitySourceRequestParams = z.infer<typeof UpdateEntitySourceRequestParams>;
 export const UpdateEntitySourceRequestParams = z.object({
-  id: z.string(),
+  id: z.string().max(256),
 });
 export type UpdateEntitySourceRequestParamsInput = z.input<typeof UpdateEntitySourceRequestParams>;
 

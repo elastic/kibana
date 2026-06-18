@@ -23,24 +23,24 @@ export const UserName = z.object({
       /**
        * The name of the user.
        */
-      name: z.string().optional(),
+      name: z.string().max(512).optional(),
     })
     .optional(),
 });
 
 export type MonitoringLabel = z.infer<typeof MonitoringLabel>;
 export const MonitoringLabel = z.object({
-  field: z.string(),
-  value: z.string(),
+  field: z.string().max(256),
+  value: z.string().max(256),
   source: z.string(),
 });
 
 export type MonitoredUserUpdateDoc = z.infer<typeof MonitoredUserUpdateDoc>;
 export const MonitoredUserUpdateDoc = z.object({
-  id: z.string().optional(),
+  id: z.string().max(256).optional(),
   user: z
     .object({
-      name: z.string().optional(),
+      name: z.string().max(512).optional(),
       /**
        * Indicates if the user is privileged.
        */
@@ -49,9 +49,9 @@ export const MonitoredUserUpdateDoc = z.object({
     .optional(),
   labels: z
     .object({
-      sources: z.array(z.unknown()).optional(),
-      source_ids: z.array(z.string()).optional(),
-      source_integrations: z.array(z.string()).optional(),
+      sources: z.array(z.unknown()).max(100).optional(),
+      source_ids: z.array(z.string().max(256)).max(100).optional(),
+      source_integrations: z.array(z.string().max(256)).max(100).optional(),
     })
     .optional(),
   entity_analytics_monitoring: z
