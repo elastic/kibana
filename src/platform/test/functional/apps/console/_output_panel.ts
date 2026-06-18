@@ -50,8 +50,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.console.focusOutputEditor();
       await PageObjects.console.clickCopyOutput();
 
-      const resultToast = await toasts.getElementByIndex(1);
-      const toastText = await resultToast.getVisibleText();
+      const toastText = await toasts.getTitleAndDismiss();
 
       expect(toastText).to.be('Selected output copied to clipboard');
 

@@ -206,21 +206,23 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.console.clickPlay();
 
         expect(await toasts.getCount()).to.be(1);
-        const resultToast = await toasts.getElementByIndex(1);
-        const toastText = await resultToast.getVisibleText();
+
+        const toastText = await toasts.getTitleAndDismiss();
+
         expect(toastText).to.be(
           'The selected request contains an error. Please resolve it and try again.'
         );
-        await toasts.dismissAll();
       });
 
       it('should display an error toast to unsupported HTTP verbs', async () => {
         await PageObjects.console.clearEditorText();
         await PageObjects.console.enterText('OPTIONS /');
         await PageObjects.console.clickPlay();
+
         expect(await toasts.getCount()).to.be(1);
-        const resultToast = await toasts.getElementByIndex(1);
-        const toastText = await resultToast.getVisibleText();
+
+        const toastText = await toasts.getTitleAndDismiss();
+
         expect(toastText).to.be(
           'The selected request contains errors. Please resolve them and try again.'
         );
