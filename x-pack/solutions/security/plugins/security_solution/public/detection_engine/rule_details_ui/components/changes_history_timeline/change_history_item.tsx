@@ -79,6 +79,12 @@ export const ChangeHistoryItem = memo(function ChangeHistoryItem({
       data-test-subj={`ruleChangeHistoryItem-${item.id}`}
       css={css`
         margin-bottom: ${euiTheme.size.m};
+
+        &:hover,
+        &:focus {
+          box-shadow: none;
+          transform: none;
+        }
       `}
     >
       <EuiFlexGroup direction="row" gutterSize="xs" alignItems="center">
