@@ -33,6 +33,8 @@ const RUN_INDEX_MAPPINGS = {
     // `result` stores the depth-tagged pipeline output as a JSON blob.
     // `enabled: false` means ES stores it without indexing — retrieval only.
     result: { type: 'object' as const, enabled: false },
+    // `partials` stores per-stage intermediate results — not indexed.
+    partials: { type: 'object' as const, enabled: false },
   },
 } as const;
 

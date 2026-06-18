@@ -151,6 +151,19 @@ export const correlationRunResultSchema = z.union([
 export type CorrelationRunResult = z.infer<typeof correlationRunResultSchema>;
 
 // ---------------------------------------------------------------------------
+// Per-stage partial results — written incrementally as each phase completes.
+// Allows polling callers to see intermediate output before the run finishes.
+// ---------------------------------------------------------------------------
+
+export const correlationRunPartialsSchema = z.object({
+  extract: extractDepthResultSchema.optional(),
+  knn: knnDepthResultSchema.optional(),
+  triage: triageDepthResultSchema.optional(),
+  synthesize: fullDepthResultSchema.optional(),
+});
+export type CorrelationRunPartials = z.infer<typeof correlationRunPartialsSchema>;
+
+// ---------------------------------------------------------------------------
 // Correlation run document
 // ---------------------------------------------------------------------------
 
@@ -175,6 +188,11 @@ export const correlationRunSchema = z.object({
   stage: correlationRunStageSchema.optional(),
   error: z.string().optional(),
   result: correlationRunResultSchema.optional(),
+  /**
+   * Per-stage output written incrementally as each pipeline phase completes.
+   * Polling callers can read partial results before the run reaches succeeded/failed.
+   */
+  partials: correlationRunPartialsSchema.optional(),
 });
 export type CorrelationRun = z.infer<typeof correlationRunSchema>;
 

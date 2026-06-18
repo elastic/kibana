@@ -9,6 +9,7 @@ import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { getCorrelationRunsIndexName } from '../../../common/threat_intelligence/hub';
 import type {
   CorrelationRun,
+  CorrelationRunPartials,
   CorrelationRunResult,
   CorrelationRunStatus,
   CorrelationRunStage,
@@ -30,6 +31,11 @@ export interface RunUpdate {
   readonly error?: string;
   readonly result?: CorrelationRunResult;
   readonly title?: string;
+  /**
+   * Single stage's partial result to merge into the `partials` object.
+   * Each call adds its slice without clobbering prior stage slices.
+   */
+  readonly partials?: Partial<CorrelationRunPartials>;
   readonly updatedAt: string;
 }
 
@@ -72,6 +78,7 @@ interface EsRunDoc {
   stage?: CorrelationRunStage;
   error?: string;
   result?: unknown;
+  partials?: unknown;
 }
 
 const runToEsDoc = (run: CorrelationRun): EsRunDoc => ({
@@ -89,6 +96,7 @@ const runToEsDoc = (run: CorrelationRun): EsRunDoc => ({
   stage: run.stage,
   error: run.error,
   result: run.result,
+  partials: run.partials,
 });
 
 const esDocToRun = (doc: EsRunDoc): CorrelationRun => ({
@@ -106,6 +114,7 @@ const esDocToRun = (doc: EsRunDoc): CorrelationRun => ({
   stage: doc.stage,
   error: doc.error,
   result: doc.result as CorrelationRunResult | undefined,
+  partials: doc.partials as CorrelationRunPartials | undefined,
 });
 
 // ---------------------------------------------------------------------------
@@ -144,23 +153,69 @@ export const createRunDataClient = ({
   };
 
   // -----------------------------------------------------------------------
-  // updateRun — partial update of mutable fields
+  // updateRun — partial update of mutable fields.
+  // When `partials` is supplied we use a painless script to merge individual
+  // stage slices into the existing `partials` object so that concurrent stage
+  // writes don't clobber each other.
   // -----------------------------------------------------------------------
   const updateRun = async (runId: string, updates: RunUpdate): Promise<void> => {
-    const doc: Record<string, unknown> = { updated_at: updates.updatedAt };
-    if (updates.status !== undefined) doc.status = updates.status;
-    if (updates.stage !== undefined) doc.stage = updates.stage;
-    if (updates.error !== undefined) doc.error = updates.error;
-    if (updates.result !== undefined) doc.result = updates.result;
-    if (updates.title !== undefined) doc.title = updates.title;
-
     try {
-      await esClient.update({
-        index: indexName,
-        id: runId,
-        doc,
-        retry_on_conflict: 3,
-      });
+      if (updates.partials && Object.keys(updates.partials).length > 0) {
+        // Build a script that initialises partials if absent, then sets each
+        // provided stage key — leaving other stage keys untouched.
+        const stageKeys = Object.keys(updates.partials) as Array<keyof CorrelationRunPartials>;
+        const scriptLines: string[] = [
+          'if (ctx._source.partials == null) { ctx._source.partials = new HashMap(); }',
+        ];
+        const params: Record<string, unknown> = { updated_at: updates.updatedAt };
+        for (const k of stageKeys) {
+          scriptLines.push(`ctx._source.partials.${k} = params.partial_${k};`);
+          params[`partial_${k}`] = (updates.partials as Record<string, unknown>)[k];
+        }
+        // Apply any other scalar updates in the same script pass.
+        scriptLines.push('ctx._source.updated_at = params.updated_at;');
+        if (updates.status !== undefined) {
+          scriptLines.push('ctx._source.status = params.status;');
+          params.status = updates.status;
+        }
+        if (updates.stage !== undefined) {
+          scriptLines.push('ctx._source.stage = params.stage;');
+          params.stage = updates.stage;
+        }
+        if (updates.error !== undefined) {
+          scriptLines.push('ctx._source.error = params.error;');
+          params.error = updates.error;
+        }
+        if (updates.result !== undefined) {
+          scriptLines.push('ctx._source.result = params.result;');
+          params.result = updates.result;
+        }
+        if (updates.title !== undefined) {
+          scriptLines.push('ctx._source.title = params.title;');
+          params.title = updates.title;
+        }
+
+        await esClient.update({
+          index: indexName,
+          id: runId,
+          script: { source: scriptLines.join(' '), lang: 'painless', params },
+          retry_on_conflict: 3,
+        });
+      } else {
+        const doc: Record<string, unknown> = { updated_at: updates.updatedAt };
+        if (updates.status !== undefined) doc.status = updates.status;
+        if (updates.stage !== undefined) doc.stage = updates.stage;
+        if (updates.error !== undefined) doc.error = updates.error;
+        if (updates.result !== undefined) doc.result = updates.result;
+        if (updates.title !== undefined) doc.title = updates.title;
+
+        await esClient.update({
+          index: indexName,
+          id: runId,
+          doc,
+          retry_on_conflict: 3,
+        });
+      }
     } catch (e: unknown) {
       // Best-effort: log but do not re-throw so the background pipeline continues.
       logger.warn(`[CorrelationRuns] Failed to update run '${runId}': ${e}`);

@@ -13,7 +13,10 @@ import {
   THREAT_INTELLIGENCE_API_PRIVILEGES,
 } from '../../../../common/threat_intelligence/hub';
 import { createCorrelationRunRequestSchema } from '../../../../common/threat_intelligence/correlation_runs';
-import type { CorrelationRunResult } from '../../../../common/threat_intelligence/correlation_runs';
+import type {
+  CorrelationRunPartials,
+  CorrelationRunResult,
+} from '../../../../common/threat_intelligence/correlation_runs';
 import { correlateThreat } from '../../services/correlate_threat';
 import type { CorrelateThreatDepthResult } from '../../services/correlate_threat';
 import { resolveCurrentSpaceId } from '../../lib/space_filter';
@@ -24,6 +27,31 @@ import type { RouteRegistrationDeps } from '../../routes';
 const CORRELATE_MAX_BODY_BYTES = 10 * 1024 * 1024;
 
 const INPUT_SUMMARY_MAX_LENGTH = 200;
+
+/**
+ * Maps a stage + its optional result into a `partials` slice for persistence.
+ * Returns undefined for stages that produce no result (search, gap_fill, dedup, done).
+ */
+const buildStagePartials = (
+  stage: string,
+  stageResult: unknown
+): Partial<CorrelationRunPartials> | undefined => {
+  if (!stageResult || typeof stageResult !== 'object') return undefined;
+  const r = stageResult as Record<string, unknown>;
+  if (stage === 'extract' && r.depth === 'extract') {
+    return { extract: r as CorrelationRunPartials['extract'] };
+  }
+  if (stage === 'search' && r.depth === 'knn') {
+    return { knn: r as CorrelationRunPartials['knn'] };
+  }
+  if (stage === 'triage' && r.depth === 'triage') {
+    return { triage: r as CorrelationRunPartials['triage'] };
+  }
+  if (stage === 'synthesize' && r.depth === 'full') {
+    return { synthesize: r as CorrelationRunPartials['synthesize'] };
+  }
+  return undefined;
+};
 
 /**
  * Maps a `CorrelateThreatDepthResult` (server-side typed) to the common
@@ -53,7 +81,7 @@ const toRunResult = (depthResult: CorrelateThreatDepthResult): CorrelationRunRes
       triaged_out: depthResult.triaged_out as unknown as Array<{
         candidate_id: string;
         score: number;
-        reason: string;
+        reason: 'below_floor' | 'not_selected';
       }>,
       candidates_fed: depthResult.candidates_fed,
       fallback_used: depthResult.fallback_used,
@@ -206,9 +234,11 @@ export const registerCreateCorrelationRunRoute = ({
               spaceId,
               input,
               depth,
-              onStage: async (stage) => {
+              onStage: async (stage, stageResult) => {
+                const stagePartials = buildStagePartials(stage, stageResult);
                 await runDataClient.updateRun(runId, {
                   stage,
+                  ...(stagePartials ? { partials: stagePartials } : {}),
                   updatedAt: new Date().toISOString(),
                 });
               },

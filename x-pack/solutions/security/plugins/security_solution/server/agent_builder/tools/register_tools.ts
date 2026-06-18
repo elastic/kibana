@@ -20,6 +20,8 @@ import {
   analyseEnvironmentTool,
   extractIocsTool,
   correlateThreatTool,
+  correlateStartTool,
+  correlatePollTool,
   searchByAnchorsTool,
   searchByDiamondTool,
   extractDiamondTool,
@@ -74,6 +76,8 @@ export const registerTools = async (
     tryRegister(agentBuilder, logger, extractIocsTool);
     tryRegister(agentBuilder, logger, analyseEnvironmentTool);
     tryRegister(agentBuilder, logger, correlateThreatTool(core, logger));
+    tryRegister(agentBuilder, logger, correlateStartTool(core, logger));
+    tryRegister(agentBuilder, logger, correlatePollTool(logger));
     tryRegister(agentBuilder, logger, searchByAnchorsTool);
     tryRegister(agentBuilder, logger, searchByDiamondTool);
     tryRegister(agentBuilder, logger, extractDiamondTool(core, logger));

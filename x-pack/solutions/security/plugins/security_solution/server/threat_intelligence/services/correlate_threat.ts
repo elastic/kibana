@@ -79,10 +79,16 @@ export interface CorrelateThreatParams {
   depth?: CorrelationDepth;
   /**
    * Called after each completed pipeline stage so background-run callers can
-   * record progress without polling. Must not throw; errors are ignored by the
-   * orchestrator to preserve the pipeline.
+   * record progress and capture per-stage output without polling.
+   * `stageResult` carries that stage's output (JSON-serializable):
+   *   extract → { depth:'extract', diamond }
+   *   search  → { depth:'knn', anchor_hits, diamond_hits, merged }
+   *   triage  → { depth:'triage', picks, groups, triaged_out, candidates_fed, fallback_used }
+   *   synthesize → { depth:'full', findings }
+   * Other stages (gap_fill, dedup, done) produce no result object.
+   * Must not throw; errors are ignored by the orchestrator to preserve the pipeline.
    */
-  onStage?: (stage: CorrelationRunStage) => void | Promise<void>;
+  onStage?: (stage: CorrelationRunStage, stageResult?: unknown) => void | Promise<void>;
 }
 
 // Depth-tagged result variants ---
@@ -478,10 +484,10 @@ export const correlateThreat = async ({
         })()
       : undefined;
 
-  const notifyStage = async (stage: CorrelationRunStage): Promise<void> => {
+  const notifyStage = async (stage: CorrelationRunStage, stageResult?: unknown): Promise<void> => {
     if (!onStage) return;
     try {
-      await onStage(stage);
+      await onStage(stage, stageResult);
     } catch (e) {
       logger.warn(`[ti:correlate] onStage('${stage}') threw — ignoring: ${(e as Error).message}`);
     }
@@ -545,8 +551,15 @@ export const correlateThreat = async ({
     ]);
   }
 
+  const extractResult: CorrelateThreatExtractResult = {
+    depth: 'extract',
+    diamond: queryDiamond,
+    trace: traceBuilder.build(),
+  };
+  await notifyStage('extract', extractResult);
+
   if (depth === 'extract') {
-    return { depth: 'extract', diamond: queryDiamond, trace: traceBuilder.build() };
+    return extractResult;
   }
 
   logger.debug(
@@ -556,22 +569,36 @@ export const correlateThreat = async ({
 
   const merged = buildMergedCandidates(anchorResults, diamondResults);
 
-  if (depth === 'knn') {
+  const buildKnnResult = async (): Promise<CorrelateThreatKnnResult> => {
     const knnIds = new Set<string>([
       ...merged.map((c) => c.report_id),
       ...anchorResults.hits.map((h) => h.report_id),
     ]);
-    const candidateMeta =
-      knnIds.size > 0 ? await fetchCandidateMeta(esClient, [...knnIds]) : undefined;
+    const knnMeta = knnIds.size > 0 ? await fetchCandidateMeta(esClient, [...knnIds]) : undefined;
     return {
       depth: 'knn',
       anchor_hits: anchorResults,
       diamond_hits: diamondResults,
       merged,
-      candidate_meta: candidateMeta,
+      candidate_meta: knnMeta,
       trace: traceBuilder.build(),
     };
+  };
+
+  if (depth === 'knn') {
+    const knnResult = await buildKnnResult();
+    await notifyStage('search', knnResult);
+    return knnResult;
   }
+
+  // Notify search completion without fetching candidate_meta (expensive) for deeper depths.
+  // The partials.knn slice will omit candidate_meta for triage/full runs, which is acceptable.
+  await notifyStage('search', {
+    depth: 'knn' as const,
+    anchor_hits: anchorResults,
+    diamond_hits: diamondResults,
+    merged,
+  });
 
   // §3 Keyword gap-fill — extend pool with candidates covering named entities
   // not represented in the diamond/anchor retrieval results.
@@ -630,24 +657,27 @@ export const correlateThreat = async ({
     traceBuilder,
   });
 
+  const triageIds = new Set<string>([
+    ...triageResult.picks.map((p) => p.candidate_id),
+    ...triageResult.groups.flatMap((g) => g.candidates.map((c) => c.candidate_id)),
+    ...triageResult.triaged_out.map((t) => t.candidate_id),
+  ]);
+  const triageMeta =
+    triageIds.size > 0 ? await fetchCandidateMeta(esClient, [...triageIds]) : undefined;
+  const triageDepthResult: CorrelateThreatTriageResult = {
+    depth: 'triage',
+    picks: triageResult.picks,
+    groups: triageResult.groups,
+    triaged_out: triageResult.triaged_out,
+    candidates_fed: triageResult.candidates_fed,
+    fallback_used: triageResult.fallback_used,
+    candidate_meta: triageMeta,
+    trace: traceBuilder.build(),
+  };
+  await notifyStage('triage', triageDepthResult);
+
   if (depth === 'triage') {
-    const triageIds = new Set<string>([
-      ...triageResult.picks.map((p) => p.candidate_id),
-      ...triageResult.groups.flatMap((g) => g.candidates.map((c) => c.candidate_id)),
-      ...triageResult.triaged_out.map((t) => t.candidate_id),
-    ]);
-    const candidateMeta =
-      triageIds.size > 0 ? await fetchCandidateMeta(esClient, [...triageIds]) : undefined;
-    return {
-      depth: 'triage',
-      picks: triageResult.picks,
-      groups: triageResult.groups,
-      triaged_out: triageResult.triaged_out,
-      candidates_fed: triageResult.candidates_fed,
-      fallback_used: triageResult.fallback_used,
-      candidate_meta: candidateMeta,
-      trace: traceBuilder.build(),
-    };
+    return triageDepthResult;
   }
 
   // §6 Synthesis — build case text and call synthesize_correlations.
@@ -693,7 +723,7 @@ export const correlateThreat = async ({
   const candidateMeta =
     outputIds.size > 0 ? await fetchCandidateMeta(esClient, [...outputIds]) : undefined;
 
-  return {
+  const fullResult: CorrelateThreatFullResult = {
     depth: 'full',
     findings: {
       ...findings,
@@ -702,4 +732,7 @@ export const correlateThreat = async ({
       candidate_meta: candidateMeta,
     },
   };
+  await notifyStage('synthesize', fullResult);
+
+  return fullResult;
 };

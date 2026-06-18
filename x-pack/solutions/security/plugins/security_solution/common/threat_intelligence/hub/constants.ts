@@ -179,6 +179,16 @@ export const THREAT_INTEL_TOOL_IDS = {
   searchByDiamond: 'threat_intel.search_by_diamond',
   /** Diamond Model extraction from raw text — adversary/capability/infrastructure/victim. Registry tool. */
   extractDiamond: 'threat_intel.extract_diamond',
+  /**
+   * Start a background correlation run — POST to correlation_runs, returns {runId} in <1s.
+   * Use with `correlate_poll` to avoid the 120 s proxy wall for full-depth runs.
+   */
+  correlateStart: 'threat_intel.correlate_start',
+  /**
+   * Poll a running correlation — returns {status, stage, partials, result, error}.
+   * Poll until status is 'succeeded' or 'failed'; partials shows per-stage output as it lands.
+   */
+  correlatePoll: 'threat_intel.correlate_poll',
 } as const;
 
 /**

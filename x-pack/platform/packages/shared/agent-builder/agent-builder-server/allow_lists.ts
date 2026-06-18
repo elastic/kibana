@@ -56,6 +56,8 @@ export const AGENT_BUILDER_BUILTIN_TOOLS = [
   'threat_intel.extract_iocs',
   'threat_intel.analyse_environment',
   'threat_intel.correlate_threat',
+  'threat_intel.correlate_start',
+  'threat_intel.correlate_poll',
   'threat_intel.search_by_anchors',
   'threat_intel.search_by_diamond',
   'threat_intel.extract_diamond',
