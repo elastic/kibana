@@ -194,8 +194,7 @@ export const AppearanceModal: FC<Props> = ({ closeModal, uiSettingsClient, isSer
     onChange,
   } = useAppearance({
     uiSettingsClient,
-    // Default new users (no persisted preference) to "System" so the UI follows their OS
-    // appearance. `space_default` is deprecated (removed in 10.0), so we no longer pre-select it.
+    // Default new users (no persisted preference) to "System" so the UI follows their OS appearance.
     defaultColorMode: 'system',
     defaultContrastMode: 'standard',
   });
