@@ -219,7 +219,8 @@ test.describe(
 
       await test.step('open sandbox, type query, and apply', async () => {
         await pageObjects.composeDiscover.openEditorButton.click();
-        await pageObjects.composeDiscover.setSandboxQuery(TEST_QUERY);
+        await pageObjects.composeDiscover.setSandboxQuery(`FROM ${TEST_INDEX}`);
+        await pageObjects.composeDiscover.setSandboxAlertCondition('| WHERE message != ""');
         await pageObjects.composeDiscover.clickApply();
       });
 

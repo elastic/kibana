@@ -313,7 +313,10 @@ export class StreamsPlugin
 
     // Build workflow clients once and reuse the shared onboarding client instance
     // everywhere, rather than constructing a second one from the same management API.
-    const workflowClients = createWorkflowClients(plugins.workflowsManagement?.management);
+    const workflowClients = createWorkflowClients(
+      plugins.workflowsManagement?.management,
+      telemetryClient
+    );
     const streamsKIsOnboardingClient = workflowClients.streamsKIsOnboardingClient;
 
     if (plugins.agentBuilder) {

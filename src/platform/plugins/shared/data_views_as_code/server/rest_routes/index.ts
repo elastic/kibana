@@ -8,5 +8,6 @@
  */
 
 import { registerGetDataViewAsCodeRoute } from './get_data_view';
+import { registerDeleteDataViewAsCodeRoute } from './delete_data_view';
 
-export const routes = [registerGetDataViewAsCodeRoute];
+export const routes = [registerGetDataViewAsCodeRoute, registerDeleteDataViewAsCodeRoute];
