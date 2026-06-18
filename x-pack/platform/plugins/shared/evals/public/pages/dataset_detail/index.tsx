@@ -63,6 +63,7 @@ import {
   useUpdateExample,
 } from '../../hooks/use_evals_api';
 import { useEvalsPermissions } from '../../hooks/use_evals_permissions';
+import { DeleteDatasetModal } from '../../components/delete_dataset_modal';
 import * as i18n from './translations';
 
 type JsonObject = Record<string, unknown>;
@@ -134,6 +135,7 @@ export const DatasetDetailPage: React.FC = () => {
   const [createOutput, setCreateOutput] = useState('{}');
   const [createMetadata, setCreateMetadata] = useState('{}');
   const [deletingExample, setDeletingExample] = useState<DatasetExample | null>(null);
+  const [isDeleteDatasetModalOpen, setIsDeleteDatasetModalOpen] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedTraceId, setSelectedTraceId] = useState<string | null>(null);
@@ -632,14 +634,29 @@ export const DatasetDetailPage: React.FC = () => {
             <EuiFlexItem grow={false}>
               <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
                 <EuiFlexItem grow={false}>
-                  <EuiButton iconType="plusInCircle" onClick={openCreateExampleFlyout} fill>
-                    {i18n.ADD_EXAMPLE_BUTTON}
-                  </EuiButton>
+                  <EuiToolTip content={i18n.EDIT_DESCRIPTION_BUTTON} disableScreenReaderOutput>
+                    <EuiButtonIcon
+                      iconType="pencil"
+                      display="base"
+                      size="m"
+                      onClick={openMetadataModal}
+                      aria-label={i18n.EDIT_DESCRIPTION_BUTTON}
+                      data-test-subj="editDatasetMetadataButton"
+                    />
+                  </EuiToolTip>
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
-                  <EuiButtonEmpty iconType="pencil" onClick={openMetadataModal}>
-                    {i18n.EDIT_METADATA_BUTTON}
-                  </EuiButtonEmpty>
+                  <EuiToolTip content={i18n.DELETE_DATASET_BUTTON} disableScreenReaderOutput>
+                    <EuiButtonIcon
+                      iconType="trash"
+                      display="base"
+                      size="m"
+                      color="danger"
+                      onClick={() => setIsDeleteDatasetModalOpen(true)}
+                      aria-label={i18n.DELETE_DATASET_BUTTON}
+                      data-test-subj="deleteDatasetButton"
+                    />
+                  </EuiToolTip>
                 </EuiFlexItem>
               </EuiFlexGroup>
             </EuiFlexItem>
@@ -682,15 +699,32 @@ export const DatasetDetailPage: React.FC = () => {
               <h3>{i18n.getExamplesCountTitle(dataset.examples.length)}</h3>
             </EuiTitle>
             <EuiSpacer size="m" />
-            <EuiFlexGroup>
-              <EuiFlexItem>
+            <EuiFlexGroup
+              gutterSize="m"
+              alignItems="center"
+              responsive={false}
+              justifyContent="spaceBetween"
+            >
+              <EuiFlexItem
+                className={css`
+                  max-width: 500px;
+                `}
+              >
                 <EuiFieldSearch
                   placeholder={i18n.SEARCH_EXAMPLES_PLACEHOLDER}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   isClearable
+                  fullWidth
                 />
               </EuiFlexItem>
+              {canManage ? (
+                <EuiFlexItem grow={false}>
+                  <EuiButton iconType="plusInCircle" onClick={openCreateExampleFlyout} fill>
+                    {i18n.ADD_EXAMPLE_BUTTON}
+                  </EuiButton>
+                </EuiFlexItem>
+              ) : null}
             </EuiFlexGroup>
             <EuiSpacer size="m" />
             <EuiBasicTable<DatasetExample>
@@ -741,6 +775,7 @@ export const DatasetDetailPage: React.FC = () => {
           minWidth={400}
           maxWidth={800}
           aria-labelledby="exampleFlyoutTitle"
+          hideCloseButton
         >
           <EuiFlyoutHeader hasBorder>
             <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" responsive={false}>
@@ -751,34 +786,48 @@ export const DatasetDetailPage: React.FC = () => {
                   </h2>
                 </EuiTitle>
               </EuiFlexItem>
-              {canManage ? (
-                <EuiFlexItem grow={false}>
-                  <EuiFlexGroup gutterSize="s" responsive={false}>
-                    {!isEditingExample ? (
-                      <>
-                        <EuiFlexItem grow={false}>
-                          <EuiButton size="s" iconType="pencil" onClick={enterEditMode}>
-                            {i18n.EDIT_EXAMPLE_BUTTON}
-                          </EuiButton>
-                        </EuiFlexItem>
-                        <EuiFlexItem grow={false}>
-                          <EuiToolTip
-                            content={i18n.DELETE_EXAMPLE_BUTTON}
-                            disableScreenReaderOutput
-                          >
-                            <EuiButtonIcon
-                              aria-label={i18n.DELETE_EXAMPLE_BUTTON}
-                              iconType="trash"
-                              color="danger"
-                              onClick={() => setDeletingExample(selectedExample)}
-                            />
-                          </EuiToolTip>
-                        </EuiFlexItem>
-                      </>
-                    ) : null}
-                  </EuiFlexGroup>
-                </EuiFlexItem>
-              ) : null}
+              <EuiFlexItem grow={false}>
+                <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center">
+                  {canManage && !isEditingExample ? (
+                    <>
+                      <EuiFlexItem grow={false}>
+                        <EuiToolTip content={i18n.EDIT_EXAMPLE_BUTTON} disableScreenReaderOutput>
+                          <EuiButtonIcon
+                            iconType="pencil"
+                            display="base"
+                            size="m"
+                            onClick={enterEditMode}
+                            aria-label={i18n.EDIT_EXAMPLE_BUTTON}
+                          />
+                        </EuiToolTip>
+                      </EuiFlexItem>
+                      <EuiFlexItem grow={false}>
+                        <EuiToolTip content={i18n.DELETE_EXAMPLE_BUTTON} disableScreenReaderOutput>
+                          <EuiButtonIcon
+                            iconType="trash"
+                            display="base"
+                            size="m"
+                            color="danger"
+                            onClick={() => setDeletingExample(selectedExample)}
+                            aria-label={i18n.DELETE_EXAMPLE_BUTTON}
+                          />
+                        </EuiToolTip>
+                      </EuiFlexItem>
+                    </>
+                  ) : null}
+                  <EuiFlexItem grow={false}>
+                    <EuiToolTip content={i18n.CLOSE_FLYOUT_BUTTON} disableScreenReaderOutput>
+                      <EuiButtonIcon
+                        iconType="cross"
+                        color="text"
+                        size="m"
+                        onClick={closeFlyout}
+                        aria-label={i18n.CLOSE_FLYOUT_BUTTON}
+                      />
+                    </EuiToolTip>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlyoutHeader>
           <EuiFlyoutBody>
@@ -1011,7 +1060,7 @@ export const DatasetDetailPage: React.FC = () => {
         <EuiModal onClose={closeModals} aria-labelledby="editMetadataModalTitle">
           <EuiModalHeader>
             <EuiModalHeaderTitle id="editMetadataModalTitle">
-              {i18n.EDIT_METADATA_MODAL_TITLE}
+              {i18n.EDIT_DESCRIPTION_MODAL_TITLE}
             </EuiModalHeaderTitle>
           </EuiModalHeader>
           <EuiModalBody>
@@ -1039,6 +1088,17 @@ export const DatasetDetailPage: React.FC = () => {
             </EuiButton>
           </EuiModalFooter>
         </EuiModal>
+      ) : null}
+
+      {/* Delete dataset confirmation */}
+      {isDeleteDatasetModalOpen && dataset ? (
+        <DeleteDatasetModal
+          datasetId={dataset.id}
+          datasetName={dataset.name}
+          examplesCount={dataset.examples.length}
+          onClose={() => setIsDeleteDatasetModalOpen(false)}
+          onDeleted={() => history.push('/datasets')}
+        />
       ) : null}
 
       {/* Delete example confirmation */}

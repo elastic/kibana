@@ -21,6 +21,8 @@ import {
   EuiPanel,
   EuiSpacer,
   EuiText,
+  EuiTextColor,
+  EuiToolTip,
   EuiFlyoutHeader,
   EuiFlyoutBody,
   EuiFlyoutResizable,
@@ -33,7 +35,9 @@ import { useParams, useHistory, useLocation } from 'react-router-dom';
 import { isHttpFetchError } from '@kbn/core-http-browser';
 import type { EvaluatorStats } from '@kbn/evals-common';
 import { TraceWaterfall, useTraceSpans } from '@kbn/llm-trace-waterfall';
+import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 import {
+  useDatasets,
   useEvaluationExperiment,
   useEvalsTraceFetcher,
   useExperimentDatasetExamples,
@@ -56,9 +60,9 @@ interface DatasetStatsAccordionProps {
   statsColumns: Array<EuiBasicTableColumn<EvaluatorStats>>;
   experimentLoading: boolean;
   isOpen: boolean;
+  datasetExists: boolean;
   selectedExampleId?: string | null;
   onTraceClick: (traceId: string, exampleId: string) => void;
-  onDatasetClick: (datasetId: string) => void;
   onDatasetToggle: (datasetId: string, isOpen: boolean) => void;
   onExampleClick: (exampleId: string) => void;
 }
@@ -70,12 +74,13 @@ const DatasetStatsAccordion: React.FC<DatasetStatsAccordionProps> = ({
   statsColumns,
   experimentLoading,
   isOpen,
+  datasetExists,
   selectedExampleId,
   onTraceClick,
-  onDatasetClick,
   onDatasetToggle,
   onExampleClick,
 }) => {
+  const history = useHistory();
   const {
     data: datasetExamples,
     isLoading: examplesLoading,
@@ -91,15 +96,24 @@ const DatasetStatsAccordion: React.FC<DatasetStatsAccordionProps> = ({
             <EuiFlexItem grow={false}>
               <EuiText size="s">
                 <h4>
-                  <EuiLink
-                    onClick={(event: MouseEvent<HTMLAnchorElement>) => {
-                      event.preventDefault();
-                      event.stopPropagation();
-                      onDatasetClick(group.datasetId);
-                    }}
-                  >
-                    {group.datasetName}
-                  </EuiLink>
+                  {datasetExists ? (
+                    <EuiLink
+                      {...reactRouterNavigate(
+                        history,
+                        `/datasets/${group.datasetId}`,
+                        (event: MouseEvent<HTMLAnchorElement>) => event.stopPropagation()
+                      )}
+                    >
+                      {group.datasetName}
+                    </EuiLink>
+                  ) : (
+                    <EuiToolTip content={i18n.DELETED_DATASET_TOOLTIP}>
+                      <span tabIndex={0}>
+                        {group.datasetName}{' '}
+                        <EuiTextColor color="subdued">{i18n.DELETED_DATASET_SUFFIX}</EuiTextColor>
+                      </span>
+                    </EuiToolTip>
+                  )}
                 </h4>
               </EuiText>
             </EuiFlexItem>
@@ -244,6 +258,18 @@ export const ExperimentDetailPage: React.FC = () => {
     },
     [updateSearchParams]
   );
+
+  const { data: datasetsData } = useDatasets({ perPage: 1000 });
+
+  // A null set means existence is undetermined (still loading, or there are more
+  // datasets than we fetched), in which case we keep the link to avoid rendering
+  // a false "(deleted)" label.
+  const existingDatasetIds = useMemo(() => {
+    if (!datasetsData || datasetsData.total > datasetsData.datasets.length) {
+      return null;
+    }
+    return new Set(datasetsData.datasets.map((dataset) => dataset.id));
+  }, [datasetsData]);
 
   const datasetStatsGroups = useMemo(() => {
     const groupedStats = new Map<string, DatasetStatsGroup>();
@@ -453,9 +479,9 @@ export const ExperimentDetailPage: React.FC = () => {
             statsColumns={statsColumns}
             experimentLoading={experimentLoading}
             isOpen={openDatasetId === group.datasetId}
+            datasetExists={existingDatasetIds ? existingDatasetIds.has(group.datasetId) : true}
             selectedExampleId={openDatasetId === group.datasetId ? selectedExampleId : null}
             onTraceClick={(traceId, exampleId) => setSelectedTrace(traceId, exampleId)}
-            onDatasetClick={(targetDatasetId) => history.push(`/datasets/${targetDatasetId}`)}
             onDatasetToggle={(targetDatasetId, nextIsOpen) =>
               setOpenDatasetId(nextIsOpen ? targetDatasetId : null)
             }

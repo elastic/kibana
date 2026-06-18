@@ -76,6 +76,9 @@ export interface ExperimentsListFilters {
 interface DatasetsListFilters {
   page?: number;
   perPage?: number;
+  search?: string;
+  sortField?: string;
+  sortOrder?: string;
 }
 
 interface DatasetWithId {
@@ -116,9 +119,12 @@ export const useDatasets = (filters: DatasetsListFilters = {}) => {
   return useQuery({
     queryKey: queryKeys.datasets.list(filters),
     queryFn: async (): Promise<GetEvaluationDatasetsResponse> => {
-      const query: Record<string, number> = {};
+      const query: Record<string, string | number> = {};
       if (filters.page) query.page = filters.page;
       if (filters.perPage) query.per_page = filters.perPage;
+      if (filters.search) query.search = filters.search;
+      if (filters.sortField) query.sort_field = filters.sortField;
+      if (filters.sortOrder) query.sort_order = filters.sortOrder;
 
       return services.http!.get<GetEvaluationDatasetsResponse>(EVALS_DATASETS_URL, {
         query,
