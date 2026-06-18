@@ -41,15 +41,11 @@ jq, xan, yq
 
 ### Navigation & Environment
 
-basename, cd, dirname, du, echo, env, export, find, hostname, printenv, pwd, tee
+basename, cd, dirname, du, echo, export, find, pwd, tee
 
 ### Shell Utilities
 
-alias, bash, chmod, clear, date, expr, false, help, history, seq, sh, sleep, time, timeout, true, unalias, which, whoami
-
-### Compression & Archives
-
-gzip, gunzip, zcat
+bash, date, false, seq, sh, time, timeout, true, which
 
 All commands support --help for usage information.
 

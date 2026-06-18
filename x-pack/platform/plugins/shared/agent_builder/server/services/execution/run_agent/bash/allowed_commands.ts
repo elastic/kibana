@@ -19,8 +19,14 @@ import type { CommandName } from 'just-bash';
  *  - js-exec, node — JS/TS via QuickJS; security surface, not needed
  *  - curl, html-to-markdown — network access, needs explicit security model
  *  - ln, readlink — symlinks aren't supported by workspace volume / persistence
- *  - tar — pulls in `node-liblzma` (LGPL-3.0) and `@mongodb-js/zstd` for
- *    compressed-archive support; disabled until those deps are reviewed
+ *  - tar — pulls in `node-liblzma` (LGPL-3.0) and `@mongodb-js/zstd`; disabled until those deps are reviewed
+ *  - gzip, gunzip, zcat — zip-bomb potential, no agent workflow needs compressed content today
+ *  - env, printenv, hostname, whoami — virtualized info-disclosure surface with no realistic agent use case
+ *  - alias, unalias — only useful as an obfuscation primitive; aliases don't persist across `bash.exec` invocations anyway
+ *  - history, help, clear — meaningless in our single-shot exec model
+ *  - expr — redundant with bash's native `$((…))` arithmetic
+ *  - chmod — the VFS sets a mode field but nothing in our stack enforces Unix permissions
+ *  - sleep — no legitimate agent use case and including it invites bad polling-loop patterns
  */
 export const ALLOWED_BASH_COMMANDS: readonly CommandName[] = [
   // File operations
@@ -76,40 +82,23 @@ export const ALLOWED_BASH_COMMANDS: readonly CommandName[] = [
   'xan',
   'yq',
 
-  // Compression & archives
-  'gzip',
-  'gunzip',
-  'zcat',
-
   // Navigation & environment
   'basename',
   'dirname',
   'du',
   'echo',
-  'env',
   'find',
-  'hostname',
-  'printenv',
   'pwd',
   'tee',
 
   // Shell utilities
-  'alias',
   'bash',
-  'chmod',
-  'clear',
   'date',
-  'expr',
   'false',
-  'help',
-  'history',
   'seq',
   'sh',
-  'sleep',
   'time',
   'timeout',
   'true',
-  'unalias',
   'which',
-  'whoami',
 ] as const satisfies readonly CommandName[];
