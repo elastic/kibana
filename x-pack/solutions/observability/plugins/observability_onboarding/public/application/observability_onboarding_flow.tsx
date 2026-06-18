@@ -14,13 +14,13 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { APP_MAIN_SCROLL_CONTAINER_ID } from '@kbn/core-chrome-layout-constants';
 import {
   AutoDetectPage,
-  KubernetesPage,
   LandingPage,
   OtelLogsPage,
-  OtelKubernetesPage,
   FirehosePage,
   OtelApmPage,
   CloudForwarderPage,
+  KubernetesPage,
+  KubernetesOtelPage,
 } from './pages';
 import {
   HostLinuxAutoDetectPage,
@@ -35,6 +35,14 @@ import { useFlowBreadcrumb } from './shared/use_flow_breadcrumbs';
 import { useManagedOtlpServiceAvailability } from './shared/use_managed_otlp_service_availability';
 
 const queryClient = new QueryClient();
+
+function OtelKubernetesRedirect() {
+  const { search } = useLocation();
+  const searchParams = new URLSearchParams(search);
+  searchParams.delete('ingestion');
+  const nextSearch = searchParams.toString();
+  return <Redirect to={`/kubernetes${nextSearch ? `?${nextSearch}` : ''}`} />;
+}
 
 export function ObservabilityOnboardingFlow() {
   const { pathname } = useLocation();
@@ -85,11 +93,14 @@ export function ObservabilityOnboardingFlow() {
         <Route path="/auto-detect">
           <AutoDetectPage />
         </Route>
-        <Route path="/kubernetes">
+        <Route key="kubernetes-otel" exact path="/kubernetes">
+          <KubernetesOtelPage />
+        </Route>
+        <Route key="kubernetes-elastic-agent" exact path="/kubernetes/elastic-agent">
           <KubernetesPage />
         </Route>
-        <Route path="/otel-kubernetes">
-          <OtelKubernetesPage />
+        <Route key="otel-kubernetes-redirect" exact path="/otel-kubernetes">
+          <OtelKubernetesRedirect />
         </Route>
         <Route path="/otel-logs">
           <OtelLogsPage />
