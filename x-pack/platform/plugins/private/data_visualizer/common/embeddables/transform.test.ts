@@ -77,7 +77,7 @@ describe('field statistics embeddable transforms', () => {
       hidePanelTitles: true,
       viewType: 'dataview',
       showDistributions: true,
-    } satisfies RawFieldStatsState;
+    } as RawFieldStatsState;
 
     expect(transformOut(legacyStoredState, [dataViewReference])).toEqual({
       title: 'Legacy field stats',
