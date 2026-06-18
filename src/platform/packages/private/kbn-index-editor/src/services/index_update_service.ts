@@ -715,10 +715,6 @@ export class IndexUpdateService {
               response,
               updates: updates.filter(isDocUpdate).map((update) => update.payload),
             });
-
-            if (this._sortOrder$.getValue().length > 0) {
-              this.refresh();
-            }
           },
           error: (error) => {
             reportIndexEditorError(error, { errorType: 'BulkSave' });
