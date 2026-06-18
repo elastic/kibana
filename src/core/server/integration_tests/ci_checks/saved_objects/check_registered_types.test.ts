@@ -202,7 +202,7 @@ describe('checking migration metadata changes on all registered SO types', () =>
         "user_connector_token": "f84f4d2e474af54e0452cc3a1c8fd11b9477d61fb21e83550ff35672d2717617",
         "visualization": "b7c299233eb6fc88faccdf5924d4cff9fc2f4c3fe8acf5376d7232c05c9a3cfd",
         "watchlist-config": "d85132445bd33d38c8d0b0884177bd6327ec227ec3fc31f45345b71cd21b868f",
-        "watchlist-entity-source": "8d47ec58fee05c4300cd607c865dd4d3db2899f7be2eb873d7f72f6f711660e2",
+        "watchlist-entity-source": "8ae15cc64c9f84e4f4ee1a0844aba5ba7ac4e6353029194ffe66ff31f5e0fd53",
         "workplace_search_telemetry": "b17dd0963b685cea46246d00b7da598822668434659b7e698313da6c2212febb",
       }
     `);
@@ -1409,6 +1409,7 @@ describe('checking migration metadata changes on all registered SO types', () =>
         "watchlist-entity-source|global: c1a10635e0b47578006f9ba55d1a8cc8b5fc29db",
         "watchlist-entity-source|mappings: 9ffd89787c09633c55456fc1d46ebd2cfd4db1cc",
         "watchlist-entity-source|schemas: da39a3ee5e6b4b0d3255bfef95601890afd80709",
+        "watchlist-entity-source|10.3.0: bc10bfcc280627a7a1443113445bfd0185a1b4dbe2ae6e7575a4a186c5c2b8c0",
         "watchlist-entity-source|10.2.0: 7b900f9752805af4d59756684a8a5e50ece3fe0cf914565bb4bede839102dc75",
         "watchlist-entity-source|10.1.0: 621e19feaaf78726f887c4c6dea9f3cc056f548a16159ecfc5fe987d7806ff1b",
         "================================================================================================",
@@ -1581,7 +1582,7 @@ describe('checking migration metadata changes on all registered SO types', () =>
         "user_connector_token": "10.1.0",
         "visualization": "10.0.0",
         "watchlist-config": "10.1.0",
-        "watchlist-entity-source": "10.2.0",
+        "watchlist-entity-source": "10.3.0",
         "workplace_search_telemetry": "10.0.0",
       }
     `);
@@ -1749,7 +1750,7 @@ describe('checking migration metadata changes on all registered SO types', () =>
         "user_connector_token": "10.1.0",
         "visualization": "8.5.0",
         "watchlist-config": "10.1.0",
-        "watchlist-entity-source": "10.2.0",
+        "watchlist-entity-source": "10.3.0",
         "workplace_search_telemetry": "0.0.0",
       }
     `);
