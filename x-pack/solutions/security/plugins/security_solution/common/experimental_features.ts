@@ -291,6 +291,11 @@ export const allowedExperimentalValues = Object.freeze({
    * ship dark and be enabled per environment.
    */
   rulePreviewAttachmentEnabled: false,
+
+  /**
+   * Enables the risk score history API endpoint for Entity Analytics.
+   */
+  riskScoreHistoryEnabled: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;
