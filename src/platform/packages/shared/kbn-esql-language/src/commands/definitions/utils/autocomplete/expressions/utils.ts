@@ -207,14 +207,22 @@ export async function getKqlSuggestionsIfApplicable(
   const cursorPositionInKql = kqlQuery.length;
 
   try {
-    // Get KQL suggestions from the autocomplete service
     const suggestions = await getKqlSuggestions(kqlQuery, cursorPositionInKql);
 
     if (!suggestions || suggestions.length === 0) {
       return null;
     }
 
-    return suggestions;
+    const kqlWordBoundary = /[\s:()"'=<>]/;
+    let kqlWordStart = kqlQuery.length;
+    while (kqlWordStart > 0 && !kqlWordBoundary.test(kqlQuery[kqlWordStart - 1])) {
+      kqlWordStart--;
+    }
+    const kqlStartInText = innerText.length - kqlQuery.length;
+    const wordStartInText = kqlStartInText + kqlWordStart;
+    const rangeToReplace = { start: wordStartInText, end: innerText.length };
+
+    return suggestions.map((s) => ({ ...s, rangeToReplace }));
   } catch (error) {
     return null;
   }
