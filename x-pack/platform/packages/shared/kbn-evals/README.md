@@ -247,7 +247,7 @@ On-demand triage routing is "branch OR PR" (never both), plus an independent Sla
 - **Slack** is independent: set `EVAL_SLACK_NOTIFICATION_CHANNEL` to also/only send the triage to a Slack channel, in either mode.
 - If you run a plain branch and do not set `EVAL_SLACK_NOTIFICATION_CHANNEL`, no triage is generated or sent (nothing to notify).
 
-Example (PR run + Slack — set Branch to `refs/pull/273461/head`, Commit `HEAD`, then under Options -> Environment Variables):
+Example (PR run + Slack — set Branch to `refs/pull/<N>/head`, Commit `HEAD`, then under Options -> Environment Variables):
 
 ```text
 EVAL_SUITE_ID=observability-ai
@@ -256,7 +256,7 @@ EVAL_INCLUDE_EIS_MODELS=1
 EVAL_SLACK_NOTIFICATION_CHANNEL=#my-test-channel
 ```
 
-On a per-suite failure this evaluates PR #273461's code, posts the triage summary as an updatable comment on `elastic/kibana#273461`, and also sends it to `#my-test-channel`. (`EVAL_SLACK_NOTIFICATION_CHANNEL` accepts a channel name like `#my-test-channel` or a Slack member/channel ID like `U07PJAGDAPP`.) Omit `EVAL_SLACK_NOTIFICATION_CHANNEL` to get the PR comment only.
+On a per-suite failure this evaluates PR #<N>'s code, posts the triage summary as an updatable comment on `elastic/kibana#<N>`, and also sends it to `#my-test-channel`. (`EVAL_SLACK_NOTIFICATION_CHANNEL` accepts a channel name like `#my-test-channel` or a Slack member/channel ID like `<ID>`.) Omit `EVAL_SLACK_NOTIFICATION_CHANNEL` to get the PR comment only.
 
 ---
 
