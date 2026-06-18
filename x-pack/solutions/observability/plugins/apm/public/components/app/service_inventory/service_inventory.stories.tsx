@@ -128,6 +128,139 @@ Example.decorators = [
   },
 ];
 
+// ── All-features story ────────────────────────────────────────────────────────
+
+/**
+ * **All-features story** — showcases every optional column and banner that
+ * requires enterprise capabilities or external data sources:
+ *
+ * - **Alerts column** — services with active alert counts (red badge)
+ * - **SLOs column** — services with SLO status (violated/degrading/healthy/noData)
+ * - **ML anomalies column** — services with anomaly scores (critical → warning)
+ * - **ML callout banner** — displayed when no anomaly-detection jobs are configured
+ *
+ * All data is hand-crafted; no Elasticsearch or ML cluster required.
+ */
+export const AllFeatures: StoryFn<{}> = () => {
+  return <ServiceInventory />;
+};
+
+AllFeatures.storyName = 'All Features (Alerts + SLOs + ML Anomalies)';
+
+AllFeatures.decorators = [
+  (StoryComponent) => {
+    const docs = opbeansScenario();
+
+    // Hand-crafted items: every optional field populated so all conditional columns appear.
+    const inventoryResponse = {
+      items: [
+        {
+          serviceName: 'opbeans-node',
+          transactionType: 'request',
+          environments: ['opbeans'],
+          agentName: 'nodejs',
+          latency: 335_000,
+          transactionErrorRate: 0,
+          throughput: 2,
+          alertsCount: 3,
+          sloStatus: 'violated',
+          sloCount: 1,
+          anomalyScore: 82, // critical
+        },
+        {
+          serviceName: 'opbeans-java',
+          transactionType: 'request',
+          environments: ['opbeans'],
+          agentName: 'java',
+          latency: 380_000,
+          transactionErrorRate: 0.1,
+          throughput: 1,
+          alertsCount: 1,
+          sloStatus: 'degrading',
+          sloCount: 2,
+          anomalyScore: 55, // major
+        },
+        {
+          serviceName: 'opbeans-go',
+          transactionType: 'request',
+          environments: ['opbeans'],
+          agentName: 'go',
+          latency: 150_000,
+          transactionErrorRate: 0,
+          throughput: 1,
+          sloStatus: 'healthy',
+          sloCount: 3,
+          anomalyScore: 27, // minor
+        },
+        {
+          serviceName: 'opbeans-python',
+          transactionType: 'request',
+          environments: ['opbeans'],
+          agentName: 'python',
+          latency: 50_000,
+          transactionErrorRate: 0,
+          throughput: 1,
+          sloStatus: 'noData',
+          sloCount: 1,
+          anomalyScore: 5, // warning
+        },
+        {
+          serviceName: 'opbeans-dotnet',
+          transactionType: 'request',
+          environments: ['opbeans'],
+          agentName: 'dotnet',
+          latency: 60_000,
+          transactionErrorRate: 0,
+          throughput: 1,
+          // no alertsCount, sloStatus, or anomalyScore → empty cells in optional columns
+        },
+      ],
+      maxCountExceeded: false,
+      serviceOverflowCount: 0,
+    };
+
+    const coreMock = {
+      http: {
+        get: async (endpoint: string) => {
+          switch (endpoint) {
+            case '/internal/apm/time_range_metadata':
+              return TIME_RANGE_METADATA_DEFAULTS;
+            case '/internal/apm/services':
+              return inventoryResponse;
+            default:
+              return {};
+          }
+        },
+        post: async (endpoint: string) => {
+          if (endpoint === '/internal/apm/services/detailed_statistics') {
+            return toDetailedStatisticsResponse(docs);
+          }
+          return { currentPeriod: {}, previousPeriod: {} };
+        },
+      },
+    } as unknown as CoreStart;
+
+    // NoJobs → ML callout banner is displayed
+    const anomalyCtx = {
+      anomalyDetectionJobsData: { jobs: [], hasLegacyJobs: false },
+      anomalyDetectionJobsStatus: FETCH_STATUS.SUCCESS,
+      anomalyDetectionJobsRefetch: () => {},
+      anomalyDetectionSetupState: AnomalyDetectionSetupState.NoJobs,
+    };
+
+    return (
+      <MockApmPluginStorybook
+        routePath={`/services?rangeFrom=${SCENARIO_START.toISOString()}&rangeTo=${SCENARIO_END.toISOString()}`}
+        apmContext={{ core: coreMock } as unknown as ApmPluginContextValue}
+      >
+        <AnomalyDetectionJobsContext.Provider value={anomalyCtx}>
+          <StoryComponent />
+        </AnomalyDetectionJobsContext.Provider>
+      </MockApmPluginStorybook>
+    );
+  },
+];
+
 // ── Synthtrace-generated story ─────────────────────────────────────────────────
 
 /**
