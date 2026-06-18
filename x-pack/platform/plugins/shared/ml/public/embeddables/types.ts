@@ -14,10 +14,8 @@ import type {
   AnomalyChartsEmbeddableState,
   SeverityThreshold,
 } from '@kbn/ml-server-schemas/embeddables/anomaly_charts';
-import type {
-  SingleMetricViewerEmbeddableState,
-  SingleMetricViewerEmbeddableUserInput,
-} from '@kbn/ml-server-schemas/embeddables/single_metric_viewer';
+import type { SingleMetricViewerEmbeddableState } from '@kbn/ml-server-schemas/embeddables/single_metric_viewer';
+import type { AnomalySingleMetricViewerEmbeddableType } from '@kbn/ml-common-types/embeddables/single_metric_viewer';
 import type {
   EmbeddableApiContext,
   HasEditCapabilities,
@@ -134,14 +132,17 @@ export type SingleMetricViewerEmbeddableApi =
     SingleMetricViewerComponentApi;
 
 /**
- * The subset of the single metric viewer Embeddable state that is actually used by the single metric viewer embeddable.
- *
- * TODO: Ideally this should be the same as the SingleMetricViewerEmbeddableState, but that type is used in many
- * places, so we cannot change it at the moment.
+ * The serialized subset of the single metric viewer embeddable state that is owned by the
+ * controls manager (job selection and detector/entity/forecast selection). Title and time
+ * range are managed separately.
  */
-export type SingleMetricViewerRuntimeState = Omit<
+export type SingleMetricViewerControlsState = Pick<
   SingleMetricViewerEmbeddableState,
-  'id' | 'filters' | 'query' | 'refreshConfig' | 'forecastId'
+  | 'job_ids'
+  | 'selected_detector_index'
+  | 'selected_entities'
+  | 'function_description'
+  | 'forecast_id'
 >;
 
 export interface SingleMetricViewerComponentApi {
@@ -151,7 +152,7 @@ export interface SingleMetricViewerComponentApi {
   selectedDetectorIndex: PublishingSubject<number>;
   selectedEntities: PublishingSubject<MlEntity | undefined>;
 
-  updateUserInput: (input: SingleMetricViewerEmbeddableUserInput) => void;
+  updateUserInput: (input: SingleMetricViewerEmbeddableState) => void;
   updateForecastId: (id: string | undefined) => void;
 }
 
@@ -198,4 +199,6 @@ export interface AnomalyChartsFieldSelectionContext extends EditAnomalyChartsPan
 export type MappedEmbeddableTypeOf<TEmbeddableType extends MlEmbeddableTypes> =
   TEmbeddableType extends AnomalyExplorerChartsEmbeddableType
     ? AnomalyChartsEmbeddableState
+    : TEmbeddableType extends AnomalySingleMetricViewerEmbeddableType
+    ? SingleMetricViewerEmbeddableState
     : unknown;
