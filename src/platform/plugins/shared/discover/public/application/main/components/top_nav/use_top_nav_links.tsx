@@ -92,7 +92,6 @@ export const useTopNavLinks = ({
   const dispatch = useInternalStateDispatch();
   const getState = useInternalStateGetState();
   const subscribe = useInternalStateSubscribe();
-
   const runtimeStateManager = useRuntimeStateManager();
   const currentDataView = useCurrentDataView();
   const appId = useObservable(services.application.currentAppId$);
@@ -153,16 +152,6 @@ export const useTopNavLinks = ({
   );
 
   const showCreateRuleV2 = isEsqlMode && canCreateESQLRule;
-
-  const getAppMenuAccessor = useProfileAccessor('getAppMenu');
-
-  const profileAppMenuExtension = useMemo(() => {
-    const getAppMenu = getAppMenuAccessor(() => ({
-      appMenuRegistry: (registry) => registry,
-    }));
-
-    return getAppMenu(discoverParams);
-  }, [getAppMenuAccessor, discoverParams]);
 
   const appMenuItems: DiscoverAppMenuItemType[] = useMemo(() => {
     const items: DiscoverAppMenuItemType[] = [];
@@ -312,6 +301,8 @@ export const useTopNavLinks = ({
     switchLanguageMode,
   ]);
 
+  const getAppMenuAccessor = useProfileAccessor('getAppMenu');
+
   const appMenuRegistry = useMemo(() => {
     const newAppMenuRegistry = new AppMenuRegistry();
 
@@ -413,7 +404,11 @@ export const useTopNavLinks = ({
     }
 
     // Allow profile accessors to add additional items/popover items
-    const registry = profileAppMenuExtension.appMenuRegistry(newAppMenuRegistry);
+    const getAppMenu = getAppMenuAccessor(() => ({
+      appMenuRegistry: () => newAppMenuRegistry,
+    }));
+
+    const registry = getAppMenu(discoverParams).appMenuRegistry(newAppMenuRegistry);
 
     if (showCreateRuleV2) {
       const createRuleOptionsAppMenuItem = getCreateRuleOptionsAppMenuItem({
@@ -432,7 +427,8 @@ export const useTopNavLinks = ({
 
     return registry;
   }, [
-    profileAppMenuExtension,
+    getAppMenuAccessor,
+    discoverParams,
     appMenuItems,
     services,
     currentTab.id,
