@@ -16,10 +16,14 @@ import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/publ
  * and a Set of ECS field names once resolved.
  *
  * Fields with a `short` description in the ECS registry are considered official ECS fields
- * and safe to emit as `data-ebt-detail` values. Non-ECS fields should use the
- * NON_ECS_FIELD_EBT_DETAIL sentinel instead to avoid leaking custom field names into telemetry.
+ * and safe to emit as `data-ebt-detail` values. Fields not in the registry receive the
+ * NON_ECS_FIELD_EBT_DETAIL sentinel to avoid leaking field names into telemetry.
  *
- * https://github.com/elastic/kibana/blob/main/src/platform/plugins/shared/discover/public/ebt_manager/scoped_discover_ebt_manager.ts
+ * Note: the registry covers ECS-defined fields only. Standard fields from other schemas
+ * (e.g. APM-specific `span.name`, OTel `k8s.pod.name`) are not ECS-registered and will
+ * receive the sentinel even though they are well-known standard fields.
+ *
+ * @see https://github.com/elastic/kibana/blob/main/src/platform/plugins/shared/discover/public/ebt_manager/scoped_discover_ebt_manager.ts
  */
 export function useEcsFieldNames(
   fieldNames: string[],

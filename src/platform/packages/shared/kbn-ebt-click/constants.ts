@@ -47,8 +47,12 @@ export const EBT_CLICK_ACTIONS = {
 } as const;
 
 /**
- * Sentinel value for `data-ebt-detail` when a field is confirmed to be non-ECS.
- * Signals to analysts that users are choosing custom or vendor-specific fields without
- * revealing the field name. ECS fields send their name directly as the detail value.
+ * Sentinel value for `data-ebt-detail` when a field is not found in the ECS fields
+ * metadata registry. This covers truly custom fields but also legitimate standard fields
+ * from other schemas (e.g. APM-specific `span.name`, OTel `k8s.pod.name`) that are not
+ * ECS-registered. Analysts should read this as "field not in ECS registry" rather than
+ * "unknown or custom field". ECS fields send their name directly as the detail value.
+ *
+ * @see https://github.com/elastic/kibana/blob/main/src/platform/plugins/shared/discover/public/ebt_manager/scoped_discover_ebt_manager.ts
  */
 export const NON_ECS_FIELD_EBT_DETAIL = '<non-ecs>';
