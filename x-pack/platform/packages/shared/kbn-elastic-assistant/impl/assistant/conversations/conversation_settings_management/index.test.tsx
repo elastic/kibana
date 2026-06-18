@@ -11,10 +11,11 @@ import { ConversationSettingsManagement } from '.';
 import { useFetchCurrentUserConversations, useFetchPrompts } from '../../api';
 import { useAssistantContext } from '../../../assistant_context';
 import { useConversationsUpdater } from '../../settings/use_settings_updater/use_conversations_updater';
-import { alertConvo, MOCK_CURRENT_USER, welcomeConvo } from '../../../mock/conversation';
+import { alertConvo, welcomeConvo } from '../../../mock/conversation';
 import * as i18n from './translations';
 
 const mockChangeSharing = 'Change sharing';
+const mockCurrentUser = { id: 'u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0', name: 'elastic' };
 
 jest.mock('../../api');
 jest.mock('../../../assistant_context');
@@ -68,7 +69,7 @@ describe('ConversationSettingsManagement', () => {
         register: jest.fn(),
       },
       assistantAvailability: { isAssistantEnabled: true },
-      currentUser: MOCK_CURRENT_USER,
+      currentUser: mockCurrentUser,
       http: { fetch: jest.fn() },
       nameSpace: 'default',
       toasts: { addSuccess: jest.fn() },
