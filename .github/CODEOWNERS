@@ -352,7 +352,6 @@ src/core/packages/user-settings/server @elastic/kibana-security
 src/core/packages/user-settings/server-internal @elastic/kibana-security
 src/core/packages/user-settings/server-mocks @elastic/kibana-security
 src/core/packages/user-settings/types @elastic/kibana-security
-src/core/packages/user-storage/README.mdx @elastic/appex-sharedux
 src/core/packages/user-storage/browser @elastic/appex-sharedux
 src/core/packages/user-storage/browser-internal @elastic/appex-sharedux
 src/core/packages/user-storage/browser-mocks @elastic/appex-sharedux
