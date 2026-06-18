@@ -46,7 +46,7 @@ export const DataFrameAnalyticsOverviewCard: FC = () => {
 
   const availableActions = useMemo(() => {
     const actions: React.ReactNode[] = [];
-    if (hasDFAs) {
+    if (hasDFAs && canGetDataFrameAnalytics) {
       actions.push(
         <EuiButton
           color="text"
@@ -61,19 +61,20 @@ export const DataFrameAnalyticsOverviewCard: FC = () => {
         </EuiButton>
       );
     }
-    actions.push(
-      <EuiButtonEmpty
-        color="text"
-        onClick={navigateToDFAManagementPath}
-        isDisabled={!canGetDataFrameAnalytics}
-        data-test-subj="mlAnalyticsManageDFAJobsButton"
-      >
-        <FormattedMessage
-          id="xpack.ml.overview.dataFrameAnalytics.manageJobsButton"
-          defaultMessage="Manage jobs"
-        />
-      </EuiButtonEmpty>
-    );
+    if (canGetDataFrameAnalytics) {
+      actions.push(
+        <EuiButtonEmpty
+          color="text"
+          onClick={navigateToDFAManagementPath}
+          data-test-subj="mlAnalyticsManageDFAJobsButton"
+        >
+          <FormattedMessage
+            id="xpack.ml.overview.dataFrameAnalytics.manageJobsButton"
+            defaultMessage="Manage jobs"
+          />
+        </EuiButtonEmpty>
+      );
+    }
     return actions;
   }, [canGetDataFrameAnalytics, navigateToDFAManagementPath, hasDFAs, navigateToResultsExplorer]);
 

@@ -70,7 +70,7 @@ export const AnomalyDetectionOverviewCard: FC = () => {
 
   const availableActions = useMemo(() => {
     const actions: React.ReactNode[] = [];
-    if (hasADJobs) {
+    if (hasADJobs && canGetJobs) {
       actions.push(
         <EuiButton
           color="text"
@@ -91,7 +91,6 @@ export const AnomalyDetectionOverviewCard: FC = () => {
           color="text"
           onClick={redirectToManageJobs}
           data-test-subj="manageJobsButton"
-          isDisabled={!canGetJobs}
         >
           <FormattedMessage
             id="xpack.ml.overview.anomalyDetection.manageJobsButton"
