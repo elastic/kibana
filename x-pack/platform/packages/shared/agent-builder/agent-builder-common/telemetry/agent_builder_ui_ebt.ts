@@ -181,6 +181,7 @@ const ebtAction = {
     VIEW_TOOL_RESPONSE: 'view_tool_response',
     VIEW_SUB_AGENT_EXECUTION: 'view_sub_agent_execution',
     OPEN_ESQL_IN_DISCOVER: 'open_esql_in_discover',
+    ROUND_PIP_NAVIGATE: 'round_pip_navigate',
   },
   libraryPanel: {
     MANAGE_ALL: 'manage_all',
