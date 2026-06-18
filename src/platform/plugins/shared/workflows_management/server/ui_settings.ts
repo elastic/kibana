@@ -11,6 +11,7 @@ import { schema } from '@kbn/config-schema';
 import type { CoreSetup } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import {
+  WORKFLOWS_EXPERIMENTAL_FEATURES_SETTING_ID,
   WORKFLOWS_UI_SETTING_ID,
   WORKFLOWS_VERSIONING_SETTING_ID,
 } from '@kbn/workflows/common/constants';
@@ -51,6 +52,22 @@ export const registerUISettings = (
       readonly: false,
       requiresPageReload: true,
       category: ['general'],
+    },
+    [WORKFLOWS_EXPERIMENTAL_FEATURES_SETTING_ID]: {
+      description: i18n.translate(
+        'workflowsManagement.uiSettings.experimentalFeatures.description',
+        {
+          defaultMessage: 'Enables experimental features for Elastic Workflows.',
+        }
+      ),
+      name: i18n.translate('workflowsManagement.uiSettings.experimentalFeatures.name', {
+        defaultMessage: 'Elastic Workflows: Experimental Features',
+      }),
+      schema: schema.boolean(),
+      value: false,
+      experimental: true,
+      requiresPageReload: true,
+      readonly: false,
     },
   });
 
