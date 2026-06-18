@@ -12,9 +12,7 @@ import type { CommonProps } from '@elastic/eui/src/components/common';
 
 import { useSyntheticsSettingsContext } from '../../../contexts';
 import { useSelectedLocation } from '../../monitor_details/hooks/use_selected_location';
-import { useGetUrlParams } from '../../../hooks';
 import { useUrlSpaceId } from '../../../hooks/use_url_space_id';
-import { getStepDetailLink } from '../../step_details_page/hooks/use_step_detail_page';
 
 export const StepDetailsLinkIcon = ({
   stepIndex,
@@ -35,17 +33,9 @@ export const StepDetailsLinkIcon = ({
   const { basePath } = useSyntheticsSettingsContext();
   const selectedLocation = useSelectedLocation({ refetchMonitorEnabled: false });
   const spaceId = useUrlSpaceId();
-  const { remoteName } = useGetUrlParams();
 
-  const stepDetailsLink = getStepDetailLink({
-    basePath,
-    monitorId: configId,
-    checkGroupId: checkGroup,
-    stepIndex: stepIndex ?? 1,
-    locationId: selectedLocation?.id,
-    spaceId,
-    remoteName,
-  });
+  const spaceIdQuery = spaceId ? `&spaceId=${spaceId}` : '';
+  const stepDetailsLink = `${basePath}/app/synthetics/monitor/${configId}/test-run/${checkGroup}/step/${stepIndex}?locationId=${selectedLocation?.id}${spaceIdQuery}`;
 
   if (asButton) {
     return (
