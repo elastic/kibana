@@ -138,6 +138,7 @@ export {
   type ResolvedAgentCapabilities,
   type AgentAnswerStepConfiguration,
   type AgentResearchStepConfiguration,
+  type ConnectorRestriction,
   agentIdRegexp,
   AgentExecutionMode,
   SubagentExecutionMode,
