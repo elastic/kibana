@@ -34,7 +34,7 @@ describe('WorkflowExecutionsTable', () => {
     jest.clearAllMocks();
   });
 
-  it('calls public executions search API', async () => {
+  it('calls internal executions search API', async () => {
     const services = createStartServicesMock();
     const dataView = createWorkflowExecutionsDataView(services.fieldFormats);
     jest.mocked(services.http.get).mockResolvedValue({
@@ -60,9 +60,9 @@ describe('WorkflowExecutionsTable', () => {
     });
 
     expect(services.http.get).toHaveBeenCalledWith(
-      '/api/workflows/executions',
+      '/internal/workflows/executions',
       expect.objectContaining({
-        version: '2023-10-31',
+        version: '1',
         query: expect.objectContaining({
           from: 0,
           size: 25,

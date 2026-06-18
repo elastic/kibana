@@ -186,6 +186,13 @@ describe('Internal Routes', () => {
     );
   });
 
+  it('should register the executions search route handler', () => {
+    expect(routeHandlers[`GET:/internal/workflows/executions`]).toBeDefined();
+    expect(routeHandlers[`GET:/internal/workflows/executions`].handler).toEqual(
+      expect.any(Function)
+    );
+  });
+
   it('should register trigger event log search routes', () => {
     expect(routeHandlers[`POST:/internal/workflows/trigger_events/_search`]).toBeDefined();
   });

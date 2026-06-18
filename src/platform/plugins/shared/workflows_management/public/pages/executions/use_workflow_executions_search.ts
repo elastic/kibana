@@ -22,8 +22,6 @@ import {
 } from './workflow_executions_search_query';
 import { useKibana } from '../../hooks/use_kibana';
 
-const WORKFLOWS_EXECUTIONS_API_VERSION = '2023-10-31';
-
 export interface UseWorkflowExecutionsSearchParams {
   dataView: DataView;
   query: Query;
@@ -93,8 +91,8 @@ export const useWorkflowExecutionsSearch = ({
       esQuery,
     ],
     queryFn: () =>
-      http.get<ESSearchResponse<EsWorkflowExecution>>('/api/workflows/executions', {
-        version: WORKFLOWS_EXECUTIONS_API_VERSION,
+      http.get<ESSearchResponse<EsWorkflowExecution>>('/internal/workflows/executions', {
+        version: '1',
         query: {
           query: JSON.stringify(esQuery),
           from: pageIndex * pageSize,

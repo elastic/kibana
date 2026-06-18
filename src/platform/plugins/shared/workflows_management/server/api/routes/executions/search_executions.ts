@@ -24,7 +24,7 @@ import { withAvailabilityCheck } from '../utils/with_availability_check';
 const MAX_EXECUTIONS_SEARCH_QUERY_JSON_LENGTH = MAX_TRIGGER_EVENT_SEARCH_KQL_LENGTH * 4;
 const MAX_EXECUTIONS_SEARCH_SORT_JSON_LENGTH = 4096;
 
-const querySchema = schema.object({
+export const querySchema = schema.object({
   query: schema.maybe(
     schema.string({
       maxLength: MAX_EXECUTIONS_SEARCH_QUERY_JSON_LENGTH,
@@ -50,7 +50,7 @@ const querySchema = schema.object({
   ),
 });
 
-const parseJsonParam = <T>(value: string | undefined, paramName: string): T | undefined => {
+export const parseJsonParam = <T>(value: string | undefined, paramName: string): T | undefined => {
   if (value == null || value === '') {
     return undefined;
   }
