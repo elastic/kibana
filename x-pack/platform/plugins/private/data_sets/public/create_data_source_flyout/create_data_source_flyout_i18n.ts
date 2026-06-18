@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 export const createDataSourceFlyoutStrings = {
   createTitle: () =>
     i18n.translate('dataSets.createFlyout.title', {
-      defaultMessage: 'Add data source',
+      defaultMessage: 'Configure cloud data source',
     }),
 
   editTitle: () =>
@@ -31,7 +31,7 @@ export const createDataSourceFlyoutStrings = {
 
   typeLabel: () =>
     i18n.translate('dataSets.createFlyout.typeLabel', {
-      defaultMessage: 'Type',
+      defaultMessage: 'Data source type',
     }),
 
   typeAriaLabel: () =>
