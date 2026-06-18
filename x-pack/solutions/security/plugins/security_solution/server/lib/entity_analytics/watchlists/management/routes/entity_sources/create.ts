@@ -7,7 +7,7 @@
 
 import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
-import type { IKibanaResponse, Logger } from '@kbn/core/server';
+import type { IKibanaResponse, Logger, KibanaRequest } from '@kbn/core/server';
 import { API_VERSIONS } from '@kbn/elastic-assistant-common';
 import { APP_ID } from '@kbn/security-solution-features/constants';
 
@@ -17,7 +17,6 @@ import { WatchlistDataSources } from '../../../../../../../common/api/entity_ana
 import type { EntityAnalyticsRoutesDeps } from '../../../../types';
 import { withMinimumLicense } from '../../../../utils/with_minimum_license';
 import { WatchlistConfigClient } from '../../watchlist_config';
-import { getRequestSavedObjectClient } from '../../../shared/utils';
 import {
   WatchlistEntitySourceClient,
   getStreamPatternFor,
@@ -26,10 +25,13 @@ import {
   oktaLastFullSyncMarkersIndex,
 } from '../../../entity_sources/infra';
 import type { IntegrationType } from '../../../entity_sources/infra';
+import { validateIndexPermissions } from '../../../entity_sources/entity_source_api_key';
 
 export const createEntitySourceRoute = (
   router: EntityAnalyticsRoutesDeps['router'],
-  logger: Logger
+  logger: Logger,
+  getStartServices: EntityAnalyticsRoutesDeps['getStartServices'],
+  hasEncryptionKey: EntityAnalyticsRoutesDeps['hasEncryptionKey']
 ) => {
   router.versioned
     .post({
@@ -64,16 +66,27 @@ export const createEntitySourceRoute = (
             const core = await context.core;
             const namespace = secSol.getSpaceId();
             const client = new WatchlistEntitySourceClient({
-              soClient: getRequestSavedObjectClient(core),
+              soClient: core.savedObjects.client,
               namespace,
+              getStartServices,
+              esClient: core.elasticsearch.client.asCurrentUser,
+              logger,
+              hasEncryptionKey,
             });
 
-            const body = await createSourceForType(client, monitoringSource, namespace);
+            if (monitoringSource.type === 'index' && monitoringSource.indexPattern) {
+              await validateIndexPermissions(
+                core.elasticsearch.client.asCurrentUser,
+                monitoringSource.indexPattern
+              );
+            }
+
+            const body = await createSourceForType(client, monitoringSource, namespace, request);
 
             const watchlistClient = new WatchlistConfigClient({
               logger,
               namespace,
-              soClient: getRequestSavedObjectClient(core),
+              soClient: core.savedObjects.client,
               esClient: core.elasticsearch.client.asCurrentUser,
             });
             await watchlistClient.addEntitySourceReference(request.params.watchlist_id, body.id);
@@ -96,7 +109,8 @@ export const createEntitySourceRoute = (
 const createSourceForType = async (
   client: WatchlistEntitySourceClient,
   source: WatchlistDataSources.CreateWatchlistEntitySourceRequestBody,
-  namespace: string
+  namespace: string,
+  request: KibanaRequest
 ): Promise<WatchlistDataSources.CreateWatchlistEntitySourceResponse> => {
   if (source.type === 'entity_analytics_integration') {
     if (!validateIntegrationName(source.integrationName)) {
@@ -111,7 +125,7 @@ const createSourceForType = async (
     throw new Error('queryRule is required for store-type sources');
   }
 
-  return client.create(source);
+  return client.create(source, request);
 };
 
 const getLastFullSyncMarkersIndex = (namespace: string, integration: IntegrationType): string => {
