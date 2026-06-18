@@ -169,9 +169,7 @@ export async function update({ context, id, action }: ConnectorUpdateParams): Pr
           isMissingSecrets: false,
           config: configForSave as SavedObjectAttributes,
           secrets: validatedActionTypeSecrets as SavedObjectAttributes,
-          ...(action.allowedSubActions !== undefined
-            ? { allowedSubActions: action.allowedSubActions }
-            : {}),
+          allowedSubActions: action.allowedSubActions,
         },
         omitBy(
           {
