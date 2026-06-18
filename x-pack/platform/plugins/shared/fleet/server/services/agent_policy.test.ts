@@ -52,6 +52,7 @@ import { licenseService } from './license';
 import type { UninstallTokenServiceInterface } from './security/uninstall_token_service';
 import { isSpaceAwarenessEnabled } from './spaces/helpers';
 import { scheduleDeployAgentPoliciesTask } from './agent_policies/deploy_agent_policies_task';
+import { scheduleBumpAgentPoliciesByIdTask } from './agent_policies/bump_agent_policies_by_id_task';
 import { createAgentPolicyWithPackages } from './agent_policy_create';
 import { agentlessAgentService } from './agents/agentless_agent';
 import { getPackageInfo } from './epm/packages';
@@ -137,6 +138,7 @@ jest.mock('./audit_logging');
 jest.mock('./agent_policies/full_agent_policy');
 jest.mock('./agent_policies/outputs_helpers');
 jest.mock('./agent_policies/deploy_agent_policies_task');
+jest.mock('./agent_policies/bump_agent_policies_by_id_task');
 jest.mock('./agent_policy_create');
 jest.mock('./epm/packages/install');
 jest.mock('./epm/packages');
@@ -584,6 +586,48 @@ describe('Agent policy', () => {
           'supports_agentless is only allowed in serverless and cloud environments that support the agentless feature'
         )
       );
+    });
+
+    it('should not generate uninstall token for agentless policies', async () => {
+      jest.spyOn(appContextService, 'getConfig').mockReturnValue({
+        agentless: { enabled: true },
+      } as any);
+      jest
+        .spyOn(appContextService, 'getCloud')
+        .mockReturnValue({ isServerlessEnabled: false, isCloudEnabled: true } as any);
+
+      const generateTokenForPolicyId = jest.fn().mockResolvedValue(undefined);
+      mockedAppContextService.getUninstallTokenService.mockReturnValueOnce({
+        scoped: jest.fn().mockReturnValue({ generateTokenForPolicyId }),
+      } as unknown as UninstallTokenServiceInterface);
+
+      const soClient = getAgentPolicyCreateMock();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+      await agentPolicyService.create(soClient, esClient, {
+        name: 'test agentless policy',
+        namespace: 'default',
+        supports_agentless: true,
+      });
+
+      expect(generateTokenForPolicyId).not.toHaveBeenCalled();
+    });
+
+    it('should generate uninstall token for non-agentless policies', async () => {
+      const generateTokenForPolicyId = jest.fn().mockResolvedValue(undefined);
+      mockedAppContextService.getUninstallTokenService.mockReturnValueOnce({
+        scoped: jest.fn().mockReturnValue({ generateTokenForPolicyId }),
+      } as unknown as UninstallTokenServiceInterface);
+
+      const soClient = getAgentPolicyCreateMock();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+      await agentPolicyService.create(soClient, esClient, {
+        name: 'test regular policy',
+        namespace: 'default',
+      });
+
+      expect(generateTokenForPolicyId).toHaveBeenCalled();
     });
   });
 
@@ -1284,6 +1328,92 @@ describe('Agent policy', () => {
           }),
         ])
       );
+    });
+
+    it('should offload the bump to a background task when above the async threshold', async () => {
+      jest.mocked(isSpaceAwarenessEnabled).mockResolvedValue(false);
+
+      const soClient = createSavedObjectClientMock();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+      // 101 policies, just above BUMP_AGENT_POLICIES_ASYNC_THRESHOLD (100)
+      soClient.find.mockResolvedValueOnce({
+        saved_objects: Array.from({ length: 101 }, (_, i) => ({
+          id: `policy-${i}`,
+          type: LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE,
+          attributes: { revision: 1 },
+          score: 1,
+          references: [],
+        })),
+        total: 101,
+        per_page: 10000,
+        page: 1,
+      } as any);
+
+      soClient.find.mockResolvedValueOnce({
+        saved_objects: [],
+        total: 0,
+        per_page: 10000,
+        page: 1,
+      } as any);
+
+      mockedAppContextService.getInternalUserSOClientWithoutSpaceExtension.mockReturnValue(
+        soClient
+      );
+
+      await agentPolicyService.bumpAllAgentPoliciesForOutput(esClient, 'output-id-123');
+
+      // The bulk Saved Objects update must not run on the request thread...
+      expect(soClient.bulkUpdate).not.toHaveBeenCalled();
+      expect(scheduleDeployAgentPoliciesTask).not.toHaveBeenCalled();
+      // ...it is offloaded to the background task instead.
+      expect(scheduleBumpAgentPoliciesByIdTask).toHaveBeenCalledTimes(1);
+      const scheduledPolicies = jest.mocked(scheduleBumpAgentPoliciesByIdTask).mock.calls[0][1];
+      expect(scheduledPolicies).toHaveLength(101);
+      expect(scheduledPolicies).toEqual(
+        expect.arrayContaining([expect.objectContaining({ id: 'policy-0' })])
+      );
+    });
+
+    it('should bump inline when at or below the async threshold', async () => {
+      jest.mocked(isSpaceAwarenessEnabled).mockResolvedValue(false);
+
+      const soClient = createSavedObjectClientMock();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+      soClient.find.mockResolvedValueOnce({
+        saved_objects: [
+          {
+            id: 'policy-1',
+            type: LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE,
+            attributes: { revision: 1 },
+            score: 1,
+            references: [],
+          },
+        ],
+        total: 1,
+        per_page: 10000,
+        page: 1,
+      } as any);
+
+      soClient.find.mockResolvedValueOnce({
+        saved_objects: [],
+        total: 0,
+        per_page: 10000,
+        page: 1,
+      } as any);
+
+      soClient.bulkUpdate.mockResolvedValue({ saved_objects: [] } as any);
+
+      mockedAppContextService.getInternalUserSOClientWithoutSpaceExtension.mockReturnValue(
+        soClient
+      );
+
+      await agentPolicyService.bumpAllAgentPoliciesForOutput(esClient, 'output-id-123');
+
+      expect(soClient.bulkUpdate).toHaveBeenCalledTimes(1);
+      expect(scheduleDeployAgentPoliciesTask).toHaveBeenCalledTimes(1);
+      expect(scheduleBumpAgentPoliciesByIdTask).not.toHaveBeenCalled();
     });
   });
 
