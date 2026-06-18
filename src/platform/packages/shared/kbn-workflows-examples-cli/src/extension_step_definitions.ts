@@ -23,17 +23,22 @@ import {
   dataRegexReplaceStepCommonDefinition,
   dataStringifyJsonStepCommonDefinition,
 } from '@kbn/workflows-extensions/common/steps/data';
-import {
-  AiClassifyStepCommonDefinition,
-  AiPromptStepCommonDefinition,
-  AiSummarizeStepCommonDefinition,
-} from '@kbn/workflows-extensions/common/steps/ai';
 
 // ai.agent and search.rerank — agent_builder plugin common
 import {
   runAgentStepCommonDefinition,
   rerankStepCommonDefinition,
 } from '@kbn/agent-builder-plugin/common/step_types';
+
+// ai.prompt, ai.summarize, ai.classify — inference_workflows plugin common
+import {
+  AiPromptStepCommonDefinition,
+  AiSummarizeStepCommonDefinition,
+  AiClassifyStepCommonDefinition,
+} from '@kbn/inference-workflows-plugin/common/steps/ai';
+
+// contextEngine.addEntry — agent_context_layer plugin common
+import { contextEngineAddEntryStepCommonDefinition } from '@kbn/agent-context-layer-plugin/common/workflow_steps/sml_index_attachment_step';
 
 // cases.* — cases plugin common
 import { addAlertsStepCommonDefinition } from '@kbn/cases-plugin/common/workflows/steps/add_alerts';
@@ -123,12 +128,14 @@ export const getExtensionStepContracts = (): BaseConnectorContract[] => {
     toContract(dataRegexReplaceStepCommonDefinition),
     toContract(dataStringifyJsonStepCommonDefinition),
     // ai.*
-    toContract(AiClassifyStepCommonDefinition),
+    toContract(runAgentStepCommonDefinition),
     toContract(AiPromptStepCommonDefinition),
     toContract(AiSummarizeStepCommonDefinition),
-    toContract(runAgentStepCommonDefinition),
+    toContract(AiClassifyStepCommonDefinition),
     // search.*
     toContract(rerankStepCommonDefinition),
+    // contextEngine.*
+    toContract(contextEngineAddEntryStepCommonDefinition),
     // cases.*
     toContract(addAlertsStepCommonDefinition),
     toContract(addCommentStepCommonDefinition),
