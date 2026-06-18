@@ -35,6 +35,9 @@ predicate shouldExcludeFileFromDoSRules(Expr e) {
     // Fleet saved-object schemas and migrations
     path.regexpMatch(".*/plugins/shared/fleet/server/saved_objects/.*")
     or
+    // Security evals evaluators (offline analysis logic, not HTTP routes)
+    path.regexpMatch(".*/kbn-evals-suite-security-esql-generation-regression/src/evaluators/.*")
+    or
     // Saved-object attribute schemas (versioned shapes, never route payloads)
     path.regexpMatch(".*/saved_objects/schemas/.*")
     or
