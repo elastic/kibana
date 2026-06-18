@@ -91,11 +91,20 @@ export class ComposeDiscoverPage {
   }
 
   /**
-   * Types an ES|QL query into the sandbox code editor.
-   * The sandbox renders a single Monaco instance (model index 0).
+   * Types an ES|QL query into the sandbox base-tab code editor (Monaco index 0).
    */
   async setSandboxQuery(query: string) {
     await this.codeEditor.setCodeEditorValue(query, 0);
+  }
+
+  /**
+   * Switches the sandbox to the "Alert condition" tab and types the given
+   * segment into the alert-condition editor (Monaco index 1, because the
+   * locked base preview occupies index 0 on that tab).
+   */
+  async setSandboxAlertCondition(segment: string) {
+    await this.page.testSubj.locator('querySandboxTab-alert').click();
+    await this.codeEditor.setCodeEditorValue(segment, 1);
   }
 
   async clickNext() {
