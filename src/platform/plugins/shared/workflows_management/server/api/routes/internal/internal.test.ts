@@ -33,7 +33,10 @@ describe('Internal Routes', () => {
   }
 
   let routeHandlers: Record<string, { handler: MockRouteHandler }>;
-  let mockApi: { disableAllWorkflows: jest.MockedFunction<(spaceId: string) => Promise<unknown>> };
+  let mockApi: {
+    disableAllWorkflows: jest.MockedFunction<(spaceId: string) => Promise<unknown>>;
+    searchExecutionsView: jest.Mock;
+  };
   let mockTriggerEventsIsEnabled: boolean;
   let mockSearch: jest.Mock;
   const mockSearchTriggerEventLog = jest.fn<
@@ -72,7 +75,7 @@ describe('Internal Routes', () => {
       page: 1,
       size: 10,
     });
-    mockApi = { disableAllWorkflows: jest.fn() };
+    mockApi = { disableAllWorkflows: jest.fn(), searchExecutionsView: jest.fn() };
     mockSearch = jest.fn().mockResolvedValue({
       hits: { hits: [], total: { value: 0, relation: 'eq' } },
     });
@@ -191,6 +194,63 @@ describe('Internal Routes', () => {
     expect(routeHandlers[`GET:/internal/workflows/executions`].handler).toEqual(
       expect.any(Function)
     );
+  });
+
+  it('should call api.searchExecutionsView with parsed query params and space id', async () => {
+    mockApi.searchExecutionsView.mockResolvedValue({
+      hits: { hits: [], total: { value: 0, relation: 'eq' } },
+    });
+
+    const response = httpServerMock.createResponseFactory();
+    const request = httpServerMock.createKibanaRequest({
+      query: {
+        query: JSON.stringify({ term: { workflowId: 'wf-1' } }),
+        from: 25,
+        size: 25,
+        sort: JSON.stringify([{ startedAt: { order: 'desc' } }]),
+        trackTotalHits: true,
+      },
+    });
+
+    await routeHandlers[`GET:/internal/workflows/executions`].handler(
+      mockContext,
+      request,
+      response
+    );
+
+    expect(mockApi.searchExecutionsView).toHaveBeenCalledWith(
+      {
+        query: { term: { workflowId: 'wf-1' } },
+        from: 25,
+        size: 25,
+        sort: [{ startedAt: { order: 'desc' } }],
+        trackTotalHits: true,
+      },
+      'default'
+    );
+    expect(response.ok).toHaveBeenCalledWith({
+      body: { hits: { hits: [], total: { value: 0, relation: 'eq' } } },
+    });
+  });
+
+  it('should return bad request for invalid JSON query params', async () => {
+    const response = httpServerMock.createResponseFactory();
+    const request = httpServerMock.createKibanaRequest({
+      query: {
+        query: '{invalid-json',
+      },
+    });
+
+    await routeHandlers[`GET:/internal/workflows/executions`].handler(
+      mockContext,
+      request,
+      response
+    );
+
+    expect(response.badRequest).toHaveBeenCalledWith({
+      body: { message: 'Invalid JSON in query' },
+    });
+    expect(mockApi.searchExecutionsView).not.toHaveBeenCalled();
   });
 
   it('should register trigger event log search routes', () => {

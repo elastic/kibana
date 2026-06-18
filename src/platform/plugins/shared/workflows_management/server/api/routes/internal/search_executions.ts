@@ -7,13 +7,57 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { schema } from '@kbn/config-schema';
 import type { SearchExecutionsViewParams } from '../../workflows_management_service';
-import { parseJsonParam, querySchema } from '../executions/search_executions';
 import type { RouteDependencies } from '../types';
-import { INTERNAL_API_VERSION } from '../utils/route_constants';
+import {
+  INTERNAL_API_VERSION,
+  MAX_TRIGGER_EVENT_SEARCH_KQL_LENGTH,
+} from '../utils/route_constants';
 import { handleRouteError } from '../utils/route_error_handlers';
 import { WORKFLOW_EXECUTION_READ_SECURITY } from '../utils/route_security';
 import { withAvailabilityCheck } from '../utils/with_availability_check';
+
+const MAX_EXECUTIONS_SEARCH_QUERY_JSON_LENGTH = MAX_TRIGGER_EVENT_SEARCH_KQL_LENGTH * 4;
+const MAX_EXECUTIONS_SEARCH_SORT_JSON_LENGTH = 4096;
+
+const querySchema = schema.object({
+  query: schema.maybe(
+    schema.string({
+      maxLength: MAX_EXECUTIONS_SEARCH_QUERY_JSON_LENGTH,
+      meta: { description: 'JSON-encoded Elasticsearch query DSL.' },
+    })
+  ),
+  sort: schema.maybe(
+    schema.string({
+      maxLength: MAX_EXECUTIONS_SEARCH_SORT_JSON_LENGTH,
+      meta: { description: 'JSON-encoded Elasticsearch sort definition.' },
+    })
+  ),
+  from: schema.maybe(schema.number({ min: 0, meta: { description: 'Pagination offset.' } })),
+  size: schema.maybe(
+    schema.number({
+      min: 1,
+      max: 1000,
+      meta: { description: 'Number of results to return.' },
+    })
+  ),
+  trackTotalHits: schema.maybe(
+    schema.boolean({ meta: { description: 'Whether to track total hit count.' } })
+  ),
+});
+
+const parseJsonParam = <T>(value: string | undefined, paramName: string): T | undefined => {
+  if (value == null || value === '') {
+    return undefined;
+  }
+
+  try {
+    return JSON.parse(value) as T;
+  } catch {
+    throw new Error(`Invalid JSON in ${paramName}`);
+  }
+};
 
 export function registerInternalSearchExecutionsRoute({ router, api, spaces }: RouteDependencies) {
   router.versioned
