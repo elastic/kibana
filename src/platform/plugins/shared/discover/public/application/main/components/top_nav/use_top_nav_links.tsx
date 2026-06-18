@@ -412,19 +412,20 @@ export const useTopNavLinks = ({
 
     const registry = getAppMenu(discoverParams).appMenuRegistry(newAppMenuRegistry);
 
-    if (showCreateRuleV2) {
-      const createRuleOptionsAppMenuItem = getCreateRuleOptionsAppMenuItem({
-        baseItem: registry.getItem(AppMenuActionId.alerts),
-        alertsPopoverItems: registry.getPopoverItems(AppMenuActionId.alerts),
-        services,
-        tabId: currentTab.id,
-        getState,
-        subscribe,
-      });
+    const CreateRuleOptionsFlyout = services.alertingVTwo?.CreateRuleOptionsFlyout;
 
-      if (createRuleOptionsAppMenuItem) {
-        registry.registerItem(createRuleOptionsAppMenuItem);
-      }
+    if (showCreateRuleV2 && CreateRuleOptionsFlyout) {
+      registry.registerItem(
+        getCreateRuleOptionsAppMenuItem({
+          CreateRuleOptionsFlyout,
+          baseItem: registry.getItem(AppMenuActionId.alerts),
+          alertsPopoverItems: registry.getPopoverItems(AppMenuActionId.alerts),
+          services,
+          tabId: currentTab.id,
+          getState,
+          subscribe,
+        })
+      );
     }
 
     return registry;

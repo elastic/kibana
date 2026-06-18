@@ -22,7 +22,10 @@ import type {
   DiscoverAppMenuPopoverItem,
   DiscoverAppMenuRunActionParams,
 } from '@kbn/discover-utils';
-import type { CreateRuleOptionsFlyoutLegacyItem } from '@kbn/alerting-v2-plugin/public';
+import type {
+  CreateRuleOptionsFlyoutLegacyItem,
+  CreateRuleOptionsFlyoutProps,
+} from '@kbn/alerting-v2-plugin/public';
 import type { AppMenuDiscoverParams } from './types';
 import type { DiscoverServices } from '../../../../../build_services';
 import { createSearchSource } from '../../../state_management/utils/create_search_source';
@@ -152,6 +155,7 @@ export const getCreateRuleOptionsFlyoutLegacyItems = (
 };
 
 export const getCreateRuleOptionsAppMenuItem = ({
+  CreateRuleOptionsFlyout,
   baseItem,
   alertsPopoverItems,
   services,
@@ -159,19 +163,14 @@ export const getCreateRuleOptionsAppMenuItem = ({
   getState,
   subscribe,
 }: {
+  CreateRuleOptionsFlyout: React.ComponentType<CreateRuleOptionsFlyoutProps>;
   baseItem: DiscoverAppMenuItemType | undefined;
   alertsPopoverItems: DiscoverAppMenuPopoverItem[];
   services: DiscoverServices;
   tabId: string;
   getState: () => DiscoverInternalState;
   subscribe: (listener: () => void) => () => void;
-}): DiscoverAppMenuItemType | undefined => {
-  const CreateRuleOptionsFlyout = services.alertingVTwo?.CreateRuleOptionsFlyout;
-
-  if (!CreateRuleOptionsFlyout) {
-    return undefined;
-  }
-
+}): DiscoverAppMenuItemType => {
   const { items, popoverWidth, popoverTestId, ...baseAppMenuItem } = baseItem ?? {};
 
   return {

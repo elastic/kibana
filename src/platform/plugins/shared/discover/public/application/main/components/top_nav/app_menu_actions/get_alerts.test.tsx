@@ -85,6 +85,16 @@ const getAlertsMenuItem = async (
   return (await setupAlertsMenuItem(params)).alertsMenuItem;
 };
 
+const getCreateRuleOptionsFlyout = (services: DiscoverServices) => {
+  const CreateRuleOptionsFlyout = services.alertingVTwo?.CreateRuleOptionsFlyout;
+
+  if (!CreateRuleOptionsFlyout) {
+    throw new Error('Expected create rule options flyout to be available');
+  }
+
+  return CreateRuleOptionsFlyout;
+};
+
 const setupCreateRuleOptionsMenuItem = async (
   params: SetupAlertsMenuItemParams & {
     alertsPopoverItems?: DiscoverAppMenuPopoverItem[];
@@ -92,6 +102,7 @@ const setupCreateRuleOptionsMenuItem = async (
 ) => {
   const setup = await setupAlertsMenuItem({ ...params, isEsqlMode: params.isEsqlMode ?? true });
   const createRuleOptionsAppMenuItem = getCreateRuleOptionsAppMenuItem({
+    CreateRuleOptionsFlyout: getCreateRuleOptionsFlyout(setup.services),
     baseItem: setup.alertsMenuItem,
     alertsPopoverItems: params.alertsPopoverItems ?? setup.alertsMenuItem.items ?? [],
     services: setup.services,
@@ -99,10 +110,6 @@ const setupCreateRuleOptionsMenuItem = async (
     getState: setup.toolkit.internalState.getState,
     subscribe: (listener) => setup.toolkit.internalState.subscribe(listener),
   });
-
-  if (!createRuleOptionsAppMenuItem) {
-    throw new Error('Expected create rule options app menu item to be defined');
-  }
 
   return { ...setup, createRuleOptionsAppMenuItem };
 };
@@ -241,6 +248,7 @@ describe('getAlertsAppMenuItem', () => {
     it('should return a direct render action that preserves base item metadata', async () => {
       const { alertsMenuItem, currentTab, services, toolkit } = await setupAlertsMenuItem();
       const createRuleOptionsAppMenuItem = getCreateRuleOptionsAppMenuItem({
+        CreateRuleOptionsFlyout: getCreateRuleOptionsFlyout(services),
         baseItem: { ...alertsMenuItem, separator: 'above' },
         alertsPopoverItems: alertsMenuItem.items ?? [],
         services,
@@ -249,29 +257,12 @@ describe('getAlertsAppMenuItem', () => {
         subscribe: (listener) => toolkit.internalState.subscribe(listener),
       });
 
-      expect(createRuleOptionsAppMenuItem?.id).toBe(AppMenuActionId.alerts);
-      expect(createRuleOptionsAppMenuItem?.label).toBe('Create alert rule');
-      expect(createRuleOptionsAppMenuItem?.testId).toBe('discoverAlertsButton');
-      expect(createRuleOptionsAppMenuItem?.separator).toBe('above');
-      expect(createRuleOptionsAppMenuItem?.render).toEqual(expect.any(Function));
-      expect(createRuleOptionsAppMenuItem?.items).toBeUndefined();
-    });
-
-    it('should return undefined when the v2 flyout is unavailable', async () => {
-      const { alertsMenuItem, currentTab, services, toolkit } = await setupAlertsMenuItem({
-        services: { ...createDiscoverServicesMock(), alertingVTwo: undefined },
-      });
-
-      const createRuleOptionsAppMenuItem = getCreateRuleOptionsAppMenuItem({
-        baseItem: alertsMenuItem,
-        alertsPopoverItems: alertsMenuItem.items ?? [],
-        services,
-        tabId: currentTab.id,
-        getState: toolkit.internalState.getState,
-        subscribe: (listener) => toolkit.internalState.subscribe(listener),
-      });
-
-      expect(createRuleOptionsAppMenuItem).toBeUndefined();
+      expect(createRuleOptionsAppMenuItem.id).toBe(AppMenuActionId.alerts);
+      expect(createRuleOptionsAppMenuItem.label).toBe('Create alert rule');
+      expect(createRuleOptionsAppMenuItem.testId).toBe('discoverAlertsButton');
+      expect(createRuleOptionsAppMenuItem.separator).toBe('above');
+      expect(createRuleOptionsAppMenuItem.render).toEqual(expect.any(Function));
+      expect(createRuleOptionsAppMenuItem.items).toBeUndefined();
     });
   });
 
