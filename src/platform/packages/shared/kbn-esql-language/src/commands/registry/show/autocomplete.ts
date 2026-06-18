@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import type { ESQLAstAllCommands } from '@elastic/esql/types';
 import type { ICommandCallbacks } from '../types';
 import { type ISuggestionItem, type ICommandContext } from '../types';
-import { getNewLineAndPipeCompleteItems } from '../complete_items';
+import { newLineAndPipeCompleteItems } from '../complete_items';
 
 export async function autocomplete(
   query: string,
@@ -22,7 +22,7 @@ export async function autocomplete(
   const innerText = query.substring(0, cursorPosition);
   // SHOW INFO /
   if (/INFO\s+$/i.test(innerText)) {
-    return getNewLineAndPipeCompleteItems();
+    return newLineAndPipeCompleteItems;
   }
   // SHOW LOLZ /
   else if (/SHOW\s+\S+\s+$/i.test(innerText)) {

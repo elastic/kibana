@@ -67,7 +67,7 @@ export const newLineCompleteItem: ISuggestionItem = withAutoSuggest({
   category: SuggestionCategory.NEW_LINE,
 });
 
-export const getNewLineAndPipeCompleteItems = (): ISuggestionItem[] => [
+export const newLineAndPipeCompleteItems: ISuggestionItem[] = [
   newLineCompleteItem,
   pipeCompleteItem,
 ];

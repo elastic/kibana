@@ -37,7 +37,6 @@ describe('KEEP Autocomplete', () => {
 
     keepExpectSuggestions('FROM a | KEEP ', [
       ...Array.from(columns.values()).map((column) => column.name),
-      '\n',
     ]);
   });
 

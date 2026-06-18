@@ -11,7 +11,7 @@ import type { ESQLAstAllCommands } from '@elastic/esql/types';
 import { isSubQuery, isSource } from '@elastic/esql';
 import {
   newLineCompleteItem,
-  getNewLineAndPipeCompleteItems,
+  newLineAndPipeCompleteItems,
   commaCompleteItem,
   buildSubqueryCompleteItems,
 } from '../complete_items';
@@ -175,7 +175,7 @@ async function suggestNextActions(
   callbacks: ICommandCallbacks | undefined
 ): Promise<ISuggestionItem[]> {
   const suggestions: ISuggestionItem[] = [
-    ...getNewLineAndPipeCompleteItems(),
+    ...newLineAndPipeCompleteItems,
     commaCompleteItem,
     metadataSuggestion,
   ];
@@ -243,6 +243,7 @@ async function suggestAdditionalSources(
     suggestions.unshift({
       ...newLineCompleteItem,
       text: lastIndex.name + '\n',
+      filterText: lastIndex.name,
       rangeToReplace: { start: indexNameStart, end: innerText.length },
     });
   }

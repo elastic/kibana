@@ -65,6 +65,7 @@ const CONTEXT_BOOSTS: Partial<Record<Location, Partial<Record<SuggestionCategory
   [Location.PROMQL]: {
     // Push language keywords (e.g. "by") after pipe but before operators.
     [SuggestionCategory.LANGUAGE_KEYWORD]: 100, // From 50 to 150
+    [SuggestionCategory.NEW_LINE]: -151, // From 199 to 48 (top, just before PIPE)
     [SuggestionCategory.PIPE]: -150, // From 200 to 50 (top)
   },
 };
