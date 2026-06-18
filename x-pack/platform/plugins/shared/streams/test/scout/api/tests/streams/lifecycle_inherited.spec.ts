@@ -155,7 +155,9 @@ apiTest.describe(
       'returns the ILM policy a classic stream would inherit from its index template',
       // ILM is a stateful-only concept, so this case does not apply to serverless.
       { tag: tags.stateful.classic },
-      async ({ apiClient, samlAuth, esClient }) => {
+      async ({ apiClient, samlAuth, esClient, config }) => {
+        apiTest.skip(config.serverless, 'ILM is a stateful-only concept');
+
         const { cookieHeader } = await samlAuth.asStreamsAdmin();
 
         // Classic stream backed by an index template that points at an ILM policy.

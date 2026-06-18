@@ -11,15 +11,15 @@ import { test } from '../../../fixtures';
 import { generateLogsData } from '../../../fixtures/generators';
 import {
   disableInheritFailureStoreIfEnabled,
-  openRetentionModal,
   saveFailureStoreChanges,
-  saveRetentionChanges,
-  setCustomRetention,
   setFailureStoreRetention,
   toggleFailureStore,
-  toggleInheritSwitch,
-  verifyRetentionDisplay,
 } from '../../../fixtures/retention_helpers';
+import {
+  ensureDslLifecycle,
+  setCustomRetention,
+  verifyRetentionDisplay,
+} from '../../../fixtures/data_lifecycle_helpers';
 
 test.describe('Stream data retention - updating failure store', () => {
   test.beforeAll(async ({ apiServices, logsSynthtraceEsClient, esClient }) => {
@@ -183,11 +183,8 @@ test.describe('Stream data retention - updating failure store', () => {
     async ({ page, pageObjects }) => {
       await pageObjects.streams.gotoDataRetentionTab('logs-generic-default');
 
-      // Set main retention to 30 days
-      await openRetentionModal(page);
-      await toggleInheritSwitch(page, false);
+      await ensureDslLifecycle(page);
       await setCustomRetention(page, '30', 'd');
-      await saveRetentionChanges(page);
       await verifyRetentionDisplay(page, '30 days');
 
       // Set failure store retention to 7 days
