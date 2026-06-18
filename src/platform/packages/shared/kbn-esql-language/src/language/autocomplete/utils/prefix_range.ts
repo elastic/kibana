@@ -9,6 +9,7 @@
 
 import { Parser } from '@elastic/esql';
 import type { ICommandContext, ISuggestionItem } from '../../../commands/registry/types';
+import { SuggestionCategory } from './sorting/types';
 import { getOverlapRange } from '../../../commands/definitions/utils/shared';
 import {
   containsWhitespace,
@@ -148,7 +149,11 @@ export function attachReplacementRanges(
       return [];
     }
 
-    if (prefixMatchesExistingColumn && !requiresExistingColumnMatch) {
+    const isStructural =
+      suggestion.category === SuggestionCategory.NEW_LINE ||
+      suggestion.category === SuggestionCategory.PIPE;
+
+    if (!isStructural && prefixMatchesExistingColumn && !requiresExistingColumnMatch) {
       return [];
     }
 
@@ -157,7 +162,7 @@ export function attachReplacementRanges(
         ? {
             ...suggestion,
             text: prefix + suggestion.text,
-            filterText: filterText ?? prefix,
+            filterText: filterText || prefix,
           }
         : suggestion;
 
