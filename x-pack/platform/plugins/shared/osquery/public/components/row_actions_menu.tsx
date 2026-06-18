@@ -8,10 +8,11 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import {
   EuiButtonIcon,
+  EuiConfirmModal,
   EuiContextMenuItem,
   EuiContextMenuPanel,
-  EuiConfirmModal,
   EuiPopover,
+  EuiToolTip,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -139,12 +140,14 @@ const RowActionsMenuComponent: React.FC<RowActionsMenuProps> = ({
     <>
       <EuiPopover
         button={
-          <EuiButtonIcon
-            iconType="boxesVertical"
-            aria-label={actionsAriaLabel}
-            onClick={togglePopover}
-            color="primary"
-          />
+          <EuiToolTip content={actionsAriaLabel} disableScreenReaderOutput>
+            <EuiButtonIcon
+              iconType="boxesVertical"
+              aria-label={actionsAriaLabel}
+              onClick={togglePopover}
+              color="primary"
+            />
+          </EuiToolTip>
         }
         isOpen={isPopoverOpen}
         closePopover={closePopover}
