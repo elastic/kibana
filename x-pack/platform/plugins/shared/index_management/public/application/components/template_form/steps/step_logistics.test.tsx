@@ -6,10 +6,36 @@
  */
 
 import React from 'react';
-import { render, screen, within } from '@testing-library/react';
+import { render, screen, within, fireEvent, waitFor } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 
 import { StepLogistics } from './step_logistics';
+
+jest.mock('../../../app_context', () => ({
+  useAppContext: () => ({
+    config: { isServerless: false },
+    plugins: { cloud: undefined },
+    core: {
+      application: { capabilities: { management: { stack: { license_management: true } } } },
+      getUrlForApp: () => 'http://localhost/app/management',
+    },
+  }),
+}));
+
+jest.mock('../../../../hooks/use_license', () => ({
+  useLicense: () => ({ isAtLeastEnterprise: () => true }),
+}));
+
+jest.mock('../../../services/api', () => ({
+  useLoadSnapshotRepositories: () => ({
+    data: {
+      hasDefaultRepository: true,
+      defaultRepository: 'found-snapshots',
+      canCreateRepository: true,
+    },
+    resendRequest: jest.fn(),
+  }),
+}));
 
 describe('StepLogistics', () => {
   const baseDefaultValue = {
@@ -60,5 +86,31 @@ describe('StepLogistics', () => {
       const nameInput = within(nameRow).getByRole('textbox');
       expect(nameInput).toBeEnabled();
     });
+  });
+
+  it('SHOULD block the step when data lifecycle is invalid', async () => {
+    const onChange = jest.fn();
+
+    render(
+      <I18nProvider>
+        <StepLogistics defaultValue={baseDefaultValue} onChange={onChange} isLegacy={false} />
+      </I18nProvider>
+    );
+
+    await waitFor(() => expect(onChange).toHaveBeenCalled());
+    const callsBeforeInvalidation = onChange.mock.calls.length;
+
+    fireEvent.click(await screen.findByTestId('dlmPhasesSelectorFrozenPhaseCard'));
+    fireEvent.click(screen.getByTestId('dlmPhasesSelectorDeletePhaseCard'));
+
+    fireEvent.change(await screen.findByTestId('deleteDurationValue'), { target: { value: '20' } });
+    await screen.findByText('Must occur after the frozen phase (30d).');
+
+    await waitFor(() => {
+      expect(onChange.mock.calls.length).toBeGreaterThan(callsBeforeInvalidation);
+    });
+
+    const lastCall = onChange.mock.calls.at(-1)?.[0];
+    expect(await lastCall.validate()).toBe(false);
   });
 });

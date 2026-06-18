@@ -7,6 +7,34 @@
 
 import type { DataStream, DataRetention } from '../types';
 
+export const HOT_ONLY_INFINITE_DATA_RETENTION: DataRetention = {
+  enabled: true,
+  infiniteDataRetention: true,
+};
+
+export const resolveLogisticsLifecycle = (
+  lifecycle: DataRetention | undefined,
+  { isDataStreamTemplate }: { isDataStreamTemplate: boolean }
+): DataRetention | undefined => {
+  if (!isDataStreamTemplate) {
+    return lifecycle;
+  }
+
+  if (lifecycle?.infiniteDataRetention) {
+    return lifecycle;
+  }
+
+  if (lifecycle?.enabled && lifecycle.value !== undefined) {
+    return lifecycle;
+  }
+
+  if (lifecycle?.frozen?.enabled) {
+    return lifecycle;
+  }
+
+  return HOT_ONLY_INFINITE_DATA_RETENTION;
+};
+
 export const splitSizeAndUnits = (field: string): { size: string; unit: string } => {
   let size = '';
   let unit = '';
@@ -24,21 +52,30 @@ export const splitSizeAndUnits = (field: string): { size: string; unit: string }
 };
 
 export const serializeAsESLifecycle = (lifecycle?: DataRetention): DataStream['lifecycle'] => {
-  if (!lifecycle || !lifecycle?.enabled) {
+  const frozenEnabled = Boolean(lifecycle?.frozen?.enabled);
+
+  if (!lifecycle || (!lifecycle.enabled && !frozenEnabled)) {
     return undefined;
   }
 
-  const { infiniteDataRetention, value, unit } = lifecycle;
+  const { infiniteDataRetention, value, unit, frozen } = lifecycle;
 
-  if (infiniteDataRetention) {
+  const frozenAfter =
+    frozenEnabled && frozen?.value !== undefined && frozen?.unit !== undefined
+      ? { frozen_after: `${frozen.value}${frozen.unit}` }
+      : {};
+
+  if (!lifecycle.enabled || infiniteDataRetention) {
     return {
       enabled: true,
+      ...frozenAfter,
     };
   }
 
   return {
     enabled: true,
     data_retention: `${value}${unit}`,
+    ...frozenAfter,
   };
 };
 
@@ -47,10 +84,18 @@ export const deserializeESLifecycle = (lifecycle?: DataStream['lifecycle']): Dat
     return { enabled: false };
   }
 
+  const frozen = lifecycle.frozen_after
+    ? (() => {
+        const { size, unit } = splitSizeAndUnits(lifecycle.frozen_after as string);
+        return { frozen: { enabled: true, value: Number(size), unit } };
+      })()
+    : {};
+
   if (!lifecycle.data_retention) {
     return {
       enabled: true,
       infiniteDataRetention: true,
+      ...frozen,
     };
   }
 
@@ -60,5 +105,6 @@ export const deserializeESLifecycle = (lifecycle?: DataStream['lifecycle']): Dat
     enabled: true,
     value: Number(size),
     unit,
+    ...frozen,
   };
 };

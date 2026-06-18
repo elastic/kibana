@@ -61,12 +61,23 @@ export const DlmPhasesSelector = ({
 
   const updateValue = useCallback(
     (nextValue: DlmPhasesSelectorValue) => {
+      hasUserModifiedRef.current = true;
       setValue(nextValue);
       const nextValidation = validateDurations(nextValue);
       onChange?.(nextValue, serializeDlmPhases(nextValue), nextValidation.isValid);
     },
     [onChange]
   );
+
+  useEffect(() => {
+    if (hasEmittedInitialChangeRef.current || !onChange) {
+      return;
+    }
+
+    hasEmittedInitialChangeRef.current = true;
+    const initialValidation = validateDurations(value);
+    onChange(value, serializeDlmPhases(value), initialValidation.isValid);
+  }, [onChange, value]);
 
   const updateFrozen = useCallback(
     (nextFrozen: DlmPhaseDuration) => {

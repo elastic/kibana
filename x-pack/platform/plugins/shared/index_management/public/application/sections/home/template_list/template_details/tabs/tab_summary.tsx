@@ -23,7 +23,10 @@ import {
 import type { IndexManagementLocatorParams } from '@kbn/index-management-shared-types';
 import { useAppContext } from '../../../../../app_context';
 import { serializeAsESLifecycle } from '../../../../../../../common/lib';
-import { getLifecycleValue } from '../../../../../lib/data_streams';
+import {
+  formatDlmLifecycleSummary,
+  resolveLifecycleForSummary,
+} from '../../../../../lib/data_streams';
 import type { TemplateDeserialized } from '../../../../../../../common';
 import { ILM_PAGES_POLICY_EDIT, INGEST_PIPELINES_EDIT } from '../../../../../constants';
 import { useIlmLocator } from '../../../../../services/use_ilm_locator';
@@ -36,7 +39,6 @@ interface Props {
   templateDetails: TemplateDeserialized;
 }
 
-const INFINITE_AS_ICON = true;
 const i18nTexts = {
   yes: i18n.translate('xpack.idxMgmt.templateDetails.summaryTab.yesDescriptionText', {
     defaultMessage: 'Yes',
@@ -50,6 +52,12 @@ const i18nTexts = {
 };
 
 export const TabSummary: React.FunctionComponent<Props> = ({ templateDetails }) => {
+  const {
+    core,
+    url,
+    config: { isServerless },
+  } = useAppContext();
+  const dlmTiersLayoutEnabled = !isServerless;
   const {
     version,
     priority,
@@ -65,7 +73,6 @@ export const TabSummary: React.FunctionComponent<Props> = ({ templateDetails }) 
 
   const numIndexPatterns = indexPatterns.length;
 
-  const { core, url } = useAppContext();
   const ilmPolicyLink = useIlmLocator(ILM_PAGES_POLICY_EDIT, ilmPolicy?.name);
   const locator = url.locators.get<IndexManagementLocatorParams>(INDEX_MANAGEMENT_LOCATOR_ID);
 
@@ -74,6 +81,12 @@ export const TabSummary: React.FunctionComponent<Props> = ({ templateDetails }) 
   const linkedIngestPipelineUrl = useIngestPipelinesLocator(
     INGEST_PIPELINES_EDIT,
     linkedIngestPipeline
+  );
+
+  const lifecycle = resolveLifecycleForSummary(
+    templateDetails.template?.lifecycle ??
+      (templateDetails.lifecycle ? serializeAsESLifecycle(templateDetails.lifecycle) : undefined),
+    { hasDataStream: hasDatastream }
   );
 
   return (
@@ -241,20 +254,19 @@ export const TabSummary: React.FunctionComponent<Props> = ({ templateDetails }) 
               {version || version === 0 ? version : i18nTexts.none}
             </EuiDescriptionListDescription>
 
-            {/* Data retention */}
-            {hasDatastream && templateDetails?.lifecycle && (
+            {/* Data lifecycle */}
+            {hasDatastream && lifecycle?.enabled && (
               <>
                 <EuiDescriptionListTitle>
                   <FormattedMessage
                     id="xpack.idxMgmt.templateDetails.summaryTab.lifecycleDescriptionListTitle"
-                    defaultMessage="Data retention"
+                    defaultMessage="Data lifecycle"
                   />
                 </EuiDescriptionListTitle>
                 <EuiDescriptionListDescription>
-                  {getLifecycleValue(
-                    serializeAsESLifecycle(templateDetails.lifecycle),
-                    INFINITE_AS_ICON
-                  )}
+                  {formatDlmLifecycleSummary(lifecycle, {
+                    includePhaseCount: dlmTiersLayoutEnabled,
+                  })}
                 </EuiDescriptionListDescription>
               </>
             )}

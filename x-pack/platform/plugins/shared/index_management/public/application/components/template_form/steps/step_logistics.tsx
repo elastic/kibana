@@ -5,10 +5,12 @@
  * 2.0.
  */
 
-import React, { useEffect, useCallback, Fragment } from 'react';
+import React, { useEffect, useCallback, useMemo, useState, Fragment } from 'react';
 import {
+  EuiBadge,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiIcon,
   EuiTitle,
   EuiButtonEmpty,
   EuiSpacer,
@@ -19,6 +21,10 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
+import { DlmPhasesSelector } from '../../data_lifecycle';
+import type { DlmPhasesSelectorProps, SerializedDlmPhases } from '../../data_lifecycle';
+import { resolveLogisticsLifecycle } from '../../../../../common/lib';
+import { buildDataRetentionFromSerializedDlmPhases } from '../../data_lifecycle/dlm_phases_selector/utils/build_data_retention';
 import type { Forms } from '../../../../shared_imports';
 import {
   useForm,
@@ -28,13 +34,14 @@ import {
   getFormRow,
   Field,
   JsonEditorField,
-  NumericField,
   RadioGroupField,
   ToggleField,
 } from '../../../../shared_imports';
-import { UnitField, timeUnits } from '../../shared';
 import type { DataRetention } from '../../../../../common';
 import { documentationService } from '../../../services/documentation';
+import { useAppContext } from '../../../app_context';
+import { useLicense } from '../../../../hooks/use_license';
+import { useLoadSnapshotRepositories } from '../../../services/api';
 import { schemas, nameConfig, nameConfigWithoutValidations } from '../template_form_schemas';
 import {
   allowAutoCreateRadios,
@@ -44,6 +51,35 @@ import {
   LOOKUP_INDEX_MODE,
 } from '../../../../../common/constants';
 import { indexModeLabels, indexModeDescriptions } from '../../../lib/index_mode_labels';
+
+const SUBSCRIPTION_FEATURES_URL = 'https://www.elastic.co/subscriptions/cloud';
+
+const buildDlmDefaultValue = (
+  lifecycle?: DataRetention
+): DlmPhasesSelectorProps['defaultValue'] => {
+  if (!lifecycle) {
+    return undefined;
+  }
+
+  const deletePhase =
+    lifecycle.enabled && !lifecycle.infiniteDataRetention && lifecycle.value !== undefined
+      ? { enabled: true, value: String(lifecycle.value), unit: lifecycle.unit ?? 'd' }
+      : undefined;
+
+  const frozenPhase =
+    lifecycle.frozen?.enabled && lifecycle.frozen.value !== undefined
+      ? { enabled: true, value: String(lifecycle.frozen.value), unit: lifecycle.frozen.unit ?? 'd' }
+      : undefined;
+
+  if (!deletePhase && !frozenPhase) {
+    return undefined;
+  }
+
+  return {
+    ...(frozenPhase ? { frozen: frozenPhase } : {}),
+    ...(deletePhase ? { delete: deletePhase } : {}),
+  };
+};
 
 // Create or Form components with partial props that are common to all instances
 const UseField = getUseField({ component: Field });
@@ -191,19 +227,6 @@ function getFieldsMeta(esDocsBase: string) {
       }),
       testSubject: 'versionField',
     },
-    dataRetention: {
-      title: i18n.translate('xpack.idxMgmt.templateForm.stepLogistics.dataRetentionTitle', {
-        defaultMessage: 'Data retention',
-      }),
-      description: i18n.translate(
-        'xpack.idxMgmt.templateForm.stepLogistics.dataRetentionDescription',
-        {
-          defaultMessage:
-            'Data will be kept at least this long before being automatically deleted.',
-        }
-      ),
-      unitTestSubject: 'unitDataRetentionField',
-    },
     allowAutoCreate: {
       title: i18n.translate('xpack.idxMgmt.templateForm.stepLogistics.allowAutoCreateTitle', {
         defaultMessage: 'Allow auto create',
@@ -225,6 +248,7 @@ function getFieldsMeta(esDocsBase: string) {
 
 interface LogisticsForm {
   [key: string]: any;
+  lifecycle?: DataRetention;
 }
 
 interface LogisticsFormInternal extends LogisticsForm {
@@ -284,27 +308,70 @@ export const StepLogistics: React.FunctionComponent<Props> = React.memo(
       updateFieldValues,
     } = form;
 
-    const [
-      { addMeta, doCreateDataStream, lifecycle, indexPatterns: indexPatternsField, setIndexMode },
-    ] = useFormData<{
-      addMeta: boolean;
-      lifecycle: DataRetention;
-      doCreateDataStream: boolean;
-      indexPatterns: string[];
-      indexMode: string;
-      setIndexMode: boolean;
-    }>({
-      form,
-      watch: [
-        'addMeta',
-        'lifecycle.enabled',
-        'lifecycle.infiniteDataRetention',
-        'doCreateDataStream',
-        'indexPatterns',
-        'indexMode',
-        'setIndexMode',
-      ],
+    const [{ addMeta, doCreateDataStream, indexPatterns: indexPatternsField, setIndexMode }] =
+      useFormData<{
+        addMeta: boolean;
+        doCreateDataStream: boolean;
+        indexPatterns: string[];
+        indexMode: string;
+        setIndexMode: boolean;
+      }>({
+        form,
+        watch: ['addMeta', 'doCreateDataStream', 'indexPatterns', 'indexMode', 'setIndexMode'],
+      });
+
+    const {
+      plugins: { cloud },
+      core: { application, getUrlForApp },
+      config: { isServerless },
+    } = useAppContext();
+    const { isAtLeastEnterprise } = useLicense();
+    const { data: snapshotRepositories, resendRequest: refreshSnapshotRepositories } =
+      useLoadSnapshotRepositories();
+
+    const isDlmPhasesSelectorServerless = isServerless;
+
+    const manageRepositoriesUrl = getUrlForApp('management', {
+      path: 'data/snapshot_restore/repositories',
     });
+    const createDefaultRepositoryUrl = getUrlForApp('management', {
+      path: 'data/snapshot_restore/add_repository',
+    });
+
+    const [lifecycle, setLifecycle] = useState<DataRetention | undefined>(defaultValue.lifecycle);
+    const [isDlmValid, setIsDlmValid] = useState(true);
+
+    const dlmDefaultValue = useMemo(
+      () => buildDlmDefaultValue(defaultValue.lifecycle),
+      [defaultValue.lifecycle]
+    );
+
+    const handleDlmChange = useCallback(
+      (_value: unknown, serialized: SerializedDlmPhases, nextIsValid: boolean) => {
+        setLifecycle(buildDataRetentionFromSerializedDlmPhases(serialized));
+        setIsDlmValid(nextIsValid);
+      },
+      []
+    );
+
+    const totalRetentionValue = useMemo(() => {
+      if (lifecycle?.enabled && lifecycle.value !== undefined) {
+        return `${lifecycle.value}${lifecycle.unit ?? 'd'}`;
+      }
+      return undefined;
+    }, [lifecycle]);
+
+    const isStepValid = isFormValid && (!doCreateDataStream || isDlmValid);
+
+    const getData = useCallback(() => {
+      const data = getFormData();
+      return {
+        ...data,
+        lifecycle: doCreateDataStream
+          ? resolveLogisticsLifecycle(lifecycle, { isDataStreamTemplate: true })
+          : undefined,
+      };
+    }, [getFormData, lifecycle, doCreateDataStream]);
 
     useEffect(() => {
       if (!setIndexMode) {
@@ -332,16 +399,17 @@ export const StepLogistics: React.FunctionComponent<Props> = React.memo(
      * and we can display the form errors on top of the forms if there are any.
      */
     const validate = useCallback(async () => {
-      return (await submit()).isValid;
-    }, [submit]);
+      const formValidation = await submit();
+      return formValidation.isValid && (!doCreateDataStream || isDlmValid);
+    }, [submit, doCreateDataStream, isDlmValid]);
 
     useEffect(() => {
       onChange({
-        isValid: isFormValid,
-        getData: getFormData,
+        isValid: isStepValid,
+        getData,
         validate,
       });
-    }, [onChange, isFormValid, validate, getFormData]);
+    }, [onChange, isStepValid, validate, getData]);
 
     const {
       name,
@@ -351,7 +419,6 @@ export const StepLogistics: React.FunctionComponent<Props> = React.memo(
       order,
       priority,
       version,
-      dataRetention,
       allowAutoCreate,
     } = getFieldsMeta(documentationService.getEsDocsBase());
 
@@ -427,57 +494,74 @@ export const StepLogistics: React.FunctionComponent<Props> = React.memo(
           )}
 
           {/*
-            Since data stream and data retention are settings that are only allowed for non legacy,
-            we only need to check if data stream is set to true to show the data retention.
+            Data lifecycle (data retention) is only available for templates that create a data
+            stream, so we only render it when "Create data stream" is enabled.
           */}
           {doCreateDataStream && (
             <FormRow
-              title={dataRetention.title}
-              description={
-                <>
-                  {dataRetention.description}
-                  <EuiSpacer size="m" />
-                  <UseField
-                    path="lifecycle.enabled"
-                    componentProps={{ 'data-test-subj': 'dataRetentionToggle' }}
-                  />
-                </>
-              }
-            >
-              {lifecycle?.enabled && (
-                <UseField
-                  path="lifecycle.value"
-                  component={NumericField}
-                  labelAppend={
-                    <UseField
-                      path="lifecycle.infiniteDataRetention"
-                      data-test-subj="infiniteDataRetentionToggle"
-                      componentProps={{
-                        euiFieldProps: {
-                          compressed: true,
-                        },
-                      }}
+              title={
+                <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+                  <EuiFlexItem grow={false}>
+                    <FormattedMessage
+                      id="xpack.idxMgmt.templateForm.stepLogistics.dataLifecycleTitle"
+                      defaultMessage="Data lifecycle"
                     />
-                  }
-                  componentProps={{
-                    euiFieldProps: {
-                      disabled: lifecycle?.infiniteDataRetention,
-                      'data-test-subj': 'valueDataRetentionField',
-                      min: 1,
-                      append: (
-                        <UnitField
-                          path="lifecycle.unit"
-                          options={timeUnits}
-                          disabled={lifecycle?.infiniteDataRetention}
-                          euiFieldProps={{
-                            'data-test-subj': 'unitDataRetentionField',
-                          }}
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiBadge color="hollow" data-test-subj="totalRetentionBadge">
+                      {totalRetentionValue ?? (
+                        <EuiIcon
+                          type="infinity"
+                          size="s"
+                          aria-label={i18n.translate(
+                            'xpack.idxMgmt.templateForm.stepLogistics.totalRetentionInfiniteAriaLabel',
+                            { defaultMessage: 'Data is kept indefinitely' }
+                          )}
                         />
-                      ),
-                    },
-                  }}
-                />
-              )}
+                      )}
+                    </EuiBadge>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              }
+              description={
+                isDlmPhasesSelectorServerless ? (
+                  <FormattedMessage
+                    id="xpack.idxMgmt.templateForm.stepLogistics.dataLifecycleDescriptionServerless"
+                    defaultMessage="Add a delete phase to your data lifecycle to specify the length of time you wish to retain your data."
+                  />
+                ) : (
+                  <FormattedMessage
+                    id="xpack.idxMgmt.templateForm.stepLogistics.dataLifecycleDescriptionStateful"
+                    defaultMessage="The data lifecycle defines how your stream's data is managed as it ages, dictating storage and retention. Use these settings to automate and optimize storage costs and query performance over time."
+                  />
+                )
+              }
+              fieldFlexItemProps={{
+                'data-test-subj': 'dataLifecyclePhasesSelector',
+              }}
+            >
+              <DlmPhasesSelector
+                defaultValue={dlmDefaultValue}
+                serverless={isDlmPhasesSelectorServerless}
+                hasEnterpriseLicense={isAtLeastEnterprise()}
+                hasDefaultSnapshotRepository={Boolean(snapshotRepositories?.hasDefaultRepository)}
+                canCreateDefaultSnapshotRepository={Boolean(
+                  snapshotRepositories?.canCreateRepository
+                )}
+                defaultSnapshotRepository={snapshotRepositories?.defaultRepository}
+                manageRepositoriesUrl={manageRepositoriesUrl}
+                createDefaultRepositoryUrl={createDefaultRepositoryUrl}
+                onRefreshDefaultSnapshotRepository={refreshSnapshotRepositories}
+                enterprise={{
+                  isCloudEnabled: Boolean(cloud?.isCloudEnabled),
+                  canManageLicense: Boolean(
+                    application?.capabilities?.management?.stack?.license_management
+                  ),
+                  trialDaysLeft: cloud?.trialDaysLeft?.(),
+                  subscriptionFeaturesUrl: SUBSCRIPTION_FEATURES_URL,
+                }}
+                onChange={handleDlmChange}
+              />
             </FormRow>
           )}
 
