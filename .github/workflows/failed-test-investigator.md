@@ -42,7 +42,7 @@ engine:
     ANTHROPIC_DEFAULT_OPUS_MODEL: llm-gateway/claude-opus-4-8[1m]
     ANTHROPIC_DEFAULT_HAIKU_MODEL: llm-gateway/claude-haiku-4-5
     ANTHROPIC_DEFAULT_SONNET_MODEL: llm-gateway/claude-sonnet-4-6
-    CLAUDE_CODE_EFFORT_LEVEL: xhigh
+    CLAUDE_CODE_EFFORT_LEVEL: high
     CLAUDE_CODE_SUBAGENT_MODEL: opus[1m]
 
 tools:
@@ -59,16 +59,26 @@ tools:
       'sort',
       'uniq',
       'date',
-      'yq',
+      'yq:*',
       'jq',
       'echo',
       'ls',
       'pwd',
+      'which:*',
+      'command:*',
       'git:*',
       'gh:*',
       'bk:*',
-      'node',
-      'curl',
+      'node:*',
+      'python3:*',
+      'curl:*',
+      'find:*',
+      'sed:*',
+      'awk:*',
+      'cut:*',
+      'tr:*',
+      'base64:*',
+      'file:*',
     ]
 
 network:
@@ -126,7 +136,7 @@ safe-outputs:
     target: *issue_number
 
 strict: false
-timeout-minutes: 20
+timeout-minutes: 30
 ---
 
 # Failed Test Investigator
@@ -140,7 +150,9 @@ Investigate a failed-test issue, classify the failure, and propose a fix when ap
 
 ## Investigate
 
-Investigate the test failure(s) using the `flaky-test-investigator` skill. Use all of the data at your disposal to reach a conclusion (source code, logs, failure screenshots, etc.).
+Investigate the test failure(s) using the `flaky-test-investigator` skill (path: `.agents/skills/flaky-test-investigator`). Read the files in the folder directly, do not invoke the skill directly as that is disabled in this environment.
+
+Use all of the data at your disposal to reach a conclusion (source code, logs, failure screenshots, etc.).
 
 Every conclusion must cite specific evidence. Do not guess.
 
