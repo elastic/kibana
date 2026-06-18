@@ -92,7 +92,7 @@ export class QueryRuleOrchestrator {
     );
 
     try {
-      await installQueries(this.rulesManagementClient, toCreate, toUpdate, definition);
+      await installQueries(this.rulesManagementClient, toCreate, toUpdate);
     } catch (installError) {
       this.logger.error(
         `installQueries failed during syncQueries for stream "${stream}". Compensating by uninstalling created rules.`
@@ -255,7 +255,7 @@ export class QueryRuleOrchestrator {
       return { promoted: 0, skipped_stats: skippedStats.length };
     }
 
-    await installQueries(this.rulesManagementClient, toPromote, [], definition);
+    await installQueries(this.rulesManagementClient, toPromote, []);
 
     try {
       await this.writer.bulk(

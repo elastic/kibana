@@ -42,11 +42,8 @@ import { ContentService } from './lib/content/content_service';
 import { registerRules } from './lib/sig_events/rules/register_rules';
 import { getSigEventsTuningConfig } from './lib/sig_events/helpers/get_sig_events_tuning_config';
 import { AttachmentService } from './lib/streams/attachments/attachment_service';
-import {
-  isSignificantEventsAlertingV2Active,
-  logAlertingV2PluginUnavailable,
-  readSignificantEventsAlertingV2UiEnabled,
-} from './lib/sig_events/significant_events_alerting_v2';
+import { resolveSignificantEventsAlertingV2State } from './lib/sig_events/create_sig_events_rules_management_client';
+import { runSignificantEventsV2Migration } from './lib/sig_events/migration';
 import { StreamsService } from './lib/streams/service';
 import { EbtTelemetryService, StatsTelemetryService } from './lib/telemetry';
 import { streamsRouteRepository } from './routes';
@@ -217,31 +214,16 @@ export class StreamsPlugin
         | undefined;
 
       const getSignificantEventsAlertingV2State = () => {
-        significantEventsAlertingV2StatePromise ??= (async () => {
-          const alertingV2UiEnabled = await readSignificantEventsAlertingV2UiEnabled(
-            uiSettingsClient,
-            this.logger
-          );
-          const alertingV2RulesClient = pluginsStart.alertingVTwo
-            ? await pluginsStart.alertingVTwo.getRulesClientWithRequestInSpace(
-                request,
-                DEFAULT_SPACE_ID
-              )
-            : undefined;
-
-          if (alertingV2UiEnabled && !alertingV2RulesClient) {
-            logAlertingV2PluginUnavailable(this.logger);
-          }
-
-          return {
-            alertingV2UiEnabled,
-            alertingV2Active: isSignificantEventsAlertingV2Active(
-              alertingV2UiEnabled,
-              alertingV2RulesClient
-            ),
-            alertingV2RulesClient,
-          };
-        })();
+        significantEventsAlertingV2StatePromise ??= resolveSignificantEventsAlertingV2State({
+          uiSettingsClient,
+          alertingVTwo: pluginsStart.alertingVTwo,
+          request,
+          logger: this.logger,
+        }).then(({ alertingV2UiEnabled, alertingV2Active, alertingV2RulesClient }) => ({
+          alertingV2UiEnabled,
+          alertingV2Active,
+          alertingV2RulesClient,
+        }));
         return significantEventsAlertingV2StatePromise;
       };
 
@@ -605,6 +587,18 @@ export class StreamsPlugin
     }).catch((error) => {
       this.logger.error(
         `Failed to initialize knowledge indicators template: ${
+          error instanceof Error ? error.message : String(error)
+        }`
+      );
+    });
+
+    void runSignificantEventsV2Migration({
+      coreStart: core,
+      pluginsStart: plugins,
+      logger: this.logger,
+    }).catch((error) => {
+      this.logger.error(
+        `Failed to run Significant Events v2 migration on start: ${
           error instanceof Error ? error.message : String(error)
         }`
       );

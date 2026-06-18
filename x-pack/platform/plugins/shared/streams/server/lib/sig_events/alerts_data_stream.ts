@@ -7,3 +7,6 @@
 
 /** Alerts-as-data alias the streams plugin reads from (owned by the alerting system). */
 export const ALERTS_DATA_STREAM = '.alerts-streams.alerts-default';
+
+/** Alerting v2 rule execution events data stream. */
+export const RULE_EVENTS_DATA_STREAM = '.rule-events';

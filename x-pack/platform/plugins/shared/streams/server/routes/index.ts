@@ -40,8 +40,10 @@ import { timeSeriesRoutes } from './internal/streams/time_series/route';
 import { internalMemoryRoutes } from './internal/memory/route';
 import { internalSigEventsAvailabilityRoutes } from './internal/sig_events/availability/route';
 import { internalSigEventsDetectionsRoutes } from './internal/sig_events/detections/route';
+import { internalSigEventsDetectionsWorkflowRoutes } from './internal/sig_events/detections/workflow_route';
 import { internalSigEventsDiscoveriesRoutes } from './internal/sig_events/discoveries/route';
 import { internalSigEventsEventsRoutes } from './internal/sig_events/events/route';
+import { internalSigEventsMigrationRoutes } from './internal/sig_events/migration/route';
 
 export const streamsRouteRepository = {
   // internal APIs
@@ -69,8 +71,10 @@ export const streamsRouteRepository = {
   ...internalMemoryRoutes,
   ...internalSigEventsAvailabilityRoutes,
   ...internalSigEventsDetectionsRoutes,
+  ...internalSigEventsDetectionsWorkflowRoutes,
   ...internalSigEventsDiscoveriesRoutes,
   ...internalSigEventsEventsRoutes,
+  ...internalSigEventsMigrationRoutes,
   ...storageStatsRoutes,
   // public APIs
   ...docCountsRoutes,

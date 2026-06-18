@@ -125,6 +125,10 @@ export class KnowledgeIndicatorClient {
     return this.reader.getPromotableUnbackedQueries(filters);
   }
 
+  getRuleBackedQueryLinks(): Promise<QueryLink[]> {
+    return this.reader.getRuleBackedQueryLinks();
+  }
+
   findFeaturesByIds(ids: string[]): Promise<Array<{ id: string; stream_name: string }>> {
     return this.reader.findFeaturesByIds(ids);
   }
