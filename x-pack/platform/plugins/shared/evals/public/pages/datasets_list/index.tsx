@@ -158,7 +158,6 @@ export const DatasetsListPage: React.FC = () => {
     if (sort) {
       setSortField(sort.field as SortableField);
       setSortDirection(sort.direction);
-      setPageIndex(0);
     }
   };
 

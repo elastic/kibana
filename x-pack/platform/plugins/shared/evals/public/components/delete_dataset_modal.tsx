@@ -115,7 +115,7 @@ export const DeleteDatasetModal: React.FC<DeleteDatasetModalProps> = ({
           <p>
             <FormattedMessage
               id="xpack.evals.deleteDatasetModal.usageWarning"
-              defaultMessage="{usageCount, plural, one {# experiment run has} other {# experiment runs have}} used this dataset. Past results are preserved under Experiments, but will then reference a dataset that no longer exists."
+              defaultMessage="{usageCount, plural, one {# experiment run has} other {# experiment runs have}} used this dataset. Deleting it keeps those results under Experiments, but they will reference a dataset that no longer exists."
               values={{ usageCount }}
             />
           </p>
