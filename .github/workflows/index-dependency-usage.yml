@@ -74,4 +74,4 @@ jobs:
 
           bash scripts/index_dependency_usage.sh \
             --group ${{ matrix.group }} \
-            $TEMPLATE_ARG
+            --setup-template
