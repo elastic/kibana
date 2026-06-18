@@ -22,7 +22,6 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
     });
 
     loadTestFile(require.resolve('./_default_columns')); // 2 min
-    loadTestFile(require.resolve('./_drag_drop')); // 1 min
     loadTestFile(require.resolve('./_request_counts')); // 6 min
   });
 }

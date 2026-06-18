@@ -8,5 +8,3 @@
  */
 
 export { MetricsExperiencePage } from './metrics_experience';
-export type { ShareHelper } from './share_helper';
-export { createShareHelper } from './share_helper';

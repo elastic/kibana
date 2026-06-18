@@ -33,6 +33,10 @@ globalSetupHook(
     );
     log.debug('[setup:logstash] logstash_functional ES data ready');
 
+    log.debug('[setup:hamlet] loading hamlet ES data (only if it does not exist)...');
+    await esArchiver.loadIfNeeded('src/platform/test/functional/fixtures/es_archiver/hamlet');
+    log.debug('[setup:hamlet] hamlet ES data ready');
+
     // Unmapped fields test data
     log.debug(
       '[setup:unmapped_fields] loading unmapped_fields ES data (only if it does not exist)...'

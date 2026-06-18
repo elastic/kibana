@@ -117,6 +117,8 @@ export function extendPlaywrightPage({
   // Method to type text with delay character by character
   extendedPage.typeWithDelay = (selector: string, text: string, options?: { delay: number }) =>
     typeWithDelay(page, selector, text, options);
+  // Method to clear the browser's sessionStorage for the current page
+  extendedPage.clearSessionStorage = () => page.evaluate(() => window.sessionStorage.clear());
   return extendedPage;
 }
 /**

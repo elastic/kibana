@@ -486,12 +486,85 @@ export class DiscoverApp {
     return headers.join(',');
   }
 
+  /**
+   * Locator for the highlight marks (`<mark>`) rendered in the document table,
+   * e.g. when a searched term is highlighted. Use with `expect(...).toHaveCount(n)`.
+   */
+  getMarks(): Locator {
+    return this.page.testSubj.locator('discoverDocTable').locator('mark');
+  }
+
   async showChart() {
     await this.page.testSubj.click('dscShowHistogramButton');
   }
 
   async hideChart() {
     await this.page.testSubj.click('dscHideHistogramButton');
+  }
+
+  /**
+   * Locator for the Discover hit-count badge (`discoverQueryHits`).
+   * Use with `expect(...).toHaveText('5')` etc.
+   */
+  hitCountLocator(): Locator {
+    return this.page.testSubj.locator('discoverQueryHits');
+  }
+
+  /**
+   * Reports whether a button identified by its `data-test-subj` is disabled.
+   * Uses Playwright's `Locator.isDisabled()` so it correctly handles both
+   * `disabled` attributes and `aria-disabled="true"` (as rendered by EUI).
+   */
+  async isButtonDisabled(testSubject: string): Promise<boolean> {
+    return this.page.testSubj.locator(testSubject).isDisabled();
+  }
+
+  /**
+   * Opens the field list sidebar if it is currently hidden, then waits for the
+   * field list to be visible. No-op if the show button is not rendered.
+   */
+  async openSidebar(): Promise<void> {
+    const showButton = this.page.testSubj.locator('dscShowSidebarButton');
+    if (await showButton.isVisible()) {
+      await showButton.click();
+    }
+    await this.page.testSubj.locator('fieldList').waitFor({ state: 'visible' });
+  }
+
+  /**
+   * Hides the field list sidebar if it is currently visible, then waits for the
+   * field list to be hidden. No-op if the hide button is not rendered.
+   */
+  async closeSidebar(): Promise<void> {
+    const hideButton = this.page.testSubj.locator('dscHideSidebarButton');
+    if (await hideButton.isVisible()) {
+      await hideButton.click();
+    }
+    await this.page.testSubj.locator('fieldList').waitFor({ state: 'hidden' });
+  }
+
+  /**
+   * Opens the documents table panel if it is currently hidden, then waits for
+   * the table to be visible. No-op if the show button is not rendered.
+   */
+  async openTablePanel(): Promise<void> {
+    const showButton = this.page.testSubj.locator('dscShowTableButton');
+    if (await showButton.isVisible()) {
+      await showButton.click();
+    }
+    await this.page.testSubj.locator('discoverDocTable').waitFor({ state: 'visible' });
+  }
+
+  /**
+   * Hides the documents table panel if it is currently visible, then waits for
+   * the table to be hidden. No-op if the hide button is not rendered.
+   */
+  async closeTablePanel(): Promise<void> {
+    const hideButton = this.page.testSubj.locator('dscHideTableButton');
+    if (await hideButton.isVisible()) {
+      await hideButton.click();
+    }
+    await this.page.testSubj.locator('discoverDocTable').waitFor({ state: 'hidden' });
   }
 
   async expectXYVisChartVisible() {

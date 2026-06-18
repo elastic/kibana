@@ -18,8 +18,6 @@ import type { ChartInteractions } from './chart_interactions';
 import { createChartInteractions } from './chart_interactions';
 import type { BreakdownSelector } from './breakdown_selector';
 import { createBreakdownSelector } from './breakdown_selector';
-import type { ShareHelper } from './share_helper';
-import { createShareHelper } from './share_helper';
 
 export class MetricsExperiencePage {
   public readonly container: Locator;
@@ -33,7 +31,6 @@ export class MetricsExperiencePage {
   public readonly emptyState: Locator;
   public readonly chartInteractions: ChartInteractions;
   public readonly breakdownSelector: BreakdownSelector;
-  public readonly share: ShareHelper;
   public readonly fullscreenButton: Locator;
   public readonly chromeHeader: Locator;
 
@@ -53,7 +50,6 @@ export class MetricsExperiencePage {
     this.searchButton = page.testSubj.locator('metricsExperienceToolbarSearch');
     this.searchInput = page.testSubj.locator('metricsExperienceGridToolbarSearch');
     this.emptyState = page.testSubj.locator('metricsExperienceNoData');
-    this.share = createShareHelper(page);
     this.fullscreenButton = page.testSubj.locator('metricsExperienceToolbarFullScreen');
     this.chromeHeader = page.testSubj.locator('kbnChromeLayoutHeader');
   }

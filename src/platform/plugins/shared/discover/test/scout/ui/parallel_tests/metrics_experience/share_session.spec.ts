@@ -48,7 +48,7 @@ spaceTest.describe(
     spaceTest(
       'should preserve metrics view state through a shared URL',
       async ({ pageObjects, page }) => {
-        const { metricsExperience, discover } = pageObjects;
+        const { metricsExperience, discover, share } = pageObjects;
 
         await discover.writeAndSubmitEsqlQuery(testData.ESQL_QUERIES.TS);
         await expect(metricsExperience.grid).toBeVisible();
@@ -68,10 +68,10 @@ spaceTest.describe(
         let sharedUrl: string;
 
         await spaceTest.step('open share modal and copy the URL', async () => {
-          await metricsExperience.share.openShareModal();
-          sharedUrl = await metricsExperience.share.getSharedUrl();
+          await share.openShareModal();
+          sharedUrl = await share.getSharedUrl();
           expect(sharedUrl).toBeTruthy();
-          await metricsExperience.share.closeShareModal();
+          await share.closeShareModal();
         });
 
         await spaceTest.step('navigate to shared URL', async () => {
