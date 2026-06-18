@@ -280,6 +280,31 @@ export const carriedOverTodos = (todos: TodoItem[] | undefined): TodoItem[] | un
   return hasIncomplete ? todos : undefined;
 };
 
+export interface AskUserQuestionStepData {
+  /** Id of the prompt that produced this step. Matches the entry in `state.prompt.responses` and the prompt request's `id`. */
+  prompt_id: string;
+  /** The questions presented to the user. */
+  questions: AskUserQuestionItem[];
+  /** Undefined while the step is pending; populated on resume back-fill. */
+  answers?: AskUserQuestionAnswer[];
+}
+
+export type AskUserQuestionStep = ConversationRoundStepMixin<
+  ConversationRoundStepType.askUserQuestion,
+  AskUserQuestionStepData
+>;
+
+export const createAskUserQuestionStep = (data: AskUserQuestionStepData): AskUserQuestionStep => {
+  return {
+    type: ConversationRoundStepType.askUserQuestion,
+    ...data,
+  };
+};
+
+export const isAskUserQuestionStep = (step: ConversationRoundStep): step is AskUserQuestionStep => {
+  return step.type === ConversationRoundStepType.askUserQuestion;
+};
+
 export type ConversationRoundStep =
   | ToolCallStep
   | ReasoningStep
