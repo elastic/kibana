@@ -1,6 +1,17 @@
 {
-  "sha1": "c906ff8c9f258cd8e63bd03802ef8ca9a94b1bb8",
+  "sha1": "e279341f8742ecbe03165792a586240740f56023",
   "tests": [
+    {
+      "id": "4aaafd2a7000640-70ec3e6d9549722",
+      "title": "Teardown environment for Streams API tests",
+      "expectedStatus": "passed",
+      "tags": [],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/global.teardown.ts",
+        "line": 11,
+        "column": 19
+      }
+    },
     {
       "id": "dc6084aa7695e8a-26220f9b20676c1",
       "title": "Setup environment for Streams API tests",
@@ -361,6 +372,48 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/sig_events/search_knowledge_indicators_tool.spec.ts",
         "line": 217,
+        "column": 12
+      }
+    },
+    {
+      "id": "94c80912f6246f4-094ac08f869a28e",
+      "title": "Significant Events discovery pipeline API POST _execute (trigger) returns an executionId",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/sig_events/significant_event_discovery_run.spec.ts",
+        "line": 30,
+        "column": 12
+      }
+    },
+    {
+      "id": "94c80912f6246f4-b38b60bd6807012",
+      "title": "Significant Events discovery pipeline API GET _status returns a valid status after trigger",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/sig_events/significant_event_discovery_run.spec.ts",
+        "line": 47,
+        "column": 12
+      }
+    },
+    {
+      "id": "94c80912f6246f4-8f29a28b4278864",
+      "title": "Significant Events discovery pipeline API POST _execute (cancel) returns executionId or null",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/sig_events/significant_event_discovery_run.spec.ts",
+        "line": 72,
         "column": 12
       }
     },

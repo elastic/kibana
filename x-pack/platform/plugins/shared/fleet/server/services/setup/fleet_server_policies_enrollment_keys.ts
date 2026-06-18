@@ -15,7 +15,6 @@ import { generateEnrollmentAPIKey } from '../api_keys';
 import { SO_SEARCH_LIMIT, MAX_CONCURRENT_AGENT_POLICIES_OPERATIONS_20 } from '../../constants';
 import { appContextService } from '../app_context';
 import { scheduleDeployAgentPoliciesTask } from '../agent_policies/deploy_agent_policies_task';
-import { scheduleBumpAgentPoliciesTask } from '../agent_policies/bump_agent_policies_task';
 
 /**
  * Return the set of agent policy ids that already have at least one enrollment API key.
@@ -68,12 +67,6 @@ export async function ensureAgentPoliciesFleetServerKeysAndPolicies({
     perPage: SO_SEARCH_LIMIT,
   });
 
-  // TODO: this will be pulled out by https://github.com/elastic/kibana/pull/272428
-  if (agentPolicies.length === 0) {
-    await scheduleBumpAgentPoliciesTask(appContextService.getTaskManagerStart()!);
-    return;
-  }
-
   const agentPolicyIds = agentPolicies.map((agentPolicy) => agentPolicy.id);
 
   // Resolve the latest deployed revision and which policies already have an enrollment API key
@@ -115,9 +108,6 @@ export async function ensureAgentPoliciesFleetServerKeysAndPolicies({
       outdatedAgentPolicyIds.push({ id: agentPolicy.id, spaceId: agentPolicy.space_ids?.[0] });
     }
   }
-
-  // TODO: this will be pulled out by https://github.com/elastic/kibana/pull/272428
-  await scheduleBumpAgentPoliciesTask(appContextService.getTaskManagerStart()!);
 
   if (!outdatedAgentPolicyIds.length) {
     return;

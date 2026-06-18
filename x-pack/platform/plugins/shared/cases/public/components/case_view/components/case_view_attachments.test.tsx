@@ -6,7 +6,13 @@
  */
 
 import React from 'react';
-import { basicCase, alertComment } from '../../../containers/mock';
+import {
+  basicCase,
+  alertComment,
+  basicComment,
+  eventComment,
+  externalReferenceAttachment,
+} from '../../../containers/mock';
 import type { CaseUI } from '../../../../common';
 import { renderWithTestingProviders } from '../../../common/mock';
 import { CaseViewAttachments } from './case_view_attachments';
@@ -58,6 +64,15 @@ const buildRegistry = () => {
     }),
     schemaValidator: () => {},
   });
+  // Comment is intentionally registered without `getAttachmentTabViewObject`
+  // to mirror production: comments live in the activity tab, not here.
+  registry.register({
+    id: 'comment',
+    displayName: 'Comment',
+    icon: 'editorComment',
+    getAttachmentViewObject: () => ({ event: 'added a comment' }),
+    schemaValidator: () => {},
+  });
   return registry;
 };
 
@@ -93,6 +108,56 @@ describe('Case View Attachments tab', () => {
 
     expect(screen.getByTestId('case-view-tabs')).toBeInTheDocument();
     expect(screen.getByTestId('cases-files-search')).toBeInTheDocument();
+  });
+
+  it('renders the attachment type filter', () => {
+    renderWithTestingProviders(
+      <CaseViewAttachments
+        caseData={caseData}
+        onSearch={onSearchMock}
+        onUpdateField={onUpdateFieldMock}
+      />
+    );
+
+    expect(screen.getByTestId('case-view-filters')).toBeInTheDocument();
+    expect(screen.getByTestId('options-filter-popover-button-attachmentType')).toBeInTheDocument();
+  });
+
+  it('omits registry types that have no tab view from the filter dropdown', async () => {
+    const unifiedAttachmentTypeRegistry = buildRegistry();
+    // Case has both an alert (tab-viewable) and a user comment (not).
+    const caseWithAlertAndComment: CaseUI = {
+      ...basicCase,
+      comments: [alertComment, basicComment],
+    };
+
+    renderWithTestingProviders(
+      <CaseViewAttachments
+        caseData={caseWithAlertAndComment}
+        onSearch={onSearchMock}
+        onUpdateField={onUpdateFieldMock}
+      />,
+      { wrapperProps: { unifiedAttachmentTypeRegistry } }
+    );
+
+    await userEvent.click(screen.getByTestId('options-filter-popover-button-attachmentType'));
+
+    expect(
+      await screen.findByTestId('options-filter-popover-item-security.alert')
+    ).toBeInTheDocument();
+    expect(screen.queryByTestId('options-filter-popover-item-comment')).not.toBeInTheDocument();
+  });
+
+  it('renders the author filter', () => {
+    renderWithTestingProviders(
+      <CaseViewAttachments
+        caseData={caseData}
+        onSearch={onSearchMock}
+        onUpdateField={onUpdateFieldMock}
+      />
+    );
+
+    expect(screen.getByTestId('options-filter-popover-button-author')).toBeInTheDocument();
   });
 
   it('calls the onSearch callback when the search field is changed', async () => {
@@ -273,7 +338,9 @@ describe('Case View Attachments tab', () => {
     expect(screen.queryByTestId('case-view-attachment-accordion-file')).not.toBeInTheDocument();
   });
 
-  it('does not render the empty state when there is no search term, even if everything is empty', () => {
+  it('renders the empty state when the case has no attachments and observables is unavailable', () => {
+    // e.g. observability: no observables accordion, so an empty case would
+    // otherwise render a blank tab.
     useGetCaseFileStatsMock.mockReturnValue({ data: { total: 0 } });
     const unifiedAttachmentTypeRegistry = buildRegistry();
 
@@ -284,6 +351,22 @@ describe('Case View Attachments tab', () => {
         onUpdateField={onUpdateFieldMock}
       />,
       { wrapperProps: { unifiedAttachmentTypeRegistry, license: basicLicense } }
+    );
+
+    expect(screen.getByTestId('case-view-attachments-no-search-results')).toBeInTheDocument();
+  });
+
+  it('does not render the empty state when observables is available and fills the empty case', () => {
+    useGetCaseFileStatsMock.mockReturnValue({ data: { total: 0 } });
+    const unifiedAttachmentTypeRegistry = buildRegistry();
+
+    renderWithTestingProviders(
+      <CaseViewAttachments
+        caseData={caseData}
+        onSearch={onSearchMock}
+        onUpdateField={onUpdateFieldMock}
+      />,
+      { wrapperProps: { unifiedAttachmentTypeRegistry, license: platinumLicense } }
     );
 
     expect(screen.queryByTestId('case-view-attachments-no-search-results')).not.toBeInTheDocument();
@@ -307,6 +390,242 @@ describe('Case View Attachments tab', () => {
     expect(screen.getByTestId('case-view-attachment-accordion-file')).toBeInTheDocument();
   });
 
+  it('narrows accordions to the selected attachment types when the filter is active', async () => {
+    const unifiedAttachmentTypeRegistry = buildRegistry();
+    const caseWithComments: CaseUI = {
+      ...basicCase,
+      comments: [alertComment, { ...eventComment, id: 'evt-1' }],
+    };
+
+    renderWithTestingProviders(
+      <CaseViewAttachments
+        caseData={caseWithComments}
+        onSearch={onSearchMock}
+        onUpdateField={onUpdateFieldMock}
+      />,
+      { wrapperProps: { unifiedAttachmentTypeRegistry, license: platinumLicense } }
+    );
+
+    expect(screen.getByTestId('case-view-attachment-accordion-security.alert')).toBeInTheDocument();
+    expect(screen.getByTestId('case-view-attachment-accordion-security.event')).toBeInTheDocument();
+    expect(
+      await screen.findByTestId('case-view-attachment-accordion-observables')
+    ).toBeInTheDocument();
+
+    await userEvent.click(screen.getByTestId('options-filter-popover-button-attachmentType'));
+    await userEvent.click(await screen.findByTestId('options-filter-popover-item-security.alert'));
+
+    await waitFor(() => {
+      expect(
+        screen.getByTestId('case-view-attachment-accordion-security.alert')
+      ).toBeInTheDocument();
+    });
+    expect(
+      screen.queryByTestId('case-view-attachment-accordion-security.event')
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByTestId('case-view-attachment-accordion-observables')
+    ).not.toBeInTheDocument();
+  });
+
+  it('shows the observables accordion when "observables" is the selected filter type', async () => {
+    const unifiedAttachmentTypeRegistry = buildRegistry();
+    // Observables option only appears when the case actually has at least one
+    // observable, so we seed one alongside the alert.
+    const caseWithAlertAndObservable: CaseUI = {
+      ...basicCase,
+      comments: [alertComment],
+      observables: [
+        {
+          id: 'obs-1',
+          value: '1.1.1.1',
+          typeKey: 'ipv4',
+          createdAt: '2024-01-01T00:00:00.000Z',
+          updatedAt: '2024-01-01T00:00:00.000Z',
+          description: null,
+        },
+      ],
+    };
+
+    renderWithTestingProviders(
+      <CaseViewAttachments
+        caseData={caseWithAlertAndObservable}
+        onSearch={onSearchMock}
+        onUpdateField={onUpdateFieldMock}
+      />,
+      { wrapperProps: { unifiedAttachmentTypeRegistry, license: platinumLicense } }
+    );
+
+    await userEvent.click(screen.getByTestId('options-filter-popover-button-attachmentType'));
+    await userEvent.click(await screen.findByTestId('options-filter-popover-item-observables'));
+
+    await waitFor(() => {
+      expect(screen.getByTestId('case-view-attachment-accordion-observables')).toBeInTheDocument();
+    });
+    expect(
+      screen.queryByTestId('case-view-attachment-accordion-security.alert')
+    ).not.toBeInTheDocument();
+  });
+
+  it('does not list observables in the filter when the feature is unavailable', async () => {
+    const unifiedAttachmentTypeRegistry = buildRegistry();
+
+    renderWithTestingProviders(
+      <CaseViewAttachments
+        caseData={caseData}
+        onSearch={onSearchMock}
+        onUpdateField={onUpdateFieldMock}
+      />,
+      { wrapperProps: { unifiedAttachmentTypeRegistry, license: basicLicense } }
+    );
+
+    await userEvent.click(screen.getByTestId('options-filter-popover-button-attachmentType'));
+
+    expect(screen.queryByTestId('options-filter-popover-item-observables')).not.toBeInTheDocument();
+  });
+
+  it('shows the no-results empty state when the filter selects a type with no attachments', async () => {
+    // A file SO is attached, but the file client (fileStats) reports 0 files —
+    // so selecting "File" should drop the only registered accordion and yield
+    // the empty state.
+    useGetCaseFileStatsMock.mockReturnValue({ data: { total: 0 } });
+    const unifiedAttachmentTypeRegistry = buildRegistry();
+    const fileComment = {
+      ...externalReferenceAttachment,
+      id: 'file-comment-id',
+      externalReferenceAttachmentTypeId: '.files',
+    };
+    const caseWithFile: CaseUI = { ...basicCase, comments: [fileComment] };
+
+    renderWithTestingProviders(
+      <CaseViewAttachments
+        caseData={caseWithFile}
+        onSearch={onSearchMock}
+        onUpdateField={onUpdateFieldMock}
+      />,
+      { wrapperProps: { unifiedAttachmentTypeRegistry, license: basicLicense } }
+    );
+
+    await userEvent.click(screen.getByTestId('options-filter-popover-button-attachmentType'));
+    await userEvent.click(await screen.findByTestId('options-filter-popover-item-file'));
+
+    await waitFor(() => {
+      expect(screen.getByTestId('case-view-attachments-no-search-results')).toBeInTheDocument();
+    });
+  });
+
+  it('narrows accordions when the author filter is active and hides observables', async () => {
+    const unifiedAttachmentTypeRegistry = buildRegistry();
+    const otherUser = {
+      fullName: 'April Ludgate',
+      username: 'aludgate',
+      email: 'april@elastic.co',
+    };
+    // Two alerts owned by different authors, plus an observable that should
+    // disappear as soon as any author filter is selected.
+    const caseWithTwoAuthors: CaseUI = {
+      ...basicCase,
+      comments: [alertComment, { ...alertComment, id: 'alert-other', createdBy: otherUser }],
+      observables: [
+        {
+          id: 'obs-1',
+          value: '1.1.1.1',
+          typeKey: 'ipv4',
+          createdAt: '2024-01-01T00:00:00.000Z',
+          updatedAt: '2024-01-01T00:00:00.000Z',
+          description: null,
+        },
+      ],
+    };
+
+    renderWithTestingProviders(
+      <CaseViewAttachments
+        caseData={caseWithTwoAuthors}
+        onSearch={onSearchMock}
+        onUpdateField={onUpdateFieldMock}
+      />,
+      { wrapperProps: { unifiedAttachmentTypeRegistry, license: platinumLicense } }
+    );
+
+    // Sanity: observables shown with no filter active.
+    expect(
+      await screen.findByTestId('case-view-attachment-accordion-observables')
+    ).toBeInTheDocument();
+
+    await userEvent.click(screen.getByTestId('options-filter-popover-button-author'));
+    await userEvent.click(
+      await screen.findByTestId(`options-filter-popover-item-${otherUser.username}`)
+    );
+
+    // Alert accordion stays (other-user authored an alert) but observables
+    // disappear because they carry no createdBy.
+    await waitFor(() => {
+      expect(
+        screen.queryByTestId('case-view-attachment-accordion-observables')
+      ).not.toBeInTheDocument();
+    });
+    expect(screen.getByTestId('case-view-attachment-accordion-security.alert')).toBeInTheDocument();
+  });
+
+  describe('clear filters button', () => {
+    it('does not render when no filter is active', () => {
+      const unifiedAttachmentTypeRegistry = buildRegistry();
+      renderWithTestingProviders(
+        <CaseViewAttachments
+          caseData={caseData}
+          onSearch={onSearchMock}
+          onUpdateField={onUpdateFieldMock}
+        />,
+        { wrapperProps: { unifiedAttachmentTypeRegistry, license: basicLicense } }
+      );
+
+      expect(screen.queryByTestId('case-view-filters-clear-filters')).not.toBeInTheDocument();
+    });
+
+    it('renders when a filter is active and resets every filter when clicked', async () => {
+      const unifiedAttachmentTypeRegistry = buildRegistry();
+      const caseWithAlerts: CaseUI = {
+        ...basicCase,
+        comments: [alertComment, { ...eventComment, id: 'evt-1' }],
+      };
+
+      renderWithTestingProviders(
+        <CaseViewAttachments
+          caseData={caseWithAlerts}
+          onSearch={onSearchMock}
+          onUpdateField={onUpdateFieldMock}
+        />,
+        { wrapperProps: { unifiedAttachmentTypeRegistry, license: basicLicense } }
+      );
+
+      // Activate the type filter.
+      await userEvent.click(screen.getByTestId('options-filter-popover-button-attachmentType'));
+      await userEvent.click(
+        await screen.findByTestId('options-filter-popover-item-security.alert')
+      );
+
+      const clearButton = await screen.findByTestId('case-view-filters-clear-filters');
+      expect(clearButton).toBeInTheDocument();
+      // Other-type accordion is hidden while the filter is active.
+      expect(
+        screen.queryByTestId('case-view-attachment-accordion-security.event')
+      ).not.toBeInTheDocument();
+
+      await userEvent.click(clearButton);
+
+      await waitFor(() => {
+        expect(screen.queryByTestId('case-view-filters-clear-filters')).not.toBeInTheDocument();
+      });
+      // Both accordions are back.
+      expect(
+        screen.getByTestId('case-view-attachment-accordion-security.alert')
+      ).toBeInTheDocument();
+      expect(
+        screen.getByTestId('case-view-attachment-accordion-security.event')
+      ).toBeInTheDocument();
+    });
+  });
+
   it('renders accordions in alphabetical order by display name', () => {
     const unifiedAttachmentTypeRegistry = buildRegistry();
     // 2 alerts + 1 event so all three registry-driven accordions render
@@ -316,7 +635,7 @@ describe('Case View Attachments tab', () => {
       comments: [
         alertComment,
         { ...alertComment, id: 'alert-2' },
-        { ...alertComment, id: 'evt-1', type: 'event' as never },
+        { ...eventComment, id: 'evt-1' },
       ],
     };
 

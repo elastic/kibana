@@ -789,6 +789,65 @@ export const enrichProcessorSchema = processorBaseWithWhereSchema.extend({
 }) satisfies z.Schema<EnrichProcessor>;
 
 /**
+ * User agent processor
+ */
+
+export const userAgentProperties = ['name', 'os', 'device', 'original', 'version'] as const;
+
+export type UserAgentProperty = (typeof userAgentProperties)[number];
+
+export interface UserAgentProcessor extends ProcessorBaseWithWhere {
+  action: 'user_agent';
+  from: string;
+  to?: string;
+  regex_file?: string;
+  properties?: UserAgentProperty[];
+  extract_device_type?: boolean;
+  ignore_missing?: boolean;
+}
+
+export const userAgentProcessorSchema = processorBaseWithWhereSchema
+  .extend({
+    action: z.literal('user_agent'),
+    from: StreamlangSourceField.describe('The field containing the user agent string'),
+    to: z
+      .optional(StreamlangTargetField)
+      .describe('The field that will be filled with the user agent details'),
+    regex_file: z
+      .optional(NonEmptyString)
+      .describe(
+        'Custom regex file name containing the regular expressions for parsing the user agent string'
+      ),
+    properties: z
+      .optional(z.array(z.enum(userAgentProperties)))
+      .describe('Specific properties to extract (defaults to all)'),
+    extract_device_type: z
+      .optional(z.boolean())
+      .describe('Extracts device type from the user agent string'),
+    ignore_missing: z
+      .optional(z.boolean())
+      .describe('Skip processing when source field is missing'),
+  })
+  .refine(
+    (obj) => {
+      const target = obj.to ?? 'user_agent';
+      return (
+        !obj.where ||
+        (obj.where && isAlwaysCondition(obj.where)) ||
+        (obj.where && Boolean(target) && obj.from !== target)
+      );
+    },
+    {
+      message:
+        'User agent processor must have the "to" parameter when there is a "where" condition. It should not be the same as the source field.',
+      path: ['to', 'where'],
+    }
+  )
+  .describe(
+    'User agent processor - Extract browser, OS, and device details from a user agent string'
+  ) satisfies z.Schema<UserAgentProcessor>;
+
+/**
  * Registered domain processor
  */
 
@@ -841,6 +900,7 @@ export type StreamlangProcessorDefinition =
   | NetworkDirectionProcessor
   | JsonExtractProcessor
   | EnrichProcessor
+  | UserAgentProcessor
   | RegisteredDomainProcessor
   | ManualIngestPipelineProcessor;
 
@@ -869,6 +929,7 @@ export const streamlangProcessorSchema = z.union([
   networkDirectionProcessorSchema,
   jsonExtractProcessorSchema,
   enrichProcessorSchema,
+  userAgentProcessorSchema,
   registeredDomainSchema,
   manualIngestPipelineProcessorSchema,
 ]);
@@ -892,6 +953,7 @@ export const isProcessWithIgnoreMissingOption = createIsNarrowSchema(
     splitProcessorSchema,
     jsonExtractProcessorSchema,
     enrichProcessorSchema,
+    userAgentProcessorSchema,
     registeredDomainSchema,
   ])
 );
