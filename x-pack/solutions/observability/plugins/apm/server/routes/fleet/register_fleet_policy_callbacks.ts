@@ -114,7 +114,7 @@ function onPackagePolicyDelete({
   };
 }
 
-function onPackagePolicyPostCreate({
+export function onPackagePolicyPostCreate({
   fleet,
   coreStart,
   logger,
@@ -142,10 +142,10 @@ function onPackagePolicyPostCreate({
 }
 
 /*
- * This is called when a new package policy is created.
- * It will add an API key to the package policy.
+ * This is called when a new package policy is created or updated.
+ * It will decorate the package policy with agent configurations and source maps.
  */
-function onPackagePolicyCreateOrUpdate({
+export function onPackagePolicyCreateOrUpdate({
   fleetPluginStart,
   getApmIndices,
   coreStart,
