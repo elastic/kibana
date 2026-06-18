@@ -39,15 +39,21 @@ describe('adCreateJobTool', () => {
       );
 
       expect(ml.validate).toHaveBeenCalledWith({ body: jobConfig });
-      expect(result.results[0].type).toBe(ToolResultType.json);
+      expect((result as { results: Array<{ type: string }> }).results[0].type).toBe(
+        ToolResultType.other
+      );
     });
 
     it('operation=validate_spec without job_config returns error', async () => {
       const result = await adCreateJobTool.handler({ operation: 'validate_spec' }, createContext());
 
-      expect(result).toEqual({
-        results: [{ type: ToolResultType.text, data: 'job_config is required for validate_spec' }],
-      });
+      const standardResult = result as {
+        results: Array<{ type: string; data: { message: string } }>;
+      };
+      expect(standardResult.results[0].type).toBe(ToolResultType.error);
+      expect(standardResult.results[0].data.message).toBe(
+        'job_config is required for validate_spec'
+      );
     });
 
     it('operation=estimate_memory calls ml.estimateModelMemory', async () => {
@@ -80,7 +86,9 @@ describe('adCreateJobTool', () => {
         createContext()
       );
 
-      expect(result.results[0].type).toBe(ToolResultType.text);
+      expect((result as { results: Array<{ type: string }> }).results[0].type).toBe(
+        ToolResultType.error
+      );
     });
 
     it('operation=create_datafeed uses datafeed-{job_id} as datafeed ID', async () => {

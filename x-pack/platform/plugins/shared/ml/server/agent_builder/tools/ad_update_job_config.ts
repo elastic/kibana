@@ -9,6 +9,7 @@ import { z } from '@kbn/zod/v4';
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
+import { createErrorResult } from '@kbn/agent-builder-server';
 import { AD_UPDATE_JOB_CONFIG_TOOL_ID } from './tool_ids';
 
 const calendarEventSchema = z.object({
@@ -65,7 +66,7 @@ export const adUpdateJobConfigTool: BuiltinToolDefinition<typeof schema> = {
             job_id: jobId,
             body: { analysis_limits: { model_memory_limit: memory_limit } } as any,
           });
-          return { results: [{ type: ToolResultType.json, data: response }] };
+          return { results: [{ type: ToolResultType.other, data: response }] };
         }
 
         case 'update_query_delay': {
@@ -73,7 +74,7 @@ export const adUpdateJobConfigTool: BuiltinToolDefinition<typeof schema> = {
             datafeed_id: datafeedId,
             body: { query_delay } as any,
           });
-          return { results: [{ type: ToolResultType.json, data: response }] };
+          return { results: [{ type: ToolResultType.other, data: response }] };
         }
 
         case 'update_delayed_data_check': {
@@ -81,27 +82,32 @@ export const adUpdateJobConfigTool: BuiltinToolDefinition<typeof schema> = {
             datafeed_id: datafeedId,
             body: { delayed_data_check_config: delayed_data_check } as any,
           });
-          return { results: [{ type: ToolResultType.json, data: response }] };
+          return { results: [{ type: ToolResultType.other, data: response }] };
         }
 
         case 'create_calendar_event': {
+          if (!calendar_event) {
+            return {
+              results: [createErrorResult('calendar_event is required for create_calendar_event')],
+            };
+          }
           const calendarId = `calendar-${jobId}`;
           const response = await ml.postCalendarEvents({
             calendar_id: calendarId,
-            body: { events: [calendar_event] } as any,
+            events: [calendar_event],
           });
-          return { results: [{ type: ToolResultType.json, data: response }] };
+          return { results: [{ type: ToolResultType.other, data: response }] };
         }
 
         default:
           return {
-            results: [{ type: ToolResultType.text, data: `Unknown operation: ${operation}` }],
+            results: [createErrorResult(`Unknown operation: ${operation}`)],
           };
       }
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err);
       return {
-        results: [{ type: ToolResultType.text, data: `Error executing ${operation}: ${message}` }],
+        results: [createErrorResult(`Error executing ${operation}: ${message}`)],
       };
     }
   },

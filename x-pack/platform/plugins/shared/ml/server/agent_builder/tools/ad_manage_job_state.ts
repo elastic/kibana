@@ -9,6 +9,7 @@ import { z } from '@kbn/zod/v4';
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
+import { createErrorResult } from '@kbn/agent-builder-server';
 import { AD_MANAGE_JOB_STATE_TOOL_ID } from './tool_ids';
 
 const schema = z.object({
@@ -53,12 +54,12 @@ export const adManageJobStateTool: BuiltinToolDefinition<typeof schema> = {
       switch (operation) {
         case 'open_job': {
           const response = await ml.openJob({ job_id: jobId });
-          return { results: [{ type: ToolResultType.json, data: response }] };
+          return { results: [{ type: ToolResultType.other, data: response }] };
         }
 
         case 'close_job': {
           const response = await ml.closeJob({ job_id: jobId });
-          return { results: [{ type: ToolResultType.json, data: response }] };
+          return { results: [{ type: ToolResultType.other, data: response }] };
         }
 
         case 'start_datafeed': {
@@ -66,46 +67,41 @@ export const adManageJobStateTool: BuiltinToolDefinition<typeof schema> = {
           if (start) body.start = start;
           if (end) body.end = end;
           const response = await ml.startDatafeed({ datafeed_id: datafeedId, body: body as any });
-          return { results: [{ type: ToolResultType.json, data: response }] };
+          return { results: [{ type: ToolResultType.other, data: response }] };
         }
 
         case 'stop_datafeed': {
           const response = await ml.stopDatafeed({ datafeed_id: datafeedId });
-          return { results: [{ type: ToolResultType.json, data: response }] };
+          return { results: [{ type: ToolResultType.other, data: response }] };
         }
 
         case 'revert_model_snapshot': {
           if (!snapshotId) {
             return {
-              results: [
-                {
-                  type: ToolResultType.text,
-                  data: 'snapshot_id is required for revert_model_snapshot',
-                },
-              ],
+              results: [createErrorResult('snapshot_id is required for revert_model_snapshot')],
             };
           }
           const response = await ml.revertModelSnapshot({
             job_id: jobId,
             snapshot_id: snapshotId,
           });
-          return { results: [{ type: ToolResultType.json, data: response }] };
+          return { results: [{ type: ToolResultType.other, data: response }] };
         }
 
         case 'preview_datafeed': {
           const response = await ml.previewDatafeed({ datafeed_id: datafeedId });
-          return { results: [{ type: ToolResultType.json, data: response }] };
+          return { results: [{ type: ToolResultType.other, data: response }] };
         }
 
         default:
           return {
-            results: [{ type: ToolResultType.text, data: `Unknown operation: ${operation}` }],
+            results: [createErrorResult(`Unknown operation: ${operation}`)],
           };
       }
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err);
       return {
-        results: [{ type: ToolResultType.text, data: `Error executing ${operation}: ${message}` }],
+        results: [createErrorResult(`Error executing ${operation}: ${message}`)],
       };
     }
   },

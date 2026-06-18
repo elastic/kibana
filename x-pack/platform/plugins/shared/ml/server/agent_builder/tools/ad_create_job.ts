@@ -9,6 +9,7 @@ import { z } from '@kbn/zod/v4';
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
+import { createErrorResult } from '@kbn/agent-builder-server';
 import { AD_CREATE_JOB_TOOL_ID } from './tool_ids';
 
 const schema = z.object({
@@ -42,40 +43,35 @@ export const adCreateJobTool: BuiltinToolDefinition<typeof schema> = {
         case 'validate_spec': {
           if (!jobConfig) {
             return {
-              results: [
-                { type: ToolResultType.text, data: 'job_config is required for validate_spec' },
-              ],
+              results: [createErrorResult('job_config is required for validate_spec')],
             };
           }
           const response = await ml.validate({ body: jobConfig as any });
-          return { results: [{ type: ToolResultType.json, data: response }] };
+          return { results: [{ type: ToolResultType.other, data: response }] };
         }
 
         case 'estimate_memory': {
           if (!jobConfig) {
             return {
-              results: [
-                { type: ToolResultType.text, data: 'job_config is required for estimate_memory' },
-              ],
+              results: [createErrorResult('job_config is required for estimate_memory')],
             };
           }
           const response = await ml.estimateModelMemory({ body: jobConfig as any });
-          return { results: [{ type: ToolResultType.json, data: response }] };
+          return { results: [{ type: ToolResultType.other, data: response }] };
         }
 
         case 'create_job': {
           if (!jobId || !jobConfig) {
             return {
-              results: [
-                {
-                  type: ToolResultType.text,
-                  data: 'job_id and job_config are required for create_job',
-                },
-              ],
+              results: [createErrorResult('job_id and job_config are required for create_job')],
             };
           }
-          const response = await ml.putJob({ job_id: jobId, body: jobConfig as any });
-          return { results: [{ type: ToolResultType.json, data: response }] };
+          // @ts-expect-error job config is passed as body at runtime
+          const response = await ml.putJob({
+            job_id: jobId,
+            body: jobConfig,
+          });
+          return { results: [{ type: ToolResultType.other, data: response }] };
         }
 
         case 'create_datafeed': {
@@ -83,10 +79,7 @@ export const adCreateJobTool: BuiltinToolDefinition<typeof schema> = {
           if (!datafeedId || !datafeedConfig) {
             return {
               results: [
-                {
-                  type: ToolResultType.text,
-                  data: 'job_id and datafeed_config are required for create_datafeed',
-                },
+                createErrorResult('job_id and datafeed_config are required for create_datafeed'),
               ],
             };
           }
@@ -94,18 +87,18 @@ export const adCreateJobTool: BuiltinToolDefinition<typeof schema> = {
             datafeed_id: datafeedId,
             body: datafeedConfig as any,
           });
-          return { results: [{ type: ToolResultType.json, data: response }] };
+          return { results: [{ type: ToolResultType.other, data: response }] };
         }
 
         default:
           return {
-            results: [{ type: ToolResultType.text, data: `Unknown operation: ${operation}` }],
+            results: [createErrorResult(`Unknown operation: ${operation}`)],
           };
       }
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err);
       return {
-        results: [{ type: ToolResultType.text, data: `Error executing ${operation}: ${message}` }],
+        results: [createErrorResult(`Error executing ${operation}: ${message}`)],
       };
     }
   },

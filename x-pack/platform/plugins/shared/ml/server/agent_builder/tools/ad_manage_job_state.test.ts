@@ -101,8 +101,13 @@ describe('adManageJobStateTool', () => {
         { operation: 'revert_model_snapshot', job_id: 'my-job' },
         createContext()
       );
-      expect(result.results[0].type).toBe(ToolResultType.text);
-      expect((result.results[0] as any).data).toMatch('snapshot_id is required');
+      expect(
+        (result as { results: Array<{ type: string; data: { message: string } }> }).results[0].type
+      ).toBe(ToolResultType.error);
+      expect(
+        (result as { results: Array<{ type: string; data: { message: string } }> }).results[0].data
+          .message
+      ).toMatch('snapshot_id is required');
     });
 
     it('operation=preview_datafeed calls ml.previewDatafeed', async () => {
@@ -121,9 +126,11 @@ describe('adManageJobStateTool', () => {
         { operation: 'open_job', job_id: 'my-job' },
         createContext(ml)
       );
-      expect(result).toEqual({
-        results: [{ type: ToolResultType.text, data: 'Error executing open_job: already open' }],
-      });
+      const standardResult = result as {
+        results: Array<{ type: string; data: { message: string } }>;
+      };
+      expect(standardResult.results[0].type).toBe(ToolResultType.error);
+      expect(standardResult.results[0].data.message).toBe('Error executing open_job: already open');
     });
   });
 });

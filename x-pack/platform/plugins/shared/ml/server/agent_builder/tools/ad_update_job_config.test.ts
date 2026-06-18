@@ -31,7 +31,7 @@ describe('adUpdateJobConfigTool', () => {
     it('operation=update_memory_limit calls ml.updateJob with analysis_limits', async () => {
       const ml = createMlMock();
       await adUpdateJobConfigTool.handler(
-        { operation: 'update_memory_limit', job_id: 'my-job', value: '512mb' },
+        { operation: 'update_memory_limit', job_id: 'my-job', memory_limit: '512mb' },
         createContext(ml)
       );
       expect(ml.updateJob).toHaveBeenCalledWith({
@@ -43,7 +43,7 @@ describe('adUpdateJobConfigTool', () => {
     it('operation=update_query_delay calls ml.updateDatafeed with query_delay', async () => {
       const ml = createMlMock();
       await adUpdateJobConfigTool.handler(
-        { operation: 'update_query_delay', job_id: 'my-job', value: '120s' },
+        { operation: 'update_query_delay', job_id: 'my-job', query_delay: '120s' },
         createContext(ml)
       );
       expect(ml.updateDatafeed).toHaveBeenCalledWith({
@@ -56,7 +56,7 @@ describe('adUpdateJobConfigTool', () => {
       const ml = createMlMock();
       const config = { enabled: true, check_window: '2h' };
       await adUpdateJobConfigTool.handler(
-        { operation: 'update_delayed_data_check', job_id: 'my-job', value: config },
+        { operation: 'update_delayed_data_check', job_id: 'my-job', delayed_data_check: config },
         createContext(ml)
       );
       expect(ml.updateDatafeed).toHaveBeenCalledWith({
@@ -73,12 +73,12 @@ describe('adUpdateJobConfigTool', () => {
         description: 'holiday',
       };
       await adUpdateJobConfigTool.handler(
-        { operation: 'create_calendar_event', job_id: 'my-job', value: event },
+        { operation: 'create_calendar_event', job_id: 'my-job', calendar_event: event },
         createContext(ml)
       );
       expect(ml.postCalendarEvents).toHaveBeenCalledWith({
         calendar_id: 'calendar-my-job',
-        body: { events: [event] },
+        events: [event],
       });
     });
 
@@ -86,14 +86,16 @@ describe('adUpdateJobConfigTool', () => {
       const ml = createMlMock();
       ml.updateJob.mockRejectedValue(new Error('job closed'));
       const result = await adUpdateJobConfigTool.handler(
-        { operation: 'update_memory_limit', job_id: 'my-job', value: '512mb' },
+        { operation: 'update_memory_limit', job_id: 'my-job', memory_limit: '512mb' },
         createContext(ml)
       );
-      expect(result).toEqual({
-        results: [
-          { type: ToolResultType.text, data: 'Error executing update_memory_limit: job closed' },
-        ],
-      });
+      const standardResult = result as {
+        results: Array<{ type: string; data: { message: string } }>;
+      };
+      expect(standardResult.results[0].type).toBe(ToolResultType.error);
+      expect(standardResult.results[0].data.message).toBe(
+        'Error executing update_memory_limit: job closed'
+      );
     });
   });
 });

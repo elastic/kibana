@@ -9,6 +9,7 @@ import { z } from '@kbn/zod/v4';
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
+import { createErrorResult } from '@kbn/agent-builder-server';
 import { AD_GET_JOB_INFO_TOOL_ID } from './tool_ids';
 
 const schema = z.object({
@@ -43,30 +44,23 @@ export const adGetJobInfoTool: BuiltinToolDefinition<typeof schema> = {
       switch (operation) {
         case 'get_jobs': {
           const response = await ml.getJobs(jobId ? { job_id: jobId } : {});
-          return { results: [{ type: ToolResultType.json, data: response }] };
+          return { results: [{ type: ToolResultType.other, data: response }] };
         }
 
         case 'get_datafeed_config': {
           if (!jobId) {
             return {
-              results: [
-                {
-                  type: ToolResultType.text,
-                  data: 'job_id is required for get_datafeed_config',
-                },
-              ],
+              results: [createErrorResult('job_id is required for get_datafeed_config')],
             };
           }
           const response = await ml.getDatafeeds({ datafeed_id: `datafeed-${jobId}` });
-          return { results: [{ type: ToolResultType.json, data: response }] };
+          return { results: [{ type: ToolResultType.other, data: response }] };
         }
 
         case 'get_job_messages': {
           if (!jobId) {
             return {
-              results: [
-                { type: ToolResultType.text, data: 'job_id is required for get_job_messages' },
-              ],
+              results: [createErrorResult('job_id is required for get_job_messages')],
             };
           }
           const messagesResponse = await esClient.asCurrentUser.search({
@@ -76,32 +70,28 @@ export const adGetJobInfoTool: BuiltinToolDefinition<typeof schema> = {
             size: 50,
           });
           return {
-            results: [{ type: ToolResultType.json, data: messagesResponse.hits.hits }],
+            results: [{ type: ToolResultType.other, data: messagesResponse.hits.hits }],
           };
         }
 
         case 'get_model_snapshots': {
           if (!jobId) {
             return {
-              results: [
-                { type: ToolResultType.text, data: 'job_id is required for get_model_snapshots' },
-              ],
+              results: [createErrorResult('job_id is required for get_model_snapshots')],
             };
           }
           const response = await ml.getModelSnapshots({ job_id: jobId });
-          return { results: [{ type: ToolResultType.json, data: response }] };
+          return { results: [{ type: ToolResultType.other, data: response }] };
         }
 
         case 'get_calendar_events': {
           if (!jobId) {
             return {
-              results: [
-                { type: ToolResultType.text, data: 'job_id is required for get_calendar_events' },
-              ],
+              results: [createErrorResult('job_id is required for get_calendar_events')],
             };
           }
           const calResponse = await ml.getCalendars({ calendar_id: `calendar-${jobId}` });
-          return { results: [{ type: ToolResultType.json, data: calResponse }] };
+          return { results: [{ type: ToolResultType.other, data: calResponse }] };
         }
 
         case 'get_available_metadata': {
@@ -118,7 +108,7 @@ export const adGetJobInfoTool: BuiltinToolDefinition<typeof schema> = {
         influencers = VALUES(\`analysis_config.influencers\`),
         bucket_spans = VALUES(\`analysis_config.bucket_span\`)`,
           });
-          return { results: [{ type: ToolResultType.json, data: response }] };
+          return { results: [{ type: ToolResultType.other, data: response }] };
         }
 
         case 'validate_permissions': {
@@ -129,7 +119,7 @@ export const adGetJobInfoTool: BuiltinToolDefinition<typeof schema> = {
           return {
             results: [
               {
-                type: ToolResultType.json,
+                type: ToolResultType.other,
                 data: { ml_info: response, has_ml_index_access: hasPermissions },
               },
             ],
@@ -138,13 +128,13 @@ export const adGetJobInfoTool: BuiltinToolDefinition<typeof schema> = {
 
         default:
           return {
-            results: [{ type: ToolResultType.text, data: `Unknown operation: ${operation}` }],
+            results: [createErrorResult(`Unknown operation: ${operation}`)],
           };
       }
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err);
       return {
-        results: [{ type: ToolResultType.text, data: `Error executing ${operation}: ${message}` }],
+        results: [createErrorResult(`Error executing ${operation}: ${message}`)],
       };
     }
   },

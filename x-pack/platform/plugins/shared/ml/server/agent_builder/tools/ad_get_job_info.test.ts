@@ -46,7 +46,7 @@ describe('adGetJobInfoTool', () => {
       const result = await adGetJobInfoTool.handler({ operation: 'get_jobs' }, context);
 
       expect(ml.getJobs).toHaveBeenCalledWith({});
-      expect(result).toEqual({ results: [{ type: ToolResultType.json, data: { jobs: [] } }] });
+      expect(result).toEqual({ results: [{ type: ToolResultType.other, data: { jobs: [] } }] });
     });
 
     it('operation=get_jobs with job_id scopes the call', async () => {
@@ -75,11 +75,13 @@ describe('adGetJobInfoTool', () => {
 
       const result = await adGetJobInfoTool.handler({ operation: 'get_datafeed_config' }, context);
 
-      expect(result).toEqual({
-        results: [
-          { type: ToolResultType.text, data: 'job_id is required for get_datafeed_config' },
-        ],
-      });
+      const standardResult = result as {
+        results: Array<{ type: string; data: { message: string } }>;
+      };
+      expect(standardResult.results[0].type).toBe(ToolResultType.error);
+      expect(standardResult.results[0].data.message).toBe(
+        'job_id is required for get_datafeed_config'
+      );
     });
 
     it('operation=get_job_messages returns error when job_id is missing', async () => {
@@ -87,9 +89,13 @@ describe('adGetJobInfoTool', () => {
 
       const result = await adGetJobInfoTool.handler({ operation: 'get_job_messages' }, context);
 
-      expect(result).toEqual({
-        results: [{ type: ToolResultType.text, data: 'job_id is required for get_job_messages' }],
-      });
+      const standardResult = result as {
+        results: Array<{ type: string; data: { message: string } }>;
+      };
+      expect(standardResult.results[0].type).toBe(ToolResultType.error);
+      expect(standardResult.results[0].data.message).toBe(
+        'job_id is required for get_job_messages'
+      );
     });
 
     it('operation=get_job_messages searches .ml-notifications-* with job filter', async () => {
@@ -107,7 +113,9 @@ describe('adGetJobInfoTool', () => {
           query: { term: { job_id: 'my-job' } },
         })
       );
-      expect(result.results[0].type).toBe(ToolResultType.json);
+      expect((result as { results: Array<{ type: string }> }).results[0].type).toBe(
+        ToolResultType.other
+      );
     });
 
     it('operation=get_calendar_events returns error when job_id is missing', async () => {
@@ -115,11 +123,13 @@ describe('adGetJobInfoTool', () => {
 
       const result = await adGetJobInfoTool.handler({ operation: 'get_calendar_events' }, context);
 
-      expect(result).toEqual({
-        results: [
-          { type: ToolResultType.text, data: 'job_id is required for get_calendar_events' },
-        ],
-      });
+      const standardResult = result as {
+        results: Array<{ type: string; data: { message: string } }>;
+      };
+      expect(standardResult.results[0].type).toBe(ToolResultType.error);
+      expect(standardResult.results[0].data.message).toBe(
+        'job_id is required for get_calendar_events'
+      );
     });
 
     it('operation=get_calendar_events looks up calendar-{job_id}', async () => {
@@ -155,7 +165,9 @@ describe('adGetJobInfoTool', () => {
 
       expect(ml.info).toHaveBeenCalled();
       expect(esClient.asCurrentUser.indices.exists).toHaveBeenCalled();
-      expect(result.results[0].type).toBe(ToolResultType.json);
+      expect((result as { results: Array<{ type: string }> }).results[0].type).toBe(
+        ToolResultType.other
+      );
     });
 
     it('returns error result when ML client throws', async () => {
@@ -165,9 +177,11 @@ describe('adGetJobInfoTool', () => {
 
       const result = await adGetJobInfoTool.handler({ operation: 'get_jobs' }, context);
 
-      expect(result).toEqual({
-        results: [{ type: ToolResultType.text, data: 'Error executing get_jobs: unauthorized' }],
-      });
+      const standardResult = result as {
+        results: Array<{ type: string; data: { message: string } }>;
+      };
+      expect(standardResult.results[0].type).toBe(ToolResultType.error);
+      expect(standardResult.results[0].data.message).toBe('Error executing get_jobs: unauthorized');
     });
   });
 });
