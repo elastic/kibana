@@ -16,7 +16,7 @@ import { suggestForExpression } from '../../definitions/utils';
 import {
   commaCompleteItem,
   newLineCompleteItem,
-  getNewLineAndPipeCompleteItems,
+  newLineAndPipeCompleteItems,
   pipeCompleteItem,
 } from '../complete_items';
 import {
@@ -103,7 +103,7 @@ export async function autocomplete(
       return [
         sortModifierSuggestions.NULLS_FIRST,
         sortModifierSuggestions.NULLS_LAST,
-        ...getNewLineAndPipeCompleteItems(),
+        ...newLineAndPipeCompleteItems,
         withAutoSuggest({ ...commaCompleteItem, text: ', ' }),
       ].map((suggestion) => ({
         ...suggestion,
@@ -120,7 +120,7 @@ export async function autocomplete(
 
     case 'after_nulls': {
       return [
-        ...getNewLineAndPipeCompleteItems(),
+        ...newLineAndPipeCompleteItems,
         withAutoSuggest({ ...commaCompleteItem, text: ', ' }),
       ];
     }

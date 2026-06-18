@@ -14,7 +14,7 @@ import type { ISuggestionItem } from '../../types';
 import { buildFieldsDefinitions } from '../../../definitions/utils/functions';
 import {
   commaCompleteItem,
-  getNewLineAndPipeCompleteItems,
+  newLineAndPipeCompleteItems,
   pipeCompleteItem,
 } from '../../complete_items';
 import { SuggestionCategory } from '../../../../language/autocomplete/utils/sorting/types';
@@ -97,7 +97,7 @@ async function suggestForMetadata(metadata: ESQLCommandOption, innerText: string
       if (filteredMetaFields.length > 0) {
         suggestions.push(commaCompleteItem);
       }
-      suggestions.push(...getNewLineAndPipeCompleteItems());
+      suggestions.push(...newLineAndPipeCompleteItems);
     }
   }
 

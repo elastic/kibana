@@ -22,7 +22,7 @@ import type { ICommandCallbacks } from '../types';
 import { Location } from '../types';
 import { type ISuggestionItem, type ICommandContext } from '../types';
 import {
-  getNewLineAndPipeCompleteItems,
+  newLineAndPipeCompleteItems,
   byCompleteItem,
   whereCompleteItem,
   commaCompleteItem,
@@ -198,7 +198,7 @@ export async function autocomplete(
 
       if (expressionType === 'boolean' && isComplete) {
         suggestions.push(
-          ...getNewLineAndPipeCompleteItems(),
+          ...newLineAndPipeCompleteItems,
           { ...commaCompleteItem, text: ', ' },
           byCompleteItem
         );

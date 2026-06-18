@@ -246,7 +246,6 @@ describe('FORK Autocomplete', () => {
         test('keep', async () => {
           await forkExpectSuggestions('FROM a | FORK (KEEP ', [
             ...getFieldNamesByType('any'),
-            '\n',
           ]);
           await forkExpectSuggestions('FROM a | FORK (KEEP integerField ', [',', '| ', '\n']);
         });
@@ -254,7 +253,6 @@ describe('FORK Autocomplete', () => {
         test('drop', async () => {
           await forkExpectSuggestions('FROM a | FORK (DROP ', [
             ...getFieldNamesByType('any'),
-            '\n',
           ]);
           await forkExpectSuggestions('FROM a | FORK (DROP integerField ', [',', '| ', '\n']);
         });

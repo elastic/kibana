@@ -216,22 +216,20 @@ describe('autocomplete', () => {
   });
 
   describe.each(['keep', 'drop'])('%s', (command) => {
-    testSuggestions(`from a | ${command} /`, ['\n', ...getFieldNamesByType('any')]);
+    testSuggestions(`from a | ${command} /`, [...getFieldNamesByType('any')]);
     testSuggestions(`from a | ${command} keywordField, /`, [
-      '\n',
       ...getFieldNamesByType('any').filter((name) => name !== 'keywordField'),
     ]);
 
     testSuggestions(
       `from a | ${command} keywordField,/`,
-      ['\n', ...getFieldNamesByType('any').filter((name) => name !== 'keywordField')],
+      [...getFieldNamesByType('any').filter((name) => name !== 'keywordField')],
       ','
     );
 
     testSuggestions(
       `from a_index | eval round(doubleField) + 1 | eval \`round(doubleField) + 1\` + 1 | eval \`\`\`round(doubleField) + 1\`\` + 1\` + 1 | eval \`\`\`\`\`\`\`round(doubleField) + 1\`\`\`\` + 1\`\` + 1\` + 1 | eval \`\`\`\`\`\`\`\`\`\`\`\`\`\`\`round(doubleField) + 1\`\`\`\`\`\`\`\` + 1\`\`\`\` + 1\`\` + 1\` + 1 | ${command} /`,
       [
-        '\n',
         ...getFieldNamesByType('any'),
         '`round(doubleField) + 1`',
         '```round(doubleField) + 1`` + 1`',
@@ -453,10 +451,10 @@ describe('autocomplete', () => {
     );
 
     // DROP (first field)
-    testSuggestions('FROM index1 | DROP f/', ['\n', ...getFieldNamesByType('any')]);
+    testSuggestions('FROM index1 | DROP f/', [...getFieldNamesByType('any')]);
 
     // DROP (subsequent field)
-    testSuggestions('FROM index1 | DROP field1, f/', ['\n', ...getFieldNamesByType('any')]);
+    testSuggestions('FROM index1 | DROP field1, f/', [...getFieldNamesByType('any')]);
 
     // ENRICH policy
     testSuggestions(
@@ -492,11 +490,10 @@ describe('autocomplete', () => {
     );
 
     // KEEP (first field)
-    testSuggestions('FROM index1 | KEEP f/', ['\n', ...getFieldNamesByType('any')]);
+    testSuggestions('FROM index1 | KEEP f/', [...getFieldNamesByType('any')]);
 
     // KEEP (subsequent fields)
     testSuggestions('FROM index1 | KEEP booleanField, f/', [
-      '\n',
       ...getFieldNamesByType('any').filter((name) => name !== 'booleanField'),
     ]);
 
@@ -1059,11 +1056,9 @@ describe('autocomplete', () => {
       describe.each(['KEEP', 'DROP'])('%s <field>', (commandName) => {
         // KEEP field
         testSuggestions(`FROM a | ${commandName} /`, [
-          '\n',
           ...getFieldNamesByType('any').map(attachTriggerCommand),
         ]);
         testSuggestions(`FROM a | ${commandName} d/`, [
-          '\n',
           ...getFieldNamesByType('any')
             .map<PartialSuggestionWithText>((text) => ({
               text,
@@ -1072,12 +1067,11 @@ describe('autocomplete', () => {
             .map(attachTriggerCommand),
         ]);
         testSuggestions(`FROM a | ${commandName} doubleFiel/`, [
-          '\n',
           ...getFieldNamesByType('any').map(attachTriggerCommand),
         ]);
         testSuggestions(
           `FROM a | ${commandName} doubleField/`,
-          ['doubleField, ', 'doubleField | ']
+          ['doubleField\n', 'doubleField, ', 'doubleField | ']
             .map((text) => ({
               text,
               filterText: 'doubleField',
@@ -1227,21 +1221,21 @@ describe('autocomplete', () => {
     describe('dot-separated field names', () => {
       testSuggestions(
         'FROM index_a | KEEP field.nam/',
-        ['\n', { text: 'field.name', rangeToReplace: { start: 20, end: 29 } }],
+        [{ text: 'field.name', rangeToReplace: { start: 20, end: 29 } }],
         undefined,
         [[{ name: 'field.name', type: 'double', userDefined: false }]]
       );
       // multi-line
       testSuggestions(
         'FROM index_a\n| KEEP field.nam/',
-        ['\n', { text: 'field.name', rangeToReplace: { start: 20, end: 29 } }],
+        [{ text: 'field.name', rangeToReplace: { start: 20, end: 29 } }],
         undefined,
         [[{ name: 'field.name', type: 'double', userDefined: false }]]
       );
       // triple separator
       testSuggestions(
         'FROM index_c\n| KEEP field.name.f/',
-        ['\n', { text: 'field.name.foo', rangeToReplace: { start: 20, end: 32 } }],
+        [{ text: 'field.name.foo', rangeToReplace: { start: 20, end: 32 } }],
         undefined,
         [[{ name: 'field.name.foo', type: 'double', userDefined: false }]]
       );
@@ -1259,18 +1253,16 @@ describe('autocomplete', () => {
   describe('Unmmapped fields', () => {
     describe('should suggest unmapped field after its first usage if unmapped is LOAD or NULLIFY', () => {
       testSuggestions('SET unmapped_fields = "LOAD"; FROM a | WHERE unmappedField > 0 | KEEP /', [
-        '\n',
         ...getFieldNamesByType('any'),
         { text: 'unmappedField' },
       ]);
       testSuggestions(
         'SET unmapped_fields = "NULLIFY"; FROM a | WHERE unmappedField > 0 | KEEP /',
-        ['\n', ...getFieldNamesByType('any'), { text: 'unmappedField' }]
+        [...getFieldNamesByType('any'), { text: 'unmappedField' }]
       );
     });
     describe('should not suggest unmapped field after its first usage if unmapped is FAIL', () => {
       testSuggestions('SET unmapped_fields = "FAIL"; FROM a | WHERE unmappedField > 0 | KEEP /', [
-        '\n',
         ...getFieldNamesByType('any'),
       ]);
     });
@@ -1278,17 +1270,17 @@ describe('autocomplete', () => {
       // Don't suggest unmappedField because it was dropped
       testSuggestions(
         'SET unmapped_fields = "LOAD"; FROM a | WHERE unmappedField > 0|  DROP unmappedField | KEEP /',
-        ['\n', ...getFieldNamesByType('any')]
+        [...getFieldNamesByType('any')]
       );
       // Suggest only the unmappedField because it was kept
       testSuggestions(
         'SET unmapped_fields = "LOAD"; FROM a | WHERE unmappedField > 0|  KEEP unmappedField | KEEP /',
-        ['\n', { text: 'unmappedField' }]
+        [{ text: 'unmappedField' }]
       );
       // Don't suggest unmappedField because STATS destroyed all fields
       testSuggestions(
         'SET unmapped_fields = "LOAD"; FROM a | WHERE unmappedField > 0 | STATS col0 = AVG(3) | KEEP /',
-        ['\n', { text: 'col0' }]
+        [{ text: 'col0' }]
       );
     });
   });
