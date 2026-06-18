@@ -17,7 +17,7 @@ import { enterpriseLicenseMiddleware } from '../../../middleware/enterprise_lice
 import { rejectUnknownRuleId } from './reject_unknown_rule_id';
 
 const paramsSchema = z.object({
-  id: z.string().describe('The resolution rule identifier.'),
+  id: z.string().max(256).describe('The resolution rule identifier.'),
 });
 
 export function registerResolutionRulesDisable(router: EntityStorePluginRouter) {

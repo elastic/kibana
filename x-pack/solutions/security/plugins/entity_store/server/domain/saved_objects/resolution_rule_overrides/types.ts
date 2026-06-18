@@ -21,7 +21,10 @@ export const EntityStoreResolutionRuleOverridesTypeMappings: SavedObjectsType['m
 };
 
 const overridesSchemaV1 = schema.object({
-  overrides: schema.recordOf(schema.string(), schema.object({ enabled: schema.boolean() })),
+  overrides: schema.recordOf(
+    schema.string({ maxLength: 256 }),
+    schema.object({ enabled: schema.boolean() })
+  ),
 });
 
 const version1: SavedObjectsFullModelVersion = {

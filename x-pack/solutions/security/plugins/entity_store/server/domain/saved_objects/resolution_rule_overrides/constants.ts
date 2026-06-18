@@ -16,5 +16,5 @@ export type ResolutionRuleOverrides = z.infer<typeof ResolutionRuleOverrides>;
 export const ResolutionRuleOverrides = z.object({
   // Map of ruleId -> override. Only rules that have been explicitly toggled appear
   // here; a rule absent from the map is treated as enabled.
-  overrides: z.record(z.string(), ResolutionRuleOverride).default({}),
+  overrides: z.record(z.string().max(256), ResolutionRuleOverride).default({}),
 });
