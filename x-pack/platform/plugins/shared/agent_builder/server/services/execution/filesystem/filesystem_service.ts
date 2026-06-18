@@ -9,9 +9,12 @@ import type { IFileSystem } from 'just-bash';
 import { InMemoryFs, MountableFs } from 'just-bash';
 import type { IFilesystemService } from '@kbn/agent-builder-server/runner';
 import type { Volume } from '@kbn/agent-builder-server/runner';
+import { CapacityLimitedFs } from './capacity_limited_fs';
 import { VolumeBackedReadOnlyFs } from './volume_backed_read_only_fs';
 import type { WorkspaceVolume } from './workspace_volume';
 import { MOUNT_POINTS } from './mount_points';
+
+export const EPHEMERAL_FS_CAPACITY_BYTES = 20 * 1024 * 1024;
 
 export interface FilesystemServiceDeps {
   workspaceVolume: WorkspaceVolume;
@@ -41,8 +44,10 @@ export class FilesystemService implements IFilesystemService {
     if (this.initialised) return;
     this.initialised = true;
 
-    const base = new InMemoryFs();
-    await base.mkdir('/tmp', { recursive: true });
+    const baseRaw = new InMemoryFs();
+    await baseRaw.mkdir('/tmp', { recursive: true });
+    // Cap ephemeral writes (/tmp, /home/user, anything not under a mount)
+    const base = new CapacityLimitedFs(baseRaw, EPHEMERAL_FS_CAPACITY_BYTES);
 
     await this.deps.workspaceVolume.load();
 
