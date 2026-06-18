@@ -8,7 +8,13 @@
  */
 
 import type { BuildkiteClient, BuildkiteGroupStep, BuildkiteStep } from '../../buildkite';
-import { AGENT_DISK_GIB, RETRIES, STEP_KEYS, TEST_STEP_TIMEOUT_MINUTES } from './const';
+import {
+  AGENT_DISK_GIB,
+  FTR_STEP_TIMEOUT_MINUTES,
+  RETRIES,
+  STEP_KEYS,
+  TEST_STEP_TIMEOUT_MINUTES,
+} from './const';
 import type { FunctionalGroup } from './types';
 import { expandAgentQueue } from '#pipeline-utils';
 
@@ -75,7 +81,7 @@ export function buildFunctionalStepGroup(
       ({ title, key, queue = opts.defaultQueue }): BuildkiteStep => ({
         label: title,
         command: opts.command,
-        timeout_in_minutes: TEST_STEP_TIMEOUT_MINUTES,
+        timeout_in_minutes: FTR_STEP_TIMEOUT_MINUTES,
         key,
         agents: expandAgentQueue(queue, AGENT_DISK_GIB.FTR),
         env: {

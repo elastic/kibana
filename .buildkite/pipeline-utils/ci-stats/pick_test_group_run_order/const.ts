@@ -90,8 +90,11 @@ export const CI_STATS_DEFAULTS = {
 /** Percentile used when ci-stats estimates per-config durations. */
 export const DURATION_PERCENTILE = 75;
 
-/** Timeout applied to every test step regardless of type. */
+/** Timeout applied to Jest test steps. */
 export const TEST_STEP_TIMEOUT_MINUTES = 50;
+
+/** Timeout applied to FTR config steps. */
+export const FTR_STEP_TIMEOUT_MINUTES = 38;
 
 /** Agent disk sizes (GiB) per step type. */
 export const AGENT_DISK_GIB = {
