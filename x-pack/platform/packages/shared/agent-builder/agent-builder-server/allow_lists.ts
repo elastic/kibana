@@ -61,6 +61,8 @@ export const AGENT_BUILDER_BUILTIN_TOOLS = [
   'threat_intel.search_by_anchors',
   'threat_intel.search_by_diamond',
   'threat_intel.extract_diamond',
+  'threat_intel.get_report',
+  'threat_intel.correlate_synthesis_pack',
 
   // Streams
   `${internalNamespaces.streams}.inspect_streams`,

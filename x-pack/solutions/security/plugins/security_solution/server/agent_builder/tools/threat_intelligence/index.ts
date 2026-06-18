@@ -23,3 +23,5 @@ export { correlatePollTool } from './correlate_poll';
 export { searchByAnchorsTool } from './search_by_anchors';
 export { searchByDiamondTool } from './search_by_diamond';
 export { extractDiamondTool } from './extract_diamond';
+export { getReportTool } from './get_report';
+export { correlateSynthesisPackTool } from './correlate_synthesis_pack';

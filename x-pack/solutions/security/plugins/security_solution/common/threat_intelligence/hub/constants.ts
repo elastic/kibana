@@ -189,6 +189,18 @@ export const THREAT_INTEL_TOOL_IDS = {
    * Poll until status is 'succeeded' or 'failed'; partials shows per-stage output as it lands.
    */
   correlatePoll: 'threat_intel.correlate_poll',
+  /**
+   * Batch full-text fetch — returns title, source type/name/URL, and body_text for up to 50
+   * report_ids. Companion to `correlate_synthesis_pack`: fetch candidate text before synthesizing.
+   */
+  getReport: 'threat_intel.get_report',
+  /**
+   * Self-contained structurally-blinded candidate surface. Runs a triage pass internally and
+   * returns candidates in randomized order with all scores/rankings stripped, plus the synthesis
+   * rubric. Use this (not `correlate_threat depth=triage`) when the caller wants an independent
+   * bias-reduced judgment — they can never un-see scores they receive.
+   */
+  correlateSynthesisPack: 'threat_intel.correlate_synthesis_pack',
 } as const;
 
 /**

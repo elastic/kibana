@@ -289,17 +289,18 @@ const buildSynthesisPrompt = (
 
 interface ReportBodySource {
   content?: { body_text?: string; title?: string };
-  source?: { type?: string; name?: string };
+  source?: { type?: string; name?: string; url?: string };
 }
 
-interface CandidateBodyEntry {
+export interface CandidateBodyEntry {
   bodyText: string;
   title: string;
   sourceType: string;
   sourceName: string;
+  url: string;
 }
 
-const fetchCandidateBodyText = async (
+export const fetchCandidateBodyText = async (
   esClient: ElasticsearchClient,
   reportIds: readonly string[]
 ): Promise<Map<string, CandidateBodyEntry>> => {
@@ -310,7 +311,7 @@ const fetchCandidateBodyText = async (
     index: THREAT_REPORTS_INDEX_PATTERN,
     size: reportIds.length + 5,
     query: { ids: { values: [...reportIds] } },
-    _source: ['content.body_text', 'content.title', 'source.type', 'source.name'],
+    _source: ['content.body_text', 'content.title', 'source.type', 'source.name', 'source.url'],
     ignore_unavailable: true,
   });
 
@@ -321,6 +322,7 @@ const fetchCandidateBodyText = async (
         title: hit._source?.content?.title ?? hit._id,
         sourceType: hit._source?.source?.type ?? 'unknown',
         sourceName: hit._source?.source?.name ?? '',
+        url: hit._source?.source?.url ?? '',
       });
     }
   }

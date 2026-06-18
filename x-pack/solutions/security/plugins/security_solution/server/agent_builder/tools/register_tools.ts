@@ -25,6 +25,8 @@ import {
   searchByAnchorsTool,
   searchByDiamondTool,
   extractDiamondTool,
+  getReportTool,
+  correlateSynthesisPackTool,
 } from './threat_intelligence';
 import type { SecuritySolutionPluginCoreSetupDependencies } from '../../plugin_contract';
 
@@ -81,5 +83,7 @@ export const registerTools = async (
     tryRegister(agentBuilder, logger, searchByAnchorsTool);
     tryRegister(agentBuilder, logger, searchByDiamondTool);
     tryRegister(agentBuilder, logger, extractDiamondTool(core, logger));
+    tryRegister(agentBuilder, logger, getReportTool);
+    tryRegister(agentBuilder, logger, correlateSynthesisPackTool(core, logger));
   }
 };

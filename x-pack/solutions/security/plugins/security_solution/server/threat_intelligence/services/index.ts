@@ -183,5 +183,5 @@ export type {
   CorrelateThreatFullResult,
 } from './correlate_threat';
 
-export { synthesizeCorrelations } from './synthesize_correlations';
-export type { SynthesizeCorrelationsParams } from './synthesize_correlations';
+export { synthesizeCorrelations, fetchCandidateBodyText } from './synthesize_correlations';
+export type { SynthesizeCorrelationsParams, CandidateBodyEntry } from './synthesize_correlations';
