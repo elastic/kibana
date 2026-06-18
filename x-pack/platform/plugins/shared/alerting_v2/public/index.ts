@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import React from 'react';
 import { ContainerModule } from 'inversify';
 import { OnSetup, PluginSetup, PluginStart, Start } from '@kbn/core-di';
 import { CoreSetup, CoreStart } from '@kbn/core-di-browser';
@@ -32,11 +33,22 @@ import { RulesApi } from './services/rules_api';
 import { registerTriggerDefinitions } from './lib/workflow_extensions/register_trigger_definitions';
 import { disableAlertingManagementUi } from './lib/disable_management_ui';
 import { setKibanaServices } from './kibana_services';
-import { DynamicRuleFormFlyout } from './create_rule_form_flyout';
 import type { AlertingV2PublicStart } from './types';
+import type { CreateRuleOptionsFlyoutProps } from './create_rule_options_flyout';
 
-export type { AlertingV2PublicStart } from './types';
-export type { CreateRuleFormFlyoutProps } from './create_rule_form_flyout';
+const LazyCreateRuleOptionsFlyout = React.lazy(() =>
+  import('./create_rule_options_flyout').then((m) => ({ default: m.CreateRuleOptionsFlyout }))
+);
+
+const CreateRuleOptionsFlyout = (props: CreateRuleOptionsFlyoutProps) =>
+  React.createElement(
+    React.Suspense,
+    { fallback: null },
+    React.createElement(LazyCreateRuleOptionsFlyout, props)
+  );
+
+export type { AlertingV2PublicStart, CreateRuleOptionsFlyoutLegacyItem } from './types';
+export type { CreateRuleOptionsFlyoutProps } from './create_rule_options_flyout';
 
 export const module = new ContainerModule(({ bind }) => {
   bind(RulesApi).toSelf().inSingletonScope();
@@ -46,7 +58,7 @@ export const module = new ContainerModule(({ bind }) => {
     .toDynamicValue(({ get }) => new WorkflowApi(get(CoreStart('http'))))
     .inSingletonScope();
   bind(Start).toConstantValue({
-    DynamicRuleFormFlyout,
+    CreateRuleOptionsFlyout,
   } satisfies AlertingV2PublicStart);
   bind(OnSetup).toConstantValue((container) => {
     const getStartServices = container.get(CoreSetup('getStartServices'));
