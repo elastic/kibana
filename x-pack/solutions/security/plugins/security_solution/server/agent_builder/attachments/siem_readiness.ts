@@ -323,8 +323,8 @@ Each actionable finding includes:
 Continuity pipeline items include silence and volume health fields:
 - silenceMs: milliseconds since the last event (null if stream never received events)
 - isSilent: true when the silence gap exceeds the category-specific threshold
-- last24hDocs: document count in the most recent 24 h window (null if stream < 7 days old)
-- baseline7dAvg: average daily doc count over the prior 6 days (null if stream < 7 days old)
+- lastFullDayDocs: document count for yesterday (the most recent complete day; the in-progress current day is excluded) (null if stream < 7 days old)
+- baseline7dAvg: average daily doc count over the prior full days (null if stream < 7 days old)
 - volumeDropPct: percentage drop vs baseline clamped to [0, ∞); null when baseline unavailable
 - blastRadiusStatus (optional): reliability of the blast radius fields
   - 'unavailable': a required lookup failed; affectedRules/Tactics/Platform are omitted and MUST be shown as "unavailable (lookup failed)" — never as "none"

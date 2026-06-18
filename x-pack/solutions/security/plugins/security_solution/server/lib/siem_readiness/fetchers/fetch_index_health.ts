@@ -7,15 +7,19 @@
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { SILENCE_BOOTSTRAP_DAYS } from '@kbn/siem-readiness';
+import { toDataStreamName } from './utils';
 
 export interface IndexHealthEntry {
   lastEventMs: number | null;
   /** Date.now() − lastEventMs; null when the stream has never received events. */
   silenceMs: number | null;
-  /** Always false from the fetcher — callers apply per-category thresholds. */
-  isSilent: boolean;
-  /** null when the stream is younger than SILENCE_BOOTSTRAP_DAYS (insufficient history). */
-  last24hDocs: number | null;
+  /**
+   * Doc count for yesterday (the most recent complete UTC day). The in-progress
+   * current day is excluded so a partial day is never compared against full-day
+   * baselines. null when the stream is younger than SILENCE_BOOTSTRAP_DAYS
+   * (insufficient history).
+   */
+  lastFullDayDocs: number | null;
   baseline7dAvg: number | null;
   /** Clamped to [0, ∞) — null when baseline unavailable or zero. */
   volumeDropPct: number | null;
@@ -36,22 +40,15 @@ interface VolumeAggregationShape {
 }
 
 /**
- * Convert a backing index name to its data stream name.
- * e.g. `.ds-logs-endpoint.events-default-2024.01.15-000001` → `logs-endpoint.events-default`
- */
-const toDataStreamName = (indexName: string): string | undefined => {
-  const match = indexName.match(/^\.ds-(.+)-\d{4}\.\d{2}\.\d{2}-\d+$/);
-  return match?.[1];
-};
-
-/**
  * Fetch last-event time and volume health for all SIEM data streams.
  *
  * - `lastEventMs` comes from `_data_stream/_stats.maximum_timestamp`, which is
  *   pre-computed by Elasticsearch and requires no query-time aggregation (aligned
  *   with the Dataset Quality data source).
- * - Volume fields (`last24hDocs`, `baseline7dAvg`, `volumeDropPct`) are computed
- *   from a single date-histogram search over the past 8 days.
+ * - Volume fields (`lastFullDayDocs`, `baseline7dAvg`, `volumeDropPct`) are
+ *   computed from a single date-histogram search over the past 8 days. We compare
+ *   yesterday's complete day against the prior full days' average; the in-progress
+ *   current day is dropped so a partial day never triggers a false volume drop.
  * - Young streams (creation_date within SILENCE_BOOTSTRAP_DAYS) get null volume
  *   fields — the baseline cannot be trusted yet.
  *
@@ -75,11 +72,13 @@ export const fetchIndexHealth = async ({
       filter_path: ['data_streams.name', 'data_streams.creation_date'],
     }),
 
-    // 3. Daily doc-count histogram for volume trend (past 8 days covers 7d baseline + today)
+    // 3. Daily doc-count histogram for volume trend. Range is rounded to UTC
+    //    midnight (`now-8d/d`) so the first bucket is a full day; this yields 8
+    //    complete prior days plus the in-progress current day (dropped below).
     esClient.search({
       index: ['logs-*', 'metrics-*'],
       size: 0,
-      query: { range: { '@timestamp': { gte: 'now-8d' } } },
+      query: { range: { '@timestamp': { gte: 'now-8d/d' } } },
       aggs: {
         by_index: {
           terms: { field: '_index', size: 1000 },
@@ -89,7 +88,7 @@ export const fetchIndexHealth = async ({
                 field: '@timestamp',
                 fixed_interval: '1d',
                 min_doc_count: 0,
-                extended_bounds: { min: 'now-8d', max: 'now' },
+                extended_bounds: { min: 'now-8d/d', max: 'now' },
               },
             },
           },
@@ -114,27 +113,30 @@ export const fetchIndexHealth = async ({
   }
 
   // Aggregate volume buckets by data stream name
-  const volumeByStream = new Map<string, { last24hDocs: number; baseline7dAvg: number }>();
+  const volumeByStream = new Map<string, { lastFullDayDocs: number; baseline7dAvg: number }>();
   const histBuckets =
     (volumeResponse.aggregations as unknown as VolumeAggregationShape | undefined)?.by_index
       ?.buckets ?? [];
 
   for (const bucket of histBuckets) {
-    const streamName = toDataStreamName(bucket.key) ?? bucket.key;
+    const streamName = toDataStreamName(bucket.key);
     const dailyBuckets = bucket.daily?.buckets ?? [];
-    if (dailyBuckets.length >= 2) {
-      const last24hDocs = dailyBuckets[dailyBuckets.length - 1].doc_count;
-      const priorDays = dailyBuckets.slice(0, -1).map((b) => b.doc_count);
+    // Drop the last bucket — it is the in-progress current day (partial). Compare
+    // yesterday (the most recent complete day) against the prior full days' average.
+    const completeDays = dailyBuckets.slice(0, -1);
+    if (completeDays.length >= 2) {
+      const lastFullDayDocs = completeDays[completeDays.length - 1].doc_count;
+      const priorDays = completeDays.slice(0, -1).map((b) => b.doc_count);
       const baseline7dAvg = priorDays.reduce((sum, n) => sum + n, 0) / priorDays.length;
 
       const existing = volumeByStream.get(streamName);
       if (existing) {
         volumeByStream.set(streamName, {
-          last24hDocs: existing.last24hDocs + last24hDocs,
+          lastFullDayDocs: existing.lastFullDayDocs + lastFullDayDocs,
           baseline7dAvg: existing.baseline7dAvg + baseline7dAvg,
         });
       } else {
-        volumeByStream.set(streamName, { last24hDocs, baseline7dAvg });
+        volumeByStream.set(streamName, { lastFullDayDocs, baseline7dAvg });
       }
     }
   }
@@ -147,27 +149,26 @@ export const fetchIndexHealth = async ({
     const creationDate = creationDateByStream.get(streamName) ?? 0;
     const isYoung = creationDate > bootstrapCutoff;
 
-    let last24hDocs: number | null = null;
+    let lastFullDayDocs: number | null = null;
     let baseline7dAvg: number | null = null;
     let volumeDropPct: number | null = null;
 
     if (!isYoung) {
       const vol = volumeByStream.get(streamName);
       if (vol !== undefined) {
-        last24hDocs = vol.last24hDocs;
+        lastFullDayDocs = vol.lastFullDayDocs;
         baseline7dAvg = vol.baseline7dAvg;
         volumeDropPct =
           baseline7dAvg === 0
             ? null
-            : Math.max(0, Math.round(((baseline7dAvg - last24hDocs) / baseline7dAvg) * 100));
+            : Math.max(0, Math.round(((baseline7dAvg - lastFullDayDocs) / baseline7dAvg) * 100));
       }
     }
 
     result[streamName] = {
       lastEventMs,
       silenceMs,
-      isSilent: false, // threshold applied by caller (fetch_pipelines)
-      last24hDocs,
+      lastFullDayDocs,
       baseline7dAvg,
       volumeDropPct,
     };

@@ -179,7 +179,7 @@ Concrete next steps, prioritized by severity (critical first). Each action refer
 Playbook guidance:
 - **Pipeline failure rate (Continuity / critical)**: Check the pipeline's \`on_failure\` processors in Stack Management > Ingest Pipelines. Look for recent index template changes or malformed documents. Common causes: field type conflicts, script processor errors.
 - **Data stream silence (Continuity / warning)**: The pipeline had activity but has received no events beyond the category threshold. Check Fleet > Agents for the relevant integration — verify the agent is enrolled and healthy. Check the log source itself (cloud account, endpoint agent, network device) to confirm it is still forwarding data.
-- **Volume drop (Continuity / warning or critical)**: Volume dropped significantly vs the 7-day baseline. Could indicate partial data loss, a misconfigured filter, or a source sending less data. Check the integration policy, log-forwarding rules, and any recent changes to the source system. Compare \`last24hDocs\` against \`baseline7dAvg\` to quantify the shortfall.
+- **Volume drop (Continuity / warning or critical)**: Volume dropped significantly vs the 7-day baseline. Could indicate partial data loss, a misconfigured filter, or a source sending less data. Check the integration policy, log-forwarding rules, and any recent changes to the source system. Compare \`lastFullDayDocs\` against \`baseline7dAvg\` to quantify the shortfall.
 - **Missing data (Coverage / warning)**: Verify the Elastic Agent policy for that category is deployed and healthy. Check Fleet > Agents for enrollment issues.
 - **ECS incompatibility (Quality / warning)**: Review the index template mappings. Use the Data Quality dashboard to see exactly which fields are mismatched. Consider updating integration versions.
 - **Retention below threshold (Retention / warning)**: Update the ILM policy or DSL lifecycle to extend the delete phase minimum age to at least 365d. For cloud-managed (serverless) environments, update the data stream retention setting.
@@ -202,8 +202,8 @@ Playbook guidance:
 
 ### For silence and volume-drop questions:
 - "Which data streams have gone silent?" → Call \`get_continuity\`, filter \`actionableFindings\` where \`type === 'silence'\`, report resource name, \`silenceMs\` converted to human-readable duration, and blast radius.
-- "Are any streams showing an unusual volume drop vs last week?" → Call \`get_continuity\`, filter \`actionableFindings\` where \`type\` is \`volume_drop_warning\` or \`volume_drop_critical\`, report \`volumeDropPct\`, \`last24hDocs\`, \`baseline7dAvg\`, and blast radius.
-- "Show me the silence status for my cloud integrations" → Call \`get_continuity\`, filter \`items\` by \`categories\` containing "Cloud", then list each with \`isSilent\`, \`silenceMs\`, and \`last24hDocs\`.
+- "Are any streams showing an unusual volume drop vs last week?" → Call \`get_continuity\`, filter \`actionableFindings\` where \`type\` is \`volume_drop_warning\` or \`volume_drop_critical\`, report \`volumeDropPct\`, \`lastFullDayDocs\`, \`baseline7dAvg\`, and blast radius.
+- "Show me the silence status for my cloud integrations" → Call \`get_continuity\`, filter \`items\` by \`categories\` containing "Cloud", then list each with \`isSilent\`, \`silenceMs\`, and \`lastFullDayDocs\`.
 
 ## Tool Output Fields
 
@@ -225,13 +225,13 @@ Playbook guidance:
 ### Continuity (\`get_continuity\`)
 - \`status\`: \`healthy | actionsRequired | noData\`
 - \`summary\`: pre-computed summary string
-- \`items\`: array of \`PipelineStats\` — \`{ name, indices, docsCount, failedDocsCount, statsAvailable, lastEventMs, silenceMs, isSilent, last24hDocs, baseline7dAvg, volumeDropPct }\`
+- \`items\`: array of \`PipelineStats\` — \`{ name, indices, docsCount, failedDocsCount, statsAvailable, lastEventMs, silenceMs, isSilent, lastFullDayDocs, baseline7dAvg, volumeDropPct }\`
   - \`statsAvailable: false\` in serverless mode — report pipelines as present but note stats are unavailable
   - \`lastEventMs\`: epoch ms of the most recent event in any index served by this pipeline; \`null\` if never had events
   - \`silenceMs\`: milliseconds since the last event (\`Date.now() - lastEventMs\`); \`null\` when \`lastEventMs\` is null
   - \`isSilent\`: \`true\` when the pipeline previously had activity and the gap now exceeds the category-specific threshold
-  - \`last24hDocs\`: document count in the most recent 24-hour bucket; \`null\` when history < 2 days (too young to trust)
-  - \`baseline7dAvg\`: average daily doc count over the prior 6 days; \`null\` when history < 2 days
+  - \`lastFullDayDocs\`: document count for yesterday (the most recent complete day; the in-progress current day is excluded); \`null\` when history < 2 complete days (too young to trust)
+  - \`baseline7dAvg\`: average daily doc count over the prior full days; \`null\` when history < 2 complete days
   - \`volumeDropPct\`: percentage drop vs baseline, clamped to [0, ∞); \`null\` when baseline is unavailable or zero
 - \`actionableFindings\`: array of \`{ category, severity, message, resource, type }\`
   - \`type\` values: \`pipeline_failure\` | \`silence\` | \`volume_drop_warning\` | \`volume_drop_critical\`

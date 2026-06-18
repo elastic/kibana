@@ -72,18 +72,6 @@ describe('fetchIndexHealth', () => {
     });
   });
 
-  describe('isSilent — always false (threshold applied by caller)', () => {
-    it('sets isSilent to false regardless of silenceMs', async () => {
-      const esClient = makeEsClient({
-        streams: [{ name: 'logs-endpoint.events-default', maximum_timestamp: NOW - 24 * 3600_000 }],
-        creationDates: { 'logs-endpoint.events-default': BOOTSTRAP_CUTOFF - 1 },
-      });
-
-      const result = await fetchIndexHealth({ esClient });
-      expect(result['logs-endpoint.events-default'].isSilent).toBe(false);
-    });
-  });
-
   describe('young stream guard (creation_date within SILENCE_BOOTSTRAP_DAYS)', () => {
     it('returns null volume fields for a stream younger than SILENCE_BOOTSTRAP_DAYS', async () => {
       const youngCreationDate = NOW - (SILENCE_BOOTSTRAP_DAYS - 1) * 24 * 60 * 60 * 1000;
@@ -93,13 +81,14 @@ describe('fetchIndexHealth', () => {
         histBuckets: [
           {
             key: 'logs-young-default',
-            daily: { buckets: makeDailyBuckets([100, 100, 100, 100, 100, 100, 100, 50]) },
+            // Last bucket is the in-progress (partial) current day and is dropped.
+            daily: { buckets: makeDailyBuckets([100, 100, 100, 100, 100, 100, 100, 50, 0]) },
           },
         ],
       });
 
       const result = await fetchIndexHealth({ esClient });
-      expect(result['logs-young-default'].last24hDocs).toBeNull();
+      expect(result['logs-young-default'].lastFullDayDocs).toBeNull();
       expect(result['logs-young-default'].baseline7dAvg).toBeNull();
       expect(result['logs-young-default'].volumeDropPct).toBeNull();
     });
@@ -112,13 +101,14 @@ describe('fetchIndexHealth', () => {
         histBuckets: [
           {
             key: 'logs-old-default',
-            daily: { buckets: makeDailyBuckets([100, 100, 100, 100, 100, 100, 100, 10]) },
+            // Trailing 0 is the in-progress current day (dropped); 10 is yesterday.
+            daily: { buckets: makeDailyBuckets([100, 100, 100, 100, 100, 100, 100, 10, 0]) },
           },
         ],
       });
 
       const result = await fetchIndexHealth({ esClient });
-      expect(result['logs-old-default'].last24hDocs).toBe(10);
+      expect(result['logs-old-default'].lastFullDayDocs).toBe(10);
       expect(result['logs-old-default'].baseline7dAvg).toBe(100);
     });
   });
@@ -131,7 +121,7 @@ describe('fetchIndexHealth', () => {
         histBuckets: [
           {
             key: 'logs-drop-default',
-            daily: { buckets: makeDailyBuckets([100, 100, 100, 100, 100, 100, 100, 10]) },
+            daily: { buckets: makeDailyBuckets([100, 100, 100, 100, 100, 100, 100, 10, 0]) },
           },
         ],
       });
@@ -147,7 +137,7 @@ describe('fetchIndexHealth', () => {
         histBuckets: [
           {
             key: 'logs-spike-default',
-            daily: { buckets: makeDailyBuckets([100, 100, 100, 100, 100, 100, 100, 500]) },
+            daily: { buckets: makeDailyBuckets([100, 100, 100, 100, 100, 100, 100, 500, 0]) },
           },
         ],
       });
@@ -163,7 +153,7 @@ describe('fetchIndexHealth', () => {
         histBuckets: [
           {
             key: 'logs-zero-default',
-            daily: { buckets: makeDailyBuckets([0, 0, 0, 0, 0, 0, 0, 10]) },
+            daily: { buckets: makeDailyBuckets([0, 0, 0, 0, 0, 0, 0, 10, 0]) },
           },
         ],
       });
@@ -184,14 +174,14 @@ describe('fetchIndexHealth', () => {
         histBuckets: [
           {
             key: backingIndex,
-            daily: { buckets: makeDailyBuckets([100, 100, 100, 100, 100, 100, 100, 50]) },
+            daily: { buckets: makeDailyBuckets([100, 100, 100, 100, 100, 100, 100, 50, 0]) },
           },
         ],
       });
 
       const result = await fetchIndexHealth({ esClient });
       expect(result[streamName]).toBeDefined();
-      expect(result[streamName].last24hDocs).toBe(50);
+      expect(result[streamName].lastFullDayDocs).toBe(50);
       expect(result[streamName].baseline7dAvg).toBe(100);
     });
   });

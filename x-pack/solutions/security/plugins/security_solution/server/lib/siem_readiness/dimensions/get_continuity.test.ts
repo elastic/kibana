@@ -125,7 +125,7 @@ describe('getContinuity', () => {
           isSilent: true,
           silenceMs: 2 * 60 * 60 * 1000,
           volumeDropPct: 100,
-          last24hDocs: 0,
+          lastFullDayDocs: 0,
           baseline7dAvg: 50,
         }),
       ]);
@@ -148,7 +148,7 @@ describe('getContinuity', () => {
           docsCount: 1000,
           failedDocsCount: 0,
           volumeDropPct: 60,
-          last24hDocs: 40,
+          lastFullDayDocs: 40,
           baseline7dAvg: 100,
         }),
       ]);
@@ -167,7 +167,7 @@ describe('getContinuity', () => {
           docsCount: 1000,
           failedDocsCount: 0,
           volumeDropPct: 95,
-          last24hDocs: 5,
+          lastFullDayDocs: 5,
           baseline7dAvg: 100,
         }),
       ]);

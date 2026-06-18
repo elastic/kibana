@@ -103,7 +103,8 @@ export interface PipelineStats {
   lastEventMs?: number | null;
   silenceMs?: number | null;
   isSilent?: boolean;
-  last24hDocs?: number | null;
+  /** Doc count for yesterday (the most recent complete day); the in-progress current day is excluded. */
+  lastFullDayDocs?: number | null;
   baseline7dAvg?: number | null;
   /** Clamped to [0, ∞) — negative means volume spike (not a drop). */
   volumeDropPct?: number | null;

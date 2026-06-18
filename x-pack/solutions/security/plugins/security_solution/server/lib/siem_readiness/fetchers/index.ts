@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+export { toDataStreamName } from './utils';
 export { fetchPipelines } from './fetch_pipelines';
 export { fetchIndexHealth } from './fetch_index_health';
 export type { IndexHealthEntry } from './fetch_index_health';

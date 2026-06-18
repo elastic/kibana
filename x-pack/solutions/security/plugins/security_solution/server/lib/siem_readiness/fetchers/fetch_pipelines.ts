@@ -8,9 +8,15 @@
 import type { NodesStatsRequest } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
-import type { PipelineStats } from '@kbn/siem-readiness';
-import { SILENCE_THRESHOLD_MS, SILENCE_THRESHOLD_DEFAULT_MS } from '@kbn/siem-readiness';
+import type { MainCategories, PipelineStats } from '@kbn/siem-readiness';
+import {
+  ALL_CATEGORIES,
+  SILENCE_THRESHOLD_MS,
+  SILENCE_THRESHOLD_DEFAULT_MS,
+} from '@kbn/siem-readiness';
+import type { IndexHealthEntry } from './fetch_index_health';
 import { fetchIndexHealth } from './fetch_index_health';
+import { toDataStreamName } from './utils';
 
 export const fetchPipelines = async ({
   esClient,
@@ -91,33 +97,65 @@ export const fetchPipelines = async ({
     }));
 
   const indexHealth = await fetchIndexHealth({ esClient });
+  const now = Date.now();
 
   const pipelines: PipelineStats[] = rawPipelines.map((p) => {
-    // fetchIndexHealth keys results by data stream name; try direct lookup first,
-    // then extract the data stream name from each backing index name as fallback.
-    const health =
-      p.indices
-        .map((idx) => {
-          if (indexHealth[idx]) return indexHealth[idx];
-          const dsName = idx.replace(/^\.ds-(.+)-\d{4}\.\d{2}\.\d{2}-\d+$/, '$1');
-          return dsName !== idx ? indexHealth[dsName] : undefined;
-        })
-        .find((h) => h !== undefined) ?? null;
+    // Collect ALL health entries for every stream this pipeline touches.
+    // A pipeline can fan-out to multiple data streams; .find() would silently
+    // drop silence/volume signals from secondary streams and make the result
+    // dependent on index iteration order.
+    const healthEntries: IndexHealthEntry[] = [];
+    for (const idx of p.indices) {
+      const entry: IndexHealthEntry | undefined = indexHealth[toDataStreamName(idx)];
+      if (entry !== undefined) {
+        healthEntries.push(entry);
+      }
+    }
 
-    const silenceMs = health?.silenceMs ?? null;
+    // lastEventMs: most recent event from any stream.
+    // The pipeline is "live" as long as at least one stream is feeding data.
+    let lastEventMs: number | null = null;
+    for (const h of healthEntries) {
+      if (h.lastEventMs !== null) {
+        lastEventMs = lastEventMs === null ? h.lastEventMs : Math.max(lastEventMs, h.lastEventMs);
+      }
+    }
+    const silenceMs: number | null = lastEventMs !== null ? now - lastEventMs : null;
+
+    // Volume: sum across all streams that have a valid baseline (bootstrap streams
+    // return null and are excluded), then recompute drop % from the merged totals.
+    // Averaging individual drop percentages would be incorrect.
+    let lastFullDayDocs: number | null = null;
+    let baseline7dAvg: number | null = null;
+    let volumeDropPct: number | null = null;
+    for (const h of healthEntries) {
+      if (h.lastFullDayDocs !== null && h.baseline7dAvg !== null) {
+        lastFullDayDocs = (lastFullDayDocs ?? 0) + h.lastFullDayDocs;
+        baseline7dAvg = (baseline7dAvg ?? 0) + h.baseline7dAvg;
+      }
+    }
+    if (lastFullDayDocs !== null && baseline7dAvg !== null && baseline7dAvg > 0) {
+      volumeDropPct = Math.max(
+        0,
+        Math.round(((baseline7dAvg - lastFullDayDocs) / baseline7dAvg) * 100)
+      );
+    }
+
     // Apply per-category silence threshold; fall back to default when category unknown
-    const category = p.categories?.[0];
-    const threshold = SILENCE_THRESHOLD_MS[category ?? ''] ?? SILENCE_THRESHOLD_DEFAULT_MS;
+    const rawCategory = p.categories?.[0];
+    const category = ALL_CATEGORIES.find((c): c is MainCategories => c === rawCategory);
+    const threshold =
+      category !== undefined ? SILENCE_THRESHOLD_MS[category] : SILENCE_THRESHOLD_DEFAULT_MS;
     const isSilent = silenceMs !== null && silenceMs > threshold;
 
     return {
       ...p,
-      lastEventMs: health?.lastEventMs ?? null,
+      lastEventMs,
       silenceMs,
       isSilent,
-      last24hDocs: health?.last24hDocs ?? null,
-      baseline7dAvg: health?.baseline7dAvg ?? null,
-      volumeDropPct: health?.volumeDropPct ?? null,
+      lastFullDayDocs,
+      baseline7dAvg,
+      volumeDropPct,
     };
   });
 

@@ -26,7 +26,7 @@ export const CRITICAL_FAILURE_RATE_THRESHOLD = 1; // 1%
  * ≥ 7 days of history the volume-based signal takes over and these thresholds
  * serve only as a backstop for truly silent streams.
  */
-export const SILENCE_THRESHOLD_MS: Record<string, number> = {
+export const SILENCE_THRESHOLD_MS: Record<MainCategories, number> = {
   Endpoint: 30 * 60 * 1000, // 30m
   Identity: 30 * 60 * 1000, // 30m
   Network: 30 * 60 * 1000, // 30m
