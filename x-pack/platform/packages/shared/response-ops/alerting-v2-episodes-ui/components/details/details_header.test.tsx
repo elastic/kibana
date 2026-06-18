@@ -10,7 +10,7 @@ import { render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { ALERT_EPISODE_STATUS } from '@kbn/alerting-v2-schemas';
 import type { RuleResponse } from '@kbn/alerting-v2-schemas';
-import { RuleStateStatus } from '../../types/rule_state';
+import { RuleStateStatus, type LoadedRuleState } from '../../types/rule_state';
 import { AlertEpisodeDetailsHeader } from './details_header';
 
 const mockRule = {
@@ -18,13 +18,15 @@ const mockRule = {
   metadata: { name: 'Rule 1', description: 'Some description' },
 } as RuleResponse;
 
+const loadedRuleState: LoadedRuleState = {
+  status: RuleStateStatus.loaded,
+  ruleId: 'rule-1',
+  rule: mockRule,
+};
+
 const defaultProps = {
   isLoadingEpisode: false,
-  ruleState: {
-    status: RuleStateStatus.loaded,
-    ruleId: 'rule-1',
-    rule: mockRule,
-  },
+  ruleState: loadedRuleState,
   tags: [] as string[],
   status: undefined,
   episodeAction: undefined,

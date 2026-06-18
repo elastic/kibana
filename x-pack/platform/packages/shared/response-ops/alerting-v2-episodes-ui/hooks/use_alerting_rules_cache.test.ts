@@ -79,7 +79,7 @@ describe('useAlertingRulesCache', () => {
     await waitFor(() =>
       expect(mockHttp.get).toHaveBeenCalledWith(ALERTING_V2_RULE_API_PATH, {
         query: {
-          filter: `id: "alerting_rule:${ruleId}"`,
+          filter: `id: "${ruleId}"`,
           perPage: 1,
           page: 1,
         },
@@ -131,7 +131,7 @@ describe('useAlertingRulesCache', () => {
     expect(result.current.rulesCache).toEqual({ [presentRuleId]: fetchedRule });
     expect(mockHttp.get).toHaveBeenCalledWith(ALERTING_V2_RULE_API_PATH, {
       query: {
-        filter: `(id: "alerting_rule:${presentRuleId}" OR id: "alerting_rule:${missingRuleId}")`,
+        filter: `(id: "${presentRuleId}" OR id: "${missingRuleId}")`,
         perPage: 2,
         page: 1,
       },

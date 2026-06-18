@@ -33,7 +33,7 @@ describe('fetchRulesByIds', () => {
 
     expect(mockHttp.get).toHaveBeenCalledWith(ALERTING_V2_RULE_API_PATH, {
       query: {
-        filter: '(id: "alerting_rule:rule-a" OR id: "alerting_rule:rule-b")',
+        filter: '(id: "rule-a" OR id: "rule-b")',
         perPage: 2,
         page: 1,
       },

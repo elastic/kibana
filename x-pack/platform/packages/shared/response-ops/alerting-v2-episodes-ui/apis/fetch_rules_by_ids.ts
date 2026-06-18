@@ -15,23 +15,14 @@ import {
 } from '@kbn/alerting-v2-schemas';
 import { ALERTING_V2_RULE_API_PATH } from '@kbn/alerting-v2-constants';
 
-const RULE_SAVED_OBJECT_TYPE = 'alerting_rule';
-
 export interface FetchRulesByIdsParams {
   http: HttpStart;
   ids: string[];
 }
 
-const toSavedObjectIdFilterValue = (ruleId: string): string =>
-  ruleId.startsWith(`${RULE_SAVED_OBJECT_TYPE}:`) ? ruleId : `${RULE_SAVED_OBJECT_TYPE}:${ruleId}`;
-
 const buildRuleIdsFilter = (ids: string[]): string =>
   toKqlExpression(
-    nodeBuilder.or(
-      ids.map((id) =>
-        nodeBuilder.is('id', nodeTypes.literal.buildNode(toSavedObjectIdFilterValue(id), true))
-      )
-    )
+    nodeBuilder.or(ids.map((id) => nodeBuilder.is('id', nodeTypes.literal.buildNode(id, true))))
   );
 
 /**

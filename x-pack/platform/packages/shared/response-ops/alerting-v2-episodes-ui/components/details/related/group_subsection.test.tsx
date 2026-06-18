@@ -9,7 +9,8 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { AlertEpisode } from '../../../queries/episodes_query';
-import { RuleStateStatus } from '../../../types/rule_state';
+import type { RuleResponse } from '@kbn/alerting-v2-schemas';
+import { RuleStateStatus, type LoadedRuleState } from '../../../types/rule_state';
 import { RelatedEpisodesGroupSubsection } from './group_subsection';
 import { useFetchSameGroupEpisodesQuery } from '../../../hooks/use_fetch_same_group_episodes_query';
 jest.mock('../../../hooks/use_fetch_same_group_episodes_query');
@@ -38,12 +39,14 @@ jest.mock('./related_list', () => ({
 
 const mockUseFetch = jest.mocked(useFetchSameGroupEpisodesQuery);
 
+const loadedRuleState: LoadedRuleState = {
+  status: RuleStateStatus.loaded,
+  ruleId: 'rule-1',
+  rule: { id: 'rule-1', metadata: { name: 'Test Rule' } } as RuleResponse,
+};
+
 const mockRuleProps = {
-  ruleState: {
-    status: RuleStateStatus.loaded,
-    ruleId: 'rule-1',
-    rule: { id: 'rule-1', metadata: { name: 'Test Rule' } },
-  },
+  ruleState: loadedRuleState,
 };
 const mockGetEpisodeDetailsHref = (id: string) => `/base/${id}`;
 
