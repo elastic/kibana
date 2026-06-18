@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { chunk } from 'lodash';
-import pLimit from 'p-limit';
 import { inject, injectable } from 'inversify';
 import { PluginStart } from '@kbn/core-di';
 import type { KibanaRequest } from '@kbn/core/server';
@@ -14,7 +12,6 @@ import type { IValidatedEvent } from '@kbn/event-log-plugin/server';
 import { nodeBuilder, nodeTypes, toKqlExpression } from '@kbn/es-query';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import {
-  MAX_BULK_ITEMS,
   POLICY_EXECUTION_HISTORY_MAX_PER_PAGE,
   type PolicyExecutionHistoryItem,
   type RuleResponse,
@@ -36,7 +33,12 @@ import { collectIdsFromEvents, denormalizeEvent, type NameMaps } from './denorma
 const TIME_WINDOW_HOURS = 24;
 const DEFAULT_PAGE = 1;
 const DEFAULT_PER_PAGE = POLICY_EXECUTION_HISTORY_MAX_PER_PAGE;
-const MAX_CONCURRENT_RULE_LOOKUPS = 5;
+
+// Cap rule lookups per page to keep the KQL filter and SO `find` bounded —
+// a single broad Action Policy can emit one event referencing thousands of rules.
+// Rule IDs over this cap render as the raw ID in the UI.
+const MAX_RULES_PER_LOOKUP = 1000;
+
 const SEARCH_ID_CAP = 500;
 const DEFAULT_OUTCOME_FILTER: PolicyExecutionOutcomeFilter = 'all';
 
@@ -214,33 +216,19 @@ export class ActionPolicyExecutionHistoryClient {
   private async lookupRulesByIds(ruleIds: string[]): Promise<RuleResponse[]> {
     if (ruleIds.length === 0) return [];
 
-    const idChunks = chunk(ruleIds, MAX_BULK_ITEMS);
-    const limiter = pLimit(MAX_CONCURRENT_RULE_LOOKUPS);
+    const cappedRuleIds = ruleIds.slice(0, MAX_RULES_PER_LOOKUP);
 
-    const responses = await Promise.all(
-      idChunks.map((idChunk) =>
-        limiter(() =>
-          this.rulesClient.findRules({
-            filter: this.buildRuleIdsFilter(idChunk),
-            perPage: idChunk.length,
-          })
-        )
-      )
-    );
+    const response = await this.rulesClient.findRules({
+      filter: this.buildRuleIdsFilter(cappedRuleIds),
+      perPage: MAX_RULES_PER_LOOKUP,
+    });
 
-    return responses.flatMap((response) => response.items);
+    return response.items;
   }
 
   private buildRuleIdsFilter(ids: string[]): string {
     return toKqlExpression(
-      nodeBuilder.or(
-        ids.map((id) =>
-          nodeBuilder.is(
-            'id',
-            nodeTypes.literal.buildNode(id, true)
-          )
-        )
-      )
+      nodeBuilder.or(ids.map((id) => nodeBuilder.is('id', nodeTypes.literal.buildNode(id, true))))
     );
   }
 
