@@ -206,6 +206,56 @@ steps:
       expect(mockWorkflowsService.createWorkflow).toHaveBeenCalled();
     });
 
+    it('should preserve comments and commented-out steps in cloned YAML', async () => {
+      const originalWorkflow = createMockWorkflow({
+        yaml: `name: Original Workflow
+enabled: true
+steps:
+  - name: first_step
+    type: console
+    with:
+      message: hello
+  # This is a commented out step that should survive cloning
+  # - name: commented_step
+  #   type: console
+  #   with:
+  #     message: i am commented out
+  - name: second_step
+    type: console
+    with:
+      message: world`,
+      });
+
+      const mockZodSchema = z.object({
+        name: z.string(),
+        enabled: z.boolean().optional(),
+        steps: z.array(z.any()).optional(),
+      });
+
+      mockWorkflowsService.getWorkflowZodSchema.mockResolvedValue(mockZodSchema);
+
+      mockWorkflowsService.createWorkflow.mockImplementation((command) =>
+        Promise.resolve({
+          ...originalWorkflow,
+          id: 'workflow-clone-456',
+          name: 'Original Workflow Copy',
+          yaml: command.yaml,
+        })
+      );
+
+      await api.cloneWorkflow(originalWorkflow, 'default', mockRequest);
+
+      expect(mockWorkflowsService.createWorkflow).toHaveBeenCalled();
+      const yamlString = mockWorkflowsService.createWorkflow.mock.calls[0][0].yaml;
+
+      // The name is updated...
+      expect(yamlString).toContain('name: Original Workflow Copy');
+      // ...but the comments and commented-out step are preserved.
+      expect(yamlString).toContain('# This is a commented out step that should survive cloning');
+      expect(yamlString).toContain('# - name: commented_step');
+      expect(yamlString).toContain('#     message: i am commented out');
+    });
+
     it('should handle YAML parsing errors gracefully', async () => {
       const originalWorkflow = createMockWorkflow({
         yaml: 'invalid: yaml: content: with: multiple: colons',

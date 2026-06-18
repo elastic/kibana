@@ -36,7 +36,6 @@ import type {
   WorkflowExecutionEventDispatchMetadata,
   WorkflowExecutionListDto,
   WorkflowListDto,
-  WorkflowYaml,
 } from '@kbn/workflows';
 import { WORKFLOW_SML_TYPE } from '@kbn/workflows/common/constants';
 import { WorkflowNotFoundError } from '@kbn/workflows/common/errors';
@@ -54,7 +53,7 @@ import type {
 import type { ServerTriggerDefinition } from '@kbn/workflows-extensions/server';
 import {
   parseWorkflowYamlToJSON,
-  stringifyWorkflowDefinition,
+  updateYamlField,
   WorkflowValidationError,
 } from '@kbn/workflows-yaml';
 import type { z } from '@kbn/zod/v4';
@@ -345,15 +344,12 @@ export class WorkflowsManagementApi {
       throw parsedYaml.error;
     }
 
-    const updatedYaml = {
-      ...parsedYaml.data,
-      name: `${workflow.name} ${i18n.translate('workflowsManagement.cloneSuffix', {
-        defaultMessage: 'Copy',
-      })}`,
-    };
-
-    // Convert back to YAML string using proper YAML stringification
-    const clonedYaml = stringifyWorkflowDefinition(updatedYaml as unknown as WorkflowYaml);
+    // Update only the `name` field in place so the rest of the YAML
+    // (comments, commented-out steps, blank lines, formatting) is preserved.
+    const clonedName = `${workflow.name} ${i18n.translate('workflowsManagement.cloneSuffix', {
+      defaultMessage: 'Copy',
+    })}`;
+    const clonedYaml = updateYamlField(workflow.yaml, 'name', clonedName);
     const result = await this.workflowsService.createWorkflow(
       { yaml: clonedYaml },
       spaceId,
