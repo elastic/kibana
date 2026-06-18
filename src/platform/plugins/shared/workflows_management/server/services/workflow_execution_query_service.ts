@@ -29,6 +29,7 @@ import {
   WORKFLOWS_STEP_EXECUTIONS_INDEX,
 } from '../../common';
 import { buildTimeRangeFilter } from '../api/lib/build_time_range_filter';
+import { buildWorkflowExecutionsSearchQuery } from '../api/lib/build_workflow_executions_search_query';
 import { isIndexNotFoundError } from '../api/lib/es_error_helpers';
 import { getChildWorkflowExecutions } from '../api/lib/get_child_workflow_executions';
 import { getWorkflowExecution } from '../api/lib/get_workflow_execution';
@@ -41,7 +42,10 @@ import type {
   GetStepExecutionParams,
   SearchStepExecutionsParams,
 } from '../api/workflows_management_api';
-import type { SearchWorkflowExecutionsParams } from '../api/workflows_management_service';
+import type {
+  SearchExecutionsViewParams,
+  SearchWorkflowExecutionsParams,
+} from '../api/workflows_management_service';
 
 const DEFAULT_PAGE_SIZE = 100;
 
@@ -167,6 +171,26 @@ export class WorkflowExecutionQueryService {
       page,
       sort,
       collapse: params.collapse ? { field: params.collapse } : undefined,
+    });
+  }
+
+  async searchExecutionsView(
+    params: SearchExecutionsViewParams,
+    spaceId: string
+  ): Promise<WorkflowExecutionListDto> {
+    const from = params.from ?? 0;
+    const size = params.size ?? DEFAULT_PAGE_SIZE;
+    const page = size > 0 ? Math.floor(from / size) + 1 : 1;
+
+    return searchWorkflowExecutions({
+      esClient: this.deps.esClient,
+      logger: this.deps.logger,
+      workflowExecutionIndex: WORKFLOWS_EXECUTIONS_INDEX,
+      query: buildWorkflowExecutionsSearchQuery(params.query, spaceId),
+      sort: params.sort,
+      from,
+      size,
+      page,
     });
   }
 
