@@ -16,7 +16,7 @@ metadata:
 Senior QA tool. Bridges three artifacts that drift independently:
 1. **Requirements** — extracted from linked GitHub issues (`[FUNCTIONAL]` / `[NEGATIVE]` / `[EDGE CASE]` / `[AUTH]` / `[ERROR]`).
 2. **Test plan scenarios** — extracted from `.md` files, sourced from a PR's diff (`--pr` / `--plan-pr`) and/or local files on disk (`--plan-file`).
-3. **Test code** — `describe` / `it` / `test` / `apiTest` / `spaceTest` / `cy.it` blocks discovered by the deterministic catalog walker, covering Jest (`*.test.ts`/`*.test.tsx`), Scout, Cypress (`*.cy.ts`), and Mocha-style FTR suites (plain `*.ts` under `test_suites/`), across any scope passed via `--pr` / `--impl-pr` / `--impl-scope` (or, when no explicit impl signal is given, auto-derived by walking up from the plan `.md` to the nearest `kibana.jsonc` *and* the solution-level test sibling — see [Source resolution rule 2](#source-resolution-rules)).
+3. **Test code** — `describe` / `it` / `test` / `apiTest` / `spaceTest` / `cy.it` blocks discovered by the deterministic catalog walker, covering Jest (`*.test.{ts,tsx,js,jsx,mjs}`), Scout, Cypress (`*.cy.*`), and Mocha-style FTR / API-integration suites (plain `.ts`/`.tsx`/`.js`/`.jsx`/`.mjs` under `test_suites/` or `tests/`), across any scope passed via `--pr` / `--impl-pr` / `--impl-scope` (or, when no explicit impl signal is given, auto-derived by walking up from the plan `.md` to the nearest `kibana.jsonc` *and* the solution-level test sibling — see [Source resolution rule 2](#source-resolution-rules)). Exact rule lives in [Source resolution rule 2](#source-resolution-rules); source of truth is `isTestFile` in `scripts/_parser.mjs`.
 
 Produces a three-way report classifying every requirement and scenario across these three axes. Catches the gap that single-axis tools miss: a scenario marked "in the plan" with no real test, a test with no scenario, a requirement in neither.
 
@@ -87,9 +87,9 @@ A second-class run mode for situations where the catalog is too large for per-sc
    - every `--impl-scope` — each one is either a directory (walked recursively) or a single test file (yielded directly, no siblings). Use a file scope to surgically pull in *one* test from a noisy parent directory; use a directory scope when you want the whole subtree.
    - the **conditional walk-up** from every scenarios-source `.md` path — see the walk-up rule below.
 
-   **Test-file detection rule** (for PR-diff filtering — *must* match what the catalog walker accepts so dir resolution and content discovery agree):
-   - matches `\.(test|spec|cy)\.(ts|tsx|js)$` (Jest, Scout, Cypress spec) — OR —
-   - lies under a path segment named `test_suites/` and ends in `.ts` (FTR / Mocha API-integration convention; excludes `index.ts` which is registration glue, not a test).
+   **Test-file detection rule** (for PR-diff filtering — *must* match what the catalog walker accepts so dir resolution and content discovery agree; source of truth is `isTestFile` in `scripts/_parser.mjs`):
+   - matches `\.(test|spec|cy)\.(ts|tsx|js|jsx|mjs)$` (Jest, Scout, Cypress, RTL spec) — OR —
+   - lies under a path segment named `test_suites/` *or* `tests/` and ends in `.ts|.tsx|.js|.jsx|.mjs` (FTR / Mocha API-integration convention). `index.ts` and `ftr_provider_context.ts` are walked but contribute zero blocks (registration glue, no `describe`) and so are harmless to include.
 
    **Walk-up rule**: from a `.md` path, walk to the nearest `kibana.jsonc` (the plugin root). If the resolved plugin lives under `x-pack/solutions/<S>/plugins/<P>/`, *also* add `x-pack/solutions/<S>/test/` — the solution-level FTR / Cypress sibling root. By Kibana convention, FTR API-integration suites (`test/<solution>_api_integration/test_suites/...`) and Cypress E2E suites (`test/<solution>_cypress/...`) live one level above the plugin even though they exercise it. The walk does not cross solutions.
 
@@ -247,6 +247,7 @@ Local `--plan-file` paths are read directly from disk (no `gh api`).
 - `scenarios.md_paths` is empty → stop regardless of mode. *"No test plan markdown resolved. Pass `--pr`, `--plan-pr`, or `--plan-file`."*
 - mode is `plan` or `both`, `--no-crawl` is set, and `issues.explicit_urls` is empty → stop. *"Requirements axis has no source."*
 - `--pr` is combined with `--plan-pr` or `--impl-pr` → stop. *"Ambiguous: use `--pr` alone for single-PR mode, or split with `--plan-pr` / `--impl-pr`."*
+- `--summary-only` is combined with `--mode plan` → stop. *"`--summary-only` has no effect with `--mode plan` (no impl phase to summarize). Drop one of the flags."*
 
 ### Phase 1 — Extract scenarios
 
