@@ -21,4 +21,18 @@ export type {
   ChangeHistoryItemProps,
   ChangeHistoryFooterProps,
 } from './src/components/timeline';
-export type { ChangeHistoryBadgeRenderFn } from './src/types';
+export {
+  ChangeHistoryModal,
+  ChangeHistoryTrigger,
+  ChangeHistoryPreviewPanel,
+} from './src/components/modal';
+export type { ChangeHistoryTriggerProps } from './src/components/modal';
+export { ChangeHistoryProvider, useChangeHistoryConfig } from './src/provider';
+export type { ChangeHistoryProviderProps } from './src/provider';
+export { useChangeHistoryList, useChangeHistoryDetail } from './src/hooks';
+export type {
+  UseChangeHistoryListArgs,
+  UseChangeHistoryListResult,
+  UseChangeHistoryDetailArgs,
+  UseChangeHistoryDetailResult,
+} from './src/hooks';

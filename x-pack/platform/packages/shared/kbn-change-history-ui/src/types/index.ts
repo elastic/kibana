@@ -17,6 +17,7 @@ export { DEFAULT_CHANGE_HISTORY_PAGE_SIZE } from './change_history_constants';
 export type { ChangeHistoryPreviewRenderFn } from './change_history_preview';
 export type { ChangeHistoryBadgeRenderFn } from './change_history_badge';
 export type { ChangeHistoryAdapter } from './change_history_adapter';
+export type { ChangeHistoryLabels } from './change_history_labels';
 export type {
   ChangeHistoryHttpClient,
   ChangeHistoryHttpGetOptions,
