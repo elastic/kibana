@@ -12,10 +12,10 @@ import React from 'react';
 import { coreMock } from '@kbn/core/public/mocks';
 
 import { mockAuthenticatedUser } from '../../../../common/model/authenticated_user.mock';
+import * as UseCurrentUserModule from '../../../components/use_current_user';
 import { securityMock } from '../../../mocks';
 import { Providers } from '../application_connections_management_app';
 import { ApplicationConnectionsPage } from '../application_connections_page';
-import * as UseCurrentUserModule from '../../../components/use_current_user';
 
 jest.mock('../assets/illustration_empty_state.svg', () => 'illustration-empty-state-mock.svg', {
   virtual: true,
