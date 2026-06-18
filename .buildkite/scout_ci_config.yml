@@ -83,6 +83,7 @@ plugins:
     - workflows_extensions
     - workflows_management
   disabled:
+    - data_views_as_code # Not yet registered for CI; added to unblock pipelines
 
 packages:
   enabled:

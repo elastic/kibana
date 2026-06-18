@@ -247,4 +247,25 @@ describe('DataViewsAsCodeService', () => {
       });
     });
   });
+
+  describe('delete', () => {
+    it('should call delete for an existing id', async () => {
+      const { service, mockDataViewsService } = createService();
+
+      mockDataViewsService.delete.mockResolvedValue(undefined);
+
+      await expect(service.delete('dv-existing')).resolves.toBeUndefined();
+      expect(mockDataViewsService.delete).toHaveBeenCalledWith('dv-existing');
+    });
+
+    it('should propagate errors when deleting a non-existent id', async () => {
+      const { service, mockDataViewsService } = createService();
+
+      const error = new Error('Data view not found');
+      mockDataViewsService.delete.mockRejectedValue(error);
+
+      await expect(service.delete('dv-missing')).rejects.toThrow('Data view not found');
+      expect(mockDataViewsService.delete).toHaveBeenCalledWith('dv-missing');
+    });
+  });
 });

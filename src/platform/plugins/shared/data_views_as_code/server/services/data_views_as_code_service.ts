@@ -50,4 +50,8 @@ export class DataViewsAsCodeService {
 
     return this.mapDataView(result);
   }
+
+  public delete(id: string) {
+    return this.dataViewsService.delete(id);
+  }
 }
