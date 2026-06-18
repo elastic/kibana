@@ -342,6 +342,7 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
   const refetchRiskScore = useRefetchOverviewPageRiskScore(USER_OVERVIEW_RISK_SCORE_QUERY_ID);
   const { calculateEntityRiskScore } = useCalculateEntityRiskScore({
     identifierType: EntityType.user,
+    entityId: displayEntityId,
     identifier: detailName,
     onSuccess: refetchRiskScore,
   });
