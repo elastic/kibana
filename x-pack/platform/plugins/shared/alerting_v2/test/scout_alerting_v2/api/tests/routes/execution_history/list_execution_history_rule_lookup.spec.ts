@@ -70,7 +70,7 @@ apiTest.describe(
 
       await apiServices.alertingV2.actionPolicies.upsert(ACTION_POLICY_ID, {
         name: 'Execution history rule lookup policy',
-        description: 'Smoke test policy for rna-program#592',
+        description: 'Smoke test policy',
         destinations: [{ type: 'workflow', id: 'test-workflow' }],
       });
     });
