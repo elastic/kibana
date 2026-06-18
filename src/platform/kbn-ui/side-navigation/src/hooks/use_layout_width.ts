@@ -16,6 +16,7 @@ export const SIDE_PANEL_WIDTH = 248;
 interface UseLayoutWidthArgs {
   hidePrimaryLabels: boolean;
   isSidePanelOpen: boolean;
+  sidePanelWidth?: number;
   setWidth: (width: number) => void;
 }
 
@@ -29,12 +30,13 @@ interface UseLayoutWidthArgs {
 export const useLayoutWidth = ({
   hidePrimaryLabels,
   isSidePanelOpen,
+  sidePanelWidth = SIDE_PANEL_WIDTH,
   setWidth,
 }: UseLayoutWidthArgs) => {
   useEffect(() => {
     const baseWidth = hidePrimaryLabels ? COLLAPSED_WIDTH : EXPANDED_WIDTH;
-    const width = isSidePanelOpen ? baseWidth + SIDE_PANEL_WIDTH : baseWidth;
+    const width = isSidePanelOpen ? baseWidth + sidePanelWidth : baseWidth;
 
     setWidth(width);
-  }, [hidePrimaryLabels, isSidePanelOpen, setWidth]);
+  }, [hidePrimaryLabels, isSidePanelOpen, sidePanelWidth, setWidth]);
 };

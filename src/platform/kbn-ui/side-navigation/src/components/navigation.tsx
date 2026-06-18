@@ -26,6 +26,7 @@ import { SideNavCollapseButton } from './collapse_button';
 import { focusMainContent } from '../utils/focus_main_content';
 import { getHasSubmenu } from '../utils/get_has_submenu';
 import { useLayoutWidth } from '../hooks/use_layout_width';
+import { useSidePanelWidth } from '../hooks/use_side_panel_width';
 import { useNavigation } from '../hooks/use_navigation';
 import { useNewItems } from '../hooks/use_new_items';
 import { useResponsiveMenu } from '../hooks/use_responsive_menu';
@@ -149,7 +150,9 @@ export const Navigation = ({
     activeItemId
   );
 
-  useLayoutWidth({ hidePrimaryLabels, isSidePanelOpen, setWidth });
+  const { width: sidePanelWidth, setWidth: setSidePanelWidth } = useSidePanelWidth();
+
+  useLayoutWidth({ hidePrimaryLabels, isSidePanelOpen, sidePanelWidth, setWidth });
 
   // Create the collapse button if a toggle callback is provided or if the navigation is not forced to be collapsed (e.g. on mobile)
   const collapseButton =
@@ -479,7 +482,12 @@ export const Navigation = ({
       </SideNav>
 
       {isSidePanelOpen && openerNode && (
-        <SideNav.SidePanel footer={sidePanelFooter} openerNode={openerNode}>
+        <SideNav.SidePanel
+          footer={sidePanelFooter}
+          openerNode={openerNode}
+          sidePanelWidth={sidePanelWidth}
+          onSidePanelWidthChange={setSidePanelWidth}
+        >
           {({ secondaryNavigationInstructionsId }) => {
             const firstNonEmptySectionIndex = openerNode.sections?.findIndex(
               (s) => s.items.length > 0

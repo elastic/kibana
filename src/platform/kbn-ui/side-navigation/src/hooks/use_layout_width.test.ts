@@ -36,7 +36,7 @@ describe('useLayoutWidth', () => {
   it('updates when dependencies change', () => {
     const setWidth = jest.fn();
     const { rerender } = renderHook(
-      (props: { hidePrimaryLabels: boolean; isSidePanelOpen: boolean }) =>
+      (props: { hidePrimaryLabels: boolean; isSidePanelOpen: boolean; sidePanelWidth?: number }) =>
         useLayoutWidth({ ...props, setWidth }),
       {
         initialProps: { hidePrimaryLabels: false, isSidePanelOpen: false },
@@ -48,5 +48,20 @@ describe('useLayoutWidth', () => {
     rerender({ hidePrimaryLabels: true, isSidePanelOpen: true });
 
     expect(setWidth).toHaveBeenNthCalledWith(1, COLLAPSED_WIDTH + SIDE_PANEL_WIDTH);
+  });
+
+  it('uses custom side panel width when provided', () => {
+    const setWidth = jest.fn();
+
+    renderHook(() =>
+      useLayoutWidth({
+        hidePrimaryLabels: false,
+        isSidePanelOpen: true,
+        sidePanelWidth: 320,
+        setWidth,
+      })
+    );
+
+    expect(setWidth).toHaveBeenCalledWith(EXPANDED_WIDTH + 320);
   });
 });
