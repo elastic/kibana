@@ -17,16 +17,11 @@ This separation ensures:
 - Better code organization
 - Reduced coupling between teams
 
-Server-side custom steps use one of two definition helpers:
+See [Contributing Custom Step Types](#contributing-custom-step-types) below for the correct way to implement external steps.
 
-- **[Single-shot custom steps](#single-shot-custom-steps-createserverstepdefinition)** — `createServerStepDefinition` with a `handler` (synchronous or fast work).
-- **[Durable start/poll custom steps](#durable-startpoll-custom-steps-createpollserverstepdefinition)** — `createPollServerStepDefinition` with `poll` and optionally `start`, `policy`, and `ceilings` (async work that wakes in `WAITING` until complete).
+## Contributing Custom Step Types
 
-Both paths share the same registration model (your plugin, common + public definitions). See the single-shot guide below for the default contributor walkthrough.
-
-## Single-shot custom steps (`createServerStepDefinition`)
-
-This section provides a complete guide for contributors who want to add **single-shot** custom step types (one `handler` invocation per step run).
+This section provides a complete guide for contributors who want to add custom step types to the workflows system.
 
 ### Step 1: Define Common Step Definition
 
@@ -93,11 +88,16 @@ export const myStepCommonDefinition: CommonStepDefinition = {
 };
 ```
 
-### Step 2: Implement Server-Side Handler
+### Step 2: Implement Server-Side Definition
+
+Server-side custom steps use one of two definition helpers:
+
+- **Single-shot** — `createServerStepDefinition` with a `handler` (synchronous or fast work).
+- **Durable start/poll** — `createPollServerStepDefinition` with `poll` and optionally `start`, `policy`, and `ceilings` (async work that wakes in `WAITING` until complete).
 
 For long-running or async work, use `createPollServerStepDefinition` instead — see [Durable start/poll custom steps](#durable-startpoll-custom-steps-createpollserverstepdefinition). Do not add `start` or `poll` to `createServerStepDefinition` definitions.
 
-Create the server-side implementation (e.g., `server/step_types/my_step.ts`):
+The example below uses **single-shot** `createServerStepDefinition`. Create the server-side implementation (e.g., `server/step_types/my_step.ts`):
 
 ```typescript
 import type { ServerStepDefinition, StepHandler } from '@kbn/workflows-extensions/server';
@@ -966,9 +966,11 @@ The public definition must include:
 
 Use this section when a step cannot finish in a single handler invocation: you **start** work, then **check status on a schedule** until the job completes or fails. The execution engine persists author state, moves the step to `WAITING` between polls, and wakes it according to `policy`.
 
+See also [Step 2: Implement Server-Side Definition](#step-2-implement-server-side-definition) in the contributor walkthrough.
+
 **Good fits:** async exports/reports, ML or Osquery actions, connector jobs, any upstream API that returns a job id and a status endpoint.
 
-**Poor fits:** quick synchronous work — use [`createServerStepDefinition`](#single-shot-custom-steps-createserverstepdefinition) with `handler` instead.
+**Poor fits:** quick synchronous work — use [`createServerStepDefinition`](#step-2-implement-server-side-definition) with `handler` instead.
 
 Do **not** mix APIs on one definition: poll-based steps omit `handler` and are built with `createPollServerStepDefinition` only.
 
