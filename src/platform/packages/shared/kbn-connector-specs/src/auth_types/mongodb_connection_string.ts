@@ -53,7 +53,7 @@ type AuthSchemaType = z.infer<typeof authSchema>;
 export const MongoDBConnectionStringAuth: AuthTypeSpec<AuthSchemaType> = {
   id: MONGODB_CONNECTION_STRING_AUTH_ID,
   schema: authSchema,
-  configure: async (_: AuthContext, axiosInstance: AxiosInstance): Promise<AxiosInstance> => {
+  configure: async (_ctx: AuthContext, axiosInstance: AxiosInstance): Promise<AxiosInstance> => {
     // No-op: MongoDB connectors use the native driver (not Axios).
     // The connection string is read from ctx.secrets.connectionString at
     // handler execution time.

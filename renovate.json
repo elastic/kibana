@@ -2217,7 +2217,7 @@
     {
       "groupName": "mongodb",
       "matchDepNames": ["mongodb"],
-      "reviewers": ["team:response-ops"],
+      "reviewers": ["team:response-ops", "team:workchat-eng"],
       "addLabels": ["Team:ResponseOps"],
       "matchBaseBranches": ["main"],
       "minimumReleaseAge": "14 days",

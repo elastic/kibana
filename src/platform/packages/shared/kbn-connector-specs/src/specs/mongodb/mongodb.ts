@@ -26,6 +26,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { z, lazySchema } from '@kbn/zod/v4';
+import type { Db, CollectionInfo } from 'mongodb';
 import type { ActionContext, ConnectorSpec } from '../../connector_spec';
 import { MONGODB_CONNECTION_STRING_AUTH_ID } from '../../auth_types/mongodb_connection_string';
 import type { FindInput, AggregateInput, CountInput, ListCollectionsInput } from './types';
@@ -39,46 +40,12 @@ import {
 // Stages that mutate data or execute arbitrary code — block these in aggregate
 const DISALLOWED_AGGREGATE_STAGES = new Set(['$out', '$merge', '$function', '$accumulator']);
 
-// Minimal local interfaces mirroring the subset of mongodb driver types we use.
-// We can't import types directly because the package uses a dynamic import at
-// runtime; these let TypeScript check the handler bodies without referencing the
-// driver package at compile time.
-interface MongoDb {
-  collection(name: string): MongoCollection;
-  listCollections(filter?: Record<string, unknown>): MongoCursor<CollectionInfo>;
-  command(cmd: Record<string, unknown>): Promise<Record<string, unknown>>;
-}
-
-interface MongoCollection {
-  find(
-    filter: Record<string, unknown>,
-    options?: {
-      projection?: Record<string, unknown>;
-      sort?: Record<string, unknown>;
-      limit?: number;
-      skip?: number;
-    }
-  ): MongoCursor<Record<string, unknown>>;
-  aggregate(pipeline: Record<string, unknown>[]): MongoCursor<Record<string, unknown>>;
-  countDocuments(filter?: Record<string, unknown>): Promise<number>;
-}
-
-interface MongoCursor<T> {
-  toArray(): Promise<T[]>;
-}
-
-interface CollectionInfo {
-  name: string;
-  type: string;
-  options?: Record<string, unknown>;
-}
-
 /**
  * Connect to MongoDB, run fn, always close.
  * Creates a fresh client per call (maxPoolSize: 1) as the framework does not
  * yet provide a pooled driver transport.
  */
-const withClient = async <T>(ctx: ActionContext, fn: (db: MongoDb) => Promise<T>): Promise<T> => {
+const withClient = async <T>(ctx: ActionContext, fn: (db: Db) => Promise<T>): Promise<T> => {
   // Dynamic import keeps the mongodb driver out of the browser bundle.
   // Both kbn-optimizer and kbn-rspack-optimizer declare 'mongodb' as a browser
   // external so this import is never resolved during browser bundling.
@@ -90,18 +57,23 @@ const withClient = async <T>(ctx: ActionContext, fn: (db: MongoDb) => Promise<T>
     maxPoolSize: 1,
     serverSelectionTimeoutMS: 5_000,
     connectTimeoutMS: 10_000,
+    // Bound in-flight query execution; prevents runaway scans from blocking indefinitely.
+    timeoutMS: 30_000,
   });
   try {
     await client.connect();
-    return await fn(client.db(database) as unknown as MongoDb);
+    return await fn(client.db(database));
   } finally {
-    await client.close();
+    // Ignore close errors so they never replace the original operation error.
+    await client.close().catch(() => {});
   }
 };
 
+const DISALLOWED_STAGES_LIST = [...DISALLOWED_AGGREGATE_STAGES].join(', ');
+
 /**
  * Validate that an aggregation pipeline contains no disallowed stages.
- * Throws if any stage key matches DISALLOWED_AGGREGATE_STAGES.
+ * Recurses into sub-pipelines ($facet branches, $lookup.pipeline, $unionWith.pipeline).
  */
 const assertReadOnlyPipeline = (pipeline: Record<string, unknown>[]): void => {
   for (const stage of pipeline) {
@@ -109,8 +81,18 @@ const assertReadOnlyPipeline = (pipeline: Record<string, unknown>[]): void => {
       if (DISALLOWED_AGGREGATE_STAGES.has(key)) {
         throw new Error(
           `Aggregation stage "${key}" is not allowed in read-only mode. ` +
-            `Disallowed stages: ${[...DISALLOWED_AGGREGATE_STAGES].join(', ')}.`
+            `Disallowed stages: ${DISALLOWED_STAGES_LIST}.`
         );
+      }
+      // Recurse into sub-pipelines that can contain arbitrary stages.
+      if (key === '$facet') {
+        const branches = stage[key] as Record<string, Record<string, unknown>[]>;
+        for (const branch of Object.values(branches)) {
+          if (Array.isArray(branch)) assertReadOnlyPipeline(branch);
+        }
+      } else if (key === '$lookup' || key === '$unionWith') {
+        const nested = stage[key] as { pipeline?: Record<string, unknown>[] };
+        if (Array.isArray(nested?.pipeline)) assertReadOnlyPipeline(nested.pipeline);
       }
     }
   }
@@ -191,12 +173,21 @@ export const MongoDBConnector: ConnectorSpec = {
       handler: async (ctx, input: AggregateInput) => {
         assertReadOnlyPipeline(input.pipeline);
 
-        // Append a $limit stage if the pipeline doesn't already end with one
+        const maxLimit = input.limit ?? 100;
         const lastStage = input.pipeline[input.pipeline.length - 1];
-        const hasLimit = lastStage != null && '$limit' in lastStage;
-        const pipeline: Record<string, unknown>[] = hasLimit
-          ? input.pipeline
-          : [...input.pipeline, { $limit: input.limit ?? 100 }];
+        const existingLimit =
+          lastStage != null && '$limit' in lastStage
+            ? (lastStage as { $limit: unknown }).$limit
+            : null;
+
+        // Always enforce the cap. If the pipeline already ends with $limit, replace it
+        // if its value exceeds maxLimit; otherwise append a fresh $limit stage.
+        const pipeline: Record<string, unknown>[] =
+          existingLimit !== null
+            ? typeof existingLimit === 'number' && existingLimit <= maxLimit
+              ? input.pipeline
+              : [...input.pipeline.slice(0, -1), { $limit: maxLimit }]
+            : [...input.pipeline, { $limit: maxLimit }];
 
         return withClient(ctx, async (db) => {
           const results = await db.collection(input.collection).aggregate(pipeline).toArray();
@@ -228,9 +219,9 @@ export const MongoDBConnector: ConnectorSpec = {
       input: ListCollectionsInputSchema,
       handler: async (ctx, input: ListCollectionsInput) => {
         return withClient(ctx, async (db) => {
-          const all = await db.listCollections().toArray();
           const { nameFilter } = input;
-          const collections = nameFilter ? all.filter((c) => c.name.includes(nameFilter)) : all;
+          const filter = nameFilter ? { name: { $regex: nameFilter } } : {};
+          const collections = await db.listCollections<CollectionInfo>(filter).toArray();
           return {
             database: (ctx.config as { database: string }).database,
             count: collections.length,

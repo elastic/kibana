@@ -19,6 +19,7 @@ import { MongoDBConnector } from './mongodb';
 const mockCountDocuments = jest.fn();
 const mockFindToArray = jest.fn();
 const mockAggregateToArray = jest.fn();
+const mockListCollections = jest.fn();
 const mockListCollectionsToArray = jest.fn();
 const mockCommand = jest.fn();
 const mockConnect = jest.fn();
@@ -57,9 +58,10 @@ beforeEach(() => {
   mockCommand.mockResolvedValue({ ok: 1 });
 
   // db() returns an object with collection(), listCollections(), and command()
+  mockListCollections.mockReturnValue({ toArray: mockListCollectionsToArray });
   mockDb.mockReturnValue({
     collection: mockCollection,
-    listCollections: jest.fn().mockReturnValue({ toArray: mockListCollectionsToArray }),
+    listCollections: mockListCollections,
     command: mockCommand,
   });
 
@@ -151,20 +153,22 @@ describe('listCollections', () => {
         { name: 'users', type: 'collection' },
       ],
     });
+    expect(mockListCollections).toHaveBeenCalledWith({});
     expect(mockConnect).toHaveBeenCalledTimes(1);
     expect(mockClose).toHaveBeenCalledTimes(1);
   });
 
-  it('filters by nameFilter substring', async () => {
+  it('passes nameFilter to the server as a regex filter', async () => {
+    // Mock returns only the server-filtered results (as MongoDB would)
     mockListCollectionsToArray.mockResolvedValue([
       { name: 'orders', type: 'collection' },
       { name: 'order_archive', type: 'collection' },
-      { name: 'users', type: 'collection' },
     ]);
 
     const result = await MongoDBConnector.actions.listCollections.handler(mockContext, {
       nameFilter: 'order',
     });
+    expect(mockListCollections).toHaveBeenCalledWith({ name: { $regex: 'order' } });
     expect(result.count).toBe(2);
     expect(result.collections.map((c: { name: string }) => c.name)).toEqual([
       'orders',
@@ -270,7 +274,7 @@ describe('aggregate', () => {
     ]);
   });
 
-  it('does not append $limit when pipeline already ends with $limit', async () => {
+  it('preserves an existing $limit stage when it is within the cap', async () => {
     mockAggregateToArray.mockResolvedValue([]);
     const collectionInstance = {
       find: jest.fn(),
@@ -290,8 +294,27 @@ describe('aggregate', () => {
     ]);
   });
 
+  it('replaces an existing $limit stage that exceeds the cap', async () => {
+    mockAggregateToArray.mockResolvedValue([]);
+    const collectionInstance = {
+      find: jest.fn(),
+      aggregate: jest.fn().mockReturnValue({ toArray: mockAggregateToArray }),
+      countDocuments: mockCountDocuments,
+    };
+    mockCollection.mockReturnValue(collectionInstance);
+
+    await MongoDBConnector.actions.aggregate.handler(mockContext, {
+      collection: 'orders',
+      pipeline: [{ $match: {} }, { $limit: 9999 }],
+      limit: 50,
+    });
+
+    // The oversized $limit should be replaced by the action-level limit
+    expect(collectionInstance.aggregate).toHaveBeenCalledWith([{ $match: {} }, { $limit: 50 }]);
+  });
+
   it.each(['$out', '$merge', '$function', '$accumulator'])(
-    'rejects pipeline containing %s',
+    'rejects pipeline containing %s at the top level',
     async (stage) => {
       await expect(
         MongoDBConnector.actions.aggregate.handler(mockContext, {
@@ -301,6 +324,26 @@ describe('aggregate', () => {
       ).rejects.toThrow(`"${stage}" is not allowed`);
     }
   );
+
+  it('rejects disallowed stages nested inside $facet sub-pipelines', async () => {
+    await expect(
+      MongoDBConnector.actions.aggregate.handler(mockContext, {
+        collection: 'orders',
+        pipeline: [{ $facet: { branch: [{ $out: 'target' }] } }],
+      })
+    ).rejects.toThrow('"$out" is not allowed');
+  });
+
+  it('rejects disallowed stages nested inside $lookup sub-pipelines', async () => {
+    await expect(
+      MongoDBConnector.actions.aggregate.handler(mockContext, {
+        collection: 'orders',
+        pipeline: [
+          { $lookup: { from: 'other', let: {}, pipeline: [{ $merge: 'target' }], as: 'r' } },
+        ],
+      })
+    ).rejects.toThrow('"$merge" is not allowed');
+  });
 });
 
 // ---------------------------------------------------------------------------
