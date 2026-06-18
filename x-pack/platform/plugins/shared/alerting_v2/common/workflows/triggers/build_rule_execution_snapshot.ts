@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { RuleResponse } from '@kbn/alerting-v2-schemas';
+import { getRootEsqlQuery, type RuleResponse } from '@kbn/alerting-v2-schemas';
 import type { RuleExecutionSnapshot } from './rule_signals_written';
 
 export const buildRuleExecutionSnapshot = (
@@ -16,6 +16,6 @@ export const buildRuleExecutionSnapshot = (
   spaceId,
   name: rule.metadata.name,
   kind: rule.kind,
-  query: rule.evaluation.query.base,
+  query: getRootEsqlQuery(rule.query),
   tags: rule.metadata.tags ?? [],
 });
