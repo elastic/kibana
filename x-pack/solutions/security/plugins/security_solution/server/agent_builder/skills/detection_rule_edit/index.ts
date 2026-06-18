@@ -91,7 +91,7 @@ Before calling \`security.create_detection_rule\`, apply the clarification gate:
 
 If none of the above is present, ask the user one focused question — the single most important missing piece — before generating the rule. Do not ask multiple questions at once.
 
-Once the request is specific enough, ALWAYS use the \`security.create_detection_rule\` tool. Pass a natural language description of the detection rule (\`user_query\` only — no \`existing_rule\`). The tool handles rule creation AND attachment creation automatically. Do NOT call \`attachment_update\`.
+Once the request is specific enough, ALWAYS use the \`security.create_detection_rule\` tool. Pass a natural language description of the detection rule (\`user_query\` only — no \`attachment_id\`). The tool handles rule creation AND attachment creation automatically. Do NOT call \`attachment_update\`.
 
 After the tool returns, render the attachment inline.
 
@@ -105,7 +105,7 @@ When the user says "add to the rule", "edit the rule", "change the rule", "updat
 
 | User request | Tool | Notes |
 |---|---|---|
-| Rewrite or change the **ES\|QL query** / detection logic | \`security.create_detection_rule\` | Requires \`existing_rule\` + \`attachment_id\` — see below |
+| Rewrite or change the **ES\|QL query** / detection logic | \`security.create_detection_rule\` | Requires \`attachment_id\` — see below |
 | Change severity, tags, schedule, name, description, MITRE, enabled, etc. | \`attachment_update\` | Hand-edit JSON — see below |
 
 ##### Rewriting the query (ES|QL)
@@ -113,18 +113,15 @@ When the user says "add to the rule", "edit the rule", "change the rule", "updat
 Do **NOT** use \`attachment_update\` to change the \`query\` field. ES|QL must be regenerated through the detection rule graph.
 
 1. **Read the latest attachment** — call \`attachment_read\`. NEVER skip this.
-2. **Parse** the \`text\` field into an object — this is \`existing_rule\`.
-3. **Call \`security.create_detection_rule\`** with all three parameters:
+2. **Call \`security.create_detection_rule\`** with two parameters:
 \`\`\`
 security.create_detection_rule({
   user_query: "<natural language description of the query change>",
-  existing_rule: <parsed rule object from step 2>,
   attachment_id: "<attachment id from step 1>"
 })
 \`\`\`
-- Always provide both \`existing_rule\` and \`attachment_id\` together. Omitting \`existing_rule\` will regenerate the rule from scratch and lose non-query fields like severity and tags.
-- The tool preserves non-query fields (severity, tags, schedule, etc.) and updates the attachment in place.
-4. Render: \`<render_attachment id="ATTACHMENT_ID" version="VERSION" />\` using the version from the tool result.
+- Always provide \`attachment_id\` when rewriting a query so the tool reads the current rule state and updates the attachment in place, preserving non-query fields (severity, tags, schedule, etc.).
+3. Render: \`<render_attachment id="ATTACHMENT_ID" version="VERSION" />\` using the version from the tool result.
 
 ##### Editing other fields (not query)
 
@@ -311,11 +308,11 @@ The lookback should be at least as long as the interval. A common pattern is int
 \`language\` (string): Always \`"esql"\`.
 \`type\` (string): Always \`"esql"\`.
 
-**To change the query**, use \`security.create_detection_rule\` with \`existing_rule\` and \`attachment_id\` — do NOT hand-edit \`query\` via \`attachment_update\`.
+**To change the query**, use \`security.create_detection_rule\` with \`attachment_id\` — do NOT hand-edit \`query\` via \`attachment_update\`.
 
 ### Identity fields — never set these
 
-Do **NOT** include \`id\` or \`rule_id\` in the rule JSON you pass to \`existing_rule\` or store via \`attachment_update\`. Both fields are server-assigned or saved-object identifiers; including them in a generated or draft rule will cause them to be confused with the attachment's own id and break save/update flows.
+Do **NOT** include \`id\` or \`rule_id\` in the rule JSON you store via \`attachment_update\`. Both fields are server-assigned or saved-object identifiers; including them in a generated or draft rule will cause them to be confused with the attachment's own id and break save/update flows.
 
 ### Enabled
 
@@ -354,16 +351,15 @@ User says: "Update the query to also filter on process.name"
 Pre-check: attachment exists in context → edit path → proceed to Step 1.
 
 1. Call \`attachment_read\` with the rule attachment ID.
-2. Parse the \`text\` field — e.g. \`{"name":"DNS Tunneling Detection","type":"esql","language":"esql","query":"FROM logs-* | WHERE dns.question.name IS NOT NULL",...}\`
-3. Call \`security.create_detection_rule\`:
+2. Call \`security.create_detection_rule\`:
    \`\`\`
    security.create_detection_rule({
      user_query: "Update the ES|QL query to also filter on process.name",
-     existing_rule: { "name": "DNS Tunneling Detection", "type": "esql", "language": "esql", "query": "FROM logs-* | WHERE dns.question.name IS NOT NULL", ... },
      attachment_id: "ATTACHMENT_ID"
    })
    \`\`\`
-4. Render: \`<render_attachment id="ATTACHMENT_ID" version="VERSION" />\` using the version from the tool result.
+   The tool reads the current rule from the attachment and rewrites only the query, preserving all other fields.
+3. Render: \`<render_attachment id="ATTACHMENT_ID" version="VERSION" />\` using the version from the tool result.
 
 ## CRITICAL INSTRUCTIONS — READ CAREFULLY
 
@@ -372,9 +368,9 @@ Pre-check: attachment exists in context → edit path → proceed to Step 1.
 3. ALWAYS read the attachment before modifying it (edit path only — skip for fresh creation).
 4. For \`attachment_update\` edits, ALWAYS re-stringify the FULL rule object — never send partial updates. On the creation path, pass natural language to \`security.create_detection_rule\`, not JSON.
 5. **ALWAYS render the attachment inline after EVERY modification** — this is the most important rule. Every single call to \`security.create_detection_rule\` or \`attachment_update\` MUST be followed by \`<render_attachment id="ATTACHMENT_ID" version="VERSION" />\` using the version from the tool result. NEVER omit this. The user cannot see changes without it.
-6. ALWAYS use \`security.create_detection_rule\` when creating a new rule (\`user_query\` only).
-7. ALWAYS use \`security.create_detection_rule\` with \`existing_rule\` + \`attachment_id\` when rewriting the query.
+6. ALWAYS use \`security.create_detection_rule\` when creating a new rule (\`user_query\` only — no \`attachment_id\`).
+7. ALWAYS use \`security.create_detection_rule\` with \`attachment_id\` when rewriting the query.
 8. Use \`attachment_update\` only for non-query field edits (tags, severity, schedule, name, description, MITRE, enabled, etc.). NEVER use \`attachment_update\` to change \`query\`.
 9. NEVER include \`id\` or \`rule_id\` in a generated or draft rule — these are server-assigned identifiers. Including them pollutes the attachment and breaks save/update flows.
-9. **ES|QL only**: If the user explicitly requests a non-ES|QL rule type (KQL, EQL, threshold, new terms, machine learning, indicator match, etc.), do NOT create it and do NOT automatically offer or pivot to an ES|QL alternative. Simply explain the limitation and stop.
+10. **ES|QL only**: If the user explicitly requests a non-ES|QL rule type (KQL, EQL, threshold, new terms, machine learning, indicator match, etc.), do NOT create it and do NOT automatically offer or pivot to an ES|QL alternative. Simply explain the limitation and stop.
 `;

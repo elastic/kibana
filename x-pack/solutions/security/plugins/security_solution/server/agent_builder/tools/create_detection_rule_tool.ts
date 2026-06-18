@@ -6,7 +6,9 @@
  */
 
 import { z } from '@kbn/zod/v4';
+import { v4 as uuidv4 } from 'uuid';
 import { ToolType } from '@kbn/agent-builder-common';
+import { getLatestVersion } from '@kbn/agent-builder-common/attachments';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition, StaticToolRegistration } from '@kbn/agent-builder-server';
 import type { CoreSetup, Logger } from '@kbn/core/server';
@@ -27,17 +29,42 @@ import { getAgentBuilderResourceAvailability } from '../utils/get_agent_builder_
 
 export const SECURITY_CREATE_DETECTION_RULE_TOOL_ID = securityTool('create_detection_rule');
 
+/**
+ * Mint a hyphen-free attachment id for new rule cards so the model-assembled
+ * `<render_attachment>` tag can't markdown-shatter (hyphens in ids can break
+ * autolink parsing). Prefix `air:` keeps it human-readable and autolink-safe.
+ */
+const mintRuleAttachmentId = (): string => `air:${uuidv4().replace(/-/g, '')}`;
+
+/**
+ * A placeholder card has no real rule content — its `text` field deserialises to
+ * an object with no `name` and no `query`. Every chat entry point seeds one of
+ * these (e.g. `create_rule_menu` uses `text: "{}"`) so the first create fills it
+ * rather than creating a second card alongside a phantom empty one.
+ */
+export const isPlaceholderRuleText = (text: string): boolean => {
+  try {
+    const parsed = JSON.parse(text);
+    if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) return false;
+    const hasName = typeof (parsed as Record<string, unknown>).name === 'string';
+    const hasQuery = typeof (parsed as Record<string, unknown>).query === 'string';
+    return !hasName && !hasQuery;
+  } catch {
+    return false;
+  }
+};
+
 const createDetectionRuleSchema = z.object({
   user_query: z
     .string()
     .describe(
       'Natural language description of the detection rule to create, including threat scenarios, data sources, and desired detection logic'
     ),
-  existing_rule: z
-    .record(z.string(), z.unknown())
+  attachment_id: z
+    .string()
     .optional()
     .describe(
-      'Current rule object from the attachment. Pass when rewriting the query of an existing rule — seeds the graph with the current rule state so non-query fields (severity, risk_score, etc.) are preserved.'
+      'ID of the existing rule attachment to update. Pass when rewriting the query of an existing rule so the tool reads the current rule state and updates in place. Omit for a fresh create.'
     ),
 });
 
@@ -93,7 +120,7 @@ Limitations: only ES|QL rules are supported; requires relevant data in existing 
       },
     },
     handler: async (
-      { user_query: userQuery, existing_rule: existingRule },
+      { user_query: userQuery, attachment_id: attachmentId },
       { esClient, modelProvider, request, events, attachments }
     ) => {
       try {
@@ -121,6 +148,52 @@ Limitations: only ES|QL rules are supported; requires relevant data in existing 
         const [coreStart, startPlugins] = await core.getStartServices();
         const savedObjectsClient = coreStart.savedObjects.getScopedClient(request);
 
+        // Resolve which attachment to target and whether the graph should be seeded with
+        // an existing rule (for query rewrites).
+        //
+        // Three-way decision:
+        //  1. attachment_id provided → update that card (query rewrite / explicit re-target).
+        //  2. attachment_id absent + an empty placeholder card exists → consume it (the first
+        //     create in a conversation that was opened from a menu/form entry point).
+        //  3. attachment_id absent + no placeholder → mint a new id (genuine second create).
+        let resolvedAttachmentId: string;
+        let existingRuleText: string | undefined;
+        let existingRuleId: string | null | undefined;
+        let isNewCard: boolean;
+
+        if (attachmentId) {
+          // Branch 1: explicit update
+          const record = attachments.getAttachmentRecord(attachmentId);
+          const latestVersion = record ? getLatestVersion(record) : undefined;
+          const versionData = latestVersion?.data as Record<string, unknown> | undefined;
+          existingRuleText = versionData?.text as string | undefined;
+          existingRuleId = versionData?.ruleId as string | null | undefined;
+          resolvedAttachmentId = attachmentId;
+          isNewCard = false;
+        } else {
+          // No explicit id — look for an empty placeholder card
+          const placeholderRecord = attachments.getAttachmentRecord(SECURITY_RULE_ATTACHMENT_ID);
+          const placeholderVersion = placeholderRecord
+            ? getLatestVersion(placeholderRecord)
+            : undefined;
+          const placeholderText = (placeholderVersion?.data as Record<string, unknown> | undefined)
+            ?.text as string | undefined;
+
+          if (placeholderRecord && placeholderText && isPlaceholderRuleText(placeholderText)) {
+            // Branch 2: consume the empty seed
+            resolvedAttachmentId = SECURITY_RULE_ATTACHMENT_ID;
+            existingRuleText = undefined; // placeholder has no real rule content
+            existingRuleId = undefined;
+            isNewCard = false;
+          } else {
+            // Branch 3: mint a new id for a genuinely additional rule
+            resolvedAttachmentId = mintRuleAttachmentId();
+            existingRuleText = undefined;
+            existingRuleId = undefined;
+            isNewCard = true;
+          }
+        }
+
         const rulesClient = await startPlugins.alerting.getRulesClientWithRequest(request);
         const iterativeAgent = await getBuildAgent({
           model,
@@ -133,9 +206,25 @@ Limitations: only ES|QL rules are supported; requires relevant data in existing 
           rulesClient,
           events,
         });
+
+        // Seed the graph with the existing rule when rewriting a query; otherwise create fresh.
+        let existingRuleForGraph: Partial<EsqlRuleCreateProps> | undefined;
+        if (existingRuleText) {
+          try {
+            const parsed = JSON.parse(existingRuleText);
+            if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
+              existingRuleForGraph = parsed as Partial<EsqlRuleCreateProps>;
+            }
+          } catch {
+            logger.warn(
+              `Could not parse existing rule text for attachment ${resolvedAttachmentId}`
+            );
+          }
+        }
+
         const result = await iterativeAgent.invoke({
           userQuery,
-          ...(existingRule && { rule: existingRule as Partial<EsqlRuleCreateProps> }),
+          ...(existingRuleForGraph && { rule: existingRuleForGraph }),
         });
 
         if (result.errors.length) {
@@ -166,48 +255,42 @@ Limitations: only ES|QL rules are supported; requires relevant data in existing 
         };
 
         const attachmentDescription = `Rule: ${result.rule.name}`;
-        const existingAttachment = attachments.getAttachmentRecord(SECURITY_RULE_ATTACHMENT_ID);
-        const isUpdate = existingAttachment !== undefined;
 
-        // Carry forward ruleId and intent from the previous version so a query rewrite on a
-        // saved rule doesn't lose the saved-rule id (which drives the 'update' button label).
-        const existingVersionData = isUpdate
-          ? (existingAttachment.versions[existingAttachment.current_version - 1]?.data as
-              | Record<string, unknown>
-              | undefined)
-          : undefined;
-        const existingRuleId = existingVersionData?.ruleId as string | undefined;
-        const existingIntent = existingVersionData?.intent as string | undefined;
+        // Per-version save signal that drives the create/update button:
+        //  - Update branch (attachment_id provided): carry the card's own saved id forward, so a
+        //    query rewrite of an already-saved rule stays "Update rule". If it was never saved (ruleId
+        //    was null/absent), keep null so it stays "Create rule".
+        //  - Create branches (no attachment_id): explicit null → "Create rule".
+        const ruleIdForAttachment: string | null =
+          attachmentId !== undefined ? existingRuleId ?? null : null;
 
         const attachmentData: Record<string, unknown> = {
           text: JSON.stringify(ruleWithoutIds),
           attachmentLabel: result.rule.name,
-          intent: existingIntent ?? 'create',
-          ...(existingRuleId !== undefined && { ruleId: existingRuleId }),
+          ruleId: ruleIdForAttachment,
         };
 
-        let resultAttachmentId: string;
-        let version: number | undefined;
+        let resultVersion: number | undefined;
 
         try {
-          if (isUpdate) {
-            const updated = await attachments.update(SECURITY_RULE_ATTACHMENT_ID, {
+          if (!isNewCard) {
+            // Update an existing card (branch 1 or branch 2)
+            const updated = await attachments.update(resolvedAttachmentId, {
               data: attachmentData,
               description: attachmentDescription,
             });
-            resultAttachmentId = updated?.id ?? SECURITY_RULE_ATTACHMENT_ID;
-            version = updated?.current_version;
-            logger.debug(`Updated rule attachment ${resultAttachmentId} v${version}`);
+            resultVersion = updated?.current_version;
+            logger.debug(`Updated rule attachment ${resolvedAttachmentId} v${resultVersion}`);
           } else {
+            // Mint a new card (branch 3)
             const created = await attachments.add({
-              id: SECURITY_RULE_ATTACHMENT_ID,
+              id: resolvedAttachmentId,
               type: SecurityAgentBuilderAttachments.rule,
               data: attachmentData,
               description: attachmentDescription,
             });
-            resultAttachmentId = created.id;
-            version = created.current_version;
-            logger.debug(`Created rule attachment ${resultAttachmentId} v${version}`);
+            resultVersion = created.current_version;
+            logger.debug(`Created rule attachment ${resolvedAttachmentId} v${resultVersion}`);
           }
         } catch (attachmentError) {
           logger.error(
@@ -225,8 +308,9 @@ Limitations: only ES|QL rules are supported; requires relevant data in existing 
               data: {
                 success: true,
                 rule: result.rule,
-                attachmentId: resultAttachmentId,
-                ...(version !== undefined && { version }),
+                attachmentId: resolvedAttachmentId,
+                isNewCard,
+                ...(resultVersion !== undefined && { version: resultVersion }),
               },
             },
           ],
