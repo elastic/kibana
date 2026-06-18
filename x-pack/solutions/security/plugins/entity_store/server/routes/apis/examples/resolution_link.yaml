@@ -25,6 +25,7 @@ responses:
                 - "user:j.doe@example.com"
               skipped: []
               target_id: "user:jane.doe@example.com"
+              entity_type: "user"
   400:
     description: "Bad request."
     content:

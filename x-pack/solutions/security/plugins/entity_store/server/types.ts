@@ -36,6 +36,7 @@ import type { HistorySnapshotClient } from './domain/history_snapshot';
 import type { CRUDClient } from './domain/crud';
 import type { ResolutionClient } from './domain/resolution';
 import type { RegisterEntityMaintainerConfig } from './tasks/entity_maintainers/types';
+import type { TelemetryReporter } from './telemetry/events';
 
 export interface EntityStoreSetupPlugins {
   taskManager: TaskManagerSetupContract;
@@ -65,6 +66,7 @@ export interface EntityStoreApiRequestHandlerContext {
   historySnapshotClient: HistorySnapshotClient;
   security: SecurityPluginStart;
   namespace: string;
+  analytics: TelemetryReporter;
 }
 
 export type EntityStoreRequestHandlerContext = CustomRequestHandlerContext<{

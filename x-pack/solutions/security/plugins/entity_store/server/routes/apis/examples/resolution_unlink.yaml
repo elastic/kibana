@@ -23,6 +23,7 @@ responses:
                 - "user:jdoe@example.com"
                 - "user:j.doe@example.com"
               skipped: []
+              entity_type: "user"
   404:
     description: "Entities not found."
     content:

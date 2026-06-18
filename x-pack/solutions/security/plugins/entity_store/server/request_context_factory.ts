@@ -137,5 +137,6 @@ export async function createRequestHandlerContext({
     historySnapshotClient,
     security: startPlugins.security,
     namespace,
+    analytics,
   };
 }

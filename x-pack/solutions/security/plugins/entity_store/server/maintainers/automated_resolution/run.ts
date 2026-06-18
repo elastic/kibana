@@ -21,6 +21,7 @@ import { getLatestEntitiesIndexName } from '../../../common';
 import type { ResolutionClient } from '../../domain/resolution';
 import { getFieldValue } from '../../../common/domain/euid/commons';
 import { ENTITY_ID_FIELD } from '../../../common/domain/definitions/common_fields';
+import type { MaintainerTelemetryClient } from '../../tasks/entity_maintainers/maintainer_telemetry_client';
 import type { AutomatedResolutionState, MatchBucket, EntityHit } from './types';
 
 const MATCH_FIELD = 'user.email';
@@ -39,10 +40,11 @@ export interface RunDeps {
   logger: Logger;
   resolutionClient: ResolutionClient;
   abortController: AbortController;
+  telemetry: MaintainerTelemetryClient;
 }
 
 export async function runAutomatedResolution(deps: RunDeps): Promise<AutomatedResolutionState> {
-  const { state, namespace, esClient, logger, resolutionClient, abortController } = deps;
+  const { state, namespace, esClient, logger, resolutionClient, abortController, telemetry } = deps;
   const index = getLatestEntitiesIndexName(namespace);
 
   // Step 1: Collect new email values
@@ -81,6 +83,16 @@ export async function runAutomatedResolution(deps: RunDeps): Promise<AutomatedRe
   logger.info(
     `Completed: ${resolutionsCreated} resolutions created, ${skippedAmbiguousBuckets} ambiguous buckets skipped, ${failedBuckets} buckets failed`
   );
+
+  telemetry.report({
+    funnel: {
+      scanned: values.length,
+      qualified: matchBuckets.length,
+      applied: resolutionsCreated,
+      skipped: skippedAmbiguousBuckets,
+      failed: failedBuckets,
+    },
+  });
 
   // Step 4: Update state — don't advance watermark if any buckets failed,
   // so the next run re-collects the same email values and retries.
