@@ -78,11 +78,6 @@ export const inferenceEndpointAdapter = {
       modelName,
     });
 
-    // TEMP DEBUG: logs the raw OpenAI-format payload sent to the inference endpoint (the LLM).
-    logger.info(
-      () => `INFERENCE_REQUEST_DEBUG inference-endpoint request payload: ${JSON.stringify(request)}`
-    );
-
     return defer(() =>
       executor.invoke({
         body: request as unknown as Record<string, unknown>,
