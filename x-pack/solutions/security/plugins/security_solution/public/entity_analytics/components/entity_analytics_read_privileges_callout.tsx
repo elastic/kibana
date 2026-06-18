@@ -7,12 +7,59 @@
 
 import React, { useMemo } from 'react';
 import hash from 'object-hash';
+import type { CallOutMessage } from '../../common/components/callouts';
 import { CallOutSwitcher } from '../../common/components/callouts';
 import { missingPrivilegesCallOutBody } from '../../common/components/missing_privileges';
 import { MISSING_PRIVILEGES_CALLOUT_TITLE } from '../../common/components/missing_privileges/translations';
 import type { MissingIndexPrivileges } from '../../common/hooks/use_missing_privileges';
 import type { RiskEngineMissingPrivilegesResponse } from '../hooks/use_missing_risk_engine_privileges';
 import type { EntityAnalyticsPrivileges } from '../../../common/api/entity_analytics';
+
+interface EntityAnalyticsReadPrivilegesCallOutParams {
+  riskEngineReadPrivileges: RiskEngineMissingPrivilegesResponse;
+  entityEnginePrivileges: EntityAnalyticsPrivileges | undefined;
+  leadGenerationPrivileges?: EntityAnalyticsPrivileges;
+  /**
+   * Prefix used to build the callout's (test-subj) id. Override when reusing
+   * this message outside the Entity Analytics home page so ids stay distinct.
+   */
+  idPrefix?: string;
+}
+
+/**
+ * Builds the "Insufficient privileges" callout message for Entity Analytics
+ * read access, or `null` when the user has all required read privileges.
+ *
+ * Exposed separately from the component so other surfaces (e.g. the cases
+ * "Entities" attachment tab) can render the same missing-privilege message in
+ * a different container (e.g. a non-dismissible inline callout) without
+ * duplicating the privilege derivation logic.
+ */
+export const getEntityAnalyticsReadPrivilegesCallOutMessage = ({
+  riskEngineReadPrivileges,
+  entityEnginePrivileges,
+  leadGenerationPrivileges,
+  idPrefix = 'entity-analytics-home-missing-privileges',
+}: EntityAnalyticsReadPrivilegesCallOutParams): CallOutMessage | null => {
+  const indexPrivileges: MissingIndexPrivileges[] = [
+    ...getRiskEngineMissingReadPrivileges(riskEngineReadPrivileges),
+    ...getEntityStoreMissingReadPrivileges(entityEnginePrivileges),
+    ...getEntityStoreMissingReadPrivileges(leadGenerationPrivileges),
+  ];
+
+  if (indexPrivileges.length === 0) return null;
+
+  return {
+    type: 'primary' as const,
+    id: `${idPrefix}-${hash(indexPrivileges)}`,
+    title: MISSING_PRIVILEGES_CALLOUT_TITLE,
+    description: missingPrivilegesCallOutBody({
+      indexPrivileges,
+      featurePrivileges: [],
+      docs: [],
+    }),
+  };
+};
 
 /**
  * Displays a Callout section when the user has missing privileges to view the Entity Analytics home page.
@@ -22,31 +69,16 @@ export const EntityAnalyticsReadPrivilegesCallout = React.memo(
     riskEngineReadPrivileges,
     entityEnginePrivileges,
     leadGenerationPrivileges,
-  }: {
-    riskEngineReadPrivileges: RiskEngineMissingPrivilegesResponse;
-    entityEnginePrivileges: EntityAnalyticsPrivileges | undefined;
-    leadGenerationPrivileges?: EntityAnalyticsPrivileges;
-  }) => {
-    const message = useMemo(() => {
-      const indexPrivileges: MissingIndexPrivileges[] = [
-        ...getRiskEngineMissingReadPrivileges(riskEngineReadPrivileges),
-        ...getEntityStoreMissingReadPrivileges(entityEnginePrivileges),
-        ...getEntityStoreMissingReadPrivileges(leadGenerationPrivileges),
-      ];
-
-      if (indexPrivileges.length === 0) return null;
-
-      return {
-        type: 'primary' as const,
-        id: `entity-analytics-home-missing-privileges-${hash(indexPrivileges)}`,
-        title: MISSING_PRIVILEGES_CALLOUT_TITLE,
-        description: missingPrivilegesCallOutBody({
-          indexPrivileges,
-          featurePrivileges: [],
-          docs: [],
+  }: Omit<EntityAnalyticsReadPrivilegesCallOutParams, 'idPrefix'>) => {
+    const message = useMemo(
+      () =>
+        getEntityAnalyticsReadPrivilegesCallOutMessage({
+          riskEngineReadPrivileges,
+          entityEnginePrivileges,
+          leadGenerationPrivileges,
         }),
-      };
-    }, [riskEngineReadPrivileges, entityEnginePrivileges, leadGenerationPrivileges]);
+      [riskEngineReadPrivileges, entityEnginePrivileges, leadGenerationPrivileges]
+    );
 
     if (!message) return null;
 

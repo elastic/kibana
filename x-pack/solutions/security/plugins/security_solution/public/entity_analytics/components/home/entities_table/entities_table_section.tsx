@@ -32,7 +32,11 @@ export const EntitiesTableSection = ({
   state,
   config = DEFAULT_ENTITIES_TABLE_CONFIG,
 }: EntitiesTableSectionProps) => {
-  const { grouping } = useEntityGrouping({ state, tableId: config.tableId });
+  const { grouping } = useEntityGrouping({
+    state,
+    tableId: config.tableId,
+    groupingId: config.groupingLocalStorageKey,
+  });
   const selectedGroup = grouping.selectedGroups[0];
 
   if (selectedGroup === 'none') {
@@ -79,6 +83,7 @@ const GroupWithURLPagination = ({
     selectedGroup,
     groupFilters: [],
     tableId: config.tableId,
+    groupingId: config.groupingLocalStorageKey,
   });
 
   useEffect(() => {
@@ -265,6 +270,7 @@ const GroupWithLocalPagination = ({
     selectedGroup,
     groupFilters,
     tableId: config.tableId,
+    groupingId: config.groupingLocalStorageKey,
   });
 
   useEffect(() => {

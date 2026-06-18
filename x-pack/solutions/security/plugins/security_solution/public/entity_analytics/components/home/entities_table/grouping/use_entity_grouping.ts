@@ -169,12 +169,20 @@ export const useEntityGrouping = ({
   groupFilters = [],
   selectedGroup,
   tableId,
+  groupingId = LOCAL_STORAGE_GROUPING_KEY,
 }: {
   state: EntityURLStateResult;
   groupFilters?: Filter[];
   selectedGroup?: string;
   /** Forwarded to `createGroupPanelRenderer` so resolution group flyouts open in the right scope. */
   tableId?: string;
+  /**
+   * Identifier used by `@kbn/grouping` to persist the active grouping
+   * selection. Defaults to the EA home page key; independent mounts (e.g. the
+   * cases attachments accordion) must pass their own so grouping state doesn't
+   * leak between tables.
+   */
+  groupingId?: string;
 }) => {
   const { query, setUrlQuery, pageSize, pageIndex } = state;
   const { dataView, dataViewIsLoading } = useContext(DataViewContext);
@@ -205,7 +213,7 @@ export const useEntityGrouping = ({
   const initialGroupings = useMemo(
     () => ({
       groupById: {
-        [LOCAL_STORAGE_GROUPING_KEY]: {
+        [groupingId]: {
           activeGroups: hasResolutionLicense
             ? [ENTITY_GROUPING_OPTIONS.RESOLUTION]
             : [ENTITY_GROUPING_OPTIONS.NONE],
@@ -213,7 +221,7 @@ export const useEntityGrouping = ({
         },
       },
     }),
-    [defaultGroupingOptions, hasResolutionLicense]
+    [defaultGroupingOptions, hasResolutionLicense, groupingId]
   );
 
   const additionalFilters = buildEsQuery(dataView, [], groupFilters);
@@ -335,7 +343,7 @@ export const useEntityGrouping = ({
     defaultGroupingOptions,
     initialGroupings,
     fields: dataViewIsLoading ? [] : dataView.fields,
-    groupingId: LOCAL_STORAGE_GROUPING_KEY,
+    groupingId,
     maxGroupingLevels: MAX_GROUPING_LEVELS,
     title: groupingTitle,
     onGroupChange: ({ groupByFields }) => {

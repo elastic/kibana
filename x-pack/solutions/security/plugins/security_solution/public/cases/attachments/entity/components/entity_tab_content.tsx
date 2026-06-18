@@ -13,7 +13,11 @@ import type { CommonAttachmentTabViewProps } from '@kbn/cases-plugin/public';
 import { SECURITY_ENTITY_ATTACHMENT_TYPE, type CaseUI } from '@kbn/cases-plugin/common';
 import type { EntityAttachmentMetadata } from '../../../../../common/cases/attachments/entity';
 import type { EntityType } from '../../../../../common/entity_analytics/types';
-import { ENTITY_TAB_EMPTY_TEST_ID, ENTITY_TAB_TABLE_TEST_ID } from './test_ids';
+import {
+  ENTITY_TAB_EMPTY_TEST_ID,
+  ENTITY_TAB_NO_PRIVILEGES_TEST_ID,
+  ENTITY_TAB_TABLE_TEST_ID,
+} from './test_ids';
 import {
   DataViewContext,
   EntitiesTableSection,
@@ -21,6 +25,10 @@ import {
 } from '../../../../entity_analytics/components/home/entities_table';
 import { useEntityStoreDataView } from '../../../../entity_analytics/components/home/use_entity_store_data_view';
 import { useEntityStoreStatus } from '../../../../entity_analytics/components/entity_store/hooks/use_entity_store';
+import { useEntityEnginePrivileges } from '../../../../entity_analytics/components/entity_store/hooks/use_entity_engine_privileges';
+import { useMissingRiskEnginePrivileges } from '../../../../entity_analytics/hooks/use_missing_risk_engine_privileges';
+import { getEntityAnalyticsReadPrivilegesCallOutMessage } from '../../../../entity_analytics/components/entity_analytics_read_privileges_callout';
+import { CallOut } from '../../../../common/components/callouts';
 import { EntityStoreDisabledEmptyPromptBody } from '../../../../entity_analytics/pages/entity_store_disabled_empty_prompt';
 import { useSpaceId } from '../../../../common/hooks/use_space_id';
 import { useEntityLocalTableState } from '../hooks/use_entity_local_table_state';
@@ -108,6 +116,7 @@ const CASE_ATTACHMENT_TABLE_CONFIG: EntitiesTableConfig = {
   columnsLocalStorageKey: 'securitySolution.entityAnalytics.cases.attachment.columns',
   columnsSettingsLocalStorageKey:
     'securitySolution.entityAnalytics.cases.attachment.columns:settings',
+  groupingLocalStorageKey: 'securitySolution.entityAnalytics.cases.attachment.grouping',
 };
 
 /**
@@ -120,8 +129,9 @@ const CASE_ATTACHMENT_TABLE_CONFIG: EntitiesTableConfig = {
  *  2. Short-circuits with an empty prompt when no entity attachments exist (or
  *     none match the search) — keeps the accordion cheap and skips the ES call.
  *  3. Gates on `useEntityStoreStatus` and reuses the home page's "store
- *     disabled" prompt body when the entity store isn't installed/running, so
- *     stale attachments don't render an empty grid.
+ *     disabled" prompt body when the entity store isn't installed/running, and
+ *     on `useEntityEnginePrivileges` so users without entity analytics read
+ *     access get an explicit message instead of a misleading empty grid.
  *  4. Loads the entity store data view and renders `EntitiesTableSection`,
  *     pinning the ES query to the attached entity ids and supplying a
  *     case-scoped `EntitiesTableConfig` so the embedded table is fully isolated
@@ -186,10 +196,29 @@ const EntityTabTable = ({ attachedEntities }: { attachedEntities: AttachedEntity
   const spaceId = useSpaceId();
   const { data: entityStoreStatusData, isLoading: isStatusLoading } = useEntityStoreStatus();
   const { dataView, isLoading: isDataViewLoading } = useEntityStoreDataView(spaceId);
+  // The embedded `EntitiesTableSection` does not gate on entity store read
+  // privileges — it assumes the parent surface already did (the EA home page
+  // does this via the same hook). Without this check a user with cases access
+  // but no entity analytics privileges would see an empty grid instead of an
+  // honest "no access" message, because the underlying ES query is denied.
+  const {
+    data: privileges,
+    isLoading: isPrivilegesLoading,
+    isError: isPrivilegesError,
+  } = useEntityEnginePrivileges();
+  // The entity table surfaces risk scores, so include risk-engine read access
+  // in the same callout the EA home page uses. `readonly: true` requires only
+  // read privileges (no run/enable cluster privileges).
+  const riskEngineReadPrivileges = useMissingRiskEnginePrivileges({ readonly: true });
 
   const isEntityStoreDisabled =
     entityStoreStatusData?.status === 'not_installed' ||
     entityStoreStatusData?.status === 'stopped';
+
+  // Mirror the EA home page: only treat as "no privileges" when the request
+  // succeeded and explicitly reports missing read permissions. A genuine
+  // request error falls through so we don't hide the table on transient failures.
+  const hasNoReadPrivileges = !isPrivilegesError && !privileges?.has_read_permissions;
 
   // `attachmentId` is the identifier captured at attach time. It is NOT the
   // entity store's `entity.id` (an EUID like `user:jane@okta`) — and for IdP
@@ -222,7 +251,7 @@ const EntityTabTable = ({ attachedEntities }: { attachedEntities: AttachedEntity
 
   const state = useEntityLocalTableState({ pinnedFilter });
 
-  if (isStatusLoading || isDataViewLoading) {
+  if (isStatusLoading || isDataViewLoading || isPrivilegesLoading) {
     return <EuiLoadingSpinner size="l" />;
   }
 
@@ -230,12 +259,42 @@ const EntityTabTable = ({ attachedEntities }: { attachedEntities: AttachedEntity
     return <EntityStoreDisabledEmptyPromptBody />;
   }
 
+  // Reuse the EA home page's "Insufficient privileges" message (and its
+  // specific list of missing Elasticsearch index/risk privileges) so the
+  // wording is identical across surfaces. Unlike the home page we render it as
+  // a non-dismissible inline callout with its own id prefix, so it neither
+  // shares dismissal state with the home page nor can be dismissed inside this
+  // accordion. `message` is null when nothing is missing, so this doubles as a
+  // banner above the table when only risk score privileges are missing.
+  const privilegesCalloutMessage = getEntityAnalyticsReadPrivilegesCallOutMessage({
+    riskEngineReadPrivileges,
+    entityEnginePrivileges: privileges,
+    idPrefix: 'entity-analytics-cases-missing-privileges',
+  });
+  const privilegesCallout = privilegesCalloutMessage ? (
+    <CallOut message={privilegesCalloutMessage} showDismissButton={false} />
+  ) : null;
+
+  // Without entity store read access the underlying ES query is denied, so we
+  // hide the table entirely and show only the callout rather than a misleading
+  // empty grid.
+  if (hasNoReadPrivileges) {
+    return (
+      <EuiFlexItem data-test-subj={ENTITY_TAB_NO_PRIVILEGES_TEST_ID}>
+        {privilegesCallout}
+      </EuiFlexItem>
+    );
+  }
+
   return (
-    <EuiFlexItem data-test-subj={ENTITY_TAB_TABLE_TEST_ID}>
-      <DataViewContext.Provider value={{ dataView, dataViewIsLoading: isDataViewLoading }}>
-        <EntitiesTableSection state={state} config={CASE_ATTACHMENT_TABLE_CONFIG} />
-      </DataViewContext.Provider>
-    </EuiFlexItem>
+    <>
+      {privilegesCallout}
+      <EuiFlexItem data-test-subj={ENTITY_TAB_TABLE_TEST_ID}>
+        <DataViewContext.Provider value={{ dataView, dataViewIsLoading: isDataViewLoading }}>
+          <EntitiesTableSection state={state} config={CASE_ATTACHMENT_TABLE_CONFIG} />
+        </DataViewContext.Provider>
+      </EuiFlexItem>
+    </>
   );
 };
 

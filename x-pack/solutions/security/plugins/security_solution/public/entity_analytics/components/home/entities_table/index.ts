@@ -11,6 +11,7 @@ import {
   ENTITY_ANALYTICS_TABLE_ID,
   ENTITY_ANALYTICS_LOCAL_STORAGE_COLUMNS_KEY,
   LOCAL_STORAGE_COLUMNS_SETTINGS_KEY,
+  LOCAL_STORAGE_GROUPING_KEY,
 } from './constants';
 
 export interface DataViewContextValue {
@@ -37,12 +38,15 @@ export interface EntitiesTableConfig {
   columnsLocalStorageKey: string;
   /** localStorage key for column widths/settings (`UnifiedDataTable` settings). */
   columnsSettingsLocalStorageKey: string;
+  /** `@kbn/grouping` id used to persist the active grouping selection. */
+  groupingLocalStorageKey: string;
 }
 
 export const DEFAULT_ENTITIES_TABLE_CONFIG: EntitiesTableConfig = {
   tableId: ENTITY_ANALYTICS_TABLE_ID,
   columnsLocalStorageKey: ENTITY_ANALYTICS_LOCAL_STORAGE_COLUMNS_KEY,
   columnsSettingsLocalStorageKey: LOCAL_STORAGE_COLUMNS_SETTINGS_KEY,
+  groupingLocalStorageKey: LOCAL_STORAGE_GROUPING_KEY,
 };
 
 export { EntitiesTableSection } from './entities_table_section';
