@@ -153,6 +153,52 @@ describe('fromEs', () => {
     });
     expect(definition.created_by).toBeUndefined();
   });
+
+  it('falls back to legacy visibility and acl entries for legacy documents', () => {
+    const document = getSampleDoc();
+    const source = document._source;
+    if (!source) {
+      throw new Error('Expected test document source');
+    }
+    const entries = [{ type: 'user' as const, name: 'alice', role: AgentAccessControlRole.Editor }];
+    delete source.access_control;
+    source.visibility = AgentAccessControlScope.Private;
+    source.acl = { entries };
+
+    const definition = fromEs(document);
+
+    expect(definition.access_control).toEqual({
+      scope: AgentAccessControlScope.Private,
+      entries,
+    });
+  });
+
+  it('prefers access_control over legacy visibility and acl fields', () => {
+    const document = getSampleDoc();
+    const source = document._source;
+    if (!source) {
+      throw new Error('Expected test document source');
+    }
+    const legacyEntries = [
+      { type: 'user' as const, name: 'alice', role: AgentAccessControlRole.Editor },
+    ];
+    const accessControlEntries = [
+      { type: 'user' as const, name: 'bob', role: AgentAccessControlRole.Manager },
+    ];
+    source.access_control = {
+      scope: AgentAccessControlScope.Shared,
+      entries: accessControlEntries,
+    };
+    source.visibility = AgentAccessControlScope.Private;
+    source.acl = { entries: legacyEntries };
+
+    const definition = fromEs(document);
+
+    expect(definition.access_control).toEqual({
+      scope: AgentAccessControlScope.Shared,
+      entries: accessControlEntries,
+    });
+  });
 });
 
 describe('createRequestToEs', () => {
@@ -492,6 +538,46 @@ describe('updateRequestToEs', () => {
       },
       labels: [],
       access_control: { scope: AgentAccessControlScope.Private, entries },
+      created_by_id: 'test-user-id',
+      created_by_name: 'test-user',
+      created_at: creationDate,
+      updated_at: updateDate,
+    };
+
+    const updateRequest: AgentUpdateRequest = {
+      access_control: { scope: AgentAccessControlScope.Shared },
+    };
+
+    const docProperties = updateRequestToEs({
+      agentId: 'id',
+      currentProps: agentProps,
+      update: updateRequest,
+      updateDate: newUpdateDate,
+    });
+
+    expect(docProperties.access_control).toEqual({
+      scope: AgentAccessControlScope.Shared,
+      entries,
+    });
+  });
+
+  it('updates access-control scope while preserving legacy acl entries', () => {
+    const newUpdateDate = new Date();
+    const entries = [{ type: 'user' as const, name: 'alice', role: AgentAccessControlRole.Editor }];
+
+    const agentProps: AgentProperties = {
+      id: 'id',
+      type: AgentType.chat,
+      name: 'name',
+      description: 'description',
+      space: 'space',
+      config: {
+        instructions: 'instructions',
+        tools: [],
+      },
+      labels: [],
+      visibility: AgentAccessControlScope.Private,
+      acl: { entries },
       created_by_id: 'test-user-id',
       created_by_name: 'test-user',
       created_at: creationDate,

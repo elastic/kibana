@@ -8,7 +8,12 @@
 import type { IndexStorageSettings } from '@kbn/storage-adapter';
 import { StorageIndexAdapter, types } from '@kbn/storage-adapter';
 import type { Logger, ElasticsearchClient } from '@kbn/core/server';
-import type { AgentAccessControl, AgentType, ToolSelection } from '@kbn/agent-builder-common';
+import type {
+  AgentAccessControl,
+  AgentAccessControlScope,
+  AgentType,
+  ToolSelection,
+} from '@kbn/agent-builder-common';
 import { chatSystemIndex } from '@kbn/agent-builder-server';
 
 export const agentsIndexName = chatSystemIndex('agents');
@@ -72,6 +77,8 @@ export interface AgentProperties {
   updated_at: string;
   // deprecated fields
   configuration?: AgentConfigurationProperties;
+  visibility?: AgentAccessControlScope;
+  acl?: Pick<AgentAccessControl, 'entries'>;
 }
 
 export interface AgentConfigurationProperties {

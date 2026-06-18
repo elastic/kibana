@@ -39,7 +39,7 @@ export const fromEs = (document: Document): PersistedAgentDefinition => {
     labels: document._source.labels,
     avatar_color: document._source.avatar_color,
     avatar_symbol: document._source.avatar_symbol,
-    access_control: normalizeAccessControl(document._source.access_control),
+    access_control: normalizeAccessControl(document._source),
     created_by:
       document._source.created_by_id || document._source.created_by_name
         ? {
@@ -113,7 +113,7 @@ export const updateRequestToEs = ({
 }): AgentProperties => {
   const currentConfig = currentProps.configuration ?? currentProps.config;
   const { configuration, access_control, ...restUpdate } = update;
-  const currentAccessControl = normalizeAccessControl(currentProps.access_control);
+  const currentAccessControl = normalizeAccessControl(currentProps);
 
   const updated: AgentProperties = {
     ...currentProps,
@@ -135,12 +135,12 @@ export const updateRequestToEs = ({
 };
 
 const normalizeAccessControl = (
-  access_control: AgentAccessControl | undefined
-): AgentAccessControl => {
-  if (!access_control) return getDefaultAgentAccessControl();
+  source: Pick<AgentProperties, 'access_control' | 'visibility' | 'acl'>
+) => {
+  const defaults = getDefaultAgentAccessControl();
   return {
-    scope: access_control.scope,
-    entries: access_control.entries,
+    scope: source.access_control?.scope ?? source.visibility ?? defaults.scope,
+    entries: source.access_control?.entries ?? source.acl?.entries ?? defaults.entries,
   };
 };
 
