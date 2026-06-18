@@ -54,7 +54,7 @@ beforeAll(() => {
 
       if (type === 'invalidPanel') {
         return {
-          validate: jest.fn().mockImplementation(() => {
+          parse: jest.fn().mockImplementation(() => {
             throw new Error('Boo!');
           }),
         };

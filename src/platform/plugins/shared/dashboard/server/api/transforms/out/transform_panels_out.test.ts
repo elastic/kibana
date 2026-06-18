@@ -16,6 +16,7 @@ beforeAll(() => {
   // eslint-disable-next-line @typescript-eslint/no-var-requires
   require('../../../kibana_services').embeddableService = {
     getTransforms: mockGetTransforms,
+    getAllEmbeddableSchemas: jest.fn().mockReturnValue({}),
   };
 });
 
@@ -106,7 +107,7 @@ describe('transformPanelsOut', () => {
           title: 'markdown',
           transformOut: jest.fn().mockImplementation((val) => val), // just pass the value through
           schema: {
-            validate: jest.fn().mockImplementation((val) => val),
+            parse: jest.fn().mockImplementation((val) => val),
           },
         };
       }
@@ -114,7 +115,7 @@ describe('transformPanelsOut', () => {
         return {
           title: 'invalid',
           schema: {
-            validate: jest.fn().mockImplementation(() => {
+            parse: jest.fn().mockImplementation(() => {
               throw new Error('Boo!');
             }),
           },
