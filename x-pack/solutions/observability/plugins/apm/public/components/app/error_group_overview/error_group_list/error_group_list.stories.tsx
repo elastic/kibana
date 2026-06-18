@@ -78,56 +78,7 @@ const stories: Meta<Args> = {
         http: {
           get: async (endpoint: string) => {
             if (endpoint === '/internal/apm/services/opbeans-node/errors/groups/main_statistics')
-              return {
-                errorGroups: [
-                  {
-                    name: 'net/http: abort Handler',
-                    occurrences: 14,
-                    culprit: 'Main.func2',
-                    groupId: '83a653297ec29afed264d7b60d5cda7b',
-                    lastSeen: 1634833121434,
-                    handled: false,
-                    type: 'errorString',
-                  },
-                  {
-                    name: 'POST /api/orders (500)',
-                    occurrences: 5,
-                    culprit: 'logrusMiddleware',
-                    groupId: '7a640436a9be648fd708703d1ac84650',
-                    lastSeen: 1634833121434,
-                    handled: false,
-                    type: 'OpError',
-                  },
-                  {
-                    name: 'write tcp 10.36.2.24:3000->10.36.1.14:34232: write: connection reset by peer',
-                    occurrences: 4,
-                    culprit: 'apiHandlers.getProductCustomers',
-                    groupId: '95ca0e312c109aa11e298bcf07f1445b',
-                    lastSeen: 1634833121434,
-                    handled: false,
-                    type: 'OpError',
-                  },
-                  {
-                    name: 'write tcp 10.36.0.21:3000->10.36.1.252:57070: write: connection reset by peer',
-                    occurrences: 3,
-                    culprit: 'apiHandlers.getCustomers',
-                    groupId: '4053d7e33d2b716c819bd96d9d6121a2',
-                    lastSeen: 1634833121434,
-                    handled: false,
-                    type: 'OpError',
-                  },
-                  {
-                    name: 'write tcp 10.36.0.21:3000->10.36.0.88:33926: write: broken pipe',
-                    occurrences: 2,
-                    culprit: 'apiHandlers.getOrders',
-                    groupId: '94f4ca8ec8c02e5318cf03f46ae4c1f3',
-                    lastSeen: 1634833121434,
-                    handled: false,
-                    type: 'OpError',
-                  },
-                ],
-                maxCountExceeded: false,
-              };
+              return { errorGroups, maxCountExceeded: false };
             return { errorGroups: [], maxCountExceeded: false };
           },
         },
@@ -166,19 +117,11 @@ export const Example: StoryObj<Args> = {
 
   decorators: [
     (StoryComponent) => {
-      mockApmApiCallResponse(
-        'GET /internal/apm/services/{serviceName}/errors/groups/main_statistics',
-        () => ({
-          errorGroups,
-          maxCountExceeded: false,
-        })
-      );
-
-      const now = Date.now();
+      const BASE_TS = 1634833121434;
       const makeTimeseries = (baseValue: number) =>
         Array.from({ length: 20 }, (_, i) => ({
-          x: now - (20 - i) * 60000,
-          y: baseValue * (0.8 + Math.random() * 0.4),
+          x: BASE_TS - (20 - i) * 60000,
+          y: baseValue * (0.8 + 0.4 * Math.sin(i / 3)),
         }));
 
       const currentPeriod: Record<string, any> = {};
@@ -211,14 +154,6 @@ export const EmptyState: StoryObj<Args> = {
 
   decorators: [
     (StoryComponent) => {
-      mockApmApiCallResponse(
-        'GET /internal/apm/services/{serviceName}/errors/groups/main_statistics',
-        () => ({
-          errorGroups: [],
-          maxCountExceeded: false,
-        })
-      );
-
       mockApmApiCallResponse(
         'POST /internal/apm/services/{serviceName}/errors/groups/detailed_statistics',
         () => ({

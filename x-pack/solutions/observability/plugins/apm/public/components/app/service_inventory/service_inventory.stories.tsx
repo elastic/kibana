@@ -99,6 +99,7 @@ Example.parameters = {
     core: {
       http: {
         get: async (endpoint: string) => {
+          if (endpoint === '/internal/apm/time_range_metadata') return TIME_RANGE_METADATA_DEFAULTS;
           if (endpoint === '/internal/apm/services') return { items: [] };
           if (endpoint === '/internal/apm/sorted_and_filtered_services') return { services: [] };
           return {};
@@ -222,19 +223,11 @@ AllFeatures.parameters = {
 };
 
 AllFeatures.decorators = [
-  (StoryComponent) => {
-    const anomalyCtx = {
-      anomalyDetectionJobsData: { jobs: [], hasLegacyJobs: false },
-      anomalyDetectionJobsStatus: FETCH_STATUS.SUCCESS,
-      anomalyDetectionJobsRefetch: () => {},
-      anomalyDetectionSetupState: AnomalyDetectionSetupState.NoJobs,
-    };
-    return (
-      <AnomalyDetectionJobsContext.Provider value={anomalyCtx}>
-        <StoryComponent />
-      </AnomalyDetectionJobsContext.Provider>
-    );
-  },
+  (StoryComponent) => (
+    <AnomalyDetectionJobsContext.Provider value={anomalyDetectionJobsContextValue}>
+      <StoryComponent />
+    </AnomalyDetectionJobsContext.Provider>
+  ),
 ];
 
 // ── Synthtrace-generated story ─────────────────────────────────────────────────
