@@ -6,6 +6,7 @@
  */
 
 import React, { memo, useState, useCallback, useEffect } from 'react';
+import { EuiComboBox, EuiFormRow, EuiSpacer } from '@elastic/eui';
 
 import type {
   FieldConfig,
@@ -22,12 +23,15 @@ import { i18n } from '@kbn/i18n';
 import { isHttpFetchError } from '@kbn/core-http-browser';
 import { toSlugIdentifier } from '@kbn/std';
 import { isValidId } from '@kbn/human-readable-id';
+import type { ConnectorSpecWireResponse } from '@kbn/alerts-ui-shared/src/common/apis/fetch_connector_spec';
 import { useKibana } from '../../../common/lib/kibana';
 import { checkConnectorIdAvailability } from '../../lib/action_connector_api';
 
 interface ConnectorFormData {
   name: string;
   id: string;
+  actionTypeId?: string;
+  allowedSubActions?: string[];
 }
 
 interface ConnectorFormFieldsProps {
@@ -197,8 +201,48 @@ const ConnectorFormFieldsGlobalComponent: React.FC<ConnectorFormFieldsProps> = (
 }) => {
   const { http } = useKibana().services;
   const { setFieldValue } = useFormContext();
-  const [{ name }] = useFormData<ConnectorFormData>({ watch: ['name', 'id'] });
+  const [{ name, actionTypeId, allowedSubActions }] = useFormData<ConnectorFormData>({
+    watch: ['name', 'id', 'actionTypeId', 'allowedSubActions'],
+  });
   const [usingCustomIdentifier, setUsingCustomIdentifier] = useState(false);
+  const [toolSubActions, setToolSubActions] = useState<string[]>([]);
+
+  useEffect(() => {
+    if (!actionTypeId) {
+      setToolSubActions([]);
+      return;
+    }
+    let cancelled = false;
+    http
+      .get<ConnectorSpecWireResponse>(
+        `/internal/actions/connector_types/${encodeURIComponent(actionTypeId)}/spec`
+      )
+      .then((spec) => {
+        if (!cancelled) setToolSubActions(spec.tool_sub_actions ?? []);
+      })
+      .catch(() => {
+        if (!cancelled) setToolSubActions([]);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [actionTypeId, http]);
+
+  const allSubActionOptions = toolSubActions.map((subActionName) => ({ label: subActionName }));
+  const selectedSubActionOptions = (allowedSubActions ?? toolSubActions).map((subActionName) => ({
+    label: subActionName,
+  }));
+
+  const handleSubActionsChange = useCallback(
+    (selected: Array<{ label: string }>) => {
+      const selectedNames = selected.map(({ label }) => label);
+      const allSelected =
+        selectedNames.length === toolSubActions.length &&
+        toolSubActions.every((s) => selectedNames.includes(s));
+      setFieldValue('allowedSubActions', allSelected ? undefined : selectedNames);
+    },
+    [toolSubActions, setFieldValue]
+  );
 
   useEffect(() => {
     if (!isEdit && !usingCustomIdentifier && name) {
@@ -245,6 +289,33 @@ const ConnectorFormFieldsGlobalComponent: React.FC<ConnectorFormFieldsProps> = (
           },
         }}
       />
+      {toolSubActions.length > 0 && (
+        <>
+          <EuiSpacer size="m" />
+          <EuiFormRow
+            label={i18n.translate(
+              'xpack.triggersActionsUI.sections.actionConnectorForm.allowedSubActionsLabel',
+              { defaultMessage: 'Allowed agent sub-actions' }
+            )}
+            helpText={i18n.translate(
+              'xpack.triggersActionsUI.sections.actionConnectorForm.allowedSubActionsHelpText',
+              {
+                defaultMessage:
+                  'Restrict which sub-actions agents can call on this connector. Leave all selected for no restrictions.',
+              }
+            )}
+            fullWidth
+          >
+            <EuiComboBox
+              options={allSubActionOptions}
+              selectedOptions={selectedSubActionOptions}
+              onChange={handleSubActionsChange}
+              fullWidth
+              data-test-subj="allowedSubActionsInput"
+            />
+          </EuiFormRow>
+        </>
+      )}
     </>
   );
 };

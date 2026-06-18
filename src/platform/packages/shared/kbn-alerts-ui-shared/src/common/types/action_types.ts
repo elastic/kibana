@@ -55,6 +55,7 @@ export interface ActionConnectorProps<Config, Secrets> {
   isConnectorTypeDeprecated: boolean;
   source?: ActionTypeSource;
   authMode?: 'shared' | 'per-user';
+  allowedSubActions?: string[];
   userAuthStatus?: ConnectorUserAuthStatus;
 }
 
@@ -96,7 +97,12 @@ export type ConnectorFormSchema<
   UserConfiguredActionConnector<Config, Secrets>,
   'actionTypeId' | 'isDeprecated' | 'config' | 'secrets'
 > &
-  Partial<Pick<UserConfiguredActionConnector<Config, Secrets>, 'id' | 'name' | 'authMode'>>;
+  Partial<
+    Pick<
+      UserConfiguredActionConnector<Config, Secrets>,
+      'id' | 'name' | 'authMode' | 'allowedSubActions'
+    >
+  >;
 
 export type InternalConnectorForm = ConnectorFormSchema & {
   __internal__?: {

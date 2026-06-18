@@ -169,6 +169,9 @@ export async function update({ context, id, action }: ConnectorUpdateParams): Pr
           isMissingSecrets: false,
           config: configForSave as SavedObjectAttributes,
           secrets: validatedActionTypeSecrets as SavedObjectAttributes,
+          ...(action.allowedSubActions !== undefined
+            ? { allowedSubActions: action.allowedSubActions }
+            : {}),
         },
         omitBy(
           {
@@ -232,5 +235,8 @@ export async function update({ context, id, action }: ConnectorUpdateParams): Pr
     isDeprecated: isConnectorDeprecated(result.attributes),
     isConnectorTypeDeprecated: context.actionTypeRegistry.isDeprecated(actionTypeId),
     authMode: resolvedAuthMode,
+    ...(result.attributes.allowedSubActions !== undefined
+      ? { allowedSubActions: result.attributes.allowedSubActions as string[] }
+      : {}),
   };
 }

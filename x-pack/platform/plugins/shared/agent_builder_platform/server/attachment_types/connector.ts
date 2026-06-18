@@ -46,11 +46,15 @@ export const createConnectorAttachmentType = (): AttachmentTypeDefinition<
         connector_id: connectorId,
         connector_name: connectorName,
         connector_type: connectorType,
+        allowed_sub_actions: allowedSubActions,
       } = attachment.data;
 
       const spec = getConnectorSpec(connectorType);
       const subActionEntries = spec
-        ? Object.entries(spec.actions).filter(([, action]) => action.isTool)
+        ? Object.entries(spec.actions).filter(
+            ([name, action]) =>
+              action.isTool && (allowedSubActions === undefined || allowedSubActions.includes(name))
+          )
         : [];
 
       return {

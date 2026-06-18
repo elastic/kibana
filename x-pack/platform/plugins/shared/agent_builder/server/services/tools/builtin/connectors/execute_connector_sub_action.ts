@@ -86,9 +86,11 @@ export const createExecuteConnectorSubActionTool = ({
 
     // Resolve the connector type from the connector ID
     let connectorType: string;
+    let instanceAllowedSubActions: string[] | undefined;
     try {
       const connector = await actionsClient.get({ id: connectorId });
       connectorType = connector.actionTypeId;
+      instanceAllowedSubActions = connector.allowedSubActions;
     } catch (error) {
       return {
         results: [
@@ -124,6 +126,20 @@ export const createExecuteConnectorSubActionTool = ({
               `Sub-action '${subAction}' is not available as a tool on connector type '${connectorType}'. ` +
               'Read the connector attachment to find the correct sub-action names.',
             metadata: { connectorId, connectorType, subAction },
+          }),
+        ],
+      };
+    }
+
+    // Enforce per-instance allowed sub-actions configured on the connector itself
+    if (instanceAllowedSubActions !== undefined && !instanceAllowedSubActions.includes(subAction)) {
+      return {
+        results: [
+          createErrorResult({
+            message:
+              `Sub-action '${subAction}' is not permitted on connector '${connectorId}'. ` +
+              `Allowed sub-actions: ${instanceAllowedSubActions.join(', ')}.`,
+            metadata: { connectorId, subAction, allowedSubActions: instanceAllowedSubActions },
           }),
         ],
       };

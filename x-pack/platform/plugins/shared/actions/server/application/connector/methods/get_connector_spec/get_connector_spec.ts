@@ -48,9 +48,13 @@ export async function getConnectorSpecAsJsonSchema({
       isEarsEnabled,
       isEarsExperimentalEnabled,
     });
+    const toolSubActions = Object.entries(spec.actions)
+      .filter(([, action]) => action.isTool)
+      .map(([name]) => name);
     return {
       metadata: serialized.metadata,
       schema: serialized.schema,
+      ...(toolSubActions.length > 0 ? { toolSubActions } : {}),
     };
   } catch (error) {
     throw new Error(

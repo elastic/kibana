@@ -11,6 +11,7 @@ import type { GetConnectorSpecResponseV1 } from '../../../../../../common/routes
 export interface GetConnectorSpecServiceResult {
   metadata: ConnectorMetadata;
   schema: Record<string, unknown>;
+  toolSubActions?: string[];
 }
 
 export const transformGetConnectorSpecResponse = (
@@ -29,4 +30,5 @@ export const transformGetConnectorSpecResponse = (
       : {}),
   },
   schema: spec.schema,
+  ...(spec.toolSubActions !== undefined ? { tool_sub_actions: spec.toolSubActions } : {}),
 });

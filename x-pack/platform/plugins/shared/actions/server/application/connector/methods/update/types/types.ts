@@ -12,6 +12,7 @@ export interface ConnectorUpdate {
   name: string;
   config: SavedObjectAttributes;
   secrets: SavedObjectAttributes;
+  allowedSubActions?: string[];
 }
 
 export interface ConnectorUpdateParams {

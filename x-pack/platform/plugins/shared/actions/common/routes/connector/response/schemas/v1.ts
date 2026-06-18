@@ -50,6 +50,14 @@ export const connectorResponseSchema = schema.object(
         },
       })
     ),
+    allowed_sub_actions: schema.maybe(
+      schema.arrayOf(schema.string(), {
+        meta: {
+          description:
+            'Optional list of sub-actions the connector is permitted to expose as agent tools. When absent, all sub-actions marked isTool in the connector spec are available.',
+        },
+      })
+    ),
   },
   { meta: { id: 'connector_response' } }
 );
@@ -255,6 +263,14 @@ export const connectorAuthStatusResponseSchema = schema.recordOf(
 );
 
 export const getConnectorSpecResponseBodySchema = schema.object({
+  tool_sub_actions: schema.maybe(
+    schema.arrayOf(schema.string(), {
+      meta: {
+        description:
+          'Sub-action names exposed as agent tools by this connector type. Absent when the connector type has no tool sub-actions.',
+      },
+    })
+  ),
   metadata: schema.object(
     {
       id: schema.string({

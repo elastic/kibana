@@ -13,6 +13,7 @@ export interface ConnectorCreate {
   name: string;
   config: SavedObjectAttributes;
   secrets: SavedObjectAttributes;
+  allowedSubActions?: string[];
 }
 
 export interface ConnectorCreateParams {

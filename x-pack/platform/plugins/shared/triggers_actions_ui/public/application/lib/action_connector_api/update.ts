@@ -23,6 +23,7 @@ const rewriteBodyRes: RewriteRequestCase<
   is_system_action: isSystemAction,
   is_connector_type_deprecated: isConnectorTypeDeprecated,
   auth_mode: authMode,
+  allowed_sub_actions: allowedSubActions,
   ...res
 }) => ({
   ...res,
@@ -33,6 +34,7 @@ const rewriteBodyRes: RewriteRequestCase<
   isSystemAction,
   isConnectorTypeDeprecated,
   ...(authMode !== undefined ? { authMode } : {}),
+  ...(allowedSubActions !== undefined ? { allowedSubActions } : {}),
 });
 
 export async function updateActionConnector({
@@ -41,7 +43,7 @@ export async function updateActionConnector({
   id,
 }: {
   http: HttpSetup;
-  connector: Pick<ActionConnectorWithoutId, 'name' | 'config' | 'secrets'>;
+  connector: Pick<ActionConnectorWithoutId, 'name' | 'config' | 'secrets' | 'allowedSubActions'>;
   id: string;
 }): Promise<ActionConnector> {
   const res = await http.put<Parameters<typeof rewriteBodyRes>[0]>(
@@ -51,6 +53,9 @@ export async function updateActionConnector({
         name: connector.name,
         config: connector.config,
         secrets: connector.secrets,
+        ...(connector.allowedSubActions !== undefined
+          ? { allowed_sub_actions: connector.allowedSubActions }
+          : {}),
       }),
     }
   );

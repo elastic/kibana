@@ -14,10 +14,14 @@ import type {
 } from '../../../types';
 
 const rewriteBodyRequest: RewriteResponseCase<
-  Pick<ActionConnectorWithoutId, 'actionTypeId' | 'name' | 'config' | 'secrets'>
-> = ({ actionTypeId, ...res }) => ({
+  Pick<
+    ActionConnectorWithoutId,
+    'actionTypeId' | 'name' | 'config' | 'secrets' | 'allowedSubActions'
+  >
+> = ({ actionTypeId, allowedSubActions, ...res }) => ({
   ...res,
   connector_type_id: actionTypeId,
+  ...(allowedSubActions !== undefined ? { allowed_sub_actions: allowedSubActions } : {}),
 });
 
 const rewriteBodyRes: RewriteRequestCase<
@@ -30,6 +34,7 @@ const rewriteBodyRes: RewriteRequestCase<
   is_system_action: isSystemAction,
   is_connector_type_deprecated: isConnectorTypeDeprecated,
   auth_mode: authMode,
+  allowed_sub_actions: allowedSubActions,
   ...res
 }) => ({
   ...res,
@@ -40,6 +45,7 @@ const rewriteBodyRes: RewriteRequestCase<
   isSystemAction,
   isConnectorTypeDeprecated,
   ...(authMode !== undefined ? { authMode } : {}),
+  ...(allowedSubActions !== undefined ? { allowedSubActions } : {}),
 });
 
 export async function createActionConnector({
@@ -48,7 +54,10 @@ export async function createActionConnector({
   id,
 }: {
   http: HttpSetup;
-  connector: Pick<ActionConnectorWithoutId, 'actionTypeId' | 'name' | 'config' | 'secrets'>;
+  connector: Pick<
+    ActionConnectorWithoutId,
+    'actionTypeId' | 'name' | 'config' | 'secrets' | 'allowedSubActions'
+  >;
   id?: string;
 }): Promise<ActionConnector> {
   const path = id
