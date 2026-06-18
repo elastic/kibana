@@ -91,6 +91,34 @@ describe('computeOldValues', () => {
     );
     expect(patch).toEqual({});
   });
+
+  it('emits null when a field transitions from undefined to a value (e.g. note added)', () => {
+    const patch = computeOldValues(
+      asRule({ name: 'a', note: 'investigation guide' }),
+      asRule({ name: 'a', note: undefined })
+    );
+    expect(patch).toEqual({ note: null });
+  });
+
+  it('emits the previous value when a field transitions from a value to undefined (e.g. note cleared)', () => {
+    const patch = computeOldValues(
+      asRule({ name: 'a', note: undefined }),
+      asRule({ name: 'a', note: 'old guide' })
+    );
+    expect(patch).toEqual({ note: 'old guide' });
+  });
+
+  it('treats keys with undefined values identically to absent keys', () => {
+    const patchFromUndefined = computeOldValues(
+      asRule({ name: 'a', note: 'new' }),
+      asRule({ name: 'a', note: undefined })
+    );
+    const patchFromAbsent = computeOldValues(
+      asRule({ name: 'a', note: 'new' }),
+      asRule({ name: 'a' })
+    );
+    expect(patchFromUndefined).toEqual(patchFromAbsent);
+  });
 });
 
 const asRule = (overrides: Record<string, unknown>): RuleResponse =>

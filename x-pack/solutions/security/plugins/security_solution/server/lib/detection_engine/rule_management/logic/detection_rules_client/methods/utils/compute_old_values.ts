@@ -23,17 +23,19 @@ export function computeOldValues(
   }
   const patch = mergePatchFromTo(current, previous);
 
-  if (patch === undefined) {
+  if (patch === NO_CHANGE) {
     return {};
   }
 
   return patch as Record<string, unknown>;
 }
 
+const NO_CHANGE = Symbol('NO_CHANGE');
+
 /**
  * Compute an RFC 7396 JSON Merge Patch describing how to transform `current`
  * back to `previous`. The result contains only the fields whose values differ
- * between the two objects. Returns `undefined` when the two are deep-equal.
+ * between the two objects. Returns `NO_CHANGE` sentinel when the two are deep-equal.
  *
  * Semantics (per RFC 7396):
  *  - Keys present in both with equal values are omitted.
@@ -44,10 +46,16 @@ export function computeOldValues(
  *    an empty patch, the key is omitted.
  *  - Arrays and primitives are compared as whole values; if they differ, the
  *    `previous` value is emitted under the key.
+ *
+ * `undefined` is treated as "absent": a key with value `undefined` is
+ * equivalent to the key being missing. This handles optional rule fields like
+ * `note` that are always emitted in the parsed object but may carry `undefined`
+ * when not set — without this treatment, a transition from `undefined` → value
+ * would be invisible to the diff.
  */
-function mergePatchFromTo(current: unknown, previous: unknown): unknown | undefined {
+const mergePatchFromTo = (current: unknown, previous: unknown): unknown | typeof NO_CHANGE => {
   if (Object.is(current, previous)) {
-    return undefined;
+    return NO_CHANGE;
   }
 
   if (isPlainObject(current) && isPlainObject(previous)) {
@@ -57,24 +65,27 @@ function mergePatchFromTo(current: unknown, previous: unknown): unknown | undefi
     const keys = new Set<string>([...Object.keys(currentObject), ...Object.keys(previousObject)]);
 
     for (const key of keys) {
-      const inCurrent = key in currentObject;
-      const inPrevious = key in previousObject;
+      // Treat `undefined` values as absent so optional fields that are always
+      // emitted by the serialiser (e.g. `note: undefined`) compare correctly
+      // against snapshots where the field was genuinely missing.
+      const inCurrent = key in currentObject && currentObject[key] !== undefined;
+      const inPrevious = key in previousObject && previousObject[key] !== undefined;
 
       if (inCurrent && !inPrevious) {
         patch[key] = null;
       } else if (!inCurrent && inPrevious) {
         patch[key] = previousObject[key];
-      } else {
+      } else if (inCurrent && inPrevious) {
         const sub = mergePatchFromTo(currentObject[key], previousObject[key]);
 
-        if (sub !== undefined) {
+        if (sub !== NO_CHANGE) {
           patch[key] = sub;
         }
       }
     }
 
     if (Object.keys(patch).length === 0) {
-      return undefined;
+      return NO_CHANGE;
     }
 
     return patch;
@@ -82,11 +93,11 @@ function mergePatchFromTo(current: unknown, previous: unknown): unknown | undefi
 
   if (Array.isArray(current) && Array.isArray(previous)) {
     if (isEqual(current, previous)) {
-      return undefined;
+      return NO_CHANGE;
     }
 
     return previous;
   }
 
   return previous;
-}
+};
