@@ -104,8 +104,6 @@ apiTest.describe('List action policies API', { tag: '@local-stateful-classic' },
       const expectedShape = {
         description: 'Scout action policy',
         destinations: [{ type: 'workflow', id: 'scout-workflow-id' }],
-        type: 'global',
-        ruleId: null,
         enabled: true,
         matcher: null,
         groupBy: null,
