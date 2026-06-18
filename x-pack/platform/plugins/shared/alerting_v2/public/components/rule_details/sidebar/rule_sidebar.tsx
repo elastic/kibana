@@ -47,7 +47,7 @@ export const RuleSidebar: React.FC = () => {
 
   return (
     <div>
-      <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" responsive={false}>
+      <EuiFlexGroup direction="column" gutterSize="s" responsive={false}>
         <EuiFlexItem grow={false}>
           <EuiTitle size="s">
             <h2>
