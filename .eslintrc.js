@@ -401,11 +401,6 @@ const RESTRICTED_IMPORTS = [
     message:
       'Do not introduce new axios usage. Use the native `fetch` API instead (available in Node.js 22 and modern browsers). Existing consumers are being migrated incrementally; the allowlist in AXIOS_LEGACY_CONSUMERS will shrink over time.',
   },
-  {
-    name: 'js-yaml',
-    message:
-      "Do not introduce new js-yaml usage. Use the `yaml` package instead (e.g. `import yaml from 'yaml'`). Existing consumers are being migrated incrementally; the allowlist in JS_YAML_LEGACY_CONSUMERS will shrink over time.",
-  },
 ];
 
 /**
@@ -473,66 +468,6 @@ const AXIOS_LEGACY_CONSUMERS = [
   'x-pack/solutions/security/plugins/security_solution/server/integration_tests/**/*.{js,mjs,ts,tsx}',
   'x-pack/solutions/security/plugins/security_solution/server/lib/telemetry/**/*.{js,mjs,ts,tsx}',
   'x-pack/solutions/security/test/security_solution_api_integration/config/services/**/*.{js,mjs,ts,tsx}',
-  'x-pack/solutions/security/test/security_solution_cypress/cypress/support/**/*.{js,mjs,ts,tsx}',
-];
-
-/**
- * Files that already import js-yaml. New js-yaml imports must not be added here;
- * this list is expected to shrink as consumers migrate to the `yaml` package.
- * Globs are scoped to existing feature boundaries to keep the leak surface small.
- */
-const JS_YAML_LEGACY_CONSUMERS = [
-  '.buildkite/**/*.{js,mjs,ts,tsx}',
-  'oas_docs/scripts/**/*.{js,mjs,ts,tsx}',
-  'packages/kbn-api-contracts/**/*.{js,mjs,ts,tsx}',
-  'packages/kbn-docs-utils/**/*.{js,mjs,ts,tsx}',
-  'packages/kbn-moon/**/*.{js,mjs,ts,tsx}',
-  'packages/kbn-optimizer/**/*.{js,mjs,ts,tsx}',
-  'packages/kbn-rspack-optimizer/**/*.{js,mjs,ts,tsx}',
-  'scripts/**/*.{js,mjs,ts,tsx}',
-  'src/cli/**/*.{js,mjs,ts,tsx}',
-  'src/dev/**/*.{js,mjs,ts,tsx}',
-  'src/platform/packages/private/kbn-apm-config-loader/**/*.{js,mjs,ts,tsx}',
-  'src/platform/packages/private/kbn-gen-ai-functional-testing/**/*.{js,mjs,ts,tsx}',
-  'src/platform/packages/private/kbn-validate-oas/**/*.{js,mjs,ts,tsx}',
-  'src/platform/packages/shared/kbn-config/src/raw/**/*.{js,mjs,ts,tsx}',
-  'src/platform/packages/shared/kbn-connector-cli/**/*.{js,mjs,ts,tsx}',
-  'src/platform/packages/shared/kbn-edot-collector/**/*.{js,mjs,ts,tsx}',
-  'src/platform/packages/shared/kbn-es/**/*.{js,mjs,ts,tsx}',
-  'src/platform/packages/shared/kbn-openapi-bundler/**/*.{js,mjs,ts,tsx}',
-  'src/platform/packages/shared/kbn-otel-demo/**/*.{js,mjs,ts,tsx}',
-  'src/platform/packages/shared/kbn-otel-semantic-conventions/**/*.{js,mjs,ts,tsx}',
-  'src/platform/packages/shared/kbn-scout/**/*.{js,mjs,ts,tsx}',
-  'src/platform/packages/shared/kbn-synthtrace/src/cli/**/*.{js,mjs,ts,tsx}',
-  'src/platform/packages/shared/kbn-test/src/functional_test_runner/**/*.{js,mjs,ts,tsx}',
-  'src/platform/plugins/private/interactive_setup/server/**/*.{js,mjs,ts,tsx}',
-  'src/platform/plugins/shared/telemetry/server/collectors/**/*.{js,mjs,ts,tsx}',
-  'x-pack/packages/kbn-synthetics-private-location/**/*.{js,mjs,ts,tsx}',
-  'x-pack/platform/packages/shared/kbn-data-forge/**/*.{js,mjs,ts,tsx}',
-  'x-pack/platform/packages/shared/kbn-evals/**/*.{js,mjs,ts,tsx}',
-  'x-pack/platform/packages/shared/kbn-inference-cli/**/*.{js,mjs,ts,tsx}',
-  'x-pack/platform/packages/shared/response-ops/alerting-v2-rule-form/**/*.{js,mjs,ts,tsx}',
-  'x-pack/platform/plugins/shared/agent_builder/server/services/**/*.{js,mjs,ts,tsx}',
-  'x-pack/platform/plugins/shared/automatic_import/**/*.{js,mjs,ts,tsx}',
-  'x-pack/platform/plugins/shared/automatic_import_v2/**/*.{js,mjs,ts,tsx}',
-  'x-pack/platform/plugins/shared/cases/**/*.{js,mjs,ts,tsx}',
-  'x-pack/platform/plugins/shared/fleet/**/*.{js,mjs,ts,tsx}',
-  'x-pack/platform/plugins/shared/inference/scripts/**/*.{js,mjs,ts,tsx}',
-  'x-pack/platform/plugins/shared/osquery/cypress/**/*.{js,mjs,ts,tsx}',
-  'x-pack/platform/plugins/shared/rule_registry/scripts/**/*.{js,mjs,ts,tsx}',
-  'x-pack/platform/plugins/shared/streams/scripts/**/*.{js,mjs,ts,tsx}',
-  'x-pack/platform/test/cases_api_integration/**/*.{js,mjs,ts,tsx}',
-  'x-pack/solutions/observability/packages/synthetics-test-data/**/*.{js,mjs,ts,tsx}',
-  'x-pack/solutions/observability/plugins/apm/scripts/**/*.{js,mjs,ts,tsx}',
-  'x-pack/solutions/observability/plugins/apm/server/routes/fleet/**/*.{js,mjs,ts,tsx}',
-  'x-pack/solutions/observability/plugins/observability_ai_assistant_app/scripts/**/*.{js,mjs,ts,tsx}',
-  'x-pack/solutions/observability/plugins/observability_onboarding/server/routes/flow/**/*.{js,mjs,ts,tsx}',
-  'x-pack/solutions/observability/plugins/synthetics/public/**/*.{js,mjs,ts,tsx}',
-  'x-pack/solutions/security/packages/test-api-clients/**/*.{js,mjs,ts,tsx}',
-  'x-pack/solutions/security/plugins/cloud_defend/**/*.{js,mjs,ts,tsx}',
-  'x-pack/solutions/security/plugins/elastic_assistant/**/*.{js,mjs,ts,tsx}',
-  'x-pack/solutions/security/plugins/security_solution/scripts/**/*.{js,mjs,ts,tsx}',
-  'x-pack/solutions/security/plugins/security_solution/server/assistant/**/*.{js,mjs,ts,tsx}',
   'x-pack/solutions/security/test/security_solution_cypress/cypress/support/**/*.{js,mjs,ts,tsx}',
 ];
 
@@ -3080,27 +3015,16 @@ module.exports = {
       // as consumers migrate to the native `fetch` API. Placed last so it wins
       // over any earlier override that re-applies RESTRICTED_IMPORTS (e.g. the
       // security_solution and workflows_management blocks). The trade-off: the
-      // 35 allowlisted files that overlap with those blocks lose their
-      // `*legacy*` pattern check; verified that none of them currently import
-      // any path matching `*legacy*`.
+      // allowlisted files that overlap with those blocks lose their `*legacy*`
+      // pattern check; verified that none of them currently import any path
+      // matching `*legacy*`. The js-yaml freeze is handled separately via
+      // @kbn/eslint/module_migration in packages/kbn-eslint-config/.eslintrc.js
+      // so it does not interact with this override.
       files: AXIOS_LEGACY_CONSUMERS,
       rules: {
         'no-restricted-imports': [
           'error',
           ...RESTRICTED_IMPORTS.filter(({ name }) => name !== 'axios'),
-        ],
-      },
-    },
-    {
-      // Allow js-yaml in files that already use it. New js-yaml imports are blocked
-      // globally by RESTRICTED_IMPORTS; this allowlist should only ever shrink
-      // as consumers migrate to the `yaml` package. Placed last so it wins
-      // over any earlier override that re-applies RESTRICTED_IMPORTS.
-      files: JS_YAML_LEGACY_CONSUMERS,
-      rules: {
-        'no-restricted-imports': [
-          'error',
-          ...RESTRICTED_IMPORTS.filter(({ name }) => name !== 'js-yaml'),
         ],
       },
     },
