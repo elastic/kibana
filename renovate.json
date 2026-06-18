@@ -2215,6 +2215,15 @@
       "enabled": true
     },
     {
+      "groupName": "mongodb",
+      "matchDepNames": ["mongodb", "@types/mongodb"],
+      "reviewers": ["team:response-ops"],
+      "addLabels": ["Team:ResponseOps", "release_note:skip", "backport:all-open", "effort:medium", "upgrade-risk:medium"],
+      "matchBaseBranches": ["main"],
+      "minimumReleaseAge": "7 days",
+      "enabled": true
+    },
+    {
       "groupName": "antlr4",
       "matchDepNames": ["antlr4"],
       "reviewers": ["team:appex-sharedux", "team:kibana-esql"],

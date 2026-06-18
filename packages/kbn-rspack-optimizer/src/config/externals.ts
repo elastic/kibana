@@ -22,5 +22,10 @@ export function getExternals(): Record<string, string> {
 
     // Node.js built-ins (rspack-specific, for browser compatibility)
     'node:crypto': 'commonjs crypto',
+
+    // mongodb driver uses Node.js TCP/TLS — never bundle for browser.
+    // Handlers that import it via dynamic import('mongodb') will only
+    // run server-side; this external prevents build-time resolution errors.
+    mongodb: 'commonjs mongodb',
   };
 }
