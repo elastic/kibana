@@ -24,7 +24,7 @@ import type {
   PackagePolicyClient,
 } from '@kbn/fleet-plugin/server';
 import type { AgentlessPolicy, PackagePolicy, PackagePolicyInput } from '@kbn/fleet-plugin/common';
-import { createPackagePolicyMock } from '@kbn/fleet-plugin/common/mocks';
+import { createAgentlessPolicyMock, createPackagePolicyMock } from '@kbn/fleet-plugin/common/mocks';
 
 jest.mock('@kbn/fleet-plugin/server/services/epm/packages', () => {
   const mockedGetPackageInfo = ({ pkgName }: { pkgName: string }) => {
@@ -352,19 +352,11 @@ describe('AgentlessConnectorsInfraService', () => {
     });
   });
   describe('deployConnector', () => {
-    let agentPolicy: AgentlessPolicy;
+    let agentlessPolicy: AgentlessPolicy;
     let sharepointOnlinePackagePolicy: PackagePolicy;
 
     beforeAll(() => {
-      agentPolicy = {
-        id: 'mock-agentless-policy-id',
-        name: 'mock-agentless-policy',
-        namespace: 'default',
-        created_at: new Date().toISOString(),
-        created_by: 'system',
-        updated_at: new Date().toISOString(),
-        updated_by: 'system',
-      };
+      agentlessPolicy = createAgentlessPolicyMock();
 
       sharepointOnlinePackagePolicy = createPackagePolicyMock();
       sharepointOnlinePackagePolicy.id = 'this-is-package-policy-id';
@@ -475,10 +467,10 @@ describe('AgentlessConnectorsInfraService', () => {
         is_deleted: false,
       };
 
-      agentlessPoliciesService.createAgentlessPolicy.mockResolvedValue(agentPolicy);
+      agentlessPoliciesService.createAgentlessPolicy.mockResolvedValue(agentlessPolicy);
 
       const result = await service.deployConnector(connector);
-      expect(result).toBe(agentPolicy);
+      expect(result).toBe(agentlessPolicy);
     });
 
     test('call agentlessPoliciesService.createAgentlessPolicy with correct params', async () => {
@@ -530,7 +522,7 @@ describe('AgentlessConnectorsInfraService', () => {
           is_deleted: false,
         };
 
-        const fakeAgentPolicy = { id: 'agent-policy-006' } as AgentPolicy;
+        const fakeAgentPolicy = { id: 'agent-policy-006' } as AgentlessPolicy;
         agentlessPoliciesService.createAgentlessPolicy.mockResolvedValue(fakeAgentPolicy);
 
         await service.deployConnector(testConnector);
