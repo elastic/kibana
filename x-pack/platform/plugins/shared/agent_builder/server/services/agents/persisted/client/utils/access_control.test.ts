@@ -68,6 +68,33 @@ describe('hasReadAccess', () => {
     expect(hasReadAccess({ source, user: nonOwnerUser, isAdmin: false })).toBe(true);
   });
 
+  it('returns false for non-owner when legacy visibility is private', () => {
+    const source = {
+      ...baseSource,
+      visibility: AgentAccessControlScope.Private,
+      created_by_name: 'owner',
+    };
+    expect(hasReadAccess({ source, user: nonOwnerUser, isAdmin: false })).toBe(false);
+  });
+
+  it('returns true for a user granted access through legacy acl entries', () => {
+    const source = {
+      ...baseSource,
+      visibility: AgentAccessControlScope.Private,
+      acl: {
+        entries: [
+          {
+            type: 'user' as const,
+            name: nonOwnerUser.username,
+            role: AgentAccessControlRole.User,
+          },
+        ],
+      },
+      created_by_name: 'owner',
+    };
+    expect(hasReadAccess({ source, user: nonOwnerUser, isAdmin: false })).toBe(true);
+  });
+
   it('returns true for non-owner when access-control scope is shared', () => {
     const source = {
       ...baseSource,
@@ -111,6 +138,33 @@ describe('hasWriteAccess', () => {
     expect(hasWriteAccess({ source, user: nonOwnerUser, isAdmin: false })).toBe(true);
   });
 
+  it('returns false for non-owner when legacy visibility is shared', () => {
+    const source = {
+      ...baseSource,
+      visibility: AgentAccessControlScope.Shared,
+      created_by_name: 'owner',
+    };
+    expect(hasWriteAccess({ source, user: nonOwnerUser, isAdmin: false })).toBe(false);
+  });
+
+  it('returns true for a user granted edit access through legacy acl entries', () => {
+    const source = {
+      ...baseSource,
+      visibility: AgentAccessControlScope.Private,
+      acl: {
+        entries: [
+          {
+            type: 'user' as const,
+            name: nonOwnerUser.username,
+            role: AgentAccessControlRole.Editor,
+          },
+        ],
+      },
+      created_by_name: 'owner',
+    };
+    expect(hasWriteAccess({ source, user: nonOwnerUser, isAdmin: false })).toBe(true);
+  });
+
   it('returns false for non-owner when access-control scope is shared', () => {
     const source = {
       ...baseSource,
@@ -138,7 +192,16 @@ describe('buildAccessControlReadFilter', () => {
         should: [
           {
             bool: {
+              must: { exists: { field: 'access_control.scope' } },
               must_not: { term: { 'access_control.scope': AgentAccessControlScope.Private } },
+            },
+          },
+          {
+            bool: {
+              must_not: [
+                { exists: { field: 'access_control.scope' } },
+                { term: { visibility: AgentAccessControlScope.Private } },
+              ],
             },
           },
           { term: { created_by_name: 'owner' } },
@@ -146,6 +209,7 @@ describe('buildAccessControlReadFilter', () => {
           {
             nested: {
               path: 'access_control.entries',
+              ignore_unmapped: true,
               query: {
                 bool: {
                   filter: [
@@ -156,6 +220,34 @@ describe('buildAccessControlReadFilter', () => {
               },
             },
           },
+          {
+            bool: {
+              must_not: { exists: { field: 'access_control.scope' } },
+              filter: {
+                nested: {
+                  path: 'acl.entries',
+                  ignore_unmapped: true,
+                  query: {
+                    bool: {
+                      filter: [
+                        { term: { 'acl.entries.type': 'user' } },
+                        { term: { 'acl.entries.name': 'owner' } },
+                      ],
+                    },
+                  },
+                },
+              },
+            },
+          },
+          {
+            bool: {
+              must_not: { exists: { field: 'access_control.scope' } },
+              filter: [
+                { term: { 'acl.entries.type': 'user' } },
+                { term: { 'acl.entries.name': 'owner' } },
+              ],
+            },
+          },
         ],
         minimum_should_match: 1,
       },
@@ -164,14 +256,26 @@ describe('buildAccessControlReadFilter', () => {
 
   it('omits created_by_id clause when user.id is undefined but still adds user-ACL nested clause', () => {
     const filter = buildAccessControlReadFilter({ user: ownerByUsernameOnly });
-    expect(filter.bool.should).toHaveLength(3);
+    expect(filter.bool.should).toHaveLength(6);
     expect(filter.bool.should[0]).toEqual({
-      bool: { must_not: { term: { 'access_control.scope': AgentAccessControlScope.Private } } },
+      bool: {
+        must: { exists: { field: 'access_control.scope' } },
+        must_not: { term: { 'access_control.scope': AgentAccessControlScope.Private } },
+      },
     });
-    expect(filter.bool.should[1]).toEqual({ term: { created_by_name: 'owner' } });
-    expect(filter.bool.should[2]).toEqual({
+    expect(filter.bool.should[1]).toEqual({
+      bool: {
+        must_not: [
+          { exists: { field: 'access_control.scope' } },
+          { term: { visibility: AgentAccessControlScope.Private } },
+        ],
+      },
+    });
+    expect(filter.bool.should[2]).toEqual({ term: { created_by_name: 'owner' } });
+    expect(filter.bool.should[3]).toEqual({
       nested: {
         path: 'access_control.entries',
+        ignore_unmapped: true,
         query: {
           bool: {
             filter: [
@@ -184,11 +288,11 @@ describe('buildAccessControlReadFilter', () => {
     });
   });
 
-  it('only emits user-type nested access_control clauses (V1)', () => {
+  it('only emits user-type access-control clauses (V1)', () => {
     const filter = buildAccessControlReadFilter({ user: ownerUser });
     const types = (filter.bool.should as Array<Record<string, any>>)
       .flatMap((clause) => clause.nested?.query?.bool?.filter ?? [])
-      .map((f) => f.term?.['access_control.entries.type'])
+      .map((f) => f.term?.['access_control.entries.type'] ?? f.term?.['acl.entries.type'])
       .filter(Boolean);
     expect(types).toEqual(['user']);
   });
@@ -243,6 +347,22 @@ describe('validateAccessControlUpdateAccess', () => {
     ).toBe(true);
   });
 
+  it('returns true when access-control scope change is same as legacy visibility', () => {
+    const source = {
+      ...baseSource,
+      visibility: AgentAccessControlScope.Private,
+      created_by_name: 'owner',
+    };
+    expect(
+      validateAccessControlUpdateAccess({
+        source,
+        update: { access_control: { scope: AgentAccessControlScope.Private } },
+        user: nonOwnerUser,
+        isAdmin: false,
+      })
+    ).toBe(true);
+  });
+
   it('returns true for owner changing access-control scope', () => {
     const source = {
       ...baseSource,
@@ -254,6 +374,31 @@ describe('validateAccessControlUpdateAccess', () => {
         source,
         update: { access_control: { scope: AgentAccessControlScope.Private } },
         user: ownerUser,
+        isAdmin: false,
+      })
+    ).toBe(true);
+  });
+
+  it('returns true for a legacy Manager ACL grantee changing access-control scope', () => {
+    const source = {
+      ...baseSource,
+      visibility: AgentAccessControlScope.Private,
+      acl: {
+        entries: [
+          {
+            type: 'user' as const,
+            name: nonOwnerUser.username,
+            role: AgentAccessControlRole.Manager,
+          },
+        ],
+      },
+      created_by_name: 'owner',
+    };
+    expect(
+      validateAccessControlUpdateAccess({
+        source,
+        update: { access_control: { scope: AgentAccessControlScope.Shared } },
+        user: nonOwnerUser,
         isAdmin: false,
       })
     ).toBe(true);
@@ -285,6 +430,22 @@ describe('validateAccessControlUpdateAccess', () => {
       validateAccessControlUpdateAccess({
         source,
         update: { access_control: { scope: AgentAccessControlScope.Private } },
+        user: nonOwnerUser,
+        isAdmin: false,
+      })
+    ).toBe(false);
+  });
+
+  it('returns false for non-owner changing legacy visibility scope without permission', () => {
+    const source = {
+      ...baseSource,
+      visibility: AgentAccessControlScope.Private,
+      created_by_name: 'owner',
+    };
+    expect(
+      validateAccessControlUpdateAccess({
+        source,
+        update: { access_control: { scope: AgentAccessControlScope.Shared } },
         user: nonOwnerUser,
         isAdmin: false,
       })
@@ -436,6 +597,29 @@ describe('redactAccessControlForCaller', () => {
     const result = redactAccessControlForCaller({
       definition,
       source: privateAgentWithAcl,
+      user: aliceUser,
+      isAdmin: false,
+    });
+    expect(result.access_control?.entries).toEqual([aliceEntry, bobEntry]);
+  });
+
+  it('returns the full entries list for a user with Editor or higher via legacy acl', () => {
+    const aliceUser = { username: 'alice' };
+    const definition = {
+      id: 'a',
+      access_control: {
+        scope: AgentAccessControlScope.Private,
+        entries: [aliceEntry, bobEntry],
+      },
+    };
+    const result = redactAccessControlForCaller({
+      definition,
+      source: {
+        ...baseSource,
+        visibility: AgentAccessControlScope.Private,
+        acl: { entries: [aliceEntry, bobEntry] },
+        created_by_name: 'owner',
+      },
       user: aliceUser,
       isAdmin: false,
     });

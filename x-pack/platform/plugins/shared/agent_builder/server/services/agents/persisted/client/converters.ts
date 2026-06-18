@@ -15,6 +15,7 @@ import type { AgentAccessControl, UserIdAndName } from '@kbn/agent-builder-commo
 import type { AgentCreateRequest, AgentUpdateRequest } from '../../../../../common/agents';
 import type { AgentConfigurationProperties, AgentProperties } from './storage';
 import type { PersistedAgentDefinition } from '../types';
+import { normalizeAccessControl } from './utils/access_control';
 
 export type Document = Pick<GetResponse<AgentProperties>, '_id' | '_source'>;
 
@@ -132,16 +133,6 @@ export const updateRequestToEs = ({
   };
 
   return updated;
-};
-
-const normalizeAccessControl = (
-  source: Pick<AgentProperties, 'access_control' | 'visibility' | 'acl'>
-) => {
-  const defaults = getDefaultAgentAccessControl();
-  return {
-    scope: source.access_control?.scope ?? source.visibility ?? defaults.scope,
-    entries: source.access_control?.entries ?? source.acl?.entries ?? defaults.entries,
-  };
 };
 
 export const accessControlUpdateToEs = ({

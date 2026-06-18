@@ -16,7 +16,6 @@ import {
   agentBuilderDefaultAgentId,
   createAgentNotFoundError,
   createBadRequestError,
-  getDefaultAgentAccessControl,
   isAgentNotFoundError,
   type AgentAccessControl,
   type CurrentUser,
@@ -59,6 +58,7 @@ import {
   hasReadAccess,
   hasUseAccess,
   hasWriteAccess,
+  normalizeAccessControl,
   redactAccessControlForCaller,
   validateAccessControlUpdateAccess,
 } from './utils/access_control';
@@ -400,7 +400,7 @@ class AgentClientImpl implements AgentClient {
       user: this.user,
       isAdmin: this.isAdmin,
     });
-    const accessControl = source.access_control ?? getDefaultAgentAccessControl();
+    const accessControl = normalizeAccessControl(source);
     return { can_manage: canManage, access_control: accessControl };
   }
 
@@ -423,7 +423,7 @@ class AgentClientImpl implements AgentClient {
     }
 
     const nextAccessControl: AgentAccessControl = {
-      ...(source.access_control ?? getDefaultAgentAccessControl()),
+      ...normalizeAccessControl(source),
       entries: update.entries,
     };
 

@@ -7,6 +7,7 @@
 
 import {
   AgentAccessControlScope,
+  getDefaultAgentAccessControl,
   type AgentAccessControl,
   type CurrentUser,
   type UserIdAndName,
@@ -19,6 +20,23 @@ import {
 } from '@kbn/agent-builder-common';
 import type { AgentUpdateRequest } from '../../../../../../common/agents';
 import type { AgentProperties } from '../storage';
+
+/**
+ * Resolves access control from persisted agent documents.
+ *
+ * `access_control` is the current field. `visibility` and `acl` are legacy fields, and are only
+ * used when the corresponding current field is missing so migrated documents keep current data as
+ * the source of truth.
+ */
+export const normalizeAccessControl = (
+  source: Pick<AgentProperties, 'access_control' | 'visibility' | 'acl'>
+): AgentAccessControl => {
+  const defaults = getDefaultAgentAccessControl();
+  return {
+    scope: source.access_control?.scope ?? source.visibility ?? defaults.scope,
+    entries: source.access_control?.entries ?? source.acl?.entries ?? defaults.entries,
+  };
+};
 
 const sourceToOwner = (source: AgentProperties): UserIdAndName | undefined =>
   source.created_by_name !== undefined
@@ -35,7 +53,7 @@ export const hasReadAccess = ({
   isAdmin: boolean;
 }): boolean =>
   hasAgentReadAccess({
-    access_control: source.access_control,
+    access_control: normalizeAccessControl(source),
     owner: sourceToOwner(source),
     currentUser: user,
     isAdmin,
@@ -51,7 +69,7 @@ export const hasUseAccess = ({
   isAdmin: boolean;
 }): boolean =>
   hasAgentUseAccess({
-    access_control: source.access_control,
+    access_control: normalizeAccessControl(source),
     owner: sourceToOwner(source),
     currentUser: user,
     isAdmin,
@@ -67,7 +85,7 @@ export const hasWriteAccess = ({
   isAdmin: boolean;
 }): boolean =>
   hasAgentWriteAccess({
-    access_control: source.access_control,
+    access_control: normalizeAccessControl(source),
     owner: sourceToOwner(source),
     currentUser: user,
     isAdmin,
@@ -83,7 +101,7 @@ export const hasDeleteAccess = ({
   isAdmin: boolean;
 }): boolean =>
   canDeleteAgent({
-    access_control: source.access_control,
+    access_control: normalizeAccessControl(source),
     owner: sourceToOwner(source),
     currentUser: user,
     isAdmin,
@@ -100,7 +118,7 @@ export const hasManageAccessControlAccess = ({
 }): boolean =>
   canManageAgentAccessControl({
     agentId: source.id,
-    access_control: source.access_control,
+    access_control: normalizeAccessControl(source),
     owner: sourceToOwner(source),
     currentUser: user,
     isAdmin,
@@ -145,11 +163,21 @@ export const redactAccessControlForCaller = <T extends { access_control?: AgentA
  */
 export const buildReadAccessFilter = ({ user }: { user: CurrentUser }) => {
   const shouldClauses: Array<Record<string, unknown>> = [
+    // Current documents: Public and Shared agents are visible to everyone; Private agents are not.
     {
       bool: {
-        must_not: {
-          term: { 'access_control.scope': AgentAccessControlScope.Private },
-        },
+        must: { exists: { field: 'access_control.scope' } },
+        must_not: { term: { 'access_control.scope': AgentAccessControlScope.Private } },
+      },
+    },
+    // Legacy documents: fall back to `visibility` only when `access_control.scope` is absent.
+    // Missing legacy visibility is treated like Public, matching `normalizeAccessControl`.
+    {
+      bool: {
+        must_not: [
+          { exists: { field: 'access_control.scope' } },
+          { term: { visibility: AgentAccessControlScope.Private } },
+        ],
       },
     },
   ];
@@ -159,9 +187,11 @@ export const buildReadAccessFilter = ({ user }: { user: CurrentUser }) => {
     shouldClauses.push({ term: { created_by_id: user.id } });
   }
 
+  // Current explicit user grants.
   shouldClauses.push({
     nested: {
       path: 'access_control.entries',
+      ignore_unmapped: true,
       query: {
         bool: {
           filter: [
@@ -170,6 +200,40 @@ export const buildReadAccessFilter = ({ user }: { user: CurrentUser }) => {
           ],
         },
       },
+    },
+  });
+
+  // Legacy explicit user grants. The guard keeps stale `acl` data from overriding current
+  // `access_control` on documents that have already been migrated.
+  shouldClauses.push({
+    bool: {
+      must_not: { exists: { field: 'access_control.scope' } },
+      filter: {
+        nested: {
+          path: 'acl.entries',
+          ignore_unmapped: true,
+          query: {
+            bool: {
+              filter: [
+                { term: { 'acl.entries.type': 'user' } },
+                { term: { 'acl.entries.name': user.username } },
+              ],
+            },
+          },
+        },
+      },
+    },
+  });
+
+  // Some legacy indices mapped `acl.entries` as a plain object rather than nested, so keep a
+  // non-nested fallback for those documents too.
+  shouldClauses.push({
+    bool: {
+      must_not: { exists: { field: 'access_control.scope' } },
+      filter: [
+        { term: { 'acl.entries.type': 'user' } },
+        { term: { 'acl.entries.name': user.username } },
+      ],
     },
   });
 
@@ -198,7 +262,8 @@ export const validateAccessControlUpdateAccess = ({
   user: CurrentUser;
   isAdmin: boolean;
 }): boolean => {
-  const currentScope = source.access_control?.scope ?? AgentAccessControlScope.Public;
+  const currentAccessControl = normalizeAccessControl(source);
+  const currentScope = currentAccessControl.scope;
   const nextScope = update.access_control?.scope;
   const isScopeChange = nextScope !== undefined && nextScope !== currentScope;
 
@@ -206,7 +271,7 @@ export const validateAccessControlUpdateAccess = ({
     !isScopeChange ||
     canChangeAgentAccessControlScope({
       agentId: source.id,
-      access_control: source.access_control,
+      access_control: currentAccessControl,
       owner: sourceToOwner(source),
       currentUser: user,
       isAdmin,
