@@ -12,7 +12,9 @@ const getAdminSettingsNode = (
   options: Parameters<typeof createNavigationTree>[0] = {}
 ): NodeDefinition => {
   const { footer } = createNavigationTree(options);
-  const adminSettingsNode = footer?.find((item) => item.id === 'admin_and_settings');
+  const adminSettingsNode = footer?.find(
+    (item) => (item as NodeDefinition)?.id === 'admin_and_settings'
+  );
 
   if (!adminSettingsNode) {
     throw new Error('Admin and Settings footer node not found');
@@ -35,9 +37,9 @@ describe('Navigation Tree', () => {
 
   it('lists Manage jobs to Stack Management anomaly detection jobs first under ML anomaly detection nav', () => {
     const { body } = createNavigationTree({});
-    const mlNode = body.find((item) => item.id === 'machine_learning-landing');
-    const anomalySection = mlNode?.children?.find(
-      (item) => item.id === 'category-anomaly_detection'
+    const mlNode = body.find((item) => (item as NodeDefinition)?.id === 'machine_learning-landing');
+    const anomalySection = (mlNode as NodeDefinition)?.children?.find(
+      (item) => (item as NodeDefinition)?.id === 'category-anomaly_detection'
     );
 
     expect(anomalySection?.children?.[0]).toEqual(
@@ -62,9 +64,10 @@ describe('Navigation Tree', () => {
 
   it('shows AI Assistant and hides Agents when AI Assistant is enabled', () => {
     const { body } = createNavigationTree({});
-
-    const aiAssistantNode = body.find((item) => item.link === 'observabilityAIAssistant');
-    const agentsNode = body.find((item) => item.link === 'agent_builder');
+    const aiAssistantNode = body.find(
+      (item) => (item as NodeDefinition)?.link === 'observabilityAIAssistant'
+    );
+    const agentsNode = body.find((item) => (item as NodeDefinition)?.link === 'agent_builder');
 
     expect(aiAssistantNode).toBeDefined();
     expect(agentsNode).toBeUndefined();
@@ -73,8 +76,10 @@ describe('Navigation Tree', () => {
   it('shows Agents and hides AI Assistant when AI Assistant is disabled', () => {
     const { body } = createNavigationTree({ showAiAssistant: false });
 
-    const aiAssistantNode = body.find((item) => item.link === 'observabilityAIAssistant');
-    const agentsNode = body.find((item) => item.link === 'agent_builder');
+    const aiAssistantNode = body.find(
+      (item) => (item as NodeDefinition)?.link === 'observabilityAIAssistant'
+    );
+    const agentsNode = body.find((item) => (item as NodeDefinition)?.link === 'agent_builder');
 
     expect(aiAssistantNode).toBeUndefined();
     expect(agentsNode).toBeDefined();
@@ -109,7 +114,9 @@ describe('Navigation Tree', () => {
     const alertsPanel = body.find(
       (item) => 'id' in item && item.id === 'alerting' && item.renderAs === 'panelOpener'
     );
-    const flatAlerts = body.find((item) => item.link === 'observability-overview:alerts');
+    const flatAlerts = body.find(
+      (item) => (item as NodeDefinition)?.link === 'observability-overview:alerts'
+    );
 
     expect(alertsPanel).toBeUndefined();
     expect(flatAlerts).toEqual(
