@@ -78,7 +78,6 @@ tools:
       'base64:*',
       'file:*',
     ]
-
 network:
   allowed:
     - defaults
