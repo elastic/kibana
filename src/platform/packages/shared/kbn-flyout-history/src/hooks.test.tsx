@@ -11,9 +11,11 @@ import React from 'react';
 import { renderHook, act } from '@testing-library/react';
 import { getFlyoutManagerStore } from '@elastic/eui';
 import { FlyoutHistoryProvider } from './history_provider';
-import { useCloseHistoryGroup } from './hooks';
+import { useCloseHistoryGroup, useGoBack, useGoToFlyout } from './hooks';
 
 jest.mock('@elastic/eui', () => ({
+  // Keep real context objects so Provider/Consumer work correctly in tests.
+  ...jest.requireActual('@elastic/eui'),
   getFlyoutManagerStore: jest.fn(),
 }));
 
@@ -21,24 +23,23 @@ const mockGetFlyoutManagerStore = getFlyoutManagerStore as jest.MockedFunction<
   typeof getFlyoutManagerStore
 >;
 
-const mockFlyoutManagerStore = (
-  store: Pick<ReturnType<typeof getFlyoutManagerStore>, 'getState' | 'closeFlyout'>
-) => {
-  mockGetFlyoutManagerStore.mockReturnValue(
-    store as unknown as ReturnType<typeof getFlyoutManagerStore>
-  );
-};
+const makeStore = (
+  sessions: Array<{ mainFlyoutId: string; historyKey: symbol }> = [],
+  overrides: Partial<ReturnType<typeof getFlyoutManagerStore>> = {}
+) =>
+  ({
+    getState: () => ({ sessions }),
+    closeFlyout: jest.fn(),
+    goBack: jest.fn(),
+    goToFlyout: jest.fn(),
+    subscribe: jest.fn(() => jest.fn()),
+    ...overrides,
+  } as unknown as ReturnType<typeof getFlyoutManagerStore>);
 
 describe('useCloseHistoryGroup', () => {
-  const makeStore = (sessions: Array<{ mainFlyoutId: string; historyKey: symbol }>) => ({
-    getState: () =>
-      ({ sessions } as ReturnType<ReturnType<typeof getFlyoutManagerStore>['getState']>),
-    closeFlyout: jest.fn(),
-  });
-
   it('does nothing when rendered outside a FlyoutHistoryProvider', () => {
     const store = makeStore([{ mainFlyoutId: 'flyout-1', historyKey: Symbol('key') }]);
-    mockFlyoutManagerStore(store);
+    mockGetFlyoutManagerStore.mockReturnValue(store);
 
     const { result } = renderHook(() => useCloseHistoryGroup());
     act(() => result.current());
@@ -49,12 +50,11 @@ describe('useCloseHistoryGroup', () => {
   it('closes only flyouts matching the provider historyKey', () => {
     const myKey = Symbol('my-group');
     const otherKey = Symbol('other-group');
-
     const store = makeStore([
       { mainFlyoutId: 'flyout-mine', historyKey: myKey },
       { mainFlyoutId: 'flyout-other', historyKey: otherKey },
     ]);
-    mockFlyoutManagerStore(store);
+    mockGetFlyoutManagerStore.mockReturnValue(store);
 
     const { result } = renderHook(() => useCloseHistoryGroup(), {
       wrapper: ({ children }) => (
@@ -70,12 +70,11 @@ describe('useCloseHistoryGroup', () => {
 
   it('closes all sessions that share the same historyKey', () => {
     const sharedKey = Symbol('shared');
-
     const store = makeStore([
       { mainFlyoutId: 'flyout-a', historyKey: sharedKey },
       { mainFlyoutId: 'flyout-b', historyKey: sharedKey },
     ]);
-    mockFlyoutManagerStore(store);
+    mockGetFlyoutManagerStore.mockReturnValue(store);
 
     const { result } = renderHook(() => useCloseHistoryGroup(), {
       wrapper: ({ children }) => (
@@ -88,5 +87,39 @@ describe('useCloseHistoryGroup', () => {
     expect(store.closeFlyout).toHaveBeenCalledTimes(2);
     expect(store.closeFlyout).toHaveBeenCalledWith('flyout-a');
     expect(store.closeFlyout).toHaveBeenCalledWith('flyout-b');
+  });
+});
+
+describe('useGoBack', () => {
+  it('calls store.goBack()', () => {
+    const store = makeStore();
+    mockGetFlyoutManagerStore.mockReturnValue(store);
+
+    const { result } = renderHook(() => useGoBack());
+    act(() => result.current());
+
+    expect(store.goBack).toHaveBeenCalledTimes(1);
+  });
+
+  it('is stable across re-renders', () => {
+    const store = makeStore();
+    mockGetFlyoutManagerStore.mockReturnValue(store);
+
+    const { result, rerender } = renderHook(() => useGoBack());
+    const first = result.current;
+    rerender();
+    expect(result.current).toBe(first);
+  });
+});
+
+describe('useGoToFlyout', () => {
+  it('calls store.goToFlyout() with the provided flyout ID', () => {
+    const store = makeStore();
+    mockGetFlyoutManagerStore.mockReturnValue(store);
+
+    const { result } = renderHook(() => useGoToFlyout());
+    act(() => result.current('flyout-123'));
+
+    expect(store.goToFlyout).toHaveBeenCalledWith('flyout-123');
   });
 });

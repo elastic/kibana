@@ -7,10 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { IconType } from '@elastic/eui';
 import { createContext, useContext } from 'react';
+
+export interface HistoryItem {
+  title: string;
+  iconType?: IconType;
+  onClick: () => void;
+}
 
 export interface FlyoutHistoryContextValue {
   historyKey: symbol;
+  historyItems: HistoryItem[];
 }
 
 export const FlyoutHistoryContext = createContext<FlyoutHistoryContextValue | null>(null);
@@ -22,3 +30,6 @@ export const FlyoutHistoryContext = createContext<FlyoutHistoryContextValue | nu
  */
 export const useFlyoutHistoryKey = (): symbol | undefined =>
   useContext(FlyoutHistoryContext)?.historyKey;
+
+export const useHistoryItems = (): HistoryItem[] =>
+  useContext(FlyoutHistoryContext)?.historyItems ?? [];

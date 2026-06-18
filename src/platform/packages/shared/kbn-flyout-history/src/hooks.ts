@@ -11,15 +11,7 @@ import { useCallback, useContext } from 'react';
 import { getFlyoutManagerStore } from '@elastic/eui';
 import { FlyoutHistoryContext } from './history_context';
 
-/**
- * Returns a stable callback that closes all flyouts belonging to the current
- * history group (identified by the `historyKey` set on the nearest
- * `FlyoutHistoryProvider`).
- *
- * Phase 1 note: EUI's current `closeAllFlyouts()` closes every session
- * regardless of historyKey, so we filter sessions manually here. This will be
- * replaced with a historyKey-scoped EUI API in PR-7 once EUI PR-6 lands.
- */
+/** Closes all flyouts in the current history group. */
 export const useCloseHistoryGroup = (): (() => void) => {
   const historyKey = useContext(FlyoutHistoryContext)?.historyKey;
 
@@ -33,4 +25,12 @@ export const useCloseHistoryGroup = (): (() => void) => {
       .filter((session) => session.historyKey === historyKey)
       .forEach((session) => store.closeFlyout(session.mainFlyoutId));
   }, [historyKey]);
+};
+
+export const useGoBack = (): (() => void) => {
+  return useCallback(() => getFlyoutManagerStore().goBack(), []);
+};
+
+export const useGoToFlyout = (): ((flyoutId: string) => void) => {
+  return useCallback((flyoutId: string) => getFlyoutManagerStore().goToFlyout(flyoutId), []);
 };

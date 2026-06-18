@@ -8,7 +8,11 @@
  */
 
 export { FlyoutHistoryProvider } from './src/history_provider';
-/** @deprecated Remove `historyKey` prop from `EuiFlyout` once EUI reads it from context. */
+
 export { useFlyoutHistoryKey } from './src/history_context';
-export type { FlyoutHistoryContextValue } from './src/history_context';
-export { useCloseHistoryGroup } from './src/hooks';
+export { useHistoryItems } from './src/history_context';
+export { useCloseHistoryGroup, useGoBack, useGoToFlyout } from './src/hooks';
+
+export { HistoryMenuBar } from './src/history_menu_bar';
+
+export type { FlyoutHistoryContextValue, HistoryItem } from './src/history_context';
