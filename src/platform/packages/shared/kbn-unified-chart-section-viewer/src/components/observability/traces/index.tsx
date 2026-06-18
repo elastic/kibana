@@ -82,6 +82,7 @@ function TraceMetricsGrid({
           onBreakdownFieldChange={handleBreakdownFieldChange}
           esqlColumns={isESQLQuery ? columns : undefined}
           recommendedFields={TRACES_BREAKDOWN_RECOMMENDED_FIELDS}
+          fieldsMetadata={services.fieldsMetadata}
         />
       ) : undefined,
     }),
@@ -92,6 +93,7 @@ function TraceMetricsGrid({
       handleBreakdownFieldChange,
       columns,
       isESQLQuery,
+      services.fieldsMetadata,
     ]
   );
 

@@ -8,3 +8,5 @@
  */
 
 export const EBT_BREAKDOWN_SELECTOR_ELEMENT = 'chartsToolbar';
+
+export const NON_ECS_FIELD_EBT_DETAIL = '<non-ecs>';

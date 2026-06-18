@@ -8,6 +8,7 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
+import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 import type { EuiSelectableOption } from '@elastic/eui';
 import {
   FieldIcon,
@@ -28,12 +29,13 @@ import {
 } from '@kbn/shared-ux-toolbar-selector';
 import { EBT_CLICK_ACTIONS, getEbtProps } from '@kbn/ebt-click';
 import type { UnifiedHistogramBreakdownContext } from '../../types';
-import { EBT_BREAKDOWN_SELECTOR_ELEMENT } from './ebt_constants';
+import { EBT_BREAKDOWN_SELECTOR_ELEMENT, NON_ECS_FIELD_EBT_DETAIL } from './ebt_constants';
+import { useEcsFieldNames } from './hooks/use_ecs_field_names';
 
-const EBT_SELECT_BREAKDOWN_PROPS = getEbtProps({
+const BREAKDOWN_EBT_BASE = {
   action: EBT_CLICK_ACTIONS.SET_BREAKDOWN,
   element: EBT_BREAKDOWN_SELECTOR_ELEMENT,
-});
+} as const;
 
 export interface BreakdownFieldSelectorProps {
   dataView: DataView;
@@ -41,6 +43,7 @@ export interface BreakdownFieldSelectorProps {
   esqlColumns?: DatatableColumn[];
   onBreakdownFieldChange?: (breakdownField: DataViewField | undefined) => void;
   recommendedFields?: ReadonlyArray<string>;
+  fieldsMetadata?: FieldsMetadataPublicStart;
 }
 
 const mapToDropdownFields = (dataView: DataView, esqlColumns?: DatatableColumn[]) => {
@@ -62,8 +65,11 @@ export const BreakdownFieldSelector = ({
   esqlColumns,
   onBreakdownFieldChange,
   recommendedFields,
+  fieldsMetadata,
 }: BreakdownFieldSelectorProps) => {
   const fields = useMemo(() => mapToDropdownFields(dataView, esqlColumns), [dataView, esqlColumns]);
+  const ecsFieldNames = useEcsFieldNames(fields, fieldsMetadata);
+
   const fieldOptions: SelectableEntry[] = useMemo(() => {
     const noBreakdownOption: SelectableEntry = {
       key: EMPTY_OPTION,
@@ -72,12 +78,11 @@ export const BreakdownFieldSelector = ({
         defaultMessage: 'No breakdown',
       }),
       checked: !breakdown?.field ? ('on' as EuiSelectableOption['checked']) : undefined,
-      ...EBT_SELECT_BREAKDOWN_PROPS,
+      ...getEbtProps(BREAKDOWN_EBT_BASE),
     };
 
     const toOption = (field: DataViewField): SelectableEntry => ({
       key: field.name,
-      name: field.name,
       label: field.displayName,
       value: field.name,
       checked:
@@ -95,7 +100,15 @@ export const BreakdownFieldSelector = ({
           <FieldIcon {...getFieldIconProps(field)} />
         </span>
       ),
-      ...EBT_SELECT_BREAKDOWN_PROPS,
+      ...getEbtProps({
+        ...BREAKDOWN_EBT_BASE,
+        detail:
+          ecsFieldNames !== null
+            ? ecsFieldNames.has(field.name)
+              ? field.name
+              : NON_ECS_FIELD_EBT_DETAIL
+            : undefined,
+      }),
     });
 
     const sortedFields = fields
@@ -136,7 +149,7 @@ export const BreakdownFieldSelector = ({
     }
 
     return [noBreakdownOption, ...sortedFields];
-  }, [fields, breakdown?.field, recommendedFields]);
+  }, [fields, breakdown?.field, recommendedFields, ecsFieldNames]);
 
   const onChange = useCallback(
     (chosenOption?: SelectableEntry) => {
