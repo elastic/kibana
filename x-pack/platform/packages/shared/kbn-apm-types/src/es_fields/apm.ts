@@ -31,6 +31,7 @@ export const EVENT_SUCCESS_COUNT = 'event.success_count';
 
 export const SERVICE = 'service';
 export const SERVICE_NAME = 'service.name';
+export const SERVICE_NAMESPACE = 'service.namespace';
 export const SERVICE_ENVIRONMENT = 'service.environment';
 export const SERVICE_FRAMEWORK_NAME = 'service.framework.name';
 export const SERVICE_FRAMEWORK_VERSION = 'service.framework.version';
@@ -172,9 +173,12 @@ export const KUBERNETES_POD_NAME_OTEL = 'k8s.pod.name';
 export const KUBERNETES_POD_UID = 'kubernetes.pod.uid';
 export const KUBERNETES_NAMESPACE = 'kubernetes.namespace';
 export const KUBERNETES_NODE_NAME = 'kubernetes.node.name';
+export const KUBERNETES_NODE_NAME_OTEL = 'k8s.node.name';
 export const KUBERNETES_CONTAINER_NAME = 'kubernetes.container.name';
 export const KUBERNETES_CONTAINER_ID = 'kubernetes.container.id';
 export const KUBERNETES_DEPLOYMENT_NAME = 'kubernetes.deployment.name';
+export const KUBERNETES_DEPLOYMENT_NAME_OTEL = 'k8s.deployment.name';
+export const KUBERNETES_CLUSTER_NAME_OTEL = 'k8s.cluster.name';
 export const KUBERNETES_REPLICASET_NAME = 'kubernetes.replicaset.name';
 
 export const FAAS_ID = 'faas.id';
