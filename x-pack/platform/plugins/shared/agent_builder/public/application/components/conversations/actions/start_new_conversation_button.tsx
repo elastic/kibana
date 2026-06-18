@@ -25,7 +25,7 @@ const NEW_CONVERSATION_BUTTON_LABEL = i18n.translate(
 
 export const StartNewConversationButton: React.FC = () => {
   const { navigateToAgentBuilderUrl } = useNavigation();
-  const { isEmbeddedContext, setConversationId } = useConversationContext();
+  const { isEmbeddedContext, setConversationId, resetAttachments } = useConversationContext();
   const { removeError } = useConversationStream();
   const lastAgentId = useLastAgentId();
 
@@ -33,10 +33,18 @@ export const StartNewConversationButton: React.FC = () => {
     if (isEmbeddedContext) {
       removeError();
       setConversationId?.(undefined);
+      resetAttachments?.();
     } else {
       navigateToAgentBuilderUrl(appPaths.agent.conversations.new({ agentId: lastAgentId }));
     }
-  }, [isEmbeddedContext, removeError, setConversationId, navigateToAgentBuilderUrl, lastAgentId]);
+  }, [
+    isEmbeddedContext,
+    removeError,
+    setConversationId,
+    resetAttachments,
+    navigateToAgentBuilderUrl,
+    lastAgentId,
+  ]);
 
   return (
     <EuiButton

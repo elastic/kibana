@@ -11,6 +11,7 @@ export {
   getESQLAdHocDataview,
   getESQLTimeFieldFromQuery,
   getIndexPatternFromESQLQuery,
+  getIndexPatternsFromESQLQuery,
   getSourceCommandFromESQLQuery,
   hasTransformationalCommand,
   getLimitFromESQLQuery,
@@ -87,8 +88,10 @@ export {
   convertQueryToESQLExpression,
   injectWhereClauseAfterSourceCommand,
   type ESQLStatsQueryMeta,
+  getVariableNamePrefix,
   type ESQLColumnsWithHighlights,
   type ESQLHighlightTags,
+  type ESQLIndexPatterns,
 } from './src';
 
 export { ENABLE_ESQL, GROUP_NOT_SET_VALUE } from './constants';

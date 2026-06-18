@@ -138,7 +138,7 @@ describe('ki_feature_create tool', () => {
             },
           }),
         },
-        getFeatureClient: jest.fn().mockResolvedValue(featureClient),
+        getKnowledgeIndicatorClient: jest.fn().mockResolvedValue(featureClient),
         licensing: {},
         uiSettingsClient: {},
       } as unknown as RouteHandlerScopedClients;
@@ -196,7 +196,7 @@ describe('ki_feature_create tool', () => {
             },
           }),
         },
-        getFeatureClient: jest.fn().mockResolvedValue(featureClient),
+        getKnowledgeIndicatorClient: jest.fn().mockResolvedValue(featureClient),
         licensing: {},
         uiSettingsClient: {},
       } as unknown as RouteHandlerScopedClients;
