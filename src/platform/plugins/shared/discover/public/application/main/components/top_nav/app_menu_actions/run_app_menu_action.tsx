@@ -135,12 +135,11 @@ export function enhanceAppMenuItemWithRunAction<T extends DiscoverAppMenuItem>({
 
   const enhancedItems =
     'items' in appMenuItem && Array.isArray(appMenuItem.items)
-      ? appMenuItem.items.map(
-          (nestedItem): AppMenuPopoverItem =>
-            enhanceAppMenuItemWithRunAction({
-              appMenuItem: nestedItem,
-              services,
-            })
+      ? appMenuItem.items.map((nestedItem) =>
+          enhanceAppMenuItemWithRunAction({
+            appMenuItem: nestedItem,
+            services,
+          })
         )
       : undefined;
 

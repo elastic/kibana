@@ -5,4 +5,7 @@
  * 2.0.
  */
 
-export const getRequestSavedObjectClient = jest.fn(() => 'mock-so-client');
+// Valid time units for Elastic Agent duration fields: milliseconds, seconds, minutes, hours
+const DURATION_REGEX = /^\d+(ms|s|m|h)$/;
+
+export const isValidDuration = (value: string): boolean => DURATION_REGEX.test(value);
