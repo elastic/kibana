@@ -548,7 +548,7 @@ describe('getEARSSSLSettings', () => {
     expect(mockReadFileSync).not.toHaveBeenCalled();
   });
 
-  test('throws the underlying error when the EARS ssl.certificate file cannot be read', () => {
+  test('throws a descriptive config error when the EARS ssl.certificate file cannot be read', () => {
     mockReadFileSync.mockImplementationOnce(() => {
       throw new Error("ENOENT: no such file or directory, open '/path/to/missing-cert.pem'");
     });
@@ -562,11 +562,11 @@ describe('getEARSSSLSettings', () => {
     );
 
     expect(() => sslConfigUtils.getEARSSSLSettings()).toThrow(
-      "ENOENT: no such file or directory, open '/path/to/missing-cert.pem'"
+      "EARS SSL configuration error: failed to read certificate file: ENOENT: no such file or directory, open '/path/to/missing-cert.pem'"
     );
   });
 
-  test('throws the underlying error when the EARS ssl.key file cannot be read', () => {
+  test('throws a descriptive config error when the EARS ssl.key file cannot be read', () => {
     mockReadFileSync
       // certificate reads fine, key cannot be read
       .mockReturnValueOnce(Buffer.from('cert-pem'))
@@ -583,7 +583,7 @@ describe('getEARSSSLSettings', () => {
     );
 
     expect(() => sslConfigUtils.getEARSSSLSettings()).toThrow(
-      "EACCES: permission denied, open '/path/to/key.pem'"
+      "EARS SSL configuration error: failed to read key file: EACCES: permission denied, open '/path/to/key.pem'"
     );
   });
 });

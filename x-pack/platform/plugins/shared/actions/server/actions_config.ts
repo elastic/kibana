@@ -217,13 +217,24 @@ export function getActionsConfigurationUtilities(
     getProxySettings: () => getProxySettingsFromConfig(config),
     getResponseSettings: () => getResponseSettingsFromConfig(config),
     getSSLSettings: () => getSSLSettingsFromConfig(config.ssl?.verificationMode),
-    getEARSSSLSettings: () => ({
-      ...getSSLSettingsFromConfig(config.auth.ears?.ssl?.verificationMode),
-      cert: config.auth.ears?.ssl?.certificate
-        ? readFileSync(config.auth.ears.ssl.certificate)
-        : undefined,
-      key: config.auth.ears?.ssl?.key ? readFileSync(config.auth.ears.ssl.key) : undefined,
-    }),
+    getEARSSSLSettings: () => {
+      const readSSLFile = (filePath: string, configKey: string): Buffer => {
+        try {
+          return readFileSync(filePath);
+        } catch (err) {
+          throw new Error(
+            `EARS SSL configuration error: failed to read ${configKey} file: ${err.message}`
+          );
+        }
+      };
+      return {
+        ...getSSLSettingsFromConfig(config.auth.ears?.ssl?.verificationMode),
+        cert: config.auth.ears?.ssl?.certificate
+          ? readSSLFile(config.auth.ears.ssl.certificate, 'certificate')
+          : undefined,
+        key: config.auth.ears?.ssl?.key ? readSSLFile(config.auth.ears.ssl.key, 'key') : undefined,
+      };
+    },
     ensureUriAllowed(uri: string) {
       if (!isUriAllowed(uri)) {
         throw new Error(allowListErrorMessage(AllowListingField.URL, uri));
