@@ -32,6 +32,7 @@ const investigationAgent = {
   avatar_icon: 'logoElastic',
   configuration: {
     instructions,
+    skill_ids: ['significant-events-memory'],
     tools: [
       {
         tool_ids: [
