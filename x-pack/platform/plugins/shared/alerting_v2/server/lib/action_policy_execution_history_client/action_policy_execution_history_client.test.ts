@@ -177,7 +177,7 @@ describe('ActionPolicyExecutionHistoryClient', () => {
 
       expect(actionPolicyClient.getActionPolicies).toHaveBeenCalledWith({ ids: ['p-1'] });
       expect(rulesClient.findRules).toHaveBeenCalledWith({
-        filter: expect.stringContaining(`id: "${RULE_SAVED_OBJECT_TYPE}:r-1"`),
+        filter: expect.stringContaining(`id: "r-1"`),
         perPage: 1,
       });
       expect(workflowsManagement.getWorkflowsByIds).toHaveBeenCalledWith(['w-1'], 'default');
