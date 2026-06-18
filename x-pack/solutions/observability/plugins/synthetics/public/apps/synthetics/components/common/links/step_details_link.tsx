@@ -63,7 +63,7 @@ export const StepDetailsLinkIcon = ({
   }
 
   return (
-    <EuiToolTip content={VIEW_DETAILS(stepIndex)}>
+    <EuiToolTip content={VIEW_DETAILS(stepIndex)} disableScreenReaderOutput>
       <EuiButtonIcon
         data-test-subj="syntheticsStepDetailsLinkIconButton"
         {...commonProps}
