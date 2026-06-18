@@ -7,7 +7,6 @@
 
 import { EuiCheckbox, EuiFlexGroup, EuiFlexItem, EuiFieldText } from '@elastic/eui';
 import React, { useState, useEffect } from 'react';
-import { i18n } from '@kbn/i18n';
 import { AlertExpressionPopover } from '../alert_expression_popover';
 import * as labels from '../translations';
 import { AlertFieldNumber } from '../alert_field_number';
