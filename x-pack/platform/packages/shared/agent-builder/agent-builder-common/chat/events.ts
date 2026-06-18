@@ -14,7 +14,12 @@ import type {
   BackgroundExecutionState,
   TodoItem,
 } from './conversation';
-import type { PromptRequestSource, PromptRequest } from '../agents/prompts';
+import type {
+  PromptRequestSource,
+  PromptRequest,
+  AskUserQuestionItem,
+  AskUserQuestionAnswer,
+} from '../agents/prompts';
 import type { VersionedAttachment } from '../attachments';
 
 export enum ChatEventType {
@@ -35,6 +40,8 @@ export enum ChatEventType {
   compactionStarted = 'compaction_started',
   compactionCompleted = 'compaction_completed',
   backgroundAgentComplete = 'background_agent_complete',
+  userQuestionAsked = 'user_question_asked',
+  userQuestionAnswered = 'user_question_answered',
 }
 
 export type ChatEventBase<
@@ -145,6 +152,58 @@ export const isPromptRequestEvent = (
   event: AgentBuilderEvent<string, any>
 ): event is PromptRequestEvent => {
   return event.type === ChatEventType.promptRequest;
+};
+
+// Ask-user-question lifecycle
+
+export interface UserQuestionAskedEventData {
+  prompt_id: string;
+  questions: AskUserQuestionItem[];
+}
+
+export type UserQuestionAskedEvent = ChatEventBase<
+  ChatEventType.userQuestionAsked,
+  UserQuestionAskedEventData
+>;
+
+export const isUserQuestionAskedEvent = (
+  event: AgentBuilderEvent<string, any>
+): event is UserQuestionAskedEvent => {
+  return event.type === ChatEventType.userQuestionAsked;
+};
+
+export const createUserQuestionAskedEvent = (
+  data: UserQuestionAskedEventData
+): UserQuestionAskedEvent => {
+  return {
+    type: ChatEventType.userQuestionAsked,
+    data,
+  };
+};
+
+export interface UserQuestionAnsweredEventData {
+  prompt_id: string;
+  answers: AskUserQuestionAnswer[];
+}
+
+export type UserQuestionAnsweredEvent = ChatEventBase<
+  ChatEventType.userQuestionAnswered,
+  UserQuestionAnsweredEventData
+>;
+
+export const isUserQuestionAnsweredEvent = (
+  event: AgentBuilderEvent<string, any>
+): event is UserQuestionAnsweredEvent => {
+  return event.type === ChatEventType.userQuestionAnswered;
+};
+
+export const createUserQuestionAnsweredEvent = (
+  data: UserQuestionAnsweredEventData
+): UserQuestionAnsweredEvent => {
+  return {
+    type: ChatEventType.userQuestionAnswered,
+    data,
+  };
 };
 
 // reasoning
@@ -384,7 +443,9 @@ export type ChatAgentEvent =
   | RoundCompleteEvent
   | CompactionStartedEvent
   | CompactionCompletedEvent
-  | BackgroundAgentCompleteEvent;
+  | BackgroundAgentCompleteEvent
+  | UserQuestionAskedEvent
+  | UserQuestionAnsweredEvent;
 
 /**
  * All types of events that can be emitted from the chat API.
