@@ -45,6 +45,7 @@ import {
 import { css } from '@emotion/css';
 import { CodeEditor } from '@kbn/code-editor';
 import { isHttpFetchError } from '@kbn/core-http-browser';
+import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 import { useHistory, useParams } from 'react-router-dom';
 import { TraceWaterfall, useTraceSpans } from '@kbn/llm-trace-waterfall';
 import type {
@@ -384,7 +385,9 @@ export const DatasetDetailPage: React.FC = () => {
           return (
             <EuiToolTip content={executionId}>
               <div tabIndex={0}>
-                <EuiLink onClick={() => history.push(`/experiments/${row.experiment_id}${query}`)}>
+                <EuiLink
+                  {...reactRouterNavigate(history, `/experiments/${row.experiment_id}${query}`)}
+                >
                   {displayName}
                 </EuiLink>
                 {modelId ? (
@@ -491,11 +494,10 @@ export const DatasetDetailPage: React.FC = () => {
             <EuiToolTip content={row.runId}>
               <div tabIndex={0}>
                 <EuiLink
-                  onClick={() =>
-                    history.push(
-                      `/experiments/${row.runId}?dataset_id=${encodeURIComponent(datasetId)}`
-                    )
-                  }
+                  {...reactRouterNavigate(
+                    history,
+                    `/experiments/${row.runId}?dataset_id=${encodeURIComponent(datasetId)}`
+                  )}
                 >
                   {displayName}
                 </EuiLink>
