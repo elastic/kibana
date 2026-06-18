@@ -352,18 +352,23 @@ export async function ensureIndexTemplate(opts: IndexerOptions): Promise<void> {
     TRANSFORM_INDEX_TEMPLATE,
     opts
   );
-  await putJson(
-    `${opts.esUrl}/_transform/${TRANSFORM_INDEX_NAME}`,
-    TRANSFORM_DEFINITION,
-    opts
-  );
-  const startRes = await fetch(`${opts.esUrl}/_transform/${TRANSFORM_INDEX_NAME}/_start`, {
-    method: 'POST',
+  // Transform creation is not idempotent — skip if it already exists.
+  const checkRes = await fetch(`${opts.esUrl}/_transform/${TRANSFORM_INDEX_NAME}`, {
     headers: buildHeaders(opts),
   });
-  // 409 means the transform is already running — not an error.
-  if (!startRes.ok && startRes.status !== 409) {
-    throw new Error(`Failed to start transform (${startRes.status}): ${await startRes.text()}`);
+  if (checkRes.status === 404) {
+    await putJson(
+      `${opts.esUrl}/_transform/${TRANSFORM_INDEX_NAME}`,
+      TRANSFORM_DEFINITION,
+      opts
+    );
+    const startRes = await fetch(`${opts.esUrl}/_transform/${TRANSFORM_INDEX_NAME}/_start`, {
+      method: 'POST',
+      headers: buildHeaders(opts),
+    });
+    if (!startRes.ok) {
+      throw new Error(`Failed to start transform (${startRes.status}): ${await startRes.text()}`);
+    }
   }
 }
 
