@@ -26,8 +26,6 @@ import {
   fieldsToKeep,
   extractPaginationParams,
   buildPaginationSection,
-  NULLIFY_UNMAPPED_FIELDS_SETTING,
-  hasFieldEvaluations,
 } from '../query_builder_commons';
 
 const REMOTE_FIELDS_TO_KEEP = [
