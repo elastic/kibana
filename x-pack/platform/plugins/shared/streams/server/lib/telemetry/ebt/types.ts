@@ -101,6 +101,15 @@ interface StreamsSignificantEventsDiscoveryTriggeredProps {
   space_id: string;
 }
 
+interface StreamsOnboardingScheduledProps {
+  stream_name: string;
+  execution_id: string;
+  workflow_id: string;
+  space_id: string;
+  skip_features: boolean;
+  skip_queries: boolean;
+}
+
 export {
   type StreamEndpointLatencyProps,
   type StreamsStateErrorProps,
@@ -113,4 +122,5 @@ export {
   type StreamsAgentToolEventCreateProps,
   type StreamsAgentToolEventStatusUpdateProps,
   type StreamsSignificantEventsDiscoveryTriggeredProps,
+  type StreamsOnboardingScheduledProps,
 };
