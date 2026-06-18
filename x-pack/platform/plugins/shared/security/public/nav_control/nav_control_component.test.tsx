@@ -83,17 +83,17 @@ describe('SecurityNavControl', () => {
               class="euiHeaderSectionItemButton__content emotion-euiHeaderSectionItemButton__content"
             >
               <div
-                aria-label="some@email"
+                aria-label="full name (email)"
                 class="euiAvatar euiAvatar--s euiAvatar--user emotion-euiAvatar-user-s-uppercase"
                 data-test-subj="userMenuAvatar"
                 role="img"
-                style="background-color: rgb(255, 199, 219); color: rgb(0, 0, 0);"
-                title="some@email"
+                style="background-color: rgb(97, 162, 255); color: rgb(0, 0, 0);"
+                title="full name (email)"
               >
                 <span
                   aria-hidden="true"
                 >
-                  s
+                  fn
                 </span>
               </div>
             </span>
