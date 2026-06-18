@@ -179,7 +179,6 @@ export type {
   DryRunPackagePolicy,
   AgentPolicy,
   AgentlessAgentPolicyConfig,
-  NewAgentlessPolicy,
   AgentlessPolicy,
   Installation,
   NewPackagePolicy,

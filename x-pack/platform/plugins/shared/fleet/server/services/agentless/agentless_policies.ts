@@ -14,15 +14,14 @@ import {
   type SavedObjectsClientContract,
   SavedObjectsErrorHelpers,
 } from '@kbn/core/server';
-import type { TypeOf } from '@kbn/config-schema';
 import { v4 as uuidv4 } from 'uuid';
 import { omit } from 'lodash';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 
 import type {
+  NewAgentlessPolicy,
   AgentlessPolicy,
   AgentlessAgentPolicyConfig,
-  CreateAgentlessPolicyRequestSchema,
   PackagePolicy,
 } from '../../../common/types';
 
@@ -51,7 +50,7 @@ import { createAndIntegrateCloudConnector } from '../cloud_connectors';
 
 export interface AgentlessPoliciesService {
   createAgentlessPolicy: (
-    data: TypeOf<typeof CreateAgentlessPolicyRequestSchema.body>,
+    data: NewAgentlessPolicy,
     context?: RequestHandlerContext,
     request?: KibanaRequest
   ) => Promise<AgentlessPolicy>;
@@ -129,7 +128,7 @@ export class AgentlessPoliciesServiceImpl implements AgentlessPoliciesService {
   ) {}
 
   async createAgentlessPolicy(
-    data: TypeOf<typeof CreateAgentlessPolicyRequestSchema.body>,
+    data: NewAgentlessPolicy,
     context?: RequestHandlerContext,
     request?: KibanaRequest
   ) {
@@ -259,6 +258,7 @@ export class AgentlessPoliciesServiceImpl implements AgentlessPoliciesService {
           bumpRevision: false,
           spaceId,
           user,
+          createDatasetTemplates: data.create_dataset_templates,
         },
         context,
         request
