@@ -107,11 +107,12 @@ test.describe('Rule Details - Edit rule button', { tag: tags.stateful.classic },
   });
 
   test('should reset rule when canceling an edit', async ({ page }) => {
-    // Rule name is now updatedRuleName from the previous test
     await page.testSubj.click('ruleActionsButton');
     await page.testSubj.click('openEditRuleFlyoutButton');
 
     const nameInput = page.testSubj.locator('ruleDetailsNameInput');
+    const savedName = await nameInput.inputValue();
+
     await nameInput.click();
     await nameInput.pressSequentially(uuidv4().slice(0, 8));
     await page.testSubj.click('rulePageFooterCancelButton');
@@ -124,9 +125,9 @@ test.describe('Rule Details - Edit rule button', { tag: tags.stateful.classic },
 
     await expect(page.testSubj.locator('rulePageFooterCancelButton')).toBeHidden();
 
-    // Open edit again — name should still be updatedRuleName
+    // Open edit again — name should still be the saved name, not the in-flyout edit
     await page.testSubj.click('ruleActionsButton');
     await page.testSubj.click('openEditRuleFlyoutButton');
-    await expect(page.testSubj.locator('ruleDetailsNameInput')).toHaveValue(updatedRuleName);
+    await expect(nameInput).toHaveValue(savedName);
   });
 });
