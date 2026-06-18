@@ -48,7 +48,7 @@ export const useBuilderContext = ({
 
   return useMemo(
     () => ({
-      appId: owner[0],
+      appId: owner[0] ?? '',
       caseData,
       casesConfiguration,
       caseConnectors,

@@ -50,7 +50,7 @@ export const useCommentsList = ({
     if (hasNextPage) {
       items.push({
         username: '',
-        'data-test-subj': 'cases-show-more-user-actions',
+        'data-test-subj': 'cases-show-more-user-actions-wrapper',
         timelineAvatar: 'list',
         timelineAvatarAriaLabel: i18n.SHOW_MORE_ACTIVITIES_ARIA,
         className: 'showMoreActivities',

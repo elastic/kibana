@@ -49,7 +49,6 @@ export const UserActions = React.memo((props: UserActionTreeProps) => {
   } = useUserActionsPagination({
     userActivityQueryParams,
     caseId: caseData.id,
-    lastPage,
   });
 
   const { isLoadingLastPageUserActions, lastPageUserActions, lastPageAttachments } =

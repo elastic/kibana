@@ -46,7 +46,7 @@ describe('useCommentsList', () => {
     );
 
     expect(result.current).toHaveLength(3);
-    expect(result.current[1]['data-test-subj']).toBe('cases-show-more-user-actions');
+    expect(result.current[1]['data-test-subj']).toBe('cases-show-more-user-actions-wrapper');
   });
 
   it('appends add-comment entry when shouldShowCommentEditor is true', () => {
@@ -69,7 +69,7 @@ describe('useCommentsList', () => {
     );
 
     expect(result.current).toHaveLength(4);
-    expect(result.current[1]['data-test-subj']).toBe('cases-show-more-user-actions');
+    expect(result.current[1]['data-test-subj']).toBe('cases-show-more-user-actions-wrapper');
     expect(result.current[3]['data-test-subj']).toBe('add-comment');
   });
 

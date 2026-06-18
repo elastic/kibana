@@ -44,10 +44,11 @@ describe('useUserActionsPagination', () => {
     expect(result.current.remainingActionCount).toBe(0);
   });
 
-  it('does not return showBottomList', () => {
+  it('does not return showBottomList or lastPage', () => {
     const { result } = renderHook(() => useUserActionsPagination(defaultParams));
 
     expect(result.current).not.toHaveProperty('showBottomList');
+    expect(result.current).not.toHaveProperty('lastPage');
   });
 
   it('computes remainingActionCount from pages', () => {

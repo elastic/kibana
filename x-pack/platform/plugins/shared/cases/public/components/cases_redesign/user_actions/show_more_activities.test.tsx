@@ -30,13 +30,10 @@ describe('ShowMoreActivities', () => {
     expect(screen.getByText('1 more activity')).toBeInTheDocument();
   });
 
-  it('marks as aria-disabled when isLoading is true', () => {
+  it('is disabled when isLoading is true', () => {
     render(<ShowMoreActivities count={5} onClick={onClickMock} isLoading={true} />);
 
-    expect(screen.getByTestId('cases-show-more-user-actions')).toHaveAttribute(
-      'aria-disabled',
-      'true'
-    );
+    expect(screen.getByTestId('cases-show-more-user-actions')).toBeDisabled();
   });
 
   it('calls onClick on click', async () => {

@@ -5,12 +5,14 @@
  * 2.0.
  */
 
-import type { EuiCommentProps } from '@elastic/eui';
+import type { EuiCommentProps, EuiThemeComputed } from '@elastic/eui';
 import { EuiCommentList, useEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/react';
 
 import React, { useMemo } from 'react';
 
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
+import { scaledMarkdownImages } from '../../utils';
 import type { CaseUI } from '../../../containers/types';
 import type { AddCommentRefObject } from '../../add_comment';
 import type { UserActionMarkdownRefObject } from '../../user_actions/markdown_form';
@@ -18,6 +20,45 @@ import type { UseUserActionsHandler } from '../../user_actions/use_user_actions_
 import { useCasesContext } from '../../cases_context/use_cases_context';
 import { CommentRenderingProvider } from '../../user_actions/comment/comment_rendering_context';
 import { useHighlightLinkedComment } from './hooks/use_highlight_linked_comment';
+
+const getCommentListCss = (euiTheme: EuiThemeComputed<{}>) => css`
+  & .userAction__comment.outlined .euiCommentEvent {
+    outline: solid 5px ${euiTheme.colors.borderBaseSubdued};
+    margin: 0.5em;
+    transition: 0.8s;
+  }
+
+  ${scaledMarkdownImages}
+
+  & .draftFooter {
+    & .euiCommentEvent__body {
+      padding: 0;
+    }
+  }
+
+  & .euiComment.isEdit {
+    & .euiCommentEvent {
+      border: none;
+      box-shadow: none;
+    }
+
+    & .euiCommentEvent__body {
+      padding: 0;
+    }
+
+    & .euiCommentEvent__header {
+      display: none;
+    }
+  }
+
+  & .comment-action.empty-comment [class*='euiCommentEvent-regular'] {
+    box-shadow: none;
+    .euiCommentEvent__header {
+      padding: ${euiTheme.size.m} ${euiTheme.size.s};
+      border-bottom: 0;
+    }
+  }
+`;
 
 export interface UserActionListProps {
   comments: EuiCommentProps[];
@@ -87,7 +128,11 @@ export const UserActionsList = React.memo(
 
     return (
       <CommentRenderingProvider value={commentRenderingContext}>
-        <EuiCommentList comments={comments} data-test-subj="user-actions-list" />
+        <EuiCommentList
+          css={getCommentListCss(euiTheme)}
+          comments={comments}
+          data-test-subj="user-actions-list"
+        />
       </CommentRenderingProvider>
     );
   }

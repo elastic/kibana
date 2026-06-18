@@ -14,13 +14,11 @@ import type { UserActivityParams } from '../../../user_actions_activity_bar/type
 interface UserActionsPagination {
   userActivityQueryParams: UserActivityParams;
   caseId: string;
-  lastPage: number;
 }
 
 export const useUserActionsPagination = ({
   userActivityQueryParams,
   caseId,
-  lastPage,
 }: UserActionsPagination) => {
   const {
     data: caseInfiniteUserActionsData,
@@ -65,7 +63,6 @@ export const useUserActionsPagination = ({
   }, [caseInfiniteUserActionsData]);
 
   return {
-    lastPage,
     isLoadingInfiniteUserActions,
     infiniteCaseUserActions: infiniteCaseUserActions.userActions,
     infiniteLatestAttachments: infiniteCaseUserActions.latestAttachments,
