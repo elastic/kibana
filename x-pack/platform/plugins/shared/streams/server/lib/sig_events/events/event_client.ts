@@ -10,9 +10,11 @@ import { esql } from '@elastic/esql';
 import type { ESQLAstExpression } from '@elastic/esql/types';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import {
+  type BulkCreateOptions,
   type CommonSearchOptions,
   type PaginatedSearchOptions,
   type PaginatedResponse,
+  throwOnBulkCreateErrors,
 } from '../query_utils';
 import {
   andWhere,
@@ -33,7 +35,7 @@ import { enrichFromEvidences } from '../utils';
 export type EventDataStreamClient = IDataStreamClient<typeof eventsMappings, StoredEvent>;
 
 export interface EventsFilterOptions {
-  verdict?: string[];
+  status?: string[];
   stream?: string[];
   search?: string;
 }
@@ -51,7 +53,7 @@ export class EventClient {
 
   private buildWhere(options: EventsFilterOptions): ESQLAstExpression | undefined {
     let where: ESQLAstExpression | undefined;
-    where = inFilter({ where, field: 'verdict', values: options.verdict });
+    where = inFilter({ where, field: 'status', values: options.status });
     where = inFilter({ where, field: 'stream_names', values: options.stream });
 
     if (options.search) {
@@ -68,11 +70,17 @@ export class EventClient {
     return where;
   }
 
-  async bulkCreate(events: SigEvent[]) {
-    return this.clients.dataStreamClient.create({
+  async bulkCreate(events: SigEvent[], { throwOnFail = false }: BulkCreateOptions = {}) {
+    const response = await this.clients.dataStreamClient.create({
       space: this.clients.space,
       documents: events,
     });
+
+    if (throwOnFail) {
+      throwOnBulkCreateErrors(response);
+    }
+
+    return response;
   }
 
   async findLatest(options: CommonSearchOptions = {}): Promise<{ hits: SigEvent[] }> {
@@ -118,5 +126,24 @@ export class EventClient {
       idField: FIELD_DISCOVERY_SLUG,
       idValue: slug,
     });
+  }
+
+  async findLatestBySlugs(slugs: string[]): Promise<Map<string, SigEvent>> {
+    if (!slugs.length) return new Map();
+    const slugLiterals = slugs.map((s) => esql.str(s));
+    const where = esql.exp`${esql.col(FIELD_DISCOVERY_SLUG)} IN (${slugLiterals})`;
+    const { hits } = await runPaginatedLatestSourceEsqlQuery<SigEvent>({
+      esClient: this.clients.esClient,
+      space: this.clients.space,
+      options: { perPage: slugs.length },
+      index: EVENTS_DATA_STREAM,
+      where,
+      groupBy: FIELD_DISCOVERY_SLUG,
+    });
+    const map = new Map<string, SigEvent>();
+    for (const event of hits) {
+      if (event.discovery_slug) map.set(event.discovery_slug, event);
+    }
+    return map;
   }
 }

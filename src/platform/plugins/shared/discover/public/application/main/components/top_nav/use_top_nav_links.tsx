@@ -90,6 +90,7 @@ export const useTopNavLinks = ({
   const dispatch = useInternalStateDispatch();
   const getState = useInternalStateGetState();
   const subscribe = useInternalStateSubscribe();
+
   const runtimeStateManager = useRuntimeStateManager();
   const currentDataView = useCurrentDataView();
   const appId = useObservable(services.application.currentAppId$);
@@ -140,18 +141,27 @@ export const useTopNavLinks = ({
       dataView,
       adHocDataViews,
       authorizedRuleTypeIds: getAuthorizedWriteConsumerIds(authorizedRuleTypes),
-      actions: {
-        updateAdHocDataViews: async (adHocDataViewList) => {
-          await dispatch(internalStateActions.loadDataViewList());
-          dispatch(internalStateActions.setAdHocDataViews(adHocDataViewList));
-        },
-      },
     }),
-    [isEsqlMode, dataView, adHocDataViews, dispatch, authorizedRuleTypes]
+    [isEsqlMode, dataView, adHocDataViews, authorizedRuleTypes]
   );
 
-  const canCreateESQLRule = !!services.capabilities.alertingVTwo;
+  const canCreateESQLRule = !!services.alertingVTwo && !!services.capabilities.alertingVTwo;
   const showCreateRuleV2 = isEsqlMode && canCreateESQLRule;
+
+  const getAppMenuAccessor = useProfileAccessor('getAppMenu');
+
+  const profileAppMenuExtension = useMemo(() => {
+    const getAppMenu = getAppMenuAccessor(() => ({
+      appMenuRegistry: (registry) => registry,
+    }));
+
+    return getAppMenu(discoverParams);
+  }, [getAppMenuAccessor, discoverParams]);
+
+  const additionalLegacyRuleTypes = useMemo(
+    () => profileAppMenuExtension.getAlertsLegacyRuleTypes?.() ?? [],
+    [profileAppMenuExtension]
+  );
 
   const appMenuItems: DiscoverAppMenuItemType[] = useMemo(() => {
     const items: DiscoverAppMenuItemType[] = [];
@@ -165,8 +175,10 @@ export const useTopNavLinks = ({
         services,
         tabId: currentTab.id,
         getState,
-        subscribe,
+        dispatch,
         showCreateRuleV2,
+        subscribe,
+        additionalLegacyRuleTypes,
       });
       items.push(alertsAppMenuItem);
     }
@@ -183,7 +195,9 @@ export const useTopNavLinks = ({
             trackingProps: { openedFrom: 'background search button' },
             onBackgroundSearchOpened: ({ session, event }) => {
               event?.preventDefault();
-              dispatch(internalStateActions.openSearchSessionInNewTab({ searchSession: session }));
+              void dispatch(
+                internalStateActions.openSearchSessionInNewTab({ searchSession: session })
+              );
             },
             onClose: onFinishAction,
           });
@@ -299,9 +313,8 @@ export const useTopNavLinks = ({
     intl,
     showCreateRuleV2,
     switchLanguageMode,
+    additionalLegacyRuleTypes,
   ]);
-
-  const getAppMenuAccessor = useProfileAccessor('getAppMenu');
 
   const appMenuRegistry = useMemo(() => {
     const newAppMenuRegistry = new AppMenuRegistry();
@@ -404,16 +417,11 @@ export const useTopNavLinks = ({
     }
 
     // Allow profile accessors to add additional items/popover items
-    const getAppMenu = getAppMenuAccessor(() => ({
-      appMenuRegistry: () => newAppMenuRegistry,
-    }));
-
-    const registry = getAppMenu(discoverParams).appMenuRegistry(newAppMenuRegistry);
+    const registry = profileAppMenuExtension.appMenuRegistry(newAppMenuRegistry);
 
     return registry;
   }, [
-    getAppMenuAccessor,
-    discoverParams,
+    profileAppMenuExtension,
     appMenuItems,
     services,
     dispatch,

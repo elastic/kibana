@@ -40,10 +40,6 @@ export class OnboardingApp {
     return this.page.getByTestId('integration-card:otel-logs');
   }
 
-  public get kubernetesQuickStartCard() {
-    return this.page.getByTestId('integration-card:kubernetes-quick-start');
-  }
-
   public get otelKubernetesCard() {
     return this.page.getByTestId('integration-card:otel-kubernetes');
   }
@@ -103,7 +99,7 @@ export class OnboardingApp {
         await this.autoDetectLogsCard.waitFor({ state: 'visible' });
         break;
       case 'kubernetes':
-        await this.kubernetesQuickStartCard.waitFor({ state: 'visible' });
+        await this.otelKubernetesCard.waitFor({ state: 'visible' });
         break;
       case 'cloud':
         await this.awsLogsVirtualCard.waitFor({ state: 'visible' });
@@ -122,7 +118,7 @@ export class OnboardingApp {
   async selectKubernetesUseCase() {
     const kubernetesRadio = this.kubernetesUseCaseTile.getByRole('radio');
     await kubernetesRadio.click();
-    await this.kubernetesQuickStartCard.waitFor({ state: 'visible' });
+    await this.otelKubernetesCard.waitFor({ state: 'visible' });
   }
 
   async selectCloudUseCase() {
@@ -144,7 +140,7 @@ export class OnboardingApp {
       /(aws-logs-virtual|azure-logs-virtual|gcp-logs-virtual|firehose-quick-start)/;
     if (!nonRouting.test(cardSelector)) {
       const urlPattern =
-        /.*\/(auto-detect|kubernetes|otel-logs|otel-kubernetes|apm-virtual|otel-virtual|synthetics-virtual)/;
+        /.*\/(auto-detect|kubernetes|otel-logs|apm-virtual|otel-virtual|synthetics-virtual)/;
 
       // Retry click + URL check to handle race conditions where the card
       // is rendered but React click handlers aren't yet attached after a re-render
@@ -226,16 +222,8 @@ export class OnboardingApp {
     return this.page.getByTestId('observabilityOnboardingAutoDetectPanelCodeSnippet');
   }
 
-  public get kubernetesCodeSnippet() {
-    return this.page.getByTestId('observabilityOnboardingKubernetesPanelCodeSnippet');
-  }
-
   async getAutoDetectCommandContent(): Promise<string> {
     return (await this.autoDetectCodeSnippet.textContent()) ?? '';
-  }
-
-  async getKubernetesCommandContent(): Promise<string> {
-    return (await this.kubernetesCodeSnippet.textContent()) ?? '';
   }
 
   // Enable Wired Streams Modal
@@ -257,5 +245,14 @@ export class OnboardingApp {
 
   async confirmEnableWiredStreamsModal() {
     await this.enableWiredStreamsConfirmButton.click();
+  }
+
+  async confirmEnableWiredStreamsModalIfPresent({ timeout = 2_000 } = {}) {
+    try {
+      await this.enableWiredStreamsModal.waitFor({ state: 'visible', timeout });
+      await this.confirmEnableWiredStreamsModal();
+    } catch {
+      // Modal omitted: Wired Streams was already enabled in this session.
+    }
   }
 }

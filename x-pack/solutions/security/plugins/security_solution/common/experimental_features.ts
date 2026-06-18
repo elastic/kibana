@@ -147,9 +147,6 @@ export const allowedExperimentalValues = Object.freeze({
    */
   crowdstrikeRunScriptEnabled: true,
 
-  /** Enables new Data View Picker */
-  newDataViewPickerEnabled: true,
-
   /**
    * Enables Microsoft Defender for Endpoint's RunScript command
    * Release: 8.19/9.1
@@ -166,6 +163,11 @@ export const allowedExperimentalValues = Object.freeze({
    * Allows users to manage trusted USB and external devices
    */
   trustedDevices: true,
+
+  /**
+   * Enables custom YARA signature management in Elastic Defend.
+   */
+  customYaraSignaturesEnabled: false,
 
   /**
    * Enables the ability to import and migration dashboards through automatic migration service
@@ -237,6 +239,12 @@ export const allowedExperimentalValues = Object.freeze({
   pciComplianceAgentBuilder: true,
 
   /**
+   * Enables the find-security-rules Agent Builder skill.
+   * Part of the DEX AI skills family (`dexAiSkill*`).
+   */
+  dexAiSkillFindRules: false,
+
+  /**
    * Enables the new flyout using the EUI flyout system
    */
   newFlyoutSystemEnabled: false,
@@ -247,9 +255,9 @@ export const allowedExperimentalValues = Object.freeze({
   entityAnalyticsEntityStoreV2: true,
 
   /**
-   * Enables entity ML job behavior maintainer
+   * Enables entity ML anomaly details API
    */
-  entityAnalyticsMlJobBehaviorMaintainer: false,
+  entityAnalyticsAnomalyDetails: false,
 
   /**
    * Enables the deprecated prebuilt rules UI
@@ -276,6 +284,18 @@ export const allowedExperimentalValues = Object.freeze({
    * (`/api/detection_engine/attacks/*`).
    */
   publicAttacksApiEnabled: false,
+
+  /**
+   * Enables the agent builder `run_rule_preview` tool and the `security.rule.preview`
+   * attachment (server type + client renderer). Gates registration so the feature can
+   * ship dark and be enabled per environment.
+   */
+  rulePreviewAttachmentEnabled: false,
+
+  /**
+   * Enables the risk score history API endpoint for Entity Analytics.
+   */
+  riskScoreHistoryEnabled: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;

@@ -6,7 +6,21 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { Detection, Discovery, Verdict } from '@kbn/streams-schema';
+import type { Detection, Discovery, SigEventStatus } from '@kbn/streams-schema';
+
+export const FIND_SIGNIFICANT_EVENTS_LABEL = i18n.translate(
+  'xpack.streams.significantEventsDiscovery.findSignificantEventsLabel',
+  {
+    defaultMessage: 'Find Significant Events',
+  }
+);
+
+export const CANCEL_DISCOVERY_LABEL = i18n.translate(
+  'xpack.streams.significantEventsDiscovery.cancelDiscoveryLabel',
+  {
+    defaultMessage: 'Cancel',
+  }
+);
 
 export const GENERATE_FEATURES_BUTTON_LABEL = i18n.translate(
   'xpack.streams.significantEventsDiscovery.streamsView.generateFeaturesButtonLabel',
@@ -105,7 +119,6 @@ export const CHANGE_TYPE_LABELS: Record<string, string> = {
 
 export const changeTypeLabel = (type?: string): string =>
   (type ? CHANGE_TYPE_LABELS[type] : undefined) ?? type ?? '-';
-
 export const DETECTION_KIND_LABELS: Record<Detection['kind'], string> = {
   detection: i18n.translate('xpack.streams.detection.kind.detected', {
     defaultMessage: 'Detected',
@@ -119,22 +132,28 @@ export const DETECTION_KIND_LABELS: Record<Detection['kind'], string> = {
 };
 
 export const DISCOVERY_KIND_LABELS: Record<Discovery['kind'], string> = {
-  finding: i18n.translate('xpack.streams.discovery.kind.finding', {
-    defaultMessage: 'Open',
+  discovery: i18n.translate('xpack.streams.discovery.kind.discovery', {
+    defaultMessage: 'Discovery',
   }),
   clearance: i18n.translate('xpack.streams.discovery.kind.clearance', {
     defaultMessage: 'Cleared',
   }),
+  handled: i18n.translate('xpack.streams.discovery.kind.handled', {
+    defaultMessage: 'Processed',
+  }),
 };
 
-export const VERDICT_LABELS: Record<Verdict['verdict'], string> = {
-  promoted: i18n.translate('xpack.streams.verdict.promoted', {
+export const SIG_EVENT_STATUS_LABELS: Record<SigEventStatus, string> = {
+  promoted: i18n.translate('xpack.streams.sigEvent.status.promoted', {
     defaultMessage: 'Promoted',
   }),
-  demoted: i18n.translate('xpack.streams.verdict.demoted', {
-    defaultMessage: 'Demoted',
-  }),
-  acknowledged: i18n.translate('xpack.streams.verdict.acknowledged', {
+  acknowledged: i18n.translate('xpack.streams.sigEvent.status.acknowledged', {
     defaultMessage: 'Acknowledged',
+  }),
+  resolved: i18n.translate('xpack.streams.sigEvent.status.resolved', {
+    defaultMessage: 'Resolved',
+  }),
+  demoted: i18n.translate('xpack.streams.sigEvent.status.demoted', {
+    defaultMessage: 'Demoted',
   }),
 };
