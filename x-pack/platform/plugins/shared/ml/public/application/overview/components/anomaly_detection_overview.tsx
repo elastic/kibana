@@ -14,15 +14,13 @@ import type { MlSummaryJobs } from '@kbn/ml-common-types/anomaly_detection_jobs/
 import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
 import adImage from '../../jobs/jobs_list/components/anomaly_detection_empty_state/machine_learning_cog.svg';
 import { usePermissionCheck } from '../../capabilities/check_capabilities';
-import { mlNodesAvailable } from '../../ml_nodes_check';
 import { useMlApi, useMlLocator, useMlManagementLocator } from '../../contexts/kibana';
 import { AnomalyDetectionEmptyState } from '../../jobs/jobs_list/components/anomaly_detection_empty_state/anomaly_detection_empty_state';
 import { MLEmptyPromptCard } from '../../components/overview/ml_empty_prompt_card';
 import { useOverviewPageCustomCss } from '../overview_ml_page';
 
 export const AnomalyDetectionOverviewCard: FC = () => {
-  const [canGetJobs, canCreateJob] = usePermissionCheck(['canGetJobs', 'canCreateJob']);
-  const disableCreateAnomalyDetectionJob = !canCreateJob || !mlNodesAvailable();
+  const canGetJobs = usePermissionCheck('canGetJobs');
   const [isLoading, setIsLoading] = useState(false);
   const [hasADJobs, setHasADJobs] = useState(false);
 
@@ -87,13 +85,13 @@ export const AnomalyDetectionOverviewCard: FC = () => {
         </EuiButton>
       );
     }
-    if (canGetJobs && canCreateJob) {
+    if (canGetJobs) {
       actions.push(
         <EuiButtonEmpty
           color="text"
           onClick={redirectToManageJobs}
-          isDisabled={disableCreateAnomalyDetectionJob}
           data-test-subj="manageJobsButton"
+          isDisabled={!canGetJobs}
         >
           <FormattedMessage
             id="xpack.ml.overview.anomalyDetection.manageJobsButton"
@@ -103,14 +101,7 @@ export const AnomalyDetectionOverviewCard: FC = () => {
       );
     }
     return actions;
-  }, [
-    disableCreateAnomalyDetectionJob,
-    hasADJobs,
-    canCreateJob,
-    canGetJobs,
-    redirectToMultiMetricExplorer,
-    redirectToManageJobs,
-  ]);
+  }, [hasADJobs, canGetJobs, redirectToMultiMetricExplorer, redirectToManageJobs]);
 
   return showEmptyState ? (
     <AnomalyDetectionEmptyState customCss={overviewPageCardCustomCss} iconSize="m" />
