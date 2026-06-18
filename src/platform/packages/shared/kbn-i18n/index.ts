@@ -55,6 +55,7 @@ export {
   toCanonicalLocaleId,
   setAvailableLocales,
   getAvailableLocales,
+  getBrowserPreferredLocale,
 } from './src/locales';
 export type { AvailableLocale, SupportedLocaleId } from './src/locales';
 export { i18n, i18nLoader };

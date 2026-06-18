@@ -91,3 +91,25 @@ export const setAvailableLocales = (locales: ReadonlyArray<AvailableLocale>): vo
  * been called or if the deployment has disabled the picker.
  */
 export const getAvailableLocales = (): ReadonlyArray<AvailableLocale> => availableLocales;
+
+/**
+ * Resolves the browser's most-preferred language to a locale id this Kibana
+ * instance can actually serve, mirroring how the server matches the
+ * `Accept-Language` header during render: the highest-priority entry in
+ * `navigator.languages` with a case-insensitive match against the available
+ * locales wins. Returns `undefined` when the browser preference cannot be
+ * served, or when called outside a browser (e.g. on the server).
+ */
+export const getBrowserPreferredLocale = (
+  availableLocales: ReadonlyArray<{ id: string }> = getAvailableLocales()
+): SupportedLocaleId | undefined => {
+  if (typeof navigator === 'undefined') return undefined;
+  const preferences = navigator.languages?.length
+    ? navigator.languages
+    : [navigator.language].filter(Boolean);
+  for (const preference of preferences) {
+    const match = availableLocales.find(({ id }) => id.toLowerCase() === preference.toLowerCase());
+    if (match) return match.id;
+  }
+  return undefined;
+};
