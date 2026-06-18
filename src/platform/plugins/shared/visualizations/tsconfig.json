@@ -90,7 +90,8 @@
     "@kbn/std",
     "@kbn/content-list",
     "@kbn/content-list-provider-client",
-    "@kbn/scout"
+    "@kbn/scout",
+    "@kbn/app-header"
   ],
   "exclude": ["target/**/*"]
 }

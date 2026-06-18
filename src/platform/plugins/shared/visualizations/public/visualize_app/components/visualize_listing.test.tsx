@@ -52,6 +52,10 @@ jest.mock('@kbn/content-management-tabbed-table-list-view', () => ({
   TabbedTableListView: () => null,
 }));
 
+jest.mock('@kbn/app-header', () => ({
+  AppHeader: () => null,
+}));
+
 describe('VisualizeListing', () => {
   beforeEach(() => {
     mockClearEditorState.mockClear();
@@ -60,15 +64,30 @@ describe('VisualizeListing', () => {
     mockNavigateToUrl.mockClear();
   });
 
-  it('renders the TabbedTableListView with the visualize-library title', () => {
+  it('renders the AppHeader with the visualize-library title and a create action', () => {
     const wrapper = shallowWithIntl(<VisualizeListing />);
-    expect(wrapper.prop('title')).toBe('Visualize library');
-    expect(wrapper.prop('headingId')).toBe('visualizeListingHeading');
+    const appHeader = wrapper.find('AppHeader');
+    expect(appHeader.prop('title')).toBe('Visualize library');
+    expect(appHeader.prop('menu')).toMatchObject({
+      primaryActionItem: {
+        id: 'createVisualization',
+        testId: 'visualizeListingCreateButton',
+        label: 'Create new visualization',
+      },
+    });
+  });
+
+  it('renders the TabbedTableListView with the listing heading id', () => {
+    const wrapper = shallowWithIntl(<VisualizeListing />);
+    expect(wrapper.find('TabbedTableListView').prop('headingId')).toBe('visualizeListingHeading');
   });
 
   it('seeds the visualize tab and merges registry tabs', () => {
     const wrapper = shallowWithIntl(<VisualizeListing />);
-    const tabs = wrapper.prop('tabs') as Array<{ id: string; title: string }>;
+    const tabs = wrapper.find('TabbedTableListView').prop('tabs') as Array<{
+      id: string;
+      title: string;
+    }>;
     expect(tabs).toHaveLength(1);
     expect(tabs[0]).toMatchObject({ id: 'visualizations', title: 'Visualizations' });
   });
@@ -82,7 +101,9 @@ describe('VisualizeListing', () => {
 
   it('navigates via the application service when the active tab changes', () => {
     const wrapper = shallowWithIntl(<VisualizeListing />);
-    const changeActiveTab = wrapper.prop('changeActiveTab') as (id: string) => void;
+    const changeActiveTab = wrapper.find('TabbedTableListView').prop('changeActiveTab') as (
+      id: string
+    ) => void;
     changeActiveTab('annotations');
     expect(mockNavigateToUrl).toHaveBeenCalledWith('#/annotations');
   });

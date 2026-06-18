@@ -39,7 +39,8 @@ export class VisualizeListingPage {
     // enclosing `<tr>` for row-scoped interactions.
     this.tableRows = page.locator('tr', { has: this.contentList.itemLinks });
     this.emptyPrompt = page.testSubj.locator('emptyListPrompt');
-    this.newVisButton = page.testSubj.locator('newItemButton');
+    // Header create action (the empty-state CTA is `newItemButton`).
+    this.newVisButton = page.testSubj.locator('visualizeListingCreateButton');
     this.dashboardFlowPrompt = page.testSubj.locator('visualize-dashboard-flow-prompt');
     this.contentEditorFlyoutTitle = page.testSubj.locator('flyoutTitle');
     this.contentEditorNameInput = page.testSubj.locator('nameInput');

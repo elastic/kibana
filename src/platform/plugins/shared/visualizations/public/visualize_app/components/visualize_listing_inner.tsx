@@ -8,9 +8,7 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
-import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import {
   ContentList,
   ContentListFooter,
@@ -63,27 +61,10 @@ export const VisualizeListingInner = ({ onCreateNewVis }: VisualizeListingInnerP
   return (
     <>
       <DashboardFlowCallout />
-      <EuiFlexGroup justifyContent="flexEnd" alignItems="center" gutterSize="s">
-        <EuiFlexItem grow={false}>
-          <EuiButton
-            data-test-subj="newItemButton"
-            iconType="plusInCircle"
-            onClick={onCreateNewVis}
-            fill
-          >
-            <FormattedMessage
-              id="visualizations.listing.createNewVisualizationButtonLabel"
-              defaultMessage="Create new visualization"
-            />
-          </EuiButton>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-      <EuiSpacer size="m" />
       <ContentList emptyState={emptyState}>
         <ContentListToolbar>
           <Filters>
             <Filters.Tags />
-            <Filters.CreatedBy />
             <Filters.Sort />
           </Filters>
         </ContentListToolbar>
@@ -94,6 +75,8 @@ export const VisualizeListingInner = ({ onCreateNewVis }: VisualizeListingInnerP
             name={customTypeColumn.name}
             field="typeTitle"
             sortable
+            width="11em"
+            truncateText
             render={renderTypeCell}
           />
           <Column.UpdatedAt />
