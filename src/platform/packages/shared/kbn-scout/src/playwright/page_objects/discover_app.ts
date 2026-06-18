@@ -132,7 +132,6 @@ export class DiscoverApp {
     }
 
     await expect(popover).toBeVisible();
-
     const menuItem = this.page.testSubj.locator(testId);
     await expect(menuItem).toBeVisible();
     await menuItem.click();
