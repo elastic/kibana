@@ -255,7 +255,7 @@ export class StreamsPlugin
             rulesClientOptions
           );
           return knowledgeIndicatorService.getClient({
-            esClient: scopedClusterClient.asCurrentUser,
+            esClient: scopedClusterClient.asInternalUser,
             soClient,
             alertingRulesClient: rulesClient,
             alertingV2RulesClient,
