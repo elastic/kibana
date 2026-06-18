@@ -6,7 +6,6 @@
  */
 
 import React, { memo, useCallback, useMemo, useState } from 'react';
-import { useParams } from 'react-router-dom';
 import {
   EuiButtonIcon,
   EuiEmptyPrompt,
@@ -38,14 +37,15 @@ const SIDEBAR_WIDTH = 400;
 const NO_HISTORY_IMG_SIZE = 128;
 
 interface RuleChangesHistoryProps {
+  ruleId: string;
   header?: React.ReactNode;
 }
 
 export const RuleChangesHistory = memo(function RuleChangesHistory({
+  ruleId,
   header,
 }: RuleChangesHistoryProps): JSX.Element {
   const { euiTheme } = useEuiTheme();
-  const { ruleId } = useParams<{ ruleId: string }>();
   const {
     application: { navigateToApp },
   } = useKibana().services;

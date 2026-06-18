@@ -117,6 +117,8 @@ const RuleActionsOverflowComponent = ({
                     data-test-subj="rules-details-history"
                     onClick={() => {
                       closePopover();
+                      // We can't use SecurityPageName.rulesChangesHistory here for
+                      // deepLinkId as deep linking doesn't support path parameters.
                       navigateToApp(APP_UI_ID, {
                         deepLinkId: SecurityPageName.rules,
                         path: getRuleChangesHistoryUrl(rule.id),
