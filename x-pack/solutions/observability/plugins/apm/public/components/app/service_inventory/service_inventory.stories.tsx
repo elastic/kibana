@@ -47,11 +47,11 @@ const stories: Meta<{}> = {
 };
 export default stories;
 
-export const Example: StoryFn<{}> = () => {
+export const EmptyState: StoryFn<{}> = () => {
   return <ServiceInventory />;
 };
 
-Example.parameters = {
+EmptyState.parameters = {
   routePath: '/services?rangeFrom=now-15m&rangeTo=now&comparisonEnabled=true&offset=1d',
   ...makeApmContextParams((endpoint) => {
     if (endpoint === '/internal/apm/time_range_metadata') return TIME_RANGE_METADATA_DEFAULTS;
@@ -61,7 +61,7 @@ Example.parameters = {
   }),
 };
 
-Example.decorators = [
+EmptyState.decorators = [
   (StoryComponent) => (
     <AnomalyDetectionJobsContext.Provider value={anomalyDetectionJobsContextValue}>
       <StoryComponent />
@@ -69,130 +69,45 @@ Example.decorators = [
   ),
 ];
 
-/**
- * Showcases alerts, SLO status, and ML anomaly columns with hand-crafted data.
- * No Elasticsearch or ML cluster required.
- */
-export const AllFeatures: StoryFn<{}> = () => {
+// Synthtrace-derived metrics augmented with alert/SLO/anomaly data for all columns.
+const _docs = opbeansScenario();
+const { items: _baseItems, ...rest } = toServiceInventoryResponse(_docs);
+
+const _ENRICHMENTS: Record<string, object> = {
+  'opbeans-node': { alertsCount: 3, sloStatus: 'violated', sloCount: 1, anomalyScore: 82 },
+  'opbeans-java': { alertsCount: 1, sloStatus: 'degrading', sloCount: 2, anomalyScore: 55 },
+  'opbeans-go': { sloStatus: 'healthy', sloCount: 3, anomalyScore: 27 },
+  'opbeans-python': { sloStatus: 'noData', sloCount: 1, anomalyScore: 5 },
+};
+
+const _enrichedInventory = {
+  ...rest,
+  items: _baseItems.map((item) => ({ ...item, ...(_ENRICHMENTS[item.serviceName] ?? {}) })),
+};
+
+export const WithData: StoryFn<{}> = () => {
   return <ServiceInventory />;
 };
 
-AllFeatures.storyName = 'All Features (Alerts + SLOs + ML Anomalies)';
+WithData.storyName = 'With Data (Alerts + SLOs + Anomalies)';
 
-AllFeatures.parameters = {
+WithData.parameters = {
   routePath: `/services?rangeFrom=${SCENARIO_START.toISOString()}&rangeTo=${SCENARIO_END.toISOString()}`,
   ...makeApmContextParams(
     (endpoint) => {
       if (endpoint === '/internal/apm/time_range_metadata') return TIME_RANGE_METADATA_DEFAULTS;
-      if (endpoint === '/internal/apm/services')
-        return {
-          items: [
-            {
-              serviceName: 'opbeans-node',
-              transactionType: 'request',
-              environments: ['opbeans'],
-              agentName: 'nodejs',
-              latency: 335_000,
-              transactionErrorRate: 0,
-              throughput: 2,
-              alertsCount: 3,
-              sloStatus: 'violated',
-              sloCount: 1,
-              anomalyScore: 82,
-            },
-            {
-              serviceName: 'opbeans-java',
-              transactionType: 'request',
-              environments: ['opbeans'],
-              agentName: 'java',
-              latency: 380_000,
-              transactionErrorRate: 0.1,
-              throughput: 1,
-              alertsCount: 1,
-              sloStatus: 'degrading',
-              sloCount: 2,
-              anomalyScore: 55,
-            },
-            {
-              serviceName: 'opbeans-go',
-              transactionType: 'request',
-              environments: ['opbeans'],
-              agentName: 'go',
-              latency: 150_000,
-              transactionErrorRate: 0,
-              throughput: 1,
-              sloStatus: 'healthy',
-              sloCount: 3,
-              anomalyScore: 27,
-            },
-            {
-              serviceName: 'opbeans-python',
-              transactionType: 'request',
-              environments: ['opbeans'],
-              agentName: 'python',
-              latency: 50_000,
-              transactionErrorRate: 0,
-              throughput: 1,
-              sloStatus: 'noData',
-              sloCount: 1,
-              anomalyScore: 5,
-            },
-            {
-              serviceName: 'opbeans-dotnet',
-              transactionType: 'request',
-              environments: ['opbeans'],
-              agentName: 'dotnet',
-              latency: 60_000,
-              transactionErrorRate: 0,
-              throughput: 1,
-            },
-          ],
-          maxCountExceeded: false,
-          serviceOverflowCount: 0,
-        };
+      if (endpoint === '/internal/apm/services') return _enrichedInventory;
       return {};
     },
     (endpoint) => {
       if (endpoint === '/internal/apm/services/detailed_statistics')
-        return toDetailedStatisticsResponse(opbeansScenario());
+        return toDetailedStatisticsResponse(_docs);
       return { currentPeriod: {}, previousPeriod: {} };
     }
   ),
 };
 
-AllFeatures.decorators = [
-  (StoryComponent) => (
-    <AnomalyDetectionJobsContext.Provider value={anomalyDetectionJobsContextValue}>
-      <StoryComponent />
-    </AnomalyDetectionJobsContext.Provider>
-  ),
-];
-
-/** All five opbeans services derived from `opbeansScenario()` — consistent with chart and service-map stories. */
-export const SynthtraceGenerated: StoryFn<{}> = () => {
-  return <ServiceInventory />;
-};
-
-const _synthDocs = opbeansScenario();
-const _inventoryResponse = toServiceInventoryResponse(_synthDocs);
-
-SynthtraceGenerated.parameters = {
-  routePath: `/services?rangeFrom=${SCENARIO_START.toISOString()}&rangeTo=${SCENARIO_END.toISOString()}`,
-  ...makeApmContextParams(
-    (endpoint) => {
-      if (endpoint === '/internal/apm/time_range_metadata') return TIME_RANGE_METADATA_DEFAULTS;
-      if (endpoint === '/internal/apm/services') return _inventoryResponse;
-      return {};
-    },
-    (endpoint) => {
-      if (endpoint === '/internal/apm/services/detailed_statistics')
-        return toDetailedStatisticsResponse(_synthDocs);
-      return { currentPeriod: {}, previousPeriod: {} };
-    }
-  ),
-};
-
-SynthtraceGenerated.decorators = [
+WithData.decorators = [
   (StoryComponent) => (
     <AnomalyDetectionJobsContext.Provider value={anomalyDetectionJobsContextValue}>
       <StoryComponent />

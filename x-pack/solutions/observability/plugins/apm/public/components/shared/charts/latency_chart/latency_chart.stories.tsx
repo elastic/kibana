@@ -72,9 +72,13 @@ const stories: Meta<Args> = {
     (StoryComponent, { args }) => {
       const { serviceName, latencyChartResponse } = args as Args;
 
-      const response = serviceName
-        ? toLatencyChartResponse(opbeansScenario(), serviceName)
-        : latencyChartResponse;
+      // latencyChartResponse (explicit story override) wins; serviceName is the interactive default
+      const response =
+        latencyChartResponse !== undefined
+          ? latencyChartResponse
+          : serviceName
+          ? toLatencyChartResponse(opbeansScenario(), serviceName)
+          : undefined;
 
       const contextServiceName = serviceName ?? 'opbeans-node';
 
