@@ -33,6 +33,7 @@ import type { DiscoverServices } from '../../../../build_services';
 import type { AppMenuDiscoverParams } from './app_menu_actions';
 import {
   getAlertsAppMenuItem,
+  getCreateRuleOptionsAppMenuItem,
   getNewSearchAppMenuItem,
   getOpenSearchAppMenuItem,
   getShareAppMenuItem,
@@ -163,11 +164,6 @@ export const useTopNavLinks = ({
     return getAppMenu(discoverParams);
   }, [getAppMenuAccessor, discoverParams]);
 
-  const additionalLegacyRuleTypes = useMemo(
-    () => profileAppMenuExtension.getAlertsLegacyRuleTypes?.() ?? [],
-    [profileAppMenuExtension]
-  );
-
   const appMenuItems: DiscoverAppMenuItemType[] = useMemo(() => {
     const items: DiscoverAppMenuItemType[] = [];
 
@@ -181,9 +177,6 @@ export const useTopNavLinks = ({
         tabId: currentTab.id,
         getState,
         dispatch,
-        showCreateRuleV2,
-        subscribe,
-        additionalLegacyRuleTypes,
       });
       items.push(alertsAppMenuItem);
     }
@@ -305,7 +298,6 @@ export const useTopNavLinks = ({
     appId,
     dispatch,
     getState,
-    subscribe,
     isEsqlMode,
     currentDataView,
     currentTab,
@@ -318,7 +310,6 @@ export const useTopNavLinks = ({
     intl,
     showCreateRuleV2,
     switchLanguageMode,
-    additionalLegacyRuleTypes,
   ]);
 
   const appMenuRegistry = useMemo(() => {
@@ -424,13 +415,31 @@ export const useTopNavLinks = ({
     // Allow profile accessors to add additional items/popover items
     const registry = profileAppMenuExtension.appMenuRegistry(newAppMenuRegistry);
 
+    if (showCreateRuleV2) {
+      const createRuleOptionsAppMenuItem = getCreateRuleOptionsAppMenuItem({
+        baseItem: registry.getItem(AppMenuActionId.alerts),
+        alertsPopoverItems: registry.getPopoverItems(AppMenuActionId.alerts),
+        services,
+        tabId: currentTab.id,
+        getState,
+        subscribe,
+      });
+
+      if (createRuleOptionsAppMenuItem) {
+        registry.registerItem(createRuleOptionsAppMenuItem);
+      }
+    }
+
     return registry;
   }, [
     profileAppMenuExtension,
     appMenuItems,
     services,
+    currentTab.id,
     dispatch,
     getState,
+    subscribe,
+    showCreateRuleV2,
     hasUnsavedChanges,
     transferBackToEditor,
     persistedDiscoverSession,

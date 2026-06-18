@@ -13,7 +13,7 @@ import type {
   AppMenuPrimaryActionItem,
   AppMenuRunActionParams,
 } from '@kbn/core-chrome-app-menu-components';
-import type { ReactElement, ReactNode } from 'react';
+import type { ReactElement } from 'react';
 
 export enum AppMenuActionId {
   new = 'new',
@@ -47,13 +47,21 @@ export interface DiscoverAppMenuRunActionParams extends AppMenuRunActionParams {
  */
 export type DiscoverAppMenuRunAction = (
   params: DiscoverAppMenuRunActionParams
-) => ReactElement | void | null | ReactNode | Promise<ReactElement | void | null | ReactNode>;
+) => void | Promise<void>;
+
+/**
+ * Discover-specific render action that returns content mounted by Discover.
+ */
+export type DiscoverAppMenuRenderAction = (
+  params: DiscoverAppMenuRunActionParams
+) => ReactElement | null;
 
 /**
  * Discover-specific popover item with typed run action and nested items
  */
 export type DiscoverAppMenuPopoverItem = Omit<AppMenuPopoverItem, 'run' | 'items'> & {
   run?: DiscoverAppMenuRunAction;
+  render?: DiscoverAppMenuRenderAction;
   /**
    * Sub-items for nested submenus (e.g., "Create legacy rules" submenu)
    */
@@ -65,6 +73,7 @@ export type DiscoverAppMenuPopoverItem = Omit<AppMenuPopoverItem, 'run' | 'items
  */
 export type DiscoverAppMenuItemType = Omit<AppMenuItemType, 'run' | 'items'> & {
   run?: DiscoverAppMenuRunAction;
+  render?: DiscoverAppMenuRenderAction;
   items?: DiscoverAppMenuPopoverItem[];
 };
 
@@ -73,6 +82,7 @@ export type DiscoverAppMenuItemType = Omit<AppMenuItemType, 'run' | 'items'> & {
  */
 export type DiscoverAppMenuPrimaryActionItem = Omit<AppMenuPrimaryActionItem, 'run'> & {
   run?: DiscoverAppMenuRunAction;
+  render?: DiscoverAppMenuRenderAction;
 };
 
 /**

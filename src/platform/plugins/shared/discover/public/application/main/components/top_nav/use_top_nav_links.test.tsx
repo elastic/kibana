@@ -22,7 +22,6 @@ import { ENABLE_ESQL } from '@kbn/esql-utils';
 import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
 import type { DiscoverServices } from '../../../../build_services';
 import type {
-  AlertsLegacyRuleType,
   AppMenuExtension,
   AppMenuExtensionParams,
   Profile,
@@ -474,23 +473,30 @@ describe('useTopNavLinks', () => {
       expect(alertsItem?.items!.length).toBeGreaterThan(0);
     });
 
-    describe('getAlertsLegacyRuleTypes', () => {
-      const profileLegacyRule: AlertsLegacyRuleType = {
-        id: 'custom-threshold-rule',
-        label: 'Create custom threshold rule',
-        render: jest.fn(() => null),
-      };
-
+    describe('profile alerts popover items', () => {
       beforeEach(() => {
         mockUseProfileAccessor.mockImplementation((accessorId) => {
           if (accessorId === 'getAppMenu') {
             return jest.fn((baseImpl) => {
               const getAppMenu = baseImpl as Profile['getAppMenu'];
 
-              return (params: AppMenuExtensionParams): AppMenuExtension => ({
-                ...getAppMenu(params),
-                getAlertsLegacyRuleTypes: () => [profileLegacyRule],
-              });
+              return (params: AppMenuExtensionParams): AppMenuExtension => {
+                const prevValue = getAppMenu(params);
+
+                return {
+                  appMenuRegistry: (registry) => {
+                    registry.registerPopoverItem(AppMenuActionId.alerts, {
+                      id: 'custom-threshold-rule',
+                      order: 2,
+                      label: 'Create custom threshold rule',
+                      testId: 'discoverAppMenuCustomThresholdRule',
+                      render: jest.fn(() => null),
+                    });
+
+                    return prevValue.appMenuRegistry(registry);
+                  },
+                };
+              };
             });
           }
 
@@ -502,32 +508,40 @@ describe('useTopNavLinks', () => {
         mockUseProfileAccessor.mockImplementation((accessorId) => jest.fn((baseImpl) => baseImpl));
       });
 
-      it('should pass profile legacy rule types to getAlertsAppMenuItem in ES|QL mode', async () => {
-        const getAlertsSpy = jest.spyOn(getAlerts, 'getAlertsAppMenuItem');
+      it('should pass profile popover items to the v2 app menu item in ES|QL mode', async () => {
+        const getCreateRuleOptionsSpy = jest.spyOn(getAlerts, 'getCreateRuleOptionsAppMenuItem');
 
         await setupWithAlertingV2({ isEsqlMode: true }, true);
 
-        expect(getAlertsSpy).toHaveBeenCalledWith(
+        expect(getCreateRuleOptionsSpy).toHaveBeenCalledWith(
           expect.objectContaining({
-            showCreateRuleV2: true,
-            additionalLegacyRuleTypes: expect.arrayContaining([
+            alertsPopoverItems: expect.arrayContaining([
               expect.objectContaining({
                 id: 'custom-threshold-rule',
                 label: 'Create custom threshold rule',
+                testId: 'discoverAppMenuCustomThresholdRule',
               }),
             ]),
           })
         );
 
-        getAlertsSpy.mockRestore();
+        getCreateRuleOptionsSpy.mockRestore();
       });
 
-      it('should not expose getAlertsLegacyRuleTypes through the v2 flyout in classic mode', async () => {
+      it('should leave profile popover items in the alerts menu in classic mode', async () => {
         const appMenuConfig = await setupWithAlertingV2({ isEsqlMode: false }, true);
 
         const alertsItem = appMenuConfig.items?.find((item) => item.id === AppMenuActionId.alerts);
         expect(alertsItem?.run).toBeUndefined();
         expect(alertsItem?.items).toBeDefined();
+        expect(alertsItem?.items).toEqual(
+          expect.arrayContaining([
+            expect.objectContaining({
+              id: 'custom-threshold-rule',
+              label: 'Create custom threshold rule',
+            }),
+          ])
+        );
       });
     });
   });

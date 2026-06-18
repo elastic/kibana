@@ -70,7 +70,7 @@ export const createExampleRootProfileProvider = (): RootProfileProvider => ({
                 order: 2,
                 label: 'Custom action 12 (from Root profile)',
                 testId: 'example-custom-root-action12',
-                run: ({ context: { onFinishAction } }) => {
+                render: ({ context: { onFinishAction } }) => {
                   // This is an example of a custom action that opens a flyout or any other custom modal.
                   // To do so, simply return a React element and call onFinishAction when you're done.
                   return (

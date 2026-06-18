@@ -85,6 +85,20 @@ export class AppMenuRegistry {
     }
   }
 
+  public getPopoverItems(parentId: string): DiscoverAppMenuPopoverItem[] {
+    return [...(this.items.get(parentId)?.items ?? [])];
+  }
+
+  public getItem(id: string): DiscoverAppMenuItemType | undefined {
+    const item = this.items.get(id);
+    if (!item) {
+      return undefined;
+    }
+
+    const { isCustom, ...menuItem } = item;
+    return menuItem.items ? { ...menuItem, items: [...menuItem.items] } : menuItem;
+  }
+
   /**
    * Get the complete AppMenuConfig.
    * Items with registered popover items will have their items property populated.

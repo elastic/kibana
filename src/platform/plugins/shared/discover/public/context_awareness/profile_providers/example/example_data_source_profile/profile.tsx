@@ -157,7 +157,7 @@ export const createExampleDataSourceProfileProvider = (): DataSourceProfileProvi
             label: 'Create SLO (Custom action)',
             iconType: 'chartGauge',
             testId: 'example-custom-action-under-alerts',
-            run: ({ context: { onFinishAction } }) => {
+            render: ({ context: { onFinishAction } }) => {
               // This is an example of a custom action that opens a flyout or any other custom modal.
               // To do so, simply return a React element and call onFinishAction when you're done.
               return (
