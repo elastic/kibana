@@ -33,6 +33,7 @@ describe('runDetectionChangePointAggregation', () => {
               doc_count: 10,
               change_points: { type: { spike: { p_value: 0.01 } } },
               last_5m: { doc_count: 2 },
+              last_floor_window: { doc_count: 0 },
             },
           ],
         },
@@ -62,10 +63,26 @@ describe('runDetectionChangePointAggregation', () => {
         aggs: expect.objectContaining({
           by_rule: expect.objectContaining({
             terms: { field: 'kibana.alert.rule.uuid', size: 1000 },
+            aggs: expect.objectContaining({
+              last_floor_window: {
+                filter: { range: { '@timestamp': { gte: 'now-20m' } } },
+              },
+            }),
           }),
         }),
       })
     );
+  });
+
+  it('passes through last_floor_window doc_count in enriched buckets', async () => {
+    const result = await runDetectionChangePointAggregation({
+      esClient,
+      resolved: { alertsSource: V1_ALERTS_SOURCE, alertIndex: ALERTS_DATA_STREAM },
+      params: { lookback: 'now-30m', bucketInterval: '30s', spaceId: 'default' },
+      ruleMetadata,
+    });
+
+    expect(result.aggregations.by_rule.buckets[0].last_floor_window).toEqual({ doc_count: 0 });
   });
 
   it('queries v2 rule-events with cardinality on group_hash', async () => {
@@ -102,6 +119,9 @@ describe('runDetectionChangePointAggregation', () => {
               change_points: {
                 change_point: { buckets_path: 'over_time>signal_count' },
               },
+              last_floor_window: {
+                filter: { range: { '@timestamp': { gte: 'now-20m' } } },
+              },
             }),
           }),
         }),
@@ -124,6 +144,7 @@ describe('runDetectionChangePointAggregation', () => {
         doc_count: 10,
         rule_name: { top: [{ metrics: { 'kibana.alert.rule.name': 'Rule A' } }] },
         stream: { buckets: [{ key: 'logs.test' }] },
+        last_floor_window: { doc_count: 0 },
       }),
     ]);
   });

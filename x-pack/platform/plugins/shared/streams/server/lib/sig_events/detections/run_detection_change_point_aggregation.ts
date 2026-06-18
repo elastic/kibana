@@ -16,6 +16,7 @@ import { ALERTS_DATA_STREAM, RULE_EVENTS_DATA_STREAM } from '../alerts_data_stre
 
 const RULES_BUCKET_SIZE = 1000;
 const RECENT_ACTIVITY_MINUTES = 5;
+const LOOKBACK_MINUTES_FLOOR = 20;
 
 export interface ChangePointScanParams {
   lookback: string;
@@ -38,6 +39,9 @@ export interface ChangePointRuleBucket {
   last_5m: {
     doc_count: number;
   };
+  last_floor_window: {
+    doc_count: number;
+  };
 }
 
 export interface ChangePointScanResult extends ResolvedDetectionAlertsSource {
@@ -55,6 +59,7 @@ interface RawRuleBucket {
   stream?: { buckets?: Array<{ key: string }> };
   change_points?: { type?: Record<string, { p_value: number }> };
   last_5m?: { doc_count?: number };
+  last_floor_window?: { doc_count?: number };
 }
 
 export async function runDetectionChangePointAggregation({
@@ -129,6 +134,9 @@ function buildV1ScanBody({ lookback, bucketInterval, spaceId }: ChangePointScanP
           last_5m: {
             filter: { range: { '@timestamp': { gte: `now-${RECENT_ACTIVITY_MINUTES}m` } } },
           },
+          last_floor_window: {
+            filter: { range: { '@timestamp': { gte: `now-${LOOKBACK_MINUTES_FLOOR}m` } } },
+          },
           change_points: {
             change_point: { buckets_path: 'over_time>_count' },
           },
@@ -169,6 +177,9 @@ function buildV2ScanBody({ lookback, bucketInterval, spaceId }: ChangePointScanP
           last_5m: {
             filter: { range: { '@timestamp': { gte: `now-${RECENT_ACTIVITY_MINUTES}m` } } },
           },
+          last_floor_window: {
+            filter: { range: { '@timestamp': { gte: `now-${LOOKBACK_MINUTES_FLOOR}m` } } },
+          },
           change_points: {
             change_point: { buckets_path: 'over_time>signal_count' },
           },
@@ -205,6 +216,7 @@ function enrichBucket(
       stream: streamAgg,
       change_points: changePoints,
       last_5m: { doc_count: bucket.last_5m?.doc_count ?? 0 },
+      last_floor_window: { doc_count: bucket.last_floor_window?.doc_count ?? 0 },
     };
   }
 
@@ -215,6 +227,7 @@ function enrichBucket(
     stream: { buckets: [{ key: streamName }] },
     change_points: changePoints,
     last_5m: { doc_count: bucket.last_5m?.doc_count ?? 0 },
+    last_floor_window: { doc_count: bucket.last_floor_window?.doc_count ?? 0 },
   };
 }
 
