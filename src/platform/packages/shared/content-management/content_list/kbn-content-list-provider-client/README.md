@@ -261,6 +261,8 @@ const TypeFilter = createFilterControl(typeFilter, {
 </ContentListClientProvider>;
 ```
 
+Omit `options` to derive the option list from the values present in the current list (faceted), exactly like the built-in tag and created-by filters — the control then shows only the values that actually occur, each with its live count, instead of a fixed universe with zero-count noise. Provide `options` only when you want a fixed set (including values not currently present).
+
 For full control over the popover, drop `createFilterControl` and use `CustomFilterRenderer` (or `SelectableFilterPopover` from `@kbn/content-list-toolbar`) inside your own `filter.createComponent`.
 
 ### Rendering `<Action.ContentEditor />`
