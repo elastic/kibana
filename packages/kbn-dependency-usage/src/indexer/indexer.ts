@@ -357,11 +357,7 @@ export async function ensureIndexTemplate(opts: IndexerOptions): Promise<void> {
     headers: buildHeaders(opts),
   });
   if (checkRes.status === 404) {
-    await putJson(
-      `${opts.esUrl}/_transform/${TRANSFORM_INDEX_NAME}`,
-      TRANSFORM_DEFINITION,
-      opts
-    );
+    await putJson(`${opts.esUrl}/_transform/${TRANSFORM_INDEX_NAME}`, TRANSFORM_DEFINITION, opts);
     const startRes = await fetch(`${opts.esUrl}/_transform/${TRANSFORM_INDEX_NAME}/_start`, {
       method: 'POST',
       headers: buildHeaders(opts),
