@@ -11,7 +11,11 @@ import { coreMock } from '@kbn/core/public/mocks';
 
 import { createIntegrationsTestRendererMock } from '../../../mock';
 
-import { useInstallPackage, useUninstallPackage, PackageInstallProvider } from './use_package_install';
+import {
+  useInstallPackage,
+  useUninstallPackage,
+  PackageInstallProvider,
+} from './use_package_install';
 
 const mockInvalidateQueries = jest.fn();
 jest.mock('@kbn/react-query', () => ({
