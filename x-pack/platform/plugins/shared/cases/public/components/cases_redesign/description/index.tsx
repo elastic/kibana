@@ -6,6 +6,7 @@
  */
 
 import React, { useCallback, useMemo, useRef, useState } from 'react';
+import { css } from '@emotion/react';
 import {
   EuiButtonIcon,
   EuiPanel,
@@ -13,6 +14,8 @@ import {
   EuiFlexItem,
   EuiText,
   EuiToolTip,
+  useEuiTheme,
+  useEuiFontSize,
 } from '@elastic/eui';
 
 import * as i18n from '../../user_actions/translations';
@@ -25,7 +28,6 @@ import type { CaseUI } from '../../../containers/types';
 import type { OnUpdateFields } from '../../case_view/types';
 import { schema } from './schema';
 import { useLensDraftDescription } from './hooks/use_lens_draft_description';
-import { useDescriptionStyles } from './hooks/use_description_styles';
 
 export type { DescriptionMarkdownRefObject } from './types';
 
@@ -46,6 +48,8 @@ export const Description = ({
   const descriptionRef = useRef(null);
   const descriptionMarkdownRef = useRef<DescriptionMarkdownRefObject | null>(null);
 
+  const { euiTheme } = useEuiTheme();
+  const sFontSize = useEuiFontSize('s');
   const { permissions, owner } = useCasesContext();
 
   const { handleOnChangeEditable } = useLensDraftDescription({
@@ -77,7 +81,51 @@ export const Description = ({
     [draftDescription, caseData.description, isLoadingDescription]
   );
 
-  const styles = useDescriptionStyles();
+  const styles = useMemo(
+    () => ({
+      title: css`
+        font-weight: ${euiTheme.font.weight.medium};
+        font-size: ${sFontSize.fontSize};
+        line-height: ${sFontSize.lineHeight};
+        letter-spacing: 0;
+      `,
+      preview: css`
+        color: ${euiTheme.colors.textSubdued};
+        font-weight: ${euiTheme.font.weight.regular};
+        font-size: ${sFontSize.fontSize};
+        line-height: ${sFontSize.lineHeight};
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        display: block;
+        max-width: 40vw;
+      `,
+      header: css`
+        padding: ${euiTheme.size.s};
+        align-items: center;
+        min-height: ${euiTheme.size.xxl};
+      `,
+      editIcon: css`
+        .euiButtonIcon__icon {
+          color: ${euiTheme.colors.textSubdued};
+        }
+      `,
+      content: css`
+        background: ${euiTheme.colors.backgroundBaseSubdued};
+        border-radius: ${euiTheme.size.xs};
+        padding: ${euiTheme.size.s};
+
+        > div {
+          padding: 0;
+        }
+      `,
+      unsavedDraft: css`
+        border-top: ${euiTheme.border.thin};
+        padding: ${euiTheme.size.s};
+      `,
+    }),
+    [euiTheme, sFontSize]
+  );
 
   const descriptionPreview = useMemo(
     () => getDescriptionPreview(caseData.description),
