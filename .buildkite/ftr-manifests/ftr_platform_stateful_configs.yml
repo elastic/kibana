@@ -365,6 +365,8 @@ enabled:
   - x-pack/platform/test/security_functional/saml.config.ts
   - x-pack/platform/test/security_functional/saml.http2.config.ts
   - x-pack/platform/test/security_functional/oidc.http2.config.ts
+  - x-pack/platform/test/security_functional/pki.config.ts
+  - x-pack/platform/test/security_functional/pki.http2.config.ts
   - x-pack/platform/test/security_functional/insecure_cluster_warning.config.ts
   - x-pack/platform/test/security_functional/user_profiles.config.ts
   - x-pack/platform/test/security_functional/expired_session.config.ts
