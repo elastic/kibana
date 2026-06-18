@@ -29,6 +29,9 @@ interface QuickRange {
 
 /**
  * Presets appended to `timepicker:quickRanges` in model version 3.
+ * Ordered chronologically (shortest span first within each family) so that the
+ * block appended to a user's existing list reads naturally.
+ *
  * Entries are deduped by `from|to`, so existing customizations (including custom
  * `display` labels) are preserved.
  *
@@ -38,13 +41,13 @@ interface QuickRange {
  * for the new value path only.
  */
 export const TIMEPICKER_QUICK_RANGES_V3_PRESETS: ReadonlyArray<QuickRange> = [
-  { from: 'now/M', to: 'now/M', display: 'This month' },
   { from: 'now-1d/d', to: 'now-1d/d', display: 'Yesterday' },
-  { from: 'now-3h', to: 'now', display: 'Last 3 hours' },
+  { from: 'now/w', to: 'now', display: 'Week to date' },
+  { from: 'now/M', to: 'now/M', display: 'This month' },
+  { from: 'now/M', to: 'now', display: 'Month to date' },
   { from: 'now/y', to: 'now/y', display: 'This year' },
   { from: 'now/y', to: 'now', display: 'Year to date' },
-  { from: 'now/M', to: 'now', display: 'Month to date' },
-  { from: 'now/w', to: 'now', display: 'Week to date' },
+  { from: 'now-3h', to: 'now', display: 'Last 3 hours' },
   { from: 'now-12h', to: 'now', display: 'Last 12 hours' },
   { from: 'now-3d', to: 'now', display: 'Last 3 days' },
 ];
