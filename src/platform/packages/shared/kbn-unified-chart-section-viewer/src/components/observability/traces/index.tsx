@@ -123,7 +123,6 @@ function TraceMetricsGrid({
           actions,
           profileId,
           breakdownField,
-          onBreakdownFieldChange,
         }}
       >
         <EuiPanel
