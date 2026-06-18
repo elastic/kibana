@@ -461,6 +461,123 @@ describe('HTTPAuthenticationProvider', () => {
 
       expect(mockOptionsWithUiam.uiam!.exchangeOAuthToken).not.toHaveBeenCalled();
     });
+
+    it('stores the original OAuth access token after a successful exchange.', async () => {
+      const header = 'Bearer essu_oauth_access_token';
+      const user = mockAuthenticatedUser();
+
+      mockOptionsWithUiam.uiam!.exchangeOAuthToken.mockResolvedValue('essu_ephemeral_token');
+
+      const request = httpServerMock.createKibanaRequest({
+        headers: { authorization: header },
+        routeTags: [ROUTE_TAG_ACCEPT_UIAM_OAUTH],
+      });
+
+      const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
+      mockScopedClusterClient.asCurrentUser.security.authenticate.mockResponse(user);
+      mockOptionsWithUiam.client.asScoped.mockReturnValue(mockScopedClusterClient);
+
+      const provider = new HTTPAuthenticationProvider(mockOptionsWithUiam, {
+        supportedSchemes: new Set(['bearer']),
+      });
+
+      await provider.authenticate(request);
+
+      expect(mockOptionsWithUiam.uiam!.setOAuthCredential).toHaveBeenCalledWith(
+        request,
+        'essu_oauth_access_token'
+      );
+    });
+
+    it('exchanges UIAM OAuth token on a public route when `taggedRoutesOnly` is disabled.', async () => {
+      const header = 'Bearer essu_oauth_access_token';
+      const user = mockAuthenticatedUser();
+
+      mockOptionsWithUiam.uiam!.exchangeOAuthToken.mockResolvedValue('essu_ephemeral_token');
+
+      const request = httpServerMock.createKibanaRequest({
+        headers: { authorization: header },
+        kibanaRouteOptions: { xsrfRequired: true, access: 'public' },
+      });
+
+      const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
+      mockScopedClusterClient.asCurrentUser.security.authenticate.mockResponse(user);
+      mockOptionsWithUiam.client.asScoped.mockReturnValue(mockScopedClusterClient);
+
+      const provider = new HTTPAuthenticationProvider(mockOptionsWithUiam, {
+        supportedSchemes: new Set(['bearer']),
+        uiam: { taggedRoutesOnly: false },
+      });
+
+      await expect(provider.authenticate(request)).resolves.toEqual(
+        AuthenticationResult.succeeded(
+          { ...user, authentication_provider: { type: 'http', name: 'http' } },
+          {
+            authHeaders: {
+              authorization: 'Bearer essu_ephemeral_token',
+              [ES_CLIENT_AUTHENTICATION_HEADER]: 'some-shared-secret',
+            },
+          }
+        )
+      );
+
+      expect(mockOptionsWithUiam.uiam!.exchangeOAuthToken).toHaveBeenCalledWith(
+        'essu_oauth_access_token'
+      );
+      expect(mockOptionsWithUiam.uiam!.setOAuthCredential).toHaveBeenCalledWith(
+        request,
+        'essu_oauth_access_token'
+      );
+    });
+
+    it('does not exchange UIAM OAuth token on an internal route even when `taggedRoutesOnly` is disabled.', async () => {
+      const header = 'Bearer essu_oauth_access_token';
+      const user = mockAuthenticatedUser();
+
+      const request = httpServerMock.createKibanaRequest({
+        headers: { authorization: header },
+        kibanaRouteOptions: { xsrfRequired: true, access: 'internal' },
+      });
+
+      const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
+      mockScopedClusterClient.asCurrentUser.security.authenticate.mockResponse(user);
+      mockOptionsWithUiam.client.asScoped.mockReturnValue(mockScopedClusterClient);
+
+      const provider = new HTTPAuthenticationProvider(mockOptionsWithUiam, {
+        supportedSchemes: new Set(['bearer']),
+        uiam: { taggedRoutesOnly: false },
+      });
+
+      await provider.authenticate(request);
+
+      expect(mockOptionsWithUiam.uiam!.exchangeOAuthToken).not.toHaveBeenCalled();
+      expect(mockOptionsWithUiam.logger.warn).toHaveBeenCalledWith(
+        expect.stringContaining('Detected UIAM OAuth token on a non-MCP endpoint')
+      );
+    });
+
+    it('does not exchange UIAM OAuth token on a public route when `taggedRoutesOnly` is enabled.', async () => {
+      const header = 'Bearer essu_oauth_access_token';
+      const user = mockAuthenticatedUser();
+
+      const request = httpServerMock.createKibanaRequest({
+        headers: { authorization: header },
+        kibanaRouteOptions: { xsrfRequired: true, access: 'public' },
+      });
+
+      const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
+      mockScopedClusterClient.asCurrentUser.security.authenticate.mockResponse(user);
+      mockOptionsWithUiam.client.asScoped.mockReturnValue(mockScopedClusterClient);
+
+      const provider = new HTTPAuthenticationProvider(mockOptionsWithUiam, {
+        supportedSchemes: new Set(['bearer']),
+        uiam: { taggedRoutesOnly: true },
+      });
+
+      await provider.authenticate(request);
+
+      expect(mockOptionsWithUiam.uiam!.exchangeOAuthToken).not.toHaveBeenCalled();
+    });
   });
 
   describe('`logout` method', () => {

@@ -211,6 +211,9 @@ describe('config schema', () => {
               "apikey",
               "bearer",
             ],
+            "uiam": Object {
+              "taggedRoutesOnly": true,
+            },
           },
           "providers": Object {
             "anonymous": undefined,
@@ -1655,6 +1658,32 @@ describe('config schema', () => {
           { serverless: true }
         ).authc.http.jwt.taggedRoutesOnly
       ).toEqual(false);
+    });
+
+    it('should not allow xpack.security.authc.http.uiam.* to be configured outside of the serverless context', () => {
+      expect(() =>
+        ConfigSchema.validate(
+          { authc: { http: { uiam: { taggedRoutesOnly: false } } } },
+          { serverless: false }
+        )
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"[authc.http.uiam]: a value wasn't expected to be present"`
+      );
+    });
+
+    it('should allow xpack.security.authc.http.uiam.* to be configured inside of the serverless context', () => {
+      expect(
+        ConfigSchema.validate(
+          { authc: { http: { uiam: { taggedRoutesOnly: false } } } },
+          { serverless: true }
+        ).authc.http.uiam?.taggedRoutesOnly
+      ).toEqual(false);
+    });
+
+    it('should default xpack.security.authc.http.uiam.taggedRoutesOnly to true inside of the serverless context', () => {
+      expect(
+        ConfigSchema.validate({}, { serverless: true }).authc.http.uiam?.taggedRoutesOnly
+      ).toEqual(true);
     });
   });
 

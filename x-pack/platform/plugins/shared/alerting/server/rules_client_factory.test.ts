@@ -590,6 +590,56 @@ describe('RulesClientFactory', () => {
     expect(uiamApiKeys.grant).not.toHaveBeenCalled();
   });
 
+  test('createAPIKey() forwards the original OAuth-exchanged request to the UIAM and ES grants', async () => {
+    const factory = new RulesClientFactory();
+    factory.initialize({
+      ...rulesClientFactoryParams,
+      securityService,
+      securityPluginSetup,
+      securityPluginStart,
+      shouldGrantUiam: true,
+    });
+    // After UIAM OAuth token exchange the request only carries the short-lived ephemeral token
+    // (still `essu_`-prefixed, so it passes the UIAM credential guard). The original OAuth token is
+    // resolved inside the security grant via the forwarded request, so the request object must be
+    // passed through unchanged.
+    const requestWithOAuth = mockRouter.createKibanaRequest({
+      headers: { authorization: 'Bearer essu_ephemeral_token' },
+    });
+    await factory.create(requestWithOAuth, savedObjectsService);
+    const constructorCall = jest.requireMock('./rules_client').RulesClient.mock.calls[0][0];
+
+    const uiamApiKeys = {
+      grant: jest
+        .fn()
+        .mockResolvedValueOnce({ id: 'uiam-id', name: 'uiam-test', api_key: 'uiam-secret' }),
+      invalidate: jest.fn(),
+    };
+    securityService.authc.apiKeys.uiam = uiamApiKeys as never;
+    securityService.authc.apiKeys.grantAsInternalUser.mockResolvedValueOnce({
+      api_key: '123',
+      id: 'abc',
+      name: '',
+    });
+
+    const createAPIKeyResult = await constructorCall.createAPIKey('test');
+
+    expect(uiamApiKeys.grant).toHaveBeenCalledWith(requestWithOAuth, { name: 'uiam-test' });
+    expect(securityService.authc.apiKeys.grantAsInternalUser).toHaveBeenCalledWith(
+      requestWithOAuth,
+      {
+        metadata: { managed: true, kibana: { type: 'alerting_rule' } },
+        name: 'test',
+        role_descriptors: {},
+      }
+    );
+    expect(createAPIKeyResult).toEqual({
+      apiKeysEnabled: true,
+      result: { api_key: '123', id: 'abc', name: '' },
+      uiamResult: { id: 'uiam-id', name: 'uiam-test', api_key: 'uiam-secret' },
+    });
+  });
+
   test('createAPIKey() returns an API key when security is enabled and grantAsInternalUser succeeds', async () => {
     const factory = new RulesClientFactory();
     factory.initialize({

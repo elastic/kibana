@@ -222,11 +222,14 @@ export class AuthenticationService {
       // For routes that accept UIAM OAuth tokens, return a 401 with a WWW-Authenticate header
       // containing the resource_metadata URL instead of redirecting to the login page.
       // https://datatracker.ietf.org/doc/html/rfc9728#name-www-authenticate-response
-      if (
-        preResponse.statusCode === 401 &&
-        config.mcp?.oauth2 &&
-        request.route.options.tags.includes(ROUTE_TAG_ACCEPT_UIAM_OAUTH)
-      ) {
+      // The challenge is emitted on routes tagged with `ROUTE_TAG_ACCEPT_UIAM_OAUTH`, or - when
+      // `taggedRoutesOnly` is disabled - on any public route (matching the authentication gate).
+      const acceptsUiamOAuth =
+        request.route.options.tags.includes(ROUTE_TAG_ACCEPT_UIAM_OAUTH) ||
+        (config.authc.http.uiam?.taggedRoutesOnly === false &&
+          request.route.options.access === 'public');
+
+      if (preResponse.statusCode === 401 && config.mcp?.oauth2 && acceptsUiamOAuth) {
         const baseUrl =
           http.basePath.publicBaseUrl ??
           `${request.url.protocol}//${request.url.host}${http.basePath.serverBasePath}`;

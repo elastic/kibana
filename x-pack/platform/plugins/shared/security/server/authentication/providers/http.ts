@@ -26,6 +26,11 @@ interface HTTPAuthenticationProviderOptions {
     // When set, only routes marked with `ROUTE_TAG_ACCEPT_JWT` tag will accept JWT as a means of authentication.
     taggedRoutesOnly: boolean;
   };
+  uiam?: {
+    // When `true`, only routes marked with the `ROUTE_TAG_ACCEPT_UIAM_OAUTH` tag accept UIAM OAuth
+    // access tokens. When `false`, UIAM OAuth access tokens are also accepted on any `access: 'public'` route.
+    taggedRoutesOnly: boolean;
+  };
 }
 
 /**
@@ -48,6 +53,11 @@ export class HTTPAuthenticationProvider extends BaseAuthenticationProvider {
    */
   private readonly jwt: HTTPAuthenticationProviderOptions['jwt'];
 
+  /**
+   * Options relevant to the UIAM OAuth authentication.
+   */
+  private readonly uiamHttp: HTTPAuthenticationProviderOptions['uiam'];
+
   constructor(
     protected readonly options: Readonly<AuthenticationProviderOptions>,
     httpOptions: Readonly<HTTPAuthenticationProviderOptions>
@@ -61,6 +71,7 @@ export class HTTPAuthenticationProvider extends BaseAuthenticationProvider {
       [...httpOptions.supportedSchemes].map((scheme) => scheme.toLowerCase())
     );
     this.jwt = httpOptions.jwt;
+    this.uiamHttp = httpOptions.uiam;
   }
 
   /**
@@ -96,7 +107,16 @@ export class HTTPAuthenticationProvider extends BaseAuthenticationProvider {
       authorizationHeader.scheme.toLowerCase() === 'bearer' &&
       isUiamCredential(authorizationHeader)
     ) {
-      if (request.route.options.tags.includes(ROUTE_TAG_ACCEPT_UIAM_OAUTH)) {
+      // UIAM OAuth tokens are accepted on routes explicitly tagged with `ROUTE_TAG_ACCEPT_UIAM_OAUTH`,
+      // or - when `taggedRoutesOnly` is disabled - on any public route. The `uiamHttp` option is only
+      // populated on the serverless offering, so this remains serverless-only by construction.
+      const acceptsUiamOAuthOnPublicRoute =
+        this.uiamHttp?.taggedRoutesOnly === false && request.route.options.access === 'public';
+
+      if (
+        request.route.options.tags.includes(ROUTE_TAG_ACCEPT_UIAM_OAUTH) ||
+        acceptsUiamOAuthOnPublicRoute
+      ) {
         return this.authenticateViaUiamOAuth(request, authorizationHeader);
       }
 
@@ -178,6 +198,9 @@ export class HTTPAuthenticationProvider extends BaseAuthenticationProvider {
       );
 
       const authHeaders = this.options.uiam!.getAuthenticationHeaders(ephemeralToken);
+
+      // Preserve the original OAuth access token for the lifetime of the request.
+      this.options.uiam!.setOAuthCredential(request, authorizationHeader.credentials);
 
       const user = await this.getUser(request, authHeaders);
 

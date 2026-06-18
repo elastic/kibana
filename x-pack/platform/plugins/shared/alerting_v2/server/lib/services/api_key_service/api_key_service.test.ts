@@ -110,6 +110,43 @@ describe('ApiKeyService', () => {
       expect(result.createdByUser).toBe(false);
     });
 
+    it('forwards the original request to the UIAM grant for an OAuth-exchanged request', async () => {
+      // After UIAM OAuth token exchange the request only carries the short-lived ephemeral token.
+      // The original OAuth token is resolved inside the security grant via the forwarded request,
+      // so alerting must hand the request object (not an extracted header) to the grant.
+      const request = httpServerMock.createKibanaRequest({
+        headers: { authorization: 'Bearer essu_ephemeral_token' },
+      });
+      const security = createMockSecurityService({ uiam: true });
+      const { invalidationSavedObjectsClient, logger } = createMockInvalidationDeps();
+      const service = new ApiKeyService(request, security, invalidationSavedObjectsClient, logger);
+
+      const result = await service.create('My Policy');
+
+      expect(security.authc.apiKeys.uiam!.grant).toHaveBeenCalledWith(request, {
+        name: 'uiam-My Policy',
+      });
+      expect(result.apiKey).toBe(Buffer.from('uiam-key-id:uiam-key-secret').toString('base64'));
+    });
+
+    it('forwards the original request to grantAsInternalUser for an OAuth-exchanged request', async () => {
+      const request = httpServerMock.createKibanaRequest({
+        headers: { authorization: 'Bearer essu_ephemeral_token' },
+      });
+      const security = createMockSecurityService();
+      const { invalidationSavedObjectsClient, logger } = createMockInvalidationDeps();
+      const service = new ApiKeyService(request, security, invalidationSavedObjectsClient, logger);
+
+      const result = await service.create('My Policy');
+
+      expect(security.authc.apiKeys.grantAsInternalUser).toHaveBeenCalledWith(request, {
+        name: 'My Policy',
+        role_descriptors: {},
+        metadata: { managed: true, kibana: { type: 'action_policy' } },
+      });
+      expect(result.apiKey).toBe(Buffer.from('es-key-id:es-key-secret').toString('base64'));
+    });
+
     it('throws when no current user is found', async () => {
       const request = httpServerMock.createKibanaRequest();
       const security = createMockSecurityService({ username: undefined });

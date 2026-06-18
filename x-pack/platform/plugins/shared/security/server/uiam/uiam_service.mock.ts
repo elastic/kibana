@@ -25,6 +25,8 @@ export const uiamServiceMock = {
       description: 'mock-api-key-name',
     }),
     exchangeOAuthToken: jest.fn().mockResolvedValue('mock-ephemeral-token'),
+    setOAuthCredential: jest.fn(),
+    getOAuthCredential: jest.fn(),
     revokeApiKey: jest.fn().mockResolvedValue(undefined),
     convertApiKeys: jest.fn().mockResolvedValue({ results: [] }),
     createOAuthClient: jest.fn().mockResolvedValue({
