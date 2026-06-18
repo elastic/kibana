@@ -23,6 +23,7 @@ export interface SaveRuleRequest {
 
 export class AiRuleCreationService {
   private readonly saveRuleSubject = new Subject<SaveRuleRequest>();
+  private readonly clearOtherAttachmentsSubject = new Subject<string>();
   private readonly savingSubject = new BehaviorSubject<boolean>(false);
   private readonly aiRuleSubject = new BehaviorSubject<RuleResponse | null>(null);
   private readonly formSyncSubject = new BehaviorSubject<boolean>(false);
@@ -33,6 +34,7 @@ export class AiRuleCreationService {
   private session: AiRuleCreationSession | null = null;
 
   public readonly saveRuleRequest$ = this.saveRuleSubject.asObservable();
+  public readonly clearOtherAttachments$ = this.clearOtherAttachmentsSubject.asObservable();
   public readonly saving$ = this.savingSubject.pipe(distinctUntilChanged());
   public readonly aiCreatedRule$ = this.aiRuleSubject.asObservable();
   public readonly formSyncActive$ = this.formSyncSubject.pipe(distinctUntilChanged());
@@ -58,6 +60,10 @@ export class AiRuleCreationService {
     if (this.session) {
       this.session.applyCount += 1;
     }
+  };
+
+  public requestClearOtherAttachments = (exceptAttachmentId: string): void => {
+    this.clearOtherAttachmentsSubject.next(exceptAttachmentId);
   };
 
   public requestSaveRule = (

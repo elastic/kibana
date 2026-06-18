@@ -67,7 +67,7 @@ export const buildRuleActionButtons = ({
       icon: 'pencil',
       type: ActionButtonType.SECONDARY,
       handler: () => {
-        // Pass attachmentId so the form bind is explicitly set to this card.
+        aiRuleCreation.requestClearOtherAttachments(attachmentId);
         aiRuleCreation.setAiCreatedRule(rule, attachmentId);
         application.navigateToApp('securitySolutionUI', {
           path: isUpdate && ruleId ? `${RULES_PATH}${getEditRuleUrl(ruleId)}` : RULES_CREATE_PATH,
