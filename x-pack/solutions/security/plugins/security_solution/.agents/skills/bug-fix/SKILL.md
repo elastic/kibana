@@ -278,38 +278,85 @@ If any gate triggers, note the required follow-up PRs explicitly in the PR descr
 
 **Only run this step if `deployment_type` in `analysis.json` is `serverless`.** Skip entirely for stateful bugs.
 
-Local serverless uses a mock SAML IdP and role files from the local repo. MKI uses the real configurations from `elasticsearch-controller` and `kibana-controller`. A fix that passes Phase 5 locally is not confirmed until it is verified on a real MKI project. MKI verification has two parts.
+Local serverless uses a mock SAML IdP and role files from the local repo. MKI uses the real configurations from `elasticsearch-controller` and `kibana-controller`. A fix that passes Phase 5 locally is not confirmed until it is verified on a real MKI project running the PR's Docker image. MKI verification has two parts.
 
-### Part 1 — Pre-fix MKI reproduction (before opening the PR)
+### Part 1 — Pre-fix MKI reproduction (recommended, before opening the PR)
 
-Confirm the bug actually occurs on a real MKI project — rules out local-only artefacts and ensures the repro is representative of production.
+Confirm the bug actually occurs on a real MKI project — rules out local-only artefacts and ensures the repro is representative of production. Skip if the local serverless reproduction was unambiguous and you have no MKI access.
 
-Ask the user: *"Do you have access to an MKI project where this bug should reproduce? If yes, provide the URL."*
+Ask the user: *"Do you have access to an existing MKI project where this bug should reproduce? If yes, provide the URL."*
 
 If the user provides a URL:
-
 1. `browser_navigate` → `<MKI project URL>` (MKI redirects to SSO automatically)
 2. MKI uses real SAML/SSO — the agent cannot complete login autonomously. Tell the user: *"Please log in to the MKI project in the browser window, then let me know when you're authenticated."* Wait for explicit confirmation before continuing.
 3. Once the user confirms login: follow `reproduction_steps` from `analysis.json` against MKI
 4. `browser_take_screenshot` → `.bug-fixer-session/mki-before.png`
-5. Record result in `.bug-fixer-session/reproduction-report.md`: add `mki_pre_fix_reproduced: true | false`
+5. Record result: add `mki_pre_fix_reproduced: true | false` to `.bug-fixer-session/reproduction-report.md`
 
-If the bug does **not** reproduce on MKI: this is significant — tell the user and investigate whether the local environment is the only affected context (Gate 3 of the Controller Check may apply).
+If the bug does **not** reproduce on MKI: this is significant — tell the user and revisit Gate 3 of the Controller Check (the fix may need to target `kibana-controller` config, not the Kibana repo).
 
-If the user has no MKI access: note in the PR description — *"MKI pre-fix reproduction not verified — no MKI access available at time of fix."*
+### Part 2 — Fix verification on MKI with the PR Docker image (before merging)
 
-### Part 2 — Post-deploy MKI verification (required before closing the bug)
+MKI verification does not require waiting for the PR to merge. CI builds a Docker image from the PR branch that can be deployed to a QA MKI project immediately.
 
-After all required PRs (Kibana + any controller PRs) are merged **and** deployed to MKI:
+**Step 1 — Build the PR Docker image**
 
-1. Navigate to the same MKI project and log in (same flow as Part 1)
-2. Follow `reproduction_steps` — the bug must not reproduce
-3. `browser_take_screenshot` → `.bug-fixer-session/mki-after.png` if possible
-4. Post a comment on the GitHub issue: *"Verified fixed on MKI — [project URL] — [date]."*
+Tell the user: *"Add the `ci:build-serverless-image` label to the PR and trigger CI. Once the CI run completes, paste the Kibana Serverless Image tag shown in the CI output (format: `docker.elastic.co/kibana-ci/kibana-serverless:pr-<PR_NUMBER>-<COMMIT>`)."*
 
-**Do not close the issue or mark it fully resolved until Part 2 is complete.** Add this note explicitly to the PR description:
+Wait for the user to provide the image tag before continuing.
 
-> ⚠️ MKI post-deploy verification required before closing this issue.
+**Step 2 — Create a QA project with the PR image**
+
+The project must be created via API (not the cloud console UI) to belong to the `testing` channel, which is required for image overrides.
+
+```bash
+curl --location --request POST "https://console.qa.cld.elstc.co/api/v1/serverless/projects/security" \
+  --header "Authorization: ApiKey <YOUR_API_KEY>" \
+  --header "Content-Type: application/json" \
+  --data '{
+    "name": "fix-<issue-number>-verify",
+    "region_id": "aws-eu-west-1",
+    "overrides": {
+        "channel": "testing",
+        "kibana": {
+            "docker_image": "docker.elastic.co/kibana-ci/kibana-serverless:pr-<PR_NUMBER>-<COMMIT>"
+        }
+    }
+  }'
+```
+
+Note the `id` and the project URL from the response — you will need the `id` to override the image if the PR receives new commits.
+
+⚠️ Projects are created as `Complete` tier by default. If the bug is tier-specific (`security_essentials` or `security_ease`), ask the user to follow the [Essentials/Ease configuration doc](https://github.com/elastic/security-team/blob/main/docs-codex/analyst-experience-team/manual-testing/serverless/3.complete-essentials-on-mki.md) before proceeding.
+
+Ask the user to provide their QA organization API key if they haven't already.
+
+**Step 3 — Verify the fix**
+
+1. `browser_navigate` → `<project URL>` (MKI redirects to SSO)
+2. Tell the user: *"Please log in to the QA MKI project in the browser window, then let me know when you're authenticated."* Wait for confirmation.
+3. Follow `reproduction_steps` — the bug must not reproduce
+4. `browser_take_screenshot` → `.bug-fixer-session/mki-after.png`
+5. Post a comment on the GitHub issue: *"Verified fixed on MKI QA project (PR image `pr-<PR_NUMBER>-<COMMIT>`) — [date]."*
+
+**If new commits are pushed to the PR** after this step, the image must be rebuilt (re-add `ci:build-serverless-image` and trigger CI) and the project updated:
+
+```bash
+curl --location --request PATCH 'https://console.qa.cld.elstc.co/api/v1/serverless/projects/security/<YOUR_PROJECT_ID>' \
+  --header 'Authorization: ApiKey <YOUR_API_KEY>' \
+  --header 'Content-Type: application/json' \
+  --data '{
+    "overrides": {
+        "kibana": {
+            "docker_image": "docker.elastic.co/kibana-ci/kibana-serverless:pr-<PR_NUMBER>-<NEW_COMMIT>"
+        }
+    }
+  }'
+```
+
+**Do not open the PR until Part 2 is complete.** Add this to the PR description:
+
+> ✅ MKI verified on QA project with PR image `pr-<PR_NUMBER>-<COMMIT>`.
 
 ## Phase 6: Open PR
 
@@ -357,10 +404,9 @@ gh pr create --draft \
 Fixes #<number>
 <similar_issues and related_prs from .bug-fixer-session/analysis.json, if any>
 
-<!-- Serverless bugs only — remove this block for stateful: -->
-<!-- ⚠️ MKI post-deploy verification required before closing this issue. -->
-<!-- - [ ] MKI pre-fix repro: <mki-before.png or "not verified"> -->
-<!-- - [ ] MKI post-deploy verification: pending -->
+<!-- Serverless bugs only — remove this block for stateful fixes: -->
+<!-- ✅ MKI verified on QA project with PR image `pr-<PR_NUMBER>-<COMMIT>` -->
+<!-- MKI pre-fix repro: <mki-before.png attached, or "skipped — local repro unambiguous"> -->
 <!-- If any Controller Check gate triggered, list required follow-up PRs: -->
 <!-- - [ ] elasticsearch-controller PR: <link> -->
 <!-- - [ ] kibana-controller PR: <link> -->
