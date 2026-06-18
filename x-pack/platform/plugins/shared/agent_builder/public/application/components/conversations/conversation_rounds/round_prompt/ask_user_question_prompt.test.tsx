@@ -322,5 +322,4 @@ describe('AskUserQuestionPrompt', () => {
       } satisfies AskUserQuestionPromptResponse);
     });
   });
-
 });

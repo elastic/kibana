@@ -78,9 +78,7 @@ export const createAgentHandlerContext = async <TParams = Record<string, unknown
     skills: true,
     subagents: isExperimentalEnabled,
     todos: isExperimentalEnabled,
-    bash: isBashEnabled,
-    // forcefully disabled until the UI is implemented
-    askUserQuestion: false, // isExperimentalEnabled,
+    askUserQuestion: isExperimentalEnabled,
   };
 
   const { filesystemService, bashService } = await createFilesystemServices({
