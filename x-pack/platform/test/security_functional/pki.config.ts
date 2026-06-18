@@ -85,7 +85,6 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         '--xpack.security.encryptionKey="wuGNaIhoMpk5sO4UBxgr3NyW1sFcLgIf"',
         '--xpack.security.authc.selector.enabled=false',
         '--xpack.security.authc.providers.pki.pki1.order=0',
-        '--xpack.security.authc.providers.pki.pki1.realm=pki1',
         '--xpack.security.authc.providers.basic.basic1.order=1',
         '--server.restrictInternalApis=false',
       ],
