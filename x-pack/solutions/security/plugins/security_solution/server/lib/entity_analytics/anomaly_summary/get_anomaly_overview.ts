@@ -14,7 +14,8 @@ import { deriveBucketInterval } from '../../../../common/entity_analytics/anomal
 import type { AnomalyOverviewEntry } from '../../../../common/api/entity_analytics';
 import { getJobConfig, getSecurityMlJobIds } from '../ml_anomaly_detection';
 
-const DEFAULT_OVERVIEW_LOOKBACK_MS = ENTITY_ANOMALY_DEFAULT_LOOKBACK_DAYS * 24 * 60 * 60 * 1000;
+export const DEFAULT_OVERVIEW_LOOKBACK_MS =
+  ENTITY_ANOMALY_DEFAULT_LOOKBACK_DAYS * 24 * 60 * 60 * 1000;
 
 interface TimeBucket {
   key_as_string: string;
@@ -97,6 +98,8 @@ export const getEntityAnomalyOverview = async ({
     );
     resolvedJobIds = tacticMatchedIds;
   }
+
+  if (threatTactics && threatTactics.length > 0 && resolvedJobIds.length === 0) return empty;
 
   let aggs: OverviewAggs | undefined;
   let totalAnomaliesCount = 0;

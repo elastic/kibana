@@ -22,7 +22,7 @@ import {
 import type { EntityAnalyticsRoutesDeps } from '../types';
 import { withMinimumLicense } from '../utils/with_minimum_license';
 import { getEntityAnomalies } from './get_anomaly_details';
-import { getEntityAnomalyOverview } from './get_anomaly_overview';
+import { DEFAULT_OVERVIEW_LOOKBACK_MS, getEntityAnomalyOverview } from './get_anomaly_overview';
 
 const ONE_YEAR_MS = 365 * 24 * 60 * 60 * 1000;
 
@@ -80,7 +80,7 @@ export const registerAnomalySummaryRoutes = ({ router, logger, ml }: EntityAnaly
                 anomalies: [],
                 tacticCounts: {},
                 totalAnomaliesCount: 0,
-                from: from ?? now - 30 * 24 * 60 * 60 * 1000,
+                from: from ?? now - DEFAULT_OVERVIEW_LOOKBACK_MS,
                 to: to ?? now,
               },
             });
