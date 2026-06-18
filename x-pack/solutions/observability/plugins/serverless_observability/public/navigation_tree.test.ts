@@ -20,7 +20,7 @@ const getAdminSettingsNode = (
     throw new Error('Admin and Settings footer node not found');
   }
 
-  return adminSettingsNode;
+  return adminSettingsNode as NodeDefinition;
 };
 
 describe('Navigation Tree', () => {
@@ -85,8 +85,10 @@ describe('Navigation Tree', () => {
       showAiAssistant: false,
     }) as NavigationTreeDefinition;
 
-    const aiAssistantNode = body.find((item) => item.link === 'observabilityAIAssistant');
-    const agentsNode = body.find((item) => item.link === 'agent_builder');
+    const aiAssistantNode = body.find(
+      (item) => (item as NodeDefinition)?.link === 'observabilityAIAssistant'
+    );
+    const agentsNode = body.find((item) => (item as NodeDefinition)?.link === 'agent_builder');
 
     expect(aiAssistantNode).toBeUndefined();
     expect(agentsNode).toBeDefined();
@@ -124,7 +126,9 @@ describe('Navigation Tree', () => {
     const alertsPanel = body.find(
       (item) => 'id' in item && item.id === 'alerting' && item.renderAs === 'panelOpener'
     );
-    const flatAlerts = body.find((item) => item.link === 'observability-overview:alerts');
+    const flatAlerts = body.find(
+      (item) => (item as NodeDefinition)?.link === 'observability-overview:alerts'
+    );
 
     expect(alertsPanel).toBeUndefined();
     expect(flatAlerts).toEqual(
