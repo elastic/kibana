@@ -475,6 +475,7 @@ export const Main: FunctionComponent<MainProps> = ({ httpClient, toasts }) => {
                         data-test-subj="dataSetsSetsCreateButton"
                         iconType="plusInCircle"
                         onClick={() => setDataSetFlyout({ kind: 'create' })}
+                        disabled={items.length === 0}
                       >
                         {mainTranslations.columns.dataSets.addButtonLabel}
                       </EuiButton>

@@ -11,6 +11,8 @@ import {
   EuiButton,
   EuiButtonEmpty,
   EuiFieldText,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiFlyout,
   EuiFlyoutBody,
   EuiFlyoutFooter,
@@ -272,19 +274,25 @@ export const CreateDatasetFlyout: FunctionComponent<CreateDatasetFlyoutProps> = 
         </EuiForm>
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
-        <EuiButtonEmpty data-test-subj="createDatasetFlyoutCancel" onClick={onClose}>
-          {createDatasetFlyoutStrings.cancelButton()}
-        </EuiButtonEmpty>
-        <EuiButton
-          fill
-          type="submit"
-          data-test-subj="createDatasetFlyoutSubmit"
-          form="createDatasetForm"
-          isLoading={isSaving}
-          disabled={isSaving || dataSources.length === 0}
-        >
-          {createDatasetFlyoutStrings.saveButton()}
-        </EuiButton>
+        <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" responsive={false}>
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty data-test-subj="createDatasetFlyoutCancel" onClick={onClose}>
+              {createDatasetFlyoutStrings.cancelButton()}
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButton
+              fill
+              type="submit"
+              data-test-subj="createDatasetFlyoutSubmit"
+              form="createDatasetForm"
+              isLoading={isSaving}
+              disabled={isSaving || dataSources.length === 0}
+            >
+              {createDatasetFlyoutStrings.saveButton()}
+            </EuiButton>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiFlyoutFooter>
     </EuiFlyout>
   );
