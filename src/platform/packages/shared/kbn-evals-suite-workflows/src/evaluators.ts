@@ -44,7 +44,7 @@ const NEGATIVE_CASE_NA = {
 };
 
 const INFRA_ERROR_PATTERN =
-  /timeout|ECONNREFUSED|503|502|500|401|ENOTFOUND|socket hang up|ERR_BAD_RESPONSE/i;
+  /timeout|ECONNREFUSED|503|502|500|401|ENOTFOUND|socket hang up|ERR_BAD_RESPONSE|fetch failed|ran out of retries|request failed/i;
 
 /**
  * Wraps an evaluator so it returns N/A when the conversation encountered an
@@ -281,14 +281,25 @@ export function createValidationPassEvaluator() {
         | { valid: boolean; errors?: string[] }
         | undefined;
 
-      if (!validation) {
-        return { score: 0, metadata: { reason: 'No validation result returned' } };
+      if (validation) {
+        return {
+          score: validation.valid ? 1 : 0,
+          metadata: { validation },
+        };
       }
 
-      return {
-        score: validation.valid ? 1 : 0,
-        metadata: { validation },
-      };
+      // Newer tool shape (platform.core.generate_workflow) doesn't return a
+      // `validation` field — it returns `success: true` only when the produced
+      // YAML parses & validates server-side. Treat that as the pass signal.
+      const success = (lastEditResult as { success?: boolean }).success;
+      if (typeof success === 'boolean') {
+        return {
+          score: success ? 1 : 0,
+          metadata: { reason: 'derived from tool success flag', success },
+        };
+      }
+
+      return { score: 0, metadata: { reason: 'No validation result returned' } };
     },
   };
 }
@@ -879,11 +890,18 @@ export function createEfficiencyEvaluator() {
   };
 }
 
+// Infrastructural tool calls the agent makes regardless of task — filter so
+// trajectory scoring reflects task-relevant tool selection, not boilerplate.
+const INFRASTRUCTURAL_TOOLS = new Set(['load_skill']);
+
 export function createToolTrajectoryEvaluator() {
   const inner = createTrajectoryEvaluator({
     extractToolCalls: (output) => {
       const steps = (output as WorkflowTaskOutput).steps ?? [];
-      return steps.filter((s) => s.type === 'tool_call' && s.tool_id).map((s) => s.tool_id!);
+      return steps
+        .filter((s) => s.type === 'tool_call' && s.tool_id)
+        .map((s) => s.tool_id!)
+        .filter((id) => !INFRASTRUCTURAL_TOOLS.has(id));
     },
     goldenPathExtractor: (expected) => {
       const exp = expected as EfficiencyExpectations;

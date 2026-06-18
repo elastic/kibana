@@ -70,7 +70,7 @@ const evaluate = base.extend<
       await use(async ({ dataset }) => {
         await executorClient.runExperiment(
           {
-            dataset,
+            datasets: [dataset],
             task: async ({ input }) => {
               const startMs = Date.now();
               const response = await chatClient.converse({
@@ -160,7 +160,7 @@ evaluate.describe(
                   'ai_summary',
                 ],
                 expectedMaxToolCalls: 4,
-                expectedToolSequence: ['platform.workflows.workflow_delete_step'],
+                expectedToolSequence: ['platform.core.generate_workflow'],
               },
               metadata: { category: 'diverse-edit-delete' },
             },
@@ -244,7 +244,7 @@ evaluate.describe(
                   'add_enrichment_comment',
                   'log_completion',
                 ],
-                expectedMaxToolCalls: 6,
+                expectedMaxToolCalls: 3,
               },
               metadata: { category: 'diverse-edit-multi-step-modify' },
             },
@@ -282,10 +282,7 @@ evaluate.describe(
                   'log_completion',
                 ],
                 expectedMaxToolCalls: 4,
-                expectedToolSequence: [
-                  'platform.workflows.get_step_definitions',
-                  'platform.workflows.workflow_insert_step',
-                ],
+                expectedToolSequence: ['platform.core.generate_workflow'],
               },
               metadata: { category: 'diverse-edit-insert-sibling' },
             },
@@ -365,11 +362,7 @@ evaluate.describe(
                   'log_backfill_result',
                 ],
                 expectedMaxToolCalls: 5,
-                expectedToolSequence: [
-                  'platform.workflows.get_step_definitions',
-                  'platform.workflows.get_connectors',
-                  'platform.workflows.workflow_insert_step',
-                ],
+                expectedToolSequence: ['platform.core.generate_workflow'],
                 expectedLiquidChains: [
                   {
                     ref: 'steps.validate_backfill.output',
@@ -394,40 +387,45 @@ evaluate.describe(
   'Diverse edits on Slack-enrichment baseline (5 steps, alert trigger)',
   { tag: tags.serverless.observability.complete },
   () => {
-    evaluate('adds an email channel alongside Slack', async ({ evaluateDiverseEditDataset }) => {
-      await evaluateDiverseEditDataset({
-        dataset: {
-          name: 'workflow-editing-diverse: enrichment-add-email',
-          description: 'Insert a second connector step that mirrors an existing one',
-          examples: [
-            {
-              input: {
-                initialYaml: infosecSlackEnrichmentYaml,
-                instruction:
-                  'In addition to the Slack message, also send an email to oncall@example.com with the same content for high or critical alerts.',
+    evaluate(
+      'adds email + ServiceNow channels alongside Slack, preserving structure',
+      async ({ evaluateDiverseEditDataset }) => {
+        await evaluateDiverseEditDataset({
+          dataset: {
+            name: 'workflow-editing-diverse: enrichment-add-email',
+            description:
+              'Insert two new connector steps that mirror an existing one without disturbing ' +
+              'the surrounding conditional, the Slack step, or the enrichment query above it. ' +
+              'Stress-tests EditPreservation in a connector-heavy file.',
+            examples: [
+              {
+                input: {
+                  initialYaml: infosecSlackEnrichmentYaml,
+                  instruction:
+                    'In addition to the Slack message, also send (a) an email to oncall@example.com and (b) open a ServiceNow incident — both with the same alert context Slack uses, and both gated by the same severity check Slack is already inside. Use the existing connector configuration style.',
+                },
+                output: {
+                  criteria: [
+                    'A new email step exists inside the same conditional block as post_to_slack (not above the gate, not at the workflow root).',
+                    'A new servicenow step exists inside that same conditional block, with the same gate.',
+                    'Each new step references the alert rule name, severity, and source IP via Liquid (same fields Slack uses).',
+                    'Both new connector steps include a connector-id field.',
+                    'The enrich_alert step is byte-identical to the original (no whitespace changes, no field reordering, no renaming).',
+                    'The post_to_slack step is byte-identical to the original.',
+                    'The log_done step is byte-identical to the original and is still the last step in the workflow.',
+                    'No new top-level workflow fields were introduced (no extra triggers, no extra consts).',
+                  ],
+                  expectedStepTypes: ['email', 'servicenow'],
+                  preservedStepNames: ['enrich_alert', 'post_to_slack', 'log_done'],
+                  expectedMaxToolCalls: 3,
+                  expectedToolSequence: ['platform.core.generate_workflow'],
+                },
+                metadata: { category: 'diverse-edit-mirror-connector' },
               },
-              output: {
-                criteria: [
-                  'A new email step has been added inside the same conditional as the Slack step.',
-                  'The email recipient is oncall@example.com.',
-                  'The email body or subject references the alert rule name, severity, and source IP, similar to the Slack message.',
-                  'Connector steps include a connector-id field.',
-                  'The Slack step and existing structure are preserved.',
-                ],
-                expectedStepTypes: ['email'],
-                preservedStepNames: ['enrich_alert', 'post_to_slack', 'log_done'],
-                expectedMaxToolCalls: 5,
-                expectedToolSequence: [
-                  'platform.workflows.get_step_definitions',
-                  'platform.workflows.get_connectors',
-                  'platform.workflows.workflow_insert_step',
-                ],
-              },
-              metadata: { category: 'diverse-edit-mirror-connector' },
-            },
-          ],
-        },
-      });
-    });
+            ],
+          },
+        });
+      }
+    );
   }
 );

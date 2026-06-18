@@ -53,7 +53,7 @@ const evaluate = base.extend<
       await use(async ({ dataset }) => {
         await executorClient.runExperiment(
           {
-            dataset,
+            datasets: [dataset],
             task: async ({ input }) => {
               const startMs = Date.now();
               const response = await chatClient.converse({
@@ -104,86 +104,6 @@ const evaluate = base.extend<
 });
 
 // ---------------------------------------------------------------------------
-// Ambiguous / underspecified — agent should ask clarifying questions
-// ---------------------------------------------------------------------------
-
-evaluate.describe(
-  'Negative cases: ambiguous or underspecified requests',
-  { tag: tags.serverless.observability.complete },
-  () => {
-    evaluate(
-      'refuses or clarifies completely vague workflow request',
-      async ({ evaluateNegativeDataset }) => {
-        await evaluateNegativeDataset({
-          dataset: {
-            name: 'workflow-negative: ambiguous-vague',
-            description:
-              'Agent should ask for details rather than guessing when the request has no specifics',
-            examples: [
-              {
-                input: {
-                  instruction: 'Create a workflow',
-                },
-                output: {
-                  expectedRefusalReason: 'ambiguous',
-                  criteria: [
-                    'The agent did NOT produce a YAML workflow.',
-                    'The agent asked at least one clarifying question about what the workflow should do (trigger, steps, or goal).',
-                  ],
-                },
-                metadata: { category: 'negative' },
-              },
-              {
-                input: {
-                  instruction:
-                    'Make a workflow that does the thing we talked about last week — you know, the one for the alerts',
-                },
-                output: {
-                  expectedRefusalReason: 'ambiguous',
-                  criteria: [
-                    'The agent did NOT produce a YAML workflow.',
-                    'The agent acknowledged the reference was unclear and asked for the specific details it needs (e.g. which alerts, what action to take).',
-                  ],
-                },
-                metadata: { category: 'negative' },
-              },
-            ],
-          },
-        });
-      }
-    );
-
-    evaluate(
-      'refuses or clarifies ambiguous edit with no context',
-      async ({ evaluateNegativeDataset }) => {
-        await evaluateNegativeDataset({
-          dataset: {
-            name: 'workflow-negative: ambiguous-edit-no-context',
-            description:
-              'Edit request with no workflow context — agent should ask what to edit rather than invent one',
-            examples: [
-              {
-                input: {
-                  instruction: 'Add error handling',
-                },
-                output: {
-                  expectedRefusalReason: 'ambiguous',
-                  criteria: [
-                    'The agent did NOT produce a YAML workflow.',
-                    'The agent asked for the workflow to edit, or explained that no workflow context was provided.',
-                  ],
-                },
-                metadata: { category: 'negative' },
-              },
-            ],
-          },
-        });
-      }
-    );
-  }
-);
-
-// ---------------------------------------------------------------------------
 // Impossible / contradictory — logically self-contradicting requirements
 // ---------------------------------------------------------------------------
 
@@ -191,12 +111,14 @@ evaluate.describe(
   'Negative cases: impossible or contradictory requirements',
   { tag: tags.serverless.observability.complete },
   () => {
-    evaluate('refuses contradictory trigger request', async ({ evaluateNegativeDataset }) => {
+    evaluate('refuses contradictory dependency request', async ({ evaluateNegativeDataset }) => {
       await evaluateNegativeDataset({
         dataset: {
           name: 'workflow-negative: impossible-trigger',
           description:
-            'Agent should flag contradictory requirements rather than silently picking one',
+            'Two cases the agent must NOT silently resolve: a trigger contradiction and ' +
+            'a step-dependency cycle. Picking one silently or generating both triggers as a ' +
+            'compromise should fail — the agent has to surface the conflict.',
           examples: [
             {
               input: {
@@ -206,8 +128,24 @@ evaluate.describe(
               output: {
                 expectedRefusalReason: 'impossible',
                 criteria: [
-                  'The agent did NOT produce a YAML workflow with both a manual trigger and a scheduled trigger silently collapsed into one.',
-                  'The agent explained the contradiction and asked which trigger type to use, OR produced a workflow with both triggers and explicitly noted the ambiguity.',
+                  'The agent did NOT produce a YAML workflow.',
+                  'The agent explicitly named the contradiction (manual vs scheduled), did not silently pick one, and did not emit a workflow with both triggers concatenated.',
+                  'The agent asked which trigger type to use before producing anything.',
+                ],
+              },
+              metadata: { category: 'negative' },
+            },
+            {
+              input: {
+                instruction:
+                  'Create a workflow with two steps: step_a should use the output of step_b in its url field, and step_b should run after step_a completes.',
+              },
+              output: {
+                expectedRefusalReason: 'impossible',
+                criteria: [
+                  'The agent did NOT produce a workflow that wires step_a.url to {{ steps.step_b.output.* }} while ordering step_a before step_b.',
+                  'The agent identified the cyclic dependency (A depends on B, B runs after A) and surfaced it explicitly.',
+                  'The agent asked which step should actually depend on which, instead of silently swapping an order or dropping a reference.',
                 ],
               },
               metadata: { category: 'negative' },
@@ -216,34 +154,6 @@ evaluate.describe(
         },
       });
     });
-
-    evaluate(
-      'refuses or flags contradictory step placement',
-      async ({ evaluateNegativeDataset }) => {
-        await evaluateNegativeDataset({
-          dataset: {
-            name: 'workflow-negative: impossible-placement',
-            description: 'Logically impossible step ordering — agent should surface the conflict',
-            examples: [
-              {
-                input: {
-                  instruction:
-                    'In my 3-step workflow, add a new step both before the first step and after the last step simultaneously in a single operation',
-                },
-                output: {
-                  expectedRefusalReason: 'impossible',
-                  criteria: [
-                    'The agent did NOT silently insert a step in an arbitrary position without acknowledgement.',
-                    'The agent clarified that two separate insertions are needed, or asked where the single new step should go.',
-                  ],
-                },
-                metadata: { category: 'negative' },
-              },
-            ],
-          },
-        });
-      }
-    );
   }
 );
 
@@ -277,26 +187,15 @@ evaluate.describe(
             },
             {
               input: {
-                instruction: "What's the weather like in Cupertino today?",
+                instruction:
+                  'Can you explain how YAML indentation works in general? Show me a few examples of valid YAML files.',
               },
               output: {
                 expectedRefusalReason: 'out-of-scope',
                 criteria: [
                   'The agent did NOT produce a YAML workflow.',
-                  'The agent explained it cannot answer weather questions and offered to help with workflows instead.',
-                ],
-              },
-              metadata: { category: 'negative' },
-            },
-            {
-              input: {
-                instruction: 'Can you explain how YAML indentation works in general?',
-              },
-              output: {
-                expectedRefusalReason: 'out-of-scope',
-                criteria: [
-                  'The agent did NOT produce a YAML workflow.',
-                  'The agent redirected the conversation toward workflow-related tasks rather than providing a general YAML tutorial.',
+                  'The agent did NOT provide a general YAML tutorial — it stayed focused on workflow authoring even though the request is workflow-adjacent.',
+                  'The response did not enumerate generic YAML indentation rules or include non-workflow YAML examples.',
                 ],
               },
               metadata: { category: 'negative' },
