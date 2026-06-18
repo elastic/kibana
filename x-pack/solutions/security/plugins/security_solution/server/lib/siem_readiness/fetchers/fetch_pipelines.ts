@@ -96,7 +96,7 @@ export const fetchPipelines = async ({
       statsAvailable: true,
     }));
 
-  const indexHealth = await fetchIndexHealth({ esClient });
+  const indexHealth = await fetchIndexHealth({ esClient, logger });
   const now = Date.now();
 
   const pipelines: PipelineStats[] = rawPipelines.map((p) => {
