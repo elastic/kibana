@@ -37,6 +37,37 @@ const refreshRulesList = async (page: ScoutPage) => {
   await page.testSubj.click('rulesTab');
 };
 
+const createRuleWithBrowserSession = async (
+  page: ScoutPage,
+  createRuleUrl: string,
+  rule: ReturnType<typeof makeEsQueryRule>
+) => {
+  const response = await page.request.post(createRuleUrl, {
+    headers: {
+      'kbn-xsrf': 'scout',
+      'x-elastic-internal-origin': 'kibana',
+    },
+    data: {
+      name: rule.name,
+      rule_type_id: rule.ruleTypeId,
+      params: rule.params,
+      consumer: rule.consumer,
+      actions: [],
+      tags: rule.tags,
+      schedule: rule.schedule,
+      enabled: true,
+    },
+  });
+
+  if (!response.ok()) {
+    throw new Error(
+      `Failed to create rule for API key update test: ${response.status()} ${response.statusText()}`
+    );
+  }
+
+  return (await response.json()) as { id: string; name: string };
+};
+
 // ── Tests ────────────────────────────────────────────────────────────────────
 
 test.describe('Rules list bulk actions', { tag: tags.stateful.classic }, () => {
@@ -179,20 +210,25 @@ test.describe('Rules list bulk actions', { tag: tags.stateful.classic }, () => {
     }
   });
 
-  test('can bulk update API key', async ({ page, apiServices }) => {
+  test('can bulk update API key', async ({ page, kbnUrl }) => {
+    const searchText = `api-key-${Date.now()}`;
+    const createRuleUrl = kbnUrl.get('/api/alerting/rule');
     const [r1, r2] = await Promise.all([
-      apiServices.alerting.rules.create(makeEsQueryRule('api-key-a')),
-      apiServices.alerting.rules.create(makeEsQueryRule('api-key-b')),
+      createRuleWithBrowserSession(page, createRuleUrl, makeEsQueryRule(`${searchText}-a`)),
+      createRuleWithBrowserSession(page, createRuleUrl, makeEsQueryRule(`${searchText}-b`)),
     ]);
-    createdRuleIds.push(r1.data.id, r2.data.id);
+    createdRuleIds.push(r1.id, r2.id);
 
     await refreshRulesList(page);
 
-    await page.testSubj.locator('ruleSearchField').fill('');
-    // Select r1, select-all (both selected), then deselect r2 → only r1 remains
-    await page.testSubj.click(`checkboxSelectRow-${r1.data.id}`);
+    await page.testSubj.locator('ruleSearchField').fill(searchText);
+    await page.keyboard.press('Enter');
+    await expect(page.testSubj.locator('totalRulesCount')).toContainText('2 rules');
+
+    // Select r1, select-all (both filtered rules selected), then deselect r2 → only r1 remains.
+    await page.testSubj.click(`checkboxSelectRow-${r1.id}`);
     await page.testSubj.click('selectAllRulesButton');
-    await page.testSubj.click(`checkboxSelectRow-${r2.data.id}`);
+    await page.testSubj.click(`checkboxSelectRow-${r2.id}`);
 
     await page.testSubj.click('showBulkActionButton');
     await page.testSubj.click('updateAPIKeys');
