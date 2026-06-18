@@ -11,14 +11,15 @@ import React, { useCallback, useState } from 'react';
 import styled from 'styled-components';
 
 import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiSpacer,
   EuiButton,
   EuiButtonIcon,
-  EuiPopover,
-  EuiContextMenuPanel,
   EuiContextMenuItem,
+  EuiContextMenuPanel,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPopover,
+  EuiSpacer,
+  EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
 
@@ -277,13 +278,15 @@ export const PackageListGrid: FunctionComponent<PackageListGridProps> = ({
                   data-test-subj="epmList.showMoreSubCategoriesButton"
                   id="moreSubCategories"
                   button={
-                    <EuiButtonIcon
-                      display="base"
-                      onClick={onButtonClick}
-                      iconType="boxesVertical"
-                      aria-label="Show more subcategories"
-                      size="s"
-                    />
+                    <EuiToolTip content="Show more subcategories" disableScreenReaderOutput>
+                      <EuiButtonIcon
+                        display="base"
+                        onClick={onButtonClick}
+                        iconType="boxesVertical"
+                        aria-label="Show more subcategories"
+                        size="s"
+                      />
+                    </EuiToolTip>
                   }
                   isOpen={isPopoverOpen}
                   closePopover={closePopover}
