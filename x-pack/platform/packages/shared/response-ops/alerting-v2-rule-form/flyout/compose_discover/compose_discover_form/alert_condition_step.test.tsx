@@ -180,6 +180,58 @@ describe('AlertConditionStep', () => {
         screen.getByText(/Couldn't automatically separate base query from alert condition/)
       ).toBeInTheDocument();
     });
+
+    it('shows alert-query-missing callout when base query is present but alert query is empty', () => {
+      renderStep(
+        { queryCommitted: true },
+        {
+          formValueOverrides: {
+            kind: 'alert',
+            query: { format: 'composed', base: 'FROM logs-*', breach: { segment: '' } },
+          },
+        }
+      );
+
+      expect(screen.getByTestId('composeDiscoverAlertQueryMissing')).toBeInTheDocument();
+      expect(screen.getByText('Alert query required')).toBeInTheDocument();
+      expect(
+        screen.getByText(
+          'Define an alert query in the query editor before continuing to the next step.'
+        )
+      ).toBeInTheDocument();
+    });
+
+    it('does not show alert-query-missing callout when both queries are defined', () => {
+      renderStep(
+        { queryCommitted: true },
+        { formValueOverrides: { kind: 'alert', query: COMPOSED_QUERY } }
+      );
+
+      expect(screen.queryByTestId('composeDiscoverAlertQueryMissing')).not.toBeInTheDocument();
+    });
+
+    it('does not show alert-query-missing callout for signal kind', () => {
+      renderStep(
+        { queryCommitted: true },
+        { formValueOverrides: { kind: 'signal', query: STANDALONE_QUERY } }
+      );
+
+      expect(screen.queryByTestId('composeDiscoverAlertQueryMissing')).not.toBeInTheDocument();
+    });
+
+    it('does not show alert-query-missing callout when query is not committed', () => {
+      renderStep(
+        { queryCommitted: false },
+        {
+          formValueOverrides: {
+            kind: 'alert',
+            query: { format: 'composed', base: 'FROM logs-*', breach: { segment: '' } },
+          },
+        }
+      );
+
+      expect(screen.queryByTestId('composeDiscoverAlertQueryMissing')).not.toBeInTheDocument();
+    });
   });
 
   describe('editor buttons', () => {

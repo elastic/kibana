@@ -130,6 +130,15 @@ export function AlertConditionStep({
   const splitFailed =
     isAlert && state.queryCommitted && query.format === 'composed' && !query.base.trim();
 
+  // FIX(rna-program#600): Show a warning callout when the user applied a base query but
+  // the breach segment is still empty, explaining why they cannot proceed.
+  const missingBreachQuery =
+    isAlert &&
+    state.queryCommitted &&
+    query.format === 'composed' &&
+    query.base.trim().length > 0 &&
+    !query.breach.segment.trim();
+
   return (
     <>
       <ModeSelect
@@ -213,6 +222,30 @@ export function AlertConditionStep({
                   }
                 )}
               />
+              <EuiSpacer size="s" />
+            </>
+          )}
+          {missingBreachQuery && (
+            <>
+              <EuiCallOut
+                announceOnMount={false}
+                size="s"
+                color="warning"
+                iconType="warning"
+                title={i18n.translate(
+                  'xpack.alertingV2.composeDiscover.alertCondition.alertQueryRequiredTitle',
+                  {
+                    defaultMessage:
+                      'Alert query required',
+                  }
+                )}
+                data-test-subj="composeDiscoverAlertQueryMissing"
+              >
+                <FormattedMessage
+                  id="xpack.alertingV2.composeDiscover.alertCondition.alertQueryRequiredDescription"
+                  defaultMessage="Define an alert query in the query editor before continuing to the next step."
+                />
+              </EuiCallOut>
               <EuiSpacer size="s" />
             </>
           )}
