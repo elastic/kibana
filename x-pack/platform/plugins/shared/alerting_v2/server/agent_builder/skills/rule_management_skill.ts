@@ -212,19 +212,20 @@ When using \`recovery_strategy: 'query'\`, add a \`set_query\` operation that in
 
 ## No-Data Strategy
 
-\`no_data_strategy\` is a **top-level rule field** that controls behaviour when no data is present. Only meaningful for standalone queries with a \`no_data\` block.
+\`no_data_strategy\` is a **top-level rule field** that controls behaviour when no data is present.
 
 | Value | Behaviour |
 |---|---|
 | \`'none'\` | No-data situations are ignored (default). |
-| \`'emit'\` | Emits a \`no_data\` alert event when \`no_data\` query returns no rows. |
+| \`'emit'\` | Emits a \`no_data\` alert event when no_data query returns no rows for the group. |
 | \`'last_known_status'\` | Holds the last known episode status when no data is present. |
 | \`'recover'\` | Forces recovery when no data is present. |
 
-When setting \`no_data_strategy\` to anything other than \`'none'\`, add a \`no_data\` block to the standalone query:
-\`no_data: { query: 'FROM heartbeat-* | STATS count = COUNT(*) BY host.name | WHERE count >= 1' }\`
+The no_data query depends on the query format:
+- **Standalone**: the configured \`no_data\` block. When setting \`no_data_strategy\` to anything other than \`'none'\`, add a \`no_data\` block to the standalone query: \`no_data: { query: 'FROM heartbeat-* | STATS count = COUNT(*) BY host.name | WHERE count >= 1' }\`
+- **Composed**: the \`base\` query is used as the data query.
 
-Signal rules cannot set \`no_data_strategy\`. Composed queries do not support \`no_data\`.
+Signal rules cannot set \`no_data_strategy\`.
 
 ## Final Validation
 

@@ -30,6 +30,7 @@ describe('CountTimeframeStrategy', () => {
     on,
     to,
     stateTransition,
+    noDataStrategy,
     statusCount,
     expectedStatusCount,
     eventTimestamp,
@@ -39,6 +40,7 @@ describe('CountTimeframeStrategy', () => {
     on: AlertEventStatus;
     to: AlertEpisodeStatus;
     stateTransition?: RuleResponse['state_transition'];
+    noDataStrategy?: RuleResponse['no_data_strategy'];
     statusCount?: number | null;
     expectedStatusCount?: number;
     eventTimestamp?: string;
@@ -47,6 +49,7 @@ describe('CountTimeframeStrategy', () => {
     const result = getNextState({
       eventStatus: on,
       stateTransition,
+      noDataStrategy,
       eventTimestamp,
       ...(from != null
         ? {
@@ -472,6 +475,53 @@ describe('CountTimeframeStrategy', () => {
       ],
     ])('stays %s', (_label, from, on, to) => {
       expectTransition({ from, on, to, stateTransition });
+    });
+  });
+
+  describe('no_data interactions', () => {
+    const stateTransition: RuleResponse['state_transition'] = {
+      pending_count: 3,
+      recovering_count: 3,
+    };
+
+    it("does not set status_count when entering 'no_data' under no_data_strategy: 'emit'", () => {
+      expectTransition({
+        from: alertEpisodeStatus.active,
+        on: alertEventStatus.no_data,
+        to: alertEpisodeStatus.no_data,
+        stateTransition,
+        noDataStrategy: 'emit',
+      });
+    });
+
+    it("preserves the prior status under no_data_strategy: 'last_known_status'", () => {
+      expectTransition({
+        from: alertEpisodeStatus.active,
+        on: alertEventStatus.no_data,
+        to: alertEpisodeStatus.active,
+        stateTransition,
+        noDataStrategy: 'last_known_status',
+      });
+    });
+
+    it('resets the pending count window on a breach event after no_data status', () => {
+      expectTransition({
+        from: alertEpisodeStatus.no_data,
+        on: alertEventStatus.breached,
+        to: alertEpisodeStatus.pending,
+        stateTransition,
+        statusCount: 7,
+        expectedStatusCount: 1,
+      });
+    });
+
+    it('recovers with no count tracking after no_data status', () => {
+      expectTransition({
+        from: alertEpisodeStatus.no_data,
+        on: alertEventStatus.recovered,
+        to: alertEpisodeStatus.inactive,
+        stateTransition,
+      });
     });
   });
 });

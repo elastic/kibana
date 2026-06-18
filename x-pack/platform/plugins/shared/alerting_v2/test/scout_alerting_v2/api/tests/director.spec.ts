@@ -1294,4 +1294,211 @@ apiTest.describe('Director', { tag: tags.stateful.classic }, () => {
       }
     }
   );
+
+  /**
+   * No-data episode transitions — see `lib/director/strategies/basic_strategy.ts`.
+   *
+   * The FSM branches on `rule.no_data_strategy` for `no_data` events:
+   *   - 'emit' advances the episode to `no_data`.
+   *   - 'last_known_status' preserves the prior episode status.
+   *
+   * The `no_data` query mirrors the breach query without the threshold
+   * predicate, so deleting the host's docs makes both queries empty for that
+   * group — which drives the active-but-absent group into the no-data
+   * partition.
+   */
+  apiTest(
+    "no_data_strategy 'emit' transitions an active episode to no_data",
+    async ({ apiServices }) => {
+      const HOST = 'host-director-no-data-emit';
+
+      await apiServices.alertingV2.sourceIndex.indexDocs({
+        index: SOURCE_INDEX,
+        docs: [
+          {
+            '@timestamp': new Date().toISOString(),
+            'host.name': HOST,
+            severity: 'high',
+            value: 1,
+          },
+        ],
+      });
+
+      const rule = await apiServices.alertingV2.rules.create(
+        buildCreateRuleData({
+          metadata: { name: 'director-no-data-emit' },
+          query: {
+            format: 'standalone',
+            breach: {
+              query: `FROM ${SOURCE_INDEX} | WHERE host.name == "${HOST}" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
+            },
+            no_data: {
+              query: `FROM ${SOURCE_INDEX} | WHERE host.name == "${HOST}" | STATS count = COUNT(*) BY host.name`,
+            },
+          },
+          no_data_strategy: 'emit',
+        })
+      );
+
+      await apiServices.alertingV2.ruleEvents.waitForAtLeast(rule.id, 1, {
+        episodeStatus: 'active',
+      });
+
+      await apiServices.alertingV2.sourceIndex.deleteDocs({
+        index: SOURCE_INDEX,
+        query: { term: { 'host.name': HOST } },
+      });
+
+      await apiServices.alertingV2.ruleEvents.waitForAtLeast(rule.id, 1, {
+        episodeStatus: 'no_data',
+      });
+    }
+  );
+
+  apiTest(
+    "no_data_strategy 'last_known_status' preserves the prior episode status when an active group has no data",
+    async ({ apiServices }) => {
+      const HOST = 'host-director-no-data-last-known';
+
+      await apiServices.alertingV2.sourceIndex.indexDocs({
+        index: SOURCE_INDEX,
+        docs: [
+          {
+            '@timestamp': new Date().toISOString(),
+            'host.name': HOST,
+            severity: 'high',
+            value: 1,
+          },
+        ],
+      });
+
+      const rule = await apiServices.alertingV2.rules.create(
+        buildCreateRuleData({
+          metadata: { name: 'director-no-data-last-known' },
+          query: {
+            format: 'standalone',
+            breach: {
+              query: `FROM ${SOURCE_INDEX} | WHERE host.name == "${HOST}" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
+            },
+            no_data: {
+              query: `FROM ${SOURCE_INDEX} | WHERE host.name == "${HOST}" | STATS count = COUNT(*) BY host.name`,
+            },
+          },
+          no_data_strategy: 'last_known_status',
+        })
+      );
+
+      await apiServices.alertingV2.ruleEvents.waitForAtLeast(rule.id, 1, {
+        episodeStatus: 'active',
+      });
+
+      await apiServices.alertingV2.sourceIndex.deleteDocs({
+        index: SOURCE_INDEX,
+        query: { term: { 'host.name': HOST } },
+      });
+
+      // Wait for the executor to write a no_data rule event so we know the
+      // director has had a chance to process it. Then assert the episode
+      // status is still 'active'.
+      await apiServices.alertingV2.ruleEvents.waitForAtLeast(rule.id, 1, { status: 'no_data' });
+
+      const noDataEvents = await apiServices.alertingV2.ruleEvents.find(rule.id, {
+        status: 'no_data',
+      });
+
+      expect(noDataEvents.length).toBeGreaterThanOrEqual(1);
+      for (const event of noDataEvents) {
+        expect(event.episode?.status).toBe('active');
+      }
+    }
+  );
+
+  apiTest(
+    "soft-resets to 'pending' when a fresh breach arrives after a no_data hold",
+    async ({ apiServices }) => {
+      const HOST = 'host-director-no-data-soft-reset';
+
+      await apiServices.alertingV2.sourceIndex.indexDocs({
+        index: SOURCE_INDEX,
+        docs: [
+          {
+            '@timestamp': new Date().toISOString(),
+            'host.name': HOST,
+            severity: 'high',
+            value: 1,
+          },
+        ],
+      });
+
+      // pending_count=1 forces an explicit pending → active transition so we
+      // can observe the soft reset back to pending after the no_data hold.
+      const rule = await apiServices.alertingV2.rules.create(
+        buildCreateRuleData({
+          metadata: { name: 'director-no-data-soft-reset' },
+          query: {
+            format: 'standalone',
+            breach: {
+              query: `FROM ${SOURCE_INDEX} | WHERE host.name == "${HOST}" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
+            },
+            no_data: {
+              query: `FROM ${SOURCE_INDEX} | WHERE host.name == "${HOST}" | STATS count = COUNT(*) BY host.name`,
+            },
+          },
+          state_transition: { pending_count: 1, recovering_count: 0 },
+          no_data_strategy: 'emit',
+        })
+      );
+
+      // 1) Drive the lifecycle to active.
+      await apiServices.alertingV2.ruleEvents.waitForAtLeast(rule.id, 1, {
+        episodeStatus: 'active',
+      });
+
+      // 2) Remove the data so the executor emits a no_data event and the FSM
+      //    advances the episode to no_data.
+      await apiServices.alertingV2.sourceIndex.deleteDocs({
+        index: SOURCE_INDEX,
+        query: { term: { 'host.name': HOST } },
+      });
+
+      await apiServices.alertingV2.ruleEvents.waitForAtLeast(rule.id, 1, {
+        episodeStatus: 'no_data',
+      });
+
+      // 3) Re-introduce the data: a fresh breached event arrives. The FSM's
+      //    soft-reset rule (`no_data + breached → pending`) requires the
+      //    pending count window to be re-met before going active.
+      await apiServices.alertingV2.sourceIndex.indexDocs({
+        index: SOURCE_INDEX,
+        docs: [
+          {
+            '@timestamp': new Date().toISOString(),
+            'host.name': HOST,
+            severity: 'high',
+            value: 1,
+          },
+        ],
+      });
+
+      await apiServices.alertingV2.ruleEvents.waitForAtLeast(rule.id, 1, {
+        episodeStatus: 'pending',
+      });
+
+      const events = await apiServices.alertingV2.ruleEvents.find(rule.id);
+      const observedStatuses = new Set(events.map((event) => event.episode?.status));
+
+      // The lifecycle must have visited all four episode states.
+      for (const status of ['pending', 'active', 'no_data'] as const) {
+        expect(observedStatuses.has(status)).toBe(true);
+      }
+
+      // The soft-reset pending event must restart the count window at 1.
+      const pendingEvents = events.filter((event) => event.episode?.status === 'pending');
+      const pendingCounts = pendingEvents
+        .map((event) => event.episode!.status_count)
+        .filter((count): count is number => typeof count === 'number');
+
+      expect(pendingCounts).toContain(1);
+    }
+  );
 });

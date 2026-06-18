@@ -260,6 +260,129 @@ describe('DirectorService', () => {
       });
     });
 
+    describe('no_data events', () => {
+      const buildPreviousState = (status: 'active' | 'recovering' | 'pending' | 'inactive') => ({
+        last_episode_timestamp: '2026-01-01T00:00:00.000Z',
+        last_status: 'breached' as const,
+        last_episode_id: 'existing-episode',
+        last_episode_status: status,
+        last_episode_status_count: null,
+        group_hash: 'hash-1',
+      });
+
+      it("transitions episode to 'no_data' when no_data_strategy is 'emit'", async () => {
+        const ruleWithEmit = createRuleResponse({ no_data_strategy: 'emit' });
+        const alertEvent = createAlertEvent({
+          group_hash: 'hash-1',
+          status: 'no_data',
+          episode: undefined,
+        });
+
+        mockEsClient.esql.query.mockResolvedValue(
+          createLatestAlertEventStateResponse([buildPreviousState('active')])
+        );
+
+        const result = await directorService.run({
+          rule: ruleWithEmit,
+          executionContext: testExecutionContext,
+          alertEvents: [alertEvent],
+        });
+
+        expect(result[0].episode).toEqual({
+          id: 'existing-episode',
+          status: alertEpisodeStatus.no_data,
+        });
+      });
+
+      it("preserves the prior episode status when no_data_strategy is 'last_known_status'", async () => {
+        const ruleWithLastKnown = createRuleResponse({ no_data_strategy: 'last_known_status' });
+        const alertEvent = createAlertEvent({
+          group_hash: 'hash-1',
+          status: 'no_data',
+          episode: undefined,
+        });
+
+        mockEsClient.esql.query.mockResolvedValue(
+          createLatestAlertEventStateResponse([buildPreviousState('active')])
+        );
+
+        const result = await directorService.run({
+          rule: ruleWithLastKnown,
+          executionContext: testExecutionContext,
+          alertEvents: [alertEvent],
+        });
+
+        expect(result[0].episode).toEqual({
+          id: 'existing-episode',
+          status: alertEpisodeStatus.active,
+        });
+      });
+
+      it("sets the episode status to 'pending' on breach after no_data status", async () => {
+        const alertEvent = createAlertEvent({
+          group_hash: 'hash-1',
+          status: 'breached',
+          episode: undefined,
+        });
+
+        mockEsClient.esql.query.mockResolvedValue(
+          createLatestAlertEventStateResponse([
+            {
+              last_episode_timestamp: '2026-01-01T00:00:00.000Z',
+              last_status: 'no_data',
+              last_episode_id: 'existing-episode',
+              last_episode_status: alertEpisodeStatus.no_data,
+              last_episode_status_count: null,
+              group_hash: 'hash-1',
+            },
+          ])
+        );
+
+        const result = await directorService.run({
+          rule,
+          executionContext: testExecutionContext,
+          alertEvents: [alertEvent],
+        });
+
+        expect(result[0].episode).toEqual({
+          id: 'existing-episode',
+          status: alertEpisodeStatus.pending,
+        });
+      });
+
+      it("sets the episode status to 'inactive' on recovered event after no_data status", async () => {
+        const alertEvent = createAlertEvent({
+          group_hash: 'hash-1',
+          status: 'recovered',
+          episode: undefined,
+        });
+
+        mockEsClient.esql.query.mockResolvedValue(
+          createLatestAlertEventStateResponse([
+            {
+              last_episode_timestamp: '2026-01-01T00:00:00.000Z',
+              last_status: 'no_data',
+              last_episode_id: 'existing-episode',
+              last_episode_status: alertEpisodeStatus.no_data,
+              last_episode_status_count: null,
+              group_hash: 'hash-1',
+            },
+          ])
+        );
+
+        const result = await directorService.run({
+          rule,
+          executionContext: testExecutionContext,
+          alertEvents: [alertEvent],
+        });
+
+        expect(result[0].episode).toEqual({
+          id: 'existing-episode',
+          status: alertEpisodeStatus.inactive,
+        });
+      });
+    });
+
     it('processes multiple alert events correctly', async () => {
       const alertEvents = [
         createAlertEvent({ group_hash: 'hash-1', status: 'breached', episode: undefined }),

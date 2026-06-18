@@ -9,10 +9,21 @@ import { injectable } from 'inversify';
 import type { AlertEventStatus } from '../../../resources/datastreams/alert_events';
 import {
   alertEpisodeStatus,
+  alertEventStatus,
   type AlertEpisodeStatus,
 } from '../../../resources/datastreams/alert_events';
 import type { RuleResponse } from '../../rules_client/types';
 import type { ITransitionStrategy, StateTransitionContext, StateTransitionResult } from './types';
+
+/**
+ * Static transitions for non-`no_data` events. The `no_data` column is
+ * computed dynamically based on `rule.no_data_strategy` — see
+ * {@link BasicTransitionStrategy.getNextState}.
+ *
+ * `no_data` rule events always carry "no signal about cpu", so the transition
+ * decision belongs to the rule's no-data policy, not the FSM table.
+ */
+type DeterministicEventStatus = Exclude<AlertEventStatus, 'no_data'>;
 
 @injectable()
 export class BasicTransitionStrategy implements ITransitionStrategy {
@@ -20,27 +31,27 @@ export class BasicTransitionStrategy implements ITransitionStrategy {
 
   protected readonly stateMachine: Record<
     AlertEpisodeStatus,
-    Record<AlertEventStatus, AlertEpisodeStatus>
+    Record<DeterministicEventStatus, AlertEpisodeStatus>
   > = {
     [alertEpisodeStatus.inactive]: {
       breached: alertEpisodeStatus.pending,
       recovered: alertEpisodeStatus.inactive,
-      no_data: alertEpisodeStatus.inactive,
     },
     [alertEpisodeStatus.pending]: {
       breached: alertEpisodeStatus.active,
       recovered: alertEpisodeStatus.inactive,
-      no_data: alertEpisodeStatus.pending,
     },
     [alertEpisodeStatus.active]: {
       breached: alertEpisodeStatus.active,
       recovered: alertEpisodeStatus.recovering,
-      no_data: alertEpisodeStatus.active,
     },
     [alertEpisodeStatus.recovering]: {
       breached: alertEpisodeStatus.active,
       recovered: alertEpisodeStatus.inactive,
-      no_data: alertEpisodeStatus.recovering,
+    },
+    [alertEpisodeStatus.no_data]: {
+      breached: alertEpisodeStatus.pending,
+      recovered: alertEpisodeStatus.inactive,
     },
   };
 
@@ -48,11 +59,19 @@ export class BasicTransitionStrategy implements ITransitionStrategy {
     return true;
   }
 
-  getNextState({ alertEvent, previousEpisode }: StateTransitionContext): StateTransitionResult {
+  getNextState({
+    rule,
+    alertEvent,
+    previousEpisode,
+  }: StateTransitionContext): StateTransitionResult {
     const currentAlertEpisodeStatus = previousEpisode?.last_episode_status;
 
     if (!currentAlertEpisodeStatus) {
       return { status: alertEpisodeStatus.pending };
+    }
+
+    if (alertEvent.status === alertEventStatus.no_data) {
+      return { status: this.getNextStatusForNoData(rule, currentAlertEpisodeStatus) };
     }
 
     const stateRules = this.stateMachine[currentAlertEpisodeStatus];
@@ -61,8 +80,19 @@ export class BasicTransitionStrategy implements ITransitionStrategy {
       return { status: alertEpisodeStatus.pending };
     }
 
-    const nextState = stateRules[alertEvent.status];
+    const nextState = stateRules[alertEvent.status as DeterministicEventStatus];
 
     return { status: nextState ?? currentAlertEpisodeStatus ?? alertEpisodeStatus.pending };
+  }
+
+  private getNextStatusForNoData(
+    rule: RuleResponse,
+    currentStatus: AlertEpisodeStatus
+  ): AlertEpisodeStatus {
+    if (rule.no_data_strategy === 'emit') {
+      return alertEpisodeStatus.no_data;
+    }
+    // for all other no_data_strategy types return the last known episode status
+    return currentStatus;
   }
 }

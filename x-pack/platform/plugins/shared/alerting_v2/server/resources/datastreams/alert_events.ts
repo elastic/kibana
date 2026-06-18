@@ -10,7 +10,7 @@ import { z } from '@kbn/zod/v4';
 import type { ResourceDefinition } from './types';
 
 export const ALERT_EVENTS_DATA_STREAM = '.rule-events';
-export const ALERT_EVENTS_DATA_STREAM_VERSION = 4;
+export const ALERT_EVENTS_DATA_STREAM_VERSION = 5;
 export const ALERT_EVENTS_BACKING_INDEX = '.ds-.rule-events-*';
 
 const mappings: MappingsDefinition = {
@@ -35,7 +35,7 @@ const mappings: MappingsDefinition = {
       type: 'object',
       properties: {
         id: { type: 'keyword' },
-        status: { type: 'keyword' }, // inactive | pending | active | recovering
+        status: { type: 'keyword' }, // inactive | pending | active | recovering | no_data
         status_count: { type: 'long' }, // only set for pending and recovering
       },
     },
@@ -46,7 +46,7 @@ const mappings: MappingsDefinition = {
 
 const alertEventStatusSchema = z.enum(['breached', 'recovered', 'no_data']);
 const alertEventTypeSchema = z.enum(['signal', 'alert']);
-const alertEpisodeStatusSchema = z.enum(['inactive', 'pending', 'active', 'recovering']);
+const alertEpisodeStatusSchema = z.enum(['inactive', 'pending', 'active', 'recovering', 'no_data']);
 const alertEpisodeStatusCountSchema = z.number().int().optional();
 const alertEventSeveritySchema = z.enum(['info', 'low', 'medium', 'high', 'critical']);
 

@@ -64,7 +64,7 @@ export const ALERT_EPISODE_FIELDS = [
 ] as const;
 
 export interface EpisodesFilterState {
-  /** Single episode status (inactive | pending | active | recovering) or null for All */
+  /** Single episode status (inactive | pending | active | recovering | no_data) or null for All */
   status?: string | null;
   /** Rule ID or null */
   ruleId?: string | null;

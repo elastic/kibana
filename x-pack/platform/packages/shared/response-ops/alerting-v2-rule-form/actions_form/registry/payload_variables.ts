@@ -64,7 +64,7 @@ export const ALERT_EPISODE_FIELDS: readonly PayloadVariable[] = [
   },
   {
     path: 'episode_status',
-    detail: "'inactive' | 'pending' | 'active' | 'recovering'",
+    detail: "'inactive' | 'pending' | 'active' | 'recovering' | 'no_data'",
     documentation: 'Current lifecycle status of the episode.',
   },
   {
