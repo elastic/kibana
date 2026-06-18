@@ -74,11 +74,7 @@ const renderFooter = (
 
   return render(
     <TestProviders>
-      <UserPanelFooter
-        identityFields={identityFields}
-        entity={entity}
-        riskLevel={RISK_LEVEL}
-      />
+      <UserPanelFooter identityFields={identityFields} entity={entity} riskLevel={RISK_LEVEL} />
     </TestProviders>
   );
 };
