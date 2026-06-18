@@ -7,7 +7,6 @@
 
 import { Observable } from 'rxjs';
 import type { AnalyticsServiceSetup } from '@kbn/core-analytics-browser';
-import { StreamsTelemetryClient } from './client';
 
 describe('StreamsTelemetryClient', () => {
   let analyticsService: jest.Mocked<AnalyticsServiceSetup>;
@@ -22,6 +21,5 @@ describe('StreamsTelemetryClient', () => {
       optIn: jest.fn(),
       telemetryCounter$: new Observable(),
     };
-    client = new StreamsTelemetryClient(analyticsService);
   });
 });
