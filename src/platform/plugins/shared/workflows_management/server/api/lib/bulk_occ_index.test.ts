@@ -136,9 +136,7 @@ describe('bulkIndexWithOccRetry', () => {
 
     expect(result).toEqual({
       successIds: ['wf-1'],
-      successfulDocuments: [
-        { id: 'wf-1', document: expect.objectContaining({ enabled: false }) },
-      ],
+      successfulDocuments: [{ id: 'wf-1', document: expect.objectContaining({ enabled: false }) }],
       failures: [],
     });
     expect(client.bulk).toHaveBeenCalledWith({
@@ -188,9 +186,7 @@ describe('bulkIndexWithOccRetry', () => {
 
     expect(result).toEqual({
       successIds: ['wf-1'],
-      successfulDocuments: [
-        { id: 'wf-1', document: expect.objectContaining({ enabled: false }) },
-      ],
+      successfulDocuments: [{ id: 'wf-1', document: expect.objectContaining({ enabled: false }) }],
       failures: [],
     });
     expect(client.search).toHaveBeenCalledWith({
