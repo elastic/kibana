@@ -9,7 +9,7 @@
 
 import React from 'react';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
-import { screen } from '@testing-library/react';
+import { screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { CustomizeNavigationModal } from './customize_navigation_modal';
 import type { NavigationItemInfo } from '../types';
@@ -23,6 +23,8 @@ describe('CustomizeNavigationModal', () => {
 
   const defaultProps = {
     items,
+    hidePrimaryLabels: false,
+    onHidePrimaryLabelsChange: jest.fn(),
     onSave: jest.fn(),
     onReset: jest.fn(() => Promise.resolve(items)),
     onChange: jest.fn(),
@@ -77,6 +79,20 @@ describe('CustomizeNavigationModal', () => {
     expect(
       screen.getByText('Reorder or hide apps in this space without affecting other users.')
     ).toBeInTheDocument();
+  });
+
+  it('should render the primary nav labels keypad menu', () => {
+    renderWithI18n(<CustomizeNavigationModal {...defaultProps} />);
+    expect(screen.getByTestId('primaryNavLabelsKeyPadMenu')).toBeInTheDocument();
+    expect(screen.getByText('Show labels')).toBeInTheDocument();
+    expect(screen.getByText('Hide labels')).toBeInTheDocument();
+  });
+
+  it('should call onHidePrimaryLabelsChange when Hide labels is selected', async () => {
+    renderWithI18n(<CustomizeNavigationModal {...defaultProps} />);
+    const hideLabelsItem = screen.getByTestId('primaryNavLabelsHide');
+    await userEvent.click(within(hideLabelsItem).getByRole('radio'));
+    expect(defaultProps.onHidePrimaryLabelsChange).toHaveBeenCalledWith(true);
   });
 
   it('should call onClose when the modal is closed', async () => {

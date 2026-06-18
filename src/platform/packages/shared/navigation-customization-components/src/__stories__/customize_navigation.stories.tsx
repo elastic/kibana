@@ -42,10 +42,13 @@ type ModalProps = React.ComponentProps<typeof CustomizeNavigationModal>;
  */
 const ControlledModal = ({ items: initialItems }: Pick<ModalProps, 'items'>) => {
   const [items, setItems] = useState(initialItems);
+  const [hidePrimaryLabels, setHidePrimaryLabels] = useState(false);
 
   return (
     <CustomizeNavigationModal
       items={items}
+      hidePrimaryLabels={hidePrimaryLabels}
+      onHidePrimaryLabelsChange={setHidePrimaryLabels}
       onChange={(order, hiddenIds) => action('onChange')({ order, hiddenIds })}
       onSave={(order, hiddenIds) => action('onSave')({ order, hiddenIds })}
       onReset={async () => {

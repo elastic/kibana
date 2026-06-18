@@ -15,6 +15,8 @@ import type { NavigationItemInfo } from './types';
 export interface OpenCustomizeNavigationModalDeps {
   items: NavigationItemInfo[];
   defaultItemIds: string[];
+  hidePrimaryLabels: boolean;
+  onHidePrimaryLabelsChange: (hidePrimaryLabels: boolean) => void;
   /**
    * Injected by the caller (navigation plugin) to avoid importing
    * `@kbn/core-chrome-navigation-customization` from this shared package — the
@@ -44,6 +46,8 @@ export interface OpenCustomizeNavigationModalDeps {
 export const openCustomizeNavigationModal = ({
   items,
   defaultItemIds,
+  hidePrimaryLabels,
+  onHidePrimaryLabelsChange,
   computeMoves,
   onChange,
   onSave,
@@ -59,6 +63,8 @@ export const openCustomizeNavigationModal = ({
   mountModal(
     React.createElement(CustomizeNavigationModal, {
       items,
+      hidePrimaryLabels,
+      onHidePrimaryLabelsChange,
       onChange: (order, hiddenIds) => onChange(toCustomization(order, hiddenIds)),
       onSave: (order, hiddenIds) => onSave(toCustomization(order, hiddenIds)),
       onReset,

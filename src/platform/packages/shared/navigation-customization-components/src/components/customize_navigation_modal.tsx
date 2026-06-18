@@ -30,10 +30,11 @@ import {
 import { css, Global } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import type { NavigationItemInfo } from '../types';
 import { DraggableItem } from './draggable_item';
 import { EmptyDropPlaceholder } from './empty_drop_placeholder';
+import { PrimaryNavLabelsKeyPadMenu } from './primary_nav_labels_keypad_menu';
 import { useItemList, HIDDEN_DROPPABLE_ID, VISIBLE_DROPPABLE_ID } from './use_item_list';
 
 const modalCss = css`
@@ -52,6 +53,8 @@ const modalBodyCss = (euiTheme: EuiThemeComputed) => css`
 
 interface Props {
   items: NavigationItemInfo[];
+  hidePrimaryLabels: boolean;
+  onHidePrimaryLabelsChange: (hidePrimaryLabels: boolean) => void;
   onSave: (order: string[], hiddenIds: string[]) => void;
   onReset: () => Promise<NavigationItemInfo[]>;
   onChange: (order: string[], hiddenIds: string[]) => void;
@@ -60,6 +63,8 @@ interface Props {
 
 export const CustomizeNavigationModal = ({
   items: initialItems,
+  hidePrimaryLabels: initialHidePrimaryLabels,
+  onHidePrimaryLabelsChange,
   onSave,
   onReset,
   onChange,
@@ -67,6 +72,8 @@ export const CustomizeNavigationModal = ({
 }: Props) => {
   const { euiTheme } = useEuiTheme();
   const modalTitleId = useGeneratedHtmlId();
+  const initialHidePrimaryLabelsRef = useRef(initialHidePrimaryLabels);
+  const [hidePrimaryLabels, setHidePrimaryLabels] = useState(initialHidePrimaryLabels);
   const {
     items,
     setItems,
@@ -78,6 +85,17 @@ export const CustomizeNavigationModal = ({
   } = useItemList(initialItems);
 
   const [isSaving, setIsSaving] = useState(false);
+
+  const hasLabelChanges = hidePrimaryLabels !== initialHidePrimaryLabelsRef.current;
+  const hasAnyChanges = hasChanges || hasLabelChanges;
+
+  const handleHidePrimaryLabelsChange = useCallback(
+    (nextHidePrimaryLabels: boolean) => {
+      setHidePrimaryLabels(nextHidePrimaryLabels);
+      onHidePrimaryLabelsChange(nextHidePrimaryLabels);
+    },
+    [onHidePrimaryLabelsChange]
+  );
 
   useEffect(() => {
     const order = items.map((item) => item.id);
@@ -125,6 +143,10 @@ export const CustomizeNavigationModal = ({
               defaultMessage="Customize navigation"
             />
           </EuiModalHeaderTitle>
+          <PrimaryNavLabelsKeyPadMenu
+            hidePrimaryLabels={hidePrimaryLabels}
+            onChange={handleHidePrimaryLabelsChange}
+          />
           <EuiText size="s" color="subdued">
             <FormattedMessage
               id="navigationCustomizationComponents.spaceDescription"
@@ -217,7 +239,7 @@ export const CustomizeNavigationModal = ({
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiFlexGroup gutterSize="s" responsive={false}>
-              {hasChanges && (
+              {hasAnyChanges && (
                 <EuiFlexItem grow={false}>
                   <EuiButtonEmpty onClick={handleClose}>
                     <FormattedMessage
@@ -232,7 +254,7 @@ export const CustomizeNavigationModal = ({
                   fill
                   onClick={handleSave}
                   isLoading={isSaving}
-                  disabled={!hasChanges}
+                  disabled={!hasAnyChanges}
                   data-test-subj="customizeNavigationSaveButton"
                 >
                   <FormattedMessage

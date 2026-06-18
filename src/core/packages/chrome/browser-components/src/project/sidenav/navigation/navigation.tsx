@@ -23,6 +23,7 @@ import { PanelStateManager } from './panel_state_manager';
 
 export interface ChromeNavigationProps {
   isCollapsed: boolean;
+  hidePrimaryLabels: boolean;
   setWidth: (width: number) => void;
   onToggleCollapsed?: (isCollapsed: boolean) => void;
 }
@@ -44,6 +45,7 @@ export const Navigation = (props: ChromeNavigationProps) => {
         items={navItems}
         logo={logoItem}
         isCollapsed={props.isCollapsed}
+        hidePrimaryLabels={props.hidePrimaryLabels}
         setWidth={props.setWidth}
         onToggleCollapsed={props.onToggleCollapsed}
         onCustomizeNavigation={onCustomizeNavigation}

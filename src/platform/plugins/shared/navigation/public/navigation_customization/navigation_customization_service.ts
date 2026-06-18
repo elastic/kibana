@@ -130,6 +130,7 @@ export class NavigationCustomizationService {
       const savedCustomization = core.userStorage.get<NavigationCustomization>(
         NAV_CUSTOMIZATION_STORAGE_KEY
       );
+      const initialHidePrimaryLabels = chrome.sideNav.getHidePrimaryLabels();
 
       // Captured after mountModal is called synchronously by openCustomizeNavigationModal.
       let closeModal: () => void = () => {};
@@ -137,6 +138,9 @@ export class NavigationCustomizationService {
       openCustomizeNavigationModal({
         items,
         defaultItemIds,
+        hidePrimaryLabels: initialHidePrimaryLabels,
+        onHidePrimaryLabelsChange: (hidePrimaryLabels) =>
+          chrome.sideNav.setHidePrimaryLabels(hidePrimaryLabels),
         computeMoves,
         onChange: (c) => chrome.project.setNavigationCustomization(c),
         onSave: (c) => {
@@ -168,6 +172,7 @@ export class NavigationCustomizationService {
         },
         onClose: () => {
           chrome.project.setNavigationCustomization(savedCustomization);
+          chrome.sideNav.setHidePrimaryLabels(initialHidePrimaryLabels);
           closeModal();
         },
         // toMountPoint is a regular function (no JSX) — safe to import in .ts.
