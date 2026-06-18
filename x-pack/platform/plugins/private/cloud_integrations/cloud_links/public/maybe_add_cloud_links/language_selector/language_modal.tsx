@@ -24,7 +24,7 @@ import {
 import type { Theme } from '@emotion/react';
 import { css } from '@emotion/react';
 import type { AnalyticsServiceStart } from '@kbn/core/public';
-import { i18n, getAvailableLocales } from '@kbn/i18n';
+import { i18n, getAvailableLocales, getBrowserPreferredLocale } from '@kbn/i18n';
 import type { LocaleValue } from '@kbn/user-profile-components';
 
 import { useLanguage } from './use_language_hook';
@@ -118,9 +118,11 @@ export const LanguageModal: FC<Props> = ({ closeModal, analytics }) => {
           onClick={() => {
             if (locale !== initialLocaleValue) {
               onChange(locale, true);
+              const preferredLocale = getBrowserPreferredLocale();
               analytics.reportEvent('display_language_changed', {
                 from: initialLocaleValue,
                 to: locale,
+                ...(preferredLocale ? { preferred_language_kibana_locale: preferredLocale } : {}),
               });
             }
             closeModal();

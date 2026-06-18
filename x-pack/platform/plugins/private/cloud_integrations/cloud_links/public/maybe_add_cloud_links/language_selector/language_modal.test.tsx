@@ -10,6 +10,8 @@ import React, { type FC, type PropsWithChildren } from 'react';
 
 import { EuiProvider } from '@elastic/eui';
 
+import { getBrowserPreferredLocale } from '@kbn/i18n';
+
 import { LanguageModal } from './language_modal';
 import { useLanguage } from './use_language_hook';
 
@@ -28,6 +30,7 @@ jest.mock('@kbn/i18n', () => {
       { id: 'fr-FR', label: 'Français' },
       { id: 'ja-JP', label: '日本語' },
     ]),
+    getBrowserPreferredLocale: jest.fn(() => 'en'),
   };
 });
 
@@ -79,8 +82,29 @@ describe('LanguageModal', () => {
     expect(reportEventMock).toHaveBeenCalledWith('display_language_changed', {
       from: 'en',
       to: 'fr-FR',
+      preferred_language_kibana_locale: 'en',
     });
     expect(closeModal).toHaveBeenCalled();
+  });
+
+  it('omits preferred_language_kibana_locale when the browser preference is unservable', () => {
+    (getBrowserPreferredLocale as jest.Mock).mockReturnValueOnce(undefined);
+    (useLanguage as jest.Mock).mockReturnValue({
+      value: 'fr-FR',
+      initialValue: 'en',
+      isLoading: false,
+      isVisible: true,
+      onChange: onChangeMock,
+    });
+
+    const { getByTestId } = renderModal({ reportEvent: reportEventMock });
+
+    fireEvent.click(getByTestId('languageModalSaveButton'));
+
+    expect(reportEventMock).toHaveBeenCalledWith('display_language_changed', {
+      from: 'en',
+      to: 'fr-FR',
+    });
   });
 
   it('does not report event when locale is unchanged', () => {
