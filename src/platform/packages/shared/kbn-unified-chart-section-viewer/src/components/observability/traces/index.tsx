@@ -12,6 +12,7 @@ import React, { useCallback, useMemo } from 'react';
 import type { DataViewField } from '@kbn/data-views-plugin/common';
 import { UnifiedBreakdownFieldSelector } from '@kbn/unified-histogram';
 import { TraceMetricsProvider } from './context/trace_metrics_context';
+import { TRACES_BREAKDOWN_RECOMMENDED_FIELDS } from './constants';
 import { useEsqlQueryInfo } from '../../../hooks/use_esql_query_info';
 import { ErrorRateChart } from './error_rate';
 import { LatencyChart } from './latency';
@@ -80,6 +81,7 @@ function TraceMetricsGrid({
           breakdown={{ field: breakdownDataViewField }}
           onBreakdownFieldChange={handleBreakdownFieldChange}
           esqlColumns={isESQLQuery ? columns : undefined}
+          recommendedFields={TRACES_BREAKDOWN_RECOMMENDED_FIELDS}
         />
       ) : undefined,
     }),
