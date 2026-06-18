@@ -326,11 +326,6 @@ export class RulesClient {
 
     await this.rulesSavedObjectService.delete({ id });
 
-    await this.actionPolicyClient.deleteActionPoliciesByFilter({
-      type: 'single_rule',
-      ruleId: id,
-    });
-
     this.ruleEventPublisher.emitRuleDeleted(this.request, [deletedRule], this.spaceId);
   }
 
