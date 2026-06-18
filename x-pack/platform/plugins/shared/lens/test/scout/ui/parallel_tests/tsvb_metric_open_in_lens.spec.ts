@@ -49,29 +49,46 @@ spaceTest.describe('TSVB Metric - Open in Lens', { tag: tags.deploymentAgnostic 
     await scoutSpace.savedObjects.cleanStandardList();
   });
 
-  spaceTest(
-    'should show the "Convert to Lens" menu item for basic metric',
-    async ({ pageObjects }) => {
-      const { dashboard } = pageObjects;
+  // Negative cases grouped — these don't navigate away from the dashboard,
+  // so they can share one browser context via test.step().
+  spaceTest('should check Convert to Lens action availability', async ({ pageObjects }) => {
+    const { dashboard } = pageObjects;
+
+    await spaceTest.step('unsupported metric has no Convert to Lens action', async () => {
+      const hasAction = await dashboard.panelHasAction(
+        CONVERT_TO_LENS_ACTION,
+        'Metric - Unsupported metric'
+      );
+      expect(hasAction).toBe(false);
+    });
+
+    await spaceTest.step('invalid panel has no Convert to Lens action', async () => {
+      const hasAction = await dashboard.panelHasAction(
+        CONVERT_TO_LENS_ACTION,
+        'Metric - Invalid panel'
+      );
+      expect(hasAction).toBe(false);
+    });
+
+    await spaceTest.step('basic metric has Convert to Lens action', async () => {
       const hasAction = await dashboard.panelHasAction(CONVERT_TO_LENS_ACTION, 'Metric - Basic');
       expect(hasAction).toBe(true);
-    }
-  );
+    });
+  });
 
+  // Each conversion test navigates from dashboard → Lens editor,
+  // so each needs its own browser context (via beforeEach).
   spaceTest('should convert basic metric to Lens', async ({ page, pageObjects }) => {
     const { dashboard } = pageObjects;
     await dashboard.clickPanelAction(CONVERT_TO_LENS_ACTION, 'Metric - Basic');
     await expect(page.testSubj.locator('mtrVis')).toBeVisible();
-
-    const metricValue = page.testSubj.locator('mtrVis').getByText('Count of records');
-    await expect(metricValue).toBeVisible();
+    await expect(page.testSubj.locator('mtrVis').getByText('Count of records')).toBeVisible();
   });
 
   spaceTest('should convert static value', async ({ page, pageObjects }) => {
     const { dashboard } = pageObjects;
     await dashboard.clickPanelAction(CONVERT_TO_LENS_ACTION, 'Metric - Static value');
     await expect(page.testSubj.locator('mtrVis')).toBeVisible();
-
     const dimensions = page.testSubj.locator('lns-dimensionTrigger');
     await expect(dimensions).toHaveCount(1);
     await expect(dimensions.getByText('10')).toBeVisible();
@@ -81,35 +98,15 @@ spaceTest.describe('TSVB Metric - Open in Lens', { tag: tags.deploymentAgnostic 
     const { dashboard } = pageObjects;
     await dashboard.clickPanelAction(CONVERT_TO_LENS_ACTION, 'Metric - Agg with params');
     await expect(page.testSubj.locator('mtrVis')).toBeVisible();
-
     const dimensions = page.testSubj.locator('lns-dimensionTrigger');
     await expect(dimensions).toHaveCount(1);
     await expect(dimensions.getByText('Count of bytes')).toBeVisible();
-  });
-
-  spaceTest('should not allow converting unsupported metric', async ({ pageObjects }) => {
-    const { dashboard } = pageObjects;
-    const hasAction = await dashboard.panelHasAction(
-      CONVERT_TO_LENS_ACTION,
-      'Metric - Unsupported metric'
-    );
-    expect(hasAction).toBe(false);
-  });
-
-  spaceTest('should not allow converting invalid panel', async ({ pageObjects }) => {
-    const { dashboard } = pageObjects;
-    const hasAction = await dashboard.panelHasAction(
-      CONVERT_TO_LENS_ACTION,
-      'Metric - Invalid panel'
-    );
-    expect(hasAction).toBe(false);
   });
 
   spaceTest('should convert color ranges', async ({ page, pageObjects }) => {
     const { dashboard } = pageObjects;
     await dashboard.clickPanelAction(CONVERT_TO_LENS_ACTION, 'Metric - Color ranges');
     await expect(page.testSubj.locator('mtrVis')).toBeVisible();
-
     const dimensions = page.testSubj.locator('lns-dimensionTrigger');
     await expect(dimensions).toHaveCount(1);
   });
