@@ -210,23 +210,6 @@ export const ActionPolicyDetailsFlyout = ({
             <EuiFlexItem grow={false}>
               <ActionPolicyStateBadge policy={policy} isLoading={false} />
             </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              {policy.type === 'single_rule' ? (
-                <EuiBadge color="hollow" iconType="link">
-                  <FormattedMessage
-                    id="xpack.alertingV2.actionPolicy.detailsFlyout.singleRuleBadge"
-                    defaultMessage="Single rule"
-                  />
-                </EuiBadge>
-              ) : (
-                <EuiBadge color="hollow">
-                  <FormattedMessage
-                    id="xpack.alertingV2.actionPolicy.detailsFlyout.globalBadge"
-                    defaultMessage="Global"
-                  />
-                </EuiBadge>
-              )}
-            </EuiFlexItem>
             {snoozedActive && policy.snoozedUntil && (
               <EuiFlexItem grow={false}>
                 <EuiBadge color="accent" iconType="bellSlash">

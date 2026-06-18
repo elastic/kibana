@@ -87,7 +87,6 @@ dependsOn:
   - '@kbn/shared-ux-link-redirect-app'
   - '@kbn/expressions-plugin'
   - '@kbn/ui-actions-plugin'
-  - '@kbn/dashboard-plugin'
   - '@kbn/field-formats-plugin'
   - '@kbn/charts-plugin'
   - '@kbn/unified-data-table'
@@ -119,6 +118,7 @@ dependsOn:
   - '@kbn/core-spaces-common'
   - '@kbn/datemath'
   - '@kbn/css-utils'
+  - '@kbn/dashboard-plugin'
   - '@kbn/cps'
 tags:
   - plugin
