@@ -496,7 +496,7 @@ export class SmlCrawlerImpl implements SmlCrawler {
         }
       }
     } catch (error) {
-      if (isNotFoundError(error)) {
+      if (isResponseError(error) && error.statusCode === 404) {
         return result;
       }
       this.logger.warn(

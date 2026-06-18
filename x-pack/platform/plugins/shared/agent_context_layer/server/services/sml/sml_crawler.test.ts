@@ -40,12 +40,6 @@ jest.mock('./sml_storage', () => ({
   createSmlStorage: jest.fn(),
 }));
 
-jest.mock('./sml_service', () => ({
-  isNotFoundError: jest.fn(
-    (error: unknown) => (error as { statusCode?: number })?.statusCode === 404
-  ),
-}));
-
 jest.mock('@kbn/es-errors', () => ({
   isResponseError: jest.fn(
     (error: unknown) => typeof (error as { statusCode?: unknown })?.statusCode === 'number'
