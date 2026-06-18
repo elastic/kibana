@@ -20,6 +20,7 @@ import { SETTINGS_PAGE_CONTENT_MAX_WIDTH } from './constants';
 
 const settingsPageContentWrapperCss = css`
   max-width: ${SETTINGS_PAGE_CONTENT_MAX_WIDTH}px;
+  margin-inline: auto;
 `;
 
 export interface SettingsPageProps {
