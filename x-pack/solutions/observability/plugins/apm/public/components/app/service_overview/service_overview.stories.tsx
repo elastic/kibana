@@ -74,6 +74,28 @@ const EMPTY_STATS = { currentPeriod: {}, previousPeriod: {} };
 const stories: Meta<{}> = {
   title: 'app/ServiceOverview',
   component: ServiceOverview,
+  tags: ['autodocs'],
+  parameters: {
+    docs: {
+      description: {
+        component:
+          'Service overview page showing latency, throughput, error-rate, and breakdown charts ' +
+          'alongside transactions, errors, dependencies, and instances tables. The `Example` story ' +
+          'derives chart data from the shared `opbeansScenario()` — no Elasticsearch required.',
+      },
+    },
+    a11y: {
+      config: {
+        rules: [
+          { id: 'color-contrast', enabled: true },
+          { id: 'image-alt', enabled: true },
+          { id: 'aria-required-attr', enabled: true },
+          { id: 'aria-roles', enabled: true },
+          { id: 'region', enabled: false }, // disabled for Storybook context
+        ],
+      },
+    },
+  },
 };
 export default stories;
 

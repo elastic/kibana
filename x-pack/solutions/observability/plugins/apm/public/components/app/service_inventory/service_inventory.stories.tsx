@@ -21,6 +21,7 @@ import {
   SCENARIO_START,
   SCENARIO_END,
   toServiceInventoryResponse,
+  toDetailedStatisticsResponse,
 } from '../../../test_helpers/synthtrace_stories';
 
 const anomalyDetectionJobsContextValue = {
@@ -64,6 +65,28 @@ const TIME_RANGE_METADATA_DEFAULTS = {
 const stories: Meta<{}> = {
   title: 'app/ServiceInventory',
   component: ServiceInventory,
+  tags: ['autodocs'],
+  parameters: {
+    docs: {
+      description: {
+        component:
+          'Service inventory table listing all APM-instrumented services with latency, ' +
+          'throughput, and error-rate metrics. The `SynthtraceGenerated` story derives its ' +
+          'data from the shared `opbeansScenario()` — no Elasticsearch required.',
+      },
+    },
+    a11y: {
+      config: {
+        rules: [
+          { id: 'color-contrast', enabled: true },
+          { id: 'image-alt', enabled: true },
+          { id: 'aria-required-attr', enabled: true },
+          { id: 'aria-roles', enabled: true },
+          { id: 'region', enabled: false }, // disabled for Storybook context
+        ],
+      },
+    },
+  },
 };
 export default stories;
 
@@ -137,7 +160,12 @@ SynthtraceGenerated.decorators = [
               return {};
           }
         },
-        post: async () => ({ currentPeriod: {}, previousPeriod: {} }),
+        post: async (endpoint: string) => {
+          if (endpoint === '/internal/apm/services/detailed_statistics') {
+            return toDetailedStatisticsResponse(docs);
+          }
+          return { currentPeriod: {}, previousPeriod: {} };
+        },
       },
     } as unknown as CoreStart;
 
