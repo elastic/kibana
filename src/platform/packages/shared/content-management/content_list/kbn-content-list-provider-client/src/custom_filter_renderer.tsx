@@ -54,16 +54,25 @@ export const CustomFilterRenderer = ({
   const idTail = filterDefinition.id.slice(1);
   const fallbackDataTestSubj = `contentList${idHead}${idTail}Filter`;
 
-  const options = useMemo(
-    (): Array<SelectableFilterOption> =>
-      filterDefinition.getOptions().map((option) => ({
-        key: option.value,
-        label: option.label,
-        value: option.label,
-        count: countByKey.get(option.value) ?? 0,
-      })),
-    [countByKey, filterDefinition]
-  );
+  const options = useMemo((): Array<SelectableFilterOption> => {
+    const toOption = (value: string, label: string): SelectableFilterOption => ({
+      key: value,
+      label,
+      value: label,
+      count: countByKey.get(value) ?? 0,
+    });
+
+    const known = filterDefinition.getOptions();
+    if (known.length > 0) {
+      return known.map((option) => toOption(option.value, option.label));
+    }
+
+    // No static option universe: derive options from the values present in the
+    // current list (faceted), mirroring the built-in tag and created-by facets.
+    return [...countByKey.keys()]
+      .sort((a, b) => a.localeCompare(b))
+      .map((value) => toOption(value, filterDefinition.getLabelForValue(value) ?? value));
+  }, [countByKey, filterDefinition]);
 
   const renderOption = useCallback(
     (option: SelectableFilterOption, state: { isActive: boolean }) => {
