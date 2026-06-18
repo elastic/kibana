@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type {
+  EuiFlyoutProps} from '@elastic/eui';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -14,7 +16,6 @@ import {
   EuiFlyout,
   EuiFlyoutBody,
   EuiFlyoutFooter,
-  EuiFlyoutProps,
   EuiHorizontalRule,
   EuiPanel,
   EuiSpacer,
