@@ -18,7 +18,6 @@ import {
   DEFAULT_PRIMARY_LABELS_ALIGNMENT,
   DEFAULT_PRIMARY_POSITION,
   DEFAULT_PRIMARY_VALUE_ALIGNMENT,
-  DEFAULT_PRIMARY_VALUE_SIZING,
   DEFAULT_SECONDARY_LABEL_PLACEMENT,
   DEFAULT_SECONDARY_VALUE_ALIGNMENT,
 } from '../../../../transforms/charts/metric/defaults';
@@ -122,8 +121,8 @@ const alignVisualizationDefaults: NormalizerConfig<MetricAttributes> = {
       delete viz.applyColorTo;
     }
 
-    // A trailing max accessor (background bar) always forces `showBar: true` in the transform.
-    viz.showBar = viz.maxAccessor ? true : viz.showBar ?? false;
+    // The transform derives `showBar` purely from the presence of a max-accessor background bar.
+    viz.showBar = Boolean(viz.maxAccessor);
     viz.titlesTextAlign = viz.titlesTextAlign ?? DEFAULT_PRIMARY_LABELS_ALIGNMENT;
 
     if (viz.icon) {
@@ -144,8 +143,8 @@ const alignVisualizationDefaults: NormalizerConfig<MetricAttributes> = {
       viz.secondaryLabelPosition = DEFAULT_SECONDARY_LABEL_PLACEMENT;
     }
 
-    viz.valueFontMode =
-      viz.valueFontMode ?? (DEFAULT_PRIMARY_VALUE_SIZING === 'auto' ? 'default' : 'fit');
+    // Absent sizing round-trips through the API as `auto`, which maps back to `valueFontMode: 'default'`.
+    viz.valueFontMode = viz.valueFontMode ?? 'default';
 
     if (viz.breakdownByAccessor && viz.maxCols == null) {
       viz.maxCols = LENS_METRIC_BREAKDOWN_DEFAULT_MAX_COLUMNS;
@@ -433,21 +432,30 @@ const alignEmptyLinkedLayers: NormalizerConfig<MetricAttributes> = {
 const alignIds: NormalizerConfig<MetricAttributes> = {
   original: (attributes) => {
     const viz = attributes.state.visualization;
-    const accessor = getMetricAccessor(viz);
+    const idMap = new Map(
+      getColumnRemapping(viz).filter((pair): pair is [string, string] => pair[0] != null)
+    );
+    const remap = (id: string | undefined): string | undefined =>
+      id == null ? id : idMap.get(id) ?? id;
 
     viz.layerId = DEFAULT_LAYER_ID;
     if (viz.trendlineLayerId) viz.trendlineLayerId = TRENDLINE_LAYER_ID;
 
-    if (accessor) viz.metricAccessor = 'metric_accessor_metric';
-    if (viz.secondaryMetricAccessor) viz.secondaryMetricAccessor = 'metric_accessor_secondary';
-    if (viz.maxAccessor) viz.maxAccessor = 'metric_accessor_max';
-    if (viz.breakdownByAccessor) viz.breakdownByAccessor = 'metric_accessor_breakdown';
-    if (viz.trendlineTimeAccessor) viz.trendlineTimeAccessor = 'x_date_histogram';
-    if (viz.trendlineMetricAccessor) viz.trendlineMetricAccessor = 'metric_accessor_trendline';
+    const accessor = getMetricAccessor(viz);
+    if (accessor) viz.metricAccessor = remap(accessor);
+    if (viz.secondaryMetricAccessor)
+      viz.secondaryMetricAccessor = remap(viz.secondaryMetricAccessor);
+    if (viz.maxAccessor) viz.maxAccessor = remap(viz.maxAccessor);
+    if (viz.breakdownByAccessor) viz.breakdownByAccessor = remap(viz.breakdownByAccessor);
+    if (viz.trendlineTimeAccessor) viz.trendlineTimeAccessor = remap(viz.trendlineTimeAccessor);
+    if (viz.trendlineMetricAccessor)
+      viz.trendlineMetricAccessor = remap(viz.trendlineMetricAccessor);
+    if (viz.trendlineBreakdownByAccessor)
+      viz.trendlineBreakdownByAccessor = remap(viz.trendlineBreakdownByAccessor);
+    // `getColumnRemapping` maps this accessor to the `X0`-suffixed formula column id; the
+    // visualization field itself uses the non-suffixed id, so set it explicitly.
     if (viz.trendlineSecondaryMetricAccessor)
       viz.trendlineSecondaryMetricAccessor = 'metric_accessor_secondary_trendline';
-    if (viz.trendlineBreakdownByAccessor)
-      viz.trendlineBreakdownByAccessor = 'metric_accessor_breakdown_trendline';
 
     if (!viz.collapseFn) delete viz.collapseFn; // remove ""
     if ('accessor' in viz) delete viz.accessor;
