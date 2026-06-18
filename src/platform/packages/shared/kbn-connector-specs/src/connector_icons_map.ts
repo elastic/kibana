@@ -172,6 +172,13 @@ export const ConnectorIconsMap: Map<
     lazy(() => import(/* webpackChunkName: "connectorIconAmazons3" */ './specs/amazon_s3/icon')),
   ],
   [
+    '.amazon_dynamodb',
+    lazy(
+      () =>
+        import(/* webpackChunkName: "connectorIconAmazonDynamoDB" */ './specs/amazon_dynamodb/icon')
+    ),
+  ],
+  [
     '.sharepoint-server',
     lazy(
       () =>

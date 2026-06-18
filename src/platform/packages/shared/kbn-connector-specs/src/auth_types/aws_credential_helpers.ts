@@ -37,6 +37,7 @@ export function parseAwsHost(
 /**
  * Sign an AWS request with SigV4.
  * Automatically collects x-amz-* headers for signing (AWS requires them signed).
+ * When sessionToken is provided, adds X-Amz-Security-Token (required for temporary credentials).
  */
 export async function signRequest(
   method: string,
@@ -48,7 +49,8 @@ export async function signRequest(
   region: string,
   service: string,
   existingHeaders: Record<string, string>,
-  body?: string
+  body?: string,
+  sessionToken?: string
 ): Promise<Record<string, string>> {
   const algorithm = 'AWS4-HMAC-SHA256';
   const now = new Date();
@@ -70,15 +72,26 @@ export async function signRequest(
   };
 
   if (hasBody) {
-    headersToSign['content-type'] = 'application/json';
+    // Use the content-type from the request if provided; fall back to application/json.
+    // This is required for services like DynamoDB which use application/x-amz-json-1.0.
+    const existingContentType = Object.entries(existingHeaders).find(
+      ([k]) => k.toLowerCase() === 'content-type'
+    )?.[1];
+    headersToSign['content-type'] = existingContentType ?? 'application/json';
   }
 
-  // Include any x-amz-* headers set by the action handler (AWS requires them signed)
+  // Include any x-amz-* headers set by the action handler (AWS requires them signed).
+  // This includes x-amz-security-token when passed via existingHeaders (legacy path).
   for (const [key, value] of Object.entries(existingHeaders)) {
     const lowerKey = key.toLowerCase();
     if (lowerKey.startsWith('x-amz-') && lowerKey !== 'x-amz-date') {
       headersToSign[lowerKey] = value;
     }
+  }
+
+  // Session token from explicit param takes precedence over any value in existingHeaders.
+  if (sessionToken) {
+    headersToSign['x-amz-security-token'] = sessionToken;
   }
 
   const sortedHeaderKeys = Object.keys(headersToSign).sort();
@@ -120,7 +133,13 @@ export async function signRequest(
   }
 
   if (hasBody) {
-    result['Content-Type'] = 'application/json';
+    // Emit the actual content-type that was signed (may be application/x-amz-json-1.0, etc.)
+    result['Content-Type'] = headersToSign['content-type'];
+  }
+
+  // Emit X-Amz-Security-Token if it was included in signing (from either existingHeaders or sessionToken param)
+  if (headersToSign['x-amz-security-token']) {
+    result['X-Amz-Security-Token'] = headersToSign['x-amz-security-token'];
   }
 
   return result;

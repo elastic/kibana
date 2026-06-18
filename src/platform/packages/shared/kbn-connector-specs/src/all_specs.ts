@@ -36,6 +36,7 @@ export * from './specs/firecrawl/firecrawl';
 export * from './specs/zoom/zoom';
 export * from './specs/zendesk/zendesk';
 export * from './specs/amazon_s3/amazon_s3';
+export * from './specs/amazon_dynamodb/amazon_dynamodb';
 export * from './specs/hubspot/hubspot';
 export * from './specs/google_cloud_storage/google_cloud_storage';
 export * from './specs/sharepoint_server/sharepoint_server';

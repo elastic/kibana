@@ -311,6 +311,35 @@ export const AWS_SECRET_ACCESS_KEY_REQUIRED_MESSAGE = i18n.translate(
   }
 );
 
+export const AWS_IAM_ROLE_LABEL = i18n.translate('connectorSpecs.awsIamRole.label', {
+  defaultMessage: 'AWS IAM Role',
+});
+
+export const AWS_IAM_ROLE_ARN_LABEL = i18n.translate('connectorSpecs.awsIamRole.roleArn.label', {
+  defaultMessage: 'Role ARN',
+});
+
+export const AWS_IAM_ROLE_ARN_REQUIRED_MESSAGE = i18n.translate(
+  'connectorSpecs.awsIamRole.roleArn.requiredMessage',
+  {
+    defaultMessage: 'Role ARN is required',
+  }
+);
+
+export const AWS_IAM_ROLE_EXTERNAL_ID_LABEL = i18n.translate(
+  'connectorSpecs.awsIamRole.externalId.label',
+  {
+    defaultMessage: 'External ID',
+  }
+);
+
+export const AWS_IAM_ROLE_SESSION_NAME_LABEL = i18n.translate(
+  'connectorSpecs.awsIamRole.sessionName.label',
+  {
+    defaultMessage: 'Session name',
+  }
+);
+
 export const EARS_LABEL = i18n.translate('connectorSpecs.ears.label', {
   defaultMessage: 'OAuth 2.0 via Elastic-owned apps',
 });
