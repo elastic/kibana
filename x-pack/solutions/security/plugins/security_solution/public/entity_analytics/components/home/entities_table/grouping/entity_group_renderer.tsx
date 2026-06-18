@@ -132,11 +132,7 @@ export const createGroupPanelRenderer = (
   ) => {
     if (selectedGroup === ENTITY_GROUPING_OPTIONS.RESOLUTION) {
       return (
-        <ResolutionGroupPanel
-          bucket={bucket}
-          targetMetadata={targetMetadata}
-          tableId={tableId}
-        />
+        <ResolutionGroupPanel bucket={bucket} targetMetadata={targetMetadata} tableId={tableId} />
       );
     }
 

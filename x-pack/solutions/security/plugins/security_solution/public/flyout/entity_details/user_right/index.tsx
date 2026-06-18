@@ -258,8 +258,8 @@ export const UserPanel = memo(function UserPanel({
 
   const headerRiskLevel = useMemo<RiskSeverity | undefined>(() => {
     if (!entityFromStoreResult.entityRecord) return undefined;
-    return ((getRiskFromEntityRecord(entityFromStoreResult.entityRecord)?.calculated_level ??
-      'Unknown') as RiskSeverity);
+    return (getRiskFromEntityRecord(entityFromStoreResult.entityRecord)?.calculated_level ??
+      'Unknown') as RiskSeverity;
   }, [entityFromStoreResult.entityRecord]);
 
   const entityStoreLookupRequested =

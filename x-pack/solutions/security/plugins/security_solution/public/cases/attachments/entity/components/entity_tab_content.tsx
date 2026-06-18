@@ -63,8 +63,9 @@ const isEntityAttachment = (
 };
 
 const matchesSearchTerm = (metadata: EntityAttachmentMetadata, searchTerm: string) => {
-  const haystack =
-    `${metadata.entityName} ${metadata.entityType} ${metadata.riskLevel ?? ''}`.toLowerCase();
+  const haystack = `${metadata.entityName} ${metadata.entityType} ${
+    metadata.riskLevel ?? ''
+  }`.toLowerCase();
   return haystack.includes(searchTerm.toLowerCase());
 };
 
