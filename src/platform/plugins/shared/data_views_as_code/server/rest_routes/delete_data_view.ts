@@ -36,15 +36,12 @@ export const registerDeleteDataViewAsCodeRoute = (
         version: INITIAL_REST_VERSION,
         validate: {
           request: {
-            params: schema.object(
-              {
-                id: schema.string({
-                  minLength: 1,
-                  maxLength: 1_000,
-                }),
-              },
-              { unknowns: 'allow' }
-            ),
+            params: schema.object({
+              id: schema.string({
+                minLength: 1,
+                maxLength: 1_000,
+              }),
+            }),
           },
         },
       },
