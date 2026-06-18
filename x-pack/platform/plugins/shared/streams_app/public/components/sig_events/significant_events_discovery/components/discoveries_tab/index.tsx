@@ -5,10 +5,12 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
+import useInterval from 'react-use/lib/useInterval';
 import {
   EuiBasicTable,
   EuiBadge,
+  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiSuperDatePicker,
@@ -17,17 +19,28 @@ import type { EuiBasicTableColumn } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { Discovery } from '@kbn/streams-schema';
+import { RUNNING_POLL_INTERVAL_MS } from '../../../constants';
 import {
   useFetchDiscoveriesEntities,
   useFetchDiscoveryHistory,
 } from '../../../../../hooks/sig_events/use_fetch_discoveries_entities';
 import { useTabTimeRange } from '../../../../../hooks/sig_events/use_tab_time_range';
+import { useSignificantEventsDiscoveryContext } from '../../context/significant_events_discovery_context';
 import { DiscoveryFlyout } from './discovery_flyout';
+import { FindSignificantEventsButton } from '../streams_view/find_significant_events_button';
 import { formatTimestamp } from '../../../../../util/formatters';
 import { DISCOVERY_KIND_LABELS } from '../shared/translations';
 import { DISCOVERY_KIND_COLORS } from '../shared/constants';
 
 const MAX_VISIBLE_STREAMS = 3;
+
+const EVENT_PROCESSED_LABEL = i18n.translate('xpack.streams.discoveriesTab.eventStatus.processed', {
+  defaultMessage: 'Processed',
+});
+
+const EVENT_PENDING_LABEL = i18n.translate('xpack.streams.discoveriesTab.eventStatus.pending', {
+  defaultMessage: 'Pending',
+});
 
 const columns: Array<EuiBasicTableColumn<Discovery>> = [
   {
@@ -44,7 +57,7 @@ const columns: Array<EuiBasicTableColumn<Discovery>> = [
     name: i18n.translate('xpack.streams.discoveriesTab.kindColumn', {
       defaultMessage: 'Kind',
     }),
-    width: '90px',
+    width: '100px',
     render: (kind: Discovery['kind']) => (
       <EuiBadge color={DISCOVERY_KIND_COLORS[kind]}>{DISCOVERY_KIND_LABELS[kind]}</EuiBadge>
     ),
@@ -99,6 +112,18 @@ const columns: Array<EuiBasicTableColumn<Discovery>> = [
     width: '100px',
     render: (value: number | undefined) => (value != null ? `${value}%` : '-'),
   },
+  {
+    name: i18n.translate('xpack.streams.discoveriesTab.eventColumn', {
+      defaultMessage: 'Status',
+    }),
+    width: '130px',
+    render: (discovery: Discovery) =>
+      discovery.processed ? (
+        <EuiBadge color="success">{EVENT_PROCESSED_LABEL}</EuiBadge>
+      ) : (
+        <EuiBadge color="hollow">{EVENT_PENDING_LABEL}</EuiBadge>
+      ),
+  },
 ];
 
 const DEFAULT_DISCOVERIES_RANGE = { from: 'now-7d', to: 'now' };
@@ -107,10 +132,27 @@ export const DiscoveriesTab = () => {
   const { pickerRange, absoluteRange, handleTimeChange, refreshAbsoluteRange } =
     useTabTimeRange(DEFAULT_DISCOVERIES_RANGE);
 
-  const { data, isLoading, refetch, pagination, setPagination } = useFetchDiscoveriesEntities({
-    from: absoluteRange.from,
-    to: absoluteRange.to,
-  });
+  const { isRunning, isCanceling, handleRun, handleCancel } =
+    useSignificantEventsDiscoveryContext();
+
+  // Discovery state is shared at the provider level, so re-resolve this tab's
+  // locked time range locally when a run finishes (isRunning true -> false) to
+  // surface documents generated after the range was frozen.
+  const wasRunningRef = useRef(isRunning);
+  useEffect(() => {
+    if (wasRunningRef.current && !isRunning) {
+      refreshAbsoluteRange();
+    }
+    wasRunningRef.current = isRunning;
+  }, [isRunning, refreshAbsoluteRange]);
+
+  const { data, isLoading, isError, refetch, pagination, setPagination } =
+    useFetchDiscoveriesEntities({
+      from: absoluteRange.from,
+      to: absoluteRange.to,
+    });
+  useInterval(refetch, isRunning ? RUNNING_POLL_INTERVAL_MS : null);
+
   const [selectedDiscovery, setSelectedDiscovery] = useState<Discovery | undefined>();
 
   const { data: historyData, isLoading: isHistoryLoading } = useFetchDiscoveryHistory(
@@ -133,8 +175,8 @@ export const DiscoveriesTab = () => {
   return (
     <EuiFlexGroup direction="column" gutterSize="s">
       <EuiFlexItem grow={false}>
-        <EuiFlexGroup justifyContent="flexEnd">
-          <EuiFlexItem grow={false}>
+        <EuiFlexGroup justifyContent="flexEnd" alignItems="center">
+          <EuiFlexItem>
             <EuiSuperDatePicker
               start={pickerRange.from}
               end={pickerRange.to}
@@ -144,12 +186,36 @@ export const DiscoveriesTab = () => {
                 refetch();
               }}
               compressed
+              width="full"
               showUpdateButton="iconOnly"
               updateButtonProps={{ size: 's', fill: false }}
             />
           </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <FindSignificantEventsButton
+              onRun={handleRun}
+              onCancel={handleCancel}
+              isRunning={isRunning}
+              isCanceling={isCanceling}
+              isDisabled={isRunning}
+              size="s"
+            />
+          </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>
+      {isError && (
+        <EuiFlexItem grow={false}>
+          <EuiCallOut
+            announceOnMount
+            title={i18n.translate('xpack.streams.discoveriesTab.fetchError', {
+              defaultMessage: 'Failed to load discoveries',
+            })}
+            color="danger"
+            iconType="error"
+            size="s"
+          />
+        </EuiFlexItem>
+      )}
       <EuiFlexItem grow={false}>
         <EuiBasicTable
           tableCaption={i18n.translate('xpack.streams.discoveriesTab.tableCaption', {

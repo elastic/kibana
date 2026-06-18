@@ -150,6 +150,17 @@ export class DiscoverApp {
     await this.page.testSubj.waitForSelector('savedObjectSaveModal', { state: 'hidden' });
   }
 
+  async saveSearchAsNew(name: string) {
+    await this.page.testSubj.click('discoverSaveButton');
+    await this.page.testSubj.fill('savedObjectTitle', name);
+    const checkbox = this.page.testSubj.locator('saveAsNewCheckbox');
+    if (!(await checkbox.isChecked())) {
+      await checkbox.click();
+    }
+    await this.page.testSubj.click('confirmSaveSavedObjectButton');
+    await this.page.testSubj.waitForSelector('savedObjectSaveModal', { state: 'hidden' });
+  }
+
   /**
    * Save the currently rendered inline visualization (e.g. an ES|QL chart) to a
    * brand-new dashboard via the "Save visualization" flow in the unified
@@ -468,11 +479,53 @@ export class DiscoverApp {
     await this.page.locator(`button:has-text("${sortOption}")`).click();
   }
 
-  async getDocHeader(): Promise<string> {
+  async getDocHeader(): Promise<string[]> {
     const headers = await this.page
-      .locator('[data-test-subj^="dataGridHeaderCell-"]')
+      .locator(
+        '.euiDataGridHeaderCell:not(.euiDataGridHeaderCell--controlColumn) .euiDataGridHeaderCell__content'
+      )
       .allInnerTexts();
-    return headers.join(',');
+    return headers.map((h) => h.trim());
+  }
+
+  /**
+   * Returns structured row data from the data grid, excluding control columns.
+   * Each inner array contains the visible text of each data cell in that row.
+   * When `isAnchorRow` is true, only the highlighted anchor row (context view) is returned.
+   */
+  async getDataGridRows(options?: { isAnchorRow?: boolean }): Promise<string[][]> {
+    const cellSelector = options?.isAnchorRow
+      ? '.euiDataGridRowCell.unifiedDataTable__cell--highlight'
+      : '.euiDataGridRowCell';
+
+    await this.page.locator(`${cellSelector} >> nth=0`).waitFor({
+      state: 'visible',
+      timeout: 30_000,
+    });
+
+    return this.page.evaluate((sel: string) => {
+      const cells = document.querySelectorAll(sel);
+      const rows: string[][] = [];
+      let rowIdx = -1;
+      let prevVisibleRowIndex = -1;
+
+      cells.forEach((cell) => {
+        const visibleRowIndex = Number(cell.getAttribute('data-gridcell-visible-row-index'));
+        if (prevVisibleRowIndex !== visibleRowIndex) {
+          rowIdx++;
+          rows[rowIdx] = [];
+          prevVisibleRowIndex = visibleRowIndex;
+        }
+        if (!cell.classList.contains('euiDataGridRowCell--controlColumn')) {
+          const content =
+            cell.querySelector<HTMLElement>('.euiDataGridRowCell__content') ??
+            (cell as HTMLElement);
+          rows[rowIdx].push(content.innerText.trim());
+        }
+      });
+
+      return rows;
+    }, cellSelector);
   }
 
   async showChart() {
@@ -784,5 +837,55 @@ export class DiscoverApp {
 
     // Return the mode that is currently visible
     return (await esqlEditor.isVisible()) ? 'esql' : 'classic';
+  }
+
+  async isShowingDocViewer(): Promise<boolean> {
+    try {
+      await this.page.testSubj
+        .locator('kbnDocViewer')
+        .waitFor({ state: 'visible', timeout: 30_000 });
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
+  /**
+   * Inside an open document-viewer flyout, type a field name into the search
+   * input to filter the fields table. Mirrors the FTR
+   * `discover.findFieldByNameOrValueInDocViewer`.
+   */
+  async findFieldByNameOrValueInDocViewer(name: string) {
+    const flyout = this.page.testSubj.locator('docViewerFlyout');
+    const searchInput = flyout.locator('[data-test-subj="unifiedDocViewerFieldsSearchInput"]');
+    await searchInput.fill(name);
+    await expect(searchInput).toHaveValue(name, { timeout: 5_000 });
+  }
+
+  /**
+   * Inside an open document-viewer flyout, click a cell-level action button
+   * for a given field (e.g. `addFilterForValueButton`, `addExistsFilterButton`).
+   * Mirrors the FTR `dataGrid.clickFieldActionInFlyout`.
+   */
+  async clickFieldActionInFlyout(fieldName: string, actionName: string) {
+    const isValueAction = ['addFilterForValueButton', 'addFilterOutValueButton'].includes(
+      actionName
+    );
+    const cellTestSubj = isValueAction
+      ? `tableDocViewRow-${fieldName}-value`
+      : `tableDocViewRow-${fieldName}-name`;
+
+    const flyout = this.page.testSubj.locator('docViewerFlyout');
+    await expect(async () => {
+      const cell = flyout.locator(`[data-test-subj="${cellTestSubj}"]`);
+      await cell.evaluate((el) => {
+        el.scrollIntoView({ block: 'center', inline: 'nearest' });
+      });
+      await cell.hover();
+
+      const actionBtn = flyout.locator(`[data-test-subj="${actionName}-${fieldName}"]`);
+      await actionBtn.waitFor({ state: 'visible' });
+      await actionBtn.click();
+    }).toPass({ timeout: 15_000 });
   }
 }
