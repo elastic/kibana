@@ -46,8 +46,9 @@ describe('SecurityNavControl', () => {
 
     useCurrentUserMock.mockReset();
     useCurrentUserMock.mockReturnValue({
-      loading: false,
-      value: mockAuthenticatedUser(),
+      isLoading: false,
+      user: mockAuthenticatedUser(),
+      error: null,
     });
 
     useObservableMock.mockReset();
@@ -108,7 +109,9 @@ describe('SecurityNavControl', () => {
       loading: true,
     });
     useCurrentUserMock.mockReturnValue({
-      loading: true,
+      isLoading: true,
+      user: null,
+      error: null,
     });
 
     renderWithIntl(
@@ -164,7 +167,9 @@ describe('SecurityNavControl', () => {
       loading: true,
     });
     useCurrentUserMock.mockReturnValue({
-      loading: true,
+      isLoading: true,
+      user: null,
+      error: null,
     });
 
     renderWithIntl(
@@ -536,10 +541,11 @@ describe('SecurityNavControl', () => {
     });
 
     useCurrentUserMock.mockReturnValue({
-      loading: false,
-      value: mockAuthenticatedUser({
+      isLoading: false,
+      user: mockAuthenticatedUser({
         authentication_provider: { type: 'anonymous', name: 'does no matter' },
       }),
+      error: null,
     });
 
     renderWithIntl(

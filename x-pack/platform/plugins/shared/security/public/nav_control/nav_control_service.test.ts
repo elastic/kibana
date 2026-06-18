@@ -27,7 +27,9 @@ useUserProfileMock.mockReturnValue({
 });
 
 useCurrentUserMock.mockReturnValue({
-  loading: true,
+  isLoading: true,
+  user: null,
+  error: null,
 });
 
 const validLicense = {

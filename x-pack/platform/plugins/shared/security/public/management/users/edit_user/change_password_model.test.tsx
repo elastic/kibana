@@ -174,8 +174,8 @@ describe('ChangePasswordModal', () => {
       jest.clearAllMocks();
       // Mock useCurrentUser to return a different user by default
       jest.spyOn(currentUserModule, 'useCurrentUser').mockReturnValue({
-        loading: false,
-        value: {
+        isLoading: false,
+        user: {
           username: 'different_user',
           roles: [],
           full_name: '',
@@ -186,8 +186,11 @@ describe('ChangePasswordModal', () => {
           authentication_provider: { type: 'basic', name: 'basic' },
           authentication_type: 'realm',
           elastic_cloud_user: false,
+          profileUid: null,
+          avatar: null,
+          userSettings: null,
         },
-        error: undefined,
+        error: null,
       });
     });
 
@@ -308,8 +311,8 @@ describe('ChangePasswordModal', () => {
       beforeEach(() => {
         // Mock useCurrentUser to return the current user
         jest.spyOn(currentUserModule, 'useCurrentUser').mockReturnValue({
-          loading: false,
-          value: {
+          isLoading: false,
+          user: {
             username: 'currentuser',
             roles: [],
             full_name: '',
@@ -320,8 +323,11 @@ describe('ChangePasswordModal', () => {
             authentication_provider: { type: 'basic', name: 'basic' },
             authentication_type: 'realm',
             elastic_cloud_user: false,
+            profileUid: null,
+            avatar: null,
+            userSettings: null,
           },
-          error: undefined,
+          error: null,
         });
       });
 
