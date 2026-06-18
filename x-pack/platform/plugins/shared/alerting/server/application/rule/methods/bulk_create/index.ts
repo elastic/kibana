@@ -5,4 +5,5 @@
  * 2.0.
  */
 
-export const getRequestSavedObjectClient = jest.fn(() => 'mock-so-client');
+export type { BulkCreateRulesItem, BulkCreateRulesParams, BulkCreateRulesResult } from './types';
+export { bulkCreateRules } from './bulk_create_rules';
