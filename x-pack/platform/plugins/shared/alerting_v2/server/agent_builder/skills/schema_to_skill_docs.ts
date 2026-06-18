@@ -6,10 +6,7 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import {
-  createRuleDataBaseSchema,
-  createActionPolicyDataSchema,
-} from '@kbn/alerting-v2-schemas';
+import { createRuleDataBaseSchema, createActionPolicyDataSchema } from '@kbn/alerting-v2-schemas';
 import { ruleOperationSchema } from '../tools/manage_rule/operations';
 
 const LARGE_ENUM_THRESHOLD = 20;
@@ -147,7 +144,9 @@ function formatFieldTable(fields: FieldInfo[]): string {
   if (fields.length === 0) return '';
   const rows = fields.map(
     (f) =>
-      `| \`${f.name}\` | ${f.type} | ${f.required ? 'required' : 'optional'} | ${f.description}${f.constraints ? ` (${f.constraints})` : ''} |`
+      `| \`${f.name}\` | ${f.type} | ${f.required ? 'required' : 'optional'} | ${f.description}${
+        f.constraints ? ` (${f.constraints})` : ''
+      } |`
   );
   return ['| Field | Type | Required | Description |', '|---|---|---|---|', ...rows].join('\n');
 }
@@ -172,9 +171,10 @@ function formatVariantSchemas(jsonSchema: unknown): string {
         ((props[discriminatorKey] as JsonSchemaNode).enum as string[])?.[0]
       : undefined;
 
-    const label = discriminatorKey && discriminatorValue
-      ? `\`${discriminatorKey}: "${discriminatorValue}"\``
-      : variant.description ?? 'Variant';
+    const label =
+      discriminatorKey && discriminatorValue
+        ? `\`${discriminatorKey}: "${discriminatorValue}"\``
+        : variant.description ?? 'Variant';
 
     const fields = jsonSchemaToFieldTable(variant);
     if (fields.length > 0) {

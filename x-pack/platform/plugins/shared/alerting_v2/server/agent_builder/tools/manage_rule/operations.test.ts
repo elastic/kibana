@@ -235,9 +235,9 @@ describe('executeRuleOperations', () => {
       const result = await executeRuleOperations({}, ops);
 
       expect(result.data.recovery_strategy).toBe('query');
-      expect(
-        (result.data.query as { recovery?: { segment: string } }).recovery
-      ).toEqual({ segment: 'WHERE avg_cpu < 0.5' });
+      expect((result.data.query as { recovery?: { segment: string } }).recovery).toEqual({
+        segment: 'WHERE avg_cpu < 0.5',
+      });
     });
   });
 
