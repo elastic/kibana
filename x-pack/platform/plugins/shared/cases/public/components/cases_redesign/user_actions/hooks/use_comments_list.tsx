@@ -54,6 +54,7 @@ export const useCommentsList = ({
         timelineAvatar: 'list',
         timelineAvatarAriaLabel: i18n.SHOW_MORE_ACTIVITIES_ARIA,
         className: 'showMoreActivities',
+        verticalAlign: 'center',
         children: (
           <ShowMoreActivities
             count={remainingActionCount}
