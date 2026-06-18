@@ -62,9 +62,11 @@ export function createNavigationTree({
   isAppRegistered,
   showAiAssistant = true,
   showAlertingV2 = false,
+  showPerformanceLink = false,
 }: ApplicationStart & {
   showAiAssistant?: boolean;
   showAlertingV2?: boolean;
+  showPerformanceLink?: boolean;
 }): NavigationTreeDefinition {
   return {
     body: [
@@ -246,11 +248,15 @@ export function createNavigationTree({
                 id: 'cloudLinkBilling',
                 cloudLink: 'billingAndSub',
               },
-              {
-                id: 'cloudLinkDeployment',
-                cloudLink: 'deployment',
-                title: PERFORMANCE_TITLE,
-              },
+              ...(showPerformanceLink
+                ? [
+                    {
+                      id: 'cloudLinkDeployment',
+                      cloudLink: 'deployment' as const,
+                      title: PERFORMANCE_TITLE,
+                    },
+                  ]
+                : []),
               {
                 cloudLink: 'userAndRoles',
               },
