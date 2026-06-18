@@ -36,5 +36,6 @@
     "@kbn/management-settings-ids",
     "@kbn/scout-oblt",
     "@kbn/workflows-management-plugin",
+    "@kbn/dashboard-plugin",
   ]
 }

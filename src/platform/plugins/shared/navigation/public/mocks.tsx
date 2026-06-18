@@ -27,6 +27,7 @@ jest.mock('@kbn/react-kibana-mount', () => {
 const createSetupContract = (): jest.Mocked<Setup> => {
   const setupContract = {
     registerMenuItem: jest.fn(),
+    registerNavigationExtension: jest.fn(),
   };
 
   return setupContract;
@@ -50,6 +51,7 @@ const createStartContract = (): jest.Mocked<Start> => {
     },
     addSolutionNavigation: jest.fn(),
     isSolutionNavEnabled$: of(false),
+    getExtensionSlotActions$: jest.fn().mockReturnValue(of(undefined)),
   };
   return startContract;
 };

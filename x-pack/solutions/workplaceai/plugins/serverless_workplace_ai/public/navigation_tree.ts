@@ -8,7 +8,9 @@
 import type { NavigationTreeDefinition } from '@kbn/core-chrome-browser';
 import { i18n } from '@kbn/i18n';
 
-export const createNavigationTree = (): NavigationTreeDefinition => {
+export const RECENT_DASHBOARDS_SLOT_ID = 'recentDashboards';
+
+export const createNavigationTree = () => {
   return {
     body: [
       {
@@ -27,9 +29,22 @@ export const createNavigationTree = (): NavigationTreeDefinition => {
       {
         link: 'dashboards',
         icon: 'productDashboard',
+        renderAs: 'panelOpener',
         getIsActive: ({ pathNameSerialized, prepend }) => {
           return pathNameSerialized.startsWith(prepend('/app/dashboards'));
         },
+        children: [
+          {
+            id: 'recent-dashboards',
+            title: i18n.translate('xpack.serverlessWorkplaceAI.nav.dashboards.recentlyViewed', {
+              defaultMessage: 'Recently viewed',
+            }),
+            renderAs: 'extension',
+            slotId: RECENT_DASHBOARDS_SLOT_ID,
+            extensionId: 'recentlyAccessedDashboards',
+            popoverOnly: true,
+          },
+        ],
       },
       {
         link: 'discover',
@@ -122,5 +137,5 @@ export const createNavigationTree = (): NavigationTreeDefinition => {
         ],
       },
     ],
-  };
+  } as const satisfies NavigationTreeDefinition;
 };

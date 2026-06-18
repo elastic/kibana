@@ -9,8 +9,8 @@ import type { NodeDefinition } from '@kbn/core-chrome-browser';
 import { SecurityPageName } from '../constants';
 import { securityLink } from '../links';
 
-export const createCasesNavigationTree = (): NodeDefinition => {
-  const children: NodeDefinition[] = [
+export const createCasesNavigationTree = () => {
+  const children = [
     {
       id: `${SecurityPageName.case}-all`,
       link: securityLink(SecurityPageName.case),
@@ -30,5 +30,5 @@ export const createCasesNavigationTree = (): NodeDefinition => {
     link: securityLink(SecurityPageName.case),
     icon: 'briefcase',
     children,
-  };
+  } as const satisfies NodeDefinition;
 };

@@ -31,6 +31,7 @@
       "searchHomepage",
       "share",
       "visualizations",
+      "navigation"
     ],
     "optionalPlugins": [
       "agentBuilder",

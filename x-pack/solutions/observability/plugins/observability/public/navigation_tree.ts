@@ -7,6 +7,7 @@
 import type { NavigationTreeDefinition } from '@kbn/core-chrome-browser';
 import type { CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
+import { createRecentItemsData$ } from '@kbn/dashboard-plugin/public';
 import type { AddSolutionNavigationArg } from '@kbn/navigation-plugin/public';
 import { STACK_MANAGEMENT_NAV_ID, DATA_MANAGEMENT_NAV_ID } from '@kbn/deeplinks-management';
 import { combineLatest, map, of } from 'rxjs';
@@ -14,6 +15,8 @@ import { AIChatExperience } from '@kbn/ai-assistant-common';
 import { AI_CHAT_EXPERIENCE_TYPE } from '@kbn/management-settings-ids';
 import type { Location } from 'history';
 import type { ObservabilityPublicPluginsStart } from './plugin';
+
+export const RECENT_DASHBOARDS_SLOT_ID = 'recentDashboards';
 
 const title = i18n.translate(
   'xpack.observability.obltNav.headerSolutionSwitcher.obltSolutionTitle',
@@ -72,9 +75,22 @@ function createNavTree({
       {
         link: 'dashboards',
         icon: 'productDashboard',
+        renderAs: 'panelOpener',
         getIsActive: ({ pathNameSerialized, prepend, location }) =>
           pathNameSerialized.startsWith(prepend('/app/dashboards')) ||
           isEditingFromDashboard(location, pathNameSerialized, prepend),
+        children: [
+          {
+            id: 'recent-dashboards',
+            title: i18n.translate('xpack.observability.obltNav.dashboards.recentlyViewed', {
+              defaultMessage: 'Recently viewed',
+            }),
+            renderAs: 'extension',
+            slotId: RECENT_DASHBOARDS_SLOT_ID,
+            extensionId: 'recentlyAccessedDashboards',
+            popoverOnly: true,
+          },
+        ],
       },
       {
         link: 'workflows',
@@ -742,4 +758,10 @@ export const createDefinition = (
       })
     )
   ),
+  slotDataSources: {
+    [RECENT_DASHBOARDS_SLOT_ID]: createRecentItemsData$(
+      coreStart.chrome.recentlyAccessed,
+      coreStart.http.basePath
+    ),
+  },
 });

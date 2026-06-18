@@ -61,6 +61,7 @@ dependsOn:
   - '@kbn/ai-assistant-common'
   - '@kbn/management-settings-ids'
   - '@kbn/features-plugin'
+  - '@kbn/dashboard-plugin'
 tags:
   - plugin
   - prod

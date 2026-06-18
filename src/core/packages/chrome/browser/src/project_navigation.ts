@@ -40,7 +40,9 @@ import type { DeepLinkId as AgentBuilderLink } from '@kbn/deeplinks-agent-builde
 import type { AppId as WorkflowsApp, DeepLinkId as WorkflowsLink } from '@kbn/deeplinks-workflows';
 import type { KibanaProject } from '@kbn/projects-solutions-groups';
 import type { BadgeType } from '@kbn/ui-side-navigation';
+import type { Serializable } from '@kbn/utility-types';
 
+import type { NavExtensionId } from './nav_extensions';
 import type { ChromeNavLink } from './nav_links';
 
 export type SolutionId = KibanaProject;
@@ -111,6 +113,8 @@ export type SideNavNodeStatus = 'hidden' | 'visible';
 
 export type RenderAs = 'home' | 'panelOpener';
 
+export type ExtensionPointRenderAs = 'extension';
+
 export type GetIsActiveFn = (params: {
   /** The current path name including the basePath + hash value but **without** any query params */
   pathNameSerialized: string;
@@ -120,16 +124,20 @@ export type GetIsActiveFn = (params: {
   prepend: (path: string) => string;
 }) => boolean;
 
-/**
- * Base definition of navigation nodes. A node can either be a "group" or an "item".
- * Each have commmon properties and specific properties.
- */
-interface NodeDefinitionBase {
+/** Shared node fields used across navigation definition roles. */
+interface NodeDefinitionCommon<LinkId extends AppDeepLinkId, Id extends string> {
+  /** Optional id, if not passed a "link" must be provided. */
+  id?: Id;
+  /** Optional title. If not provided and a "link" is provided the title will be the Deep link title */
+  title?: string;
+  /** App id or deeplink id */
+  link?: LinkId;
+  /** Cloud link id */
+  cloudLink?: CloudLinkId;
   /**
    * Optional icon for the navigation node. Note: not all navigation depth will render the icon
    */
   icon?: IconType;
-
   /**
    * href for absolute links only. Internal links should use "link".
    */
@@ -148,21 +156,113 @@ interface NodeDefinitionBase {
    * Optional function to get the active state. This function is called whenever the location changes.
    */
   getIsActive?: GetIsActiveFn;
-
-  /**
-   * Indicate if this is a special node
-   * - home - node should be rendered as the home link
-   */
-  renderAs?: RenderAs;
-
   /**
    * (optional) The type of badge shown next to the item (e.g. `beta`, `techPreview`, `new`).
    */
   badgeType?: BadgeType;
 }
 
-/** @public */
 /**
+ * Leaf section rendered by a framework template (an "extension slot").
+ * Valid only under `panelOpener.children`. The node is plain serializable data:
+ * `slotId` is the per-placement key (owned by the solution), `extensionId` references
+ * the plugin-published extension definition. The powering `data$` is supplied separately
+ * in the slot data-source map at registration.
+ */
+export interface ExtensionPointNodeDefinition<Id extends string = string>
+  extends Omit<NodeDefinitionCommon<AppDeepLinkId, Id>, 'cloudLink'> {
+  renderAs: ExtensionPointRenderAs;
+  slotId: string;
+  extensionId: NavExtensionId;
+  popoverOnly?: boolean;
+  link?: never;
+  cloudLink?: never;
+  children?: never;
+}
+
+/** Standard nav node used outside panel-opener section lists. */
+export type StandardNodeDefinition<
+  LinkId extends AppDeepLinkId = AppDeepLinkId,
+  Id extends string = string,
+  ChildrenId extends string = Id
+> = NodeDefinitionCommon<LinkId, Id> & {
+  renderAs?: RenderAs;
+  slotId?: never;
+  extensionId?: never;
+  popoverOnly?: never;
+  children?: Array<StandardNodeDefinition<LinkId, ChildrenId, ChildrenId>>;
+};
+
+/** Allowed only under `panelOpener.children`. */
+export type PanelOpenerChildDefinition<
+  LinkId extends AppDeepLinkId = AppDeepLinkId,
+  Id extends string = string
+> =
+  | ExtensionPointNodeDefinition<Id>
+  | StandardNodeDefinition<LinkId, Id, Id>
+  | (NodeDefinitionCommon<LinkId, Id> & {
+      renderAs?: never;
+      slotId?: never;
+      extensionId?: never;
+      popoverOnly?: never;
+      link?: LinkId;
+      href?: string;
+      children?: never;
+    });
+
+/** Root-level node: body/footer items. */
+export type RootNodeDefinition<
+  LinkId extends AppDeepLinkId = AppDeepLinkId,
+  Id extends string = string,
+  ChildrenId extends string = Id
+> =
+  | (NodeDefinitionCommon<LinkId, Id> & {
+      renderAs: 'home';
+      children?: never;
+    })
+  | (NodeDefinitionCommon<LinkId, Id> & {
+      renderAs: 'panelOpener';
+      children?: Array<PanelOpenerChildDefinition<LinkId, ChildrenId>>;
+    })
+  | (NodeDefinitionCommon<LinkId, Id> & {
+      renderAs?: never;
+      children?: Array<StandardNodeDefinition<LinkId, ChildrenId, ChildrenId>>;
+    });
+
+interface ChromeNavigationNodeCommon {
+  icon?: IconType;
+  href?: string;
+  breadcrumbStatus?: 'hidden' | 'visible';
+  sideNavStatus?: SideNavNodeStatus;
+  getIsActive?: GetIsActiveFn;
+  badgeType?: BadgeType;
+  id: string;
+  title?: string;
+  path: string;
+  deepLink?: ChromeNavLink;
+  isExternalLink?: boolean;
+}
+
+/** @public */
+export interface ChromeExtensionPointNavigationNode extends ChromeNavigationNodeCommon {
+  renderAs: ExtensionPointRenderAs;
+  slotId: string;
+  extensionId: string;
+  popoverOnly?: boolean;
+  children?: never;
+}
+
+/** @public */
+export interface ChromeStandardNavigationNode extends ChromeNavigationNodeCommon {
+  renderAs?: RenderAs;
+  slotId?: never;
+  extensionId?: never;
+  popoverOnly?: never;
+  children?: ChromeProjectNavigationNode[];
+}
+
+/**
+ * @public
  * Chrome project navigation node. This is the tree definition stored in the Chrome service
  * that is generated based on the NodeDefinition below.
  * Some of the process that occurs between the 2 are:
@@ -170,25 +270,14 @@ interface NodeDefinitionBase {
  * - "path" is added to each node based on where it is located in the tree
  * - "isActive" state is set for each node if its URL matches the current location
  */
-export interface ChromeProjectNavigationNode extends NodeDefinitionBase {
-  /** Optional id, if not passed a "link" must be provided. */
-  id: string;
-  /** Optional title. If not provided and a "link" is provided the title will be the Deep link title */
-  title?: string;
-  /** Path in the tree of the node */
-  path: string;
-  /** App id or deeplink id */
-  deepLink?: ChromeNavLink;
-  /**
-   * Optional children of the navigation node. Once a node has "children" defined it is
-   * considered a "group" node.
-   */
-  children?: ChromeProjectNavigationNode[];
-  /**
-   * Flag to indicate if the node is an "external" cloud link
-   */
-  isExternalLink?: boolean;
-}
+export type ChromeProjectNavigationNode =
+  | ChromeStandardNavigationNode
+  | ChromeExtensionPointNavigationNode;
+
+/**
+ * @public
+ */
+export type ChromeRootNavigationNode = ChromeStandardNavigationNode;
 
 /** @public */
 export interface ChromeSetProjectBreadcrumbsParams {
@@ -198,27 +287,16 @@ export interface ChromeSetProjectBreadcrumbsParams {
 /**
  * @public
  *
- * A navigation node definition with its unique id, title, path in the tree and optional
+ * A root navigation node definition with its unique id, title, path in the tree and optional
  * deep link and children.
  * This definition serves to build the full ChromeProjectNavigation.navigationTree, converting
  * "link" to "deepLink" and adding the "path" property for each node.
  */
-export interface NodeDefinition<
+export type NodeDefinition<
   LinkId extends AppDeepLinkId = AppDeepLinkId,
   Id extends string = string,
   ChildrenId extends string = Id
-> extends NodeDefinitionBase {
-  /** Optional id, if not passed a "link" must be provided. */
-  id?: Id;
-  /** Optional title. If not provided and a "link" is provided the title will be the Deep link title */
-  title?: string;
-  /** App id or deeplink id */
-  link?: LinkId;
-  /** Cloud link id */
-  cloudLink?: CloudLinkId;
-  /** Optional children of the navigation node. Can not be used with `isGroupTitle` */
-  children?: Array<NodeDefinition<LinkId, Id, ChildrenId>>;
-}
+> = RootNodeDefinition<LinkId, Id, ChildrenId>;
 
 /**
  * @public
@@ -233,11 +311,11 @@ export interface NavigationTreeDefinition<
   /**
    * Main content of the navigation.
    * */
-  body: Array<NodeDefinition<LinkId, Id, ChildrenId>>;
+  body: Array<RootNodeDefinition<LinkId, Id, ChildrenId>>;
   /**
    * Footer content of the navigation
    * */
-  footer?: Array<NodeDefinition<LinkId, Id, ChildrenId>>;
+  footer?: Array<RootNodeDefinition<LinkId, Id, ChildrenId>>;
 }
 
 export type SideNavigationSection = keyof NavigationTreeDefinition;
@@ -252,8 +330,8 @@ export type SideNavigationSection = keyof NavigationTreeDefinition;
  */
 export interface NavigationTreeDefinitionUI {
   id: SolutionId;
-  body: Array<ChromeProjectNavigationNode>;
-  footer?: Array<ChromeProjectNavigationNode>;
+  body: Array<ChromeRootNavigationNode>;
+  footer?: Array<ChromeRootNavigationNode>;
 }
 
 /**
@@ -279,6 +357,15 @@ export interface SolutionNavigationDefinition<LinkId extends AppDeepLinkId = App
 export type SolutionNavigationDefinitions = {
   [id in SolutionId]?: SolutionNavigationDefinition;
 };
+
+/** Value emitted by a slot data `Observable` (row object, row array, etc.). */
+export type NavExtensionSlotData = Serializable;
+
+/**
+ * Runtime data sources powering extension slots, keyed by `slotId`. Supplied by a
+ * solution at registration; the serializable tree only references slots by id.
+ */
+export type SlotDataSources = Record<string, Observable<NavExtensionSlotData>>;
 
 /**
  * Temporary helper interface while we have to maintain both the legacy side navigation

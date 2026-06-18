@@ -14,6 +14,7 @@ import type { Subscription } from 'rxjs';
 import { combineLatest, map, of } from 'rxjs';
 import { AIChatExperience } from '@kbn/ai-assistant-common';
 import { AI_CHAT_EXPERIENCE_TYPE } from '@kbn/management-settings-ids';
+import { createRecentItemsData$ } from '@kbn/dashboard-plugin/public';
 import { docLinks } from '../common/doc_links';
 import type {
   ServerlessSearchPluginSetup,
@@ -22,7 +23,7 @@ import type {
   ServerlessSearchPluginStartDependencies,
 } from './types';
 import { getErrorCode, getErrorMessage, isKibanaServerError } from './utils/get_error_message';
-import { createNavigationTree } from './navigation_tree';
+import { createNavigationTree, RECENT_DASHBOARDS_SLOT_ID } from './navigation_tree';
 import { WEB_CRAWLERS_LABEL } from '../common/i18n_string';
 
 export class ServerlessSearchPlugin
@@ -147,7 +148,13 @@ export class ServerlessSearchPlugin
         });
       })
     );
-    serverless.initNavigation('es', navigationTree$);
+
+    serverless.initNavigation('es', navigationTree$, {
+      [RECENT_DASHBOARDS_SLOT_ID]: createRecentItemsData$(
+        core.chrome.recentlyAccessed,
+        core.http.basePath
+      ),
+    });
 
     this.managementCardsSubscription = serverless
       .getNavigationCards$(
