@@ -30,7 +30,6 @@ import { useEntityStoreEuidApi } from '@kbn/entity-store/public';
 import { ExpandablePanel } from '../../../../flyout_v2/shared/components/expandable_panel';
 import type { RelatedHost } from '../../../../../common/search_strategy/security_solution/related_entities/related_hosts';
 import type { RiskSeverity } from '../../../../../common/search_strategy';
-import { buildUserNamesFilter } from '../../../../../common/search_strategy';
 import { UserOverview } from '../../../../overview/components/user_overview';
 import { AnomalyTableProvider } from '../../../../common/components/ml/anomaly/anomaly_table_provider';
 import { InspectButton, InspectButtonContainer } from '../../../../common/components/inspect';
@@ -70,7 +69,6 @@ import type { NarrowDateRange } from '../../../../common/components/ml/types';
 import { MisconfigurationsInsight } from '../../../../flyout_v2/document/main/components/misconfiguration_insight';
 import { AlertCountInsight } from '../../../../flyout_v2/document/main/components/alert_count_insight';
 import { DocumentEventTypes } from '../../../../common/lib/telemetry';
-import { useRiskScore } from '../../../../entity_analytics/api/hooks/use_risk_score';
 import { useSelectedPatterns } from '../../../../data_view_manager/hooks/use_selected_patterns';
 import { useSecurityDefaultPatterns } from '../../../../data_view_manager/hooks/use_security_default_patterns';
 import { useEntityFromStore } from '../../../entity_details/shared/hooks/use_entity_from_store';
@@ -143,14 +141,6 @@ export const UserDetails: React.FC<UserDetailsProps> = ({
 
   const { openPreviewPanel } = useExpandableFlyoutApi();
 
-  const timerange = useMemo(
-    () => ({
-      from,
-      to,
-    }),
-    [from, to]
-  );
-
   const narrowDateRange = useCallback<NarrowDateRange>(
     (score, interval) => {
       const fromTo = scoreIntervalToDateTime(score, interval);
@@ -190,18 +180,6 @@ export const UserDetails: React.FC<UserDetailsProps> = ({
   });
   const observedUser = useObservedUser(userName, scopeId, entityFromStoreResult);
 
-  const filterQuery = useMemo(
-    () => (userName ? buildUserNamesFilter([userName]) : undefined),
-    [userName]
-  );
-
-  const { data: userRisk } = useRiskScore({
-    filterQuery,
-    riskEntity: EntityType.user,
-    timerange,
-    skip: !!observedUser?.entityRecord,
-  });
-  const userRiskData = userRisk && userRisk.length > 0 ? userRisk[0] : undefined;
   // Always show observed user fields from the same indices useObservedUser queries (security
   // defaults). A duplicate useObservedUserDetails against sourcerer patterns (e.g. alerts-only)
   // returns sparse objects that are still truthy, which hid real data behind "—" rows.

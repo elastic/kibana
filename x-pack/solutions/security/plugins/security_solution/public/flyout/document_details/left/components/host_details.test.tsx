@@ -85,12 +85,6 @@ jest.mock('../../../../helper_hooks', () => ({
   useHasSecurityCapability: () => mockUseHasSecurityCapability(),
 }));
 
-jest.mock('../../../../sourcerer/containers', () => ({
-  useSourcererDataView: jest
-    .fn()
-    .mockReturnValue({ selectedPatterns: ['index'], sourcererDataView: {} }),
-}));
-
 jest.mock('../../../../common/hooks/use_space_id', () => ({
   useSpaceId: () => 'default',
 }));
