@@ -109,6 +109,7 @@ export const AGENT_BUILDER_BUILTIN_SKILLS = [
   'data-exploration',
   'visualization-creation',
   'graph-creation',
+  'agent-builder-traces',
 
   // Platform – Alerting
   'rule-management',

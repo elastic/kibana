@@ -10,7 +10,10 @@ import type { ReadonlySkillProvider } from '../skill_provider';
 import type { SkillListOptions } from '../persisted/client';
 import { convertBuiltinSkill } from './converter';
 
-export const createBuiltinSkillProvider = (skills: SkillDefinition[]): ReadonlySkillProvider => {
+export const createBuiltinSkillProvider = (
+  skills: SkillDefinition[],
+  spaceId: string
+): ReadonlySkillProvider => {
   const skillsMap = new Map(skills.map((s) => [s.id, s]));
 
   return {
@@ -19,20 +22,20 @@ export const createBuiltinSkillProvider = (skills: SkillDefinition[]): ReadonlyS
     has: (skillId) => skillsMap.has(skillId),
     get: (skillId) => {
       const skill = skillsMap.get(skillId);
-      return skill ? convertBuiltinSkill(skill) : undefined;
+      return skill ? convertBuiltinSkill(skill, spaceId) : undefined;
     },
     bulkGet: (ids) => {
       const result = new Map<string, InternalSkillDefinition>();
       for (const id of ids) {
         const skill = skillsMap.get(id);
         if (skill) {
-          result.set(id, convertBuiltinSkill(skill));
+          result.set(id, convertBuiltinSkill(skill, spaceId));
         }
       }
       return result;
     },
     list: (options?: SkillListOptions) => {
-      const converted = [...skillsMap.values()].map(convertBuiltinSkill);
+      const converted = [...skillsMap.values()].map((s) => convertBuiltinSkill(s, spaceId));
       if (options?.summaryOnly) {
         return converted.map((s) => ({
           ...s,

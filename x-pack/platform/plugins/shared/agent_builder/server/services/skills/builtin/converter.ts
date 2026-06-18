@@ -6,12 +6,18 @@
  */
 
 import type { SkillDefinition, InternalSkillDefinition } from '@kbn/agent-builder-server/skills';
+import { AGENT_BUILDER_TRACES_NAMESPACE_PLACEHOLDER } from '../../../dashboard/constants';
 
-export const convertBuiltinSkill = (skill: SkillDefinition): InternalSkillDefinition => ({
+export const convertBuiltinSkill = (
+  skill: SkillDefinition,
+  spaceId: string
+): InternalSkillDefinition => ({
   id: skill.id,
   name: skill.name,
   description: skill.description,
-  content: skill.content,
+  content: spaceId
+    ? skill.content.replaceAll(AGENT_BUILDER_TRACES_NAMESPACE_PLACEHOLDER, spaceId)
+    : skill.content,
   readonly: true,
   experimental: skill.experimental ?? false,
   referencedContent: skill.referencedContent,

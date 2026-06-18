@@ -120,7 +120,7 @@ class SkillServiceImpl implements SkillService {
         await this.mutationQueue;
         await validated;
         const space = getCurrentSpaceId({ request, spaces });
-        const builtinProvider = createBuiltinSkillProvider([...this.skills.values()]);
+        const builtinProvider = createBuiltinSkillProvider([...this.skills.values()], space);
         const persistedProvider = createPersistedSkillProvider({
           space,
           esClient: elasticsearch.client.asInternalUser,
