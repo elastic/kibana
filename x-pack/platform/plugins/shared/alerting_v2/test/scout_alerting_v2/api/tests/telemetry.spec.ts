@@ -39,7 +39,7 @@ apiTest.describe('Alerting V2 Telemetry', { tag: tags.stateful.classic }, () => 
           metadata: { name: 'alert-rule-1' },
           time_field: '@timestamp',
           schedule: { every: '1m', lookback: '5m' },
-          evaluation: { query: { base: 'FROM metrics-* | LIMIT 10' } },
+          query: { format: 'standalone', breach: { query: 'FROM metrics-* | LIMIT 10' } },
           grouping: { fields: ['host.name', 'service.name'] },
           no_data: { behavior: 'last_status', timeframe: '10m' },
           // Builder defaults to `no_breach`; original FTR rule had no recovery_policy.
@@ -52,7 +52,7 @@ apiTest.describe('Alerting V2 Telemetry', { tag: tags.stateful.classic }, () => 
           metadata: { name: 'signal-rule-1' },
           time_field: '@timestamp',
           schedule: { every: '5m' },
-          evaluation: { query: { base: 'FROM logs-* | LIMIT 10' } },
+          query: { format: 'standalone', breach: { query: 'FROM logs-* | LIMIT 10' } },
           recovery_policy: { type: 'no_breach' },
           // Signal rules forbid state_transition; grouping omitted to match original.
           state_transition: undefined,
@@ -65,7 +65,7 @@ apiTest.describe('Alerting V2 Telemetry', { tag: tags.stateful.classic }, () => 
           metadata: { name: 'alert-rule-2' },
           time_field: '@timestamp',
           schedule: { every: '5m', lookback: '10m' },
-          evaluation: { query: { base: 'FROM metrics-* | LIMIT 5' } },
+          query: { format: 'standalone', breach: { query: 'FROM metrics-* | LIMIT 5' } },
           no_data: { behavior: 'recover', timeframe: '15m' },
           recovery_policy: undefined,
           grouping: undefined,
