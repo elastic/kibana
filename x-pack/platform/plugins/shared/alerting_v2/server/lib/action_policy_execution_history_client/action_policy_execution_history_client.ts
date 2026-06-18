@@ -233,14 +233,7 @@ export class ActionPolicyExecutionHistoryClient {
 
   private buildRuleIdsFilter(ids: string[]): string {
     return toKqlExpression(
-      nodeBuilder.or(
-        ids.map((id) =>
-          nodeBuilder.is(
-            'id',
-            nodeTypes.literal.buildNode(id, true)
-          )
-        )
-      )
+      nodeBuilder.or(ids.map((id) => nodeBuilder.is('id', nodeTypes.literal.buildNode(id, true))))
     );
   }
 
