@@ -55,12 +55,7 @@ export class KnowledgeIndicatorClient {
       config.feature_ttl_days
     );
     this.reader = new IndicatorReader(revisionReader);
-    this.searcher = new IndicatorSearcher(
-      deps.dataStreamClient,
-      deps.logger,
-      config,
-      revisionReader
-    );
+    this.searcher = new IndicatorSearcher(deps.esClient, deps.logger, config, revisionReader);
     this.orchestrator = new QueryRuleOrchestrator(
       deps.rulesManagementClient,
       deps.logger,
@@ -130,6 +125,10 @@ export class KnowledgeIndicatorClient {
     return this.reader.getPromotableUnbackedQueries(filters);
   }
 
+  findFeaturesByIds(ids: string[]): Promise<Array<{ id: string; stream_name: string }>> {
+    return this.reader.findFeaturesByIds(ids);
+  }
+
   findIndicators(
     streams: string | string[],
     query: string,
@@ -166,6 +165,16 @@ export class KnowledgeIndicatorClient {
     options?: { currentLinks?: QueryLink[] }
   ): Promise<void> {
     return this.orchestrator.syncQueries(definition, queries, options);
+  }
+
+  async replaceStreamQueries(
+    definition: Streams.all.Definition,
+    getNextQueries: (currentLinks: QueryLink[]) => StreamQuery[]
+  ): Promise<void> {
+    const { [definition.name]: currentLinks } = await this.getStreamToQueryLinksMap([
+      definition.name,
+    ]);
+    await this.syncQueries(definition, getNextQueries(currentLinks), { currentLinks });
   }
 
   upsertQuery(definition: Streams.all.Definition, query: StreamQuery): Promise<void> {
