@@ -190,6 +190,9 @@ export const isStatLabelValid = (stat: StatDefinition): boolean => Boolean(stat.
 export const isStatFieldValid = (stat: StatDefinition): boolean =>
   !AGGREGATIONS_REQUIRING_FIELD.includes(stat.aggregation) || Boolean(stat.field?.trim());
 
+export const areAllStatsValid = (stats: StatDefinition[]): boolean =>
+  stats.length > 0 && stats.every((s) => isStatLabelValid(s) && isStatFieldValid(s));
+
 export const DEFAULT_ALERT_CONDITION: Omit<AlertCondition, 'id'> = {
   metric: 'count',
   comparator: Comparator.GT,

@@ -7,6 +7,7 @@
 
 import {
   Aggregation,
+  areAllStatsValid,
   Comparator,
   isStatFieldValid,
   isStatLabelValid,
@@ -51,6 +52,35 @@ describe('isStatFieldValid', () => {
     expect(isStatFieldValid({ id: '1', label: 'avg_val', aggregation: Aggregation.AVG })).toBe(
       false
     );
+  });
+});
+
+describe('areAllStatsValid', () => {
+  it('returns false when any stat has an invalid label', () => {
+    expect(
+      areAllStatsValid([
+        { id: '1', label: 'count', aggregation: Aggregation.COUNT },
+        { id: '2', label: '', aggregation: Aggregation.COUNT },
+      ])
+    ).toBe(false);
+  });
+
+  it('returns false when any stat is missing a required field', () => {
+    expect(
+      areAllStatsValid([
+        { id: '1', label: 'count', aggregation: Aggregation.COUNT },
+        { id: '2', label: 'avg_val', aggregation: Aggregation.AVG },
+      ])
+    ).toBe(false);
+  });
+
+  it('returns true only when every stat is valid', () => {
+    expect(
+      areAllStatsValid([
+        { id: '1', label: 'count', aggregation: Aggregation.COUNT },
+        { id: '2', label: 'errors', aggregation: Aggregation.COUNT },
+      ])
+    ).toBe(true);
   });
 });
 

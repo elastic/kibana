@@ -9,10 +9,9 @@ import React from 'react';
 import type { RuleBuilderDefinition } from './types';
 import type { ThresholdFormValues } from './threshold/form_types';
 import {
+  areAllStatsValid,
   DEFAULT_THRESHOLD_FORM_VALUES,
   generateId,
-  isStatFieldValid,
-  isStatLabelValid,
   reconcileAlertConditionMetrics,
 } from './threshold/form_types';
 import { RuleBuilderAlertConditionStep } from './threshold/alert_condition_step';
@@ -26,8 +25,7 @@ const defineBuilder = <TState>(def: RuleBuilderDefinition<TState>): RuleBuilderD
 const isThresholdFormValid = (values: ThresholdFormValues): boolean => {
   if (!values.indexPattern.trim()) return false;
 
-  const hasValidStat = values.stats.some((s) => isStatLabelValid(s) && isStatFieldValid(s));
-  if (!hasValidStat) return false;
+  if (!areAllStatsValid(values.stats)) return false;
 
   const hasValidCondition = values.alertConditions.some(
     (c) => c.metric.trim() && c.threshold.length > 0
