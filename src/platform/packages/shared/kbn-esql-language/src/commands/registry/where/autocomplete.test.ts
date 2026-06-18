@@ -82,7 +82,7 @@ describe('WHERE Autocomplete', () => {
   });
 
   describe('within the expression', () => {
-    const suggest = async (query: string) => {
+    const whereSuggest = async (query: string) => {
       const cursorPosition = query.length;
       const { command } = findAutocompleteAstPosition(query, cursorPosition);
       if (!command) {
@@ -374,7 +374,7 @@ describe('WHERE Autocomplete', () => {
     });
 
     test('pipe suggestion after complete expression', async () => {
-      expect(await suggest('from index | WHERE doubleField != doubleField ')).toContainEqual(
+      expect(await whereSuggest('from index | WHERE doubleField != doubleField ')).toContainEqual(
         expect.objectContaining({
           label: '|',
         })
