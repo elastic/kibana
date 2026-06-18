@@ -72,7 +72,6 @@ export const bucketDateHistogramOperationSchema = z
       description: 'When `true`, drops partial intervals from the results.',
     }),
   })
-  .strict()
   .meta({ id: 'dateHistogramOperation', title: BUCKET_OP_TITLES.dateHistogram });
 const bucketTermsRankByCustomSharedSchema = z
   .object({
@@ -304,7 +303,6 @@ export const bucketTermsOperationSchema = z
       ])
       .optional(),
   })
-  .strict()
   .meta({ id: 'termsOperation', title: BUCKET_OP_TITLES.terms });
 
 export const bucketFiltersOperationSchema = z
@@ -316,7 +314,6 @@ export const bucketFiltersOperationSchema = z
      */
     filters: z.array(filterWithLabelSchema).max(100),
   })
-  .strict()
   .meta({ id: 'filtersOperation', title: BUCKET_OP_TITLES.filters });
 
 export const bucketHistogramOperationSchema = z
@@ -354,7 +351,6 @@ export const bucketHistogramOperationSchema = z
       description: 'When `true`, includes empty rows in the results.',
     }),
   })
-  .strict()
   .meta({ id: 'histogramOperation', title: BUCKET_OP_TITLES.histogram });
 
 export const bucketRangesOperationSchema = z
@@ -404,7 +400,6 @@ export const bucketRangesOperationSchema = z
       )
       .max(100),
   })
-  .strict()
   .meta({ id: 'rangesOperation', title: BUCKET_OP_TITLES.ranges });
 
 export const bucketOperationDefinitionSchema = z

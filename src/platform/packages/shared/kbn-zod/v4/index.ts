@@ -8,7 +8,6 @@
  */
 
 export * from 'zod/v4';
-export * from './custom';
 export { isZod } from './utils';
 export { lazySchema, setLazySchemaDisabled } from './lazy_schema';
 export type { ZodObjectType } from './types';

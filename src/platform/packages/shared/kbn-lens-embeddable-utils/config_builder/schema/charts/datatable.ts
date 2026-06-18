@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { smartIntersection, z } from '@kbn/zod';
+import { z } from '@kbn/zod';
 import { DEFAULT_HEADER_ROW_HEIGHT_LINES, DEFAULT_ROW_HEIGHT_LINES } from '@kbn/lens-common';
 import { esqlColumnWithFormatSchema } from '../metric_ops';
 import {
@@ -346,8 +346,7 @@ export const datatableConfigSchemaNoESQL = z
      */
     metrics: z
       .array(
-        smartIntersection(
-          getMetricsWithChartDimensionSchemaWithRefBasedOps('datatableMetric'),
+        getMetricsWithChartDimensionSchemaWithRefBasedOps('datatableMetric').and(
           datatableConfigMetricsOptionsSchema
         )
       )
@@ -359,8 +358,7 @@ export const datatableConfigSchemaNoESQL = z
      */
     rows: z
       .array(
-        smartIntersection(
-          getBucketsWithChartDimensionSchema('datatableRow'),
+        getBucketsWithChartDimensionSchema('datatableRow').and(
           datatableConfigRowsOptionsNoESQLSchema
         )
       )
@@ -378,8 +376,6 @@ export const datatableConfigSchemaNoESQL = z
       .optional()
       .meta({ description: 'Array of operations to split the metric columns by' }),
   })
-  .strict()
-
   .superRefine((data, ctx) => {
     const msg = validateSortBy(data);
     if (msg) {
@@ -432,7 +428,6 @@ export const datatableConfigSchemaESQL = z
       .optional()
       .meta({ description: 'Array of operations to split the metric columns by' }),
   })
-  .strict()
   .superRefine((data, ctx) => {
     const sortByError = validateSortBy(data);
     if (sortByError) {

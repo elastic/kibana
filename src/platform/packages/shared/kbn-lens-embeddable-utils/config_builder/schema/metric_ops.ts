@@ -21,12 +21,10 @@ import {
 import { LENS_EMPTY_AS_NULL_DEFAULT_VALUE } from '../transforms/columns/utils';
 import { labelSharedSchema } from './shared';
 
-export const genericOperationOptionsSchema = z
-  .object({
-    ...formatSchema.shape,
-    ...labelSharedSchema.shape,
-  })
-  .strict();
+export const genericOperationOptionsSchema = z.object({
+  ...formatSchema.shape,
+  ...labelSharedSchema.shape,
+});
 
 export const METRIC_OP_TITLES = {
   static: 'Static Operation Definition',

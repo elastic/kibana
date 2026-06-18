@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { smartIntersection, smartIntersectionWith, z } from '@kbn/zod';
+import { z } from '@kbn/zod';
 import { esqlColumnWithFormatSchema } from '../metric_ops';
 import { colorMappingSchema } from '../color';
 import { dataSourceSchema, dataSourceEsqlTableSchema } from '../data_source';
@@ -115,8 +115,7 @@ export const mosaicConfigSchemaNoESQL = z
     metric: getMetricsWithChartDimensionSchemaWithRefBasedOps('mosaicMetric'),
     group_by: z
       .array(
-        smartIntersection(
-          getBucketsWithChartDimensionSchema('mosaicGroupBy'),
+        getBucketsWithChartDimensionSchema('mosaicGroupBy').and(
           partitionConfigBreakdownByOptionsSchema
         )
       )
@@ -131,16 +130,17 @@ export const mosaicConfigSchemaNoESQL = z
      */
     group_breakdown_by: z
       .array(
-        smartIntersectionWith(getBucketsWithChartDimensionSchema('mosaicGroupBreakdownBy'), {
-          collapse_by: collapseBySchema.optional(),
-        })
+        getBucketsWithChartDimensionSchema('mosaicGroupBreakdownBy').and(
+          z.object({
+            collapse_by: collapseBySchema.optional(),
+          })
+        )
       )
       .min(1)
       .max(100)
       .optional()
       .meta({ description: 'Array of group breakdown dimensions (minimum 1)' }),
   })
-  .strict()
   .superRefine((data, ctx) => {
     const msg = validateMosaicGroupings(data);
     if (msg) {
@@ -186,7 +186,6 @@ export const mosaicConfigSchemaESQL = z
       .optional()
       .meta({ description: 'Array of group breakdown dimensions (minimum 1)' }),
   })
-  .strict()
   .superRefine((data, ctx) => {
     const msg = validateMosaicGroupings(data);
     if (msg) {

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { smartIntersectionWith, z } from '@kbn/zod';
+import { z } from '@kbn/zod';
 
 import { dataSourceSchema, dataSourceEsqlTableSchema } from '../data_source';
 import { colorByValueSchema, autoColorSchema, AUTO_COLOR } from '../color';
@@ -79,55 +79,53 @@ const heatmapStylingSchema = z
     description: 'Visual chart styling options',
   });
 
-const heatmapSharedConfigSchema = z
-  .object({
-    type: z.literal('heatmap'),
-    legend: legendSchema.optional().meta({
-      id: 'heatmapLegend',
-      title: 'Legend',
-      description: 'Legend configuration',
+const heatmapSharedConfigSchema = z.object({
+  type: z.literal('heatmap'),
+  legend: legendSchema.optional().meta({
+    id: 'heatmapLegend',
+    title: 'Legend',
+    description: 'Legend configuration',
+  }),
+  ...sharedPanelInfoSchema.shape,
+  ...layerSettingsSchema.shape,
+  axis: z
+    .object({
+      x: z
+        .object({
+          title: axisTitleSchema.optional(),
+          labels: labelsSchema.optional(),
+          sort: heatmapSortPredicateSchema.optional(),
+          scale: xScaleSchema,
+        })
+        .strict()
+        .optional()
+        .meta({
+          id: 'heatmapXAxis',
+          title: 'X Axis',
+          description: 'X axis configuration',
+        }),
+      y: z
+        .object({
+          title: axisTitleSchema.optional(),
+          labels: simpleLabelsSchema.optional(),
+          sort: heatmapSortPredicateSchema.optional(),
+        })
+        .strict()
+        .optional()
+        .meta({
+          id: 'heatmapYAxis',
+          title: 'Y Axis',
+          description: 'Y axis configuration',
+        }),
+    })
+    .strict()
+    .optional()
+    .meta({
+      id: 'heatmapAxes',
+      title: 'Axes',
+      description: 'Axis configuration for X and Y axes',
     }),
-    ...sharedPanelInfoSchema.shape,
-    ...layerSettingsSchema.shape,
-    axis: z
-      .object({
-        x: z
-          .object({
-            title: axisTitleSchema.optional(),
-            labels: labelsSchema.optional(),
-            sort: heatmapSortPredicateSchema.optional(),
-            scale: xScaleSchema,
-          })
-          .strict()
-          .optional()
-          .meta({
-            id: 'heatmapXAxis',
-            title: 'X Axis',
-            description: 'X axis configuration',
-          }),
-        y: z
-          .object({
-            title: axisTitleSchema.optional(),
-            labels: simpleLabelsSchema.optional(),
-            sort: heatmapSortPredicateSchema.optional(),
-          })
-          .strict()
-          .optional()
-          .meta({
-            id: 'heatmapYAxis',
-            title: 'Y Axis',
-            description: 'Y axis configuration',
-          }),
-      })
-      .strict()
-      .optional()
-      .meta({
-        id: 'heatmapAxes',
-        title: 'Axes',
-        description: 'Axis configuration for X and Y axes',
-      }),
-  })
-  .strict();
+});
 
 const heatmapAxesConfigShape = {
   x: bucketOperationDefinitionSchema,
@@ -153,9 +151,8 @@ export const heatmapConfigSchemaNoESQL = heatmapSharedConfigSchema
     ...dslOnlyPanelInfoSchema.shape,
     ...dataSourceSchema.shape,
     styling: heatmapStylingSchema.optional(),
-    metric: smartIntersectionWith(
-      getMetricsWithChartDimensionSchemaWithRefBasedOps('heatmapMetric'),
-      heatmapConfigMetricOptionsShape
+    metric: getMetricsWithChartDimensionSchemaWithRefBasedOps('heatmapMetric').and(
+      z.object(heatmapConfigMetricOptionsShape)
     ),
   })
   .meta({

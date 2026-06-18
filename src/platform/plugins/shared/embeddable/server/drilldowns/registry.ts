@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { smartIntersectionWith, z } from '@kbn/zod';
+import { z } from '@kbn/zod';
 import type { DrilldownSetup } from './types';
 import { getTransformDrilldownsIn } from '../../common/drilldowns/transform_drilldowns_in';
 import { getTransformDrilldownsOut } from '../../common/drilldowns/transform_drilldowns_out';
@@ -46,18 +46,22 @@ export function getDrilldownRegistry() {
         // sort to ensure consistent order in OAS documenation
         .sort(([aType], [bType]) => aType.localeCompare(bType))
         .map(([type, drilldownSetup]) =>
-          smartIntersectionWith(drilldownSetup.schema, {
-            label: z.string(),
-            trigger: z.union(
-              drilldownSetup.supportedTriggers
-                // narrow drilldown triggers to only those that intersect with supported triggers
-                .filter((trigger) => supportedTriggers.includes(trigger))
-                // sort to ensure consistent order in OAS documenation
-                .sort()
-                .map((trigger) => z.literal(trigger))
-            ),
-            type: z.literal(type),
-          }).meta({ title: type })
+          drilldownSetup.schema
+            .and(
+              z.object({
+                label: z.string(),
+                trigger: z.union(
+                  drilldownSetup.supportedTriggers
+                    // narrow drilldown triggers to only those that intersect with supported triggers
+                    .filter((trigger) => supportedTriggers.includes(trigger))
+                    // sort to ensure consistent order in OAS documenation
+                    .sort()
+                    .map((trigger) => z.literal(trigger))
+                ),
+                type: z.literal(type),
+              })
+            )
+            .meta({ title: type })
         );
 
       if (drilldownSchemas.length === 0) {

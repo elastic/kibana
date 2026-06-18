@@ -128,7 +128,7 @@ describe('Legacy Metric Schema', () => {
       const result = legacyMetricConfigSchema.safeParse(input);
       expectPrettyError(result).toMatchInlineSnapshot(`
         "✖ Invalid input
-          → at metric"
+          → at metric.labels.alignment"
       `);
     });
 
@@ -145,7 +145,7 @@ describe('Legacy Metric Schema', () => {
       const result = legacyMetricConfigSchema.safeParse(input);
       expectPrettyError(result).toMatchInlineSnapshot(`
         "✖ Invalid input
-          → at metric"
+          → at metric.size"
       `);
     });
 
@@ -171,7 +171,7 @@ describe('Legacy Metric Schema', () => {
       const result = legacyMetricConfigSchema.safeParse(input);
       expectPrettyError(result).toMatchInlineSnapshot(`
         "✖ Invalid input
-          → at metric"
+          → at metric.apply_color_to"
       `);
     });
 
@@ -197,7 +197,7 @@ describe('Legacy Metric Schema', () => {
       const result = legacyMetricConfigSchema.safeParse(input);
       expectPrettyError(result).toMatchInlineSnapshot(`
         "✖ Invalid input
-          → at metric"
+          → at metric.color"
       `);
     });
   });

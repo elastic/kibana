@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { smartIntersectionWith, z } from '@kbn/zod';
+import { z } from '@kbn/zod';
 import { esqlColumnWithFormatSchema } from '../metric_ops';
 import { colorMappingSchema, staticColorSchema, autoColorSchema, AUTO_COLOR } from '../color';
 import { dataSourceSchema, dataSourceEsqlTableSchema } from '../data_source';
@@ -140,9 +140,8 @@ export const pieConfigSchemaNoESQL = z
     styling: pieStylingSchema.optional(),
     metrics: z
       .array(
-        smartIntersectionWith(
-          getMetricsWithChartDimensionSchemaWithRefBasedOps('pieMetric'),
-          partitionConfigPrimaryMetricOptionsShape
+        getMetricsWithChartDimensionSchemaWithRefBasedOps('pieMetric').and(
+          z.object(partitionConfigPrimaryMetricOptionsShape)
         )
       )
       .min(1)
@@ -150,9 +149,8 @@ export const pieConfigSchemaNoESQL = z
       .meta({ description: 'Array of metric configurations (minimum 1)' }),
     group_by: z
       .array(
-        smartIntersectionWith(
-          getBucketsWithChartDimensionSchema('pieGroupBy'),
-          partitionConfigBreakdownByOptionsShape
+        getBucketsWithChartDimensionSchema('pieGroupBy').and(
+          z.object(partitionConfigBreakdownByOptionsShape)
         )
       )
       .min(1)
@@ -160,7 +158,6 @@ export const pieConfigSchemaNoESQL = z
       .optional()
       .meta({ description: 'Array of breakdown dimensions (minimum 1)' }),
   })
-  .strict()
   .superRefine((data, ctx) => {
     const msg = validateForMultipleMetrics(data);
     if (msg) {
@@ -200,7 +197,6 @@ export const pieConfigSchemaESQL = z
       .optional()
       .meta({ description: 'Array of breakdown dimensions (minimum 1)' }),
   })
-  .strict()
   .superRefine((data, ctx) => {
     const msg = validateForMultipleMetrics(data);
     if (msg) {

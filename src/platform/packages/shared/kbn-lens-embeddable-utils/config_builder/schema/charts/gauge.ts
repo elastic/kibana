@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { smartIntersectionWith, z } from '@kbn/zod';
+import { z } from '@kbn/zod';
 import {
   esqlColumnWithFormatSchema,
   esqlColumnSchema,
@@ -153,12 +153,13 @@ export const gaugeConfigSchemaNoESQL = z
     /**
      * Primary value configuration, must define operation.
      */
-    metric: smartIntersectionWith(getMetricsWithChartDimensionSchema('gaugeMetric'), {
-      ...gaugeConfigMetricOptionsShape,
-      ...gaugeConfigMetricInnerNoESQLOpsShape,
-    }),
+    metric: getMetricsWithChartDimensionSchema('gaugeMetric').and(
+      z.object({
+        ...gaugeConfigMetricOptionsShape,
+        ...gaugeConfigMetricInnerNoESQLOpsShape,
+      })
+    ),
   })
-  .strict()
   .meta({
     id: 'gaugeNoESQL',
     title: 'Gauge Chart (DSL)',
@@ -182,7 +183,6 @@ export const gaugeConfigSchemaESQL = z
       })
       .strict(),
   })
-  .strict()
   .meta({
     id: 'gaugeESQL',
     title: 'Gauge Chart (ES|QL)',

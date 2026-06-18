@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { smartIntersectionWith, z } from '@kbn/zod';
+import { z } from '@kbn/zod';
 import { esqlColumnWithFormatSchema } from '../metric_ops';
 import { colorMappingSchema, staticColorSchema, autoColorSchema, AUTO_COLOR } from '../color';
 import { dataSourceSchema, dataSourceEsqlTableSchema } from '../data_source';
@@ -97,9 +97,8 @@ export const waffleConfigSchemaNoESQL = z
     styling: waffleStylingSchema.optional(),
     metrics: z
       .array(
-        smartIntersectionWith(
-          getMetricsWithChartDimensionSchemaWithRefBasedOps('waffleMetric'),
-          partitionConfigPrimaryMetricOptionsShape
+        getMetricsWithChartDimensionSchemaWithRefBasedOps('waffleMetric').and(
+          z.object(partitionConfigPrimaryMetricOptionsShape)
         )
       )
       .min(1)
@@ -107,9 +106,8 @@ export const waffleConfigSchemaNoESQL = z
       .meta({ description: 'Array of metric configurations (minimum 1)' }),
     group_by: z
       .array(
-        smartIntersectionWith(
-          getBucketsWithChartDimensionSchema('waffleGroupBy'),
-          partitionConfigBreakdownByOptionsShape
+        getBucketsWithChartDimensionSchema('waffleGroupBy').and(
+          z.object(partitionConfigBreakdownByOptionsShape)
         )
       )
       .min(1)
@@ -117,7 +115,6 @@ export const waffleConfigSchemaNoESQL = z
       .optional()
       .meta({ description: 'Array of breakdown dimensions (minimum 1)' }),
   })
-  .strict()
   .superRefine((data, ctx) => {
     const msg = validateMultipleMetricsCriteria(data);
     if (msg) {
@@ -153,7 +150,6 @@ export const waffleConfigSchemaESQL = z
       .optional()
       .meta({ description: 'Array of ES|QL breakdown columns (minimum 1)' }),
   })
-  .strict()
   .superRefine((data, ctx) => {
     const msg = validateMultipleMetricsCriteria(data);
     if (msg) {

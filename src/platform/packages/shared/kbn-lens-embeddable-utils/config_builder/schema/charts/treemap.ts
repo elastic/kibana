@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { smartIntersectionWith, z } from '@kbn/zod';
+import { z } from '@kbn/zod';
 import { esqlColumnWithFormatSchema } from '../metric_ops';
 import { colorMappingSchema, staticColorSchema, autoColorSchema, AUTO_COLOR } from '../color';
 import { dataSourceSchema, dataSourceEsqlTableSchema } from '../data_source';
@@ -133,9 +133,8 @@ export const treemapConfigSchemaNoESQL = z
      */
     metrics: z
       .array(
-        smartIntersectionWith(
-          getMetricsWithChartDimensionSchemaWithRefBasedOps('treemapMetric'),
-          partitionConfigPrimaryMetricOptionsShape
+        getMetricsWithChartDimensionSchemaWithRefBasedOps('treemapMetric').and(
+          z.object(partitionConfigPrimaryMetricOptionsShape)
         )
       )
       .min(1)
@@ -146,9 +145,8 @@ export const treemapConfigSchemaNoESQL = z
      */
     group_by: z
       .array(
-        smartIntersectionWith(
-          getBucketsWithChartDimensionSchema('treemapGroupBy'),
-          partitionConfigBreakdownByOptionsShape
+        getBucketsWithChartDimensionSchema('treemapGroupBy').and(
+          z.object(partitionConfigBreakdownByOptionsShape)
         )
       )
       .min(1)
@@ -156,7 +154,6 @@ export const treemapConfigSchemaNoESQL = z
       .optional()
       .meta({ description: 'Array of breakdown dimensions (minimum 1)' }),
   })
-  .strict()
   .superRefine((data, ctx) => {
     const msg = validateForMultipleMetrics({
       metrics: data.metrics as PartitionMetric[],
@@ -199,7 +196,6 @@ export const treemapConfigSchemaESQL = z
       .optional()
       .meta({ description: 'Array of breakdown dimensions (minimum 1)' }),
   })
-  .strict()
   .superRefine((data, ctx) => {
     const msg = validateForMultipleMetrics({
       metrics: data.metrics as PartitionMetric[],

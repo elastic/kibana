@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { smartIntersectionWith, z } from '@kbn/zod';
+import { z } from '@kbn/zod';
 import {
   axisTitleSchema,
   collapseBySchema,
@@ -507,20 +507,26 @@ const xyDataLayerSchemaNoESQL = z
     ...layerSettingsSchema.shape,
     ...dataSourceSchema.shape,
     ...xyDataLayerSharedShape,
-    breakdown_by: smartIntersectionWith(getBucketsWithChartDimensionSchema('xyBreakdown'), {
-      collapse_by: collapseBySchema.optional(),
-      color: colorMappingSchema.optional(),
-      aggregate_first: z.boolean().optional().meta({
-        description:
-          'When `true`, aggregates data before splitting into series. Defaults to `false`.',
-      }),
-    }).optional(),
+    breakdown_by: getBucketsWithChartDimensionSchema('xyBreakdown')
+      .and(
+        z.object({
+          collapse_by: collapseBySchema.optional(),
+          color: colorMappingSchema.optional(),
+          aggregate_first: z.boolean().optional().meta({
+            description:
+              'When `true`, aggregates data before splitting into series. Defaults to `false`.',
+          }),
+        })
+      )
+      .optional(),
     y: z
       .array(
-        smartIntersectionWith(getMetricsWithChartDimensionSchemaWithRefBasedOps('xyY'), {
-          axis: yMetricOnAxisSchema.optional(),
-          color: z.union([staticColorSchema, autoColorSchema]).default(AUTO_COLOR).optional(),
-        })
+        getMetricsWithChartDimensionSchemaWithRefBasedOps('xyY').and(
+          z.object({
+            axis: yMetricOnAxisSchema.optional(),
+            color: z.union([staticColorSchema, autoColorSchema]).default(AUTO_COLOR).optional(),
+          })
+        )
       )
       .max(100)
       .meta({ description: 'Array of metrics to display on Y-axis' }),
@@ -645,9 +651,8 @@ const referenceLineLayerSchemaNoESQL = z
     type: z.literal('reference_lines'),
     thresholds: z
       .array(
-        smartIntersectionWith(
-          getMetricsWithChartDimensionSchemaWithStaticOps('xyRefLine'),
-          referenceLineLayerSharedShape
+        getMetricsWithChartDimensionSchemaWithStaticOps('xyRefLine').and(
+          z.object(referenceLineLayerSharedShape)
         )
       )
       .min(1)
@@ -873,7 +878,6 @@ export const xyConfigSchemaNoESQL = z
     ...dslOnlyPanelInfoSchema.shape,
     layers: z.array(xyLayerUnionNoESQL).min(1).max(100).meta({ description: 'Chart layers' }),
   })
-  .strict()
   .meta({
     id: 'xyChartNoESQL',
     title: 'XY Chart (DSL)',
@@ -890,7 +894,6 @@ export const xyConfigSchemaESQL = z
     ...xySharedSettings,
     layers: z.array(xyLayerUnionESQL).min(1).max(100).meta({ description: 'ES|QL chart layers' }),
   })
-  .strict()
   .meta({
     id: 'xyChartESQL',
     title: 'XY Chart (ES|QL)',

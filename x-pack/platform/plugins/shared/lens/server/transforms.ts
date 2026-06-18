@@ -5,12 +5,7 @@
  * 2.0.
  */
 
-import type {
-  SmartIntersectionInput,
-  SmartIntersectionOutput,
-  SmartIntersectionSchema,
-} from '@kbn/zod';
-import { smartIntersection, z } from '@kbn/zod';
+import { z } from '@kbn/zod';
 import { lensApiConfigSchema, type LensConfigBuilder } from '@kbn/lens-embeddable-utils';
 import type { LensByRefSerializedAPIConfig } from '@kbn/lens-common-2';
 import type { EmbeddableSetup, GetDrilldownsSchemaFnType } from '@kbn/embeddable-plugin/server';
@@ -89,15 +84,10 @@ const getSharedPanelSchema = (getDrilldownsSchema: GetDrilldownsSchemaFnType) =>
     })
     .strict();
 
-export const getLensByValuePanelSchema = (
-  getDrilldownsSchema: GetDrilldownsSchemaFnType
-): SmartIntersectionSchema<
-  SmartIntersectionOutput<typeof lensApiConfigSchema, ReturnType<typeof getSharedPanelSchema>>,
-  SmartIntersectionInput<typeof lensApiConfigSchema, ReturnType<typeof getSharedPanelSchema>>
-> => {
-  return smartIntersection(lensApiConfigSchema, getSharedPanelSchema(getDrilldownsSchema)).meta(
-    BY_VALUE_SCHEMA_META
-  );
+export const getLensByValuePanelSchema = (getDrilldownsSchema: GetDrilldownsSchemaFnType) => {
+  return lensApiConfigSchema
+    .and(getSharedPanelSchema(getDrilldownsSchema))
+    .meta(BY_VALUE_SCHEMA_META);
 };
 
 const getLensByRefPanelSchema = (getDrilldownsSchema: GetDrilldownsSchemaFnType) =>
