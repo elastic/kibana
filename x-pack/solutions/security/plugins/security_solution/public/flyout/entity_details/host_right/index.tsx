@@ -11,7 +11,7 @@ import { useHasMisconfigurations } from '@kbn/cloud-security-posture/src/hooks/u
 import { useHasVulnerabilities } from '@kbn/cloud-security-posture/src/hooks/use_has_vulnerabilities';
 import { TableId } from '@kbn/securitysolution-data-table';
 import { FF_ENABLE_ENTITY_STORE_V2, useEntityStoreEuidApi } from '@kbn/entity-store/public';
-import { EuiSpacer } from '@elastic/eui';
+import { EuiFlyoutFooter, EuiSpacer } from '@elastic/eui';
 import { useAssetCriticalityPrivileges } from '../../../entity_analytics/components/asset_criticality/use_asset_criticality';
 import { useUpdateAssetCriticality } from '../../../entity_analytics/api/hooks/use_update_asset_criticality';
 import { buildEuidCspPreviewOptions } from '../../../cloud_security_posture/utils/build_euid_csp_preview_options';
@@ -27,14 +27,14 @@ import { useGlobalTime } from '../../../common/containers/use_global_time';
 import { buildHostNamesFilter, type RiskSeverity } from '../../../../common/search_strategy';
 import { useUiSetting, useKibana } from '../../../common/lib/kibana';
 import { FlyoutNavigation } from '../../shared/components/flyout_navigation';
-import { HostPanelFooter } from './footer';
-import { HostPanelContent } from './content';
-import { HostPanelHeader } from './header';
+import { Footer } from '../../../flyout_v2/entity/host/main/footer';
+import { Content } from '../../../flyout_v2/entity/host/main/content';
+import { Header } from '../../../flyout_v2/entity/host/main/header';
 import { EntityDetailsLeftPanelTab } from '../shared/components/left_panel/left_panel_header';
 import { HostPreviewPanelFooter } from '../host_preview/footer';
 import { useNavigateToHostDetails } from './hooks/use_navigate_to_host_details';
 import { EntityType } from '../../../../common/entity_analytics/types';
-import { useObservedHost } from './hooks/use_observed_host';
+import { useObservedHost } from '../../../flyout_v2/entity/host/main/hooks/use_observed_host';
 import {
   buildRiskScoreStateFromEntityRecord,
   getRiskFromEntityRecord,
@@ -46,7 +46,11 @@ import {
   mergeLegacyIdentityWhenStoreEntityMissing,
   type IdentityFields,
 } from '../../document_details/shared/utils';
-import { HOST_PANEL_RISK_SCORE_QUERY_ID, HOST_PANEL_OBSERVED_HOST_QUERY_ID } from './constants';
+import {
+  HOST_PANEL_RISK_SCORE_QUERY_ID,
+  HOST_PANEL_OBSERVED_HOST_QUERY_ID,
+} from '../../../flyout_v2/entity/host/main/constants';
+import { FlyoutHeader } from '../../shared/components/flyout_header';
 import { FlyoutBody } from '../../shared/components/flyout_body';
 import { useEntityPanelTabs, TABLE_TAB_ID } from '../shared/hooks/use_entity_panel_tabs';
 import { EntityPanelHeaderTabs } from '../shared/components/entity_panel_tabs';
@@ -297,19 +301,21 @@ export const HostPanel = memo(function HostPanel({
         isPreviewMode={isPreviewMode}
         isRulePreview={scopeId === TableId.rulePreview}
       />
-      <HostPanelHeader
-        hostName={hostName}
-        lastSeen={observedHost.lastSeen}
-        entityId={panelDisplayEntityId}
-        identityFields={documentEntityIdentifiers}
-        isEntityInStore={!!observedHost.entityRecord}
-        riskLevel={
-          observedHost.entityRecord
-            ? ((getRiskFromEntityRecord(observedHost.entityRecord)?.calculated_level ??
-                'Unknown') as RiskSeverity)
-            : undefined
-        }
-      />
+      <FlyoutHeader>
+        <Header
+          hostName={hostName}
+          lastSeen={observedHost.lastSeen}
+          entityId={panelDisplayEntityId}
+          identityFields={documentEntityIdentifiers}
+          isEntityInStore={!!observedHost.entityRecord}
+          riskLevel={
+            observedHost.entityRecord
+              ? ((getRiskFromEntityRecord(observedHost.entityRecord)?.calculated_level ??
+                  'Unknown') as RiskSeverity)
+              : undefined
+          }
+        />
+      </FlyoutHeader>
       <FlyoutBody>
         {observedHost.entityRecord && (
           <EntitySummaryGrid
@@ -323,7 +329,7 @@ export const HostPanel = memo(function HostPanel({
         {tabs && selectedTabId === TABLE_TAB_ID && observedHost.entityRecord ? (
           <EntityStoreTableTab entityRecord={observedHost.entityRecord} />
         ) : (
-          <HostPanelContent
+          <Content
             identityFields={documentEntityIdentifiers}
             observedHost={observedHost}
             riskScoreState={effectiveRiskScoreState}
@@ -348,7 +354,9 @@ export const HostPanel = memo(function HostPanel({
         />
       )}
       {!isPreviewMode && assetInventoryEnabled && (
-        <HostPanelFooter identityFields={documentEntityIdentifiers} entity={entityFromStore} />
+        <EuiFlyoutFooter>
+          <Footer identityFields={documentEntityIdentifiers} entity={entityFromStore} />
+        </EuiFlyoutFooter>
       )}
     </>
   );
