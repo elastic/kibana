@@ -143,13 +143,16 @@ apiTest.describe(
         const itemsByRule = (id: string): PolicyExecutionHistoryItem[] =>
           body.items.filter((it) => it.rule.id === id);
 
-        expect(itemsByRule(RULE_ID_KEPT).length).toBeGreaterThanOrEqual(1);
-        expect(itemsByRule(RULE_ID_DELETED).length).toBeGreaterThanOrEqual(1);
+        const itemsOfRuleKept = itemsByRule(RULE_ID_KEPT);
+        const itemsOfRuleDeleted = itemsByRule(RULE_ID_DELETED);
 
-        for (const item of itemsByRule(RULE_ID_KEPT)) {
+        expect(itemsOfRuleKept.length).toBeGreaterThanOrEqual(1);
+        expect(itemsOfRuleDeleted.length).toBeGreaterThanOrEqual(1);
+
+        for (const item of itemsOfRuleKept) {
           expect(item.rule).toStrictEqual({ id: RULE_ID_KEPT, name: RULE_KEPT_NAME });
         }
-        for (const item of itemsByRule(RULE_ID_DELETED)) {
+        for (const item of itemsOfRuleDeleted) {
           expect(item.rule).toStrictEqual({ id: RULE_ID_DELETED, name: null });
         }
       }
