@@ -26,10 +26,7 @@ export const useMetricFieldsFilter = ({
         return true;
       }
 
-      return fieldNameWildcardMatcher(
-        { name: metricItem.metricName },
-        fieldSearchHighlight
-      );
+      return fieldNameWildcardMatcher({ name: metricItem.metricName }, fieldSearchHighlight);
     });
   }, [metricItems, searchTerm]);
 
