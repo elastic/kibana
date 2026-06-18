@@ -13,6 +13,7 @@ import { useGetUrlParams } from '../../../hooks';
 import { ConfigKey } from '../../../../../../common/runtime_types';
 import { PLUGIN } from '../../../../../../common/constants/plugin';
 import { useUrlSpaceId } from '../../../hooks/use_url_space_id';
+import { buildMonitorParamsSearch } from '../../../utils/url_params';
 
 export const useErrorDetailsBreadcrumbs = (
   extraCrumbs?: Array<{ text: string; href?: string }>
@@ -28,18 +29,16 @@ export const useErrorDetailsBreadcrumbs = (
   // path; otherwise the local errors page 404s against missing saved objects.
   const { remoteName } = useGetUrlParams();
 
-  const errorsHrefParams = new URLSearchParams();
-  if (selectedLocation?.id) errorsHrefParams.set('locationId', selectedLocation.id);
-  if (spaceId) errorsHrefParams.set('spaceId', spaceId);
-  if (remoteName) errorsHrefParams.set('remoteName', remoteName);
-  const errorsHrefSearch = errorsHrefParams.toString();
+  const errorsSearch = buildMonitorParamsSearch({
+    locationId: selectedLocation?.id,
+    spaceId,
+    remoteName,
+  });
 
   const errorsBreadcrumbs = [
     {
       text: ERRORS_CRUMB,
-      href: `${appPath}/monitor/${monitor?.[ConfigKey.CONFIG_ID]}/errors${
-        errorsHrefSearch ? `?${errorsHrefSearch}` : ''
-      }`,
+      href: `${appPath}/monitor/${monitor?.[ConfigKey.CONFIG_ID]}/errors${errorsSearch}`,
     },
     ...(extraCrumbs ?? []),
   ];

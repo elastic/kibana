@@ -11,6 +11,7 @@ import { EuiLink, EuiIcon } from '@elastic/eui';
 import { InPortal } from 'react-reverse-portal';
 import { useSelectedLocation } from '../monitor_details/hooks/use_selected_location';
 import { useUrlSpaceId } from '../../hooks/use_url_space_id';
+import { buildMonitorParamsSearch } from '../../utils/url_params';
 import { MonitorDetailsLinkPortalNode } from './portals';
 
 interface Props {
@@ -64,7 +65,7 @@ const MonitorDetailsLinkWithLocation = ({
   const history = useHistory();
   const href = history.createHref({
     pathname: `monitor/${configId}`,
-    search: buildSearch({ locationId: locId, spaceId, remoteName }),
+    search: buildMonitorParamsSearch({ locationId: locId, spaceId, remoteName }),
   });
   return <MonitorLink href={href} name={name} />;
 };
@@ -74,26 +75,9 @@ const MonitorDetailsLink = ({ name, configId, remoteName }: Props) => {
   const history = useHistory();
   const href = history.createHref({
     pathname: `monitor/${configId}`,
-    search: buildSearch({ spaceId, remoteName }),
+    search: buildMonitorParamsSearch({ spaceId, remoteName }),
   });
   return <MonitorLink href={href} name={name} />;
-};
-
-const buildSearch = ({
-  locationId,
-  spaceId,
-  remoteName,
-}: {
-  locationId?: string;
-  spaceId?: string;
-  remoteName?: string;
-}): string | undefined => {
-  const params = new URLSearchParams();
-  if (locationId) params.set('locationId', locationId);
-  if (spaceId) params.set('spaceId', spaceId);
-  if (remoteName) params.set('remoteName', remoteName);
-  const qs = params.toString();
-  return qs ? `?${qs}` : undefined;
 };
 
 const MonitorLink = ({ href, name }: { href: string; name: string }) => {

@@ -12,6 +12,7 @@ import { TEST_RUN_DETAILS_ROUTE } from '../../../../../../common/constants/ui';
 import { useJourneySteps } from '../../monitor_details/hooks/use_journey_steps';
 import { useTestRunDetailsBreadcrumbs } from '../../test_run_details/hooks/use_test_run_details_breadcrumbs';
 import { useGetUrlParams } from '../../../hooks';
+import { buildMonitorParamsSearch } from '../../../utils/url_params';
 import { PLUGIN } from '../../../../../../common/constants/plugin';
 
 export const useStepDetailsBreadcrumbs = (extraCrumbs?: Array<{ text: string; href?: string }>) => {
@@ -29,17 +30,15 @@ export const useStepDetailsBreadcrumbs = (extraCrumbs?: Array<{ text: string; hr
   // remote (CCS) cluster path and doesn't 404 against local indices.
   const { remoteName } = useGetUrlParams();
 
-  const testRunHrefParams = new URLSearchParams();
-  if (selectedLocation?.id) testRunHrefParams.set('locationId', selectedLocation.id);
-  if (remoteName) testRunHrefParams.set('remoteName', remoteName);
-  const testRunHrefSearch = testRunHrefParams.toString();
+  const testRunSearch = buildMonitorParamsSearch({
+    locationId: selectedLocation?.id,
+    remoteName,
+  });
 
   useTestRunDetailsBreadcrumbs([
     {
       text: data ? moment(data.details?.timestamp).format('LLL') : '',
-      href: `${appPath}/${generatePath(TEST_RUN_DETAILS_ROUTE, params)}${
-        testRunHrefSearch ? `?${testRunHrefSearch}` : ''
-      }`,
+      href: `${appPath}/${generatePath(TEST_RUN_DETAILS_ROUTE, params)}${testRunSearch}`,
     },
 
     {
