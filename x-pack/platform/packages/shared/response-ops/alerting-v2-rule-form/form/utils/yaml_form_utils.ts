@@ -135,10 +135,7 @@ export const formValuesToYamlObject = (values: FormValues): YamlRuleObject => {
  * Lenient extractor for a nested `{ query: string }` or `{ segment: string }` block.
  * Also accepts a bare string for backward compatibility with hand-written YAML.
  */
-const extractNestedString = (
-  value: unknown,
-  key: 'query' | 'segment'
-): string => {
+const extractNestedString = (value: unknown, key: 'query' | 'segment'): string => {
   if (typeof value === 'string') return value;
   if (value && typeof value === 'object' && !Array.isArray(value)) {
     const nested = (value as Record<string, unknown>)[key];

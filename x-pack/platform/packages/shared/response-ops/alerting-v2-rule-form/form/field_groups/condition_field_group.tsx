@@ -19,7 +19,9 @@ interface ConditionFieldGroupProps {
   includeBase?: boolean;
 }
 
-export const ConditionFieldGroup = ({ includeBase: _includeBase = false }: ConditionFieldGroupProps) => {
+export const ConditionFieldGroup = ({
+  includeBase: _includeBase = false,
+}: ConditionFieldGroupProps) => {
   const { control } = useFormContext<FormValues>();
   const ruleQuery = useWatch({ control, name: 'query' }) as RuleQuery | undefined;
   const baseQuery = getBreachQuery(ruleQuery);

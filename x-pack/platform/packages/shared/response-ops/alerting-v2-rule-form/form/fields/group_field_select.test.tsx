@@ -52,7 +52,10 @@ describe('GroupFieldSelect', () => {
 
   it('renders with label', () => {
     render(<GroupFieldSelect />, {
-      wrapper: createFormWrapper({ query: { format: 'standalone', breach: { query: defaultQuery } } }, mockServices),
+      wrapper: createFormWrapper(
+        { query: { format: 'standalone', breach: { query: defaultQuery } } },
+        mockServices
+      ),
     });
 
     expect(screen.getByText('Group Fields')).toBeInTheDocument();
@@ -74,7 +77,10 @@ describe('GroupFieldSelect', () => {
     } as any);
 
     render(<GroupFieldSelect />, {
-      wrapper: createFormWrapper({ query: { format: 'standalone', breach: { query: defaultQuery } } }, mockServices),
+      wrapper: createFormWrapper(
+        { query: { format: 'standalone', breach: { query: defaultQuery } } },
+        mockServices
+      ),
     });
 
     // Click to open the combo box
@@ -153,7 +159,10 @@ describe('GroupFieldSelect', () => {
     } as any);
 
     render(<GroupFieldSelect />, {
-      wrapper: createFormWrapper({ query: { format: 'standalone', breach: { query: defaultQuery } } }, mockServices),
+      wrapper: createFormWrapper(
+        { query: { format: 'standalone', breach: { query: defaultQuery } } },
+        mockServices
+      ),
     });
 
     // Click to open the combo box
@@ -174,9 +183,13 @@ describe('GroupFieldSelect', () => {
 
   it('renders correctly in flyout layout', () => {
     render(<GroupFieldSelect />, {
-      wrapper: createFormWrapper({ query: { format: 'standalone', breach: { query: defaultQuery } } }, mockServices, {
-        layout: 'flyout',
-      }),
+      wrapper: createFormWrapper(
+        { query: { format: 'standalone', breach: { query: defaultQuery } } },
+        mockServices,
+        {
+          layout: 'flyout',
+        }
+      ),
     });
 
     expect(screen.getByRole('combobox')).toBeInTheDocument();
@@ -195,7 +208,10 @@ describe('GroupFieldSelect', () => {
     } as any);
 
     render(<GroupFieldSelect />, {
-      wrapper: createFormWrapper({ query: { format: 'standalone', breach: { query: defaultQuery } } }, mockServices),
+      wrapper: createFormWrapper(
+        { query: { format: 'standalone', breach: { query: defaultQuery } } },
+        mockServices
+      ),
     });
 
     // Component should still render, just with no options
@@ -205,7 +221,13 @@ describe('GroupFieldSelect', () => {
   describe('auto-populate from query BY clause', () => {
     const QueryChanger = ({ newQuery }: { newQuery: string }) => {
       const { setValue } = useFormContext<FormValues>();
-      return <button onClick={() => setValue('query', { format: 'standalone', breach: { query: newQuery } })}>Change Query</button>;
+      return (
+        <button
+          onClick={() => setValue('query', { format: 'standalone', breach: { query: newQuery } })}
+        >
+          Change Query
+        </button>
+      );
     };
 
     const renderWithQueryChanger = (
