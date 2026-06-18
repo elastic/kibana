@@ -346,11 +346,6 @@ export const convertSOQueriesToPackConfig = (
       const resultType = snapshot === false ? { removed, snapshot } : {};
       const index = queryId ? queryId : key;
 
-      // Strip the mode-specific override fields from `rest`. We rebuild them
-      // below according to the per-query / pack-mode rules so the output
-      // never carries both `interval` and `rrule_schedule` on one query.
-      const baseRest = { ...rest };
-
       let scheduleFields: Record<string, unknown> = {};
 
       if (!isRruleFeatureEnabled) {
@@ -392,7 +387,7 @@ export const convertSOQueriesToPackConfig = (
 
       queriesOut[index] = omitBy(
         {
-          ...baseRest,
+          ...rest,
           ...scheduleFields,
           query: removeMultilines(query),
           ...(!isEmpty(ecs_mapping)
