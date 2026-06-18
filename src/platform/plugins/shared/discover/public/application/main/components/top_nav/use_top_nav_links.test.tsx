@@ -440,17 +440,7 @@ describe('useTopNavLinks', () => {
       ).result.current;
     };
 
-    it('should include the alerts menu as a direct action when alerting v2 is enabled', async () => {
-      const appMenuConfig = await setupWithAlertingV2({ isEsqlMode: true }, true);
-
-      const alertsItem = appMenuConfig.items?.find((item) => item.id === AppMenuActionId.alerts);
-      expect(alertsItem).toBeDefined();
-      expect(alertsItem?.label).toBe('Create alert rule');
-      expect(alertsItem?.run).toBeDefined();
-      expect(alertsItem?.items).toBeUndefined();
-    });
-
-    it('should show the v2 selector flyout only in ES|QL mode and fall back to v1 popover in classic mode', async () => {
+    it('should use the v2 selector flyout in ES|QL mode and the v1 popover in classic mode', async () => {
       const esqlConfig = await setupWithAlertingV2({ isEsqlMode: true }, true);
       const classicConfig = await setupWithAlertingV2({ isEsqlMode: false }, true);
 
@@ -458,10 +448,12 @@ describe('useTopNavLinks', () => {
       const classicAlerts = classicConfig.items?.find((item) => item.id === AppMenuActionId.alerts);
 
       expect(esqlAlerts).toBeDefined();
+      expect(esqlAlerts?.label).toBe('Create alert rule');
+      expect(esqlAlerts?.run).toBeDefined();
       expect(esqlAlerts?.items).toBeUndefined();
       expect(classicAlerts).toBeDefined();
       expect(classicAlerts?.items).toBeDefined();
-      expect(classicAlerts?.items!.length).toBeGreaterThan(0);
+      expect(classicAlerts?.items?.length).toBeGreaterThan(0);
     });
 
     it('should fall back to v1 popover items when alerting v2 is disabled', async () => {
@@ -470,7 +462,7 @@ describe('useTopNavLinks', () => {
       const alertsItem = appMenuConfig.items?.find((item) => item.id === AppMenuActionId.alerts);
       expect(alertsItem).toBeDefined();
       expect(alertsItem?.items).toBeDefined();
-      expect(alertsItem?.items!.length).toBeGreaterThan(0);
+      expect(alertsItem?.items?.length).toBeGreaterThan(0);
     });
 
     describe('profile alerts popover items', () => {
@@ -508,40 +500,41 @@ describe('useTopNavLinks', () => {
         mockUseProfileAccessor.mockImplementation((accessorId) => jest.fn((baseImpl) => baseImpl));
       });
 
-      it('should pass profile popover items to the v2 app menu item in ES|QL mode', async () => {
+      it('should apply profile popover items before replacing the ES|QL alerts menu', async () => {
         const getCreateRuleOptionsSpy = jest.spyOn(getAlerts, 'getCreateRuleOptionsAppMenuItem');
 
-        await setupWithAlertingV2({ isEsqlMode: true }, true);
+        try {
+          await setupWithAlertingV2({ isEsqlMode: true }, true);
+          const classicConfig = await setupWithAlertingV2({ isEsqlMode: false }, true);
 
-        expect(getCreateRuleOptionsSpy).toHaveBeenCalledWith(
-          expect.objectContaining({
-            alertsPopoverItems: expect.arrayContaining([
+          expect(getCreateRuleOptionsSpy).toHaveBeenCalledWith(
+            expect.objectContaining({
+              alertsPopoverItems: expect.arrayContaining([
+                expect.objectContaining({
+                  id: 'custom-threshold-rule',
+                  label: 'Create custom threshold rule',
+                  testId: 'discoverAppMenuCustomThresholdRule',
+                }),
+              ]),
+            })
+          );
+
+          const alertsItem = classicConfig.items?.find(
+            (item) => item.id === AppMenuActionId.alerts
+          );
+          expect(alertsItem?.run).toBeUndefined();
+          expect(alertsItem?.items).toBeDefined();
+          expect(alertsItem?.items).toEqual(
+            expect.arrayContaining([
               expect.objectContaining({
                 id: 'custom-threshold-rule',
                 label: 'Create custom threshold rule',
-                testId: 'discoverAppMenuCustomThresholdRule',
               }),
-            ]),
-          })
-        );
-
-        getCreateRuleOptionsSpy.mockRestore();
-      });
-
-      it('should leave profile popover items in the alerts menu in classic mode', async () => {
-        const appMenuConfig = await setupWithAlertingV2({ isEsqlMode: false }, true);
-
-        const alertsItem = appMenuConfig.items?.find((item) => item.id === AppMenuActionId.alerts);
-        expect(alertsItem?.run).toBeUndefined();
-        expect(alertsItem?.items).toBeDefined();
-        expect(alertsItem?.items).toEqual(
-          expect.arrayContaining([
-            expect.objectContaining({
-              id: 'custom-threshold-rule',
-              label: 'Create custom threshold rule',
-            }),
-          ])
-        );
+            ])
+          );
+        } finally {
+          getCreateRuleOptionsSpy.mockRestore();
+        }
       });
     });
   });
@@ -549,7 +542,7 @@ describe('useTopNavLinks', () => {
   describe('alerts menu when only alerting v2 capability is granted', () => {
     /**
      * Users with v2 access but no v1 rule-type authorization should still see
-     * the Alerts menu (containing only the v2 ES|QL rule entry) when in ES|QL
+     * the Alerts menu as a direct v2 action when in ES|QL
      * mode. Verifies the parent gate considers v2 access independently.
      */
     const setupV2OnlyServices = (
@@ -601,29 +594,7 @@ describe('useTopNavLinks', () => {
 
     it('should show the v2 selector flyout as a direct action when only alerting v2 is granted', async () => {
       const services = setupV2OnlyServices();
-      const toolkit = getDiscoverInternalStateMock({ services });
-      await toolkit.initializeTabs();
-      await toolkit.initializeSingleTab({ tabId: toolkit.getCurrentTab().id });
-
-      const appMenuConfig = renderHook(
-        () =>
-          useTopNavLinks({
-            dataView: dataViewMock,
-            services,
-            hasUnsavedChanges: false,
-            isEsqlMode: true,
-            adHocDataViews: [],
-            hasShareIntegration: false,
-            persistedDiscoverSession: undefined,
-            onOpenSaveModal: jest.fn(),
-            onOpenSaveAsModal: jest.fn(),
-          }),
-        {
-          wrapper: ({ children }) => (
-            <DiscoverToolkitTestProvider toolkit={toolkit}>{children}</DiscoverToolkitTestProvider>
-          ),
-        }
-      ).result.current;
+      const appMenuConfig = await setup({ services, isEsqlMode: true });
 
       const alertsItem = appMenuConfig.items?.find((item) => item.id === AppMenuActionId.alerts);
       expect(alertsItem).toBeDefined();
@@ -633,29 +604,7 @@ describe('useTopNavLinks', () => {
 
     it('should NOT include the alerts menu when neither v1 nor v2 access is granted', async () => {
       const services = setupV2OnlyServices({ alertingVTwoEnabled: false });
-      const toolkit = getDiscoverInternalStateMock({ services });
-      await toolkit.initializeTabs();
-      await toolkit.initializeSingleTab({ tabId: toolkit.getCurrentTab().id });
-
-      const appMenuConfig = renderHook(
-        () =>
-          useTopNavLinks({
-            dataView: dataViewMock,
-            services,
-            hasUnsavedChanges: false,
-            isEsqlMode: true,
-            adHocDataViews: [],
-            hasShareIntegration: false,
-            persistedDiscoverSession: undefined,
-            onOpenSaveModal: jest.fn(),
-            onOpenSaveAsModal: jest.fn(),
-          }),
-        {
-          wrapper: ({ children }) => (
-            <DiscoverToolkitTestProvider toolkit={toolkit}>{children}</DiscoverToolkitTestProvider>
-          ),
-        }
-      ).result.current;
+      const appMenuConfig = await setup({ services, isEsqlMode: true });
 
       const alertsItem = appMenuConfig.items?.find((item) => item.id === AppMenuActionId.alerts);
       expect(alertsItem).toBeUndefined();
