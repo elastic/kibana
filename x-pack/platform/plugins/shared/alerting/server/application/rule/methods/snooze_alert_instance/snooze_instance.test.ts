@@ -112,6 +112,7 @@ describe('snooze alert instance', () => {
     });
     expect(alertsServiceMock.isExistingAlert).not.toHaveBeenCalled();
     expect(alertsServiceMock.muteAlertInstance).not.toHaveBeenCalled();
+    expect(actionsAuthorizationMock.ensureAuthorized).not.toHaveBeenCalled();
     expect(unsecuredSavedObjectsClient.update).toHaveBeenCalledWith(
       'alert',
       '1',
@@ -166,6 +167,43 @@ describe('snooze alert instance', () => {
     });
 
     expect(alertsServiceMock.isExistingAlert).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not check actionsAuthorization.execute even when the rule has actions', async () => {
+    unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
+      id: '1',
+      type: 'test-rule-type',
+      attributes: {
+        name: 'connector rule',
+        alertTypeId: '123',
+        consumer: 'test-consumer',
+        schedule: { interval: '10s' },
+        params: { bar: true },
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        actions: [
+          {
+            group: 'default',
+            actionRef: 'action_0',
+            params: { foo: true },
+          },
+        ],
+        notifyWhen: 'onActiveAlert',
+        mutedInstanceIds: [],
+        snoozedInstances: [],
+      },
+      references: [{ name: 'action_0', type: 'action', id: '1' }],
+      version: 'v1',
+    });
+
+    await snoozeAlertInstance(context, {
+      params: { alertId: '1', alertInstanceId: 'instance1' },
+      query: { validateAlertsExistence: false },
+      body: { expiresAt: '2099-12-31T23:59:59.000Z' },
+    });
+
+    expect(actionsAuthorizationMock.ensureAuthorized).not.toHaveBeenCalled();
+    expect(unsecuredSavedObjectsClient.update).toHaveBeenCalled();
   });
 
   it('rejects conditionOperator when conditions are absent', async () => {

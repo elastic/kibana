@@ -114,6 +114,44 @@ describe('unsnooze alert instance', () => {
     expect(savedObjectsMock.update).not.toHaveBeenCalled();
   });
 
+  it('does not check actionsAuthorization.execute even when the rule has actions', async () => {
+    savedObjectsMock.get.mockResolvedValueOnce({
+      id: '1',
+      type: 'test-rule-type',
+      attributes: {
+        name: 'connector rule',
+        alertTypeId: '123',
+        consumer: 'alerts',
+        schedule: { interval: '10s' },
+        params: { bar: true },
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        actions: [
+          {
+            group: 'default',
+            actionRef: 'action_0',
+            params: { foo: true },
+          },
+        ],
+        notifyWhen: 'onActiveAlert',
+        snoozedInstances: [
+          {
+            instanceId: 'instance1',
+            snoozedAt: '2026-04-14T10:00:00.000Z',
+            snoozedBy: 'elastic',
+          },
+        ],
+      },
+      references: [{ name: 'action_0', type: 'action', id: '1' }],
+      version: 'v1',
+    });
+
+    await unsnoozeAlertInstance(context, { alertId: '1', alertInstanceId: 'instance1' });
+
+    expect(actionsAuthorizationMock.ensureAuthorized).not.toHaveBeenCalled();
+    expect(savedObjectsMock.update).toHaveBeenCalled();
+  });
+
   it('logs an alert_unsnooze audit event before the SO update', async () => {
     savedObjectsMock.get.mockResolvedValueOnce({
       id: '1',

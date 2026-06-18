@@ -247,7 +247,7 @@ describe('snoozeAlertInstance()', () => {
         body: { expiresAt: '2099-12-31T23:59:59.000Z' },
       });
 
-      expect(actionsAuthorization.ensureAuthorized).toHaveBeenCalledWith({ operation: 'execute' });
+      expect(actionsAuthorization.ensureAuthorized).not.toHaveBeenCalled();
       expect(authorization.ensureAuthorized).toHaveBeenCalledWith({
         entity: 'rule',
         consumer: 'myApp',

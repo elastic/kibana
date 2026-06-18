@@ -347,6 +347,8 @@ describe(`feature_privilege_builder`, () => {
           Array [
             "alerting:alert-type/my-consumer/rule/muteAlert",
             "alerting:alert-type/my-consumer/rule/unmuteAlert",
+            "alerting:alert-type/my-consumer/rule/snoozeAlert",
+            "alerting:alert-type/my-consumer/rule/unsnoozeAlert",
           ]
         `);
       });
