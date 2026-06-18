@@ -9,7 +9,6 @@ import React from 'react';
 
 import type { CoreStart } from '@kbn/core/public';
 import { ADD_PANEL_VISUALIZATION_GROUP } from '@kbn/embeddable-plugin/public';
-import type { FieldStatsTableEmbeddableState } from '@kbn/data-visualizer-server-schemas/embeddables/field_stats';
 import { ENABLE_ESQL } from '@kbn/esql-utils';
 import { i18n } from '@kbn/i18n';
 import { openLazyFlyout } from '@kbn/presentation-util';
@@ -19,7 +18,10 @@ import type { UiActionsActionDefinition } from '@kbn/ui-actions-plugin/public';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 
 import type { DataVisualizerStartDependencies } from '../../common/types/data_visualizer_plugin';
-import type { FieldStatsInitialState } from '../../../../common/embeddables/types';
+import type {
+  FieldStatisticsTableEmbeddableState,
+  FieldStatsInitialState,
+} from '../../../../common/embeddables/types';
 import { FieldStatsInitializerViewType } from '../../../../common/embeddables/types';
 import { FIELD_STATS_EMBEDDABLE_TYPE } from '../../../../common/embeddables/constants';
 
@@ -41,7 +43,7 @@ const getDefaultInitialState = async (
     const indexPattern = defaultDataView?.getIndexPattern();
     return indexPattern
       ? {
-          view_type: FieldStatsInitializerViewType.ESQL,
+          viewType: FieldStatsInitializerViewType.ESQL,
           query: { esql: `from ${indexPattern} | limit 10` },
         }
       : undefined;
@@ -49,30 +51,30 @@ const getDefaultInitialState = async (
 
   return defaultDataView?.id
     ? {
-        view_type: FieldStatsInitializerViewType.DATA_VIEW,
-        data_view_id: defaultDataView.id,
+        viewType: FieldStatsInitializerViewType.DATA_VIEW,
+        dataViewId: defaultDataView.id,
       }
     : undefined;
 };
 
 const getSerializedState = (
   nextUpdate: FieldStatsInitialState
-): FieldStatsTableEmbeddableState | undefined => {
-  const showDistributions = nextUpdate.show_distributions ?? false;
+): FieldStatisticsTableEmbeddableState | undefined => {
+  const showDistributions = nextUpdate.showDistributions ?? false;
 
-  if (nextUpdate.view_type === FieldStatsInitializerViewType.ESQL && nextUpdate.query) {
+  if (nextUpdate.viewType === FieldStatsInitializerViewType.ESQL && nextUpdate.query) {
     return {
-      view_type: FieldStatsInitializerViewType.ESQL,
+      viewType: FieldStatsInitializerViewType.ESQL,
       query: nextUpdate.query,
-      show_distributions: showDistributions,
+      showDistributions,
     };
   }
 
-  if (nextUpdate.view_type === FieldStatsInitializerViewType.DATA_VIEW && nextUpdate.data_view_id) {
+  if (nextUpdate.viewType === FieldStatsInitializerViewType.DATA_VIEW && nextUpdate.dataViewId) {
     return {
-      view_type: FieldStatsInitializerViewType.DATA_VIEW,
-      data_view_id: nextUpdate.data_view_id,
-      show_distributions: showDistributions,
+      viewType: FieldStatsInitializerViewType.DATA_VIEW,
+      dataViewId: nextUpdate.dataViewId,
+      showDistributions,
     };
   }
 };
@@ -125,7 +127,7 @@ export function createAddFieldStatsTableAction(
                   return;
                 }
 
-                presentationContainerParent.addNewPanel<FieldStatsTableEmbeddableState>({
+                presentationContainerParent.addNewPanel<FieldStatisticsTableEmbeddableState>({
                   panelType: FIELD_STATS_EMBEDDABLE_TYPE,
                   serializedState,
                 });
