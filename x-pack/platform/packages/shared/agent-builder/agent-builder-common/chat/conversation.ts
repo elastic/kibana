@@ -232,6 +232,8 @@ export const isTodosStep = (step: ConversationRoundStep): step is TodosStep => {
   return step.type === ConversationRoundStepType.updateTodos;
 };
 
+// ask_user_question step
+
 export interface AskUserQuestionStepData {
   /** Id of the prompt that produced this step. Matches the entry in `state.prompt.responses` and the prompt request's `id`. */
   prompt_id: string;
