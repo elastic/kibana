@@ -64,7 +64,7 @@ export const registerUISettings = (
           'Internal gate for workflow version history (change-history writes and read routes).',
       }),
       schema: schema.boolean(),
-      value: true, // TODO: change to false when versioning is ready
+      value: false,
       readonly: true,
       readonlyMode: 'ui',
       requiresPageReload: true,
