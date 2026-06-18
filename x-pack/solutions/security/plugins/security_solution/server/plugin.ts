@@ -354,6 +354,7 @@ export class Plugin implements ISecuritySolutionPlugin {
           entityStore: plugins.entityStore,
           getStartServices: core.getStartServices,
           logger: this.logger,
+          hasEncryptionKey: plugins.encryptedSavedObjects?.canEncrypt === true,
         });
       }
     } else {
@@ -376,6 +377,7 @@ export class Plugin implements ISecuritySolutionPlugin {
       auditLogger: plugins.security?.audit.withoutRequest,
       kibanaVersion: pluginContext.env.packageInfo.version,
       experimentalFeatures,
+      hasEncryptionKey: plugins.encryptedSavedObjects?.canEncrypt === true,
     }).catch((err) => {
       logger.error(`Error scheduling entity analytics migration: ${err}`);
     });
