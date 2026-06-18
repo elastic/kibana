@@ -40,6 +40,9 @@ import { useEvalsPermissions } from '../../hooks/use_evals_permissions';
 import { DeleteDatasetModal } from '../../components/delete_dataset_modal';
 import * as i18n from './translations';
 
+// `created_at` is intentionally omitted: the list surfaces a "Last updated"
+// column but not a creation-date one, so it isn't offered as a sort option here.
+// The API (sort_field) still supports `created_at` for other consumers.
 type SortableField = Extract<keyof DatasetSummary, 'name' | 'examples_count' | 'updated_at'>;
 
 export const DatasetsListPage: React.FC = () => {
@@ -155,6 +158,7 @@ export const DatasetsListPage: React.FC = () => {
     if (sort) {
       setSortField(sort.field as SortableField);
       setSortDirection(sort.direction);
+      setPageIndex(0);
     }
   };
 
@@ -204,16 +208,16 @@ export const DatasetsListPage: React.FC = () => {
   return (
     <>
       <EuiPageSection paddingSize="none" css={{ paddingTop: euiTheme.size.l }}>
-        {showSearchBar || canManage ? (
+        {showSearchBar ? (
           <>
             <EuiFlexGroup
               responsive={false}
               alignItems="center"
-              justifyContent="flexEnd"
+              justifyContent="spaceBetween"
               gutterSize="m"
             >
               {showSearchBar ? (
-                <EuiFlexItem>
+                <EuiFlexItem css={{ maxWidth: 500 }}>
                   <EuiFieldSearch
                     placeholder={i18n.SEARCH_PLACEHOLDER}
                     value={searchText}
@@ -314,18 +318,21 @@ export const DatasetsListPage: React.FC = () => {
                 label={i18n.CREATE_DATASET_NAME_LABEL}
                 isInvalid={Boolean(createError)}
                 error={createError ?? undefined}
+                fullWidth
               >
                 <EuiFieldText
                   value={name}
                   onChange={(event) => setName(event.target.value)}
                   isInvalid={Boolean(createError)}
+                  fullWidth
                 />
               </EuiFormRow>
-              <EuiFormRow label={i18n.CREATE_DATASET_DESCRIPTION_LABEL}>
+              <EuiFormRow label={i18n.CREATE_DATASET_DESCRIPTION_LABEL} fullWidth>
                 <EuiTextArea
                   value={description}
                   onChange={(event) => setDescription(event.target.value)}
                   rows={3}
+                  fullWidth
                 />
               </EuiFormRow>
             </EuiForm>

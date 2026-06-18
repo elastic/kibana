@@ -26,6 +26,7 @@ import {
   EVALS_DATASET_EXAMPLE_URL,
   API_VERSIONS,
   type GetEvaluationDatasetsResponse,
+  type GetEvaluationDatasetsRequestQuery,
   type GetEvaluationDatasetResponse,
   type CreateEvaluationDatasetRequestBodyInput,
   type CreateEvaluationDatasetResponse,
@@ -73,12 +74,15 @@ export interface ExperimentsListFilters {
   perPage?: number;
 }
 
+type DatasetSortField = NonNullable<GetEvaluationDatasetsRequestQuery['sort_field']>;
+type DatasetSortOrder = NonNullable<GetEvaluationDatasetsRequestQuery['sort_order']>;
+
 interface DatasetsListFilters {
   page?: number;
   perPage?: number;
   search?: string;
-  sortField?: string;
-  sortOrder?: string;
+  sortField?: DatasetSortField;
+  sortOrder?: DatasetSortOrder;
 }
 
 interface DatasetWithId {

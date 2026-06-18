@@ -145,10 +145,40 @@ const createDatasetStorageClient = () => {
     return { result: deleted ? 'deleted' : 'not_found' };
   });
 
+  const bulk = jest.fn(
+    async ({
+      operations,
+    }: {
+      operations: Array<{
+        index?: { _id: string; document: DatasetStorageDocument };
+        delete?: { _id: string };
+      }>;
+    }) => {
+      const items: Array<{ index?: { status: number }; delete?: { status: number } }> = [];
+
+      for (const operation of operations) {
+        if (operation.index) {
+          // ES `index` action overwrites (no 409), matching the storage adapter.
+          docs.set(operation.index._id, operation.index.document);
+          items.push({ index: { status: 200 } });
+          continue;
+        }
+
+        if (operation.delete) {
+          docs.delete(operation.delete._id);
+          items.push({ delete: { status: 200 } });
+        }
+      }
+
+      return { items };
+    }
+  );
+
   const client = {
     search,
     index,
     delete: remove,
+    bulk,
   } as unknown as InternalIStorageClient<DatasetStorageDocument>;
 
   return { docs, client };

@@ -587,6 +587,7 @@ export class DatasetClient {
     return {
       id: hit._id,
       ...hit._source,
+      examples_count: hit._source.examples_count ?? 0,
     };
   }
 
@@ -683,6 +684,48 @@ export class DatasetClient {
   }
 
   /**
+   * Counts examples for many datasets in a single request via a `terms`
+   * aggregation. Used by the backfill to avoid one count search per dataset.
+   * Datasets with no examples are absent from the result (callers default to 0).
+   */
+  private async countExamplesByDatasetIds(datasetIds: string[]): Promise<Map<string, number>> {
+    if (datasetIds.length === 0) {
+      return new Map();
+    }
+
+    const response = await this.examplesStorage.search({
+      track_total_hits: false,
+      size: 0,
+      query: {
+        terms: {
+          dataset_id: datasetIds,
+        },
+      },
+      aggs: {
+        by_dataset_id: {
+          terms: {
+            field: 'dataset_id',
+            size: datasetIds.length,
+          },
+        },
+      },
+    });
+
+    const buckets =
+      (
+        response.aggregations?.by_dataset_id as
+          | { buckets?: Array<{ key: string; doc_count: number }> }
+          | undefined
+      )?.buckets ?? [];
+
+    const counts = new Map<string, number>();
+    for (const bucket of buckets) {
+      counts.set(bucket.key, bucket.doc_count);
+    }
+    return counts;
+  }
+
+  /**
    * Recomputes the denormalized `examples_count` for a dataset and writes it
    * back. By default this also advances `updated_at` (a "touch"); pass
    * `bumpUpdatedAt: false` to refresh the count while preserving the timestamp.
@@ -744,20 +787,25 @@ export class DatasetClient {
         break;
       }
 
-      for (const hit of hits) {
-        const examplesCount = await this.countExamplesByDatasetId(hit._id);
-        await this.datasetsStorage.index({
-          id: hit._id,
-          document: {
-            name: hit._source.name,
-            description: hit._source.description,
-            examples_count: examplesCount,
-            created_at: hit._source.created_at,
-            updated_at: hit._source.updated_at,
+      const counts = await this.countExamplesByDatasetIds(hits.map((hit) => hit._id));
+
+      const operations: Array<StorageClientBulkOperation<DatasetStorageDocument>> = hits.map(
+        (hit) => ({
+          index: {
+            _id: hit._id,
+            document: {
+              name: hit._source.name,
+              description: hit._source.description,
+              examples_count: counts.get(hit._id) ?? 0,
+              created_at: hit._source.created_at,
+              updated_at: hit._source.updated_at,
+            },
           },
-        });
-        updated += 1;
-      }
+        })
+      );
+
+      await this.datasetsStorage.bulk({ operations, refresh: 'wait_for', throwOnFail: true });
+      updated += operations.length;
     }
 
     return { updated };

@@ -35,7 +35,7 @@ export const GetEvaluationDatasetsRequestQuery = lazySchema(() =>
     /**
      * Filter datasets by name or description
      */
-    search: z.string().optional(),
+    search: z.string().max(256).optional(),
     sort_field: z
       .enum(['name', 'created_at', 'updated_at', 'examples_count'])
       .optional()
