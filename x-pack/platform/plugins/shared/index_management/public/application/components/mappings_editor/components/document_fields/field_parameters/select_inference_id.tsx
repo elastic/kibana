@@ -231,13 +231,13 @@ const SelectInferenceIdContent: React.FC<SelectInferenceIdContentProps> = ({
                     ctaLink={documentationService.getCloudPricing()}
                     isCloudEnabled={cloud?.isCloudEnabled ?? false}
                     isReady={isSelectInferenceIdOpen}
+                    fieldName={fieldType}
                   >
                     <EuiButton
                       iconType="chevronSingleDown"
                       iconSide="right"
                       color="text"
                       fullWidth
-                      is
                       contentProps={{ style: { justifyContent: 'space-between' } }}
                       data-test-subj="inferenceIdButton"
                       onClick={() => {
