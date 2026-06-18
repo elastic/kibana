@@ -13,9 +13,6 @@ import { ApmDocumentType } from '../../../../common/document_type';
 import { RollupInterval } from '../../../../common/rollup';
 import { AnomalyDetectionJobsContext } from '../../../context/anomaly_detection_jobs/anomaly_detection_jobs_context';
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
-import type { CoreStart } from '@kbn/core/public';
-import { MockApmPluginStorybook } from '../../../context/apm_plugin/mock_apm_plugin_storybook';
-import type { ApmPluginContextValue } from '../../../context/apm_plugin/apm_plugin_context';
 import {
   opbeansScenario,
   SCENARIO_START,
@@ -96,36 +93,27 @@ export const Example: StoryFn<{}> = () => {
   return <ServiceInventory />;
 };
 
-Example.decorators = [
-  (StoryComponent) => {
-    const coreMock = {
+Example.parameters = {
+  routePath: '/services?rangeFrom=now-15m&rangeTo=now&comparisonEnabled=true&offset=1d',
+  apmContext: {
+    core: {
       http: {
         get: async (endpoint: string) => {
-          switch (endpoint) {
-            case '/internal/apm/services':
-              return { items: [] };
-
-            case '/internal/apm/sorted_and_filtered_services':
-              return { services: [] };
-
-            default:
-              return {};
-          }
+          if (endpoint === '/internal/apm/services') return { items: [] };
+          if (endpoint === '/internal/apm/sorted_and_filtered_services') return { services: [] };
+          return {};
         },
       },
-    } as unknown as CoreStart;
-
-    return (
-      <MockApmPluginStorybook
-        routePath="/services?rangeFrom=now-15m&rangeTo=now&comparisonEnabled=true&offset=1d"
-        apmContext={{ core: coreMock } as unknown as ApmPluginContextValue}
-      >
-        <AnomalyDetectionJobsContext.Provider value={anomalyDetectionJobsContextValue}>
-          <StoryComponent />
-        </AnomalyDetectionJobsContext.Provider>
-      </MockApmPluginStorybook>
-    );
+    },
   },
+};
+
+Example.decorators = [
+  (StoryComponent) => (
+    <AnomalyDetectionJobsContext.Provider value={anomalyDetectionJobsContextValue}>
+      <StoryComponent />
+    </AnomalyDetectionJobsContext.Provider>
+  ),
 ];
 
 // ── All-features story ────────────────────────────────────────────────────────
@@ -147,116 +135,104 @@ export const AllFeatures: StoryFn<{}> = () => {
 
 AllFeatures.storyName = 'All Features (Alerts + SLOs + ML Anomalies)';
 
-AllFeatures.decorators = [
-  (StoryComponent) => {
-    const docs = opbeansScenario();
-
-    // Hand-crafted items: every optional field populated so all conditional columns appear.
-    const inventoryResponse = {
-      items: [
-        {
-          serviceName: 'opbeans-node',
-          transactionType: 'request',
-          environments: ['opbeans'],
-          agentName: 'nodejs',
-          latency: 335_000,
-          transactionErrorRate: 0,
-          throughput: 2,
-          alertsCount: 3,
-          sloStatus: 'violated',
-          sloCount: 1,
-          anomalyScore: 82, // critical
-        },
-        {
-          serviceName: 'opbeans-java',
-          transactionType: 'request',
-          environments: ['opbeans'],
-          agentName: 'java',
-          latency: 380_000,
-          transactionErrorRate: 0.1,
-          throughput: 1,
-          alertsCount: 1,
-          sloStatus: 'degrading',
-          sloCount: 2,
-          anomalyScore: 55, // major
-        },
-        {
-          serviceName: 'opbeans-go',
-          transactionType: 'request',
-          environments: ['opbeans'],
-          agentName: 'go',
-          latency: 150_000,
-          transactionErrorRate: 0,
-          throughput: 1,
-          sloStatus: 'healthy',
-          sloCount: 3,
-          anomalyScore: 27, // minor
-        },
-        {
-          serviceName: 'opbeans-python',
-          transactionType: 'request',
-          environments: ['opbeans'],
-          agentName: 'python',
-          latency: 50_000,
-          transactionErrorRate: 0,
-          throughput: 1,
-          sloStatus: 'noData',
-          sloCount: 1,
-          anomalyScore: 5, // warning
-        },
-        {
-          serviceName: 'opbeans-dotnet',
-          transactionType: 'request',
-          environments: ['opbeans'],
-          agentName: 'dotnet',
-          latency: 60_000,
-          transactionErrorRate: 0,
-          throughput: 1,
-          // no alertsCount, sloStatus, or anomalyScore → empty cells in optional columns
-        },
-      ],
-      maxCountExceeded: false,
-      serviceOverflowCount: 0,
-    };
-
-    const coreMock = {
+AllFeatures.parameters = {
+  routePath: `/services?rangeFrom=${SCENARIO_START.toISOString()}&rangeTo=${SCENARIO_END.toISOString()}`,
+  apmContext: {
+    core: {
       http: {
         get: async (endpoint: string) => {
-          switch (endpoint) {
-            case '/internal/apm/time_range_metadata':
-              return TIME_RANGE_METADATA_DEFAULTS;
-            case '/internal/apm/services':
-              return inventoryResponse;
-            default:
-              return {};
-          }
+          if (endpoint === '/internal/apm/time_range_metadata') return TIME_RANGE_METADATA_DEFAULTS;
+          if (endpoint === '/internal/apm/services')
+            return {
+              items: [
+                {
+                  serviceName: 'opbeans-node',
+                  transactionType: 'request',
+                  environments: ['opbeans'],
+                  agentName: 'nodejs',
+                  latency: 335_000,
+                  transactionErrorRate: 0,
+                  throughput: 2,
+                  alertsCount: 3,
+                  sloStatus: 'violated',
+                  sloCount: 1,
+                  anomalyScore: 82,
+                },
+                {
+                  serviceName: 'opbeans-java',
+                  transactionType: 'request',
+                  environments: ['opbeans'],
+                  agentName: 'java',
+                  latency: 380_000,
+                  transactionErrorRate: 0.1,
+                  throughput: 1,
+                  alertsCount: 1,
+                  sloStatus: 'degrading',
+                  sloCount: 2,
+                  anomalyScore: 55,
+                },
+                {
+                  serviceName: 'opbeans-go',
+                  transactionType: 'request',
+                  environments: ['opbeans'],
+                  agentName: 'go',
+                  latency: 150_000,
+                  transactionErrorRate: 0,
+                  throughput: 1,
+                  sloStatus: 'healthy',
+                  sloCount: 3,
+                  anomalyScore: 27,
+                },
+                {
+                  serviceName: 'opbeans-python',
+                  transactionType: 'request',
+                  environments: ['opbeans'],
+                  agentName: 'python',
+                  latency: 50_000,
+                  transactionErrorRate: 0,
+                  throughput: 1,
+                  sloStatus: 'noData',
+                  sloCount: 1,
+                  anomalyScore: 5,
+                },
+                {
+                  serviceName: 'opbeans-dotnet',
+                  transactionType: 'request',
+                  environments: ['opbeans'],
+                  agentName: 'dotnet',
+                  latency: 60_000,
+                  transactionErrorRate: 0,
+                  throughput: 1,
+                },
+              ],
+              maxCountExceeded: false,
+              serviceOverflowCount: 0,
+            };
+          return {};
         },
         post: async (endpoint: string) => {
           if (endpoint === '/internal/apm/services/detailed_statistics') {
-            return toDetailedStatisticsResponse(docs);
+            return toDetailedStatisticsResponse(opbeansScenario());
           }
           return { currentPeriod: {}, previousPeriod: {} };
         },
       },
-    } as unknown as CoreStart;
+    },
+  },
+};
 
-    // NoJobs → ML callout banner is displayed
+AllFeatures.decorators = [
+  (StoryComponent) => {
     const anomalyCtx = {
       anomalyDetectionJobsData: { jobs: [], hasLegacyJobs: false },
       anomalyDetectionJobsStatus: FETCH_STATUS.SUCCESS,
       anomalyDetectionJobsRefetch: () => {},
       anomalyDetectionSetupState: AnomalyDetectionSetupState.NoJobs,
     };
-
     return (
-      <MockApmPluginStorybook
-        routePath={`/services?rangeFrom=${SCENARIO_START.toISOString()}&rangeTo=${SCENARIO_END.toISOString()}`}
-        apmContext={{ core: coreMock } as unknown as ApmPluginContextValue}
-      >
-        <AnomalyDetectionJobsContext.Provider value={anomalyCtx}>
-          <StoryComponent />
-        </AnomalyDetectionJobsContext.Provider>
-      </MockApmPluginStorybook>
+      <AnomalyDetectionJobsContext.Provider value={anomalyCtx}>
+        <StoryComponent />
+      </AnomalyDetectionJobsContext.Provider>
     );
   },
 ];
@@ -276,41 +252,34 @@ export const SynthtraceGenerated: StoryFn<{}> = () => {
   return <ServiceInventory />;
 };
 
-SynthtraceGenerated.decorators = [
-  (StoryComponent) => {
-    const docs = opbeansScenario();
-    const inventoryResponse = toServiceInventoryResponse(docs);
+const _synthDocs = opbeansScenario();
+const _inventoryResponse = toServiceInventoryResponse(_synthDocs);
 
-    const coreMock = {
+SynthtraceGenerated.parameters = {
+  routePath: `/services?rangeFrom=${SCENARIO_START.toISOString()}&rangeTo=${SCENARIO_END.toISOString()}`,
+  apmContext: {
+    core: {
       http: {
         get: async (endpoint: string) => {
-          switch (endpoint) {
-            case '/internal/apm/time_range_metadata':
-              return TIME_RANGE_METADATA_DEFAULTS;
-            case '/internal/apm/services':
-              return inventoryResponse;
-            default:
-              return {};
-          }
+          if (endpoint === '/internal/apm/time_range_metadata') return TIME_RANGE_METADATA_DEFAULTS;
+          if (endpoint === '/internal/apm/services') return _inventoryResponse;
+          return {};
         },
         post: async (endpoint: string) => {
           if (endpoint === '/internal/apm/services/detailed_statistics') {
-            return toDetailedStatisticsResponse(docs);
+            return toDetailedStatisticsResponse(_synthDocs);
           }
           return { currentPeriod: {}, previousPeriod: {} };
         },
       },
-    } as unknown as CoreStart;
-
-    return (
-      <MockApmPluginStorybook
-        routePath={`/services?rangeFrom=${SCENARIO_START.toISOString()}&rangeTo=${SCENARIO_END.toISOString()}`}
-        apmContext={{ core: coreMock } as unknown as ApmPluginContextValue}
-      >
-        <AnomalyDetectionJobsContext.Provider value={anomalyDetectionJobsContextValue}>
-          <StoryComponent />
-        </AnomalyDetectionJobsContext.Provider>
-      </MockApmPluginStorybook>
-    );
+    },
   },
+};
+
+SynthtraceGenerated.decorators = [
+  (StoryComponent) => (
+    <AnomalyDetectionJobsContext.Provider value={anomalyDetectionJobsContextValue}>
+      <StoryComponent />
+    </AnomalyDetectionJobsContext.Provider>
+  ),
 ];

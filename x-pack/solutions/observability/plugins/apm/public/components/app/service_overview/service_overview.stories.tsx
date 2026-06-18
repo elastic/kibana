@@ -5,14 +5,11 @@
  * 2.0.
  */
 
-import type { CoreStart } from '@kbn/core/public';
 import type { StoryFn, Meta } from '@storybook/react';
 import React from 'react';
 import { ServiceOverview } from '.';
 import { ApmDocumentType } from '../../../../common/document_type';
 import { RollupInterval } from '../../../../common/rollup';
-import { MockApmPluginStorybook } from '../../../context/apm_plugin/mock_apm_plugin_storybook';
-import type { ApmPluginContextValue } from '../../../context/apm_plugin/apm_plugin_context';
 import type { APMServiceContextValue } from '../../../context/apm_service/apm_service_context';
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
 import {
@@ -111,11 +108,21 @@ export const Example: StoryFn<{}> = () => {
   return <ServiceOverview />;
 };
 
-Example.decorators = [
-  (StoryComponent) => {
-    const docs = opbeansScenario();
+const _overviewDocs = opbeansScenario();
 
-    const coreMock = {
+Example.parameters = {
+  routePath: `/services/${SERVICE_NAME}/overview?environment=ENVIRONMENT_ALL&rangeFrom=${SCENARIO_START.toISOString()}&rangeTo=${SCENARIO_END.toISOString()}`,
+  serviceContextValue: {
+    serviceName: SERVICE_NAME,
+    agentName: 'nodejs',
+    transactionType: 'request',
+    transactionTypeStatus: FETCH_STATUS.SUCCESS,
+    transactionTypes: ['request'],
+    fallbackToTransactions: false,
+    serviceAgentStatus: FETCH_STATUS.SUCCESS,
+  } as unknown as APMServiceContextValue,
+  apmContext: {
+    core: {
       http: {
         get: async (endpoint: string) => {
           if (endpoint === '/internal/apm/time_range_metadata') return TIME_RANGE_METADATA_DEFAULTS;
@@ -123,11 +130,11 @@ Example.decorators = [
           if (endpoint === '/internal/apm/fallback_to_transactions')
             return { fallbackToTransactions: false };
           if (endpoint.endsWith('/transactions/charts/latency'))
-            return toLatencyChartResponse(docs, SERVICE_NAME);
+            return toLatencyChartResponse(_overviewDocs, SERVICE_NAME);
           if (endpoint.endsWith('/throughput'))
-            return toThroughputChartResponse(docs, SERVICE_NAME);
+            return toThroughputChartResponse(_overviewDocs, SERVICE_NAME);
           if (endpoint.endsWith('/transactions/charts/error_rate'))
-            return toErrorRateChartResponse(docs, SERVICE_NAME);
+            return toErrorRateChartResponse(_overviewDocs, SERVICE_NAME);
           if (endpoint.endsWith('/transaction/charts/breakdown')) return { timeseries: [] };
           if (endpoint.includes('/annotation/search')) return { annotations: [] };
           if (endpoint.endsWith('/transactions/groups/main_statistics'))
@@ -149,26 +156,6 @@ Example.decorators = [
         },
         post: async () => EMPTY_STATS,
       },
-    } as unknown as CoreStart;
-
-    const serviceContextValue = {
-      serviceName: SERVICE_NAME,
-      agentName: 'nodejs',
-      transactionType: 'request',
-      transactionTypeStatus: FETCH_STATUS.SUCCESS,
-      transactionTypes: ['request'],
-      fallbackToTransactions: false,
-      serviceAgentStatus: FETCH_STATUS.SUCCESS,
-    } as unknown as APMServiceContextValue;
-
-    return (
-      <MockApmPluginStorybook
-        routePath={`/services/${SERVICE_NAME}/overview?environment=ENVIRONMENT_ALL&rangeFrom=${SCENARIO_START.toISOString()}&rangeTo=${SCENARIO_END.toISOString()}`}
-        serviceContextValue={serviceContextValue}
-        apmContext={{ core: coreMock } as unknown as ApmPluginContextValue}
-      >
-        <StoryComponent />
-      </MockApmPluginStorybook>
-    );
+    },
   },
-];
+};

@@ -5,18 +5,16 @@
  * 2.0.
  */
 
-import type { CoreStart } from '@kbn/core/public';
 import type { StoryObj, Meta } from '@storybook/react';
 import React from 'react';
 import { LatencyChart } from '.';
 import type { Props } from '.';
 import { ApmDocumentType } from '../../../../../common/document_type';
 import { RollupInterval } from '../../../../../common/rollup';
-import type { ApmPluginContextValue } from '../../../../context/apm_plugin/apm_plugin_context';
-import { MockApmPluginStorybook } from '../../../../context/apm_plugin/mock_apm_plugin_storybook';
 import type { APMServiceContextValue } from '../../../../context/apm_service/apm_service_context';
-import { ChartPointerEventContextProvider } from '../../../../context/chart_pointer_event/chart_pointer_event_context';
+import { APMServiceContext } from '../../../../context/apm_service/apm_service_context';
 import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
+import { createCallApmApi } from '../../../../services/rest/create_call_apm_api';
 import type { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 import {
   opbeansScenario,
@@ -75,6 +73,7 @@ const stories: Meta<Args> = {
   component: LatencyChart,
   tags: ['autodocs'],
   parameters: {
+    routePath: `/services/opbeans-node/overview?environment=ENVIRONMENT_ALL&kuery=&rangeFrom=${SCENARIO_START.toISOString()}&rangeTo=${SCENARIO_END.toISOString()}&transactionType=request&comparisonEnabled=false&latencyAggregationType=avg`,
     docs: {
       description: {
         component:
@@ -123,16 +122,16 @@ const stories: Meta<Args> = {
 
       const contextServiceName = serviceName ?? 'opbeans-node';
 
-      const coreMock = {
+      // Override createCallApmApi so the chart's useFetcher calls hit our mock.
+      createCallApmApi({
         http: {
           get: async (pathname: string) => {
-            if (pathname === '/internal/apm/time_range_metadata')
-              return TIME_RANGE_METADATA_DEFAULTS;
+            if (pathname === '/internal/apm/time_range_metadata') return TIME_RANGE_METADATA_DEFAULTS;
             if (pathname.endsWith('/transactions/charts/latency')) return response;
             return {};
           },
         },
-      } as unknown as CoreStart;
+      } as any);
 
       const serviceContextValue = {
         serviceName: contextServiceName,
@@ -145,15 +144,9 @@ const stories: Meta<Args> = {
       } as unknown as APMServiceContextValue;
 
       return (
-        <MockApmPluginStorybook
-          routePath={`/services/${contextServiceName}/overview?environment=ENVIRONMENT_ALL&kuery=&rangeFrom=${SCENARIO_START.toISOString()}&rangeTo=${SCENARIO_END.toISOString()}&transactionType=request&comparisonEnabled=false&latencyAggregationType=avg`}
-          apmContext={{ core: coreMock } as unknown as ApmPluginContextValue}
-          serviceContextValue={serviceContextValue}
-        >
-          <ChartPointerEventContextProvider>
-            <StoryComponent />
-          </ChartPointerEventContextProvider>
-        </MockApmPluginStorybook>
+        <APMServiceContext.Provider value={serviceContextValue}>
+          <StoryComponent />
+        </APMServiceContext.Provider>
       );
     },
   ],
