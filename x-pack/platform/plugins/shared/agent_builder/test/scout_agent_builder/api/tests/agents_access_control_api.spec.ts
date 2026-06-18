@@ -124,6 +124,35 @@ apiTest.describe(
       createdAgentIds.add(id);
       return id;
     };
+    const legacyAccessControlMappingsExist = async (): Promise<boolean> => {
+      const mappingResponse = await sysEsClient.indices.getMapping({ index: CHAT_AGENTS_INDEX });
+      const properties = Object.values(mappingResponse)[0]?.mappings?.properties;
+      return properties?.visibility !== undefined && properties?.acl !== undefined;
+    };
+
+    const addLegacyAccessControlMappings = async () => {
+      if (await legacyAccessControlMappingsExist()) {
+        return;
+      }
+      await sysEsClient.indices.putMapping({
+        index: CHAT_AGENTS_INDEX,
+        properties: {
+          visibility: { type: 'keyword' },
+          acl: {
+            properties: {
+              entries: {
+                type: 'nested',
+                properties: {
+                  type: { type: 'keyword' },
+                  name: { type: 'keyword' },
+                  role: { type: 'keyword' },
+                },
+              },
+            },
+          },
+        },
+      });
+    };
 
     apiTest.beforeAll(async ({ asAdmin, config, esClient, samlAuth, kbnClient }) => {
       sysEsClient = await createSystemIndicesEsClient(esClient, config);
@@ -250,6 +279,7 @@ apiTest.describe(
       visibility: AgentAccessControlScope;
       entries?: Array<{ type: 'user'; name: string; role: AgentAccessControlRole }>;
     }) => {
+      await addLegacyAccessControlMappings();
       const timestamp = new Date().toISOString();
       await sysEsClient.index({
         index: CHAT_AGENTS_INDEX,
