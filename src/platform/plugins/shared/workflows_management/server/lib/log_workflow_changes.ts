@@ -26,7 +26,7 @@ export interface LogWorkflowChangesParams {
   workflows: Array<{ id: string; document: WorkflowProperties }>;
   changeHistoryService: Pick<IWorkflowChangeHistoryService, 'isInitialized'> | undefined;
   scopedChangeHistory: IScopedWorkflowChangeHistoryService | undefined;
-  isWorkflowVersioningEnabled: () => Promise<boolean>;
+  workflowVersioningEnabled: boolean;
   action: WorkflowChangeHistoryActionType;
   spaceId: string;
   timestamp: string | Date;
@@ -69,7 +69,7 @@ export const logWorkflowChanges = async ({
   workflows,
   changeHistoryService,
   scopedChangeHistory,
-  isWorkflowVersioningEnabled,
+  workflowVersioningEnabled,
   action,
   spaceId,
   timestamp,
@@ -82,7 +82,7 @@ export const logWorkflowChanges = async ({
     return;
   }
 
-  if (!(await isWorkflowVersioningEnabled())) {
+  if (!workflowVersioningEnabled) {
     return;
   }
 

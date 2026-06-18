@@ -10,51 +10,11 @@
 import type { CoreStart } from '@kbn/core/server';
 import { WORKFLOWS_VERSIONING_SETTING_ID } from '@kbn/workflows/common/constants';
 
-import {
-  isWorkflowVersioningEnabled,
-  resetWorkflowVersioningEnabledCache,
-} from './is_workflow_versioning_enabled';
+import { readWorkflowVersioningEnabled } from './is_workflow_versioning_enabled';
 
-describe('isWorkflowVersioningEnabled', () => {
-  const createCoreStart = (enabled: boolean) => {
-    const get = jest.fn().mockResolvedValue(enabled);
-    return {
-      savedObjects: {
-        createInternalRepository: jest.fn().mockReturnValue({}),
-      },
-      uiSettings: {
-        globalAsScopedToClient: jest.fn().mockReturnValue({ get }),
-      },
-    } as unknown as CoreStart & {
-      uiSettings: { globalAsScopedToClient: jest.Mock };
-    };
-  };
-
-  beforeEach(() => {
-    resetWorkflowVersioningEnabledCache();
-  });
-
-  it('reads the global uiSetting once and caches the result', async () => {
-    const coreStart = createCoreStart(true);
-
-    await expect(isWorkflowVersioningEnabled(coreStart)).resolves.toBe(true);
-    await expect(isWorkflowVersioningEnabled(coreStart)).resolves.toBe(true);
-
-    expect(coreStart.savedObjects.createInternalRepository).toHaveBeenCalledTimes(1);
-    expect(coreStart.uiSettings.globalAsScopedToClient).toHaveBeenCalledTimes(1);
-    expect(
-      coreStart.uiSettings.globalAsScopedToClient.mock.results[0].value.get
-    ).toHaveBeenCalledWith(WORKFLOWS_VERSIONING_SETTING_ID);
-  });
-
-  it('deduplicates concurrent reads', async () => {
-    let resolveGet: (value: boolean) => void = () => undefined;
-    const get = jest.fn(
-      () =>
-        new Promise<boolean>((resolve) => {
-          resolveGet = resolve;
-        })
-    );
+describe('readWorkflowVersioningEnabled', () => {
+  it('reads the global workflows versioning uiSetting', async () => {
+    const get = jest.fn().mockResolvedValue(true);
     const coreStart = {
       savedObjects: {
         createInternalRepository: jest.fn().mockReturnValue({}),
@@ -64,22 +24,10 @@ describe('isWorkflowVersioningEnabled', () => {
       },
     } as unknown as CoreStart;
 
-    const first = isWorkflowVersioningEnabled(coreStart);
-    const second = isWorkflowVersioningEnabled(coreStart);
+    await expect(readWorkflowVersioningEnabled(coreStart)).resolves.toBe(true);
 
-    resolveGet(true);
-
-    await expect(Promise.all([first, second])).resolves.toEqual([true, true]);
-    expect(get).toHaveBeenCalledTimes(1);
-  });
-
-  it('re-reads after the cache is reset', async () => {
-    const coreStart = createCoreStart(false);
-
-    await isWorkflowVersioningEnabled(coreStart);
-    resetWorkflowVersioningEnabledCache();
-    await isWorkflowVersioningEnabled(coreStart);
-
-    expect(coreStart.savedObjects.createInternalRepository).toHaveBeenCalledTimes(2);
+    expect(coreStart.savedObjects.createInternalRepository).toHaveBeenCalledTimes(1);
+    expect(coreStart.uiSettings.globalAsScopedToClient).toHaveBeenCalledTimes(1);
+    expect(get).toHaveBeenCalledWith(WORKFLOWS_VERSIONING_SETTING_ID);
   });
 });

@@ -80,33 +80,33 @@ describe('get_workflow_change_history', () => {
       deps: {
         changeHistoryService,
         getWorkflow: jest.fn().mockResolvedValue(workflowResult),
-        isWorkflowVersioningEnabled: jest.fn().mockResolvedValue(versioningEnabled),
+        workflowVersioningEnabled: versioningEnabled,
       },
       changeHistoryService,
     };
   };
 
   describe('assertWorkflowChangeHistoryEnabled', () => {
-    it('throws when change history is not initialized', async () => {
+    it('throws when change history is not initialized', () => {
       const { deps } = createDeps({ initialized: false });
 
-      await expect(
+      expect(() =>
         assertWorkflowChangeHistoryEnabled(
           deps.changeHistoryService,
-          deps.isWorkflowVersioningEnabled
+          deps.workflowVersioningEnabled
         )
-      ).rejects.toBeInstanceOf(WorkflowChangeHistoryDisabledError);
+      ).toThrow(WorkflowChangeHistoryDisabledError);
     });
 
-    it('throws when versioning uiSetting is disabled', async () => {
+    it('throws when versioning uiSetting is disabled', () => {
       const { deps } = createDeps({ versioningEnabled: false });
 
-      await expect(
+      expect(() =>
         assertWorkflowChangeHistoryEnabled(
           deps.changeHistoryService,
-          deps.isWorkflowVersioningEnabled
+          deps.workflowVersioningEnabled
         )
-      ).rejects.toBeInstanceOf(WorkflowChangeHistoryDisabledError);
+      ).toThrow(WorkflowChangeHistoryDisabledError);
     });
   });
 

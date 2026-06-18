@@ -101,6 +101,24 @@ describe('WorkflowChangeHistoryService', () => {
     expect(ready).toBe(true);
   });
 
+  it('resolves without throwing when client initialization fails', async () => {
+    const cause = new Error('data stream unavailable');
+    clientMock.initialize.mockRejectedValue(cause);
+
+    const service = new WorkflowChangeHistoryService(logger, '9.0.0');
+    const elasticsearchClient = elasticsearchServiceMock.createElasticsearchClient();
+    const authService = {
+      getCurrentUser: jest.fn().mockReturnValue({ username: 'alice', profile_uid: 'profile-1' }),
+    };
+
+    await expect(
+      service.initialize({ elasticsearchClient, authService: authService as any })
+    ).resolves.toBeUndefined();
+
+    expect(logger.error).toHaveBeenCalled();
+    expect(service.isInitialized()).toBe(false);
+  });
+
   it('reports initialized state from the underlying client', () => {
     clientMock.isInitialized.mockReturnValue(true);
     const service = new WorkflowChangeHistoryService(logger, '9.0.0');

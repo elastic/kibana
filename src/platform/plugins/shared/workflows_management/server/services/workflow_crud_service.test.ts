@@ -18,21 +18,13 @@ import { WorkflowCrudService } from './workflow_crud_service';
 import type { WorkflowExecutionQueryService } from './workflow_execution_query_service';
 import type { WorkflowValidationService } from './workflow_validation_service';
 import * as workflowPrepare from '../api/lib/workflow_prepare';
-import { isWorkflowVersioningEnabled } from '../lib/is_workflow_versioning_enabled';
 import { logWorkflowChanges } from '../lib/log_workflow_changes';
 import type { WorkflowProperties } from '../storage/workflow_storage';
-
-jest.mock('../lib/is_workflow_versioning_enabled', () => ({
-  isWorkflowVersioningEnabled: jest.fn().mockResolvedValue(true),
-}));
 
 jest.mock('../lib/log_workflow_changes', () => ({
   logWorkflowChanges: jest.fn().mockResolvedValue(undefined),
 }));
 
-const mockedIsWorkflowVersioningEnabled = isWorkflowVersioningEnabled as jest.MockedFunction<
-  typeof isWorkflowVersioningEnabled
->;
 const mockedLogWorkflowChanges = logWorkflowChanges as jest.MockedFunction<
   typeof logWorkflowChanges
 >;
@@ -69,7 +61,8 @@ const makeSecurityMock = (username: string = 'alice') =>
   } as any);
 
 const makeDeps = (
-  clientOverrides?: Partial<ReturnType<typeof makeStorageClient>>
+  clientOverrides?: Partial<ReturnType<typeof makeStorageClient>>,
+  depsOverrides?: Partial<WorkflowCrudDeps>
 ): { deps: WorkflowCrudDeps; client: ReturnType<typeof makeStorageClient> } => {
   const client = { ...makeStorageClient(), ...clientOverrides };
   const executionQueryService = {
@@ -96,6 +89,8 @@ const makeDeps = (
       asScoped: jest.fn(),
       asSystemUser: jest.fn(),
     } as any,
+    workflowVersioningEnabled: true,
+    ...depsOverrides,
   };
   return { deps, client };
 };
@@ -1152,10 +1147,6 @@ describe('WorkflowCrudService', () => {
   describe('updateWorkflow', () => {
     const request = { auth: { credentials: { username: 'alice' } } } as any;
 
-    beforeEach(() => {
-      mockedIsWorkflowVersioningEnabled.mockResolvedValue(true);
-    });
-
     it('throws when the workflow does not exist', async () => {
       const { deps, client } = makeDeps();
       client.search.mockResolvedValue({ hits: { hits: [] } });
@@ -1370,8 +1361,7 @@ describe('WorkflowCrudService', () => {
     });
 
     it('does not increment version when workflow versioning uiSetting is disabled', async () => {
-      const { deps, client } = makeDeps();
-      mockedIsWorkflowVersioningEnabled.mockResolvedValue(false);
+      const { deps, client } = makeDeps(undefined, { workflowVersioningEnabled: false });
       client.search.mockResolvedValue({
         hits: {
           hits: [

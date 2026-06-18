@@ -74,7 +74,7 @@ import type {
 
 import type { BulkFailureEntry } from '../lib/bulk_id_helpers';
 import { getHistoryForWorkflow } from '../lib/get_workflow_change_history';
-import { isWorkflowVersioningEnabled } from '../lib/is_workflow_versioning_enabled';
+import { readWorkflowVersioningEnabled } from '../lib/is_workflow_versioning_enabled';
 import { ManagedWorkflowsService } from '../services/managed_workflows_service';
 import { WorkflowChangeHistoryService } from '../services/workflow_change_history_service';
 import { WorkflowCrudService } from '../services/workflow_crud_service';
@@ -120,6 +120,7 @@ export class WorkflowsService {
   private searchService!: WorkflowSearchService;
   private crudService!: WorkflowCrudService;
   private managedWorkflowsService!: ManagedWorkflowsService;
+  private workflowVersioningEnabled!: boolean;
   private readonly changeHistoryService: WorkflowChangeHistoryService;
   private getActionsClient!: () => Promise<IUnsecuredActionsClient>;
   private getActionsClientWithRequest!: (
@@ -192,6 +193,8 @@ export class WorkflowsService {
 
     await this.initializeChangeHistoryService(coreStart);
 
+    this.workflowVersioningEnabled = await readWorkflowVersioningEnabled(coreStart);
+
     this.crudService = new WorkflowCrudService({
       logger: this.logger,
       esClient: this.esClient,
@@ -203,6 +206,7 @@ export class WorkflowsService {
       validationService: this.validationService,
       getCoreStart: () => this.coreStart,
       changeHistoryService: this.changeHistoryService,
+      workflowVersioningEnabled: this.workflowVersioningEnabled,
     });
 
     this.managedWorkflowsService = new ManagedWorkflowsService({
@@ -251,7 +255,7 @@ export class WorkflowsService {
       {
         changeHistoryService: this.changeHistoryService,
         getWorkflow: (workflowId, sid) => this.crudService.getWorkflow(workflowId, sid),
-        isWorkflowVersioningEnabled: () => isWorkflowVersioningEnabled(this.coreStart),
+        workflowVersioningEnabled: this.workflowVersioningEnabled,
       },
       { workflowId: id, spaceId, ...options }
     );

@@ -233,7 +233,7 @@ export class ManagedWorkflowsService {
       enabled,
       createdAt: existing.created_at,
     });
-    const versioningEnabled = await this.deps.crudService.isWorkflowVersioningEnabled();
+    const versioningEnabled = this.deps.crudService.isWorkflowVersioningEnabled();
     const documentWithVersion = maybeApplyWorkflowVersion(document, existing, versioningEnabled);
     const savedDocument = await this.deps.crudService.writeWorkflowDocumentWithOcc(
       workflowDocumentId,

@@ -52,7 +52,6 @@ const makeDocument = (overrides: Partial<WorkflowProperties> = {}): WorkflowProp
 
 describe('logWorkflowChanges', () => {
   let scopedChangeHistory: jest.Mocked<IScopedWorkflowChangeHistoryService>;
-  let isWorkflowVersioningEnabled: jest.Mock;
   let logger: ReturnType<typeof loggingSystemMock.createLogger>;
 
   beforeEach(() => {
@@ -62,7 +61,6 @@ describe('logWorkflowChanges', () => {
       logBulk: jest.fn().mockResolvedValue(undefined),
       getHistory: jest.fn(),
     };
-    isWorkflowVersioningEnabled = jest.fn().mockResolvedValue(true);
     logger = loggingSystemMock.createLogger();
   });
 
@@ -71,7 +69,7 @@ describe('logWorkflowChanges', () => {
       workflows: [{ id: 'wf-1', document: makeDocument() }],
       changeHistoryService: { isInitialized: () => true },
       scopedChangeHistory,
-      isWorkflowVersioningEnabled,
+      workflowVersioningEnabled: true,
       action: WorkflowChangeHistoryAction.workflowUpdate,
       spaceId: 'default',
       timestamp: new Date(REFERENCE_TIMESTAMP_MS),
@@ -80,9 +78,7 @@ describe('logWorkflowChanges', () => {
     });
 
   it('does not call logBulk when workflow versioning is disabled', async () => {
-    isWorkflowVersioningEnabled.mockResolvedValue(false);
-
-    await logChanges();
+    await logChanges({ workflowVersioningEnabled: false });
 
     expect(scopedChangeHistory.logBulk).not.toHaveBeenCalled();
   });

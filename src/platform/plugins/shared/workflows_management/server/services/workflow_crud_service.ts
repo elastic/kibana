@@ -65,7 +65,6 @@ import {
   removeConflictingIds,
 } from '../lib/bulk_id_helpers';
 import { getAuthenticatedUser } from '../lib/get_user';
-import { isWorkflowVersioningEnabled } from '../lib/is_workflow_versioning_enabled';
 import { logWorkflowChanges } from '../lib/log_workflow_changes';
 import { resolveUniqueWorkflowIds, validateWorkflowId } from '../lib/workflow_id_resolver';
 import { maybeApplyWorkflowVersion } from '../lib/workflow_version';
@@ -90,8 +89,8 @@ export class WorkflowCrudService {
 
   constructor(private readonly deps: WorkflowCrudDeps) {}
 
-  isWorkflowVersioningEnabled(): Promise<boolean> {
-    return isWorkflowVersioningEnabled(this.deps.getCoreStart());
+  isWorkflowVersioningEnabled(): boolean {
+    return this.deps.workflowVersioningEnabled;
   }
 
   async logWorkflowChangesAfterWrite(params: {
@@ -111,7 +110,7 @@ export class WorkflowCrudService {
       workflows: params.workflows,
       changeHistoryService,
       scopedChangeHistory,
-      isWorkflowVersioningEnabled: () => this.isWorkflowVersioningEnabled(),
+      workflowVersioningEnabled: this.deps.workflowVersioningEnabled,
       action: params.action,
       spaceId: params.spaceId,
       timestamp: params.timestamp,
@@ -282,7 +281,7 @@ export class WorkflowCrudService {
     spaceId: string,
     params: ReadModifyWriteWorkflowDocumentParams
   ): Promise<WorkflowProperties> {
-    const versioningEnabled = await this.isWorkflowVersioningEnabled();
+    const versioningEnabled = this.isWorkflowVersioningEnabled();
 
     return this.runOccWrite(id, async () => {
       const writer = this.getReadModifyWriteOccWriter(
@@ -334,7 +333,7 @@ export class WorkflowCrudService {
       now: params.now,
       spaceId: params.spaceId,
       triggerDefinitions,
-      versioningEnabled: await this.isWorkflowVersioningEnabled(),
+      versioningEnabled: this.isWorkflowVersioningEnabled(),
     });
   }
 
@@ -485,7 +484,7 @@ export class WorkflowCrudService {
     const authenticatedUser = getAuthenticatedUser(request, this.deps.getSecurity());
     const now = new Date();
     const triggerDefinitions = this.deps.workflowsExtensions?.getAllTriggerDefinitions() ?? [];
-    const versioningEnabled = await this.isWorkflowVersioningEnabled();
+    const versioningEnabled = this.isWorkflowVersioningEnabled();
 
     const {
       id: baseId,
@@ -570,7 +569,7 @@ export class WorkflowCrudService {
     const created: WorkflowDetailDto[] = [];
     const failed: BulkFailureEntry[] = [];
     const validWorkflows: BulkWorkflowEntry[] = [];
-    const versioningEnabled = await this.isWorkflowVersioningEnabled();
+    const versioningEnabled = this.isWorkflowVersioningEnabled();
 
     for (let i = 0; i < workflows.length; i++) {
       try {
@@ -884,7 +883,7 @@ export class WorkflowCrudService {
     disabled: number;
     failures: Array<{ id: string; error: string }>;
   }> {
-    const versioningEnabled = spaceId ? await this.isWorkflowVersioningEnabled() : false;
+    const versioningEnabled = spaceId ? this.isWorkflowVersioningEnabled() : false;
     const result = await disableAllWorkflows({
       storage: this.deps.workflowStorage,
       taskScheduler: this.deps.getTaskScheduler(),

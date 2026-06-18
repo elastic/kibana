@@ -41,6 +41,8 @@ export interface WorkflowCrudDeps extends WorkflowStorageDeps {
   validationService: WorkflowValidationService;
   getCoreStart: () => CoreStart;
   changeHistoryService: IWorkflowChangeHistoryService;
+  /** Frozen at WorkflowsService startup from `workflows:versioning:enabled`. */
+  workflowVersioningEnabled: boolean;
 }
 
 /** Deps for WorkflowSearchService. */

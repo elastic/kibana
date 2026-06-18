@@ -209,7 +209,7 @@ const createCrudServiceMock = () => {
     ),
     deleteWorkflows: jest.fn().mockResolvedValue(undefined),
     logWorkflowChangesAfterWrite: jest.fn().mockResolvedValue(undefined),
-    isWorkflowVersioningEnabled: jest.fn().mockResolvedValue(false),
+    isWorkflowVersioningEnabled: jest.fn().mockReturnValue(false),
     prepareWorkflowDocumentForStorage: jest.fn(
       async ({
         id,
@@ -433,7 +433,7 @@ describe('ManagedWorkflowsService', () => {
       const definition = createDefinition({ version: 2 });
       mockManagedWorkflowDefinitions = [definition];
       const { crudService, service } = createService();
-      crudService.isWorkflowVersioningEnabled.mockResolvedValue(true);
+      crudService.isWorkflowVersioningEnabled.mockReturnValue(true);
       mockPrepareReturnsInitialVersion(crudService);
       crudService.getWorkflowDocumentWithVersion.mockResolvedValue(
         createVersionedDocument(
@@ -478,7 +478,7 @@ describe('ManagedWorkflowsService', () => {
       const definition = createDefinition({ version: 2 });
       mockManagedWorkflowDefinitions = [definition];
       const { crudService, service } = createService();
-      crudService.isWorkflowVersioningEnabled.mockResolvedValue(false);
+      crudService.isWorkflowVersioningEnabled.mockReturnValue(false);
       mockPrepareReturnsInitialVersion(crudService);
       crudService.getWorkflowDocumentWithVersion.mockResolvedValue(
         createVersionedDocument(
