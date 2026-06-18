@@ -630,6 +630,7 @@ src/platform/packages/shared/kbn-monaco @elastic/appex-sharedux
 src/platform/packages/shared/kbn-object-utils @elastic/kibana-core
 src/platform/packages/shared/kbn-object-versioning @elastic/appex-sharedux
 src/platform/packages/shared/kbn-object-versioning-utils @elastic/appex-sharedux
+src/platform/packages/shared/kbn-occ @elastic/workflows-eng
 src/platform/packages/shared/kbn-openapi-bundler @elastic/security-detection-rule-management
 src/platform/packages/shared/kbn-openapi-common @elastic/security-detection-rule-management
 src/platform/packages/shared/kbn-openapi-generator @elastic/security-detection-rule-management
@@ -1203,6 +1204,7 @@ x-pack/platform/plugins/shared/logs_shared @elastic/obs-exploration-team
 x-pack/platform/plugins/shared/maintenance_windows @elastic/response-ops
 x-pack/platform/plugins/shared/maps @elastic/kibana-presentation
 x-pack/platform/plugins/shared/ml @elastic/ml-ui
+x-pack/platform/plugins/shared/notification_center @elastic/search-kibana
 x-pack/platform/plugins/shared/notifications @elastic/appex-sharedux
 x-pack/platform/plugins/shared/observability_ai_assistant @elastic/obs-ai-team
 x-pack/platform/plugins/shared/osquery @elastic/security-defend-workflows
@@ -1419,6 +1421,7 @@ x-pack/platform/test/serverless/api_integration/test_suites/platform_security @e
 /packages/kbn-check-saved-objects-cli/src/migrations/__fixtures__/action @elastic/response-ops
 /packages/kbn-check-saved-objects-cli/src/migrations/__fixtures__/alert @elastic/response-ops
 /packages/kbn-check-saved-objects-cli/src/migrations/__fixtures__/alerting_action_policy @elastic/rna-project-team
+/packages/kbn-check-saved-objects-cli/src/migrations/__fixtures__/alerting_rule @elastic/rna-project-team
 /packages/kbn-check-saved-objects-cli/src/migrations/__fixtures__/alerting_rule_template @elastic/response-ops
 /packages/kbn-check-saved-objects-cli/src/migrations/__fixtures__/api_key_pending_invalidation @elastic/response-ops
 /packages/kbn-check-saved-objects-cli/src/migrations/__fixtures__/api_key_to_invalidate @elastic/response-ops
@@ -2466,6 +2469,7 @@ packages/kbn-eslint-plugin-eslint/rules/no_unsafe_hash.js @elastic/kibana-securi
 /.github/workflows/codeql.yml @elastic/kibana-security
 /.github/workflows/codeql-pr.yml @elastic/kibana-security
 /.github/workflows/evaluate-dependency-health.yml @elastic/kibana-security
+/.github/workflows/index-dependency-usage.yml @elastic/kibana-security
 /src/dev/eslint/security_eslint_rule_tests.ts @elastic/kibana-security
 /src/core/server/integration_tests/config/check_dynamic_config.test.ts @elastic/kibana-security
 /src/platform/plugins/shared/telemetry/server/config/telemetry_labels.ts @elastic/kibana-security
@@ -2758,7 +2762,15 @@ x-pack/platform/test/functional/page_objects/search_profiler_page.ts @elastic/se
 
 /x-pack/platform/plugins/shared/stack_connectors/public/connector_types/thehive @elastic/kibana-cases
 /x-pack/platform/plugins/shared/stack_connectors/server/connector_types/thehive @elastic/kibana-cases
-src/platform/packages/shared/kbn-connector-schemas/thehive @elastic/kibana-cases
+/src/platform/packages/shared/kbn-connector-schemas/thehive @elastic/kibana-cases
+
+/x-pack/platform/plugins/shared/stack_connectors/public/connector_types/cases_webhook @elastic/kibana-cases
+/x-pack/platform/plugins/shared/stack_connectors/server/connector_types/cases_webhook @elastic/kibana-cases
+/src/platform/packages/shared/kbn-connector-schemas/cases_webhook @elastic/kibana-cases
+
+/x-pack/platform/plugins/shared/stack_connectors/public/connector_types/xsoar @elastic/kibana-cases
+/x-pack/platform/plugins/shared/stack_connectors/server/connector_types/xsoar @elastic/kibana-cases
+/src/platform/packages/shared/kbn-connector-schemas/xsoar @elastic/kibana-cases
 
 /x-pack/solutions/observability/test/api_integration/apis/cases/ @elastic/kibana-cases
 /x-pack/solutions/observability/test/serverless/api_integration/test_suites/cases/ @elastic/kibana-cases
@@ -2918,6 +2930,9 @@ x-pack/solutions/security/test/security_solution_api_integration/test_suites/sou
 /x-pack/solutions/security/plugins/security_solution/public/common/components/navigation @elastic/security-pds-deployment
 /x-pack/solutions/security/plugins/security_solution/public/onboarding @elastic/security-pds-deployment
 /x-pack/solutions/security/plugins/security_solution/public/reports @elastic/security-pds-deployment
+/x-pack/solutions/security/plugins/security_solution/test/scout/ui/parallel_tests/reports/ @elastic/security-pds-deployment
+/x-pack/solutions/security/plugins/security_solution/test/scout/ui/parallel_tests/navigation/serverless_ai_value_report* @elastic/security-pds-deployment
+/x-pack/solutions/security/plugins/security_solution/test/scout_ai_value_report/ @elastic/security-pds-deployment
 x-pack/solutions/security/plugins/security_solution/common/trial_companion/ @elastic/security-pds-deployment
 x-pack/solutions/security/plugins/security_solution/public/trial_companion/ @elastic/security-pds-deployment
 x-pack/solutions/security/plugins/security_solution/server/lib/trial_companion/ @elastic/security-pds-deployment
@@ -3049,7 +3064,7 @@ x-pack/solutions/security/plugins/entity_store @elastic/core-analysis
 
 /x-pack/solutions/security/packages/test-api-clients/supertest/timelines.gen.ts @elastic/security-threat-hunting
 
-## Generative AI owner connectors
+## Security Threat Hunting owner connectors
 # OpenAI
 /x-pack/platform/plugins/shared/stack_connectors/public/connector_types/openai @elastic/security-threat-hunting
 /x-pack/platform/plugins/shared/stack_connectors/server/connector_types/openai @elastic/security-threat-hunting
@@ -3065,16 +3080,47 @@ x-pack/solutions/security/plugins/entity_store @elastic/core-analysis
 /x-pack/platform/plugins/shared/stack_connectors/server/connector_types/gemini @elastic/security-threat-hunting
 /src/platform/packages/shared/kbn-connector-schemas/gemini @elastic/security-threat-hunting
 
+# D3 Security
+/x-pack/platform/plugins/shared/stack_connectors/public/connector_types/d3security @elastic/security-threat-hunting
+/x-pack/platform/plugins/shared/stack_connectors/server/connector_types/d3security @elastic/security-threat-hunting
+/src/platform/packages/shared/kbn-connector-schemas/d3security @elastic/security-threat-hunting
+
+# Swimlane
+/x-pack/platform/plugins/shared/stack_connectors/public/connector_types/swimlane @elastic/security-threat-hunting
+/x-pack/platform/plugins/shared/stack_connectors/server/connector_types/swimlane @elastic/security-threat-hunting
+/src/platform/packages/shared/kbn-connector-schemas/swimlane @elastic/security-threat-hunting
+
+# Tines
+/x-pack/platform/plugins/shared/stack_connectors/public/connector_types/tines @elastic/security-threat-hunting
+/x-pack/platform/plugins/shared/stack_connectors/server/connector_types/tines @elastic/security-threat-hunting
+/src/platform/packages/shared/kbn-connector-schemas/tines @elastic/security-threat-hunting
+
+# Torq
+/x-pack/platform/plugins/shared/stack_connectors/public/connector_types/torq @elastic/security-threat-hunting
+/x-pack/platform/plugins/shared/stack_connectors/server/connector_types/torq @elastic/security-threat-hunting
+/src/platform/packages/shared/kbn-connector-schemas/torq @elastic/security-threat-hunting
+
+# xMatters
+/x-pack/platform/plugins/shared/stack_connectors/public/connector_types/xmatters @elastic/security-threat-hunting
+/x-pack/platform/plugins/shared/stack_connectors/server/connector_types/xmatters @elastic/security-threat-hunting
+/src/platform/packages/shared/kbn-connector-schemas/xmatters @elastic/security-threat-hunting
+
+# SentinelOne
+/x-pack/platform/plugins/shared/stack_connectors/public/connector_types/sentinelone @elastic/security-defend-workflows @elastic/security-threat-hunting
+/x-pack/platform/plugins/shared/stack_connectors/server/connector_types/sentinelone @elastic/security-defend-workflows @elastic/security-threat-hunting
+/src/platform/packages/shared/kbn-connector-schemas/sentinelone @elastic/security-defend-workflows @elastic/security-threat-hunting
+/x-pack/solutions/security/test/alerting_api_integration/security_and_spaces/group2/tests/actions/connector_types/sentinelone.ts @elastic/security-defend-workflows @elastic/security-threat-hunting
+
 # MCP
 /x-pack/platform/plugins/shared/stack_connectors/public/connector_types/mcp @elastic/workchat-eng
 /x-pack/platform/plugins/shared/stack_connectors/server/connector_types/mcp @elastic/workchat-eng
 /src/platform/packages/shared/kbn-connector-schemas/mcp @elastic/workchat-eng
 
 # Inference API
-/x-pack/platform/plugins/shared/stack_connectors/public/connector_types/inference @elastic/search-kibana @elastic/obs-ai-team
-/x-pack/platform/plugins/shared/stack_connectors/server/connector_types/inference @elastic/search-kibana @elastic/obs-ai-team
+/x-pack/platform/plugins/shared/stack_connectors/public/connector_types/inference @elastic/search-kibana @elastic/security-generative-ai @elastic/obs-ai-team
+/x-pack/platform/plugins/shared/stack_connectors/server/connector_types/inference @elastic/search-kibana @elastic/security-generative-ai @elastic/obs-ai-team
 /x-pack/platform/plugins/shared/stack_connectors/server/usage/inference @elastic/search-kibana
-/src/platform/packages/shared/kbn-connector-schemas/inference @elastic/search-kibana @elastic/obs-ai-team
+/src/platform/packages/shared/kbn-connector-schemas/inference @elastic/search-kibana @elastic/security-generative-ai @elastic/obs-ai-team
 
 # HTTP
 /x-pack/platform/plugins/shared/stack_connectors/public/connector_types/http @elastic/workflows-eng
@@ -3085,12 +3131,9 @@ x-pack/solutions/security/plugins/entity_store @elastic/core-analysis
 x-pack/platform/plugins/shared/actions/server/lib/token_tracking @elastic/security-threat-hunting
 
 ## Defend Workflows owner connectors
-/x-pack/platform/plugins/shared/stack_connectors/public/connector_types/sentinelone @elastic/security-defend-workflows
-/x-pack/platform/plugins/shared/stack_connectors/server/connector_types/sentinelone @elastic/security-defend-workflows
-/src/platform/packages/shared/kbn-connector-schemas/sentinelone @elastic/security-defend-workflows
 /x-pack/solutions/security/test/api_integration_basic @elastic/security-defend-workflows
 /x-pack/solutions/security/test/alerting_api_integration/security_and_spaces @elastic/security-defend-workflows
-/x-pack/solutions/security/test/alerting_api_integration/security_and_spaces/group2/tests/actions/connector_types/sentinelone.ts @elastic/security-defend-workflows
+/x-pack/platform/plugins/shared/stack_connectors/public/connector_types/crowdstrike @elastic/security-defend-workflows
 /x-pack/platform/plugins/shared/stack_connectors/server/connector_types/crowdstrike @elastic/security-defend-workflows
 /src/platform/packages/shared/kbn-connector-schemas/crowdstrike @elastic/security-defend-workflows
 /x-pack/solutions/security/test/alerting_api_integration/security_and_spaces/group2/tests/actions/connector_types/crowdstrike.ts @elastic/security-defend-workflows
@@ -3099,6 +3142,84 @@ x-pack/platform/plugins/shared/actions/server/lib/token_tracking @elastic/securi
 /src/platform/packages/shared/kbn-connector-schemas/microsoft_defender_endpoint @elastic/security-defend-workflows
 /x-pack/solutions/security/test/alerting_api_integration/security_and_spaces/group2/tests/actions/connector_types/microsoft_defender_endpoint.ts @elastic/security-defend-workflows
 
+
+## Response Ops owner connectors
+# Email
+/x-pack/platform/plugins/shared/stack_connectors/public/connector_types/email @elastic/response-ops
+/x-pack/platform/plugins/shared/stack_connectors/server/connector_types/email @elastic/response-ops
+/src/platform/packages/shared/kbn-connector-schemas/email @elastic/response-ops
+
+# ES Index
+/x-pack/platform/plugins/shared/stack_connectors/public/connector_types/es_index @elastic/response-ops
+/x-pack/platform/plugins/shared/stack_connectors/server/connector_types/es_index @elastic/response-ops
+
+# Jira
+/x-pack/platform/plugins/shared/stack_connectors/public/connector_types/jira @elastic/response-ops
+/x-pack/platform/plugins/shared/stack_connectors/server/connector_types/jira @elastic/response-ops
+/src/platform/packages/shared/kbn-connector-schemas/jira @elastic/response-ops
+
+# Jira Service Management
+/x-pack/platform/plugins/shared/stack_connectors/public/connector_types/jira-service-management @elastic/response-ops
+/x-pack/platform/plugins/shared/stack_connectors/server/connector_types/jira-service-management @elastic/response-ops
+/src/platform/packages/shared/kbn-connector-schemas/jira-service-management @elastic/response-ops
+
+# Opsgenie
+/x-pack/platform/plugins/shared/stack_connectors/public/connector_types/opsgenie @elastic/response-ops
+/x-pack/platform/plugins/shared/stack_connectors/server/connector_types/opsgenie @elastic/response-ops
+/src/platform/packages/shared/kbn-connector-schemas/opsgenie @elastic/response-ops
+
+# PagerDuty
+/x-pack/platform/plugins/shared/stack_connectors/public/connector_types/pagerduty @elastic/response-ops
+/x-pack/platform/plugins/shared/stack_connectors/server/connector_types/pagerduty @elastic/response-ops
+/src/platform/packages/shared/kbn-connector-schemas/pagerduty @elastic/response-ops
+
+# Resilient
+/x-pack/platform/plugins/shared/stack_connectors/public/connector_types/resilient @elastic/response-ops
+/x-pack/platform/plugins/shared/stack_connectors/server/connector_types/resilient @elastic/response-ops
+/src/platform/packages/shared/kbn-connector-schemas/resilient @elastic/response-ops
+
+# Server Log
+/x-pack/platform/plugins/shared/stack_connectors/public/connector_types/server_log @elastic/response-ops
+/x-pack/platform/plugins/shared/stack_connectors/server/connector_types/server_log @elastic/response-ops
+/src/platform/packages/shared/kbn-connector-schemas/server_log @elastic/response-ops
+
+# ServiceNow
+/src/platform/packages/shared/kbn-connector-schemas/servicenow @elastic/response-ops
+
+# ServiceNow ITOM
+/x-pack/platform/plugins/shared/stack_connectors/public/connector_types/servicenow_itom @elastic/response-ops
+/x-pack/platform/plugins/shared/stack_connectors/server/connector_types/servicenow_itom @elastic/response-ops
+/src/platform/packages/shared/kbn-connector-schemas/servicenow_itom @elastic/response-ops
+
+# ServiceNow ITSM
+/x-pack/platform/plugins/shared/stack_connectors/public/connector_types/servicenow_itsm @elastic/response-ops
+/x-pack/platform/plugins/shared/stack_connectors/server/connector_types/servicenow_itsm @elastic/response-ops
+/src/platform/packages/shared/kbn-connector-schemas/servicenow_itsm @elastic/response-ops
+
+# ServiceNow SIR
+/x-pack/platform/plugins/shared/stack_connectors/public/connector_types/servicenow_sir @elastic/response-ops
+/x-pack/platform/plugins/shared/stack_connectors/server/connector_types/servicenow_sir @elastic/response-ops
+/src/platform/packages/shared/kbn-connector-schemas/servicenow_sir @elastic/response-ops
+
+# Slack
+/x-pack/platform/plugins/shared/stack_connectors/public/connector_types/slack @elastic/response-ops
+/x-pack/platform/plugins/shared/stack_connectors/server/connector_types/slack @elastic/response-ops
+/src/platform/packages/shared/kbn-connector-schemas/slack @elastic/response-ops
+
+# Slack API
+/x-pack/platform/plugins/shared/stack_connectors/public/connector_types/slack_api @elastic/response-ops
+/x-pack/platform/plugins/shared/stack_connectors/server/connector_types/slack_api @elastic/response-ops
+/src/platform/packages/shared/kbn-connector-schemas/slack_api @elastic/response-ops
+
+# Microsoft Teams
+/x-pack/platform/plugins/shared/stack_connectors/public/connector_types/teams @elastic/response-ops
+/x-pack/platform/plugins/shared/stack_connectors/server/connector_types/teams @elastic/response-ops
+/src/platform/packages/shared/kbn-connector-schemas/teams @elastic/response-ops
+
+# Webhook
+/x-pack/platform/plugins/shared/stack_connectors/public/connector_types/webhook @elastic/response-ops
+/x-pack/platform/plugins/shared/stack_connectors/server/connector_types/webhook @elastic/response-ops
+/src/platform/packages/shared/kbn-connector-schemas/webhook @elastic/response-ops
 
 ## Security Solution shared OAS schemas
 /x-pack/solutions/security/plugins/security_solution/common/api/model @elastic/security-detection-rule-management @elastic/security-detection-engine
@@ -3536,6 +3657,7 @@ x-pack/solutions/observability/plugins/synthetics/server/saved_objects/synthetic
 /src/cli_keystore/ @elastic/kibana-operations
 /.github/workflows/ @elastic/kibana-operations
 /.github/workflows/failed-test-investigator.md @elastic/kibana-operations @elastic/appex-qa
+/.github/workflows/flaky-test-fixer.md @elastic/kibana-operations @elastic/appex-qa
 /.github/aw/ @elastic/kibana-operations
 /.buildkite/ @elastic/kibana-operations
 /moon.yml @elastic/kibana-operations

@@ -42,7 +42,6 @@ import { ContentService } from './lib/content/content_service';
 import { registerRules } from './lib/sig_events/rules/register_rules';
 import { getSigEventsTuningConfig } from './lib/sig_events/helpers/get_sig_events_tuning_config';
 import { AttachmentService } from './lib/streams/attachments/attachment_service';
-import { QueryService } from './lib/streams/assets/query/query_service';
 import {
   isSignificantEventsAlertingV2Active,
   logAlertingV2PluginUnavailable,
@@ -59,10 +58,7 @@ import type {
 } from './types';
 import { createStreamsGlobalSearchResultProvider } from './lib/streams/create_streams_global_search_result_provider';
 import { backfillWiredStreamViews } from './lib/streams/esql_views/backfill_wired_stream_views';
-import { FeatureService } from './lib/streams/feature/feature_service';
-import type { FeatureClient } from './lib/streams/feature/feature_client';
-import type { QueryClient } from './lib/streams/assets/query/query_client';
-import { initializeKnowledgeIndicatorsTemplate } from './lib/streams/ki';
+import { KnowledgeIndicatorService, initializeKnowledgeIndicatorsTemplate } from './lib/streams/ki';
 import { ProcessorSuggestionsService } from './lib/streams/ingest_pipelines/processor_suggestions_service';
 import { registerStreamsSavedObjects } from './lib/saved_objects/register_saved_objects';
 import { TaskService } from './lib/tasks/task_service';
@@ -166,10 +162,9 @@ export class StreamsPlugin
     const significantEventsServices = createSignificantEventsServices();
     const attachmentService = new AttachmentService(core, this.logger);
     const streamsService = new StreamsService(core, this.logger, this.isDev);
-    const featureService = new FeatureService(core, this.logger);
+    const knowledgeIndicatorService = new KnowledgeIndicatorService(core, this.logger);
     const insightService = new InsightService(core, this.logger);
     const contentService = new ContentService(core, this.logger);
-    const queryService = new QueryService(core, this.logger);
     const taskService = new TaskService(plugins.taskManager);
     this.streamsGetScopedClients = async ({
       request,
@@ -204,12 +199,6 @@ export class StreamsPlugin
         contentService.getClient(),
         getSigEventsTuningConfig(globalUiSettingsClient, this.logger),
       ]);
-
-      let featureClientPromise: Promise<FeatureClient> | undefined;
-      const getFeatureClient = (): Promise<FeatureClient> => {
-        featureClientPromise ??= featureService.getClient(tuningConfig);
-        return featureClientPromise;
-      };
 
       const space = pluginsStart.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
 
@@ -256,24 +245,24 @@ export class StreamsPlugin
         return significantEventsAlertingV2StatePromise;
       };
 
-      let queryClientPromise: Promise<QueryClient> | undefined;
-      const getQueryClient = (): Promise<QueryClient> => {
-        queryClientPromise ??= (async () => {
+      let kiClientPromise: ReturnType<typeof knowledgeIndicatorService.getClient> | undefined;
+      const getKnowledgeIndicatorClient = () => {
+        kiClientPromise ??= (async () => {
           const { alertingV2RulesClient } = await getSignificantEventsAlertingV2State();
           const rulesClient = await pluginsStart.alerting.getRulesClientWithRequestInSpace(
             request,
             DEFAULT_SPACE_ID,
             rulesClientOptions
           );
-          return queryService.getClient({
-            esClient: coreStart.elasticsearch.client.asInternalUser,
+          return knowledgeIndicatorService.getClient({
+            esClient: scopedClusterClient.asInternalUser,
             soClient,
             alertingRulesClient: rulesClient,
             alertingV2RulesClient,
             config: tuningConfig,
           });
         })();
-        return queryClientPromise;
+        return kiClientPromise;
       };
 
       const getAlertingV2RulesClient = async (): Promise<RulesClientApi | undefined> => {
@@ -286,8 +275,7 @@ export class StreamsPlugin
 
       const streamsClient = await streamsService.getClient({
         attachmentClient,
-        getQueryClient,
-        getFeatureClient,
+        getKnowledgeIndicatorClient,
         esClient: scopedClusterClient.asCurrentUser,
         esClientAsInternalUser: coreStart.elasticsearch.client.asInternalUser,
         uiSettingsClient,
@@ -304,12 +292,11 @@ export class StreamsPlugin
         soClient,
         attachmentClient,
         streamsClient,
-        getFeatureClient,
+        getKnowledgeIndicatorClient,
         ...significantEventsClients,
         insightClient,
         inferenceClient,
         contentClient,
-        getQueryClient,
         getAlertingV2RulesClient,
         fieldsMetadataClient,
         licensing,
@@ -326,7 +313,10 @@ export class StreamsPlugin
 
     // Build workflow clients once and reuse the shared onboarding client instance
     // everywhere, rather than constructing a second one from the same management API.
-    const workflowClients = createWorkflowClients(plugins.workflowsManagement?.management);
+    const workflowClients = createWorkflowClients(
+      plugins.workflowsManagement?.management,
+      telemetryClient
+    );
     const streamsKIsOnboardingClient = workflowClients.streamsKIsOnboardingClient;
 
     if (plugins.agentBuilder) {
