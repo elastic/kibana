@@ -65,7 +65,6 @@ enabled:
   - src/platform/test/examples/config.js
   - src/platform/test/functional/apps/bundles/config.ts
   - src/platform/test/functional/apps/console/config.ts
-  - src/platform/test/functional/apps/context/config.ts
   - src/platform/test/functional/apps/dashboard_elements/controls/common/config.ts
   - src/platform/test/functional/apps/dashboard_elements/controls/options_list/config.ts
   - src/platform/test/functional/apps/dashboard_elements/image_embeddable/config.ts
