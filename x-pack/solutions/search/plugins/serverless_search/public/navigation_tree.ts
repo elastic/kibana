@@ -63,9 +63,11 @@ const PROJECT_PERFORMANCE_TITLE = i18n.translate(
 export function createNavigationTree({
   core,
   showAiAssistant = true,
+  showPerformanceLink = false,
 }: ApplicationStart & {
   core: CoreStart;
   showAiAssistant?: boolean;
+  showPerformanceLink?: boolean;
 }): NavigationTreeDefinition {
   return {
     body: [
@@ -247,11 +249,15 @@ export function createNavigationTree({
                 id: 'cloudLinkBilling',
                 cloudLink: 'billingAndSub',
               },
-              {
-                id: 'cloudLinkDeployment',
-                cloudLink: 'deployment',
-                title: PERFORMANCE_TITLE,
-              },
+              ...(showPerformanceLink
+                ? [
+                    {
+                      id: 'cloudLinkDeployment',
+                      cloudLink: 'deployment' as const,
+                      title: PERFORMANCE_TITLE,
+                    },
+                  ]
+                : []),
               {
                 cloudLink: 'userAndRoles',
               },

@@ -152,6 +152,7 @@ dependsOn:
   - '@kbn/logging'
   - '@kbn/logging-mocks'
   - '@kbn/react-hooks'
+  - '@kbn/app-header'
 tags:
   - plugin
   - prod

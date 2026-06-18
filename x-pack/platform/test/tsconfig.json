@@ -125,7 +125,6 @@
     "@kbn/ml-category-validator",
     "@kbn/response-ops-alerts-filters-form",
     "@kbn/embeddable-alerts-table-plugin",
-    "@kbn/synthtrace-client",
     "@kbn/synthtrace",
     "@kbn/streams-schema",
     "@kbn/streams-plugin",
@@ -177,5 +176,6 @@
     "@kbn/core-spaces-common",
     "@kbn/deeplinks-analytics",
     "@kbn/core-user-profile-common",
+    "@kbn/synthtrace-client",
   ]
 }

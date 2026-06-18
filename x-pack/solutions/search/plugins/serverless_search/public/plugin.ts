@@ -143,6 +143,7 @@ export class ServerlessSearchPlugin
           ...application,
           core,
           showAiAssistant,
+          showPerformanceLink: Boolean(application.capabilities.serverlessSearch?.manageCluster),
         });
       })
     );

@@ -1,6 +1,6 @@
 ---
 name: Flaky Test Fixer
-description: Open a draft fix PR for a `failed-test` issue that has been labeled `ai:auto-flaky-fix`.
+description: Open a draft fix PR for a `failed-test` issue that has been labeled `ai:fix-flaky`.
 on:
   issues:
     types: [labeled]
@@ -19,7 +19,7 @@ permissions:
   checks: read
   models: read
 
-if: "${{ (github.event_name == 'workflow_dispatch' && github.event.inputs.issue_number != '') || (github.event_name == 'issues' && github.event.action == 'labeled' && github.event.label.name == 'ai:auto-flaky-fix' && !github.event.issue.pull_request) }}"
+if: "${{ (github.event_name == 'workflow_dispatch' && github.event.inputs.issue_number != '') || (github.event_name == 'issues' && github.event.action == 'labeled' && github.event.label.name == 'ai:fix-flaky' && !github.event.issue.pull_request) }}"
 
 concurrency:
   group: 'flaky-test-fixer-${{ github.event.issue.number || github.event.inputs.issue_number }}'
@@ -65,9 +65,8 @@ tools:
       'git:*',
       'gh:*',
       'bk:*',
-      'node',
-      'yarn',
-      'curl',
+      'node scripts/:*',
+      'yarn kbn:*',
     ]
 
 network:
@@ -83,7 +82,6 @@ sandbox:
   agent: awf
 
 safe-outputs:
-  staged: true
   activation-comments: false
   report-failure-as-issue: false
   add-comment:
@@ -93,11 +91,15 @@ safe-outputs:
   create-pull-request:
     draft: true
     max: 1
-    labels: [ai:flaky-fix-ready]
+    labels: [flaky-test-fixer]
     base-branch: main
-    allowed-base-branches: [main]
+    allowed-base-branches: ['main', '9.*', '8.*', '7.*']
     if-no-changes: 'ignore'
     protected-files: fallback-to-issue
+    # Use git format-patch / `git am --3way` instead of a git bundle. The bundle
+    # transport makes the shallow safe_outputs checkout run `git fetch --unshallow`,
+    # which on a repo Kibana's size cannot finish within the 15m job timeout.
+    patch-format: am
 
 strict: false
 timeout-minutes: 90
@@ -105,7 +107,7 @@ timeout-minutes: 90
 
 # Flaky Test Fixer
 
-Open one draft PR with the smallest test-side fix for this flaky-test issue. If you cannot find a credible fix, stop without opening a PR.
+Open a single draft PR with the smallest possible test-side fix for this flaky-test issue. Do not open a PR if either of the following is true: you find an existing open PR with an identical or similar fix (search PRs for ones that reference this issue number in their body, or check the issue timeline for PRs that reference it), or you cannot identify a credible fix.
 
 ## Steps
 
@@ -123,7 +125,13 @@ Open one draft PR with the smallest test-side fix for this flaky-test issue. If 
   ```
   Fixes #<issue-number> (add more issue numbers here if this fix resolves multiple issues)
 
-  <a few sentences: what was failing, and what this patch changes>
+  ### Summary
+  <a few bullet points: what was failing, and what this patch changes - keep it very concise, every bullet point must be earned>
+
+  <if this fix matches what the failed test investigator already proposed in the issue, reference it instead of repeating it here; otherwise, explain how and why it differs>
+
+  <details>
+  <summary>Verification</summary>
 
   #### Verified locally
 
@@ -131,7 +139,14 @@ Open one draft PR with the smallest test-side fix for this flaky-test issue. If 
 
   #### Not verified locally
 
-  <bullet list of what you could not verify and why — e.g. behavior under CI parallel load, on a different stack version, against a real Elasticsearch instance, etc. Omit this section if there is nothing to mention.
+  <bullet list of what you could not verify and why. E.g., behavior under CI parallel load, on a different stack version, against a real Elasticsearch instance, etc. Omit this section if there is nothing to mention.>
 
-  This PR was opened automatically by the Flaky Test Fixer. Provide feedback in [#appex-qa](https://elastic.slack.com/archives/C04HT4P1YS3).
+  </details>
   ```
+
+Add the following at the very end of the PR description (and outside of the details block):
+
+```markdown
+> [!NOTE]
+> Created by the Flaky Test Fixer workflow. Share feedback or questions in #appex-qa.
+```
