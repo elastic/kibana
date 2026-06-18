@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { parse } from 'yaml';
 import { updateYamlField } from './update_yaml_field';
 
 describe('updateYamlField', () => {
@@ -210,10 +211,9 @@ steps: []`;
     expect(result).toContain('steps: []');
   });
 
-  // Byte-exact regression tests: only the targeted scalar should change,
-  // everything else (indent, quoting, blank lines, comments, trailing newline)
-  // must remain byte-identical. The previous implementation re-emitted the
-  // entire document via doc.toString() and silently reformatted the source.
+  // The .toContain() checks above let the previous doc.toString()-based
+  // implementation pass while it silently reformatted the rest of the source.
+  // These tests assert byte-exact equality.
   describe('byte-exact preservation', () => {
     it('flips enabled without touching anything else', () => {
       const yaml = `name: Test Workflow
@@ -375,15 +375,11 @@ steps: []`
       );
     });
 
-    it('quotes a string value when needed', () => {
+    it('round-trips a string that needs quoting', () => {
       const yaml = `name: Old
 enabled: true`;
-      // Strings containing YAML special characters must be quoted.
       const result = updateYamlField(yaml, 'name', 'has: colon');
-      // After re-parsing, the value round-trips correctly.
-      // We don't pin a specific quote style — only require that the value
-      // round-trips and the rest of the source is byte-identical.
-      expect(result.startsWith('name: ')).toBe(true);
+      expect(parse(result)).toEqual({ name: 'has: colon', enabled: true });
       expect(result.endsWith('\nenabled: true')).toBe(true);
     });
   });

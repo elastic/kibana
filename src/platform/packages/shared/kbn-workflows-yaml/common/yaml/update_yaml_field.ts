@@ -10,23 +10,13 @@
 import { parseDocument, isScalar, stringify } from 'yaml';
 
 /**
- * Updates a field in YAML while preserving comments, formatting, and blank lines.
+ * Updates a field in YAML by `fieldPath` (e.g. `enabled`, `metadata.author`).
  *
- * When the target field already exists and holds a scalar value, the new value
- * is spliced directly into the original source string at the scalar's byte
- * range. This keeps the rest of the document byte-identical (indentation,
- * quoting of unrelated scalars, blank lines, comments, block-scalar style and
- * trailing newlines all survive untouched).
- *
- * When the field does not yet exist, or holds a collection (sequence/map), we
- * fall back to re-emitting the document via `doc.toString()`. That path can
- * normalize formatting, but it is only taken for additive updates — the common
- * "toggle enabled" / "rename" paths use the splice fast path.
- *
- * @param yamlString - The original YAML string
- * @param fieldPath - Dot-notated path to the field (e.g. 'enabled', 'metadata.author')
- * @param value - The new value for the field
- * @returns The updated YAML string
+ * For an existing scalar field with a primitive value, the new value is
+ * spliced into the source at the scalar's byte range, leaving every other
+ * byte (indentation, quoting, comments, blank lines, block scalars, trailing
+ * newlines) untouched. For a missing field or a non-scalar value, we fall
+ * back to `doc.setIn` + `doc.toString()`, which can normalize formatting.
  */
 export function updateYamlField(yamlString: string, fieldPath: string, value: unknown): string {
   try {
