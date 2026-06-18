@@ -35,6 +35,7 @@ import {
   selectTools,
   getPendingRound,
   evictInternalEvents,
+  estimatePerRoundTokens,
 } from './utils';
 import { registerInternalTools } from './tools/register_internal_tools';
 import { resolveCapabilities } from './utils/capabilities';
@@ -221,13 +222,19 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
 
   const graphRecursionLimit = getRecursionLimit(CYCLE_LIMIT);
 
+  const perRoundTokenCounts = await estimatePerRoundTokens(processedConversation.previousRounds, {
+    toolManager,
+    toolRegistry,
+  });
+  const conversationTokenEstimate = perRoundTokenCounts.reduce((sum, count) => sum + count, 0);
+
   // Create unified result transformer for tool result optimization
   const resultTransformer = createResultTransformer({
-    processedConversation,
     toolRegistry,
     toolManager,
     filestore,
     filestoreEnabled: experimentalFeatures.filestore,
+    conversationTokenEstimate,
   });
 
   // Context-aware compaction: check if conversation history exceeds the
@@ -240,6 +247,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     processedConversation,
     chatModel: model.chatModel,
     contextBudget,
+    perRoundTokenCounts,
     existingSummary: conversation?.state?.compaction_summary,
     logger,
     abortSignal,
@@ -254,6 +262,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     capabilities: resolvedCapabilities,
     filestore,
     processedConversation,
+    toolManager,
     resultTransformer,
     outputSchema,
     conversationTimestamp,

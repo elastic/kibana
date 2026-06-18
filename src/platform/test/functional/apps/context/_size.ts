@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+// Serverless test (remove during Scout migration): x-pack/platform/test/serverless/functional/test_suites/context/_size.ts
 import type { FtrProviderContext } from '../../ftr_provider_context';
 
 const TEST_INDEX_PATTERN = 'logstash-*';
