@@ -99,6 +99,10 @@ xpack.features.overrides:
     ### The short URL sub-feature privilege should be always granted.
     subFeatures.privileges.url_create.includeIn: "read"
 
+# for deploying a test project to CFT region
+xpack.actions.auth.ears:
+  enabled: true
+
 # Cloud links
 xpack.cloud.base_url: 'https://cloud.elastic.co'
 
