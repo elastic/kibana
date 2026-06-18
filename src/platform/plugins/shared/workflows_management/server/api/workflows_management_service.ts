@@ -74,7 +74,10 @@ import type {
 } from './workflows_management_api';
 
 import type { BulkFailureEntry } from '../lib/bulk_id_helpers';
+import { getHistoryForWorkflow } from '../lib/get_workflow_change_history';
+import { readWorkflowVersioningEnabled } from '../lib/is_workflow_versioning_enabled';
 import { ManagedWorkflowsService } from '../services/managed_workflows_service';
+import { WorkflowChangeHistoryService } from '../services/workflow_change_history_service';
 import { WorkflowCrudService } from '../services/workflow_crud_service';
 import { WorkflowExecutionQueryService } from '../services/workflow_execution_query_service';
 import { WorkflowSearchService } from '../services/workflow_search_service';
@@ -82,6 +85,7 @@ import { WorkflowValidationService } from '../services/workflow_validation_servi
 import { createStorage, type WorkflowStorage } from '../storage/workflow_storage';
 import { WorkflowTaskScheduler } from '../tasks/workflow_task_scheduler';
 import type { WorkflowsServerPluginStartDeps } from '../types';
+import type { WorkflowChangesHistoryResponse } from '../types/workflow_change_history';
 
 export interface SearchExecutionsViewParams {
   query?: estypes.QueryDslQueryContainer;
@@ -125,6 +129,8 @@ export class WorkflowsService {
   private searchService!: WorkflowSearchService;
   private crudService!: WorkflowCrudService;
   private managedWorkflowsService!: ManagedWorkflowsService;
+  private workflowVersioningEnabled!: boolean;
+  private readonly changeHistoryService: WorkflowChangeHistoryService;
   private getActionsClient!: () => Promise<IUnsecuredActionsClient>;
   private getActionsClientWithRequest!: (
     request: KibanaRequest
@@ -134,13 +140,27 @@ export class WorkflowsService {
 
   constructor(
     startServices: StartServicesAccessor<WorkflowsServerPluginStartDeps>,
-    private readonly logger: Logger
+    private readonly logger: Logger,
+    kibanaVersion: string
   ) {
+    this.changeHistoryService = new WorkflowChangeHistoryService(logger, kibanaVersion);
     this.initPromise = this.initialize(startServices);
   }
 
   private async ensureInitialized(): Promise<void> {
     await this.initPromise;
+  }
+
+  private async initializeChangeHistoryService(coreStart: CoreStart): Promise<void> {
+    if (coreStart.security) {
+      await this.changeHistoryService.initialize({
+        elasticsearchClient: coreStart.elasticsearch.client.asInternalUser,
+        authService: coreStart.security.authc,
+      });
+      return;
+    }
+
+    this.logger.warn('Workflows Management: workflow change history is not initialized');
   }
 
   private async initialize(startServices: StartServicesAccessor<WorkflowsServerPluginStartDeps>) {
@@ -180,6 +200,16 @@ export class WorkflowsService {
       esClient: this.esClient,
     });
 
+    this.workflowVersioningEnabled = await readWorkflowVersioningEnabled(coreStart);
+
+    if (this.workflowVersioningEnabled) {
+      await this.initializeChangeHistoryService(coreStart);
+    } else {
+      this.logger.debug(
+        'Workflow version history is disabled; skipping change-history data stream init'
+      );
+    }
+
     this.crudService = new WorkflowCrudService({
       logger: this.logger,
       esClient: this.esClient,
@@ -189,6 +219,9 @@ export class WorkflowsService {
       getTaskScheduler: () => this.taskScheduler,
       executionQueryService: this.executionQueryService,
       validationService: this.validationService,
+      getCoreStart: () => this.coreStart,
+      changeHistoryService: this.changeHistoryService,
+      workflowVersioningEnabled: this.workflowVersioningEnabled,
     });
 
     this.managedWorkflowsService = new ManagedWorkflowsService({
@@ -225,6 +258,22 @@ export class WorkflowsService {
   ): Promise<WorkflowDetailDto | null> {
     await this.ensureInitialized();
     return this.crudService.getWorkflow(id, spaceId, options);
+  }
+
+  public async getHistoryForWorkflow(
+    id: string,
+    spaceId: string,
+    options?: { page?: number; perPage?: number }
+  ): Promise<WorkflowChangesHistoryResponse> {
+    await this.ensureInitialized();
+    return getHistoryForWorkflow(
+      {
+        changeHistoryService: this.changeHistoryService,
+        getWorkflow: (workflowId, sid) => this.crudService.getWorkflow(workflowId, sid),
+        workflowVersioningEnabled: this.workflowVersioningEnabled,
+      },
+      { workflowId: id, spaceId, ...options }
+    );
   }
 
   public async getWorkflowsByIds(

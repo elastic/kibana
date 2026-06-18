@@ -36,6 +36,7 @@ describe('Internal Routes', () => {
   let mockApi: {
     disableAllWorkflows: jest.MockedFunction<(spaceId: string) => Promise<unknown>>;
     searchExecutionsView: jest.Mock;
+    getHistoryForWorkflow: jest.Mock;
   };
   let mockTriggerEventsIsEnabled: boolean;
   let mockSearch: jest.Mock;
@@ -75,7 +76,11 @@ describe('Internal Routes', () => {
       page: 1,
       size: 10,
     });
-    mockApi = { disableAllWorkflows: jest.fn(), searchExecutionsView: jest.fn() };
+    mockApi = {
+      disableAllWorkflows: jest.fn(),
+      searchExecutionsView: jest.fn(),
+      getHistoryForWorkflow: jest.fn(),
+    };
     mockSearch = jest.fn().mockResolvedValue({
       hits: { hits: [], total: { value: 0, relation: 'eq' } },
     });
@@ -133,7 +138,7 @@ describe('Internal Routes', () => {
       service: mockWorkflowsService,
       logger,
       spaces: { getSpaceId: jest.fn().mockReturnValue('default') },
-      audit: {},
+      audit: { logWorkflowAccessed: jest.fn() },
     } as unknown as RouteDependencies;
 
     registerInternalRoutes(routeDependencies);
@@ -255,6 +260,51 @@ describe('Internal Routes', () => {
 
   it('should register trigger event log search routes', () => {
     expect(routeHandlers[`POST:/internal/workflows/trigger_events/_search`]).toBeDefined();
+  });
+
+  it('should register the workflow history route handler', () => {
+    expect(routeHandlers[`GET:/internal/workflows/workflow/{id}/history`]).toBeDefined();
+  });
+
+  it('should call api.getHistoryForWorkflow with page/per_page defaults', async () => {
+    const history = { page: 1, perPage: 20, total: 1, items: [{ id: 'event-1' }] };
+    mockApi.getHistoryForWorkflow.mockResolvedValue(history);
+
+    const response = httpServerMock.createResponseFactory();
+    const request = httpServerMock.createKibanaRequest({ params: { id: 'wf-1' } });
+
+    await routeHandlers[`GET:/internal/workflows/workflow/{id}/history`].handler(
+      mockContext,
+      request,
+      response
+    );
+
+    expect(mockApi.getHistoryForWorkflow).toHaveBeenCalledWith('wf-1', 'default', {
+      page: 1,
+      perPage: 20,
+    });
+    expect(response.ok).toHaveBeenCalledWith({ body: history });
+  });
+
+  it('should pass through page and per_page query params', async () => {
+    mockApi.getHistoryForWorkflow.mockResolvedValue({ page: 2, perPage: 5, total: 0, items: [] });
+
+    const response = httpServerMock.createResponseFactory();
+    const request = httpServerMock.createKibanaRequest({
+      params: { id: 'wf-1' },
+      query: { page: 2, per_page: 5 },
+    });
+
+    await routeHandlers[`GET:/internal/workflows/workflow/{id}/history`].handler(
+      mockContext,
+      request,
+      response
+    );
+
+    expect(mockApi.getHistoryForWorkflow).toHaveBeenCalledWith('wf-1', 'default', {
+      page: 2,
+      perPage: 5,
+    });
   });
 
   it('forwards trigger event log search params to the execution engine', async () => {
