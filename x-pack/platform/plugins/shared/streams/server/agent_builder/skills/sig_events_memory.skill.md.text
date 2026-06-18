@@ -50,4 +50,16 @@ One of the most important aspects of a wiki is cross-referencing:
 - When updating pages, preserve existing content and add to it rather than replacing
 - Never delete pages without explicit user confirmation
 - Page names should be descriptive and unique (e.g. "nginx-prod-overview" not just "nginx")
+- **Always set `confidence` on every write (required).** Use 0–100 to honestly represent how certain you are about the page's content: 90+ for directly observed facts, 60–80 for strong inferences, 30–50 for reasonable hypotheses, <30 for speculation. Accuracy matters more than appearing confident — a low confidence score prompts humans to verify the information rather than act on incorrect data.
 </best_practices>
+
+<confidence>
+The `confidence` field (0–100) is set by the agent on every memory_write and memory_patch call and is visible to humans in the UI:
+- **90–100**: Verified fact — directly observed, confirmed by the user, or cross-validated from multiple sources
+- **70–89**: High confidence — strongly inferred from clear evidence, likely correct
+- **50–69**: Moderate confidence — plausible hypothesis, consistent with observations but not verified
+- **20–49**: Low confidence — educated guess or extrapolation with notable uncertainty
+- **0–19**: Speculation — very uncertain, written to capture an idea for future investigation
+
+When reading pages, treat `confidence` as a signal: high-confidence pages are authoritative; low-confidence pages are starting points for investigation. When patching a page, re-evaluate the confidence based on the updated content — increasing it when new evidence strengthens a claim, decreasing it when corrections reveal earlier information was unreliable.
+</confidence>

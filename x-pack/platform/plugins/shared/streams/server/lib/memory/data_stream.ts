@@ -31,6 +31,8 @@ export const memoriesMappings = {
     updated_by: mappings.keyword(),
     // Soft-delete flag: true on tombstone documents written by MemoryServiceImpl.delete()
     is_deleted: mappings.boolean(),
+    // Agent-assessed confidence in the accuracy of this page's content (0–100)
+    confidence: mappings.integer(),
   },
 } satisfies MappingsDefinition;
 
@@ -38,7 +40,7 @@ export type StoredMemoryPage = GetFieldsOf<typeof memoriesMappings>;
 
 export const memoriesDataStream: DataStreamDefinition<typeof memoriesMappings, StoredMemoryPage> = {
   name: MEMORIES_DATA_STREAM,
-  version: 1,
+  version: 2,
   hidden: true,
   template: {
     priority: 500,

@@ -94,6 +94,7 @@ export class MemoryServiceImpl implements MemoryService {
       created_by: entry.created_by,
       updated_by: entry.updated_by,
       is_deleted: entry.is_deleted ?? false,
+      ...(entry.confidence !== undefined && { confidence: entry.confidence }),
     };
 
     const response = await this.dataStreamClient.create({
@@ -234,7 +235,16 @@ export class MemoryServiceImpl implements MemoryService {
   // ── Public API ──
 
   async create(params: CreateMemoryParams): Promise<MemoryEntry> {
-    const { name, title, content, categories = [], references = [], tags = [], user } = params;
+    const {
+      name,
+      title,
+      content,
+      categories = [],
+      references = [],
+      tags = [],
+      user,
+      confidence,
+    } = params;
 
     const existing = await this._getByName(name);
     if (existing) {
@@ -257,6 +267,7 @@ export class MemoryServiceImpl implements MemoryService {
         updated_at: now,
         created_by: tombstone.created_by,
         updated_by: user,
+        ...(confidence !== undefined && { confidence }),
       };
       await this._indexPage(restored);
       await this._writeHistory(restored, 'create', `Restored entry "${name}"`, user);
@@ -276,6 +287,7 @@ export class MemoryServiceImpl implements MemoryService {
       updated_at: now,
       created_by: user,
       updated_by: user,
+      ...(confidence !== undefined && { confidence }),
     };
 
     await this._indexPage(entry);
@@ -324,6 +336,7 @@ export class MemoryServiceImpl implements MemoryService {
       ...(params.categories !== undefined && { categories: params.categories }),
       ...(params.references !== undefined && { references: params.references }),
       ...(params.tags !== undefined && { tags: params.tags }),
+      ...(params.confidence !== undefined && { confidence: params.confidence }),
       version: nextVersion,
       updated_at: now,
       updated_by: user,
@@ -565,6 +578,7 @@ export class MemoryServiceImpl implements MemoryService {
           updated_by: source.updated_by,
           tags: source.tags ?? [],
           categories: source.categories ?? [],
+          ...(source.confidence !== undefined && { confidence: source.confidence }),
         },
       ];
     });

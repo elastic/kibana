@@ -50,6 +50,12 @@ import {
 } from './use_memory';
 import type { MemoryCategoryNode, MemoryVersionRecord } from './types';
 
+const getConfidenceColor = (confidence: number): 'success' | 'warning' | 'danger' => {
+  if (confidence >= 70) return 'success';
+  if (confidence >= 40) return 'warning';
+  return 'danger';
+};
+
 export function MemoryTab() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedEntryId, setSelectedEntryId] = useState<string | null>(null);
@@ -193,6 +199,16 @@ export function MemoryTab() {
                       <EuiFlexItem>
                         <EuiText size="s">{result.snippet}</EuiText>
                       </EuiFlexItem>
+                      {result.confidence !== undefined && (
+                        <EuiFlexItem grow={false}>
+                          <EuiBadge color={getConfidenceColor(result.confidence)}>
+                            {i18n.translate('xpack.streams.memory.searchResultConfidence', {
+                              defaultMessage: '{score}% confidence',
+                              values: { score: result.confidence },
+                            })}
+                          </EuiBadge>
+                        </EuiFlexItem>
+                      )}
                     </EuiFlexGroup>
                   </EuiFlexItem>
                 ))}
@@ -395,16 +411,30 @@ function EntryFlyout({
                 ))}
               </EuiFlexGroup>
               <EuiSpacer size="xs" />
-              <EuiText size="xs" color="subdued">
-                {i18n.translate('xpack.streams.memory.entryMeta', {
-                  defaultMessage: 'Version {version} · Updated {updatedAt} by {updatedBy}',
-                  values: {
-                    version: entry.version,
-                    updatedAt: new Date(entry.updated_at).toLocaleString(),
-                    updatedBy: entry.updated_by,
-                  },
-                })}
-              </EuiText>
+              <EuiFlexGroup gutterSize="s" alignItems="center" wrap>
+                <EuiFlexItem grow={false}>
+                  <EuiText size="xs" color="subdued">
+                    {i18n.translate('xpack.streams.memory.entryMeta', {
+                      defaultMessage: 'Version {version} · Updated {updatedAt} by {updatedBy}',
+                      values: {
+                        version: entry.version,
+                        updatedAt: new Date(entry.updated_at).toLocaleString(),
+                        updatedBy: entry.updated_by,
+                      },
+                    })}
+                  </EuiText>
+                </EuiFlexItem>
+                {entry.confidence !== undefined && (
+                  <EuiFlexItem grow={false}>
+                    <EuiBadge color={getConfidenceColor(entry.confidence)}>
+                      {i18n.translate('xpack.streams.memory.confidenceBadge', {
+                        defaultMessage: 'Confidence: {score}%',
+                        values: { score: entry.confidence },
+                      })}
+                    </EuiBadge>
+                  </EuiFlexItem>
+                )}
+              </EuiFlexGroup>
             </>
           ) : (
             <EuiText>

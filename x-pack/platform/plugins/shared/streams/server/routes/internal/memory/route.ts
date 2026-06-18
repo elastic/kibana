@@ -70,6 +70,7 @@ const createEntryRoute = createServerRoute({
       categories: z.array(z.string()).optional(),
       references: z.array(z.string()).optional(),
       tags: z.array(z.string()).optional(),
+      confidence: z.number().int().min(0).max(100).optional(),
     }),
   }),
   handler: async ({ params, request, server, logger, getScopedClients }): Promise<MemoryEntry> => {
@@ -167,6 +168,7 @@ const updateEntryRoute = createServerRoute({
       references: z.array(z.string()).optional(),
       tags: z.array(z.string()).optional(),
       change_summary: z.string().optional(),
+      confidence: z.number().int().min(0).max(100).optional(),
     }),
   }),
   handler: async ({ params, request, server, logger, getScopedClients }): Promise<MemoryEntry> => {
@@ -183,6 +185,7 @@ const updateEntryRoute = createServerRoute({
       id: params.path.id,
       ...params.body,
       changeSummary: params.body.change_summary,
+      confidence: params.body.confidence,
       user,
     });
   },

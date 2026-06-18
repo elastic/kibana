@@ -37,6 +37,12 @@ export interface MemoryEntry {
   updated_by: string;
   /** Present and true for soft-deleted tombstone documents */
   is_deleted?: boolean;
+  /**
+   * Agent-assessed confidence in the accuracy of this page's content, 0–100.
+   * 100 = verified fact; 0 = pure speculation. Agents must set this on every write.
+   * May be undefined for pages written before this field was introduced.
+   */
+  confidence?: number;
 }
 
 /**
@@ -84,6 +90,7 @@ export interface MemorySearchResult {
   updated_by: string;
   tags: string[];
   categories: string[];
+  confidence?: number;
 }
 
 /** Parameters for creating a memory entry */
@@ -95,6 +102,7 @@ export interface CreateMemoryParams {
   references?: string[];
   tags?: string[];
   user: string;
+  confidence?: number;
 }
 
 /** Parameters for updating a memory entry */
@@ -108,6 +116,7 @@ export interface UpdateMemoryParams {
   tags?: string[];
   user: string;
   changeSummary?: string;
+  confidence?: number;
 }
 
 /** Parameters for searching memory */

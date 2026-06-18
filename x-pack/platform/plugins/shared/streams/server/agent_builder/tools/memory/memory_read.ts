@@ -149,6 +149,7 @@ export const createMemoryReadTool = ({
               references: entry.references,
               updated_at: entry.updated_at,
               updated_by: entry.updated_by,
+              confidence: entry.confidence,
               content,
               total_lines: totalLines,
               returned_range: { start, end: start + slicedLines.length },

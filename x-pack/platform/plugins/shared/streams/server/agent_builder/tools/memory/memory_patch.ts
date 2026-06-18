@@ -55,6 +55,16 @@ const memoryPatchSchema = z.object({
     .max(20)
     .describe('List of patch operations to apply in order.'),
   change_summary: z.string().describe('Human-readable description of what was changed (required).'),
+  confidence: z
+    .number()
+    .int()
+    .min(0)
+    .max(100)
+    .describe(
+      'Required: your confidence in the accuracy of this page content after applying these patches, 0–100. ' +
+        '100 = verified fact; 50 = plausible but unconfirmed; 0 = pure speculation. ' +
+        'Update this when the patch changes how certain you are about the content.'
+    ),
 });
 
 const applySearchReplace = (
@@ -167,7 +177,7 @@ export const createMemoryPatchTool = ({
   schema: memoryPatchSchema,
   tags: ['memory'],
   confirmation: { askUser: 'never' },
-  handler: async ({ id, name, operations, change_summary: changeSummary }, context) => {
+  handler: async ({ id, name, operations, change_summary: changeSummary, confidence }, context) => {
     const memoryService = getMemoryService(context.esClient.asCurrentUser);
     const { request, esClient } = context;
     const { username: user } = await getUserFromRequest({
@@ -247,6 +257,7 @@ export const createMemoryPatchTool = ({
         content: currentContent,
         user,
         changeSummary,
+        confidence,
       });
 
       return {

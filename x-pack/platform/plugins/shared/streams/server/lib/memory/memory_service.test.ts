@@ -472,4 +472,42 @@ describe('MemoryServiceImpl', () => {
 
     await expect(service.getBacklinks({ id: target.id })).resolves.toEqual([]);
   });
+
+  it('persists confidence on create, preserves it when update omits it, overwrites when supplied, and projects it in search', async () => {
+    mockedUuidV4
+      .mockReturnValueOnce('entry-conf-1')
+      .mockReturnValueOnce('history-conf-1')
+      .mockReturnValueOnce('history-conf-2')
+      .mockReturnValueOnce('history-conf-3');
+    const { service } = createService();
+
+    // Create with confidence=80 — should be persisted
+    const created = await service.create({
+      name: 'conf-page',
+      title: 'Conf page',
+      content: 'body',
+      user,
+      confidence: 80,
+    });
+    expect(created.confidence).toBe(80);
+    await expect(service.get({ id: created.id })).resolves.toMatchObject({ confidence: 80 });
+
+    // Update without supplying confidence — should be preserved from current
+    const updatedNoConf = await service.update({ id: created.id, content: 'body v2', user });
+    expect(updatedNoConf.confidence).toBe(80);
+
+    // Update with a new confidence value — should be overwritten
+    const updatedWithConf = await service.update({
+      id: created.id,
+      content: 'body v3',
+      user,
+      confidence: 95,
+    });
+    expect(updatedWithConf.confidence).toBe(95);
+
+    // Search — confidence should appear in results
+    const results = await service.search({ query: 'body', size: 5 });
+    expect(results).toHaveLength(1);
+    expect(results[0]).toMatchObject({ id: created.id, confidence: 95 });
+  });
 });
