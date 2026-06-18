@@ -104,6 +104,64 @@ apiTest.describe('POST /api/data_views - as code', { tag: tags.deploymentAgnosti
     }
   );
 
+  apiTest(
+    'can create a data view with field_settings and return transformed shape',
+    async ({ apiClient }) => {
+      const uniqueId = `dv-create-field-settings-${Date.now()}-${Math.random()}`;
+      const uniqueIndexPattern = `logs-field-settings-${Date.now()}-*`;
+
+      const response = await apiClient.post(BASE_PATH, {
+        headers: {
+          ...COMMON_HEADERS,
+          ...adminApiCredentials.apiKeyHeader,
+        },
+        body: {
+          id: uniqueId,
+          index_pattern: uniqueIndexPattern,
+          field_settings: {
+            bytes_field: {
+              popularity: 10,
+              format: {
+                type: 'bytes',
+                params: {
+                  pattern: '0,0.[000]b',
+                },
+              },
+            },
+            host_name: {
+              popularity: 3,
+              custom_label: 'Host',
+              custom_description: 'Hostname field',
+            },
+          },
+        },
+        responseType: 'json',
+      });
+
+      createdIds.push(uniqueId);
+
+      expect(response).toHaveStatusCode(201);
+      expect(response.body.id).toBe(uniqueId);
+      expect(response.body.data.index_pattern).toBe(uniqueIndexPattern);
+      expect(response.body.data.field_settings).toMatchObject({
+        bytes_field: {
+          popularity: 10,
+          format: {
+            type: 'bytes',
+            params: {
+              pattern: '0,0.[000]b',
+            },
+          },
+        },
+        host_name: {
+          popularity: 3,
+          custom_label: 'Host',
+          custom_description: 'Hostname field',
+        },
+      });
+    }
+  );
+
   apiTest('can create a data view without an explicit id', async ({ apiClient }) => {
     const response = await apiClient.post(BASE_PATH, {
       headers: {
@@ -159,6 +217,23 @@ apiTest.describe('POST /api/data_views - as code', { tag: tags.deploymentAgnosti
     expect(response).toHaveStatusCode(400);
   });
 
+  apiTest('returns 400 when index_pattern is an empty string', async ({ apiClient }) => {
+    const response = await apiClient.post(BASE_PATH, {
+      headers: {
+        ...COMMON_HEADERS,
+        ...adminApiCredentials.apiKeyHeader,
+      },
+      body: {
+        id: `dv-empty-pattern-${Date.now()}-${Math.random()}`,
+        index_pattern: '',
+      },
+      responseType: 'json',
+    });
+
+    expect(response).toHaveStatusCode(400);
+    expect(response.body.message).toContain('index_pattern');
+  });
+
   apiTest('returns 400 when body is empty', async ({ apiClient }) => {
     const response = await apiClient.post(BASE_PATH, {
       headers: {
@@ -172,7 +247,7 @@ apiTest.describe('POST /api/data_views - as code', { tag: tags.deploymentAgnosti
     expect(response).toHaveStatusCode(400);
   });
 
-  apiTest('returns 400 when creating a data view with a duplicate id', async ({ apiClient }) => {
+  apiTest('returns 409 when creating a data view with a duplicate id', async ({ apiClient }) => {
     const uniqueId = `dv-create-dup-id-${Date.now()}-${Math.random()}`;
 
     // Create the first data view
@@ -205,7 +280,7 @@ apiTest.describe('POST /api/data_views - as code', { tag: tags.deploymentAgnosti
       responseType: 'json',
     });
 
-    expect(duplicateResponse).toHaveStatusCode(400);
+    expect(duplicateResponse).toHaveStatusCode(409);
     expect(duplicateResponse.body.message).toContain(uniqueId);
     expect(duplicateResponse.body.message.toLowerCase()).toContain('conflict');
   });

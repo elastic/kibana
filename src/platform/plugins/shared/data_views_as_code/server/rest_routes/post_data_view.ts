@@ -43,6 +43,15 @@ export const registerPostDataViewAsCodeRoute = (
             201: {
               body: () => asCodeResponseSchema,
             },
+            400: {
+              description: 'invalid request',
+            },
+            403: {
+              description: 'forbidden',
+            },
+            409: {
+              description: 'conflict',
+            },
           },
         },
       },

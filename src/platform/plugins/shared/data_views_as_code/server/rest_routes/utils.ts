@@ -13,6 +13,7 @@ import type {
   RouteMethod,
   StartServicesAccessor,
 } from '@kbn/core/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type Boom from '@hapi/boom';
 import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/common';
 import type { ErrorIndexPatternNotFound } from '@kbn/data-views-plugin/server/error';
@@ -80,6 +81,19 @@ export const handleErrors =
 
         if (is404) {
           return response.notFound({
+            headers: {
+              'content-type': 'application/json',
+            },
+            body,
+          });
+        }
+
+        const isConflict =
+          SavedObjectsErrorHelpers.isConflictError(error) ||
+          (error as Boom.Boom)?.output?.statusCode === 409;
+
+        if (isConflict) {
+          return response.conflict({
             headers: {
               'content-type': 'application/json',
             },
