@@ -31,6 +31,7 @@ import { useDataFields } from '../../../../form/hooks/use_data_fields';
 import { useIndexSources } from '../../../../form/hooks/use_index_sources';
 import { ScheduleField } from '../../../../form/fields/schedule_field';
 import { LookbackWindowField } from '../../../../form/fields/lookback_window_field';
+import { AlertDelayField } from '../../../../form/fields/alert_delay_field';
 import { ModeSelect } from '../../../../form/fields/mode_select';
 import type { RuleBuilderStepProps } from '../types';
 import { useBuilderState } from '../builder_state_context';
@@ -119,7 +120,6 @@ export const RuleBuilderAlertConditionStep: React.FC<RuleBuilderStepProps> = ({
 
   const esqlQuery = useMemo(() => buildThresholdEsql(thresholdValues), [thresholdValues]);
   const recoveryBlock = useMemo(() => buildRecoveryBlock(thresholdValues), [thresholdValues]);
-  const hasValidQuery = Boolean(esqlQuery);
 
   // Rebuild and commit ES|QL whenever form values change
   useEffect(() => {
@@ -350,7 +350,7 @@ export const RuleBuilderAlertConditionStep: React.FC<RuleBuilderStepProps> = ({
                 'xpack.alertingV2.ruleBuilder.alertCondition.previewAriaLabel',
                 { defaultMessage: 'Preview results' }
               )}
-              isDisabled={!hasValidQuery || state.childOpen}
+              isDisabled={state.childOpen}
               onClick={() => dispatch({ type: 'OPEN_CHILD_FOR_STEP', step: state.step, isAlert })}
               data-test-subj="ruleBuilderOpenPreview"
             />
@@ -842,6 +842,13 @@ export const RuleBuilderAlertConditionStep: React.FC<RuleBuilderStepProps> = ({
           defaultMessage="Add condition"
         />
       </EuiButtonEmpty>
+
+      {isAlert && (
+        <>
+          <EuiSpacer size="m" />
+          <AlertDelayField />
+        </>
+      )}
 
       {/* ── Schedule and lookback ── */}
       <EuiSpacer size="m" />
