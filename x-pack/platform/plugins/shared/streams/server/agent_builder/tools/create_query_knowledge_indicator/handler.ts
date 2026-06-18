@@ -8,7 +8,7 @@
 import { deriveQueryType, type StreamQuery, type Streams } from '@kbn/streams-schema';
 import type { Logger } from '@kbn/core/server';
 import { v4 as uuidv4 } from 'uuid';
-import type { QueryClient } from '../../../lib/streams/assets/query/query_client';
+import type { KnowledgeIndicatorClient } from '../../../lib/streams/ki';
 import { validateEsqlQueryForStreamOrThrow } from '../../../lib/sig_events/validate_esql_query';
 
 export interface QueryInput {
@@ -21,12 +21,12 @@ export interface QueryInput {
 }
 
 export async function createQueryKnowledgeIndicatorToolHandler({
-  queryClient,
+  kiClient,
   definition,
   queryInput,
   logger,
 }: {
-  queryClient: QueryClient;
+  kiClient: KnowledgeIndicatorClient;
   definition: Streams.all.Definition;
   queryInput: QueryInput;
   logger: Logger;
@@ -50,7 +50,7 @@ export async function createQueryKnowledgeIndicatorToolHandler({
     evidence: queryInput.evidence,
   };
 
-  await queryClient.upsert(definition, query);
+  await kiClient.upsertQuery(definition, query);
 
   logger.debug(
     `ki_query_create: created query KI for stream "${definition.name}" with id "${query.id}"`

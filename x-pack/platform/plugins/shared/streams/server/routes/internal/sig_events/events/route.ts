@@ -61,7 +61,7 @@ const eventsSearchRoute = createServerRoute({
       to: z.iso.datetime().optional(),
       page: z.coerce.number().int().min(1).optional(),
       perPage: z.coerce.number().int().min(1).max(1000).optional(),
-      verdict: z.union([z.string().max(50), z.array(z.string().max(50)).max(50)]).optional(),
+      status: z.union([z.string().max(50), z.array(z.string().max(50)).max(50)]).optional(),
       stream: z.union([z.string().max(255), z.array(z.string().max(255)).max(50)]).optional(),
       search: z.string().max(500).optional(),
     }),
@@ -76,11 +76,11 @@ const eventsSearchRoute = createServerRoute({
 
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
 
-    const { verdict, stream, search, ...rest } = params.query;
+    const { status, stream, search, ...rest } = params.query;
 
     return getEventClient().findLatestPaginated({
       ...rest,
-      verdict: toArray(verdict),
+      status: toArray(status),
       stream: toArray(stream),
       search: search || undefined,
     });

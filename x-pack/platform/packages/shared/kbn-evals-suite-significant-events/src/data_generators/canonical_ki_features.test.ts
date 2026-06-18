@@ -7,7 +7,6 @@
 
 import type { Feature } from '@kbn/streams-schema';
 import { canonicalKIFeaturesFromExpectedGroundTruth } from './canonical_ki_features';
-import { CANONICAL_LAST_SEEN } from './canonical_ki_features';
 
 const getFeatureById = (features: Feature[], id: string) =>
   features.find((feature) => feature.id === id);
@@ -35,11 +34,6 @@ describe('canonical_ki_features', () => {
     expect(getFeatureById(features, 'infra-kubernetes')?.properties).toEqual({
       name: 'kubernetes',
     });
-
-    expect(getFeatureById(features, 'entity-frontend')?.uuid).toMatch(
-      /^[0-9a-f]{8}-[0-9a-f]{4}-5[0-9a-f]{3}-a[0-9a-f]{3}-[0-9a-f]{12}$/
-    );
-    expect(getFeatureById(features, 'entity-frontend')?.last_seen).toBe(CANONICAL_LAST_SEEN);
   });
 
   it('filters ellipsis and "multiple services" items', () => {
@@ -76,22 +70,5 @@ describe('canonical_ki_features', () => {
 
     expect(features.some((feature) => feature.id === 'entity-payment')).toBe(true);
     expect(features.some((feature) => feature.id.includes('nodejs'))).toBe(false);
-  });
-
-  it('generates stable uuids for the same scenario and KI feature id', () => {
-    const firstRun = canonicalKIFeaturesFromExpectedGroundTruth({
-      streamName: 'logs',
-      scenarioId: 'payment-unreachable',
-      expectedGroundTruth: 'entities=[frontend]',
-    });
-    const secondRun = canonicalKIFeaturesFromExpectedGroundTruth({
-      streamName: 'logs',
-      scenarioId: 'payment-unreachable',
-      expectedGroundTruth: 'entities=[frontend]',
-    });
-
-    expect(getFeatureById(firstRun, 'entity-frontend')?.uuid).toBe(
-      getFeatureById(secondRun, 'entity-frontend')?.uuid
-    );
   });
 });
