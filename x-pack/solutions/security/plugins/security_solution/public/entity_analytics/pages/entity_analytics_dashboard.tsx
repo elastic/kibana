@@ -19,7 +19,6 @@ import { EntityAnalyticsHeader } from '../components/entity_analytics_header';
 import { EntityAnalyticsAnomalies } from '../components/entity_analytics_anomalies';
 
 import { EntityStoreDashboardPanels } from '../components/entity_store/components/dashboard_entity_store_panels';
-import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 import { useDataView } from '../../data_view_manager/hooks/use_data_view';
 import { PageLoader } from '../../common/components/page_loader';
 import { EaMlJobCallout } from '../components/ea_ml_job_callout';
