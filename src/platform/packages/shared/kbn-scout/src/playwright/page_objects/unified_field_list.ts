@@ -7,12 +7,33 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { Locator } from '../../..';
 import type { ScoutPage } from '..';
 
 type SidebarSectionName = 'meta' | 'empty' | 'available' | 'unmapped' | 'popular' | 'selected';
 
 export class UnifiedFieldList {
   constructor(private readonly page: ScoutPage) {}
+
+  /**
+   * Get the sidebar aria description, which summarizes the field counts
+   * (e.g. "48 available fields. 5 empty fields. 4 meta fields.")
+   */
+  getSidebarAriaDescription(): Locator {
+    return this.page.testSubj.locator('fieldListGrouped__ariaDescription');
+  }
+
+  /**
+   * Wait until the sidebar has finished loading, i.e. the field counts summary
+   * (aria description) is present and non-empty.
+   */
+  async waitUntilSidebarHasLoaded(): Promise<void> {
+    await this.getSidebarAriaDescription().waitFor({ state: 'attached' });
+    await this.page.waitForFunction(() => {
+      const el = document.querySelector('[data-test-subj="fieldListGrouped__ariaDescription"]');
+      return !!el && (el.textContent ?? '').trim().length > 0;
+    });
+  }
 
   /**
    * Get all field names visible in the sidebar

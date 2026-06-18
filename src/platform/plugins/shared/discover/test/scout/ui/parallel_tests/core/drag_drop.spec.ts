@@ -21,6 +21,7 @@ spaceTest.describe('Discover drag and drop', { tag: tags.stateful.all }, () => {
   spaceTest.beforeEach(async ({ browserAuth, pageObjects }) => {
     await browserAuth.loginAsAdmin();
     await pageObjects.discover.goto({ queryMode: 'classic' });
+    await pageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
   });
 
   spaceTest.afterAll(async ({ scoutSpace }) => {
@@ -30,10 +31,11 @@ spaceTest.describe('Discover drag and drop', { tag: tags.stateful.all }, () => {
 
   spaceTest('supports dragging a field onto the grid', async ({ page, pageObjects }) => {
     await expect(page.testSubj.locator('field-extension')).toBeVisible();
-    await expect(page.testSubj.locator('fieldListGrouped__ariaDescription')).toContainText(
-      'available fields'
+    await expect(pageObjects.unifiedFieldList.getSidebarAriaDescription()).toHaveText(
+      '48 available fields. 5 empty fields. 4 meta fields.'
     );
     await expect(pageObjects.discover.getColumnHeader('@timestamp')).toBeVisible();
+    await expect(pageObjects.discover.getColumnHeader('extension')).toBeHidden();
 
     await pageObjects.discover.dragFieldToGrid(['extension']);
     await pageObjects.discover.waitUntilSearchingHasFinished();

@@ -48,7 +48,7 @@ spaceTest.describe('Discover shared links in session storage', { tag: tags.state
 
       const actualTime = await pageObjects.datePicker.getTimeConfig();
 
-      await page.evaluate(() => window.sessionStorage.clear());
+      await page.clearSessionStorage();
       await page.goto(sharedUrl);
       await expect.poll(() => page.url()).toContain('/app/discover');
 
@@ -60,7 +60,7 @@ spaceTest.describe('Discover shared links in session storage', { tag: tags.state
   spaceTest('does not crash when reopening the current hashed URL', async ({ page }) => {
     const currentUrl = page.url();
 
-    await page.evaluate(() => window.sessionStorage.clear());
+    await page.clearSessionStorage();
     await page.goto(currentUrl);
     await expect.poll(() => page.url()).toContain('/app/discover');
 

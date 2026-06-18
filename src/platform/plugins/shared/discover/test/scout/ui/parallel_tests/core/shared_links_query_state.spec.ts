@@ -49,18 +49,32 @@ spaceTest.describe('Discover shared links in query state', { tag: tags.stateful.
     expect(sharedUrl.startsWith(new URL(page.url()).origin)).toBe(true);
   });
 
-  spaceTest('loads a snapshot URL with an empty sort param correctly', async ({ page }) => {
-    const currentUrl = page.url();
-    const { origin } = new URL(currentUrl);
-    const spacePrefix = getSpacePrefix(currentUrl);
-    const snapshotUrl =
-      `${origin}${spacePrefix}/app/discover?_t=1453775307251#` +
-      `/?_g=(filters:!(),refreshInterval:(pause:!t,value:0),time` +
-      `:(from:'2015-09-19T06:31:44.000Z',to:'2015-09-23T18:31:44.000Z'))` +
-      `&_a=(columns:!(),filters:!(),index:'logstash-*',interval:auto,query:(language:kuery,query:''),sort:!())`;
+  spaceTest(
+    'loads a snapshot URL with an empty sort param correctly',
+    async ({ page, pageObjects }) => {
+      const { discover } = pageObjects;
+      const currentUrl = page.url();
+      const { origin } = new URL(currentUrl);
+      const spacePrefix = getSpacePrefix(currentUrl);
+      const snapshotUrl =
+        `${origin}${spacePrefix}/app/discover?_t=1453775307251#` +
+        `/?_g=(filters:!(),refreshInterval:(pause:!t,value:0),time` +
+        `:(from:'2015-09-19T06:31:44.000Z',to:'2015-09-23T18:31:44.000Z'))` +
+        `&_a=(columns:!(),filters:!(),index:'logstash-*',interval:auto,query:(language:kuery,query:''),sort:!())`;
 
-    await page.goto(snapshotUrl);
-    await expect.poll(() => page.url()).toContain('/app/discover');
-    await expect(page.testSubj.locator('querySubmitButton')).toBeVisible();
-  });
+      await page.goto(snapshotUrl);
+      await discover.waitUntilSearchingHasFinished();
+
+      // url fallback default sort should have been pushed to the URL. Playwright's
+      // page.url() returns the decoded URL (literal single quotes), unlike the
+      // percent-encoded form Selenium's getCurrentUrl() exposed in the legacy FTR test.
+      await expect.poll(() => page.url()).toContain("sort:!(!('@timestamp',desc))");
+
+      // document table should contain the right timestamp in the first row
+      await discover.waitForDocTableRendered();
+      await expect
+        .poll(() => discover.getDocTableIndex(1))
+        .toContain('Sep 22, 2015 @ 23:50:13.253');
+    }
+  );
 });

@@ -58,6 +58,13 @@ export type ScoutPage = Page & {
    * @returns A Promise that resolves once the text has been typed.
    */
   typeWithDelay: (selector: string, text: string, options?: { delay: number }) => Promise<void>;
+
+  /**
+   * Clears the browser's `sessionStorage` for the current page.
+   * @returns A Promise that resolves once `sessionStorage` has been cleared.
+   */
+  clearSessionStorage: () => Promise<void>;
+
   /**
    * Simplified API to interact with elements using Kibana's 'data-test-subj' attribute.
    */

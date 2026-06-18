@@ -11,9 +11,12 @@ import type { ScoutPage } from '@kbn/scout';
 import { test, tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { testData } from '../../fixtures/common';
-import { DISCOVER_LOGSTASH_ONLY_ROLE } from '../../fixtures/common/custom_roles';
 
-const NO_TIME_DATA_VIEW = 'log*';
+// Use a `logstash*` wildcard (not `log*`) so the ad-hoc data view resolves to
+// exactly the `logstash_functional` fixture indices. A broader `log*` would
+// also match unrelated `log*` indices on the shared cluster (e.g. synthtrace
+// `logs-*` data streams), making hit-count assertions non-deterministic.
+const NO_TIME_DATA_VIEW = 'logstash*';
 const DEFAULT_TIME_RANGE = `{ "from": "${testData.DEFAULT_TIME_RANGE.from}", "to": "${testData.DEFAULT_TIME_RANGE.to}"}`;
 
 const assertClassicPanelState = async ({
@@ -74,12 +77,7 @@ test.describe('Discover panel toggles in classic mode', { tag: tags.stateful.all
   });
 
   test.beforeEach(async ({ browserAuth, pageObjects }) => {
-    // The second test in this describe selects the wildcard `log*` data
-    // view; with built-in roles the wildcard resolves to every `log*` index
-    // in the cluster, which makes hit-count assertions non-deterministic.
-    // Pin the role to `logstash*` so `log*` covers exactly the
-    // `logstash_functional` fixture indices.
-    await browserAuth.loginWithCustomRole(DISCOVER_LOGSTASH_ONLY_ROLE);
+    await browserAuth.loginAsAdmin();
     await pageObjects.discover.goto({ queryMode: 'classic' });
     await pageObjects.discover.waitUntilSearchingHasFinished();
     await pageObjects.discover.waitForDocTableRendered();

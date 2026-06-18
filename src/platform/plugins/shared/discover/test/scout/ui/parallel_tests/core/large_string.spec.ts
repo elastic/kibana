@@ -50,9 +50,9 @@ spaceTest.describe('Discover large strings', { tag: tags.stateful.all }, () => {
     await expect(page.testSubj.locator('discoverQueryHits')).toHaveText('1');
   });
 
-  spaceTest('highlights the Newsletter match in the field data', async ({ page, pageObjects }) => {
+  spaceTest('highlights the Newsletter match in the field data', async ({ pageObjects }) => {
     await pageObjects.discover.writeAndSubmitKqlQuery('Newsletter');
 
-    await expect(page.locator('[data-test-subj="discoverDocTable"] mark')).toHaveCount(1);
+    await expect(pageObjects.discover.getMarks()).toHaveCount(1);
   });
 });

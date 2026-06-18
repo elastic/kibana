@@ -486,6 +486,14 @@ export class DiscoverApp {
     return headers.join(',');
   }
 
+  /**
+   * Locator for the highlight marks (`<mark>`) rendered in the document table,
+   * e.g. when a searched term is highlighted. Use with `expect(...).toHaveCount(n)`.
+   */
+  getMarks(): Locator {
+    return this.page.testSubj.locator('discoverDocTable').locator('mark');
+  }
+
   async showChart() {
     await this.page.testSubj.click('dscShowHistogramButton');
   }

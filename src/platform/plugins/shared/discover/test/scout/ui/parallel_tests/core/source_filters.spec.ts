@@ -43,10 +43,8 @@ spaceTest.describe('Discover source filters', { tag: tags.stateful.all }, () => 
     await scoutSpace.savedObjects.cleanStandardList();
   });
 
-  spaceTest('does not expose filtered fields in the field list', async ({ page }) => {
-    const fieldNames = await page
-      .locator('[data-test-subj="fieldListGroupedFieldGroups"] .kbnFieldButton__name')
-      .allInnerTexts();
+  spaceTest('does not expose filtered fields in the field list', async ({ pageObjects }) => {
+    const fieldNames = await pageObjects.unifiedFieldList.getAllFieldNames();
 
     expect(fieldNames).not.toContain('referer');
     expect(fieldNames.filter((fieldName) => fieldName.startsWith('relatedContent'))).toHaveLength(
