@@ -274,6 +274,52 @@ describe('When on integration detail', () => {
     });
   });
 
+  describe('and the package is not installed while viewing an old pinned version with prerelease enabled', () => {
+    // Reproduces the bug from https://github.com/elastic/ingest-dev/issues/7934:
+    // URL is pinned to an old version (0.3.7) after uninstall; GA=1.0.0 and prerelease=1.0.0-beta exist.
+    // Before the fix, showVersionSelect was false (version ≠ latestGA or latestPrerelease) → no dropdown.
+    // After the fix, notInstalled status also reveals the dropdown.
+    beforeEach(async () => {
+      mockedApi.responseProvider.getSettings.mockReturnValue({
+        item: { prerelease_integrations_enabled: true, id: '' },
+      });
+
+      // URL is pinned to 0.3.7 (old). GA=1.0.0, prerelease=1.0.0-beta. Package is not installed.
+      const baseResponse = mockedApi.responseProvider.epmGetInfo('nginx');
+      const notInstalledOldVersion = {
+        ...baseResponse.item,
+        status: 'not_installed' as const,
+        version: '0.3.7',
+        latestVersion: '1.0.0',
+      };
+
+      mockedApi.responseProvider.epmGetInfo.mockImplementation((name, version, query) => {
+        if (query?.prerelease === false) {
+          // latest GA query (empty version, prerelease=false)
+          return { item: { ...notInstalledOldVersion, version: '1.0.0' } };
+        }
+        if (!version || version === '') {
+          // latest prerelease query (empty version, prerelease=true or undefined)
+          return { item: { ...notInstalledOldVersion, version: '1.0.0-beta' } };
+        }
+        // specific version query (0.3.7 pinned by URL)
+        return { item: notInstalledOldVersion };
+      });
+
+      await render();
+      await act(() => mockedApi.waitForApi());
+      await act(() => mockedApi.waitForApi());
+      await act(() => mockedApi.waitForApi());
+      await act(() => mockedApi.waitForApi());
+    }, TESTS_TIMEOUT);
+
+    it('should display the version selector even when viewing an old pinned version after uninstall', async () => {
+      const versionSelect = renderResult.queryByTestId('versionSelect');
+      expect(versionSelect).toBeInTheDocument();
+      expect(renderResult.queryByTestId('versionText')).not.toBeInTheDocument();
+    });
+  });
+
   describe('and the package is not installed and prerelease disabled', () => {
     beforeEach(async () => {
       mockGAAndPrereleaseVersions('1.0.0');

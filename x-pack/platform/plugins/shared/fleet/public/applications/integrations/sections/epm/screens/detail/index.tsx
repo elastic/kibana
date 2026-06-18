@@ -286,6 +286,10 @@ export function Detail() {
   const [oldPackageInstallStatus, setOldPackageStatus] = useState(packageInstallStatus);
 
   useEffect(() => {
+    if (oldPackageInstallStatus === 'installed' && packageInstallStatus === 'not_installed') {
+      setOldPackageStatus(packageInstallStatus);
+      refetchPackageInfo();
+    }
     if (packageInstallStatus === 'not_installed') {
       setOldPackageStatus(packageInstallStatus);
     }
@@ -534,8 +538,9 @@ export function Detail() {
       latestGAVersion !== latestPrereleaseVersion &&
       (!packageInfo?.version ||
         packageInfo.version === latestGAVersion ||
-        packageInfo.version === latestPrereleaseVersion),
-    [latestGAVersion, latestPrereleaseVersion, packageInfo?.version]
+        packageInfo.version === latestPrereleaseVersion ||
+        packageInstallStatus === InstallStatus.notInstalled),
+    [latestGAVersion, latestPrereleaseVersion, packageInfo?.version, packageInstallStatus]
   );
 
   const versionOptions = useMemo(
