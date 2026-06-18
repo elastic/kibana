@@ -228,6 +228,50 @@ Restart services for a clean environment — stale reproduction state produces f
 | Tests fail | **Fix broke something** |
 | Related tests fail | **Regression** |
 
+## Controller Check (serverless bugs only)
+
+**Only run this step if `deployment_type` in `analysis.json` is `serverless`.** Skip entirely for stateful bugs.
+
+A fix that only touches the Kibana repo will be correct in local dev but wrong in MKI if either controller repo is the real source of truth. Two private Elastic repos own critical serverless configuration that is not deployed from Kibana:
+
+- **`elastic/elasticsearch-controller`** — owns predefined roles, SAML realm config, and internal system users for all serverless projects
+- **`elastic/kibana-controller`** — owns the `kibana.yml` config injected into MKI pods (SAML auth providers, UIAM, encryption keys, audit logging, agentless API, etc.)
+
+Run through each gate before opening the PR:
+
+**Gate 1 — Does the bug involve a user missing or wrongly having a privilege?**
+
+Check `elasticsearch-controller/internal/config/roles/<project_type>.yaml`. The predefined roles (`viewer`, `editor`, `t1_analyst`, `platform_engineer`, etc.) are defined there — the Kibana mirror at `src/platform/packages/shared/kbn-es/src/serverless_resources/project_roles/<type>/roles.yml` is for local dev only and has no effect in MKI.
+
+→ If the fix requires changing a role's index or Kibana feature privileges: open a PR to `elasticsearch-controller` with the role change **and** a matching PR to Kibana updating the mirror file. The `elasticsearch-controller` PR is what actually fixes MKI.
+
+**Gate 2 — Is the bug specific to a Security AI SOC Engine / Search AI Lake project?**
+
+→ The roles file is `security.ai_soc_engine.yaml` in `elasticsearch-controller`, with its Kibana mirror at `project_roles/security/search_ai_lake/roles.yml`. Note: `xpack.ml.ad.enabled` and `xpack.ml.dfa.enabled` are forced `false` at the ES level for this tier — anomaly detection features do not work there regardless of role.
+
+**Gate 3 — Does the bug only reproduce in MKI, not in local serverless?**
+
+→ The likely cause is a `kibana.yml` value that `kibana-controller` injects and that is absent locally. Check `kibana-controller/internal/controllers/kibana/config/config_settings.go`. MKI-only values include: SAML auth provider config (`xpack.security.authc.providers.saml.*`), UIAM (`xpack.security.uiam.*`), encryption keys, audit log appender, agentless API TLS, AutoOps, UsageAPI, cloud integrations.
+
+→ If the fix requires changing any of these, it goes in `kibana-controller`, not in Kibana's `kibana.yml` or plugin config.
+
+**Gate 4 — Does the Kibana PR rename, deprecate, or split a feature privilege?**
+
+→ The privilege name is referenced by name in `elasticsearch-controller` role YAML files. Renaming `feature_siemV5` (or any other feature privilege) without updating the controller roles will silently break those roles in MKI. A PR to `elasticsearch-controller` is required.
+
+**Controller check summary:**
+
+| Symptom | Where the fix lives |
+|---|---|
+| User missing/having wrong privilege in MKI | `elasticsearch-controller` roles YAML + Kibana mirror |
+| Feature privilege renamed/split in Kibana | `elasticsearch-controller` roles YAML (must stay in sync) |
+| Kibana config correct locally, wrong in MKI | `kibana-controller` `config_settings.go` |
+| SAML / SSO broken in MKI | Both controllers (ES owns realm, Kibana controller owns auth provider) |
+| AI SOC Engine / Search AI Lake role issue | `security.ai_soc_engine.yaml` in `elasticsearch-controller` |
+| New internal role needs to be blocked from SAML | `samlExcludedRoles` in `elasticsearch-controller` `saml.go` |
+
+If any gate triggers, note the required follow-up PRs explicitly in the PR description and link them. **Do not mark the bug as fixed until all controller PRs are also merged.**
+
 ## Phase 6: Open PR
 
 Only proceed if Phase 5 verdict is **Fix verified**.
@@ -273,6 +317,11 @@ gh pr create --draft \
 
 Fixes #<number>
 <similar_issues and related_prs from .bug-fixer-session/analysis.json, if any>
+
+<!-- If any Controller Check gate triggered, list required follow-up PRs here: -->
+<!-- - [ ] elasticsearch-controller PR: <link> -->
+<!-- - [ ] kibana-controller PR: <link> -->
+<!-- Do not close this bug as fixed until all controller PRs are merged. -->
 
 🤖 Generated with [Claude Code](https://claude.ai/claude-code)
 EOF
