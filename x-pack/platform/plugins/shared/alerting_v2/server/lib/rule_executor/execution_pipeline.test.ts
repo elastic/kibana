@@ -44,11 +44,7 @@ describe('RuleExecutionPipeline', () => {
         })
       );
 
-      const pipeline = new RuleExecutionPipeline(
-        loggerService,
-        [step1, step2, step3],
-        []
-      );
+      const pipeline = new RuleExecutionPipeline(loggerService, [step1, step2, step3], []);
       const input = createRuleExecutionPipelineInput();
 
       const result = await pipeline.execute(input);
@@ -83,11 +79,7 @@ describe('RuleExecutionPipeline', () => {
         })
       );
 
-      const pipeline = new RuleExecutionPipeline(
-        loggerService,
-        [step1, step2, step3],
-        []
-      );
+      const pipeline = new RuleExecutionPipeline(loggerService, [step1, step2, step3], []);
       const input = createRuleExecutionPipelineInput();
 
       const result = await pipeline.execute(input);
@@ -123,11 +115,7 @@ describe('RuleExecutionPipeline', () => {
         })
       );
 
-      const pipeline = new RuleExecutionPipeline(
-        loggerService,
-        [step1, step2, step3],
-        []
-      );
+      const pipeline = new RuleExecutionPipeline(loggerService, [step1, step2, step3], []);
       const input = createRuleExecutionPipelineInput();
 
       const result = await pipeline.execute(input);
@@ -307,16 +295,11 @@ describe('RuleExecutionPipeline', () => {
         })
       );
 
-      const pipeline = new RuleExecutionPipeline(
-        loggerService,
-        [step1],
-        [errorMiddleware]
-      );
+      const pipeline = new RuleExecutionPipeline(loggerService, [step1], [errorMiddleware]);
       const input = createRuleExecutionPipelineInput();
 
       await expect(pipeline.execute(input)).rejects.toThrow('Step error');
       expect(errorHandlerCalled).toHaveBeenCalledWith(expect.any(Error));
     });
-
   });
 });
