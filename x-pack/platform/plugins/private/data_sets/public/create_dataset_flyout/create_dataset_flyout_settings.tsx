@@ -5,15 +5,14 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import {
-  EuiFieldNumber,
-  EuiFieldText,
+  EuiButtonEmpty,
   EuiFormRow,
   EuiSelect,
   EuiSpacer,
-  EuiSwitch,
   EuiText,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import type { Control } from 'react-hook-form';
 import { useController } from 'react-hook-form';
@@ -32,6 +31,8 @@ export function CreateDatasetFlyoutSettings({
 }: {
   control: Control<CreateDatasetFormValues>;
 }) {
+  const [isOpen, setIsOpen] = useState(false);
+  const contentId = useGeneratedHtmlId({ prefix: 'createDatasetFlyoutOptionalSettings' });
   const { field: formatField } = useController({
     name: 'settings.format',
     control,
@@ -69,11 +70,26 @@ export function CreateDatasetFlyoutSettings({
   return (
     <>
       <EuiSpacer size="m" />
-      <EuiText size="s" color="subdued" data-test-subj="createDatasetFlyoutSettingsHelp">
-        {createDatasetFlyoutStrings.settingsSectionHelp()}
-      </EuiText>
-      <EuiSpacer size="s" />
-      {/**
+      <EuiButtonEmpty
+        size="s"
+        flush="left"
+        iconType={isOpen ? 'arrowDown' : 'arrowRight'}
+        aria-expanded={isOpen}
+        aria-controls={contentId}
+        onClick={() => setIsOpen((value) => !value)}
+        data-test-subj="createDatasetFlyoutOptionalSettingsToggle"
+      >
+        {isOpen
+          ? createDatasetFlyoutStrings.optionalSettingsHide()
+          : createDatasetFlyoutStrings.optionalSettingsShow()}
+      </EuiButtonEmpty>
+      <div id={contentId} hidden={!isOpen}>
+        <EuiSpacer size="s" />
+        <EuiText size="s" color="subdued" data-test-subj="createDatasetFlyoutSettingsHelp">
+          {createDatasetFlyoutStrings.settingsSectionHelp()}
+        </EuiText>
+        <EuiSpacer size="s" />
+        {/**
       <EuiFormRow label={createDatasetFlyoutStrings.settingsFormatLabel()} fullWidth>
         <EuiSelect
           options={formatOptions}
@@ -89,7 +105,8 @@ export function CreateDatasetFlyoutSettings({
         {showFileSettings ? <CreateDatasetFlyoutFileSettings control={control} /> : null}
 
       */}
-      <CreateDatasetFlyoutFileSettings control={control} />
+        <CreateDatasetFlyoutFileSettings control={control} />
+      </div>
     </>
   );
 }

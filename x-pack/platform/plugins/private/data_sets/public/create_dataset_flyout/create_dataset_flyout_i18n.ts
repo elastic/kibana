@@ -79,6 +79,16 @@ export const createDatasetFlyoutStrings = {
       defaultMessage: 'Optional format and parsing settings for this data set.',
     }),
 
+  optionalSettingsShow: () =>
+    i18n.translate('dataSets.createDatasetFlyout.optionalSettingsShow', {
+      defaultMessage: 'Show optional settings',
+    }),
+
+  optionalSettingsHide: () =>
+    i18n.translate('dataSets.createDatasetFlyout.optionalSettingsHide', {
+      defaultMessage: 'Hide optional settings',
+    }),
+
   settingsFormatLabel: () =>
     i18n.translate('dataSets.createDatasetFlyout.settingsFormatLabel', {
       defaultMessage: 'Format',
