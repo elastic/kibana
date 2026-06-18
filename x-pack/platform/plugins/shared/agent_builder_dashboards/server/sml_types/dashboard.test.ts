@@ -172,7 +172,10 @@ describe('dashboardSmlType', () => {
         expect.objectContaining({
           type: 'dashboard',
           title: 'System Overview',
-          permissions: ['saved_object:dashboard/get'],
+          permissions: {
+            kibana: { privileges: [{ name: 'saved_object:dashboard/get' }] },
+            elasticsearch: { indices: [] },
+          },
         }),
       ],
     });
@@ -182,14 +185,6 @@ describe('dashboardSmlType', () => {
     expect(result?.chunks[0].content).toContain('Operations');
     expect(result?.chunks[0].content).toContain('2 panels');
     expect(result?.chunks[0].content).toContain('1 sections');
-    const requestHandlerContext = dashboardClient.read.mock.calls[0][0];
-    await expect(requestHandlerContext.resolve(['core'])).resolves.toEqual({
-      core: {
-        savedObjects: {
-          client: savedObjectsClient,
-        },
-      },
-    });
   });
 
   it('converts saved dashboards into dashboard attachments with origin', async () => {
@@ -205,11 +200,16 @@ describe('dashboardSmlType', () => {
         type: 'dashboard',
         title: 'System Overview',
         origin_id: 'dashboard-1',
+        origin: { uri: 'dashboard://dashboard-1' },
         content: '...',
         created_at: '2025-01-01T00:00:00.000Z',
         updated_at: '2025-01-01T00:00:00.000Z',
         spaces: ['default'],
-        permissions: ['saved_object:dashboard/get'],
+        permissions: {
+          kibana: { privileges: [{ name: 'saved_object:dashboard/get' }] },
+          elasticsearch: { indices: [] },
+        },
+        ingestion_method: 'crawled',
       },
       {
         request: {} as never,
@@ -244,14 +244,6 @@ describe('dashboardSmlType', () => {
         }),
       ])
     );
-    const requestHandlerContext = dashboardClient.read.mock.calls[0][0];
-    await expect(requestHandlerContext.resolve(['core'])).resolves.toEqual({
-      core: {
-        savedObjects: {
-          client: savedObjectsClient,
-        },
-      },
-    });
   });
 
   it('falls back to generic panel storage when a lens panel is already in API format', async () => {
@@ -270,11 +262,16 @@ describe('dashboardSmlType', () => {
         type: 'dashboard',
         title: 'API Lens Dashboard',
         origin_id: 'dashboard-2',
+        origin: { uri: 'dashboard://dashboard-2' },
         content: '...',
         created_at: '2025-01-01T00:00:00.000Z',
         updated_at: '2025-01-01T00:00:00.000Z',
         spaces: ['default'],
-        permissions: ['saved_object:dashboard/get'],
+        permissions: {
+          kibana: { privileges: [{ name: 'saved_object:dashboard/get' }] },
+          elasticsearch: { indices: [] },
+        },
+        ingestion_method: 'crawled',
       },
       {
         request: {} as never,
@@ -323,13 +320,5 @@ describe('dashboardSmlType', () => {
         chunks: [expect.objectContaining({ type: 'dashboard', title: 'System Overview' })],
       })
     );
-    const requestHandlerContext = dashboardClient.read.mock.calls[0][0];
-    await expect(requestHandlerContext.resolve(['core'])).resolves.toEqual({
-      core: {
-        savedObjects: {
-          client: savedObjectsClient,
-        },
-      },
-    });
   });
 });

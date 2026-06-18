@@ -69,53 +69,54 @@ export function wrapKbnClientWithRetries({
   const wrappedRequest: KbnClient['request'] = async (params: any) => {
     const label = `kbnClient.request ${params?.method ?? 'GET'} ${params?.path ?? ''}`.trim();
 
-    return withRetry(
-      async () => {
-        try {
-          const response = await (kbnClient.request as any)(params);
+    const doRequest = async () => {
+      try {
+        const response = await (kbnClient.request as any)(params);
 
-          // Some endpoints return SSE text with an embedded error instead of a non-2xx status.
-          // When that error is clearly a rate-limit signal, treat it as retryable.
-          if (isSseRateLimitPayload(response?.data)) {
-            throw new Error(
-              `Rate limited (SSE error payload): ${String(response.data).slice(0, 2000)}`
-            );
-          }
-
-          return response;
-        } catch (error) {
-          // 413 is terminal — surface it loudly so cluster regressions don't get
-          // buried in a generic retry warning. Re-throw so withRetry sees it.
-          if (getStatusCode(error) === 413) {
-            log.error(
-              `${label} failed with HTTP 413 Payload Too Large — request body exceeds the cluster limit. ` +
-                `This is treated as terminal (no retry). Error: ${toErrorMessage(error)}`
-            );
-          }
-          throw error;
-        }
-      },
-      {
-        label,
-        maxAttempts,
-        minDelayMs,
-        maxDelayMs,
-        onRetry: ({ attempt, maxAttempts: total, delayMs, error }) => {
-          const message = toErrorMessage(error);
-          const headers = (error as any)?.response?.headers ?? (error as any)?.headers;
-          const retryAfterMs =
-            getRetryAfterMsFromHeaders(headers) ??
-            parseRetryAfterMsFromMessage(message) ??
-            undefined;
-
-          log.warning(
-            `${label} failed (attempt ${attempt}/${total}); retrying in ${delayMs}ms${
-              retryAfterMs ? ` (retry-after=${retryAfterMs}ms)` : ''
-            }. Error: ${message}`
+        // Some endpoints return SSE text with an embedded error instead of a non-2xx status.
+        // When that error is clearly a rate-limit signal, treat it as retryable.
+        if (isSseRateLimitPayload(response?.data)) {
+          throw new Error(
+            `Rate limited (SSE error payload): ${String(response.data).slice(0, 2000)}`
           );
-        },
+        }
+
+        return response;
+      } catch (error) {
+        // 413 is terminal — surface it loudly so cluster regressions don't get
+        // buried in a generic retry warning. Re-throw so withRetry sees it.
+        if (getStatusCode(error) === 413) {
+          log.error(
+            `${label} failed with HTTP 413 Payload Too Large — request body exceeds the cluster limit. ` +
+              `This is treated as terminal (no retry). Error: ${toErrorMessage(error)}`
+          );
+        }
+        throw error;
       }
-    );
+    };
+
+    if (params?.retries === 0) {
+      return doRequest();
+    }
+
+    return withRetry(doRequest, {
+      label,
+      maxAttempts,
+      minDelayMs,
+      maxDelayMs,
+      onRetry: ({ attempt, maxAttempts: total, delayMs, error }) => {
+        const message = toErrorMessage(error);
+        const headers = (error as any)?.response?.headers ?? (error as any)?.headers;
+        const retryAfterMs =
+          getRetryAfterMsFromHeaders(headers) ?? parseRetryAfterMsFromMessage(message) ?? undefined;
+
+        log.warning(
+          `${label} failed (attempt ${attempt}/${total}); retrying in ${delayMs}ms${
+            retryAfterMs ? ` (retry-after=${retryAfterMs}ms)` : ''
+          }. Error: ${message}`
+        );
+      },
+    });
   };
 
   // Proxy all properties, override only request()

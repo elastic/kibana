@@ -24,7 +24,7 @@ const { useKeyboardShortcut } = jest.mocked(
   jest.requireMock('@kbn/shared-ux-utility') as typeof import('@kbn/shared-ux-utility')
 );
 
-const renderButton = (config?: { onClick: () => void; shortcutKey?: string }) => {
+const renderButton = (config?: { onClick: () => void }) => {
   const chrome = chromeServiceMock.createStartContract();
   (chrome.next.globalSearch.get$ as jest.Mock).mockReturnValue(new BehaviorSubject(config));
   return render(
@@ -44,21 +44,21 @@ describe('SearchButton', () => {
   });
 
   it('renders the search button when config is provided', () => {
-    renderButton({ onClick: jest.fn(), shortcutKey: '/' });
+    renderButton({ onClick: jest.fn() });
     expect(screen.getByTestId('chromeNextGlobalHeaderSearchButton')).toBeInTheDocument();
   });
 
   it('calls onClick when clicked', () => {
     const onClick = jest.fn();
-    renderButton({ onClick, shortcutKey: '/' });
+    renderButton({ onClick });
 
     fireEvent.click(screen.getByTestId('chromeNextGlobalHeaderSearchButton'));
     expect(onClick).toHaveBeenCalledTimes(1);
   });
 
-  it('registers keyboard shortcut from config', () => {
+  it('registers keyboard shortcut', () => {
     const onClick = jest.fn();
-    renderButton({ onClick, shortcutKey: '/' });
+    renderButton({ onClick });
 
     expect(useKeyboardShortcut).toHaveBeenCalledWith({ key: '/', meta: true }, onClick);
   });

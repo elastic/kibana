@@ -22,6 +22,7 @@ import {
   scopedHistoryMock,
   themeServiceMock,
 } from '@kbn/core/public/mocks';
+import { loggerMock } from '@kbn/logging-mocks';
 import {
   CONTEXT_STEP_SETTING,
   DEFAULT_COLUMNS_SETTING,
@@ -321,12 +322,14 @@ export function createDiscoverServicesMock(): DiscoverServices {
       canSaveToDashboard: jest.fn(() => false),
       transferBackToEditor: jest.fn(),
       getByValueTab: jest.fn(),
+      getEmbeddableId: jest.fn(() => undefined),
       clearEditorState: jest.fn(),
     },
     alertingVTwo: {
-      DynamicRuleFormFlyout: jest.fn(() => null),
+      CreateRuleOptionsFlyout: jest.fn(() => null),
     },
     trackUiMetric: jest.fn(),
+    logger: { get: jest.fn(() => loggerMock.create()) },
   } as unknown as DiscoverServices;
 }
 
