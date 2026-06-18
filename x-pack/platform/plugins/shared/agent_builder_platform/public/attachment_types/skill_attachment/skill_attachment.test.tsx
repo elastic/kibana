@@ -5,6 +5,10 @@
  * 2.0.
  */
 
+import React from 'react';
+import { render, screen } from '@testing-library/react';
+import { EuiProvider } from '@elastic/eui';
+import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import type { CoreStart, HttpStart } from '@kbn/core/public';
 import type { AgentsServiceStartContract } from '@kbn/agent-builder-browser';
 import type { ActionButton } from '@kbn/agent-builder-browser/attachments';
@@ -15,6 +19,31 @@ jest.mock('@kbn/agent-builder-plugin/public', () => ({
   SKILLS_API_PATH: '/api/agent_builder/skills',
   AGENTBUILDER_APP_ID: 'agent_builder',
 }));
+
+jest.mock('./skill_diff_viewer', () => ({
+  SkillDiffViewer: ({
+    beforeContent,
+    afterContent,
+  }: {
+    beforeContent: string;
+    afterContent: string;
+  }) => (
+    <div
+      data-test-subj="skillDiffViewerStub"
+      data-before={beforeContent}
+      data-after={afterContent}
+    />
+  ),
+}));
+
+const SHOW_DIFF_LABEL = 'Show diff';
+
+const renderWithProviders = (ui: React.ReactElement) =>
+  render(
+    <IntlProvider locale="en">
+      <EuiProvider>{ui}</EuiProvider>
+    </IntlProvider>
+  );
 
 const CREATE_BUTTON_LABEL = 'Create skill';
 const SAVE_CHANGES_LABEL = 'Save changes';
@@ -38,8 +67,40 @@ const buildCreateAttachment = (): SkillAttachment =>
   ({
     id: 'attachment-1',
     type: SKILL_ATTACHMENT_TYPE,
-    data: { mode: 'create', skill: buildSkillData() },
+    data: { mode: 'create', skill: buildSkillData(), originalContent: 'instructions' },
     versionData: { version: 1, versionCount: 1, createdAt: TIMESTAMP_A },
+  } as unknown as SkillAttachment);
+
+/** Create attachment that has been patched — current content differs from first draft. */
+const buildPatchedCreateAttachment = (): SkillAttachment =>
+  ({
+    id: 'attachment-1',
+    type: SKILL_ATTACHMENT_TYPE,
+    data: {
+      mode: 'create',
+      skill: { ...buildSkillData(), content: 'updated instructions' },
+      originalContent: 'instructions',
+    },
+    versionData: { version: 2, versionCount: 2, createdAt: TIMESTAMP_B },
+  } as unknown as SkillAttachment);
+
+/** Create attachment after the skill was successfully created (committed). */
+const buildCreatedCommittedAttachment = (): SkillAttachment =>
+  ({
+    id: 'attachment-1',
+    type: SKILL_ATTACHMENT_TYPE,
+    origin: NEW_SKILL_ID,
+    data: {
+      mode: 'create',
+      skill: { ...buildSkillData(), content: 'updated instructions' },
+      originalContent: 'instructions',
+    },
+    versionData: {
+      version: 2,
+      versionCount: 2,
+      createdAt: TIMESTAMP_B,
+      originSyncedAt: TIMESTAMP_B,
+    },
   } as unknown as SkillAttachment);
 
 /** Edit attachment freshly loaded by the agent — committed (no draft changes). */
@@ -158,6 +219,7 @@ const setup = () => {
     getCreateHandler,
     getButtons,
     getHeader,
+    definition,
   };
 };
 
@@ -282,5 +344,44 @@ describe('createSkillAttachmentDefinition - edit mode (older committed version)'
     const header = getHeader(buildOldCommittedAttachment());
 
     expect(header?.badges).toEqual([]);
+  });
+});
+
+describe('createSkillAttachmentDefinition - instructions diff visibility', () => {
+  const renderInline = (attachment: SkillAttachment) => {
+    const { definition } = setup();
+    return renderWithProviders(
+      <>{definition.renderInlineContent?.({ attachment, isSidebar: false })}</>
+    );
+  };
+
+  it('hides the "Show diff" switch on a fresh create draft (no edits yet)', () => {
+    renderInline(buildCreateAttachment());
+    expect(screen.queryByText(SHOW_DIFF_LABEL)).not.toBeInTheDocument();
+  });
+
+  it('shows the "Show diff" switch on a patched create draft (diverges from first draft)', () => {
+    renderInline(buildPatchedCreateAttachment());
+    expect(screen.getByText(SHOW_DIFF_LABEL)).toBeInTheDocument();
+  });
+
+  it('hides the "Show diff" switch on a created (committed) attachment', () => {
+    renderInline(buildCreatedCommittedAttachment());
+    expect(screen.queryByText(SHOW_DIFF_LABEL)).not.toBeInTheDocument();
+  });
+
+  it('hides the "Show diff" switch on a freshly loaded edit attachment (content matches persisted)', () => {
+    renderInline(buildLoadedEditAttachment());
+    expect(screen.queryByText(SHOW_DIFF_LABEL)).not.toBeInTheDocument();
+  });
+
+  it('shows the "Show diff" switch on a dirty edit draft (pending save)', () => {
+    renderInline(buildDirtyEditAttachment());
+    expect(screen.getByText(SHOW_DIFF_LABEL)).toBeInTheDocument();
+  });
+
+  it('hides the "Show diff" switch on a saved edit attachment (post-save, content matches persisted)', () => {
+    renderInline(buildSavedEditAttachment());
+    expect(screen.queryByText(SHOW_DIFF_LABEL)).not.toBeInTheDocument();
   });
 });

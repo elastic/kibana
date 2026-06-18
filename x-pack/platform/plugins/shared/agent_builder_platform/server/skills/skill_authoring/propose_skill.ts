@@ -98,7 +98,11 @@ export const createProposeSkillTool = (): BuiltinSkillBoundedTool<typeof propose
       };
     }
 
-    const data: SkillAttachmentData = { mode: 'create', skill: parsed.data };
+    const data: SkillAttachmentData = {
+      mode: 'create',
+      skill: parsed.data,
+      originalContent: parsed.data.content,
+    };
     const toolValidation = await validateToolIdsAgainstRegistry(context, data.skill.tool_ids);
     if (!toolValidation.ok) {
       return {

@@ -10,14 +10,13 @@ import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import {
   EuiBadge,
-  EuiButtonEmpty,
-  EuiButtonGroup,
   EuiCodeBlock,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
   EuiPanel,
   EuiSpacer,
+  EuiSwitch,
   EuiText,
 } from '@elastic/eui';
 import type { CoreStart, HttpStart } from '@kbn/core/public';
@@ -36,11 +35,7 @@ import {
   SKILLS_API_PATH,
   type CreateSkillResponse,
 } from '@kbn/agent-builder-plugin/public';
-import {
-  SKILL_ATTACHMENT_TYPE,
-  type SkillAttachment,
-  type SkillAttachmentData,
-} from '../../../common/attachments';
+import { SKILL_ATTACHMENT_TYPE, type SkillAttachment } from '../../../common/attachments';
 import { SkillDiffViewer } from './skill_diff_viewer';
 
 const SKILLS_MANAGE_PATH = '/manage/skills';
@@ -158,32 +153,22 @@ const previewInstructionsStyles = css`
   }
 `;
 
-type DiffBase = 'previous' | 'original';
-
 const SkillInstructions = ({
   showFullContent,
   content,
-  previousContent,
   originalContent,
-  mode,
+  isCommitted: committed,
 }: {
   showFullContent: boolean;
   content: string;
-  previousContent?: string;
   originalContent?: string;
-  mode: SkillAttachmentData['mode'];
+  isCommitted: boolean;
 }) => {
   const [showDiff, setShowDiff] = useState(false);
-  const [diffBase, setDiffBase] = useState<DiffBase>('previous');
 
-  // Only offer the diff toggle when there is a genuine previous version to compare against
-  const hasPreviousVersion = previousContent !== undefined && previousContent !== content;
-  // Only offer the "vs original" secondary option in edit mode when the original content differs
-  const hasOriginalDiff =
-    mode === 'edit' && originalContent !== undefined && originalContent !== content;
-
-  const beforeContent =
-    diffBase === 'original' && originalContent ? originalContent : previousContent;
+  // Only offer the diff toggle when there is a meaningful original to compare against
+  // AND the draft hasn't been committed (after save/create, current content matches what is persisted).
+  const hasDiff = !committed && typeof originalContent === 'string' && originalContent !== content;
 
   const label = showFullContent ? (
     <FormattedMessage
@@ -214,71 +199,27 @@ const SkillInstructions = ({
               <strong>{label}</strong>
             </EuiText>
           </EuiFlexItem>
-          {hasPreviousVersion && (
+          {hasDiff && (
             <EuiFlexItem grow={false}>
-              <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-                {showDiff && hasOriginalDiff && (
-                  <EuiFlexItem grow={false}>
-                    <EuiButtonEmpty
-                      size="xs"
-                      color="primary"
-                      onClick={() => {
-                        setDiffBase((prev) => (prev === 'original' ? 'previous' : 'original'));
-                      }}
-                    >
-                      {diffBase === 'original' ? (
-                        <FormattedMessage
-                          id="xpack.agentBuilderPlatform.attachments.skill.instructions.vsPrevious"
-                          defaultMessage="vs previous version"
-                        />
-                      ) : (
-                        <FormattedMessage
-                          id="xpack.agentBuilderPlatform.attachments.skill.instructions.vsOriginal"
-                          defaultMessage="vs original content"
-                        />
-                      )}
-                    </EuiButtonEmpty>
-                  </EuiFlexItem>
-                )}
-                <EuiFlexItem grow={false}>
-                  <EuiButtonGroup
-                    legend={i18n.translate(
-                      'xpack.agentBuilderPlatform.attachments.skill.instructions.viewToggleLegend',
-                      { defaultMessage: 'Instructions view' }
-                    )}
-                    options={[
-                      {
-                        id: 'current',
-                        label: i18n.translate(
-                          'xpack.agentBuilderPlatform.attachments.skill.instructions.currentOption',
-                          { defaultMessage: 'Current' }
-                        ),
-                      },
-                      {
-                        id: 'diff',
-                        label: i18n.translate(
-                          'xpack.agentBuilderPlatform.attachments.skill.instructions.changesOption',
-                          { defaultMessage: 'Changes' }
-                        ),
-                      },
-                    ]}
-                    idSelected={showDiff ? 'diff' : 'current'}
-                    onChange={(id) => {
-                      setShowDiff(id === 'diff');
-                    }}
-                    buttonSize="compressed"
-                    color="text"
+              <EuiSwitch
+                label={
+                  <FormattedMessage
+                    id="xpack.agentBuilderPlatform.attachments.skill.instructions.showDiffLabel"
+                    defaultMessage="Show diff"
                   />
-                </EuiFlexItem>
-              </EuiFlexGroup>
+                }
+                checked={showDiff}
+                onChange={(e) => setShowDiff(e.target.checked)}
+                compressed
+              />
             </EuiFlexItem>
           )}
         </EuiFlexGroup>
       </EuiFlexItem>
       <EuiFlexItem css={showFullContent && minHeightZeroStyles}>
-        {showDiff && hasPreviousVersion && beforeContent ? (
+        {showDiff && hasDiff && originalContent ? (
           <SkillDiffViewer
-            beforeContent={beforeContent}
+            beforeContent={originalContent}
             afterContent={content}
             showFullContent={showFullContent}
           />
@@ -298,18 +239,36 @@ const SkillInstructions = ({
   );
 };
 
+const isAttachmentLatest = (attachment: SkillAttachment): boolean => {
+  const { version, versionCount } = attachment.versionData ?? {};
+  return (
+    typeof version === 'number' && typeof versionCount === 'number' && version === versionCount
+  );
+};
+
+// An attachment is "committed" when its current version predates the last save.
+// If the version was created after originSyncedAt, the draft has diverged from
+// what is persisted at origin and needs to be saved again.
+const isAttachmentCommitted = (attachment: SkillAttachment): boolean => {
+  const { versionData } = attachment;
+  if (!attachment.origin || !versionData?.originSyncedAt) {
+    return false;
+  }
+  const hasDraftChanges = versionData.createdAt > versionData.originSyncedAt;
+  return !hasDraftChanges;
+};
+
 interface SkillCardProps extends AttachmentRenderProps<SkillAttachment> {
   isCanvas?: boolean;
 }
 
 const SkillCard: React.FC<SkillCardProps> = ({ attachment, isCanvas }) => {
   const {
-    mode,
     originalContent,
     skill: { content, description, tool_ids: toolIds, referenced_content: referencedContent },
   } = attachment.data;
-  const previousContent = attachment.versionData?.previousVersionData?.skill?.content;
   const showFullContent = isCanvas === true;
+  const committed = isAttachmentCommitted(attachment);
 
   return (
     <EuiPanel
@@ -338,9 +297,8 @@ const SkillCard: React.FC<SkillCardProps> = ({ attachment, isCanvas }) => {
           <SkillInstructions
             showFullContent={showFullContent}
             content={content}
-            previousContent={previousContent}
             originalContent={originalContent}
-            mode={mode}
+            isCommitted={committed}
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
@@ -388,23 +346,6 @@ export const createSkillAttachmentDefinition = ({
   agents,
 }: CreateSkillDeps): AttachmentUIDefinition<SkillAttachment> => {
   const canCreate = application.capabilities.agentBuilder?.manageSkills === true;
-  const isLatest = (attachment: SkillAttachment): boolean => {
-    const { version, versionCount } = attachment.versionData ?? {};
-    return (
-      typeof version === 'number' && typeof versionCount === 'number' && version === versionCount
-    );
-  };
-  // An attachment is "committed" when its current version predates the last save.
-  // If the version was created after originSyncedAt, the draft has diverged from
-  // what is persisted at origin and needs to be saved again.
-  const isCommitted = (attachment: SkillAttachment): boolean => {
-    const { versionData } = attachment;
-    if (!attachment.origin || !versionData?.originSyncedAt) {
-      return false;
-    }
-    const hasDraftChanges = versionData.createdAt > versionData.originSyncedAt;
-    return !hasDraftChanges;
-  };
 
   return {
     getLabel: (attachment) =>
@@ -418,12 +359,12 @@ export const createSkillAttachmentDefinition = ({
       } = attachment;
       const badges: HeaderBadge[] = [];
 
-      if (isCommitted(attachment)) {
+      if (isAttachmentCommitted(attachment)) {
         const isCreating = mode === 'create';
         // Only show the committed badge on the latest version.
         // Show no badges for a freshly loaded skill since no user action has been taken yet.
         const isFreshLoad = !isCreating && (attachment.versionData?.versionCount ?? 0) === 1;
-        if (isLatest(attachment) && !isFreshLoad) {
+        if (isAttachmentLatest(attachment) && !isFreshLoad) {
           const label = isCreating
             ? i18n.translate('xpack.agentBuilderPlatform.attachments.skill.committedBadge.create', {
                 defaultMessage: 'Created',
@@ -444,7 +385,7 @@ export const createSkillAttachmentDefinition = ({
       };
       badges.push(draftBadge);
 
-      if (isLatest(attachment)) {
+      if (isAttachmentLatest(attachment)) {
         const latestBadge: HeaderBadge = {
           label: i18n.translate('xpack.agentBuilderPlatform.attachments.skill.latestBadge', {
             defaultMessage: 'Latest',
@@ -539,11 +480,11 @@ export const createSkillAttachmentDefinition = ({
         actionButtons.push(previewButton);
       }
 
-      if (!isLatest(attachment)) {
+      if (!isAttachmentLatest(attachment)) {
         return actionButtons;
       }
 
-      if (isCommitted(attachment)) {
+      if (isAttachmentCommitted(attachment)) {
         const skillId = attachment.origin;
         const editInManagementButton: ActionButton = {
           label: editInManagementLabel,
