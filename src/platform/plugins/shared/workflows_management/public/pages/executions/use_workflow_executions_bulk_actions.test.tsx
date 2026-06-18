@@ -7,9 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+const mockCopyToClipboard = jest.fn((_value: string) => true);
+jest.mock('@elastic/eui', () => {
+  const actual = jest.requireActual('@elastic/eui');
+  return {
+    ...actual,
+    copyToClipboard: (value: string) => mockCopyToClipboard(value),
+  };
+});
+
 import { act, renderHook } from '@testing-library/react';
 import type React from 'react';
 import { ExecutionStatus, type WorkflowExecutionListItemDto } from '@kbn/workflows';
+import { formatWorkflowExecutionsForCopy } from './format_workflow_executions_for_copy';
 import {
   useWorkflowExecutionRerun,
   useWorkflowExecutionsBulkActions,
@@ -56,6 +66,31 @@ describe('useWorkflowExecutionsBulkActions', () => {
     jest.clearAllMocks();
     mockUseWorkflowsCapabilities.mockReturnValue({ canExecuteWorkflow: true });
     mockRunWorkflow.mockResolvedValue({ workflowExecutionId: 'new-exec' });
+    mockCopyToClipboard.mockReturnValue(true);
+  });
+
+  it('always includes bulk copy as JSON', () => {
+    const services = createStartServicesMock();
+    const executions = [createExecution('exec-1', 'wf-1')];
+
+    const { result } = renderHook(
+      () =>
+        useWorkflowExecutionsBulkActions({
+          onRefresh,
+          onAction,
+          executions,
+          selectedExecutionIds: ['exec-1'],
+        }),
+      {
+        wrapper: getTestProvider({ services }),
+      }
+    );
+
+    const copyAction = result.current.panels[0]?.items?.find(
+      (item) => item.key === 'bulk-copy-as-json'
+    );
+    expect(copyAction).toBeDefined();
+    expect(copyAction?.['data-test-subj']).toBe('workflowExecutionsBulkActionCopyAsJson');
   });
 
   it('includes bulk re-run when user can execute workflows', () => {
@@ -98,7 +133,71 @@ describe('useWorkflowExecutionsBulkActions', () => {
       }
     );
 
-    expect(result.current.panels).toHaveLength(0);
+    const items = result.current.panels[0]?.items ?? [];
+    expect(items).toHaveLength(1);
+    expect(items[0]?.key).toBe('bulk-copy-as-json');
+  });
+
+  it('copies selected executions as JSON and closes the popover', async () => {
+    const services = createStartServicesMock();
+    const executions = [
+      createExecution('exec-1', 'wf-1', { workflowName: 'Workflow 1' }),
+      createExecution('exec-2', 'wf-2', { workflowName: 'Workflow 2' }),
+    ];
+    const { result } = renderHook(
+      () =>
+        useWorkflowExecutionsBulkActions({
+          onRefresh,
+          onAction,
+          executions,
+          selectedExecutionIds: ['exec-1', 'exec-2'],
+        }),
+      {
+        wrapper: getTestProvider({ services }),
+      }
+    );
+
+    const copyAction = result.current.panels[0]?.items?.find(
+      (item) => item.key === 'bulk-copy-as-json'
+    );
+
+    await act(async () => {
+      copyAction?.onClick?.({} as unknown as React.MouseEvent<HTMLHRElement>);
+    });
+
+    expect(onAction).toHaveBeenCalledTimes(1);
+    expect(mockCopyToClipboard).toHaveBeenCalledWith(formatWorkflowExecutionsForCopy(executions));
+    expect(services.notifications.toasts.addSuccess).toHaveBeenCalled();
+    expect(onRefresh).not.toHaveBeenCalled();
+  });
+
+  it('shows a warning toast when clipboard copy fails', async () => {
+    mockCopyToClipboard.mockReturnValue(false);
+    const services = createStartServicesMock();
+    const executions = [createExecution('exec-1', 'wf-1')];
+    const { result } = renderHook(
+      () =>
+        useWorkflowExecutionsBulkActions({
+          onRefresh,
+          onAction,
+          executions,
+          selectedExecutionIds: ['exec-1'],
+        }),
+      {
+        wrapper: getTestProvider({ services }),
+      }
+    );
+
+    const copyAction = result.current.panels[0]?.items?.find(
+      (item) => item.key === 'bulk-copy-as-json'
+    );
+
+    await act(async () => {
+      copyAction?.onClick?.({} as unknown as React.MouseEvent<HTMLHRElement>);
+    });
+
+    expect(services.notifications.toasts.addWarning).toHaveBeenCalled();
+    expect(services.notifications.toasts.addSuccess).not.toHaveBeenCalled();
   });
 
   it('re-runs selected executions and refreshes the list without navigating', async () => {

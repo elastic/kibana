@@ -8,12 +8,14 @@
  */
 
 import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
+import { copyToClipboard } from '@elastic/eui';
 import { useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { WorkflowExecutionListItemDto } from '@kbn/workflows';
 import { useRunWorkflow, useWorkflowsCapabilities } from '@kbn/workflows-ui';
 import { buildReplayInputsFromExecutionContext } from './build_replay_inputs_from_execution_context';
 import type { RerunWorkflowExecutionParams } from './build_replay_inputs_from_execution_context';
+import { formatWorkflowExecutionsForCopy } from './format_workflow_executions_for_copy';
 import { useKibana } from '../../hooks/use_kibana';
 
 export const useWorkflowExecutionRerun = ({
@@ -75,6 +77,41 @@ export const useWorkflowExecutionsBulkActions = ({
     [executions]
   );
 
+  const copySelectedExecutionsAsJson = useCallback(
+    (executionIdsToCopy: string[]) => {
+      const selectedExecutions = executionIdsToCopy.flatMap((executionId) => {
+        const execution = executionsById.get(executionId);
+        return execution ? [execution] : [];
+      });
+
+      if (selectedExecutions.length === 0) {
+        return;
+      }
+
+      const text = formatWorkflowExecutionsForCopy(selectedExecutions);
+      if (!copyToClipboard(text)) {
+        notifications.toasts.addWarning({
+          title: i18n.translate('workflowsManagement.executionsPage.bulkCopyAsJson.copyFailed', {
+            defaultMessage: 'Unable to copy to clipboard in this browser',
+          }),
+        });
+        return;
+      }
+
+      notifications.toasts.addSuccess({
+        title: i18n.translate('workflowsManagement.executionsPage.bulkCopyAsJson.successTitle', {
+          defaultMessage: 'Copied to clipboard',
+        }),
+        text: i18n.translate('workflowsManagement.executionsPage.bulkCopyAsJson.successText', {
+          defaultMessage:
+            '{count, plural, one {# execution copied} other {# executions copied}} as JSON',
+          values: { count: selectedExecutions.length },
+        }),
+      });
+    },
+    [executionsById, notifications.toasts]
+  );
+
   const rerunSelectedExecutions = useCallback(
     async (executionIdsToRerun: string[]) => {
       const executionsToRerun = executionIdsToRerun.flatMap((executionId) => {
@@ -132,8 +169,34 @@ export const useWorkflowExecutionsBulkActions = ({
   );
 
   return useMemo(() => {
-    if (!canExecuteWorkflow) {
-      return { panels: [] };
+    const items = [
+      {
+        key: 'bulk-copy-as-json',
+        icon: 'copy',
+        name: i18n.translate('workflowsManagement.executionsPage.bulkCopyAsJson.label', {
+          defaultMessage: 'Copy as JSON',
+        }),
+        'data-test-subj': 'workflowExecutionsBulkActionCopyAsJson',
+        onClick: () => {
+          onAction();
+          copySelectedExecutionsAsJson(selectedExecutionIds);
+        },
+      },
+    ];
+
+    if (canExecuteWorkflow) {
+      items.push({
+        key: 'bulk-re-run',
+        icon: 'refresh',
+        name: i18n.translate('workflowsManagement.executionsPage.bulkReRun.label', {
+          defaultMessage: 'Re-run',
+        }),
+        'data-test-subj': 'workflowExecutionsBulkActionReRun',
+        onClick: () => {
+          onAction();
+          void rerunSelectedExecutions(selectedExecutionIds);
+        },
+      });
     }
 
     return {
@@ -143,22 +206,15 @@ export const useWorkflowExecutionsBulkActions = ({
           title: i18n.translate('workflowsManagement.executionsPage.bulkActions.title', {
             defaultMessage: 'Actions',
           }),
-          items: [
-            {
-              key: 'bulk-re-run',
-              icon: 'refresh',
-              name: i18n.translate('workflowsManagement.executionsPage.bulkReRun.label', {
-                defaultMessage: 'Re-run',
-              }),
-              'data-test-subj': 'workflowExecutionsBulkActionReRun',
-              onClick: () => {
-                onAction();
-                void rerunSelectedExecutions(selectedExecutionIds);
-              },
-            },
-          ],
+          items,
         },
       ],
     };
-  }, [canExecuteWorkflow, onAction, rerunSelectedExecutions, selectedExecutionIds]);
+  }, [
+    canExecuteWorkflow,
+    copySelectedExecutionsAsJson,
+    onAction,
+    rerunSelectedExecutions,
+    selectedExecutionIds,
+  ]);
 };
