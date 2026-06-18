@@ -184,7 +184,8 @@ export interface CloudSetup extends CloudBasicUrls {
   isCloudEnabled: boolean;
   /**
    * `true` when running on ECE (Elastic Cloud Enterprise).
-   * `false` or `undefined` on ESS or self-managed.
+   * When `isSaasContainer` is missing, cloud-enabled non-serverless deployments are assumed to
+   * be ECE. Self-managed and serverless deployments remain `undefined` unless explicitly set.
    */
   isEce?: boolean;
   /**
