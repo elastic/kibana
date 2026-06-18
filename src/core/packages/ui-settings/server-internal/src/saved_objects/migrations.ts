@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { schema } from '@kbn/config-schema';
 import type {
   SavedObjectUnsanitizedDoc,
   SavedObjectSanitizedDoc,
@@ -47,6 +48,20 @@ export const TIMEPICKER_QUICK_RANGES_V3_PRESETS: ReadonlyArray<QuickRange> = [
   { from: 'now-12h', to: 'now', display: 'Last 12 hours' },
   { from: 'now-3d', to: 'now', display: 'Last 3 days' },
 ];
+
+/**
+ * Schema for `config` SO type attributes at model version 3.
+ *
+ * `config` stores `buildNum` plus an open-ended set of UI setting keys
+ * (e.g. `timepicker:quickRanges`, `dateFormat`). `unknowns: 'allow'` lets the
+ * dynamic setting keys flow through; `forwardCompatibility` uses `'ignore'` so
+ * that any attributes a future model version may add are stripped when this
+ * version reads such a document.
+ */
+const configAttributesSchemaV3 = schema.object(
+  { buildNum: schema.number() },
+  { unknowns: 'allow' }
+);
 
 export const mergeTimepickerQuickRangesV3: SavedObjectModelUnsafeTransformFn<any, any> = (doc) => {
   const raw = doc.attributes?.['timepicker:quickRanges'];
@@ -107,6 +122,10 @@ export const modelVersions: SavedObjectsModelVersionMap = {
         transformFn: (guard) => guard(mergeTimepickerQuickRangesV3),
       },
     ],
+    schemas: {
+      forwardCompatibility: configAttributesSchemaV3.extends({}, { unknowns: 'ignore' }),
+      create: configAttributesSchemaV3,
+    },
   },
 };
 

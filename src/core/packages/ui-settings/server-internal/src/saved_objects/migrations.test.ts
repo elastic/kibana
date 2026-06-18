@@ -14,6 +14,7 @@ import type {
 import {
   migrations,
   mergeTimepickerQuickRangesV3,
+  modelVersions,
   TIMEPICKER_QUICK_RANGES_V3_PRESETS,
 } from './migrations';
 
@@ -493,6 +494,13 @@ describe('ui_settings model version 3 — mergeTimepickerQuickRangesV3', () => {
     const result = mergeTimepickerQuickRangesV3(doc, transformContext);
     const raw = result.document.attributes!['timepicker:quickRanges'] as string;
     expect(raw).toBe(JSON.stringify(TIMEPICKER_QUICK_RANGES_V3_PRESETS, null, 2));
+  });
+
+  test('defines forwardCompatibility and create schemas (required by the SO check)', () => {
+    const mv3 = modelVersions[3];
+    expect(mv3).toBeDefined();
+    expect(mv3?.schemas?.forwardCompatibility).toBeDefined();
+    expect(mv3?.schemas?.create).toBeDefined();
   });
 });
 
