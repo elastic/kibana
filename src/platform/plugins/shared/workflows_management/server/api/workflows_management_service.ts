@@ -191,9 +191,15 @@ export class WorkflowsService {
       esClient: this.esClient,
     });
 
-    await this.initializeChangeHistoryService(coreStart);
-
     this.workflowVersioningEnabled = await readWorkflowVersioningEnabled(coreStart);
+
+    if (this.workflowVersioningEnabled) {
+      await this.initializeChangeHistoryService(coreStart);
+    } else {
+      this.logger.debug(
+        'Workflow version history is disabled; skipping change-history data stream init'
+      );
+    }
 
     this.crudService = new WorkflowCrudService({
       logger: this.logger,

@@ -101,6 +101,10 @@ export class WorkflowCrudService {
     request?: KibanaRequest;
     correlationId?: string;
   }): Promise<void> {
+    if (!this.deps.workflowVersioningEnabled) {
+      return;
+    }
+
     const changeHistoryService = this.deps.changeHistoryService;
     const scopedChangeHistory = params.request
       ? changeHistoryService.asScoped(params.request)

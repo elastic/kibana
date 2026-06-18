@@ -108,6 +108,39 @@ const lightweightWorkflowYaml = [
 ].join('\n');
 
 describe('WorkflowCrudService', () => {
+  describe('logWorkflowChangesAfterWrite', () => {
+    it('does not touch change history when workflow versioning is disabled', async () => {
+      const asScoped = jest.fn(() => {
+        throw new Error('asScoped should not be called when versioning is disabled');
+      });
+      const asSystemUser = jest.fn(() => {
+        throw new Error('asSystemUser should not be called when versioning is disabled');
+      });
+      const { deps } = makeDeps(undefined, {
+        workflowVersioningEnabled: false,
+        changeHistoryService: {
+          isInitialized: () => false,
+          initialize: jest.fn().mockResolvedValue(undefined),
+          getHistory: jest.fn(),
+          asScoped,
+          asSystemUser,
+        },
+      });
+      const service = new WorkflowCrudService(deps);
+
+      await service.logWorkflowChangesAfterWrite({
+        workflows: [{ id: 'wf-1', document: makeSource() }],
+        action: WorkflowChangeHistoryAction.workflowUpdate,
+        spaceId: 'default',
+        timestamp: new Date(),
+      });
+
+      expect(asScoped).not.toHaveBeenCalled();
+      expect(asSystemUser).not.toHaveBeenCalled();
+      expect(mockedLogWorkflowChanges).not.toHaveBeenCalled();
+    });
+  });
+
   describe('prepareWorkflowDocumentForStorage', () => {
     it('uses lightweight validation only when explicitly requested', async () => {
       const { deps } = makeDeps();

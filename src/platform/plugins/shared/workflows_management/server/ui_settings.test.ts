@@ -51,7 +51,7 @@ describe('Workflows Management UI Settings', () => {
       expect.objectContaining({
         [WORKFLOWS_VERSIONING_SETTING_ID]: expect.objectContaining({
           schema: expect.any(Object),
-          value: true,
+          value: false,
           readonly: true,
           readonlyMode: 'ui',
           requiresPageReload: true,
