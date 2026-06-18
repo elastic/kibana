@@ -56,8 +56,8 @@
         "@cloud-stateful-security_complete"
       ],
       "location": {
-        "file": "src/platform/plugins/shared/discover/test/scout/ui/tests/tabs/save_and_load_multi_tab.spec.ts",
-        "line": 105,
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/tests/tabs/discover_session_multi_tab_save_load.spec.ts",
+        "line": 73,
         "column": 7
       }
     },
@@ -76,8 +76,8 @@
         "@cloud-stateful-security_complete"
       ],
       "location": {
-        "file": "src/platform/plugins/shared/discover/test/scout/ui/tests/tabs/save_and_load_multi_tab.spec.ts",
-        "line": 248,
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/tests/tabs/discover_session_multi_tab_save_load.spec.ts",
+        "line": 216,
         "column": 7
       }
     },
@@ -96,14 +96,14 @@
         "@cloud-stateful-security_complete"
       ],
       "location": {
-        "file": "src/platform/plugins/shared/discover/test/scout/ui/tests/tabs/save_and_load_multi_tab.spec.ts",
-        "line": 300,
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/tests/tabs/discover_session_multi_tab_save_load.spec.ts",
+        "line": 271,
         "column": 7
       }
     },
     {
       "id": "6df55cf80b8f70f-e3b4abc1dad4c79",
-      "title": "tabs - multi-tab Discover sessions should clear all tabs when starting a new session",
+      "title": "tabs - multi-tab Discover session reset behavior should clear all tabs when starting a new session",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -116,14 +116,14 @@
         "@cloud-stateful-security_complete"
       ],
       "location": {
-        "file": "src/platform/plugins/shared/discover/test/scout/ui/tests/tabs/save_and_load_multi_tab.spec.ts",
-        "line": 413,
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/tests/tabs/discover_session_multi_tab_reset.spec.ts",
+        "line": 59,
         "column": 7
       }
     },
     {
       "id": "6df55cf80b8f70f-6e87947fc4332fd",
-      "title": "tabs - multi-tab Discover sessions should restore correct data view or ES|QL query for uninitialized tabs",
+      "title": "tabs - multi-tab Discover session reset behavior should restore correct data view or ES|QL query for uninitialized tabs",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -136,8 +136,8 @@
         "@cloud-stateful-security_complete"
       ],
       "location": {
-        "file": "src/platform/plugins/shared/discover/test/scout/ui/tests/tabs/save_and_load_multi_tab.spec.ts",
-        "line": 446,
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/tests/tabs/discover_session_multi_tab_reset.spec.ts",
+        "line": 110,
         "column": 7
       }
     },
@@ -157,7 +157,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/tests/tabs/save_and_load_time_based.spec.ts",
-        "line": 61,
+        "line": 64,
         "column": 7
       }
     },
@@ -177,7 +177,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/tests/tabs/save_and_load_time_based.spec.ts",
-        "line": 179,
+        "line": 182,
         "column": 7
       }
     }

@@ -17,7 +17,7 @@
 import { test, tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { testData } from '../../fixtures/common';
-import { saveSearchExtended, getHitCount } from '../../fixtures/tabs/helpers';
+import { saveDiscoverSession, getHitCount } from '../../fixtures/tabs/helpers';
 
 const LEGACY_SESSION_NAME = 'A Saved Search';
 const UPDATED_SESSION_NAME = 'Updated legacy session';
@@ -84,7 +84,7 @@ test.describe('tabs - legacy Discover sessions', { tag: tags.stateful.all }, () 
     });
 
     await test.step('save as new session', async () => {
-      await saveSearchExtended(page, UPDATED_SESSION_NAME, { saveAsNew: true });
+      await saveDiscoverSession(page, UPDATED_SESSION_NAME, { saveAsNew: true });
       await expect(page.testSubj.locator('breadcrumb last')).toHaveText(UPDATED_SESSION_NAME);
       expect(await discover.getTabLabels()).toStrictEqual(['Untitled', 'Untitled 2']);
     });

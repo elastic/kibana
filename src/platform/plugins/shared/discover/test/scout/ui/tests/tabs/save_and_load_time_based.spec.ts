@@ -17,7 +17,10 @@
 import { test, tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { testData } from '../../fixtures/common';
-import { createDataViewFromSearchBar, openSaveSearchModal } from '../../fixtures/tabs/helpers';
+import {
+  createDataViewFromSearchBar,
+  openSaveDiscoverSessionModal,
+} from '../../fixtures/tabs/helpers';
 
 const AD_HOC_WITH_TIME_RANGE = 'log';
 const AD_HOC_WITHOUT_TIME_RANGE = 'logs';
@@ -65,7 +68,7 @@ test.describe('tabs - time based save behavior', { tag: tags.stateful.all }, () 
     const { discover } = pageObjects;
 
     const expectTimeSwitchVisible = async () => {
-      await openSaveSearchModal(page);
+      await openSaveDiscoverSessionModal(page);
       await expect(page.testSubj.locator('storeTimeWithSearch')).toBeVisible();
       await page.keyboard.press('Escape');
       await expect(page.testSubj.locator('confirmSaveSavedObjectButton')).toBeHidden();
@@ -183,7 +186,7 @@ test.describe('tabs - time based save behavior', { tag: tags.stateful.all }, () 
     const { discover } = pageObjects;
 
     const expectTimeSwitchMissing = async () => {
-      await openSaveSearchModal(page);
+      await openSaveDiscoverSessionModal(page);
       await expect(page.testSubj.locator('storeTimeWithSearch')).toBeHidden();
       await page.keyboard.press('Escape');
       await expect(page.testSubj.locator('confirmSaveSavedObjectButton')).toBeHidden();

@@ -106,8 +106,13 @@ export class DiscoverApp {
   ) {
     const item = this.page.testSubj.locator(testId);
     if (!isInOverflowMenu && (await item.isVisible())) {
-      await item.click();
-      return;
+      const clicked = await item
+        .click({ timeout: 5_000 })
+        .then(() => true)
+        .catch(() => false);
+      if (clicked) {
+        return;
+      }
     }
     const overflowButton = this.page.testSubj.locator('app-menu-overflow-button');
     const popover = this.page.testSubj.locator('app-menu-popover');
@@ -119,19 +124,11 @@ export class DiscoverApp {
     }
 
     await expect(overflowButton).toBeVisible();
-    await overflowButton.click();
-
-    // If the click was consumed by closing a stale overlay, the popover won't be open.
-    // Click the overflow button again if needed.
-    const popoverOpened = await popover
-      .waitFor({ state: 'visible', timeout: 2000 })
-      .then(() => true)
-      .catch(() => false);
-    if (!popoverOpened) {
+    await expect(async () => {
       await overflowButton.click();
-    }
+      await expect(popover).toBeVisible({ timeout: 5_000 });
+    }).toPass({ timeout: 30_000 });
 
-    await expect(popover).toBeVisible();
     const menuItem = this.page.testSubj.locator(testId);
     await expect(menuItem).toBeVisible();
     await menuItem.click();
@@ -766,20 +763,22 @@ export class DiscoverApp {
    */
   async editTabLabel(index: number, newLabel: string) {
     const tab = await this.getTabAtIndex(index);
+    const testSubj = await tab.getAttribute('data-test-subj');
+    if (!testSubj) {
+      throw new Error(`Discover tab at index ${index} is missing a data-test-subj attribute`);
+    }
+
     await tab.dblclick();
 
-    const labelInput = this.page.locator(
-      `[data-test-subj^="${UNIFIED_TABS_TEST_SUBJ.editTabLabelInputPrefix}"]`
+    const tabId = testSubj.slice(UNIFIED_TABS_TEST_SUBJ.selectTabBtnPrefix.length);
+    const labelInput = this.page.testSubj.locator(
+      `${UNIFIED_TABS_TEST_SUBJ.editTabLabelInputPrefix}${tabId}`
     );
     await labelInput.waitFor({ state: 'visible' });
     await labelInput.fill(newLabel);
     await this.page.keyboard.press('Enter');
 
     // Wait for the label to update
-    const testSubj = await tab.getAttribute('data-test-subj');
-    if (!testSubj) {
-      throw new Error(`Discover tab at index ${index} is missing a data-test-subj attribute`);
-    }
     await this.page.waitForFunction(
       ({ tabTestSubj, label }) => {
         const tabButton = document.querySelector(`[data-test-subj="${tabTestSubj}"]`);

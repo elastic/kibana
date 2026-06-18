@@ -10,7 +10,9 @@
 import { EuiToastWrapper, type ScoutPage } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 
-export const openSaveSearchModal = async (page: ScoutPage) => {
+const NO_TIME_FILTER_OPTION = "--- I don't want to use the time filter ---";
+
+export const openSaveDiscoverSessionModal = async (page: ScoutPage) => {
   const saveButton = page.testSubj.locator('discoverSaveButton');
   if (await saveButton.isVisible()) {
     await saveButton.click();
@@ -26,32 +28,24 @@ export const openSaveSearchModal = async (page: ScoutPage) => {
   }
 
   await expect(overflowButton).toBeVisible();
-  await overflowButton.click();
-
-  const popoverOpened = await popover
-    .waitFor({ state: 'visible', timeout: 2000 })
-    .then(() => true)
-    .catch(() => false);
-
-  if (!popoverOpened) {
+  await expect(async () => {
     await overflowButton.click();
-  }
+    await expect(popover).toBeVisible({ timeout: 5_000 });
+  }).toPass({ timeout: 30_000 });
 
-  await expect(popover).toBeVisible();
   await expect(saveButton).toBeVisible();
   await saveButton.click();
 };
 
 /**
- * Extended save that supports `saveAsNew` and `storeTimeRange` options.
- * The base `DiscoverApp.saveSearch` only handles the name.
+ * Saves a Discover session with options that are not covered by the shared page object.
  */
-export const saveSearchExtended = async (
+export const saveDiscoverSession = async (
   page: ScoutPage,
   name: string,
   options?: { saveAsNew?: boolean; storeTimeRange?: boolean }
 ) => {
-  await openSaveSearchModal(page);
+  await openSaveDiscoverSessionModal(page);
   await page.testSubj.fill('savedObjectTitle', name);
 
   if (options?.saveAsNew !== undefined) {
@@ -112,10 +106,10 @@ export const createDataViewFromSearchBar = async (
   const comboInput = page.testSubj.locator('timestampField >> comboBoxSearchInput');
   if (!options.hasTimeField && (await comboInput.isEnabled())) {
     await comboInput.click();
-    await comboInput.fill("--- I don't want to use the time filter ---");
-    // Wait for the option to appear in the combobox dropdown and click it
+    await comboInput.fill(NO_TIME_FILTER_OPTION);
+    // This EUI option has no stable test subject; centralize the copy dependency.
     const optionLocator = page.getByRole('option', {
-      name: "--- I don't want to use the time filter ---",
+      name: NO_TIME_FILTER_OPTION,
     });
     await optionLocator.click();
   }
@@ -140,7 +134,9 @@ export const selectDataViewMode = async (page: ScoutPage, options?: { discardMod
     has: page.locator('[data-test-subj^="unifiedTabs_selectTabBtn_"][aria-selected="true"]'),
   });
   await activeTabContainer.locator('[data-test-subj^="unifiedTabs_tabMenuBtn_"]').click();
-  await page.testSubj.click('unifiedTabs_tabMenuItem_switchToClassic');
+  const switchToClassicMenuItem = page.testSubj.locator('unifiedTabs_tabMenuItem_switchToClassic');
+  await expect(switchToClassicMenuItem).toBeVisible();
+  await switchToClassicMenuItem.click();
 
   if (options?.discardModal) {
     await expect(page.testSubj.locator('discover-esql-to-dataview-modal')).toBeVisible();
@@ -179,6 +175,8 @@ export const changeVisShape = async (page: ScoutPage, seriesType: string) => {
 
   await page.testSubj.locator('applyFlyoutButton').scrollIntoViewIfNeeded();
   await page.testSubj.click('applyFlyoutButton');
+  await expect(page.testSubj.locator('lnsConfigPanelWrapper')).toBeHidden({ timeout: 30_000 });
+  await expect(page.testSubj.locator('lnsChartSwitchPopover')).toBeHidden({ timeout: 30_000 });
 };
 
 /**
