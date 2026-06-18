@@ -43,9 +43,10 @@ export const createOptionsListControlAction = (): CreateControlTypeAction<
       // ES|QL-source controls can sometimes pass a field name that omits a .keyword suffix, so try adding it before
       // declaring the field non-existent
       const field =
-        dataView.getFieldByName(fieldName) ?? !fieldName.endsWith('.keyword')
+        dataView.getFieldByName(fieldName) ??
+        (!fieldName.endsWith('.keyword')
           ? dataView.getFieldByName(`${fieldName}.keyword`)
-          : undefined;
+          : undefined);
       return Boolean(field && isFieldCompatible(field));
     },
     execute: async ({ embeddable, state, controlId }) => {
