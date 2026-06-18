@@ -23,10 +23,6 @@ import { LogoIcon } from '../shared/logo_icon';
 import { usePricingFeature } from '../quickstart_flows/shared/use_pricing_feature';
 import { useManagedOtlpServiceAvailability } from '../shared/use_managed_otlp_service_availability';
 
-/**
- * Shared id for the Amazon CloudWatch quickstart card. Used both here (card definition)
- * and in the onboarding form (to locate the card for its dedicated row), so keep them in sync.
- */
 export const AWS_CLOUDWATCH_OTEL_CARD_ID = 'aws-cloudwatch-otel-virtual';
 
 export function useCustomCards(
@@ -441,6 +437,32 @@ export function useCustomCards(
       isCollectionCard: true,
       onCardClick: createCollectionCardHandler('azure'),
     },
+    {
+      id: AWS_CLOUDWATCH_OTEL_CARD_ID,
+      name: 'aws-cloudwatch-otel',
+      type: 'virtual',
+      title: i18n.translate(
+        'xpack.observability_onboarding.useCustomCardsForCategory.awsCloudwatchOtelTitle',
+        { defaultMessage: 'AWS' }
+      ),
+      description: i18n.translate(
+        'xpack.observability_onboarding.useCustomCardsForCategory.awsCloudwatchOtelDescription',
+        {
+          defaultMessage: 'Collect signals from AWS with OpenTelemetry',
+        }
+      ),
+      categories: ['observability'],
+      icons: [
+        {
+          type: 'eui',
+          src: 'logoAWS',
+        },
+      ],
+      url: awsCloudwatchOtelUrl,
+      version: '',
+      integration: '',
+      isQuickstart: true,
+    },
     ...(isIngestHubOnboardingEnabled
       ? [
           {
@@ -466,7 +488,7 @@ export function useCustomCards(
             type: 'virtual',
             title: i18n.translate(
               'xpack.observability_onboarding.useCustomCardsForCategory.awsTitle',
-              { defaultMessage: 'AWS' }
+              { defaultMessage: 'AWS collection' }
             ),
             description: i18n.translate(
               'xpack.observability_onboarding.useCustomCardsForCategory.awsDescription',
@@ -502,32 +524,6 @@ export function useCustomCards(
       integration: '',
       isCollectionCard: true,
       onCardClick: createCollectionCardHandler('gcp'),
-    },
-    {
-      id: AWS_CLOUDWATCH_OTEL_CARD_ID,
-      name: 'aws-cloudwatch-otel',
-      type: 'virtual',
-      title: i18n.translate(
-        'xpack.observability_onboarding.useCustomCardsForCategory.awsCloudwatchOtelTitle',
-        { defaultMessage: 'Amazon CloudWatch' }
-      ),
-      description: i18n.translate(
-        'xpack.observability_onboarding.useCustomCardsForCategory.awsCloudwatchOtelDescription',
-        {
-          defaultMessage: 'Collect CloudWatch metrics with the Elastic Distro for OpenTelemetry',
-        }
-      ),
-      categories: ['observability'],
-      icons: [
-        {
-          type: 'eui',
-          src: 'logoAWS',
-        },
-      ],
-      url: awsCloudwatchOtelUrl,
-      version: '',
-      integration: '',
-      isQuickstart: true,
     },
     {
       id: 'upload-file-virtual',

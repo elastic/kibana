@@ -138,10 +138,10 @@ describe('OnboardingFlowForm', () => {
       expect(screen.getByTestId('package-item-otel-kubernetes')).toBeInTheDocument();
     });
 
-    it('renders the AWS CloudWatch OTel tile in its own centered row under the cloud providers', () => {
+    it('leads with the AWS quickstart in the provider grid and shows the AWS collection as a fallback below', () => {
       mockUseCustomCards.mockReturnValue([
         { id: 'azure-logs-virtual', title: 'Azure' } as IntegrationCardItem,
-        { id: 'aws-logs-virtual', title: 'AWS' } as IntegrationCardItem,
+        { id: 'aws-logs-virtual', title: 'AWS collection' } as IntegrationCardItem,
         { id: 'gcp-logs-virtual', title: 'Google Cloud Platform' } as IntegrationCardItem,
         { id: 'aws-cloudwatch-otel-virtual', title: 'AWS' } as IntegrationCardItem,
       ]);
@@ -150,15 +150,16 @@ describe('OnboardingFlowForm', () => {
 
       const [featuredPackageList] = screen.getAllByTestId('package-list');
       expect(
-        within(featuredPackageList).queryByTestId('package-item-aws-cloudwatch-otel-virtual')
+        within(featuredPackageList).getByTestId('package-item-aws-cloudwatch-otel-virtual')
+      ).toBeInTheDocument();
+      expect(
+        within(featuredPackageList).queryByTestId('package-item-aws-logs-virtual')
       ).not.toBeInTheDocument();
       expect(within(featuredPackageList).getAllByTestId(/^package-item-/)).toHaveLength(3);
 
-      const extraRow = screen.getByTestId('observabilityOnboardingCloudExtraRow');
-      expect(extraRow).toBeInTheDocument();
-      expect(
-        within(extraRow).getByTestId('package-card-aws-cloudwatch-otel-virtual')
-      ).toBeInTheDocument();
+      const fallbackRow = screen.getByTestId('observabilityOnboardingCloudExtraRow');
+      expect(fallbackRow).toBeInTheDocument();
+      expect(within(fallbackRow).getByTestId('package-card-aws-logs-virtual')).toBeInTheDocument();
     });
   });
 
@@ -199,10 +200,10 @@ describe('OnboardingFlowForm', () => {
       expect(grid).toBeInTheDocument();
     });
 
-    it('renders the AWS CloudWatch OTel tile in its own centered row under the cloud providers', () => {
+    it('leads with the AWS quickstart in the provider grid and shows the AWS collection as a fallback below', () => {
       mockUseCustomCards.mockReturnValue([
         { id: 'azure-logs-virtual', title: 'Azure' } as IntegrationCardItem,
-        { id: 'aws-logs-virtual', title: 'AWS' } as IntegrationCardItem,
+        { id: 'aws-logs-virtual', title: 'AWS collection' } as IntegrationCardItem,
         { id: 'gcp-logs-virtual', title: 'Google Cloud Platform' } as IntegrationCardItem,
         { id: 'aws-cloudwatch-otel-virtual', title: 'AWS' } as IntegrationCardItem,
       ]);
@@ -211,15 +212,16 @@ describe('OnboardingFlowForm', () => {
 
       const [featuredPackageList] = screen.getAllByTestId('package-list');
       expect(
-        within(featuredPackageList).queryByTestId('package-item-aws-cloudwatch-otel-virtual')
+        within(featuredPackageList).getByTestId('package-item-aws-cloudwatch-otel-virtual')
+      ).toBeInTheDocument();
+      expect(
+        within(featuredPackageList).queryByTestId('package-item-aws-logs-virtual')
       ).not.toBeInTheDocument();
       expect(within(featuredPackageList).getAllByTestId(/^package-item-/)).toHaveLength(3);
 
-      const extraRow = screen.getByTestId('observabilityOnboardingCloudExtraRow');
-      expect(extraRow).toBeInTheDocument();
-      expect(
-        within(extraRow).getByTestId('package-card-aws-cloudwatch-otel-virtual')
-      ).toBeInTheDocument();
+      const fallbackRow = screen.getByTestId('observabilityOnboardingCloudExtraRow');
+      expect(fallbackRow).toBeInTheDocument();
+      expect(within(fallbackRow).getByTestId('package-card-aws-logs-virtual')).toBeInTheDocument();
     });
   });
 

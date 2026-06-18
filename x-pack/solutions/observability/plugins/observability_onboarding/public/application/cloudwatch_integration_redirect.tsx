@@ -16,7 +16,6 @@ import type { ObservabilityOnboardingAppServices } from '..';
 
 const AWS_CLOUDWATCH_OTEL_PACKAGE = 'aws_cloudwatch_input_otel';
 const BACK_LINK_PATH = '?category=cloud';
-// Abort version resolution if Fleet's EPM endpoint hangs, so the user is never stuck on the spinner.
 const RESOLVE_TIMEOUT_MS = 30_000;
 
 export const CloudwatchIntegrationRedirect: React.FC = () => {
@@ -25,7 +24,6 @@ export const CloudwatchIntegrationRedirect: React.FC = () => {
   } = useKibana<ObservabilityOnboardingAppServices>();
 
   const [hasError, setHasError] = useState(false);
-  // Bumping this re-runs the resolve effect when the user clicks "Try again".
   const [attempt, setAttempt] = useState(0);
 
   const goBackToCloud = useCallback(() => {
@@ -47,9 +45,6 @@ export const CloudwatchIntegrationRedirect: React.FC = () => {
 
     const resolveAndRedirect = async () => {
       try {
-        // The package is beta-only, so prerelease must be enabled to resolve its version.
-        // EPM_API_ROUTES.INFO_PATTERN requires a pinned version, which is what we are
-        // resolving here, so the version-less package info path is used directly.
         const response = await http.get<{ item: { version: string } }>(
           `/api/fleet/epm/packages/${AWS_CLOUDWATCH_OTEL_PACKAGE}`,
           { query: { prerelease: true }, signal: controller.signal }
@@ -67,7 +62,6 @@ export const CloudwatchIntegrationRedirect: React.FC = () => {
           path: BACK_LINK_PATH,
         });
 
-        // Use Fleet's typed route state and path builder so a Fleet rename surfaces here at build time.
         const routeState: CreatePackagePolicyRouteState = {
           onCancelNavigateTo: [OBSERVABILITY_ONBOARDING_APP_ID, { path: BACK_LINK_PATH }],
           onCancelUrl,
@@ -76,8 +70,6 @@ export const CloudwatchIntegrationRedirect: React.FC = () => {
           pkgkey: `${AWS_CLOUDWATCH_OTEL_PACKAGE}-${version}`,
         });
 
-        // `replace: true` keeps this redirect out of history so the browser back button
-        // returns to the Add data grid instead of re-firing the redirect.
         application.navigateToApp('fleet', {
           path: addIntegrationPath,
           state: routeState,

@@ -112,11 +112,9 @@ describe('useCustomCards', () => {
     expect(screen.getByTestId('card-name-aws-cloudwatch-otel-virtual')).toHaveTextContent(
       'aws-cloudwatch-otel'
     );
-    expect(screen.getByTestId('card-title-aws-cloudwatch-otel-virtual')).toHaveTextContent(
-      'Amazon CloudWatch'
-    );
+    expect(screen.getByTestId('card-title-aws-cloudwatch-otel-virtual')).toHaveTextContent('AWS');
     expect(screen.getByTestId('card-description-aws-cloudwatch-otel-virtual')).toHaveTextContent(
-      'Collect CloudWatch metrics with the Elastic Distro for OpenTelemetry'
+      'Collect signals from AWS with OpenTelemetry'
     );
     expect(screen.getByTestId('card-icon-aws-cloudwatch-otel-virtual')).toHaveTextContent(
       'logoAWS'

@@ -121,4 +121,10 @@ describe('CloudWatch routes', () => {
     expect(screen.getByTestId('cloudwatchIntegrationRedirectStub')).toBeInTheDocument();
     expect(screen.queryByTestId('landingPageStub')).toBeNull();
   });
+
+  it('renders CloudwatchIntegrationRedirect at the /aws alias', () => {
+    renderFlow(false, '/aws');
+    expect(screen.getByTestId('cloudwatchIntegrationRedirectStub')).toBeInTheDocument();
+    expect(screen.queryByTestId('landingPageStub')).toBeNull();
+  });
 });

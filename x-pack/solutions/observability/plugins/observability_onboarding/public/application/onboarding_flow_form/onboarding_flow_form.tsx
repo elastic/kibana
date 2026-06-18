@@ -40,9 +40,6 @@ import type { ObservabilityOnboardingAppServices } from '../..';
 import { PackageList } from '../package_list/package_list';
 import { usePricingFeature } from '../quickstart_flows/shared/use_pricing_feature';
 
-// Cloud provider tiles (Azure/AWS/GCP) are collection cards that render a "View collection"
-// footer, making them taller than PackageCard's 127px default. Pin the CloudWatch quickstart
-// tile to the same height so the extra row lines up visually with the provider row above.
 const CLOUD_PROVIDER_TILE_MIN_HEIGHT = 152;
 
 interface UseCaseOption {
@@ -192,13 +189,13 @@ export const OnboardingFlowForm: FunctionComponent = () => {
     host: ['auto-detect-logs', 'otel-logs'],
     kubernetes: ['otel-kubernetes'],
     application: ['apm-virtual', 'otel-virtual', 'synthetics-virtual'],
-    cloud: ['azure-logs-virtual', 'aws-logs-virtual', 'gcp-logs-virtual'],
+    cloud: ['azure-logs-virtual', AWS_CLOUDWATCH_OTEL_CARD_ID, 'gcp-logs-virtual'],
   };
   const customCards = useCustomCards(createCollectionCardHandler);
   const selectedCategory = searchParams.get('category') as Category;
-  const awsCloudwatchOtelCard =
+  const awsCollectionFallbackCard =
     selectedCategory === 'cloud'
-      ? customCards.find((card) => card.id === AWS_CLOUDWATCH_OTEL_CARD_ID)
+      ? customCards.find((card) => card.id === 'aws-logs-virtual')
       : undefined;
   const featuredCardsForCategory: IntegrationCardItem[] = customCards.filter((card) => {
     if (selectedCategory === null) {
@@ -373,8 +370,16 @@ export const OnboardingFlowForm: FunctionComponent = () => {
             </strong>
           </EuiTitle>
           <EuiSpacer size="m" />
-          <PackageList list={featuredCardsForCategory} showCardLabels={true} />
-          {awsCloudwatchOtelCard && (
+          <div
+            css={css`
+              [data-test-subj='integration-card:${AWS_CLOUDWATCH_OTEL_CARD_ID}'] {
+                padding-block-start: ${euiTheme.size.base};
+              }
+            `}
+          >
+            <PackageList list={featuredCardsForCategory} showCardLabels={true} />
+          </div>
+          {awsCollectionFallbackCard && (
             <>
               <EuiSpacer size="s" />
               <EuiFlexGroup
@@ -384,20 +389,12 @@ export const OnboardingFlowForm: FunctionComponent = () => {
                 <EuiFlexItem
                   grow={false}
                   css={css`
-                    // Match the width of a single provider tile in the 3-column grid above.
-                    // That grid uses EuiFlexGrid gutterSize="m" (gap = euiTheme.size.base),
-                    // so a column is the full width minus two gutters, divided by three.
                     width: calc((100% - ${euiTheme.size.base} * 2) / 3);
                   `}
                 >
-                  {/*
-                   * Render the card directly instead of through PackageList, which wraps
-                   * a single card in a virtualized grid that adds trailing spacing and
-                   * reserved row height. This keeps the tile flush with the provider row.
-                   */}
                   <Suspense fallback={null}>
                     <LazyPackageCard
-                      {...awsCloudwatchOtelCard}
+                      {...awsCollectionFallbackCard}
                       showLabels={true}
                       minCardHeight={CLOUD_PROVIDER_TILE_MIN_HEIGHT}
                     />
@@ -425,8 +422,6 @@ export const OnboardingFlowForm: FunctionComponent = () => {
           setSearchQuery={setIntegrationSearch}
           flowCategory={selectedCategory}
           customCards={customCards.filter(
-            // The CloudWatch quickstart has its own featured tile in the Cloud category, so keep
-            // it out of the search results to avoid showing the same tile twice.
             (card) => !card.isCollectionCard && card.id !== AWS_CLOUDWATCH_OTEL_CARD_ID
           )}
           excludePackageIdList={searchExcludePackageIdList}
