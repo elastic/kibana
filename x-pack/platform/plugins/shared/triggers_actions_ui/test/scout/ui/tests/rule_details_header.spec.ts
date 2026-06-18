@@ -8,7 +8,6 @@
 // Migrated from: x-pack/platform/test/functional_with_es_ssl/apps/rules/details.ts
 // Section: "Rule Details" header block (disable, snooze, re-enable, snooze schedule).
 // Rule type: test.always-firing → .es-query with 1s interval (triggers interval-warning toast).
-// Tests are stateful: state mutates across them (disable in test 3, re-enable in test 5).
 
 import type { KbnClient } from '@kbn/scout';
 import { tags } from '@kbn/scout';
@@ -32,26 +31,37 @@ const createHeaderRule = async (kbnClient: KbnClient, name: string) => {
   return resp.data;
 };
 
+const disableRule = async (kbnClient: KbnClient, ruleId: string) => {
+  await kbnClient.request({
+    method: 'POST',
+    path: `/api/alerting/rule/${ruleId}/_disable`,
+    headers: { 'kbn-xsrf': 'scout' },
+  });
+};
+
 test.describe('Rule Details - Header', { tag: tags.stateful.classic }, () => {
   let ruleId: string;
+  let ruleName: string;
 
-  test.beforeAll(async ({ kbnClient }) => {
-    const rule = await createHeaderRule(kbnClient, `header-test-rule-${Date.now()}`);
+  test.beforeEach(async ({ browserAuth, kbnClient, pageObjects }) => {
+    ruleName = `header-test-rule-${Date.now()}`;
+    const rule = await createHeaderRule(kbnClient, ruleName);
     ruleId = rule.id;
-  });
 
-  test.beforeEach(async ({ browserAuth, pageObjects }) => {
     await browserAuth.loginAsAdmin();
     await pageObjects.ruleDetailsPage.gotoById(ruleId);
     await expect(pageObjects.ruleDetailsPage.ruleDetailsTitle).toBeVisible({ timeout: 20_000 });
   });
 
-  test.afterAll(async ({ apiServices }) => {
-    if (ruleId) await apiServices.alerting.rules.delete(ruleId);
+  test.afterEach(async ({ apiServices }) => {
+    if (ruleId) {
+      await apiServices.alerting.rules.delete(ruleId);
+      ruleId = '';
+    }
   });
 
   test('renders the rule details', async ({ page }) => {
-    await expect(page.testSubj.locator('ruleDetailsTitle')).toContainText('header-test-rule');
+    await expect(page.testSubj.locator('ruleDetailsTitle')).toContainText(ruleName);
     await expect(page.testSubj.locator('ruleSummaryRuleType')).toHaveText('Elasticsearch query');
     await expect(page.testSubj.locator('apiKeyOwnerLabel')).toContainText('elastic');
   });
@@ -75,8 +85,10 @@ test.describe('Rule Details - Header', { tag: tags.stateful.classic }, () => {
     await expect(statusDropdown).toContainText('Disabled', { timeout: 15_000 });
   });
 
-  test('should allow you to snooze a disabled rule', async ({ page }) => {
-    // Rule is DISABLED from the previous test
+  test('should allow you to snooze a disabled rule', async ({ page, pageObjects, kbnClient }) => {
+    await disableRule(kbnClient, ruleId);
+    await pageObjects.ruleDetailsPage.gotoById(ruleId);
+
     const statusDropdown = page.testSubj.locator('statusDropdown');
     await expect(statusDropdown).toContainText('Disabled');
 
@@ -92,8 +104,10 @@ test.describe('Rule Details - Header', { tag: tags.stateful.classic }, () => {
     await page.testSubj.click('ruleSnoozeCancel');
   });
 
-  test('should reenable a disabled rule', async ({ page }) => {
-    // Rule is DISABLED from test "should disable the rule"
+  test('should reenable a disabled rule', async ({ page, pageObjects, kbnClient }) => {
+    await disableRule(kbnClient, ruleId);
+    await pageObjects.ruleDetailsPage.gotoById(ruleId);
+
     const statusDropdown = page.testSubj.locator('statusDropdown');
     await expect(statusDropdown).toContainText('Disabled');
 

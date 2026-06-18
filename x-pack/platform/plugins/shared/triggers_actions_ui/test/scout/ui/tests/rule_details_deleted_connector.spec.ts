@@ -13,17 +13,14 @@
 // add a replacement connector of the same type.
 //
 // FTR used preconfigured 'my-slack1' (Slack#xyztest) as the replacement; here we
-// use the preconfigured '.server-log' connector ('Serverlog') that the Scout
-// stateful base config now registers, and a throwaway Slack connector as the one
-// that gets deleted.
+// create a second Slack connector dynamically so the same-type replacement
+// behavior is covered without depending on preconfigured connectors.
 
 import { v4 as uuidv4 } from 'uuid';
 import type { KbnClient } from '@kbn/scout';
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { test } from '../fixtures';
-
-const PRECONFIGURED_SERVER_LOG_NAME = 'Serverlog';
 
 const createSlackConnector = async (kbnClient: KbnClient, name: string) => {
   const resp = await kbnClient.request<{ id: string; name: string }>({
@@ -57,11 +54,20 @@ test.describe(
   () => {
     const ruleName = `deleted-connector-${uuidv4()}`;
     let ruleId: string;
-    let slackConnectorId: string;
+    let deletedSlackConnectorId: string;
+    let replacementSlackConnectorId: string;
+    let replacementSlackConnectorName: string;
 
     test.beforeAll(async ({ kbnClient }) => {
       const connector = await createSlackConnector(kbnClient, `scout-slack-del-${Date.now()}`);
-      slackConnectorId = connector.id;
+      deletedSlackConnectorId = connector.id;
+
+      const replacementConnector = await createSlackConnector(
+        kbnClient,
+        `scout-slack-replace-${Date.now()}`
+      );
+      replacementSlackConnectorId = replacementConnector.id;
+      replacementSlackConnectorName = replacementConnector.name;
 
       const resp = await kbnClient.request<{ id: string }>({
         method: 'POST',
@@ -74,7 +80,7 @@ test.describe(
           schedule: { interval: '1m' },
           actions: [
             {
-              id: slackConnectorId,
+              id: deletedSlackConnectorId,
               group: 'query matched',
               params: { message: 'from alert' },
               frequency: { summary: false, notify_when: 'onActionGroupChange', throttle: null },
@@ -102,7 +108,7 @@ test.describe(
 
       // Delete the connector while it is still referenced by the rule so the rule
       // now points at a missing connector.
-      await deleteConnector(kbnClient, slackConnectorId);
+      await deleteConnector(kbnClient, deletedSlackConnectorId);
     });
 
     test.beforeEach(async ({ browserAuth, pageObjects }) => {
@@ -111,8 +117,11 @@ test.describe(
       await expect(pageObjects.ruleDetailsPage.ruleDetailsTitle).toBeVisible({ timeout: 20_000 });
     });
 
-    test.afterAll(async ({ apiServices }) => {
+    test.afterAll(async ({ apiServices, kbnClient }) => {
       if (ruleId) await apiServices.alerting.rules.delete(ruleId);
+      if (replacementSlackConnectorId) {
+        await deleteConnector(kbnClient, replacementSlackConnectorId);
+      }
     });
 
     test('should show and update deleted connectors when there are existing connectors of the same type', async ({
@@ -133,12 +142,18 @@ test.describe(
       await expect(page.testSubj.locator('ruleActionsConnectorsModal')).toBeVisible();
       await page
         .locator('[data-test-subj="ruleActionsConnectorsModalCard"]')
-        .filter({ hasText: PRECONFIGURED_SERVER_LOG_NAME })
+        .filter({ hasText: replacementSlackConnectorName })
         .locator('button')
         .click();
 
-      // Both the broken action and the newly-added one should be present.
-      await expect(page.testSubj.locator('ruleActionsItem')).toHaveCount(2);
+      const ruleActionItems = page.testSubj.locator('ruleActionsItem');
+      await expect(ruleActionItems).toHaveCount(2);
+      // The deleted connector action is still shown.
+      await expect(ruleActionItems.filter({ hasText: 'Unable to find connector' })).toBeVisible();
+      // The replacement Slack connector was added successfully.
+      await expect(
+        ruleActionItems.filter({ hasText: replacementSlackConnectorName })
+      ).toBeVisible();
     });
   }
 );

@@ -90,15 +90,20 @@ const setEditorValue = async (page: ScoutPage, testSubj: string, value: string) 
 
 const cancelRuleCreation = async (page: ScoutPage) => {
   const cancelBtn = page.testSubj.locator('rulePageFooterCancelButton');
-  if (await cancelBtn.isVisible({ timeout: 2_000 }).catch(() => false)) {
-    await cancelBtn.click();
-    const confirmBtn = page.testSubj
-      .locator('confirmRuleCloseModal')
-      .locator('[data-test-subj="confirmModalConfirmButton"]');
-    if (await confirmBtn.isVisible({ timeout: 1_000 }).catch(() => false)) {
-      await confirmBtn.click();
+  await cancelBtn.click({ timeout: 2_000 }).catch((e: Error) => {
+    if (!e.message.includes('Timeout')) {
+      throw e;
     }
-  }
+  });
+
+  const confirmBtn = page.testSubj
+    .locator('confirmRuleCloseModal')
+    .locator('[data-test-subj="confirmModalConfirmButton"]');
+  await confirmBtn.click({ timeout: 1_000 }).catch((e: Error) => {
+    if (!e.message.includes('Timeout')) {
+      throw e;
+    }
+  });
 };
 
 // Navigate to rules page then use the shared fixture to fill the form.
@@ -597,7 +602,11 @@ test.describe('Alert create flyout', { tag: tags.stateful.classic }, () => {
       .locator('confirmRuleCloseModal')
       .locator('[data-test-subj="confirmModalConfirmButton"]')
       .click({ timeout: 2_000 })
-      .catch(() => {});
+      .catch((e: Error) => {
+        if (!e.message.includes('Timeout')) {
+          throw e;
+        }
+      });
   });
 
   test('should show KEEP command warning when creating a ES query rule with ESQL', async ({
@@ -682,7 +691,11 @@ test.describe('Alert create flyout', { tag: tags.stateful.classic }, () => {
       .locator('confirmRuleCloseModal')
       .locator('[data-test-subj="confirmModalConfirmButton"]')
       .click({ timeout: 2_000 })
-      .catch(() => {});
+      .catch((e: Error) => {
+        if (!e.message.includes('Timeout')) {
+          throw e;
+        }
+      });
   });
 
   test('should add filter', async ({ page, kbnUrl }) => {
