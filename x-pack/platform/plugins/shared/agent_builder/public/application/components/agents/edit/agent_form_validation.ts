@@ -6,7 +6,11 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { agentIdRegexp, agentIdMaxLength } from '@kbn/agent-builder-common/agents';
+import {
+  AGENT_ACCESS_CONTROL_PRINCIPAL_NAME_MAX_LENGTH,
+  agentIdRegexp,
+  agentIdMaxLength,
+} from '@kbn/agent-builder-common/agents';
 import {
   isInProtectedNamespace,
   hasNamespaceName,
@@ -97,7 +101,7 @@ export const agentFormSchema = z.object({
     entries: z.array(
       z.object({
         type: z.literal('user'),
-        name: z.string().min(1),
+        name: z.string().min(1).max(AGENT_ACCESS_CONTROL_PRINCIPAL_NAME_MAX_LENGTH),
         role: z.enum(['user', 'editor', 'manager']),
       })
     ),
