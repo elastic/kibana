@@ -467,7 +467,7 @@ describe('ui_settings model version 3 — mergeTimepickerQuickRangesV3', () => {
     expect(out).toEqual([...userEntries, ...expectedAdded]);
   });
 
-  test('distinguishes between presets with same `from` but different `to` (e.g. "This year" vs "Year to date")', () => {
+  test('distinguishes between presets with same `from` but different `to` (e.g. "This year" vs "This year until now")', () => {
     const userEntries = [
       // Matches "This year" (now/y → now/y) — should be deduped against that one only.
       { from: 'now/y', to: 'now/y', display: 'Current year' },
@@ -478,8 +478,8 @@ describe('ui_settings model version 3 — mergeTimepickerQuickRangesV3', () => {
 
     // User's "This year" label is preserved.
     expect(out).toContainEqual({ from: 'now/y', to: 'now/y', display: 'Current year' });
-    // "Year to date" (now/y → now) is a different entry — still added.
-    expect(out).toContainEqual({ from: 'now/y', to: 'now', display: 'Year to date' });
+    // "This year until now" (now/y → now) is a different entry — still added.
+    expect(out).toContainEqual({ from: 'now/y', to: 'now', display: 'This year until now' });
   });
 
   test('is a no-op when the user already has every new preset', () => {

@@ -389,48 +389,6 @@ export function getUiSettings(
             }),
           },
           {
-            from: 'now/w',
-            to: 'now/w',
-            display: i18n.translate('data.advancedSettings.timepicker.thisWeek', {
-              defaultMessage: 'This week',
-            }),
-          },
-          {
-            from: 'now/w',
-            to: 'now',
-            display: i18n.translate('data.advancedSettings.timepicker.weekToDate', {
-              defaultMessage: 'Week to date',
-            }),
-          },
-          {
-            from: 'now/M',
-            to: 'now/M',
-            display: i18n.translate('data.advancedSettings.timepicker.thisMonth', {
-              defaultMessage: 'This month',
-            }),
-          },
-          {
-            from: 'now/M',
-            to: 'now',
-            display: i18n.translate('data.advancedSettings.timepicker.monthToDate', {
-              defaultMessage: 'Month to date',
-            }),
-          },
-          {
-            from: 'now/y',
-            to: 'now/y',
-            display: i18n.translate('data.advancedSettings.timepicker.thisYear', {
-              defaultMessage: 'This year',
-            }),
-          },
-          {
-            from: 'now/y',
-            to: 'now',
-            display: i18n.translate('data.advancedSettings.timepicker.yearToDate', {
-              defaultMessage: 'Year to date',
-            }),
-          },
-          {
             from: 'now-1m',
             to: 'now',
             display: i18n.translate('data.advancedSettings.timepicker.last1Minute', {
@@ -512,6 +470,48 @@ export function getUiSettings(
             to: 'now',
             display: i18n.translate('data.advancedSettings.timepicker.last1Year', {
               defaultMessage: 'Last 1 year',
+            }),
+          },
+          {
+            from: 'now/w',
+            to: 'now/w',
+            display: i18n.translate('data.advancedSettings.timepicker.thisWeek', {
+              defaultMessage: 'This week',
+            }),
+          },
+          {
+            from: 'now/w',
+            to: 'now',
+            display: i18n.translate('data.advancedSettings.timepicker.weekToDate', {
+              defaultMessage: 'This week until now',
+            }),
+          },
+          {
+            from: 'now/M',
+            to: 'now/M',
+            display: i18n.translate('data.advancedSettings.timepicker.thisMonth', {
+              defaultMessage: 'This month',
+            }),
+          },
+          {
+            from: 'now/M',
+            to: 'now',
+            display: i18n.translate('data.advancedSettings.timepicker.monthToDate', {
+              defaultMessage: 'This month until now',
+            }),
+          },
+          {
+            from: 'now/y',
+            to: 'now/y',
+            display: i18n.translate('data.advancedSettings.timepicker.thisYear', {
+              defaultMessage: 'This year',
+            }),
+          },
+          {
+            from: 'now/y',
+            to: 'now',
+            display: i18n.translate('data.advancedSettings.timepicker.yearToDate', {
+              defaultMessage: 'This year until now',
             }),
           },
         ],
