@@ -51,11 +51,7 @@ export function useCustomCards(
 
   const { href: autoDetectUrl } = reactRouterNavigate(history, `/auto-detect/${location.search}`);
   const { href: otelLogsUrl } = reactRouterNavigate(history, `/otel-logs/${location.search}`);
-  const { href: kubernetesUrl } = reactRouterNavigate(history, `/kubernetes/${location.search}`);
-  const { href: otelKubernetesUrl } = reactRouterNavigate(
-    history,
-    `/otel-kubernetes/${location.search}`
-  );
+  const { href: otelKubernetesUrl } = reactRouterNavigate(history, `/kubernetes${location.search}`);
   const { href: firehoseUrl } = reactRouterNavigate(history, `/firehose/${location.search}`);
   const { href: otelApmQuickstartUrl } = reactRouterNavigate(
     history,
@@ -230,53 +226,6 @@ export function useCustomCards(
         },
       ],
       url: otelLogsUrl,
-      version: '',
-      integration: '',
-      isQuickstart: true,
-    },
-    {
-      id: 'kubernetes-quick-start',
-      name: 'kubernetes-quick-start',
-      type: 'virtual',
-      title: metricsOnboardingEnabled
-        ? i18n.translate(
-            'xpack.observability_onboarding.useCustomCardsForCategory.kubernetesTitle',
-            {
-              defaultMessage: 'Elastic Agent: Logs & Metrics',
-            }
-          )
-        : i18n.translate(
-            'xpack.observability_onboarding.logsEssential.useCustomCardsForCategory.kubernetesTitle',
-            {
-              defaultMessage: 'Elastic Agent: Logs',
-            }
-          ),
-      description: metricsOnboardingEnabled
-        ? i18n.translate(
-            'xpack.observability_onboarding.useCustomCardsForCategory.kubernetesDescription',
-            {
-              defaultMessage: 'Collect logs and metrics from Kubernetes using Elastic Agent',
-            }
-          )
-        : i18n.translate(
-            'xpack.observability_onboarding.logsEssential.useCustomCardsForCategory.kubernetesDescription',
-            {
-              defaultMessage: 'Collect logs from Kubernetes using Elastic Agent',
-            }
-          ),
-      extraLabelsBadges: [
-        <ExtraLabelBadgeWrapper>
-          <LogoIcon logo="kubernetes" size="m" />
-        </ExtraLabelBadgeWrapper>,
-      ],
-      categories: ['observability'],
-      icons: [
-        {
-          type: 'eui',
-          src: 'agentApp',
-        },
-      ],
-      url: kubernetesUrl,
       version: '',
       integration: '',
       isQuickstart: true,

@@ -26,7 +26,7 @@
 export const APPROVED_STEP_DEFINITIONS: Array<{ id: string; definitionHash: string }> = [
   {
     id: 'ai.agent',
-    definitionHash: '3cc20b70cda1a2ee2574acffc6ac28adb4a811b2c48dee3fc654a59f283877e3',
+    definitionHash: '14056a04764cf7f51a137a3be9a55399658e8a239050aa1d41f1edb347bb7718',
   },
   {
     id: 'ai.classify',
@@ -195,5 +195,9 @@ export const APPROVED_STEP_DEFINITIONS: Array<{ id: string; definitionHash: stri
   {
     id: 'search.rerank',
     definitionHash: 'c989f0b20019b12079d797d11b122285552e3b863ef96aaddad81640f0c2a951',
+  },
+  {
+    id: 'security.setAlertStatus',
+    definitionHash: 'cb1720032b9f90a53888a08fe7d7a75e0ca274d572e3effad7760cea7e5bc5d8',
   },
 ];
