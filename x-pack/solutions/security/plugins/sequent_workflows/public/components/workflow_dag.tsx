@@ -25,16 +25,18 @@ interface WorkflowDagProps {
   basePath?: string;
 }
 
+const MONO_FONT = "'JetBrains Mono', 'SF Mono', 'Fira Code', monospace";
+
 const flowDash = keyframes`
   to { stroke-dashoffset: -12; }
 `;
 
 const arrowColor = (fromStatus: StepStatus, toStatus: StepStatus) => {
-  if (fromStatus === 'completed' && toStatus === 'completed') return '#00BFB3';
-  if (fromStatus === 'failed' || toStatus === 'failed') return '#BD271E';
-  if (fromStatus === 'completed' && toStatus === 'running') return '#F5A700';
-  if (fromStatus === 'completed') return '#00BFB3';
-  return '#D3DAE6';
+  if (fromStatus === 'completed' && toStatus === 'completed') return '#2ee6c4';
+  if (fromStatus === 'failed' || toStatus === 'failed') return '#ff5d62';
+  if (fromStatus === 'completed' && toStatus === 'running') return '#ffb13b';
+  if (fromStatus === 'completed') return '#1aa98f';
+  return '#222c39';
 };
 
 const isAnimated = (fromStatus: StepStatus, toStatus: StepStatus) =>
@@ -54,14 +56,14 @@ const Arrow: React.FC<{ from: StepStatus; to: StepStatus }> = ({ from, to }) => 
         flex-shrink: 0;
       `}
     >
-      <svg width="48" height="20" viewBox="0 0 48 20">
+      <svg width="46" height="20" viewBox="0 0 46 20">
         <line
           x1="0"
           y1="10"
-          x2="36"
+          x2="34"
           y2="10"
           stroke={color}
-          strokeWidth="2"
+          strokeWidth="2.5"
           strokeDasharray={animate ? '6 6' : 'none'}
           css={
             animate
@@ -71,7 +73,7 @@ const Arrow: React.FC<{ from: StepStatus; to: StepStatus }> = ({ from, to }) => 
               : undefined
           }
         />
-        <polygon points="36,5 48,10 36,15" fill={color} />
+        <polygon points="34,5 46,10 34,15" fill={color} />
       </svg>
     </div>
   );
@@ -98,16 +100,16 @@ const ForkArrows: React.FC<{ from: StepStatus; toTop: StepStatus; toBottom: Step
       `}
     >
       <svg width="48" height="72" viewBox="0 0 48 72">
-        <line x1="0" y1="36" x2="16" y2="36" stroke={topColor} strokeWidth="2" />
-        <line x1="16" y1="36" x2="16" y2="12" stroke={topColor} strokeWidth="2" />
-        <line x1="16" y1="36" x2="16" y2="60" stroke={bottomColor} strokeWidth="2" />
+        <line x1="0" y1="36" x2="16" y2="36" stroke={topColor} strokeWidth="2.5" />
+        <line x1="16" y1="36" x2="16" y2="12" stroke={topColor} strokeWidth="2.5" />
+        <line x1="16" y1="36" x2="16" y2="60" stroke={bottomColor} strokeWidth="2.5" />
         <line
           x1="16"
           y1="12"
           x2="36"
           y2="12"
           stroke={topColor}
-          strokeWidth="2"
+          strokeWidth="2.5"
           strokeDasharray={animateTop ? '6 6' : 'none'}
           css={
             animateTop
@@ -123,7 +125,7 @@ const ForkArrows: React.FC<{ from: StepStatus; toTop: StepStatus; toBottom: Step
           x2="36"
           y2="60"
           stroke={bottomColor}
-          strokeWidth="2"
+          strokeWidth="2.5"
           strokeDasharray={animateBottom ? '6 6' : 'none'}
           css={
             animateBottom
@@ -149,8 +151,8 @@ const MergeArrows: React.FC<{ fromTop: StepStatus; fromBottom: StepStatus; to: S
   const bottomColor = arrowColor(fromBottom, to);
   const merged =
     fromTop === 'completed' && fromBottom === 'completed' && to !== 'pending'
-      ? '#00BFB3'
-      : '#D3DAE6';
+      ? '#2ee6c4'
+      : '#222c39';
 
   return (
     <div
@@ -163,10 +165,10 @@ const MergeArrows: React.FC<{ fromTop: StepStatus; fromBottom: StepStatus; to: S
       `}
     >
       <svg width="48" height="72" viewBox="0 0 48 72">
-        <line x1="0" y1="12" x2="16" y2="12" stroke={topColor} strokeWidth="2" />
-        <line x1="0" y1="60" x2="16" y2="60" stroke={bottomColor} strokeWidth="2" />
-        <line x1="16" y1="12" x2="16" y2="60" stroke={merged} strokeWidth="2" />
-        <line x1="16" y1="36" x2="36" y2="36" stroke={merged} strokeWidth="2" />
+        <line x1="0" y1="12" x2="16" y2="12" stroke={topColor} strokeWidth="2.5" />
+        <line x1="0" y1="60" x2="16" y2="60" stroke={bottomColor} strokeWidth="2.5" />
+        <line x1="16" y1="12" x2="16" y2="60" stroke={merged} strokeWidth="2.5" />
+        <line x1="16" y1="36" x2="36" y2="36" stroke={merged} strokeWidth="2.5" />
         <polygon points="36,32 48,36 36,40" fill={merged} />
       </svg>
     </div>
@@ -178,25 +180,61 @@ const overallBadge = (executionState?: string) => {
     case 'running':
     case 'deploying':
       return (
-        <EuiBadge color="warning" iconType="clock">
+        <EuiBadge
+          color="warning"
+          iconType="clock"
+          css={css`
+            font-family: ${MONO_FONT};
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+          `}
+        >
           Running
         </EuiBadge>
       );
     case 'completed':
       return (
-        <EuiBadge color="success" iconType="check">
+        <EuiBadge
+          color="success"
+          iconType="check"
+          css={css`
+            font-family: ${MONO_FONT};
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+          `}
+        >
           Completed
         </EuiBadge>
       );
     case 'failed':
       return (
-        <EuiBadge color="danger" iconType="cross">
+        <EuiBadge
+          color="danger"
+          iconType="cross"
+          css={css`
+            font-family: ${MONO_FONT};
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+          `}
+        >
           Failed
         </EuiBadge>
       );
     default:
       return (
-        <EuiBadge color="hollow" iconType="empty">
+        <EuiBadge
+          color="hollow"
+          iconType="empty"
+          css={css`
+            font-family: ${MONO_FONT};
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+          `}
+        >
           Ready
         </EuiBadge>
       );
@@ -219,22 +257,47 @@ export const WorkflowDag: React.FC<WorkflowDagProps> = ({ steps, executionState,
       hasBorder
       paddingSize="l"
       css={css`
-        border-radius: 12px;
+        border-radius: 10px;
+        border-color: #222c39;
+        background: radial-gradient(
+            circle at center,
+            rgba(46, 230, 196, 0.025),
+            transparent 70%
+          ),
+          linear-gradient(#1c2531 1px, transparent 1px) 0 0 / 26px 26px,
+          linear-gradient(90deg, #1c2531 1px, transparent 1px) 0 0 / 26px 26px,
+          #0a0e13;
       `}
     >
       <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" responsive={false}>
         <EuiFlexItem grow={false}>
           <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
             <EuiFlexItem grow={false}>
-              <EuiIcon type="branch" size="l" color="primary" />
+              <EuiIcon type="branch" size="l" color="#2ee6c4" />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <div>
-                <EuiText size="s">
-                  <strong>Workflow Pipeline</strong>
+                <EuiText
+                  size="s"
+                  css={css`
+                    font-family: ${MONO_FONT};
+                    font-weight: 700;
+                    color: #e7eef6;
+                  `}
+                >
+                  Workflow Pipeline
                 </EuiText>
-                <EuiText size="xs" color="subdued">
-                  Sequential, parallel fan-out, then join
+                <EuiText
+                  size="xs"
+                  css={css`
+                    font-family: ${MONO_FONT};
+                    font-size: 10px;
+                    color: #5c6878;
+                    text-transform: uppercase;
+                    letter-spacing: 0.5px;
+                  `}
+                >
+                  sequential → parallel fan-out → join
                 </EuiText>
               </div>
             </EuiFlexItem>
@@ -248,7 +311,7 @@ export const WorkflowDag: React.FC<WorkflowDagProps> = ({ steps, executionState,
       <div
         css={css`
           overflow-x: auto;
-          padding: 8px 0;
+          padding: 12px 0;
         `}
       >
         <EuiFlexGroup
@@ -275,6 +338,8 @@ export const WorkflowDag: React.FC<WorkflowDagProps> = ({ steps, executionState,
           <EuiFlexItem grow={false}>
             <StepNode step={pollLoadstar} basePath={basePath} />
           </EuiFlexItem>
+
+          {/* Parallel fan-out separator */}
           <EuiFlexItem grow={false}>
             <ForkArrows
               from={pollLoadstar.status}
@@ -282,16 +347,34 @@ export const WorkflowDag: React.FC<WorkflowDagProps> = ({ steps, executionState,
               toBottom={sepRally.status}
             />
           </EuiFlexItem>
+
           <EuiFlexItem grow={false}>
             <EuiFlexGroup direction="column" gutterSize="s" alignItems="center">
               <EuiFlexItem grow={false}>
                 <StepNode step={horde} basePath={basePath} />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
+                <EuiText
+                  size="xs"
+                  css={css`
+                    font-family: ${MONO_FONT};
+                    font-size: 9px;
+                    color: #2ee6c4;
+                    text-transform: uppercase;
+                    letter-spacing: 1px;
+                    text-align: center;
+                    padding: 2px 0;
+                  `}
+                >
+                  parallel
+                </EuiText>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
                 <StepNode step={sepRally} basePath={basePath} />
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>
+
           <EuiFlexItem grow={false}>
             <MergeArrows
               fromTop={horde.status}

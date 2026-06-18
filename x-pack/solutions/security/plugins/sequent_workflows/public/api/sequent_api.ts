@@ -6,7 +6,7 @@
  */
 
 import type { HttpSetup } from '@kbn/core-http-browser';
-import { API_RUN, API_EXECUTION_STATUS } from '../../common';
+import { API_RUN, API_RUN_V2, API_EXECUTION_STATUS } from '../../common';
 
 const VERSION = '1';
 
@@ -56,6 +56,13 @@ export class SequentApi {
 
   async runWorkflow(baseUrl: string): Promise<DeployResponse> {
     return this.http.post(API_RUN, {
+      version: VERSION,
+      body: JSON.stringify({ base_url: baseUrl }),
+    });
+  }
+
+  async runWorkflowV2(baseUrl: string): Promise<DeployResponse> {
+    return this.http.post(API_RUN_V2, {
       version: VERSION,
       body: JSON.stringify({ base_url: baseUrl }),
     });

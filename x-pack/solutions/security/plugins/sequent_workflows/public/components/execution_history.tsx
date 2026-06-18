@@ -11,7 +11,6 @@ import {
   EuiPanel,
   EuiText,
   EuiSpacer,
-  EuiBadge,
   EuiLink,
   EuiFlexGroup,
   EuiFlexItem,
@@ -39,6 +38,8 @@ interface ExecutionHistoryProps {
   basePath?: string;
 }
 
+const MONO_FONT = "'JetBrains Mono', 'SF Mono', 'Fira Code', monospace";
+
 const workflowExecutionUrl = (bp: string, workflowId: string, executionId?: string) => {
   const base = `${bp}/app/workflows/${encodeURIComponent(workflowId)}`;
   if (executionId) {
@@ -47,35 +48,66 @@ const workflowExecutionUrl = (bp: string, workflowId: string, executionId?: stri
   return `${base}?tab=executions`;
 };
 
-const statusBadge = (status: HistoryEntry['status']) => {
-  switch (status) {
-    case 'completed':
-      return (
-        <EuiBadge color="success" iconType="check">
-          Completed
-        </EuiBadge>
-      );
-    case 'failed':
-      return (
-        <EuiBadge color="danger" iconType="cross">
-          Failed
-        </EuiBadge>
-      );
-    case 'running':
-      return (
-        <EuiBadge color="warning" iconType="clock">
-          Running
-        </EuiBadge>
-      );
-    case 'deploying':
-      return (
-        <EuiBadge color="primary" iconType="push">
-          Deploying
-        </EuiBadge>
-      );
-    default:
-      return <EuiBadge color="hollow">{status}</EuiBadge>;
-  }
+const statusColors: Record<string, { dot: string; text: string; bg: string; border: string }> = {
+  completed: {
+    dot: '#3fd97a',
+    text: '#3fd97a',
+    bg: 'rgba(63, 217, 122, 0.1)',
+    border: 'rgba(63, 217, 122, 0.25)',
+  },
+  failed: {
+    dot: '#ff5d62',
+    text: '#ff5d62',
+    bg: 'rgba(255, 93, 98, 0.1)',
+    border: 'rgba(255, 93, 98, 0.25)',
+  },
+  running: {
+    dot: '#ffb13b',
+    text: '#ffb13b',
+    bg: 'rgba(255, 177, 59, 0.1)',
+    border: 'rgba(255, 177, 59, 0.25)',
+  },
+  deploying: {
+    dot: '#5ca8ff',
+    text: '#5ca8ff',
+    bg: 'rgba(92, 168, 255, 0.1)',
+    border: 'rgba(92, 168, 255, 0.25)',
+  },
+};
+
+const StatusPill: React.FC<{ status: HistoryEntry['status'] }> = ({ status }) => {
+  const cfg = statusColors[status] ?? statusColors.running;
+  return (
+    <span
+      css={css`
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        font-family: ${MONO_FONT};
+        font-size: 10px;
+        font-weight: 600;
+        padding: 4px 9px;
+        border-radius: 20px;
+        text-transform: uppercase;
+        letter-spacing: 0.3px;
+        background: ${cfg.bg};
+        color: ${cfg.text};
+        border: 1px solid ${cfg.border};
+      `}
+    >
+      <span
+        css={css`
+          width: 7px;
+          height: 7px;
+          border-radius: 50%;
+          background: ${cfg.dot};
+          box-shadow: 0 0 8px ${cfg.dot};
+          display: inline-block;
+        `}
+      />
+      {status}
+    </span>
+  );
 };
 
 const formatTime = (iso: string) => {
@@ -109,8 +141,8 @@ const makeColumns = (bp: string): Array<EuiBasicTableColumn<HistoryEntry>> => [
   {
     field: 'status',
     name: 'Status',
-    width: '120px',
-    render: (status: HistoryEntry['status']) => statusBadge(status),
+    width: '130px',
+    render: (status: HistoryEntry['status']) => <StatusPill status={status} />,
   },
   {
     field: 'mainWorkflowId',
@@ -118,7 +150,14 @@ const makeColumns = (bp: string): Array<EuiBasicTableColumn<HistoryEntry>> => [
     truncateText: true,
     render: (id: string, item: HistoryEntry) => (
       <EuiLink href={workflowExecutionUrl(bp, id, item.executionId)} target="_blank" external={false}>
-        <EuiText size="xs" css={css`font-family: 'Roboto Mono', monospace;`}>
+        <EuiText
+          size="xs"
+          css={css`
+            font-family: ${MONO_FONT};
+            font-size: 12px;
+            color: #2ee6c4;
+          `}
+        >
           {id}
         </EuiText>
       </EuiLink>
@@ -132,7 +171,13 @@ const makeColumns = (bp: string): Array<EuiBasicTableColumn<HistoryEntry>> => [
     render: (execId: string, item: HistoryEntry) => (
       <EuiToolTip content={`Full ID: ${execId}`}>
         <EuiLink href={workflowExecutionUrl(bp, item.mainWorkflowId, execId)} target="_blank" external={false}>
-          <EuiText size="xs" css={css`font-family: 'Roboto Mono', monospace;`}>
+          <EuiText
+            size="xs"
+            css={css`
+              font-family: ${MONO_FONT};
+              font-size: 12px;
+            `}
+          >
             {execId.length > 12 ? `${execId.substring(0, 12)}...` : execId}
           </EuiText>
         </EuiLink>
@@ -144,7 +189,14 @@ const makeColumns = (bp: string): Array<EuiBasicTableColumn<HistoryEntry>> => [
     name: 'Started',
     width: '170px',
     render: (val: string) => (
-      <EuiText size="xs" color="subdued">
+      <EuiText
+        size="xs"
+        css={css`
+          font-family: ${MONO_FONT};
+          font-size: 11px;
+          color: #5c6878;
+        `}
+      >
         {formatTime(val)}
       </EuiText>
     ),
@@ -153,7 +205,14 @@ const makeColumns = (bp: string): Array<EuiBasicTableColumn<HistoryEntry>> => [
     name: 'Duration',
     width: '100px',
     render: (item: HistoryEntry) => (
-      <EuiText size="xs" color="subdued">
+      <EuiText
+        size="xs"
+        css={css`
+          font-family: ${MONO_FONT};
+          font-size: 11px;
+          color: #8a97a8;
+        `}
+      >
         {formatDuration(item.startedAt, item.finishedAt)}
       </EuiText>
     ),
@@ -165,7 +224,14 @@ const makeColumns = (bp: string): Array<EuiBasicTableColumn<HistoryEntry>> => [
     truncateText: true,
     render: (url: string) => (
       <EuiToolTip content={url}>
-        <EuiText size="xs" color="subdued">
+        <EuiText
+          size="xs"
+          css={css`
+            font-family: ${MONO_FONT};
+            font-size: 11px;
+            color: #5c6878;
+          `}
+        >
           {url}
         </EuiText>
       </EuiToolTip>
@@ -194,7 +260,11 @@ export const ExecutionHistory: React.FC<ExecutionHistoryProps> = ({ history, act
       <EuiPanel
         hasBorder
         paddingSize="l"
-        css={css`border-radius: 12px;`}
+        css={css`
+          border-radius: 10px;
+          border-color: #222c39;
+          background: #11171f;
+        `}
       >
         <EuiEmptyPrompt
           iconType="listAdd"
@@ -212,8 +282,11 @@ export const ExecutionHistory: React.FC<ExecutionHistoryProps> = ({ history, act
   const rowProps = (item: HistoryEntry) => ({
     css: css`
       ${item.runId === activeRunId
-        ? 'background: rgba(0, 119, 204, 0.05); border-left: 3px solid #0077CC;'
+        ? 'background: rgba(46, 230, 196, 0.04); border-left: 3px solid #2ee6c4;'
         : ''}
+      &:hover {
+        background: #161d28;
+      }
     `,
   });
 
@@ -221,19 +294,42 @@ export const ExecutionHistory: React.FC<ExecutionHistoryProps> = ({ history, act
     <EuiPanel
       hasBorder
       paddingSize="l"
-      css={css`border-radius: 12px;`}
+      css={css`
+        border-radius: 10px;
+        border-color: #222c39;
+        background: #11171f;
+      `}
     >
       <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
         <EuiFlexItem grow={false}>
-          <EuiIcon type="clock" color="primary" />
+          <EuiIcon type="clock" color="#2ee6c4" />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiText size="s">
-            <strong>Execution History</strong>
+          <EuiText
+            size="s"
+            css={css`
+              font-family: ${MONO_FONT};
+              font-weight: 700;
+              color: #e7eef6;
+            `}
+          >
+            Execution History
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiBadge color="hollow">{history.length}</EuiBadge>
+          <span
+            css={css`
+              font-family: ${MONO_FONT};
+              font-size: 10px;
+              background: #1c2531;
+              padding: 2px 8px;
+              border-radius: 10px;
+              color: #5c6878;
+              border: 1px solid #222c39;
+            `}
+          >
+            {history.length}
+          </span>
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="m" />

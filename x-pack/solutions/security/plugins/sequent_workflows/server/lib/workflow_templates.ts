@@ -166,6 +166,181 @@ export interface GeneratedWorkflows {
   yamls: Record<string, string>;
 }
 
+function mainWorkflowV2(
+  baseUrl: string,
+  runId: string,
+  childHorde: string,
+  childSepRally: string,
+  kibanaBaseUrl: string,
+  apiKey: string
+): object {
+  return {
+    name: `sequent-main-workflow-${runId}`,
+    description: 'Orchestrates sequential and parallel execution steps (v2 — callback mode)',
+    enabled: true,
+    settings: { timeout: '1h' },
+    consts: {
+      base_url: baseUrl,
+      kibana_base_url: kibanaBaseUrl,
+      resume_api_key: apiKey,
+    },
+    triggers: [{ type: 'manual' }],
+    steps: [
+      {
+        name: 'healthcheck',
+        type: 'http',
+        with: {
+          url: '{{ consts.base_url }}/api/v1/healthcheck',
+          method: 'GET',
+        },
+      },
+      {
+        name: 'execute_sec_loadstar',
+        type: 'http',
+        with: {
+          url: '{{ consts.base_url }}/api/v2/execute/sec-loadstar',
+          method: 'POST',
+          body: {
+            callback_url:
+              '{{ consts.kibana_base_url }}/api/workflows/executions/{{ execution.id }}/resume',
+            api_key: '{{ consts.resume_api_key }}',
+            execution_id: '{{ execution.id }}',
+          },
+          headers: { 'Content-Type': 'application/json' },
+        },
+      },
+      {
+        name: 'wait_sec_loadstar',
+        type: 'waitForInput',
+        with: {
+          message: 'Waiting for sec-loadstar task to complete',
+        },
+      },
+      {
+        name: 'run_horde',
+        type: 'workflow.executeAsync',
+        with: { 'workflow-id': childHorde },
+      },
+      {
+        name: 'run_sep_rally',
+        type: 'workflow.executeAsync',
+        with: { 'workflow-id': childSepRally },
+      },
+      {
+        name: 'await_children',
+        type: 'while',
+        condition:
+          '${{ steps.check_horde_status.output.status == "running" or steps.check_horde_status.output.status == "pending" or steps.check_horde_status.output.status == "waiting" or steps.check_horde_status.output.status == "waiting_for_child" or steps.check_horde_status.output.status == "waiting_for_input" or steps.check_sep_rally_status.output.status == "running" or steps.check_sep_rally_status.output.status == "pending" or steps.check_sep_rally_status.output.status == "waiting" or steps.check_sep_rally_status.output.status == "waiting_for_child" or steps.check_sep_rally_status.output.status == "waiting_for_input" }}',
+        'max-iterations': { limit: 120, 'on-limit': 'fail' },
+        steps: [
+          {
+            name: 'check_horde_status',
+            type: 'kibana.request',
+            with: {
+              use_server_info: true,
+              fetcher: { skip_ssl_verification: true },
+              method: 'GET',
+              path: '/api/workflows/executions/{{ steps.run_horde.output.executionId }}',
+              headers: { 'elastic-api-version': '2023-10-31' },
+            },
+          },
+          {
+            name: 'check_sep_rally_status',
+            type: 'kibana.request',
+            with: {
+              use_server_info: true,
+              fetcher: { skip_ssl_verification: true },
+              method: 'GET',
+              path: '/api/workflows/executions/{{ steps.run_sep_rally.output.executionId }}',
+              headers: { 'elastic-api-version': '2023-10-31' },
+            },
+          },
+          {
+            name: 'wait_children_poll',
+            type: 'wait',
+            with: { duration: '5s' },
+          },
+        ],
+      },
+      {
+        name: 'success',
+        type: 'console',
+        with: { message: 'All steps completed successfully' },
+      },
+    ],
+  };
+}
+
+function childWorkflowV2(
+  name: string,
+  taskName: string,
+  baseUrl: string,
+  kibanaBaseUrl: string,
+  apiKey: string
+): object {
+  const safe = taskName.replace(/-/g, '_');
+  return {
+    name,
+    description: `Child workflow for ${taskName} (v2 — callback mode)`,
+    enabled: true,
+    settings: { timeout: '1h' },
+    consts: {
+      base_url: baseUrl,
+      kibana_base_url: kibanaBaseUrl,
+      resume_api_key: apiKey,
+    },
+    triggers: [{ type: 'manual' }],
+    steps: [
+      {
+        name: `execute_${safe}`,
+        type: 'http',
+        with: {
+          url: `{{ consts.base_url }}/api/v2/execute/${taskName}`,
+          method: 'POST',
+          body: {
+            callback_url:
+              '{{ consts.kibana_base_url }}/api/workflows/executions/{{ execution.id }}/resume',
+            api_key: '{{ consts.resume_api_key }}',
+            execution_id: '{{ execution.id }}',
+          },
+          headers: { 'Content-Type': 'application/json' },
+        },
+      },
+      {
+        name: `wait_${safe}`,
+        type: 'waitForInput',
+        with: {
+          message: `Waiting for ${taskName} task to complete`,
+        },
+      },
+    ],
+  };
+}
+
+export function generateWorkflowYamlsV2(
+  baseUrl: string,
+  kibanaBaseUrl: string,
+  apiKey: string
+): GeneratedWorkflows {
+  const runId = crypto.randomBytes(4).toString('hex');
+  const mainName = `sequent-main-workflow-${runId}`;
+  const childHorde = `sequent-child-horde-${runId}`;
+  const childSepRally = `sequent-child-sep-rally-${runId}`;
+
+  const definitions: Record<string, object> = {
+    [mainName]: mainWorkflowV2(baseUrl, runId, childHorde, childSepRally, kibanaBaseUrl, apiKey),
+    [childHorde]: childWorkflowV2(childHorde, 'horde', baseUrl, kibanaBaseUrl, apiKey),
+    [childSepRally]: childWorkflowV2(childSepRally, 'sep-rally', baseUrl, kibanaBaseUrl, apiKey),
+  };
+
+  const yamls: Record<string, string> = {};
+  for (const [n, def] of Object.entries(definitions)) {
+    yamls[n] = dump(def, { noRefs: true, sortKeys: false, lineWidth: -1 });
+  }
+
+  return { runId, mainName, childNames: [childHorde, childSepRally], yamls };
+}
+
 export function generateWorkflowYamls(baseUrl: string): GeneratedWorkflows {
   const runId = crypto.randomBytes(4).toString('hex');
   const mainName = `sequent-main-workflow-${runId}`;

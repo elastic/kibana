@@ -7,9 +7,11 @@
 
 import type { IRouter, Logger, CoreSetup } from '@kbn/core/server';
 import { registerRunWorkflowRoute } from './run_workflow';
+import { registerRunWorkflowV2Route } from './run_workflow_v2';
 import { registerGetExecutionRoute } from './get_execution';
 
 export const defineRoutes = (router: IRouter, core: CoreSetup, logger: Logger): void => {
   registerRunWorkflowRoute(router, core, logger);
+  registerRunWorkflowV2Route(router, core, logger);
   registerGetExecutionRoute(router, core, logger);
 };

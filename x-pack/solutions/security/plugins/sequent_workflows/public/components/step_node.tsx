@@ -29,20 +29,22 @@ export interface WorkflowStep {
   executionId?: string;
 }
 
-const pulseGreen = keyframes`
-  0%, 100% { box-shadow: 0 0 0 0 rgba(0, 191, 179, 0.4); }
-  50% { box-shadow: 0 0 0 6px rgba(0, 191, 179, 0); }
+const pulseRunning = keyframes`
+  0%, 100% { box-shadow: 0 0 0 0 rgba(255, 177, 59, 0.18); }
+  50% { box-shadow: 0 0 0 7px rgba(255, 177, 59, 0); }
 `;
 
-const pulseAmber = keyframes`
-  0%, 100% { box-shadow: 0 0 0 0 rgba(245, 167, 0, 0.4); }
-  50% { box-shadow: 0 0 0 6px rgba(245, 167, 0, 0); }
+const pulseCompleted = keyframes`
+  0%, 100% { box-shadow: 0 0 0 0 rgba(63, 217, 122, 0.2); }
+  50% { box-shadow: 0 0 0 6px rgba(63, 217, 122, 0); }
 `;
 
 const pulseRed = keyframes`
-  0%, 100% { box-shadow: 0 0 0 0 rgba(189, 39, 30, 0.3); }
-  50% { box-shadow: 0 0 0 6px rgba(189, 39, 30, 0); }
+  0%, 100% { box-shadow: 0 0 0 0 rgba(255, 93, 98, 0.2); }
+  50% { box-shadow: 0 0 0 6px rgba(255, 93, 98, 0); }
 `;
+
+const MONO_FONT = "'JetBrains Mono', 'SF Mono', 'Fira Code', monospace";
 
 const statusConfig: Record<
   StepStatus,
@@ -50,37 +52,37 @@ const statusConfig: Record<
     color: string;
     borderColor: string;
     icon: React.ReactNode;
-    label: string;
-    badgeColor: string;
+    stateLabel: string;
+    statePrefix: string;
   }
 > = {
   pending: {
-    color: '#98A2B3',
-    borderColor: '#D3DAE6',
-    icon: <EuiIcon type="dot" color="subdued" size="m" />,
-    label: 'Pending',
-    badgeColor: '#F5F7FA',
+    color: '#5c6878',
+    borderColor: '#222c39',
+    icon: <EuiIcon type="dot" color="subdued" size="s" />,
+    stateLabel: 'pending',
+    statePrefix: '○',
   },
   running: {
-    color: '#F5A700',
-    borderColor: '#F5A700',
+    color: '#ffb13b',
+    borderColor: 'rgba(255, 177, 59, 0.5)',
     icon: <EuiLoadingSpinner size="s" />,
-    label: 'Running',
-    badgeColor: '#FFF9E8',
+    stateLabel: 'running',
+    statePrefix: '●',
   },
   completed: {
-    color: '#00BFB3',
-    borderColor: '#00BFB3',
-    icon: <EuiIcon type="checkInCircleFilled" color="#00BFB3" size="m" />,
-    label: 'Success',
-    badgeColor: '#E6FFF8',
+    color: '#3fd97a',
+    borderColor: 'rgba(63, 217, 122, 0.45)',
+    icon: <EuiIcon type="checkInCircleFilled" color="#3fd97a" size="s" />,
+    stateLabel: 'completed',
+    statePrefix: '✓',
   },
   failed: {
-    color: '#BD271E',
-    borderColor: '#BD271E',
-    icon: <EuiIcon type="crossInCircleFilled" color="#BD271E" size="m" />,
-    label: 'Failed',
-    badgeColor: '#FFF1F0',
+    color: '#ff5d62',
+    borderColor: 'rgba(255, 93, 98, 0.5)',
+    icon: <EuiIcon type="crossInCircleFilled" color="#ff5d62" size="s" />,
+    stateLabel: 'failed',
+    statePrefix: '✕',
   },
 };
 
@@ -106,28 +108,30 @@ export const StepNode: React.FC<StepNodeProps> = ({ step, basePath = '' }) => {
       paddingSize="s"
       hasBorder
       css={css`
-        min-width: 154px;
-        max-width: 180px;
+        min-width: 140px;
+        max-width: 172px;
         border-color: ${cfg.borderColor};
-        border-width: 2px;
-        border-radius: 8px;
-        background: ${cfg.badgeColor};
-        transition: all 0.4s ease;
+        border-width: 1.5px;
+        border-radius: 9px;
+        background: linear-gradient(160deg, #1c2531, #11171f);
+        box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35);
+        transition: all 0.2s ease;
         cursor: ${hasLink ? 'pointer' : 'default'};
-        ${step.status === 'running' ? `animation: ${pulseAmber} 2s ease-in-out infinite;` : ''}
+        opacity: ${step.status === 'pending' ? 0.55 : 1};
+        ${step.status === 'running' ? `animation: ${pulseRunning} 1.8s infinite;` : ''}
         ${step.status === 'completed'
-          ? `animation: ${pulseGreen} 1s ease-in-out 1;
-             box-shadow: 0 0 12px rgba(0, 191, 179, 0.15);`
+          ? `animation: ${pulseCompleted} 1s ease-in-out 1;`
           : ''}
         ${step.status === 'failed'
-          ? `animation: ${pulseRed} 1s ease-in-out 1;
-             box-shadow: 0 0 12px rgba(189, 39, 30, 0.12);`
+          ? `animation: ${pulseRed} 1s ease-in-out 1;`
           : ''}
         &:hover {
-          ${hasLink ? 'transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,0,0,0.08);' : ''}
+          border-color: ${step.status === 'pending' ? '#2e3a4b' : cfg.color};
+          ${hasLink ? 'transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,0.4);' : ''}
         }
       `}
     >
+      {/* State label */}
       <EuiFlexGroup
         gutterSize="xs"
         alignItems="center"
@@ -139,28 +143,51 @@ export const StepNode: React.FC<StepNodeProps> = ({ step, basePath = '' }) => {
           <EuiText
             size="xs"
             css={css`
+              font-family: ${MONO_FONT};
+              font-size: 9px;
               text-transform: uppercase;
-              letter-spacing: 0.06em;
+              letter-spacing: 0.6px;
               color: ${cfg.color};
               font-weight: 600;
               line-height: 1;
             `}
           >
-            {cfg.label}
+            {cfg.statePrefix} {cfg.stateLabel}
           </EuiText>
         </EuiFlexItem>
       </EuiFlexGroup>
 
+      {/* Step name */}
       <EuiText
         size="s"
         css={css`
+          font-family: ${MONO_FONT};
           font-weight: 700;
+          font-size: 13px;
           text-align: center;
-          margin-top: 4px;
-          font-family: 'Inter', -apple-system, sans-serif;
+          margin-top: 6px;
+          color: #e7eef6;
         `}
       >
         {step.label}
+      </EuiText>
+
+      {/* Description / route */}
+      <EuiText
+        size="xs"
+        css={css`
+          font-family: ${MONO_FONT};
+          font-size: 10px;
+          text-align: center;
+          margin-top: 4px;
+          color: #5c6878;
+          line-height: 1.3;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+        `}
+      >
+        {step.description.replace(/^(GET|POST|Poll)\s+/, '').substring(0, 24)}
       </EuiText>
 
       {hasLink && (
@@ -168,17 +195,19 @@ export const StepNode: React.FC<StepNodeProps> = ({ step, basePath = '' }) => {
           size="xs"
           css={css`
             text-align: center;
-            margin-top: 2px;
+            margin-top: 4px;
           `}
         >
           <EuiLink
             href={workflowExecutionUrl(basePath, step.workflowId!, step.executionId)}
             target="_blank"
             css={css`
-              font-size: 10px;
+              font-family: ${MONO_FONT};
+              font-size: 9px;
+              color: #2ee6c4;
             `}
           >
-            View execution
+            view exec ↗
           </EuiLink>
         </EuiText>
       )}

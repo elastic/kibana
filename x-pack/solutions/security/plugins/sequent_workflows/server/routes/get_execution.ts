@@ -8,6 +8,7 @@
 import { schema } from '@kbn/config-schema';
 import type { IRouter, Logger, CoreSetup } from '@kbn/core/server';
 import { API_EXECUTION_STATUS } from '../../common';
+import { apiKeyStore } from './run_workflow_v2';
 
 const WORKFLOWS_API_VERSION = '2023-10-31';
 
@@ -111,6 +112,53 @@ export const registerGetExecutionRoute = (
           } else {
             const stepsError = await stepsRes.text();
             logger.warn(`Steps fetch failed for ${workflowId}: ${stepsRes.status} ${stepsError}`);
+          }
+
+          const TERMINAL_STATUSES = new Set([
+            'completed',
+            'failed',
+            'cancelled',
+            'timed_out',
+          ]);
+          const latestExec = execData?.results?.[0];
+          if (latestExec && TERMINAL_STATUSES.has(latestExec.status) && apiKeyStore.has(workflowId)) {
+            const keyInfo = apiKeyStore.get(workflowId)!;
+
+            let allChildrenTerminal = true;
+            for (const childId of keyInfo.childWorkflowIds) {
+              try {
+                const childRes = await internalFetch(
+                  request,
+                  coreStart,
+                  'GET',
+                  `/api/workflows/workflow/${childId}/executions?size=1`
+                );
+                if (childRes.ok) {
+                  const childData = await childRes.json();
+                  const childExec = childData?.results?.[0];
+                  if (childExec && !TERMINAL_STATUSES.has(childExec.status)) {
+                    allChildrenTerminal = false;
+                    break;
+                  }
+                }
+              } catch (childErr) {
+                logger.debug(`Could not check child workflow ${childId}: ${childErr}`);
+              }
+            }
+
+            if (allChildrenTerminal) {
+              apiKeyStore.delete(workflowId);
+              try {
+                await coreStart.security.authc.apiKeys.invalidateAsInternalUser({
+                  ids: [keyInfo.apiKeyId],
+                });
+                logger.info(
+                  `Invalidated API key ${keyInfo.apiKeyId} for completed workflow ${workflowId}`
+                );
+              } catch (keyErr) {
+                logger.warn(`Failed to invalidate API key ${keyInfo.apiKeyId}: ${keyErr}`);
+              }
+            }
           }
 
           return response.ok({

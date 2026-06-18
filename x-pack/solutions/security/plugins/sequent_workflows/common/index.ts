@@ -10,4 +10,5 @@ export const PLUGIN_NAME = 'Sequent Workflows';
 
 export const API_BASE = '/api/sequent_workflows';
 export const API_RUN = `${API_BASE}/run`;
+export const API_RUN_V2 = `${API_BASE}/v2/run`;
 export const API_EXECUTION_STATUS = `${API_BASE}/execution`;

@@ -12,7 +12,8 @@
     "browser": true,
     "server": true,
     "requiredPlugins": [
-      "features"
+      "features",
+      "security"
     ],
     "requiredBundles": [
       "kibanaReact"

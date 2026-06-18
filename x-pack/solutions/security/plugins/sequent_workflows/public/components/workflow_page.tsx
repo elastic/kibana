@@ -14,19 +14,20 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiCallOut,
-  EuiBadge,
   EuiText,
   EuiPanel,
   EuiIcon,
   EuiProgress,
-  EuiHorizontalRule,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
+
+const MONO_FONT = "'JetBrains Mono', 'SF Mono', 'Fira Code', monospace";
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
 import { useSequentApi } from '../api/use_sequent_api';
 import { WorkflowDag } from './workflow_dag';
 import { RunModal } from './run_modal';
+import type { WorkflowVersion } from './run_modal';
 import { ExecutionLog } from './execution_log';
 import { ExecutionHistory } from './execution_history';
 import type { HistoryEntry } from './execution_history';
@@ -134,12 +135,13 @@ const STEP_ID_MAP: Record<string, string> = {
   poll_sec_loadstar: 'poll_sec_loadstar',
   check_sec_loadstar: 'poll_sec_loadstar',
   wait_poll: 'poll_sec_loadstar',
+  wait_sec_loadstar: 'poll_sec_loadstar',
   run_horde: 'horde',
   run_sep_rally: 'sep_rally',
   await_children: 'await_children',
-  check_horde_status: 'await_children',
-  check_sep_rally_status: 'await_children',
-  wait_children_poll: 'await_children',
+  check_horde_status: '_skip_',
+  check_sep_rally_status: '_skip_',
+  wait_children_poll: '_skip_',
   success: 'success',
 };
 
@@ -147,9 +149,11 @@ const CHILD_STEP_ID_MAP: Record<string, string> = {
   execute_horde: 'execute_horde',
   poll_horde: 'poll_horde',
   check_horde: 'poll_horde',
+  wait_horde: 'poll_horde',
   execute_sep_rally: 'execute_sep_rally',
   poll_sep_rally: 'poll_sep_rally',
   check_sep_rally: 'poll_sep_rally',
+  wait_sep_rally: 'poll_sep_rally',
   wait_poll: '_skip_',
 };
 
@@ -325,7 +329,7 @@ export const WorkflowPage: React.FC = () => {
         const latestByDagId: Record<string, string> = {};
         for (const stepExec of stepResults) {
           const dagStepId = STEP_ID_MAP[stepExec.stepId];
-          if (!dagStepId) continue;
+          if (!dagStepId || dagStepId === '_skip_') continue;
 
           const existing = latestByDagId[dagStepId];
           const isTerminal =
@@ -493,7 +497,7 @@ export const WorkflowPage: React.FC = () => {
   );
 
   const handleRun = useCallback(
-    async (baseUrl: string) => {
+    async (baseUrl: string, version: WorkflowVersion = 'v2') => {
       setDeployError(undefined);
       setExecutionState('deploying');
       setSteps(DEFAULT_STEPS);
@@ -502,10 +506,13 @@ export const WorkflowPage: React.FC = () => {
       loggedStepStatusRef.current = {};
       loggedChildStepStatusRef.current = {};
       childWorkflowIdsRef.current = {};
-      addLog(`Creating and running workflow with base_url: ${baseUrl}`, 'success');
+      addLog(`Creating and running workflow (${version}) with base_url: ${baseUrl}`, 'success');
 
       try {
-        const result = await api.runWorkflow(baseUrl);
+        const result =
+          version === 'v2'
+            ? await api.runWorkflowV2(baseUrl)
+            : await api.runWorkflow(baseUrl);
         setExecutionId(result.execution_id);
         setMainWorkflowId(result.main_workflow_id);
         setCurrentRunId(result.run_id);
@@ -638,72 +645,112 @@ export const WorkflowPage: React.FC = () => {
           </>
         )}
 
-        {/* Current execution info bar */}
+        {/* Execution status bar */}
         {executionId && (
           <>
             <EuiPanel
               hasBorder
               paddingSize="m"
-              color={
-                executionState === 'completed'
-                  ? 'success'
-                  : executionState === 'failed'
-                  ? 'danger'
-                  : 'primary'
-              }
               css={css`
-                border-radius: 8px;
+                border-radius: 10px;
+                border-color: #222c39;
+                background: #11171f;
               `}
             >
               <EuiFlexGroup
-                gutterSize="m"
+                gutterSize="l"
                 alignItems="center"
                 responsive={false}
                 wrap
               >
                 <EuiFlexItem grow={false}>
-                  <EuiIcon
-                    type={
-                      executionState === 'completed'
-                        ? 'checkInCircleFilled'
-                        : executionState === 'failed'
-                        ? 'crossInCircleFilled'
-                        : 'clock'
-                    }
-                    color={
-                      executionState === 'completed'
-                        ? 'success'
-                        : executionState === 'failed'
-                        ? 'danger'
-                        : 'warning'
-                    }
-                    size="l"
-                  />
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiText size="s">
-                    <strong>
+                  <div>
+                    <EuiText
+                      size="xs"
+                      css={css`
+                        font-family: ${MONO_FONT};
+                        font-size: 10px;
+                        text-transform: uppercase;
+                        letter-spacing: 0.5px;
+                        color: #5c6878;
+                      `}
+                    >
+                      Status
+                    </EuiText>
+                    <EuiText
+                      size="s"
+                      css={css`
+                        font-family: ${MONO_FONT};
+                        font-weight: 600;
+                        color: ${executionState === 'completed'
+                          ? '#3fd97a'
+                          : executionState === 'failed'
+                          ? '#ff5d62'
+                          : '#ffb13b'};
+                      `}
+                    >
                       {executionState === 'completed'
-                        ? 'Workflow completed successfully'
+                        ? '● Completed'
                         : executionState === 'failed'
-                        ? 'Workflow execution failed'
+                        ? '✕ Failed'
                         : executionState === 'deploying'
-                        ? 'Deploying workflow...'
-                        : 'Workflow is running...'}
-                    </strong>
-                  </EuiText>
+                        ? '◌ Deploying'
+                        : '● Running'}
+                    </EuiText>
+                  </div>
                 </EuiFlexItem>
-                <EuiFlexItem grow />
                 <EuiFlexItem grow={false}>
-                  <EuiBadge color="hollow">
-                    {completedCount}/{steps.length} steps
-                  </EuiBadge>
+                  <div>
+                    <EuiText
+                      size="xs"
+                      css={css`
+                        font-family: ${MONO_FONT};
+                        font-size: 10px;
+                        text-transform: uppercase;
+                        letter-spacing: 0.5px;
+                        color: #5c6878;
+                      `}
+                    >
+                      Steps
+                    </EuiText>
+                    <EuiText
+                      size="s"
+                      css={css`
+                        font-family: ${MONO_FONT};
+                        font-weight: 600;
+                        color: #e7eef6;
+                      `}
+                    >
+                      {completedCount} / {steps.length}
+                    </EuiText>
+                  </div>
                 </EuiFlexItem>
                 {mainWorkflowId && (
                   <EuiFlexItem grow={false}>
-                    <EuiText size="xs" color="subdued">
-                      {mainWorkflowId}
-                    </EuiText>
+                    <div>
+                      <EuiText
+                        size="xs"
+                        css={css`
+                          font-family: ${MONO_FONT};
+                          font-size: 10px;
+                          text-transform: uppercase;
+                          letter-spacing: 0.5px;
+                          color: #5c6878;
+                        `}
+                      >
+                        Workflow
+                      </EuiText>
+                      <EuiText
+                        size="xs"
+                        css={css`
+                          font-family: ${MONO_FONT};
+                          font-size: 12px;
+                          color: #2ee6c4;
+                        `}
+                      >
+                        {mainWorkflowId}
+                      </EuiText>
+                    </div>
                   </EuiFlexItem>
                 )}
               </EuiFlexGroup>
@@ -717,14 +764,17 @@ export const WorkflowPage: React.FC = () => {
 
         <EuiSpacer size="l" />
 
-        {/* Execution log (collapsible) */}
+        {/* Execution log (collapsible terminal) */}
         {logs.length > 0 && (
           <>
             <EuiPanel
               hasBorder
-              paddingSize="m"
+              paddingSize="none"
               css={css`
-                border-radius: 12px;
+                border-radius: 10px;
+                border-color: #222c39;
+                background: #0a0e13;
+                overflow: hidden;
               `}
             >
               <EuiFlexGroup
@@ -735,30 +785,58 @@ export const WorkflowPage: React.FC = () => {
                 css={css`
                   cursor: pointer;
                   user-select: none;
+                  padding: 10px 14px;
+                  background: #11171f;
+                  border-bottom: ${showLog ? '1px solid #222c39' : 'none'};
                 `}
               >
                 <EuiFlexItem grow={false}>
-                  <EuiIcon type={showLog ? 'arrowDown' : 'arrowRight'} size="s" />
+                  <EuiIcon
+                    type={showLog ? 'arrowDown' : 'arrowRight'}
+                    size="s"
+                    color="#5c6878"
+                  />
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
-                  <EuiIcon type="list" color="primary" />
+                  <EuiIcon type="console" color="#2ee6c4" size="s" />
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
-                  <EuiText size="s">
-                    <strong>Execution Log</strong>
+                  <EuiText
+                    size="s"
+                    css={css`
+                      font-family: ${MONO_FONT};
+                      font-weight: 600;
+                      color: #e7eef6;
+                      font-size: 13px;
+                    `}
+                  >
+                    Execution Log
                   </EuiText>
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
-                  <EuiBadge color="hollow">{logs.length}</EuiBadge>
+                  <span
+                    css={css`
+                      font-family: ${MONO_FONT};
+                      font-size: 10px;
+                      background: #1c2531;
+                      padding: 2px 8px;
+                      border-radius: 10px;
+                      color: #5c6878;
+                      border: 1px solid #222c39;
+                    `}
+                  >
+                    {logs.length}
+                  </span>
                 </EuiFlexItem>
               </EuiFlexGroup>
               {showLog && (
-                <>
-                  <EuiSpacer size="s" />
-                  <EuiHorizontalRule margin="none" />
-                  <EuiSpacer size="s" />
+                <div
+                  css={css`
+                    padding: 0;
+                  `}
+                >
                   <ExecutionLog logs={logs} />
-                </>
+                </div>
               )}
             </EuiPanel>
             <EuiSpacer size="l" />
@@ -779,7 +857,13 @@ export const WorkflowPage: React.FC = () => {
           </>
         )}
 
-        <EuiHorizontalRule />
+        <div
+          css={css`
+            height: 1px;
+            background: linear-gradient(90deg, transparent, #222c39, transparent);
+            margin: 8px 0;
+          `}
+        />
 
         {/* Execution history table */}
         <ExecutionHistory history={history} activeRunId={currentRunId} basePath={basePath} />

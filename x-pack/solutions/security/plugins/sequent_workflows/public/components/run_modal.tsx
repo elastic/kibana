@@ -14,6 +14,7 @@ import {
   EuiModalFooter,
   EuiButton,
   EuiButtonEmpty,
+  EuiButtonGroup,
   EuiFieldText,
   EuiFormRow,
   EuiText,
@@ -55,9 +56,16 @@ const isValidUrl = (value: string): boolean => {
   }
 };
 
+export type WorkflowVersion = 'v1' | 'v2';
+
+const VERSION_OPTIONS = [
+  { id: 'v2' as const, label: 'V2 — Callback (recommended)' },
+  { id: 'v1' as const, label: 'V1 — Polling' },
+];
+
 interface RunModalProps {
   onClose: () => void;
-  onConfirm: (baseUrl: string) => void;
+  onConfirm: (baseUrl: string, version: WorkflowVersion) => void;
   isLoading: boolean;
   error?: string;
 }
@@ -65,6 +73,7 @@ interface RunModalProps {
 export const RunModal: React.FC<RunModalProps> = ({ onClose, onConfirm, isLoading, error }) => {
   const [baseUrl, setBaseUrl] = useState(getSavedUrl);
   const [touched, setTouched] = useState(false);
+  const [version, setVersion] = useState<WorkflowVersion>('v2');
 
   const trimmed = baseUrl.trim();
   const isEmpty = trimmed.length === 0;
@@ -81,7 +90,7 @@ export const RunModal: React.FC<RunModalProps> = ({ onClose, onConfirm, isLoadin
     setTouched(true);
     if (!urlValid) return;
     saveUrl(trimmed);
-    onConfirm(trimmed);
+    onConfirm(trimmed, version);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -123,6 +132,18 @@ export const RunModal: React.FC<RunModalProps> = ({ onClose, onConfirm, isLoadin
           </EuiFlexGroup>
         </EuiPanel>
         <EuiSpacer size="l" />
+
+        <EuiFormRow label="Execution Mode" fullWidth>
+          <EuiButtonGroup
+            legend="Workflow execution mode"
+            options={VERSION_OPTIONS}
+            idSelected={version}
+            onChange={(id) => setVersion(id as WorkflowVersion)}
+            isFullWidth
+            isDisabled={isLoading}
+          />
+        </EuiFormRow>
+        <EuiSpacer size="m" />
 
         <EuiFormRow
           label="Workflow Runner Base URL"
@@ -172,7 +193,14 @@ export const RunModal: React.FC<RunModalProps> = ({ onClose, onConfirm, isLoadin
             <li>Creates child workflows (horde, sep-rally) in Kibana</li>
             <li>Creates and starts the main workflow</li>
             <li>Workflow executes: healthcheck, sec-loadstar, then parallel fan-out</li>
-            <li>Each step calls your runner service and reports status live</li>
+            {version === 'v2' ? (
+              <li>
+                Each step calls your runner service. Kibana waits for a callback from the runner to
+                proceed
+              </li>
+            ) : (
+              <li>Each step calls your runner service and polls status until complete</li>
+            )}
           </ol>
         </EuiText>
 
