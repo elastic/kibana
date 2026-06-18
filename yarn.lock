@@ -4692,6 +4692,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/alerting-v2-utils@link:x-pack/platform/packages/shared/response-ops/alerting-v2-utils":
+  version "0.0.0"
+  uid ""
+
 "@kbn/alerts-as-data-utils@link:src/platform/packages/shared/kbn-alerts-as-data-utils":
   version "0.0.0"
   uid ""
