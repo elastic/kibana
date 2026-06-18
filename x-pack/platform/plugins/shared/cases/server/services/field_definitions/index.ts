@@ -27,26 +27,45 @@ export class FieldDefinitionsService {
     }
   ) {}
 
-  async getFieldDefinitions(owner: string | string[]): Promise<FieldDefinitionsFindResponse> {
+  /**
+   * Returns field definitions for the given owner(s).
+   *
+   * `isGlobal: true`  — returns only definitions flagged as global.
+   * `isGlobal: false` — same as `undefined`: returns ALL definitions.
+   *
+   * NOTE: `isGlobal` filtering is done in application code (not via KQL) because
+   * the `isGlobal` boolean is not reliably indexed for all documents (e.g. documents
+   * created before the mapping was applied). In-app filtering on `_source` is always
+   * accurate.
+   */
+  async getFieldDefinitions(
+    owner: string | string[],
+    { isGlobal }: { isGlobal?: boolean } = {}
+  ): Promise<FieldDefinitionsFindResponse> {
     const owners = castArray(owner);
 
     if (owners.length === 0) {
       return { fieldDefinitions: [], total: 0 };
     }
 
-    const filter = owners
+    const ownerFilter = owners
       .map((o) => `${CASE_FIELD_DEFINITION_SAVED_OBJECT}.attributes.owner: "${escapeKuery(o)}"`)
       .join(' OR ');
 
     const result = await this.dependencies.unsecuredSavedObjectsClient.find<FieldDefinition>({
       type: CASE_FIELD_DEFINITION_SAVED_OBJECT,
-      filter,
+      filter: ownerFilter,
       perPage: MAX_FIELD_DEFINITIONS_PER_OWNER * owners.length,
     });
 
+    const allDefs = result.saved_objects.map((so) => so.attributes);
+
+    const fieldDefinitions =
+      isGlobal === true ? allDefs.filter((fd) => fd.isGlobal === true) : allDefs;
+
     return {
-      fieldDefinitions: result.saved_objects.map((so) => so.attributes),
-      total: result.total,
+      fieldDefinitions,
+      total: fieldDefinitions.length,
     };
   }
 

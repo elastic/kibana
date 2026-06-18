@@ -19,8 +19,10 @@ import { casesCustomFields } from '../../custom_fields';
 import { MAX_CUSTOM_FIELDS_PER_CASE } from '../../../common/constants';
 import type { CaseSavedObjectTransformed } from '../../common/types/case';
 import type { TemplatesService } from '../../services/templates';
+import type { FieldDefinitionsService } from '../../services/field_definitions';
 import { parseTemplate } from '../../routes/api/templates/parse_template';
 import { validateExtendedFields } from '../../../common/types/domain/template/validate_extended_fields';
+import { parseFieldDefinitionsToInlineFields, getFieldSnakeKey } from '../../../common/utils';
 
 interface CustomFieldValidationParams {
   requestCustomFields?: CaseRequestCustomFields;
@@ -156,23 +158,57 @@ export const validateRequiredCustomFields = ({
   }
 };
 
+/**
+ * Parses isGlobal field definitions for the given owner and returns the
+ * set of valid extended-field snake_case keys those definitions produce.
+ *
+ * Uses the unsecured SO client directly because the `owner` has already been
+ * validated by `authorization.ensureAuthorized` on the parent case operation —
+ * no additional privilege check is required here.
+ */
+export const resolveGlobalFieldKeys = async (
+  owner: string,
+  fieldDefinitionsService: FieldDefinitionsService
+): Promise<Set<string>> => {
+  const { fieldDefinitions } = await fieldDefinitionsService.getFieldDefinitions(owner, {
+    isGlobal: true,
+  });
+  const inlineFields = parseFieldDefinitionsToInlineFields(fieldDefinitions);
+  return new Set(inlineFields.map((f) => getFieldSnakeKey(f.name, f.type)));
+};
+
 export const validateExtendedFieldsInRequest = async ({
   updateReq,
   originalCase,
   templatesService,
+  globalKeys,
 }: {
   updateReq: CasePatchRequest;
   originalCase: CaseSavedObjectTransformed;
   templatesService: TemplatesService;
+  globalKeys: Set<string>;
 }): Promise<void> => {
   if (!updateReq.extended_fields) return;
-  if (updateReq.template === null) {
-    throw Boom.badRequest('extended_fields cannot be set when template is being cleared');
-  }
-  const templateId = updateReq.template?.id ?? originalCase.attributes.template?.id;
+
+  // null means the template is being cleared; undefined means it is not changing.
+  const templateId =
+    updateReq.template === null
+      ? null
+      : updateReq.template?.id ?? originalCase.attributes.template?.id;
+
   if (!templateId) {
-    throw Boom.badRequest('extended_fields require a template to be specified on the case');
+    // No template (either never set or being cleared) — only global field keys are permitted.
+    const invalidKeys = Object.keys(updateReq.extended_fields).filter((k) => !globalKeys.has(k));
+    if (invalidKeys.length) {
+      throw Boom.badRequest(
+        `extended_fields keys [${invalidKeys.join(
+          ', '
+        )}] are not global (isGlobal) field definitions`
+      );
+    }
+    return;
   }
+
   const templateSO = await templatesService.getTemplate(templateId);
   if (!templateSO) {
     throw Boom.badRequest(`Template ${templateId} not found`);
@@ -183,10 +219,14 @@ export const validateExtendedFieldsInRequest = async ({
   } catch (err) {
     throw Boom.badRequest(`Template ${templateId} has an invalid definition`);
   }
-  const errors = validateExtendedFields(
-    updateReq.extended_fields,
-    parsedTemplate.definition.fields
+
+  // Validate only the template-specific keys (global keys are always valid).
+  const templateOnlyFields = Object.fromEntries(
+    Object.entries(updateReq.extended_fields).filter(([k]) => !globalKeys.has(k))
   );
+  const errors = validateExtendedFields(templateOnlyFields, parsedTemplate.definition.fields, {
+    partial: true,
+  });
   if (errors.length) {
     throw Boom.badRequest(`Invalid extended_fields: ${errors.join('; ')}`);
   }

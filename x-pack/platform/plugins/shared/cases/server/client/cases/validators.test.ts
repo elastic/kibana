@@ -19,6 +19,7 @@ import {
 } from './validators';
 import type { CaseSavedObjectTransformed } from '../../common/types/case';
 import type { TemplatesService } from '../../services/templates';
+import { getFieldSnakeKey } from '../../../common/utils';
 
 describe('validators', () => {
   describe('validateCustomFieldTypesInRequest', () => {
@@ -721,6 +722,9 @@ describe('validators', () => {
       },
     });
 
+    const makeGlobalKeys = (defs: Array<{ name: string; type: string }> = []): Set<string> =>
+      new Set(defs.map(({ name, type }) => getFieldSnakeKey(name, type)));
+
     const simpleTemplateSO = makeTemplatesSO({
       fields: [{ control: 'INPUT_TEXT', name: 'summary', label: 'Summary', type: 'keyword' }],
     });
@@ -739,18 +743,33 @@ describe('validators', () => {
           updateReq: { id: 'case-1', version: '1' },
           originalCase: makeOriginalCase('tpl-1'),
           templatesService: templatesService as unknown as TemplatesService,
+          globalKeys: makeGlobalKeys(),
         })
       ).resolves.toBeUndefined();
     });
 
-    it('throws when extended_fields is present but no template on request or original case', async () => {
+    it('allows global field keys in extended_fields when no template is set', async () => {
       await expect(
         validateExtendedFieldsInRequest({
           updateReq: { id: 'case-1', version: '1', extended_fields: { summary_as_keyword: 'hi' } },
           originalCase: makeOriginalCase(), // no template
           templatesService: templatesService as unknown as TemplatesService,
+          globalKeys: makeGlobalKeys([{ name: 'summary', type: 'keyword' }]),
         })
-      ).rejects.toThrow('extended_fields require a template to be specified on the case');
+      ).resolves.toBeUndefined();
+    });
+
+    it('throws when extended_fields has non-global keys and no template is set', async () => {
+      await expect(
+        validateExtendedFieldsInRequest({
+          updateReq: { id: 'case-1', version: '1', extended_fields: { summary_as_keyword: 'hi' } },
+          originalCase: makeOriginalCase(), // no template, no global defs
+          templatesService: templatesService as unknown as TemplatesService,
+          globalKeys: makeGlobalKeys(),
+        })
+      ).rejects.toThrow(
+        'extended_fields keys [summary_as_keyword] are not global (isGlobal) field definitions'
+      );
     });
 
     it('throws when template not found', async () => {
@@ -766,6 +785,7 @@ describe('validators', () => {
           },
           originalCase: makeOriginalCase(),
           templatesService: templatesService as unknown as TemplatesService,
+          globalKeys: makeGlobalKeys(),
         })
       ).rejects.toThrow('Template missing-tpl not found');
     });
@@ -781,11 +801,44 @@ describe('validators', () => {
           },
           originalCase: makeOriginalCase(),
           templatesService: templatesService as unknown as TemplatesService,
+          globalKeys: makeGlobalKeys(),
         })
       ).resolves.toBeUndefined();
     });
 
     it('throws with validation errors for invalid extended_fields', async () => {
+      const templateSOWithRequired = makeTemplatesSO({
+        fields: [
+          {
+            control: 'INPUT_TEXT',
+            name: 'summary',
+            label: 'Summary',
+            type: 'keyword',
+            validation: { required: true },
+          },
+        ],
+      });
+      templatesService.getTemplate.mockResolvedValue(templateSOWithRequired);
+
+      // Explicitly setting a required field to empty string should still fail.
+      // Omitting the key entirely (partial update) is allowed — the server merges
+      // existing values, so absent keys retain their stored value.
+      await expect(
+        validateExtendedFieldsInRequest({
+          updateReq: {
+            id: 'case-1',
+            version: '1',
+            template: { id: 'tpl-1', version: 1 },
+            extended_fields: { summary_as_keyword: '' },
+          },
+          originalCase: makeOriginalCase(),
+          templatesService: templatesService as unknown as TemplatesService,
+          globalKeys: makeGlobalKeys(),
+        })
+      ).rejects.toThrow('Invalid extended_fields: Field "Summary" is required');
+    });
+
+    it('does not throw when only global fields are provided for a case with required template fields', async () => {
       const templateSOWithRequired = makeTemplatesSO({
         fields: [
           {
@@ -805,12 +858,13 @@ describe('validators', () => {
             id: 'case-1',
             version: '1',
             template: { id: 'tpl-1', version: 1 },
-            extended_fields: {},
+            extended_fields: { my_global_field_as_keyword: 'value' },
           },
-          originalCase: makeOriginalCase(),
+          originalCase: makeOriginalCase('tpl-1'),
           templatesService: templatesService as unknown as TemplatesService,
+          globalKeys: makeGlobalKeys([{ name: 'my_global_field', type: 'keyword' }]),
         })
-      ).rejects.toThrow('Invalid extended_fields: Field "Summary" is required');
+      ).resolves.toBeUndefined();
     });
 
     it('throws when template definition is invalid YAML/schema', async () => {
@@ -839,11 +893,12 @@ describe('validators', () => {
           },
           originalCase: makeOriginalCase(),
           templatesService: templatesService as unknown as TemplatesService,
+          globalKeys: makeGlobalKeys(),
         })
       ).rejects.toThrow('Template tpl-1 has an invalid definition');
     });
 
-    it('throws when template is explicitly null and extended_fields are provided', async () => {
+    it('throws when template is explicitly null and non-global extended_fields are provided', async () => {
       await expect(
         validateExtendedFieldsInRequest({
           updateReq: {
@@ -854,8 +909,29 @@ describe('validators', () => {
           },
           originalCase: makeOriginalCase('tpl-from-original'),
           templatesService: templatesService as unknown as TemplatesService,
+          globalKeys: makeGlobalKeys(),
         })
-      ).rejects.toThrow('extended_fields cannot be set when template is being cleared');
+      ).rejects.toThrow(
+        'extended_fields keys [summary_as_keyword] are not global (isGlobal) field definitions'
+      );
+
+      expect(templatesService.getTemplate).not.toHaveBeenCalled();
+    });
+
+    it('allows global field keys when template is explicitly null', async () => {
+      await expect(
+        validateExtendedFieldsInRequest({
+          updateReq: {
+            id: 'case-1',
+            version: '1',
+            template: null,
+            extended_fields: { summary_as_keyword: 'hi' },
+          },
+          originalCase: makeOriginalCase('tpl-from-original'),
+          templatesService: templatesService as unknown as TemplatesService,
+          globalKeys: makeGlobalKeys([{ name: 'summary', type: 'keyword' }]),
+        })
+      ).resolves.toBeUndefined();
 
       expect(templatesService.getTemplate).not.toHaveBeenCalled();
     });
@@ -870,10 +946,30 @@ describe('validators', () => {
           },
           originalCase: makeOriginalCase('tpl-from-original'),
           templatesService: templatesService as unknown as TemplatesService,
+          globalKeys: makeGlobalKeys(),
         })
       ).resolves.toBeUndefined();
 
       expect(templatesService.getTemplate).toHaveBeenCalledWith('tpl-from-original');
+    });
+
+    it('allows global field keys alongside template fields when template is set', async () => {
+      await expect(
+        validateExtendedFieldsInRequest({
+          updateReq: {
+            id: 'case-1',
+            version: '1',
+            template: { id: 'tpl-1', version: 1 },
+            extended_fields: {
+              summary_as_keyword: 'hello',
+              global_tag_as_keyword: 'security',
+            },
+          },
+          originalCase: makeOriginalCase(),
+          templatesService: templatesService as unknown as TemplatesService,
+          globalKeys: makeGlobalKeys([{ name: 'global_tag', type: 'keyword' }]),
+        })
+      ).resolves.toBeUndefined();
     });
   });
 });

@@ -12,11 +12,17 @@ import userEvent from '@testing-library/user-event';
 import type { CaseUI } from '../../../../common';
 import type { ParsedTemplate } from '../../../../common/types/domain/template/v1';
 import { FieldType } from '../../../../common/types/domain/template/fields';
-import { TemplateFields } from './template_fields';
+import yaml from 'js-yaml';
+import { TemplateFields, GlobalCaseFields } from './template_fields';
 
 const mockUseGetTemplate = jest.fn();
 jest.mock('../../templates_v2/hooks/use_get_template', () => ({
   useGetTemplate: (...args: unknown[]) => mockUseGetTemplate(...args),
+}));
+
+const mockUseGetFieldDefinitions = jest.fn();
+jest.mock('../../field_library/hooks/use_get_field_definitions', () => ({
+  useGetFieldDefinitions: (...args: unknown[]) => mockUseGetFieldDefinitions(...args),
 }));
 
 jest.mock('../../field_library/hooks/use_resolved_fields', () => ({
@@ -75,11 +81,16 @@ describe('TemplateFields', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockUseGetTemplate.mockReturnValue({ data: mockTemplate, isLoading: false });
+    mockUseGetFieldDefinitions.mockReturnValue({
+      data: { fieldDefinitions: [] },
+      isLoading: false,
+    });
   });
 
-  it('renders fields for each template definition field', () => {
+  it('renders the Extended fields heading and all template fields', () => {
     render(<TemplateFields {...defaultProps} />);
 
+    expect(screen.getByText('Extended fields')).toBeInTheDocument();
     expect(screen.getByText('Summary')).toBeInTheDocument();
     expect(screen.getByText('Effort')).toBeInTheDocument();
     expect(screen.getByText('Notes')).toBeInTheDocument();
@@ -535,5 +546,237 @@ describe('TemplateFields', () => {
         expect(screen.queryByTestId('template-field-cancel-priority')).not.toBeInTheDocument();
       });
     });
+  });
+});
+
+describe('GlobalCaseFields', () => {
+  const caseData = {
+    owner: 'securitySolution',
+    extendedFields: { incidentTypeAsKeyword: 'outage' },
+  } as unknown as CaseUI;
+
+  const makeGlobalDef = (name: string) => ({
+    fieldDefinitionId: `fd-${name}`,
+    name,
+    definition: yaml.dump({ name, type: 'keyword', control: 'INPUT_TEXT', label: name }),
+    owner: 'securitySolution',
+    isGlobal: true,
+    description: '',
+  });
+
+  const globalOnUpdateField = jest.fn();
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('renders nothing while field definitions are loading', () => {
+    mockUseGetFieldDefinitions.mockReturnValue({ data: undefined, isLoading: true });
+    const { container } = render(
+      <GlobalCaseFields caseData={caseData} onUpdateField={globalOnUpdateField} />
+    );
+    expect(container.textContent).toBe('');
+  });
+
+  it('renders nothing when the field definitions query errors', () => {
+    mockUseGetFieldDefinitions.mockReturnValue({
+      data: undefined,
+      isLoading: false,
+      isError: true,
+    });
+    const { container } = render(
+      <GlobalCaseFields caseData={caseData} onUpdateField={globalOnUpdateField} />
+    );
+    expect(container.textContent).toBe('');
+  });
+
+  it('renders nothing when there are no isGlobal definitions', () => {
+    mockUseGetFieldDefinitions.mockReturnValue({
+      data: { fieldDefinitions: [] },
+      isLoading: false,
+    });
+    const { container } = render(
+      <GlobalCaseFields caseData={caseData} onUpdateField={globalOnUpdateField} />
+    );
+    expect(container.textContent).toBe('');
+  });
+
+  it('renders global fields form when isGlobal definitions exist', () => {
+    mockUseGetFieldDefinitions.mockReturnValue({
+      data: { fieldDefinitions: [makeGlobalDef('incident_type')] },
+      isLoading: false,
+    });
+    render(<GlobalCaseFields caseData={caseData} onUpdateField={globalOnUpdateField} />);
+    expect(screen.queryByText('Global fields')).not.toBeInTheDocument();
+    expect(screen.getByTestId('template-fields-form')).toBeInTheDocument();
+  });
+
+  it('renders the "Extended fields" heading when there is no active template', () => {
+    const caseWithoutTemplate = { ...caseData, template: undefined } as unknown as CaseUI;
+    mockUseGetFieldDefinitions.mockReturnValue({
+      data: { fieldDefinitions: [makeGlobalDef('incident_type')] },
+      isLoading: false,
+    });
+    mockUseGetTemplate.mockReturnValue({ data: undefined, isLoading: false });
+    render(<GlobalCaseFields caseData={caseWithoutTemplate} onUpdateField={globalOnUpdateField} />);
+    expect(screen.getByText('Extended fields')).toBeInTheDocument();
+    expect(screen.getByTestId('template-fields-form')).toBeInTheDocument();
+  });
+
+  it('does not render the "Extended fields" heading when a template is active', () => {
+    const caseWithTemplate = {
+      ...caseData,
+      template: { id: 'template-1', version: 1 },
+    } as unknown as CaseUI;
+    mockUseGetFieldDefinitions.mockReturnValue({
+      data: { fieldDefinitions: [makeGlobalDef('incident_type')] },
+      isLoading: false,
+    });
+    mockUseGetTemplate.mockReturnValue({
+      data: {
+        templateId: 'template-1',
+        definition: { name: 'Test', fields: [] },
+      },
+      isLoading: false,
+    });
+    render(<GlobalCaseFields caseData={caseWithTemplate} onUpdateField={globalOnUpdateField} />);
+    expect(screen.queryByText('Extended fields')).not.toBeInTheDocument();
+    expect(screen.getByTestId('template-fields-form')).toBeInTheDocument();
+  });
+
+  it('skips malformed definitions without crashing', () => {
+    mockUseGetFieldDefinitions.mockReturnValue({
+      data: {
+        fieldDefinitions: [
+          { ...makeGlobalDef('bad'), definition: 'not: valid: [broken' },
+          makeGlobalDef('good_field'),
+        ],
+      },
+      isLoading: false,
+    });
+    render(<GlobalCaseFields caseData={caseData} onUpdateField={globalOnUpdateField} />);
+    expect(screen.getByTestId('template-fields-form')).toBeInTheDocument();
+  });
+
+  it('queries field definitions with isGlobal: true and the case owner', () => {
+    mockUseGetFieldDefinitions.mockReturnValue({
+      data: { fieldDefinitions: [] },
+      isLoading: false,
+    });
+    render(<GlobalCaseFields caseData={caseData} onUpdateField={globalOnUpdateField} />);
+    expect(mockUseGetFieldDefinitions).toHaveBeenCalledWith(
+      expect.objectContaining({ owner: 'securitySolution', isGlobal: true })
+    );
+  });
+
+  describe('when a template is active', () => {
+    const caseWithTemplate = {
+      ...caseData,
+      template: { id: 'template-1', version: 1 },
+    } as unknown as CaseUI;
+
+    it('hides a global field that is already referenced via $ref in the template', () => {
+      mockUseGetFieldDefinitions.mockReturnValue({
+        data: {
+          fieldDefinitions: [makeGlobalDef('incident_type'), makeGlobalDef('environment')],
+        },
+        isLoading: false,
+        isError: false,
+      });
+      mockUseGetTemplate.mockReturnValue({
+        data: {
+          templateId: 'template-1',
+          definition: {
+            name: 'Test',
+            fields: [{ $ref: 'incident_type' }],
+          },
+        },
+        isLoading: false,
+      });
+
+      render(<GlobalCaseFields caseData={caseWithTemplate} onUpdateField={globalOnUpdateField} />);
+
+      expect(screen.queryByTestId('template-field-incident_type')).not.toBeInTheDocument();
+      expect(screen.getByTestId('template-fields-form')).toBeInTheDocument();
+    });
+
+    it('shows a global field that is NOT referenced by the template', () => {
+      mockUseGetFieldDefinitions.mockReturnValue({
+        data: {
+          fieldDefinitions: [makeGlobalDef('incident_type'), makeGlobalDef('environment')],
+        },
+        isLoading: false,
+        isError: false,
+      });
+      mockUseGetTemplate.mockReturnValue({
+        data: {
+          templateId: 'template-1',
+          definition: {
+            name: 'Test',
+            fields: [{ $ref: 'incident_type' }],
+          },
+        },
+        isLoading: false,
+      });
+
+      render(<GlobalCaseFields caseData={caseWithTemplate} onUpdateField={globalOnUpdateField} />);
+
+      expect(screen.getByTestId('template-fields-form')).toBeInTheDocument();
+    });
+
+    it('renders nothing when all global fields are referenced by the template', () => {
+      mockUseGetFieldDefinitions.mockReturnValue({
+        data: { fieldDefinitions: [makeGlobalDef('incident_type')] },
+        isLoading: false,
+        isError: false,
+      });
+      mockUseGetTemplate.mockReturnValue({
+        data: {
+          templateId: 'template-1',
+          definition: {
+            name: 'Test',
+            fields: [{ $ref: 'incident_type' }],
+          },
+        },
+        isLoading: false,
+      });
+
+      const { container } = render(
+        <GlobalCaseFields caseData={caseWithTemplate} onUpdateField={globalOnUpdateField} />
+      );
+      expect(container.textContent).toBe('');
+    });
+
+    it('suppresses render while the template is loading to prevent field flash', () => {
+      mockUseGetFieldDefinitions.mockReturnValue({
+        data: { fieldDefinitions: [makeGlobalDef('incident_type')] },
+        isLoading: false,
+        isError: false,
+      });
+      mockUseGetTemplate.mockReturnValue({ data: undefined, isLoading: true });
+
+      const { container } = render(
+        <GlobalCaseFields caseData={caseWithTemplate} onUpdateField={globalOnUpdateField} />
+      );
+      expect(container.textContent).toBe('');
+    });
+  });
+
+  it('shows all global fields when there is no active template', () => {
+    const caseWithoutTemplate = {
+      ...caseData,
+      template: undefined,
+    } as unknown as CaseUI;
+
+    mockUseGetFieldDefinitions.mockReturnValue({
+      data: { fieldDefinitions: [makeGlobalDef('incident_type'), makeGlobalDef('environment')] },
+      isLoading: false,
+      isError: false,
+    });
+    mockUseGetTemplate.mockReturnValue({ data: undefined, isLoading: false });
+
+    render(<GlobalCaseFields caseData={caseWithoutTemplate} onUpdateField={globalOnUpdateField} />);
+
+    expect(screen.getByTestId('template-fields-form')).toBeInTheDocument();
   });
 });
