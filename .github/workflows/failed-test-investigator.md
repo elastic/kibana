@@ -126,6 +126,10 @@ Use all of the data at your disposal to reach a conclusion (source code, logs, f
 
 Every conclusion must cite specific evidence. Do not guess.
 
+## Environment constraints
+
+**Scratch files**: write throwaway files inside the repository checkout (the current working directory). Redirecting (`>`) elsewhere (e.g. `/tmp/...`) may be blocked — use a path under the repo root.
+
 ## Classify
 
 Set `classification` based on where the evidence points:
