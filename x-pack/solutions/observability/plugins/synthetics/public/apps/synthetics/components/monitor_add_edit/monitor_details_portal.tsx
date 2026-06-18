@@ -18,9 +18,6 @@ interface Props {
   configId: string;
   locationId?: string;
   updateUrl?: boolean;
-  // Forwarded to the breadcrumb URL so the monitor detail page knows the
-  // monitor lives on a remote (CCS) cluster and skips the local saved-object
-  // fetch that would otherwise 404.
   remoteName?: string;
 }
 
