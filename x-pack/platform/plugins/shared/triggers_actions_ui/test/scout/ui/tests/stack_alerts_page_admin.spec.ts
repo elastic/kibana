@@ -61,34 +61,35 @@ test.describe('Stack alerts page (admin)', { tag: tags.stateful.classic }, () =>
   test('disables the non-SIEM solution filters when Security is applied', async ({ page }) => {
     await page.testSubj.click('showQueryBarMenu');
     const menu = page.testSubj.locator('queryBarMenuPanel');
+    await expect(menu).toBeVisible();
 
     await menu
       .locator(`[data-test-subj="quick-filters-item-Security${SOLUTION_FILTER_SUFFIX}"]`)
       .click();
 
-    // Clicking a filter closes the menu — re-open it and assert that no
-    // non-Security solution filter is enabled (they're exclusive with SIEM).
-    await page.testSubj.click('showQueryBarMenu');
-    const reopenedMenu = page.testSubj.locator('queryBarMenuPanel');
-
-    const enabledNonSecurityFilters = reopenedMenu.locator(
-      `[data-test-subj$="${SOLUTION_FILTER_SUFFIX}"]:not([data-test-subj*="Security"]):not([disabled])`
-    );
-    await expect(enabledNonSecurityFilters).toHaveCount(0);
+    // Applying a quick filter keeps the menu open and updates the disabled states
+    // in place; the non-Security solution filters are present but all disabled
+    // (they're mutually exclusive with SIEM). toHaveCount auto-retries while the
+    // applied-filter state propagates.
+    const nonSecuritySelector = `[data-test-subj$="${SOLUTION_FILTER_SUFFIX}"]:not([data-test-subj*="Security"])`;
+    await expect(menu.locator(nonSecuritySelector)).not.toHaveCount(0);
+    await expect(menu.locator(`${nonSecuritySelector}:not([disabled])`)).toHaveCount(0);
   });
 
   test('disables the SIEM solution filter when any other is applied', async ({ page }) => {
     await page.testSubj.click('showQueryBarMenu');
     const menu = page.testSubj.locator('queryBarMenuPanel');
+    await expect(menu).toBeVisible();
 
     const firstNonSecurityFilter = menu
       .locator(`[data-test-subj$="${SOLUTION_FILTER_SUFFIX}"]:not([data-test-subj*="Security"])`)
       .first();
     await firstNonSecurityFilter.click();
 
-    await page.testSubj.click('showQueryBarMenu');
-    const reopenedMenu = page.testSubj.locator('queryBarMenuPanel');
-    const securityFilter = reopenedMenu.locator(
+    // Applying a quick filter keeps the menu open and disables the SIEM filter in
+    // place (exclusive with the other solutions). toBeDisabled auto-retries while
+    // the applied-filter state propagates.
+    const securityFilter = menu.locator(
       `[data-test-subj="quick-filters-item-Security${SOLUTION_FILTER_SUFFIX}"]`
     );
     await expect(securityFilter).toBeDisabled();
