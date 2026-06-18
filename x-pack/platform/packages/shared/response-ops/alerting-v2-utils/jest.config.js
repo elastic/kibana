@@ -5,4 +5,8 @@
  * 2.0.
  */
 
-export const ALERTING_V2_DISPATCHER_ENABLED_SETTING_ID = 'observability:alerting:dispatcherEnabled';
+module.exports = {
+  preset: '@kbn/test',
+  rootDir: '../../../../../..',
+  roots: ['<rootDir>/x-pack/platform/packages/shared/response-ops/alerting-v2-utils'],
+};
