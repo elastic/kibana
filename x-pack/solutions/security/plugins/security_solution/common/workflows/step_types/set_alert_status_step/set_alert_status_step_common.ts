@@ -72,7 +72,7 @@ export const setAlertStatusStepCommonDefinition: BaseStepDefinition<
 - name: close_alerts
   type: security.setAlertStatus
   with:
-    alert_ids: 
+    alert_ids:
       - "alert-1"
       - "alert-2"
     status: "closed"
