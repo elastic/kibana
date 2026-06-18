@@ -1,0 +1,422 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import type { RenovateConfig } from './reviewer_sync';
+import {
+  computeReviewersForPackages,
+  convertTeamFormat,
+  getRulePackages,
+  normalizeSortedUnique,
+  sameStringSet,
+  syncReviewersInConfig,
+} from './reviewer_sync';
+
+describe('reviewer sync', () => {
+  it('convertTeamFormat converts @elastic/foo to team:foo', () => {
+    expect(convertTeamFormat('@elastic/kibana-core')).toEqual('team:kibana-core');
+    expect(convertTeamFormat('@elastic/something')).toEqual('team:something');
+  });
+
+  it('convertTeamFormat normalizes individual users to bare usernames', () => {
+    expect(convertTeamFormat('@vigneshshanmugam')).toEqual('vigneshshanmugam');
+    expect(convertTeamFormat('@markov00')).toEqual('markov00');
+  });
+
+  it('normalizeSortedUnique sorts and de-dupes', () => {
+    expect(normalizeSortedUnique(['b', 'a', 'a'])).toEqual(['a', 'b']);
+  });
+
+  it('sameStringSet compares sets order-insensitively', () => {
+    expect(sameStringSet(['b', 'a'], ['a', 'b'])).toEqual(true);
+    expect(sameStringSet(['a', 'b'], ['b', 'a'])).toEqual(true);
+    expect(sameStringSet(['a', 'a', 'b'], ['b', 'a'])).toEqual(true);
+    expect(sameStringSet(['a'], ['a', 'b'])).toEqual(false);
+    expect(sameStringSet(undefined, [])).toEqual(true);
+    expect(sameStringSet(undefined, ['a'])).toEqual(false);
+  });
+
+  it('getRulePackages collects matchDepNames + matchPackageNames and filters to known packages', () => {
+    const knownPackages = new Set(['lodash', 'react', '@elastic/eui']);
+
+    expect(
+      getRulePackages(
+        {
+          matchDepNames: ['lodash', 'unknown'],
+          matchPackageNames: ['@elastic/eui', 'unknown2'],
+        },
+        knownPackages
+      )
+    ).toEqual(['@elastic/eui', 'lodash']);
+  });
+
+  it('getRulePackages expands matchDepPatterns against known packages', () => {
+    const knownPackages = new Set(['@babel/core', '@babel/parser', 'lodash', 'react']);
+
+    expect(getRulePackages({ matchDepPatterns: ['^@babel'] }, knownPackages)).toEqual([
+      '@babel/core',
+      '@babel/parser',
+    ]);
+  });
+
+  it('getRulePackages throws on invalid matchDepPatterns', () => {
+    expect(() => getRulePackages({ matchDepPatterns: ['['] }, new Set(['lodash']))).toThrow(
+      /Invalid matchDepPatterns pattern/
+    );
+  });
+
+  it('computeReviewersForPackages unions teams across packages and normalizes format', () => {
+    const packageToTeams = new Map<string, string[]>([
+      ['lodash', ['@elastic/kibana-core']],
+      ['react', ['@elastic/kibana-core', '@elastic/kibana-presentation']],
+    ]);
+
+    expect(computeReviewersForPackages(['lodash', 'react'], packageToTeams)).toEqual([
+      'team:kibana-core',
+      'team:kibana-presentation',
+    ]);
+  });
+
+  it('syncReviewersInConfig does not clobber rules when computed reviewers are empty', () => {
+    const renovateConfig: RenovateConfig = {
+      packageRules: [
+        {
+          matchPackageNames: ['lodash'],
+          reviewers: ['team:some-manual-team'],
+        },
+      ],
+    };
+
+    const report = syncReviewersInConfig({
+      renovateConfig,
+      knownPackages: new Set(['lodash']),
+      packageToTeams: new Map([['lodash', []]]), // no teams computed
+      applyChanges: true,
+    });
+
+    expect(report.rulesWithNoComputedReviewers).toEqual(1);
+    expect(report.rulesWithNoComputedReviewersDetails).toEqual([
+      {
+        index: 0,
+        mode: 'report',
+        packages: ['lodash'],
+        before: ['team:some-manual-team'],
+      },
+    ]);
+    expect(report.updatedRules).toEqual(0);
+    expect(renovateConfig.packageRules?.[0].reviewers).toEqual(['team:some-manual-team']);
+  });
+
+  it('syncReviewersInConfig respects x_kbn_reviewer_sync.mode=fixed and does not update reviewers', () => {
+    const renovateConfig: RenovateConfig = {
+      packageRules: [
+        {
+          matchPackageNames: ['lodash'],
+          reviewers: ['team:maintainers'],
+          x_kbn_reviewer_sync: { mode: 'fixed', reason: 'Maintainer-owned rule' },
+        },
+      ],
+    };
+
+    const report = syncReviewersInConfig({
+      renovateConfig,
+      knownPackages: new Set(['lodash']),
+      packageToTeams: new Map([['lodash', ['@elastic/kibana-core']]]),
+      applyChanges: true,
+    });
+
+    expect(report.rulesFixedByOverride).toEqual(1);
+    expect(report.updatedRules).toEqual(0);
+    expect(report.ruleDrift).toHaveLength(0);
+    expect(report.rulesWithNoComputedReviewersDetails).toEqual([]);
+    expect(renovateConfig.packageRules?.[0].reviewers).toEqual(['team:maintainers']);
+  });
+
+  it('syncReviewersInConfig ignores disabled rules, including broad pattern rules', () => {
+    const renovateConfig: RenovateConfig = {
+      packageRules: [
+        {
+          matchDepPatterns: ['.*'],
+          enabled: false,
+        },
+      ],
+    };
+
+    const report = syncReviewersInConfig({
+      renovateConfig,
+      knownPackages: new Set(['lodash']),
+      packageToTeams: new Map([['lodash', ['@elastic/kibana-core']]]),
+      applyChanges: false,
+    });
+
+    expect(report.packagesCoveredByRules).toEqual(0);
+    expect(report.rulesWithNoMappablePackages).toEqual(0);
+    expect(report.packagesUsedButNotCovered).toEqual(['lodash']);
+  });
+
+  it('syncReviewersInConfig throws on invalid x_kbn_reviewer_sync.mode values', () => {
+    const renovateConfig: RenovateConfig = JSON.parse(
+      JSON.stringify({
+        packageRules: [
+          {
+            matchPackageNames: ['lodash'],
+            x_kbn_reviewer_sync: { mode: 'synce' },
+          },
+        ],
+      })
+    );
+
+    expect(() =>
+      syncReviewersInConfig({
+        renovateConfig,
+        knownPackages: new Set(['lodash']),
+        packageToTeams: new Map([['lodash', ['@elastic/kibana-core']]]),
+        applyChanges: true,
+      })
+    ).toThrow(/Invalid x_kbn_reviewer_sync\.mode "synce"/);
+  });
+
+  it('syncReviewersInConfig reports sync-mode rules when computed reviewers are empty', () => {
+    const renovateConfig: RenovateConfig = {
+      packageRules: [
+        {
+          matchPackageNames: ['lodash'],
+          reviewers: ['team:manual-owner'],
+          x_kbn_reviewer_sync: { mode: 'sync' },
+        },
+      ],
+    };
+
+    const report = syncReviewersInConfig({
+      renovateConfig,
+      knownPackages: new Set(['lodash']),
+      packageToTeams: new Map([['lodash', []]]),
+      applyChanges: true,
+    });
+
+    expect(report.rulesWithNoComputedReviewersDetails).toEqual([
+      {
+        index: 0,
+        mode: 'sync',
+        packages: ['lodash'],
+        before: ['team:manual-owner'],
+      },
+    ]);
+    expect(report.updatedRules).toEqual(0);
+    expect(renovateConfig.packageRules?.[0].reviewers).toEqual(['team:manual-owner']);
+  });
+
+  it('syncReviewersInConfig reports drift for rules without x_kbn_reviewer_sync and does not update them even if applyChanges=true', () => {
+    const renovateConfig: RenovateConfig = {
+      packageRules: [
+        {
+          matchDepNames: ['lodash', 'react'],
+          reviewers: ['team:old'],
+        },
+      ],
+    };
+
+    const report = syncReviewersInConfig({
+      renovateConfig,
+      knownPackages: new Set(['lodash', 'react']),
+      packageToTeams: new Map([
+        ['lodash', ['@elastic/kibana-core']],
+        ['react', ['@elastic/kibana-presentation']],
+      ]),
+      applyChanges: true,
+    });
+
+    expect(report.reportOnlyRulesWithDrift).toEqual(1);
+    expect(report.ruleDrift).toHaveLength(1);
+    expect(report.updatedRules).toEqual(0);
+    expect(report.rulesWithNoComputedReviewersDetails).toEqual([]);
+    expect(renovateConfig.packageRules?.[0].reviewers).toEqual(['team:old']);
+  });
+
+  it('syncReviewersInConfig updates reviewers when x_kbn_reviewer_sync.mode=sync and applyChanges=true, without reporting drift', () => {
+    const renovateConfig: RenovateConfig = {
+      packageRules: [
+        {
+          matchDepNames: ['lodash', 'react'],
+          reviewers: ['team:old'],
+          x_kbn_reviewer_sync: { mode: 'sync' },
+        },
+      ],
+    };
+
+    const report = syncReviewersInConfig({
+      renovateConfig,
+      knownPackages: new Set(['lodash', 'react']),
+      packageToTeams: new Map([
+        ['lodash', ['@elastic/kibana-core']],
+        ['react', ['@elastic/kibana-presentation']],
+      ]),
+      applyChanges: true,
+    });
+
+    expect(report.updatedRules).toEqual(1);
+    expect(report.rulesSyncManaged).toEqual(1);
+    expect(report.managedSyncNeeded).toEqual(1);
+    expect(report.ruleDrift).toHaveLength(0);
+    expect(report.managedRuleDrift).toHaveLength(1);
+    expect(report.rulesWithNoComputedReviewersDetails).toEqual([]);
+    expect(report.managedRuleDrift[0]).toEqual({
+      index: 0,
+      packages: ['lodash', 'react'],
+      before: ['team:old'],
+      after: ['team:kibana-core', 'team:kibana-presentation'],
+    });
+    expect(renovateConfig.packageRules?.[0].reviewers).toEqual([
+      'team:kibana-core',
+      'team:kibana-presentation',
+    ]);
+  });
+
+  it('syncReviewersInConfig counts all in-scope mode=sync rules in rulesSyncManaged, even when already in sync', () => {
+    const renovateConfig: RenovateConfig = {
+      packageRules: [
+        {
+          // sync rule already in sync - should count toward rulesSyncManaged but not managedSyncNeeded
+          matchDepNames: ['lodash'],
+          reviewers: ['team:kibana-core'],
+          x_kbn_reviewer_sync: { mode: 'sync' },
+        },
+        {
+          // sync rule with drift - should count toward both rulesSyncManaged and managedSyncNeeded
+          matchDepNames: ['react'],
+          reviewers: ['team:old'],
+          x_kbn_reviewer_sync: { mode: 'sync' },
+        },
+      ],
+    };
+
+    const report = syncReviewersInConfig({
+      renovateConfig,
+      knownPackages: new Set(['lodash', 'react']),
+      packageToTeams: new Map([
+        ['lodash', ['@elastic/kibana-core']],
+        ['react', ['@elastic/kibana-presentation']],
+      ]),
+      applyChanges: true,
+    });
+
+    expect(report.rulesSyncManaged).toEqual(2);
+    expect(report.managedSyncNeeded).toEqual(1);
+    expect(report.managedRuleDrift).toHaveLength(1);
+    expect(report.updatedRules).toEqual(1);
+    expect(report.managedRuleDrift[0].packages).toEqual(['react']);
+    expect(renovateConfig.packageRules?.[0].reviewers).toEqual(['team:kibana-core']);
+    expect(renovateConfig.packageRules?.[1].reviewers).toEqual(['team:kibana-presentation']);
+  });
+
+  it('syncReviewersInConfig propagates `groupName` into drift / managedDrift / rulesWithNoComputedReviewersDetails', () => {
+    const renovateConfig: RenovateConfig = {
+      packageRules: [
+        {
+          groupName: 'webpack',
+          matchDepNames: ['lodash'],
+          reviewers: ['team:old'],
+        },
+        {
+          groupName: 'babel',
+          matchDepNames: ['react'],
+          reviewers: ['team:old'],
+          x_kbn_reviewer_sync: { mode: 'sync' },
+        },
+        {
+          groupName: 'no-coverage',
+          matchDepNames: ['uncovered'],
+          reviewers: ['team:kept'],
+        },
+      ],
+    };
+
+    const report = syncReviewersInConfig({
+      renovateConfig,
+      knownPackages: new Set(['lodash', 'react', 'uncovered']),
+      packageToTeams: new Map([
+        ['lodash', ['@elastic/kibana-core']],
+        ['react', ['@elastic/kibana-presentation']],
+        ['uncovered', []],
+      ]),
+      applyChanges: false,
+    });
+
+    expect(report.ruleDrift).toEqual([
+      {
+        index: 0,
+        groupName: 'webpack',
+        packages: ['lodash'],
+        before: ['team:old'],
+        after: ['team:kibana-core'],
+      },
+    ]);
+    expect(report.managedRuleDrift).toEqual([
+      {
+        index: 1,
+        groupName: 'babel',
+        packages: ['react'],
+        before: ['team:old'],
+        after: ['team:kibana-presentation'],
+      },
+    ]);
+    expect(report.rulesWithNoComputedReviewersDetails).toEqual([
+      {
+        index: 2,
+        groupName: 'no-coverage',
+        mode: 'report',
+        packages: ['uncovered'],
+        before: ['team:kept'],
+      },
+    ]);
+  });
+
+  it('syncReviewersInConfig omits groupName when the rule has none', () => {
+    const renovateConfig: RenovateConfig = {
+      packageRules: [
+        {
+          matchDepNames: ['lodash'],
+          reviewers: ['team:old'],
+        },
+      ],
+    };
+
+    const report = syncReviewersInConfig({
+      renovateConfig,
+      knownPackages: new Set(['lodash']),
+      packageToTeams: new Map([['lodash', ['@elastic/kibana-core']]]),
+      applyChanges: false,
+    });
+
+    expect(report.ruleDrift).toHaveLength(1);
+    expect(report.ruleDrift[0].groupName).toBeUndefined();
+  });
+
+  it('syncReviewersInConfig reports missing coverage for packages used in code but not referenced by any rule', () => {
+    const renovateConfig: RenovateConfig = {
+      packageRules: [
+        {
+          matchPackageNames: ['lodash'],
+          reviewers: ['team:kibana-core'],
+        },
+      ],
+    };
+
+    const report = syncReviewersInConfig({
+      renovateConfig,
+      knownPackages: new Set(['lodash', 'react']),
+      packageToTeams: new Map([
+        ['lodash', ['@elastic/kibana-core']],
+        ['react', ['@elastic/kibana-core']], // used, but not covered by rule list
+      ]),
+      applyChanges: false,
+    });
+
+    expect(report.packagesUsedButNotCovered).toEqual(['react']);
+  });
+});

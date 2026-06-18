@@ -1,0 +1,18 @@
+steps:
+  - command: .buildkite/scripts/steps/renovate_reviewer_sync.sh
+    label: Renovate Reviewer Sync
+    timeout_in_minutes: 60
+    agents:
+      image: family/kibana-ubuntu-2404
+      imageProject: elastic-images-prod
+      provider: gcp
+      machineType: n2-standard-4
+      preemptible: true
+    retry:
+      automatic:
+        # Scoped to preemption-style "agent lost" exits only. The script intentionally exits 1
+        # when it opens/updates a bot PR as a "needs review" signal — we do not want to retry
+        # that and produce duplicate force-pushes. `exit_status: -1` is Kibana's standard
+        # preemption retry code (see `.buildkite/pipelines/on_merge.yml` etc.).
+        - exit_status: '-1'
+          limit: 1
