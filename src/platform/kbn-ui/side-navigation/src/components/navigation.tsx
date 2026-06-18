@@ -41,9 +41,15 @@ export interface NavigationProps {
    */
   activeItemId?: string;
   /**
-   * Whether the navigation is collapsed. This can be controlled by the parent component.
+   * Whether the secondary navigation side panel is collapsed.
+   * This can be controlled by the parent component via the collapse button.
    */
   isCollapsed: boolean;
+  /**
+   * Whether primary navigation labels are hidden (icon-only mode).
+   * When omitted, defaults to false. On small viewports labels are always hidden.
+   */
+  hidePrimaryLabels?: boolean;
   /**
    * The navigation structure containing primary, secondary, and footer items.
    */
@@ -62,6 +68,7 @@ export interface NavigationProps {
   onItemClick?: (item: MenuItem | SecondaryMenuItem | SideNavLogo) => void;
   /**
    * Callback fired when the collapse button is toggled.
+   * Controls secondary navigation (side panel) visibility only.
    *
    * The collapsed state's source of truth lives in chrome_service.tsx as a BehaviorSubject
    * that is persisted to localStorage. External consumers rely on this state.
@@ -90,6 +97,7 @@ export interface NavigationProps {
 export const Navigation = ({
   activeItemId,
   isCollapsed: isCollapsedProp,
+  hidePrimaryLabels: hidePrimaryLabelsProp = false,
   items,
   logo,
   onCustomizeNavigation,
@@ -102,6 +110,7 @@ export const Navigation = ({
 }: NavigationProps) => {
   const forcedCollapsed = useIsWithinBreakpoints(['xs', 's']);
   const isCollapsed = forcedCollapsed || isCollapsedProp;
+  const hidePrimaryLabels = forcedCollapsed || hidePrimaryLabelsProp;
   const euiThemeContext = useEuiTheme();
 
   const topSeparatorStyles = css`
@@ -126,7 +135,7 @@ export const Navigation = ({
   const [isAnyPopoverLocked, setIsAnyPopoverLocked] = useState(false);
 
   const { overflowMenuItems, primaryMenuRef, visibleMenuItems } = useResponsiveMenu(
-    isCollapsed,
+    hidePrimaryLabels,
     items.primaryItems
   );
 
@@ -140,7 +149,7 @@ export const Navigation = ({
     activeItemId
   );
 
-  useLayoutWidth({ isCollapsed, isSidePanelOpen, setWidth });
+  useLayoutWidth({ hidePrimaryLabels, isSidePanelOpen, setWidth });
 
   // Create the collapse button if a toggle callback is provided or if the navigation is not forced to be collapsed (e.g. on mobile)
   const collapseButton =
@@ -154,11 +163,11 @@ export const Navigation = ({
       data-test-subj={rest['data-test-subj'] ?? NAVIGATION_ROOT_SELECTOR}
       id={NAVIGATION_ROOT_SELECTOR}
     >
-      <SideNav isCollapsed={isCollapsed}>
+      <SideNav hidePrimaryLabels={hidePrimaryLabels}>
         {showTopSeparator && <div css={topSeparatorStyles} aria-hidden />}
         {logo && (
           <SideNav.Logo
-            isCollapsed={isCollapsed}
+            hidePrimaryLabels={hidePrimaryLabels}
             isCurrent={actualActiveItemId === logo.id}
             isHighlighted={visuallyActivePageId === logo.id}
             onClick={() => onItemClick?.(logo)}
@@ -166,7 +175,7 @@ export const Navigation = ({
           />
         )}
 
-        <SideNav.PrimaryMenu ref={primaryMenuRef} isCollapsed={isCollapsed}>
+        <SideNav.PrimaryMenu ref={primaryMenuRef} hidePrimaryLabels={hidePrimaryLabels}>
           {({ mainNavigationInstructionsId }) => (
             <>
               {visibleMenuItems.map((item, index) => {
@@ -187,7 +196,7 @@ export const Navigation = ({
                         aria-posinset={index + 1}
                         aria-setsize={setSize}
                         hasContent={getHasSubmenu(item)}
-                        isCollapsed={isCollapsed}
+                        hidePrimaryLabels={hidePrimaryLabels}
                         isCurrent={actualActiveItemId === item.id}
                         isHighlighted={item.id === visuallyActivePageId}
                         isNew={getIsNewPrimary(item.id)}
@@ -264,7 +273,7 @@ export const Navigation = ({
                       hasContent
                       iconType="boxesVertical"
                       id={MORE_MENU_ID}
-                      isCollapsed={isCollapsed}
+                      hidePrimaryLabels={hidePrimaryLabels}
                       isHighlighted={allOverflowItems.some(
                         (item) => item.id === visuallyActivePageId
                       )}
@@ -389,7 +398,7 @@ export const Navigation = ({
           )}
         </SideNav.PrimaryMenu>
 
-        <SideNav.Footer isCollapsed={isCollapsed} collapseButton={collapseButton}>
+        <SideNav.Footer hidePrimaryLabels={hidePrimaryLabels} collapseButton={collapseButton}>
           {({ footerNavigationInstructionsId }) => (
             <>
               {items.footerItems.slice(0, MAX_FOOTER_ITEMS).map((item, index) => {

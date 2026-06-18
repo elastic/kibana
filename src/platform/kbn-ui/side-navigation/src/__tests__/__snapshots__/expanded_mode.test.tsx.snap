@@ -374,7 +374,7 @@ exports[`Expanded mode should render the side navigation 1`] = `
             id="generated-id_euiToolTipAnchor"
           >
             <button
-              aria-controls="kbnChromeNav-primaryNavigation"
+              aria-controls="kbnChromeNav-sidePanel"
               aria-expanded="true"
               aria-label="Collapse navigation menu"
               aria-pressed="true"

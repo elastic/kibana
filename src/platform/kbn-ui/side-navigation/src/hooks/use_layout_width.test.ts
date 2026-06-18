@@ -20,7 +20,7 @@ describe('useLayoutWidth', () => {
   it('sets the collapsed width when the navigation is collapsed', () => {
     const setWidth = jest.fn();
 
-    renderHook(() => useLayoutWidth({ isCollapsed: true, isSidePanelOpen: false, setWidth }));
+    renderHook(() => useLayoutWidth({ hidePrimaryLabels: true, isSidePanelOpen: false, setWidth }));
 
     expect(setWidth).toHaveBeenCalledWith(COLLAPSED_WIDTH);
   });
@@ -28,7 +28,7 @@ describe('useLayoutWidth', () => {
   it('adds the side panel width when the side panel is open', () => {
     const setWidth = jest.fn();
 
-    renderHook(() => useLayoutWidth({ isCollapsed: false, isSidePanelOpen: true, setWidth }));
+    renderHook(() => useLayoutWidth({ hidePrimaryLabels: false, isSidePanelOpen: true, setWidth }));
 
     expect(setWidth).toHaveBeenNthCalledWith(1, EXPANDED_WIDTH + SIDE_PANEL_WIDTH);
   });
@@ -36,16 +36,16 @@ describe('useLayoutWidth', () => {
   it('updates when dependencies change', () => {
     const setWidth = jest.fn();
     const { rerender } = renderHook(
-      (props: { isCollapsed: boolean; isSidePanelOpen: boolean }) =>
+      (props: { hidePrimaryLabels: boolean; isSidePanelOpen: boolean }) =>
         useLayoutWidth({ ...props, setWidth }),
       {
-        initialProps: { isCollapsed: false, isSidePanelOpen: false },
+        initialProps: { hidePrimaryLabels: false, isSidePanelOpen: false },
       }
     );
 
     setWidth.mockClear();
 
-    rerender({ isCollapsed: true, isSidePanelOpen: true });
+    rerender({ hidePrimaryLabels: true, isSidePanelOpen: true });
 
     expect(setWidth).toHaveBeenNthCalledWith(1, COLLAPSED_WIDTH + SIDE_PANEL_WIDTH);
   });
