@@ -78,6 +78,10 @@ export function createNavigationTree({
         breadcrumbStatus: 'hidden',
       },
       {
+        icon: 'productAgent',
+        link: 'agent_builder',
+      },
+      {
         link: 'discover',
         icon: 'productDiscover',
       },
@@ -87,10 +91,6 @@ export function createNavigationTree({
         getIsActive: ({ pathNameSerialized, prepend, location }) =>
           pathNameSerialized.startsWith(prepend('/app/dashboards')) ||
           isEditingFromDashboard(location, pathNameSerialized, prepend),
-      },
-      {
-        icon: 'productAgent',
-        link: 'agent_builder',
       },
       {
         link: 'workflows',
