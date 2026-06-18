@@ -67,6 +67,9 @@ Work through all of these questions:
   - _Why it matters:_ shared failure modes point to shared building blocks (page objects, fixtures, setup) and usually call for a structural change rather than a per-test patch.
 - **Did it fail on a specific version branch?**
   - _Why it matters:_ if the failure isn't happening on `main`, compare the branches to identify what's different. The branch that passes tells you what `main` is missing (or what it added).
+- **Does the test still exist on the branch that's failing?** A test can be deleted or migrated (e.g. FTR → Scout) on `main` while it still runs on a release branch. Identify the branch of the most recent failure and inspect the file there, not on `main`.
+  - _Why it matters:_ if the file is gone from `main`, the failure is branch-local — a fix (if any) belongs on the release branch, and reasoning from `main`'s code will be wrong.
+  - Don't spend too much time on tests that no longer exist (the CI build may have not picked up the latest branch changes). Acknowledge them and move on.
 - **When did it first fail, and when did it last pass?**
   - _Why it matters:_ narrows down the Kibana commit or PR that may have introduced the flakiness.
 - **Has this issue or a related one been closed and reopened before?**
