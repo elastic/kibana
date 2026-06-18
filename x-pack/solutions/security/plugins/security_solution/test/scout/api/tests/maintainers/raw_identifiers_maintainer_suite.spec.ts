@@ -16,14 +16,14 @@ import {
   LATEST_ALIAS,
   LATEST_INDEX,
   UPDATES_INDEX,
-} from './constants';
+} from '../../fixtures/maintainers/constants';
 import {
   clearEntityStoreIndices,
   seedHostEntity,
   triggerMaintainerRun,
   waitForRelationshipIds,
   assertNoRelationshipId,
-} from './helpers';
+} from '../../fixtures/maintainers/helpers';
 
 /**
  * Config describing one raw_identifiers-based relationship maintainer under test.
@@ -65,7 +65,7 @@ export interface RawIdentifiersMaintainerSuiteConfig {
  *     entityPrefix: 'adm',
  *   });
  */
-export const registerRawIdentifiersMaintainerSuite = (
+const registerRawIdentifiersMaintainerSuite = (
   config: RawIdentifiersMaintainerSuiteConfig
 ): void => {
   const { maintainerId, relationshipKey, entityPrefix, requiredEntitySource } = config;
@@ -234,3 +234,13 @@ export const registerRawIdentifiersMaintainerSuite = (
     }
   );
 };
+
+// Add a new entry here as each maintainer is onboarded (depends_on, supervises, …);
+// the shared suite seeds host entities, runs the maintainer, and asserts the
+// entity.lifecycle.last_seen watermark gate end-to-end.
+registerRawIdentifiersMaintainerSuite({
+  maintainerId: 'administers',
+  relationshipKey: 'administers',
+  entityPrefix: 'adm',
+  requiredEntitySource: 'entityanalytics_ad',
+});

@@ -10,6 +10,7 @@ import type { EntityUpdateClient, BulkObject } from '@kbn/entity-store/server';
 import type { Entity } from '@kbn/entity-store/common/domain/definitions/entity.gen';
 
 import type { EntityRelationshipRecord } from './types';
+import { entityTypeFromEuid } from './types';
 
 type ValidRecord = EntityRelationshipRecord & { entityId: string };
 
@@ -62,19 +63,6 @@ export interface WriteEntityIdsResult {
   updated: number;
   notFound: number;
   errors: number;
-}
-
-/**
- * Extracts the entity type prefix from a full EUID string.
- * EUIDs are formatted as "<type>:<identity>", e.g. "user:alice@corp.com" or
- * "host:workstation-01.corp.com". Falls back to 'user' for EUIDs that do not
- * follow this pattern (backward-compatible with existing log-based maintainers
- * whose actors are always users).
- */
-function entityTypeFromEuid(entityId: string): 'user' | 'host' | 'service' {
-  const prefix = entityId.split(':')[0];
-  if (prefix === 'host' || prefix === 'service') return prefix;
-  return 'user';
 }
 
 export const writeEntityIds = async (

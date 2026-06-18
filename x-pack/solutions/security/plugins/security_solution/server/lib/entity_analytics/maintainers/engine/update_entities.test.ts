@@ -250,7 +250,7 @@ describe('entityTypeFromEuid (via writeEntityIds)', () => {
     const records: EntityRelationshipRecord[] = [
       {
         entityId: 'host:workstation-01.corp.com',
-        entityType: 'user' as const,
+        entityType: 'host' as const,
         relationships: { administers: ['host:server-01.corp.com'] },
       },
     ];
