@@ -1009,6 +1009,60 @@ describe('getSubtreeIds', () => {
 });
 
 describe('useTraceWaterfall - legends from filtered subtree', () => {
+  it('does not treat an orphan ancestor of the selected transaction as a duplicate span', () => {
+    const traceItems: TraceItem[] = [
+      {
+        id: 'service-parent',
+        parentId: 'upstream-root',
+        timestampUs: 0,
+        name: 'service-parent',
+        traceId: 'trace1',
+        duration: 1000,
+        serviceName: 'checkout-service',
+        errors: [],
+        spanLinksCount: { incoming: 0, outgoing: 0 },
+        docType: 'transaction',
+      },
+      {
+        id: 'entry-transaction',
+        parentId: 'service-parent',
+        timestampUs: 100,
+        name: 'entry-transaction',
+        traceId: 'trace1',
+        duration: 500,
+        serviceName: 'checkout-service',
+        errors: [],
+        spanLinksCount: { incoming: 0, outgoing: 0 },
+        docType: 'transaction',
+      },
+      {
+        id: 'entry-child-span',
+        parentId: 'entry-transaction',
+        timestampUs: 150,
+        name: 'entry-child-span',
+        traceId: 'trace1',
+        duration: 100,
+        serviceName: 'checkout-service',
+        errors: [],
+        spanLinksCount: { incoming: 0, outgoing: 0 },
+        docType: 'span',
+      },
+    ];
+
+    const { result } = renderHook(() =>
+      useTraceWaterfall({
+        traceItems,
+        entryTransactionId: 'entry-transaction',
+      })
+    );
+
+    expect(result.current.traceState).toBe(TraceDataState.Partial);
+    expect(result.current.traceWaterfall.map((item) => item.id)).toEqual([
+      'entry-transaction',
+      'entry-child-span',
+    ]);
+  });
+
   it('calculates legends only from visible subtree when entryTransactionId is provided', () => {
     const traceItems: TraceItem[] = [
       {
