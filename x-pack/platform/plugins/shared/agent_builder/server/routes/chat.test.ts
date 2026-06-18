@@ -54,14 +54,6 @@ describe('promptResponseEntrySchema', () => {
     ).not.toThrow();
   });
 
-  it('rejects an empty answers array', () => {
-    expect(() => promptResponseEntrySchema.validate({ answers: [] })).toThrow();
-  });
-
-  it('rejects negative choice indices', () => {
-    expect(() => promptResponseEntrySchema.validate({ answers: [{ choice: [-1] }] })).toThrow();
-  });
-
   it('rejects unknown payload shapes', () => {
     expect(() => promptResponseEntrySchema.validate({ foo: 'bar' })).toThrow();
   });

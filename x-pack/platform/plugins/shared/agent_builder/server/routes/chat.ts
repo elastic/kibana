@@ -43,11 +43,11 @@ export const promptResponseEntrySchema = schema.oneOf([
   schema.object({
     answers: schema.arrayOf(
       schema.object({
-        choice: schema.maybe(schema.arrayOf(schema.number({ min: 0 }))),
-        custom: schema.maybe(schema.string()),
+        choice: schema.maybe(schema.arrayOf(schema.number(), { maxSize: 100 })),
+        custom: schema.maybe(schema.string({ minLength: 1, maxLength: 20_000 })),
         skipped: schema.maybe(schema.boolean()),
       }),
-      { minSize: 1 }
+      { maxSize: 100 }
     ),
   }),
 ]);
