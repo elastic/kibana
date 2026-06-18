@@ -7,25 +7,22 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { SIDE_PANEL_WIDTH } from './use_layout_width';
+import {
+  applyElasticSidePanelWidth,
+  clampSidePanelWidth,
+  resolveSidePanelWidthOnRelease,
+} from '../utils/side_panel_width_utils';
+
+export {
+  clampSidePanelWidth,
+  getMaxSidePanelWidth,
+  MIN_SIDE_PANEL_WIDTH,
+} from '../utils/side_panel_width_utils';
 
 const SIDE_PANEL_WIDTH_STORAGE_KEY = 'core.chrome.sideNavSecondaryPanelWidth';
-const MIN_SIDE_PANEL_WIDTH = 200;
-const MAX_SIDE_PANEL_WIDTH_PERCENT = 0.4;
-
-export function getMaxSidePanelWidth(): number {
-  return Math.max(
-    MIN_SIDE_PANEL_WIDTH,
-    Math.floor(window.innerWidth * MAX_SIDE_PANEL_WIDTH_PERCENT)
-  );
-}
-
-export function clampSidePanelWidth(width: number): number {
-  width = Math.floor(width);
-  return Math.max(MIN_SIDE_PANEL_WIDTH, Math.min(getMaxSidePanelWidth(), width));
-}
 
 function readStoredSidePanelWidth(): number {
   const stored = localStorage.getItem(SIDE_PANEL_WIDTH_STORAGE_KEY);
@@ -47,23 +44,43 @@ function persistSidePanelWidth(width: number): void {
  */
 export const useSidePanelWidth = () => {
   const [width, setWidthState] = useState(readStoredSidePanelWidth);
+  const persistedWidthRef = useRef(width);
 
   const setWidth = useCallback((newWidth: number) => {
     const clamped = clampSidePanelWidth(newWidth);
-    setWidthState((current) => {
-      if (current === clamped) {
-        return current;
-      }
+    setWidthState(clamped);
+
+    if (persistedWidthRef.current !== clamped) {
+      persistedWidthRef.current = clamped;
       persistSidePanelWidth(clamped);
-      return clamped;
-    });
+    }
   }, []);
+
+  const setDragWidth = useCallback((rawWidth: number) => {
+    setWidthState(applyElasticSidePanelWidth(rawWidth));
+  }, []);
+
+  const commitDragWidth = useCallback(
+    (rawWidth: number): boolean => {
+      const resolution = resolveSidePanelWidthOnRelease(rawWidth);
+
+      if (resolution.type === 'collapse') {
+        setWidthState(persistedWidthRef.current);
+        return true;
+      }
+
+      setWidth(resolution.width);
+      return false;
+    },
+    [setWidth]
+  );
 
   useEffect(() => {
     const handleWindowResize = () => {
       setWidthState((current) => {
         const clamped = clampSidePanelWidth(current);
         if (clamped !== current) {
+          persistedWidthRef.current = clamped;
           persistSidePanelWidth(clamped);
         }
         return clamped;
@@ -74,5 +91,5 @@ export const useSidePanelWidth = () => {
     return () => window.removeEventListener('resize', handleWindowResize);
   }, []);
 
-  return { width, setWidth };
+  return { width, setWidth, setDragWidth, commitDragWidth };
 };

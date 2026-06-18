@@ -68,6 +68,9 @@ export interface SidePanelProps {
   footer?: ReactNode;
   openerNode: MenuItem;
   sidePanelWidth: number;
+  onSidePanelDragWidthChange: (rawWidth: number) => void;
+  onSidePanelDragWidthCommit: (rawWidth: number) => boolean;
+  onSidePanelCollapse: () => void;
   onSidePanelWidthChange: (width: number) => void;
 }
 
@@ -80,6 +83,9 @@ export const SidePanel = ({
   footer,
   openerNode,
   sidePanelWidth,
+  onSidePanelDragWidthChange,
+  onSidePanelDragWidthCommit,
+  onSidePanelCollapse,
   onSidePanelWidthChange,
 }: SidePanelProps): JSX.Element => {
   const euiThemeContext = useEuiTheme();
@@ -166,7 +172,13 @@ export const SidePanel = ({
               {footer}
             </EuiSplitPanel.Inner>
           </EuiSplitPanel.Outer>
-          <SidePanelResizeHandle width={sidePanelWidth} onWidthChange={onSidePanelWidthChange} />
+          <SidePanelResizeHandle
+            width={sidePanelWidth}
+            onDragWidthChange={onSidePanelDragWidthChange}
+            onDragWidthCommit={onSidePanelDragWidthCommit}
+            onCollapse={onSidePanelCollapse}
+            onWidthChange={onSidePanelWidthChange}
+          />
         </div>
       </SidePanelWidthProvider>
     </>

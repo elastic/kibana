@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useState, type ReactNode } from 'react';
+import React, { useCallback, useState, type ReactNode } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
@@ -150,7 +150,22 @@ export const Navigation = ({
     activeItemId
   );
 
-  const { width: sidePanelWidth, setWidth: setSidePanelWidth } = useSidePanelWidth();
+  const { width: sidePanelWidth, setWidth: setSidePanelWidth, setDragWidth: setSidePanelDragWidth, commitDragWidth: commitSidePanelDragWidth } = useSidePanelWidth();
+
+  const handleSidePanelCollapse = useCallback(() => {
+    onToggleCollapsed?.(true);
+  }, [onToggleCollapsed]);
+
+  const handleSidePanelDragCommit = useCallback(
+    (rawWidth: number) => {
+      const shouldCollapse = commitSidePanelDragWidth(rawWidth);
+      if (shouldCollapse) {
+        handleSidePanelCollapse();
+      }
+      return shouldCollapse;
+    },
+    [commitSidePanelDragWidth, handleSidePanelCollapse]
+  );
 
   useLayoutWidth({ hidePrimaryLabels, isSidePanelOpen, sidePanelWidth, setWidth });
 
@@ -486,6 +501,9 @@ export const Navigation = ({
           footer={sidePanelFooter}
           openerNode={openerNode}
           sidePanelWidth={sidePanelWidth}
+          onSidePanelDragWidthChange={setSidePanelDragWidth}
+          onSidePanelDragWidthCommit={handleSidePanelDragCommit}
+          onSidePanelCollapse={handleSidePanelCollapse}
           onSidePanelWidthChange={setSidePanelWidth}
         >
           {({ secondaryNavigationInstructionsId }) => {
