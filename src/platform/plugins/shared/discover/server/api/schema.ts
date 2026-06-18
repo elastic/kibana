@@ -20,7 +20,6 @@ import { classicTabSchema, esqlTabSchema } from '../embeddable/schema';
 export const MAX_SESSION_TITLE_LENGTH = 256;
 export const MAX_SESSION_DESCRIPTION_LENGTH = 1000;
 export const MAX_TAB_LABEL_LENGTH = 120;
-export const MAX_CHART_INTERVAL_LENGTH = 64;
 export const MAX_BREAKDOWN_FIELD_LENGTH = 1000;
 export const MAX_VIS_CONTEXT_ATTRIBUTE_KEY_LENGTH = 256;
 
@@ -34,7 +33,7 @@ const visContextSchema = schema.object({
     {
       meta: {
         description:
-          'Discover histogram suggestion path that produced the chart. Inner Lens state is validated by the Lens embeddable transform registry.',
+          'Chart suggestion type used by Discover to generate this histogram configuration.',
       },
     }
   ),
@@ -43,8 +42,7 @@ const visContextSchema = schema.object({
     schema.any(),
     {
       meta: {
-        description:
-          'Opaque Lens visualization attributes. Validation is delegated to the Lens embeddable transform registry. Chart request metadata (data view, time field, breakdown field, interval) is inferred from the tab `data_source`, `breakdown_field`, and `chart_interval` when applying this context at runtime.',
+        description: 'Chart configuration payload for the selected `suggestion_type`.',
       },
     }
   ),
@@ -53,36 +51,49 @@ const visContextSchema = schema.object({
 const discoverSessionTabPresentationSchema = schema.object({
   hide_chart: schema.boolean({
     defaultValue: false,
-    meta: { description: 'When `true`, the chart is hidden. Defaults to `false`.' },
+    meta: { description: 'When `true`, the chart is hidden.' },
   }),
   hide_table: schema.boolean({
     defaultValue: false,
-    meta: { description: 'When `true`, the data table is hidden. Defaults to `false`.' },
+    meta: { description: 'When `true`, the data table is hidden.' },
   }),
   hide_aggregated_preview: schema.maybe(
     schema.boolean({
-      meta: { description: 'When `true`, the aggregated preview is hidden.' },
+      meta: { description: 'When `true`, aggregated preview panels are hidden.' },
     })
   ),
   breakdown_field: schema.maybe(
     schema.string({
       maxLength: MAX_BREAKDOWN_FIELD_LENGTH,
-      meta: { description: 'Field used to break down chart series.' },
+      meta: { description: 'Field name used to split chart data into series.' },
     })
   ),
   chart_interval: schema.maybe(
-    schema.string({
-      maxLength: MAX_CHART_INTERVAL_LENGTH,
-      meta: {
-        description: 'Time interval for the chart histogram on this tab.',
-      },
-    })
+    schema.oneOf(
+      [
+        schema.literal('auto'),
+        schema.literal('ms'),
+        schema.literal('s'),
+        schema.literal('m'),
+        schema.literal('h'),
+        schema.literal('d'),
+        schema.literal('w'),
+        schema.literal('M'),
+        schema.literal('y'),
+      ],
+      {
+        meta: {
+          description:
+            'Time interval for the chart histogram on this tab.',
+        },
+      }
+    )
   ),
   time_restore: schema.boolean({
     defaultValue: false,
     meta: {
       description:
-        'When `true`, the tab stores its own `time_range` and `refresh_interval` instead of using the global timepicker. Defaults to `false`.',
+        "When `true`, Discover applies this tab's `time_range` and `refresh_interval`. When `false`, those fields are ignored and global time settings are used.",
     },
   }),
   time_range: schema.maybe(timeRangeSchema),
@@ -95,7 +106,7 @@ const discoverSessionTabIdentitySchema = schema.object({
   id: asCodeIdSchema,
   label: schema.string({
     maxLength: MAX_TAB_LABEL_LENGTH,
-    meta: { description: 'Human-readable label displayed on the tab.' },
+    meta: { description: 'Tab label.' },
   }),
 });
 
@@ -121,19 +132,18 @@ export const discoverSessionDataSchema = schema.object(
     title: schema.string({
       minLength: 1,
       maxLength: MAX_SESSION_TITLE_LENGTH,
-      meta: { description: 'A human-readable title for the Discover session.' },
+      meta: { description: 'Discover session title.' },
     }),
     description: schema.string({
       defaultValue: '',
       maxLength: MAX_SESSION_DESCRIPTION_LENGTH,
-      meta: { description: 'A short description of the Discover session.' },
+      meta: { description: 'Discover session description.' },
     }),
     tabs: schema.arrayOf(discoverSessionApiTabSchema, {
       minSize: 1,
       maxSize: MAX_DISCOVER_SESSION_TABS,
       meta: {
-        description:
-          'Tabs in the Discover session. Each tab is either a classic data view tab or an ES|QL tab, discriminated by `data_source.type`.',
+        description: 'Ordered list of tabs in the Discover session.',
       },
     }),
   },
@@ -141,7 +151,7 @@ export const discoverSessionDataSchema = schema.object(
     meta: {
       id: 'kbn-discover-session-data',
       title: 'Discover session data',
-      description: 'User-defined configuration for a Discover session.',
+      description: 'Configuration data for a Discover session.',
     },
   }
 );

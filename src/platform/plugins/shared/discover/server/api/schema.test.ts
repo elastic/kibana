@@ -17,7 +17,6 @@ import {
   discoverSessionApiResponseSchema,
   discoverSessionDataSchema,
   MAX_BREAKDOWN_FIELD_LENGTH,
-  MAX_CHART_INTERVAL_LENGTH,
   MAX_SESSION_DESCRIPTION_LENGTH,
   MAX_SESSION_TITLE_LENGTH,
   MAX_TAB_LABEL_LENGTH,
@@ -384,18 +383,34 @@ describe('discoverSessionDataSchema', () => {
       ).toThrow();
     });
 
-    it('rejects a chart_interval that exceeds the max length', () => {
+    it('rejects an unsupported chart_interval option', () => {
       expect(() =>
         discoverSessionDataSchema.validate({
           title: 'Valid title',
           tabs: [
             {
               ...classicTab,
-              chart_interval: repeat('a', MAX_CHART_INTERVAL_LENGTH + 1),
+              chart_interval: '10m',
             },
           ],
         })
       ).toThrow();
+    });
+
+    it('accepts supported chart_interval options', () => {
+      for (const chartInterval of ['auto', 'ms', 's', 'm', 'h', 'd', 'w', 'M', 'y']) {
+        const validated = discoverSessionDataSchema.validate({
+          title: 'Valid title',
+          tabs: [
+            {
+              ...classicTab,
+              chart_interval: chartInterval,
+            },
+          ],
+        });
+
+        expect(validated.tabs[0].chart_interval).toBe(chartInterval);
+      }
     });
 
     it('rejects a breakdown_field that exceeds the max length', () => {
