@@ -17,8 +17,10 @@ export interface ChangeHistoryListItem {
   };
   /** Human-readable action label (domain may map from `event.action`). */
   action: string;
-  /** Optional one-line summary for the list (domain-computed). */
-  summary?: string;
+  /** Number of field/path changes when the domain computes a diff count. */
+  changeCount?: number;
+  /** Optional user comment / reason shown on the timeline row when present. */
+  comment?: string;
   /** True when this row reflects the entity's current live state. */
   isCurrent?: boolean;
   /** Optional domain tags (e.g. bulk operation, restore). */

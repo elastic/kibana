@@ -11,4 +11,5 @@ Shared browser package for **change history** UI in Kibana. Domains integrate vi
 ## Exports
 
 - Types (`ChangeHistoryAdapter`, DTOs, …)
+- Timeline (`ChangeHistoryTimeline`, `ChangeHistoryItem`, `ChangeHistoryFooter`, …)
 - `createChangeHistoryHttpAdapter`
