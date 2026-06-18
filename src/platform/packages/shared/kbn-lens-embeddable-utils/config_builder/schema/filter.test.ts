@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { expectPrettyError } from '@kbn/zod-helpers/v4';
 import { filterSchema, filterWithLabelSchema } from './filter';
 
 describe('Filter Schemas', () => {
@@ -17,7 +18,7 @@ describe('Filter Schemas', () => {
         expression: 'status:active AND category:electronics',
       };
 
-      const validated = filterSchema.validate(input);
+      const validated = filterSchema.parse(input);
       expect(validated).toEqual(input);
     });
 
@@ -27,7 +28,7 @@ describe('Filter Schemas', () => {
         expression: 'status:active AND category:electronics',
       };
 
-      const validated = filterSchema.validate(input);
+      const validated = filterSchema.parse(input);
       expect(validated).toEqual(input);
     });
 
@@ -37,7 +38,11 @@ describe('Filter Schemas', () => {
         expression: 'status:active',
       };
 
-      expect(() => filterSchema.validate(input)).toThrow();
+      const result = filterSchema.safeParse(input);
+      expectPrettyError(result).toMatchInlineSnapshot(`
+        "✖ Invalid input
+          → at language"
+      `);
     });
 
     it('throws on missing expression', () => {
@@ -45,7 +50,11 @@ describe('Filter Schemas', () => {
         language: 'kql',
       };
 
-      expect(() => filterSchema.validate(input)).toThrow(/\[expression\]: expected value of type/);
+      const result = filterSchema.safeParse(input);
+      expectPrettyError(result).toMatchInlineSnapshot(`
+        "✖ Invalid input: expected string, received undefined
+          → at expression"
+      `);
     });
   });
 
@@ -59,7 +68,7 @@ describe('Filter Schemas', () => {
         label: 'Active Status',
       };
 
-      const validated = filterWithLabelSchema.validate(input);
+      const validated = filterWithLabelSchema.parse(input);
       expect(validated).toEqual(input);
     });
 
@@ -71,7 +80,7 @@ describe('Filter Schemas', () => {
         },
       };
 
-      const validated = filterWithLabelSchema.validate(input);
+      const validated = filterWithLabelSchema.parse(input);
       expect(validated).toEqual(input);
     });
 
@@ -80,7 +89,11 @@ describe('Filter Schemas', () => {
         label: 'Active Status',
       };
 
-      expect(() => filterWithLabelSchema.validate(input)).toThrow();
+      const result = filterWithLabelSchema.safeParse(input);
+      expectPrettyError(result).toMatchInlineSnapshot(`
+        "✖ Invalid input: expected object, received undefined
+          → at filter"
+      `);
     });
 
     it('throws on invalid filter', () => {
@@ -92,7 +105,11 @@ describe('Filter Schemas', () => {
         label: 'Active Status',
       };
 
-      expect(() => filterWithLabelSchema.validate(input)).toThrow();
+      const result = filterWithLabelSchema.safeParse(input);
+      expectPrettyError(result).toMatchInlineSnapshot(`
+        "✖ Invalid input
+          → at filter.language"
+      `);
     });
 
     it('validates complex KQL queries', () => {
@@ -104,7 +121,7 @@ describe('Filter Schemas', () => {
         label: 'Complex Filter',
       };
 
-      const validated = filterWithLabelSchema.validate(input);
+      const validated = filterWithLabelSchema.parse(input);
       expect(validated).toEqual(input);
     });
 
@@ -117,7 +134,7 @@ describe('Filter Schemas', () => {
         label: 'Complex Filter',
       };
 
-      const validated = filterWithLabelSchema.validate(input);
+      const validated = filterWithLabelSchema.parse(input);
       expect(validated).toEqual(input);
     });
   });

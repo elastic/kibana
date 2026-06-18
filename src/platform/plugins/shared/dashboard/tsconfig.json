@@ -33,6 +33,7 @@
     "@kbn/ui-actions-plugin",
     "@kbn/spaces-plugin",
     "@kbn/config-schema",
+    "@kbn/zod",
     "@kbn/utility-types",
     "@kbn/es-query",
     "@kbn/i18n",

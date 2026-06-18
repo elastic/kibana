@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { z } from '@kbn/zod';
 import { schema } from '@kbn/config-schema';
 
 export const markdownAttributesSchema = schema.object(
@@ -26,3 +27,23 @@ export const markdownAttributesSchema = schema.object(
   },
   { unknowns: 'forbid' }
 );
+
+/**
+ * Duplicate schema for non-SavedObject usage.
+ *
+ * TODO: Use in SavedObject definition once supported, see https://github.com/elastic/kibana/issues/262683
+ */
+export const markdownAttributesSchemaZod = z
+  .object({
+    title: z.string().meta({ description: 'A human-readable title' }),
+    description: z.string().optional().meta({ description: 'A short description.' }),
+    content: z.string().meta({ description: 'Markdown enriched text content' }),
+    settings: z
+      .object({
+        open_links_in_new_tab: z.boolean().default(true),
+      })
+      .strict()
+      .default({ open_links_in_new_tab: true })
+      .optional(),
+  })
+  .strict();

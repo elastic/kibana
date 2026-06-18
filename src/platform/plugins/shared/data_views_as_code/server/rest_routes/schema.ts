@@ -7,14 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { z } from '@kbn/zod';
 import { savedDataViewSpecSchema } from '@kbn/as-code-data-views-schema';
-import { schema } from '@kbn/config-schema';
 import { asCodeMetaSchema } from '@kbn/as-code-shared-schemas';
 
-export const asCodeResponseSchema = schema.object({
-  id: schema.string({ maxLength: 1000 }),
-  data: savedDataViewSpecSchema,
-  meta: asCodeMetaSchema.extends({
-    namespaces: schema.maybe(schema.arrayOf(schema.string({ maxLength: 1000 }), { maxSize: 100 })),
-  }),
-});
+export const asCodeResponseSchema = z
+  .object({
+    id: z.string().max(1000),
+    data: savedDataViewSpecSchema,
+    meta: asCodeMetaSchema.extend({
+      namespaces: z.array(z.string().max(1000)).max(100).optional(),
+    }),
+  })
+  .strict();

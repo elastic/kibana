@@ -130,8 +130,9 @@
     "@kbn/observability-agent-builder-plugin",
     "@kbn/agent-builder-browser",
     "@kbn/core-analytics-browser",
-    "@kbn/core-spaces-common",
     "@kbn/inspector-plugin",
+    "@kbn/zod-helpers",
+    "@kbn/core-spaces-common",
     "@kbn/core-feature-flags-server"
   ]
 }

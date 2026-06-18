@@ -7,19 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { schema } from '@kbn/config-schema';
+import { z } from '@kbn/zod';
 import { isValidId } from './is_valid_id';
 
-export const asCodeIdSchema = schema.string({
-  meta: {
+export const asCodeIdSchema = z
+  .string()
+  .min(1)
+  .max(250)
+  .refine((value) => isValidId(value), {
+    message: 'ID must contain only lowercase letters, numbers, hyphens, and underscores.',
+  })
+  .meta({
     description:
       'A unique identifier. Must contain only lowercase letters, numbers, hyphens, and underscores.',
-  },
-  validate: (value) => {
-    if (!isValidId(value)) {
-      return 'ID must contain only lowercase letters, numbers, hyphens, and underscores.';
-    }
-  },
-  minLength: 1,
-  maxLength: 250,
-});
+  });

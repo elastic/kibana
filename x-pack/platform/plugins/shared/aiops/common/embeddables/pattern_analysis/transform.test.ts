@@ -17,7 +17,7 @@ describe('pattern analysis embeddable transforms', () => {
   // ── Schema validation ────────────────────────────────────────────────────────
 
   it('validates the dashboard-as-code schema and applies defaults', () => {
-    const state = patternAnalysisEmbeddableStateSchema.validate({
+    const state = patternAnalysisEmbeddableStateSchema.parse({
       data_view_id: 'data-view-id',
       field_name: 'message',
     });
@@ -33,7 +33,7 @@ describe('pattern analysis embeddable transforms', () => {
 
   it('rejects unsupported minimum_time_range values', () => {
     expect(() =>
-      patternAnalysisEmbeddableStateSchema.validate({
+      patternAnalysisEmbeddableStateSchema.parse({
         data_view_id: 'data-view-id',
         field_name: 'message',
         minimum_time_range: 'No minimum',
@@ -43,7 +43,7 @@ describe('pattern analysis embeddable transforms', () => {
 
   it('rejects missing data_view_id', () => {
     expect(() =>
-      patternAnalysisEmbeddableStateSchema.validate({
+      patternAnalysisEmbeddableStateSchema.parse({
         field_name: 'message',
       })
     ).toThrow();
@@ -51,7 +51,7 @@ describe('pattern analysis embeddable transforms', () => {
 
   it('rejects missing field_name', () => {
     expect(() =>
-      patternAnalysisEmbeddableStateSchema.validate({
+      patternAnalysisEmbeddableStateSchema.parse({
         data_view_id: 'data-view-id',
       })
     ).toThrow();
@@ -59,7 +59,7 @@ describe('pattern analysis embeddable transforms', () => {
 
   it('rejects empty data_view_id', () => {
     expect(() =>
-      patternAnalysisEmbeddableStateSchema.validate({
+      patternAnalysisEmbeddableStateSchema.parse({
         data_view_id: '',
         field_name: 'message',
       })
@@ -68,7 +68,7 @@ describe('pattern analysis embeddable transforms', () => {
 
   it('rejects on_manual mode with null random_sampler_probability', () => {
     expect(() =>
-      patternAnalysisEmbeddableStateSchema.validate({
+      patternAnalysisEmbeddableStateSchema.parse({
         data_view_id: 'data-view-id',
         field_name: 'message',
         random_sampler_mode: 'on_manual',
@@ -79,7 +79,7 @@ describe('pattern analysis embeddable transforms', () => {
 
   it('rejects random_sampler_probability above MAX_SAMPLER_PROBABILITY', () => {
     expect(() =>
-      patternAnalysisEmbeddableStateSchema.validate({
+      patternAnalysisEmbeddableStateSchema.parse({
         data_view_id: 'data-view-id',
         field_name: 'message',
         random_sampler_mode: 'on_manual',
@@ -89,7 +89,7 @@ describe('pattern analysis embeddable transforms', () => {
   });
 
   it('accepts on_manual mode with a valid random_sampler_probability', () => {
-    const state = patternAnalysisEmbeddableStateSchema.validate({
+    const state = patternAnalysisEmbeddableStateSchema.parse({
       data_view_id: 'data-view-id',
       field_name: 'message',
       random_sampler_mode: 'on_manual',

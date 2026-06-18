@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ObjectType, Type } from '@kbn/config-schema';
+import type { ZodObjectType } from '@kbn/zod';
 import type { getDrilldownRegistry } from '../drilldowns/registry';
 import type { EmbeddableServerDefinition } from './types';
 
@@ -15,7 +15,7 @@ export function getEmbeddableServerRegistry(
   drilldownRegistry: ReturnType<typeof getDrilldownRegistry>
 ) {
   const registry: { [key: string]: EmbeddableServerDefinition<any, any> } = {};
-  let schemaCache: Record<string, Type<object> | undefined> = {};
+  let schemaCache: Record<string, ZodObjectType | undefined> = {};
 
   function getCachedSchema(type: string) {
     if (schemaCache[type]) {
@@ -40,12 +40,12 @@ export function getEmbeddableServerRegistry(
       registry[type] = definition;
     },
     getAllEmbeddableSchemas: () => {
-      const schemas: { [key: string]: { schema: ObjectType; title: string } } = {};
+      const schemas: { [key: string]: { schema: ZodObjectType; title: string } } = {};
       Object.entries(registry).forEach(([type, definition]) => {
         const schema = getCachedSchema(type);
         if (schema) {
           schemas[type] = {
-            schema: schema as ObjectType,
+            schema: schema as ZodObjectType,
             title: definition.title,
           };
         }

@@ -7,47 +7,33 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { schema } from '@kbn/config-schema';
+import { z } from '@kbn/zod';
 import { PAGINATION_DEFAULT_PER_PAGE, PAGINATION_MAX_SIZE } from '../../constants';
 
-export const asCodePaginationParamsSchema = schema.object({
-  page: schema.number({
-    meta: {
+export const asCodePaginationParamsSchema = z
+  .object({
+    page: z.coerce.number().min(1).default(1).meta({
       description: 'The page of results to return.',
-    },
-    min: 1,
-    defaultValue: 1,
-  }),
-  per_page: schema.number({
-    meta: {
-      description: 'The number of results to return per page.',
-    },
-    defaultValue: PAGINATION_DEFAULT_PER_PAGE,
-    min: 1,
-    max: PAGINATION_MAX_SIZE,
-  }),
-});
+    }),
+    per_page: z.coerce
+      .number()
+      .min(1)
+      .max(PAGINATION_MAX_SIZE)
+      .default(PAGINATION_DEFAULT_PER_PAGE)
+      .meta({
+        description: 'The number of results to return per page.',
+      }),
+  })
+  .strict();
 
-export const asCodePaginationResponseMetaSchema = schema.object(
-  {
-    page: schema.number({
-      meta: {
-        description: 'The returned page of results.',
-      },
-      min: 1,
-      defaultValue: 1,
+export const asCodePaginationResponseMetaSchema = z
+  .object({
+    page: z.number().min(1).default(1).meta({
+      description: 'The returned page of results.',
     }),
-    per_page: schema.number({
-      meta: {
-        description: 'The number of results returned per page.',
-      },
-      defaultValue: PAGINATION_DEFAULT_PER_PAGE,
-      min: 1,
-      max: PAGINATION_MAX_SIZE,
+    per_page: z.number().min(1).max(PAGINATION_MAX_SIZE).default(PAGINATION_DEFAULT_PER_PAGE).meta({
+      description: 'The number of results returned per page.',
     }),
-    total: schema.number({
-      meta: { description: 'The total number of results matching the query.' },
-    }),
-  },
-  { unknowns: 'forbid' }
-);
+    total: z.number().meta({ description: 'The total number of results matching the query.' }),
+  })
+  .strict();

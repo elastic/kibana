@@ -7,15 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Type } from '@kbn/config-schema';
-import type {
-  ObjectResultType,
-  ObjectType,
-  Props,
-  TypeOptions,
-} from '@kbn/config-schema/src/types';
-import type { ObjectUnionType } from './charts/utils/object_union';
-import { objectUnion } from './charts/utils/object_union';
+import type { ZodType } from '@kbn/zod';
+import { z } from '@kbn/zod';
+
 import type { MetricConfig, MetricConfigESQL, MetricConfigNoESQL } from './charts/metric';
 import {
   metricConfigSchema,
@@ -95,39 +89,51 @@ import {
 import type { PieConfig, PieConfigESQL, PieConfigNoESQL } from './charts/pie';
 import { pieConfigSchema, pieConfigSchemaESQL, pieConfigSchemaNoESQL } from './charts/pie';
 
-/**
+/*
  * We need to break the type inference here to avoid exceeding the ts compiler serialization limit.
  *
  * This requires:
  *  - Casting the schema as any
  *  - Defining the `LensApiConfig` type from the schema types
  *  - Exporting this value as `Type<LensApiConfig>`
+ *
+ * Applies to:
+ *  - lensApiConfigSchema
+ *  - lensApiConfigSchemaESQL
+ *  - lensApiConfigSchemaNoESQL
  */
-export const _lensApiConfigSchema: any = objectUnion(
-  [
-    ...metricConfigSchema.getUnionTypes(),
-    ...legacyMetricConfigSchema.getUnionTypes(),
-    ...xyConfigSchema.getUnionTypes(),
-    ...gaugeConfigSchema.getUnionTypes(),
-    ...heatmapConfigSchema.getUnionTypes(),
-    ...tagcloudConfigSchema.getUnionTypes(),
-    ...regionMapConfigSchema.getUnionTypes(),
-    ...datatableConfigSchema.getUnionTypes(),
-    ...pieConfigSchema.getUnionTypes(),
-    ...mosaicConfigSchema.getUnionTypes(),
-    ...treemapConfigSchema.getUnionTypes(),
-    ...waffleConfigSchema.getUnionTypes(),
-  ],
-  {
-    meta: {
-      id: 'lensApiConfig',
-      title: 'Visualizations',
-      description:
-        'Visualization configuration. Use the `type` field to specify the chart type. Each chart type has its own set of required and optional fields.',
-    },
-  }
-);
 
+/**
+ * Schema for Lens API configs
+ */
+export const lensApiConfigSchema: ZodType<LensApiConfig> = z
+  // lazy needed to break the type inference limit
+  .lazy(() =>
+    z.union([
+      metricConfigSchema,
+      legacyMetricConfigSchema,
+      xyConfigSchema,
+      gaugeConfigSchema,
+      heatmapConfigSchema,
+      tagcloudConfigSchema,
+      regionMapConfigSchema,
+      datatableConfigSchema,
+      pieConfigSchema,
+      mosaicConfigSchema,
+      treemapConfigSchema,
+      waffleConfigSchema,
+    ])
+  )
+  .meta({
+    id: 'lensApiConfig',
+    title: 'Visualizations',
+    description:
+      'Visualization configuration. Use the `type` field to specify the chart type. Each chart type has its own set of required and optional fields.',
+  });
+
+/**
+ * Lens API configs
+ */
 export type LensApiConfig =
   | MetricConfig
   | LegacyMetricConfig
@@ -142,34 +148,32 @@ export type LensApiConfig =
   | TreemapConfig
   | WaffleConfig;
 
-export const lensApiConfigSchema: Type<LensApiConfig> = _lensApiConfigSchema;
+/**
+ * Schema for Lens API configs (DSL)
+ */
+export const lensApiConfigSchemaNoESQL: ZodType<LensApiConfigNoESQL> = z
+  // lazy needed to break the type inference limit
+  .lazy(() =>
+    z.union([
+      metricConfigSchemaNoESQL,
+      legacyMetricConfigSchemaNoESQL,
+      xyConfigSchemaNoESQL,
+      gaugeConfigSchemaNoESQL,
+      heatmapConfigSchemaNoESQL,
+      tagcloudConfigSchemaNoESQL,
+      regionMapConfigSchemaNoESQL,
+      datatableConfigSchemaNoESQL,
+      pieConfigSchemaNoESQL,
+      mosaicConfigSchemaNoESQL,
+      treemapConfigSchemaNoESQL,
+      waffleConfigSchemaNoESQL,
+    ])
+  )
+  .meta({ id: 'lensApiConfigNoESQL', title: 'Visualizations (DSL)' });
 
 /**
- * We need to break the type inference here to avoid exceeding the ts compiler serialization limit.
- *
- * This requires:
- *  - Casting the schema as any
- *  - Defining the `LensApiConfig` type from the schema types
- *  - Exporting this value as `Type<LensApiConfig>`
+ * Lens API configs (DSL)
  */
-export const _lensApiConfigSchemaNoESQL: any = objectUnion(
-  [
-    metricConfigSchemaNoESQL,
-    legacyMetricConfigSchemaNoESQL,
-    xyConfigSchemaNoESQL,
-    gaugeConfigSchemaNoESQL,
-    heatmapConfigSchemaNoESQL,
-    tagcloudConfigSchemaNoESQL,
-    regionMapConfigSchemaNoESQL,
-    datatableConfigSchemaNoESQL,
-    pieConfigSchemaNoESQL,
-    mosaicConfigSchemaNoESQL,
-    treemapConfigSchemaNoESQL,
-    waffleConfigSchemaNoESQL,
-  ],
-  { meta: { id: 'lensApiConfigNoESQL', title: 'Visualizations (DSL)' } }
-);
-
 export type LensApiConfigNoESQL =
   | MetricConfigNoESQL
   | LegacyMetricConfigNoESQL
@@ -184,33 +188,31 @@ export type LensApiConfigNoESQL =
   | TreemapConfigNoESQL
   | WaffleConfigNoESQL;
 
-export const lensApiConfigSchemaNoESQL: Type<LensApiConfigNoESQL> = _lensApiConfigSchemaNoESQL;
+/**
+ * Schema for Lens API configs (ES|QL)
+ */
+export const lensApiConfigSchemaESQL: ZodType<LensApiConfigESQL> = z
+  // lazy needed to break the type inference limit
+  .lazy(() =>
+    z.union([
+      metricConfigSchemaESQL,
+      xyConfigSchemaESQL,
+      gaugeConfigSchemaESQL,
+      heatmapConfigSchemaESQL,
+      tagcloudConfigSchemaESQL,
+      regionMapConfigSchemaESQL,
+      datatableConfigSchemaESQL,
+      pieConfigSchemaESQL,
+      mosaicConfigSchemaESQL,
+      treemapConfigSchemaESQL,
+      waffleConfigSchemaESQL,
+    ])
+  )
+  .meta({ id: 'lensApiConfigESQL', title: 'Visualizations (ES|QL)' });
 
 /**
- * We need to break the type inference here to avoid exceeding the ts compiler serialization limit.
- *
- * This requires:
- *  - Casting the schema as any
- *  - Defining the `LensApiConfig` type from the schema types
- *  - Exporting this value as `Type<LensApiConfig>`
+ * Lens API configs (ES|QL)
  */
-export const _lensApiConfigSchemaESQL: any = objectUnion(
-  [
-    metricConfigSchemaESQL,
-    xyConfigSchemaESQL,
-    gaugeConfigSchemaESQL,
-    heatmapConfigSchemaESQL,
-    tagcloudConfigSchemaESQL,
-    regionMapConfigSchemaESQL,
-    datatableConfigSchemaESQL,
-    pieConfigSchemaESQL,
-    mosaicConfigSchemaESQL,
-    treemapConfigSchemaESQL,
-    waffleConfigSchemaESQL,
-  ],
-  { meta: { id: 'lensApiConfigESQL', title: 'Visualizations (ES|QL)' } }
-);
-
 export type LensApiConfigESQL =
   | MetricConfigESQL
   | GaugeConfigESQL
@@ -223,23 +225,6 @@ export type LensApiConfigESQL =
   | MosaicConfigESQL
   | TreemapConfigESQL
   | WaffleConfigESQL;
-
-export const lensApiConfigSchemaESQL: Type<LensApiConfigESQL> = _lensApiConfigSchemaESQL;
-
-/**
- * Extends `lensApiConfigSchema` with extra props and options.
- *
- * This type will be be union of all `LensApiConfig` intersected with the new props.
- */
-export function extendLensApiConfigSchema<T extends Props>(
-  props: T,
-  options?: TypeOptions<LensApiConfig & T>
-): Type<LensApiConfig & ObjectResultType<T>> {
-  // these types are a bit of a hack mainly due to the tsc compiler limit
-  // but baseSchema can extend with any props correctly and return the correct `Type` wrapper
-  const baseSchema = _lensApiConfigSchema as ObjectUnionType<[ObjectType<any>], LensApiConfig & T>;
-  return baseSchema.extends(props, options as any).toType();
-}
 
 export type {
   LensApiFieldMetricOrFormulaOperation,

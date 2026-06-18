@@ -16,6 +16,7 @@ export {
   type SOWithMetadata,
   type SOWithMetadataPartial,
   type CMCrudTypes,
+  type GetResultSO,
   type CreateArgsToSoCreateOptions,
   type UpdateArgsToSoUpdateOptions,
   type SearchArgsToSOFindOptions,

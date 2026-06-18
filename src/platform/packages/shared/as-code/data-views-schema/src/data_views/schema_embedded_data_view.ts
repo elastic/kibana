@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { schema } from '@kbn/config-schema';
+import { z } from '@kbn/zod';
 import {
   compositeRuntimeFieldSchema,
   primitiveRuntimeFieldSchema,
@@ -16,44 +16,37 @@ import { fieldSettingsBaseSchema } from '../schema_field_settings';
 import { AS_CODE_DATA_VIEW_REFERENCE_TYPE, AS_CODE_DATA_VIEW_SPEC_TYPE } from './constants';
 import { fieldSettingsFieldNameSchema, indexPatternSchema, timeFieldSchema } from './common';
 
-export const fieldSettingsSchema = schema.oneOf(
-  [compositeRuntimeFieldSchema, primitiveRuntimeFieldSchema, fieldSettingsBaseSchema],
-  {
-    meta: {
-      id: 'kbn-field-settings-entry',
-      title: 'Field settings or runtime field',
+export const fieldSettingsSchema = z
+  .union([compositeRuntimeFieldSchema, primitiveRuntimeFieldSchema, fieldSettingsBaseSchema])
+  .meta({
+    id: 'kbn-field-settings-entry',
+    title: 'Field settings or runtime field',
+    description:
+      'Display overrides for an indexed field, or a runtime field definition when `type` is set to a runtime field kind.',
+  });
+
+export const dataViewReferenceSchema = z
+  .object({
+    type: z.literal(AS_CODE_DATA_VIEW_REFERENCE_TYPE),
+    ref_id: z.string().meta({
       description:
-        'Display overrides for an indexed field, or a runtime field definition when `type` is set to a runtime field kind.',
-    },
-  }
-);
-
-export const dataViewReferenceSchema = schema.object(
-  {
-    type: schema.literal(AS_CODE_DATA_VIEW_REFERENCE_TYPE),
-    ref_id: schema.string({
-      meta: {
-        description:
-          'The id of the Kibana data view to use as the data source. Example: "my-data-view".',
-      },
+        'The id of the Kibana data view to use as the data source. Example: "my-data-view".',
     }),
-  },
-  { meta: { id: 'kbn-data-view-reference-schema', title: 'Data view reference' } }
-);
+  })
+  .strict()
+  .meta({ id: 'kbn-data-view-reference-schema', title: 'Data view reference' });
 
-export const dataViewSpecSchema = schema.object(
-  {
-    type: schema.literal(AS_CODE_DATA_VIEW_SPEC_TYPE),
+export const dataViewSpecSchema = z
+  .object({
+    type: z.literal(AS_CODE_DATA_VIEW_SPEC_TYPE),
     index_pattern: indexPatternSchema,
     time_field: timeFieldSchema,
-    field_settings: schema.maybe(
-      schema.recordOf(fieldSettingsFieldNameSchema, fieldSettingsSchema)
-    ),
-  },
-  { meta: { id: 'kbn-data-view-spec-schema', title: 'Data view inline spec' } }
-);
+    field_settings: z.record(fieldSettingsFieldNameSchema, fieldSettingsSchema).optional(),
+  })
+  .strict()
+  .meta({ id: 'kbn-data-view-spec-schema', title: 'Data view inline spec' });
 
-export const dataViewSchema = schema.discriminatedUnion('type', [
+export const dataViewSchema = z.discriminatedUnion('type', [
   dataViewReferenceSchema,
   dataViewSpecSchema,
 ]);

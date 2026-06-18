@@ -15,7 +15,7 @@
     "target/**/*"
   ],
   "kbn_references": [
-    "@kbn/config-schema",
+    "@kbn/zod",
     "@kbn/data-service-server",
     "@kbn/es-query-server",
     "@kbn/ml-anomaly-utils",

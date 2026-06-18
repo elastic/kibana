@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { TypeOf } from '@kbn/config-schema';
+import type { z } from '@kbn/zod';
 import type { DrilldownState } from '@kbn/embeddable-plugin/server';
 import type { urlDrilldownSchema } from './schemas';
 
-export type UrlDrilldownState = DrilldownState & TypeOf<typeof urlDrilldownSchema>;
+export type UrlDrilldownState = DrilldownState & z.output<typeof urlDrilldownSchema>;

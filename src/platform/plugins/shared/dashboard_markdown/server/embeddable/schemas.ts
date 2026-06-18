@@ -7,49 +7,47 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { TypeOf } from '@kbn/config-schema';
-import { schema } from '@kbn/config-schema';
+import { z } from '@kbn/zod';
 import { serializedTitlesSchema } from '@kbn/presentation-publishing-schemas';
 import { BY_REF_SCHEMA_META, BY_VALUE_SCHEMA_META } from '@kbn/presentation-publishing-schemas';
 
-export const markdownByValueStateSchema = schema.object({
-  content: schema.string(),
-  settings: schema.object({
-    open_links_in_new_tab: schema.boolean({ defaultValue: true }),
-  }),
-});
+export const markdownByValueStateSchema = z
+  .object({
+    content: z.string(),
+    settings: z
+      .object({
+        open_links_in_new_tab: z.boolean().default(true),
+      })
+      .strict(),
+  })
+  .strict();
 
-const markdownByReferenceStateSchema = schema.object({
-  ref_id: schema.string({
-    meta: { description: 'The unique identifier of the markdown library item.' },
-  }),
-});
+const markdownByReferenceStateSchema = z
+  .object({
+    ref_id: z.string().meta({
+      description: 'The unique identifier of the markdown library item.',
+    }),
+  })
+  .strict();
 
-export const markdownByValueEmbeddableSchema = schema.allOf(
-  [markdownByValueStateSchema, serializedTitlesSchema],
-  {
-    meta: BY_VALUE_SCHEMA_META,
-  }
-);
+export const markdownByValueEmbeddableSchema = markdownByValueStateSchema
+  .extend(serializedTitlesSchema.shape)
+  .strict()
+  .meta(BY_VALUE_SCHEMA_META);
 
-const markdownByReferenceEmbeddableSchema = schema.allOf(
-  [markdownByReferenceStateSchema, serializedTitlesSchema],
-  {
-    meta: BY_REF_SCHEMA_META,
-  }
-);
+const markdownByReferenceEmbeddableSchema = markdownByReferenceStateSchema
+  .extend(serializedTitlesSchema.shape)
+  .strict()
+  .meta(BY_REF_SCHEMA_META);
 
-export const markdownEmbeddableSchema = schema.oneOf(
-  [markdownByValueEmbeddableSchema, markdownByReferenceEmbeddableSchema],
-  {
-    meta: {
-      description: 'Markdown panel config',
-    },
-  }
-);
+export const markdownEmbeddableSchema = z
+  .union([markdownByValueEmbeddableSchema, markdownByReferenceEmbeddableSchema])
+  .meta({
+    description: 'Markdown panel config',
+  });
 
-export type MarkdownByValueState = TypeOf<typeof markdownByValueStateSchema>;
-export type MarkdownByReferenceState = TypeOf<typeof markdownByReferenceStateSchema>;
-export type MarkdownEmbeddableState = TypeOf<typeof markdownEmbeddableSchema>;
+export type MarkdownByValueState = z.output<typeof markdownByValueStateSchema>;
+export type MarkdownByReferenceState = z.output<typeof markdownByReferenceStateSchema>;
+export type MarkdownEmbeddableState = z.output<typeof markdownEmbeddableSchema>;
 
 export type MarkdownSettingsState = MarkdownByValueState['settings'];

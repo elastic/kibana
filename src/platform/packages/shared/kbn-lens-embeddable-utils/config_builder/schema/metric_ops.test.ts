@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { expectPrettyError } from '@kbn/zod-helpers/v4';
 import { LENS_EMPTY_AS_NULL_DEFAULT_VALUE } from '../transforms/columns/utils';
 import {
   LENS_LAST_VALUE_DEFAULT_MULTI_VALUE,
@@ -38,7 +39,7 @@ describe('Metric Operations Schemas', () => {
         column: 'sum' as const,
       };
 
-      const validated = esqlColumnSchema.validate(input);
+      const validated = esqlColumnSchema.parse(input);
       expect(validated).toEqual(input);
     });
   });
@@ -51,7 +52,7 @@ describe('Metric Operations Schemas', () => {
         label: 'Static Value',
       };
 
-      const validated = staticOperationDefinitionSchema.validate(input);
+      const validated = staticOperationDefinitionSchema.parse(input);
       expect(validated).toEqual(input);
     });
   });
@@ -64,7 +65,7 @@ describe('Metric Operations Schemas', () => {
         label: 'Custom Formula',
       };
 
-      const validated = formulaOperationDefinitionSchema.validate(input);
+      const validated = formulaOperationDefinitionSchema.parse(input);
       expect(validated).toEqual(input);
     });
 
@@ -73,7 +74,11 @@ describe('Metric Operations Schemas', () => {
         operation: 'formula' as const,
       };
 
-      expect(() => formulaOperationDefinitionSchema.validate(input)).toThrow();
+      const result = formulaOperationDefinitionSchema.safeParse(input);
+      expectPrettyError(result).toMatchInlineSnapshot(`
+        "✖ Invalid input: expected string, received undefined
+          → at formula"
+      `);
     });
   });
 
@@ -90,7 +95,7 @@ describe('Metric Operations Schemas', () => {
         },
       };
 
-      const validated = countMetricOperationSchema.validate(input);
+      const validated = countMetricOperationSchema.parse(input);
       expect(validated).toEqual(input);
     });
 
@@ -101,7 +106,7 @@ describe('Metric Operations Schemas', () => {
         empty_as_null: true,
       };
 
-      const validated = uniqueCountMetricOperationSchema.validate(input);
+      const validated = uniqueCountMetricOperationSchema.parse(input);
       expect(validated).toEqual(input);
     });
 
@@ -115,7 +120,7 @@ describe('Metric Operations Schemas', () => {
           time_scale: 'h' as const,
         };
 
-        const validated = metricOperationSchema.validate(input);
+        const validated = metricOperationSchema.parse(input);
         expect(validated).toEqual(input);
       });
     });
@@ -129,7 +134,7 @@ describe('Metric Operations Schemas', () => {
         percentile: 95,
       };
 
-      const validated = percentileOperationSchema.validate(input);
+      const validated = percentileOperationSchema.parse(input);
       expect(validated).toEqual(input);
     });
 
@@ -140,7 +145,7 @@ describe('Metric Operations Schemas', () => {
         percentile: undefined,
       };
 
-      const validated = percentileOperationSchema.validate(input);
+      const validated = percentileOperationSchema.parse(input);
       expect(validated).toEqual({ ...input, percentile: LENS_PERCENTILE_DEFAULT_VALUE });
     });
 
@@ -150,7 +155,7 @@ describe('Metric Operations Schemas', () => {
         field: 'response_time',
       };
 
-      const validated = percentileOperationSchema.validate(input);
+      const validated = percentileOperationSchema.parse(input);
       expect(validated).toEqual({ ...input, percentile: LENS_PERCENTILE_DEFAULT_VALUE });
     });
 
@@ -161,7 +166,7 @@ describe('Metric Operations Schemas', () => {
         rank: 50,
       };
 
-      const validated = percentileRanksOperationSchema.validate(input);
+      const validated = percentileRanksOperationSchema.parse(input);
       expect(validated).toEqual(input);
     });
 
@@ -171,7 +176,7 @@ describe('Metric Operations Schemas', () => {
         field: 'response_time',
       };
 
-      const validated = percentileRanksOperationSchema.validate(input);
+      const validated = percentileRanksOperationSchema.parse(input);
       expect(validated).toEqual({ ...input, rank: LENS_PERCENTILE_RANK_DEFAULT_VALUE });
     });
 
@@ -182,7 +187,7 @@ describe('Metric Operations Schemas', () => {
         rank: undefined,
       };
 
-      const validated = percentileRanksOperationSchema.validate(input);
+      const validated = percentileRanksOperationSchema.parse(input);
       expect(validated).toEqual({ ...input, rank: LENS_PERCENTILE_RANK_DEFAULT_VALUE });
     });
 
@@ -196,7 +201,7 @@ describe('Metric Operations Schemas', () => {
         },
       };
 
-      const validated = differencesOperationSchema.validate(input);
+      const validated = differencesOperationSchema.parse(input);
       expect(validated).toEqual(input);
     });
 
@@ -211,7 +216,7 @@ describe('Metric Operations Schemas', () => {
         window: 7,
       };
 
-      const validated = movingAverageOperationSchema.validate(input);
+      const validated = movingAverageOperationSchema.parse(input);
       expect(validated).toEqual(input);
     });
 
@@ -225,7 +230,7 @@ describe('Metric Operations Schemas', () => {
         },
       };
 
-      const validated = movingAverageOperationSchema.validate(input);
+      const validated = movingAverageOperationSchema.parse(input);
       expect(validated).toEqual({ ...input, window: LENS_MOVING_AVERAGE_DEFAULT_WINDOW });
     });
 
@@ -240,7 +245,7 @@ describe('Metric Operations Schemas', () => {
         window: undefined,
       };
 
-      const validated = movingAverageOperationSchema.validate(input);
+      const validated = movingAverageOperationSchema.parse(input);
       expect(validated).toEqual({ ...input, window: LENS_MOVING_AVERAGE_DEFAULT_WINDOW });
     });
   });
@@ -252,7 +257,7 @@ describe('Metric Operations Schemas', () => {
         field: 'value',
       };
 
-      const validated = cumulativeSumOperationSchema.validate(input);
+      const validated = cumulativeSumOperationSchema.parse(input);
       expect(validated).toEqual(input);
     });
 
@@ -262,7 +267,7 @@ describe('Metric Operations Schemas', () => {
         field: 'value',
       };
 
-      const validated = counterRateOperationSchema.validate(input);
+      const validated = counterRateOperationSchema.parse(input);
       expect(validated).toEqual(input);
     });
 
@@ -273,7 +278,7 @@ describe('Metric Operations Schemas', () => {
         time_field: 'timestamp',
       };
 
-      const validated = lastValueOperationSchema.validate(input);
+      const validated = lastValueOperationSchema.parse(input);
       expect(validated).toEqual({
         ...input,
         multi_value: LENS_LAST_VALUE_DEFAULT_MULTI_VALUE,
@@ -288,7 +293,7 @@ describe('Metric Operations Schemas', () => {
         multi_value: undefined,
       };
 
-      const validated = lastValueOperationSchema.validate(input);
+      const validated = lastValueOperationSchema.parse(input);
       expect(validated).toEqual({
         ...input,
         multi_value: LENS_LAST_VALUE_DEFAULT_MULTI_VALUE,
@@ -325,7 +330,7 @@ describe('Metric Operations Schemas', () => {
       ];
 
       operations.forEach((op) => {
-        const validated = metricOperationDefinitionSchema.validate(op);
+        const validated = metricOperationDefinitionSchema.parse(op);
         expect(validated).toEqual(op);
       });
     });
@@ -336,7 +341,8 @@ describe('Metric Operations Schemas', () => {
         field: 'value',
       };
 
-      expect(() => metricOperationDefinitionSchema.validate(input)).toThrow();
+      const result = metricOperationDefinitionSchema.safeParse(input);
+      expectPrettyError(result).toMatchInlineSnapshot(`"✖ Invalid input"`);
     });
   });
 });

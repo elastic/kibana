@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
-import type { TypeOf } from '@kbn/config-schema';
+import { z } from '@kbn/zod';
 import { storedFilterSchema, querySchema } from '@kbn/es-query-server';
 import { refreshIntervalSchema } from '@kbn/data-service-server';
 import {
@@ -15,52 +14,60 @@ import {
 } from '@kbn/presentation-publishing-schemas';
 import { mlEntityFieldValueSchema } from '@kbn/ml-anomaly-utils/schemas';
 
-const baseUserInputProps = schema.object({
-  forecastId: schema.maybe(schema.string()),
-  functionDescription: schema.maybe(schema.string()),
-  jobIds: schema.arrayOf(schema.string(), { maxSize: 10000 }),
-  selectedDetectorIndex: schema.number(),
-  selectedEntities: schema.maybe(
-    schema.recordOf(schema.string(), schema.maybe(mlEntityFieldValueSchema))
-  ),
-});
+const baseUserInputProps = z
+  .object({
+    forecastId: z.string().optional(),
+    functionDescription: z.string().optional(),
+    jobIds: z.array(z.string()).max(10000),
+    selectedDetectorIndex: z.number(),
+    selectedEntities: z.record(z.string(), mlEntityFieldValueSchema.optional()).optional(),
+  })
+  .strict();
 
-export const singleMetricViewerEmbeddableUserInputSchema = schema.object({
-  ...baseUserInputProps.getPropSchemas(),
-  panelTitle: schema.maybe(schema.string()),
-});
+export const singleMetricViewerEmbeddableUserInputSchema = z
+  .object({
+    ...baseUserInputProps.shape,
+    panelTitle: z.string().optional(),
+  })
+  .strict();
 
-export type SingleMetricViewerEmbeddableUserInput = TypeOf<
+export type SingleMetricViewerEmbeddableUserInput = z.output<
   typeof singleMetricViewerEmbeddableUserInputSchema
 >;
 
-export const singleMetricViewerEmbeddableCustomInputSchema = schema.object({
-  ...baseUserInputProps.getPropSchemas(),
-  ...serializedTimeRangeSchema.getPropSchemas(),
-  id: schema.maybe(schema.string()),
-  filters: schema.maybe(schema.arrayOf(storedFilterSchema, { maxSize: 10000 })),
-  query: schema.maybe(querySchema),
-  refreshConfig: schema.maybe(refreshIntervalSchema),
-});
+export const singleMetricViewerEmbeddableCustomInputSchema = z
+  .object({
+    ...baseUserInputProps.shape,
+    ...serializedTimeRangeSchema.shape,
+    id: z.string().optional(),
+    filters: z.array(storedFilterSchema).max(10000).optional(),
+    query: querySchema.optional(),
+    refreshConfig: refreshIntervalSchema.optional(),
+  })
+  .strict();
 
-export type SingleMetricViewerEmbeddableCustomInput = TypeOf<
+export type SingleMetricViewerEmbeddableCustomInput = z.output<
   typeof singleMetricViewerEmbeddableCustomInputSchema
 >;
 
-export const singleMetricViewerEmbeddableInputSchema = schema.object({
-  ...singleMetricViewerEmbeddableCustomInputSchema.getPropSchemas(),
-  title: schema.maybe(schema.string()),
-});
+export const singleMetricViewerEmbeddableInputSchema = z
+  .object({
+    ...singleMetricViewerEmbeddableCustomInputSchema.shape,
+    title: z.string().optional(),
+  })
+  .strict();
 
-export type SingleMetricViewerEmbeddableInput = TypeOf<
+export type SingleMetricViewerEmbeddableInput = z.output<
   typeof singleMetricViewerEmbeddableInputSchema
 >;
 
-export const singleMetricViewerEmbeddableStateSchema = schema.object({
-  ...serializedTitlesSchema.getPropSchemas(),
-  ...singleMetricViewerEmbeddableCustomInputSchema.getPropSchemas(),
-});
+export const singleMetricViewerEmbeddableStateSchema = z
+  .object({
+    ...serializedTitlesSchema.shape,
+    ...singleMetricViewerEmbeddableCustomInputSchema.shape,
+  })
+  .strict();
 
-export type SingleMetricViewerEmbeddableState = TypeOf<
+export type SingleMetricViewerEmbeddableState = z.output<
   typeof singleMetricViewerEmbeddableStateSchema
 >;

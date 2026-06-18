@@ -9,7 +9,7 @@
 
 import type { VersionedRouter } from '@kbn/core-http-server';
 import type { RequestHandlerContext } from '@kbn/core/server';
-import { schema } from '@kbn/config-schema';
+import { z } from '@kbn/zod';
 import { INTERNAL_API_VERSION, commonRouteConfig } from '../constants';
 import { deleteMarkdown } from './delete';
 import { MARKDOWN_API_PATH } from '../../../common/constants';
@@ -26,13 +26,13 @@ export function registerDeleteRoute(router: VersionedRouter<RequestHandlerContex
       version: INTERNAL_API_VERSION,
       validate: {
         request: {
-          params: schema.object({
-            id: schema.string({
-              meta: {
+          params: z
+            .object({
+              id: z.string().meta({
                 description: 'A unique identifier for the markdown library item.',
-              },
-            }),
-          }),
+              }),
+            })
+            .strict(),
         },
         response: {
           204: {

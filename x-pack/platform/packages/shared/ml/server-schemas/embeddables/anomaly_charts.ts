@@ -5,44 +5,51 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
-import type { TypeOf } from '@kbn/config-schema';
+import { z } from '@kbn/zod';
 import { mlEntityFieldSchema } from '@kbn/ml-anomaly-utils/schemas';
 import {
   serializedTimeRangeSchema,
   serializedTitlesSchema,
 } from '@kbn/presentation-publishing-schemas';
 
-export const severityThresholdSchema = schema.object({
-  min: schema.number(),
-  max: schema.maybe(schema.number()),
-});
+export const severityThresholdSchema = z
+  .object({
+    min: z.number(),
+    max: z.number().optional(),
+  })
+  .strict();
 
-export type SeverityThreshold = TypeOf<typeof severityThresholdSchema>;
+export type SeverityThreshold = z.output<typeof severityThresholdSchema>;
 
-export const anomalyChartsEmbeddableRuntimeStateSchema = schema.object({
-  jobIds: schema.arrayOf(schema.string(), { maxSize: 10000 }),
-  maxSeriesToPlot: schema.number(),
-  severityThreshold: schema.maybe(schema.arrayOf(severityThresholdSchema, { maxSize: 10000 })),
-  selectedEntities: schema.maybe(schema.arrayOf(mlEntityFieldSchema, { maxSize: 10000 })),
-});
+export const anomalyChartsEmbeddableRuntimeStateSchema = z
+  .object({
+    jobIds: z.array(z.string()).max(10000),
+    maxSeriesToPlot: z.number(),
+    severityThreshold: z.array(severityThresholdSchema).max(10000).optional(),
+    selectedEntities: z.array(mlEntityFieldSchema).max(10000).optional(),
+  })
+  .strict();
 
-export type AnomalyChartsEmbeddableRuntimeState = TypeOf<
+export type AnomalyChartsEmbeddableRuntimeState = z.output<
   typeof anomalyChartsEmbeddableRuntimeStateSchema
 >;
 
-export const anomalyChartsEmbeddableOverridableStateSchema = schema.object({
-  ...anomalyChartsEmbeddableRuntimeStateSchema.getPropSchemas(),
-  ...serializedTimeRangeSchema.getPropSchemas(),
-});
+export const anomalyChartsEmbeddableOverridableStateSchema = z
+  .object({
+    ...anomalyChartsEmbeddableRuntimeStateSchema.shape,
+    ...serializedTimeRangeSchema.shape,
+  })
+  .strict();
 
-export type AnomalyChartsEmbeddableOverridableState = TypeOf<
+export type AnomalyChartsEmbeddableOverridableState = z.output<
   typeof anomalyChartsEmbeddableOverridableStateSchema
 >;
 
-export const anomalyChartsEmbeddableStateSchema = schema.object({
-  ...serializedTitlesSchema.getPropSchemas(),
-  ...anomalyChartsEmbeddableOverridableStateSchema.getPropSchemas(),
-});
+export const anomalyChartsEmbeddableStateSchema = z
+  .object({
+    ...serializedTitlesSchema.shape,
+    ...anomalyChartsEmbeddableOverridableStateSchema.shape,
+  })
+  .strict();
 
-export type AnomalyChartsEmbeddableState = TypeOf<typeof anomalyChartsEmbeddableStateSchema>;
+export type AnomalyChartsEmbeddableState = z.output<typeof anomalyChartsEmbeddableStateSchema>;

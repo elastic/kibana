@@ -1,0 +1,243 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`given a embedded runtime field given a boolean runtime field when it has a script that is not a string should throw an error 1`] = `
+"✖ Invalid input: expected string, received object
+  → at script"
+`;
+
+exports[`given a embedded runtime field given a boolean runtime field when it has an empty script should throw an error 1`] = `
+"✖ Too small: expected string to have >=1 characters
+  → at script"
+`;
+
+exports[`given a embedded runtime field given a composite runtime field when fields is not a record should throw an error 1`] = `
+"✖ Invalid input: expected record, received array
+  → at fields"
+`;
+
+exports[`given a embedded runtime field given a composite runtime field when it does NOT have fields should throw an error 1`] = `
+"✖ Invalid input: expected record, received undefined
+  → at fields"
+`;
+
+exports[`given a embedded runtime field given a composite runtime field when it has a script that is not a string should throw an error 1`] = `
+"✖ Invalid input: expected string, received object
+  → at script"
+`;
+
+exports[`given a embedded runtime field given a composite runtime field when it has a top-level custom_description should throw an error 1`] = `"✖ Unrecognized key: \\"custom_description\\""`;
+
+exports[`given a embedded runtime field given a composite runtime field when it has a top-level custom_label should throw an error 1`] = `"✖ Unrecognized key: \\"custom_label\\""`;
+
+exports[`given a embedded runtime field given a composite runtime field when it has an empty script should throw an error 1`] = `
+"✖ Too small: expected string to have >=1 characters
+  → at script"
+`;
+
+exports[`given a embedded runtime field given a composite runtime field when it has subfields when the subfield DOES NOT have a type should throw an error 1`] = `
+"✖ Invalid option: expected one of \\"keyword\\"|\\"long\\"|\\"double\\"|\\"date\\"|\\"ip\\"|\\"boolean\\"|\\"geo_point\\"
+  → at fields.my_runtime_subfield.type"
+`;
+
+exports[`given a embedded runtime field given a composite runtime field when it has subfields when the subfield has an invalid type should throw an error 1`] = `
+"✖ Invalid option: expected one of \\"keyword\\"|\\"long\\"|\\"double\\"|\\"date\\"|\\"ip\\"|\\"boolean\\"|\\"geo_point\\"
+  → at fields.my_runtime_subfield.type"
+`;
+
+exports[`given a embedded runtime field given a composite runtime field when it has subfields when the subfield key is empty should throw an error 1`] = `
+"✖ Invalid key in record
+  → at fields."
+`;
+
+exports[`given a embedded runtime field given a composite runtime field when it has subfields when the subfield key is too long should throw an error 1`] = `
+"✖ Invalid key in record
+  → at fields.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+`;
+
+exports[`given a embedded runtime field given a composite runtime field when it has top-level field formatting settings should throw an error 1`] = `"✖ Unrecognized key: \\"format\\""`;
+
+exports[`given a embedded runtime field given a date runtime field when it has a script that is not a string should throw an error 1`] = `
+"✖ Invalid input: expected string, received object
+  → at script"
+`;
+
+exports[`given a embedded runtime field given a date runtime field when it has an empty script should throw an error 1`] = `
+"✖ Too small: expected string to have >=1 characters
+  → at script"
+`;
+
+exports[`given a embedded runtime field given a double runtime field when it has a script that is not a string should throw an error 1`] = `
+"✖ Invalid input: expected string, received object
+  → at script"
+`;
+
+exports[`given a embedded runtime field given a double runtime field when it has an empty script should throw an error 1`] = `
+"✖ Too small: expected string to have >=1 characters
+  → at script"
+`;
+
+exports[`given a embedded runtime field given a geo_point runtime field when it has a script that is not a string should throw an error 1`] = `
+"✖ Invalid input: expected string, received object
+  → at script"
+`;
+
+exports[`given a embedded runtime field given a geo_point runtime field when it has an empty script should throw an error 1`] = `
+"✖ Too small: expected string to have >=1 characters
+  → at script"
+`;
+
+exports[`given a embedded runtime field given a ip runtime field when it has a script that is not a string should throw an error 1`] = `
+"✖ Invalid input: expected string, received object
+  → at script"
+`;
+
+exports[`given a embedded runtime field given a ip runtime field when it has an empty script should throw an error 1`] = `
+"✖ Too small: expected string to have >=1 characters
+  → at script"
+`;
+
+exports[`given a embedded runtime field given a keyword runtime field when it has a script that is not a string should throw an error 1`] = `
+"✖ Invalid input: expected string, received object
+  → at script"
+`;
+
+exports[`given a embedded runtime field given a keyword runtime field when it has an empty script should throw an error 1`] = `
+"✖ Too small: expected string to have >=1 characters
+  → at script"
+`;
+
+exports[`given a embedded runtime field given a long runtime field when it has a script that is not a string should throw an error 1`] = `
+"✖ Invalid input: expected string, received object
+  → at script"
+`;
+
+exports[`given a embedded runtime field given a long runtime field when it has an empty script should throw an error 1`] = `
+"✖ Too small: expected string to have >=1 characters
+  → at script"
+`;
+
+exports[`given a embedded runtime field given an invalid type should throw an error 1`] = `
+"✖ Invalid discriminator value. Expected 'keyword' | 'long' | 'double' | 'date' | 'ip' | 'boolean' | 'geo_point' | 'composite'
+  → at type"
+`;
+
+exports[`given a saved runtime field given a boolean runtime field when it has a script that is not a string should throw an error 1`] = `
+"✖ Invalid input: expected string, received object
+  → at script"
+`;
+
+exports[`given a saved runtime field given a boolean runtime field when it has an empty script should throw an error 1`] = `
+"✖ Too small: expected string to have >=1 characters
+  → at script"
+`;
+
+exports[`given a saved runtime field given a composite runtime field when fields is not a record should throw an error 1`] = `
+"✖ Invalid input: expected record, received array
+  → at fields"
+`;
+
+exports[`given a saved runtime field given a composite runtime field when it does NOT have fields should throw an error 1`] = `
+"✖ Invalid input: expected record, received undefined
+  → at fields"
+`;
+
+exports[`given a saved runtime field given a composite runtime field when it has a script that is not a string should throw an error 1`] = `
+"✖ Invalid input: expected string, received object
+  → at script"
+`;
+
+exports[`given a saved runtime field given a composite runtime field when it has a top-level custom_description should throw an error 1`] = `"✖ Unrecognized key: \\"custom_description\\""`;
+
+exports[`given a saved runtime field given a composite runtime field when it has a top-level custom_label should throw an error 1`] = `"✖ Unrecognized key: \\"custom_label\\""`;
+
+exports[`given a saved runtime field given a composite runtime field when it has an empty script should throw an error 1`] = `
+"✖ Too small: expected string to have >=1 characters
+  → at script"
+`;
+
+exports[`given a saved runtime field given a composite runtime field when it has subfields when the subfield DOES NOT have a type should throw an error 1`] = `
+"✖ Invalid option: expected one of \\"keyword\\"|\\"long\\"|\\"double\\"|\\"date\\"|\\"ip\\"|\\"boolean\\"|\\"geo_point\\"
+  → at fields.my_runtime_subfield.type"
+`;
+
+exports[`given a saved runtime field given a composite runtime field when it has subfields when the subfield has an invalid type should throw an error 1`] = `
+"✖ Invalid option: expected one of \\"keyword\\"|\\"long\\"|\\"double\\"|\\"date\\"|\\"ip\\"|\\"boolean\\"|\\"geo_point\\"
+  → at fields.my_runtime_subfield.type"
+`;
+
+exports[`given a saved runtime field given a composite runtime field when it has subfields when the subfield key is empty should throw an error 1`] = `
+"✖ Invalid key in record
+  → at fields."
+`;
+
+exports[`given a saved runtime field given a composite runtime field when it has subfields when the subfield key is too long should throw an error 1`] = `
+"✖ Invalid key in record
+  → at fields.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+`;
+
+exports[`given a saved runtime field given a composite runtime field when it has top-level field formatting settings should throw an error 1`] = `"✖ Unrecognized key: \\"format\\""`;
+
+exports[`given a saved runtime field given a date runtime field when it has a script that is not a string should throw an error 1`] = `
+"✖ Invalid input: expected string, received object
+  → at script"
+`;
+
+exports[`given a saved runtime field given a date runtime field when it has an empty script should throw an error 1`] = `
+"✖ Too small: expected string to have >=1 characters
+  → at script"
+`;
+
+exports[`given a saved runtime field given a double runtime field when it has a script that is not a string should throw an error 1`] = `
+"✖ Invalid input: expected string, received object
+  → at script"
+`;
+
+exports[`given a saved runtime field given a double runtime field when it has an empty script should throw an error 1`] = `
+"✖ Too small: expected string to have >=1 characters
+  → at script"
+`;
+
+exports[`given a saved runtime field given a geo_point runtime field when it has a script that is not a string should throw an error 1`] = `
+"✖ Invalid input: expected string, received object
+  → at script"
+`;
+
+exports[`given a saved runtime field given a geo_point runtime field when it has an empty script should throw an error 1`] = `
+"✖ Too small: expected string to have >=1 characters
+  → at script"
+`;
+
+exports[`given a saved runtime field given a ip runtime field when it has a script that is not a string should throw an error 1`] = `
+"✖ Invalid input: expected string, received object
+  → at script"
+`;
+
+exports[`given a saved runtime field given a ip runtime field when it has an empty script should throw an error 1`] = `
+"✖ Too small: expected string to have >=1 characters
+  → at script"
+`;
+
+exports[`given a saved runtime field given a keyword runtime field when it has a script that is not a string should throw an error 1`] = `
+"✖ Invalid input: expected string, received object
+  → at script"
+`;
+
+exports[`given a saved runtime field given a keyword runtime field when it has an empty script should throw an error 1`] = `
+"✖ Too small: expected string to have >=1 characters
+  → at script"
+`;
+
+exports[`given a saved runtime field given a long runtime field when it has a script that is not a string should throw an error 1`] = `
+"✖ Invalid input: expected string, received object
+  → at script"
+`;
+
+exports[`given a saved runtime field given a long runtime field when it has an empty script should throw an error 1`] = `
+"✖ Too small: expected string to have >=1 characters
+  → at script"
+`;
+
+exports[`given a saved runtime field given an invalid type should throw an error 1`] = `
+"✖ Invalid discriminator value. Expected 'keyword' | 'long' | 'double' | 'date' | 'ip' | 'boolean' | 'geo_point' | 'composite'
+  → at type"
+`;

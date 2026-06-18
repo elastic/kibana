@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
+import { z } from '@kbn/zod';
 import {
   LABEL_BORDER_SIZES,
   LABEL_POSITIONS,
@@ -15,107 +15,110 @@ import {
 } from '../../../../../../common/constants';
 import { styleFieldSchema } from './style_field_schema';
 
-export const labelBorderSizeOptions = schema.object({
-  size: schema.oneOf([
-    schema.literal(LABEL_BORDER_SIZES.NONE),
-    schema.literal(LABEL_BORDER_SIZES.SMALL),
-    schema.literal(LABEL_BORDER_SIZES.MEDIUM),
-    schema.literal(LABEL_BORDER_SIZES.LARGE),
-  ]),
-});
+export const labelBorderSizeOptions = z
+  .object({
+    size: z.union([
+      z.literal(LABEL_BORDER_SIZES.NONE),
+      z.literal(LABEL_BORDER_SIZES.SMALL),
+      z.literal(LABEL_BORDER_SIZES.MEDIUM),
+      z.literal(LABEL_BORDER_SIZES.LARGE),
+    ]),
+  })
+  .strict();
 
-export const labelBorderSizeSchema = schema.object(
-  {
+export const labelBorderSizeSchema = z
+  .object({
     options: labelBorderSizeOptions,
-  },
-  {
-    defaultValue: {
-      options: {
-        size: LABEL_BORDER_SIZES.SMALL,
-      },
+  })
+  .strict()
+  .default({
+    options: {
+      size: LABEL_BORDER_SIZES.SMALL,
     },
-    meta: {
-      description: 'Configure to set label border width',
-    },
-  }
-);
+  })
+  .meta({
+    description: 'Configure to set label border width',
+  });
 
-export const labelPositionSchema = schema.object(
-  {
-    options: schema.object({
-      position: schema.oneOf([
-        schema.literal(LABEL_POSITIONS.BOTTOM),
-        schema.literal(LABEL_POSITIONS.CENTER),
-        schema.literal(LABEL_POSITIONS.TOP),
-      ]),
-    }),
-  },
-  {
-    defaultValue: {
-      options: {
-        position: LABEL_POSITIONS.CENTER,
-      },
+export const labelPositionSchema = z
+  .object({
+    options: z
+      .object({
+        position: z.union([
+          z.literal(LABEL_POSITIONS.BOTTOM),
+          z.literal(LABEL_POSITIONS.CENTER),
+          z.literal(LABEL_POSITIONS.TOP),
+        ]),
+      })
+      .strict(),
+  })
+  .strict()
+  .default({
+    options: {
+      position: LABEL_POSITIONS.CENTER,
     },
-    meta: {
-      description: 'Configure to place label above, in the center of, or below the Point feature',
-    },
-  }
-);
+  })
+  .meta({
+    description: 'Configure to place label above, in the center of, or below the Point feature',
+  });
 
-export const labelZoomRangeSchema = schema.object(
-  {
-    options: schema.object({
-      useLayerZoomRange: schema.boolean(),
-      minZoom: schema.number(),
-      maxZoom: schema.number(),
-    }),
-  },
-  {
-    defaultValue: {
-      options: {
-        useLayerZoomRange: true,
-        minZoom: MIN_ZOOM,
-        maxZoom: MAX_ZOOM,
-      },
+export const labelZoomRangeSchema = z
+  .object({
+    options: z
+      .object({
+        useLayerZoomRange: z.boolean(),
+        minZoom: z.number(),
+        maxZoom: z.number(),
+      })
+      .strict(),
+  })
+  .strict()
+  .default({
+    options: {
+      useLayerZoomRange: true,
+      minZoom: MIN_ZOOM,
+      maxZoom: MAX_ZOOM,
     },
-    meta: {
-      description: 'Configure to set the zoom range for which labels are displayed',
-    },
-  }
-);
+  })
+  .meta({
+    description: 'Configure to set the zoom range for which labels are displayed',
+  });
 
-export const labelDynamicOptions = schema.object({
-  field: schema.maybe(styleFieldSchema),
-});
+export const labelDynamicOptions = z
+  .object({
+    field: styleFieldSchema.optional(),
+  })
+  .strict();
 
-export const labelStaticOptions = schema.object({
-  value: schema.string({
-    meta: {
+export const labelStaticOptions = z
+  .object({
+    value: z.string().meta({
       description: 'Provided value displayed as feature label',
-    },
-  }),
-});
+    }),
+  })
+  .strict();
 
-export const labelSchema = schema.oneOf(
-  [
-    schema.object({
-      type: schema.literal(STYLE_TYPE.STATIC),
-      options: labelStaticOptions,
-    }),
-    schema.object({
-      type: schema.literal(STYLE_TYPE.DYNAMIC),
-      options: labelDynamicOptions,
-    }),
-  ],
-  {
-    defaultValue: {
-      type: STYLE_TYPE.STATIC,
-      options: {
-        value: '',
-      },
+export const labelSchema = z
+  .union([
+    z
+      .object({
+        type: z.literal(STYLE_TYPE.STATIC),
+        options: labelStaticOptions,
+      })
+      .strict(),
+    z
+      .object({
+        type: z.literal(STYLE_TYPE.DYNAMIC),
+        options: labelDynamicOptions,
+      })
+      .strict(),
+  ])
+  .default({
+    type: STYLE_TYPE.STATIC,
+    options: {
+      value: '',
     },
-    meta: {
-      description: 'Configure to set label content',
-    },
-  }
-);
+  })
+  .meta({
+    description: 'Configure to set label content',
+  });

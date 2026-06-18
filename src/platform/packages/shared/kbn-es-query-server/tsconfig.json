@@ -7,8 +7,8 @@
   "include": ["**/*.ts"],
   "exclude": ["target/**/*"],
   "kbn_references": [
-    "@kbn/config-schema",
+    "@kbn/zod",
     "@kbn/utility-types",
-    "@kbn/es-query-constants",
-  ],
+    "@kbn/es-query-constants"
+  ]
 }

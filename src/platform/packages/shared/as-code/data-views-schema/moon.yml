@@ -17,8 +17,9 @@ project:
   owner: '@elastic/kibana-data-discovery'
   sourceRoot: src/platform/packages/shared/as-code/data-views-schema
 dependsOn:
-  - '@kbn/config-schema'
+  - '@kbn/zod'
   - '@kbn/data-views-plugin'
+  - '@kbn/zod-helpers'
 tags:
   - shared-common
   - package

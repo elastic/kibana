@@ -27,7 +27,7 @@ dependsOn:
   - '@kbn/expressions-plugin'
   - '@kbn/core-saved-objects-common'
   - '@kbn/esql-utils'
-  - '@kbn/config-schema'
+  - '@kbn/zod'
   - '@kbn/coloring'
   - '@kbn/content-management-utils'
   - '@kbn/lens-common'
@@ -36,6 +36,7 @@ dependsOn:
   - '@kbn/transpose-utils'
   - '@kbn/palettes'
   - '@kbn/crypto-browser'
+  - '@kbn/zod-helpers'
 tags:
   - shared-common
   - package

@@ -9,6 +9,7 @@
 
 import { freeze, produce } from 'immer';
 
+import { expectPrettyError } from '@kbn/zod-helpers/v4';
 import type {
   ColorByValueStep,
   ColorByValueType,
@@ -31,49 +32,49 @@ describe('Color Schema', () => {
         ['lte only', { lte: 0 }],
       ])('should validate for %s', (_, constraints) => {
         const step: ColorByValueStep = { color, ...constraints };
-        const validated = colorByValueStepsSchema.validate([step]);
-        expect(validated).toEqual([step]);
+        const validated = colorByValueStepsSchema.parse([step]);
+        expect(validated).toMatchObject([step]);
       });
 
       describe('validation errors', () => {
         it('should invalidate unconstrained step', () => {
           const step: ColorByValueStep = { color };
 
-          expect(() => {
-            colorByValueStepsSchema.validate([step]);
-          }).toThrowErrorMatchingInlineSnapshot(
-            `"[0]: At least one of \\"gte\\", \\"lt\\", or \\"lte\\" must be provided."`
-          );
+          const result = colorByValueStepsSchema.safeParse([step]);
+          expectPrettyError(result).toMatchInlineSnapshot(`
+            "✖ At least one of \\"gte\\", \\"lt\\", or \\"lte\\" must be provided.
+              → at [0]"
+          `);
         });
 
         it('should invalidate using both lt and lte (overconstrained)', () => {
           const step: ColorByValueStep = { color, lte: 50, lt: 100 };
 
-          expect(() => {
-            colorByValueStepsSchema.validate([step]);
-          }).toThrowErrorMatchingInlineSnapshot(
-            `"[0]: Cannot provide both \\"lt\\" and \\"lte\\" for the same step."`
-          );
+          const result = colorByValueStepsSchema.safeParse([step]);
+          expectPrettyError(result).toMatchInlineSnapshot(`
+            "✖ Cannot provide both \\"lt\\" and \\"lte\\" for the same step.
+              → at [0]"
+          `);
         });
 
         it('should invalidate using inverted range - lt', () => {
           const step: ColorByValueStep = { color, gte: 100, lt: 50 };
 
-          expect(() => {
-            colorByValueStepsSchema.validate([step]);
-          }).toThrowErrorMatchingInlineSnapshot(
-            `"[0]: Inverted range: \\"gte\\" value must be less than the \\"lt\\" value"`
-          );
+          const result = colorByValueStepsSchema.safeParse([step]);
+          expectPrettyError(result).toMatchInlineSnapshot(`
+            "✖ Inverted range: \\"gte\\" value must be less than the \\"lt\\" value
+              → at [0]"
+          `);
         });
 
         it('should invalidate using inverted range - lte', () => {
           const step: ColorByValueStep = { color, gte: 100, lte: 50 };
 
-          expect(() => {
-            colorByValueStepsSchema.validate([step]);
-          }).toThrowErrorMatchingInlineSnapshot(
-            `"[0]: Inverted range: \\"gte\\" value must be less than the \\"lte\\" value"`
-          );
+          const result = colorByValueStepsSchema.safeParse([step]);
+          expectPrettyError(result).toMatchInlineSnapshot(`
+            "✖ Inverted range: \\"gte\\" value must be less than the \\"lte\\" value
+              → at [0]"
+          `);
         });
       });
     });
@@ -92,8 +93,8 @@ describe('Color Schema', () => {
         });
 
         it('should validate complete step ranges', () => {
-          const validated = allColoringTypeSchema.validate(baseConfig);
-          expect(validated).toEqual(baseConfig);
+          const validated = allColoringTypeSchema.parse(baseConfig);
+          expect(validated).toMatchObject(baseConfig);
         });
 
         it('should validate with implicit lower and upper bounds', () => {
@@ -101,24 +102,24 @@ describe('Color Schema', () => {
             base.steps[0].gte = undefined;
             base.steps[2].lt = undefined;
           });
-          const validated = allColoringTypeSchema.validate(config);
-          expect(validated).toEqual(config);
+          const validated = allColoringTypeSchema.parse(config);
+          expect(validated).toMatchObject(config);
         });
 
         it('should validate with implicit lower bound', () => {
           const config = produce(baseConfig, (base) => {
             base.steps[0].gte = undefined;
           });
-          const validated = allColoringTypeSchema.validate(config);
-          expect(validated).toEqual(config);
+          const validated = allColoringTypeSchema.parse(config);
+          expect(validated).toMatchObject(config);
         });
 
         it('should validate with implicit upper bound', () => {
           const config = produce(baseConfig, (base) => {
             base.steps[2].lt = undefined;
           });
-          const validated = allColoringTypeSchema.validate(config);
-          expect(validated).toEqual(config);
+          const validated = allColoringTypeSchema.parse(config);
+          expect(validated).toMatchObject(config);
         });
 
         describe('validation errors', () => {
@@ -126,21 +127,21 @@ describe('Color Schema', () => {
             const config = produce(baseConfig, (base) => {
               base.steps = [];
             });
-            expect(() => allColoringTypeSchema.validate(config)).toThrow();
+            expect(() => allColoringTypeSchema.parse(config)).toThrow();
           });
 
           it('should invalidate implicit "gte" on middle step', () => {
             const config = produce(baseConfig, (base) => {
               base.steps[1].gte = undefined;
             });
-            expect(() => allColoringTypeSchema.validate(config)).toThrow();
+            expect(() => allColoringTypeSchema.parse(config)).toThrow();
           });
 
           it('should invalidate implicit "gte" on last step', () => {
             const config = produce(baseConfig, (base) => {
               base.steps[2].gte = undefined;
             });
-            expect(() => allColoringTypeSchema.validate(config)).toThrow();
+            expect(() => allColoringTypeSchema.parse(config)).toThrow();
           });
 
           it('should invalidate "lte" on first step', () => {
@@ -148,7 +149,7 @@ describe('Color Schema', () => {
               base.steps[0].lte = base.steps[0].lt;
               base.steps[0].lt = null;
             });
-            expect(() => allColoringTypeSchema.validate(config)).toThrow();
+            expect(() => allColoringTypeSchema.parse(config)).toThrow();
           });
 
           it('should invalidate "lte" on middle step', () => {
@@ -156,35 +157,35 @@ describe('Color Schema', () => {
               base.steps[1].lte = base.steps[1].lt;
               base.steps[1].lt = null;
             });
-            expect(() => allColoringTypeSchema.validate(config)).toThrow();
+            expect(() => allColoringTypeSchema.parse(config)).toThrow();
           });
 
           it('should invalidate implicit "lt" on middle step', () => {
             const config = produce(baseConfig, (base) => {
               base.steps[1].lt = undefined;
             });
-            expect(() => allColoringTypeSchema.validate(config)).toThrow();
+            expect(() => allColoringTypeSchema.parse(config)).toThrow();
           });
 
           it('should invalidate implicit "gte" on first step', () => {
             const config = produce(baseConfig, (base) => {
               base.steps[0].lt = undefined;
             });
-            expect(() => allColoringTypeSchema.validate(config)).toThrow();
+            expect(() => allColoringTypeSchema.parse(config)).toThrow();
           });
 
           it('should invalidate discontinuous step ranges', () => {
             const config = produce(baseConfig, (base) => {
               base.steps[1].gte = base.steps[1].gte! + 1;
             });
-            expect(() => allColoringTypeSchema.validate(config)).toThrow();
+            expect(() => allColoringTypeSchema.parse(config)).toThrow();
           });
 
           it('should invalidate overlapping step ranges', () => {
             const config = produce(baseConfig, (base) => {
               base.steps[0].lt = base.steps[1].gte! + 1;
             });
-            expect(() => allColoringTypeSchema.validate(config)).toThrow();
+            expect(() => allColoringTypeSchema.parse(config)).toThrow();
           });
 
           it('should invalidate inverted range - lt', () => {
@@ -193,7 +194,7 @@ describe('Color Schema', () => {
               base.steps[1].lt = gte;
               base.steps[1].gte = lt;
             });
-            expect(() => allColoringTypeSchema.validate(config)).toThrow();
+            expect(() => allColoringTypeSchema.parse(config)).toThrow();
           });
 
           it('should invalidate inverted range - lte', () => {
@@ -202,7 +203,7 @@ describe('Color Schema', () => {
               base.steps[2].lte = gte;
               base.steps[2].gte = lte;
             });
-            expect(() => allColoringTypeSchema.validate(config)).toThrow();
+            expect(() => allColoringTypeSchema.parse(config)).toThrow();
           });
         });
       }
@@ -216,8 +217,8 @@ describe('Color Schema', () => {
         color: 'red',
       };
 
-      const validated = allColoringTypeSchema.validate(input);
-      expect(validated).toEqual(input);
+      const validated = allColoringTypeSchema.parse(input);
+      expect(validated).toMatchObject(input);
     });
 
     describe('validation errors', () => {
@@ -227,7 +228,8 @@ describe('Color Schema', () => {
           palette: 'not-a-color',
         };
 
-        expect(() => allColoringTypeSchema.validate(input)).toThrow();
+        const result = allColoringTypeSchema.safeParse(input);
+        expectPrettyError(result).toMatchInlineSnapshot(`"✖ Invalid input"`);
       });
     });
   });
@@ -246,8 +248,8 @@ describe('Color Schema', () => {
         unassigned: { type: 'color_code', value: 'green' },
       };
 
-      const validated = allColoringTypeSchema.validate(input);
-      expect(validated).toEqual(input);
+      const validated = allColoringTypeSchema.parse(input);
+      expect(validated).toMatchObject(input);
     });
 
     it('validates a full static categorical color mapping with loop unassigned', () => {
@@ -262,8 +264,8 @@ describe('Color Schema', () => {
         ],
       };
 
-      const validated = allColoringTypeSchema.validate(input);
-      expect(validated).toEqual(input);
+      const validated = allColoringTypeSchema.parse(input);
+      expect(validated).toMatchObject(input);
     });
 
     it('validates a full categorical color mapping', () => {
@@ -279,8 +281,8 @@ describe('Color Schema', () => {
         unassigned: { type: 'color_code', value: 'green' },
       };
 
-      const validated = allColoringTypeSchema.validate(input);
-      expect(validated).toEqual(input);
+      const validated = allColoringTypeSchema.parse(input);
+      expect(validated).toMatchObject(input);
     });
 
     it('validates a full categorical color mapping with loop unassigned', () => {
@@ -295,8 +297,8 @@ describe('Color Schema', () => {
         ],
       };
 
-      const validated = allColoringTypeSchema.validate(input);
-      expect(validated).toEqual(input);
+      const validated = allColoringTypeSchema.parse(input);
+      expect(validated).toMatchObject(input);
     });
 
     it('validates a full categorical color mapping with mixed assignments', () => {
@@ -315,8 +317,8 @@ describe('Color Schema', () => {
         ],
       };
 
-      const validated = allColoringTypeSchema.validate(input);
-      expect(validated).toEqual(input);
+      const validated = allColoringTypeSchema.parse(input);
+      expect(validated).toMatchObject(input);
     });
 
     it('validates a valid gradient color mapping using palette color', () => {
@@ -338,8 +340,8 @@ describe('Color Schema', () => {
         ],
       };
 
-      const validated = allColoringTypeSchema.validate(input);
-      expect(validated).toEqual(input);
+      const validated = allColoringTypeSchema.parse(input);
+      expect(validated).toMatchObject(input);
     });
 
     it('validates a valid gradient color mapping using palette color and unassigned values', () => {
@@ -362,8 +364,8 @@ describe('Color Schema', () => {
         unassigned: { type: 'color_code', value: 'green' },
       };
 
-      const validated = allColoringTypeSchema.validate(input);
-      expect(validated).toEqual(input);
+      const validated = allColoringTypeSchema.parse(input);
+      expect(validated).toMatchObject(input);
     });
 
     it('validates color mapping with minimal otherColors', () => {
@@ -373,8 +375,8 @@ describe('Color Schema', () => {
         mapping: [],
       };
 
-      const validated = allColoringTypeSchema.validate(input);
-      expect(validated).toEqual(input);
+      const validated = allColoringTypeSchema.parse(input);
+      expect(validated).toMatchObject(input);
     });
 
     describe('validation errors', () => {
@@ -391,21 +393,22 @@ describe('Color Schema', () => {
           ],
         } satisfies ColorMappingCategoricalType;
 
-        expect(() => allColoringTypeSchema.validate(input)).toThrow();
+        const result = allColoringTypeSchema.safeParse(input);
+        expectPrettyError(result).toMatchInlineSnapshot(`"✖ Invalid input"`);
       });
     });
   });
 
   describe('noColor schema', () => {
     it('validates via allColoringTypeSchema', () => {
-      const validated = allColoringTypeSchema.validate(NO_COLOR);
+      const validated = allColoringTypeSchema.parse(NO_COLOR);
       expect(validated).toEqual({ type: 'none' });
     });
   });
 
   describe('autoColor schema', () => {
     it('validates via allColoringTypeSchema', () => {
-      const validated = allColoringTypeSchema.validate(AUTO_COLOR);
+      const validated = allColoringTypeSchema.parse(AUTO_COLOR);
       expect(validated).toEqual({ type: 'auto' });
     });
   });

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { TypeOf } from '@kbn/config-schema';
+import type { z } from '@kbn/zod';
 import type {
   dashboardLinkSchema,
   externalLinkSchema,
@@ -20,13 +20,13 @@ import type {
   externalLinkOptionsSchema,
 } from './cm_services';
 
-export type DashboardLink = TypeOf<typeof dashboardLinkSchema>;
-export type ExternalLink = TypeOf<typeof externalLinkSchema>;
-export type ExternalLinkOptions = TypeOf<typeof externalLinkOptionsSchema>;
+export type DashboardLink = z.output<typeof dashboardLinkSchema>;
+export type ExternalLink = z.output<typeof externalLinkSchema>;
+export type ExternalLinkOptions = z.output<typeof externalLinkOptionsSchema>;
 export type Link = DashboardLink | ExternalLink;
 export type LinkOptions = DashboardLink['options'] | ExternalLinkOptions;
 
-export type LinksState = TypeOf<typeof linksSchema>;
+export type LinksState = z.output<typeof linksSchema>;
 
 export type StoredLink = StoredDashboardLink | StoredExternalLink;
 export type StoredLinksState = Omit<LinksState, 'links'> & {
@@ -38,13 +38,13 @@ export type StoredDashboardLink = Omit<DashboardLink, 'destination'> &
   };
 type StoredExternalLink = ExternalLink & DeprecatedLinkProperties;
 
-export type LinksCreateOptions = TypeOf<typeof linksCreateOptionsSchema>;
-export type LinksUpdateOptions = TypeOf<typeof linksUpdateOptionsSchema>;
-export type LinksSearchOptions = TypeOf<typeof linksSearchOptionsSchema>;
+export type LinksCreateOptions = z.output<typeof linksCreateOptionsSchema>;
+export type LinksUpdateOptions = z.output<typeof linksUpdateOptionsSchema>;
+export type LinksSearchOptions = z.output<typeof linksSearchOptionsSchema>;
 
-export type LinksGetOut = TypeOf<typeof linksGetResultSchema>;
-export type LinksCreateOut = TypeOf<typeof linksCreateResultSchema>;
-export type LinksUpdateOut = TypeOf<typeof linksCreateResultSchema>;
+export type LinksGetOut = z.output<typeof linksGetResultSchema>;
+export type LinksCreateOut = z.output<typeof linksCreateResultSchema>;
+export type LinksUpdateOut = z.output<typeof linksCreateResultSchema>;
 
 // For BWC, optionally include deprecated props in StoredLink states so they can be transformed away
 interface DeprecatedLinkProperties {

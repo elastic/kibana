@@ -7,16 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { schema } from '@kbn/config-schema';
+import { z } from '@kbn/zod';
 import { serializedTitlesSchema } from '@kbn/presentation-publishing-schemas';
 import type { ContentManagementServicesDefinition as ServicesDefinition } from '@kbn/object-versioning';
 import {
   savedObjectSchema,
   createResultSchema,
   updateOptionsSchema,
-  createOptionsSchemas,
+  createOptionsSchema,
   objectTypeToGetResultSchema,
-} from '@kbn/content-management-utils';
+} from '@kbn/content-management-utils/zod';
 import { dashboardNavigationOptionsSchema } from '@kbn/dashboard-navigation-options-schema';
 import { DEFAULT_EXTERNAL_LINK_OPTIONS } from '../../../../common/constants';
 import { DASHBOARD_LINK_TYPE, EXTERNAL_LINK_TYPE } from '../../../../common/content_management/v1';
@@ -25,106 +25,92 @@ import {
   LINKS_VERTICAL_LAYOUT,
 } from '../../../../common/content_management/v1/constants';
 
-const baseLinkSchema = {
-  label: schema.maybe(
-    schema.string({ meta: { description: 'The label of the link to be displayed in the UI' } })
-  ),
-};
+const baseLinkSchema = z
+  .object({
+    label: z
+      .string()
+      .optional()
+      .meta({ description: 'The label of the link to be displayed in the UI' }),
+  })
+  .strict();
 
-export const dashboardLinkSchema = schema.object(
-  {
-    ...baseLinkSchema,
-    type: schema.literal(DASHBOARD_LINK_TYPE),
-    destination: schema.string({
-      meta: { description: 'Linked dashboard saved object id' },
-    }),
+export const dashboardLinkSchema = baseLinkSchema
+  .extend({
+    destination: z.string().meta({ description: 'Linked dashboard saved object id' }),
+    type: z.literal(DASHBOARD_LINK_TYPE),
     options: dashboardNavigationOptionsSchema,
-  },
-  {
-    meta: {
-      id: `kbn-link-panel-type-${DASHBOARD_LINK_TYPE}`,
-    },
-  }
-);
+  })
+  .strict()
+  .meta({
+    id: `kbn-link-panel-type-${DASHBOARD_LINK_TYPE}`,
+  });
 
-export const externalLinkOptionsSchema = schema.object(
-  {
-    open_in_new_tab: schema.boolean({
-      meta: {
-        description: 'Whether to open this link in a new tab when clicked',
-      },
-      defaultValue: DEFAULT_EXTERNAL_LINK_OPTIONS.open_in_new_tab,
+export const externalLinkOptionsSchema = z
+  .object({
+    open_in_new_tab: z.boolean().default(DEFAULT_EXTERNAL_LINK_OPTIONS.open_in_new_tab).meta({
+      description: 'Whether to open this link in a new tab when clicked',
     }),
-    encode_url: schema.boolean({
-      meta: {
-        description: 'Whether to escape the URL with percent encoding',
-      },
-      defaultValue: DEFAULT_EXTERNAL_LINK_OPTIONS.encode_url,
+    encode_url: z.boolean().default(DEFAULT_EXTERNAL_LINK_OPTIONS.encode_url).meta({
+      description: 'Whether to escape the URL with percent encoding',
     }),
-  },
-  { defaultValue: DEFAULT_EXTERNAL_LINK_OPTIONS, unknowns: 'forbid' }
-);
+  })
+  .strict()
+  .default(DEFAULT_EXTERNAL_LINK_OPTIONS);
 
-export const externalLinkSchema = schema.object(
-  {
-    ...baseLinkSchema,
-    type: schema.literal(EXTERNAL_LINK_TYPE),
-    destination: schema.string({ meta: { description: 'The external URL to link to' } }),
+export const externalLinkSchema = baseLinkSchema
+  .extend({
+    type: z.literal(EXTERNAL_LINK_TYPE),
+    destination: z.string().meta({ description: 'The external URL to link to' }),
     options: externalLinkOptionsSchema,
-  },
-  {
-    meta: {
-      id: `kbn-link-type-${EXTERNAL_LINK_TYPE}`,
-    },
-  }
-);
+  })
+  .strict()
+  .meta({
+    id: `kbn-link-type-${EXTERNAL_LINK_TYPE}`,
+  });
 
-export const linksArraySchema = schema.arrayOf(
-  schema.discriminatedUnion('type', [dashboardLinkSchema, externalLinkSchema]),
-  {
-    meta: { description: 'The list of links to display' },
-    maxSize: 100,
-  }
-);
+export const linksArraySchema = z
+  .array(z.discriminatedUnion('type', [dashboardLinkSchema, externalLinkSchema]))
+  .max(100)
+  .meta({ description: 'The list of links to display' });
 
 // Shared schema for layout - used by both saved objects and embeddables
-export const layoutSchema = schema.maybe(
-  schema.oneOf([schema.literal(LINKS_HORIZONTAL_LAYOUT), schema.literal(LINKS_VERTICAL_LAYOUT)], {
-    meta: {
-      description: 'Denote whether to display the links in a horizontal or vertical layout',
-    },
-  })
-);
+export const layoutSchema = z
+  .union([z.literal(LINKS_HORIZONTAL_LAYOUT), z.literal(LINKS_VERTICAL_LAYOUT)])
+  .optional()
+  .meta({
+    description: 'Denote whether to display the links in a horizontal or vertical layout',
+  });
 
-export const linksSchema = serializedTitlesSchema.extends(
-  {
+export const linksSchema = serializedTitlesSchema
+  .extend({
     links: linksArraySchema,
     layout: layoutSchema,
-  },
-  { unknowns: 'forbid' }
-);
+  })
+  .strict();
 
 const linksSavedObjectSchema = savedObjectSchema(linksSchema);
 
-export const linksSearchOptionsSchema = schema.maybe(
-  schema.object(
-    {
-      onlyTitle: schema.maybe(schema.boolean()),
-    },
-    { unknowns: 'forbid' }
-  )
-);
+export const linksSearchOptionsSchema = z
+  .object({
+    onlyTitle: z.boolean().optional(),
+  })
+  .strict()
+  .optional();
 
-export const linksCreateOptionsSchema = schema.object({
-  overwrite: createOptionsSchemas.overwrite,
-});
+export const linksCreateOptionsSchema = z
+  .object({
+    overwrite: createOptionsSchema.shape.overwrite,
+  })
+  .strict();
 
 // update references needed because visualize listing table uses content management
 // to update title/description/tags and tags passes references in this use case
 // TODO remove linksUpdateOptionsSchema once visualize listing table updated to pass in tags without references
-export const linksUpdateOptionsSchema = schema.object({
-  references: updateOptionsSchema.references,
-});
+export const linksUpdateOptionsSchema = z
+  .object({
+    references: updateOptionsSchema.shape.references,
+  })
+  .strict();
 
 export const linksGetResultSchema = objectTypeToGetResultSchema(linksSavedObjectSchema);
 export const linksCreateResultSchema = createResultSchema(linksSavedObjectSchema);

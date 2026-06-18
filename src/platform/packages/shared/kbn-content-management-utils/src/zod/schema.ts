@@ -7,15 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z, type ZodType } from '@kbn/zod';
-
-/**
- * Some Zod object schema type
- *
- * This enforces only that the **output** of the schema is an object, not that
- * it is of the type `ZodObject`.
- */
-export type ZodObjectType = ZodType<Record<string, unknown>>; // TODO: move this to kbn-zod package
+import { z, type ZodObjectType } from '@kbn/zod';
 
 export const apiError = z.object({
   error: z.string(),

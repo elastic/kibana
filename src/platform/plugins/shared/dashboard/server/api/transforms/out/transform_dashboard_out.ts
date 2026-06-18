@@ -106,11 +106,12 @@ export function transformDashboardOut(
     time_range: timeRange,
     title: title ?? '',
   };
+  const schemaShape = strictValidationSchema.shape;
   (Object.keys(validatedState) as Array<keyof typeof validatedState>).forEach((key) => {
     try {
       validatedState = {
         ...validatedState,
-        [key]: strictValidationSchema.validateKey(key, validatedState[key]),
+        [key]: schemaShape[key as keyof typeof schemaShape].parse(validatedState[key]),
       };
     } catch (error) {
       const warningMessage = `Unexpected error transforming ${key}. Error: ${error.message}`;

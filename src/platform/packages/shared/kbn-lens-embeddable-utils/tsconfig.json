@@ -20,7 +20,7 @@
     "@kbn/expressions-plugin",
     "@kbn/core-saved-objects-common",
     "@kbn/esql-utils",
-    "@kbn/config-schema",
+    "@kbn/zod",
     "@kbn/coloring",
     "@kbn/content-management-utils",
     "@kbn/lens-common",
@@ -29,5 +29,6 @@
     "@kbn/transpose-utils",
     "@kbn/palettes",
     "@kbn/crypto-browser",
+    "@kbn/zod-helpers",
   ]
 }

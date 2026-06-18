@@ -273,7 +273,7 @@ describe('Options List Control Api', () => {
 
   describe('unsaved changes', () => {
     test('should have unsaved changes when there are changes', async () => {
-      const lastSavedState = optionsListDSLControlSchema.validate({
+      const lastSavedState = optionsListDSLControlSchema.parse({
         data_view_id: 'oldDataViewId',
         field_name: 'myFieldName',
       });
@@ -296,7 +296,7 @@ describe('Options List Control Api', () => {
     });
 
     test('should not have unsaved changes when there are no changes', async () => {
-      const initialState = optionsListDSLControlSchema.validate({
+      const initialState = optionsListDSLControlSchema.parse({
         data_view_id: 'myDataViewId',
         field_name: 'myFieldName',
       });
@@ -321,7 +321,7 @@ describe('Options List Control Api', () => {
       factory
         .buildEmbeddable({
           initializeDrilldownsManager: jest.fn(),
-          initialState: optionsListDSLControlSchema.validate({
+          initialState: optionsListDSLControlSchema.parse({
             data_view_id: 'myDataViewId',
             field_name: 'myFieldName',
           }),
