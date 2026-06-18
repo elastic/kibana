@@ -36,7 +36,10 @@ const createMockManagementApi = (overrides: Record<string, jest.Mock> = {}) => (
 const createClient = (overrides: Record<string, jest.Mock> = {}) => {
   const managementApi = createMockManagementApi(overrides);
   const telemetry = { trackOnboardingScheduled: jest.fn() } as never;
-  const client = new StreamsKIsOnboardingClient({ managementApi: managementApi as never, telemetry });
+  const client = new StreamsKIsOnboardingClient({
+    managementApi: managementApi as never,
+    telemetry,
+  });
   return { client, managementApi, telemetry };
 };
 
