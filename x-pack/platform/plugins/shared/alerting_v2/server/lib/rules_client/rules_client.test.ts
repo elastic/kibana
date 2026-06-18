@@ -13,12 +13,12 @@ import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 
 import type { RuleSavedObjectAttributes } from '../../saved_objects';
 import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
-import type { ActionPolicyClient } from '../action_policy_client';
 import { createRulesSavedObjectService } from '../services/rules_saved_object_service/rules_saved_object_service.mock';
 import type { UserService } from '../services/user_service/user_service';
 import { createUserService } from '../services/user_service/user_service.mock';
 import { createRuleSoAttributes } from '../test_utils';
 import type { RuleEventPublisher } from '../events/rule_event_publisher/rule_event_publisher';
+import type { ActionPolicyClient } from '../action_policy_client';
 import { RulesClient } from './rules_client';
 import type { CreateRuleParams, UpdateRuleData } from './types';
 
@@ -41,20 +41,14 @@ const baseCreateData: CreateRuleParams['data'] = {
   metadata: { name: 'rule-1' },
   time_field: '@timestamp',
   schedule: { every: '1m', lookback: '1m' },
-  evaluation: {
-    query: {
-      base: 'FROM logs-* | LIMIT 1',
-    },
-  },
+  query: { format: 'standalone', breach: { query: 'FROM logs-* | LIMIT 1' } },
 };
 
 const baseSoAttrs = createRuleSoAttributes({
   metadata: { name: 'rule-1' },
   time_field: '@timestamp',
   schedule: { every: '1m', lookback: '1m' },
-  evaluation: {
-    query: { base: 'FROM logs-* | LIMIT 1' },
-  },
+  query: { format: 'standalone', breach: { query: 'FROM logs-* | LIMIT 1' } },
 });
 
 describe('RulesClient', () => {
@@ -259,9 +253,7 @@ describe('RulesClient', () => {
         client.createRule({
           data: {
             ...baseCreateData,
-            evaluation: {
-              query: { base: 'FROM |' },
-            },
+            query: { format: 'standalone', breach: { query: 'FROM |' } },
           },
           options: { id: 'rule-id-5' },
         })
@@ -1200,7 +1192,7 @@ describe('RulesClient', () => {
         type: RULE_SAVED_OBJECT_TYPE,
         page: 2,
         perPage: 50,
-        sortField: 'updatedAt',
+        sortField: 'updated_at',
         sortOrder: 'desc',
       });
 
@@ -1248,7 +1240,7 @@ describe('RulesClient', () => {
         type: RULE_SAVED_OBJECT_TYPE,
         page: 1,
         perPage: 20,
-        sortField: 'updatedAt',
+        sortField: 'updated_at',
         sortOrder: 'desc',
       });
       expect(mockSavedObjectsClient.bulkGet).not.toHaveBeenCalled();
@@ -1274,7 +1266,7 @@ describe('RulesClient', () => {
         type: RULE_SAVED_OBJECT_TYPE,
         page: 1,
         perPage: 20,
-        sortField: 'updatedAt',
+        sortField: 'updated_at',
         sortOrder: 'desc',
         filter: `${RULE_SAVED_OBJECT_TYPE}.attributes.enabled: true`,
       });
@@ -1296,7 +1288,7 @@ describe('RulesClient', () => {
         type: RULE_SAVED_OBJECT_TYPE,
         page: 2,
         perPage: 10,
-        sortField: 'updatedAt',
+        sortField: 'updated_at',
         sortOrder: 'desc',
         search: 'prod* alerts*',
         searchFields: ['metadata.name', 'metadata.description'],
@@ -1361,7 +1353,7 @@ describe('RulesClient', () => {
         type: RULE_SAVED_OBJECT_TYPE,
         page: 1,
         perPage: 20,
-        sortField: 'updatedAt',
+        sortField: 'updated_at',
         sortOrder: 'desc',
       });
     });

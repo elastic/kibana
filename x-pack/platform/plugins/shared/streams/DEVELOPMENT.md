@@ -143,7 +143,7 @@ The full route repository is assembled in `server/routes/index.ts` by spreading 
 | `GET /api/streams/{name}/_doc_counts` | Get document counts per stream |
 | `GET /api/streams/{name}/_query` | Get a query stream definition |
 | `PUT /api/streams/{name}/_query` | Create or update a query stream (creates `$.`-prefixed ES\|QL view) |
-| `GET/PUT/DELETE /api/streams/{name}/queries/*` | Manage significant event queries |
+| `GET/PUT/DELETE /api/streams/{name}/queries/*` | Manage significant event queries. Deprecated, pending removal (use the internal query endpoints). |
 | `GET/POST /api/queries/*` | Query management |
 | `GET/PUT /api/content/*` | Content pack import/export |
 | `GET/POST/DELETE /api/attachments/*` | Asset attachments (dashboards, rules) |
