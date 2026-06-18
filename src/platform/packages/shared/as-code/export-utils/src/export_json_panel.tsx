@@ -7,8 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { compressToEncodedURIComponent } from 'lz-string';
 import React, { useEffect, useMemo, useState } from 'react';
-import { css } from '@emotion/react';
+
 import {
   EuiAccordion,
   EuiButton,
@@ -25,15 +26,17 @@ import {
   useEuiTheme,
   useGeneratedHtmlId,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
+import { CodeEditor, XJsonLang } from '@kbn/code-editor';
 import { i18n } from '@kbn/i18n';
-import { XJsonLang } from '@kbn/monaco';
-import { compressToEncodedURIComponent } from 'lz-string';
-import { CodeEditor } from '@kbn/code-editor';
+import { useExportJsonFlyoutContext } from './export_json_context_provider';
 import type { ExportJsonSanitizedState } from './types';
-import { buildCreateDashboardRequestForConsole } from './export_json_share_utils';
-import { coreServices, shareService } from '../services/kibana_services';
 
-export type ExportJsonPanelProps = ExportJsonSanitizedState & { onRetry: () => void };
+export type ExportJsonPanelProps<SanitizedState extends object> =
+  ExportJsonSanitizedState<SanitizedState> & {
+    apiPath?: string;
+    onRetry: () => void;
+  };
 
 function WarningsCallout({
   warnings,
@@ -106,7 +109,7 @@ function WarningsCallout({
               css={warningsListStyles}
             >
               <ul>
-                {warnings.map((warning, idx) => (
+                {warnings?.map((warning, idx) => (
                   <li key={`${idx}-${warning}`}>{warning}</li>
                 ))}
               </ul>
@@ -151,12 +154,16 @@ function SuccessState({
   openInConsoleRequest,
   jsonValue,
 }: {
-  openInConsoleRequest: string;
+  openInConsoleRequest?: string;
   jsonValue: string;
 }) {
-  const useUrl = shareService?.url.locators.useUrl;
+  const { services } = useExportJsonFlyoutContext();
 
-  const devToolsDataUri = compressToEncodedURIComponent(openInConsoleRequest);
+  const useUrl = services.share?.url.locators.useUrl;
+
+  const devToolsDataUri = openInConsoleRequest
+    ? compressToEncodedURIComponent(openInConsoleRequest)
+    : undefined;
   const consoleHref = useUrl?.(
     () => ({
       id: 'CONSOLE_APP_LOCATOR',
@@ -168,7 +175,7 @@ function SuccessState({
   );
 
   const canShowDevTools = Boolean(
-    coreServices.application?.capabilities?.dev_tools?.show && consoleHref !== undefined
+    services.core.application?.capabilities?.dev_tools?.show && consoleHref !== undefined
   );
 
   return (
@@ -313,13 +320,14 @@ function ErrorState({ error, onRetry }: { error: Error | undefined; onRetry: () 
   );
 }
 
-export const ExportJsonPanel = ({
+export const ExportJsonPanel = <State extends object, SanitizedState extends object>({
+  apiPath,
   status,
   data,
   warnings,
   error,
   onRetry,
-}: ExportJsonPanelProps) => {
+}: ExportJsonPanelProps<SanitizedState>) => {
   const warningsAccordionId = useGeneratedHtmlId({ prefix: 'dashboardExportSourceWarnings' });
   const [isWarningsExpanded, setIsWarningsExpanded] = useState(false);
   const [showWarningsCallout, setShowWarningsCallout] = useState(true);
@@ -336,8 +344,8 @@ export const ExportJsonPanel = ({
   );
 
   const openInConsoleRequest = useMemo(
-    () => buildCreateDashboardRequestForConsole(jsonValue),
-    [jsonValue]
+    () => (apiPath ? `POST kbn:${apiPath}\n${jsonValue}` : undefined),
+    [apiPath, jsonValue]
   );
 
   return (

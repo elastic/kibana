@@ -7,6 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { i18n } from '@kbn/i18n';
+
 export const DRILLDOWN_ACTION_GROUP = { id: 'drilldown', order: 3 } as const;
 export const OPEN_FLYOUT_ADD_DRILLDOWN = 'OPEN_FLYOUT_ADD_DRILLDOWN';
 export const OPEN_FLYOUT_EDIT_DRILLDOWN = 'OPEN_FLYOUT_EDIT_DRILLDOWN';
+
+export const EXPORT_ACTION_GROUP = {
+  id: 'export_actions',
+  order: 9,
+  // asContextMenu: true,
+  getIconType: () => 'upload',
+  getDisplayName: () =>
+    i18n.translate('embeddable.actions.exportDisplayName', {
+      defaultMessage: 'Export',
+    }),
+} as const;

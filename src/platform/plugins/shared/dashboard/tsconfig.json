@@ -11,7 +11,7 @@
     "test/scout/**/*",
     "test/scout_oas_schema/**/*",
     "test/scout_oas_schema/**/*.json",
-    "test/scout_anonymous_authc/**/*",
+    "test/scout_anonymous_authc/**/*"
   ],
   "kbn_references": [
     "@kbn/core",
@@ -128,7 +128,5 @@
     "@kbn/core-test-helpers-test-utils",
     "@kbn/app-header"
   ],
-  "exclude": [
-    "target/**/*"
-  ]
+  "exclude": ["target/**/*"]
 }

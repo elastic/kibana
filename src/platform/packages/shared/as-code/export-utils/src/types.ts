@@ -7,13 +7,21 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DashboardState } from '../../server';
-
 export type ExportJsonStatus = 'loading' | 'success' | 'error';
 
-export interface ExportJsonSanitizedState {
+export interface ExportJsonSharingData<State extends object> {
+  title: string;
+  isByReference?: boolean;
+  exportJson: (byReference?: boolean) => State;
+}
+
+export interface ExportJsonSanitizedState<SanitizedState extends object> {
   status: ExportJsonStatus;
-  data: DashboardState | undefined;
+  data: SanitizedState | undefined;
   warnings: string[];
   error: Error | undefined;
 }
+
+export type SanitizeStateFunction<State extends object, SanitizedState extends object> = (
+  state: State
+) => Promise<{ data: SanitizedState; warnings: Array<{ message: string }> }>;

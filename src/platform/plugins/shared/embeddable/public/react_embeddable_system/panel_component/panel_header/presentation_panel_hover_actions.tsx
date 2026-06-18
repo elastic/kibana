@@ -279,6 +279,7 @@ export const PresentationPanelHoverActions = ({
         closeMenu: onClose,
       });
       setContextMenuPanels(menuPanels);
+      console.log({ menuPanels });
       setShowNotification(contextMenuActions.some((action) => action.showNotification));
       setQuickActions(
         compatibleActions.filter(({ id }) => (quickActionIds as readonly string[]).includes(id))

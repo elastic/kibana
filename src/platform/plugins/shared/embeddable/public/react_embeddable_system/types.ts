@@ -111,6 +111,11 @@ export interface EmbeddablePublicDefinition<
    * Provide layout contraints to customize resize behavior
    */
   layoutConstraints?: LayoutConstraints;
+
+  /**
+   * The path to the as-code REST API (if defined)
+   */
+  apiPath?: string;
 }
 
 export type LayoutConstraints = {

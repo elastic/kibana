@@ -7,24 +7,27 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useCallback, useEffect, useState } from 'react';
 import { apm } from '@elastic/apm-rum';
-import type { DashboardState } from '../../server';
-import { sanitizeDashboard } from './sanitize_dashboard';
-import type { ExportJsonSanitizedState, ExportJsonStatus } from './types';
+import { useCallback, useEffect, useState } from 'react';
+import type { ExportJsonSanitizedState, ExportJsonStatus, SanitizeStateFunction } from './types';
 
-export type UseSanitizedDashboardStateResult = ExportJsonSanitizedState & { retry: () => void };
+export type UseSanitizedStateResult<SanitizedState extends object> =
+  ExportJsonSanitizedState<SanitizedState> & {
+    retry: () => void;
+  };
 
-export function useSanitizedDashboardState({
-  dashboardState,
+export function useSanitizedState<State extends object, SanitizedState extends object>({
+  state,
+  sanitizeState,
 }: {
-  dashboardState: DashboardState;
-}): UseSanitizedDashboardStateResult {
+  state: State;
+  sanitizeState: SanitizeStateFunction<State, SanitizedState>;
+}): UseSanitizedStateResult<SanitizedState> {
   const [status, setStatus] = useState<ExportJsonStatus>('loading');
   const [error, setError] = useState<Error | undefined>(undefined);
-  const [data, setData] = useState<DashboardState | undefined>(undefined);
+  const [data, setData] = useState<SanitizedState | undefined>(undefined);
   const [warnings, setWarnings] = useState<string[]>([]);
-  // reloadCount is used to trigger a reload of the dashboard state when retry is called
+  // reloadCount is used to trigger a reload of the state when retry is called
   const [reloadCount, setReloadCount] = useState(0);
 
   const retry = useCallback(() => {
@@ -39,8 +42,9 @@ export function useSanitizedDashboardState({
     setData(undefined);
     setWarnings([]);
 
-    sanitizeDashboard(dashboardState)
+    sanitizeState(state)
       .then(({ data: responseData, warnings: responseWarnings }) => {
+        // console.log({ data, responseWarnings });
         if (!isMounted) return;
         setWarnings(responseWarnings.map(({ message }) => message));
         setData(responseData);
@@ -61,7 +65,7 @@ export function useSanitizedDashboardState({
     return () => {
       isMounted = false;
     };
-  }, [dashboardState, reloadCount]);
+  }, [state, reloadCount, sanitizeState]);
 
   return { status, data, warnings, error, retry };
 }

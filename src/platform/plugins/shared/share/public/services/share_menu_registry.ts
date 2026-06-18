@@ -187,7 +187,9 @@ export class ShareRegistry implements ShareRegistryPublicApi {
     objectType,
     isServerless,
     ...shareContext
-  }: ShareContext & { isServerless: boolean }): Promise<ShareConfigs[]> {
+  }: Partial<ShareContext> & Pick<ShareContext, 'objectType'> & { isServerless: boolean }): Promise<
+    ShareConfigs[]
+  > {
     if (!this.urlService || !this.anonymousAccessServiceProvider) {
       throw new Error('ShareOptionsManager#start was not invoked');
     }
@@ -201,20 +203,20 @@ export class ShareRegistry implements ShareRegistryPublicApi {
             config = shareAction.config.call(null, {
               objectType,
               ...shareContext,
-            });
+            } as ShareContext);
           } else if (shareAction.shareType === 'integration') {
             config = await shareAction.config.call(null, {
               urlService: this.urlService!,
               anonymousAccessServiceProvider: this.anonymousAccessServiceProvider,
               objectType,
-              ...shareContext,
+              ...(shareContext as Omit<ShareContext, 'objectType'>),
             });
           } else {
             config = shareAction.config.call(null, {
               urlService: this.urlService!,
               anonymousAccessServiceProvider: this.anonymousAccessServiceProvider,
               objectType,
-              ...shareContext,
+              ...(shareContext as Omit<ShareContext, 'objectType'>),
             });
           }
 

@@ -10,12 +10,10 @@
 import React from 'react';
 import { EuiButtonEmpty } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { ExportShareParameters } from '@kbn/share-plugin/public';
 import { ExportJsonFlyout, ExportJsonFlyoutContext } from '@kbn/as-code-export-utils';
-import { sanitizeDashboard } from './sanitize_dashboard';
-import { type DashboardState, DASHBOARD_API_PATH } from '../../common';
-import { type DashboardSanitizeResponseBody } from '../../server';
-import { coreServices, shareService } from '../services/kibana_services';
+import type { ExportShareParameters } from '@kbn/share-plugin/public';
+import type { LinksState } from '../../server';
+import { coreServices, shareServices } from '../services/kibana_services';
 
 export const exportJsonConfig: ExportShareParameters = {
   label: ({ openFlyout }) => (
@@ -25,7 +23,7 @@ export const exportJsonConfig: ExportShareParameters = {
       onClick={openFlyout}
       data-test-subj="exportMenuItem-JSON"
     >
-      {i18n.translate('dashboard.exportJson.label', {
+      {i18n.translate('links.exportJson.label', {
         defaultMessage: 'JSON',
       })}
     </EuiButtonEmpty>
@@ -35,15 +33,19 @@ export const exportJsonConfig: ExportShareParameters = {
     size: 'm',
     maxWidth: 1000,
   },
-  flyoutContent: ({ closeFlyout }) => (
-    <ExportJsonFlyoutContext.Provider
-      value={{ services: { core: coreServices, share: shareService } }}
-    >
-      <ExportJsonFlyout<DashboardState, DashboardSanitizeResponseBody['data']>
-        closeFlyout={closeFlyout}
-        sanitizeState={sanitizeDashboard}
-        apiPath={DASHBOARD_API_PATH}
-      />
-    </ExportJsonFlyoutContext.Provider>
-  ),
+  flyoutContent: ({ closeFlyout }) => {
+    return (
+      <ExportJsonFlyoutContext.Provider
+        value={{ services: { core: coreServices, share: shareServices } }}
+      >
+        <ExportJsonFlyout<LinksState, LinksState>
+          closeFlyout={closeFlyout}
+          sanitizeState={async (state: LinksState) => {
+            return { data: state, warnings: [] };
+          }}
+          apiPath={'/api/links'}
+        />
+      </ExportJsonFlyoutContext.Provider>
+    );
+  },
 };
