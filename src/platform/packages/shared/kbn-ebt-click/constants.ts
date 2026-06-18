@@ -57,4 +57,8 @@ export const EBT_CLICK_ACTIONS = {
  */
 export const NON_ECS_FIELD_EBT_DETAIL = '<non-ecs>';
 
+/**
+ * Sentinel value for `data-ebt-detail` when the user deliberately selects "none" or clears
+ * a selection. Distinguishes an intentional empty choice from a missing or unknown value.
+ */
 export const NONE_EBT_DETAIL = '<none>';
