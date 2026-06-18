@@ -301,7 +301,7 @@ processors:
 
           // Some datasets are written by Kibana rather than agents.
           // Kibana is trusted to accurately report agent.id for these datasets.
-          if (ctx?._security?.username == 'elastic/kibana'
+          if ((ctx?._security?.username == 'elastic/kibana' || ctx?._security?.username == 'kibana_system')
               && params?.kibana_user_allowed_datasets != null
               && params.kibana_user_allowed_datasets.contains(ctx?.data_stream?.dataset)) {
             return "verified";
