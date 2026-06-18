@@ -11,7 +11,7 @@ export { createSearchSource } from './create_search_source';
 export { injectReferences } from './inject_references';
 export { extractReferences } from './extract_references';
 export { parseSearchSourceJSON } from './parse_json';
-export { getResponseInspectorStats } from './inspect';
+export { getResponseInspectorStats } from '../inspect';
 export * from './fetch';
 export * from './search_source';
 export * from './search_source_service';

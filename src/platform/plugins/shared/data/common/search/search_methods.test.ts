@@ -49,7 +49,6 @@ describe('SearchMethodsService', () => {
     adapter: { start: jest.fn().mockReturnValue(requestResponder) } as unknown as RequestAdapter,
     title: 'Test Request',
     description: 'Test description',
-    id: 'test-id',
   });
 
   describe('esql', () => {
@@ -141,7 +140,6 @@ describe('SearchMethodsService', () => {
         await service.esql({ query: 'FROM logs' }, { inspector, sessionId: 'test-session-123' });
 
         expect(inspector.adapter.start).toHaveBeenCalledWith('Test Request', {
-          id: 'test-id',
           description: 'Test description',
           searchSessionId: 'test-session-123',
         });
@@ -371,7 +369,6 @@ describe('SearchMethodsService', () => {
         );
 
         expect(inspector.adapter.start).toHaveBeenCalledWith('Test Request', {
-          id: 'test-id',
           description: 'Test description',
           searchSessionId: 'test-session',
         });

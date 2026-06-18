@@ -42,10 +42,9 @@ export interface IBaseSearchOptions {
    * Inspector integration options for tracking requests
    */
   inspector?: {
-    adapter?: RequestAdapter;
+    adapter: RequestAdapter;
     title: string;
     description?: string;
-    id?: string;
     /**
      * Callback to provide pre-request metadata stats (e.g., index pattern name)
      */

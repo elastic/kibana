@@ -38,10 +38,7 @@ import type {
   EQL_SEARCH_STRATEGY,
   SQL_SEARCH_STRATEGY,
 } from '.';
-import {
-  getResponseInspectorStats,
-  getEsqlInspectorStats,
-} from './search_source/inspect/inspector_stats';
+import { getResponseInspectorStats, getEsqlInspectorStats } from './inspect/inspector_stats';
 
 /**
  * SearchMethodsService provides strategy-specific search methods with type-safe
@@ -59,17 +56,39 @@ export class SearchMethodsService implements ISearchMethods {
    */
   async esql(params: IEsqlSearchParams, options?: IEsqlSearchOptions): Promise<IEsqlSearchResult> {
     const request = this.buildEsqlRequest(params, options);
-
-    const response = await this.executeSearch(
-      request,
-      this.mapEsqlOptions(options, 'esql_async' as typeof ESQL_ASYNC_SEARCH_STRATEGY),
-      options?.inspector,
-      (req) => (req.params ?? {}) as Record<string, unknown>,
-      (result: any) => getEsqlInspectorStats(result.rawResponse)
+    const searchOptions = this.mapEsqlOptions(
+      options,
+      'esql_async' as typeof ESQL_ASYNC_SEARCH_STRATEGY
     );
-    return {
-      rawResponse: response.rawResponse,
-    };
+
+    const requestResponder = options?.inspector?.adapter.start(options.inspector.title, {
+      description: options.inspector.description,
+      searchSessionId: searchOptions?.sessionId,
+    });
+
+    requestResponder?.json((request.params ?? {}) as Record<string, unknown>);
+    if (options?.inspector?.getRequestStats) {
+      requestResponder?.stats(options.inspector.getRequestStats());
+    }
+
+    try {
+      const response = await this.executeSearch(request, searchOptions);
+
+      requestResponder?.stats(getEsqlInspectorStats(response.rawResponse));
+      requestResponder?.ok({
+        json: { rawResponse: response.rawResponse },
+        requestParams: response.requestParams,
+      });
+
+      return {
+        rawResponse: response.rawResponse,
+      };
+    } catch (error) {
+      requestResponder?.error({
+        json: 'attributes' in error ? error.attributes : { message: error.message },
+      });
+      throw error;
+    }
   }
 
   /**
@@ -77,17 +96,36 @@ export class SearchMethodsService implements ISearchMethods {
    */
   async dsl(params: IDslSearchParams, options?: IDslSearchOptions): Promise<IDslSearchResult> {
     const request = this.buildDslRequest(params, options);
+    const searchOptions = this.mapDslOptions(options, params);
 
-    const response = await this.executeSearch(
-      request,
-      this.mapDslOptions(options, params),
-      options?.inspector,
-      (req) => (req.params?.body ?? {}) as Record<string, unknown>,
-      (result: any) => getResponseInspectorStats(result.rawResponse)
-    );
-    return {
-      rawResponse: response.rawResponse,
-    };
+    const requestResponder = options?.inspector?.adapter.start(options.inspector.title, {
+      description: options.inspector.description,
+      searchSessionId: searchOptions?.sessionId,
+    });
+
+    requestResponder?.json((request.params?.body ?? {}) as Record<string, unknown>);
+    if (options?.inspector?.getRequestStats) {
+      requestResponder?.stats(options.inspector.getRequestStats());
+    }
+
+    try {
+      const response = await this.executeSearch(request, searchOptions);
+
+      requestResponder?.stats(getResponseInspectorStats(response.rawResponse));
+      requestResponder?.ok({
+        json: { rawResponse: response.rawResponse },
+        requestParams: response.requestParams,
+      });
+
+      return {
+        rawResponse: response.rawResponse,
+      };
+    } catch (error) {
+      requestResponder?.error({
+        json: 'attributes' in error ? error.attributes : { message: error.message },
+      });
+      throw error;
+    }
   }
 
   /**
@@ -103,13 +141,7 @@ export class SearchMethodsService implements ISearchMethods {
       trackTotalHits: true,
     };
     const request = this.buildDslRequest(params, options);
-    const response = await this.executeSearch(
-      request,
-      this.mapDslOptions(options, params),
-      undefined,
-      () => ({}),
-      undefined
-    );
+    const response = await this.executeSearch(request, this.mapDslOptions(options, params));
 
     return {
       rawResponse: response.rawResponse,
@@ -122,15 +154,35 @@ export class SearchMethodsService implements ISearchMethods {
    */
   async eql(params: IEqlSearchParams, options?: IEqlSearchOptions): Promise<IEqlSearchResult> {
     const request = this.buildEqlRequest(params, options);
-    const response = await this.executeSearch(
-      request,
-      this.mapEqlOptions(options, 'eql' as typeof EQL_SEARCH_STRATEGY),
-      options?.inspector,
-      (req) => (req.params?.body ?? {}) as Record<string, unknown>
-    );
-    return {
-      rawResponse: response.rawResponse,
-    };
+    const searchOptions = this.mapEqlOptions(options, 'eql' as typeof EQL_SEARCH_STRATEGY);
+
+    const requestResponder = options?.inspector?.adapter.start(options.inspector.title, {
+      description: options.inspector.description,
+      searchSessionId: searchOptions?.sessionId,
+    });
+
+    requestResponder?.json((request.params?.body ?? {}) as Record<string, unknown>);
+    if (options?.inspector?.getRequestStats) {
+      requestResponder?.stats(options.inspector.getRequestStats());
+    }
+
+    try {
+      const response = await this.executeSearch(request, searchOptions);
+
+      requestResponder?.ok({
+        json: { rawResponse: response.rawResponse },
+        requestParams: response.requestParams,
+      });
+
+      return {
+        rawResponse: response.rawResponse,
+      };
+    } catch (error) {
+      requestResponder?.error({
+        json: 'attributes' in error ? error.attributes : { message: error.message },
+      });
+      throw error;
+    }
   }
 
   /**
@@ -138,18 +190,27 @@ export class SearchMethodsService implements ISearchMethods {
    */
   async sql(params: ISqlSearchParams, options?: ISqlSearchOptions): Promise<ISqlSearchResult> {
     const request = this.buildSqlRequest(params, options);
+    const searchOptions = this.mapSqlOptions(options, 'sql' as typeof SQL_SEARCH_STRATEGY);
 
-    const response = await this.executeSearch(
-      request,
-      this.mapSqlOptions(options, 'sql' as typeof SQL_SEARCH_STRATEGY),
-      options?.inspector,
-      (req) => (req.params?.body ?? {}) as Record<string, unknown>,
-      (result: any) => ({
+    const requestResponder = options?.inspector?.adapter.start(options.inspector.title, {
+      description: options.inspector.description,
+      searchSessionId: searchOptions?.sessionId,
+    });
+
+    requestResponder?.json((request.params?.body ?? {}) as Record<string, unknown>);
+    if (options?.inspector?.getRequestStats) {
+      requestResponder?.stats(options.inspector.getRequestStats());
+    }
+
+    try {
+      const response = await this.executeSearch(request, searchOptions);
+
+      requestResponder?.stats({
         hits: {
           label: i18n.translate('data.search.es_search.hitsLabel', {
             defaultMessage: 'Hits',
           }),
-          value: `${result.rawResponse.rows?.length ?? 0}`,
+          value: `${response.rawResponse.rows?.length ?? 0}`,
           description: i18n.translate('data.search.es_search.hitsDescription', {
             defaultMessage: 'The number of documents returned by the query.',
           }),
@@ -160,7 +221,7 @@ export class SearchMethodsService implements ISearchMethods {
           }),
           value: i18n.translate('data.search.es_search.queryTimeValue', {
             defaultMessage: '{queryTime}ms',
-            values: { queryTime: result.took },
+            values: { queryTime: response.took },
           }),
           description: i18n.translate('data.search.es_search.queryTimeDescription', {
             defaultMessage:
@@ -168,12 +229,22 @@ export class SearchMethodsService implements ISearchMethods {
               'Does not include the time to send the request or parse it in the browser.',
           }),
         },
-      })
-    );
-    return {
-      rawResponse: response.rawResponse,
-      took: response.took,
-    };
+      });
+      requestResponder?.ok({
+        json: { rawResponse: response.rawResponse },
+        requestParams: response.requestParams,
+      });
+
+      return {
+        rawResponse: response.rawResponse,
+        took: response.took,
+      };
+    } catch (error) {
+      requestResponder?.error({
+        json: 'attributes' in error ? error.attributes : { message: error.message },
+      });
+      throw error;
+    }
   }
 
   // ============================================================================
@@ -185,51 +256,10 @@ export class SearchMethodsService implements ISearchMethods {
    */
   private async executeSearch<T extends IKibanaSearchRequest>(
     request: T,
-    options: ISearchOptions,
-    inspector: IBaseSearchOptions['inspector'],
-    getRequestBody: (request: T) => Record<string, unknown>,
-    getResponseStats?: (result: any) => any
+    options: ISearchOptions
   ): Promise<any> {
-    const requestResponder = inspector?.adapter?.start(inspector.title, {
-      id: inspector.id,
-      description: inspector.description,
-      searchSessionId: options?.sessionId,
-    });
-
-    // Log request body if inspector is active
-    if (requestResponder) {
-      requestResponder.json(getRequestBody(request));
-      // Log request metadata before executing search
-      if (inspector?.getRequestStats) {
-        requestResponder.stats(inspector.getRequestStats());
-      }
-    }
-
-    try {
-      const response$ = this.search(request, options);
-      const result = await lastValueFrom(
-        response$.pipe(takeWhile((r) => r.isRunning === true, true))
-      );
-
-      if (requestResponder) {
-        if (getResponseStats) {
-          requestResponder.stats(getResponseStats(result));
-        }
-        requestResponder.ok({
-          json: { rawResponse: result.rawResponse },
-          requestParams: result.requestParams,
-        });
-      }
-
-      return result;
-    } catch (error) {
-      if (requestResponder) {
-        requestResponder.error({
-          json: 'attributes' in error ? error.attributes : { message: error.message },
-        });
-      }
-      throw error;
-    }
+    const response$ = this.search(request, options);
+    return lastValueFrom(response$.pipe(takeWhile((r) => r.isRunning === true, true)));
   }
 
   // ============================================================================
@@ -312,12 +342,7 @@ export class SearchMethodsService implements ISearchMethods {
           (request.params as any).body.search_after = lastHit.sort;
         }
 
-        const nextResponse = await self.executeSearch(
-          request,
-          self.mapDslOptions(options),
-          undefined,
-          (req) => (req.params?.body ?? {}) as Record<string, unknown>
-        );
+        const nextResponse = await self.executeSearch(request, self.mapDslOptions(options));
 
         return {
           rawResponse: nextResponse.rawResponse,

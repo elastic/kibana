@@ -100,7 +100,7 @@ import type {
 } from './types';
 import { getSearchParamsFromRequest, RequestFailure } from './fetch';
 import type { FetchHandlers, SearchRequest } from './fetch';
-import { getRequestInspectorStats, getResponseInspectorStats } from './inspect';
+import { getRequestInspectorStats, getResponseInspectorStats } from '../inspect';
 
 import { getEsQueryConfig, isRunningResponse, UI_SETTINGS } from '../..';
 import type { AggsStart } from '../aggs';
