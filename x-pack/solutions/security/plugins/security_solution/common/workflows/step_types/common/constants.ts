@@ -5,10 +5,5 @@
  * 2.0.
  */
 
-import type { FtrProviderContext } from '../../../../ftr_provider_context';
-
-export default function ({ loadTestFile }: FtrProviderContext) {
-  describe('embeddable', function () {
-    loadTestFile(require.resolve('./canvas'));
-  });
-}
+export const MAX_ALERT_ID_LENGTH = 256;
+export const MAX_WORKFLOW_MESSAGE_LENGTH = 1000;
