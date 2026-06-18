@@ -3656,7 +3656,6 @@ x-pack/solutions/observability/plugins/synthetics/server/saved_objects/synthetic
 /src/cli/ @elastic/kibana-operations
 /src/cli_keystore/ @elastic/kibana-operations
 /.github/workflows/ @elastic/kibana-operations
-# Source (.md) and generated lock (.lock.yml) co-owned by Operations and Appex QA
 /.github/workflows/failed-test-investigator.* @elastic/kibana-operations @elastic/appex-qa
 /.github/workflows/flaky-test-fixer.* @elastic/kibana-operations @elastic/appex-qa
 /.github/aw/ @elastic/kibana-operations
