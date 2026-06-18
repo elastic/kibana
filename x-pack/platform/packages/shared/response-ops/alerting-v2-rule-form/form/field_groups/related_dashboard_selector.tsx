@@ -29,6 +29,7 @@ import { useDebounceFn } from '@kbn/react-hooks';
 import { useController, useFormContext } from 'react-hook-form';
 import { useRuleFormServices } from '../contexts';
 import type { FormValues } from '../types';
+import { OptionalFieldLabelAppend } from '../optional_field_label_append';
 import {
   resolveDashboardsByIds,
   searchRelatedDashboard,
@@ -153,6 +154,7 @@ const RelatedDashboardsComboBox = ({
   return (
     <EuiComboBox
       async
+      compressed
       fullWidth
       isLoading={isLoading}
       options={dashboardOptions}
@@ -331,14 +333,7 @@ export const RelatedDashboardSelector: React.FC = () => {
           </span>
         }
         fullWidth
-        labelAppend={
-          <EuiText size="xs">
-            <FormattedMessage
-              id="xpack.alertingV2.ruleForm.artifactFieldOptional"
-              defaultMessage="optional"
-            />
-          </EuiText>
-        }
+        labelAppend={<OptionalFieldLabelAppend />}
       >
         <RelatedDashboardsComboBox
           dashboard={dashboard}

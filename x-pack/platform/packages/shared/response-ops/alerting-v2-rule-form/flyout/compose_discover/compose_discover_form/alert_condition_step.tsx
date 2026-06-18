@@ -10,22 +10,22 @@ import { useFormContext } from 'react-hook-form';
 import { Parser, isColumn } from '@elastic/esql';
 import { useQuery } from '@kbn/react-query';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { getEsqlColumns } from '@kbn/esql-utils';
 import {
   EuiButton,
   EuiCallOut,
   EuiComboBox,
   EuiFormRow,
-  EuiPanel,
+  EuiHorizontalRule,
   EuiSelect,
   EuiSpacer,
-  EuiText,
   EuiTitle,
 } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 import type { ComposeDiscoverAction, ComposeDiscoverState } from '../types';
 import type { ComposeFormValues } from '../compose_form_types';
-import { QuerySummary } from '../query_summary';
+import { isQueryDefined } from '../compose_form_types';
+import { EsqlQuerySummarySection } from './esql_query_summary_section';
 import type { RuleFormServices } from '../../../form/contexts/rule_form_context';
 import { useDataFields } from '../../../form/hooks/use_data_fields';
 import { ScheduleField } from '../../../form/fields/schedule_field';
@@ -38,6 +38,7 @@ interface AlertConditionStepProps {
   dispatch: React.Dispatch<ComposeDiscoverAction>;
   services: RuleFormServices;
   onKindChange: (kind: 'signal' | 'alert') => void;
+  onSeparateBaseAndAlert?: () => void;
   isEditing: boolean;
 }
 
@@ -46,6 +47,7 @@ export function AlertConditionStep({
   dispatch,
   services,
   onKindChange,
+  onSeparateBaseAndAlert,
   isEditing,
 }: AlertConditionStepProps) {
   const { setValue, watch } = useFormContext<ComposeFormValues>();
@@ -125,145 +127,196 @@ export function AlertConditionStep({
     }
   }, [state.queryCommitted, committedQuery, setValue]);
 
+  // Callout when Apply was used but no query content was committed.
+  const queryEmpty = isAlert && state.queryCommitted && !isQueryDefined(query);
+
   // Callout when the heuristic split couldn't find a clear split point.
-  // Only relevant after Apply (when the committed query is in composed format).
   const splitFailed =
-    isAlert && state.queryCommitted && query.format === 'composed' && !query.base.trim();
+    isAlert &&
+    state.queryCommitted &&
+    isQueryDefined(query) &&
+    query.format === 'composed' &&
+    !query.base.trim();
+
+  // Base query without a separate alert condition (e.g. STATS with no trailing WHERE).
+  const noAlertCondition =
+    isAlert &&
+    state.queryCommitted &&
+    isQueryDefined(query) &&
+    query.format === 'composed' &&
+    Boolean(query.base.trim()) &&
+    !query.breach.segment.trim();
+
+  const openQueryEditor = () =>
+    dispatch({ type: 'OPEN_CHILD_FOR_STEP', step: state.step, isAlert });
+
+  const editQueryLabel = i18n.translate(
+    'xpack.alertingV2.composeDiscover.alertCondition.editQueryButtonLabel',
+    { defaultMessage: 'Edit query' }
+  );
+
+  const openEditorLabel = i18n.translate(
+    'xpack.alertingV2.composeDiscover.alertCondition.openEditorButtonLabel',
+    { defaultMessage: 'Open query editor' }
+  );
+
+  const notDefinedLabel = i18n.translate(
+    'xpack.alertingV2.composeDiscover.alertCondition.notDefined',
+    { defaultMessage: 'Not defined' }
+  );
+
+  const querySectionDescription = !state.queryCommitted
+    ? i18n.translate('xpack.alertingV2.composeDiscover.alertCondition.startQueryDescription', {
+        defaultMessage: 'Open the editor to write your ES|QL query',
+      })
+    : queryEmpty
+      ? i18n.translate('xpack.alertingV2.composeDiscover.alertCondition.queryEmptyDescription', {
+          defaultMessage: 'Define an ES|QL query in the editor',
+        })
+      : splitFailed
+        ? i18n.translate('xpack.alertingV2.composeDiscover.alertCondition.splitFailedDescription', {
+            defaultMessage: 'Review your query or separate it manually',
+          })
+        : noAlertCondition
+          ? i18n.translate(
+              'xpack.alertingV2.composeDiscover.alertCondition.noAlertConditionDescription',
+              {
+                defaultMessage: 'Base query defined — no separate alert condition',
+              }
+            )
+          : isAlert
+            ? i18n.translate('xpack.alertingV2.composeDiscover.alertCondition.baseAndAlertDetected', {
+                defaultMessage: 'Search query and alert condition identified',
+              })
+            : i18n.translate('xpack.alertingV2.composeDiscover.alertCondition.queryDefined', {
+                defaultMessage: 'Query defined',
+              });
+
+  const queryEmptyCallout = queryEmpty ? (
+    <EuiCallOut
+      announceOnMount={false}
+      size="s"
+      color="primary"
+      iconType="info"
+      title={i18n.translate('xpack.alertingV2.composeDiscover.alertCondition.queryEmptyTitle', {
+        defaultMessage: 'No query defined',
+      })}
+    >
+      {i18n.translate('xpack.alertingV2.composeDiscover.alertCondition.queryEmptyBody', {
+        defaultMessage: 'Enter an ES|QL query in the editor before continuing.',
+      })}
+    </EuiCallOut>
+  ) : undefined;
+
+  const splitFailedCallout = splitFailed ? (
+    <EuiCallOut
+      announceOnMount={false}
+      size="s"
+      color="primary"
+      iconType="info"
+      title={i18n.translate('xpack.alertingV2.composeDiscover.alertCondition.splitFailedTitle', {
+        defaultMessage: "Couldn't automatically separate base query from alert condition.",
+      })}
+    >
+      {onSeparateBaseAndAlert && (
+        <>
+          <EuiSpacer size="s" />
+          <EuiButton
+            size="s"
+            isDisabled={state.childOpen}
+            onClick={onSeparateBaseAndAlert}
+            data-test-subj="composeDiscoverSeparateBaseAndAlert"
+          >
+            {i18n.translate(
+              'xpack.alertingV2.composeDiscover.alertCondition.separateBaseAndAlertButton',
+              { defaultMessage: 'Separate base and alert' }
+            )}
+          </EuiButton>
+        </>
+      )}
+    </EuiCallOut>
+  ) : undefined;
+
+  const noAlertConditionCallout = noAlertCondition ? (
+    <EuiCallOut
+      announceOnMount={false}
+      size="s"
+      color="primary"
+      iconType="info"
+      title={i18n.translate(
+        'xpack.alertingV2.composeDiscover.alertCondition.noAlertConditionTitle',
+        {
+          defaultMessage: 'No alert condition',
+        }
+      )}
+    >
+      {i18n.translate('xpack.alertingV2.composeDiscover.alertCondition.noAlertConditionBody', {
+        defaultMessage:
+          'Without an alert condition, every row returned by the base query is treated as a breach.',
+      })}
+    </EuiCallOut>
+  ) : undefined;
 
   return (
     <>
       <ModeSelect
         value={isAlert ? 'alert' : 'signal'}
         onChange={onKindChange}
-        disabled={!state.queryCommitted || isEditing}
+        disabled={!state.queryCommitted || !isQueryDefined(query) || isEditing || state.childOpen}
         compressed
         data-test-subj="composeDiscoverModeSelect"
       />
       <EuiSpacer size="m" />
-      <EuiTitle size="xs">
-        <h3>
-          <FormattedMessage
-            id="xpack.alertingV2.composeDiscover.alertCondition.esqlQueryTitle"
-            defaultMessage="ES|QL query"
-          />
-        </h3>
-      </EuiTitle>
-      <EuiSpacer size="s" />
 
-      {!state.queryCommitted ? (
-        <>
-          <EuiPanel color="subdued" paddingSize="m">
-            <EuiText size="s" color="subdued">
-              <FormattedMessage
-                id="xpack.alertingV2.composeDiscover.alertCondition.noQueryDescription"
-                defaultMessage="No query defined yet"
-              />
-            </EuiText>
-          </EuiPanel>
-          <EuiSpacer size="s" />
-          <EuiButton
-            iconType="editorCodeBlock"
-            isDisabled={state.childOpen}
-            onClick={() => dispatch({ type: 'OPEN_CHILD_FOR_STEP', step: state.step, isAlert })}
-            data-test-subj="composeDiscoverOpenEditor"
-          >
-            <FormattedMessage
-              id="xpack.alertingV2.composeDiscover.alertCondition.openEditorButtonLabel"
-              defaultMessage="Open query editor"
-            />
-          </EuiButton>
-        </>
-      ) : !isAlert ? (
-        <>
-          <QuerySummary
-            query={fullQuery}
-            emptyMessage={i18n.translate(
-              'xpack.alertingV2.composeDiscover.alertCondition.noQueryDefined',
-              { defaultMessage: 'No query defined' }
-            )}
-          />
-          <EuiSpacer size="s" />
-          <EuiButton
-            size="s"
-            iconType="editorCodeBlock"
-            isDisabled={state.childOpen}
-            onClick={() => dispatch({ type: 'OPEN_CHILD_FOR_STEP', step: state.step, isAlert })}
-            data-test-subj="composeDiscoverEditQuery"
-          >
-            <FormattedMessage
-              id="xpack.alertingV2.composeDiscover.alertCondition.editQueryButtonLabel"
-              defaultMessage="Edit query"
-            />
-          </EuiButton>
-        </>
-      ) : (
-        <>
-          {splitFailed && (
-            <>
-              <EuiCallOut
-                announceOnMount={false}
-                size="s"
-                color="primary"
-                iconType="iInCircle"
-                title={i18n.translate(
-                  'xpack.alertingV2.composeDiscover.alertCondition.splitFailedTitle',
-                  {
-                    defaultMessage:
-                      "Couldn't automatically separate base query from alert condition. Adjust the split in the query editor.",
-                  }
-                )}
-              />
-              <EuiSpacer size="s" />
-            </>
-          )}
-          <EuiText size="xs" color="subdued">
-            <strong>
-              <FormattedMessage
-                id="xpack.alertingV2.composeDiscover.alertCondition.baseQueryLabel"
-                defaultMessage="Base query"
-              />
-            </strong>
-          </EuiText>
-          <EuiSpacer size="xs" />
-          <QuerySummary
-            query={baseQuery}
-            emptyMessage={i18n.translate(
-              'xpack.alertingV2.composeDiscover.alertCondition.noBaseQueryDefined',
-              { defaultMessage: 'No base query defined' }
-            )}
-          />
-          <EuiSpacer size="m" />
-          <EuiText size="xs" color="subdued">
-            <strong>
-              <FormattedMessage
-                id="xpack.alertingV2.composeDiscover.alertCondition.alertConditionLabel"
-                defaultMessage="Alert condition"
-              />
-            </strong>
-          </EuiText>
-          <EuiSpacer size="xs" />
-          <QuerySummary
-            query={alertBlock}
-            emptyMessage={i18n.translate(
-              'xpack.alertingV2.composeDiscover.alertCondition.noAlertConditionDefined',
-              { defaultMessage: 'No alert condition defined' }
-            )}
-          />
-          <EuiSpacer size="s" />
-          <EuiButton
-            size="s"
-            iconType="editorCodeBlock"
-            isDisabled={state.childOpen}
-            onClick={() => dispatch({ type: 'OPEN_CHILD_FOR_STEP', step: state.step, isAlert })}
-            data-test-subj="composeDiscoverEditQueries"
-          >
-            <FormattedMessage
-              id="xpack.alertingV2.composeDiscover.alertCondition.editQueriesButtonLabel"
-              defaultMessage="Edit queries"
-            />
-          </EuiButton>
-        </>
-      )}
+      <EsqlQuerySummarySection
+        description={querySectionDescription}
+        callout={queryEmptyCallout ?? splitFailedCallout ?? noAlertConditionCallout}
+        isEmpty={!state.queryCommitted}
+        emptyAction={{
+          label: openEditorLabel,
+          onClick: openQueryEditor,
+          testSubj: 'composeDiscoverOpenEditor',
+          disabled: state.childOpen,
+        }}
+        blocks={
+          isAlert
+            ? [
+                {
+                  id: 'base',
+                  label: i18n.translate(
+                    'xpack.alertingV2.composeDiscover.alertCondition.baseQueryLabel',
+                    { defaultMessage: 'Base query' }
+                  ),
+                  query: baseQuery,
+                  emptyMessage: notDefinedLabel,
+                },
+                {
+                  id: 'alert',
+                  label: i18n.translate(
+                    'xpack.alertingV2.composeDiscover.alertCondition.alertBlockLabel',
+                    { defaultMessage: 'Alert condition' }
+                  ),
+                  query: alertBlock,
+                  emptyMessage: notDefinedLabel,
+                },
+              ]
+            : [
+                {
+                  id: 'query',
+                  label: i18n.translate(
+                    'xpack.alertingV2.composeDiscover.alertCondition.queryLabel',
+                    { defaultMessage: 'Query' }
+                  ),
+                  query: fullQuery,
+                  emptyMessage: notDefinedLabel,
+                },
+              ]
+        }
+        editButtonLabel={editQueryLabel}
+        onEdit={openQueryEditor}
+        editDisabled={state.childOpen}
+        editTestSubj="composeDiscoverEditQuery"
+      />
 
       <EuiSpacer size="m" />
       <EuiFormRow
@@ -274,6 +327,7 @@ export function AlertConditionStep({
       >
         <EuiSelect
           fullWidth
+          compressed
           options={timeFieldOptions}
           value={timeField}
           onChange={(e) => setValue('timeField', e.target.value, { shouldDirty: true })}
@@ -290,6 +344,7 @@ export function AlertConditionStep({
       >
         <EuiComboBox
           fullWidth
+          compressed
           options={outputColumns.map((name) => ({ label: name }))}
           selectedOptions={groupFields.map((f) => ({ label: f }))}
           onChange={(opts) =>
@@ -308,15 +363,33 @@ export function AlertConditionStep({
         />
       </EuiFormRow>
 
+      <EuiHorizontalRule margin="m" />
+
       {isAlert && (
         <>
-          <EuiSpacer size="m" />
+          <EuiTitle size="xs" data-test-subj="composeDiscoverAlertConditionsSectionTitle">
+            <h3>
+              <FormattedMessage
+                id="xpack.alertingV2.composeDiscover.alertCondition.alertConditionsSectionTitle"
+                defaultMessage="Alert conditions"
+              />
+            </h3>
+          </EuiTitle>
+          <EuiSpacer size="s" />
           <AlertDelayField />
+          <EuiHorizontalRule margin="m" />
         </>
       )}
 
-      {/* Schedule and lookback -- connected to RHF via useFormContext() internally */}
-      <EuiSpacer size="m" />
+      <EuiTitle size="xs" data-test-subj="composeDiscoverRuleExecutionSectionTitle">
+        <h3>
+          <FormattedMessage
+            id="xpack.alertingV2.composeDiscover.alertCondition.ruleExecutionSectionTitle"
+            defaultMessage="Rule execution"
+          />
+        </h3>
+      </EuiTitle>
+      <EuiSpacer size="s" />
       <ScheduleField />
       <EuiSpacer size="m" />
       <LookbackWindowField />

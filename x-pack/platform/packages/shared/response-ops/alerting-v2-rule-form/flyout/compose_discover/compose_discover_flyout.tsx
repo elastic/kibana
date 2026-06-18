@@ -8,9 +8,9 @@
 import {
   EuiBadge,
   EuiButton,
-  EuiButtonEmpty,
   EuiButtonGroup,
   EuiCallOut,
+  EuiConfirmModal,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyout,
@@ -36,7 +36,7 @@ import { mergeArtifactsByType, splitArtifactsByType } from '../../form/utils/art
 import { parseYamlToFormValues, serializeFormToYaml } from '../../form/utils/yaml_form_utils';
 import { ComposeDiscoverForm, getSteps } from './compose_discover_form';
 import type { ComposeFormValues, RuleQuery } from './compose_form_types';
-import { getBreachQuery, getRecoverQuery } from './compose_form_types';
+import { getBreachQuery, getRecoverQuery, isQueryDefined } from './compose_form_types';
 import {
   composeFormToCreateRequest,
   composeFormToUpdateRequest,
@@ -48,8 +48,22 @@ import { RULE_BUILDER_REGISTRY, BuilderStateProvider, type BuilderState } from '
 import type { ComposeDiscoverMode, QueryTab, RecoveryType } from './types';
 import { getSandboxTabs, useComposeDiscoverState } from './use_compose_discover_state';
 import { useEsqlAutocomplete } from './use_esql_providers';
-import { guessRecoveryBlock, discoverQueryToComposed, splitQuery } from './use_heuristic_split';
+import { guessRecoveryBlock, discoverQueryToComposed } from './use_heuristic_split';
 import { useSplitQueryCompletion } from './use_split_query_completion';
+import {
+  ensureComposedQuery,
+  getYamlSandboxTabs,
+  queryFromYamlToForm,
+  resolveSandboxQueryOnApply,
+  shouldPreserveYamlSplitOnFormExit,
+  shouldShowManualSplitToggle,
+  shouldShowRecoverySandboxHeader,
+  shouldShowSignalQueryHeader,
+  shouldUseUnifiedSandboxEditor,
+  toManualSplitQuery,
+  toUnifiedSandboxQuery,
+  type AlertQuerySnapshot,
+} from './sandbox_query_utils';
 
 const LazyYamlRuleForm = React.lazy(() =>
   import('../../form/yaml_rule_form').then((m) => ({ default: m.YamlRuleForm }))
@@ -93,11 +107,6 @@ const CREATE_RULE_BUTTON_LABEL = i18n.translate(
 const SAVE_RULE_BUTTON_LABEL = i18n.translate(
   'xpack.alertingV2.composeDiscover.flyout.saveButtonLabel',
   { defaultMessage: 'Save rule' }
-);
-
-const CANCEL_BUTTON_LABEL = i18n.translate(
-  'xpack.alertingV2.composeDiscover.flyout.cancelButtonLabel',
-  { defaultMessage: 'Cancel' }
 );
 
 const BACK_BUTTON_LABEL = i18n.translate(
@@ -217,7 +226,7 @@ const EMPTY_FORM_VALUES: ComposeFormValues = {
   metadata: { name: '', enabled: true, description: '', tags: [] },
   timeField: '@timestamp',
   schedule: { every: '1m', lookback: '5m' },
-  query: { format: 'composed', base: '', breach: { segment: '' } },
+  query: { format: 'standalone', breach: { query: '' } },
   grouping: undefined,
   stateTransition: undefined,
   stateTransitionAlertDelayMode: 'immediate',
@@ -325,8 +334,7 @@ export function ComposeDiscoverFlyout({
   // our onClose callback for EUI-managed close paths (X, ESC, outside click).
   // By the time handleRequestClose runs, the flyout is already unregistered
   // from the manager. Incrementing the key forces React to re-mount the
-  // EuiFlyout, re-registering it with the manager. The Cancel button doesn't
-  // go through closeAllFlyouts(), so no remount is needed for that path.
+  // EuiFlyout, re-registering it with the manager.
   // Form state is preserved because FormProvider sits above the flyout.
   const [flyoutKey, setFlyoutKey] = useState(0);
   const isDirtyRef = useRef(false);
@@ -346,11 +354,10 @@ export function ComposeDiscoverFlyout({
   // the form dirty. Track the initial value to detect user changes.
   const initialRecoveryTypeRef = useRef(hasInitialCustomRecovery ? 'custom' : 'default');
 
-  // Tracks whether the close was triggered by the Cancel button ('button')
-  // or by EUI's managed paths — X, ESC, outside click ('eui'). Only the
-  // EUI path calls closeAllFlyouts() which unregisters the flyout and
-  // requires a flyoutKey remount.
-  const closeSourceRef = useRef<'button' | 'eui'>('eui');
+  // Tracks whether the close was triggered by EUI's managed paths — X, ESC,
+  // outside click. Used when "Continue editing" remounts the flyout after
+  // dismissing the unsaved-changes confirmation.
+  const closeSourceRef = useRef<'eui'>('eui');
 
   // After "Continue editing" on the EUI-managed path, the flyoutKey remount
   // cascade-closes the sandbox. This ref tells the subsequent effect whether
@@ -380,21 +387,26 @@ export function ComposeDiscoverFlyout({
 
   const handleCancelDiscard = useCallback(() => {
     setIsConfirmCloseVisible(false);
-    if (closeSourceRef.current === 'eui') {
-      // EUI-managed close already called closeAllFlyouts() — remount to
-      // re-register the flyout with the manager, and reopen the sandbox
-      // if it was cascade-closed.
-      reopenChildRef.current = uiState.yamlMode || uiState.childOpen;
-      setFlyoutKey((k) => k + 1);
-    }
+    // EUI-managed close already called closeAllFlyouts() — remount to
+    // re-register the flyout with the manager, and reopen the sandbox
+    // if it was cascade-closed.
+    reopenChildRef.current = uiState.yamlMode || uiState.childOpen;
+    setFlyoutKey((k) => k + 1);
     closeSourceRef.current = 'eui';
   }, [uiState.yamlMode, uiState.childOpen]);
 
-  const [sandboxQuery, setSandboxQuery] = useState<RuleQuery>(() => methods.getValues('query'));
+  const [sandboxQuery, setSandboxQuery] = useState<RuleQuery>(() => {
+    const formQuery = methods.getValues('query');
+    const kind = methods.getValues('kind');
+    return kind === 'alert' ? toUnifiedSandboxQuery(formQuery) : formQuery;
+  });
   const [sandboxTimeField, setSandboxTimeField] = useState<string>(() =>
     methods.getValues('timeField')
   );
   const [dateRange, setDateRange] = useState({ dateStart: 'now-15m', dateEnd: 'now' });
+  const [isConfirmUnifiedVisible, setIsConfirmUnifiedVisible] = useState(false);
+  const alertSnapshotRef = useRef<AlertQuerySnapshot | null>(null);
+  const unifiedBufferBeforeManualRef = useRef<string | null>(null);
 
   useEffect(() => {
     if (rule || initialQuery === undefined) {
@@ -422,9 +434,28 @@ export function ComposeDiscoverFlyout({
   }, [initialQuery, esqlVariables, inlineResult.query, rule, methods, dispatch]);
 
   const syncSandbox = useCallback(() => {
-    setSandboxQuery(methods.getValues('query'));
+    const formQuery = methods.getValues('query');
+    const kind = methods.getValues('kind');
+    const isAlertKind = kind === 'alert';
+
+    if (uiState.yamlMode && isAlertKind && !isBuilderMode) {
+      setSandboxQuery(ensureComposedQuery(formQuery));
+    } else {
+      const useUnified = shouldUseUnifiedSandboxEditor(
+        isAlertKind,
+        uiState.step,
+        uiState.yamlMode,
+        isBuilderMode,
+        uiState.manualSplitEnabled
+      );
+      setSandboxQuery(useUnified ? toUnifiedSandboxQuery(formQuery) : formQuery);
+    }
     setSandboxTimeField(methods.getValues('timeField'));
-  }, [methods]);
+  }, [methods, uiState.step, uiState.yamlMode, uiState.manualSplitEnabled, isBuilderMode]);
+
+  const handleSandboxQueryChange = useCallback((query: RuleQuery) => {
+    setSandboxQuery(query);
+  }, []);
 
   /*
    * Split-query completion for alert and recovery block editors. Registered at
@@ -442,6 +473,8 @@ export function ComposeDiscoverFlyout({
   });
 
   const isAlert = useWatch({ control: methods.control, name: 'kind' }) === 'alert';
+  const committedQuery = useWatch({ control: methods.control, name: 'query' });
+  const hasDefinedQuery = uiState.queryCommitted && isQueryDefined(committedQuery);
   const isAlertRef = useRef(isAlert);
   isAlertRef.current = isAlert;
 
@@ -458,31 +491,113 @@ export function ComposeDiscoverFlyout({
 
   const handleKindChange = useCallback(
     (kind: 'signal' | 'alert') => {
-      if (kind === 'alert') {
-        const full = getBreachQuery(methods.getValues('query'));
-        const { base, alertBlock } = splitQuery(full);
-        const composed: RuleQuery = {
-          format: 'composed',
-          base,
-          breach: { segment: alertBlock },
-        };
-        setSandboxQuery(composed);
-        methods.setValue('query', composed, { shouldDirty: true });
-      } else {
-        // Assemble from committed query — discards any unapplied sandbox edits cleanly.
-        const assembled = getBreachQuery(methods.getValues('query'));
+      if (uiState.childOpen) {
+        return;
+      }
+
+      const currentKind = methods.getValues('kind');
+      if (currentKind === kind) {
+        return;
+      }
+
+      if (kind === 'signal') {
+        const currentQuery = methods.getValues('query');
+        const fullQuery = getBreachQuery(currentQuery).trim();
+        if (currentQuery.format === 'composed') {
+          alertSnapshotRef.current = {
+            query: currentQuery,
+            manualSplitEnabled: uiState.manualSplitEnabled,
+            fullQuery,
+          };
+        } else {
+          alertSnapshotRef.current = null;
+        }
         const standalone: RuleQuery = {
           format: 'standalone',
-          breach: { query: assembled },
+          breach: { query: fullQuery },
         };
         setSandboxQuery(standalone);
         methods.setValue('query', standalone, { shouldDirty: true });
+      } else {
+        const currentQuery = methods.getValues('query');
+        const fullQuery = getBreachQuery(currentQuery).trim();
+        const snapshot = alertSnapshotRef.current;
+        let composed: RuleQuery;
+        let restoreManualSplit = false;
+
+        if (snapshot && snapshot.fullQuery === fullQuery) {
+          composed = snapshot.query;
+          restoreManualSplit = snapshot.manualSplitEnabled;
+        } else {
+          composed = toManualSplitQuery(fullQuery);
+          restoreManualSplit = false;
+        }
+
+        setSandboxQuery(
+          restoreManualSplit ? composed : toUnifiedSandboxQuery(composed)
+        );
+        methods.setValue('query', composed, { shouldDirty: true });
+        dispatch({ type: 'KIND_CHANGE', kind: 'alert' });
+        if (restoreManualSplit) {
+          dispatch({ type: 'ENABLE_MANUAL_SPLIT' });
+        }
+        methods.setValue('kind', kind, { shouldDirty: true });
+        return;
       }
+
       methods.setValue('kind', kind, { shouldDirty: true });
       dispatch({ type: 'KIND_CHANGE', kind });
     },
-    [methods, dispatch]
+    [methods, dispatch, uiState.childOpen, uiState.manualSplitEnabled]
   );
+
+  const handleEnableManualSplit = useCallback(() => {
+    const fullQuery =
+      sandboxQuery.format === 'standalone'
+        ? sandboxQuery.breach.query
+        : getBreachQuery(sandboxQuery);
+    unifiedBufferBeforeManualRef.current = fullQuery.trim();
+    setSandboxQuery(toManualSplitQuery(fullQuery));
+    dispatch({ type: 'ENABLE_MANUAL_SPLIT' });
+  }, [sandboxQuery, dispatch]);
+
+  const handleOpenSeparateBaseAndAlert = useCallback(() => {
+    if (uiState.childOpen) {
+      return;
+    }
+
+    const formQuery = methods.getValues('query');
+    const fullQuery = getBreachQuery(formQuery).trim();
+    unifiedBufferBeforeManualRef.current = fullQuery;
+
+    if (formQuery.format === 'composed') {
+      setSandboxQuery(formQuery);
+    } else {
+      setSandboxQuery(toManualSplitQuery(fullQuery));
+    }
+
+    dispatch({ type: 'ENABLE_MANUAL_SPLIT' });
+    dispatch({ type: 'OPEN_CHILD_FOR_STEP', step: uiState.step, isAlert: true });
+  }, [uiState.childOpen, uiState.step, methods, dispatch]);
+
+  const handleDisableManualSplit = useCallback(() => {
+    const currentJoined = getBreachQuery(sandboxQuery).trim();
+    const priorJoined = unifiedBufferBeforeManualRef.current?.trim() ?? '';
+    if (priorJoined && currentJoined !== priorJoined) {
+      setIsConfirmUnifiedVisible(true);
+      return;
+    }
+    setSandboxQuery(toUnifiedSandboxQuery(sandboxQuery));
+    unifiedBufferBeforeManualRef.current = null;
+    dispatch({ type: 'DISABLE_MANUAL_SPLIT' });
+  }, [sandboxQuery, dispatch]);
+
+  const handleConfirmUseSingleEditor = useCallback(() => {
+    setSandboxQuery(toUnifiedSandboxQuery(sandboxQuery));
+    unifiedBufferBeforeManualRef.current = null;
+    dispatch({ type: 'DISABLE_MANUAL_SPLIT' });
+    setIsConfirmUnifiedVisible(false);
+  }, [sandboxQuery, dispatch]);
 
   useEffect(() => {
     if (!isBuilderMode) return;
@@ -496,22 +611,25 @@ export function ComposeDiscoverFlyout({
   const handleRecoveryTypeChange = useCallback(
     (type: RecoveryType) => {
       if (type === 'custom') {
-        setSandboxQuery((q) => {
-          if (q.format !== 'composed') return q;
-          const current = q.recovery?.segment ?? '';
-          if (current.trim()) return q;
+        const formQuery = methods.getValues('query');
+        const composedQuery = ensureComposedQuery(formQuery);
+
+        setSandboxQuery(() => {
+          const current = composedQuery.recovery?.segment ?? '';
+          if (current.trim()) {
+            return composedQuery;
+          }
           if (isBuilderMode) {
-            const formQuery = methods.getValues('query');
             const builderRecover =
               formQuery.format === 'composed' ? formQuery.recovery?.segment ?? '' : '';
             if (builderRecover.trim()) {
-              return { ...q, recovery: { segment: builderRecover } };
+              return { ...composedQuery, recovery: { segment: builderRecover } };
             }
           }
           return {
-            ...q,
+            ...composedQuery,
             recovery: {
-              segment: guessRecoveryBlock(q.breach.segment),
+              segment: guessRecoveryBlock(composedQuery.breach.segment),
             },
           };
         });
@@ -606,12 +724,18 @@ export function ComposeDiscoverFlyout({
 
   const handleToggleYamlMode = useCallback(
     (enabled: boolean) => {
+      if (enabled && uiState.childOpen && !uiState.yamlMode) {
+        return;
+      }
       if (enabled) {
         const serialized = serializeFormToYaml(
           composeFormValuesForYamlSerialize(methods.getValues())
         );
         setYamlText(serialized);
         yamlBaselineRef.current = serialized;
+        if (methods.getValues('kind') === 'alert' && !isBuilderMode) {
+          setSandboxQuery(ensureComposedQuery(methods.getValues('query')));
+        }
       } else {
         const yamlWasDirty =
           yamlBaselineRef.current !== null && yamlTextRef.current !== yamlBaselineRef.current;
@@ -619,12 +743,35 @@ export function ComposeDiscoverFlyout({
         cancelYamlParse();
         const result = parseYamlToFormValues(yamlText);
         if (result.values) {
+          const parsedForm = formValuesFromYamlToCompose(result.values);
+          const preserveYamlSplit = shouldPreserveYamlSplitOnFormExit(
+            parsedForm.kind === 'alert',
+            isBuilderMode,
+            sandboxQuery
+          );
           const composed = {
-            ...formValuesFromYamlToCompose(result.values),
+            ...parsedForm,
+            query: queryFromYamlToForm({
+              parsedQuery: parsedForm.query,
+              yamlSandboxQuery: sandboxQuery,
+              isAlertKind: parsedForm.kind === 'alert',
+              isBuilderMode,
+            }),
             notifications: methods.getValues('notifications'),
           };
           methods.reset(composed);
-          syncSandbox();
+          if (preserveYamlSplit) {
+            setSandboxQuery(sandboxQuery);
+            dispatch({ type: 'ENABLE_MANUAL_SPLIT' });
+            if (
+              sandboxQuery.format === 'composed' &&
+              Boolean(sandboxQuery.recovery?.segment?.trim())
+            ) {
+              dispatch({ type: 'SET_RECOVERY_TYPE', recoveryType: 'custom', isBuilderMode });
+            }
+          } else {
+            syncSandbox();
+          }
           if (getBreachQuery(composed.query).trim()) {
             dispatch({ type: 'COMMIT_QUERY' });
           }
@@ -638,21 +785,78 @@ export function ComposeDiscoverFlyout({
       }
       dispatch({ type: 'SET_YAML_MODE', enabled });
     },
-    [cancelYamlParse, methods, yamlText, syncSandbox, dispatch]
+    [
+      cancelYamlParse,
+      methods,
+      yamlText,
+      sandboxQuery,
+      syncSandbox,
+      dispatch,
+      isBuilderMode,
+      uiState.childOpen,
+      uiState.yamlMode,
+    ]
   );
 
   const handleSandboxApply = useCallback(() => {
-    methods.setValue('query', sandboxQuery, { shouldDirty: true });
+    const useUnified = shouldUseUnifiedSandboxEditor(
+      isAlert,
+      uiState.step,
+      uiState.yamlMode,
+      isBuilderMode,
+      uiState.manualSplitEnabled
+    );
+
+    const queryToCommit = resolveSandboxQueryOnApply({
+      sandboxQuery,
+      committedQuery: methods.getValues('query'),
+      useUnified,
+    });
+
+    methods.setValue('query', queryToCommit, { shouldDirty: true });
     methods.setValue('timeField', sandboxTimeField, { shouldDirty: true });
+    setSandboxQuery(queryToCommit);
     if (uiState.yamlMode) {
-      const current = { ...methods.getValues(), query: sandboxQuery, timeField: sandboxTimeField };
+      const current = { ...methods.getValues(), query: queryToCommit, timeField: sandboxTimeField };
       setYamlText(serializeFormToYaml(composeFormValuesForYamlSerialize(current)));
     }
     dispatch({ type: 'COMMIT_QUERY' });
     if (!uiState.yamlMode) {
       dispatch({ type: 'CLOSE_CHILD' });
     }
-  }, [sandboxQuery, sandboxTimeField, uiState.yamlMode, methods, dispatch]);
+  }, [
+    sandboxQuery,
+    sandboxTimeField,
+    uiState.yamlMode,
+    uiState.step,
+    uiState.manualSplitEnabled,
+    isAlert,
+    isBuilderMode,
+    methods,
+    dispatch,
+  ]);
+
+  const showManualSplitToggle = shouldShowManualSplitToggle(
+    isAlert,
+    uiState.step,
+    uiState.yamlMode,
+    isBuilderMode,
+    uiState.manualSplitEnabled,
+    uiState.queryCommitted
+  );
+
+  const showUnifiedQueryHeader =
+    !isBuilderMode &&
+    shouldUseUnifiedSandboxEditor(
+      isAlert,
+      uiState.step,
+      uiState.yamlMode,
+      isBuilderMode,
+      uiState.manualSplitEnabled
+    );
+
+  const showSignalQueryHeader =
+    !isBuilderMode && shouldShowSignalQueryHeader(isAlert, uiState.step, isBuilderMode);
 
   const handleSubmit = methods.handleSubmit((values) => {
     if (hasValidationErrors) {
@@ -754,15 +958,20 @@ export function ComposeDiscoverFlyout({
     </>
   ) : null;
 
-  // TODO: recoveryType drives whether the recovery tab appears in YAML mode.
-  // Follow schema decisions in #268984 — if recoveryType is superseded by a
-  // field on RuleQuery itself, gate this on query shape instead.
   const sandboxTabs: QueryTab[] | undefined =
-    uiState.yamlMode && sandboxQuery.format === 'composed'
-      ? uiState.recoveryType === 'custom'
-        ? ['base', 'alert', 'recovery']
-        : ['base', 'alert']
+    uiState.yamlMode && isAlert && !isBuilderMode
+      ? getYamlSandboxTabs(sandboxQuery, uiState.recoveryType)
       : getSandboxTabs(isAlert, uiState);
+
+  const showYamlQueryHeader = uiState.yamlMode && isAlert && !isBuilderMode;
+
+  const showRecoveryQueryHeader = shouldShowRecoverySandboxHeader(
+    isAlert,
+    uiState.step,
+    uiState.yamlMode,
+    isBuilderMode,
+    uiState.recoveryType
+  );
 
   return (
     <RuleFormProvider services={services} meta={{ layout: 'flyout' }}>
@@ -812,6 +1021,7 @@ export function ComposeDiscoverFlyout({
                     options={EDIT_MODE_OPTIONS}
                     idSelected={uiState.yamlMode ? 'yaml' : 'form'}
                     onChange={(id) => handleToggleYamlMode(id === 'yaml')}
+                    isDisabled={uiState.childOpen && !uiState.yamlMode}
                     isIconOnly
                     buttonSize="compressed"
                     data-test-subj="composeDiscoverEditModeToggle"
@@ -841,6 +1051,9 @@ export function ComposeDiscoverFlyout({
                   services={baseServices}
                   onRecoveryTypeChange={handleRecoveryTypeChange}
                   onKindChange={handleKindChange}
+                  onSeparateBaseAndAlert={
+                    !isBuilderMode ? handleOpenSeparateBaseAndAlert : undefined
+                  }
                   isEditing={isEditing}
                   ruleId={ruleId}
                   builderType={builderType}
@@ -865,75 +1078,61 @@ export function ComposeDiscoverFlyout({
                 </EuiFlexItem>
               </EuiFlexGroup>
             ) : (
-              <EuiFlexGroup justifyContent="spaceBetween">
+              <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" responsive={false}>
                 <EuiFlexItem grow={false}>
-                  <EuiButtonEmpty
-                    onClick={() => {
-                      closeSourceRef.current = 'button';
-                      handleRequestClose();
-                    }}
-                    data-test-subj="composeDiscoverCancel"
-                  >
-                    {CANCEL_BUTTON_LABEL}
-                  </EuiButtonEmpty>
+                  {uiState.step > 0 && (
+                    <EuiButton
+                      color="text"
+                      iconType="arrowLeft"
+                      isDisabled={uiState.childOpen}
+                      onClick={() => dispatch({ type: 'GO_BACK' })}
+                      data-test-subj="composeDiscoverBack"
+                    >
+                      {BACK_BUTTON_LABEL}
+                    </EuiButton>
+                  )}
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
-                  <EuiFlexGroup gutterSize="s" responsive={false}>
-                    {uiState.step > 0 && (
-                      <EuiFlexItem grow={false}>
-                        <EuiButtonEmpty
-                          iconType="arrowLeft"
-                          isDisabled={uiState.childOpen}
-                          onClick={() => dispatch({ type: 'GO_BACK' })}
-                          data-test-subj="composeDiscoverBack"
-                        >
-                          {BACK_BUTTON_LABEL}
-                        </EuiButtonEmpty>
-                      </EuiFlexItem>
-                    )}
-                    <EuiFlexItem grow={false}>
-                      {isLastStep ? (
-                        <EuiButton
-                          fill
-                          isLoading={isSaving}
-                          isDisabled={hasValidationErrors}
-                          onClick={handleFinalSubmit}
-                          data-test-subj="composeDiscoverSubmit"
-                        >
-                          {isCreate ? CREATE_RULE_BUTTON_LABEL : SAVE_RULE_BUTTON_LABEL}
-                        </EuiButton>
-                      ) : (
-                        <EuiToolTip
-                          content={
-                            hasValidationErrors
-                              ? VALIDATION_ERRORS_NEXT_TOOLTIP
-                              : (currentStep?.id === 'alertCondition' ||
-                                  currentStep?.id === 'builderCondition') &&
-                                !uiState.queryCommitted
-                              ? NEXT_DISABLED_TOOLTIP
-                              : undefined
-                          }
-                        >
-                          <EuiButton
-                            fill
-                            iconType="arrowRight"
-                            iconSide="right"
-                            isDisabled={
-                              uiState.childOpen ||
-                              hasValidationErrors ||
-                              ((currentStep?.id === 'alertCondition' ||
-                                currentStep?.id === 'builderCondition') &&
-                                !uiState.queryCommitted)
-                            }
-                            onClick={handleNext}
-                            data-test-subj="composeDiscoverNext"
-                          >
-                            {NEXT_BUTTON_LABEL}
-                          </EuiButton>
-                        </EuiToolTip>
-                      )}
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
+                  {isLastStep ? (
+                    <EuiButton
+                      fill
+                      isLoading={isSaving}
+                      isDisabled={hasValidationErrors}
+                      onClick={handleFinalSubmit}
+                      data-test-subj="composeDiscoverSubmit"
+                    >
+                      {isCreate ? CREATE_RULE_BUTTON_LABEL : SAVE_RULE_BUTTON_LABEL}
+                    </EuiButton>
+                  ) : (
+                    <EuiToolTip
+                      content={
+                        hasValidationErrors
+                          ? VALIDATION_ERRORS_NEXT_TOOLTIP
+                          : (currentStep?.id === 'alertCondition' ||
+                              currentStep?.id === 'builderCondition') &&
+                            !hasDefinedQuery
+                          ? NEXT_DISABLED_TOOLTIP
+                          : undefined
+                      }
+                    >
+                      <EuiButton
+                        color="text"
+                        iconType="arrowRight"
+                        iconSide="right"
+                        isDisabled={
+                          uiState.childOpen ||
+                          hasValidationErrors ||
+                          ((currentStep?.id === 'alertCondition' ||
+                            currentStep?.id === 'builderCondition') &&
+                            !hasDefinedQuery)
+                        }
+                        onClick={handleNext}
+                        data-test-subj="composeDiscoverNext"
+                      >
+                        {NEXT_BUTTON_LABEL}
+                      </EuiButton>
+                    </EuiToolTip>
+                  )}
                 </EuiFlexItem>
               </EuiFlexGroup>
             )}
@@ -942,7 +1141,7 @@ export function ComposeDiscoverFlyout({
           {uiState.childOpen && (
             <QuerySandboxFlyout
               query={sandboxQuery}
-              onQueryChange={isBuilderMode ? undefined : setSandboxQuery}
+              onQueryChange={isBuilderMode ? undefined : handleSandboxQueryChange}
               tabs={sandboxTabs}
               timeField={sandboxTimeField}
               onTimeFieldChange={isBuilderMode ? undefined : setSandboxTimeField}
@@ -952,6 +1151,16 @@ export function ComposeDiscoverFlyout({
               onTabChange={(tab) => dispatch({ type: 'SET_TAB', tab })}
               onAlertEditorMount={onAlertEditorMount}
               onRecoveryEditorMount={onRecoveryEditorMount}
+              onEditManually={
+                showManualSplitToggle && !isBuilderMode ? handleEnableManualSplit : undefined
+              }
+              onUseSingleEditor={
+                uiState.manualSplitEnabled && !isBuilderMode ? handleDisableManualSplit : undefined
+              }
+              showUnifiedQueryHeader={showUnifiedQueryHeader}
+              showYamlQueryHeader={showYamlQueryHeader}
+              showRecoveryQueryHeader={showRecoveryQueryHeader}
+              showSignalQueryHeader={showSignalQueryHeader}
               onClose={() => {
                 syncSandbox();
                 dispatch({ type: 'CLOSE_CHILD' });
@@ -960,6 +1169,45 @@ export function ComposeDiscoverFlyout({
             />
           )}
         </EuiFlyout>
+        {isConfirmUnifiedVisible && (
+          <EuiConfirmModal
+            title={i18n.translate(
+              'xpack.alertingV2.composeDiscover.querySandbox.confirmUnifiedTitle',
+              { defaultMessage: 'Switch to single editor?' }
+            )}
+            onCancel={() => setIsConfirmUnifiedVisible(false)}
+            onConfirm={handleConfirmUseSingleEditor}
+            cancelButtonText={i18n.translate(
+              'xpack.alertingV2.composeDiscover.querySandbox.confirmUnifiedCancel',
+              { defaultMessage: 'Keep split editor' }
+            )}
+            confirmButtonText={i18n.translate(
+              'xpack.alertingV2.composeDiscover.querySandbox.confirmUnifiedConfirm',
+              { defaultMessage: 'Use single editor' }
+            )}
+            buttonColor="primary"
+            data-test-subj="querySandboxConfirmUnified"
+          >
+            <p>
+              {i18n.translate(
+                'xpack.alertingV2.composeDiscover.querySandbox.confirmUnifiedBodyMerge',
+                {
+                  defaultMessage:
+                    'Your base and alert edits will be merged into one query in the editor.',
+                }
+              )}
+            </p>
+            <p>
+              {i18n.translate(
+                'xpack.alertingV2.composeDiscover.querySandbox.confirmUnifiedBodyApply',
+                {
+                  defaultMessage:
+                    'When you apply, we automatically separate the base query and alert condition again. You can adjust the split later if needed.',
+                }
+              )}
+            </p>
+          </EuiConfirmModal>
+        )}
         {isConfirmCloseVisible && (
           <ConfirmRuleClose onCancel={handleCancelDiscard} onConfirm={handleConfirmDiscard} />
         )}

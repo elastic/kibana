@@ -30,6 +30,8 @@ export interface StepRenderProps {
   services: RuleFormServices;
   onRecoveryTypeChange: (type: RecoveryType) => void;
   onKindChange: (kind: 'signal' | 'alert') => void;
+  /** Opens the sandbox in base/alert split mode. */
+  onSeparateBaseAndAlert?: () => void;
   isEditing: boolean;
   ruleId?: string;
   renderBuilderRecovery?: (props: RuleBuilderRecoveryProps) => React.ReactNode;
@@ -67,11 +69,15 @@ export interface ComposeDiscoverState {
   queryCommitted: boolean;
   /** When true the stepped form is replaced by a full YAML editor. */
   yamlMode: boolean;
+  /** Session flag: user opted into base/alert tab split in the query sandbox. */
+  manualSplitEnabled: boolean;
 }
 
 export type ComposeDiscoverAction =
   | { type: 'SET_RECOVERY_TYPE'; recoveryType: RecoveryType; isBuilderMode?: boolean }
   | { type: 'KIND_CHANGE'; kind: 'signal' | 'alert' }
+  | { type: 'ENABLE_MANUAL_SPLIT' }
+  | { type: 'DISABLE_MANUAL_SPLIT' }
   | { type: 'SET_TAB'; tab: QueryTab }
   | { type: 'SET_STEP'; step: number }
   | { type: 'GO_NEXT'; isAlert: boolean }

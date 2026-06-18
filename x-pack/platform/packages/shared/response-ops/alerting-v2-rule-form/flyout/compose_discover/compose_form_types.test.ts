@@ -39,6 +39,25 @@ describe('getBreachQuery', () => {
     expect(getBreachQuery(query)).toBe(`${BASE}\n| ${ALERT_SEGMENT}`);
   });
 
+  it('joins base and breach segment when breach segment already has a leading pipe', () => {
+    const query: ComposedQuery = {
+      format: 'composed',
+      base: BASE,
+      breach: { segment: `| ${ALERT_SEGMENT}` },
+    };
+    expect(getBreachQuery(query)).toBe(`${BASE}\n| ${ALERT_SEGMENT}`);
+  });
+
+  it('joins multi-line base and piped breach segment without duplicating pipes', () => {
+    const multiLineBase = 'FROM flights | STATS c = COUNT(*) BY price\n| WHERE price IS NOT NULL';
+    const query: ComposedQuery = {
+      format: 'composed',
+      base: multiLineBase,
+      breach: { segment: '| WHERE price > 100' },
+    };
+    expect(getBreachQuery(query)).toBe(`${multiLineBase}\n| WHERE price > 100`);
+  });
+
   it('returns just breach segment when composed base is empty', () => {
     const query: ComposedQuery = {
       format: 'composed',
@@ -83,6 +102,16 @@ describe('getRecoverQuery', () => {
       base: BASE,
       breach: { segment: ALERT_SEGMENT },
       recovery: { segment: RECOVERY_SEGMENT },
+    };
+    expect(getRecoverQuery(query)).toBe(`${BASE}\n| ${RECOVERY_SEGMENT}`);
+  });
+
+  it('joins base and recovery segment when recovery segment already has a leading pipe', () => {
+    const query: ComposedQuery = {
+      format: 'composed',
+      base: BASE,
+      breach: { segment: ALERT_SEGMENT },
+      recovery: { segment: `| ${RECOVERY_SEGMENT}` },
     };
     expect(getRecoverQuery(query)).toBe(`${BASE}\n| ${RECOVERY_SEGMENT}`);
   });

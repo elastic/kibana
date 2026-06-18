@@ -17,11 +17,6 @@ import type { ComposeDiscoverState } from '../types';
 import type { ComposeFormValues, RuleQuery } from '../compose_form_types';
 import { RecoveryConditionStep } from './recovery_condition_step';
 
-jest.mock('@kbn/code-editor', () => ({
-  ...jest.requireActual('@kbn/code-editor'),
-  CodeEditor: ({ value }: { value: string }) => <pre data-test-subj="codeEditorMock">{value}</pre>,
-}));
-
 const BASE_QUERY = 'FROM logs-*\n| STATS count = COUNT(*) BY host.name';
 const ALERT_SEGMENT = 'WHERE count > 100';
 const RECOVERY_SEGMENT = 'WHERE count < 100';
@@ -116,29 +111,52 @@ describe('RecoveryConditionStep', () => {
   it('does not render query summaries or edit button in default mode', () => {
     renderRecoveryStep({ recoveryType: 'default' });
 
-    expect(screen.queryByText('Base query')).not.toBeInTheDocument();
-    expect(screen.queryByText('Recovery condition')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('composeDiscoverEsqlQuerySection')).not.toBeInTheDocument();
     expect(screen.queryByTestId('composeDiscoverEditRecovery')).not.toBeInTheDocument();
   });
 
-  it('renders query summaries and edit button in custom mode', () => {
+  it('renders the ES|QL summary section with code blocks and edit button in custom mode', () => {
     renderRecoveryStep({ recoveryType: 'custom' }, CUSTOM_RECOVERY_QUERY);
 
+    expect(screen.getByTestId('composeDiscoverEsqlQuerySection')).toBeInTheDocument();
+    expect(screen.getByTestId('composeDiscoverEsqlQuerySectionTitle')).toHaveTextContent(
+      'Recovery condition'
+    );
+    expect(screen.getByText('Custom recovery condition defined')).toBeInTheDocument();
     expect(screen.getByText('Base query')).toBeInTheDocument();
-    expect(screen.getByText('Recovery condition')).toBeInTheDocument();
+    expect(screen.getByText('Recovery condition', { selector: 'label' })).toBeInTheDocument();
+    expect(screen.getByTestId('composeDiscoverEsqlQueryBlock-base')).toHaveTextContent('FROM logs-*');
+    expect(screen.getByTestId('composeDiscoverEsqlQueryBlock-base')).toHaveTextContent(
+      'STATS count = COUNT(*) BY host.name'
+    );
+    expect(screen.getByTestId('composeDiscoverEsqlQueryBlock-recovery')).toHaveTextContent(
+      RECOVERY_SEGMENT
+    );
     expect(screen.getByTestId('composeDiscoverEditRecovery')).toBeInTheDocument();
   });
 
-  it('shows "Custom condition set" badge when recovery block is populated', () => {
-    renderRecoveryStep({ recoveryType: 'custom' }, CUSTOM_RECOVERY_QUERY);
+  it('derives the base query display from standalone committed queries', () => {
+    renderRecoveryStep(
+      { recoveryType: 'custom' },
+      {
+        format: 'standalone',
+        breach: {
+          query: `${BASE_QUERY}\n| ${ALERT_SEGMENT}`,
+        },
+      }
+    );
 
-    expect(screen.getByText('Custom condition set')).toBeInTheDocument();
+    expect(screen.getByTestId('composeDiscoverEsqlQueryBlock-base')).toHaveTextContent('FROM logs-*');
+    expect(screen.getByTestId('composeDiscoverEsqlQueryBlock-base')).toHaveTextContent(
+      'STATS count = COUNT(*) BY host.name'
+    );
   });
 
-  it('does not show badge when recovery block is empty', () => {
+  it('shows start description when recovery block is empty', () => {
     renderRecoveryStep({ recoveryType: 'custom' }, CUSTOM_NO_RECOVERY_QUERY);
 
-    expect(screen.queryByText('Custom condition set')).not.toBeInTheDocument();
+    expect(screen.getByText('Open the editor to define your recovery condition')).toBeInTheDocument();
+    expect(screen.getByText('Not defined')).toBeInTheDocument();
   });
 
   it('disables the edit button when the child flyout is open', () => {

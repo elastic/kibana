@@ -10,10 +10,14 @@ import { NameField } from '../fields/name_field';
 import { TagsField } from '../fields/tags_field';
 import { DescriptionField } from '../fields/description_field';
 
-export const RuleDetailsFieldGroup = () => {
+interface RuleDetailsFieldGroupProps {
+  autoFocusName?: boolean;
+}
+
+export const RuleDetailsFieldGroup = ({ autoFocusName = false }: RuleDetailsFieldGroupProps) => {
   return (
     <>
-      <NameField />
+      <NameField autoFocus={autoFocusName} />
       <TagsField />
       <DescriptionField />
     </>
