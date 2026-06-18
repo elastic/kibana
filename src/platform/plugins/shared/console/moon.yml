@@ -27,7 +27,6 @@ dependsOn:
   - '@kbn/share-plugin'
   - '@kbn/usage-collection-plugin'
   - '@kbn/i18n'
-  - '@kbn/analytics'
   - '@kbn/utility-types'
   - '@kbn/i18n-react'
   - '@kbn/shared-ux-utility'
