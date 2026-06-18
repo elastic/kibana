@@ -77,7 +77,7 @@ const LIKELY_IRRELEVANT_FAILURE_SUBSTRINGS: readonly string[] = [
   // Cloud session creation failures are environmental (cloud login endpoint unavailable, MFA, etc.).
   'Failed to create the new cloud session',
   // Network connection refused errors are environmental (target host/service unreachable).
-  'connect ECONNREFUSED',
+  'ECONNREFUSED',
 ];
 
 const isLikelyIrrelevant = (name: string, failure: string) => {
