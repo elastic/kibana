@@ -14,35 +14,6 @@ import type { RoleSessionCredentials, BaseWorkerFixtures } from '../core_fixture
 import { coreWorkerFixtures } from '../core_fixtures';
 import { SamlAuthManager } from './saml_auth_manager';
 
-/**
- * UI settings returns 400 when a key is locked by `uiSettings.globalOverrides`.
- * Collect message + Error.cause chain so we match reliably across clients/wrappers.
- */
-function formatUnknownError(err: unknown): string {
-  if (err == null) {
-    return '';
-  }
-  if (typeof err === 'string') {
-    return err;
-  }
-  const parts: string[] = [];
-  let current: unknown = err;
-  for (let depth = 0; depth < 8 && current != null; depth++) {
-    if (current instanceof Error) {
-      parts.push(current.message);
-      current = current.cause;
-    } else {
-      try {
-        parts.push(JSON.stringify(current));
-      } catch {
-        parts.push(String(current));
-      }
-      break;
-    }
-  }
-  return parts.join('\n');
-}
-
 export interface SamlAuth {
   session: SamlSessionManager;
   customRoleName: string;
