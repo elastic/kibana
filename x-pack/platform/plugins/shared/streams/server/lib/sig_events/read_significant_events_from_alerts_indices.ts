@@ -13,6 +13,7 @@ import type { SignificantEventsGetResponse, SignificantEventsResponse } from '@k
 import { MS_PER_UNIT } from '@kbn/streams-schema';
 import { isEsqlUnknownIndexError } from '@kbn/storage-adapter';
 import { chunk, isEmpty } from 'lodash';
+import pLimit from 'p-limit';
 import type { QueryLink, SearchMode } from '../../../common/queries';
 import type { KnowledgeIndicatorClient } from '../streams/ki';
 import type { RuleUnbackedFilter } from '../streams/ki';
@@ -32,6 +33,9 @@ interface TimeBucket {
   ms: number;
   date: string;
 }
+
+export const V1_ALERTS_SOURCE = 'v1' as const;
+export const V2_ALERTS_SOURCE = 'v2' as const;
 
 export type AlertsSource = typeof V1_ALERTS_SOURCE | typeof V2_ALERTS_SOURCE;
 
@@ -73,8 +77,9 @@ const EMPTY_CHANGE_POINTS = { type: {} } as const;
 // batch rules under it and run batches in parallel.
 const RESULT_CEILING = 10_000;
 
-export const V1_ALERTS_SOURCE = 'v1' as const;
-export const V2_ALERTS_SOURCE = 'v2' as const;
+// Upper bound on parallel ES|QL requests when the per-rule fold spans multiple
+// batches, so a large rule set can't fan out into hundreds of concurrent queries.
+const BATCH_CONCURRENCY = 5;
 
 function buildTimeline({
   from,
@@ -174,12 +179,17 @@ export async function computeOccurrences(
   const intervalMs = value * (MS_PER_UNIT[unit] ?? 1000);
 
   // Build the grid once; reused by lazy per-rule fill and the aggregate.
+  // `buckets` is capped at MAX_FILL_BUCKETS, so for ranges wider than the cap
+  // the LIMIT below intentionally matches the truncated grid: SORT bucket ASC
+  // keeps the earliest buckets, the only ones the timeline can render.
   const timeline = buildTimeline({ from, to, intervalMs });
   const buckets = Math.max(timeline.length, 1);
 
-  // One row per (rule × bucket): batch rules under the row cap, run in parallel.
+  // One row per (rule × bucket): batch rules under the row cap, run in parallel
+  // but concurrency-capped so a large rule set can't flood ES with requests.
   const rulesPerBatch = Math.max(1, Math.floor(RESULT_CEILING / buckets));
   const batches = chunk(ruleIds, rulesPerBatch);
+  const limiter = pLimit(BATCH_CONCURRENCY);
 
   const timeRangeFilter = {
     bool: {
@@ -215,7 +225,9 @@ export async function computeOccurrences(
     }
   };
 
-  const responses = await Promise.all(batches.map(runBatch));
+  const responses = await Promise.all(
+    batches.map((batchRuleIds) => limiter(() => runBatch(batchRuleIds)))
+  );
 
   // Fold every batch into per-rule firing buckets and, in the same pass,
   // per-bucket totals across rules (by epoch ms) for the aggregate. A batch with
