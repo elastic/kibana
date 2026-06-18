@@ -6,11 +6,8 @@
  */
 
 import { Observable } from 'rxjs';
-import type { AnalyticsServiceSetup } from '@kbn/core-analytics-browser';
 
 describe('StreamsTelemetryClient', () => {
-  let analyticsService: jest.Mocked<AnalyticsServiceSetup>;
-
   beforeEach(() => {
     analyticsService = {
       reportEvent: jest.fn(),
