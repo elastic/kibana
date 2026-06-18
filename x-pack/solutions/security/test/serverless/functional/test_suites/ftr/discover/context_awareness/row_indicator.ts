@@ -15,8 +15,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const queryBar = getService('queryBar');
   const find = getService('find');
 
-  // Failing: See https://github.com/elastic/kibana/issues/233199
-  describe.skip('security document profile', () => {
+  describe('security document profile', () => {
     before(async () => {
       await PageObjects.svlCommonPage.loginAsViewer();
     });
