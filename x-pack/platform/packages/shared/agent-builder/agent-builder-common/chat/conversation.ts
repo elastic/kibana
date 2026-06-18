@@ -232,29 +232,6 @@ export const isTodosStep = (step: ConversationRoundStep): step is TodosStep => {
   return step.type === ConversationRoundStepType.updateTodos;
 };
 
-// ask_user_question step
-
-/**
- * Returns the (single) todos step from a list of steps, if present.
- * A round only ever has at most one todos step, which is updated in place.
- */
-export const findTodosStep = (
-  steps: ConversationRoundStep[] | undefined
-): TodosStep | undefined => {
-  return steps?.find(isTodosStep);
-};
-
-/**
- * Returns the todo list to carry over from the previous round, or undefined if nothing should carry over.
- * Carryover only happens when at least one item is still incomplete (pending / in_progress).
- * When carried over, both complete and incomplete items are included so the full plan is visible.
- */
-export const carriedOverTodos = (todos: TodoItem[] | undefined): TodoItem[] | undefined => {
-  if (!todos?.length) return undefined;
-  const hasIncomplete = todos.some((t) => t.status !== 'completed' && t.status !== 'cancelled');
-  return hasIncomplete ? todos : undefined;
-};
-
 export interface AskUserQuestionStepData {
   /** Id of the prompt that produced this step. Matches the entry in `state.prompt.responses` and the prompt request's `id`. */
   prompt_id: string;
@@ -278,6 +255,27 @@ export const createAskUserQuestionStep = (data: AskUserQuestionStepData): AskUse
 
 export const isAskUserQuestionStep = (step: ConversationRoundStep): step is AskUserQuestionStep => {
   return step.type === ConversationRoundStepType.askUserQuestion;
+};
+
+/**
+ * Returns the (single) todos step from a list of steps, if present.
+ * A round only ever has at most one todos step, which is updated in place.
+ */
+export const findTodosStep = (
+  steps: ConversationRoundStep[] | undefined
+): TodosStep | undefined => {
+  return steps?.find(isTodosStep);
+};
+
+/**
+ * Returns the todo list to carry over from the previous round, or undefined if nothing should carry over.
+ * Carryover only happens when at least one item is still incomplete (pending / in_progress).
+ * When carried over, both complete and incomplete items are included so the full plan is visible.
+ */
+export const carriedOverTodos = (todos: TodoItem[] | undefined): TodoItem[] | undefined => {
+  if (!todos?.length) return undefined;
+  const hasIncomplete = todos.some((t) => t.status !== 'completed' && t.status !== 'cancelled');
+  return hasIncomplete ? todos : undefined;
 };
 
 export type ConversationRoundStep =

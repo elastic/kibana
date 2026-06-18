@@ -29,9 +29,7 @@ export interface AskUserQuestionPromptProps {
   promptId: string;
   questions: AskUserQuestionItem[];
   onSubmit: (response: AskUserQuestionPromptResponse) => void;
-  /** True while the resume mutation is in flight after final submit. */
   isLoading?: boolean;
-  /** General disabled state (e.g. another stream owns the round). */
   isDisabled?: boolean;
 }
 
@@ -86,6 +84,7 @@ export const optionCardStyles = ({ euiTheme }: UseEuiTheme) => css`
 export const customRowStyles = ({ euiTheme }: UseEuiTheme) => css`
   margin-top: 0;
   border-radius: ${euiTheme.border.radius.medium};
+  /* Need to tweak EUI nested element */
   .euiSplitPanel__inner.euiPanel--transparent {
     padding: ${euiTheme.size.s} 0 0 ${euiTheme.size.base};
   }
