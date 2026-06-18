@@ -30,6 +30,7 @@ import { useKiGeneration } from '../knowledge_indicators_table/ki_generation_con
 import { useSignificantEventsDiscoveryContext } from '../../context/significant_events_discovery_context';
 import { SigEventFlyout } from './sig_event_flyout';
 import { FindSignificantEventsButton } from '../streams_view/find_significant_events_button';
+import type { StreamsAppSearchBarProps } from '../../../../streams_app_search_bar';
 import { StreamsAppSearchBar } from '../../../../streams_app_search_bar';
 import { formatTimestamp } from '../../../../../util/formatters';
 import { FilterPopover } from './filter_popover';
@@ -235,18 +236,18 @@ export const SigEventsTab = () => {
     }
   };
 
+  const handleQueryChange: StreamsAppSearchBarProps['onQueryChange'] = (queryPayload) => {
+    setSearchQuery(String(queryPayload.query ?? ''));
+  };
+
   return (
     <EuiFlexGroup direction="column" gutterSize="s">
       <EuiFlexItem grow={false}>
         <EuiFlexGroup gutterSize="s" alignItems="center" wrap>
           <EuiFlexItem grow style={{ minWidth: 160 }}>
             <StreamsAppSearchBar
-              onQuerySubmit={(queryPayload) => {
-                setSearchQuery(String(queryPayload.query?.query ?? ''));
-              }}
-              onQueryChange={(queryPayload) => {
-                setSearchQuery(String(queryPayload.query?.query ?? ''));
-              }}
+              onQuerySubmit={handleQueryChange}
+              onQueryChange={handleQueryChange}
               placeholder={SEARCH_PLACEHOLDER}
               query={{
                 query: searchQuery,

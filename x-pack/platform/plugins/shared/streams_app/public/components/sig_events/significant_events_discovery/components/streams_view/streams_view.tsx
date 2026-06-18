@@ -12,6 +12,7 @@ import React, { useCallback, useMemo, useState } from 'react';
 import type { TableRow } from './utils';
 import { useAIFeatures } from '../../../../../hooks/use_ai_features';
 import { useSignificantEventsDiscoveryContext } from '../../context/significant_events_discovery_context';
+import type { StreamsAppSearchBarProps } from '../../../../streams_app_search_bar';
 import { StreamsAppSearchBar } from '../../../../streams_app_search_bar';
 import { useKiGeneration } from '../knowledge_indicators_table/ki_generation_context';
 import { GenerateSplitButton } from '../shared/generate_split_button';
@@ -98,18 +99,18 @@ export function StreamsView() {
     cancelOnboarding(streamName);
   };
 
+  const handleQueryChange: StreamsAppSearchBarProps['onQueryChange'] = (queryPayload) => {
+    setSearchText(String(queryPayload.query ?? ''));
+  };
+
   return (
     <EuiFlexGroup direction="column" gutterSize="m">
       <EuiFlexItem grow={false}>
         <EuiFlexGroup gutterSize="s" alignItems="center" wrap>
           <EuiFlexItem grow style={{ minWidth: 200 }}>
             <StreamsAppSearchBar
-              onQuerySubmit={(queryPayload) => {
-                setSearchText(String(queryPayload.query?.query ?? ''));
-              }}
-              onQueryChange={(queryPayload) => {
-                setSearchText(String(queryPayload.query?.query ?? ''));
-              }}
+              onQuerySubmit={handleQueryChange}
+              onQueryChange={handleQueryChange}
               placeholder={STREAMS_TABLE_SEARCH_ARIA_LABEL}
               query={{
                 query: searchText,
