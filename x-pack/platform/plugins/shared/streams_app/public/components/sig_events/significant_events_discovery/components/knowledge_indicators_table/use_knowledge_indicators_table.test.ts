@@ -115,20 +115,19 @@ jest.mock('@kbn/react-query', () => ({
 }));
 
 function makeFeature(
-  overrides: Partial<Feature> & { uuid: string; stream_name: string } & Record<string, unknown>
+  overrides: Partial<Feature> & { id: string; stream_name: string } & Record<string, unknown>
 ): Feature {
   return {
     type: 'entity',
-    id: overrides.uuid,
-    title: overrides.title ?? overrides.uuid,
+    title: overrides.title ?? overrides.id,
     subtype: undefined,
-    excluded_at: undefined,
+    excluded: undefined,
     ...overrides,
   } as unknown as Feature;
 }
 
 function makeFeatureKI(
-  overrides: Partial<Feature> & { uuid: string; stream_name: string } & Record<string, unknown>
+  overrides: Partial<Feature> & { id: string; stream_name: string } & Record<string, unknown>
 ): KnowledgeIndicator {
   return { kind: 'feature', feature: makeFeature(overrides) };
 }
@@ -154,12 +153,12 @@ function makeQueryKI(opts: {
 
 describe('getKnowledgeIndicatorTitle', () => {
   it('returns feature title when available', () => {
-    const ki = makeFeatureKI({ uuid: 'f1', stream_name: 's1', title: 'My Feature' });
+    const ki = makeFeatureKI({ id: 'f1', stream_name: 's1', title: 'My Feature' });
     expect(getKnowledgeIndicatorTitle(ki)).toBe('My Feature');
   });
 
   it('falls back to feature id when title is missing', () => {
-    const ki = makeFeatureKI({ uuid: 'f1', stream_name: 's1', title: undefined });
+    const ki = makeFeatureKI({ id: 'f1', stream_name: 's1', title: undefined });
     expect(getKnowledgeIndicatorTitle(ki)).toBe('f1');
   });
 
@@ -185,23 +184,23 @@ describe('useKnowledgeIndicatorsTable', () => {
   });
 
   describe('filteredKnowledgeIndicators', () => {
-    it('filters by active status (excludes features with excluded_at)', () => {
+    it('filters by active status (excludes features with excluded)', () => {
       mockKnowledgeIndicators = [
-        makeFeatureKI({ uuid: 'f1', stream_name: 's1' }),
-        makeFeatureKI({ uuid: 'f2', stream_name: 's1', excluded_at: '2024-01-01' }),
+        makeFeatureKI({ id: 'f1', stream_name: 's1' }),
+        makeFeatureKI({ id: 'f2', stream_name: 's1', excluded: true }),
       ];
       const { result } = renderHook(() => useKnowledgeIndicatorsTable());
       expect(result.current.filteredKnowledgeIndicators).toHaveLength(1);
       expect(result.current.filteredKnowledgeIndicators[0].kind).toBe('feature');
       if (result.current.filteredKnowledgeIndicators[0].kind === 'feature') {
-        expect(result.current.filteredKnowledgeIndicators[0].feature.uuid).toBe('f1');
+        expect(result.current.filteredKnowledgeIndicators[0].feature.id).toBe('f1');
       }
     });
 
     it('sorts alphabetically by title', () => {
       mockKnowledgeIndicators = [
-        makeFeatureKI({ uuid: 'f2', stream_name: 's1', title: 'Zebra' }),
-        makeFeatureKI({ uuid: 'f1', stream_name: 's1', title: 'Alpha' }),
+        makeFeatureKI({ id: 'f2', stream_name: 's1', title: 'Zebra' }),
+        makeFeatureKI({ id: 'f1', stream_name: 's1', title: 'Alpha' }),
         makeQueryKI({ id: 'q1', stream_name: 's1', title: 'Middle' }),
       ];
       const { result } = renderHook(() => useKnowledgeIndicatorsTable());
@@ -211,8 +210,8 @@ describe('useKnowledgeIndicatorsTable', () => {
 
     it('filters by search term (case-insensitive)', () => {
       mockKnowledgeIndicators = [
-        makeFeatureKI({ uuid: 'f1', stream_name: 's1', title: 'CPU Usage' }),
-        makeFeatureKI({ uuid: 'f2', stream_name: 's1', title: 'Memory' }),
+        makeFeatureKI({ id: 'f1', stream_name: 's1', title: 'CPU Usage' }),
+        makeFeatureKI({ id: 'f2', stream_name: 's1', title: 'Memory' }),
       ];
       mockQuery = { search: 'cpu' };
       const { result } = renderHook(() => useKnowledgeIndicatorsTable());
@@ -221,8 +220,8 @@ describe('useKnowledgeIndicatorsTable', () => {
 
     it('hides computed feature types by default', () => {
       mockKnowledgeIndicators = [
-        makeFeatureKI({ uuid: 'f1', stream_name: 's1', type: 'entity' }),
-        makeFeatureKI({ uuid: 'f2', stream_name: 's1', type: 'dataset_analysis' }),
+        makeFeatureKI({ id: 'f1', stream_name: 's1', type: 'entity' }),
+        makeFeatureKI({ id: 'f2', stream_name: 's1', type: 'dataset_analysis' }),
       ];
       const { result } = renderHook(() => useKnowledgeIndicatorsTable());
       expect(result.current.filteredKnowledgeIndicators).toHaveLength(1);
@@ -231,8 +230,8 @@ describe('useKnowledgeIndicatorsTable', () => {
     it('shows computed types when showComputed is true', () => {
       mockQuery = { showComputed: 'true' };
       mockKnowledgeIndicators = [
-        makeFeatureKI({ uuid: 'f1', stream_name: 's1', type: 'entity' }),
-        makeFeatureKI({ uuid: 'f2', stream_name: 's1', type: 'dataset_analysis' }),
+        makeFeatureKI({ id: 'f1', stream_name: 's1', type: 'entity' }),
+        makeFeatureKI({ id: 'f2', stream_name: 's1', type: 'dataset_analysis' }),
       ];
       const { result } = renderHook(() => useKnowledgeIndicatorsTable());
       expect(result.current.filteredKnowledgeIndicators).toHaveLength(2);
@@ -261,7 +260,7 @@ describe('useKnowledgeIndicatorsTable', () => {
 
   describe('bulk exclude', () => {
     it('calls excludeFeaturesInBulk with features only, shows success', async () => {
-      const feature = makeFeature({ uuid: 'f1', stream_name: 's1' });
+      const feature = makeFeature({ id: 'f1', stream_name: 's1' });
       const ki = { kind: 'feature' as const, feature };
       mockKnowledgeIndicators = [ki];
       mockExcludeFeaturesInBulk.mockResolvedValue({ failedCount: 0 });
@@ -282,7 +281,7 @@ describe('useKnowledgeIndicatorsTable', () => {
     });
 
     it('shows warning when some features fail', async () => {
-      const ki = makeFeatureKI({ uuid: 'f1', stream_name: 's1' });
+      const ki = makeFeatureKI({ id: 'f1', stream_name: 's1' });
       mockKnowledgeIndicators = [ki];
       mockExcludeFeaturesInBulk.mockResolvedValue({ failedCount: 1 });
 
@@ -299,7 +298,7 @@ describe('useKnowledgeIndicatorsTable', () => {
     });
 
     it('shows error toast when operation throws', async () => {
-      const ki = makeFeatureKI({ uuid: 'f1', stream_name: 's1' });
+      const ki = makeFeatureKI({ id: 'f1', stream_name: 's1' });
       mockKnowledgeIndicators = [ki];
       mockExcludeFeaturesInBulk.mockRejectedValue(new Error('network fail'));
 
@@ -317,7 +316,7 @@ describe('useKnowledgeIndicatorsTable', () => {
     });
 
     it('wraps non-Error throwables', async () => {
-      const ki = makeFeatureKI({ uuid: 'f1', stream_name: 's1' });
+      const ki = makeFeatureKI({ id: 'f1', stream_name: 's1' });
       mockKnowledgeIndicators = [ki];
       mockExcludeFeaturesInBulk.mockRejectedValue('string error');
 
@@ -356,9 +355,9 @@ describe('useKnowledgeIndicatorsTable', () => {
   describe('bulk restore', () => {
     it('calls restoreFeaturesInBulk and shows success', async () => {
       const ki = makeFeatureKI({
-        uuid: 'f1',
+        id: 'f1',
         stream_name: 's1',
-        excluded_at: '2024-01-01',
+        excluded: true,
       });
       mockKnowledgeIndicators = [ki];
       mockRestoreFeaturesInBulk.mockResolvedValue({ failedCount: 0 });
@@ -436,7 +435,7 @@ describe('useKnowledgeIndicatorsTable', () => {
 
   describe('bulk delete callback', () => {
     it('onSuccess clears selections and closes flyout', () => {
-      mockKnowledgeIndicators = [makeFeatureKI({ uuid: 'f1', stream_name: 's1' })];
+      mockKnowledgeIndicators = [makeFeatureKI({ id: 'f1', stream_name: 's1' })];
       const { result } = renderHook(() => useKnowledgeIndicatorsTable());
 
       act(() => {
@@ -456,8 +455,8 @@ describe('useKnowledgeIndicatorsTable', () => {
 
   describe('selection pruning', () => {
     it('prunes selected indicators when they disappear from data', () => {
-      const ki1 = makeFeatureKI({ uuid: 'f1', stream_name: 's1' });
-      const ki2 = makeFeatureKI({ uuid: 'f2', stream_name: 's1' });
+      const ki1 = makeFeatureKI({ id: 'f1', stream_name: 's1' });
+      const ki2 = makeFeatureKI({ id: 'f2', stream_name: 's1' });
       mockKnowledgeIndicators = [ki1, ki2];
 
       const { result, rerender } = renderHook(() => useKnowledgeIndicatorsTable());
@@ -489,7 +488,7 @@ describe('useKnowledgeIndicatorsTable', () => {
     });
 
     it('selectionContainsNonExcludable is true when computed features are selected', () => {
-      const ki = makeFeatureKI({ uuid: 'f1', stream_name: 's1', type: 'dataset_analysis' });
+      const ki = makeFeatureKI({ id: 'f1', stream_name: 's1', type: 'dataset_analysis' });
       mockQuery = { showComputed: 'true' };
       mockKnowledgeIndicators = [ki];
 
@@ -501,7 +500,7 @@ describe('useKnowledgeIndicatorsTable', () => {
     });
 
     it('selectionContainsNonExcludable is false for regular features', () => {
-      const ki = makeFeatureKI({ uuid: 'f1', stream_name: 's1', type: 'entity' });
+      const ki = makeFeatureKI({ id: 'f1', stream_name: 's1', type: 'entity' });
       mockKnowledgeIndicators = [ki];
 
       const { result } = renderHook(() => useKnowledgeIndicatorsTable());
@@ -518,7 +517,7 @@ describe('useKnowledgeIndicatorsTable', () => {
 
     it('isSelectionActionsDisabled is true when operation in progress', () => {
       mockIsDeleting = true;
-      const ki = makeFeatureKI({ uuid: 'f1', stream_name: 's1' });
+      const ki = makeFeatureKI({ id: 'f1', stream_name: 's1' });
       mockKnowledgeIndicators = [ki];
 
       const { result } = renderHook(() => useKnowledgeIndicatorsTable());
@@ -574,7 +573,7 @@ describe('useKnowledgeIndicatorsTable', () => {
     it('returns false when hideComputedTypes is false', () => {
       mockQuery = { showComputed: 'true' };
       mockKnowledgeIndicators = [
-        makeFeatureKI({ uuid: 'f1', stream_name: 's1', type: 'dataset_analysis' }),
+        makeFeatureKI({ id: 'f1', stream_name: 's1', type: 'dataset_analysis' }),
       ];
       const { result } = renderHook(() => useKnowledgeIndicatorsTable());
       expect(result.current.hasOnlyHiddenComputedFeatures).toBe(false);
@@ -587,14 +586,14 @@ describe('useKnowledgeIndicatorsTable', () => {
     });
 
     it('returns false when there are visible filtered results', () => {
-      mockKnowledgeIndicators = [makeFeatureKI({ uuid: 'f1', stream_name: 's1', type: 'entity' })];
+      mockKnowledgeIndicators = [makeFeatureKI({ id: 'f1', stream_name: 's1', type: 'entity' })];
       const { result } = renderHook(() => useKnowledgeIndicatorsTable());
       expect(result.current.hasOnlyHiddenComputedFeatures).toBe(false);
     });
 
     it('returns true when all matching indicators are hidden computed features', () => {
       mockKnowledgeIndicators = [
-        makeFeatureKI({ uuid: 'f1', stream_name: 's1', type: 'dataset_analysis' }),
+        makeFeatureKI({ id: 'f1', stream_name: 's1', type: 'dataset_analysis' }),
       ];
       const { result } = renderHook(() => useKnowledgeIndicatorsTable());
       expect(result.current.filteredKnowledgeIndicators).toHaveLength(0);
