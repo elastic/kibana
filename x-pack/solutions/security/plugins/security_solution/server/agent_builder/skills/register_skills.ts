@@ -73,6 +73,6 @@ export const registerSkills = async ({
   }
 
   if (experimentalFeatures.investigateRuleSkill) {
-    await agentBuilder.skills.register(createInvestigateRuleSkill({ getStartServices, logger }));
+    await agentBuilder.skills.register(createInvestigateRuleSkill());
   }
 };

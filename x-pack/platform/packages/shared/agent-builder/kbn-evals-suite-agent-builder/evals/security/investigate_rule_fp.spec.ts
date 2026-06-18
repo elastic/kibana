@@ -32,7 +32,7 @@ evaluate.describe(
   { tag: [...tags.serverless.security.complete, ...tags.serverless.security.ease] },
   () => {
     evaluate(
-      'rules with analyst FP dispositions are fast-pathed to a tune-rule recommendation',
+      'rules with analyst FP dispositions are fast-pathed to a remediation recommendation',
       async ({ evaluateDataset }) => {
         await evaluateDataset({
           dataset: {
@@ -40,11 +40,11 @@ evaluate.describe(
             description:
               'Validates that the skill surfaces kibana.alert.workflow_reason as the primary ' +
               'FP signal when analysts have already closed alerts as false_positive or benign_positive, ' +
-              'and routes to a tune-rule recommendation without requiring entity analysis.',
+              'and routes to a remediation recommendation without requiring entity analysis.',
             examples: [
               {
                 // Analyst dispositions referenced explicitly: the skill should call
-                // get_rule_alerts, read workflow_reasons, and fast-path to tune-rule.
+                // security.alerts, read workflow_reasons, and fast-path to a remediation suggestion.
                 input: {
                   question:
                     'Most of the recent alerts from rule d4b14cb2-3c4e-4d7a-8b02-d3a1e5f9c7e1 ' +
@@ -55,13 +55,13 @@ evaluate.describe(
                   expected:
                     'I will fetch recent alerts for this rule and check the workflow_reason ' +
                     'dispositions. Since many alerts have been closed as false_positive, I will ' +
-                    'treat this as confirmed FP evidence and recommend a tune-rule action for ' +
+                    'treat this as confirmed FP evidence and recommend adding an exception for ' +
                     'the top contributing entities.',
                 },
                 metadata: {
                   query_intent: 'Known FP by analyst disposition',
                   expectedSkill: 'investigate-rule',
-                  expectedToolId: 'investigate-rule.get_rule_alerts',
+                  expectedToolId: 'security.alerts',
                 },
               },
               {
@@ -78,12 +78,12 @@ evaluate.describe(
                     'I will retrieve the alert data for this rule and examine the workflow_reason ' +
                     'distribution. benign_positive dispositions are a strong signal that this rule ' +
                     'is generating noise from expected activity; I will identify the top entities ' +
-                    'and recommend an exception or suppression via tune-rule.',
+                    'and recommend an exception or suppression in the Detection Rules UI.',
                 },
                 metadata: {
                   query_intent: 'Known FP by benign_positive disposition',
                   expectedSkill: 'investigate-rule',
-                  expectedToolId: 'investigate-rule.get_rule_alerts',
+                  expectedToolId: 'security.alerts',
                 },
               },
               {
@@ -106,13 +106,13 @@ evaluate.describe(
                 metadata: {
                   query_intent: 'Mixed FP signal: dispositions + open alerts',
                   expectedSkill: 'investigate-rule',
-                  expectedToolId: 'investigate-rule.get_rule_alerts',
+                  expectedToolId: 'security.alerts',
                 },
               },
               {
                 // Implicit disposition signal: the user says "keep closing" without
                 // using the technical term. The skill should still route correctly and
-                // call get_rule_alerts to verify the workflow_reason data.
+                // call security.alerts to verify the workflow_reason data.
                 input: {
                   question:
                     'Every time this rule fires for host "admin-workstation-42" I close it ' +
@@ -123,13 +123,13 @@ evaluate.describe(
                   expected:
                     'I will load the alert data for this rule to confirm that the alerts for ' +
                     'admin-workstation-42 carry a false_positive workflow_reason, then recommend ' +
-                    'adding a host-level exception via tune-rule to prevent future alerts from ' +
+                    'adding a host-level exception in the Detection Rules UI to prevent future alerts from ' +
                     'that host.',
                 },
                 metadata: {
                   query_intent: 'Implicit FP disposition from repeated manual closure',
                   expectedSkill: 'investigate-rule',
-                  expectedToolId: 'investigate-rule.get_rule_alerts',
+                  expectedToolId: 'security.alerts',
                 },
               },
             ],
@@ -152,11 +152,11 @@ evaluate.describe(
             name: 'agent builder: security-investigate-rule-fp',
             description:
               'Validates that false-positive and noise queries activate the investigate-rule skill ' +
-              'and call get_rule_alerts to surface top contributing entities.',
+              'and call security.alerts to surface top contributing entities.',
             examples: [
               {
                 // Typical first-turn FP report — rule referenced by UUID, no prior attachment.
-                // Expect: resolve_rule_attachment (to load the rule) then get_rule_alerts.
+                // Expect: resolve_rule_attachment (to load the rule) then security.alerts.
                 input: {
                   question:
                     'Rule d4b14cb2-3c4e-4d7a-8b02-d3a1e5f9c7e1 is generating a huge number of ' +
@@ -176,7 +176,7 @@ evaluate.describe(
               },
               {
                 // Noise complaint without a UUID — should still route to investigate-rule
-                // and call get_rule_alerts once the attachment is in context.
+                // and call security.alerts once the attachment is in context.
                 input: {
                   question:
                     'Why is the "Unusual Process by Web Server" rule so noisy? I get hundreds ' +
@@ -191,12 +191,12 @@ evaluate.describe(
                 metadata: {
                   query_intent: 'FP Investigation',
                   expectedSkill: 'investigate-rule',
-                  expectedToolId: 'investigate-rule.get_rule_alerts',
+                  expectedToolId: 'security.alerts',
                 },
               },
               {
                 // Entity-concentrated FP pattern explicitly described — the skill should
-                // use get_rule_alerts to confirm the entity concentration and classify
+                // use security.alerts to confirm the entity concentration and classify
                 // the root cause as benign activity from a known host.
                 input: {
                   question:
@@ -207,18 +207,19 @@ evaluate.describe(
                 output: {
                   expected:
                     'I will fetch the alert data for this rule and confirm that build-agent-03 ' +
-                    'is generating a disproportionate share of alerts. Since this is expected ' +
-                    'CI automation, I will recommend adding an exception for that host via tune-rule.',
+                    'is generating a disproportionate share of alerts. Since the user has indicated ' +
+                    'this is expected CI automation, I will recommend adding an exception (or alert ' +
+                    'suppression) for that host in the Detection Rules UI.',
                 },
                 metadata: {
                   query_intent: 'FP Investigation — entity concentration',
                   expectedSkill: 'investigate-rule',
-                  expectedToolId: 'investigate-rule.get_rule_alerts',
+                  expectedToolId: 'security.alerts',
                 },
               },
               {
                 // Explicit ask for top entities — maps directly to the top_entities
-                // aggregation returned by get_rule_alerts.
+                // aggregation returned by security.alerts.
                 input: {
                   question:
                     'Show me which hosts and users are generating the most alerts from ' +
@@ -232,7 +233,7 @@ evaluate.describe(
                 metadata: {
                   query_intent: 'FP Entity Breakdown',
                   expectedSkill: 'investigate-rule',
-                  expectedOnlyToolId: 'investigate-rule.get_rule_alerts',
+                  expectedToolId: 'security.alerts',
                 },
               },
               {
@@ -253,7 +254,7 @@ evaluate.describe(
                 metadata: {
                   query_intent: 'FP Investigation — extended window',
                   expectedSkill: 'investigate-rule',
-                  expectedToolId: 'investigate-rule.get_rule_alerts',
+                  expectedToolId: 'security.alerts',
                 },
               },
             ],
@@ -306,6 +307,25 @@ evaluate.describe(
                 },
                 metadata: {
                   query_intent: 'Gap Analysis',
+                  shouldNotActivateSkill: 'investigate-rule',
+                },
+              },
+              {
+                // Plural list/rank request — belongs to find-security-rules, not the
+                // single-rule investigate-rule skill. Guards the scoping boundary that
+                // investigate-rule only handles ONE explicitly-identified rule.
+                input: {
+                  question:
+                    'Which of my detection rules are the noisiest right now? ' +
+                    'Give me the top 5 by alert volume.',
+                },
+                output: {
+                  expected:
+                    'This is a plural list/rank request across many rules, so it belongs to ' +
+                    'find-security-rules, not the single-rule investigate-rule skill.',
+                },
+                metadata: {
+                  query_intent: 'Plural list/rank — belongs to find-security-rules',
                   shouldNotActivateSkill: 'investigate-rule',
                 },
               },
