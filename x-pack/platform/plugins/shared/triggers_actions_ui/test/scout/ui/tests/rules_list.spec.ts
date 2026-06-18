@@ -750,14 +750,22 @@ test.describe('Rules list', { tag: tags.stateful.classic }, () => {
     await searchRules(page, uniqueTag);
     await expect(getTableRows(page)).toHaveCount(4);
 
-    // Toggle a status option and wait for the list to settle on the expected
-    // count. The filter is an EuiPopover + EuiSelectable: a table reload can
-    // shift focus and close the popover, so re-open it whenever the options
-    // aren't visible before clicking. toHaveCount auto-retries and serializes
-    // each step (the next click only fires once the list has settled), so a
-    // stale in-flight response can't overwrite a later filter state.
+    // Toggle a status option, then confirm it registered before checking rows.
+    // The filter is an EuiPopover + EuiSelectable: a table reload can shift focus
+    // and close the popover, so re-open it whenever the options aren't visible.
+    // The authoritative "toggle registered" signal is the filter button's active-
+    // count badge (it tracks selectedStatuses synchronously); the row count is a
+    // downstream async refetch that can lag or settle on a stale value, so we gate
+    // on the badge first and only then assert the filtered row count.
     const optionsPanel = page.testSubj.locator('ruleStatusFilterSelect');
-    const applyFilter = async (filterSubj: string, expectedRowCount: number) => {
+    const activeFilterBadge = page.testSubj
+      .locator('ruleStatusFilterButton')
+      .locator('.euiFilterButton__notification');
+    const applyFilter = async (
+      filterSubj: string,
+      expectedSelectedCount: number,
+      expectedRowCount: number
+    ) => {
       // A table reload can shift focus and close the popover; re-open it when the
       // options aren't visible. The conditional is required for that resilience —
       // the expects below stay outside it.
@@ -767,23 +775,24 @@ test.describe('Rules list', { tag: tags.stateful.classic }, () => {
       }
       await expect(optionsPanel).toBeVisible();
       await page.testSubj.click(filterSubj);
+      await expect(activeFilterBadge).toHaveText(String(expectedSelectedCount));
       await expect(getTableRows(page)).toHaveCount(expectedRowCount);
     };
 
     // Select only enabled → 2 rules (enabled + snoozed)
-    await applyFilter('ruleStatusFilterOption-enabled', 2);
+    await applyFilter('ruleStatusFilterOption-enabled', 1, 2);
     // Add disabled → all 4
-    await applyFilter('ruleStatusFilterOption-disabled', 4);
+    await applyFilter('ruleStatusFilterOption-disabled', 2, 4);
     // Deselect enabled → only disabled (2)
-    await applyFilter('ruleStatusFilterOption-enabled', 2);
+    await applyFilter('ruleStatusFilterOption-enabled', 1, 2);
     // Deselect disabled → no status filter, all 4
-    await applyFilter('ruleStatusFilterOption-disabled', 4);
+    await applyFilter('ruleStatusFilterOption-disabled', 0, 4);
     // Select snoozed → only snoozed (2)
-    await applyFilter('ruleStatusFilterOption-snoozed', 2);
+    await applyFilter('ruleStatusFilterOption-snoozed', 1, 2);
     // Add disabled → disabled + snoozed (3)
-    await applyFilter('ruleStatusFilterOption-disabled', 3);
+    await applyFilter('ruleStatusFilterOption-disabled', 2, 3);
     // Add enabled → all 4
-    await applyFilter('ruleStatusFilterOption-enabled', 4);
+    await applyFilter('ruleStatusFilterOption-enabled', 3, 4);
 
     // Close filter panel
     await page.testSubj.click('ruleStatusFilterButton');
