@@ -106,13 +106,8 @@ export class DiscoverApp {
   ) {
     const item = this.page.testSubj.locator(testId);
     if (!isInOverflowMenu && (await item.isVisible())) {
-      const clicked = await item
-        .click({ timeout: 5_000 })
-        .then(() => true)
-        .catch(() => false);
-      if (clicked) {
-        return;
-      }
+      await item.click();
+      return;
     }
     const overflowButton = this.page.testSubj.locator('app-menu-overflow-button');
     const popover = this.page.testSubj.locator('app-menu-popover');
@@ -125,6 +120,17 @@ export class DiscoverApp {
 
     await expect(overflowButton).toBeVisible();
     await overflowButton.click();
+
+    // If the click was consumed by closing a stale overlay, the popover won't be open.
+    // Click the overflow button again if needed.
+    const popoverOpened = await popover
+      .waitFor({ state: 'visible', timeout: 2000 })
+      .then(() => true)
+      .catch(() => false);
+    if (!popoverOpened) {
+      await overflowButton.click();
+    }
+
     await expect(popover).toBeVisible();
 
     const menuItem = this.page.testSubj.locator(testId);
