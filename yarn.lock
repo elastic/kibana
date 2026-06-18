@@ -9430,6 +9430,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/synthtrace-scenario-codegen@link:src/platform/packages/shared/kbn-synthtrace-scenario-codegen":
+  version "0.0.0"
+  uid ""
+
 "@kbn/synthtrace@link:src/platform/packages/shared/kbn-synthtrace":
   version "0.0.0"
   uid ""

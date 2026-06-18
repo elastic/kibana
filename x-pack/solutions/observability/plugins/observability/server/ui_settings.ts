@@ -34,6 +34,7 @@ import {
   apmEnableServiceInventoryTableSearchBar,
   searchExcludedDataTiers,
   enableDiagnosticMode,
+  enableSynthtraceCapture,
 } from '../common/ui_settings_keys';
 
 /**
@@ -447,6 +448,21 @@ export const uiSettings: Record<string, UiSettingsParams<boolean | number | stri
     description: i18n.translate('xpack.observability.enableDiagnosticModeDescription', {
       defaultMessage:
         'Enable diagnostic mode for debugging and troubleshooting capabilities. Currently available only in the Service map view.',
+    }),
+    schema: schema.boolean(),
+    requiresPageReload: false,
+    solutionViews: ['classic', 'oblt'],
+    technicalPreview: true,
+  },
+  [enableSynthtraceCapture]: {
+    category: [observabilityFeatureId],
+    name: i18n.translate('xpack.observability.enableSynthtraceCapture', {
+      defaultMessage: 'Enable synthtrace scenario capture',
+    }),
+    value: false,
+    description: i18n.translate('xpack.observability.enableSynthtraceCaptureDescription', {
+      defaultMessage:
+        'Enable the "Capture page as synthtrace scenario" developer tool across Observability apps (APM, Infrastructure), which turns the data on the page currently being viewed into a runnable synthtrace scenario.',
     }),
     schema: schema.boolean(),
     requiresPageReload: false,

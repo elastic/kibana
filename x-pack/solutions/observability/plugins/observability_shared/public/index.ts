@@ -105,3 +105,9 @@ export { type ControlPanels, useControlPanels } from './hooks/use_control_panels
 export { useKibanaQuerySettings } from './hooks/use_kibana_query_settings';
 
 export { ExternalResourceLinks } from './components/external_resource_links';
+
+export { SynthtraceCaptureFab } from './components/synthtrace_capture_fab/synthtrace_capture_fab';
+export type {
+  SynthtraceCaptureFabProps,
+  SynthtraceCaptureResult,
+} from './components/synthtrace_capture_fab/synthtrace_capture_fab';

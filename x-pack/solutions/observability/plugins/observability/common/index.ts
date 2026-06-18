@@ -44,6 +44,7 @@ export {
   apmEnableTransactionProfiling,
   apmEnableServiceInventoryTableSearchBar,
   enableDiagnosticMode,
+  enableSynthtraceCapture,
 } from './ui_settings_keys';
 
 export {

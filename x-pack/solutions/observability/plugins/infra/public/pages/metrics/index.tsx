@@ -34,6 +34,7 @@ import { ReactQueryProvider } from '../../containers/react_query_provider';
 import { usePluginConfig } from '../../containers/plugin_config_context';
 import { RedirectWithQueryParams } from '../../utils/redirect_with_query_params';
 import { OnboardingFlow } from '../../components/shared/templates/no_data_config';
+import { CaptureSynthtraceFab } from '../../components/synthtrace_capture_fab/capture_synthtrace_fab';
 const ADD_DATA_LABEL = i18n.translate('xpack.infra.metricsHeaderAddDataButtonLabel', {
   defaultMessage: 'Add data',
 });
@@ -131,6 +132,8 @@ export const InfrastructurePage = () => {
                 )}
               />
             </Routes>
+
+            <CaptureSynthtraceFab />
           </InfraMLCapabilitiesProvider>
         </AlertPrefillProvider>
       </ReactQueryProvider>

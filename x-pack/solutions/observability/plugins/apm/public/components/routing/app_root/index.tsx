@@ -35,6 +35,7 @@ import { ApmErrorBoundary } from '../apm_error_boundary';
 import { apmRouter } from '../apm_route_config';
 import { TrackPageview } from '../track_pageview';
 import { ApmHeaderActionMenu } from './apm_header_action_menu';
+import { CaptureSynthtraceFab } from './capture_synthtrace_fab';
 import { RedirectDependenciesToDependenciesInventory } from './redirect_dependencies_to_dependencies_inventory';
 import { RedirectWithDefaultDateRange } from './redirect_with_default_date_range';
 import { RedirectWithDefaultEnvironment } from './redirect_with_default_environment';
@@ -85,6 +86,7 @@ export function ApmAppRoot({
                                           <AnomalyDetectionJobsContextProvider>
                                             <InspectorContextProvider>
                                               <MountApmHeaderActionMenu />
+                                              <CaptureSynthtraceFab />
                                               <Route component={ScrollToTopOnPathChange} />
                                               <RouteRenderer />
                                             </InspectorContextProvider>

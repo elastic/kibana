@@ -47,6 +47,7 @@
     "@kbn/es-query",
     "@kbn/ui-theme",
     "@kbn/synthtrace-client",
+    "@kbn/synthtrace-scenario-codegen",
     "@kbn/lens-plugin",
     "@kbn/unified-search-plugin",
     "@kbn/share-plugin",

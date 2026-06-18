@@ -31,6 +31,10 @@ export interface SemconvHostMetricsDocument extends SemconvHostDocument {
   'metricset.name'?: string;
   state?: string;
   direction?: string;
+  // Some Hosts view aggregations filter dimensions via the literal `attributes.*` path rather than
+  // the top-level alias (e.g. disk IOPS/throughput use `attributes.direction`).
+  'attributes.state'?: string;
+  'attributes.direction'?: string;
   'system.cpu.utilization'?: number;
   'system.cpu.logical.count'?: number;
   'system.cpu.load_average.1m'?: number;
@@ -41,12 +45,30 @@ export interface SemconvHostMetricsDocument extends SemconvHostDocument {
   'system.memory.usage'?: number;
   'metrics.system.filesystem.usage'?: number;
   'metrics.system.network.io'?: number;
+  // Disk read/write IOPS (`system.disk.operations`) and throughput (`system.disk.io`).
+  'system.disk.operations'?: number;
+  'system.disk.io'?: number;
+  'metrics.system.disk.operations'?: number;
+  'metrics.system.disk.io'?: number;
   'device.keyword'?: string;
 }
 
 class SemconvHostMetrics extends Serializable<SemconvHostMetricsDocument> {}
 
 export class SemconvHost extends Entity<SemconvHostDocument> {
+  /**
+   * Emits a single semconv host metric document carrying exactly the provided fields on top of the
+   * host's base identity. Unlike `cpu()`/`memory()`/... (which fan out to several synthetic
+   * per-`state` documents with generated values), this preserves a captured document verbatim, so
+   * it is used by the synthtrace capture tool to faithfully reproduce real OTel host metrics.
+   */
+  metricset(fields: Partial<SemconvHostMetricsDocument>) {
+    return new SemconvHostMetrics({
+      ...this.fields,
+      ...fields,
+    });
+  }
+
   cpu() {
     const loadAvg1m = 1 + Math.random() * 3;
     return [

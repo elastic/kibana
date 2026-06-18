@@ -89,6 +89,19 @@ export class InfraSynthtraceEsClientImpl
                   mapping: { type: 'keyword', ignore_above: 1024 },
                 },
               },
+              {
+                // OTel host metrics are gauges/counters that are almost always fractional
+                // (e.g. `metrics.system.cpu.utilization`), but some samples are integer-valued
+                // (the `interrupt`/`nice`/`steal` CPU states report exactly `0`). Without an
+                // explicit type, dynamic mapping infers `long` from whichever integer-valued sample
+                // lands first and then truncates every fractional value to its floor (0.95 -> 0),
+                // which makes the Hosts view CPU read `1 - 0 = 100%`. This is a metrics-only data
+                // stream, so map every numeric field to `double` to preserve fractional values.
+                numbers_as_double: {
+                  match_mapping_type: 'long',
+                  mapping: { type: 'double' },
+                },
+              },
             ],
             properties: {
               '@timestamp': { type: 'date' },

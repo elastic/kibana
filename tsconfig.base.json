@@ -2496,6 +2496,8 @@
       "@kbn/synthtrace/*": ["src/platform/packages/shared/kbn-synthtrace/*"],
       "@kbn/synthtrace-client": ["src/platform/packages/shared/kbn-synthtrace-client"],
       "@kbn/synthtrace-client/*": ["src/platform/packages/shared/kbn-synthtrace-client/*"],
+      "@kbn/synthtrace-scenario-codegen": ["src/platform/packages/shared/kbn-synthtrace-scenario-codegen"],
+      "@kbn/synthtrace-scenario-codegen/*": ["src/platform/packages/shared/kbn-synthtrace-scenario-codegen/*"],
       "@kbn/task-manager-dependencies-plugin": ["x-pack/platform/plugins/private/task_manager_dependencies"],
       "@kbn/task-manager-dependencies-plugin/*": ["x-pack/platform/plugins/private/task_manager_dependencies/*"],
       "@kbn/task-manager-fixture-plugin": ["x-pack/platform/test/alerting_api_integration/common/plugins/task_manager_fixture"],

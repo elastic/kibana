@@ -33,6 +33,7 @@ import { initMetricsExplorerViewRoutes } from './routes/metrics_explorer_views';
 import { initProfilingRoutes } from './routes/profiling';
 import { initServicesRoute } from './routes/services';
 import { initCustomDashboardsRoutes } from './routes/custom_dashboards/custom_dashboards';
+import { initSynthtraceScenarioRoute } from './routes/synthtrace_scenario/route';
 import type { InfraBackendLibs } from './lib/infra_types';
 
 export const registerRoutes = (libs: InfraBackendLibs) => {
@@ -63,4 +64,5 @@ export const registerRoutes = (libs: InfraBackendLibs) => {
   initProfilingRoutes(libs);
   initServicesRoute(libs);
   initCustomDashboardsRoutes(libs.framework);
+  initSynthtraceScenarioRoute(libs);
 };

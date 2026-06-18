@@ -42,20 +42,22 @@ export const getApmDataAccessClient = ({
       return undefined;
     }
 
-    const services = apmDataAccess.getServices({
-      apmEventClient: new APMEventClient({
-        indices: apmIndices,
-        options: {
-          includeFrozen,
-        },
-        debug: false,
-        esClient,
-        request,
-      }),
+    const apmEventClient = new APMEventClient({
+      indices: apmIndices,
+      options: {
+        includeFrozen,
+      },
+      debug: false,
+      esClient,
+      request,
     });
+
+    const services = apmDataAccess.getServices({ apmEventClient });
 
     return {
       ...services,
+      // Exposed so callers (e.g. the synthtrace capture) can query raw APM documents directly.
+      apmEventClient,
       getDocumentSources: async ({
         start,
         end,
