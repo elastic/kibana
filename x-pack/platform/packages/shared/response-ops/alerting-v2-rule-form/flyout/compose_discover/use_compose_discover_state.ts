@@ -31,6 +31,8 @@ export interface InitialStateConfig {
   initialKind?: RuleKind;
   initialRecoveryType?: RecoveryType;
   isBuilderMode?: boolean;
+  /** When true, the query is already populated (e.g. from Discover) and the sandbox gate is skipped. */
+  isQueryPrePopulated?: boolean;
 }
 
 export const createInitialState = ({
@@ -38,6 +40,7 @@ export const createInitialState = ({
   initialKind = 'alert',
   initialRecoveryType = 'default',
   isBuilderMode = false,
+  isQueryPrePopulated = false,
 }: InitialStateConfig): ComposeDiscoverState => {
   const recoveryType = initialKind === 'alert' ? initialRecoveryType : 'default';
   return {
@@ -47,8 +50,8 @@ export const createInitialState = ({
     activeTab: defaultTabForTabs(
       getSandboxTabs(initialKind === 'alert', { step: 0, recoveryType })
     ),
-    childOpen: mode === 'create' && !isBuilderMode,
-    queryCommitted: mode === 'edit',
+    childOpen: mode === 'create',
+    queryCommitted: mode === 'edit' || isQueryPrePopulated,
     yamlMode: false,
   };
 };
