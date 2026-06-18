@@ -213,6 +213,56 @@ return (
 );
 ```
 
+### Custom filters
+
+Registering a filter dimension and rendering its toolbar control are two separate steps:
+
+- **Register** with `features.filters` (a `ResolvedContentListFilter` from `defineContentListFilter`). This is all that KQL search and facet counts need — a registered dimension filters correctly through the search bar on its own, with no toolbar control.
+- **Place** a control explicitly with `createFilterControl(filterDefinition, opts?)`, which returns a declarative component for the `<Filters>` slot. This mirrors `<recents.RecentsFilter />`: registration never auto-renders a control, so you decide whether and where one appears.
+
+```tsx
+import {
+  ContentListClientProvider,
+  defineContentListFilter,
+  createFilterControl,
+} from '@kbn/content-list-provider-client';
+
+const typeFilter = defineContentListFilter({
+  id: 'contentType',
+  title: 'Type',
+  getItemValue: (item) => item.type,
+  options: [
+    { value: 'dashboard', label: 'Dashboard' },
+    { value: 'visualization', label: 'Visualization' },
+  ],
+});
+
+// Stable identity — define at module scope or memoize.
+const TypeFilter = createFilterControl(typeFilter, {
+  // Optional: render an icon/avatar/color instead of plain text.
+  renderOptionContent: ({ label, value }) => (
+    <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+      <EuiFlexItem grow={false}>
+        <EuiIcon type={iconByValue.get(value) ?? 'empty'} />
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>{label}</EuiFlexItem>
+    </EuiFlexGroup>
+  ),
+});
+
+<ContentListClientProvider features={{ filters: { contentType: typeFilter } }} /* … */>
+  <ContentListToolbar>
+    <Filters>
+      <Filters.Tags />
+      <TypeFilter />
+      <Filters.Sort />
+    </Filters>
+  </ContentListToolbar>
+</ContentListClientProvider>;
+```
+
+For full control over the popover, drop `createFilterControl` and use `CustomFilterRenderer` (or `SelectableFilterPopover` from `@kbn/content-list-toolbar`) inside your own `filter.createComponent`.
+
 ### Rendering `<Action.ContentEditor />`
 
 `<Action.ContentEditor />` reads `open` from `features.contentEditor` on the active provider. When the consumer supplies a `contentEditor` config here, the client provider rebuilds it into a base `{ open }` callback so the action can wire itself; if no config is supplied, `open` is `undefined` and the action self-skips, dropping the row icon. Consumers therefore render the action unconditionally — there's no flag to gate on.
