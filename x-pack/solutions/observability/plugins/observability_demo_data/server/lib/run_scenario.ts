@@ -98,11 +98,18 @@ export const runScenario = async ({
   const ownsEsClient = Boolean(connection?.esUrl);
   const esClient = ownsEsClient ? createEsClientFromConnection(connection!) : defaultEsClient;
 
+  // synthtrace's `indexAll`/`client.index` return void, so the only source of
+  // the indexed document count is the `Produced <n> events` line each ES client
+  // logs after a successful bulk index (see kbn-synthtrace base_client.ts). We
+  // intercept that line per client and accumulate it; this is the same count
+  // surfaced by the synthtrace CLI. If synthtrace changes that wording, the
+  // count would read 0 — covered by `run_scenario.test`-style assertions.
   let eventsIndexed = 0;
   const synthtraceLogger = createLogger(LogLevel.info);
   const originalInfo = synthtraceLogger.info.bind(synthtraceLogger);
+  const producedEventsPattern = /^Produced (\d+) events$/;
   synthtraceLogger.info = (message: string) => {
-    const match = /^Produced (\d+) events$/.exec(String(message));
+    const match = producedEventsPattern.exec(String(message));
     if (match) {
       eventsIndexed += parseInt(match[1], 10);
       onProgress?.({ type: 'progress', eventsIndexed });

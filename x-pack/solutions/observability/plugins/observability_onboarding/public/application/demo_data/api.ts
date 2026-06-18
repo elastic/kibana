@@ -13,6 +13,9 @@ import {
   DEMO_ML_JOB_PREFIX,
   LOGS_INDEX_PATTERN,
   METRICS_INDEX_PATTERN,
+  ML_FORCE_START_DATAFEEDS_API_PATH,
+  ML_JOBS_API_VERSION,
+  ML_JOBS_SUMMARY_API_PATH,
   ML_MODULE_API_VERSION,
   ML_MODULE_SETUP_API_PATH,
   SLO_API_PATH,
@@ -36,6 +39,52 @@ export const createApmAnomalyJobs = (
   environments: string[]
 ): Promise<{ jobCreated: boolean }> =>
   http.post(APM_ANOMALY_DETECTION_JOBS_API_PATH, { body: JSON.stringify({ environments }) });
+
+/**
+ * Backfill window for APM anomaly datafeeds. The APM jobs endpoint creates jobs
+ * with their datafeeds stopped, so they never analyze the recently-ingested
+ * (historical) demo data and appear closed/stopped. We start them over this
+ * window so they process the demo data and then continue in real time.
+ */
+const APM_ML_BACKFILL_WINDOW_MS = 7 * 24 * 60 * 60 * 1000;
+
+interface MlJobSummary {
+  id: string;
+  datafeedId?: string;
+  groups?: string[];
+}
+
+const getApmDatafeedIds = async (http: HttpStart): Promise<string[]> => {
+  const jobs = await http.post<MlJobSummary[]>(ML_JOBS_SUMMARY_API_PATH, {
+    version: ML_JOBS_API_VERSION,
+    body: JSON.stringify({ jobIds: [] }),
+  });
+  return jobs.reduce<string[]>((ids, job) => {
+    if (job.datafeedId && job.groups?.includes('apm')) {
+      ids.push(job.datafeedId);
+    }
+    return ids;
+  }, []);
+};
+
+/**
+ * Creates the APM anomaly-detection jobs and then starts their datafeeds over a
+ * backfill window so they analyze the demo data instead of sitting idle.
+ */
+export const setupApmAnomalyJobs = async (
+  http: HttpStart,
+  environments: string[]
+): Promise<{ jobCreated: boolean }> => {
+  const result = await createApmAnomalyJobs(http, environments);
+  const datafeedIds = await getApmDatafeedIds(http);
+  if (datafeedIds.length > 0) {
+    await http.post(ML_FORCE_START_DATAFEEDS_API_PATH, {
+      version: ML_JOBS_API_VERSION,
+      body: JSON.stringify({ datafeedIds, start: Date.now() - APM_ML_BACKFILL_WINDOW_MS }),
+    });
+  }
+  return result;
+};
 
 export interface SetupMlModuleBody {
   indexPatternName: string;
@@ -228,15 +277,29 @@ export const runSynthtraceStreaming = async (
   let buffer = '';
   let eventsIndexed = 0;
   let errorMessage: string | undefined;
+  // The server always ends the stream with a `complete` or `error` event. If we
+  // reach the end without one, the run was interrupted (proxy timeout, server
+  // restart, tab/connection drop) and we must not report success.
+  let sawTerminalEvent = false;
 
   const handleLine = (line: string): void => {
     const trimmed = line.trim();
     if (!trimmed) {
       return;
     }
-    const event = JSON.parse(trimmed) as SynthtraceProgressEvent;
+    let event: SynthtraceProgressEvent;
+    try {
+      event = JSON.parse(trimmed) as SynthtraceProgressEvent;
+    } catch {
+      // A non-JSON line means a truncated/partial chunk; skip it. A genuinely
+      // incomplete stream is caught below by the missing terminal event.
+      return;
+    }
     if (event.type === 'progress' || event.type === 'complete') {
       eventsIndexed = event.eventsIndexed;
+    }
+    if (event.type === 'complete' || event.type === 'error') {
+      sawTerminalEvent = true;
     }
     if (event.type === 'error') {
       errorMessage = event.message;
@@ -258,6 +321,12 @@ export const runSynthtraceStreaming = async (
 
   if (errorMessage) {
     throw new Error(errorMessage);
+  }
+
+  if (!sawTerminalEvent) {
+    throw new Error(
+      'The synthtrace run ended unexpectedly before completing. Check the Kibana server logs.'
+    );
   }
 
   return { scenarioId: body.scenarioId, eventsIndexed };

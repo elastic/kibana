@@ -53,6 +53,11 @@ export const registerSynthtraceRoutes = ({
   config: ObservabilityDemoDataConfig;
   logger: Logger;
 }): void => {
+  // Each run buffers generated docs in the Kibana server heap, so concurrent
+  // runs (two tabs, a double-submit) compound memory pressure and can OOM the
+  // process. Allow only one run at a time across the server.
+  let isRunActive = false;
+
   router.get(
     {
       path: SYNTHTRACE_STATUS_API_PATH,
@@ -87,6 +92,19 @@ export const registerSynthtraceRoutes = ({
       const requestedFromMs = parseDate(from, () => toMs - 60 * 60 * 1000);
       const fromMs = Math.max(requestedFromMs, toMs - MAX_RUN_WINDOW_MS);
 
+      if (fromMs >= toMs) {
+        return response.badRequest({
+          body: `Invalid time range: "from" (${from}) must resolve to a time before "to" (${to}).`,
+        });
+      }
+
+      if (isRunActive) {
+        return response.customError({
+          statusCode: 429,
+          body: 'A synthtrace run is already in progress. Wait for it to finish before starting another.',
+        });
+      }
+
       if (fromMs !== requestedFromMs) {
         logger.warn(
           `Synthtrace run window for "${scenarioId}" was clamped to the last ${
@@ -117,6 +135,7 @@ export const registerSynthtraceRoutes = ({
         }
       };
 
+      isRunActive = true;
       void (async () => {
         try {
           const { eventsIndexed } = await runScenario({
@@ -136,6 +155,7 @@ export const registerSynthtraceRoutes = ({
           logger.error(`Failed to run synthtrace scenario "${scenarioId}": ${message}`);
           write({ type: 'error', message });
         } finally {
+          isRunActive = false;
           if (!stream.writableEnded && !stream.destroyed) {
             stream.end();
           }

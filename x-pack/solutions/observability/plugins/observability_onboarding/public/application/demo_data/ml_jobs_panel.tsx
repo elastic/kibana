@@ -25,7 +25,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useMemo, useState } from 'react';
 import {
-  createApmAnomalyJobs,
+  setupApmAnomalyJobs,
   setupLogsAnalysisModule,
   setupLogsCategoriesModule,
   setupMetricsHostsModule,
@@ -197,7 +197,7 @@ export const MlJobsPanel: React.FC<Props> = ({
         label: i18n.translate('xpack.observability_onboarding.demoData.ml.task.apm', {
           defaultMessage: 'APM anomaly detection',
         }),
-        promise: createApmAnomalyJobs(http, [selectedEnvironment]),
+        promise: setupApmAnomalyJobs(http, [selectedEnvironment]),
       });
     }
 

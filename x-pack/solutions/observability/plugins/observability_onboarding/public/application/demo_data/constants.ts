@@ -32,6 +32,11 @@ export const DEMO_DATA_TAG = 'observability-demo-data';
 export const ML_MODULE_SETUP_API_PATH = '/internal/ml/modules/setup';
 export const ML_MODULE_API_VERSION = '1';
 
+/** ML job-service APIs used to start APM datafeeds over the demo data window. */
+export const ML_JOBS_SUMMARY_API_PATH = '/internal/ml/jobs/jobs_summary';
+export const ML_FORCE_START_DATAFEEDS_API_PATH = '/internal/ml/jobs/force_start_datafeeds';
+export const ML_JOBS_API_VERSION = '1';
+
 /** Stable job-id prefix for demo ML module setup — re-runs target the same job names. */
 export const DEMO_ML_JOB_PREFIX = 'demo-obs-';
 

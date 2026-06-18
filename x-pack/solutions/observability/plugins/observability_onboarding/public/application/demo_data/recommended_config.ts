@@ -215,11 +215,19 @@ const RULE_PRESETS: Record<PresetId, RulePresetValues> = {
   },
 };
 
+// NOTE: `latencyThresholdMs` is intentionally set ABOVE the ~1s transaction
+// latency that the bundled synthtrace scenarios generate. A threshold at or
+// below the demo baseline would make the latency SLI a flat 0% ("good"
+// transactions = those faster than the threshold), so the SLO would look
+// permanently breached on demo data even though nothing is wrong. These are
+// demo-friendly starting values; lower them to match real workload latencies.
+// `availabilityTarget` is kept at realistic SRE values — note that scenarios
+// with a high injected failure rate will show this SLO as breached by design.
 const SLO_PRESETS: Record<PresetId, SloPresetValues> = {
   loose: {
     availabilityTarget: 0.95,
     latencyTarget: 0.95,
-    latencyThresholdMs: 1000,
+    latencyThresholdMs: 3000,
     logsAvailabilityTarget: 0.95,
     windowDays: 30,
     includeLatencySlo: false,
@@ -228,7 +236,7 @@ const SLO_PRESETS: Record<PresetId, SloPresetValues> = {
   recommended: {
     availabilityTarget: 0.99,
     latencyTarget: 0.99,
-    latencyThresholdMs: 500,
+    latencyThresholdMs: 1500,
     logsAvailabilityTarget: 0.99,
     windowDays: 30,
     includeLatencySlo: true,
@@ -237,7 +245,7 @@ const SLO_PRESETS: Record<PresetId, SloPresetValues> = {
   strict: {
     availabilityTarget: 0.995,
     latencyTarget: 0.999,
-    latencyThresholdMs: 200,
+    latencyThresholdMs: 1200,
     logsAvailabilityTarget: 0.995,
     windowDays: 7,
     includeLatencySlo: true,
