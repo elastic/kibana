@@ -31,11 +31,7 @@ export const RuleSummaryFlyoutContainer = ({ ruleId, onClose, onEdit, onClone }:
   const { mutate: toggleRuleEnabled } = useToggleRuleEnabled();
 
   if (isLoading) {
-    return (
-      <LoadingFlyout
-        onClose={onClose}
-      />
-    );
+    return <LoadingFlyout onClose={onClose} />;
   }
 
   if (isError || !rule) {
@@ -58,7 +54,7 @@ export const RuleSummaryFlyoutContainer = ({ ruleId, onClose, onEdit, onClone }:
         rule={rule}
         hasAnimation={false}
         ownFocus={false}
-        session='start'
+        session="start"
         onClose={onClose}
         onEdit={onEdit}
         onClone={onClone}

@@ -6,12 +6,7 @@
  */
 
 import React from 'react';
-import {
-  EuiEmptyPrompt,
-  EuiFlyout,
-  EuiFlyoutBody,
-  EuiLoadingSpinner,
-} from '@elastic/eui';
+import { EuiEmptyPrompt, EuiFlyout, EuiFlyoutBody, EuiLoadingSpinner } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 const FLYOUT_TITLE_ID = 'loadingFlyoutTitle';
@@ -23,7 +18,7 @@ interface Props {
 export const LoadingFlyout = ({ onClose }: Props) => (
   <EuiFlyout
     type="push"
-    size="s"    
+    size="s"
     onClose={onClose}
     aria-labelledby={FLYOUT_TITLE_ID}
     data-test-subj="loadingFlyout"
