@@ -258,8 +258,8 @@ xpack.actions.queued.max: 10000
 xpack.actions.auth.ears:
   enabled: true
   ssl:
-    certificate: /mnt/elastic-internal/http-certs/tls.crt
-    key: /mnt/elastic-internal/http-certs/tls.key
+    certificate: random bad string
+    key: random bad string
 
 uiSettings:
   overrides:
