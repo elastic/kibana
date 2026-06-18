@@ -31,11 +31,13 @@ const STREAMS_KI_WORKFLOW_MANAGEMENT = {
   enablement: 'enforced',
 } as const;
 
-// The continuous onboarding workflow is installed disabled and toggled on/off
-// by the user via the continuous KI extraction setting.
-// enablement: 'restorable' — the user's enabled/disabled choice is preserved
+// Used by workflows that are installed disabled and enabled lazily at runtime
+// (continuous onboarding is toggled by the user; sync is enabled on the first
+// KI identification). The disabled -> enabled transition is what schedules the
+// recurring trigger.
+// enablement: 'restorable' — the runtime enabled/disabled state is preserved
 // across upgrades instead of being reset from the YAML.
-const STREAMS_KI_CONTINUOUS_ONBOARDING_MANAGEMENT = {
+const STREAMS_KI_RESTORABLE_WORKFLOW_MANAGEMENT = {
   lifecycle: 'static',
   versionStrategy: 'auto',
   enablement: 'restorable',
@@ -70,7 +72,7 @@ export const STREAMS_KI_CONTINUOUS_ONBOARDING_WORKFLOW = {
   pluginId: 'streams',
   version: 1,
   yaml: CONTINUOUS_ONBOARDING_YAML,
-  management: STREAMS_KI_CONTINUOUS_ONBOARDING_MANAGEMENT,
+  management: STREAMS_KI_RESTORABLE_WORKFLOW_MANAGEMENT,
 } as const satisfies ManagedWorkflowDefinition;
 
 export const STREAMS_KI_SYNC_WORKFLOW = {
@@ -78,6 +80,8 @@ export const STREAMS_KI_SYNC_WORKFLOW = {
   pluginId: 'streams',
   version: 1,
   yaml: SYNC_YAML,
-  // enforced: stays active independent of continuous-extraction toggle.
-  management: STREAMS_KI_WORKFLOW_MANAGEMENT,
+  // restorable: installed disabled, then enabled (and thus scheduled) lazily on
+  // the first KI identification. Runs independently of the continuous-extraction
+  // toggle, and the enabled state is preserved across upgrades.
+  management: STREAMS_KI_RESTORABLE_WORKFLOW_MANAGEMENT,
 } as const satisfies ManagedWorkflowDefinition;

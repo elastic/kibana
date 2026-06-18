@@ -315,7 +315,8 @@ export class StreamsPlugin
     // everywhere, rather than constructing a second one from the same management API.
     const workflowClients = createWorkflowClients(
       plugins.workflowsManagement?.management,
-      telemetryClient
+      telemetryClient,
+      this.logger
     );
     const streamsKIsOnboardingClient = workflowClients.streamsKIsOnboardingClient;
 
