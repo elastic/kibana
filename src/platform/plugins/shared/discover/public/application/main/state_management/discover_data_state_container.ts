@@ -79,6 +79,7 @@ export interface DataDocumentsMsg extends DataMsg {
   esqlQueryColumns?: DatatableColumn[]; // columns from ES|QL request
   esqlHeaderWarning?: string;
   interceptedWarnings?: SearchResponseWarning[]; // warnings (like shard failures)
+  isApproximate?: boolean; // true while showing approximate results, cleared when exact results arrive
 }
 
 export interface DataTotalHitsMsg extends DataMsg {
