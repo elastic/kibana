@@ -113,9 +113,7 @@ export const RevokeApplicationConnectionsModal = ({
         if (!item.userId) {
           return <EuiTextColor color="subdued">{'—'}</EuiTextColor>;
         }
-        return user && item.userId === user.username
-          ? getUserDisplayName(user)
-          : item.userId;
+        return user && item.userId === user.username ? getUserDisplayName(user) : item.userId;
       },
     },
   ];
