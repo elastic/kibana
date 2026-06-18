@@ -21,7 +21,6 @@ export const FILE_ATTACHMENT_TYPE = 'file';
 export const LENS_ATTACHMENT_TYPE = 'lens';
 export const OSQUERY_ATTACHMENT_TYPE = 'osquery';
 export const INDICATOR_ATTACHMENT_TYPE = 'security.indicator';
-// POC (entityAttachmentsEnabled): Entity Analytics -> Cases bridge. New unified-only
 // type with no legacy v1 equivalent, so it is intentionally absent from the legacy maps.
 export const SECURITY_ENTITY_ATTACHMENT_TYPE = 'security.entity';
 export const SECURITY_TIMELINE_ATTACHMENT_TYPE = 'security.timeline';

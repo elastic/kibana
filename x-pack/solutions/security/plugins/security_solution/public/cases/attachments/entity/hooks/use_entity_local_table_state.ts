@@ -37,12 +37,11 @@ interface UseEntityLocalTableStateArgs {
  * Returns the same `EntityURLStateResult` shape so it's a drop-in substitute
  * at the call site.
  *
- * --
- * POC NOTE — this is a fork (Option C in the design discussion). The
- * long-term home for this is **Option A**: extract a `useEntityTableBaseState`
- * primitive from `useEntityURLState` that both hooks compose. Once that
- * refactor lands in `entity_analytics/components/home/entities_table/hooks/`,
- * delete this file and import the base hook directly.
+ * Kept separate from `useEntityURLState` rather than sharing a base hook
+ * because that hook's URL/Redux/filterManager bidirectional sync is not
+ * cleanly separable from its core logic. A future improvement would be to
+ * extract a `useEntityTableBaseState` primitive that both hooks compose,
+ * eliminating this fork entirely.
  *
  * @see x-pack/solutions/security/plugins/security_solution/public/entity_analytics/components/home/entities_table/hooks/use_entity_url_state.ts
  */

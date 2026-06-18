@@ -11,7 +11,6 @@ export const ENTITY_RISK_SCORE_TEST_ID = 'eaCasesEntityRiskScore';
 export const ENTITY_RISK_LEVEL_TEST_ID = 'eaCasesEntityRiskLevel';
 export const ADD_TO_NEW_CASE_TEST_ID = 'eaCasesAddToNewCase';
 export const ADD_TO_EXISTING_CASE_TEST_ID = 'eaCasesAddToExistingCase';
-export const ADD_TO_CASE_BUTTON_TEST_ID = 'eaCasesAddToCaseButton';
 export const ENTITY_TAB_TABLE_TEST_ID = 'eaCasesEntityTabTable';
 export const ENTITY_TAB_EMPTY_TEST_ID = 'eaCasesEntityTabEmpty';
 export const ENTITY_TAB_NO_PRIVILEGES_TEST_ID = 'eaCasesEntityTabNoPrivileges';

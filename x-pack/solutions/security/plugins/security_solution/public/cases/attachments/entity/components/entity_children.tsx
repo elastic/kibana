@@ -51,7 +51,7 @@ const FieldRow: FC<FieldRowProps> = ({ label, value, valueTestSubj }) => (
 
 /**
  * Renders the basic entity values (name, type, and risk, when present) in the
- * case attachment view. For the POC we render directly from the persisted metadata
+ * case attachment view. Render directly from the persisted metadata
  * rather than re-fetching the entity.
  */
 export const EntityChildren: FC<EntityChildrenProps> = ({ metadata }) => {

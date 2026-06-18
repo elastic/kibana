@@ -123,8 +123,7 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Entity Analytics: enables attaching entities (users, hosts, IPs) to a case from
    * Entity Analytics surfaces such as the entity flyout, and registers the
-   * `security.entity` unified cases attachment type. POC for the Entity Analytics ->
-   * Cases bridge (OneCases).
+   * `security.entity` unified cases attachment type.
    */
   entityAttachmentsEnabled: false,
 
