@@ -23,7 +23,6 @@ import { StreamsTreeTable } from './tree_table';
 
 const datePickerStyle = css`
   .euiFormControlLayout,
-  .euiSuperDatePicker button,
   .euiButton {
     height: 40px;
   }
@@ -122,7 +121,7 @@ export function StreamsView() {
             />
           </EuiFlexItem>
           <EuiFlexItem grow={false} css={datePickerStyle}>
-            <StreamsAppSearchBar showDatePicker />
+            <StreamsAppSearchBar showDatePicker enableDateRangePicker />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <GenerateSplitButton
