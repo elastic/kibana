@@ -11,8 +11,7 @@ import { CUSTOM_QUERY_RULE } from '@kbn/scout-security/src/playwright/constants/
 
 const RIGHT = 'right';
 
-// Failing: See https://github.com/elastic/kibana/issues/256433
-spaceTest.describe.skip(
+spaceTest.describe(
   'Expandable flyout state sync',
   { tag: [...tags.stateful.classic, ...tags.serverless.security.complete] },
   () => {
@@ -31,7 +30,11 @@ spaceTest.describe.skip(
       await apiServices.detectionAlerts.deleteAll();
     });
 
-    spaceTest('should test flyout url sync', async ({ pageObjects, page }) => {
+    spaceTest('should test flyout url sync', async ({ pageObjects, page, apiServices }) => {
+      // Wait for the detection engine to produce an alert before loading the UI.
+      // Without this, the page loads before the rule has executed, causing the KPI panel
+      // and alert row lookups to time out on slower CI workers.
+      await apiServices.detectionAlerts.waitForAlerts(ruleName, 1, 60_000);
       await pageObjects.alertsTablePage.navigate();
 
       const urlBeforeAlertDetails = page.url();
