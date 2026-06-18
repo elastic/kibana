@@ -15,7 +15,12 @@ import { HTTPAuthorizationHeader, isUiamCredential } from '@kbn/core-security-se
 import { truncate } from 'lodash';
 import { ApiKeyType } from '../config';
 import type { ConcreteTaskInstance, TaskInstance } from '../task';
-import { createApiKey, requestHasApiKey, getApiKeyFromRequest } from '../lib/api_key_utils';
+import {
+  createApiKey,
+  requestHasApiKey,
+  getApiKeyFromRequest,
+  shouldCloneApiKeyFromRequest,
+} from '../lib/api_key_utils';
 import type {
   ApiKeySOFields,
   ApiKeyStrategy,
@@ -52,7 +57,7 @@ export class EsAndUiamApiKeyStrategy implements ApiKeyStrategy {
     security: SecurityServiceStart,
     opts?: GrantApiKeysOpts
   ): Promise<Map<string, ApiKeySOFields>> {
-    const esKeys = await createApiKey(taskInstances, request, security);
+    const esKeys = await createApiKey(taskInstances, request, security, opts);
     const uiamKeys =
       opts?.onEsKey === true
         ? new Map<string, UiamApiKeyResult>()
@@ -74,7 +79,8 @@ export class EsAndUiamApiKeyStrategy implements ApiKeyStrategy {
     // independent flags on `userScope` (e.g., `esApiKeyCreatedByUser` /
     // `uiamApiKeyCreatedByUser`) with matching per-credential checks in
     // `getApiKeyIdsForInvalidation`.
-    const apiKeyCreatedByUser = requestHasApiKey(security, request);
+    const cloneApiKey = shouldCloneApiKeyFromRequest(security, request, opts);
+    const apiKeyCreatedByUser = requestHasApiKey(security, request) && !cloneApiKey;
 
     const result = new Map<string, ApiKeySOFields>();
     taskInstances.forEach((task) => {

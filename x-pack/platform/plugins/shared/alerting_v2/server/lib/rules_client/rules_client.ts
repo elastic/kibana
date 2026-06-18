@@ -610,6 +610,7 @@ export class RulesClient {
         try {
           await this.taskManager.bulkSchedule(tasksToSchedule, {
             request: this.request as unknown as CoreKibanaRequest,
+            cloneApiKey: true,
           });
         } catch {
           // Task scheduling failure is non-fatal for bulk operations
