@@ -162,7 +162,17 @@ function serializeRuleDomain(ruleDomain: RuleDomain): RuleChangeHistorySnapshot 
 
   return {
     ...purifiedRuleDomain,
-    createdAt: ruleDomain.createdAt.toISOString(),
-    updatedAt: ruleDomain.updatedAt.toISOString(),
+    createdAt: normalizeDate(ruleDomain.createdAt, new Date()),
+    updatedAt: normalizeDate(ruleDomain.updatedAt, new Date()),
   };
+}
+
+function normalizeDate(value: string | number | Date, fallback: Date): string {
+  const date = new Date(value);
+
+  if (!isNaN(date.getTime())) {
+    return date.toISOString();
+  }
+
+  return fallback.toISOString();
 }
