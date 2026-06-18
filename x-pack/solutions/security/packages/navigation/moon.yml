@@ -21,6 +21,7 @@ dependsOn:
   - '@kbn/core'
   - '@kbn/deeplinks-security'
   - '@kbn/core-chrome-browser'
+  - '@kbn/dashboard-plugin'
 tags:
   - shared-common
   - package

@@ -35,5 +35,6 @@
     "@kbn/ai-assistant-icon",
     "@kbn/shared-ux-page-kibana-template",
     "@kbn/shared-ux-ai-components",
+    "@kbn/dashboard-plugin",
   ]
 }
