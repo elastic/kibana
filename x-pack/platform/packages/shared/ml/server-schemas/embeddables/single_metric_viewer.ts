@@ -44,7 +44,7 @@ export const singleMetricViewerEmbeddableStateSchema = schema.object(
       schema.string({
         meta: {
           description:
-            'For detectors that use the `metric` function, selects which value to plot — `min`, `max`, or `mean`. Ignored for other detector functions; when omitted the viewer derives a default from the highest-scoring anomaly record.',
+            'For detectors that use the `metric` function, selects which value to plot: `min`, `max`, or `mean`. Ignored for other detector functions. When omitted, the viewer derives a default from the highest-scoring anomaly record.',
         },
         maxLength: 1000,
       })
