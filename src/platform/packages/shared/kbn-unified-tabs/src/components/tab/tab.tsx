@@ -392,6 +392,14 @@ function getTabContainerCss(
         opacity: 1;
       }
 
+      ${!isSelected
+        ? `
+        .unifiedTabs__tabLabelText {
+          color: ${euiTheme.colors.primary};
+        }
+      `
+        : ''}
+
       .unifiedTabs__tabLabel {
         width: calc(100% - ${euiTheme.size.l} * 2 - ${euiTheme.size.xs});
         mask-image: linear-gradient(

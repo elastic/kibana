@@ -96,7 +96,8 @@ export const TabWithBackground = React.forwardRef<HTMLDivElement, TabWithBackgro
             ${!isSelected
               ? `
               &:hover {
-                background-color: ${euiTheme.colors.backgroundBasePrimary};
+                background-color: ${euiTheme.colors.backgroundLightPrimary};
+                color: ${euiTheme.colors.primary};
                 border-radius: ${euiTheme.border.radius.small};
               }
             `
