@@ -17,7 +17,11 @@ import type { PackSavedObject } from '../../common/types';
 import { PLUGIN_ID } from '../../../common';
 
 import { packSavedObjectType } from '../../../common/types';
-import { convertSOQueriesToPack } from './utils';
+import {
+  convertSOQueriesToPack,
+  buildScheduleResponseSlice,
+  stripPerQueryRruleFields,
+} from './utils';
 import { convertShardsToObject } from '../utils';
 import type { ReadPackResponseData } from './types';
 import { readPacksRequestParamsSchema } from '../../../common/api';
@@ -83,6 +87,8 @@ export const readPackRoute = (router: IRouter, osqueryContext: OsqueryAppContext
         const osqueryPackAssetReference = !!filter(references, ['type', 'osquery-pack-asset'])
           .length;
 
+        const isRruleFeatureEnabled = osqueryContext.experimentalFeatures.rruleScheduling;
+
         const data: ReadPackResponseData = {
           type: rest.type,
           namespaces: rest.namespaces,
@@ -100,14 +106,19 @@ export const readPackRoute = (router: IRouter, osqueryContext: OsqueryAppContext
           updated_by: attributes.updated_by,
           updated_by_profile_uid: attributes.updated_by_profile_uid,
           saved_object_id: id,
-          queries: mapValues(
-            convertSOQueriesToPack(attributes.queries),
-            // `start_date` is a write-side detail and must not leak to the public API.
-            ({ start_date: _omit, ...query }) => query
+          queries: stripPerQueryRruleFields(
+            mapValues(
+              convertSOQueriesToPack(attributes.queries),
+              // `start_date` is a write-side detail and must not leak to the public API.
+              ({ start_date: _startDate, ...query }) => query
+            ),
+            isRruleFeatureEnabled
           ),
           shards: convertShardsToObject(attributes.shards),
           policy_ids: policyIds,
           read_only: attributes.version !== undefined && osqueryPackAssetReference,
+          // Discriminated read response — see buildScheduleResponseSlice.
+          ...buildScheduleResponseSlice(attributes, isRruleFeatureEnabled),
         };
 
         return response.ok({

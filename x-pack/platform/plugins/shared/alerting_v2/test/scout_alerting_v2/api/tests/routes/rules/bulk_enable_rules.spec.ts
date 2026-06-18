@@ -9,12 +9,12 @@ import { expect } from '@kbn/scout/api';
 import type { RoleApiCredentials } from '@kbn/scout';
 import { ID_MAX_LENGTH, MAX_BULK_ITEMS } from '@kbn/alerting-v2-schemas';
 import {
-  ALL_ROLE,
+  ALERTING_V2_RULES_ALL_ROLE,
+  ALERTING_V2_RULES_READ_ROLE,
   apiTest,
   buildCreateRuleData,
   expectNoBulkTruncationMetadata,
   NO_ACCESS_ROLE,
-  READ_ROLE,
   testData,
 } from '../../../fixtures';
 
@@ -25,7 +25,7 @@ apiTest.describe('Bulk enable rules API', { tag: '@local-stateful-classic' }, ()
   let writerHeaders: Record<string, string>;
 
   apiTest.beforeAll(async ({ requestAuth }) => {
-    writerCredentials = await requestAuth.getApiKeyForCustomRole(ALL_ROLE);
+    writerCredentials = await requestAuth.getApiKeyForCustomRole(ALERTING_V2_RULES_ALL_ROLE);
     writerHeaders = { ...testData.COMMON_HEADERS, ...writerCredentials.apiKeyHeader };
   });
 
@@ -160,6 +160,11 @@ apiTest.describe('Bulk enable rules API', { tag: '@local-stateful-classic' }, ()
         buildCreateRuleData({
           kind: 'signal',
           state_transition: undefined,
+          recovery_strategy: undefined,
+          query: {
+            format: 'standalone',
+            breach: { query: 'FROM logs-* | LIMIT 10' },
+          },
           metadata: { name: 'signal-rule' },
         })
       );
@@ -260,7 +265,9 @@ apiTest.describe('Bulk enable rules API', { tag: '@local-stateful-classic' }, ()
         buildCreateRuleData({ metadata: { name: 'reader-cannot-enable' } })
       );
       await apiServices.alertingV2.rules.bulkDisable({ ids: [rule.id] });
-      const readerCredentials = await requestAuth.getApiKeyForCustomRole(READ_ROLE);
+      const readerCredentials = await requestAuth.getApiKeyForCustomRole(
+        ALERTING_V2_RULES_READ_ROLE
+      );
       const response = await apiClient.post(BULK_ENABLE_URL, {
         headers: { ...testData.COMMON_HEADERS, ...readerCredentials.apiKeyHeader },
         body: { ids: [rule.id] },

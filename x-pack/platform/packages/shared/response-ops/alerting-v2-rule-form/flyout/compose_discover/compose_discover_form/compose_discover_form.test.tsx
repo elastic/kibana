@@ -5,20 +5,20 @@
  * 2.0.
  */
 
-import React from 'react';
+import { DASHBOARD_ARTIFACT_TYPE, RUNBOOK_ARTIFACT_TYPE } from '@kbn/alerting-v2-constants';
+import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
+import { QueryClientProvider } from '@kbn/react-query';
+import type { DashboardStart } from '@kbn/dashboard-plugin/public';
 import { render, screen, waitFor } from '@testing-library/react';
+import React from 'react';
 import type { UseFormReturn } from 'react-hook-form';
 import { FormProvider, useForm } from 'react-hook-form';
-import { QueryClientProvider } from '@kbn/react-query';
-import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
-import { DASHBOARD_ARTIFACT_TYPE, RUNBOOK_ARTIFACT_TYPE } from '@kbn/alerting-v2-constants';
+import { ComposeDiscoverForm, getSteps } from '.';
 import { RuleFormProvider, type RuleFormServices } from '../../../form/contexts';
 import { createMockServices, createTestQueryClient } from '../../../test_utils';
-import { createInitialState } from '../use_compose_discover_state';
-import type { ComposeDiscoverState } from '../types';
 import type { ComposeFormValues } from '../compose_form_types';
-import { ComposeDiscoverForm, getSteps } from '.';
+import type { ComposeDiscoverState } from '../types';
+import { createInitialState } from '../use_compose_discover_state';
 
 const createState = (overrides: Partial<ComposeDiscoverState> = {}): ComposeDiscoverState => ({
   ...createInitialState({ mode: 'create' }),
@@ -26,11 +26,11 @@ const createState = (overrides: Partial<ComposeDiscoverState> = {}): ComposeDisc
 });
 
 const BASE_COMPOSE_VALUES: ComposeFormValues = {
-  kind: 'signal',
+  kind: 'alert',
   metadata: { name: 'Test rule', enabled: true },
   timeField: '@timestamp',
   schedule: { every: '1m', lookback: '5m' },
-  query: { format: 'standalone', breach: '' },
+  query: { format: 'composed', base: '', breach: { segment: '' } },
   stateTransitionAlertDelayMode: 'immediate',
   stateTransitionRecoveryDelayMode: 'immediate',
   artifacts: [],
@@ -38,40 +38,31 @@ const BASE_COMPOSE_VALUES: ComposeFormValues = {
   dashboardArtifacts: [],
 };
 
-interface Dashboard {
-  id: string;
-  title: string;
-}
-
-interface GetDashboardsByIdContext {
-  ids: string[];
-  onResults: (dashboards: Dashboard[]) => void;
-}
-
 const DASHBOARD_ID = 'dashboard-123';
 const DASHBOARD_TITLE = 'Dashboard 123';
 
-const mockGetByIdExecute = jest.fn((context: GetDashboardsByIdContext) => {
-  context.onResults(
-    context.ids
-      .map((id) => (id === DASHBOARD_ID ? { id: DASHBOARD_ID, title: DASHBOARD_TITLE } : null))
-      .filter((dashboard): dashboard is Dashboard => Boolean(dashboard))
-  );
-});
+const mockFindByIds = jest.fn(async (ids: string[]) =>
+  ids.map((id) =>
+    id === DASHBOARD_ID
+      ? { id, status: 'success', attributes: { title: DASHBOARD_TITLE } }
+      : { id, status: 'error', notFound: true, error: new Error('not found') }
+  )
+);
 
-const mockUiActions = {
-  getAction: jest.fn((actionId: string) => {
-    if (actionId === 'getDashboardsByIdsAction') {
-      return Promise.resolve({ execute: mockGetByIdExecute });
-    }
+const mockFindDashboardsService = jest.fn(async () => ({
+  search: jest.fn(async () => ({ total: 0, dashboards: [] })),
+  findById: jest.fn(),
+  findByIds: mockFindByIds,
+  findByTitle: jest.fn(),
+}));
 
-    return Promise.resolve({ execute: jest.fn() });
-  }),
-} as unknown as UiActionsStart;
+const mockDashboard = {
+  findDashboardsService: mockFindDashboardsService,
+} as unknown as DashboardStart;
 
 const createComposeFormWrapper = (
   defaultValues: ComposeFormValues = BASE_COMPOSE_VALUES,
-  services: RuleFormServices = { ...createMockServices(), uiActions: mockUiActions }
+  services: RuleFormServices = { ...createMockServices(), dashboard: mockDashboard }
 ) => {
   const queryClient = createTestQueryClient();
 
@@ -95,11 +86,12 @@ const createComposeFormWrapper = (
 const renderComposeDiscoverDetailsStep = (defaultValues: ComposeFormValues = BASE_COMPOSE_VALUES) =>
   render(
     <ComposeDiscoverForm
-      state={createState({ step: 1 })}
+      state={createState({ step: 2 })}
       dispatch={jest.fn()}
-      services={{ ...createMockServices(), uiActions: mockUiActions }}
+      services={{ ...createMockServices(), dashboard: mockDashboard }}
       onRecoveryTypeChange={jest.fn()}
       onKindChange={jest.fn()}
+      isEditing={false}
     />,
     { wrapper: createComposeFormWrapper(defaultValues) }
   );
@@ -110,13 +102,40 @@ describe('step validation', () => {
   });
 
   describe('alertCondition.validate', () => {
-    const alertStep = getSteps(false).find((s) => s.id === 'alertCondition')!;
+    const alertStep = getSteps(false).steps.find((s) => s.id === 'alertCondition')!;
 
-    it('returns true when queryCommitted is true', async () => {
+    it('returns true when queryCommitted and composed alert query is complete', async () => {
       const state = createState({ queryCommitted: true });
-      const methods = {} as UseFormReturn<ComposeFormValues>;
+      const methods = {
+        getValues: (field?: keyof ComposeFormValues) => {
+          if (field === 'kind') return 'alert';
+          if (field === 'query') {
+            return {
+              format: 'composed',
+              base: 'FROM logs-*',
+              breach: { segment: '| WHERE status == "error"' },
+            };
+          }
+          return undefined;
+        },
+      } as unknown as UseFormReturn<ComposeFormValues>;
 
       expect(await alertStep.validate!(methods, state)).toBe(true);
+    });
+
+    it('returns false when queryCommitted but breach segment is empty', async () => {
+      const state = createState({ queryCommitted: true });
+      const methods = {
+        getValues: (field?: keyof ComposeFormValues) => {
+          if (field === 'kind') return 'alert';
+          if (field === 'query') {
+            return { format: 'composed', base: 'FROM logs-*', breach: { segment: '' } };
+          }
+          return undefined;
+        },
+      } as unknown as UseFormReturn<ComposeFormValues>;
+
+      expect(await alertStep.validate!(methods, state)).toBe(false);
     });
 
     it('returns false when queryCommitted is false', async () => {
@@ -128,7 +147,7 @@ describe('step validation', () => {
   });
 
   describe('details.validate', () => {
-    const detailsStep = getSteps(false).find((s) => s.id === 'details')!;
+    const detailsStep = getSteps(false).steps.find((s) => s.id === 'details')!;
 
     it('delegates to methods.trigger with metadata.name', async () => {
       const state = createState();
@@ -187,23 +206,82 @@ describe('step validation', () => {
       await waitFor(() => {
         expect(screen.getByText(DASHBOARD_TITLE)).toBeTruthy();
       });
-      expect(mockUiActions.getAction).toHaveBeenCalledWith('getDashboardsByIdsAction');
+      expect(mockFindByIds).toHaveBeenCalledWith([DASHBOARD_ID]);
     });
   });
 
   describe('step registry', () => {
     it('recoveryCondition has no validate function', () => {
-      const recoveryStep = getSteps(true).find((s) => s.id === 'recoveryCondition')!;
+      const recoveryStep = getSteps(true).steps.find((s) => s.id === 'recoveryCondition')!;
       expect(recoveryStep.validate).toBeUndefined();
     });
+  });
 
-    it('does not include the placeholder notifications step', () => {
-      expect(getSteps(false).map((step) => step.id)).toEqual(['alertCondition', 'details']);
-      expect(getSteps(true).map((step) => step.id)).toEqual([
-        'alertCondition',
-        'recoveryCondition',
-        'details',
-      ]);
+  describe('notifications.validate', () => {
+    const notificationsStep = getSteps(true).steps.find((s) => s.id === 'notifications')!;
+
+    it('returns true when notifications are disabled', async () => {
+      const state = createState({ mode: 'create' });
+      const methods = {
+        getValues: jest.fn().mockReturnValue(undefined),
+      } as unknown as UseFormReturn<ComposeFormValues>;
+      expect(await notificationsStep.validate!(methods, state)).toBe(true);
     });
+
+    it('returns false when an existing-workflow action has no workflowId', async () => {
+      const state = createState({ mode: 'create' });
+      const methods = {
+        getValues: jest.fn().mockReturnValue({
+          workflows: [{ id: 'item-1', source: 'existing', workflowId: null }],
+        }),
+      } as unknown as UseFormReturn<ComposeFormValues>;
+      expect(await notificationsStep.validate!(methods, state)).toBe(false);
+    });
+
+    it('returns true for a complete existing-workflow action', async () => {
+      const state = createState({ mode: 'create' });
+      const methods = {
+        getValues: jest.fn().mockReturnValue({
+          workflows: [{ id: 'item-1', source: 'existing', workflowId: 'wf-1' }],
+        }),
+      } as unknown as UseFormReturn<ComposeFormValues>;
+      expect(await notificationsStep.validate!(methods, state)).toBe(true);
+    });
+
+    it('returns false for an inline action with no connector', async () => {
+      const state = createState({ mode: 'create' });
+      const methods = {
+        getValues: jest.fn().mockReturnValue({
+          workflows: [
+            {
+              id: 'item-1',
+              source: 'inline',
+              stepType: 'email',
+              connectorId: null,
+              params: '',
+            },
+          ],
+        }),
+      } as unknown as UseFormReturn<ComposeFormValues>;
+      expect(await notificationsStep.validate!(methods, state)).toBe(false);
+    });
+
+    it('returns true when notifications.workflows is empty', async () => {
+      const state = createState({ mode: 'create' });
+      const methods = {
+        getValues: jest.fn().mockReturnValue({ workflows: [] }),
+      } as unknown as UseFormReturn<ComposeFormValues>;
+      expect(await notificationsStep.validate!(methods, state)).toBe(true);
+    });
+  });
+
+  it('includes the correct steps based on isAlert', () => {
+    expect(getSteps(false).steps.map((step) => step.id)).toEqual(['alertCondition', 'details']);
+    expect(getSteps(true).steps.map((step) => step.id)).toEqual([
+      'alertCondition',
+      'recoveryCondition',
+      'details',
+      'notifications',
+    ]);
   });
 });

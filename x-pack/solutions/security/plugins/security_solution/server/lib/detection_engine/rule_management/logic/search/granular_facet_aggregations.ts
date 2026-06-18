@@ -6,15 +6,18 @@
  */
 
 import type { AggregationsAggregationContainer } from '@elastic/elasticsearch/lib/api/types';
+import type { RulesClient } from '@kbn/alerting-plugin/server';
 
+import { RULES_FACET_CATEGORY_TO_ATTRIBUTE } from '../../../../../../common/api/detection_engine/rule_management/granular_rules/granular_rules_facet_dimensions';
 import type {
   FacetCounts,
   GranularRulesFacetCategory,
 } from '../../../../../../common/api/detection_engine/rule_management/granular_rules/granular_rules_contract.gen';
-import { RULES_FACET_CATEGORY_TO_ATTRIBUTE } from '../../../../../../common/api/detection_engine/rule_management';
+import { findRules } from './find_rules';
 
 const DEFAULT_AGGREGATION_MAX_SIZE = 200;
 
+const FACET_AGG_ID_CHUNK_SIZE = 1024;
 export interface TermsAggBuckets {
   buckets: Array<{
     key: string | number | boolean;
@@ -38,12 +41,11 @@ export const buildAggregations = ({
 }): Record<string, AggregationsAggregationContainer> => {
   const aggregations: Record<string, AggregationsAggregationContainer> = {};
   for (const category of categories) {
-    // Allows us to support user friendly names while maintaining raw KQL attributes as an escape hatch.
-    const fieldName = category.startsWith('alert.attributes.')
-      ? category
-      : RULES_FACET_CATEGORY_TO_ATTRIBUTE[category];
     aggregations[`facet_${category}`] = {
-      terms: { field: fieldName, size: DEFAULT_AGGREGATION_MAX_SIZE },
+      terms: {
+        field: RULES_FACET_CATEGORY_TO_ATTRIBUTE[category],
+        size: DEFAULT_AGGREGATION_MAX_SIZE,
+      },
     };
   }
 
@@ -52,7 +54,7 @@ export const buildAggregations = ({
 
 export const expandRawAggregationResult = (
   raw: Record<string, unknown>,
-  categories: GranularRulesFacetCategory[]
+  categories: readonly string[]
 ): FacetCounts => {
   const counts: FacetCounts = {};
   for (const category of categories) {
@@ -62,4 +64,64 @@ export const expandRawAggregationResult = (
     }
   }
   return counts;
+};
+
+interface FetchGranularFacetCountsChunkedArgs {
+  rulesClient: RulesClient;
+  ruleIds: string[];
+  categories: GranularRulesFacetCategory[];
+  chunkSize?: number;
+}
+
+/**
+ * Run the same terms aggregations as `buildAggregations` over a (potentially
+ * large) set of alerting saved-object ids without OR-ing every id into one
+ * KQL clause. Splits `ruleIds` into chunks, runs an aggs-only `findRules`
+ * call per chunk, and merges the per-chunk terms buckets by summing
+ * `doc_count` per `(category, key)`.
+ */
+export const fetchGranularFacetCountsChunked = async ({
+  rulesClient,
+  ruleIds,
+  categories,
+  chunkSize = FACET_AGG_ID_CHUNK_SIZE,
+}: FetchGranularFacetCountsChunkedArgs): Promise<FacetCounts> => {
+  if (ruleIds.length === 0 || categories.length === 0) {
+    return {};
+  }
+
+  const aggs = buildAggregations({ categories });
+  const merged: FacetCounts = Object.fromEntries(categories.map((c) => [c, {}]));
+
+  for (let start = 0; start < ruleIds.length; start += chunkSize) {
+    const chunk = ruleIds.slice(start, start + chunkSize);
+    const result = await findRules({
+      rulesClient,
+      filter: undefined,
+      ruleIds: chunk,
+      page: 1,
+      perPage: 0,
+      sortField: undefined,
+      sortOrder: undefined,
+      fields: undefined,
+      aggregations: aggs,
+    });
+
+    if (result.aggregations) {
+      const partial = expandRawAggregationResult(
+        result.aggregations as Record<string, unknown>,
+        categories
+      );
+      for (const category of categories) {
+        const bucket = partial[category] ?? {};
+        const accum = merged[category] ?? {};
+        for (const [key, count] of Object.entries(bucket)) {
+          accum[key] = (accum[key] ?? 0) + count;
+        }
+        merged[category] = accum;
+      }
+    }
+  }
+
+  return merged;
 };

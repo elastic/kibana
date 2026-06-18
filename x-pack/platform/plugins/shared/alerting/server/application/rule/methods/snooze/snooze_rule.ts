@@ -7,7 +7,6 @@
 
 import Boom from '@hapi/boom';
 import { withSpan } from '@kbn/apm-utils';
-import type { SavedObject } from '@kbn/core/server';
 import { RuleChangeTrackingAction } from '@kbn/alerting-types';
 import { ruleSnoozeScheduleSchema } from '../../../../../common/routes/rule/request';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
@@ -72,10 +71,6 @@ async function snoozeWithOCC<Params extends RuleParams = never>(
       operation: WriteOperations.Snooze,
       entity: AlertingAuthorizationEntity.Rule,
     });
-
-    if (attributes.actions.length) {
-      await context.actionsAuthorization.ensureAuthorized({ operation: 'execute' });
-    }
   } catch (error) {
     context.auditLogger?.log(
       ruleAuditEvent({
@@ -121,7 +116,13 @@ async function snoozeWithOCC<Params extends RuleParams = never>(
   });
 
   await logRuleChanges({
-    ruleSOs: [updatedRuleRaw] as Array<SavedObject<RawRule>>,
+    ruleSOs: [
+      {
+        ...updatedRuleRaw,
+        attributes: { ...attributes, ...updatedRuleRaw.attributes },
+        references: updatedRuleRaw.references ?? [],
+      },
+    ],
     rulesClientContext: context,
     changesContext: {
       action: RuleChangeTrackingAction.ruleSnooze,

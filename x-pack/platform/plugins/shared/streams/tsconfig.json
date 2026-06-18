@@ -96,6 +96,11 @@
     "@kbn/workflows",
     "@kbn/agent-builder-plugin",
     "@kbn/data-streams",
-    "@kbn/es-mappings"
+    "@kbn/es-mappings",
+    "@kbn/core-spaces-common",
+    "@kbn/elastic-agent-utils",
+    "@kbn/sample-log-parser",
+    "@kbn/workflows-extensions",
+    "@kbn/agent-context-layer-plugin"
   ]
 }

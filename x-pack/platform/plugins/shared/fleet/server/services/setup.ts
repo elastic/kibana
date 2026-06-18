@@ -15,7 +15,7 @@ import { compact } from 'lodash';
 import pRetry from 'p-retry';
 
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { LockAcquisitionError } from '@kbn/lock-manager';
 
 import { MessageSigningError } from '../../common/errors';
@@ -54,6 +54,7 @@ import {
 import { cleanUpOldFileIndices } from './setup/clean_old_fleet_indices';
 import type { UninstallTokenInvalidError } from './security/uninstall_token_service';
 import { ensureAgentPoliciesFleetServerKeysAndPolicies } from './setup/fleet_server_policies_enrollment_keys';
+import { scheduleBumpMigratedAgentPoliciesTask } from './agent_policies/bump_migrated_agent_policies_task';
 import { ensureSpaceSettings } from './preconfiguration/space_settings';
 import {
   ensureDeleteUnenrolledAgentsSetting,
@@ -272,6 +273,11 @@ async function createSetupSideEffects(
   logger.debug('Upgrade Agent policy schema version');
   await upgradeAgentPolicySchemaVersion(soClient);
   stepSpan?.end();
+
+  // Bump the revision of agent policies whose package policies were flagged for a bump by a
+  // saved object migration (no span: this only schedules a background task).
+  logger.debug('Scheduling agent policy revision bump for migrated package policies');
+  await scheduleBumpMigratedAgentPoliciesTask(appContextService.getTaskManagerStart()!);
 
   stepSpan = apm.startSpan('Set up enrollment keys for preconfigured policies', 'preconfiguration');
   logger.debug(

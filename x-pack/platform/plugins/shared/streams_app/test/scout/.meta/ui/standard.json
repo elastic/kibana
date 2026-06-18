@@ -1,6 +1,17 @@
 {
-  "sha1": "61f1f4a26f98394e2539a6412bb00a4c37004dcd",
+  "sha1": "0b77a945a6482fa97adc6399c779991571d19564",
   "tests": [
+    {
+      "id": "8fdb537796db270-7132d4e40af07dc",
+      "title": "Teardown environment for streams tests",
+      "expectedStatus": "passed",
+      "tags": [],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/global.teardown.ts",
+        "line": 10,
+        "column": 19
+      }
+    },
     {
       "id": "3cc9409cebf2cef-744ce32675c025c",
       "title": "Setup environment for streams tests",
@@ -246,7 +257,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/draft_stream_simulation.spec.ts",
-        "line": 91,
+        "line": 96,
         "column": 9
       }
     },
@@ -260,7 +271,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/draft_stream_simulation.spec.ts",
-        "line": 98,
+        "line": 103,
         "column": 9
       }
     },
@@ -274,7 +285,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/draft_stream_simulation.spec.ts",
-        "line": 122,
+        "line": 127,
         "column": 9
       }
     },
@@ -288,7 +299,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/draft_stream_simulation.spec.ts",
-        "line": 141,
+        "line": 146,
         "column": 9
       }
     },
@@ -302,7 +313,23 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/draft_stream_simulation.spec.ts",
-        "line": 165,
+        "line": 170,
+        "column": 9
+      }
+    },
+    {
+      "id": "72321f7b67c15f4-083706ce01b6201",
+      "title": "Stream data processing - fetch more matching samples should show fetch more button when condition match rate is below threshold, clicking it should fetch more documents until the threshold is reached",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/fetch_more_matching_samples.spec.ts",
+        "line": 49,
         "column": 9
       }
     },
