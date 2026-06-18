@@ -113,6 +113,7 @@ dependsOn:
   - '@kbn/inbox-plugin'
   - '@kbn/inbox-common'
   - '@kbn/datemath'
+  - '@kbn/presentation-publishing'
 tags:
   - plugin
   - prod
