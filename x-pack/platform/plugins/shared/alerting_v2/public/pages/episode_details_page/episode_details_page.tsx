@@ -23,6 +23,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { useQueryClient } from '@kbn/react-query';
+import { getBreachEsqlQuery } from '@kbn/alerting-v2-schemas';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useFetchEpisodeQuery } from '@kbn/alerting-v2-episodes-ui/hooks/use_fetch_episode_query';
 import { useFetchRule } from '@kbn/alerting-v2-episodes-ui/hooks/use_fetch_rule';
@@ -144,7 +145,7 @@ export function EpisodeDetailsPage() {
             share: services.share,
             capabilities: services.application.capabilities,
             uiSettings: services.uiSettings,
-            ruleEsql: showRuleDependentUi ? ruleState.rule.evaluation?.query?.base : undefined,
+            ruleEsql: showRuleDependentUi ? getBreachEsqlQuery(ruleState.rule.query) : undefined,
             episodeIsoTimestamp: ts,
           }),
       }),

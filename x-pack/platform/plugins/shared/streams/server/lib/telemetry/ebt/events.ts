@@ -17,6 +17,8 @@ import {
   STREAMS_AGENT_TOOL_KI_IDENTIFICATION_STARTED_EVENT_TYPE,
   STREAMS_AGENT_TOOL_EVENT_CREATE_EVENT_TYPE,
   STREAMS_AGENT_TOOL_EVENT_STATUS_UPDATE_EVENT_TYPE,
+  STREAMS_SIGNIFICANT_EVENTS_DISCOVERY_TRIGGERED_EVENT_TYPE,
+  STREAMS_ONBOARDING_SCHEDULED_EVENT_TYPE,
 } from './constants';
 import {
   streamsEndpointLatencySchema,
@@ -30,6 +32,8 @@ import {
   streamsAgentToolKiIdentificationStartedSchema,
   streamsAgentToolEventCreateSchema,
   streamsAgentToolEventStatusUpdateSchema,
+  streamsSignificantEventsDiscoveryTriggeredSchema,
+  streamsOnboardingScheduledSchema,
 } from './schemas';
 
 const streamsEndpointLatencyEventType = {
@@ -85,6 +89,16 @@ const streamsAgentToolEventStatusUpdateEventType = {
   schema: streamsAgentToolEventStatusUpdateSchema,
 };
 
+const streamsSignificantEventsDiscoveryTriggeredEventType = {
+  eventType: STREAMS_SIGNIFICANT_EVENTS_DISCOVERY_TRIGGERED_EVENT_TYPE,
+  schema: streamsSignificantEventsDiscoveryTriggeredSchema,
+};
+
+const streamsOnboardingScheduledEventType = {
+  eventType: STREAMS_ONBOARDING_SCHEDULED_EVENT_TYPE,
+  schema: streamsOnboardingScheduledSchema,
+};
+
 export {
   streamsEndpointLatencyEventType,
   streamsStateErrorEventType,
@@ -97,4 +111,6 @@ export {
   streamsAgentToolKiIdentificationStartedEventType,
   streamsAgentToolEventCreateEventType,
   streamsAgentToolEventStatusUpdateEventType,
+  streamsSignificantEventsDiscoveryTriggeredEventType,
+  streamsOnboardingScheduledEventType,
 };

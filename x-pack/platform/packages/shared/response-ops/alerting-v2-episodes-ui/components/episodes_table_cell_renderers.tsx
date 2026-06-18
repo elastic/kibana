@@ -18,6 +18,7 @@ import {
 
 import type { CustomCellRenderer } from '@kbn/unified-data-table';
 import type { FindRulesResponse } from '@kbn/alerting-v2-schemas';
+import { getBreachEsqlQuery } from '@kbn/alerting-v2-schemas';
 import type { AlertEpisodeStatus } from '@kbn/alerting-v2-schemas';
 import type { EpisodeActionState } from '../types/action';
 import type { AlertEpisodeGroupAction } from '../types/action';
@@ -139,7 +140,7 @@ export const EpisodeRuleCell = ({
             padding: 0;
           `}
         >
-          {rule.evaluation.query.base}
+          {getBreachEsqlQuery(rule.query)}
         </EuiCode>
       </EuiFlexItem>
     </EuiFlexGroup>
