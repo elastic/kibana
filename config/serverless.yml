@@ -254,13 +254,6 @@ xpack.alerting.rules.maxScheduledPerMinute: 400
 xpack.actions.run.maxAttempts: 10
 xpack.actions.queued.max: 10000
 
-# for deploying a test project to CFT region
-xpack.actions.auth.ears:
-  enabled: true
-  ssl:
-    certificate: random bad string
-    key: random bad string
-
 uiSettings:
   overrides:
     # Disables ESQL in advanced settings (hides it from the UI)
