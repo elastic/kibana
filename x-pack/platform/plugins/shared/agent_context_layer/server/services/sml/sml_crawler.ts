@@ -152,8 +152,7 @@ export class SmlCrawlerImpl implements SmlCrawler {
       if (!isResponseError(error)) throw error;
       if (error.statusCode === 404) return false;
 
-      const errorType =
-        (error.body as { error?: { type?: string } })?.error?.type ?? error.message;
+      const errorType = (error.body as { error?: { type?: string } })?.error?.type ?? error.message;
       this.logger.warn(
         `SML crawler: mapping update failed (${error.statusCode} ${errorType}) — dropping index '${smlIndexName}' and re-crawling immediately`
       );
