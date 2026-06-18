@@ -34,7 +34,7 @@ const fieldStatsEsqlSchema = schema.object({
   ...baseProps,
   view_type: schema.literal('esql'),
   query: schema.object(
-    { esql: schema.string({ meta: { description: 'The ES|QL query string.' } }) },
+    { esql: schema.string({ maxLength: 1000, meta: { description: 'The ES|QL query string.' } }) },
     { meta: { description: 'ES|QL query.' } }
   ),
 });
