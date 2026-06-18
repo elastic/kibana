@@ -10,11 +10,9 @@ import type { RRuleScheduleConfig, ScheduleType } from '../../../common/schedule
 import type { RRuleFields } from '../../../common/utils/rrule_serializer';
 import { parseRRule } from '../../../common/utils/rrule_parser';
 import { serializeRRule } from '../../../common/utils/rrule_serializer';
-import { MAX_SPLAY_SECONDS } from '../../../common/schedule';
 import {
   parseSplayPermissive,
   serializeSplay,
-  sumCompoundSeconds,
   type SplayFormState,
 } from '../../../common/utils/splay_utils';
 import {
@@ -268,12 +266,7 @@ const deserializeSplay = (raw: string | undefined): SplayFormStateUI => {
 const serializeSplayState = (splay: SplayFormStateUI): string | undefined => {
   if (!splay.enabled) return undefined;
   if (splay.rawCompound) {
-    // Preserve the loaded compound string verbatim (D16) — but never emit one
-    // that breaches the 12h cap (review #2). An over-limit compound is dropped
-    // so the wire payload can't carry an invalid splay.
-    return sumCompoundSeconds(splay.rawCompound) > MAX_SPLAY_SECONDS
-      ? undefined
-      : splay.rawCompound;
+    return splay.rawCompound;
   }
 
   const state: SplayFormState = { value: splay.value, unit: splay.unit };

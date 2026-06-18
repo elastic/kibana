@@ -185,26 +185,6 @@ const PackFormComponent: React.FC<PackFormProps> = ({
 
   const [showScheduleErrors, setShowScheduleErrors] = useState(false);
 
-  // Mirror the pack-level schedule into the legacy top-level fields so the
-  // QueriesField → QueryFlyout path sees `schedule_type` / `interval` /
-  // `rrule_schedule` via `useWatch()` and can lock the per-query override
-  // selector to the pack mode (D11).
-  useEffect(() => {
-    if (!isRruleSchedulingEnabled || !schedule) {
-      return;
-    }
-
-    const serialized = serializeSchedule(schedule);
-    setValue('schedule_type', serialized.schedule_type, { shouldDirty: false });
-    if (serialized.schedule_type === 'interval') {
-      setValue('interval', serialized.interval, { shouldDirty: false });
-      setValue('rrule_schedule', undefined, { shouldDirty: false });
-    } else {
-      setValue('rrule_schedule', serialized.rrule_schedule, { shouldDirty: false });
-      setValue('interval', undefined, { shouldDirty: false });
-    }
-  }, [isRruleSchedulingEnabled, schedule, setValue]);
-
   const onDirtyStateChangeRef = useRef(onDirtyStateChange);
   onDirtyStateChangeRef.current = onDirtyStateChange;
 
@@ -256,10 +236,6 @@ const PackFormComponent: React.FC<PackFormProps> = ({
         schedule: scheduleFormState,
         policy_ids: payloadAgentPolicyIds,
         queries: payloadQueries,
-        // Flag-off leak fix: peel the rrule-era schedule fields off
-        // `restPayload` so a flag-off submit never spreads `schedule_type` /
-        // pack-level `interval` / `rrule_schedule`. When the flag is on,
-        // `scheduleFields` below re-adds the correct values from the form state.
         schedule_type: _scheduleType,
         interval: _interval,
         rrule_schedule: _rruleSchedule,

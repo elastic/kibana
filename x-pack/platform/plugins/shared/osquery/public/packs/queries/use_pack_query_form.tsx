@@ -83,6 +83,43 @@ export interface PackQueryFormData {
   rrule_schedule?: RRuleScheduleConfig;
 }
 
+/**
+ * Single source of truth for the same-mode constraint: a per-query
+ * override may only refine the pack's schedule, never switch its mode. The UI
+ * locks the selector to the pack mode so this is normally a no-op; both the
+ * serializer's mismatch guard and the override-on path use this predicate so
+ * the invariant lives in exactly one place.
+ */
+const isSameScheduleMode = (
+  packScheduleType: ScheduleType | undefined,
+  queryScheduleType: ScheduleType | undefined
+): boolean => packScheduleType === undefined || packScheduleType === queryScheduleType;
+
+/**
+ * Drop the schedule fields that must never co-exist with the pack's mode on a
+ * query that inherits / cannot override it. RRULE mode reads `rrule_schedule.timeout`
+ * from beats, so the legacy per-query `timeout` is stripped too; interval
+ * mode only needs the per-query `interval` removed.
+ */
+const stripInheritedScheduleFields = (
+  base: PackSOQueryFormData,
+  packScheduleType: ScheduleType | undefined
+): PackSOQueryFormData => {
+  if (packScheduleType === 'rrule') {
+    const { interval: _interval, timeout: _timeout, ...stripped } = base;
+
+    return stripped as PackSOQueryFormData;
+  }
+
+  if (packScheduleType === 'interval') {
+    const { interval: _interval, ...stripped } = base;
+
+    return stripped as PackSOQueryFormData;
+  }
+
+  return base;
+};
+
 const deserializer = (
   payload: PackSOQueryFormData,
   packSchedule?: UsePackQueryFormProps['packSchedule']
@@ -154,35 +191,18 @@ const serializer = (
     }
   );
 
+  // Inherited query: emits no per-query schedule fields. The server fan-out
+  // stamps the pack default onto the wire for it.
   if (!overridePackSchedule || !schedule) {
-    if (packSchedule?.schedule_type === 'rrule') {
-      const { interval: _interval, timeout: _timeout, ...stripped } = base;
-
-      return stripped as PackSOQueryFormData;
-    }
-
-    if (packSchedule?.schedule_type === 'interval') {
-      const { interval: _interval, ...stripped } = base;
-
-      return stripped as PackSOQueryFormData;
-    }
-
-    return base;
+    return stripInheritedScheduleFields(base, packSchedule?.schedule_type);
   }
 
-  // Same-mode constraint: when the pack has a schedule_type, the
-  // query's override schedule_type MUST match. The UI locks the selector via
-  // `lockedScheduleType` so this is normally a no-op; the guard catches
-  // programmatic mutation.
+  // Same-mode constraint (D11): the override mode MUST match the pack's. The UI
+  // locks the selector so this is normally a no-op; the guard catches
+  // programmatic mutation, falling through to the inherited shape as a safety net.
   const serialized = serializeSchedule(schedule);
-  if (packSchedule?.schedule_type && serialized.schedule_type !== packSchedule.schedule_type) {
-    if (packSchedule.schedule_type === 'rrule') {
-      const { interval: _interval, timeout: _timeout, ...stripped } = base;
-
-      return stripped as PackSOQueryFormData;
-    }
-
-    return base;
+  if (!isSameScheduleMode(packSchedule?.schedule_type, serialized.schedule_type)) {
+    return stripInheritedScheduleFields(base, packSchedule?.schedule_type);
   }
 
   if (serialized.schedule_type === 'rrule' && serialized.rrule_schedule) {

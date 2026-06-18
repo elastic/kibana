@@ -20,6 +20,8 @@ import { QueryFlyout } from '../queries/query_flyout';
 import { OsqueryPackUploader } from './pack_uploader';
 import { getSupportedPlatforms } from '../queries/platforms';
 import type { PackQueryFormData } from '../queries/use_pack_query_form';
+import { serializeSchedule } from './schedule_serializer';
+import type { ScheduleFormData } from '../../components/schedule_section/types';
 
 interface QueriesFieldProps {
   euiFieldProps: EuiComboBoxProps<{}>;
@@ -39,20 +41,12 @@ const QueriesFieldComponent: React.FC<QueriesFieldProps> = ({ euiFieldProps }) =
   });
 
   const { setValue } = useFormContext();
-  const {
-    name: packName,
-    schedule_type: packScheduleType,
-    interval: packInterval,
-    rrule_schedule: packRruleSchedule,
-  } = useWatch();
+  const packName = useWatch({ name: 'name' });
+  const packScheduleFormData = useWatch({ name: 'schedule' }) as ScheduleFormData | undefined;
 
   const packSchedule = useMemo(
-    () => ({
-      schedule_type: packScheduleType,
-      interval: packInterval,
-      rrule_schedule: packRruleSchedule,
-    }),
-    [packScheduleType, packInterval, packRruleSchedule]
+    () => (packScheduleFormData ? serializeSchedule(packScheduleFormData) : undefined),
+    [packScheduleFormData]
   );
 
   const handleNameChange = useCallback(
