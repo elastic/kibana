@@ -78,10 +78,7 @@ export async function autocomplete(
 
   // Has at least one pattern - suggest pipe or comma for more patterns
   if (hasPatterns) {
-    return [
-      ...newLineAndPipeCompleteItems,
-      withAutoSuggest({ ...commaCompleteItem, text: ', ' }),
-    ];
+    return [...newLineAndPipeCompleteItems, withAutoSuggest({ ...commaCompleteItem, text: ', ' })];
   }
 
   return [];

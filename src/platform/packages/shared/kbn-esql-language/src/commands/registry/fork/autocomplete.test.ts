@@ -244,16 +244,12 @@ describe('FORK Autocomplete', () => {
         });
 
         test('keep', async () => {
-          await forkExpectSuggestions('FROM a | FORK (KEEP ', [
-            ...getFieldNamesByType('any'),
-          ]);
+          await forkExpectSuggestions('FROM a | FORK (KEEP ', [...getFieldNamesByType('any')]);
           await forkExpectSuggestions('FROM a | FORK (KEEP integerField ', [',', '| ', '\n']);
         });
 
         test('drop', async () => {
-          await forkExpectSuggestions('FROM a | FORK (DROP ', [
-            ...getFieldNamesByType('any'),
-          ]);
+          await forkExpectSuggestions('FROM a | FORK (DROP ', [...getFieldNamesByType('any')]);
           await forkExpectSuggestions('FROM a | FORK (DROP integerField ', [',', '| ', '\n']);
         });
 
