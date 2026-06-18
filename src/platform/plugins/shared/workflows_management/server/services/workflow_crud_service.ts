@@ -9,6 +9,13 @@
 
 import type { KibanaRequest } from '@kbn/core/server';
 import { isNotFoundError } from '@kbn/es-errors';
+import {
+  DEFAULT_MAX_RETRIES,
+  isElasticsearchWriteConflict,
+  isOccConflictError,
+  OCC_CONFLICT_STATUS_CODE,
+  OccWriter,
+} from '@kbn/occ';
 import type {
   CreateWorkflowCommand,
   EsWorkflow,
@@ -22,6 +29,13 @@ import type { WorkflowPartialDetailDto } from '@kbn/workflows/types/v1';
 import { WorkflowConflictError } from '@kbn/workflows-yaml';
 import type { z } from '@kbn/zod/v4';
 import type { WorkflowCrudDeps } from './types';
+import type {
+  IndexWorkflowDocumentOptions,
+  ReadModifyWriteWorkflowDocumentParams,
+  VersionedWorkflowDocument,
+  WorkflowDocumentGetOptions,
+  WriteWorkflowDocumentWithOccParams,
+} from './workflow_occ_types';
 import { getWorkflowZodSchema } from '../../common/schema';
 import { extractBulkItemError } from '../api/lib/bulk_response_helpers';
 import { deleteWorkflows } from '../api/lib/workflow_deletion';
@@ -50,32 +64,21 @@ import type { WorkflowProperties } from '../storage/workflow_storage';
 import { scheduleWorkflowTriggers } from '../task_defs/schedule_workflow_triggers';
 import { syncSchedulerAfterSave } from '../task_defs/sync_scheduler_after_save';
 
-const VERSION_CONFLICT_STATUS = 409;
 // How many times to re-resolve a server-generated ID after losing a TOCTOU race
 // against `op_type: 'create'`. The id resolver itself walks up to MAX_COLLISION_RETRIES
 // candidates per call, so the practical ceiling is far higher than this number;
 // this only bounds repeated round-trips when many concurrent writers share a base ID.
 const TOCTOU_MAX_RETRIES = 5;
 
-const isVersionConflictError = (error: unknown): boolean => {
-  if (!error || typeof error !== 'object') return false;
-  const e = error as { statusCode?: number; meta?: { statusCode?: number } };
-  return e.statusCode === VERSION_CONFLICT_STATUS || e.meta?.statusCode === VERSION_CONFLICT_STATUS;
-};
-
-export interface VersionedWorkflowDocument {
-  source: WorkflowProperties;
-  seqNo: number;
-  primaryTerm: number;
-}
-
-export interface IndexWorkflowDocumentOptions {
-  create?: boolean;
-  ifPrimaryTerm?: number;
-  ifSeqNo?: number;
-}
+export type {
+  ReadModifyWriteWorkflowDocumentParams,
+  VersionedWorkflowDocument,
+  WriteWorkflowDocumentWithOccParams,
+} from './workflow_occ_types';
 
 export class WorkflowCrudService {
+  private indexOccWriter?: OccWriter<WorkflowProperties>;
+
   constructor(private readonly deps: WorkflowCrudDeps) {}
 
   async getWorkflowDocumentSource(
@@ -131,8 +134,8 @@ export class WorkflowCrudService {
     id: string,
     document: WorkflowProperties,
     options?: IndexWorkflowDocumentOptions
-  ): Promise<void> {
-    await this.deps.workflowStorage.getClient().index({
+  ): Promise<{ seqNo: number; primaryTerm: number }> {
+    const response = await this.deps.workflowStorage.getClient().index({
       id,
       document,
       ...(options?.create ? { op_type: 'create' as const } : {}),
@@ -140,6 +143,117 @@ export class WorkflowCrudService {
         ? { if_seq_no: options.ifSeqNo, if_primary_term: options.ifPrimaryTerm }
         : {}),
       refresh: true,
+    });
+
+    if (response._seq_no == null || response._primary_term == null) {
+      throw new Error(
+        `Elasticsearch index response missing seq_no/primary_term for workflow ${id}`
+      );
+    }
+
+    return { seqNo: response._seq_no, primaryTerm: response._primary_term };
+  }
+
+  private getIndexOccWriter(): OccWriter<WorkflowProperties> {
+    if (!this.indexOccWriter) {
+      this.indexOccWriter = new OccWriter<WorkflowProperties>({
+        index: async ({ id, document, create, ifSeqNo, ifPrimaryTerm }) =>
+          this.indexWorkflowDocument(id, document, { create, ifSeqNo, ifPrimaryTerm }),
+        logger: this.deps.logger,
+      });
+    }
+    return this.indexOccWriter;
+  }
+
+  private getReadModifyWriteOccWriter(
+    spaceId: string,
+    maxRetries?: number,
+    getOptions?: WorkflowDocumentGetOptions
+  ): OccWriter<WorkflowProperties> {
+    const resolvedMaxRetries = maxRetries ?? DEFAULT_MAX_RETRIES;
+    return new OccWriter<WorkflowProperties>({
+      get: async (id) => {
+        const document = await this.getWorkflowDocumentWithVersion(id, spaceId, getOptions);
+        if (!document) {
+          return null;
+        }
+        return {
+          id,
+          source: document.source,
+          occ: { seqNo: document.seqNo, primaryTerm: document.primaryTerm },
+        };
+      },
+      index: async ({ id, document, create, ifSeqNo, ifPrimaryTerm }) =>
+        this.indexWorkflowDocument(id, document, { create, ifSeqNo, ifPrimaryTerm }),
+      logger: this.deps.logger,
+      maxRetries: resolvedMaxRetries,
+    });
+  }
+
+  private isWorkflowDocumentNotFoundError(error: unknown, id: string): boolean {
+    return error instanceof Error && error.message === `Document with id "${id}" not found`;
+  }
+
+  private async runOccWrite<T>(id: string, write: () => Promise<T>): Promise<T> {
+    try {
+      return await write();
+    } catch (error) {
+      if (isOccConflictError(error)) {
+        throw new WorkflowConflictError(
+          `Workflow with id '${id}' was updated concurrently. Please retry.`,
+          id
+        );
+      }
+      if (this.isWorkflowDocumentNotFoundError(error, id)) {
+        throw new Error(`Workflow with id ${id} not found`);
+      }
+      throw error;
+    }
+  }
+
+  async createWorkflowDocument(
+    id: string,
+    spaceId: string,
+    document: WorkflowProperties
+  ): Promise<WorkflowProperties> {
+    return this.runOccWrite(id, async () => {
+      const { document: created } = await this.getIndexOccWriter().create({ id, document });
+      return created;
+    });
+  }
+
+  async writeWorkflowDocumentWithOcc(
+    id: string,
+    spaceId: string,
+    params: WriteWorkflowDocumentWithOccParams
+  ): Promise<WorkflowProperties> {
+    return this.runOccWrite(id, async () => {
+      const { document } = await this.getIndexOccWriter().write({
+        id,
+        document: params.document,
+        ifSeqNo: params.ifSeqNo,
+        ifPrimaryTerm: params.ifPrimaryTerm,
+      });
+      return document;
+    });
+  }
+
+  async readModifyWriteWorkflowDocument(
+    id: string,
+    spaceId: string,
+    params: ReadModifyWriteWorkflowDocumentParams
+  ): Promise<WorkflowProperties> {
+    return this.runOccWrite(id, async () => {
+      const writer = this.getReadModifyWriteOccWriter(
+        spaceId,
+        params.maxRetries,
+        params.getOptions
+      );
+      const { document } = await writer.readModifyWrite({
+        id,
+        mutate: params.mutate,
+      });
+      return document;
     });
   }
 
@@ -364,7 +478,7 @@ export class WorkflowCrudService {
       );
     }
 
-    id = await this.createWorkflowDocument({
+    id = await this.indexNewWorkflowDocument({
       initialId: id,
       baseId,
       isUserSupplied: Boolean(workflow.id),
@@ -477,7 +591,7 @@ export class WorkflowCrudService {
           created.push(transformStorageDocumentToWorkflowDto(entry.id, entry.workflowData));
           successfullyWritten.push(entry);
         } else {
-          const isVersionConflict = operation.status === VERSION_CONFLICT_STATUS;
+          const isVersionConflict = operation.status === OCC_CONFLICT_STATUS_CODE;
           const canRetry = isVersionConflict && entry.idSource === 'server-generated';
 
           if (canRetry && attempt < TOCTOU_MAX_RETRIES) {
@@ -550,60 +664,79 @@ export class WorkflowCrudService {
     request: KibanaRequest
   ): Promise<UpdatedWorkflowResponseDto> {
     try {
-      const { source: existingSource } = await this.getExistingWorkflowDocument(id, spaceId);
       const authenticatedUser = getAuthenticatedUser(request, this.deps.getSecurity());
       const now = new Date();
       const validationErrors: string[] = [];
-      let updatedData: Partial<WorkflowProperties> = {
-        lastUpdatedBy: authenticatedUser,
-        updated_at: now.toISOString(),
-      };
+      let shouldUpdateScheduler = false;
 
-      let shouldUpdateScheduler =
-        workflow.enabled !== undefined && workflow.enabled !== existingSource.enabled;
+      const workflowYaml = workflow.yaml;
+      const zodSchema = workflowYaml
+        ? await this.deps.validationService.getWorkflowZodSchema({ loose: false }, spaceId, request)
+        : undefined;
+      const triggerDefinitions = workflowYaml
+        ? this.deps.workflowsExtensions?.getAllTriggerDefinitions() ?? []
+        : undefined;
+      const yamlResult =
+        workflowYaml && zodSchema && triggerDefinitions
+          ? {
+              workflowYaml,
+              ...applyYamlUpdate({
+                workflowYaml,
+                zodSchema,
+                triggerDefinitions,
+              }),
+            }
+          : undefined;
 
-      if (workflow.yaml) {
-        const zodSchema = await this.deps.validationService.getWorkflowZodSchema(
-          { loose: false },
-          spaceId,
-          request
-        );
-        const triggerDefinitions = this.deps.workflowsExtensions?.getAllTriggerDefinitions() ?? [];
-        const yamlResult = applyYamlUpdate({
-          workflowYaml: workflow.yaml,
-          zodSchema,
-          triggerDefinitions,
-        });
-        updatedData = { ...updatedData, yaml: workflow.yaml, ...yamlResult.updatedDataPatch };
-        validationErrors.push(...yamlResult.validationErrors);
-        shouldUpdateScheduler = shouldUpdateScheduler || yamlResult.shouldUpdateScheduler;
+      const finalData = await this.readModifyWriteWorkflowDocument(id, spaceId, {
+        getOptions: { includeDeleted: true, includeGlobal: true },
+        mutate: (existingSource: WorkflowProperties) => {
+          let updatedData: Partial<WorkflowProperties> = {
+            lastUpdatedBy: authenticatedUser,
+            updated_at: now.toISOString(),
+          };
 
-        if (
-          yamlResult.validationErrors.length === 0 &&
-          yamlResult.updatedDataPatch.valid &&
-          updatedData.definition &&
-          !workflowYamlDeclaresTopLevelEnabled(workflow.yaml)
-        ) {
-          const resolvedEnabled =
-            workflow.enabled !== undefined ? workflow.enabled : existingSource.enabled;
-          updatedData.enabled = resolvedEnabled;
-          const currentDefinition = updatedData.definition;
-          if (currentDefinition) {
-            updatedData.definition = { ...currentDefinition, enabled: resolvedEnabled };
+          shouldUpdateScheduler =
+            workflow.enabled !== undefined && workflow.enabled !== existingSource.enabled;
+
+          if (yamlResult) {
+            updatedData = {
+              ...updatedData,
+              yaml: yamlResult.workflowYaml,
+              ...yamlResult.updatedDataPatch,
+            };
+            validationErrors.length = 0;
+            validationErrors.push(...yamlResult.validationErrors);
+            shouldUpdateScheduler = shouldUpdateScheduler || yamlResult.shouldUpdateScheduler;
+
+            if (
+              yamlResult.validationErrors.length === 0 &&
+              yamlResult.updatedDataPatch.valid &&
+              updatedData.definition &&
+              !workflowYamlDeclaresTopLevelEnabled(yamlResult.workflowYaml)
+            ) {
+              const resolvedEnabled =
+                workflow.enabled !== undefined ? workflow.enabled : existingSource.enabled;
+              updatedData.enabled = resolvedEnabled;
+              const currentDefinition = updatedData.definition;
+              if (currentDefinition) {
+                updatedData.definition = { ...currentDefinition, enabled: resolvedEnabled };
+              }
+            }
+          } else if (!workflowYaml) {
+            const fieldResult = applyFieldUpdates(workflow, existingSource);
+            updatedData = { ...updatedData, ...fieldResult.patch };
+            validationErrors.length = 0;
+            validationErrors.push(...fieldResult.validationErrors);
           }
-        }
-      } else {
-        const fieldResult = applyFieldUpdates(workflow, existingSource);
-        updatedData = { ...updatedData, ...fieldResult.patch };
-        validationErrors.push(...fieldResult.validationErrors);
-      }
 
-      const finalData: WorkflowProperties = { ...existingSource, ...updatedData };
-      if (finalData.triggerTypes === undefined) {
-        finalData.triggerTypes = getTriggerTypesFromDefinition(finalData.definition) ?? [];
-      }
-
-      await this.indexWorkflowDocument(id, finalData);
+          const merged: WorkflowProperties = { ...existingSource, ...updatedData };
+          if (merged.triggerTypes === undefined) {
+            merged.triggerTypes = getTriggerTypesFromDefinition(merged.definition) ?? [];
+          }
+          return merged;
+        },
+      });
 
       const taskScheduler = this.deps.getTaskScheduler();
       if (shouldUpdateScheduler && taskScheduler) {
@@ -696,20 +829,6 @@ export class WorkflowCrudService {
     };
   }
 
-  private async getExistingWorkflowDocument(
-    id: string,
-    spaceId: string
-  ): Promise<{ source: WorkflowProperties }> {
-    const source = await this.getWorkflowDocumentSource(id, spaceId, {
-      includeDeleted: true,
-      includeGlobal: true,
-    });
-    if (!source) {
-      throw new Error(`Workflow with id ${id} not found in space ${spaceId}`);
-    }
-    return { source };
-  }
-
   private async resolveAndDeduplicateBulkIds(
     validWorkflows: readonly BulkWorkflowEntry[],
     overwrite: boolean
@@ -759,7 +878,7 @@ export class WorkflowCrudService {
    *   The resolver picks the next available `baseId-N` candidate, so the human
    *   readability of the ID is preserved.
    */
-  private async createWorkflowDocument(params: {
+  private async indexNewWorkflowDocument(params: {
     initialId: string;
     baseId: string;
     isUserSupplied: boolean;
@@ -774,7 +893,7 @@ export class WorkflowCrudService {
         await this.indexWorkflowDocument(id, document, { create: true });
         return id;
       } catch (error) {
-        if (!isVersionConflictError(error)) {
+        if (!isElasticsearchWriteConflict(error)) {
           throw error;
         }
         if (isUserSupplied) {
