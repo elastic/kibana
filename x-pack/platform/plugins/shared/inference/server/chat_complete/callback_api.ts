@@ -271,26 +271,7 @@ function createChatCompletePipeline({
                 stream,
               }).pipe(chunksIntoMessage({ toolOptions: { toolChoice, tools }, logger }));
             }
-          ).pipe(
-            deanonymizeMessage({ ...preparedAnonymization, replacementsId }),
-            // TEMP DEBUG: capture the exact request that triggered a failure (e.g. the
-            // "Tool call key is missing" merge error). Logs only on error, then rethrows.
-            catchError((error) => {
-              logger.error(
-                `INFERENCE_REQUEST_DEBUG inference request FAILED: ${
-                  error instanceof Error ? error.message : String(error)
-                }\nRequest payload: ${JSON.stringify({
-                  modelName,
-                  temperature,
-                  toolChoice,
-                  tools,
-                  system: systemWithAnonymizationInstructions,
-                  messages: preparedAnonymization.messages,
-                })}`
-              );
-              return throwError(() => error);
-            })
-          );
+          ).pipe(deanonymizeMessage({ ...preparedAnonymization, replacementsId }));
         }),
         tokenUsageLogger
           ? handleTokenUsageLogging({
