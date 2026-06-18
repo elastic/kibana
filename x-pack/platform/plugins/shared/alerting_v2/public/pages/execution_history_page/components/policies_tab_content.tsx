@@ -8,9 +8,8 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import {
   EuiBadge,
+  EuiBadgeGroup,
   EuiBasicTable,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiLink,
   EuiSpacer,
   EuiText,
@@ -96,21 +95,21 @@ const buildColumns = (
     render: (workflows: PolicyExecutionHistoryItem['workflows']) => {
       if (workflows.length === 0) return null;
       return (
-        <EuiFlexGroup gutterSize="xs" wrap responsive={false}>
+        <EuiBadgeGroup gutterSize="xs">
           {workflows.map((w) => (
-            <EuiFlexItem key={w.id} grow={false}>
-              <EuiBadge
-                color="hollow"
-                iconType="workflow"
-                href={getWorkflowUrl(w.id)}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                {w.name ?? w.id}
-              </EuiBadge>
-            </EuiFlexItem>
+            <EuiBadge
+              key={w.id}
+              color="hollow"
+              iconType="workflow"
+              href={getWorkflowUrl(w.id)}
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{ maxWidth: '100%' }}
+            >
+              {w.name ?? w.id}
+            </EuiBadge>
           ))}
-        </EuiFlexGroup>
+        </EuiBadgeGroup>
       );
     },
   },
