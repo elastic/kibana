@@ -108,6 +108,44 @@ describe('replayMoves', () => {
       const items = ['a', 'b', 'c', 'd'];
       expect(replayMoves(items, [{ id: 'c', afterId: null }], getId)).toEqual(['c', 'a', 'b', 'd']);
     });
+
+    it('move-to-front (afterId null) defends top slot when product adds a new first item', () => {
+      // v1: [a, b, c]; user dragged c to the very top → afterId: null.
+      // v2: product adds x at the top → default becomes [x, a, b, c].
+      // The user's explicit front-pin wins; x lands at position 2.
+      const items = ['x', 'a', 'b', 'c'];
+      expect(replayMoves(items, [{ id: 'c', afterId: null }], getId)).toEqual(['c', 'x', 'a', 'b']);
+    });
+
+    it('anchored middle move does NOT defend top slot when product adds a new first item', () => {
+      // v1: [a, b, c]; user moved c after a (middle reorder, not a front-pin).
+      // v2: product adds x at the top → default becomes [x, a, b, c].
+      // x stays at the top because the user never claimed that position.
+      const items = ['x', 'a', 'b', 'c'];
+      expect(replayMoves(items, [{ id: 'c', afterId: 'a' }], getId)).toEqual(['x', 'a', 'c', 'b']);
+    });
+
+    it('keeps a moved item glued to its anchor when the product inserts a new item between them', () => {
+      // v1: [a, b, c, d]; user moved d directly after a.
+      // v2: product inserts x between a and b → default becomes [a, x, b, c, d].
+      // d stays immediately after a; x is pushed down.
+      const items = ['a', 'x', 'b', 'c', 'd'];
+      expect(replayMoves(items, [{ id: 'd', afterId: 'a' }], getId)).toEqual([
+        'a',
+        'd',
+        'x',
+        'b',
+        'c',
+      ]);
+    });
+
+    it('skips a removed-anchor move without disturbing a newly added top item', () => {
+      // v1: [a, b, c]; user moved c after b (which later gets removed).
+      // v2: product adds x at the top and removes b → default becomes [x, a, c].
+      // The move is skipped (anchor b gone); x stays at its default top position.
+      const items = ['x', 'a', 'c'];
+      expect(replayMoves(items, [{ id: 'c', afterId: 'b' }], getId)).toEqual(['x', 'a', 'c']);
+    });
   });
 
   describe('round-trip with computeMoves', () => {
