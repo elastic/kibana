@@ -14,7 +14,7 @@ import type { FormValues } from './types';
 /**
  * Recursively extracts all error messages from a nested FieldErrors object.
  * Handles both flat errors (e.g., { name: { message: "..." } })
- * and nested errors (e.g., { evaluation: { query: { base: { message: "..." } } } })
+ * and nested errors (e.g., { query: { breach: { message: "..." } } })
  */
 const extractErrorMessages = (errors: FieldErrors): string[] => {
   const messages: string[] = [];
