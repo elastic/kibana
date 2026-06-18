@@ -160,8 +160,8 @@ const RuleBuilderSectionDivider: React.FC = () => (
       <EuiFlexItem grow={false}>
         <EuiText size="s" color="subdued">
           <FormattedMessage
-            id="xpack.alertingV2.ruleCreateOptionsPanel.listEmptyStateBuilderDivider"
-            defaultMessage="Or start from a builder"
+            id="xpack.alertingV2.ruleCreateOptionsPanel.orStartFromBuilderLabel"
+            defaultMessage="or start from a builder"
           />
         </EuiText>
       </EuiFlexItem>
@@ -342,33 +342,7 @@ const RuleCreateOptionsFlyoutPanel: React.FC<RuleCreateOptionsPanelProps> = ({
           />
         </EuiFlexItem>
       </EuiFlexGroup>
-      <EuiSpacer size="s" />
-      <EuiFlexGroup alignItems="center" gutterSize="m">
-        <EuiFlexItem>
-          <EuiHorizontalRule margin="none" />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiText size="s" color="subdued">
-            <FormattedMessage
-              id="xpack.alertingV2.ruleCreateOptionsPanel.orDividerLabel"
-              defaultMessage="or"
-            />
-          </EuiText>
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiHorizontalRule margin="none" />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-      <EuiSpacer size="s" />
-      <EuiTitle size="xs">
-        <h3>
-          <FormattedMessage
-            id="xpack.alertingV2.ruleCreateOptionsPanel.ruleBuilderSectionTitle"
-            defaultMessage="Start from a rule builder"
-          />
-        </h3>
-      </EuiTitle>
-      <EuiSpacer size="l" />
+      <RuleBuilderSectionDivider />
       <EuiCard
         layout="horizontal"
         display="plain"
