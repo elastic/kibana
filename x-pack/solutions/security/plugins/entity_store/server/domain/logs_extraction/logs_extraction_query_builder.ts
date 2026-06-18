@@ -121,12 +121,6 @@ export function buildLogsExtractionEsqlQuery({
     })
   );
 
-  if (entityDefinition.whenConditionTrueSetFieldsPreAgg?.length) {
-    for (const entry of entityDefinition.whenConditionTrueSetFieldsPreAgg) {
-      parts.push(buildSetFieldsByCondition(entry));
-    }
-  }
-
   // Single | EVAL stage: later assignments can reference columns from earlier ones.
   {
     const fieldEvalsEsql = getFieldEvaluationsEsqlFromDefinition(entityDefinition);
@@ -134,6 +128,12 @@ export function buildLogsExtractionEsqlQuery({
       withTypeId: false,
     });
     parts.push(`| EVAL ${fieldEvalsEsql ? `${fieldEvalsEsql},\n ${euidEsql}` : euidEsql}`);
+  }
+
+  if (entityDefinition.whenConditionTrueSetFieldsPreAgg?.length) {
+    for (const entry of entityDefinition.whenConditionTrueSetFieldsPreAgg) {
+      parts.push(buildSetFieldsByCondition(entry));
+    }
   }
 
   // Main stats aggregation from incoming data

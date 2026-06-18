@@ -86,17 +86,17 @@ export function buildCcsLogsExtractionEsqlQuery({
     })
   );
 
-  if (entityDefinition.whenConditionTrueSetFieldsPreAgg?.length) {
-    for (const entry of entityDefinition.whenConditionTrueSetFieldsPreAgg) {
-      parts.push(buildSetFieldsByCondition(entry));
-    }
-  }
-
   // Single | EVAL stage: later assignments can reference columns from earlier ones.
   {
     const fieldEvalsEsql = getFieldEvaluationsEsqlFromDefinition(entityDefinition);
     const euidEsql = getEuidEsqlEvaluation(type, MAIN_ENTITY_ID_FIELD);
     parts.push(`| EVAL ${fieldEvalsEsql ? `${fieldEvalsEsql},\n ${euidEsql}` : euidEsql}`);
+  }
+
+  if (entityDefinition.whenConditionTrueSetFieldsPreAgg?.length) {
+    for (const entry of entityDefinition.whenConditionTrueSetFieldsPreAgg) {
+      parts.push(buildSetFieldsByCondition(entry));
+    }
   }
 
   // Main stats aggregation from incoming data
