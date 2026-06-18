@@ -35,6 +35,28 @@ test.describe('Ingest pipelines Manage Processors', { tag: tags.stateful.classic
       .toBe(false);
   };
 
+  // On cloud-stateful-classic ES runs with ingest.geoip.downloader.enabled=true and
+  // auto-registers web-type GeoIP databases that cannot be deleted via the user API, so
+  // data.length is never 0 and the geoipEmptyListPrompt branch is unreachable. Skip the
+  // empty-list assertion when the cluster still reports any database after cleanup (local
+  // kbn-es disables the downloader, so this stays active there).
+  const skipIfClusterHasManagedDatabases = async (esClient: ScoutWorkerFixtures['esClient']) => {
+    let databaseCount = 0;
+    try {
+      const { databases } = (await esClient.ingest.getGeoipDatabase()) as {
+        databases: Array<{ id: string }>;
+      };
+      databaseCount = databases.length;
+    } catch {
+      // ES returns 404 when there are no databases
+      databaseCount = 0;
+    }
+    test.skip(
+      databaseCount > 0,
+      'Cluster has auto-managed GeoIP databases (downloader enabled); empty-list prompt is unreachable.'
+    );
+  };
+
   test.beforeAll(async ({ esClient, log }) => {
     for (const databaseId of [testData.MAXMIND_DATABASE_ID, testData.IPINFO_DATABASE_ID]) {
       try {
@@ -66,7 +88,8 @@ test.describe('Ingest pipelines Manage Processors', { tag: tags.stateful.classic
     }
   });
 
-  test('shows the empty list prompt', async ({ pageObjects }) => {
+  test('shows the empty list prompt', async ({ pageObjects, esClient }) => {
+    await skipIfClusterHasManagedDatabases(esClient);
     await expect(pageObjects.ingestPipelines.geoipEmptyListPrompt).toBeVisible();
   });
 
@@ -118,6 +141,9 @@ test.describe('Ingest pipelines Manage Processors', { tag: tags.stateful.classic
     await expectDatabasesCleared(esClient);
     await pageObjects.ingestPipelines.goto();
     await pageObjects.ingestPipelines.navigateToManageProcessorsPage();
+    // After the user databases are deleted, ES on cloud-stateful-classic still reports the
+    // auto-managed web-type databases, so the empty-list prompt remains unreachable there.
+    await skipIfClusterHasManagedDatabases(esClient);
     await expect(pageObjects.ingestPipelines.geoipEmptyListPrompt).toBeVisible();
   });
 });
