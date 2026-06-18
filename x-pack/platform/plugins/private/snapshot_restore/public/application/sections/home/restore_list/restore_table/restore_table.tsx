@@ -9,7 +9,7 @@ import React, { useState, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { orderBy } from 'lodash';
 import type { EuiBasicTableColumn } from '@elastic/eui';
-import { EuiBasicTable, EuiButtonIcon, EuiHealth, RIGHT_ALIGNMENT } from '@elastic/eui';
+import { EuiBasicTable, EuiButtonIcon, EuiHealth, EuiToolTip, RIGHT_ALIGNMENT } from '@elastic/eui';
 
 import type { SnapshotRestore } from '../../../../../../common/types';
 import { UIM_RESTORE_LIST_EXPAND_INDEX } from '../../../../constants';
@@ -174,11 +174,16 @@ export const RestoreTable: React.FunctionComponent<Props> = React.memo(({ restor
       width: '40px',
       isExpander: true,
       render: (item: SnapshotRestore) => (
-        <EuiButtonIcon
-          onClick={() => toggleIndexRestoreDetails(item)}
-          aria-label={itemIdToExpandedRowMap[item.index] ? 'Collapse' : 'Expand'}
-          iconType={itemIdToExpandedRowMap[item.index] ? 'chevronSingleUp' : 'chevronSingleDown'}
-        />
+        <EuiToolTip
+          content={itemIdToExpandedRowMap[item.index] ? 'Collapse' : 'Expand'}
+          disableScreenReaderOutput
+        >
+          <EuiButtonIcon
+            onClick={() => toggleIndexRestoreDetails(item)}
+            aria-label={itemIdToExpandedRowMap[item.index] ? 'Collapse' : 'Expand'}
+            iconType={itemIdToExpandedRowMap[item.index] ? 'chevronSingleUp' : 'chevronSingleDown'}
+          />
+        </EuiToolTip>
       ),
     },
   ];
