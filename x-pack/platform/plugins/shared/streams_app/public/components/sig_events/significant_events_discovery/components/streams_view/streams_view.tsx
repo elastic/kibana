@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiSearchBar, EuiText } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { STREAMS_KIS_ONBOARDING_IN_PROGRESS_STATUSES } from '@kbn/streams-schema';
 import React, { useCallback, useMemo, useState } from 'react';
 import type { TableRow } from './utils';
+import { parseSearchQuery } from './utils';
 import { useAIFeatures } from '../../../../../hooks/use_ai_features';
 import { useSignificantEventsDiscoveryContext } from '../../context/significant_events_discovery_context';
 import type { StreamsAppSearchBarProps } from '../../../../streams_app_search_bar';
@@ -23,10 +24,7 @@ import { StreamsTreeTable } from './tree_table';
 export function StreamsView() {
   const [searchText, setSearchText] = useState('');
 
-  const searchQuery = useMemo(
-    () => (searchText ? EuiSearchBar.Query.parse(searchText) : undefined),
-    [searchText]
-  );
+  const searchQuery = useMemo(() => parseSearchQuery(searchText), [searchText]);
 
   const {
     filteredStreams,
