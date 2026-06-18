@@ -6,16 +6,24 @@
  */
 
 import { randomUUID } from 'crypto';
+import type { Client } from '@elastic/elasticsearch';
 import {
   agentBuilderDefaultAgentId,
   AgentAccessControlRole,
   AgentAccessControlScope,
+  AgentType,
 } from '@kbn/agent-builder-common';
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
+import { createSystemIndicesEsClient } from '../../../scout_agent_builder_shared/lib/system_indices_es_client';
 import { publicApiPath } from '../../../../common/constants';
 import { apiTest } from '../fixtures';
-import { COMMON_HEADERS, ELASTIC_API_VERSION, INTERNAL_AGENT_BUILDER } from '../fixtures/constants';
+import {
+  CHAT_AGENTS_INDEX,
+  COMMON_HEADERS,
+  ELASTIC_API_VERSION,
+  INTERNAL_AGENT_BUILDER,
+} from '../fixtures/constants';
 import { spaceUrl } from '../fixtures/space_paths';
 
 const ACCESS_CONTROL_TEST_PREFIX = 'access-control-test';
@@ -97,6 +105,7 @@ apiTest.describe(
     const allPrincipals = [alice, bob, eve, reader];
 
     let adminCookie: Record<string, string>;
+    let sysEsClient: Client;
 
     const headersFor = (user: { username: string; password: string }) => ({
       ...COMMON_HEADERS,
@@ -116,7 +125,8 @@ apiTest.describe(
       return id;
     };
 
-    apiTest.beforeAll(async ({ samlAuth, kbnClient }) => {
+    apiTest.beforeAll(async ({ asAdmin, config, esClient, samlAuth, kbnClient }) => {
+      sysEsClient = await createSystemIndicesEsClient(esClient, config);
       const { cookieHeader } = await samlAuth.asInteractiveUser('admin');
       adminCookie = cookieHeader;
 
@@ -156,6 +166,12 @@ apiTest.describe(
           },
         });
       }
+
+      const bootstrapAgentId = trackAgent(`${ACCESS_CONTROL_TEST_PREFIX}-bootstrap-${testRunId}`);
+      await asAdmin.post(`${accessControlApiBase}/agents`, {
+        body: mockAgent(bootstrapAgentId),
+        responseType: 'json',
+      });
     });
 
     apiTest.afterAll(async ({ apiClient, kbnClient }) => {
@@ -225,6 +241,40 @@ apiTest.describe(
       );
     };
 
+    const seedLegacyAgent = async ({
+      agentId,
+      visibility,
+      entries = [],
+    }: {
+      agentId: string;
+      visibility: AgentAccessControlScope;
+      entries?: Array<{ type: 'user'; name: string; role: AgentAccessControlRole }>;
+    }) => {
+      const timestamp = new Date().toISOString();
+      await sysEsClient.index({
+        index: CHAT_AGENTS_INDEX,
+        id: agentId,
+        refresh: 'wait_for',
+        document: {
+          id: agentId,
+          name: 'Legacy Access Control Test Agent',
+          type: AgentType.chat,
+          space: accessControlSpaceId,
+          description: 'Legacy fixture for access control tests',
+          created_by_name: alice.username,
+          visibility,
+          acl: { entries },
+          config: {
+            instructions: 'Legacy test agent',
+            tools: [{ tool_ids: ['*'] }],
+          },
+          created_at: timestamp,
+          updated_at: timestamp,
+        },
+      });
+      trackAgent(agentId);
+    };
+
     // ── read access ─────────────────────────────────────────────────────────
 
     apiTest('non-owner gets 404 on a Private agent until granted', async ({ apiClient }) => {
@@ -271,6 +321,74 @@ apiTest.describe(
       const idsAfter = listAfterGrant.body.results.map((a: { id: string }) => a.id);
       expect(idsAfter).toContain(agentId);
     });
+
+    apiTest(
+      'legacy visibility and acl are honored for read, list, and access-control APIs',
+      async ({ apiClient }) => {
+        const deniedAgentId = `${ACCESS_CONTROL_TEST_PREFIX}-legacy-denied-${randomUUID()}`;
+        const grantedAgentId = `${ACCESS_CONTROL_TEST_PREFIX}-legacy-granted-${randomUUID()}`;
+
+        await seedLegacyAgent({
+          agentId: deniedAgentId,
+          visibility: AgentAccessControlScope.Private,
+        });
+        await seedLegacyAgent({
+          agentId: grantedAgentId,
+          visibility: AgentAccessControlScope.Private,
+          entries: [
+            { type: 'user', name: bob.username, role: AgentAccessControlRole.User },
+            { type: 'user', name: eve.username, role: AgentAccessControlRole.Editor },
+          ],
+        });
+
+        const denied = await apiClient.get(
+          `${accessControlApiBase}/agents/${encodeURIComponent(deniedAgentId)}`,
+          {
+            headers: headersFor(bob),
+            responseType: 'json',
+          }
+        );
+        expect(denied).toHaveStatusCode(404);
+
+        const granted = await apiClient.get(
+          `${accessControlApiBase}/agents/${encodeURIComponent(grantedAgentId)}`,
+          {
+            headers: headersFor(bob),
+            responseType: 'json',
+          }
+        );
+        expect(granted).toHaveStatusCode(200);
+        expect(granted.body.access_control).toMatchObject({
+          scope: AgentAccessControlScope.Private,
+          entries: [],
+        });
+
+        const list = await apiClient.get(`${accessControlApiBase}/agents`, {
+          headers: headersFor(bob),
+          responseType: 'json',
+        });
+        expect(list).toHaveStatusCode(200);
+        const listedIds = list.body.results.map((agent: { id: string }) => agent.id);
+        expect(listedIds).not.toContain(deniedAgentId);
+        expect(listedIds).toContain(grantedAgentId);
+
+        const bobAccessControl = await apiClient.get(
+          `${accessControlApiBase}/agents/${encodeURIComponent(grantedAgentId)}/access_control`,
+          { headers: headersFor(bob), responseType: 'json' }
+        );
+        expect(bobAccessControl).toHaveStatusCode(200);
+        expect(bobAccessControl.body.can_manage_access_control).toBe(false);
+        expect(bobAccessControl.body.access_control.entries).toHaveLength(0);
+
+        const eveAccessControl = await apiClient.get(
+          `${accessControlApiBase}/agents/${encodeURIComponent(grantedAgentId)}/access_control`,
+          { headers: headersFor(eve), responseType: 'json' }
+        );
+        expect(eveAccessControl).toHaveStatusCode(200);
+        expect(eveAccessControl.body.can_manage_access_control).toBe(true);
+        expect(eveAccessControl.body.access_control.entries).toHaveLength(2);
+      }
+    );
 
     // ── access control redaction on agent read paths ───────────────────────────────────
 
@@ -362,6 +480,30 @@ apiTest.describe(
         expect(eveAttempt).toHaveStatusCode(200);
       }
     );
+
+    apiTest('legacy Manager acl can change access-control scope', async ({ apiClient }) => {
+      const agentId = `${ACCESS_CONTROL_TEST_PREFIX}-legacy-scope-${randomUUID()}`;
+      await seedLegacyAgent({
+        agentId,
+        visibility: AgentAccessControlScope.Private,
+        entries: [{ type: 'user', name: bob.username, role: AgentAccessControlRole.Manager }],
+      });
+
+      const response = await apiClient.put(
+        `${accessControlApiBase}/agents/${encodeURIComponent(agentId)}`,
+        {
+          headers: headersFor(bob),
+          body: { access_control: { scope: AgentAccessControlScope.Shared } },
+          responseType: 'json',
+        }
+      );
+
+      expect(response).toHaveStatusCode(200);
+      expect(response.body.access_control).toMatchObject({
+        scope: AgentAccessControlScope.Shared,
+        entries: [{ type: 'user', name: bob.username, role: AgentAccessControlRole.Manager }],
+      });
+    });
 
     apiTest(
       'PUT /agents/{id}/access_control rejects callers without manageAgents (403)',
