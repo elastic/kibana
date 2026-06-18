@@ -54,7 +54,7 @@ savedObjectsMock.get = jest.fn().mockReturnValue({
 });
 
 const context = {
-  logger: { error: loggerErrorMock },
+  logger: { error: loggerErrorMock, debug: jest.fn() },
   getActionsClient: () => {
     return {
       getBulk: getBulkMock,

@@ -19,11 +19,23 @@ import type { RuleDomain } from '../../types';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 import { transformRuleAttributesToRuleDomain } from '../../transforms';
 
+interface EncryptedRuleFields {
+  apiKey?: string | null;
+  uiamApiKey?: string | null;
+}
+
 interface LogRuleChanges {
   /**
    * Rule saved objects after applying the changes
    */
   ruleSOs: Array<SavedObject<RawRule>>;
+  /**
+   * Plaintext encrypted field values keyed by rule id. When provided, the
+   * corresponding SO attributes are overlaid before building the snapshot so
+   * the real values are captured (the SO may contain ciphertext after a save
+   * via unsecuredSavedObjectsClient).
+   */
+  encryptedFieldsMap?: Map<string, EncryptedRuleFields>;
   /**
    * Context information describing the changes
    */
@@ -46,6 +58,7 @@ interface LogRuleChanges {
 
 export async function logRuleChanges({
   ruleSOs,
+  encryptedFieldsMap,
   rulesClientContext: { changeTrackingService, ruleTypeRegistry, logger, spaceId, isSystemAction },
   changesContext: { action, timestamp, metadata },
 }: LogRuleChanges): Promise<void> {
@@ -53,9 +66,12 @@ export async function logRuleChanges({
     return;
   }
 
+  const effectiveRuleSOs = encryptedFieldsMap?.size
+    ? overlayEncryptedFields(ruleSOs, encryptedFieldsMap)
+    : ruleSOs;
   const changes: RuleChange[] = [];
 
-  for (const ruleSO of ruleSOs) {
+  for (const ruleSO of effectiveRuleSOs) {
     if (ruleSO.error) {
       continue;
     }
@@ -175,4 +191,26 @@ function normalizeDate(value: string | number | Date, fallback: Date): string {
   }
 
   return fallback.toISOString();
+}
+
+function overlayEncryptedFields(
+  ruleSOs: Array<SavedObject<RawRule>>,
+  encryptedFieldsMap: Map<string, EncryptedRuleFields>
+): Array<SavedObject<RawRule>> {
+  return ruleSOs.map((so) => {
+    const fields = encryptedFieldsMap.get(so.id);
+
+    if (!fields?.apiKey && !fields?.uiamApiKey) {
+      return so;
+    }
+
+    return {
+      ...so,
+      attributes: {
+        ...so.attributes,
+        ...(fields.apiKey ? { apiKey: fields.apiKey } : {}),
+        ...(fields.uiamApiKey ? { uiamApiKey: fields.uiamApiKey } : {}),
+      },
+    };
+  });
 }
