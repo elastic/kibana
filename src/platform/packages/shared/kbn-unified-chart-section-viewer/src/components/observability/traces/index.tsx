@@ -122,7 +122,7 @@ function TraceMetricsGrid({
           discoverFetch$,
           actions,
           profileId,
-          breakdownField,
+          breakdownField: breakdownDataViewField?.name,
         }}
       >
         <EuiPanel
