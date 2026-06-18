@@ -21,6 +21,7 @@ export const ConfigSchema = z.object({
 export const InputSchema = z.object({
   condition: z.string(),
   limit: z.number().positive().optional(),
+  default: z.unknown().optional(),
 });
 
 export const OutputSchema = z.array(z.unknown());
