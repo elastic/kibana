@@ -32,7 +32,7 @@ import type { RuleFormServices } from '../../form/contexts/rule_form_context';
 import { RuleFormProvider } from '../../form/contexts/rule_form_context';
 import { ConfirmRuleClose } from '../confirm_rule_close';
 import type { FormValues, RuleNotificationsValue } from '../../form/types';
-import { mergeArtifactsByType, splitArtifactsByType } from '../../form/utils/artifact_mappers';
+import { mergeArtifactsByType } from '../../form/utils/artifact_mappers';
 import { parseYamlToFormValues, serializeFormToYaml } from '../../form/utils/yaml_form_utils';
 import { ComposeDiscoverForm, getSteps } from './compose_discover_form';
 import type { ComposeFormValues, RuleQuery } from './compose_form_types';
@@ -41,9 +41,11 @@ import {
   composeFormToCreateRequest,
   composeFormToUpdateRequest,
   mapRuleToComposeFormValues,
+  mapYamlFormValuesToComposeFormValues,
 } from './compose_mappers';
 import { HorizontalMinimalStepper, type MinimalStep } from './horizontal_minimal_stepper';
 import { QuerySandboxFlyout } from './query_sandbox_flyout';
+import { isAlertTabDisabled } from './compose_discover_tabs';
 import { RULE_BUILDER_REGISTRY, BuilderStateProvider, type BuilderState } from './rule_builder';
 import type { ComposeDiscoverMode, QueryTab, RecoveryType } from './types';
 import { getSandboxTabs, useComposeDiscoverState } from './use_compose_discover_state';
@@ -174,24 +176,6 @@ const getStepStatus = (currentStep: number, stepIndex: number): MinimalStep['sta
   if (stepIndex === currentStep) return 'current';
   return 'incomplete';
 };
-
-/** Bridge YAML parse (FormValues) into compose form shape. */
-const formValuesFromYamlToCompose = (parsed: FormValues): ComposeFormValues => ({
-  kind: parsed.kind,
-  metadata: parsed.metadata,
-  timeField: parsed.timeField,
-  schedule: parsed.schedule,
-  query: {
-    format: 'standalone',
-    breach: { query: parsed.query.breach },
-    ...(parsed.query.recover ? { recovery: { query: parsed.query.recover } } : {}),
-  },
-  grouping: parsed.grouping,
-  stateTransition: parsed.stateTransition,
-  stateTransitionAlertDelayMode: parsed.stateTransitionAlertDelayMode,
-  stateTransitionRecoveryDelayMode: parsed.stateTransitionRecoveryDelayMode,
-  ...splitArtifactsByType(parsed.artifacts),
-});
 
 /** Compose form → FormValues for YAML serialization via yaml_form_utils. */
 const composeFormValuesForYamlSerialize = (compose: ComposeFormValues): FormValues => {
@@ -426,6 +410,20 @@ export function ComposeDiscoverFlyout({
     setSandboxTimeField(methods.getValues('timeField'));
   }, [methods]);
 
+  const applyYamlValuesToFormAndSandbox = useCallback(
+    (parsed: FormValues): ComposeFormValues => {
+      const composed = {
+        ...mapYamlFormValuesToComposeFormValues(parsed),
+        notifications: methods.getValues('notifications'),
+      };
+      methods.reset(composed);
+      setSandboxQuery(composed.query);
+      setSandboxTimeField(composed.timeField);
+      return composed;
+    },
+    [methods]
+  );
+
   /*
    * Split-query completion for alert and recovery block editors. Registered at
    * the flyout level so providers survive Sandbox (child) open/close cycles and
@@ -574,16 +572,12 @@ export function ComposeDiscoverFlyout({
   const [yamlText, setYamlText] = useState('');
   yamlTextRef.current = yamlText;
 
-  // Debounced (~300 ms) lenient parse that pushes every YAML keystroke into RHF.
-  // The Sandbox watches RHF via props, so it sees YAML edits live.
+  // Debounced (~300 ms) lenient parse that pushes every YAML keystroke into RHF
+  // and mirrors the composed query into the sandbox editing buffer.
   const { run: runYamlParse, cancel: cancelYamlParse } = useDebounceFn((yaml: string) => {
     const result = parseYamlToFormValues(yaml);
     if (result.values) {
-      methods.reset({
-        ...formValuesFromYamlToCompose(result.values),
-        notifications: methods.getValues('notifications'),
-      });
-      syncSandbox();
+      applyYamlValuesToFormAndSandbox(result.values);
     }
   }, YAML_PARSE_DEBOUNCE_OPTIONS);
 
@@ -598,10 +592,9 @@ export function ComposeDiscoverFlyout({
   const handleBlurSync = useCallback(
     (values: FormValues) => {
       cancelYamlParse();
-      methods.reset(formValuesFromYamlToCompose(values));
-      syncSandbox();
+      applyYamlValuesToFormAndSandbox(values);
     },
-    [cancelYamlParse, methods, syncSandbox]
+    [cancelYamlParse, applyYamlValuesToFormAndSandbox]
   );
 
   const handleToggleYamlMode = useCallback(
@@ -612,6 +605,11 @@ export function ComposeDiscoverFlyout({
         );
         setYamlText(serialized);
         yamlBaselineRef.current = serialized;
+        cancelYamlParse();
+        const result = parseYamlToFormValues(serialized);
+        if (result.values) {
+          applyYamlValuesToFormAndSandbox(result.values);
+        }
       } else {
         const yamlWasDirty =
           yamlBaselineRef.current !== null && yamlTextRef.current !== yamlBaselineRef.current;
@@ -619,12 +617,7 @@ export function ComposeDiscoverFlyout({
         cancelYamlParse();
         const result = parseYamlToFormValues(yamlText);
         if (result.values) {
-          const composed = {
-            ...formValuesFromYamlToCompose(result.values),
-            notifications: methods.getValues('notifications'),
-          };
-          methods.reset(composed);
-          syncSandbox();
+          const composed = applyYamlValuesToFormAndSandbox(result.values);
           if (getBreachQuery(composed.query).trim()) {
             dispatch({ type: 'COMMIT_QUERY' });
           }
@@ -632,27 +625,30 @@ export function ComposeDiscoverFlyout({
             hasBeenEditedRef.current = true;
           }
         }
-        // No syncSandbox() on parse-failure path: the debounced parse always calls
-        // methods.reset() + syncSandbox() together, so RHF and sandbox state are already in
+        // No apply on parse-failure path: the debounced parse always calls
+        // applyYamlValuesToFormAndSandbox together, so RHF and sandbox state are already in
         // sync at the last valid parse state. The current yamlText simply can't be applied.
       }
       dispatch({ type: 'SET_YAML_MODE', enabled });
     },
-    [cancelYamlParse, methods, yamlText, syncSandbox, dispatch]
+    [cancelYamlParse, methods, yamlText, applyYamlValuesToFormAndSandbox, dispatch]
   );
 
   const handleSandboxApply = useCallback(() => {
     methods.setValue('query', sandboxQuery, { shouldDirty: true });
     methods.setValue('timeField', sandboxTimeField, { shouldDirty: true });
     if (uiState.yamlMode) {
+      cancelYamlParse();
       const current = { ...methods.getValues(), query: sandboxQuery, timeField: sandboxTimeField };
-      setYamlText(serializeFormToYaml(composeFormValuesForYamlSerialize(current)));
+      const serialized = serializeFormToYaml(composeFormValuesForYamlSerialize(current));
+      setYamlText(serialized);
+      yamlBaselineRef.current = serialized;
     }
     dispatch({ type: 'COMMIT_QUERY' });
     if (!uiState.yamlMode) {
       dispatch({ type: 'CLOSE_CHILD' });
     }
-  }, [sandboxQuery, sandboxTimeField, uiState.yamlMode, methods, dispatch]);
+  }, [sandboxQuery, sandboxTimeField, uiState.yamlMode, methods, dispatch, cancelYamlParse]);
 
   const handleSubmit = methods.handleSubmit((values) => {
     if (hasValidationErrors) {
@@ -684,13 +680,19 @@ export function ComposeDiscoverFlyout({
     cancelYamlParse();
     const result = parseYamlToFormValues(yamlText);
     if (result.values) {
-      methods.reset(formValuesFromYamlToCompose(result.values));
+      applyYamlValuesToFormAndSandbox(result.values);
       // No syncSandbox() here: draft is temporarily stale after methods.reset(), but
       // we're about to submit. On success the flyout closes; on failure the user is still
       // in YAML mode and handleToggleYamlMode(false) will resync when they switch back.
     }
     handleSubmit();
-  }, [cancelYamlParse, yamlText, methods, handleSubmit, hasValidationErrors]);
+  }, [
+    cancelYamlParse,
+    yamlText,
+    applyYamlValuesToFormAndSandbox,
+    handleSubmit,
+    hasValidationErrors,
+  ]);
 
   const handleNext = useCallback(async () => {
     if (hasValidationErrors) {
@@ -757,12 +759,28 @@ export function ComposeDiscoverFlyout({
   // TODO: recoveryType drives whether the recovery tab appears in YAML mode.
   // Follow schema decisions in #268984 — if recoveryType is superseded by a
   // field on RuleQuery itself, gate this on query shape instead.
-  const sandboxTabs: QueryTab[] | undefined =
-    uiState.yamlMode && sandboxQuery.format === 'composed'
-      ? uiState.recoveryType === 'custom'
-        ? ['base', 'alert', 'recovery']
-        : ['base', 'alert']
-      : getSandboxTabs(isAlert, uiState);
+  const sandboxTabs = useMemo<QueryTab[] | undefined>(() => {
+    if (uiState.yamlMode && sandboxQuery.format === 'composed') {
+      return uiState.recoveryType === 'custom' ? ['base', 'alert', 'recovery'] : ['base', 'alert'];
+    }
+    return getSandboxTabs(isAlert, {
+      step: uiState.step,
+      recoveryType: uiState.recoveryType,
+    });
+  }, [uiState.yamlMode, uiState.recoveryType, uiState.step, sandboxQuery.format, isAlert]);
+
+  const handleSandboxTabChange = useCallback(
+    (tab: QueryTab) => {
+      const tabs = sandboxTabs ?? [];
+
+      if (tab === 'alert' && isAlertTabDisabled(tabs, sandboxQuery)) {
+        return;
+      }
+
+      dispatch({ type: 'SET_TAB', tab });
+    },
+    [dispatch, sandboxQuery, sandboxTabs]
+  );
 
   return (
     <RuleFormProvider services={services} meta={{ layout: 'flyout' }}>
@@ -949,7 +967,7 @@ export function ComposeDiscoverFlyout({
               dateRange={dateRange}
               onDateRangeChange={setDateRange}
               activeTab={uiState.activeTab}
-              onTabChange={(tab) => dispatch({ type: 'SET_TAB', tab })}
+              onTabChange={handleSandboxTabChange}
               onAlertEditorMount={onAlertEditorMount}
               onRecoveryEditorMount={onRecoveryEditorMount}
               onClose={() => {

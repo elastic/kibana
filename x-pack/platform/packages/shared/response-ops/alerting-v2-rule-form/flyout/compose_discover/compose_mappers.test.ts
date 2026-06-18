@@ -7,11 +7,13 @@
 
 import type { RuleResponse } from '@kbn/alerting-v2-schemas';
 import { DASHBOARD_ARTIFACT_TYPE, RUNBOOK_ARTIFACT_TYPE } from '@kbn/alerting-v2-constants';
+import type { FormValues } from '../../form/types';
 import type { ComposeFormValues } from './compose_form_types';
 import {
   composeFormToCreateRequest,
   composeFormToUpdateRequest,
   mapRuleToComposeFormValues,
+  mapYamlFormValuesToComposeFormValues,
 } from './compose_mappers';
 
 // ── fixtures ─────────────────────────────────────────────────────────────────
@@ -420,5 +422,45 @@ describe('mapRuleToComposeFormValues', () => {
     } as RuleResponse;
     const result = mapRuleToComposeFormValues(rule);
     expect(result.stateTransitionRecoveryDelayMode).toBe('recoveries');
+  });
+});
+
+describe('mapYamlFormValuesToComposeFormValues', () => {
+  const parsedYaml: FormValues = {
+    kind: 'alert',
+    metadata: { name: 'Test', enabled: true, description: '', tags: [] },
+    timeField: '@timestamp',
+    schedule: { every: '1m', lookback: '5m' },
+    query: {
+      breach: `${BASE}\n| ${ALERT_SEGMENT}`,
+    },
+    stateTransitionAlertDelayMode: 'immediate',
+    stateTransitionRecoveryDelayMode: 'immediate',
+    artifacts: [],
+  };
+
+  it('splits alert YAML queries into composed base and breach segments', () => {
+    const result = mapYamlFormValuesToComposeFormValues(parsedYaml);
+
+    expect(result.query.format).toBe('composed');
+    if (result.query.format !== 'composed') {
+      throw new Error('expected composed query');
+    }
+    expect(result.query.base).toBe(BASE);
+    expect(result.query.breach.segment).toBe(`| ${ALERT_SEGMENT}`);
+  });
+
+  it('keeps signal YAML queries in standalone format', () => {
+    const result = mapYamlFormValuesToComposeFormValues({
+      ...parsedYaml,
+      kind: 'signal',
+      query: { breach: 'FROM logs-* | LIMIT 10' },
+    });
+
+    expect(result.query.format).toBe('standalone');
+    if (result.query.format !== 'standalone') {
+      throw new Error('expected standalone query');
+    }
+    expect(result.query.breach.query).toBe('FROM logs-* | LIMIT 10');
   });
 });

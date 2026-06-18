@@ -31,17 +31,34 @@ export interface StandaloneQuery {
 
 export type RuleQuery = ComposedQuery | StandaloneQuery;
 
+const joinComposedQuerySegment = (base: string, segment: string): string => {
+  const trimmedBase = base.trim();
+  const trimmedSegment = segment.trim();
+
+  if (!trimmedSegment) {
+    return trimmedBase;
+  }
+
+  if (!trimmedBase) {
+    return trimmedSegment.startsWith('|') ? trimmedSegment : `| ${trimmedSegment}`;
+  }
+
+  const normalizedSegment = trimmedSegment.startsWith('|') ? trimmedSegment : `| ${trimmedSegment}`;
+
+  return `${trimmedBase}\n${normalizedSegment}`;
+};
+
 export function getBreachQuery(query: RuleQuery | undefined): string {
   if (!query) return '';
   if (query.format === 'standalone') return query.breach.query;
-  return [query.base, query.breach.segment].filter(Boolean).join('\n| ');
+  return joinComposedQuerySegment(query.base, query.breach.segment);
 }
 
 export function getRecoverQuery(query: RuleQuery | undefined): string {
   if (!query) return '';
   if (query.format === 'standalone') return query.recovery?.query ?? '';
-  if (!query.recovery?.segment) return '';
-  return [query.base, query.recovery.segment].filter(Boolean).join('\n| ');
+  if (!query.recovery?.segment.trim()) return '';
+  return joinComposedQuerySegment(query.base, query.recovery.segment);
 }
 
 // ---------------------------------------------------------------------------
