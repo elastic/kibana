@@ -5,6 +5,17 @@
  * 2.0.
  */
 
+/**
+ * TSVB Open in Lens — Scout migration coverage notes
+ *
+ * These tests verify that TSVB panels convert correctly to Lens (conversion logic only).
+ * The following flows are NOT yet covered and should be added:
+ *
+ * TODO: Save & return to dashboard — does the converted panel persist after saving?
+ * TODO: Replace in dashboard — does the converted Lens panel replace the original TSVB panel?
+ * TODO: Save to library — can the converted visualization be saved as a library item?
+ */
+
 import { spaceTest, tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { testData } from '../fixtures';
@@ -14,8 +25,8 @@ const CONVERT_TO_LENS_ACTION = 'embeddablePanelAction-ACTION_EDIT_IN_LENS';
 spaceTest.describe('TSVB Top N - Open in Lens', { tag: tags.deploymentAgnostic }, () => {
   spaceTest.beforeAll(async ({ scoutSpace }) => {
     await scoutSpace.savedObjects.load(testData.KBN_ARCHIVES.TSVB_TOP_N);
+    await scoutSpace.uiSettings.setDefaultIndex(testData.DATA_VIEW_ID.LOGSTASH);
     await scoutSpace.uiSettings.set({
-      defaultIndex: testData.DATA_VIEW_ID.LOGSTASH,
       'dateFormat:tz': 'UTC',
       'timepicker:timeDefaults': JSON.stringify({
         from: testData.LOGSTASH_IN_RANGE_DATES.from,
@@ -30,6 +41,7 @@ spaceTest.describe('TSVB Top N - Open in Lens', { tag: tags.deploymentAgnostic }
     await dashboard.goto();
     await dashboard.clickDashboardTitleLink(testData.TSVB_DASHBOARDS.TOP_N);
     await dashboard.switchToEditMode();
+    await dashboard.waitForRenderComplete();
   });
 
   spaceTest.afterAll(async ({ scoutSpace }) => {
