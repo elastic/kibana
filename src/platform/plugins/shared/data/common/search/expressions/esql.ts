@@ -417,7 +417,8 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
             includeExecutionMetadata: true,
           };
 
-          const isStatsQuery = /\|\s*stats\s/i.test(fixedQuery);
+          const querySummary = getQuerySummary(fixedQuery);
+          const isStatsQuery = querySummary.aggregates.size > 0 || querySummary.grouping.size > 0;
 
           if (isStatsQuery) {
             let exactDone = false;
