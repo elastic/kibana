@@ -23,10 +23,10 @@ import type { Observable } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { UserMenuLink } from '@kbn/security-plugin-types-public';
-import { UserAvatar, type UserProfileAvatarData } from '@kbn/user-profile-components';
+import { UserAvatar } from '@kbn/user-profile-components';
 
 import { getUserDisplayName, isUserAnonymous } from '../../common/model';
-import { useCurrentUser, useUserProfile } from '../components';
+import { useCurrentUser } from '../components';
 
 type ContextMenuItem = Omit<EuiContextMenuPanelItemDescriptor, 'content' | 'onClick'> & {
   content?: ReactNode | ((args: { closePopover: () => void }) => ReactNode);
@@ -91,28 +91,26 @@ export const SecurityNavControl: FunctionComponent<SecurityNavControlProps> = ({
   const userMenuLinks = useObservable(userMenuLinks$, []);
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
-  const userProfile = useUserProfile<{ avatar: UserProfileAvatarData }>('avatar,userSettings');
-  const currentUser = useCurrentUser(); // User profiles do not exist for anonymous users so need to fetch current user as well
+  const { user, isLoading } = useCurrentUser();
 
-  const displayName = currentUser.value ? getUserDisplayName(currentUser.value) : '';
+  const displayName = user ? getUserDisplayName(user) : '';
 
   const toggleMenu = useCallback(
-    () => setIsPopoverOpen((value) => (currentUser.value ? !value : false)),
-    [currentUser.value]
+    () => setIsPopoverOpen((value) => (user ? !value : false)),
+    [user]
   );
 
-  const avatar = userProfile.value ? (
-    <UserAvatar
-      user={userProfile.value.user}
-      avatar={userProfile.value.data.avatar}
-      size={avatarSize}
-      data-test-subj="userMenuAvatar"
-    />
-  ) : currentUser.value && userProfile.error ? (
-    <UserAvatar user={currentUser.value} size={avatarSize} data-test-subj="userMenuAvatar" />
-  ) : (
-    <EuiLoadingSpinner size="m" />
-  );
+  const avatar =
+    isLoading && !user ? (
+      <EuiLoadingSpinner size="m" />
+    ) : (
+      <UserAvatar
+        user={user ?? undefined}
+        avatar={user?.avatar ?? undefined}
+        size={avatarSize}
+        data-test-subj="userMenuAvatar"
+      />
+    );
 
   const button = renderButton ? (
     renderButton({ isOpen: isPopoverOpen, toggleMenu, avatar })
@@ -146,7 +144,7 @@ export const SecurityNavControl: FunctionComponent<SecurityNavControlProps> = ({
     items.push(...userMenuLinkMenuItems);
   }
 
-  const isAnonymous = currentUser.value ? isUserAnonymous(currentUser.value) : false;
+  const isAnonymous = user ? isUserAnonymous(user) : false;
   const hasCustomProfileLinks = userMenuLinks.some(({ setAsProfile }) => setAsProfile === true);
 
   if (!isAnonymous && !hasCustomProfileLinks) {

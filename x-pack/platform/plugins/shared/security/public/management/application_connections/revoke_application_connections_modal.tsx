@@ -50,7 +50,7 @@ export const RevokeApplicationConnectionsModal = ({
   const { revokeConnections, isRevoking } = useRevokeConnections();
   const { services } = useKibana<CoreStart>();
   const { toasts } = services.notifications;
-  const { value: currentUser } = useCurrentUser();
+  const { user } = useCurrentUser();
 
   const count = connections.length;
 
@@ -113,8 +113,8 @@ export const RevokeApplicationConnectionsModal = ({
         if (!item.userId) {
           return <EuiTextColor color="subdued">{'—'}</EuiTextColor>;
         }
-        return currentUser && item.userId === currentUser.username
-          ? getUserDisplayName(currentUser)
+        return user && item.userId === user.username
+          ? getUserDisplayName(user)
           : item.userId;
       },
     },

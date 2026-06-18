@@ -34,7 +34,7 @@ export const useConnectionTableColumns = ({
   withClientNameColumn = true,
 }: ConnectionTableColumnsOptions = {}): Array<EuiBasicTableColumn<ApplicationConnection>> => {
   const { revokeConnections, viewClientDetails } = useApplicationConnectionsActions();
-  const { value: currentUser } = useCurrentUser();
+  const { user } = useCurrentUser();
 
   return useMemo(() => {
     const connectionNameColumn: EuiTableFieldDataColumnType<ApplicationConnection> = {
@@ -106,8 +106,8 @@ export const useConnectionTableColumns = ({
           );
         }
         const displayName =
-          currentUser && connection.user_id === currentUser.username
-            ? getUserDisplayName(currentUser)
+          user && connection.user_id === user.username
+            ? getUserDisplayName(user)
             : connection.user_id;
         return (
           <EuiText size="s" data-test-subj={dataTestSubj}>
@@ -172,5 +172,5 @@ export const useConnectionTableColumns = ({
       statusColumn,
       actionsColumn,
     ];
-  }, [currentUser, revokeConnections, viewClientDetails, withClientNameColumn]);
+  }, [user, revokeConnections, viewClientDetails, withClientNameColumn]);
 };

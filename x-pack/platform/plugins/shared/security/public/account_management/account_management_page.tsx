@@ -22,23 +22,21 @@ import { Breadcrumb } from '../components/breadcrumb';
 export const AccountManagementPage: FunctionComponent = () => {
   const { services } = useKibana<CoreStart>();
 
-  const currentUser = useCurrentUser();
+  const { user, error: authError } = useCurrentUser();
   const userProfile = useUserProfile<UserProfileData>('avatar,userSettings');
 
   // If we fail to load profile, we treat it as a failure _only_ if user is supposed
   // to have a profile. For example, anonymous and users authenticated via
   // authentication proxies don't have profiles.
   const profileLoadError =
-    userProfile.error && currentUser.value && canUserHaveProfile(currentUser.value)
-      ? userProfile.error
-      : undefined;
+    userProfile.error && user && canUserHaveProfile(user) ? userProfile.error : undefined;
 
-  const error = currentUser.error || profileLoadError;
+  const error = authError || profileLoadError;
   if (error) {
     return <EuiEmptyPrompt iconType="warning" title={<h2>{error.message}</h2>} />;
   }
 
-  if (!currentUser.value || (canUserHaveProfile(currentUser.value) && !userProfile.value)) {
+  if (!user || (canUserHaveProfile(user) && !userProfile.value)) {
     return null;
   }
 
@@ -49,7 +47,7 @@ export const AccountManagementPage: FunctionComponent = () => {
       })}
       href={services.http.basePath.prepend('/security/account')}
     >
-      <UserProfile user={currentUser.value} data={userProfile.value?.data} />
+      <UserProfile user={user} data={userProfile.value?.data} />
     </Breadcrumb>
   );
 };
