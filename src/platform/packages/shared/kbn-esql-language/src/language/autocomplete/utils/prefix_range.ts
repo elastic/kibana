@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Parser } from '@elastic/esql';
 import type { ICommandContext, ISuggestionItem } from '../../../commands/registry/types';
 import { getOverlapRange } from '../../../commands/definitions/utils/shared';
+import { getEsqlLexerTokens, isVisibleToken, type EsqlLexerToken } from '../../shared/lexer_scope';
 import {
   containsWhitespace,
   findFirstNonWhitespaceIndex,
@@ -75,6 +75,8 @@ interface ScopedReplacementRangeOptions {
 }
 
 export interface AttachReplacementRangesOptions {
+  /** Lexer tokens for `innerText`. */
+  tokens: EsqlLexerToken[];
   /** Command context used to look up existing columns and resolve column-match rules. */
   commandContext?: ICommandContext;
   /** Full query text — required when a suggestion declares a `ROOT_QUERY` strategy. */
@@ -86,15 +88,21 @@ export interface AttachReplacementRangesOptions {
 /**
  * Resolves the prefix currently under the cursor and the text range that should
  * be replaced if a suggestion is accepted.
+ * This standalone helper reads lexer tokens itself; callers that already have
+ * tokens should go through attachReplacementRanges.
  */
 export function computePrefixRange(query: string): PrefixResult {
-  const tokens = getVisibleLexerTokens(query);
+  return computePrefixRangeFromTokens(query, getEsqlLexerTokens(query));
+}
 
-  if (tokens.length === 0) {
+function computePrefixRangeFromTokens(query: string, tokens: EsqlLexerToken[]): PrefixResult {
+  const visibleTokens = getVisibleLexerTokens(tokens);
+
+  if (visibleTokens.length === 0) {
     return createEmptyPrefixResult(query, 'fallback-required');
   }
 
-  const lastToken = tokens[tokens.length - 1];
+  const lastToken = visibleTokens[visibleTokens.length - 1];
   const lastTokenEnd = lastToken.stop + 1;
 
   // "WHERE x IS N" → the lexer tokenizes up to "IS", leaving " N" as unrecognized text (gap = 2)
@@ -107,10 +115,10 @@ export function computePrefixRange(query: string): PrefixResult {
 
   // Structural delimiters like ( ) , . = are not valid prefixes — cursor is in an empty position
   if (!startsWithWordChar(lastToken.text[0])) {
-    return getPrefixResultAfterDelimiter(query, tokens);
+    return getPrefixResultAfterDelimiter(query, visibleTokens);
   }
 
-  return getPrefixResultFromLastToken(query, tokens, lastToken, lastTokenEnd);
+  return getPrefixResultFromLastToken(query, visibleTokens, lastToken, lastTokenEnd);
 }
 
 // =============================================
@@ -121,14 +129,14 @@ export function computePrefixRange(query: string): PrefixResult {
 export function attachReplacementRanges(
   innerText: string,
   suggestions: ISuggestionItem[],
-  options: AttachReplacementRangesOptions = {}
+  options: AttachReplacementRangesOptions
 ): ISuggestionItem[] {
   if (suggestions.length === 0) {
     return suggestions;
   }
 
-  const { commandContext, fullText, offset } = options;
-  const prefixResult = computePrefixRange(innerText);
+  const { commandContext, fullText, offset, tokens } = options;
+  const prefixResult = computePrefixRangeFromTokens(innerText, tokens);
   const { prefix, range } = prefixResult;
   const hasExistingColumnMatch = Boolean(prefix && commandContext?.columns.has(prefix));
   const prefixMatchesExistingColumn =
@@ -249,7 +257,8 @@ function computeRootQueryReplacementRange(
   fullText: string,
   offset: number
 ): SuggestionRangeToReplace | undefined {
-  const start = computePrefixRange(fullText.substring(0, offset)).range.start;
+  const textBeforeCursor = fullText.substring(0, offset);
+  const start = computePrefixRange(textBeforeCursor).range.start;
   const end = fullText.length;
 
   // Nothing after the cursor, nothing to replace.
@@ -298,28 +307,11 @@ function resolveReplacementRange(
 // Local Helpers
 // =============================================
 
-/** Extracts visible (channel 0) tokens from the ANTLR lexer. */
-function getVisibleLexerTokens(query: string): LexerToken[] {
-  const parser = Parser.create(query);
-  const tokens: LexerToken[] = [];
-
-  while (true) {
-    const { type, channel, text, start, stop } = parser.lexer.nextToken();
-
-    // type -1 = EOF in ANTLR
-    if (type < 0) {
-      break;
-    }
-
-    // channel 0 = default (keywords, identifiers, operators); skip whitespace/comments
-    if (channel !== 0 || !text.length) {
-      continue;
-    }
-
-    tokens.push({ text, start, stop });
-  }
-
-  return tokens;
+/** Extracts visible (channel 0) tokens, reusing the defensive lexer reader. */
+function getVisibleLexerTokens(tokens: EsqlLexerToken[]): LexerToken[] {
+  return tokens
+    .filter((token) => isVisibleToken(token) && token.text)
+    .map(({ text, start, stop }) => ({ text: text ?? '', start, stop }));
 }
 
 /** Range of non-whitespace text after the last recognized token (fallback case). */
