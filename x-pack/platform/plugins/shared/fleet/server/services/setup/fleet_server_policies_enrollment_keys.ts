@@ -34,7 +34,9 @@ async function getPolicyIdsWithEnrollmentAPIKeys(
     size: 0,
     query: { terms: { policy_id: agentPolicyIds } },
     aggs: {
-      policies: { terms: { field: 'policy_id', size: agentPolicyIds.length } },
+      policies: {
+        terms: { field: 'policy_id', size: agentPolicyIds.length, execution_hint: 'map' },
+      },
     },
   });
 
@@ -146,12 +148,16 @@ export async function ensureAgentPoliciesFleetServerKeysAndPolicies({
           ids.length === 1 ? 'policy' : 'policies'
         } [${ids.join(', ')}] in space [${spaceId}] during setup`
       );
-      await agentPolicyService.deployPolicies(
-        appContextService.getInternalUserSOClientForSpaceId(spaceId),
-        ids,
-        undefined,
-        { throwOnAnyError: true }
-      );
+      try {
+        await agentPolicyService.deployPolicies(
+          appContextService.getInternalUserSOClientForSpaceId(spaceId),
+          ids,
+          undefined,
+          { throwOnAnyError: true }
+        );
+      } catch (e) {
+        logger.error(`Failed to deploy fleet server policies [${ids.join(', ')}]: ${e.message}`);
+      }
     }
   }
 

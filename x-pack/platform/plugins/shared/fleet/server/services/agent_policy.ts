@@ -2153,7 +2153,7 @@ class AgentPolicyService {
       query: { terms: { policy_id: agentPolicyIds } },
       aggs: {
         policies: {
-          terms: { field: 'policy_id', size: agentPolicyIds.length },
+          terms: { field: 'policy_id', size: agentPolicyIds.length, execution_hint: 'map' },
           aggs: { latest_revision: { max: { field: 'revision_idx' } } },
         },
       },
