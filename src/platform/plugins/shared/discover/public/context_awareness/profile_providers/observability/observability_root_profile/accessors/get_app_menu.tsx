@@ -26,7 +26,10 @@ export const createGetAppMenu =
   (prev) =>
   (params) => {
     const prevValue = prev(params);
-    const showCreateRuleV2 = params.isEsqlMode && Boolean(services.alertingVTwo);
+    const showCreateRuleV2 =
+      params.isEsqlMode &&
+      Boolean(services.alertingVTwo) &&
+      Boolean(services.application.capabilities.alertingVTwo);
 
     return {
       getAlertsLegacyRuleTypes: showCreateRuleV2
