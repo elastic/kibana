@@ -68,14 +68,16 @@ contains the rule definition (query, index patterns, schedule, type, enabled
 state, MITRE mappings). Never assume attachment contents; always read the latest
 version.
 
-Extract and retain: \`rule_id\` (or \`id\`), \`name\`, \`type\`, \`language\`, \`query\`,
+Extract and retain: \`rule_id\`, \`id\`, \`name\`, \`type\`, \`language\`, \`query\`,
 \`index\`, \`interval\`, \`from\`, \`enabled\`, and \`investigation_fields\` when present.
 
 ### Step 2: Fetch the Rule's Alerts (two focused queries)
 
 Call the \`security.alerts\` tool **twice**, keeping the two concerns separate so the
-result is unambiguous. Both queries filter to this rule only
-(\`kibana.alert.rule.uuid\` equals the rule's \`id\` from the attachment).
+result is unambiguous. Both queries filter to this rule only. Map each identifier to its
+alert field — \`rule_id\` → \`kibana.alert.rule.rule_id\`, \`id\` → \`kibana.alert.rule.uuid\` —
+and use \`rule_id\`: filter \`kibana.alert.rule.rule_id\` equals the rule's \`rule_id\` from the
+attachment.
 
 **Noise query — the noise picture (counts only).** Ask for:
 - the total alert count,
@@ -94,7 +96,7 @@ list of entity names without counts is not acceptable output.
 
 **Confirmed dispositions query — the closed alerts.** Restrict to alerts
 analysts have already closed (\`kibana.alert.workflow_status\` is \`closed\`) for this
-rule (filter on \`kibana.alert.rule.uuid\`). Name the fields to return explicitly —
+rule (filter on \`kibana.alert.rule.rule_id\`). Name the fields to return explicitly —
 these are the candidates for an exception condition (Step 4), so request exactly:
 - \`kibana.alert.workflow_reason\` and \`kibana.alert.workflow_user\` (the verdict),
 - entity fields: \`host.name\`, \`user.name\`, \`source.ip\`,
