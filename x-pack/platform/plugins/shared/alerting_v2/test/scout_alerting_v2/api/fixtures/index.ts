@@ -136,7 +136,6 @@ export {
 } from '../../common/urls';
 export { expectNoBulkTruncationMetadata } from '../../common/assertions';
 export {
-  ACTION_POLICY_CREATED_BY_MAX_LENGTH,
   ACTION_POLICY_PER_PAGE_MAX,
   ACTION_POLICY_SEARCH_MAX_LENGTH,
   ACTION_POLICY_TAG_MAX_LENGTH,

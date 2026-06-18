@@ -74,6 +74,10 @@ export const getNavigationTreeDefinition = ({
               title,
             },
             {
+              icon: 'productAgent',
+              link: 'agent_builder',
+            },
+            {
               icon: 'productDiscover',
               link: 'discover',
             },
@@ -83,10 +87,6 @@ export const getNavigationTreeDefinition = ({
                 isEditingFromDashboard(location, pathNameSerialized, prepend),
               icon: 'productDashboard',
               link: 'dashboards',
-            },
-            {
-              icon: 'productAgent',
-              link: 'agent_builder',
             },
             {
               link: 'workflows',

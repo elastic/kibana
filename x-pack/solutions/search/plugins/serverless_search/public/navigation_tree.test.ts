@@ -34,6 +34,11 @@ describe('Navigation Tree', () => {
     });
   });
 
+  it('has agent_builder as the first item after home', () => {
+    const { body } = createNavigationTree(mockApplication);
+    expect(body[1]).toMatchObject({ link: 'agent_builder' });
+  });
+
   it('includes Manage jobs link to Stack Management anomaly detection jobs list under ML nav', () => {
     const { body } = createNavigationTree(mockApplication);
     const mlNode = body.find((item: any) => item.id === 'machine_learning');
