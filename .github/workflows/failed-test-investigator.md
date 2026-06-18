@@ -106,7 +106,7 @@ safe-outputs:
     target: *issue_number
 
 strict: false
-timeout-minutes: 30
+timeout-minutes: 35
 ---
 
 # Failed Test Investigator
