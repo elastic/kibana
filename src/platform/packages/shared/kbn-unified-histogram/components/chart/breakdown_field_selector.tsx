@@ -27,10 +27,14 @@ import {
   ToolbarSelector,
   type SelectableEntry,
 } from '@kbn/shared-ux-toolbar-selector';
-import { EBT_CLICK_ACTIONS, getEbtProps } from '@kbn/ebt-click';
+import {
+  EBT_CLICK_ACTIONS,
+  getEbtProps,
+  NON_ECS_FIELD_EBT_DETAIL,
+  useEcsFieldNames,
+} from '@kbn/ebt-click';
 import type { UnifiedHistogramBreakdownContext } from '../../types';
-import { EBT_BREAKDOWN_SELECTOR_ELEMENT, NON_ECS_FIELD_EBT_DETAIL } from './ebt_constants';
-import { useEcsFieldNames } from './hooks/use_ecs_field_names';
+import { EBT_BREAKDOWN_SELECTOR_ELEMENT } from './ebt_constants';
 
 const BREAKDOWN_EBT_BASE = {
   action: EBT_CLICK_ACTIONS.SET_BREAKDOWN,
@@ -68,7 +72,8 @@ export const BreakdownFieldSelector = ({
   fieldsMetadata,
 }: BreakdownFieldSelectorProps) => {
   const fields = useMemo(() => mapToDropdownFields(dataView, esqlColumns), [dataView, esqlColumns]);
-  const ecsFieldNames = useEcsFieldNames(fields, fieldsMetadata);
+  const fieldNames = useMemo(() => fields.map((f) => f.name), [fields]);
+  const ecsFieldNames = useEcsFieldNames(fieldNames, fieldsMetadata);
 
   const fieldOptions: SelectableEntry[] = useMemo(() => {
     const noBreakdownOption: SelectableEntry = {
