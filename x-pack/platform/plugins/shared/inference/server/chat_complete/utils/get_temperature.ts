@@ -5,14 +5,20 @@
  * 2.0.
  */
 import type { InferenceConnector } from '@kbn/inference-common';
-import { InferenceConnectorType } from '@kbn/inference-common';
+import { InferenceConnectorType, InferenceEndpointProvider } from '@kbn/inference-common';
 
 const OPENAI_MODELS_WITHOUT_TEMPERATURE = ['o1', 'o3', 'gpt-5'];
 
-// Claude 4.7+ models on Bedrock deprecated the temperature parameter.
-// Model IDs follow the pattern claude-{variant}-{major}-{minor}-{date},
-// e.g. us.anthropic.claude-opus-4-8-20251101-v1:0
-const isBedRockClaudeWithoutTemperature = (modelId: string): boolean => {
+/**
+ * Returns true when the given Claude model ID is known to not accept the temperature parameter.
+ * Claude 4.7+ models (on Bedrock or any other backend) deprecated temperature.
+ *
+ * Claude 4.x model IDs follow the pattern claude-{variant}-{major}-{minor}-{date}
+ * (e.g. us.anthropic.claude-opus-4-8-20251101-v1:0). Claude 3.x IDs use a different
+ * order (claude-3-7-sonnet-...) and are intentionally not matched by the regex, so they
+ * correctly default to "supports temperature".
+ */
+export const isClaudeWithoutTemperature = (modelId: string): boolean => {
   const match = modelId.toLowerCase().match(/claude-[a-z][\w]*-(\d+)-(\d+)/);
   if (!match) return false;
   const major = parseInt(match[1], 10);
@@ -59,8 +65,21 @@ export const getTemperatureIfValid = (
     }
   }
 
+  // Bedrock connector: Claude 4.7+ deprecated temperature.
   if (connector?.type === InferenceConnectorType.Bedrock && model) {
-    if (isBedRockClaudeWithoutTemperature(model)) {
+    if (isClaudeWithoutTemperature(model)) {
+      return {};
+    }
+  }
+
+  // Inference connector backed by Amazon Bedrock (e.g. an ES inference endpoint using the
+  // amazonbedrock provider) — apply the same Claude version check.
+  if (
+    connector?.type === InferenceConnectorType.Inference &&
+    connector?.config?.provider === InferenceEndpointProvider.AmazonBedrock &&
+    model
+  ) {
+    if (isClaudeWithoutTemperature(model)) {
       return {};
     }
   }

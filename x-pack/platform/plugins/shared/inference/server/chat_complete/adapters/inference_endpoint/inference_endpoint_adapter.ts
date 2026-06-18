@@ -30,6 +30,7 @@ import {
 } from '../../simulated_function_calling';
 import type { InferenceEndpointExecutor } from '../../utils/inference_endpoint_executor';
 import type { OpenAIRequest } from '../openai/types';
+import { isClaudeWithoutTemperature } from '../../utils/get_temperature';
 
 export interface InferenceEndpointAdapterChatCompleteOptions {
   executor: InferenceEndpointExecutor;
@@ -111,6 +112,10 @@ const createEndpointRequest = ({
   temperature?: number;
   modelName?: string;
 }): OpenAIRequest => {
+  const supportsTemperature = !modelName || !isClaudeWithoutTemperature(modelName);
+  const temperatureSpread =
+    supportsTemperature && temperature >= 0 ? { temperature } : {};
+
   if (simulatedFunctionCalling) {
     const wrapped = wrapWithSimulatedFunctionCalling({
       system,
@@ -119,7 +124,7 @@ const createEndpointRequest = ({
       tools,
     });
     return {
-      ...(temperature >= 0 ? { temperature } : {}),
+      ...temperatureSpread,
       model: modelName,
       messages: messagesToOpenAI({ system: wrapped.system, messages: wrapped.messages }),
     };
@@ -129,7 +134,7 @@ const createEndpointRequest = ({
   const hasTools = Array.isArray(openAiTools) && openAiTools.length > 0;
 
   return {
-    ...(temperature >= 0 ? { temperature } : {}),
+    ...temperatureSpread,
     model: modelName,
     messages: messagesToOpenAI({ system, messages }),
     ...(hasTools
