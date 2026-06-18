@@ -137,7 +137,7 @@ function isRetryable(error: any): { retry: boolean; retryAfterMs?: number } {
     ) ||
     /fetch failed|other side closed|socket hang ?up|SocketError/i.test(message)
   ) {
-    return { retry: true };
+    return { retry: true, retryAfterMs };
   }
 
   return { retry: false };
