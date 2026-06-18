@@ -105,33 +105,31 @@ export const OptionsListPopoverSortingButton = ({
   );
 
   const SortButton = () => (
-    <EuiButtonIcon
-      size="xs"
-      display="empty"
-      color="text"
-      iconType={sort?.direction === 'asc' ? 'sortAscending' : 'sortDescending'}
-      isDisabled={showOnlySelected}
-      className="optionsList__sortButton"
-      data-test-subj="optionsListControl__sortingOptionsButton"
-      onClick={() => setIsSortingPopoverOpen(!isSortingPopoverOpen)}
-      aria-label={OptionsListStrings.popover.getSortPopoverDescription()}
-    />
+    <EuiToolTip
+      position="top"
+      content={
+        showOnlySelected
+          ? OptionsListStrings.popover.getSortDisabledTooltip()
+          : OptionsListStrings.popover.getSortPopoverTitle()
+      }
+    >
+      <EuiButtonIcon
+        size="xs"
+        display="empty"
+        color="text"
+        iconType={sort?.direction === 'asc' ? 'sortAscending' : 'sortDescending'}
+        isDisabled={showOnlySelected}
+        className="optionsList__sortButton"
+        data-test-subj="optionsListControl__sortingOptionsButton"
+        onClick={() => setIsSortingPopoverOpen(!isSortingPopoverOpen)}
+        aria-label={OptionsListStrings.popover.getSortPopoverDescription()}
+      />
+    </EuiToolTip>
   );
 
   return (
     <EuiPopover
-      button={
-        <EuiToolTip
-          position="top"
-          content={
-            showOnlySelected
-              ? OptionsListStrings.popover.getSortDisabledTooltip()
-              : OptionsListStrings.popover.getSortPopoverTitle()
-          }
-        >
-          <SortButton />
-        </EuiToolTip>
-      }
+      button={<SortButton />}
       panelPaddingSize="none"
       isOpen={isSortingPopoverOpen}
       aria-labelledby="optionsList_sortingOptions"
@@ -166,7 +164,7 @@ export const OptionsListPopoverSortingButton = ({
           singleSelection="always"
           onChange={onSortByChange}
           id="optionsList_sortingOptions"
-          listProps={{ bordered: false }}
+          listProps={{ bordered: false, paddingSize: 's' }}
           data-test-subj="optionsListControl__sortingOptions"
           aria-label={OptionsListStrings.popover.getSortPopoverDescription()}
         >

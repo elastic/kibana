@@ -7,7 +7,7 @@
 
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
-import type { SmlListItem } from '@kbn/agent-builder-plugin/server';
+import type { SmlListItem } from '@kbn/agent-context-layer-plugin/server';
 import { AttachmentType } from '@kbn/agent-builder-common/attachments';
 import { createConnectorSmlType } from './connector';
 
@@ -92,7 +92,10 @@ describe('connectorSmlType', () => {
             type: 'connector',
             title: 'My MCP Connector',
             content: 'My MCP Connector\nMCP\nModel Context Protocol connector',
-            permissions: ['action:execute'],
+            permissions: {
+              kibana: { privileges: [{ name: 'action:execute' }] },
+              elasticsearch: { indices: [] },
+            },
           },
         ],
       });
@@ -189,7 +192,10 @@ describe('connectorSmlType', () => {
         type: 'connector',
         title: 'Basic Connector',
         content: 'Basic Connector\n.unknown',
-        permissions: ['action:execute'],
+        permissions: {
+          kibana: { privileges: [{ name: 'action:execute' }] },
+          elasticsearch: { indices: [] },
+        },
       });
     });
   });

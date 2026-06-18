@@ -10,7 +10,14 @@ import type {
   EuiContextMenuPanelDescriptor,
   EuiContextMenuPanelItemDescriptor,
 } from '@elastic/eui';
-import { EuiButtonIcon, EuiPopover, EuiContextMenu, EuiIcon, EuiTextColor } from '@elastic/eui';
+import {
+  EuiButtonIcon,
+  EuiContextMenu,
+  EuiIcon,
+  EuiPopover,
+  EuiTextColor,
+  EuiToolTip,
+} from '@elastic/eui';
 import type { Observable } from '../../../common/types/domain/observable/v1';
 import * as i18n from './translations';
 
@@ -65,7 +72,7 @@ export const ObservableActionsPopoverButton: React.FC<{
     if (permissions.update) {
       mainPanelItems.push({
         name: <EuiTextColor color={'danger'}>{i18n.DELETE_OBSERVABLE}</EuiTextColor>,
-        icon: <EuiIcon type="trash" size="m" color={'danger'} />,
+        icon: <EuiIcon type="trash" size="m" color={'danger'} aria-hidden={true} />,
         onClick: () => {
           closePopover();
           onDeletionModalOpen();
@@ -76,7 +83,7 @@ export const ObservableActionsPopoverButton: React.FC<{
 
       mainPanelItems.push({
         name: <EuiTextColor>{i18n.EDIT_OBSERVABLE}</EuiTextColor>,
-        icon: <EuiIcon type="pencil" size="m" />,
+        icon: <EuiIcon type="pencil" size="m" aria-hidden={true} />,
         onClick: () => {
           setShowEditModal(true);
           closePopover();
@@ -96,15 +103,17 @@ export const ObservableActionsPopoverButton: React.FC<{
         key={`cases-observables-popover-${observable.id}`}
         data-test-subj={`cases-observables-popover-${observable.id}`}
         button={
-          <EuiButtonIcon
-            onClick={tooglePopover}
-            iconType="boxesVertical"
-            aria-label={i18n.OBSERVABLE_ACTIONS}
-            color="text"
-            key={`cases-observables-actions-popover-button-${observable.id}`}
-            data-test-subj={`cases-observables-actions-popover-button-${observable.id}`}
-            buttonRef={buttonRef}
-          />
+          <EuiToolTip content={i18n.OBSERVABLE_ACTIONS} disableScreenReaderOutput>
+            <EuiButtonIcon
+              onClick={tooglePopover}
+              iconType="boxesVertical"
+              aria-label={i18n.OBSERVABLE_ACTIONS}
+              color="text"
+              key={`cases-observables-actions-popover-button-${observable.id}`}
+              data-test-subj={`cases-observables-actions-popover-button-${observable.id}`}
+              buttonRef={buttonRef}
+            />
+          </EuiToolTip>
         }
         isOpen={isPopoverOpen}
         closePopover={closePopover}

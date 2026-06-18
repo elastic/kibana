@@ -8,6 +8,7 @@
 import React, { useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { ToolDefinition } from '@kbn/agent-builder-common';
+import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
 import { labels } from '../../../utils/i18n';
 import { appPaths } from '../../../utils/app_paths';
 import { LibraryPanel } from '../common/library_panel';
@@ -40,7 +41,6 @@ interface ToolLibraryPanelProps {
   allTools: ToolDefinition[];
   activeToolIdSet: Set<string>;
   onToggleTool: (tool: ToolDefinition, isActive: boolean) => void;
-  mutatingToolId: string | null;
   enableElasticCapabilities?: boolean;
   builtinToolIdSet?: Set<string>;
 }
@@ -50,7 +50,6 @@ export const ToolLibraryPanel: React.FC<ToolLibraryPanelProps> = ({
   allTools,
   activeToolIdSet,
   onToggleTool,
-  mutatingToolId,
   enableElasticCapabilities = false,
   builtinToolIdSet,
 }) => {
@@ -70,12 +69,12 @@ export const ToolLibraryPanel: React.FC<ToolLibraryPanelProps> = ({
       allItems={allTools}
       activeItemIdSet={activeToolIdSet}
       onToggleItem={onToggleTool}
-      mutatingItemId={mutatingToolId}
       flyoutTitleId="toolLibraryFlyoutTitle"
       libraryLabels={libraryLabels}
       manageLibraryPath={appPaths.tools.list}
       disabledItemIdSet={disabledItemIdSet}
       readOnlyItemIdSet={readOnlyItemIdSet}
+      ebtEntityType={AGENT_BUILDER_UI_EBT.entity.TOOL}
     />
   );
 };

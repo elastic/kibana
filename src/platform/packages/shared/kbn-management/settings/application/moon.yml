@@ -37,6 +37,7 @@ dependsOn:
   - '@kbn/core-chrome-browser'
   - '@kbn/core-user-profile-browser-mocks'
   - '@kbn/spaces-plugin'
+  - '@kbn/core'
 tags:
   - shared-browser
   - package

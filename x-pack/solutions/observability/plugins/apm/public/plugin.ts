@@ -76,7 +76,7 @@ import type { SavedSearchPublicPluginStart } from '@kbn/saved-search-plugin/publ
 import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 import type { SharePublicStart } from '@kbn/share-plugin/public/plugin';
 import type { ApmSourceAccessPluginStart } from '@kbn/apm-sources-access-plugin/public';
-import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
+import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
 import type { ObservabilityAgentBuilderPluginPublicStart } from '@kbn/observability-agent-builder-plugin/public';
 import type { CasesPublicStart } from '@kbn/cases-plugin/public';
 import type {
@@ -107,6 +107,10 @@ import type { ITelemetryClient } from './services/telemetry';
 import { TelemetryService } from './services/telemetry';
 import { createLazyFocusedTraceWaterfallRenderer } from './components/shared/focused_trace_waterfall/lazy_create_focused_trace_waterfall_renderer';
 import { createLazyFullTraceWaterfallRenderer } from './components/shared/trace_waterfall/lazy_create_full_trace_waterfall_renderer';
+import type { ApmCoreSetup } from './components/alerting/utils/create_lazy_component_with_context';
+import { registerEmbeddables } from './embeddable/register_embeddables';
+import { registerServiceMapAttachment } from './agent_builder/attachment_types';
+import { registerApmRuleTypes } from './components/alerting/rule_types/register_apm_rule_types';
 
 export type ApmPluginSetup = ReturnType<ApmPlugin['setup']>;
 export type ApmPluginStart = ReturnType<ApmPlugin['start']>;
@@ -460,24 +464,38 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
           id: 'service-groups-list',
           title: serviceGroupsTitle,
           path: '/service-groups',
+          visibleIn: ['globalSearch', 'projectSideNav'],
         },
         {
           id: 'services',
           title: servicesTitle,
           path: '/services',
+          visibleIn: ['globalSearch', 'projectSideNav'],
         },
         {
           id: 'traces',
           title: tracesTitle,
           path: '/traces',
+          visibleIn: ['globalSearch', 'projectSideNav'],
         },
-        { id: 'service-map', title: serviceMapTitle, path: '/service-map' },
+        {
+          id: 'service-map',
+          title: serviceMapTitle,
+          path: '/service-map',
+          visibleIn: ['globalSearch', 'projectSideNav'],
+        },
         {
           id: 'dependencies',
           title: dependenciesTitle,
           path: '/dependencies/inventory',
+          visibleIn: ['globalSearch', 'projectSideNav'],
         },
-        { id: 'settings', title: apmSettingsTitle, path: '/settings' },
+        {
+          id: 'settings',
+          title: apmSettingsTitle,
+          path: '/settings',
+          visibleIn: ['globalSearch', 'projectSideNav'],
+        },
         {
           id: 'storage-explorer',
           title: apmStorageExplorerTitle,
@@ -509,19 +527,21 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
       },
     });
 
-    import('./components/alerting/rule_types/register_apm_rule_types').then(
-      ({ registerApmRuleTypes }) => {
-        registerApmRuleTypes(observabilityRuleTypeRegistry);
-      }
-    );
-    import('./embeddable/register_embeddables').then(({ registerEmbeddables }) => {
-      registerEmbeddables({
-        coreSetup: core,
-        pluginsSetup: plugins,
-        config,
-        kibanaEnvironment,
-        observabilityRuleTypeRegistry,
-      });
+    registerApmRuleTypes(observabilityRuleTypeRegistry, core as ApmCoreSetup, {
+      coreSetup: core,
+      pluginsSetup: plugins,
+      config,
+      kibanaEnvironment,
+      observabilityRuleTypeRegistry,
+      telemetry,
+    });
+    registerEmbeddables({
+      coreSetup: core,
+      pluginsSetup: plugins,
+      config,
+      kibanaEnvironment,
+      observabilityRuleTypeRegistry,
+      telemetry,
     });
 
     const locator = plugins.share.url.locators.create(new APMServiceDetailLocator(core.uiSettings));
@@ -547,7 +567,9 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
     } else {
       setApmInternalServices({});
     }
-
+    if (plugins.agentBuilder) {
+      registerServiceMapAttachment(plugins.agentBuilder!.attachments);
+    }
     plugins.observabilityAIAssistant?.service.register(async ({ registerRenderFunction }) => {
       const mod = await import('./assistant_functions');
 

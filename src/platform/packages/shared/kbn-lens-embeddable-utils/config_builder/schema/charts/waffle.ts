@@ -18,6 +18,7 @@ import {
   layerSettingsSchema,
   sharedPanelInfoSchema,
   legendTruncateAfterLinesSchema,
+  legendPositionSchema,
 } from '../shared';
 import { validateMultipleMetricsCriteria, valueDisplaySchema } from './partition_shared';
 import {
@@ -28,7 +29,7 @@ import {
 } from './shared';
 import { objectUnion } from './utils/object_union';
 
-const waffleStateSharedSchema = {
+const waffleConfigSharedSchema = {
   legend: schema.maybe(
     schema.object(
       {
@@ -46,6 +47,7 @@ const waffleStateSharedSchema = {
         truncate_after_lines: legendTruncateAfterLinesSchema,
         visibility: legendVisibilitySchemaWithAuto,
         size: legendSizeSchema,
+        position: legendPositionSchema,
       },
       {
         meta: {
@@ -74,7 +76,7 @@ const waffleStylingSchema = schema.object(
 /**
  * Color configuration for primary metric in waffle chart
  */
-const partitionStatePrimaryMetricOptionsSchema = {
+const partitionConfigPrimaryMetricOptionsSchema = {
   /**
    * Color configuration
    */
@@ -88,7 +90,7 @@ const partitionStatePrimaryMetricOptionsSchema = {
 /**
  * Breakdown configuration including color mapping and collapse behavior
  */
-const partitionStateBreakdownByOptionsSchema = {
+const partitionConfigBreakdownByOptionsSchema = {
   color: schema.maybe(colorMappingSchema),
   collapse_by: schema.maybe(collapseBySchema),
 };
@@ -96,18 +98,19 @@ const partitionStateBreakdownByOptionsSchema = {
 /**
  * Waffle chart configuration for standard (non-ES|QL) queries
  */
-export const waffleStateSchemaNoESQL = schema.object(
+export const waffleConfigSchemaNoESQL = schema.object(
   {
     type: schema.literal('waffle'),
     ...sharedPanelInfoSchema,
     ...layerSettingsSchema,
     ...dataSourceSchema,
     ...dslOnlyPanelInfoSchema,
-    ...waffleStateSharedSchema,
+    ...waffleConfigSharedSchema,
     styling: schema.maybe(waffleStylingSchema),
     metrics: schema.arrayOf(
       mergeAllMetricsWithChartDimensionSchemaWithRefBasedOps(
-        partitionStatePrimaryMetricOptionsSchema
+        partitionConfigPrimaryMetricOptionsSchema,
+        'waffleMetric'
       ),
       {
         minSize: 1,
@@ -117,7 +120,10 @@ export const waffleStateSchemaNoESQL = schema.object(
     ),
     group_by: schema.maybe(
       schema.arrayOf(
-        mergeAllBucketsWithChartDimensionSchema(partitionStateBreakdownByOptionsSchema),
+        mergeAllBucketsWithChartDimensionSchema(
+          partitionConfigBreakdownByOptionsSchema,
+          'waffleGroupBy'
+        ),
         {
           minSize: 1,
           maxSize: 100,
@@ -139,16 +145,16 @@ export const waffleStateSchemaNoESQL = schema.object(
 /**
  * Waffle chart configuration for ES|QL queries
  */
-export const waffleStateSchemaESQL = schema.object(
+export const waffleConfigSchemaESQL = schema.object(
   {
     type: schema.literal('waffle'),
     ...sharedPanelInfoSchema,
     ...layerSettingsSchema,
     ...dataSourceEsqlTableSchema,
-    ...waffleStateSharedSchema,
+    ...waffleConfigSharedSchema,
     styling: schema.maybe(waffleStylingSchema),
     metrics: schema.arrayOf(
-      esqlColumnWithFormatSchema.extends(partitionStatePrimaryMetricOptionsSchema),
+      esqlColumnWithFormatSchema.extends(partitionConfigPrimaryMetricOptionsSchema),
       {
         minSize: 1,
         maxSize: 100,
@@ -156,7 +162,7 @@ export const waffleStateSchemaESQL = schema.object(
       }
     ),
     group_by: schema.maybe(
-      schema.arrayOf(esqlColumnWithFormatSchema.extends(partitionStateBreakdownByOptionsSchema), {
+      schema.arrayOf(esqlColumnWithFormatSchema.extends(partitionConfigBreakdownByOptionsSchema), {
         minSize: 1,
         maxSize: 100,
         meta: { description: 'Array of ES|QL breakdown columns (minimum 1)' },
@@ -176,7 +182,7 @@ export const waffleStateSchemaESQL = schema.object(
 /**
  * Complete waffle chart configuration supporting both standard and ES|QL queries
  */
-export const waffleStateSchema = objectUnion([waffleStateSchemaNoESQL, waffleStateSchemaESQL], {
+export const waffleConfigSchema = objectUnion([waffleConfigSchemaNoESQL, waffleConfigSchemaESQL], {
   meta: {
     id: 'waffleChart',
     title: 'Waffle Chart',
@@ -184,6 +190,6 @@ export const waffleStateSchema = objectUnion([waffleStateSchemaNoESQL, waffleSta
   },
 });
 
-export type WaffleState = TypeOf<typeof waffleStateSchema>;
-export type WaffleStateNoESQL = TypeOf<typeof waffleStateSchemaNoESQL>;
-export type WaffleStateESQL = TypeOf<typeof waffleStateSchemaESQL>;
+export type WaffleConfig = TypeOf<typeof waffleConfigSchema>;
+export type WaffleConfigNoESQL = TypeOf<typeof waffleConfigSchemaNoESQL>;
+export type WaffleConfigESQL = TypeOf<typeof waffleConfigSchemaESQL>;

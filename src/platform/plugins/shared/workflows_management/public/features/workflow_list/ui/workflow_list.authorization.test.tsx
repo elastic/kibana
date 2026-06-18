@@ -11,7 +11,9 @@ import { EuiProvider } from '@elastic/eui';
 import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React, { useState } from 'react';
+import { TypeRegistry } from '@kbn/alerts-ui-shared/lib';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import type { ActionTypeModel } from '@kbn/triggers-actions-ui-plugin/public';
 import type { WorkflowsSearchParams } from '@kbn/workflows';
 import { useWorkflows } from '@kbn/workflows-ui';
 import { WorkflowList } from './workflow_list';
@@ -131,8 +133,20 @@ function setKibanaCapabilities(workflowsManagement: {
         },
       },
       http: {},
+      triggersActionsUi: {
+        actionTypeRegistry: new TypeRegistry<ActionTypeModel>(),
+      },
+      workflowsExtensions: {
+        getStepDefinition: () => undefined,
+        getAllStepDefinitions: () => [],
+        hasStepDefinition: () => false,
+        getTriggerDefinition: () => undefined,
+        getAllTriggerDefinitions: () => [],
+        hasTriggerDefinition: () => false,
+        isReady: () => true,
+      },
     },
-  } as ReturnType<typeof useKibana>);
+  } as unknown as ReturnType<typeof useKibana>);
 }
 
 function WorkflowListHarness({ item = defaultWorkflow }: { item?: typeof defaultWorkflow } = {}) {
@@ -269,6 +283,36 @@ describe('Authorization matrix', () => {
       expectControlDisabled('deleteWorkflowAction', expectDeleteDisabled);
     }
   );
+
+  it('disables the delete row action for managed workflows', async () => {
+    setKibanaCapabilities({
+      createWorkflow: true,
+      updateWorkflow: true,
+      deleteWorkflow: true,
+      executeWorkflow: true,
+    });
+    renderList({ item: createWorkflowListItem({ id: 'managed-wf', managed: true }) });
+
+    await openFirstRowCollapsedActions();
+
+    expect(screen.getByTestId('deleteWorkflowAction')).toBeDisabled();
+  });
+
+  it('explains why managed workflows cannot be deleted', async () => {
+    setKibanaCapabilities({
+      createWorkflow: true,
+      updateWorkflow: true,
+      deleteWorkflow: true,
+      executeWorkflow: true,
+    });
+    renderList({ item: createWorkflowListItem({ id: 'managed-wf', managed: true }) });
+
+    await openFirstRowCollapsedActions();
+    const deleteAction = screen.getByTestId('deleteWorkflowAction');
+    await userEvent.hover(deleteAction.parentElement ?? deleteAction);
+
+    expect(await screen.findByText('Managed workflows cannot be deleted')).toBeInTheDocument();
+  });
 
   it('disables the enabled switch when the workflow is invalid even if update is granted', () => {
     setKibanaCapabilities({

@@ -10,7 +10,14 @@ import type {
   EuiContextMenuPanelDescriptor,
   EuiContextMenuPanelItemDescriptor,
 } from '@elastic/eui';
-import { EuiButtonIcon, EuiPopover, EuiContextMenu, EuiIcon, EuiTextColor } from '@elastic/eui';
+import {
+  EuiButtonIcon,
+  EuiContextMenu,
+  EuiIcon,
+  EuiPopover,
+  EuiTextColor,
+  EuiToolTip,
+} from '@elastic/eui';
 import type { FileJSON } from '@kbn/shared-ux-file-types';
 import { useFilesContext } from '@kbn/shared-ux-file-context';
 import type { Owner } from '../../../../common/constants/types';
@@ -127,7 +134,7 @@ export const FileActionsPopoverButton: React.FC<{ caseId: string; theFile: FileJ
     if (permissions.delete) {
       mainPanelItems.push({
         name: <EuiTextColor color={'danger'}>{i18n.DELETE_FILE}</EuiTextColor>,
-        icon: <EuiIcon type="trash" size="m" color={'danger'} />,
+        icon: <EuiIcon type="trash" size="m" color={'danger'} aria-hidden={true} />,
         onClick: () => {
           closePopover();
           onModalOpen();
@@ -156,15 +163,17 @@ export const FileActionsPopoverButton: React.FC<{ caseId: string; theFile: FileJ
         key={`cases-files-popover-${theFile.id}`}
         data-test-subj={`cases-files-popover-${theFile.id}`}
         button={
-          <EuiButtonIcon
-            onClick={tooglePopover}
-            iconType="boxesVertical"
-            aria-label={i18n.ACTIONS}
-            color="text"
-            key={`cases-files-actions-popover-button-${theFile.id}`}
-            data-test-subj={`cases-files-actions-popover-button-${theFile.id}`}
-            buttonRef={buttonRef}
-          />
+          <EuiToolTip content={i18n.ACTIONS} disableScreenReaderOutput>
+            <EuiButtonIcon
+              onClick={tooglePopover}
+              iconType="boxesVertical"
+              aria-label={i18n.ACTIONS}
+              color="text"
+              key={`cases-files-actions-popover-button-${theFile.id}`}
+              data-test-subj={`cases-files-actions-popover-button-${theFile.id}`}
+              buttonRef={buttonRef}
+            />
+          </EuiToolTip>
         }
         isOpen={isPopoverOpen}
         closePopover={closePopover}

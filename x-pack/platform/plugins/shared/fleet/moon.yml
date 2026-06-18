@@ -111,7 +111,7 @@ dependsOn:
   - '@kbn/core-di'
   - '@kbn/licensing-types'
   - '@kbn/alerting-plugin'
-  - '@kbn/spaces-utils'
+  - '@kbn/core-spaces-common'
   - '@kbn/setup-node-env'
   - '@kbn/react-query'
   - '@kbn/fs'
@@ -125,6 +125,10 @@ dependsOn:
   - '@kbn/rule-data-utils'
   - '@kbn/doc-links'
   - '@kbn/yaml-loader'
+  - '@kbn/charts-theme'
+  - '@kbn/search-types'
+  - '@kbn/human-readable-id'
+  - '@kbn/elastic-agent-condition-language'
 tags:
   - plugin
   - prod

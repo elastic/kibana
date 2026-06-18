@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+// Serverless test (remove during Scout migration): x-pack/platform/test/serverless/functional/test_suites/context/_discover_navigation.ts
 import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 
@@ -122,8 +123,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await rowActions[0].click();
       });
 
-      const hasDocHit = await testSubjects.exists('doc-hit');
-      expect(hasDocHit).to.be(true);
+      await retry.try(async () => {
+        const hasDocHit = await testSubjects.exists('doc-hit');
+        expect(hasDocHit).to.be(true);
+      });
 
       await testSubjects.click('~breadcrumb & ~first');
       await discover.waitForDiscoverAppOnScreen();

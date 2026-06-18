@@ -14,8 +14,13 @@ import { warningsSchema } from '../warnings_schema';
 
 export function getReadResponseBodySchema(isDashboardAppRequest: boolean) {
   return schema.object({
-    id: schema.string(),
-    data: getDashboardStateSchema(isDashboardAppRequest),
+    id: schema.string({
+      meta: {
+        description:
+          'The unique ID of the dashboard, as returned by the create or search endpoints.',
+      },
+    }),
+    data: getDashboardStateSchema(isDashboardAppRequest, true),
     meta: asCodeMetaSchema,
     warnings: schema.maybe(warningsSchema),
   });

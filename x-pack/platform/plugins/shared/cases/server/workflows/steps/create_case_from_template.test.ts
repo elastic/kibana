@@ -22,6 +22,7 @@ describe('createCaseFromTemplateStepDefinition', () => {
     expect(typeof definition.handler).toBe('function');
     expect(
       definition.inputSchema.safeParse({
+        owner: 'securitySolution',
         case_template_id: 'triage_template',
       }).success
     ).toBe(true);
@@ -61,6 +62,7 @@ describe('createCaseFromTemplateStepDefinition', () => {
     const result = await definition.handler(
       createContext({
         case_template_id: 'triage_template',
+        owner: 'securitySolution',
         overwrites: {
           title: 'Overwrite title',
           status: 'in-progress',
@@ -136,6 +138,7 @@ describe('createCaseFromTemplateStepDefinition', () => {
 
     await definition.handler(
       createContext({
+        owner: 'securitySolution',
         case_template_id: 'triage_template',
       })
     );
@@ -173,6 +176,7 @@ describe('createCaseFromTemplateStepDefinition', () => {
 
     await definition.handler(
       createContext({
+        owner: 'securitySolution',
         case_template_id: 'triage_template',
       })
     );
@@ -202,6 +206,7 @@ describe('createCaseFromTemplateStepDefinition', () => {
 
     const result = await definition.handler(
       createContext({
+        owner: 'securitySolution',
         case_template_id: 'missing_template',
       })
     );
@@ -238,6 +243,7 @@ describe('createCaseFromTemplateStepDefinition', () => {
     await definition.handler(
       createContext(
         {
+          owner: 'securitySolution',
           case_template_id: 'triage_template',
         },
         { 'push-case': true }

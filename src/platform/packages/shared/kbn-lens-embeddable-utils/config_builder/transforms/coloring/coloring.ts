@@ -43,6 +43,19 @@ export function isLegacyColorPalette(
   return 'palette' in (color ?? {});
 }
 
+export function getContinuity(
+  rangeMin: number | null,
+  rangeMax: number | null
+): 'all' | 'above' | 'below' | 'none' {
+  return rangeMin === null && rangeMax === null
+    ? 'all'
+    : rangeMax === null
+    ? 'above'
+    : rangeMin === null
+    ? 'below'
+    : 'none';
+}
+
 export function fromColorByValueAPIToLensState(
   config?: ColorByValueType
 ): PaletteOutput<CustomPaletteParams> | undefined {
@@ -90,23 +103,15 @@ export function fromColorByValueAPIToLensState(
             // value can be null
             stop: i === 0 ? (rangeMin as number) : stops[i - 1].stop,
           })),
-      // ignore colorStops when shifting palettes stops
       colorStops,
-      continuity:
-        rangeMin === null && rangeMax === null
-          ? 'all'
-          : rangeMax === null
-          ? 'above'
-          : rangeMin === null
-          ? 'below'
-          : 'none',
+      continuity: getContinuity(rangeMin, rangeMax),
       steps: stops.length,
       maxSteps: Math.max(5, stops.length), // TODO: point this to a constant or a common default
     },
   };
 }
 
-function getRangeValue(value?: number | null): number | null {
+export function getRangeValue(value?: number | null): number | null {
   if (value === undefined || value === null || !isFinite(value)) return null;
   return value;
 }
@@ -121,7 +126,8 @@ export function fromColorByValueLensStateToAPI(
   const { rangeType, reverse } = colorParams;
   let originalStops = colorParams.stops ?? [];
 
-  const palette = colorParams.name ?? 'custom';
+  // config.name is the root palette identifier used by the runtime palette service
+  const palette = config.name ?? colorParams.name ?? 'custom';
   const isLegacy = palette !== 'custom';
   const rangeMin = getRangeValue(colorParams.rangeMin);
   const rangeMax = getRangeValue(colorParams.rangeMax);
@@ -258,10 +264,40 @@ function mapSerializedValueFromAPI(value: SerializableValueType): unknown {
   return value;
 }
 
+/**
+ * Mirrors the renderable rule shapes from `ColorAssignmentMatcher#getKey`:
+ *   - `raw` -> serialized value.
+ *   - `match` with `matchEntireWord: true` -> bare pattern string; lowercased
+ *     when `matchCase` is falsy (matcher lowercases the rule side on lookup).
+ * Other shapes (`match` with `matchEntireWord: false`, `regex`, `range`) are not
+ * renderable and are silently dropped.=
+ *
+ * Round-trip rebuilds everything as `type: 'raw'` (see `fromRulesAPIToLensState`).
+ * Render-equivalent for editor-produced match rules, since both reduce to the
+ * same `String(rawValue)` lookup.
+ */
 function fromRulesLensStateToAPI(rules: ColorMapping.ColorRule[]): SerializableValueType[] {
+  const isRawRule = (
+    rule: ColorMapping.ColorRule
+  ): rule is Extract<ColorMapping.ColorRule, { type: 'raw' }> => rule.type === 'raw';
+
+  const isRenderableMatchRule = (
+    rule: ColorMapping.ColorRule
+  ): rule is Extract<ColorMapping.ColorRule, { type: 'match' }> =>
+    rule.type === 'match' && rule.matchEntireWord === true;
+
   return rules
-    .filter((rule): rule is Extract<ColorMapping.ColorRule, { type: 'raw' }> => rule.type === 'raw')
-    .map((rule) => mapSerializedValueToAPI(rule.value));
+    .filter(
+      (rule): rule is Extract<ColorMapping.ColorRule, { type: 'raw' | 'match' }> =>
+        isRawRule(rule) || isRenderableMatchRule(rule)
+    )
+    .map((rule) =>
+      isRawRule(rule)
+        ? mapSerializedValueToAPI(rule.value)
+        : rule.matchCase
+        ? rule.pattern
+        : rule.pattern.toLowerCase()
+    );
 }
 
 function isLensStateCategoricalConfigColorMapping(

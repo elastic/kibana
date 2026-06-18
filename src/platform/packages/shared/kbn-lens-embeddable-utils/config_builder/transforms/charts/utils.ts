@@ -21,7 +21,7 @@ import type {
 } from '@kbn/lens-common';
 
 import type { LensAttributes } from '../../types';
-import type { LensApiState } from '../../schema';
+import type { LensApiConfig } from '../../schema';
 import type { legendTruncateAfterLinesSchema } from '../../schema/shared';
 import { buildReferences, getAdhocDataviews, isTextBasedLayer, nonNullable } from '../utils';
 import { LENS_LAYER_SUFFIX } from '../constants';
@@ -31,7 +31,7 @@ import type { XScaleSchemaType } from '../../schema/charts/shared';
 
 export function getSharedChartLensStateToAPI(
   config: Pick<LensAttributes, 'title' | 'description'>
-): Pick<LensApiState, 'title' | 'description'> {
+): Pick<LensApiConfig, 'title' | 'description'> {
   return {
     // @TODO: need to make this optional in LensDocument type
     title: config.title ?? '',
@@ -125,20 +125,32 @@ export function getDataViewsMetadata(
 }
 
 /**
+ * A metric column with its assigned accessor id.
+ */
+interface MetricColumnWithId {
+  column: AnyMetricLensStateColumn;
+  id: string;
+}
+
+/**
  * Processes converted metric columns and their optional reference columns,
  * assigning IDs.
  */
-export function processMetricColumnsWithReferences<T extends AnyMetricLensStateColumn>(
-  convertedMetrics: T[][],
+export function processMetricColumnsWithReferences(
+  convertedMetrics: AnyMetricLensStateColumn[][],
   getAccessorName: (index: number) => string,
   getRefAccessorName: (index: number) => string
-): Array<{ column: T; id: string }> {
-  const result: Array<{ column: T; id: string }> = [];
+): {
+  metricColumns: MetricColumnWithId[];
+  referencesColumns: MetricColumnWithId[];
+} {
+  const metricColumns: MetricColumnWithId[] = [];
+  const referencesColumns: MetricColumnWithId[] = [];
 
   for (const [index, convertedColumns] of Object.entries(convertedMetrics)) {
     const [mainMetric, refMetric] = convertedColumns;
     const id = getAccessorName(Number(index));
-    result.push({ column: mainMetric, id });
+    metricColumns.push({ column: mainMetric, id });
 
     if (refMetric) {
       // Use a different format for reference column ids
@@ -148,11 +160,11 @@ export function processMetricColumnsWithReferences<T extends AnyMetricLensStateC
       if ('references' in mainMetric && Array.isArray(mainMetric.references)) {
         mainMetric.references = [refId];
       }
-      result.push({ column: refMetric, id: refId });
+      referencesColumns.push({ column: refMetric, id: refId });
     }
   }
 
-  return result;
+  return { metricColumns, referencesColumns };
 }
 
 type LegendTruncateAfterLines = TypeOf<typeof legendTruncateAfterLinesSchema>;
@@ -222,5 +234,20 @@ export function getScaleTypeFromColumnType(columnType: string | undefined): XSca
     return 'linear';
   } else {
     return 'ordinal';
+  }
+}
+
+/**
+ * Determines the column metadata type based on the API x-axis scale type.
+ */
+export function getColumnTypeFromScaleType(
+  scaleType: XScaleSchemaType
+): 'date' | 'number' | 'string' {
+  if (scaleType === 'temporal') {
+    return 'date';
+  } else if (scaleType === 'linear') {
+    return 'number';
+  } else {
+    return 'string';
   }
 }

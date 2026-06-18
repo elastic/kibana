@@ -44,7 +44,7 @@ import {
   getChartAnomalyTimeseries,
 } from './helper/get_chart_anomaly_timeseries';
 import { isTimeseriesEmpty, onBrushEnd } from './helper/helper';
-import { expandApmTimeseriesWithEdgeDottedLines } from './utils/split_line_series_for_edge_dots';
+import { expandTimeseriesWithDottedGapLines } from './utils/timeseries_gap_handling';
 import type { TimeseriesChartWithContextProps } from './timeseries_chart_with_context';
 
 const END_ZONE_LABEL = i18n.translate('xpack.apm.timeseries.endzone', {
@@ -90,7 +90,7 @@ export function TimeseriesChart({
   const isEmpty = isTimeseriesEmpty(timeseries);
   const isComparingExpectedBounds = comparisonEnabled && isExpectedBoundsComparison(offset);
   const timeseriesWithEdgeDots = useMemo(
-    () => expandApmTimeseriesWithEdgeDottedLines(timeseries),
+    () => expandTimeseriesWithDottedGapLines(timeseries),
     [timeseries]
   );
   const allSeries = [
@@ -161,7 +161,7 @@ export function TimeseriesChart({
                     css={{ fontWeight: 'normal' }}
                   >
                     <EuiFlexItem grow={false}>
-                      <EuiIcon type="info" />
+                      <EuiIcon type="info" aria-hidden={true} />
                     </EuiFlexItem>
                     <EuiFlexItem>{END_ZONE_LABEL}</EuiFlexItem>
                   </EuiFlexGroup>
@@ -236,6 +236,7 @@ export function TimeseriesChart({
               timeZone={timeZone}
               key={serie.id ?? `${serie.title}-${index}`}
               id={serie.id || serie.title}
+              name={serie.title}
               groupId={serie.groupId}
               // Defaults to multi layer time axis as of Elastic Charts v70
               xScaleType={ScaleType.Time}

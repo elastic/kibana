@@ -15,12 +15,14 @@ import { ConditionFieldGroup } from './field_groups/condition_field_group';
 import { AlertConditionsFieldGroup } from './field_groups/alert_conditions_field_group';
 import { RULE_FORM_ID } from './constants';
 import { KindField } from './fields/kind_field';
-import { AttachmentRunbookFieldGroup } from './field_groups/attachment_runbook_field_group';
+import { RunbookArtifactField } from './field_groups/runbook_artifact_field';
 
 export interface GuiRuleFormProps {
   onSubmit: (values: FormValues) => void;
   /** Whether to include the ES|QL query editor (default: true) */
   includeQueryEditor?: boolean;
+  /** Whether the form is editing an existing rule (disables immutable fields like kind) */
+  isEditing?: boolean;
 }
 
 /**
@@ -28,14 +30,18 @@ export interface GuiRuleFormProps {
  *
  * This component renders the visual form interface with field groups for:
  * - Rule details (name, tags, description — no wrapper panel)
- * - Rule evaluation (full ES|QL query)
+ * - Alert condition (breach ES|QL query)
  * - Rule execution settings (schedule, lookback)
  * - Rule kind (alert vs monitor)
  * - Alert conditions (alert delay, recovery policy, recovery delay)
  *
  * Requires a FormProvider context with FormValues type to be present in the component tree.
  */
-export const GuiRuleForm = ({ onSubmit, includeQueryEditor = true }: GuiRuleFormProps) => {
+export const GuiRuleForm = ({
+  onSubmit,
+  includeQueryEditor = true,
+  isEditing = false,
+}: GuiRuleFormProps) => {
   const { handleSubmit } = useFormContext<FormValues>();
 
   return (
@@ -46,11 +52,11 @@ export const GuiRuleForm = ({ onSubmit, includeQueryEditor = true }: GuiRuleForm
       <EuiSpacer size="m" />
       <RuleExecutionFieldGroup />
       <EuiSpacer size="m" />
-      <KindField />
+      <KindField disabled={isEditing} />
       <EuiSpacer size="m" />
       <AlertConditionsFieldGroup />
       <EuiSpacer size="m" />
-      <AttachmentRunbookFieldGroup />
+      <RunbookArtifactField />
     </EuiForm>
   );
 };

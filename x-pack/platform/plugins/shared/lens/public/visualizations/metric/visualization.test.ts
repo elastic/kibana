@@ -12,6 +12,8 @@ import type {
   ExpressionAstExpression,
   ExpressionAstFunction,
 } from '@kbn/expressions-plugin/common';
+// Static EUI token values for assertions
+// eslint-disable-next-line @elastic/eui/no-restricted-eui-imports
 import { euiThemeVars } from '@kbn/ui-theme';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import type { FrameMock } from '../../mocks';
@@ -123,6 +125,10 @@ describe('metric visualization', () => {
       expect(visualization.initialize(() => 'some-id')).toEqual({
         layerId: 'some-id',
         layerType: LayerTypes.DATA,
+        titlesTextAlign: 'left',
+        primaryPosition: 'bottom',
+        primaryAlign: 'right',
+        secondaryAlign: 'right',
       });
     });
 
@@ -972,7 +978,6 @@ describe('metric visualization', () => {
               "metric": Array [
                 "metric-col-id",
               ],
-              "palette": Array [],
               "primaryAlign": Array [
                 "right",
               ],
@@ -1052,6 +1057,7 @@ describe('metric visualization', () => {
             visualization.toExpression(
               {
                 ...fullState,
+                applyColorTo: undefined,
                 showBar: true,
                 color: undefined,
               },

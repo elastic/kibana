@@ -24,22 +24,23 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import useMountedState from 'react-use/lib/useMountedState';
+import type {
+  AnomalySwimLaneEmbeddableState,
+  SwimlaneType,
+} from '@kbn/ml-server-schemas/embeddables/anomaly_swimlane';
+import { SWIMLANE_TYPE } from '@kbn/ml-common-types/embeddables/swimlane_type';
+import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
 import { useMlLink } from '../../application/contexts/kibana';
-import { ML_PAGES } from '../../../common/constants/locator';
 import type { MlApi } from '../../application/services/ml_api_service';
 import { extractInfluencers } from '../../../common/util/job_utils';
 import { JobSelectorControl } from '../../alerting/job_selector';
-import type { SwimlaneType } from '../../application/explorer/explorer_constants';
-import { SWIMLANE_TYPE, VIEW_BY_JOB_LABEL } from '../../application/explorer/explorer_constants';
-import type { AnomalySwimlaneEmbeddableUserInput, AnomalySwimlaneInitialInput } from '..';
+import { VIEW_BY_JOB_LABEL } from '../../application/explorer/explorer_constants';
 import { getDefaultSwimlanePanelTitle } from './anomaly_swimlane_embeddable';
 import { getJobSelectionErrors } from '../utils';
 
-export type ExplicitInput = AnomalySwimlaneEmbeddableUserInput;
-
 export interface AnomalySwimlaneInitializerProps {
-  initialInput?: AnomalySwimlaneInitialInput;
-  onCreate: (swimlaneProps: ExplicitInput) => void;
+  initialInput?: Partial<AnomalySwimLaneEmbeddableState>;
+  onCreate: (state: AnomalySwimLaneEmbeddableState) => void;
   onCancel: () => void;
   adJobsApiService: MlApi['jobs'];
 }
@@ -54,7 +55,7 @@ export const AnomalySwimlaneInitializer: FC<AnomalySwimlaneInitializerProps> = (
 
   const titleManuallyChanged = useRef(!!initialInput?.title);
 
-  const [jobIds, setJobIds] = useState(initialInput?.jobIds ?? []);
+  const [jobIds, setJobIds] = useState(initialInput?.job_ids ?? []);
 
   const [influencers, setInfluencers] = useState<string[]>([VIEW_BY_JOB_LABEL]);
 
@@ -76,9 +77,11 @@ export const AnomalySwimlaneInitializer: FC<AnomalySwimlaneInitializerProps> = (
 
   const [panelTitle, setPanelTitle] = useState(initialInput?.title ?? '');
   const [swimlaneType, setSwimlaneType] = useState<SwimlaneType>(
-    initialInput?.swimlaneType ?? SWIMLANE_TYPE.OVERALL
+    initialInput?.swimlane_type ?? SWIMLANE_TYPE.OVERALL
   );
-  const [viewBySwimlaneFieldName, setViewBySwimlaneFieldName] = useState(initialInput?.viewBy);
+  const [viewBySwimlaneFieldName, setViewBySwimlaneFieldName] = useState(
+    initialInput?.swimlane_type === SWIMLANE_TYPE.VIEW_BY ? initialInput.view_by : undefined
+  );
 
   useEffect(
     function updateDefaultTitle() {
@@ -121,12 +124,20 @@ export const AnomalySwimlaneInitializer: FC<AnomalySwimlaneInitializerProps> = (
     (swimlaneType === SWIMLANE_TYPE.OVERALL ||
       (swimlaneType === SWIMLANE_TYPE.VIEW_BY && !!viewBySwimlaneFieldName));
 
-  const resultInput: AnomalySwimlaneEmbeddableUserInput = {
-    jobIds,
-    panelTitle,
-    swimlaneType,
-    ...(viewBySwimlaneFieldName ? { viewBy: viewBySwimlaneFieldName } : {}),
-  };
+  const titleField = panelTitle ? { title: panelTitle } : {};
+  const resultInput: AnomalySwimLaneEmbeddableState =
+    swimlaneType === SWIMLANE_TYPE.VIEW_BY && viewBySwimlaneFieldName
+      ? {
+          ...titleField,
+          job_ids: jobIds,
+          swimlane_type: SWIMLANE_TYPE.VIEW_BY,
+          view_by: viewBySwimlaneFieldName,
+        }
+      : {
+          ...titleField,
+          job_ids: jobIds,
+          swimlane_type: SWIMLANE_TYPE.OVERALL,
+        };
 
   const newJobUrl = useMlLink({ page: ML_PAGES.ANOMALY_DETECTION_CREATE_JOB });
 

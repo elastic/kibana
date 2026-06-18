@@ -28,6 +28,8 @@ import { useMonitorListColumns } from './columns';
 import * as labels from './labels';
 import type { ClientPluginsStart } from '../../../../../../plugin';
 
+export type MonitorListItem = EncryptedSyntheticsSavedMonitor;
+
 interface Props {
   pageState: MonitorListPageState;
   syntheticsMonitors: EncryptedSyntheticsSavedMonitor[];
@@ -59,11 +61,18 @@ export const MonitorList = ({
   } | null>(null);
   const { resetMonitors, isFixableByReset } = useMonitorIntegrationHealth();
 
+  const items: MonitorListItem[] = useMemo(
+    () => syntheticsMonitors as MonitorListItem[],
+    [syntheticsMonitors]
+  );
+
+  const totalItemCount = total;
+
   const handleOnChange = useCallback(
     ({
       page = { index: 0, size: 10 },
       sort = { field: ConfigKey.NAME, direction: 'asc' },
-    }: Criteria<EncryptedSyntheticsSavedMonitor>) => {
+    }: Criteria<MonitorListItem>) => {
       const { index, size } = page;
       const { field, direction } = sort;
 
@@ -80,21 +89,21 @@ export const MonitorList = ({
   const pagination = {
     pageIndex,
     pageSize,
-    totalItemCount: total,
+    totalItemCount,
     pageSizeOptions: [5, 10, 25, 50, 100],
   };
 
-  const sorting: EuiTableSortingType<EncryptedSyntheticsSavedMonitor> = {
+  const sorting: EuiTableSortingType<MonitorListItem> = {
     sort: {
-      field: sortField?.replace('.keyword', '') as keyof EncryptedSyntheticsSavedMonitor,
+      field: sortField?.replace('.keyword', '') as keyof MonitorListItem,
       direction: sortOrder,
     },
   };
 
   const recordRangeLabel = labels.getRecordRangeLabel({
-    rangeStart: total === 0 ? 0 : pageSize * pageIndex + 1,
+    rangeStart: totalItemCount === 0 ? 0 : pageSize * pageIndex + 1,
     rangeEnd: pageSize * pageIndex + pageSize,
-    total,
+    total: totalItemCount,
   });
 
   const columns = useMonitorListColumns({
@@ -105,12 +114,12 @@ export const MonitorList = ({
     isFixableByReset,
   });
 
-  const [selectedItems, setSelectedItems] = useState<EncryptedSyntheticsSavedMonitor[]>([]);
-  const onSelectionChange = (selItems: EncryptedSyntheticsSavedMonitor[]) => {
+  const [selectedItems, setSelectedItems] = useState<MonitorListItem[]>([]);
+  const onSelectionChange = (selItems: MonitorListItem[]) => {
     setSelectedItems(selItems);
   };
 
-  const selection: EuiTableSelectionType<EncryptedSyntheticsSavedMonitor> = {
+  const selection: EuiTableSelectionType<MonitorListItem> = {
     onSelectionChange,
     initialSelected: selectedItems,
   };
@@ -132,12 +141,12 @@ export const MonitorList = ({
       >
         <MonitorListHeader
           recordRangeLabel={recordRangeLabel}
-          selectedItems={selectedItems}
+          selectedItems={selectedItems as EncryptedSyntheticsSavedMonitor[]}
           setMonitorPendingDeletion={setMonitorPendingDeletion}
           setMonitorPendingReset={setMonitorPendingReset}
         />
         <EuiHorizontalRule margin="s" />
-        <EuiBasicTable
+        <EuiBasicTable<MonitorListItem>
           aria-label={i18n.translate('xpack.synthetics.management.monitorList.title', {
             defaultMessage: 'Synthetics monitors list',
           })}
@@ -147,7 +156,7 @@ export const MonitorList = ({
           error={error?.body?.message}
           loading={loading}
           itemId="config_id"
-          items={syntheticsMonitors}
+          items={items}
           columns={columns}
           tableLayout={isXl ? 'auto' : 'fixed'}
           pagination={pagination}

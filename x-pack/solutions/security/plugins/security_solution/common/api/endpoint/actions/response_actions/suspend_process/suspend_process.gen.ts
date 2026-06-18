@@ -14,42 +14,48 @@
  *   version: 2023-10-31
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 import {
   ResponseActionCreateSuccessResponse,
   BaseActionSchema,
 } from '../../../model/schema/common.gen';
 
-export type SuspendProcessRouteRequestBody = z.infer<typeof SuspendProcessRouteRequestBody>;
-export const SuspendProcessRouteRequestBody = BaseActionSchema.merge(
-  z.object({
-    parameters: z.union([
-      z.object({
-        /**
-         * The process ID (PID) of the process to suspend.
-         */
-        pid: z.number().int().min(1).optional(),
-      }),
-      z.object({
-        /**
-         * The entity ID of the process to suspend.
-         */
-        entity_id: z.string().min(1).optional(),
-      }),
-    ]),
-  })
+export const SuspendProcessRouteRequestBody = lazySchema(() =>
+  BaseActionSchema.merge(
+    z.object({
+      parameters: z.union([
+        z.object({
+          /**
+           * The process ID (PID) of the process to suspend.
+           */
+          pid: z.number().int().min(1).optional(),
+        }),
+        z.object({
+          /**
+           * The entity ID of the process to suspend.
+           */
+          entity_id: z.string().min(1).optional(),
+        }),
+      ]),
+    })
+  )
 );
+export type SuspendProcessRouteRequestBody = z.infer<typeof SuspendProcessRouteRequestBody>;
 
+export const EndpointSuspendProcessActionRequestBody = lazySchema(
+  () => SuspendProcessRouteRequestBody
+);
 export type EndpointSuspendProcessActionRequestBody = z.infer<
   typeof EndpointSuspendProcessActionRequestBody
 >;
-export const EndpointSuspendProcessActionRequestBody = SuspendProcessRouteRequestBody;
 export type EndpointSuspendProcessActionRequestBodyInput = z.input<
   typeof EndpointSuspendProcessActionRequestBody
 >;
 
+export const EndpointSuspendProcessActionResponse = lazySchema(
+  () => ResponseActionCreateSuccessResponse
+);
 export type EndpointSuspendProcessActionResponse = z.infer<
   typeof EndpointSuspendProcessActionResponse
 >;
-export const EndpointSuspendProcessActionResponse = ResponseActionCreateSuccessResponse;

@@ -7,6 +7,7 @@
 
 import {
   createAlertActionParamsSchema,
+  errorResponseSchema,
   type CreateAlertActionBody,
   type CreateAlertActionParams,
 } from '@kbn/alerting-v2-schemas';
@@ -48,7 +49,7 @@ export const createAlertActionRouteForType = <
   @injectable()
   class CreateTypedAlertActionRoute extends BaseAlertingRoute {
     static method = 'post' as const;
-    static path = `${ALERTING_V2_ALERT_API_PATH}/{group_hash}/action/${pathSuffix}`;
+    static path = `${ALERTING_V2_ALERT_API_PATH}/{group_hash}/${pathSuffix}`;
     static security: RouteSecurity = {
       authz: {
         requiredPrivileges: [ALERTING_V2_API_PRIVILEGES.alerts.write],
@@ -62,6 +63,19 @@ export const createAlertActionRouteForType = <
       request: {
         params: buildRouteValidationWithZod(createAlertActionParamsSchema),
         body: buildRouteValidationWithZod(bodySchema),
+      },
+      response: {
+        204: {
+          description: 'Returns the newly created alert action.',
+        },
+        400: {
+          body: () => errorResponseSchema,
+          description: 'Indicates an invalid schema or parameters.',
+        },
+        404: {
+          body: () => errorResponseSchema,
+          description: 'Indicates the alert event was not found.',
+        },
       },
     } as const;
 

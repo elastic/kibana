@@ -13,6 +13,7 @@ import {
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useMemo } from 'react';
 import { SecurityPageName } from '@kbn/security-solution-navigation';
@@ -37,7 +38,6 @@ interface HostPanelHeaderProps {
 }
 
 const linkTitleCSS = { width: 'fit-content' };
-
 const urlParamOverride = { timeline: { isOpen: false } };
 
 export const HostPanelHeader = ({
@@ -55,22 +55,32 @@ export const HostPanelHeader = ({
     [lastSeenDate]
   );
   return (
-    <FlyoutHeader data-test-subj="host-panel-header">
+    <FlyoutHeader
+      data-test-subj="host-panel-header"
+      hasBorder={false}
+      css={css`
+        & > .euiPanel {
+          padding-bottom: 0;
+        }
+      `}
+    >
       <EuiFlexGroup gutterSize="s" responsive={false} direction="column">
-        <EuiFlexItem grow={false}>
-          <EuiText size="xs" data-test-subj={'host-panel-header-lastSeen'}>
-            {isLoading ? (
-              <EuiSkeletonText
-                lines={1}
-                size="xs"
-                data-test-subj="host-panel-header-lastSeen-loading"
-              />
-            ) : (
-              lastSeenDateFormatted && <PreferenceFormattedDate value={lastSeenDateFormatted} />
-            )}
-            <EuiSpacer size="xs" />
-          </EuiText>
-        </EuiFlexItem>
+        {!isEntityInStore && (
+          <EuiFlexItem grow={false}>
+            <EuiText size="xs" data-test-subj={'host-panel-header-lastSeen'}>
+              {isLoading ? (
+                <EuiSkeletonText
+                  lines={1}
+                  size="xs"
+                  data-test-subj="host-panel-header-lastSeen-loading"
+                />
+              ) : (
+                lastSeenDateFormatted && <PreferenceFormattedDate value={lastSeenDateFormatted} />
+              )}
+              <EuiSpacer size="xs" />
+            </EuiText>
+          </EuiFlexItem>
+        )}
         <EuiFlexItem grow={false}>
           <EuiFlexGroup
             gutterSize="xs"
@@ -79,23 +89,27 @@ export const HostPanelHeader = ({
             alignItems="flexStart"
           >
             <EuiFlexItem grow={false}>
-              <SecuritySolutionLinkAnchor
-                deepLinkId={SecurityPageName.hosts}
-                path={getHostDetailsUrl(
-                  hostName,
-                  undefined,
-                  entityId,
-                  identityFields && Object.keys(identityFields).length > 0
-                    ? identityFields
-                    : undefined
-                )}
-                target={'_blank'}
-                external={false}
-                css={linkTitleCSS}
-                override={urlParamOverride}
-              >
-                <FlyoutTitle title={hostName} iconType={'storage'} isLink />
-              </SecuritySolutionLinkAnchor>
+              {isEntityInStore ? (
+                <FlyoutTitle title={hostName} iconType={'storage'} />
+              ) : (
+                <SecuritySolutionLinkAnchor
+                  deepLinkId={SecurityPageName.hosts}
+                  path={getHostDetailsUrl(
+                    hostName,
+                    undefined,
+                    entityId,
+                    identityFields && Object.keys(identityFields).length > 0
+                      ? identityFields
+                      : undefined
+                  )}
+                  target={'_blank'}
+                  external={false}
+                  css={linkTitleCSS}
+                  override={urlParamOverride}
+                >
+                  <FlyoutTitle title={hostName} iconType={'storage'} isLink />
+                </SecuritySolutionLinkAnchor>
+              )}
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
@@ -109,7 +123,7 @@ export const HostPanelHeader = ({
           </EuiFlexItem>
         ) : (
           <EuiFlexItem grow={false}>
-            <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+            <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
               <EuiFlexItem grow={false}>
                 <EuiBadge data-test-subj="host-panel-header-entity-type-badge" color="hollow">
                   <FormattedMessage

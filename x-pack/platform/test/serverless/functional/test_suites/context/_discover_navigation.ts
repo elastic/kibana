@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+// Original test (remove during Scout migration): src/platform/test/functional/apps/context/_discover_navigation.ts
 import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 
@@ -128,8 +129,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await rowActions[0].click();
       });
 
-      const hasDocHit = await testSubjects.exists('doc-hit');
-      expect(hasDocHit).to.be(true);
+      await retry.try(async () => {
+        const hasDocHit = await testSubjects.exists('doc-hit');
+        expect(hasDocHit).to.be(true);
+      });
 
       // TODO: Clicking breadcrumbs works differently in Serverless
       await PageObjects.svlCommonNavigation.breadcrumbs.clickBreadcrumb({

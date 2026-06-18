@@ -145,25 +145,21 @@ jest.mock('@kbn/kibana-react-plugin/public', () => {
     ...actual,
     useKibana: jest.fn(() => ({
       services: {
-        cloud: {
-          isCloudEnabled: false,
-        },
+        cloud: { isCloudEnabled: false },
         application: {
           capabilities: {
-            cloudConnect: {
-              show: true,
-              configure: true,
-            },
+            cloudConnect: { show: true, configure: true },
+            searchInferenceEndpoints: { show: true, manage: true },
           },
           navigateToApp: jest.fn(),
         },
-        uiSettings: {
-          get: jest.fn().mockReturnValue(true),
-        },
+        uiSettings: { get: jest.fn().mockReturnValue(true) },
       },
     })),
   };
 });
+
+const mockUseKibana = jest.requireMock('@kbn/kibana-react-plugin/public').useKibana as jest.Mock;
 
 const renderTabularPageWithProviders = () => {
   return render(
@@ -323,114 +319,6 @@ describe('When the tabular page is loaded', () => {
       expect(rows[11]).not.toHaveTextContent(techPreview);
     });
   });
-  describe('group by models', () => {
-    beforeEach(() => {
-      renderTabularPageWithProviders();
-    });
-
-    it('should display accordions with tables for model groups', () => {
-      const groupAccordions = screen.getAllByTestId(/-accordion$/);
-      expect(groupAccordions).toHaveLength(6);
-      const groupTables = screen.getAllByTestId(/-table$/);
-      expect(groupTables).toHaveLength(6);
-    });
-
-    it('should have expected endpoint table columns', () => {
-      const endpointTables = screen.getAllByTestId(/-table$/);
-
-      endpointTables.forEach((table) => {
-        const columnHeaders = within(table).getAllByRole('columnheader');
-        const headerLabels = columnHeaders.map((header) => header.textContent?.trim() ?? '');
-
-        expect(headerLabels).toEqual(['Endpoint', 'Model', 'Service', '']);
-      });
-    });
-
-    it('should show expected group labels and endpoint counts', () => {
-      const expectedGroups = [
-        {
-          groupId: 'Elastic',
-          label: 'Elastic',
-          countLabel: '5 endpoints',
-        },
-        {
-          groupId: 'Anthropic',
-          label: 'Anthropic',
-          countLabel: '1 endpoint',
-        },
-        {
-          groupId: '.own_model',
-          label: '.own_model',
-          countLabel: '2 endpoints',
-        },
-        {
-          groupId: 'multilingual-e5',
-          label: 'Multilingual E5',
-          countLabel: '1 endpoint',
-        },
-        {
-          groupId: 'multilingual-embed-v1',
-          label: 'multilingual-embed-v1',
-          countLabel: '1 endpoint',
-        },
-        {
-          groupId: 'rerank-v1',
-          label: 'rerank-v1',
-          countLabel: '1 endpoint',
-        },
-      ];
-
-      expectedGroups.forEach(({ groupId, label, countLabel }) => {
-        const accordionHeader = screen.getByTestId(`${groupId}-accordion-header`);
-        expect(within(accordionHeader).getByText(label)).toBeInTheDocument();
-        expect(within(accordionHeader).getByText(countLabel)).toBeInTheDocument();
-      });
-    });
-
-    it('should show empty prompt when search removes all groups', async () => {
-      fireEvent.change(screen.getByTestId('search-field-endpoints'), {
-        target: { value: 'no-matching-endpoint' },
-      });
-
-      expect(await screen.findByText('No items found')).toBeInTheDocument();
-    });
-
-    it('should disable delete action for preconfigured endpoints in grouped tables', () => {
-      const elserTable = screen.getByTestId('Elastic-table');
-
-      const preconfiguredRow = within(elserTable).getByText('.elser-2-elastic').closest('tr');
-
-      expect(preconfiguredRow).not.toBeNull();
-
-      act(() => {
-        within(preconfiguredRow as HTMLElement)
-          .getByTestId('euiCollapsedItemActionsButton')
-          .click();
-      });
-
-      const deleteAction = screen.getByTestId(/inferenceUIDeleteAction/);
-
-      expect(deleteAction).toBeDisabled();
-    });
-
-    it('should enable delete action for user-defined endpoints in grouped tables', () => {
-      const elserTable = screen.getByTestId('Elastic-table');
-
-      const userDefinedRow = within(elserTable).getByText('custom-inference-id').closest('tr');
-
-      expect(userDefinedRow).not.toBeNull();
-
-      act(() => {
-        within(userDefinedRow as HTMLElement)
-          .getByTestId('euiCollapsedItemActionsButton')
-          .click();
-      });
-
-      const deleteAction = screen.getByTestId(/inferenceUIDeleteAction/);
-
-      expect(deleteAction).toBeEnabled();
-    });
-  });
   describe('group by service', () => {
     beforeAll(() => {
       window.history.pushState({}, '', '?groupBy=service');
@@ -531,5 +419,41 @@ describe('When the tabular page is loaded', () => {
 
     // 11 endpoints total
     expect(screen.getByTestId('endpointStatsEndpointsCount')).toHaveTextContent('11');
+  });
+
+  describe('read-only mode (manage: false)', () => {
+    beforeEach(() => {
+      mockUseKibana.mockReturnValue({
+        services: {
+          cloud: { isCloudEnabled: false },
+          application: {
+            capabilities: {
+              cloudConnect: { show: true, configure: true },
+              searchInferenceEndpoints: { show: true, manage: false },
+            },
+            navigateToApp: jest.fn(),
+          },
+          uiSettings: { get: jest.fn().mockReturnValue(true) },
+        },
+      });
+      window.history.pushState({}, '', '?groupBy=none');
+      renderTabularPageWithProviders();
+    });
+
+    afterEach(() => {
+      mockUseKibana.mockReset();
+      window.history.pushState({}, '', '/');
+    });
+
+    it('should not show the three-dots actions menu when view and delete are hidden', () => {
+      expect(screen.queryByTestId('euiCollapsedItemActionsButton')).not.toBeInTheDocument();
+    });
+
+    it('should still display all endpoints in the table', () => {
+      const table = screen.getByTestId('inferenceEndpointTable');
+      const rows = within(table).getAllByRole('row');
+      // 11 data rows + 1 header row
+      expect(rows).toHaveLength(12);
+    });
   });
 });

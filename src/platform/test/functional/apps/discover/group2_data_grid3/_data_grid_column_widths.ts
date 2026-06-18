@@ -12,7 +12,6 @@ import type { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const browser = getService('browser');
-  const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const dataGrid = getService('dataGrid');
   const dashboardAddPanel = getService('dashboardAddPanel');
@@ -37,9 +36,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('discover data grid column widths', function describeIndexTests() {
     before(async () => {
       await security.testUser.setRoles(['kibana_admin', 'test_logstash_reader']);
-      await esArchiver.loadIfNeeded(
-        'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
-      );
       await kibanaServer.importExport.load(
         'src/platform/test/functional/fixtures/kbn_archiver/discover'
       );
@@ -120,6 +116,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboardAddPanel.clickAddFromLibrary();
       await dashboardAddPanel.addSavedSearch('A Saved Search');
       await header.waitUntilLoadingHasFinished();
+      await dashboard.waitForRenderComplete();
       await testResizeColumn('_source');
     });
 
@@ -129,6 +126,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboardAddPanel.clickAddFromLibrary();
       await dashboardAddPanel.addSavedSearch('A Saved Search');
       await header.waitUntilLoadingHasFinished();
+      await dashboard.waitForRenderComplete();
       const { originalWidth, newWidth } = await dataGrid.resizeColumn('_source', -100);
       expect(newWidth).to.be(originalWidth - 100);
       await dashboard.saveDashboard('test');

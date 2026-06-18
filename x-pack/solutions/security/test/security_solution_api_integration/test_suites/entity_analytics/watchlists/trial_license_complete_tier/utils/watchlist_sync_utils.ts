@@ -10,49 +10,72 @@ import type { FtrProviderContext } from '../../../../../ftr_provider_context';
 
 export const WatchlistSyncUtils = (
   getService: FtrProviderContext['getService'],
-  sourceIndexName: string
+  managedIndexNames: string[] = []
 ) => {
   const log = getService('log');
   const es = getService('es');
   const entityAnalyticsApi = getService('entityAnalyticsApi');
+  const kibanaServer = getService('kibanaServer');
 
-  const createSourceIndex = async () =>
+  const createSourceIndex = async (indexName: string) =>
     es.indices.create({
-      index: sourceIndexName,
+      index: indexName,
       mappings: {
         properties: {
-          user: {
-            properties: {
-              name: {
-                type: 'keyword',
-              },
-            },
-          },
+          '@timestamp': { type: 'date' },
+          user: { properties: { name: { type: 'keyword' } } },
+          department: { type: 'keyword' },
         },
       },
     });
 
-  const addUsersToSourceIndex = async (users: string[]) => {
-    const ops = users.flatMap((name) => [{ index: {} }, { user: { name } }]);
-    await es.bulk({
-      index: sourceIndexName,
-      body: ops,
-      refresh: true,
+  const addUsersToSourceIndex = async (users: string[], indexName: string, timestamp?: string) => {
+    const ops = users.flatMap((name) => [
+      { index: {} },
+      { '@timestamp': timestamp ?? new Date().toISOString(), user: { name } },
+    ]);
+    await es.bulk({ index: indexName, body: ops, refresh: true });
+  };
+
+  const addDocsToSourceIndex = async (docs: Array<Record<string, unknown>>, indexName: string) => {
+    const ops = docs.flatMap((doc) => [{ index: {} }, doc]);
+    await es.bulk({ index: indexName, body: ops, refresh: true });
+  };
+
+  const deleteSourceIndex = async (indexName: string) => {
+    await es.indices.delete({ index: indexName }, { ignore: [404] }).catch((err) => {
+      log.error(`Error deleting index ${indexName}: ${err}`);
     });
   };
 
-  const deleteSourceIndex = async () => {
-    await es.indices.delete({ index: sourceIndexName }, { ignore: [404] }).catch((err) => {
-      log.error(`Error deleting index ${sourceIndexName}: ${err}`);
-    });
+  const deleteAllSourceIndices = async () => {
+    for (const indexName of managedIndexNames) {
+      await deleteSourceIndex(indexName);
+    }
   };
 
-  const createWatchlistAndEntitySource = async (watchlistName: string) => {
+  const clearSourceIndex = async (indexName: string) => {
+    await es
+      .deleteByQuery(
+        { index: indexName, query: { match_all: {} }, refresh: true },
+        { ignore: [404] }
+      )
+      .catch((err) => {
+        log.error(`Error clearing index ${indexName}: ${err}`);
+      });
+  };
+
+  const createWatchlistAndEntitySource = async (
+    watchlistName: string,
+    sourceIndexPattern: string,
+    range?: { start: string; end: string },
+    queryRule?: string
+  ) => {
     const { body: watchlist } = await entityAnalyticsApi.createWatchlist({
       body: {
         name: watchlistName,
         description: `Test watchlist for ${watchlistName}`,
-        riskModifier: 10,
+        riskModifier: 1,
       },
     });
 
@@ -62,9 +85,12 @@ export const WatchlistSyncUtils = (
       params: { watchlist_id: watchlist.id },
       body: {
         type: 'index',
-        name: `Source for ${sourceIndexName}`,
-        indexPattern: sourceIndexName,
+        name: `Source for ${watchlistName}`,
+        indexPattern: sourceIndexPattern,
+        identifierField: 'user.name',
         enabled: true,
+        range: range ?? { start: 'now-10d', end: 'now' },
+        ...(queryRule ? { queryRule } : {}),
       },
     });
 
@@ -82,13 +108,13 @@ export const WatchlistSyncUtils = (
     return response;
   };
 
-  const queryWatchlistIndex = async (watchlistName: string, namespace: string = 'default') => {
-    const indexName = `.entity_analytics.watchlists.${watchlistName}-${namespace}`;
+  const queryWatchlistIndex = async (watchlistId: string, namespace: string = 'default') => {
+    const indexName = `.entity_analytics.watchlists.${namespace}`;
 
     const response = await es.search({
       index: indexName,
       size: 1000,
-      query: { match_all: {} },
+      query: { term: { 'watchlist.id': watchlistId } },
     });
 
     return response.hits.hits.map((hit) => hit._source as Record<string, unknown>);
@@ -103,21 +129,45 @@ export const WatchlistSyncUtils = (
       return entity?.id === euid;
     });
 
-  const deleteWatchlistIndex = async (watchlistName: string, namespace: string = 'default') => {
-    const indexName = `.entity_analytics.watchlists.${watchlistName}-${namespace}`;
-    await es.indices.delete({ index: indexName }, { ignore: [404] }).catch((err) => {
-      log.error(`Error deleting watchlist index ${indexName}: ${err}`);
+  const deleteWatchlistDocs = async (watchlistId: string, namespace: string = 'default') => {
+    const indexName = `.entity_analytics.watchlists.${namespace}`;
+    await es
+      .deleteByQuery(
+        { index: indexName, query: { term: { 'watchlist.id': watchlistId } }, refresh: true },
+        { ignore: [404] }
+      )
+      .catch((err) => {
+        log.error(`Error deleting watchlist docs for ${watchlistId}: ${err}`);
+      });
+  };
+
+  const cleanWatchlistState = async () => {
+    await kibanaServer.savedObjects.clean({
+      types: ['watchlist-config', 'watchlist-entity-source'],
+    });
+  };
+
+  const clearEntitySourceApiKey = async (entitySourceId: string) => {
+    await kibanaServer.savedObjects.update({
+      id: entitySourceId,
+      type: 'watchlist-entity-source',
+      attributes: { apiKeyId: null, apiKey: null },
     });
   };
 
   return {
     createSourceIndex,
     addUsersToSourceIndex,
+    addDocsToSourceIndex,
     deleteSourceIndex,
+    deleteAllSourceIndices,
+    clearSourceIndex,
+    cleanWatchlistState,
     createWatchlistAndEntitySource,
     syncWatchlist,
     queryWatchlistIndex,
     findEntity,
-    deleteWatchlistIndex,
+    deleteWatchlistDocs,
+    clearEntitySourceApiKey,
   };
 };

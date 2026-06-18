@@ -10,10 +10,14 @@ import type {
   StreamEndpointLatencyProps,
   StreamsDescriptionGeneratedProps,
   StreamsSignificantEventsQueriesGeneratedProps,
-  StreamsInsightsGeneratedProps,
   StreamsStateErrorProps,
   StreamsProcessingPipelineSuggestedProps,
   StreamsFeaturesIdentifiedProps,
+  StreamsAgentBuilderKnowledgeIndicatorCreatedProps,
+  StreamsAgentToolKiIdentificationStartedProps,
+  StreamsAgentToolEventCreateProps,
+  StreamsAgentToolEventStatusUpdateProps,
+  StreamsOnboardingScheduledProps,
 } from './types';
 
 const streamsEndpointLatencySchema: RootSchema<StreamEndpointLatencyProps> = {
@@ -116,6 +120,18 @@ const streamsSignificantEventsQueriesGeneratedSchema: RootSchema<StreamsSignific
         description: 'The number of output tokens used for the generation request',
       },
     },
+    cached_tokens_used: {
+      type: 'long',
+      _meta: {
+        description: 'Cached tokens used for the generation request',
+      },
+    },
+    duration_ms: {
+      type: 'long',
+      _meta: {
+        description: 'Duration of the query generation operation in milliseconds',
+      },
+    },
     stream_type: {
       type: 'keyword',
       _meta: {
@@ -177,28 +193,6 @@ const streamsSignificantEventsQueriesGeneratedSchema: RootSchema<StreamsSignific
       },
     },
   };
-
-const streamsInsightsGeneratedSchema: RootSchema<StreamsInsightsGeneratedProps> = {
-  input_tokens_used: {
-    type: 'long',
-    _meta: {
-      description: 'The number of input tokens used for the generation request',
-    },
-  },
-  output_tokens_used: {
-    type: 'long',
-    _meta: {
-      description: 'The number of output tokens used for the generation request',
-    },
-  },
-  cached_tokens_used: {
-    type: 'long',
-    _meta: {
-      description: 'The number of cached tokens used for the generation request',
-      optional: true,
-    },
-  },
-};
 
 const streamsProcessingPipelineSuggestedSchema: RootSchema<StreamsProcessingPipelineSuggestedProps> =
   {
@@ -352,12 +346,189 @@ const streamsFeaturesIdentifiedSchema: RootSchema<StreamsFeaturesIdentifiedProps
   },
 };
 
+const streamsAgentBuilderKnowledgeIndicatorCreatedSchema: RootSchema<StreamsAgentBuilderKnowledgeIndicatorCreatedProps> =
+  {
+    ki_kind: {
+      type: 'keyword',
+      _meta: {
+        description: 'The kind of KI created by the agent builder tool: feature or query',
+      },
+    },
+    tool_id: {
+      type: 'keyword',
+      _meta: {
+        description: 'The tool that created the KI',
+      },
+    },
+    success: {
+      type: 'boolean',
+      _meta: {
+        description: 'Whether KI creation succeeded',
+      },
+    },
+    stream_name: {
+      type: 'keyword',
+      _meta: {
+        description: 'The name of the Stream',
+      },
+    },
+    stream_type: {
+      type: 'keyword',
+      _meta: {
+        description: 'The type of the stream: wired, classic, query, or unknown',
+      },
+    },
+    error_message: {
+      type: 'text',
+      _meta: {
+        description: 'Error message when KI creation fails',
+        optional: true,
+      },
+    },
+  };
+
+const streamsAgentToolKiIdentificationStartedSchema: RootSchema<StreamsAgentToolKiIdentificationStartedProps> =
+  {
+    success: {
+      type: 'boolean',
+      _meta: {
+        description: 'Whether starting KI identification succeeded',
+      },
+    },
+    stream_name: {
+      type: 'keyword',
+      _meta: {
+        description: 'The name of the Stream',
+      },
+    },
+    error_message: {
+      type: 'text',
+      _meta: {
+        description: 'Error message when KI identification start fails',
+        optional: true,
+      },
+    },
+  };
+
+const streamsAgentToolEventCreateSchema: RootSchema<StreamsAgentToolEventCreateProps> = {
+  success: {
+    type: 'boolean',
+    _meta: {
+      description: 'Whether the event creation succeeded',
+    },
+  },
+  stream_names: {
+    type: 'array',
+    items: {
+      type: 'keyword',
+      _meta: {
+        description: 'A stream name',
+      },
+    },
+    _meta: {
+      description: 'The names of the Streams associated with the event',
+    },
+  },
+  error_message: {
+    type: 'text',
+    _meta: {
+      description: 'Error message when event creation fails',
+      optional: true,
+    },
+  },
+};
+
+const streamsAgentToolEventStatusUpdateSchema: RootSchema<StreamsAgentToolEventStatusUpdateProps> =
+  {
+    success: {
+      type: 'boolean',
+      _meta: {
+        description: 'Whether the event status update succeeded',
+      },
+    },
+    event_id: {
+      type: 'keyword',
+      _meta: {
+        description: 'The identifier of the updated significant event',
+      },
+    },
+    status: {
+      type: 'keyword',
+      _meta: {
+        description: 'The status value set on the significant event',
+      },
+    },
+    error_message: {
+      type: 'text',
+      _meta: {
+        description: 'Error message when event status update fails',
+        optional: true,
+      },
+    },
+  };
+
+const streamsSignificantEventsDiscoveryTriggeredSchema = {
+  execution_id: {
+    type: 'keyword' as const,
+    _meta: { description: 'The workflow execution ID returned by the orchestrator' },
+  },
+  space_id: {
+    type: 'keyword' as const,
+    _meta: { description: 'The Kibana space in which the pipeline was triggered' },
+  },
+};
+
+const streamsOnboardingScheduledSchema: RootSchema<StreamsOnboardingScheduledProps> = {
+  stream_name: {
+    type: 'keyword',
+    _meta: {
+      description: 'The name of the stream being onboarded',
+    },
+  },
+  execution_id: {
+    type: 'keyword',
+    _meta: {
+      description:
+        'The workflow execution ID for this onboarding run; join key to workflow_execution_completed/_failed/_cancelled engine events and to streams-features-identified / streams-significant-events-queries-generated events',
+    },
+  },
+  workflow_id: {
+    type: 'keyword',
+    _meta: {
+      description: 'The managed workflow ID that was triggered (system-streams-ki-onboarding)',
+    },
+  },
+  space_id: {
+    type: 'keyword',
+    _meta: {
+      description: 'The Kibana space in which the workflow execution was created',
+    },
+  },
+  skip_features: {
+    type: 'boolean',
+    _meta: {
+      description: 'Whether the features identification step was skipped for this run',
+    },
+  },
+  skip_queries: {
+    type: 'boolean',
+    _meta: {
+      description: 'Whether the queries generation step was skipped for this run',
+    },
+  },
+};
+
 export {
   streamsEndpointLatencySchema,
   streamsStateErrorSchema,
   streamsDescriptionGeneratedSchema,
   streamsSignificantEventsQueriesGeneratedSchema,
-  streamsInsightsGeneratedSchema,
   streamsProcessingPipelineSuggestedSchema,
   streamsFeaturesIdentifiedSchema,
+  streamsAgentBuilderKnowledgeIndicatorCreatedSchema,
+  streamsAgentToolKiIdentificationStartedSchema,
+  streamsAgentToolEventCreateSchema,
+  streamsAgentToolEventStatusUpdateSchema,
+  streamsSignificantEventsDiscoveryTriggeredSchema,
+  streamsOnboardingScheduledSchema,
 };

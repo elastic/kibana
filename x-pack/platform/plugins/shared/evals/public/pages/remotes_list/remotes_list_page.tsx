@@ -32,6 +32,7 @@ import {
   EuiTitle,
   type EuiBasicTableColumn,
   useEuiTheme,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { goldenClusterPrivileges } from '@kbn/evals-common';
 import {
@@ -42,6 +43,7 @@ import {
   useUpdateRemote,
   type EvalsRemoteSummary,
 } from '../../hooks/use_evals_api';
+import { useEvalsPermissions } from '../../hooks/use_evals_permissions';
 import * as i18n from './translations';
 
 const API_KEY_PAYLOAD = {
@@ -91,6 +93,9 @@ const getUrlValidationError = (value: string): string | null => {
 
 export const RemotesListPage: React.FC = () => {
   const { euiTheme } = useEuiTheme();
+  const { canManage } = useEvalsPermissions();
+  const deleteModalTitleId = useGeneratedHtmlId();
+  const flyoutTitleId = useGeneratedHtmlId();
   const { data, isLoading, error } = useRemotes();
   const createRemote = useCreateRemote();
   const updateRemote = useUpdateRemote();
@@ -279,11 +284,14 @@ export const RemotesListPage: React.FC = () => {
 
   const isSaving = createRemote.isLoading || updateRemote.isLoading;
 
-  const columns = useMemo<Array<EuiBasicTableColumn<EvalsRemoteSummary>>>(
-    () => [
+  const columns = useMemo<Array<EuiBasicTableColumn<EvalsRemoteSummary>>>(() => {
+    const baseColumns: Array<EuiBasicTableColumn<EvalsRemoteSummary>> = [
       { field: 'displayName', name: i18n.COLUMN_NAME },
       { field: 'url', name: i18n.COLUMN_URL },
-      {
+    ];
+
+    if (canManage) {
+      baseColumns.push({
         name: i18n.COLUMN_ACTIONS,
         width: '120px',
         actions: [
@@ -303,27 +311,31 @@ export const RemotesListPage: React.FC = () => {
             onClick: (item) => setConfirmDelete(item),
           },
         ],
-      },
-    ],
-    [openEdit]
-  );
+      });
+    }
+
+    return baseColumns;
+  }, [openEdit, canManage]);
 
   const items = data?.remotes ?? [];
 
   return (
     <>
       <EuiPageSection paddingSize="none" css={{ paddingTop: euiTheme.size.l }}>
-        <EuiFlexGroup justifyContent="flexEnd" responsive={false}>
-          <EuiFlexItem grow={false}>
-            <EuiButton onClick={openCreate} fill iconType="plusInCircle">
-              {i18n.CREATE_REMOTE_BUTTON}
-            </EuiButton>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+        {canManage ? (
+          <EuiFlexGroup justifyContent="flexEnd" responsive={false}>
+            <EuiFlexItem grow={false}>
+              <EuiButton onClick={openCreate} fill iconType="plusInCircle">
+                {i18n.CREATE_REMOTE_BUTTON}
+              </EuiButton>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        ) : null}
         <EuiSpacer size="m" />
         {actionError ? (
           <>
             <EuiCallOut
+              announceOnMount
               title={i18n.DELETE_ERROR_TITLE}
               color="danger"
               iconType="error"
@@ -337,7 +349,13 @@ export const RemotesListPage: React.FC = () => {
         ) : null}
         {error ? (
           <>
-            <EuiCallOut title={i18n.LOAD_ERROR_TITLE} color="danger" iconType="error" size="s">
+            <EuiCallOut
+              announceOnMount
+              title={i18n.LOAD_ERROR_TITLE}
+              color="danger"
+              iconType="error"
+              size="s"
+            >
               <p>{error instanceof Error ? error.message : String(error)}</p>
             </EuiCallOut>
             <EuiSpacer size="m" />
@@ -345,6 +363,7 @@ export const RemotesListPage: React.FC = () => {
         ) : null}
 
         <EuiBasicTable<EvalsRemoteSummary>
+          tableCaption={i18n.REMOTES_TABLE_CAPTION}
           items={items}
           columns={columns}
           loading={isLoading}
@@ -353,9 +372,9 @@ export const RemotesListPage: React.FC = () => {
       </EuiPageSection>
 
       {flyout ? (
-        <EuiFlyout onClose={closeFlyout} size="m" ownFocus={false}>
+        <EuiFlyout onClose={closeFlyout} size="m" ownFocus={false} aria-labelledby={flyoutTitleId}>
           <EuiFlyoutHeader hasBorder>
-            <EuiTitle size="m">
+            <EuiTitle size="m" id={flyoutTitleId}>
               <h2>
                 {flyout.mode === 'create' ? i18n.CREATE_FLYOUT_TITLE : i18n.EDIT_FLYOUT_TITLE}
               </h2>
@@ -363,7 +382,13 @@ export const RemotesListPage: React.FC = () => {
           </EuiFlyoutHeader>
           <EuiFlyoutBody>
             {formError ? (
-              <EuiCallOut title={i18n.FORM_ERROR_TITLE} color="danger" iconType="error" size="s">
+              <EuiCallOut
+                announceOnMount
+                title={i18n.FORM_ERROR_TITLE}
+                color="danger"
+                iconType="error"
+                size="s"
+              >
                 <p>{formError}</p>
               </EuiCallOut>
             ) : null}
@@ -458,6 +483,7 @@ export const RemotesListPage: React.FC = () => {
                 <>
                   <EuiSpacer size="s" />
                   <EuiCallOut
+                    announceOnMount
                     title={
                       testResult.success
                         ? i18n.TEST_CONNECTION_SUCCESS
@@ -493,6 +519,8 @@ export const RemotesListPage: React.FC = () => {
       {confirmDelete ? (
         <EuiConfirmModal
           title={i18n.DELETE_CONFIRM_TITLE}
+          aria-labelledby={deleteModalTitleId}
+          titleProps={{ id: deleteModalTitleId }}
           onCancel={() => {
             setConfirmDelete(null);
           }}

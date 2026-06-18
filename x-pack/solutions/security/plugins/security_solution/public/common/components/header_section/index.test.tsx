@@ -79,7 +79,7 @@ describe('HeaderSection', () => {
     expect(screen.queryByText(tooltipTitle)).not.toBeInTheDocument();
     expect(screen.queryByText(tooltipContent)).not.toBeInTheDocument();
 
-    userEvent.hover(tooltip);
+    await userEvent.hover(tooltip);
 
     expect(await screen.findByText(tooltipTitle)).toBeInTheDocument();
     expect(await screen.findByText(tooltipContent)).toBeInTheDocument();

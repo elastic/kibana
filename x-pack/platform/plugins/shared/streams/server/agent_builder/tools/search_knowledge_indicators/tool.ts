@@ -110,20 +110,16 @@ export function createSearchKnowledgeIndicatorsTool({
       const { request } = context;
 
       try {
-        const { streamsClient, getFeatureClient, getQueryClient, licensing, uiSettingsClient } =
+        const { streamsClient, getKnowledgeIndicatorClient, licensing, uiSettingsClient } =
           await getScopedClients({ request });
 
         await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
 
-        const [featureClient, queryClient] = await Promise.all([
-          getFeatureClient(),
-          getQueryClient(),
-        ]);
+        const kiClient = await getKnowledgeIndicatorClient();
 
         const output = await searchKnowledgeIndicatorsToolHandler({
           streamsClient,
-          featureClient,
-          queryClient,
+          kiClient,
           logger,
           params: toolParams,
         });
@@ -138,7 +134,7 @@ export function createSearchKnowledgeIndicatorsTool({
         };
       } catch (error) {
         const message = error instanceof Error ? error.message : 'Unknown error';
-        logger.error(`Error running search_kis: ${message}`);
+        logger.error(`Error running ki_search: ${message}`);
         if (error instanceof Error) {
           logger.debug(error.stack ?? error.message);
         } else {

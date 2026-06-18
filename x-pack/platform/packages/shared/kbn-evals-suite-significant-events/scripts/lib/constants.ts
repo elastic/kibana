@@ -25,9 +25,10 @@ export const KI_FEATURE_EXTRACTION_TIMEOUT_MS = 5 * 60 * 1000;
 
 export const HEALTHY_BASELINE_SCENARIO: Scenario = { id: 'healthy-baseline' };
 
+export const QUERIES_INDEX = '.kibana_streams_assets-*';
 export const VALID_SYSTEM_INDICES = [
   '.kibana_streams_features-*',
-  '.kibana_streams_assets-*',
+  QUERIES_INDEX,
   '.kibana_streams_insights-*',
   '.kibana_streams_tasks-*',
 ] as const;
@@ -38,10 +39,9 @@ type ValidStreamsSystemIndices = (typeof VALID_SYSTEM_INDICES)[number];
 type ValidStreamsAlertIndices = (typeof VALID_ALERT_INDICES)[number];
 type ValidStreamsIndices = ValidStreamsSystemIndices | ValidStreamsAlertIndices;
 
-export const INDEX_ALIAS_CONFIG: Record<
-  ValidStreamsIndices,
-  Pick<IndicesUpdateAliasesAddAction, 'alias' | 'is_hidden'>
-> = {
+export type StreamsIndexAliasConfig = Pick<IndicesUpdateAliasesAddAction, 'alias' | 'is_hidden'>;
+
+export const INDEX_ALIAS_CONFIG: Record<ValidStreamsIndices, StreamsIndexAliasConfig> = {
   '.kibana_streams_features-*': {
     alias: '.kibana_streams_features',
     is_hidden: true,

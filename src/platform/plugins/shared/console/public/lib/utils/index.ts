@@ -9,11 +9,7 @@
 
 import _ from 'lodash';
 import { XJson } from '@kbn/es-ui-shared-plugin/public';
-import type {
-  RequestArgs,
-  RequestResult,
-} from '../../application/hooks/use_send_current_request/send_request';
-import type { DevToolsVariable } from '../../application/components';
+import type { RequestResult } from '../../application/hooks/use_send_current_request/send_request';
 import { asArray } from './array_utils';
 
 const { collapseLiteralStrings, expandLiteralStrings } = XJson;
@@ -50,31 +46,6 @@ export function formatRequestBodyDoc(data: string[], indent: boolean) {
     changed,
     data: formattedData,
   };
-}
-
-// Regular expression to match different types of comments:
-// - Block comments, single and multiline (/* ... */)
-// - Single-line comments (// ...)
-// - Hash comments (# ...)
-export function hasComments(data: string) {
-  /*
-    1. (\/\*[^*]*\*+(?:[^/*][^*]*\*+)*\/)
-       - (\/\*): Matches the start of a block comment
-       - [^*]*: Matches any number of characters that are NOT an asterisk (*), to avoid prematurely closing the comment.
-       - \*+: Matches one or more asterisks (*), which is part of the block comment closing syntax.
-       - (?:[^/*][^*]*\*+)*: This non-capturing group ensures that any characters between asterisks and slashes are correctly matched and prevents mismatching on nested or unclosed comments.
-       - \*\/: Matches the closing of a block comment
-
-    2. (\/\/.*)
-       - Matches single-line comments starting with '//'.
-       - .*: Matches any characters that follow until the end of the line.
-
-    3. (#.*)
-       - Matches single-line comments starting with a hash (#).
-       - .*: Matches any characters that follow until the end of the line.
-   */
-  const re = /(\/\*[^*]*\*+(?:[^/*][^*]*\*+)*\/)|(\/\/.*)|(#.*)/;
-  return re.test(data);
 }
 
 export function extractWarningMessages(warnings: string) {
@@ -148,94 +119,4 @@ export const getResponseWithMostSevereStatusCode = (
       .sort((a, b) => a.response.statusCode - b.response.statusCode)
       .pop();
   }
-};
-
-export const replaceVariables = (
-  requests: RequestArgs['requests'],
-  variables: DevToolsVariable[]
-) => {
-  const urlRegex = /\${(\w+)}/g;
-
-  // The forward part '([\\"]?)"' of regex matches '\\"', '""', and '"', but the only
-  // last match is preferable. The unwanted ones can be filtered out by checking whether
-  // the first capturing group is empty. This functionality is identical to the one
-  // achievable by negative lookbehind assertion - i.e. '(?<![\\"])"'
-  const bodyRegexSingleQuote = /([\\"]?)"\${(\w+)}"(?!")/g;
-  const bodyRegexTripleQuotes = /([\\"]?)"""\${(\w+)}"""(?!")/g;
-
-  return requests.map((req) => {
-    // safeguard - caller passes any[] from editor's getRequestsInRange() as requests
-    if (!req || !req.url || !req.data) {
-      return req;
-    }
-
-    if (urlRegex.test(req.url)) {
-      req.url = req.url.replaceAll(urlRegex, (match, key) => {
-        const variable = variables.find(({ name }) => name === key);
-
-        return variable?.value ?? match;
-      });
-    }
-
-    req.data = req.data.map((data) => {
-      if (bodyRegexSingleQuote.test(data)) {
-        data = data.replaceAll(bodyRegexSingleQuote, (match, lookbehind, key) => {
-          const variable = variables.find(({ name }) => name === key);
-
-          if (!lookbehind && variable) {
-            // All values must be stringified to send a successful request to ES.
-            const { value } = variable;
-
-            const isStringifiedObject = value.startsWith('{') && value.endsWith('}');
-            if (isStringifiedObject) {
-              return value;
-            }
-
-            const isStringifiedNumber = !isNaN(parseFloat(value));
-            // We need to check uuids as well, since they are also numbers.
-            if (isStringifiedNumber && !isUUID(value)) {
-              return value;
-            }
-
-            const isStringifiedArray = value.startsWith('[') && value.endsWith(']');
-            if (isStringifiedArray) {
-              return value;
-            }
-
-            const isStringifiedBool = value === 'true' || value === 'false';
-            if (isStringifiedBool) {
-              return value;
-            }
-
-            // At this point the value must be an unstringified string, so we have to stringify it.
-            // Example: 'stringValue' -> '"stringValue"'
-            return JSON.stringify(value);
-          }
-
-          return match;
-        });
-      }
-
-      if (bodyRegexTripleQuotes.test(data)) {
-        data = data.replaceAll(bodyRegexTripleQuotes, (match, lookbehind, key) => {
-          const variable = variables.find(({ name }) => name === key);
-
-          return !lookbehind && variable?.value
-            ? '""' + JSON.stringify(variable?.value) + '""'
-            : match;
-        });
-      }
-
-      return data;
-    });
-
-    return req;
-  });
-};
-
-const isUUID = (val: string) => {
-  return (
-    typeof val === 'string' &&
-    val.match(/[0-9a-fA-F]{8}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{12}/)
-  );
 };

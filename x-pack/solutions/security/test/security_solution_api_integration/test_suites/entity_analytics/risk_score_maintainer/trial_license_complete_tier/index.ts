@@ -12,9 +12,11 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./setup_and_status'));
     loadTestFile(require.resolve('./task_execution'));
     loadTestFile(require.resolve('./task_execution_nondefault_spaces'));
+    loadTestFile(require.resolve('./migrations'));
     loadTestFile(require.resolve('./risk_score_calculation'));
     loadTestFile(require.resolve('./resolution_scoring'));
     loadTestFile(require.resolve('./preview_api'));
+    loadTestFile(require.resolve('./highlights_v2'));
     loadTestFile(require.resolve('./asset_criticality_csv_upload_v2'));
   });
 }

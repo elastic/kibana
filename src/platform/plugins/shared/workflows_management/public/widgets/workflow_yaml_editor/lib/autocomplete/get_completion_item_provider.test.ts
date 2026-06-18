@@ -16,7 +16,8 @@ import {
   clearAllYamlProviders,
   interceptMonacoYamlProvider,
 } from './intercept_monaco_yaml_provider';
-import { getDeprecatedStepMetadataMap } from '../../../../../common/schema';
+
+import { isDeprecatedStepType } from '../../../../../common/schema';
 
 // Mock dependencies
 jest.mock('./suggestions/get_suggestions', () => ({
@@ -29,11 +30,12 @@ jest.mock('./context/build_autocomplete_context', () => ({
     path: ['triggers', 0, 'type'],
     linePrefix: '  - type:',
     lineSuffix: '',
+    isInEsqlQueryField: false,
   })),
 }));
 
 jest.mock('../../../../../common/schema', () => ({
-  getDeprecatedStepMetadataMap: jest.fn(() => ({})),
+  isDeprecatedStepType: jest.fn(() => false),
 }));
 
 describe('getCompletionItemProvider', () => {
@@ -63,7 +65,7 @@ describe('getCompletionItemProvider', () => {
     } as monaco.languages.CompletionContext;
 
     getState = jest.fn(() => ({} as any));
-    (getDeprecatedStepMetadataMap as jest.Mock).mockReturnValue({});
+    (isDeprecatedStepType as jest.Mock).mockReturnValue(false);
   });
 
   afterEach(() => {
@@ -79,7 +81,19 @@ describe('getCompletionItemProvider', () => {
 
     it('should have correct trigger characters', () => {
       const provider = getCompletionItemProvider(getState);
-      expect(provider.triggerCharacters).toEqual(['@', '.', ' ', '"', "'", '(', ':', '|', '{']);
+      expect(provider.triggerCharacters).toEqual([
+        '@',
+        '.',
+        ' ',
+        '"',
+        "'",
+        '(',
+        ':',
+        '|',
+        '{',
+        '[',
+        '?',
+      ]);
     });
   });
 
@@ -170,10 +184,10 @@ describe('getCompletionItemProvider', () => {
         }),
       };
 
-      (getDeprecatedStepMetadataMap as jest.Mock).mockReturnValue({
-        'kibana.createCase': { replacementStepType: 'cases.createCase' },
-        'kibana.createCaseDefaultSpace': { replacementStepType: 'kibana.createCase' },
-      });
+      const deprecatedStepTypes = new Set(['kibana.createCase', 'kibana.createCaseDefaultSpace']);
+      (isDeprecatedStepType as jest.Mock).mockImplementation((stepType: string) =>
+        deprecatedStepTypes.has(stepType)
+      );
       monaco.languages.registerCompletionItemProvider(YAML_LANG_ID, yamlProvider);
 
       const provider = getCompletionItemProvider(getState);
@@ -463,6 +477,7 @@ describe('getCompletionItemProvider', () => {
         lineUpToCursor: '',
         lineParseResult: { matchType: 'liquid-block-keyword', fullKey: '', match: null },
         isInLiquidBlock: false,
+        isInEsqlQueryField: false,
         focusedStepInfo: null,
       });
 
@@ -506,6 +521,7 @@ describe('getCompletionItemProvider', () => {
         lineUpToCursor: '  assign',
         lineParseResult: { matchType: 'liquid-block-keyword', fullKey: 'assign', match: null },
         isInLiquidBlock: true,
+        isInEsqlQueryField: false,
         focusedStepInfo: null,
       });
 

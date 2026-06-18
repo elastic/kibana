@@ -52,12 +52,16 @@ interface NewBaseOutput {
   write_to_logs_streams?: boolean | null;
 }
 
-export interface NewElasticsearchOutput extends NewBaseOutput {
-  type: OutputType['Elasticsearch'];
+export interface OtelExporterOutput {
   otel_exporter_config_yaml?: string | null;
+  otel_disable_beatsauth?: boolean | null;
 }
 
-export interface NewRemoteElasticsearchOutput extends NewBaseOutput {
+export interface NewElasticsearchOutput extends NewBaseOutput, OtelExporterOutput {
+  type: OutputType['Elasticsearch'];
+}
+
+export interface NewRemoteElasticsearchOutput extends NewBaseOutput, OtelExporterOutput {
   type: OutputType['RemoteElasticsearch'];
   service_token?: string | null;
   secrets?: RemoteESOutputSecrets;
@@ -101,7 +105,7 @@ export interface KafkaOutput extends NewBaseOutput {
   version?: string;
   key?: string;
   compression?: ValueOf<KafkaCompressionType>;
-  compression_level?: number;
+  compression_level?: number | null;
   auth_type?: ValueOf<KafkaAuthType>;
   connection_type?: ValueOf<KafkaConnectionTypeType>;
   username?: string | null;

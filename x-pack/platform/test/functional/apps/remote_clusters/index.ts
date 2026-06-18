@@ -12,7 +12,6 @@ import type { FtrProviderContext } from '../../ftr_provider_context';
 // https://www.elastic.co/guide/en/kibana/7.9/working-remote-clusters.html
 export default ({ loadTestFile }: FtrProviderContext) => {
   describe('Remote Clusters app', function () {
-    loadTestFile(require.resolve('./feature_controls'));
     loadTestFile(require.resolve('./home_page'));
     loadTestFile(require.resolve('./remote_clusters'));
   });

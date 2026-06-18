@@ -82,6 +82,7 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   namespace: 'default',
   getUserName: jest.fn(),
   createAPIKey: jest.fn(),
+  cloneAPIKey: jest.fn(),
   logger: loggingSystemMock.create().get(),
   internalSavedObjectsRepository,
   encryptedSavedObjectsClient: encryptedSavedObjects,
@@ -447,6 +448,7 @@ describe('create()', () => {
           "status": "pending",
         },
         "id": "1",
+        "isSnoozedUntil": null,
         "muteAll": false,
         "mutedInstanceIds": Array [],
         "name": "abc",
@@ -459,6 +461,7 @@ describe('create()', () => {
           "interval": "1m",
         },
         "scheduledTaskId": "task-123",
+        "snoozeSchedule": Array [],
         "systemActions": Array [],
         "tags": Array [
           "foo",
@@ -961,6 +964,7 @@ describe('create()', () => {
           "status": "pending",
         },
         "id": "1",
+        "isSnoozedUntil": null,
         "notifyWhen": null,
         "params": Object {
           "bar": true,
@@ -970,6 +974,7 @@ describe('create()', () => {
           "interval": "1m",
         },
         "scheduledTaskId": "task-123",
+        "snoozeSchedule": Array [],
         "systemActions": Array [],
         "updatedAt": 2019-02-12T21:01:22.479Z,
       }
@@ -1160,6 +1165,7 @@ describe('create()', () => {
           "status": "pending",
         },
         "id": "1",
+        "isSnoozedUntil": null,
         "notifyWhen": null,
         "params": Object {
           "bar": true,
@@ -1169,6 +1175,7 @@ describe('create()', () => {
           "interval": "1m",
         },
         "scheduledTaskId": "task-123",
+        "snoozeSchedule": Array [],
         "systemActions": Array [],
         "updatedAt": 2019-02-12T21:01:22.479Z,
       }
@@ -1412,6 +1419,7 @@ describe('create()', () => {
           "status": "pending",
         },
         "id": "1",
+        "isSnoozedUntil": null,
         "notifyWhen": null,
         "params": Object {
           "bar": true,
@@ -1421,6 +1429,7 @@ describe('create()', () => {
           "interval": "1m",
         },
         "scheduledTaskId": "task-123",
+        "snoozeSchedule": Array [],
         "systemActions": Array [
           Object {
             "actionTypeId": "test",
@@ -1597,6 +1606,7 @@ describe('create()', () => {
           "status": "pending",
         },
         "id": "1",
+        "isSnoozedUntil": null,
         "notifyWhen": null,
         "params": Object {
           "bar": true,
@@ -1605,6 +1615,7 @@ describe('create()', () => {
         "schedule": Object {
           "interval": 10000,
         },
+        "snoozeSchedule": Array [],
         "systemActions": Array [],
         "updatedAt": 2019-02-12T21:01:22.479Z,
       }
@@ -1801,6 +1812,7 @@ describe('create()', () => {
           "status": "pending",
         },
         "id": "1",
+        "isSnoozedUntil": null,
         "notifyWhen": null,
         "params": Object {
           "bar": true,
@@ -1811,6 +1823,7 @@ describe('create()', () => {
           "interval": "1m",
         },
         "scheduledTaskId": "task-123",
+        "snoozeSchedule": Array [],
         "systemActions": Array [],
         "updatedAt": 2019-02-12T21:01:22.479Z,
       }
@@ -2005,6 +2018,7 @@ describe('create()', () => {
           "status": "pending",
         },
         "id": "1",
+        "isSnoozedUntil": null,
         "notifyWhen": null,
         "params": Object {
           "bar": true,
@@ -2015,6 +2029,7 @@ describe('create()', () => {
           "interval": "1m",
         },
         "scheduledTaskId": "task-123",
+        "snoozeSchedule": Array [],
         "systemActions": Array [],
         "updatedAt": 2019-02-12T21:01:22.479Z,
       }
@@ -2195,6 +2210,7 @@ describe('create()', () => {
           "status": "pending",
         },
         "id": "1",
+        "isSnoozedUntil": null,
         "muteAll": false,
         "mutedInstanceIds": Array [],
         "name": "abc",
@@ -2207,6 +2223,7 @@ describe('create()', () => {
           "interval": "1m",
         },
         "scheduledTaskId": "task-123",
+        "snoozeSchedule": Array [],
         "systemActions": Array [],
         "tags": Array [
           "foo",
@@ -2350,6 +2367,7 @@ describe('create()', () => {
           "status": "pending",
         },
         "id": "1",
+        "isSnoozedUntil": null,
         "muteAll": false,
         "mutedInstanceIds": Array [],
         "name": "abc",
@@ -2362,6 +2380,7 @@ describe('create()', () => {
           "interval": "1m",
         },
         "scheduledTaskId": "task-123",
+        "snoozeSchedule": Array [],
         "systemActions": Array [],
         "tags": Array [
           "foo",
@@ -2507,6 +2526,7 @@ describe('create()', () => {
           "status": "pending",
         },
         "id": "1",
+        "isSnoozedUntil": null,
         "muteAll": false,
         "mutedInstanceIds": Array [],
         "name": "abc",
@@ -2519,6 +2539,7 @@ describe('create()', () => {
           "interval": "1m",
         },
         "scheduledTaskId": "task-123",
+        "snoozeSchedule": Array [],
         "systemActions": Array [],
         "tags": Array [
           "foo",
@@ -2707,6 +2728,7 @@ describe('create()', () => {
           "status": "pending",
         },
         "id": "123",
+        "isSnoozedUntil": null,
         "muteAll": false,
         "mutedInstanceIds": Array [],
         "name": "abc",
@@ -2721,6 +2743,7 @@ describe('create()', () => {
           "interval": "10s",
         },
         "scheduledTaskId": "task-123",
+        "snoozeSchedule": Array [],
         "systemActions": Array [],
         "tags": Array [
           "foo",
@@ -3024,6 +3047,7 @@ describe('create()', () => {
         legacyId: null,
         params: { bar: true },
         apiKey: Buffer.from('123:abc').toString('base64'),
+        apiKeyCreatedByUser: false,
         apiKeyOwner: 'elastic',
         artifacts: {
           dashboards: [],
@@ -3887,6 +3911,7 @@ describe('create()', () => {
           "status": "pending",
         },
         "id": "1",
+        "isSnoozedUntil": null,
         "notifyWhen": null,
         "params": Object {
           "bar": true,
@@ -3895,6 +3920,7 @@ describe('create()', () => {
           "interval": "1m",
         },
         "scheduledTaskId": "task-123",
+        "snoozeSchedule": Array [],
         "systemActions": Array [],
         "updatedAt": 2019-02-12T21:01:22.479Z,
       }
@@ -4289,6 +4315,7 @@ describe('create()', () => {
             "status": "pending",
           },
           "id": "1",
+          "isSnoozedUntil": null,
           "notifyWhen": null,
           "params": Object {
             "bar": true,
@@ -4298,6 +4325,7 @@ describe('create()', () => {
             "interval": "1m",
           },
           "scheduledTaskId": "task-123",
+          "snoozeSchedule": Array [],
           "systemActions": Array [
             Object {
               "actionTypeId": "test",
@@ -4926,6 +4954,167 @@ This is the type of text _investigation guides_ will contain.`;
           tags: ['foo'], // Only original tags
         }),
         expect.anything()
+      );
+    });
+  });
+
+  describe('change tracking', () => {
+    const createdRuleSO = {
+      id: '1',
+      type: RULE_SAVED_OBJECT_TYPE,
+      attributes: {
+        alertTypeId: '123',
+        schedule: { interval: '1m' },
+        params: { bar: true },
+        createdAt: '2019-02-12T21:01:22.479Z',
+        actions: [],
+        executionStatus: getRuleExecutionStatusPending('2019-02-12T21:01:22.479Z'),
+        running: false,
+      },
+      references: [
+        {
+          name: 'action_0',
+          type: 'action',
+          id: '1',
+        },
+      ],
+    };
+
+    const createChangeTrackingService = () => ({
+      log: jest.fn().mockResolvedValue(undefined),
+      logBulk: jest.fn().mockResolvedValue(undefined),
+      getHistory: jest.fn().mockResolvedValue({ items: [], total: 0 }),
+    });
+
+    const setRuleType = (overrides: { trackChanges?: boolean } = {}) => {
+      ruleTypeRegistry.get.mockReturnValue({
+        id: '123',
+        name: 'Test',
+        actionGroups: [{ id: 'default', name: 'Default' }],
+        recoveryActionGroup: RecoveredActionGroup,
+        defaultActionGroupId: 'default',
+        minimumLicenseRequired: 'basic',
+        isExportable: true,
+        async executor() {
+          return { state: {} };
+        },
+        category: 'test',
+        producer: 'alerts',
+        solution: 'stack' as const,
+        validate: { params: { validate: (params) => params } },
+        validLegacyConsumers: [],
+        trackChanges: true,
+        ...overrides,
+      });
+    };
+
+    test('logs the change after the rule is created', async () => {
+      const changeTrackingService = createChangeTrackingService();
+      const trackingClient = new RulesClient({ ...rulesClientParams, changeTrackingService });
+      setRuleType();
+
+      unsecuredSavedObjectsClient.create.mockResolvedValueOnce(createdRuleSO);
+
+      await trackingClient.create({ data: getMockData() });
+
+      expect(changeTrackingService.logBulk).toHaveBeenCalledTimes(1);
+      // Single-rule callers fall back to ruleSOs.length for bulkCount.
+      expect(changeTrackingService.logBulk).toHaveBeenCalledWith(
+        [expect.objectContaining({ objectId: '1', module: 'stack' })],
+        {
+          action: 'rule_create',
+          spaceId: 'default',
+        }
+      );
+    });
+
+    test('captures the full post-creation attributes and references of the rule', async () => {
+      const changeTrackingService = createChangeTrackingService();
+      const trackingClient = new RulesClient({ ...rulesClientParams, changeTrackingService });
+      setRuleType();
+
+      unsecuredSavedObjectsClient.create.mockResolvedValueOnce(createdRuleSO);
+
+      await trackingClient.create({ data: getMockData() });
+
+      expect(changeTrackingService.logBulk).toHaveBeenCalledWith(
+        [
+          {
+            // setGlobalDate pins Date.now() to mockedDateString.
+            timestamp: '2019-02-12T21:01:22.479Z',
+            objectId: '1',
+            objectType: RULE_SAVED_OBJECT_TYPE,
+            module: 'stack',
+            snapshot: {
+              attributes: createdRuleSO.attributes,
+              references: createdRuleSO.references,
+            },
+          },
+        ],
+        expect.any(Object)
+      );
+    });
+
+    test('stamps the change with the time the create flow began (Date.now() at start of create)', async () => {
+      const changeTrackingService = createChangeTrackingService();
+      const trackingClient = new RulesClient({ ...rulesClientParams, changeTrackingService });
+      setRuleType();
+
+      // Drive Date.now() so the create flow captures a known timestamp at its start.
+      const startTimeMs = Date.parse('2030-06-01T08:00:00.000Z');
+      const dateNowSpy = jest.spyOn(Date, 'now').mockReturnValue(startTimeMs);
+
+      try {
+        unsecuredSavedObjectsClient.create.mockResolvedValueOnce(createdRuleSO);
+
+        await trackingClient.create({ data: getMockData() });
+
+        expect(changeTrackingService.logBulk).toHaveBeenCalledTimes(1);
+        const [changes] = changeTrackingService.logBulk.mock.calls[0];
+        expect(changes).toHaveLength(1);
+        expect(changes[0].timestamp).toBe('2030-06-01T08:00:00.000Z');
+      } finally {
+        dateNowSpy.mockRestore();
+      }
+    });
+
+    test('does not log when the rule type opts out of tracking', async () => {
+      const changeTrackingService = createChangeTrackingService();
+      const trackingClient = new RulesClient({ ...rulesClientParams, changeTrackingService });
+      setRuleType({ trackChanges: false });
+
+      unsecuredSavedObjectsClient.create.mockResolvedValueOnce(createdRuleSO);
+
+      await trackingClient.create({ data: getMockData() });
+
+      expect(changeTrackingService.logBulk).not.toHaveBeenCalled();
+    });
+
+    test('does not log when no change tracking service is configured', async () => {
+      // Default rulesClient has no changeTrackingService configured.
+      setRuleType();
+
+      unsecuredSavedObjectsClient.create.mockResolvedValueOnce(createdRuleSO);
+
+      await rulesClient.create({ data: getMockData() });
+
+      // No service to assert against; verify the call simply did not throw.
+      // The negative assertion is exercised at the helper level
+      // (see common_utils/log_bulk_rule_changes.test.ts).
+      expect(unsecuredSavedObjectsClient.create).toHaveBeenCalled();
+    });
+
+    test('rule creation succeeds even if change tracking throws', async () => {
+      const changeTrackingService = createChangeTrackingService();
+      changeTrackingService.logBulk.mockRejectedValueOnce(new Error('boom'));
+      const trackingClient = new RulesClient({ ...rulesClientParams, changeTrackingService });
+      setRuleType();
+
+      unsecuredSavedObjectsClient.create.mockResolvedValueOnce(createdRuleSO);
+
+      await expect(trackingClient.create({ data: getMockData() })).resolves.toBeDefined();
+      expect(rulesClientParams.logger.warn).toHaveBeenCalledWith(
+        expect.stringContaining('Unable to log bulk rule changes for action "rule_create"')
       );
     });
   });

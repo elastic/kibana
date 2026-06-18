@@ -1279,6 +1279,19 @@ describe('Output Service', () => {
         ).resolves.not.toThrow();
       });
     });
+
+    it('should throw FleetError when given an invalid id', async () => {
+      const soClient = getMockedSoClient();
+
+      await expect(
+        outputService.create(
+          soClient,
+          esClientMock,
+          { is_default: false, is_default_monitoring: false, name: 'Test', type: 'elasticsearch' },
+          { id: '../bad-id' }
+        )
+      ).rejects.toThrow('id is not valid');
+    });
   });
 
   describe('update', () => {
@@ -1627,6 +1640,8 @@ describe('Output Service', () => {
         hosts: ['test:4343'],
         ca_sha256: null,
         ca_trusted_fingerprint: null,
+        otel_disable_beatsauth: null,
+        otel_exporter_config_yaml: null,
         write_to_logs_streams: null,
       });
     });
@@ -1999,6 +2014,8 @@ describe('Output Service', () => {
         client_id: 'Elastic',
         compression: 'gzip',
         compression_level: 4,
+        otel_disable_beatsauth: null,
+        otel_exporter_config_yaml: null,
         partition: 'hash',
         timeout: 30,
         version: '1.0.0',

@@ -27,7 +27,6 @@ import type {
   CaseAssignees,
   CaseCustomFields,
 } from '../../../common/types/domain';
-import type { PersistableStateAttachmentTypeRegistry } from '../../attachment_framework/persistable_state_registry';
 import type {
   UserActionPersistedAttributes,
   UserActionSavedObjectTransformed,
@@ -113,6 +112,9 @@ export interface BuilderParameters {
   extended_fields: {
     parameters: { payload: { extended_fields: Record<string, string> } };
   };
+  template: {
+    parameters: { payload: { template: { id: string; version: number } | null } };
+  };
 }
 
 export interface CreateUserAction<T extends keyof BuilderParameters> {
@@ -166,13 +168,8 @@ export type CommonBuilderArguments = CommonArguments & {
   valueKey: string;
 };
 
-export interface BuilderDeps {
-  persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry;
-}
-
 export interface ServiceContext {
   log: Logger;
-  persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry;
   unsecuredSavedObjectsClient: SavedObjectsClientContract;
   savedObjectsSerializer: ISavedObjectsSerializer;
   auditLogger: AuditLogger;

@@ -27,6 +27,20 @@ export type {
 // Hooks.
 export { useContentListItems, useContentListState } from './src/state';
 export type { ContentListQueryData } from './src/state';
+
+// Phase.
+export {
+  useContentListPhase,
+  useIsInitialLoad,
+  useIsEmpty,
+  useIsFiltering,
+  useIsFiltered,
+  useIsPopulated,
+  derivePhase,
+  derivePhaseFromState,
+} from './src/phase';
+export type { ContentListPhase, DerivePhaseInput } from './src/phase';
+
 export {
   isFilterFacetConfig,
   useContentListSort,
@@ -41,6 +55,7 @@ export {
   isSortingConfig,
   isPaginationConfig,
   isSearchConfig,
+  isSelectionConfig,
   TAG_FILTER_ID,
   CREATED_BY_FILTER_ID,
   DEFAULT_SORT_FIELDS,
@@ -55,10 +70,22 @@ export { CONTENT_LIST_ACTIONS } from './src/state';
 export type { ContentListAction } from './src/state';
 
 // Types.
-export type { ContentListItem, ContentListItemConfig } from './src/item';
+export type {
+  ContentListItem,
+  ContentListItemConfig,
+  ContentListActions,
+  ActionConfig,
+  ActionRestriction,
+  ActionId,
+  KnownActionId,
+  ItemActionHref,
+  ItemActionHandler,
+  BulkActionHandler,
+} from './src/item';
 export type {
   ContentListFeatures,
   ContentListSupports,
+  ContentEditorFeatureConfig,
   FilterFacet,
   FilterFacetParams,
   FilterFacetConfig,
@@ -70,6 +97,7 @@ export type {
   UseContentListPaginationReturn,
   SearchConfig,
   UseContentListSearchReturn,
+  SelectionConfig,
   UseContentListSelectionReturn,
   UseContentListFiltersReturn,
   DeleteConfirmationModalProps,
@@ -95,7 +123,12 @@ export type {
   FieldDefinition,
   FlagDefinition,
 } from './src/query_model';
-export { EMPTY_MODEL, toFindItemsFilters, useQueryModel } from './src/query_model';
+export {
+  EMPTY_MODEL,
+  toFindItemsFilters,
+  useActiveFilters,
+  useQueryModel,
+} from './src/query_model';
 
 // Services.
 export {
@@ -117,5 +150,9 @@ export {
   getCreatorKey,
 } from './src/item';
 
+// Bulk actions.
+export { partitionByRestriction } from './src/bulk_actions';
+export type { BulkActionPartition, BulkActionSkippedItem } from './src/bulk_actions';
+
 // Utilities.
-export { contentListKeys } from './src/query';
+export { contentListKeys, contentListQueryClient } from './src/query';

@@ -72,6 +72,7 @@ export const getTransformOut = (
 
     const {
       title: _, // ignore attributes title
+      description: __, // ignore attributes description
       ...apiConfig
     } = builder.toAPIFormat({
       ...migratedAttributes,
@@ -88,7 +89,9 @@ export const getTransformOut = (
 /**
  * Handles transforming old lens SO in dashboard to v1 Lens SO
  */
-function migrateAttributes(attributes: LensByValueSerializedState['attributes']): LensAttributes {
+export function migrateAttributes(
+  attributes: LensByValueSerializedState['attributes']
+): LensAttributes {
   if (!attributes) {
     throw new Error('Why are attributes undefined?');
   }

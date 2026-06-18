@@ -6,40 +6,20 @@
  */
 
 import type { EuiSearchBarProps, Query } from '@elastic/eui';
-import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiSearchBar, EuiText } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSearchBar, EuiText } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import { toMountPoint } from '@kbn/react-kibana-mount';
-import type { OnboardingResult, TaskResult } from '@kbn/streams-schema';
-import { OnboardingStep, TaskStatus } from '@kbn/streams-schema';
-import pMap from 'p-map';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
-import useAsyncFn from 'react-use/lib/useAsyncFn';
+import { STREAMS_KIS_ONBOARDING_IN_PROGRESS_STATUSES } from '@kbn/streams-schema';
+import React, { useCallback, useState } from 'react';
 import type { TableRow } from './utils';
-import { useIndexPatternsConfig } from '../../../../../hooks/use_index_patterns_config';
-import { useKibana } from '../../../../../hooks/use_kibana';
-import { useInsightsDiscoveryApi } from '../../../../../hooks/sig_events/use_insights_discovery_api';
-import { useConnectorConfig } from '../../../../../hooks/sig_events/use_connector_config';
-import type { ScheduleOnboardingOptions } from '../../../../../hooks/use_onboarding_api';
-import { useOnboardingApi } from '../../../../../hooks/use_onboarding_api';
-import { useStreamsAppRouter } from '../../../../../hooks/use_streams_app_router';
-import { useTaskPolling } from '../../../../../hooks/use_task_polling';
-import { getFormattedError } from '../../../../../util/errors';
+import { useAIFeatures } from '../../../../../hooks/use_ai_features';
+import { useSignificantEventsDiscoveryContext } from '../../context/significant_events_discovery_context';
 import { StreamsAppSearchBar } from '../../../../streams_app_search_bar';
-import { useOnboardingStatusUpdateQueue } from '../../hooks/use_onboarding_status_update_queue';
-import { GenerateSplitButton } from './generate_split_button';
-import { InsightsSplitButton } from './insights_split_button';
-import {
-  getInsightsCompleteToastTitle,
-  INSIGHTS_COMPLETE_TOAST_VIEW_BUTTON,
-  INSIGHTS_SCHEDULING_FAILURE_TITLE,
-  NO_INSIGHTS_TOAST_TITLE,
-  ONBOARDING_FAILURE_TITLE,
-  ONBOARDING_SCHEDULING_FAILURE_TITLE,
-  STREAMS_TABLE_SEARCH_ARIA_LABEL,
-} from './translations';
+import { useKiGeneration } from '../knowledge_indicators_table/ki_generation_context';
+import { GenerateSplitButton } from '../shared/generate_split_button';
+import { FindSignificantEventsButton } from './find_significant_events_button';
+import { STREAMS_TABLE_SEARCH_ARIA_LABEL } from './translations';
 import { StreamsTreeTable } from './tree_table';
-import { useFetchStreams } from '../../hooks/use_fetch_streams';
 
 const datePickerStyle = css`
   .euiFormControlLayout,
@@ -49,189 +29,49 @@ const datePickerStyle = css`
   }
 `;
 
-interface StreamsViewProps {
-  refreshUnbackedQueriesCount: () => void;
-}
-
-export function StreamsView({ refreshUnbackedQueriesCount }: StreamsViewProps) {
-  const {
-    core,
-    core: {
-      notifications: { toasts },
-    },
-  } = useKibana();
-  const isInitialStatusUpdateDone = useRef(false);
+export function StreamsView() {
   const [searchQuery, setSearchQuery] = useState<Query | undefined>();
-  const [isWaitingForInsightsTask, setIsWaitingForInsightsTask] = useState(false);
-  const { filterStreamsByIndexPatterns } = useIndexPatternsConfig();
 
   const {
-    featuresConnectors,
-    queriesConnectors,
-    discoveryConnectors,
-    allConnectors,
-    connectorError,
-    isConnectorCatalogUnavailable,
-    discoveryConnectorOverride,
-    setDiscoveryConnectorOverride,
-    displayDiscoveryConnectorId,
+    filteredStreams,
+    isStreamsLoading,
+    isScheduling,
     onboardingConfig,
     setOnboardingConfig,
-  } = useConnectorConfig();
+    featuresConnectors,
+    queriesConnectors,
+    generatingStreamNames,
+    streamStatusMap,
+    cancelOnboarding,
+    bulkScheduleOnboarding,
+    bulkOnboardAll,
+    bulkOnboardFeaturesOnly,
+    bulkOnboardQueriesOnly,
+  } = useKiGeneration();
 
-  const streamsListFetch = useFetchStreams({
-    select: (result) => {
-      return {
-        ...result,
-        /**
-         * Significant events discovery works with streams that match the configured index patterns.
-         */
-        streams: filterStreamsByIndexPatterns(result.streams),
-      };
+  const aiFeatures = useAIFeatures();
+  const allConnectors = aiFeatures?.genAiConnectors?.connectors ?? [];
+  const connectorError = aiFeatures?.genAiConnectors?.error;
+  const isConnectorCatalogUnavailable =
+    !allConnectors.length || !!aiFeatures?.genAiConnectors?.loading || !!connectorError;
+
+  const { isRunning, isCanceling, handleRun, handleCancel } =
+    useSignificantEventsDiscoveryContext();
+
+  const isStreamActionable = useCallback(
+    (streamName: string) => {
+      if (generatingStreamNames.includes(streamName)) return false;
+      const result = streamStatusMap[streamName];
+      return !!result && !STREAMS_KIS_ONBOARDING_IN_PROGRESS_STATUSES.has(result.status);
     },
-  });
+    [generatingStreamNames, streamStatusMap]
+  );
 
   const [selectedStreams, setSelectedStreams] = useState<TableRow[]>([]);
-  const [streamOnboardingResultMap, setStreamOnboardingResultMap] = useState<
-    Record<string, TaskResult<OnboardingResult>>
-  >({});
-  const router = useStreamsAppRouter();
-  const { scheduleOnboardingTask, cancelOnboardingTask } = useOnboardingApi();
-  const { scheduleInsightsDiscoveryTask, getInsightsDiscoveryTaskStatus } =
-    useInsightsDiscoveryApi();
-  const [{ value: insightsTask }, getInsightsTaskStatus] = useAsyncFn(
-    getInsightsDiscoveryTaskStatus
-  );
-  useTaskPolling({
-    task: insightsTask,
-    onPoll: getInsightsDiscoveryTaskStatus,
-    onRefresh: getInsightsTaskStatus,
-  });
-
-  const [{ loading: isSchedulingInsights }, scheduleInsightsTask] = useAsyncFn(async () => {
-    const streamNames =
-      selectedStreams.length > 0 ? selectedStreams.map((row) => row.stream.name) : undefined;
-    try {
-      await scheduleInsightsDiscoveryTask(streamNames, discoveryConnectorOverride);
-      setIsWaitingForInsightsTask(true);
-      await getInsightsTaskStatus();
-    } catch (error) {
-      toasts.addError(getFormattedError(error), {
-        title: INSIGHTS_SCHEDULING_FAILURE_TITLE,
-      });
-      throw error;
-    }
-  }, [
-    scheduleInsightsDiscoveryTask,
-    selectedStreams,
-    discoveryConnectorOverride,
-    toasts,
-    getInsightsTaskStatus,
-  ]);
-
-  // When we started the insights task from this view and it completes, show toast
-  useEffect(() => {
-    if (!isWaitingForInsightsTask || !insightsTask) return;
-    if (insightsTask.status !== TaskStatus.Completed && insightsTask.status !== TaskStatus.Failed) {
-      return;
-    }
-    setIsWaitingForInsightsTask(false);
-    if (insightsTask.status === TaskStatus.Failed) {
-      toasts.addError(getFormattedError(new Error(insightsTask.error)), {
-        title: INSIGHTS_SCHEDULING_FAILURE_TITLE,
-      });
-      return;
-    }
-    if (insightsTask.status === TaskStatus.Completed) {
-      const count = insightsTask.insights?.length ?? 0;
-      if (count === 0) {
-        toasts.addInfo({
-          title: NO_INSIGHTS_TOAST_TITLE,
-        });
-      } else {
-        const toast = toasts.addSuccess({
-          title: getInsightsCompleteToastTitle(count),
-          text: toMountPoint(
-            <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
-              <EuiFlexItem grow={false}>
-                <EuiButton
-                  size="s"
-                  data-test-subj="significant_events_view_insights_toast_button"
-                  onClick={() => {
-                    toasts.remove(toast);
-                    router.push('/_discovery/{tab}', {
-                      path: { tab: 'significant_events' },
-                      query: {},
-                    });
-                  }}
-                >
-                  {INSIGHTS_COMPLETE_TOAST_VIEW_BUTTON}
-                </EuiButton>
-              </EuiFlexItem>
-            </EuiFlexGroup>,
-            core
-          ),
-        });
-      }
-    }
-  }, [isWaitingForInsightsTask, insightsTask, toasts, router, core]);
-
-  const onStreamStatusUpdate = useCallback(
-    (streamName: string, taskResult: TaskResult<OnboardingResult>) => {
-      setStreamOnboardingResultMap((currentMap) => ({
-        ...currentMap,
-        [streamName]: taskResult,
-      }));
-
-      /**
-       * Preventing showing error toasts and doing extra work
-       * for the initial status update when the page loads for
-       * the first time
-       */
-      if (!isInitialStatusUpdateDone.current) {
-        return;
-      }
-
-      if (taskResult.status === TaskStatus.Failed) {
-        toasts.addError(getFormattedError(new Error(taskResult.error)), {
-          title: ONBOARDING_FAILURE_TITLE,
-        });
-      }
-
-      if (taskResult.status === TaskStatus.Completed) {
-        refreshUnbackedQueriesCount();
-      }
-    },
-    [refreshUnbackedQueriesCount, toasts]
-  );
-  const { onboardingStatusUpdateQueue, processStatusUpdateQueue } =
-    useOnboardingStatusUpdateQueue(onStreamStatusUpdate);
 
   const handleQueryChange: EuiSearchBarProps['onChange'] = ({ query }) => {
     if (query) setSearchQuery(query);
   };
-
-  useEffect(() => {
-    if (streamsListFetch.data === undefined) {
-      return;
-    }
-
-    streamsListFetch.data.streams.forEach((item) => {
-      onboardingStatusUpdateQueue.add(item.stream.name);
-    });
-    processStatusUpdateQueue().finally(() => {
-      isInitialStatusUpdateDone.current = true;
-    });
-  }, [onboardingStatusUpdateQueue, processStatusUpdateQueue, streamsListFetch.data]);
-
-  const isStreamActionable = useCallback(
-    (streamName: string) => {
-      const result = streamOnboardingResultMap[streamName];
-      if (!result) return false;
-      return ![TaskStatus.InProgress, TaskStatus.BeingCanceled].includes(result.status);
-    },
-    [streamOnboardingResultMap]
-  );
 
   const getActionableStreamNames = useCallback(
     () =>
@@ -241,69 +81,37 @@ export function StreamsView({ refreshUnbackedQueriesCount }: StreamsViewProps) {
     [selectedStreams, isStreamActionable]
   );
 
-  const bulkScheduleOnboardingTask = useCallback(
-    async (streamList: string[], options?: ScheduleOnboardingOptions) => {
-      try {
-        await pMap(
-          streamList,
-          async (streamName) => {
-            await scheduleOnboardingTask(streamName, options);
-          },
-          { concurrency: 10 }
-        );
-      } catch (error) {
-        toasts.addError(getFormattedError(error), { title: ONBOARDING_SCHEDULING_FAILURE_TITLE });
-      }
-
-      streamList.forEach((streamName) => {
-        onboardingStatusUpdateQueue.add(streamName);
-      });
-      processStatusUpdateQueue();
-    },
-    [scheduleOnboardingTask, toasts, onboardingStatusUpdateQueue, processStatusUpdateQueue]
-  );
-
   const onBulkOnboardStreamsClick = useCallback(async () => {
     const streamList = getActionableStreamNames();
     setSelectedStreams([]);
-    await bulkScheduleOnboardingTask(streamList, onboardingConfig);
-  }, [getActionableStreamNames, bulkScheduleOnboardingTask, onboardingConfig]);
+    await bulkOnboardAll(streamList);
+  }, [getActionableStreamNames, bulkOnboardAll]);
 
-  const onBulkOnboardStep = useCallback(
-    async (step: OnboardingStep) => {
-      const streamList = getActionableStreamNames();
-      setSelectedStreams([]);
-      await bulkScheduleOnboardingTask(streamList, {
-        steps: [step],
-        connectors: onboardingConfig.connectors,
-      });
-    },
-    [getActionableStreamNames, bulkScheduleOnboardingTask, onboardingConfig.connectors]
-  );
+  const onBulkOnboardFeaturesOnly = useCallback(async () => {
+    const streamList = getActionableStreamNames();
+    setSelectedStreams([]);
+    await bulkOnboardFeaturesOnly(streamList);
+  }, [getActionableStreamNames, bulkOnboardFeaturesOnly]);
 
-  const onBulkOnboardFeaturesOnly = useCallback(
-    () => onBulkOnboardStep(OnboardingStep.FeaturesIdentification),
-    [onBulkOnboardStep]
-  );
-
-  const onBulkOnboardQueriesOnly = useCallback(
-    () => onBulkOnboardStep(OnboardingStep.QueriesGeneration),
-    [onBulkOnboardStep]
-  );
+  const onBulkOnboardQueriesOnly = useCallback(async () => {
+    const streamList = getActionableStreamNames();
+    setSelectedStreams([]);
+    await bulkOnboardQueriesOnly(streamList);
+  }, [getActionableStreamNames, bulkOnboardQueriesOnly]);
 
   const onOnboardStreamActionClick = async (streamName: string) => {
-    await bulkScheduleOnboardingTask([streamName]);
+    await bulkScheduleOnboarding([streamName]);
   };
 
   const onStopOnboardingActionClick = (streamName: string) => {
-    cancelOnboardingTask(streamName);
+    cancelOnboarding(streamName);
   };
 
   return (
     <EuiFlexGroup direction="column" gutterSize="m">
       <EuiFlexItem grow={false}>
-        <EuiFlexGroup gutterSize="s" alignItems="center">
-          <EuiFlexItem>
+        <EuiFlexGroup gutterSize="s" alignItems="center" wrap>
+          <EuiFlexItem style={{ minWidth: 200 }}>
             <EuiSearchBar
               query={searchQuery}
               onChange={handleQueryChange}
@@ -331,21 +139,20 @@ export function StreamsView({ refreshUnbackedQueriesCount }: StreamsViewProps) {
                 selectedStreams.length === 0 ||
                 isConnectorCatalogUnavailable ||
                 featuresConnectors.loading ||
-                queriesConnectors.loading
+                queriesConnectors.loading ||
+                isScheduling
               }
               isConfigDisabled={selectedStreams.length === 0}
+              isLoading={isScheduling}
             />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <InsightsSplitButton
-              allConnectors={allConnectors}
-              connectorError={connectorError}
-              resolvedConnectorId={discoveryConnectors.resolvedConnectorId}
-              displayConnectorId={displayDiscoveryConnectorId}
-              onConnectorChange={setDiscoveryConnectorOverride}
-              onRun={scheduleInsightsTask}
-              isLoading={isSchedulingInsights || isWaitingForInsightsTask}
-              isDisabled={isConnectorCatalogUnavailable || discoveryConnectors.loading}
+            <FindSignificantEventsButton
+              onRun={handleRun}
+              onCancel={handleCancel}
+              isRunning={isRunning}
+              isCanceling={isCanceling}
+              isDisabled={isRunning}
             />
           </EuiFlexItem>
         </EuiFlexGroup>
@@ -357,7 +164,7 @@ export function StreamsView({ refreshUnbackedQueriesCount }: StreamsViewProps) {
             'xpack.streams.significantEventsDiscovery.streamsTree.streamsCountLabel',
             {
               defaultMessage: '{count} streams',
-              values: { count: streamsListFetch.data?.streams.length ?? 0 },
+              values: { count: filteredStreams?.length ?? 0 },
             }
           )}
         </EuiText>
@@ -365,9 +172,9 @@ export function StreamsView({ refreshUnbackedQueriesCount }: StreamsViewProps) {
 
       <EuiFlexItem>
         <StreamsTreeTable
-          streams={streamsListFetch.data?.streams}
-          streamOnboardingResultMap={streamOnboardingResultMap}
-          loading={streamsListFetch.isLoading}
+          streams={filteredStreams}
+          streamOnboardingResultMap={streamStatusMap}
+          loading={isStreamsLoading}
           searchQuery={searchQuery}
           selection={{
             selected: selectedStreams,

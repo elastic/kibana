@@ -9,10 +9,6 @@ import { z } from '@kbn/zod/v4';
 import { isEqual, uniq } from 'lodash';
 import { conditionSchema, type Condition } from '@kbn/streamlang';
 
-const featureStatus = ['active', 'stale', 'expired'] as const;
-export const featureStatusSchema = z.enum(featureStatus);
-export type FeatureStatus = z.infer<typeof featureStatusSchema>;
-
 export const DATASET_ANALYSIS_FEATURE_TYPE = 'dataset_analysis' as const;
 export const LOG_SAMPLES_FEATURE_TYPE = 'log_samples' as const;
 export const LOG_PATTERNS_FEATURE_TYPE = 'log_patterns' as const;
@@ -23,6 +19,14 @@ export const COMPUTED_FEATURE_TYPES = [
   LOG_SAMPLES_FEATURE_TYPE,
   LOG_PATTERNS_FEATURE_TYPE,
   ERROR_LOGS_FEATURE_TYPE,
+] as const;
+
+export const INFERRED_FEATURE_TYPES = [
+  'entity',
+  'infrastructure',
+  'technology',
+  'dependency',
+  'schema',
 ] as const;
 
 export const baseFeatureSchema = z.object({
@@ -68,11 +72,10 @@ export type IgnoredFeature = z.infer<typeof ignoredFeatureSchema>;
 
 export const featureSchema = baseFeatureSchema.and(
   z.object({
-    uuid: z.string(),
-    status: featureStatusSchema,
-    last_seen: z.string(),
-    expires_at: z.string().optional(),
-    excluded_at: z.string().optional(),
+    run_id: z.string().optional(),
+    excluded: z.boolean().optional(),
+    updated_at: z.iso.datetime().optional(),
+    expires_at: z.iso.datetime().optional(),
   })
 );
 

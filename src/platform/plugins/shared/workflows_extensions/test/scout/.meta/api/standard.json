@@ -1,5 +1,5 @@
 {
-  "sha1": "6e3d4c6460fda8a4e36aa14399104bbd2a4f7392",
+  "sha1": "0947b7441823b611f0a45b405509612ef58e38e1",
   "tests": [
     {
       "id": "2e9661be655a029-bbe4bc87d5491d8",
@@ -15,11 +15,13 @@
         "@local-serverless-observability_complete",
         "@cloud-serverless-observability_complete",
         "@local-serverless-workplaceai",
-        "@cloud-serverless-workplaceai"
+        "@cloud-serverless-workplaceai",
+        "@local-serverless-vectordb",
+        "@cloud-serverless-vectordb"
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_extensions/test/scout/api/tests/step_definitions_approval.spec.ts",
-        "line": 34,
+        "line": 35,
         "column": 12
       }
     },
@@ -37,11 +39,13 @@
         "@local-serverless-observability_complete",
         "@cloud-serverless-observability_complete",
         "@local-serverless-workplaceai",
-        "@cloud-serverless-workplaceai"
+        "@cloud-serverless-workplaceai",
+        "@local-serverless-vectordb",
+        "@cloud-serverless-vectordb"
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_extensions/test/scout/api/tests/trigger_definitions_approval.spec.ts",
-        "line": 34,
+        "line": 35,
         "column": 12
       }
     }

@@ -48,12 +48,18 @@ import type {
 } from '@kbn/osquery-plugin/common/api/saved_query/saved_query.gen';
 import type {
   OsqueryCreateLiveQueryRequestBodyInput,
+  OsqueryExportLiveQueryResultsRequestQueryInput,
+  OsqueryExportLiveQueryResultsRequestParamsInput,
+  OsqueryExportLiveQueryResultsRequestBodyInput,
   OsqueryFindLiveQueriesRequestQueryInput,
   OsqueryGetLiveQueryDetailsRequestParamsInput,
   OsqueryGetLiveQueryResultsRequestQueryInput,
   OsqueryGetLiveQueryResultsRequestParamsInput,
 } from '@kbn/osquery-plugin/common/api/live_query/live_queries.gen';
 import type {
+  OsqueryExportScheduledQueryResultsRequestQueryInput,
+  OsqueryExportScheduledQueryResultsRequestParamsInput,
+  OsqueryExportScheduledQueryResultsRequestBodyInput,
   OsqueryGetScheduledActionResultsRequestQueryInput,
   OsqueryGetScheduledActionResultsRequestParamsInput,
   OsqueryGetScheduledQueryResultsRequestQueryInput,
@@ -204,6 +210,59 @@ const securitySolutionApiServiceFactory = (supertest: SuperTest.Agent) => ({
       .set('kbn-xsrf', 'true')
       .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
+  },
+  /**
+      * Export the results of a live query action as a downloadable file. The response is a streaming file attachment in the requested format.
+This endpoint is gated behind the `exportResults` experimental feature flag and must be enabled in `kibana.yml` before use:
+```yaml xpack.osquery.enableExperimental:
+  - exportResults
+```
+
+      */
+  osqueryExportLiveQueryResults(
+    props: OsqueryExportLiveQueryResultsProps,
+    kibanaSpace: string = 'default'
+  ) {
+    return supertest
+      .post(
+        getRouteUrlForSpace(
+          replaceParams('/api/osquery/live_queries/{id}/results/{actionId}/_export', props.params),
+          kibanaSpace
+        )
+      )
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+      .send(props.body as object)
+      .query(props.query);
+  },
+  /**
+      * Export all result rows for a specific scheduled query execution as a downloadable file. The response is a streaming file attachment in the requested format.
+This endpoint is gated behind the `exportResults` experimental feature flag and must be enabled in `kibana.yml` before use:
+```yaml xpack.osquery.enableExperimental:
+  - exportResults
+```
+
+      */
+  osqueryExportScheduledQueryResults(
+    props: OsqueryExportScheduledQueryResultsProps,
+    kibanaSpace: string = 'default'
+  ) {
+    return supertest
+      .post(
+        getRouteUrlForSpace(
+          replaceParams(
+            '/api/osquery/scheduled_results/{scheduleId}/{executionCount}/_export',
+            props.params
+          ),
+          kibanaSpace
+        )
+      )
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+      .send(props.body as object)
+      .query(props.query);
   },
   /**
    * Get a list of all live queries.
@@ -471,6 +530,16 @@ export interface OsqueryDeletePacksProps {
 }
 export interface OsqueryDeleteSavedQueryProps {
   params: OsqueryDeleteSavedQueryRequestParamsInput;
+}
+export interface OsqueryExportLiveQueryResultsProps {
+  query: OsqueryExportLiveQueryResultsRequestQueryInput;
+  params: OsqueryExportLiveQueryResultsRequestParamsInput;
+  body: OsqueryExportLiveQueryResultsRequestBodyInput;
+}
+export interface OsqueryExportScheduledQueryResultsProps {
+  query: OsqueryExportScheduledQueryResultsRequestQueryInput;
+  params: OsqueryExportScheduledQueryResultsRequestParamsInput;
+  body: OsqueryExportScheduledQueryResultsRequestBodyInput;
 }
 export interface OsqueryFindLiveQueriesProps {
   query: OsqueryFindLiveQueriesRequestQueryInput;

@@ -1,0 +1,11 @@
+# TODO: Sean to store API token in vault (search-team#13913)
+enabled: false
+spec_id: .pagerduty_mcp
+name: "PagerDuty (testing)"
+auth_type: api_key_header
+config:
+  serverUrl: "https://mcp.pagerduty.com/mcp"
+secrets:
+  Authorization:
+    vault: secret/ent-search-team/connectors-sources/pagerduty
+    field: api-token

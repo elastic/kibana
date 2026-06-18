@@ -22,6 +22,7 @@ apiTest.describe(
       ...tags.serverless.security.complete,
       ...tags.serverless.observability.complete,
       ...tags.serverless.workplaceai,
+      ...tags.serverless.vectordb,
     ],
   },
   () => {
@@ -46,17 +47,34 @@ apiTest.describe(
         expect(response.body.steps).toBeDefined();
         expect(Array.isArray(response.body.steps)).toBe(true);
 
-        for (const step of response.body.steps) {
-          const approvedStep = APPROVED_STEP_DEFINITIONS.find(({ id }) => id === step.id);
+        const stepEntriesToUpdate: Array<{ id: string; definitionHash: string }> = [];
+        const issues = response.body.steps.reduce(
+          (acc: string[], step: { id: string; definitionHash: string }) => {
+            const approvedStep = APPROVED_STEP_DEFINITIONS.find(({ id }) => id === step.id);
 
-          expect(approvedStep, {
-            message: `Step "${step.id}" is not in the approved list`,
-          }).toBeDefined();
+            if (!approvedStep) {
+              acc.push(`Step "${step.id}" is not in the approved list.`);
+              stepEntriesToUpdate.push({ id: step.id, definitionHash: step.definitionHash });
+            } else if (step.definitionHash !== approvedStep.definitionHash) {
+              acc.push(
+                `Step "${step.id}" has an invalid definition hash (expected "${approvedStep.definitionHash}", got "${step.definitionHash}").`
+              );
+              stepEntriesToUpdate.push({ id: step.id, definitionHash: step.definitionHash });
+            }
+            return acc;
+          },
+          []
+        );
 
-          expect(step.handlerHash, {
-            message: `Step "${step.id}" has an invalid handler hash`,
-          }).toBe(approvedStep?.handlerHash);
-        }
+        expect(issues, {
+          message: `Found ${
+            issues.length
+          } unapproved step definition(s). Need to update the following step entries in APPROVED_STEP_DEFINITIONS and request review from the workflows-eng team:\n\n${JSON.stringify(
+            stepEntriesToUpdate,
+            null,
+            2
+          )}`,
+        }).toStrictEqual([]);
       }
     );
   }

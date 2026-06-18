@@ -26,11 +26,6 @@ export const isAdvancedVar = (
   varGroups?: RegistryVarGroup[],
   varGroupSelections?: VarGroupSelection
 ): boolean => {
-  // section_header vars are decorative and always render with required vars, never under "Advanced options"
-  if (varDef.type === 'section_header') {
-    return false;
-  }
-
   // If var is in a selected var_group option, treat as non-advanced (override show_user: false)
   if (
     varGroups &&

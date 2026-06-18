@@ -10,6 +10,7 @@ paths:
       x-codegen-enabled: true
       operationId: ListPrivMonUsers
       summary: List all monitored users
+      description: Returns a list of all privileged users currently being monitored. Supports optional KQL filtering.
       parameters:
         - name: kql
           in: query
@@ -26,3 +27,31 @@ paths:
                 type: array
                 items:
                   $ref: "./common.schema.yaml#/components/schemas/MonitoredUserDoc"
+              examples:
+                ListPrivMonUsersResponse:
+                  summary: List of monitored users
+                  value:
+                    - id: user-abc-123
+                      user:
+                        name: john.doe
+                        is_privileged: true
+                      entity_analytics_monitoring:
+                        labels:
+                          - field: department
+                            value: IT
+                            source: api
+                      "@timestamp": "2026-01-28T12:00:00.000Z"
+                      event:
+                        ingested: "2026-01-28T12:00:00.000Z"
+                    - id: user-def-456
+                      user:
+                        name: jane.smith
+                        is_privileged: true
+                      entity_analytics_monitoring:
+                        labels:
+                          - field: department
+                            value: Security
+                            source: csv
+                      "@timestamp": "2026-01-15T09:00:00.000Z"
+                      event:
+                        ingested: "2026-01-15T09:00:00.000Z"

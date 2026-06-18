@@ -19,18 +19,17 @@ import type { LockManagerService } from '@kbn/lock-manager';
 import type { Condition } from '@kbn/streamlang';
 import type { RoutingStatus } from '@kbn/streams-schema';
 import {
+  Streams,
+  convertUpsertRequestIntoDefinition,
   deriveQueryType,
+  getAncestors,
+  getParentId,
   LOGS_ROOT_STREAM_NAME,
   LOGS_OTEL_STREAM_NAME,
   LOGS_ECS_STREAM_NAME,
+  ROOT_STREAM_NAMES,
 } from '@kbn/streams-schema';
-import {
-  Streams,
-  convertUpsertRequestIntoDefinition,
-  getAncestors,
-  getParentId,
-} from '@kbn/streams-schema';
-import type { QueryClient } from './assets/query/query_client';
+import type { StreamSummary } from '../../../common';
 import type { AttachmentClient } from './attachments/attachment_client';
 import {
   DefinitionNotFoundError,
@@ -43,7 +42,9 @@ import { createRootStreamDefinition } from './root_stream_definition';
 import { State } from './state_management/state';
 import type { StreamsStorageClient } from './storage/streams_storage_client';
 import { checkAccess, checkAccessBulk } from './stream_crud';
-import type { FeatureClient } from './feature';
+import { upsertDataStream } from './data_streams/manage_data_streams';
+import { shouldExcludeFromStreamsList } from './data_streams/should_exclude_from_streams_list';
+import type { KnowledgeIndicatorClient } from './ki';
 
 interface AcknowledgeResponse<TResult extends Result> {
   acknowledged: true;
@@ -79,8 +80,7 @@ export class StreamsClient {
       esClientAsInternalUser: ElasticsearchClient;
       esClient: ElasticsearchClient;
       attachmentClient: AttachmentClient;
-      getQueryClient?: () => Promise<QueryClient>;
-      getFeatureClient?: () => Promise<FeatureClient>;
+      getKnowledgeIndicatorClient?: () => Promise<KnowledgeIndicatorClient>;
       storageClient: StreamsStorageClient;
       logger: Logger;
       isServerless: boolean;
@@ -204,6 +204,49 @@ export class StreamsClient {
   }
 
   /**
+   * Materializes backing data streams for root wired streams that exist in
+   * Kibana storage but are missing their backing ES data stream. This can
+   * happen when enableStreams was previously called with defer: true.
+   *
+   * Returns true if any data streams were materialized, false otherwise.
+   */
+  private async materializeDeferredRootDataStreams(
+    kibanaStreams: Record<string, boolean>
+  ): Promise<boolean> {
+    const existingRootStreamNames = ROOT_STREAM_NAMES.filter(
+      (name) => kibanaStreams[name as keyof typeof kibanaStreams]
+    );
+
+    const rootsNeedingMaterialization = (
+      await Promise.all(
+        existingRootStreamNames.map(async (name) => {
+          const dataStreamExists = await this.dependencies.esClient.indices.exists({
+            index: name,
+          });
+          return { name, exists: dataStreamExists as boolean };
+        })
+      )
+    )
+      .filter(({ exists }) => !exists)
+      .map(({ name }) => name);
+
+    if (rootsNeedingMaterialization.length === 0) {
+      return false;
+    }
+
+    await Promise.all(
+      rootsNeedingMaterialization.map((name) =>
+        upsertDataStream({
+          esClient: this.dependencies.esClient,
+          name,
+          logger: this.dependencies.logger,
+        })
+      )
+    );
+    return true;
+  }
+
+  /**
    * Enabling streams means creating the necessary root streams.
    * For fresh installs: creates logs.otel and logs.ecs
    * For existing users: keeps logs, adds logs.otel and logs.ecs
@@ -245,6 +288,12 @@ export class StreamsClient {
 
     // Step 3: Check if this is a noop
     if (streamsToCreate.length === 0 && streamsToEnableInES.length === 0) {
+      if (!defer) {
+        const materialized = await this.materializeDeferredRootDataStreams(kibanaStreams);
+        if (materialized) {
+          return { acknowledged: true, result: 'created' };
+        }
+      }
       return { acknowledged: true, result: 'noop' };
     }
 
@@ -322,13 +371,8 @@ export class StreamsClient {
         }
       );
 
-      const { attachmentClient, getQueryClient, storageClient } = this.dependencies;
-      const cleanOps: Array<Promise<unknown>> = [attachmentClient.clean(), storageClient.clean()];
-      if (getQueryClient) {
-        const queryClient = await getQueryClient();
-        cleanOps.push(queryClient.clean());
-      }
-      await Promise.all(cleanOps);
+      const { attachmentClient, storageClient } = this.dependencies;
+      await Promise.all([attachmentClient.clean(), storageClient.clean()]);
     }
 
     // Disable in Elasticsearch (parallel calls)
@@ -434,11 +478,13 @@ export class StreamsClient {
     name,
     where: condition,
     status,
+    draft,
   }: {
     parent: string;
     name: string;
     where: Condition;
     status: RoutingStatus;
+    draft?: boolean;
   }): Promise<ForkStreamResponse> {
     const parentDefinition = Streams.WiredStream.Definition.parse(await this.getStream(parent));
 
@@ -464,6 +510,7 @@ export class StreamsClient {
                   destination: name,
                   where: condition,
                   status,
+                  ...(draft ? { draft: true } : {}),
                 }),
               },
             },
@@ -484,6 +531,7 @@ export class StreamsClient {
               wired: {
                 fields: {},
                 routing: [],
+                ...(draft ? { draft: true } : {}),
               },
               failure_store: { inherit: {} },
             },
@@ -684,21 +732,75 @@ export class StreamsClient {
       };
     }
 
+    const privileges = await this.checkIndexPrivileges(names);
+
     const isServerless = this.dependencies.isServerless;
-    const REQUIRED_MANAGE_PRIVILEGES = [
+    const REQUIRED_MANAGE_PRIVILEGES = this.getRequiredManagePrivileges();
+    const CREATE_SNAPSHOT_REPOSITORY_CLUSTER_PRIVILEGE = 'cluster:admin/repository/put';
+
+    return {
+      manage:
+        REQUIRED_MANAGE_PRIVILEGES.every((privilege) => privileges.cluster[privilege] === true) &&
+        names.every((name) =>
+          Object.values(privileges.index[name]).every((privilege) => privilege === true)
+        ),
+      monitor: names.every((name) => privileges.index[name].monitor),
+      view_index_metadata: names.every((name) => privileges.index[name].view_index_metadata),
+      lifecycle: isServerless
+        ? names.every((name) => privileges.index[name].manage_data_stream_lifecycle)
+        : names.every(
+            (name) =>
+              privileges.index[name].manage_data_stream_lifecycle &&
+              privileges.index[name].manage_ilm
+          ),
+      simulate:
+        privileges.cluster.read_pipeline && names.every((name) => privileges.index[name].create),
+      text_structure: isServerless ? true : privileges.cluster.monitor_text_structure,
+      read_failure_store: names.every((name) => privileges.index[name].read_failure_store),
+      manage_failure_store: names.every((name) => privileges.index[name].manage_failure_store),
+      create_snapshot_repository:
+        privileges.cluster[CREATE_SNAPSHOT_REPOSITORY_CLUSTER_PRIVILEGE] === true,
+    };
+  }
+
+  async getPrivilegesPerStream(
+    names: string[]
+  ): Promise<Record<string, { read_failure_store: boolean }>> {
+    if (!this.dependencies.isSecurityEnabled) {
+      const result: Record<string, { read_failure_store: boolean }> = {};
+      names.forEach((name) => {
+        result[name] = { read_failure_store: true };
+      });
+      return result;
+    }
+
+    const privileges = await this.checkIndexPrivileges(names);
+
+    const result: Record<string, { read_failure_store: boolean }> = {};
+    names.forEach((name) => {
+      result[name] = {
+        read_failure_store: privileges.index[name]?.read_failure_store ?? false,
+      };
+    });
+
+    return result;
+  }
+
+  private getRequiredManagePrivileges(): string[] {
+    const privileges = [
       'manage_index_templates',
       'manage_ingest_pipelines',
       'manage_pipeline',
       'read_pipeline',
     ];
-
-    if (!isServerless) {
-      REQUIRED_MANAGE_PRIVILEGES.push('monitor_text_structure');
+    if (!this.dependencies.isServerless) {
+      privileges.push('monitor_text_structure');
     }
+    return privileges;
+  }
 
-    const CREATE_SNAPSHOT_REPOSITORY_CLUSTER_PRIVILEGE = 'cluster:admin/repository/put';
-
-    const REQUIRED_INDEX_PRIVILEGES = [
+  private getRequiredIndexPrivileges(): string[] {
+    const privileges = [
       'read',
       'write',
       'create',
@@ -709,45 +811,21 @@ export class StreamsClient {
       'read_failure_store',
       'manage_failure_store',
     ];
-    if (!isServerless) {
-      REQUIRED_INDEX_PRIVILEGES.push('manage_ilm');
+    if (!this.dependencies.isServerless) {
+      privileges.push('manage_ilm');
     }
+    return privileges;
+  }
 
-    const privileges = await this.dependencies.esClient.security.hasPrivileges({
-      cluster: [...REQUIRED_MANAGE_PRIVILEGES, CREATE_SNAPSHOT_REPOSITORY_CLUSTER_PRIVILEGE],
-      index: [
-        {
-          names,
-          privileges: REQUIRED_INDEX_PRIVILEGES,
-        },
+  private async checkIndexPrivileges(names: string[]) {
+    const CREATE_SNAPSHOT_REPOSITORY_CLUSTER_PRIVILEGE = 'cluster:admin/repository/put';
+    return this.dependencies.esClient.security.hasPrivileges({
+      cluster: [
+        ...this.getRequiredManagePrivileges(),
+        CREATE_SNAPSHOT_REPOSITORY_CLUSTER_PRIVILEGE,
       ],
+      index: [{ names, privileges: this.getRequiredIndexPrivileges() }],
     });
-
-    return {
-      manage:
-        REQUIRED_MANAGE_PRIVILEGES.every((privilege) => privileges.cluster[privilege] === true) &&
-        names.every((name) =>
-          Object.values(privileges.index[name]).every((privilege) => privilege === true)
-        ),
-      monitor: names.every((name) => privileges.index[name].monitor),
-      view_index_metadata: names.every((name) => privileges.index[name].view_index_metadata),
-      // on serverless, there is no ILM, so we map lifecycle to true if the user has manage_data_stream_lifecycle
-      lifecycle: isServerless
-        ? names.every((name) => privileges.index[name].manage_data_stream_lifecycle)
-        : names.every(
-            (name) =>
-              privileges.index[name].manage_data_stream_lifecycle &&
-              privileges.index[name].manage_ilm
-          ),
-      simulate:
-        privileges.cluster.read_pipeline && names.every((name) => privileges.index[name].create),
-      // text structure is always available for the internal user, but not for the current user
-      text_structure: isServerless ? true : privileges.cluster.monitor_text_structure,
-      read_failure_store: names.every((name) => privileges.index[name].read_failure_store),
-      manage_failure_store: names.every((name) => privileges.index[name].manage_failure_store),
-      create_snapshot_repository:
-        privileges.cluster[CREATE_SNAPSHOT_REPOSITORY_CLUSTER_PRIVILEGE] === true,
-    };
   }
 
   /**
@@ -791,6 +869,20 @@ export class StreamsClient {
       });
 
     return exists;
+  }
+
+  /**
+   * Fetches a summary (name, type, description) for each requested stream name.
+   * Stream names for which no managed stream exists are ignored.
+   */
+  async getStreamSummaries(names: string[]): Promise<StreamSummary[]> {
+    if (names.length === 0) {
+      return [];
+    }
+    const streams = await this.getManagedStreams({
+      query: { terms: { name: names } },
+    });
+    return streams.map(({ name, type, description }) => ({ name, type, description }));
   }
 
   /**
@@ -847,19 +939,21 @@ export class StreamsClient {
 
     const now = new Date().toISOString();
 
-    return response.data_streams.map((dataStream) => ({
-      type: 'classic' as const,
-      name: dataStream.name,
-      description: '',
-      updated_at: now,
-      ingest: {
-        lifecycle: { inherit: {} },
-        processing: { steps: [], updated_at: now },
-        settings: {},
-        classic: {},
-        failure_store: { inherit: {} },
-      },
-    }));
+    return response.data_streams
+      .filter((dataStream) => !shouldExcludeFromStreamsList(dataStream))
+      .map((dataStream) => ({
+        type: 'classic' as const,
+        name: dataStream.name,
+        description: '',
+        updated_at: now,
+        ingest: {
+          lifecycle: { inherit: {} },
+          processing: { steps: [], updated_at: now },
+          settings: {},
+          classic: {},
+          failure_store: { inherit: {} },
+        },
+      }));
   }
 
   /**
@@ -1015,10 +1109,10 @@ export class StreamsClient {
       ),
     ];
 
-    if (this.dependencies.getQueryClient) {
-      const queryClient = await this.dependencies.getQueryClient();
+    if (this.dependencies.getKnowledgeIndicatorClient) {
+      const kiClient = await this.dependencies.getKnowledgeIndicatorClient();
       ops.push(
-        queryClient.syncQueries(
+        kiClient.syncQueries(
           definition,
           queries.map((q) => ({ ...q, type: deriveQueryType(q.esql.query) }))
         )

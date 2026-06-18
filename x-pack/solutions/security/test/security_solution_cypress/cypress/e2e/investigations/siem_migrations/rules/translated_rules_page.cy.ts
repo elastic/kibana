@@ -13,7 +13,8 @@ import {
   TRANSLATED_RULE_RESULT_BADGE,
   TRANSLATED_RULES_RESULT_TABLE,
 } from '../../../../screens/siem_migrations';
-import { deleteConnectors, suppressGlobalAnnouncements } from '../../../../tasks/api_calls/common';
+import { deleteConnectors } from '../../../../tasks/api_calls/common';
+import { suppressGlobalAnnouncements } from '../../../../tasks/api_calls/suppress_global_announcements';
 import { createBedrockConnector } from '../../../../tasks/api_calls/connectors';
 import { visit } from '../../../../tasks/navigation';
 import {
@@ -30,7 +31,7 @@ import { role } from '../common/role';
 
 // TODO: https://github.com/elastic/kibana/issues/228940 remove @skipInServerlessMKI tag when privileges issue is fixed
 describe(
-  'Rule Migrations - Translated Rules Page (securityClassicNavUpdate enabled)',
+  'Rule Migrations - Translated Rules Page',
   {
     tags: ['@ess', '@serverless', '@skipInServerlessMKI'],
   },

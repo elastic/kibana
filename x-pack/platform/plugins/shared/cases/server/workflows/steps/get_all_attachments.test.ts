@@ -64,15 +64,14 @@ describe('getAllAttachmentsStepDefinition', () => {
   });
 
   it('returns error when attachments.getAll throws', async () => {
-    // FAILURE SCENARIO: client throws (e.g. case not found or auth failure)
     const getAll = jest.fn().mockRejectedValue(new Error('not found'));
     const getCasesClient = jest.fn().mockResolvedValue({
       attachments: { getAll },
     } as unknown as CasesClient);
     const definition = getAllAttachmentsStepDefinition(getCasesClient);
 
-    await expect(definition.handler(createContext({ case_id: 'case-1' }))).rejects.toThrow(
-      'not found'
-    );
+    const result = await definition.handler(createContext({ case_id: 'case-1' }));
+
+    expect(result).toMatchObject({ error: expect.objectContaining({ message: 'not found' }) });
   });
 });

@@ -47,7 +47,7 @@ const indexPattern1 = {
   hasRestrictions: false,
   isPersisted: () => true,
   toSpec: () => ({}),
-  getFormatterForField: () => ({ convert: (v: unknown) => v }),
+  getFormatterForField: () => ({ convertToText: (v: unknown) => v }),
   fields: [
     {
       name: 'timestamp',
@@ -230,5 +230,9 @@ export function mockDataViewsService() {
       ];
     }),
     create: jest.fn(),
-  } as unknown as Pick<DataViewsContract, 'get' | 'getIdsWithTitle' | 'create'>;
+    clearInstanceCache: jest.fn(),
+  } as unknown as Pick<
+    DataViewsContract,
+    'get' | 'getIdsWithTitle' | 'create' | 'clearInstanceCache'
+  >;
 }

@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import type { SmlTypeDefinition } from '@kbn/agent-builder-plugin/server';
-import type { LensAttributes } from '@kbn/lens-embeddable-utils/config_builder';
+import type { SmlTypeDefinition } from '@kbn/agent-context-layer-plugin/server';
 import {
   LensConfigBuilder,
-  type LensApiSchemaType,
-} from '@kbn/lens-embeddable-utils/config_builder';
+  type LensApiConfig,
+  type LensAttributes,
+} from '@kbn/lens-embeddable-utils';
 
 const VISUALIZATION_SML_TYPE = 'visualization';
 
@@ -43,7 +43,7 @@ const toLensAttributes = (
   references: references ?? attributes.references ?? [],
 });
 
-const toLensApiConfig = (attributes: LensAttributes): LensApiSchemaType =>
+const toLensApiConfig = (attributes: LensAttributes): LensApiConfig =>
   new LensConfigBuilder().toAPIFormat(attributes);
 
 export const visualizationSmlType: SmlTypeDefinition = {
@@ -88,7 +88,10 @@ export const visualizationSmlType: SmlTypeDefinition = {
             type: VISUALIZATION_SML_TYPE,
             title,
             content: contentParts.join('\n'),
-            permissions: ['saved_object:lens/get'],
+            permissions: {
+              kibana: { privileges: [{ name: 'saved_object:lens/get' }] },
+              elasticsearch: { indices: [] },
+            },
           },
         ],
       };
@@ -101,7 +104,7 @@ export const visualizationSmlType: SmlTypeDefinition = {
   },
 
   toAttachment: async (item, context) => {
-    const resolveResult = await context.savedObjectsClient.resolve('lens', item.origin_id);
+    const resolveResult = await context.savedObjectsClient.resolve('lens', item.origin_id ?? '');
     const savedObject = resolveResult.saved_object as { error?: { message?: string } };
     if (savedObject?.error) {
       return undefined;

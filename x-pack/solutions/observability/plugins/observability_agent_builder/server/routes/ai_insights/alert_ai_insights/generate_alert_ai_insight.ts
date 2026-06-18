@@ -21,7 +21,7 @@ import type {
   ObservabilityAgentBuilderCoreSetup,
   ObservabilityAgentBuilderPluginSetupDependencies,
 } from '../../../types';
-import { getEntityLinkingInstructions } from '../../../agent/register_observability_agent';
+import { getEntityLinkingInstructions } from '../../../utils/get_entity_linking_instructions';
 import { runSignalFetchers, formatSignalResults } from './signal_fetchers';
 
 /**

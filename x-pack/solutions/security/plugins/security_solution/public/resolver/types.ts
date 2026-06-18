@@ -856,6 +856,10 @@ export interface ResolverProps {
    * Optional callback invoked after alert mutations in nested flyouts.
    */
   onAlertUpdated?: () => void;
+  /**
+   * Use the legacy expandable flyout behavior for resolver panels.
+   */
+  useLegacyExpandableFlyout?: boolean;
 }
 
 /**

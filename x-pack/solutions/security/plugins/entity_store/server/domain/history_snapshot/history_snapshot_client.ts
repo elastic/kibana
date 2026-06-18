@@ -10,7 +10,7 @@ import moment from 'moment';
 import type { EntityStoreGlobalState } from '../saved_objects';
 import type { EntityStoreGlobalStateClient } from '../saved_objects';
 import { createIndex, reindex, updateByQueryWithScript } from '../../infra/elasticsearch';
-import { getEntitiesAlias, ENTITY_LATEST } from '../../../common/domain/entity_index';
+import { getLatestEntitiesIndexName } from '../../../common/domain/entity_index';
 import { getErrorMessage } from '../../../common';
 import { getHistorySnapshotIndexName } from '../asset_manager/history_snapshot_index';
 import { HISTORY_SNAPSHOT_RESET_SCRIPT } from './constants';
@@ -25,6 +25,9 @@ export interface RunHistorySnapshotOptions {
 }
 
 export { HISTORY_SNAPSHOT_RESET_SCRIPT } from './constants';
+
+const POLL_INTERVAL_MS = 30 * 1000;
+const POLL_MIN_INTERVAL_MS = 5 * 1000;
 
 export interface HistorySnapshotClientDependencies {
   logger: Logger;
@@ -65,7 +68,7 @@ export class HistorySnapshotClient {
 
     const timestampNow = moment.utc().toISOString();
     const snapshotDate = moment.utc().toDate();
-    const latestIndex = getEntitiesAlias(ENTITY_LATEST, this.namespace);
+    const latestIndex = getLatestEntitiesIndexName(this.namespace);
     const historySnapshotIndex = getHistorySnapshotIndexName(this.namespace, snapshotDate);
 
     try {
@@ -75,6 +78,12 @@ export class HistorySnapshotClient {
         source: { index: latestIndex },
         dest: { index: historySnapshotIndex },
         signal: abortSignal,
+        waitForTask: {
+          logger: this.logger,
+          minTimeout: POLL_MIN_INTERVAL_MS,
+          maxTimeout: POLL_INTERVAL_MS,
+          forever: true,
+        },
       });
       const docCount = reindexResult.total;
       if (docCount === 0) {
@@ -88,6 +97,12 @@ export class HistorySnapshotClient {
         script: HISTORY_SNAPSHOT_RESET_SCRIPT,
         params: { timestampNow },
         signal: abortSignal,
+        waitForTask: {
+          logger: this.logger,
+          minTimeout: POLL_MIN_INTERVAL_MS,
+          maxTimeout: POLL_INTERVAL_MS,
+          forever: true,
+        },
       });
       await this.updateGlobalStateOnSuccess(globalState);
       return {
@@ -98,7 +113,7 @@ export class HistorySnapshotClient {
       };
     } catch (err) {
       const caughtError = err instanceof Error ? err : new Error(String(err));
-      this.logger.error(`history snapshot failed: ${caughtError.message}`);
+      this.logger.error(`history snapshot failed: ${caughtError.message}`, { error: caughtError });
       await this.updateGlobalStateOnError(globalState, caughtError);
       return { ok: false, error: new Error('History snapshot failed') };
     }

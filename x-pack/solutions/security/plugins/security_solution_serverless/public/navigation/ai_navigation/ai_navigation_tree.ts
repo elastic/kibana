@@ -23,7 +23,8 @@ const SOLUTION_NAME = i18n.translate(
 export const createAiNavigationTree = (
   chatExperience: AIChatExperience = AIChatExperience.Classic,
   workflowsUiEnabled: boolean = false,
-  showAlertingV2: boolean = false
+  showAlertingV2: boolean = false,
+  showAgentBuilderNavAtTop: boolean = false
 ): NavigationTreeDefinition => ({
   body: [
     {
@@ -33,6 +34,14 @@ export const createAiNavigationTree = (
       icon: AiNavigationIcon,
       renderAs: 'home',
     },
+    ...(chatExperience === AIChatExperience.Agent && showAgentBuilderNavAtTop
+      ? [
+          {
+            icon: 'productAgent',
+            link: 'agent_builder' as AppDeepLinkId,
+          },
+        ]
+      : []),
     {
       id: SecurityPageName.alertSummary,
       link: securityLink(SecurityPageName.alertSummary),
@@ -76,10 +85,15 @@ export const createAiNavigationTree = (
       breadcrumbStatus: 'hidden',
       children: [
         {
+          link: 'inbox' as AppDeepLinkId,
+          icon: 'email',
+        },
+        {
           link: 'discover' as AppDeepLinkId,
           icon: 'productDiscover',
         },
-        ...(chatExperience === AIChatExperience.Agent
+        // TODO: remove this item when agentBuilderNavAtTop is enabled by default and the Agent Builder link is always at the top of the nav
+        ...(chatExperience === AIChatExperience.Agent && !showAgentBuilderNavAtTop
           ? [
               {
                 icon: 'productAgent',
@@ -100,6 +114,10 @@ export const createAiNavigationTree = (
           icon: 'reporter',
         },
       ],
+    },
+    {
+      link: 'onboarding' as AppDeepLinkId,
+      sideNavStatus: 'hidden',
     },
   ],
   footer: [
@@ -151,7 +169,11 @@ export const createAiNavigationTree = (
       children: [
         {
           title: i18nStrings.stackManagementV2.access.title,
-          children: [{ link: 'management:api_keys' }, { link: 'management:roles' }],
+          children: [
+            { link: 'management:api_keys' },
+            { link: 'management:application_connections' },
+            { link: 'management:roles' },
+          ],
         },
         {
           title: i18nStrings.stackManagementV2.organization.title,
@@ -173,7 +195,8 @@ export const createAiNavigationTree = (
                 renderAs: 'panelOpener' as const,
                 children: [
                   { link: 'management:rules' as const },
-                  { link: 'management:notification_policies' as const },
+                  { link: 'management:action_policies' as const },
+                  { link: 'management:execution_history' as const },
                 ],
               },
             ]

@@ -24,7 +24,7 @@ import type {
   DataLayerType,
   ReferenceLineLayerType,
   AnnotationLayerByValueType,
-  XYState,
+  XYConfig,
 } from '../../../schema/charts/xy';
 import { addLayerColumn, generateLayer } from '../../utils';
 import {
@@ -78,15 +78,14 @@ export function getValueColumns(
   ];
 }
 
-function buildDataLayer(config: XYState, layer: DataLayerType, i: number): XYDataLayerConfig {
+function buildDataLayer(config: XYConfig, layer: DataLayerType, i: number): XYDataLayerConfig {
   const seriesTypeLabel = (
     layer.type.includes('percentage') ? `${layer.type}_stacked` : layer.type
   ) as SeriesType;
 
   const yConfig = layer.y.map<YConfig>((yMetric, index) => {
-    const axisId = yMetric?.axis_id ?? 'y';
-    const anchor = config.axis?.[axisId]?.anchor ?? (axisId === 'secondary_y' ? 'end' : 'start');
-    const axisMode = anchor === 'end' ? 'right' : 'left';
+    const onAxis = yMetric?.axis ?? 'y';
+    const axisMode = onAxis === 'y2' ? 'right' : 'left';
     return {
       ...(yMetric.color && !isAutoColor(yMetric.color) ? { color: yMetric.color?.color } : {}),
       axisMode,
@@ -198,8 +197,7 @@ function buildReferenceLineLayer(
   i: number
 ): XYReferenceLineLayerConfig {
   const yConfig = layer.thresholds.map<YConfig>((threshold, index) => {
-    const axisMode =
-      threshold.axis_id === 'secondary_y' ? 'right' : threshold.axis_id === 'x' ? 'bottom' : 'left';
+    const axisMode = threshold.axis === 'y2' ? 'right' : threshold.axis === 'x' ? 'bottom' : 'left';
     return {
       icon: xyIconCompat.toState(threshold.icon),
       iconPosition: threshold.position,
@@ -221,7 +219,7 @@ function buildReferenceLineLayer(
 }
 
 export function buildXYLayer(
-  config: XYState,
+  config: XYConfig,
   layer: unknown,
   i: number,
   dataViewId: string,
@@ -285,14 +283,15 @@ export function buildFormBasedXYLayer(layer: unknown, i: number) {
   if (isAPIDataLayer(layer)) {
     // convert metrics in buckets, do not flat yet
     const yColumnsConverted = layer.y.map((col) => fromMetricAPItoLensState(col));
-    const yColumnsWithIds = processMetricColumnsWithReferences(
+    const { metricColumns, referencesColumns } = processMetricColumnsWithReferences(
       yColumnsConverted,
       (index) => getAccessorNameForXY(layer, METRIC_ACCESSOR_PREFIX, index),
       (index) => getAccessorNameForXY(layer, `${METRIC_ACCESSOR_PREFIX}_ref`, index)
     );
-    const xColumns = layer.x ? fromBucketLensApiToLensState(layer.x, yColumnsWithIds) : undefined;
+    // fromBucketLensApiToLensState resolves rank_by.metric_index against visible metrics only.
+    const xColumns = layer.x ? fromBucketLensApiToLensState(layer.x, metricColumns) : undefined;
     const breakdownColumns = layer.breakdown_by
-      ? fromBucketLensApiToLensState(layer.breakdown_by, yColumnsWithIds)
+      ? fromBucketLensApiToLensState(layer.breakdown_by, metricColumns)
       : undefined;
 
     // Add bucketed coluns first
@@ -311,7 +310,10 @@ export function buildFormBasedXYLayer(layer: unknown, i: number) {
     }
 
     // then metric ones
-    for (const { id, column } of yColumnsWithIds) {
+    for (const { id, column } of metricColumns) {
+      addLayerColumn(newLayer, id, column);
+    }
+    for (const { id, column } of referencesColumns) {
       addLayerColumn(newLayer, id, column);
     }
   }

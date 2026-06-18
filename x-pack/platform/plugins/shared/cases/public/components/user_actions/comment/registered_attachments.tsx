@@ -14,7 +14,14 @@
 import React, { Suspense } from 'react';
 import { memoize, partition } from 'lodash';
 
-import { EuiCallOut, EuiCode, EuiLoadingSpinner, EuiButtonIcon, EuiFlexItem } from '@elastic/eui';
+import {
+  EuiButtonIcon,
+  EuiCallOut,
+  EuiCode,
+  EuiFlexItem,
+  EuiLoadingSpinner,
+  EuiToolTip,
+} from '@elastic/eui';
 
 import type {
   AttachmentType,
@@ -155,6 +162,7 @@ export const createRegisteredAttachmentUserActionBuilder = <
         className,
         css: attachmentViewObject.css,
         event: attachmentViewObject.event,
+        eventColor: attachmentViewObject.eventColor,
         'data-test-subj': `comment-${attachment.type}-${attachmentTypeId}`,
         timestamp: <UserActionTimestamp createdAt={userAction.createdAt} />,
         timelineAvatar: attachmentViewObject.timelineAvatar,
@@ -168,14 +176,16 @@ export const createRegisteredAttachmentUserActionBuilder = <
                     data-test-subj={`attachment-${attachmentTypeId}-${attachment.id}`}
                     key={`attachment-${attachmentTypeId}-${attachment.id}`}
                   >
-                    <EuiButtonIcon
-                      aria-label={action.label}
-                      iconType={action.iconType}
-                      color={action.color ?? 'text'}
-                      onClick={action.onClick}
-                      data-test-subj={`attachment-${attachmentTypeId}-${attachment.id}-${action.iconType}`}
-                      key={`attachment-${attachmentTypeId}-${attachment.id}-${action.iconType}`}
-                    />
+                    <EuiToolTip content={action.label} disableScreenReaderOutput>
+                      <EuiButtonIcon
+                        aria-label={action.label}
+                        iconType={action.iconType}
+                        color={action.color ?? 'text'}
+                        onClick={action.onClick}
+                        data-test-subj={`attachment-${attachmentTypeId}-${attachment.id}-${action.iconType}`}
+                        key={`attachment-${attachmentTypeId}-${attachment.id}-${action.iconType}`}
+                      />
+                    </EuiToolTip>
                   </EuiFlexItem>
                 )) ||
                 (action.type === AttachmentActionType.CUSTOM && action.render())

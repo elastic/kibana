@@ -14,16 +14,18 @@
  *   version: not applicable
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 /**
  * Anomaly score threshold above which the rule creates an alert. Valid values are from 0 to 100.
  */
+export const AnomalyThreshold = lazySchema(() => z.number().int().min(0));
 export type AnomalyThreshold = z.infer<typeof AnomalyThreshold>;
-export const AnomalyThreshold = z.number().int().min(0);
 
 /**
  * Machine learning job ID(s) the rule monitors for anomaly scores.
  */
+export const MachineLearningJobId = lazySchema(() =>
+  z.union([z.string(), z.array(z.string()).min(1)])
+);
 export type MachineLearningJobId = z.infer<typeof MachineLearningJobId>;
-export const MachineLearningJobId = z.union([z.string(), z.array(z.string()).min(1)]);

@@ -1,0 +1,10 @@
+prs:
+- https://github.com/elastic/kibana/pull/268440
+issues:
+- https://github.com/elastic/search-team/issues/14381
+type: bug-fix
+products:
+- product: cloud-serverless
+  target: 2026-05-14
+title: "Add conversation filtering for AI Assistant events"
+description: "Enables filtering of AI Assistant events by conversation ID through an enhanced public events API."

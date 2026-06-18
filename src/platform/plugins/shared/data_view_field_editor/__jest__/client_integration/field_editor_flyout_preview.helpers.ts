@@ -7,27 +7,23 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { act } from 'react-dom/test-utils';
-import type { ReactWrapper } from 'enzyme';
-import type { TestBed } from '@kbn/test-jest-helpers';
-import { registerTestBed } from '@kbn/test-jest-helpers';
-
-import { FIELD_PREVIEW_PATH } from '../../common/constants';
+import type { UserEvent } from '@testing-library/user-event';
+import { screen } from '@testing-library/react';
 import type { Context } from '../../public/components/field_editor_context';
 import type { Props } from '../../public/components/field_editor_flyout_content';
-import { FieldEditorFlyoutContent } from '../../public/components/field_editor_flyout_content';
 import type { TestDoc } from './helpers';
 import {
-  WithFieldEditorDependencies,
-  getCommonActions,
-  spyIndexPatternGetByName,
-  spySearchQuery,
-  spySearchQueryResponse,
-} from './helpers';
+  createRtlHelpers,
+  flushDocumentsAndPreviewTimers,
+  flushPreviewAndSearchTimers,
+  setupFieldEditorFlyout,
+} from './helpers/rtl_helpers';
+import { FIELD_PREVIEW_PATH } from '../../common/constants';
+import { spyIndexPatternGetByName, spySearchQuery, spySearchQueryResponse } from './helpers';
 
 const defaultProps: Props = {
-  onSave: () => {},
-  onCancel: () => {},
+  onCancel: jest.fn(),
+  onSave: jest.fn(),
 };
 
 /**
@@ -41,16 +37,12 @@ export const setIndexPatternFields = (fields: Array<{ name: string; displayName:
 export const getSearchCallMeta = () => {
   const totalCalls = spySearchQuery.mock.calls.length;
   const lastCall = spySearchQuery.mock.calls[totalCalls - 1] ?? null;
-  let lastCallParams = null;
-
-  if (lastCall) {
-    lastCallParams = lastCall[0];
-  }
+  const lastCallParams = lastCall ? lastCall[0] : null;
 
   return {
-    totalCalls,
     lastCall,
     lastCallParams,
+    totalCalls,
   };
 };
 
@@ -60,55 +52,31 @@ export const setSearchResponse = (
   spySearchQueryResponse.mockResolvedValue({
     rawResponse: {
       hits: {
-        total: documents.length,
         hits: documents,
+        total: documents.length,
       },
     },
   });
 };
 
-const getActions = (testBed: TestBed) => {
-  const getWrapperRenderedIndexPatternFields = (): ReactWrapper | null => {
-    if (testBed.find('indexPatternFieldList').length === 0) {
-      return null;
-    }
-    return testBed.find('indexPatternFieldList.listItem');
-  };
+const getTypeValueFromLabel = (label: string) => label.toLowerCase().replaceAll(' ', '_');
 
-  const getRenderedIndexPatternFields = (): Array<{ key: string; value: string }> => {
-    const allFields = getWrapperRenderedIndexPatternFields();
+const getActions = (user: UserEvent) => {
+  const {
+    createFieldEditorFields,
+    getTextByTestSubjectPath,
+    queryAllByTestSubjectPath,
+    queryByTestSubjectPath,
+    setInputValue,
+    toggleFormRow,
+  } = createRtlHelpers(user);
 
-    if (allFields === null) {
-      return [];
-    }
+  const clearFieldSearch = async () => {
+    const button = queryByTestSubjectPath('emptySearchResult.clearSearchButton');
 
-    return allFields.map((field) => {
-      const key = testBed.find('key', field).text();
-      const value = testBed.find('value', field).text();
-      return { key, value };
-    });
-  };
+    if (!button) throw new Error(`Unable to find clear search button.`);
 
-  const getRenderedFieldsPreview = () => {
-    if (testBed.find('fieldPreviewItem').length === 0) {
-      return [];
-    }
-
-    const previewFields = testBed.find('fieldPreviewItem.listItem');
-
-    return previewFields.map((field) => {
-      const key = testBed.find('key', field).text();
-      const value = testBed.find('value', field).text();
-      return { key, value };
-    });
-  };
-
-  const setFilterFieldsValue = async (value: string) => {
-    await act(async () => {
-      testBed.form.setInputValue('filterFieldsInput', value);
-    });
-
-    testBed.component.update();
+    await user.click(button);
   };
 
   // Need to set "server: any" (instead of SinonFakeServer) to avoid a TS error :(
@@ -118,6 +86,7 @@ const getActions = (testBed: TestBed) => {
 
     while (i >= 0) {
       const request = server.requests[i];
+
       if (request.method === 'POST' && request.url === FIELD_PREVIEW_PATH) {
         return {
           ...request,
@@ -130,50 +99,124 @@ const getActions = (testBed: TestBed) => {
     throw new Error(`Can't access the latest preview HTTP request as it hasn't been called.`);
   };
 
-  const goToNextDocument = async () => {
-    await act(async () => {
-      testBed.find('goToNextDocButton').simulate('click');
+  const getRenderedFieldsPreview = () => {
+    if (screen.queryAllByTestId('fieldPreviewItem').length === 0) return [];
+
+    const previewFields = queryAllByTestSubjectPath('fieldPreviewItem.listItem');
+
+    return previewFields.map((field) => {
+      const key = getTextByTestSubjectPath('key', field);
+      const value = getTextByTestSubjectPath('value', field);
+
+      return { key, value };
     });
-    testBed.component.update();
+  };
+
+  const getRenderedIndexPatternFieldElements = () => {
+    if (screen.queryAllByTestId('indexPatternFieldList').length === 0) return null;
+
+    return queryAllByTestSubjectPath('indexPatternFieldList.listItem');
+  };
+
+  const getRenderedIndexPatternFields = () => {
+    const allFields = getRenderedIndexPatternFieldElements();
+
+    if (allFields === null) return [];
+
+    return allFields.map((field) => {
+      const key = getTextByTestSubjectPath('key', field);
+      const value = getTextByTestSubjectPath('value', field);
+
+      return { key, value };
+    });
+  };
+
+  const goToNextDocument = async () => {
+    const button = queryByTestSubjectPath('goToNextDocButton');
+
+    if (!button) throw new Error(`Unable to find next document button.`);
+
+    await user.click(button);
+    await flushPreviewAndSearchTimers();
   };
 
   const goToPreviousDocument = async () => {
-    await act(async () => {
-      testBed.find('goToPrevDocButton').simulate('click');
-    });
-    testBed.component.update();
+    const button = queryByTestSubjectPath('goToPrevDocButton');
+
+    if (!button) throw new Error(`Unable to find previous document button.`);
+
+    await user.click(button);
+    await flushPreviewAndSearchTimers();
   };
 
-  const loadCustomDocument = (docId: string) => {};
+  const loadDocumentsFromCluster = async () => {
+    const button = queryByTestSubjectPath('loadDocsFromClusterButton');
+
+    if (!button) throw new Error(`Unable to find load documents from cluster button.`);
+
+    await user.click(button);
+    await flushPreviewAndSearchTimers();
+  };
+
+  const pinFieldAt = async (index: number) => {
+    const field = getRenderedIndexPatternFieldElements()?.[index];
+    const button = field ? queryByTestSubjectPath('pinFieldButton', field) : undefined;
+
+    if (!button) throw new Error(`Unable to find pin button for field at index ${index}.`);
+
+    await user.click(button);
+  };
+
+  const setDocumentId = async (docId: string) => {
+    await setInputValue('documentIdField', docId);
+    await flushPreviewAndSearchTimers();
+  };
+
+  const setFilterFieldsValue = async (value: string) => {
+    await setInputValue('filterFieldsInput', value);
+  };
+
+  const updateFormat = async (value: string) => {
+    const select = queryByTestSubjectPath('editorSelectedFormatId');
+
+    if (!select) throw new Error(`Unable to find format field.`);
+
+    await user.selectOptions(select, value);
+  };
+
+  const loadCustomDocument = setDocumentId;
+  const fields = createFieldEditorFields({
+    getTypeValue: getTypeValueFromLabel,
+  });
 
   return {
-    ...getCommonActions(testBed),
-    getWrapperRenderedIndexPatternFields,
-    getRenderedIndexPatternFields,
-    getRenderedFieldsPreview,
-    setFilterFieldsValue,
+    clearFieldSearch,
+    fields: {
+      updateFormat,
+      ...fields,
+    },
+    flushDocumentsAndPreviewTimers,
+    flushPreviewAndSearchTimers,
     getLatestPreviewHttpRequest,
+    getRenderedFieldsPreview,
+    getRenderedIndexPatternFieldElements,
+    getRenderedIndexPatternFields,
     goToNextDocument,
     goToPreviousDocument,
     loadCustomDocument,
+    loadDocumentsFromCluster,
+    pinFieldAt,
+    setDocumentId,
+    setFilterFieldsValue,
+    toggleFormRow,
   };
 };
 
 export const setup = async (props?: Partial<Props>, deps?: Partial<Context>) => {
-  let testBed: TestBed;
+  const { user } = await setupFieldEditorFlyout(props, deps, defaultProps);
+  const actions = getActions(user);
 
-  // Setup testbed
-  await act(async () => {
-    testBed = registerTestBed(WithFieldEditorDependencies(FieldEditorFlyoutContent, deps), {
-      memoryRouter: {
-        wrapComponent: false,
-      },
-    })({ ...defaultProps, ...props });
-  });
-
-  testBed!.component.update();
-
-  return { ...testBed!, actions: getActions(testBed!) };
+  return {
+    actions,
+  };
 };
-
-export type FieldEditorFlyoutContentTestBed = TestBed & { actions: ReturnType<typeof getActions> };

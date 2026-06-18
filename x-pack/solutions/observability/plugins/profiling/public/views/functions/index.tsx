@@ -15,6 +15,7 @@ import { RedirectTo } from '../../components/redirect_to';
 import { useProfilingParams } from '../../hooks/use_profiling_params';
 import { useProfilingRouter } from '../../hooks/use_profiling_router';
 import { useProfilingRoutePath } from '../../hooks/use_profiling_route_path';
+import { DifferentialTopNSearchPanel } from './differential_topn/differential_topn_search_panel';
 
 export function FunctionsView({ children }: { children: React.ReactElement }) {
   const { query } = useProfilingParams('/functions/*');
@@ -64,7 +65,13 @@ export function FunctionsView({ children }: { children: React.ReactElement }) {
   ];
 
   return (
-    <ProfilingAppPageTemplate tabs={tabs} hideSearchBar={isDifferentialView}>
+    <ProfilingAppPageTemplate
+      tabs={tabs}
+      customSearchBar={isDifferentialView ? <DifferentialTopNSearchPanel /> : undefined}
+      pageTitle={i18n.translate('xpack.profiling.functionsView.pageTitle', {
+        defaultMessage: 'Functions',
+      })}
+    >
       {children}
     </ProfilingAppPageTemplate>
   );

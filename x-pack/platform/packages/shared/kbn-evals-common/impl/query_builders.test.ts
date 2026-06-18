@@ -6,15 +6,15 @@
  */
 
 import {
-  buildRunFilterQuery,
+  buildExperimentFilterQuery,
   buildExampleScoresQuery,
   buildDatasetExampleScoresQuery,
   buildStatsAggregation,
   parseStatsAggregationResponse,
   SCORES_SORT_ORDER,
-  buildRunsListingFilterQuery,
-  buildRunsListingAggregation,
-  parseRunsListingResponse,
+  buildExperimentsListingFilterQuery,
+  buildExperimentsListingAggregation,
+  parseExperimentsListingResponse,
   buildModelDisplayId,
 } from './query_builders';
 
@@ -29,47 +29,71 @@ describe('query_builders', () => {
   });
 
   describe('buildDatasetExampleScoresQuery', () => {
-    it('filters by example.dataset.id and run_id', () => {
-      const query = buildDatasetExampleScoresQuery('dataset-123', 'run-123');
+    it('filters by example.dataset.id and experiment_id', () => {
+      const query = buildDatasetExampleScoresQuery('dataset-123', 'experiment-123');
       expect(query).toEqual({
         bool: {
           must: [
             { term: { 'example.dataset.id': 'dataset-123' } },
-            { term: { run_id: 'run-123' } },
+            { term: { experiment_id: 'experiment-123' } },
+          ],
+        },
+      });
+    });
+
+    it('filters by metadata.execution_id when filterField is specified', () => {
+      const query = buildDatasetExampleScoresQuery('dataset-123', 'run-abc', {
+        filterField: 'metadata.execution_id',
+      });
+      expect(query).toEqual({
+        bool: {
+          must: [
+            { term: { 'example.dataset.id': 'dataset-123' } },
+            { term: { 'metadata.execution_id': 'run-abc' } },
           ],
         },
       });
     });
   });
 
-  describe('buildRunFilterQuery', () => {
-    it('filters by run_id only when no options provided', () => {
-      const query = buildRunFilterQuery('run-123');
+  describe('buildExperimentFilterQuery', () => {
+    it('filters by experiment_id only when no options provided', () => {
+      const query = buildExperimentFilterQuery('experiment-123');
       expect(query).toEqual({
-        bool: { must: [{ term: { run_id: 'run-123' } }] },
+        bool: { must: [{ term: { experiment_id: 'experiment-123' } }] },
       });
     });
 
     it('adds suite filter when suiteId is provided', () => {
-      const query = buildRunFilterQuery('run-123', { suiteId: 'suite-a' });
+      const query = buildExperimentFilterQuery('experiment-123', { suiteId: 'suite-a' });
       expect(query.bool.must).toHaveLength(2);
-      expect(query.bool.must[1]).toEqual({ term: { 'suite.id': 'suite-a' } });
+      expect(query.bool.must[1]).toEqual({ term: { 'metadata.suite_id': 'suite-a' } });
     });
 
     it('adds model filter when modelId is provided', () => {
-      const query = buildRunFilterQuery('run-123', { modelId: 'gpt-4' });
+      const query = buildExperimentFilterQuery('experiment-123', { modelId: 'gpt-4' });
       expect(query.bool.must).toHaveLength(2);
       expect(query.bool.must[1]).toEqual({ term: { 'task.model.id': 'gpt-4' } });
     });
 
     it('adds both filters when both options are provided', () => {
-      const query = buildRunFilterQuery('run-123', { suiteId: 'suite-a', modelId: 'gpt-4' });
+      const query = buildExperimentFilterQuery('experiment-123', {
+        suiteId: 'suite-a',
+        modelId: 'gpt-4',
+      });
       expect(query.bool.must).toHaveLength(3);
     });
 
     it('ignores empty string options', () => {
-      const query = buildRunFilterQuery('run-123', { suiteId: '', modelId: '' });
+      const query = buildExperimentFilterQuery('experiment-123', { suiteId: '', modelId: '' });
       expect(query.bool.must).toHaveLength(1);
+    });
+
+    it('filters by metadata.execution_id when filterField is specified', () => {
+      const query = buildExperimentFilterQuery('run-abc', { filterField: 'metadata.execution_id' });
+      expect(query).toEqual({
+        bool: { must: [{ term: { 'metadata.execution_id': 'run-abc' } }] },
+      });
     });
   });
 
@@ -77,6 +101,9 @@ describe('query_builders', () => {
     it('returns the expected aggregation structure', () => {
       const agg = buildStatsAggregation();
       expect(agg.by_dataset.terms.field).toBe('example.dataset.id');
+      expect(agg.by_dataset.aggs.example_count).toEqual({
+        cardinality: { field: 'example.id' },
+      });
       expect(agg.by_dataset.aggs.by_evaluator.terms.field).toBe('evaluator.name');
       expect(agg.by_dataset.aggs.by_evaluator.aggs.score_stats).toEqual({
         extended_stats: { field: 'evaluator.score' },
@@ -98,33 +125,33 @@ describe('query_builders', () => {
     });
   });
 
-  describe('buildRunsListingFilterQuery', () => {
-    const preflightExclusion = { term: { run_id: 'kbn-evals-preflight' } };
+  describe('buildExperimentsListingFilterQuery', () => {
+    const preflightExclusion = { term: { experiment_id: 'kbn-evals-preflight' } };
 
-    it('excludes preflight runs when no filters provided', () => {
-      expect(buildRunsListingFilterQuery()).toEqual({
+    it('excludes preflight experiments when no filters provided', () => {
+      expect(buildExperimentsListingFilterQuery()).toEqual({
         bool: { must_not: [preflightExclusion] },
       });
     });
 
-    it('excludes preflight runs for empty options', () => {
-      expect(buildRunsListingFilterQuery({})).toEqual({
+    it('excludes preflight experiments for empty options', () => {
+      expect(buildExperimentsListingFilterQuery({})).toEqual({
         bool: { must_not: [preflightExclusion] },
       });
     });
 
     it('filters by suiteId', () => {
-      const query = buildRunsListingFilterQuery({ suiteId: 'suite-a' });
+      const query = buildExperimentsListingFilterQuery({ suiteId: 'suite-a' });
       expect(query).toEqual({
         bool: {
           must_not: [preflightExclusion],
-          filter: [{ term: { 'suite.id': 'suite-a' } }],
+          filter: [{ term: { 'metadata.suite_id': 'suite-a' } }],
         },
       });
     });
 
     it('filters by modelId', () => {
-      const query = buildRunsListingFilterQuery({ modelId: 'gpt-4' });
+      const query = buildExperimentsListingFilterQuery({ modelId: 'gpt-4' });
       expect(query).toEqual({
         bool: {
           must_not: [preflightExclusion],
@@ -133,18 +160,27 @@ describe('query_builders', () => {
       });
     });
 
-    it('filters by branch', () => {
-      const query = buildRunsListingFilterQuery({ branch: 'main' });
+    it('filters by branch using wildcard', () => {
+      const query = buildExperimentsListingFilterQuery({ branch: 'main' });
       expect(query).toEqual({
         bool: {
           must_not: [preflightExclusion],
-          filter: [{ term: { 'run_metadata.git_branch': 'main' } }],
+          filter: [
+            {
+              wildcard: {
+                'metadata.git.branch': {
+                  value: '*main*',
+                  case_insensitive: true,
+                },
+              },
+            },
+          ],
         },
       });
     });
 
     it('filters by datasetId', () => {
-      const query = buildRunsListingFilterQuery({ datasetId: 'dataset-1' });
+      const query = buildExperimentsListingFilterQuery({ datasetId: 'dataset-1' });
       expect(query).toEqual({
         bool: {
           must_not: [preflightExclusion],
@@ -154,7 +190,7 @@ describe('query_builders', () => {
     });
 
     it('filters by datasetName', () => {
-      const query = buildRunsListingFilterQuery({ datasetName: 'Dataset One' });
+      const query = buildExperimentsListingFilterQuery({ datasetName: 'Dataset One' });
       expect(query).toEqual({
         bool: {
           must_not: [preflightExclusion],
@@ -163,41 +199,59 @@ describe('query_builders', () => {
       });
     });
 
+    it('filters by buildId', () => {
+      const query = buildExperimentsListingFilterQuery({ buildId: 'bk-abc123' });
+      expect(query).toEqual({
+        bool: {
+          must_not: [preflightExclusion],
+          filter: [{ term: { 'metadata.ci.build_id': 'bk-abc123' } }],
+        },
+      });
+    });
+
     it('combines all filters when all options are provided', () => {
-      const query = buildRunsListingFilterQuery({
+      const query = buildExperimentsListingFilterQuery({
         suiteId: 'suite-a',
         modelId: 'gpt-4',
         branch: 'main',
         datasetId: 'dataset-1',
         datasetName: 'Dataset One',
+        buildId: 'bk-abc123',
       }) as { bool: { filter: unknown[]; must_not: unknown[] } };
-      expect(query.bool.filter).toHaveLength(5);
+      expect(query.bool.filter).toHaveLength(6);
       expect(query.bool.must_not).toEqual([preflightExclusion]);
     });
   });
 
-  describe('buildRunsListingAggregation', () => {
+  describe('buildExperimentsListingAggregation', () => {
     it('sets terms size to page * perPage', () => {
-      const agg = buildRunsListingAggregation({ page: 3, perPage: 25 });
-      expect(agg.runs.terms.size).toBe(75);
+      const agg = buildExperimentsListingAggregation({ page: 3, perPage: 25 });
+      expect(agg.experiments.terms.size).toBe(75);
     });
 
-    it('includes cardinality aggregation for total_runs', () => {
-      const agg = buildRunsListingAggregation({ page: 1, perPage: 10 });
-      expect(agg.total_runs).toEqual({ cardinality: { field: 'run_id' } });
+    it('includes cardinality aggregation for total_experiments by metadata.execution_id', () => {
+      const agg = buildExperimentsListingAggregation({ page: 1, perPage: 10 });
+      expect(agg.total_experiments).toEqual({ cardinality: { field: 'metadata.execution_id' } });
+    });
+
+    it('groups by metadata.execution_id', () => {
+      const agg = buildExperimentsListingAggregation({ page: 1, perPage: 10 });
+      expect(agg.experiments.terms.field).toBe('metadata.execution_id');
     });
 
     it('sorts by latest_timestamp descending', () => {
-      const agg = buildRunsListingAggregation({ page: 1, perPage: 10 });
-      expect(agg.runs.terms.order).toEqual({ latest_timestamp: 'desc' });
+      const agg = buildExperimentsListingAggregation({ page: 1, perPage: 10 });
+      expect(agg.experiments.terms.order).toEqual({ latest_timestamp: 'desc' });
     });
 
     it('includes all expected sub-aggregations', () => {
-      const agg = buildRunsListingAggregation({ page: 1, perPage: 10 });
-      const subAggs = Object.keys(agg.runs.aggs);
+      const agg = buildExperimentsListingAggregation({ page: 1, perPage: 10 });
+      const subAggs = Object.keys(agg.experiments.aggs);
       expect(subAggs).toEqual(
         expect.arrayContaining([
           'latest_timestamp',
+          'experiment_count',
+          'experiment_name',
           'suite_id',
           'dataset_id',
           'dataset_name',
@@ -217,11 +271,13 @@ describe('query_builders', () => {
     });
   });
 
-  describe('parseRunsListingResponse', () => {
+  describe('parseExperimentsListingResponse', () => {
     const makeBucket = (overrides: Partial<Record<string, unknown>> = {}) => ({
-      key: 'run-1',
+      key: 'build-run-1',
       doc_count: 10,
       latest_timestamp: { value_as_string: '2025-01-01T00:00:00Z' },
+      experiment_count: { value: 3 },
+      experiment_name: { buckets: [{ key: 'My Experiment' }] },
       suite_id: { buckets: [{ key: 'suite-a' }] },
       dataset_id: { buckets: [{ key: 'dataset-1' }] },
       dataset_name: { buckets: [{ key: 'Dataset One' }] },
@@ -239,34 +295,37 @@ describe('query_builders', () => {
       ...overrides,
     });
 
-    it('returns empty runs and zero total for undefined aggregations', () => {
-      const result = parseRunsListingResponse(undefined, { page: 1, perPage: 25 });
-      expect(result).toEqual({ runs: [], total: 0 });
+    it('returns empty experiments and zero total for undefined aggregations', () => {
+      const result = parseExperimentsListingResponse(undefined, { page: 1, perPage: 25 });
+      expect(result).toEqual({ experiments: [], total: 0 });
     });
 
-    it('returns empty runs for empty buckets', () => {
-      const result = parseRunsListingResponse(
-        { total_runs: { value: 0 }, runs: { buckets: [] } },
+    it('returns empty experiments for empty buckets', () => {
+      const result = parseExperimentsListingResponse(
+        { total_experiments: { value: 0 }, experiments: { buckets: [] } },
         { page: 1, perPage: 25 }
       );
-      expect(result).toEqual({ runs: [], total: 0 });
+      expect(result).toEqual({ experiments: [], total: 0 });
     });
 
     it('parses a single bucket correctly', () => {
       const aggs = {
-        total_runs: { value: 1 },
-        runs: { buckets: [makeBucket()] },
+        total_experiments: { value: 1 },
+        experiments: { buckets: [makeBucket()] },
       };
-      const result = parseRunsListingResponse(aggs, { page: 1, perPage: 25 });
+      const result = parseExperimentsListingResponse(aggs, { page: 1, perPage: 25 });
 
       expect(result.total).toBe(1);
-      expect(result.runs).toHaveLength(1);
-      expect(result.runs[0]).toEqual({
-        run_id: 'run-1',
+      expect(result.experiments).toHaveLength(1);
+      expect(result.experiments[0]).toEqual({
+        execution_id: 'build-run-1',
+        experiment_id: 'build-run-1',
+        experiment_name: 'My Experiment',
+        experiment_count: 3,
         timestamp: '2025-01-01T00:00:00Z',
         suite_id: 'suite-a',
-        dataset_id: 'dataset-1',
-        dataset_name: 'Dataset One',
+        dataset_ids: ['dataset-1'],
+        dataset_names: ['Dataset One'],
         task_model: { id: 'gpt-4', family: 'gpt-4', provider: 'openai' },
         evaluator_model: { id: 'claude-3', family: 'claude-3', provider: 'anthropic' },
         git_branch: 'main',
@@ -278,50 +337,50 @@ describe('query_builders', () => {
 
     it('slices to the correct page window', () => {
       const buckets = Array.from({ length: 5 }, (_, i) =>
-        makeBucket({ key: `run-${i}`, doc_count: i + 1 })
+        makeBucket({ key: `build-run-${i}`, doc_count: i + 1 })
       );
-      const aggs = { total_runs: { value: 5 }, runs: { buckets } };
+      const aggs = { total_experiments: { value: 5 }, experiments: { buckets } };
 
-      const page1 = parseRunsListingResponse(aggs, { page: 1, perPage: 2 });
-      expect(page1.runs.map((r) => r.run_id)).toEqual(['run-0', 'run-1']);
+      const page1 = parseExperimentsListingResponse(aggs, { page: 1, perPage: 2 });
+      expect(page1.experiments.map((e) => e.execution_id)).toEqual(['build-run-0', 'build-run-1']);
 
-      const page2 = parseRunsListingResponse(aggs, { page: 2, perPage: 2 });
-      expect(page2.runs.map((r) => r.run_id)).toEqual(['run-2', 'run-3']);
+      const page2 = parseExperimentsListingResponse(aggs, { page: 2, perPage: 2 });
+      expect(page2.experiments.map((e) => e.execution_id)).toEqual(['build-run-2', 'build-run-3']);
 
-      const page3 = parseRunsListingResponse(aggs, { page: 3, perPage: 2 });
-      expect(page3.runs.map((r) => r.run_id)).toEqual(['run-4']);
+      const page3 = parseExperimentsListingResponse(aggs, { page: 3, perPage: 2 });
+      expect(page3.experiments.map((e) => e.execution_id)).toEqual(['build-run-4']);
     });
 
-    it('returns empty runs for a page beyond results', () => {
+    it('returns empty experiments for a page beyond results', () => {
       const aggs = {
-        total_runs: { value: 1 },
-        runs: { buckets: [makeBucket()] },
+        total_experiments: { value: 1 },
+        experiments: { buckets: [makeBucket()] },
       };
-      const result = parseRunsListingResponse(aggs, { page: 5, perPage: 25 });
-      expect(result.runs).toHaveLength(0);
+      const result = parseExperimentsListingResponse(aggs, { page: 5, perPage: 25 });
+      expect(result.experiments).toHaveLength(0);
       expect(result.total).toBe(1);
     });
 
-    it('falls back to null for missing git metadata', () => {
+    it('falls back to null for missing git metadata and empty arrays for missing datasets', () => {
       const bucket = makeBucket({
         git_branch: { buckets: [] },
         git_commit_sha: undefined,
         dataset_id: { buckets: [] },
         dataset_name: undefined,
       });
-      const aggs = { total_runs: { value: 1 }, runs: { buckets: [bucket] } };
-      const result = parseRunsListingResponse(aggs, { page: 1, perPage: 25 });
-      expect(result.runs[0].git_branch).toBeNull();
-      expect(result.runs[0].git_commit_sha).toBeNull();
-      expect(result.runs[0].dataset_id).toBeNull();
-      expect(result.runs[0].dataset_name).toBeNull();
+      const aggs = { total_experiments: { value: 1 }, experiments: { buckets: [bucket] } };
+      const result = parseExperimentsListingResponse(aggs, { page: 1, perPage: 25 });
+      expect(result.experiments[0].git_branch).toBeNull();
+      expect(result.experiments[0].git_commit_sha).toBeNull();
+      expect(result.experiments[0].dataset_ids).toEqual([]);
+      expect(result.experiments[0].dataset_names).toEqual([]);
     });
 
     it('defaults total_repetitions to 1 when missing', () => {
       const bucket = makeBucket({ total_repetitions: {} });
-      const aggs = { total_runs: { value: 1 }, runs: { buckets: [bucket] } };
-      const result = parseRunsListingResponse(aggs, { page: 1, perPage: 25 });
-      expect(result.runs[0].total_repetitions).toBe(1);
+      const aggs = { total_experiments: { value: 1 }, experiments: { buckets: [bucket] } };
+      const result = parseExperimentsListingResponse(aggs, { page: 1, perPage: 25 });
+      expect(result.experiments[0].total_repetitions).toBe(1);
     });
   });
 
@@ -367,6 +426,7 @@ describe('query_builders', () => {
             {
               key: 'ds-1',
               dataset_name: { buckets: [{ key: 'Dataset One' }] },
+              example_count: { value: 5 },
               by_evaluator: {
                 buckets: [
                   {
@@ -387,6 +447,7 @@ describe('query_builders', () => {
         dataset_id: 'ds-1',
         dataset_name: 'Dataset One',
         evaluator_name: 'correctness',
+        example_count: 5,
         stats: { mean: 0.8, median: 0.85, std_dev: 0.1, min: 0.5, max: 1.0, count: 10 },
       });
     });
@@ -398,6 +459,7 @@ describe('query_builders', () => {
             {
               key: 'ds-fallback',
               dataset_name: { buckets: [] },
+              example_count: { value: 3 },
               by_evaluator: {
                 buckets: [
                   {
@@ -414,7 +476,62 @@ describe('query_builders', () => {
 
       const result = parseStatsAggregationResponse(aggs);
       expect(result[0].dataset_name).toBe('ds-fallback');
+      expect(result[0].example_count).toBe(3);
       expect(result[0].stats.mean).toBe(0);
+    });
+
+    it('assigns the same example_count to all evaluators in a dataset', () => {
+      const aggs = {
+        by_dataset: {
+          buckets: [
+            {
+              key: 'ds-1',
+              dataset_name: { buckets: [{ key: 'Dataset One' }] },
+              example_count: { value: 7 },
+              by_evaluator: {
+                buckets: [
+                  {
+                    key: 'Cached Tokens',
+                    score_stats: {},
+                    score_median: { values: {} },
+                  },
+                  {
+                    key: 'Criteria',
+                    score_stats: { avg: 0.8, std_deviation: 0.1, min: 0.5, max: 1.0, count: 7 },
+                    score_median: { values: { '50.0': 0.85 } },
+                  },
+                ],
+              },
+            },
+          ],
+        },
+      };
+
+      const result = parseStatsAggregationResponse(aggs);
+      expect(result).toHaveLength(2);
+      expect(result[0].example_count).toBe(7);
+      expect(result[1].example_count).toBe(7);
+      expect(result[0].evaluator_name).toBe('Cached Tokens');
+      expect(result[1].evaluator_name).toBe('Criteria');
+    });
+
+    it('defaults example_count to 0 when cardinality value is null', () => {
+      const aggs = {
+        by_dataset: {
+          buckets: [
+            {
+              key: 'ds-1',
+              example_count: { value: null },
+              by_evaluator: {
+                buckets: [{ key: 'eval-a' }],
+              },
+            },
+          ],
+        },
+      };
+
+      const result = parseStatsAggregationResponse(aggs);
+      expect(result[0].example_count).toBe(0);
     });
 
     it('defaults stats to 0 when score_stats fields are missing', () => {
@@ -432,6 +549,7 @@ describe('query_builders', () => {
       };
 
       const result = parseStatsAggregationResponse(aggs);
+      expect(result[0].example_count).toBe(0);
       expect(result[0].stats).toEqual({
         mean: 0,
         median: 0,

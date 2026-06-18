@@ -14,105 +14,156 @@
  *   version: 2023-10-31
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
-export type FindLiveQueryRequestQuery = z.infer<typeof FindLiveQueryRequestQuery>;
-export const FindLiveQueryRequestQuery = z.object({
-  /**
-   * A KQL search string to filter live queries.
-   */
-  kuery: z.string().optional(),
-  /**
-   * The page number to return. The default is 1.
-   */
-  page: z.number().int().optional(),
-  /**
-   * The number of results to return per page. The default is 20.
-   */
-  pageSize: z.number().int().optional(),
-  /**
-   * The field to sort results by.
-   */
-  sort: z.string().optional(),
-  /**
-   * The sort order.
-   */
-  sortOrder: z.enum(['asc', 'desc']).optional(),
-  /**
+import { ECSMappingOrUndefined } from '../model/schema/common_attributes.gen';
+
+export const FindLiveQueryRequestQuery = lazySchema(() =>
+  z.object({
+    /**
+     * A KQL search string to filter live queries.
+     */
+    kuery: z.string().optional(),
+    /**
+     * The page number to return. The default is 1.
+     */
+    page: z.number().int().optional(),
+    /**
+     * The number of results to return per page. The default is 20.
+     */
+    pageSize: z.number().int().optional(),
+    /**
+     * The field to sort results by.
+     */
+    sort: z.string().optional(),
+    /**
+     * The sort order.
+     */
+    sortOrder: z.enum(['asc', 'desc']).optional(),
+    /**
       * When true, the response includes result_counts on each item with aggregated result statistics from the action responses index.
 
       */
-  withResultCounts: z.boolean().optional(),
-});
+    withResultCounts: z.boolean().optional(),
+  })
+);
+export type FindLiveQueryRequestQuery = z.infer<typeof FindLiveQueryRequestQuery>;
 
-/**
- * A list of live queries.
- */
+export const FindLiveQueryResponse = lazySchema(() =>
+  z.object({
+    data: z
+      .object({
+        /**
+         * The total number of live queries.
+         */
+        total: z.number().int().optional(),
+        /**
+         * An array of live query action items.
+         */
+        items: z
+          .array(
+            z.object({
+              _source: z
+                .object({
+                  action_id: z.string().optional(),
+                  expiration: z.string().datetime().optional(),
+                  '@timestamp': z.string().datetime().optional(),
+                  agents: z.array(z.string()).optional(),
+                  user_id: z.string().optional(),
+                  pack_id: z.string().optional(),
+                  queries: z
+                    .array(
+                      z.object({
+                        action_id: z.string().optional(),
+                        id: z.string().optional(),
+                        query: z.string().optional(),
+                        saved_query_id: z.string().optional(),
+                        ecs_mapping: ECSMappingOrUndefined.optional(),
+                        agents: z.array(z.string()).optional(),
+                      })
+                    )
+                    .optional(),
+                  /**
+                   * Result count statistics (present when withResultCounts is true).
+                   */
+                  result_counts: z
+                    .object({
+                      total_rows: z.number().int().optional(),
+                      responded_agents: z.number().int().optional(),
+                      successful_agents: z.number().int().optional(),
+                      error_agents: z.number().int().optional(),
+                    })
+                    .optional(),
+                })
+                .optional(),
+            })
+          )
+          .optional(),
+      })
+      .optional(),
+  })
+);
 export type FindLiveQueryResponse = z.infer<typeof FindLiveQueryResponse>;
-export const FindLiveQueryResponse = z.object({
-  /**
-   * The response data wrapper.
-   */
-  data: z
-    .object({
-      /**
-       * The list of live queries.
-       */
-      items: z.array(z.object({})).optional(),
-    })
-    .optional(),
-});
 
-/**
- * The details of a live query.
- */
+export const FindLiveQueryDetailsResponse = lazySchema(() =>
+  z.object({
+    data: z
+      .object({
+        action_id: z.string().optional(),
+        expiration: z.string().datetime().optional(),
+        '@timestamp': z.string().datetime().optional(),
+        agents: z.array(z.string()).optional(),
+        user_id: z.string().optional(),
+        user_profile_uid: z.string().optional(),
+        pack_id: z.string().optional(),
+        pack_name: z.string().optional(),
+        prebuilt_pack: z.boolean().optional(),
+        tags: z.array(z.string()).optional(),
+        /**
+         * Global status of the live query (completed, running).
+         */
+        status: z.enum(['completed', 'running']).optional(),
+        /**
+         * The queries with their execution status.
+         */
+        queries: z
+          .array(
+            z.object({
+              action_id: z.string().optional(),
+              id: z.string().optional(),
+              query: z.string().optional(),
+              saved_query_id: z.string().optional(),
+              ecs_mapping: ECSMappingOrUndefined.optional(),
+              agents: z.array(z.string()).optional(),
+              /**
+               * Number of result documents.
+               */
+              docs: z.number().int().optional(),
+              /**
+               * Number of failed queries.
+               */
+              failed: z.number().int().optional(),
+              /**
+               * Number of pending agents.
+               */
+              pending: z.number().int().optional(),
+              /**
+               * Total responded agents.
+               */
+              responded: z.number().int().optional(),
+              /**
+               * Number of successful agents.
+               */
+              successful: z.number().int().optional(),
+              /**
+               * Status of this individual query.
+               */
+              status: z.enum(['completed', 'running']).optional(),
+            })
+          )
+          .optional(),
+      })
+      .optional(),
+  })
+);
 export type FindLiveQueryDetailsResponse = z.infer<typeof FindLiveQueryDetailsResponse>;
-export const FindLiveQueryDetailsResponse = z.object({
-  /**
-   * The live query details.
-   */
-  data: z
-    .object({
-      /**
-       * The ID of the live query action.
-       */
-      action_id: z.string().optional(),
-      /**
-       * The expiration date and time of the live query.
-       */
-      expiration: z.string().optional(),
-      /**
-       * The timestamp when the live query was created.
-       */
-      '@timestamp': z.string().optional(),
-      /**
-       * The original agent selection criteria.
-       */
-      agent_selection: z.object({}).optional(),
-      /**
-       * A list of agent IDs targeted by the live query.
-       */
-      agents: z.array(z.string()).optional(),
-      /**
-       * The ID of the user who ran the live query.
-       */
-      user_id: z.string().optional(),
-      /**
-       * The pack ID, if the live query was run from a pack.
-       */
-      pack_id: z.string().optional(),
-      /**
-       * The pack name, if the live query was run from a pack.
-       */
-      pack_name: z.string().optional(),
-      /**
-       * The list of queries in the live query action, each with aggregated result counts.
-       */
-      queries: z.array(z.object({})).optional(),
-      /**
-       * The overall status of the live query.
-       */
-      status: z.enum(['completed', 'running']).optional(),
-    })
-    .optional(),
-});

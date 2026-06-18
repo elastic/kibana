@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
+import path from 'node:path';
 import { z } from '@kbn/zod/v4';
 import type { IKibanaResponse } from '@kbn/core-http-server';
+import { buildStrictRouteValidationWithZod } from '../utils/build_strict_route_validation';
 import { API_VERSIONS, ENTITY_STORE_ROUTES } from '../../../../common';
 import { RESOLUTION_ENTITY_STORE_PERMISSIONS } from '../../constants';
 import type { EntityStorePluginRouter } from '../../../types';
@@ -16,7 +17,7 @@ import { enterpriseLicenseMiddleware } from '../../middleware/enterprise_license
 import { EntitiesNotFoundError, ResolutionSearchTruncatedError } from '../../../domain/errors';
 
 const querySchema = z.object({
-  entity_id: z.string(),
+  entity_id: z.string().describe('The entity identifier to look up the resolution group for.'),
 });
 
 export function registerResolutionGroup(router: EntityStorePluginRouter) {
@@ -24,6 +25,12 @@ export function registerResolutionGroup(router: EntityStorePluginRouter) {
     .get({
       path: ENTITY_STORE_ROUTES.public.RESOLUTION_GROUP,
       access: 'public',
+      summary: 'Get resolution group',
+      description:
+        'Get the resolution group for a given entity, returning all linked entities. Requires an enterprise license.',
+      options: {
+        tags: ['oas-tag:Security entity store'],
+      },
       security: {
         authz: RESOLUTION_ENTITY_STORE_PERMISSIONS,
       },
@@ -34,8 +41,11 @@ export function registerResolutionGroup(router: EntityStorePluginRouter) {
         version: API_VERSIONS.public.v1,
         validate: {
           request: {
-            query: buildRouteValidationWithZod(querySchema),
+            query: buildStrictRouteValidationWithZod(querySchema),
           },
+        },
+        options: {
+          oasOperationObject: () => path.join(__dirname, '../examples/resolution_group.yaml'),
         },
       },
       wrapMiddlewares(

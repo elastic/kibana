@@ -34,7 +34,14 @@ import { CapabilitiesSection } from './capabilities_section';
 import { EditDetailsFlyout } from './edit_details_flyout';
 import { SettingsSection } from './settings_section';
 import { PageWrapper } from '../common/page_wrapper';
-import { getActiveTools } from '../../../utils/tool_selection_utils';
+import { AccessFlyout } from '../access/access_flyout';
+import { AccessSummaryCard } from '../access/access_summary_card';
+import { useCanManageAgentAccess } from '../../../hooks/agents/use_can_manage_agent_access';
+import {
+  getActivePlugins,
+  getActiveSkills,
+  getActiveTools,
+} from '../../../utils/tool_selection_utils';
 
 export const AgentOverview: React.FC = () => {
   const { agentId } = useParams<{ agentId: string }>();
@@ -55,7 +62,9 @@ export const AgentOverview: React.FC = () => {
   const { plugins: allPlugins, isLoading: pluginsLoading } = usePluginsService();
   const { tools: allTools, isLoading: toolsLoading } = useToolsService();
   const [isEditFlyoutOpen, setIsEditFlyoutOpen] = useState(false);
+  const [isAccessFlyoutOpen, setIsAccessFlyoutOpen] = useState(false);
   const canEditAgent = useCanEditAgent({ agent });
+  const { canManage: canManageAccess } = useCanManageAgentAccess(agent);
 
   const canChangeVisibility = useMemo(() => {
     if (!isExperimentalFeaturesEnabled || !agent) return false;
@@ -71,38 +80,18 @@ export const AgentOverview: React.FC = () => {
 
   const enableElasticCapabilities = agent?.configuration?.enable_elastic_capabilities ?? false;
 
-  const agentSkillIdSet = useMemo(
-    () => new Set(agent?.configuration?.skill_ids ?? []),
-    [agent?.configuration?.skill_ids]
+  const skillsCount = useMemo(
+    () =>
+      getActiveSkills(allSkills, agent?.configuration?.skill_ids, enableElasticCapabilities).length,
+    [allSkills, agent?.configuration?.skill_ids, enableElasticCapabilities]
   );
 
-  const builtinSkills = useMemo(() => allSkills.filter((s) => s.readonly), [allSkills]);
-
-  const skillsCount = useMemo(() => {
-    const explicitCount = agent?.configuration?.skill_ids?.length ?? 0;
-    if (!enableElasticCapabilities) return explicitCount;
-    const builtinNotExplicit = builtinSkills.filter((s) => !agentSkillIdSet.has(s.id)).length;
-    return explicitCount + builtinNotExplicit;
-  }, [agent?.configuration?.skill_ids, enableElasticCapabilities, builtinSkills, agentSkillIdSet]);
-
-  const agentPluginIdSet = useMemo(
-    () => new Set(agent?.configuration?.plugin_ids ?? []),
-    [agent?.configuration?.plugin_ids]
+  const pluginsCount = useMemo(
+    () =>
+      getActivePlugins(allPlugins, agent?.configuration?.plugin_ids, enableElasticCapabilities)
+        .length,
+    [allPlugins, agent?.configuration?.plugin_ids, enableElasticCapabilities]
   );
-
-  const builtinPlugins = useMemo(() => allPlugins.filter((p) => p.readonly), [allPlugins]);
-
-  const pluginsCount = useMemo(() => {
-    const explicitCount = agent?.configuration?.plugin_ids?.length ?? 0;
-    if (!enableElasticCapabilities) return explicitCount;
-    const builtinNotExplicit = builtinPlugins.filter((p) => !agentPluginIdSet.has(p.id)).length;
-    return explicitCount + builtinNotExplicit;
-  }, [
-    agent?.configuration?.plugin_ids,
-    enableElasticCapabilities,
-    builtinPlugins,
-    agentPluginIdSet,
-  ]);
 
   const defaultToolIdSet = useMemo(() => new Set<string>(defaultAgentToolIds), []);
 
@@ -115,6 +104,8 @@ export const AgentOverview: React.FC = () => {
       defaultToolIdSet
     ).length;
   }, [agent, allTools, enableElasticCapabilities, defaultToolIdSet]);
+
+  const connectorsCount = agent?.configuration?.connector_ids?.length ?? 0;
 
   if (isLoading || !agent) {
     return (
@@ -145,15 +136,21 @@ export const AgentOverview: React.FC = () => {
           docsUrl={docLinksService.agentBuilderAgents}
           canEditAgent={canEditAgent}
           onEditDetails={() => setIsEditFlyoutOpen(true)}
+          canManageAccess={canManageAccess}
+          onManageAccess={() => setIsAccessFlyoutOpen(true)}
         />
 
-        <EuiSpacer size="xl" />
+        <EuiSpacer size="l" />
         <EuiHorizontalRule margin="none" />
-        <EuiSpacer size="xl" />
+        <EuiSpacer size="l" />
+
+        <AccessSummaryCard agent={agent} onManage={() => setIsAccessFlyoutOpen(true)} />
+        <EuiSpacer size="l" />
 
         <CapabilitiesSection
           skillsCount={skillsCount}
           pluginsCount={pluginsCount}
+          connectorsCount={connectorsCount}
           toolsCount={toolsCount}
           skillsCountLoading={skillsLoading}
           pluginsCountLoading={pluginsLoading}
@@ -162,12 +159,16 @@ export const AgentOverview: React.FC = () => {
           isExperimentalFeaturesEnabled={isExperimentalFeaturesEnabled}
           skillsHref={createAgentBuilderUrl(appPaths.agent.skills({ agentId: agentId! }))}
           pluginsHref={createAgentBuilderUrl(appPaths.agent.plugins({ agentId: agentId! }))}
+          connectorsHref={createAgentBuilderUrl(appPaths.agent.connectors({ agentId: agentId! }))}
           toolsHref={createAgentBuilderUrl(appPaths.agent.tools({ agentId: agentId! }))}
           onNavigateToSkills={() =>
             navigateToAgentBuilderUrl(appPaths.agent.skills({ agentId: agentId! }))
           }
           onNavigateToPlugins={() =>
             navigateToAgentBuilderUrl(appPaths.agent.plugins({ agentId: agentId! }))
+          }
+          onNavigateToConnectors={() =>
+            navigateToAgentBuilderUrl(appPaths.agent.connectors({ agentId: agentId! }))
           }
           onNavigateToTools={() =>
             navigateToAgentBuilderUrl(appPaths.agent.tools({ agentId: agentId! }))
@@ -189,10 +190,13 @@ export const AgentOverview: React.FC = () => {
           <EditDetailsFlyout
             agent={agent}
             onClose={() => setIsEditFlyoutOpen(false)}
-            isExperimentalFeaturesEnabled={isExperimentalFeaturesEnabled}
             canChangeVisibility={canChangeVisibility}
             showWorkflowSection={showWorkflowSection}
           />
+        )}
+
+        {isAccessFlyoutOpen && agent && (
+          <AccessFlyout agent={agent} onClose={() => setIsAccessFlyoutOpen(false)} />
         )}
       </div>
     </PageWrapper>

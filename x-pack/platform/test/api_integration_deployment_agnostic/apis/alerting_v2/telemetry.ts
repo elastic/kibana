@@ -11,10 +11,10 @@ import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_co
 import type { RoleCredentials } from '../../services';
 
 const RULE_API_PATH = '/api/alerting/v2/rules';
-const NOTIFICATION_POLICY_API_PATH = '/api/alerting/v2/notification_policies';
+const ACTION_POLICY_API_PATH = '/api/alerting/v2/action_policies';
 const RULE_SO_TYPE = 'alerting_rule';
-const NOTIFICATION_POLICY_SO_TYPE = 'alerting_notification_policy';
-const TELEMETRY_TASK_ID = 'AlertingV2-alerting_v2_telemetry';
+const ACTION_POLICY_SO_TYPE = 'alerting_action_policy';
+const TELEMETRY_TASK_ID = 'AlertingV2-alerting_v2:telemetry';
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const samlAuth = getService('samlAuth');
@@ -29,7 +29,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
     before(async () => {
       await kibanaServer.savedObjects.clean({
-        types: [RULE_SO_TYPE, NOTIFICATION_POLICY_SO_TYPE],
+        types: [RULE_SO_TYPE, ACTION_POLICY_SO_TYPE],
       });
       roleAuthc = await samlAuth.createM2mApiKeyWithRoleScope('admin');
 
@@ -45,9 +45,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             metadata: { name: 'alert-rule-1' },
             time_field: '@timestamp',
             schedule: { every: '1m', lookback: '5m' },
-            evaluation: {
-              query: { base: 'FROM metrics-* | LIMIT 10' },
-            },
+            query: { format: 'standalone', breach: { query: 'FROM metrics-* | LIMIT 10' } },
             grouping: { fields: ['host.name', 'service.name'] },
             no_data: { behavior: 'last_status', timeframe: '10m' },
           }),
@@ -61,10 +59,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             metadata: { name: 'signal-rule-1' },
             time_field: '@timestamp',
             schedule: { every: '5m' },
-            evaluation: {
-              query: { base: 'FROM logs-* | LIMIT 10' },
-            },
-            recovery_policy: { type: 'no_breach' },
+            query: { format: 'standalone', breach: { query: 'FROM logs-* | LIMIT 10' } },
           }),
         // Rule 3: alert kind, 5m schedule, disabled
         supertestWithoutAuth
@@ -76,13 +71,12 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             metadata: { name: 'alert-rule-2' },
             time_field: '@timestamp',
             schedule: { every: '5m', lookback: '10m' },
-            evaluation: { query: { base: 'FROM metrics-* | LIMIT 5' } },
-            no_data: { behavior: 'recover', timeframe: '15m' },
+            query: { format: 'standalone', breach: { query: 'FROM metrics-* | LIMIT 5' } },
           }),
       ]);
 
       for (const result of ruleResults) {
-        expect(result.status).to.be(200);
+        expect(result.status).to.be(201);
       }
 
       // Disable rule 3
@@ -94,11 +88,11 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         .send({ ids: [rule3Id] });
       expect(disableResponse.status).to.be(200);
 
-      // Create notification policies
+      // Create action policies
       const policyResults = await Promise.all([
         // Policy 1: with matcher, groupBy, throttle
         supertestWithoutAuth
-          .post(NOTIFICATION_POLICY_API_PATH)
+          .post(ACTION_POLICY_API_PATH)
           .set(roleAuthc.apiKeyHeader)
           .set(samlAuth.getInternalRequestHeader())
           .send({
@@ -111,7 +105,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           }),
         // Policy 2: different workflow, no matcher, different throttle
         supertestWithoutAuth
-          .post(NOTIFICATION_POLICY_API_PATH)
+          .post(ACTION_POLICY_API_PATH)
           .set(roleAuthc.apiKeyHeader)
           .set(samlAuth.getInternalRequestHeader())
           .send({
@@ -123,13 +117,13 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       ]);
 
       for (const result of policyResults) {
-        expect(result.status).to.be(200);
+        expect(result.status).to.be(201);
       }
     });
 
     after(async () => {
       await kibanaServer.savedObjects.clean({
-        types: [RULE_SO_TYPE, NOTIFICATION_POLICY_SO_TYPE],
+        types: [RULE_SO_TYPE, ACTION_POLICY_SO_TYPE],
       });
       await samlAuth.invalidateM2mApiKeyWithRoleScope(roleAuthc);
     });
@@ -137,10 +131,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     it('should retrieve telemetry data in the expected format', async () => {
       // Request the telemetry task to run immediately
       await supertestWithoutAuth
-        .post('/api/alerting_v2_fixture_telemetry/run_soon')
+        .post(`/internal/ftr/task_manager/${TELEMETRY_TASK_ID}/run_soon`)
         .set(roleAuthc.apiKeyHeader)
         .set(samlAuth.getInternalRequestHeader())
-        .send({ taskId: TELEMETRY_TASK_ID })
         .expect(200);
 
       // Wait for the task to complete and verify the state
@@ -182,20 +175,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           { name: '10m', value: 1 },
           { name: '5m', value: 1 },
         ]);
-        expect(parsedState.count_with_recovery_policy).to.be(1);
-        expect(parsedState.count_by_recovery_policy_type).to.eql({ no_breach: 1 });
         expect(parsedState.count_with_grouping).to.be(1);
         expect(parsedState.avg_grouping_fields_count).to.be(2);
-        expect(parsedState.count_with_no_data).to.be(2);
-        expect(parsedState.count_by_no_data_behavior).to.eql({ recover: 1, last_status: 1 });
-        expect(
-          [...parsedState.count_by_no_data_timeframe].sort(
-            (a: { name: string }, b: { name: string }) => a.name.localeCompare(b.name)
-          )
-        ).to.eql([
-          { name: '10m', value: 1 },
-          { name: '15m', value: 1 },
-        ]);
         expect(parsedState.min_created_at).to.be.a('string');
 
         // Execution stats
@@ -207,14 +188,14 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(parsedState.executions_delay_p99_ms).to.not.be(undefined);
         expect(parsedState.dispatcher_executions_count_24hr).to.be.a('number');
 
-        // Notification policy stats
-        expect(parsedState.notification_policies_count).to.be(2);
-        expect(parsedState.notification_policies_unique_workflow_count).to.be(2);
-        expect(parsedState.notification_policies_count_with_matcher).to.be(1);
-        expect(parsedState.notification_policies_count_with_group_by).to.be(1);
-        expect(parsedState.notification_policies_avg_group_by_fields_count).to.be(2);
+        // Action policy stats
+        expect(parsedState.action_policies_count).to.be(2);
+        expect(parsedState.action_policies_unique_workflow_count).to.be(2);
+        expect(parsedState.action_policies_count_with_matcher).to.be(1);
+        expect(parsedState.action_policies_count_with_group_by).to.be(1);
+        expect(parsedState.action_policies_avg_group_by_fields_count).to.be(2);
         expect(
-          [...parsedState.notification_policies_count_by_throttle_interval].sort(
+          [...parsedState.action_policies_count_by_throttle_interval].sort(
             (a: { name: string }, b: { name: string }) => a.name.localeCompare(b.name)
           )
         ).to.eql([

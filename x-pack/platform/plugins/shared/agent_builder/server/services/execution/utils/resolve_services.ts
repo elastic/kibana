@@ -10,14 +10,17 @@ import type { KibanaRequest } from '@kbn/core-http-server';
 import type { UiSettingsServiceStart } from '@kbn/core-ui-settings-server';
 import type { SavedObjectsServiceStart } from '@kbn/core-saved-objects-server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
-import { MODEL_TELEMETRY_METADATA } from '../../../telemetry';
+import type { SearchInferenceEndpointsPluginStart } from '@kbn/search-inference-endpoints/server';
+import type { ConnectorTelemetryMetadata } from '@kbn/inference-common';
 import type { ConversationService } from '../../conversation';
 import type { AgentsServiceStart } from '../../agents';
 import { resolveSelectedConnectorId } from '../../../utils/resolve_selected_connector_id';
+import { createModelProvider } from '../runner/model_provider';
 
 export const resolveServices = async ({
   agentId,
   connectorId,
+  telemetryMetadata,
   request,
   logger,
   inference,
@@ -25,9 +28,11 @@ export const resolveServices = async ({
   agentService,
   uiSettings,
   savedObjects,
+  searchInferenceEndpoints,
 }: {
   agentId: string;
   connectorId?: string;
+  telemetryMetadata?: ConnectorTelemetryMetadata;
   request: KibanaRequest;
   logger: Logger;
   inference: InferenceServerStart;
@@ -35,6 +40,7 @@ export const resolveServices = async ({
   agentService: AgentsServiceStart;
   uiSettings: UiSettingsServiceStart;
   savedObjects: SavedObjectsServiceStart;
+  searchInferenceEndpoints: SearchInferenceEndpointsPluginStart;
 }) => {
   const selectedConnectorId = await resolveSelectedConnectorId({
     request,
@@ -42,6 +48,7 @@ export const resolveServices = async ({
     uiSettings,
     savedObjects,
     inference,
+    searchInferenceEndpoints,
   });
 
   if (!selectedConnectorId) {
@@ -56,20 +63,22 @@ export const resolveServices = async ({
     throw new Error(`Agent "${agentId}" not found or not available`);
   }
 
-  const [conversationClient, chatModel] = await Promise.all([
-    conversationService.getScopedClient({ request }),
-    inference.getChatModel({
-      request,
-      connectorId: selectedConnectorId,
-      chatModelOptions: {
-        telemetryMetadata: MODEL_TELEMETRY_METADATA,
-      },
-    }),
-  ]);
+  const modelProvider = createModelProvider({
+    inference,
+    request,
+    defaultConnectorId: selectedConnectorId,
+    telemetryMetadata,
+    logger,
+    uiSettings,
+    savedObjects,
+    searchInferenceEndpoints,
+  });
+
+  const conversationClient = await conversationService.getScopedClient({ request });
 
   return {
     conversationClient,
-    chatModel,
+    modelProvider,
     selectedConnectorId,
   };
 };

@@ -1,5 +1,5 @@
 {
-  "sha1": "1284fc5f1ff1408ac248272036442119308302bb",
+  "sha1": "1f64f92def0d9b9bad1301449ea6972489da50e1",
   "tests": [
     {
       "id": "e7ca8c886a58426-d57f60fe1d6db3b",
@@ -11,7 +11,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/index_management/test/scout/ui/tests/home_page.spec.ts",
-        "line": 28,
+        "line": 47,
         "column": 7
       }
     },
@@ -25,7 +25,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/index_management/test/scout/ui/tests/home_page.spec.ts",
-        "line": 46,
+        "line": 65,
         "column": 7
       }
     },
@@ -39,7 +39,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/index_management/test/scout/ui/tests/home_page.spec.ts",
-        "line": 57,
+        "line": 76,
         "column": 7
       }
     },
@@ -53,7 +53,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/index_management/test/scout/ui/tests/home_page.spec.ts",
-        "line": 67,
+        "line": 86,
         "column": 7
       }
     },
@@ -67,7 +67,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/index_management/test/scout/ui/tests/home_page.spec.ts",
-        "line": 78,
+        "line": 97,
         "column": 7
       }
     },
@@ -81,7 +81,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/index_management/test/scout/ui/tests/home_page.spec.ts",
-        "line": 89,
+        "line": 108,
         "column": 7
       }
     },
@@ -95,7 +95,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/index_management/test/scout/ui/tests/home_page.spec.ts",
-        "line": 104,
+        "line": 123,
         "column": 7
       }
     },
@@ -194,6 +194,20 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/index_management/test/scout/ui/tests/index_template_wizard.spec.ts",
         "line": 25,
+        "column": 7
+      }
+    },
+    {
+      "id": "334b2c159a85a53-5c9af8158963588",
+      "title": "Index Management — management sidebar smoke data section contains index_management and transform for index_management_user role",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/index_management/test/scout/ui/tests/management_sidebar_smoke.spec.ts",
+        "line": 32,
         "column": 7
       }
     }

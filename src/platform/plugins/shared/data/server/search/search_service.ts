@@ -28,6 +28,7 @@ import type {
   ISearchOptions,
   IEsSearchRequest,
   IEsSearchResponse,
+  ISearchGeneric,
 } from '@kbn/search-types';
 import type { ExpressionsServerSetup } from '@kbn/expressions-plugin/server';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/server';
@@ -85,6 +86,7 @@ import {
   SQL_SEARCH_STRATEGY,
   ESQL_SEARCH_STRATEGY,
   ESQL_ASYNC_SEARCH_STRATEGY,
+  SearchMethodsService,
 } from '../../common/search';
 import { getEsaggs, getEsdsl, getEssql, getEql, getEsql } from './expressions';
 import {
@@ -100,7 +102,6 @@ import {
 } from './strategies/ese_search';
 import { eqlSearchStrategyProvider } from './strategies/eql_search';
 import { NoSearchIdInSessionError } from './errors/no_search_id_in_session';
-import { CachedUiSettingsClient } from './services';
 import { sqlSearchStrategyProvider } from './strategies/sql_search';
 import { searchSessionSavedObjectType } from './saved_objects';
 import { esqlSearchStrategyProvider } from './strategies/esql_search';
@@ -559,21 +560,28 @@ export class SearchService {
         searchSessionsClient,
         savedObjectsClient,
         esClient: this.createScopedEsClient({ client: elasticsearch.client, request, opts }),
-        uiSettingsClient: new CachedUiSettingsClient(
-          uiSettings.asScopedToClient(savedObjectsClient)
-        ),
+        uiSettingsClient: uiSettings.asScopedToClient(savedObjectsClient),
+
         request,
         rollupsEnabled,
       };
+      const search = <
+        SearchStrategyRequest extends IKibanaSearchRequest = IEsSearchRequest,
+        SearchStrategyResponse extends IKibanaSearchResponse = IEsSearchResponse
+      >(
+        searchRequest: SearchStrategyRequest,
+        options: ISearchOptions = {}
+      ) => this.search<SearchStrategyRequest, SearchStrategyResponse>(deps, searchRequest, options);
+
+      const searchMethodsService = new SearchMethodsService(search as ISearchGeneric);
+
       return {
-        search: <
-          SearchStrategyRequest extends IKibanaSearchRequest = IEsSearchRequest,
-          SearchStrategyResponse extends IKibanaSearchResponse = IEsSearchResponse
-        >(
-          searchRequest: SearchStrategyRequest,
-          options: ISearchOptions = {}
-        ) =>
-          this.search<SearchStrategyRequest, SearchStrategyResponse>(deps, searchRequest, options),
+        search,
+        dsl: (params, options) => searchMethodsService.dsl(params, options),
+        dslPaginated: (params, options) => searchMethodsService.dslPaginated(params, options),
+        esql: (params, options) => searchMethodsService.esql(params, options),
+        eql: (params, options) => searchMethodsService.eql(params, options),
+        sql: (params, options) => searchMethodsService.sql(params, options),
         cancel: this.cancel.bind(this, deps),
         extend: this.extend.bind(this, deps),
         saveSession: searchSessionsClient.save,
