@@ -48,7 +48,7 @@ Step 2 (after reviewing the reproduction report): `/bug-fix`
     shasum -a 256 "$SKILL_ROOT"/bug-fixer/SKILL.md "$SKILL_ROOT"/bug-reproduce/SKILL.md "$SKILL_ROOT"/bug-fix/SKILL.md \
       > ~/.claude/skills/.bug-fixer.sha256
     ```
-  - **Claude Code — verify** (after each `git pull`; restart only if all lines say `OK`):
+  - **Claude Code — verify** (run this in your terminal — not via the agent; the agent's `~/.claude/` access is blocked by the skill guard; restart only if all lines say `OK`):
     ```bash
     shasum -a 256 --check ~/.claude/skills/.bug-fixer.sha256
     ```

@@ -115,6 +115,26 @@ test('Write to root-level .agents/skills SKILL.md is denied', () => {
 });
 
 // ---------------------------------------------------------------------------
+// Write / Edit: secret paths → deny (regression: was silently allowed before)
+// ---------------------------------------------------------------------------
+
+test('Write to ~/.ssh/authorized_keys is denied', () => {
+  deny('Write', { file_path: '~/.ssh/authorized_keys' });
+});
+
+test('Write to ~/.aws/credentials is denied', () => {
+  deny('Write', { file_path: '~/.aws/credentials' });
+});
+
+test('Edit ~/.claude/settings.json is denied', () => {
+  deny('Edit', { file_path: '~/.claude/settings.json' });
+});
+
+test('Write to .env file is denied', () => {
+  deny('Write', { file_path: '/Users/glo/projects/kibana/.env' });
+});
+
+// ---------------------------------------------------------------------------
 // Write / Edit: normal files → allow
 // ---------------------------------------------------------------------------
 
@@ -192,6 +212,11 @@ test('Bash tee to skill file is denied', () => {
 
 test('Bash sed -i on skill references file is denied', () => {
   deny('Bash', { command: "sed -i 's/old/new/' .agents/skills/bug-validator/references/bulk-mode.md" });
+});
+
+// Regression: no-space redirect bypassed the '> ' indicator check
+test('Bash no-space redirect to skill file is denied', () => {
+  deny('Bash', { command: 'echo "injected content">.agents/skills/bug-fixer/SKILL.md' });
 });
 
 // Reading a references file via shell is allowed (only writes are blocked)

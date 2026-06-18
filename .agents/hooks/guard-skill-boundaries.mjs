@@ -83,10 +83,10 @@ const BASH_SKILL_PATH_SUBSTRINGS = ['.agents/skills/'];
 /**
  * Shell write indicators. If a command contains one of these AND a skill
  * instruction path, it is a best-effort shell-based write attempt.
- * Using `>>`, `> `, and `tee` covers the common redirect/append/pipe patterns
- * without false-positiving on `>` in other contexts (e.g. `git log --format=`).
+ * Using `>` (which also covers `>>` and `> `) catches both spaced and
+ * no-space redirect forms: `echo x > file` and `echo x>file`.
  */
-const BASH_WRITE_INDICATORS = ['>>', '> ', 'tee ', 'sed -i'];
+const BASH_WRITE_INDICATORS = ['>>', '>', 'tee ', 'sed -i'];
 
 // ---------------------------------------------------------------------------
 // Skill instruction file patterns
@@ -125,6 +125,12 @@ const DENY_BASH_SKILL_WRITE =
   `Shell-based writes to skill files are blocked by the guard-skill-boundaries hook. ` +
   `Skill instruction files must only be changed via a reviewed pull request. ` +
   `Note: this is a best-effort check — write patterns via variables or eval may pass through.`;
+
+const DENY_SECRET_WRITE = (path) =>
+  `Writing to credential/secret files is blocked by the guard-skill-boundaries hook. ` +
+  `The path '${path}' matches a known credential location ` +
+  `(~/.netrc, ~/.aws, ~/.ssh, ~/.claude, ~/.config/gh, or a .env file). ` +
+  `If this is a legitimate need, ask the user to run the command directly in their terminal.`;
 
 const DENY_SKILL_WRITE = (path) =>
   `Writing to skill instruction files is blocked by the guard-skill-boundaries hook. ` +
@@ -182,10 +188,11 @@ export const analyzeToolCall = ({ tool_name, tool_input }) => {
     return null;
   }
 
-  // --- Write / Edit: check skill instruction paths --------------------------
+  // --- Write / Edit: block secret paths AND skill instruction paths ----------
   if (name === 'write' || name === 'edit') {
     const raw = tool_input?.file_path ?? '';
     const normalised = normalisePath(String(raw));
+    if (isSecretPath(normalised)) return { deny: DENY_SECRET_WRITE(raw) };
     if (isSkillInstructionPath(normalised)) return { deny: DENY_SKILL_WRITE(raw) };
     return null;
   }
