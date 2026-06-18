@@ -13,7 +13,8 @@
   "kbn_references": [
     "@kbn/utility-types",
     "@kbn/core-i18n-server-internal",
-    "@kbn/lazy-object"
+    "@kbn/lazy-object",
+    "@kbn/core-i18n-server"
   ],
   "exclude": [
     "target/**/*",
