@@ -62,9 +62,11 @@ export function createNavigationTree({
   isAppRegistered,
   showAiAssistant = true,
   showAlertingV2 = false,
+  showPerformanceLink = false,
 }: ApplicationStart & {
   showAiAssistant?: boolean;
   showAlertingV2?: boolean;
+  showPerformanceLink?: boolean;
 }): NavigationTreeDefinition {
   return {
     body: [
@@ -105,7 +107,6 @@ export function createNavigationTree({
               { link: 'ml:dataDriftPage', sideNavStatus: 'hidden' },
               { link: 'ml:fileUpload', sideNavStatus: 'hidden' },
               { link: 'ml:indexDataVisualizer', sideNavStatus: 'hidden' },
-              { link: 'ml:indexDataVisualizerPage', sideNavStatus: 'hidden' },
             ],
           },
           {
@@ -233,6 +234,7 @@ export function createNavigationTree({
             title: ACCESS_TITLE,
             children: [
               { link: 'management:api_keys', breadcrumbStatus: 'hidden' },
+              { link: 'management:application_connections', breadcrumbStatus: 'hidden' },
               { link: 'management:roles', breadcrumbStatus: 'hidden' },
             ],
           },
@@ -246,11 +248,15 @@ export function createNavigationTree({
                 id: 'cloudLinkBilling',
                 cloudLink: 'billingAndSub',
               },
-              {
-                id: 'cloudLinkDeployment',
-                cloudLink: 'deployment',
-                title: PERFORMANCE_TITLE,
-              },
+              ...(showPerformanceLink
+                ? [
+                    {
+                      id: 'cloudLinkDeployment',
+                      cloudLink: 'deployment' as const,
+                      title: PERFORMANCE_TITLE,
+                    },
+                  ]
+                : []),
               {
                 cloudLink: 'userAndRoles',
               },
@@ -286,7 +292,7 @@ export function createNavigationTree({
             breadcrumbStatus: 'hidden',
             children: [
               { link: 'management:triggersActionsAlerts', breadcrumbStatus: 'hidden' },
-              { link: 'rules', breadcrumbStatus: 'hidden' },
+              { link: 'management:triggersActions', breadcrumbStatus: 'hidden' },
               { link: 'management:triggersActionsConnectors', breadcrumbStatus: 'hidden' },
             ],
           },

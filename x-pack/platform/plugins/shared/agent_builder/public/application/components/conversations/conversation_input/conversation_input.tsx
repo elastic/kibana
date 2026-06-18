@@ -53,6 +53,7 @@ const InputContainer: React.FC<
 interface ConversationInputProps {
   onSubmit?: () => void;
   onEditorFocus?: () => void;
+  onSubmitOverride?: (message: string) => void;
 }
 
 const disabledPlaceholder = (agentId?: string) =>
@@ -91,6 +92,7 @@ const getMessageEditorAriaLabel = ({
 export const ConversationInput: React.FC<ConversationInputProps> = ({
   onSubmit,
   onEditorFocus,
+  onSubmitOverride,
 }) => {
   const { pendingMessage, error, isResuming, isResponseLoading } = useConversationStream();
   const { isFetched } = useAgentBuilderAgents();
@@ -129,12 +131,10 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({
 
   const visibleAttachments = useMemo(() => {
     if (!attachments || shouldHideAttachments) return [];
-    return attachments
-      .filter((attachment) => !attachment.hidden)
-      .map((attachment, idx) => ({
-        ...attachment,
-        id: attachment.id ?? `attachment-${idx}`,
-      }));
+    return attachments.filter((attachment) => {
+      if ('items' in attachment) return true; // AttachmentGroup — always visible
+      return !attachment.hidden;
+    });
   }, [attachments, shouldHideAttachments]);
 
   const isNewConversation = !conversationId;
@@ -189,7 +189,11 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({
       }
       return;
     }
-    submitMessage(content);
+    if (onSubmitOverride) {
+      onSubmitOverride(content);
+    } else {
+      submitMessage(content);
+    }
     messageEditorController.clear();
     onSubmit?.();
   };

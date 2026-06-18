@@ -14,6 +14,7 @@ import React, { Suspense } from 'react';
 import { isTriggerType } from '@kbn/workflows';
 import { PopoverItems } from './popover_items';
 import * as i18n from '../../../common/translations';
+import { withTooltip } from '../../shared/ui/with_tooltip';
 import { triggerSchemas } from '../../trigger_schemas';
 
 interface WorkflowsTriggersListProps {
@@ -34,7 +35,6 @@ const triggersListStyles = {
   container: css({
     maxWidth: '100%',
     minWidth: 0,
-    backgroundColor: 'blue',
   }),
   textContainer: css({
     minWidth: 0,
@@ -84,7 +84,7 @@ export function TriggerIcon({ triggerType }: { triggerType: string }) {
         <EuiIcon type={icon} size="m" title={label} />
       </Suspense>
     );
-  return <span css={triggerIconAnchorStyle}>{iconNode}</span>;
+  return <span css={triggerIconAnchorStyle}>{withTooltip(iconNode, label)}</span>;
 }
 
 export const WorkflowsTriggersList = ({ triggers }: WorkflowsTriggersListProps) => {

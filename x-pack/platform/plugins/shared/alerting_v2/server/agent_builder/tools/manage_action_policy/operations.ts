@@ -18,7 +18,7 @@ import {
   AGGREGATE_STRATEGIES,
   STRATEGIES_REQUIRING_INTERVAL,
 } from '@kbn/alerting-v2-schemas';
-import { buildActionPolicyPayload } from '../../../../common/agent_builder/action_policy_mappers';
+import { attachmentDataToActionPolicyPayload } from '../../../../common/agent_builder/action_policy_mappers';
 
 // ─── Operation schemas ────────────────────────────────────────────────────────
 // Derived from shared alerting-v2-schemas so tool-level validation stays
@@ -173,7 +173,7 @@ export const executeActionPolicyOperations = (
         break;
 
       case 'validate': {
-        const payload = buildActionPolicyPayload(next);
+        const payload = attachmentDataToActionPolicyPayload(next);
         const result = createActionPolicyDataSchema.safeParse(payload);
         if (!result.success) {
           const issues = result.error.issues

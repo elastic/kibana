@@ -5,38 +5,56 @@
  * 2.0.
  */
 
-import { TaskStatus } from '@kbn/streams-schema';
+import { SigEventsWorkflowStatus } from '@kbn/streams-schema';
+import { ExecutionStatus } from '@kbn/workflows';
+import { StreamsKIsOnboardingClient } from '../../../lib/workflows/onboarding_workflow_client';
 import { createKiIdentificationCancelTool } from './tool';
-import { createMockGetScopedClients, createMockToolContext } from '../../utils/test_helpers';
+import { createMockToolContext } from '../../utils/test_helpers';
 
 describe('createKiIdentificationCancelTool', () => {
   const setup = () => {
-    const { getScopedClients, taskClient } = createMockGetScopedClients();
-    const tool = createKiIdentificationCancelTool({ getScopedClients });
+    const managementApi = {
+      getWorkflowExecutions: jest.fn().mockResolvedValue({
+        results: [{ id: 'exec-1', status: ExecutionStatus.RUNNING }],
+      }),
+      cancelWorkflowExecution: jest.fn().mockResolvedValue(undefined),
+    };
+    const streamsKIsOnboardingClient = new StreamsKIsOnboardingClient({
+      managementApi: managementApi as never,
+      telemetry: { trackOnboardingScheduled: jest.fn() } as never,
+    });
+
+    const tool = createKiIdentificationCancelTool({
+      streamsKIsOnboardingClient,
+    });
     const context = createMockToolContext();
-    return { tool, context, taskClient };
+    return { tool, context, managementApi };
   };
 
-  it('cancels task and returns being_canceled status', async () => {
-    const { tool, context, taskClient } = setup();
+  it('cancels workflow execution and returns canceled status', async () => {
+    const { tool, context, managementApi } = setup();
 
     const result = await tool.handler({ stream_name: 'logs.nginx' }, context);
 
-    expect(taskClient.cancel).toHaveBeenCalledWith('streams_onboarding_logs.nginx');
+    expect(managementApi.cancelWorkflowExecution).toHaveBeenCalledWith(
+      'exec-1',
+      'default',
+      context.request
+    );
 
     if ('results' in result) {
       expect(result.results[0].type).toBe('other');
       expect(result.results[0].data).toEqual({
         stream_name: 'logs.nginx',
-        task_id: 'streams_onboarding_logs.nginx',
-        status: TaskStatus.BeingCanceled,
+        execution_id: 'exec-1',
+        status: SigEventsWorkflowStatus.Canceled,
       });
     }
   });
 
   it('returns error result when cancellation fails', async () => {
-    const { tool, context, taskClient } = setup();
-    taskClient.cancel.mockRejectedValueOnce(new Error('boom'));
+    const { tool, context, managementApi } = setup();
+    managementApi.cancelWorkflowExecution.mockRejectedValueOnce(new Error('boom'));
 
     const result = await tool.handler({ stream_name: 'logs.nginx' }, context);
 

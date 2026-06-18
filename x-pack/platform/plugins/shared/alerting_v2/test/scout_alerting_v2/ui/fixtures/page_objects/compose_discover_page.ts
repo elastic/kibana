@@ -33,6 +33,9 @@ export class ComposeDiscoverPage {
   public readonly sandboxApplyButton: Locator;
   public readonly sandboxTimeFieldSelector: Locator;
   public readonly ruleNameInput: Locator;
+  public readonly addRunbookButton: Locator;
+  public readonly relatedDashboardsSelector: Locator;
+  public readonly relatedDashboardsInput: Locator;
   public readonly createRulePopoverButton: Locator;
   public readonly createEsqlRuleButton: Locator;
   /** "Create ES|QL rule" card in the empty-state panel (shown when no rules exist). */
@@ -56,6 +59,11 @@ export class ComposeDiscoverPage {
     this.sandboxApplyButton = this.page.testSubj.locator('querySandboxApply');
     this.sandboxTimeFieldSelector = this.page.testSubj.locator('composeDiscoverTimeField');
     this.ruleNameInput = this.flyout.locator('[data-test-subj="ruleNameInput"]');
+    this.addRunbookButton = this.flyout.locator('[data-test-subj="addRunbookButton"]');
+    this.relatedDashboardsSelector = this.flyout.locator('[data-test-subj="dashboardsSelector"]');
+    this.relatedDashboardsInput = this.flyout.locator(
+      'input[placeholder="Link related dashboards for investigation"]'
+    );
     this.createRulePopoverButton = this.page.testSubj.locator('createRulePopoverButton');
     this.createEsqlRuleButton = this.page.testSubj.locator('createEsqlRuleButton');
     this.createEsqlRuleCard = this.page.testSubj.locator('createEsqlRuleCard');
@@ -83,11 +91,20 @@ export class ComposeDiscoverPage {
   }
 
   /**
-   * Types an ES|QL query into the sandbox code editor.
-   * The sandbox renders a single Monaco instance (model index 0).
+   * Types an ES|QL query into the sandbox base-tab code editor (Monaco index 0).
    */
   async setSandboxQuery(query: string) {
     await this.codeEditor.setCodeEditorValue(query, 0);
+  }
+
+  /**
+   * Switches the sandbox to the "Alert condition" tab and types the given
+   * segment into the alert-condition editor (Monaco index 1, because the
+   * locked base preview occupies index 0 on that tab).
+   */
+  async setSandboxAlertCondition(segment: string) {
+    await this.page.testSubj.locator('querySandboxTab-alert').click();
+    await this.codeEditor.setCodeEditorValue(segment, 1);
   }
 
   async clickNext() {
@@ -104,5 +121,13 @@ export class ComposeDiscoverPage {
 
   async setRuleName(name: string) {
     await this.ruleNameInput.fill(name);
+  }
+
+  async addRunbook(text: string) {
+    await this.addRunbookButton.click();
+
+    const runbookModal = this.page.getByRole('dialog', { name: 'Add Runbook' });
+    await runbookModal.getByLabel('Runbook').fill(text);
+    await runbookModal.getByRole('button', { name: 'Add Runbook' }).click();
   }
 }

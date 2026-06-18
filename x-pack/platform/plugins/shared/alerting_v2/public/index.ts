@@ -18,25 +18,35 @@ import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
 import type { WorkflowsExtensionsPublicPluginSetup } from '@kbn/workflows-extensions/public';
 import { WorkflowApi } from '@kbn/workflows-ui';
+import React from 'react';
 import {
   ALERTING_V2_SECTION_ID,
   ALERTING_V2_RULES_APP_ID,
   ALERTING_V2_ACTION_POLICIES_APP_ID,
   ALERTING_V2_EPISODES_APP_ID,
   ALERTING_V2_EXECUTION_HISTORY_APP_ID,
-  ALERTING_V2_RULE_DOCTOR_APP_ID,
 } from './constants';
-import { ALERTING_V2_EXPERIMENTAL_FEATURES_SETTING_ID } from '../common/advanced_settings';
 import { ActionPoliciesApi } from './services/action_policies_api';
 import { ExecutionHistoryApi } from './services/execution_history_api';
 import { RulesApi } from './services/rules_api';
 import { registerTriggerDefinitions } from './lib/workflow_extensions/register_trigger_definitions';
 import { setKibanaServices } from './kibana_services';
-import { DynamicRuleFormFlyout } from './create_rule_form_flyout';
 import type { AlertingV2PublicStart } from './types';
+import type { CreateRuleOptionsFlyoutProps } from './create_rule_options_flyout';
 
-export type { AlertingV2PublicStart } from './types';
-export type { CreateRuleFormFlyoutProps } from './create_rule_form_flyout';
+const LazyCreateRuleOptionsFlyout = React.lazy(() =>
+  import('./create_rule_options_flyout').then((m) => ({ default: m.CreateRuleOptionsFlyout }))
+);
+
+const CreateRuleOptionsFlyout = (props: CreateRuleOptionsFlyoutProps) =>
+  React.createElement(
+    React.Suspense,
+    { fallback: null },
+    React.createElement(LazyCreateRuleOptionsFlyout, props)
+  );
+
+export type { AlertingV2PublicStart, CreateRuleOptionsFlyoutLegacyItem } from './types';
+export type { CreateRuleOptionsFlyoutProps } from './create_rule_options_flyout';
 
 export const module = new ContainerModule(({ bind }) => {
   bind(RulesApi).toSelf().inSingletonScope();
@@ -46,7 +56,7 @@ export const module = new ContainerModule(({ bind }) => {
     .toDynamicValue(({ get }) => new WorkflowApi(get(CoreStart('http'))))
     .inSingletonScope();
   bind(Start).toConstantValue({
-    DynamicRuleFormFlyout,
+    CreateRuleOptionsFlyout,
   } satisfies AlertingV2PublicStart);
   bind(OnSetup).toConstantValue((container) => {
     const getStartServices = container.get(CoreSetup('getStartServices'));
@@ -69,13 +79,8 @@ export const module = new ContainerModule(({ bind }) => {
         uiActions: diContainer.get(PluginStart('uiActions')) as UiActionsStart,
       });
 
-      const experimentalEnabled = coreStart.settings.globalClient.get<boolean>(
-        ALERTING_V2_EXPERIMENTAL_FEATURES_SETTING_ID,
-        false
-      );
-
       const agentBuilderToken = PluginStart('agentBuilder');
-      if (experimentalEnabled && diContainer.isBound(agentBuilderToken)) {
+      if (diContainer.isBound(agentBuilderToken)) {
         const agentBuilder = diContainer.get(agentBuilderToken) as AgentBuilderPluginStart;
         import(
           /* webpackChunkName: "alerting_v2_rule_attachment" */
@@ -162,30 +167,6 @@ export const module = new ContainerModule(({ bind }) => {
           coreStart,
         });
       },
-    });
-
-    getStartServices().then(([coreStart]) => {
-      const experimentalEnabled = coreStart.uiSettings.get<boolean>(
-        ALERTING_V2_EXPERIMENTAL_FEATURES_SETTING_ID,
-        false
-      );
-      if (experimentalEnabled) {
-        alertingV2Section.registerApp({
-          id: ALERTING_V2_RULE_DOCTOR_APP_ID,
-          title: i18n.translate('xpack.alertingV2.management.ruleDoctorNavTitle', {
-            defaultMessage: 'Rule Doctor',
-          }),
-          order: 4,
-          async mount(params) {
-            const { mountRuleDoctorApp } = await import('./application/mount');
-            return mountRuleDoctorApp({
-              params,
-              container: coreStart.injection.getContainer(),
-              coreStart,
-            });
-          },
-        });
-      }
     });
 
     alertingV2Section.registerApp({
