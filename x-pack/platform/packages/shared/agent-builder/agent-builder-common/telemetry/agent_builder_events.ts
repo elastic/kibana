@@ -163,6 +163,8 @@ export interface ReportSkillCreatedParams {
   skill_id: string;
   /** Optional origin (`custom` for direct API creates, `plugin` for plugin-bundled creates). */
   origin?: SkillCreationOrigin;
+  /** Deduplicated, normalized tool IDs included in the created skill. */
+  tool_ids: string[];
 }
 
 /** Telemetry params reported when a user-created skill is updated. */
@@ -175,6 +177,8 @@ export interface ReportSkillUpdatedParams {
   skill_id: string;
   /** Optional origin (`custom` for direct API updates, `plugin` for plugin-bundled updates). */
   origin?: SkillCreationOrigin;
+  /** Deduplicated, normalized tool IDs included in the updated skill. */
+  tool_ids: string[];
 }
 
 /** Telemetry params reported when a user-created skill is deleted. */
@@ -582,6 +586,21 @@ const SKILL_CREATED_EVENT: AgentBuilderTelemetryEvent = {
         optional: true,
       },
     },
+    tool_ids: {
+      type: 'array',
+      items: {
+        type: 'keyword',
+        _meta: {
+          description:
+            'Tool ID included in the created skill (normalized: built-in tools keep ID, custom tools become "custom-<sha256_prefix>")',
+        },
+      },
+      _meta: {
+        description:
+          'Tool IDs included in the created skill (normalized: built-in tools keep ID, custom tools become "custom-<sha256_prefix>"). This is a de-duplicated list of tool IDs (one entry per tool, not per invocation).',
+        optional: false,
+      },
+    },
   },
 };
 
@@ -602,6 +621,21 @@ const SKILL_UPDATED_EVENT: AgentBuilderTelemetryEvent = {
         description:
           'Origin of the updated skill (custom for direct API updates, plugin for plugin-bundled updates)',
         optional: true,
+      },
+    },
+    tool_ids: {
+      type: 'array',
+      items: {
+        type: 'keyword',
+        _meta: {
+          description:
+            'Tool ID included in the updated skill (normalized: built-in tools keep ID, custom tools become "custom-<sha256_prefix>")',
+        },
+      },
+      _meta: {
+        description:
+          'Tool IDs included in the updated skill (normalized: built-in tools keep ID, custom tools become "custom-<sha256_prefix>"). This is a de-duplicated list of tool IDs (one entry per tool, not per invocation).',
+        optional: false,
       },
     },
   },
