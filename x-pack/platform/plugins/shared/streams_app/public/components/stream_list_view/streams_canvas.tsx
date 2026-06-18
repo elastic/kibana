@@ -5,1340 +5,141 @@
  * 2.0.
  */
 
-import React, {
-  createContext,
-  memo,
-  useCallback,
-  useContext,
-  useMemo,
-  useRef,
-  useState,
-} from 'react';
+/**
+ * StreamsCanvas — the React Flow canvas orchestrator.
+ *
+ * This file owns the canvas's React Flow state (nodes/edges) and the
+ * interaction wiring that has to live next to it: drag (with live grid snap via
+ * `onNodesChangeSnapped`), connect/reconnect, the routing-endpoint "puck"
+ * drag-to-connect, placement of new nodes from the palette, click-to-edit
+ * (`onNodeClick`), hover-to-spotlight-a-flow, search filtering, Cleanup
+ * auto-layout, and the mode/keyboard wiring. Everything that can stand on its
+ * own is a module under `./canvas/`:
+ *
+ *   constants / types / contexts ..... shared primitives
+ *   nodes/* ........................... the node components + registry
+ *   edges/* ........................... the connector edge, its path math,
+ *                                       and bridge (line-hop) geometry
+ *   (note: there is no "group" feature — selections stay flat)
+ *   node-data / seed-graph ............ default data + the production seed
+ *   auto-layout ....................... Cleanup layout + chain straightening
+ *   connected-flow .................... directed reachability (hover + select)
+ *   search ............................ KQL-like search → which streams show
+ *   canvas-toolbar / canvas-minimap ... the bottom toolbar and the minimap
+ *   canvas-context-menu ............... the right-click menu
+ *   use-canvas-history ................ undo/redo
+ *   use-canvas-shortcuts .............. ⌘A / ⌘Z / ⌘⇧Z
+ *   use-canvas-selection .............. Select-stream / Cleanup-selection + menu
+ *   use-edge-bridges .................. crossing-bridge computation
+ *
+ * Node/edge components reach back to the canvas via the contexts in
+ * `./canvas/contexts.ts` (opening flyouts, publishing edge segments for
+ * bridges) rather than threaded props.
+ */
+
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   Background,
-  BaseEdge,
   ConnectionLineType,
   Controls,
-  EdgeLabelRenderer,
   getNodesBounds,
-  getSmoothStepPath,
-  Handle,
   MarkerType,
-  Position,
   reconnectEdge,
   ReactFlow,
   ReactFlowProvider,
+  SelectionMode,
   useEdgesState,
-  useNodeConnections,
   useNodesState,
   useReactFlow,
   type Connection,
   type Edge,
-  type EdgeProps,
-  type EdgeTypes,
   type FinalConnectionState,
   type IsValidConnection,
   type Node,
-  type NodeProps,
-  type NodeTypes,
+  type NodeChange,
   type OnConnectStart,
   type ReactFlowInstance,
   type XYPosition,
 } from '@xyflow/react';
 import {
-  EuiBadge,
-  EuiButton,
-  EuiButtonEmpty,
-  EuiButtonGroup,
-  EuiButtonIcon,
   EuiFieldSearch,
-  EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiHealth,
-  EuiHorizontalRule,
-  EuiIcon,
   EuiPanel,
-  EuiPopover,
-  EuiSpacer,
   EuiText,
   useEuiTheme,
-  useGeneratedHtmlId,
 } from '@elastic/eui';
-import type { IconType } from '@elastic/eui';
-import { css, keyframes } from '@emotion/css';
+import { css } from '@emotion/css';
 import { i18n } from '@kbn/i18n';
+import '@xyflow/react/dist/style.css';
 
-import { SelectCursorIcon } from './select_cursor_icon';
-import { PipelineNodeIcon } from './pipeline_node_icon';
 import { DestinationFlyout } from './destination_flyout';
 import { SourceFlyout } from './source_flyout';
 import { PipelineFlyout } from './pipeline_flyout';
+import { CreatePipelineFlyout } from './create_pipeline_flyout';
 import { CreateRoutingFlyout } from './create_routing_flyout';
 import { StreamsListTableTools } from './streams_list_table_tools';
 import { STREAMS_TABLE_SEARCH_ARIA_LABEL } from './translations';
 
-import '@xyflow/react/dist/style.css';
-
-type CanvasNodeType = 'source' | 'destination';
-
-const DRAG_DATA_TYPE = 'application/streams-canvas-node';
-
-// The node-type pairs an edge may connect, as [sourceType, targetType]:
-//   - source → pipeline      (a pipeline transforms data in transit)
-//   - pipeline → destination
-//   - source → destination   (direct, no pipeline)
-//   - destination → destination (a destination's routing node feeding another)
-//   - destination → pipeline  (a destination's routing node feeding a pipeline
-//                              that precedes another destination)
-//   - routing → destination  (an inline routing node's branch feeding a destination)
-//   - routing → pipeline      (an inline routing node's branch feeding a pipeline
-//                              that precedes another destination)
-const ALLOWED_CONNECTIONS: ReadonlyArray<readonly [string, string]> = [
-  ['source', 'pipeline'],
-  ['pipeline', 'destination'],
-  ['source', 'destination'],
-  ['destination', 'destination'],
-  ['destination', 'pipeline'],
-  ['routing', 'destination'],
-  ['routing', 'pipeline'],
-];
-
-// Target node types a connector starting from the given source type may land on.
-function allowedTargetTypesFor(sourceType: string | undefined): string[] {
-  if (!sourceType) {
-    return [];
-  }
-  return ALLOWED_CONNECTIONS.filter(([from]) => from === sourceType).map(([, to]) => to);
-}
-
-// Source node types that may feed into the given target type (the inverse of
-// allowedTargetTypesFor; used when the tail/source end of a connector is dragged).
-function allowedSourceTypesFor(targetType: string | undefined): string[] {
-  if (!targetType) {
-    return [];
-  }
-  return ALLOWED_CONNECTIONS.filter(([, to]) => to === targetType).map(([from]) => from);
-}
-
-// The id of the routing endpoint node that a dangling routing edge ends at, if any.
-function danglingEndpointIdOf(edge: Pick<Edge, 'data'>): string | undefined {
-  return edge.data?.routingEndpointNodeId as string | undefined;
-}
-
-const noop = () => {};
-
-// Lets dynamically-created nodes and edges open the shared flyouts without
-// threading a callback through every node's/edge's data object.
-const DestinationFlyoutContext = createContext<(destinationName: string) => void>(noop);
-const SourceFlyoutContext = createContext<(sourceName: string) => void>(noop);
-const PipelineFlyoutContext = createContext<(edgeId: string) => void>(noop);
-// Opens the routing flyout for a routing condition triggered from a connector's
-// "Add step" menu. Applying it splices a routing node into that edge (mirroring
-// the pipeline-on-edge flow).
-const EdgeRoutingFlyoutContext = createContext<(edgeId: string) => void>(noop);
-
-interface SourceNodeData {
-  title: string;
-  subtitle: string;
-  rate: string;
-  [key: string]: unknown;
-}
-
-type DestinationMode = 'unconfigured' | 'configuring' | 'configured';
-type DestinationStorage = 'local' | 'external';
-
-interface DestinationNodeData {
-  title: string;
-  mode: DestinationMode;
-  meta?: string;
-  status?: string;
-  storage?: DestinationStorage;
-  [key: string]: unknown;
-}
-
-interface PipelineNodeData {
-  title: string;
-  /** Throughput shown in the hover stats card, e.g. "3.8k eps". */
-  eps?: string;
-  /** Processing latency shown in the hover stats card, e.g. "190ms". */
-  latency?: string;
-  [key: string]: unknown;
-}
-
-interface RoutingNodeData {
-  [key: string]: unknown;
-}
-
-type SourceFlowNode = Node<SourceNodeData, 'source'>;
-type DestinationFlowNode = Node<DestinationNodeData, 'destination'>;
-type PipelineFlowNode = Node<PipelineNodeData, 'pipeline'>;
-type RoutingFlowNode = Node<RoutingNodeData, 'routing'>;
-
-const hiddenHandleClassName = css`
-  visibility: hidden;
-`;
-
-// Connection anchors (the small circles at the ends of connectors, matching the
-// product reference). The anchor markup lives on ReactFlow handles so it doubles
-// as the connect/reconnect hit target.
-//
-// The handle ELEMENT is kept tiny at rest so it doesn't intercept clicks on the
-// node, while the visible dot is drawn with an ::after pseudo-element centered on
-// the handle's anchor point. This lets the canvas expand the handle to cover the
-// whole node *while a connection is being dragged* (see connectingHighlight
-// className) — making the entire node a forgiving drop target — without the dot
-// moving or the handle blocking clicks the rest of the time.
-//
-// States:
-//   - rest: a subtle grey dot, so the connection point is discoverable.
-//   - magnetized (`connectingto.valid`): a filled primary dot with a ring — the
-//     cursor has snapped to this anchor and releasing will connect here.
-const ANCHOR_DOT_SIZE = 9;
-function useAnchorHandleClassName() {
-  const { euiTheme } = useEuiTheme();
-  return css`
-    width: ${ANCHOR_DOT_SIZE}px;
-    height: ${ANCHOR_DOT_SIZE}px;
-    min-width: ${ANCHOR_DOT_SIZE}px;
-    min-height: ${ANCHOR_DOT_SIZE}px;
-    background: transparent;
-    border: none;
-
-    &::after {
-      content: '';
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      width: ${ANCHOR_DOT_SIZE}px;
-      height: ${ANCHOR_DOT_SIZE}px;
-      transform: translate(-50%, -50%);
-      background-color: ${euiTheme.colors.backgroundBasePlain};
-      border: ${euiTheme.border.width.thin} solid ${euiTheme.colors.mediumShade};
-      border-radius: 50%;
-      transition: background-color 80ms ease-out, border-color 80ms ease-out,
-        box-shadow 80ms ease-out;
-    }
-
-    &.connectingto.valid::after {
-      background-color: ${euiTheme.colors.primary};
-      border-color: ${euiTheme.colors.primary};
-      box-shadow: 0 0 0 3px ${euiTheme.colors.backgroundBasePrimary},
-        0 0 0 5px ${euiTheme.colors.primary};
-    }
-  `;
-}
-
-const inflate = keyframes`
-  from {
-    opacity: 0;
-    transform: scale(0.6);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
-`;
-
-const inflateClassName = css`
-  animation: ${inflate} 180ms ease-out;
-  transform-origin: center center;
-`;
-
-function SourceNodeContents({ data, onClick }: { data: SourceNodeData; onClick?: () => void }) {
-  const { euiTheme } = useEuiTheme();
-  const isClickable = Boolean(onClick);
-  return (
-    <EuiPanel
-      element={isClickable ? 'button' : 'div'}
-      hasShadow
-      paddingSize="m"
-      onClick={
-        isClickable
-          ? (event: React.MouseEvent) => {
-              event.stopPropagation();
-              onClick?.();
-            }
-          : undefined
-      }
-      className={`${isClickable ? 'nodrag' : ''} ${css`
-        display: flex;
-        flex-direction: column;
-        gap: ${euiTheme.size.xs};
-        width: 204px;
-        text-align: left;
-        ${isClickable ? 'cursor: pointer;' : ''}
-        border-radius: ${euiTheme.border.radius.medium};
-      `}`}
-    >
-      <div
-        className={css`
-          display: flex;
-          flex-direction: column;
-        `}
-      >
-        <EuiText
-          size="xs"
-          className={css`
-            font-weight: ${euiTheme.font.weight.semiBold};
-            color: ${euiTheme.colors.textParagraph};
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-          `}
-        >
-          {data.title}
-        </EuiText>
-        <EuiText size="xs" color="subdued">
-          {data.subtitle}
-        </EuiText>
-      </div>
-      <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center" justifyContent="spaceBetween">
-        <EuiFlexItem grow={false}>
-          <EuiText size="xs" color="subdued">
-            {data.rate}
-          </EuiText>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiHealth color="success">
-            <EuiText size="xs">
-              {i18n.translate('xpack.streams.streamsCanvas.healthy', {
-                defaultMessage: 'Healthy',
-              })}
-            </EuiText>
-          </EuiHealth>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </EuiPanel>
-  );
-}
-
-const SourceNode = memo(({ data }: NodeProps<SourceFlowNode>) => {
-  const openFlyout = useContext(SourceFlyoutContext);
-  const anchorHandleClassName = useAnchorHandleClassName();
-  return (
-    <div className={inflateClassName}>
-      <Handle type="target" position={Position.Left} className={hiddenHandleClassName} />
-      <SourceNodeContents data={data} onClick={() => openFlyout(data.title)} />
-      <Handle type="source" position={Position.Right} className={anchorHandleClassName} />
-    </div>
-  );
-});
-SourceNode.displayName = 'SourceNode';
-
-function DestinationTitle({ title, icon }: { title: string; icon: string }) {
-  const { euiTheme } = useEuiTheme();
-  return (
-    <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false} wrap={false}>
-      <EuiFlexItem grow={false}>
-        <EuiIcon type={icon} size="s" />
-      </EuiFlexItem>
-      <EuiFlexItem
-        className={css`
-          min-width: 0;
-        `}
-      >
-        <EuiText
-          size="xs"
-          className={css`
-            font-weight: ${euiTheme.font.weight.semiBold};
-            color: ${euiTheme.colors.textParagraph};
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-          `}
-        >
-          {title}
-        </EuiText>
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  );
-}
-
-function BorderedShell({
-  children,
-  className,
-  tone = 'danger',
-  hasShadow = false,
-}: {
-  children: React.ReactNode;
-  className?: string;
-  tone?: 'danger' | 'subdued';
-  hasShadow?: boolean;
-}) {
-  const { euiTheme } = useEuiTheme();
-  const borderColor = tone === 'danger' ? euiTheme.colors.danger : euiTheme.colors.borderBaseSubdued;
-  return (
-    <EuiPanel
-      hasShadow={hasShadow}
-      paddingSize="none"
-      className={`${css`
-        display: flex;
-        align-items: stretch;
-        gap: ${euiTheme.size.xxs};
-        padding: ${euiTheme.size.xs} ${euiTheme.size.xs} ${euiTheme.size.xs} ${euiTheme.size.s};
-        background-color: ${euiTheme.colors.backgroundBaseSubdued};
-        border: ${euiTheme.border.width.thin} solid ${borderColor};
-        border-radius: ${euiTheme.border.radius.medium};
-      `} ${className ?? ''}`}
-    >
-      {children}
-    </EuiPanel>
-  );
-}
-
-function UnconfiguredDestinationContents({
-  data,
-  onClick,
-}: {
-  data: DestinationNodeData;
-  onClick: () => void;
-}) {
-  const { euiTheme } = useEuiTheme();
-  return (
-    <BorderedShell>
-      <EuiPanel
-        element="button"
-        hasShadow={false}
-        hasBorder
-        paddingSize="s"
-        onClick={(event) => {
-          event.stopPropagation();
-          onClick();
-        }}
-        className={`nodrag ${css`
-          min-width: 140px;
-          cursor: pointer;
-          border-radius: ${euiTheme.border.radius.medium};
-        `}`}
-      >
-        <DestinationTitle title={data.title} icon="dashedCircle" />
-        <EuiText size="xs" color="subdued" textAlign="center">
-          {i18n.translate('xpack.streams.streamsCanvas.clickToConfigure', {
-            defaultMessage: 'Click to configure',
-          })}
-        </EuiText>
-      </EuiPanel>
-    </BorderedShell>
-  );
-}
-
-const STORAGE_OPTIONS = [
-  {
-    id: 'local',
-    label: i18n.translate('xpack.streams.streamsCanvas.storageLocal', {
-      defaultMessage: 'Local Elasticsearch',
-    }),
-  },
-  {
-    id: 'external',
-    label: i18n.translate('xpack.streams.streamsCanvas.storageExternal', {
-      defaultMessage: 'External storage',
-    }),
-  },
-];
-
-function ConfiguringDestinationContents({
-  data,
-  onCancel,
-  onSave,
-  onDelete,
-}: {
-  data: DestinationNodeData;
-  onCancel: () => void;
-  onSave: (name: string) => void;
-  onDelete: () => void;
-}) {
-  const { euiTheme } = useEuiTheme();
-  const [name, setName] = useState(data.title === NEW_DESTINATION_TITLE ? '' : data.title);
-  const [storage, setStorage] = useState<DestinationStorage>(data.storage ?? 'local');
-  const storageGroupId = useGeneratedHtmlId({ prefix: 'destinationStorage' });
-
-  // Prevent React Flow from panning/selecting while interacting with the form.
-  const stop = (event: React.SyntheticEvent) => event.stopPropagation();
-
-  return (
-    <BorderedShell
-      className={css`
-        width: 366px;
-        flex-shrink: 0;
-        align-items: flex-start;
-      `}
-    >
-      <EuiPanel
-        hasShadow={false}
-        hasBorder
-        paddingSize="s"
-        className={`nodrag nopan ${css`
-          flex: 1 1 0;
-          min-width: 0;
-          border-radius: ${euiTheme.border.radius.medium};
-        `}`}
-        onClick={stop}
-        onMouseDown={stop}
-      >
-        <DestinationTitle title={data.title} icon="dashedCircle" />
-        <EuiSpacer size="m" />
-        <EuiButtonGroup
-          legend={i18n.translate('xpack.streams.streamsCanvas.storageLegend', {
-            defaultMessage: 'Destination storage',
-          })}
-          options={STORAGE_OPTIONS}
-          idSelected={storage}
-          onChange={(id) => setStorage(id as DestinationStorage)}
-          buttonSize="compressed"
-          isFullWidth
-          name={storageGroupId}
-        />
-        <EuiSpacer size="m" />
-        <EuiFieldText
-          compressed
-          fullWidth
-          value={name}
-          onChange={(event) => setName(event.target.value)}
-          placeholder={i18n.translate('xpack.streams.streamsCanvas.namePlaceholder', {
-            defaultMessage: 'foo.bar',
-          })}
-          aria-label={i18n.translate('xpack.streams.streamsCanvas.nameAriaLabel', {
-            defaultMessage: 'Destination name',
-          })}
-        />
-        <EuiSpacer size="xs" />
-        <EuiText size="xs" color="subdued">
-          {i18n.translate('xpack.streams.streamsCanvas.nameHelpText', {
-            defaultMessage:
-              'Name your destination or leave to be renamed when connected to a source. This can\u2019t be changed.',
-          })}
-        </EuiText>
-        <EuiSpacer size="m" />
-        <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-          <EuiFlexItem grow={false}>
-            <EuiButtonIcon
-              iconType="trash"
-              color="danger"
-              display="base"
-              onClick={onDelete}
-              aria-label={i18n.translate('xpack.streams.streamsCanvas.deleteDestination', {
-                defaultMessage: 'Delete destination',
-              })}
-            />
-          </EuiFlexItem>
-          <EuiFlexItem />
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty size="s" color="text" onClick={onCancel}>
-              {i18n.translate('xpack.streams.streamsCanvas.cancel', {
-                defaultMessage: 'Cancel',
-              })}
-            </EuiButtonEmpty>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButton size="s" fill onClick={() => onSave(name)}>
-              {i18n.translate('xpack.streams.streamsCanvas.save', {
-                defaultMessage: 'Save',
-              })}
-            </EuiButton>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiPanel>
-    </BorderedShell>
-  );
-}
-
-function ConfiguredDestinationContents({
-  data,
-  isConnected,
-  onClick,
-}: {
-  data: DestinationNodeData;
-  isConnected: boolean;
-  onClick?: () => void;
-}) {
-  const { euiTheme } = useEuiTheme();
-  const isClickable = Boolean(onClick);
-  return (
-    <BorderedShell
-      tone="subdued"
-      hasShadow
-      className={css`
-        min-width: 211px;
-      `}
-    >
-      <EuiPanel
-        element={isClickable ? 'button' : 'div'}
-        hasShadow={false}
-        hasBorder
-        paddingSize="s"
-        onClick={
-          isClickable
-            ? (event: React.MouseEvent) => {
-                event.stopPropagation();
-                onClick?.();
-              }
-            : undefined
-        }
-        className={`${isClickable ? 'nodrag' : ''} ${css`
-          flex: 1 1 0;
-          min-width: 0;
-          text-align: left;
-          ${isClickable ? 'cursor: pointer;' : ''}
-          border-radius: ${euiTheme.border.radius.medium};
-        `}`}
-      >
-        <DestinationTitle title={data.title} icon="package" />
-        {isConnected ? (
-          <EuiFlexGroup
-            gutterSize="s"
-            alignItems="center"
-            responsive={false}
-            justifyContent="spaceBetween"
-          >
-            <EuiFlexItem grow={false}>
-              <EuiText size="xs" color="subdued">
-                {data.meta}
-              </EuiText>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiBadge color="success">{data.status}</EuiBadge>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        ) : (
-          <EuiText size="xs" color="subdued">
-            {i18n.translate('xpack.streams.streamsCanvas.dataNotFlowingIn', {
-              defaultMessage: 'Data not flowing in',
-            })}
-          </EuiText>
-        )}
-      </EuiPanel>
-    </BorderedShell>
-  );
-}
-
-const DestinationNode = memo(({ id, data }: NodeProps<DestinationFlowNode>) => {
-  const { setNodes, deleteElements } = useReactFlow();
-  const openFlyout = useContext(DestinationFlyoutContext);
-  const anchorHandleClassName = useAnchorHandleClassName();
-
-  // A destination is "connected to a source" once an incoming (target) edge exists.
-  // Until then it stays editable: clicking it re-opens the configuration card.
-  const incomingConnections = useNodeConnections({ handleType: 'target' });
-  const isConnectedToSource = incomingConnections.length > 0;
-
-  const updateData = useCallback(
-    (patch: Partial<DestinationNodeData>) => {
-      setNodes((current) =>
-        current.map((node) =>
-          node.id === id ? { ...node, data: { ...node.data, ...patch } } : node
-        )
-      );
-    },
-    [id, setNodes]
-  );
-
-  const startConfiguring = useCallback(() => {
-    updateData({ mode: 'configuring' });
-  }, [updateData]);
-
-  const cancelConfiguring = useCallback(() => {
-    updateData({ ...unconfiguredDestinationData() });
-  }, [updateData]);
-
-  const save = useCallback(
-    (name: string) => {
-      updateData({ ...configuredDestinationData(name) });
-    },
-    [updateData]
-  );
-
-  const remove = useCallback(() => {
-    deleteElements({ nodes: [{ id }] });
-  }, [deleteElements, id]);
-
-  return (
-    <div className={inflateClassName}>
-      <Handle type="target" position={Position.Left} className={anchorHandleClassName} />
-      {data.mode === 'configured' ? (
-        <ConfiguredDestinationContents
-          data={data}
-          isConnected={isConnectedToSource}
-          onClick={isConnectedToSource ? () => openFlyout(data.title) : startConfiguring}
-        />
-      ) : data.mode === 'configuring' ? (
-        <ConfiguringDestinationContents
-          data={data}
-          onCancel={cancelConfiguring}
-          onSave={save}
-          onDelete={remove}
-        />
-      ) : (
-        <UnconfiguredDestinationContents data={data} onClick={startConfiguring} />
-      )}
-      {/*
-        Legacy default source handle kept for layout compatibility. The routing
-        handle above is the real output anchor, so this one is non-interactive to
-        avoid two overlapping connectable points on the right edge.
-      */}
-      <Handle
-        type="source"
-        position={Position.Right}
-        isConnectable={false}
-        className={hiddenHandleClassName}
-      />
-    </div>
-  );
-});
-DestinationNode.displayName = 'DestinationNode';
-
-function PipelineNodeContents({ data }: { data: PipelineNodeData }) {
-  const { euiTheme } = useEuiTheme();
-
-  const stats = [data.eps, data.latency].filter(Boolean).join('・');
-
-  // The "Big" pipeline node from the design: a horizontal card that always shows
-  // the pipeline icon alongside its name and throughput/latency stats.
-  return (
-    <EuiPanel
-      hasShadow
-      paddingSize="none"
-      className={css`
-        display: flex;
-        gap: ${euiTheme.size.s};
-        align-items: center;
-        justify-content: center;
-        width: 120px;
-        min-width: 120px;
-        padding: 6px ${euiTheme.size.s};
-        border-radius: ${euiTheme.border.radius.small};
-      `}
-    >
-      <EuiIcon type={PipelineNodeIcon} size="s" color={euiTheme.colors.textParagraph} />
-      <div
-        className={css`
-          display: flex;
-          flex: 1 0 0;
-          min-width: 0;
-          flex-direction: column;
-          align-items: flex-start;
-          white-space: nowrap;
-        `}
-      >
-        <EuiText
-          className={css`
-            font-size: 10.5px;
-            line-height: 16px;
-            color: ${euiTheme.colors.textParagraph};
-            overflow: hidden;
-            text-overflow: ellipsis;
-            max-width: 100%;
-          `}
-        >
-          {data.title}
-        </EuiText>
-        {stats ? (
-          <EuiText
-            className={css`
-              font-size: 9px;
-              line-height: 12px;
-              color: ${euiTheme.colors.textSubdued};
-            `}
-          >
-            {stats}
-          </EuiText>
-        ) : null}
-      </div>
-    </EuiPanel>
-  );
-}
-
-const PipelineNode = memo(({ data }: NodeProps<PipelineFlowNode>) => {
-  const anchorHandleClassName = useAnchorHandleClassName();
-  return (
-    <div className={inflateClassName}>
-      <Handle type="target" position={Position.Left} className={anchorHandleClassName} />
-      <PipelineNodeContents data={data} />
-      <Handle type="source" position={Position.Right} className={anchorHandleClassName} />
-    </div>
-  );
-});
-PipelineNode.displayName = 'PipelineNode';
-
-// A routing node placed inline on a connector (created by applying a routing
-// condition from the connector's "Add step" menu). It mirrors the small inline
-// pipeline node — a white, subtly bordered panel with a shadow — but carries a
-// primary "branch" glyph rotated 90° as the routing cue.
-function RoutingNodeContents() {
-  const { euiTheme } = useEuiTheme();
-  return (
-    <div
-      className={css`
-        position: relative;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-      `}
-    >
-      <EuiPanel
-        hasShadow
-        paddingSize="m"
-        className={css`
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          border: ${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBaseSubdued};
-          border-radius: ${euiTheme.border.radius.small};
-
-          .euiIcon {
-            transform: rotate(90deg);
-          }
-        `}
-      >
-        <EuiIcon type="branch" size="m" color="primary" />
-      </EuiPanel>
-    </div>
-  );
-}
-
-const RoutingNode = memo((_props: NodeProps<RoutingFlowNode>) => {
-  const anchorHandleClassName = useAnchorHandleClassName();
-  return (
-    <div className={inflateClassName}>
-      <Handle type="target" position={Position.Left} className={anchorHandleClassName} />
-      <RoutingNodeContents />
-      <Handle type="source" position={Position.Right} className={anchorHandleClassName} />
-    </div>
-  );
-});
-RoutingNode.displayName = 'RoutingNode';
-
-// The dangling end of a freshly created routing connector. The connector's own
-// target anchor circle (drawn by the edge) sits at this node's handle and is the
-// grab point; this node just carries a hint label and is itself draggable, so the
-// user can reposition the loose end and drop it onto a destination.
-function RoutingEndpointContents() {
-  const { euiTheme } = useEuiTheme();
-  return (
-    <div
-      className={css`
-        display: flex;
-        align-items: center;
-        justify-content: flex-end;
-        padding-right: ${euiTheme.size.s};
-        cursor: grab;
-        &:active {
-          cursor: grabbing;
-        }
-      `}
-    >
-      <EuiText
-        size="xs"
-        color="subdued"
-        className={css`
-          white-space: nowrap;
-        `}
-      >
-        {i18n.translate('xpack.streams.streamsCanvas.dragToConnect', {
-          defaultMessage: 'Drag to a destination',
-        })}
-      </EuiText>
-    </div>
-  );
-}
-
-const RoutingEndpointNode = memo(() => {
-  return (
-    <div className={inflateClassName}>
-      <Handle type="target" position={Position.Right} className={hiddenHandleClassName} />
-      <RoutingEndpointContents />
-    </div>
-  );
-});
-RoutingEndpointNode.displayName = 'RoutingEndpointNode';
-
-const nodeTypes: NodeTypes = {
-  source: SourceNode,
-  destination: DestinationNode,
-  pipeline: PipelineNode,
-  routing: RoutingNode,
-  routingEndpoint: RoutingEndpointNode,
-};
-
-function EdgeMenuItem({
-  title,
-  description,
-  onClick,
-}: {
-  title: string;
-  description: string;
-  onClick: () => void;
-}) {
-  const { euiTheme } = useEuiTheme();
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className={css`
-        width: 100%;
-        text-align: left;
-        background: transparent;
-        border: none;
-        padding: ${euiTheme.size.xs} 0;
-        cursor: pointer;
-        &:hover p:first-of-type {
-          text-decoration: underline;
-        }
-      `}
-    >
-      <EuiText
-        size="xs"
-        className={css`
-          font-weight: ${euiTheme.font.weight.medium};
-          color: ${euiTheme.colors.textPrimary};
-        `}
-      >
-        {title}
-      </EuiText>
-      <EuiText size="xs" color="subdued">
-        {description}
-      </EuiText>
-    </button>
-  );
-}
-
-function PipelineRoutingEdge({
-  id,
-  sourceX,
-  sourceY,
-  targetX,
-  targetY,
-  sourcePosition,
-  targetPosition,
-  markerEnd,
-  style,
-  data,
-}: EdgeProps) {
-  const { euiTheme } = useEuiTheme();
-  const openPipelineFlyout = useContext(PipelineFlyoutContext);
-  const openEdgeRoutingFlyout = useContext(EdgeRoutingFlyoutContext);
-  const [isHovered, setIsHovered] = useState(false);
-  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-
-  // A dangling routing connector (one whose head is not yet wired to a
-  // destination) always shows a prominent grab dot at its loose end as a
-  // call-to-action to connect it.
-  const isDanglingRouting = Boolean(data?.routingEndpointNodeId);
-
-  // Square-elbow (orthogonal) connectors with lightly rounded corners, matching
-  // the product reference where routing connectors use right-angle segments.
-  const [edgePath, labelX, labelY] = getSmoothStepPath({
-    sourceX,
-    sourceY,
-    sourcePosition,
-    targetX,
-    targetY,
-    targetPosition,
-    borderRadius: 8,
-  });
-
-  const isActive = isHovered || isPopoverOpen;
-  const strokeColor = isActive ? euiTheme.colors.primary : euiTheme.colors.mediumShade;
-
-  // The connectors' grab anchors are the node handles themselves (small circles
-  // at each connection point), so we don't draw anchors on a normal edge. The one
-  // exception is a dangling routing connector: its loose end rests on an endpoint
-  // node with no visible handle, so we draw a filled primary dot there as a
-  // call-to-action to connect it to a destination.
-  return (
-    <g
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-    >
-      <BaseEdge
-        id={id}
-        path={edgePath}
-        markerEnd={isDanglingRouting ? undefined : markerEnd}
-        style={{ ...style, stroke: strokeColor, strokeWidth: 1.5 }}
-        interactionWidth={24}
-      />
-      {isDanglingRouting ? (
-        <circle
-          cx={targetX}
-          cy={targetY}
-          r={5}
-          stroke={euiTheme.colors.primary}
-          strokeWidth={1.5}
-          fill={euiTheme.colors.primary}
-          style={{ pointerEvents: 'none' }}
-        />
-      ) : null}
-      <EdgeLabelRenderer>
-        {isActive ? (
-          <div
-            onMouseEnter={() => setIsHovered(true)}
-            onMouseLeave={() => setIsHovered(false)}
-            className={`nodrag nopan ${css`
-              position: absolute;
-              transform: translate(-50%, -50%) translate(${labelX}px, ${labelY}px);
-              pointer-events: all;
-              z-index: 5;
-            `}`}
-          >
-            <EuiPopover
-              isOpen={isPopoverOpen}
-              closePopover={() => setIsPopoverOpen(false)}
-              anchorPosition="upCenter"
-              panelPaddingSize="none"
-              button={
-                <button
-                  type="button"
-                  aria-label={i18n.translate('xpack.streams.streamsCanvas.addStep', {
-                    defaultMessage: 'Add step',
-                  })}
-                  onClick={(event) => {
-                    event.stopPropagation();
-                    setIsPopoverOpen((open) => !open);
-                  }}
-                  className={css`
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    width: 24px;
-                    height: 24px;
-                    padding: 0;
-                    cursor: pointer;
-                    border-radius: 50%;
-                    color: ${euiTheme.colors.primary};
-                    background-color: ${euiTheme.colors.backgroundBasePrimary};
-                    border: ${euiTheme.border.width.thin} solid ${euiTheme.colors.primary};
-                    box-shadow: 0 1px 2px rgba(43, 57, 79, 0.16), 0 2px 4px rgba(43, 57, 79, 0.05);
-                  `}
-                >
-                  <EuiIcon type="plus" size="s" color="primary" />
-                </button>
-              }
-            >
-              <EuiPanel
-                hasShadow={false}
-                paddingSize="none"
-                className={css`
-                  padding: ${euiTheme.size.s} ${euiTheme.size.m};
-                  min-width: 220px;
-                `}
-              >
-                <EdgeMenuItem
-                  title={i18n.translate('xpack.streams.streamsCanvas.pipeline', {
-                    defaultMessage: 'Pipeline',
-                  })}
-                  description={i18n.translate('xpack.streams.streamsCanvas.pipelineDescription', {
-                    defaultMessage: 'transform your data in transit',
-                  })}
-                  onClick={() => {
-                    setIsPopoverOpen(false);
-                    openPipelineFlyout(id);
-                  }}
-                />
-                <EuiHorizontalRule margin="xs" />
-                <EdgeMenuItem
-                  title={i18n.translate('xpack.streams.streamsCanvas.routing', {
-                    defaultMessage: 'Routing',
-                  })}
-                  description={i18n.translate('xpack.streams.streamsCanvas.routingDescription', {
-                    defaultMessage: 'conditionally route or duplicate your data',
-                  })}
-                  onClick={() => {
-                    setIsPopoverOpen(false);
-                    openEdgeRoutingFlyout(id);
-                  }}
-                />
-              </EuiPanel>
-            </EuiPopover>
-          </div>
-        ) : null}
-      </EdgeLabelRenderer>
-    </g>
-  );
-}
-
-const edgeTypes: EdgeTypes = {
-  pipelineRouting: PipelineRoutingEdge,
-};
-
-function sourceData(): SourceNodeData {
-  return {
-    title: i18n.translate('xpack.streams.streamsCanvas.sourceTitle', {
-      defaultMessage: 'AWS CloudWatch',
-    }),
-    subtitle: i18n.translate('xpack.streams.streamsCanvas.sourceSubtitle', {
-      defaultMessage: 'Logs \u00b7 Push via Firehose',
-    }),
-    rate: '11.9k/s',
-  };
-}
-
-const DEFAULT_DESTINATION_TITLE = i18n.translate('xpack.streams.streamsCanvas.destinationTitle', {
-  defaultMessage: 'Destination name',
-});
-
-const NEW_DESTINATION_TITLE = i18n.translate('xpack.streams.streamsCanvas.newDestinationTitle', {
-  defaultMessage: 'New destination',
-});
-
-function configuredDestinationData(title?: string): DestinationNodeData {
-  return {
-    title: title?.trim() || DEFAULT_DESTINATION_TITLE,
-    mode: 'configured',
-    meta: '8.1k eps\u30fb175ms',
-    status: i18n.translate('xpack.streams.streamsCanvas.destinationStatus', {
-      defaultMessage: 'Good',
-    }),
-  };
-}
-
-function unconfiguredDestinationData(): DestinationNodeData {
-  return {
-    title: NEW_DESTINATION_TITLE,
-    mode: 'unconfigured',
-  };
-}
-
-function pipelineData(): PipelineNodeData {
-  return {
-    title: i18n.translate('xpack.streams.streamsCanvas.pipelineNodeName', {
-      defaultMessage: 'MyPipelineName',
-    }),
-    eps: '3.8k eps',
-    latency: '190ms',
-  };
-}
-
-function routingData(): RoutingNodeData {
-  return {};
-}
-
-function defaultDataFor(type: CanvasNodeType): SourceNodeData | DestinationNodeData {
-  return type === 'source' ? sourceData() : configuredDestinationData();
-}
-
-let nodeIdCounter = 0;
-function createNode(type: CanvasNodeType, position: XYPosition): Node {
-  nodeIdCounter += 1;
-  // Newly added destinations start unconfigured until the user sets them up.
-  const data = type === 'source' ? sourceData() : unconfiguredDestinationData();
-  return {
-    id: `${type}-${Date.now()}-${nodeIdCounter}`,
-    type,
-    position,
-    data,
-  };
-}
-
-const initialNodes: Node[] = [
-  {
-    id: 'source-1',
-    type: 'source',
-    position: { x: 0, y: 0 },
-    data: defaultDataFor('source'),
-  },
-  {
-    id: 'destination-1',
-    type: 'destination',
-    position: { x: 360, y: 18 },
-    data: defaultDataFor('destination'),
-  },
-];
-
-const initialEdges: Edge[] = [
-  {
-    id: 'e-source-1-destination-1',
-    source: 'source-1',
-    target: 'destination-1',
-    type: 'pipelineRouting',
-  },
-];
-
-/**
- * A structural fingerprint of the canvas: which nodes exist (id + type) and how
- * they are wired (edge id + endpoints). Used to detect when the user has made a
- * meaningful change (added/removed/connected nodes) versus transient churn like
- * selection, hover, or node measurement. Intentionally ignores positions and
- * node data so neither moving nor selecting a node flips the "dirty" flag.
- */
-function canvasSignature(nodes: Node[], edges: Edge[]): string {
-  const nodePart = nodes
-    .map((node) => `${node.id}:${node.type ?? ''}`)
-    .sort()
-    .join('|');
-  const edgePart = edges
-    .map(
-      (edge) =>
-        `${edge.id}:${edge.source}>${edge.target}:${edge.sourceHandle ?? ''}>${
-          edge.targetHandle ?? ''
-        }`
-    )
-    .sort()
-    .join('|');
-  return `${nodePart}#${edgePart}`;
-}
-
-const INITIAL_CANVAS_SIGNATURE = canvasSignature(initialNodes, initialEdges);
-
-interface PaletteButtonProps {
-  type: CanvasNodeType;
-  iconType: string;
-  label: string;
-  isActive: boolean;
-  onActivate: (type: CanvasNodeType) => void;
-}
-
-function PaletteButton({ type, iconType, label, isActive, onActivate }: PaletteButtonProps) {
-  const { euiTheme } = useEuiTheme();
-
-  const onDragStart = useCallback(
-    (event: React.DragEvent) => {
-      event.dataTransfer.setData(DRAG_DATA_TYPE, type);
-      event.dataTransfer.effectAllowed = 'move';
-    },
-    [type]
-  );
-
-  return (
-    <EuiPanel
-      element="button"
-      hasShadow={false}
-      hasBorder
-      paddingSize="s"
-      draggable
-      onDragStart={onDragStart}
-      onClick={() => onActivate(type)}
-      className={css`
-        cursor: grab;
-        border-radius: ${euiTheme.border.radius.medium};
-        ${isActive ? `border-color: ${euiTheme.colors.primary};` : ''}
-        &:active {
-          cursor: grabbing;
-        }
-      `}
-    >
-      <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-        <EuiFlexItem grow={false}>
-          <EuiIcon type={iconType} />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiText
-            size="xs"
-            className={css`
-              font-weight: ${euiTheme.font.weight.medium};
-              color: ${euiTheme.colors.textParagraph};
-            `}
-          >
-            {label}
-          </EuiText>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </EuiPanel>
-  );
-}
-
-interface CanvasControlsProps {
-  placementType: CanvasNodeType | null;
-  onActivatePlacement: (type: CanvasNodeType) => void;
-}
-
-function CanvasControls({ placementType, onActivatePlacement }: CanvasControlsProps) {
-  const { euiTheme } = useEuiTheme();
-
-  const toolButton = (iconType: IconType, label: string) => (
-    <EuiButtonIcon iconType={iconType} color="text" size="s" aria-label={label} />
-  );
-
-  const verticalRule = (
-    <EuiHorizontalRule
-      margin="none"
-      className={css`
-        block-size: ${euiTheme.size.l};
-        inline-size: ${euiTheme.border.width.thin};
-      `}
-    />
-  );
-
-  return (
-    <EuiPanel
-      hasShadow
-      paddingSize="s"
-      className={css`
-        position: absolute;
-        bottom: ${euiTheme.size.l};
-        left: 50%;
-        transform: translateX(-50%);
-        z-index: 5;
-        border-radius: ${euiTheme.border.radius.medium};
-      `}
-    >
-      <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-        <EuiFlexItem grow={false}>
-          {toolButton(
-            SelectCursorIcon,
-            i18n.translate('xpack.streams.streamsCanvas.selectTool', {
-              defaultMessage: 'Select',
-            })
-          )}
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          {toolButton(
-            'grab',
-            i18n.translate('xpack.streams.streamsCanvas.panTool', {
-              defaultMessage: 'Pan',
-            })
-          )}
-        </EuiFlexItem>
-
-        <EuiFlexItem grow={false}>{verticalRule}</EuiFlexItem>
-
-        <EuiFlexItem grow={false}>
-          {toolButton(
-            'editorUndo',
-            i18n.translate('xpack.streams.streamsCanvas.undo', {
-              defaultMessage: 'Undo',
-            })
-          )}
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          {toolButton(
-            'editorRedo',
-            i18n.translate('xpack.streams.streamsCanvas.redo', {
-              defaultMessage: 'Redo',
-            })
-          )}
-        </EuiFlexItem>
-
-        <EuiFlexItem grow={false}>{verticalRule}</EuiFlexItem>
-
-        <EuiFlexItem grow={false}>
-          <PaletteButton
-            type="source"
-            iconType="dashedCircle"
-            label={i18n.translate('xpack.streams.streamsCanvas.addSource', {
-              defaultMessage: 'Source',
-            })}
-            isActive={placementType === 'source'}
-            onActivate={onActivatePlacement}
-          />
-        </EuiFlexItem>
-
-        <EuiFlexItem grow={false}>
-          <PaletteButton
-            type="destination"
-            iconType="package"
-            label={i18n.translate('xpack.streams.streamsCanvas.addDestination', {
-              defaultMessage: 'Destination',
-            })}
-            isActive={placementType === 'destination'}
-            onActivate={onActivatePlacement}
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </EuiPanel>
-  );
-}
+import {
+  ALLOWED_CONNECTIONS,
+  allowedSourceTypesFor,
+  allowedTargetTypesFor,
+  danglingEndpointIdOf,
+  DRAG_DATA_TYPE,
+  GRID_SIZE,
+  noop,
+  type CanvasNodeType,
+} from './canvas/constants';
+import type { DestinationNodeData, PipelineNodeData, SourceNodeData } from './canvas/types';
+import {
+  DestinationFlyoutContext,
+  EdgeHopsContext,
+  EdgeRoutingFlyoutContext,
+  EdgeSegmentsContext,
+  PipelineFlyoutContext,
+  SourceFlyoutContext,
+} from './canvas/contexts';
+import { useEdgeBridges } from './canvas/use-edge-bridges';
+import {
+  createNode,
+  pipelineData,
+  routingData,
+  sourceData,
+  unconfiguredDestinationData,
+} from './canvas/node-data';
+import { initialEdges, initialNodes } from './canvas/seed-graph';
+import { canvasSignature, INITIAL_CANVAS_SIGNATURE } from './canvas/canvas-signature';
+import { computeCleanupLayout, straightenChains } from './canvas/auto-layout';
+import { flowDirectionFor, reachableFlow } from './canvas/connected-flow';
+import { evaluateSearch } from './canvas/search';
+import { nodeTypes } from './canvas/nodes/node-types';
+import { SourceNodeContents } from './canvas/nodes/source-node';
+import { UnconfiguredDestinationContents } from './canvas/nodes/destination-node';
+import { edgeTypes } from './canvas/edges/pipeline-routing-edge';
+import { CanvasControls } from './canvas/canvas-toolbar';
+import { useCanvasHistory } from './canvas/use-canvas-history';
+import { useCanvasShortcuts } from './canvas/use-canvas-shortcuts';
+import { useCanvasSelection } from './canvas/use-canvas-selection';
+import { CanvasContextMenu } from './canvas/canvas-context-menu';
+
+// Bound the pannable area so the user can't stray far from the streams. Derived
+// from the seed graph's footprint plus generous padding (room to rearrange, but
+// not to get lost in empty space). Used as React Flow's translateExtent.
+const EXTENT_PADDING = 700;
+const SEED_NODE_WIDTH = 300;
+const SEED_NODE_HEIGHT = 140;
+const CANVAS_TRANSLATE_EXTENT: [[number, number], [number, number]] = (() => {
+  const xs = initialNodes.map((n) => n.position.x);
+  const ys = initialNodes.map((n) => n.position.y);
+  return [
+    [Math.min(...xs) - EXTENT_PADDING, Math.min(...ys) - EXTENT_PADDING],
+    [
+      Math.max(...xs) + SEED_NODE_WIDTH + EXTENT_PADDING,
+      Math.max(...ys) + SEED_NODE_HEIGHT + EXTENT_PADDING,
+    ],
+  ];
+})();
 
 function ShadowNode({ type, position }: { type: CanvasNodeType; position: XYPosition }) {
   // Mirror what createNode produces so the preview matches the placed node.
@@ -1356,9 +157,13 @@ function ShadowNode({ type, position }: { type: CanvasNodeType; position: XYPosi
       `}
     >
       {type === 'source' ? (
-        <SourceNodeContents data={data as SourceNodeData} />
+        <SourceNodeContents data={data as SourceNodeData} interactive={false} />
       ) : (
-        <UnconfiguredDestinationContents data={data as DestinationNodeData} onClick={noop} />
+        <UnconfiguredDestinationContents
+          data={data as DestinationNodeData}
+          onClick={noop}
+          interactive={false}
+        />
       )}
     </div>
   );
@@ -1366,10 +171,36 @@ function ShadowNode({ type, position }: { type: CanvasNodeType; position: XYPosi
 
 function StreamsCanvasInner() {
   const { euiTheme } = useEuiTheme();
-  const { screenToFlowPosition, getNodes, getEdges, getIntersectingNodes } = useReactFlow();
+  const { screenToFlowPosition, getNodes, getEdges, getIntersectingNodes, fitView } =
+    useReactFlow();
 
   const [nodes, setNodes, onNodesChange] = useNodesState<Node>(initialNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState<Edge>(initialEdges);
+
+  // Snap nodes to the grid the connectors use, LIVE, by rewriting drag position
+  // changes before they're applied (rather than fighting React Flow with a
+  // separate setNodes). Each dragged card's vertical CENTER — where its handles
+  // sit — lands on the grid, so it steps on exactly the same grid as the links
+  // and there's no jump-into-place on release. Pucks and groups are left free.
+  const onNodesChangeSnapped = useCallback(
+    (changes: NodeChange<Node>[]) => {
+      const snapped = changes.map((change) => {
+        if (change.type !== 'position' || !change.position || !change.dragging) {
+          return change;
+        }
+        const node = nodes.find((n) => n.id === change.id);
+        if (!node || node.type === 'routingEndpoint') {
+          return change;
+        }
+        const h = node.measured?.height ?? node.height ?? 0;
+        const x = Math.round(change.position.x / GRID_SIZE) * GRID_SIZE;
+        const centerY = Math.round((change.position.y + h / 2) / GRID_SIZE) * GRID_SIZE;
+        return { ...change, position: { x, y: centerY - h / 2 } };
+      });
+      onNodesChange(snapped);
+    },
+    [nodes, onNodesChange]
+  );
 
   // The "Save changes" button stays disabled until the user makes a meaningful
   // edit to the canvas. We derive "dirty" by comparing a structural signature of
@@ -1380,12 +211,27 @@ function StreamsCanvasInner() {
     [nodes, edges]
   );
 
+  // Bridge (line-hop) registry + computed hops for crossing connectors. See
+  // useEdgeBridges — edges publish exact segments, hops come back here.
+  const { edgeHops, segmentRegistry } = useEdgeBridges();
+
   const wrapperRef = useRef<HTMLDivElement>(null);
   // Tracks whether the in-progress edge reconnection landed on a valid handle.
   // If it didn't (dropped on empty canvas), onReconnectEnd disconnects the edge.
   const reconnectSucceededRef = useRef(false);
+  // True while a connection is being drawn/reconnected. Hover-to-spotlight is
+  // suppressed during this so dimming doesn't fade out (and visually fight) the
+  // target anchors the user is aiming at.
+  const connectingRef = useRef(false);
   const [placementType, setPlacementType] = useState<CanvasNodeType | null>(null);
   const [shadowPosition, setShadowPosition] = useState<XYPosition | null>(null);
+  // Canvas interaction mode:
+  //   - 'select' (mouse tool): left-drag on empty canvas draws a selection box;
+  //     selected nodes move together; individual nodes are draggable. Panning is
+  //     on middle/right mouse so left-drag stays free for selection.
+  //   - 'pan' (hand tool): left-drag pans the canvas (grab/grabbing cursor) and
+  //     nodes are locked in place.
+  const [canvasMode, setCanvasMode] = useState<'select' | 'pan'>('select');
   // Presentational search box for the canvas toolbar (mirrors the list tables).
   const [searchQuery, setSearchQuery] = useState('');
   const [flyoutDestination, setFlyoutDestination] = useState<string | null>(null);
@@ -1394,6 +240,13 @@ function StreamsCanvasInner() {
   // The id of the connector whose "Add step" menu opened the routing flyout.
   // Applying a routing condition splices a routing node into that edge.
   const [routingFlyoutEdgeId, setRoutingFlyoutEdgeId] = useState<string | null>(null);
+  // Editing an EXISTING pipeline / routing node: clicking the node opens the
+  // same flyout used to create it (in a view/edit capacity). Kept separate from
+  // the edge-triggered "Add step" flow above, which splices a new node in.
+  // For a pipeline node we hold the clicked node's name so the editor opens
+  // preloaded with that pipeline (rather than the pipeline picker); null = closed.
+  const [pipelineNodeName, setPipelineNodeName] = useState<string | null>(null);
+  const [routingNodeFlyoutOpen, setRoutingNodeFlyoutOpen] = useState(false);
   // While an end of a connector (or a brand-new connection) is being dragged:
   //   - connectingFromNodeId: the node the drag is anchored to (excluded from the
   //     highlight, since you can't connect a node to itself).
@@ -1408,7 +261,14 @@ function StreamsCanvasInner() {
   // While dragging the routing-endpoint puck: the valid target node it is currently
   // hovering over (so we can fill in that node's anchor as the imminent drop point).
   const [hoveredTargetNodeId, setHoveredTargetNodeId] = useState<string | null>(null);
-
+  // The flow (connected component) of the node currently under the cursor.
+  // Everything outside it is dimmed to spotlight the hovered flow.
+  const [hoveredFlow, setHoveredFlow] = useState<{
+    nodeIds: Set<string>;
+    edgeIds: Set<string>;
+  } | null>(null);
+  // Right-click context menu over a selection: screen position + the node ids
+  // it acts on. Null when closed.
   const openDestinationFlyout = useCallback((destinationName: string) => {
     setFlyoutDestination(destinationName);
   }, []);
@@ -1416,6 +276,25 @@ function StreamsCanvasInner() {
   const openSourceFlyout = useCallback((sourceName: string) => {
     setFlyoutSource(sourceName);
   }, []);
+
+  // Undo / redo (see useCanvasHistory). recordHistory() is called at the start
+  // of each mutating action so undo can restore the pre-change state.
+  const { recordHistory, undo, redo, canUndo, canRedo } = useCanvasHistory({
+    getNodes,
+    getEdges,
+    setNodes,
+    setEdges,
+  });
+
+  // Selection actions + right-click context-menu state (see useCanvasSelection).
+  const {
+    contextMenu,
+    setContextMenu,
+    selectStream,
+    cleanupSelected,
+    onSelectionContextMenu,
+    onNodeContextMenu,
+  } = useCanvasSelection({ setNodes, recordHistory });
 
   const openPipelineFlyout = useCallback((edgeId: string) => {
     setPipelineFlyoutEdgeId(edgeId);
@@ -1439,6 +318,7 @@ function StreamsCanvasInner() {
     const destinationNode = targetEdge && getNodes().find((node) => node.id === targetEdge.target);
 
     if (targetEdge && sourceNode && destinationNode) {
+      recordHistory();
       const pipelineNodeId = `pipeline-${Date.now()}`;
 
       // Center the small pipeline node on the connector: horizontally between the
@@ -1493,7 +373,7 @@ function StreamsCanvasInner() {
     }
 
     setPipelineFlyoutEdgeId(null);
-  }, [pipelineFlyoutEdgeId, getEdges, getNodes, setNodes, setEdges]);
+  }, [pipelineFlyoutEdgeId, getEdges, getNodes, setNodes, setEdges, recordHistory]);
 
   const openEdgeRoutingFlyout = useCallback((edgeId: string) => {
     setRoutingFlyoutEdgeId(edgeId);
@@ -1518,6 +398,7 @@ function StreamsCanvasInner() {
     const destinationNode = targetEdge && getNodes().find((node) => node.id === targetEdge.target);
 
     if (targetEdge && sourceNode && destinationNode) {
+      recordHistory();
       const routingNodeId = `routing-${Date.now()}`;
       const endpointNodeId = `routing-endpoint-${Date.now()}`;
 
@@ -1601,7 +482,7 @@ function StreamsCanvasInner() {
     }
 
     setRoutingFlyoutEdgeId(null);
-  }, [routingFlyoutEdgeId, getEdges, getNodes, setNodes, setEdges]);
+  }, [routingFlyoutEdgeId, getEdges, getNodes, setNodes, setEdges, recordHistory]);
 
   // The loose end of a routing connector is a draggable "puck" node. Rather than
   // rely on connecting to a tiny handle, we let the user drag this node and detect
@@ -1632,17 +513,39 @@ function StreamsCanvasInner() {
       // Prefer the last (top-most) matching node.
       for (let i = intersecting.length - 1; i >= 0; i--) {
         const candidate = intersecting[i];
-        if (
-          candidate.id !== originId &&
-          candidate.type &&
-          allowed.includes(candidate.type)
-        ) {
+        if (candidate.id !== originId && candidate.type && allowed.includes(candidate.type)) {
           return candidate;
         }
       }
       return undefined;
     },
     [getIntersectingNodes]
+  );
+
+  // Snap dragged nodes so their connector anchors — the handles, which sit at
+  // the node's vertical center — land on the grid. Applied LIVE during the drag
+  // (not just on release) so a node steps on exactly the same grid the links
+  // use; there's no jump-into-place when the drag ends. X snaps to the grid too.
+  // Group containers and routing-endpoint pucks are left free.
+  const centerSnapDragged = useCallback(
+    (node: Node, draggedNodes?: Node[]) => {
+      const moved = (draggedNodes?.length ? draggedNodes : [node]).filter(
+        (n) => n.type !== 'routingEndpoint'
+      );
+      if (!moved.length) return;
+      const snapped = new Map(
+        moved.map((n) => {
+          const h = n.measured?.height ?? n.height ?? 0;
+          const x = Math.round(n.position.x / GRID_SIZE) * GRID_SIZE;
+          const centerY = Math.round((n.position.y + h / 2) / GRID_SIZE) * GRID_SIZE;
+          return [n.id, { x, y: centerY - h / 2 }];
+        })
+      );
+      setNodes((current) =>
+        current.map((n) => (snapped.has(n.id) ? { ...n, position: snapped.get(n.id)! } : n))
+      );
+    },
+    [setNodes]
   );
 
   const onNodeDrag = useCallback(
@@ -1665,8 +568,23 @@ function StreamsCanvasInner() {
     [routingEdgeForEndpoint, intersectingTargetForEndpoint]
   );
 
+  // Snapshot before a drag so undo restores the pre-drag positions.
+  const onNodeDragStart = useCallback(() => {
+    recordHistory();
+  }, [recordHistory]);
+
+  // Snapshot before any deletion (toolbar trash, Backspace/Delete key) so the
+  // removed nodes/edges can be brought back with undo.
+  const onBeforeDelete = useCallback(async () => {
+    recordHistory();
+    return true;
+  }, [recordHistory]);
+
   const onNodeDragStop = useCallback(
-    (_event: React.MouseEvent, node: Node) => {
+    (_event: React.MouseEvent, node: Node, draggedNodes?: Node[]) => {
+      // Final center-snap (matches the live snap, so nothing jumps on release).
+      centerSnapDragged(node, draggedNodes);
+
       if (node.type !== 'routingEndpoint') {
         return;
       }
@@ -1707,8 +625,73 @@ function StreamsCanvasInner() {
       );
       setNodes((current) => current.filter((n) => n.id !== node.id));
     },
-    [routingEdgeForEndpoint, intersectingTargetForEndpoint, getIntersectingNodes, setEdges, setNodes]
+    [
+      centerSnapDragged,
+      routingEdgeForEndpoint,
+      intersectingTargetForEndpoint,
+      getIntersectingNodes,
+      setEdges,
+      setNodes,
+    ]
   );
+
+  // Click-to-edit for every block. React Flow only fires onNodeClick for a
+  // genuine click (one that did not turn into a drag), so this coexists cleanly
+  // with dragging the same card. Destinations keep their own in-card click
+  // handling (the unconfigured → configuring → configured state machine), so we
+  // deliberately don't intercept them here.
+  const onNodeClick = useCallback(
+    (event: React.MouseEvent, node: Node) => {
+      // Ignore context-menu gestures: a macOS ctrl+click (and right-click) is a
+      // button-0 click with ctrlKey set, which would otherwise open a flyout and
+      // hide the right-click menu. Let those fall through to onNodeContextMenu.
+      if (event.ctrlKey || event.metaKey || event.button === 2) {
+        return;
+      }
+      if (node.type === 'source') {
+        openSourceFlyout((node.data as SourceNodeData).title);
+      } else if (node.type === 'pipeline') {
+        // Clicking a pipeline already on the canvas opens the pipeline editor
+        // preloaded with that pipeline, not the "Apply pipeline" picker.
+        setPipelineNodeName((node.data as PipelineNodeData).title);
+      } else if (node.type === 'routing') {
+        // Clicking a routing node already on the canvas opens its configured
+        // condition in an editable state, not the empty "create routing" prompt.
+        setRoutingNodeFlyoutOpen(true);
+      } else if (node.type === 'destination') {
+        const data = node.data as DestinationNodeData;
+        if (data.mode === 'configuring') {
+          return; // the inline form handles its own clicks
+        }
+        const connected = getEdges().some((edge) => edge.target === node.id);
+        if (data.mode === 'configured' && connected) {
+          openDestinationFlyout(data.title);
+        } else {
+          // Unconfigured, or configured-but-not-connected: open the config form.
+          setNodes((current) =>
+            current.map((n) =>
+              n.id === node.id ? { ...n, data: { ...n.data, mode: 'configuring' } } : n
+            )
+          );
+        }
+      }
+    },
+    [openSourceFlyout, openDestinationFlyout, getEdges, setNodes]
+  );
+
+  // Hovering a node spotlights everywhere an event could travel relative to it
+  // (downstream from a source, upstream from a destination, both for a
+  // pipeline/routing node) and dims everything else.
+  const onNodeMouseEnter = useCallback(
+    (_event: React.MouseEvent, node: Node) => {
+      // While building a link, don't spotlight/dim — it would fade the very
+      // anchors the user is dragging toward.
+      if (connectingRef.current) return;
+      setHoveredFlow(reachableFlow(node.id, getEdges(), flowDirectionFor(node.type)));
+    },
+    [getEdges]
+  );
+  const onNodeMouseLeave = useCallback(() => setHoveredFlow(null), []);
 
   // Starting to drag a brand-new connection out of an output anchor: highlight
   // the input anchors of every node it could legally land on (same affordance as
@@ -1719,6 +702,8 @@ function StreamsCanvasInner() {
         return;
       }
       const sourceType = getNodes().find((node) => node.id === params.nodeId)?.type;
+      connectingRef.current = true;
+      setHoveredFlow(null);
       setConnectingFromNodeId(params.nodeId);
       setConnectingTargetTypes(allowedTargetTypesFor(sourceType));
       setConnectingHandleSide('target');
@@ -1730,22 +715,24 @@ function StreamsCanvasInner() {
   // has already gated this to an allowed node-type pair.
   const onConnect = useCallback(
     (connection: Connection) => {
+      recordHistory();
       setEdges((current) =>
         current.concat({
           ...connection,
-          id: `${connection.source}${connection.sourceHandle ? `:${connection.sourceHandle}` : ''}-${
-            connection.target
-          }`,
+          id: `${connection.source}${
+            connection.sourceHandle ? `:${connection.sourceHandle}` : ''
+          }-${connection.target}`,
           type: 'pipelineRouting',
         })
       );
     },
-    [setEdges]
+    [setEdges, recordHistory]
   );
 
   // Always clear the target highlight when a new-connection drag ends, whether or
   // not it landed on a valid anchor.
   const onConnectEnd = useCallback(() => {
+    connectingRef.current = false;
     setConnectingFromNodeId(null);
     setConnectingTargetTypes([]);
   }, []);
@@ -1795,14 +782,16 @@ function StreamsCanvasInner() {
   const onReconnectStart = useCallback(
     (_event: React.MouseEvent | React.TouchEvent, edge: Edge, handleType: 'source' | 'target') => {
       reconnectSucceededRef.current = false;
-      const nodes = getNodes();
+      connectingRef.current = true;
+      setHoveredFlow(null);
+      const currentNodes = getNodes();
       if (handleType === 'source') {
-        const sourceType = nodes.find((node) => node.id === edge.source)?.type;
+        const sourceType = currentNodes.find((node) => node.id === edge.source)?.type;
         setConnectingFromNodeId(edge.source);
         setConnectingTargetTypes(allowedTargetTypesFor(sourceType));
         setConnectingHandleSide('target');
       } else {
-        const targetType = nodes.find((node) => node.id === edge.target)?.type;
+        const targetType = currentNodes.find((node) => node.id === edge.target)?.type;
         setConnectingFromNodeId(edge.target);
         setConnectingTargetTypes(allowedSourceTypesFor(targetType));
         setConnectingHandleSide('source');
@@ -1825,6 +814,7 @@ function StreamsCanvasInner() {
       handleType: 'source' | 'target',
       connectionState: FinalConnectionState
     ) => {
+      connectingRef.current = false;
       setConnectingFromNodeId(null);
       setConnectingTargetTypes([]);
 
@@ -1852,9 +842,9 @@ function StreamsCanvasInner() {
       if (!connection.source || !connection.target || connection.source === connection.target) {
         return false;
       }
-      const nodes = getNodes();
-      const sourceType = nodes.find((node) => node.id === connection.source)?.type;
-      const targetType = nodes.find((node) => node.id === connection.target)?.type;
+      const currentNodes = getNodes();
+      const sourceType = currentNodes.find((node) => node.id === connection.source)?.type;
+      const targetType = currentNodes.find((node) => node.id === connection.target)?.type;
       return ALLOWED_CONNECTIONS.some(([from, to]) => from === sourceType && to === targetType);
     },
     [getNodes]
@@ -1905,13 +895,62 @@ function StreamsCanvasInner() {
     setShadowPosition(null);
   }, []);
 
+  // "Cleanup": auto-layout the graph into tidy columns by flow depth, then fit
+  // the result into view. Excludes transient routing-endpoint pucks (they track
+  // their routing node) so a half-drawn routing branch isn't yanked into a row.
+  // Straighten connectors by aligning the centers of 1:1-linked nodes (see
+  // straightenChains). Cosmetic, so it doesn't record history.
+  const straighten = useCallback(() => {
+    const pos = straightenChains(getNodes(), getEdges());
+    if (!pos.size) return;
+    setNodes((current) =>
+      current.map((node) => {
+        const next = pos.get(node.id);
+        return next ? { ...node, position: next } : node;
+      })
+    );
+  }, [getNodes, getEdges, setNodes]);
+
+  const cleanup = useCallback(() => {
+    recordHistory();
+    const current = getNodes();
+    const currentEdges = getEdges();
+    // 1) lay out into flow-depth columns, then 2) straighten 1:1 chains on those
+    // laid-out positions — in ONE synchronous pass, so there's no timing race
+    // (a separate post-setNodes straighten could run before React committed the
+    // new positions, leaving chains jogged).
+    const layout = computeCleanupLayout(
+      current.filter((node) => node.type !== 'routingEndpoint'),
+      currentEdges
+    );
+    const laidOut = current.map((node) => {
+      const next = layout.get(node.id);
+      return next ? { ...node, position: next } : node;
+    });
+    const straight = straightenChains(laidOut, currentEdges);
+    setNodes(
+      laidOut.map((node) => {
+        const next = straight.get(node.id);
+        return next ? { ...node, position: next } : node;
+      })
+    );
+    setTimeout(() => fitView({ padding: 0.2, duration: 400 }), 60);
+  }, [getNodes, getEdges, setNodes, fitView, recordHistory]);
+
+  // Straighten the seed graph once on mount (after nodes are measured).
+  useEffect(() => {
+    const timer = setTimeout(straighten, 150);
+    return () => clearTimeout(timer);
+  }, [straighten]);
+
   const onPaneClick = useCallback(() => {
     if (placementType && shadowPosition) {
       addNodeAtScreenPosition(placementType, shadowPosition);
     }
     setPlacementType(null);
     setShadowPosition(null);
-  }, [placementType, shadowPosition, addNodeAtScreenPosition]);
+    setContextMenu(null);
+  }, [placementType, shadowPosition, addNodeAtScreenPosition, setContextMenu]);
 
   const onMouseMove = useCallback(
     (event: React.MouseEvent) => {
@@ -1933,6 +972,10 @@ function StreamsCanvasInner() {
       setShadowPosition(null);
     }
   }, []);
+
+  // Keyboard shortcuts: ⌘/Ctrl+A select all, ⌘/Ctrl+Z undo,
+  // ⌘/Ctrl+Shift+Z (or Ctrl+Y) redo (see useCanvasShortcuts).
+  useCanvasShortcuts({ setNodes, undo, redo });
 
   // Center the canvas content (at 100% zoom) once React Flow has mounted and
   // measured the nodes, so the elements appear in the middle on load.
@@ -1988,141 +1031,354 @@ function StreamsCanvasInner() {
       box-shadow: 0 0 0 3px ${euiTheme.colors.backgroundBasePrimary},
         0 0 0 5px ${euiTheme.colors.primary};
     }
-    ${
-      hoveredTargetNodeId
-        ? `.react-flow__node[data-id='${hoveredTargetNodeId}'] .react-flow__handle.${connectingHandleSide}::after`
-        : '.__never__'
-    } {
+    ${hoveredTargetNodeId
+      ? `.react-flow__node[data-id='${hoveredTargetNodeId}'] .react-flow__handle.${connectingHandleSide}::after`
+      : '.__never__'} {
       background-color: ${euiTheme.colors.primary};
       border-color: ${euiTheme.colors.primary};
     }
   `;
 
+  // Dim every node/edge that is NOT part of the hovered flow.
+  const dimClassName = useMemo(() => {
+    if (!hoveredFlow) return '';
+    const nodeKeep = [...hoveredFlow.nodeIds]
+      .map((id) => `.react-flow__node[data-id="${id}"]`)
+      .join(', ');
+    const edgeKeep = [...hoveredFlow.edgeIds]
+      .map((id) => `.react-flow__edge[data-id="${id}"]`)
+      .join(', ');
+    return css`
+      .react-flow__node {
+        opacity: 0.18;
+        transition: opacity 120ms ease;
+      }
+      .react-flow__edge {
+        opacity: 0.12;
+        transition: opacity 120ms ease;
+      }
+      ${nodeKeep ? `${nodeKeep} { opacity: 1; }` : ''}
+      ${edgeKeep ? `${edgeKeep} { opacity: 1; }` : ''}
+    `;
+  }, [hoveredFlow]);
+
+  // Search: hide streams with no match, outline the matching nodes in blue.
+  // Debounced — the input stays responsive, but the filter only runs ~300ms
+  // after the user stops typing (avoids re-filtering on every keystroke).
+  const [debouncedSearch, setDebouncedSearch] = useState('');
+  useEffect(() => {
+    const timer = setTimeout(() => setDebouncedSearch(searchQuery), 300);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+  const search = useMemo(
+    () => evaluateSearch(nodes, edges, debouncedSearch),
+    [nodes, edges, debouncedSearch]
+  );
+  // Hiding is done via React Flow's `hidden` flag (below) so hidden nodes are
+  // truly non-interactive; this class only draws the blue ring on matches.
+  const searchClassName = useMemo(() => {
+    if (!search.active || search.matchedIds.size === 0) return '';
+    const matched = [...search.matchedIds]
+      .map((id) => `.react-flow__node[data-id="${id}"] .euiPanel`)
+      .join(', ');
+    return css`
+      ${matched} {
+        box-shadow: 0 0 0 2px ${euiTheme.colors.primary}, 0 2px 8px ${euiTheme.colors.primary}40 !important;
+      }
+    `;
+  }, [search, euiTheme]);
+
+  // Apply the search filter by toggling React Flow's `hidden` flag on nodes/edges
+  // (rather than CSS display:none), so filtered-out items can't be marquee-
+  // selected or clicked. No-ops when nothing actually changes, to avoid loops.
+  useEffect(() => {
+    setNodes((current) => {
+      let changed = false;
+      const next = current.map((n) => {
+        const hide = search.active && search.hiddenNodeIds.has(n.id);
+        if (!!n.hidden !== hide) {
+          changed = true;
+          return { ...n, hidden: hide };
+        }
+        return n;
+      });
+      return changed ? next : current;
+    });
+    setEdges((current) => {
+      let changed = false;
+      const next = current.map((e) => {
+        const hide = search.active && search.hiddenEdgeIds.has(e.id);
+        if (!!e.hidden !== hide) {
+          changed = true;
+          return { ...e, hidden: hide };
+        }
+        return e;
+      });
+      return changed ? next : current;
+    });
+  }, [search, setNodes, setEdges]);
+
   return (
     <DestinationFlyoutContext.Provider value={openDestinationFlyout}>
       <SourceFlyoutContext.Provider value={openSourceFlyout}>
-      <PipelineFlyoutContext.Provider value={openPipelineFlyout}>
-      <EdgeRoutingFlyoutContext.Provider value={openEdgeRoutingFlyout}>
-      <div
-        className={css`
-          display: flex;
-          flex-direction: column;
-          height: 100%;
-          width: 100%;
-          gap: ${euiTheme.size.m};
-        `}
-      >
-      {/* Toolbar mirrors the search + filters row on the list table tabs, but the
+        <PipelineFlyoutContext.Provider value={openPipelineFlyout}>
+          <EdgeRoutingFlyoutContext.Provider value={openEdgeRoutingFlyout}>
+            <EdgeSegmentsContext.Provider value={segmentRegistry}>
+              <EdgeHopsContext.Provider value={edgeHops}>
+                <div
+                  className={css`
+                    display: flex;
+                    flex-direction: column;
+                    height: 100%;
+                    width: 100%;
+                    gap: ${euiTheme.size.m};
+                  `}
+                >
+                  {/* Toolbar mirrors the search + filters row on the list table tabs, but the
           primary action saves the canvas instead of creating a new entity. */}
-      <EuiFlexGroup
-        gutterSize="s"
-        alignItems="center"
-        responsive={false}
-        className={css`
-          flex-grow: 0;
-          max-height: 32px;
-        `}
-      >
-        <EuiFlexItem>
-          <EuiFieldSearch
-            compressed
-            incremental
-            fullWidth
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            aria-label={STREAMS_TABLE_SEARCH_ARIA_LABEL}
-            data-test-subj="streamsCanvasSearch"
-          />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <StreamsListTableTools
-            newButtonIconType="save"
-            newButtonDisabled={!hasChanges}
-            newButtonLabel={i18n.translate('xpack.streams.streamsCanvas.saveChangesButtonLabel', {
-              defaultMessage: 'Save changes',
-            })}
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-      <div
-        ref={wrapperRef}
-        role="presentation"
-        onDragOver={onDragOver}
-        onDrop={onDrop}
-        onMouseMove={onMouseMove}
-        onKeyDown={onKeyDown}
-        className={`${css`
-          position: relative;
-          flex: 1;
-          min-height: 0;
-          width: 100%;
-          background-color: ${euiTheme.colors.backgroundBaseSubdued};
-          border: ${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBaseSubdued};
-          border-radius: ${euiTheme.border.radius.small};
-          overflow: hidden;
-          ${placementType ? 'cursor: copy;' : ''}
+                  <EuiFlexGroup
+                    gutterSize="s"
+                    alignItems="center"
+                    responsive={false}
+                    className={css`
+                      flex-grow: 0;
+                      max-height: 32px;
+                    `}
+                  >
+                    <EuiFlexItem>
+                      <EuiFieldSearch
+                        compressed
+                        incremental
+                        fullWidth
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        placeholder="Search streams — e.g. kafka, source:nginx, destination:archive"
+                        aria-label={STREAMS_TABLE_SEARCH_ARIA_LABEL}
+                        data-test-subj="streamsCanvasSearch"
+                      />
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      <StreamsListTableTools
+                        newButtonIconType="save"
+                        newButtonDisabled={!hasChanges}
+                        newButtonLabel={i18n.translate(
+                          'xpack.streams.streamsCanvas.saveChangesButtonLabel',
+                          {
+                            defaultMessage: 'Save changes',
+                          }
+                        )}
+                      />
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                  <div
+                    ref={wrapperRef}
+                    role="presentation"
+                    onDragOver={onDragOver}
+                    onDrop={onDrop}
+                    onMouseMove={onMouseMove}
+                    onKeyDown={onKeyDown}
+                    className={`${css`
+                      position: relative;
+                      flex: 1;
+                      min-height: 0;
+                      width: 100%;
+                      background-color: ${euiTheme.colors.backgroundBaseSubdued};
+                      border: ${euiTheme.border.width.thin} solid
+                        ${euiTheme.colors.borderBaseSubdued};
+                      border-radius: ${euiTheme.border.radius.small};
+                      overflow: hidden;
+                      ${placementType ? 'cursor: copy;' : ''}
+
+                      /* Hand (pan) mode: the empty canvas reads as draggable — a hand at
+             rest, a closed fist while panning. */
+          ${canvasMode === 'pan'
+                        ? `
+          .react-flow__pane {
+            cursor: grab;
+          }
+          .react-flow__pane.dragging {
+            cursor: grabbing;
+          }
+          `
+                        : ''}
 
           /* React Flow's native edge reconnect anchors sit on top of the handle
              dots at each connector end; show a grab cursor over their hit area so
              the connection ends feel draggable. */
           .react-flow__edgeupdater {
-            cursor: grab;
-          }
-        `} ${connectingTargetTypes.length > 0 ? connectingHighlightClassName : ''}`}
-      >
-        <ReactFlow
-          nodes={nodes}
-          edges={edges}
-          nodeTypes={nodeTypes}
-          edgeTypes={edgeTypes}
-          defaultEdgeOptions={defaultEdgeOptions}
-          onNodesChange={onNodesChange}
-          onEdgesChange={onEdgesChange}
-          onNodeDrag={onNodeDrag}
-          onNodeDragStop={onNodeDragStop}
-          onConnect={onConnect}
-          onConnectStart={onConnectStart}
-          onConnectEnd={onConnectEnd}
-          onReconnect={onReconnect}
-          onReconnectStart={onReconnectStart}
-          onReconnectEnd={onReconnectEnd}
-          isValidConnection={isValidConnection}
-          connectionLineType={ConnectionLineType.SmoothStep}
-          connectionRadius={60}
-          reconnectRadius={14}
-          onPaneClick={onPaneClick}
-          onInit={handleInit}
-          defaultViewport={{ x: 0, y: 0, zoom: 1 }}
-          nodesConnectable
-          edgesReconnectable
-          proOptions={{ hideAttribution: true }}
-        >
-          <Background />
-          <Controls showInteractive={false} showFitView={false} />
-        </ReactFlow>
-        {placementType && shadowPosition ? (
-          <ShadowNode type={placementType} position={shadowPosition} />
-        ) : null}
-        <CanvasControls placementType={placementType} onActivatePlacement={activatePlacement} />
-      </div>
-      </div>
-      {flyoutDestination !== null ? (
-        <DestinationFlyout
-          destinationName={flyoutDestination}
-          onClose={() => setFlyoutDestination(null)}
-        />
-      ) : null}
-      {flyoutSource !== null ? (
-        <SourceFlyout sourceName={flyoutSource} onClose={() => setFlyoutSource(null)} />
-      ) : null}
-      {pipelineFlyoutEdgeId !== null ? (
-        <PipelineFlyout onClose={closePipelineFlyout} onApply={applyPipeline} />
-      ) : null}
-      {routingFlyoutEdgeId !== null ? (
-        <CreateRoutingFlyout onClose={closeEdgeRoutingFlyout} onApply={applyEdgeRouting} />
-      ) : null}
-      </EdgeRoutingFlyoutContext.Provider>
-      </PipelineFlyoutContext.Provider>
+                        cursor: grab;
+                      }
+
+                      /* Selected state. Our nodes are custom EUI cards (every node type
+             renders an EuiPanel), so React Flow's default selection outline
+             lands on the transparent, zero-border node wrapper and is
+             invisible — selecting a stream looked like nothing happened. Draw an
+             on-brand primary ring on the card itself, which covers both the
+             "Select stream" action and drag-marquee selections. Group
+             containers (no EuiPanel) keep React Flow's own selected styling. */
+                      .react-flow__node.selected .euiPanel {
+                        box-shadow: 0 0 0 2px ${euiTheme.colors.primary},
+                          0 2px 8px ${euiTheme.colors.primary}40;
+                        border-radius: ${euiTheme.border.radius.medium};
+                        transition: box-shadow 120ms ease;
+                      }
+                    `} ${
+                      connectingTargetTypes.length > 0 ? connectingHighlightClassName : dimClassName
+                    } ${searchClassName}`}
+                  >
+                    <ReactFlow
+                      nodes={nodes}
+                      edges={edges}
+                      nodeTypes={nodeTypes}
+                      edgeTypes={edgeTypes}
+                      defaultEdgeOptions={defaultEdgeOptions}
+                      onNodesChange={onNodesChangeSnapped}
+                      onEdgesChange={onEdgesChange}
+                      onNodeClick={onNodeClick}
+                      onNodeMouseEnter={onNodeMouseEnter}
+                      onNodeMouseLeave={onNodeMouseLeave}
+                      onNodeContextMenu={onNodeContextMenu}
+                      onSelectionContextMenu={onSelectionContextMenu}
+                      onPaneContextMenu={() => setContextMenu(null)}
+                      nodeDragThreshold={4}
+                      onNodeDragStart={onNodeDragStart}
+                      onNodeDrag={onNodeDrag}
+                      onNodeDragStop={onNodeDragStop}
+                      onBeforeDelete={onBeforeDelete}
+                      onConnect={onConnect}
+                      onConnectStart={onConnectStart}
+                      onConnectEnd={onConnectEnd}
+                      onReconnect={onReconnect}
+                      onReconnectStart={onReconnectStart}
+                      onReconnectEnd={onReconnectEnd}
+                      isValidConnection={isValidConnection}
+                      connectionLineType={ConnectionLineType.SmoothStep}
+                      connectionRadius={60}
+                      reconnectRadius={14}
+                      onPaneClick={onPaneClick}
+                      onInit={handleInit}
+                      defaultViewport={{ x: 0, y: 0, zoom: 1 }}
+                      // Keep the viewport near the streams: bound panning to the seed
+                      // footprint + padding, and don't allow zooming out into the void.
+                      translateExtent={CANVAS_TRANSLATE_EXTENT}
+                      minZoom={0.4}
+                      maxZoom={2}
+                      // Node snapping is done in onNodeDrag (center-snap), not snapToGrid,
+                      // so dragged cards step on the same grid the connectors align to.
+                      // Figma-style trackpad navigation: two-finger scroll (any direction)
+                      // pans the canvas; pinch still zooms. Disabling zoomOnScroll keeps the
+                      // wheel/trackpad mapped to panning rather than zooming.
+                      panOnScroll
+                      zoomOnScroll={false}
+                      nodesConnectable
+                      edgesReconnectable
+                      // Mode-driven interaction. In 'select' mode left-drag is reserved for
+                      // the selection box and pan moves to the MIDDLE mouse button only —
+                      // the right button is left free so right-click opens the context menu
+                      // (incl. on a single node). In 'pan' mode left-drag pans and nodes are
+                      // locked.
+                      nodesDraggable={canvasMode === 'select'}
+                      selectionOnDrag={canvasMode === 'select'}
+                      selectNodesOnDrag={canvasMode === 'select'}
+                      selectionMode={SelectionMode.Partial}
+                      panOnDrag={canvasMode === 'pan' ? true : [1]}
+                      proOptions={{ hideAttribution: true }}
+                    >
+                      <Background gap={GRID_SIZE} />
+                      <Controls showInteractive={false} showFitView={false} />
+                      {/* Minimap hidden for now — re-enable by uncommenting:
+          <CanvasMinimap hoveredFlow={hoveredFlow} /> */}
+                    </ReactFlow>
+                    {placementType && shadowPosition ? (
+                      <ShadowNode type={placementType} position={shadowPosition} />
+                    ) : null}
+                    {search.noResult ? (
+                      <div
+                        className={css`
+                          position: absolute;
+                          inset: 0;
+                          display: flex;
+                          align-items: center;
+                          justify-content: center;
+                          pointer-events: none;
+                          z-index: 6;
+                        `}
+                      >
+                        <EuiPanel
+                          hasShadow
+                          paddingSize="l"
+                          className={css`
+                            text-align: center;
+                            border-radius: ${euiTheme.border.radius.medium};
+                          `}
+                        >
+                          <EuiText>
+                            <strong>No results</strong>
+                          </EuiText>
+                          <EuiText size="xs" color="subdued">
+                            {i18n.translate('xpack.streams.streamsCanvas.noResultsHint', {
+                              defaultMessage: 'No streams match your search.',
+                            })}
+                          </EuiText>
+                        </EuiPanel>
+                      </div>
+                    ) : null}
+                    <CanvasControls
+                      placementType={placementType}
+                      onActivatePlacement={activatePlacement}
+                      onCleanup={cleanup}
+                      canvasMode={canvasMode}
+                      onChangeMode={setCanvasMode}
+                      onUndo={undo}
+                      onRedo={redo}
+                      canUndo={canUndo}
+                      canRedo={canRedo}
+                    />
+                    <CanvasContextMenu
+                      menu={contextMenu}
+                      onClose={() => setContextMenu(null)}
+                      onSelectStream={selectStream}
+                      onCleanup={cleanupSelected}
+                    />
+                  </div>
+                </div>
+                {flyoutDestination !== null ? (
+                  <DestinationFlyout
+                    destinationName={flyoutDestination}
+                    onClose={() => setFlyoutDestination(null)}
+                  />
+                ) : null}
+                {flyoutSource !== null ? (
+                  <SourceFlyout sourceName={flyoutSource} onClose={() => setFlyoutSource(null)} />
+                ) : null}
+                {pipelineFlyoutEdgeId !== null ? (
+                  <PipelineFlyout onClose={closePipelineFlyout} onApply={applyPipeline} />
+                ) : null}
+                {pipelineNodeName !== null ? (
+                  <CreatePipelineFlyout
+                    pipelineName={pipelineNodeName}
+                    initialPopulated
+                    onClose={() => setPipelineNodeName(null)}
+                    onApply={() => setPipelineNodeName(null)}
+                  />
+                ) : null}
+                {routingFlyoutEdgeId !== null ? (
+                  <CreateRoutingFlyout
+                    onClose={closeEdgeRoutingFlyout}
+                    onApply={applyEdgeRouting}
+                  />
+                ) : null}
+                {routingNodeFlyoutOpen ? (
+                  <CreateRoutingFlyout
+                    initialStep="applied"
+                    onClose={() => setRoutingNodeFlyoutOpen(false)}
+                    onApply={() => setRoutingNodeFlyoutOpen(false)}
+                  />
+                ) : null}
+              </EdgeHopsContext.Provider>
+            </EdgeSegmentsContext.Provider>
+          </EdgeRoutingFlyoutContext.Provider>
+        </PipelineFlyoutContext.Provider>
       </SourceFlyoutContext.Provider>
     </DestinationFlyoutContext.Provider>
   );

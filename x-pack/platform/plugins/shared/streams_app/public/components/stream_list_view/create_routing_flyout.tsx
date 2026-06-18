@@ -988,14 +988,22 @@ type RoutingStep = 'empty' | 'form' | 'applied';
 export function CreateRoutingFlyout({
   onClose,
   onApply,
+  initialStep = 'empty',
 }: {
   onClose: () => void;
   onApply?: () => void;
+  /**
+   * Which step the flyout opens on. Defaults to 'empty' (create from scratch,
+   * used by the connector "Add step" flow). Editing an existing routing node on
+   * the canvas opens on 'applied' so the configured condition is shown with its
+   * edit affordance.
+   */
+  initialStep?: RoutingStep;
 }) {
   const { euiTheme } = useEuiTheme();
   const applyAndClose = onApply ?? onClose;
   const titleId = useGeneratedHtmlId({ prefix: 'createRoutingFlyoutTitle' });
-  const [step, setStep] = useState<RoutingStep>('empty');
+  const [step, setStep] = useState<RoutingStep>(initialStep);
   const [routingMode, setRoutingMode] = useState('route');
   const [destination, setDestination] = useState('none');
   const [conditions, setConditions] = useState<ConditionRow[]>(() => [
@@ -1013,9 +1021,13 @@ export function CreateRoutingFlyout({
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="s">
           <h2 id={titleId}>
-            {i18n.translate('xpack.streams.createRoutingFlyout.title', {
-              defaultMessage: 'Create routing conditions',
-            })}
+            {initialStep === 'applied'
+              ? i18n.translate('xpack.streams.createRoutingFlyout.editTitle', {
+                  defaultMessage: 'Routing conditions',
+                })
+              : i18n.translate('xpack.streams.createRoutingFlyout.title', {
+                  defaultMessage: 'Create routing conditions',
+                })}
           </h2>
         </EuiTitle>
       </EuiFlyoutHeader>
