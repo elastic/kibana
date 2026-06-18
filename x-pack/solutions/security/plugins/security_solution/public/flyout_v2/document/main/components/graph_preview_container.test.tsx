@@ -37,6 +37,9 @@ jest.mock('@kbn/cloud-security-posture-common/utils/ui_metrics', () => ({
 jest.mock('@kbn/cloud-security-posture-graph', () => ({
   Graph: () => <div data-test-subj="securitySolutionFlyoutGraphPreview" />,
 }));
+jest.mock('../../../shared/components/graph_preview', () => ({
+  GraphPreview: () => <div data-test-subj="securitySolutionFlyoutGraphPreview" />,
+}));
 
 const mockUseUpsellingComponent = useUpsellingComponent as jest.Mock;
 const mockUseGraphPreview = useGraphPreview as jest.Mock;
