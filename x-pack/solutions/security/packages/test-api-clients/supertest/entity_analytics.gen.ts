@@ -65,6 +65,8 @@ import type {
 import type { EntityDetailsHighlightsRequestBodyInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/entity_details/highlights.gen';
 import type { FindAssetCriticalityRecordsRequestQueryInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/asset_criticality/list_asset_criticality.gen';
 import type {
+  GetAnomalyOverviewRequestParamsInput,
+  GetAnomalyOverviewRequestBodyInput,
   GetAnomalySummaryRequestParamsInput,
   GetAnomalySummaryRequestBodyInput,
 } from '@kbn/security-solution-plugin/common/api/entity_analytics/anomaly_summary/anomaly_summary.gen';
@@ -356,7 +358,7 @@ If a record already exists for the specified entity, that record is overwritten 
   },
   /**
       * Delete a single entity in Entity Store.
-The entity will be immediately deleted from the latest index.  It will remain available in historical snapshots if it has been snapshotted.  The delete operation does not prevent the entity from being recreated if it is observed again in the future. 
+The entity will be immediately deleted from the latest index.  It will remain available in historical snapshots if it has been snapshotted.  The delete operation does not prevent the entity from being recreated if it is observed again in the future.
 
       */
   deleteSingleEntity(props: DeleteSingleEntityProps, kibanaSpace: string = 'default') {
@@ -459,6 +461,25 @@ The entity will be immediately deleted from the latest index.  It will remain av
       .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
       .query(props.query);
+  },
+  /**
+   * Returns time-bucketed anomaly counts and tactic distribution for a given entity.
+   */
+  getAnomalyOverview(props: GetAnomalyOverviewProps, kibanaSpace: string = 'default') {
+    return supertest
+      .post(
+        getRouteUrlForSpace(
+          replaceParams(
+            '/internal/entity_analytics/entities/{entity_type}/{entity_id}/anomaly_overview',
+            props.params
+          ),
+          kibanaSpace
+        )
+      )
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+      .send(props.body as object);
   },
   /**
    * Queries ML anomaly records on demand, enriches them with baseline data, and returns results for a given entity.
@@ -1138,6 +1159,10 @@ export interface EntityDetailsHighlightsProps {
 }
 export interface FindAssetCriticalityRecordsProps {
   query: FindAssetCriticalityRecordsRequestQueryInput;
+}
+export interface GetAnomalyOverviewProps {
+  params: GetAnomalyOverviewRequestParamsInput;
+  body: GetAnomalyOverviewRequestBodyInput;
 }
 export interface GetAnomalySummaryProps {
   params: GetAnomalySummaryRequestParamsInput;

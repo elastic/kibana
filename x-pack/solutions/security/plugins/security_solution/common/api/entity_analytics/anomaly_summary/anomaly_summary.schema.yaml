@@ -4,6 +4,42 @@ info:
   version: '2023-10-31'
 
 paths:
+  /internal/entity_analytics/entities/{entity_type}/{entity_id}/anomaly_overview:
+    post:
+      x-labels: [ess, serverless]
+      x-codegen-enabled: true
+      operationId: GetAnomalyOverview
+      summary: Get anomaly overview for an entity
+      description: Returns time-bucketed anomaly counts and tactic distribution for a given entity.
+      parameters:
+        - name: entity_type
+          in: path
+          required: true
+          schema:
+            type: string
+            enum: [user, host]
+          description: Entity type — determines which EUID runtime mapping is used when searching the anomalies index
+        - name: entity_id
+          in: path
+          required: true
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 1000
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AnomalyOverviewRequestBody'
+      responses:
+        '200':
+          description: Anomaly overview retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AnomalyOverviewResponse'
+
   /internal/entity_analytics/entities/{entity_type}/{entity_id}/anomaly_summary:
     post:
       x-labels: [ess, serverless]
@@ -224,3 +260,83 @@ components:
           type: integer
         page_size:
           type: integer
+
+    AnomalyOverviewRequestBody:
+      type: object
+      properties:
+        from:
+          type: integer
+          format: int64
+          minimum: 0
+          description: Start time as epoch milliseconds; defaults to now-30d when omitted
+        to:
+          type: integer
+          format: int64
+          minimum: 0
+          description: End time as epoch milliseconds; defaults to now when omitted
+        threat_tactics:
+          type: array
+          maxItems: 100
+          items:
+            type: string
+            maxLength: 150
+          description: Filter results to jobs associated with the specified MITRE ATT&CK tactic names; returns all tactics when omitted
+
+    AnomalyOverviewEntry:
+      type: object
+      required:
+        - timestamp
+        - maxScore
+        - threatTactics
+      properties:
+        timestamp:
+          type: string
+          maxLength: 100
+          description: ISO-8601 start of the time bucket
+        maxScore:
+          type: number
+          description: Highest anomaly record_score within this time bucket
+        threatTactics:
+          type: array
+          maxItems: 100
+          items:
+            type: string
+            maxLength: 150
+          description: MITRE ATT&CK tactic names for all jobs that fired in this bucket
+
+    AnomalyOverviewResponse:
+      type: object
+      required:
+        - entityId
+        - anomalies
+        - tacticCounts
+        - totalAnomaliesCount
+        - from
+        - to
+      properties:
+        entityId:
+          type: string
+          maxLength: 200
+        entityType:
+          type: string
+          maxLength: 100
+        anomalies:
+          type: array
+          items:
+            $ref: '#/components/schemas/AnomalyOverviewEntry'
+        tacticCounts:
+          type: object
+          additionalProperties:
+            type: integer
+          description: Number of anomaly records associated with each MITRE ATT&CK tactic
+        totalAnomaliesCount:
+          type: integer
+          description: Total number of anomaly records returned
+        from:
+          type: integer
+          format: int64
+          description: Effective start of the query time range as epoch milliseconds
+        to:
+          type: integer
+          format: int64
+          description: Effective end of the query time range as epoch milliseconds

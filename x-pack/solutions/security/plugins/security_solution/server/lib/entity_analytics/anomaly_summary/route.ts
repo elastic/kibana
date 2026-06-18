@@ -8,21 +8,105 @@
 import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import {
+  GetAnomalyOverviewRequestBody,
+  GetAnomalyOverviewRequestParams,
   GetAnomalySummaryRequestBody,
   GetAnomalySummaryRequestParams,
 } from '../../../../common/api/entity_analytics';
 import {
   API_VERSIONS,
   APP_ID,
+  ENTITY_ANOMALY_OVERVIEW_INTERNAL_URL,
   ENTITY_ANOMALY_SUMMARY_INTERNAL_URL,
 } from '../../../../common/constants';
 import type { EntityAnalyticsRoutesDeps } from '../types';
 import { withMinimumLicense } from '../utils/with_minimum_license';
 import { getEntityAnomalies } from './get_anomaly_details';
+import { getEntityAnomalyOverview } from './get_anomaly_overview';
 
 const ONE_YEAR_MS = 365 * 24 * 60 * 60 * 1000;
 
+const getStartOfDayOneYearAgo = (): number => {
+  const d = new Date(Date.now() - ONE_YEAR_MS);
+  d.setUTCHours(0, 0, 0, 0);
+  return d.getTime();
+};
+
 export const registerAnomalySummaryRoutes = ({ router, logger, ml }: EntityAnalyticsRoutesDeps) => {
+  router.versioned
+    .post({
+      access: 'internal',
+      path: ENTITY_ANOMALY_OVERVIEW_INTERNAL_URL,
+      security: {
+        authz: {
+          requiredPrivileges: ['securitySolution', `${APP_ID}-entity-analytics`],
+        },
+      },
+      enableQueryVersion: true,
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.internal.v1,
+        validate: {
+          request: {
+            params: GetAnomalyOverviewRequestParams,
+            body: GetAnomalyOverviewRequestBody,
+          },
+        },
+      },
+      withMinimumLicense(async (context, request, response) => {
+        const siemResponse = buildSiemResponse(response);
+        try {
+          const { entity_id: entityId, entity_type: entityType } = request.params;
+          const { from, to, threat_tactics: threatTactics } = request.body ?? {};
+
+          if (from !== undefined && from < getStartOfDayOneYearAgo()) {
+            return siemResponse.error({
+              statusCode: 400,
+              body: '`from` must not be older than 1 year',
+            });
+          }
+
+          const core = await context.core;
+          const soClient = core.savedObjects.client;
+
+          if (!ml) {
+            logger.warn('ML plugin is unavailable; returning empty anomaly overview.');
+            const now = Date.now();
+            return response.ok({
+              body: {
+                entityId,
+                entityType,
+                anomalies: [],
+                tacticCounts: {},
+                totalAnomaliesCount: 0,
+                from: from ?? now - 30 * 24 * 60 * 60 * 1000,
+                to: to ?? now,
+              },
+            });
+          }
+
+          const overview = await getEntityAnomalyOverview({
+            entityId,
+            entityType,
+            fromMs: from,
+            toMs: to,
+            threatTactics,
+            logger,
+            ml,
+            soClient,
+          });
+
+          return response.ok({ body: { entityId, entityType, ...overview } });
+        } catch (err) {
+          logger.error(`Error retrieving anomaly overview - ${err}`);
+
+          const error = transformError(err);
+          return siemResponse.error({ statusCode: error.statusCode, body: error.message });
+        }
+      }, 'platinum')
+    );
+
   router.versioned
     .post({
       access: 'internal',
@@ -58,8 +142,7 @@ export const registerAnomalySummaryRoutes = ({ router, logger, ml }: EntityAnaly
             sort,
           } = request.body ?? {};
 
-          // Validate that `from` is not older than 1 year ago
-          if (from !== undefined && from < Date.now() - ONE_YEAR_MS) {
+          if (from !== undefined && from < getStartOfDayOneYearAgo()) {
             return siemResponse.error({
               statusCode: 400,
               body: '`from` must not be older than 1 year',
