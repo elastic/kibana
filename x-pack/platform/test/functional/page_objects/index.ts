@@ -37,6 +37,9 @@ import { IndexLifecycleManagementPageProvider } from './index_lifecycle_manageme
 import { RollupPageObject } from './rollup_page';
 import { RemoteClustersPageProvider } from './remote_clusters_page';
 import { CrossClusterReplicationPageProvider } from './cross_cluster_replication_page';
+import { SearchProfilerPageProvider } from './search_profiler_page';
+import { GrokDebuggerPageObject } from './grok_debugger_page';
+import { OneChatPageObject } from './onechat_page';
 
 // just like services, PageObjects are defined as a map of
 // names to Providers. Merge in Kibana's or pick specific ones
@@ -73,4 +76,7 @@ export const pageObjects = {
   rollup: RollupPageObject,
   remoteClusters: RemoteClustersPageProvider,
   crossClusterReplication: CrossClusterReplicationPageProvider,
+  searchProfiler: SearchProfilerPageProvider,
+  grokDebugger: GrokDebuggerPageObject,
+  onechat: OneChatPageObject,
 };
