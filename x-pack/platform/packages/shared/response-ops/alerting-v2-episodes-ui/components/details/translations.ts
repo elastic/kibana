@@ -335,5 +335,3 @@ export const RUNBOOK_SECTION_LOAD_ERROR = i18n.translate(
     defaultMessage: 'Could not load the runbook for this episode.',
   }
 );
-
-/** --- Metadata section --- */

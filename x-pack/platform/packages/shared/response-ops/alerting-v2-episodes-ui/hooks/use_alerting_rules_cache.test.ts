@@ -61,7 +61,7 @@ describe('useAlertingRulesCache', () => {
     const fetchedRule = {
       id: ruleId,
       metadata: { name: 'Fetched Rule' },
-    } as unknown as FindRulesResponse['items'][number];
+    } as FindRulesResponse['items'][number];
     mockHttp.get.mockResolvedValue({
       items: [fetchedRule],
       total: 1,

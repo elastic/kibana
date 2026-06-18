@@ -15,7 +15,7 @@ import {
   toRuleState,
 } from './rule_state';
 
-const mockRule = { id: 'r1', metadata: { name: 'Rule 1' } } as unknown as RuleResponse;
+const mockRule = { id: 'r1', metadata: { name: 'Rule 1' } } as RuleResponse;
 
 describe('toRuleState', () => {
   it('returns idle when id is undefined', () => {

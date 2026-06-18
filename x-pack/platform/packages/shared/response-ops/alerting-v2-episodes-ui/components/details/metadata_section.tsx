@@ -59,7 +59,7 @@ export const AlertEpisodeMetadataSection = ({
   });
 
   const { value: dataView, loading: isDataViewLoading } = useAlertingEpisodeSourceDataView({
-    query: isRuleLoaded(ruleState) ? getRootEsqlQuery(rule.query) : undefined,
+    query: isRuleLoaded(ruleState) ? getRootEsqlQuery(ruleState.rule.query) : undefined,
     dataViews: services.dataViews,
     http: services.http,
   });
