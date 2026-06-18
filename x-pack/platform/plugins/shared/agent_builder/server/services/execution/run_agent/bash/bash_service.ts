@@ -13,22 +13,36 @@ import { createExecToolCommand, type ExecToolFn, type ResolveToolIdFn } from './
 import { truncateBashOutput } from './output_truncation';
 import { ALLOWED_BASH_COMMANDS } from './allowed_commands';
 
-export const DEFAULT_BASH_TIMEOUT_MS = 5 * 60 * 1000; // 5 minutes
+export const DEFAULT_BASH_TIMEOUT_MS = 90 * 1000; // 90 seconds
 export const DEFAULT_BASH_CWD = '/tmp';
 
 /**
  * Execution caps for a single `bash` invocation. These are belt-and-suspenders
- * — the 5-minute wall-clock timeout is the real safety net — but lower limits
- * fail runaway scripts in milliseconds instead of minutes. Tuned conservatively
- * for typical agent usage (short pipelines, hundreds of files at most). Revisit
- * once we have production telemetry.
+ * — the wall-clock timeout is the real safety net — but lower limits fail
+ * runaway scripts in milliseconds instead of seconds. Tuned conservatively
+ * against observed agent usage (short pipelines, dozens of commands at most).
+ * Revisit once we have production telemetry.
  */
 export const DEFAULT_EXECUTION_LIMITS = {
-  maxCallDepth: 50, // recursion is unusual in agent-generated bash
-  maxCommandCount: 2_000, // ~5x typical heavy use
-  maxLoopIterations: 2_000, // same
-  maxAwkIterations: 5_000, // text processing legitimately runs higher
-  maxSedIterations: 5_000, // same
+  // ---- Core iteration / recursion caps ----
+  maxCallDepth: 20,
+  maxCommandCount: 500,
+  maxLoopIterations: 500,
+  maxAwkIterations: 2_000,
+  maxSedIterations: 2_000,
+  maxJqIterations: 2_000,
+  // ---- DoS / OOM vectors ----
+  maxGlobOperations: 10_000, // entries a single `*` glob can match
+  maxHeredocSize: 1024 * 1024, // `<<EOF ... EOF` payload size (1 MiB)
+  maxBraceExpansionResults: 1_000, // e.g. `echo {1..1000000}`
+  maxOutputSize: 8 * 1024 * 1024, // combined stdout + stderr accumulator
+  // ---- Defense in depth ----
+  maxStringLength: 2 * 1024 * 1024, // single string value (e.g. `x=$(cat …)`)
+  maxArrayElements: 10_000, // single bash/awk array
+  // ---- Cosmetic / hardening ----
+  maxSubstitutionDepth: 10, // `$(... $(... $(...)))` nesting
+  maxSourceDepth: 10, // `source` / `.` nesting
+  maxFileDescriptors: 128, // pipes / redirections per script
 };
 
 /**
