@@ -13,57 +13,84 @@ import { TASK_MANAGER_INDEX } from '@kbn/task-manager-plugin/server/constants';
 import { TASK_ID as TELEMETRY_TASK_ID } from '../../../../server/lib/usage/constants';
 import type { LatestTaskStateSchema as TelemetryTaskState } from '../../../../server/lib/usage/task_state';
 import { POLL_INTERVAL_MS, POLL_TIMEOUT_MS } from '../constants';
+import type { TaskManagerService } from './task_manager_service';
 
 /**
- * Test-time accessor for the telemetry task. Polls the task
- * manager saved object until the telemetry task has produced its first run
- * and exposes the parsed state.
+ * Test-time accessor for the telemetry task. Drives an immediate run via
+ * `runSoon` and reads back the resulting persisted task state.
  */
 export interface TelemetryService {
   /**
-   * Polls until the telemetry task has run at least once (status `idle`,
-   * `runs > 0`) and returns the parsed state. Callers typically invoke
-   * `apiServices.alertingV2.taskManager.runSoon(...)` first so the wait is
-   * deterministic rather than depending on the default schedule.
+   * Triggers an immediate run of the telemetry task and waits for that run
+   * to complete — i.e. the task returns to `idle` and the persisted `runs`
+   * counter has incremented past the value observed before triggering.
+   *
+   * Snapshotting the `runs` counter before `runSoon` is essential: the
+   * telemetry task auto-schedules on plugin start and runs once on its
+   * default schedule, so by the time a test executes the task SO already
+   * carries a stale state with `runs >= 1` reflecting data from before the
+   * test's `beforeAll`. A naive `runs > 0` predicate would resolve against
+   * that stale snapshot. Waiting for `runs > snapshot` guarantees the
+   * returned state reflects data produced by the current test.
    */
-  waitForState: () => Promise<TelemetryTaskState>;
+  runAndWaitForState: () => Promise<TelemetryTaskState>;
 }
 
 export const getTelemetryService = ({
   log,
   esClient,
+  taskManager,
 }: {
   log: ScoutLogger;
   esClient: EsClient;
+  taskManager: TaskManagerService;
 }): TelemetryService => {
-  const fetchState = async (): Promise<TelemetryTaskState | null> => {
+  const fetchTask = async (): Promise<SerializedConcreteTaskInstance | undefined> => {
     const taskDoc = await esClient.get<{ task: SerializedConcreteTaskInstance }>({
       id: `task:${TELEMETRY_TASK_ID}`,
       index: TASK_MANAGER_INDEX,
     });
-
-    const task = taskDoc._source?.task;
-
-    if (task?.status !== 'idle' || !task.state) return null;
-
-    const parsed = JSON.parse(task.state) as TelemetryTaskState;
-    return parsed.runs > 0 ? parsed : null;
+    return taskDoc._source?.task;
   };
 
-  const unwrap = (state: TelemetryTaskState | null): TelemetryTaskState => {
-    if (state === null) {
-      throw new Error('Telemetry task state was unexpectedly null after poll resolved');
+  const parseRuns = (task: SerializedConcreteTaskInstance | undefined): number => {
+    if (!task?.state) return 0;
+    try {
+      const parsed = JSON.parse(task.state) as TelemetryTaskState;
+      return parsed.runs ?? 0;
+    } catch {
+      return 0;
     }
-    return state;
+  };
+
+  const fetchStateOnceAtLeast = async (minRuns: number): Promise<TelemetryTaskState | null> => {
+    const task = await fetchTask();
+    if (task?.status !== 'idle' || !task.state) return null;
+    const parsed = JSON.parse(task.state) as TelemetryTaskState;
+    return (parsed.runs ?? 0) >= minRuns ? parsed : null;
   };
 
   return {
-    waitForState: () =>
-      measurePerformanceAsync(log, 'telemetry.waitForState', async () => {
+    runAndWaitForState: () =>
+      measurePerformanceAsync(log, 'telemetry.runAndWaitForState', async () => {
+        const baselineRuns = parseRuns(await fetchTask());
+        const targetRuns = baselineRuns + 1;
+
+        await taskManager.runSoon(TELEMETRY_TASK_ID);
+
+        const fetchFreshState = () => fetchStateOnceAtLeast(targetRuns);
+
         await expect
-          .poll(fetchState, { timeout: POLL_TIMEOUT_MS, intervals: [POLL_INTERVAL_MS] })
+          .poll(fetchFreshState, { timeout: POLL_TIMEOUT_MS, intervals: [POLL_INTERVAL_MS] })
           .not.toBeNull();
-        return unwrap(await fetchState());
+
+        const finalState = await fetchFreshState();
+        if (finalState === null) {
+          throw new Error(
+            `Telemetry task state was unexpectedly null after the poll for runs >= ${targetRuns} resolved`
+          );
+        }
+        return finalState;
       }),
   };
 };

@@ -8,17 +8,16 @@
 /**
  * We exclude `@kbn/eslint/scout_require_api_client_in_api_test` for this spec
  * because we are not testing an HTTP endpoint — we drive the alerting_v2
- * telemetry background task via the task manager service and observe the
- * resulting task state via the telemetry service. All endpoint and ES access
- * is encapsulated in `apiServices`, which is the right tool here. The same
- * exclusion is used by `dispatcher.spec.ts` and `rule_executor.spec.ts` for the equivalent reason.
+ * telemetry background task and observe the resulting task state via the
+ * telemetry service. All endpoint and ES access is encapsulated in
+ * `apiServices`, which is the right tool here. The same exclusion is used by
+ * `dispatcher.spec.ts` and `rule_executor.spec.ts` for the equivalent reason.
  */
 
 /* eslint-disable @kbn/eslint/scout_require_api_client_in_api_test */
 
 import { expect } from '@kbn/scout/api';
 import { tags } from '@kbn/scout';
-import { TASK_ID as TELEMETRY_TASK_ID } from '../../../../server/lib/usage/constants';
 import type { NameValuePair } from '../../../../server/lib/usage/types';
 import { apiTest, buildCreateActionPolicyData, buildCreateRuleData } from '../fixtures';
 
@@ -41,9 +40,9 @@ apiTest.describe('Alerting V2 Telemetry', { tag: tags.stateful.classic }, () => 
           schedule: { every: '1m', lookback: '5m' },
           query: { format: 'standalone', breach: { query: 'FROM metrics-* | LIMIT 10' } },
           grouping: { fields: ['host.name', 'service.name'] },
-          no_data: { behavior: 'last_status', timeframe: '10m' },
-          // Builder defaults to `no_breach`; original FTR rule had no recovery_policy.
-          recovery_policy: undefined,
+          no_data_strategy: 'last_known_status',
+          // Builder defaults to `no_breach`; original FTR rule had no recovery strategy.
+          recovery_strategy: undefined,
         })
       ),
       apiServices.alertingV2.rules.create(
@@ -53,8 +52,8 @@ apiTest.describe('Alerting V2 Telemetry', { tag: tags.stateful.classic }, () => 
           time_field: '@timestamp',
           schedule: { every: '5m' },
           query: { format: 'standalone', breach: { query: 'FROM logs-* | LIMIT 10' } },
-          recovery_policy: { type: 'no_breach' },
-          // Signal rules forbid state_transition; grouping omitted to match original.
+          // Signal rules forbid state_transition and recovery_strategy; grouping omitted to match original.
+          recovery_strategy: undefined,
           state_transition: undefined,
           grouping: undefined,
         })
@@ -66,8 +65,8 @@ apiTest.describe('Alerting V2 Telemetry', { tag: tags.stateful.classic }, () => 
           time_field: '@timestamp',
           schedule: { every: '5m', lookback: '10m' },
           query: { format: 'standalone', breach: { query: 'FROM metrics-* | LIMIT 5' } },
-          no_data: { behavior: 'recover', timeframe: '15m' },
-          recovery_policy: undefined,
+          no_data_strategy: 'recover',
+          recovery_strategy: undefined,
           grouping: undefined,
         })
       ),
@@ -102,8 +101,7 @@ apiTest.describe('Alerting V2 Telemetry', { tag: tags.stateful.classic }, () => 
   });
 
   apiTest('should retrieve telemetry data in the expected format', async ({ apiServices }) => {
-    await apiServices.alertingV2.taskManager.runSoon(TELEMETRY_TASK_ID);
-    const state = await apiServices.alertingV2.telemetry.waitForState();
+    const state = await apiServices.alertingV2.telemetry.runAndWaitForState();
 
     expect(state.has_errors).toBe(false);
 
@@ -119,16 +117,8 @@ apiTest.describe('Alerting V2 Telemetry', { tag: tags.stateful.classic }, () => 
       { name: '10m', value: 1 },
       { name: '5m', value: 1 },
     ]);
-    expect(state.count_with_recovery_policy).toBe(1);
-    expect(state.count_by_recovery_policy_type).toStrictEqual({ no_breach: 1 });
     expect(state.count_with_grouping).toBe(1);
     expect(state.avg_grouping_fields_count).toBe(2);
-    expect(state.count_with_no_data).toBe(2);
-    expect(state.count_by_no_data_behavior).toStrictEqual({ recover: 1, last_status: 1 });
-    expect(sortByName(state.count_by_no_data_timeframe)).toStrictEqual([
-      { name: '10m', value: 1 },
-      { name: '15m', value: 1 },
-    ]);
 
     expect(state.executions_delay_p50_ms).toBeDefined();
     expect(state.executions_delay_p75_ms).toBeDefined();

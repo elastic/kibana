@@ -60,18 +60,21 @@ export const buildAlertingApiServices = ({
   esClient: EsClient;
   kbnClient: KbnClient;
   log: ScoutLogger;
-}): AlertingApiServices => ({
-  rules: getRulesApiService({ kbnClient, log }),
-  ruleEvents: getRuleEventsApiService({ esClient, log }),
-  alertActions: getAlertActionsApiService({ esClient, log }),
-  actionPolicies: getActionPoliciesApiService({ kbnClient, log }),
-  maintenanceWindows: getMaintenanceWindowsApiService({ kbnClient, log }),
-  sourceIndex: getSourceIndexApiService({ esClient, log }),
-  ruleExecutions: getRuleExecutionsApiService({ esClient, log }),
-  dispatcher: getDispatcherApiService({ esClient, log }),
-  taskManager: getTaskManagerService({ kbnClient, log }),
-  telemetry: getTelemetryService({ esClient, log }),
-});
+}): AlertingApiServices => {
+  const taskManager = getTaskManagerService({ kbnClient, log });
+  return {
+    rules: getRulesApiService({ kbnClient, log }),
+    ruleEvents: getRuleEventsApiService({ esClient, log }),
+    alertActions: getAlertActionsApiService({ esClient, log }),
+    actionPolicies: getActionPoliciesApiService({ kbnClient, log }),
+    maintenanceWindows: getMaintenanceWindowsApiService({ kbnClient, log }),
+    sourceIndex: getSourceIndexApiService({ esClient, log }),
+    ruleExecutions: getRuleExecutionsApiService({ esClient, log }),
+    dispatcher: getDispatcherApiService({ esClient, log }),
+    taskManager,
+    telemetry: getTelemetryService({ esClient, log, taskManager }),
+  };
+};
 
 export const apiTest = baseApiTest.extend<{}, { apiServices: AlertingApiServicesFixture }>({
   apiServices: [
