@@ -217,7 +217,7 @@ export const executeNewTermsEsqlApproach = async (execOptions: NewTermsExecutorO
       const bucketFilter = {
         bool: {
           must: newTermsFields.map((field) => ({
-            match: { [field]: bucket[field] },
+            term: { [field]: bucket[field] },
           })),
         },
       };
