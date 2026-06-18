@@ -217,6 +217,12 @@ export const Tab: React.FC<TabProps> = (props) => {
         tabIndex={isSelected ? 0 : -1}
         aria-haspopup={!isInlineEditActive}
         aria-selected={isSelected}
+        css={css`
+          &:focus,
+          &:focus-visible {
+            outline: none;
+          }
+        `}
         onClick={isInlineEditActive ? undefined : onClick}
         onDoubleClick={isInlineEditActive ? undefined : onDoubleClick}
         onKeyDown={isInlineEditActive ? undefined : onKeyDownEvent}

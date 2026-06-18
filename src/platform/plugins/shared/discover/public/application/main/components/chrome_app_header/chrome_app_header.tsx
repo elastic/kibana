@@ -9,7 +9,6 @@
 
 import type { ReactNode } from 'react';
 import React, { useMemo } from 'react';
-import { css } from '@emotion/react';
 import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
 import { AppHeader } from '@kbn/app-header';
 import { AppMenuActionId } from '@kbn/discover-utils';
@@ -60,20 +59,14 @@ export const ChromeAppHeader = ({ menu, titleAppend, isCollapsed }: ChromeAppHea
   }
 
   return (
-    <div
-      css={css`
-        position: relative;
-      `}
-    >
-      <AppHeader
-        title={title}
-        back={back}
-        menu={appMenu}
-        sticky={false}
-        padding="m"
-        titleAppend={titleAppend}
-        borderless
-      />
-    </div>
+    <AppHeader
+      title={title}
+      back={back}
+      menu={appMenu}
+      sticky={false}
+      padding="m"
+      titleAppend={titleAppend}
+      borderless
+    />
   );
 };

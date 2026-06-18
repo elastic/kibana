@@ -42,10 +42,6 @@ export const TabWithBackground = React.forwardRef<HTMLDivElement, TabWithBackgro
           position: relative;
           display: inline-block;
           border-radius: ${euiTheme.border.radius.small};
-          // reserve space for the active-tab accent and side borders so selecting a tab doesn't shift layout
-          border-top: ${euiTheme.border.width.thick} solid transparent;
-          border-left: ${euiTheme.border.width.thin} solid transparent;
-          border-right: ${euiTheme.border.width.thin} solid transparent;
           background: ${isSelected || isDragging
             ? euiTheme.colors.backgroundBasePlain
             : 'transparent'};
@@ -58,11 +54,13 @@ export const TabWithBackground = React.forwardRef<HTMLDivElement, TabWithBackgro
           ${isSelected
             ? `
               position: relative;
-              border-top-color: ${
+              border-top: ${euiTheme.border.width.thick} solid ${
                 isLoading ? euiTheme.colors.borderBaseSubdued : euiTheme.colors.primary
               };
-              border-left-color: ${euiTheme.colors.borderBaseSubdued};
-              border-right-color: ${euiTheme.colors.borderBaseSubdued};
+              border-left: ${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBaseSubdued};
+              border-right: ${euiTheme.border.width.thin} solid ${
+                euiTheme.colors.borderBaseSubdued
+              }; 
               border-bottom-left-radius: 0;
               border-bottom-right-radius: 0;
             `

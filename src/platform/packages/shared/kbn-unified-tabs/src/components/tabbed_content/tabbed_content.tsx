@@ -500,8 +500,8 @@ export const TabbedContent: React.FC<TabbedContentProps> = ({
     </EuiFlexGroup>
   );
 
-  const renderedTabsBar = hideTabsBar ? null : tabsBar;
-  const tabsBarContent = wrapTabsBar ? wrapTabsBar(renderedTabsBar) : renderedTabsBar;
+  const tabsBarNode = hideTabsBar ? null : tabsBar;
+  const renderedTabsBar = wrapTabsBar ? wrapTabsBar(tabsBarNode) : tabsBarNode;
 
   // The separating line between tabs and content
   const tabsBarSeparatorCss = css`
@@ -509,7 +509,7 @@ export const TabbedContent: React.FC<TabbedContentProps> = ({
   `;
 
   if (!renderContent) {
-    return <div css={tabsBarSeparatorCss}>{tabsBarContent}</div>;
+    return <div css={tabsBarSeparatorCss}>{renderedTabsBar}</div>;
   }
 
   return (
@@ -519,9 +519,9 @@ export const TabbedContent: React.FC<TabbedContentProps> = ({
       gutterSize="none"
       className="eui-fullHeight"
     >
-      {tabsBarContent && (
+      {renderedTabsBar && (
         <EuiFlexItem grow={false} css={tabsBarSeparatorCss}>
-          {tabsBarContent}
+          {renderedTabsBar}
         </EuiFlexItem>
       )}
       {selectedItem ? (
