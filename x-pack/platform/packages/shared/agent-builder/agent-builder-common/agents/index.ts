@@ -18,7 +18,7 @@ export {
 export {
   canCurrentUserEditAgent,
   isAgentOwner,
-  canChangeAgentAccessControlScope,
+  canChangeAgentAccessControlMode,
   hasAgentReadAccess,
   hasAgentUseAccess,
   hasAgentWriteAccess,
@@ -29,9 +29,9 @@ export {
   type AgentAuthzArgs,
 } from './access_control';
 export {
-  ACCESS_CONTROL_SCOPE_ICON,
-  ACCESS_CONTROL_SCOPE_BADGE_COLOR,
-  AgentAccessControlScope,
+  ACCESS_CONTROL_MODE_ICON,
+  ACCESS_CONTROL_MODE_BADGE_COLOR,
+  AgentAccessControlMode,
   AgentAccessControlRole,
   AGENT_ACCESS_CONTROL_MAX_ENTRIES,
   AGENT_ACCESS_CONTROL_PRINCIPAL_NAME_MAX_LENGTH,

@@ -24,10 +24,10 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import {
-  AgentAccessControlScope,
+  AgentAccessControlMode,
   AGENT_BUILDER_UI_EBT,
-  ACCESS_CONTROL_SCOPE_BADGE_COLOR,
-  ACCESS_CONTROL_SCOPE_ICON,
+  ACCESS_CONTROL_MODE_BADGE_COLOR,
+  ACCESS_CONTROL_MODE_ICON,
   type AgentDefinition,
 } from '@kbn/agent-builder-common';
 import { getEbtProps } from '@kbn/ebt-click';
@@ -50,14 +50,14 @@ const { editDetails: flyoutLabels } = labels.agentOverview;
 interface EditDetailsFlyoutProps {
   agent: AgentDefinition;
   onClose: () => void;
-  canChangeAccessControlScope: boolean;
+  canChangeAccessControlMode: boolean;
   showWorkflowSection: boolean;
 }
 
 export const EditDetailsFlyout: React.FC<EditDetailsFlyoutProps> = ({
   agent,
   onClose,
-  canChangeAccessControlScope,
+  canChangeAccessControlMode,
   showWorkflowSection,
 }) => {
   const { euiTheme } = useEuiTheme();
@@ -74,7 +74,7 @@ export const EditDetailsFlyout: React.FC<EditDetailsFlyoutProps> = ({
       avatar_color: agent.avatar_color ?? '',
       labels: agent.labels ?? [],
       access_control: agent.access_control ?? {
-        scope: AgentAccessControlScope.Private,
+        access_mode: AgentAccessControlMode.Private,
         entries: [],
       },
       configuration: {
@@ -114,7 +114,7 @@ export const EditDetailsFlyout: React.FC<EditDetailsFlyoutProps> = ({
     },
   });
 
-  const isShared = agent.access_control?.scope === AgentAccessControlScope.Shared;
+  const isShared = agent.access_control?.access_mode === AgentAccessControlMode.Shared;
 
   const contentPadding = css`
     padding: ${euiTheme.size.s};
@@ -145,8 +145,8 @@ export const EditDetailsFlyout: React.FC<EditDetailsFlyoutProps> = ({
                   <span>
                     {flyoutLabels.sharedWarningPrefix}
                     <EuiBadge
-                      iconType={ACCESS_CONTROL_SCOPE_ICON[AgentAccessControlScope.Shared]}
-                      color={ACCESS_CONTROL_SCOPE_BADGE_COLOR[AgentAccessControlScope.Shared]}
+                      iconType={ACCESS_CONTROL_MODE_ICON[AgentAccessControlMode.Shared]}
+                      color={ACCESS_CONTROL_MODE_BADGE_COLOR[AgentAccessControlMode.Shared]}
                     >
                       {flyoutLabels.sharedWarningBadge}
                     </EuiBadge>
@@ -162,7 +162,7 @@ export const EditDetailsFlyout: React.FC<EditDetailsFlyoutProps> = ({
             <IdentificationSection />
 
             <EuiHorizontalRule margin="xl" />
-            <AccessSection canChangeAccessControlScope={canChangeAccessControlScope} />
+            <AccessSection canChangeAccessControlMode={canChangeAccessControlMode} />
 
             <EuiHorizontalRule margin="xl" />
             <CustomizationSection showWorkflowSection={showWorkflowSection} />

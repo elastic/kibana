@@ -10,7 +10,7 @@ import type { Client } from '@elastic/elasticsearch';
 import {
   agentBuilderDefaultAgentId,
   AgentAccessControlRole,
-  AgentAccessControlScope,
+  AgentAccessControlMode,
   AgentType,
 } from '@kbn/agent-builder-common';
 import { tags } from '@kbn/scout';
@@ -28,13 +28,16 @@ import { spaceUrl } from '../fixtures/space_paths';
 
 const ACCESS_CONTROL_TEST_PREFIX = 'access-control-test';
 
-function mockAgent(id: string, scope: AgentAccessControlScope = AgentAccessControlScope.Private) {
+function mockAgent(
+  id: string,
+  accessMode: AgentAccessControlMode = AgentAccessControlMode.Private
+) {
   return {
     id,
     name: 'Access Control Test Agent',
     description: 'Fixture for access control tests',
-    // Create accepts scope only; entries are managed via PUT /access_control.
-    access_control: { scope },
+    // Create accepts access_mode only; entries are managed via PUT /access_control.
+    access_control: { access_mode: accessMode },
     configuration: {
       instructions: 'Test agent',
       tools: [{ tool_ids: ['*'] }],
@@ -276,7 +279,7 @@ apiTest.describe(
       entries = [],
     }: {
       agentId: string;
-      visibility: AgentAccessControlScope;
+      visibility: AgentAccessControlMode;
       entries?: Array<{ type: 'user'; name: string; role: AgentAccessControlRole }>;
     }) => {
       await addLegacyAccessControlMappings();
@@ -309,7 +312,7 @@ apiTest.describe(
 
     apiTest('non-owner gets 404 on a Private agent until granted', async ({ apiClient }) => {
       const agentId = `${ACCESS_CONTROL_TEST_PREFIX}-read-${randomUUID()}`;
-      await createAgentAs(apiClient, alice, mockAgent(agentId, AgentAccessControlScope.Private));
+      await createAgentAs(apiClient, alice, mockAgent(agentId, AgentAccessControlMode.Private));
 
       // Bob has no grant.
       const denied = await apiClient.get(
@@ -360,11 +363,11 @@ apiTest.describe(
 
         await seedLegacyAgent({
           agentId: deniedAgentId,
-          visibility: AgentAccessControlScope.Private,
+          visibility: AgentAccessControlMode.Private,
         });
         await seedLegacyAgent({
           agentId: grantedAgentId,
-          visibility: AgentAccessControlScope.Private,
+          visibility: AgentAccessControlMode.Private,
           entries: [
             { type: 'user', name: bob.username, role: AgentAccessControlRole.User },
             { type: 'user', name: eve.username, role: AgentAccessControlRole.Editor },
@@ -389,7 +392,7 @@ apiTest.describe(
         );
         expect(granted).toHaveStatusCode(200);
         expect(granted.body.access_control).toMatchObject({
-          scope: AgentAccessControlScope.Private,
+          access_mode: AgentAccessControlMode.Private,
           entries: [],
         });
 
@@ -426,7 +429,7 @@ apiTest.describe(
       'GET /agents/{id} redacts access_control.entries for non-managers',
       async ({ apiClient }) => {
         const agentId = `${ACCESS_CONTROL_TEST_PREFIX}-redact-${randomUUID()}`;
-        await createAgentAs(apiClient, alice, mockAgent(agentId, AgentAccessControlScope.Private));
+        await createAgentAs(apiClient, alice, mockAgent(agentId, AgentAccessControlMode.Private));
         const setRes = await setAccessControlAs(apiClient, alice, agentId, [
           { type: 'user', name: bob.username, role: AgentAccessControlRole.User },
           { type: 'user', name: eve.username, role: AgentAccessControlRole.Editor },
@@ -463,7 +466,7 @@ apiTest.describe(
       'GET /agents/{id}/access_control returns can_manage_access_control and redacts entries for non-managers',
       async ({ apiClient }) => {
         const agentId = `${ACCESS_CONTROL_TEST_PREFIX}-get-${randomUUID()}`;
-        await createAgentAs(apiClient, alice, mockAgent(agentId, AgentAccessControlScope.Private));
+        await createAgentAs(apiClient, alice, mockAgent(agentId, AgentAccessControlMode.Private));
         await setAccessControlAs(apiClient, alice, agentId, [
           { type: 'user', name: bob.username, role: AgentAccessControlRole.User },
           { type: 'user', name: eve.username, role: AgentAccessControlRole.Editor },
@@ -493,7 +496,7 @@ apiTest.describe(
       'PUT /agents/{id}/access_control gates on write access (User → 404, Editor → 200)',
       async ({ apiClient }) => {
         const agentId = `${ACCESS_CONTROL_TEST_PREFIX}-put-${randomUUID()}`;
-        await createAgentAs(apiClient, alice, mockAgent(agentId, AgentAccessControlScope.Private));
+        await createAgentAs(apiClient, alice, mockAgent(agentId, AgentAccessControlMode.Private));
         await setAccessControlAs(apiClient, alice, agentId, [
           { type: 'user', name: bob.username, role: AgentAccessControlRole.User },
           { type: 'user', name: eve.username, role: AgentAccessControlRole.Editor },
@@ -511,11 +514,11 @@ apiTest.describe(
       }
     );
 
-    apiTest('legacy Manager acl can change access-control scope', async ({ apiClient }) => {
-      const agentId = `${ACCESS_CONTROL_TEST_PREFIX}-legacy-scope-${randomUUID()}`;
+    apiTest('legacy Manager acl can change access-control mode', async ({ apiClient }) => {
+      const agentId = `${ACCESS_CONTROL_TEST_PREFIX}-legacy-mode-${randomUUID()}`;
       await seedLegacyAgent({
         agentId,
-        visibility: AgentAccessControlScope.Private,
+        visibility: AgentAccessControlMode.Private,
         entries: [{ type: 'user', name: bob.username, role: AgentAccessControlRole.Manager }],
       });
 
@@ -523,14 +526,14 @@ apiTest.describe(
         `${accessControlApiBase}/agents/${encodeURIComponent(agentId)}`,
         {
           headers: headersFor(bob),
-          body: { access_control: { scope: AgentAccessControlScope.Shared } },
+          body: { access_control: { access_mode: AgentAccessControlMode.Shared } },
           responseType: 'json',
         }
       );
 
       expect(response).toHaveStatusCode(200);
       expect(response.body.access_control).toMatchObject({
-        scope: AgentAccessControlScope.Shared,
+        access_mode: AgentAccessControlMode.Shared,
         entries: [{ type: 'user', name: bob.username, role: AgentAccessControlRole.Manager }],
       });
     });
@@ -539,7 +542,7 @@ apiTest.describe(
       'PUT /agents/{id}/access_control rejects callers without manageAgents (403)',
       async ({ apiClient }) => {
         const agentId = `${ACCESS_CONTROL_TEST_PREFIX}-noprivs-${randomUUID()}`;
-        await createAgentAs(apiClient, alice, mockAgent(agentId, AgentAccessControlScope.Private));
+        await createAgentAs(apiClient, alice, mockAgent(agentId, AgentAccessControlMode.Private));
 
         const res = await setAccessControlAs(apiClient, reader, agentId, []);
         expect(res).toHaveStatusCode(403);
@@ -570,7 +573,7 @@ apiTest.describe(
       'cluster admin can read a Private agent they are not in the access control of',
       async ({ apiClient, asAdmin }) => {
         const agentId = `${ACCESS_CONTROL_TEST_PREFIX}-admin-${randomUUID()}`;
-        await createAgentAs(apiClient, alice, mockAgent(agentId, AgentAccessControlScope.Private));
+        await createAgentAs(apiClient, alice, mockAgent(agentId, AgentAccessControlMode.Private));
 
         const res = await asAdmin.get(
           `${accessControlApiBase}/agents/${encodeURIComponent(agentId)}`,

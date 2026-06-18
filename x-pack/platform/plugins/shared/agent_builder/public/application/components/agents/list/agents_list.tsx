@@ -41,13 +41,13 @@ import { useCurrentUser } from '../../../hooks/agents/use_current_user';
 import { FilterOptionWithMatchesBadge } from '../../common/filter_option_with_matches_badge';
 import { Labels } from '../../common/labels';
 import { AgentAvatar } from '../../common/agent_avatar';
-import { AgentAccessControlScopeBadge } from './agent_access_control_scope_badge';
+import { AgentAccessControlModeBadge } from './agent_access_control_mode_badge';
 import { AccessFlyout } from '../access/access_flyout';
 import { accessSummaryManageButton } from '../access/access_i18n';
 
 const columnNames = {
   name: i18n.translate('xpack.agentBuilder.agents.nameColumn', { defaultMessage: 'Name' }),
-  accessControlScope: i18n.translate('xpack.agentBuilder.agents.accessControlScopeColumn', {
+  accessControlMode: i18n.translate('xpack.agentBuilder.agents.accessControlModeColumn', {
     defaultMessage: 'Access',
   }),
   labels: i18n.translate('xpack.agentBuilder.agents.labelsColumn', { defaultMessage: 'Labels' }),
@@ -176,11 +176,11 @@ export const AgentsList: React.FC = () => {
       'data-test-subj': 'agentBuilderAgentsListLabels',
     };
 
-    const agentAccessControlScope: EuiTableComputedColumnType<AgentDefinition> = {
+    const agentAccessControlMode: EuiTableComputedColumnType<AgentDefinition> = {
       width: '135px',
-      name: columnNames.accessControlScope,
-      render: (agent) => <AgentAccessControlScopeBadge agent={agent} />,
-      'data-test-subj': 'agentBuilderAgentsListAccessControlScope',
+      name: columnNames.accessControlMode,
+      render: (agent) => <AgentAccessControlModeBadge agent={agent} />,
+      'data-test-subj': 'agentBuilderAgentsListAccessControlMode',
     };
 
     const agentActions: EuiTableActionsColumnType<AgentDefinition> = {
@@ -263,7 +263,7 @@ export const AgentsList: React.FC = () => {
     return [
       agentAvatar,
       agentNameAndDescription,
-      agentAccessControlScope,
+      agentAccessControlMode,
       agentLabels,
       agentActions,
     ];

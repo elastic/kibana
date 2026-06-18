@@ -30,10 +30,10 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
   agentBuilderDefaultAgentId,
-  AgentAccessControlScope,
+  AgentAccessControlMode,
   AGENT_BUILDER_UI_EBT,
-  ACCESS_CONTROL_SCOPE_ICON,
-  canChangeAgentAccessControlScope,
+  ACCESS_CONTROL_MODE_ICON,
+  canChangeAgentAccessControlMode,
   type UserIdAndName,
 } from '@kbn/agent-builder-common';
 import { getEbtProps } from '@kbn/ebt-click';
@@ -49,7 +49,7 @@ import { useCurrentUser } from '../../../../hooks/agents/use_current_user';
 import { useUiPrivileges } from '../../../../hooks/use_ui_privileges';
 import { WorkflowPicker } from '../../../tools/form/components/workflow/workflow_picker';
 import { isPreExecutionWorkflowEnabled } from '../../../../utils/is_pre_execution_workflow_enabled';
-import { ACCESS_CONTROL_SCOPE_LABELS } from '../../../../utils/access_control_scope_i18n';
+import { ACCESS_CONTROL_MODE_LABELS } from '../../../../utils/access_control_mode_i18n';
 import type { AgentFormData } from '../agent_form';
 import { truncateAvatarSymbol } from '../agent_form_validation';
 
@@ -78,15 +78,15 @@ export const AgentSettingsTab: React.FC<AgentSettingsTabProps> = ({
 
   const { currentUser } = useCurrentUser();
   const { isAdmin } = useUiPrivileges();
-  const currentAccessControlScope = useWatch({ control, name: 'access_control.scope' });
+  const currentAccessControlMode = useWatch({ control, name: 'access_control.access_mode' });
   const currentEntries = useWatch({ control, name: 'access_control.entries' }) ?? [];
 
-  const canChangeAccessControlScope =
+  const canChangeAccessControlMode =
     isCreateMode ||
-    canChangeAgentAccessControlScope({
+    canChangeAgentAccessControlMode({
       agentId,
       access_control: {
-        scope: currentAccessControlScope,
+        access_mode: currentAccessControlMode,
         entries: currentEntries,
       },
       owner,
@@ -99,9 +99,9 @@ export const AgentSettingsTab: React.FC<AgentSettingsTabProps> = ({
   // (seeded from the loaded agent in `useAgentEdit`), not from local state.
   const accessFormAgent = useMemo(
     () => ({
-      access_control: { scope: currentAccessControlScope, entries: [] },
+      access_control: { access_mode: currentAccessControlMode, entries: [] },
     }),
-    [currentAccessControlScope]
+    [currentAccessControlMode]
   );
 
   const showAgentWorkflowsSection = useMemo(() => {
@@ -112,13 +112,7 @@ export const AgentSettingsTab: React.FC<AgentSettingsTabProps> = ({
   const formFlexColumnStyles = css`
     min-width: 0;
   `;
-  const renderAccessControlScopeOption = ({
-    icon,
-    label,
-  }: {
-    icon: EuiIconType;
-    label: string;
-  }) => (
+  const renderAccessControlModeOption = ({ icon, label }: { icon: EuiIconType; label: string }) => (
     <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
       <EuiFlexItem grow={false}>
         <EuiIcon type={icon} aria-hidden={true} />
@@ -126,26 +120,26 @@ export const AgentSettingsTab: React.FC<AgentSettingsTabProps> = ({
       <EuiFlexItem>{label}</EuiFlexItem>
     </EuiFlexGroup>
   );
-  const accessControlScopeOptions = [
+  const accessControlModeOptions = [
     {
-      value: AgentAccessControlScope.Public,
-      inputDisplay: renderAccessControlScopeOption({
-        icon: ACCESS_CONTROL_SCOPE_ICON[AgentAccessControlScope.Public],
-        label: ACCESS_CONTROL_SCOPE_LABELS[AgentAccessControlScope.Public],
+      value: AgentAccessControlMode.Public,
+      inputDisplay: renderAccessControlModeOption({
+        icon: ACCESS_CONTROL_MODE_ICON[AgentAccessControlMode.Public],
+        label: ACCESS_CONTROL_MODE_LABELS[AgentAccessControlMode.Public],
       }),
     },
     {
-      value: AgentAccessControlScope.Shared,
-      inputDisplay: renderAccessControlScopeOption({
-        icon: ACCESS_CONTROL_SCOPE_ICON[AgentAccessControlScope.Shared],
-        label: ACCESS_CONTROL_SCOPE_LABELS[AgentAccessControlScope.Shared],
+      value: AgentAccessControlMode.Shared,
+      inputDisplay: renderAccessControlModeOption({
+        icon: ACCESS_CONTROL_MODE_ICON[AgentAccessControlMode.Shared],
+        label: ACCESS_CONTROL_MODE_LABELS[AgentAccessControlMode.Shared],
       }),
     },
     {
-      value: AgentAccessControlScope.Private,
-      inputDisplay: renderAccessControlScopeOption({
-        icon: ACCESS_CONTROL_SCOPE_ICON[AgentAccessControlScope.Private],
-        label: ACCESS_CONTROL_SCOPE_LABELS[AgentAccessControlScope.Private],
+      value: AgentAccessControlMode.Private,
+      inputDisplay: renderAccessControlModeOption({
+        icon: ACCESS_CONTROL_MODE_ICON[AgentAccessControlMode.Private],
+        label: ACCESS_CONTROL_MODE_LABELS[AgentAccessControlMode.Private],
       }),
     },
   ];
@@ -400,7 +394,7 @@ export const AgentSettingsTab: React.FC<AgentSettingsTabProps> = ({
                 <EuiTitle size="xxs">
                   <span>
                     {i18n.translate(
-                      'xpack.agentBuilder.agents.form.settings.accessControlScopeMeaningLabel',
+                      'xpack.agentBuilder.agents.form.settings.accessControlModeMeaningLabel',
                       {
                         defaultMessage: 'Access control levels',
                       }
@@ -412,14 +406,14 @@ export const AgentSettingsTab: React.FC<AgentSettingsTabProps> = ({
                     <EuiText size="s" color="subdued">
                       <strong>
                         {i18n.translate(
-                          'xpack.agentBuilder.agents.form.settings.accessControlScopeMeaningPublicLabel',
+                          'xpack.agentBuilder.agents.form.settings.accessControlModeMeaningPublicLabel',
                           {
                             defaultMessage: 'Public:',
                           }
                         )}
                       </strong>{' '}
                       {i18n.translate(
-                        'xpack.agentBuilder.agents.form.settings.accessControlScopeMeaningPublicDescription',
+                        'xpack.agentBuilder.agents.form.settings.accessControlModeMeaningPublicDescription',
                         {
                           defaultMessage: 'Anyone can view and edit.',
                         }
@@ -430,14 +424,14 @@ export const AgentSettingsTab: React.FC<AgentSettingsTabProps> = ({
                     <EuiText size="s" color="subdued">
                       <strong>
                         {i18n.translate(
-                          'xpack.agentBuilder.agents.form.settings.accessControlScopeMeaningSharedLabel',
+                          'xpack.agentBuilder.agents.form.settings.accessControlModeMeaningSharedLabel',
                           {
                             defaultMessage: 'Shared:',
                           }
                         )}
                       </strong>{' '}
                       {i18n.translate(
-                        'xpack.agentBuilder.agents.form.settings.accessControlScopeMeaningSharedDescription',
+                        'xpack.agentBuilder.agents.form.settings.accessControlModeMeaningSharedDescription',
                         {
                           defaultMessage:
                             'Anyone can view. Only the owner, an administrator, or people you explicitly grant access to can edit.',
@@ -449,14 +443,14 @@ export const AgentSettingsTab: React.FC<AgentSettingsTabProps> = ({
                     <EuiText size="s" color="subdued">
                       <strong>
                         {i18n.translate(
-                          'xpack.agentBuilder.agents.form.settings.accessControlScopeMeaningPrivateLabel',
+                          'xpack.agentBuilder.agents.form.settings.accessControlModeMeaningPrivateLabel',
                           {
                             defaultMessage: 'Private:',
                           }
                         )}
                       </strong>{' '}
                       {i18n.translate(
-                        'xpack.agentBuilder.agents.form.settings.accessControlScopeMeaningPrivateDescription',
+                        'xpack.agentBuilder.agents.form.settings.accessControlModeMeaningPrivateDescription',
                         {
                           defaultMessage:
                             'Only the owner, an administrator, or people you explicitly grant access to can view and edit.',
@@ -514,47 +508,44 @@ export const AgentSettingsTab: React.FC<AgentSettingsTabProps> = ({
           </EuiFormRow>
 
           <EuiFormRow
-            label={i18n.translate('xpack.agentBuilder.agents.form.accessControlScopeLabel', {
+            label={i18n.translate('xpack.agentBuilder.agents.form.accessControlModeLabel', {
               defaultMessage: 'Access control',
             })}
             helpText={
               agentId === agentBuilderDefaultAgentId
                 ? i18n.translate(
-                    'xpack.agentBuilder.agents.form.accessControlScopeDefaultAgentReason',
+                    'xpack.agentBuilder.agents.form.accessControlModeDefaultAgentReason',
                     {
                       defaultMessage: 'The default agent is always accessible to all users.',
                     }
                   )
-                : !canChangeAccessControlScope
-                ? i18n.translate(
-                    'xpack.agentBuilder.agents.form.accessControlScopeDisabledReason',
-                    {
-                      defaultMessage:
-                        'Only the owner or an administrator can change the access control scope.',
-                    }
-                  )
+                : !canChangeAccessControlMode
+                ? i18n.translate('xpack.agentBuilder.agents.form.accessControlModeDisabledReason', {
+                    defaultMessage:
+                      'Only the owner or an administrator can change the access control mode.',
+                  })
                 : undefined
             }
-            isInvalid={!!formState.errors.access_control?.scope}
-            error={formState.errors.access_control?.scope?.message}
+            isInvalid={!!formState.errors.access_control?.access_mode}
+            error={formState.errors.access_control?.access_mode?.message}
           >
             <Controller
-              name="access_control.scope"
+              name="access_control.access_mode"
               control={control}
               render={({ field: { onChange, value } }) => (
                 <EuiSuperSelect
                   fullWidth
-                  options={accessControlScopeOptions}
+                  options={accessControlModeOptions}
                   valueOfSelected={value}
                   onChange={onChange}
-                  disabled={isFormDisabled || !canChangeAccessControlScope}
+                  disabled={isFormDisabled || !canChangeAccessControlMode}
                   aria-label={i18n.translate(
-                    'xpack.agentBuilder.agents.form.accessControlScopeAriaLabel',
+                    'xpack.agentBuilder.agents.form.accessControlModeAriaLabel',
                     {
-                      defaultMessage: 'Agent access control scope',
+                      defaultMessage: 'Agent access control mode',
                     }
                   )}
-                  data-test-subj="agentSettingsAccessControlScopeSelect"
+                  data-test-subj="agentSettingsAccessControlModeSelect"
                 />
               )}
             />

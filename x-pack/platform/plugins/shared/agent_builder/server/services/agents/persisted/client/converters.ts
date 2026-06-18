@@ -85,7 +85,7 @@ export const createRequestToEs = ({
     created_by_id: user.id,
     created_by_name: user.username,
     access_control: profile.access_control
-      ? { scope: profile.access_control.scope, entries: [] }
+      ? { access_mode: profile.access_control.access_mode, entries: [] }
       : getDefaultAgentAccessControl(),
     config: {
       instructions: profile.configuration.instructions,
@@ -121,7 +121,7 @@ export const updateRequestToEs = ({
     ...restUpdate,
     id: agentId,
     access_control: access_control
-      ? { ...currentAccessControl, scope: access_control.scope }
+      ? { ...currentAccessControl, access_mode: access_control.access_mode }
       : currentProps.access_control,
     // Explicitly omit configuration to ensure migration
     configuration: undefined,

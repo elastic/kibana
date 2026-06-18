@@ -11,7 +11,7 @@ import { agentBuilderDefaultAgentId } from '../definition';
 import type { AgentAccessControl } from './types';
 import {
   AgentAccessControlRole,
-  AgentAccessControlScope,
+  AgentAccessControlMode,
   accessControlRoleMeets,
   maxAccessControlRole,
 } from './types';
@@ -45,18 +45,18 @@ export const isAgentOwner = ({
   return false;
 };
 
-const accessControlScopeRole = (
-  scope?: AgentAccessControlScope
+const accessControlModeRole = (
+  accessMode?: AgentAccessControlMode
 ): AgentAccessControlRole | undefined => {
-  const effective = scope ?? AgentAccessControlScope.Public;
+  const effective = accessMode ?? AgentAccessControlMode.Public;
   switch (effective) {
-    case AgentAccessControlScope.Public:
+    case AgentAccessControlMode.Public:
       // Public preserves the previous behavior: anyone can read AND write.
       return AgentAccessControlRole.Editor;
-    case AgentAccessControlScope.Shared:
+    case AgentAccessControlMode.Shared:
       // Shared: anyone can read and run; only owner+admin can write (matches legacy).
       return AgentAccessControlRole.User;
-    case AgentAccessControlScope.Private:
+    case AgentAccessControlMode.Private:
       return undefined;
   }
 };
@@ -87,7 +87,7 @@ const accessControlRoleForUser = (
  *   1. isAdmin → 'admin'
  *   2. ownership → 'owner' (implicit Manager)
  *   3. access-control grant (max of user grant and any role grants)
- *   4. access-control scope baseline (Public→Editor, Shared→User, Private→nothing)
+ *   4. access-control mode baseline (Public→Editor, Shared→User, Private→nothing)
  */
 export const getEffectiveAgentRole = ({
   access_control,
@@ -102,7 +102,7 @@ export const getEffectiveAgentRole = ({
     return 'owner';
   }
   const entryRole = accessControlRoleForUser(access_control, currentUser);
-  const baseline = accessControlScopeRole(access_control?.scope);
+  const baseline = accessControlModeRole(access_control?.access_mode);
   return maxAccessControlRole(entryRole, baseline);
 };
 
@@ -120,15 +120,15 @@ const meetsThreshold = (
 };
 
 /**
- * Whether the current user may change the agent's access-control scope
+ * Whether the current user may change the agent's access-control mode
  * (`Public`, `Shared`, or `Private`).
  *
- * Scope changes alter the baseline access for everyone in the workspace, so they are
+ * Mode changes alter the baseline access for everyone in the workspace, so they are
  * stricter than editing access-control entries. Only admins, owners, and Manager
- * grantees may change the scope. The default agent is excluded because its scope is
+ * grantees may change the mode. The default agent is excluded because its mode is
  * system-owned and must remain Public.
  */
-export const canChangeAgentAccessControlScope = (
+export const canChangeAgentAccessControlMode = (
   args: AgentAuthzArgs & { agentId?: string }
 ): boolean => {
   if (args.agentId === agentBuilderDefaultAgentId) {
@@ -171,8 +171,8 @@ export const canDeleteAgent = (args: AgentAuthzArgs): boolean =>
  * `manageAgents` Kibana sub-feature privilege. Cluster admin bypasses via the `isAdmin`
  * path in {@link hasAgentWriteAccess}.
  *
- * This does not imply permission to change the access-control scope; use
- * {@link canChangeAgentAccessControlScope} for that stricter check.
+ * This does not imply permission to change the access-control mode; use
+ * {@link canChangeAgentAccessControlMode} for that stricter check.
  *
  * The default agent is excluded — it is system-owned, always Public, and must remain
  * reachable for everyone in the workspace.

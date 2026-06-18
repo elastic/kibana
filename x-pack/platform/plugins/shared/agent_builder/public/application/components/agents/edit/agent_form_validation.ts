@@ -97,7 +97,7 @@ export const agentFormSchema = z.object({
     }),
   }),
   access_control: z.object({
-    scope: z.enum(['private', 'public', 'shared']),
+    access_mode: z.enum(['private', 'public', 'shared']),
     entries: z.array(
       z.object({
         type: z.literal('user'),

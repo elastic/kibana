@@ -7,7 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 import path from 'node:path';
-import { AgentAccessControlRole, AgentAccessControlScope } from '@kbn/agent-builder-common';
+import { AgentAccessControlRole, AgentAccessControlMode } from '@kbn/agent-builder-common';
 import type { RouteDependencies } from './types';
 import { getHandlerWrapper } from './wrap_handler';
 import { publicApiPath } from '../../common/constants';
@@ -72,16 +72,16 @@ const CONNECTORS_SCHEMA = schema.arrayOf(
   }
 );
 
-const ACCESS_CONTROL_SCOPE_SCHEMA = schema.oneOf(
+const ACCESS_CONTROL_MODE_SCHEMA = schema.oneOf(
   [
-    schema.literal(AgentAccessControlScope.Public),
-    schema.literal(AgentAccessControlScope.Shared),
-    schema.literal(AgentAccessControlScope.Private),
+    schema.literal(AgentAccessControlMode.Public),
+    schema.literal(AgentAccessControlMode.Shared),
+    schema.literal(AgentAccessControlMode.Private),
   ],
   {
     meta: {
       description:
-        '**Technical Preview; added in 9.4.0.** Access-control scope: `public` (any privileged user can read/write), `shared` (any privileged user can read, only owner can write), `private` (only owner can read/write).',
+        '**Technical Preview; added in 9.4.0.** Access-control mode: `public` (any privileged user can read/write), `shared` (any privileged user can read, only owner can write), `private` (only owner can read/write).',
     },
   }
 );
@@ -119,8 +119,8 @@ const ACCESS_CONTROL_ENTRIES_SCHEMA = schema.arrayOf(
   }
 );
 
-const ACCESS_CONTROL_SCOPE_ONLY_SCHEMA = schema.object({
-  scope: ACCESS_CONTROL_SCOPE_SCHEMA,
+const ACCESS_CONTROL_MODE_ONLY_SCHEMA = schema.object({
+  access_mode: ACCESS_CONTROL_MODE_SCHEMA,
 });
 
 export function registerAgentRoutes({
@@ -259,7 +259,7 @@ export function registerAgentRoutes({
                   }
                 )
               ),
-              access_control: schema.maybe(ACCESS_CONTROL_SCOPE_ONLY_SCHEMA),
+              access_control: schema.maybe(ACCESS_CONTROL_MODE_ONLY_SCHEMA),
               configuration: schema.object(
                 {
                   instructions: schema.maybe(
@@ -387,7 +387,7 @@ export function registerAgentRoutes({
                   }
                 )
               ),
-              access_control: schema.maybe(ACCESS_CONTROL_SCOPE_ONLY_SCHEMA),
+              access_control: schema.maybe(ACCESS_CONTROL_MODE_ONLY_SCHEMA),
               configuration: schema.maybe(
                 schema.object(
                   {

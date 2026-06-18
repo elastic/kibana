@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { AgentAccessControlRole, AgentAccessControlScope } from '@kbn/agent-builder-common';
+import { AgentAccessControlRole, AgentAccessControlMode } from '@kbn/agent-builder-common';
 
 export const ROLE_LABEL: Record<AgentAccessControlRole, string> = {
   [AgentAccessControlRole.User]: i18n.translate('xpack.agentBuilder.acl.role.user.label', {
@@ -45,17 +45,17 @@ const ROLE_ORDER: AgentAccessControlRole[] = [
 ];
 
 /**
- * Roles that meaningfully grant something on top of a given access control scope.
+ * Roles that meaningfully grant something on top of a given access control mode.
  *
  * For Public/Shared agents the see/use baseline is already global, so a `User` entry
  * would be a no-op. We hide it in the role dropdown to prevent misleading rows.
  */
-export const selectableRolesForAccessControlScope = (
-  accessControlScope: AgentAccessControlScope | undefined
+export const selectableRolesForAccessControlMode = (
+  accessControlMode: AgentAccessControlMode | undefined
 ): AgentAccessControlRole[] => {
   if (
-    accessControlScope === AgentAccessControlScope.Public ||
-    accessControlScope === AgentAccessControlScope.Shared
+    accessControlMode === AgentAccessControlMode.Public ||
+    accessControlMode === AgentAccessControlMode.Shared
   ) {
     return [AgentAccessControlRole.Editor, AgentAccessControlRole.Manager];
   }

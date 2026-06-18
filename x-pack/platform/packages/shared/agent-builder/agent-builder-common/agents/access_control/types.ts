@@ -8,26 +8,26 @@
 import type { EuiBadgeProps } from '@elastic/eui';
 import type { EuiIconType } from '@elastic/eui/src/components/icon/icon';
 
-export enum AgentAccessControlScope {
+export enum AgentAccessControlMode {
   Private = 'private',
   Public = 'public',
   Shared = 'shared',
 }
 
-/** Map from agent access-control scope to the icon used in the UI. */
-export const ACCESS_CONTROL_SCOPE_ICON: Record<AgentAccessControlScope, EuiIconType> = {
-  [AgentAccessControlScope.Public]: 'globe',
-  [AgentAccessControlScope.Shared]: 'users',
-  [AgentAccessControlScope.Private]: 'lock',
+/** Map from agent access-control mode to the icon used in the UI. */
+export const ACCESS_CONTROL_MODE_ICON: Record<AgentAccessControlMode, EuiIconType> = {
+  [AgentAccessControlMode.Public]: 'globe',
+  [AgentAccessControlMode.Shared]: 'users',
+  [AgentAccessControlMode.Private]: 'lock',
 };
 
-export const ACCESS_CONTROL_SCOPE_BADGE_COLOR: Record<
-  AgentAccessControlScope,
+export const ACCESS_CONTROL_MODE_BADGE_COLOR: Record<
+  AgentAccessControlMode,
   EuiBadgeProps['color']
 > = {
-  [AgentAccessControlScope.Private]: 'hollow',
-  [AgentAccessControlScope.Shared]: 'primary',
-  [AgentAccessControlScope.Public]: 'success',
+  [AgentAccessControlMode.Private]: 'hollow',
+  [AgentAccessControlMode.Shared]: 'primary',
+  [AgentAccessControlMode.Public]: 'success',
 };
 
 /**
@@ -62,12 +62,12 @@ export interface AgentAccessControlEntry {
 }
 
 export interface AgentAccessControl {
-  scope: AgentAccessControlScope;
+  access_mode: AgentAccessControlMode;
   entries: AgentAccessControlEntry[];
 }
 
 export const getDefaultAgentAccessControl = (): AgentAccessControl => ({
-  scope: AgentAccessControlScope.Public,
+  access_mode: AgentAccessControlMode.Public,
   entries: [],
 });
 

@@ -8,7 +8,7 @@
 import {
   agentBuilderDefaultAgentId,
   AgentType,
-  AgentAccessControlScope,
+  AgentAccessControlMode,
   AgentAccessControlRole,
 } from '@kbn/agent-builder-common';
 import type { AgentCreateRequest, AgentUpdateRequest } from '../../../../../common/agents';
@@ -32,7 +32,7 @@ describe('fromEs', () => {
         labels: ['foo', 'bar'],
         avatar_color: 'blue',
         avatar_symbol: 'star',
-        access_control: { scope: AgentAccessControlScope.Shared, entries: [] },
+        access_control: { access_mode: AgentAccessControlMode.Shared, entries: [] },
         created_by_id: 'user-id-1',
         created_by_name: 'test-user',
         config: {
@@ -66,7 +66,7 @@ describe('fromEs', () => {
       labels: ['foo', 'bar'],
       avatar_color: 'blue',
       avatar_symbol: 'star',
-      access_control: { scope: AgentAccessControlScope.Shared, entries: [] },
+      access_control: { access_mode: AgentAccessControlMode.Shared, entries: [] },
       created_by: { id: 'user-id-1', username: 'test-user' },
     });
   });
@@ -98,7 +98,7 @@ describe('fromEs', () => {
       labels: ['foo', 'bar'],
       avatar_color: 'blue',
       avatar_symbol: 'star',
-      access_control: { scope: AgentAccessControlScope.Shared, entries: [] },
+      access_control: { access_mode: AgentAccessControlMode.Shared, entries: [] },
       created_by: { id: 'user-id-1', username: 'test-user' },
     });
   });
@@ -148,7 +148,7 @@ describe('fromEs', () => {
     const definition = fromEs(document);
 
     expect(definition.access_control).toEqual({
-      scope: AgentAccessControlScope.Public,
+      access_mode: AgentAccessControlMode.Public,
       entries: [],
     });
     expect(definition.created_by).toBeUndefined();
@@ -162,13 +162,13 @@ describe('fromEs', () => {
     }
     const entries = [{ type: 'user' as const, name: 'alice', role: AgentAccessControlRole.Editor }];
     delete source.access_control;
-    source.visibility = AgentAccessControlScope.Private;
+    source.visibility = AgentAccessControlMode.Private;
     source.acl = { entries };
 
     const definition = fromEs(document);
 
     expect(definition.access_control).toEqual({
-      scope: AgentAccessControlScope.Private,
+      access_mode: AgentAccessControlMode.Private,
       entries,
     });
   });
@@ -186,16 +186,16 @@ describe('fromEs', () => {
       { type: 'user' as const, name: 'bob', role: AgentAccessControlRole.Manager },
     ];
     source.access_control = {
-      scope: AgentAccessControlScope.Shared,
+      access_mode: AgentAccessControlMode.Shared,
       entries: accessControlEntries,
     };
-    source.visibility = AgentAccessControlScope.Private;
+    source.visibility = AgentAccessControlMode.Private;
     source.acl = { entries: legacyEntries };
 
     const definition = fromEs(document);
 
     expect(definition.access_control).toEqual({
-      scope: AgentAccessControlScope.Shared,
+      access_mode: AgentAccessControlMode.Shared,
       entries: accessControlEntries,
     });
   });
@@ -246,7 +246,7 @@ describe('createRequestToEs', () => {
       labels: ['foo', 'bar'],
       avatar_color: 'green',
       avatar_symbol: 'circle',
-      access_control: { scope: AgentAccessControlScope.Public, entries: [] },
+      access_control: { access_mode: AgentAccessControlMode.Public, entries: [] },
       created_by_id: 'user-id',
       created_by_name: 'test-user',
       created_at: expect.any(String),
@@ -280,12 +280,12 @@ describe('createRequestToEs', () => {
     expect(docProperties.config!.enable_elastic_capabilities).toBe(true);
   });
 
-  it('persists create request access-control scope with empty entries', () => {
+  it('persists create request access-control mode with empty entries', () => {
     const createRequest: AgentCreateRequest = {
       id: 'id',
       name: 'name',
       description: 'description',
-      access_control: { scope: AgentAccessControlScope.Private },
+      access_control: { access_mode: AgentAccessControlMode.Private },
       configuration: {
         instructions: 'instructions',
         tools: [],
@@ -300,7 +300,7 @@ describe('createRequestToEs', () => {
     });
 
     expect(docProperties.access_control).toEqual({
-      scope: AgentAccessControlScope.Private,
+      access_mode: AgentAccessControlMode.Private,
       entries: [],
     });
   });
@@ -311,7 +311,7 @@ describe('createRequestToEs', () => {
       name: 'name',
       description: 'description',
       access_control: {
-        scope: AgentAccessControlScope.Private,
+        access_mode: AgentAccessControlMode.Private,
         entries: [{ type: 'user' as const, name: 'alice', role: AgentAccessControlRole.Editor }],
       },
       configuration: {
@@ -328,7 +328,7 @@ describe('createRequestToEs', () => {
     });
 
     expect(docProperties.access_control).toEqual({
-      scope: AgentAccessControlScope.Private,
+      access_mode: AgentAccessControlMode.Private,
       entries: [],
     });
   });
@@ -363,7 +363,7 @@ describe('updateRequestToEs', () => {
       labels: ['foo', 'bar'],
       avatar_color: 'red',
       avatar_symbol: 'triangle',
-      access_control: { scope: AgentAccessControlScope.Public, entries: [] },
+      access_control: { access_mode: AgentAccessControlMode.Public, entries: [] },
       created_by_id: 'test-user-id',
       created_by_name: 'test-user',
       created_at: creationDate,
@@ -402,7 +402,7 @@ describe('updateRequestToEs', () => {
       labels: ['foo', 'bar'],
       avatar_color: 'red',
       avatar_symbol: 'triangle',
-      access_control: { scope: AgentAccessControlScope.Public, entries: [] },
+      access_control: { access_mode: AgentAccessControlMode.Public, entries: [] },
       created_by_id: 'test-user-id',
       created_by_name: 'test-user',
       created_at: creationDate,
@@ -432,7 +432,7 @@ describe('updateRequestToEs', () => {
       labels: ['foo', 'bar'],
       avatar_color: 'yellow',
       avatar_symbol: 'square',
-      access_control: { scope: AgentAccessControlScope.Public, entries: [] },
+      access_control: { access_mode: AgentAccessControlMode.Public, entries: [] },
       created_by_id: 'test-user-id',
       created_by_name: 'test-user',
       created_at: creationDate,
@@ -471,7 +471,7 @@ describe('updateRequestToEs', () => {
       labels: ['foo', 'bar'],
       avatar_color: 'yellow',
       avatar_symbol: 'square',
-      access_control: { scope: AgentAccessControlScope.Public, entries: [] },
+      access_control: { access_mode: AgentAccessControlMode.Public, entries: [] },
       created_by_id: 'test-user-id',
       created_by_name: 'test-user',
       created_at: creationDate,
@@ -496,7 +496,7 @@ describe('updateRequestToEs', () => {
         enable_elastic_capabilities: false,
       },
       labels: [],
-      access_control: { scope: AgentAccessControlScope.Public, entries: [] },
+      access_control: { access_mode: AgentAccessControlMode.Public, entries: [] },
       created_by_id: 'test-user-id',
       created_by_name: 'test-user',
       created_at: creationDate,
@@ -522,7 +522,7 @@ describe('updateRequestToEs', () => {
     expect(docProperties.config!.instructions).toBe('instructions');
   });
 
-  it('updates access-control scope without changing entries', () => {
+  it('updates access-control mode without changing entries', () => {
     const newUpdateDate = new Date();
     const entries = [{ type: 'user' as const, name: 'alice', role: AgentAccessControlRole.Editor }];
 
@@ -537,7 +537,7 @@ describe('updateRequestToEs', () => {
         tools: [],
       },
       labels: [],
-      access_control: { scope: AgentAccessControlScope.Private, entries },
+      access_control: { access_mode: AgentAccessControlMode.Private, entries },
       created_by_id: 'test-user-id',
       created_by_name: 'test-user',
       created_at: creationDate,
@@ -545,7 +545,7 @@ describe('updateRequestToEs', () => {
     };
 
     const updateRequest: AgentUpdateRequest = {
-      access_control: { scope: AgentAccessControlScope.Shared },
+      access_control: { access_mode: AgentAccessControlMode.Shared },
     };
 
     const docProperties = updateRequestToEs({
@@ -556,12 +556,12 @@ describe('updateRequestToEs', () => {
     });
 
     expect(docProperties.access_control).toEqual({
-      scope: AgentAccessControlScope.Shared,
+      access_mode: AgentAccessControlMode.Shared,
       entries,
     });
   });
 
-  it('updates access-control scope while preserving legacy acl entries', () => {
+  it('updates access-control mode while preserving legacy acl entries', () => {
     const newUpdateDate = new Date();
     const entries = [{ type: 'user' as const, name: 'alice', role: AgentAccessControlRole.Editor }];
 
@@ -576,7 +576,7 @@ describe('updateRequestToEs', () => {
         tools: [],
       },
       labels: [],
-      visibility: AgentAccessControlScope.Private,
+      visibility: AgentAccessControlMode.Private,
       acl: { entries },
       created_by_id: 'test-user-id',
       created_by_name: 'test-user',
@@ -585,7 +585,7 @@ describe('updateRequestToEs', () => {
     };
 
     const updateRequest: AgentUpdateRequest = {
-      access_control: { scope: AgentAccessControlScope.Shared },
+      access_control: { access_mode: AgentAccessControlMode.Shared },
     };
 
     const docProperties = updateRequestToEs({
@@ -596,7 +596,7 @@ describe('updateRequestToEs', () => {
     });
 
     expect(docProperties.access_control).toEqual({
-      scope: AgentAccessControlScope.Shared,
+      access_mode: AgentAccessControlMode.Shared,
       entries,
     });
   });

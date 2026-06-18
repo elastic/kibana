@@ -10,7 +10,7 @@ import { useMutation, useQueryClient } from '@kbn/react-query';
 import {
   type AgentDefinition,
   type AgentAccessControlEntry,
-  AgentAccessControlScope,
+  AgentAccessControlMode,
   type ToolSelection,
   defaultAgentToolIds,
 } from '@kbn/agent-builder-common';
@@ -39,7 +39,7 @@ const emptyState = (): AgentEditState => ({
   id: '',
   name: '',
   description: '',
-  access_control: { scope: AgentAccessControlScope.Public, entries: [] },
+  access_control: { access_mode: AgentAccessControlMode.Public, entries: [] },
   labels: [],
   avatar_color: '',
   avatar_symbol: '',
@@ -123,7 +123,7 @@ export function useAgentEdit({
     if (agent) {
       const { type, ...agentState } = agent;
       agentState.access_control = agentState.access_control ?? {
-        scope: AgentAccessControlScope.Public,
+        access_mode: AgentAccessControlMode.Public,
         entries: [],
       };
       if (isClone) {
@@ -141,7 +141,7 @@ export function useAgentEdit({
         const { id, access_control, ...updatedAgent } = requestData;
         const result = await updateMutation.mutateAsync(
           access_control
-            ? { ...updatedAgent, access_control: { scope: access_control.scope } }
+            ? { ...updatedAgent, access_control: { access_mode: access_control.access_mode } }
             : updatedAgent
         );
 
@@ -169,7 +169,7 @@ export function useAgentEdit({
         const { access_control, created_by, avatar_icon, ...createData } = requestData;
         const result = await createMutation.mutateAsync(
           access_control
-            ? { ...createData, access_control: { scope: access_control.scope } }
+            ? { ...createData, access_control: { access_mode: access_control.access_mode } }
             : createData
         );
         queryClient.invalidateQueries({ queryKey: queryKeys.agentProfiles.all });

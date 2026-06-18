@@ -15,13 +15,13 @@ export type AgentCreateRequest = Omit<
   AgentDefinition,
   'type' | 'readonly' | 'created_by' | 'access_control'
 > & {
-  access_control?: Pick<AgentAccessControl, 'scope'>;
+  access_control?: Pick<AgentAccessControl, 'access_mode'>;
 };
 
 export type AgentUpdateRequest = Partial<
   Pick<AgentDefinition, 'name' | 'description' | 'labels' | 'avatar_color' | 'avatar_symbol'>
 > & {
-  access_control?: Pick<AgentAccessControl, 'scope'>;
+  access_control?: Pick<AgentAccessControl, 'access_mode'>;
   configuration?: Partial<AgentConfiguration>;
 };
 

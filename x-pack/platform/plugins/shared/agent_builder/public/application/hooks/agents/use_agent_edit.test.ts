@@ -6,7 +6,7 @@
  */
 
 import { act, renderHook } from '@testing-library/react';
-import { AgentAccessControlRole, AgentAccessControlScope } from '@kbn/agent-builder-common';
+import { AgentAccessControlRole, AgentAccessControlMode } from '@kbn/agent-builder-common';
 import { useAgentEdit, type AgentEditState } from './use_agent_edit';
 
 const mockCreate = jest.fn();
@@ -72,7 +72,7 @@ describe('useAgentEdit submit (create/clone branch)', () => {
     mockCreate.mockResolvedValue({ id: 'cloned-agent' });
     mockUpdate.mockResolvedValue({ id: 'existing-agent' });
     mockUpdateAccessControl.mockResolvedValue({
-      scope: AgentAccessControlScope.Private,
+      access_mode: AgentAccessControlMode.Private,
       entries: [],
     });
   });
@@ -83,7 +83,7 @@ describe('useAgentEdit submit (create/clone branch)', () => {
       name: 'Cloned Agent',
       description: 'A clone of an existing agent',
       access_control: {
-        scope: AgentAccessControlScope.Private,
+        access_mode: AgentAccessControlMode.Private,
         entries: [{ type: 'user', name: 'alice', role: AgentAccessControlRole.Editor }],
       },
       labels: ['support'],
@@ -110,7 +110,7 @@ describe('useAgentEdit submit (create/clone branch)', () => {
       id: 'cloned-agent',
       name: 'Cloned Agent',
       description: 'A clone of an existing agent',
-      access_control: { scope: AgentAccessControlScope.Private },
+      access_control: { access_mode: AgentAccessControlMode.Private },
       labels: ['support'],
       avatar_color: '#FFFFFF',
       avatar_symbol: 'CA',
@@ -123,7 +123,7 @@ describe('useAgentEdit submit (create/clone branch)', () => {
       id: 'new-agent',
       name: 'New Agent',
       description: 'A new agent',
-      access_control: { scope: AgentAccessControlScope.Private, entries: [] },
+      access_control: { access_mode: AgentAccessControlMode.Private, entries: [] },
       labels: [],
       avatar_color: '',
       avatar_symbol: '',
@@ -142,7 +142,7 @@ describe('useAgentEdit submit (create/clone branch)', () => {
     expect(mockCreate.mock.calls[0][0]).toMatchObject({
       id: 'new-agent',
       name: 'New Agent',
-      access_control: { scope: AgentAccessControlScope.Private },
+      access_control: { access_mode: AgentAccessControlMode.Private },
     });
     expect(mockCreate.mock.calls[0][0].access_control).not.toHaveProperty('entries');
   });
@@ -153,7 +153,7 @@ describe('useAgentEdit submit (create/clone branch)', () => {
       name: 'Existing Agent',
       description: 'An existing agent',
       access_control: {
-        scope: AgentAccessControlScope.Shared,
+        access_mode: AgentAccessControlMode.Shared,
         entries: [{ type: 'user', name: 'alice', role: AgentAccessControlRole.Editor }],
       },
       labels: [],
@@ -177,7 +177,7 @@ describe('useAgentEdit submit (create/clone branch)', () => {
     expect(mockUpdate).toHaveBeenCalledTimes(1);
     const payload = mockUpdate.mock.calls[0][1];
     expect(payload).toMatchObject({
-      access_control: { scope: AgentAccessControlScope.Shared },
+      access_control: { access_mode: AgentAccessControlMode.Shared },
     });
     expect(payload.access_control).not.toHaveProperty('entries');
     expect(mockUpdateAccessControl).not.toHaveBeenCalled();
@@ -189,7 +189,7 @@ describe('useAgentEdit submit (create/clone branch)', () => {
       name: 'Existing Agent',
       description: 'An existing agent',
       access_control: {
-        scope: AgentAccessControlScope.Private,
+        access_mode: AgentAccessControlMode.Private,
         entries: [
           { type: 'user', name: 'bob', role: AgentAccessControlRole.User },
           { type: 'user', name: 'alice', role: AgentAccessControlRole.Editor },
@@ -204,7 +204,7 @@ describe('useAgentEdit submit (create/clone branch)', () => {
     const updateData: AgentEditState = {
       ...mockAgent,
       access_control: {
-        scope: AgentAccessControlScope.Private,
+        access_mode: AgentAccessControlMode.Private,
         entries: [{ type: 'user', name: 'alice', role: AgentAccessControlRole.Editor }],
       },
     };
@@ -230,7 +230,7 @@ describe('useAgentEdit submit (create/clone branch)', () => {
       mockUpdateAccessControl.mock.invocationCallOrder[0]
     );
     expect(mockUpdate.mock.calls[0][1].access_control).toEqual({
-      scope: AgentAccessControlScope.Private,
+      access_mode: AgentAccessControlMode.Private,
     });
     expect(mockUpdate.mock.calls[0][1].access_control).not.toHaveProperty('entries');
   });

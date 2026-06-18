@@ -7,7 +7,7 @@
 
 import type { IRouter } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
-import { AgentAccessControlScope } from '@kbn/agent-builder-common';
+import { AgentAccessControlMode } from '@kbn/agent-builder-common';
 import { registerAgentRoutes } from './agents';
 import type { RouteDependencies } from './types';
 import { publicApiPath } from '../../common/constants';
@@ -50,7 +50,7 @@ describe('Agent Routes - experimental access-control gate', () => {
 
   const updateBodyWithAccessControl = {
     name: 'Updated',
-    access_control: { scope: AgentAccessControlScope.Private },
+    access_control: { access_mode: AgentAccessControlMode.Private },
   };
 
   const mockProfile = {
@@ -58,7 +58,7 @@ describe('Agent Routes - experimental access-control gate', () => {
     name: 'Test Agent',
     description: 'Test',
     configuration: { tools: [] },
-    access_control: { scope: AgentAccessControlScope.Public, entries: [] },
+    access_control: { access_mode: AgentAccessControlMode.Public, entries: [] },
   };
 
   beforeEach(() => {
@@ -145,7 +145,7 @@ describe('Agent Routes - experimental access-control gate', () => {
   };
 
   describe('POST /agents (create)', () => {
-    it('allows create and calls service.create when access-control scope is provided', async () => {
+    it('allows create and calls service.create when access-control mode is provided', async () => {
       const handler = getCreateHandler();
       expect(handler).toBeDefined();
 
@@ -153,7 +153,7 @@ describe('Agent Routes - experimental access-control gate', () => {
       const request = {
         body: {
           ...createBody,
-          access_control: { scope: AgentAccessControlScope.Shared },
+          access_control: { access_mode: AgentAccessControlMode.Shared },
         },
       };
 
@@ -161,7 +161,7 @@ describe('Agent Routes - experimental access-control gate', () => {
 
       expect(mockCreate).toHaveBeenCalledWith({
         ...createBody,
-        access_control: { scope: AgentAccessControlScope.Shared },
+        access_control: { access_mode: AgentAccessControlMode.Shared },
       });
       expect(result).toMatchObject({ type: 'ok', body: mockProfile });
     });
@@ -181,7 +181,7 @@ describe('Agent Routes - experimental access-control gate', () => {
   });
 
   describe('PUT /agents/{id} (update)', () => {
-    it('allows update and calls service.update when access-control scope is provided', async () => {
+    it('allows update and calls service.update when access-control mode is provided', async () => {
       const handler = getUpdateHandler();
       expect(handler).toBeDefined();
 
@@ -195,7 +195,7 @@ describe('Agent Routes - experimental access-control gate', () => {
 
       expect(mockUpdate).toHaveBeenCalledWith('agent-1', {
         name: 'Updated',
-        access_control: { scope: AgentAccessControlScope.Private },
+        access_control: { access_mode: AgentAccessControlMode.Private },
       });
       expect(result).toMatchObject({ type: 'ok', body: mockProfile });
     });

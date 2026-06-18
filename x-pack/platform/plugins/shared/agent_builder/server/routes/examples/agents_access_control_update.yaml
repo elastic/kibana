@@ -13,7 +13,7 @@ requestBody:
                 name: bob
                 role: user
         clearAgentAccessControlRequestExample:
-          description: "Submit an empty entries list to remove all custom grants. Access then falls back to the agent's access-control scope."
+          description: "Submit an empty entries list to remove all custom grants. Access then falls back to the agent's access-control mode."
           value:
             entries: []
 responses:
@@ -25,7 +25,7 @@ responses:
           updateAgentAccessControlResponseExample:
             description: "Example response returning the persisted access control after the update."
             value:
-              scope: private
+              access_mode: private
               entries:
                 - type: user
                   name: alice

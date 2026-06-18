@@ -2649,21 +2649,21 @@ export const labels = {
         'xpack.agentBuilder.overview.editDetails.accessDescription',
         { defaultMessage: 'Control who can view and edit this agent.' }
       ),
-      accessControlScopeLabel: i18n.translate(
-        'xpack.agentBuilder.overview.editDetails.accessControlScopeLabel',
+      accessControlModeLabel: i18n.translate(
+        'xpack.agentBuilder.overview.editDetails.accessControlModeLabel',
         {
           defaultMessage: 'Access control',
         }
       ),
-      accessControlScopeDisabledReason: i18n.translate(
-        'xpack.agentBuilder.overview.editDetails.accessControlScopeDisabledReason',
+      accessControlModeDisabledReason: i18n.translate(
+        'xpack.agentBuilder.overview.editDetails.accessControlModeDisabledReason',
         {
-          defaultMessage: 'Only the owner or an administrator can change the access control scope.',
+          defaultMessage: 'Only the owner or an administrator can change the access control mode.',
         }
       ),
-      accessControlScopeAriaLabel: i18n.translate(
-        'xpack.agentBuilder.overview.editDetails.accessControlScopeAriaLabel',
-        { defaultMessage: 'Agent access control scope' }
+      accessControlModeAriaLabel: i18n.translate(
+        'xpack.agentBuilder.overview.editDetails.accessControlModeAriaLabel',
+        { defaultMessage: 'Agent access control mode' }
       ),
       customizationTitle: i18n.translate(
         'xpack.agentBuilder.overview.editDetails.customizationTitle',

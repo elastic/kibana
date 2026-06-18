@@ -7,7 +7,7 @@
 
 import {
   isAgentOwner,
-  canChangeAgentAccessControlScope,
+  canChangeAgentAccessControlMode,
   canDeleteAgent,
   canManageAgentAccessControl,
   getEffectiveAgentRole,
@@ -18,7 +18,7 @@ import {
 } from '.';
 import type { AgentConfiguration, AgentDefinition } from '../definition';
 import { agentBuilderDefaultAgentId, AgentType } from '../definition';
-import { AgentAccessControlRole, AgentAccessControlScope } from './types';
+import { AgentAccessControlRole, AgentAccessControlMode } from './types';
 import type { CurrentUser, UserIdAndName } from '../../base/users';
 
 const owner: UserIdAndName = { id: 'owner-id', username: 'owner-user' };
@@ -74,10 +74,10 @@ describe('isAgentOwner', () => {
   });
 });
 
-describe('canChangeAgentAccessControlScope', () => {
+describe('canChangeAgentAccessControlMode', () => {
   test('returns true when isAdmin is true', () => {
     expect(
-      canChangeAgentAccessControlScope({
+      canChangeAgentAccessControlMode({
         owner,
         currentUser: otherUser,
         isAdmin: true,
@@ -87,7 +87,7 @@ describe('canChangeAgentAccessControlScope', () => {
 
   test('returns false when override is false and current user is not owner', () => {
     expect(
-      canChangeAgentAccessControlScope({
+      canChangeAgentAccessControlMode({
         owner,
         currentUser: otherUser,
         isAdmin: false,
@@ -97,7 +97,7 @@ describe('canChangeAgentAccessControlScope', () => {
 
   test('returns true when override is false but current user is owner (by id)', () => {
     expect(
-      canChangeAgentAccessControlScope({
+      canChangeAgentAccessControlMode({
         owner,
         currentUser,
         isAdmin: false,
@@ -109,7 +109,7 @@ describe('canChangeAgentAccessControlScope', () => {
     const ownerByUsername: UserIdAndName = { username: 'alice' };
     const userByUsername: UserIdAndName = { username: 'alice' };
     expect(
-      canChangeAgentAccessControlScope({
+      canChangeAgentAccessControlMode({
         owner: ownerByUsername,
         currentUser: userByUsername,
         isAdmin: false,
@@ -119,7 +119,7 @@ describe('canChangeAgentAccessControlScope', () => {
 
   test('returns false for the default agent even when user is owner', () => {
     expect(
-      canChangeAgentAccessControlScope({
+      canChangeAgentAccessControlMode({
         agentId: agentBuilderDefaultAgentId,
         owner,
         currentUser,
@@ -130,7 +130,7 @@ describe('canChangeAgentAccessControlScope', () => {
 
   test('returns false for the default agent even with access-control override', () => {
     expect(
-      canChangeAgentAccessControlScope({
+      canChangeAgentAccessControlMode({
         agentId: agentBuilderDefaultAgentId,
         owner,
         currentUser: otherUser,
@@ -151,7 +151,7 @@ describe('hasAgentReadAccess', () => {
     expect(
       hasAgentReadAccess({
         ...baseArgs,
-        access_control: { scope: AgentAccessControlScope.Private, entries: [] },
+        access_control: { access_mode: AgentAccessControlMode.Private, entries: [] },
         isAdmin: true,
       })
     ).toBe(true);
@@ -161,40 +161,40 @@ describe('hasAgentReadAccess', () => {
     expect(
       hasAgentReadAccess({
         ...baseArgs,
-        access_control: { scope: AgentAccessControlScope.Private, entries: [] },
+        access_control: { access_mode: AgentAccessControlMode.Private, entries: [] },
         currentUser,
       })
     ).toBe(true);
   });
 
-  test('returns true when access-control scope is Public', () => {
+  test('returns true when access-control mode is Public', () => {
     expect(
       hasAgentReadAccess({
         ...baseArgs,
-        access_control: { scope: AgentAccessControlScope.Public, entries: [] },
+        access_control: { access_mode: AgentAccessControlMode.Public, entries: [] },
       })
     ).toBe(true);
   });
 
-  test('returns true when access-control scope is Shared', () => {
+  test('returns true when access-control mode is Shared', () => {
     expect(
       hasAgentReadAccess({
         ...baseArgs,
-        access_control: { scope: AgentAccessControlScope.Shared, entries: [] },
+        access_control: { access_mode: AgentAccessControlMode.Shared, entries: [] },
       })
     ).toBe(true);
   });
 
-  test('returns false when access-control scope is Private and user is not owner and no override', () => {
+  test('returns false when access-control mode is Private and user is not owner and no override', () => {
     expect(
       hasAgentReadAccess({
         ...baseArgs,
-        access_control: { scope: AgentAccessControlScope.Private, entries: [] },
+        access_control: { access_mode: AgentAccessControlMode.Private, entries: [] },
       })
     ).toBe(false);
   });
 
-  test('when access-control scope is undefined (legacy agent), treats as Public so any user can read', () => {
+  test('when access-control mode is undefined (legacy agent), treats as Public so any user can read', () => {
     expect(
       hasAgentReadAccess({
         owner,
@@ -216,7 +216,7 @@ describe('hasAgentWriteAccess', () => {
     expect(
       hasAgentWriteAccess({
         ...baseArgs,
-        access_control: { scope: AgentAccessControlScope.Private, entries: [] },
+        access_control: { access_mode: AgentAccessControlMode.Private, entries: [] },
         isAdmin: true,
       })
     ).toBe(true);
@@ -226,40 +226,40 @@ describe('hasAgentWriteAccess', () => {
     expect(
       hasAgentWriteAccess({
         ...baseArgs,
-        access_control: { scope: AgentAccessControlScope.Private, entries: [] },
+        access_control: { access_mode: AgentAccessControlMode.Private, entries: [] },
         currentUser,
       })
     ).toBe(true);
   });
 
-  test('returns true when access-control scope is Public', () => {
+  test('returns true when access-control mode is Public', () => {
     expect(
       hasAgentWriteAccess({
         ...baseArgs,
-        access_control: { scope: AgentAccessControlScope.Public, entries: [] },
+        access_control: { access_mode: AgentAccessControlMode.Public, entries: [] },
       })
     ).toBe(true);
   });
 
-  test('returns false when access-control scope is Shared and user is not owner', () => {
+  test('returns false when access-control mode is Shared and user is not owner', () => {
     expect(
       hasAgentWriteAccess({
         ...baseArgs,
-        access_control: { scope: AgentAccessControlScope.Shared, entries: [] },
+        access_control: { access_mode: AgentAccessControlMode.Shared, entries: [] },
       })
     ).toBe(false);
   });
 
-  test('returns false when access-control scope is Private and user is not owner', () => {
+  test('returns false when access-control mode is Private and user is not owner', () => {
     expect(
       hasAgentWriteAccess({
         ...baseArgs,
-        access_control: { scope: AgentAccessControlScope.Private, entries: [] },
+        access_control: { access_mode: AgentAccessControlMode.Private, entries: [] },
       })
     ).toBe(false);
   });
 
-  test('when access-control scope is undefined (legacy agent), treats as Public so any user can write', () => {
+  test('when access-control mode is undefined (legacy agent), treats as Public so any user can write', () => {
     expect(
       hasAgentWriteAccess({
         owner,
@@ -273,7 +273,7 @@ describe('hasAgentWriteAccess', () => {
 describe('canCurrentUserEditAgent', () => {
   const publicAgent: AgentDefinition = {
     readonly: false,
-    access_control: { scope: AgentAccessControlScope.Public, entries: [] },
+    access_control: { access_mode: AgentAccessControlMode.Public, entries: [] },
     created_by: owner,
     id: 'test-agent-id',
     type: AgentType.chat,
@@ -332,7 +332,7 @@ describe('canCurrentUserEditAgent', () => {
       canCurrentUserEditAgent({
         agent: {
           ...publicAgent,
-          access_control: { scope: AgentAccessControlScope.Private, entries: [] },
+          access_control: { access_mode: AgentAccessControlMode.Private, entries: [] },
         },
         manageAgents: true,
         currentUser: otherUser,
@@ -346,7 +346,7 @@ describe('canCurrentUserEditAgent', () => {
       canCurrentUserEditAgent({
         agent: {
           ...publicAgent,
-          access_control: { scope: AgentAccessControlScope.Shared, entries: [] },
+          access_control: { access_mode: AgentAccessControlMode.Shared, entries: [] },
         },
         manageAgents: true,
         currentUser: otherUser,
@@ -360,7 +360,7 @@ describe('canCurrentUserEditAgent', () => {
       canCurrentUserEditAgent({
         agent: {
           ...publicAgent,
-          access_control: { scope: AgentAccessControlScope.Private, entries: [] },
+          access_control: { access_mode: AgentAccessControlMode.Private, entries: [] },
         },
         manageAgents: true,
         currentUser,
@@ -374,7 +374,7 @@ describe('canCurrentUserEditAgent', () => {
       canCurrentUserEditAgent({
         agent: {
           ...publicAgent,
-          access_control: { scope: AgentAccessControlScope.Private, entries: [] },
+          access_control: { access_mode: AgentAccessControlMode.Private, entries: [] },
         },
         manageAgents: true,
         currentUser: otherUser,
@@ -399,7 +399,7 @@ describe('ACL-aware authorization', () => {
     test('returns "admin" when isAdmin', () => {
       expect(
         getEffectiveAgentRole({
-          access_control: { scope: AgentAccessControlScope.Private, entries: [] },
+          access_control: { access_mode: AgentAccessControlMode.Private, entries: [] },
           owner: aliceOwner,
           currentUser: bob,
           isAdmin: true,
@@ -410,7 +410,7 @@ describe('ACL-aware authorization', () => {
     test('returns "owner" for the agent owner', () => {
       expect(
         getEffectiveAgentRole({
-          access_control: { scope: AgentAccessControlScope.Private, entries: [] },
+          access_control: { access_mode: AgentAccessControlMode.Private, entries: [] },
           owner: aliceOwner,
           currentUser: { id: 'owner-id', username: 'alice' },
           isAdmin: false,
@@ -421,7 +421,7 @@ describe('ACL-aware authorization', () => {
     test('returns undefined for a private agent with no ACL match', () => {
       expect(
         getEffectiveAgentRole({
-          access_control: { scope: AgentAccessControlScope.Private, entries: [] },
+          access_control: { access_mode: AgentAccessControlMode.Private, entries: [] },
           owner: aliceOwner,
           currentUser: bob,
           isAdmin: false,
@@ -433,7 +433,7 @@ describe('ACL-aware authorization', () => {
       expect(
         getEffectiveAgentRole({
           access_control: {
-            scope: AgentAccessControlScope.Private,
+            access_mode: AgentAccessControlMode.Private,
             entries: [{ type: 'user', name: 'bob', role: AgentAccessControlRole.User }],
           },
           owner: aliceOwner,
@@ -447,7 +447,7 @@ describe('ACL-aware authorization', () => {
       expect(
         getEffectiveAgentRole({
           access_control: {
-            scope: AgentAccessControlScope.Private,
+            access_mode: AgentAccessControlMode.Private,
             entries: [{ type: 'user', name: 'analyst', role: AgentAccessControlRole.Manager }],
           },
           owner: aliceOwner,
@@ -461,7 +461,7 @@ describe('ACL-aware authorization', () => {
       expect(
         getEffectiveAgentRole({
           access_control: {
-            scope: AgentAccessControlScope.Private,
+            access_mode: AgentAccessControlMode.Private,
             entries: [
               { type: 'user', name: 'bob', role: AgentAccessControlRole.User },
               { type: 'user', name: 'bob', role: AgentAccessControlRole.Manager },
@@ -474,10 +474,10 @@ describe('ACL-aware authorization', () => {
       ).toBe(AgentAccessControlRole.Manager);
     });
 
-    test('Public access-control scope grants Editor baseline to non-owners', () => {
+    test('Public access-control mode grants Editor baseline to non-owners', () => {
       expect(
         getEffectiveAgentRole({
-          access_control: { scope: AgentAccessControlScope.Public, entries: [] },
+          access_control: { access_mode: AgentAccessControlMode.Public, entries: [] },
           owner: aliceOwner,
           currentUser: bob,
           isAdmin: false,
@@ -485,10 +485,10 @@ describe('ACL-aware authorization', () => {
       ).toBe(AgentAccessControlRole.Editor);
     });
 
-    test('Shared access-control scope grants User baseline to non-owners', () => {
+    test('Shared access-control mode grants User baseline to non-owners', () => {
       expect(
         getEffectiveAgentRole({
-          access_control: { scope: AgentAccessControlScope.Shared, entries: [] },
+          access_control: { access_mode: AgentAccessControlMode.Shared, entries: [] },
           owner: aliceOwner,
           currentUser: bob,
           isAdmin: false,
@@ -496,12 +496,12 @@ describe('ACL-aware authorization', () => {
       ).toBe(AgentAccessControlRole.User);
     });
 
-    test('ACL upgrades over access-control scope baseline', () => {
+    test('ACL upgrades over access-control mode baseline', () => {
       // Public alone gives Editor; ACL Manager wins.
       expect(
         getEffectiveAgentRole({
           access_control: {
-            scope: AgentAccessControlScope.Public,
+            access_mode: AgentAccessControlMode.Public,
             entries: [{ type: 'user', name: 'bob', role: AgentAccessControlRole.Manager }],
           },
           owner: aliceOwner,
@@ -511,7 +511,7 @@ describe('ACL-aware authorization', () => {
       ).toBe(AgentAccessControlRole.Manager);
     });
 
-    test('legacy agent (no access-control scope, no ACL) treats as Public Editor', () => {
+    test('legacy agent (no access-control mode, no ACL) treats as Public Editor', () => {
       expect(
         getEffectiveAgentRole({
           owner: aliceOwner,
@@ -524,7 +524,7 @@ describe('ACL-aware authorization', () => {
 
   describe('hierarchy checks', () => {
     const privateAgent = {
-      access_control: { scope: AgentAccessControlScope.Private, entries: [] },
+      access_control: { access_mode: AgentAccessControlMode.Private, entries: [] },
       owner: aliceOwner,
       isAdmin: false,
     };
@@ -532,7 +532,7 @@ describe('ACL-aware authorization', () => {
     test('User can see, read, and run but not write, delete, or manage ACL', () => {
       // V1 has no Viewer tier — see/read and use share the User threshold.
       const accessControl = {
-        scope: AgentAccessControlScope.Private,
+        access_mode: AgentAccessControlMode.Private,
         entries: [{ type: 'user' as const, name: 'bob', role: AgentAccessControlRole.User }],
       };
       const args = { ...privateAgent, access_control: accessControl, currentUser: bob };
@@ -555,7 +555,7 @@ describe('ACL-aware authorization', () => {
       // ACL management is bundled into write access; Editor can edit the ACL.
       // Delete still requires Manager.
       const accessControl = {
-        scope: AgentAccessControlScope.Private,
+        access_mode: AgentAccessControlMode.Private,
         entries: [{ type: 'user' as const, name: 'bob', role: AgentAccessControlRole.Editor }],
       };
       const args = { ...privateAgent, access_control: accessControl, currentUser: bob };
@@ -566,7 +566,7 @@ describe('ACL-aware authorization', () => {
 
     test('Manager can delete and manage ACL', () => {
       const accessControl = {
-        scope: AgentAccessControlScope.Private,
+        access_mode: AgentAccessControlMode.Private,
         entries: [{ type: 'user' as const, name: 'bob', role: AgentAccessControlRole.Manager }],
       };
       const args = { ...privateAgent, access_control: accessControl, currentUser: bob };
@@ -574,10 +574,10 @@ describe('ACL-aware authorization', () => {
       expect(canManageAgentAccessControl(args)).toBe(true);
     });
 
-    test('Public access-control scope does NOT silently grant Manager to all users', () => {
+    test('Public access-control mode does NOT silently grant Manager to all users', () => {
       // ACL Manager is granted to bob; carol gets only the Public baseline (Editor).
       const accessControl = {
-        scope: AgentAccessControlScope.Public,
+        access_mode: AgentAccessControlMode.Public,
         entries: [{ type: 'user' as const, name: 'bob', role: AgentAccessControlRole.Manager }],
       };
       expect(
@@ -592,7 +592,7 @@ describe('ACL-aware authorization', () => {
 
     test('owner is implicitly Manager regardless of ACL', () => {
       const args = {
-        access_control: { scope: AgentAccessControlScope.Private, entries: [] },
+        access_control: { access_mode: AgentAccessControlMode.Private, entries: [] },
         owner: aliceOwner,
         currentUser: { id: 'owner-id', username: 'alice' } as CurrentUser,
         isAdmin: false,
@@ -616,7 +616,7 @@ describe('ACL-aware authorization', () => {
     test('grants for the agent owner on a Private agent', () => {
       expect(
         canManageAgentAccessControl({
-          access_control: { scope: AgentAccessControlScope.Private, entries: [] },
+          access_control: { access_mode: AgentAccessControlMode.Private, entries: [] },
           owner: aliceOwner,
           currentUser: { id: 'owner-id', username: 'alice' },
           isAdmin: false,
@@ -627,7 +627,7 @@ describe('ACL-aware authorization', () => {
     test('denies a non-owner on a Private agent with no ACL grant', () => {
       expect(
         canManageAgentAccessControl({
-          access_control: { scope: AgentAccessControlScope.Private, entries: [] },
+          access_control: { access_mode: AgentAccessControlMode.Private, entries: [] },
           owner: aliceOwner,
           currentUser: bob,
           isAdmin: false,
@@ -639,7 +639,7 @@ describe('ACL-aware authorization', () => {
       expect(
         canManageAgentAccessControl({
           access_control: {
-            scope: AgentAccessControlScope.Private,
+            access_mode: AgentAccessControlMode.Private,
             entries: [{ type: 'user', name: 'bob', role: AgentAccessControlRole.Editor }],
           },
           owner: aliceOwner,
@@ -653,7 +653,7 @@ describe('ACL-aware authorization', () => {
       expect(
         canManageAgentAccessControl({
           access_control: {
-            scope: AgentAccessControlScope.Private,
+            access_mode: AgentAccessControlMode.Private,
             entries: [{ type: 'user', name: 'bob', role: AgentAccessControlRole.Manager }],
           },
           owner: aliceOwner,
@@ -663,10 +663,10 @@ describe('ACL-aware authorization', () => {
       ).toBe(true);
     });
 
-    test('grants for any non-owner on a Public agent (access-control scope baseline = Editor)', () => {
+    test('grants for any non-owner on a Public agent (access-control mode baseline = Editor)', () => {
       expect(
         canManageAgentAccessControl({
-          access_control: { scope: AgentAccessControlScope.Public, entries: [] },
+          access_control: { access_mode: AgentAccessControlMode.Public, entries: [] },
           owner: aliceOwner,
           currentUser: bob,
           isAdmin: false,
@@ -677,7 +677,7 @@ describe('ACL-aware authorization', () => {
     test('grants for cluster admin regardless of agent state', () => {
       expect(
         canManageAgentAccessControl({
-          access_control: { scope: AgentAccessControlScope.Private, entries: [] },
+          access_control: { access_mode: AgentAccessControlMode.Private, entries: [] },
           owner: aliceOwner,
           currentUser: bob,
           isAdmin: true,
@@ -689,7 +689,7 @@ describe('ACL-aware authorization', () => {
       expect(
         canManageAgentAccessControl({
           agentId: agentBuilderDefaultAgentId,
-          access_control: { scope: AgentAccessControlScope.Public, entries: [] },
+          access_control: { access_mode: AgentAccessControlMode.Public, entries: [] },
           owner: aliceOwner,
           currentUser: bob,
           isAdmin: true,
@@ -701,7 +701,7 @@ describe('ACL-aware authorization', () => {
       expect(
         canManageAgentAccessControl({
           agentId: agentBuilderDefaultAgentId,
-          access_control: { scope: AgentAccessControlScope.Public, entries: [] },
+          access_control: { access_mode: AgentAccessControlMode.Public, entries: [] },
           owner: aliceOwner,
           currentUser: { id: 'owner-id', username: 'alice' },
           isAdmin: false,
@@ -710,13 +710,13 @@ describe('ACL-aware authorization', () => {
     });
   });
 
-  describe('canChangeAgentAccessControlScope', () => {
+  describe('canChangeAgentAccessControlMode', () => {
     test('blocks default agent even for Manager via ACL', () => {
       expect(
-        canChangeAgentAccessControlScope({
+        canChangeAgentAccessControlMode({
           agentId: agentBuilderDefaultAgentId,
           access_control: {
-            scope: AgentAccessControlScope.Private,
+            access_mode: AgentAccessControlMode.Private,
             entries: [{ type: 'user', name: 'bob', role: AgentAccessControlRole.Manager }],
           },
           owner: aliceOwner,
@@ -728,10 +728,10 @@ describe('ACL-aware authorization', () => {
 
     test('allows Manager via ACL on a non-default agent', () => {
       expect(
-        canChangeAgentAccessControlScope({
+        canChangeAgentAccessControlMode({
           agentId: 'custom-agent',
           access_control: {
-            scope: AgentAccessControlScope.Private,
+            access_mode: AgentAccessControlMode.Private,
             entries: [{ type: 'user', name: 'bob', role: AgentAccessControlRole.Manager }],
           },
           owner: aliceOwner,

@@ -6,7 +6,7 @@
  */
 
 import {
-  AgentAccessControlScope,
+  AgentAccessControlMode,
   getDefaultAgentAccessControl,
   type AgentAccessControl,
   type CurrentUser,
@@ -16,7 +16,7 @@ import {
   hasAgentWriteAccess,
   canDeleteAgent,
   canManageAgentAccessControl,
-  canChangeAgentAccessControlScope,
+  canChangeAgentAccessControlMode,
 } from '@kbn/agent-builder-common';
 import type { AgentUpdateRequest } from '../../../../../../common/agents';
 import type { AgentProperties } from '../storage';
@@ -33,7 +33,7 @@ export const normalizeAccessControl = (
 ): AgentAccessControl => {
   const defaults = getDefaultAgentAccessControl();
   return {
-    scope: source.access_control?.scope ?? source.visibility ?? defaults.scope,
+    access_mode: source.access_control?.access_mode ?? source.visibility ?? defaults.access_mode,
     entries: source.access_control?.entries ?? source.acl?.entries ?? defaults.entries,
   };
 };
@@ -154,7 +154,7 @@ export const redactAccessControlForCaller = <T extends { access_control?: AgentA
  * to those they may at least see/list.
  *
  * A non-admin user can list an agent when any of the following holds:
- *   - the agent's scope is not Private (Public + Shared cover the world by default), OR
+ *   - the agent's access mode is not Private (Public + Shared cover the world by default), OR
  *   - the user is the agent's creator (matched on profile id and/or username), OR
  *   - the agent's access-control entries have a `type=user` entry naming the current user.
  *
@@ -166,17 +166,17 @@ export const buildReadAccessFilter = ({ user }: { user: CurrentUser }) => {
     // Current documents: Public and Shared agents are visible to everyone; Private agents are not.
     {
       bool: {
-        must: { exists: { field: 'access_control.scope' } },
-        must_not: { term: { 'access_control.scope': AgentAccessControlScope.Private } },
+        must: { exists: { field: 'access_control.access_mode' } },
+        must_not: { term: { 'access_control.access_mode': AgentAccessControlMode.Private } },
       },
     },
-    // Legacy documents: fall back to `visibility` only when `access_control.scope` is absent.
+    // Legacy documents: fall back to `visibility` only when `access_control.access_mode` is absent.
     // Missing legacy visibility is treated like Public, matching `normalizeAccessControl`.
     {
       bool: {
         must_not: [
-          { exists: { field: 'access_control.scope' } },
-          { term: { visibility: AgentAccessControlScope.Private } },
+          { exists: { field: 'access_control.access_mode' } },
+          { term: { visibility: AgentAccessControlMode.Private } },
         ],
       },
     },
@@ -207,7 +207,7 @@ export const buildReadAccessFilter = ({ user }: { user: CurrentUser }) => {
   // `access_control` on documents that have already been migrated.
   shouldClauses.push({
     bool: {
-      must_not: { exists: { field: 'access_control.scope' } },
+      must_not: { exists: { field: 'access_control.access_mode' } },
       filter: {
         nested: {
           path: 'acl.entries',
@@ -229,7 +229,7 @@ export const buildReadAccessFilter = ({ user }: { user: CurrentUser }) => {
   // non-nested fallback for those documents too.
   shouldClauses.push({
     bool: {
-      must_not: { exists: { field: 'access_control.scope' } },
+      must_not: { exists: { field: 'access_control.access_mode' } },
       filter: [
         { term: { 'acl.entries.type': 'user' } },
         { term: { 'acl.entries.name': user.username } },
@@ -263,13 +263,13 @@ export const validateAccessControlUpdateAccess = ({
   isAdmin: boolean;
 }): boolean => {
   const currentAccessControl = normalizeAccessControl(source);
-  const currentScope = currentAccessControl.scope;
-  const nextScope = update.access_control?.scope;
-  const isScopeChange = nextScope !== undefined && nextScope !== currentScope;
+  const currentAccessMode = currentAccessControl.access_mode;
+  const nextAccessMode = update.access_control?.access_mode;
+  const isAccessModeChange = nextAccessMode !== undefined && nextAccessMode !== currentAccessMode;
 
   return (
-    !isScopeChange ||
-    canChangeAgentAccessControlScope({
+    !isAccessModeChange ||
+    canChangeAgentAccessControlMode({
       agentId: source.id,
       access_control: currentAccessControl,
       owner: sourceToOwner(source),

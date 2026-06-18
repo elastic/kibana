@@ -8,7 +8,7 @@
 import {
   AGENT_ACCESS_CONTROL_PRINCIPAL_NAME_MAX_LENGTH,
   AgentAccessControlRole,
-  AgentAccessControlScope,
+  AgentAccessControlMode,
 } from '@kbn/agent-builder-common';
 import {
   isValidAvatarSymbol,
@@ -94,7 +94,7 @@ describe('agentFormSchema avatar_symbol', () => {
     id: 'my-agent',
     name: 'My Agent',
     description: 'A test agent',
-    access_control: { scope: 'private' as const, entries: [] },
+    access_control: { access_mode: 'private' as const, entries: [] },
     configuration: { tools: [] },
   };
 
@@ -144,7 +144,7 @@ describe('agentFormSchema access_control entries', () => {
     id: 'my-agent',
     name: 'My Agent',
     description: 'A test agent',
-    access_control: { scope: AgentAccessControlScope.Private, entries: [] },
+    access_control: { access_mode: AgentAccessControlMode.Private, entries: [] },
     configuration: { tools: [] },
   };
 
@@ -152,7 +152,7 @@ describe('agentFormSchema access_control entries', () => {
     const result = agentFormSchema.safeParse({
       ...baseData,
       access_control: {
-        scope: AgentAccessControlScope.Private,
+        access_mode: AgentAccessControlMode.Private,
         entries: [
           {
             type: 'user',

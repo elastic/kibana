@@ -17,22 +17,22 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import type { IconType } from '@elastic/eui';
-import { AgentAccessControlScope, ACCESS_CONTROL_SCOPE_ICON } from '@kbn/agent-builder-common';
+import { AgentAccessControlMode, ACCESS_CONTROL_MODE_ICON } from '@kbn/agent-builder-common';
 import { Controller, useFormContext } from 'react-hook-form';
 import { labels } from '../../../../utils/i18n';
 import {
-  ACCESS_CONTROL_SCOPE_LABELS,
-  ACCESS_CONTROL_SCOPE_TOOLTIPS,
-} from '../../../../utils/access_control_scope_i18n';
+  ACCESS_CONTROL_MODE_LABELS,
+  ACCESS_CONTROL_MODE_TOOLTIPS,
+} from '../../../../utils/access_control_mode_i18n';
 import type { EditDetailsFormData } from './types';
 
 const { editDetails: flyoutLabels } = labels.agentOverview;
 
 interface AccessSectionProps {
-  canChangeAccessControlScope: boolean;
+  canChangeAccessControlMode: boolean;
 }
 
-const renderAccessControlScopeOption = ({ icon, label }: { icon: IconType; label: string }) => (
+const renderAccessControlModeOption = ({ icon, label }: { icon: IconType; label: string }) => (
   <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
     <EuiFlexItem grow={false}>
       <EuiIcon type={icon} aria-hidden={true} />
@@ -41,68 +41,68 @@ const renderAccessControlScopeOption = ({ icon, label }: { icon: IconType; label
   </EuiFlexGroup>
 );
 
-const accessControlScopeOptions = [
+const accessControlModeOptions = [
   {
-    value: AgentAccessControlScope.Private,
-    inputDisplay: renderAccessControlScopeOption({
-      icon: ACCESS_CONTROL_SCOPE_ICON[AgentAccessControlScope.Private],
-      label: ACCESS_CONTROL_SCOPE_LABELS[AgentAccessControlScope.Private],
+    value: AgentAccessControlMode.Private,
+    inputDisplay: renderAccessControlModeOption({
+      icon: ACCESS_CONTROL_MODE_ICON[AgentAccessControlMode.Private],
+      label: ACCESS_CONTROL_MODE_LABELS[AgentAccessControlMode.Private],
     }),
     dropdownDisplay: (
       <EuiFlexGroup direction="column" gutterSize="xs" responsive={false}>
         <EuiFlexItem>
-          {renderAccessControlScopeOption({
-            icon: ACCESS_CONTROL_SCOPE_ICON[AgentAccessControlScope.Private],
-            label: ACCESS_CONTROL_SCOPE_LABELS[AgentAccessControlScope.Private],
+          {renderAccessControlModeOption({
+            icon: ACCESS_CONTROL_MODE_ICON[AgentAccessControlMode.Private],
+            label: ACCESS_CONTROL_MODE_LABELS[AgentAccessControlMode.Private],
           })}
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiText size="xs" color="subdued">
-            {ACCESS_CONTROL_SCOPE_TOOLTIPS[AgentAccessControlScope.Private]}
+            {ACCESS_CONTROL_MODE_TOOLTIPS[AgentAccessControlMode.Private]}
           </EuiText>
         </EuiFlexItem>
       </EuiFlexGroup>
     ),
   },
   {
-    value: AgentAccessControlScope.Shared,
-    inputDisplay: renderAccessControlScopeOption({
-      icon: ACCESS_CONTROL_SCOPE_ICON[AgentAccessControlScope.Shared],
-      label: ACCESS_CONTROL_SCOPE_LABELS[AgentAccessControlScope.Shared],
+    value: AgentAccessControlMode.Shared,
+    inputDisplay: renderAccessControlModeOption({
+      icon: ACCESS_CONTROL_MODE_ICON[AgentAccessControlMode.Shared],
+      label: ACCESS_CONTROL_MODE_LABELS[AgentAccessControlMode.Shared],
     }),
     dropdownDisplay: (
       <EuiFlexGroup direction="column" gutterSize="xs" responsive={false}>
         <EuiFlexItem>
-          {renderAccessControlScopeOption({
-            icon: ACCESS_CONTROL_SCOPE_ICON[AgentAccessControlScope.Shared],
-            label: ACCESS_CONTROL_SCOPE_LABELS[AgentAccessControlScope.Shared],
+          {renderAccessControlModeOption({
+            icon: ACCESS_CONTROL_MODE_ICON[AgentAccessControlMode.Shared],
+            label: ACCESS_CONTROL_MODE_LABELS[AgentAccessControlMode.Shared],
           })}
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiText size="xs" color="subdued">
-            {ACCESS_CONTROL_SCOPE_TOOLTIPS[AgentAccessControlScope.Shared]}
+            {ACCESS_CONTROL_MODE_TOOLTIPS[AgentAccessControlMode.Shared]}
           </EuiText>
         </EuiFlexItem>
       </EuiFlexGroup>
     ),
   },
   {
-    value: AgentAccessControlScope.Public,
-    inputDisplay: renderAccessControlScopeOption({
-      icon: ACCESS_CONTROL_SCOPE_ICON[AgentAccessControlScope.Public],
-      label: ACCESS_CONTROL_SCOPE_LABELS[AgentAccessControlScope.Public],
+    value: AgentAccessControlMode.Public,
+    inputDisplay: renderAccessControlModeOption({
+      icon: ACCESS_CONTROL_MODE_ICON[AgentAccessControlMode.Public],
+      label: ACCESS_CONTROL_MODE_LABELS[AgentAccessControlMode.Public],
     }),
     dropdownDisplay: (
       <EuiFlexGroup direction="column" gutterSize="xs" responsive={false}>
         <EuiFlexItem>
-          {renderAccessControlScopeOption({
-            icon: ACCESS_CONTROL_SCOPE_ICON[AgentAccessControlScope.Public],
-            label: ACCESS_CONTROL_SCOPE_LABELS[AgentAccessControlScope.Public],
+          {renderAccessControlModeOption({
+            icon: ACCESS_CONTROL_MODE_ICON[AgentAccessControlMode.Public],
+            label: ACCESS_CONTROL_MODE_LABELS[AgentAccessControlMode.Public],
           })}
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiText size="xs" color="subdued">
-            {ACCESS_CONTROL_SCOPE_TOOLTIPS[AgentAccessControlScope.Public]}
+            {ACCESS_CONTROL_MODE_TOOLTIPS[AgentAccessControlMode.Public]}
           </EuiText>
         </EuiFlexItem>
       </EuiFlexGroup>
@@ -110,7 +110,7 @@ const accessControlScopeOptions = [
   },
 ];
 
-export const AccessSection: React.FC<AccessSectionProps> = ({ canChangeAccessControlScope }) => {
+export const AccessSection: React.FC<AccessSectionProps> = ({ canChangeAccessControlMode }) => {
   const { control, formState } = useFormContext<EditDetailsFormData>();
 
   return (
@@ -124,26 +124,26 @@ export const AccessSection: React.FC<AccessSectionProps> = ({ canChangeAccessCon
       </EuiText>
       <EuiSpacer size="l" />
       <EuiFormRow
-        label={flyoutLabels.accessControlScopeLabel}
+        label={flyoutLabels.accessControlModeLabel}
         helpText={
-          !canChangeAccessControlScope ? flyoutLabels.accessControlScopeDisabledReason : undefined
+          !canChangeAccessControlMode ? flyoutLabels.accessControlModeDisabledReason : undefined
         }
-        isInvalid={!!formState.errors.access_control?.scope}
-        error={formState.errors.access_control?.scope?.message}
+        isInvalid={!!formState.errors.access_control?.access_mode}
+        error={formState.errors.access_control?.access_mode?.message}
         fullWidth
       >
         <Controller
-          name="access_control.scope"
+          name="access_control.access_mode"
           control={control}
           render={({ field: { onChange, value } }) => (
             <EuiSuperSelect
               fullWidth
-              options={accessControlScopeOptions}
+              options={accessControlModeOptions}
               valueOfSelected={value}
               onChange={onChange}
-              disabled={!canChangeAccessControlScope}
-              aria-label={flyoutLabels.accessControlScopeAriaLabel}
-              data-test-subj="editDetailsAccessControlScopeSelect"
+              disabled={!canChangeAccessControlMode}
+              aria-label={flyoutLabels.accessControlModeAriaLabel}
+              data-test-subj="editDetailsAccessControlModeSelect"
             />
           )}
         />

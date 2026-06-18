@@ -9,7 +9,7 @@ responses:
             value:
               can_manage_access_control: true
               access_control:
-                scope: private
+                access_mode: private
                 entries:
                   - type: user
                     name: alice
@@ -22,7 +22,7 @@ responses:
             value:
               can_manage_access_control: false
               access_control:
-                scope: private
+                access_mode: private
                 entries: []
   404:
     description: "Not Found — no agent with this ID is visible to the caller. Matches the existing `agentNotFound` shape, so unprivileged callers cannot probe for hidden agents."

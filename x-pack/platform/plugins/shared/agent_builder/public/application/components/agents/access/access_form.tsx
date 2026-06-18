@@ -24,7 +24,7 @@ import {
   AgentAccessControlRole,
   type AgentDefinition,
 } from '@kbn/agent-builder-common';
-import { selectableRolesForAccessControlScope } from './role_to_capabilities';
+import { selectableRolesForAccessControlMode } from './role_to_capabilities';
 import { PrincipalRow } from './principal_row';
 import { UserPicker } from './user_picker';
 import {
@@ -93,12 +93,12 @@ export const AccessForm: React.FC<AccessFormProps> = ({
   onChange,
 }) => {
   const { euiTheme } = useEuiTheme();
-  const accessControlScope = agent.access_control?.scope;
+  const accessControlMode = agent.access_control?.access_mode;
 
   const defaultRole = useMemo(() => {
-    const allowed = selectableRolesForAccessControlScope(accessControlScope);
+    const allowed = selectableRolesForAccessControlMode(accessControlMode);
     return allowed.includes(AgentAccessControlRole.User) ? AgentAccessControlRole.User : allowed[0];
-  }, [accessControlScope]);
+  }, [accessControlMode]);
 
   const handleAdd = (entry: AgentAccessControlEntry) => {
     onChange([...entries, entry]);
@@ -151,7 +151,7 @@ export const AccessForm: React.FC<AccessFormProps> = ({
                 <PrincipalRow
                   key={`user:${entry.name}`}
                   entry={entry}
-                  accessControlScope={accessControlScope}
+                  accessControlMode={accessControlMode}
                   isDisabled={isDisabled}
                   onChangeRole={(role) => handleChangeRole(entry, role)}
                   onRemove={() => handleRemove(entry)}

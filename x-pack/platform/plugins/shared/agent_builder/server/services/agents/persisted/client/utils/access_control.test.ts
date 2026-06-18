@@ -9,7 +9,7 @@ import {
   agentBuilderDefaultAgentId,
   AgentAccessControlRole,
   AgentType,
-  AgentAccessControlScope,
+  AgentAccessControlMode,
 } from '@kbn/agent-builder-common';
 import type { AgentProperties } from '../storage';
 import {
@@ -36,19 +36,19 @@ const nonOwnerUser = { id: 'user-2', username: 'other' };
 const ownerByUsernameOnly = { username: 'owner' };
 
 describe('hasReadAccess', () => {
-  it('returns true for admins regardless of access-control scope', () => {
+  it('returns true for admins regardless of access-control mode', () => {
     const source = {
       ...baseSource,
-      access_control: { scope: AgentAccessControlScope.Private, entries: [] },
+      access_control: { access_mode: AgentAccessControlMode.Private, entries: [] },
       created_by_name: 'owner',
     };
     expect(hasReadAccess({ source, user: nonOwnerUser, isAdmin: true })).toBe(true);
   });
 
-  it('returns true for owner regardless of access-control scope', () => {
+  it('returns true for owner regardless of access-control mode', () => {
     const source = {
       ...baseSource,
-      access_control: { scope: AgentAccessControlScope.Private, entries: [] },
+      access_control: { access_mode: AgentAccessControlMode.Private, entries: [] },
       created_by_name: 'owner',
     };
     expect(hasReadAccess({ source, user: ownerUser, isAdmin: false })).toBe(true);
@@ -57,13 +57,13 @@ describe('hasReadAccess', () => {
   it('returns true for owner by username only', () => {
     const source = {
       ...baseSource,
-      access_control: { scope: AgentAccessControlScope.Private, entries: [] },
+      access_control: { access_mode: AgentAccessControlMode.Private, entries: [] },
       created_by_name: 'owner',
     };
     expect(hasReadAccess({ source, user: ownerByUsernameOnly, isAdmin: false })).toBe(true);
   });
 
-  it('returns true for non-owner when access-control scope is undefined (legacy agent treated as public)', () => {
+  it('returns true for non-owner when access-control mode is undefined (legacy agent treated as public)', () => {
     const source = { ...baseSource, created_by_name: 'owner' };
     expect(hasReadAccess({ source, user: nonOwnerUser, isAdmin: false })).toBe(true);
   });
@@ -71,7 +71,7 @@ describe('hasReadAccess', () => {
   it('returns false for non-owner when legacy visibility is private', () => {
     const source = {
       ...baseSource,
-      visibility: AgentAccessControlScope.Private,
+      visibility: AgentAccessControlMode.Private,
       created_by_name: 'owner',
     };
     expect(hasReadAccess({ source, user: nonOwnerUser, isAdmin: false })).toBe(false);
@@ -80,7 +80,7 @@ describe('hasReadAccess', () => {
   it('returns true for a user granted access through legacy acl entries', () => {
     const source = {
       ...baseSource,
-      visibility: AgentAccessControlScope.Private,
+      visibility: AgentAccessControlMode.Private,
       acl: {
         entries: [
           {
@@ -95,19 +95,19 @@ describe('hasReadAccess', () => {
     expect(hasReadAccess({ source, user: nonOwnerUser, isAdmin: false })).toBe(true);
   });
 
-  it('returns true for non-owner when access-control scope is shared', () => {
+  it('returns true for non-owner when access-control mode is shared', () => {
     const source = {
       ...baseSource,
-      access_control: { scope: AgentAccessControlScope.Shared, entries: [] },
+      access_control: { access_mode: AgentAccessControlMode.Shared, entries: [] },
       created_by_name: 'owner',
     };
     expect(hasReadAccess({ source, user: nonOwnerUser, isAdmin: false })).toBe(true);
   });
 
-  it('returns false for non-owner when access-control scope is private', () => {
+  it('returns false for non-owner when access-control mode is private', () => {
     const source = {
       ...baseSource,
-      access_control: { scope: AgentAccessControlScope.Private, entries: [] },
+      access_control: { access_mode: AgentAccessControlMode.Private, entries: [] },
       created_by_name: 'owner',
     };
     expect(hasReadAccess({ source, user: nonOwnerUser, isAdmin: false })).toBe(false);
@@ -115,25 +115,25 @@ describe('hasReadAccess', () => {
 });
 
 describe('hasWriteAccess', () => {
-  it('returns true for admins regardless of access-control scope', () => {
+  it('returns true for admins regardless of access-control mode', () => {
     const source = {
       ...baseSource,
-      access_control: { scope: AgentAccessControlScope.Private, entries: [] },
+      access_control: { access_mode: AgentAccessControlMode.Private, entries: [] },
       created_by_name: 'owner',
     };
     expect(hasWriteAccess({ source, user: nonOwnerUser, isAdmin: true })).toBe(true);
   });
 
-  it('returns true for owner regardless of access-control scope', () => {
+  it('returns true for owner regardless of access-control mode', () => {
     const source = {
       ...baseSource,
-      access_control: { scope: AgentAccessControlScope.Private, entries: [] },
+      access_control: { access_mode: AgentAccessControlMode.Private, entries: [] },
       created_by_name: 'owner',
     };
     expect(hasWriteAccess({ source, user: ownerUser, isAdmin: false })).toBe(true);
   });
 
-  it('returns true for non-owner when access-control scope is undefined (legacy agent treated as public)', () => {
+  it('returns true for non-owner when access-control mode is undefined (legacy agent treated as public)', () => {
     const source = { ...baseSource, created_by_name: 'owner' };
     expect(hasWriteAccess({ source, user: nonOwnerUser, isAdmin: false })).toBe(true);
   });
@@ -141,7 +141,7 @@ describe('hasWriteAccess', () => {
   it('returns false for non-owner when legacy visibility is shared', () => {
     const source = {
       ...baseSource,
-      visibility: AgentAccessControlScope.Shared,
+      visibility: AgentAccessControlMode.Shared,
       created_by_name: 'owner',
     };
     expect(hasWriteAccess({ source, user: nonOwnerUser, isAdmin: false })).toBe(false);
@@ -150,7 +150,7 @@ describe('hasWriteAccess', () => {
   it('returns true for a user granted edit access through legacy acl entries', () => {
     const source = {
       ...baseSource,
-      visibility: AgentAccessControlScope.Private,
+      visibility: AgentAccessControlMode.Private,
       acl: {
         entries: [
           {
@@ -165,19 +165,19 @@ describe('hasWriteAccess', () => {
     expect(hasWriteAccess({ source, user: nonOwnerUser, isAdmin: false })).toBe(true);
   });
 
-  it('returns false for non-owner when access-control scope is shared', () => {
+  it('returns false for non-owner when access-control mode is shared', () => {
     const source = {
       ...baseSource,
-      access_control: { scope: AgentAccessControlScope.Shared, entries: [] },
+      access_control: { access_mode: AgentAccessControlMode.Shared, entries: [] },
       created_by_name: 'owner',
     };
     expect(hasWriteAccess({ source, user: nonOwnerUser, isAdmin: false })).toBe(false);
   });
 
-  it('returns false for non-owner when access-control scope is private', () => {
+  it('returns false for non-owner when access-control mode is private', () => {
     const source = {
       ...baseSource,
-      access_control: { scope: AgentAccessControlScope.Private, entries: [] },
+      access_control: { access_mode: AgentAccessControlMode.Private, entries: [] },
       created_by_name: 'owner',
     };
     expect(hasWriteAccess({ source, user: nonOwnerUser, isAdmin: false })).toBe(false);
@@ -185,22 +185,22 @@ describe('hasWriteAccess', () => {
 });
 
 describe('buildAccessControlReadFilter', () => {
-  it('includes owner clauses, the not-private access-control scope clause, and a nested user-ACL clause', () => {
+  it('includes owner clauses, the not-private access-control mode clause, and a nested user-ACL clause', () => {
     const filter = buildAccessControlReadFilter({ user: ownerUser });
     expect(filter).toEqual({
       bool: {
         should: [
           {
             bool: {
-              must: { exists: { field: 'access_control.scope' } },
-              must_not: { term: { 'access_control.scope': AgentAccessControlScope.Private } },
+              must: { exists: { field: 'access_control.access_mode' } },
+              must_not: { term: { 'access_control.access_mode': AgentAccessControlMode.Private } },
             },
           },
           {
             bool: {
               must_not: [
-                { exists: { field: 'access_control.scope' } },
-                { term: { visibility: AgentAccessControlScope.Private } },
+                { exists: { field: 'access_control.access_mode' } },
+                { term: { visibility: AgentAccessControlMode.Private } },
               ],
             },
           },
@@ -222,7 +222,7 @@ describe('buildAccessControlReadFilter', () => {
           },
           {
             bool: {
-              must_not: { exists: { field: 'access_control.scope' } },
+              must_not: { exists: { field: 'access_control.access_mode' } },
               filter: {
                 nested: {
                   path: 'acl.entries',
@@ -241,7 +241,7 @@ describe('buildAccessControlReadFilter', () => {
           },
           {
             bool: {
-              must_not: { exists: { field: 'access_control.scope' } },
+              must_not: { exists: { field: 'access_control.access_mode' } },
               filter: [
                 { term: { 'acl.entries.type': 'user' } },
                 { term: { 'acl.entries.name': 'owner' } },
@@ -259,15 +259,15 @@ describe('buildAccessControlReadFilter', () => {
     expect(filter.bool.should).toHaveLength(6);
     expect(filter.bool.should[0]).toEqual({
       bool: {
-        must: { exists: { field: 'access_control.scope' } },
-        must_not: { term: { 'access_control.scope': AgentAccessControlScope.Private } },
+        must: { exists: { field: 'access_control.access_mode' } },
+        must_not: { term: { 'access_control.access_mode': AgentAccessControlMode.Private } },
       },
     });
     expect(filter.bool.should[1]).toEqual({
       bool: {
         must_not: [
-          { exists: { field: 'access_control.scope' } },
-          { term: { visibility: AgentAccessControlScope.Private } },
+          { exists: { field: 'access_control.access_mode' } },
+          { term: { visibility: AgentAccessControlMode.Private } },
         ],
       },
     });
@@ -299,10 +299,10 @@ describe('buildAccessControlReadFilter', () => {
 });
 
 describe('validateAccessControlUpdateAccess', () => {
-  it('returns true when update does not change access-control scope', () => {
+  it('returns true when update does not change access-control mode', () => {
     const source = {
       ...baseSource,
-      access_control: { scope: AgentAccessControlScope.Public, entries: [] },
+      access_control: { access_mode: AgentAccessControlMode.Public, entries: [] },
       created_by_name: 'owner',
     };
     expect(
@@ -315,10 +315,10 @@ describe('validateAccessControlUpdateAccess', () => {
     ).toBe(true);
   });
 
-  it('returns true when update access-control scope is undefined', () => {
+  it('returns true when update access-control mode is undefined', () => {
     const source = {
       ...baseSource,
-      access_control: { scope: AgentAccessControlScope.Private, entries: [] },
+      access_control: { access_mode: AgentAccessControlMode.Private, entries: [] },
       created_by_name: 'owner',
     };
     expect(
@@ -331,58 +331,58 @@ describe('validateAccessControlUpdateAccess', () => {
     ).toBe(true);
   });
 
-  it('returns true when access-control scope change is to same value (no actual change)', () => {
+  it('returns true when access-control mode change is to same value (no actual change)', () => {
     const source = {
       ...baseSource,
-      access_control: { scope: AgentAccessControlScope.Public, entries: [] },
+      access_control: { access_mode: AgentAccessControlMode.Public, entries: [] },
       created_by_name: 'owner',
     };
     expect(
       validateAccessControlUpdateAccess({
         source,
-        update: { access_control: { scope: AgentAccessControlScope.Public } },
+        update: { access_control: { access_mode: AgentAccessControlMode.Public } },
         user: nonOwnerUser,
         isAdmin: false,
       })
     ).toBe(true);
   });
 
-  it('returns true when access-control scope change is same as legacy visibility', () => {
+  it('returns true when access-control mode change is same as legacy visibility', () => {
     const source = {
       ...baseSource,
-      visibility: AgentAccessControlScope.Private,
+      visibility: AgentAccessControlMode.Private,
       created_by_name: 'owner',
     };
     expect(
       validateAccessControlUpdateAccess({
         source,
-        update: { access_control: { scope: AgentAccessControlScope.Private } },
+        update: { access_control: { access_mode: AgentAccessControlMode.Private } },
         user: nonOwnerUser,
         isAdmin: false,
       })
     ).toBe(true);
   });
 
-  it('returns true for owner changing access-control scope', () => {
+  it('returns true for owner changing access-control mode', () => {
     const source = {
       ...baseSource,
-      access_control: { scope: AgentAccessControlScope.Public, entries: [] },
+      access_control: { access_mode: AgentAccessControlMode.Public, entries: [] },
       created_by_name: 'owner',
     };
     expect(
       validateAccessControlUpdateAccess({
         source,
-        update: { access_control: { scope: AgentAccessControlScope.Private } },
+        update: { access_control: { access_mode: AgentAccessControlMode.Private } },
         user: ownerUser,
         isAdmin: false,
       })
     ).toBe(true);
   });
 
-  it('returns true for a legacy Manager ACL grantee changing access-control scope', () => {
+  it('returns true for a legacy Manager ACL grantee changing access-control mode', () => {
     const source = {
       ...baseSource,
-      visibility: AgentAccessControlScope.Private,
+      visibility: AgentAccessControlMode.Private,
       acl: {
         entries: [
           {
@@ -397,90 +397,90 @@ describe('validateAccessControlUpdateAccess', () => {
     expect(
       validateAccessControlUpdateAccess({
         source,
-        update: { access_control: { scope: AgentAccessControlScope.Shared } },
+        update: { access_control: { access_mode: AgentAccessControlMode.Shared } },
         user: nonOwnerUser,
         isAdmin: false,
       })
     ).toBe(true);
   });
 
-  it('returns true for admins changing access-control scope', () => {
+  it('returns true for admins changing access-control mode', () => {
     const source = {
       ...baseSource,
-      access_control: { scope: AgentAccessControlScope.Public, entries: [] },
+      access_control: { access_mode: AgentAccessControlMode.Public, entries: [] },
       created_by_name: 'owner',
     };
     expect(
       validateAccessControlUpdateAccess({
         source,
-        update: { access_control: { scope: AgentAccessControlScope.Private } },
+        update: { access_control: { access_mode: AgentAccessControlMode.Private } },
         user: nonOwnerUser,
         isAdmin: true,
       })
     ).toBe(true);
   });
 
-  it('returns false for non-owner without access-control scope permission changing access-control scope', () => {
+  it('returns false for non-owner without access-control mode permission changing access-control mode', () => {
     const source = {
       ...baseSource,
-      access_control: { scope: AgentAccessControlScope.Public, entries: [] },
+      access_control: { access_mode: AgentAccessControlMode.Public, entries: [] },
       created_by_name: 'owner',
     };
     expect(
       validateAccessControlUpdateAccess({
         source,
-        update: { access_control: { scope: AgentAccessControlScope.Private } },
+        update: { access_control: { access_mode: AgentAccessControlMode.Private } },
         user: nonOwnerUser,
         isAdmin: false,
       })
     ).toBe(false);
   });
 
-  it('returns false for non-owner changing legacy visibility scope without permission', () => {
+  it('returns false for non-owner changing legacy visibility without permission', () => {
     const source = {
       ...baseSource,
-      visibility: AgentAccessControlScope.Private,
+      visibility: AgentAccessControlMode.Private,
       created_by_name: 'owner',
     };
     expect(
       validateAccessControlUpdateAccess({
         source,
-        update: { access_control: { scope: AgentAccessControlScope.Shared } },
+        update: { access_control: { access_mode: AgentAccessControlMode.Shared } },
         user: nonOwnerUser,
         isAdmin: false,
       })
     ).toBe(false);
   });
 
-  it('returns false when changing access-control scope of the default agent even for owner', () => {
+  it('returns false when changing access-control mode of the default agent even for owner', () => {
     const source = {
       ...baseSource,
       id: agentBuilderDefaultAgentId,
-      access_control: { scope: AgentAccessControlScope.Public, entries: [] },
+      access_control: { access_mode: AgentAccessControlMode.Public, entries: [] },
       created_by_id: ownerUser.id,
       created_by_name: ownerUser.username,
     };
     expect(
       validateAccessControlUpdateAccess({
         source,
-        update: { access_control: { scope: AgentAccessControlScope.Private } },
+        update: { access_control: { access_mode: AgentAccessControlMode.Private } },
         user: ownerUser,
         isAdmin: false,
       })
     ).toBe(false);
   });
 
-  it('returns false when changing access-control scope of the default agent even with override', () => {
+  it('returns false when changing access-control mode of the default agent even with override', () => {
     const source = {
       ...baseSource,
       id: agentBuilderDefaultAgentId,
-      access_control: { scope: AgentAccessControlScope.Public, entries: [] },
+      access_control: { access_mode: AgentAccessControlMode.Public, entries: [] },
       created_by_name: 'owner',
     };
     expect(
       validateAccessControlUpdateAccess({
         source,
-        update: { access_control: { scope: AgentAccessControlScope.Shared } },
+        update: { access_control: { access_mode: AgentAccessControlMode.Shared } },
         user: nonOwnerUser,
         isAdmin: true,
       })
@@ -495,7 +495,7 @@ describe('redactAccessControlForCaller', () => {
   const privateAgentWithAcl: AgentProperties = {
     ...baseSource,
     access_control: {
-      scope: AgentAccessControlScope.Private,
+      access_mode: AgentAccessControlMode.Private,
       entries: [aliceEntry, bobEntry],
     },
     created_by_name: 'owner',
@@ -515,13 +515,13 @@ describe('redactAccessControlForCaller', () => {
   it('returns the definition unchanged when access_control entries are empty', () => {
     const definition = {
       id: 'a',
-      access_control: { scope: AgentAccessControlScope.Private, entries: [] },
+      access_control: { access_mode: AgentAccessControlMode.Private, entries: [] },
     };
     const result = redactAccessControlForCaller({
       definition,
       source: {
         ...baseSource,
-        access_control: { scope: AgentAccessControlScope.Private, entries: [] },
+        access_control: { access_mode: AgentAccessControlMode.Private, entries: [] },
       },
       user: nonOwnerUser,
       isAdmin: false,
@@ -533,7 +533,7 @@ describe('redactAccessControlForCaller', () => {
     const definition = {
       id: 'a',
       access_control: {
-        scope: AgentAccessControlScope.Private,
+        access_mode: AgentAccessControlMode.Private,
         entries: [aliceEntry, bobEntry],
       },
     };
@@ -550,7 +550,7 @@ describe('redactAccessControlForCaller', () => {
     const definition = {
       id: 'a',
       access_control: {
-        scope: AgentAccessControlScope.Private,
+        access_mode: AgentAccessControlMode.Private,
         entries: [aliceEntry, bobEntry],
       },
     };
@@ -569,7 +569,7 @@ describe('redactAccessControlForCaller', () => {
     const definition = {
       id: 'a',
       access_control: {
-        scope: AgentAccessControlScope.Private,
+        access_mode: AgentAccessControlMode.Private,
         entries: [aliceEntry, bobEntry],
       },
     };
@@ -590,7 +590,7 @@ describe('redactAccessControlForCaller', () => {
     const definition = {
       id: 'a',
       access_control: {
-        scope: AgentAccessControlScope.Private,
+        access_mode: AgentAccessControlMode.Private,
         entries: [aliceEntry, bobEntry],
       },
     };
@@ -608,7 +608,7 @@ describe('redactAccessControlForCaller', () => {
     const definition = {
       id: 'a',
       access_control: {
-        scope: AgentAccessControlScope.Private,
+        access_mode: AgentAccessControlMode.Private,
         entries: [aliceEntry, bobEntry],
       },
     };
@@ -616,7 +616,7 @@ describe('redactAccessControlForCaller', () => {
       definition,
       source: {
         ...baseSource,
-        visibility: AgentAccessControlScope.Private,
+        visibility: AgentAccessControlMode.Private,
         acl: { entries: [aliceEntry, bobEntry] },
         created_by_name: 'owner',
       },
@@ -630,7 +630,7 @@ describe('redactAccessControlForCaller', () => {
     // Default agent never accepts access_control management — even the owner gets [] back.
     const definition = {
       id: agentBuilderDefaultAgentId,
-      access_control: { scope: AgentAccessControlScope.Private, entries: [aliceEntry] },
+      access_control: { access_mode: AgentAccessControlMode.Private, entries: [aliceEntry] },
     };
     const result = redactAccessControlForCaller({
       definition,
@@ -638,7 +638,7 @@ describe('redactAccessControlForCaller', () => {
         ...baseSource,
         id: agentBuilderDefaultAgentId,
         created_by_name: 'owner',
-        access_control: { scope: AgentAccessControlScope.Private, entries: [aliceEntry] },
+        access_control: { access_mode: AgentAccessControlMode.Private, entries: [aliceEntry] },
       },
       user: ownerUser,
       isAdmin: false,

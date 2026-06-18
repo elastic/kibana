@@ -10,7 +10,7 @@ import { StorageIndexAdapter, types } from '@kbn/storage-adapter';
 import type { Logger, ElasticsearchClient } from '@kbn/core/server';
 import type {
   AgentAccessControl,
-  AgentAccessControlScope,
+  AgentAccessControlMode,
   AgentType,
   ToolSelection,
 } from '@kbn/agent-builder-common';
@@ -34,7 +34,7 @@ const storageSettings = {
       created_by_name: types.keyword({}),
       access_control: types.object({
         properties: {
-          scope: types.keyword({}),
+          access_mode: types.keyword({}),
           entries: types.nested({
             properties: {
               type: types.keyword({}),
@@ -77,7 +77,7 @@ export interface AgentProperties {
   updated_at: string;
   // deprecated fields
   configuration?: AgentConfigurationProperties;
-  visibility?: AgentAccessControlScope;
+  visibility?: AgentAccessControlMode;
   acl?: Pick<AgentAccessControl, 'entries'>;
 }
 
