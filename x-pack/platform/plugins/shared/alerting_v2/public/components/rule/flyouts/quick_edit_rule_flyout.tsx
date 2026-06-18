@@ -89,7 +89,7 @@ export const QuickEditRuleFlyout = ({ rule, onClose }: QuickEditRuleFlyoutProps)
         every: mapped.schedule?.every ?? '1m',
         lookback: mapped.schedule?.lookback ?? '5m',
       },
-      query: mapped.query ?? { breach: '' },
+      query: mapped.query ?? { format: 'standalone', breach: { query: '' } },
       grouping: mapped.grouping,
       stateTransition: mapped.stateTransition,
       stateTransitionAlertDelayMode: mapped.stateTransitionAlertDelayMode ?? 'immediate',

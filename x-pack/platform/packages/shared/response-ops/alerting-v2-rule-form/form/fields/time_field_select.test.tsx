@@ -175,7 +175,8 @@ describe('TimeFieldSelect', () => {
       wrapper: createFormWrapper(
         {
           query: {
-            breach: 'FROM logs-*',
+            format: 'standalone',
+            breach: { query: 'FROM logs-*' },
           },
         },
         mockServices

@@ -10,7 +10,8 @@ import type { DataViewFieldMap } from '@kbn/data-views-plugin/common';
 import { Controller, useWatch, useFormContext } from 'react-hook-form';
 import { EuiSelect, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { FormValues } from '../types';
+import type { FormValues, RuleQuery } from '../types';
+import { getBreachQuery } from '../types';
 import { getTimeFieldOptions } from '../utils';
 import { useDataFields } from '../hooks/use_data_fields';
 import { useRuleFormServices, useRuleFormMeta } from '../contexts';
@@ -32,7 +33,8 @@ export const TimeFieldSelect = () => {
   const { http, dataViews } = useRuleFormServices();
   const { layout } = useRuleFormMeta();
   const { control, setValue, getValues } = useFormContext<FormValues>();
-  const query = useWatch({ name: 'query.breach', control });
+  const ruleQuery = useWatch({ name: 'query', control }) as RuleQuery | undefined;
+  const query = getBreachQuery(ruleQuery);
 
   const handleAutoSelect = useCallback(
     (fields: DataViewFieldMap) => {

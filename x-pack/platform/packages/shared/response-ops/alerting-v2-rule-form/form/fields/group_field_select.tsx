@@ -9,7 +9,8 @@ import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { Controller, useFormContext, useWatch } from 'react-hook-form';
 import { EuiComboBox, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { FormValues } from '../types';
+import type { FormValues, RuleQuery } from '../types';
+import { getBreachQuery } from '../types';
 import { useQueryColumns, type QueryColumn } from '../hooks/use_query_columns';
 import { getGroupByColumnsFromQuery } from '../hooks/use_default_group_by';
 import { useRuleFormServices, useRuleFormMeta } from '../contexts';
@@ -18,7 +19,8 @@ export const GroupFieldSelect = () => {
   const { data } = useRuleFormServices();
   const { layout } = useRuleFormMeta();
   const { control, setValue, getValues } = useFormContext<FormValues>();
-  const query = useWatch({ name: 'query.breach', control });
+  const ruleQuery = useWatch({ name: 'query', control }) as RuleQuery | undefined;
+  const query = getBreachQuery(ruleQuery);
   const groupByRowId = 'ruleV2FormGroupByField';
 
   // Auto-populate group fields from the STATS ... BY clause whenever the
