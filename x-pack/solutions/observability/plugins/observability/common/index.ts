@@ -22,6 +22,7 @@ export { ProcessorEvent } from './processor_event';
 
 export {
   enableInspectEsQueries,
+  searchExcludedDataTiers,
   maxSuggestions,
   enableComparisonByDefault,
   defaultApmServiceEnvironment,
