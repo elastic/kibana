@@ -53,7 +53,7 @@ test.describe('Canvas visualization embeddable', { tag: ['@local-stateful-classi
   });
 
   test('creates a by-value Vega panel via the editor menu', async ({ pageObjects: { canvas } }) => {
-    await canvas.addNewPanel('Vega');
+    await canvas.addNewVegaPanel();
     await canvas.saveVisualizeAndReturn();
 
     // A fresh workpad starts empty, so saving the Vega panel adds exactly one panel.

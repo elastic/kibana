@@ -250,11 +250,24 @@ export class CanvasPage {
 
   /**
    * Add a new panel of the given type via the canvas editor menu.
-   * @param actionName e.g. 'Visualization', 'Maps', 'Vega'
+   * @param actionName e.g. 'Visualization', 'Maps'
    */
   async addNewPanel(actionName: string) {
     await this.page.testSubj.locator('canvasEditorMenuButton').click();
     await this.page.testSubj.locator(`create-action-${actionName}`).click();
+  }
+
+  /**
+   * Add a new Vega panel by opening the editor menu and clicking the Vega add-panel action.
+   * The action's display name changed from "Vega" (main) to "Custom visualization" (9.x), so
+   * match either to stay compatible across branches.
+   */
+  async addNewVegaPanel() {
+    await this.page.testSubj.locator('canvasEditorMenuButton').click();
+    const vegaAction = this.page.testSubj
+      .locator('create-action-Vega')
+      .or(this.page.testSubj.locator('create-action-Custom visualization'));
+    await vegaAction.click();
   }
 
   /** Click "Add from library" to open the dashboard add-panel flyout. */
