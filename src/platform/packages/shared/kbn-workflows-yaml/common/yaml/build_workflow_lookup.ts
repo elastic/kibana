@@ -18,6 +18,8 @@ export interface StepInfo {
   lineEnd: number;
   propInfos: Record<string, StepPropInfo>;
   parentStepId?: string;
+  /** Which nested key under the parent this step belongs to ('steps', 'else', 'on-failure', …). */
+  branchKey?: NestedStepKey;
 }
 
 export interface StepPropInfo {
@@ -92,7 +94,8 @@ export function isNestedStepKey(value: unknown): value is NestedStepKey {
 export function inspectStep(
   node: any,
   lineCounter: LineCounter,
-  parentStepId?: string
+  parentStepId?: string,
+  branchKey?: NestedStepKey
 ): Record<string, StepInfo> {
   const result: Record<string, StepInfo> = {};
 
@@ -113,7 +116,7 @@ export function inspectStep(
         const keyValue = YAML.isScalar(item.key) ? item.key.value : undefined;
         if (!isNestedStepKey(keyValue)) {
           const currentParentStepId = stepId ?? parentStepId;
-          Object.assign(result, inspectStep(item.value, lineCounter, currentParentStepId));
+          Object.assign(result, inspectStep(item.value, lineCounter, currentParentStepId, branchKey));
         }
       }
     });
@@ -121,13 +124,21 @@ export function inspectStep(
     node.items.forEach((item) => {
       if (YAML.isPair(item) && YAML.isScalar(item.key)) {
         if (isNestedStepKey(item.key.value)) {
-          Object.assign(result, inspectStep(item.value, lineCounter, stepId ?? parentStepId));
+          Object.assign(
+            result,
+            inspectStep(
+              item.value,
+              lineCounter,
+              stepId ?? parentStepId,
+              item.key.value as NestedStepKey
+            )
+          );
         }
       }
     });
   } else if (YAML.isSeq(node)) {
     node.items.forEach((subItem) => {
-      Object.assign(result, inspectStep(subItem, lineCounter, parentStepId));
+      Object.assign(result, inspectStep(subItem, lineCounter, parentStepId, branchKey));
     });
   }
 
@@ -150,6 +161,7 @@ export function inspectStep(
       lineEnd,
       propInfos: propNodes,
       parentStepId,
+      branchKey,
     };
   }
 

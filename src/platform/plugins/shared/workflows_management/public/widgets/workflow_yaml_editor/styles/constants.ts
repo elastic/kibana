@@ -24,3 +24,18 @@ export const FOCUSED_STEP_DECORATION_INSET_PX = 4;
  * If scrollbar styling or supported environments change, this value may need adjustment.
  */
 export const EDITOR_SCROLLBAR_WIDTH_PX = 14;
+
+/** Top padding inside the Monaco editor viewport (matches editorOptions.padding.top). */
+export const EDITOR_PADDING_TOP_PX = 24;
+
+/** Width of the step minimap panel (label area + track column). */
+export const MINIMAP_WIDTH_PX = 176;
+
+/** Horizontal padding inside the minimap container on each side.
+ *  Gives the viewport indicator border room so it doesn't clip the severity dots (left)
+ *  or the SVG track circles (right). */
+export const MINIMAP_PADDING_LEFT_PX = 16;
+export const MINIMAP_PADDING_RIGHT_PX = 16;
+
+/** Total right-side reserve: minimap + both side paddings + gap. Scrollbar is hidden. */
+export const MINIMAP_RESERVE_PX = MINIMAP_WIDTH_PX + MINIMAP_PADDING_LEFT_PX + MINIMAP_PADDING_RIGHT_PX + 8;
