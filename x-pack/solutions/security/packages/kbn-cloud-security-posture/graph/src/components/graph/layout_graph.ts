@@ -454,9 +454,13 @@ const alignNodesCenterInPlace = (
   }
 };
 
+// Cycle-tolerant: a directed cycle (e.g. an event self-loop where actor === target, or a
+// relationship cycle) has no valid topological order, but this ordering only feeds the cosmetic
+// `alignNodesCenterInPlace` pass and Dagre's own `layout()` already breaks cycles before positions
+// are computed. Termination is guaranteed by `visited`; back-edges are simply skipped instead of
+// throwing, so cyclic graphs render rather than failing the whole view.
 const topsort = (g: Dagre.graphlib.Graph, filter: (node: string) => boolean): string[] => {
   const visited: Record<string, boolean> = {};
-  const stack: Record<string, boolean> = {};
   const results: string[] = [];
 
   function visit(node: string): void {
@@ -464,17 +468,13 @@ const topsort = (g: Dagre.graphlib.Graph, filter: (node: string) => boolean): st
       return;
     }
 
-    if (Object.hasOwn(stack, node)) {
-      throw new Error('CycleException');
+    if (Object.hasOwn(visited, node)) {
+      return;
     }
 
-    if (!Object.hasOwn(visited, node)) {
-      stack[node] = true;
-      visited[node] = true;
-      g.predecessors(node)?.forEach((preNode) => visit(preNode.toString()));
-      delete stack[node];
-      results.push(node);
-    }
+    visited[node] = true;
+    g.predecessors(node)?.forEach((preNode) => visit(preNode.toString()));
+    results.push(node);
   }
 
   g.sinks().forEach((node) => visit(node.toString()));

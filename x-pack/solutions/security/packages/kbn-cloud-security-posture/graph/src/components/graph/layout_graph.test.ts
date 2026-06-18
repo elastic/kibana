@@ -418,4 +418,98 @@ describe('layoutGraph', () => {
       expect(entity2!.position.x).toBeGreaterThan(relNode!.position.x);
     });
   });
+
+  describe('cyclic graphs', () => {
+    it('should not throw and should position all nodes for an actor===target self-loop reachable from a sink', () => {
+      // Reproduces the CycleException scenario: an event whose actor and target resolve to the
+      // same entity (self-loop entity <-> label), plus a resolution relationship that introduces
+      // a sink. Traversing predecessors from the sink reaches the self-loop.
+      //
+      //   label <-> user:1049@auditd -> rel(...resolved_to) -> user:...@local (sink)
+      const nodes: Array<Node<NodeViewModel>> = [
+        {
+          id: 'user:1049@auditd',
+          type: 'entity',
+          position: { x: 0, y: 0 },
+          data: {
+            id: 'user:1049@auditd',
+            label: 'chaison_griffin',
+            color: 'primary',
+            shape: 'ellipse',
+            icon: 'user',
+          },
+        },
+        {
+          id: 'label(modified-user-account)',
+          type: 'label',
+          position: { x: 0, y: 0 },
+          data: {
+            id: 'label(modified-user-account)',
+            label: 'modified-user-account',
+            color: 'primary',
+            shape: 'label',
+          },
+        },
+        {
+          id: 'rel(user:1049@auditd-resolution.resolved_to)',
+          type: 'relationship',
+          position: { x: 0, y: 0 },
+          data: {
+            id: 'rel(user:1049@auditd-resolution.resolved_to)',
+            label: 'Resolved to',
+            shape: 'relationship',
+          },
+        },
+        {
+          id: 'user:chaison_griffin@host@local',
+          type: 'entity',
+          position: { x: 0, y: 0 },
+          data: {
+            id: 'user:chaison_griffin@host@local',
+            label: 'chaison_griffin@host',
+            color: 'primary',
+            shape: 'ellipse',
+            icon: 'user',
+          },
+        },
+      ];
+
+      const edges: Array<Edge<EdgeViewModel>> = [
+        // Self-loop: actor and target are the same entity
+        {
+          id: 'user-label',
+          source: 'user:1049@auditd',
+          target: 'label(modified-user-account)',
+        },
+        {
+          id: 'label-user',
+          source: 'label(modified-user-account)',
+          target: 'user:1049@auditd',
+        },
+        // Resolution relationship introduces a sink reachable from the self-loop
+        {
+          id: 'user-rel',
+          source: 'user:1049@auditd',
+          target: 'rel(user:1049@auditd-resolution.resolved_to)',
+        },
+        {
+          id: 'rel-local',
+          source: 'rel(user:1049@auditd-resolution.resolved_to)',
+          target: 'user:chaison_griffin@host@local',
+        },
+      ];
+
+      let result: ReturnType<typeof layoutGraph> | undefined;
+      expect(() => {
+        result = layoutGraph(nodes, edges);
+      }).not.toThrow();
+
+      // Every input node should be present with numeric positions
+      expect(result!.nodes).toHaveLength(nodes.length);
+      result!.nodes.forEach((node) => {
+        expect(typeof node.position.x).toBe('number');
+        expect(typeof node.position.y).toBe('number');
+      });
+    });
+  });
 });
