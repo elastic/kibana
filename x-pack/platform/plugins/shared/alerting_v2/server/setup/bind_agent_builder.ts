@@ -131,9 +131,7 @@ export function bindAgentBuilder({ bind }: ContainerModuleLoadOptions) {
           .get(Logger)
           .warn(`Rule management skill registered with empty schema docs: ${message}`);
       } else {
-        container
-          .get(Logger)
-          .warn(`Failed to register rule management skill: ${message}`);
+        container.get(Logger).warn(`Failed to register rule management skill: ${message}`);
       }
     }
 

@@ -56,10 +56,7 @@ function zodToJsonSchema(schema: z.ZodType): unknown {
     return compactLargeEnums(jsonSchema);
   } catch (e) {
     const message = e instanceof Error ? e.message : String(e);
-    throw new SchemaTranslationError(
-      `Failed to convert Zod schema to JSON Schema: ${message}`,
-      e
-    );
+    throw new SchemaTranslationError(`Failed to convert Zod schema to JSON Schema: ${message}`, e);
   }
 }
 

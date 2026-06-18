@@ -291,9 +291,7 @@ describe('executeRuleOperations', () => {
       ];
 
       const promise = executeRuleOperations({}, ops);
-      await expect(promise).rejects.toThrow(
-        'recovery_strategy "query" requires a recovery block'
-      );
+      await expect(promise).rejects.toThrow('recovery_strategy "query" requires a recovery block');
       await expect(executeRuleOperations({}, ops)).rejects.toBeInstanceOf(
         RuleOperationValidationError
       );
@@ -315,7 +313,6 @@ describe('executeRuleOperations', () => {
       const result = await executeRuleOperations({}, ops);
       expect(result.data.recovery_strategy).toBe('query');
     });
-
   });
 
   describe('set_grouping with column validation', () => {
