@@ -9,8 +9,8 @@
 
 import { useCallback, useRef } from 'react';
 
-const MOUSE_DRAG_THRESHOLD = 4;
-const TOUCH_DRAG_THRESHOLD = 8;
+const MOUSE_DRAG_THRESHOLD = 8;
+const TOUCH_DRAG_THRESHOLD = 12;
 
 import { useGridLayoutContext } from '../../use_grid_layout_context';
 import {
