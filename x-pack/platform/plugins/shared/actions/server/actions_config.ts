@@ -218,7 +218,6 @@ export function getActionsConfigurationUtilities(
     getResponseSettings: () => getResponseSettingsFromConfig(config),
     getSSLSettings: () => getSSLSettingsFromConfig(config.ssl?.verificationMode),
     getEARSSSLSettings: () => ({
-      // do we really need this to be configurable, or can we hardcode it to 'full' always?
       ...getSSLSettingsFromConfig(config.auth.ears?.ssl?.verificationMode),
       cert: config.auth.ears?.ssl?.certificate
         ? readFileSync(config.auth.ears.ssl.certificate)
