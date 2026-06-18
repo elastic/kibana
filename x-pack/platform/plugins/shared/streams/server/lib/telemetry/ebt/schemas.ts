@@ -120,6 +120,18 @@ const streamsSignificantEventsQueriesGeneratedSchema: RootSchema<StreamsSignific
         description: 'The number of output tokens used for the generation request',
       },
     },
+    cached_tokens_used: {
+      type: 'long',
+      _meta: {
+        description: 'Cached tokens used for the generation request',
+      },
+    },
+    duration_ms: {
+      type: 'long',
+      _meta: {
+        description: 'Duration of the query generation operation in milliseconds',
+      },
+    },
     stream_type: {
       type: 'keyword',
       _meta: {
