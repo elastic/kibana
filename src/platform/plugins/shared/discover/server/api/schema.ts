@@ -83,8 +83,7 @@ const discoverSessionTabPresentationSchema = schema.object({
       ],
       {
         meta: {
-          description:
-            'Time interval for the chart histogram on this tab.',
+          description: 'Time interval for the chart histogram on this tab.',
         },
       }
     )
