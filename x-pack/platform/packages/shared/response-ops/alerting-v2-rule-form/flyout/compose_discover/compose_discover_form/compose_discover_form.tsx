@@ -14,11 +14,14 @@ import type {
   ComposeDiscoverAction,
   RecoveryType,
   StepDefinition,
+  StepRenderProps,
 } from '../types';
 import { getStepIds, getBuilderStepIds } from '../use_compose_discover_state';
 import type { ComposeFormValues } from '../compose_form_types';
+import { getBreachQuery } from '../compose_form_types';
 import type { RuleFormServices } from '../../../form/contexts/rule_form_context';
 import { RULE_BUILDER_REGISTRY } from '../rule_builder';
+import { isActionValid } from '../../../actions_form';
 import { AlertConditionStep } from './alert_condition_step';
 import { RecoveryConditionStep } from './recovery_condition_step';
 import { DetailsAndArtifactsStep } from './details_and_artifacts_step';
@@ -32,10 +35,9 @@ interface Props {
   services: RuleFormServices;
   onRecoveryTypeChange: (type: RecoveryType) => void;
   onKindChange: (kind: 'signal' | 'alert') => void;
+  isEditing: boolean;
   ruleId?: string;
   builderType?: string;
-  builderState?: unknown;
-  onBuilderStateChange?: (state: unknown) => void;
 }
 
 const STEP_REGISTRY: Record<StepDefinition['id'], StepDefinition> = {
@@ -50,9 +52,20 @@ const STEP_REGISTRY: Record<StepDefinition['id'], StepDefinition> = {
         dispatch={props.dispatch}
         services={props.services}
         onKindChange={props.onKindChange}
+        isEditing={props.isEditing}
       />
     ),
-    validate: (_methods, s) => s.queryCommitted,
+    validate: (methods, s) => {
+      if (!s.queryCommitted) {
+        return false;
+      }
+      const kind = methods.getValues('kind');
+      const query = methods.getValues('query');
+      if (kind === 'alert' && query.format === 'composed') {
+        return query.base.trim().length > 0 && query.breach.segment.trim().length > 0;
+      }
+      return getBreachQuery(query).trim().length > 0;
+    },
   },
   builderCondition: {
     id: 'builderCondition',
@@ -72,6 +85,7 @@ const STEP_REGISTRY: Record<StepDefinition['id'], StepDefinition> = {
         state={props.state}
         dispatch={props.dispatch}
         onRecoveryTypeChange={props.onRecoveryTypeChange}
+        renderBuilderRecovery={props.renderBuilderRecovery}
       />
     ),
   },
@@ -93,51 +107,53 @@ const STEP_REGISTRY: Record<StepDefinition['id'], StepDefinition> = {
         <CentralizedActionPoliciesPanel http={props.services.http} />
         <EuiSpacer size="m" />
         <LinkedActionPoliciesStep http={props.services.http} ruleId={props.ruleId} />
-        {props.state.mode !== 'edit' && (
+        {props.ruleId === undefined && (
           <>
             <EuiHorizontalRule margin="m" />
-            <NotificationsStep services={props.services} />
+            <NotificationsStep />
           </>
         )}
       </>
     ),
-    validate: (methods, state, services) => {
-      if (state.mode === 'edit') return true;
+    validate: (methods) => {
       const notifs = methods.getValues('notifications');
       if (!notifs) return true;
-      return services?.workflowForm?.isValid?.(notifs.workflow) ?? true;
+      return notifs.workflows.every(isActionValid);
     },
   },
 };
 
-export const getSteps = (isAlert: boolean, builderType?: string): StepDefinition[] => {
+interface ResolvedSteps {
+  steps: StepDefinition[];
+  renderBuilderRecovery?: StepRenderProps['renderBuilderRecovery'];
+}
+
+export const getSteps = (isAlert: boolean, builderType?: string): ResolvedSteps => {
   const ids = builderType ? getBuilderStepIds(isAlert) : getStepIds(isAlert);
-  return ids.map((id) => {
+  const definition = builderType ? RULE_BUILDER_REGISTRY[builderType] : undefined;
+
+  const steps = ids.map((id) => {
     const base = STEP_REGISTRY[id];
-    if (id === 'builderCondition' && builderType) {
-      const definition = RULE_BUILDER_REGISTRY[builderType];
-      if (definition) {
-        return {
-          ...base,
-          title: definition.stepTitle,
-          render: (props) => {
-            if (!props.builderState || !props.onBuilderStateChange) return null;
-            return definition.renderStep({
-              state: props.state,
-              dispatch: props.dispatch,
-              services: props.services,
-              builderState: props.builderState,
-              onBuilderStateChange: props.onBuilderStateChange,
-            });
-          },
-          validate: definition.validate
-            ? (_methods, s, _services, bs) => definition.validate!(s, bs)
-            : base.validate,
-        };
-      }
+    if (id === 'builderCondition' && definition) {
+      const step: StepDefinition = {
+        ...base,
+        title: definition.stepTitle,
+        render: (props) =>
+          definition.renderStep({
+            state: props.state,
+            dispatch: props.dispatch,
+            services: props.services,
+          }),
+        validate: definition.validate
+          ? (_methods, s, _services, bs) => definition.validate!(s, bs)
+          : base.validate,
+      };
+      return step;
     }
     return base;
   });
+
+  return { steps, renderBuilderRecovery: definition?.renderRecoveryStep };
 };
 
 export const ComposeDiscoverForm = ({
@@ -146,21 +162,21 @@ export const ComposeDiscoverForm = ({
   services,
   onRecoveryTypeChange,
   onKindChange,
+  isEditing,
   ruleId,
   builderType,
-  builderState,
-  onBuilderStateChange,
 }: Props) => {
   const isAlert = useWatch<ComposeFormValues, 'kind'>({ name: 'kind' }) === 'alert';
-  const steps = getSteps(isAlert, builderType);
+  const { steps, renderBuilderRecovery } = getSteps(isAlert, builderType);
+
   return steps[state.step].render({
     state,
     dispatch,
     services,
     onRecoveryTypeChange,
     onKindChange,
+    isEditing,
     ruleId,
-    builderState,
-    onBuilderStateChange,
+    renderBuilderRecovery,
   });
 };

@@ -124,24 +124,45 @@ function configureExperiment({
 
   const selectedEvaluators = selectEvaluators([
     {
+      name: 'ExpectedToolCalled',
+      kind: 'CODE' as const,
+      evaluate: async ({ output, metadata }) => {
+        const expectedToolId = getStringMeta(metadata, 'expectedToolId');
+        if (!expectedToolId) return { score: 1 };
+
+        const toolCalls = getToolCallSteps(output as TaskOutput);
+        if (toolCalls.length === 0) {
+          return { score: 0, metadata: { reason: 'No tool calls found', expectedToolId } };
+        }
+
+        const usedToolIds = toolCalls.map((t) => t.tool_id).filter(Boolean);
+        const invoked = usedToolIds.includes(expectedToolId);
+
+        return {
+          score: invoked ? 1 : 0,
+          metadata: { expectedToolId, usedToolIds },
+        };
+      },
+    },
+    {
       name: 'ToolUsageOnly',
       kind: 'CODE' as const,
       evaluate: async ({ output, metadata }) => {
         const expectedOnlyToolId = getStringMeta(metadata, 'expectedOnlyToolId');
         if (!expectedOnlyToolId) return { score: 1 };
 
+        // Exclude attachment/filestore/internal framework tools (see isInternalTool).
         const toolCalls = getToolCallSteps(output as TaskOutput);
-        // Filter out platform-internal tools (e.g. load_skill) — they are
-        // infrastructure calls, not model decisions, and must not count against
-        // the ToolUsageOnly constraint.
-        const userFacingToolCalls = toolCalls.filter(
-          (t) => t.tool_id && !isInternalTool(t.tool_id)
-        );
-        if (userFacingToolCalls.length === 0) {
-          return { score: 0, metadata: { reason: 'No tool calls found', expectedOnlyToolId } };
+        const domainToolCalls = toolCalls.filter((t) => t.tool_id && !isInternalTool(t.tool_id));
+
+        if (domainToolCalls.length === 0) {
+          return {
+            score: 0,
+            metadata: { reason: 'No domain tool calls found', expectedOnlyToolId },
+          };
         }
 
-        const usedToolIds = userFacingToolCalls.map((t) => t.tool_id).filter(Boolean);
+        const usedToolIds = domainToolCalls.map((t) => t.tool_id).filter(Boolean);
         const hasExpected = usedToolIds.includes(expectedOnlyToolId);
         const allExpected = usedToolIds.every((id) => id === expectedOnlyToolId);
 
@@ -248,9 +269,16 @@ function configureExperiment({
             explanation: 'No traceId available for skill invocation check',
           };
         }
+        if (!/^[a-zA-Z0-9_-]+$/.test(traceId)) {
+          return {
+            score: null,
+            label: 'error',
+            explanation: `Invalid traceId for skill invocation check: ${traceId}`,
+          };
+        }
 
         const query = `FROM traces-*
-| WHERE trace.id == "${traceId}"
+| WHERE trace_id == "${traceId}"
 | STATS skill_invoked = COUNT(
     CASE(
       attributes.gen_ai.tool.name == "filestore.read"
@@ -328,7 +356,7 @@ export function createEvaluateDataset({
 
     await executorClient.runExperiment(
       {
-        dataset,
+        datasets: [dataset],
         task,
       },
       selectedEvaluators
@@ -360,14 +388,16 @@ export function createEvaluateExternalDataset({
 
     await executorClient.runExperiment(
       {
-        dataset: {
-          name: datasetName,
-          description: resolvesFromPhoenix
-            ? 'External dataset resolved from Phoenix by name'
-            : 'External dataset resolved from Elasticsearch by name',
-          // Examples are resolved from upstream dataset storage, not provided in code.
-          examples: [],
-        },
+        datasets: [
+          {
+            name: datasetName,
+            description: resolvesFromPhoenix
+              ? 'External dataset resolved from Phoenix by name'
+              : 'External dataset resolved from Elasticsearch by name',
+            // Examples are resolved from upstream dataset storage, not provided in code.
+            examples: [],
+          },
+        ],
         task,
         trustUpstreamDataset: true,
       },

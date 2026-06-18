@@ -7,14 +7,40 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { IRouter } from '@kbn/core/server';
+import type { Logger } from '@kbn/core/server';
 import { httpServerMock } from '@kbn/core/server/mocks';
+import { KQLSyntaxError } from '@kbn/es-query';
+import type { SearchTriggerEventLogResult } from '@kbn/workflows-ui';
 import { registerInternalRoutes } from '.';
+import type { RouteDependencies } from '../types';
 
 describe('Internal Routes', () => {
-  let routeHandlers: Record<string, { handler: (...args: any[]) => Promise<any> }>;
-  let mockApi: { disableAllWorkflows: jest.Mock };
+  type MockRouteHandler = (
+    context: typeof mockContext,
+    request: ReturnType<typeof httpServerMock.createKibanaRequest>,
+    response: ReturnType<typeof httpServerMock.createResponseFactory>
+  ) => Promise<unknown>;
+
+  /** Matches {@link registerTriggerEventsLogRoutes} → execution engine `searchTriggerEventLog`. */
+  interface TriggerEventLogSearchCall {
+    spaceId: string;
+    kql?: string;
+    from?: string;
+    to?: string;
+    page?: number;
+    size?: number;
+  }
+
+  let routeHandlers: Record<string, { handler: MockRouteHandler }>;
+  let mockApi: {
+    disableAllWorkflows: jest.MockedFunction<(spaceId: string) => Promise<unknown>>;
+    getHistoryForWorkflow: jest.Mock;
+  };
   let mockTriggerEventsIsEnabled: boolean;
+  const mockSearchTriggerEventLog = jest.fn<
+    Promise<SearchTriggerEventLogResult>,
+    [TriggerEventLogSearchCall]
+  >();
 
   const mockContext = {
     workflows: Promise.resolve({
@@ -41,22 +67,31 @@ describe('Internal Routes', () => {
     jest.clearAllMocks();
     routeHandlers = {};
     mockTriggerEventsIsEnabled = true;
-
-    mockApi = { disableAllWorkflows: jest.fn() };
+    mockSearchTriggerEventLog.mockResolvedValue({
+      hits: [],
+      total: 0,
+      page: 1,
+      size: 10,
+    });
+    mockApi = {
+      disableAllWorkflows: jest.fn(),
+      getHistoryForWorkflow: jest.fn(),
+    };
 
     const mockWorkflowsService = {
       getWorkflowsExecutionEngine: jest.fn().mockImplementation(async () => ({
-        triggerEvents: { isEnabled: mockTriggerEventsIsEnabled },
+        triggerEvents: {
+          isEnabled: mockTriggerEventsIsEnabled,
+          searchTriggerEventLog: mockSearchTriggerEventLog,
+        },
       })),
     };
 
     const createVersionedRoute = (method: string, path: string) => ({
-      addVersion: jest
-        .fn()
-        .mockImplementation((_config: unknown, handler: (...args: any[]) => Promise<any>) => {
-          routeHandlers[`${method}:${path}`] = { handler };
-          return { addVersion: jest.fn() };
-        }),
+      addVersion: jest.fn().mockImplementation((_config: unknown, handler: MockRouteHandler) => {
+        routeHandlers[`${method}:${path}`] = { handler };
+        return { addVersion: jest.fn() };
+      }),
     });
 
     const mockRouter = {
@@ -72,16 +107,25 @@ describe('Internal Routes', () => {
             createVersionedRoute('POST', config.path)
           ),
       },
-    } as unknown as jest.Mocked<IRouter>;
+    };
 
-    registerInternalRoutes({
-      router: mockRouter as any,
-      api: mockApi as any,
-      service: mockWorkflowsService as any,
-      logger: { error: jest.fn(), warn: jest.fn(), info: jest.fn(), debug: jest.fn() } as any,
-      spaces: { getSpaceId: jest.fn().mockReturnValue('default') } as any,
-      audit: {} as any,
-    });
+    const logger: Logger = {
+      error: jest.fn(),
+      warn: jest.fn(),
+      info: jest.fn(),
+      debug: jest.fn(),
+    } as unknown as Logger;
+
+    const routeDependencies: RouteDependencies = {
+      router: mockRouter,
+      api: mockApi,
+      service: mockWorkflowsService,
+      logger,
+      spaces: { getSpaceId: jest.fn().mockReturnValue('default') },
+      audit: { logWorkflowAccessed: jest.fn() },
+    } as unknown as RouteDependencies;
+
+    registerInternalRoutes(routeDependencies);
   });
 
   it('should register the config route handler', () => {
@@ -118,6 +162,128 @@ describe('Internal Routes', () => {
   it('should register the disable route handler', () => {
     expect(routeHandlers[`POST:/internal/workflows/disable`]).toBeDefined();
     expect(routeHandlers[`POST:/internal/workflows/disable`].handler).toEqual(expect.any(Function));
+  });
+
+  it('should register trigger event log search routes', () => {
+    expect(routeHandlers[`POST:/internal/workflows/trigger_events/_search`]).toBeDefined();
+  });
+
+  it('should register the workflow history route handler', () => {
+    expect(routeHandlers[`GET:/internal/workflows/workflow/{id}/history`]).toBeDefined();
+  });
+
+  it('should call api.getHistoryForWorkflow with page/per_page defaults', async () => {
+    const history = { page: 1, perPage: 20, total: 1, items: [{ id: 'event-1' }] };
+    mockApi.getHistoryForWorkflow.mockResolvedValue(history);
+
+    const response = httpServerMock.createResponseFactory();
+    const request = httpServerMock.createKibanaRequest({ params: { id: 'wf-1' } });
+
+    await routeHandlers[`GET:/internal/workflows/workflow/{id}/history`].handler(
+      mockContext,
+      request,
+      response
+    );
+
+    expect(mockApi.getHistoryForWorkflow).toHaveBeenCalledWith('wf-1', 'default', {
+      page: 1,
+      perPage: 20,
+    });
+    expect(response.ok).toHaveBeenCalledWith({ body: history });
+  });
+
+  it('should pass through page and per_page query params', async () => {
+    mockApi.getHistoryForWorkflow.mockResolvedValue({ page: 2, perPage: 5, total: 0, items: [] });
+
+    const response = httpServerMock.createResponseFactory();
+    const request = httpServerMock.createKibanaRequest({
+      params: { id: 'wf-1' },
+      query: { page: 2, per_page: 5 },
+    });
+
+    await routeHandlers[`GET:/internal/workflows/workflow/{id}/history`].handler(
+      mockContext,
+      request,
+      response
+    );
+
+    expect(mockApi.getHistoryForWorkflow).toHaveBeenCalledWith('wf-1', 'default', {
+      page: 2,
+      perPage: 5,
+    });
+  });
+
+  it('forwards trigger event log search params to the execution engine', async () => {
+    const response = httpServerMock.createResponseFactory();
+    const request = httpServerMock.createKibanaRequest({
+      body: { kql: 'triggerId : x', page: 2, size: 25 },
+    });
+
+    await routeHandlers[`POST:/internal/workflows/trigger_events/_search`].handler(
+      mockContext,
+      request,
+      response
+    );
+
+    expect(mockSearchTriggerEventLog).toHaveBeenCalledWith({
+      spaceId: 'default',
+      kql: 'triggerId : x',
+      from: undefined,
+      to: undefined,
+      page: 2,
+      size: 25,
+    });
+    expect(response.ok).toHaveBeenCalledWith({
+      body: { hits: [], total: 0, page: 1, size: 10 },
+    });
+  });
+
+  it('forwards payload.* KQL to the execution engine unchanged', async () => {
+    const response = httpServerMock.createResponseFactory();
+    const request = httpServerMock.createKibanaRequest({
+      body: { kql: 'payload.workflow.status : failed', page: 1, size: 10 },
+    });
+
+    await routeHandlers[`POST:/internal/workflows/trigger_events/_search`].handler(
+      mockContext,
+      request,
+      response
+    );
+
+    expect(mockSearchTriggerEventLog).toHaveBeenCalledWith({
+      spaceId: 'default',
+      kql: 'payload.workflow.status : failed',
+      from: undefined,
+      to: undefined,
+      page: 1,
+      size: 10,
+    });
+  });
+
+  it('returns 400 when trigger event log search throws KQLSyntaxError', async () => {
+    const kqlError = new KQLSyntaxError(
+      {
+        message: 'Expected',
+        expected: null,
+        found: '',
+        location: { start: { offset: 0 } },
+      } as ConstructorParameters<typeof KQLSyntaxError>[0],
+      'bad:'
+    );
+    mockSearchTriggerEventLog.mockRejectedValueOnce(kqlError);
+
+    const response = httpServerMock.createResponseFactory();
+    const request = httpServerMock.createKibanaRequest({ body: {} });
+
+    await routeHandlers[`POST:/internal/workflows/trigger_events/_search`].handler(
+      mockContext,
+      request,
+      response
+    );
+
+    expect(response.badRequest).toHaveBeenCalledWith({
+      body: { message: kqlError.shortMessage },
+    });
   });
 
   it('should call api.disableAllWorkflows scoped to the request space', async () => {

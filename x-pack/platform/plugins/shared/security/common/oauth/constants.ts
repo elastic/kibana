@@ -7,8 +7,7 @@
 
 /**
  * Defensive caps for the OAuth client management API exposed under
- * `/internal/security/oauth/clients`. UIAM (the upstream service these routes
- * proxy to) does not publish or enforce server-side caps for these inputs.
+ * `/internal/security/oauth/clients`.
  */
 
 /**
@@ -17,15 +16,24 @@
 export const OAUTH_CLIENT_LOGO_MAX_DATA_LENGTH = 262144;
 
 /**
+ * Maximum length of an OAuth client's human-readable display name.
+ */
+export const OAUTH_CLIENT_NAME_MAX_LENGTH = 128;
+
+/**
+ * Maximum length of an OAuth connection's human-readable display name.
+ */
+export const OAUTH_CONNECTION_NAME_MAX_LENGTH = 128;
+
+/**
  * Upper bound on the number of redirect URIs that may be registered against a
  * single OAuth client.
  */
-export const OAUTH_REDIRECT_URIS_MAX_SIZE = 32;
+export const OAUTH_REDIRECT_URIS_MAX_SIZE = 20;
 
 /**
  * Generic cap for short, identifier/name-like string fields on the OAuth
- * client management API (client IDs, names, metadata keys/values, revocation
- * reasons).
+ * client management API.
  */
 export const OAUTH_MAX_STRING_FIELD_LENGTH = 1024;
 
@@ -34,6 +42,12 @@ export const OAUTH_MAX_STRING_FIELD_LENGTH = 1024;
  * (redirect URIs).
  */
 export const OAUTH_MAX_URI_LENGTH = 2048;
+
+/**
+ * Upper bound on the number of `(client_id, connection_id)` targets that
+ * may be submitted in a single call to the bulk connection revocation API.
+ */
+export const OAUTH_MAX_BULK_REVOKE_CONNECTIONS = 100;
 
 /**
  * Image media types accepted by the OAuth client management API for the

@@ -54,7 +54,12 @@ export type { PluginsService } from './plugins_service';
 export type { ToolManager } from './tool_manager';
 export { ToolManagerToolType } from './tool_manager';
 export type { SkillsStore, WritableSkillsStore } from './skills_store';
-export type { PromptManager, ToolPromptManager, ConfirmationInfo } from './prompt_manager';
+export type {
+  PromptManager,
+  ToolPromptManager,
+  ConfirmationInfo,
+  AuthorizationInfo,
+} from './prompt_manager';
 export type { ConversationStateManager, ToolStateManager } from './state_manager';
 export type { TodoStateManager } from './todo_state_manager';
 export { createTodoStateManager } from './todo_state_manager';
@@ -71,3 +76,6 @@ export type {
   FileEntryMetadata,
   FileEntryContent,
 } from './filestore';
+export type { IFilesystemService } from './filesystem_service';
+export type { IBashService, BashExecResult } from './bash_service';
+export type { Volume, VolumeGlobOptions } from './volume';

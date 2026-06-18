@@ -194,7 +194,6 @@ export const AGENT_API_ROUTES = {
   BULK_UNENROLL_PATTERN: `${API_ROOT}/agents/bulk_unenroll`,
   REMOVE_COLLECTOR_PATTERN: `${API_ROOT}/agents/{agentId}/remove_collector`,
   BULK_REMOVE_COLLECTORS_PATTERN: `${API_ROOT}/agents/bulk_remove_collectors`,
-  COLLECTOR_GROUPS_PATTERN: `${API_ROOT}/agents/collector_groups`,
   REASSIGN_PATTERN: `${API_ROOT}/agents/{agentId}/reassign`,
   BULK_REASSIGN_PATTERN: `${API_ROOT}/agents/bulk_reassign`,
   REQUEST_DIAGNOSTICS_PATTERN: `${API_ROOT}/agents/{agentId}/request_diagnostics`,
@@ -271,6 +270,7 @@ export const REMOTE_SYNCED_INTEGRATIONS_API_ROUTES = {
 };
 
 export const CREATE_STANDALONE_AGENT_API_KEY_ROUTE = `${INTERNAL_ROOT}/create_standalone_agent_api_key`;
+export const CREATE_MANAGED_OTLP_API_KEY_ROUTE = `${INTERNAL_ROOT}/create_managed_otlp_api_key`;
 
 // Fleet debug routes
 export const FLEET_DEBUG_ROUTES = {

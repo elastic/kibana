@@ -1,6 +1,17 @@
 {
-  "sha1": "e1a12a091144ec4ba340f535d6e71b85fc95939e",
+  "sha1": "9051e2d6dcfe162630720b4a362c71cc9297f001",
   "tests": [
+    {
+      "id": "5f3825f308b4d12-d89fd2ade65d14f",
+      "title": "Teardown Discover tests data",
+      "expectedStatus": "passed",
+      "tags": [],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/global.teardown.ts",
+        "line": 16,
+        "column": 19
+      }
+    },
     {
       "id": "71242d88739937b-70753e6cedbcd4d",
       "title": "Setup Discover tests data",
@@ -24,13 +35,7 @@
         "@local-stateful-observability_complete",
         "@cloud-stateful-observability_complete",
         "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete",
-        "@local-serverless-search",
-        "@cloud-serverless-search",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
+        "@cloud-stateful-security_complete"
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/data_grid_doc_table.spec.ts",
@@ -50,13 +55,7 @@
         "@local-stateful-observability_complete",
         "@cloud-stateful-observability_complete",
         "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete",
-        "@local-serverless-search",
-        "@cloud-serverless-search",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
+        "@cloud-stateful-security_complete"
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/data_grid_doc_table.spec.ts",
@@ -76,13 +75,7 @@
         "@local-stateful-observability_complete",
         "@cloud-stateful-observability_complete",
         "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete",
-        "@local-serverless-search",
-        "@cloud-serverless-search",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
+        "@cloud-stateful-security_complete"
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/data_grid_doc_table.spec.ts",
@@ -102,13 +95,7 @@
         "@local-stateful-observability_complete",
         "@cloud-stateful-observability_complete",
         "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete",
-        "@local-serverless-search",
-        "@cloud-serverless-search",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
+        "@cloud-stateful-security_complete"
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/data_grid_doc_table.spec.ts",
@@ -128,13 +115,7 @@
         "@local-stateful-observability_complete",
         "@cloud-stateful-observability_complete",
         "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete",
-        "@local-serverless-search",
-        "@cloud-serverless-search",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
+        "@cloud-stateful-security_complete"
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/data_grid_doc_viewer.spec.ts",
@@ -154,13 +135,7 @@
         "@local-stateful-observability_complete",
         "@cloud-stateful-observability_complete",
         "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete",
-        "@local-serverless-search",
-        "@cloud-serverless-search",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
+        "@cloud-stateful-security_complete"
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/data_grid_doc_viewer.spec.ts",
@@ -180,13 +155,7 @@
         "@local-stateful-observability_complete",
         "@cloud-stateful-observability_complete",
         "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete",
-        "@local-serverless-search",
-        "@cloud-serverless-search",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
+        "@cloud-stateful-security_complete"
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/data_grid_doc_viewer.spec.ts",
@@ -206,13 +175,7 @@
         "@local-stateful-observability_complete",
         "@cloud-stateful-observability_complete",
         "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete",
-        "@local-serverless-search",
-        "@cloud-serverless-search",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
+        "@cloud-stateful-security_complete"
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/data_grid_doc_viewer.spec.ts",
@@ -232,13 +195,7 @@
         "@local-stateful-observability_complete",
         "@cloud-stateful-observability_complete",
         "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete",
-        "@local-serverless-search",
-        "@cloud-serverless-search",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
+        "@cloud-stateful-security_complete"
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/data_grid_doc_viewer.spec.ts",
@@ -258,17 +215,137 @@
         "@local-stateful-observability_complete",
         "@cloud-stateful-observability_complete",
         "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete",
-        "@local-serverless-search",
-        "@cloud-serverless-search",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
+        "@cloud-stateful-security_complete"
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/data_grid_doc_viewer.spec.ts",
         "line": 125,
+        "column": 12
+      }
+    },
+    {
+      "id": "eeef9afe3528fb0-cf1d0ab3767cdfd",
+      "title": "Data view without timefield should not display a timepicker",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/dataview_without_timefield.spec.ts",
+        "line": 39,
+        "column": 12
+      }
+    },
+    {
+      "id": "eeef9afe3528fb0-4dcd58d4d17dc8f",
+      "title": "Data view without timefield should adapt sidebar fields when switching",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/dataview_without_timefield.spec.ts",
+        "line": 45,
+        "column": 12
+      }
+    },
+    {
+      "id": "eeef9afe3528fb0-689e4102c9d0f2c",
+      "title": "Data view without timefield should display a timepicker after switching to an index pattern with timefield",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/dataview_without_timefield.spec.ts",
+        "line": 61,
+        "column": 12
+      }
+    },
+    {
+      "id": "eeef9afe3528fb0-2cb55638133f42c",
+      "title": "Data view without timefield should switch between with and without timefield using the browser back button",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/dataview_without_timefield.spec.ts",
+        "line": 74,
+        "column": 12
+      }
+    },
+    {
+      "id": "eeef9afe3528fb0-23036590bd0ebdb",
+      "title": "Data view without timefield should disable the auto refresh interval when switching to a data view without a time field",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/dataview_without_timefield.spec.ts",
+        "line": 111,
+        "column": 12
+      }
+    },
+    {
+      "id": "eeef9afe3528fb0-00c5477088e960e",
+      "title": "Data view without timefield should allow switching from a saved search with a time field to a saved search without a time field",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/dataview_without_timefield.spec.ts",
+        "line": 133,
+        "column": 12
+      }
+    },
+    {
+      "id": "eeef9afe3528fb0-c5b17d1e26ed8de",
+      "title": "Data view without timefield should allow switching from data views with different timefields and sort correctly",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/dataview_without_timefield.spec.ts",
+        "line": 163,
+        "column": 12
+      }
+    },
+    {
+      "id": "49c22da29b5800c-8b9c03c82c9a60e",
+      "title": "Data view with unmapped fields unmapped fields exist on a new saved search",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/unmapped_fields.spec.ts",
+        "line": 45,
+        "column": 12
+      }
+    },
+    {
+      "id": "49c22da29b5800c-f0f2d7d9751d7e2",
+      "title": "Data view with unmapped fields unmapped fields exist on an existing saved search",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/unmapped_fields.spec.ts",
+        "line": 70,
         "column": 12
       }
     },
@@ -1309,8 +1386,8 @@
       }
     },
     {
-      "id": "df7f704800ddfee-8d357b33752c84d",
-      "title": "Traces in Discover - Explore from APM Transaction Detail - \"Open in Discover\" links open traces experience",
+      "id": "df7f704800ddfee-28abd4718293f58",
+      "title": "Traces in Discover - Explore from APM Transaction Detail - Charts open traces experience",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -1326,7 +1403,51 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/traces_experience/explore_from_apm.spec.ts",
-        "line": 192,
+        "line": 198,
+        "column": 14
+      }
+    },
+    {
+      "id": "df7f704800ddfee-f1149dcbd89012f",
+      "title": "Traces in Discover - Explore from APM Transaction Detail - Waterfall and span links open traces experience",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/traces_experience/explore_from_apm.spec.ts",
+        "line": 234,
+        "column": 14
+      }
+    },
+    {
+      "id": "df7f704800ddfee-be9559ffd2b76cf",
+      "title": "Traces in Discover - Explore from APM Transaction Detail - Correlations open traces experience",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/traces_experience/explore_from_apm.spec.ts",
+        "line": 261,
         "column": 14
       }
     },
@@ -1348,7 +1469,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/traces_experience/explore_from_apm.spec.ts",
-        "line": 265,
+        "line": 289,
         "column": 14
       }
     },
@@ -1370,7 +1491,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/traces_experience/explore_from_apm.spec.ts",
-        "line": 293,
+        "line": 317,
         "column": 14
       }
     },
@@ -1392,7 +1513,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/traces_experience/explore_from_apm.spec.ts",
-        "line": 345,
+        "line": 363,
         "column": 14
       }
     },

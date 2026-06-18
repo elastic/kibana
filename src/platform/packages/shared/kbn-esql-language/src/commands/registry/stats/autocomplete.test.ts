@@ -29,11 +29,7 @@ import {
 } from '../../definitions/all_operators';
 import type { ICommandCallbacks } from '../types';
 import type { FunctionReturnType } from '../../definitions/types';
-import {
-  ESQL_NUMBER_TYPES,
-  FunctionDefinitionTypes,
-  ESQL_COMMON_NUMERIC_TYPES,
-} from '../../definitions/types';
+import { FunctionDefinitionTypes, ESQL_COMMON_NUMERIC_TYPES } from '../../definitions/types';
 import { findAutocompleteAstPosition } from '../../../language/shared/parse_for_autocomplete_query';
 import { setTestFunctions } from '../../definitions/utils/test_functions';
 import {
@@ -171,6 +167,7 @@ describe('STATS Autocomplete', () => {
 
       test('on space after aggregate field', async () => {
         await statsExpectSuggestions('from a | stats a=min(integerField) ', [
+          '\n',
           'WHERE ',
           'BY ',
           ', ',
@@ -184,6 +181,7 @@ describe('STATS Autocomplete', () => {
         ]);
 
         await statsExpectSuggestions('FROM index1 | STATS AVG(doubleField) WHE', [
+          '\n',
           'WHERE ',
           'BY ',
           ', ',
@@ -197,6 +195,7 @@ describe('STATS Autocomplete', () => {
         ]);
 
         await statsExpectSuggestions('FROM index1 | STATS AVG(doubleField) B', [
+          '\n',
           'WHERE ',
           'BY ',
           ', ',
@@ -307,7 +306,7 @@ describe('STATS Autocomplete', () => {
             ...getFieldNamesByType(roundParameterTypes),
             ...getFunctionSignaturesByReturnType(
               Location.STATS_BY,
-              ESQL_NUMBER_TYPES,
+              roundParameterTypes,
               { scalar: true, grouping: true },
               undefined,
               ['round']
@@ -321,7 +320,7 @@ describe('STATS Autocomplete', () => {
             ...getFieldNamesByType(roundParameterTypes),
             ...getFunctionSignaturesByReturnType(
               Location.STATS_BY,
-              ESQL_NUMBER_TYPES,
+              roundParameterTypes,
               { scalar: true, grouping: true },
               undefined,
               ['round']
@@ -470,6 +469,7 @@ describe('STATS Autocomplete', () => {
         await statsExpectSuggestions(
           'from a | stats a = min(integerField) | sort b',
           [
+            '\n',
             'WHERE ',
             'BY ',
             ', ',
@@ -500,6 +500,7 @@ describe('STATS Autocomplete', () => {
 
       test('expressions with aggregates', async () => {
         await statsExpectSuggestions('from a | stats col0 = min(integerField) ', [
+          '\n',
           'BY ',
           'WHERE ',
           '| ',
@@ -645,23 +646,26 @@ describe('STATS Autocomplete', () => {
 
       test('on complete column name', async () => {
         await statsExpectSuggestions('from a | stats a=max(b) by integerField', [
+          '\n',
           'integerField | ',
           'integerField, ',
         ]);
 
         await statsExpectSuggestions('from a | stats a=max(b) by col0 = integerField', [
+          '\n',
           'integerField | ',
           'integerField, ',
         ]);
 
         await statsExpectSuggestions('from a | stats a=max(b) by keywordField, integerField', [
+          '\n',
           'integerField | ',
           'integerField, ',
         ]);
 
         await statsExpectSuggestions(
           'from a | stats a=max(b) by keywordField, col0 = integerField',
-          ['integerField | ', 'integerField, ']
+          ['\n', 'integerField | ', 'integerField, ']
         );
       });
 
@@ -676,6 +680,7 @@ describe('STATS Autocomplete', () => {
 
       test('on space after grouping field', async () => {
         await statsExpectSuggestions('from a | stats a=c by keywordField ', [
+          '\n',
           ', ',
           '| ',
           ...getFunctionSignaturesByReturnType(
@@ -692,6 +697,7 @@ describe('STATS Autocomplete', () => {
 
       test('on space after grouping function', async () => {
         await statsExpectSuggestions('from a | stats a=c by CATEGORIZE(keywordField) ', [
+          '\n',
           ', ',
           '| ',
           ...getFunctionSignaturesByReturnType(
@@ -779,6 +785,7 @@ describe('STATS Autocomplete', () => {
 
       test('on space after expression right hand side operand', async () => {
         await statsExpectSuggestions('from a | stats avg(b) by doubleField % 2 ', [
+          '\n',
           ', ',
           '| ',
           ...getFunctionSignaturesByReturnType(
@@ -795,6 +802,7 @@ describe('STATS Autocomplete', () => {
         await statsExpectSuggestions(
           'from a | stats col0 = AVG(doubleField) BY col1 = BUCKET(dateField, 1 day) ',
           [
+            '\n',
             ', ',
             '| ',
             ...getFunctionSignaturesByReturnType(
