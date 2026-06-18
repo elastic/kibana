@@ -43,6 +43,7 @@ import { getTargetEuidEsqlEvaluation } from './target_euid';
 import { SECURITY_ALERTS_PARTIAL_IDENTIFIER } from '../../../common/constants';
 import type { EsQuery, OriginEventId, EventEdge, EventEsqlRow } from './types';
 import type { EntityEnrichmentFields } from './fetch_entity_enrichment';
+import { buildEnrichmentQuery } from './runtime_evaluations';
 
 interface BuildEsqlQueryParams {
   indexPatterns: string[];
@@ -153,42 +154,25 @@ const buildDslFilter = (
             lte: end,
           },
         },
-      },
-      ...(showUnknownTarget
-        ? []
-        : [
-            {
-              bool: {
-                should: [
-                  ...GRAPH_TARGET_EUID_SOURCE_FIELDS.generic,
-                  ...GRAPH_TARGET_EUID_SOURCE_FIELDS.host,
-                  ...GRAPH_TARGET_EUID_SOURCE_FIELDS.user,
-                  ...GRAPH_TARGET_EUID_SOURCE_FIELDS.service,
-                ].map((field) => ({
-                  exists: { field },
-                })),
-                minimum_should_match: 1,
-              },
-            },
-          ]),
+      }, // TODO: DISCUSS THIS PART
       {
         bool: {
           should: [
             ...(esQuery?.bool.filter?.length ||
-            esQuery?.bool.must?.length ||
-            esQuery?.bool.should?.length ||
-            esQuery?.bool.must_not?.length
+              esQuery?.bool.must?.length ||
+              esQuery?.bool.should?.length ||
+              esQuery?.bool.must_not?.length
               ? [esQuery]
               : []),
             // we might have no eventIds when opening from entity flyout
             ...(eventIds.length > 0
               ? [
-                  {
-                    terms: {
-                      'event.id': eventIds,
-                    },
+                {
+                  terms: {
+                    'event.id': eventIds,
                   },
-                ]
+                },
+              ]
               : []),
           ],
           minimum_should_match: 1,
@@ -419,48 +403,38 @@ const buildEsqlQuery = ({
   alertsMappingsIncluded,
   pinnedIds,
 }: BuildEsqlQueryParams): string => {
-  const query = `SET unmapped_fields="nullify";
+  const query = `SET unmapped_fields="LOAD";
 FROM ${indexPatterns
-    .filter((indexPattern) => indexPattern.length > 0)
-    .join(',')} METADATA _id, _index
+      .filter((indexPattern) => indexPattern.length > 0)
+      .join(',')} METADATA _id, _index
+| EVAL  __actor_exists = user.id IS NOT NULL OR user.full_name IS NOT NULL OR user.email IS NOT NULL
+| EVAL __target_exists = user.target.id IS NOT NULL OR user.target.name IS NOT NULL OR user.target.email IS NOT NULL
+    OR service.target.id IS NOT NULL OR service.target.name IS NOT NULL
+    OR entity.target.id IS NOT NULL OR entity.target.name IS NOT NULL
+| EVAL  __action_exists = event.action IS NOT NULL
+${buildEnrichmentQuery({ skipColumns: ['host.ip', 'host.target.ip'] })}
 ${buildV2ActorResolution()}
 | WHERE event.action IS NOT NULL AND actorEntityId IS NOT NULL
 ${buildV2TargetResolution()}
-// Save EUID source fields after MV_EXPAND (single-value per row) but before entity enrichment overwrites them
-${buildSaveSourceFieldsEsql()}
 | MV_EXPAND actorEntityId
 | MV_EXPAND targetEntityId
 ${buildPinnedEsql(pinnedIds)}
-// Create actor and target data - entity object built by TypeScript enrichment
-| EVAL actorDocData = CONCAT(${JSON_OBJECT_START},
-    ${concatJsonObjectPropertyEsqlExprAsString('id', 'actorEntityId')},
-    ${JSON_OBJECT_SEPARATOR}, ${concatJsonObjectPropertyString('type', DOCUMENT_TYPE_ENTITY)},
-    ${JSON_OBJECT_SEPARATOR}, ${buildActorSourceFieldsEsql()},
-  ${JSON_OBJECT_END})
-| EVAL targetDocData = CONCAT(${JSON_OBJECT_START},
-    ${concatJsonObjectPropertyEsqlExprAsString('id', 'COALESCE(targetEntityId, "")')},
-    ${JSON_OBJECT_SEPARATOR}, ${concatJsonObjectPropertyString('type', DOCUMENT_TYPE_ENTITY)},
-    ${JSON_OBJECT_SEPARATOR}, ${buildTargetSourceFieldsEsql()},
-  ${JSON_OBJECT_END})
-
 // Map host and source values to enriched contextual data
 | EVAL sourceIps = source.ip
 | EVAL sourceCountryCodes = source.geo.country_iso_code
 // Origin event and alerts allow us to identify the start position of graph traversal
-| EVAL isOrigin = ${
-    originEventIds.length > 0
-      ? `CASE (event.id IS NOT NULL AND event.id != "", event.id in (${originEventIds
-          .map((_id, idx) => `?og_id${idx}`)
-          .join(', ')}), false)`
+| EVAL isOrigin = ${originEventIds.length > 0
+      ? `COALESCE(event.id in (${originEventIds
+        .map((_id, idx) => `?og_id${idx}`)
+        .join(', ')}), false)`
       : 'false'
-  }
-| EVAL isOriginAlert = ${
-    originAlertIds.length > 0
-      ? `CASE (event.id IS NOT NULL AND event.id != "", isOrigin AND event.id in (${originAlertIds
-          .map((_id, idx) => `?og_alrt_id${idx}`)
-          .join(', ')}), false)`
+    }
+| EVAL isOriginAlert = ${originAlertIds.length > 0
+      ? `COALESCE(isOrigin AND event.id in (${originAlertIds
+        .map((_id, idx) => `?og_alrt_id${idx}`)
+        .join(', ')}), false)`
       : 'false'
-  }
+    }
 | EVAL isAlert = _index LIKE "*${SECURITY_ALERTS_PARTIAL_IDENTIFIER}*"
 | EVAL action = event.action
 // Aggregate document's data for popover expansion and metadata enhancements
@@ -473,18 +447,18 @@ ${buildPinnedEsql(pinnedIds)}
     ",\\"type\\":\\"", docType, "\\"",
     ",\\"index\\":\\"", _index, "\\"",
     ${
-      // ESQL complains about missing field's mapping when we don't fetch from alerts index
-      alertsMappingsIncluded
-        ? `CASE (isAlert, CONCAT(",\\"alert\\":", "{",
+    // ESQL complains about missing field's mapping when we don't fetch from alerts index
+    alertsMappingsIncluded
+      ? `CASE (isAlert, CONCAT(",\\"alert\\":", "{",
       "\\"ruleName\\":\\"", kibana.alert.rule.name, "\\"",
     "}"), ""),`
-        : ''
+      : ''
     }
   "}")
 // Per-triple rows. All grouping (action × actor/target type × origin/pinned)
 // happens in TypeScript via regroupEvents. STATS … BY (action, actorEntityId, targetEntityId, …)
 // would inflate row count beyond ES|QL's 10,000-row hard cap on dense graphs.
-| KEEP _id, action, actorEntityId, targetEntityId, isOrigin, isOriginAlert, isAlert, pinned, docData, sourceIps, sourceCountryCodes, actorDocData, targetDocData
+| KEEP _id, action, actorEntityId, targetEntityId, isOrigin, isOriginAlert, isAlert, pinned, docData, sourceIps, sourceCountryCodes
 | EVAL pinnedSort = CASE(pinned IS NULL, 1, 0)
 | SORT action DESC, pinnedSort ASC, isOrigin
 | LIMIT 1000
@@ -614,8 +588,8 @@ export const regroupEvents = (
       targetEntityIds.length === 0
         ? null
         : targetEntityIds.length === 1
-        ? targetEntityIds[0]
-        : hashIds(targetEntityIds);
+          ? targetEntityIds[0]
+          : hashIds(targetEntityIds);
 
     const docIds = [...group.docIds];
     const labelNodeId =
