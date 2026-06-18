@@ -74,7 +74,7 @@ export class EntityStorePlugin
 
     registerTasks(plugins.taskManager, this.logger, core, this.isServerless);
     this.logger.debug('Registering routes');
-    registerRoutes(router, core);
+    registerRoutes(router);
 
     this.logger.debug('Registering ui settings');
     registerUiSettings(core.uiSettings);
