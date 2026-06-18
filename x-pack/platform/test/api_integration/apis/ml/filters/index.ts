@@ -7,6 +7,9 @@
 
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 
+// TODO: Remove these FTR tests once Scout API coverage is verified in CI.
+// Scout equivalents: x-pack/platform/plugins/shared/ml/test/scout/api/parallel_tests/filters/
+// See related PR: https://github.com/elastic/kibana/pull/263811
 export default function ({ loadTestFile }: FtrProviderContext) {
   describe('filters', function () {
     loadTestFile(require.resolve('./create_filters'));
