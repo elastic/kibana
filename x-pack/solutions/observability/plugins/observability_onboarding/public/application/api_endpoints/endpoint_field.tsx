@@ -5,15 +5,7 @@
  * 2.0.
  */
 
-import {
-  EuiButtonIcon,
-  EuiCopy,
-  EuiFieldText,
-  EuiFormRow,
-  EuiToolTip,
-  useEuiTheme,
-} from '@elastic/eui';
-import { css } from '@emotion/react';
+import { EuiCopy, EuiFieldText, EuiFormAppend, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 
@@ -23,29 +15,15 @@ interface Props {
 }
 
 export const EndpointField = ({ url, isLoading }: Props) => {
-  const { euiTheme } = useEuiTheme();
-  const copyLabel = i18n.translate('xpack.observability_onboarding.apiEndpoints.copyAriaLabel', {
-    defaultMessage: 'Copy endpoint to clipboard',
-  });
-
-  // EUI paints the enabled copy button white inside a readOnly field; force the readOnly grey instead.
-  const copyButtonBackground = css`
-    .euiButtonIcon {
-      background-color: ${euiTheme.components.forms.backgroundReadOnly} !important;
-    }
-  `;
-
   return (
     <EuiFormRow
       fullWidth
-      css={copyButtonBackground}
       label={i18n.translate('xpack.observability_onboarding.apiEndpoints.endpointLabel', {
         defaultMessage: 'Endpoint',
       })}
     >
       <EuiFieldText
         fullWidth
-        readOnly
         isLoading={isLoading}
         value={url ?? ''}
         data-test-subj="observabilityOnboardingApiEndpointValue"
@@ -55,15 +33,19 @@ export const EndpointField = ({ url, isLoading }: Props) => {
         append={
           <EuiCopy textToCopy={url ?? ''}>
             {(copy) => (
-              <EuiToolTip content={copyLabel} disableScreenReaderOutput>
-                <EuiButtonIcon
-                  iconType="copyClipboard"
-                  onClick={copy}
-                  isDisabled={!url}
-                  aria-label={copyLabel}
-                  data-test-subj="observabilityOnboardingApiEndpointCopyButton"
-                />
-              </EuiToolTip>
+              <EuiFormAppend
+                element="button"
+                iconLeft="copy"
+                onClick={copy}
+                isDisabled={!url}
+                data-test-subj="observabilityOnboardingApiEndpointCopyButton"
+                aria-label={i18n.translate(
+                  'xpack.observability_onboarding.apiEndpoints.copyButton',
+                  {
+                    defaultMessage: 'Copy to clipboard',
+                  }
+                )}
+              />
             )}
           </EuiCopy>
         }

@@ -20,7 +20,6 @@ import {
   EuiText,
   EuiTitle,
   EuiToolTip,
-  useGeneratedHtmlId,
   useIsWithinBreakpoints,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -36,15 +35,18 @@ import { useApiKeys } from './use_api_keys';
 
 const LEARN_MORE_LINK = 'https://ela.st/connect-deployment-endpoints';
 
+const API_ENDPOINTS_SECTION_ID = 'apiEndpoints';
+const TITLE_ID = `${API_ENDPOINTS_SECTION_ID}Title`;
+
 export const ApiEndpoints = () => {
   const {
-    services: { share },
+    services: { share, application },
   } = useKibana<ObservabilityOnboardingAppServices>();
-  const titleId = useGeneratedHtmlId({ prefix: 'apiEndpointsTitle' });
   const isMobile = useIsWithinBreakpoints(['xs', 's', 'm']);
 
   const { endpoints, isLoading } = useApiEndpoints();
   const { encodedApiKeys, creatingEndpointId, createApiKey } = useApiKeys();
+  const canCreateApiKey = Boolean(application.capabilities.api_keys?.save);
   const [isOpen, setIsOpen] = useState<boolean>(true);
   const [selectedEndpointId, setSelectedEndpointId] = useState<string | undefined>(undefined);
   const [apiKeysManagementUrl, setApiKeysManagementUrl] = useState<string | undefined>(undefined);
@@ -73,9 +75,9 @@ export const ApiEndpoints = () => {
   return (
     <>
       <EuiHorizontalRule margin="xl" />
-      <section aria-labelledby={titleId}>
+      <section id={API_ENDPOINTS_SECTION_ID} aria-labelledby={TITLE_ID}>
         <EuiTitle size="s">
-          <h3 id={titleId}>
+          <h3 id={TITLE_ID}>
             {i18n.translate('xpack.observability_onboarding.apiEndpoints.title', {
               defaultMessage: 'Connect directly to the endpoint',
             })}
@@ -147,7 +149,7 @@ export const ApiEndpoints = () => {
                 </EuiFlexItem>
               </EuiFlexGroup>
             </EuiFlexItem>
-            {!isMobile && (
+            {!isMobile && canCreateApiKey && (
               <EuiFlexItem grow={false}>
                 <EuiButtonEmpty
                   size="s"
@@ -174,13 +176,14 @@ export const ApiEndpoints = () => {
                   <ApiKeyField
                     encodedApiKey={encodedApiKeys[selectedEndpoint.id]}
                     isCreating={creatingEndpointId === selectedEndpoint.id}
+                    canCreate={canCreateApiKey}
                     onCreate={() => createApiKey(selectedEndpoint.id)}
                   />
                 </EuiFlexItem>
               </EuiFlexGroup>
             </>
           )}
-          {isMobile && (
+          {isMobile && canCreateApiKey && (
             <>
               <EuiSpacer size="m" />
               <EuiButton

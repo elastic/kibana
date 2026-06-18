@@ -7,56 +7,49 @@
 
 import {
   EuiButton,
-  EuiButtonIcon,
   EuiCopy,
-  EuiFieldText,
+  EuiFieldPassword,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiFormAppend,
   EuiFormRow,
   EuiToolTip,
-  useEuiTheme,
 } from '@elastic/eui';
-import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 
 interface Props {
   encodedApiKey?: string;
   isCreating: boolean;
+  canCreate: boolean;
   onCreate: () => void;
 }
 
-const MASKED_API_KEY = '•'.repeat(30);
-
-export const ApiKeyField = ({ encodedApiKey, isCreating, onCreate }: Props) => {
-  const { euiTheme } = useEuiTheme();
+export const ApiKeyField = ({ encodedApiKey, isCreating, canCreate, onCreate }: Props) => {
   const hasApiKey = Boolean(encodedApiKey);
 
-  const copyLabel = i18n.translate(
-    'xpack.observability_onboarding.apiEndpoints.copyApiKeyAriaLabel',
-    {
-      defaultMessage: 'Copy API key to clipboard',
-    }
-  );
   const apiKeyLabel = i18n.translate('xpack.observability_onboarding.apiEndpoints.apiKeyLabel', {
     defaultMessage: 'API key',
   });
-
-  // EUI paints the enabled copy button white inside a readOnly field; force the readOnly grey instead.
-  const copyButtonBackground = css`
-    .euiButtonIcon {
-      background-color: ${euiTheme.components.forms.backgroundReadOnly} !important;
+  const noPermissionMessage = i18n.translate(
+    'xpack.observability_onboarding.apiEndpoints.noPermissionMessage',
+    {
+      defaultMessage: "You don't have permission to create API keys. Contact your administrator.",
     }
-  `;
+  );
 
   return (
-    <EuiFlexGroup gutterSize="s" alignItems="flexEnd" responsive={false}>
+    <EuiFlexGroup gutterSize="s" alignItems="flexStart" responsive={false}>
       <EuiFlexItem>
-        <EuiFormRow fullWidth css={copyButtonBackground} label={apiKeyLabel}>
-          <EuiFieldText
+        <EuiFormRow
+          fullWidth
+          label={apiKeyLabel}
+          helpText={!canCreate ? noPermissionMessage : undefined}
+        >
+          <EuiFieldPassword
             fullWidth
-            readOnly
-            value={hasApiKey ? MASKED_API_KEY : ''}
+            type="dual"
+            value={encodedApiKey ?? ''}
             placeholder={i18n.translate(
               'xpack.observability_onboarding.apiEndpoints.apiKeyPlaceholder',
               {
@@ -69,14 +62,18 @@ export const ApiKeyField = ({ encodedApiKey, isCreating, onCreate }: Props) => {
               hasApiKey ? (
                 <EuiCopy textToCopy={encodedApiKey ?? ''}>
                   {(copy) => (
-                    <EuiToolTip content={copyLabel} disableScreenReaderOutput>
-                      <EuiButtonIcon
-                        iconType="copyClipboard"
-                        onClick={copy}
-                        aria-label={copyLabel}
-                        data-test-subj="observabilityOnboardingApiEndpointApiKeyCopyButton"
-                      />
-                    </EuiToolTip>
+                    <EuiFormAppend
+                      element="button"
+                      iconLeft="copy"
+                      onClick={copy}
+                      data-test-subj="observabilityOnboardingApiEndpointApiKeyCopyButton"
+                      aria-label={i18n.translate(
+                        'xpack.observability_onboarding.apiEndpoints.copyButton',
+                        {
+                          defaultMessage: 'Copy to clipboard',
+                        }
+                      )}
+                    />
                   )}
                 </EuiCopy>
               ) : undefined
@@ -85,16 +82,21 @@ export const ApiKeyField = ({ encodedApiKey, isCreating, onCreate }: Props) => {
         </EuiFormRow>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiButton
-          iconType="plusInCircle"
-          onClick={onCreate}
-          isLoading={isCreating}
-          data-test-subj="observabilityOnboardingApiEndpointCreateApiKeyButton"
-        >
-          {i18n.translate('xpack.observability_onboarding.apiEndpoints.createKey', {
-            defaultMessage: 'Create key',
-          })}
-        </EuiButton>
+        <EuiFormRow hasEmptyLabelSpace>
+          <EuiToolTip content={!canCreate ? noPermissionMessage : undefined}>
+            <EuiButton
+              iconType="plusInCircle"
+              onClick={onCreate}
+              isLoading={isCreating}
+              isDisabled={!canCreate}
+              data-test-subj="observabilityOnboardingApiEndpointCreateApiKeyButton"
+            >
+              {i18n.translate('xpack.observability_onboarding.apiEndpoints.createKey', {
+                defaultMessage: 'Create key',
+              })}
+            </EuiButton>
+          </EuiToolTip>
+        </EuiFormRow>
       </EuiFlexItem>
     </EuiFlexGroup>
   );

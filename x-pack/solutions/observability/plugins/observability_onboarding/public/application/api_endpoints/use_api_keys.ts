@@ -7,6 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { useCallback, useState } from 'react';
+import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser';
 import { useKibana } from '../../hooks/use_kibana';
 import { callObservabilityOnboardingApi } from '../../services/rest/create_call_api';
 import type { ApiEndpointId } from '../../../common/api_endpoints';
@@ -36,13 +37,25 @@ export function useApiKeys(): UseApiKeysResult {
         );
         setEncodedApiKeys((previous) => ({ ...previous, [endpointId]: encodedApiKey }));
       } catch (error) {
-        notifications?.toasts.addError(error, {
+        const fetchError = error as IHttpFetchError<ResponseErrorBody>;
+        notifications?.toasts.addError(fetchError, {
           title: i18n.translate('xpack.observability_onboarding.apiEndpoints.createKeyError', {
             defaultMessage: 'Failed to create API key',
           }),
+          toastMessage:
+            fetchError.body?.message ??
+            i18n.translate('xpack.observability_onboarding.apiEndpoints.createKeyErrorFallback', {
+              defaultMessage:
+                'Something went wrong while creating the API key. Try again or contact your administrator.',
+            }),
         });
       } finally {
         setCreatingEndpointId(undefined);
+        notifications?.toasts.addSuccess({
+          title: i18n.translate('xpack.observability_onboarding.apiEndpoints.createKeySuccess', {
+            defaultMessage: 'API key created successfully',
+          }),
+        });
       }
     },
     [notifications]
