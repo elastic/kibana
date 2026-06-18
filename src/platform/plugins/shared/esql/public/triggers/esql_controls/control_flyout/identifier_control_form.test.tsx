@@ -23,10 +23,14 @@ import {
   DEFAULT_PINNED_CONTROL_STATE,
 } from '@kbn/controls-constants';
 
-jest.mock('@kbn/esql-utils', () => ({
-  getESQLQueryColumnsRaw: jest.fn().mockResolvedValue([{ name: 'column1' }, { name: 'column2' }]),
-  getValuesFromQueryField: jest.fn().mockReturnValue('field'),
-}));
+jest.mock('@kbn/esql-utils', () => {
+  const actual = jest.requireActual('@kbn/esql-utils');
+  return {
+    getESQLQueryColumnsRaw: jest.fn().mockResolvedValue([{ name: 'column1' }, { name: 'column2' }]),
+    getValuesFromQueryField: jest.fn().mockReturnValue('field'),
+    getVariableNamePrefix: actual.getVariableNamePrefix,
+  };
+});
 
 const core = coreMock.createStart();
 const defaultProps = {

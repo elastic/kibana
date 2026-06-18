@@ -1,5 +1,5 @@
 {
-  "sha1": "3cc23b8892af9881c13682174fb4d487397f831e",
+  "sha1": "0b77a945a6482fa97adc6399c779991571d19564",
   "tests": [
     {
       "id": "8fdb537796db270-7132d4e40af07dc",
@@ -257,7 +257,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/draft_stream_simulation.spec.ts",
-        "line": 91,
+        "line": 96,
         "column": 9
       }
     },
@@ -271,7 +271,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/draft_stream_simulation.spec.ts",
-        "line": 98,
+        "line": 103,
         "column": 9
       }
     },
@@ -285,7 +285,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/draft_stream_simulation.spec.ts",
-        "line": 122,
+        "line": 127,
         "column": 9
       }
     },
@@ -299,7 +299,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/draft_stream_simulation.spec.ts",
-        "line": 141,
+        "line": 146,
         "column": 9
       }
     },
@@ -313,7 +313,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/draft_stream_simulation.spec.ts",
-        "line": 165,
+        "line": 170,
         "column": 9
       }
     },
