@@ -39,11 +39,38 @@ User Storage co-exists with several other per-user storage layers; pick the one 
 |---|---|---|
 | Ephemeral UI state — panel widths, collapsed/expanded states, sort orders, view-mode toggles, tour completions, callout dismissals | **`localStorage`** | Trivially re-set; no real cost when lost. Doesn't need to follow the user across devices. |
 | Identity / personalization that might follow the user across Elastic Cloud products — dark mode, avatar | **ES User Profile** | ES enforces per-user isolation; field set is small and stable. The right home for portable identity data, not for arbitrary plugin-owned state. |
-| Space-wide or cluster-wide admin-set defaults, *not* per-user | **`uiSettings`** | Admin-managed, scoped to a space or cluster. No user dimension. |
+| Space-wide or cluster-wide admin-set defaults, *not* per-user | **Advanced Settings (`uiSettings`)** | Admin-managed and shared by all users in a space or cluster; can be enforced via `kibana.yml` overrides. No user dimension — see [Deciding between Advanced Settings and User Storage](#deciding-between-advanced-settings-and-user-storage). |
 | Shared / multi-user data | **Saved Objects** | Has its own visibility and sharing model. |
 | Large blobs (>~few KB) | **file service** | Saved Objects are not blob storage. |
 | Frequently-changing high-volume telemetry | **analytics** | Persisting every event in a per-user SO is the wrong shape. |
 | Settings that must work for unauthenticated users | **`localStorage`** | User Storage requires a `profile_uid`; there is no anonymous fallback today. |
+
+## Deciding between Advanced Settings and User Storage
+
+Both store configuration-like values, so the two are easy to confuse. The deciding question is **who owns the value**: an Advanced Setting (`uiSettings`) is a single value per space (or global) shared by everyone, whereas a User Storage key is owned independently by each user.
+
+**Reach for Advanced Settings when:**
+
+- The value applies to everyone in a space or cluster — an admin-managed default.
+- An operator may need to enforce or lock the value (`uiSettings.overrides` in `kibana.yml`).
+- It must be readable by requests without a logged-in user (API-key or anonymous access).
+- You want the built-in Stack Management editing UI.
+
+**Reach for User Storage when:**
+
+- The value is personal — each user sets their own without affecting others.
+- It should follow the user across spaces (`scope: 'global'`) or vary per space (`scope: 'space'`).
+- You're replacing scattered `localStorage` usage with a server-backed, schema-validated store that survives device switches and cache clears.
+
+Three differences are worth weighing before choosing User Storage:
+
+- **No enforcement.** There is no equivalent of `uiSettings.overrides`; admins cannot pin a value for all users. If you need an enforced default *and* a per-user override, you need both systems.
+- **Requires a `profile_uid`.** Anonymous and API-key requests get defaults and cannot write; Advanced Settings have no such requirement.
+- **Reads aren't synchronous by default.** Advanced Settings reads are synchronous in the browser; User Storage reads are synchronous only for `preload: true` keys (see [Preloaded values](#key-concepts)).
+
+<DocCallOut title="Migrating an existing Advanced Setting is a behavior change">
+  Moving a setting from `uiSettings` to User Storage turns one shared value into per-user values — it is not a drop-in swap. Plan for the semantic shift, the loss of central enforcement, and a transition path for existing values.
+</DocCallOut>
 
 ## Quickstart
 
