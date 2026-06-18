@@ -40,7 +40,11 @@ import type {
 } from '@kbn/workflows';
 import { WORKFLOW_SML_TYPE } from '@kbn/workflows/common/constants';
 import { WorkflowNotFoundError } from '@kbn/workflows/common/errors';
-import type { ChildWorkflowExecutionItem, WorkflowPartialDetailDto } from '@kbn/workflows/types/v1';
+import type {
+  ChildWorkflowExecutionItem,
+  WorkflowPartialDetailDto,
+  WorkflowSortField,
+} from '@kbn/workflows/types/v1';
 import type { WorkflowsExecutionEnginePluginStart } from '@kbn/workflows-execution-engine/server';
 import type { LogSearchResult } from '@kbn/workflows-execution-engine/server/repositories/logs_repository';
 import type {
@@ -80,6 +84,12 @@ export interface GetWorkflowsParams {
   query?: string;
   managedFilter?: 'all' | 'managed' | 'unmanaged';
   _full?: boolean;
+  sortField?: WorkflowSortField;
+  sortOrder?: 'asc' | 'desc';
+}
+
+export interface GetWorkflowAggsOptions {
+  managedFilter?: GetWorkflowsParams['managedFilter'];
 }
 
 export interface DeleteWorkflowsResponse {
@@ -866,8 +876,14 @@ export class WorkflowsManagementApi {
     return this.workflowsService.getWorkflowStats(spaceId, options);
   }
 
-  public async getWorkflowAggs(fields: string[] = [], spaceId: string) {
-    return this.workflowsService.getWorkflowAggs(fields, spaceId);
+  public async getWorkflowAggs(
+    fields: string[] = [],
+    spaceId: string,
+    options?: GetWorkflowAggsOptions
+  ) {
+    return options
+      ? this.workflowsService.getWorkflowAggs(fields, spaceId, options)
+      : this.workflowsService.getWorkflowAggs(fields, spaceId);
   }
 
   public async getAvailableConnectors(

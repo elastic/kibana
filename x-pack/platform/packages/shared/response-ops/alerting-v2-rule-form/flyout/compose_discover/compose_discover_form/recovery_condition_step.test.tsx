@@ -23,8 +23,8 @@ jest.mock('@kbn/code-editor', () => ({
 }));
 
 const BASE_QUERY = 'FROM logs-*\n| STATS count = COUNT(*) BY host.name';
-const ALERT_BLOCK = '| WHERE count > 100';
-const RECOVERY_BLOCK = '| WHERE count < 100';
+const ALERT_SEGMENT = 'WHERE count > 100';
+const RECOVERY_SEGMENT = 'WHERE count < 100';
 
 const createState = (overrides: Partial<ComposeDiscoverState> = {}): ComposeDiscoverState => ({
   ...createInitialState({ mode: 'create' }),
@@ -36,7 +36,7 @@ const BASE_COMPOSE_VALUES: ComposeFormValues = {
   metadata: { name: '', enabled: true },
   timeField: '@timestamp',
   schedule: { every: '1m', lookback: '5m' },
-  query: { format: 'standalone', breach: '' },
+  query: { format: 'composed', base: '', breach: { segment: '' } },
   stateTransitionAlertDelayMode: 'immediate',
   stateTransitionRecoveryDelayMode: 'immediate',
 };
@@ -72,13 +72,14 @@ const createComposeFormWrapper = (
 const CUSTOM_RECOVERY_QUERY: RuleQuery = {
   format: 'composed',
   base: BASE_QUERY,
-  blocks: { breach: ALERT_BLOCK, recover: RECOVERY_BLOCK },
+  breach: { segment: ALERT_SEGMENT },
+  recovery: { segment: RECOVERY_SEGMENT },
 };
 
 const CUSTOM_NO_RECOVERY_QUERY: RuleQuery = {
   format: 'composed',
   base: BASE_QUERY,
-  blocks: { breach: ALERT_BLOCK },
+  breach: { segment: ALERT_SEGMENT },
 };
 
 const renderRecoveryStep = (

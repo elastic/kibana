@@ -6,7 +6,7 @@
  */
 
 import type { UserIdAndName } from '../base/users';
-import type { ToolOrigin } from '../tools/definition';
+import type { ToolOrigin, ToolType } from '../tools/definition';
 import type { ToolResult } from '../tools/tool_result';
 import type { ExecutionStatus, SerializedExecutionError } from '../agents/execution_status';
 import type {
@@ -15,7 +15,13 @@ import type {
   AttachmentInput,
   AttachmentVersionRef,
 } from '../attachments';
-import type { PromptRequest, PromptResponse, PromptStorageState } from '../agents/prompts';
+import type {
+  PromptRequest,
+  PromptResponse,
+  PromptStorageState,
+  AskUserQuestionItem,
+  AskUserQuestionAnswer,
+} from '../agents/prompts';
 import type { RuntimeAgentConfigurationOverrides } from '../agents/definition';
 import type { RoundState } from './round_state';
 
@@ -79,6 +85,7 @@ export enum ConversationRoundStepType {
   compaction = 'compaction',
   backgroundAgentComplete = 'background_agent_complete',
   updateTodos = 'update_todos',
+  askUserQuestion = 'ask_user_question',
 }
 
 // tool call step
@@ -130,6 +137,7 @@ export interface ToolCallWithResult {
    */
   tool_call_group_id?: string;
   tool_origin?: ToolOrigin;
+  tool_type?: ToolType;
 }
 
 export type ToolCallStep = ConversationRoundStepMixin<
@@ -224,6 +232,33 @@ export const isTodosStep = (step: ConversationRoundStep): step is TodosStep => {
   return step.type === ConversationRoundStepType.updateTodos;
 };
 
+// ask_user_question step
+
+export interface AskUserQuestionStepData {
+  /** Id of the prompt that produced this step. Matches the entry in `state.prompt.responses` and the prompt request's `id`. */
+  prompt_id: string;
+  /** The questions presented to the user. */
+  questions: AskUserQuestionItem[];
+  /** Undefined while the step is pending; populated on resume back-fill. */
+  answers?: AskUserQuestionAnswer[];
+}
+
+export type AskUserQuestionStep = ConversationRoundStepMixin<
+  ConversationRoundStepType.askUserQuestion,
+  AskUserQuestionStepData
+>;
+
+export const createAskUserQuestionStep = (data: AskUserQuestionStepData): AskUserQuestionStep => {
+  return {
+    type: ConversationRoundStepType.askUserQuestion,
+    ...data,
+  };
+};
+
+export const isAskUserQuestionStep = (step: ConversationRoundStep): step is AskUserQuestionStep => {
+  return step.type === ConversationRoundStepType.askUserQuestion;
+};
+
 /**
  * Returns the (single) todos step from a list of steps, if present.
  * A round only ever has at most one todos step, which is updated in place.
@@ -250,7 +285,8 @@ export type ConversationRoundStep =
   | ReasoningStep
   | CompactionStep
   | BackgroundAgentCompleteStep
-  | TodosStep;
+  | TodosStep
+  | AskUserQuestionStep;
 
 export enum ConversationRoundStatus {
   /** round is currently being processed */
@@ -259,6 +295,24 @@ export enum ConversationRoundStatus {
   completed = 'completed',
   /** round has been interrupted and is awaiting user input */
   awaitingPrompt = 'awaiting_prompt',
+}
+
+/**
+ * Frontend-only derived status for a conversation in the sidebar list.
+ * Computed client-side from the backend `read` flag, `ConversationRoundStatus`,
+ * and the active-streams map — never returned directly by any API endpoint.
+ */
+export enum ConversationDisplayStatus {
+  /** conversation has been read, no pending activity */
+  read = 'read',
+  /** conversation has new content the user hasn't seen */
+  unread = 'unread',
+  /** agent is actively streaming a response */
+  inProgress = 'in_progress',
+  /** agent is paused and waiting for user confirmation (HITL) */
+  awaitingPrompt = 'awaiting_prompt',
+  /** last round ended with an error */
+  error = 'error',
 }
 
 /**

@@ -29,17 +29,11 @@ import type {
 import type { WorkflowsExecutionEnginePluginStart } from '@kbn/workflows-execution-engine/server';
 import { updateYamlField } from '@kbn/workflows-yaml';
 import type { WorkflowCrudService } from './workflow_crud_service';
+import { isRetryableWorkflowWriteConflict } from '../lib/workflow_write_conflicts';
 import type { WorkflowProperties } from '../storage/workflow_storage';
 
 const MANAGED_WORKFLOW_SYSTEM_USER = 'elastic/kibana';
 const MAX_MANAGED_INSTALL_RETRIES = 2;
-const VERSION_CONFLICT_STATUS = 409;
-
-const isVersionConflictError = (error: unknown): boolean => {
-  if (!error || typeof error !== 'object') return false;
-  const e = error as { statusCode?: number; meta?: { statusCode?: number } };
-  return e.statusCode === VERSION_CONFLICT_STATUS || e.meta?.statusCode === VERSION_CONFLICT_STATUS;
-};
 
 const computeDefinitionHash = (yaml: string): string => {
   return createHash('sha256').update(yaml.trim()).digest('hex');
@@ -139,7 +133,7 @@ export class ManagedWorkflowsService {
         await this.installManagedWorkflowOnce(id, options, registeredPluginId);
         return;
       } catch (error) {
-        if (!isVersionConflictError(error) || attempt === MAX_MANAGED_INSTALL_RETRIES) {
+        if (!isRetryableWorkflowWriteConflict(error) || attempt === MAX_MANAGED_INSTALL_RETRIES) {
           throw error;
         }
 
@@ -190,9 +184,7 @@ export class ManagedWorkflowsService {
         spaceId,
         now,
       });
-      await this.deps.crudService.indexWorkflowDocument(workflowDocumentId, document, {
-        create: true,
-      });
+      await this.deps.crudService.createWorkflowDocument(workflowDocumentId, spaceId, document);
       return;
     }
 
@@ -229,7 +221,8 @@ export class ManagedWorkflowsService {
       enabled,
       createdAt: existing.created_at,
     });
-    await this.deps.crudService.indexWorkflowDocument(workflowDocumentId, document, {
+    await this.deps.crudService.writeWorkflowDocumentWithOcc(workflowDocumentId, spaceId, {
+      document,
       ifSeqNo: existingDocument.seqNo,
       ifPrimaryTerm: existingDocument.primaryTerm,
     });
@@ -575,6 +568,7 @@ export class ManagedWorkflowsService {
       id: workflowDocumentId,
       yaml,
       actor: MANAGED_WORKFLOW_SYSTEM_USER,
+      lightweightValidation: true,
       now,
       spaceId,
     });
