@@ -2469,6 +2469,7 @@ packages/kbn-eslint-plugin-eslint/rules/no_unsafe_hash.js @elastic/kibana-securi
 /.github/workflows/codeql.yml @elastic/kibana-security
 /.github/workflows/codeql-pr.yml @elastic/kibana-security
 /.github/workflows/evaluate-dependency-health.yml @elastic/kibana-security
+/.github/workflows/index-dependency-usage.yml @elastic/kibana-security
 /src/dev/eslint/security_eslint_rule_tests.ts @elastic/kibana-security
 /src/core/server/integration_tests/config/check_dynamic_config.test.ts @elastic/kibana-security
 /src/platform/plugins/shared/telemetry/server/config/telemetry_labels.ts @elastic/kibana-security
@@ -2915,6 +2916,7 @@ x-pack/solutions/security/test/security_solution_api_integration/test_suites/sou
 /x-pack/solutions/security/plugins/security_solution/.agents/skills/bug-fixer @elastic/security-engineering-productivity
 /x-pack/solutions/security/plugins/security_solution/.agents/skills/bug-reproduce @elastic/security-engineering-productivity
 /x-pack/solutions/security/plugins/security_solution/.agents/skills/bug-fix @elastic/security-engineering-productivity
+/x-pack/solutions/security/plugins/security_solution/.agents/skills/bug-validator/** @elastic/security-engineering-productivity
 /x-pack/solutions/security/test/security_solution_cypress/* @elastic/security-engineering-productivity
 /x-pack/solutions/security/test/security_solution_cypress/cypress/* @elastic/security-engineering-productivity
 /x-pack/solutions/security/test/security_solution_cypress/cypress/tasks/login.ts @elastic/security-engineering-productivity
