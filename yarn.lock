@@ -7192,6 +7192,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/flyout-history@link:src/platform/packages/shared/kbn-flyout-history":
+  version "0.0.0"
+  uid ""
+
 "@kbn/flyout-system-example-plugin@link:examples/flyout_system":
   version "0.0.0"
   uid ""
