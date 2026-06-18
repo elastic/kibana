@@ -19,6 +19,7 @@ import {
   type InboxRequestContext,
 } from '@kbn/inbox-plugin/server';
 import { ExecutionStatus } from '@kbn/workflows';
+import { WorkflowExecutionInvalidStatusError } from '@kbn/workflows/common/errors';
 import {
   buildWorkflowSourceId,
   parseWorkflowSourceId,
@@ -69,6 +70,7 @@ export const createWorkflowsInboxProvider = ({
         {
           page: params.page ?? 1,
           perPage: params.perPage ?? pageSize,
+          includeReasoning: true,
         }
       );
 
@@ -128,20 +130,8 @@ export const createWorkflowsInboxProvider = ({
         );
       }
 
-      // The engine's `resumeWorkflowExecution` only validates the
-      // execution-level status, not which step is currently waiting. That
-      // is unsafe in two ways:
-      //   1. A response composed against a stale inbox listing can land
-      //      after the originally-targeted step has been advanced and a
-      //      *later* `waitForInput` is now blocking — the engine would
-      //      silently apply the input to that unrelated later step.
-      //   2. Two near-simultaneous responses to the same step both pass
-      //      the workflow-level check; without a step-level claim, one
-      //      input could be dropped with no error surfaced to either client.
-      // We mitigate (1) here by re-reading the targeted step doc and
-      // refusing to forward unless it is still the one waiting. We mitigate
-      // (2) below by using `markStepAsResponded` as a first-writer-wins
-      // claim before scheduling the resume.
+      // Re-read the targeted step so stale inbox responses cannot resume a
+      // later waitForInput step from the same execution.
       const stepExecution = await api.getStepExecution(
         { executionId: parsed.executionId, id: parsed.stepExecutionId },
         ctx.spaceId
@@ -163,12 +153,7 @@ export const createWorkflowsInboxProvider = ({
         );
       }
 
-      // Defence-in-depth: a race between the workflow-level timeout monitor
-      // and the waitForInput step can leave a doc with
-      // `status: waiting_for_input` AND `finishedAt`/`error` set. The status
-      // check above then passes, but the step is actually terminal. Translate
-      // this to a clean 409 here so responders see a meaningful message
-      // instead of a 500 from the engine's freshness check.
+      // A timeout can leave a stale waiting_for_input status on a settled doc.
       if (stepExecution.finishedAt || stepExecution.error) {
         throw createInboxActionConflictError(
           WORKFLOWS_INBOX_SOURCE_APP,
@@ -179,44 +164,7 @@ export const createWorkflowsInboxProvider = ({
         );
       }
 
-      // Audit-stamp the step doc *before* scheduling the resume so the
-      // "responded but not yet resumed" window is observable to every
-      // client (Kibana inbox, Slack, agent builder, raw API). Doing this
-      // first is intentional: if the audit write succeeds and the
-      // resume schedule fails, the next list pass will surface a step
-      // with `respondedAt` set but still in `WAITING_FOR_INPUT` — the
-      // engine timeout monitor / a manual retry can then drive it
-      // forward. The reverse ordering would let a responder see "no
-      // change" on a successful resume that beat its own audit write.
-      // `ctx.channel` is set by the inbox respond route from the request
-      // body's slug-validated field; it falls back to `'inbox'` when the
-      // caller (e.g. the in-product Kibana inbox UI) doesn't explicitly
-      // identify itself, preserving pre-existing audit semantics. Non-UI
-      // clients (MCP, Slack bot, agent builder) tag their channel
-      // explicitly so the audit feed can render "via …" attribution.
       const channel = ctx.channel ?? 'inbox';
-      let didMarkStep: boolean;
-      try {
-        didMarkStep = await api.markStepAsResponded(
-          parsed.stepExecutionId,
-          ctx.request,
-          channel,
-          ctx.spaceId
-        );
-      } catch (error) {
-        logger.error(
-          `Workflows inbox provider failed to mark step ${parsed.stepExecutionId} as responded; aborting resume: ${error}`
-        );
-        throw error;
-      }
-      if (!didMarkStep) {
-        throw createInboxActionConflictError(
-          WORKFLOWS_INBOX_SOURCE_APP,
-          sourceId,
-          `step execution ${parsed.stepExecutionId} was already claimed or no longer exists`
-        );
-      }
-
       logger.debug(
         `Workflows inbox provider resuming execution ${parsed.executionId} (workflow ${parsed.workflowId})`
       );
@@ -225,13 +173,21 @@ export const createWorkflowsInboxProvider = ({
           parsed.executionId,
           ctx.spaceId,
           input,
-          ctx.request
+          ctx.request,
+          { channel, stepExecutionId: parsed.stepExecutionId }
         );
         audit.logExecutionResumed(ctx.request, {
           executionId: parsed.executionId,
           resumedBy,
         });
       } catch (error) {
+        if (error instanceof WorkflowExecutionInvalidStatusError) {
+          throw createInboxActionConflictError(
+            WORKFLOWS_INBOX_SOURCE_APP,
+            sourceId,
+            `step execution ${parsed.stepExecutionId} was already claimed or no longer accepts input`
+          );
+        }
         audit.logExecutionResumed(ctx.request, {
           executionId: parsed.executionId,
           error,

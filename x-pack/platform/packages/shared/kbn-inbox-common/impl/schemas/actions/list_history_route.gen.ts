@@ -26,7 +26,7 @@ export const ListInboxActionsHistoryRequestQuery = lazySchema(() =>
      */
     source_app: z.string().max(256).optional(),
     /**
-     * Free-text search applied to responder, workflow id and step id (case-insensitive substring). Empty string is treated as omitted.
+     * Free-text search applied to responder, workflow id and step id (case-insensitive prefix). Empty string is treated as omitted.
      */
     q: z.string().max(256).optional(),
     /**

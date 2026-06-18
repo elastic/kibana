@@ -58,7 +58,7 @@ export interface InboxActionProviderListParams {
  * at `kbn-inbox-common/impl/schemas/actions/list_history_route.schema.yaml`.
  */
 export interface InboxActionProviderListProcessedParams extends InboxActionProviderListParams {
-  /** Free-text search applied to responder / workflow / step labels (case-insensitive substring). */
+  /** Free-text search applied to responder / workflow / step labels (case-insensitive prefix). */
   q?: string;
   channel?: string[];
   workflowId?: string[];

@@ -410,7 +410,7 @@ export class WorkflowsService {
 
   public async listWaitingForInputSteps(
     spaceId: string,
-    pagination: { page?: number; perPage?: number } = {}
+    pagination: { page?: number; perPage?: number; includeReasoning?: boolean } = {}
   ): Promise<WaitForInputListResult> {
     await this.ensureInitialized();
     return this.executionQueryService.listWaitingForInputSteps(spaceId, pagination);
@@ -418,7 +418,11 @@ export class WorkflowsService {
 
   public async listProcessedWaitForInputSteps(
     spaceId: string,
-    options: { page?: number; perPage?: number } & ProcessedWaitForInputFilters = {}
+    options: {
+      page?: number;
+      perPage?: number;
+      includeReasoning?: boolean;
+    } & ProcessedWaitForInputFilters = {}
   ): Promise<WaitForInputListResult> {
     await this.ensureInitialized();
     return this.executionQueryService.listProcessedWaitForInputSteps(spaceId, options);
@@ -447,6 +451,14 @@ export class WorkflowsService {
       { respondedBy, respondedAt: new Date().toISOString(), channel },
       spaceId
     );
+  }
+
+  public async getWaitingStepExecutionId(
+    executionId: string,
+    spaceId: string
+  ): Promise<string | null> {
+    await this.ensureInitialized();
+    return this.executionQueryService.getWaitingStepExecutionId(executionId, spaceId);
   }
 
   public async getWorkflowExecutionHistory(

@@ -26,7 +26,7 @@ paths:
           schema:
             type: string
             maxLength: 256
-          description: Free-text search applied to responder, workflow id and step id (case-insensitive substring). Empty string is treated as omitted.
+          description: Free-text search applied to responder, workflow id and step id (case-insensitive prefix). Empty string is treated as omitted.
         - name: channel
           in: query
           required: false

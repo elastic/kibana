@@ -39,7 +39,10 @@ import type {
   WorkflowYaml,
 } from '@kbn/workflows';
 import { WORKFLOW_SML_TYPE } from '@kbn/workflows/common/constants';
-import { WorkflowNotFoundError } from '@kbn/workflows/common/errors';
+import {
+  WorkflowExecutionInvalidStatusError,
+  WorkflowNotFoundError,
+} from '@kbn/workflows/common/errors';
 import type {
   ChildWorkflowExecutionItem,
   WorkflowPartialDetailDto,
@@ -865,12 +868,37 @@ export class WorkflowsManagementApi {
     return workflowsExecutionEngine.cancelAllActiveWorkflowExecutions({ spaceId, workflowId });
   }
 
+  /**
+   * Claims the waiting HITL step before scheduling the resume so every resume
+   * channel shares the same audit stamp and first-writer-wins guard.
+   */
   public async resumeWorkflowExecution(
     executionId: string,
     spaceId: string,
     input: Record<string, unknown>,
-    request: KibanaRequest
+    request: KibanaRequest,
+    options?: { channel?: string; stepExecutionId?: string }
   ): Promise<ResumeWorkflowExecutionResponseDto> {
+    const stepExecutionId =
+      options?.stepExecutionId ??
+      (await this.workflowsService.getWaitingStepExecutionId(executionId, spaceId));
+
+    if (stepExecutionId) {
+      const claimed = await this.workflowsService.markStepAsResponded(
+        stepExecutionId,
+        request,
+        options?.channel ?? 'inbox',
+        spaceId
+      );
+      if (!claimed) {
+        throw new WorkflowExecutionInvalidStatusError(
+          executionId,
+          'already responded to or no longer waiting for input',
+          'waiting_for_input'
+        );
+      }
+    }
+
     const workflowsExecutionEngine = await this.getWorkflowsExecutionEngine();
     return workflowsExecutionEngine.resumeWorkflowExecution(executionId, spaceId, input, request);
   }
@@ -878,7 +906,7 @@ export class WorkflowsManagementApi {
   /** Cross-workflow listing of active `waitForInput` step executions. */
   public async listWaitingForInputSteps(
     spaceId: string,
-    params: { page?: number; perPage?: number } = {}
+    params: { page?: number; perPage?: number; includeReasoning?: boolean } = {}
   ): Promise<WaitForInputListResult> {
     return this.workflowsService.listWaitingForInputSteps(spaceId, params);
   }
@@ -886,7 +914,11 @@ export class WorkflowsManagementApi {
   /** Cross-workflow listing of processed `waitForInput` step executions. */
   public async listProcessedWaitForInputSteps(
     spaceId: string,
-    params: { page?: number; perPage?: number } & ProcessedWaitForInputFilters = {}
+    params: {
+      page?: number;
+      perPage?: number;
+      includeReasoning?: boolean;
+    } & ProcessedWaitForInputFilters = {}
   ): Promise<WaitForInputListResult> {
     return this.workflowsService.listProcessedWaitForInputSteps(spaceId, params);
   }

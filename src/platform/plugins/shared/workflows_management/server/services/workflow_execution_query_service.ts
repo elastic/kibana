@@ -8,7 +8,7 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
-import { ExecutionType } from '@kbn/workflows';
+import { ExecutionType, TerminalExecutionStatuses } from '@kbn/workflows';
 import type {
   EsWorkflowStepExecution,
   WorkflowExecutionDto,
@@ -48,6 +48,13 @@ const DEFAULT_PAGE_SIZE = 100;
 /** Max completed steps fetched per page when resolving predecessor `output.reasoning`. */
 const PREDECESSOR_REASONING_MAX_HITS = 1000;
 
+const SETTLED_STEP_STATUSES: readonly string[] = TerminalExecutionStatuses;
+
+const PROCESSED_WAIT_FOR_INPUT_SHOULD: estypes.QueryDslQueryContainer[] = [
+  { exists: { field: 'finishedAt' } },
+  { exists: { field: 'hitl.respondedAt' } },
+];
+
 /**
  * Extends EsWorkflowStepExecution with the legacy `endedAt` field
  * that may exist on older documents written before the rename to `finishedAt`.
@@ -59,7 +66,7 @@ interface StepExecutionWithLegacyFields extends EsWorkflowStepExecution {
 /**
  * Filters applied to processed wait-for-input step executions. Multi-value
  * fields are OR'd within a field and AND'd across fields; `q` is a
- * case-insensitive substring search over responder, workflow id, and step id.
+ * case-insensitive prefix search over responder, workflow id, and step id.
  */
 export interface ProcessedWaitForInputFilters {
   q?: string;
@@ -67,6 +74,12 @@ export interface ProcessedWaitForInputFilters {
   workflowId?: string[];
   respondedBy?: string[];
   sortOrder?: 'asc' | 'desc';
+}
+
+interface WaitForInputListOptions {
+  page?: number;
+  perPage?: number;
+  includeReasoning?: boolean;
 }
 
 /**
@@ -310,7 +323,7 @@ export class WorkflowExecutionQueryService {
    */
   async listWaitingForInputSteps(
     spaceId: string,
-    { page = 1, perPage = 100 }: { page?: number; perPage?: number } = {}
+    { page = 1, perPage = 100, includeReasoning = false }: WaitForInputListOptions = {}
   ): Promise<WaitForInputListResult> {
     const from = Math.max(0, (page - 1) * perPage);
     let response: estypes.SearchResponse<EsWorkflowStepExecution>;
@@ -372,7 +385,13 @@ export class WorkflowExecutionQueryService {
       )
     );
 
-    const aliveIds = await this.getAliveWorkflowIds(distinctWorkflowIds, spaceId);
+    // Resolve workflow deletion and optional predecessor reasoning in parallel.
+    const [aliveIds, reasoningByStepId] = await Promise.all([
+      this.getAliveWorkflowIds(distinctWorkflowIds, spaceId),
+      includeReasoning
+        ? this.resolvePredecessorReasoning(allResults, spaceId)
+        : Promise.resolve(new Map<string, Record<string, unknown>>()),
+    ]);
 
     if (aliveIds === null) {
       // Lookup itself failed (already logged). Fall back to unfiltered
@@ -380,7 +399,7 @@ export class WorkflowExecutionQueryService {
       return {
         results: allResults,
         total,
-        reasoningByStepId: await this.resolvePredecessorReasoning(allResults, spaceId),
+        reasoningByStepId,
         deletedWorkflowIds: new Set(),
       };
     }
@@ -395,7 +414,7 @@ export class WorkflowExecutionQueryService {
     return {
       results,
       total: Math.max(0, total - dropped),
-      reasoningByStepId: await this.resolvePredecessorReasoning(results, spaceId),
+      reasoningByStepId,
       // Pending drops orphans outright, so no surviving row is from a deleted parent.
       deletedWorkflowIds: new Set(),
     };
@@ -413,12 +432,13 @@ export class WorkflowExecutionQueryService {
     {
       page = 1,
       perPage = 25,
+      includeReasoning = false,
       q,
       channel,
       workflowId,
       respondedBy,
       sortOrder = 'desc',
-    }: { page?: number; perPage?: number } & ProcessedWaitForInputFilters = {}
+    }: WaitForInputListOptions & ProcessedWaitForInputFilters = {}
   ): Promise<WaitForInputListResult> {
     const from = Math.max(0, (page - 1) * perPage);
     const filterMust = buildHistoryFilterClauses({ channel, workflowId, respondedBy, q });
@@ -429,19 +449,7 @@ export class WorkflowExecutionQueryService {
         query: {
           bool: {
             must: [{ term: { spaceId } }, { term: { stepType: 'waitForInput' } }, ...filterMust],
-            // Include terminated rows and response claims that have not yet
-            // been resumed by Task Manager.
-            should: [
-              {
-                bool: {
-                  must: [
-                    { exists: { field: 'finishedAt' } },
-                    { terms: { status: ['completed', 'failed', 'cancelled'] } },
-                  ],
-                },
-              },
-              { exists: { field: 'hitl.respondedAt' } },
-            ],
+            should: PROCESSED_WAIT_FOR_INPUT_SHOULD,
             minimum_should_match: 1,
           },
         },
@@ -494,13 +502,19 @@ export class WorkflowExecutionQueryService {
       )
     );
 
-    const aliveIds = await this.getAliveWorkflowIds(distinctWorkflowIds, spaceId);
+    // Resolve workflow deletion and optional predecessor reasoning in parallel.
+    const [aliveIds, reasoningByStepId] = await Promise.all([
+      this.getAliveWorkflowIds(distinctWorkflowIds, spaceId),
+      includeReasoning
+        ? this.resolvePredecessorReasoning(allResults, spaceId)
+        : Promise.resolve(new Map<string, Record<string, unknown>>()),
+    ]);
 
     if (aliveIds === null) {
       return {
         results: allResults,
         total,
-        reasoningByStepId: await this.resolvePredecessorReasoning(allResults, spaceId),
+        reasoningByStepId,
         deletedWorkflowIds: new Set(),
       };
     }
@@ -511,7 +525,7 @@ export class WorkflowExecutionQueryService {
     return {
       results: allResults,
       total,
-      reasoningByStepId: await this.resolvePredecessorReasoning(allResults, spaceId),
+      reasoningByStepId,
       deletedWorkflowIds,
     };
   }
@@ -538,17 +552,7 @@ export class WorkflowExecutionQueryService {
         query: {
           bool: {
             must: [{ term: { spaceId } }, { term: { stepType: 'waitForInput' } }],
-            should: [
-              {
-                bool: {
-                  must: [
-                    { exists: { field: 'finishedAt' } },
-                    { terms: { status: ['completed', 'failed', 'cancelled'] } },
-                  ],
-                },
-              },
-              { exists: { field: 'hitl.respondedAt' } },
-            ],
+            should: PROCESSED_WAIT_FOR_INPUT_SHOULD,
             minimum_should_match: 1,
           },
         },
@@ -621,7 +625,9 @@ export class WorkflowExecutionQueryService {
           { workflowRunId: { order: 'asc' } },
           { finishedAt: { order: 'desc', missing: '_last' } },
         ],
-        _source: { includes: ['workflowRunId', 'finishedAt', 'output'] },
+        // Fetch only the reasoning sub-object, not the full (potentially
+        // large) step `output` blob — most predecessors carry no reasoning.
+        _source: { includes: ['workflowRunId', 'finishedAt', 'output.reasoning'] },
         size: PREDECESSOR_REASONING_MAX_HITS,
         track_total_hits: false,
       });
@@ -707,6 +713,43 @@ export class WorkflowExecutionQueryService {
     }
   }
 
+  /** Returns the claimable `waitForInput` step currently blocking the run. */
+  async getWaitingStepExecutionId(executionId: string, spaceId: string): Promise<string | null> {
+    try {
+      const response = await this.deps.esClient.search<EsWorkflowStepExecution>({
+        index: WORKFLOWS_STEP_EXECUTIONS_INDEX,
+        query: {
+          bool: {
+            must: [
+              { term: { workflowRunId: executionId } },
+              { term: { spaceId } },
+              { term: { stepType: 'waitForInput' } },
+              { term: { status: 'waiting_for_input' } },
+            ],
+            must_not: [
+              { exists: { field: 'finishedAt' } },
+              { exists: { field: 'hitl.respondedAt' } },
+            ],
+          },
+        },
+        _source: ['id'],
+        sort: [{ startedAt: { order: 'desc' } }],
+        size: 1,
+        track_total_hits: false,
+      });
+      const hit = response.hits.hits[0];
+      return hit?._source?.id ?? hit?._id ?? null;
+    } catch (error) {
+      if (isIndexNotFoundError(error)) {
+        return null;
+      }
+      this.deps.logger.warn(
+        `Failed to resolve the waiting step execution for ${executionId}: ${error}`
+      );
+      return null;
+    }
+  }
+
   async getStepExecution(
     params: GetStepExecutionParams,
     spaceId: string
@@ -734,8 +777,9 @@ export class WorkflowExecutionQueryService {
    * Claims a `waitForInput` step by writing HITL audit metadata before resume.
    *
    * Returns `true` when this caller won the claim, or `false` when the doc is
-   * missing, belongs to another space, or was already claimed. Unexpected ES
-   * failures are rethrown.
+   * missing, belongs to another space, has already settled (terminal status
+   * or `finishedAt` set), or was already claimed. Unexpected ES failures are
+   * rethrown.
    */
   async markStepAsResponded(
     stepExecutionId: string,
@@ -752,22 +796,21 @@ export class WorkflowExecutionQueryService {
         retry_on_conflict: 3,
         script: {
           source:
-            'if (ctx._source.spaceId != params.spaceId) { ctx.op = "noop"; }' +
-            'else {' +
-            '  if (ctx._source.hitl != null && ctx._source.hitl.respondedAt != null) { ctx.op = "noop"; }' +
-            '  else {' +
-            '    if (ctx._source.hitl == null) { ctx._source.hitl = [:]; }' +
-            '    ctx._source.hitl.respondedBy = params.respondedBy;' +
-            '    ctx._source.hitl.respondedAt = params.respondedAt;' +
-            '    ctx._source.hitl.channel = params.channel;' +
-            '  }' +
-            '}',
+            'if (ctx._source.spaceId != params.spaceId) { ctx.op = "noop"; return; }' +
+            'if (ctx._source.finishedAt != null) { ctx.op = "noop"; return; }' +
+            'if (ctx._source.status != null && params.settledStatuses.contains(ctx._source.status)) { ctx.op = "noop"; return; }' +
+            'if (ctx._source.hitl != null && ctx._source.hitl.respondedAt != null) { ctx.op = "noop"; return; }' +
+            'if (ctx._source.hitl == null) { ctx._source.hitl = [:]; }' +
+            'ctx._source.hitl.respondedBy = params.respondedBy;' +
+            'ctx._source.hitl.respondedAt = params.respondedAt;' +
+            'ctx._source.hitl.channel = params.channel;',
           lang: 'painless',
           params: {
             spaceId,
             respondedBy: audit.respondedBy,
             respondedAt: audit.respondedAt,
             channel: audit.channel,
+            settledStatuses: SETTLED_STEP_STATUSES,
           },
         },
         refresh: 'wait_for',
@@ -810,15 +853,13 @@ function buildHistoryFilterClauses({
     filterMust.push({ terms: { 'hitl.respondedBy': respondedBy } });
   }
   if (q && q.length > 0) {
-    // These fields are keywords, so substring search requires wildcards. The
-    // user input is escaped before it is wrapped in our own wildcard envelope.
-    const escaped = escapeWildcardOperators(q);
+    // Avoid leading-wildcard scans on keyword fields.
     filterMust.push({
       bool: {
         should: ['hitl.respondedBy', 'workflowId', 'stepId'].map((field) => ({
-          wildcard: {
+          prefix: {
             [field]: {
-              value: `*${escaped}*`,
+              value: q,
               case_insensitive: true,
             },
           },
@@ -828,16 +869,6 @@ function buildHistoryFilterClauses({
     });
   }
   return filterMust;
-}
-
-/**
- * Escape the two characters Elasticsearch interprets as wildcards (`*` and
- * `?`) so a literal `?` or `*` typed by the user is matched verbatim rather
- * than expanding inside our `*term*` envelope. The backslash itself is
- * doubled because ES wildcard syntax already uses `\` for escaping.
- */
-function escapeWildcardOperators(input: string): string {
-  return input.replace(/[\\*?]/g, (char) => `\\${char}`);
 }
 
 /**

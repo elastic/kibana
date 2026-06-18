@@ -59,8 +59,7 @@ export const registerListInboxActionsHistoryRoute = ({
           // providers then have to pre-validate.
           const trimmedQuery = q?.trim();
 
-          // Soft cap on multi-valued filters to keep ES `terms` clauses (and
-          // the eventual `wildcard` expansion) bounded. Anything beyond
+          // Soft cap on multi-valued filters to keep ES clauses bounded. Anything beyond
           // MAX_FILTER_VALUES_PER_DIMENSION is truncated rather than rejected
           // so a mistyped URL or an over-eager bookmark doesn't flip the route
           // to 400 and hide otherwise-valid filters.

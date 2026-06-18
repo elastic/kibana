@@ -530,9 +530,7 @@ describe('WorkflowExecutionQueryService', () => {
 
       const result = await service.listWaitingForInputSteps('default');
 
-      // 1) step-executions listing, 2) alive-workflow lookup, 3) predecessor
-      // reasoning lookup (resolved from the step before each `waitForInput`).
-      expect(mockEsClient.search).toHaveBeenCalledTimes(3);
+      expect(mockEsClient.search).toHaveBeenCalledTimes(2);
       const searchArgs = mockEsClient.search.mock.calls[0][0] as {
         index: string;
         query: {
@@ -563,18 +561,6 @@ describe('WorkflowExecutionQueryService', () => {
     });
 
     it('excludes step executions that already have finishedAt or hitl.respondedAt set', async () => {
-      // Regression #1: a race between the workflow-level timeout monitor
-      // and the waitForInput step could leave a doc with
-      // `status: waiting_for_input` AND `finishedAt` set (the step is
-      // actually terminal). Such docs must not resurface in the Inbox —
-      // responding to them is a no-op because the parent workflow
-      // execution is already finished.
-      //
-      // Regression #2: when a responder submits via Kibana / Slack /
-      // agent builder, the inbox provider stamps `hitl.respondedAt` on
-      // the step doc *before* Task Manager runs the resume. Pending must
-      // exclude these so the row drops the moment any client submits —
-      // history picks them up immediately as "Processing…".
       mockEsClient.search.mockResolvedValueOnce({
         hits: { hits: [], total: { value: 0 } },
       } as any);
@@ -632,11 +618,6 @@ describe('WorkflowExecutionQueryService', () => {
       );
     });
 
-    // Orphan-filtering regressions — soft-deleted workflows leave their step
-    // execution docs behind in `.workflows-step-executions` (see
-    // `workflow_deletion.ts` — only hard-deletes call deleteByQuery against
-    // that index). Without these the Inbox surfaces ghost actions for
-    // workflows the user has already removed from `/app/workflows`.
     describe('orphan filtering (soft-deleted parent workflows)', () => {
       it('drops step executions whose parent workflow is soft-deleted and adjusts total', async () => {
         mockEsClient.search.mockResolvedValueOnce({
@@ -691,9 +672,7 @@ describe('WorkflowExecutionQueryService', () => {
 
         await service.listWaitingForInputSteps('default');
 
-        // 1) step-executions listing, 2) alive-workflow lookup, 3) predecessor
-        // reasoning lookup (resolved from the step before each `waitForInput`).
-        expect(mockEsClient.search).toHaveBeenCalledTimes(3);
+        expect(mockEsClient.search).toHaveBeenCalledTimes(2);
         const lookupArgs = mockEsClient.search.mock.calls[1][0] as {
           index: string;
           _source: boolean;
@@ -772,10 +751,6 @@ describe('WorkflowExecutionQueryService', () => {
   });
 
   describe('listProcessedWaitForInputSteps', () => {
-    // Inbox history (audit-log) listing — terminated `waitForInput` step
-    // executions across all workflows in the space, sorted by `finishedAt`
-    // desc.  Pending-vs-processed parity is enforced here so a future
-    // refactor to the pending listing can't silently change history.
     const buildProcessedHit = (overrides: Record<string, unknown> = {}) => ({
       _id: 'doc-1',
       _source: {
@@ -808,14 +783,6 @@ describe('WorkflowExecutionQueryService', () => {
     };
 
     it('matches either terminated steps or audit-stamped (responded but not yet resumed) steps', async () => {
-      // Two source-of-truth windows feed the audit feed:
-      //   1. Fully terminated rows: `finishedAt` set, status ∈
-      //      `completed | failed | cancelled`.
-      //   2. Audit-stamped rows from `markStepAsResponded`:
-      //      `hitl.respondedAt` set, status still `waiting_for_input`
-      //      (Task Manager hasn't run the resume yet).  This window is
-      //      what makes the inbox multi-client safe — every client sees
-      //      the response land regardless of which Task Manager polls first.
       mockEsClient.search.mockResolvedValueOnce({
         hits: { hits: [buildProcessedHit()], total: { value: 1 } },
       } as any);
@@ -823,9 +790,7 @@ describe('WorkflowExecutionQueryService', () => {
 
       const result = await service.listProcessedWaitForInputSteps('default');
 
-      // 1) processed-step listing, 2) alive-workflow lookup, 3) predecessor
-      // reasoning lookup (resolved from the step before each `waitForInput`).
-      expect(mockEsClient.search).toHaveBeenCalledTimes(3);
+      expect(mockEsClient.search).toHaveBeenCalledTimes(2);
       const searchArgs = mockEsClient.search.mock.calls[0][0] as {
         index: string;
         query: {
@@ -845,14 +810,7 @@ describe('WorkflowExecutionQueryService', () => {
         ])
       );
       expect(searchArgs.query.bool.should).toEqual([
-        {
-          bool: {
-            must: [
-              { exists: { field: 'finishedAt' } },
-              { terms: { status: ['completed', 'failed', 'cancelled'] } },
-            ],
-          },
-        },
+        { exists: { field: 'finishedAt' } },
         { exists: { field: 'hitl.respondedAt' } },
       ]);
       expect(searchArgs.query.bool.minimum_should_match).toBe(1);
@@ -862,6 +820,28 @@ describe('WorkflowExecutionQueryService', () => {
       ]);
       expect(result.total).toBe(1);
       expect(result.results).toHaveLength(1);
+    });
+
+    it('keeps settled waiting_for_input rows with finishedAt in processed history', async () => {
+      mockEsClient.search.mockResolvedValueOnce({
+        hits: {
+          hits: [
+            buildProcessedHit({
+              id: 'settled-wait',
+              status: 'waiting_for_input',
+              hitl: undefined,
+              output: undefined,
+            }),
+          ],
+          total: { value: 1 },
+        },
+      } as any);
+      mockAliveWorkflowsLookup(['wf-1']);
+
+      const result = await service.listProcessedWaitForInputSteps('default');
+
+      expect(result.results.map((r) => r.id)).toEqual(['settled-wait']);
+      expect(result.total).toBe(1);
     });
 
     it('paginates via from/size derived from page/perPage', async () => {
@@ -907,10 +887,6 @@ describe('WorkflowExecutionQueryService', () => {
     });
 
     it('retains history rows for deleted parent workflows and flags them via deletedWorkflowIds', async () => {
-      // The audit trail must survive workflow deletion — unlike the pending
-      // listing, processed rows are NOT dropped when their parent is gone.
-      // They're kept (total unchanged) and the deleted parent ids are
-      // reported so the provider/UI can tag them.
       mockEsClient.search.mockResolvedValueOnce({
         hits: {
           hits: [
@@ -949,9 +925,6 @@ describe('WorkflowExecutionQueryService', () => {
     });
 
     describe('history filters & sort', () => {
-      // Empty-results path short-circuits before the alive-workflow and
-      // predecessor-reasoning lookups, so a single mocked listing call is
-      // enough to inspect the query the filters produced.
       const mockEmptyListing = () => {
         mockEsClient.search.mockResolvedValueOnce({
           hits: { hits: [], total: { value: 0 } },
@@ -985,20 +958,18 @@ describe('WorkflowExecutionQueryService', () => {
         expect(must).toContainEqual({ terms: { 'hitl.respondedBy': ['alice'] } });
       });
 
-      it('translates free-text `q` into a case-insensitive wildcard OR with metacharacters escaped', async () => {
+      it('translates free-text `q` into a case-insensitive prefix OR across the keyword fields', async () => {
         mockEmptyListing();
 
-        // The `*` is a literal the user typed — it must be escaped so it
-        // can't expand inside our `*term*` envelope.
         await service.listProcessedWaitForInputSteps('default', { q: 'ali*ce' });
 
         const must = (mockEsClient.search.mock.calls[0][0] as any).query.bool.must;
-        const qClause = must.find((clause: any) => clause.bool?.should?.[0]?.wildcard);
+        const qClause = must.find((clause: any) => clause.bool?.should?.[0]?.prefix);
         expect(qClause.bool.minimum_should_match).toBe(1);
         expect(qClause.bool.should).toEqual([
-          { wildcard: { 'hitl.respondedBy': { value: '*ali\\*ce*', case_insensitive: true } } },
-          { wildcard: { workflowId: { value: '*ali\\*ce*', case_insensitive: true } } },
-          { wildcard: { stepId: { value: '*ali\\*ce*', case_insensitive: true } } },
+          { prefix: { 'hitl.respondedBy': { value: 'ali*ce', case_insensitive: true } } },
+          { prefix: { workflowId: { value: 'ali*ce', case_insensitive: true } } },
+          { prefix: { stepId: { value: 'ali*ce', case_insensitive: true } } },
         ]);
       });
 
@@ -1016,10 +987,6 @@ describe('WorkflowExecutionQueryService', () => {
     });
 
     describe('predecessor reasoning resolution', () => {
-      // Reasoning is resolved from the most-recent completed step that
-      // finished at/before the wait step started — the work the workflow did
-      // right before pausing. The lookup is a third ES search after the
-      // listing + alive-workflow lookup.
       const mockListingWithWaitStep = (overrides: Record<string, unknown> = {}) => {
         mockEsClient.search.mockResolvedValueOnce({
           hits: {
@@ -1038,7 +1005,16 @@ describe('WorkflowExecutionQueryService', () => {
         mockAliveWorkflowsLookup(['wf-1']);
       };
 
-      it('surfaces the reasoning blob from the immediate predecessor step', async () => {
+      it('skips predecessor reasoning unless explicitly requested', async () => {
+        mockListingWithWaitStep();
+
+        const result = await service.listProcessedWaitForInputSteps('default');
+
+        expect(mockEsClient.search).toHaveBeenCalledTimes(2);
+        expect(result.reasoningByStepId.size).toBe(0);
+      });
+
+      it('surfaces the reasoning blob from the immediate predecessor step when requested', async () => {
         mockListingWithWaitStep();
         mockEsClient.search.mockResolvedValueOnce({
           hits: {
@@ -1061,8 +1037,25 @@ describe('WorkflowExecutionQueryService', () => {
           },
         } as any);
 
-        const result = await service.listProcessedWaitForInputSteps('default');
+        const result = await service.listProcessedWaitForInputSteps('default', {
+          includeReasoning: true,
+        });
 
+        const reasoningArgs = mockEsClient.search.mock.calls[2][0] as any;
+        expect(reasoningArgs).toMatchObject({
+          index: WORKFLOWS_STEP_EXECUTIONS_INDEX,
+          _source: { includes: ['workflowRunId', 'finishedAt', 'output.reasoning'] },
+          size: 1000,
+          track_total_hits: false,
+        });
+        expect(reasoningArgs.query.bool.must).toEqual(
+          expect.arrayContaining([
+            { term: { spaceId: 'default' } },
+            { terms: { workflowRunId: ['run-1'] } },
+            { term: { status: 'completed' } },
+            { range: { finishedAt: { lte: '2026-04-28T15:00:00.000Z' } } },
+          ])
+        );
         expect(result.reasoningByStepId.get('wait-1')).toEqual({ summary: 'did the thing' });
       });
 
@@ -1082,7 +1075,9 @@ describe('WorkflowExecutionQueryService', () => {
           },
         } as any);
 
-        const result = await service.listProcessedWaitForInputSteps('default');
+        const result = await service.listProcessedWaitForInputSteps('default', {
+          includeReasoning: true,
+        });
 
         expect(result.reasoningByStepId.has('wait-1')).toBe(false);
       });
@@ -1103,7 +1098,9 @@ describe('WorkflowExecutionQueryService', () => {
           },
         } as any);
 
-        const result = await service.listProcessedWaitForInputSteps('default');
+        const result = await service.listProcessedWaitForInputSteps('default', {
+          includeReasoning: true,
+        });
 
         expect(result.reasoningByStepId.size).toBe(0);
       });
@@ -1112,7 +1109,9 @@ describe('WorkflowExecutionQueryService', () => {
         mockListingWithWaitStep();
         mockEsClient.search.mockRejectedValueOnce(new Error('predecessor boom'));
 
-        const result = await service.listProcessedWaitForInputSteps('default');
+        const result = await service.listProcessedWaitForInputSteps('default', {
+          includeReasoning: true,
+        });
 
         expect(result.results.map((r) => r.id)).toEqual(['wait-1']);
         expect(result.reasoningByStepId.size).toBe(0);
@@ -1143,22 +1142,12 @@ describe('WorkflowExecutionQueryService', () => {
       const args = mockEsClient.search.mock.calls[0][0] as any;
       expect(args.index).toBe(WORKFLOWS_STEP_EXECUTIONS_INDEX);
       expect(args.size).toBe(0);
-      // Same baseline as the listing — but deliberately without the
-      // channel/workflow/responder/q clauses so the dropdown options stay
-      // stable as the user toggles other filters.
       expect(args.query.bool.must).toEqual([
         { term: { spaceId: 'default' } },
         { term: { stepType: 'waitForInput' } },
       ]);
       expect(args.query.bool.should).toEqual([
-        {
-          bool: {
-            must: [
-              { exists: { field: 'finishedAt' } },
-              { terms: { status: ['completed', 'failed', 'cancelled'] } },
-            ],
-          },
-        },
+        { exists: { field: 'finishedAt' } },
         { exists: { field: 'hitl.respondedAt' } },
       ]);
       expect(args.query.bool.minimum_should_match).toBe(1);
@@ -1248,12 +1237,65 @@ describe('WorkflowExecutionQueryService', () => {
     });
   });
 
+  describe('getWaitingStepExecutionId', () => {
+    it('resolves the only claimable waitForInput step for the run', async () => {
+      mockEsClient.search.mockResolvedValueOnce({
+        hits: { hits: [{ _id: 'step-exec-7', _source: { id: 'step-exec-7' } }] },
+      } as any);
+
+      const id = await service.getWaitingStepExecutionId('run-1', 'default');
+
+      expect(id).toBe('step-exec-7');
+      const args = mockEsClient.search.mock.calls[0][0] as {
+        index: string;
+        size: number;
+        query: {
+          bool: {
+            must: Array<Record<string, unknown>>;
+            must_not: Array<Record<string, unknown>>;
+          };
+        };
+      };
+      expect(args.index).toBe(WORKFLOWS_STEP_EXECUTIONS_INDEX);
+      expect(args.size).toBe(1);
+      expect(args.query.bool.must).toEqual(
+        expect.arrayContaining([
+          { term: { workflowRunId: 'run-1' } },
+          { term: { spaceId: 'default' } },
+          { term: { stepType: 'waitForInput' } },
+          { term: { status: 'waiting_for_input' } },
+        ])
+      );
+      expect(args.query.bool.must_not).toEqual(
+        expect.arrayContaining([
+          { exists: { field: 'finishedAt' } },
+          { exists: { field: 'hitl.respondedAt' } },
+        ])
+      );
+    });
+
+    it('returns null when no claimable step is found', async () => {
+      mockEsClient.search.mockResolvedValueOnce({ hits: { hits: [] } } as any);
+
+      expect(await service.getWaitingStepExecutionId('run-1', 'default')).toBeNull();
+    });
+
+    it('returns null (not throws) when the step-executions index does not exist yet', async () => {
+      mockEsClient.search.mockRejectedValueOnce(
+        new errors.ResponseError({
+          statusCode: 404,
+          body: { error: { type: 'index_not_found_exception' } },
+          headers: {},
+          meta: {} as any,
+          warnings: [],
+        })
+      );
+
+      expect(await service.getWaitingStepExecutionId('run-1', 'default')).toBeNull();
+    });
+  });
+
   describe('markStepAsResponded', () => {
-    // Synchronous audit-stamp on the step doc — the bridge that lets
-    // every client (Kibana inbox, Slack, agent builder, raw API) see
-    // "responded but not yet resumed" without per-client overlay state.
-    // Surgical extension of the workflow-execution-level audit fields
-    // tracked in [kibana#256603](https://github.com/elastic/kibana/pull/256603).
     const audit = {
       respondedBy: 'alice',
       respondedAt: '2026-04-29T10:00:00.000Z',
@@ -1261,11 +1303,6 @@ describe('WorkflowExecutionQueryService', () => {
     };
 
     it('issues a scripted partial update guarded on spaceId with refresh: wait_for', async () => {
-      // refresh=wait_for is what makes the immediate refetch on the
-      // inbox client (after the respond mutation settles) see the
-      // audit fields. spaceId guard is defence-in-depth: a misrouted
-      // call cannot stamp a doc in another space, even though the
-      // caller has already verified ownership.
       (mockEsClient.update as jest.Mock).mockResolvedValueOnce({ result: 'updated' });
 
       const ok = await service.markStepAsResponded('step-exec-1', audit, 'default');
@@ -1281,17 +1318,26 @@ describe('WorkflowExecutionQueryService', () => {
       expect(args.index).toBe(WORKFLOWS_STEP_EXECUTIONS_INDEX);
       expect(args.id).toBe('step-exec-1');
       expect(args.refresh).toBe('wait_for');
-      // Simultaneous responders read the same _seq_no; retry_on_conflict lets
-      // ES re-run the script against the now-stamped doc so the loser noops
-      // (→ clean 409) instead of throwing a raw version conflict (→ 500).
       expect(args.retry_on_conflict).toBeGreaterThan(0);
       expect(args.script.lang).toBe('painless');
       expect(args.script.source).toContain('ctx._source.spaceId != params.spaceId');
+      expect(args.script.source).toContain('ctx._source.finishedAt != null');
+      expect(args.script.source).toContain('params.settledStatuses.contains(ctx._source.status)');
       expect(args.script.source).toContain('ctx._source.hitl.respondedAt != null');
       expect(args.script.source).toContain('ctx._source.hitl.respondedBy = params.respondedBy');
       expect(args.script.source).toContain('ctx._source.hitl.respondedAt = params.respondedAt');
       expect(args.script.source).toContain('ctx._source.hitl.channel = params.channel');
-      expect(args.script.params).toEqual({ spaceId: 'default', ...audit });
+      expect(args.script.params).toEqual({
+        spaceId: 'default',
+        ...audit,
+        settledStatuses: expect.arrayContaining([
+          'completed',
+          'failed',
+          'cancelled',
+          'timed_out',
+          'skipped',
+        ]),
+      });
     });
 
     it('returns false when the scripted update no-ops', async () => {
@@ -1306,10 +1352,6 @@ describe('WorkflowExecutionQueryService', () => {
     });
 
     it('returns false (not throws) when the step doc is gone', async () => {
-      // Concurrent termination — e.g. the workflow timeout monitor flipped
-      // the step status between the pre-respond freshness check and the
-      // audit write. The provider treats this as a soft no-op and returns
-      // a conflict before scheduling the resume.
       (mockEsClient.update as jest.Mock).mockRejectedValueOnce(
         new errors.ResponseError({
           statusCode: 404,
