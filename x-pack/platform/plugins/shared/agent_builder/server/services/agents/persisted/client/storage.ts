@@ -12,6 +12,7 @@ import type {
   AgentAcl,
   AgentType,
   AgentVisibility,
+  ConnectorRestriction,
   ToolSelection,
 } from '@kbn/agent-builder-common';
 import { chatSystemIndex } from '@kbn/agent-builder-server';
@@ -51,6 +52,12 @@ const storageSettings = {
           plugin_ids: types.keyword({}),
           skill_ids: types.keyword({}),
           connector_ids: types.keyword({}),
+          connector_restrictions: types.nested({
+            properties: {
+              connector_id: types.keyword({}),
+              allowed_sub_actions: types.keyword({}),
+            },
+          }),
         },
         dynamic: false,
       }),
@@ -88,6 +95,7 @@ export interface AgentConfigurationProperties {
   workflow_ids?: string[];
   plugin_ids?: string[];
   connector_ids?: string[];
+  connector_restrictions?: ConnectorRestriction[];
 }
 
 export type AgentProfileStorageSettings = typeof storageSettings;

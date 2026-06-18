@@ -71,6 +71,42 @@ const CONNECTORS_SCHEMA = schema.arrayOf(
   }
 );
 
+const CONNECTOR_RESTRICTIONS_SCHEMA = schema.arrayOf(
+  schema.object(
+    {
+      connector_id: schema.string({
+        meta: { description: 'The saved connector ID to restrict.' },
+      }),
+      allowed_sub_actions: schema.maybe(
+        schema.arrayOf(
+          schema.string({
+            meta: { description: 'Sub-action name the agent is allowed to call.' },
+          }),
+          {
+            meta: {
+              description:
+                'Subset of sub-actions the agent may call on this connector. When absent, all sub-actions marked as tools in the connector spec are allowed.',
+            },
+          }
+        )
+      ),
+    },
+    {
+      meta: {
+        description:
+          'Per-connector restriction entry. Connectors not listed here cannot be called via execute_connector_sub_action.',
+      },
+    }
+  ),
+  {
+    maxSize: 100,
+    meta: {
+      description:
+        'Optional per-connector sub-action restrictions. When set, the agent may only call connectors listed here, and only the specified sub-actions.',
+    },
+  }
+);
+
 export function registerAgentRoutes({
   router,
   getInternalServices,
@@ -252,6 +288,7 @@ export function registerAgentRoutes({
                   ),
                   plugin_ids: schema.maybe(PLUGINS_SCHEMA),
                   connector_ids: schema.maybe(CONNECTORS_SCHEMA),
+                  connector_restrictions: schema.maybe(CONNECTOR_RESTRICTIONS_SCHEMA),
                 },
                 {
                   meta: { description: 'Configuration settings for the agent.' },
@@ -396,6 +433,7 @@ export function registerAgentRoutes({
                     ),
                     plugin_ids: schema.maybe(PLUGINS_SCHEMA),
                     connector_ids: schema.maybe(CONNECTORS_SCHEMA),
+                    connector_restrictions: schema.maybe(CONNECTOR_RESTRICTIONS_SCHEMA),
                   },
                   {
                     meta: { description: 'Updated configuration settings for the agent.' },

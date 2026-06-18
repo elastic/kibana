@@ -14,6 +14,7 @@ export {
   type RuntimeAgentConfigurationOverrides,
   type AgentResearchStepConfiguration,
   type AgentAnswerStepConfiguration,
+  type ConnectorRestriction,
 } from './definition';
 export { VISIBILITY_ICON, VISIBILITY_BADGE_COLOR, AgentVisibility } from './visibility';
 export {

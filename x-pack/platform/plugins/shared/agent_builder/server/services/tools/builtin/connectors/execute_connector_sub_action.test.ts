@@ -347,6 +347,87 @@ describe('createExecuteConnectorSubActionTool', () => {
     });
   });
 
+  describe('connector_restrictions enforcement', () => {
+    const buildContext = (restrictions: Array<{ connector_id: string; allowed_sub_actions?: string[] }>) =>
+      ({
+        ...mockContext,
+        agentConfiguration: {
+          tools: [],
+          connector_restrictions: restrictions,
+        },
+      } as unknown as ToolHandlerContext);
+
+    it('blocks a connector not listed in restrictions', async () => {
+      const tool = createExecuteConnectorSubActionTool({ getActions });
+      const result = await tool.handler(
+        { connectorId: 'conn-123', subAction: 'searchMessages', params: {} },
+        buildContext([{ connector_id: 'other-connector' }])
+      );
+
+      expect((result as ToolHandlerStandardReturn).results).toHaveLength(1);
+      expect((result as ToolHandlerStandardReturn).results[0].type).toBe(ToolResultType.error);
+      expect(
+        ((result as ToolHandlerStandardReturn).results[0] as ErrorResult).data.message
+      ).toContain("'conn-123' is not permitted");
+      expect(mockExecute).not.toHaveBeenCalled();
+    });
+
+    it('blocks a sub-action not in allowed_sub_actions', async () => {
+      const tool = createExecuteConnectorSubActionTool({ getActions });
+      const result = await tool.handler(
+        { connectorId: 'conn-123', subAction: 'sendMessage', params: {} },
+        buildContext([{ connector_id: 'conn-123', allowed_sub_actions: ['searchMessages', 'listChannels'] }])
+      );
+
+      expect((result as ToolHandlerStandardReturn).results).toHaveLength(1);
+      expect((result as ToolHandlerStandardReturn).results[0].type).toBe(ToolResultType.error);
+      const msg = ((result as ToolHandlerStandardReturn).results[0] as ErrorResult).data.message;
+      expect(msg).toContain("'sendMessage' is not permitted");
+      expect(msg).toContain('searchMessages');
+      expect(msg).toContain('listChannels');
+      expect(mockExecute).not.toHaveBeenCalled();
+    });
+
+    it('allows a sub-action present in allowed_sub_actions', async () => {
+      mockExecute.mockResolvedValue({ status: 'ok', data: { ok: true } });
+
+      const tool = createExecuteConnectorSubActionTool({ getActions });
+      const result = await tool.handler(
+        { connectorId: 'conn-123', subAction: 'searchMessages', params: {} },
+        buildContext([{ connector_id: 'conn-123', allowed_sub_actions: ['searchMessages'] }])
+      );
+
+      expect(mockExecute).toHaveBeenCalled();
+      expect((result as ToolHandlerStandardReturn).results[0].type).toBe(ToolResultType.other);
+    });
+
+    it('allows all isTool sub-actions when allowed_sub_actions is absent', async () => {
+      mockExecute.mockResolvedValue({ status: 'ok', data: { ok: true } });
+
+      const tool = createExecuteConnectorSubActionTool({ getActions });
+      const result = await tool.handler(
+        { connectorId: 'conn-123', subAction: 'sendMessage', params: {} },
+        buildContext([{ connector_id: 'conn-123' }])
+      );
+
+      expect(mockExecute).toHaveBeenCalled();
+      expect((result as ToolHandlerStandardReturn).results[0].type).toBe(ToolResultType.other);
+    });
+
+    it('applies no restrictions when connector_restrictions is absent', async () => {
+      mockExecute.mockResolvedValue({ status: 'ok', data: { ok: true } });
+
+      const tool = createExecuteConnectorSubActionTool({ getActions });
+      const result = await tool.handler(
+        { connectorId: 'conn-123', subAction: 'sendMessage', params: {} },
+        mockContext
+      );
+
+      expect(mockExecute).toHaveBeenCalled();
+      expect((result as ToolHandlerStandardReturn).results[0].type).toBe(ToolResultType.other);
+    });
+  });
+
   describe('connector authorization (HITL prompt)', () => {
     const expectedPromptId = `tools.${platformCoreTools.executeConnectorSubAction}.authorization.conn-123`;
 

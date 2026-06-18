@@ -131,6 +131,18 @@ export interface AgentConfiguration {
   connector_ids?: string[];
 
   /**
+   * Optional per-connector sub-action restrictions for this agent.
+   * When set, the `execute_connector_sub_action` tool enforces these restrictions at call time:
+   * - A connector not listed here cannot be called at all.
+   * - For a listed connector, only the sub-actions in `allowed_sub_actions` may be called.
+   *   If `allowed_sub_actions` is absent for an entry, all sub-actions that are marked
+   *   `isTool: true` in the connector spec remain accessible.
+   * When the field itself is absent, no extra restrictions apply beyond the connector spec's
+   * own `isTool` flag.
+   */
+  connector_restrictions?: ConnectorRestriction[];
+
+  /**
    * Custom configuration for the research step of the agent.
    */
   research?: AgentResearchStepConfiguration;
@@ -139,6 +151,21 @@ export interface AgentConfiguration {
    * Custom configuration for the answer step of the agent.
    */
   answer?: AgentAnswerStepConfiguration;
+}
+
+/**
+ * Per-connector restriction entry used in {@link AgentConfiguration.connector_restrictions}.
+ */
+export interface ConnectorRestriction {
+  /**
+   * The saved connector ID to restrict.
+   */
+  connector_id: string;
+  /**
+   * Subset of sub-actions the agent may call on this connector.
+   * When absent, all sub-actions marked `isTool: true` in the connector spec are allowed.
+   */
+  allowed_sub_actions?: string[];
 }
 
 export interface AgentResearchStepConfiguration {

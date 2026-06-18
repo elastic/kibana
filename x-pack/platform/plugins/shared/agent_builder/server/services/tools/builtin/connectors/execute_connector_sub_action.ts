@@ -129,6 +129,37 @@ export const createExecuteConnectorSubActionTool = ({
       };
     }
 
+    // Enforce per-connector sub-action restrictions from the agent configuration
+    const restrictions = context.agentConfiguration?.connector_restrictions;
+    if (restrictions !== undefined) {
+      const entry = restrictions.find((r) => r.connector_id === connectorId);
+      if (!entry) {
+        return {
+          results: [
+            createErrorResult({
+              message: `Connector '${connectorId}' is not permitted for this agent.`,
+              metadata: { connectorId, subAction },
+            }),
+          ],
+        };
+      }
+      if (
+        entry.allowed_sub_actions !== undefined &&
+        !entry.allowed_sub_actions.includes(subAction)
+      ) {
+        return {
+          results: [
+            createErrorResult({
+              message:
+                `Sub-action '${subAction}' is not permitted on connector '${connectorId}' for this agent. ` +
+                `Allowed sub-actions: ${entry.allowed_sub_actions.join(', ')}.`,
+              metadata: { connectorId, subAction, allowedSubActions: entry.allowed_sub_actions },
+            }),
+          ],
+        };
+      }
+    }
+
     const resolveAuthorizationResult = ({
       authMethod,
       connectorName,
