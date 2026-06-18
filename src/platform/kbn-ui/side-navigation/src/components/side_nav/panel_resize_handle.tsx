@@ -8,18 +8,40 @@
  */
 
 import type { FC, KeyboardEvent, MouseEvent, TouchEvent } from 'react';
-import React, { useCallback, useRef } from 'react';
+import React, { useCallback, useRef, useState } from 'react';
 import { EuiResizableButton } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 
-import { MIN_SIDE_PANEL_WIDTH } from '../../utils/side_panel_width_utils';
+import {
+  getSidePanelDragIndicatorState,
+  MIN_SIDE_PANEL_WIDTH,
+  type SidePanelDragIndicatorState,
+} from '../../utils/side_panel_width_utils';
+import { SidePanelResizeIndicator } from './panel_resize_indicator';
 
 const resizeButtonStyles = css`
   flex-shrink: 0;
 `;
 
+const resizeButtonDraggingStyles = css`
+  &::before,
+  &::after {
+    opacity: 0;
+  }
+
+  &:focus,
+  &:active {
+    background-color: transparent;
+  }
+`;
+
 const KEYBOARD_RESIZE_STEP = 10;
+
+interface DragIndicatorBounds extends SidePanelDragIndicatorState {
+  top: number;
+  height: number;
+}
 
 export interface SidePanelResizeHandleProps {
   width: number;
@@ -48,25 +70,61 @@ export const SidePanelResizeHandle: FC<SidePanelResizeHandleProps> = ({
   const startXRef = useRef<number>(0);
   const startWidthRef = useRef<number>(0);
   const lastRawWidthRef = useRef<number>(width);
+  const dragBoundsRef = useRef<{ top: number; height: number }>({ top: 0, height: 0 });
+  const [dragIndicator, setDragIndicator] = useState<DragIndicatorBounds | null>(null);
+
+  const clearDragIndicator = useCallback(() => {
+    setDragIndicator(null);
+  }, []);
+
+  const updateDragIndicator = useCallback((clientX: number, rawWidth: number) => {
+    const indicatorState = getSidePanelDragIndicatorState(
+      rawWidth,
+      startXRef.current,
+      startWidthRef.current,
+      clientX
+    );
+
+    setDragIndicator({
+      ...indicatorState,
+      top: dragBoundsRef.current.top,
+      height: dragBoundsRef.current.height,
+    });
+  }, []);
 
   const finishDrag = useCallback(() => {
     buttonRef.current?.blur();
+    clearDragIndicator();
     if (onDragWidthCommit(lastRawWidthRef.current)) {
       onCollapse();
     }
-  }, [onCollapse, onDragWidthCommit]);
+  }, [clearDragIndicator, onCollapse, onDragWidthCommit]);
+
+  const beginDrag = useCallback(
+    (clientX: number) => {
+      if (buttonRef.current) {
+        const { top, height } = buttonRef.current.getBoundingClientRect();
+        dragBoundsRef.current = { top, height };
+      }
+
+      startXRef.current = clientX;
+      startWidthRef.current = width;
+      lastRawWidthRef.current = width;
+      updateDragIndicator(clientX, width);
+    },
+    [updateDragIndicator, width]
+  );
 
   const handleMouseDown = useCallback(
     (e: MouseEvent) => {
-      startXRef.current = e.clientX;
-      startWidthRef.current = width;
-      lastRawWidthRef.current = width;
+      beginDrag(e.clientX);
 
       const handleMouseMove = (moveEvent: globalThis.MouseEvent) => {
         const delta = moveEvent.clientX - startXRef.current;
         const rawWidth = startWidthRef.current + delta;
         lastRawWidthRef.current = rawWidth;
         onDragWidthChange(rawWidth);
+        updateDragIndicator(moveEvent.clientX, rawWidth);
       };
 
       const handleMouseUp = () => {
@@ -78,15 +136,13 @@ export const SidePanelResizeHandle: FC<SidePanelResizeHandleProps> = ({
       document.addEventListener('mousemove', handleMouseMove);
       document.addEventListener('mouseup', handleMouseUp);
     },
-    [finishDrag, onDragWidthChange, width]
+    [beginDrag, finishDrag, onDragWidthChange, updateDragIndicator]
   );
 
   const handleTouchStart = useCallback(
     (e: TouchEvent) => {
       const touch = e.touches[0];
-      startXRef.current = touch.clientX;
-      startWidthRef.current = width;
-      lastRawWidthRef.current = width;
+      beginDrag(touch.clientX);
 
       const handleTouchMove = (moveEvent: globalThis.TouchEvent) => {
         const moveTouch = moveEvent.touches[0];
@@ -94,6 +150,7 @@ export const SidePanelResizeHandle: FC<SidePanelResizeHandleProps> = ({
         const rawWidth = startWidthRef.current + delta;
         lastRawWidthRef.current = rawWidth;
         onDragWidthChange(rawWidth);
+        updateDragIndicator(moveTouch.clientX, rawWidth);
       };
 
       const handleTouchEnd = () => {
@@ -105,7 +162,7 @@ export const SidePanelResizeHandle: FC<SidePanelResizeHandleProps> = ({
       document.addEventListener('touchmove', handleTouchMove);
       document.addEventListener('touchend', handleTouchEnd);
     },
-    [finishDrag, onDragWidthChange, width]
+    [beginDrag, finishDrag, onDragWidthChange, updateDragIndicator]
   );
 
   const handleKeyDown = useCallback(
@@ -129,19 +186,22 @@ export const SidePanelResizeHandle: FC<SidePanelResizeHandleProps> = ({
   );
 
   return (
-    <EuiResizableButton
-      ref={buttonRef}
-      css={resizeButtonStyles}
-      indicator="border"
-      isHorizontal
-      onMouseDown={handleMouseDown}
-      onTouchStart={handleTouchStart}
-      onKeyDown={handleKeyDown}
-      data-test-subj="secondaryNavResizeHandle"
-      aria-label={i18n.translate('kbnUI.sideNavigation.resizeSecondaryPanelAriaLabel', {
-        defaultMessage:
-          'Resize secondary navigation panel. Use left and right arrow keys to adjust width.',
-      })}
-    />
+    <>
+      <EuiResizableButton
+        ref={buttonRef}
+        css={[resizeButtonStyles, dragIndicator && resizeButtonDraggingStyles]}
+        indicator="border"
+        isHorizontal
+        onMouseDown={handleMouseDown}
+        onTouchStart={handleTouchStart}
+        onKeyDown={handleKeyDown}
+        data-test-subj="secondaryNavResizeHandle"
+        aria-label={i18n.translate('kbnUI.sideNavigation.resizeSecondaryPanelAriaLabel', {
+          defaultMessage:
+            'Resize secondary navigation panel. Use left and right arrow keys to adjust width.',
+        })}
+      />
+      {dragIndicator && <SidePanelResizeIndicator {...dragIndicator} />}
+    </>
   );
 };

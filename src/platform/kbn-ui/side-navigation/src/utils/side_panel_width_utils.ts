@@ -13,6 +13,12 @@ const MAX_SIDE_PANEL_WIDTH_PERCENT = 0.4;
 /** How far past the minimum (in px) a drag can go before collapsing on release. */
 export const SIDE_PANEL_COLLAPSE_DRAG_RANGE = 48;
 
+/** Maximum overscroll stretch (in px) shown on the resize indicator at min/max limits. */
+export const SIDE_PANEL_INDICATOR_STRETCH_MAX = 20;
+
+/** Default width of the resize indicator highlight band. */
+export const SIDE_PANEL_INDICATOR_BASE_WIDTH = 16;
+
 export const SIDE_PANEL_COLLAPSE_THRESHOLD =
   MIN_SIDE_PANEL_WIDTH - SIDE_PANEL_COLLAPSE_DRAG_RANGE;
 
@@ -29,6 +35,49 @@ export function clampSidePanelWidth(width: number): number {
 }
 
 export type SidePanelWidthResolution = { type: 'collapse' } | { type: 'width'; width: number };
+
+export interface SidePanelDragIndicatorState {
+  primaryX: number;
+  stretchLeft: number;
+  stretchRight: number;
+}
+
+/**
+ * Computes resize-indicator position during a drag. The primary line follows the cursor
+ * within valid bounds; at min/max limits it stays on the boundary while the background
+ * band stretches toward the cursor up to {@link SIDE_PANEL_INDICATOR_STRETCH_MAX}.
+ */
+export function getSidePanelDragIndicatorState(
+  rawWidth: number,
+  startX: number,
+  startWidth: number,
+  clientX: number
+): SidePanelDragIndicatorState {
+  const floored = Math.floor(rawWidth);
+  const max = getMaxSidePanelWidth();
+
+  if (floored < MIN_SIDE_PANEL_WIDTH) {
+    return {
+      primaryX: startX + (MIN_SIDE_PANEL_WIDTH - startWidth),
+      stretchLeft: Math.min(SIDE_PANEL_INDICATOR_STRETCH_MAX, MIN_SIDE_PANEL_WIDTH - floored),
+      stretchRight: 0,
+    };
+  }
+
+  if (floored > max) {
+    return {
+      primaryX: startX + (max - startWidth),
+      stretchLeft: 0,
+      stretchRight: Math.min(SIDE_PANEL_INDICATOR_STRETCH_MAX, floored - max),
+    };
+  }
+
+  return {
+    primaryX: clientX,
+    stretchLeft: 0,
+    stretchRight: 0,
+  };
+}
 
 /**
  * Returns the visible panel width during a drag. The panel never renders narrower than the
