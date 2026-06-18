@@ -67,6 +67,28 @@ describe('requestEarsToken', () => {
     );
   });
 
+  it('rejects with a catchable error (does not crash) when the configured EARS ssl files cannot be read', async () => {
+    // Simulates an invalid xpack.actions.auth.ears.ssl.certificate/key path:
+    // readFileSync throws inside getEARSSSLSettings when the request is built.
+    configurationUtilities.getEARSSSLSettings.mockImplementationOnce(() => {
+      throw new Error("ENOENT: no such file or directory, open '/bad/cert.pem'");
+    });
+
+    // The failure surfaces as a rejected promise the caller can catch (e.g. the
+    // OAuth callback route handler), rather than an uncaught throw that crashes Kibana.
+    await expect(
+      requestEarsToken(
+        'my-provider',
+        logger,
+        { code: 'auth-code', pkceVerifier: 'pkce-verifier' },
+        configurationUtilities
+      )
+    ).rejects.toThrow("ENOENT: no such file or directory, open '/bad/cert.pem'");
+
+    // The HTTP request is never attempted when the client certificate cannot be loaded.
+    expect(mockRequest).not.toHaveBeenCalled();
+  });
+
   it('returns a mapped token response on success', async () => {
     const result = await requestEarsToken(
       'my-provider',

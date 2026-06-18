@@ -547,6 +547,45 @@ describe('getEARSSSLSettings', () => {
     expect(sslSettings.key).toBeUndefined();
     expect(mockReadFileSync).not.toHaveBeenCalled();
   });
+
+  test('throws the underlying error when the EARS ssl.certificate file cannot be read', () => {
+    mockReadFileSync.mockImplementationOnce(() => {
+      throw new Error("ENOENT: no such file or directory, open '/path/to/missing-cert.pem'");
+    });
+
+    const sslConfigUtils = getActionsConfigurationUtilities(
+      configWithEarsSsl({
+        verificationMode: 'full',
+        certificate: '/path/to/missing-cert.pem',
+        key: '/path/to/key.pem',
+      })
+    );
+
+    expect(() => sslConfigUtils.getEARSSSLSettings()).toThrow(
+      "ENOENT: no such file or directory, open '/path/to/missing-cert.pem'"
+    );
+  });
+
+  test('throws the underlying error when the EARS ssl.key file cannot be read', () => {
+    mockReadFileSync
+      // certificate reads fine, key cannot be read
+      .mockReturnValueOnce(Buffer.from('cert-pem'))
+      .mockImplementationOnce(() => {
+        throw new Error("EACCES: permission denied, open '/path/to/key.pem'");
+      });
+
+    const sslConfigUtils = getActionsConfigurationUtilities(
+      configWithEarsSsl({
+        verificationMode: 'full',
+        certificate: '/path/to/cert.pem',
+        key: '/path/to/key.pem',
+      })
+    );
+
+    expect(() => sslConfigUtils.getEARSSSLSettings()).toThrow(
+      "EACCES: permission denied, open '/path/to/key.pem'"
+    );
+  });
 });
 
 const testEmailsOk = ['bob@elastic.co', 'jim@elastic.co'];
