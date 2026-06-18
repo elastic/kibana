@@ -126,7 +126,7 @@ describe('WorkflowChangeHistoryService', () => {
     const authService = {
       getCurrentUser: jest.fn().mockReturnValue({ username: 'alice', profile_uid: 'profile-1' }),
     };
-    service.initialize({
+    await service.initialize({
       elasticsearchClient: elasticsearchServiceMock.createElasticsearchClient(),
       authService: authService as any,
     });
