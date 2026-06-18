@@ -2216,11 +2216,11 @@
     },
     {
       "groupName": "mongodb",
-      "matchDepNames": ["mongodb", "@types/mongodb"],
+      "matchDepNames": ["mongodb"],
       "reviewers": ["team:response-ops"],
-      "addLabels": ["Team:ResponseOps", "release_note:skip", "backport:all-open", "effort:medium", "upgrade-risk:medium"],
+      "addLabels": ["Team:ResponseOps"],
       "matchBaseBranches": ["main"],
-      "minimumReleaseAge": "7 days",
+      "minimumReleaseAge": "14 days",
       "enabled": true
     },
     {

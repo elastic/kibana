@@ -146,10 +146,10 @@ export const MongoDBConnector: ConnectorSpec = {
         .describe('Default database name to use for all actions.')
         .meta({
           widget: 'text',
-          label: i18n.translate('connectorSpecs.mongodb.schema.database.label', {
+          label: i18n.translate('core.kibanaConnectorSpecs.mongodb.config.database.label', {
             defaultMessage: 'Database',
           }),
-          helpText: i18n.translate('connectorSpecs.mongodb.schema.database.helpText', {
+          helpText: i18n.translate('core.kibanaConnectorSpecs.mongodb.config.database.helpText', {
             defaultMessage: 'The name of the MongoDB database to query.',
           }),
           placeholder: 'my_database',
@@ -242,7 +242,7 @@ export const MongoDBConnector: ConnectorSpec = {
   },
 
   test: {
-    description: i18n.translate('connectorSpecs.mongodb.test.description', {
+    description: i18n.translate('core.kibanaConnectorSpecs.mongodb.test.description', {
       defaultMessage: 'Verifies the connection string is valid by pinging the MongoDB deployment.',
     }),
     handler: async (ctx) => {
