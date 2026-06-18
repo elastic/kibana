@@ -45,3 +45,10 @@ export const EBT_CLICK_ACTIONS = {
   /** User sets a breakdown field on a chart. */
   SET_BREAKDOWN: 'setBreakdown',
 } as const;
+
+/**
+ * Sentinel value for `data-ebt-detail` when a field is confirmed to be non-ECS.
+ * Signals to analysts that users are choosing custom or vendor-specific fields without
+ * revealing the field name. ECS fields send their name directly as the detail value.
+ */
+export const NON_ECS_FIELD_EBT_DETAIL = '<non-ecs>';
