@@ -7,6 +7,7 @@
 
 import { randomUUID } from 'crypto';
 import { tags, test as baseTest } from '@kbn/scout-security';
+import type { BrowserContext } from 'playwright/test';
 import type { EsClient, SecurityTestFixtures, SecurityWorkerFixtures } from '@kbn/scout-security';
 
 // ---------------------------------------------------------------------------
@@ -137,7 +138,7 @@ export interface CpsSpaceFixture {
 // ---------------------------------------------------------------------------
 
 export const test = baseTest.extend<
-  SecurityTestFixtures & { cpsSpace: CpsSpaceFixture; context: SecurityTestFixtures['context'] },
+  SecurityTestFixtures & { cpsSpace: CpsSpaceFixture; context: BrowserContext },
   SecurityWorkerFixtures & {
     cpsTestData: CpsTestDataFixture;
     graphCpsTestData: GraphCpsTestDataFixture;
