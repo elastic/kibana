@@ -104,11 +104,13 @@ The execution step will decide the specific Scout auth API to use; the plan just
 
 ### 8. Server configuration and feature flags
 
+**Prefer Scout's default servers config.** It mirrors the Elastic Cloud (MKI/ECH) setup and is batched with other default-config suites in CI, so tests that pass locally on it are likely to pass on Cloud. A custom server config set runs only in local pipelines (no Cloud) and adds CI cost — treat it as a last resort, used only when a setting must be present at Kibana boot (e.g. registering HTTP routes at plugin `setup`). See [Can your tests reuse Scout's default servers config?](../../../../docs/extend/scout/migrate-tests.md#dont-migrate-blindly).
+
 1. **List every server arg** from `kbnTestServer.serverArgs` and `esTestCluster.serverArgs` across all relevant configs (including inherited base configs)
 2. **Classify each arg**:
    - **Already in Scout's default server config**: no action needed
-   - **Runtime-settable** (can be changed via API/UI settings without restarting servers): note which API or setting key
-   - **Requires server config**: needs a custom Scout server config set. Check if a matching one already exists under `src/platform/packages/shared/kbn-scout/src/servers/configs/config_sets/`
+   - **Runtime-settable** (can be changed via API/UI settings without restarting servers): note which API or setting key. Most FTR server args land here — map them to `apiServices.core.settings()` runtime feature flags, the `uiSettings` fixture, or data ingestion rather than a custom config
+   - **Requires a custom server config set**: only when the arg must apply at Kibana boot. Check if a matching one already exists under `src/platform/packages/shared/kbn-scout/src/servers/configs/config_sets/`
 3. **Flag experimental feature flags** and note whether they're compile-time or runtime-settable
 
 ### 9. Deployment targets and Cloud portability
@@ -127,7 +129,7 @@ For each test group, answer all four:
    - Node topology assumptions (single-node, specific port)
    - Cluster settings unavailable on Elastic Cloud
    - Custom server args / feature flags set in FTR configs (these need to become runtime settings or move to a Scout server config set)
-4. **Custom servers config or default?** State whether the migrated tests can use Scout's default test servers config, or whether they need a [custom servers config](../../../../docs/extend/scout/feature-flags.md#scout-feature-flags-custom-servers). If custom, list which args force the choice and whether a matching config set already exists.
+4. **Custom servers config or default?** Default to Scout's default test servers config (see step 8 for why); only call for a [custom servers config](../../../../docs/extend/scout/feature-flags.md#scout-feature-flags-custom-servers) when a server arg must apply at Kibana boot. If custom, list which args force the choice and whether a matching config set already exists.
 
 ### 10. FTR test smells
 
