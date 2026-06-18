@@ -67,10 +67,7 @@ export function useCustomCards(
     history,
     `/cloudforwarder/${location.search}`
   );
-  const { href: awsCloudwatchOtelUrl } = reactRouterNavigate(
-    history,
-    `/cloudwatch${location.search}`
-  );
+  const { href: awsCloudwatchOtelUrl } = reactRouterNavigate(history, `/aws${location.search}`);
 
   const apmUrl = `${getUrlForApp?.('apm')}/${isServerless ? 'onboarding' : 'tutorial'}`;
   const otelApmUrl = isManagedOtlpServiceAvailable ? otelApmQuickstartUrl : apmUrl;

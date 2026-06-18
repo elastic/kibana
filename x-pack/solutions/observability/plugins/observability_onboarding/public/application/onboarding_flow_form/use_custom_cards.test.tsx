@@ -119,8 +119,6 @@ describe('useCustomCards', () => {
     expect(screen.getByTestId('card-icon-aws-cloudwatch-otel-virtual')).toHaveTextContent(
       'logoAWS'
     );
-    expect(screen.getByTestId('card-url-aws-cloudwatch-otel-virtual')).toHaveTextContent(
-      /^\/cloudwatch$/
-    );
+    expect(screen.getByTestId('card-url-aws-cloudwatch-otel-virtual')).toHaveTextContent(/^\/aws$/);
   });
 });

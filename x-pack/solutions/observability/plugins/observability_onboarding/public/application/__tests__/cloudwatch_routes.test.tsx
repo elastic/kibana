@@ -110,20 +110,14 @@ const renderFlow = (flagEnabled: boolean, path: string) => {
 };
 
 describe('CloudWatch routes', () => {
-  it('renders CloudwatchIntegrationRedirect at /cloudwatch', () => {
-    renderFlow(false, '/cloudwatch');
-    expect(screen.getByTestId('cloudwatchIntegrationRedirectStub')).toBeInTheDocument();
-    expect(screen.queryByTestId('landingPageStub')).toBeNull();
-  });
-
-  it('renders CloudwatchIntegrationRedirect at /cloudwatch when the add data page V2 flag is on', () => {
-    renderFlow(true, '/cloudwatch');
-    expect(screen.getByTestId('cloudwatchIntegrationRedirectStub')).toBeInTheDocument();
-    expect(screen.queryByTestId('landingPageStub')).toBeNull();
-  });
-
-  it('renders CloudwatchIntegrationRedirect at the /aws alias', () => {
+  it('renders CloudwatchIntegrationRedirect at /aws', () => {
     renderFlow(false, '/aws');
+    expect(screen.getByTestId('cloudwatchIntegrationRedirectStub')).toBeInTheDocument();
+    expect(screen.queryByTestId('landingPageStub')).toBeNull();
+  });
+
+  it('renders CloudwatchIntegrationRedirect at /aws when the add data page V2 flag is on', () => {
+    renderFlow(true, '/aws');
     expect(screen.getByTestId('cloudwatchIntegrationRedirectStub')).toBeInTheDocument();
     expect(screen.queryByTestId('landingPageStub')).toBeNull();
   });

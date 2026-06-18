@@ -92,9 +92,6 @@ export function ObservabilityOnboardingFlow() {
         <Route path="/otel-kubernetes">
           <OtelKubernetesPage />
         </Route>
-        <Route key="cloudwatch-redirect" exact path="/cloudwatch">
-          <CloudwatchIntegrationRedirect />
-        </Route>
         <Route key="aws-redirect" exact path="/aws">
           <CloudwatchIntegrationRedirect />
         </Route>
