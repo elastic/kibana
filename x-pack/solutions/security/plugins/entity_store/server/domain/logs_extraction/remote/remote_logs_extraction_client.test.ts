@@ -389,7 +389,8 @@ describe('RemoteLogsExtractionClient', () => {
   });
 
   it('should resume from slice-boundary recovery state (checkpointTimestamp set, paginationRecoveryId null)', async () => {
-    const sliceBoundaryTimestamp = '2024-06-15T10:00:00.000Z';
+    // Use a recent checkpoint (within 4.5h of FIXED_NOW) so the lag cutoff does not fire.
+    const sliceBoundaryTimestamp = '2026-01-01T10:00:00.000Z';
     mockStateClient.findOrInit.mockResolvedValue({
       checkpointTimestamp: sliceBoundaryTimestamp,
       paginationRecoveryId: null,
@@ -431,7 +432,8 @@ describe('RemoteLogsExtractionClient', () => {
   });
 
   it('should use checkpointTimestamp as fromDateISO on normal continuation', async () => {
-    const checkpoint = '2025-12-01T06:00:00.000Z';
+    // Use a recent checkpoint (within 4.5h of FIXED_NOW) so the lag cutoff does not fire.
+    const checkpoint = '2026-01-01T10:00:00.000Z';
     mockStateClient.findOrInit.mockResolvedValue({
       checkpointTimestamp: checkpoint,
       paginationRecoveryId: null,
