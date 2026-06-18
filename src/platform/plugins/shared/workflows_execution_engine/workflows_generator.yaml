@@ -68,24 +68,21 @@ steps:
                   alias_name: .workflows-executions
                   metrics_mapping:
                     - metric: 'workflowExecution.count'
-                      unit: 'date'
+                      unit: 'int'
                       expression: |
                         metricValue = 1;
                     - metric: 'workflowExecution.createdAt'
-                      unit: 'date'
-                      expression: |
-                        if (source.createdAt == null) { ctx.op = "noop"; return; }
-                        metricValue = ZonedDateTime.parse(source.createdAt).toInstant().toEpochMilli();
+                      unit: 'int'
+                      expression: metricValue = Instant.parse(createdAt).toEpochMilli();
 
                     - metric: 'workflowExecution.duration'
                       unit: 'int'
-                      expression: metricValue = source.duration;
+                      expression: metricValue = duration;
                   
-                    - metric: workflowExecution.queueTime
+                    - metric: 'workflowExecution.queueTime'
                       unit: int
                       expression: |
-                        if (source.createdAt == null || source.startedAt == null) { ctx.op = "noop"; return; }
-                        metricValue = ZonedDateTime.parse(source.createdAt).toInstant().toEpochMilli() - ZonedDateTime.parse(source.startedAt).toInstant().toEpochMilli();
+                        metricValue = Instant.parse(startedAt).toEpochMilli() - Instant.parse(createdAt).toEpochMilli();
               steps:
                 - name: get_backing_indexes_count
                   type: elasticsearch.request
@@ -99,7 +96,7 @@ steps:
                     method: POST
                     path: /{{consts.WORKFLOW_METRICS_COLLECTOR_INDEX}}/_doc
                     body:
-                      "@timestamp": "${{ 'now' | date: '%Y-%m-%dT%H:%M:%SZ' }}"
+                      "@timestamp": "${{ 'now' | date: '%Y-%m-%dT%H:%M:%S.%LZ', 'UTC' }}"
                       metric: '{{foreach.item.group}}.backing_indexes_count'
                       value: ${{steps.get_backing_indexes_count.output | entries | size}}
                       unit: int
@@ -116,10 +113,10 @@ steps:
                     method: POST
                     path: /{{consts.WORKFLOW_METRICS_COLLECTOR_INDEX}}/_doc
                     body:
-                      "@timestamp": "${{ 'now' | date: '%Y-%m-%dT%H:%M:%SZ' }}"
+                      "@timestamp": "${{ 'now' | date: '%Y-%m-%dT%H:%M:%S.%LZ', 'UTC' }}"
                       metric: '{{foreach.item.group}}.overall_size'
-                      value: '${{steps.get_alias_disk_size.output._all.total.store.size_in_bytes }}'
-                      unit: int
+                      value: '${{steps.get_alias_disk_size.output._all.total.store.size_in_bytes | divided_by: 1048576}}'
+                      unit: mb
                 
                 - name: async_reindex_duration_metrics
                   type: elasticsearch.request
@@ -159,10 +156,17 @@ steps:
                       script:
                         lang: painless
                         source: |
-                          def source = ctx._source;
-
-                          def metricValue;
+                          def spaceId = ctx._source.spaceId;
+                          def id = ctx._source.id;
+                          def finishedAt = ctx._source.finishedAt;
+                          def createdAt = ctx._source.createdAt;
+                          def startedAt = ctx._source.startedAt;
+                          def duration = ctx._source.duration;
                           def metricId = "{{foreach.item.metric}}_" + ctx._source.id;
+                          def metric = "{{foreach.item.metric}}";
+                          def unit = "{{foreach.item.unit}}";
+  
+                          def metricValue;
 
                           ctx._source.clear();
 
@@ -172,12 +176,12 @@ steps:
 
                           if (metricValue == null) { ctx.op = "noop"; return; }
 
-                          ctx._source.spaceId = source.spaceId;
-                          ctx._source.metric = "{{foreach.item.metric}}";
+                          ctx._source.spaceId = spaceId;
+                          ctx._source.metric = metric;
                           ctx._source.value = metricValue;
 
-                          ctx._source.unit = "{{foreach.item.unit}}";
-                          ctx._source['@timestamp'] = source.finishedAt;
+                          ctx._source.unit = unit;
+                          ctx._source['@timestamp'] = finishedAt;
                           ctx._source.id = metricId;
                           ctx._id = metricId;
           {% endraw %}
@@ -202,6 +206,9 @@ steps:
       body:
         title: Workflow metrics
         description: Collected workflow execution metrics from {{ consts.WORKFLOW_METRICS_COLLECTOR_INDEX }}
+        time_range:
+          from: now-1h
+          to: now
         panels:
           - grid:
               x: 0
@@ -228,7 +235,7 @@ steps:
                     operation: date_histogram
                     field: "@timestamp"
                     suggested_interval: 1m
-                    use_original_time_range: true
+                    use_original_time_range: false
                     include_empty_rows: true
                     drop_partial_intervals: false
                   y:
@@ -263,7 +270,7 @@ steps:
                     operation: date_histogram
                     field: "@timestamp"
                     suggested_interval: 1m
-                    use_original_time_range: true
+                    use_original_time_range: false
                     include_empty_rows: true
                     drop_partial_intervals: false
                   y:
@@ -298,16 +305,16 @@ steps:
                     operation: date_histogram
                     field: "@timestamp"
                     suggested_interval: 1m
-                    use_original_time_range: true
+                    use_original_time_range: false
                     include_empty_rows: true
                     drop_partial_intervals: false
                   y:
-                    - operation: average
+                    - operation: sum
                       field: value
               axis:
                 y:
                   title:
-                    text: Avg executions per minute
+                    text: Executions per minute
           - grid:
               x: 0
               y: 36
@@ -333,7 +340,7 @@ steps:
                     operation: date_histogram
                     field: "@timestamp"
                     suggested_interval: 1m
-                    use_original_time_range: true
+                    use_original_time_range: false
                     include_empty_rows: true
                     drop_partial_intervals: false
                   y:
@@ -368,16 +375,20 @@ steps:
                     operation: date_histogram
                     field: "@timestamp"
                     suggested_interval: 1m
-                    use_original_time_range: true
+                    use_original_time_range: false
                     include_empty_rows: true
                     drop_partial_intervals: false
                   y:
-                    - operation: average
+                    - operation: max
                       field: value
+                      format:
+                        type: number
+                        decimals: 2
+                        suffix: " MB"
               axis:
                 y:
                   title:
-                    text: Avg disk size (bytes)
+                    text: Max disk size (MB)
   - name: create_scheduled_workflows
     type: kibana.request
     foreach: ${{ (1..20) | json }}
