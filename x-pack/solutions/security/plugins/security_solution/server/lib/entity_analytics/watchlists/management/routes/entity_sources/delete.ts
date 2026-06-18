@@ -17,10 +17,8 @@ import { WatchlistDataSources } from '../../../../../../../common/api/entity_ana
 import type { EntityAnalyticsRoutesDeps } from '../../../../types';
 import { withMinimumLicense } from '../../../../utils/with_minimum_license';
 import { WatchlistConfigClient } from '../../watchlist_config';
-import {
-  WatchlistEntitySourceClient,
-  watchlistEntitySourceTypeName,
-} from '../../../entity_sources/infra';
+import { WatchlistEntitySourceClient } from '../../../entity_sources/infra';
+import { getWatchlistSavedObjectClient } from '../../../shared/utils';
 
 export const deleteEntitySourceRoute = (
   router: EntityAnalyticsRoutesDeps['router'],
@@ -53,9 +51,7 @@ export const deleteEntitySourceRoute = (
         try {
           const secSol = await context.securitySolution;
           const core = await context.core;
-          const soClient = core.savedObjects.getClient({
-            includedHiddenTypes: [watchlistEntitySourceTypeName],
-          });
+          const soClient = getWatchlistSavedObjectClient(core);
           const client = new WatchlistEntitySourceClient({
             soClient,
             namespace: secSol.getSpaceId(),

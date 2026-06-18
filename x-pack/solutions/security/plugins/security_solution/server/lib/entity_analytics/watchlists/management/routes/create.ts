@@ -17,11 +17,9 @@ import { WATCHLISTS_URL } from '../../../../../../common/entity_analytics/watchl
 import type { EntityAnalyticsRoutesDeps } from '../../../types';
 import { withMinimumLicense } from '../../../utils/with_minimum_license';
 import { WatchlistConfigClient } from '../watchlist_config';
-import {
-  WatchlistEntitySourceClient,
-  watchlistEntitySourceTypeName,
-} from '../../entity_sources/infra';
+import { WatchlistEntitySourceClient } from '../../entity_sources/infra';
 import { createEntitySourcesService } from '../../entity_sources/entity_sources_service';
+import { getWatchlistSavedObjectClient } from '../../shared/utils';
 import {
   buildWatchlistApiCallSuccessFields,
   reportWatchlistApiCallError,
@@ -61,9 +59,7 @@ export const createWatchlistRoute = (
             const secSol = await context.securitySolution;
             const core = await context.core;
             const namespace = secSol.getSpaceId();
-            const soClient = core.savedObjects.getClient({
-              includedHiddenTypes: [watchlistEntitySourceTypeName],
-            });
+            const soClient = getWatchlistSavedObjectClient(core);
 
             const watchlistClient = new WatchlistConfigClient({
               logger,

@@ -24,8 +24,8 @@ import {
   INTEGRATION_TYPES,
   integrationsSourceIndex,
   oktaLastFullSyncMarkersIndex,
-  watchlistEntitySourceTypeName,
 } from '../../../entity_sources/infra';
+import { getWatchlistSavedObjectClient } from '../../../shared/utils';
 import type { IntegrationType } from '../../../entity_sources/infra';
 
 export const createEntitySourceRoute = (
@@ -66,9 +66,7 @@ export const createEntitySourceRoute = (
             const secSol = await context.securitySolution;
             const core = await context.core;
             const namespace = secSol.getSpaceId();
-            const soClient = core.savedObjects.getClient({
-              includedHiddenTypes: [watchlistEntitySourceTypeName],
-            });
+            const soClient = getWatchlistSavedObjectClient(core);
             const client = new WatchlistEntitySourceClient({
               soClient,
               namespace,
