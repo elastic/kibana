@@ -43,6 +43,17 @@ export const registerDeleteDataViewAsCodeRoute = (
               }),
             }),
           },
+          response: {
+            200: {
+              description: 'deleted',
+            },
+            403: {
+              description: 'forbidden',
+            },
+            404: {
+              description: 'not found',
+            },
+          },
         },
       },
       handleErrors(async (ctx, req, res) => {
