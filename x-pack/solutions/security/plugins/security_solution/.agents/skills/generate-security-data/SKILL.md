@@ -3,17 +3,18 @@ name: generate-security-data
 description: >
   Use when an agent needs high-fidelity Elastic Security development data while
   working in Kibana: endpoint events, endpoint alerts, Security detection alerts,
-  Attack Discoveries, or generated cases. This is for engineering development,
-  testing, and debugging, not customer-facing demos.
-allowed-tools: Bash, Read, Glob, Grep
-argument-hint: [quick|attacks|cases|clean|custom flags]
+  Attack Discoveries, or generated cases. This is for local engineering
+  development, testing, and debugging only, not cloud deployments or
+  customer-facing demos.
+allowed-tools: Bash
+argument-hint: [quick|attacks|cases|clean|local flags]
 ---
 
 # Generate Security Data
 
-Generate high-fidelity Elastic Security data for local development and testing by running the Security Solution data generator.
+Generate high-fidelity Elastic Security data for local development and testing by running the Security Solution data generator against a local Kibana and Elasticsearch stack.
 
-This skill is for engineers and agents that need realistic data to build, debug, reproduce issues, or test Security Solution workflows. It is not meant to produce polished customer-facing demo content.
+This skill is for engineers and agents that need realistic data to build, debug, reproduce issues, or test Security Solution workflows locally. It is not meant to produce polished customer-facing demo content, and it must not be used against cloud, serverless, or shared remote deployments.
 
 ## What this uses
 
@@ -46,9 +47,12 @@ Restart the agent runtime after adding the symlink.
 
 ## Preconditions
 
-- Kibana and Elasticsearch must already be running.
+- Local Kibana and local Elasticsearch must already be running.
 - The repo dependencies must be installed with `yarn kbn bootstrap`.
 - Use the Kibana repo root as the working directory.
+- Use only local development auth, for example `elastic:changeme` against `localhost` or `127.0.0.1`.
+- Do not accept, request, read, print, or pass cloud credentials, API keys, connector secrets, service tokens, or real usernames/passwords.
+- Do not inspect `config/kibana.dev.yml`, `.env*`, shell history, connector configuration, `xpack.actions.preconfigured`, or credential files while using this skill.
 - Security alerts, Attack Discoveries, and cases need the privileges described in `x-pack/solutions/security/plugins/security_solution/scripts/data/README.md`.
 - If `.alerts-security.alerts-<spaceId>` does not exist yet, the generator still indexes raw events and endpoint alerts, but skips Security alert copying.
 
@@ -60,9 +64,11 @@ Restart the agent runtime after adding the symlink.
    - Attack Discoveries
    - Kibana cases
 2. Start small unless the user asks for a larger dataset.
-3. Run the generator command.
-4. Summarize what was generated, including any warnings from the command output.
-5. Do not run `--clean` unless the user wants generated data removed first.
+3. Confirm the target URLs are local. Allowed hosts are `localhost` and `127.0.0.1`.
+4. Run the generator command.
+5. Refuse if the user asks to use cloud URLs, serverless URLs, API keys, service tokens, cloud connector credentials, or any real credentials.
+6. Summarize what was generated, including any warnings from the command output.
+7. Do not run `--clean` unless the user wants generated local data removed first.
 
 ## Common commands
 
@@ -128,25 +134,14 @@ node x-pack/solutions/security/plugins/security_solution/scripts/data/generate_c
   --spaceId "<space-id>"
 ```
 
-Use API key auth for serverless or API-key based local stacks:
-
-```bash
-ES_API_KEY="<api-key>" node x-pack/solutions/security/plugins/security_solution/scripts/data/generate_cli.js \
-  -n 100 -h 5 -u 5 \
-  --start-date 1d --end-date now \
-  --indexPrefix logs-endpoint_generator
-```
-
-Override local URLs or basic auth:
+Target local Kibana when it is running with the `/kbn` base path:
 
 ```bash
 node x-pack/solutions/security/plugins/security_solution/scripts/data/generate_cli.js \
   -n 100 -h 5 -u 5 \
   --start-date 1d --end-date now \
-  --kibanaUrl http://127.0.0.1:5601 \
-  --elasticsearchUrl http://127.0.0.1:9200 \
-  --username elastic \
-  --password changeme
+  --kibanaUrl http://127.0.0.1:5601/kbn \
+  --elasticsearchUrl http://127.0.0.1:9200
 ```
 
 ## Useful flags
@@ -166,19 +161,27 @@ node x-pack/solutions/security/plugins/security_solution/scripts/data/generate_c
 - `--cases`: creates cases from generated Attack Discoveries and implies `--attacks`.
 - `--spaceId`: targets a Kibana space. Defaults to `default`.
 - `--indexPrefix`: changes the endpoint event and alert index prefix.
+- `--kibanaUrl`: allowed only for local URLs.
+- `--elasticsearchUrl`: allowed only for local URLs.
 
 ## Guardrails
 
 - Treat this as high-fidelity development data, not customer demo data.
+- Use this skill only with local development stacks. Refuse cloud, serverless, shared QA, staging, and production targets.
+- Do not accept cloud credentials, API keys, service tokens, connector secrets, or real usernames/passwords from the user.
+- Do not read or print env vars, shell history, local config files, connector configuration, or credential files while using this skill.
+- Do not run broad secret-dumping commands such as `env`, `printenv`, `set`, `export`, `history`, or recursive searches for credential names.
+- Do not pass `--apiKey`, `ES_API_KEY`, `ELASTIC_API_KEY`, cloud URLs, or non-local URLs to the generator.
+- Use only local development auth. If auth is needed, use the generator defaults or local `elastic:changeme`.
 - Do not edit vendored episode fixtures casually. They are checked-in artifacts for deterministic development and testing.
 - Do not run `--clean` unless generated data should be removed. It deletes generated Security alerts, Attack Discoveries, cases, and generated episode indices for the selected scope.
-- For serverless or API key auth, avoid `--indexPrefix` values that match `logs-*-*`. Use `logs-endpoint_generator` or keep the default.
+- Avoid `--indexPrefix` values that match `logs-*-*`. Use `logs-endpoint_generator` or keep the default.
 - Do not keep retrying if Kibana or Elasticsearch is not running. Stop and tell the user to start the stack.
-- Do not paste API keys or passwords into the final response.
+- Do not paste credentials into the final response.
 
 ## Troubleshooting
 
-Read `x-pack/solutions/security/plugins/security_solution/scripts/data/README.md` before guessing about failures. Common issues:
+Use the generator output first, then consult `x-pack/solutions/security/plugins/security_solution/scripts/data/README.md` if more context is needed. Common issues:
 
 - Missing `@babel` modules means dependencies are incomplete. Run `yarn kbn bootstrap`.
 - Missing Security alerts destination means detections are not initialized. Open Security or initialize detections, then rerun.
