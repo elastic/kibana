@@ -812,7 +812,8 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
   'securitySolution:alertValidationWorkflowAutoCloseEnabled': {
     type: 'boolean',
     _meta: {
-      description: 'Auto-close alerts validated as false positives by the alert validation workflow',
+      description:
+        'Auto-close alerts validated as false positives by the alert validation workflow',
     },
   },
   'securitySolution:alertValidationWorkflowAutoCloseConfidenceScoreMinThreshold': {
