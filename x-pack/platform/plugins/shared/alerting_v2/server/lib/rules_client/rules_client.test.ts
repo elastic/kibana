@@ -2696,7 +2696,7 @@ describe('RulesClient', () => {
     });
 
     describe('bulkEnableRules', () => {
-      it('emits one ruleEnabled event with only successfully enabled rules', async () => {
+      it('emits ruleEnabled for only successfully enabled rules', async () => {
         const client = createClient();
         mockSavedObjectsClient.bulkGet.mockResolvedValueOnce({
           saved_objects: [
@@ -2759,7 +2759,7 @@ describe('RulesClient', () => {
     });
 
     describe('bulkDisableRules', () => {
-      it('emits one ruleDisabled event with only successfully disabled rules', async () => {
+      it('emits ruleDisabled for only successfully disabled rules', async () => {
         const client = createClient();
         mockSavedObjectsClient.bulkGet.mockResolvedValueOnce({
           saved_objects: [
@@ -2822,7 +2822,7 @@ describe('RulesClient', () => {
     });
 
     describe('bulkDeleteRules', () => {
-      it('emits one ruleDeleted event with snapshots of successfully deleted rules', async () => {
+      it('emits ruleDeleted for snapshots of successfully deleted rules', async () => {
         const client = createClient();
         mockSavedObjectsClient.bulkGet.mockResolvedValueOnce({
           saved_objects: [

@@ -98,7 +98,7 @@ export class RuleEventPublisher implements RuleEventPublisherContract {
       return;
     }
 
-    const payload = this.toLifecyclePayload([rule], spaceId);
+    const payload = this.toLifecyclePayload(rule, spaceId);
 
     this.publish(request, { type: RULE_UPDATED_EVENT_TYPE, payload });
 
@@ -121,17 +121,17 @@ export class RuleEventPublisher implements RuleEventPublisherContract {
     rules: RuleResponse[],
     spaceId: string
   ): void {
-    if (rules.length === 0) {
-      return;
+    for (const rule of rules) {
+      this.publish(request, {
+        type: eventType,
+        payload: this.toLifecyclePayload(rule, spaceId),
+      });
     }
-
-    const payload = this.toLifecyclePayload(rules, spaceId);
-    this.publish(request, { type: eventType, payload });
   }
 
-  private toLifecyclePayload(rules: RuleResponse[], spaceId: string): RuleLifecycleEvent {
+  private toLifecyclePayload(rule: RuleResponse, spaceId: string): RuleLifecycleEvent {
     return {
-      rules: rules.map((rule) => buildRuleSnapshot(rule, spaceId)),
+      rule: buildRuleSnapshot(rule, spaceId),
     };
   }
 

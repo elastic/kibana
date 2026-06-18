@@ -21,7 +21,7 @@ export const ruleSnapshotSchema = z.object({
 export type RuleSnapshot = z.infer<typeof ruleSnapshotSchema>;
 
 export const ruleLifecycleEventSchema = z.object({
-  rules: z.array(ruleSnapshotSchema).min(1).describe('Rules affected by this operation.'),
+  rule: ruleSnapshotSchema.describe('Rule affected by this operation.'),
 });
 
 export type RuleLifecycleEvent = z.infer<typeof ruleLifecycleEventSchema>;

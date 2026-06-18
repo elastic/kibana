@@ -22,31 +22,31 @@ export interface BaseRuleEvent<TType extends string> {
 /** Discriminator value for {@link RuleCreatedEvent}. */
 export const RULE_CREATED_EVENT_TYPE = 'rule.created' as const;
 
-/** Domain event published when one or more alerting rules are created. */
+/** Domain event published when a single alerting rule is created. */
 export type RuleCreatedEvent = BaseRuleEvent<typeof RULE_CREATED_EVENT_TYPE>;
 
 /** Discriminator value for {@link RuleUpdatedEvent}. */
 export const RULE_UPDATED_EVENT_TYPE = 'rule.updated' as const;
 
-/** Domain event published when one or more alerting rules are updated. */
+/** Domain event published when a single alerting rule is updated. */
 export type RuleUpdatedEvent = BaseRuleEvent<typeof RULE_UPDATED_EVENT_TYPE>;
 
 /** Discriminator value for {@link RuleDeletedEvent}. */
 export const RULE_DELETED_EVENT_TYPE = 'rule.deleted' as const;
 
-/** Domain event published when one or more alerting rules are deleted. */
+/** Domain event published when a single alerting rule is deleted. */
 export type RuleDeletedEvent = BaseRuleEvent<typeof RULE_DELETED_EVENT_TYPE>;
 
 /** Discriminator value for {@link RuleEnabledEvent}. */
 export const RULE_ENABLED_EVENT_TYPE = 'rule.enabled' as const;
 
-/** Domain event published when one or more alerting rules are enabled. */
+/** Domain event published when a single alerting rule is enabled. */
 export type RuleEnabledEvent = BaseRuleEvent<typeof RULE_ENABLED_EVENT_TYPE>;
 
 /** Discriminator value for {@link RuleDisabledEvent}. */
 export const RULE_DISABLED_EVENT_TYPE = 'rule.disabled' as const;
 
-/** Domain event published when one or more alerting rules are disabled. */
+/** Domain event published when a single alerting rule is disabled. */
 export type RuleDisabledEvent = BaseRuleEvent<typeof RULE_DISABLED_EVENT_TYPE>;
 
 /**

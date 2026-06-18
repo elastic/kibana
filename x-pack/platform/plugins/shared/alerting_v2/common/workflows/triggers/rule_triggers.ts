@@ -15,7 +15,7 @@ export const RuleDeletedTriggerId = 'alerting.ruleDeleted' as const;
 export const RuleEnabledTriggerId = 'alerting.ruleEnabled' as const;
 export const RuleDisabledTriggerId = 'alerting.ruleDisabled' as const;
 
-const ruleKindFilterSnippet = 'event.rules.kind: "alert"';
+const ruleKindFilterSnippet = 'event.rule.kind: "alert"';
 
 const createRuleTriggerDefinition = ({
   id,
@@ -58,13 +58,13 @@ export const ruleCreatedTriggerCommonDefinition = createRuleTriggerDefinition({
     defaultMessage: 'Alerting - Rule created',
   }),
   description: i18n.translate('xpack.alertingV2.workflowTriggers.ruleCreated.description', {
-    defaultMessage: 'Emitted when one or more alerting rules are created.',
+    defaultMessage: 'Emitted when an alerting rule is created.',
   }),
   documentationDetails: i18n.translate(
     'xpack.alertingV2.workflowTriggers.ruleCreated.documentation.details',
     {
       defaultMessage:
-        'Emitted after rule creation. The payload includes event.rules with ruleId, spaceId, name, kind, query, and enabled. Use KQL on event.rules.* for trigger conditions.',
+        'Emitted after rule creation. The payload includes event.rule with ruleId, spaceId, name, kind, query, and enabled. Use KQL on event.rule.* for trigger conditions.',
     }
   ),
   exampleCondition: ruleKindFilterSnippet,
@@ -76,7 +76,7 @@ export const ruleUpdatedTriggerCommonDefinition = createRuleTriggerDefinition({
     defaultMessage: 'Alerting - Rule updated',
   }),
   description: i18n.translate('xpack.alertingV2.workflowTriggers.ruleUpdated.description', {
-    defaultMessage: 'Emitted when one or more alerting rules are updated.',
+    defaultMessage: 'Emitted when an alerting rule is updated.',
   }),
   documentationDetails: i18n.translate(
     'xpack.alertingV2.workflowTriggers.ruleUpdated.documentation.details',
@@ -94,13 +94,13 @@ export const ruleDeletedTriggerCommonDefinition = createRuleTriggerDefinition({
     defaultMessage: 'Alerting - Rule deleted',
   }),
   description: i18n.translate('xpack.alertingV2.workflowTriggers.ruleDeleted.description', {
-    defaultMessage: 'Emitted when one or more alerting rules are deleted.',
+    defaultMessage: 'Emitted when an alerting rule is deleted.',
   }),
   documentationDetails: i18n.translate(
     'xpack.alertingV2.workflowTriggers.ruleDeleted.documentation.details',
     {
       defaultMessage:
-        'Emitted after rule deletion with a snapshot of each deleted rule in event.rules. Bulk deletes emit one event listing all successfully deleted rules.',
+        'Emitted after rule deletion with a snapshot of the deleted rule in event.rule. Bulk deletes emit one event per successfully deleted rule.',
     }
   ),
   exampleCondition: ruleKindFilterSnippet,
@@ -112,16 +112,16 @@ export const ruleEnabledTriggerCommonDefinition = createRuleTriggerDefinition({
     defaultMessage: 'Alerting - Rule enabled',
   }),
   description: i18n.translate('xpack.alertingV2.workflowTriggers.ruleEnabled.description', {
-    defaultMessage: 'Emitted when one or more alerting rules are enabled.',
+    defaultMessage: 'Emitted when an alerting rule is enabled.',
   }),
   documentationDetails: i18n.translate(
     'xpack.alertingV2.workflowTriggers.ruleEnabled.documentation.details',
     {
       defaultMessage:
-        'Emitted when rules transition to enabled. Bulk enable emits one event with all successfully enabled rules in event.rules.',
+        'Emitted when a rule transitions to enabled. Bulk enable emits one event per successfully enabled rule.',
     }
   ),
-  exampleCondition: 'event.rules.enabled: true',
+  exampleCondition: 'event.rule.enabled: true',
 });
 
 export const ruleDisabledTriggerCommonDefinition = createRuleTriggerDefinition({
@@ -130,14 +130,14 @@ export const ruleDisabledTriggerCommonDefinition = createRuleTriggerDefinition({
     defaultMessage: 'Alerting - Rule disabled',
   }),
   description: i18n.translate('xpack.alertingV2.workflowTriggers.ruleDisabled.description', {
-    defaultMessage: 'Emitted when one or more alerting rules are disabled.',
+    defaultMessage: 'Emitted when an alerting rule is disabled.',
   }),
   documentationDetails: i18n.translate(
     'xpack.alertingV2.workflowTriggers.ruleDisabled.documentation.details',
     {
       defaultMessage:
-        'Emitted when rules transition to disabled. Bulk disable emits one event with all successfully disabled rules in event.rules.',
+        'Emitted when a rule transitions to disabled. Bulk disable emits one event per successfully disabled rule.',
     }
   ),
-  exampleCondition: 'event.rules.enabled: false',
+  exampleCondition: 'event.rule.enabled: false',
 });
