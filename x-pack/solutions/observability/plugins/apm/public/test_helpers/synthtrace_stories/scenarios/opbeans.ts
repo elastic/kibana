@@ -6,22 +6,8 @@
  */
 
 /**
- * Opbeans synthtrace scenario — in-memory APM data, no Elasticsearch.
- *
- * Topology:
- *   opbeans-node (nodejs)
- *     → opbeans-go (go)             [browse products]
- *         → postgresql (db)
- *         → redis      (cache)
- *         → opbeans-python (python) [recommendations]
- *             → elasticsearch (db)
- *         → opbeans-dotnet (dotnet) [inventory]
- *             → postgresql (db)
- *     → opbeans-java (java)         [payment]
- *         → postgresql (db)
- *
- * Usage:
- *   const docs = opbeansScenario();      // ApmFields[]
+ * Opbeans synthtrace scenario — deterministic 15-minute in-memory APM dataset, no Elasticsearch.
+ * Topology: node → go (products) / java (payment); go → python (recommendations) / dotnet (inventory).
  */
 
 import { apm, timerange, type ApmFields } from '@kbn/synthtrace-client';
@@ -44,10 +30,7 @@ const dotnet = apm.service('opbeans-dotnet', ENV, 'dotnet').instance('dotnet-01'
 
 let _cached: ApmFields[] | null = null;
 
-/**
- * Returns in-memory APM documents for the opbeans topology.
- * Memoised so multiple selectors share one dataset.
- */
+/** Memoised: returns in-memory APM documents for the opbeans topology. */
 export function opbeansScenario(): ApmFields[] {
   if (_cached) return _cached;
 

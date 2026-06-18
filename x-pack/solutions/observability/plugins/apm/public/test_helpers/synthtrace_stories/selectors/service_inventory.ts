@@ -5,17 +5,7 @@
  * 2.0.
  */
 
-/**
- * In-memory analog of the server's service-inventory endpoint.
- *
- * Converts flat synthtrace `ApmFields[]` into the shape expected by
- * `GET /internal/apm/services`.
- *
- * Each service entry aggregates:
- *   - latency:               average transaction.duration.us across all transactions
- *   - throughput:            transactions per minute over the scenario window
- *   - transactionErrorRate:  fraction where event.outcome === 'failure'
- */
+/** Converts flat synthtrace ApmFields[] into the GET /internal/apm/services response shape. */
 
 import type { ApmFields } from '@kbn/synthtrace-client';
 import type { AgentName } from '../../../../typings/es_schemas/ui/fields/agent';

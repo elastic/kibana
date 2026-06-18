@@ -9,8 +9,6 @@ import type { StoryObj, Meta } from '@storybook/react';
 import React from 'react';
 import { LatencyChart } from '.';
 import type { Props } from '.';
-import { ApmDocumentType } from '../../../../../common/document_type';
-import { RollupInterval } from '../../../../../common/rollup';
 import type { APMServiceContextValue } from '../../../../context/apm_service/apm_service_context';
 import { APMServiceContext } from '../../../../context/apm_service/apm_service_context';
 import { ChartPointerEventContextProvider } from '../../../../context/chart_pointer_event/chart_pointer_event_context';
@@ -22,40 +20,10 @@ import {
   toLatencyChartResponse,
   SCENARIO_START,
   SCENARIO_END,
+  TIME_RANGE_METADATA_DEFAULTS,
+  APM_STORY_A11Y,
 } from '../../../../test_helpers/synthtrace_stories';
 
-/** Minimal time_range_metadata so usePreferredDataSourceAndBucketSize returns non-null. */
-const TIME_RANGE_METADATA_DEFAULTS = {
-  isUsingServiceDestinationMetrics: true,
-  sources: [
-    {
-      documentType: ApmDocumentType.ServiceTransactionMetric,
-      hasDocs: true,
-      rollupInterval: RollupInterval.OneMinute,
-      hasDurationSummaryField: true,
-    },
-    {
-      documentType: ApmDocumentType.TransactionMetric,
-      hasDocs: true,
-      rollupInterval: RollupInterval.OneMinute,
-      hasDurationSummaryField: true,
-    },
-    {
-      documentType: ApmDocumentType.TransactionEvent,
-      hasDocs: true,
-      rollupInterval: RollupInterval.None,
-      hasDurationSummaryField: false,
-    },
-    {
-      documentType: ApmDocumentType.ServiceDestinationMetric,
-      hasDocs: true,
-      rollupInterval: RollupInterval.None,
-      hasDurationSummaryField: false,
-    },
-  ],
-};
-
-/** Service names available in the shared opbeans scenario. */
 const OPBEANS_SERVICES = [
   'opbeans-node',
   'opbeans-go',
@@ -83,17 +51,7 @@ const stories: Meta<Args> = {
           'to switch between opbeans services and see how latency profiles differ.',
       },
     },
-    a11y: {
-      config: {
-        rules: [
-          { id: 'color-contrast', enabled: true },
-          { id: 'image-alt', enabled: true },
-          { id: 'aria-required-attr', enabled: true },
-          { id: 'aria-roles', enabled: true },
-          { id: 'region', enabled: false }, // disabled for Storybook context
-        ],
-      },
-    },
+    a11y: APM_STORY_A11Y,
   },
   argTypes: {
     serviceName: {
@@ -104,9 +62,7 @@ const stories: Meta<Args> = {
         "with that service's latency data (derived from in-memory synthtrace docs).",
     },
     latencyChartResponse: {
-      control: {
-        type: 'object',
-      },
+      control: { type: 'object' },
       description:
         'Advanced override: supply the full latency chart API response directly. ' +
         'When `serviceName` is set this field is ignored.',
@@ -116,18 +72,17 @@ const stories: Meta<Args> = {
     (StoryComponent, { args }) => {
       const { serviceName, latencyChartResponse } = args as Args;
 
-      // serviceName control takes priority; fall back to the explicit response (e.g. NoData).
       const response = serviceName
         ? toLatencyChartResponse(opbeansScenario(), serviceName)
         : latencyChartResponse;
 
       const contextServiceName = serviceName ?? 'opbeans-node';
 
-      // Override createCallApmApi so the chart's useFetcher calls hit our mock.
       createCallApmApi({
         http: {
           get: async (pathname: string) => {
-            if (pathname === '/internal/apm/time_range_metadata') return TIME_RANGE_METADATA_DEFAULTS;
+            if (pathname === '/internal/apm/time_range_metadata')
+              return TIME_RANGE_METADATA_DEFAULTS;
             if (pathname.endsWith('/transactions/charts/latency')) return response;
             return {};
           },
@@ -157,30 +112,13 @@ const stories: Meta<Args> = {
 
 export default stories;
 
-/**
- * **Synthtrace-generated story** — demonstrates the scenario-driven pattern.
- *
- * The `latencyChartResponse` fixture is derived from the shared `opbeansScenario()`
- * (the same dataset the service map uses), so latency values here are consistent
- * with the topology shown in `app/ServiceMap/ServiceMap → SynthtraceGenerated`.
- *
- * Use the **serviceName** control to switch between the five opbeans services.
- */
 export const Example: StoryObj<Args> = {
-  render: () => {
-    return <LatencyChart height={300} kuery="" />;
-  },
-
-  args: {
-    serviceName: 'opbeans-node',
-  },
+  render: () => <LatencyChart height={300} kuery="" />,
+  args: { serviceName: 'opbeans-node' },
 };
 
 export const NoData: StoryObj<Args> = {
-  render: () => {
-    return <LatencyChart height={300} kuery="" />;
-  },
-
+  render: () => <LatencyChart height={300} kuery="" />,
   args: {
     latencyChartResponse: {
       currentPeriod: { latencyTimeseries: [], overallAvgDuration: null },

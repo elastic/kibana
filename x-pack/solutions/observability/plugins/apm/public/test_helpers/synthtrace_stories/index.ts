@@ -5,20 +5,7 @@
  * 2.0.
  */
 
-/**
- * Shared synthtrace scenario + selectors for APM Storybook stories.
- *
- * Pattern: pick a scenario (in-memory ApmFields[]), then run it through
- * component-specific selectors to get the exact shape each component expects.
- * Every story pulling from the same scenario shows consistent services,
- * latencies, and topology across the whole Storybook.
- *
- * @example
- * import { opbeansScenario, toServiceMapResponse } from '../../test_helpers/synthtrace_stories';
- * import { transformToReactFlow } from '../../common/service_map/transform_to_react_flow';
- *
- * const { nodes, edges } = transformToReactFlow(toServiceMapResponse(opbeansScenario()));
- */
+/** Shared synthtrace scenario, selectors, and Storybook helpers for APM stories. */
 
 export { opbeansScenario, SCENARIO_START, SCENARIO_END } from './scenarios/opbeans';
 export { toServiceMapResponse } from './selectors/service_map';
@@ -27,3 +14,8 @@ export { toThroughputChartResponse } from './selectors/throughput_chart';
 export { toErrorRateChartResponse } from './selectors/error_rate_chart';
 export { toServiceInventoryResponse } from './selectors/service_inventory';
 export { toDetailedStatisticsResponse } from './selectors/detailed_statistics';
+export {
+  TIME_RANGE_METADATA_DEFAULTS,
+  APM_STORY_A11Y,
+  makeApmContextParams,
+} from './storybook_helpers';

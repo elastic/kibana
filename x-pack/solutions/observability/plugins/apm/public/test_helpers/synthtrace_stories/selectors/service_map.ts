@@ -5,17 +5,7 @@
  * 2.0.
  */
 
-/**
- * In-memory analog of the server's `fetch_exit_span_samples.ts`.
- *
- * Converts flat synthtrace `ApmFields[]` into `ServiceMapResponse` by:
- *   1. Finding exit span docs (have `span.destination.service.resource`).
- *   2. Matching each exit span to the downstream service's transaction via `parent.id`.
- *   3. Collecting unique services into `servicesData`.
- *
- * The result can be passed directly to `transformToReactFlow` (the production
- * pure function already imported by the service map stories).
- */
+/** Converts flat synthtrace ApmFields[] into ServiceMapResponse (compatible with transformToReactFlow). */
 
 import type { AgentName } from '@kbn/apm-types';
 import type { ApmFields } from '@kbn/synthtrace-client';
@@ -25,10 +15,6 @@ import type {
   ServicesResponse,
 } from '../../../../common/service_map';
 
-/**
- * Build a `ServiceMapResponse` from flat in-memory APM documents.
- * No Elasticsearch involved — pure data transformation.
- */
 export function toServiceMapResponse(docs: ApmFields[]): ServiceMapResponse {
   // ── 1. Index downstream transactions by parent.id ────────────────────────────
   const txnByParentId = new Map<string, ApmFields>();

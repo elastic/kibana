@@ -5,15 +5,7 @@
  * 2.0.
  */
 
-/**
- * In-memory analog of the server's transaction-latency chart endpoint.
- *
- * Converts flat synthtrace `ApmFields[]` into the shape expected by
- * `GET /internal/apm/services/{serviceName}/transactions/charts/latency`.
- *
- * Each minute-bucket averages `transaction.duration.us` across all transactions
- * for the given service in that bucket.
- */
+/** Converts flat synthtrace ApmFields[] into the GET .../transactions/charts/latency response shape. */
 
 import type { ApmFields } from '@kbn/synthtrace-client';
 import type { APIReturnType } from '../../../services/rest/create_call_apm_api';
@@ -21,14 +13,6 @@ import type { APIReturnType } from '../../../services/rest/create_call_apm_api';
 type LatencyChartResponse =
   APIReturnType<'GET /internal/apm/services/{serviceName}/transactions/charts/latency'>;
 
-/**
- * Build the latency chart API response shape from in-memory synthtrace docs.
- * Durations are in microseconds (us), matching the real APM API.
- *
- * @param docs   Flat ApmFields[] from a synthtrace scenario.
- * @param serviceName  Filter to this service.
- * @param bucketMs  Bucket size in milliseconds (default: 60 000 = 1 min).
- */
 export function toLatencyChartResponse(
   docs: ApmFields[],
   serviceName: string,

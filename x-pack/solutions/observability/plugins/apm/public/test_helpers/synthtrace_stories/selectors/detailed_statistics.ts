@@ -5,15 +5,7 @@
  * 2.0.
  */
 
-/**
- * In-memory analog of the server's service detailed-statistics endpoint.
- *
- * Converts flat synthtrace `ApmFields[]` into the shape expected by
- * `POST /internal/apm/services/detailed_statistics`.
- *
- * Each service entry contains per-bucket timeseries for latency, throughput,
- * and error rate — used by the SparkPlot columns in the service inventory table.
- */
+/** Converts flat synthtrace ApmFields[] into the POST .../services/detailed_statistics response shape. */
 
 import type { ApmFields } from '@kbn/synthtrace-client';
 import type { APIReturnType } from '../../../services/rest/create_call_apm_api';

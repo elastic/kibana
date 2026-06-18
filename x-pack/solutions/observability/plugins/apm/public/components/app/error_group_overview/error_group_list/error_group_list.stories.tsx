@@ -12,6 +12,7 @@ import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 import { mockApmApiCallResponse } from '../../../../services/rest/storybook_mock_http';
 import { APMServiceContext } from '../../../../context/apm_service/apm_service_context';
 import type { APMServiceContextValue } from '../../../../context/apm_service/apm_service_context';
+import { makeApmContextParams } from '../../../../test_helpers/synthtrace_stories';
 
 type Args = ComponentProps<typeof ErrorGroupList>;
 
@@ -73,17 +74,11 @@ const stories: Meta<Args> = {
   component: ErrorGroupList,
   parameters: {
     routePath: '/services/{serviceName}/errors?rangeFrom=now-15m&rangeTo=now',
-    apmContext: {
-      core: {
-        http: {
-          get: async (endpoint: string) => {
-            if (endpoint === '/internal/apm/services/opbeans-node/errors/groups/main_statistics')
-              return { errorGroups, maxCountExceeded: false };
-            return { errorGroups: [], maxCountExceeded: false };
-          },
-        },
-      },
-    },
+    ...makeApmContextParams((endpoint) => {
+      if (endpoint === '/internal/apm/services/opbeans-node/errors/groups/main_statistics')
+        return { errorGroups, maxCountExceeded: false };
+      return { errorGroups: [], maxCountExceeded: false };
+    }),
   },
   decorators: [
     (StoryComponent, { args }) => {

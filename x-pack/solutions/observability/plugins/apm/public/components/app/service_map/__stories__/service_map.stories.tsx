@@ -32,7 +32,11 @@ import {
 } from './generate_elements';
 import { transformToReactFlow } from '../../../../../common/service_map/transform_to_react_flow';
 import type { ServiceMapResponse } from '../../../../../common/service_map';
-import { opbeansScenario, toServiceMapResponse } from '../../../../test_helpers/synthtrace_stories';
+import {
+  opbeansScenario,
+  toServiceMapResponse,
+  APM_STORY_A11Y,
+} from '../../../../test_helpers/synthtrace_stories';
 
 function getHeight() {
   return window.innerHeight - 50;
@@ -50,17 +54,7 @@ const meta: Meta<typeof ServiceMapGraph> = {
   parameters: {
     routePath: '/service-map?rangeFrom=now-15m&rangeTo=now',
     layout: 'fullscreen',
-    a11y: {
-      config: {
-        rules: [
-          { id: 'color-contrast', enabled: true },
-          { id: 'image-alt', enabled: true },
-          { id: 'aria-required-attr', enabled: true },
-          { id: 'aria-roles', enabled: true },
-          { id: 'region', enabled: false }, // Disabled for Storybook context
-        ],
-      },
-    },
+    a11y: APM_STORY_A11Y,
     docs: {
       description: {
         component:

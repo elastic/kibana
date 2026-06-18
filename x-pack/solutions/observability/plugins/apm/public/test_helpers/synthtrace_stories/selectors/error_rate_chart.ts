@@ -5,14 +5,7 @@
  * 2.0.
  */
 
-/**
- * In-memory analog of the server's failed-transaction-rate chart endpoint.
- *
- * Converts flat synthtrace `ApmFields[]` into the shape expected by
- * `GET /internal/apm/services/{serviceName}/transactions/charts/error_rate`.
- *
- * Each minute-bucket computes `failed / total` using `event.outcome === 'failure'`.
- */
+/** Converts flat synthtrace ApmFields[] into the GET .../transactions/charts/error_rate response shape. */
 
 import type { ApmFields } from '@kbn/synthtrace-client';
 import type { APIReturnType } from '../../../services/rest/create_call_apm_api';

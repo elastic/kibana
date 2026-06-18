@@ -5,15 +5,7 @@
  * 2.0.
  */
 
-/**
- * In-memory analog of the server's throughput chart endpoint.
- *
- * Converts flat synthtrace `ApmFields[]` into the shape expected by
- * `GET /internal/apm/services/{serviceName}/throughput`.
- *
- * Each minute-bucket counts transactions for the given service and converts
- * to transactions-per-minute (tpm).
- */
+/** Converts flat synthtrace ApmFields[] into the GET .../throughput response shape. */
 
 import type { ApmFields } from '@kbn/synthtrace-client';
 import type { APIReturnType } from '../../../services/rest/create_call_apm_api';
