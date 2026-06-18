@@ -3,9 +3,6 @@ on:
   schedule:
     # Runs daily at 02:00 UTC
     - cron: '0 2 * * *'
-  push:
-    branches:
-      - 'on-week-deps'
 
   workflow_dispatch:
     inputs:
@@ -74,4 +71,4 @@ jobs:
 
           bash scripts/index_dependency_usage.sh \
             --group ${{ matrix.group }} \
-            --setup-template
+            $TEMPLATE_ARG
