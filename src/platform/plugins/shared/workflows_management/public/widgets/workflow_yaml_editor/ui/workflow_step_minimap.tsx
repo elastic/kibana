@@ -353,7 +353,10 @@ const inactiveText = euiTheme.colors.primaryText;
           Negative left/right offsets extend the border into the outer padding zones so
           severity dots (left) and SVG track circles (right) sit inside the border. */}
       {viewportSteps &&
-        !(viewportSteps.first === 0 && viewportSteps.last === stepEntries.length - 1) && (
+        visibleLineRange &&
+        stepEntries.length > 0 &&
+        (visibleLineRange.start > stepEntries[0][1].lineStart ||
+          visibleLineRange.end < stepEntries[stepEntries.length - 1][1].lineEnd) && (
         <div
           aria-hidden="true"
           css={css({
