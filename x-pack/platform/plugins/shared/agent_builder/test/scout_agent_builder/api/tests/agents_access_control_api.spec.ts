@@ -25,7 +25,8 @@ function mockAgent(id: string, scope: AgentAccessControlScope = AgentAccessContr
     id,
     name: 'Access Control Test Agent',
     description: 'Fixture for access control tests',
-    access_control: { scope, entries: [] },
+    // Create accepts scope only; entries are managed via PUT /access_control.
+    access_control: { scope },
     configuration: {
       instructions: 'Test agent',
       tools: [{ tool_ids: ['*'] }],
@@ -313,7 +314,7 @@ apiTest.describe(
     apiTest(
       'GET /agents/{id}/access_control returns can_manage_access_control and redacts entries for non-managers',
       async ({ apiClient }) => {
-        const agentId = `${ACCESS_CONTROL_TEST_PREFIX}-access-control-get-${randomUUID()}`;
+        const agentId = `${ACCESS_CONTROL_TEST_PREFIX}-get-${randomUUID()}`;
         await createAgentAs(apiClient, alice, mockAgent(agentId, AgentAccessControlScope.Private));
         await setAccessControlAs(apiClient, alice, agentId, [
           { type: 'user', name: bob.username, role: AgentAccessControlRole.User },
@@ -396,7 +397,7 @@ apiTest.describe(
     apiTest(
       'cluster admin can read a Private agent they are not in the access control of',
       async ({ apiClient, asAdmin }) => {
-        const agentId = `${ACCESS_CONTROL_TEST_PREFIX}-admin-bypass-${randomUUID()}`;
+        const agentId = `${ACCESS_CONTROL_TEST_PREFIX}-admin-${randomUUID()}`;
         await createAgentAs(apiClient, alice, mockAgent(agentId, AgentAccessControlScope.Private));
 
         const res = await asAdmin.get(
