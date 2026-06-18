@@ -53,7 +53,7 @@ export class UserProfileAPIClient implements UserProfileAPIClientType {
   }
 
   public start() {
-    this.getCurrent().catch(() => {});
+    this.getCurrent({ dataPath: DEFAULT_DATA_PATHS }).catch(() => {});
   }
 
   /**
@@ -70,12 +70,12 @@ export class UserProfileAPIClient implements UserProfileAPIClientType {
       return Promise.reject(new Error('Unable to retrieve user profile for anonymous paths'));
     }
 
-    const key = params?.dataPath ?? DEFAULT_DATA_PATHS;
+    const key = params?.dataPath ?? '';
 
     if (!this._cache.has(key)) {
       const req = this.http
         .get<GetUserProfileResponse<D>>('/internal/security/user_profile', {
-          query: { dataPath: key },
+          query: { dataPath: params?.dataPath },
         })
         .then((response) => {
           this._userProfile$.next(merge(this._userProfile$.getValue(), response?.data ?? {}));

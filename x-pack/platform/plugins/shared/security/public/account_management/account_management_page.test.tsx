@@ -72,7 +72,10 @@ describe('<AccountManagementPage>', () => {
 
     await findByRole('form');
 
-    expect(UserProfileMock).toHaveBeenCalledWith({ user, data }, expect.anything());
+    expect(UserProfileMock).toHaveBeenCalledWith(
+      expect.objectContaining({ user: expect.objectContaining(user), data }),
+      expect.anything()
+    );
     expect(coreStart.chrome.setBreadcrumbs).toHaveBeenLastCalledWith([
       { href: '/security/account', text: 'User settings' },
       { href: undefined, text: 'user' },

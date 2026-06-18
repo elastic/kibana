@@ -15,9 +15,21 @@ import { mockAuthenticatedUser } from '../../../../common/model/authenticated_us
 import { securityMock } from '../../../mocks';
 import { Providers } from '../application_connections_management_app';
 import { ApplicationConnectionsPage } from '../application_connections_page';
+import * as UseCurrentUserModule from '../../../components/use_current_user';
 
 jest.mock('../assets/illustration_empty_state.svg', () => 'illustration-empty-state-mock.svg', {
   virtual: true,
+});
+
+jest.spyOn(UseCurrentUserModule, 'useCurrentUser').mockReturnValue({
+  isLoading: false,
+  user: {
+    ...mockAuthenticatedUser({ username: 'current_user', full_name: 'Current User' }),
+    profileUid: null,
+    avatar: null,
+    userSettings: null,
+  },
+  error: null,
 });
 
 type CoreStartMock = ReturnType<typeof coreMock.createStart>;

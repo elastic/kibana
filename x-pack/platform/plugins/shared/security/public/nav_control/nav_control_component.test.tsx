@@ -47,7 +47,7 @@ describe('SecurityNavControl', () => {
     useCurrentUserMock.mockReset();
     useCurrentUserMock.mockReturnValue({
       isLoading: false,
-      user: mockAuthenticatedUser(),
+      user: { ...mockAuthenticatedUser(), profileUid: null, avatar: null, userSettings: null },
       error: null,
     });
 
@@ -62,7 +62,6 @@ describe('SecurityNavControl', () => {
       <SecurityNavControl editProfileUrl="" logoutUrl="" userMenuLinks$={userMenuLinks$} />
     );
 
-    expect(useUserProfileMock).toHaveBeenCalledTimes(1);
     expect(useCurrentUserMock).toHaveBeenCalledTimes(1);
     expect(screen.getByTestId('userMenuButton')).toMatchInlineSnapshot(`
       <button
@@ -118,7 +117,6 @@ describe('SecurityNavControl', () => {
       <SecurityNavControl editProfileUrl="" logoutUrl="" userMenuLinks$={userMenuLinks$} />
     );
 
-    expect(useUserProfileMock).toHaveBeenCalledTimes(1);
     expect(useCurrentUserMock).toHaveBeenCalledTimes(1);
     expect(screen.getByTestId('userMenuButton')).toMatchInlineSnapshot(`
       <button
@@ -542,9 +540,14 @@ describe('SecurityNavControl', () => {
 
     useCurrentUserMock.mockReturnValue({
       isLoading: false,
-      user: mockAuthenticatedUser({
-        authentication_provider: { type: 'anonymous', name: 'does no matter' },
-      }),
+      user: {
+        ...mockAuthenticatedUser({
+          authentication_provider: { type: 'anonymous', name: 'does no matter' },
+        }),
+        profileUid: null,
+        avatar: null,
+        userSettings: null,
+      },
       error: null,
     });
 
