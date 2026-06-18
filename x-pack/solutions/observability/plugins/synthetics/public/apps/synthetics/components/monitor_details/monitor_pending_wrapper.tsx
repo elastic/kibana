@@ -63,12 +63,6 @@ export const MonitorPendingWrapper: FC<PropsWithChildren<unknown>> = ({ children
 
   return (
     <>
-      {/*
-        Rendered above the loader so the remote-monitor callout (and its deep
-        link to the origin cluster) is visible immediately on remote pages,
-        rather than waiting for the first ping to arrive. Returns null for
-        local monitors, leaving non-remote pages visually unchanged.
-      */}
       <MonitorRemoteCallout />
       {!loaded ? (
         <PageLoader
