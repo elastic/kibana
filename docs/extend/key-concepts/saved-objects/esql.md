@@ -67,6 +67,50 @@ const result = await savedObjectsClient.esql({
 
 See the full example in the Kibana repository at `examples/saved_objects`.
 
+### Building pipelines with `@elastic/esql`
+
+The [`@elastic/esql`](https://www.npmjs.com/package/@elastic/esql) package provides an `esql` tagged template that makes pipeline construction safer and more ergonomic:
+
+- `esql.col()` produces a correctly-quoted ES|QL identifier — field names containing dots (e.g. `my_type.title`) are automatically backtick-quoted as required by ES|QL syntax.
+- Template holes using `${{ name: value }}` become named ES|QL parameters, keeping user input out of the query string (see [Safe pipeline construction](#safe-pipeline-construction-with-esql-params)).
+
+```ts
+import { esql } from '@elastic/esql';
+import { isResponseError } from '@kbn/es-errors';
+import { MY_TYPE } from './saved_objects';
+
+const titleCol = esql.col(`${MY_TYPE}.title`);
+const descCol = esql.col(`${MY_TYPE}.description`);
+
+try {
+  const result = await savedObjectsClient.esql({
+    type: [MY_TYPE],
+    namespaces: ['default'],
+    pipeline: esql`
+      KEEP ${titleCol}, ${descCol}
+      | SORT ${titleCol}
+      | LIMIT 100
+    `,
+  });
+} catch (e) {
+  if (isResponseError(e)) {
+    log.error(JSON.stringify(e.meta.body, null, 2));
+  }
+  throw e;
+}
+```
+
+To include `METADATA` fields with the tagged template:
+
+```ts
+const result = await savedObjectsClient.esql({
+  type: [MY_TYPE],
+  namespaces: ['default'],
+  metadata: ['_id', '_source'],
+  pipeline: esql`KEEP _id, ${esql.col(`${MY_TYPE}.title`)} | LIMIT 100`,
+});
+```
+
 ## Safe pipeline construction with ES|QL params
 
 When interpolating user input into ES|QL pipelines, **never** use string concatenation. Instead, use ES|QL's native parameterization — named params (`?paramName`) or positional params (`?`) — to separate code from data at the protocol level.
@@ -104,6 +148,30 @@ const result = await savedObjectsClient.esql({
   params: [userInput],
 });
 ```
+
+### Tagged template params (via `@elastic/esql`)
+
+If you are using the `esql` tagged template from `@elastic/esql`, use `${{ name: value }}` holes for user-supplied values. The value becomes a named ES|QL parameter forwarded to Elasticsearch separately — it never appears in the query string:
+
+```ts
+import { esql } from '@elastic/esql';
+
+const searchTerm = req.body.title;
+const titleCol = esql.col(`${MY_TYPE}.title`);
+
+const result = await savedObjectsClient.esql({
+  type: [MY_TYPE],
+  namespaces: ['default'],
+  pipeline: esql`
+    WHERE ${titleCol} LIKE ${{ title: searchTerm }}
+    | LIMIT 100
+  `,
+});
+```
+
+:::{warning}
+**Never pass user input via `esql.exp(userInput)`** — that injects a raw ES|QL expression and bypasses parameterization entirely.
+:::
 
 ## Security model
 

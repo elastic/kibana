@@ -18,6 +18,7 @@ import type {
   StreamsAgentToolKiIdentificationStartedProps,
   StreamsAgentToolEventCreateProps,
   StreamsAgentToolEventStatusUpdateProps,
+  StreamsOnboardingScheduledProps,
 } from './types';
 
 const streamsEndpointLatencySchema: RootSchema<StreamEndpointLatencyProps> = {
@@ -477,6 +478,57 @@ const streamsAgentToolEventStatusUpdateSchema: RootSchema<StreamsAgentToolEventS
     },
   };
 
+const streamsSignificantEventsDiscoveryTriggeredSchema = {
+  execution_id: {
+    type: 'keyword' as const,
+    _meta: { description: 'The workflow execution ID returned by the orchestrator' },
+  },
+  space_id: {
+    type: 'keyword' as const,
+    _meta: { description: 'The Kibana space in which the pipeline was triggered' },
+  },
+};
+
+const streamsOnboardingScheduledSchema: RootSchema<StreamsOnboardingScheduledProps> = {
+  stream_name: {
+    type: 'keyword',
+    _meta: {
+      description: 'The name of the stream being onboarded',
+    },
+  },
+  execution_id: {
+    type: 'keyword',
+    _meta: {
+      description:
+        'The workflow execution ID for this onboarding run; join key to workflow_execution_completed/_failed/_cancelled engine events and to streams-features-identified / streams-significant-events-queries-generated events',
+    },
+  },
+  workflow_id: {
+    type: 'keyword',
+    _meta: {
+      description: 'The managed workflow ID that was triggered (system-streams-ki-onboarding)',
+    },
+  },
+  space_id: {
+    type: 'keyword',
+    _meta: {
+      description: 'The Kibana space in which the workflow execution was created',
+    },
+  },
+  skip_features: {
+    type: 'boolean',
+    _meta: {
+      description: 'Whether the features identification step was skipped for this run',
+    },
+  },
+  skip_queries: {
+    type: 'boolean',
+    _meta: {
+      description: 'Whether the queries generation step was skipped for this run',
+    },
+  },
+};
+
 export {
   streamsEndpointLatencySchema,
   streamsStateErrorSchema,
@@ -489,4 +541,6 @@ export {
   streamsAgentToolKiIdentificationStartedSchema,
   streamsAgentToolEventCreateSchema,
   streamsAgentToolEventStatusUpdateSchema,
+  streamsSignificantEventsDiscoveryTriggeredSchema,
+  streamsOnboardingScheduledSchema,
 };
