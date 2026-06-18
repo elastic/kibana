@@ -2113,7 +2113,7 @@
     "fix-esm": "1.0.1",
     "form-data": "4.0.6",
     "geckodriver": "6.1.0",
-    "globby": "11.1.0",
+    "globby": "16.2.0",
     "gulp-brotli": "3.0.0",
     "has-ansi": "3.0.0",
     "hdr-histogram-js": "3.0.1",
