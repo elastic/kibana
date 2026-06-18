@@ -23,7 +23,7 @@ import {
   EuiTitle,
   EuiToolTip,
 } from '@elastic/eui';
-import { load as parseYaml } from 'js-yaml';
+import { parse as parseYaml } from 'yaml';
 import type { FieldDefinition } from '../../../../common/types/domain/field_definition/v1';
 import {
   FieldType,

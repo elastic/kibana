@@ -6,7 +6,7 @@
  */
 
 import { camelCase } from 'lodash';
-import { load as parseYaml } from 'js-yaml';
+import { parse as parseYaml } from 'yaml';
 import { FieldSchema, isInlineField } from '../types/domain/template/fields';
 import type { InlineField } from '../types/domain/template/fields';
 import type { FieldDefinition } from '../types/domain/field_definition/latest';

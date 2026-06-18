@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import yaml from 'js-yaml';
+import { stringify as yamlStringify } from 'yaml';
 import { CustomFieldTypes, CaseStatuses } from '../../../common/types/domain';
 import {
   MAX_CATEGORY_LENGTH,
@@ -2374,7 +2374,7 @@ describe('update', () => {
       owner,
       description: '',
       isGlobal: true,
-      definition: yaml.dump({ name, type: 'keyword', control: 'INPUT_TEXT', label: name }),
+      definition: yamlStringify({ name, type: 'keyword', control: 'INPUT_TEXT', label: name }),
     });
 
     const secCase = {

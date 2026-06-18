@@ -9,7 +9,7 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 
 import type { CaseUI } from '../../../../common';
-import yaml from 'js-yaml';
+import { stringify as yamlStringify } from 'yaml';
 import { GlobalCaseFields } from './global_case_fields';
 
 const mockUseGetTemplate = jest.fn();
@@ -38,7 +38,7 @@ describe('GlobalCaseFields', () => {
   const makeGlobalDef = (name: string) => ({
     fieldDefinitionId: `fd-${name}`,
     name,
-    definition: yaml.dump({ name, type: 'keyword', control: 'INPUT_TEXT', label: name }),
+    definition: yamlStringify({ name, type: 'keyword', control: 'INPUT_TEXT', label: name }),
     owner: 'securitySolution',
     isGlobal: true,
     description: '',

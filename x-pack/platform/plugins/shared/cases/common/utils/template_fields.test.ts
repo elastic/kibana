@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import yaml from 'js-yaml';
+import { stringify as yamlStringify } from 'yaml';
 import {
   getFieldCamelKey,
   getFieldSnakeKey,
@@ -62,7 +62,7 @@ describe('template field key utils', () => {
         owner: 'securitySolution',
         description: '',
         isGlobal: true,
-        definition: yaml.dump(
+        definition: yamlStringify(
           defYaml ?? { name: 'my_field', type: 'keyword', control: 'INPUT_TEXT', label: 'My Field' }
         ),
         ...rest,
@@ -83,7 +83,12 @@ describe('template field key utils', () => {
       const bad = makeDef({ definition: 'not: valid: yaml: [broken' });
       const good = makeDef({
         name: 'ok',
-        definition: yaml.dump({ name: 'ok', type: 'keyword', control: 'INPUT_TEXT', label: 'OK' }),
+        definition: yamlStringify({
+          name: 'ok',
+          type: 'keyword',
+          control: 'INPUT_TEXT',
+          label: 'OK',
+        }),
       });
       const fields = parseFieldDefinitionsToInlineFields([bad, good]);
       expect(fields).toHaveLength(1);

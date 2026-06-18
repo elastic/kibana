@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { screen, waitFor } from '@testing-library/react';
-import yaml from 'js-yaml';
+import { stringify as yamlStringify } from 'yaml';
 
 import { CreateCaseTemplateFields } from './template_fields';
 import { renderWithTestingProviders } from '../../common/mock';
@@ -177,7 +177,7 @@ describe('CreateCaseTemplateFields', () => {
           {
             fieldDefinitionId: 'fd-1',
             name: 'incident_type',
-            definition: yaml.dump({
+            definition: yamlStringify({
               name: 'incident_type',
               type: 'keyword',
               control: 'INPUT_TEXT',
@@ -212,7 +212,7 @@ describe('CreateCaseTemplateFields', () => {
           {
             fieldDefinitionId: 'fd-1',
             name: 'incident_type',
-            definition: yaml.dump({
+            definition: yamlStringify({
               name: 'incident_type',
               type: 'keyword',
               control: 'INPUT_TEXT',
@@ -253,7 +253,7 @@ describe('CreateCaseTemplateFields', () => {
           {
             fieldDefinitionId: 'fd-1',
             name: 'incident_type',
-            definition: yaml.dump({
+            definition: yamlStringify({
               name: 'incident_type',
               type: 'keyword',
               control: 'INPUT_TEXT',
@@ -296,7 +296,7 @@ describe('CreateCaseTemplateFields', () => {
           {
             fieldDefinitionId: 'fd-1',
             name: 'incident_type',
-            definition: yaml.dump({
+            definition: yamlStringify({
               name: 'incident_type',
               type: 'keyword',
               control: 'INPUT_TEXT',
@@ -327,7 +327,7 @@ describe('CreateCaseTemplateFields', () => {
           {
             fieldDefinitionId: 'fd-1',
             name: 'incident_type',
-            definition: yaml.dump({
+            definition: yamlStringify({
               name: 'incident_type',
               type: 'keyword',
               control: 'INPUT_TEXT',

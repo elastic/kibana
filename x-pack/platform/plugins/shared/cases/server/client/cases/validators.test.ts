@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import yaml from 'js-yaml';
+import { stringify as yamlStringify } from 'yaml';
 import type { CustomFieldsConfiguration, CaseCustomFields } from '../../../common/types/domain';
 import { CustomFieldTypes } from '../../../common/types/domain';
 import type { CasesSearchRequest } from '../../../common/types/api';
@@ -715,7 +715,7 @@ describe('validators', () => {
         templateId: 'tpl-1',
         name: 'Test Template',
         owner: 'securitySolution',
-        definition: yaml.dump({ name: 'Test Template', fields: [], ...definition }),
+        definition: yamlStringify({ name: 'Test Template', fields: [], ...definition }),
         templateVersion: 1,
         deletedAt: null,
         isLatest: true,

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import yaml from 'js-yaml';
+import { stringify as yamlStringify } from 'yaml';
 import {
   MAX_DESCRIPTION_LENGTH,
   MAX_TAGS_PER_CASE,
@@ -841,7 +841,7 @@ describe('create', () => {
       owner: SECURITY_SOLUTION_OWNER,
       description: '',
       isGlobal,
-      definition: yaml.dump({ name, type, control: 'INPUT_TEXT', label: name }),
+      definition: yamlStringify({ name, type, control: 'INPUT_TEXT', label: name }),
     });
 
     const makeTemplateSO = (fields: object[]) => ({
@@ -852,7 +852,7 @@ describe('create', () => {
         templateId: 'tmpl-ext',
         name: 'Ext Template',
         owner: SECURITY_SOLUTION_OWNER,
-        definition: yaml.dump({ name: 'Ext Template', fields }),
+        definition: yamlStringify({ name: 'Ext Template', fields }),
         templateVersion: 1,
         deletedAt: null,
         isLatest: true,
@@ -934,7 +934,7 @@ describe('create', () => {
           // Override definition to include required validation
           {
             ...makeFieldDef('risk_score', 'keyword'),
-            definition: yaml.dump({
+            definition: yamlStringify({
               name: 'risk_score',
               type: 'keyword',
               control: 'INPUT_TEXT',
