@@ -9,9 +9,12 @@
 
 export {
   WORKFLOW_CHANGE_HISTORY_DATASET,
+  WORKFLOW_CHANGE_HISTORY_INTERNAL_API_VERSION,
+  WORKFLOW_CHANGE_HISTORY_LIST_PATH,
   WORKFLOW_CHANGE_HISTORY_MODULE,
   WORKFLOW_CHANGE_HISTORY_OBJECT_TYPE,
   WORKFLOW_CHANGE_HISTORY_SYSTEM_USER,
   WorkflowChangeHistoryAction,
-} from '../../common/lib/workflow_change_history/constants';
-export type { WorkflowChangeHistoryActionType } from '../../common/lib/workflow_change_history/constants';
+} from './constants';
+export type { WorkflowChangeHistoryActionType } from './constants';
+export type { WorkflowChangesHistoryResponse, WorkflowHistoryItem } from './types';

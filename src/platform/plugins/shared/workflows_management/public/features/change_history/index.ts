@@ -7,11 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+export { createWorkflowChangeHistoryAdapter } from './workflow_change_history_adapter';
 export {
-  WORKFLOW_CHANGE_HISTORY_DATASET,
-  WORKFLOW_CHANGE_HISTORY_MODULE,
-  WORKFLOW_CHANGE_HISTORY_OBJECT_TYPE,
-  WORKFLOW_CHANGE_HISTORY_SYSTEM_USER,
+  mapWorkflowHistoryItemToDetail,
+  mapWorkflowHistoryItemToListItem,
+} from './map_workflow_history_item';
+export type {
+  WorkflowChangesHistoryResponse,
+  WorkflowHistoryItem,
+} from '../../../common/lib/workflow_change_history/types';
+export {
   WorkflowChangeHistoryAction,
-} from '../../common/lib/workflow_change_history/constants';
-export type { WorkflowChangeHistoryActionType } from '../../common/lib/workflow_change_history/constants';
+  WORKFLOW_CHANGE_HISTORY_INTERNAL_API_VERSION,
+  WORKFLOW_CHANGE_HISTORY_LIST_PATH,
+} from '../../../common/lib/workflow_change_history/constants';

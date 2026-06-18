@@ -7,11 +7,21 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export {
-  WORKFLOW_CHANGE_HISTORY_DATASET,
-  WORKFLOW_CHANGE_HISTORY_MODULE,
-  WORKFLOW_CHANGE_HISTORY_OBJECT_TYPE,
-  WORKFLOW_CHANGE_HISTORY_SYSTEM_USER,
-  WorkflowChangeHistoryAction,
-} from '../../common/lib/workflow_change_history/constants';
-export type { WorkflowChangeHistoryActionType } from '../../common/lib/workflow_change_history/constants';
+/** Single workflow change-history entry. */
+export interface WorkflowHistoryItem {
+  timestamp: string;
+  id: string;
+  user: { id?: string; name: string } | null;
+  action: string;
+  version?: number;
+  workflow: {
+    yaml: string;
+  };
+}
+
+export interface WorkflowChangesHistoryResponse {
+  page: number;
+  perPage: number;
+  total: number;
+  items: WorkflowHistoryItem[];
+}
