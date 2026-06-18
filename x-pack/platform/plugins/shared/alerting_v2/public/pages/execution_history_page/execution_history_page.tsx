@@ -92,9 +92,6 @@ export const ExecutionHistoryPage = () => {
             </EuiFlexItem>
           </EuiFlexGroup>
         }
-        description={i18n.translate('xpack.alertingV2.executionHistory.pageDescription', {
-          defaultMessage: 'Showing dispatcher decisions from the last 24 hours.',
-        })}
       />
       <EuiSpacer size="l" />
       <EuiTabs>

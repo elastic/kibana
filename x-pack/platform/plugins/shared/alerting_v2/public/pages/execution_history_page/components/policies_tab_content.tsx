@@ -13,6 +13,7 @@ import {
   EuiFlexItem,
   EuiLink,
   EuiSpacer,
+  EuiText,
   type CriteriaWithPagination,
   type EuiBasicTableColumn,
 } from '@elastic/eui';
@@ -176,6 +177,14 @@ export const PoliciesTabContent = ({ onPolicyClick, onRuleClick }: Props) => {
 
   return (
     <>
+      <EuiText size="s">
+        <p>
+          {i18n.translate('xpack.alertingV2.executionHistory.policiesTab.description', {
+            defaultMessage: 'Showing dispatcher decisions from the last 24 hours.',
+          })}
+        </p>
+      </EuiText>
+      <EuiSpacer size="m" />
       {showBanner && (
         <>
           <NewEventsBanner
