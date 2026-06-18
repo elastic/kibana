@@ -571,6 +571,96 @@ describe('EntityMaintainersClient', () => {
     });
   });
 
+  describe('stopAll', () => {
+    it('should stop all registered maintainer tasks', async () => {
+      const entries: EntityMaintainerTaskEntry[] = [
+        { id: 'm1', interval: '5m', minLicense: DEFAULT_ENTITY_MAINTAINER_MIN_LICENSE },
+        { id: 'm2', interval: '1h', minLicense: DEFAULT_ENTITY_MAINTAINER_MIN_LICENSE },
+      ];
+      entityMaintainersRegistry.getAll.mockReturnValue(entries);
+      entityMaintainersRegistry.hasId.mockReturnValue(true);
+      const client = createClient();
+      const request = createMockRequest();
+
+      await client.stopAll(request);
+
+      expect(entityMaintainersRegistry.getAll).toHaveBeenCalled();
+      expect(stopEntityMaintainer).toHaveBeenCalledTimes(2);
+      expect(stopEntityMaintainer).toHaveBeenCalledWith(
+        expect.objectContaining({ id: 'm1', namespace: 'default', request })
+      );
+      expect(stopEntityMaintainer).toHaveBeenCalledWith(
+        expect.objectContaining({ id: 'm2', namespace: 'default', request })
+      );
+    });
+
+    it('should do nothing when registry is empty', async () => {
+      entityMaintainersRegistry.getAll.mockReturnValue([]);
+      const client = createClient();
+
+      await client.stopAll(createMockRequest());
+
+      expect(stopEntityMaintainer).not.toHaveBeenCalled();
+    });
+
+    it('should propagate error when any stop fails', async () => {
+      const entries: EntityMaintainerTaskEntry[] = [
+        { id: 'm1', interval: '5m', minLicense: DEFAULT_ENTITY_MAINTAINER_MIN_LICENSE },
+      ];
+      entityMaintainersRegistry.getAll.mockReturnValue(entries);
+      entityMaintainersRegistry.hasId.mockReturnValue(true);
+      (stopEntityMaintainer as jest.Mock).mockRejectedValueOnce(new Error('stop failed'));
+      const client = createClient();
+
+      await expect(client.stopAll(createMockRequest())).rejects.toThrow('stop failed');
+    });
+  });
+
+  describe('startAll', () => {
+    it('should start all registered maintainer tasks', async () => {
+      const entries: EntityMaintainerTaskEntry[] = [
+        { id: 'm1', interval: '5m', minLicense: DEFAULT_ENTITY_MAINTAINER_MIN_LICENSE },
+        { id: 'm2', interval: '1h', minLicense: DEFAULT_ENTITY_MAINTAINER_MIN_LICENSE },
+      ];
+      entityMaintainersRegistry.getAll.mockReturnValue(entries);
+      entityMaintainersRegistry.hasId.mockReturnValue(true);
+      const client = createClient();
+      const request = createMockRequest();
+
+      await client.startAll(request);
+
+      expect(entityMaintainersRegistry.getAll).toHaveBeenCalled();
+      expect(startEntityMaintainer).toHaveBeenCalledTimes(2);
+      expect(startEntityMaintainer).toHaveBeenCalledWith(
+        expect.objectContaining({ id: 'm1', namespace: 'default', request })
+      );
+      expect(startEntityMaintainer).toHaveBeenCalledWith(
+        expect.objectContaining({ id: 'm2', namespace: 'default', request })
+      );
+    });
+
+    it('should do nothing when registry is empty', async () => {
+      entityMaintainersRegistry.getAll.mockReturnValue([]);
+      const client = createClient();
+
+      await client.startAll(createMockRequest());
+
+      expect(startEntityMaintainer).not.toHaveBeenCalled();
+    });
+
+    it('should propagate error when any start fails', async () => {
+      const entries: EntityMaintainerTaskEntry[] = [
+        { id: 'm1', interval: '5m', minLicense: DEFAULT_ENTITY_MAINTAINER_MIN_LICENSE },
+      ];
+      entityMaintainersRegistry.getAll.mockReturnValue(entries);
+      entityMaintainersRegistry.hasId.mockReturnValue(true);
+      (startEntityMaintainer as jest.Mock).mockRejectedValueOnce(new Error('start failed'));
+      const client = createClient();
+
+      await expect(client.startAll(createMockRequest())).rejects.toThrow('start failed');
+    });
+  });
+
   describe('getMaintainers', () => {
     it('should only return requested maintainers when ids filter is provided', async () => {
       entityMaintainersRegistry.getAll.mockReturnValue([

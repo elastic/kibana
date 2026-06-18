@@ -226,6 +226,28 @@ export class EntityMaintainersClient {
     }
   }
 
+  public async stopAll(request: KibanaRequest): Promise<void> {
+    this.logger.debug('Stopping all entity maintainer tasks');
+    try {
+      const tasks = entityMaintainersRegistry.getAll();
+      await Promise.all(tasks.map(({ id }) => this.stop(id, request)));
+    } catch (error) {
+      this.logger.error('Failed to stop all entity maintainer tasks', { error });
+      throw error;
+    }
+  }
+
+  public async startAll(request: KibanaRequest): Promise<void> {
+    this.logger.debug('Starting all entity maintainer tasks');
+    try {
+      const tasks = entityMaintainersRegistry.getAll();
+      await Promise.all(tasks.map(({ id }) => this.start(id, request)));
+    } catch (error) {
+      this.logger.error('Failed to start all entity maintainer tasks', { error });
+      throw error;
+    }
+  }
+
   public async removeAll(): Promise<void> {
     this.logger.debug('Removing all entity maintainer tasks');
     try {
