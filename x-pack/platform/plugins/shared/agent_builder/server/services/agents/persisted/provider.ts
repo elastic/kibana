@@ -114,7 +114,7 @@ const createPersistedProvider = async ({
     },
     getAccessControl: async (agentId: string) => {
       const result = await client.getAccessControl(agentId);
-      return { canManage: result.canManage, access_control: result.access_control };
+      return { can_manage: result.can_manage, access_control: result.access_control };
     },
     updateAccessControl: async (agentId, update) => {
       return client.updateAccessControl(agentId, update);

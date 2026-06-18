@@ -67,7 +67,7 @@ import { hasRequiredDocumentFields } from './utils/helper';
 
 export interface GetAgentAccessControlResult {
   /** True when the caller is allowed to read the principal list. */
-  canManage: boolean;
+  can_manage: boolean;
   /** Always present; entries[] may be empty for default agents. */
   access_control: AgentAccessControl;
 }
@@ -401,7 +401,7 @@ class AgentClientImpl implements AgentClient {
       isAdmin: this.isAdmin,
     });
     const accessControl = source.access_control ?? getDefaultAgentAccessControl();
-    return { canManage, access_control: accessControl };
+    return { can_manage: canManage, access_control: accessControl };
   }
 
   async updateAccessControl(

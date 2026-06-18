@@ -560,8 +560,8 @@ export function registerAgentRoutes({
         const result = await service.getAccessControl(request.params.id);
 
         const body: GetAgentAccessControlResponse = {
-          can_manage_access_control: result.canManage,
-          access_control: result.canManage
+          can_manage_access_control: result.can_manage,
+          access_control: result.can_manage
             ? result.access_control
             : { ...result.access_control, entries: [] },
         };

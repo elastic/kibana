@@ -23,7 +23,7 @@ export interface GetAgentOptions {
 }
 
 export interface AgentAccessControlResult {
-  canManage: boolean;
+  can_manage: boolean;
   access_control: AgentAccessControl;
 }
 
