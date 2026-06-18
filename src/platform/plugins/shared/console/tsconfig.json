@@ -50,6 +50,7 @@
     "@kbn/node-libs-browser-webpack-plugin",
     "@kbn/core-application-common",
     "@kbn/core-chrome-layout-constants",
+    "@kbn/esql-types",
   ],
   "exclude": [
     "target/**/*",

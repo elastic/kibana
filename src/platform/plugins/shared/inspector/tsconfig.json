@@ -11,14 +11,14 @@
     "@kbn/i18n",
     "@kbn/test-jest-helpers",
     "@kbn/i18n-react",
-    "@kbn/tomato",
     "@kbn/core-ui-settings-browser-mocks",
     "@kbn/core-ui-settings-browser",
     "@kbn/std",
     "@kbn/code-editor",
     "@kbn/core-lifecycle-browser",
     "@kbn/presentation-util",
-    "@kbn/shared-ux-utility"
+    "@kbn/shared-ux-utility",
+    "@kbn/monaco"
   ],
   "exclude": ["target/**/*"]
 }

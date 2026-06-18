@@ -27,6 +27,7 @@ dependsOn:
   - '@kbn/share-plugin'
   - '@kbn/usage-collection-plugin'
   - '@kbn/i18n'
+  - '@kbn/analytics'
   - '@kbn/utility-types'
   - '@kbn/i18n-react'
   - '@kbn/shared-ux-utility'
@@ -59,9 +60,9 @@ dependsOn:
   - '@kbn/babel-register'
   - '@kbn/core-injected-metadata-browser-internal'
   - '@kbn/node-libs-browser-webpack-plugin'
-  - '@kbn/esql-types'
   - '@kbn/core-application-common'
   - '@kbn/core-chrome-layout-constants'
+  - '@kbn/esql-types'
 tags:
   - plugin
   - prod
