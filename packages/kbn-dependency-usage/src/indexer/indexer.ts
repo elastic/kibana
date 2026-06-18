@@ -243,51 +243,70 @@ export interface IndexerOptions {
   indexName: string;
 }
 
+const MAPPINGS_PROPERTIES = {
+  '@timestamp': { type: 'date' },
+  snapshot_id: { type: 'keyword' },
+  package: {
+    properties: {
+      path: { type: 'keyword' },
+      name: { type: 'keyword' },
+      type: { type: 'keyword' },
+      group: { type: 'keyword' },
+      visibility: { type: 'keyword' },
+    },
+  },
+  code_owners: { type: 'keyword' },
+  dependency: {
+    properties: {
+      name: { type: 'keyword' },
+      declared_version: { type: 'keyword' },
+    },
+  },
+  dependent: {
+    properties: {
+      file_count: { type: 'integer' },
+      test_file_count: { type: 'integer' },
+      prod_file_count: { type: 'integer' },
+      files: { type: 'keyword' },
+    },
+  },
+  renovate: {
+    properties: {
+      team: { type: 'keyword' },
+      group: { type: 'keyword' },
+      orphan: { type: 'boolean' },
+    },
+  },
+};
+
+export const INDEX_NAME = 'kibana-dependency-usage';
+export const TRANSFORM_INDEX_NAME = 'latest-kibana-dependency-usage';
+
 /** ES index template — PUT once with --setup-template.
  *  Shard/replica settings are intentionally omitted so the template works on
  *  both stateful and serverless clusters (serverless manages those itself). */
 export const INDEX_TEMPLATE = {
-  index_patterns: ['kibana-dependency-usage*'],
+  index_patterns: [`${INDEX_NAME}*`],
   priority: 100,
-  template: {
-    mappings: {
-      properties: {
-        '@timestamp': { type: 'date' },
-        snapshot_id: { type: 'keyword' },
-        package: {
-          properties: {
-            path: { type: 'keyword' },
-            name: { type: 'keyword' },
-            type: { type: 'keyword' },
-            group: { type: 'keyword' },
-            visibility: { type: 'keyword' },
-          },
-        },
-        code_owners: { type: 'keyword' },
-        dependency: {
-          properties: {
-            name: { type: 'keyword' },
-            declared_version: { type: 'keyword' },
-          },
-        },
-        dependent: {
-          properties: {
-            file_count: { type: 'integer' },
-            test_file_count: { type: 'integer' },
-            prod_file_count: { type: 'integer' },
-            files: { type: 'keyword' },
-          },
-        },
-        renovate: {
-          properties: {
-            team: { type: 'keyword' },
-            group: { type: 'keyword' },
-            orphan: { type: 'boolean' },
-          },
-        },
-      },
-    },
+  template: { mappings: { properties: MAPPINGS_PROPERTIES } },
+};
+
+/** Index template for the transform destination index. */
+export const TRANSFORM_INDEX_TEMPLATE = {
+  index_patterns: [TRANSFORM_INDEX_NAME],
+  priority: 100,
+  template: { mappings: { properties: MAPPINGS_PROPERTIES } },
+};
+
+/** Transform that keeps the latest snapshot doc per (package.name, dependency.name). */
+export const TRANSFORM_DEFINITION = {
+  source: { index: [`${INDEX_NAME}*`] },
+  dest: { index: TRANSFORM_INDEX_NAME },
+  latest: {
+    sort: '@timestamp',
+    unique_key: ['package.name', 'dependency.name'],
   },
+  sync: { time: { field: '@timestamp' } },
 };
 
 function buildHeaders(opts: IndexerOptions): Record<string, string> {
@@ -311,15 +330,40 @@ function buildBulkBody(docs: DepUsageDoc[]): string {
   );
 }
 
-export async function ensureIndexTemplate(opts: IndexerOptions): Promise<void> {
-  const url = `${opts.esUrl}/_index_template/kibana-dependency-usage-template`;
+async function putJson(url: string, body: unknown, opts: IndexerOptions): Promise<void> {
   const res = await fetch(url, {
     method: 'PUT',
     headers: buildHeaders(opts),
-    body: JSON.stringify(INDEX_TEMPLATE),
+    body: JSON.stringify(body),
   });
   if (!res.ok) {
-    throw new Error(`Failed to PUT index template (${res.status}): ${await res.text()}`);
+    throw new Error(`PUT ${url} failed (${res.status}): ${await res.text()}`);
+  }
+}
+
+export async function ensureIndexTemplate(opts: IndexerOptions): Promise<void> {
+  await putJson(
+    `${opts.esUrl}/_index_template/kibana-dependency-usage-template`,
+    INDEX_TEMPLATE,
+    opts
+  );
+  await putJson(
+    `${opts.esUrl}/_index_template/kibana-dependency-usage-transform-template`,
+    TRANSFORM_INDEX_TEMPLATE,
+    opts
+  );
+  await putJson(
+    `${opts.esUrl}/_transform/${TRANSFORM_INDEX_NAME}`,
+    TRANSFORM_DEFINITION,
+    opts
+  );
+  const startRes = await fetch(`${opts.esUrl}/_transform/${TRANSFORM_INDEX_NAME}/_start`, {
+    method: 'POST',
+    headers: buildHeaders(opts),
+  });
+  // 409 means the transform is already running — not an error.
+  if (!startRes.ok && startRes.status !== 409) {
+    throw new Error(`Failed to start transform (${startRes.status}): ${await startRes.text()}`);
   }
 }
 
