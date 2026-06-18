@@ -101,7 +101,8 @@ export function AlertConditionStep({
   // Auto-populate group fields from the STATS BY clause whenever the committed
   // query changes. Re-derives on every new Apply so switching indices updates
   // the group fields instead of leaving stale values from the previous query.
-  const autoPopulatedForRef = useRef<string | null>(null);
+  // Skips the first run when editing to preserve API-seeded grouping defaults.
+  const autoPopulatedForRef = useRef<string | null>(isEditing ? committedQuery : null);
   useEffect(() => {
     if (!state.queryCommitted || !committedQuery) return;
     if (autoPopulatedForRef.current === committedQuery) return;
