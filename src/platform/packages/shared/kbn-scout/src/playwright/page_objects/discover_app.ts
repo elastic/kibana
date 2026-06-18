@@ -124,10 +124,8 @@ export class DiscoverApp {
     }
 
     await expect(overflowButton).toBeVisible();
-    await expect(async () => {
-      await overflowButton.click();
-      await expect(popover).toBeVisible({ timeout: 5_000 });
-    }).toPass({ timeout: 30_000 });
+    await overflowButton.click();
+    await expect(popover).toBeVisible();
 
     const menuItem = this.page.testSubj.locator(testId);
     await expect(menuItem).toBeVisible();
