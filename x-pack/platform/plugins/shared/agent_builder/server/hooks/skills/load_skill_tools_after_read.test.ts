@@ -6,7 +6,7 @@
  */
 
 import type { AfterToolCallHookContext } from '@kbn/agent-builder-server';
-import { filestoreTools } from '@kbn/agent-builder-common/tools';
+import { internalTools } from '@kbn/agent-builder-common/tools';
 import { FileEntryType } from '@kbn/agent-builder-server/runner/filestore';
 import type { FileEntry } from '@kbn/agent-builder-server/runner/filestore';
 import type {
@@ -85,7 +85,7 @@ const createMockSkill = (
 });
 
 const createHookContext = ({
-  toolId = filestoreTools.read,
+  toolId = internalTools.readFile,
   toolParams = { path: 'skills/platform/my-skill/SKILL.md' },
   toolHandlerContext,
 }: {

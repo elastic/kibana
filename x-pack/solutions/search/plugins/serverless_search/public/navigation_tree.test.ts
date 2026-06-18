@@ -23,6 +23,11 @@ describe('Navigation Tree', () => {
     });
   });
 
+  it('has agent_builder as the first item after home', () => {
+    const { body } = createNavigationTree(mockApplication);
+    expect(body[1]).toMatchObject({ link: 'agent_builder' });
+  });
+
   it('includes Manage jobs link to Stack Management anomaly detection jobs list under ML nav', () => {
     const { body } = createNavigationTree(mockApplication);
     const mlNode = body.find((item: any) => item.id === 'machine_learning');
@@ -100,6 +105,54 @@ describe('Navigation Tree', () => {
     expect(aiSection?.children).not.toContainEqual(
       expect.objectContaining({
         link: 'management:observabilityAiAssistantManagement',
+      })
+    );
+  });
+
+  it('shows Performance link in Organization section when showPerformanceLink is true', () => {
+    const { footer } = createNavigationTree({ ...mockApplication, showPerformanceLink: true });
+
+    const adminAndSettingsNode = footer?.find((item: any) => item.id === 'admin_and_settings');
+    const orgSection = adminAndSettingsNode?.children?.find(
+      (item: any) => item.id === 'organization'
+    );
+
+    expect(orgSection).toBeDefined();
+    expect(orgSection?.children).toContainEqual(
+      expect.objectContaining({
+        id: 'cloudLinkDeployment',
+        cloudLink: 'deployment',
+      })
+    );
+  });
+
+  it('hides Performance link in Organization section when showPerformanceLink is false', () => {
+    const { footer } = createNavigationTree({ ...mockApplication, showPerformanceLink: false });
+
+    const adminAndSettingsNode = footer?.find((item: any) => item.id === 'admin_and_settings');
+    const orgSection = adminAndSettingsNode?.children?.find(
+      (item: any) => item.id === 'organization'
+    );
+
+    expect(orgSection).toBeDefined();
+    expect(orgSection?.children).not.toContainEqual(
+      expect.objectContaining({
+        id: 'cloudLinkDeployment',
+      })
+    );
+  });
+
+  it('hides Performance link by default (no manage cluster privilege)', () => {
+    const { footer } = createNavigationTree(mockApplication);
+
+    const adminAndSettingsNode = footer?.find((item: any) => item.id === 'admin_and_settings');
+    const orgSection = adminAndSettingsNode?.children?.find(
+      (item: any) => item.id === 'organization'
+    );
+
+    expect(orgSection?.children).not.toContainEqual(
+      expect.objectContaining({
+        id: 'cloudLinkDeployment',
       })
     );
   });
