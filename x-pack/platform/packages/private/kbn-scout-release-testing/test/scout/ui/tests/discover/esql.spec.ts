@@ -9,11 +9,6 @@ import { expect } from '@kbn/scout/ui';
 import { test, tags } from '@kbn/scout';
 import { SavedObjectsTracker } from '../../helpers';
 
-const defaultSettings = {
-  defaultIndex: 'kibana_sample_data_logs',
-  'dateFormat:tz': 'UTC',
-};
-
 // Sample data for `kibana_sample_data_logs` is generated relative to the install
 // time and spans roughly three weeks in the past and one week in the future, so
 // a wide default time range guarantees the histogram and aggregations have data
