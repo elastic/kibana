@@ -6,10 +6,13 @@
  */
 
 import expect from '@kbn/expect';
+import { createEsClientForFtrConfig, kibanaServerTestUser } from '@kbn/test';
 import type { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../../helpers';
 
 const TEST_INDEX = 'logs-log.log-test';
+
+const AGENT_TEST_INDEX = 'logs-elastic_agent.status_change-default';
 
 const FINAL_PIPELINE_ID = '.fleet_final_pipeline-1';
 
@@ -45,6 +48,12 @@ export default function (providerContext: FtrProviderContext) {
         .set('kbn-xsrf', 'xxxx')
         .send({ force: true })
         .expect(200);
+
+      await supertest
+        .post(`/api/fleet/epm/packages/elastic_agent`)
+        .set('kbn-xsrf', 'xxxx')
+        .send({ force: true })
+        .expect(200);
     });
 
     after(async () => {
@@ -53,9 +62,15 @@ export default function (providerContext: FtrProviderContext) {
         .set('kbn-xsrf', 'xxxx')
         .send({ force: true })
         .expect(200);
+
+      await supertest
+        .delete(`/api/fleet/epm/packages/elastic_agent`)
+        .set('kbn-xsrf', 'xxxx')
+        .send({ force: true })
+        .expect(200);
       await esArchiver.unload('x-pack/platform/test/fixtures/es_archives/fleet/empty_fleet_server');
       const res = await es.search({
-        index: TEST_INDEX,
+        index: [TEST_INDEX, AGENT_TEST_INDEX].join(','),
       });
 
       for (const hit of res.hits.hits) {
@@ -230,8 +245,11 @@ export default function (providerContext: FtrProviderContext) {
     ];
 
     it('For a doc written by elastic/kibana user to a kibana_user_allowed_datasets should write verified status', async () => {
-      // Mirrors what AgentStatusChangeTask writes using asInternalUser (elastic/kibana service account)
-      const res = await es.index({
+      const config = getService('config');
+      const esAsKibanaSystem = createEsClientForFtrConfig(config, {
+        authOverride: kibanaServerTestUser,
+      });
+      const res = await esAsKibanaSystem.index({
         index: 'logs-elastic_agent.status_change-default',
         document: {
           '@timestamp': '2020-01-01T09:09:00',
