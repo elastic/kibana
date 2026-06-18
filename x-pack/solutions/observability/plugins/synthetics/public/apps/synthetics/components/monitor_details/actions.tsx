@@ -14,10 +14,6 @@ import { useGetUrlParams } from '../../hooks';
 
 export function Actions() {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-  // Remote (CCS) monitors have no local saved object, so mutating actions
-  // (edit, run test manually) cannot operate on them. We detect remoteness
-  // from the URL — the same source `useSelectedMonitor` / `useRemoteMonitor`
-  // use to decide whether the monitor is remote.
   const { remoteName } = useGetUrlParams();
   const isRemote = Boolean(remoteName);
   const handleActionsClick = () => setIsPopoverOpen((value) => !value);
