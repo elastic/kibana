@@ -11,6 +11,7 @@ import { ServiceOverview } from '.';
 import { ApmDocumentType } from '../../../../common/document_type';
 import { RollupInterval } from '../../../../common/rollup';
 import type { APMServiceContextValue } from '../../../context/apm_service/apm_service_context';
+import { ChartPointerEventContextProvider } from '../../../context/chart_pointer_event/chart_pointer_event_context';
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
 import {
   opbeansScenario,
@@ -109,6 +110,14 @@ export const Example: StoryFn<{}> = () => {
 };
 
 const _overviewDocs = opbeansScenario();
+
+Example.decorators = [
+  (StoryComponent) => (
+    <ChartPointerEventContextProvider>
+      <StoryComponent />
+    </ChartPointerEventContextProvider>
+  ),
+];
 
 Example.parameters = {
   routePath: `/services/${SERVICE_NAME}/overview?environment=ENVIRONMENT_ALL&rangeFrom=${SCENARIO_START.toISOString()}&rangeTo=${SCENARIO_END.toISOString()}`,

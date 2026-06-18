@@ -13,6 +13,7 @@ import { ApmDocumentType } from '../../../../../common/document_type';
 import { RollupInterval } from '../../../../../common/rollup';
 import type { APMServiceContextValue } from '../../../../context/apm_service/apm_service_context';
 import { APMServiceContext } from '../../../../context/apm_service/apm_service_context';
+import { ChartPointerEventContextProvider } from '../../../../context/chart_pointer_event/chart_pointer_event_context';
 import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 import { createCallApmApi } from '../../../../services/rest/create_call_apm_api';
 import type { APIReturnType } from '../../../../services/rest/create_call_apm_api';
@@ -145,7 +146,9 @@ const stories: Meta<Args> = {
 
       return (
         <APMServiceContext.Provider value={serviceContextValue}>
-          <StoryComponent />
+          <ChartPointerEventContextProvider>
+            <StoryComponent />
+          </ChartPointerEventContextProvider>
         </APMServiceContext.Provider>
       );
     },
