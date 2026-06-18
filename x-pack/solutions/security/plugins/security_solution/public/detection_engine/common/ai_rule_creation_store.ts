@@ -15,15 +15,9 @@ export interface AiRuleCreationSession {
   applyCount: number;
 }
 
-/** A save request, carrying the card id and version it was triggered from (for the duplicate guard). */
 export interface SaveRuleRequest {
   rule: RuleResponse;
-  /**
-   * Id of the attachment card that triggered the save. Threaded through so the handler can
-   * target the correct attachment when persisting the saved rule id.
-   */
   attachmentId?: string;
-  /** Version of the create card that requested the save. Undefined for update saves. */
   createCardVersion?: number;
 }
 
@@ -32,18 +26,9 @@ export class AiRuleCreationService {
   private readonly savingSubject = new BehaviorSubject<boolean>(false);
   private readonly aiRuleSubject = new BehaviorSubject<RuleResponse | null>(null);
   private readonly formSyncSubject = new BehaviorSubject<boolean>(false);
-  /**
-   * Create-card keys that have been saved in the active conversation. Keyed by
-   * `"${attachmentId}:${version}"` so saving card A-v1 never triggers the warning on card B-v1.
-   * Session-scoped: cleared on conversation switch and reset (the frozen `data.ruleId` label
-   * remains the refresh-safe source of truth).
-   */
+  // Keyed `"${attachmentId}:${version}"` so saving card A-v1 can't trigger the warning on card B-v1.
   private readonly savedCreateVersionsSubject = new BehaviorSubject<ReadonlySet<string>>(new Set());
-  /**
-   * The attachment id of the rule card currently bound to the create/edit form. `null` means the
-   * form is idle (no active bind). Set by "Open in form", updated by round-complete edits, and
-   * released when a brand-new rule card is minted.
-   */
+  // `null` = form idle (no active bind). Released when a brand-new rule card is minted.
   private readonly boundAttachmentIdSubject = new BehaviorSubject<string | null>(null);
   private session: AiRuleCreationSession | null = null;
 
@@ -87,10 +72,6 @@ export class AiRuleCreationService {
     });
   };
 
-  /**
-   * Record that the create card at `(attachmentId, version)` has been saved (shows its duplicate
-   * warning). Keyed as `"${attachmentId}:${version}"` so saving card A-v1 never warns on card B-v1.
-   */
   public markCreateSaved = (attachmentId: string, version: number): void => {
     const key = `${attachmentId}:${version}`;
     const next = new Set(this.savedCreateVersionsSubject.getValue());
@@ -98,7 +79,6 @@ export class AiRuleCreationService {
     this.savedCreateVersionsSubject.next(next);
   };
 
-  /** Drop all recorded saved create cards (e.g. when the active conversation changes). */
   public clearSavedCreateVersions = (): void => {
     if (this.savedCreateVersionsSubject.getValue().size > 0) {
       this.savedCreateVersionsSubject.next(new Set());
@@ -120,12 +100,10 @@ export class AiRuleCreationService {
     }
   };
 
-  /** Set the attachment id the create/edit form is currently bound to. */
   public setBoundAttachment = (attachmentId: string): void => {
     this.boundAttachmentIdSubject.next(attachmentId);
   };
 
-  /** Release the form bind — the form goes idle (no attachment syncing). */
   public releaseBind = (): void => {
     this.boundAttachmentIdSubject.next(null);
   };
@@ -140,6 +118,10 @@ export class AiRuleCreationService {
 
   public activateFormSync = (): void => {
     this.formSyncSubject.next(true);
+  };
+
+  public deactivateFormSync = (): void => {
+    this.formSyncSubject.next(false);
   };
 
   public clearSession = (): void => {

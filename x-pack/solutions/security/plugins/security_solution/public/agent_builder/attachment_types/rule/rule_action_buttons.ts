@@ -88,10 +88,7 @@ export const buildRuleActionButtons = ({
             if (aiRuleCreation.getIsSaving()) {
               return;
             }
-            aiRuleCreation.requestSaveRule(
-              { ...rule, id: ruleId ?? rule.id },
-              { attachmentId }
-            );
+            aiRuleCreation.requestSaveRule({ ...rule, id: ruleId ?? rule.id }, { attachmentId });
           },
         }
       : {

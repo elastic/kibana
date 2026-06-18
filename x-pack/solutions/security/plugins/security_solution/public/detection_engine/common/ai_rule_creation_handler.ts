@@ -45,11 +45,27 @@ const stripReadOnlyFields = (rule: RuleResponse): RuleUpdateProps => {
   return mutable as unknown as RuleUpdateProps;
 };
 
-// When updating by id, rule_id must not be present — the server rejects requests
-// with both fields set. Strip it so the PUT body only carries the id identifier.
+// Server rejects PUT requests that include both `id` and `rule_id`.
 const stripRuleId = (rule: RuleUpdateProps): RuleUpdateProps => {
   const { rule_id: _, ...rest } = rule as RuleUpdateProps & { rule_id?: string };
   return rest as RuleUpdateProps;
+};
+
+// Strip server-assigned fields from attachment text — `id`/`rule_id` in the text causes the
+// agent to skip `attachment_id` and mint a new card instead of updating the existing one.
+const stripServerFields = (rule: RuleResponse): Partial<RuleResponse> => {
+  const {
+    id: _id,
+    rule_id: _ruleId,
+    revision: _revision,
+    created_at: _createdAt,
+    created_by: _createdBy,
+    updated_at: _updatedAt,
+    updated_by: _updatedBy,
+    execution_summary: _execSummary,
+    ...spec
+  } = rule as RuleResponse & { rule_id?: string };
+  return spec;
 };
 
 export const createAiRuleCreationHandler = ({
@@ -66,9 +82,7 @@ export const createAiRuleCreationHandler = ({
   let activeConversationId: string | undefined;
   const conversationIdSub = agentBuilder?.events.ui.activeConversation$.subscribe((change) => {
     const nextId = change?.id;
-    // Only reset on a real switch to a different conversation. Version numbers are per-conversation,
-    // so a stale guard could otherwise mis-warn. A transient null/undefined binding (e.g. the sidebar
-    // briefly unbinding) must NOT clear it, or we'd lose the warning mid-session.
+    // Ignore transient null/undefined (sidebar briefly unbinding) — only clear on a real switch.
     if (nextId !== undefined && nextId !== activeConversationId) {
       aiRuleCreation.clearSavedCreateVersions();
     }
@@ -77,148 +91,145 @@ export const createAiRuleCreationHandler = ({
 
   const saveSub = aiRuleCreation.saveRuleRequest$.subscribe(
     async ({ rule, attachmentId, createCardVersion }) => {
-    const parseResult = EsqlRuleCreateProps.safeParse(rule);
-    if (!parseResult.success) {
-      const summary = parseResult.error.issues
-        .map((e) => `${e.path.join('.')}: ${e.message}`)
-        .join('; ');
-      aiRuleCreation.clearSaving();
-      notifications.toasts.addDanger({
-        title: i18n.translate('xpack.securitySolution.saveRuleHandler.saveFailedTitle', {
-          defaultMessage: 'Failed to save rule',
-        }),
-        text: summary,
-      });
-      return;
-    }
-
-    try {
-      let saved: RuleResponse;
-      const savedRuleId = rule.id;
-      const isUpdate = !!savedRuleId;
-      if (savedRuleId) {
-        saved = await updateRule({
-          rule: transformOutput(stripRuleId(stripReadOnlyFields(rule))),
+      const parseResult = EsqlRuleCreateProps.safeParse(rule);
+      if (!parseResult.success) {
+        const summary = parseResult.error.issues
+          .map((e) => `${e.path.join('.')}: ${e.message}`)
+          .join('; ');
+        aiRuleCreation.clearSaving();
+        notifications.toasts.addDanger({
+          title: i18n.translate('xpack.securitySolution.saveRuleHandler.saveFailedTitle', {
+            defaultMessage: 'Failed to save rule',
+          }),
+          text: summary,
         });
-      } else {
-        const { id: _id, ...createProps } = rule as RuleResponse & { id?: string };
-        saved = await createRule({
-          rule: transformOutput(createProps as unknown as RuleUpdateProps),
-        });
-      }
-      notifications.toasts.addSuccess(
-        isUpdate
-          ? i18n.translate('xpack.securitySolution.saveRuleHandler.updatedTitle', {
-              defaultMessage: 'Rule updated',
-            })
-          : i18n.translate('xpack.securitySolution.saveRuleHandler.savedTitle', {
-              defaultMessage: 'Rule saved',
-            })
-      );
-
-      const session = aiRuleCreation.getSession();
-      if (session) {
-        telemetry.reportEvent(RuleCreationEventTypes.AiSaved, {
-          ruleId: saved.id,
-          isUpdate,
-          sessionId: session.sessionId,
-          applyCount: session.applyCount,
-          durationSinceSessionStartMs: Date.now() - session.startTimestamp,
-        });
+        return;
       }
 
-      aiRuleCreation.clearSaving();
-
-      // Mark this exact create card as saved so it (and only it) shows the duplicate-save warning.
-      if (!isUpdate && createCardVersion !== undefined && attachmentId) {
-        aiRuleCreation.markCreateSaved(attachmentId, createCardVersion);
-      }
-
-      // Target the specific attachment that triggered the save; fall back to the constant id
-      // for legacy/form-seeded saves that don't carry an attachmentId.
-      const targetAttachmentId = attachmentId ?? SECURITY_RULE_ATTACHMENT_ID;
-
-      const convId = activeConversationId;
-      if (convId) {
-        // Persist the saved rule id AND full data (B7) — a partial {ruleId}-only PUT leaves the
-        // server version with the pre-save `text`, so a reload would show a stale card.
-        agentBuilder
-          ?.updateAttachment(convId, targetAttachmentId, {
-            data: {
-              text: JSON.stringify(saved),
-              attachmentLabel: saved.name,
-              ruleId: saved.id,
-            },
-          })
-          .catch(() => {
-            notifications.toasts.addWarning({
-              title: i18n.translate(
-                'xpack.securitySolution.saveRuleHandler.syncConversationFailedTitle',
-                {
-                  defaultMessage: 'Rule saved, but the assistant view could not be synced',
-                }
-              ),
-              text: i18n.translate(
-                'xpack.securitySolution.saveRuleHandler.syncConversationFailedText',
-                {
-                  defaultMessage:
-                    'The rule was saved successfully. Refreshing the page may show the rule as not yet saved in the assistant.',
-                }
-              ),
-            });
+      try {
+        let saved: RuleResponse;
+        const savedRuleId = rule.id;
+        const isUpdate = !!savedRuleId;
+        if (savedRuleId) {
+          saved = await updateRule({
+            rule: transformOutput(stripRuleId(stripReadOnlyFields(rule))),
           });
-        if (!isUpdate) {
+        } else {
+          const { id: _id, ...createProps } = rule as RuleResponse & { id?: string };
+          saved = await createRule({
+            rule: transformOutput(createProps as unknown as RuleUpdateProps),
+          });
+        }
+        notifications.toasts.addSuccess(
+          isUpdate
+            ? i18n.translate('xpack.securitySolution.saveRuleHandler.updatedTitle', {
+                defaultMessage: 'Rule updated',
+              })
+            : i18n.translate('xpack.securitySolution.saveRuleHandler.savedTitle', {
+                defaultMessage: 'Rule saved',
+              })
+        );
+
+        const session = aiRuleCreation.getSession();
+        if (session) {
+          telemetry.reportEvent(RuleCreationEventTypes.AiSaved, {
+            ruleId: saved.id,
+            isUpdate,
+            sessionId: session.sessionId,
+            applyCount: session.applyCount,
+            durationSinceSessionStartMs: Date.now() - session.startTimestamp,
+          });
+        }
+
+        aiRuleCreation.clearSaving();
+        // Deactivate so a post-save form edit can't clobber the attachment's ruleId before the
+        // next AI round reactivates sync.
+        aiRuleCreation.deactivateFormSync();
+
+        if (!isUpdate && createCardVersion !== undefined && attachmentId) {
+          aiRuleCreation.markCreateSaved(attachmentId, createCardVersion);
+        }
+
+        const targetAttachmentId = attachmentId ?? SECURITY_RULE_ATTACHMENT_ID;
+
+        const convId = activeConversationId;
+        if (convId) {
           agentBuilder
-            ?.updateAttachmentOrigin(convId, targetAttachmentId, saved.id)
+            ?.updateAttachment(convId, targetAttachmentId, {
+              data: {
+                text: JSON.stringify(stripServerFields(saved)),
+                attachmentLabel: saved.name,
+                ruleId: saved.id,
+              },
+            })
             .catch(() => {
+              notifications.toasts.addWarning({
+                title: i18n.translate(
+                  'xpack.securitySolution.saveRuleHandler.syncConversationFailedTitle',
+                  {
+                    defaultMessage: 'Rule saved, but the assistant view could not be synced',
+                  }
+                ),
+                text: i18n.translate(
+                  'xpack.securitySolution.saveRuleHandler.syncConversationFailedText',
+                  {
+                    defaultMessage:
+                      'The rule was saved successfully. Refreshing the page may show the rule as not yet saved in the assistant.',
+                  }
+                ),
+              });
+            });
+          if (!isUpdate) {
+            agentBuilder?.updateAttachmentOrigin(convId, targetAttachmentId, saved.id).catch(() => {
               // Non-fatal: origin is a secondary link used for navigation, not the button state.
             });
+          }
         }
-      }
 
-      securitySolutionQueryClient.invalidateQueries(['POST', RULE_MANAGEMENT_RULES_URL_SEARCH], {
-        exact: false,
-      });
-      securitySolutionQueryClient.invalidateQueries(RULE_MANAGEMENT_FILTERS_QUERY_KEY, {
-        exact: false,
-      });
-      if (isUpdate) {
-        // Push to cache immediately so rule details page reflects changes without waiting for refetch.
-        securitySolutionQueryClient.setQueryData(
-          ['GET', DETECTION_ENGINE_RULES_URL, saved.id],
-          transformInput(saved)
-        );
-        securitySolutionQueryClient.invalidateQueries(['GET', DETECTION_ENGINE_RULES_URL], {
+        securitySolutionQueryClient.invalidateQueries(['POST', RULE_MANAGEMENT_RULES_URL_SEARCH], {
           exact: false,
         });
-      }
-
-      agentBuilder?.addAttachment({
-        id: targetAttachmentId,
-        type: SecurityAgentBuilderAttachments.rule,
-        description: saved.name,
-        data: {
-          text: JSON.stringify(saved),
-          attachmentLabel: saved.name,
-          ruleId: saved.id,
-        },
-      });
-    } catch (err) {
-      aiRuleCreation.clearSaving();
-      const message =
-        (err as { body?: { message?: string } })?.body?.message ??
-        (err as Error)?.message ??
-        i18n.translate('xpack.securitySolution.saveRuleHandler.unknownErrorMessage', {
-          defaultMessage: 'Unknown error',
+        securitySolutionQueryClient.invalidateQueries(RULE_MANAGEMENT_FILTERS_QUERY_KEY, {
+          exact: false,
         });
-      notifications.toasts.addDanger({
-        title: i18n.translate('xpack.securitySolution.saveRuleHandler.saveFailedTitle', {
-          defaultMessage: 'Failed to save rule',
-        }),
-        text: message,
-      });
+        if (isUpdate) {
+          // Push to cache immediately so rule details page reflects changes without waiting for refetch.
+          securitySolutionQueryClient.setQueryData(
+            ['GET', DETECTION_ENGINE_RULES_URL, saved.id],
+            transformInput(saved)
+          );
+          securitySolutionQueryClient.invalidateQueries(['GET', DETECTION_ENGINE_RULES_URL], {
+            exact: false,
+          });
+        }
+
+        agentBuilder?.addAttachment({
+          id: targetAttachmentId,
+          type: SecurityAgentBuilderAttachments.rule,
+          description: saved.name,
+          data: {
+            text: JSON.stringify(stripServerFields(saved)),
+            attachmentLabel: saved.name,
+            ruleId: saved.id,
+          },
+        });
+      } catch (err) {
+        aiRuleCreation.clearSaving();
+        const message =
+          (err as { body?: { message?: string } })?.body?.message ??
+          (err as Error)?.message ??
+          i18n.translate('xpack.securitySolution.saveRuleHandler.unknownErrorMessage', {
+            defaultMessage: 'Unknown error',
+          });
+        notifications.toasts.addDanger({
+          title: i18n.translate('xpack.securitySolution.saveRuleHandler.saveFailedTitle', {
+            defaultMessage: 'Failed to save rule',
+          }),
+          text: message,
+        });
+      }
     }
-  });
+  );
 
   saveSub.add(conversationIdSub);
   return saveSub;

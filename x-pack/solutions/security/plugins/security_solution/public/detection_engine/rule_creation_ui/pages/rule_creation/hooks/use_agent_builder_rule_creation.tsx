@@ -52,10 +52,7 @@ const ruleDefaultMetadataFields = {
 
 const SYNC_DEBOUNCE_MS = 500;
 
-// Tool ids used for round-complete bind decisions. These are string constants that must stay in sync
-// with the server-side tool registrations:
-//   security.create_detection_rule → create_detection_rule_tool.ts (SECURITY_CREATE_DETECTION_RULE_TOOL_ID)
-//   attachments.update              → platform builtin attachment_update tool
+// Must match server-side tool registrations (create_detection_rule_tool.ts + platform builtin).
 const RULE_CREATE_TOOL_ID = 'security.create_detection_rule';
 const ATTACHMENT_UPDATE_TOOL_ID = 'attachments.update';
 
@@ -115,8 +112,6 @@ export const useAgentBuilderRuleCreation = ({
     return () => subscription.unsubscribe();
   }, [aiRuleCreation]);
 
-  // On conversation switch, align intent/ruleId with the attachment (including on rule edit pages).
-  // Prefers the bound attachment id; falls back to first-of-type on fresh page load.
   useEffect(() => {
     if (!agentBuilder?.events?.ui?.activeConversation$) {
       return;
@@ -124,7 +119,6 @@ export const useAgentBuilderRuleCreation = ({
     const subscription = agentBuilder.events.ui.activeConversation$.subscribe((change) => {
       const attachments = change?.conversation?.attachments ?? [];
       const boundId = aiRuleCreation.getBoundAttachmentId();
-      // Prefer the bound attachment when one is set; otherwise pick first-of-type (fresh page load).
       const ruleAttachment =
         (boundId
           ? attachments.find(
@@ -156,8 +150,6 @@ export const useAgentBuilderRuleCreation = ({
       const intent = intentRef.current;
       // ruleId is a sibling of `text` (not embedded in the rule JSON) — survives shallow merges.
       const ruleId = intent === 'update' ? savedRuleId ?? getRuleIdForSync() : undefined;
-      // Target the bound attachment; fall back to the constant id for the legacy seed path
-      // (e.g. when the form is open before any chat conversation exists).
       const targetId = aiRuleCreation.getBoundAttachmentId() ?? SECURITY_RULE_ATTACHMENT_ID;
       const attachment: AttachmentInput = {
         id: targetId,
@@ -248,8 +240,6 @@ export const useAgentBuilderRuleCreation = ({
   }, [aiRuleCreation]);
 
   // CHAT -> FORM
-  // On each round, scan tool steps to find which rule card was last edited and decide whether to
-  // follow-and-sync or release the form bind.
   useEffect(() => {
     if (!agentBuilder?.events?.chat$) return;
     const subscription = agentBuilder.events.chat$.subscribe((event) => {
@@ -268,8 +258,7 @@ export const useAgentBuilderRuleCreation = ({
             for (const result of step.results) {
               const resultData = result.data as Record<string, unknown> | undefined;
               if (resultData) {
-                // create_detection_rule → { attachmentId, isNewCard, ... }
-                // attachment_update     → { attachment_id, ... }
+                // create_detection_rule returns `attachmentId`; attachment_update returns `attachment_id`.
                 const candidateId =
                   (resultData.attachmentId as string | undefined) ??
                   (resultData.attachment_id as string | undefined);
@@ -285,12 +274,10 @@ export const useAgentBuilderRuleCreation = ({
       }
 
       if (touchedIsNewCard) {
-        // The user asked for a brand-new additional rule — release the bind so the form goes idle.
         aiRuleCreation.releaseBind();
         return;
       }
 
-      // Determine which attachment to sync to the form.
       // Priority: touched attachment this round → bound attachment → first-of-type in event.
       const attachments = event.data.attachments ?? [];
       const resolvedId = touchedAttachmentId ?? aiRuleCreation.getBoundAttachmentId() ?? undefined;
@@ -302,7 +289,6 @@ export const useAgentBuilderRuleCreation = ({
 
       if (!ruleAttachment) return;
 
-      // Update the bound id to the attachment we're about to sync.
       if (ruleAttachment.id !== aiRuleCreation.getBoundAttachmentId()) {
         aiRuleCreation.setBoundAttachment(ruleAttachment.id);
       }

@@ -25,7 +25,11 @@ describe('AiRuleCreationService', () => {
       const promise = firstValueFrom(service.saveRuleRequest$);
       service.requestSaveRule(mockRule);
       const value = await promise;
-      expect(value).toEqual({ rule: mockRule, attachmentId: undefined, createCardVersion: undefined });
+      expect(value).toEqual({
+        rule: mockRule,
+        attachmentId: undefined,
+        createCardVersion: undefined,
+      });
     });
 
     it('carries the create card version and attachmentId through requestSaveRule', async () => {
