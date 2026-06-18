@@ -8,7 +8,6 @@
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
-import type { ActionPolicyClient } from '../action_policy_client';
 import type { RuleEventPublisher } from '../events/rule_event_publisher/rule_event_publisher';
 import { createRulesSavedObjectService } from '../services/rules_saved_object_service/rules_saved_object_service.mock';
 import { createUserService } from '../services/user_service/user_service.mock';
@@ -23,11 +22,6 @@ export function createRulesClient(): {
   const request = httpServerMock.createKibanaRequest();
   const taskManager = taskManagerMock.createStart();
   const { userService } = createUserService();
-  const actionPolicyClient = {
-    deleteActionPoliciesByFilter: jest
-      .fn()
-      .mockResolvedValue({ processed: 0, total: 0, errors: [] }),
-  } as unknown as ActionPolicyClient;
   const ruleEventPublisher = {
     emitRuleCreated: jest.fn(),
     emitRuleUpdated: jest.fn(),
@@ -42,7 +36,6 @@ export function createRulesClient(): {
     rulesSavedObjectService,
     taskManager,
     userService,
-    actionPolicyClient,
     'default',
     ruleEventPublisher
   );

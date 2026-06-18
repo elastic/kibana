@@ -18,7 +18,6 @@ import type { UserService } from '../services/user_service/user_service';
 import { createUserService } from '../services/user_service/user_service.mock';
 import { createRuleSoAttributes } from '../test_utils';
 import type { RuleEventPublisher } from '../events/rule_event_publisher/rule_event_publisher';
-import type { ActionPolicyClient } from '../action_policy_client';
 import { RulesClient } from './rules_client';
 import type { CreateRuleParams, UpdateRuleData } from './types';
 
@@ -109,18 +108,11 @@ describe('RulesClient', () => {
   } as unknown as jest.Mocked<RuleEventPublisher>;
 
   function createClient() {
-    const actionPolicyClient = {
-      deleteActionPoliciesByFilter: jest
-        .fn()
-        .mockResolvedValue({ processed: 0, total: 0, errors: [] }),
-    } as unknown as ActionPolicyClient;
-
     return new RulesClient(
       request,
       rulesSavedObjectService,
       taskManager,
       userService,
-      actionPolicyClient,
       'space-1',
       ruleEventPublisher
     );
