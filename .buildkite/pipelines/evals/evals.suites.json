@@ -269,7 +269,7 @@
       "configPath": "x-pack/solutions/security/packages/kbn-evals-suite-siem-readiness/playwright.config.ts",
       "tags": ["security", "siem-readiness"],
       "ciLabels": ["evals:siem-readiness"],
-      "serverConfigSet": "evals_siem_readiness"
+      "serverConfigSet": "evals_tracing"
     }
   ]
 }

@@ -17,7 +17,8 @@ import {
 const createdRuleIds: string[] = [];
 
 evaluate.describe('SIEM Readiness', { tag: tags.stateful.classic }, () => {
-  evaluate.beforeAll(async ({ internalEsClient, chatClient, fetch, log }) => {
+  evaluate.beforeAll(async ({ internalEsClient, chatClient, fetch, log, uiSettings }) => {
+    await uiSettings.set({ 'agentBuilder:experimentalFeatures': true });
     await seedSiemReadinessData({ esClient: internalEsClient, log });
 
     // Create detection rules for blast-radius testing
@@ -87,7 +88,8 @@ evaluate.describe('SIEM Readiness', { tag: tags.stateful.classic }, () => {
     }
   });
 
-  evaluate.afterAll(async ({ internalEsClient, fetch, log }) => {
+  evaluate.afterAll(async ({ internalEsClient, fetch, log, uiSettings }) => {
+    await uiSettings.unset('agentBuilder:experimentalFeatures');
     await cleanupSiemReadinessData({ esClient: internalEsClient, log });
     const idsToDelete = createdRuleIds.splice(0);
     if (idsToDelete.length > 0) {
