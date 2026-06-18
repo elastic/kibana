@@ -23,7 +23,7 @@ import { css } from '@emotion/react';
 import { capitalize } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { SIG_EVENT_STATUS_OPTIONS } from '@kbn/streams-schema';
-import type { SigEvent } from '@kbn/streams-schema';
+import type { SigEvent, SigEventStatus } from '@kbn/streams-schema';
 import useInterval from 'react-use/lib/useInterval';
 import { useTabTimeRange } from '../../../../../hooks/sig_events/use_tab_time_range';
 import { RUNNING_POLL_INTERVAL_MS } from '../../../constants';
@@ -34,7 +34,8 @@ import { SigEventFlyout } from './sig_event_flyout';
 import { FindSignificantEventsButton } from '../streams_view/find_significant_events_button';
 import { formatTimestamp } from '../../../../../util/formatters';
 import { FilterPopover } from './filter_popover';
-import { getStatusColor } from '../../utils/event_status_color';
+import { getSigEventStatusColor } from '../shared/status_display';
+import { SIG_EVENT_STATUS_LABELS } from '../shared/translations';
 
 const MAX_VISIBLE_STREAMS = 3;
 
@@ -73,27 +74,28 @@ const columns: Array<EuiBasicTableColumn<SigEvent>> = [
     render: (timestamp: string) => formatTimestamp(timestamp),
   },
   {
-    field: 'status',
-    name: i18n.translate('xpack.streams.sigEventsTab.statusColumn', {
-      defaultMessage: 'Status',
-    }),
-    width: '110px',
-    render: (status: string) => <EuiBadge color={getStatusColor(status)}>{status}</EuiBadge>,
-  },
-  {
     field: 'title',
     name: i18n.translate('xpack.streams.sigEventsTab.titleColumn', {
       defaultMessage: 'Title',
     }),
     truncateText: true,
-    width: '40%',
+  },
+  {
+    field: 'status',
+    name: i18n.translate('xpack.streams.sigEventsTab.statusColumn', {
+      defaultMessage: 'Status',
+    }),
+    width: '100px',
+    render: (status: SigEventStatus) => (
+      <EuiBadge color={getSigEventStatusColor(status)}>{SIG_EVENT_STATUS_LABELS[status]}</EuiBadge>
+    ),
   },
   {
     field: 'stream_names',
     name: i18n.translate('xpack.streams.sigEventsTab.streamsColumn', {
       defaultMessage: 'Streams',
     }),
-    width: '150px',
+    width: '160px',
     render: (streamNames: string[]) => {
       const names = streamNames ?? [];
       const visible = names.slice(0, MAX_VISIBLE_STREAMS);
@@ -121,21 +123,8 @@ const columns: Array<EuiBasicTableColumn<SigEvent>> = [
     name: i18n.translate('xpack.streams.sigEventsTab.criticalityColumn', {
       defaultMessage: 'Criticality',
     }),
-    width: '90px',
-    render: (criticality: number | undefined) => <EuiText size="xs">{criticality ?? '-'}</EuiText>,
-  },
-  {
-    field: 'recommended_action',
-    name: i18n.translate('xpack.streams.sigEventsTab.actionColumn', {
-      defaultMessage: 'Action',
-    }),
     width: '100px',
-    render: (action?: string) =>
-      action ? (
-        <EuiBadge color={action === 'escalate' ? 'danger' : 'hollow'}>{action}</EuiBadge>
-      ) : (
-        '-'
-      ),
+    render: (criticality: number | undefined) => <EuiText size="xs">{criticality ?? '-'}</EuiText>,
   },
 ];
 
