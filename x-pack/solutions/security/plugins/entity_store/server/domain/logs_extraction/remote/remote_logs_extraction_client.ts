@@ -117,13 +117,17 @@ export class RemoteLogsExtractionClient {
         ? { checkpointTimestamp: null, paginationRecoveryId: null }
         : await this.strategy.stateClient.findOrInit(type);
 
-    const { effectiveFromDateISO: resolvedFromDateISO, effectiveWindowEnd, recoveryId, isWindowOverride } =
-      resolveRemoteExtractionWindow({
-        config: { lookbackPeriod, delay },
-        state,
-        windowOverride,
-        logger: this.logger,
-      });
+    const {
+      effectiveFromDateISO: resolvedFromDateISO,
+      effectiveWindowEnd,
+      recoveryId,
+      isWindowOverride,
+    } = resolveRemoteExtractionWindow({
+      config: { lookbackPeriod, delay },
+      state,
+      windowOverride,
+      logger: this.logger,
+    });
 
     const effectiveFromDateISO = isWindowOverride
       ? resolvedFromDateISO
