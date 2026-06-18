@@ -155,7 +155,6 @@ function serializeRuleDomain(ruleDomain: RuleDomain): RuleChangeHistorySnapshot 
     isSnoozedUntil: _isSnoozedUntil,
     viewInAppRelativeUrl: _viewInAppRelativeUrl,
     scheduledTaskId: _scheduledTaskId,
-    mutedInstanceIds: _mutedInstanceIds,
     createdAt: _createdAt,
     updatedAt: _updatedAt,
     ...purifiedRuleDomain
