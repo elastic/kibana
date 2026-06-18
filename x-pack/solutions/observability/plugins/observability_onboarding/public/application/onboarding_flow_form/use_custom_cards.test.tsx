@@ -85,7 +85,7 @@ describe('useCustomCards', () => {
     } as unknown as ReturnType<typeof useKibana<ObservabilityOnboardingAppServices>>);
   });
 
-  it('uses the Kubernetes OTel quickstart route for the Kubernetes add data entry', () => {
+  it('uses the merged Kubernetes OTel quickstart for the Kubernetes add data entry', () => {
     render(
       <MemoryRouter>
         <CompatRouter>
@@ -94,9 +94,7 @@ describe('useCustomCards', () => {
       </MemoryRouter>
     );
 
-    expect(screen.getByTestId('card-url-otel-kubernetes')).toHaveTextContent(
-      /^\/otel-kubernetes\/?$/
-    );
+    expect(screen.getByTestId('card-url-otel-kubernetes')).toHaveTextContent(/^\/kubernetes$/);
   });
 
   it('exposes the AWS CloudWatch OTel quickstart card with expected metadata', () => {
