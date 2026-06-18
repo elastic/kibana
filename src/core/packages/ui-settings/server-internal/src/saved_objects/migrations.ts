@@ -62,7 +62,7 @@ export const TIMEPICKER_QUICK_RANGES_V3_PRESETS: ReadonlyArray<QuickRange> = [
  * version reads such a document.
  */
 const configAttributesSchemaV3 = schema.object(
-  { buildNum: schema.number() },
+  { buildNum: schema.maybe(schema.number()) },
   { unknowns: 'allow' }
 );
 
