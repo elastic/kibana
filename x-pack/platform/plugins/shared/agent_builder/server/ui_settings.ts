@@ -57,10 +57,9 @@ export const registerUISettings = ({ uiSettings }: { uiSettings: UiSettingsServi
       }),
       schema: schema.boolean(),
       value: false,
-      technicalPreview: true,
+      experimental: true,
       requiresPageReload: false,
-      readonly: true,
-      readonlyMode: 'ui',
+      readonly: false,
     },
     [AGENT_BUILDER_UIAM_OAUTH_CLIENT_MANAGEMENT_SETTING_ID]: {
       description: i18n.translate(
