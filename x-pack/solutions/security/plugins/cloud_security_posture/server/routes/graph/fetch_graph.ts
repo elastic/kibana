@@ -117,6 +117,7 @@ export const fetchGraph = async ({
         entityIds,
         spaceId,
         entityStoreIndexExists,
+        pinnedIds,
       }).catch((error) => {
         logger.error(`Failed to fetch entity relationships: ${error.message}`);
         throw error;
@@ -175,12 +176,10 @@ export const fetchGraph = async ({
         })
       : new Map<string, EntityEnrichmentFields>();
 
-  const pinnedIdsSet = new Set(pinnedIds ?? []);
-
   return {
     events: enrichEventDocData(regroupEvents(eventsResult.records, enrichmentMap), enrichmentMap),
     relationships: enrichRelationshipDocData(
-      regroupRelationships(relationshipsResult.records, enrichmentMap, pinnedIdsSet),
+      regroupRelationships(relationshipsResult.records, enrichmentMap),
       enrichmentMap
     ),
     entities: enrichEntityRecords(entitiesResult.records, enrichmentMap),

@@ -32,6 +32,7 @@ import type { EntityEnrichmentFields } from './fetch_entity_enrichment';
 interface BuildRelationshipsEsqlQueryParams {
   indexName: string;
   relationshipFields: readonly string[];
+  pinnedIds?: string[];
 }
 
 const RESOLUTION_RELATIONSHIP_FIELD = 'resolution.resolved_to' as const;
@@ -56,9 +57,21 @@ const buildRelationshipTargetsEval = (field: string): string => {
  * The filter is applied via the DSL filter parameter.
  * Target enrichment is applied later in TypeScript via fetchEntityEnrichment.
  */
+/**
+ * Generates the EVAL statement that marks whether the entity is pinned.
+ */
+const buildPinnedEsql = (pinnedIds?: string[]): string => {
+  if (!pinnedIds || pinnedIds.length === 0) {
+    return '| EVAL pinned = TO_STRING(null)';
+  }
+  const pinnedParamsStr = pinnedIds.map((_id, idx) => `?pinned_id${idx}`).join(', ');
+  return `| EVAL pinned = CASE(actorId IN (${pinnedParamsStr}), actorId, null)`;
+};
+
 const buildRelationshipsEsqlQuery = ({
   indexName,
   relationshipFields,
+  pinnedIds,
 }: BuildRelationshipsEsqlQueryParams): string => {
   const targetsEval = relationshipFields
     .map((field) => buildRelationshipTargetsEval(field))
@@ -122,8 +135,11 @@ ${forkBranches}
   \`entity.sub_type\` AS actorEntitySubType,
   \`entity.name\` AS actorEntityName,
   \`host.ip\` AS actorHostIps
-| KEEP actorId, actorEntityType, actorEntitySubType, actorEntityName, actorHostIps, actorDocData, relationship, relationshipNodeId, targetId, targetDocData
-| SORT relationship ASC`;
+${buildPinnedEsql(pinnedIds)}
+| KEEP actorId, actorEntityType, actorEntitySubType, actorEntityName, actorHostIps, actorDocData, relationship, relationshipNodeId, targetId, targetDocData, pinned
+| EVAL pinnedSort = CASE(pinned IS NULL, 1, 0)
+| SORT relationship ASC, pinnedSort ASC
+| DROP pinnedSort`;
 };
 
 /**
@@ -186,12 +202,14 @@ export const fetchEntityRelationships = async ({
   entityIds,
   spaceId,
   entityStoreIndexExists,
+  pinnedIds,
 }: {
   esClient: IScopedClusterClient;
   logger: Logger;
   entityIds: EntityId[];
   spaceId: string;
   entityStoreIndexExists: boolean;
+  pinnedIds?: string[];
 }): Promise<EsqlToRecords<RelationshipEsqlRow>> => {
   if (!entityStoreIndexExists) {
     return { columns: [], records: [] };
@@ -203,6 +221,7 @@ export const fetchEntityRelationships = async ({
   const query = buildRelationshipsEsqlQuery({
     indexName,
     relationshipFields: ENTITY_RELATIONSHIP_FIELDS,
+    pinnedIds,
   });
   const filter = buildRelationshipDslFilter(entityIds);
 
@@ -214,6 +233,7 @@ export const fetchEntityRelationships = async ({
       columnar: false,
       filter,
       query,
+      params: (pinnedIds ?? []).map((id, idx) => ({ [`pinned_id${idx}`]: id })),
     })
     .toRecords<RelationshipEsqlRow>();
 
@@ -359,8 +379,7 @@ interface RelationshipGroup {
  */
 export const regroupRelationships = (
   records: RelationshipEsqlRow[],
-  enrichmentMap: Map<string, EntityEnrichmentFields>,
-  pinnedIds: Set<string> = new Set()
+  enrichmentMap: Map<string, EntityEnrichmentFields>
 ): RelationshipEdge[] => {
   const groups = new Map<string, RelationshipGroup>();
 
@@ -374,12 +393,12 @@ export const regroupRelationships = (
     const targetType = targetEnrichment?.type ?? null;
     const targetSubType = targetEnrichment?.subType ?? null;
 
-    // Pinned actors get their own isolated group — use the raw actorId as the key
-    // dimension so they never merge with other actors of the same type.
-    const actorDimension = pinnedIds.has(actorId) ? actorId : null;
+    // Pinned actors are isolated into their own group via the ES|QL pinned column —
+    // same pattern as regroupEvents in fetch_events_graph.ts.
+    const pinned = record.pinned ?? null;
 
     const groupKey = JSON.stringify([
-      actorDimension,
+      pinned,
       record.actorEntityType ?? null,
       record.actorEntitySubType ?? null,
       record.relationship,
