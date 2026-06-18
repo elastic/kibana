@@ -68,12 +68,11 @@ describe('RuleCreateOptionsFlyout', () => {
     expect(onCreateWithAgent).toHaveBeenCalledTimes(1);
   });
 
-  it('renders the "Start from a rule builder" heading', () => {
+  it('renders the builder divider before the Threshold Alert option', () => {
     renderFlyout();
 
-    expect(
-      screen.getByRole('heading', { level: 3, name: 'Start from a rule builder' })
-    ).toBeInTheDocument();
+    expect(screen.getByText('or start from a builder')).toBeInTheDocument();
+    expect(screen.queryByText('Start from a rule builder')).not.toBeInTheDocument();
   });
 
   it('calls onCreateThresholdAlert when the Threshold Alert option is selected', () => {
