@@ -20,7 +20,54 @@ import {
 export interface SidePanelResizeIndicatorProps extends SidePanelDragIndicatorState {
   top: number;
   height: number;
+  pointerY: number;
 }
+
+interface StretchBandPathParams {
+  height: number;
+  primaryX: number;
+  stretchLeft: number;
+  stretchRight: number;
+  pointerY: number;
+  baseHalfWidth: number;
+}
+
+export const buildStretchBandPath = ({
+  height,
+  primaryX,
+  stretchLeft,
+  stretchRight,
+  pointerY,
+  baseHalfWidth,
+}: StretchBandPathParams): string => {
+  const left = primaryX - baseHalfWidth;
+  const right = primaryX + baseHalfWidth;
+  const clampedPointerY = Math.max(0, Math.min(height, pointerY));
+
+  if (stretchLeft > 0) {
+    return [
+      `M ${right} 0`,
+      `L ${right} ${height}`,
+      `L ${left} ${height}`,
+      `Q ${left - stretchLeft} ${clampedPointerY} ${left} 0`,
+      'Z',
+    ].join(' ');
+  }
+
+  if (stretchRight > 0) {
+    return [
+      `M ${left} 0`,
+      `L ${left} ${height}`,
+      `L ${right} ${height}`,
+      `Q ${right + stretchRight} ${clampedPointerY} ${right} 0`,
+      'Z',
+    ].join(' ');
+  }
+
+  return [`M ${left} 0`, `L ${right} 0`, `L ${right} ${height}`, `L ${left} ${height}`, 'Z'].join(
+    ' '
+  );
+};
 
 const getContainerStyles = (euiThemeContext: UseEuiTheme) => css`
   position: fixed;
@@ -29,13 +76,17 @@ const getContainerStyles = (euiThemeContext: UseEuiTheme) => css`
   z-index: ${euiThemeContext.euiTheme.levels.header};
 `;
 
-const getStretchBandStyles = (euiThemeContext: UseEuiTheme) => css`
+const getStretchSvgStyles = css`
   position: absolute;
   top: 0;
-  height: 100%;
-  background-color: ${transparentize(euiThemeContext.euiTheme.colors.primary, 0.1)};
-  transition: width ${euiThemeContext.euiTheme.animation.fast} ease,
-    left ${euiThemeContext.euiTheme.animation.fast} ease;
+  left: 0;
+  overflow: visible;
+`;
+
+const getStretchTransitionStyles = (euiThemeContext: UseEuiTheme) => css`
+  path {
+    transition: d ${euiThemeContext.euiTheme.animation.fast} ease;
+  }
 `;
 
 const getPrimaryLineStyles = (euiThemeContext: UseEuiTheme) => css`
@@ -53,27 +104,36 @@ export const SidePanelResizeIndicator: FC<SidePanelResizeIndicatorProps> = ({
   primaryX,
   stretchLeft,
   stretchRight,
+  pointerY,
 }) => {
   const euiThemeContext = useEuiTheme();
   const baseHalfWidth = SIDE_PANEL_INDICATOR_BASE_WIDTH / 2;
-  const bandWidth = SIDE_PANEL_INDICATOR_BASE_WIDTH + stretchLeft + stretchRight;
-  const bandLeft = primaryX - baseHalfWidth - stretchLeft;
   const isStretching = stretchLeft > 0 || stretchRight > 0;
+  const fillColor = transparentize(euiThemeContext.euiTheme.colors.primary, 0.1);
+  const bandPath = buildStretchBandPath({
+    height,
+    primaryX,
+    stretchLeft,
+    stretchRight,
+    pointerY,
+    baseHalfWidth,
+  });
 
   return (
     <EuiPortal>
       <div css={getContainerStyles(euiThemeContext)}>
         <div css={{ top, height, position: 'absolute', left: 0, right: 0 }}>
-          <div
+          <svg
+            aria-hidden
             css={[
-              getStretchBandStyles(euiThemeContext),
-              !isStretching &&
-                css`
-                  transition: none;
-                `,
+              getStretchSvgStyles,
+              isStretching && getStretchTransitionStyles(euiThemeContext),
             ]}
-            style={{ left: bandLeft, width: bandWidth }}
-          />
+            height={height}
+            width="100%"
+          >
+            <path d={bandPath} fill={fillColor} />
+          </svg>
           <div css={getPrimaryLineStyles(euiThemeContext)} style={{ left: primaryX }} />
         </div>
       </div>

@@ -41,6 +41,7 @@ const KEYBOARD_RESIZE_STEP = 10;
 interface DragIndicatorBounds extends SidePanelDragIndicatorState {
   top: number;
   height: number;
+  pointerY: number;
 }
 
 export interface SidePanelResizeHandleProps {
@@ -77,20 +78,24 @@ export const SidePanelResizeHandle: FC<SidePanelResizeHandleProps> = ({
     setDragIndicator(null);
   }, []);
 
-  const updateDragIndicator = useCallback((clientX: number, rawWidth: number) => {
-    const indicatorState = getSidePanelDragIndicatorState(
-      rawWidth,
-      startXRef.current,
-      startWidthRef.current,
-      clientX
-    );
+  const updateDragIndicator = useCallback(
+    (clientX: number, clientY: number, rawWidth: number) => {
+      const indicatorState = getSidePanelDragIndicatorState(
+        rawWidth,
+        startXRef.current,
+        startWidthRef.current,
+        clientX
+      );
 
-    setDragIndicator({
-      ...indicatorState,
-      top: dragBoundsRef.current.top,
-      height: dragBoundsRef.current.height,
-    });
-  }, []);
+      setDragIndicator({
+        ...indicatorState,
+        top: dragBoundsRef.current.top,
+        height: dragBoundsRef.current.height,
+        pointerY: clientY - dragBoundsRef.current.top,
+      });
+    },
+    []
+  );
 
   const finishDrag = useCallback(() => {
     buttonRef.current?.blur();
@@ -101,7 +106,7 @@ export const SidePanelResizeHandle: FC<SidePanelResizeHandleProps> = ({
   }, [clearDragIndicator, onCollapse, onDragWidthCommit]);
 
   const beginDrag = useCallback(
-    (clientX: number) => {
+    (clientX: number, clientY: number) => {
       if (buttonRef.current) {
         const { top, height } = buttonRef.current.getBoundingClientRect();
         dragBoundsRef.current = { top, height };
@@ -110,21 +115,21 @@ export const SidePanelResizeHandle: FC<SidePanelResizeHandleProps> = ({
       startXRef.current = clientX;
       startWidthRef.current = width;
       lastRawWidthRef.current = width;
-      updateDragIndicator(clientX, width);
+      updateDragIndicator(clientX, clientY, width);
     },
     [updateDragIndicator, width]
   );
 
   const handleMouseDown = useCallback(
     (e: MouseEvent) => {
-      beginDrag(e.clientX);
+      beginDrag(e.clientX, e.clientY);
 
       const handleMouseMove = (moveEvent: globalThis.MouseEvent) => {
         const delta = moveEvent.clientX - startXRef.current;
         const rawWidth = startWidthRef.current + delta;
         lastRawWidthRef.current = rawWidth;
         onDragWidthChange(rawWidth);
-        updateDragIndicator(moveEvent.clientX, rawWidth);
+        updateDragIndicator(moveEvent.clientX, moveEvent.clientY, rawWidth);
       };
 
       const handleMouseUp = () => {
@@ -142,7 +147,7 @@ export const SidePanelResizeHandle: FC<SidePanelResizeHandleProps> = ({
   const handleTouchStart = useCallback(
     (e: TouchEvent) => {
       const touch = e.touches[0];
-      beginDrag(touch.clientX);
+      beginDrag(touch.clientX, touch.clientY);
 
       const handleTouchMove = (moveEvent: globalThis.TouchEvent) => {
         const moveTouch = moveEvent.touches[0];
@@ -150,7 +155,7 @@ export const SidePanelResizeHandle: FC<SidePanelResizeHandleProps> = ({
         const rawWidth = startWidthRef.current + delta;
         lastRawWidthRef.current = rawWidth;
         onDragWidthChange(rawWidth);
-        updateDragIndicator(moveTouch.clientX, rawWidth);
+        updateDragIndicator(moveTouch.clientX, moveTouch.clientY, rawWidth);
       };
 
       const handleTouchEnd = () => {
