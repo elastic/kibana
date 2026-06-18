@@ -38,12 +38,6 @@ interface StreamsSignificantEventsQueriesGeneratedProps {
   tool_usage: SignificantEventsToolUsage;
 }
 
-interface StreamsInsightsGeneratedProps {
-  input_tokens_used: number;
-  output_tokens_used: number;
-  cached_tokens_used?: number;
-}
-
 interface StreamsProcessingPipelineSuggestedProps {
   duration_ms: number;
   steps_used: number;
@@ -121,7 +115,6 @@ export {
   type StreamsStateErrorProps,
   type StreamsDescriptionGeneratedProps,
   type StreamsSignificantEventsQueriesGeneratedProps,
-  type StreamsInsightsGeneratedProps,
   type StreamsProcessingPipelineSuggestedProps,
   type StreamsFeaturesIdentifiedProps,
   type StreamsAgentBuilderKnowledgeIndicatorCreatedProps,

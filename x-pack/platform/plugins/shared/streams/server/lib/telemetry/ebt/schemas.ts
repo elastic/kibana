@@ -10,7 +10,6 @@ import type {
   StreamEndpointLatencyProps,
   StreamsDescriptionGeneratedProps,
   StreamsSignificantEventsQueriesGeneratedProps,
-  StreamsInsightsGeneratedProps,
   StreamsStateErrorProps,
   StreamsProcessingPipelineSuggestedProps,
   StreamsFeaturesIdentifiedProps,
@@ -182,28 +181,6 @@ const streamsSignificantEventsQueriesGeneratedSchema: RootSchema<StreamsSignific
       },
     },
   };
-
-const streamsInsightsGeneratedSchema: RootSchema<StreamsInsightsGeneratedProps> = {
-  input_tokens_used: {
-    type: 'long',
-    _meta: {
-      description: 'The number of input tokens used for the generation request',
-    },
-  },
-  output_tokens_used: {
-    type: 'long',
-    _meta: {
-      description: 'The number of output tokens used for the generation request',
-    },
-  },
-  cached_tokens_used: {
-    type: 'long',
-    _meta: {
-      description: 'The number of cached tokens used for the generation request',
-      optional: true,
-    },
-  },
-};
 
 const streamsProcessingPipelineSuggestedSchema: RootSchema<StreamsProcessingPipelineSuggestedProps> =
   {
@@ -534,7 +511,6 @@ export {
   streamsStateErrorSchema,
   streamsDescriptionGeneratedSchema,
   streamsSignificantEventsQueriesGeneratedSchema,
-  streamsInsightsGeneratedSchema,
   streamsProcessingPipelineSuggestedSchema,
   streamsFeaturesIdentifiedSchema,
   streamsAgentBuilderKnowledgeIndicatorCreatedSchema,
