@@ -142,7 +142,8 @@ function hydrateRuleSnapshot(
   try {
     const ruleDomain = {
       ...snapshot,
-      ...hydrateDateFields(snapshot),
+      createdAt: hydrateDateField(snapshot.createdAt),
+      updatedAt: hydrateDateField(snapshot.updatedAt),
     };
 
     return transformRuleDomainToRule(ruleDomain as RuleDomain);
@@ -162,16 +163,6 @@ function hydrateDateField(value: unknown): Date | null {
   }
 
   return null;
-}
-
-function hydrateDateFields(snapshot: RuleChangeHistorySnapshot): {
-  createdAt: Date | null;
-  updatedAt: Date | null;
-} {
-  return {
-    createdAt: hydrateDateField(snapshot.createdAt),
-    updatedAt: hydrateDateField(snapshot.updatedAt),
-  };
 }
 
 /**
