@@ -177,6 +177,40 @@ describe('generateExecutorFunction', () => {
     });
   });
 
+  describe('ctx.getClient — lease receives clientType.terminate as 3rd arg', () => {
+    it('passes clientType.terminate to pool.lease', async () => {
+      const terminateSpy = jest.fn().mockResolvedValue(undefined);
+      const fakeClient = { id: 'x' };
+      const fakeClientType = {
+        id: 'typed',
+        build: jest.fn().mockResolvedValue(fakeClient),
+        terminate: terminateSpy,
+      };
+
+      const leaseSpy = jest.spyOn(fakeLeasePool, 'lease');
+
+      const executor = generateExecutorFunction({
+        actions: {
+          testAction: {
+            isTool: true,
+            input: {} as never,
+            handler: jest.fn(async (ctx: ActionContext) => {
+              await (ctx.getClient as unknown as (id: string) => Promise<unknown>)('typed');
+              return {};
+            }),
+          },
+        },
+        getAxiosInstanceWithAuth: mockGetAxiosInstanceWithAuth,
+        getClientLeasePool: () => fakeLeasePool,
+        clientTypes: { typed: fakeClientType },
+      });
+
+      await executor(makeExecOptions({ subAction: 'testAction', subActionParams: {} }));
+
+      expect(leaseSpy).toHaveBeenCalledWith(expect.any(String), expect.any(Function), terminateSpy);
+    });
+  });
+
   describe('ctx.getClient (pooled client access)', () => {
     type GetClient = (id: string) => Promise<unknown>;
 

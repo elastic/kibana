@@ -8,7 +8,7 @@
  */
 
 import { mcpClientType } from './mcp_client_type';
-import { clientTypes } from './index';
+import { clientTypes } from '.';
 import { createMcpClientFromAxios } from '../mcp/create_mcp_client_from_axios';
 
 jest.mock('../mcp/create_mcp_client_from_axios');
@@ -34,7 +34,10 @@ describe('clientTypes registry', () => {
 
 describe('mcpClientType', () => {
   const fakeAxiosInstance = {} as import('axios').AxiosInstance;
-  const fakeLogger = { error: jest.fn(), info: jest.fn() } as unknown as import('@kbn/logging').Logger;
+  const fakeLogger = {
+    error: jest.fn(),
+    info: jest.fn(),
+  } as unknown as import('@kbn/logging').Logger;
 
   const fakeBuildContext = {
     logger: fakeLogger,
@@ -44,12 +47,14 @@ describe('mcpClientType', () => {
 
   let mockConnect: jest.Mock;
   let mockDisconnect: jest.Mock;
-  let mockClient: { connect: jest.Mock; disconnect: jest.Mock };
+  let mockTerminate: jest.Mock;
+  let mockClient: { connect: jest.Mock; disconnect: jest.Mock; terminate: jest.Mock };
 
   beforeEach(() => {
     mockConnect = jest.fn().mockResolvedValue(undefined);
     mockDisconnect = jest.fn().mockResolvedValue(undefined);
-    mockClient = { connect: mockConnect, disconnect: mockDisconnect };
+    mockTerminate = jest.fn().mockResolvedValue(undefined);
+    mockClient = { connect: mockConnect, disconnect: mockDisconnect, terminate: mockTerminate };
     mockCreateMcpClientFromAxios.mockReturnValue(
       mockClient as unknown as ReturnType<typeof createMcpClientFromAxios>
     );
@@ -75,22 +80,23 @@ describe('mcpClientType', () => {
     });
 
     it('throws if config.serverUrl is missing', async () => {
-      await expect(
-        mcpClientType.build({ ...fakeBuildContext, config: {} })
-      ).rejects.toThrow('config.serverUrl is required');
+      await expect(mcpClientType.build({ ...fakeBuildContext, config: {} })).rejects.toThrow(
+        'config.serverUrl is required'
+      );
     });
 
     it('throws if config is undefined', async () => {
-      await expect(
-        mcpClientType.build({ ...fakeBuildContext, config: undefined })
-      ).rejects.toThrow('config.serverUrl is required');
+      await expect(mcpClientType.build({ ...fakeBuildContext, config: undefined })).rejects.toThrow(
+        'config.serverUrl is required'
+      );
     });
   });
 
   describe('terminate', () => {
-    it('calls client.disconnect()', async () => {
+    it('calls client.terminate()', async () => {
       await mcpClientType.terminate(mockClient as unknown as import('@kbn/mcp-client').McpClient);
-      expect(mockDisconnect).toHaveBeenCalledTimes(1);
+      expect(mockTerminate).toHaveBeenCalledTimes(1);
+      expect(mockDisconnect).not.toHaveBeenCalled();
     });
   });
 });

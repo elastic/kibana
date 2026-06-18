@@ -56,7 +56,13 @@ import { AuthTypeRegistry, registerAuthTypes } from './auth_types';
 import { createBulkExecutionEnqueuerFunction } from './create_execute_function';
 import { registerActionsUsageCollector } from './usage';
 import type { ILicenseState } from './lib';
-import { ActionExecutor, TaskRunnerFactory, LicenseState, spaceIdToNamespace, LeasePool } from './lib';
+import {
+  ActionExecutor,
+  TaskRunnerFactory,
+  LicenseState,
+  spaceIdToNamespace,
+  LeasePool,
+} from './lib';
 import type {
   Services,
   ActionType,
@@ -527,7 +533,7 @@ export class ActionsPlugin
   }
 
   public start(core: CoreStart, plugins: ActionsPluginsStart): PluginStartContract {
-    this.clientLeasePool = new LeasePool<unknown>();
+    this.clientLeasePool = new LeasePool<unknown>(this.logger);
 
     const {
       logger,
@@ -608,6 +614,7 @@ export class ActionsPlugin
         encryptedSavedObjectsClient,
         connectorLifecycleListeners: this.connectorLifecycleListeners,
         getCurrentUserProfileId,
+        evictClientPool: (connectorId: string) => this.clientLeasePool?.evict(connectorId),
       });
     };
 
@@ -982,6 +989,7 @@ export class ActionsPlugin
       connectorLifecycleListeners,
     } = this;
     const getSkippedPreconfiguredIds = () => this.skippedPreconfiguredConnectorIds;
+    const evictClientPool = (connectorId: string) => this.clientLeasePool?.evict(connectorId);
 
     return async function actionsRouteHandlerContext(context, request) {
       const [coreStart, pluginsStart] = await core.getStartServices();
@@ -1042,6 +1050,7 @@ export class ActionsPlugin
             connectorLifecycleListeners,
             getCurrentUserProfileId: (requestWithAuth: KibanaRequest) =>
               getCurrentUserProfileIdFromRequest(requestWithAuth, pluginsStart.security, logger),
+            evictClientPool,
           });
         },
         listTypes: (featureId?: string) => {
@@ -1110,6 +1119,7 @@ export class ActionsPlugin
     if (this.licenseState) {
       this.licenseState.clean();
     }
+    this.clientLeasePool?.stop();
   }
 }
 

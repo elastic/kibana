@@ -365,6 +365,65 @@ describe('McpClient', () => {
     });
   });
 
+  describe('sessionId', () => {
+    it('returns the transport session id', () => {
+      const client = new McpClient(mockLogger, clientDetails);
+      (mockTransport as unknown as { sessionId: string }).sessionId = 'sess-abc';
+      expect(client.sessionId).toBe('sess-abc');
+    });
+
+    it('returns undefined when transport has no session id', () => {
+      const client = new McpClient(mockLogger, clientDetails);
+      expect(client.sessionId).toBeUndefined();
+    });
+  });
+
+  describe('terminate', () => {
+    it('calls terminateSession then disconnect in order', async () => {
+      const order: string[] = [];
+      (mockTransport as unknown as { terminateSession: jest.Mock }).terminateSession = jest
+        .fn()
+        .mockImplementation(async () => {
+          order.push('terminateSession');
+        });
+      mockClient.close.mockImplementation(async () => {
+        order.push('close');
+      });
+
+      const client = await createConnectedClient();
+      await client.terminate();
+
+      expect(order).toEqual(['terminateSession', 'close']);
+    });
+
+    it('calls terminateSession and disconnect once each', async () => {
+      (mockTransport as unknown as { terminateSession: jest.Mock }).terminateSession = jest
+        .fn()
+        .mockResolvedValue(undefined);
+      mockClient.close.mockResolvedValue(undefined);
+
+      const client = await createConnectedClient();
+      await client.terminate();
+
+      expect(
+        (mockTransport as unknown as { terminateSession: jest.Mock }).terminateSession
+      ).toHaveBeenCalledTimes(1);
+      expect(mockClient.close).toHaveBeenCalledTimes(1);
+    });
+
+    it('still calls disconnect when terminateSession rejects', async () => {
+      (mockTransport as unknown as { terminateSession: jest.Mock }).terminateSession = jest
+        .fn()
+        .mockRejectedValue(new Error('network error'));
+      mockClient.close.mockResolvedValue(undefined);
+
+      const client = await createConnectedClient();
+      await expect(client.terminate()).rejects.toThrow('network error');
+
+      expect(mockClient.close).toHaveBeenCalledTimes(1);
+    });
+  });
+
   describe('disconnect', () => {
     it('disconnects when connected', async () => {
       const client = await createConnectedClient();

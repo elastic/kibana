@@ -121,8 +121,10 @@ export const generateExecutorFunction = ({
       if (!clientType) {
         throw new Error(`[Action][ExternalService] Unknown client type ${id}.`);
       }
-      return pool.lease(buildClientLeaseKey(connectorId, id), () =>
-        clientType.build({ logger, axiosInstance, config })
+      return pool.lease(
+        buildClientLeaseKey(connectorId, id),
+        () => clientType.build({ logger, axiosInstance, config }),
+        clientType.terminate
       );
     };
 

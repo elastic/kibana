@@ -19,8 +19,7 @@ export const mcpClientType: ClientTypeSpec<McpClient> = {
   // Runs at lease time (first getClient('mcp') for this connector), not at spec load.
   // Same per-action axios + config as before; connect moved out of withMcpClient's finally.
   async build(ctx) {
-    const serverUrl =
-      typeof ctx.config?.serverUrl === 'string' ? ctx.config.serverUrl : undefined;
+    const serverUrl = typeof ctx.config?.serverUrl === 'string' ? ctx.config.serverUrl : undefined;
     if (!serverUrl) {
       throw new Error('config.serverUrl is required');
     }
@@ -35,8 +34,7 @@ export const mcpClientType: ClientTypeSpec<McpClient> = {
     return client;
   },
 
-  // Reserved for future pool eviction / connector-delete hooks; not called in this PoC.
   async terminate(client) {
-    await client.disconnect();
+    await client.terminate();
   },
 };

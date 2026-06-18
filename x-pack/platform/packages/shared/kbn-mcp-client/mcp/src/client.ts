@@ -129,6 +129,18 @@ export class McpClient {
     };
   }
 
+  public get sessionId(): string | undefined {
+    return this.transport.sessionId;
+  }
+
+  public async terminate(): Promise<void> {
+    try {
+      await this.transport.terminateSession();
+    } finally {
+      await this.disconnect();
+    }
+  }
+
   /**
    * Disconnect from the MCP client and return the disconnected status.
    */
