@@ -308,6 +308,7 @@ export class LogsExtractionClient {
       maxLogsPerPage: config.maxLogsPerPage,
       lookbackPeriod: config.lookbackPeriod,
       delay: config.delay,
+      frequency: config.frequency,
       maxTimeWindowSize: config.maxTimeWindowSize,
       maxLogsPerWindow: config.maxLogsPerWindow,
       maxLogsPerWindowCapBehavior: config.maxLogsPerWindowCapBehavior,

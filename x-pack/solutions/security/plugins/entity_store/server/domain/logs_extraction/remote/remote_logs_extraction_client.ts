@@ -34,7 +34,11 @@ import {
 import { executeEsqlQuery } from '../../../infra/elasticsearch/esql';
 import { ingestEntities } from '../../../infra/elasticsearch/ingest';
 import { getUpdatesEntitiesDataStreamName } from '../../asset_manager/updates_data_stream';
-import { capExtractionWindowEnd, resolveRemoteExtractionWindow } from '../extraction_window';
+import {
+  applyMaxLagCutoff,
+  capExtractionWindowEnd,
+  resolveRemoteExtractionWindow,
+} from '../extraction_window';
 import { capAtMaxLogsPerWindow } from '../effective_page_limits';
 import type { RemoteExtractionStrategy } from './strategies';
 
@@ -45,6 +49,7 @@ interface RemoteExtractToUpdatesParams {
   maxLogsPerPage: number;
   lookbackPeriod: string;
   delay: string;
+  frequency: string;
   entityDefinition: ManagedEntityDefinition;
   abortController?: AbortController;
   windowOverride?: { fromDateISO: string; toDateISO: string };
@@ -95,6 +100,7 @@ export class RemoteLogsExtractionClient {
     maxLogsPerPage,
     lookbackPeriod,
     delay,
+    frequency,
     entityDefinition,
     abortController,
     windowOverride,
@@ -111,13 +117,23 @@ export class RemoteLogsExtractionClient {
         ? { checkpointTimestamp: null, paginationRecoveryId: null }
         : await this.strategy.stateClient.findOrInit(type);
 
-    const { effectiveFromDateISO, effectiveWindowEnd, recoveryId, isWindowOverride } =
+    const { effectiveFromDateISO: resolvedFromDateISO, effectiveWindowEnd, recoveryId, isWindowOverride } =
       resolveRemoteExtractionWindow({
         config: { lookbackPeriod, delay },
         state,
         windowOverride,
         logger: this.logger,
       });
+
+    const effectiveFromDateISO = isWindowOverride
+      ? resolvedFromDateISO
+      : applyMaxLagCutoff({
+          fromDateISO: resolvedFromDateISO,
+          effectiveWindowEnd,
+          lookbackPeriod,
+          frequency,
+          logger: this.logger,
+        });
 
     if (effectiveFromDateISO >= effectiveWindowEnd) {
       this.logger.error(
