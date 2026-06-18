@@ -345,5 +345,68 @@ apiTest.describe(
         expect(after.apiKeyOwner).toBe(before.apiKeyOwner);
       }
     );
+
+    apiTest(
+      'restricted user (alerting all, no actions) can snooze an alert instance',
+      async ({ apiClient }) => {
+        const response = await apiClient.post(
+          `api/alerting/rule/${ruleId}/alert/${ENCODED_ALERT_INSTANCE_ID}/_snooze`,
+          {
+            headers: { ...COMMON_HEADERS, ...restrictedCreds.apiKeyHeader },
+            body: { expires_at: '2099-12-31T23:59:59.000Z' },
+            responseType: 'json',
+          }
+        );
+        expect(response).toHaveStatusCode(204);
+      }
+    );
+
+    apiTest(
+      'restricted user (alerting all, no actions) can unsnooze an alert instance',
+      async ({ apiClient }) => {
+        const response = await apiClient.post(
+          `api/alerting/rule/${ruleId}/alert/${ENCODED_ALERT_INSTANCE_ID}/_unsnooze`,
+          { headers: { ...COMMON_HEADERS, ...restrictedCreds.apiKeyHeader } }
+        );
+        expect(response).toHaveStatusCode(204);
+      }
+    );
+
+    apiTest(
+      'per-alert snooze/unsnooze by restricted user does not rotate the rule API key',
+      async ({ apiClient, esClient }) => {
+        const getAlertAttrs = async () => {
+          const result = await esClient.search({
+            index: '.kibana_alerting_cases*',
+            query: { term: { _id: `alert:${ruleId}` } },
+            size: 1,
+          });
+          const hit = result.hits.hits[0];
+          expect(hit).toBeDefined();
+          return (hit._source as Record<string, unknown>)?.alert as Record<string, unknown>;
+        };
+
+        const before = await getAlertAttrs();
+        expect(before.apiKey).toBeDefined();
+        expect(before.apiKeyOwner).toBeDefined();
+
+        await apiClient.post(
+          `api/alerting/rule/${ruleId}/alert/${ENCODED_ALERT_INSTANCE_ID}/_snooze`,
+          {
+            headers: { ...COMMON_HEADERS, ...restrictedCreds.apiKeyHeader },
+            body: { expires_at: '2099-12-31T23:59:59.000Z' },
+            responseType: 'json',
+          }
+        );
+        await apiClient.post(
+          `api/alerting/rule/${ruleId}/alert/${ENCODED_ALERT_INSTANCE_ID}/_unsnooze`,
+          { headers: { ...COMMON_HEADERS, ...restrictedCreds.apiKeyHeader } }
+        );
+
+        const after = await getAlertAttrs();
+        expect(after.apiKey).toBe(before.apiKey);
+        expect(after.apiKeyOwner).toBe(before.apiKeyOwner);
+      }
+    );
   }
 );
