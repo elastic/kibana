@@ -137,12 +137,21 @@ export interface CpsSpaceFixture {
 // ---------------------------------------------------------------------------
 
 export const test = baseTest.extend<
-  SecurityTestFixtures & { cpsSpace: CpsSpaceFixture },
+  SecurityTestFixtures & { cpsSpace: CpsSpaceFixture; context: SecurityTestFixtures['context'] },
   SecurityWorkerFixtures & {
     cpsTestData: CpsTestDataFixture;
     graphCpsTestData: GraphCpsTestDataFixture;
   }
 >({
+  context: async ({ context }, use) => {
+    // Suppress the CPS onboarding tour before any page loads so it cannot
+    // intercept pointer events during test interactions.
+    await context.addInitScript(() => {
+      window.localStorage.setItem('cps:projectPicker:tourShown', 'true');
+    });
+    await use(context);
+  },
+
   cpsTestData: [
     async ({ esClient, linkedProject }, use) => {
       const runId = randomUUID().slice(0, 8);
