@@ -8,11 +8,10 @@
  */
 
 import type { ScoutPage } from '@kbn/scout';
-import { test, tags } from '@kbn/scout';
+import { spaceTest, tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { testData } from '../../fixtures/common';
 
-const DEFAULT_TIME_RANGE = `{ "from": "${testData.DEFAULT_TIME_RANGE.from}", "to": "${testData.DEFAULT_TIME_RANGE.to}"}`;
 // Note: this query is intentionally non-aggregate (no `stats ... by ...`).
 // In the default cascade layout, an aggregate ES|QL query swaps the
 // `discoverDocTable` for a grouped/cascade rendering, which would break the
@@ -43,86 +42,83 @@ const assertEsqlChartState = async ({
   await expect(page.testSubj.locator('discoverDocTable')).toHaveCount(tableOpen ? 1 : 0);
 };
 
-test.describe('Discover panel toggles in ESQL chart modes', { tag: tags.stateful.all }, () => {
-  test.beforeAll(async ({ kbnClient }) => {
-    await kbnClient.importExport.load(testData.DISCOVER_KBN_ARCHIVE);
-    await kbnClient.uiSettings.update({
-      defaultIndex: testData.DEFAULT_DATA_VIEW,
-      'timepicker:timeDefaults': DEFAULT_TIME_RANGE,
-    });
+spaceTest.describe('Discover panel toggles in ESQL chart modes', { tag: tags.stateful.all }, () => {
+  spaceTest.beforeAll(async ({ scoutSpace }) => {
+    await scoutSpace.savedObjects.load(testData.DISCOVER_KBN_ARCHIVE);
+    await scoutSpace.uiSettings.setDefaultIndex(testData.DEFAULT_DATA_VIEW);
+    await scoutSpace.uiSettings.setDefaultTime(testData.DEFAULT_TIME_RANGE);
   });
 
-  test.beforeEach(async ({ browserAuth, pageObjects }) => {
+  spaceTest.beforeEach(async ({ browserAuth, pageObjects }) => {
     await browserAuth.loginAsAdmin();
     await pageObjects.discover.goto({ queryMode: 'esql' });
     await pageObjects.discover.waitUntilSearchingHasFinished();
     await pageObjects.discover.waitForDocTableRendered();
   });
 
-  test.afterAll(async ({ kbnClient }) => {
-    await Promise.all([
-      kbnClient.uiSettings.unset('defaultIndex'),
-      kbnClient.uiSettings.unset('timepicker:timeDefaults'),
-    ]);
-    await kbnClient.importExport.unload(testData.DISCOVER_KBN_ARCHIVE);
-    await kbnClient.savedObjects.cleanStandardList();
+  spaceTest.afterAll(async ({ scoutSpace }) => {
+    await scoutSpace.uiSettings.unset('defaultIndex', 'timepicker:timeDefaults');
+    await scoutSpace.savedObjects.cleanStandardList();
   });
 
-  test('toggles panels for the default ESQL histogram chart', async ({ page, pageObjects }) => {
-    await assertEsqlChartState({
-      page,
-      sidebarOpen: true,
-      chartOpen: true,
-      tableOpen: true,
-      totalHits: '1,000',
-    });
+  spaceTest(
+    'toggles panels for the default ESQL histogram chart',
+    async ({ page, pageObjects }) => {
+      await assertEsqlChartState({
+        page,
+        sidebarOpen: true,
+        chartOpen: true,
+        tableOpen: true,
+        totalHits: '1,000',
+      });
 
-    await pageObjects.discover.closeSidebar();
-    await assertEsqlChartState({
-      page,
-      sidebarOpen: false,
-      chartOpen: true,
-      tableOpen: true,
-      totalHits: '1,000',
-    });
-    await pageObjects.discover.openSidebar();
+      await pageObjects.discover.closeSidebar();
+      await assertEsqlChartState({
+        page,
+        sidebarOpen: false,
+        chartOpen: true,
+        tableOpen: true,
+        totalHits: '1,000',
+      });
+      await pageObjects.discover.openSidebar();
 
-    await pageObjects.discover.hideChart();
-    await assertEsqlChartState({
-      page,
-      sidebarOpen: true,
-      chartOpen: false,
-      tableOpen: true,
-      totalHits: '1,000',
-    });
-    expect(await pageObjects.discover.isButtonDisabled('dscHideTableButton')).toBe(true);
-    await pageObjects.discover.showChart();
+      await pageObjects.discover.hideChart();
+      await assertEsqlChartState({
+        page,
+        sidebarOpen: true,
+        chartOpen: false,
+        tableOpen: true,
+        totalHits: '1,000',
+      });
+      expect(await pageObjects.discover.isButtonDisabled('dscHideTableButton')).toBe(true);
+      await pageObjects.discover.showChart();
 
-    await pageObjects.discover.closeTablePanel();
-    await assertEsqlChartState({
-      page,
-      sidebarOpen: true,
-      chartOpen: true,
-      tableOpen: false,
-      totalHits: '1,000',
-    });
-    expect(await pageObjects.discover.isButtonDisabled('dscHideHistogramButton')).toBe(true);
-    await pageObjects.discover.openTablePanel();
+      await pageObjects.discover.closeTablePanel();
+      await assertEsqlChartState({
+        page,
+        sidebarOpen: true,
+        chartOpen: true,
+        tableOpen: false,
+        totalHits: '1,000',
+      });
+      expect(await pageObjects.discover.isButtonDisabled('dscHideHistogramButton')).toBe(true);
+      await pageObjects.discover.openTablePanel();
 
-    await pageObjects.discover.closeSidebar();
-    await pageObjects.discover.hideChart();
-    await assertEsqlChartState({
-      page,
-      sidebarOpen: false,
-      chartOpen: false,
-      tableOpen: true,
-      totalHits: '1,000',
-    });
-    await pageObjects.discover.openSidebar();
-    await pageObjects.discover.showChart();
-  });
+      await pageObjects.discover.closeSidebar();
+      await pageObjects.discover.hideChart();
+      await assertEsqlChartState({
+        page,
+        sidebarOpen: false,
+        chartOpen: false,
+        tableOpen: true,
+        totalHits: '1,000',
+      });
+      await pageObjects.discover.openSidebar();
+      await pageObjects.discover.showChart();
+    }
+  );
 
-  test('toggles panels for an aggregate ES|QL query', async ({ page, pageObjects }) => {
+  spaceTest('toggles panels for an aggregate ES|QL query', async ({ page, pageObjects }) => {
     await pageObjects.discover.writeAndSubmitEsqlQuery(ESQL_LIMITED_QUERY);
     await pageObjects.discover.waitForDocTableRendered();
 
