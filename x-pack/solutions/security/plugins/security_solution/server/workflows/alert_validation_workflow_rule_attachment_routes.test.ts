@@ -30,7 +30,7 @@ jest.mock(
   '../lib/detection_engine/prebuilt_rules/logic/rule_assets/prebuilt_rule_assets_client',
   () => ({
     createPrebuiltRuleAssetsClient: jest.fn(() => ({
-      fetchAssetsByVersion: jest.fn().mockResolvedValue([]),
+      fetchAssetsByVersion: jest.fn().mockResolvedValue({ assets: [] }),
     })),
   })
 );

@@ -197,6 +197,9 @@ export interface UsageStats {
   'observability:streamsEnableDraftStreams': boolean;
   'observability:streamsSigEventsIndexPatterns': string;
   'securitySolution:entityStoreEnableV2': boolean;
+  'securitySolution:alertValidationWorkflowAutoCloseEnabled': boolean;
+  'securitySolution:alertValidationWorkflowAutoCloseConfidenceScoreMinThreshold': number;
+  'securitySolution:alertValidationWorkflowAutoCloseConfidenceScoreMaxThreshold': number;
   'elasticRamen:enabled': boolean;
   'query_activity:minRunningTime': number;
   'genAiSettings:tokenUsageTracking': boolean;
