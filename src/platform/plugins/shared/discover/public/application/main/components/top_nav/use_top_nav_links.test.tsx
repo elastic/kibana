@@ -13,7 +13,7 @@ import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { AppMenuActionId } from '@kbn/discover-utils';
 import { BehaviorSubject } from 'rxjs';
 import { triggersActionsUiMock } from '@kbn/triggers-actions-ui-plugin/public/mocks';
-import { useTopNavLinks } from './use_top_nav_links';
+import { useTopNavLinks, type UseTopNavLinksParams } from './use_top_nav_links';
 import { getDiscoverInternalStateMock } from '../../../../__mocks__/discover_state.mock';
 import { createDiscoverServicesMock } from '../../../../__mocks__/services';
 import { DiscoverToolkitTestProvider } from '../../../../__mocks__/test_provider';
@@ -21,11 +21,7 @@ import { internalStateActions } from '../../state_management/redux';
 import { ENABLE_ESQL } from '@kbn/esql-utils';
 import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
 import type { DiscoverServices } from '../../../../build_services';
-import type {
-  AppMenuExtension,
-  AppMenuExtensionParams,
-  Profile,
-} from '../../../../context_awareness/types';
+import type { AppMenuExtension, AppMenuExtensionParams } from '../../../../context_awareness/types';
 import { useProfileAccessor } from '../../../../context_awareness/hooks/use_profile_accessor';
 import * as getAlerts from './app_menu_actions/get_alerts';
 
@@ -47,7 +43,7 @@ jest.mock('../../../../context_awareness/hooks/use_profile_accessor', () => ({
   useProfileAccessor: jest.fn((accessorId: string) => jest.fn((baseImpl) => baseImpl)),
 }));
 
-const mockUseProfileAccessor = useProfileAccessor as jest.MockedFunction<typeof useProfileAccessor>;
+const mockUseProfileAccessor = jest.mocked(useProfileAccessor);
 
 const createTestServices = (overrides: Partial<DiscoverServices> = {}): DiscoverServices => {
   const services = createDiscoverServicesMock();
@@ -83,7 +79,7 @@ const createTestServices = (overrides: Partial<DiscoverServices> = {}): Discover
 };
 
 describe('useTopNavLinks', () => {
-  const setup = async (hookAttrs: Partial<Parameters<typeof useTopNavLinks>[0]> = {}) => {
+  const setup = async (hookAttrs: Partial<UseTopNavLinksParams> = {}) => {
     const services = hookAttrs.services ?? createTestServices();
     const toolkit = getDiscoverInternalStateMock({ services });
     const testDataView = hookAttrs.dataView ?? dataViewMock;
@@ -373,7 +369,7 @@ describe('useTopNavLinks', () => {
 
   describe('alerting v2 rules menu', () => {
     const setupWithAlertingV2 = async (
-      hookAttrs: Partial<Parameters<typeof useTopNavLinks>[0]> = {},
+      hookAttrs: Partial<UseTopNavLinksParams> = {},
       alertingV2Enabled = true
     ) => {
       const baseMock = createDiscoverServicesMock();
@@ -469,12 +465,8 @@ describe('useTopNavLinks', () => {
       beforeEach(() => {
         mockUseProfileAccessor.mockImplementation((accessorId) => {
           if (accessorId === 'getAppMenu') {
-            return jest.fn((baseImpl) => {
-              const getAppMenu = baseImpl as Profile['getAppMenu'];
-
+            return jest.fn(() => {
               return (params: AppMenuExtensionParams): AppMenuExtension => {
-                const prevValue = getAppMenu(params);
-
                 return {
                   appMenuRegistry: (registry) => {
                     registry.registerPopoverItem(AppMenuActionId.alerts, {
@@ -485,7 +477,7 @@ describe('useTopNavLinks', () => {
                       render: jest.fn(() => null),
                     });
 
-                    return prevValue.appMenuRegistry(registry);
+                    return registry;
                   },
                 };
               };
@@ -507,31 +499,25 @@ describe('useTopNavLinks', () => {
           await setupWithAlertingV2({ isEsqlMode: true }, true);
           const classicConfig = await setupWithAlertingV2({ isEsqlMode: false }, true);
 
-          expect(getCreateRuleOptionsSpy).toHaveBeenCalledWith(
-            expect.objectContaining({
-              alertsPopoverItems: expect.arrayContaining([
-                expect.objectContaining({
-                  id: 'custom-threshold-rule',
-                  label: 'Create custom threshold rule',
-                  testId: 'discoverAppMenuCustomThresholdRule',
-                }),
-              ]),
-            })
-          );
+          const [{ alertsPopoverItems }] = getCreateRuleOptionsSpy.mock.calls[0];
+          expect(
+            alertsPopoverItems.map(({ id, label, testId }) => ({ id, label, testId }))
+          ).toContainEqual({
+            id: 'custom-threshold-rule',
+            label: 'Create custom threshold rule',
+            testId: 'discoverAppMenuCustomThresholdRule',
+          });
 
           const alertsItem = classicConfig.items?.find(
             (item) => item.id === AppMenuActionId.alerts
           );
+          const classicPopoverItems = alertsItem?.items?.map(({ id, label }) => ({ id, label }));
+
           expect(alertsItem?.run).toBeUndefined();
-          expect(alertsItem?.items).toBeDefined();
-          expect(alertsItem?.items).toEqual(
-            expect.arrayContaining([
-              expect.objectContaining({
-                id: 'custom-threshold-rule',
-                label: 'Create custom threshold rule',
-              }),
-            ])
-          );
+          expect(classicPopoverItems).toContainEqual({
+            id: 'custom-threshold-rule',
+            label: 'Create custom threshold rule',
+          });
         } finally {
           getCreateRuleOptionsSpy.mockRestore();
         }

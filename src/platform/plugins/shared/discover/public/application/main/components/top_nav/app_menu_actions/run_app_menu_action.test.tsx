@@ -15,7 +15,10 @@ import type { DiscoverAppMenuItemType, DiscoverAppMenuRunActionParams } from '@k
 describe('run app menu actions', () => {
   describe('runAppMenuAction', () => {
     it('should call the run function with correct params', async () => {
-      const mockRun = jest.fn();
+      let capturedParams: DiscoverAppMenuRunActionParams | undefined;
+      const mockRun = jest.fn((params: DiscoverAppMenuRunActionParams) => {
+        capturedParams = params;
+      });
       const appMenuItem: DiscoverAppMenuItemType = {
         id: 'action-1',
         order: 1,
@@ -35,15 +38,14 @@ describe('run app menu actions', () => {
       });
 
       expect(mockRun).toHaveBeenCalledTimes(1);
-      expect(mockRun).toHaveBeenCalledWith(
-        expect.objectContaining({
-          triggerElement: anchorElement,
-          returnFocus: expect.any(Function),
-          context: expect.objectContaining({
-            onFinishAction: expect.any(Function),
-          }),
-        })
-      );
+
+      if (!capturedParams) {
+        throw new Error('Expected run params to be captured');
+      }
+
+      expect(capturedParams.triggerElement).toBe(anchorElement);
+      expect(capturedParams.returnFocus).toEqual(expect.any(Function));
+      expect(capturedParams.context).toEqual({ onFinishAction: expect.any(Function) });
     });
 
     it('should not render anything when only run is defined', async () => {
@@ -71,7 +73,11 @@ describe('run app menu actions', () => {
     });
 
     it('should render content returned from render', async () => {
-      const mockRender = jest.fn(() => <div data-test-subj="test-content">Custom Content</div>);
+      let capturedParams: DiscoverAppMenuRunActionParams | undefined;
+      const mockRender = jest.fn((params: DiscoverAppMenuRunActionParams) => {
+        capturedParams = params;
+        return <div data-test-subj="test-content">Custom Content</div>;
+      });
       const appMenuItem: DiscoverAppMenuItemType = {
         id: 'action-1',
         order: 1,
@@ -91,15 +97,13 @@ describe('run app menu actions', () => {
         returnFocus: jest.fn(),
       });
 
-      expect(mockRender).toHaveBeenCalledWith(
-        expect.objectContaining({
-          triggerElement: anchorElement,
-          returnFocus: expect.any(Function),
-          context: expect.objectContaining({
-            onFinishAction: expect.any(Function),
-          }),
-        })
-      );
+      if (!capturedParams) {
+        throw new Error('Expected render params to be captured');
+      }
+
+      expect(capturedParams.triggerElement).toBe(anchorElement);
+      expect(capturedParams.returnFocus).toEqual(expect.any(Function));
+      expect(capturedParams.context).toEqual({ onFinishAction: expect.any(Function) });
       expect(document.querySelector('[data-test-subj="test-content"]')).toBeInTheDocument();
     });
 

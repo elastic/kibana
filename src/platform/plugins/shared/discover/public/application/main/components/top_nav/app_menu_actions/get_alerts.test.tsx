@@ -7,21 +7,34 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { isValidElement, type ReactElement } from 'react';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { ES_QUERY_ID } from '@kbn/rule-data-utils';
-import { AppMenuActionId, type DiscoverAppMenuPopoverItem } from '@kbn/discover-utils';
+import {
+  AppMenuActionId,
+  type DiscoverAppMenuItemType,
+  type DiscoverAppMenuPopoverItem,
+  type DiscoverAppMenuRunActionParams,
+} from '@kbn/discover-utils';
 import { ESQLVariableType } from '@kbn/esql-types';
+import type { CreateRuleOptionsFlyoutProps } from '@kbn/alerting-v2-plugin/public';
 import { getAlertsAppMenuItem, getCreateRuleOptionsAppMenuItem } from './get_alerts';
 import { createDiscoverServicesMock } from '../../../../../__mocks__/services';
 import { dataViewWithTimefieldMock } from '../../../../../__mocks__/data_view_with_timefield';
 import { dataViewWithNoTimefieldMock } from '../../../../../__mocks__/data_view_no_timefield';
 import { getDiscoverInternalStateMock } from '../../../../../__mocks__/discover_state.mock';
 import type { AppMenuExtensionParams } from '../../../../../context_awareness';
-import type { DiscoverAppMenuItemType } from '@kbn/discover-utils';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { DiscoverServices } from '../../../../../build_services';
 import { internalStateActions } from '../../../state_management/redux';
-import type { ReactElement } from 'react';
+
+interface SetupAlertsMenuItemParams {
+  dataView?: DataView;
+  isEsqlMode?: boolean;
+  authorizedRuleTypeIds?: string[];
+  services?: DiscoverServices;
+  esqlQuery?: string;
+}
 
 const setupAlertsMenuItem = async ({
   dataView = dataViewMock,
@@ -29,13 +42,7 @@ const setupAlertsMenuItem = async ({
   authorizedRuleTypeIds = [ES_QUERY_ID],
   services = createDiscoverServicesMock(),
   esqlQuery = 'FROM logs-*',
-}: {
-  dataView?: DataView;
-  isEsqlMode?: boolean;
-  authorizedRuleTypeIds?: string[];
-  services?: DiscoverServices;
-  esqlQuery?: string;
-} = {}) => {
+}: SetupAlertsMenuItemParams = {}) => {
   const toolkit = getDiscoverInternalStateMock({ services });
 
   await toolkit.initializeTabs();
@@ -73,13 +80,13 @@ const setupAlertsMenuItem = async ({
 };
 
 const getAlertsMenuItem = async (
-  params: Parameters<typeof setupAlertsMenuItem>[0] = {}
+  params: SetupAlertsMenuItemParams = {}
 ): Promise<DiscoverAppMenuItemType> => {
   return (await setupAlertsMenuItem(params)).alertsMenuItem;
 };
 
 const setupCreateRuleOptionsMenuItem = async (
-  params: Parameters<typeof setupAlertsMenuItem>[0] & {
+  params: SetupAlertsMenuItemParams & {
     alertsPopoverItems?: DiscoverAppMenuPopoverItem[];
   } = {}
 ) => {
@@ -98,6 +105,23 @@ const setupCreateRuleOptionsMenuItem = async (
   }
 
   return { ...setup, createRuleOptionsAppMenuItem };
+};
+
+const renderCreateRuleOptionsFlyout = (
+  appMenuItem: DiscoverAppMenuItemType,
+  runParams: DiscoverAppMenuRunActionParams
+): ReactElement<CreateRuleOptionsFlyoutProps> => {
+  if (!appMenuItem.render) {
+    throw new Error('Expected create rule options app menu item to render content');
+  }
+
+  const flyoutElement = appMenuItem.render(runParams);
+
+  if (!isValidElement<CreateRuleOptionsFlyoutProps>(flyoutElement)) {
+    throw new Error('Expected create rule options app menu item to render a flyout');
+  }
+
+  return flyoutElement;
 };
 
 describe('getAlertsAppMenuItem', () => {
@@ -203,10 +227,8 @@ describe('getAlertsAppMenuItem', () => {
   describe('Manage rules and connectors link', () => {
     it('should link to the unified rules page when rules app is registered', async () => {
       const services = createDiscoverServicesMock();
-      (services.application.isAppRegistered as jest.Mock).mockReturnValue(true);
-      (services.application.getUrlForApp as jest.Mock).mockImplementation(
-        (appId: string) => `/app/${appId}`
-      );
+      jest.mocked(services.application.isAppRegistered).mockReturnValue(true);
+      jest.mocked(services.application.getUrlForApp).mockImplementation((appId) => `/app/${appId}`);
       const alertsMenuItem = await getAlertsMenuItem({ services });
       const manageAlertsItem = alertsMenuItem.items?.find(
         (item) => item.testId === 'discoverManageAlertsButton'
@@ -227,15 +249,11 @@ describe('getAlertsAppMenuItem', () => {
         subscribe: (listener) => toolkit.internalState.subscribe(listener),
       });
 
-      expect(createRuleOptionsAppMenuItem).toEqual(
-        expect.objectContaining({
-          id: AppMenuActionId.alerts,
-          label: 'Create alert rule',
-          testId: 'discoverAlertsButton',
-          separator: 'above',
-          render: expect.any(Function),
-        })
-      );
+      expect(createRuleOptionsAppMenuItem?.id).toBe(AppMenuActionId.alerts);
+      expect(createRuleOptionsAppMenuItem?.label).toBe('Create alert rule');
+      expect(createRuleOptionsAppMenuItem?.testId).toBe('discoverAlertsButton');
+      expect(createRuleOptionsAppMenuItem?.separator).toBe('above');
+      expect(createRuleOptionsAppMenuItem?.render).toEqual(expect.any(Function));
       expect(createRuleOptionsAppMenuItem?.items).toBeUndefined();
     });
 
@@ -266,10 +284,8 @@ describe('getAlertsAppMenuItem', () => {
 
     it('should render CreateRuleOptionsFlyout with the current ES|QL query and subscribe handler', async () => {
       const createRuleOptionsFlyoutMock = jest.fn(() => null);
-      const services = {
-        ...createDiscoverServicesMock(),
-        alertingVTwo: { CreateRuleOptionsFlyout: createRuleOptionsFlyoutMock },
-      } as DiscoverServices;
+      const services = createDiscoverServicesMock();
+      services.alertingVTwo = { CreateRuleOptionsFlyout: createRuleOptionsFlyoutMock };
       const { createRuleOptionsAppMenuItem } = await setupCreateRuleOptionsMenuItem({
         services,
         isEsqlMode: true,
@@ -277,9 +293,10 @@ describe('getAlertsAppMenuItem', () => {
       });
 
       const onFinishAction = jest.fn();
-      const flyoutElement = createRuleOptionsAppMenuItem.render!(
+      const flyoutElement = renderCreateRuleOptionsFlyout(
+        createRuleOptionsAppMenuItem,
         createRunParams(onFinishAction)
-      ) as ReactElement;
+      );
 
       expect(flyoutElement.type).toBe(createRuleOptionsFlyoutMock);
       expect(flyoutElement.props.initialQuery).toBe('FROM test-index | WHERE message != ""');
@@ -309,24 +326,32 @@ describe('getAlertsAppMenuItem', () => {
       });
 
       const runParams = createRunParams();
-      const flyoutElement = createRuleOptionsAppMenuItem.render!(runParams) as ReactElement;
-      const legacyRuleType = flyoutElement.props.legacyRuleTypes.find(
-        ({ id }: { id: string }) => id === 'custom-threshold-rule'
-      );
+      const flyoutElement = renderCreateRuleOptionsFlyout(createRuleOptionsAppMenuItem, runParams);
+      const legacyRuleTypes = flyoutElement.props.legacyRuleTypes ?? [];
+      const legacyRuleType = legacyRuleTypes.find(({ id }) => id === 'custom-threshold-rule');
 
-      expect(flyoutElement.props.legacyRuleTypes).toEqual(
-        expect.arrayContaining([
-          expect.objectContaining({
-            id: AppMenuActionId.createRule,
-            label: 'Create search threshold rule',
-            'data-test-subj': 'discoverCreateAlertButton',
-          }),
-          expect.objectContaining({
-            id: 'custom-threshold-rule',
-            label: 'Create custom threshold rule',
-          }),
-        ])
-      );
+      if (!legacyRuleType) {
+        throw new Error('Expected custom threshold legacy rule type to be mapped');
+      }
+
+      expect(
+        legacyRuleTypes.map(({ id, label, 'data-test-subj': testSubj }) => ({
+          id,
+          label,
+          'data-test-subj': testSubj,
+        }))
+      ).toEqual([
+        {
+          id: AppMenuActionId.createRule,
+          label: 'Create search threshold rule',
+          'data-test-subj': 'discoverCreateAlertButton',
+        },
+        {
+          id: 'custom-threshold-rule',
+          label: 'Create custom threshold rule',
+          'data-test-subj': 'discoverAppMenuCustomThresholdRule',
+        },
+      ]);
 
       const onClose = jest.fn();
       expect(legacyRuleType.render(onClose)).toBeNull();
@@ -365,11 +390,12 @@ describe('getAlertsAppMenuItem', () => {
         alertsPopoverItems: [actionOnlyRuleItem, disabledRuleItem, enabledRuleItem],
       });
 
-      const flyoutElement = createRuleOptionsAppMenuItem.render!(createRunParams()) as ReactElement;
+      const flyoutElement = renderCreateRuleOptionsFlyout(
+        createRuleOptionsAppMenuItem,
+        createRunParams()
+      );
 
-      expect(flyoutElement.props.legacyRuleTypes.map(({ id }: { id: string }) => id)).toEqual([
-        'enabled-rule',
-      ]);
+      expect(flyoutElement.props.legacyRuleTypes?.map(({ id }) => id)).toEqual(['enabled-rule']);
     });
 
     it('should expose getters that read the latest tab state when invoked', async () => {
@@ -390,10 +416,18 @@ describe('getAlertsAppMenuItem', () => {
         })
       );
 
-      const flyoutElement = createRuleOptionsAppMenuItem.render!(createRunParams()) as ReactElement;
+      const flyoutElement = renderCreateRuleOptionsFlyout(
+        createRuleOptionsAppMenuItem,
+        createRunParams()
+      );
+      const { getQuery, getEsqlVariables } = flyoutElement.props;
 
-      expect(flyoutElement.props.getQuery()).toBe('FROM initial-index');
-      expect(flyoutElement.props.getEsqlVariables()).toEqual([
+      if (!getQuery || !getEsqlVariables) {
+        throw new Error('Expected create rule options flyout getters to be defined');
+      }
+
+      expect(getQuery()).toBe('FROM initial-index');
+      expect(getEsqlVariables()).toEqual([
         { key: 'host', value: 'web-1', type: ESQLVariableType.VALUES },
       ]);
 
@@ -408,8 +442,8 @@ describe('getAlertsAppMenuItem', () => {
         })
       );
 
-      expect(flyoutElement.props.getQuery()).toBe('FROM updated-index | WHERE status == "open"');
-      expect(flyoutElement.props.getEsqlVariables()).toEqual([
+      expect(getQuery()).toBe('FROM updated-index | WHERE status == "open"');
+      expect(getEsqlVariables()).toEqual([
         { key: 'host', value: 'web-2', type: ESQLVariableType.VALUES },
       ]);
     });

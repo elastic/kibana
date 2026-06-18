@@ -64,6 +64,18 @@ const TAB_SCOPED_APP_MENU_ITEM_IDS = new Set<string>([
   AppMenuActionId.inspect,
 ]);
 
+export interface UseTopNavLinksParams {
+  dataView: DataView | undefined;
+  services: DiscoverServices;
+  hasUnsavedChanges: boolean;
+  isEsqlMode: boolean;
+  adHocDataViews: DataView[];
+  hasShareIntegration: boolean;
+  persistedDiscoverSession: DiscoverSession | undefined;
+  onOpenSaveModal: () => void;
+  onOpenSaveAsModal: () => void;
+}
+
 /**
  * Helper function to build the top nav links
  */
@@ -77,17 +89,7 @@ export const useTopNavLinks = ({
   persistedDiscoverSession,
   onOpenSaveModal,
   onOpenSaveAsModal,
-}: {
-  dataView: DataView | undefined;
-  services: DiscoverServices;
-  hasUnsavedChanges: boolean;
-  isEsqlMode: boolean;
-  adHocDataViews: DataView[];
-  hasShareIntegration: boolean;
-  persistedDiscoverSession: DiscoverSession | undefined;
-  onOpenSaveModal: () => void;
-  onOpenSaveAsModal: () => void;
-}): AppMenuConfig => {
+}: UseTopNavLinksParams): AppMenuConfig => {
   const intl = useI18n();
   const dispatch = useInternalStateDispatch();
   const getState = useInternalStateGetState();
