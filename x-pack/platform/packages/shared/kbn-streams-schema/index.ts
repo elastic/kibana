@@ -233,7 +233,6 @@ export {
   type BaseFeature,
   type IdentifiedFeature,
   type IgnoredFeature,
-  type FeatureStatus,
   DATASET_ANALYSIS_FEATURE_TYPE,
   LOG_SAMPLES_FEATURE_TYPE,
   LOG_PATTERNS_FEATURE_TYPE,
@@ -251,7 +250,6 @@ export {
   baseFeatureSchema,
   identifiedFeatureSchema,
   ignoredFeatureSchema,
-  featureStatusSchema,
 } from './src/feature';
 
 export { FeatureAccumulator } from './src/feature_accumulator';
@@ -275,7 +273,6 @@ export { TaskStatus, type TaskResult } from './src/tasks/types';
 export type { GenerateDescriptionResult } from './src/api/description_generation';
 export type { IdentifyFeaturesResult, IterationResult } from './src/api/features';
 export { tokenCountSchema, iterationResultSchema } from './src/api/features';
-
 export {
   type GenerateInsightsResult,
   type Insight,
@@ -319,9 +316,11 @@ export type {
 } from './src/onboarding';
 export {
   StreamsKIsOnboardingStep,
-  StreamsKIsOnboardingStatus,
   STREAMS_KIS_ONBOARDING_IN_PROGRESS_STATUSES,
 } from './src/onboarding';
+export type { SigEventsWorkflowStatusResult } from './src/workflows';
+export { SigEventsWorkflowStatus } from './src/workflows';
+
 export { streamsOasDefinitions } from './src/oas_definitions';
 export type { StreamsOasDefinitions } from './src/oas_definitions';
 

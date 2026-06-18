@@ -58,8 +58,8 @@ consts:
   SEVERITY_HIGH: 51
   SEVERITY_MEDIUM: 25
   UNHANDLED_RULES_MAX: 500
-  VERDICT_ACKNOWLEDGED: "acknowledged"
-  VERDICT_PROMOTED: "promoted"
+  STATUS_ACKNOWLEDGED: "acknowledged"
+  STATUS_PROMOTED: "promoted"
 
 steps:
   # Copy workflow.spaceId into variables so ES body Liquid expressions can reference it.
@@ -280,7 +280,7 @@ steps:
 
   # -----------------------------------------------------------------------
   # Step 3: Unhandled detection docs → correlation agent → index discoveries.
-  # -----------------------------------------------------------------------
+  # -----------------------------------------------------------------------      
   - name: get_active_unhandled_rules
     type: elasticsearch.request
     with:
@@ -312,10 +312,9 @@ steps:
     type: data.set
     with:
       # active_rule_uuids: rules whose latest doc is kind:detection — fed to investigator batch.
-      # catchall_rule_uuids: detection OR quiet latest — fed to the catchall handled stamper so
-      #   quiet-latest rules also receive a kind:handled stamp after investigation.
       active_rule_uuids: "${{ steps.get_active_unhandled_rules.output.hits.hits | where: '_source.kind', 'detection' | map: '_source' | map: 'rule_uuid' | default: [] }}"
-      catchall_rule_uuids: "${{ steps.get_active_unhandled_rules.output.hits.hits | reject: '_source.kind', 'handled' | map: '_source' | map: 'rule_uuid' | default: [] }}"
+      # quiet_rule_uuids: rules whose latest doc is kind:quiet — not investigated, but stamped handled.
+      quiet_rule_uuids: "${{ steps.get_active_unhandled_rules.output.hits.hits | where: '_source.kind', 'quiet' | map: '_source' | map: 'rule_uuid' | default: [] }}"
 
   - name: get_detected_window
     # if guard: terms with an empty array causes an ES parsing_exception.
@@ -364,6 +363,14 @@ steps:
     on-failure:
       continue: true
 
+  - name: compute_stamp_rule_uuids
+    # Rules to mark handled this cycle: the investigated batch plus quiet (recovered) rules,
+    # so recovered rules aren't left looking unprocessed. Active rules beyond the
+    # detectionBatchMax cap are excluded so they survive for the next cycle.
+    type: data.set
+    with:
+      stamp_rule_uuids: "${{ steps.get_detected_window.output.hits.hits | map: '_source' | map: 'rule_uuid' | compact | concat: steps.compute_active_unhandled_rule_uuids.output.quiet_rule_uuids | uniq | default: [] }}"
+
   - name: exit_idle
     type: workflow.output
     if: "${{ steps.compute_active_unhandled_rule_uuids.output.active_rule_uuids.size == 0 or steps.get_detected_window.error != null or steps.get_detected_window.output.hits.total.value == 0 }}"
@@ -405,7 +412,7 @@ steps:
       continue: true
 
   - name: get_active_events
-    # No verdict filter — ES filters BEFORE collapse; post-filtered in compute_active_events_context.
+    # No status filter — ES filters BEFORE collapse; post-filtered in compute_active_events_context.
     type: elasticsearch.request
     with:
       method: POST
@@ -421,7 +428,7 @@ steps:
           includes:
             - discovery_slug
             - title
-            - verdict
+            - status
         query:
           bool:
             filter:
@@ -436,8 +443,8 @@ steps:
   - name: compute_active_events_context
     type: data.set
     with:
-      promoted_events: "${{ steps.get_active_events.output.hits.hits | where: '_source.verdict', 'promoted' | map: '_source' | default: [] }}"
-      acknowledged_events: "${{ steps.get_active_events.output.hits.hits | where: '_source.verdict', 'acknowledged' | map: '_source' | default: [] }}"
+      promoted_events: "${{ steps.get_active_events.output.hits.hits | where: '_source.status', 'promoted' | map: '_source' | default: [] }}"
+      acknowledged_events: "${{ steps.get_active_events.output.hits.hits | where: '_source.status', 'acknowledged' | map: '_source' | default: [] }}"
 
   - name: run_investigator_agent
     # TODO: agent-id and connector-id are config fields and are NOT rendered through Liquid by the
@@ -446,6 +453,10 @@ steps:
     type: ai.agent
     agent-id: "platform.streams.significant-events.discovery.investigator"
     connector-id: ".openai-gpt-5.2-chat_completion"
+    # Keep plugin-id/aggregate-by in sync with @kbn/streams-schema inference_feature_ids.ts
+    # (STREAMS_SIG_EVENTS_DISCOVERY_INFERENCE_FEATURE_ID / STREAMS_SIGNIFICANT_EVENTS_INFERENCE_PARENT_FEATURE_ID).
+    plugin-id: "streams_sig_events_discovery"
+    aggregate-by: "streams_significant_events"
     create-conversation: true
     with:
       message: |
@@ -630,7 +641,7 @@ steps:
           is_not_group: "${{ foreach.item.grouped_discovery_ids == null or foreach.item.grouped_discovery_ids.size == 0 }}"
 
       - name: get_active_event_for_slug
-        # No verdict filter — post-filtered in compute_active_event_for_slug.
+        # No status filter — post-filtered in compute_active_event_for_slug.
         type: elasticsearch.request
         with:
           method: POST
@@ -644,7 +655,7 @@ steps:
                   order: desc
             _source:
               includes:
-                - verdict
+                - status
             query:
               bool:
                 filter:
@@ -660,9 +671,9 @@ steps:
         with:
           has_active_event: >-
             ${{ steps.get_active_event_for_slug.output.hits.total.value > 0
-            and steps.get_active_event_for_slug.output.hits.hits[0]._source.verdict == consts.VERDICT_PROMOTED
+            and steps.get_active_event_for_slug.output.hits.hits[0]._source.status == consts.STATUS_PROMOTED
             or steps.get_active_event_for_slug.output.hits.total.value > 0
-            and steps.get_active_event_for_slug.output.hits.hits[0]._source.verdict == consts.VERDICT_ACKNOWLEDGED }}
+            and steps.get_active_event_for_slug.output.hits.hits[0]._source.status == consts.STATUS_ACKNOWLEDGED }}
 
       - name: check_recent_finding
         if: "${{ foreach.item.detections != null and foreach.item.detections.size > 0 }}"
@@ -925,12 +936,9 @@ steps:
               continue: true
 
   - name: get_unhandled_state_docs
-    # Use catchall_rule_uuids (detection OR quiet latest) so quiet-latest rules
-    # also get a kind:handled stamp. active_rule_uuids would exclude them.
-    # Gate on agent success: if the agent failed, skip handled stamping so detections
-    # are not silently consumed — they will be retried on the next discovery cycle.
+    # Skip handled-stamping if the agent failed, so its detections are retried next cycle.
     if: >-
-      ${{ steps.compute_active_unhandled_rule_uuids.output.catchall_rule_uuids.size > 0
+      ${{ steps.compute_stamp_rule_uuids.output.stamp_rule_uuids.size > 0
       and steps.run_investigator_agent.error == null }}
     type: elasticsearch.request
     with:
@@ -951,7 +959,7 @@ steps:
                     - '{{ consts.KIND_DETECTION }}'
                     - '{{ consts.KIND_QUIET }}'
               - terms:
-                  rule_uuid: "${{ steps.compute_active_unhandled_rule_uuids.output.catchall_rule_uuids }}"
+                  rule_uuid: "${{ steps.compute_stamp_rule_uuids.output.stamp_rule_uuids }}"
               - range:
                   "@timestamp":
                     gte: '{{ inputs.detectionLookback }}'
