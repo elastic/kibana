@@ -16,13 +16,11 @@ import { DatePickerContextProvider } from '@kbn/ml-date-picker';
 import type { DatePickerDependencies } from '@kbn/ml-date-picker';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
 import { pick } from 'lodash';
-import { isOfAggregateQueryType } from '@kbn/es-query';
 import { getCoreStart, getPluginsStart } from '../../../../kibana_services';
 import type {
   FieldStatisticTableEmbeddableProps,
   ESQLDataVisualizerGridEmbeddableState,
 } from './types';
-import FieldStatsUnavailableMessage from './embeddable_error_msg';
 
 const EmbeddableESQLFieldStatsTableWrapper = dynamic(
   () => import('./embeddable_esql_field_stats_table')
@@ -43,10 +41,7 @@ function isFieldStatisticTableEmbeddableState(
 
 const FieldStatisticsWrapperContent = (props: FieldStatisticTableEmbeddableProps) => {
   if (isESQLFieldStatisticTableEmbeddableState(props)) {
-    const isEsql = props.esqlQuery && isOfAggregateQueryType(props.esqlQuery);
-    return isEsql ? (
-      <FieldStatsUnavailableMessage id={props.id} />
-    ) : (
+    return (
       <EmbeddableESQLFieldStatsTableWrapper
         id={props.id}
         dataView={props.dataView}
