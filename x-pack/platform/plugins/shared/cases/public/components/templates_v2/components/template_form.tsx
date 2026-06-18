@@ -8,7 +8,7 @@
 import React, { useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import type { UseEuiTheme } from '@elastic/eui';
-import { EuiIcon, EuiLoadingSpinner, useEuiTheme } from '@elastic/eui';
+import { EuiIconTip, EuiLoadingSpinner, useEuiTheme } from '@elastic/eui';
 import { css, Global } from '@emotion/react';
 import {
   getTemplateDefinitionJsonSchema,
@@ -135,7 +135,13 @@ export const TemplateYamlEditor = ({
         )}
         {!isSaving && isSaved && (
           <div css={styles.statusIndicator(euiTheme)}>
-            <EuiIcon type="check" color="success" size="l" title="Template saved" />
+            <EuiIconTip
+              type="check"
+              color="success"
+              size="l"
+              content="Template saved"
+              anchorProps={{ 'data-test-subj': 'template-saved-icon' }}
+            />
           </div>
         )}
         <TemplateYamlEditorBase
