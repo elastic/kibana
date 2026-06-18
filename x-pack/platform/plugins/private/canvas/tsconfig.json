@@ -84,7 +84,8 @@
     "@kbn/core-saved-objects-api-server",
     "@kbn/visualizations-common",
     "@kbn/core-http-browser",
-    "@kbn/scout"
+    "@kbn/scout",
+    "@kbn/rison"
   ],
   "exclude": ["target/**/*"]
 }
