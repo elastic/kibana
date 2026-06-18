@@ -64,4 +64,52 @@ describe('RuleInlineContent', () => {
     const { queryByText } = renderContent(makeAttachment(rule));
     expect(queryByText('Saving…')).not.toBeInTheDocument();
   });
+
+  describe('duplicate-save warning', () => {
+    const ATT_A = 'attachment-1';
+    const ATT_B = 'attachment-2';
+
+    const createCard = (id: string, version: number): RuleAttachment =>
+      ({
+        id,
+        type: 'security.rule',
+        data: { text: JSON.stringify(rule), attachmentLabel: rule.name },
+        version,
+      } as unknown as RuleAttachment);
+
+    it('does not warn on a create card whose version has not been saved', () => {
+      const { queryByText } = renderContent(createCard(ATT_A, 2));
+      expect(queryByText('This rule has already been saved')).not.toBeInTheDocument();
+    });
+
+    it('warns on the exact (attachmentId, version) pair that was saved', () => {
+      aiRuleCreation.markCreateSaved(ATT_A, 2);
+      const { getByText } = renderContent(createCard(ATT_A, 2));
+      expect(getByText('This rule has already been saved')).toBeInTheDocument();
+    });
+
+    it('does not warn on a different create card version (re-create in the same conversation)', () => {
+      aiRuleCreation.markCreateSaved(ATT_A, 2);
+      const { queryByText } = renderContent(createCard(ATT_A, 5));
+      expect(queryByText('This rule has already been saved')).not.toBeInTheDocument();
+    });
+
+    it('saving card A does not trigger the warning on card B at the same version (no cross-card collision)', () => {
+      aiRuleCreation.markCreateSaved(ATT_A, 2);
+      const { queryByText } = renderContent(createCard(ATT_B, 2));
+      expect(queryByText('This rule has already been saved')).not.toBeInTheDocument();
+    });
+
+    it('does not warn on an update card even if its (attachmentId, version) was saved', () => {
+      aiRuleCreation.markCreateSaved(ATT_A, 2);
+      const updateCard = {
+        id: ATT_A,
+        type: 'security.rule',
+        data: { text: JSON.stringify(rule), attachmentLabel: rule.name, ruleId: 'rule-1' },
+        version: 2,
+      } as unknown as RuleAttachment;
+      const { queryByText } = renderContent(updateCard);
+      expect(queryByText('This rule has already been saved')).not.toBeInTheDocument();
+    });
+  });
 });

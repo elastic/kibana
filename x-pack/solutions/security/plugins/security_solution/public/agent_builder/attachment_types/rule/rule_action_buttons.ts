@@ -31,6 +31,10 @@ interface BuildRuleActionButtonsParams {
   intent: RuleAttachmentIntent;
   /** Saved-rule id — PATCH target for update-intent saves and "View rule" link. */
   ruleId: string | undefined;
+  /** The attachment card id — threaded into save requests and "Open in form" for per-card targeting. */
+  attachmentId: string;
+  /** Version of the rendered create card, recorded on save to scope the duplicate-save warning. */
+  createCardVersion: number | undefined;
 }
 
 /** Builds action buttons for a rule attachment. Called from `getActionButtons` (not a hook). */
@@ -41,6 +45,8 @@ export const buildRuleActionButtons = ({
   uiSettings,
   intent,
   ruleId,
+  attachmentId,
+  createCardVersion,
 }: BuildRuleActionButtonsParams): ActionButton[] => {
   const canEditRules = hasCapabilities(application.capabilities, RULES_UI_EDIT_PRIVILEGE);
   if (!rule || !canEditRules || (rule.type === 'esql' && !uiSettings.get(ENABLE_ESQL))) {
@@ -61,7 +67,8 @@ export const buildRuleActionButtons = ({
       icon: 'pencil',
       type: ActionButtonType.SECONDARY,
       handler: () => {
-        aiRuleCreation.setAiCreatedRule(rule);
+        // Pass attachmentId so the form bind is explicitly set to this card.
+        aiRuleCreation.setAiCreatedRule(rule, attachmentId);
         application.navigateToApp('securitySolutionUI', {
           path: isUpdate && ruleId ? `${RULES_PATH}${getEditRuleUrl(ruleId)}` : RULES_CREATE_PATH,
         });
@@ -81,7 +88,10 @@ export const buildRuleActionButtons = ({
             if (aiRuleCreation.getIsSaving()) {
               return;
             }
-            aiRuleCreation.requestSaveRule({ ...rule, id: ruleId ?? rule.id });
+            aiRuleCreation.requestSaveRule(
+              { ...rule, id: ruleId ?? rule.id },
+              { attachmentId }
+            );
           },
         }
       : {
@@ -97,7 +107,10 @@ export const buildRuleActionButtons = ({
               return;
             }
             const { id: _id, ...ruleWithoutId } = rule as RuleResponse & { id?: string };
-            aiRuleCreation.requestSaveRule(ruleWithoutId as RuleResponse);
+            aiRuleCreation.requestSaveRule(ruleWithoutId as RuleResponse, {
+              createCardVersion,
+              attachmentId,
+            });
           },
         },
   ];

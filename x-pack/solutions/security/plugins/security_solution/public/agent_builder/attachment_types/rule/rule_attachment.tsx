@@ -75,6 +75,8 @@ export const createRuleAttachmentDefinition = ({
       uiSettings,
       intent,
       ruleId,
+      attachmentId: attachment.id,
+      createCardVersion: attachment.version,
     });
   },
 });

@@ -182,6 +182,12 @@ describe('createRuleAttachmentDefinition', () => {
       ).toBe('Update rule');
     });
 
+    it('labels an attachment with an explicit null ruleId "Create rule"', () => {
+      expect(primaryLabel(buildButtons({ text: JSON.stringify(validRule), ruleId: null }))).toBe(
+        'Create rule'
+      );
+    });
+
     it('shows "Create rule" for legacy attachments that have origin but no data.ruleId', () => {
       // origin is a server-side linkage from a prior session; it must NOT flip the button to
       // "Update rule" when the user is asking to create a fresh rule.
@@ -304,6 +310,7 @@ describe('buildRuleActionButtons', () => {
   beforeEach(() => {
     aiRuleCreation = new AiRuleCreationService();
     jest.spyOn(aiRuleCreation, 'requestSaveRule');
+    jest.spyOn(aiRuleCreation, 'setAiCreatedRule');
     window.history.pushState({}, '', '/');
     baseProps = {
       rule: { name: 'Test Rule', type: 'query' } as unknown as RuleResponse,
@@ -312,6 +319,8 @@ describe('buildRuleActionButtons', () => {
       uiSettings: makeUiSettings(),
       intent: 'create',
       ruleId: undefined,
+      attachmentId: 'air:testcard',
+      createCardVersion: undefined,
     };
   });
 
@@ -349,8 +358,24 @@ describe('buildRuleActionButtons', () => {
     const buttons = buildRuleActionButtons({ ...baseProps, intent: 'update', ruleId: 'rule-123' });
     primaryButton(buttons)!.handler();
     expect(aiRuleCreation.requestSaveRule).toHaveBeenCalledWith(
-      expect.objectContaining({ id: 'rule-123' })
+      expect.objectContaining({ id: 'rule-123' }),
+      expect.objectContaining({ attachmentId: 'air:testcard' })
     );
+  });
+
+  it('requests a save with the attachmentId for a create-intent attachment', () => {
+    const buttons = buildRuleActionButtons({ ...baseProps, createCardVersion: 2 });
+    primaryButton(buttons)!.handler();
+    expect(aiRuleCreation.requestSaveRule).toHaveBeenCalledWith(
+      expect.not.objectContaining({ id: expect.anything() }),
+      expect.objectContaining({ attachmentId: 'air:testcard', createCardVersion: 2 })
+    );
+  });
+
+  it('"Open in form" calls setAiCreatedRule with the rule and attachmentId', () => {
+    const buttons = buildRuleActionButtons(baseProps);
+    buttons.find((b) => b.label === 'Open in form')!.handler();
+    expect(aiRuleCreation.setAiCreatedRule).toHaveBeenCalledWith(baseProps.rule, 'air:testcard');
   });
 
   it('guards against a double-submit while a save is already in flight', () => {

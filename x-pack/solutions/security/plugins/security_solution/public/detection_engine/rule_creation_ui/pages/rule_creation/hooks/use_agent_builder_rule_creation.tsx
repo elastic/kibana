@@ -10,6 +10,7 @@ import { i18n } from '@kbn/i18n';
 import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
 import { getLatestVersion } from '@kbn/agent-builder-common/attachments';
 import { isRoundCompleteEvent } from '@kbn/agent-builder-common/chat/events';
+import { isToolCallStep } from '@kbn/agent-builder-common/chat/conversation';
 import type { ActionTypeRegistryContract } from '@kbn/triggers-actions-ui-plugin/public';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { useAppToasts } from '../../../../../common/hooks/use_app_toasts';
@@ -50,6 +51,13 @@ const ruleDefaultMetadataFields = {
 };
 
 const SYNC_DEBOUNCE_MS = 500;
+
+// Tool ids used for round-complete bind decisions. These are string constants that must stay in sync
+// with the server-side tool registrations:
+//   security.create_detection_rule → create_detection_rule_tool.ts (SECURITY_CREATE_DETECTION_RULE_TOOL_ID)
+//   attachments.update              → platform builtin attachment_update tool
+const RULE_CREATE_TOOL_ID = 'security.create_detection_rule';
+const ATTACHMENT_UPDATE_TOOL_ID = 'attachments.update';
 
 interface UseAgentBuilderRuleCreationParams {
   defineStepForm: FormHook<DefineStepRule, DefineStepRule>;
@@ -108,14 +116,22 @@ export const useAgentBuilderRuleCreation = ({
   }, [aiRuleCreation]);
 
   // On conversation switch, align intent/ruleId with the attachment (including on rule edit pages).
+  // Prefers the bound attachment id; falls back to first-of-type on fresh page load.
   useEffect(() => {
     if (!agentBuilder?.events?.ui?.activeConversation$) {
       return;
     }
     const subscription = agentBuilder.events.ui.activeConversation$.subscribe((change) => {
-      const ruleAttachment = change?.conversation?.attachments?.find(
-        (a) => a.type === SecurityAgentBuilderAttachments.rule
-      );
+      const attachments = change?.conversation?.attachments ?? [];
+      const boundId = aiRuleCreation.getBoundAttachmentId();
+      // Prefer the bound attachment when one is set; otherwise pick first-of-type (fresh page load).
+      const ruleAttachment =
+        (boundId
+          ? attachments.find(
+              (a) => a.id === boundId && a.type === SecurityAgentBuilderAttachments.rule
+            )
+          : undefined) ?? attachments.find((a) => a.type === SecurityAgentBuilderAttachments.rule);
+
       if (!ruleAttachment) {
         syncRuleIdRef.current = undefined;
         intentRef.current = existingRuleIdRef.current ? 'update' : 'create';
@@ -130,7 +146,7 @@ export const useAgentBuilderRuleCreation = ({
       syncRuleIdRef.current = ruleId ?? existingRuleIdRef.current;
     });
     return () => subscription.unsubscribe();
-  }, [agentBuilder]);
+  }, [agentBuilder, aiRuleCreation]);
 
   const addRuleAttachment = useCallback(
     (ruleData: unknown, label: string, savedRuleId?: string) => {
@@ -140,21 +156,23 @@ export const useAgentBuilderRuleCreation = ({
       const intent = intentRef.current;
       // ruleId is a sibling of `text` (not embedded in the rule JSON) — survives shallow merges.
       const ruleId = intent === 'update' ? savedRuleId ?? getRuleIdForSync() : undefined;
+      // Target the bound attachment; fall back to the constant id for the legacy seed path
+      // (e.g. when the form is open before any chat conversation exists).
+      const targetId = aiRuleCreation.getBoundAttachmentId() ?? SECURITY_RULE_ATTACHMENT_ID;
       const attachment: AttachmentInput = {
-        id: SECURITY_RULE_ATTACHMENT_ID,
+        id: targetId,
         type: SecurityAgentBuilderAttachments.rule,
         // Guard against empty string — server treats "" as valid and would overwrite a prior label.
         ...(label ? { description: label } : {}),
         data: {
           text: JSON.stringify(ruleData),
           attachmentLabel: label,
-          intent,
           ...(ruleId ? { ruleId } : {}),
         },
       };
       agentBuilder.addAttachment(attachment);
     },
-    [agentBuilder, getRuleIdForSync]
+    [agentBuilder, getRuleIdForSync, aiRuleCreation]
   );
 
   const updateFormFromChat = useCallback(
@@ -230,14 +248,65 @@ export const useAgentBuilderRuleCreation = ({
   }, [aiRuleCreation]);
 
   // CHAT -> FORM
+  // On each round, scan tool steps to find which rule card was last edited and decide whether to
+  // follow-and-sync or release the form bind.
   useEffect(() => {
     if (!agentBuilder?.events?.chat$) return;
     const subscription = agentBuilder.events.chat$.subscribe((event) => {
       if (!isRoundCompleteEvent(event)) return;
-      const ruleAttachment = event.data.attachments?.find(
-        (a) => a.type === SecurityAgentBuilderAttachments.rule
-      );
+
+      // Find the last rule-editing tool call in this round.
+      const steps = event.data.round?.steps ?? [];
+      let touchedAttachmentId: string | undefined;
+      let touchedIsNewCard = false;
+
+      for (const step of steps) {
+        if (isToolCallStep(step)) {
+          const toolId = step.tool_id;
+          if (toolId === RULE_CREATE_TOOL_ID || toolId === ATTACHMENT_UPDATE_TOOL_ID) {
+            // Each result is a ToolResult; we need the first 'other' result's data.
+            for (const result of step.results) {
+              const resultData = result.data as Record<string, unknown> | undefined;
+              if (resultData) {
+                // create_detection_rule → { attachmentId, isNewCard, ... }
+                // attachment_update     → { attachment_id, ... }
+                const candidateId =
+                  (resultData.attachmentId as string | undefined) ??
+                  (resultData.attachment_id as string | undefined);
+                if (candidateId) {
+                  touchedAttachmentId = candidateId;
+                  touchedIsNewCard =
+                    toolId === RULE_CREATE_TOOL_ID ? Boolean(resultData.isNewCard) : false;
+                }
+              }
+            }
+          }
+        }
+      }
+
+      if (touchedIsNewCard) {
+        // The user asked for a brand-new additional rule — release the bind so the form goes idle.
+        aiRuleCreation.releaseBind();
+        return;
+      }
+
+      // Determine which attachment to sync to the form.
+      // Priority: touched attachment this round → bound attachment → first-of-type in event.
+      const attachments = event.data.attachments ?? [];
+      const resolvedId = touchedAttachmentId ?? aiRuleCreation.getBoundAttachmentId() ?? undefined;
+      const ruleAttachment = resolvedId
+        ? attachments.find(
+            (a) => a.id === resolvedId && a.type === SecurityAgentBuilderAttachments.rule
+          )
+        : attachments.find((a) => a.type === SecurityAgentBuilderAttachments.rule);
+
       if (!ruleAttachment) return;
+
+      // Update the bound id to the attachment we're about to sync.
+      if (ruleAttachment.id !== aiRuleCreation.getBoundAttachmentId()) {
+        aiRuleCreation.setBoundAttachment(ruleAttachment.id);
+      }
+
       const latestVersion = getLatestVersion(ruleAttachment);
       if (!latestVersion) return;
       let parsed: RuleResponse | undefined;
@@ -258,7 +327,7 @@ export const useAgentBuilderRuleCreation = ({
       updateFormFromChatRef.current(ruleToApply, { silent: true });
     });
     return () => subscription.unsubscribe();
-  }, [agentBuilder]);
+  }, [agentBuilder, aiRuleCreation]);
 
   // FORM -> CHAT
   useEffect(() => {

@@ -30,10 +30,11 @@ import {
   getRuleTypeLabel,
   getQueryLabel,
   getRuleAttachmentIntent,
-  getRuleIdFromAttachment,
 } from './helpers';
 import type { RuleAttachment } from './helpers';
 import { INDEX_FIELD_LABEL, RULE_TYPE_FIELD_LABEL } from './translations';
+
+const EMPTY_SAVED_VERSIONS: ReadonlySet<string> = new Set();
 
 const SectionHeading: React.FC<{ children: React.ReactNode }> = ({ children }) => (
   <EuiText size="s">
@@ -111,15 +112,20 @@ export const RuleInlineContent: React.FC<RuleInlineContentProps> = ({
   aiRuleCreation,
 }) => {
   const isSaving = useObservable(aiRuleCreation.saving$, false);
-  const savedRuleId = useObservable(aiRuleCreation.savedRuleId$, undefined);
+  const savedCreateVersions = useObservable(
+    aiRuleCreation.savedCreateVersions$,
+    EMPTY_SAVED_VERSIONS
+  );
 
   const rule = useMemo(() => parseRuleFromAttachment(attachment), [attachment]);
 
-  // Warn on the (frozen) create card once its rule is saved — server id survives refresh,
-  // savedRuleId$ covers the immediate in-session case — since saving again duplicates the rule.
-  const intent = getRuleAttachmentIntent(attachment);
-  const ruleId = getRuleIdFromAttachment(attachment) ?? savedRuleId ?? undefined;
-  const willDuplicateOnSave = intent === 'create' && ruleId !== undefined;
+  // The label is frozen per version, so a saved rule's create card keeps saying "Create rule".
+  // Warn that clicking it again duplicates the rule. The guard is keyed on (attachmentId, version)
+  // so saving card A-v1 never triggers the warning on card B-v1.
+  const willDuplicateOnSave =
+    getRuleAttachmentIntent(attachment) === 'create' &&
+    attachment.version !== undefined &&
+    savedCreateVersions.has(`${attachment.id}:${attachment.version}`);
 
   if (!rule) {
     return null;

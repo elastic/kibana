@@ -65,10 +65,18 @@ export const createAiRuleCreationHandler = ({
 }): Subscription => {
   let activeConversationId: string | undefined;
   const conversationIdSub = agentBuilder?.events.ui.activeConversation$.subscribe((change) => {
-    activeConversationId = change?.id;
+    const nextId = change?.id;
+    // Only reset on a real switch to a different conversation. Version numbers are per-conversation,
+    // so a stale guard could otherwise mis-warn. A transient null/undefined binding (e.g. the sidebar
+    // briefly unbinding) must NOT clear it, or we'd lose the warning mid-session.
+    if (nextId !== undefined && nextId !== activeConversationId) {
+      aiRuleCreation.clearSavedCreateVersions();
+    }
+    activeConversationId = nextId;
   });
 
-  const saveSub = aiRuleCreation.saveRuleRequest$.subscribe(async (rule) => {
+  const saveSub = aiRuleCreation.saveRuleRequest$.subscribe(
+    async ({ rule, attachmentId, createCardVersion }) => {
     const parseResult = EsqlRuleCreateProps.safeParse(rule);
     if (!parseResult.success) {
       const summary = parseResult.error.issues
@@ -119,19 +127,28 @@ export const createAiRuleCreationHandler = ({
         });
       }
 
-      if (!isUpdate) {
-        aiRuleCreation.setSavedRuleId(saved.id);
-      }
       aiRuleCreation.clearSaving();
+
+      // Mark this exact create card as saved so it (and only it) shows the duplicate-save warning.
+      if (!isUpdate && createCardVersion !== undefined && attachmentId) {
+        aiRuleCreation.markCreateSaved(attachmentId, createCardVersion);
+      }
+
+      // Target the specific attachment that triggered the save; fall back to the constant id
+      // for legacy/form-seeded saves that don't carry an attachmentId.
+      const targetAttachmentId = attachmentId ?? SECURITY_RULE_ATTACHMENT_ID;
 
       const convId = activeConversationId;
       if (convId) {
-        // Persist the saved rule id (shallow-merge PUT) so later versions render as 'update' and it
-        // survives refreshes. Surface failures: the local addAttachment keeps the current view right,
-        // but a refresh would reload stale state.
+        // Persist the saved rule id AND full data (B7) — a partial {ruleId}-only PUT leaves the
+        // server version with the pre-save `text`, so a reload would show a stale card.
         agentBuilder
-          ?.updateAttachment(convId, SECURITY_RULE_ATTACHMENT_ID, {
-            data: { ruleId: saved.id },
+          ?.updateAttachment(convId, targetAttachmentId, {
+            data: {
+              text: JSON.stringify(saved),
+              attachmentLabel: saved.name,
+              ruleId: saved.id,
+            },
           })
           .catch(() => {
             notifications.toasts.addWarning({
@@ -152,7 +169,7 @@ export const createAiRuleCreationHandler = ({
           });
         if (!isUpdate) {
           agentBuilder
-            ?.updateAttachmentOrigin(convId, SECURITY_RULE_ATTACHMENT_ID, saved.id)
+            ?.updateAttachmentOrigin(convId, targetAttachmentId, saved.id)
             .catch(() => {
               // Non-fatal: origin is a secondary link used for navigation, not the button state.
             });
@@ -177,7 +194,7 @@ export const createAiRuleCreationHandler = ({
       }
 
       agentBuilder?.addAttachment({
-        id: SECURITY_RULE_ATTACHMENT_ID,
+        id: targetAttachmentId,
         type: SecurityAgentBuilderAttachments.rule,
         description: saved.name,
         data: {

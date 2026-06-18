@@ -29,10 +29,11 @@ export type RuleAttachment = Attachment<
   {
     text: string;
     attachmentLabel?: string;
-    /** Saved-rule id. Its per-version presence drives the button label (see getRuleAttachmentIntent). */
-    ruleId?: string;
-    /** Legacy fallback intent for attachments written before `ruleId`. */
-    intent?: RuleAttachmentIntent;
+    /**
+     * Save signal that drives the button label: `null` (or absent) means the rule isn't saved yet
+     * ('create'); a saved id means it's saved ('update'). Emitted explicitly per version.
+     */
+    ruleId?: string | null;
   }
 >;
 
@@ -85,18 +86,13 @@ export const getRuleIdFromAttachment = (attachment: RuleAttachment): string | un
   attachment.data?.ruleId ?? (attachment as { origin?: string }).origin ?? undefined;
 
 /**
- * Effective intent, gated on *save* and frozen per version: a version written before the rule is
- * saved has no `ruleId` ('create'); one written after carries it forward ('update'). The create
- * card never gains a `ruleId`, so it stays 'create'. `origin` is excluded (it's attachment-level,
- * not per-version); `data.intent` is a legacy fallback.
+ * Effective intent for the button. Driven entirely by `data.ruleId`: a saved id means 'update',
+ * `null`/absent means 'create'. The id is emitted explicitly per version and carried forward once
+ * the rule is saved, so the latest attachment always reflects the correct per-card label.
  */
 export const getRuleAttachmentIntent = (attachment: RuleAttachment): RuleAttachmentIntent => {
   if (attachment.data?.ruleId) {
     return 'update';
-  }
-  const dataIntent = attachment.data?.intent;
-  if (dataIntent === 'create' || dataIntent === 'update') {
-    return dataIntent;
   }
   return 'create';
 };
