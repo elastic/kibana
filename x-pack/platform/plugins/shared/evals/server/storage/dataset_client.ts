@@ -44,6 +44,9 @@ export interface DatasetExampleInput {
 
 export interface DatasetDocument extends DatasetStorageProperties {
   id: string;
+  // Normalized on read: legacy documents missing the stored field are
+  // backfilled to 0, so callers can always rely on a number here.
+  examples_count: number;
 }
 
 export interface DatasetWithExamples extends DatasetDocument {
@@ -225,6 +228,10 @@ export class DatasetClient {
       : 'updated_at';
     const sortOrder: DatasetSortOrder = options.sortOrder === 'asc' ? 'asc' : 'desc';
 
+    // The leading `*` wildcard on the `name` keyword field can't use the inverted
+    // index and scans all dataset name terms, so cost grows with the number of
+    // datasets. This is fine at evals scale; if dataset counts grow large, switch
+    // `name` to a `text`/`search_as_you_type` mapping with a `match` query.
     const query = search
       ? {
           bool: {
@@ -280,7 +287,10 @@ export class DatasetClient {
     datasetId: string,
     updates: Pick<DatasetStorageProperties, 'description'>
   ): Promise<DatasetWithExamples | undefined> {
-    const existing = await this.get(datasetId);
+    // A description-only update doesn't change the example count, so read just
+    // the dataset document and reuse the denormalized count rather than loading
+    // every example via `get()`.
+    const existing = await this.getDatasetById(datasetId);
     if (!existing) {
       return undefined;
     }
@@ -292,7 +302,7 @@ export class DatasetClient {
       document: {
         name: existing.name,
         description: updates.description,
-        examples_count: existing.examples.length,
+        examples_count: existing.examples_count,
         created_at: existing.created_at,
         updated_at: updatedAt,
       },
@@ -542,22 +552,29 @@ export class DatasetClient {
         })),
         throwOnFail: true,
       }),
-      description !== existing.description
-        ? this.datasetsStorage.index({
-            id: existing.id,
-            document: {
-              name: existing.name,
-              description,
-              examples_count: existing.examples.length,
-              created_at: existing.created_at,
-              updated_at: new Date().toISOString(),
-            },
-          })
-        : Promise.resolve(),
     ]);
 
-    if (added > 0 || toDelete.length > 0) {
-      await this.touchDataset(existing.id);
+    const examplesChanged = added > 0 || toDelete.length > 0;
+    const descriptionChanged = description !== existing.description;
+
+    // Write the dataset document at most once. When examples changed we recompute
+    // the count (and fold in any new description); otherwise the count is
+    // unchanged, so a description-only edit reuses the known count.
+    if (examplesChanged) {
+      await this.touchDataset(existing.id, {
+        description: descriptionChanged ? description : undefined,
+      });
+    } else if (descriptionChanged) {
+      await this.datasetsStorage.index({
+        id: existing.id,
+        document: {
+          name: existing.name,
+          description,
+          examples_count: existing.examples_count,
+          created_at: existing.created_at,
+          updated_at: new Date().toISOString(),
+        },
+      });
     }
 
     return {
@@ -734,9 +751,9 @@ export class DatasetClient {
    */
   private async touchDataset(
     datasetId: string,
-    options: { bumpUpdatedAt?: boolean } = {}
+    options: { bumpUpdatedAt?: boolean; description?: string } = {}
   ): Promise<void> {
-    const { bumpUpdatedAt = true } = options;
+    const { bumpUpdatedAt = true, description } = options;
     const dataset = await this.getDatasetById(datasetId);
     if (!dataset) {
       return;
@@ -748,7 +765,7 @@ export class DatasetClient {
       id: datasetId,
       document: {
         name: dataset.name,
-        description: dataset.description,
+        description: description ?? dataset.description,
         examples_count: examplesCount,
         created_at: dataset.created_at,
         updated_at: bumpUpdatedAt ? new Date().toISOString() : dataset.updated_at,

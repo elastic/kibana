@@ -220,7 +220,11 @@ export const DatasetsListPage: React.FC = () => {
                   placeholder={i18n.SEARCH_PLACEHOLDER}
                   value={searchText}
                   onChange={(e) => {
-                    setSearchText(e.target.value);
+                    const value = e.target.value;
+                    setSearchText(value);
+                    if (!value) {
+                      setDebouncedSearch('');
+                    }
                     setPageIndex(0);
                   }}
                   isClearable

@@ -78,8 +78,8 @@ export const DeleteDatasetModal: React.FC<DeleteDatasetModalProps> = ({
     try {
       setError(null);
       await deleteDataset.mutateAsync({ datasetId });
-      onDeleted?.();
       onClose();
+      onDeleted?.();
     } catch (err) {
       setError(err instanceof Error ? err.message : String(err));
     }

@@ -25,7 +25,7 @@ export const datasetsStorageSettings = {
 export interface DatasetStorageProperties {
   name: string;
   description: string;
-  examples_count: number;
+  examples_count?: number;
   created_at: string;
   updated_at: string;
 }
