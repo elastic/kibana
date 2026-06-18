@@ -156,13 +156,7 @@ export const AvailabilityExpressionSelect: React.FC<Props> = ({
           </EuiFlexItem>
           <EuiFlexItem>
             <AlertExpressionPopover
-              aria-label={i18n.translate(
-                'xpack.uptime.availabilityExpressionSelect.alertExpressionPopover.xpacksyntheticsalertsmonitorstatusavailabilitytimerangeunitLabel',
-                {
-                  defaultMessage:
-                    'xpack.synthetics.alerts.monitorStatus.availability.timerangeUnit',
-                }
-              )}
+              aria-label="xpack.synthetics.alerts.monitorStatus.availability.timerangeUnit"
               content={
                 <TimeUnitSelectable
                   aria-label={labels.ENTER_AVAILABILITY_RANGE_SELECT_ARIA}
