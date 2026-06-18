@@ -1,169 +1,291 @@
 version: "1"
 name: Upload 20 Scheduled Copies
 enabled: true
+consts:
+  WORKFLOW_METRICS_COLLECTOR_INDEX: workflow-metrics-collector
+  WORKFLOW_EXECUTIONS_INDEX_PATTERN: .workflows-executions*
 triggers:
   - type: manual
 
 steps:
-  - name: create_scheduled_copy
+  - name: delete_workflow_metrics_collector_index
+    type: elasticsearch.request
+    with:
+      method: DELETE
+      path: /{{ consts.WORKFLOW_METRICS_COLLECTOR_INDEX }}
+    on-failure:
+      continue: true
+
+  - name: create_workflow_metrics_collector_index
+    type: elasticsearch.request
+    with:
+      method: PUT
+      path: /{{ consts.WORKFLOW_METRICS_COLLECTOR_INDEX }}
+      body:
+        mappings:
+          dynamic: false
+          properties:
+            "@timestamp":
+              type: date
+            collectedAt:
+              type: date
+            spaceId:
+              type: keyword
+            metric:
+              type: keyword
+            value:
+              type: double
+            unit:
+              type: keyword
+            tags:
+              type: keyword
+  - name: create_metrics_collector_workflow
     type: kibana.request
-    foreach: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
     with:
       method: POST
       path: /s/{{workflow.spaceId}}/api/workflows/workflow
       body:
         yaml: |
-          name: {{ foreach.item }} Scheduled 1mb
+          {% raw %}
+          version: "1"
+          name: Workflow metrics collector
+          enabled: true
+          triggers:
+            - type: scheduled
+              with:
+                every: 1m
+          consts:
+            WORKFLOW_METRICS_COLLECTOR_INDEX: workflow-metrics-collector
+            WORKFLOW_EXECUTIONS_INDEX_PATTERN: .workflows-executions*
+
+          steps:
+            - name: loop
+              type: foreach
+              foreach:
+                - group: stepExecutions
+                  alias_name: .workflows-step-executions
+                - group: workflowExecutions
+                  alias_name: .workflows-executions
+                  metrics_mapping:
+                    - metric: 'execution.createdAt'
+                      unit: 'date'
+                      expression: |
+                        if (source.createdAt == null) { ctx.op = "noop"; return; }
+                        metricValue = ZonedDateTime.parse(source.createdAt).toInstant().toEpochMilli();
+
+                    - metric: 'execution.duration'
+                      unit: 'int'
+                      expression: metricValue = source.duration;
+                  
+                    - metric: execution.queueTime
+                      unit: int
+                      expression: |
+                        if (source.createdAt == null || source.startedAt) { ctx.op = "noop"; return; }
+                        metricValue = ZonedDateTime.parse(source.createdAt).toInstant().toEpochMilli() - ZonedDateTime.parse(source.startedAt).toInstant().toEpochMilli();
+              steps:
+                - name: get_backing_indexes_count
+                  type: elasticsearch.request
+                  with:
+                    method: GET
+                    path: _alias/{{foreach.item.alias_name}}
+
+                - name: index_indexes_count
+                  type: elasticsearch.request
+                  with:
+                    method: POST
+                    path: /{{consts.WORKFLOW_METRICS_COLLECTOR_INDEX}}/_doc
+                    body:
+                      metric: '{{foreach.item.group}}.backing_indexes_count'
+                      value: ${{steps.get_backing_indexes_count.output | entries | size}}
+                      unit: int
+                
+                - name: get_alias_disk_size
+                  type: elasticsearch.request
+                  with:
+                    method: GET
+                    path: '{{foreach.item.alias_name}}*/_stats/store'
+                
+                - name: index_overall_space_taken
+                  type: elasticsearch.request
+                  with:
+                    method: POST
+                    path: /{{consts.WORKFLOW_METRICS_COLLECTOR_INDEX}}/_doc
+                    body:
+                      metric: '{{foreach.item.group}}.overall_size'
+                      value: '${{steps.get_alias_disk_size.output._all.total.store.size_in_bytes }}'
+                      unit: int
+                
+                - name: async_reindex_duration_metrics
+                  type: elasticsearch.request
+                  foreach: "${{foreach.item.metrics_mapping | default: '[]' | json_parse}}"
+                  with:
+                    method: POST
+                    path: /_reindex
+                    params:
+                      wait_for_completion: false
+                    body:
+                      source:
+                        index: "{{ consts.WORKFLOW_EXECUTIONS_INDEX_PATTERN }}"
+                        _source:
+                          - spaceId
+                          - id
+                          - duration
+                          - createdAt
+                          - finishedAt
+                        query:
+                          range:
+                            startedAt:
+                              gte: now-2m
+                      dest:
+                        index: "{{ consts.WORKFLOW_METRICS_COLLECTOR_INDEX }}"
+                        op_type: create
+                      script:
+                        lang: painless
+                        source: |
+                          def source = ctx._source;
+                          def metricValue;
+
+                          ctx._source.clear();
+
+                          {% if foreach.item.expression %}
+                            {{foreach.item.expression}}
+                          {% endif %}
+
+                          if (metricValue == null) { ctx.op = "noop"; return; }
+
+                          ctx._source.spaceId = source.spaceId;
+                          ctx._source.metric = "{{foreach.item.metric}}";
+                          ctx._source.value = metricValue;
+
+                          ctx._source.unit = "{{foreach.item.unit}}";
+                          ctx._source.collectedAt = "{{ 'now' | date: '%Y-%m-%dT%H:%M:%SZ' }}";
+                          ctx._source._id = source._id
+          {% endraw %}
+  - name: create_executions_data_view
+    type: kibana.request
+    with:
+      method: POST
+      path: /s/{{workflow.spaceId}}/api/data_views/data_view
+      body:
+        override: true
+        data_view:
+          id: workflows-executions-dv
+          title: .workflows-executions*
+          name: Workflow executions
+          timeFieldName: startedAt
+          allowHidden: true
+          runtimeFieldMap:
+            startDelayMs:
+              type: long
+              script:
+                source: 'if (doc["startedAt"].size() == 0 || doc["createdAt"].size() == 0) return; emit(doc["startedAt"].value.toInstant().toEpochMilli() - doc["createdAt"].value.toInstant().toEpochMilli());'
+  - name: create_executions_dashboard
+    type: kibana.request
+    with:
+      method: PUT
+      path: /s/{{workflow.spaceId}}/api/dashboards/workflows-exec-throughput
+      body:
+        title: Workflow executions
+        description: Throughput and start delay from .workflows-executions
+        panels:
+          - grid:
+              x: 0
+              y: 0
+              w: 48
+              h: 15
+            type: vis
+            config:
+              type: xy
+              title: Workflow executions throughput
+              legend:
+                visibility: visible
+                position: right
+              layers:
+                - type: line
+                  data_source:
+                    type: data_view_reference
+                    ref_id: workflows-executions-dv
+                  ignore_global_filters: false
+                  sampling: 1
+                  x:
+                    operation: date_histogram
+                    field: startedAt
+                    suggested_interval: auto
+                    use_original_time_range: true
+                    include_empty_rows: true
+                    drop_partial_intervals: false
+                  y:
+                    - operation: count
+                      empty_as_null: true
+          - grid:
+              x: 0
+              y: 15
+              w: 48
+              h: 15
+            type: vis
+            config:
+              type: xy
+              title: Start delay (createdAt → startedAt)
+              legend:
+                visibility: hidden
+              layers:
+                - type: line
+                  data_source:
+                    type: data_view_reference
+                    ref_id: workflows-executions-dv
+                  ignore_global_filters: false
+                  sampling: 1
+                  x:
+                    operation: date_histogram
+                    field: startedAt
+                    suggested_interval: auto
+                    use_original_time_range: true
+                    include_empty_rows: true
+                    drop_partial_intervals: false
+                  y:
+                    - operation: average
+                      field: startDelayMs
+              axis:
+                y:
+                  title:
+                    text: Avg delay (ms)
+  - name: create_scheduled_workflows
+    type: kibana.request
+    foreach: ${{ (1..20) | json }}
+    with:
+      method: POST
+      path: /s/{{workflow.spaceId}}/api/workflows/workflow
+      body:
+        yaml: |
+          name: {{foreach.item}} Scheduled 5mb
           enabled: true
           description: This is a new workflow
           triggers:
             - type: scheduled
               with:
                 every: 1m
-
+          outputs:
+            - name: file1
+              type: string
+            - name: file2
+              type: string
+            - name: file3
+              type: string
+            
           steps:
             - name: download_json
               type: http
-              foreach:
-                [
-                  1,
-                  1,
-                  1,
-                  1,
-                  1,
-                  1,
-                  1,
-                  1,
-                  1,
-                  1,
-                  1,
-                  1,
-                  1,
-                  1,
-                  1,
-                  1,
-                  1,
-                  1,
-                  1,
-                  1,
-                  1,
-                  1,
-                  1,
-                  1,
-                  1,
-                  1,
-                  1,
-                  1,
-                  1,
-                  1,
-                  1,
-                  1,
-                  1,
-                  1,
-                  1,
-                  1,
-                  1,
-                  1,
-                  1,
-                  1,
-                  1,
-                  1,
-                  1,
-                  1,
-                  1,
-                  1,
-                  1,
-                  1,
-                  1,
-                  1,
-                  1,
-                  1,
-                  1,
-                  1,
-                  1,
-                  1,
-                  1,
-                  1,
-                  1,
-                  1,
-                  1,
-                  1,
-                  1,
-                  1,
-                  1,
-                  1,
-                  1,
-                  1,
-                  1,
-                  1,
-                  1,
-                  1,
-                  1,
-                  1,
-                  1,
-                  1,
-                  1,
-                  1,
-                  1,
-                  1,
-                  1,
-                  1,
-                  1,
-                  1,
-                  1,
-                  1,
-                  1,
-                  1,
-                  1,
-                  1,
-                  1,
-                  1,
-                  1,
-                  1,
-                  1,
-                  1,
-                  1,
-                  1,
-                  1,
-                  1,
-                  1,
-                  1,
-                  1,
-                  1,
-                  1,
-                  1,
-                  1,
-                  1,
-                  1,
-                  1,
-                  1,
-                  1,
-                  1,
-                  1,
-                  1,
-                  1,
-                  1,
-                  1,
-                  1,
-                  1,
-                  1,
-                  1,
-                  1,
-                  1,
-                  1,
-                  1,
-                  1,
-                  1,
-                  1,
-                  1,
-                  1,
-                  1,
-                  1,
-                  1,
-                  1,
-                  1
-                ]
+              foreach: ${{ (1..200) | json }}
               with:
                 method: GET
                 url: http://localhost:3000/api/large-json/5mb
+            
+            - name: x
+              type: workflow.output
+              with:
+          {% raw %}
+                file1: ${{steps.download_json.output | json}}
+                file2: ${{steps.download_json.output | json}}
+                file3: ${{steps.download_json.output | json}}
+          {% endraw %}
 
