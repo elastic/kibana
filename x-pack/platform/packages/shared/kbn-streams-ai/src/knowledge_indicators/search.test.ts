@@ -10,15 +10,12 @@ import { searchKnowledgeIndicators } from './search';
 
 function makeFeature(overrides: Partial<Feature> = {}): Feature {
   return {
-    uuid: 'feature-uuid',
     id: 'feature-id',
     stream_name: 'logs.test',
     type: 'dataset_analysis',
     description: 'Feature description',
     properties: {},
     confidence: 90,
-    status: 'active',
-    last_seen: new Date().toISOString(),
     ...overrides,
   };
 }
@@ -46,9 +43,6 @@ describe('searchKnowledgeIndicators', () => {
           rule_backed: true,
           rule_id: 'rule-1',
           stream_name: 'logs.test',
-          'asset.uuid': 'asset-uuid',
-          'asset.type': 'query',
-          'asset.id': 'asset-id',
         },
       ],
     });
@@ -67,9 +61,6 @@ describe('searchKnowledgeIndicators', () => {
           rule_backed: false,
           rule_id: 'rule-1',
           stream_name: 'logs.test',
-          'asset.uuid': 'asset-uuid',
-          'asset.type': 'query',
-          'asset.id': 'asset-id',
         },
       ]
     );
@@ -149,18 +140,12 @@ describe('searchKnowledgeIndicators', () => {
             rule_backed: true,
             rule_id: 'rule-1',
             stream_name: 'logs.test',
-            'asset.uuid': 'asset-uuid',
-            'asset.type': 'query',
-            'asset.id': 'asset-id',
           },
           {
             query: makeStreamQuery({ id: 'q2' }),
             rule_backed: true,
             rule_id: 'rule-2',
             stream_name: 'logs.test',
-            'asset.uuid': 'asset-uuid',
-            'asset.type': 'query',
-            'asset.id': 'asset-id',
           },
         ] as QueryLink[],
     });
