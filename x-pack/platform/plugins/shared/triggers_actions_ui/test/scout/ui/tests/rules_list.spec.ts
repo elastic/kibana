@@ -753,45 +753,43 @@ test.describe('Rules list', { tag: tags.stateful.classic }, () => {
     // The dropdown stays open between clicks; use toHaveCount (auto-retry) instead
     // of waitFor (unreliable with fast table reloads).
 
-    // Each filter click triggers an API call. Clicking the next option before the
-    // previous request finishes can race the filter update — the stale response
-    // arrives last and overwrites the new filter state. Wait for the loading
-    // indicator to clear between every click to prevent this.
-    const waitForListStable = () =>
-      expect(
-        page.locator('.euiBasicTable[data-test-subj="rulesList"].euiBasicTable-loading')
-      ).toBeHidden({ timeout: 10_000 });
+    // Each filter click triggers an API call. Wait for the network response
+    // before asserting counts — the loading-class approach is unreliable because
+    // the class may appear and clear before the assertion runs.
+    const applyFilter = async (filterSubj: string) => {
+      // Register the listener BEFORE clicking so a fast response is not missed.
+      const settled = page.waitForResponse(
+        (r) => r.url().includes('rules/_find') && r.status() === 200,
+        { timeout: 10_000 }
+      );
+      await page.testSubj.click(filterSubj);
+      await settled;
+    };
 
     // Select only enabled → 2 rules (enabled + snoozed)
     await page.testSubj.click('ruleStatusFilterButton');
-    await page.testSubj.click('ruleStatusFilterOption-enabled');
-    await waitForListStable();
+    await applyFilter('ruleStatusFilterOption-enabled');
     await expect(getTableRows(page)).toHaveCount(2);
 
     // Add disabled → all 4
-    await page.testSubj.click('ruleStatusFilterOption-disabled');
-    await waitForListStable();
+    await applyFilter('ruleStatusFilterOption-disabled');
     await expect(getTableRows(page)).toHaveCount(4);
 
     // Deselect enabled → only disabled (2)
-    await page.testSubj.click('ruleStatusFilterOption-enabled');
-    await waitForListStable();
+    await applyFilter('ruleStatusFilterOption-enabled');
     await expect(getTableRows(page)).toHaveCount(2);
 
     // Deselect disabled, select snoozed → only snoozed (2)
-    await page.testSubj.click('ruleStatusFilterOption-disabled');
-    await page.testSubj.click('ruleStatusFilterOption-snoozed');
-    await waitForListStable();
+    await applyFilter('ruleStatusFilterOption-disabled');
+    await applyFilter('ruleStatusFilterOption-snoozed');
     await expect(getTableRows(page)).toHaveCount(2);
 
     // Add disabled → disabled + snoozed (3)
-    await page.testSubj.click('ruleStatusFilterOption-disabled');
-    await waitForListStable();
+    await applyFilter('ruleStatusFilterOption-disabled');
     await expect(getTableRows(page)).toHaveCount(3);
 
     // Add enabled → all 4
-    await page.testSubj.click('ruleStatusFilterOption-enabled');
-    await waitForListStable();
+    await applyFilter('ruleStatusFilterOption-enabled');
     await expect(getTableRows(page)).toHaveCount(4);
 
     // Close filter panel
