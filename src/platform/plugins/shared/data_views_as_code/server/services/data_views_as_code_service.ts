@@ -37,4 +37,8 @@ export class DataViewsAsCodeService {
     const result = await this.dataViewsService.getDataViewLazy(id);
     return this.mapDataView(result);
   }
+
+  public delete(id: string) {
+    return this.dataViewsService.delete(id);
+  }
 }
