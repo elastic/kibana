@@ -17424,10 +17424,10 @@ chrome-trace-event@^1.0.2:
   dependencies:
     tslib "^1.9.0"
 
-chromedriver@149.0.0:
-  version "149.0.0"
-  resolved "https://registry.yarnpkg.com/chromedriver/-/chromedriver-149.0.0.tgz#4eaa557c0acbbb001543f6b117e7518d53379284"
-  integrity sha512-kFZI2Tft4p6QXGhtbjohRHad2uGhwcH95YH2CLVhOjQM676+QnJPl00OgcB1o3tTobmW8BezufMYTKYFjmTvtg==
+chromedriver@149.0.1:
+  version "149.0.1"
+  resolved "https://registry.yarnpkg.com/chromedriver/-/chromedriver-149.0.1.tgz#0ec8c327f592a785922839c89aa4afe90ed8a9cf"
+  integrity sha512-mAIzz2KZzl/zwgWklkFzYCGK3Ub3yU25JAM1qOcT1aB4p0dMXJxqu8naI/NwI8eGKqX/2OFN87KXmFqmcvmPvA==
   dependencies:
     "@testim/chrome-version" "^1.1.4"
     adm-zip "^0.5.17"
