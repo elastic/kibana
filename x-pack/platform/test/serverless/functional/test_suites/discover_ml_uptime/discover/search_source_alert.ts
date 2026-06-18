@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+// Original test (remove during Scout migration): x-pack/platform/test/functional_with_es_ssl/apps/discover_ml/discover/search_source_alert.ts
 import expect from '@kbn/expect';
 import { asyncForEach } from '@kbn/std';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
@@ -320,7 +321,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.header.waitUntilLoadingHasFinished();
       }
       const rulesList = await testSubjects.find('rulesList');
-      const alertRule = await rulesList.findByCssSelector(`[title="${ruleName}"]`);
+      const alertRule = await rulesList.findByCssSelector(
+        `[data-test-subj="rulesListTableRowName-${ruleName}"]`
+      );
       await alertRule.click();
       await PageObjects.header.waitUntilLoadingHasFinished();
     });

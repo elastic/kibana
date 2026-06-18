@@ -10,7 +10,7 @@ import type { KibanaAssetReference } from '@kbn/fleet-plugin/common';
 
 import type { PackageClient } from '@kbn/fleet-plugin/server';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-utils';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { OSQUERY_INTEGRATION_NAME } from '../../../common';
 import { savedQuerySavedObjectType } from '../../../common/types';
 
