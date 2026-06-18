@@ -198,6 +198,6 @@ export const APPROVED_STEP_DEFINITIONS: Array<{ id: string; definitionHash: stri
   },
   {
     id: 'security.setAlertStatus',
-    definitionHash: '8404b8a70cc79308b0b8a1eb41408abd2647eb2d6dff24323c9b254a82315ef3',
+    definitionHash: 'cb1720032b9f90a53888a08fe7d7a75e0ca274d572e3effad7760cea7e5bc5d8',
   },
 ];

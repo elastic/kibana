@@ -6,6 +6,7 @@
  */
 
 import { setAlertStatusInputSchema } from './set_alert_status_step_common';
+import { MAX_ALERT_ID_LENGTH } from '../common/constants';
 
 describe('setAlertStatusInputSchema', () => {
   it('should validate valid input for closing an alert', () => {
@@ -65,6 +66,16 @@ describe('setAlertStatusInputSchema', () => {
 
   it('should fail if alert_ids array contains an empty string', () => {
     const input = { alert_ids: ['alert-1', ''], status: 'closed' };
+    expect(() => setAlertStatusInputSchema.parse(input)).toThrow();
+  });
+
+  it('should fail if alert_ids string is too long', () => {
+    const input = { alert_ids: 'a'.repeat(MAX_ALERT_ID_LENGTH + 1), status: 'closed' };
+    expect(() => setAlertStatusInputSchema.parse(input)).toThrow();
+  });
+
+  it('should fail if alert_ids array contains a string that is too long', () => {
+    const input = { alert_ids: ['alert-1', 'a'.repeat(MAX_ALERT_ID_LENGTH + 1)], status: 'closed' };
     expect(() => setAlertStatusInputSchema.parse(input)).toThrow();
   });
 });
