@@ -1,5 +1,5 @@
 {
-  "sha1": "f3c763d499f94eaf107318e6b4f1788762bcf922",
+  "sha1": "4cf69e4ad7ce83861c26d3952dfaf5bffb981380",
   "tests": [
     {
       "id": "5e91b4cbd08e25e-f2cd2d3cdc77643",
@@ -797,7 +797,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_map/service_map_a11y.spec.ts",
-        "line": 86,
+        "line": 94,
         "column": 9
       }
     },
@@ -970,6 +970,22 @@
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_map/service_map_embeddable.spec.ts",
         "line": 46,
+        "column": 9
+      }
+    },
+    {
+      "id": "6ab0e55ecb54392-1c6000de23b1820",
+      "title": "Service map embeddable adds a Service map panel with filters + sync toggle and saves the dashboard",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_map/service_map_embeddable.spec.ts",
+        "line": 244,
         "column": 9
       }
     },
@@ -2687,7 +2703,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/transaction_details/trace_waterfall_flyout.spec.ts",
-        "line": 81,
+        "line": 89,
         "column": 9
       }
     },
@@ -2703,7 +2719,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/transaction_details/trace_waterfall_flyout.spec.ts",
-        "line": 93,
+        "line": 101,
         "column": 9
       }
     },

@@ -19,7 +19,7 @@ permissions:
   checks: read
   models: read
 
-if: "${{ (github.event_name == 'workflow_dispatch' && github.event.inputs.issue_number != '') || (github.event_name == 'issues' && !github.event.issue.pull_request && contains(github.event.issue.labels.*.name, 'failed-test')) }}"
+if: "${{ (github.event_name == 'workflow_dispatch' && github.event.inputs.issue_number != '') || (github.event_name == 'issues' && !github.event.issue.pull_request && contains(github.event.issue.labels.*.name, 'failed-test') && (github.event.action != 'labeled' || github.event.label.name == 'failed-test')) }}"
 
 concurrency:
   group: 'failed-test-investigator-${{ github.event.issue.number || github.event.inputs.issue_number }}'
@@ -32,16 +32,17 @@ env:
 
 engine:
   id: claude
-  version: '2.1.111'
+  version: '2.1.165'
   model: opus
   max-turns: 120
   env:
     ANTHROPIC_API_KEY: ${{ secrets.LITELLM_API_KEY }}
     ANTHROPIC_BASE_URL: https://elastic.litellm-prod.ai
     ENABLE_PROMPT_CACHING_1H: '1'
-    ANTHROPIC_DEFAULT_OPUS_MODEL: llm-gateway/claude-opus-4-7[1m]
+    ANTHROPIC_DEFAULT_OPUS_MODEL: llm-gateway/claude-opus-4-8[1m]
     ANTHROPIC_DEFAULT_HAIKU_MODEL: llm-gateway/claude-haiku-4-5
     ANTHROPIC_DEFAULT_SONNET_MODEL: llm-gateway/claude-sonnet-4-6
+    CLAUDE_CODE_EFFORT_LEVEL: high
     CLAUDE_CODE_SUBAGENT_MODEL: opus[1m]
 
 tools:
@@ -59,7 +60,6 @@ network:
     - ci-stats.kibana.dev
     - github.com
     - api.github.com
-    - chatgpt.com
     - elastic.litellm-prod.ai
 sandbox:
   agent: awf # Migrated from deprecated network setting
@@ -95,12 +95,18 @@ safe-outputs:
     target: *issue_number
     hide-older-comments: true
   add-labels:
-    allowed: [ai:auto-flaky-fix]
-    max: 1
+    allowed:
+      - failure:ai-fixable
+      - failure:test-design
+      - failure:test-environment
+      - failure:application
+      - failure:ci-environment
+      - failure:inconclusive
+    max: 2
     target: *issue_number
 
 strict: false
-timeout-minutes: 20
+timeout-minutes: 30
 ---
 
 # Failed Test Investigator
@@ -114,32 +120,27 @@ Investigate a failed-test issue, classify the failure, and propose a fix when ap
 
 ## Investigate
 
-Investigate the test failure(s) using the `flaky-test-investigator` skill. Use all of the data at your disposal to reach a conclusion (source code, logs, failure screenshots, etc.).
+Investigate the test failure(s) using the `flaky-test-investigator` skill (path: `.agents/skills/flaky-test-investigator`). Read the files in the folder directly, do not invoke the skill directly as that is disabled in this environment.
+
+Use all of the data at your disposal to reach a conclusion (source code, logs, failure screenshots, etc.).
 
 Every conclusion must cite specific evidence. Do not guess.
+
+## Environment constraints
+
+**Scratch files**: write throwaway files inside the repository checkout (the current working directory). Redirecting (`>`) elsewhere (e.g. `/tmp/...`) may be blocked — use a path under the repo root.
 
 ## Classify
 
 Set `classification` based on where the evidence points:
 
-- **`test-design`**: issue lives in the test code — timing/waits, selectors, fixtures, helpers, setup/teardown, assertion shape.
-- **`test-environment`**: test code is fine, but its surroundings are wrong — leaked state from prior tests, flaky fixture init, missing `data-test-subj` the test relies on, parallel-slot interference.
-- **`application`**: real product bug exposed by the test — race, regression, broken contract, feature-flag bug.
-- **`external`**: outside test + app — CI agent, downed dependency (e.g., ES failed to start), network, credentials, registry. Failures on `local-*` targets are less likely to be external; weigh that when classifying.
+- **`test-design`**: issue lives in the test code (e.g., timing/waits, selectors, fixtures, helpers, setup/teardown, assertion shape).
+- **`test-environment`**: test code is fine, but its surroundings are problematic (e.g., leaked state from prior tests, flaky fixture init, missing `data-test-subj` the test relies on, parallel-slot interference).
+- **`application`**: real product bug exposed by the test (e.g., race, regression, broken contract, feature-flag bug).
+- **`ci-environment`**: outside test + app — CI agent, downed dependency (e.g., ES failed to start), network, credentials, registry.
 - **`inconclusive`**: evidence does not support a defensible call.
 
 Set `confidence` to `high` (direct evidence pins the cause), `medium` (strong inference from converging signals), or `low` (plausible but underspecified).
-
-## Assign label `ai:auto-flaky-fix` in specific cases
-
-Apply the `ai:auto-flaky-fix` label to the triggering issue **only** when **all** of these conditions hold:
-
-- The GitHub issue represents a Scout test failure (it has the `scout-playwright` label)
-- The test failed in the `kibana-on-merge` pipeline
-- `classification` is `test-design`, `test-environment`, or `application`
-- A concrete fix has been identified.
-
-No other side-effects beyond posting the comment and updating the label.
 
 ## Fix proposal
 
@@ -148,6 +149,22 @@ No other side-effects beyond posting the comment and updating the label.
 - For test fixes: name the assertion, wait, fixture, setup/teardown, or helper to change.
 - For code fixes: name the module, API, or behavior that looks wrong and why.
 - If you cannot justify a concrete fix, say what additional evidence would change the conclusion.
+
+## Labels
+
+### Classification label
+
+Add exactly one classification label to the issue that matches the chosen `classification`:
+
+- `failure:test-design`: when `classification` is `test-design`
+- `failure:test-environment`: when `classification` is `test-environment`
+- `failure:application`: when `classification` is `application`
+- `failure:ci-environment`: when `classification` is `ci-environment`
+- `failure:inconclusive`: when `classification` is `inconclusive`
+
+### "Is the issue fixable?" label
+
+Add `failure:ai-fixable` to the issue if we are confident that a fix is available (it would imply opening a PR against the codebase).
 
 ## Attribution
 
@@ -164,31 +181,67 @@ No other side-effects beyond posting the comment and updating the label.
 
 ## Comment format
 
-Post exactly one comment on the issue. Keep it concise, actionable, and prioritize the most critical findings at the very top. Adapt the sections below to best fit the specific failure. **Use `####` for all subsections** (e.g., `#### Proposed Fix`, `#### Root Cause`).
+Post exactly one comment on the issue. Keep the content concise and actionable.
 
-Do not create standalone sections for "what the test does" "evidence," "where the test ran," or "failure screenshot". Integrate these details seamlessly into the sections below if they add value. Do not also mention why the `ai:auto-flaky-fix` isn't added.
+Follow the format below exactly. Do not create standalone sections for "what the test does" "evidence," "where the test ran," or "failure screenshot". Integrate these details seamlessly into the sections below if they add value.
 
-### 1. The TL;DR (Required)
+The comment has different parts: a compact header that stays visible on the issue page (one `####` headline + metadata + summary), and a `<details>` block that hides everything else, as well as a comment to label the issue to trigger the flaky test fixer workflow (it is only posted under certain conditions, more info below).
 
-Start with a clear heading, essential metadata, and a brief summary of the failure, followed by a horizontal rule.
+**Inside the `<details>` block, every section starts with `#### Section name` on its own line** (e.g., `#### Proposed fix`, `#### Root cause & evidence`).
+
+Add the following snippet of Markdown right after (and outside) the `<details>` block only if a fix is needed and available.
+
+```markdown
+> [!TIP]
+> Label this issue `ai:fix-flaky` and an agent will **open a fix PR** for you. This usually takes 15–20 minutes, and the PR will appear below this comment. Share early feedback in #appex-qa.
+```
+
+If a fix PR is already up (in draft or in review) in the Kibana repository, mention the PR link in the same tip block (instead of suggesting to add the label).
+
+### 1. Visible header (required)
+
+Three things in order, with a blank line between each:
 
 ```
-## {Classification}: {One-line description of what broke}
+#### [{classification}] {One-line description of what broke}
 
-## **Classification:** {type} | **Confidence:** {level} | **Introduced by:** {commit/PR if known}
+**Confidence:** {level} | **Introduced by:** {commit/PR if known — omit this segment entirely if unknown}
 
 **Summary:** One or two sentences explaining the exact failure point.
 ```
 
-### 2. Proposed fix (required)
+### 2. Collapsible investigation (required)
 
-Provide the most direct path to resolution immediately after the summary.
+Wrap **everything after the summary** in a single `<details>` block so the issue page stays scannable. The sections below live inside the block, in this order:
+
+```
+<details>
+<summary>Investigation details</summary>
+
+#### Proposed fix
+
+{content — see guidance below}
+
+#### Root cause & evidence
+
+{content — see guidance below}
+
+#### Additional context
+
+{content — optional, omit the whole section if there is nothing high-signal to add}
+
+</details>
+```
+
+#### Proposed fix (required)
+
+Provide the most direct path to resolution.
 
 - **Single file:** lead directly with the suggested code diff or specific action.
 - **Multiple files:** use a brief table to list affected files, followed by the necessary changes.
 - **No concrete fix:** clearly state what additional evidence or investigation is needed to propose one.
 
-### 3. Root Cause & Evidence (required)
+#### Root cause & evidence (required)
 
 Explain _why_ the failure occurred, citing specific evidence. Choose the format that best fits the complexity of the bug:
 
@@ -196,10 +249,19 @@ Explain _why_ the failure occurred, citing specific evidence. Choose the format 
 - Use an ASCII timeline diagram for race conditions, multi-component bugs, or complex state leaks.
 - Fold relevant evidence (like missing `data-test-subj` attributes, failing network calls, or screenshot descriptions) directly into this narrative.
 
-### 4. Additional context (optional)
+#### Additional context (optional)
 
 Include the following only if they provide high-value, actionable signal:
 
 - **Ruled out:** a brief note on alternative hypotheses that were investigated and dismissed.
 - **Verification:** specific steps to reproduce the failure or confirm the fix.
 - **Open questions:** unresolved design or environmental issues blocking a definitive fix ("a screenshot would have helped troubleshoot this" is a valid open question).
+
+#### Data collection issues (troubleshooting)
+
+If you couldn't retrieve evidence such as screenshots or logs because of an error, document each failure here so the workflow itself can be debugged. For each one, include:
+
+- the command you ran
+- the URL (if applicable)
+- the resulting error message
+- any other detail that could be useful for the investigation

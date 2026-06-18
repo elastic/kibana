@@ -32,10 +32,26 @@ interface InlineAttachmentWithActionsProps {
   previewBadgeState?: AttachmentPreviewState;
 }
 
+const areInlineAttachmentPropsEqual = (
+  prevProps: InlineAttachmentWithActionsProps,
+  nextProps: InlineAttachmentWithActionsProps
+): boolean =>
+  prevProps.attachment.id === nextProps.attachment.id &&
+  prevProps.attachment.type === nextProps.attachment.type &&
+  prevProps.attachment.hidden === nextProps.attachment.hidden &&
+  prevProps.attachment.origin === nextProps.attachment.origin &&
+  prevProps.attachmentsService === nextProps.attachmentsService &&
+  prevProps.conversationId === nextProps.conversationId &&
+  prevProps.isSidebar === nextProps.isSidebar &&
+  prevProps.previewBadgeState === nextProps.previewBadgeState &&
+  prevProps.screenContext === nextProps.screenContext &&
+  prevProps.attachment.version === nextProps.attachment.version &&
+  prevProps.attachment.versionCount === nextProps.attachment.versionCount;
+
 /**
  * Component that renders an inline attachment with its action buttons.
  */
-export const InlineAttachmentWithActions: React.FC<InlineAttachmentWithActionsProps> = ({
+const InlineAttachmentWithActionsComponent: React.FC<InlineAttachmentWithActionsProps> = ({
   attachment,
   attachmentsService,
   isSidebar,
@@ -169,3 +185,9 @@ export const InlineAttachmentWithActions: React.FC<InlineAttachmentWithActionsPr
     </EuiSplitPanel.Outer>
   );
 };
+
+export const InlineAttachmentWithActions = React.memo(
+  InlineAttachmentWithActionsComponent,
+  areInlineAttachmentPropsEqual
+);
+InlineAttachmentWithActions.displayName = 'InlineAttachmentWithActions';

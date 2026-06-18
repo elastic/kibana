@@ -6,6 +6,44 @@
  */
 
 import type { KbnClient, ScoutPage } from '@kbn/scout';
+import { expect } from '@kbn/scout/ui';
+
+/**
+ * Fills the mandatory fields of the .index-threshold rule form so the rule can
+ * be saved without validation errors.
+ *
+ * Opens the index popover, picks the first index option after typing '.kibana',
+ * waits for the time-field <select> to populate, and selects the first real
+ * date field.
+ */
+export const fillIndexThresholdForm = async (page: ScoutPage, name: string) => {
+  await page.testSubj.locator('ruleDetailsNameInput').fill(name);
+
+  await page.testSubj.click('selectIndexExpression');
+
+  // Type to trigger the debounced index search (250 ms debounce).
+  const comboInput = page.testSubj.locator('thresholdIndexesComboBox').locator('input');
+  await comboInput.fill('.kibana');
+
+  // Wait for the listbox to appear; even if no real indices match, the "Choose…"
+  // fallback group always renders the typed pattern as a selectable option.
+  const listbox = page.locator('[role="listbox"]');
+  await listbox.waitFor({ state: 'visible', timeout: 15_000 });
+  await listbox.locator('[role="option"]:first-child').click();
+
+  // After index selection the form calls getFieldsForWildcard async.
+  // Wait for at least one real time-field option to appear (index 0 is the
+  // "Select a field" placeholder, index 1 is the first real date field).
+  const timeFieldSelect = page.testSubj.locator('thresholdAlertTimeFieldSelect');
+  await expect(timeFieldSelect.locator('option:nth-child(2)')).toBeAttached({ timeout: 15_000 });
+
+  const firstFieldValue = await timeFieldSelect
+    .locator('option:nth-child(2)')
+    .getAttribute('value');
+  await timeFieldSelect.selectOption(firstFieldValue!);
+
+  await page.testSubj.click('closePopover');
+};
 
 interface RuleFindResponse {
   data: Array<{ id: string; name: string }>;
@@ -50,7 +88,11 @@ export const THRESHOLD_TEST_INDEX = 'scout-threshold-rule-test';
 // name + THRESHOLD_TEST_INDEX + time field (first non-placeholder option).
 // Callers must create THRESHOLD_TEST_INDEX (with @timestamp mapping) in beforeAll.
 // Used in both rules_create_flow.spec.ts and connector_slack.spec.ts.
-export const defineIndexThresholdRule = async (page: ScoutPage, name: string) => {
+export const defineIndexThresholdRule = async (
+  page: ScoutPage,
+  name: string,
+  indexName: string = THRESHOLD_TEST_INDEX
+) => {
   await page.testSubj.click('createRuleButton');
   await page.testSubj.locator('ruleTypeModal').waitFor({ state: 'visible' });
   await page.testSubj.click('.index-threshold-SelectOption');
@@ -64,10 +106,13 @@ export const defineIndexThresholdRule = async (page: ScoutPage, name: string) =>
 
   await indexCombo.locator('[data-test-subj="comboBoxInput"]').click();
 
+  // Type all but the last character so the "custom pattern" option gets
+  // title = indexName.slice(0,-1), which differs from the real index title.
+  // That makes .euiComboBoxOption[title="${indexName}"] match exactly one element.
   await indexCombo
     .locator('[data-test-subj="comboBoxSearchInput"]')
-    .pressSequentially('scout-threshold-rule', { delay: 50 });
-  const indexOption = page.locator(`.euiComboBoxOption[title="${THRESHOLD_TEST_INDEX}"]`);
+    .pressSequentially(indexName.slice(0, -1), { delay: 50 });
+  const indexOption = page.locator(`.euiComboBoxOption[title="${indexName}"]`);
   await indexOption.waitFor({ state: 'visible', timeout: 30000 });
   await indexOption.click();
 
@@ -102,8 +147,28 @@ export const makeEsQueryRule = (namePrefix: string) => ({
     excludeHitsFromPreviousRun: false,
     sourceFields: [],
     index: ['.kibana'],
-    timeField: '@timestamp',
+    timeField: 'updated_at',
   },
   schedule: { interval: '1m' },
   tags: [namePrefix],
+});
+
+export const makeIndexThresholdRule = (namePrefix: string) => ({
+  name: `${namePrefix}-rule-${Date.now()}`,
+  ruleTypeId: '.index-threshold',
+  consumer: 'alerts',
+  enabled: true,
+  schedule: { interval: '1m' },
+  actions: [],
+  params: {
+    aggType: 'count',
+    termSize: 5,
+    thresholdComparator: '>',
+    timeWindowSize: 5,
+    timeWindowUnit: 'm',
+    groupBy: 'all',
+    threshold: [1000],
+    index: ['.kibana'],
+    timeField: '@timestamp',
+  },
 });
