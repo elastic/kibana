@@ -7,9 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { renderHook, waitFor } from '@testing-library/react';
+import { act, renderHook, waitFor } from '@testing-library/react';
 import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 import { useEcsFieldNames } from './use_ecs_field_names';
+
+const SERVICE_NAME = 'service.name';
+const HOST_NAME = 'host.name';
+const LABELS_CUSTOM = 'labels.custom';
 
 const makeFieldsMetadata = (
   ecsFields: Record<string, { short?: string } | undefined>
@@ -26,7 +30,7 @@ const makeFieldsMetadata = (
 
 describe('useEcsFieldNames', () => {
   it('returns null when fieldsMetadata is not provided', () => {
-    const { result } = renderHook(() => useEcsFieldNames(['service.name'], undefined));
+    const { result } = renderHook(() => useEcsFieldNames([SERVICE_NAME], undefined));
     expect(result.current).toBeNull();
   });
 
@@ -36,11 +40,11 @@ describe('useEcsFieldNames', () => {
   });
 
   it('resolves to a Set containing only fields with a short description', async () => {
-    const fieldNames = ['service.name', 'host.name', 'labels.custom'];
+    const fieldNames = [SERVICE_NAME, HOST_NAME, LABELS_CUSTOM];
     const fieldsMetadata = makeFieldsMetadata({
-      'service.name': { short: 'Name of the service' },
-      'host.name': { short: 'Name of the host' },
-      'labels.custom': undefined,
+      [SERVICE_NAME]: { short: 'Name of the service' },
+      [HOST_NAME]: { short: 'Name of the host' },
+      [LABELS_CUSTOM]: undefined,
     });
 
     const { result } = renderHook(() => useEcsFieldNames(fieldNames, fieldsMetadata));
@@ -49,29 +53,61 @@ describe('useEcsFieldNames', () => {
 
     await waitFor(() => expect(result.current).not.toBeNull());
 
-    expect(result.current).toEqual(new Set(['service.name', 'host.name']));
-    expect(result.current?.has('labels.custom')).toBe(false);
+    expect(result.current).toEqual(new Set([SERVICE_NAME, HOST_NAME]));
+    expect(result.current?.has(LABELS_CUSTOM)).toBe(false);
+  });
+
+  it('resolves to an empty Set when getClient rejects', async () => {
+    const fieldNames = [SERVICE_NAME];
+    const fieldsMetadata = {
+      getClient: jest.fn().mockRejectedValue(new Error('network error')),
+    } as unknown as FieldsMetadataPublicStart;
+
+    const { result } = renderHook(() => useEcsFieldNames(fieldNames, fieldsMetadata));
+
+    await act(async () => {
+      await Promise.resolve();
+    });
+
+    expect(result.current).toEqual(new Set());
+  });
+
+  it('resolves to an empty Set when find rejects', async () => {
+    const fieldNames = [SERVICE_NAME];
+    const fieldsMetadata = {
+      getClient: jest.fn().mockResolvedValue({
+        find: jest.fn().mockRejectedValue(new Error('find error')),
+      }),
+    } as unknown as FieldsMetadataPublicStart;
+
+    const { result } = renderHook(() => useEcsFieldNames(fieldNames, fieldsMetadata));
+
+    await act(async () => {
+      await Promise.resolve();
+    });
+
+    expect(result.current).toEqual(new Set());
   });
 
   it('resets to null and re-resolves when fieldNames change', async () => {
     const fieldsMetadata = makeFieldsMetadata({
-      'service.name': { short: 'Name of the service' },
-      'host.name': { short: 'Name of the host' },
+      [SERVICE_NAME]: { short: 'Name of the service' },
+      [HOST_NAME]: { short: 'Name of the host' },
     });
 
     const { result, rerender } = renderHook(
       ({ fieldNames }: { fieldNames: string[] }) => useEcsFieldNames(fieldNames, fieldsMetadata),
-      { initialProps: { fieldNames: ['service.name'] } }
+      { initialProps: { fieldNames: [SERVICE_NAME] } }
     );
 
     await waitFor(() => expect(result.current).not.toBeNull());
-    expect(result.current).toEqual(new Set(['service.name']));
+    expect(result.current).toEqual(new Set([SERVICE_NAME]));
 
-    rerender({ fieldNames: ['host.name'] });
+    rerender({ fieldNames: [HOST_NAME] });
 
     expect(result.current).toBeNull();
 
     await waitFor(() => expect(result.current).not.toBeNull());
-    expect(result.current).toEqual(new Set(['host.name']));
+    expect(result.current).toEqual(new Set([HOST_NAME]));
   });
 });

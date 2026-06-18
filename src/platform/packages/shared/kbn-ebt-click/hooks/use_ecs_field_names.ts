@@ -48,7 +48,9 @@ export function useEcsFieldNames(
           )
         );
       })
-      .catch(() => {});
+      .catch(() => {
+        if (!cancelled) setEcsFieldNames(new Set());
+      });
     return () => {
       cancelled = true;
     };
