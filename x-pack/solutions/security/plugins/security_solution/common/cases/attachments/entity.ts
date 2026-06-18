@@ -16,27 +16,27 @@ export const ENTITY_ATTACHMENT_TYPES = ['user', 'host', 'service', 'generic'] as
 const EntityAttachmentMetadataSchema = z
   .object({
     /** Human-readable entity name, used as the link label in the attachment view. */
-    entityName: z.string(),
+    entityName: z.string().max(256),
     /** The kind of entity (user, host, service, generic). */
     entityType: z.enum(ENTITY_ATTACHMENT_TYPES),
     /** Optional risk score (0-100) captured at attach time. */
     riskScore: z.number().optional(),
     /** Optional risk level (e.g. Low, Moderate, High, Critical) captured at attach time. */
-    riskLevel: z.string().optional(),
+    riskLevel: z.string().max(50).optional(),
   })
   .strict();
 
 export const EntityAttachmentPayloadSchema = z
   .object({
     type: z.literal(SECURITY_ENTITY_ATTACHMENT_TYPE),
-    owner: z.string(),
+    owner: z.string().max(100),
     /**
      * The canonical entity id (EUID) from the entity store, e.g.
      * `user:alice@host@namespace`. Stored verbatim so the attachment view can
      * resolve the entity with a single `terms` query on `entity.id` instead of
      * OR-ing a raw identity value across every candidate ECS field.
      */
-    attachmentId: z.string(),
+    attachmentId: z.string().max(1000),
     metadata: EntityAttachmentMetadataSchema,
   })
   .strict();
