@@ -17,6 +17,7 @@ import { MemoryRouter, useLocation } from 'react-router-dom';
 import { CompatRouter } from 'react-router-dom-v5-compat';
 import type { ObservabilityOnboardingAppServices } from '../..';
 import { IS_ADD_DATA_PAGE_V2_ENABLED } from '../../../common/feature_flags';
+import { createCallApi } from '../../services/rest/create_call_api';
 import { ObservabilityOnboardingFlow } from '../observability_onboarding_flow';
 import { LandingPage } from './landing';
 
@@ -91,6 +92,7 @@ const renderWithFlag = (enabled: boolean, initialPath: string = '/') => {
   coreStart.featureFlags.getBooleanValue.mockImplementation((id, fallback) =>
     id === IS_ADD_DATA_PAGE_V2_ENABLED ? enabled : fallback
   );
+  createCallApi(coreStart);
   const services = createObservabilityServices(coreStart);
   return render(
     <I18nProvider>
@@ -110,6 +112,7 @@ const renderLandingWithRouter = (enabled: boolean) => {
   coreStart.featureFlags.getBooleanValue.mockImplementation((id, fallback) =>
     id === IS_ADD_DATA_PAGE_V2_ENABLED ? enabled : fallback
   );
+  createCallApi(coreStart);
   const services = createObservabilityServices(coreStart);
   return render(
     <I18nProvider>
@@ -130,6 +133,7 @@ const renderFlowAtPath = (enabled: boolean, path: string) => {
   coreStart.featureFlags.getBooleanValue.mockImplementation((id, fallback) =>
     id === IS_ADD_DATA_PAGE_V2_ENABLED ? enabled : fallback
   );
+  createCallApi(coreStart);
   const services = createObservabilityServices(coreStart);
   return render(
     <I18nProvider>

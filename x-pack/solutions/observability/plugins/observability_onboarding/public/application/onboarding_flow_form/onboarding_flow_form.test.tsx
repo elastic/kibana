@@ -42,6 +42,10 @@ jest.mock('../package_list/package_list', () => ({
   ),
 }));
 
+jest.mock('../api_endpoints/api_endpoints', () => ({
+  ApiEndpoints: () => <div data-test-subj="apiEndpointsStub" />,
+}));
+
 const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
 const mockUsePricingFeature = usePricingFeature as jest.MockedFunction<typeof usePricingFeature>;
 const mockPackageListSearchForm = jest.fn(({ searchQuery }: { searchQuery: string }) => (
