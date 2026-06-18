@@ -14,14 +14,17 @@ import {
   toFieldRendererItems,
 } from '../../../../../timelines/components/field_renderers/default_renderer';
 import { getEmptyTagValue } from '../../../../../common/components/empty_value';
-import type { BasicEntityData, EntityTableColumns } from './types';
+import type { BasicEntityData, EntityTableColumns, EntityTableLinkRenderer } from './types';
 import { isFlyoutLink } from '../../../../shared/utils/link_utils';
 import { PreviewLink } from '../../../../shared/components/preview_link';
 
 export const getEntityTableColumns = <T extends BasicEntityData>(
   contextID: string,
   scopeId: string,
-  data: T
+  data: T,
+  // Used only by the flyout_v2 host flyout; v2 components own the rendering contract
+  // but thread it here rather than duplicating the column config.
+  linkRenderer?: EntityTableLinkRenderer
 ): EntityTableColumns<T> => [
   {
     name: (
@@ -55,17 +58,28 @@ export const getEntityTableColumns = <T extends BasicEntityData>(
       const values = getValues && getValues(data);
 
       if (field) {
-        const showPreviewLink = values && isFlyoutLink({ field, scopeId });
-        const renderPreviewLink = (value: string) => (
-          <PreviewLink field={field} value={value} entityId={data.entityId} scopeId={scopeId} />
-        );
+        let renderLink: ((value: string) => JSX.Element) | undefined;
+        if (linkRenderer) {
+          const LinkRenderer = linkRenderer;
+          renderLink = (value: string) => (
+            <LinkRenderer field={field} value={value}>
+              {value}
+            </LinkRenderer>
+          );
+        } else if (values && isFlyoutLink({ field, scopeId })) {
+          renderLink = (value: string) => (
+            <PreviewLink field={field} value={value} entityId={data.entityId} scopeId={scopeId} />
+          );
+        } else {
+          renderLink = renderField;
+        }
         return (
           <DefaultFieldRenderer
             rowItems={toFieldRendererItems(values)}
             attrName={field}
             idPrefix={contextID ? `entityTable-${contextID}` : 'entityTable'}
             scopeId={scopeId}
-            render={showPreviewLink ? renderPreviewLink : renderField}
+            render={renderLink}
             data-test-subj="entity-table-value"
           />
         );
