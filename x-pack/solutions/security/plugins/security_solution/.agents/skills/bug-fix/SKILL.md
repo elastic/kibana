@@ -39,6 +39,8 @@ reproduction before fix work can begin."_
 |-------|-------------|----------------|
 | **4 — Fix (TDD)** | Root cause analysis → fix plan → user approval → red test → green fix | User explicitly approves plan; test passes |
 | **5 — Verify** | Clean environment, browser re-reproduction, test suite | All pass + bug gone in browser |
+| **Controller Check** *(serverless only)* | Identify whether controller repo PRs are also required | All gates answered; follow-up PRs noted if needed |
+| **MKI Verification** *(serverless only)* | Reproduce on real MKI before PR; verify fix on MKI post-deploy | Pre-fix: bug reproduced on MKI. Post-deploy: bug gone on MKI |
 | **6 — PR** | Open draft PR with description and before/after screenshots | PR URL presented to user |
 | **7 — Review** | Respond to reviewer comments; push back when justified | All reviewer threads resolved |
 
@@ -272,6 +274,43 @@ Check `elasticsearch-controller/internal/config/roles/<project_type>.yaml`. The 
 
 If any gate triggers, note the required follow-up PRs explicitly in the PR description and link them. **Do not mark the bug as fixed until all controller PRs are also merged.**
 
+## MKI Verification (serverless bugs only)
+
+**Only run this step if `deployment_type` in `analysis.json` is `serverless`.** Skip entirely for stateful bugs.
+
+Local serverless uses a mock SAML IdP and role files from the local repo. MKI uses the real configurations from `elasticsearch-controller` and `kibana-controller`. A fix that passes Phase 5 locally is not confirmed until it is verified on a real MKI project. MKI verification has two parts.
+
+### Part 1 — Pre-fix MKI reproduction (before opening the PR)
+
+Confirm the bug actually occurs on a real MKI project — rules out local-only artefacts and ensures the repro is representative of production.
+
+Ask the user: *"Do you have access to an MKI project where this bug should reproduce? If yes, provide the URL."*
+
+If the user provides a URL:
+
+1. `browser_navigate` → `<MKI project URL>` (MKI redirects to SSO automatically)
+2. MKI uses real SAML/SSO — the agent cannot complete login autonomously. Tell the user: *"Please log in to the MKI project in the browser window, then let me know when you're authenticated."* Wait for explicit confirmation before continuing.
+3. Once the user confirms login: follow `reproduction_steps` from `analysis.json` against MKI
+4. `browser_take_screenshot` → `.bug-fixer-session/mki-before.png`
+5. Record result in `.bug-fixer-session/reproduction-report.md`: add `mki_pre_fix_reproduced: true | false`
+
+If the bug does **not** reproduce on MKI: this is significant — tell the user and investigate whether the local environment is the only affected context (Gate 3 of the Controller Check may apply).
+
+If the user has no MKI access: note in the PR description — *"MKI pre-fix reproduction not verified — no MKI access available at time of fix."*
+
+### Part 2 — Post-deploy MKI verification (required before closing the bug)
+
+After all required PRs (Kibana + any controller PRs) are merged **and** deployed to MKI:
+
+1. Navigate to the same MKI project and log in (same flow as Part 1)
+2. Follow `reproduction_steps` — the bug must not reproduce
+3. `browser_take_screenshot` → `.bug-fixer-session/mki-after.png` if possible
+4. Post a comment on the GitHub issue: *"Verified fixed on MKI — [project URL] — [date]."*
+
+**Do not close the issue or mark it fully resolved until Part 2 is complete.** Add this note explicitly to the PR description:
+
+> ⚠️ MKI post-deploy verification required before closing this issue.
+
 ## Phase 6: Open PR
 
 Only proceed if Phase 5 verdict is **Fix verified**.
@@ -318,10 +357,13 @@ gh pr create --draft \
 Fixes #<number>
 <similar_issues and related_prs from .bug-fixer-session/analysis.json, if any>
 
-<!-- If any Controller Check gate triggered, list required follow-up PRs here: -->
+<!-- Serverless bugs only — remove this block for stateful: -->
+<!-- ⚠️ MKI post-deploy verification required before closing this issue. -->
+<!-- - [ ] MKI pre-fix repro: <mki-before.png or "not verified"> -->
+<!-- - [ ] MKI post-deploy verification: pending -->
+<!-- If any Controller Check gate triggered, list required follow-up PRs: -->
 <!-- - [ ] elasticsearch-controller PR: <link> -->
 <!-- - [ ] kibana-controller PR: <link> -->
-<!-- Do not close this bug as fixed until all controller PRs are merged. -->
 
 🤖 Generated with [Claude Code](https://claude.ai/claude-code)
 EOF
