@@ -132,7 +132,7 @@ export function buildLogsExtractionEsqlQuery({
 
   // Evaluation of the id without type so we can fallback to name
   parts.push(
-    `| EVAL ${recentData(ENGINE_METADATA_UNTYPED_ID_FIELD)} = ${getEuidEsqlEvaluation(type, {
+    `| EVAL ${getEuidEsqlEvaluation(type, recentData(ENGINE_METADATA_UNTYPED_ID_FIELD), {
       withTypeId: false,
     })}`
   );
