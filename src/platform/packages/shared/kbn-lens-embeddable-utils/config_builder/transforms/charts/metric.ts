@@ -485,7 +485,7 @@ function enrichConfigurationWithVisualizationProperties(
       primaryMetric.color = AUTO_COLOR;
     }
 
-    // Check for valid enum, somehow set to bar in integrations panels to 'bar', unknown values default to unselected
+    // Check for valid enum, some integration panels have applyColorTo === 'bar', which is not a valid API enum; treat unknown values as unselected.
     if (visualization.applyColorTo === 'value' || visualization.applyColorTo === 'background') {
       primaryMetric.apply_color_to = visualization.applyColorTo;
     }
