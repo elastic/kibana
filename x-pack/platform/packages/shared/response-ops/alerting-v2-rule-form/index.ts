@@ -75,3 +75,13 @@ export type { RuleFormFlyoutProps, DynamicRuleFormFlyoutProps } from './flyout';
 
 export { buildInlineWorkflowYaml } from './actions_form';
 export type { ActionDraft } from './actions_form';
+
+export {
+  resolveDashboardsByIds,
+  searchRelatedDashboard,
+} from './form/field_groups/search_related_dashboards';
+export type {
+  Dashboard,
+  MissingDashboard,
+  ResolveDashboardsResult,
+} from './form/field_groups/search_related_dashboards';
