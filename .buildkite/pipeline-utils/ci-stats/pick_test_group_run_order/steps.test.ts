@@ -111,6 +111,7 @@ describe('buildFunctionalStepGroup', () => {
 
     const first = step.steps[0];
     expect(first.command).toBe('scripts/run_ftr.sh');
+    expect(first.timeout_in_minutes).toBe(38);
     expect(first.env).toEqual({
       FTR_CONFIG_GROUP_KEY: 'a',
       FTR_EXTRA_ARGS: '--bail',
