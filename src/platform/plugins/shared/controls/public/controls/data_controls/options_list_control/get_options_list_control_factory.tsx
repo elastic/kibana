@@ -153,8 +153,14 @@ export const getOptionsListControlFactory = (): EmbeddablePublicDefinition<
       const fieldChangedSubscription = combineLatest([
         dataControlManager.api.fieldName$,
         dataControlManager.api.dataViewId$,
+        dataControlManager.api.valuesSource$,
       ])
         .pipe(
+          filter(([, , valuesSource]) => valuesSource === ControlValuesSource.FIELD),
+          distinctUntilChanged(
+            ([fieldNameA, dataViewIdA], [fieldNameB, dataViewIdB]) =>
+              fieldNameA === fieldNameB && dataViewIdA === dataViewIdB
+          ),
           skip(1) // skip first, since this represents initialization
         )
         .subscribe(() => {

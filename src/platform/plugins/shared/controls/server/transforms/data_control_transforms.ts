@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { omit } from 'lodash';
 import type { Reference } from '@kbn/content-management-utils';
 import type {
   LegacyStoredDataControlState,
@@ -21,47 +22,35 @@ type FieldDataControlState = Extract<
   StrictDataControlState,
   { values_source: ControlValuesSource.FIELD }
 >;
-type EsqlDataControlState = Extract<
+type EsqlDataControlState<T> = Extract<
   StrictDataControlState,
   { values_source: ControlValuesSource.ESQL }
->;
+> &
+  Omit<T, keyof StrictDataControlState>;
 
-type StoredFieldDataControlState = Omit<FieldDataControlState, 'data_view_id'> & {
+type StoredFieldDataControlState<T> = Omit<FieldDataControlState, 'data_view_id'> & {
   dataViewRefName: string;
-};
+} & Omit<T, keyof StrictDataControlState>;
 
-export function transformDataControlIn(
+export function transformDataControlIn<StoredStateType extends DataControlState>(
   state: DataControlState,
   referenceName: string
 ): {
-  state: StoredFieldDataControlState | EsqlDataControlState;
+  state: StoredFieldDataControlState<StoredStateType> | EsqlDataControlState<StoredStateType>;
   references?: Reference[];
 } {
   if (state.values_source === ControlValuesSource.ESQL) {
-    const { title, esql_query, use_global_filters, ignore_validations, values_source } =
-      state as EsqlDataControlState;
     return {
-      state: {
-        title,
-        esql_query,
-        use_global_filters,
-        ignore_validations,
-        values_source,
-      },
+      state: omit(state, 'data_view_id', 'field_name') as EsqlDataControlState<StoredStateType>,
     };
   }
 
-  const { title, field_name, use_global_filters, ignore_validations, values_source, data_view_id } =
-    state as FieldDataControlState;
+  const { data_view_id } = state as FieldDataControlState;
   return {
     state: {
-      title,
-      field_name,
-      use_global_filters,
-      ignore_validations,
-      values_source,
+      ...omit(state, 'data_view_id', 'esql_query'),
       dataViewRefName: referenceName,
-    },
+    } as StoredFieldDataControlState<StoredStateType>,
     references: [
       {
         name: referenceName,
@@ -90,7 +79,7 @@ export function transformDataControlOut<
       esql_query: esql_query ?? '',
       ...(typeof use_global_filters === 'boolean' && { use_global_filters }),
       ...(typeof ignore_validations === 'boolean' && { ignore_validations }),
-    } as EsqlDataControlState;
+    } as EsqlDataControlState<StoredStateType>;
 
     ensureRequiredFields(convertedState);
     return convertedState;

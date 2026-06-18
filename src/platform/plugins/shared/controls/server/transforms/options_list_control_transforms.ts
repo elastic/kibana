@@ -33,10 +33,11 @@ export const registerOptionsListControlTransforms = (embeddable: EmbeddableSetup
     getSchema: () => optionsListDSLControlSchema,
     getTransforms: () => ({
       transformIn: (state: OptionsListDSLControlState) => {
-        const { state: dataControlState, references } = transformDataControlIn(
-          state as StrictDataControlState,
-          OPTIONS_LIST_REF_NAME
-        );
+        const { state: dataControlState, references } =
+          transformDataControlIn<OptionsListDSLControlState>(
+            state as StrictDataControlState,
+            OPTIONS_LIST_REF_NAME
+          );
         return {
           state: dataControlState,
           references,
