@@ -28,8 +28,40 @@
  */
 export const APPROVED_TRIGGER_DEFINITIONS: Array<{ id: string; schemaHash: string }> = [
   {
+    id: 'alerting.episodeAcked',
+    schemaHash: 'd280f377a1b17bcbd655e93f00ebb80b1935ef93951115cc1559305a5da01942',
+  },
+  {
+    id: 'alerting.episodeActivated',
+    schemaHash: 'b2d6d720052206559b91d1558e8c2d66376d6eaad15db1f1748cfd59ef894f5f',
+  },
+  {
     id: 'alerting.episodeAssigned',
-    schemaHash: 'fce48752c788e4620a70cf8d33040117c7a46c78508a5cf98c5c0fa93f631ad0',
+    schemaHash: 'cab4d7b9ed82d802f6dd51f4d29327f7fb84bfabcf958a046c53ceb5d7136b0b',
+  },
+  {
+    id: 'alerting.episodeDeactivated',
+    schemaHash: '69cf494f29d6410e2df10766ccaef4641e6b8718c8dc3b01e5833cb9a1de1238',
+  },
+  {
+    id: 'alerting.episodeSnoozed',
+    schemaHash: 'ca2d9156382a2d132b94e6058488d1f78df92e539445403f1b315ea16a3e6270',
+  },
+  {
+    id: 'alerting.episodeTagged',
+    schemaHash: 'c69b1bf9ecdac0753366584be4240b0ae6423ce0fd9aa537a618b4028926f792',
+  },
+  {
+    id: 'alerting.episodeUnacked',
+    schemaHash: 'd280f377a1b17bcbd655e93f00ebb80b1935ef93951115cc1559305a5da01942',
+  },
+  {
+    id: 'alerting.episodeUnassigned',
+    schemaHash: 'd280f377a1b17bcbd655e93f00ebb80b1935ef93951115cc1559305a5da01942',
+  },
+  {
+    id: 'alerting.episodeUnsnoozed',
+    schemaHash: 'd280f377a1b17bcbd655e93f00ebb80b1935ef93951115cc1559305a5da01942',
   },
   {
     id: 'alerting.ruleSignalsWritten',
