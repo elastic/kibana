@@ -11,7 +11,7 @@ import { act, fireEvent } from '@testing-library/react';
 
 import { EuiContextMenuItem } from '@elastic/eui';
 
-import type { AgentPolicy, PackagePolicy } from '../types';
+import type { AgentPolicy, PackagePolicy, PackagePolicyPackage } from '../types';
 import { createIntegrationsTestRendererMock } from '../mock';
 
 import { sendGetAgents, useMultipleAgentPolicies } from '../hooks';
@@ -42,14 +42,19 @@ const sendGetAgentsMock = sendGetAgents as jest.MockedFunction<typeof sendGetAge
 function renderMenu({
   agentPolicies,
   packagePolicyIds,
+  packagePolicyPackage,
 }: {
   agentPolicies: AgentPolicy[];
   packagePolicyIds: string[];
+  packagePolicyPackage?: PackagePolicyPackage;
 }) {
   const renderer = createIntegrationsTestRendererMock();
 
   const utils = renderer.render(
-    <PackagePolicyDeleteProvider agentPolicies={agentPolicies}>
+    <PackagePolicyDeleteProvider
+      agentPolicies={agentPolicies}
+      packagePolicyPackage={packagePolicyPackage}
+    >
       {(deletePackagePoliciesPrompt) => {
         return (
           <EuiContextMenuItem
@@ -256,5 +261,66 @@ describe('PackagePolicyDeleteProvider', () => {
       utils.getByText('This action can not be undone. Are you sure you wish to continue?')
     ).toBeInTheDocument();
     expect(utils.getAllByText(/integration will stop data ingestion./).length).toBe(1);
+  });
+
+  it('When deleting the Fleet Server integration show a specific warning', async () => {
+    useMultipleAgentPoliciesMock.mockReturnValue({ canUseMultipleAgentPolicies: false });
+    sendGetAgentsMock.mockResolvedValue({
+      data: { statusSummary: {}, items: [], total: 0 },
+    } as any);
+    const agentPolicies = createMockAgentPolicies();
+    const { utils } = renderMenu({
+      agentPolicies,
+      packagePolicyIds: ['integration-0001'],
+      packagePolicyPackage: { name: 'fleet_server' } as PackagePolicyPackage,
+    });
+    const button = utils.getByTestId('deleteIntegrationBtn');
+    fireEvent.click(button);
+
+    await waitFor(() => {
+      expect(utils.getByTestId('fleetServerDeleteCallOut').textContent).toContain(
+        'will lose their connection to Fleet'
+      );
+    });
+  });
+
+  it('Shows the Fleet Server warning even when multiple agent policies are present', async () => {
+    useMultipleAgentPoliciesMock.mockReturnValue({ canUseMultipleAgentPolicies: true });
+    sendGetAgentsMock.mockResolvedValue({
+      data: { statusSummary: {}, items: [], total: 0 },
+    } as any);
+    const agentPolicies = createMockAgentPolicies(undefined, true);
+    const { utils } = renderMenu({
+      agentPolicies,
+      packagePolicyIds: ['integration-0001'],
+      packagePolicyPackage: { name: 'fleet_server' } as PackagePolicyPackage,
+    });
+    const button = utils.getByTestId('deleteIntegrationBtn');
+    fireEvent.click(button);
+
+    await waitFor(() => {
+      expect(utils.getByTestId('fleetServerDeleteCallOut')).toBeInTheDocument();
+      expect(utils.getByTestId('sharedAgentPolicyCallOut')).toBeInTheDocument();
+    });
+  });
+
+  it('Does not show the Fleet Server warning when deleting a non-Fleet Server integration', async () => {
+    useMultipleAgentPoliciesMock.mockReturnValue({ canUseMultipleAgentPolicies: false });
+    sendGetAgentsMock.mockResolvedValue({
+      data: { statusSummary: {}, items: [], total: 0 },
+    } as any);
+    const agentPolicies = createMockAgentPolicies();
+    const { utils } = renderMenu({
+      agentPolicies,
+      packagePolicyIds: ['integration-0001'],
+      packagePolicyPackage: { name: 'nginx' } as PackagePolicyPackage,
+    });
+    const button = utils.getByTestId('deleteIntegrationBtn');
+    fireEvent.click(button);
+
+    await waitFor(() => {
+      expect(utils.getByTestId('confirmModalBodyText')).toBeInTheDocument();
+    });
+    expect(utils.queryByTestId('fleetServerDeleteCallOut')).not.toBeInTheDocument();
   });
 });
