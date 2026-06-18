@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+// Original test (remove during Scout migration): x-pack/platform/test/functional_with_es_ssl/apps/discover_ml/discover/search_source_alert.ts
 import expect from '@kbn/expect';
 import { asyncForEach } from '@kbn/std';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
@@ -240,7 +241,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   const openManagementAlertFlyout = async () => {
     // TODO: Navigation to Rule Management is different in Serverless
-    await PageObjects.common.navigateToApp('rules');
+    await PageObjects.common.navigateToApp('management', {
+      path: 'insightsAndAlerting/triggersActions',
+    });
     await PageObjects.header.waitUntilLoadingHasFinished();
     await testSubjects.click('createFirstRuleButton');
     await PageObjects.header.waitUntilLoadingHasFinished();
@@ -303,7 +306,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   const openAlertRuleInManagement = async (ruleName: string) => {
     // Navigation to Rule Management is different in Serverless
-    await PageObjects.common.navigateToApp('rules');
+    await PageObjects.common.navigateToApp('management', {
+      path: 'insightsAndAlerting/triggersActions',
+    });
     await PageObjects.header.waitUntilLoadingHasFinished();
 
     let retries = 0;
@@ -316,7 +321,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.header.waitUntilLoadingHasFinished();
       }
       const rulesList = await testSubjects.find('rulesList');
-      const alertRule = await rulesList.findByCssSelector(`[title="${ruleName}"]`);
+      const alertRule = await rulesList.findByCssSelector(
+        `[data-test-subj="rulesListTableRowName-${ruleName}"]`
+      );
       await alertRule.click();
       await PageObjects.header.waitUntilLoadingHasFinished();
     });
@@ -682,7 +689,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await createDataView(SOURCE_DATA_VIEW);
 
       // Navigation to Rule Management is different in Serverless
-      await PageObjects.common.navigateToApp('rules');
+      await PageObjects.common.navigateToApp('management', {
+        path: 'insightsAndAlerting/triggersActions',
+      });
       await PageObjects.header.waitUntilLoadingHasFinished();
 
       await testSubjects.click('createRuleButton');

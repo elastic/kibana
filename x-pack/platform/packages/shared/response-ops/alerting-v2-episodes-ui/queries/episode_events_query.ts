@@ -28,9 +28,11 @@ const ALERT_EPISODE_EVENT_FIELDS = [
 /**
  * ES|QL query returning all events for a single alert episode, oldest first.
  */
-export const buildEpisodeEventsEsqlQuery = (episodeId: string) => {
+export const buildEpisodeEventsEsqlQuery = (spaceId: string, episodeId: string) => {
   // prettier-ignore
-  return esql.from(ALERT_EVENTS_DATA_STREAM).where`type == "alert"`
+  return esql.from(ALERT_EVENTS_DATA_STREAM)
+    .where`space_id == ${spaceId}`
+    .where`type == "alert"`
     .where`episode.id == ${episodeId}`
     .sort([TIME_FIELD, 'ASC'])
     .keep(...ALERT_EPISODE_EVENT_FIELDS);

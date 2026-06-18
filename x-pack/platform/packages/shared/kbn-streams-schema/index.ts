@@ -13,6 +13,7 @@ export {
   WiredStream,
   WiredIngestUpsertRequest,
   isDraftStream,
+  isDraftGetResponse,
   type DraftStreamDefinition,
 } from './src/models/ingest/wired';
 export {
@@ -59,6 +60,7 @@ export {
   keepFields,
   namespacePrefixes,
   otelReservedFields,
+  aliases as otelFieldAliases,
   isNamespacedEcsField,
   isOtelReservedField,
   getRegularEcsField,
@@ -68,6 +70,7 @@ export { getInheritedFieldsFromAncestors } from './src/helpers/get_inherited_fie
 export { getInheritedSettings } from './src/helpers/get_inherited_settings';
 export {
   buildMetadataOption,
+  withUnmappedFieldsDirective,
   deriveQueryType,
   ensureMetadata,
   extractBucketColumnName,
@@ -84,6 +87,7 @@ export {
   hasSameEsql,
   replaceFromSources,
   rewriteFromSources,
+  stripMetadata,
 } from './src/helpers/esql_helpers';
 
 export * from './src/ingest_pipeline_processors';
@@ -134,6 +138,8 @@ export {
 export {
   type EsqlQuery,
   esqlQuerySchema,
+  type QueryFeature,
+  queryFeatureSchema,
   type StreamQuery,
   type QueryLink,
   type QueryType,
@@ -201,11 +207,11 @@ export {
 export type {
   SignificantEventsResponse,
   SignificantEventsGetResponse,
-  SignificantEventsPreviewResponse,
-  SignificantEventsGenerateResponse,
   GeneratedSignificantEventQuery,
   SignificantEventsQueriesGenerationResult,
   SignificantEventsQueriesGenerationTaskResult,
+  LifecycleDetection,
+  EventLifecycleResponse,
 } from './src/api/significant_events';
 export { generatedSignificantEventQuerySchema } from './src/api/significant_events';
 
@@ -224,7 +230,6 @@ export {
   type BaseFeature,
   type IdentifiedFeature,
   type IgnoredFeature,
-  type FeatureStatus,
   DATASET_ANALYSIS_FEATURE_TYPE,
   LOG_SAMPLES_FEATURE_TYPE,
   LOG_PATTERNS_FEATURE_TYPE,
@@ -242,7 +247,6 @@ export {
   baseFeatureSchema,
   identifiedFeatureSchema,
   ignoredFeatureSchema,
-  featureStatusSchema,
 } from './src/feature';
 
 export { FeatureAccumulator } from './src/feature_accumulator';
@@ -266,7 +270,6 @@ export { TaskStatus, type TaskResult } from './src/tasks/types';
 export type { GenerateDescriptionResult } from './src/api/description_generation';
 export type { IdentifyFeaturesResult, IterationResult } from './src/api/features';
 export { tokenCountSchema, iterationResultSchema } from './src/api/features';
-
 export {
   type GenerateInsightsResult,
   type Insight,
@@ -287,10 +290,39 @@ export {
   INSIGHT_IMPACT_LEVEL_MAP,
   getImpactLevel,
 } from './src/insights';
-export type { OnboardingResult } from './src/onboarding';
-export { OnboardingStep } from './src/onboarding';
+export {
+  SIG_EVENT_STATUS_OPTIONS,
+  SIG_EVENT_IMPACT_OPTIONS,
+  detectionSchema,
+  type Detection,
+  discoverySchema,
+  type Discovery,
+  sigEventSchema,
+  sigEventStatusSchema,
+  sigEventImpactSchema,
+  type SigEvent,
+  type KnowledgeIndicator,
+  type SigEventStatus,
+  type SigEventImpact,
+} from './src/sig_events';
+export type {
+  StreamsKIsOnboardingResult,
+  StreamsKIsOnboardingFeaturesResult,
+  StreamsKIsOnboardingQueriesResult,
+  StreamsKIsOnboardingStatusResult,
+} from './src/onboarding';
+export {
+  StreamsKIsOnboardingStep,
+  STREAMS_KIS_ONBOARDING_IN_PROGRESS_STATUSES,
+} from './src/onboarding';
+export type { SigEventsWorkflowStatusResult } from './src/workflows';
+export { SigEventsWorkflowStatus } from './src/workflows';
+
 export { streamsOasDefinitions } from './src/oas_definitions';
 export type { StreamsOasDefinitions } from './src/oas_definitions';
+
+export { stripOtelAliases } from './src/helpers/strip_otel_aliases';
+export { mergeSourceIntoDocuments } from './src/helpers/merge_esql_source';
 
 export { streamMatchesIndexPatterns } from './src/helpers/stream_matches_index_patterns';
 export { DEFAULT_INDEX_PATTERNS } from './src/helpers/default_index_patterns';

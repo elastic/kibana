@@ -7,7 +7,6 @@
 
 import type { Feature } from '@kbn/streams-schema';
 import { selectLogPatternsForLlm } from '@kbn/streams-ai/src/features/computed/log_patterns';
-import { CANONICAL_LAST_SEEN } from '../../src/data_generators/canonical_ki_features';
 
 const ERROR_KEYWORDS = ['error', 'exception', 'fatal', 'fail', 'panic', 'timeout', 'traceback'];
 const MAX_FIELD_VALUE_SAMPLES = 5;
@@ -110,9 +109,6 @@ const buildDatasetAnalysis = (
 
   return {
     id: 'dataset_analysis',
-    uuid: 'canonical-dataset-analysis',
-    status: 'active',
-    last_seen: CANONICAL_LAST_SEEN,
     stream_name: streamName,
     type: 'dataset_analysis',
     description: 'Dataset schema and field analysis including value distributions and coverage',
@@ -126,9 +122,6 @@ const buildLogSamples = (streamName: string, flatDocs: Array<Record<string, unkn
 
   return {
     id: 'log_samples',
-    uuid: 'canonical-log-samples',
-    status: 'active',
-    last_seen: CANONICAL_LAST_SEEN,
     stream_name: streamName,
     type: 'log_samples',
     description: 'Raw sample log documents from the stream',
@@ -175,9 +168,6 @@ const buildLogPatterns = (
 
   return {
     id: 'log_patterns',
-    uuid: 'canonical-log-patterns',
-    status: 'active',
-    last_seen: CANONICAL_LAST_SEEN,
     stream_name: streamName,
     type: 'log_patterns',
     description: 'Log message patterns identified through categorization analysis',
@@ -196,9 +186,6 @@ const buildErrorLogs = (streamName: string, flatDocs: Array<Record<string, unkno
 
   return {
     id: 'error_logs',
-    uuid: 'canonical-error-logs',
-    status: 'active',
-    last_seen: CANONICAL_LAST_SEEN,
     stream_name: streamName,
     type: 'error_logs',
     description: 'Sample error logs extracted from the stream',

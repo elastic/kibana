@@ -46,7 +46,12 @@ const lifecycleSchema = z.object({
     .string()
     .optional()
     .describe('For "dsl" only: retention period, e.g. "30d", "90d", "1y". Omit for unlimited.'),
-  ilm_policy: z.string().optional().describe('For "ilm" only: ILM policy name.'),
+  ilm_policy: z
+    .string()
+    .optional()
+    .describe(
+      'For "ilm" only: ILM policy name. Use list_ilm_policies to discover available policies.'
+    ),
 });
 
 const fieldsSchema = z
@@ -155,10 +160,11 @@ export const createUpdateStreamTool = ({
   handler: async ({ name, changes }, { request }) => {
     const signal = abortSignalFromRequest(request);
     try {
-      const { streamsClient, getQueryClient, attachmentClient } = await getScopedClients({
-        request,
-      });
-      const queryClient = await getQueryClient();
+      const { streamsClient, getKnowledgeIndicatorClient, attachmentClient } =
+        await getScopedClients({
+          request,
+        });
+      const kiClient = await getKnowledgeIndicatorClient();
 
       if (changes.processing) {
         const validation = validateProcessingJson({ steps: changes.processing });
@@ -194,7 +200,7 @@ export const createUpdateStreamTool = ({
 
         await patchIngestAndUpsert({
           streamsClient,
-          queryClient,
+          kiClient,
           attachmentClient,
           name,
           patchFn: (definition) => {

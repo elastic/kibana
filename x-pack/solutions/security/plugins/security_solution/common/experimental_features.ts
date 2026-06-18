@@ -48,19 +48,25 @@ export const allowedExperimentalValues = Object.freeze({
    * `runscript` response action for Elastic Defend Endpoint
    * Release: 9.4
    */
-  responseActionsEndpointRunScript: false,
+  responseActionsEndpointRunScript: true,
 
   /**
    * Support for Automated Endpoint `runscript` (from rules)
    * Release: 9.4
    */
-  responseActionsEndpointAutomatedRunScript: false,
+  responseActionsEndpointAutomatedRunScript: true,
 
   /**
    * Scripts library in support of `runscript`/upload-execute` new command for elastic defend
    * Release: 9.4
    */
-  responseActionsScriptLibraryManagement: false,
+  responseActionsScriptLibraryManagement: true,
+
+  /**
+   * `cancel` response action for Elastic Defend Endpoint
+   * Release: 9.5
+   */
+  responseActionsEndpointCancel: false,
 
   /**
    * Enables the Assistant Model Evaluation advanced setting and API endpoint, introduced in `8.11.0`.
@@ -84,14 +90,14 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Enables the new Entity Analytics home page experience.
    */
-  entityAnalyticsNewHomePageEnabled: false,
+  entityAnalyticsNewHomePageEnabled: true,
 
   /**
    * Enables the lead generation pipeline for Entity Analytics.
    * When enabled, the lead generation engine, observation modules,
    * API routes, and persistence indices are activated.
    */
-  leadGenerationEnabled: false,
+  leadGenerationEnabled: true,
 
   /**
    * disables ES|QL rules
@@ -134,9 +140,6 @@ export const allowedExperimentalValues = Object.freeze({
    * Release: 8.18/9.0
    */
   crowdstrikeRunScriptEnabled: true,
-
-  /** Enables new Data View Picker */
-  newDataViewPickerEnabled: true,
 
   /**
    * Enables Microsoft Defender for Endpoint's RunScript command
@@ -185,7 +188,7 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Enables the Entity Analytics Watchlist feature.
    */
-  entityAnalyticsWatchlistEnabled: false,
+  entityAnalyticsWatchlistEnabled: true,
 
   /**
    * Enables the Trial Companion feature.
@@ -219,6 +222,18 @@ export const allowedExperimentalValues = Object.freeze({
   automaticTroubleshootingSkill: false,
 
   /**
+   * Enables the PCI DSS v4.0.1 Compliance Agent Builder skill and its backing tools.
+   * Gates skill + tool registration so the feature can ship dark and be enabled per environment.
+   */
+  pciComplianceAgentBuilder: true,
+
+  /**
+   * Enables the find-security-rules Agent Builder skill.
+   * Part of the DEX AI skills family (`dexAiSkill*`).
+   */
+  dexAiSkillFindRules: false,
+
+  /**
    * Enables the new flyout using the EUI flyout system
    */
   newFlyoutSystemEnabled: false,
@@ -226,13 +241,50 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Uses entity store v2 for entity analytics skill
    */
-  entityAnalyticsEntityStoreV2: false,
+  entityAnalyticsEntityStoreV2: true,
+
+  /**
+   * Enables entity ML job behavior maintainer
+   */
+  entityAnalyticsMlJobBehaviorMaintainer: false,
 
   /**
    * Enables the deprecated prebuilt rules UI
    * Release: 9.4
    */
   prebuiltRulesDeprecationUIEnabled: true,
+
+  /**
+   * Enables the Detection Rule Changes History API endpoint
+   * (`GET /api/detection_engine/rules/_history`).
+   *
+   * Independent of the alerting framework's `xpack.alerting.ruleChangeTracking.enabled`
+   * config flag, which gates the underlying primitive that produces the history
+   * records. Both must be enabled for the API to return non-empty results.
+   */
+  ruleChangesHistoryEnabled: false,
+
+  /**
+   * Enables the Agents, Discover and Workflows external links in the classic Security Solution side navigation
+   */
+  securityClassicNavExternalLinks: false,
+  /**
+   * Enables public Detection Engine attacks REST APIs
+   * (`/api/detection_engine/attacks/*`).
+   */
+  publicAttacksApiEnabled: false,
+
+  /**
+   * Enables the agent builder `run_rule_preview` tool and the `security.rule.preview`
+   * attachment (server type + client renderer). Gates registration so the feature can
+   * ship dark and be enabled per environment.
+   */
+  rulePreviewAttachmentEnabled: false,
+
+  /**
+   * Enables the risk score history API endpoint for Entity Analytics.
+   */
+  riskScoreHistoryEnabled: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;

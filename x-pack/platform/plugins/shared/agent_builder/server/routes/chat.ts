@@ -6,6 +6,7 @@
  */
 
 import { omit } from 'lodash';
+import { validate as uuidValidate } from 'uuid';
 import { schema } from '@kbn/config-schema';
 import path from 'node:path';
 import type { Observable } from 'rxjs';
@@ -73,8 +74,18 @@ export function registerChatRoutes({
     ),
     conversation_id: schema.maybe(
       schema.string({
+        validate: (v) => (uuidValidate(v) ? undefined : 'conversation_id must be a valid UUID'),
         meta: {
           description: 'Optional existing conversation ID to continue a previous conversation.',
+        },
+      })
+    ),
+    execution_id: schema.maybe(
+      schema.string({
+        validate: (v) => (uuidValidate(v) ? undefined : 'execution_id must be a valid UUID'),
+        meta: {
+          description:
+            'Optional client-generated execution ID. Provide it to address this execution later (for example, to abort it). Must be unique; defaults to a server-generated ID.',
         },
       })
     ),
@@ -84,9 +95,29 @@ export function registerChatRoutes({
       })
     ),
     prompts: schema.maybe(
-      schema.recordOf(schema.string(), schema.object({ allow: schema.boolean() }), {
-        meta: { description: 'Can be used to respond to a confirmation prompt.' },
-      })
+      schema.recordOf(
+        schema.string({ minLength: 1, maxLength: 512 }),
+        schema.oneOf([
+          schema.object({ allow: schema.boolean() }),
+          schema.object({ authorized: schema.boolean() }),
+          schema.object({
+            answers: schema.arrayOf(
+              schema.object({
+                choice: schema.maybe(schema.arrayOf(schema.number(), { maxSize: 100 })),
+                custom: schema.maybe(schema.string({ minLength: 1, maxLength: 20_000 })),
+                skipped: schema.maybe(schema.boolean()),
+              }),
+              { maxSize: 100 }
+            ),
+          }),
+        ]),
+        {
+          meta: {
+            description:
+              'Use this field to respond to a confirmation, authorization, or ask_user_question prompt. Send `allow` for confirmation, `authorized` for authorization, or `answers` (array of `{ choice?, custom?, skipped? }`) for ask_user_question.',
+          },
+        }
+      )
     ),
     attachments: schema.maybe(
       schema.arrayOf(
@@ -119,6 +150,21 @@ export function registerChatRoutes({
             hidden: schema.maybe(
               schema.boolean({
                 meta: { description: 'When true, the attachment will not be displayed in the UI.' },
+              })
+            ),
+            description: schema.maybe(
+              schema.string({
+                maxLength: 1024,
+                meta: { description: 'Human-readable label for the attachment.' },
+              })
+            ),
+            group_id: schema.maybe(
+              schema.string({
+                maxLength: 256,
+                meta: {
+                  description:
+                    'Stable identifier for the logical group this attachment belongs to. Attachments sharing the same group_id were submitted together as a single logical entity.',
+                },
               })
             ),
           },
@@ -266,17 +312,16 @@ export function registerChatRoutes({
   const executeAgent = async ({
     payload,
     request,
-    abortSignal,
     executionService,
   }: {
     payload: ChatRequestBodyPayload;
     request: KibanaRequest;
-    abortSignal: AbortSignal;
     executionService: AgentExecutionService;
   }) => {
     const {
       agent_id: agentId,
       conversation_id: conversationId,
+      execution_id: executionId,
       input,
       prompts,
       attachments,
@@ -295,12 +340,13 @@ export function registerChatRoutes({
     const { events$ } = await executionService.executeAgent({
       mode: AgentExecutionMode.conversation,
       request,
-      abortSignal,
+      executionId,
       useTaskManager,
       params: {
         agentId,
         connectorId,
         conversationId,
+        autoCreateConversationWithId: true,
         capabilities,
         browserApiTools,
         configurationOverrides,
@@ -325,7 +371,7 @@ export function registerChatRoutes({
       access: 'public',
       summary: 'Send chat message',
       description:
-        'Send a message to an agent and receive a complete response. This synchronous endpoint waits for the agent to fully process your request before returning the final result. Use this for simple chat interactions where you need the complete response. To learn more, refer to the [agent chat documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/chat).',
+        'Send a message to an agent and receive a complete response. This synchronous endpoint waits for the agent to fully process your request before returning the final result. Use this for simple chat interactions where you need the complete response. To learn more about agent chat, refer to the [agent chat documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/chat).',
       options: {
         timeout: {
           idleSocket: AGENT_SOCKET_TIMEOUT_MS,
@@ -353,15 +399,9 @@ export function registerChatRoutes({
         await validateConfigurationOverrides({ payload, request });
         validateAction(payload);
 
-        const abortController = new AbortController();
-        request.events.aborted$.subscribe(() => {
-          abortController.abort();
-        });
-
         const chatEvents$ = await executeAgent({
           payload,
           request,
-          abortSignal: abortController.signal,
           executionService,
         });
 
@@ -434,7 +474,6 @@ export function registerChatRoutes({
         const chatEvents$ = await executeAgent({
           payload,
           request,
-          abortSignal: abortController.signal,
           executionService,
         });
 

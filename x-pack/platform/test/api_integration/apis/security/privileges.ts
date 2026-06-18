@@ -115,6 +115,7 @@ export default function ({ getService }: FtrProviderContext) {
         'workflow_read',
         'workflow_execution_read',
         'workflow_execution_cancel',
+        'workflow_update_managed',
       ],
       searchInferenceEndpoints: ['all', 'read', 'minimal_all', 'minimal_read'],
       fleetv2: [
@@ -285,6 +286,8 @@ export default function ({ getService }: FtrProviderContext) {
         'endpoint_exceptions_read',
         'policy_management_all',
         'policy_management_read',
+        'scripts_management_all',
+        'scripts_management_read',
         'actions_log_management_all',
         'actions_log_management_read',
         'host_isolation_all',

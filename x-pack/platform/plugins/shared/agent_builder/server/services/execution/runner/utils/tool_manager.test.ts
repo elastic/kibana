@@ -85,6 +85,7 @@ describe('ToolManager', () => {
     description,
     tags: [],
     readonly: false,
+    experimental: false,
     configuration: {},
     getSchema: async () => z.object({}),
     execute: jest.fn(),
@@ -660,9 +661,9 @@ describe('ToolManager', () => {
         logger: mockLogger,
       });
 
-      expect(toolManager.getToolOrigin('registry.tool')).toBe(ToolOrigin.registry);
-      expect(toolManager.getToolOrigin('inline.tool')).toBe(ToolOrigin.inline);
-      expect(toolManager.getToolOrigin('missing.tool')).toBeUndefined();
+      expect(toolManager.getToolMeta('registry.tool').origin).toBe(ToolOrigin.registry);
+      expect(toolManager.getToolMeta('inline.tool').origin).toBe(ToolOrigin.inline);
+      expect(toolManager.getToolMeta('missing.tool').origin).toBeUndefined();
     });
 
     it('overwrites existing entries when a newer origin is provided', async () => {
@@ -677,7 +678,7 @@ describe('ToolManager', () => {
         logger: mockLogger,
       });
 
-      expect(toolManager.getToolOrigin('tool.id')).toBe(ToolOrigin.registry);
+      expect(toolManager.getToolMeta('tool.id').origin).toBe(ToolOrigin.registry);
     });
   });
 

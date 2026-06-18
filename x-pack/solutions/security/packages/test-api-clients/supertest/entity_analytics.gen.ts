@@ -46,8 +46,17 @@ import type {
   CreateWatchlistEntitySourceRequestBodyInput,
 } from '@kbn/security-solution-plugin/common/api/entity_analytics/watchlists/data_source/create.gen';
 import type { DeleteAssetCriticalityRecordRequestQueryInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/asset_criticality/delete_asset_criticality.gen';
+import type {
+  DeleteEntityEngineRequestQueryInput,
+  DeleteEntityEngineRequestParamsInput,
+  DeleteEntityEnginesRequestQueryInput,
+} from '@kbn/security-solution-plugin/common/api/entity_analytics/entity_store/engine/delete.gen';
 import type { DeleteMonitoringEngineRequestQueryInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/monitoring/engine/delete.gen';
 import type { DeletePrivMonUserRequestParamsInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/monitoring/users/delete.gen';
+import type {
+  DeleteSingleEntityRequestParamsInput,
+  DeleteSingleEntityRequestBodyInput,
+} from '@kbn/security-solution-plugin/common/api/entity_analytics/entity_store/entities/delete_entity.gen';
 import type { DeleteWatchlistEntitySourceRequestParamsInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/watchlists/data_source/delete.gen';
 import type {
   DeprecatedTriggerRiskScoreCalculationRequestBodyInput,
@@ -56,8 +65,17 @@ import type {
 import type { EntityDetailsHighlightsRequestBodyInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/entity_details/highlights.gen';
 import type { FindAssetCriticalityRecordsRequestQueryInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/asset_criticality/list_asset_criticality.gen';
 import type { GetAssetCriticalityRecordRequestQueryInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/asset_criticality/get_asset_criticality.gen';
+import type { GetEntityEngineRequestParamsInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/entity_store/engine/get.gen';
+import type { GetEntityStoreStatusRequestQueryInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/entity_store/status.gen';
+import type { GetRiskScoreHistoryRequestQueryInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/risk_engine/risk_score_history_route.gen';
 import type { GetWatchlistRequestParamsInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/watchlists/management/get.gen';
 import type { GetWatchlistEntitySourceRequestParamsInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/watchlists/data_source/get.gen';
+import type {
+  InitEntityEngineRequestParamsInput,
+  InitEntityEngineRequestBodyInput,
+} from '@kbn/security-solution-plugin/common/api/entity_analytics/entity_store/engine/init.gen';
+import type { InitEntityStoreRequestBodyInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/entity_store/enable.gen';
+import type { ListEntitiesRequestQueryInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/entity_store/entities/list_entities.gen';
 import type { ListPrivMonUsersRequestQueryInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/monitoring/users/list.gen';
 import type {
   ListWatchlistEntitySourcesRequestQueryInput,
@@ -66,6 +84,8 @@ import type {
 import type { PreviewRiskScoreRequestBodyInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/risk_engine/preview_route.gen';
 import type { ScheduleRiskEngineNowRequestBodyInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/risk_engine/engine_schedule_now_route.gen';
 import type { SearchPrivilegesIndicesRequestQueryInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/monitoring/search_indices.gen';
+import type { StartEntityEngineRequestParamsInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/entity_store/engine/start.gen';
+import type { StopEntityEngineRequestParamsInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/entity_store/engine/stop.gen';
 import type { SyncWatchlistRequestParamsInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/watchlists/sync/sync.gen';
 import type {
   UnassignWatchlistEntitiesRequestParamsInput,
@@ -84,11 +104,30 @@ import type {
   UpdateWatchlistEntitySourceRequestBodyInput,
 } from '@kbn/security-solution-plugin/common/api/entity_analytics/watchlists/data_source/update.gen';
 import type { UploadWatchlistCsvRequestParamsInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/watchlists/csv_upload/csv_upload.gen';
+import type {
+  UpsertEntitiesBulkRequestQueryInput,
+  UpsertEntitiesBulkRequestBodyInput,
+} from '@kbn/security-solution-plugin/common/api/entity_analytics/entity_store/entities/upsert_entities_bulk.gen';
+import type {
+  UpsertEntityRequestQueryInput,
+  UpsertEntityRequestParamsInput,
+  UpsertEntityRequestBodyInput,
+} from '@kbn/security-solution-plugin/common/api/entity_analytics/entity_store/entities/upsert_entity.gen';
 
 import type { FtrProviderContext } from '@kbn/ftr-common-functional-services';
 import { getRouteUrlForSpace } from '@kbn/spaces-plugin/common';
 
 const securitySolutionApiServiceFactory = (supertest: SuperTest.Agent) => ({
+  /**
+   * Synchronize data view index patterns to all running entity engines so that newly added indices are picked up by the transforms.
+   */
+  applyEntityEngineDataviewIndices(kibanaSpace: string = 'default') {
+    return supertest
+      .post(getRouteUrlForSpace('/api/entity_store/engines/apply_dataview_indices', kibanaSpace))
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
+  },
   assetCriticalityGetPrivileges(kibanaSpace: string = 'default') {
     return supertest
       .get(getRouteUrlForSpace('/internal/asset_criticality/privileges', kibanaSpace))
@@ -252,6 +291,27 @@ If a record already exists for the specified entity, that record is overwritten 
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
       .query(props.query);
   },
+  deleteEntityEngine(props: DeleteEntityEngineProps, kibanaSpace: string = 'default') {
+    return supertest
+      .delete(
+        getRouteUrlForSpace(
+          replaceParams('/api/entity_store/engines/{entityType}', props.params),
+          kibanaSpace
+        )
+      )
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+      .query(props.query);
+  },
+  deleteEntityEngines(props: DeleteEntityEnginesProps, kibanaSpace: string = 'default') {
+    return supertest
+      .delete(getRouteUrlForSpace('/api/entity_store/engines', kibanaSpace))
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+      .query(props.query);
+  },
   deleteEntitySource(props: DeleteEntitySourceProps, kibanaSpace: string = 'default') {
     return supertest
       .delete(
@@ -289,6 +349,24 @@ If a record already exists for the specified entity, that record is overwritten 
       .set('kbn-xsrf', 'true')
       .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
+  },
+  /**
+      * Delete a single entity in Entity Store.
+The entity will be immediately deleted from the latest index.  It will remain available in historical snapshots if it has been snapshotted.  The delete operation does not prevent the entity from being recreated if it is observed again in the future. 
+
+      */
+  deleteSingleEntity(props: DeleteSingleEntityProps, kibanaSpace: string = 'default') {
+    return supertest
+      .delete(
+        getRouteUrlForSpace(
+          replaceParams('/api/entity_store/entities/{entityType}', props.params),
+          kibanaSpace
+        )
+      )
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+      .send(props.body as object);
   },
   deleteWatchlistEntitySource(
     props: DeleteWatchlistEntitySourceProps,
@@ -355,6 +433,16 @@ If a record already exists for the specified entity, that record is overwritten 
       .send(props.body as object);
   },
   /**
+   * Check whether the current user has the required Elasticsearch and Kibana privileges to use the Entity Store.
+   */
+  entityStoreGetPrivileges(kibanaSpace: string = 'default') {
+    return supertest
+      .get(getRouteUrlForSpace('/internal/entity_store/privileges', kibanaSpace))
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
+  },
+  /**
    * List asset criticality records, paging, sorting and filtering as needed.
    */
   findAssetCriticalityRecords(
@@ -389,6 +477,21 @@ If a record already exists for the specified entity, that record is overwritten 
       .set(ELASTIC_HTTP_VERSION_HEADER, '1')
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
   },
+  /**
+   * Get the engine descriptor for a specific entity type, including its configuration and current status.
+   */
+  getEntityEngine(props: GetEntityEngineProps, kibanaSpace: string = 'default') {
+    return supertest
+      .get(
+        getRouteUrlForSpace(
+          replaceParams('/api/entity_store/engines/{entityType}', props.params),
+          kibanaSpace
+        )
+      )
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
+  },
   getEntitySource(props: GetEntitySourceProps, kibanaSpace: string = 'default') {
     return supertest
       .get(
@@ -400,6 +503,17 @@ If a record already exists for the specified entity, that record is overwritten 
       .set('kbn-xsrf', 'true')
       .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
+  },
+  /**
+   * Get the overall Entity Store status and per-engine statuses, optionally including component-level health details.
+   */
+  getEntityStoreStatus(props: GetEntityStoreStatusProps, kibanaSpace: string = 'default') {
+    return supertest
+      .get(getRouteUrlForSpace('/api/entity_store/status', kibanaSpace))
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+      .query(props.query);
   },
   /**
    * Returns the installation and ML module setup status of the privileged access detection package, along with the state of each associated ML job.
@@ -425,6 +539,17 @@ If a record already exists for the specified entity, that record is overwritten 
       .set('kbn-xsrf', 'true')
       .set(ELASTIC_HTTP_VERSION_HEADER, '1')
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
+  },
+  /**
+   * Returns time-ordered historical risk score entries from the risk score time-series index for a given entity.
+   */
+  getRiskScoreHistory(props: GetRiskScoreHistoryProps, kibanaSpace: string = 'default') {
+    return supertest
+      .get(getRouteUrlForSpace('/api/risk_score/history', kibanaSpace))
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+      .query(props.query);
   },
   /**
    * Retrieves the details of an entity analytics watchlist by its unique identifier.
@@ -455,6 +580,33 @@ If a record already exists for the specified entity, that record is overwritten 
       .set('kbn-xsrf', 'true')
       .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
+  },
+  /**
+   * Initialize a single entity engine for the specified entity type.
+   */
+  initEntityEngine(props: InitEntityEngineProps, kibanaSpace: string = 'default') {
+    return supertest
+      .post(
+        getRouteUrlForSpace(
+          replaceParams('/api/entity_store/engines/{entityType}/init', props.params),
+          kibanaSpace
+        )
+      )
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+      .send(props.body as object);
+  },
+  /**
+   * Initialize the entire Entity Store, creating engines for all or specified entity types.
+   */
+  initEntityStore(props: InitEntityStoreProps, kibanaSpace: string = 'default') {
+    return supertest
+      .post(getRouteUrlForSpace('/api/entity_store/enable', kibanaSpace))
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+      .send(props.body as object);
   },
   /**
    * Initializes the Privilege Monitoring Engine, setting up the required resources and starting the engine.
@@ -504,6 +656,27 @@ Each row will match up to 10,000 entities.
       .post(getRouteUrlForSpace('/internal/asset_criticality/upload_csv_v2', kibanaSpace))
       .set('kbn-xsrf', 'true')
       .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
+  },
+  /**
+   * List entities records, paging, sorting and filtering as needed.
+   */
+  listEntities(props: ListEntitiesProps, kibanaSpace: string = 'default') {
+    return supertest
+      .get(getRouteUrlForSpace('/api/entity_store/entities/list', kibanaSpace))
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+      .query(props.query);
+  },
+  /**
+   * Get a list of all installed entity engines and their current status.
+   */
+  listEntityEngines(kibanaSpace: string = 'default') {
+    return supertest
+      .get(getRouteUrlForSpace('/api/entity_store/engines', kibanaSpace))
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
   },
   listEntitySources(props: ListEntitySourcesProps, kibanaSpace: string = 'default') {
@@ -648,6 +821,36 @@ Each row will match up to 10,000 entities.
       .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
       .query(props.query);
+  },
+  /**
+   * Start a previously stopped entity engine, resuming transform processing for the given entity type.
+   */
+  startEntityEngine(props: StartEntityEngineProps, kibanaSpace: string = 'default') {
+    return supertest
+      .post(
+        getRouteUrlForSpace(
+          replaceParams('/api/entity_store/engines/{entityType}/start', props.params),
+          kibanaSpace
+        )
+      )
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
+  },
+  /**
+   * Stop a running entity engine, pausing transform processing for the given entity type.
+   */
+  stopEntityEngine(props: StopEntityEngineProps, kibanaSpace: string = 'default') {
+    return supertest
+      .post(
+        getRouteUrlForSpace(
+          replaceParams('/api/entity_store/engines/{entityType}/stop', props.params),
+          kibanaSpace
+        )
+      )
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
   },
   syncWatchlist(props: SyncWatchlistProps, kibanaSpace: string = 'default') {
     return supertest
@@ -795,6 +998,42 @@ Each row will match up to 10,000 entities.
       .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
   },
+  /**
+      * Update or create many entities in Entity Store.
+If the specified entity already exists, it is updated with the provided values.  If the entity does not exist, a new one is created.
+The creation is asynchronous. The time for a document to be present in the  final index depends on the entity store transform and usually takes more than 1 minute.
+
+      */
+  upsertEntitiesBulk(props: UpsertEntitiesBulkProps, kibanaSpace: string = 'default') {
+    return supertest
+      .put(getRouteUrlForSpace('/api/entity_store/entities/bulk', kibanaSpace))
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+      .send(props.body as object)
+      .query(props.query);
+  },
+  /**
+      * Update or create an entity in Entity Store.
+If the specified entity already exists, it is updated with the provided values.  If the entity does not exist, a new one is created. By default, only the following fields can be updated: * `entity.attributes.*` * `entity.lifecycle.*` * `entity.behavior.*` To update other fields, set the `force` query parameter to `true`. > info > Some fields always retain the first observed value. Updates to these fields will not appear in the final index.
+> Due to technical limitations, not all updates are guaranteed to appear in the final list of observed values.
+> Due to technical limitations, create is an async operation. The time for a document to be present in the  > final index depends on the entity store transform and usually takes more than 1 minute.
+
+      */
+  upsertEntity(props: UpsertEntityProps, kibanaSpace: string = 'default') {
+    return supertest
+      .put(
+        getRouteUrlForSpace(
+          replaceParams('/api/entity_store/entities/{entityType}', props.params),
+          kibanaSpace
+        )
+      )
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+      .send(props.body as object)
+      .query(props.query);
+  },
 });
 
 export function SecuritySolutionApiProvider({ getService }: FtrProviderContext) {
@@ -845,6 +1084,13 @@ export interface CreateWatchlistEntitySourceProps {
 export interface DeleteAssetCriticalityRecordProps {
   query: DeleteAssetCriticalityRecordRequestQueryInput;
 }
+export interface DeleteEntityEngineProps {
+  query: DeleteEntityEngineRequestQueryInput;
+  params: DeleteEntityEngineRequestParamsInput;
+}
+export interface DeleteEntityEnginesProps {
+  query: DeleteEntityEnginesRequestQueryInput;
+}
 export interface DeleteEntitySourceProps {
   params: DeleteEntitySourceRequestParamsInput;
 }
@@ -853,6 +1099,10 @@ export interface DeleteMonitoringEngineProps {
 }
 export interface DeletePrivMonUserProps {
   params: DeletePrivMonUserRequestParamsInput;
+}
+export interface DeleteSingleEntityProps {
+  params: DeleteSingleEntityRequestParamsInput;
+  body: DeleteSingleEntityRequestBodyInput;
 }
 export interface DeleteWatchlistEntitySourceProps {
   params: DeleteWatchlistEntitySourceRequestParamsInput;
@@ -869,14 +1119,33 @@ export interface FindAssetCriticalityRecordsProps {
 export interface GetAssetCriticalityRecordProps {
   query: GetAssetCriticalityRecordRequestQueryInput;
 }
+export interface GetEntityEngineProps {
+  params: GetEntityEngineRequestParamsInput;
+}
 export interface GetEntitySourceProps {
   params: GetEntitySourceRequestParamsInput;
+}
+export interface GetEntityStoreStatusProps {
+  query: GetEntityStoreStatusRequestQueryInput;
+}
+export interface GetRiskScoreHistoryProps {
+  query: GetRiskScoreHistoryRequestQueryInput;
 }
 export interface GetWatchlistProps {
   params: GetWatchlistRequestParamsInput;
 }
 export interface GetWatchlistEntitySourceProps {
   params: GetWatchlistEntitySourceRequestParamsInput;
+}
+export interface InitEntityEngineProps {
+  params: InitEntityEngineRequestParamsInput;
+  body: InitEntityEngineRequestBodyInput;
+}
+export interface InitEntityStoreProps {
+  body: InitEntityStoreRequestBodyInput;
+}
+export interface ListEntitiesProps {
+  query: ListEntitiesRequestQueryInput;
 }
 export interface ListEntitySourcesProps {
   query: ListEntitySourcesRequestQueryInput;
@@ -896,6 +1165,12 @@ export interface ScheduleRiskEngineNowProps {
 }
 export interface SearchPrivilegesIndicesProps {
   query: SearchPrivilegesIndicesRequestQueryInput;
+}
+export interface StartEntityEngineProps {
+  params: StartEntityEngineRequestParamsInput;
+}
+export interface StopEntityEngineProps {
+  params: StopEntityEngineRequestParamsInput;
 }
 export interface SyncWatchlistProps {
   params: SyncWatchlistRequestParamsInput;
@@ -925,4 +1200,13 @@ export interface UpdateWatchlistEntitySourceProps {
 }
 export interface UploadWatchlistCsvProps {
   params: UploadWatchlistCsvRequestParamsInput;
+}
+export interface UpsertEntitiesBulkProps {
+  query: UpsertEntitiesBulkRequestQueryInput;
+  body: UpsertEntitiesBulkRequestBodyInput;
+}
+export interface UpsertEntityProps {
+  query: UpsertEntityRequestQueryInput;
+  params: UpsertEntityRequestParamsInput;
+  body: UpsertEntityRequestBodyInput;
 }

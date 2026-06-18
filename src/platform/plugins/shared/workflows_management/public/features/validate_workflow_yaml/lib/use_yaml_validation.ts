@@ -18,7 +18,7 @@ import { validateConnectorIds } from './validate_connector_ids';
 import { validateDeprecatedStepTypes } from './validate_deprecated_step_types';
 import { validateIfConditions } from './validate_if_conditions';
 import { validateJsonSchemaDefaults } from './validate_json_schema_defaults';
-import { validateLiquidTemplate } from './validate_liquid_template';
+import { validateLiquidYamlScalars } from './validate_liquid_yaml_scalars';
 import { validateStepNameUniqueness } from './validate_step_name_uniqueness';
 import { validateStepProperties } from './validate_step_properties';
 import { validateTriggerConditions } from './validate_trigger_conditions';
@@ -35,6 +35,8 @@ import {
   selectYamlLineCounter,
 } from '../../../entities/workflows/store/workflow_detail/selectors';
 import { useKibana } from '../../../hooks/use_kibana';
+import { useWorkflowEsqlCallbacks } from '../../../widgets/workflow_yaml_editor/lib/esql_validation/use_workflow_esql_callbacks';
+import { validateEsqlSteps } from '../../../widgets/workflow_yaml_editor/lib/esql_validation/validate_esql_steps';
 import { MarkerSeverity } from '../../../widgets/workflow_yaml_editor/lib/utils';
 import {
   BATCHED_CUSTOM_MARKER_OWNER,
@@ -85,10 +87,23 @@ export function useYamlValidation(
   const isWorkflowTab = useSelector(selectIsWorkflowTab);
   const connectors = useSelector(selectConnectors);
   const workflows = useSelector(selectWorkflows);
-  const { application } = useKibana().services;
+  const { application, http, data, licensing } = useKibana().services;
+  const esqlCallbacks = useWorkflowEsqlCallbacks({
+    http,
+    application,
+    data,
+    licensing,
+  });
+  // Held in a ref so the effect below doesn't re-fire just because the
+  // memo identity rebuilt (it does on every render in tests where the kibana
+  // mock returns fresh service objects).
+  const esqlCallbacksRef = useRef(esqlCallbacks);
+  esqlCallbacksRef.current = esqlCallbacks;
   const getPropertyHandler = useGetPropertyHandler();
 
   useEffect(() => {
+    const esqlAbortController = new AbortController();
+
     async function validateYaml() {
       if (!editor) {
         return;
@@ -135,17 +150,38 @@ export function useYamlValidation(
       // (e.g. during editing when the YAML doesn't fully match the workflow schema yet)
       // so that connector-id, step-name, liquid-template, step-property, and
       // workflow-inputs validation still provide feedback.
+      const yamlString = model.getValue();
+      const liquidScalarResults =
+        workflowGraph && workflowDefinition
+          ? validateLiquidYamlScalars(
+              yamlString,
+              yamlDocument,
+              model,
+              workflowGraph,
+              workflowDefinition
+            )
+          : validateLiquidYamlScalars(yamlString, yamlDocument, null);
       const results: YamlValidationResult[] = [
         ...(lineCounter ? validateStepNameUniqueness(yamlDocument, lineCounter) : []),
-        ...validateLiquidTemplate(model.getValue(), yamlDocument),
+        ...liquidScalarResults.filter((result) => result.owner === 'liquid-template-validation'),
         ...validateConnectorIds(connectorIdItems, dynamicConnectorTypes, connectorsManagementUrl),
         ...validateWorkflowOutputsInYaml(yamlDocument, model, workflowDefinition?.outputs),
         ...(stepPropertyItems ? await validateStepProperties(stepPropertyItems) : []),
+        // Lookup-backed validators run sequentially (each await blocks the next).
+        // ES|QL runs after step-property validation so property errors surface first
+        // and we avoid overlapping cluster calls from validateQuery with property handlers.
         ...(workflowLookup && lineCounter
           ? [
               ...validateDeprecatedStepTypes(workflowLookup, lineCounter),
               ...validateWorkflowInputs(workflowLookup, workflows, lineCounter),
               ...validateIfConditions(workflowLookup, lineCounter),
+              ...(await validateEsqlSteps(
+                workflowLookup,
+                lineCounter,
+                model,
+                esqlCallbacksRef.current,
+                esqlAbortController.signal
+              ).catch(() => [])),
             ]
           : []),
       ];
@@ -166,6 +202,7 @@ export function useYamlValidation(
             yamlDocument,
             model
           ),
+          ...liquidScalarResults.filter((result) => result.owner === 'variable-validation'),
           ...validateJsonSchemaDefaults(yamlDocument, workflowDefinition, model)
         );
       }
@@ -184,6 +221,10 @@ export function useYamlValidation(
     }
 
     validateYaml();
+
+    return () => {
+      esqlAbortController.abort();
+    };
   }, [
     editor,
     lineCounter,

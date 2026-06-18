@@ -7,7 +7,15 @@
 
 import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import type { Criteria, EuiBasicTableColumn, EuiTableSortingType } from '@elastic/eui';
-import { EuiSpacer, EuiPanel, EuiText, EuiBasicTable, EuiIcon, EuiButtonIcon } from '@elastic/eui';
+import {
+  EuiBasicTable,
+  EuiButtonIcon,
+  EuiIcon,
+  EuiPanel,
+  EuiSpacer,
+  EuiText,
+  EuiToolTip,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { CspFindingResult } from '@kbn/cloud-security-posture-common';
 import { MISCONFIGURATION_STATUS } from '@kbn/cloud-security-posture-common';
@@ -198,7 +206,7 @@ export const MisconfigurationFindingsDetailsTable = memo(
     const sortFieldDirection: { [key: string]: string } = {};
     sortFieldDirection[sortField] = sortDirection;
 
-    const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2, false);
+    const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2);
 
     const { entityRecord, isLoading: isEntityRecordLoading } = useEntityFromStore({
       entityId,
@@ -326,43 +334,54 @@ export const MisconfigurationFindingsDetailsTable = memo(
         name: '',
         width: `${linkWidth}`,
         render: (rule: CspBenchmarkRuleMetadata, finding: MisconfigurationFindingDetailFields) => (
-          <EuiButtonIcon
-            aria-label={i18n.translate(
+          <EuiToolTip
+            content={i18n.translate(
               'xpack.securitySolution.flyout.left.insights.misconfigurations.previewButtonAriaLabel',
               {
                 defaultMessage: 'Preview finding details',
               }
             )}
-            iconType="maximize"
-            onClick={() => {
-              uiMetricService.trackUiMetric(
-                METRIC_TYPE.CLICK,
-                NAV_TO_FINDINGS_BY_RULE_NAME_FROM_ENTITY_FLYOUT
-              );
+            disableScreenReaderOutput
+          >
+            <EuiButtonIcon
+              aria-label={i18n.translate(
+                'xpack.securitySolution.flyout.left.insights.misconfigurations.previewButtonAriaLabel',
+                {
+                  defaultMessage: 'Preview finding details',
+                }
+              )}
+              iconType="maximize"
+              onClick={() => {
+                uiMetricService.trackUiMetric(
+                  METRIC_TYPE.CLICK,
+                  NAV_TO_FINDINGS_BY_RULE_NAME_FROM_ENTITY_FLYOUT
+                );
 
-              const previewPanelProps: FindingsMisconfigurationPanelExpandableFlyoutPropsPreview = {
-                id: MisconfigurationFindingsPreviewPanelKey,
-                params: {
-                  resourceId: finding.resource.id,
-                  ruleId: finding.rule.id,
-                  scopeId,
-                  isPreviewMode: true,
-                  banner: {
-                    title: i18n.translate(
-                      'xpack.securitySolution.flyout.right.misconfigurationFinding.PreviewTitle',
-                      {
-                        defaultMessage: 'Preview finding details',
-                      }
-                    ),
-                    backgroundColor: 'warning',
-                    textColor: 'warning',
-                  },
-                },
-              };
+                const previewPanelProps: FindingsMisconfigurationPanelExpandableFlyoutPropsPreview =
+                  {
+                    id: MisconfigurationFindingsPreviewPanelKey,
+                    params: {
+                      resourceId: finding.resource.id,
+                      ruleId: finding.rule.id,
+                      scopeId,
+                      isPreviewMode: true,
+                      banner: {
+                        title: i18n.translate(
+                          'xpack.securitySolution.flyout.right.misconfigurationFinding.PreviewTitle',
+                          {
+                            defaultMessage: 'Preview finding details',
+                          }
+                        ),
+                        backgroundColor: 'warning',
+                        textColor: 'warning',
+                      },
+                    },
+                  };
 
-              openPreviewPanel(previewPanelProps);
-            }}
-          />
+                openPreviewPanel(previewPanelProps);
+              }}
+            />
+          </EuiToolTip>
         ),
       },
       {
@@ -416,7 +435,7 @@ export const MisconfigurationFindingsDetailsTable = memo(
                 defaultMessage: 'Misconfigurations ',
               }
             )}
-            <EuiIcon type="external" />
+            <EuiIcon type="external" aria-hidden={true} />
           </SecuritySolutionLinkAnchor>
           <EuiSpacer size="xl" />
           <DistributionBar stats={misconfigurationStats} />

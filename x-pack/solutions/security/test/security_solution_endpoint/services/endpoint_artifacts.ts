@@ -27,7 +27,7 @@ import { BLOCKLISTS_LIST_DEFINITION } from '@kbn/security-solution-plugin/public
 import { TRUSTED_DEVICES_EXCEPTION_LIST_DEFINITION } from '@kbn/security-solution-plugin/public/management/pages/trusted_devices/constants';
 import { ManifestConstants } from '@kbn/security-solution-plugin/server/endpoint/lib/artifacts';
 import type TestAgent from 'supertest/lib/agent';
-import { addSpaceIdToPath, DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import { addSpaceIdToPath, DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { isArtifactGlobal } from '@kbn/security-solution-plugin/common/endpoint/service/artifacts';
 import { ENDPOINT_EXCEPTIONS_LIST_DEFINITION } from '@kbn/security-solution-plugin/public/management/pages/endpoint_exceptions/constants';
 import type { FtrProviderContext } from '../configs/ftr_provider_context';

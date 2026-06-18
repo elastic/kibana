@@ -16,6 +16,7 @@ import {
   EuiPopoverTitle,
   EuiSwitch,
   EuiText,
+  EuiToolTip,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { useMemo } from 'react';
@@ -115,18 +116,34 @@ export const AISummarySectionSettings: React.FC<AISummarySectionSettingsProps> =
 
   return (
     <EuiPopover
+      aria-label={i18n.translate(
+        'xpack.securitySolution.attackDetailsFlyout.overview.AISummary.settingsPopoverAriaLabel',
+        {
+          defaultMessage: 'Attack summary settings',
+        }
+      )}
       button={
-        <EuiButtonIcon
-          aria-label={i18n.translate(
+        <EuiToolTip
+          content={i18n.translate(
             'xpack.securitySolution.attackDetailsFlyout.overview.AISummary.openMenuAriaLabel',
             {
               defaultMessage: 'Attack summary settings menu',
             }
           )}
-          data-test-subj="overview-tab-ai-summary-settings-menu"
-          iconType="boxesVertical"
-          onClick={openPopover}
-        />
+          disableScreenReaderOutput
+        >
+          <EuiButtonIcon
+            aria-label={i18n.translate(
+              'xpack.securitySolution.attackDetailsFlyout.overview.AISummary.openMenuAriaLabel',
+              {
+                defaultMessage: 'Attack summary settings menu',
+              }
+            )}
+            data-test-subj="overview-tab-ai-summary-settings-menu"
+            iconType="boxesVertical"
+            onClick={openPopover}
+          />
+        </EuiToolTip>
       }
       isOpen={isPopoverOpen}
       closePopover={closePopover}
@@ -138,7 +155,6 @@ export const AISummarySectionSettings: React.FC<AISummarySectionSettingsProps> =
           width: 280px;
         `}
         initialPanelId={0}
-        size="m"
         panels={panels}
       />
     </EuiPopover>

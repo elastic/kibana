@@ -1,6 +1,17 @@
 {
-  "sha1": "bf21dbb038d8102155c251443b318bff09967812",
+  "sha1": "e279341f8742ecbe03165792a586240740f56023",
   "tests": [
+    {
+      "id": "4aaafd2a7000640-70ec3e6d9549722",
+      "title": "Teardown environment for Streams API tests",
+      "expectedStatus": "passed",
+      "tags": [],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/global.teardown.ts",
+        "line": 11,
+        "column": 19
+      }
+    },
     {
       "id": "dc6084aa7695e8a-26220f9b20676c1",
       "title": "Setup environment for Streams API tests",
@@ -10,6 +21,86 @@
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/global.setup.ts",
         "line": 11,
         "column": 16
+      }
+    },
+    {
+      "id": "b44f6c2216cb6bc-ea3faff2f10da6c",
+      "title": "Memory CRUD API smoke: create, read, search, categories, soft-delete, and restore by name",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/memory/memory_crud.spec.ts",
+        "line": 45,
+        "column": 12
+      }
+    },
+    {
+      "id": "b44f6c2216cb6bc-597176718a618d6",
+      "title": "Memory CRUD API a freshly written page is immediately readable without polling",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/memory/memory_crud.spec.ts",
+        "line": 216,
+        "column": 12
+      }
+    },
+    {
+      "id": "b44f6c2216cb6bc-24f17689411c1be",
+      "title": "Memory CRUD API removing a category does not return the stale older version",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/memory/memory_crud.spec.ts",
+        "line": 305,
+        "column": 12
+      }
+    },
+    {
+      "id": "b44f6c2216cb6bc-0f36a39d57a31b9",
+      "title": "Memory CRUD API search does not return a page whose latest version no longer matches the filter",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/memory/memory_crud.spec.ts",
+        "line": 379,
+        "column": 12
+      }
+    },
+    {
+      "id": "b44f6c2216cb6bc-695cc6450b8de2c",
+      "title": "Memory CRUD API search does not return a soft-deleted page even if its latest version matches the filter",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/memory/memory_crud.spec.ts",
+        "line": 442,
+        "column": 12
       }
     },
     {
@@ -282,6 +373,132 @@
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/sig_events/search_knowledge_indicators_tool.spec.ts",
         "line": 217,
         "column": 12
+      }
+    },
+    {
+      "id": "94c80912f6246f4-094ac08f869a28e",
+      "title": "Significant Events discovery pipeline API POST _execute (trigger) returns an executionId",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/sig_events/significant_event_discovery_run.spec.ts",
+        "line": 30,
+        "column": 12
+      }
+    },
+    {
+      "id": "94c80912f6246f4-b38b60bd6807012",
+      "title": "Significant Events discovery pipeline API GET _status returns a valid status after trigger",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/sig_events/significant_event_discovery_run.spec.ts",
+        "line": 47,
+        "column": 12
+      }
+    },
+    {
+      "id": "94c80912f6246f4-8f29a28b4278864",
+      "title": "Significant Events discovery pipeline API POST _execute (cancel) returns executionId or null",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/sig_events/significant_event_discovery_run.spec.ts",
+        "line": 72,
+        "column": 12
+      }
+    },
+    {
+      "id": "53fcb18bfdd8ffe-9ee0f0d7f22c74a",
+      "title": "Draft stream simulation should simulate a set processor on a draft stream",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/draft_stream_simulate.spec.ts",
+        "line": 57,
+        "column": 10
+      }
+    },
+    {
+      "id": "53fcb18bfdd8ffe-613a376a423c275",
+      "title": "Draft stream simulation should simulate grok processing on a draft stream",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/draft_stream_simulate.spec.ts",
+        "line": 85,
+        "column": 10
+      }
+    },
+    {
+      "id": "53fcb18bfdd8ffe-13442199fc239a6",
+      "title": "Draft stream simulation should detect mapping errors for draft stream detected_fields",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/draft_stream_simulate.spec.ts",
+        "line": 122,
+        "column": 10
+      }
+    },
+    {
+      "id": "53fcb18bfdd8ffe-8021a5e1c328229",
+      "title": "Draft stream simulation should report processor failures correctly on a draft stream",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/draft_stream_simulate.spec.ts",
+        "line": 162,
+        "column": 10
+      }
+    },
+    {
+      "id": "53fcb18bfdd8ffe-8814c3f8c6c4449",
+      "title": "Draft stream simulation should simulate processing on a nested draft (draft child of draft)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/draft_stream_simulate.spec.ts",
+        "line": 194,
+        "column": 10
+      }
+    },
+    {
+      "id": "53fcb18bfdd8ffe-eca05f32c585194",
+      "title": "Draft stream simulation should simulate multiple sequential processors on a draft stream",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/draft_stream_simulate.spec.ts",
+        "line": 230,
+        "column": 10
       }
     },
     {

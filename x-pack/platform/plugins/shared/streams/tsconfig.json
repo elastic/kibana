@@ -29,6 +29,7 @@
     "@kbn/storage-adapter",
     "@kbn/object-utils",
     "@kbn/alerting-plugin",
+    "@kbn/alerting-v2-plugin",
     "@kbn/alerts-as-data-utils",
     "@kbn/rule-registry-plugin",
     "@kbn/es-types",
@@ -44,7 +45,6 @@
     "@kbn/features-plugin",
     "@kbn/server-route-repository-utils",
     "@kbn/es-query",
-    "@kbn/traced-es-client",
     "@kbn/zod-helpers",
     "@kbn/inference-common",
     "@kbn/inference-prompt-utils",
@@ -94,6 +94,13 @@
     "@kbn/core-security-server",
     "@kbn/workflows-management-plugin",
     "@kbn/workflows",
-    "@kbn/agent-builder-plugin"
+    "@kbn/agent-builder-plugin",
+    "@kbn/data-streams",
+    "@kbn/es-mappings",
+    "@kbn/core-spaces-common",
+    "@kbn/elastic-agent-utils",
+    "@kbn/sample-log-parser",
+    "@kbn/workflows-extensions",
+    "@kbn/agent-context-layer-plugin"
   ]
 }

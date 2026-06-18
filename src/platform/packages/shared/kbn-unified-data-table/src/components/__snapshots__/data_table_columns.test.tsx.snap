@@ -16,7 +16,6 @@ Array [
             id="unifiedDataTable.grid.copyColumnNameToClipBoardButton"
           />,
           "onClick": [Function],
-          "size": "xs",
         },
         Object {
           "data-test-subj": "gridCopyColumnValuesToClipBoardButton",
@@ -29,7 +28,6 @@ Array [
             id="unifiedDataTable.grid.copyColumnValuesToClipBoardButton"
           />,
           "onClick": [Function],
-          "size": "xs",
         },
       ],
       "showHide": Object {
@@ -73,7 +71,6 @@ Array [
             id="unifiedDataTable.grid.copyColumnNameToClipBoardButton"
           />,
           "onClick": [Function],
-          "size": "xs",
         },
         Object {
           "data-test-subj": "gridCopyColumnValuesToClipBoardButton",
@@ -86,7 +83,6 @@ Array [
             id="unifiedDataTable.grid.copyColumnValuesToClipBoardButton"
           />,
           "onClick": [Function],
-          "size": "xs",
         },
       ],
       "showHide": Object {
@@ -128,7 +124,6 @@ Array [
             id="unifiedDataTable.grid.copyColumnNameToClipBoardButton"
           />,
           "onClick": [Function],
-          "size": "xs",
         },
         Object {
           "data-test-subj": "gridCopyColumnValuesToClipBoardButton",
@@ -141,7 +136,6 @@ Array [
             id="unifiedDataTable.grid.copyColumnValuesToClipBoardButton"
           />,
           "onClick": [Function],
-          "size": "xs",
         },
       ],
       "showHide": Object {
@@ -336,7 +330,6 @@ Array [
             id="unifiedDataTable.grid.copyColumnNameToClipBoardButton"
           />,
           "onClick": [Function],
-          "size": "xs",
         },
         Object {
           "data-test-subj": "gridCopyColumnValuesToClipBoardButton",
@@ -349,7 +342,6 @@ Array [
             id="unifiedDataTable.grid.copyColumnValuesToClipBoardButton"
           />,
           "onClick": [Function],
-          "size": "xs",
         },
       ],
       "showHide": false,
@@ -542,7 +534,6 @@ Array [
             id="unifiedDataTable.grid.copyColumnNameToClipBoardButton"
           />,
           "onClick": [Function],
-          "size": "xs",
         },
         Object {
           "data-test-subj": "gridCopyColumnValuesToClipBoardButton",
@@ -555,7 +546,6 @@ Array [
             id="unifiedDataTable.grid.copyColumnValuesToClipBoardButton"
           />,
           "onClick": [Function],
-          "size": "xs",
         },
       ],
       "showHide": Object {
@@ -735,7 +725,6 @@ Array [
             id="unifiedDataTable.grid.copyColumnNameToClipBoardButton"
           />,
           "onClick": [Function],
-          "size": "xs",
         },
         Object {
           "data-test-subj": "gridCopyColumnValuesToClipBoardButton",
@@ -748,7 +737,6 @@ Array [
             id="unifiedDataTable.grid.copyColumnValuesToClipBoardButton"
           />,
           "onClick": [Function],
-          "size": "xs",
         },
       ],
       "showHide": Object {
@@ -931,7 +919,6 @@ Array [
             id="unifiedDataTable.grid.copyColumnNameToClipBoardButton"
           />,
           "onClick": [Function],
-          "size": "xs",
         },
         Object {
           "data-test-subj": "gridCopyColumnValuesToClipBoardButton",
@@ -944,7 +931,6 @@ Array [
             id="unifiedDataTable.grid.copyColumnValuesToClipBoardButton"
           />,
           "onClick": [Function],
-          "size": "xs",
         },
       ],
       "showHide": Object {
@@ -1135,7 +1121,6 @@ Array [
             id="unifiedDataTable.grid.copyColumnNameToClipBoardButton"
           />,
           "onClick": [Function],
-          "size": "xs",
         },
         Object {
           "data-test-subj": "gridCopyColumnValuesToClipBoardButton",
@@ -1148,7 +1133,6 @@ Array [
             id="unifiedDataTable.grid.copyColumnValuesToClipBoardButton"
           />,
           "onClick": [Function],
-          "size": "xs",
         },
       ],
       "showHide": Object {
@@ -1344,7 +1328,6 @@ Array [
             id="unifiedDataTable.grid.copyColumnNameToClipBoardButton"
           />,
           "onClick": [Function],
-          "size": "xs",
         },
         Object {
           "data-test-subj": "gridCopyColumnValuesToClipBoardButton",
@@ -1357,7 +1340,6 @@ Array [
             id="unifiedDataTable.grid.copyColumnValuesToClipBoardButton"
           />,
           "onClick": [Function],
-          "size": "xs",
         },
       ],
       "showHide": false,
@@ -1532,7 +1514,6 @@ Array [
             id="unifiedDataTable.grid.copyColumnNameToClipBoardButton"
           />,
           "onClick": [Function],
-          "size": "xs",
         },
         Object {
           "data-test-subj": "gridCopyColumnValuesToClipBoardButton",
@@ -1545,7 +1526,6 @@ Array [
             id="unifiedDataTable.grid.copyColumnValuesToClipBoardButton"
           />,
           "onClick": [Function],
-          "size": "xs",
         },
       ],
       "showHide": false,
@@ -1723,7 +1703,6 @@ Array [
             id="unifiedDataTable.grid.copyColumnNameToClipBoardButton"
           />,
           "onClick": [Function],
-          "size": "xs",
         },
         Object {
           "data-test-subj": "gridCopyColumnValuesToClipBoardButton",
@@ -1736,7 +1715,6 @@ Array [
             id="unifiedDataTable.grid.copyColumnValuesToClipBoardButton"
           />,
           "onClick": [Function],
-          "size": "xs",
         },
       ],
       "showHide": false,
@@ -1929,7 +1907,6 @@ Array [
             id="unifiedDataTable.grid.copyColumnNameToClipBoardButton"
           />,
           "onClick": [Function],
-          "size": "xs",
         },
         Object {
           "data-test-subj": "gridCopyColumnValuesToClipBoardButton",
@@ -1942,7 +1919,6 @@ Array [
             id="unifiedDataTable.grid.copyColumnValuesToClipBoardButton"
           />,
           "onClick": [Function],
-          "size": "xs",
         },
       ],
       "showHide": Object {
@@ -2121,7 +2097,6 @@ Array [
             id="unifiedDataTable.grid.copyColumnNameToClipBoardButton"
           />,
           "onClick": [Function],
-          "size": "xs",
         },
         Object {
           "data-test-subj": "gridCopyColumnValuesToClipBoardButton",
@@ -2134,7 +2109,6 @@ Array [
             id="unifiedDataTable.grid.copyColumnValuesToClipBoardButton"
           />,
           "onClick": [Function],
-          "size": "xs",
         },
       ],
       "showHide": Object {
@@ -2316,7 +2290,6 @@ Array [
             id="unifiedDataTable.grid.copyColumnNameToClipBoardButton"
           />,
           "onClick": [Function],
-          "size": "xs",
         },
         Object {
           "data-test-subj": "gridCopyColumnValuesToClipBoardButton",
@@ -2329,7 +2302,6 @@ Array [
             id="unifiedDataTable.grid.copyColumnValuesToClipBoardButton"
           />,
           "onClick": [Function],
-          "size": "xs",
         },
       ],
       "showHide": false,
@@ -2524,7 +2496,6 @@ Array [
             id="unifiedDataTable.grid.copyColumnNameToClipBoardButton"
           />,
           "onClick": [Function],
-          "size": "xs",
         },
         Object {
           "data-test-subj": "gridCopyColumnValuesToClipBoardButton",
@@ -2537,7 +2508,6 @@ Array [
             id="unifiedDataTable.grid.copyColumnValuesToClipBoardButton"
           />,
           "onClick": [Function],
-          "size": "xs",
         },
       ],
       "showHide": Object {
@@ -2731,7 +2701,6 @@ Array [
             id="unifiedDataTable.grid.copyColumnNameToClipBoardButton"
           />,
           "onClick": [Function],
-          "size": "xs",
         },
         Object {
           "data-test-subj": "gridCopyColumnValuesToClipBoardButton",
@@ -2744,7 +2713,6 @@ Array [
             id="unifiedDataTable.grid.copyColumnValuesToClipBoardButton"
           />,
           "onClick": [Function],
-          "size": "xs",
         },
       ],
       "showHide": Object {

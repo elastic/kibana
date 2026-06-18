@@ -21,6 +21,10 @@ type CommonlyUsedTimeRange =
   | 'Last_90 days'
   | 'Last_1 year';
 
+interface TimeoutOptions {
+  timeout?: number;
+}
+
 export class DashboardApp {
   private readonly renderable: RenderablePage;
   private readonly toasts: Toasts;
@@ -31,7 +35,6 @@ export class DashboardApp {
   private readonly viewOnlyModeButton;
   private readonly dashboardViewport;
   private readonly embeddablePanel;
-  private readonly dashboardPanel;
 
   // Add panel flow
   private readonly addTopNavButton;
@@ -78,7 +81,6 @@ export class DashboardApp {
     this.viewOnlyModeButton = this.page.testSubj.locator('dashboardViewOnlyMode');
     this.dashboardViewport = this.page.testSubj.locator('dshDashboardViewport');
     this.embeddablePanel = this.page.testSubj.locator('embeddablePanel');
-    this.dashboardPanel = this.page.testSubj.locator('dashboardPanel');
 
     // Add panel flow
     this.addTopNavButton = this.page.testSubj.locator('dashboardAddTopNavButton');
@@ -133,9 +135,9 @@ export class DashboardApp {
   }
 
   /** Navigates to the new dashboard creation page and waits for the editor toolbar to load. */
-  async openNewDashboard() {
+  async openNewDashboard(options?: TimeoutOptions) {
     await this.page.gotoApp('dashboards', { hash: '/create' });
-    await expect(this.addTopNavButton).toBeVisible({ timeout: 20_000 });
+    await expect(this.addTopNavButton).toBeVisible({ timeout: options?.timeout ?? 20_000 });
   }
 
   private getSettingsFlyout() {
@@ -205,11 +207,23 @@ export class DashboardApp {
   }
 
   /**
+   * Ensures the dashboard is in edit mode, switching from view mode if necessary.
+   * Useful after flows (e.g. saving an ES|QL viz from Discover) that already
+   * leave the dashboard in edit mode and therefore have no Edit button to click.
+   */
+  async ensureEditMode() {
+    if (await this.getIsInViewMode()) {
+      await this.switchToEditMode();
+    }
+  }
+
+  /**
    * Opens the "Add panel" flyout for selecting panel types to add to the dashboard.
    */
-  async openAddPanelFlyout() {
+  async openAddPanelFlyout(options?: TimeoutOptions) {
+    await this.addTopNavButton.waitFor({ state: 'visible', timeout: options?.timeout ?? 10_000 });
     await this.addTopNavButton.click();
-    await expect(this.panelSelectionFlyout).toBeVisible();
+    await expect(this.panelSelectionFlyout).toBeVisible({ timeout: options?.timeout ?? 10_000 });
   }
 
   async saveDashboard(name: string) {
@@ -262,23 +276,26 @@ export class DashboardApp {
 
   /**
    * Opens the "Add from library" flyout.
-   * Low-level building block used by addEmbeddable().
    */
-  private async openLibraryFlyout() {
+  async openLibraryFlyout(options?: TimeoutOptions) {
     await this.addTopNavButton.click();
     await this.page.testSubj.click('addToDashboardTab-library');
     await expect(this.savedObjectsFinderTable).toBeVisible();
     await expect(this.savedObjectFinderLoadingIndicator).toBeHidden({
-      timeout: 30_000,
+      timeout: options?.timeout ?? 30_000,
     });
   }
 
   /**
    * Closes the library flyout.
    */
-  private async closeLibraryFlyout() {
-    await this.page.testSubj.click('euiFlyoutCloseButton');
-    await expect(this.page.testSubj.locator('euiFlyoutCloseButton')).toBeHidden();
+  async closeLibraryFlyout() {
+    await expect(this.savedObjectsFinderTable).toBeVisible();
+    await this.page
+      .locator('.euiFlyout', { has: this.savedObjectsFinderTable })
+      .locator('[data-test-subj="euiFlyoutCloseButton"]')
+      .click();
+    await expect(this.savedObjectsFinderTable).toBeHidden();
   }
 
   /**
@@ -287,8 +304,13 @@ export class DashboardApp {
    *
    * @param embeddableName - Name with dashes (e.g., 'Rendering-Test:-saved-search')
    * @param embeddableType - Optional type filter (e.g., 'search', 'Visualization')
+   * @param options - Optional timeout overrides
    */
-  private async filterEmbeddableNames(embeddableName: string, embeddableType?: string) {
+  private async filterEmbeddableNames(
+    embeddableName: string,
+    embeddableType?: string,
+    options?: TimeoutOptions
+  ) {
     // Build search query using type filter and quoted name.
     // type:(search) "Rendering Test:-saved-search" (only first dash replaced with space)
     const typePrefix = embeddableType ? `type:(${embeddableType}) ` : '';
@@ -301,7 +323,7 @@ export class DashboardApp {
 
     // Wait for search results to load
     await expect(this.savedObjectFinderLoadingIndicator).toBeHidden({
-      timeout: 30_000,
+      timeout: options?.timeout ?? 30_000,
     });
   }
 
@@ -310,10 +332,11 @@ export class DashboardApp {
    *
    * @param embeddableName - Name with dashes (e.g., 'Rendering-Test:-saved-search')
    * @param embeddableType - Optional type filter (e.g., 'search', 'Visualization')
+   * @param options - Optional timeout overrides
    */
-  async addEmbeddable(embeddableName: string, embeddableType?: string) {
-    await this.openLibraryFlyout();
-    await this.filterEmbeddableNames(embeddableName, embeddableType);
+  async addEmbeddable(embeddableName: string, embeddableType?: string, options?: TimeoutOptions) {
+    await this.openLibraryFlyout(options);
+    await this.filterEmbeddableNames(embeddableName, embeddableType, options);
 
     // Click on the saved object title
     const titleSelector = `savedObjectTitle${embeddableName.split(' ').join('-')}`;
@@ -335,9 +358,10 @@ export class DashboardApp {
    * Wrapper around addEmbeddable() with type='search'.
    *
    * @param searchName - Name with dashes (e.g., 'Rendering-Test:-saved-search')
+   * @param options - Optional timeout overrides
    */
-  async addSavedSearch(searchName: string) {
-    return this.addEmbeddable(searchName, 'search');
+  async addSavedSearch(searchName: string, options?: TimeoutOptions) {
+    return this.addEmbeddable(searchName, 'search', options);
   }
 
   /**
@@ -345,9 +369,10 @@ export class DashboardApp {
    * Wrapper around addEmbeddable() with type='lens'.
    *
    * @param lensName - Name of the Lens saved object
+   * @param options - Optional timeout overrides
    */
-  async addLens(lensName: string) {
-    return this.addEmbeddable(lensName, 'lens');
+  async addLens(lensName: string, options?: TimeoutOptions) {
+    return this.addEmbeddable(lensName, 'lens', options);
   }
 
   /**
@@ -365,7 +390,10 @@ export class DashboardApp {
     await editorInput.fill(content);
     await this.markdownEditorApplyButton.click();
 
-    await expect(this.markdownRenderer).toBeVisible();
+    // Scope to the renderer containing the content we just typed; the dashboard may
+    // already have other markdown panels, in which case an unfiltered `markdownRenderer`
+    // locator would resolve to multiple elements and trip strict mode.
+    await expect(this.markdownRenderer.filter({ hasText: content })).toBeVisible();
   }
 
   async addMapPanel() {
@@ -433,9 +461,13 @@ export class DashboardApp {
 
   /**
    * Gets the count of panels on the dashboard
+   * Returns the count of *visible* embeddable panels on the dashboard. Hidden panels
+   * (e.g. those occluded when another panel is maximized) remain in the DOM.
    */
   async getPanelCount(): Promise<number> {
-    return this.dashboardPanel.count();
+    const panels = await this.embeddablePanel.all();
+    const visibilities = await Promise.all(panels.map((panel) => panel.isVisible()));
+    return visibilities.filter(Boolean).length;
   }
 
   /**
@@ -477,40 +509,44 @@ export class DashboardApp {
     return Number(attribute);
   }
 
-  async getPanelGroupOrder(): Promise<string[]> {
-    const panelGroups = await this.panelSelectionFlyout
+  async getAddPanelFlyoutGroups(): Promise<string[]> {
+    const groupElements = await this.panelSelectionFlyout
       .locator('[data-test-subj*="dashboardEditorMenu-"]')
       .all();
 
-    const panelGroupData = await Promise.all(
-      panelGroups.map(async (panelGroup) => {
-        const order = await panelGroup.getAttribute('data-group-sort-order');
-        const testSubj = await panelGroup.getAttribute('data-test-subj');
+    return await Promise.all(
+      groupElements.map(async (groupElement) => {
+        const testSubj = await groupElement.getAttribute('data-test-subj');
+        // remove prefix so strings like 'dashboardEditorMenu-visualizationsGroup' become 'visualizationsGroup'
         const match = testSubj?.match(/dashboardEditorMenu-(.*)/);
-        return { order, groupTitle: match?.[1] };
+        return match?.[1] ?? '';
       })
     );
-
-    const panelGroupByOrder = new Map<string, string>();
-    panelGroupData
-      .filter((item): item is { order: string; groupTitle: string } =>
-        Boolean(item.order && item.groupTitle)
-      )
-      .forEach((item) => panelGroupByOrder.set(item.order, item.groupTitle));
-
-    return [...panelGroupByOrder.values()];
   }
 
-  async getPanelTypeCount(): Promise<number> {
-    return this.panelSelectionFlyout.locator('[data-test-subj*="create-action-"]').count();
+  async getAddPanelFlyoutActions(): Promise<string[]> {
+    const addPanelActions = await this.panelSelectionFlyout
+      .locator('[data-test-subj*="create-action-"]:not([data-test-subj$="-wrapper"])')
+      .all();
+
+    return await Promise.all(
+      addPanelActions.map(async (action) => {
+        const testSubj = await action.getAttribute('data-test-subj');
+        // remove prefix so strings like 'create-action-Links' become 'Links'
+        const match = testSubj?.match(/create-action-(.*)/);
+        return match?.[1] ?? '';
+      })
+    );
   }
 
   /**
-   * Waits for all dashboard panels to finish rendering.
-   * Uses the data-render-complete attribute to determine completion.
+   * Waits for all dashboard controls and panels to finish rendering.
+   * Uses the data-render-complete attribute to determine panel rendering completion.
    */
   async waitForRenderComplete() {
     await expect(this.dashboardViewport).toBeVisible();
+
+    await this.waitForControlsReady();
 
     try {
       const count = await this.getSharedItemsCount();
@@ -526,6 +562,25 @@ export class DashboardApp {
     if (count > 0) {
       await this.waitForPanelsToLoad(count);
     }
+  }
+
+  private async waitForControlsReady(timeout: number = 60_000) {
+    const controlsReadyLocator = this.page.locator('[data-dashboard-controls-ready]');
+    await expect(controlsReadyLocator).toBeAttached({ timeout });
+
+    const requiredConsecutiveReadySamples = 3;
+    let consecutiveReadySamples = 0;
+    await expect
+      .poll(
+        async () => {
+          const isReady =
+            (await controlsReadyLocator.getAttribute('data-dashboard-controls-ready')) === 'true';
+          consecutiveReadySamples = isReady ? consecutiveReadySamples + 1 : 0;
+          return consecutiveReadySamples;
+        },
+        { timeout, intervals: [100] }
+      )
+      .toBeGreaterThanOrEqual(requiredConsecutiveReadySamples);
   }
 
   // ============================================================
@@ -890,8 +945,16 @@ export class DashboardApp {
     return this.page.locator(`[data-test-embeddable-id="${id}"]`);
   }
 
+  async addNewLensPanel() {
+    await this.addNewPanel('Visualization');
+  }
+
+  async addNewESQLPanel() {
+    await this.addNewPanel('Visualization (query)');
+  }
+
   /** Opens the add-panel flyout, selects the given panel type, and waits for the flyout to close. */
-  async addNewPanel(panelType: 'ES|QL' | 'Lens' | 'Vega' | 'Maps' | 'Links') {
+  async addNewPanel(panelType: string) {
     await this.openAddPanelFlyout();
     await this.page.testSubj.click(`create-action-${panelType}`);
     await expect(this.panelSelectionFlyout).toBeHidden();
@@ -920,11 +983,21 @@ export class DashboardApp {
    * Opens the "Save as..." dialog via the quick-save dropdown,
    * fills in the new title, and confirms.
    */
-  async saveDashboardAsCopy(dashboardTitle: string) {
+  async saveDashboardAsCopy(dashboardTitle?: string) {
     await this.quickSaveSecondaryButton.click();
-    await this.interactiveSaveMenuItem.click();
+    await this.interactiveSaveMenuItem.isVisible();
+    // The dashboard sometimes flags spurious unsaved changes on initial layout,
+    // which triggers a continuous toolbar re-render that nudges the popover by a
+    // pixel each frame and defeats Playwright's stability check. The menu item
+    // is visibly clickable; bypass actionability to land the click.
+    await this.interactiveSaveMenuItem.click({ force: true });
     await expect(this.savedObjectTitleInput).toBeVisible();
-    await this.savedObjectTitleInput.fill(dashboardTitle);
+
+    if (dashboardTitle !== undefined) {
+      await this.savedObjectTitleInput.fill(dashboardTitle);
+    }
+
+    await expect(this.confirmSaveButton).toBeEnabled();
     await this.confirmSaveButton.click();
     await expect(this.confirmSaveButton).toBeHidden();
   }
@@ -943,7 +1016,7 @@ export class DashboardApp {
   // ============================================================
 
   async expectPanelCount(expectedCount: number) {
-    await expect.poll(() => this.dashboardPanel.count()).toBe(expectedCount);
+    await expect.poll(() => this.embeddablePanel.count()).toBe(expectedCount);
   }
 
   // ============================================================
@@ -972,23 +1045,32 @@ export class DashboardApp {
   // Maximize Panel
   // ============================================================
 
-  async maximizePanel(title?: string) {
+  /**
+   * Toggles the expand/minimize state of a panel. Use this for symmetric flows
+   * (expand then minimize) that should not assert an end state. For one-way
+   * expansion that asserts the maximized layout, use `maximizePanel`.
+   */
+  async togglePanelExpand(title?: string) {
     if (title) {
       await this.clickPanelAction('embeddablePanelAction-togglePanel', title);
-    } else {
-      const panelWrapper = this.page.locator('.embPanel__hoverActionsAnchor >> nth=0');
-      await panelWrapper.scrollIntoViewIfNeeded();
-      await panelWrapper.hover();
-      const toggleAction = panelWrapper.locator(
-        '[data-test-subj="embeddablePanelAction-togglePanel"]'
-      );
-      if (await toggleAction.isVisible()) {
-        await toggleAction.click();
-      } else {
-        await panelWrapper.locator('[data-test-subj="embeddablePanelToggleMenuIcon"]').click();
-        await this.page.testSubj.click('embeddablePanelAction-togglePanel');
-      }
+      return;
     }
+    const panelWrapper = this.page.locator('.embPanel__hoverActionsAnchor >> nth=0');
+    await panelWrapper.scrollIntoViewIfNeeded();
+    await panelWrapper.hover();
+    const toggleAction = panelWrapper.locator(
+      '[data-test-subj="embeddablePanelAction-togglePanel"]'
+    );
+    if (await toggleAction.isVisible()) {
+      await toggleAction.click();
+    } else {
+      await panelWrapper.locator('[data-test-subj="embeddablePanelToggleMenuIcon"]').click();
+      await this.page.testSubj.click('embeddablePanelAction-togglePanel');
+    }
+  }
+
+  async maximizePanel(title?: string) {
+    await this.togglePanelExpand(title);
     await expect(this.page.locator('.dshLayout-isMaximizedPanel')).toBeVisible();
   }
 

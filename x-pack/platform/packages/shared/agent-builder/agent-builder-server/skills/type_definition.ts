@@ -26,6 +26,7 @@ import type {
 export type SkillsDirectoryStructure = Directory<{
   skills: Directory<{
     platform: FileDirectory<{
+      'agent-builder': FileDirectory;
       alerting: FileDirectory;
       dashboard: FileDirectory;
       discover: FileDirectory;
@@ -38,10 +39,12 @@ export type SkillsDirectoryStructure = Directory<{
       alerts: FileDirectory<{
         rules: FileDirectory;
       }>;
+      compliance: FileDirectory<{}>;
       rules: FileDirectory;
       entities: FileDirectory<{}>;
       endpoint: FileDirectory<{}>;
       ml: FileDirectory<{}>;
+      siem_readiness: FileDirectory<{}>;
     }>;
     search: FileDirectory<{}>;
   }>;

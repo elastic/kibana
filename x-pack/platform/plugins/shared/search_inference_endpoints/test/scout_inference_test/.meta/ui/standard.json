@@ -1,5 +1,5 @@
 {
-  "sha1": "4f39ad4e7f436aa9081d5d8bf48359a25a2938f8",
+  "sha1": "279bb3242b0e4d1bfb808fd2d010f83f822878ae",
   "tests": [
     {
       "id": "42293a2b206815f-21f4f530da45d0c",
@@ -42,7 +42,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/eis_models_page.spec.ts",
-        "line": 45,
+        "line": 47,
         "column": 7
       }
     },
@@ -57,7 +57,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/eis_models_page.spec.ts",
-        "line": 64,
+        "line": 66,
         "column": 7
       }
     },
@@ -72,7 +72,22 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/eis_models_page.spec.ts",
-        "line": 83,
+        "line": 85,
+        "column": 7
+      }
+    },
+    {
+      "id": "42293a2b206815f-dad678cd80df6dc",
+      "title": "EIS Models Page renders status badges on deprecated and EOL model cards",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-stateful-search",
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/eis_models_page.spec.ts",
+        "line": 103,
         "column": 7
       }
     },
@@ -87,7 +102,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/eis_models_page.spec.ts",
-        "line": 101,
+        "line": 126,
         "column": 7
       }
     },
@@ -302,6 +317,111 @@
       }
     },
     {
+      "id": "1721454f7fa1c0d-8e82bee9fd25a73",
+      "title": "deprecation surface renders no callouts when only GA models are assigned",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-stateful-search",
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/feature_settings_deprecations.spec.ts",
+        "line": 27,
+        "column": 7
+      }
+    },
+    {
+      "id": "1721454f7fa1c0d-50126af2d943b61",
+      "title": "deprecation surface global model combobox suffixes deprecated and EOL options",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-stateful-search",
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/feature_settings_deprecations.spec.ts",
+        "line": 34,
+        "column": 7
+      }
+    },
+    {
+      "id": "1721454f7fa1c0d-93b15d4eb2fffc2",
+      "title": "deprecation surface selecting an EOL model as the global default shows the danger callout",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-stateful-search",
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/feature_settings_deprecations.spec.ts",
+        "line": 53,
+        "column": 7
+      }
+    },
+    {
+      "id": "1721454f7fa1c0d-38dfd3d4385959e",
+      "title": "deprecation surface assigning a deprecated model to a feature shows the warning callout and badge on the row",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-stateful-search",
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/feature_settings_deprecations.spec.ts",
+        "line": 65,
+        "column": 7
+      }
+    },
+    {
+      "id": "1721454f7fa1c0d-e0df9867ea75307",
+      "title": "deprecation surface add model popover disables the EOL option and renders icon-only status badges",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-stateful-search",
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/feature_settings_deprecations.spec.ts",
+        "line": 89,
+        "column": 7
+      }
+    },
+    {
+      "id": "1721454f7fa1c0d-25155c9b4eaeadf",
+      "title": "deprecation surface global-default locked row renders the deprecation badge",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-stateful-search",
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/feature_settings_deprecations.spec.ts",
+        "line": 120,
+        "column": 7
+      }
+    },
+    {
+      "id": "1721454f7fa1c0d-48d4d7355553fe1",
+      "title": "deprecation surface callouts are hidden when Feature specific models is off",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-stateful-search",
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/feature_settings_deprecations.spec.ts",
+        "line": 136,
+        "column": 7
+      }
+    },
+    {
       "id": "600135eb4869d8a-d5355675947674e",
       "title": "Feature Settings shows empty state when no models are available",
       "expectedStatus": "passed",
@@ -317,8 +437,8 @@
       }
     },
     {
-      "id": "600135eb4869d8a-2a44bf3f7ae15b7",
-      "title": "Feature Settings displays page header",
+      "id": "600135eb4869d8a-8df0d23c40a5ef7",
+      "title": "Feature Settings displays page header and the default-model section",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -332,8 +452,8 @@
       }
     },
     {
-      "id": "600135eb4869d8a-9892a48538e11bb",
-      "title": "Feature Settings renders default model section and controls",
+      "id": "600135eb4869d8a-37a10a051f55732",
+      "title": "Feature Settings shows only the AI capabilities row when AI is off",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -342,13 +462,13 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/feature_settings.spec.ts",
-        "line": 46,
+        "line": 51,
         "column": 7
       }
     },
     {
-      "id": "600135eb4869d8a-d926e1a42b2e157",
-      "title": "Feature Settings toggling disallow other models hides and restores feature sections",
+      "id": "600135eb4869d8a-0bafdd79ff13b84",
+      "title": "Feature Settings toggling AI on reveals Global model and Feature specific models rows",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -357,7 +477,37 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/feature_settings.spec.ts",
-        "line": 62,
+        "line": 63,
+        "column": 7
+      }
+    },
+    {
+      "id": "600135eb4869d8a-f5de9f9c38a5807",
+      "title": "Feature Settings toggling Feature specific models off hides the feature list",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-stateful-search",
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/feature_settings.spec.ts",
+        "line": 75,
+        "column": 7
+      }
+    },
+    {
+      "id": "600135eb4869d8a-d2ac659fb98c961",
+      "title": "Feature Settings save button is disabled when AI is on, feature-specific models off, and no global model is selected",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-stateful-search",
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/feature_settings.spec.ts",
+        "line": 93,
         "column": 7
       }
     },
@@ -372,7 +522,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/feature_settings.spec.ts",
-        "line": 84,
+        "line": 105,
         "column": 7
       }
     },
@@ -387,13 +537,13 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/feature_settings.spec.ts",
-        "line": 105,
+        "line": 118,
         "column": 7
       }
     },
     {
-      "id": "600135eb4869d8a-64e8d22a32d3078",
-      "title": "Feature Settings opens add model popover with search input",
+      "id": "600135eb4869d8a-1a9925e1c2ad4d8",
+      "title": "Feature Settings per-sub-feature: turning Use recommended defaults off opens disable modal",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -402,13 +552,13 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/feature_settings.spec.ts",
-        "line": 117,
+        "line": 125,
         "column": 7
       }
     },
     {
-      "id": "600135eb4869d8a-ad69c74bc665a4d",
-      "title": "Feature Settings cancelling reset to defaults modal preserves state",
+      "id": "600135eb4869d8a-e45b570d0bf7867",
+      "title": "Feature Settings per-sub-feature: confirming the disable modal unlocks the editable list",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -417,13 +567,13 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/feature_settings.spec.ts",
-        "line": 126,
+        "line": 146,
         "column": 7
       }
     },
     {
-      "id": "600135eb4869d8a-e32c159bcb80e61",
-      "title": "Feature Settings cancelling copy to modal closes without changes",
+      "id": "600135eb4869d8a-684a141fedeab45",
+      "title": "Feature Settings per-sub-feature: turning Use recommended defaults back on opens reset modal",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -432,7 +582,22 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/feature_settings.spec.ts",
-        "line": 141,
+        "line": 159,
+        "column": 7
+      }
+    },
+    {
+      "id": "600135eb4869d8a-341ce8251c256a7",
+      "title": "Feature Settings opens add model popover with search input when toggle is off",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-stateful-search",
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/feature_settings.spec.ts",
+        "line": 189,
         "column": 7
       }
     },
@@ -447,7 +612,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/feature_settings.spec.ts",
-        "line": 156,
+        "line": 198,
         "column": 7
       }
     },
@@ -462,13 +627,13 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/feature_settings.spec.ts",
-        "line": 175,
+        "line": 219,
         "column": 7
       }
     },
     {
-      "id": "600135eb4869d8a-e96e035f3a50d36",
-      "title": "Feature Settings copy to applies source endpoint list to the target sub-feature",
+      "id": "600135eb4869d8a-34d2c619d3cb78c",
+      "title": "Feature Settings Copy to copies the assignment to another sub-feature",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -477,7 +642,133 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/feature_settings.spec.ts",
-        "line": 202,
+        "line": 253,
+        "column": 7
+      }
+    },
+    {
+      "id": "a408dc2671061e0-466cef2092a43b1",
+      "title": "Inference Navigation - Search Solution Space EIS Models Page: displays correct breadcrumbs in search solution navigation",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/inference_navigation_search_solution.spec.ts",
+        "line": 32,
+        "column": 14
+      }
+    },
+    {
+      "id": "a408dc2671061e0-9de5bdb039340ba",
+      "title": "Inference Navigation - Search Solution Space External Inference Page: displays correct breadcrumbs in search solution navigation",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/inference_navigation_search_solution.spec.ts",
+        "line": 46,
+        "column": 14
+      }
+    },
+    {
+      "id": "a408dc2671061e0-e858606929a1019",
+      "title": "Inference Navigation - Search Solution Space Feature Settings Page: displays correct breadcrumbs in search solution navigation",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/inference_navigation_search_solution.spec.ts",
+        "line": 60,
+        "column": 14
+      }
+    },
+    {
+      "id": "40a7429a3ee22de-2d7108d04faa4e4",
+      "title": "Inference Navigation EIS Models Page: displays correct breadcrumbs in classic navigation",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/inference_navigation.spec.ts",
+        "line": 25,
+        "column": 7
+      }
+    },
+    {
+      "id": "40a7429a3ee22de-a3dcc52118922ad",
+      "title": "Inference Navigation EIS Models Page: displays correct breadcrumbs in serverless search navigation",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/inference_navigation.spec.ts",
+        "line": 40,
+        "column": 7
+      }
+    },
+    {
+      "id": "40a7429a3ee22de-474738238fdaf7f",
+      "title": "Inference Navigation External Inference Page: displays correct breadcrumbs in classic navigation",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/inference_navigation.spec.ts",
+        "line": 55,
+        "column": 7
+      }
+    },
+    {
+      "id": "40a7429a3ee22de-91b64dfbfbcf424",
+      "title": "Inference Navigation External Inference Page: displays correct breadcrumbs in serverless search navigation",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/inference_navigation.spec.ts",
+        "line": 70,
+        "column": 7
+      }
+    },
+    {
+      "id": "40a7429a3ee22de-0f4c5c0fadf830f",
+      "title": "Inference Navigation Feature Settings Page: displays correct breadcrumbs in classic navigation",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/inference_navigation.spec.ts",
+        "line": 85,
+        "column": 7
+      }
+    },
+    {
+      "id": "40a7429a3ee22de-0ee788225722c36",
+      "title": "Inference Navigation Feature Settings Page: displays correct breadcrumbs in serverless search navigation",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/inference_navigation.spec.ts",
+        "line": 100,
         "column": 7
       }
     },
@@ -542,6 +833,36 @@
       }
     },
     {
+      "id": "68d451451493487-cc3dc0edc8db202",
+      "title": "Model Detail Flyout deprecated model flyout shows the deprecated badge and enables Add endpoint",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-stateful-search",
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/model_detail_flyout.spec.ts",
+        "line": 123,
+        "column": 7
+      }
+    },
+    {
+      "id": "68d451451493487-febfd8836752f31",
+      "title": "Model Detail Flyout EOL model flyout shows the EOL badge and disables Add endpoint",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-stateful-search",
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/model_detail_flyout.spec.ts",
+        "line": 142,
+        "column": 7
+      }
+    },
+    {
       "id": "68d451451493487-a7f4daa29d4e5a6",
       "title": "Model Detail Flyout opens view endpoint modal from flyout",
       "expectedStatus": "passed",
@@ -552,7 +873,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/model_detail_flyout.spec.ts",
-        "line": 123,
+        "line": 161,
         "column": 7
       }
     }

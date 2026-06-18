@@ -12,7 +12,7 @@ import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import { getToolResultId } from '@kbn/agent-builder-server';
 import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
 import type { RuleAttachmentData } from '@kbn/alerting-v2-schemas';
-import { RULE_ATTACHMENT_TYPE } from '@kbn/alerting-v2-schemas';
+import { RULE_ATTACHMENT_TYPE, getBreachEsqlQuery } from '@kbn/alerting-v2-schemas';
 import { alertingTools } from '../../common/constants';
 import {
   ruleOperationSchema,
@@ -44,28 +44,44 @@ Use operations[] to:
 1. set_metadata — set name, description, and tags
 2. set_kind — set rule kind (alert | signal)
 3. set_schedule — set execution interval and lookback window
-4. set_query — set the base ES|QL detection query
+4. set_query — set the rule's detection query plus recovery and no-data strategies. Fields:
+   - query (required): two formats supported:
+     - composed: required "base" (ES|QL string) + "breach: { segment }", optional "recovery: { segment }" (only when recovery_strategy is "query")
+     - standalone: required "breach: { query }", optional "recovery: { query }" (only when recovery_strategy is "query") and "no_data: { query }" (only when no_data_strategy is not "none")
+   - recovery_strategy (optional): "no_breach" | "query" | "none" — "no_breach" recovers when breach stops, "query" runs a separate recovery query, "none" disables recovery. Signal rules cannot set this.
+   - no_data_strategy (optional): "last_known_status" | "emit" | "recover" | "none" — controls behaviour when no data is present; requires a "no_data" block in standalone queries. Signal rules cannot set this.
 5. set_grouping — set fields to group alerts by
 6. set_state_transition — set consecutive breaches threshold
-7. set_recovery_policy — set recovery detection type and optional query`,
+7. validate — validate the accumulated rule against the API request schema; throws if not ready to save`,
   schema: manageRuleSchema,
   handler: async (
     { ruleAttachmentId: previousAttachmentId, operations },
     { logger, attachments, esClient }
   ) => {
     try {
-      const persistedRecord = previousAttachmentId
+      const currentAttachment = previousAttachmentId
         ? attachments.getAttachmentRecord(previousAttachmentId)
         : undefined;
 
-      const isNew = !persistedRecord;
+      const isNew = !currentAttachment;
       const attachmentId = previousAttachmentId ?? uuidv4();
 
-      const currentData: Partial<RuleAttachmentData> = persistedRecord?.versions.at(-1)?.data ?? {};
+      const currentData: Partial<RuleAttachmentData> =
+        currentAttachment?.versions.at(-1)?.data ?? {};
 
-      const updatedData = (await executeRuleOperations(currentData, operations, esClient, {
-        isNew,
-      })) as RuleAttachmentData;
+      const { data: updatedData, queryColumns } = await executeRuleOperations(
+        currentData,
+        operations,
+        esClient,
+        { isNew }
+      );
+
+      // Pre-assign a stable rule ID so that action policies can reference it
+      // via `rule.id` before the rule is persisted. The UI will use this ID
+      // when calling PUT /api/alerting/v2/rules/{id} (upsert).
+      if (isNew && !updatedData.id) {
+        updatedData.id = uuidv4();
+      }
 
       const attachmentInput = {
         id: attachmentId,
@@ -98,11 +114,13 @@ Use operations[] to:
               version: attachment.current_version ?? 1,
               ruleAttachment: {
                 id: attachment.id,
+                ruleId: updatedData.id,
                 name: updatedData.metadata?.name,
                 kind: updatedData.kind,
                 schedule: updatedData.schedule,
-                query: updatedData.evaluation?.query?.base,
+                query: updatedData.query ? getBreachEsqlQuery(updatedData.query) : undefined,
               },
+              ...(queryColumns ? { queryColumns } : {}),
             },
           },
         ],
@@ -110,9 +128,9 @@ Use operations[] to:
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
       if (error instanceof RuleOperationValidationError) {
-        logger.warn(`manage_rule tool: invalid input — ${message}`);
+        logger.debug(`manage_rule tool: invalid input — ${message}`);
       } else {
-        logger.error(`Error in manage_rule tool: ${message}`);
+        logger.warn(`Error in manage_rule tool: ${message}`);
       }
       return {
         results: [

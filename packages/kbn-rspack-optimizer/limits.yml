@@ -1,19 +1,21 @@
 pageLoadAssetSize:
   actions: 3110
   advancedSettings: 1981
-  agentBuilder: 254
+  agentBuilder: 289
+  agentBuilderDashboards: 3074
   agentBuilderPlatform: 4152
-  agentContextLayer: 292
+  agentBuilderWorkflows: 13383
+  agentContextLayer: 324
   aiAssistantManagementSelection: 355
   aiops: 317
   alerting: 8789
-  alertingVTwo: 7442
-  apm: 16978
+  alertingVTwo: 10685
+  apm: 33124
   apmSourcesAccess: 779
   automaticImport: 13257
   banners: 1157
   canvas: 6000
-  cases: 2250
+  cases: 2799
   charts: 1188
   cloud: 8477
   cloudConnect: 4998
@@ -21,19 +23,18 @@ pageLoadAssetSize:
   cloudDefend: 3152
   cloudExperiments: 75153
   cloudFullStory: 1373
-  cloudLinks: 18163
+  cloudLinks: 18143
   cloudSecurityPosture: 12224
   console: 24516
   contentConnectors: 2789
   contentManagement: 6738
-  controls: 4478
+  controls: 4166
   core: 320
   cps: 5080
   crossClusterReplication: 7691
   customIntegrations: 636
   dashboard: 452
-  dashboardAgent: 3074
-  dashboardMarkdown: 2058
+  dashboardMarkdown: 4405
   data: 11799
   dataQuality: 5836
   datasetQuality: 41081
@@ -43,12 +44,12 @@ pageLoadAssetSize:
   dataViewManagement: 1302
   dataViews: 1697
   dataVisualizer: 7461
-  developerToolbar: 1457
+  developerToolbar: 1947
   devTools: 4281
-  discover: 18157
+  discover: 18086
   discoverEnhanced: 1091
   discoverShared: 1070
-  elasticAssistant: 137486
+  elasticAssistant: 137336
   elasticAssistantSharedState: 3369
   elasticConsole: 850
   embeddable: 895
@@ -58,7 +59,7 @@ pageLoadAssetSize:
   esql: 308
   esqlDataGrid: 215
   esUiShared: 2284
-  evals: 1915
+  evals: 1711
   eventAnnotation: 17299
   eventAnnotationListing: 2401
   exploratoryView: 707
@@ -72,7 +73,7 @@ pageLoadAssetSize:
   expressionXY: 566
   features: 1218
   feedback: 2246
-  fieldFormats: 4195
+  fieldFormats: 4165
   fieldsMetadata: 1568
   files: 3957
   filesManagement: 952
@@ -86,10 +87,11 @@ pageLoadAssetSize:
   grokdebugger: 1333
   home: 9251
   imageEmbeddable: 1732
-  inbox: 935
-  indexLifecycleManagement: 29229
+  inbox: 1294
+  indexLifecycleManagement: 39553
   indexManagement: 316
   inference: 5751
+  inferenceWorkflows: 25000
   infra: 45673
   ingestHub: 1923
   ingestPipelines: 270
@@ -107,7 +109,7 @@ pageLoadAssetSize:
   lens: 316
   licenseManagement: 3292
   licensing: 8329
-  links: 3857
+  links: 3586
   lists: 371
   logsDataAccess: 308
   logsShared: 1774
@@ -120,9 +122,10 @@ pageLoadAssetSize:
   ml: 663
   mockIdpPlugin: 4203
   monitoring: 22416
-  navigation: 8671
+  navigation: 10081
   newsfeed: 9707
   noDataPage: 630
+  notificationCenter: 332
   observability: 3614
   observabilityAgentBuilder: 679
   observabilityAIAssistant: 1967
@@ -133,20 +136,20 @@ pageLoadAssetSize:
   observabilityShared: 7496
   osquery: 13046
   painlessLab: 2282
-  presentationUtil: 771
+  presentationUtil: 669
   productDocBase: 3614
   productIntercept: 4738
   profiling: 12944
   queryActivity: 881
   reindexService: 1696
   remoteClusters: 5794
-  reporting: 33990
+  reporting: 27953
   rollup: 8005
   runtimeFields: 301
   sampleDataIngest: 1084
   savedObjects: 365
   savedObjectsFinder: 256
-  savedObjectsManagement: 18255
+  savedObjectsManagement: 18227
   savedObjectsTagging: 18398
   savedObjectsTaggingOss: 808
   savedSearch: 696
@@ -162,22 +165,23 @@ pageLoadAssetSize:
   searchprofiler: 2260
   searchQueryRules: 2167
   searchSynonyms: 1919
-  security: 215
+  security: 627
   securitySolution: 118003
   securitySolutionEss: 19938
   securitySolutionServerless: 33422
   serverless: 1272
   serverlessObservability: 14424
   serverlessSearch: 18261
+  serverlessVectordb: 3694
   serverlessWorkplaceAI: 3338
   sessionView: 379
   share: 440
   shared-core: 315647
-  shared-misc: 77817
+  shared-misc: 77371
   shared-packages: 3079800
-  shared-plugins: 10954901
+  shared-plugins: 12276963
   shared-solution-packages: 184340
-  slo: 19696
+  slo: 19531
   snapshotRestore: 16909
   spaces: 22966
   stackAlerts: 1717
@@ -191,20 +195,19 @@ pageLoadAssetSize:
   transform: 8828
   triggersActionsUi: 3033
   uiActions: 454
-  unifiedDocViewer: 568
+  unifiedDocViewer: 627
   unifiedSearch: 511
   upgradeAssistant: 1822
-  uptime: 37818
+  uptime: 37816
   urlDrilldown: 1267
   urlForwarding: 1412
   usageCollection: 223
   ux: 2418
-  vendors: 4594254
+  vendors: 4591364
   vendors-heavy: 1388239
   visDefaultEditor: 738
   visTypeGauge: 7639
   visTypeHeatmap: 6961
-  visTypeMarkdown: 4929
   visTypeMetric: 6932
   visTypePie: 22902
   visTypeTable: 13200

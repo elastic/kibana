@@ -31,9 +31,10 @@ import type {
   IlmExplainLifecycleLifecycleExplainManaged,
   IlmExplainLifecycleResponse,
 } from '@elastic/elasticsearch/lib/api/types';
+import { usePhaseColors } from '@kbn/data-lifecycle-phases';
 import type { Index, Phase } from '../../../common/types';
 import { getPolicyEditPath } from '../../application/services/navigation';
-import { usePhaseColors } from '../../application/lib';
+import { PHASE_NAMES } from '../../application/lib';
 import { sendGet } from '../../application/services/http';
 import { usePollingUntil } from '../../application/hooks/use_polling_until';
 
@@ -157,23 +158,23 @@ export const IndexLifecycleSummary = ({ index, getUrlForApp }: IndexLifecycleSum
   const phaseToBadgeMapping: Record<Phase, { color: EuiBadgeProps['color']; label: string }> = {
     hot: {
       color: phaseColors.hot,
-      label: 'Hot',
+      label: PHASE_NAMES.hot,
     },
     warm: {
       color: phaseColors.warm,
-      label: 'Warm',
+      label: PHASE_NAMES.warm,
     },
     cold: {
       color: phaseColors.cold,
-      label: 'Cold',
+      label: PHASE_NAMES.cold,
     },
     frozen: {
       color: phaseColors.frozen,
-      label: 'Frozen',
+      label: PHASE_NAMES.frozen,
     },
     delete: {
       color: 'default',
-      label: 'Delete',
+      label: PHASE_NAMES.delete,
     },
   };
 

@@ -6,14 +6,15 @@
  */
 
 import React, { useCallback, useMemo, useState } from 'react';
-import { useLocation, useHistory } from 'react-router-dom';
+import { useHistory, useLocation } from 'react-router-dom';
 import {
+  EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLoadingSpinner,
   EuiPanel,
   EuiTitle,
-  EuiButtonIcon,
+  EuiToolTip,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
@@ -27,7 +28,6 @@ import { SiemSearchBar } from '../../common/components/search_bar';
 import { InputsModelId } from '../../common/store/inputs/constants';
 import { FiltersGlobal } from '../../common/components/filters_global';
 import { SpyRoute } from '../../common/utils/route/spy_routes';
-import { useSourcererDataView } from '../../sourcerer/containers';
 import { useKibana } from '../../common/lib/kibana';
 import { EntityEventTypes } from '../../common/lib/telemetry';
 import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
@@ -43,15 +43,15 @@ import {
   ENTITY_ANALYTICS_LOCAL_STORAGE_PAGE_SIZE_KEY,
 } from '../components/home/constants';
 import {
-  EntitiesTableSection,
   DataViewContext,
   useEntityURLState,
+  DEFAULT_ENTITIES_TABLE_SORT,
   type EntitiesBaseURLQuery,
+  EntitiesTableSection,
   type URLQuery,
 } from '../components/home/entities_table';
 import { DynamicRiskLevelPanel } from '../components/home/dynamic_risk_level_panel';
-import { useEntityStoreStatus } from '../components/entity_store/hooks/use_entity_store';
-import { EntityStoreDisabledEmptyPrompt } from './entity_store_disabled_empty_prompt';
+
 import { useGetSecuritySolutionUrl } from '../../common/components/link_to';
 import { TabId } from './entity_analytics_management_page';
 import { TopThreatHuntingLeads } from '../components/threat_hunting/top_threat_hunting_leads';
@@ -63,6 +63,7 @@ import type { HuntingLead } from '../components/threat_hunting/top_threat_huntin
 import { useMissingRiskEnginePrivileges } from '../hooks/use_missing_risk_engine_privileges';
 import { useEntityEnginePrivileges } from '../components/entity_store/hooks/use_entity_engine_privileges';
 import { EntityAnalyticsReadPrivilegesCallout } from '../components/entity_analytics_read_privileges_callout';
+import { useLeadGenerationPrivileges } from '../api/hooks/use_lead_generation_privileges';
 import { NoPrivileges } from '../../common/components/no_privileges';
 
 const PAGE_TITLE = i18n.translate('xpack.securitySolution.entityAnalytics.homePage.pageTitle', {
@@ -73,7 +74,7 @@ const getDefaultQuery = ({ query, filters }: EntitiesBaseURLQuery): URLQuery => 
   query,
   filters,
   pageFilters: [],
-  sort: [['@timestamp', 'desc']],
+  sort: DEFAULT_ENTITIES_TABLE_SORT,
   pageIndex: 0,
 });
 
@@ -88,6 +89,10 @@ const anomaliesPanelFlexItemStyle = css`
 export const EntityAnalyticsHomePage = () => {
   const riskEngineReadPrivileges = useMissingRiskEnginePrivileges({ readonly: true });
   const entityEnginePrivilegesQuery = useEntityEnginePrivileges();
+  const isEnterprise = useLicense().isEnterprise();
+  const leadGenerationEnabled =
+    useIsExperimentalFeatureEnabled('leadGenerationEnabled') && isEnterprise;
+  const leadGenerationPrivilegesQuery = useLeadGenerationPrivileges(leadGenerationEnabled);
 
   if (entityEnginePrivilegesQuery.isLoading || riskEngineReadPrivileges.isLoading) {
     return <PageLoader />;
@@ -101,6 +106,7 @@ export const EntityAnalyticsHomePage = () => {
       <EntityAnalyticsReadPrivilegesCallout
         riskEngineReadPrivileges={riskEngineReadPrivileges}
         entityEnginePrivileges={entityEnginePrivilegesQuery.data}
+        leadGenerationPrivileges={leadGenerationPrivilegesQuery.data}
       />
       <SecuritySolutionPageWrapper data-test-subj="entityAnalyticsHomePage">
         {noPrivileges ? (
@@ -123,18 +129,11 @@ const EntityAnalyticsHomePageContent = () => {
   const { telemetry, agentBuilder, http } = useKibana().services;
   const { isAgentChatExperienceEnabled } = useAgentBuilderAvailability();
   const { data: availableConnectors } = useLoadConnectors({ http, featureId: 'lead_generation' });
-  const {
-    indicesExist: oldIndicesExist,
-    loading: oldIsSourcererLoading,
-    sourcererDataView: oldSourcererDataViewSpec,
-  } = useSourcererDataView();
-  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
   const isEnterprise = useLicense().isEnterprise();
   const leadGenerationEnabled =
     useIsExperimentalFeatureEnabled('leadGenerationEnabled') && isEnterprise;
   const spaceId = useSpaceId();
-  const { dataView: entityDataView, isLoading: entityDataViewLoading } =
-    useEntityStoreDataView(spaceId);
+  const { dataView, isLoading: dataViewLoading } = useEntityStoreDataView(spaceId);
 
   const resolvedSpaceId = spaceId ?? 'default';
   const [storedConnectorId, setStoredConnectorId] = useStoredAssistantConnectorId(resolvedSpaceId);
@@ -165,11 +164,6 @@ const EntityAnalyticsHomePageContent = () => {
 
   const [isFlyoutOpen, setIsFlyoutOpen] = useState(false);
 
-  const isSourcererLoading = useMemo(
-    () => (newDataViewPickerEnabled ? entityDataViewLoading : oldIsSourcererLoading),
-    [newDataViewPickerEnabled, oldIsSourcererLoading, entityDataViewLoading]
-  );
-
   // Only subscribe to `search` rather than the whole `location` object so this
   // component doesn't re-render (and re-create callbacks) on unrelated URL
   // updates like flyout params.
@@ -180,11 +174,6 @@ const EntityAnalyticsHomePageContent = () => {
   const selectedWatchlistId = useMemo(() => {
     const params = new URLSearchParams(search);
     return params.get('watchlistId') || undefined;
-  }, [search]);
-
-  const selectedWatchlistName = useMemo(() => {
-    const params = new URLSearchParams(search);
-    return params.get('watchlistName') || undefined;
   }, [search]);
 
   const setSelectedWatchlist = useCallback(
@@ -208,16 +197,11 @@ const EntityAnalyticsHomePageContent = () => {
   );
 
   const indicesExist = useMemo(
-    () => (newDataViewPickerEnabled ? !entityDataViewLoading : oldIndicesExist),
-    [entityDataViewLoading, newDataViewPickerEnabled, oldIndicesExist]
+    () => !!dataView?.matchedIndices?.length,
+    [dataView?.matchedIndices?.length]
   );
 
   const showEmptyPrompt = !indicesExist;
-
-  const { data: entityStoreStatusData } = useEntityStoreStatus();
-  const entityStoreDisabled =
-    entityStoreStatusData?.status === 'not_installed' ||
-    entityStoreStatusData?.status === 'stopped';
 
   const handleOpenFlyout = useCallback(() => setIsFlyoutOpen(true), []);
   const handleCloseFlyout = useCallback(() => setIsFlyoutOpen(false), []);
@@ -234,7 +218,7 @@ const EntityAnalyticsHomePageContent = () => {
     agentBuilder?.openChat({ newConversation: true, sessionTag: 'security' });
   }, [agentBuilder]);
 
-  if (newDataViewPickerEnabled && entityDataViewLoading) {
+  if (dataViewLoading) {
     return <PageLoader />;
   }
 
@@ -242,19 +226,10 @@ const EntityAnalyticsHomePageContent = () => {
     return <EmptyPrompt />;
   }
 
-  if (entityStoreDisabled) {
-    return <EntityStoreDisabledEmptyPrompt />;
-  }
-
   return (
     <>
       <FiltersGlobal>
-        <SiemSearchBar
-          dataView={entityDataView}
-          id={InputsModelId.global}
-          sourcererDataViewSpec={oldSourcererDataViewSpec}
-          hideDatePicker
-        />
+        <SiemSearchBar dataView={dataView} id={InputsModelId.global} hideDatePicker />
       </FiltersGlobal>
 
       <HeaderPage
@@ -268,81 +243,83 @@ const EntityAnalyticsHomePageContent = () => {
               />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiButtonIcon
-                display="base"
-                iconType="gear"
-                size="m"
-                aria-label={i18n.translate(
+              <EuiToolTip
+                content={i18n.translate(
                   'xpack.securitySolution.entityAnalytics.homePage.watchlistsSettingsButtonAriaLabel',
                   { defaultMessage: 'Watchlists settings' }
                 )}
-                href={getSecuritySolutionUrl({
-                  deepLinkId: SecurityPageName.entityAnalyticsManagement,
-                  path: `/${TabId.Watchlists}`,
-                })}
-              />
+                disableScreenReaderOutput
+              >
+                <EuiButtonIcon
+                  display="base"
+                  iconType="gear"
+                  size="m"
+                  aria-label={i18n.translate(
+                    'xpack.securitySolution.entityAnalytics.homePage.watchlistsSettingsButtonAriaLabel',
+                    { defaultMessage: 'Watchlists settings' }
+                  )}
+                  href={getSecuritySolutionUrl({
+                    deepLinkId: SecurityPageName.entityAnalyticsManagement,
+                    path: `/${TabId.Watchlists}`,
+                  })}
+                />
+              </EuiToolTip>
             </EuiFlexItem>
           </EuiFlexGroup>,
         ]}
       />
 
-      {isSourcererLoading ? (
-        <EuiLoadingSpinner size="l" data-test-subj="entityAnalyticsHomePageLoader" />
-      ) : (
-        <EuiFlexGroup direction="column" gutterSize="l">
-          {leadGenerationEnabled && !leadsReadPermissionError && (
-            <EuiFlexItem>
-              <TopThreatHuntingLeads
-                leads={leads}
-                totalCount={totalCount}
-                isLoading={isLeadsLoading}
-                isGenerating={isGenerating}
-                hasGenerated={hasGenerated}
-                lastRunTimestamp={lastRunTimestamp}
-                isScheduled={isScheduled}
-                onToggleSchedule={toggleSchedule}
-                onSeeAll={handleOpenFlyout}
-                onLeadClick={handleOpenLeadInChat}
-                onHuntInChat={handleHuntInChat}
-                onGenerate={generate}
-                connectorId={connectorId}
-                hasValidConnector={hasValidConnector}
-                onConnectorIdSelected={safeSetConnectorId}
-                isAgentChatExperienceEnabled={isAgentChatExperienceEnabled}
-                hasWritePermissionError={leadsWritePermissionError}
-              />
-            </EuiFlexItem>
-          )}
-
+      <EuiFlexGroup direction="column" gutterSize="l">
+        {leadGenerationEnabled && !leadsReadPermissionError && (
           <EuiFlexItem>
-            <EuiFlexGroup wrap gutterSize="m">
-              <EuiFlexItem grow={3} css={riskPanelFlexItemStyle}>
-                <EuiPanel hasBorder>
-                  <DynamicRiskLevelPanel
-                    watchlistId={selectedWatchlistId}
-                    watchlistName={selectedWatchlistName}
-                    entityDataView={entityDataView}
-                  />
-                </EuiPanel>
-              </EuiFlexItem>
-              <EuiFlexItem grow={5} css={anomaliesPanelFlexItemStyle}>
-                <EuiPanel hasBorder>
-                  <EntityAnalyticsRecentAnomalies watchlistId={selectedWatchlistId} />
-                </EuiPanel>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexItem>
-
-          <EuiPanel hasBorder>
-            <EntityAnalyticsEntitiesTable
-              watchlistId={selectedWatchlistId}
-              watchlistName={selectedWatchlistName}
-              entityDataView={entityDataView}
-              entityDataViewLoading={entityDataViewLoading}
+            <TopThreatHuntingLeads
+              leads={leads}
+              totalCount={totalCount}
+              isLoading={isLeadsLoading}
+              isGenerating={isGenerating}
+              hasGenerated={hasGenerated}
+              lastRunTimestamp={lastRunTimestamp}
+              isScheduled={isScheduled}
+              onToggleSchedule={toggleSchedule}
+              onSeeAll={handleOpenFlyout}
+              onLeadClick={handleOpenLeadInChat}
+              onHuntInChat={handleHuntInChat}
+              onGenerate={generate}
+              connectorId={connectorId}
+              hasValidConnector={hasValidConnector}
+              onConnectorIdSelected={safeSetConnectorId}
+              isAgentChatExperienceEnabled={isAgentChatExperienceEnabled}
+              hasWritePermissionError={leadsWritePermissionError}
             />
-          </EuiPanel>
-        </EuiFlexGroup>
-      )}
+          </EuiFlexItem>
+        )}
+
+        <EuiFlexItem>
+          <EuiFlexGroup wrap gutterSize="m">
+            <EuiFlexItem grow={3} css={riskPanelFlexItemStyle}>
+              <EuiPanel hasBorder>
+                <DynamicRiskLevelPanel
+                  watchlistId={selectedWatchlistId}
+                  entityDataView={dataView}
+                />
+              </EuiPanel>
+            </EuiFlexItem>
+            <EuiFlexItem grow={5} css={anomaliesPanelFlexItemStyle}>
+              <EuiPanel hasBorder>
+                <EntityAnalyticsRecentAnomalies watchlistId={selectedWatchlistId} />
+              </EuiPanel>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+
+        <EuiPanel hasBorder>
+          <EntityAnalyticsEntitiesTable
+            watchlistId={selectedWatchlistId}
+            entityDataView={dataView}
+            entityDataViewLoading={dataViewLoading}
+          />
+        </EuiPanel>
+      </EuiFlexGroup>
 
       {leadGenerationEnabled && isFlyoutOpen && (
         <ThreatHuntingLeadsFlyout onClose={handleCloseFlyout} onSelectLead={handleOpenLeadInChat} />
@@ -353,12 +330,10 @@ const EntityAnalyticsHomePageContent = () => {
 
 const EntityAnalyticsEntitiesTable = ({
   watchlistId,
-  watchlistName,
   entityDataView,
   entityDataViewLoading,
 }: {
   watchlistId?: string;
-  watchlistName?: string;
   entityDataView: ReturnType<typeof useEntityStoreDataView>['dataView'];
   entityDataViewLoading: boolean;
 }) => {
@@ -376,20 +351,10 @@ const EntityAnalyticsEntitiesTable = ({
       <EuiFlexItem grow={false}>
         <EuiTitle size="s">
           <h3>
-            {watchlistId ? (
-              <FormattedMessage
-                id="xpack.securitySolution.entityAnalytics.homePage.entitiesTableTitleWithWatchlist"
-                defaultMessage="{watchlistName} entities"
-                values={{
-                  watchlistName: watchlistName ?? watchlistId,
-                }}
-              />
-            ) : (
-              <FormattedMessage
-                id="xpack.securitySolution.entityAnalytics.homePage.entitiesTableTitle"
-                defaultMessage="Entities"
-              />
-            )}
+            <FormattedMessage
+              id="xpack.securitySolution.entityAnalytics.homePage.entitiesTableTitle"
+              defaultMessage="Entities"
+            />
           </h3>
         </EuiTitle>
       </EuiFlexItem>

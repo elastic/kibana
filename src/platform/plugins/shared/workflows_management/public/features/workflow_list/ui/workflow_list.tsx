@@ -29,12 +29,14 @@ import { useExportWithReferences } from './use_export_with_references';
 import { WorkflowListTable } from './workflow_list_table';
 import { WorkflowsUtilityBar } from './workflows_utility_bar';
 import { WorkflowsEmptyState } from '../../../components';
+import { WorkflowsEmptyStateReadOnly } from '../../../components/workflows_empty_state/workflows_empty_state';
 import { useWorkflowActions } from '../../../entities/workflows/model/use_workflow_actions';
 import { useKibana } from '../../../hooks/use_kibana';
 import { useTelemetry } from '../../../hooks/use_telemetry';
 import { shouldShowWorkflowsEmptyState } from '../../../shared/utils/workflow_utils';
 import type { WorkflowTriggerTab } from '../../run_workflow/ui/types';
 import { WorkflowExecuteModal } from '../../run_workflow/ui/workflow_execute_modal';
+import { hasCustomEventTrigger } from '../../run_workflow/ui/workflow_execute_modal_helpers';
 import { WORKFLOWS_TABLE_INITIAL_PAGE_SIZE } from '../constants';
 
 interface WorkflowListProps {
@@ -57,8 +59,18 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
 
   const searchParams = useMemo(() => {
     if (search.enabled != null) {
-      // The stats aggs return enabled as 0 (false) and 1 (true), we need to convert the values to booleans for the search params.
-      return { ...search, enabled: search.enabled.map((enabled) => Boolean(enabled)) };
+      return {
+        ...search,
+        enabled: search.enabled.map((enabled) => {
+          if (typeof enabled === 'string') {
+            return (enabled as string).trim().toLowerCase() === 'true';
+          }
+          if (typeof enabled === 'number') {
+            return enabled === 1;
+          }
+          return Boolean(enabled);
+        }),
+      };
     }
     return search;
   }, [search]);
@@ -137,9 +149,14 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
   }, [refetch]);
 
   const handleRunWorkflow = useCallback(
-    (id: string, event: Record<string, unknown>, triggerTab?: WorkflowTriggerTab) => {
+    (
+      id: string,
+      event: Record<string, unknown>,
+      triggerTab?: WorkflowTriggerTab,
+      workflowHasCustomEventTrigger?: boolean
+    ) => {
       runWorkflow.mutate(
-        { id, inputs: event, triggerTab },
+        { id, inputs: event, triggerTab, hasCustomEventTrigger: workflowHasCustomEventTrigger },
         {
           onSuccess: ({ workflowExecutionId }) => {
             notifications?.toasts.addSuccess('Workflow run started', {
@@ -161,6 +178,25 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
       );
     },
     [application, notifications, runWorkflow]
+  );
+
+  const handleCloseExecuteModal = useCallback(() => {
+    setExecuteWorkflow(null);
+  }, []);
+
+  const handleExecuteModalSubmit = useCallback(
+    (data: Record<string, unknown>, triggerTab: WorkflowTriggerTab) => {
+      if (!executeWorkflow) {
+        return;
+      }
+      handleRunWorkflow(
+        executeWorkflow.id,
+        data,
+        triggerTab,
+        hasCustomEventTrigger(executeWorkflow.definition)
+      );
+    },
+    [executeWorkflow, handleRunWorkflow]
   );
 
   const handleDeleteWorkflow = useCallback(
@@ -208,6 +244,7 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
           workflow: {
             enabled: !item.enabled,
           },
+          workflowDefinition: item.definition ?? undefined,
           skipRefetch: true,
         },
         {
@@ -271,10 +308,11 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
     return (
       <EuiFlexGroup justifyContent="center" alignItems="center" style={{ minHeight: '60vh' }}>
         <EuiFlexItem grow={false}>
-          <WorkflowsEmptyState
-            onCreateWorkflow={onCreateWorkflow}
-            canCreateWorkflow={canCreateWorkflow}
-          />
+          {canCreateWorkflow ? (
+            <WorkflowsEmptyState onCreateWorkflow={onCreateWorkflow} />
+          ) : (
+            <WorkflowsEmptyStateReadOnly />
+          )}
         </EuiFlexItem>
       </EuiFlexGroup>
     );
@@ -343,8 +381,8 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
           isTestRun={false}
           definition={executeWorkflow.definition}
           workflowId={executeWorkflow.id}
-          onClose={() => setExecuteWorkflow(null)}
-          onSubmit={(data, triggerTab) => handleRunWorkflow(executeWorkflow.id, data, triggerTab)}
+          onClose={handleCloseExecuteModal}
+          onSubmit={handleExecuteModalSubmit}
         />
       )}
       {singleExportModal && (

@@ -9,7 +9,7 @@
 
 import React, { useEffect, useState, useCallback } from 'react';
 import type { MouseEvent } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiText, EuiHealth, EuiBadge } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiHealth, EuiBadge } from '@elastic/eui';
 import type { FieldValueOptionType, Query } from '@elastic/eui';
 import { isMac } from '@kbn/shared-ux-utility';
 
@@ -102,7 +102,7 @@ export const useTagFilterPanel = ({
                 data-test-subj={`tag-searchbar-option-${testSubjFriendly(name)}`}
                 onClick={onOptionClick(tag)}
               >
-                <EuiText>{name}</EuiText>
+                {name}
               </EuiHealth>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>

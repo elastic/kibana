@@ -83,10 +83,10 @@ export const getConnectorList = async (
       ...ep,
       type: InferenceConnectorType.Inference,
       name:
-        ep.metadata.display?.name ??
+        ep.metadata?.display?.name ??
         stackConnectorByInferenceId.get(ep.inferenceId)?.name ??
         ep.inferenceId,
-      creator: ep.metadata.display?.creator,
+      creator: ep.metadata?.display?.model_creator,
       connectorId: ep.inferenceId,
       config: {
         inferenceId: ep.inferenceId,
@@ -96,13 +96,13 @@ export const getConnectorList = async (
         taskType: ep.taskType,
         service: ep.service,
         serviceSettings: ep.serviceSettings,
-        // temporary any until types are propagated in ES client
-        modelCreator: (ep.metadata as Record<string, any>)?.display?.model_creator,
+        modelCreator: ep.metadata?.display?.model_creator,
       },
       capabilities: {},
       isInferenceEndpoint: true,
-      isPreconfigured: !!ep.metadata.display?.name,
+      isPreconfigured: !!ep.metadata?.display?.name,
       isEis: ep.service === 'elastic',
+      metadata: ep.metadata,
     })
   );
 

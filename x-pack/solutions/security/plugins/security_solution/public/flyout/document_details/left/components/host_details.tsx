@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
 import { v4 as uuid } from 'uuid';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import {
@@ -34,11 +34,10 @@ import { useHasVulnerabilities } from '@kbn/cloud-security-posture/src/hooks/use
 import { useEntityStoreEuidApi } from '@kbn/entity-store/public';
 import { getEntitiesAlias, ENTITY_LATEST } from '@kbn/entity-store/common';
 import { buildEuidCspPreviewOptions } from '../../../../cloud_security_posture/utils/build_euid_csp_preview_options';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useNonClosedAlerts } from '../../../../cloud_security_posture/hooks/use_non_closed_alerts';
 import { ExpandablePanel } from '../../../../flyout_v2/shared/components/expandable_panel';
 import type { RelatedUser } from '../../../../../common/search_strategy/security_solution/related_entities/related_users';
-import type { RiskSeverity, HostItem } from '../../../../../common/search_strategy';
+import type { HostItem, RiskSeverity } from '../../../../../common/search_strategy';
 import { buildHostNamesFilter } from '../../../../../common/search_strategy';
 import { HostOverview } from '../../../../overview/components/host_overview';
 import { AnomalyTableProvider } from '../../../../common/components/ml/anomaly/anomaly_table_provider';
@@ -78,17 +77,16 @@ import { ENTITY_RISK_LEVEL } from '../../../../entity_analytics/components/risk_
 import { useHasSecurityCapability } from '../../../../helper_hooks';
 import { PreviewLink } from '../../../shared/components/preview_link';
 import { HostPreviewPanelKey } from '../../../entity_details/host_right';
-import { HOST_PREVIEW_BANNER } from '../../right/components/host_entity_overview';
+import { HOST_PREVIEW_BANNER } from '../../../../flyout_v2/document/main/components/host_entity_overview';
 import type { NarrowDateRange } from '../../../../common/components/ml/types';
-import { MisconfigurationsInsight } from '../../shared/components/misconfiguration_insight';
-import { VulnerabilitiesInsight } from '../../shared/components/vulnerabilities_insight';
-import { AlertCountInsight } from '../../shared/components/alert_count_insight';
+import { MisconfigurationsInsight } from '../../../../flyout_v2/document/main/components/misconfiguration_insight';
+import { VulnerabilitiesInsight } from '../../../../flyout_v2/document/main/components/vulnerabilities_insight';
+import { AlertCountInsight } from '../../../../flyout_v2/document/main/components/alert_count_insight';
 import { DocumentEventTypes } from '../../../../common/lib/telemetry';
 import { DETECTION_RESPONSE_ALERTS_BY_STATUS_ID } from '../../../../overview/components/detection_response/alerts_by_status/types';
 import { useNavigateToHostDetails } from '../../../entity_details/host_right/hooks/use_navigate_to_host_details';
 import { useRiskScore } from '../../../../entity_analytics/api/hooks/use_risk_score';
 import { useSecurityDefaultPatterns } from '../../../../data_view_manager/hooks/use_security_default_patterns';
-import { sourcererSelectors } from '../../../../sourcerer/store';
 import { useSpaceId } from '../../../../common/hooks/use_space_id';
 import type { EntityFromStoreResult } from '../../../entity_details/shared/hooks/use_entity_from_store';
 import { useObservedHost } from '../../../entity_details/host_right/hooks/use_observed_host';
@@ -96,7 +94,11 @@ import {
   buildRiskScoreStateFromEntityRecord,
   getRiskFromEntityRecord,
 } from '../../../entity_details/shared/entity_store_risk_utils';
-import { mergeLegacyIdentityWhenStoreEntityMissing, type IdentityFields } from '../../shared/utils';
+import {
+  CspInsightLeftPanelSubTab,
+  EntityDetailsLeftPanelTab,
+} from '../../../entity_details/shared/components/left_panel/left_panel_header';
+import { type IdentityFields, mergeLegacyIdentityWhenStoreEntityMissing } from '../../shared/utils';
 
 const HOST_DETAILS_ID = 'entities-hosts-details';
 const RELATED_USERS_ID = 'entities-hosts-related-users';
@@ -155,14 +157,7 @@ export const HostDetails: React.FC<HostDetailsProps> = ({
 
   const { to, from, deleteQuery, setQuery, isInitializing } = useGlobalTime();
 
-  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
-
-  const oldSecurityDefaultPatterns =
-    useSelector(sourcererSelectors.defaultDataView)?.patternList ?? [];
-  const { indexPatterns: experimentalSecurityDefaultIndexPatterns } = useSecurityDefaultPatterns();
-  const securityDefaultPatterns = newDataViewPickerEnabled
-    ? experimentalSecurityDefaultIndexPatterns
-    : oldSecurityDefaultPatterns;
+  const { indexPatterns: securityDefaultPatterns } = useSecurityDefaultPatterns();
   const dispatch = useDispatch();
   const { telemetry } = useKibana().services;
   // create a unique, but stable (across re-renders) query id
@@ -512,20 +507,35 @@ export const HostDetails: React.FC<HostDetailsProps> = ({
           entityType={EntityType.host}
           queryId={`${DETECTION_RESPONSE_ALERTS_BY_STATUS_ID}-document-details-host-entities`}
           direction="column"
-          openDetailsPanel={openDetailsPanel}
+          onShowAlertCountDetails={() =>
+            openDetailsPanel({
+              tab: EntityDetailsLeftPanelTab.CSP_INSIGHTS,
+              subTab: CspInsightLeftPanelSubTab.ALERTS,
+            })
+          }
           data-test-subj={HOST_DETAILS_ALERT_COUNT_TEST_ID}
         />
         <MisconfigurationsInsight
           identityFields={hostInsightsIdentityFields}
           direction="column"
-          openDetailsPanel={openDetailsPanel}
+          onShowMisconfigurationsDetails={() =>
+            openDetailsPanel({
+              tab: EntityDetailsLeftPanelTab.CSP_INSIGHTS,
+              subTab: CspInsightLeftPanelSubTab.MISCONFIGURATIONS,
+            })
+          }
           data-test-subj={HOST_DETAILS_MISCONFIGURATIONS_TEST_ID}
           telemetryKey={MISCONFIGURATION_INSIGHT_HOST_DETAILS}
         />
         <VulnerabilitiesInsight
           identityFields={hostInsightsIdentityFields}
           direction="column"
-          openDetailsPanel={openDetailsPanel}
+          onShowVulnerabilitiesDetails={() =>
+            openDetailsPanel({
+              tab: EntityDetailsLeftPanelTab.CSP_INSIGHTS,
+              subTab: CspInsightLeftPanelSubTab.VULNERABILITIES,
+            })
+          }
           data-test-subj={HOST_DETAILS_VULNERABILITIES_TEST_ID}
           telemetryKey={VULNERABILITIES_INSIGHT_HOST_DETAILS}
         />

@@ -181,6 +181,7 @@ export const TagFilterPanel: FC<{}> = ({}) => {
           onChange={onSelectChange}
           data-test-subj="tagSelectableList"
           aria-label={tagsLabel}
+          listProps={{ paddingSize: 's' }}
           {...searchProps}
         >
           {(list, search) => {

@@ -6,7 +6,13 @@
  */
 
 import React, { useCallback, useState } from 'react';
-import { EuiButtonIcon, EuiPopover, EuiListGroup, EuiHorizontalRule } from '@elastic/eui';
+import {
+  EuiButtonIcon,
+  EuiHorizontalRule,
+  EuiListGroup,
+  EuiPopover,
+  EuiToolTip,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { PopoverListItem } from '../../../../popovers/primitives/popover_list_item';
 import {
@@ -154,13 +160,15 @@ export const EntityActionsButton = ({ item, scopeId }: EntityActionsButtonProps)
     <EuiPopover
       aria-label={actionsButtonAriaLabel}
       button={
-        <EuiButtonIcon
-          iconType="boxesHorizontal"
-          aria-label={actionsButtonAriaLabel}
-          color="text"
-          onClick={togglePopover}
-          data-test-subj={GROUPED_ITEM_ACTIONS_BUTTON_TEST_ID}
-        />
+        <EuiToolTip content={actionsButtonAriaLabel} disableScreenReaderOutput>
+          <EuiButtonIcon
+            iconType="boxesHorizontal"
+            aria-label={actionsButtonAriaLabel}
+            color="text"
+            onClick={togglePopover}
+            data-test-subj={GROUPED_ITEM_ACTIONS_BUTTON_TEST_ID}
+          />
+        </EuiToolTip>
       }
       isOpen={isPopoverOpen}
       closePopover={closePopover}
@@ -168,7 +176,7 @@ export const EntityActionsButton = ({ item, scopeId }: EntityActionsButtonProps)
       anchorPosition="rightCenter"
       data-test-subj={GROUPED_ITEM_ACTIONS_POPOVER_TEST_ID}
     >
-      <EuiListGroup gutterSize="none" bordered={false} flush={true} size="l">
+      <EuiListGroup bordered={false}>
         {items.map((popoverItem, index) => {
           if (popoverItem.type === 'separator') {
             return <EuiHorizontalRule key={index} margin="none" size="full" />;

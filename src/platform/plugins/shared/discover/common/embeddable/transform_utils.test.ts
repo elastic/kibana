@@ -289,7 +289,6 @@ describe('search embeddable transform utils', () => {
                 },
                 data_view_id: 'c7d7a1f5-19da-4ba9-af15-5919e8cd2528',
                 disabled: false,
-                negate: false,
               },
             ],
             sort: [{ name: '@timestamp', direction: 'desc' }],
@@ -412,10 +411,10 @@ describe('search embeddable transform utils', () => {
       expect(result.ref_id).toBe('session-without-ref-array');
     });
 
-    it('prefers savedObjectId on state over the matching saved search reference', () => {
+    it('prefers the saved search reference over a stale savedObjectId on state', () => {
       const storedSearch: SearchEmbeddableByReferenceState = {
         title: 'Panel',
-        savedObjectId: 'id-from-state',
+        savedObjectId: 'stale-id-from-source-space',
       };
       const references: SavedObjectReference[] = [
         {
@@ -425,7 +424,7 @@ describe('search embeddable transform utils', () => {
         },
       ];
       const result = fromStoredSearchEmbeddableByRef(storedSearch, references);
-      expect(result.ref_id).toBe('id-from-state');
+      expect(result.ref_id).toBe('id-from-reference');
     });
   });
 

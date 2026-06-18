@@ -42,7 +42,7 @@ jest.mock('../form/components/matcher_input', () => ({
 }));
 
 jest.mock('../../../hooks/use_fetch_data_fields', () => ({
-  useFetchDataFields: () => ({ data: undefined, isLoading: false }),
+  useFetchDataFields: (_matcher?: string) => ({ data: undefined, isLoading: false }),
 }));
 
 jest.mock('../../../hooks/use_fetch_rules', () => ({
@@ -150,7 +150,7 @@ describe('ActionPolicyFormFlyout', () => {
       name: 'Policy from test',
       description: 'Description from test',
       groupingMode: 'per_episode',
-      throttle: { strategy: 'on_status_change' },
+      throttle: { strategy: 'on_status_change', interval: null },
       destinations: [{ type: 'workflow', id: 'wf-1' }],
     });
   });
@@ -172,10 +172,8 @@ describe('ActionPolicyFormFlyout', () => {
       snoozedUntil: null,
       destinations: [{ type: 'workflow', id: 'workflow-2' }],
       createdBy: 'elastic',
-      createdByUsername: 'elastic',
       createdAt: '2026-03-01T10:00:00.000Z',
       updatedBy: 'elastic',
-      updatedByUsername: 'elastic',
       updatedAt: '2026-03-01T10:00:00.000Z',
       auth: {
         owner: 'elastic',

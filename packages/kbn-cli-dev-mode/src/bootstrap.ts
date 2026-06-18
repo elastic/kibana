@@ -25,6 +25,15 @@ interface BootstrapArgs {
 export async function bootstrapDevMode({ configs, cliArgs, applyConfigOverrides }: BootstrapArgs) {
   const log = new CliLog(!!cliArgs.silent);
 
+  // When --eis is set, discover EIS inference endpoints from the running ES
+  // and pass them to the Kibana child process as preconfigured connectors via
+  // an environment variable (the child reads it in serve.js).
+  if (cliArgs.eis) {
+    const { discoverEisConnectors } = await import('./eis_dev_orchestrator');
+    const result = await discoverEisConnectors(log);
+    process.env.KBN_EIS_CONNECTORS = JSON.stringify(result.preconfiguredConnectors);
+  }
+
   const env = Env.createDefault(REPO_ROOT, {
     configs,
     cliArgs,

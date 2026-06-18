@@ -24,7 +24,8 @@ import { usePreferredDataSourceAndBucketSize } from '../../../../hooks/use_prefe
 import { ApmDocumentType } from '../../../../../common/document_type';
 import { asExactTransactionRate } from '../../../../../common/utils/formatters';
 import { TransactionTypeSelect } from './transaction_type_select';
-import { RED_METRICS_CHART_ELEMENT, RedMetricsChartActions } from './red_metrics_chart_actions';
+import { APM_CHART_EBT_ELEMENTS } from '../../../shared/charts/ebt_constants';
+import { RedMetricsChartActions } from './red_metrics_chart_actions';
 import { useGetChartAlertAnnotations } from './use_get_chart_alert_annotations';
 
 const INITIAL_STATE = {
@@ -51,6 +52,8 @@ export function ThroughputChart({
   customAlertEvaluationThreshold,
   threshold,
   ruleTypeId,
+  compact,
+  showAlertAnnotations,
 }: {
   alert: TopAlert;
   transactionType?: string;
@@ -70,6 +73,10 @@ export function ThroughputChart({
   customAlertEvaluationThreshold?: number;
   threshold?: ReactElement;
   ruleTypeId?: ApmRuleType;
+  /** When true, hide the threshold side panel even if `threshold` is provided. */
+  compact?: boolean;
+  /** When set, overrides the default annotation behavior (which is keyed off `threshold`). */
+  showAlertAnnotations?: boolean;
 }) {
   const {
     services: { uiSettings },
@@ -129,7 +136,8 @@ export function ThroughputChart({
   const alertAnnotations = useGetChartAlertAnnotations({
     alert,
     dateFormat,
-    showAnnotations: !!threshold,
+    showAnnotations: showAlertAnnotations ?? !!threshold,
+    showThresholdAnnotation: !!threshold,
     customAlertEvaluationThreshold,
     normalizeThreshold: (value) => value / 100,
   });
@@ -201,19 +209,19 @@ export function ThroughputChart({
                   }}
                   timeRange={{ from: start, to: end }}
                   ruleTypeId={ruleTypeId}
-                  element={RED_METRICS_CHART_ELEMENT.THROUGHPUT}
+                  element={APM_CHART_EBT_ELEMENTS.THROUGHPUT}
                 />
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>
         </EuiFlexGroup>
         <EuiFlexGroup direction="row" gutterSize="m">
-          {!!threshold && (
+          {!!threshold && !compact && (
             <EuiFlexItem style={{ minWidth: THRESHOLD_SIDEBAR_MIN_WIDTH }} grow={1}>
               {threshold}
             </EuiFlexItem>
           )}
-          <EuiFlexItem grow={!!threshold ? 5 : undefined}>
+          <EuiFlexItem grow={!!threshold && !compact ? 5 : undefined}>
             <TimeseriesChart
               id="throughput"
               height={200}

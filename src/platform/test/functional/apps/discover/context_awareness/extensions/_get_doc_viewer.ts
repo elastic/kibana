@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+// Serverless test (remove during Scout migration): x-pack/platform/test/serverless/functional/test_suites/discover/context_awareness/extensions/_get_doc_viewer.ts
+
 import kbnRison from '@kbn/rison';
 import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../../ftr_provider_context';
@@ -53,7 +55,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await testSubjects.existOrFail('docViewerTab-doc_view_source');
         await testSubjects.existOrFail('docViewerTab-doc_view_example');
         await testSubjects.existOrFail('docViewerTab-doc_view_restorable_state_example');
-        expect(await testSubjects.getVisibleText('docViewerRowDetailsTitle')).to.be('Record #0');
+        expect(await testSubjects.getVisibleText('docViewerRowDetailsTitle')).to.contain(
+          'Record #1'
+        );
       });
 
       it('should render custom doc viewer header', async () => {

@@ -227,7 +227,9 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
         await expandedFlyoutGraph.assertGraphNodesNumber(3);
 
         // Click on the entity node to show grouped entities
-        await expandedFlyoutGraph.showEntityDetails('9da97a47da11862817d60dcc1cfbaaef');
+        await expandedFlyoutGraph.showEntityDetails(
+          '081f21718bb4b854bda72b01719d0febe88b10520dede17fc2640260002ea339'
+        );
 
         // Verify grouped entities preview panel is open
         await entityFlyout.clickOnEntity('host:host-instance-1');

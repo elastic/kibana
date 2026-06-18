@@ -34,7 +34,7 @@ import { throwRetryableError, throwUnrecoverableError } from './errors';
 import apm from 'elastic-apm-node';
 import { SpanStatusCode, trace } from '@opentelemetry/api';
 import { tracing } from '@elastic/opentelemetry-node/sdk';
-import { executionContextServiceMock, httpServiceMock } from '@kbn/core/server/mocks';
+import { executionContextServiceMock } from '@kbn/core/server/mocks';
 import { usageCountersServiceMock } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counters_service.mock';
 import { bufferedTaskStoreMock } from '../buffered_task_store.mock';
 import {
@@ -2004,6 +2004,60 @@ describe('TaskManagerRunner', () => {
       expect(wasCancelled).toBeTruthy();
     });
 
+    test('does not run heartbeat updates while processing recurring task result', async () => {
+      let sawProcessResultUpdate = false;
+      let heartbeatUpdateCount = 0;
+      let heartbeatCountBeforeProcessResult: number | undefined;
+      const { runner, store } = await readyToRunStageSetup({
+        instance: {
+          id: 'foo',
+          status: TaskStatus.Running,
+          startedAt: new Date(),
+          enabled: true,
+          schedule: { interval: '1m' },
+        },
+        definitions: {
+          bar: {
+            title: 'Bar!',
+            timeout: `365d`,
+            createTaskRunner: () => ({
+              async run() {
+                const promise = new Promise((r) => setTimeout(r, 60000));
+                jest.advanceTimersByTime(60000);
+                await promise;
+                return { state: {} };
+              },
+            }),
+          },
+        },
+      });
+
+      store.partialUpdate.mockImplementation(async (doc) => {
+        if (doc.retryAt && !doc.status) {
+          heartbeatUpdateCount += 1;
+        }
+
+        if (doc.status === TaskStatus.Idle) {
+          sawProcessResultUpdate = true;
+          heartbeatCountBeforeProcessResult = heartbeatUpdateCount;
+          // If heartbeat timer is still running while processResult persists task state,
+          // advancing time here will trigger an additional retryAt update.
+          jest.advanceTimersByTime(60000);
+        }
+        return mockInstance({
+          ...doc,
+          schedule: { interval: '1m' },
+        }) as ConcreteTaskInstance;
+      });
+
+      await runner.run();
+
+      expect(sawProcessResultUpdate).toBe(true);
+      expect(heartbeatUpdateCount).toBeGreaterThan(0);
+      expect(heartbeatCountBeforeProcessResult).toBeDefined();
+      expect(heartbeatUpdateCount).toBe(heartbeatCountBeforeProcessResult);
+    });
+
     describe('TaskEvents', () => {
       test('emits TaskEvent when a task is run successfully', async () => {
         const id = _.random(1, 20).toString();
@@ -2700,6 +2754,95 @@ describe('TaskManagerRunner', () => {
       });
     });
 
+    describe('logTaskRunStartEvent', () => {
+      test('eventLog logs a start event when a task begins running', async () => {
+        const id = _.random(1, 20).toString();
+        const { runner, instance } = await readyToRunStageSetup({
+          instance: { id },
+          definitions: {
+            bar: {
+              title: 'Bar!',
+              createTaskRunner: () => ({
+                async run() {
+                  return { state: {} };
+                },
+              }),
+            },
+          },
+        });
+
+        await runner.run();
+
+        expect(eventLoggerMock.logEvent).toHaveBeenCalledWith({
+          event: {
+            action: 'task-run-start',
+            // start must equal task.startedAt so it aligns with the stored task document
+            start: instance.startedAt?.toISOString(),
+          },
+          kibana: {
+            task: {
+              id,
+              type: 'bar',
+              schedule_delay: expect.any(String),
+              scheduled: expect.any(String),
+            },
+          },
+          message: `Task bar "${id}" started.`,
+        });
+      });
+
+      test('eventLog logs the start event before the end event', async () => {
+        const id = _.random(1, 20).toString();
+        const { runner } = await readyToRunStageSetup({
+          instance: { id },
+          definitions: {
+            bar: {
+              title: 'Bar!',
+              createTaskRunner: () => ({
+                async run() {
+                  return { state: {} };
+                },
+              }),
+            },
+          },
+        });
+
+        await runner.run();
+
+        const calls = (eventLoggerMock.logEvent as jest.Mock).mock.calls;
+        const startCallIndex = calls.findIndex((c) => c[0].event.action === 'task-run-start');
+        const endCallIndex = calls.findIndex((c) => c[0].event.action === 'task-run');
+        expect(startCallIndex).toBeGreaterThanOrEqual(0);
+        expect(endCallIndex).toBeGreaterThanOrEqual(0);
+        expect(startCallIndex).toBeLessThan(endCallIndex);
+      });
+
+      test('eventLog logs a start event even when a task run fails', async () => {
+        const id = _.random(1, 20).toString();
+        const { runner } = await readyToRunStageSetup({
+          instance: { id },
+          definitions: {
+            bar: {
+              title: 'Bar!',
+              createTaskRunner: () => ({
+                async run() {
+                  throw new Error('Dangit!');
+                },
+              }),
+            },
+          },
+        });
+
+        await runner.run();
+
+        expect(eventLoggerMock.logEvent).toHaveBeenCalledWith(
+          expect.objectContaining({
+            event: expect.objectContaining({ action: 'task-run-start' }),
+          })
+        );
+      });
+    });
+
     describe('logTaskRunEvent', () => {
       test('eventLog logs an event when a task is run successfully', async () => {
         const id = _.random(1, 20).toString();
@@ -2833,7 +2976,7 @@ describe('TaskManagerRunner', () => {
           },
           message: `Task bar "${id}" failed.`,
         });
-        expect(eventLoggerMock.logEvent).toHaveBeenCalledTimes(1);
+        expect(eventLoggerMock.logEvent).toHaveBeenCalledTimes(2);
       });
 
       test('eventLog logs failure and cancel events when a recurring task run throws an error due to timeout', async () => {
@@ -2908,7 +3051,7 @@ describe('TaskManagerRunner', () => {
           message: `Task bar "${id}" failed.`,
         });
 
-        expect(eventLoggerMock.logEvent).toHaveBeenCalledTimes(2);
+        expect(eventLoggerMock.logEvent).toHaveBeenCalledTimes(3);
       });
 
       test('eventLog logs failure and cancel events when an ad-hoc task run throws an error due to timeout', async () => {
@@ -3599,7 +3742,6 @@ describe('TaskManagerRunner', () => {
     }
 
     const runner = new TaskManagerRunner({
-      basePathService: httpServiceMock.createBasePath(),
       defaultMaxAttempts: 5,
       beforeRun: (context) => Promise.resolve(context),
       beforeMarkRunning: (context) => Promise.resolve(context),

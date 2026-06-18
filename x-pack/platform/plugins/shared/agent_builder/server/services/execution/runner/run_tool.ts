@@ -29,7 +29,10 @@ import type {
 } from '@kbn/agent-builder-server/runner';
 import { generateFakeToolCallId } from '@kbn/agent-builder-genai-utils/langchain';
 import { createErrorResult } from '@kbn/agent-builder-server';
-import type { InternalToolDefinition } from '@kbn/agent-builder-server/tools';
+import type {
+  InternalToolDefinition,
+  ToolHandlerCallContext,
+} from '@kbn/agent-builder-server/tools';
 import { isToolHandlerStandardReturn } from '@kbn/agent-builder-server/tools';
 import { getToolResultId } from '@kbn/agent-builder-server/tools';
 import { ConfirmationStatus } from '@kbn/agent-builder-common/agents';
@@ -152,9 +155,11 @@ export const runInternalTool = async <TParams = Record<string, unknown>>({
   const startTime = Date.now();
   const toolHandlerContext = await createToolHandlerContext<TParams>({
     toolExecutionParams: {
-      ...toolExecutionParams,
       toolId: tool.id,
+      toolCallId,
+      source,
       toolParams: toolParams as TParams,
+      onEvent: toolExecutionParams.onEvent ?? (() => undefined),
     },
     manager,
   });
@@ -202,6 +207,7 @@ export const runInternalTool = async <TParams = Record<string, unknown>>({
     reportToolCallTelemetry({
       parentManager,
       toolId: tool.id,
+      toolType: tool.type,
       toolCallId,
       source,
       results: resultsWithIds,
@@ -248,14 +254,19 @@ export const runInternalTool = async <TParams = Record<string, unknown>>({
   return runToolReturn;
 };
 
+type ToolHandlerExecutionParams<TParams = Record<string, unknown>> = Pick<
+  Required<ScopedRunnerRunToolsParams<TParams>>,
+  'onEvent' | 'toolId' | 'toolCallId' | 'toolParams' | 'source'
+>;
+
 export const createToolHandlerContext = async <TParams = Record<string, unknown>>({
   manager,
   toolExecutionParams,
 }: {
-  toolExecutionParams: ScopedRunnerRunToolsParams<TParams>;
+  toolExecutionParams: ToolHandlerExecutionParams<TParams>;
   manager: RunnerManager;
 }): Promise<ToolHandlerContext> => {
-  const { onEvent, toolId, toolCallId, toolParams } = toolExecutionParams;
+  const { onEvent, toolId, toolCallId, toolParams, source } = toolExecutionParams;
   const {
     request,
     elasticsearch,
@@ -273,7 +284,15 @@ export const createToolHandlerContext = async <TParams = Record<string, unknown>
     toolManager,
   } = manager.deps;
   const spaceId = getCurrentSpaceId({ request, spaces });
+
+  const callContext: ToolHandlerCallContext = {
+    toolId,
+    toolCallId,
+    callSource: source,
+  };
+
   return {
+    callContext,
     request,
     spaceId,
     logger,
@@ -306,6 +325,7 @@ export const createToolHandlerContext = async <TParams = Record<string, unknown>
     events: createToolEventEmitter({ eventHandler: onEvent, context: manager.context }),
     runContext: manager.context,
     executionMode: manager.deps.executionMode,
+    agentConfiguration: manager.deps.agentConfiguration,
   };
 };
 
@@ -316,6 +336,7 @@ const getAgentExecutionContext = (manager: RunnerManager) => {
 const reportToolCallTelemetry = ({
   parentManager,
   toolId,
+  toolType,
   toolCallId,
   source,
   results,
@@ -323,6 +344,7 @@ const reportToolCallTelemetry = ({
 }: {
   parentManager: RunnerManager;
   toolId: string;
+  toolType: ToolType;
   toolCallId: string;
   source: string;
   results: ToolResult[];
@@ -348,6 +370,7 @@ const reportToolCallTelemetry = ({
         conversationId: agentContext?.conversationId,
         executionId: agentContext?.executionId,
         toolId,
+        toolType,
         toolCallId,
         source,
         errorType: 'tool_error',
@@ -360,6 +383,7 @@ const reportToolCallTelemetry = ({
         conversationId: agentContext?.conversationId,
         executionId: agentContext?.executionId,
         toolId,
+        toolType,
         toolCallId,
         source,
         resultTypes: results.map((r) => r.type),

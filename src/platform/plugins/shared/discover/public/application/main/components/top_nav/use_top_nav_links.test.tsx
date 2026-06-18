@@ -71,8 +71,17 @@ describe('useTopNavLinks', () => {
   const setup = async (hookAttrs: Partial<Parameters<typeof useTopNavLinks>[0]> = {}) => {
     const services = hookAttrs.services ?? createTestServices();
     const toolkit = getDiscoverInternalStateMock({ services });
+    const testDataView = hookAttrs.dataView ?? dataViewMock;
 
     await toolkit.initializeTabs();
+
+    if (hookAttrs.isEsqlMode) {
+      toolkit.internalState.dispatch(
+        toolkit.injectCurrentTab(internalStateActions.setAppState)({
+          appState: { query: { esql: 'FROM test-index' } },
+        })
+      );
+    }
 
     await toolkit.initializeSingleTab({
       tabId: toolkit.getCurrentTab().id,
@@ -81,7 +90,7 @@ describe('useTopNavLinks', () => {
     return renderHook(
       () =>
         useTopNavLinks({
-          dataView: dataViewMock,
+          dataView: testDataView,
           services,
           hasUnsavedChanges: false,
           isEsqlMode: false,
@@ -102,6 +111,8 @@ describe('useTopNavLinks', () => {
 
   it('should return results', async () => {
     const appMenuConfig = await setup();
+    const newItem = appMenuConfig.items?.find((item) => item.id === AppMenuActionId.new);
+    const openItem = appMenuConfig.items?.find((item) => item.id === AppMenuActionId.open);
 
     expect(appMenuConfig.items).toBeDefined();
     expect(appMenuConfig.items?.length).toBeGreaterThan(0);
@@ -110,6 +121,8 @@ describe('useTopNavLinks', () => {
     const itemIds = appMenuConfig.items?.map((item) => item.id);
     expect(itemIds).toContain('new');
     expect(itemIds).toContain('open');
+    expect(newItem?.label).toBe('New session');
+    expect(openItem?.label).toBe('Open session');
 
     // Check primary action item (Save)
     expect(appMenuConfig.primaryActionItem).toBeDefined();
@@ -117,26 +130,38 @@ describe('useTopNavLinks', () => {
   });
 
   describe('when ES|QL mode is true', () => {
-    it('should NOT include the esql item', async () => {
+    it('should include the switch-to-classic item', async () => {
       const appMenuConfig = await setup({
         isEsqlMode: true,
       });
 
-      expect(appMenuConfig.items).toBeDefined();
-      const itemIds = appMenuConfig.items?.map((item) => item.id);
-      expect(itemIds).not.toContain('esql');
+      const switchLanguageModeItem = appMenuConfig.items?.find(
+        (item) => item.testId === 'select-classic-mode-btn'
+      );
+
+      expect(switchLanguageModeItem).toBeDefined();
+      expect(switchLanguageModeItem?.label).toBe('Switch to Classic');
+      expect(switchLanguageModeItem?.tooltipContent).toBe(
+        'Search your data with data views and KQL in Classic Discover'
+      );
     });
   });
 
   describe('when ES|QL mode is false (classic mode)', () => {
-    it('should include the esql item', async () => {
+    it('should include the switch-to-esql item', async () => {
       const appMenuConfig = await setup({
         isEsqlMode: false,
       });
 
-      expect(appMenuConfig.items).toBeDefined();
-      const itemIds = appMenuConfig.items?.map((item) => item.id);
-      expect(itemIds).toContain('esql');
+      const switchLanguageModeItem = appMenuConfig.items?.find(
+        (item) => item.testId === 'select-text-based-language-btn'
+      );
+
+      expect(switchLanguageModeItem).toBeDefined();
+      expect(switchLanguageModeItem?.label).toBe('Query in ES|QL');
+      expect(switchLanguageModeItem?.tooltipContent).toBe(
+        'Search, transform, join, and aggregate your data with ES|QL or PromQL'
+      );
     });
   });
 
@@ -179,7 +204,7 @@ describe('useTopNavLinks', () => {
 
       const exportItem = appMenuConfig.items?.find((item) => item.id === 'export');
       expect(exportItem).toBeDefined();
-      expect(exportItem?.label).toBe('Export');
+      expect(exportItem?.label).toBe('Export tab results');
 
       expect(exportItem?.items).toBeDefined();
       expect(exportItem?.items?.length).toBeGreaterThan(0);
@@ -214,19 +239,12 @@ describe('useTopNavLinks', () => {
   });
 
   describe('inspect menu item', () => {
-    it('should include the inspect menu item when onOpenInspector is provided', async () => {
-      const appMenuConfig = await setup({ onOpenInspector: jest.fn() });
-
-      const inspectItem = appMenuConfig.items?.find((item) => item.id === 'inspect');
-      expect(inspectItem).toBeDefined();
-      expect(inspectItem?.label).toBe('Inspect');
-    });
-
-    it('should NOT include the inspect menu item when onOpenInspector is not provided', async () => {
+    it('should include the inspect menu item', async () => {
       const appMenuConfig = await setup();
 
       const inspectItem = appMenuConfig.items?.find((item) => item.id === 'inspect');
-      expect(inspectItem).toBeUndefined();
+      expect(inspectItem).toBeDefined();
+      expect(inspectItem?.label).toBe('Inspect tab');
     });
   });
 
@@ -269,7 +287,7 @@ describe('useTopNavLinks', () => {
         true
       );
       expect(
-        appMenuConfig.primaryActionItem?.splitButtonProps?.notifcationIndicatorTooltipContent
+        appMenuConfig.primaryActionItem?.splitButtonProps?.notificationIndicatorTooltipContent
       ).toBe('You have unsaved changes');
     });
 
@@ -282,7 +300,7 @@ describe('useTopNavLinks', () => {
         false
       );
       expect(
-        appMenuConfig.primaryActionItem?.splitButtonProps?.notifcationIndicatorTooltipContent
+        appMenuConfig.primaryActionItem?.splitButtonProps?.notificationIndicatorTooltipContent
       ).toBeUndefined();
     });
 
@@ -364,6 +382,15 @@ describe('useTopNavLinks', () => {
 
       const toolkit = getDiscoverInternalStateMock({ services: v2Services });
       await toolkit.initializeTabs();
+
+      if (hookAttrs.isEsqlMode) {
+        toolkit.internalState.dispatch(
+          toolkit.injectCurrentTab(internalStateActions.setAppState)({
+            appState: { query: { esql: 'FROM test-index' } },
+          })
+        );
+      }
+
       await toolkit.initializeSingleTab({
         tabId: toolkit.getCurrentTab().id,
       });
@@ -377,7 +404,6 @@ describe('useTopNavLinks', () => {
         () =>
           useTopNavLinks({
             dataView: dataViewMock,
-            onOpenInspector: jest.fn(),
             services: v2Services,
             hasUnsavedChanges: false,
             isEsqlMode: true,
@@ -401,7 +427,7 @@ describe('useTopNavLinks', () => {
 
       const alertsItem = appMenuConfig.items?.find((item) => item.id === AppMenuActionId.alerts);
       expect(alertsItem).toBeDefined();
-      expect(alertsItem?.label).toBe('Alerts');
+      expect(alertsItem?.label).toBe('Create alert rule');
 
       const createRuleTopLevel = appMenuConfig.items?.find(
         (item) => item.id === AppMenuActionId.createRule
@@ -514,7 +540,6 @@ describe('useTopNavLinks', () => {
             adHocDataViews: [],
             hasShareIntegration: false,
             persistedDiscoverSession: undefined,
-            onOpenInspector: jest.fn(),
             onOpenSaveModal: jest.fn(),
             onOpenSaveAsModal: jest.fn(),
           }),
@@ -558,7 +583,6 @@ describe('useTopNavLinks', () => {
             adHocDataViews: [],
             hasShareIntegration: false,
             persistedDiscoverSession: undefined,
-            onOpenInspector: jest.fn(),
             onOpenSaveModal: jest.fn(),
             onOpenSaveAsModal: jest.fn(),
           }),
@@ -571,6 +595,30 @@ describe('useTopNavLinks', () => {
 
       const alertsItem = appMenuConfig.items?.find((item) => item.id === AppMenuActionId.alerts);
       expect(alertsItem).toBeUndefined();
+    });
+  });
+
+  describe('when there are tab-scoped app menu items', () => {
+    it('should add the separator above the first tab-scoped app menu item', async () => {
+      const services = createTestServices();
+
+      jest.spyOn(services.share!, 'availableIntegrations').mockReturnValue([]);
+
+      let appMenuConfig = await setup({ hasShareIntegration: true, services });
+
+      let exportItem = appMenuConfig.items?.find((item) => item.id === AppMenuActionId.export);
+      let inspectItem = appMenuConfig.items?.find((item) => item.id === AppMenuActionId.inspect);
+
+      expect(exportItem?.separator).toBe('above');
+      expect(inspectItem?.separator).toBeUndefined();
+
+      appMenuConfig = await setup({ services });
+
+      exportItem = appMenuConfig.items?.find((item) => item.id === AppMenuActionId.export);
+      inspectItem = appMenuConfig.items?.find((item) => item.id === AppMenuActionId.inspect);
+
+      expect(exportItem?.separator).toBeUndefined();
+      expect(inspectItem?.separator).toBe('above');
     });
   });
 });

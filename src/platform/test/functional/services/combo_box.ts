@@ -87,7 +87,7 @@ export class ComboBoxService extends FtrService {
   public async getOptions(comboBoxSelector: string) {
     const comboBoxElement = await this.testSubjects.find(comboBoxSelector);
     await this.openOptionsList(comboBoxElement);
-    return await this.find.allByCssSelector('.euiFilterSelectItem', this.WAIT_FOR_EXISTS_TIME);
+    return await this.find.allByCssSelector('.euiComboBoxOption', this.WAIT_FOR_EXISTS_TIME);
   }
 
   /**
@@ -116,7 +116,7 @@ export class ComboBoxService extends FtrService {
 
     if (trimmedValue !== undefined) {
       const selectOptions = await this.find.allByCssSelector(
-        `.euiFilterSelectItem[title="${trimmedValue}"]`,
+        `.euiComboBoxOption[title="${trimmedValue}"]`,
         this.WAIT_FOR_EXISTS_TIME
       );
 
@@ -127,7 +127,7 @@ export class ComboBoxService extends FtrService {
         const alternateTitle = (
           await Promise.all(
             (
-              await this.find.allByCssSelector(`.euiFilterSelectItem`, this.WAIT_FOR_EXISTS_TIME)
+              await this.find.allByCssSelector(`.euiComboBoxOption`, this.WAIT_FOR_EXISTS_TIME)
             ).map(async (e) => {
               const title = (await e.getAttribute('title')) ?? '';
               return { title, formattedTitle: title.toLowerCase().trim() };
@@ -139,7 +139,7 @@ export class ComboBoxService extends FtrService {
 
         const [alternate] = alternateTitle
           ? await this.find.allByCssSelector(
-              `.euiFilterSelectItem[title="${alternateTitle}" i]`,
+              `.euiComboBoxOption[title="${alternateTitle}" i]`,
               this.WAIT_FOR_EXISTS_TIME
             )
           : [];
@@ -154,12 +154,12 @@ export class ComboBoxService extends FtrService {
           this.log.warning(
             `comboBox.setElement - Could not find option [${trimmedValue}], using first`
           );
-          const firstOption = await this.find.byCssSelector('.euiFilterSelectItem', 5000);
+          const firstOption = await this.find.byCssSelector('.euiComboBoxOption', 5000);
           await this.clickOption(options.clickWithMouse, firstOption);
         }
       }
     } else {
-      const firstOption = await this.find.byCssSelector('.euiFilterSelectItem');
+      const firstOption = await this.find.byCssSelector('.euiComboBoxOption');
       await this.clickOption(options.clickWithMouse, firstOption);
     }
     await this.closeOptionsList(comboBoxElement);

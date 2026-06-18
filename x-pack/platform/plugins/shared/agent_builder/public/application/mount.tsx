@@ -13,7 +13,7 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { I18nProvider } from '@kbn/i18n-react';
 import { Router } from '@kbn/shared-ux-router';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { AgentBuilderRoutes } from './routes';
 import type { AgentBuilderInternalService } from '../services';
 import type { AgentBuilderStartDependencies } from '../types';
@@ -21,6 +21,7 @@ import { AgentBuilderServicesContext } from './context/agent_builder_services_co
 import { ActiveSpaceProvider } from './context/active_space_context';
 import { PageWrapper } from './page_wrapper';
 import { AppLeaveContext, type OnAppLeave } from './context/app_leave_context';
+import { StreamingProvider } from './context/streaming/streaming_context';
 
 export const mountApp = async ({
   core,
@@ -56,7 +57,9 @@ export const mountApp = async ({
                     <RedirectAppLinks coreStart={core}>
                       <PageWrapper>
                         <Router history={history}>
-                          <AgentBuilderRoutes />
+                          <StreamingProvider>
+                            <AgentBuilderRoutes />
+                          </StreamingProvider>
                         </Router>
                       </PageWrapper>
                     </RedirectAppLinks>
