@@ -12,15 +12,14 @@ import {
   EuiFlexItem,
   EuiLoadingSpinner,
   EuiText,
-  useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { useChangeHistoryConfig } from '../../provider/use_change_history_config';
 import { useChangeHistoryDetail } from '../../hooks/use_change_history_detail';
+import { getChangeHistoryErrorMessage } from '../../utils/get_change_history_error_message';
 import * as i18n from '../timeline/translations';
 
 export function ChangeHistoryPreviewPanel(): JSX.Element {
-  const { euiTheme } = useEuiTheme();
   const { adapter, objectId, renderPreview, selectedChangeId } = useChangeHistoryConfig();
   const { change, isLoading, error } = useChangeHistoryDetail({
     adapter,
@@ -71,6 +70,8 @@ export function ChangeHistoryPreviewPanel(): JSX.Element {
   }
 
   if (error || !change) {
+    const errorMessage = error ? getChangeHistoryErrorMessage(error) : undefined;
+
     return (
       <EuiFlexGroup
         alignItems="center"
@@ -81,7 +82,18 @@ export function ChangeHistoryPreviewPanel(): JSX.Element {
         data-test-subj="changeHistoryPreviewError"
       >
         <EuiFlexItem grow={false}>
-          <EuiEmptyPrompt iconType="alert" title={<h3>{i18n.PREVIEW_ERROR}</h3>} titleSize="xs" />
+          <EuiEmptyPrompt
+            iconType="alert"
+            title={<h3>{i18n.PREVIEW_ERROR}</h3>}
+            body={
+              errorMessage ? (
+                <EuiText size="s" color="subdued">
+                  <p>{errorMessage}</p>
+                </EuiText>
+              ) : undefined
+            }
+            titleSize="xs"
+          />
         </EuiFlexItem>
       </EuiFlexGroup>
     );
@@ -93,7 +105,7 @@ export function ChangeHistoryPreviewPanel(): JSX.Element {
         height: 100%;
         min-height: 0;
         overflow: auto;
-        padding: ${euiTheme.size.m};
+        padding: 0;
       `}
       data-test-subj="changeHistoryPreview"
     >

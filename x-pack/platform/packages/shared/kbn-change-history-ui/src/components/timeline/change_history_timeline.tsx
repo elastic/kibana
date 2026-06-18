@@ -11,7 +11,6 @@ import {
   EuiFlexItem,
   EuiLoadingSpinner,
   EuiPanel,
-  EuiSpacer,
   EuiText,
   useEuiTheme,
 } from '@elastic/eui';
@@ -78,9 +77,10 @@ export function ChangeHistoryTimeline({
         flex: 1 1 0;
         overflow-y: auto;
         min-height: 0;
-        padding-top: ${euiTheme.size.s};
-        padding-left: ${euiTheme.size.m};
-        padding-right: ${euiTheme.size.m};
+        display: flex;
+        flex-direction: column;
+        gap: ${euiTheme.size.s};
+        padding: ${euiTheme.size.s};
       `,
     }),
     [euiTheme]
@@ -112,16 +112,12 @@ export function ChangeHistoryTimeline({
         ))}
         {onLoadMore && <div ref={sentinelRef} />}
         {isLoading && (
-          <>
-            <EuiSpacer size="s" />
-            <EuiFlexGroup justifyContent="center" alignItems="center" gutterSize="s">
-              <EuiFlexItem grow={false}>
-                <EuiLoadingSpinner size="m" />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </>
+          <EuiFlexGroup justifyContent="center" alignItems="center" gutterSize="s">
+            <EuiFlexItem grow={false}>
+              <EuiLoadingSpinner size="m" />
+            </EuiFlexItem>
+          </EuiFlexGroup>
         )}
-        <EuiSpacer size="s" />
       </div>
       {historyStartedAt && <ChangeHistoryFooter startedAt={historyStartedAt} />}
     </div>

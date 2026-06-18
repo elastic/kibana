@@ -52,6 +52,7 @@ import {
   selectWorkflow,
 } from '../../../entities/workflows/store/workflow_detail/selectors';
 import { setIsTestModalOpen } from '../../../entities/workflows/store/workflow_detail/slice';
+import { WorkflowChangeHistoryEmbed } from '../../../features/change_history';
 import { useKibana } from '../../../hooks/use_kibana';
 import {
   useWorkflowUrlState,
@@ -392,6 +393,14 @@ export const WorkflowDetailHeader = React.memo(
                   />
                 </EuiToolTip>
                 <EuiFlexItem grow={false} css={styles.separator} />
+                {workflowId && !isExecutionsTab ? (
+                  <EuiFlexItem grow={false}>
+                    <WorkflowChangeHistoryEmbed
+                      workflowId={workflowId}
+                      workflowName={workflow?.name}
+                    />
+                  </EuiFlexItem>
+                ) : null}
                 <EuiToolTip content={runWorkflowTooltipContent}>
                   <EuiButtonIcon
                     color="success"

@@ -18,6 +18,13 @@ export const SYSTEM_ACTOR_NAME = i18n.translate(
   }
 );
 
+export const BACK_TO_WORKFLOW = i18n.translate(
+  'xpack.workflowsManagement.changeHistory.backToWorkflow',
+  {
+    defaultMessage: 'Back to workflow',
+  }
+);
+
 const ACTION_LABELS: Record<string, string> = {
   [WorkflowChangeHistoryAction.workflowCreate]: i18n.translate(
     'xpack.workflowsManagement.changeHistory.action.create',

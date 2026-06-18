@@ -14,7 +14,7 @@ export const TIMELINE_ARIA_LABEL = i18n.translate('xpack.changeHistoryUi.timelin
 export const CURRENT_CHANGE_BADGE = i18n.translate(
   'xpack.changeHistoryUi.timeline.currentChangeBadge',
   {
-    defaultMessage: 'Current',
+    defaultMessage: 'Current version',
   }
 );
 
@@ -47,6 +47,14 @@ export const MODAL_TITLE = i18n.translate('xpack.changeHistoryUi.modal.title', {
   defaultMessage: 'Change history',
 });
 
+export const BACK_TO_HOST = i18n.translate('xpack.changeHistoryUi.modal.backToHost', {
+  defaultMessage: 'Back',
+});
+
+export const CLOSE_MODAL = i18n.translate('xpack.changeHistoryUi.modal.close', {
+  defaultMessage: 'Close change history',
+});
+
 export const SELECT_CHANGE_PROMPT = i18n.translate(
   'xpack.changeHistoryUi.modal.selectChangePrompt',
   {
@@ -56,10 +64,6 @@ export const SELECT_CHANGE_PROMPT = i18n.translate(
 
 export const TRIGGER_LABEL = i18n.translate('xpack.changeHistoryUi.modal.triggerLabel', {
   defaultMessage: 'Change history',
-});
-
-export const CLOSE_MODAL = i18n.translate('xpack.changeHistoryUi.modal.close', {
-  defaultMessage: 'Close change history',
 });
 
 export const TIMELINE_PANEL_TITLE = i18n.translate(
@@ -75,4 +79,8 @@ export const PREVIEW_LOADING = i18n.translate('xpack.changeHistoryUi.modal.previ
 
 export const PREVIEW_ERROR = i18n.translate('xpack.changeHistoryUi.modal.previewError', {
   defaultMessage: 'Unable to load change preview',
+});
+
+export const LIST_ERROR = i18n.translate('xpack.changeHistoryUi.modal.listError', {
+  defaultMessage: 'Unable to load change history',
 });

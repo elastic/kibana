@@ -23,7 +23,6 @@ export const ChangeHistoryFooter = memo(function ChangeHistoryFooter({
     <div
       css={css`
         padding: ${euiTheme.size.s} ${euiTheme.size.m};
-        border-top: ${euiTheme.border.thin};
       `}
       data-test-subj="changeHistoryFooter"
     >
@@ -35,7 +34,7 @@ export const ChangeHistoryFooter = memo(function ChangeHistoryFooter({
           <EuiText size="xs" color="subdued">
             <FormattedMessage
               id="xpack.changeHistoryUi.timeline.historyStartedOn"
-              defaultMessage="History started on {date}"
+              defaultMessage="On {date} History started"
               values={{
                 date: (
                   <>

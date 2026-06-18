@@ -67,14 +67,16 @@ export const ChangeHistoryItem = memo(function ChangeHistoryItem({
   return (
     <EuiPanel
       hasBorder
-      color={selected ? 'primary' : undefined}
+      grow={false}
+      paddingSize="s"
       role="button"
       tabIndex={0}
       onClick={onClick}
       onKeyDown={handleKeyDown}
       data-test-subj={`changeHistoryItem-${item.id}`}
       css={css`
-        margin-bottom: ${euiTheme.size.m};
+        margin: 0;
+        ${selected ? `background-color: ${euiTheme.colors.backgroundLightPrimary};` : ''}
 
         &:hover,
         &:focus {
@@ -104,9 +106,10 @@ export const ChangeHistoryItem = memo(function ChangeHistoryItem({
                     white-space: nowrap;
                     overflow: hidden;
                     text-overflow: ellipsis;
+                    font-weight: var(--Font-weight-Semi-Bold, 600);
                   `}
                 >
-                  <strong>{formattedTimestamp}</strong>
+                  {formattedTimestamp}
                 </EuiText>
               </EuiToolTip>
             </EuiFlexItem>
@@ -114,6 +117,10 @@ export const ChangeHistoryItem = memo(function ChangeHistoryItem({
               grow={false}
               css={css`
                 flex-shrink: 0;
+
+                .euiBadge {
+                  font-weight: ${euiTheme.font.weight.regular};
+                }
               `}
             >
               {badge}
@@ -122,7 +129,12 @@ export const ChangeHistoryItem = memo(function ChangeHistoryItem({
         </EuiFlexItem>
 
         <EuiFlexItem grow={false}>
-          <EuiText size="xs">
+          <EuiText
+            size="xs"
+            css={css`
+              font-weight: ${euiTheme.font.weight.regular};
+            `}
+          >
             {item.actor.name}
             {item.changeCount != null && item.changeCount > 0
               ? ` • ${i18n.N_CHANGES(item.changeCount)}`

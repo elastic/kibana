@@ -6,27 +6,25 @@
  */
 
 import React, { useEffect, useMemo } from 'react';
-import {
-  EuiButtonIcon,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiModal,
-  EuiModalBody,
-  EuiModalHeader,
-  EuiModalHeaderTitle,
-  EuiTitle,
-  EuiToolTip,
-  useEuiTheme,
-} from '@elastic/eui';
+import { EuiModal, EuiModalBody, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { ChangeHistoryEmptyPrompt } from '../timeline/change_history_empty_prompt';
+import { ChangeHistoryListErrorPrompt } from '../timeline/change_history_list_error_prompt';
 import { ChangeHistoryTimeline } from '../timeline/change_history_timeline';
 import { useChangeHistoryList } from '../../hooks/use_change_history_list';
 import { useChangeHistoryConfig } from '../../provider/use_change_history_config';
 import { ChangeHistoryPreviewPanel } from './change_history_preview_panel';
-import * as i18n from '../timeline/translations';
+import { ChangeHistoryPreviewShell } from './change_history_preview_shell';
+import { ChangeHistorySidebarPanel } from './change_history_sidebar_panel';
 
-const TIMELINE_PANEL_WIDTH = 400;
+const getHistoryStartedAt = (timestamps: string[]): Date | undefined => {
+  if (timestamps.length === 0) {
+    return undefined;
+  }
+
+  const oldestTimestamp = timestamps[timestamps.length - 1];
+  return oldestTimestamp ? new Date(oldestTimestamp) : undefined;
+};
 
 export function ChangeHistoryModal(): JSX.Element | null {
   const { euiTheme } = useEuiTheme();
@@ -34,6 +32,7 @@ export function ChangeHistoryModal(): JSX.Element | null {
     adapter,
     objectId,
     renderBadge,
+    renderPreviewFooter,
     labels,
     isModalOpen,
     closeModal,
@@ -41,7 +40,7 @@ export function ChangeHistoryModal(): JSX.Element | null {
     setSelectedChangeId,
   } = useChangeHistoryConfig();
 
-  const { items, isLoading, isLoadingMore, loadMore } = useChangeHistoryList({
+  const { items, isLoading, isLoadingMore, error, loadMore } = useChangeHistoryList({
     adapter,
     objectId,
     enabled: isModalOpen,
@@ -57,49 +56,50 @@ export function ChangeHistoryModal(): JSX.Element | null {
 
   const styles = useMemo(
     () => ({
+      modal: css`
+        background-color: ${euiTheme.colors.backgroundBaseSubdued};
+        block-size: 100vh;
+        max-block-size: 100vh !important;
+        inline-size: 100vw !important;
+        max-inline-size: none !important;
+        min-inline-size: 0 !important;
+        border-radius: 0;
+
+        .euiModal__closeIcon {
+          display: none;
+        }
+      `,
       modalBody: css`
-        .euiModalBody__overflow {
+        flex: 1 1 auto;
+        min-height: 0;
+        overflow: hidden;
+
+        &:last-of-type .euiModalBody__overflow {
           flex: 1;
           min-height: 0;
           display: flex;
           flex-direction: column;
           overflow: hidden;
-          padding: 0;
+          padding: ${euiTheme.size.s};
+          padding-block-end: ${euiTheme.size.s};
+          background: ${euiTheme.colors.backgroundBaseSubdued};
         }
       `,
       splitLayout: css`
         flex: 1;
         min-height: 0;
+        height: 100%;
         display: flex;
+        align-items: stretch;
+        gap: ${euiTheme.size.s};
         overflow: hidden;
       `,
-      previewPanel: css`
-        flex: 1 1 auto;
-        min-width: 0;
-        min-height: 0;
-        border-right: ${euiTheme.border.thin};
-      `,
-      timelinePanel: css`
-        flex: 0 0 ${TIMELINE_PANEL_WIDTH}px;
-        min-height: 0;
+      sidebarEmptyState: css`
         display: flex;
-        flex-direction: column;
-        background: ${euiTheme.colors.backgroundBasePlain};
-      `,
-      timelineHeader: css`
-        padding: ${euiTheme.size.m};
-        border-bottom: ${euiTheme.border.thin};
-      `,
-      timelineBody: css`
         flex: 1;
-        min-height: 0;
-      `,
-      fullEmptyState: css`
-        flex: 1;
-        min-height: 0;
-        display: flex;
         align-items: center;
         justify-content: center;
+        padding: ${euiTheme.size.m};
       `,
     }),
     [euiTheme]
@@ -110,65 +110,71 @@ export function ChangeHistoryModal(): JSX.Element | null {
   }
 
   const hasItems = items.length > 0;
-  const showLoadingEmpty = isLoading && !hasItems;
+  const showLoadingSidebar = isLoading && !hasItems && !error;
+  const showListError = Boolean(error) && !hasItems && !isLoading;
+  const historyStartedAt = getHistoryStartedAt(items.map((item) => item.timestamp));
+
+  const previewFooter = renderPreviewFooter?.({
+    objectId,
+    selectedChangeId,
+  });
+
+  const renderSidebarContent = () => {
+    if (showLoadingSidebar) {
+      return <ChangeHistoryTimeline items={[]} isLoading />;
+    }
+
+    if (showListError) {
+      return (
+        <div css={styles.sidebarEmptyState} data-test-subj="changeHistoryModalError">
+          <ChangeHistoryListErrorPrompt error={error} />
+        </div>
+      );
+    }
+
+    if (!hasItems) {
+      return (
+        <div css={styles.sidebarEmptyState} data-test-subj="changeHistoryModalEmpty">
+          <ChangeHistoryEmptyPrompt />
+        </div>
+      );
+    }
+
+    return (
+      <ChangeHistoryTimeline
+        items={items}
+        selectedItemId={selectedChangeId}
+        historyStartedAt={historyStartedAt}
+        isLoading={isLoadingMore}
+        onSelectItem={(item) => setSelectedChangeId(item.id)}
+        onLoadMore={loadMore}
+        renderBadge={renderBadge}
+      />
+    );
+  };
 
   return (
     <EuiModal
       onClose={closeModal}
       maxWidth={false}
-      style={{ width: '100vw', height: '100vh' }}
+      css={styles.modal}
       data-test-subj="changeHistoryModal"
     >
-      <EuiModalHeader>
-        <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-          <EuiFlexItem>
-            <EuiModalHeaderTitle>{labels.modalTitle}</EuiModalHeaderTitle>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiToolTip content={i18n.CLOSE_MODAL} disableScreenReaderOutput>
-              <EuiButtonIcon
-                iconType="cross"
-                aria-label={i18n.CLOSE_MODAL}
-                onClick={closeModal}
-                data-test-subj="changeHistoryModalClose"
-              />
-            </EuiToolTip>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiModalHeader>
       <EuiModalBody css={styles.modalBody}>
-        {showLoadingEmpty ? (
-          <div css={styles.fullEmptyState} data-test-subj="changeHistoryModalLoading">
-            <ChangeHistoryTimeline items={[]} isLoading />
-          </div>
-        ) : !hasItems ? (
-          <div css={styles.fullEmptyState} data-test-subj="changeHistoryModalEmpty">
-            <ChangeHistoryEmptyPrompt />
-          </div>
-        ) : (
-          <div css={styles.splitLayout}>
-            <div css={styles.previewPanel}>
-              <ChangeHistoryPreviewPanel />
-            </div>
-            <div css={styles.timelinePanel}>
-              <div css={styles.timelineHeader}>
-                <EuiTitle size="xs">
-                  <h2>{i18n.TIMELINE_PANEL_TITLE}</h2>
-                </EuiTitle>
-              </div>
-              <div css={styles.timelineBody}>
-                <ChangeHistoryTimeline
-                  items={items}
-                  selectedItemId={selectedChangeId}
-                  isLoading={isLoadingMore}
-                  onSelectItem={(item) => setSelectedChangeId(item.id)}
-                  onLoadMore={loadMore}
-                  renderBadge={renderBadge}
-                />
-              </div>
-            </div>
-          </div>
-        )}
+        <div css={styles.splitLayout}>
+          <ChangeHistoryPreviewShell
+            backLabel={labels.previewBackLabel}
+            title={labels.previewTitle}
+            onBack={closeModal}
+            footer={previewFooter}
+          >
+            <ChangeHistoryPreviewPanel />
+          </ChangeHistoryPreviewShell>
+
+          <ChangeHistorySidebarPanel title={labels.timelinePanelTitle} onClose={closeModal}>
+            {renderSidebarContent()}
+          </ChangeHistorySidebarPanel>
+        </div>
       </EuiModalBody>
     </EuiModal>
   );

@@ -9,6 +9,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import type { ChangeHistoryAdapter } from '../types/change_history_adapter';
 import type { ChangeHistoryBadgeRenderFn } from '../types/change_history_badge';
 import type { ChangeHistoryLabels } from '../types/change_history_labels';
+import type { ChangeHistoryPreviewFooterRenderFn } from '../types/change_history_preview_footer';
 import type { ChangeHistoryPreviewRenderFn } from '../types/change_history_preview';
 import { ChangeHistoryContext } from './change_history_context';
 import * as i18n from '../components/timeline/translations';
@@ -17,6 +18,7 @@ export interface ChangeHistoryProviderProps {
   objectId: string;
   adapter: ChangeHistoryAdapter;
   renderPreview: ChangeHistoryPreviewRenderFn;
+  renderPreviewFooter?: ChangeHistoryPreviewFooterRenderFn;
   renderBadge?: ChangeHistoryBadgeRenderFn;
   labels?: ChangeHistoryLabels;
   children: React.ReactNode;
@@ -26,6 +28,7 @@ export const ChangeHistoryProvider = ({
   objectId,
   adapter,
   renderPreview,
+  renderPreviewFooter,
   renderBadge,
   labels,
   children,
@@ -55,9 +58,12 @@ export const ChangeHistoryProvider = ({
       objectId,
       adapter,
       renderPreview,
+      renderPreviewFooter,
       renderBadge,
       labels: {
-        modalTitle: labels?.modalTitle ?? i18n.MODAL_TITLE,
+        previewBackLabel: labels?.previewBackLabel ?? i18n.BACK_TO_HOST,
+        previewTitle: labels?.previewTitle ?? labels?.modalTitle ?? '',
+        timelinePanelTitle: labels?.timelinePanelTitle ?? i18n.TIMELINE_PANEL_TITLE,
       },
       isModalOpen,
       openModal,
@@ -71,10 +77,14 @@ export const ChangeHistoryProvider = ({
       handleSelectChangeId,
       isModalOpen,
       labels?.modalTitle,
+      labels?.previewBackLabel,
+      labels?.previewTitle,
+      labels?.timelinePanelTitle,
       objectId,
       openModal,
       renderBadge,
       renderPreview,
+      renderPreviewFooter,
       selectedChangeId,
     ]
   );

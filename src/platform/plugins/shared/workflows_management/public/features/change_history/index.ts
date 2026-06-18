@@ -7,6 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+export { WorkflowChangeHistoryEmbed } from './workflow_change_history_embed';
+export type { WorkflowChangeHistoryEmbedProps } from './workflow_change_history_embed';
+export {
+  useWorkflowChangeHistoryAdapter,
+  useWorkflowChangeHistoryEnabled,
+  useWorkflowVersioningEnabled,
+} from './use_workflow_change_history';
+export { renderWorkflowChangeHistoryPreview } from './workflow_change_history_preview';
+export { renderWorkflowChangeHistoryBadge } from './workflow_change_history_badge';
 export { createWorkflowChangeHistoryAdapter } from './workflow_change_history_adapter';
 export {
   mapWorkflowHistoryItemToDetail,
