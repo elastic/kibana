@@ -117,6 +117,31 @@ describe('WaitForInputStepImpl', () => {
       });
     });
 
+    it('should persist externalResumeApiKeyId from the with block', async () => {
+      node.configuration.with = {
+        message: 'Approve',
+        externalResumeApiKeyId: '{{ steps.mint.output.apiKeyId }}',
+      } as WaitForInputStep['with'];
+      (
+        mockStepExecutionRuntime.contextManager.renderValueAccordingToContext as jest.Mock
+      ).mockImplementation((v: unknown) =>
+        v === '{{ steps.mint.output.apiKeyId }}' ? 'api-key-id' : v
+      );
+
+      underTest = new WaitForInputStepImpl(
+        node,
+        mockStepExecutionRuntime,
+        mockWorkflowRuntime,
+        workflowLogger
+      );
+      await underTest.run();
+
+      expect(mockStepExecutionRuntime.setInput).toHaveBeenCalledWith({
+        message: 'Approve',
+        externalResumeApiKeyId: 'api-key-id',
+      });
+    });
+
     it('should not call setInput when the with block is absent', async () => {
       node.configuration = {
         name: 'wait-for-input-step',
@@ -338,6 +363,17 @@ describe('WaitForInputStepSchema', () => {
     const result = WaitForInputStepSchema.safeParse({
       name: 'approve',
       type: 'waitForInput',
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it('should accept externalResumeApiKeyId on the with block', () => {
+    const result = WaitForInputStepSchema.safeParse({
+      name: 'approve',
+      type: 'waitForInput',
+      with: {
+        externalResumeApiKeyId: '{{ steps.mint.output.apiKeyId }}',
+      },
     });
     expect(result.success).toBe(true);
   });

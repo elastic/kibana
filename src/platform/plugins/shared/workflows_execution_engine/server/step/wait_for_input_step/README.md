@@ -17,6 +17,7 @@ steps:
 - **`type`**: Must be `"waitForInput"`
 - **`with.message`**: Message displayed to the human reviewer (optional)
 - **`with.schema`**: JSON Schema describing the expected input payload (optional). When provided, the resume UI renders validation and autocomplete from the schema, and default values are pre-filled
+- **`with.externalResumeApiKeyId`**: API key id from a prior `workflows.publicApiAccess` step. Binds external resume requests to this pause (for example `{{ steps.mint-public-access.output.apiKeyId }}`).
 
 ## Execution Flow
 
