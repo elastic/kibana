@@ -429,6 +429,60 @@ describe('ManagedWorkflowsService', () => {
       );
     });
 
+    it('sets document.version to 1 on managed create when versioning is enabled', async () => {
+      const definition = createDefinition();
+      mockManagedWorkflowDefinitions = [definition];
+      const { crudService, service } = createService();
+      crudService.isWorkflowVersioningEnabled.mockReturnValue(true);
+      crudService.getWorkflowDocumentWithVersion.mockResolvedValue(null);
+
+      await service.installManagedWorkflow(WORKFLOW_ID, { spaceId: SPACE_ID }, definition.pluginId);
+
+      const indexedDocument = getIndexedDocument(crudService);
+      expect(indexedDocument.version).toBe(INITIAL_WORKFLOW_VERSION);
+      expect(crudService.createWorkflowDocument).toHaveBeenCalledWith(
+        WORKFLOW_ID,
+        SPACE_ID,
+        expect.objectContaining({ version: INITIAL_WORKFLOW_VERSION })
+      );
+    });
+
+    it('does not set document.version on managed create when versioning is disabled', async () => {
+      const definition = createDefinition();
+      mockManagedWorkflowDefinitions = [definition];
+      const { crudService, service } = createService();
+      crudService.isWorkflowVersioningEnabled.mockReturnValue(false);
+      crudService.prepareWorkflowDocumentForStorage.mockImplementation(
+        async ({ id, yaml, actor, now, spaceId }) => {
+          const enabled = getYamlEnabled(yaml);
+          return {
+            workflowData: createWorkflowSource({
+              name: id,
+              enabled,
+              yaml,
+              definition: { name: id, enabled } as WorkflowYaml,
+              createdBy: actor,
+              lastUpdatedBy: actor,
+              spaceId,
+              created_at: now.toISOString(),
+              updated_at: now.toISOString(),
+            }),
+          };
+        }
+      );
+      crudService.getWorkflowDocumentWithVersion.mockResolvedValue(null);
+
+      await service.installManagedWorkflow(WORKFLOW_ID, { spaceId: SPACE_ID }, definition.pluginId);
+
+      const indexedDocument = getIndexedDocument(crudService);
+      expect(indexedDocument).not.toHaveProperty('version');
+      expect(crudService.createWorkflowDocument).toHaveBeenCalledWith(
+        WORKFLOW_ID,
+        SPACE_ID,
+        expect.not.objectContaining({ version: expect.anything() })
+      );
+    });
+
     it('bumps document.version from the existing document on managed update when versioning is enabled', async () => {
       const definition = createDefinition({ version: 2 });
       mockManagedWorkflowDefinitions = [definition];
