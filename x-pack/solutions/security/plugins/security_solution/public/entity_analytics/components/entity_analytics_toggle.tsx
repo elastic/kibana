@@ -114,7 +114,7 @@ export const EntityAnalyticsToggle: React.FC<EntityAnalyticsToggleProps> = ({
       <EuiSpacer size="m" />
       <EuiFlexItem grow={false}>
         <EuiFlexGroup gutterSize="s" alignItems="center">
-          {isLoading && (
+          {(isLoading || isStatusLoading) && (
             <EuiFlexItem grow={false}>
               <EuiLoadingSpinner
                 data-test-subj={ENTITY_ANALYTICS_STATUS_LOADING_TEST_ID}

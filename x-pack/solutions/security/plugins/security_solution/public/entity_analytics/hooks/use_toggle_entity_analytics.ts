@@ -149,7 +149,7 @@ export const useToggleEntityAnalytics = ({
   }, [entityStoreStatus, installEntityStoreMutation, startEntityStoreMutation]);
 
   const toggle = useCallback(async () => {
-    if (isLoading) {
+    if (isLoading || isStatusLoading) {
       return;
     }
 
@@ -181,6 +181,7 @@ export const useToggleEntityAnalytics = ({
     }
   }, [
     isLoading,
+    isStatusLoading,
     riskEngineStatus,
     entityStoreStatus,
     addSuccess,

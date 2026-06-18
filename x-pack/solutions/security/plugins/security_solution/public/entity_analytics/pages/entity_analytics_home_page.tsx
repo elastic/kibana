@@ -65,6 +65,8 @@ import { useEntityEnginePrivileges } from '../components/entity_store/hooks/use_
 import { EntityAnalyticsReadPrivilegesCallout } from '../components/entity_analytics_read_privileges_callout';
 import { useLeadGenerationPrivileges } from '../api/hooks/use_lead_generation_privileges';
 import { NoPrivileges } from '../../common/components/no_privileges';
+import { useEntityStoreStatus } from '../components/entity_store/hooks/use_entity_store';
+import { EntityStoreDisabledEmptyPrompt } from './entity_store_disabled_empty_prompt';
 
 const PAGE_TITLE = i18n.translate('xpack.securitySolution.entityAnalytics.homePage.pageTitle', {
   defaultMessage: 'Entity analytics',
@@ -203,6 +205,11 @@ const EntityAnalyticsHomePageContent = () => {
 
   const showEmptyPrompt = !indicesExist;
 
+  const { data: entityStoreStatusData } = useEntityStoreStatus();
+  const entityStoreDisabled =
+    entityStoreStatusData?.status === 'not_installed' ||
+    entityStoreStatusData?.status === 'stopped';
+
   const handleOpenFlyout = useCallback(() => setIsFlyoutOpen(true), []);
   const handleCloseFlyout = useCallback(() => setIsFlyoutOpen(false), []);
 
@@ -224,6 +231,10 @@ const EntityAnalyticsHomePageContent = () => {
 
   if (showEmptyPrompt) {
     return <EmptyPrompt />;
+  }
+
+  if (entityStoreDisabled) {
+    return <EntityStoreDisabledEmptyPrompt />;
   }
 
   return (
