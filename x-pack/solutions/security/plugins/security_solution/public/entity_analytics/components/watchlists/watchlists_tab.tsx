@@ -10,7 +10,7 @@ import { EuiButton, EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } 
 import { FormattedMessage } from '@kbn/i18n-react';
 import { FF_ENABLE_ENTITY_STORE_V2 } from '@kbn/entity-store/public';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
-import { StoreStatusEnum } from '../../../../common/api/entity_analytics/entity_store/common.gen';
+import { StoreStatusEnum } from '../../../../common/entity_analytics/entity_store/types';
 import { useSpaceId } from '../../../common/hooks/use_space_id';
 import { useUiSetting } from '../../../common/lib/kibana';
 import { WatchlistsFlyoutKey } from '../../../flyout/entity_details/shared/constants';

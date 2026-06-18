@@ -54,6 +54,7 @@ interface ToggleOptions {
 interface UseToggleEntityAnalyticsReturn {
   status: EntityAnalyticsStatus;
   isLoading: boolean;
+  isStatusLoading: boolean;
   toggle: () => Promise<void>;
   errors: EntityAnalyticsErrors;
 }
@@ -110,6 +111,8 @@ export const useToggleEntityAnalytics = ({
   const entityStoreStatus = entityStoreStatusQuery.data?.status;
   const riskEngineState = summarizeOperations(riskEngineMutations);
   const entityStoreState = summarizeOperations(entityStoreMutations);
+
+  const isStatusLoading = entityStoreStatusQuery.isLoading || riskEngineStatusQuery.isLoading;
 
   const isLoading =
     isToggling || riskEngineState.isPending || entityStoreState.isPending || isSavingSettings;
@@ -193,6 +196,7 @@ export const useToggleEntityAnalytics = ({
   return {
     status,
     isLoading,
+    isStatusLoading,
     toggle,
     errors,
   };

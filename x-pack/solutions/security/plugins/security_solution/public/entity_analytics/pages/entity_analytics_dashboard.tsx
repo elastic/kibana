@@ -21,6 +21,7 @@ import { EntityAnalyticsAnomalies } from '../components/entity_analytics_anomali
 import { EntityStoreDashboardPanels } from '../components/entity_store/components/dashboard_entity_store_panels';
 import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 import { useDataView } from '../../data_view_manager/hooks/use_data_view';
+import { useEntityAnalyticsTypes } from '../hooks/use_enabled_entity_types';
 import { PageLoader } from '../../common/components/page_loader';
 import { EaMlJobCallout } from '../components/ea_ml_job_callout';
 

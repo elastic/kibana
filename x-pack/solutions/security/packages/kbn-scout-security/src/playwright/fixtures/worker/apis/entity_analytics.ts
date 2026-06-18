@@ -183,7 +183,7 @@ export const getEntityAnalyticsApiService = ({
         async () => {
           const response = await kbnClient.request<GetEntityStoreStatusResponse>({
             method: 'GET',
-            path: `${basePath}${ENTITY_STORE_V2_STATUS_URL}`,
+            path: `${basePath}${ENTITY_STORE_STATUS_URL}`,
             headers: {
               'elastic-api-version': API_VERSIONS.public.v1,
             },
