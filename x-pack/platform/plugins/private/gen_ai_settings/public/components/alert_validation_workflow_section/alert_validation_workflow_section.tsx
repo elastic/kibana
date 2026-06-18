@@ -97,11 +97,12 @@ export const AlertValidationWorkflowSection: React.FC = () => {
       );
     },
     onError: (error) => {
+      const fetchError = error as { body?: { message?: string }; message?: string } | null;
       notifications.toasts.addDanger({
         title: i18n.translate('xpack.genAiSettings.alertValidationWorkflow.saveErrorMessage', {
           defaultMessage: 'Failed to save alert validation workflow settings',
         }),
-        text: error?.body?.message ?? error?.message,
+        text: fetchError?.body?.message ?? fetchError?.message,
       });
     },
   });

@@ -22,6 +22,7 @@ describe('managed workflows', () => {
     install: jest.fn().mockResolvedValue(undefined),
     uninstall: jest.fn().mockResolvedValue(undefined),
     ready: jest.fn().mockResolvedValue(undefined),
+    getWorkflowStatus: jest.fn().mockResolvedValue(undefined),
     execute: jest.fn().mockResolvedValue('execution-id'),
   });
 

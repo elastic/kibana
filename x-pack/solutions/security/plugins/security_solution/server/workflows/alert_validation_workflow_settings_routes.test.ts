@@ -33,7 +33,13 @@ describe('registerAlertValidationWorkflowSettingsRoutes', () => {
   let getStartServices: jest.MockedFunction<StartServicesAccessor<StartPlugins>>;
   let mockResponse: ReturnType<typeof httpServerMock.createResponseFactory>;
   let uiSettingsClient: { get: jest.Mock; set: jest.Mock };
-  let managedWorkflowsClient: { install: jest.Mock };
+  let managedWorkflowsClient: {
+    install: jest.Mock;
+    uninstall: jest.Mock;
+    ready: jest.Mock;
+    getWorkflowStatus: jest.Mock;
+    execute: jest.Mock;
+  };
 
   const createContext = (): SecuritySolutionRequestHandlerContext => {
     const securitySolutionContext = {
@@ -51,7 +57,7 @@ describe('registerAlertValidationWorkflowSettingsRoutes', () => {
     httpServerMock.createKibanaRequest({
       method: body ? 'put' : 'get',
       path: ALERT_VALIDATION_WORKFLOW_SETTINGS_ROUTE,
-      body,
+      body: body as Record<string, unknown>,
     });
 
   beforeEach(() => {
@@ -64,6 +70,10 @@ describe('registerAlertValidationWorkflowSettingsRoutes', () => {
     };
     managedWorkflowsClient = {
       install: jest.fn().mockResolvedValue(undefined),
+      uninstall: jest.fn().mockResolvedValue(undefined),
+      ready: jest.fn().mockResolvedValue(undefined),
+      getWorkflowStatus: jest.fn().mockResolvedValue(undefined),
+      execute: jest.fn().mockResolvedValue('mock-execution-id'),
     };
 
     (coreStart.uiSettings.asScopedToClient as jest.Mock).mockReturnValue(uiSettingsClient);
