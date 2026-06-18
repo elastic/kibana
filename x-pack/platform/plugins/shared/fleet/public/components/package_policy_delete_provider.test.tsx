@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-import { act, fireEvent } from '@testing-library/react';
+import { act, fireEvent, waitFor } from '@testing-library/react';
 
 import { EuiContextMenuItem } from '@elastic/eui';
 

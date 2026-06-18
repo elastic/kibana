@@ -243,7 +243,6 @@ export const PackagePolicyDeleteProvider: React.FunctionComponent<Props> = ({
         {isDeletingFleetServer && (
           <>
             <EuiCallOut
-              announceOnMount={false}
               color="danger"
               iconType="warning"
               title={
