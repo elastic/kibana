@@ -399,6 +399,11 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
         }
         searchQuery={search.query}
         isLoading={showLoadingBar}
+        onSortChange={(field, order) =>
+          setSearch({ ...search, sortField: field, sortOrder: order, page: 1 })
+        }
+        sortField={search.sortField}
+        sortOrder={search.sortOrder}
         onToggleWorkflow={handleToggleWorkflow}
         onDeleteWorkflow={handleDeleteWorkflow}
         onCloneWorkflow={handleCloneWorkflow}
