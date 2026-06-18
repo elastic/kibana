@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import yaml from 'js-yaml';
+import { stringify as yamlStringify } from 'yaml';
 import { CASES_URL, CASE_EXTENDED_FIELDS } from '@kbn/cases-plugin/common/constants';
 import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import { deleteAllCaseItems, createCase } from '../../../../common/lib/api';
@@ -18,7 +18,7 @@ const buildFieldDef = (name: string, type = 'keyword', isGlobal = true) => ({
   name,
   owner: 'securitySolutionFixture',
   isGlobal,
-  definition: yaml.dump({ name, type, control: 'INPUT_TEXT', label: name }),
+  definition: yamlStringify({ name, type, control: 'INPUT_TEXT', label: name }),
 });
 
 export default ({ getService }: FtrProviderContext): void => {
@@ -72,7 +72,7 @@ export default ({ getService }: FtrProviderContext): void => {
           .send({
             name: 'Test Template',
             owner: 'securitySolutionFixture',
-            definition: yaml.dump({
+            definition: yamlStringify({
               name: 'Test Template',
               fields: [
                 { name: 'summary', type: 'keyword', control: 'INPUT_TEXT', label: 'Summary' },
@@ -203,7 +203,7 @@ export default ({ getService }: FtrProviderContext): void => {
           .send({
             name: 'Test Template',
             owner: 'securitySolutionFixture',
-            definition: yaml.dump({
+            definition: yamlStringify({
               name: 'Test Template',
               fields: [],
             }),
