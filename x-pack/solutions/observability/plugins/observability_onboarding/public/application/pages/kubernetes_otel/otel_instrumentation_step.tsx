@@ -62,6 +62,23 @@ const OTEL_LANGUAGE_OPTIONS: Array<{ id: OtelLanguageId; label: string }> = [
   },
 ];
 
+const getPodsAnnotationSnippet = (languageId: OtelLanguageId): string => `apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: myapp
+spec:
+  ...
+  template:
+    metadata:
+      annotations:
+        instrumentation.opentelemetry.io/inject-${languageId}: "${OTEL_STACK_NAMESPACE}/elastic-instrumentation"
+      ...
+    spec:
+      containers:
+      - image: myapplication-image
+        name: app
+      ...`;
+
 const ANNOTATION_MODE_OPTIONS: Array<KubernetesCardOption<OtelAnnotationMode>> = [
   {
     id: 'pods',
@@ -165,22 +182,7 @@ export const OtelInstrumentationStep: React.FC = () => {
               isCopyable={true}
               data-test-subj="observabilityOnboardingKubernetesOtelInstrumentationPodsSnippet"
             >
-              {`apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: myapp
-spec:
-  ...
-  template:
-    metadata:
-      annotations:
-        instrumentation.opentelemetry.io/inject-${languageId}: "${OTEL_STACK_NAMESPACE}/elastic-instrumentation"
-      ...
-    spec:
-      containers:
-      - image: myapplication-image
-        name: app
-      ...`}
+              {getPodsAnnotationSnippet(languageId)}
             </EuiCodeBlock>
           ) : (
             <EuiCodeBlock
