@@ -45,6 +45,7 @@ describe('ExitForeachNodeImpl', () => {
 
     stepIoService = {
       evictStaleLoopOutputs: jest.fn(),
+      unpinForeachScope: jest.fn(),
     } as unknown as StepIoService;
 
     workflowGraph = {
