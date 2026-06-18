@@ -223,7 +223,7 @@ on_failure:
       value:
         - 'failed in Fleet agent event_ingested_pipeline: {{ _ingest.on_failure_message }}'`;
 
-export const FLEET_FINAL_PIPELINE_VERSION = 4;
+export const FLEET_FINAL_PIPELINE_VERSION = 5;
 
 // If the content is updated you probably need to update the FLEET_FINAL_PIPELINE_VERSION too to allow upgrade of the pipeline
 export const FLEET_FINAL_PIPELINE_CONTENT = `---
@@ -299,6 +299,14 @@ processors:
             return "missing";
           }
 
+          // Some datasets are written by Kibana rather than agents.
+          // Kibana is trusted to accurately report agent.id for these datasets.
+          if (ctx?._security?.username == 'elastic/kibana'
+              && params?.kibana_user_allowed_datasets != null
+              && params.kibana_user_allowed_datasets.contains(ctx?.data_stream?.dataset)) {
+            return "verified";
+          }
+
           // Check auth metadata from API key.
           if (ctx?._security?.authentication_type == null
               // Agents only use API keys.
@@ -333,6 +341,9 @@ processors:
             realm: found
           - username: elastic
             realm: reserved
+        # Datasets written by Kibana (elastic/kibana user) that are allowed to bypass API key verification.
+        kibana_user_allowed_datasets:
+          - elastic_agent.status_change
   - remove:
       field: _security
       ignore_missing: true
