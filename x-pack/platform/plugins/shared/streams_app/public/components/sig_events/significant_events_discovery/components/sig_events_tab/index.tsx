@@ -237,7 +237,7 @@ export const SigEventsTab = () => {
   };
 
   const handleQueryChange: StreamsAppSearchBarProps['onQueryChange'] = (queryPayload) => {
-    setSearchQuery(String(queryPayload.query ?? ''));
+    setSearchQuery(String(queryPayload.query?.query ?? ''));
   };
 
   return (

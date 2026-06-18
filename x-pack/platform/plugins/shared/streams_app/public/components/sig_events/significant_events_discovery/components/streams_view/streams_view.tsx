@@ -100,7 +100,7 @@ export function StreamsView() {
   };
 
   const handleQueryChange: StreamsAppSearchBarProps['onQueryChange'] = (queryPayload) => {
-    setSearchText(String(queryPayload.query ?? ''));
+    setSearchText(String(queryPayload.query?.query ?? ''));
   };
 
   return (
