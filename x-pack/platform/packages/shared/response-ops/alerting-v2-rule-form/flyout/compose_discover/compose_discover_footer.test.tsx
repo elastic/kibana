@@ -56,17 +56,15 @@ const Wrapper = ({
   );
 };
 
-const renderFooter = (
-  {
-    stateOverrides = {},
-    formValues = {},
-    propsOverrides = {},
-  }: {
-    stateOverrides?: Partial<ComposeDiscoverState>;
-    formValues?: Partial<ComposeFormValues>;
-    propsOverrides?: Partial<ComposeDiscoverFooterProps>;
-  } = {}
-) => {
+const renderFooter = ({
+  stateOverrides = {},
+  formValues = {},
+  propsOverrides = {},
+}: {
+  stateOverrides?: Partial<ComposeDiscoverState>;
+  formValues?: Partial<ComposeFormValues>;
+  propsOverrides?: Partial<ComposeDiscoverFooterProps>;
+} = {}) => {
   const onNext = jest.fn();
   const onFinalSubmit = jest.fn();
   const onYamlSave = jest.fn();

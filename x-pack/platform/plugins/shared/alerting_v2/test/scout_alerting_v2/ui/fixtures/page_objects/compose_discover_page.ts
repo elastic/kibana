@@ -73,9 +73,7 @@ export class ComposeDiscoverPage {
     this.createEsqlRuleButton = this.page.testSubj.locator('createEsqlRuleButton');
     this.createEsqlRuleCard = this.page.testSubj.locator('createEsqlRuleCard');
     this.cancelButton = this.page.testSubj.locator('composeDiscoverCancel');
-    this.breachQueryMissingCallout = this.page.testSubj.locator(
-      'composeDiscoverAlertQueryMissing'
-    );
+    this.breachQueryMissingCallout = this.page.testSubj.locator('composeDiscoverAlertQueryMissing');
   }
 
   editRuleButton(ruleId: string) {
