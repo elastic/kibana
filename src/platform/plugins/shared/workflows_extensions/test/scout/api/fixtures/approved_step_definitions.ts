@@ -113,6 +113,10 @@ export const APPROVED_STEP_DEFINITIONS: Array<{ id: string; definitionHash: stri
     definitionHash: 'a78432b7b4396bb8ad9a6821ffbfdeef12135525e849ff48c70f5830ab6a18dc',
   },
   {
+    id: 'cases.pushCases',
+    definitionHash: '35fe57a4996b0495c3ab850e6b628d2c0bea19bde3960146793069f12fc6c2af',
+  },
+  {
     id: 'cases.setCustomField',
     definitionHash: '4743e7ebb05a662caa089c2596edf6887b0665f67073dede6de28fc696e108e1',
   },
