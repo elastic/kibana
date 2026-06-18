@@ -1455,7 +1455,7 @@
     "launchdarkly-js-client-sdk": "3.9.1",
     "liquidjs": "10.26.0",
     "lodash": "4.18.1",
-    "lru-cache": "11.3.6",
+    "lru-cache": "11.5.1",
     "lz-string": "1.5.0",
     "magic-bytes.js": "1.12.1",
     "mapbox-gl-draw-rectangle-mode": "1.0.4",
