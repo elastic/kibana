@@ -46,12 +46,23 @@ function compactLargeEnums(node: unknown): unknown {
   return result;
 }
 
-function zodToJsonSchemaSafe(schema: z.ZodType): unknown {
+export class SchemaTranslationError extends Error {
+  constructor(message: string, public readonly cause?: unknown) {
+    super(message);
+    this.name = 'SchemaTranslationError';
+  }
+}
+
+function zodToJsonSchema(schema: z.ZodType): unknown {
   try {
     const jsonSchema = z.toJSONSchema(schema, { target: 'draft-7', unrepresentable: 'any' });
     return compactLargeEnums(jsonSchema);
-  } catch {
-    return undefined;
+  } catch (e) {
+    const message = e instanceof Error ? e.message : String(e);
+    throw new SchemaTranslationError(
+      `Failed to convert Zod schema to JSON Schema: ${message}`,
+      e
+    );
   }
 }
 
@@ -178,11 +189,10 @@ function formatVariantSchemas(jsonSchema: unknown): string {
  * Intended for embedding in the skill's `referencedContent`.
  */
 export const generateRuleSchemaDoc = (): string => {
-  const jsonSchema = zodToJsonSchemaSafe(createRuleDataBaseSchema);
+  const jsonSchema = zodToJsonSchema(createRuleDataBaseSchema);
   const fields = jsonSchemaToFieldTable(jsonSchema);
   const fieldTable = formatFieldTable(fields);
 
-  const queryField = fields.find((f) => f.name === 'query');
   let queryVariants = '';
   if (jsonSchema && typeof jsonSchema === 'object') {
     const schema = jsonSchema as JsonSchemaNode;
@@ -213,7 +223,7 @@ export const generateRuleSchemaDoc = (): string => {
  * Generates concise markdown documentation for the manage_rule tool operations.
  */
 export const generateRuleOperationsDoc = (): string => {
-  const jsonSchema = zodToJsonSchemaSafe(ruleOperationSchema);
+  const jsonSchema = zodToJsonSchema(ruleOperationSchema);
   const variants = formatVariantSchemas(jsonSchema);
 
   return [
@@ -229,7 +239,7 @@ export const generateRuleOperationsDoc = (): string => {
  * Generates concise markdown documentation from the create-action-policy Zod schema.
  */
 export const generateActionPolicySchemaDoc = (): string => {
-  const jsonSchema = zodToJsonSchemaSafe(createActionPolicyDataSchema);
+  const jsonSchema = zodToJsonSchema(createActionPolicyDataSchema);
   const fields = jsonSchemaToFieldTable(jsonSchema);
   const fieldTable = formatFieldTable(fields);
 

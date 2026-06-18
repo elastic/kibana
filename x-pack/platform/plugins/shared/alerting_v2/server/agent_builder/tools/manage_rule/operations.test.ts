@@ -290,8 +290,12 @@ describe('executeRuleOperations', () => {
         },
       ];
 
-      await expect(executeRuleOperations({}, ops)).rejects.toThrow(
+      const promise = executeRuleOperations({}, ops);
+      await expect(promise).rejects.toThrow(
         'recovery_strategy "query" requires a recovery block'
+      );
+      await expect(executeRuleOperations({}, ops)).rejects.toBeInstanceOf(
+        RuleOperationValidationError
       );
     });
 
@@ -312,22 +316,6 @@ describe('executeRuleOperations', () => {
       expect(result.data.recovery_strategy).toBe('query');
     });
 
-    it('wraps recovery cross-field errors as RuleOperationValidationError', async () => {
-      const ops: RuleOperation[] = [
-        {
-          operation: 'set_query',
-          query: {
-            format: 'standalone',
-            breach: { query: 'FROM metrics-* | WHERE cpu > 0.9' },
-          },
-          recovery_strategy: 'query',
-        },
-      ];
-
-      await expect(executeRuleOperations({}, ops)).rejects.toBeInstanceOf(
-        RuleOperationValidationError
-      );
-    });
   });
 
   describe('set_grouping with column validation', () => {
