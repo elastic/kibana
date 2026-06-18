@@ -765,32 +765,33 @@ test.describe('Rules list', { tag: tags.stateful.classic }, () => {
     // Select only enabled → 2 rules (enabled + snoozed)
     await page.testSubj.click('ruleStatusFilterButton');
     await page.testSubj.click('ruleStatusFilterOption-enabled');
-    await expect(getTableRows(page)).toHaveCount(2);
     await waitForListStable();
+    await expect(getTableRows(page)).toHaveCount(2);
 
     // Add disabled → all 4
     await page.testSubj.click('ruleStatusFilterOption-disabled');
-    await expect(getTableRows(page)).toHaveCount(4);
     await waitForListStable();
+    await expect(getTableRows(page)).toHaveCount(4);
 
     // Deselect enabled → only disabled (2)
     await page.testSubj.click('ruleStatusFilterOption-enabled');
-    await expect(getTableRows(page)).toHaveCount(2);
     await waitForListStable();
+    await expect(getTableRows(page)).toHaveCount(2);
 
     // Deselect disabled, select snoozed → only snoozed (2)
     await page.testSubj.click('ruleStatusFilterOption-disabled');
     await page.testSubj.click('ruleStatusFilterOption-snoozed');
-    await expect(getTableRows(page)).toHaveCount(2);
     await waitForListStable();
+    await expect(getTableRows(page)).toHaveCount(2);
 
     // Add disabled → disabled + snoozed (3)
     await page.testSubj.click('ruleStatusFilterOption-disabled');
-    await expect(getTableRows(page)).toHaveCount(3);
     await waitForListStable();
+    await expect(getTableRows(page)).toHaveCount(3);
 
     // Add enabled → all 4
     await page.testSubj.click('ruleStatusFilterOption-enabled');
+    await waitForListStable();
     await expect(getTableRows(page)).toHaveCount(4);
 
     // Close filter panel
