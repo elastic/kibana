@@ -50,7 +50,7 @@ describe('LanguageModal', () => {
     });
   });
 
-  const renderModal = (analytics?: { reportEvent: jest.Mock }) =>
+  const renderModal = (analytics: { reportEvent: jest.Mock } = { reportEvent: reportEventMock }) =>
     render(<LanguageModal closeModal={closeModal} analytics={analytics as any} />, {
       wrapper: Wrapper,
     });
@@ -90,23 +90,6 @@ describe('LanguageModal', () => {
 
     expect(onChangeMock).not.toHaveBeenCalled();
     expect(reportEventMock).not.toHaveBeenCalled();
-    expect(closeModal).toHaveBeenCalled();
-  });
-
-  it('does not report event when analytics is not provided', () => {
-    (useLanguage as jest.Mock).mockReturnValue({
-      value: 'ja-JP',
-      initialValue: 'en',
-      isLoading: false,
-      isVisible: true,
-      onChange: onChangeMock,
-    });
-
-    const { getByTestId } = renderModal(undefined);
-
-    fireEvent.click(getByTestId('languageModalSaveButton'));
-
-    expect(onChangeMock).toHaveBeenCalledWith('ja-JP', true);
     expect(closeModal).toHaveBeenCalled();
   });
 

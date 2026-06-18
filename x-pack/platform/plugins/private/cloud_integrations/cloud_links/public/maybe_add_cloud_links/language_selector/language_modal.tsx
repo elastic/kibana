@@ -37,7 +37,7 @@ const betaBadgeStyle = ({ euiTheme }: Theme) => css`
 
 interface Props {
   closeModal: () => void;
-  analytics?: AnalyticsServiceStart;
+  analytics: AnalyticsServiceStart;
 }
 
 export const LanguageModal: FC<Props> = ({ closeModal, analytics }) => {
@@ -118,7 +118,7 @@ export const LanguageModal: FC<Props> = ({ closeModal, analytics }) => {
           onClick={() => {
             if (locale !== initialLocaleValue) {
               onChange(locale, true);
-              analytics?.reportEvent('display_language_changed', {
+              analytics.reportEvent('display_language_changed', {
                 from: initialLocaleValue,
                 to: locale,
               });
