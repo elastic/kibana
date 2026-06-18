@@ -20,30 +20,26 @@ import type {
 } from '@elastic/charts';
 import { Chart, Partition, Position, Settings, TooltipType, Tooltip } from '@elastic/charts';
 import { ESQL_TABLE_TYPE } from '@kbn/data-plugin/common';
-import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import type { UseEuiTheme } from '@elastic/eui';
-import { euiFontSize, useEuiTheme } from '@elastic/eui';
-import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
+import { useEuiTheme } from '@elastic/eui';
 import type { PaletteRegistry } from '@kbn/coloring';
+import type { FieldFormat } from '@kbn/field-formats-plugin/common';
 import type { ChartsPluginSetup } from '@kbn/charts-plugin/public';
 import { LegendToggle } from '@kbn/charts-plugin/public';
 import type { PersistedState } from '@kbn/visualizations-common';
 import {
+  ChartTooltipFooterMessage,
   getColumnByAccessor,
   getComputedColumnWarningForColumns,
+  getOverridesFor,
+  DEFAULT_LEGEND_SIZE,
+  LegendSizeToPixels,
 } from '@kbn/chart-expressions-common';
 import type {
   Datatable,
   DatatableColumn,
   IInterpreterRenderHandlers,
 } from '@kbn/expressions-plugin/public';
-import type { FieldFormat } from '@kbn/field-formats-plugin/common';
-import {
-  getOverridesFor,
-  DEFAULT_LEGEND_SIZE,
-  LegendSizeToPixels,
-} from '@kbn/chart-expressions-common';
 import { useKbnPalettes } from '@kbn/palettes';
 import { useAppFixedViewport } from '@kbn/core-rendering-browser';
 import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
@@ -91,25 +87,6 @@ declare global {
     _echDebugStateFlag?: boolean;
   }
 }
-
-const chartTooltipFooterMessageStyles = {
-  root: (euiThemeContext: UseEuiTheme) =>
-    css`
-      color: ${euiThemeContext.euiTheme.colors.textSubdued};
-      ${euiFontSize(euiThemeContext, 'xs', { unit: 'px' })};
-      font-weight: ${euiThemeContext.euiTheme.font.weight.regular};
-    `,
-};
-
-/** Renders a styled message in the footer of the chart tooltip. */
-const ChartTooltipFooterMessage: React.FC<{ message: string }> = ({ message }) => {
-  const styles = useMemoCss(chartTooltipFooterMessageStyles);
-  return (
-    <div css={styles.root} data-test-subj="chartTooltipFooterMessage">
-      {message}
-    </div>
-  );
-};
 
 export type PartitionVisComponentProps = Omit<
   PartitionChartProps,

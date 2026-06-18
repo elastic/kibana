@@ -9,9 +9,6 @@
 
 import type { FC } from 'react';
 import React, { memo, useMemo, useState, useCallback, useRef } from 'react';
-import { css } from '@emotion/react';
-import { euiFontSize, type UseEuiTheme } from '@elastic/eui';
-import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import moment from 'moment';
 import { ESQL_TABLE_TYPE } from '@kbn/data-plugin/common';
 import type {
@@ -33,18 +30,17 @@ import type { CustomPaletteState } from '@kbn/charts-plugin/public';
 import { search } from '@kbn/data-plugin/public';
 import { LegendToggle, EmptyPlaceholder, useActiveCursor } from '@kbn/charts-plugin/public';
 import {
+  ChartTooltipFooterMessage,
   getAccessorByDimension,
   getFormatByAccessor,
   getComputedColumnWarningForColumns,
-} from '@kbn/chart-expressions-common';
-import { i18n } from '@kbn/i18n';
-import type { DatatableColumn } from '@kbn/expressions-plugin/public';
-import { IconChartHeatmap } from '@kbn/chart-icons';
-import {
   getOverridesFor,
   DEFAULT_LEGEND_SIZE,
   LegendSizeToPixels,
 } from '@kbn/chart-expressions-common';
+import { i18n } from '@kbn/i18n';
+import type { DatatableColumn } from '@kbn/expressions-plugin/public';
+import { IconChartHeatmap } from '@kbn/chart-icons';
 import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
 import type { CoreSetup } from '@kbn/core/public';
 
@@ -287,25 +283,6 @@ export function getDateFormatPattern(
   // Fallback to default date format
   return uiSettings.get('dateFormat');
 }
-
-const chartTooltipFooterMessageStyles = {
-  root: (euiThemeContext: UseEuiTheme) =>
-    css`
-      color: ${euiThemeContext.euiTheme.colors.textSubdued};
-      ${euiFontSize(euiThemeContext, 'xs', { unit: 'px' })};
-      font-weight: ${euiThemeContext.euiTheme.font.weight.regular};
-    `,
-};
-
-/** Renders a styled message in the footer of the chart tooltip. */
-const ChartTooltipFooterMessage: React.FC<{ message: string }> = ({ message }) => {
-  const styles = useMemoCss(chartTooltipFooterMessageStyles);
-  return (
-    <div css={styles.root} data-test-subj="chartTooltipFooterMessage">
-      {message}
-    </div>
-  );
-};
 
 export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
   ({

@@ -38,7 +38,7 @@ import {
   LEGACY_LIGHT_THEME,
 } from '@elastic/charts';
 import { partition } from 'lodash';
-import { euiFontSize, type IconType, type UseEuiTheme } from '@elastic/eui';
+import { type IconType } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import type { PaletteRegistry } from '@kbn/coloring';
@@ -54,6 +54,7 @@ import { useActiveCursor } from '@kbn/charts-plugin/public';
 import type { ChartSizeSpec } from '@kbn/chart-expressions-common';
 import type { PersistedState } from '@kbn/visualizations-common';
 import {
+  ChartTooltipFooterMessage,
   DEFAULT_LEGEND_SIZE,
   LegendSizeToPixels,
   getLegendLayout,
@@ -64,7 +65,6 @@ import {
 import { useAppFixedViewport } from '@kbn/core-rendering-browser';
 import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
 import type { AlertRuleFromVisUIActionData } from '@kbn/alerts-ui-shared';
-import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import type {
   FilterEvent,
   BrushEvent,
@@ -199,25 +199,6 @@ function getIconForSeriesType(layer: CommonXYDataLayerConfig): IconType {
     )?.icon || 'empty'
   );
 }
-
-const chartTooltipFooterMessageStyles = {
-  root: (euiThemeContext: UseEuiTheme) =>
-    css`
-      color: ${euiThemeContext.euiTheme.colors.textSubdued};
-      ${euiFontSize(euiThemeContext, 'xs', { unit: 'px' })};
-      font-weight: ${euiThemeContext.euiTheme.font.weight.regular};
-    `,
-};
-
-/** Renders a styled message in the footer of the chart tooltip. */
-const ChartTooltipFooterMessage: React.FC<{ message: string }> = ({ message }) => {
-  const styles = useMemoCss(chartTooltipFooterMessageStyles);
-  return (
-    <div css={styles.root} data-test-subj="chartTooltipFooterMessage">
-      {message}
-    </div>
-  );
-};
 
 export const XYChartReportable = React.memo(XYChart);
 
