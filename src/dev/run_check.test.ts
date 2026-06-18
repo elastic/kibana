@@ -158,6 +158,11 @@ describe('run_check', () => {
       warningCount: 0,
     });
     mockExecuteTypeCheckValidation.mockResolvedValue({ projectCount: 2 });
+    mockExeca.mockResolvedValue({
+      exitCode: 0,
+      stdout: '',
+      stderr: '',
+    });
 
     // Default: successful Moon jest run
     mockRunJestViaMoon.mockResolvedValue({
@@ -277,7 +282,11 @@ describe('run_check', () => {
 
     await handler(createArgs());
 
-    expect(mockExeca).not.toHaveBeenCalled();
+    expect(mockExeca).not.toHaveBeenCalledWith(
+      process.execPath,
+      expect.arrayContaining(['scripts/jest']),
+      expect.anything()
+    );
     expect(mockRunJestViaMoon).toHaveBeenCalled();
   });
 
@@ -301,7 +310,11 @@ describe('run_check', () => {
 
     await handler(createArgs());
 
-    expect(mockExeca).not.toHaveBeenCalled();
+    expect(mockExeca).not.toHaveBeenCalledWith(
+      process.execPath,
+      expect.arrayContaining(['scripts/jest']),
+      expect.anything()
+    );
     expect(mockRunJestViaMoon).toHaveBeenCalled();
   });
 
@@ -325,7 +338,11 @@ describe('run_check', () => {
 
     await handler(createArgs());
 
-    expect(mockExeca).not.toHaveBeenCalled();
+    expect(mockExeca).not.toHaveBeenCalledWith(
+      process.execPath,
+      expect.arrayContaining(['scripts/jest']),
+      expect.anything()
+    );
     expect(mockRunJestViaMoon).toHaveBeenCalled();
   });
 

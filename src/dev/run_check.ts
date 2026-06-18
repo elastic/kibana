@@ -274,52 +274,10 @@ run(
         baseContext.runContext.kind === 'full' ||
         baseContext.contract.testMode === 'all');
 
-    // ── lint ───────────────────────────────────────────────────────────
-
-    {
-      const { log, captured } = createSilentLog();
-      const progress = startProgress('lint');
-      try {
-        const result = await executeEslintValidation({ baseContext, log, fix });
-        if (!result) {
-          progress.writeResult(line('lint', '—', 'no files changed'));
-        } else if (result.failedFiles.length > 0) {
-          progress.writeResult(line('lint', '✗', 'failed', progress.elapsed()));
-          if (captured.length > 0) {
-            writeln('');
-            for (const msg of captured) writeln(`    ${msg}`);
-          }
-          writeln(`    $ node scripts/eslint ${result.failedFiles.join(' ')}`);
-          writeln('');
-          errors.push(new Error('eslint failed'));
-        } else {
-          const notes: string[] = [];
-          if (result.fixedFiles.length > 0) {
-            notes.push(`fixed ${pluralize(result.fixedFiles.length, 'file')}`);
-          }
-          if (result.warningCount > 0) {
-            notes.push(pluralize(result.warningCount, 'warning'));
-          }
-          const suffix = notes.length > 0 ? ` (${notes.join(', ')})` : '';
-          progress.writeResult(
-            line(
-              'lint',
-              result.warningCount > 0 ? '⚠' : '✓',
-              `${pluralize(result.fileCount, 'file')}${suffix}`,
-              progress.elapsed()
-            )
-          );
-          if (verbose && result.fixedFiles.length > 0) {
-            for (const file of result.fixedFiles) {
-              writeln(`         fixed: ${file}`);
-            }
-          }
-        }
-      } catch (error) {
-        progress.writeResult(line('lint', '✗', 'failed', progress.elapsed()));
-        errors.push(error instanceof Error ? error : new Error(String(error)));
-      }
-    }
+    // Steps run in a fixed order: tsproj → moon → lint → jest → tsc.
+    // @kbn/ts-projects is cached for the process; tsproj autofixes tsconfigs in a
+    // subprocess, so lint/tsc must not load TS_PROJECTS until those fixes are on disk.
+    // Do not reorder or add top-level imports that pull in @kbn/ts-projects earlier.
 
     // ── ts projects ────────────────────────────────────────────────────
 
@@ -404,6 +362,53 @@ run(
         }
       } catch (error) {
         moonProgress.writeResult(line('moon', '✗', 'failed', moonProgress.elapsed()));
+        errors.push(error instanceof Error ? error : new Error(String(error)));
+      }
+    }
+
+    // ── lint ───────────────────────────────────────────────────────────
+
+    {
+      const { log, captured } = createSilentLog();
+      const progress = startProgress('lint');
+      try {
+        const result = await executeEslintValidation({ baseContext, log, fix });
+        if (!result) {
+          progress.writeResult(line('lint', '—', 'no files changed'));
+        } else if (result.failedFiles.length > 0) {
+          progress.writeResult(line('lint', '✗', 'failed', progress.elapsed()));
+          if (captured.length > 0) {
+            writeln('');
+            for (const msg of captured) writeln(`    ${msg}`);
+          }
+          writeln(`    $ node scripts/eslint ${result.failedFiles.join(' ')}`);
+          writeln('');
+          errors.push(new Error('eslint failed'));
+        } else {
+          const notes: string[] = [];
+          if (result.fixedFiles.length > 0) {
+            notes.push(`fixed ${pluralize(result.fixedFiles.length, 'file')}`);
+          }
+          if (result.warningCount > 0) {
+            notes.push(pluralize(result.warningCount, 'warning'));
+          }
+          const suffix = notes.length > 0 ? ` (${notes.join(', ')})` : '';
+          progress.writeResult(
+            line(
+              'lint',
+              result.warningCount > 0 ? '⚠' : '✓',
+              `${pluralize(result.fileCount, 'file')}${suffix}`,
+              progress.elapsed()
+            )
+          );
+          if (verbose && result.fixedFiles.length > 0) {
+            for (const file of result.fixedFiles) {
+              writeln(`         fixed: ${file}`);
+            }
+          }
+        }
+      } catch (error) {
+        progress.writeResult(line('lint', '✗', 'failed', progress.elapsed()));
         errors.push(error instanceof Error ? error : new Error(String(error)));
       }
     }
