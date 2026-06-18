@@ -33,6 +33,7 @@ describe('DescriptionField', () => {
 
     expect(screen.getByTestId('ruleDescriptionInput')).toBeInTheDocument();
     expect(screen.getByText('Description')).toBeInTheDocument();
+    expect(screen.getByText('optional')).toBeInTheDocument();
   });
 
   it('displays textarea directly when initial description value exists', () => {
@@ -57,9 +58,7 @@ describe('DescriptionField', () => {
 
     await user.click(screen.getByTestId('addDescriptionButton'));
 
-    expect(
-      screen.getByPlaceholderText('Add an optional description for this rule...')
-    ).toBeInTheDocument();
+    expect(screen.getByPlaceholderText('Add a description for this rule')).toBeInTheDocument();
   });
 
   it('updates value when user types in textarea', async () => {
@@ -73,15 +72,15 @@ describe('DescriptionField', () => {
     expect(textarea).toHaveValue('My new description');
   });
 
-  it('renders correctly in flyout layout', async () => {
-    const user = userEvent.setup();
+  it('renders the description field with optional label in flyout layout', () => {
     render(<DescriptionField />, {
       wrapper: createFormWrapper({}, createMockServices(), { layout: 'flyout' }),
     });
 
-    await user.click(screen.getByTestId('addDescriptionButton'));
-
     expect(screen.getByTestId('ruleDescriptionInput')).toBeInTheDocument();
+    expect(screen.getByText('optional')).toBeInTheDocument();
+    expect(screen.getByPlaceholderText('Add a description for this rule')).toBeInTheDocument();
+    expect(screen.queryByTestId('addDescriptionButton')).not.toBeInTheDocument();
   });
 
   it('keeps textarea visible after clearing the value', async () => {

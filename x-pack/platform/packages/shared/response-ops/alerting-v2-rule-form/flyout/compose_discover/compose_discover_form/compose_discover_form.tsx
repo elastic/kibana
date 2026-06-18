@@ -18,7 +18,7 @@ import type {
 } from '../types';
 import { getStepIds, getBuilderStepIds } from '../use_compose_discover_state';
 import type { ComposeFormValues } from '../compose_form_types';
-import { getBreachQuery } from '../compose_form_types';
+import { isQueryDefined } from '../compose_form_types';
 import type { RuleFormServices } from '../../../form/contexts/rule_form_context';
 import { RULE_BUILDER_REGISTRY } from '../rule_builder';
 import { isActionValid } from '../../../actions_form';
@@ -35,6 +35,7 @@ interface Props {
   services: RuleFormServices;
   onRecoveryTypeChange: (type: RecoveryType) => void;
   onKindChange: (kind: 'signal' | 'alert') => void;
+  onSeparateBaseAndAlert?: () => void;
   isEditing: boolean;
   ruleId?: string;
   builderType?: string;
@@ -52,20 +53,11 @@ const STEP_REGISTRY: Record<StepDefinition['id'], StepDefinition> = {
         dispatch={props.dispatch}
         services={props.services}
         onKindChange={props.onKindChange}
+        onSeparateBaseAndAlert={props.onSeparateBaseAndAlert}
         isEditing={props.isEditing}
       />
     ),
-    validate: (methods, s) => {
-      if (!s.queryCommitted) {
-        return false;
-      }
-      const kind = methods.getValues('kind');
-      const query = methods.getValues('query');
-      if (kind === 'alert' && query.format === 'composed') {
-        return query.base.trim().length > 0 && query.breach.segment.trim().length > 0;
-      }
-      return getBreachQuery(query).trim().length > 0;
-    },
+    validate: (methods, s) => s.queryCommitted && isQueryDefined(methods.getValues('query')),
   },
   builderCondition: {
     id: 'builderCondition',
@@ -73,7 +65,7 @@ const STEP_REGISTRY: Record<StepDefinition['id'], StepDefinition> = {
       defaultMessage: 'Alert Condition',
     }),
     render: () => null,
-    validate: (_methods, s) => s.queryCommitted,
+    validate: (methods, s) => s.queryCommitted && isQueryDefined(methods.getValues('query')),
   },
   recoveryCondition: {
     id: 'recoveryCondition',
@@ -162,6 +154,7 @@ export const ComposeDiscoverForm = ({
   services,
   onRecoveryTypeChange,
   onKindChange,
+  onSeparateBaseAndAlert,
   isEditing,
   ruleId,
   builderType,
@@ -175,6 +168,7 @@ export const ComposeDiscoverForm = ({
     services,
     onRecoveryTypeChange,
     onKindChange,
+    onSeparateBaseAndAlert,
     isEditing,
     ruleId,
     renderBuilderRecovery,

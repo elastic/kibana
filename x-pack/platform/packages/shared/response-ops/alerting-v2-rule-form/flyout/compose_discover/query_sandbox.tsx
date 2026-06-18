@@ -13,6 +13,7 @@ import {
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiLink,
   EuiLoadingSpinner,
   EuiPanel,
   EuiSelect,
@@ -21,6 +22,7 @@ import {
   EuiTab,
   EuiTabs,
   EuiText,
+  EuiTitle,
   EuiToolTip,
   type EuiDataGridColumn,
   type EuiDataGridCellValueElementProps,
@@ -78,12 +80,87 @@ export interface QuerySandboxProps {
     onRecoveryEditorMount?: (editor: monaco.editor.IStandaloneCodeEditor) => void;
     readOnly?: boolean;
   };
+  /** Unified mode — opt into base/alert split editors via helper link. */
+  onEditManually?: () => void;
+  /** Split mode — return to a single editor via helper link. */
+  onUseSingleEditor?: () => void;
+  /** Show ES|QL title and helper text in unified alert mode (before first apply). */
+  showUnifiedQueryHeader?: boolean;
+  /** YAML mode — title, manual-split helper, and tabs (no unified/split toggle icons). */
+  showYamlQueryHeader?: boolean;
+  /** Recovery step — title and helper; single editor for the recovery block (no tab bar). */
+  showRecoveryQueryHeader?: boolean;
+  /** Signal rules — title and helper on the condition step (single editor, no split copy). */
+  showSignalQueryHeader?: boolean;
+  /** Query executed for Search/preview when it differs from the editor value (recovery step). */
+  previewQuery?: string;
+  onEditorMount?: (editor: monaco.editor.IStandaloneCodeEditor) => void;
 }
 
 const VISIBLE_ROWS = 10;
 const INITIAL_EDITOR_HEIGHT = 200;
 const MIN_EDITOR_HEIGHT = 80;
 const MAX_EDITOR_HEIGHT = 600;
+
+const ESQL_QUERY_TITLE = i18n.translate(
+  'xpack.alertingV2.composeDiscover.querySandbox.esqlQueryTitle',
+  { defaultMessage: 'ES|QL query' }
+);
+
+const SEPARATE_BASE_AND_ALERT_LABEL = i18n.translate(
+  'xpack.alertingV2.composeDiscover.querySandbox.separateBaseAndAlertButton',
+  { defaultMessage: 'Separate base and alert' }
+);
+
+const USE_SINGLE_EDITOR_LABEL = i18n.translate(
+  'xpack.alertingV2.composeDiscover.querySandbox.useSingleEditorButton',
+  { defaultMessage: 'Use single editor' }
+);
+
+const UNIFIED_QUERY_HELPER_TEXT = i18n.translate(
+  'xpack.alertingV2.composeDiscover.querySandbox.unifiedQueryHelperText',
+  {
+    defaultMessage:
+      "We'll automatically identify the base query and alert condition when you apply changes.",
+  }
+);
+
+const MANUAL_SPLIT_QUERY_HELPER_TEXT = i18n.translate(
+  'xpack.alertingV2.composeDiscover.querySandbox.manualSplitQueryHelperText',
+  {
+    defaultMessage:
+      'Define the base query and alert condition separately. Automatic query splitting is disabled in this mode.',
+  }
+);
+
+const YAML_QUERY_HELPER_TEXT = i18n.translate(
+  'xpack.alertingV2.composeDiscover.querySandbox.yamlQueryHelperText',
+  {
+    defaultMessage:
+      'Edit in YAML view or in this query sandbox. Apply changes to update the YAML. Each query block is on its own tab.',
+  }
+);
+
+const RECOVERY_QUERY_TITLE = i18n.translate(
+  'xpack.alertingV2.composeDiscover.querySandbox.recoveryQueryTitle',
+  { defaultMessage: 'Recovery condition' }
+);
+
+const RECOVERY_QUERY_HELPER_TEXT = i18n.translate(
+  'xpack.alertingV2.composeDiscover.querySandbox.recoveryQueryHelperText',
+  {
+    defaultMessage:
+      'Define when the alert should recover. This ES|QL block is evaluated against the base query.',
+  }
+);
+
+const SIGNAL_QUERY_HELPER_TEXT = i18n.translate(
+  'xpack.alertingV2.composeDiscover.querySandbox.signalQueryHelperText',
+  {
+    defaultMessage:
+      'Define what to detect with ES|QL. Each match is recorded as a signal for querying and investigation, without alert lifecycle or notifications.',
+  }
+);
 
 const isMac = typeof navigator !== 'undefined' && /Mac|iPod|iPhone|iPad/.test(navigator.userAgent);
 const RUN_SHORTCUT_LABEL = isMac ? '⌘⏎' : 'Ctrl+Enter';
@@ -97,6 +174,14 @@ export const QuerySandbox: React.FC<QuerySandboxProps> = ({
   onDateRangeChange,
   autoRun = false,
   tabProps,
+  onEditManually,
+  onUseSingleEditor,
+  showUnifiedQueryHeader = false,
+  showYamlQueryHeader = false,
+  showRecoveryQueryHeader = false,
+  showSignalQueryHeader = false,
+  previewQuery,
+  onEditorMount,
 }) => {
   const services = useRuleFormServices();
   const isReadOnly = !onQueryChange;
@@ -107,12 +192,96 @@ export const QuerySandbox: React.FC<QuerySandboxProps> = ({
     return TAB_DEFINITIONS.filter((t) => tabProps.tabs.includes(t.id));
   }, [tabProps?.tabs]);
 
+  const showEsqlQueryHeader = Boolean(
+    showUnifiedQueryHeader ||
+      showYamlQueryHeader ||
+      showRecoveryQueryHeader ||
+      showSignalQueryHeader ||
+      onEditManually ||
+      onUseSingleEditor
+  );
+  const showTabsBelowHeader =
+    splitTabs.length > 0 &&
+    Boolean(tabProps) &&
+    showEsqlQueryHeader &&
+    !showRecoveryQueryHeader;
+  const showTabsWithoutHeader =
+    splitTabs.length > 0 && Boolean(tabProps) && !showEsqlQueryHeader && !showRecoveryQueryHeader;
+  const showEditorChrome =
+    showEsqlQueryHeader || showTabsBelowHeader || showTabsWithoutHeader;
+  const querySectionTitle = showRecoveryQueryHeader ? RECOVERY_QUERY_TITLE : ESQL_QUERY_TITLE;
+
+  const queryHelperContent = useMemo(() => {
+    if (showRecoveryQueryHeader) {
+      return RECOVERY_QUERY_HELPER_TEXT;
+    }
+
+    if (showSignalQueryHeader) {
+      return SIGNAL_QUERY_HELPER_TEXT;
+    }
+
+    if (showYamlQueryHeader) {
+      return YAML_QUERY_HELPER_TEXT;
+    }
+
+    if (onUseSingleEditor) {
+      return (
+        <>
+          {MANUAL_SPLIT_QUERY_HELPER_TEXT}{' '}
+          <FormattedMessage
+            id="xpack.alertingV2.composeDiscover.querySandbox.useSingleEditorHelperLink"
+            defaultMessage="Prefer one editor? {link}"
+            values={{
+              link: (
+                <EuiLink onClick={onUseSingleEditor} data-test-subj="querySandboxUseSingleEditor">
+                  {USE_SINGLE_EDITOR_LABEL}
+                </EuiLink>
+              ),
+            }}
+          />
+        </>
+      );
+    }
+
+    if (onEditManually) {
+      return (
+        <>
+          {UNIFIED_QUERY_HELPER_TEXT}{' '}
+          <FormattedMessage
+            id="xpack.alertingV2.composeDiscover.querySandbox.separateBaseAndAlertHelperLink"
+            defaultMessage="Prefer to edit them separately? {link}"
+            values={{
+              link: (
+                <EuiLink
+                  onClick={onEditManually}
+                  data-test-subj="querySandboxSeparateBaseAndAlert"
+                >
+                  {SEPARATE_BASE_AND_ALERT_LABEL}
+                </EuiLink>
+              ),
+            }}
+          />
+        </>
+      );
+    }
+
+    return UNIFIED_QUERY_HELPER_TEXT;
+  }, [
+    showRecoveryQueryHeader,
+    showSignalQueryHeader,
+    showYamlQueryHeader,
+    onUseSingleEditor,
+    onEditManually,
+  ]);
+
+  const executionQuery = previewQuery ?? query;
+
   const timeRange = useMemo(
     () => ({ from: dateRange.dateStart, to: dateRange.dateEnd }),
     [dateRange.dateStart, dateRange.dateEnd]
   );
 
-  const queryForFields = /^\s*FROM\s+[a-zA-Z0-9_.*-]/i.test(query) ? query : '';
+  const queryForFields = /^\s*FROM\s+[a-zA-Z0-9_.*-]/i.test(executionQuery) ? executionQuery : '';
   const { data: fieldMap } = useDataFields({
     query: queryForFields,
     http: services.http,
@@ -155,7 +324,7 @@ export const QuerySandbox: React.FC<QuerySandboxProps> = ({
     hasRun,
     lastExecutedQuery,
   } = useQueryExecution({
-    query,
+    query: executionQuery,
     timeField,
     timeRange,
     data: services.data,
@@ -226,6 +395,40 @@ export const QuerySandbox: React.FC<QuerySandboxProps> = ({
 
   return (
     <div data-test-subj="querySandbox">
+      {showEditorChrome && (
+        <>
+          {showEsqlQueryHeader && (
+            <>
+              <EuiTitle size="xs" data-test-subj="querySandboxEsqlQueryTitle">
+                <h3>{querySectionTitle}</h3>
+              </EuiTitle>
+              <EuiSpacer size="xs" />
+              <EuiText size="xs" color="subdued" data-test-subj="querySandboxSeparateQueryHelper">
+                {queryHelperContent}
+              </EuiText>
+              <EuiSpacer size="s" />
+            </>
+          )}
+          {(showTabsBelowHeader || showTabsWithoutHeader) && tabProps && (
+            <>
+              <EuiTabs>
+                {splitTabs.map((tab) => (
+                  <EuiTab
+                    key={tab.id}
+                    isSelected={tabProps.activeTab === tab.id}
+                    onClick={() => tabProps.onTabChange(tab.id)}
+                    data-test-subj={`querySandboxTab-${tab.id}`}
+                  >
+                    {tab.label}
+                  </EuiTab>
+                ))}
+              </EuiTabs>
+              <EuiSpacer size="s" />
+            </>
+          )}
+        </>
+      )}
+
       <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap={false}>
         <CpsPicker />
         <EuiFlexItem grow={false} style={{ width: 200, minWidth: 0 }}>
@@ -280,24 +483,6 @@ export const QuerySandbox: React.FC<QuerySandboxProps> = ({
       </EuiFlexGroup>
       <EuiSpacer size="s" />
 
-      {splitTabs.length > 0 && tabProps && (
-        <>
-          <EuiTabs>
-            {splitTabs.map((tab) => (
-              <EuiTab
-                key={tab.id}
-                isSelected={tabProps.activeTab === tab.id}
-                onClick={() => tabProps.onTabChange(tab.id)}
-                data-test-subj={`querySandboxTab-${tab.id}`}
-              >
-                {tab.label}
-              </EuiTab>
-            ))}
-          </EuiTabs>
-          <EuiSpacer size="s" />
-        </>
-      )}
-
       <EuiPanel hasBorder paddingSize="s" style={{ ...editorPanelStyles }}>
         {tabProps && hasTabs ? (
           <ComposeDiscoverTabs
@@ -321,6 +506,7 @@ export const QuerySandbox: React.FC<QuerySandboxProps> = ({
             value={query}
             onChange={(v) => onQueryChange?.(v)}
             height="100%"
+            editorDidMount={onEditorMount}
             options={{
               minimap: { enabled: false },
               automaticLayout: true,

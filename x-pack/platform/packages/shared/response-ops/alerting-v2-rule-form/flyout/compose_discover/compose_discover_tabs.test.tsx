@@ -74,6 +74,23 @@ describe('ComposeDiscoverTabs', () => {
     expect(onAlertEditorMount).not.toHaveBeenCalled();
   });
 
+  it('renders the locked base query above the recovery block editor', () => {
+    render(
+      <ComposeDiscoverTabs
+        {...defaultProps}
+        activeTab="recovery"
+        tabs={['recovery']}
+        hideTabBar
+        onRecoveryEditorMount={jest.fn()}
+      />
+    );
+
+    const editors = screen.getAllByTestId('codeEditorMock');
+    expect(editors).toHaveLength(2);
+    expect(editors[0]).toHaveTextContent('FROM logs-*');
+    expect(editors[1]).toHaveTextContent(recoveryBlock);
+  });
+
   it('uses the ES|QL language for base and split block editors', () => {
     render(
       <ComposeDiscoverTabs

@@ -15,7 +15,7 @@ export function DetailsAndArtifactsStep() {
   return (
     <>
       {/* Name, description, tags -- connected to RHF via useFormContext() internally */}
-      <RuleDetailsFieldGroup />
+      <RuleDetailsFieldGroup autoFocusName />
 
       <EuiHorizontalRule margin="m" />
 

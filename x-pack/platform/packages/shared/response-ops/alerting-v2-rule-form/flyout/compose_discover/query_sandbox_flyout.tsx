@@ -19,6 +19,8 @@ import {
 import { i18n } from '@kbn/i18n';
 import type { monaco } from '@kbn/code-editor';
 import type { RuleQuery } from './compose_form_types';
+import { getBreachQuery, getRecoverQuery } from './compose_form_types';
+import { ensureComposedQuery, ruleQueryFromUnifiedEditorChange } from './sandbox_query_utils';
 import type { QueryTab } from './types';
 import { QuerySandbox } from './query_sandbox';
 import type { QuerySandboxProps } from './query_sandbox';
@@ -52,7 +54,7 @@ export interface QuerySandboxFlyoutProps {
   onQueryChange?: (q: RuleQuery) => void;
   /**
    * Which tabs to show. Absent or [] → single editor, no tab bar.
-   * ['base', 'alert'] → base-alert split; ['recovery'] → recovery tab only.
+   * ['base', 'alert'] → base-alert split. Recovery step uses locked base + recovery editor (no tab bar).
    */
   tabs?: QueryTab[];
   /** Active tab — ignored when tabs is absent/[]. */
@@ -68,6 +70,18 @@ export interface QuerySandboxFlyoutProps {
   onDateRangeChange: (r: { dateStart: string; dateEnd: string }) => void;
   /** When provided an Apply button is shown. No-args: caller already holds current state. */
   onApply?: () => void;
+  /** When provided, shows a separate-base-and-alert icon above the preview toolbar (unified mode). */
+  onEditManually?: () => void;
+  /** When provided, shows "Use single editor" on the tab row (split mode). */
+  onUseSingleEditor?: () => void;
+  /** Show ES|QL title and helper text in unified alert mode (before first apply). */
+  showUnifiedQueryHeader?: boolean;
+  /** YAML mode — title, manual-split helper, and tabs (no unified/split toggle icons). */
+  showYamlQueryHeader?: boolean;
+  /** Recovery step — title and helper when editing the recovery tab only. */
+  showRecoveryQueryHeader?: boolean;
+  /** Signal rules — title and helper on the condition step. */
+  showSignalQueryHeader?: boolean;
   onClose: () => void;
   title?: string;
   onAlertEditorMount?: (editor: monaco.editor.IStandaloneCodeEditor) => void;
@@ -88,6 +102,12 @@ export const QuerySandboxFlyout: React.FC<QuerySandboxFlyoutProps> = ({
   onDateRangeChange,
   onApply,
   onClose,
+  onEditManually,
+  onUseSingleEditor,
+  showUnifiedQueryHeader,
+  showYamlQueryHeader,
+  showRecoveryQueryHeader,
+  showSignalQueryHeader,
   onAlertEditorMount,
   onRecoveryEditorMount,
   title = i18n.translate('xpack.alertingV2.composeDiscover.querySandbox.defaultTitle', {
@@ -96,21 +116,14 @@ export const QuerySandboxFlyout: React.FC<QuerySandboxFlyoutProps> = ({
 }) => {
   const isReadOnly = !onQueryChange;
 
-  const queryFields = useMemo(
-    () =>
-      query.format === 'composed'
-        ? {
-            base: query.base,
-            breach: query.breach.segment,
-            recover: query.recovery?.segment ?? '',
-          }
-        : {
-            base: query.no_data?.query ?? '',
-            breach: query.breach.query,
-            recover: query.recovery?.query ?? '',
-          },
-    [query]
-  );
+  const queryFields = useMemo(() => {
+    const composed = ensureComposedQuery(query);
+    return {
+      base: composed.base,
+      breach: composed.breach.segment,
+      recover: composed.recovery?.segment ?? '',
+    };
+  }, [query]);
 
   const updateQuery = useCallback(
     (patch: { base?: string; breach?: string; recover?: string }) => {
@@ -135,14 +148,39 @@ export const QuerySandboxFlyout: React.FC<QuerySandboxFlyoutProps> = ({
     [query, queryFields, onQueryChange]
   );
 
-  const activeQuery =
-    query.format === 'composed'
-      ? [query.base, query.breach.segment].filter(Boolean).join('\n')
-      : query.breach.query;
+  const handleUnifiedEditorChange = useCallback(
+    (value: string) => {
+      if (!onQueryChange) return;
+      onQueryChange(ruleQueryFromUnifiedEditorChange(query, value));
+    },
+    [onQueryChange, query]
+  );
 
-  const handleQueryChange = useCallback((v: string) => updateQuery({ breach: v }), [updateQuery]);
+  const isRecoveryEditor = Boolean(showRecoveryQueryHeader);
+
+  const previewQuery = isRecoveryEditor ? getRecoverQuery(query) : undefined;
+
+  const editorQuery =
+    previewQuery ??
+    (query.format === 'composed' ? getBreachQuery(query) : query.breach.query);
 
   const tabProps: QuerySandboxProps['tabProps'] = useMemo(() => {
+    if (showRecoveryQueryHeader) {
+      return {
+        tabs: ['recovery'],
+        activeTab: 'recovery',
+        onTabChange: onTabChange ?? (() => {}),
+        baseQuery: queryFields.base,
+        alertBlock: queryFields.breach,
+        recoveryBlock: queryFields.recover,
+        onBaseQueryChange: (v: string) => updateQuery({ base: v }),
+        onAlertBlockChange: (v: string) => updateQuery({ breach: v }),
+        onRecoveryBlockChange: (v: string) => updateQuery({ recover: v }),
+        onAlertEditorMount,
+        onRecoveryEditorMount,
+        readOnly: isReadOnly,
+      };
+    }
     if (!tabs?.length) return undefined;
     return {
       tabs,
@@ -159,6 +197,7 @@ export const QuerySandboxFlyout: React.FC<QuerySandboxFlyoutProps> = ({
       readOnly: isReadOnly,
     };
   }, [
+    showRecoveryQueryHeader,
     tabs,
     activeTab,
     onTabChange,
@@ -185,14 +224,21 @@ export const QuerySandboxFlyout: React.FC<QuerySandboxFlyoutProps> = ({
 
       <EuiFlyoutBody>
         <QuerySandbox
-          query={activeQuery}
-          onQueryChange={isReadOnly ? undefined : handleQueryChange}
+          query={editorQuery}
+          previewQuery={previewQuery}
+          onQueryChange={isReadOnly ? undefined : handleUnifiedEditorChange}
           timeField={timeField}
           onTimeFieldChange={onTimeFieldChange}
           dateRange={dateRange}
           onDateRangeChange={onDateRangeChange}
           autoRun
           tabProps={tabProps}
+          onEditManually={onEditManually}
+          onUseSingleEditor={onUseSingleEditor}
+          showUnifiedQueryHeader={showUnifiedQueryHeader}
+          showYamlQueryHeader={showYamlQueryHeader}
+          showRecoveryQueryHeader={showRecoveryQueryHeader}
+          showSignalQueryHeader={showSignalQueryHeader}
         />
       </EuiFlyoutBody>
 

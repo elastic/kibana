@@ -11,6 +11,7 @@ import { EuiFormRow, EuiTextArea, EuiButtonEmpty, EuiSpacer } from '@elastic/eui
 import { Controller, useFormContext } from 'react-hook-form';
 import type { FormValues } from '../types';
 import { useRuleFormMeta } from '../contexts';
+import { OptionalFieldLabelAppend } from '../optional_field_label_append';
 
 const DESCRIPTION_ROW_ID = 'ruleV2FormDescriptionField';
 
@@ -18,9 +19,12 @@ export const DescriptionField = () => {
   const { control, watch } = useFormContext<FormValues>();
   const { layout } = useRuleFormMeta();
   const descriptionValue = watch('metadata.description');
+  const isFlyoutLayout = layout === 'flyout';
 
-  // Show the input if there's already a description value
-  const [isInputVisible, setIsInputVisible] = useState(() => Boolean(descriptionValue));
+  // Flyout wizards show the field up front; page layout keeps progressive disclosure.
+  const [isInputVisible, setIsInputVisible] = useState(
+    () => isFlyoutLayout || Boolean(descriptionValue)
+  );
 
   // Update visibility if description value changes externally (e.g., form reset)
   useEffect(() => {
@@ -63,6 +67,7 @@ export const DescriptionField = () => {
           label={i18n.translate('xpack.alertingV2.ruleForm.descriptionLabel', {
             defaultMessage: 'Description',
           })}
+          labelAppend={<OptionalFieldLabelAppend />}
           fullWidth
           isInvalid={!!error}
           error={error?.message}
@@ -75,7 +80,7 @@ export const DescriptionField = () => {
             isInvalid={!!error}
             compressed={layout === 'flyout'}
             placeholder={i18n.translate('xpack.alertingV2.ruleForm.descriptionPlaceholder', {
-              defaultMessage: 'Add an optional description for this rule...',
+              defaultMessage: 'Add a description for this rule',
             })}
             data-test-subj="ruleDescriptionInput"
           />

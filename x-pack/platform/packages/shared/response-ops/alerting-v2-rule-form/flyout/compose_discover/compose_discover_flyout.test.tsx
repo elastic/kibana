@@ -163,12 +163,20 @@ describe('ComposeDiscoverFlyout', () => {
     });
 
     it('does not render the stepper in YAML mode', () => {
-      renderFlyout();
+      renderFlyout({ mode: 'edit' });
 
       clickEditMode('yaml');
 
       expect(screen.queryByRole('group', { name: /Step \d+ of \d+/ })).not.toBeInTheDocument();
       expect(screen.getByTestId('composeDiscoverYamlBadge')).toBeInTheDocument();
+    });
+
+    it('disables the form/YAML toggle while the query sandbox is open in form mode', () => {
+      renderFlyout();
+
+      const toggleGroup = screen.getByTestId('composeDiscoverEditModeToggle');
+      expect(toggleGroup.querySelector('button[data-test-subj="yaml"]')).toBeDisabled();
+      expect(toggleGroup.querySelector('button[data-test-subj="form"]')).toBeDisabled();
     });
   });
 
@@ -227,6 +235,10 @@ describe('ComposeDiscoverFlyout', () => {
       renderFlyout();
       expect(screen.getByTestId('composeDiscoverNext')).toBeDisabled();
     });
+    it('does not show Cancel button in the footer', () => {
+      renderFlyout();
+      expect(screen.queryByTestId('composeDiscoverCancel')).not.toBeInTheDocument();
+    });
   });
 
   describe('unsaved-changes confirmation', () => {
@@ -240,33 +252,12 @@ describe('ComposeDiscoverFlyout', () => {
       expect(screen.queryByTestId('alertingV2ConfirmRuleCloseModal')).not.toBeInTheDocument();
     });
 
-    it('closes immediately when the form is pristine and Cancel is clicked', () => {
-      const onClose = jest.fn();
-      renderFlyout({ onClose });
-
-      fireEvent.click(screen.getByTestId('composeDiscoverCancel'));
-
-      expect(onClose).toHaveBeenCalledTimes(1);
-      expect(screen.queryByTestId('alertingV2ConfirmRuleCloseModal')).not.toBeInTheDocument();
-    });
-
     it('shows the confirmation modal when the form is dirty and the X button is clicked', () => {
       const onClose = jest.fn();
       renderFlyout({ onClose });
 
       fireEvent.click(screen.getByTestId('mockMakeDirty'));
       fireEvent.click(screen.getByTestId('euiFlyoutCloseButton'));
-
-      expect(onClose).not.toHaveBeenCalled();
-      expect(screen.getByTestId('alertingV2ConfirmRuleCloseModal')).toBeInTheDocument();
-    });
-
-    it('shows the confirmation modal when the form is dirty and Cancel is clicked', () => {
-      const onClose = jest.fn();
-      renderFlyout({ onClose });
-
-      fireEvent.click(screen.getByTestId('mockMakeDirty'));
-      fireEvent.click(screen.getByTestId('composeDiscoverCancel'));
 
       expect(onClose).not.toHaveBeenCalled();
       expect(screen.getByTestId('alertingV2ConfirmRuleCloseModal')).toBeInTheDocument();
@@ -298,7 +289,7 @@ describe('ComposeDiscoverFlyout', () => {
 
     it('shows confirmation in YAML mode when text differs from baseline', () => {
       const onClose = jest.fn();
-      renderFlyout({ onClose });
+      renderFlyout({ onClose, mode: 'edit' });
 
       clickEditMode('yaml');
 
@@ -311,7 +302,7 @@ describe('ComposeDiscoverFlyout', () => {
 
     it('closes immediately in YAML mode when text matches baseline', () => {
       const onClose = jest.fn();
-      renderFlyout({ onClose });
+      renderFlyout({ onClose, mode: 'edit' });
 
       clickEditMode('yaml');
 
@@ -336,7 +327,7 @@ describe('ComposeDiscoverFlyout', () => {
 
     it('"Continue editing" reopens sandbox in YAML mode', () => {
       const onClose = jest.fn();
-      renderFlyout({ onClose });
+      renderFlyout({ onClose, mode: 'edit' });
 
       clickEditMode('yaml');
 
@@ -351,7 +342,7 @@ describe('ComposeDiscoverFlyout', () => {
 
     it('shows confirmation after editing in YAML mode and switching back to form mode', () => {
       const onClose = jest.fn();
-      renderFlyout({ onClose });
+      renderFlyout({ onClose, mode: 'edit' });
 
       clickEditMode('yaml');
       fireEvent.click(screen.getByTestId('mockMakeYamlDirty'));

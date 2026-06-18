@@ -144,6 +144,125 @@ describe('QuerySandbox', () => {
     expect(screen.getByText('Alert')).toBeInTheDocument();
   });
 
+  it('renders ES|QL query title and helper on first create without the separate link', () => {
+    renderSandbox({ showUnifiedQueryHeader: true });
+
+    expect(screen.getByTestId('querySandboxEsqlQueryTitle')).toBeInTheDocument();
+    expect(screen.getByText('ES|QL query')).toBeInTheDocument();
+    expect(screen.getByTestId('querySandboxSeparateQueryHelper')).toHaveTextContent(
+      "We'll automatically identify the base query and alert condition when you apply changes."
+    );
+    expect(screen.queryByTestId('querySandboxSeparateBaseAndAlert')).not.toBeInTheDocument();
+  });
+
+  it('renders separate link in helper when onEditManually is provided', () => {
+    renderSandbox({ onEditManually: jest.fn() });
+    expect(screen.getByTestId('querySandboxEsqlQueryTitle')).toBeInTheDocument();
+    expect(screen.getByText('ES|QL query')).toBeInTheDocument();
+    expect(screen.getByTestId('querySandboxSeparateBaseAndAlert')).toHaveTextContent(
+      'Separate base and alert'
+    );
+    expect(screen.getByTestId('querySandboxSeparateQueryHelper')).toHaveTextContent(
+      "We'll automatically identify the base query and alert condition when you apply changes."
+    );
+    expect(screen.getByTestId('querySandboxSeparateQueryHelper')).toHaveTextContent(
+      'Prefer to edit them separately?'
+    );
+    expect(screen.queryByText('Base')).not.toBeInTheDocument();
+  });
+
+  it('renders ES|QL query title and base/alert sub-tabs when manual split', () => {
+    renderSandbox({
+      onUseSingleEditor: jest.fn(),
+      tabProps: {
+        tabs: ['base', 'alert'],
+        activeTab: 'alert',
+        onTabChange: jest.fn(),
+        baseQuery: 'FROM logs-*',
+        alertBlock: '| WHERE count > 100',
+        recoveryBlock: '',
+        onBaseQueryChange: jest.fn(),
+        onAlertBlockChange: jest.fn(),
+        onRecoveryBlockChange: jest.fn(),
+      },
+    });
+    expect(screen.getByTestId('querySandboxEsqlQueryTitle')).toBeInTheDocument();
+    expect(screen.getByTestId('querySandboxUseSingleEditor')).toHaveTextContent('Use single editor');
+    expect(screen.getByTestId('querySandboxSeparateQueryHelper')).toHaveTextContent(
+      'Define the base query and alert condition separately. Automatic query splitting is disabled in this mode.'
+    );
+    expect(screen.getByTestId('querySandboxSeparateQueryHelper')).toHaveTextContent(
+      'Prefer one editor?'
+    );
+    expect(screen.getByText('Base')).toBeInTheDocument();
+    expect(screen.getByText('Alert')).toBeInTheDocument();
+  });
+
+  it('renders ES|QL title, YAML helper, and tabs in YAML mode without mode-switch links', () => {
+    renderSandbox({
+      showYamlQueryHeader: true,
+      tabProps: {
+        tabs: ['base', 'alert', 'recovery'],
+        activeTab: 'alert',
+        onTabChange: jest.fn(),
+        baseQuery: 'FROM logs-*',
+        alertBlock: '| WHERE count > 100',
+        recoveryBlock: '| WHERE count < 50',
+        onBaseQueryChange: jest.fn(),
+        onAlertBlockChange: jest.fn(),
+        onRecoveryBlockChange: jest.fn(),
+      },
+    });
+    expect(screen.getByTestId('querySandboxEsqlQueryTitle')).toBeInTheDocument();
+    expect(screen.getByTestId('querySandboxSeparateQueryHelper')).toHaveTextContent(
+      'Edit in YAML view or in this query sandbox. Apply changes to update the YAML. Each query block is on its own tab.'
+    );
+    expect(screen.queryByTestId('querySandboxSeparateBaseAndAlert')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('querySandboxUseSingleEditor')).not.toBeInTheDocument();
+    expect(screen.getByText('Base')).toBeInTheDocument();
+    expect(screen.getByText('Alert')).toBeInTheDocument();
+    expect(screen.getByText('Recovery')).toBeInTheDocument();
+  });
+
+  it('renders signal title and helper without split-query copy', () => {
+    renderSandbox({ showSignalQueryHeader: true });
+
+    expect(screen.getByTestId('querySandboxEsqlQueryTitle')).toHaveTextContent('ES|QL query');
+    expect(screen.getByTestId('querySandboxSeparateQueryHelper')).toHaveTextContent(
+      'Define what to detect with ES|QL. Each match is recorded as a signal for querying and investigation, without alert lifecycle or notifications.'
+    );
+    expect(screen.queryByTestId('querySandboxSeparateBaseAndAlert')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('querySandboxUseSingleEditor')).not.toBeInTheDocument();
+    expect(screen.getByTestId('querySandboxSeparateQueryHelper')).not.toHaveTextContent(
+      'base query and alert condition'
+    );
+  });
+
+  it('renders recovery title, helper, and split editor without a tab bar in recovery-only sandbox', () => {
+    renderSandbox({
+      showRecoveryQueryHeader: true,
+      tabProps: {
+        tabs: ['recovery'],
+        activeTab: 'recovery',
+        onTabChange: jest.fn(),
+        baseQuery: 'FROM logs-* | STATS c = COUNT(*) BY host',
+        alertBlock: '| WHERE c > 100',
+        recoveryBlock: '| WHERE c < 50',
+        onBaseQueryChange: jest.fn(),
+        onAlertBlockChange: jest.fn(),
+        onRecoveryBlockChange: jest.fn(),
+      },
+    });
+    expect(screen.getByTestId('querySandboxEsqlQueryTitle')).toHaveTextContent(
+      'Recovery condition'
+    );
+    expect(screen.getByTestId('querySandboxSeparateQueryHelper')).toHaveTextContent(
+      'Define when the alert should recover. This ES|QL block is evaluated against the base query.'
+    );
+    expect(screen.getByTestId('mockComposeDiscoverTabs')).toBeInTheDocument();
+    expect(screen.queryByTestId('querySandboxTab-recovery')).not.toBeInTheDocument();
+  });
+
   it('shows "Run your query" prompt when hasRun is false', () => {
     renderSandbox();
     expect(screen.getByText('Run your query to see results')).toBeInTheDocument();

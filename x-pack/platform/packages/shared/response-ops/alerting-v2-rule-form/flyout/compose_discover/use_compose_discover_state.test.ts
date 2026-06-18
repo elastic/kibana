@@ -22,8 +22,8 @@ describe('createInitialState', () => {
     expect(state.mode).toBe('create');
     expect(state.childOpen).toBe(true);
     expect(state.queryCommitted).toBe(false);
-    // Split editor opens on the base query, not the alert query.
-    expect(state.activeTab).toBe('base');
+    // Unified editor — no split tabs on alert condition step.
+    expect(state.activeTab).toBe('alert');
   });
 
   it('starts on the alert tab for signal create (single editor)', () => {
@@ -94,22 +94,42 @@ describe('createInitialState', () => {
 
 describe('reducer', () => {
   describe('KIND_CHANGE', () => {
-    it('kind=alert opens child on the base tab and resets to step 0', () => {
+    it('kind=alert resets to step 0 without opening child', () => {
       const state = createState({ step: 2, childOpen: false, activeTab: 'alert' });
       const next = reducer(state, { type: 'KIND_CHANGE', kind: 'alert' });
 
-      expect(next.childOpen).toBe(true);
+      expect(next.childOpen).toBe(false);
       expect(next.step).toBe(0);
-      expect(next.activeTab).toBe('base');
+      expect(next.activeTab).toBe('alert');
+      expect(next.manualSplitEnabled).toBe(false);
     });
 
-    it('kind=signal keeps child open, resets step and recoveryType', () => {
-      const state = createState({ step: 1, childOpen: true, recoveryType: 'custom' });
+    it('kind=signal resets step and recoveryType without opening child', () => {
+      const state = createState({ step: 1, childOpen: false, recoveryType: 'custom' });
       const next = reducer(state, { type: 'KIND_CHANGE', kind: 'signal' });
 
-      expect(next.childOpen).toBe(true);
+      expect(next.childOpen).toBe(false);
       expect(next.step).toBe(0);
       expect(next.recoveryType).toBe('default');
+      expect(next.manualSplitEnabled).toBe(false);
+    });
+  });
+
+  describe('manual split', () => {
+    it('ENABLE_MANUAL_SPLIT sets manualSplitEnabled and alert tab', () => {
+      const state = createState();
+      const next = reducer(state, { type: 'ENABLE_MANUAL_SPLIT' });
+
+      expect(next.manualSplitEnabled).toBe(true);
+      expect(next.activeTab).toBe('alert');
+    });
+
+    it('DISABLE_MANUAL_SPLIT clears manualSplitEnabled', () => {
+      const state = createState({ manualSplitEnabled: true });
+      const next = reducer(state, { type: 'DISABLE_MANUAL_SPLIT' });
+
+      expect(next.manualSplitEnabled).toBe(false);
+      expect(next.activeTab).toBe('alert');
     });
   });
 
@@ -199,14 +219,19 @@ describe('getSandboxTabs', () => {
     expect(getSandboxTabs(false, state)).toBeUndefined();
   });
 
-  it('returns [base, alert] on alertCondition step with isAlert true', () => {
-    const state = createState({ step: 0 });
+  it('returns [base, alert] on alertCondition step when manual split is enabled', () => {
+    const state = createState({ step: 0, manualSplitEnabled: true });
     expect(getSandboxTabs(true, state)).toEqual(['base', 'alert']);
   });
 
-  it('returns [recovery] on recoveryCondition step with custom recovery', () => {
+  it('returns undefined on alertCondition step with isAlert true (unified editor)', () => {
+    const state = createState({ step: 0 });
+    expect(getSandboxTabs(true, state)).toBeUndefined();
+  });
+
+  it('returns undefined on recoveryCondition step with custom recovery (single editor + header)', () => {
     const state = createState({ step: 1, recoveryType: 'custom' });
-    expect(getSandboxTabs(true, state)).toEqual(['recovery']);
+    expect(getSandboxTabs(true, state)).toBeUndefined();
   });
 
   it('returns undefined on recoveryCondition step with default recovery', () => {

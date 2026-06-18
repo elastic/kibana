@@ -105,6 +105,7 @@ const renderStep = (
   });
   const dispatch = jest.fn();
   const onKindChange = jest.fn();
+  const onSeparateBaseAndAlert = jest.fn();
   const services = createMockServices();
 
   render(
@@ -115,13 +116,14 @@ const renderStep = (
         dispatch={dispatch}
         services={services}
         onKindChange={onKindChange}
+        onSeparateBaseAndAlert={onSeparateBaseAndAlert}
         isEditing={isEditing}
       />
     </>,
     { wrapper: createComposeFormWrapper(formValueOverrides, services) }
   );
 
-  return { dispatch, state, onKindChange };
+  return { dispatch, state, onKindChange, onSeparateBaseAndAlert };
 };
 
 const STANDALONE_QUERY: RuleQuery = {
@@ -141,13 +143,28 @@ const COMPOSED_QUERY_EMPTY_BASE: RuleQuery = {
   breach: { segment: '| WHERE count > 100' },
 };
 
+const COMPOSED_QUERY_EMPTY: RuleQuery = {
+  format: 'composed',
+  base: '',
+  breach: { segment: '' },
+};
+
+const COMPOSED_QUERY_NO_ALERT_CONDITION: RuleQuery = {
+  format: 'composed',
+  base: 'FROM logs-* | STATS count = COUNT(*) BY host.name',
+  breach: { segment: '' },
+};
+
 describe('AlertConditionStep', () => {
   describe('query display', () => {
-    it('shows "No query defined yet" when query is not committed', () => {
+    it('shows "Open the editor to write your ES|QL query" when query is not committed', () => {
       renderStep({ queryCommitted: false });
 
-      expect(screen.getByText('No query defined yet')).toBeInTheDocument();
+      expect(screen.getByTestId('composeDiscoverEsqlQuerySectionDescription')).toHaveTextContent(
+        'Open the editor to write your ES|QL query'
+      );
       expect(screen.getByTestId('composeDiscoverOpenEditor')).toBeInTheDocument();
+      expect(screen.queryByText('No query defined yet')).not.toBeInTheDocument();
     });
 
     it('shows standalone query summary for signal kind', () => {
@@ -159,26 +176,80 @@ describe('AlertConditionStep', () => {
       expect(screen.getByTestId('composeDiscoverEditQuery')).toBeInTheDocument();
     });
 
-    it('shows base and alert condition summaries for alert kind', () => {
+    it('shows base and alert block summaries for alert kind', () => {
       renderStep(
         { queryCommitted: true },
         { formValueOverrides: { kind: 'alert', query: COMPOSED_QUERY } }
       );
 
+      expect(screen.getByTestId('composeDiscoverEsqlQuerySection')).toBeInTheDocument();
       expect(screen.getByText('Base query')).toBeInTheDocument();
       expect(screen.getByText('Alert condition')).toBeInTheDocument();
-      expect(screen.getByTestId('composeDiscoverEditQueries')).toBeInTheDocument();
+      expect(screen.getByText('Search query and alert condition identified')).toBeInTheDocument();
+      expect(screen.getByTestId('composeDiscoverEditQuery')).toBeInTheDocument();
     });
 
-    it('shows split-failed callout when base query is empty', () => {
+    it('shows empty-query callout when Apply committed no query content', () => {
       renderStep(
-        { queryCommitted: true },
+        { queryCommitted: true, childOpen: false },
+        { formValueOverrides: { kind: 'alert', query: COMPOSED_QUERY_EMPTY } }
+      );
+
+      const querySection = screen.getByTestId('composeDiscoverEsqlQuerySection');
+      expect(
+        within(querySection).getByText('No query defined')
+      ).toBeInTheDocument();
+      expect(
+        within(querySection).getByText('Enter an ES|QL query in the editor before continuing.')
+      ).toBeInTheDocument();
+      expect(screen.getByTestId('composeDiscoverEsqlQuerySectionDescription')).toHaveTextContent(
+        'Define an ES|QL query in the editor'
+      );
+      expect(
+        within(querySection).queryByText(/Couldn't automatically separate base query/)
+      ).not.toBeInTheDocument();
+      expect(screen.queryByTestId('composeDiscoverSeparateBaseAndAlert')).not.toBeInTheDocument();
+    });
+
+    it('shows split-failed callout inside the query section with separate action when base query is empty', async () => {
+      const user = userEvent.setup();
+      const { onSeparateBaseAndAlert } = renderStep(
+        { queryCommitted: true, childOpen: false },
         { formValueOverrides: { kind: 'alert', query: COMPOSED_QUERY_EMPTY_BASE } }
       );
 
+      const querySection = screen.getByTestId('composeDiscoverEsqlQuerySection');
       expect(
-        screen.getByText(/Couldn't automatically separate base query from alert condition/)
+        within(querySection).getByText(/Couldn't automatically separate base query from alert condition/)
       ).toBeInTheDocument();
+      expect(screen.getByTestId('composeDiscoverEsqlQuerySectionDescription')).toHaveTextContent(
+        'Review your query or separate it manually'
+      );
+      const separateButton = screen.getByTestId('composeDiscoverSeparateBaseAndAlert');
+      expect(separateButton).not.toBeDisabled();
+      await user.click(separateButton);
+      expect(onSeparateBaseAndAlert).toHaveBeenCalledTimes(1);
+    });
+
+    it('shows no-alert-condition callout when base query is defined without an alert segment', () => {
+      renderStep(
+        { queryCommitted: true, childOpen: false },
+        { formValueOverrides: { kind: 'alert', query: COMPOSED_QUERY_NO_ALERT_CONDITION } }
+      );
+
+      const querySection = screen.getByTestId('composeDiscoverEsqlQuerySection');
+      expect(within(querySection).getByText('No alert condition')).toBeInTheDocument();
+      expect(
+        within(querySection).getByText(
+          'Without an alert condition, every row returned by the base query is treated as a breach.'
+        )
+      ).toBeInTheDocument();
+      expect(screen.getByTestId('composeDiscoverEsqlQuerySectionDescription')).toHaveTextContent(
+        'Base query defined — no separate alert condition'
+      );
+      expect(
+        screen.queryByText('Search query and alert condition identified')
+      ).not.toBeInTheDocument();
     });
   });
 
@@ -198,13 +269,13 @@ describe('AlertConditionStep', () => {
       expect(screen.getByTestId('composeDiscoverEditQuery')).toBeDisabled();
     });
 
-    it('disables "Edit queries" when child flyout is open', () => {
+    it('disables "Edit query" when child flyout is open', () => {
       renderStep(
         { queryCommitted: true, childOpen: true },
         { formValueOverrides: { kind: 'alert', query: COMPOSED_QUERY } }
       );
 
-      expect(screen.getByTestId('composeDiscoverEditQueries')).toBeDisabled();
+      expect(screen.getByTestId('composeDiscoverEditQuery')).toBeDisabled();
     });
 
     it('dispatches OPEN_CHILD_FOR_STEP on "Open query editor" click', () => {
@@ -243,8 +314,8 @@ describe('AlertConditionStep', () => {
   });
 
   describe('mode select', () => {
-    it('is enabled when queryCommitted is true and not editing', () => {
-      renderStep({ queryCommitted: true }, { isEditing: false });
+    it('is enabled when queryCommitted is true, sandbox is closed, and not editing', () => {
+      renderStep({ queryCommitted: true, childOpen: false }, { isEditing: false });
 
       expect(screen.getByTestId('composeDiscoverModeSelect')).not.toBeDisabled();
     });
@@ -257,6 +328,12 @@ describe('AlertConditionStep', () => {
 
     it('is disabled when query is not committed', () => {
       renderStep({ queryCommitted: false }, { isEditing: false });
+
+      expect(screen.getByTestId('composeDiscoverModeSelect')).toBeDisabled();
+    });
+
+    it('is disabled while the query sandbox is open', () => {
+      renderStep({ queryCommitted: true, childOpen: true }, { isEditing: false });
 
       expect(screen.getByTestId('composeDiscoverModeSelect')).toBeDisabled();
     });
@@ -279,7 +356,7 @@ describe('AlertConditionStep', () => {
     it('calls onKindChange when Signal is selected', async () => {
       const user = userEvent.setup({ pointerEventsCheck: 0 });
       const { onKindChange } = renderStep(
-        { queryCommitted: true },
+        { queryCommitted: true, childOpen: false },
         { formValueOverrides: { kind: 'alert' } }
       );
 

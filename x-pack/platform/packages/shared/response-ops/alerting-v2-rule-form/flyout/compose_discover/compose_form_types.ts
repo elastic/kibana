@@ -31,17 +31,40 @@ export interface StandaloneQuery {
 
 export type RuleQuery = ComposedQuery | StandaloneQuery;
 
+/** Strip leading pipes so composed segments can be joined with a single `| `. */
+function normalizeComposedSegment(segment: string): string {
+  return segment.trim().replace(/^\|+\s*/, '');
+}
+
+function joinComposedQuery(base: string, segment: string): string {
+  const trimmedBase = base.trim();
+  const normalizedSegment = normalizeComposedSegment(segment);
+
+  if (!trimmedBase) {
+    return normalizedSegment;
+  }
+  if (!normalizedSegment) {
+    return trimmedBase;
+  }
+  return `${trimmedBase}\n| ${normalizedSegment}`;
+}
+
 export function getBreachQuery(query: RuleQuery | undefined): string {
   if (!query) return '';
   if (query.format === 'standalone') return query.breach.query;
-  return [query.base, query.breach.segment].filter(Boolean).join('\n| ');
+  return joinComposedQuery(query.base, query.breach.segment);
+}
+
+/** True when the rule has any ES|QL content in the breach (alert) pipeline. */
+export function isQueryDefined(query: RuleQuery | undefined): boolean {
+  return Boolean(getBreachQuery(query).trim());
 }
 
 export function getRecoverQuery(query: RuleQuery | undefined): string {
   if (!query) return '';
   if (query.format === 'standalone') return query.recovery?.query ?? '';
   if (!query.recovery?.segment) return '';
-  return [query.base, query.recovery.segment].filter(Boolean).join('\n| ');
+  return joinComposedQuery(query.base, query.recovery.segment);
 }
 
 // ---------------------------------------------------------------------------

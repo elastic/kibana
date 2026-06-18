@@ -15,7 +15,11 @@ import { useRuleFormMeta } from '../contexts';
 
 const NAME_ROW_ID = 'ruleV2FormNameField';
 
-export const NameField = () => {
+interface NameFieldProps {
+  autoFocus?: boolean;
+}
+
+export const NameField = ({ autoFocus = false }: NameFieldProps) => {
   const { control } = useFormContext<FormValues>();
   const { layout } = useRuleFormMeta();
 
@@ -52,6 +56,7 @@ export const NameField = () => {
             {...field}
             value={field.value ?? ''}
             inputRef={ref}
+            autoFocus={autoFocus}
             fullWidth
             isInvalid={!!error}
             compressed={layout === 'flyout'}

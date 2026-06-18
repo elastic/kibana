@@ -48,6 +48,12 @@ describe('NameField', () => {
     expect(screen.getByTestId('ruleNameInput')).toHaveValue('My Test Rule');
   });
 
+  it('focuses the name input when autoFocus is enabled', () => {
+    render(<NameField autoFocus />, { wrapper: createFormWrapper() });
+
+    expect(screen.getByTestId('ruleNameInput')).toHaveFocus();
+  });
+
   it('shows required error when submitted with empty value', async () => {
     const queryClient = createTestQueryClient();
     const services = createMockServices();
