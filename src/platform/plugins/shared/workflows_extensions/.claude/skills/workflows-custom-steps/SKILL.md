@@ -48,9 +48,32 @@ your-plugin/
 
 Keep `id`, `inputSchema`, `outputSchema`, `configSchema` in the **common** file only. Re-importing them on both sides is how server/public stay locked together.
 
+## Workflow YAML naming conventions (read first)
+
+**Rule:** The case convention differs per YAML area. Only the **step type action** is camelCase — step **input args** are **NOT**. Getting this wrong is the most common mistake when generating steps.
+
+| YAML area | Convention | Example |
+|---|---|---|
+| **Step type** (`type:` value) | `<namespace>.<action>` — **kebab-case** namespace, **camelCase** action | `security.createAlert` |
+| **Config keys** (step-level, outside `with:`, that we own) | **kebab-case** | `connector-id`, `on-failure`, `agent-id` |
+| **Input args** (inside `with:`) | **kebab-case** or **snake_case** — **never camelCase** for keys we own | `alert-id`, `rule_name` |
+
+```yaml
+- name: create_alert
+  type: security.createAlert        # action: camelCase ✓
+  connector-id: my-connector        # config key: kebab-case ✓
+  with:
+    alert-id: '123'                 # input key: kebab-case ✓  (NOT alertId)
+    rule_name: 'My rule'            # input key: snake_case ✓  (NOT ruleName)
+```
+
+**Inherited formats** (OpenAPI-generated params, connector specs, platform-owned APIs) keep the shape defined by their contract — even if that is camelCase. The conventions above apply to keys **we own** (custom step config and input params).
+
+This is the single source of truth: [STEPS.md → Workflow YAML naming conventions](https://github.com/elastic/kibana/blob/main/src/platform/plugins/shared/workflows_extensions/dev_docs/STEPS.md#workflow-yaml-naming-conventions). The rest of this skill repeats and applies these conventions; if they ever drift, that section wins.
+
 ## 1. `id` and naming — namespaced and stable
 
-**Rule:** Step IDs MUST follow `<namespace>.<action>` with **kebab-case** namespace and **camelCase** action. Once shipped, the ID is part of users' YAML; renaming it breaks every existing workflow.
+**Rule:** Step IDs MUST follow `<namespace>.<action>` with **kebab-case** namespace and **camelCase** action. Note this camelCase applies **only to the action segment of the step type** — it does NOT extend to config keys or input args (see [Workflow YAML naming conventions](#workflow-yaml-naming-conventions-read-first) above). Once shipped, the ID is part of users' YAML; renaming it breaks every existing workflow.
 
 ```ts
 export const MyStepTypeId = 'agent-builder.runAgent';   // ✓
@@ -131,7 +154,9 @@ export const myStepCommonDefinition: CommonStepDefinition<
 |---|---|---|
 | Examples | `connector-id`, `agent-id`, `mode`, `timeout`, `strategy` | `index`, `channel`, `document`, `message`, `query`, `severity` |
 | YAML position | Step level keys | Nested under `with:` |
-| Naming convention | **kebab-case** (we own the schema) | **kebab-case** or **snake_case** preferred; inherited OpenAPI/connector shapes allowed |
+| Naming convention | **kebab-case** (we own the schema) | **kebab-case** or **snake_case** — **never camelCase**; inherited OpenAPI/connector shapes keep their original case |
+
+For keys you own, never emit camelCase (e.g. `alertId`, `ruleName`); use `alert-id` or `rule_name`. See [Workflow YAML naming conventions](#workflow-yaml-naming-conventions-read-first). Inherited contract shapes (OpenAPI/connector) are the only exception.
 
 Config keys also unlock built-in step-level features (`if`, `foreach`, `on-failure`, `timeout`) for free — those are reserved keys the engine already understands; do not redefine them in `configSchema`.
 
@@ -428,6 +453,7 @@ export const APPROVED_STEP_DEFINITIONS: Array<{ id: string; handlerHash: string 
 | Common file | Holds `id`, schemas, `label`, `description`, `category`, `documentation` | n/a | Drift between server and public side |
 | `category` | Pick the menu group users will look in | n/a | Step hides in the wrong actions-menu section |
 | `configSchema` vs `inputSchema` | Config controls behavior; input carries payload | n/a | Awkward YAML; selection UX confused about what to autocomplete |
+| Key casing (keys we own) | Config: kebab-case; input (`with:`): kebab-case or snake_case — never camelCase | n/a | camelCase args drift from the [naming conventions](#workflow-yaml-naming-conventions-read-first); inconsistent YAML across steps |
 | `createServerStepDefinition` | Use it (don't hand-annotate types) | n/a | Loss of input/output type inference, drift |
 | `abortSignal` | Pass to ES, HTTP, loops | n/a | Step runs past cancellation; blocks shutdown |
 | `onCancel` | Implement only when the step holds resources beyond the signal | none | Leaks; or empty stub gives false confidence |
@@ -453,7 +479,7 @@ When adding a new step:
    - [ ] Template syntax (`{{ ... }}`) inside i18n strings goes through `values:`
    - [ ] `inputSchema` / `outputSchema` declared with `z` from `@kbn/zod/v4`
    - [ ] `configSchema` declared **only** for behavior-controlling step-level properties; no reserved keys (`if`, `foreach`, `on-failure`, `timeout`)
-   - [ ] Workflow-owned config keys are kebab-case; inherited keys (OpenAPI/connector) keep their original shape
+   - [ ] Workflow-owned config keys are kebab-case; workflow-owned input keys (under `with:`) are kebab-case or snake_case — **never camelCase**; inherited keys (OpenAPI/connector) keep their original shape (see [Workflow YAML naming conventions](#workflow-yaml-naming-conventions-read-first))
 
 2. **Server file** (`server/step_types/<step>.ts`)
    - [ ] Uses `createServerStepDefinition` (no explicit `ServerStepDefinition` annotation)
@@ -492,6 +518,7 @@ When reviewing a PR that adds or modifies a custom step:
 - [ ] No new top-level files inside `src/platform/plugins/shared/workflows_extensions/{server,public}/steps/` — external steps belong in the owning plugin
 - [ ] `label`, `description`, `category`, `schemas` live in the common file, not duplicated on server/public
 - [ ] `id` follows `<kebab>.<camel>`, has a fresh namespace, and is not in a reserved prefix
+- [ ] Workflow-owned config/input keys follow the [naming conventions](#workflow-yaml-naming-conventions-read-first) — config keys kebab-case, `with:` input keys kebab-case or snake_case, **no camelCase** for keys we own (inherited OpenAPI/connector shapes excepted)
 - [ ] Server handler uses `createServerStepDefinition`; types are inferred, not restated
 - [ ] `abortSignal` flows through every ES/HTTP call in the diff — search for new `esClient.search(` / `fetch(` without a `signal:`
 - [ ] If `callKibanaApi` is used, check whether a request-scoped client from the target plugin would work instead

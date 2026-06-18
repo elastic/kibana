@@ -10,7 +10,7 @@ export const ADD_QUICK_PROMPT = '[data-test-subj="addQuickPrompt"]';
 export const AI_ASSISTANT_BUTTON = '[data-test-subj="assistantNavLink"]';
 export const ASSISTANT_CHAT_BODY = '[data-test-subj="assistantChat"]';
 export const CHAT_CONTEXT_MENU = '[data-test-subj="chat-context-menu"]';
-export const CHAT_ICON = '[data-test-subj="newChat"]';
+export const CHAT_ICON = '[data-test-subj="plusCircle"]';
 export const CHAT_ICON_SM = '[data-test-subj="newChatByTitle"]';
 export const CLEAR_CHAT = '[data-test-subj="clear-chat"]';
 export const CLEAR_SYSTEM_PROMPT = '[data-test-subj="clearSystemPrompt"]';

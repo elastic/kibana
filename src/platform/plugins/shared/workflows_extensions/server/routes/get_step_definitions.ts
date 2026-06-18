@@ -7,17 +7,67 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { IRouter } from '@kbn/core/server';
+import type { IRouter, Logger } from '@kbn/core/server';
 import { createSHA256Hash } from '@kbn/crypto';
+import { stableStringify } from '@kbn/std';
+import { z } from '@kbn/zod/v4';
 import type { ServerStepRegistry } from '../step_registry';
-import {
-  type CommonServerStepDefinition,
-  isOneShotStepDefinition,
-  isPollOnlyStepDefinition,
-  isStartPlusPollStepDefinition,
-} from '../step_registry/types';
+import type { ServerStepDefinition } from '../step_registry/types';
 
 const ROUTE_PATH = '/internal/workflows_extensions/step_definitions';
+
+/**
+ * Converts a zod schema to a stable JSON Schema representation for hashing.
+ * Falls back to a deterministic marker so an unconvertible schema still
+ * contributes to (and changes) the hash when it changes.
+ */
+function schemaToJson(schema?: z.ZodType): unknown {
+  if (!schema) {
+    return undefined;
+  }
+  return z.toJSONSchema(schema);
+}
+
+/**
+ * Computes a hash over the serializable contract of a step definition: its
+ * schemas (inputSchema/outputSchema/configSchema) and metadata. `id` is excluded
+ * since it's the lookup key.
+ *
+ * Function (handler/onCancel) implementations are intentionally NOT hashed: there is no
+ * reliable way to hash function behavior at runtime. `fn.toString()` misses logic
+ * in closed-over wrappers (e.g. `createCasesStepHandler`) and changes across
+ * builds/transpilation. Plugins own their implementations; the first registration
+ * is reviewed manually, and contract (schema/metadata) changes are caught here.
+ */
+function computeDefinitionHash(definition: ServerStepDefinition, logger: Logger): string {
+  const {
+    label,
+    description,
+    category,
+    stability,
+    deprecation,
+    inputSchema,
+    outputSchema,
+    configSchema,
+  } = definition;
+
+  try {
+    const canonical = {
+      label,
+      description,
+      category,
+      stability,
+      deprecation,
+      inputSchema: schemaToJson(inputSchema),
+      outputSchema: schemaToJson(outputSchema),
+      configSchema: schemaToJson(configSchema),
+    };
+    return createSHA256Hash(stableStringify(canonical));
+  } catch (error) {
+    logger.error(`Failed to compute definition hash for step ${definition.id}`, { error });
+    return 'definition-hashing-error';
+  }
+}
 
 /**
  * Registers the route to get all registered step definitions.
@@ -26,7 +76,8 @@ const ROUTE_PATH = '/internal/workflows_extensions/step_definitions';
  */
 export function registerGetStepDefinitionsRoute(
   router: IRouter,
-  registry: ServerStepRegistry
+  registry: ServerStepRegistry,
+  logger: Logger
 ): void {
   router.get(
     {
@@ -45,7 +96,11 @@ export function registerGetStepDefinitionsRoute(
     async (_context, _request, response) => {
       const allStepDefinitions = registry.getAll();
       const steps = allStepDefinitions
-        .map((def) => ({ id: def.id, handlerHash: hashStepImplementation(def) }))
+        // hash the serializable contract (schemas + metadata) to detect changes
+        .map((definition) => ({
+          id: definition.id,
+          definitionHash: computeDefinitionHash(definition, logger),
+        }))
         .sort((a, b) => a.id.localeCompare(b.id));
 
       return response.ok({ body: { steps } });
@@ -53,38 +108,3 @@ export function registerGetStepDefinitionsRoute(
   );
 }
 
-/**
- * Builds a stable SHA-256 fingerprint of a step's author-written callables for
- * the Scout approval fixture (`approved_step_definitions.ts`).
- *
- * Hashing is mode-specific (mutually exclusive shapes):
- *
- * - **Single-shot** (`createServerStepDefinition` with `handler` only): SHA-256 of
- *   `handler.toString()`. Unchanged from the original approval flow so legacy steps
- *   keep their existing approved hashes.
- * - **Poll-only** (`createPollServerStepDefinition` without `start`): SHA-256 of
- *   `poll.toString()` only.
- * - **Start + poll** (`createPollServerStepDefinition` with `start` and `poll`):
- *   SHA-256 of `start` and `poll` source joined with `\n--\n` (order: start, then poll).
- *
- * `policy`, `ceilings`, and `onCancel` are not hashed — only the phase
- * functions that implement step behavior. Changing policy/ceilings or cancel cleanup
- * without editing `poll` / `start` / `handler` does not change the hash.
- */
-function hashStepImplementation(definition: CommonServerStepDefinition): string {
-  if (isStartPlusPollStepDefinition(definition)) {
-    return createSHA256Hash(
-      [definition.start.toString(), definition.poll.toString()].join('\n--\n')
-    );
-  }
-
-  if (isPollOnlyStepDefinition(definition)) {
-    return createSHA256Hash(definition.poll.toString());
-  }
-
-  if (isOneShotStepDefinition(definition)) {
-    return createSHA256Hash(definition.handler.toString());
-  }
-
-  throw new Error(`Unknown step definition type: ${JSON.stringify(definition)}`);
-}

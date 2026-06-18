@@ -181,7 +181,7 @@ export abstract class BaseAtomicNodeImplementation<TStep extends BaseStep>
       // context growth. Layer 1 (pre-emptive I/O enforcement) may have
       // already caught this at the transport level.
       let measuredOutputSize: number | undefined;
-      if (result.output != null && !result.error) {
+      if (result.output != null) {
         const maxBytes = this.getMaxResponseBytes();
         if (maxBytes > 0) {
           const outputSize = safeOutputSize(result.output);
@@ -225,7 +225,13 @@ export abstract class BaseAtomicNodeImplementation<TStep extends BaseStep>
       }
 
       if (result.error) {
-        this.stepExecutionRuntime.failStep(new ExecutionError(result.error));
+        // Pass partial output (e.g. token-usage metadata accumulated before a
+        // stream error) so it is persisted and reachable via
+        // `steps.x.output.metadata.usage` even when the step fails.
+        this.stepExecutionRuntime.failStep(
+          new ExecutionError(result.error),
+          result.output ?? undefined
+        );
         if (stepSpan) {
           stepSpan.setOutcome('failure');
         }
