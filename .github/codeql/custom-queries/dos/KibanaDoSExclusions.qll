@@ -32,6 +32,9 @@ predicate shouldExcludeFileFromDoSRules(Expr e) {
     (e.getFile().getBaseName() = "index.ts" and
      path.regexpMatch(".*/plugins/[^/]+(/[^/]+)?/server/index\\.ts"))
     or
+    // Fleet saved-object schemas and migrations
+    path.regexpMatch(".*/plugins/shared/fleet/server/saved_objects/.*")
+    or
     // Saved-object attribute schemas (versioned shapes, never route payloads)
     path.regexpMatch(".*/saved_objects/schemas/.*")
     or
