@@ -18,18 +18,15 @@ import { merge, noop } from 'lodash';
 import type { ReactNode } from 'react';
 import React from 'react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import { PerformanceContext } from '@kbn/ebt-tools';
 import { Observable, of } from 'rxjs';
 import { getMockApiCache } from '../../services/rest/call_apm_api_spy';
 import { apmRouter } from '../../components/routing/apm_route_config';
 import type { ITelemetryClient } from '../../services/telemetry/types';
 import { createCallApmApi } from '../../services/rest/create_call_apm_api';
-import { storybookMockHttp } from '../../services/rest/storybook_mock_http';
 import type { APMServiceContextValue } from '../apm_service/apm_service_context';
 import { APMServiceContext } from '../apm_service/apm_service_context';
 import { MockTimeRangeContextProvider } from '../time_range_metadata/mock_time_range_metadata_context_provider';
 import { ApmTimeRangeMetadataContextProvider } from '../time_range_metadata/time_range_metadata_context';
-import { ChartPointerEventContextProvider } from '../chart_pointer_event/chart_pointer_event_context';
 import type { ApmPluginContextValue } from './apm_plugin_context';
 import { ApmPluginContext } from './apm_plugin_context';
 
