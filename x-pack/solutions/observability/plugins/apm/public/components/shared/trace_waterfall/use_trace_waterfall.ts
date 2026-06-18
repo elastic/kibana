@@ -302,16 +302,16 @@ function reparentOrphansToRoot(
   // map.
   const children = (parentChildMap[rootItem.id] ??= []);
 
-  for (const orphan of orphans) {
-    // A service-filtered partial trace can choose a descendant transaction as the
-    // visible root. Reparenting an orphan ancestor below that root would create a
-    // cycle in the waterfall traversal.
-    if (hasPathToTarget(parentChildMap, orphan.id, rootItem.id)) {
-      continue;
-    }
-
-    children.push({ ...orphan, parentId: rootItem.id, isOrphan: true });
-  }
+  children.push(
+    ...orphans
+      .filter((orphan) => {
+        // A partial trace can choose a descendant transaction as the visible root.
+        // Reparenting an orphan ancestor below that root would create a cycle in
+        // the waterfall traversal.
+        return !hasPathToTarget(parentChildMap, orphan.id, rootItem.id);
+      })
+      .map((orphan) => ({ ...orphan, parentId: rootItem.id, isOrphan: true }))
+  );
 }
 
 function hasPathToTarget(
