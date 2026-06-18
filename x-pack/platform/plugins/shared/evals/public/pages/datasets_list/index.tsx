@@ -216,22 +216,20 @@ export const DatasetsListPage: React.FC = () => {
               justifyContent="spaceBetween"
               gutterSize="m"
             >
-              {showSearchBar ? (
-                <EuiFlexItem css={{ maxWidth: 500 }}>
-                  <EuiFieldSearch
-                    placeholder={i18n.SEARCH_PLACEHOLDER}
-                    value={searchText}
-                    onChange={(e) => {
-                      setSearchText(e.target.value);
-                      setPageIndex(0);
-                    }}
-                    isClearable
-                    fullWidth
-                    aria-label={i18n.SEARCH_PLACEHOLDER}
-                    data-test-subj="datasetsSearch"
-                  />
-                </EuiFlexItem>
-              ) : null}
+              <EuiFlexItem css={{ maxWidth: 500 }}>
+                <EuiFieldSearch
+                  placeholder={i18n.SEARCH_PLACEHOLDER}
+                  value={searchText}
+                  onChange={(e) => {
+                    setSearchText(e.target.value);
+                    setPageIndex(0);
+                  }}
+                  isClearable
+                  fullWidth
+                  aria-label={i18n.SEARCH_PLACEHOLDER}
+                  data-test-subj="datasetsSearch"
+                />
+              </EuiFlexItem>
               {canManage ? (
                 <EuiFlexItem grow={false}>
                   <EuiButton onClick={openCreateFlyout} fill iconType="plusInCircle">
