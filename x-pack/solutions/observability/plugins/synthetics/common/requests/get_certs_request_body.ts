@@ -7,6 +7,14 @@
 
 import type { estypes } from '@elastic/elasticsearch';
 import DateMath from '@kbn/datemath';
+import { isNonLocalIndexName } from '@kbn/es-query';
+
+// Inlined to keep this file safe for the public bundle. Importing
+// `ALL_SPACES_ID` from `@kbn/spaces-plugin/common/constants` (or
+// `@kbn/security-plugin/common/constants`) is a non-public sub-path that the
+// optimizer rejects, and `@kbn/spaces-plugin/common`'s public entry doesn't
+// re-export it. The value is a stable saved-objects contract.
+const ALL_SPACES_ID = '*';
 import {
   EXCLUDE_RUN_ONCE_FILTER,
   FINAL_SUMMARY_FILTER,
@@ -14,7 +22,7 @@ import {
 } from '../constants/client_defaults';
 import { selectedMimeCategoriesQuery } from '../constants/mime_types';
 import type { CertificatesResults } from '../../server/queries/get_certs';
-import type { CertResult, GetCertsParams, Ping } from '../runtime_types';
+import type { CertResult, GetCertsParams, Ping, RemoteMonitorInfo } from '../runtime_types';
 import { createEsQuery } from '../utils/es_search';
 
 import { asMutableArray } from '../utils/as_mutable_array';
@@ -77,25 +85,122 @@ export function absoluteDate(relativeDate: string) {
   return DateMath.parse(relativeDate)?.valueOf() ?? relativeDate;
 }
 
-export const getCertsRequestBody = ({
+export interface BuildMonitorScopingFilterArgs {
+  monitorIds?: string[];
+  ccsEnabled: boolean;
+  remoteNames?: string[];
+  spaceId?: string;
+  showFromAllSpaces: boolean;
+}
+
+/**
+ * Builds the filter that scopes the cert search to (a) local pings whose
+ * `monitor.id` belongs to an enabled local saved object, and (b) when CCS is
+ * on, remote pings irrespective of any local saved object.
+ *
+ * The motivation for the asymmetry is that remote-only monitors have no local
+ * SO to gate them against, mirroring how the overview status query admits
+ * remote-only monitors. See `overview_status_service.ts`.
+ */
+export const buildMonitorScopingFilter = ({
   monitorIds,
-  pageIndex,
-  search,
-  notValidBefore,
-  notValidAfter,
-  size = DEFAULT_SIZE,
-  to = DEFAULT_TO,
-  from = DEFAULT_FROM,
-  sortBy = DEFAULT_SORT,
-  direction = DEFAULT_DIRECTION,
-  filters,
-  monitorTypes,
-  browserResourceTypes,
-  party,
-  tags,
-  issuers,
-  includeBrowserCerts = false,
-}: GetCertsParams) => {
+  ccsEnabled,
+  remoteNames,
+  spaceId,
+  showFromAllSpaces,
+}: BuildMonitorScopingFilterArgs): estypes.QueryDslQueryContainer[] => {
+  const hasMonitorIds = Boolean(monitorIds && monitorIds.length > 0);
+
+  if (!ccsEnabled) {
+    return hasMonitorIds ? [{ terms: { 'monitor.id': monitorIds! } }] : [];
+  }
+
+  // `_index` does not support `terms`/`regexp`, so cluster-alias targeting uses
+  // `wildcard` filters — one per selected alias — combined as a `bool.should`.
+  const remoteAliasFilter: estypes.QueryDslQueryContainer | undefined = remoteNames?.length
+    ? {
+        bool: {
+          should: remoteNames.map((alias) => ({ wildcard: { _index: `${alias}:*` } })),
+          minimum_should_match: 1,
+        },
+      }
+    : undefined;
+
+  // Tie remote pings to the active space so a user in space A can't see
+  // remote certs whose originating monitor lived in space B on the remote
+  // cluster. Local pings are bounded by the SO query elsewhere, so they get
+  // no `meta.space_id` constraint here.
+  const remoteSpaceFilter: estypes.QueryDslQueryContainer | undefined =
+    !showFromAllSpaces && spaceId
+      ? { terms: { 'meta.space_id': [spaceId, ALL_SPACES_ID] } }
+      : undefined;
+
+  const localBranchFilters: estypes.QueryDslQueryContainer[] = [
+    { bool: { must_not: [{ wildcard: { _index: '*:*' } }] } },
+    ...(hasMonitorIds ? [{ terms: { 'monitor.id': monitorIds! } } as const] : []),
+  ];
+
+  const remoteBranchFilters: estypes.QueryDslQueryContainer[] = [
+    { wildcard: { _index: '*:*' } },
+    ...(remoteAliasFilter ? [remoteAliasFilter] : []),
+    ...(remoteSpaceFilter ? [remoteSpaceFilter] : []),
+  ];
+
+  return [
+    {
+      bool: {
+        minimum_should_match: 1,
+        should: [
+          { bool: { filter: localBranchFilters } },
+          { bool: { filter: remoteBranchFilters } },
+        ],
+      },
+    },
+  ];
+};
+
+export interface GetCertsRequestBodyOptions {
+  // Whether the experimental CCS feature is enabled. When false the function
+  // produces today's local-only query (`monitor.id IN <enabledIds>`). When
+  // true, it splits the SO-id constraint into a `bool.should` so remote pings
+  // are admitted regardless of any local saved object — see comment in the
+  // function body for the full filter shape.
+  ccsEnabled?: boolean;
+  // Cluster aliases the user has narrowed the page to. Adds an `_index: "<alias>:*"`
+  // wildcard filter on the remote-ping branch of the bool.should.
+  remoteNames?: string[];
+  // Active Kibana space. Used to scope remote pings to monitors that ran in
+  // this space (or `*`) so a user in space A can't see remote certs whose
+  // originating monitor lived in space B on the remote cluster.
+  spaceId?: string;
+  // When true, drop the active-space scoping on remote pings so the user
+  // sees remote certs from every space. The cert routes pass this through
+  // when the caller has all-spaces read access.
+  showFromAllSpaces?: boolean;
+}
+
+export const getCertsRequestBody = (
+  {
+    monitorIds,
+    pageIndex,
+    search,
+    notValidBefore,
+    notValidAfter,
+    size = DEFAULT_SIZE,
+    to = DEFAULT_TO,
+    from = DEFAULT_FROM,
+    sortBy = DEFAULT_SORT,
+    direction = DEFAULT_DIRECTION,
+    filters,
+    monitorTypes,
+    browserResourceTypes,
+    party,
+    tags,
+    issuers,
+    includeBrowserCerts = false,
+  }: GetCertsParams,
+  { ccsEnabled = false, remoteNames, spaceId, showFromAllSpaces = false }: GetCertsRequestBodyOptions = {}
+) => {
   const sort = SortFields[sortBy as keyof typeof SortFields];
 
   // The collapse/dedupe key. For the lightweight-only query we keep using the
@@ -209,7 +314,13 @@ export const getCertsRequestBody = ({
           ...certTypeFilter,
           EXCLUDE_RUN_ONCE_FILTER,
           ...(filters ? [filters] : []),
-          ...(monitorIds && monitorIds.length > 0 ? [{ terms: { 'monitor.id': monitorIds } }] : []),
+          ...buildMonitorScopingFilter({
+            monitorIds,
+            ccsEnabled,
+            remoteNames,
+            spaceId,
+            showFromAllSpaces,
+          }),
           ...(monitorTypes && monitorTypes.length > 0
             ? [{ terms: { 'monitor.type': monitorTypes } }]
             : []),
@@ -289,13 +400,26 @@ export const getCertsRequestBody = ({
       'labels',
       'tags',
       'error',
+      // Remote (CCS) deep linking — present on pings from clusters whose
+      // ingest pipeline stamps it. Local pings have it too when configured.
+      'kibanaUrl',
     ],
     collapse: {
       field: certIdField,
       inner_hits: {
         size: 100,
         _source: {
-          includes: ['monitor.id', 'monitor.name', 'monitor.type', 'url.full', 'config_id'],
+          includes: [
+            'monitor.id',
+            'monitor.name',
+            'monitor.type',
+            'url.full',
+            'config_id',
+            // Each inner hit can come from a different cluster (the same cert
+            // fingerprint can legitimately appear on multiple deployments), so
+            // we need `kibanaUrl` per-monitor for accurate deep-linking.
+            'kibanaUrl',
+          ],
         },
         collapse: {
           field: 'monitor.id',
@@ -314,6 +438,17 @@ export const getCertsRequestBody = ({
   });
 };
 
+// Same logic as `server/lib/remote_result_utils.getRemoteMonitorInfo`, kept
+// inline here so this module stays usable from both common code and tests
+// without pulling in server-only deps.
+const remoteFromIndex = (index: string, kibanaUrl?: string): RemoteMonitorInfo | undefined => {
+  if (!isNonLocalIndexName(index)) {
+    return undefined;
+  }
+  const remoteName = index.substring(0, index.indexOf(':'));
+  return { remoteName, ...(kibanaUrl ? { kibanaUrl } : {}) };
+};
+
 export const processCertsResult = (result: CertificatesResults): CertResult => {
   const certs = result.hits?.hits?.map((hit) => {
     const ping = hit._source;
@@ -326,8 +461,12 @@ export const processCertsResult = (result: CertificatesResults): CertResult => {
     const sha1 = server?.hash?.sha1;
     const sha256 = server?.hash?.sha256;
 
+    // Each inner hit can come from a different cluster (the same fingerprint /
+    // common name can legitimately appear on multiple deployments), so derive
+    // remote info from the inner hit's own `_index` rather than the outer one.
     const monitors = hit.inner_hits!.monitors.hits.hits.map((monitor) => {
-      const monitorPing = monitor._source as Ping;
+      const monitorPing = monitor._source as Ping & { kibanaUrl?: string };
+      const remote = remoteFromIndex(monitor._index, monitorPing?.kibanaUrl);
 
       return {
         name: monitorPing?.monitor.name,
@@ -335,8 +474,11 @@ export const processCertsResult = (result: CertificatesResults): CertResult => {
         configId: monitorPing?.config_id,
         url: monitorPing?.url?.full,
         type: monitorPing?.monitor?.type,
+        ...(remote ? { remote } : {}),
       };
     });
+
+    const remote = remoteFromIndex(hit._index, (ping as Ping & { kibanaUrl?: string })?.kibanaUrl);
 
     return {
       monitors,
@@ -360,6 +502,7 @@ export const processCertsResult = (result: CertificatesResults): CertResult => {
       locationName: ping?.observer?.geo?.name,
       errorMessage: ping?.error?.message,
       errorStackTrace: ping?.error?.stack_trace,
+      ...(remote ? { remote } : {}),
     };
   });
   const total = result.aggregations?.total?.value ?? 0;

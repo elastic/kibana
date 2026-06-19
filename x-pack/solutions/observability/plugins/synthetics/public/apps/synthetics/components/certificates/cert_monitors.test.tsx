@@ -77,4 +77,73 @@ describe('CertMonitors', () => {
     expect(queryByText('Monitor 11')).not.toBeInTheDocument();
     expect(getByTestId('certMonitorsViewAll')).toHaveTextContent('+5 more');
   });
+
+  describe('remote (CCS) monitors', () => {
+    const localMonitor: CertMonitor = {
+      name: 'Local Monitor',
+      id: 'local-id',
+      configId: 'local-cfg',
+      url: 'https://local.example.com',
+    };
+    const remoteWithKibanaUrl: CertMonitor = {
+      name: 'Remote With URL',
+      id: 'remote-1',
+      configId: 'remote-cfg-1',
+      url: 'https://remote-1.example.com',
+      remote: { remoteName: 'cluster1', kibanaUrl: 'https://remote-1.kibana' },
+    };
+    const remoteWithoutKibanaUrl: CertMonitor = {
+      name: 'Remote No URL',
+      id: 'remote-2',
+      configId: 'remote-cfg-2',
+      url: 'https://remote-2.example.com',
+      remote: { remoteName: 'cluster2' },
+    };
+
+    it('renders no remote badge for a local cert monitor', () => {
+      const { queryByTestId } = render(<CertMonitors monitors={[localMonitor]} />);
+      expect(queryByTestId('certMonitorRemoteBadge')).not.toBeInTheDocument();
+    });
+
+    it('renders the cluster alias as a badge next to a remote cert monitor', () => {
+      const { getAllByTestId } = render(
+        <CertMonitors monitors={[remoteWithKibanaUrl, remoteWithoutKibanaUrl]} />
+      );
+      const badges = getAllByTestId('certMonitorRemoteBadge');
+      expect(badges).toHaveLength(2);
+      expect(badges[0]).toHaveTextContent('cluster1');
+      expect(badges[1]).toHaveTextContent('cluster2');
+    });
+
+    it('opens an external link to remote Kibana when a kibanaUrl is known', () => {
+      const { getByTestId } = render(<CertMonitors monitors={[remoteWithKibanaUrl]} />);
+      const link = getByTestId('syntheticsMonitorPageLinkRemoteLink') as HTMLAnchorElement;
+      expect(link).toBeInTheDocument();
+      expect(link.target).toBe('_blank');
+      // Path includes the remote configId; query string carries no remoteName
+      // because the link is a deep link to the remote Kibana itself.
+      expect(link.href).toContain('https://remote-1.kibana');
+      expect(link.href).toContain('remote-cfg-1');
+      expect(link.href).not.toContain('remoteName=');
+    });
+
+    it('falls back to a local link with ?remoteName= when no kibanaUrl is known', () => {
+      const { getByTestId, queryByTestId } = render(
+        <CertMonitors monitors={[remoteWithoutKibanaUrl]} />
+      );
+      expect(queryByTestId('syntheticsMonitorPageLinkRemoteLink')).not.toBeInTheDocument();
+      const link = getByTestId('syntheticsMonitorPageLinkLink') as HTMLAnchorElement;
+      expect(link.target).not.toBe('_blank');
+      expect(link.getAttribute('href')).toContain('/app/synthetics/monitor/remote-cfg-2');
+      expect(link.getAttribute('href')).toContain('remoteName=cluster2');
+    });
+
+    it('keeps the plain local link for non-remote monitors', () => {
+      const { getByTestId } = render(<CertMonitors monitors={[localMonitor]} />);
+      const link = getByTestId('syntheticsMonitorPageLinkLink') as HTMLAnchorElement;
+      const href = link.getAttribute('href') ?? '';
+      expect(href).toContain('/app/synthetics/monitor/local-cfg');
+      expect(href).not.toContain('remoteName=');
+    });
+  });
 });

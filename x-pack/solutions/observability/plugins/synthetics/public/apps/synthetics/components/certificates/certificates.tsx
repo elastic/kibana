@@ -74,6 +74,7 @@ export const CertificatesPage: React.FC = () => {
     party,
     tags,
     issuers,
+    remoteNames,
     expiringWithin,
     setSearch,
     setMonitorTypes,
@@ -86,7 +87,11 @@ export const CertificatesPage: React.FC = () => {
 
   const dispatch = useDispatch();
 
-  const facets = useCertFacets();
+  // Honour the URL-driven cluster selection so that an external link
+  // (e.g. from a Lens in another space) lands on a pre-filtered view. The
+  // dedicated "Cluster" quick filter is intentionally not added here yet —
+  // tracked as a follow-up to issue #273622.
+  const facets = useCertFacets(remoteNames);
 
   const monitorTypeOptions = useMemo(
     () => withCounts(MONITOR_TYPE_FILTER_OPTIONS, facets?.monitorTypes),
@@ -132,6 +137,7 @@ export const CertificatesPage: React.FC = () => {
     tags,
     issuers,
     notValidAfter: expiringWithin,
+    remoteNames,
   });
 
   useEffect(() => {
