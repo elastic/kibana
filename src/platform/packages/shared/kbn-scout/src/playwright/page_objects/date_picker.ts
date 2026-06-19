@@ -398,13 +398,17 @@ export class DatePicker {
   }
 
   async timePickerExists(): Promise<boolean> {
-    if (await this.isNewDateRangePicker()) {
-      return await this.page.testSubj
-        .locator('dateRangePickerControlButton')
-        .isVisible({ timeout: 1000 })
-        .catch(() => false);
-    } else {
-      return await this.quickMenuButton.isVisible({ timeout: 1000 }).catch(() => false);
-    }
+    // Some views have no time picker at all (e.g. a data view without a time
+    // field), so this must resolve to `false` rather than throw. Don't delegate
+    // to `isNewDateRangePicker()`: it waits up to 10s for a picker to mount and
+    // throws when none does. Probe both variant markers directly with a short,
+    // non-throwing wait — either one present means a time picker exists.
+    const anyPicker = this.page.testSubj
+      .locator('dateRangePickerControlButton')
+      .or(this.quickMenuButton);
+    return anyPicker
+      .waitFor({ state: 'visible', timeout: 1000 })
+      .then(() => true)
+      .catch(() => false);
   }
 }
