@@ -5,5 +5,4 @@
  * 2.0.
  */
 
-// Enzyme helpers
-export { mountWithIntl } from './mount_with_i18n';
+export const DESCRIPTION_ID = 'description';
