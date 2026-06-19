@@ -248,17 +248,18 @@ export type PollOnCancelHandler<
 > = (context: PollHandlerContext<Input, Config, State>) => Promise<void> | void;
 
 /**
- * Full server definition for **`poll` only** (flat `poll`, optional `policy`, `ceilings`).
+ * Server definition for durable poll-based steps (`poll` required; optional `start`).
  * Omit `policy` to use {@link PollStepDefaults.policy} (fixed 1 s interval) via
  * {@link createPollServerStepDefinition}.
  */
-export type PollOnlyStepDefinition<
+export type PollStepDefinition<
   Input extends z.ZodType = z.ZodType,
   Output extends z.ZodType = z.ZodType,
   Config extends z.ZodObject = z.ZodObject,
   State extends z.ZodObject = z.ZodObject
 > = Omit<CommonServerStepDefinition<Input, Output, Config>, 'handler'> & {
   poll: PollHandler<Input, Output, Config, State>;
+  start?: StartWithHandoffHandler<Input, Output, Config, State>;
   policy?: PollPolicy;
   ceilings?: PollCeilings;
   /**
@@ -269,44 +270,10 @@ export type PollOnlyStepDefinition<
   onCancel?: PollOnCancelHandler<Input, Config, State>;
 };
 
-/**
- * Full server definition for **`start` + `poll`**.
- */
-export type StartPlusPollStepDefinition<
-  Input extends z.ZodType = z.ZodType,
-  Output extends z.ZodType = z.ZodType,
-  Config extends z.ZodObject = z.ZodObject,
-  State extends z.ZodObject = z.ZodObject
-> = PollOnlyStepDefinition<Input, Output, Config, State> & {
-  start: StartWithHandoffHandler<Input, Output, Config, State>;
-};
-
-export const isStartPlusPollStepDefinition = (
-  definition: CommonServerStepDefinition
-): definition is StartPlusPollStepDefinition =>
-  'start' in definition &&
-  typeof definition.start === 'function' &&
-  'poll' in definition &&
-  typeof definition.poll === 'function';
-
-export type PollStepDefinition<
-  Input extends z.ZodType = z.ZodType,
-  Output extends z.ZodType = z.ZodType,
-  Config extends z.ZodObject = z.ZodObject,
-  State extends z.ZodObject = z.ZodObject
-> =
-  | PollOnlyStepDefinition<Input, Output, Config, State>
-  | StartPlusPollStepDefinition<Input, Output, Config, State>;
-
-export const isPollOnlyStepDefinition = (
-  definition: CommonServerStepDefinition
-): definition is PollStepDefinition =>
-  'poll' in definition && typeof definition.poll === 'function' && !('start' in definition);
-
 export const isPollStepDefinition = (
   definition: CommonServerStepDefinition
 ): definition is PollStepDefinition =>
-  isPollOnlyStepDefinition(definition) || isStartPlusPollStepDefinition(definition);
+  'poll' in definition && typeof definition.poll === 'function';
 
 /**
  * Helper function to create a ServerStepDefinition with automatic type inference.
@@ -355,9 +322,7 @@ export function createPollServerStepDefinition<
   Config extends z.ZodObject = z.ZodObject,
   State extends z.ZodObject = z.ZodObject
 >(
-  definition:
-    | PollOnlyStepDefinition<Input, Output, Config, State>
-    | StartPlusPollStepDefinition<Input, Output, Config, State>
+  definition: PollStepDefinition<Input, Output, Config, State>
 ): PollStepDefinition<Input, Output, Config, State> {
   if (!definition.ceilings) {
     definition.ceilings = PollStepDefaults.ceilings;

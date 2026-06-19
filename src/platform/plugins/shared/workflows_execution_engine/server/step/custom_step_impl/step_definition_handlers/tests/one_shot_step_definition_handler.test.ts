@@ -109,7 +109,7 @@ describe('OneShotStepDefinitionHandler', () => {
       const stepHandler = buildHandler({ handler, onCancel });
 
       await stepHandler.run({ ran: true }, { ran: true }, {});
-      await asHandler(stepHandler).onCancel({}, {}, {});
+      await asHandler(stepHandler).onCancel({ ran: true }, { ran: true }, {});
 
       expect(onCancel).toHaveBeenCalledWith(
         expect.objectContaining({

@@ -45,8 +45,6 @@ export {
 
 export type {
   ServerStepDefinition,
-  PollOnlyStepDefinition,
-  StartPlusPollStepDefinition,
   PollStepDefinition,
   StepHandler,
   StepHandlerContext,
@@ -65,12 +63,7 @@ export type {
   RegisteredStepDefinition,
 } from './step_registry/types';
 
-export {
-  isOneShotStepDefinition,
-  isPollStepDefinition,
-  isStartPlusPollStepDefinition,
-  isPollOnlyStepDefinition,
-} from './step_registry/types';
+export { isOneShotStepDefinition, isPollStepDefinition } from './step_registry/types';
 
 export {
   createServerStepDefinition,

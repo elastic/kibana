@@ -55,9 +55,8 @@ describe('PollPolicyStepHandler', () => {
 
       const durable = getDurableState(mocks.persistedState.value);
       expect(durable.customState).toEqual({ actionId: 'abc' });
-      expect(durable.initialStartState?.isStart).toBe(true);
+      expect(durable.startCalled).toBe(true);
       expect(durable.pollState?.attempt).toBe(1);
-      expect(typeof durable.startedAt).toBe('string');
     });
 
     it('poll-only: invokes poll handler on first execution and continues on { state }', async () => {
@@ -88,12 +87,10 @@ describe('PollPolicyStepHandler', () => {
       const startedAt = new Date(Date.now() - 5_000).toISOString();
       const initialState = {
         [DURABLE_STEP_STATE_KEY]: {
-          startedAt,
-          initialStartState: { isStart: true },
+          startCalled: true,
           pollState: {
             attempt: 1,
             nextPollAt: startedAt,
-            lastPollAt: startedAt,
           },
           customState: { ready: false },
         },
@@ -122,12 +119,10 @@ describe('PollPolicyStepHandler', () => {
       const startedAt = new Date(Date.now() - 5_000).toISOString();
       const initialState = {
         [DURABLE_STEP_STATE_KEY]: {
-          startedAt,
-          initialStartState: { isStart: true },
+          startCalled: true,
           pollState: {
             attempt: 1,
             nextPollAt: startedAt,
-            lastPollAt: startedAt,
           },
           customState: { progress: 1 },
         },
@@ -156,12 +151,10 @@ describe('PollPolicyStepHandler', () => {
       const startedAt = new Date(Date.now() - 10_000).toISOString();
       const initialState = {
         [DURABLE_STEP_STATE_KEY]: {
-          startedAt,
-          initialStartState: { isStart: true },
+          startCalled: true,
           pollState: {
             attempt: 3,
             nextPollAt: startedAt,
-            lastPollAt: startedAt,
           },
           customState: { actionId: 'abc' },
         },
@@ -187,8 +180,7 @@ describe('PollPolicyStepHandler', () => {
       const startedAt = new Date(Date.now() - 2_000).toISOString();
       const initialState = {
         [DURABLE_STEP_STATE_KEY]: {
-          startedAt,
-          pollState: { attempt: 1, nextPollAt: startedAt, lastPollAt: startedAt },
+          pollState: { attempt: 1, nextPollAt: startedAt },
           customState: { kept: true },
         },
       };
@@ -211,8 +203,7 @@ describe('PollPolicyStepHandler', () => {
       const startedAt = new Date(Date.now() - 2_000).toISOString();
       const initialState = {
         [DURABLE_STEP_STATE_KEY]: {
-          startedAt,
-          pollState: { attempt: 1, nextPollAt: startedAt, lastPollAt: startedAt },
+          pollState: { attempt: 1, nextPollAt: startedAt },
           customState: { kept: true },
         },
       };
@@ -234,11 +225,9 @@ describe('PollPolicyStepHandler', () => {
       const startedAt = new Date(Date.now() - 1_000).toISOString();
       const initialState = {
         [DURABLE_STEP_STATE_KEY]: {
-          startedAt,
           pollState: {
             attempt: 5,
             nextPollAt: startedAt,
-            lastPollAt: startedAt,
           },
         },
       };
@@ -266,8 +255,7 @@ describe('PollPolicyStepHandler', () => {
       const before = Date.now();
       const initialState = {
         [DURABLE_STEP_STATE_KEY]: {
-          startedAt,
-          pollState: { attempt: 0, nextPollAt: startedAt, lastPollAt: startedAt },
+          pollState: { attempt: 0, nextPollAt: startedAt },
         },
       };
       const mocks = createHandlerTestMocks(initialState);
@@ -292,8 +280,7 @@ describe('PollPolicyStepHandler', () => {
       const before = Date.now();
       const initialState = {
         [DURABLE_STEP_STATE_KEY]: {
-          startedAt,
-          pollState: { attempt: 0, nextPollAt: startedAt, lastPollAt: startedAt },
+          pollState: { attempt: 0, nextPollAt: startedAt },
         },
       };
       const mocks = createHandlerTestMocks(initialState);
@@ -318,8 +305,7 @@ describe('PollPolicyStepHandler', () => {
       const before = Date.now();
       const initialState = {
         [DURABLE_STEP_STATE_KEY]: {
-          startedAt,
-          pollState: { attempt: 0, nextPollAt: startedAt, lastPollAt: startedAt },
+          pollState: { attempt: 0, nextPollAt: startedAt },
         },
       };
       const mocks = createHandlerTestMocks(initialState);
@@ -338,41 +324,13 @@ describe('PollPolicyStepHandler', () => {
       expect(resumeAt.getTime()).toBeLessThanOrEqual(Date.now() + 2_000 + 50);
     });
 
-    it('sets lastPollAt to when the poll phase completed', async () => {
-      const pollHandler = jest.fn().mockResolvedValue({ state: { n: 1 } });
-      const startedAt = new Date(Date.now() - 2_000).toISOString();
-      const before = Date.now();
-      const initialState = {
-        [DURABLE_STEP_STATE_KEY]: {
-          startedAt,
-          pollState: { attempt: 0, nextPollAt: startedAt, lastPollAt: startedAt },
-        },
-      };
-      const mocks = createHandlerTestMocks(initialState);
-      const stepDefinition = {
-        poll: pollHandler,
-        policy: { strategy: 'fixed' as const, intervalMs: 1_000 },
-        ceilings: { maxAttempts: 10, maxWaitMs: 60_000 },
-      };
-      const handler = buildPollHandler(stepDefinition, mocks);
-
-      await handler.run({}, {}, pollNode.configuration);
-
-      const lastPollAt = Date.parse(
-        getDurableState(mocks.persistedState.value).pollState!.lastPollAt
-      );
-      expect(lastPollAt).toBeGreaterThanOrEqual(before);
-      expect(lastPollAt).toBeLessThanOrEqual(Date.now() + 50);
-    });
-
     it('uses nextPollDelayMs override for the next wake-up when provided', async () => {
       const pollHandler = jest.fn().mockResolvedValue({ state: {}, nextPollDelayMs: 123 });
       const startedAt = new Date(Date.now() - 1_000).toISOString();
       const before = Date.now();
       const initialState = {
         [DURABLE_STEP_STATE_KEY]: {
-          startedAt,
-          pollState: { attempt: 0, nextPollAt: startedAt, lastPollAt: startedAt },
+          pollState: { attempt: 0, nextPollAt: startedAt },
         },
       };
       const mocks = createHandlerTestMocks(initialState);
@@ -403,8 +361,7 @@ describe('PollPolicyStepHandler', () => {
       const startedAt = new Date().toISOString();
       const mocks = createHandlerTestMocks({
         [DURABLE_STEP_STATE_KEY]: {
-          startedAt,
-          pollState: { attempt: 0, nextPollAt: startedAt, lastPollAt: startedAt },
+          pollState: { attempt: 0, nextPollAt: startedAt },
         },
       });
       const handler = buildPollHandler(stepDefinition, mocks);
@@ -422,8 +379,7 @@ describe('PollPolicyStepHandler', () => {
       const startedAt = new Date().toISOString();
       const mocks = createHandlerTestMocks({
         [DURABLE_STEP_STATE_KEY]: {
-          startedAt,
-          pollState: { attempt: 1, nextPollAt: startedAt, lastPollAt: startedAt },
+          pollState: { attempt: 1, nextPollAt: startedAt },
         },
       });
       const handler = buildPollHandler(stepDefinition, mocks);
@@ -445,8 +401,7 @@ describe('PollPolicyStepHandler', () => {
       const startedAt = new Date().toISOString();
       const initialState = {
         [DURABLE_STEP_STATE_KEY]: {
-          startedAt,
-          pollState: { attempt: 0, nextPollAt: startedAt, lastPollAt: startedAt },
+          pollState: { attempt: 0, nextPollAt: startedAt },
           customState: { jobId: 'job-1' },
         },
       };

@@ -13,15 +13,9 @@ export const DURABLE_STEP_STATE_KEY = '__durableStepState';
 export interface DurableStepState {
   /** Author state JSON persisted between polls (opaque to the engine). */
   customState?: Record<string, unknown>;
-  initialStartState?: {
-    isStart: boolean;
-  };
+  startCalled?: boolean;
   pollState?: {
     attempt: number;
     nextPollAt: string;
-    /** ISO time when the poll/start phase last completed (not used for ceiling math). */
-    lastPollAt: string;
   };
-  /** Epoch ms when the step entered its poll loop (after `start`). */
-  startedAt?: string;
 }

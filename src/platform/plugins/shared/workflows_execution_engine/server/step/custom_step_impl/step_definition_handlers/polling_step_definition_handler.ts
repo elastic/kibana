@@ -9,11 +9,7 @@
 
 import type { AtomicGraphNode } from '@kbn/workflows/graph';
 import { ExecutionError } from '@kbn/workflows/server';
-import {
-  isPollStepDefinition,
-  isStartPlusPollStepDefinition,
-  PollStepDefaults,
-} from '@kbn/workflows-extensions/server';
+import { PollStepDefaults } from '@kbn/workflows-extensions/server';
 import type {
   DurablePhaseResult,
   PollCeilings,
@@ -63,20 +59,13 @@ export class PollPolicyStepHandler implements CustomStepDefinitionHandler {
     rawInput: unknown,
     config: Record<string, unknown>
   ): Promise<RunStepResult> {
-    let res;
+    const state = this.getDurableStepState();
+    const durableResult =
+      this.stepDefinition.start && !state.startCalled
+        ? await this.handleStart(input, rawInput, config)
+        : await this.handlePoll(input, rawInput, config);
 
-    if (
-      isStartPlusPollStepDefinition(this.stepDefinition) &&
-      !this.getDurableStepState().initialStartState?.isStart
-    ) {
-      res = await this.handleStart(input, rawInput, config);
-    } else if (isPollStepDefinition(this.stepDefinition)) {
-      res = await this.handlePoll(input, rawInput, config);
-    } else {
-      throw new Error(`Step "${this.node.stepType}" has no "start" or "poll" phase.`);
-    }
-
-    return this.handleDurableResult(input, res);
+    return this.handleDurableResult(input, durableResult);
   }
 
   private async handleStart(
@@ -84,8 +73,8 @@ export class PollPolicyStepHandler implements CustomStepDefinitionHandler {
     rawInput: unknown,
     config: Record<string, unknown>
   ): Promise<DurablePhaseResult> {
-    if (!isStartPlusPollStepDefinition(this.stepDefinition)) {
-      throw new Error(`Step "${this.node.stepType}" has no "start" phase.`);
+    if (!this.stepDefinition.start) {
+      throw new Error(`Poll step "${this.node.stepType}" has no "start" handler.`);
     }
 
     const result = await this.stepDefinition.start(
@@ -94,10 +83,7 @@ export class PollPolicyStepHandler implements CustomStepDefinitionHandler {
 
     this.setDurableStepState({
       ...this.getDurableStepState(),
-      startedAt: new Date().toISOString(),
-      initialStartState: {
-        isStart: true,
-      },
+      startCalled: true,
     });
 
     return result as DurablePhaseResult;
@@ -108,15 +94,9 @@ export class PollPolicyStepHandler implements CustomStepDefinitionHandler {
     rawInput: unknown,
     config: Record<string, unknown>
   ): Promise<DurablePhaseResult> {
-    const stepState = this.getDurableStepState();
     const pollResult = await this.stepDefinition.poll(
       this.createPollHandlerContext(input, rawInput, config)
     );
-
-    this.setDurableStepState({
-      ...stepState,
-      startedAt: stepState.startedAt ?? new Date().toISOString(),
-    });
 
     return pollResult as DurablePhaseResult;
   }
@@ -126,10 +106,6 @@ export class PollPolicyStepHandler implements CustomStepDefinitionHandler {
     pollResult: DurablePhaseResult
   ): Promise<RunStepResult> {
     let stepState = this.getDurableStepState();
-
-    if (!stepState.startedAt) {
-      throw new Error('Step has not started yet.');
-    }
 
     let nextPollAtOverride: Date | undefined;
     let customState = stepState.customState;
@@ -154,7 +130,6 @@ export class PollPolicyStepHandler implements CustomStepDefinitionHandler {
 
     let nextPollAt: string | undefined;
     const attempt = stepState?.pollState?.attempt ?? 0;
-    const pollCompletedAt = new Date().toISOString();
     const nextAttempt = attempt + 1;
 
     if (nextPollAtOverride) {
@@ -188,7 +163,6 @@ export class PollPolicyStepHandler implements CustomStepDefinitionHandler {
       pollState: {
         attempt: nextAttempt,
         nextPollAt,
-        lastPollAt: pollCompletedAt,
       },
       customState,
     };

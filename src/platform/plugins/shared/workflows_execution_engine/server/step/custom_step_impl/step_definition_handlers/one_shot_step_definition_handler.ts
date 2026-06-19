@@ -16,18 +16,10 @@ import type { IWorkflowEventLogger } from '../../../workflow_event_logger';
 import type { RunStepResult } from '../../node_implementation';
 import type { CustomStepDefinitionHandler } from '../types';
 
-interface LastRunParams {
-  input: unknown;
-  rawInput: unknown;
-  config: Record<string, unknown>;
-}
-
 /**
  * Executes a single-shot custom step (`ServerStepDefinition` with `handler`).
  */
 export class OneShotStepDefinitionHandler implements CustomStepDefinitionHandler {
-  private lastRunParams: LastRunParams | undefined;
-
   constructor(
     private readonly stepDefinition: ServerStepDefinition,
     private readonly node: AtomicGraphNode,
@@ -35,16 +27,14 @@ export class OneShotStepDefinitionHandler implements CustomStepDefinitionHandler
     private readonly workflowLogger: IWorkflowEventLogger
   ) {}
 
-  public async onCancel(): Promise<void> {
+  public async onCancel(
+    input: unknown,
+    rawInput: unknown,
+    config: Record<string, unknown>
+  ): Promise<void> {
     if (!this.stepDefinition.onCancel) {
       return;
     }
-
-    const { input, rawInput, config } = this.lastRunParams ?? {
-      input: {},
-      rawInput: this.node.configuration.with ?? {},
-      config: this.node.configuration ?? {},
-    };
 
     await this.stepDefinition.onCancel(
       createBaseHandlerContext(
@@ -63,8 +53,6 @@ export class OneShotStepDefinitionHandler implements CustomStepDefinitionHandler
     rawInput: unknown,
     config: Record<string, unknown>
   ): Promise<RunStepResult> {
-    this.lastRunParams = { input, rawInput, config };
-
     const handler = this.stepDefinition.handler;
     if (!handler) {
       throw new Error(`Step "${this.node.stepType}" has no "handler".`);
