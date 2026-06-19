@@ -266,6 +266,7 @@ export class TemplatesMigrationTaskManager {
                 owner,
                 definition: yaml,
                 description: cf.label,
+                isGlobal: true,
               },
               { id: fdId, ...(nsOption ? { namespace: nsOption } : {}), refresh: false }
             );

@@ -217,7 +217,7 @@ describe('TemplatesMigrationTaskManager', () => {
 
       const [fieldDefCall, templateCall] = repo.create.mock.calls;
       expect(fieldDefCall[0]).toBe(CASE_FIELD_DEFINITION_SAVED_OBJECT);
-      expect(fieldDefCall[1]).toMatchObject({ name: 'cf_text', owner: 'cases' });
+      expect(fieldDefCall[1]).toMatchObject({ name: 'cf_text', owner: 'cases', isGlobal: true });
 
       expect(templateCall[0]).toBe(CASE_TEMPLATE_SAVED_OBJECT);
       expect(templateCall[1]).toMatchObject({
@@ -232,6 +232,31 @@ describe('TemplatesMigrationTaskManager', () => {
         { legacyTemplatesMigrated: true, legacyCustomFieldsMigrated: true },
         expect.anything()
       );
+    });
+
+    it('sets isGlobal: true on every migrated field definition', async () => {
+      const configSO = buildConfigureSO({
+        customFields: [
+          buildLegacyCustomField('cf_text', CustomFieldTypes.TEXT),
+          buildLegacyCustomField('cf_num', CustomFieldTypes.NUMBER),
+        ],
+      });
+
+      repo.find
+        .mockResolvedValueOnce({ saved_objects: [configSO], total: 1 })
+        .mockResolvedValueOnce({ saved_objects: [], total: 0 }) // field-defs
+        .mockResolvedValueOnce({ saved_objects: [], total: 0 }); // templates
+
+      const manager = await buildAndSchedule();
+      await getTaskRunner(manager).run();
+
+      const fieldDefCreates = repo.create.mock.calls.filter(
+        (c) => c[0] === CASE_FIELD_DEFINITION_SAVED_OBJECT
+      );
+      expect(fieldDefCreates).toHaveLength(2);
+      for (const call of fieldDefCreates) {
+        expect(call[1]).toMatchObject({ isGlobal: true });
+      }
     });
 
     it('reuses existing field definitions by name and does not duplicate', async () => {
