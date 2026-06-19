@@ -228,7 +228,6 @@ export const AskUserQuestionPrompt = ({
                     currentQuestion.multi_select ? e.target.checked : true
                   )
                 }
-                data-test-subj={`agentBuilderAskUserQuestionPromptOption-${optionIndex}`}
               >
                 {option.description && (
                   <EuiText size="xs" color="subdued">
@@ -287,9 +286,7 @@ export const AskUserQuestionPrompt = ({
         {/* Validation error */}
         {showCustomError && (
           <EuiFlexItem grow={false}>
-            <EuiFormErrorText data-test-subj="agentBuilderAskUserQuestionPromptCustomError">
-              {labels.customError}
-            </EuiFormErrorText>
+            <EuiFormErrorText>{labels.customError}</EuiFormErrorText>
           </EuiFlexItem>
         )}
       </EuiFlexGroup>
@@ -310,7 +307,6 @@ export const AskUserQuestionPrompt = ({
                   disabled={isInteractionDisabled}
                   size="s"
                   color="text"
-                  data-test-subj="agentBuilderAskUserQuestionPromptSkipAllButton"
                 >
                   {labels.skipAllButton}
                 </EuiButtonEmpty>
