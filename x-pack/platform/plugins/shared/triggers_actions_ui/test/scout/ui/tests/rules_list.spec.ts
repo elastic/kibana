@@ -751,12 +751,8 @@ test.describe('Rules list', { tag: tags.stateful.classic }, () => {
     await expect(getTableRows(page)).toHaveCount(4);
 
     // Toggle a status option, then confirm it registered before checking rows.
-    // The filter is an EuiPopover + EuiSelectable: a table reload can shift focus
-    // and close the popover, so re-open it whenever the options aren't visible.
-    // The authoritative "toggle registered" signal is the filter button's active-
-    // count badge (it tracks selectedStatuses synchronously); the row count is a
-    // downstream async refetch that can lag or settle on a stale value, so we gate
-    // on the badge first and only then assert the filtered row count.
+    // Re-open the selectable for each change so EUI derives option checked state
+    // from the latest selectedStatuses after each table refetch.
     const optionsPanel = page.testSubj.locator('ruleStatusFilterSelect');
     const activeFilterBadge = page.testSubj
       .locator('ruleStatusFilterButton')
@@ -766,17 +762,14 @@ test.describe('Rules list', { tag: tags.stateful.classic }, () => {
       expectedSelectedCount: number,
       expectedRowCount: number
     ) => {
-      // A table reload can shift focus and close the popover; re-open it when the
-      // options aren't visible. The conditional is required for that resilience —
-      // the expects below stay outside it.
-      // eslint-disable-next-line playwright/no-conditional-in-test
-      if (!(await optionsPanel.isVisible().catch(() => false))) {
-        await page.testSubj.click('ruleStatusFilterButton');
-      }
+      await expect(optionsPanel).toBeHidden();
+      await page.testSubj.click('ruleStatusFilterButton');
       await expect(optionsPanel).toBeVisible();
       await page.testSubj.click(filterSubj);
       await expect(activeFilterBadge).toHaveText(String(expectedSelectedCount));
       await expect(getTableRows(page)).toHaveCount(expectedRowCount);
+      await page.keyboard.press('Escape');
+      await expect(optionsPanel).toBeHidden();
     };
 
     // Select only enabled → 2 rules (enabled + snoozed)
@@ -787,6 +780,13 @@ test.describe('Rules list', { tag: tags.stateful.classic }, () => {
     await applyFilter('ruleStatusFilterOption-enabled', 1, 2);
     // Deselect disabled → no status filter, all 4
     await applyFilter('ruleStatusFilterOption-disabled', 0, 4);
+
+    // Start from a freshly mounted filter before reusing options that were
+    // selected and cleared above.
+    await refreshRulesList(page);
+    await searchRules(page, uniqueTag);
+    await expect(getTableRows(page)).toHaveCount(4);
+
     // Select snoozed → only snoozed (2)
     await applyFilter('ruleStatusFilterOption-snoozed', 1, 2);
     // Add disabled → disabled + snoozed (3)
@@ -794,8 +794,7 @@ test.describe('Rules list', { tag: tags.stateful.classic }, () => {
     // Add enabled → all 4
     await applyFilter('ruleStatusFilterOption-enabled', 3, 4);
 
-    // Close filter panel
-    await page.testSubj.click('ruleStatusFilterButton');
+    await expect(optionsPanel).toBeHidden();
   });
 
   test('should filter alerts by the tag', async ({ page, apiServices }) => {
