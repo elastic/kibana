@@ -19,6 +19,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import type { monaco } from '@kbn/code-editor';
 import type { RuleQuery } from './compose_form_types';
+import { getBreachQuery } from './compose_form_types';
 import type { QueryTab } from './types';
 import { QuerySandbox } from './query_sandbox';
 import type { QuerySandboxProps } from './query_sandbox';
@@ -99,8 +100,16 @@ export const QuerySandboxFlyout: React.FC<QuerySandboxFlyoutProps> = ({
   const queryFields = useMemo(
     () =>
       query.format === 'composed'
-        ? { base: query.base, breach: query.blocks.breach, recover: query.blocks.recover ?? '' }
-        : { base: query.no_data ?? '', breach: query.breach, recover: query.recover ?? '' },
+        ? {
+            base: query.base,
+            breach: query.breach.segment,
+            recover: query.recovery?.segment ?? '',
+          }
+        : {
+            base: query.no_data?.query ?? '',
+            breach: query.breach.query,
+            recover: query.recovery?.query ?? '',
+          },
     [query]
   );
 
@@ -113,23 +122,21 @@ export const QuerySandboxFlyout: React.FC<QuerySandboxFlyoutProps> = ({
           ? {
               format: 'composed',
               base: next.base,
-              blocks: { breach: next.breach, ...(next.recover ? { recover: next.recover } : {}) },
+              breach: { segment: next.breach },
+              ...(next.recover ? { recovery: { segment: next.recover } } : {}),
             }
           : {
               format: 'standalone',
-              breach: next.breach,
-              ...(next.base ? { no_data: next.base } : {}),
-              ...(next.recover ? { recover: next.recover } : {}),
+              breach: { query: next.breach },
+              ...(next.base ? { no_data: { query: next.base } } : {}),
+              ...(next.recover ? { recovery: { query: next.recover } } : {}),
             }
       );
     },
     [query, queryFields, onQueryChange]
   );
 
-  const activeQuery =
-    query.format === 'composed'
-      ? [query.base, query.blocks.breach].filter(Boolean).join('\n')
-      : query.breach;
+  const activeQuery = query.format === 'composed' ? getBreachQuery(query) : query.breach.query;
 
   const handleQueryChange = useCallback((v: string) => updateQuery({ breach: v }), [updateQuery]);
 
