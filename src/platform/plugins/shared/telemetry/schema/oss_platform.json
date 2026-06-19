@@ -12083,6 +12083,12 @@
             "description": "Switches the Entity Store Engine to v2"
           }
         },
+        "securitySolution:alertValidationWorkflowEnabled": {
+          "type": "boolean",
+          "_meta": {
+            "description": "Whether the managed alert analysis workflow is enabled"
+          }
+        },
         "securitySolution:alertValidationWorkflowAutoCloseEnabled": {
           "type": "boolean",
           "_meta": {
@@ -12099,6 +12105,12 @@
           "type": "float",
           "_meta": {
             "description": "Maximum false positive confidence score for auto-closing alerts"
+          }
+        },
+        "securitySolution:alertValidationWorkflowConnectorId": {
+          "type": "keyword",
+          "_meta": {
+            "description": "AI connector used by the alert analysis workflow"
           }
         },
         "elasticRamen:enabled": {
