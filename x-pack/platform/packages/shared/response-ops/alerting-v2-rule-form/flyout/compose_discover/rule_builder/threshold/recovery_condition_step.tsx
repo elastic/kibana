@@ -75,10 +75,10 @@ export const BuilderRecoveryForm: React.FC<RuleBuilderRecoveryProps> = ({ state,
     if (!recoveryConfig || !generatedRecoveryBlock) return;
     const current = getValues('query');
     if (current.format !== 'composed') return;
-    if (current.blocks.recover === generatedRecoveryBlock) return;
+    if (current.recovery?.segment === generatedRecoveryBlock) return;
     setValue('query', {
       ...current,
-      blocks: { ...current.blocks, recover: generatedRecoveryBlock },
+      recovery: { segment: generatedRecoveryBlock },
     });
   }, [recoveryConfig, generatedRecoveryBlock, getValues, setValue]);
 
