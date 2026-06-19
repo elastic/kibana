@@ -89,9 +89,9 @@ export const InferenceCostsTransparencyTour = ({
           <p>
             <FormattedMessage
               id="searchApiPanels.inferenceCosts.tour.description"
-              defaultMessage="Using {fieldName} requires an inference endpoint and may incur costs based on Elastic Inference Service token usage or Machine Learning (ML) node usage, depending on your configuration."
+              defaultMessage="Using {semanticText} requires an inference endpoint and may incur costs based on Elastic Inference Service token usage or Machine Learning (ML) node usage, depending on your configuration."
               values={{
-                fieldName: <EuiCode>{fieldName}</EuiCode>,
+                semanticText: <EuiCode>{fieldName}</EuiCode>,
               }}
             />
           </p>
