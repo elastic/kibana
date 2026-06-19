@@ -57,7 +57,6 @@ describe('SkillsStore', () => {
       const store = new SkillsStoreImpl({ skills: [skill] });
       expect(store.has('skill-1')).toBe(true);
     });
-
   });
 
   describe('add', () => {

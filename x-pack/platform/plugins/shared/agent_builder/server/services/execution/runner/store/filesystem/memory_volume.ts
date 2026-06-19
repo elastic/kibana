@@ -234,5 +234,4 @@ export class MemoryVolume {
 
     return node;
   }
-
 }
