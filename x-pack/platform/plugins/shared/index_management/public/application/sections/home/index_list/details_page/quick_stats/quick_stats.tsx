@@ -8,6 +8,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { EuiFlexGrid, useIsWithinMinBreakpoint } from '@elastic/eui';
 import { formatBytes } from '../../../../../lib/format_bytes';
+import { isClosedIndexStatus } from '../../../../../lib/is_closed_index_status';
 import type { Index } from '../../../../../../../common';
 import { loadIndexDocCount } from '../../../../../services/api';
 import { StorageDetails } from './storage_details';
@@ -20,8 +21,8 @@ export interface DocCountState {
   count?: number;
   isLoading: boolean;
   isError: boolean;
-  /** True when the count comes from index metadata rather than a live ES|QL query. */
-  isApproximate?: boolean;
+  /** Present when the count comes from index metadata rather than a live ES|QL query. */
+  approximateReason?: 'closed_index' | 'requires_read';
 }
 interface Props {
   indexDetails: Index;
@@ -45,7 +46,7 @@ export const QuickStats = ({ indexDetails }: Props) => {
   const primarySizeFormatted = formatBytes(primarySize);
 
   const metadataDocCount = indexDetails.documents;
-  const isClosed = status === 'close';
+  const isClosed = isClosedIndexStatus(status);
 
   const [docCount, setDocCount] = useState<DocCountState>({ isLoading: true, isError: false });
 
@@ -56,7 +57,7 @@ export const QuickStats = ({ indexDetails }: Props) => {
         count: metadataDocCount,
         isLoading: false,
         isError: false,
-        isApproximate: true,
+        approximateReason: 'closed_index',
       });
       return;
     }
@@ -66,7 +67,12 @@ export const QuickStats = ({ indexDetails }: Props) => {
         // Fall back to the metadata count (already available from the index stats response).
         // Only mark as an error when there's nothing to show.
         if (metadataDocCount !== undefined) {
-          setDocCount({ count: metadataDocCount, isLoading: false, isError: false, isApproximate: true });
+          setDocCount({
+            count: metadataDocCount,
+            isLoading: false,
+            isError: false,
+            approximateReason: 'requires_read',
+          });
         } else {
           setDocCount({ isLoading: false, isError: true });
         }
@@ -75,7 +81,12 @@ export const QuickStats = ({ indexDetails }: Props) => {
       }
     } catch {
       if (metadataDocCount !== undefined) {
-        setDocCount({ count: metadataDocCount, isLoading: false, isError: false, isApproximate: true });
+        setDocCount({
+          count: metadataDocCount,
+          isLoading: false,
+          isError: false,
+          approximateReason: 'requires_read',
+        });
       } else {
         setDocCount({ isLoading: false, isError: true });
       }

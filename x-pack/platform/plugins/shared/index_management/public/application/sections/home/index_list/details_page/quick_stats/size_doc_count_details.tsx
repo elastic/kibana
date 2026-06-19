@@ -27,6 +27,7 @@ import {
   docCountErrorTooltip,
   docCountErrorLabel,
   docCountApproximateTooltip,
+  docCountClosedIndexTooltip,
   storageCardTitle,
 } from './translations';
 
@@ -57,6 +58,13 @@ export const SizeDocCountDetails: FunctionComponent<{
       );
     }
 
+    const approximateHint =
+      docCount.approximateReason === 'closed_index'
+        ? docCountClosedIndexTooltip
+        : docCount.approximateReason === 'requires_read'
+        ? docCountApproximateTooltip
+        : undefined;
+
     const docCountContent = (
       <EuiFlexGroup gutterSize="xs">
         <EuiFlexItem grow={false}>
@@ -78,21 +86,16 @@ export const SizeDocCountDetails: FunctionComponent<{
             )}
           </EuiTextColor>
         </EuiFlexItem>
-        {docCount.isApproximate && (
+        {approximateHint && (
           <EuiFlexItem grow={false}>
-            <EuiIcon
-              type="info"
-              size="s"
-              color="subdued"
-              aria-label={docCountApproximateTooltip}
-            />
+            <EuiIcon type="info" size="s" color="subdued" aria-label={approximateHint} />
           </EuiFlexItem>
         )}
       </EuiFlexGroup>
     );
 
-    if (docCount.isApproximate) {
-      return <EuiToolTip content={docCountApproximateTooltip}>{docCountContent}</EuiToolTip>;
+    if (approximateHint) {
+      return <EuiToolTip content={approximateHint}>{docCountContent}</EuiToolTip>;
     }
 
     return docCountContent;

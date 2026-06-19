@@ -10,21 +10,25 @@ import { EuiIcon, EuiLoadingSpinner, EuiText, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import useObservable from 'react-use/lib/useObservable';
 import { type DocCountResult, type docCountApi, RequestResultType } from './get_doc_count';
-import {
-  docCountApproximateTooltip,
-  docCountClosedIndexTooltip,
-} from '../translations';
+import { isClosedIndexStatus } from '../../../../lib/is_closed_index_status';
+import { docCountApproximateTooltip, docCountClosedIndexTooltip } from '../translations';
 interface DocCountCellProps {
   indexName: string;
   docCountApi: ReturnType<typeof docCountApi>;
   /** Metadata-based doc count already fetched as part of the index list (available even without read access). */
   metadataCount?: number;
-  /** Index status — 'close' prevents ES|QL from running at all. */
+  /** Index status — closed indices prevent ES|QL from running at all. */
   status?: string;
 }
 
-export const DocCountCell = ({ indexName, docCountApi, metadataCount, status }: DocCountCellProps) => {
-  const isClosed = status === 'close';
+export const DocCountCell = ({
+  indexName,
+  docCountApi,
+  metadataCount,
+  status,
+}: DocCountCellProps) => {
+  const isClosed = isClosedIndexStatus(status);
+  const isWaitingForIndexStats = status === undefined && metadataCount === undefined;
 
   const docCountResponse = useObservable<Record<string, DocCountResult>>(
     docCountApi.getObservable()
@@ -34,10 +38,10 @@ export const DocCountCell = ({ indexName, docCountApi, metadataCount, status }: 
   useEffect(() => {
     // Don't request an ES|QL count for closed indices — ES|QL can't read them and would
     // poison the whole batch they share.
-    if (!isClosed) {
+    if (!isClosed && !isWaitingForIndexStats) {
       docCountApi.getByName(indexName);
     }
-  }, [docCountApi, indexName, isClosed]);
+  }, [docCountApi, indexName, isClosed, isWaitingForIndexStats]);
 
   // Closed index: skip ES|QL entirely, show metadata count with a tooltip.
   if (isClosed) {
