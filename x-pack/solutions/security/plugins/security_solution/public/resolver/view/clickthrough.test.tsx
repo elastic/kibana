@@ -26,7 +26,7 @@ let entityIDs: { origin: string; firstChild: string; secondChild: string };
 const resolverComponentInstanceID = 'resolverComponentInstanceID';
 
 describe("Resolver, when rendered with the `indices` prop set to `[]` and the `databaseDocumentID` prop set to `_id`, and when the document is found in an index called 'awesome_index'", () => {
-  beforeEach(async () => {
+  beforeEach(() => {
     // create a mock data access layer
     const { metadata: dataAccessLayerMetadata, dataAccessLayer } =
       noAncestorsTwoChildenInIndexCalledAwesomeIndex();
@@ -87,7 +87,7 @@ describe("Resolver, when rendered with the `indices` prop set to `[]` and the `d
 });
 
 describe('Resolver, when analyzing a tree that has no ancestors and 2 children', () => {
-  beforeEach(async () => {
+  beforeEach(() => {
     // create a mock data access layer
     const { metadata: dataAccessLayerMetadata, dataAccessLayer } = noAncestorsTwoChildren();
 
@@ -441,7 +441,7 @@ describe.skip('Resolver, when using a generated tree with 20 generations, 4 chil
 });
 
 describe('Resolver, when analyzing a tree that has 2 related registry and 1 related event of all other categories for the origin node', () => {
-  beforeEach(async () => {
+  beforeEach(() => {
     // create a mock data access layer with related events
     const { metadata: dataAccessLayerMetadata, dataAccessLayer } =
       noAncestorsTwoChildrenWithRelatedEventsOnOrigin();
