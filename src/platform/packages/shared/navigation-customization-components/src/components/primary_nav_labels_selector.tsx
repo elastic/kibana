@@ -104,9 +104,7 @@ const PrimaryNavLabelsOptionCard = ({
           <PrimaryNavLabelsIllustration showText={showText} selected={isSelected} />
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiText size="s">
-            <strong>{label}</strong>
-          </EuiText>
+          <EuiText size="s">{label}</EuiText>
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiPanel>
