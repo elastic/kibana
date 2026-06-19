@@ -5,6 +5,7 @@
  * 2.0.
  */
 import React, { useEffect, useMemo, useState } from 'react';
+import type { SearchRequest } from '@elastic/elasticsearch/lib/api/types';
 import { i18n } from '@kbn/i18n';
 import type { EuiContextMenuPanelItemDescriptor } from '@elastic/eui';
 import {
@@ -114,7 +115,7 @@ const useRemoteKibanaUrlFallback = ({
 
   const { data } = useEsSearch<
     { kibanaUrl?: string; remote?: { kibanaUrl?: string } },
-    { index: string }
+    SearchRequest
   >(
     {
       index,
