@@ -155,12 +155,6 @@ export const redTeamCmd: Command<void> = {
       return;
     }
 
-    const report = await runRedTeam(redTeamConfig, log);
-    log.info(
-      `Stub report: ${report.attackCount} attacks, ${report.passCount} pass, ${report.failCount} fail`
-    );
-    log.info('');
-
     if (!skipServer) {
       await ensureEvalStack({
         repoRoot,
@@ -170,6 +164,12 @@ export const redTeamCmd: Command<void> = {
         requiresEisCcm,
       });
     }
+
+    const report = await runRedTeam(redTeamConfig, log);
+    log.info(
+      `Stub report: ${report.attackCount} attacks, ${report.passCount} pass, ${report.failCount} fail`
+    );
+    log.info('');
 
     const envOverrides = buildEvalRunEnv({
       evaluationConnectorId,
