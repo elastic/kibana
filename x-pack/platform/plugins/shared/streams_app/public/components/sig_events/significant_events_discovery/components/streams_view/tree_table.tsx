@@ -337,9 +337,7 @@ export function StreamsTreeTable({
                           path: { key: item.stream.name, tab: 'significantEvents' },
                         })}
                       >
-                        <EuiHighlight search={searchQuery.text}>
-                          {item.stream.name}
-                        </EuiHighlight>
+                        <EuiHighlight search={searchQuery.text}>{item.stream.name}</EuiHighlight>
                       </EuiLink>
                     </EuiFlexItem>
                   </EuiFlexGroup>
