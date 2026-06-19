@@ -8,8 +8,8 @@
 import type { IFileSystem } from 'just-bash';
 import { InMemoryFs, MountableFs } from 'just-bash';
 import type { IFilesystemService } from '@kbn/agent-builder-server/runner';
-import { CapacityLimitedFs } from './capacity_limited_fs';
 import type { FileEntryAccessor } from '@kbn/agent-builder-server/runner';
+import { CapacityLimitedFs } from './capacity_limited_fs';
 import { VolumeBackedReadOnlyFs } from './volume_backed_read_only_fs';
 import type { WorkspaceVolume } from './workspace_volume';
 import { MOUNT_POINTS } from './mount_points';
