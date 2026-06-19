@@ -148,6 +148,7 @@ export {
   createSpanLatencyEvaluator,
   createSkillInvocationEvaluator,
   createToolCallsEvaluator,
+  createCachedReadInputTokensEvaluator,
 } from './src/evaluators/trace_based';
 export { getGitMetadata, type GitMetadata } from './src/utils/git_metadata';
 

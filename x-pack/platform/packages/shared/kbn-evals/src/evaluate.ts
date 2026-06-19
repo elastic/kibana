@@ -26,6 +26,7 @@ import { createCorrectnessAnalysisEvaluator } from './evaluators/correctness';
 import { createGroundednessAnalysisEvaluator } from './evaluators/groundedness';
 import {
   createCachedTokensEvaluator,
+  createCachedReadInputTokensEvaluator,
   createInputTokensEvaluator,
   createLatencyEvaluator,
   createOutputTokensEvaluator,
@@ -410,6 +411,10 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
             log,
           }),
           cachedTokens: createCachedTokensEvaluator({
+            traceEsClient,
+            log,
+          }),
+          cachedReadInputTokens: createCachedReadInputTokensEvaluator({
             traceEsClient,
             log,
           }),

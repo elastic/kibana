@@ -13,6 +13,7 @@ import { SIGNIFICANT_EVENTS_DISCOVERY_TOOL_IDS } from './constants';
 
 export const SIGEVENTS_INVESTIGATOR_AGENT_ID =
   'platform.streams.significant-events.discovery.investigator';
+export const SIGEVENTS_INVESTIGATOR_INSTRUCTIONS: string = instructions;
 
 export function createSigEventsInvestigatorAgent({
   server,

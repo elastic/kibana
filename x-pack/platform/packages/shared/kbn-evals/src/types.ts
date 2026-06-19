@@ -117,6 +117,7 @@ export interface DefaultEvaluators {
     latency: Evaluator;
     toolCalls: Evaluator;
     cachedTokens: Evaluator;
+    cachedReadInputTokens: Evaluator;
   };
 }
 
