@@ -25,6 +25,10 @@ export function registerResolutionRulesList(router: EntityStorePluginRouter) {
         'Requires an enterprise license.',
       options: {
         tags: ['oas-tag:Security entity store'],
+        availability: {
+          stability: 'stable',
+          since: '9.5.0',
+        },
       },
       security: {
         authz: RESOLUTION_ENTITY_STORE_PERMISSIONS,
