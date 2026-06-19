@@ -71,14 +71,13 @@ export const spaceTest = baseSpaceTest.extend<
       async deleteAll() {
         const response = await kbnClient.request<{ cases: Array<{ id: string }> }>({
           method: 'GET',
-          path: `${spacePrefix}${CASES_API}?perPage=100`,
+          path: `${spacePrefix}${CASES_API}/_find?perPage=100`,
         });
         const ids = (response.data?.cases ?? []).map((c) => c.id);
         if (ids.length > 0) {
           await kbnClient.request({
             method: 'DELETE',
-            path: `${spacePrefix}${CASES_API}`,
-            body: { ids },
+            path: `${spacePrefix}${CASES_API}?ids=${encodeURIComponent(JSON.stringify(ids))}`,
             headers: XSRF,
           });
         }

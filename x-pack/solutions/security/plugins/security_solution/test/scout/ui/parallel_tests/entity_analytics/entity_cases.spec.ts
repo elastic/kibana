@@ -54,7 +54,6 @@ spaceTest.describe.skip(
     spaceTest.beforeEach(async ({ browserAuth, apiServices, scoutSpace, casesApi }) => {
       await casesApi.deleteAll();
       await apiServices.detectionRule.deleteAll();
-      await apiServices.detectionAlerts.deleteAll();
 
       await apiServices.detectionRule.createCustomQueryRule({
         ...ALERT_RULE,
@@ -67,7 +66,6 @@ spaceTest.describe.skip(
     spaceTest.afterEach(async ({ apiServices, casesApi }) => {
       await casesApi.deleteAll();
       await apiServices.detectionRule.deleteAll();
-      await apiServices.detectionAlerts.deleteAll();
     });
 
     spaceTest(
