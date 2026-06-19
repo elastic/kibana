@@ -54,6 +54,6 @@ export const SECURITY_ALERT_VALIDATION_WORKFLOW = {
   management: {
     lifecycle: 'dynamic',
     versionStrategy: 'on_adopt',
-    enablement: 'restorable',
+    enablement: 'enforced',
   },
 } as const satisfies ManagedWorkflowDefinition<SecurityAlertValidationWorkflowTemplateValues>;
