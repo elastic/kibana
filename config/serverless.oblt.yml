@@ -29,6 +29,9 @@ xpack.features.overrides:
 # Customize empty page state for analytics apps
 no_data_page.analyticsNoDataPageFlavor: 'serverless_observability'
 
+## Default the integrations catalog to these categories in Observability projects
+xpack.fleet.defaultIntegrationCategory: [opentelemetry, observability]
+
 ## Disable adding the component template `.fleet_agent_id_verification-1` to every index template for each datastream for each integration
 xpack.fleet.agentIdVerificationEnabled: false
 

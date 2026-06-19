@@ -18,6 +18,7 @@ import {
   useGetAppendCustomIntegrationsQuery,
   useGetReplacementCustomIntegrationsQuery,
   useGetPackageVerificationKeyId,
+  useConfig,
 } from '../../../../../hooks';
 import { useMergeEprPackagesWithReplacements } from '../../../../../hooks/use_merge_epr_with_replacements';
 
@@ -154,6 +155,7 @@ export const useAvailablePackages = ({
 
   const { isAgentlessEnabled } = useAgentless();
   const { applyOnboardingOverride } = useOnboardingOverride();
+  const config = useConfig();
 
   const { packageVerificationKeyId } = useGetPackageVerificationKeyId();
 
@@ -169,7 +171,9 @@ export const useAvailablePackages = ({
     addBasePath,
   } = useBuildIntegrationsUrl();
 
-  const [selectedCategory, setCategory] = useState(initialSelectedCategory);
+  const [selectedCategory, setCategory] = useState(
+    initialSelectedCategory || config.defaultIntegrationCategory?.[0] || ''
+  );
   const [selectedSubCategory, setSelectedSubCategory] = useState<string | undefined>(
     initialSubcategory
   );

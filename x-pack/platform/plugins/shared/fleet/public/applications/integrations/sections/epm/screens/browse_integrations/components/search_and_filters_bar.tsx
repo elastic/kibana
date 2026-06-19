@@ -38,7 +38,11 @@ import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import type { CategoryFacet } from '../../home/category_facets';
 
 import { useUrlFilters, useAddUrlFilters } from '../hooks/url_filters';
-import { useUrlCategories, useSetUrlCategory } from '../hooks/url_categories';
+import {
+  useUrlCategories,
+  useSetUrlCategory,
+  useUrlDefaultCategories,
+} from '../hooks/url_categories';
 import type {
   BrowseIntegrationSortType,
   IntegrationStatusFilterType,
@@ -424,6 +428,7 @@ const SearchBar: React.FC<SearchBarProps> = ({ categories, availableSubCategorie
   const urlFilters = useUrlFilters();
   const addUrlFilters = useAddUrlFilters();
   const { category: selectedCategory, subCategory: selectedSubCategory } = useUrlCategories();
+  const urlDefaultCategories = useUrlDefaultCategories();
   const setUrlCategory = useSetUrlCategory();
   const styles = useMemoCss(searchBarStyles);
 
@@ -447,16 +452,31 @@ const SearchBar: React.FC<SearchBarProps> = ({ categories, availableSubCategorie
     : undefined;
 
   const categoryBadgeLabel = useMemo(() => {
-    const selectedSubCategoryTitle =
-      selectedSubCategory && availableSubCategories
-        ? availableSubCategories.find((subCat) => subCat.id === selectedSubCategory)?.title
-        : undefined;
+    if (selectedCategory) {
+      const selectedSubCategoryTitle =
+        selectedSubCategory && availableSubCategories
+          ? availableSubCategories.find((subCat) => subCat.id === selectedSubCategory)?.title
+          : undefined;
 
-    if (selectedCategoryTitle && selectedSubCategoryTitle) {
-      return `${selectedCategoryTitle}, ${selectedSubCategoryTitle}`;
+      if (selectedCategoryTitle && selectedSubCategoryTitle) {
+        return `${selectedCategoryTitle}, ${selectedSubCategoryTitle}`;
+      }
+      return selectedCategoryTitle ?? '';
     }
-    return selectedCategoryTitle ?? '';
-  }, [availableSubCategories, selectedCategoryTitle, selectedSubCategory]);
+
+    // Multi-default categories from URL search params
+    const defaultTitles = urlDefaultCategories
+      .map((catId) => categories?.find((c) => c.id === catId)?.title)
+      .filter(Boolean) as string[];
+    return defaultTitles.join(', ');
+  }, [
+    availableSubCategories,
+    categories,
+    selectedCategory,
+    selectedCategoryTitle,
+    selectedSubCategory,
+    urlDefaultCategories,
+  ]);
 
   const handleCategoryBadgeDismiss = useCallback(() => {
     if (selectedSubCategory) {
@@ -480,7 +500,7 @@ const SearchBar: React.FC<SearchBarProps> = ({ categories, availableSubCategorie
       onChange={(e) => setSearchTerms(e.target.value)}
       fullWidth
       prepend={
-        selectedCategoryTitle ? (
+        categoryBadgeLabel ? (
           <EuiFormPrepend
             label={
               <>

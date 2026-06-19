@@ -9,7 +9,7 @@ import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { EuiFlexItem, EuiFlexGroup, EuiSpacer, useEuiTheme } from '@elastic/eui';
 import { useLocation, useHistory } from 'react-router-dom';
 
-import { useBreadcrumbs, useStartServices } from '../../../../hooks';
+import { useBreadcrumbs, useStartServices, useConfig } from '../../../../hooks';
 import { NoEprCallout } from '../../components/no_epr_callout';
 import { categoryExists } from '../home';
 
@@ -17,21 +17,24 @@ import { ResponsivePackageGrid } from './components/responsive_package_grid';
 import { SearchAndFiltersBar } from './components/search_and_filters_bar';
 import { Sidebar } from './components/side_bar';
 import { useBrowseIntegrationHook } from './hooks';
-import { useSetUrlCategory } from './hooks/url_categories';
+import {
+  useSetUrlCategory,
+  useUrlDefaultCategories,
+  useSetUrlDefaultCategories,
+} from './hooks/url_categories';
 import { NoDataPrompt } from './components/no_data_prompt';
 import {
   ManageIntegrationsTable,
   type CreatedIntegrationRow,
 } from './components/manage_integrations_table';
 
-const OBLT_DEFAULT_CATEGORY = 'opentelemetry';
-
 export const BrowseIntegrationsPage: React.FC<{ prereleaseIntegrationsEnabled: boolean }> = ({
   prereleaseIntegrationsEnabled,
 }) => {
   useBreadcrumbs('integrations_all');
 
-  const { automaticImport, application, cloud } = useStartServices();
+  const { automaticImport, application } = useStartServices();
+  const config = useConfig();
   const { pathname, search } = useLocation();
   const history = useHistory();
   const euiTheme = useEuiTheme();
@@ -71,10 +74,12 @@ export const BrowseIntegrationsPage: React.FC<{ prereleaseIntegrationsEnabled: b
   );
 
   const setUrlCategory = useSetUrlCategory();
+  const setUrlDefaultCategories = useSetUrlDefaultCategories();
+  const urlDefaultCategories = useUrlDefaultCategories();
   const {
     allCategories,
     initialSelectedCategory,
-    selectedCategory,
+    selectedCategories,
     mainCategories,
     isLoading,
     isLoadingCategories,
@@ -87,25 +92,34 @@ export const BrowseIntegrationsPage: React.FC<{ prereleaseIntegrationsEnabled: b
     availableSubCategories,
   } = useBrowseIntegrationHook({ prereleaseIntegrationsEnabled });
 
-  const isObservability = cloud?.serverless?.projectType === 'observability';
-
-  // Tracks whether we've already auto-redirected to the default category this page visit.
-  // Without this, clicking "All categories" (which clears initialSelectedCategory) would
-  // immediately trigger another redirect back to the default — preventing removal.
+  // Tracks whether we've already auto-redirected to the default categories this page visit.
+  // Without this, clicking "All categories" (which clears URL categories) would immediately
+  // trigger another redirect back to the defaults — preventing the user from removing them.
   const hasAutoRedirectedRef = useRef(false);
 
   useEffect(() => {
     if (
-      !hasAutoRedirectedRef.current &&
-      isObservability &&
-      !isLoading &&
-      !initialSelectedCategory &&
-      categoryExists(OBLT_DEFAULT_CATEGORY, allCategories)
-    ) {
+      hasAutoRedirectedRef.current ||
+      isLoading ||
+      initialSelectedCategory ||
+      urlDefaultCategories.length > 0
+    )
+      return;
+    const validDefaults = (config.defaultIntegrationCategory ?? []).filter((cat) =>
+      categoryExists(cat, allCategories)
+    );
+    if (validDefaults.length > 0) {
       hasAutoRedirectedRef.current = true;
-      setUrlCategory({ category: OBLT_DEFAULT_CATEGORY }, { replace: true });
+      setUrlDefaultCategories(validDefaults, { replace: true });
     }
-  }, [isObservability, isLoading, initialSelectedCategory, allCategories, setUrlCategory]);
+  }, [
+    isLoading,
+    initialSelectedCategory,
+    urlDefaultCategories.length,
+    config.defaultIntegrationCategory,
+    allCategories,
+    setUrlDefaultCategories,
+  ]);
 
   if (!isLoading && !categoryExists(initialSelectedCategory, allCategories)) {
     setUrlCategory({ category: '' }, { replace: true });
@@ -133,7 +147,7 @@ export const BrowseIntegrationsPage: React.FC<{ prereleaseIntegrationsEnabled: b
       <Sidebar
         isLoading={isLoading}
         categories={mainCategories}
-        selectedCategory={selectedCategory}
+        selectedCategories={selectedCategories}
         onCategoryChange={onCategoryChange}
         CreateIntegrationCardButton={
           canReadAutomaticImportIntegrations

@@ -25,12 +25,15 @@ jest.mock(
   })
 );
 
+const mockUseConfig = jest.fn();
+
 jest.mock('../../../../../hooks', () => ({
   useGetPackagesQuery: (params: any) => mockUseGetPackagesQuery(params),
   useGetCategoriesQuery: (params: any) => mockUseGetCategoriesQuery(params),
   useGetAppendCustomIntegrationsQuery: () => mockUseGetAppendCustomIntegrationsQuery(),
   useGetReplacementCustomIntegrationsQuery: () => mockUseGetReplacementCustomIntegrationsQuery(),
   useGetPackageVerificationKeyId: () => mockUseGetPackageVerificationKeyId(),
+  useConfig: () => mockUseConfig(),
   useStartServices: () => ({
     featureFlags: { getBooleanValue: jest.fn().mockReturnValue(false) },
     application: {
@@ -165,6 +168,7 @@ describe('useAvailablePackages', () => {
   beforeEach(() => {
     jest.clearAllMocks();
 
+    mockUseConfig.mockReturnValue({});
     mockUseAgentless.mockReturnValue({ isAgentlessEnabled: false });
     mockUseGetPackageVerificationKeyId.mockReturnValue({
       packageVerificationKeyId: mockPackageVerificationKeyId,

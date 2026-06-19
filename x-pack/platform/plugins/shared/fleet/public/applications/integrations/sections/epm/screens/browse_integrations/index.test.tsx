@@ -12,7 +12,10 @@ import { EuiThemeProvider } from '@elastic/eui';
 
 const mockUseBrowseIntegrationHook = jest.fn();
 const mockUseSetUrlCategory = jest.fn();
+const mockUseSetUrlDefaultCategories = jest.fn();
+const mockUseUrlDefaultCategories = jest.fn();
 const mockUseStartServices = jest.fn();
+const mockUseConfig = jest.fn();
 
 jest.mock('./hooks', () => ({
   useBrowseIntegrationHook: () => mockUseBrowseIntegrationHook(),
@@ -20,10 +23,13 @@ jest.mock('./hooks', () => ({
 
 jest.mock('./hooks/url_categories', () => ({
   useSetUrlCategory: () => mockUseSetUrlCategory(),
+  useSetUrlDefaultCategories: () => mockUseSetUrlDefaultCategories(),
+  useUrlDefaultCategories: () => mockUseUrlDefaultCategories(),
 }));
 
 jest.mock('../../../../hooks', () => ({
   useStartServices: () => mockUseStartServices(),
+  useConfig: () => mockUseConfig(),
   useBreadcrumbs: jest.fn(),
 }));
 
@@ -45,12 +51,13 @@ import { BrowseIntegrationsPage } from '.';
 
 const ALL_CATEGORY = { id: '', title: 'All categories', count: 10 };
 const OPENTELEMETRY_CATEGORY = { id: 'opentelemetry', title: 'OpenTelemetry', count: 5 };
+const OBSERVABILITY_CATEGORY = { id: 'observability', title: 'Observability', count: 8 };
 
 const makeDefaultHookReturn = (overrides = {}) => ({
-  allCategories: [ALL_CATEGORY, OPENTELEMETRY_CATEGORY],
+  allCategories: [ALL_CATEGORY, OPENTELEMETRY_CATEGORY, OBSERVABILITY_CATEGORY],
   initialSelectedCategory: '',
   selectedCategory: 'opentelemetry',
-  mainCategories: [ALL_CATEGORY, OPENTELEMETRY_CATEGORY],
+  mainCategories: [ALL_CATEGORY, OPENTELEMETRY_CATEGORY, OBSERVABILITY_CATEGORY],
   isLoading: false,
   isLoadingCategories: false,
   isLoadingAllPackages: false,
@@ -64,14 +71,19 @@ const makeDefaultHookReturn = (overrides = {}) => ({
 });
 
 describe('BrowseIntegrationsPage', () => {
-  const mockSetUrlCategory = jest.fn();
+  const mockSetUrlDefaultCategoriesFn = jest.fn();
+  const mockSetUrlCategoryFn = jest.fn();
 
   beforeEach(() => {
     jest.clearAllMocks();
     mockUseBrowseIntegrationHook.mockReturnValue(makeDefaultHookReturn());
-    mockUseSetUrlCategory.mockReturnValue(mockSetUrlCategory);
+    mockUseSetUrlDefaultCategories.mockReturnValue(mockSetUrlDefaultCategoriesFn);
+    mockUseSetUrlCategory.mockReturnValue(mockSetUrlCategoryFn);
+    mockUseUrlDefaultCategories.mockReturnValue([]);
+    mockUseConfig.mockReturnValue({
+      defaultIntegrationCategory: ['opentelemetry', 'observability'],
+    });
     mockUseStartServices.mockReturnValue({
-      cloud: { serverless: { projectType: 'observability' } },
       application: { capabilities: {} },
       automaticImport: undefined,
     });
@@ -87,29 +99,38 @@ describe('BrowseIntegrationsPage', () => {
     );
   }
 
-  describe('default category redirect for Observability projects', () => {
-    it('redirects to opentelemetry when no URL category is set', async () => {
+  describe('default multi-category redirect', () => {
+    it('sets both configured default categories as URL query params on first load', async () => {
       renderPage();
       await waitFor(() => {
-        expect(mockSetUrlCategory).toHaveBeenCalledWith(
-          { category: 'opentelemetry' },
+        expect(mockSetUrlDefaultCategoriesFn).toHaveBeenCalledWith(
+          ['opentelemetry', 'observability'],
           { replace: true }
         );
       });
     });
 
-    it('does not redirect when not on an Observability project', async () => {
-      mockUseStartServices.mockReturnValue({
-        cloud: { serverless: { projectType: 'security' } },
-        application: { capabilities: {} },
-        automaticImport: undefined,
-      });
+    it('only sets categories that exist in the catalog', async () => {
+      // opentelemetry exists, observability does not
+      mockUseBrowseIntegrationHook.mockReturnValue(
+        makeDefaultHookReturn({
+          allCategories: [ALL_CATEGORY, OPENTELEMETRY_CATEGORY],
+          mainCategories: [ALL_CATEGORY, OPENTELEMETRY_CATEGORY],
+        })
+      );
       renderPage();
       await waitFor(() => {
-        expect(mockSetUrlCategory).not.toHaveBeenCalledWith(
-          { category: 'opentelemetry' },
-          expect.anything()
-        );
+        expect(mockSetUrlDefaultCategoriesFn).toHaveBeenCalledWith(['opentelemetry'], {
+          replace: true,
+        });
+      });
+    });
+
+    it('does not redirect when no default categories are configured', async () => {
+      mockUseConfig.mockReturnValue({});
+      renderPage();
+      await waitFor(() => {
+        expect(mockSetUrlDefaultCategoriesFn).not.toHaveBeenCalled();
       });
     });
 
@@ -117,57 +138,39 @@ describe('BrowseIntegrationsPage', () => {
       mockUseBrowseIntegrationHook.mockReturnValue(makeDefaultHookReturn({ isLoading: true }));
       renderPage();
       await waitFor(() => {
-        expect(mockSetUrlCategory).not.toHaveBeenCalled();
+        expect(mockSetUrlDefaultCategoriesFn).not.toHaveBeenCalled();
       });
     });
 
-    it('does not redirect when a category is already in the URL', async () => {
-      const SECURITY_CATEGORY = { id: 'security', title: 'Security', count: 3 };
+    it('does not redirect when a path-based category is already in the URL', async () => {
       mockUseBrowseIntegrationHook.mockReturnValue(
-        makeDefaultHookReturn({
-          initialSelectedCategory: 'security',
-          selectedCategory: 'security',
-          allCategories: [ALL_CATEGORY, OPENTELEMETRY_CATEGORY, SECURITY_CATEGORY],
-          mainCategories: [ALL_CATEGORY, OPENTELEMETRY_CATEGORY, SECURITY_CATEGORY],
-        })
+        makeDefaultHookReturn({ initialSelectedCategory: 'security', selectedCategory: 'security' })
       );
       renderPage();
       await waitFor(() => {
-        expect(mockSetUrlCategory).not.toHaveBeenCalledWith(
-          { category: 'opentelemetry' },
-          expect.anything()
-        );
+        expect(mockSetUrlDefaultCategoriesFn).not.toHaveBeenCalled();
       });
     });
 
-    it('does not redirect when the opentelemetry category does not exist', async () => {
-      const SECURITY_CATEGORY = { id: 'security', title: 'Security', count: 3 };
-      mockUseBrowseIntegrationHook.mockReturnValue(
-        makeDefaultHookReturn({
-          allCategories: [ALL_CATEGORY, SECURITY_CATEGORY],
-          mainCategories: [ALL_CATEGORY, SECURITY_CATEGORY],
-        })
-      );
+    it('does not redirect when default categories are already set as URL query params', async () => {
+      mockUseUrlDefaultCategories.mockReturnValue(['opentelemetry', 'observability']);
       renderPage();
       await waitFor(() => {
-        expect(mockSetUrlCategory).not.toHaveBeenCalledWith(
-          { category: 'opentelemetry' },
-          expect.anything()
-        );
+        expect(mockSetUrlDefaultCategoriesFn).not.toHaveBeenCalled();
       });
     });
 
     it('does not redirect again after the user navigates to All categories', async () => {
-      // Simulate the initial load: no URL category → redirect fires
       const { rerender } = renderPage();
       await waitFor(() => {
-        expect(mockSetUrlCategory).toHaveBeenCalledTimes(1);
+        expect(mockSetUrlDefaultCategoriesFn).toHaveBeenCalledTimes(1);
       });
 
-      // Simulate the user clicking "All categories": initialSelectedCategory goes back to ''
+      // Simulate user clicking "All categories": URL categories and path category both cleared
       mockUseBrowseIntegrationHook.mockReturnValue(
         makeDefaultHookReturn({ initialSelectedCategory: '', selectedCategory: '' })
       );
+      mockUseUrlDefaultCategories.mockReturnValue([]);
       rerender(
         <I18nProvider>
           <EuiThemeProvider>
@@ -176,9 +179,8 @@ describe('BrowseIntegrationsPage', () => {
         </I18nProvider>
       );
 
-      // The redirect must not fire a second time
       await waitFor(() => {
-        expect(mockSetUrlCategory).toHaveBeenCalledTimes(1);
+        expect(mockSetUrlDefaultCategoriesFn).toHaveBeenCalledTimes(1);
       });
     });
   });
