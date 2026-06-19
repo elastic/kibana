@@ -26,6 +26,7 @@ import {
   shareService,
 } from '../services/kibana_services';
 import { DASHBOARD_STATE_STORAGE_KEY } from '../utils/urls';
+import { useCollapseSideNav } from './hooks/use_collapse_side_nav';
 import { useCreationOptions } from './hooks/use_creation_options';
 import { useDashboardMountContext } from './hooks/dashboard_mount_context';
 import { useDashboardOutcomeValidation } from './hooks/use_dashboard_outcome_validation';
@@ -86,16 +87,7 @@ export function DashboardApp({
     };
   }, [incomingEmbeddables, savedDashboardId]);
 
-  /**
-   * Collapse the project side nav when viewing or creating a dashboard to maximize canvas space.
-   */
-  useEffect(() => {
-    if (embedSettings) {
-      return;
-    }
-
-    coreServices.chrome.sideNav.setIsCollapsed(true);
-  }, [embedSettings]);
+  useCollapseSideNav(!embedSettings);
 
   const [dashboardApi, setDashboardApi] = useState<DashboardApi | undefined>(undefined);
   const [dashboardInternalApi, setDashboardInternalApi] = useState<

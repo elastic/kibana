@@ -68,6 +68,18 @@ const renderDashboardListingPage = (props: Partial<DashboardListingPageProps> = 
     { wrapper: I18nProvider }
   );
 
+beforeEach(() => {
+  (coreServices.chrome.sideNav.setIsCollapsed as jest.Mock).mockClear();
+});
+
+test('collapses the side nav when opening the dashboards listing page', async () => {
+  renderDashboardListingPage();
+
+  await waitFor(() => {
+    expect(coreServices.chrome.sideNav.setIsCollapsed).toHaveBeenCalledWith(true);
+  });
+});
+
 test('renders analytics no data page when the user has no data view', async () => {
   mockIsDashboardAppInNoDataState.mockResolvedValueOnce(true);
   dataService.dataViews.hasData.hasUserDataView = jest.fn().mockResolvedValue(false);
