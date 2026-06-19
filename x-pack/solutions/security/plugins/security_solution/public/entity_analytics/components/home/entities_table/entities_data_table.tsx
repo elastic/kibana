@@ -310,14 +310,14 @@ export const EntitiesDataTable = ({
   const { dataView, dataViewIsLoading } = useContext(DataViewContext);
 
   const customGridColumnsConfiguration = useMemo<CustomGridColumnsConfiguration>(() => {
-    const config: CustomGridColumnsConfiguration = {
+    const columnsConfig: CustomGridColumnsConfiguration = {
       alerts: ({ column }) => ({ ...column, isExpandable: false }),
       [ENTITY_FIELDS.ENTITY_SOURCE]: ({ column }) => ({ ...column, isExpandable: false }),
     };
     if (dataView.timeFieldName) {
-      config[dataView.timeFieldName] = ({ column }) => ({ ...column, display: undefined });
+      columnsConfig[dataView.timeFieldName] = ({ column }) => ({ ...column, display: undefined });
     }
-    return config;
+    return columnsConfig;
   }, [dataView.timeFieldName]);
 
   const {

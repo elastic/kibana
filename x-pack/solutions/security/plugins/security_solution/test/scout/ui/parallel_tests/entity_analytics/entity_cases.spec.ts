@@ -126,6 +126,7 @@ const ALERT_RULE: typeof CUSTOM_QUERY_RULE = {
  * Remove `.skip` and ensure the server is started with `entityAttachmentsEnabled`
  * before running these tests (see file-level JSDoc above).
  */
+// eslint-disable-next-line playwright/no-skipped-test
 spaceTest.describe.skip(
   'Entity attachment cases – flyout add-to-case actions and Entities tab',
   { tag: [...tags.stateful.classic] },
@@ -153,12 +154,11 @@ spaceTest.describe.skip(
 
     spaceTest(
       'shows Add to new case and Add to existing case in the host flyout Take Action menu',
-      async ({ page, scoutSpace }) => {
-        await page.gotoApp('security', {
-          path: `/s/${scoutSpace.id}/app/security/alerts`,
-        });
+      async ({ page }) => {
+        await page.gotoApp('security/alerts');
 
         // Wait for an alert row and open the host entity flyout via its link.
+        // eslint-disable-next-line playwright/no-nth-methods
         const hostLink = page.testSubj.locator('host-details-button').first();
         await hostLink.waitFor();
         await hostLink.click();
@@ -175,11 +175,10 @@ spaceTest.describe.skip(
 
     spaceTest(
       'shows Add to new case and Add to existing case in the user flyout Take Action menu',
-      async ({ page, scoutSpace }) => {
-        await page.gotoApp('security', {
-          path: `/s/${scoutSpace.id}/app/security/alerts`,
-        });
+      async ({ page }) => {
+        await page.gotoApp('security/alerts');
 
+        // eslint-disable-next-line playwright/no-nth-methods
         const userLink = page.testSubj.locator('users-link').first();
         await userLink.waitFor();
         await userLink.click();
@@ -200,11 +199,10 @@ spaceTest.describe.skip(
       async ({ page, scoutSpace }) => {
         const caseName = `Scout entity case – host – ${scoutSpace.id}`;
 
-        await page.gotoApp('security', {
-          path: `/s/${scoutSpace.id}/app/security/alerts`,
-        });
+        await page.gotoApp('security/alerts');
 
         await spaceTest.step('open host flyout and click Add to new case', async () => {
+          // eslint-disable-next-line playwright/no-nth-methods
           const hostLink = page.testSubj.locator('host-details-button').first();
           await hostLink.waitFor();
           await hostLink.click();
@@ -228,6 +226,7 @@ spaceTest.describe.skip(
         await spaceTest.step('navigate to the new case and check the Entities tab', async () => {
           // A toast with a link to the case is shown; click it.
           const caseToastLink = page.locator('[data-test-subj*="toastLink"]');
+          // eslint-disable-next-line playwright/no-nth-methods
           await caseToastLink.first().click();
 
           // The Entities tab should be visible for cases that have entity attachments.
@@ -253,9 +252,7 @@ spaceTest.describe.skip(
           entityType: 'host',
         });
 
-        await page.gotoApp('security', {
-          path: `/s/${scoutSpace.id}/app/security/cases/${caseId}`,
-        });
+        await page.gotoApp(`security/cases/${caseId}`);
 
         await expect(page.testSubj.locator(CASE_VIEW_ENTITIES_TAB)).toBeVisible({
           timeout: 15000,
@@ -284,9 +281,7 @@ spaceTest.describe.skip(
           },
         });
 
-        await page.gotoApp('security', {
-          path: `/s/${scoutSpace.id}/app/security/cases/${caseResp.data.id}`,
-        });
+        await page.gotoApp(`security/cases/${caseResp.data.id}`);
 
         await expect(page.testSubj.locator(CASE_VIEW_ENTITIES_TAB)).toBeVisible({
           timeout: 15000,
@@ -294,7 +289,7 @@ spaceTest.describe.skip(
         await page.testSubj.locator(CASE_VIEW_ENTITIES_TAB).click();
 
         await expect(page.testSubj.locator(ENTITY_TAB_EMPTY)).toBeVisible({ timeout: 15000 });
-        await expect(page.testSubj.locator(ENTITY_TAB_TABLE)).not.toBeVisible();
+        await expect(page.testSubj.locator(ENTITY_TAB_TABLE)).toBeHidden();
       }
     );
   }
