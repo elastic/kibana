@@ -78,6 +78,7 @@
     "@kbn/react-query",
     "@kbn/kql",
     "@kbn/entity-store",
+    "@kbn/logging-mocks",
     "@kbn/core-spaces-common"
   ],
   "exclude": ["target/**/*"]
