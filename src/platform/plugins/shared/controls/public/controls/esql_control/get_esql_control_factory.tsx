@@ -148,7 +148,7 @@ export const getESQLControlFactory = <
           };
 
           /** For static ??field controls, we need to know which query to pull suggestions from */
-          let relatedQuery;
+          let relatedQuery = '';
           if (
             isStaticESQLControl(nextState) &&
             nextState.variable_type === ESQLVariableType.FIELDS
@@ -179,9 +179,7 @@ export const getESQLControlFactory = <
 
           try {
             await uiActionsService.executeTriggerActions('ESQL_CONTROL_TRIGGER', {
-              queryString: isStaticESQLControl(nextState)
-                ? relatedQuery ?? ''
-                : nextState.esql_query,
+              queryString: isStaticESQLControl(nextState) ? relatedQuery : nextState.esql_query,
               variableType: nextState.variable_type,
               controlType: nextState.control_type,
               esqlVariables: variablesInParent,
