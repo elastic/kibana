@@ -1,30 +1,30 @@
-<svg width="68" height="56" viewBox="0 0 68 56" fill="none" xmlns="http://www.w3.org/2000/svg">
+<svg width="72" height="56" viewBox="0 0 72 56" fill="none" xmlns="http://www.w3.org/2000/svg">
 <g clip-path="url(#clip0_10542_2484)">
-<rect width="68" height="56" fill="#D9E8FF"/>
+<rect width="72" height="56" fill="#D9E8FF"/>
 <g filter="url(#filter0_ddd_10542_2484)">
-<rect x="23" y="6" width="36" height="44" rx="2" fill="white"/>
+<rect x="25" y="6" width="36" height="44" rx="2" fill="white"/>
 </g>
-<path d="M28 11.5C28 11.2239 28.2239 11 28.5 11H53.5C53.7761 11 54 11.2239 54 11.5V14.5C54 14.7761 53.7761 15 53.5 15H28.5C28.2239 15 28 14.7761 28 14.5V11.5Z" fill="#E3E8F2"/>
-<path d="M28 18.5C28 18.2239 28.2239 18 28.5 18H46.5C46.7761 18 47 18.2239 47 18.5V21.5C47 21.7761 46.7761 22 46.5 22H28.5C28.2239 22 28 21.7761 28 21.5V18.5Z" fill="#E3E8F2"/>
+<path d="M30 11.5C30 11.2239 30.2239 11 30.5 11H55.5C55.7761 11 56 11.2239 56 11.5V14.5C56 14.7761 55.7761 15 55.5 15H30.5C30.2239 15 30 14.7761 30 14.5V11.5Z" fill="#E3E8F2"/>
+<path d="M30 18.5C30 18.2239 30.2239 18 30.5 18H48.5C48.7761 18 49 18.2239 49 18.5V21.5C49 21.7761 48.7761 22 48.5 22H30.5C30.2239 22 30 21.7761 30 21.5V18.5Z" fill="#E3E8F2"/>
 <g clip-path="url(#clip1_10542_2484)">
-<path d="M8 10C8 7.79086 9.79086 6 12 6V6C14.2091 6 16 7.79086 16 10V10C16 12.2091 14.2091 14 12 14V14C9.79086 14 8 12.2091 8 10V10Z" fill="#61A2FF"/>
-<rect x="11" y="4" width="8" height="8" rx="4" fill="#A3CBFF"/>
+<path d="M10 10C10 7.79086 11.7909 6 14 6V6C16.2091 6 18 7.79086 18 10V10C18 12.2091 16.2091 14 14 14V14C11.7909 14 10 12.2091 10 10V10Z" fill="#61A2FF"/>
+<rect x="13" y="4" width="8" height="8" rx="4" fill="#A3CBFF"/>
 </g>
 <g clip-path="url(#clip2_10542_2484)">
-<path d="M8 22C8 19.7909 9.79086 18 12 18V18C14.2091 18 16 19.7909 16 22V22C16 24.2091 14.2091 26 12 26V26C9.79086 26 8 24.2091 8 22V22Z" fill="#61A2FF"/>
-<rect x="11" y="16" width="8" height="8" rx="4" fill="#A3CBFF"/>
+<path d="M10 22C10 19.7909 11.7909 18 14 18V18C16.2091 18 18 19.7909 18 22V22C18 24.2091 16.2091 26 14 26V26C11.7909 26 10 24.2091 10 22V22Z" fill="#61A2FF"/>
+<rect x="13" y="16" width="8" height="8" rx="4" fill="#A3CBFF"/>
 </g>
 <g clip-path="url(#clip3_10542_2484)">
-<path d="M8 34C8 31.7909 9.79086 30 12 30V30C14.2091 30 16 31.7909 16 34V34C16 36.2091 14.2091 38 12 38V38C9.79086 38 8 36.2091 8 34V34Z" fill="#61A2FF"/>
-<rect x="11" y="28" width="8" height="8" rx="4" fill="#A3CBFF"/>
+<path d="M10 34C10 31.7909 11.7909 30 14 30V30C16.2091 30 18 31.7909 18 34V34C18 36.2091 16.2091 38 14 38V38C11.7909 38 10 36.2091 10 34V34Z" fill="#61A2FF"/>
+<rect x="13" y="28" width="8" height="8" rx="4" fill="#A3CBFF"/>
 </g>
 <g clip-path="url(#clip4_10542_2484)">
-<path d="M8 46C8 43.7909 9.79086 42 12 42V42C14.2091 42 16 43.7909 16 46V46C16 48.2091 14.2091 50 12 50V50C9.79086 50 8 48.2091 8 46V46Z" fill="#61A2FF"/>
-<rect x="11" y="40" width="8" height="8" rx="4" fill="#A3CBFF"/>
+<path d="M10 46C10 43.7909 11.7909 42 14 42V42C16.2091 42 18 43.7909 18 46V46C18 48.2091 16.2091 50 14 50V50C11.7909 50 10 48.2091 10 46V46Z" fill="#61A2FF"/>
+<rect x="13" y="40" width="8" height="8" rx="4" fill="#A3CBFF"/>
 </g>
 </g>
 <defs>
-<filter id="filter0_ddd_10542_2484" x="15" y="0" width="52" height="60" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+<filter id="filter0_ddd_10542_2484" x="17" y="0" width="52" height="60" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
 <feFlood flood-opacity="0" result="BackgroundImageFix"/>
 <feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha"/>
 <feOffset dy="2"/>
@@ -47,19 +47,19 @@
 <feBlend mode="normal" in="SourceGraphic" in2="effect3_dropShadow_10542_2484" result="shape"/>
 </filter>
 <clipPath id="clip0_10542_2484">
-<rect width="68" height="56" fill="white"/>
+<rect width="72" height="56" fill="white"/>
 </clipPath>
 <clipPath id="clip1_10542_2484">
-<path d="M8 10C8 7.79086 9.79086 6 12 6V6C14.2091 6 16 7.79086 16 10V10C16 12.2091 14.2091 14 12 14V14C9.79086 14 8 12.2091 8 10V10Z" fill="white"/>
+<path d="M10 10C10 7.79086 11.7909 6 14 6V6C16.2091 6 18 7.79086 18 10V10C18 12.2091 16.2091 14 14 14V14C11.7909 14 10 12.2091 10 10V10Z" fill="white"/>
 </clipPath>
 <clipPath id="clip2_10542_2484">
-<path d="M8 22C8 19.7909 9.79086 18 12 18V18C14.2091 18 16 19.7909 16 22V22C16 24.2091 14.2091 26 12 26V26C9.79086 26 8 24.2091 8 22V22Z" fill="white"/>
+<path d="M10 22C10 19.7909 11.7909 18 14 18V18C16.2091 18 18 19.7909 18 22V22C18 24.2091 16.2091 26 14 26V26C11.7909 26 10 24.2091 10 22V22Z" fill="white"/>
 </clipPath>
 <clipPath id="clip3_10542_2484">
-<path d="M8 34C8 31.7909 9.79086 30 12 30V30C14.2091 30 16 31.7909 16 34V34C16 36.2091 14.2091 38 12 38V38C9.79086 38 8 36.2091 8 34V34Z" fill="white"/>
+<path d="M10 34C10 31.7909 11.7909 30 14 30V30C16.2091 30 18 31.7909 18 34V34C18 36.2091 16.2091 38 14 38V38C11.7909 38 10 36.2091 10 34V34Z" fill="white"/>
 </clipPath>
 <clipPath id="clip4_10542_2484">
-<path d="M8 46C8 43.7909 9.79086 42 12 42V42C14.2091 42 16 43.7909 16 46V46C16 48.2091 14.2091 50 12 50V50C9.79086 50 8 48.2091 8 46V46Z" fill="white"/>
+<path d="M10 46C10 43.7909 11.7909 42 14 42V42C16.2091 42 18 43.7909 18 46V46C18 48.2091 16.2091 50 14 50V50C11.7909 50 10 48.2091 10 46V46Z" fill="white"/>
 </clipPath>
 </defs>
 </svg>
