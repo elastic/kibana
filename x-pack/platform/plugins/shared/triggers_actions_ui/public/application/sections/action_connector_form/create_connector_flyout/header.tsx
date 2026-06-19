@@ -20,6 +20,7 @@ import {
   EuiBetaBadge,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { useKibana } from '../../../../common/lib/kibana';
 import { TECH_PREVIEW_DESCRIPTION, TECH_PREVIEW_LABEL } from '../../translations';
 
 interface Props {
@@ -39,12 +40,16 @@ const FlyoutHeaderComponent: React.FC<Props> = ({
   isExperimental,
   docsUrl,
 }) => {
+  const {
+    docLinks: { links },
+  } = useKibana().services;
+
   return (
     <EuiFlyoutHeader hasBorder data-test-subj="create-connector-flyout-header">
       <EuiFlexGroup gutterSize="m" alignItems="center">
         {icon ? (
           <EuiFlexItem grow={false} data-test-subj="create-connector-flyout-header-icon">
-            <EuiIcon type={icon} size="xl" />
+            <EuiIcon type={icon} size="xl" aria-hidden={true} />
           </EuiFlexItem>
         ) : null}
         <EuiFlexItem grow={false}>
@@ -112,14 +117,22 @@ const FlyoutHeaderComponent: React.FC<Props> = ({
               )}
             </>
           ) : (
-            <EuiTitle size="s">
-              <h3 id="selectConnectorFlyoutTitle">
+            <>
+              <EuiTitle size="s">
+                <h3 id="selectConnectorFlyoutTitle">
+                  <FormattedMessage
+                    defaultMessage="Select a connector"
+                    id="xpack.triggersActionsUI.sections.addConnectorForm.selectConnectorFlyoutTitle"
+                  />
+                </h3>
+              </EuiTitle>
+              <EuiLink href={links.alerting.connectors} target="_blank" external>
                 <FormattedMessage
-                  defaultMessage="Select a connector"
-                  id="xpack.triggersActionsUI.sections.addConnectorForm.selectConnectorFlyoutTitle"
+                  id="xpack.triggersActionsUI.sections.addConnectorForm.selectConnectorFlyoutDocsLink"
+                  defaultMessage="View documentation"
                 />
-              </h3>
-            </EuiTitle>
+              </EuiLink>
+            </>
           )}
         </EuiFlexItem>
       </EuiFlexGroup>

@@ -72,7 +72,6 @@ export const Box: ConnectorSpec = {
       defaultMessage:
         'Search files and folders, read content, and query enterprise content using Box AI',
     }),
-    docsUrl: 'https://www.elastic.co/docs/reference/connectors-kibana/box-action-type',
     minimumLicense: 'enterprise',
     isTechnicalPreview: true,
     supportedFeatureIds: ['workflows', 'agentBuilder'],

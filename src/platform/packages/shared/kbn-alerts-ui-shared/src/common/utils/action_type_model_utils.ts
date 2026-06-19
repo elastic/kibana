@@ -55,6 +55,25 @@ export async function fetchConnectorSpec(
   return transformConnectorSpecResponse(wire);
 }
 
+const CONNECTORS_DOCS_BASE = 'https://www.elastic.co/docs/reference/kibana/connectors-kibana/';
+
+/**
+ * Derives the documentation URL for a spec-based connector.
+ * Uses docsUrl from spec metadata if explicitly set; otherwise derives it from the connector id.
+ * Derivation: strip leading '.', convert underscores/camelCase to kebab-case, append '-action-type'.
+ */
+function getDocsUrlFromSpec(spec: ConnectorSpecResponse): string {
+  if (spec.metadata.docsUrl) {
+    return spec.metadata.docsUrl;
+  }
+  const slug = spec.metadata.id
+    .replace(/^\./, '')
+    .replace(/_/g, '-')
+    .replace(/([a-z])([A-Z])/g, '$1-$2')
+    .toLowerCase();
+  return `${CONNECTORS_DOCS_BASE}${slug}-action-type`;
+}
+
 /**
  * Resolves the icon for a connector based on the spec metadata.
  */
@@ -88,7 +107,7 @@ export function transformSpecToActionTypeModel(
     iconClass: getIconFromSpec(spec),
     subtype: undefined,
     isExperimental: spec.metadata.isTechnicalPreview ?? false,
-    ...(spec.metadata.docsUrl !== undefined ? { docsUrl: spec.metadata.docsUrl } : {}),
+    docsUrl: getDocsUrlFromSpec(spec),
     getHideInUi: (_actionTypes: ActionType[]) =>
       shouldHideWorkflowsOnlyConnector(spec.metadata.supportedFeatureIds, uiSettings),
     actionConnectorFields: lazy(async () => {
