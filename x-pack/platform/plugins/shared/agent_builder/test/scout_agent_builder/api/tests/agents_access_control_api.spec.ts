@@ -370,7 +370,7 @@ apiTest.describe(
           visibility: AgentAccessControlMode.Private,
           entries: [
             { type: 'user', name: bob.username, role: AgentAccessControlRole.User },
-            { type: 'user', name: eve.username, role: AgentAccessControlRole.Editor },
+            { type: 'user', name: eve.username, role: AgentAccessControlRole.Manager },
           ],
         });
 
@@ -426,7 +426,7 @@ apiTest.describe(
     // ── access control redaction on agent read paths ───────────────────────────────────
 
     apiTest(
-      'GET /agents/{id} redacts access_control.entries for non-managers',
+      "GET /agents/{id} keeps only the caller's access_control entry for non-managers",
       async ({ apiClient }) => {
         const agentId = `${ACCESS_CONTROL_TEST_PREFIX}-redact-${randomUUID()}`;
         await createAgentAs(apiClient, alice, mockAgent(agentId, AgentAccessControlMode.Private));
@@ -436,7 +436,8 @@ apiTest.describe(
         ]);
         expect(setRes).toHaveStatusCode(200);
 
-        // Eve has Editor → manage threshold met → sees the full entries list.
+        // Eve has Editor, which is enough for edit-page write access but below the
+        // manage-ACL threshold. She sees only her own grant, not Bob's.
         const eveRes = await apiClient.get(
           `${accessControlApiBase}/agents/${encodeURIComponent(agentId)}`,
           {
@@ -445,9 +446,14 @@ apiTest.describe(
           }
         );
         expect(eveRes).toHaveStatusCode(200);
-        expect(eveRes.body.access_control?.entries).toHaveLength(2);
+        expect(eveRes.body.access_control?.entries).toHaveLength(1);
+        expect(eveRes.body.access_control?.entries[0]).toMatchObject({
+          type: 'user',
+          name: eve.username,
+          role: AgentAccessControlRole.Editor,
+        });
 
-        // Bob has User → manage threshold NOT met → entries redacted.
+        // Bob has User → manage threshold NOT met → only his own grant is returned.
         const bobRes = await apiClient.get(
           `${accessControlApiBase}/agents/${encodeURIComponent(agentId)}`,
           {
@@ -456,7 +462,12 @@ apiTest.describe(
           }
         );
         expect(bobRes).toHaveStatusCode(200);
-        expect(bobRes.body.access_control?.entries).toHaveLength(0);
+        expect(bobRes.body.access_control?.entries).toHaveLength(1);
+        expect(bobRes.body.access_control?.entries[0]).toMatchObject({
+          type: 'user',
+          name: bob.username,
+          role: AgentAccessControlRole.User,
+        });
       }
     );
 
@@ -469,7 +480,7 @@ apiTest.describe(
         await createAgentAs(apiClient, alice, mockAgent(agentId, AgentAccessControlMode.Private));
         await setAccessControlAs(apiClient, alice, agentId, [
           { type: 'user', name: bob.username, role: AgentAccessControlRole.User },
-          { type: 'user', name: eve.username, role: AgentAccessControlRole.Editor },
+          { type: 'user', name: eve.username, role: AgentAccessControlRole.Manager },
         ]);
 
         const eveAccessControlRes = await apiClient.get(
@@ -493,7 +504,7 @@ apiTest.describe(
     // ── PUT /access_control authz ──────────────────────────────────────────────────────
 
     apiTest(
-      'PUT /agents/{id}/access_control gates on write access (User → 404, Editor → 200)',
+      'PUT /agents/{id}/access_control gates on access-control management (User and Editor → 404, Manager → 200)',
       async ({ apiClient }) => {
         const agentId = `${ACCESS_CONTROL_TEST_PREFIX}-put-${randomUUID()}`;
         await createAgentAs(apiClient, alice, mockAgent(agentId, AgentAccessControlMode.Private));
@@ -510,7 +521,17 @@ apiTest.describe(
         const eveAttempt = await setAccessControlAs(apiClient, eve, agentId, [
           { type: 'user', name: bob.username, role: AgentAccessControlRole.Editor },
         ]);
-        expect(eveAttempt).toHaveStatusCode(200);
+        expect(eveAttempt).toHaveStatusCode(404);
+
+        await setAccessControlAs(apiClient, alice, agentId, [
+          { type: 'user', name: bob.username, role: AgentAccessControlRole.User },
+          { type: 'user', name: eve.username, role: AgentAccessControlRole.Manager },
+        ]);
+
+        const managerAttempt = await setAccessControlAs(apiClient, eve, agentId, [
+          { type: 'user', name: bob.username, role: AgentAccessControlRole.Editor },
+        ]);
+        expect(managerAttempt).toHaveStatusCode(200);
       }
     );
 

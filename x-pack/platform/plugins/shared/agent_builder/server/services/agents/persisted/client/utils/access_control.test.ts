@@ -563,8 +563,8 @@ describe('redactAccessControlForCaller', () => {
     expect(result.access_control?.entries).toEqual([aliceEntry, bobEntry]);
   });
 
-  it('redacts entries to [] for a user without manage rights', () => {
-    // Bob has User access via the access_control (User < Editor threshold) so he cannot manage.
+  it("keeps only the caller's own entry for a user without manage rights", () => {
+    // Bob has User access via the access_control (User < Manager threshold) so he cannot manage.
     const bobUser = { username: 'bob' };
     const definition = {
       id: 'a',
@@ -579,13 +579,13 @@ describe('redactAccessControlForCaller', () => {
       user: bobUser,
       isAdmin: false,
     });
-    expect(result.access_control?.entries).toEqual([]);
+    expect(result.access_control?.entries).toEqual([bobEntry]);
     // Shallow-copy: the original definition is untouched.
     expect(definition.access_control?.entries).toEqual([aliceEntry, bobEntry]);
   });
 
-  it('returns the full entries list for a user with Editor or higher via the access_control', () => {
-    // Alice has Editor via the access_control, which meets the manage-ACL threshold.
+  it("keeps only the caller's own entry for a user with Editor via the access_control", () => {
+    // Alice can edit the agent, but ACL management requires Manager.
     const aliceUser = { username: 'alice' };
     const definition = {
       id: 'a',
@@ -600,16 +600,21 @@ describe('redactAccessControlForCaller', () => {
       user: aliceUser,
       isAdmin: false,
     });
-    expect(result.access_control?.entries).toEqual([aliceEntry, bobEntry]);
+    expect(result.access_control?.entries).toEqual([aliceEntry]);
   });
 
-  it('returns the full entries list for a user with Editor or higher via legacy acl', () => {
+  it('returns the full entries list for a user with Manager via legacy acl', () => {
     const aliceUser = { username: 'alice' };
+    const aliceManagerEntry = {
+      type: 'user' as const,
+      name: 'alice',
+      role: AgentAccessControlRole.Manager,
+    };
     const definition = {
       id: 'a',
       access_control: {
         access_mode: AgentAccessControlMode.Private,
-        entries: [aliceEntry, bobEntry],
+        entries: [aliceManagerEntry, bobEntry],
       },
     };
     const result = redactAccessControlForCaller({
@@ -617,13 +622,13 @@ describe('redactAccessControlForCaller', () => {
       source: {
         ...baseSource,
         visibility: AgentAccessControlMode.Private,
-        acl: { entries: [aliceEntry, bobEntry] },
+        acl: { entries: [aliceManagerEntry, bobEntry] },
         created_by_name: 'owner',
       },
       user: aliceUser,
       isAdmin: false,
     });
-    expect(result.access_control?.entries).toEqual([aliceEntry, bobEntry]);
+    expect(result.access_control?.entries).toEqual([aliceManagerEntry, bobEntry]);
   });
 
   it('redacts entries on the default agent even for the owner', () => {

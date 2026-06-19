@@ -577,7 +577,7 @@ export function registerAgentRoutes({
       access: 'public',
       summary: "Update an agent's access control list",
       description:
-        'Replace the per-agent access-control entries. The agent owner, cluster admins, and anyone access control grants Editor or higher can call this endpoint (or anyone with `manageAgents` on a Public agent). Each call replaces the entire entries list — the most recent successful update wins. To learn more about agents, refer to the [agents documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/agent-builder-agents).',
+        'Replace the per-agent access-control entries. The agent owner, cluster admins, and anyone access control grants Manager can call this endpoint. Each call replaces the entire entries list — the most recent successful update wins. To learn more about agents, refer to the [agents documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/agent-builder-agents).',
       options: {
         tags: ['agent', 'oas-tag:agent builder'],
         availability: { since: '9.5.0' },

@@ -15,8 +15,7 @@ import {
   hasAgentUseAccess,
   hasAgentWriteAccess,
   canDeleteAgent,
-  canManageAgentAccessControl,
-  canChangeAgentAccessControlMode,
+  canChangeAgentAccessControl,
 } from '@kbn/agent-builder-common';
 import type { AgentUpdateRequest } from '../../../../../../common/agents';
 import type { AgentProperties } from '../storage';
@@ -116,7 +115,7 @@ export const hasManageAccessControlAccess = ({
   user: CurrentUser;
   isAdmin: boolean;
 }): boolean =>
-  canManageAgentAccessControl({
+  canChangeAgentAccessControl({
     agentId: source.id,
     accessControl: normalizeAccessControl(source),
     owner: sourceToOwner(source),
@@ -125,8 +124,9 @@ export const hasManageAccessControlAccess = ({
   });
 
 /**
- * Strips `access_control.entries` from a returned agent definition when the caller is not allowed
- * to manage the agent access control.
+ * Redacts `access_control.entries` from a returned agent definition when the caller is not allowed
+ * to manage the agent access control. The caller's own entry is retained so the client can still
+ * evaluate non-management permissions such as Editor-level write access.
  */
 export const redactAccessControlForCaller = <T extends { access_control?: AgentAccessControl }>({
   definition,
@@ -146,7 +146,15 @@ export const redactAccessControlForCaller = <T extends { access_control?: AgentA
   if (canManage) {
     return definition;
   }
-  return { ...definition, access_control: { ...definition.access_control, entries: [] } };
+  return {
+    ...definition,
+    access_control: {
+      ...definition.access_control,
+      entries: definition.access_control.entries.filter(
+        (entry) => entry.type === 'user' && user.username && entry.name === user.username
+      ),
+    },
+  };
 };
 
 /**
@@ -269,7 +277,7 @@ export const validateAccessControlUpdateAccess = ({
 
   return (
     !isAccessModeChange ||
-    canChangeAgentAccessControlMode({
+    canChangeAgentAccessControl({
       agentId: source.id,
       accessControl: currentAccessControl,
       owner: sourceToOwner(source),

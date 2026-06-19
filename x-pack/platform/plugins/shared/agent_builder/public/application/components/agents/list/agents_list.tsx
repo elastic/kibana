@@ -26,6 +26,7 @@ import { getEbtProps } from '@kbn/ebt-click';
 import {
   agentBuilderDefaultAgentId,
   canCurrentUserEditAgent,
+  canChangeAgentAccessControl,
   type AgentDefinition,
   AGENT_BUILDER_UI_EBT,
 } from '@kbn/agent-builder-common';
@@ -87,15 +88,14 @@ export const AgentsList: React.FC = () => {
 
   const canManageAgentAccess = React.useCallback(
     (agent: AgentDefinition) => {
-      // The default agent never accepts ACLs; everyone else falls through to the same
-      // "can I edit this agent?" check that gates the rest of the row actions.
       if (agent.id === agentBuilderDefaultAgentId) return false;
-      return canCurrentUserEditAgent({
-        agent,
-        manageAgents,
-        currentUser,
+      if (!manageAgents || isCurrentUserLoading) return false;
+      return canChangeAgentAccessControl({
+        agentId: agent.id,
+        accessControl: agent.access_control,
+        owner: agent.created_by,
+        currentUser: currentUser ?? undefined,
         isAdmin,
-        isCurrentUserLoading,
       });
     },
     [currentUser, isAdmin, isCurrentUserLoading, manageAgents]

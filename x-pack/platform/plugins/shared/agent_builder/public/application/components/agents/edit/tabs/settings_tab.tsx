@@ -33,7 +33,7 @@ import {
   AgentAccessControlMode,
   AGENT_BUILDER_UI_EBT,
   ACCESS_CONTROL_MODE_ICON,
-  canChangeAgentAccessControlMode,
+  canChangeAgentAccessControl,
   type UserIdAndName,
 } from '@kbn/agent-builder-common';
 import { getEbtProps } from '@kbn/ebt-click';
@@ -83,7 +83,7 @@ export const AgentSettingsTab: React.FC<AgentSettingsTabProps> = ({
 
   const canChangeAccessControlMode =
     isCreateMode ||
-    canChangeAgentAccessControlMode({
+    canChangeAgentAccessControl({
       agentId,
       accessControl: {
         access_mode: currentAccessControlMode,
@@ -562,7 +562,7 @@ export const AgentSettingsTab: React.FC<AgentSettingsTabProps> = ({
                     agent={accessFormAgent}
                     entries={field.value ?? []}
                     ownerName={owner?.username}
-                    isDisabled={isFormDisabled}
+                    isDisabled={isFormDisabled || !canChangeAccessControlMode}
                     onChange={field.onChange}
                   />
                 )}

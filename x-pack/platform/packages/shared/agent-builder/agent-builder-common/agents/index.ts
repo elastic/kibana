@@ -18,12 +18,11 @@ export {
 export {
   canCurrentUserEditAgent,
   isAgentOwner,
-  canChangeAgentAccessControlMode,
+  canChangeAgentAccessControl,
   hasAgentReadAccess,
   hasAgentUseAccess,
   hasAgentWriteAccess,
   canDeleteAgent,
-  canManageAgentAccessControl,
   getEffectiveAgentRole,
   type EffectiveAgentRole,
   type AgentAuthzArgs,

@@ -7,20 +7,15 @@
 
 import { useMemo } from 'react';
 import type { AgentDefinition } from '@kbn/agent-builder-common';
-import { agentBuilderDefaultAgentId, canCurrentUserEditAgent } from '@kbn/agent-builder-common';
+import { canChangeAgentAccessControl } from '@kbn/agent-builder-common';
 import { useUiPrivileges } from '../use_ui_privileges';
 import { useCurrentUser } from './use_current_user';
 
 /**
- * Returns whether the current user is allowed to view and edit an agent's access control list.
+ * Returns whether the current user is allowed to view and edit an agent's access control.
  *
- * ACL editing is bundled into write access on the agent — if you can edit the agent, you
- * can edit its ACL. That covers the agent owner, cluster admins, anyone the ACL grants
- * Editor or higher, and (on Public agents) anyone holding the `manageAgents` sub-feature
- * privilege via the access control mode baseline.
- *
- * The default agent is excluded entirely — it is system-owned, always Public, and must
- * remain reachable for everyone in the workspace, so ACLs on it are not supported.
+ * ACL entry edits can grant higher permissions, so they use the same Manager-level
+ * authorization check as access-control mode changes.
  *
  * Returns `false` while the current user is still loading to avoid flashing incorrect actions.
  */
@@ -32,13 +27,13 @@ export const useCanManageAgentAccess = (
 
   const canManage = useMemo(() => {
     if (!agent) return false;
-    if (agent.id === agentBuilderDefaultAgentId) return false;
-    return canCurrentUserEditAgent({
-      agent,
-      manageAgents,
-      currentUser,
+    if (!manageAgents || isLoading) return false;
+    return canChangeAgentAccessControl({
+      agentId: agent.id,
+      accessControl: agent.access_control,
+      owner: agent.created_by,
+      currentUser: currentUser ?? undefined,
       isAdmin,
-      isCurrentUserLoading: isLoading,
     });
   }, [agent, currentUser, isAdmin, manageAgents, isLoading]);
 

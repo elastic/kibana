@@ -7,9 +7,8 @@
 
 import {
   isAgentOwner,
-  canChangeAgentAccessControlMode,
+  canChangeAgentAccessControl,
   canDeleteAgent,
-  canManageAgentAccessControl,
   getEffectiveAgentRole,
   hasAgentReadAccess,
   hasAgentUseAccess,
@@ -74,10 +73,10 @@ describe('isAgentOwner', () => {
   });
 });
 
-describe('canChangeAgentAccessControlMode', () => {
+describe('canChangeAgentAccessControl', () => {
   test('returns true when isAdmin is true', () => {
     expect(
-      canChangeAgentAccessControlMode({
+      canChangeAgentAccessControl({
         owner,
         currentUser: otherUser,
         isAdmin: true,
@@ -87,7 +86,7 @@ describe('canChangeAgentAccessControlMode', () => {
 
   test('returns false when override is false and current user is not owner', () => {
     expect(
-      canChangeAgentAccessControlMode({
+      canChangeAgentAccessControl({
         owner,
         currentUser: otherUser,
         isAdmin: false,
@@ -97,7 +96,7 @@ describe('canChangeAgentAccessControlMode', () => {
 
   test('returns true when override is false but current user is owner (by id)', () => {
     expect(
-      canChangeAgentAccessControlMode({
+      canChangeAgentAccessControl({
         owner,
         currentUser,
         isAdmin: false,
@@ -109,7 +108,7 @@ describe('canChangeAgentAccessControlMode', () => {
     const ownerByUsername: UserIdAndName = { username: 'alice' };
     const userByUsername: UserIdAndName = { username: 'alice' };
     expect(
-      canChangeAgentAccessControlMode({
+      canChangeAgentAccessControl({
         owner: ownerByUsername,
         currentUser: userByUsername,
         isAdmin: false,
@@ -119,7 +118,7 @@ describe('canChangeAgentAccessControlMode', () => {
 
   test('returns false for the default agent even when user is owner', () => {
     expect(
-      canChangeAgentAccessControlMode({
+      canChangeAgentAccessControl({
         agentId: agentBuilderDefaultAgentId,
         owner,
         currentUser,
@@ -130,7 +129,7 @@ describe('canChangeAgentAccessControlMode', () => {
 
   test('returns false for the default agent even with access-control override', () => {
     expect(
-      canChangeAgentAccessControlMode({
+      canChangeAgentAccessControl({
         agentId: agentBuilderDefaultAgentId,
         owner,
         currentUser: otherUser,
@@ -540,7 +539,7 @@ describe('ACL-aware authorization', () => {
       expect(hasAgentUseAccess(args)).toBe(true);
       expect(hasAgentWriteAccess(args)).toBe(false);
       expect(canDeleteAgent(args)).toBe(false);
-      expect(canManageAgentAccessControl(args)).toBe(false);
+      expect(canChangeAgentAccessControl(args)).toBe(false);
     });
 
     test('no ACL grant on a Private agent denies read and use alike', () => {
@@ -551,16 +550,15 @@ describe('ACL-aware authorization', () => {
       expect(hasAgentUseAccess(args)).toBe(false);
     });
 
-    test('Editor can write and manage ACL but not delete', () => {
-      // ACL management is bundled into write access; Editor can edit the ACL.
-      // Delete still requires Manager.
+    test('Editor can write but not delete or manage ACL', () => {
+      // ACL management can grant Manager, so it stays on the Manager threshold.
       const accessControl = {
         access_mode: AgentAccessControlMode.Private,
         entries: [{ type: 'user' as const, name: 'bob', role: AgentAccessControlRole.Editor }],
       };
       const args = { ...privateAgent, accessControl, currentUser: bob };
       expect(hasAgentWriteAccess(args)).toBe(true);
-      expect(canManageAgentAccessControl(args)).toBe(true);
+      expect(canChangeAgentAccessControl(args)).toBe(false);
       expect(canDeleteAgent(args)).toBe(false);
     });
 
@@ -571,7 +569,7 @@ describe('ACL-aware authorization', () => {
       };
       const args = { ...privateAgent, accessControl, currentUser: bob };
       expect(canDeleteAgent(args)).toBe(true);
-      expect(canManageAgentAccessControl(args)).toBe(true);
+      expect(canChangeAgentAccessControl(args)).toBe(true);
     });
 
     test('Public access-control mode does NOT silently grant Manager to all users', () => {
@@ -598,7 +596,7 @@ describe('ACL-aware authorization', () => {
         isAdmin: false,
       };
       expect(canDeleteAgent(args)).toBe(true);
-      expect(canManageAgentAccessControl(args)).toBe(true);
+      expect(canChangeAgentAccessControl(args)).toBe(true);
     });
 
     test('user with no access has no privileges at all', () => {
@@ -607,15 +605,15 @@ describe('ACL-aware authorization', () => {
       expect(hasAgentUseAccess(args)).toBe(false);
       expect(hasAgentWriteAccess(args)).toBe(false);
       expect(canDeleteAgent(args)).toBe(false);
-      expect(canManageAgentAccessControl(args)).toBe(false);
+      expect(canChangeAgentAccessControl(args)).toBe(false);
     });
   });
 
-  describe('canManageAgentAccessControl', () => {
-    // ACL management is bundled into write access on the agent.
+  describe('canChangeAgentAccessControl', () => {
+    // ACL management mutates the full access-control object and requires Manager.
     test('grants for the agent owner on a Private agent', () => {
       expect(
-        canManageAgentAccessControl({
+        canChangeAgentAccessControl({
           accessControl: { access_mode: AgentAccessControlMode.Private, entries: [] },
           owner: aliceOwner,
           currentUser: { id: 'owner-id', username: 'alice' },
@@ -626,7 +624,7 @@ describe('ACL-aware authorization', () => {
 
     test('denies a non-owner on a Private agent with no ACL grant', () => {
       expect(
-        canManageAgentAccessControl({
+        canChangeAgentAccessControl({
           accessControl: { access_mode: AgentAccessControlMode.Private, entries: [] },
           owner: aliceOwner,
           currentUser: bob,
@@ -635,9 +633,9 @@ describe('ACL-aware authorization', () => {
       ).toBe(false);
     });
 
-    test('grants for an ACL Editor grant on a Private agent', () => {
+    test('denies an ACL Editor grant on a Private agent', () => {
       expect(
-        canManageAgentAccessControl({
+        canChangeAgentAccessControl({
           accessControl: {
             access_mode: AgentAccessControlMode.Private,
             entries: [{ type: 'user', name: 'bob', role: AgentAccessControlRole.Editor }],
@@ -646,12 +644,12 @@ describe('ACL-aware authorization', () => {
           currentUser: bob,
           isAdmin: false,
         })
-      ).toBe(true);
+      ).toBe(false);
     });
 
     test('grants for an ACL Manager grant on a Private agent', () => {
       expect(
-        canManageAgentAccessControl({
+        canChangeAgentAccessControl({
           accessControl: {
             access_mode: AgentAccessControlMode.Private,
             entries: [{ type: 'user', name: 'bob', role: AgentAccessControlRole.Manager }],
@@ -663,20 +661,20 @@ describe('ACL-aware authorization', () => {
       ).toBe(true);
     });
 
-    test('grants for any non-owner on a Public agent (access-control mode baseline = Editor)', () => {
+    test('denies any non-owner on a Public agent (access-control mode baseline = Editor)', () => {
       expect(
-        canManageAgentAccessControl({
+        canChangeAgentAccessControl({
           accessControl: { access_mode: AgentAccessControlMode.Public, entries: [] },
           owner: aliceOwner,
           currentUser: bob,
           isAdmin: false,
         })
-      ).toBe(true);
+      ).toBe(false);
     });
 
     test('grants for cluster admin regardless of agent state', () => {
       expect(
-        canManageAgentAccessControl({
+        canChangeAgentAccessControl({
           accessControl: { access_mode: AgentAccessControlMode.Private, entries: [] },
           owner: aliceOwner,
           currentUser: bob,
@@ -687,7 +685,7 @@ describe('ACL-aware authorization', () => {
 
     test('denies for the default agent regardless of caller, even superuser', () => {
       expect(
-        canManageAgentAccessControl({
+        canChangeAgentAccessControl({
           agentId: agentBuilderDefaultAgentId,
           accessControl: { access_mode: AgentAccessControlMode.Public, entries: [] },
           owner: aliceOwner,
@@ -699,7 +697,7 @@ describe('ACL-aware authorization', () => {
 
     test('denies for the default agent even when caller is the owner', () => {
       expect(
-        canManageAgentAccessControl({
+        canChangeAgentAccessControl({
           agentId: agentBuilderDefaultAgentId,
           accessControl: { access_mode: AgentAccessControlMode.Public, entries: [] },
           owner: aliceOwner,
@@ -710,10 +708,10 @@ describe('ACL-aware authorization', () => {
     });
   });
 
-  describe('canChangeAgentAccessControlMode', () => {
+  describe('default-agent access-control mutation', () => {
     test('blocks default agent even for Manager via ACL', () => {
       expect(
-        canChangeAgentAccessControlMode({
+        canChangeAgentAccessControl({
           agentId: agentBuilderDefaultAgentId,
           accessControl: {
             access_mode: AgentAccessControlMode.Private,
@@ -728,7 +726,7 @@ describe('ACL-aware authorization', () => {
 
     test('allows Manager via ACL on a non-default agent', () => {
       expect(
-        canChangeAgentAccessControlMode({
+        canChangeAgentAccessControl({
           agentId: 'custom-agent',
           accessControl: {
             access_mode: AgentAccessControlMode.Private,

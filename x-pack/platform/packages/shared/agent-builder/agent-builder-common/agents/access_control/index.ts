@@ -120,15 +120,14 @@ const meetsThreshold = (
 };
 
 /**
- * Whether the current user may change the agent's access-control mode
- * (`Public`, `Shared`, or `Private`).
+ * Whether the current user may change the agent's access-control object.
  *
- * Mode changes alter the baseline access for everyone in the workspace, so they are
- * stricter than editing access-control entries. Only admins, owners, and Manager
- * grantees may change the mode. The default agent is excluded because its mode is
- * system-owned and must remain Public.
+ * Mode changes alter the baseline access for everyone in the workspace, and entry
+ * changes can grant higher privileges. Only admins, owners, and Manager grantees
+ * may change access control. The default agent is excluded because its access
+ * control is system-owned and must remain Public.
  */
-export const canChangeAgentAccessControlMode = (
+export const canChangeAgentAccessControl = (
   args: AgentAuthzArgs & { agentId?: string }
 ): boolean => {
   if (args.agentId === agentBuilderDefaultAgentId) {
@@ -161,28 +160,6 @@ export const hasAgentWriteAccess = (args: AgentAuthzArgs): boolean =>
 /** Whether the current user may delete the agent. */
 export const canDeleteAgent = (args: AgentAuthzArgs): boolean =>
   meetsThreshold(getEffectiveAgentRole(args), AgentAccessControlRole.Manager);
-
-/**
- * Whether the current user may view/edit the agent's access-control entries.
- *
- * Entry management is bundled into write access on the agent: if you can write to the
- * agent, you can grant or remove explicit access-control entries. That covers owner,
- * effective ACL Editor/Manager grantees, and (for Public agents) anyone holding the
- * `manageAgents` Kibana sub-feature privilege. Cluster admin bypasses via the `isAdmin`
- * path in {@link hasAgentWriteAccess}.
- *
- * This does not imply permission to change the access-control mode; use
- * {@link canChangeAgentAccessControlMode} for that stricter check.
- *
- * The default agent is excluded — it is system-owned, always Public, and must remain
- * reachable for everyone in the workspace.
- */
-export const canManageAgentAccessControl = (
-  args: AgentAuthzArgs & { agentId?: string }
-): boolean => {
-  if (args.agentId === agentBuilderDefaultAgentId) return false;
-  return hasAgentWriteAccess(args);
-};
 
 /**
  * Whether the current user may edit agent settings, attach skills/tools, etc.
