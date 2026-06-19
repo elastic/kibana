@@ -27,7 +27,7 @@ import type {
   MappingWildcardProperty,
 } from '@elastic/elasticsearch/lib/api/types';
 import { z } from '@kbn/zod/v4';
-import { DeepStrict, NonEmptyString } from '@kbn/zod-helpers/v4';
+import { NonEmptyString } from '@kbn/zod-helpers/v4';
 
 import { recursiveRecord } from '../shared/record_types';
 
@@ -85,28 +85,32 @@ export type FieldDefinitionConfigAdvancedParameters = Omit<
   'type' | 'format' | 'description'
 >;
 
-export const fieldDefinitionConfigSchema = DeepStrict(
-  z.intersection(
-    recursiveRecord,
-    z.union([
-      z.object({
-        type: z.enum(FIELD_DEFINITION_TYPES),
-        format: z.optional(NonEmptyString),
-        description: z.optional(z.string()),
-      }),
-      z.object({
-        // Documentation-only override: require description and forbid type entirely
-        description: z.string(),
-        type: z.never().optional(),
-        format: z.never().optional(),
-      }),
-      z.object({
-        type: z.literal('system'),
-        description: z.optional(z.string()),
-      }),
-    ])
-  ) as z.ZodType<FieldDefinitionConfig>
-).meta({ id: 'FieldDefinitionConfig' });
+// Mapping types: allow arbitrary ES mapping properties
+const mappingFieldSchema = z.intersection(
+  recursiveRecord,
+  z.object({
+    type: z.enum(FIELD_DEFINITION_TYPES),
+    format: z.optional(NonEmptyString),
+    description: z.optional(z.string()),
+  })
+);
+
+// Documentation-only override: require description and forbid type entirely
+const descriptionOnlyFieldSchema = z.strictObject({
+  description: z.string(),
+  type: z.never().optional(),
+  format: z.never().optional(),
+});
+
+// System field type: only allow description override
+const systemFieldSchema = z.strictObject({
+  type: z.literal('system'),
+  description: z.optional(z.string()),
+});
+
+export const fieldDefinitionConfigSchema = z
+  .union([mappingFieldSchema, descriptionOnlyFieldSchema, systemFieldSchema])
+  .meta({ id: 'FieldDefinitionConfig' }) as z.ZodType<FieldDefinitionConfig>;
 
 export interface FieldDefinition {
   [x: string]: FieldDefinitionConfig;
@@ -158,21 +162,8 @@ export type ClassicFieldDefinitionConfig =
       description?: string;
     };
 
-export const classicFieldDefinitionConfigSchema = DeepStrict(
-  z.intersection(
-    recursiveRecord,
-    z.union([
-      z.object({
-        type: z.enum(FIELD_DEFINITION_TYPES),
-        format: z.optional(NonEmptyString),
-        description: z.optional(z.string()),
-      }),
-      z.object({
-        type: z.literal('system'),
-        description: z.optional(z.string()),
-      }),
-    ])
-  ) as z.ZodType<ClassicFieldDefinitionConfig>
+export const classicFieldDefinitionConfigSchema = (
+  z.union([mappingFieldSchema, systemFieldSchema]) as z.ZodType<ClassicFieldDefinitionConfig>
 ).meta({ id: 'ClassicFieldDefinitionConfig' });
 
 export interface ClassicFieldDefinition {
@@ -192,18 +183,16 @@ export interface InheritedFieldDefinition {
   [x: string]: InheritedFieldDefinitionConfig;
 }
 
+const inheritedFieldExtension = { from: NonEmptyString, alias_for: z.optional(NonEmptyString) };
+
 export const inheritedFieldDefinitionSchema: z.Schema<InheritedFieldDefinition> = z
   .record(
     z.string(),
-    DeepStrict(
-      z.intersection(
-        fieldDefinitionConfigSchema,
-        z.object({
-          from: NonEmptyString,
-          alias_for: z.optional(NonEmptyString),
-        })
-      )
-    )
+    z.union([
+      mappingFieldSchema.and(z.object(inheritedFieldExtension)),
+      descriptionOnlyFieldSchema.extend(inheritedFieldExtension),
+      systemFieldSchema.extend(inheritedFieldExtension),
+    ]) as z.ZodType<InheritedFieldDefinitionConfig>
   )
   .meta({ id: 'InheritedFieldDefinition' });
 
@@ -211,11 +200,10 @@ export type NamedFieldDefinitionConfig = FieldDefinitionConfig & {
   name: string;
 };
 
-export const namedFieldDefinitionConfigSchema: z.Schema<NamedFieldDefinitionConfig> = DeepStrict(
-  z.intersection(
-    fieldDefinitionConfigSchema,
-    z.object({
-      name: NonEmptyString,
-    })
-  )
-);
+const namedFieldExtension = { name: NonEmptyString };
+
+export const namedFieldDefinitionConfigSchema: z.Schema<NamedFieldDefinitionConfig> = z.union([
+  mappingFieldSchema.and(z.object(namedFieldExtension)),
+  descriptionOnlyFieldSchema.extend(namedFieldExtension),
+  systemFieldSchema.extend(namedFieldExtension),
+]) as z.ZodType<NamedFieldDefinitionConfig>;

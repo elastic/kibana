@@ -777,6 +777,26 @@ export const convert = (schema: z.ZodTypeAny, opts: ConvertOptions = {}) => {
         return;
       }
 
+      // Handle pipe schemas (e.g. DeepStrict: pipe(unknown.check(), schema)).
+      // z.toJSONSchema() cannot represent a custom check function in JSON Schema
+      // and produces {} for the whole pipe. Unwrap to the meaningful schema in
+      // `out` (same heuristic as unwrapZodType: if out is a transform, the real
+      // schema is in `in`; otherwise it's in `out`).
+      if ('_zod' in zodSchema && (zodSchema as any)._zod?.def?.type === 'pipe') {
+        const pipeIn = (zodSchema as any)._zod.def.in;
+        const pipeOut = (zodSchema as any)._zod.def.out;
+        const pipeOutType = (pipeOut as any)?._zod?.def?.type;
+        const realSchema: z.ZodType = pipeOutType === 'transform' ? pipeIn : pipeOut;
+        const { $schema: _$schema, ...innerJs } = z.toJSONSchema(realSchema, {
+          unrepresentable: 'any',
+          io: 'input',
+        }) as Record<string, unknown>;
+        for (const key of Object.keys(js)) {
+          delete (js as any)[key];
+        }
+        Object.assign(js, innerJs);
+      }
+
       const zSchema = zodSchema as unknown as z.ZodType;
 
       const stableName = getStableComponentName(zSchema);
