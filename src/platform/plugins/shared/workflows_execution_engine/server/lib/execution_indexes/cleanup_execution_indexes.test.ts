@@ -21,6 +21,8 @@ const NOW_MS = 1_000_000_000_000;
 const OLD_CREATION_MS = NOW_MS - 4 * 60_000;
 
 const createEsClientMock = () => ({
+  search: jest.fn().mockResolvedValue({ hits: { total: { value: 0 } } }),
+  deleteByQuery: jest.fn().mockResolvedValue({}),
   indices: {
     existsAlias: jest.fn(),
     getAlias: jest.fn(),
@@ -112,8 +114,76 @@ describe('cleanupExecutionIndexIfEligible', () => {
     });
 
     expect(deletedCount).toBe(1);
+    expect(esClient.search).toHaveBeenCalledWith(
+      expect.objectContaining({
+        index: '.workflows-executions-000002',
+        size: 0,
+        query: {
+          bool: {
+            filter: [
+              {
+                terms: {
+                  status: expect.arrayContaining(['pending', 'running']),
+                },
+              },
+            ],
+          },
+        },
+      }),
+      { signal: undefined }
+    );
     expect(esClient.indices.delete).toHaveBeenCalledWith(
       { index: '.workflows-executions-000002' },
+      { signal: undefined }
+    );
+  });
+
+  it('skips old non-write backing indexes that still contain non-terminal executions', async () => {
+    const esClient = createEsClientMock();
+    esClient.indices.existsAlias.mockResolvedValue(true);
+    esClient.indices.getAlias.mockResolvedValue({
+      '.workflows-executions-000001': {
+        aliases: { [WORKFLOWS_EXECUTIONS_INDEX]: { is_write_index: true } },
+      },
+      '.workflows-executions-000002': {
+        aliases: { [WORKFLOWS_EXECUTIONS_INDEX]: {} },
+      },
+    });
+    esClient.indices.getSettings.mockResolvedValue({
+      '.workflows-executions-000002': {
+        settings: { index: { creation_date: String(OLD_CREATION_MS) } },
+      },
+    });
+    esClient.search.mockResolvedValue({ hits: { total: { value: 1 } } });
+    const logger = createLoggerMock();
+
+    const deletedCount = await cleanupExecutionIndexIfEligible({
+      esClient: esClient as any,
+      aliasName: WORKFLOWS_EXECUTIONS_INDEX,
+      options: OPTIONS,
+      logger: logger as any,
+      nowMs: NOW_MS,
+    });
+
+    expect(deletedCount).toBe(0);
+    expect(esClient.indices.delete).not.toHaveBeenCalled();
+    expect(logger.debug).toHaveBeenCalledWith(
+      'Skipping .workflows-executions-000002 deletion: delete non-terminal executions first'
+    );
+    expect(esClient.deleteByQuery).toHaveBeenCalledWith(
+      {
+        index: '.workflows-executions-000002',
+        wait_for_completion: false,
+        query: {
+          bool: {
+            must_not: {
+              terms: {
+                status: expect.arrayContaining(['pending', 'running']),
+              },
+            },
+          },
+        },
+      },
       { signal: undefined }
     );
   });

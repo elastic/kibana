@@ -10,6 +10,7 @@
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 
+import { NonTerminalExecutionStatuses } from '@kbn/workflows';
 import { WORKFLOWS_EXECUTIONS_INDEX, WORKFLOWS_STEP_EXECUTIONS_INDEX } from '../../../common';
 import { parseDuration } from '../../utils';
 
@@ -79,6 +80,78 @@ export interface CleanupExecutionIndexIfEligibleParams {
 }
 
 /**
+ * Checks if the index has any non-terminal executions.
+ */
+const hasNonTerminalExecutionsInIndex = async ({
+  esClient,
+  indexName,
+  signal,
+}: {
+  esClient: ElasticsearchClient;
+  indexName: string;
+  signal?: AbortSignal;
+}): Promise<boolean> => {
+  const response = await esClient.search(
+    {
+      index: indexName,
+      size: 0,
+      terminate_after: 1,
+      track_total_hits: true,
+      _source: false,
+      query: {
+        bool: {
+          filter: [
+            {
+              terms: {
+                status: [...NonTerminalExecutionStatuses],
+              },
+            },
+          ],
+        },
+      },
+    },
+    { signal }
+  );
+
+  const total =
+    typeof response?.hits?.total === 'number'
+      ? response.hits.total
+      : response?.hits?.total?.value ?? 0;
+
+  return total > 0;
+};
+
+const deleteTerminalExecutionsFromIndex = async ({
+  esClient,
+  indexName,
+  logger,
+  signal,
+}: {
+  esClient: ElasticsearchClient;
+  indexName: string;
+  logger: Logger;
+  signal?: AbortSignal;
+}): Promise<void> => {
+  logger.debug(`Skipping ${indexName} deletion: delete non-terminal executions first`);
+  await esClient.deleteByQuery(
+    {
+      index: indexName,
+      wait_for_completion: false,
+      query: {
+        bool: {
+          must_not: {
+            terms: {
+              status: [...NonTerminalExecutionStatuses],
+            },
+          },
+        },
+      },
+    },
+    { signal }
+  );
+};
+
+/**
  * Deletes non-write backing indexes older than `minIndexAge`.
  *
  * Assumes workflow timeouts are much shorter than `minIndexAge` (e.g. 30d in production),
@@ -101,7 +174,20 @@ export const cleanupExecutionIndexIfEligible = async ({
       return deletedCount;
     }
 
-    if (!candidate.isWriteIndex) {
+    const anyNonTerminalStatus = await hasNonTerminalExecutionsInIndex({
+      esClient,
+      indexName: candidate.indexName,
+      signal,
+    });
+
+    if (anyNonTerminalStatus) {
+      await deleteTerminalExecutionsFromIndex({
+        esClient,
+        indexName: candidate.indexName,
+        logger,
+        signal,
+      });
+    } else if (!candidate.isWriteIndex) {
       const creationTimeMs = await getIndexCreationTimeMs({
         esClient,
         indexName: candidate.indexName,
