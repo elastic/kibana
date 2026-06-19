@@ -12,6 +12,7 @@ export function reconstructBefore(
   oldValues: Record<string, unknown>
 ): Record<string, unknown> {
   const before = { ...after };
+
   for (const [key, val] of Object.entries(oldValues)) {
     if (!IGNORED_DIFF_FIELDS.has(key)) {
       if (val === null) {
@@ -21,5 +22,6 @@ export function reconstructBefore(
       }
     }
   }
+
   return before;
 }
