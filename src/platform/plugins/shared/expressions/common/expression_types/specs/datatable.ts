@@ -103,10 +103,6 @@ export interface DatatableColumnMeta {
    * any extra parameters for the source that produced this column
    */
   sourceParams?: SerializableRecord;
-  /**
-   * The backing ES field types when a column has incompatible mappings across indices.
-   */
-  conflictingEsTypes?: string[];
 }
 
 interface SourceParamsESQL extends Record<string, unknown> {
