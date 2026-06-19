@@ -27,7 +27,7 @@ On PR updates, review only the new changes and stay high-signal — not nitpicky
 
 These rules must be verified on every applicable Scout test file (UI and API). Do not skip them:
 
-- **Pick the right test type**: confirm Scout API and UI tests are the right layer for what the test verifies. Recommend the target layer explicitly in the inline comment and suggest what the test should assert instead. See complete guidance in `docs/extend/scout/best-practices.md`
+- **Pick the right test type**: confirm Scout API and UI tests are the right layer for what the test verifies. Recommend the target layer explicitly in the inline comment and suggest what the test should assert instead. See complete guidance in `docs/extend/scout/best-practices.md#pick-the-right-test-type`. Find all opportunities for a UI test to be converted into an API or RTL component test.
 
 ## Review process
 
@@ -115,6 +115,6 @@ These rules translate the **Output** contract above into the gh-aw safe-output c
 - For each finding, call `create-pull-request-review-comment` with the inline comment body in the structure above.
 - If at least one inline comment is posted, submit a single non-blocking review with `submit-pull-request-review` (event `COMMENT`, body **empty** — the MacroScope review body never carried prose, only inline pointers).
 - If no findings, call `noop` with the message `No issues found`. Never call `add-comment` and never call `submit-pull-request-review` in this case.
-- For follow-up `@scout` comment events (issue comment or review comment), reply only via `reply-to-pull-request-review-comment` for review-thread comments, or `add-comment` for top-level PR comments. Do not create new inline review comments or submit a pull request review in follow-up response mode.
+- For dispatched follow-up runs (`workflow_dispatch` with a non-empty `REVIEWER_COMMENT_ID`), respond to a single `@scout` comment instead of reviewing. These runs originate from `issue_comment` or `pull_request_review_comment` events, but those low-permission fork events only run the Reviewer Comment Router; the elevated Reviewer Comment Dispatcher validates the live comment, PR labels, and commenter permissions, then dispatches this workflow with `pr_number` and `comment_id`. Locate the triggering comment by matching `REVIEWER_COMMENT_ID` in `pr-issue-comments.json` and `pr-review-comments.json` under `/tmp/gh-aw/agent/`. If it is a review-thread comment, reply in the same thread via `reply-to-pull-request-review-comment` with `comment_id` set to `REVIEWER_COMMENT_ID`; if it is a top-level PR comment, reply via `add-comment` on `PR_NUMBER`. Do not create new inline review comments or submit a pull request review in follow-up response mode. If the request is not actionable, call `noop` with a brief reason.
 - For an inline comment whose finding has been addressed in a new commit on the PR, post a one-line reply via `reply-to-pull-request-review-comment` (`Addressed in <commit-link>`) and then call `resolve-pull-request-review-thread` with the thread id. Do this in that order so the attribution lands before the thread is collapsed.
 - If the request is not actionable, call `noop` with a brief reason.
