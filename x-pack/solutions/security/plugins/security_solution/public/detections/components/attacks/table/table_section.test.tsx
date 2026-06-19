@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, waitFor, act } from '@testing-library/react';
+import { act, render, waitFor } from '@testing-library/react';
 import { createStubDataView } from '@kbn/data-views-plugin/common/data_views/data_view.stub';
 import type { GroupingBucket, ParsedGroupingAggregation } from '@kbn/grouping/src';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
@@ -14,8 +14,8 @@ import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { TestProviders } from '../../../../common/mock';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import {
-  TABLE_SECTION_TEST_ID,
   ATTACKS_TABLE_SORT_STORAGE_KEY,
+  TABLE_SECTION_TEST_ID,
   TableSection,
 } from './table_section';
 import { useUserData } from '../../user_info';
@@ -88,9 +88,6 @@ jest.mock('../../../../flyout_v2/attack/main/attack_flyout_wrapper', () => ({
   AttackFlyoutWrapper: (props: unknown) => (
     <div data-test-subj="attack-flyout-wrapper">{JSON.stringify(props)}</div>
   ),
-}));
-jest.mock('../../../../flyout_v2/attack/main/hooks/use_open_attack_flyout_v2_from_url', () => ({
-  useOpenAttackFlyoutV2FromUrl: jest.fn(),
 }));
 jest.mock('react-redux', () => ({
   ...jest.requireActual('react-redux'),

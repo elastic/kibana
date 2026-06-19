@@ -45,7 +45,8 @@ export const createSecurityDocumentProfileProviders = (
           const isAlert = isAlertDocument(params.record);
           const isEvent = isEventDocument(params.record);
           const isIOC = isIOCDocument(params.record);
-          const isAttack = isAttackDocument(params.record);
+          // TODO Attack flyout is not yet ready for GA. Disabled until all related PRs are merged.
+          const isAttack = false && isAttackDocument(params.record);
 
           let renderFooter = prevDocViewer.renderFooter;
           if (isIOC) {

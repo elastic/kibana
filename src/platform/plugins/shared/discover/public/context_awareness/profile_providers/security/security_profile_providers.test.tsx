@@ -84,7 +84,7 @@ describe('createSecurityDocumentProfileProviders', () => {
       expect(result.renderFooter).not.toBe(prevRenderFooter);
     });
 
-    it('overrides renderHeader for attack discovery alerts', () => {
+    it('does not override renderHeader for attack discovery alerts', () => {
       const { result, prevRenderHeader } = getDocViewerResult(
         createRecord({
           'event.kind': 'signal',
@@ -92,11 +92,10 @@ describe('createSecurityDocumentProfileProviders', () => {
         })
       );
 
-      expect(result.renderHeader).toBeDefined();
-      expect(result.renderHeader).not.toBe(prevRenderHeader);
+      expect(result.renderHeader).toBe(prevRenderHeader);
     });
 
-    it('overrides renderFooter for attack discovery alerts', () => {
+    it('does not override renderFooter for attack discovery alerts', () => {
       const { result, prevRenderFooter } = getDocViewerResult(
         createRecord({
           'event.kind': 'signal',
@@ -104,8 +103,7 @@ describe('createSecurityDocumentProfileProviders', () => {
         })
       );
 
-      expect(result.renderFooter).toBeDefined();
-      expect(result.renderFooter).not.toBe(prevRenderFooter);
+      expect(result.renderFooter).toBe(prevRenderFooter);
     });
 
     it('adds the overview tab to the registry for alert documents', () => {
@@ -128,7 +126,7 @@ describe('createSecurityDocumentProfileProviders', () => {
       );
     });
 
-    it('adds the attack overview tab to the registry for attack discovery alerts', () => {
+    it('does not add the overview tab to the registry for attack discovery alerts', () => {
       const { result } = getDocViewerResult(
         createRecord({
           'event.kind': 'signal',
@@ -138,9 +136,7 @@ describe('createSecurityDocumentProfileProviders', () => {
       const registry = { add: jest.fn() };
       result.docViewsRegistry(registry as never);
 
-      expect(registry.add).toHaveBeenCalledWith(
-        expect.objectContaining({ id: 'doc_view_attack_overview' })
-      );
+      expect(registry.add).not.toHaveBeenCalled();
     });
 
     it('does not override renderHeader when event.kind is absent', () => {
@@ -306,55 +302,6 @@ describe('createSecurityDocumentProfileProviders', () => {
 
       expect(registry.add).toHaveBeenCalledWith(
         expect.objectContaining({ id: 'doc_view_ioc_overview' })
-      );
-    });
-
-    it('forwards refreshData action to enhanced attack flyout header', () => {
-      const refreshData = jest.fn();
-      const hit = createRecord({
-        'event.kind': 'signal',
-        [ALERT_RULE_TYPE_ID]: ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID,
-      });
-      const { result } = getDocViewerResult(hit, { refreshData });
-
-      const renderedHeader = result.renderHeader?.({ hit, dataView: dataViewMock });
-      expect(renderedHeader).toBeDefined();
-      expect((renderedHeader as { props: { refreshData: () => void } }).props.refreshData).toBe(
-        refreshData
-      );
-    });
-
-    it('forwards refreshData action to enhanced attack flyout footer', () => {
-      const refreshData = jest.fn();
-      const hit = createRecord({
-        'event.kind': 'signal',
-        [ALERT_RULE_TYPE_ID]: ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID,
-      });
-      const { result } = getDocViewerResult(hit, { refreshData });
-
-      const renderedFooter = result.renderFooter?.({ hit, dataView: dataViewMock });
-      expect(renderedFooter).toBeDefined();
-      expect((renderedFooter as { props: { refreshData: () => void } }).props.refreshData).toBe(
-        refreshData
-      );
-    });
-
-    it('forwards refreshData action to enhanced attack overview tab', () => {
-      const refreshData = jest.fn();
-      const hit = createRecord({
-        'event.kind': 'signal',
-        [ALERT_RULE_TYPE_ID]: ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID,
-      });
-      const { result } = getDocViewerResult(hit, { refreshData });
-      const registry = { add: jest.fn() };
-
-      result.docViewsRegistry(registry as never);
-      const addedOverviewTab = registry.add.mock.calls[0][0];
-
-      const renderedOverview = addedOverviewTab.render({ hit, dataView: dataViewMock });
-      expect(renderedOverview).toBeDefined();
-      expect((renderedOverview as { props: { refreshData: () => void } }).props.refreshData).toBe(
-        refreshData
       );
     });
   });

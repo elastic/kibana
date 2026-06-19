@@ -30,7 +30,6 @@ import { useDefaultDocumentFlyoutProperties } from '../../../../flyout_v2/shared
 import { flyoutProviders } from '../../../../flyout_v2/shared/components/flyout_provider';
 import { AttackFlyoutWrapper } from '../../../../flyout_v2/attack/main/attack_flyout_wrapper';
 import { documentFlyoutHistoryKey } from '../../../../flyout_v2/shared/constants/flyout_history';
-import { useOpenAttackFlyoutV2FromUrl } from '../../../../flyout_v2/attack/main/hooks/use_open_attack_flyout_v2_from_url';
 import { useUserData } from '../../user_info';
 import { useListsConfig } from '../../../containers/detection_engine/lists/use_lists_config';
 import {
@@ -51,8 +50,8 @@ import { dsl } from '../utils/dsl';
 import { groupingOptions, groupingSettings } from './grouping_settings/grouping_configs';
 import {
   buildAttacksOnlyFilter,
-  buildConnectorIdFilter,
   buildAttackTypeFilter,
+  buildConnectorIdFilter,
 } from './filtering_configs';
 import type { GroupTakeActionItems } from '../../alerts_table/types';
 import { AttacksGroupTakeActionItems } from './attacks_group_take_action_items';
@@ -164,9 +163,6 @@ export const TableSection = React.memo(
 
     const [attackIds, setAttackIds] = useState<string[] | undefined>(undefined);
     const { getAttack, isLoading: isAttacksLoading } = useAttackGroupHandler({ attackIds });
-
-    const noopOnAttackUpdated = useCallback(() => {}, []);
-    useOpenAttackFlyoutV2FromUrl({ onAttackUpdated: noopOnAttackUpdated });
 
     const { openFlyout } = useExpandableFlyoutApi();
     const openAttackDetailsFlyout = useCallback(
