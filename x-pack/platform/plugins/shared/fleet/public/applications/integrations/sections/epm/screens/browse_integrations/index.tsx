@@ -105,20 +105,25 @@ export const BrowseIntegrationsPage: React.FC<{ prereleaseIntegrationsEnabled: b
       hasAutoRedirectedRef.current ||
       !isObservability ||
       isLoading ||
+      isManageIntegrationsView ||
       initialSelectedCategory ||
       urlDefaultCategories.length > 0
     )
       return;
+    // Mark as redirected regardless of whether valid defaults exist, so the
+    // effect does not keep re-running when none of the default categories exist
+    // in the catalog.
+    hasAutoRedirectedRef.current = true;
     const validDefaults = OBLT_DEFAULT_CATEGORIES.filter((cat) =>
       categoryExists(cat, allCategories)
     );
     if (validDefaults.length > 0) {
-      hasAutoRedirectedRef.current = true;
       setUrlDefaultCategories(validDefaults, { replace: true });
     }
   }, [
     isObservability,
     isLoading,
+    isManageIntegrationsView,
     initialSelectedCategory,
     urlDefaultCategories.length,
     allCategories,
@@ -160,6 +165,7 @@ export const BrowseIntegrationsPage: React.FC<{ prereleaseIntegrationsEnabled: b
         }
         hasCreatedIntegrations={hasCreatedIntegrations}
         isLoadingCreatedIntegrations={isLoadingCreatedIntegrations}
+        manageIntegrationsHref={manageIntegrationsHref}
         onManageIntegrationsClick={onManageIntegrationsClick}
       />
       <EuiFlexItem grow={5}>

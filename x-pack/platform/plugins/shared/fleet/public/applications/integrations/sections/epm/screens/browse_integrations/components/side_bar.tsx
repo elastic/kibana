@@ -96,6 +96,7 @@ export interface SidebarProps extends Props {
   CreateIntegrationCardButton?: React.ComponentType;
   hasCreatedIntegrations?: boolean;
   isLoadingCreatedIntegrations?: boolean;
+  manageIntegrationsHref?: string;
   onManageIntegrationsClick?: (ev: React.MouseEvent<HTMLAnchorElement>) => void;
 }
 
@@ -107,6 +108,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   CreateIntegrationCardButton,
   hasCreatedIntegrations,
   isLoadingCreatedIntegrations,
+  manageIntegrationsHref,
   onManageIntegrationsClick,
 }) => {
   const { euiTheme } = useEuiTheme();
@@ -118,6 +120,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
           {hasCreatedIntegrations ? (
             <EuiLink
               color="text"
+              href={manageIntegrationsHref}
               onClick={onManageIntegrationsClick}
               data-test-subj="manageCreatedIntegrationsLink"
               css={{
@@ -175,7 +178,11 @@ export function CategoryFacets({
           return (
             <EuiFacetButton
               data-test-subj={`epmList.categories.${category.id}`}
-              isSelected={selectedCategories.includes(category.id)}
+              isSelected={
+                selectedCategories.length === 0
+                  ? category.id === ''
+                  : selectedCategories.includes(category.id)
+              }
               key={category.id}
               id={category.id}
               style={{

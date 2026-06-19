@@ -31,8 +31,9 @@ jest.mock('../../../../hooks', () => ({
   useBreadcrumbs: jest.fn(),
 }));
 
+const mockUseLocation = jest.fn();
 jest.mock('react-router-dom', () => ({
-  useLocation: () => ({ pathname: '/app/integrations', search: '' }),
+  useLocation: () => mockUseLocation(),
   useHistory: () => ({ push: jest.fn() }),
 }));
 
@@ -85,6 +86,7 @@ describe('BrowseIntegrationsPage', () => {
     mockUseSetUrlCategory.mockReturnValue(mockSetUrlCategoryFn);
     mockUseUrlDefaultCategories.mockReturnValue([]);
     mockUseStartServices.mockReturnValue(observabilityStartServices);
+    mockUseLocation.mockReturnValue({ pathname: '/app/integrations/browse', search: '' });
   });
 
   function renderPage() {
@@ -156,6 +158,21 @@ describe('BrowseIntegrationsPage', () => {
 
     it('does not redirect when default categories are already set as URL query params', async () => {
       mockUseUrlDefaultCategories.mockReturnValue(['opentelemetry', 'observability']);
+      renderPage();
+      await waitFor(() => {
+        expect(mockSetUrlDefaultCategoriesFn).not.toHaveBeenCalled();
+      });
+    });
+
+    it('does not redirect when the Manage Integrations view is active (?view=manage)', async () => {
+      mockUseLocation.mockReturnValue({
+        pathname: '/app/integrations/browse',
+        search: '?view=manage',
+      });
+      mockUseStartServices.mockReturnValue({
+        ...observabilityStartServices,
+        application: { capabilities: { automatic_import: { view: true } } },
+      });
       renderPage();
       await waitFor(() => {
         expect(mockSetUrlDefaultCategoriesFn).not.toHaveBeenCalled();

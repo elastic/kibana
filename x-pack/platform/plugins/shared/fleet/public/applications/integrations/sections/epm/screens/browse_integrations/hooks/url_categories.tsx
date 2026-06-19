@@ -46,7 +46,6 @@ export function useSetUrlDefaultCategories() {
         .split('?')[0];
       const params = new URLSearchParams(search);
       params.delete('category');
-      params.delete('view');
       categories.filter(Boolean).forEach((cat) => params.append('category', cat));
       const qs = params.toString();
       const fullUrl = qs ? `${basePath}?${qs}` : basePath;
