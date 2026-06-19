@@ -8,7 +8,7 @@
  */
 
 import { expect } from '@kbn/scout/ui';
-import { spaceTest, tags, testData } from '../../fixtures/common';
+import { spaceTest, testData } from '../../fixtures/common';
 
 const INITIAL_HIT_COUNT = 14004;
 const FILTERED_HIT_COUNT = 270;
@@ -16,7 +16,7 @@ const BREAKDOWN_FIELD = 'geo.src';
 const BREAKDOWN_SELECTED_LABEL = `Breakdown by ${BREAKDOWN_FIELD}`;
 const BREAKDOWN_NONE_LABEL = 'No breakdown';
 
-spaceTest.describe('Discover tabs - tab duplication', { tag: tags.stateful.all }, () => {
+spaceTest.describe('Discover tabs - tab duplication', { tag: '@local-stateful-classic' }, () => {
   spaceTest.use({ viewport: { width: 1920, height: 1080 } });
 
   spaceTest.beforeAll(async ({ discoverScoutSpace }) => {
