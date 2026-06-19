@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { LENS_DOCUMENT_FIELD_NAME, type CumulativeSumIndexPatternColumn } from '@kbn/lens-common';
+import type { CumulativeSumIndexPatternColumn } from '@kbn/lens-common';
 import type {
   LensApiCountMetricOperation,
   LensApiCumulativeSumOperation,
@@ -15,12 +15,6 @@ import type {
 } from '../../schema/metric_ops';
 import { fromFormatAPIToLensState, fromFormatLensStateToAPI } from './format';
 import { getLensAPIMetricSharedProps, getLensStateMetricSharedProps } from './utils';
-
-function getCumulativeSumReferenceApiField(
-  ref: LensApiCountMetricOperation | LensApiSumMetricOperation
-): string {
-  return ref.operation === 'count' ? LENS_DOCUMENT_FIELD_NAME : ref.field;
-}
 
 export const fromCumulativeSumAPItoLensState = (
   options: LensApiCumulativeSumOperation
@@ -43,7 +37,7 @@ export const fromCumulativeSumLensStateToAPI = (
 ): LensApiCumulativeSumOperation => {
   return {
     operation: 'cumulative_sum',
-    field: getCumulativeSumReferenceApiField(ref),
+    ...(ref.operation === 'sum' ? { field: ref.field } : {}),
     ...getLensAPIMetricSharedProps(options),
     ...(options.params?.format ? { format: fromFormatLensStateToAPI(options.params.format) } : {}),
   };

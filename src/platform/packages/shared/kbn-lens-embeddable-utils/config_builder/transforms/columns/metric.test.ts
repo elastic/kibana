@@ -161,12 +161,23 @@ describe('Metric Transforms', () => {
       it('should transform cumulative sum of count of records', () => {
         const input: LensApiCumulativeSumOperation = {
           operation: 'cumulative_sum',
-          field: LENS_DOCUMENT_FIELD_NAME,
         };
 
         const result = fromMetricAPItoLensState(input);
         expect(result).toHaveLength(2);
         expect(result[0].operationType).toBe('cumulative_sum');
+        expect(result[1].operationType).toBe('count');
+        expect(result[1]).toHaveProperty('sourceField', LENS_DOCUMENT_FIELD_NAME);
+      });
+
+      it('should treat legacy ___records___ field as count of records', () => {
+        const input = {
+          operation: 'cumulative_sum' as const,
+          field: LENS_DOCUMENT_FIELD_NAME,
+        };
+
+        const result = fromMetricAPItoLensState(input);
+        expect(result).toHaveLength(2);
         expect(result[1].operationType).toBe('count');
         expect(result[1]).toHaveProperty('sourceField', LENS_DOCUMENT_FIELD_NAME);
       });
@@ -190,7 +201,6 @@ describe('Metric Transforms', () => {
         operation: 'unsupported' as any,
       };
 
-      // @ts-expect-error
       expect(() => fromMetricAPItoLensState(input)).toThrow('Unsupported metric operation');
     });
   });
@@ -295,7 +305,7 @@ describe('Metric Transforms', () => {
         fail();
       }
       expect(result?.operation).toBe('cumulative_sum');
-      expect(result?.field).toBe(LENS_DOCUMENT_FIELD_NAME);
+      expect(result?.field).toBeUndefined();
     });
 
     it('should return undefined for invalid reference', () => {

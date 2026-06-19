@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { LENS_DOCUMENT_FIELD_NAME } from '@kbn/lens-common';
 import { fromCumulativeSumAPItoLensState, fromCumulativeSumLensStateToAPI } from './cumulative_sum';
 import type { CumulativeSumIndexPatternColumn } from '@kbn/lens-common';
 import type {
@@ -155,7 +154,6 @@ describe('Cumulative Sum Transforms', () => {
 
       expect(fromCumulativeSumLensStateToAPI(input, countRef)).toEqual({
         operation: 'cumulative_sum',
-        field: LENS_DOCUMENT_FIELD_NAME,
       });
     });
   });

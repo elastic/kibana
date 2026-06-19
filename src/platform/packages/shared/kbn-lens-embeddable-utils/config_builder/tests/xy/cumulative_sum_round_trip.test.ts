@@ -89,7 +89,7 @@ describe('Cumulative sum SO round-trip', () => {
 
     const apiConfig = builder.toAPIFormat(attributes) as XYConfig;
     const cumsumMetric = getCumulativeSumMetric(apiConfig);
-    expect(cumsumMetric.field).toBe(LENS_DOCUMENT_FIELD_NAME);
+    expect(cumsumMetric.field).toBeUndefined();
 
     const roundTrippedAttributes = builder.fromAPIFormat(apiConfig);
     const roundTrippedApiConfig = builder.toAPIFormat(roundTrippedAttributes) as XYConfig;
