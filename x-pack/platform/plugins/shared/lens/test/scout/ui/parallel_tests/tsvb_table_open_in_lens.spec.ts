@@ -49,68 +49,73 @@ spaceTest.describe('TSVB Table - Open in Lens', { tag: tags.deploymentAgnostic }
     await scoutSpace.savedObjects.cleanStandardList();
   });
 
-  spaceTest('should allow converting a count aggregation', async ({ pageObjects }) => {
+  // Negative cases grouped — these don't navigate away from the dashboard,
+  // so they can share one browser context via test.step().
+  spaceTest('should check Convert to Lens action availability', async ({ pageObjects }) => {
     const { dashboard } = pageObjects;
-    const hasAction = await dashboard.panelHasAction(CONVERT_TO_LENS_ACTION, 'Table - Basic');
-    expect(hasAction).toBe(true);
-  });
 
-  spaceTest('should not allow converting of not valid panel', async ({ pageObjects }) => {
-    const { dashboard } = pageObjects;
-    const hasAction = await dashboard.panelHasAction(
-      CONVERT_TO_LENS_ACTION,
-      'Table - Invalid panel'
-    );
-    expect(hasAction).toBe(false);
-  });
-
-  spaceTest('should not allow converting of unsupported aggregations', async ({ pageObjects }) => {
-    const { dashboard } = pageObjects;
-    const hasAction = await dashboard.panelHasAction(
-      CONVERT_TO_LENS_ACTION,
-      'Table - Unsupported agg'
-    );
-    expect(hasAction).toBe(false);
-  });
-
-  spaceTest(
-    'should not allow converting sibling pipeline aggregations',
-    async ({ pageObjects }) => {
-      const { dashboard } = pageObjects;
+    await spaceTest.step('invalid panel has no Convert to Lens action', async () => {
       const hasAction = await dashboard.panelHasAction(
         CONVERT_TO_LENS_ACTION,
-        'Table - Sibling pipeline agg'
+        'Table - Invalid panel'
       );
       expect(hasAction).toBe(false);
-    }
-  );
+    });
 
-  spaceTest('should not allow converting parent pipeline aggregations', async ({ pageObjects }) => {
-    const { dashboard } = pageObjects;
-    const hasAction = await dashboard.panelHasAction(
-      CONVERT_TO_LENS_ACTION,
-      'Table - Parent pipeline agg'
-    );
-    expect(hasAction).toBe(false);
-  });
-
-  spaceTest('should not allow converting invalid aggregation function', async ({ pageObjects }) => {
-    const { dashboard } = pageObjects;
-    const hasAction = await dashboard.panelHasAction(CONVERT_TO_LENS_ACTION, 'Table - Invalid agg');
-    expect(hasAction).toBe(false);
-  });
-
-  spaceTest(
-    'should not allow converting series with different aggregation function or aggregation by',
-    async ({ pageObjects }) => {
-      const { dashboard } = pageObjects;
+    await spaceTest.step('unsupported aggregations have no Convert to Lens action', async () => {
       const hasAction = await dashboard.panelHasAction(
         CONVERT_TO_LENS_ACTION,
-        'Table - Different agg function'
+        'Table - Unsupported agg'
       );
       expect(hasAction).toBe(false);
-    }
-  );
+    });
+
+    await spaceTest.step(
+      'sibling pipeline aggregations have no Convert to Lens action',
+      async () => {
+        const hasAction = await dashboard.panelHasAction(
+          CONVERT_TO_LENS_ACTION,
+          'Table - Sibling pipeline agg'
+        );
+        expect(hasAction).toBe(false);
+      }
+    );
+
+    await spaceTest.step(
+      'parent pipeline aggregations have no Convert to Lens action',
+      async () => {
+        const hasAction = await dashboard.panelHasAction(
+          CONVERT_TO_LENS_ACTION,
+          'Table - Parent pipeline agg'
+        );
+        expect(hasAction).toBe(false);
+      }
+    );
+
+    await spaceTest.step('invalid aggregation function has no Convert to Lens action', async () => {
+      const hasAction = await dashboard.panelHasAction(
+        CONVERT_TO_LENS_ACTION,
+        'Table - Invalid agg'
+      );
+      expect(hasAction).toBe(false);
+    });
+
+    await spaceTest.step(
+      'different aggregation function has no Convert to Lens action',
+      async () => {
+        const hasAction = await dashboard.panelHasAction(
+          CONVERT_TO_LENS_ACTION,
+          'Table - Different agg function'
+        );
+        expect(hasAction).toBe(false);
+      }
+    );
+
+    await spaceTest.step('count aggregation has Convert to Lens action', async () => {
+      const hasAction = await dashboard.panelHasAction(CONVERT_TO_LENS_ACTION, 'Table - Basic');
+      expect(hasAction).toBe(true);
+    });
+  });
 
   spaceTest(
     'should convert last value mode to reduced time range',
@@ -120,7 +125,7 @@ spaceTest.describe('TSVB Table - Open in Lens', { tag: tags.deploymentAgnostic }
       await expect(page.testSubj.locator('lnsDataTable')).toBeVisible();
 
       const dimensions = page.testSubj
-        .locator('lnsDatatable_metrics')
+        .locator('[data-test-subj="lnsDatatable_metrics"]')
         .locator('[data-test-subj="lns-dimensionTrigger"]');
       await expect(dimensions.filter({ hasText: 'Count of records last 1m' })).toBeVisible();
     }
@@ -134,7 +139,7 @@ spaceTest.describe('TSVB Table - Open in Lens', { tag: tags.deploymentAgnostic }
       await expect(page.testSubj.locator('lnsDataTable')).toBeVisible();
 
       const dimensions = page.testSubj
-        .locator('lnsDatatable_metrics')
+        .locator('[data-test-subj="lnsDatatable_metrics"]')
         .locator('[data-test-subj="lns-dimensionTrigger"]');
       await expect(dimensions).toHaveText(['Count of records', '10']);
     }
@@ -146,7 +151,7 @@ spaceTest.describe('TSVB Table - Open in Lens', { tag: tags.deploymentAgnostic }
     await expect(page.testSubj.locator('lnsDataTable')).toBeVisible();
 
     const splitRows = page.testSubj
-      .locator('lnsDatatable_rows')
+      .locator('[data-test-subj="lnsDatatable_rows"]')
       .locator('[data-test-subj="lns-dimensionTrigger"]');
     await expect(splitRows).toHaveText([
       'Top 10 values of machine.os.raw',
@@ -160,7 +165,7 @@ spaceTest.describe('TSVB Table - Open in Lens', { tag: tags.deploymentAgnostic }
     await expect(page.testSubj.locator('lnsDataTable')).toBeVisible();
 
     const splitRows = page.testSubj
-      .locator('lnsDatatable_rows')
+      .locator('[data-test-subj="lnsDatatable_rows"]')
       .locator('[data-test-subj="lns-dimensionTrigger"]');
     await expect(splitRows.filter({ hasText: 'test' })).toBeVisible();
   });
@@ -171,7 +176,7 @@ spaceTest.describe('TSVB Table - Open in Lens', { tag: tags.deploymentAgnostic }
     await expect(page.testSubj.locator('lnsDataTable')).toBeVisible();
 
     const dimensions = page.testSubj
-      .locator('lnsDatatable_metrics')
+      .locator('[data-test-subj="lnsDatatable_metrics"]')
       .locator('[data-test-subj="lns-dimensionTrigger"]');
     await expect(dimensions).toHaveCount(1);
   });

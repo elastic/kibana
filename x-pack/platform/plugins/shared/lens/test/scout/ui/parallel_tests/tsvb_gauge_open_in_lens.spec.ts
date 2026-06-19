@@ -49,14 +49,32 @@ spaceTest.describe('TSVB Gauge - Open in Lens', { tag: tags.deploymentAgnostic }
     await scoutSpace.savedObjects.cleanStandardList();
   });
 
-  spaceTest(
-    'should show the "Convert to Lens" menu item for basic gauge',
-    async ({ pageObjects }) => {
-      const { dashboard } = pageObjects;
+  // Negative cases grouped — these don't navigate away from the dashboard,
+  // so they can share one browser context via test.step().
+  spaceTest('should check Convert to Lens action availability', async ({ pageObjects }) => {
+    const { dashboard } = pageObjects;
+
+    await spaceTest.step('unsupported metric has no Convert to Lens action', async () => {
+      const hasAction = await dashboard.panelHasAction(
+        CONVERT_TO_LENS_ACTION,
+        'Gauge - Unsupported metric'
+      );
+      expect(hasAction).toBe(false);
+    });
+
+    await spaceTest.step('invalid panel has no Convert to Lens action', async () => {
+      const hasAction = await dashboard.panelHasAction(
+        CONVERT_TO_LENS_ACTION,
+        'Gauge - Invalid panel'
+      );
+      expect(hasAction).toBe(false);
+    });
+
+    await spaceTest.step('basic gauge has Convert to Lens action', async () => {
       const hasAction = await dashboard.panelHasAction(CONVERT_TO_LENS_ACTION, 'Gauge - Basic');
       expect(hasAction).toBe(true);
-    }
-  );
+    });
+  });
 
   spaceTest('should convert basic gauge to Lens', async ({ page, pageObjects }) => {
     const { dashboard } = pageObjects;
@@ -76,24 +94,6 @@ spaceTest.describe('TSVB Gauge - Open in Lens', { tag: tags.deploymentAgnostic }
     await expect(dimensions).toHaveCount(2);
     await expect(dimensions.getByText('Count of bytes')).toBeVisible();
     await expect(dimensions.getByText('overall_max(count(bytes))')).toBeVisible();
-  });
-
-  spaceTest('should not allow converting unsupported metric', async ({ pageObjects }) => {
-    const { dashboard } = pageObjects;
-    const hasAction = await dashboard.panelHasAction(
-      CONVERT_TO_LENS_ACTION,
-      'Gauge - Unsupported metric'
-    );
-    expect(hasAction).toBe(false);
-  });
-
-  spaceTest('should not allow converting invalid panel', async ({ pageObjects }) => {
-    const { dashboard } = pageObjects;
-    const hasAction = await dashboard.panelHasAction(
-      CONVERT_TO_LENS_ACTION,
-      'Gauge - Invalid panel'
-    );
-    expect(hasAction).toBe(false);
   });
 
   spaceTest('should convert color ranges', async ({ page, pageObjects }) => {

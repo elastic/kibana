@@ -49,56 +49,54 @@ spaceTest.describe('TSVB Top N - Open in Lens', { tag: tags.deploymentAgnostic }
     await scoutSpace.savedObjects.cleanStandardList();
   });
 
-  spaceTest(
-    'should show the "Convert to Lens" menu item for a count aggregation',
-    async ({ pageObjects }) => {
-      const { dashboard } = pageObjects;
+  // Negative cases grouped — these don't navigate away from the dashboard,
+  // so they can share one browser context via test.step().
+  spaceTest('should check Convert to Lens action availability', async ({ pageObjects }) => {
+    const { dashboard } = pageObjects;
+
+    await spaceTest.step('invalid panel has no Convert to Lens action', async () => {
+      const hasAction = await dashboard.panelHasAction(
+        CONVERT_TO_LENS_ACTION,
+        'Top N - Invalid panel'
+      );
+      expect(hasAction).toBe(false);
+    });
+
+    await spaceTest.step('unsupported aggregations have no Convert to Lens action', async () => {
+      const hasAction = await dashboard.panelHasAction(
+        CONVERT_TO_LENS_ACTION,
+        'Top N - Unsupported agg'
+      );
+      expect(hasAction).toBe(false);
+    });
+
+    await spaceTest.step(
+      'sibling pipeline aggregations have no Convert to Lens action',
+      async () => {
+        const hasAction = await dashboard.panelHasAction(
+          CONVERT_TO_LENS_ACTION,
+          'Top N - Sibling pipeline agg'
+        );
+        expect(hasAction).toBe(false);
+      }
+    );
+
+    await spaceTest.step(
+      'parent pipeline aggregations have no Convert to Lens action',
+      async () => {
+        const hasAction = await dashboard.panelHasAction(
+          CONVERT_TO_LENS_ACTION,
+          'Top N - Parent pipeline agg'
+        );
+        expect(hasAction).toBe(false);
+      }
+    );
+
+    await spaceTest.step('count aggregation has Convert to Lens action', async () => {
       const hasAction = await dashboard.panelHasAction(CONVERT_TO_LENS_ACTION, 'Top N - Basic');
       expect(hasAction).toBe(true);
-    }
-  );
-
-  spaceTest('should not allow converting of invalid panel', async ({ pageObjects }) => {
-    const { dashboard } = pageObjects;
-    const hasAction = await dashboard.panelHasAction(
-      CONVERT_TO_LENS_ACTION,
-      'Top N - Invalid panel'
-    );
-    expect(hasAction).toBe(false);
+    });
   });
-
-  spaceTest('should not allow converting of unsupported aggregations', async ({ pageObjects }) => {
-    const { dashboard } = pageObjects;
-    const hasAction = await dashboard.panelHasAction(
-      CONVERT_TO_LENS_ACTION,
-      'Top N - Unsupported agg'
-    );
-    expect(hasAction).toBe(false);
-  });
-
-  spaceTest(
-    'should hide "Convert to Lens" for sibling pipeline aggregations',
-    async ({ pageObjects }) => {
-      const { dashboard } = pageObjects;
-      const hasAction = await dashboard.panelHasAction(
-        CONVERT_TO_LENS_ACTION,
-        'Top N - Sibling pipeline agg'
-      );
-      expect(hasAction).toBe(false);
-    }
-  );
-
-  spaceTest(
-    'should hide "Convert to Lens" for parent pipeline aggregations',
-    async ({ pageObjects }) => {
-      const { dashboard } = pageObjects;
-      const hasAction = await dashboard.panelHasAction(
-        CONVERT_TO_LENS_ACTION,
-        'Top N - Parent pipeline agg'
-      );
-      expect(hasAction).toBe(false);
-    }
-  );
 
   spaceTest('should convert to horizontal bar', async ({ page, pageObjects }) => {
     const { dashboard } = pageObjects;
@@ -109,8 +107,8 @@ spaceTest.describe('TSVB Top N - Open in Lens', { tag: tags.deploymentAgnostic }
     await expect(chartSwitcher).toHaveText('Bar');
 
     const yDimension = page.testSubj
-      .locator('lnsXY_yDimensionPanel')
-      .locator('lns-dimensionTrigger');
+      .locator('[data-test-subj="lnsXY_yDimensionPanel"]')
+      .locator('[data-test-subj="lns-dimensionTrigger"]');
     await expect(yDimension).toHaveText('Maximum of memory');
   });
 
@@ -120,11 +118,11 @@ spaceTest.describe('TSVB Top N - Open in Lens', { tag: tags.deploymentAgnostic }
     await expect(page.testSubj.locator('xyVisChart')).toBeVisible();
 
     const xDimension = page.testSubj
-      .locator('lnsXY_xDimensionPanel')
-      .locator('lns-dimensionTrigger');
+      .locator('[data-test-subj="lnsXY_xDimensionPanel"]')
+      .locator('[data-test-subj="lns-dimensionTrigger"]');
     const yDimension = page.testSubj
-      .locator('lnsXY_yDimensionPanel')
-      .locator('lns-dimensionTrigger');
+      .locator('[data-test-subj="lnsXY_yDimensionPanel"]')
+      .locator('[data-test-subj="lns-dimensionTrigger"]');
     await expect(xDimension).toHaveText('Top 10 values of extension.raw');
     await expect(yDimension).toHaveText('Count of records');
   });
@@ -137,8 +135,8 @@ spaceTest.describe('TSVB Top N - Open in Lens', { tag: tags.deploymentAgnostic }
       await expect(page.testSubj.locator('xyVisChart')).toBeVisible();
 
       const yDimension = page.testSubj
-        .locator('lnsXY_yDimensionPanel')
-        .locator('lns-dimensionTrigger');
+        .locator('[data-test-subj="lnsXY_yDimensionPanel"]')
+        .locator('[data-test-subj="lns-dimensionTrigger"]');
       await yDimension.click();
       await page.testSubj.locator('indexPattern-advanced-accordion').click();
 
@@ -159,12 +157,12 @@ spaceTest.describe('TSVB Top N - Open in Lens', { tag: tags.deploymentAgnostic }
       await expect(page.testSubj.locator('xyVisChart')).toBeVisible();
 
       // Verify 2 layers
-      const layerTabs = page.testSubj.locator('lns-layerPanel');
+      const layerTabs = page.testSubj.locator('[data-test-subj="lns-layerPanel"]');
       await expect(layerTabs).toHaveCount(2);
 
       // Layer 0: Count of records
       const layer0YDimension = page.testSubj
-        .locator('lns-layerPanel')
+        .locator('[data-test-subj="lns-layerPanel"]')
         .filter({ hasText: 'Count of records' })
         .locator(
           '[data-test-subj="lnsXY_yDimensionPanel"] [data-test-subj="lns-dimensionTrigger"]'
@@ -173,7 +171,7 @@ spaceTest.describe('TSVB Top N - Open in Lens', { tag: tags.deploymentAgnostic }
 
       // Layer 1: Static value 10
       const layer1YDimension = page.testSubj
-        .locator('lns-layerPanel')
+        .locator('[data-test-subj="lns-layerPanel"]')
         .filter({ hasText: '10' })
         .locator(
           '[data-test-subj="lnsXY_yDimensionPanel"] [data-test-subj="lns-dimensionTrigger"]'
@@ -188,8 +186,8 @@ spaceTest.describe('TSVB Top N - Open in Lens', { tag: tags.deploymentAgnostic }
     await expect(page.testSubj.locator('xyVisChart')).toBeVisible();
 
     const yDimension = page.testSubj
-      .locator('lnsXY_yDimensionPanel')
-      .locator('lns-dimensionTrigger');
+      .locator('[data-test-subj="lnsXY_yDimensionPanel"]')
+      .locator('[data-test-subj="lns-dimensionTrigger"]');
     await expect(yDimension).toHaveText('Count of records');
   });
 

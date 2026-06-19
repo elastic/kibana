@@ -76,8 +76,6 @@ spaceTest.describe('TSVB Metric - Open in Lens', { tag: tags.deploymentAgnostic 
     });
   });
 
-  // Each conversion test navigates from dashboard → Lens editor,
-  // so each needs its own browser context (via beforeEach).
   spaceTest('should convert basic metric to Lens', async ({ page, pageObjects }) => {
     const { dashboard } = pageObjects;
     await dashboard.clickPanelAction(CONVERT_TO_LENS_ACTION, 'Metric - Basic');
