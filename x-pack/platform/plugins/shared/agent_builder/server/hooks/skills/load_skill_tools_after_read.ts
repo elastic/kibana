@@ -6,7 +6,7 @@
  */
 
 import type { AfterToolCallHookContext } from '@kbn/agent-builder-server';
-import { filestoreTools } from '@kbn/agent-builder-common/tools';
+import { internalTools } from '@kbn/agent-builder-common/tools';
 import { loadSkillTools } from '../../services/skills/load_skill_tools';
 import { isSkillFileEntry } from '../../services/execution/runner/store/volumes/skills/utils';
 import type { AnalyticsService, TrackingService } from '../../telemetry';
@@ -16,7 +16,7 @@ export const createLoadSkillToolsAfterRead = ({
   trackingService,
 }: { analyticsService?: AnalyticsService; trackingService?: TrackingService } = {}) => {
   return async (context: AfterToolCallHookContext): Promise<void> => {
-    if (context.toolId !== filestoreTools.read) {
+    if (context.toolId !== internalTools.readFile) {
       return;
     }
 
