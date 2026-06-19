@@ -79,6 +79,7 @@ export const createAgentHandlerContext = async <TParams = Record<string, unknown
     subagents: isExperimentalEnabled,
     todos: isExperimentalEnabled,
     askUserQuestion: isExperimentalEnabled,
+    bash: isBashEnabled,
   };
 
   const { filesystemService, bashService } = await createFilesystemServices({
