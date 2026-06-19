@@ -464,6 +464,10 @@ describe('Resolver, when analyzing a tree that has 2 related registry and 1 rela
     });
   });
 
+  afterEach(() => {
+    simulator.unmount();
+  });
+
   // FLAKY: https://github.com/elastic/kibana/issues/170118
   describe.skip('when it has loaded', () => {
     let originBounds: AABB;
