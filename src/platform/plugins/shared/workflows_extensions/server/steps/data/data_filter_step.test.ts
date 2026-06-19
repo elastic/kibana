@@ -240,8 +240,16 @@ describe('dataFilterStepDefinition', () => {
     });
 
     it('should continue filtering even if one item evaluation fails', async () => {
+      const badItem: Record<string, unknown> = {};
+      Object.defineProperty(badItem, 'status', {
+        get() {
+          throw new Error('Property access failed');
+        },
+        enumerable: true,
+      });
+
       const config = {
-        items: [{ status: 'active', id: 1 }, null, { status: 'active', id: 3 }],
+        items: [{ status: 'active', id: 1 }, badItem, { status: 'active', id: 3 }],
       };
       const input = {
         condition: 'item.status: active',

@@ -238,8 +238,16 @@ describe('dataFindStepDefinition', () => {
     });
 
     it('should continue searching even if one item evaluation fails', async () => {
+      const badItem: Record<string, unknown> = {};
+      Object.defineProperty(badItem, 'status', {
+        get() {
+          throw new Error('Property access failed');
+        },
+        enumerable: true,
+      });
+
       const config = {
-        items: [null, { status: 'active', id: 2 }],
+        items: [badItem, { status: 'active', id: 2 }],
       };
       const input = {
         condition: 'item.status: active',
