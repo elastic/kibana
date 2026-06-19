@@ -17,6 +17,7 @@ const ilmPhases = {
 
 describe('buildIlmPreviewPhases', () => {
   const policy: SerializedPolicy = {
+    name: 'test-policy',
     phases: {
       hot: { min_age: '0ms', actions: {} },
       warm: { min_age: '2d', actions: {} },
@@ -61,7 +62,10 @@ describe('buildIlmPreviewPhases', () => {
 
   it('should default hot to 0.0 B when stats are missing', () => {
     const phases = buildIlmPreviewPhases({
-      policy: { phases: { hot: { actions: {} }, warm: { min_age: '2d', actions: {} } } },
+      policy: {
+        name: 'test-policy',
+        phases: { hot: { actions: {} }, warm: { min_age: '2d', actions: {} } },
+      },
       ilmPhases,
     });
 
