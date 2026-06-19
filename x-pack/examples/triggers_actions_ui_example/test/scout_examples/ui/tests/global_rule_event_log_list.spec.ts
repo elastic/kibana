@@ -74,6 +74,9 @@ test.describe('Global rule event log list', { tag: ['@local-stateful-classic'] }
   test.beforeAll(async ({ apiServices }) => {
     test.setTimeout(180_000);
 
+    // Delete first so a space left behind by a previously failed run doesn't make
+    // create fail on rerun (spaces.delete ignores 404). Mirrors the deleted FTR.
+    await apiServices.spaces.delete(SPACE_2);
     await apiServices.spaces.create({ id: SPACE_2, name: 'Space 2' });
 
     apmErrorRateRuleId = (await apiServices.alerting.rules.create(APM_ERROR_RATE_RULE)).data.id;

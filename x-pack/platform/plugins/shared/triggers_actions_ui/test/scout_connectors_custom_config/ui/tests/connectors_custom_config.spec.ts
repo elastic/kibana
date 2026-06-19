@@ -12,7 +12,7 @@
 //   - connectors/webhook_disabled_ssl_pfx/webhook.ts
 
 import type { KibanaRole, ScoutPage } from '@kbn/scout';
-import { tags, test } from '@kbn/scout';
+import { test } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 
 const CONNECTORS_APP_PATH = '/app/management/insightsAndAlerting/triggersActionsConnectors';
@@ -61,7 +61,9 @@ const openConnectorCard = async (page: ScoutPage, cardSubj: string) => {
   await page.testSubj.click(cardSubj);
 };
 
-test.describe('Connector custom Kibana config', { tag: tags.stateful.classic }, () => {
+// Local-only: these assertions depend on the connectors_custom_config server args,
+// which are not applied on Cloud — so this suite must not run on @cloud-stateful-classic.
+test.describe('Connector custom Kibana config', { tag: ['@local-stateful-classic'] }, () => {
   test.beforeEach(async ({ browserAuth, page, kbnUrl }) => {
     await browserAuth.loginWithCustomRole(CONNECTORS_ROLE);
     await page.goto(kbnUrl.get(CONNECTORS_APP_PATH));
