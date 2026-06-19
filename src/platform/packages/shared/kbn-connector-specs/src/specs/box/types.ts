@@ -46,6 +46,7 @@ export const SearchFilesKeywordInputSchema = lazySchema(() =>
       ),
     folderId: z
       .string()
+      .max(256)
       .optional()
       .describe(
         'Restrict search to files inside a specific folder (by folder ID). Leave empty to search all content.'
@@ -77,6 +78,7 @@ export const ListFolderContentInputSchema = lazySchema(() =>
   z.object({
     folderId: z
       .string()
+      .max(256)
       .describe(
         'The ID of the folder to list. Use "0" for the root folder, or a folder ID from search results.'
       ),
@@ -97,6 +99,7 @@ export const GetFileContentInputSchema = lazySchema(() =>
     fileId: z
       .string()
       .min(1)
+      .max(256)
       .describe(
         'The ID of the file to retrieve content for. Use file IDs from searchFilesKeyword or listFolderContent results.'
       ),
@@ -109,6 +112,7 @@ export const GetFileDetailsInputSchema = lazySchema(() =>
     fileId: z
       .string()
       .min(1)
+      .max(256)
       .describe(
         'The ID of the file to retrieve details for. Use file IDs from searchFilesKeyword or listFolderContent results.'
       ),
@@ -121,6 +125,7 @@ export const GetFolderDetailsInputSchema = lazySchema(() =>
     folderId: z
       .string()
       .min(1)
+      .max(256)
       .describe(
         'The ID of the folder to retrieve details for. Use folder IDs from searchFoldersByName or listFolderContent results.'
       ),
@@ -133,6 +138,7 @@ export const AiQaSingleFileInputSchema = lazySchema(() =>
     fileId: z
       .string()
       .min(1)
+      .max(256)
       .describe(
         'The ID of the Box file to query. Use file IDs from searchFilesKeyword or listFolderContent results.'
       ),
@@ -150,7 +156,7 @@ export type AiQaSingleFileInput = z.infer<typeof AiQaSingleFileInputSchema>;
 export const AiQaMultiFileInputSchema = lazySchema(() =>
   z.object({
     fileIds: z
-      .array(z.string().min(1))
+      .array(z.string().min(1).max(256))
       .min(1)
       .describe(
         'Array of Box file IDs to query across. Use file IDs from searchFilesKeyword or listFolderContent results.'
@@ -171,6 +177,7 @@ export const AiQaHubInputSchema = lazySchema(() =>
     hubId: z
       .string()
       .min(1)
+      .max(256)
       .describe('The ID of the Box Hub to query. Use hub IDs from listHubs results.'),
     prompt: z
       .string()
@@ -188,6 +195,7 @@ export const AiExtractFreeformInputSchema = lazySchema(() =>
     fileId: z
       .string()
       .min(1)
+      .max(256)
       .describe(
         'The ID of the Box file to extract metadata from. Use file IDs from searchFilesKeyword or listFolderContent results.'
       ),
@@ -207,17 +215,20 @@ export const AiExtractStructuredFromMetadataTemplateInputSchema = lazySchema(() 
     fileId: z
       .string()
       .min(1)
+      .max(256)
       .describe(
         'The ID of the Box file to extract structured metadata from. Use file IDs from searchFilesKeyword or listFolderContent results.'
       ),
     templateKey: z
       .string()
       .min(1)
+      .max(256)
       .describe(
         'The key of the Box metadata template to use for extraction. Use template keys from list_metadata_templates results.'
       ),
     scope: z
       .string()
+      .max(64)
       .optional()
       .default('enterprise')
       .describe(
@@ -237,6 +248,7 @@ export const GetHubDetailsInputSchema = lazySchema(() =>
     hubId: z
       .string()
       .min(1)
+      .max(256)
       .describe(
         'The ID of the Box Hub to retrieve details for. Use hub IDs from listHubs results.'
       ),
@@ -249,6 +261,7 @@ export const GetHubItemsInputSchema = lazySchema(() =>
     hubId: z
       .string()
       .min(1)
+      .max(256)
       .describe(
         'The ID of the Box Hub to list items for. Use hub IDs from listHubs results. Returns associated files and folders.'
       ),
@@ -275,6 +288,7 @@ export const GetCommentsInputSchema = lazySchema(() =>
     fileId: z
       .string()
       .min(1)
+      .max(256)
       .describe(
         'The ID of the Box file to retrieve comments for. Use file IDs from searchFilesKeyword or listFolderContent results.'
       ),
@@ -294,11 +308,13 @@ export const SearchByMetadataInputSchema = lazySchema(() =>
     templateKey: z
       .string()
       .min(1)
+      .max(256)
       .describe(
         'The key of the metadata template to query against. Use `callTool` with `list_metadata_templates` to discover available template keys.'
       ),
     scope: z
       .string()
+      .max(64)
       .optional()
       .default('enterprise')
       .describe(
@@ -306,6 +322,7 @@ export const SearchByMetadataInputSchema = lazySchema(() =>
       ),
     ancestorFolderId: z
       .string()
+      .max(256)
       .optional()
       .describe(
         'Restrict results to items inside this folder (by folder ID). Leave empty to search all content.'
@@ -324,7 +341,7 @@ export type SearchByMetadataInput = z.infer<typeof SearchByMetadataInputSchema>;
 
 export const CallToolInputSchema = lazySchema(() =>
   z.object({
-    name: z.string().min(1).describe('Name of the Box MCP tool to call'),
+    name: z.string().min(1).max(200).describe('Name of the Box MCP tool to call'),
     arguments: z
       .record(z.string(), z.unknown())
       .optional()
