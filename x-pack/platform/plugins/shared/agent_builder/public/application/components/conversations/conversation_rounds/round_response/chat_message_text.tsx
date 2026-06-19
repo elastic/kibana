@@ -91,23 +91,6 @@ export function ChatMessageText({
 
   const [pendingExternalUrl, setPendingExternalUrl] = useState<string | null>(null);
 
-  // Skills emit bare root-relative paths (e.g. `/app/security/...`) with no
-  // awareness of the server basePath. Prepend it so the link resolves correctly
-  // for both click-driven SPA navigation and `target="_blank"` opens.
-  const normalizeHref = useCallback(
-    (href: string): string => {
-      if (!http) {
-        return href;
-      }
-
-      const basePath = http.basePath.get();
-      const isRootRelative = href.startsWith('/') && !href.startsWith('//');
-      const alreadyPrefixed = basePath !== '' && href.startsWith(`${basePath}/`);
-      return isRootRelative && !alreadyPrefixed ? http.basePath.prepend(href) : href;
-    },
-    [http]
-  );
-
   const handleLinkClick = useCallback(
     (href: string, e: React.MouseEvent) => {
       const internal = http?.externalUrl?.isInternalUrl(href);
@@ -169,21 +152,17 @@ export function ChatMessageText({
 
     rehypeToReactOptions.components = {
       ...rehypeToReactOptions.components,
-      a: (props) => {
-        const normalizedHref = props.href ? normalizeHref(props.href) : props.href;
-        return (
-          <EuiLink
-            {...props}
-            href={normalizedHref}
-            target="_blank"
-            rel="noreferrer"
-            external={false}
-            onClick={(e: React.MouseEvent<HTMLAnchorElement>) => {
-              if (normalizedHref) handleLinkClick(normalizedHref, e);
-            }}
-          />
-        );
-      },
+      a: (props) => (
+        <EuiLink
+          {...props}
+          target="_blank"
+          rel="noreferrer"
+          external={false}
+          onClick={(e: React.MouseEvent<HTMLAnchorElement>) => {
+            if (props.href) handleLinkClick(props.href, e);
+          }}
+        />
+      ),
       cursor: Cursor,
       codeBlock: (props) => {
         return (
@@ -252,7 +231,7 @@ export function ChatMessageText({
       ],
       processingPluginList: processingPlugins,
     };
-  }, [visualizationRenderer, renderAttachmentRenderer, handleLinkClick, normalizeHref]);
+  }, [visualizationRenderer, renderAttachmentRenderer, handleLinkClick]);
 
   return (
     <>
