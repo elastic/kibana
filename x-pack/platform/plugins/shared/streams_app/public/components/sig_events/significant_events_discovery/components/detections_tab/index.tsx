@@ -16,6 +16,7 @@ import {
   EuiFlexItem,
   EuiLink,
   EuiLoadingSpinner,
+  EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
 import type { EuiBasicTableColumn } from '@elastic/eui';
@@ -138,7 +139,7 @@ export const DetectionsTab = () => {
         name: i18n.translate('xpack.streams.detectionsTab.changeTypeColumn', {
           defaultMessage: 'Change',
         }),
-        width: '160px',
+        width: '140px',
         render: (detection: Detection) => {
           const changeType = detection.detection_evidence?.change_point_type;
           if (!changeType) {
@@ -152,7 +153,7 @@ export const DetectionsTab = () => {
         name: i18n.translate('xpack.streams.detectionsTab.kindColumn', {
           defaultMessage: 'Kind',
         }),
-        width: '120px',
+        width: '100px',
         render: (kind: Detection['kind']) => (
           <EuiBadge color={kindColor(kind)}>{kindLabel(kind)}</EuiBadge>
         ),
@@ -178,7 +179,7 @@ export const DetectionsTab = () => {
         name: i18n.translate('xpack.streams.detectionsTab.discoveryColumn', {
           defaultMessage: 'Discovery',
         }),
-        width: '140px',
+        width: '100px',
         render: (detection: Detection) => {
           if (detection.processed) {
             return <EuiBadge color="success">{DISCOVERY_STATUS_LABELS.processed}</EuiBadge>;
