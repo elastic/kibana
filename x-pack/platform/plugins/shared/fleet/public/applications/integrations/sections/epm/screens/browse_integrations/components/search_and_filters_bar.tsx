@@ -493,7 +493,6 @@ const SearchBar: React.FC<SearchBarProps> = ({ categories, availableSubCategorie
                   </span>
                 </EuiScreenReaderOnly>
                 {categoryBadgeLabel}
-                {categoryBadgeLabel}
               </>
             }
             data-test-subj="epmList.categoryBadge"
