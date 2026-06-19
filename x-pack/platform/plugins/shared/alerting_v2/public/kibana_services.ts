@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { Container } from 'inversify';
 import { BehaviorSubject } from 'rxjs';
 import type { RuleFormServices } from '@kbn/alerting-v2-rule-form';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
@@ -16,8 +15,6 @@ export type AlertingV2KibanaServices = RuleFormServices & {
 };
 
 const servicesReady$ = new BehaviorSubject<AlertingV2KibanaServices | undefined>(undefined);
-
-let pluginDiContainer: Container | undefined;
 
 export const untilPluginStartServicesReady = (): Promise<AlertingV2KibanaServices> => {
   if (servicesReady$.value) return Promise.resolve(servicesReady$.value);
@@ -34,9 +31,3 @@ export const untilPluginStartServicesReady = (): Promise<AlertingV2KibanaService
 export const setKibanaServices = (services: AlertingV2KibanaServices) => {
   servicesReady$.next(services);
 };
-
-export const setDiContainer = (container: Container) => {
-  pluginDiContainer = container;
-};
-
-export const getDiContainer = (): Container | undefined => pluginDiContainer;

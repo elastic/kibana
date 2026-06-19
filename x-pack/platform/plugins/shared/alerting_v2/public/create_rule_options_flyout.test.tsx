@@ -69,7 +69,6 @@ jest.mock('./kibana_services', () => ({
     new Promise<RuleFormServices>((resolve) => {
       pendingResolvers.push(resolve);
     }),
-  getDiContainer: () => undefined,
 }));
 
 jest.mock('./services/rules_api', () => ({

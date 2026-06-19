@@ -32,7 +32,7 @@ import { ExecutionHistoryApi } from './services/execution_history_api';
 import { RulesApi } from './services/rules_api';
 import { registerTriggerDefinitions } from './lib/workflow_extensions/register_trigger_definitions';
 import { disableAlertingManagementUi } from './lib/disable_management_ui';
-import { setKibanaServices, setDiContainer } from './kibana_services';
+import { setKibanaServices } from './kibana_services';
 import type { AlertingV2PublicStart } from './types';
 import type { CreateRuleOptionsFlyoutProps } from './create_rule_options_flyout';
 
@@ -144,7 +144,6 @@ export const module = new ContainerModule(({ bind }) => {
 
     getStartServices().then(([coreStart]) => {
       const diContainer = coreStart.injection.getContainer();
-      setDiContainer(diContainer);
       setKibanaServices({
         http: coreStart.http,
         notifications: coreStart.notifications,
