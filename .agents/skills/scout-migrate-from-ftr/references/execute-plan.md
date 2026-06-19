@@ -30,6 +30,7 @@ The plan answers _what_ and _why_; this file answers _how_.
 - **TypeScript layout for Scout tests** (pick one; see **Where Scout tests are typechecked** under step 6): either fold `test/scout/**/*` into the **plugin root** `tsconfig.json` and add Scout `kbn_references` (like `discover_enhanced`), or keep **dedicated** `test/scout/{ui,api}/tsconfig.json` files. Only the latter forbids relative imports into `server/` / `public/`.
 - **Prefer Scout's default servers config**: replace FTR config nesting / per-suite server args with `uiSettings` / `scoutSpace.uiSettings` and (when needed) `apiServices.core.settings(...)` runtime settings. Only create a custom server config set when the plan calls for it (a setting that must apply at Kibana boot) — custom configs run only in local pipelines (no Cloud) and add CI cost.
 - Auth/roles are fixture-driven: `browserAuth` (UI), `requestAuth` (API key), `samlAuth` (cookie / `cookieHeader`), plus custom roles. Avoid FTR-style role mutation. For Scout **API** tests, see **Scout API auth (`cookieHeader` vs API key)** under step 4.
+- **Prefer default Cloud-compatible roles over custom ones.** For general user flows, use the least-privileged built-in role (`browserAuth.loginAsViewer()` → `loginAsPrivilegedUser()` → `loginAsAdmin()`). Reach for `loginWithCustomRole(roleDescriptor)` only when the test specifically validates permission-scoped behavior that no built-in role expresses — don't port FTR custom roles 1:1, as many were scoped incidentally and work fine on a default role. `loginAs(role)` (built-in role by name) is stateful-only and isn't supported on serverless (ensure the tests aren't targeting serverless).
 
 ## Core workflow
 
@@ -58,6 +59,8 @@ FTR **deployment-agnostic** configs often load the same files under both statefu
 - **Platform modules** (`src/platform/**`, `x-pack/platform/**`): `tags.deploymentAgnostic` is appropriate when the original intent was "run everywhere."
 
 API and UI specs should both carry tags that match the intended `run-tests` / CI targets; see step 9.
+
+**Prefer tags inline.** Avoid wrapping tags in a named constant unless the same tag set is reused across multiple suites. Never change an existing tag constant's value to fit a different suite. Apply per-issue tag instructions inline and only to the tests specified.
 
 ### 3) Translate the test structure
 
@@ -130,7 +133,7 @@ For general Scout API auth patterns (`requestAuth`, `samlAuth`, common headers, 
 ### 6) Add helpers and constants
 
 - Put shared helpers in `test/scout*/ui/fixtures/helpers.ts` (or API helpers in API fixtures).
-- Add test-subject constants in `fixtures/constants.ts` for reuse across tests and page objects.
+- Add test-subject constants in `fixtures/constants.ts` for reuse across tests and page objects. For other shared values (archive paths, time ranges, etc.), follow the plan's "Shared constants to extract" list rather than introducing new constants during execution.
 - For `parallel_tests/` ingestion, use `parallel_tests/global.setup.ts` + `globalSetupHook` (no `esArchiver` in spec files).
 - For suite-wide Elasticsearch/Kibana state reset (e.g. reverting feature flags or global `uiSettings`, dropping hand-indexed data that affects other Scout configs sharing the cluster), use the **optional** `globalTeardownHook` in `parallel_tests/global.teardown.ts`. Picked up automatically when `runGlobalSetup: true` — no extra config flag. Use `esClient.indices.delete` / `deleteDataStream` / `deleteByQuery`, `kbnClient.uiSettings.unset(...)`, and `apiServices.core.settings(...)` to reset state. Per-test/per-suite cleanup still belongs in `afterEach`/`afterAll`.
 
