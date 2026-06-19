@@ -13,7 +13,6 @@ import type { PluginConfig } from '../config';
 import type { AlertingServerSetupDependencies, AlertingServerStartDependencies } from '../types';
 import { registerFeaturePrivileges } from '../lib/security/privileges';
 import { registerSavedObjects } from '../saved_objects';
-import { alertingV2UiSettings } from '../ui_settings/advanced_settings';
 import { EventLoggerToken } from '../lib/services/event_log_service/tokens';
 import { registerStepDefinitions } from '../lib/workflow_extensions/register_step_definitions';
 import { registerTriggerDefinitions } from '../lib/workflow_extensions/register_trigger_definitions';
@@ -22,6 +21,7 @@ import {
   ACTION_POLICY_EVENT_ACTIONS,
   ACTION_POLICY_EVENT_PROVIDER,
 } from '../lib/dispatcher/steps/constants';
+import { alertingAdvancedSettings } from '../settings/advanced_settings';
 
 /**
  * Core platform setup-phase registrations (feature privileges, saved objects,
@@ -55,13 +55,9 @@ export function bindOnSetup({ bind }: ContainerModuleLoadOptions) {
       });
     }
 
-    container.get(CoreSetup('capabilities')).registerProvider(() => ({
-      alertingVTwo: {},
-    }));
-
     const uiSettingsSetup = container.get(CoreSetup('uiSettings'));
 
-    uiSettingsSetup.registerGlobal(alertingV2UiSettings);
+    uiSettingsSetup.registerGlobal(alertingAdvancedSettings);
 
     const eventLogService = container.get(
       PluginSetup<AlertingServerSetupDependencies['eventLog']>('eventLog')
