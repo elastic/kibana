@@ -135,6 +135,25 @@ describe('useResolveTimeField', () => {
     });
   });
 
+  it('does not reset timeField when no query is committed yet', async () => {
+    const onTimeFieldChange = jest.fn();
+
+    renderHook(
+      () =>
+        useResolveTimeField({
+          ...defaultParams,
+          query: '',
+          timeField: 'event.start',
+          onTimeFieldChange,
+        }),
+      { wrapper: createWrapper() }
+    );
+
+    await waitFor(() => {
+      expect(onTimeFieldChange).not.toHaveBeenCalled();
+    });
+  });
+
   it('reports isTimeFieldResolved once correction completes', async () => {
     (useDataFields as jest.Mock).mockReturnValue({
       data: {

@@ -110,6 +110,7 @@ describe('QuerySandboxFlyout — timefield auto-select', () => {
 
     renderSandbox({ timeField: '@timestamp', onTimeFieldChange });
 
+    // sorted: event.end < event.start
     expect(onTimeFieldChange).toHaveBeenCalledWith('event.end');
   });
 

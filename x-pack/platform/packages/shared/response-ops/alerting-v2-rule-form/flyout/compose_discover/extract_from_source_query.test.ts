@@ -34,4 +34,10 @@ describe('extractFromSourceQuery', () => {
   it('returns empty string when query has no FROM', () => {
     expect(extractFromSourceQuery('SHOW INFO')).toBe('');
   });
+
+  it('extracts FROM with multiple indices', () => {
+    expect(extractFromSourceQuery('FROM logs-*, metrics-* | LIMIT 10')).toBe(
+      'FROM logs-*, metrics-*'
+    );
+  });
 });

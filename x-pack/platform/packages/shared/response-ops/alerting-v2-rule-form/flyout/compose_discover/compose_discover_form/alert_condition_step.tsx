@@ -60,7 +60,7 @@ export function AlertConditionStep({
   const alertBlock = query.format === 'composed' ? query.breach.segment : '';
   const fullQuery = query.format === 'standalone' ? query.breach.query : '';
 
-  // Use the base query for field lookup when tracking is on; fall back to full breach query.
+  // Committed pipeline query for output-column lookup and STATS BY auto-populate.
   const committedQuery = useMemo(
     () => getTimeFieldResolutionQuery(query, isAlert, state.queryCommitted),
     [query, isAlert, state.queryCommitted]

@@ -96,7 +96,7 @@ export const useResolveTimeField = ({
   ]);
 
   useEffect(() => {
-    if (!onTimeFieldChange) {
+    if (!onTimeFieldChange || !fromSourceQuery) {
       return;
     }
     if (dateFields.length > 0 && !dateFields.includes(timeField)) {
@@ -106,16 +106,10 @@ export const useResolveTimeField = ({
     } else if (dateFields.length === 0 && !apiTimeField && timeField !== '@timestamp') {
       onTimeFieldChange('@timestamp');
     }
-  }, [dateFields, apiTimeField, timeField, onTimeFieldChange]);
+  }, [fromSourceQuery, dateFields, apiTimeField, timeField, onTimeFieldChange]);
 
   return {
-    fromSourceQuery,
-    dateFields,
-    apiTimeField,
-    resolvedTimeField,
     timeFieldOptions,
     isTimeFieldResolved,
-    isLoadingFields,
-    isLoadingApiTimeField,
   };
 };

@@ -17,15 +17,19 @@ export interface ComposeDiscoverTimeFieldContextValue {
   isTimeFieldResolved: boolean;
 }
 
-const defaultValue: ComposeDiscoverTimeFieldContextValue = {
-  timeFieldOptions: [{ value: '@timestamp', text: '@timestamp' }],
-  isTimeFieldResolved: true,
+const ComposeDiscoverTimeFieldContext = createContext<ComposeDiscoverTimeFieldContextValue | null>(
+  null
+);
+
+export const useComposeDiscoverTimeField = (): ComposeDiscoverTimeFieldContextValue => {
+  const ctx = useContext(ComposeDiscoverTimeFieldContext);
+  if (!ctx) {
+    throw new Error(
+      'useComposeDiscoverTimeField must be used within ComposeDiscoverTimeFieldContextProvider'
+    );
+  }
+  return ctx;
 };
-
-const ComposeDiscoverTimeFieldContext = createContext(defaultValue);
-
-export const useComposeDiscoverTimeField = (): ComposeDiscoverTimeFieldContextValue =>
-  useContext(ComposeDiscoverTimeFieldContext);
 
 export const ComposeDiscoverTimeFieldContextProvider: React.FC<{
   value: ComposeDiscoverTimeFieldContextValue;
