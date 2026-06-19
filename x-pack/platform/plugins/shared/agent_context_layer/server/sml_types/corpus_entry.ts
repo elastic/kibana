@@ -32,12 +32,8 @@ export const CORPUS_ENTRY_SML_TYPE = 'corpus_entry';
 export const corpusEntrySmlType: SmlTypeDefinition = {
   id: CORPUS_ENTRY_SML_TYPE,
 
-  // No crawling: entries are written explicitly via contextEngine.addEntry.
-  list: (_context) => ({
-    [Symbol.asyncIterator]: () => ({ next: async () => ({ done: true as const, value: [] }) }),
-  }),
+  list: async function* () {},
 
-  // Content-mode writes supply chunks directly; getSmlData is never invoked.
   getSmlData: async () => undefined,
 
   /**
