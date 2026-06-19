@@ -9,8 +9,8 @@
 
 import type { Logger } from '@kbn/logging';
 import type { z } from '@kbn/zod/v4';
-import type { RegisteredStepDefinition, ServerStepDefinition } from './types';
-import type { RegisteredStepDefinitionOrLoader } from '../types';
+import type { ServerStepDefinition } from './types';
+import type { ServerStepDefinitionOrLoader } from '../types';
 
 /**
  * Registry for server-side workflow step implementations.
@@ -31,7 +31,7 @@ export class ServerStepRegistry {
     Input extends z.ZodType = z.ZodType,
     Output extends z.ZodType = z.ZodType,
     Config extends z.ZodObject = z.ZodObject
-  >(definitionOrLoader: RegisteredStepDefinitionOrLoader<Input, Output, Config>): void {
+  >(definitionOrLoader: ServerStepDefinitionOrLoader<Input, Output, Config>): void {
     if (typeof definitionOrLoader === 'function') {
       const promise = definitionOrLoader()
         .then((definition) => {
@@ -60,13 +60,13 @@ export class ServerStepRegistry {
     Input extends z.ZodType = z.ZodType,
     Output extends z.ZodType = z.ZodType,
     Config extends z.ZodObject = z.ZodObject
-  >(definition: RegisteredStepDefinition<Input, Output, Config>): void {
+  >(definition: ServerStepDefinition<Input, Output, Config>): void {
     if (this.registry.has(definition.id)) {
       throw new Error(
         `Step definition for type "${definition.id}" is already registered. Each step type must have a unique definition.`
       );
     }
-    this.registry.set(definition.id, definition as ServerStepDefinition);
+    this.registry.set(definition.id, definition);
   }
 
   /**

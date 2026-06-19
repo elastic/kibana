@@ -14,7 +14,7 @@ import type {
   DurablePhaseResult,
   PollCeilings,
   PollHandlerContext,
-  PollStepDefinition,
+  ServerPollStepDefinition,
   StepHandlerContext,
 } from '@kbn/workflows-extensions/server';
 import { createBaseHandlerContext } from './create_base_handler_context';
@@ -38,7 +38,7 @@ type PolicyCalculationResult =
 
 export class PollPolicyStepHandler implements CustomStepDefinitionHandler {
   constructor(
-    private readonly stepDefinition: PollStepDefinition,
+    private readonly stepDefinition: ServerPollStepDefinition,
     private readonly node: AtomicGraphNode,
     private readonly stepExecutionRuntime: StepExecutionRuntime,
     private readonly workflowLogger: IWorkflowEventLogger

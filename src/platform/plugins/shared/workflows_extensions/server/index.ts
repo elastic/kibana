@@ -45,7 +45,8 @@ export {
 
 export type {
   ServerStepDefinition,
-  PollStepDefinition,
+  ServerHandlerStepDefinition,
+  ServerPollStepDefinition,
   StepHandler,
   StepHandlerContext,
   StepHandlerResult,
@@ -60,7 +61,6 @@ export type {
   DurablePhaseResult,
   PollContinueResult,
   CommonServerStepDefinition,
-  RegisteredStepDefinition,
 } from './step_registry/types';
 
 export { isOneShotStepDefinition, isPollStepDefinition } from './step_registry/types';

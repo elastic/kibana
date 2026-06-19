@@ -109,10 +109,8 @@ export type PollHandler<
 ) => Promise<DurablePhaseResult<Output, State>>;
 
 /**
- * Handler function that executes a custom workflow step.
- * Legacy alias retained for backward compatibility with step definitions that
- * use the `handler` field. New poll-based steps should use
- * {@link createPollServerStepDefinition} instead.
+ * Handler for a single-shot custom step ({@link createServerStepDefinition}).
+ * For durable start/poll work, use {@link createPollServerStepDefinition} instead.
  *
  * @param context - The runtime context for the step execution
  * @returns The step output (should conform to outputSchema)
@@ -198,12 +196,8 @@ export interface CommonServerStepDefinition<
 // -----------------------------------------------------------------------------
 
 /**
- * Definition of a server-side workflow step extension.
- * Contains the technical/behavioral implementation of a step.
- *
- * The input and output types are automatically inferred from the inputSchema and outputSchema,
- * so you don't need to specify them explicitly. Use `createServerStepDefinition` helper function
- * for the best type inference experience.
+ * Single-shot server-side workflow step (`handler` executes once per invocation).
+ * Use {@link createServerStepDefinition} for automatic type inference.
  *
  * @example
  * ```typescript
@@ -219,7 +213,7 @@ export interface CommonServerStepDefinition<
  * });
  *
  * // Option 2: Using type annotation (works but may require explicit types in some cases)
- * const myStepDefinition: ServerStepDefinition = {
+ * const myStepDefinition: ServerHandlerStepDefinition = {
  *   id: 'custom.myStep',
  *   inputSchema: z.object({ message: z.string() }),
  *   outputSchema: z.object({ result: z.string() }),
@@ -229,7 +223,7 @@ export interface CommonServerStepDefinition<
  * };
  * ```
  */
-export interface ServerStepDefinition<
+export interface ServerHandlerStepDefinition<
   Input extends z.ZodType = z.ZodType,
   Output extends z.ZodType = z.ZodType,
   Config extends z.ZodObject = z.ZodObject
@@ -252,12 +246,12 @@ export type PollOnCancelHandler<
  * Omit `policy` to use {@link PollStepDefaults.policy} (fixed 1 s interval) via
  * {@link createPollServerStepDefinition}.
  */
-export type PollStepDefinition<
+export type ServerPollStepDefinition<
   Input extends z.ZodType = z.ZodType,
   Output extends z.ZodType = z.ZodType,
   Config extends z.ZodObject = z.ZodObject,
   State extends z.ZodObject = z.ZodObject
-> = Omit<CommonServerStepDefinition<Input, Output, Config>, 'handler'> & {
+> = CommonServerStepDefinition<Input, Output, Config> & {
   poll: PollHandler<Input, Output, Config, State>;
   start?: StartWithHandoffHandler<Input, Output, Config, State>;
   policy?: PollPolicy;
@@ -272,11 +266,11 @@ export type PollStepDefinition<
 
 export const isPollStepDefinition = (
   definition: CommonServerStepDefinition
-): definition is PollStepDefinition =>
+): definition is ServerPollStepDefinition =>
   'poll' in definition && typeof definition.poll === 'function';
 
 /**
- * Helper function to create a ServerStepDefinition with automatic type inference.
+ * Helper function to create a ServerHandlerStepDefinition with automatic type inference.
  * This ensures that the handler's input and output types are correctly inferred
  * from the inputSchema and outputSchema without needing explicit type annotations.
  *
@@ -299,14 +293,14 @@ export function createServerStepDefinition<
   Output extends z.ZodType = z.ZodType,
   Config extends z.ZodObject = z.ZodObject
 >(
-  definition: ServerStepDefinition<Input, Output, Config>
-): ServerStepDefinition<Input, Output, Config> {
+  definition: ServerHandlerStepDefinition<Input, Output, Config>
+): ServerHandlerStepDefinition<Input, Output, Config> {
   return definition;
 }
 
 export const isOneShotStepDefinition = (
   definition: CommonServerStepDefinition
-): definition is ServerStepDefinition =>
+): definition is ServerHandlerStepDefinition =>
   'handler' in definition && typeof definition.handler === 'function';
 
 /**
@@ -322,8 +316,8 @@ export function createPollServerStepDefinition<
   Config extends z.ZodObject = z.ZodObject,
   State extends z.ZodObject = z.ZodObject
 >(
-  definition: PollStepDefinition<Input, Output, Config, State>
-): PollStepDefinition<Input, Output, Config, State> {
+  definition: ServerPollStepDefinition<Input, Output, Config, State>
+): ServerPollStepDefinition<Input, Output, Config, State> {
   if (!definition.ceilings) {
     definition.ceilings = PollStepDefaults.ceilings;
   }
@@ -493,8 +487,16 @@ export interface StepHandlerResult<TOutput extends z.ZodType = z.ZodType> {
   error?: Error;
 }
 
-export type RegisteredStepDefinition<
+/**
+ * Server-side workflow step definition registered by plugins.
+ * Union of {@link ServerHandlerStepDefinition} (single-shot `handler`) and
+ * {@link ServerPollStepDefinition} (durable `start`/`poll`).
+ */
+export type ServerStepDefinition<
   Input extends z.ZodType = z.ZodType,
   Output extends z.ZodType = z.ZodType,
-  Config extends z.ZodObject = z.ZodObject
-> = ServerStepDefinition<Input, Output, Config> | PollStepDefinition<Input, Output, Config>;
+  Config extends z.ZodObject = z.ZodObject,
+  State extends z.ZodObject = z.ZodObject
+> =
+  | ServerHandlerStepDefinition<Input, Output, Config>
+  | ServerPollStepDefinition<Input, Output, Config, State>;
