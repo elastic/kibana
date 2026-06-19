@@ -264,6 +264,22 @@ describe('updateDataStreamsLifecycle inherit', () => {
     });
     expect(mockEsClient.indices.deleteDataLifecycle).not.toHaveBeenCalled();
   });
+
+  it('fails closed when a backing template exists but has no index patterns', async () => {
+    mockEsClient.indices.getIndexTemplate = jest.fn().mockResolvedValue({
+      index_templates: [{ index_template: { index_patterns: [] } }],
+    });
+
+    await expect(
+      updateDataStreamsLifecycle({
+        esClient: mockEsClient as unknown as ElasticsearchClient,
+        logger: mockLogger as unknown as Logger,
+        names: ['logs-foo-default'],
+        lifecycle: { inherit: {} },
+        isServerless: false,
+      })
+    ).rejects.toThrow('Cannot determine template lifecycle for logs-foo-default');
+  });
 });
 
 describe('updateDataStreamsFailureStore', () => {

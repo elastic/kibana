@@ -404,10 +404,6 @@ export type SimulatedClassicStreamTemplate = IndicesSimulateTemplateTemplate & {
   data_stream_options?: IndicesDataStreamOptions;
 };
 
-interface SimulateClassicStreamTemplateResponse {
-  template?: SimulatedClassicStreamTemplate;
-}
-
 export async function simulateClassicStreamTemplate({
   esClient,
   name,
@@ -424,27 +420,32 @@ export async function simulateClassicStreamTemplate({
     .catch(() => undefined);
 
   const templateName = dataStream?.template;
-  const indexPatterns = templateName
-    ? await retryTransientEsErrors(
-        () => esClient.indices.getIndexTemplate({ name: templateName }),
-        {
-          logger,
-        }
-      )
-        .then((response) => response.index_templates?.[0]?.index_template?.index_patterns)
-        .catch(() => undefined)
-    : undefined;
+  if (!templateName) {
+    const simulation = await retryTransientEsErrors(
+      () => esClient.indices.simulateIndexTemplate({ name: dataStream?.name ?? name }),
+      { logger }
+    ).catch(() => undefined);
+    return simulation?.template;
+  }
+
+  const indexPatterns = await retryTransientEsErrors(
+    () => esClient.indices.getIndexTemplate({ name: templateName }),
+    { logger }
+  )
+    .then((response) => response.index_templates?.[0]?.index_template?.index_patterns)
+    .catch(() => undefined);
 
   const pattern = Array.isArray(indexPatterns) ? indexPatterns[0] : indexPatterns;
-  const simulatedIndexName =
-    typeof pattern === 'string' && pattern.length > 0
-      ? pattern.replace(/[*?]/g, '0')
-      : dataStream?.name ?? name;
+  if (typeof pattern !== 'string' || pattern.length === 0) {
+    return undefined;
+  }
 
-  const simulation = (await retryTransientEsErrors(
+  const simulatedIndexName = pattern.replace(/[*?]/g, '0');
+
+  const simulation = await retryTransientEsErrors(
     () => esClient.indices.simulateIndexTemplate({ name: simulatedIndexName }),
     { logger }
-  ).catch(() => undefined)) as SimulateClassicStreamTemplateResponse | undefined;
+  ).catch(() => undefined);
 
   return simulation?.template;
 }
