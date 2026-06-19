@@ -166,7 +166,7 @@ const DatasetStatsAccordion: React.FC<DatasetStatsAccordionProps> = ({
 // Upper bound on datasets fetched solely to resolve which referenced datasets
 // still exist (for the "(deleted)" label). Above this, existence is treated as
 // undetermined and links are kept. A server-side existence flag is the proper
-// long-term fix; see the follow-up tracked for the experiment stats response.
+// long-term fix
 const MAX_DATASETS_FOR_EXISTENCE_CHECK = 1000;
 
 export const ExperimentDetailPage: React.FC = () => {
