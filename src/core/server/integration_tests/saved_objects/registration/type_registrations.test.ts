@@ -9,7 +9,9 @@
 
 import { createRoot } from '@kbn/core-test-helpers-kbn-server';
 import removedTypes from '@kbn/core-saved-objects-server-internal/removed_types.json';
-import wipTypes from '@kbn/core-saved-objects-server-internal/wip_types.json';
+import wipTypesJson from '@kbn/core-saved-objects-server-internal/wip_types.json';
+
+const wipTypes: readonly string[] = wipTypesJson;
 
 // Types should NEVER be removed from this array
 const previouslyRegisteredTypes = [
