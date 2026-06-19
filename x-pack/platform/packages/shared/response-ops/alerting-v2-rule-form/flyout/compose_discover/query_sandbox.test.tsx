@@ -155,18 +155,15 @@ describe('QuerySandbox', () => {
     expect(screen.queryByTestId('querySandboxSeparateBaseAndAlert')).not.toBeInTheDocument();
   });
 
-  it('renders separate link in helper when onEditManually is provided', () => {
+  it('renders split button in header when onEditManually is provided', () => {
     renderSandbox({ onEditManually: jest.fn() });
     expect(screen.getByTestId('querySandboxEsqlQueryTitle')).toBeInTheDocument();
     expect(screen.getByText('ES|QL query')).toBeInTheDocument();
     expect(screen.getByTestId('querySandboxSeparateBaseAndAlert')).toHaveTextContent(
-      'Separate base and alert'
+      'Split base and alert'
     );
     expect(screen.getByTestId('querySandboxSeparateQueryHelper')).toHaveTextContent(
       "We'll automatically identify the base query and alert condition when you apply changes."
-    );
-    expect(screen.getByTestId('querySandboxSeparateQueryHelper')).toHaveTextContent(
-      'Prefer to edit them separately?'
     );
     expect(screen.queryByText('Base')).not.toBeInTheDocument();
   });
@@ -187,12 +184,11 @@ describe('QuerySandbox', () => {
       },
     });
     expect(screen.getByTestId('querySandboxEsqlQueryTitle')).toBeInTheDocument();
-    expect(screen.getByTestId('querySandboxUseSingleEditor')).toHaveTextContent('Use single editor');
-    expect(screen.getByTestId('querySandboxSeparateQueryHelper')).toHaveTextContent(
-      'Define the base query and alert condition separately. Automatic query splitting is disabled in this mode.'
+    expect(screen.getByTestId('querySandboxUseSingleEditor')).toHaveTextContent(
+      'Merge to single editor'
     );
     expect(screen.getByTestId('querySandboxSeparateQueryHelper')).toHaveTextContent(
-      'Prefer one editor?'
+      'Define the base query and alert condition separately. Automatic query splitting is disabled in this mode.'
     );
     expect(screen.getByText('Base')).toBeInTheDocument();
     expect(screen.getByText('Alert')).toBeInTheDocument();

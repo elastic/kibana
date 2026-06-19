@@ -13,7 +13,6 @@ import {
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiLink,
   EuiLoadingSpinner,
   EuiPanel,
   EuiSelect,
@@ -107,14 +106,14 @@ const ESQL_QUERY_TITLE = i18n.translate(
   { defaultMessage: 'ES|QL query' }
 );
 
-const SEPARATE_BASE_AND_ALERT_LABEL = i18n.translate(
-  'xpack.alertingV2.composeDiscover.querySandbox.separateBaseAndAlertButton',
-  { defaultMessage: 'Separate base and alert' }
+const SPLIT_BASE_AND_ALERT_LABEL = i18n.translate(
+  'xpack.alertingV2.composeDiscover.querySandbox.splitBaseAndAlertButton',
+  { defaultMessage: 'Split base and alert' }
 );
 
-const USE_SINGLE_EDITOR_LABEL = i18n.translate(
-  'xpack.alertingV2.composeDiscover.querySandbox.useSingleEditorButton',
-  { defaultMessage: 'Use single editor' }
+const MERGE_TO_SINGLE_EDITOR_LABEL = i18n.translate(
+  'xpack.alertingV2.composeDiscover.querySandbox.mergeToSingleEditorButton',
+  { defaultMessage: 'Merge to single editor' }
 );
 
 const UNIFIED_QUERY_HELPER_TEXT = i18n.translate(
@@ -225,54 +224,45 @@ export const QuerySandbox: React.FC<QuerySandboxProps> = ({
     }
 
     if (onUseSingleEditor) {
-      return (
-        <>
-          {MANUAL_SPLIT_QUERY_HELPER_TEXT}{' '}
-          <FormattedMessage
-            id="xpack.alertingV2.composeDiscover.querySandbox.useSingleEditorHelperLink"
-            defaultMessage="Prefer one editor? {link}"
-            values={{
-              link: (
-                <EuiLink onClick={onUseSingleEditor} data-test-subj="querySandboxUseSingleEditor">
-                  {USE_SINGLE_EDITOR_LABEL}
-                </EuiLink>
-              ),
-            }}
-          />
-        </>
-      );
+      return MANUAL_SPLIT_QUERY_HELPER_TEXT;
     }
 
     if (onEditManually) {
-      return (
-        <>
-          {UNIFIED_QUERY_HELPER_TEXT}{' '}
-          <FormattedMessage
-            id="xpack.alertingV2.composeDiscover.querySandbox.separateBaseAndAlertHelperLink"
-            defaultMessage="Prefer to edit them separately? {link}"
-            values={{
-              link: (
-                <EuiLink
-                  onClick={onEditManually}
-                  data-test-subj="querySandboxSeparateBaseAndAlert"
-                >
-                  {SEPARATE_BASE_AND_ALERT_LABEL}
-                </EuiLink>
-              ),
-            }}
-          />
-        </>
-      );
+      return UNIFIED_QUERY_HELPER_TEXT;
     }
 
     return UNIFIED_QUERY_HELPER_TEXT;
-  }, [
-    showRecoveryQueryHeader,
-    showSignalQueryHeader,
-    showYamlQueryHeader,
-    onUseSingleEditor,
-    onEditManually,
-  ]);
+  }, [showRecoveryQueryHeader, showSignalQueryHeader, showYamlQueryHeader, onUseSingleEditor, onEditManually]);
+
+  const modeSwitchButton = useMemo(() => {
+    if (onEditManually) {
+      return (
+        <EuiButton
+          size="s"
+          iconType="branch"
+          onClick={onEditManually}
+          data-test-subj="querySandboxSeparateBaseAndAlert"
+        >
+          {SPLIT_BASE_AND_ALERT_LABEL}
+        </EuiButton>
+      );
+    }
+
+    if (onUseSingleEditor) {
+      return (
+        <EuiButton
+          size="s"
+          iconType="merge"
+          onClick={onUseSingleEditor}
+          data-test-subj="querySandboxUseSingleEditor"
+        >
+          {MERGE_TO_SINGLE_EDITOR_LABEL}
+        </EuiButton>
+      );
+    }
+
+    return null;
+  }, [onEditManually, onUseSingleEditor]);
 
   const executionQuery = previewQuery ?? query;
 
@@ -399,13 +389,20 @@ export const QuerySandbox: React.FC<QuerySandboxProps> = ({
         <>
           {showEsqlQueryHeader && (
             <>
-              <EuiTitle size="xs" data-test-subj="querySandboxEsqlQueryTitle">
-                <h3>{querySectionTitle}</h3>
-              </EuiTitle>
-              <EuiSpacer size="xs" />
-              <EuiText size="xs" color="subdued" data-test-subj="querySandboxSeparateQueryHelper">
-                {queryHelperContent}
-              </EuiText>
+              <EuiFlexGroup alignItems="flexStart" gutterSize="m" responsive={false}>
+                <EuiFlexItem>
+                  <EuiTitle size="xs" data-test-subj="querySandboxEsqlQueryTitle">
+                    <h3>{querySectionTitle}</h3>
+                  </EuiTitle>
+                  <EuiSpacer size="xs" />
+                  <EuiText size="xs" color="subdued" data-test-subj="querySandboxSeparateQueryHelper">
+                    {queryHelperContent}
+                  </EuiText>
+                </EuiFlexItem>
+                {modeSwitchButton && (
+                  <EuiFlexItem grow={false}>{modeSwitchButton}</EuiFlexItem>
+                )}
+              </EuiFlexGroup>
               <EuiSpacer size="s" />
             </>
           )}
