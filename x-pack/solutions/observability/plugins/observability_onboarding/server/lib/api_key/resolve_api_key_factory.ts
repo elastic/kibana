@@ -29,7 +29,6 @@ export function resolveApiKeyFactory(
     case ApiEndpointId.Prometheus:
       return isServerless ? createManagedOtlpServiceApiKey : createPrometheusApiKey;
     case ApiEndpointId.Elasticsearch:
-    default:
       return (esClient, name) => createShipperApiKey(esClient, name, true);
   }
 }

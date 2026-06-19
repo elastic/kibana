@@ -11,12 +11,16 @@ import type { ElasticsearchClient } from '@kbn/core/server';
 import { createObservabilityOnboardingServerRoute } from '../create_observability_onboarding_server_route';
 import { getFallbackESUrl } from '../../lib/get_fallback_urls';
 import { getManagedOtlpServiceUrl } from '../../lib/get_managed_otlp_service_url';
-import { resolveApiKeyFactory } from '../../lib/api_key/resolve_api_key_factory';
+import {
+  resolveApiKeyFactory,
+  type ApiKeyFactoryContext,
+} from '../../lib/api_key/resolve_api_key_factory';
 import { hasLogMonitoringPrivileges } from '../../lib/api_key/has_log_monitoring_privileges';
 import { hasApiKeyPrivileges } from '../../lib/api_key/has_api_key_privileges';
 import {
   APM_EVENT_WRITE_APPLICATION,
   INDEX_OTLP_LOGS_METRICS_AND_TRACES,
+  INDEX_PROMETHEUS_REMOTE_WRITE,
 } from '../../lib/api_key/privileges';
 import { ApiEndpointId } from '../../../common/api_endpoints';
 import { IS_MANAGED_OTLP_SERVICE_ENABLED } from '../../../common/feature_flags';
@@ -30,13 +34,9 @@ export interface ApiEndpointApiKeyResponse {
   encodedApiKey: string;
 }
 
-/**
- * Verifies the current user holds the privileges granted by the key that
- * `resolveApiKeyFactory` will create for the given endpoint, mirroring its branching.
- */
 function hasRequiredPrivileges(
   id: ApiEndpointId,
-  isManagedOtlpServiceAvailable: boolean,
+  { isManagedOtlpServiceAvailable, isServerless }: ApiKeyFactoryContext,
   esClient: ElasticsearchClient
 ): Promise<boolean> {
   switch (id) {
@@ -44,11 +44,12 @@ function hasRequiredPrivileges(
       return isManagedOtlpServiceAvailable
         ? hasApiKeyPrivileges(esClient, { application: [APM_EVENT_WRITE_APPLICATION] })
         : hasApiKeyPrivileges(esClient, { index: [INDEX_OTLP_LOGS_METRICS_AND_TRACES] });
+    case ApiEndpointId.Prometheus:
+      return isServerless
+        ? hasApiKeyPrivileges(esClient, { application: [APM_EVENT_WRITE_APPLICATION] })
+        : hasApiKeyPrivileges(esClient, { index: [INDEX_PROMETHEUS_REMOTE_WRITE] });
     case ApiEndpointId.Elasticsearch:
       return hasLogMonitoringPrivileges(esClient, true);
-    case ApiEndpointId.Prometheus:
-    default:
-      return hasLogMonitoringPrivileges(esClient, false);
   }
 }
 
@@ -115,7 +116,7 @@ const createApiKeyRoute = createObservabilityOnboardingServerRoute({
 
     const hasPrivileges = await hasRequiredPrivileges(
       id,
-      isManagedOtlpServiceAvailable,
+      { isManagedOtlpServiceAvailable, isServerless },
       client.asCurrentUser
     );
     if (!hasPrivileges) {
