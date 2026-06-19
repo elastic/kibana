@@ -96,6 +96,69 @@ describe('evaluateKql', () => {
       expect(evaluateKql(kql, { users: [{ name: 'Charlie' }, { name: 'Bob' }] })).toBe(false);
     });
 
+    it('should resolve nested fields across arrays of objects (any-element semantics)', () => {
+      const context = {
+        event: {
+          items: [
+            { status: 'open', labels: ['urgent', 'billing'] },
+            { status: 'closed', labels: ['archived'] },
+          ],
+        },
+      };
+
+      expect(evaluateKql('event.items.status: "open"', context)).toBe(true);
+      expect(evaluateKql('event.items.status: "closed"', context)).toBe(true);
+      expect(evaluateKql('event.items.status: "pending"', context)).toBe(false);
+      expect(evaluateKql('event.items.labels: "urgent"', context)).toBe(true);
+      expect(
+        evaluateKql('event.items.status: "open" AND NOT event.items.labels: "spam"', context)
+      ).toBe(true);
+      expect(
+        evaluateKql('event.items.status: "open" AND NOT event.items.labels: "spam"', {
+          event: {
+            items: [{ status: 'open', labels: ['spam'] }],
+          },
+        })
+      ).toBe(false);
+    });
+
+    it('should resolve nested fields when the path segment is a singular object', () => {
+      const condition = 'event.record.type: "widget" AND event.record.tags: "featured"';
+
+      expect(
+        evaluateKql(condition, {
+          event: {
+            record: {
+              type: 'widget',
+              tags: ['featured', 'homepage', 'new'],
+            },
+          },
+        })
+      ).toBe(true);
+
+      expect(
+        evaluateKql(condition, {
+          event: {
+            record: {
+              type: 'widget',
+              tags: ['homepage'],
+            },
+          },
+        })
+      ).toBe(false);
+
+      expect(
+        evaluateKql(condition, {
+          event: {
+            record: {
+              type: 'gadget',
+              tags: ['featured'],
+            },
+          },
+        })
+      ).toBe(false);
+    });
+
     describe('range expressions', () => {
       it('should correctly evaluate a simple "range" KQL expression with number', () => {
         const kql = 'matchesCount >= 1000 and matchesCount <= 5000';

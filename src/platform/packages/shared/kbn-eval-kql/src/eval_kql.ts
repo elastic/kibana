@@ -161,17 +161,75 @@ function readContextPath(
 ): { pathExists: boolean; value: any } {
   const strPropertyPath = String(propertyPath); // sometimes it could be boolean or number
   const propertyPathSegments = parseJsPropertyAccess(strPropertyPath);
-  let result: any = context;
+  return resolvePathSegments(context, propertyPathSegments);
+}
 
-  for (const segment of propertyPathSegments) {
-    if (!(segment in result)) {
-      return { pathExists: false, value: undefined }; // Path not found in context
-    }
-
-    result = result[segment];
+/**
+ * When a path crosses an array of objects (e.g. `event.items.status`), resolve the
+ * remaining segments on each element and merge matches (any-element semantics,
+ * aligned with multi-valued ES fields). Numeric segments still select by index
+ * (`users.0.name`) when they are valid array indices.
+ */
+function resolvePathSegments(
+  value: unknown,
+  segments: string[]
+): { pathExists: boolean; value: unknown } {
+  if (segments.length === 0) {
+    return { pathExists: true, value };
   }
 
-  return { pathExists: true, value: result };
+  if (value === null || value === undefined) {
+    return { pathExists: false, value: undefined };
+  }
+
+  if (Array.isArray(value)) {
+    const [head] = segments;
+    if (isArrayIndexSegment(head, value)) {
+      return resolvePathSegments(value[Number(head)], segments.slice(1));
+    }
+
+    const collected: unknown[] = [];
+    for (const element of value) {
+      const resolved = resolvePathSegments(element, segments);
+      if (resolved.pathExists) {
+        collected.push(resolved.value);
+      }
+    }
+
+    if (collected.length === 0) {
+      return { pathExists: false, value: undefined };
+    }
+
+    return { pathExists: true, value: mergeCollectedPathValues(collected) };
+  }
+
+  if (typeof value !== 'object') {
+    return { pathExists: false, value: undefined };
+  }
+
+  const [head, ...tail] = segments;
+  const record = value as Record<string, unknown>;
+  if (!(head in record)) {
+    return { pathExists: false, value: undefined };
+  }
+
+  return resolvePathSegments(record[head], tail);
+}
+
+function isArrayIndexSegment(segment: string, array: unknown[]): boolean {
+  if (!/^\d+$/.test(segment)) {
+    return false;
+  }
+  const index = Number(segment);
+  return Number.isInteger(index) && index >= 0 && index < array.length;
+}
+
+function mergeCollectedPathValues(values: unknown[]): unknown {
+  if (values.length === 1) {
+    return values[0];
+  }
+
+  return values.flatMap((entry) => (Array.isArray(entry) ? entry : [entry]));
 }
 
 function isDateMathExpression(value: string): boolean {
