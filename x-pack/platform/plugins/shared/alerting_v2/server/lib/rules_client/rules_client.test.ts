@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { BULK_FILTER_MAX_RULES } from '@kbn/alerting-v2-schemas';
+import { BULK_FILTER_MAX_RULES, getBreachEsqlQuery } from '@kbn/alerting-v2-schemas';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
@@ -16,6 +16,7 @@ import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
 import { createRulesSavedObjectService } from '../services/rules_saved_object_service/rules_saved_object_service.mock';
 import type { UserService } from '../services/user_service/user_service';
 import { createUserService } from '../services/user_service/user_service.mock';
+import type { QueryServiceContract } from '../services/query_service/query_service';
 import { createRuleSoAttributes } from '../test_utils';
 import { RulesClient } from './rules_client';
 import type { CreateRuleParams, UpdateRuleData } from './types';
@@ -54,6 +55,10 @@ describe('RulesClient', () => {
   const taskManager = taskManagerMock.createStart();
   let userService: UserService;
   const { rulesSavedObjectService, mockSavedObjectsClient } = createRulesSavedObjectService();
+
+  const queryService = {
+    validateQueryExecutable: jest.fn().mockResolvedValue(undefined),
+  } as unknown as jest.Mocked<QueryServiceContract>;
 
   beforeAll(() => {
     jest.useFakeTimers().setSystemTime(new Date('2025-01-01T00:00:00.000Z'));
@@ -98,7 +103,14 @@ describe('RulesClient', () => {
   });
 
   function createClient() {
-    return new RulesClient(request, rulesSavedObjectService, taskManager, userService, 'space-1');
+    return new RulesClient(
+      request,
+      rulesSavedObjectService,
+      taskManager,
+      userService,
+      'space-1',
+      queryService
+    );
   }
 
   describe('createRule', () => {
@@ -235,6 +247,36 @@ describe('RulesClient', () => {
       ).rejects.toMatchObject({
         output: { statusCode: 400 },
       });
+
+      expect(queryService.validateQueryExecutable).not.toHaveBeenCalled();
+    });
+
+    it('throws 400 when ES|QL fails Arrow execution validation', async () => {
+      const client = createClient();
+      queryService.validateQueryExecutable.mockRejectedValueOnce(
+        new Error(
+          'illegal_argument_exception: ES|QL type [flattened] is not supported by the Arrow format'
+        )
+      );
+
+      await expect(
+        client.createRule({
+          data: baseCreateData,
+          options: { id: 'rule-id-arrow' },
+        })
+      ).rejects.toMatchObject({
+        output: {
+          statusCode: 400,
+          payload: {
+            message: expect.stringContaining('Arrow format required for rule evaluation'),
+          },
+        },
+      });
+
+      expect(queryService.validateQueryExecutable).toHaveBeenCalledWith({
+        query: getBreachEsqlQuery(baseCreateData.query),
+      });
+      expect(mockSavedObjectsClient.create).not.toHaveBeenCalled();
     });
   });
 
@@ -545,6 +587,63 @@ describe('RulesClient', () => {
 
       expect(res.version).toBe('WzNEW=');
     });
+
+    it('throws 400 when ES|QL fails Arrow execution validation', async () => {
+      const client = createClient();
+      const updatedQuery = 'FROM .rule-events | LIMIT 1';
+
+      mockSavedObjectsClient.get.mockResolvedValueOnce({
+        attributes: baseSoAttrs,
+        version: 'WzEsMV0=',
+        id: 'rule-id-arrow-update',
+        type: RULE_SAVED_OBJECT_TYPE,
+        references: [],
+      });
+
+      queryService.validateQueryExecutable.mockRejectedValueOnce(
+        new Error(
+          'illegal_argument_exception: ES|QL type [flattened] is not supported by the Arrow format'
+        )
+      );
+
+      await expect(
+        client.updateRule({
+          id: 'rule-id-arrow-update',
+          data: { query: { format: 'standalone', breach: { query: updatedQuery } } },
+        })
+      ).rejects.toMatchObject({
+        output: {
+          statusCode: 400,
+          payload: {
+            message: expect.stringContaining('Arrow format required for rule evaluation'),
+          },
+        },
+      });
+
+      expect(queryService.validateQueryExecutable).toHaveBeenCalledWith({
+        query: updatedQuery,
+      });
+      expect(mockSavedObjectsClient.update).not.toHaveBeenCalled();
+    });
+
+    it('does not validate ES|QL when the query is not updated', async () => {
+      const client = createClient();
+
+      mockSavedObjectsClient.get.mockResolvedValueOnce({
+        attributes: baseSoAttrs,
+        version: 'WzEsMV0=',
+        id: 'rule-id-no-query-update',
+        type: RULE_SAVED_OBJECT_TYPE,
+        references: [],
+      });
+
+      await client.updateRule({
+        id: 'rule-id-no-query-update',
+        data: { schedule: { every: '5m' } },
+      });
+
+      expect(queryService.validateQueryExecutable).not.toHaveBeenCalled();
+    });
   });
 
   describe('upsertRule', () => {
@@ -589,6 +688,9 @@ describe('RulesClient', () => {
         expect(res).toEqual({
           created: true,
           rule: expect.objectContaining({ id: 'rule-id-1', enabled: true }),
+        });
+        expect(queryService.validateQueryExecutable).toHaveBeenCalledWith({
+          query: getBreachEsqlQuery(baseCreateData.query),
         });
       });
 
@@ -789,6 +891,40 @@ describe('RulesClient', () => {
           }),
           expect.objectContaining({ mergeAttributes: false })
         );
+      });
+
+      it('throws 400 when ES|QL fails Arrow execution validation', async () => {
+        const client = createClient();
+        const existingDoc = {
+          id: 'rule-id-1',
+          attributes: baseSoAttrs,
+          version: 'WzEsMV0=',
+          type: RULE_SAVED_OBJECT_TYPE,
+          references: [],
+        };
+
+        mockSavedObjectsClient.get.mockResolvedValueOnce(existingDoc);
+        queryService.validateQueryExecutable.mockRejectedValueOnce(
+          new Error(
+            'illegal_argument_exception: ES|QL type [flattened] is not supported by the Arrow format'
+          )
+        );
+
+        await expect(
+          client.upsertRule({ id: 'rule-id-1', data: baseCreateData })
+        ).rejects.toMatchObject({
+          output: {
+            statusCode: 400,
+            payload: {
+              message: expect.stringContaining('Arrow format required for rule evaluation'),
+            },
+          },
+        });
+
+        expect(queryService.validateQueryExecutable).toHaveBeenCalledWith({
+          query: getBreachEsqlQuery(baseCreateData.query),
+        });
+        expect(mockSavedObjectsClient.update).not.toHaveBeenCalled();
       });
     });
 

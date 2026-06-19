@@ -89,8 +89,26 @@ describe('useUpdateRule', () => {
     result.current.mutate({ id: 'rule-1', payload: {} });
 
     await waitFor(() => {
-      expect(mockAddDanger).toHaveBeenCalledWith(expect.any(String));
+      expect(mockAddDanger).toHaveBeenCalledWith('Failed to update rule');
       expect(mockAddSuccess).not.toHaveBeenCalled();
+    });
+  });
+
+  it('should include the server error message when update fails with an HTTP error', async () => {
+    const serverMessage =
+      'ES|QL query cannot be executed using the Arrow format required for rule evaluation: flattened is not supported by the Arrow format';
+    mockUpdateRule.mockRejectedValue({
+      body: { message: serverMessage },
+    });
+    const { result } = renderHook(() => useUpdateRule(), { wrapper: createWrapper() });
+
+    result.current.mutate({ id: 'rule-1', payload: {} });
+
+    await waitFor(() => {
+      expect(mockAddDanger).toHaveBeenCalledWith({
+        title: 'Failed to update rule',
+        text: serverMessage,
+      });
     });
   });
 });

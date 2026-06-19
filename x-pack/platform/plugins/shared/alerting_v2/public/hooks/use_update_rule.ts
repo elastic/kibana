@@ -10,6 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { useService, CoreStart } from '@kbn/core-di-browser';
 import type { UpdateRuleData } from '@kbn/alerting-v2-schemas';
 import { RulesApi } from '../services/rules_api';
+import { addHttpFetchErrorToast } from '../utils/get_http_fetch_error_message';
 import { ruleKeys } from './query_key_factory';
 
 export const useUpdateRule = () => {
@@ -31,11 +32,13 @@ export const useUpdateRule = () => {
       queryClient.invalidateQueries(ruleKeys.tags());
       queryClient.invalidateQueries(ruleKeys.detail(variables.id));
     },
-    onError: () => {
-      toasts.addDanger(
+    onError: (error) => {
+      addHttpFetchErrorToast(
+        toasts,
         i18n.translate('xpack.alertingV2.hooks.useUpdateRule.errorMessage', {
           defaultMessage: 'Failed to update rule',
-        })
+        }),
+        error
       );
     },
   });

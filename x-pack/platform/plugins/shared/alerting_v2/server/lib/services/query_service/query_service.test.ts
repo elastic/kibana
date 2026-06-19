@@ -440,4 +440,43 @@ describe('QueryService', () => {
       expect(reader.cancel).toHaveBeenCalledTimes(1);
     });
   });
+
+  describe('validateQueryExecutable', () => {
+    const mockQuery = 'FROM .alerting-* | LIMIT 10';
+
+    it('validates the query through the Arrow helper with LIMIT 0', async () => {
+      const reader = createMockArrowReader([]);
+      mockHelpersEsqlToArrowReader(mockEsClient, jest.fn().mockResolvedValue(reader));
+
+      await queryService.validateQueryExecutable({ query: mockQuery });
+
+      expect(mockEsClient.helpers.esql).toHaveBeenCalledWith(
+        {
+          query: 'FROM .alerting-* | LIMIT 10 | LIMIT 0',
+          drop_null_columns: false,
+        },
+        {}
+      );
+      expect(mockLogger.error).not.toHaveBeenCalled();
+    });
+
+    it('throws and logs when Arrow validation fails', async () => {
+      mockHelpersEsqlToArrowReader(
+        mockEsClient,
+        jest
+          .fn()
+          .mockRejectedValue(
+            new Error(
+              'illegal_argument_exception: ES|QL type [flattened] is not supported by the Arrow format'
+            )
+          )
+      );
+
+      await expect(queryService.validateQueryExecutable({ query: mockQuery })).rejects.toThrow(
+        'flattened'
+      );
+
+      expect(mockLogger.error).toHaveBeenCalled();
+    });
+  });
 });

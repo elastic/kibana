@@ -19,6 +19,7 @@ import { RuleHeaderDescription } from '../../components/rule_details/rule_header
 import { RuleSidebar } from '../../components/rule_details/sidebar/rule_sidebar';
 import { paths } from '../../constants';
 import { RulesApi, type RuleApiResponse } from '../../services/rules_api';
+import { addHttpFetchErrorToast } from '../../utils/get_http_fetch_error_message';
 import { buildRulePayload } from '../../../common/agent_builder/rule_mappers';
 import type { RuleAttachment } from './rule_attachment_definition';
 
@@ -60,14 +61,24 @@ export const RuleCanvasContent = ({
           icon: 'save',
           type: ActionButtonType.PRIMARY,
           handler: async () => {
-            await rulesApi.upsertRule(data.id!, buildRulePayload(data));
-            await updateOrigin(data.id!);
-            notifications.toasts.addSuccess(
-              i18n.translate('xpack.alertingV2.ruleAttachment.createdSuccess', {
-                defaultMessage: 'Rule "{name}" created',
-                values: { name: data.metadata.name },
-              })
-            );
+            try {
+              await rulesApi.upsertRule(data.id!, buildRulePayload(data));
+              await updateOrigin(data.id!);
+              notifications.toasts.addSuccess(
+                i18n.translate('xpack.alertingV2.ruleAttachment.createdSuccess', {
+                  defaultMessage: 'Rule "{name}" created',
+                  values: { name: data.metadata.name },
+                })
+              );
+            } catch (error) {
+              addHttpFetchErrorToast(
+                notifications.toasts,
+                i18n.translate('xpack.alertingV2.ruleAttachment.createError', {
+                  defaultMessage: 'Failed to create rule',
+                }),
+                error
+              );
+            }
           },
         },
       ]);
@@ -84,13 +95,23 @@ export const RuleCanvasContent = ({
         icon: 'save',
         type: ActionButtonType.PRIMARY,
         handler: async () => {
-          await rulesApi.upsertRule(ruleId, buildRulePayload(data));
-          notifications.toasts.addSuccess(
-            i18n.translate('xpack.alertingV2.ruleAttachment.updatedSuccess', {
-              defaultMessage: 'Rule "{name}" updated',
-              values: { name: data.metadata.name },
-            })
-          );
+          try {
+            await rulesApi.upsertRule(ruleId, buildRulePayload(data));
+            notifications.toasts.addSuccess(
+              i18n.translate('xpack.alertingV2.ruleAttachment.updatedSuccess', {
+                defaultMessage: 'Rule "{name}" updated',
+                values: { name: data.metadata.name },
+              })
+            );
+          } catch (error) {
+            addHttpFetchErrorToast(
+              notifications.toasts,
+              i18n.translate('xpack.alertingV2.ruleAttachment.updateError', {
+                defaultMessage: 'Failed to update rule',
+              }),
+              error
+            );
+          }
         },
       },
       {

@@ -335,9 +335,44 @@ describe('CreateRuleOptionsFlyout', () => {
       });
 
       expect(mockServices.notifications.toasts.addDanger).toHaveBeenCalledWith(
-        expect.stringContaining('Failed to create rule')
+        'Failed to create rule'
       );
       expect(onClose).not.toHaveBeenCalled();
+    });
+
+    it('includes the server ES|QL error message on failed rule creation', async () => {
+      const onClose = jest.fn();
+      const serverMessage =
+        'ES|QL query cannot be executed using the Arrow format required for rule evaluation: flattened is not supported by the Arrow format';
+      const mockCreateRule = jest.fn().mockRejectedValue({
+        body: { message: serverMessage },
+      });
+      (RulesApi as jest.Mock).mockImplementation(() => ({
+        createRule: mockCreateRule,
+      }));
+
+      renderFlyout({ onClose });
+      resolveServices(mockServices);
+
+      await waitFor(() => {
+        expect(screen.getByTestId('mockRuleCreateOptionsFlyout')).toBeInTheDocument();
+      });
+
+      fireEvent.click(screen.getByTestId('thresholdBtn'));
+
+      await waitFor(() => {
+        expect(screen.getByTestId('mockComposeDiscoverFlyout')).toBeInTheDocument();
+      });
+
+      const onCreateRule = capturedComposeProps.onCreateRule as (payload: unknown) => Promise<void>;
+      await act(async () => {
+        await onCreateRule({ name: 'Bad rule' });
+      });
+
+      expect(mockServices.notifications.toasts.addDanger).toHaveBeenCalledWith({
+        title: 'Failed to create rule',
+        text: serverMessage,
+      });
     });
   });
 });

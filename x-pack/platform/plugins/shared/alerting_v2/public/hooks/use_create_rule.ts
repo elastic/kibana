@@ -10,6 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { useService, CoreStart } from '@kbn/core-di-browser';
 import type { CreateRuleData } from '@kbn/alerting-v2-schemas';
 import { RulesApi } from '../services/rules_api';
+import { addHttpFetchErrorToast } from '../utils/get_http_fetch_error_message';
 import { ruleKeys } from './query_key_factory';
 
 export const useCreateRule = () => {
@@ -29,11 +30,13 @@ export const useCreateRule = () => {
       queryClient.invalidateQueries(ruleKeys.lists());
       queryClient.invalidateQueries(ruleKeys.tags());
     },
-    onError: () => {
-      toasts.addDanger(
+    onError: (error) => {
+      addHttpFetchErrorToast(
+        toasts,
         i18n.translate('xpack.alertingV2.hooks.useCreateRule.errorMessage', {
           defaultMessage: 'Failed to create rule',
-        })
+        }),
+        error
       );
     },
   });

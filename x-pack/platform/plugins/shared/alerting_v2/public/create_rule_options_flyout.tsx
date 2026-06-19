@@ -25,6 +25,7 @@ import type { ComposeDiscoverFlyoutProps } from '@kbn/alerting-v2-rule-form';
 import { untilPluginStartServicesReady, type AlertingV2KibanaServices } from './kibana_services';
 import { RuleCreateOptionsFlyout } from './components/rule_create_options/rule_create_options_flyout';
 import { RulesApi } from './services/rules_api';
+import { addHttpFetchErrorToast } from './utils/get_http_fetch_error_message';
 import { CREATE_WITH_AGENT_INITIAL_PROMPT, AGENT_BUILDER_NEW_CONVERSATION_PATH } from './constants';
 
 export interface CreateRuleOptionsFlyoutLegacyItem {
@@ -196,10 +197,12 @@ const CreateRuleOptionsFlyoutInner = ({
         );
         onClose();
       } catch (err) {
-        value.services.notifications.toasts.addDanger(
+        addHttpFetchErrorToast(
+          value.services.notifications.toasts,
           i18n.translate('xpack.alertingV2.createAlertFlyout.createError', {
             defaultMessage: 'Failed to create rule',
-          })
+          }),
+          err
         );
         setIsSaving(false);
       }

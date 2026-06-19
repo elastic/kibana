@@ -9,6 +9,7 @@ import Boom from '@hapi/boom';
 import {
   BULK_FILTER_MAX_RULES,
   createRuleDataSchema,
+  getBreachEsqlQuery,
   isStateTransitionAllowed,
   updateRuleDataSchema,
 } from '@kbn/alerting-v2-schemas';
@@ -27,6 +28,9 @@ import { ALERTING_V2_ERROR_CODES } from '../errors/error_codes';
 import { ALERTING_RULE_EXECUTOR_TASK_TYPE } from '../rule_executor';
 import { ensureRuleExecutorTaskScheduled, getRuleExecutorTaskId } from '../rule_executor/schedule';
 import type { RuleExecutorTaskParams } from '../rule_executor/types';
+import type { QueryServiceContract } from '../services/query_service/query_service';
+import { formatEsqlArrowExecutionErrorMessage } from '../services/query_service/validate_esql_query_executable';
+import { QueryServiceScopedToken } from '../services/query_service/tokens';
 import type { RulesSavedObjectServiceContract } from '../services/rules_saved_object_service/rules_saved_object_service';
 import { RulesSavedObjectServiceScopedToken } from '../services/rules_saved_object_service/tokens';
 import { RequestSpaceIdToken } from '../services/spaces_service/tokens';
@@ -89,7 +93,8 @@ export class RulesClient {
     @inject(PluginStart<TaskManagerStartContract>('taskManager'))
     private readonly taskManager: TaskManagerStartContract,
     @inject(UserService) private readonly userService: UserServiceContract,
-    @inject(RequestSpaceIdToken) private readonly spaceId: string
+    @inject(RequestSpaceIdToken) private readonly spaceId: string,
+    @inject(QueryServiceScopedToken) private readonly queryService: QueryServiceContract
   ) {}
 
   private getSpaceContext(): { spaceId: string } {
@@ -112,6 +117,21 @@ export class RulesClient {
       );
     }
     return parsed.data;
+  }
+
+  private async validateEvaluationQuery(
+    query: string,
+    context: 'create' | 'update' | 'upsert'
+  ): Promise<void> {
+    try {
+      await this.queryService.validateQueryExecutable({ query });
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      throw Boom.badRequest(formatEsqlArrowExecutionErrorMessage(message), {
+        code: ALERTING_V2_ERROR_CODES.INVALID_RULE_DATA,
+        details: { context, field: 'query.breach.query' },
+      });
+    }
   }
 
   private async getExistingRule(
@@ -178,6 +198,8 @@ export class RulesClient {
     const { spaceId } = this.getSpaceContext();
     const parsed = this.parseRuleData(createRuleDataSchema, params.data, 'create');
 
+    await this.validateEvaluationQuery(getBreachEsqlQuery(parsed.query), 'create');
+
     const userProfileUid = await this.userService.getCurrentUserProfileUid();
 
     const nowIso = new Date().toISOString();
@@ -227,6 +249,10 @@ export class RulesClient {
   public async updateRule({ id, data, options }: UpdateRuleParams): Promise<RuleResponse> {
     const { spaceId } = this.getSpaceContext();
     const parsed = this.parseRuleData(updateRuleDataSchema, data, 'update');
+
+    if (parsed.query) {
+      await this.validateEvaluationQuery(getBreachEsqlQuery(parsed.query), 'update');
+    }
 
     const userProfileUid = await this.userService.getCurrentUserProfileUid();
     const nowIso = new Date().toISOString();
@@ -722,6 +748,8 @@ export class RulesClient {
       const rule = await this.createRule({ data, options: { id } });
       return { rule, created: true };
     }
+
+    await this.validateEvaluationQuery(getBreachEsqlQuery(parsed.query), 'upsert');
 
     const { spaceId } = this.getSpaceContext();
     const userProfileUid = await this.userService.getCurrentUserProfileUid();
