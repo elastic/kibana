@@ -309,7 +309,7 @@ async function createSetupSideEffects(
   const { savedObjectsImporter } = getSpaceAwareSaveobjectsClients();
   await createCCSIndexPatterns(esClient, soClient, savedObjectsImporter);
 
-  const nonFatalErrors = [
+  const rawNonFatalErrors = [
     ...preconfiguredPackagesNonFatalErrors,
     ...(messageSigningServiceNonFatalError ? [messageSigningServiceNonFatalError] : []),
     ...(backfillPackagePolicySupportsAgentlessError
@@ -321,9 +321,9 @@ async function createSetupSideEffects(
   logger.info('Scheduling async setup tasks');
   await scheduleSetupTask(appContextService.getTaskManagerStart()!);
 
-  if (nonFatalErrors.length > 0) {
+  if (rawNonFatalErrors.length > 0) {
     logger.info('Encountered non fatal errors during Fleet setup');
-    formatNonFatalErrors(nonFatalErrors)
+    formatNonFatalErrors(rawNonFatalErrors)
       .map((e) => JSON.stringify(e))
       .forEach((error) => {
         logger.info(error);
@@ -331,12 +331,39 @@ async function createSetupSideEffects(
       });
   }
 
+  // Strip heavy ES connection metadata from stored errors to prevent large ResponseError
+  // objects from being retained in the module-level promise.
+  // See https://github.com/elastic/kibana/issues/273921
+  const nonFatalErrors = rawNonFatalErrors.map(sanitizeNonFatalError);
+
   logger.info('Fleet setup completed');
 
   return {
     isInitialized: true,
     nonFatalErrors,
   };
+}
+
+/**
+ * Strips heavy ES client metadata (meta.connection, connection pool, TLS config, etc.)
+ * from any `ResponseError` stored inside a non-fatal error entry.  Each such object can
+ * retain ~10 MB of connection state, causing multi-GB heap growth when hundreds of errors
+ * accumulate in the module-level `awaitIfPending` promise.
+ *
+ * The entry's structural shape (package, agentPolicy, installType, …) is preserved so
+ * callers that inspect those fields continue to work.  Only the inner `.error` / `.errors`
+ * values are replaced with lightweight plain-Error objects carrying just name + message.
+ */
+function sanitizeNonFatalError(
+  e: SetupStatus['nonFatalErrors'][number]
+): SetupStatus['nonFatalErrors'][number] {
+  if ('error' in e) {
+    const slim = new Error(e.error.message);
+    slim.name = e.error.name;
+    return { ...e, error: slim } as typeof e;
+  }
+  // UpgradeManagedPackagePoliciesResult uses `errors: any` — nothing large to strip there.
+  return e;
 }
 
 /**
