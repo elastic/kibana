@@ -35,31 +35,31 @@ import { applyRulePatch } from '../mergers/apply_rule_patch';
 import { convertRuleResponseToAlertingRule } from '../converters/convert_rule_response_to_alerting_rule';
 import { updateReadAuthEditRuleFields } from './rbac_methods/update_rule_with_read_privileges';
 
-interface PatchRuleOptions {
+interface PatchRuleDeps {
   actionsClient: ActionsClient;
   rulesClient: RulesClient;
   prebuiltRuleAssetClient: IPrebuiltRuleAssetsClient;
-  rulePatch: RulePatchProps;
   mlAuthz: MlAuthz;
   rulesAuthz: DetectionRulesAuthz;
+}
+
+interface PatchRuleParams {
+  rulePatch: RulePatchProps;
+  deps: PatchRuleDeps;
   changeTracking?: SecurityRuleChangeTracking;
 }
 
-export const patchRule = async ({
-  actionsClient,
-  rulesClient,
-  prebuiltRuleAssetClient,
+export async function patchRule({
   rulePatch,
-  mlAuthz,
-  rulesAuthz,
+  deps: { actionsClient, rulesClient, prebuiltRuleAssetClient, mlAuthz, rulesAuthz },
   changeTracking,
-}: PatchRuleOptions): Promise<RuleResponse> => {
+}: PatchRuleParams): Promise<RuleResponse> {
   const { rule_id: ruleId, id, ...rulePatchObjWithoutIds } = rulePatch;
 
   const existingRule = await getRuleByIdOrRuleId({
-    rulesClient,
     ruleId,
     id,
+    rulesClient,
   });
 
   if (existingRule == null) {
@@ -143,4 +143,4 @@ export const patchRule = async ({
 
     return convertAlertingRuleToRuleResponse({ ...patchedInternalRule, enabled });
   }
-};
+}

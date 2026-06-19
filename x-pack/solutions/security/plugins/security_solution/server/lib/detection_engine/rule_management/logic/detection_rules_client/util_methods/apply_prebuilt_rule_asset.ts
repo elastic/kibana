@@ -17,47 +17,55 @@ import { convertAlertingRuleToRuleResponse } from '../converters/convert_alertin
 import { convertRuleResponseToAlertingRule } from '../converters/convert_rule_response_to_alerting_rule';
 import { applyRuleUpdate } from '../mergers/apply_rule_update';
 import { ClientError, validateMlAuth, mergeExceptionLists } from '../utils';
-import { createRule } from './create_rule';
-import { getRuleByRuleId } from './get_rule_by_rule_id';
+import { createRule } from '../methods/create_rule';
+import { getRuleByRuleId } from '../methods/get_rule_by_rule_id';
 
-export const upgradePrebuiltRule = async ({
-  actionsClient,
-  rulesClient,
-  ruleAsset,
-  mlAuthz,
-  prebuiltRuleAssetClient,
-  changeTracking,
-}: {
+interface ApplyPrebuiltRuleAssetParams {
+  asset: PrebuiltRuleAsset;
+  deps: ApplyPrebuiltRuleAssetDeps;
+  changeTracking?: SecurityRuleChangeTracking<never>;
+}
+
+interface ApplyPrebuiltRuleAssetDeps {
   actionsClient: ActionsClient;
   rulesClient: RulesClient;
-  ruleAsset: PrebuiltRuleAsset;
   mlAuthz: MlAuthz;
   prebuiltRuleAssetClient: IPrebuiltRuleAssetsClient;
-  changeTracking?: SecurityRuleChangeTracking<never>;
-}): Promise<RuleResponse> => {
-  await validateMlAuth(mlAuthz, ruleAsset.type);
+}
+
+/**
+ * Applies a prebuilt rule asset directly to an installed prebuilt rule.
+ *
+ * Throws an error when the prebuilt rule isn't installed.
+ *
+ * In case prebuiltRuleAsset.type is equal to existingRule.type the rule
+ * gets updated. Otherwise the rule gets re-installed.
+ */
+export async function applyPrebuiltRuleAsset({
+  asset,
+  deps: { actionsClient, rulesClient, mlAuthz, prebuiltRuleAssetClient },
+  changeTracking,
+}: ApplyPrebuiltRuleAssetParams): Promise<RuleResponse> {
+  await validateMlAuth(mlAuthz, asset.type);
 
   const existingRule = await getRuleByRuleId({
+    ruleId: asset.rule_id,
     rulesClient,
-    ruleId: ruleAsset.rule_id,
   });
 
   if (!existingRule) {
-    throw new ClientError(`Failed to find rule ${ruleAsset.rule_id}`, 500);
+    throw new ClientError(`Failed to find rule ${asset.rule_id}`, 500);
   }
 
-  if (ruleAsset.type !== existingRule.type) {
+  if (asset.type !== existingRule.type) {
     // If we're trying to change the type of a prepackaged rule, we need to delete the old one
     // and replace it with the new rule, keeping the enabled setting, actions, throttle, id,
     // and exception lists from the old rule
     await rulesClient.delete({ id: existingRule.id });
 
     const createdRule = await createRule({
-      actionsClient,
-      rulesClient,
-      mlAuthz,
       rule: {
-        ...ruleAsset,
+        ...asset,
         immutable: true,
         enabled: existingRule.enabled,
         exceptions_list: existingRule.exceptions_list,
@@ -66,20 +74,20 @@ export const upgradePrebuiltRule = async ({
         timeline_title: existingRule.timeline_title,
       },
       id: existingRule.id,
+      deps: { actionsClient, rulesClient, mlAuthz },
       changeTracking: { action: SecurityRuleChangeTrackingAction.ruleUpgrade, ...changeTracking },
     });
 
     return createdRule;
   }
 
-  // Else, recreate the rule from scratch with the passed payload.
   const updatedRule = await applyRuleUpdate({
     prebuiltRuleAssetClient,
     existingRule,
-    ruleUpdate: ruleAsset,
+    ruleUpdate: asset,
   });
 
-  // We want to preserve existing actions from existing rule on upgrade
+  // Preserve existing actions from the installed rule
   if (existingRule.actions.length) {
     updatedRule.actions = existingRule.actions;
   }
@@ -96,4 +104,4 @@ export const upgradePrebuiltRule = async ({
   });
 
   return convertAlertingRuleToRuleResponse(updatedInternalRule);
-};
+}

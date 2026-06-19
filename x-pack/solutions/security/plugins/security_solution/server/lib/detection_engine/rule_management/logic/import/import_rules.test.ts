@@ -31,7 +31,7 @@ describe('importRules', () => {
 
   it('returns an empty rules response if no rules to import', async () => {
     const result = await importRules({
-      ruleChunks: [],
+      rules: [],
       overwriteRules: false,
       detectionRulesClient,
       ruleSourceImporter: mockRuleSourceImporter,
@@ -53,7 +53,7 @@ describe('importRules', () => {
     ]);
 
     const result = await importRules({
-      ruleChunks: [[ruleToImport]],
+      rules: [ruleToImport],
       overwriteRules: false,
       detectionRulesClient,
       ruleSourceImporter: mockRuleSourceImporter,
@@ -90,7 +90,7 @@ describe('importRules', () => {
     ]);
 
     const result = await importRules({
-      ruleChunks: [[ruleToImport]],
+      rules: [ruleToImport],
       overwriteRules: false,
       detectionRulesClient,
       ruleSourceImporter: mockRuleSourceImporter,
@@ -129,7 +129,7 @@ describe('importRules', () => {
     ]);
 
     const result = await importRules({
-      ruleChunks: [[ruleToImport]],
+      rules: [ruleToImport],
       overwriteRules: false,
       detectionRulesClient,
       ruleSourceImporter: mockRuleSourceImporter,
@@ -170,7 +170,7 @@ describe('importRules', () => {
     const successfulRuleId = getRulesSchemaMock().rule_id;
 
     const result = await importRules({
-      ruleChunks: [[ruleToImport]],
+      rules: [ruleToImport],
       overwriteRules: false,
       detectionRulesClient,
       ruleSourceImporter: mockRuleSourceImporter,
@@ -204,7 +204,7 @@ describe('importRules', () => {
     const successfulRuleId = getRulesSchemaMock().rule_id;
 
     const result = await importRules({
-      ruleChunks: [[ruleToImport]],
+      rules: [ruleToImport],
       overwriteRules: false,
       detectionRulesClient,
       ruleSourceImporter: mockRuleSourceImporter,

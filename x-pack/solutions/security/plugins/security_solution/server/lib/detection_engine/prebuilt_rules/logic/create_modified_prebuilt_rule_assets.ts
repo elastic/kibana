@@ -5,31 +5,34 @@
  * 2.0.
  */
 import { pickBy } from 'lodash';
-import { isRuleCustomized } from '../../../../../../common/detection_engine/rule_management/utils';
-import { withSecuritySpanSync } from '../../../../../utils/with_security_span';
-import type { PromisePoolError } from '../../../../../utils/promise_pool';
+import { isRuleCustomized } from '../../../../../common/detection_engine/rule_management/utils';
+import { withSecuritySpanSync } from '../../../../utils/with_security_span';
+import type { PromisePoolError } from '../../../../utils/promise_pool';
 import {
-  type PerformRuleUpgradeRequestBody,
   type PickVersionValues,
   type AllThreeWayFieldsDiff,
   MissingVersion,
-} from '../../../../../../common/api/detection_engine';
-import type { UpgradeConflictResolution } from '../../../../../../common/api/detection_engine/prebuilt_rules';
-import { UpgradeConflictResolutionEnum } from '../../../../../../common/api/detection_engine/prebuilt_rules';
-import { convertRuleToDiffable } from '../../../../../../common/detection_engine/prebuilt_rules/diff/convert_rule_to_diffable';
-import type { PrebuiltRuleAsset } from '../../model/rule_assets/prebuilt_rule_asset';
-import { assertPickVersionIsTarget } from './assert_pick_version_is_target';
-import { FIELD_NAMES_BY_RULE_TYPE_MAP } from './create_props_to_rule_type_map';
-import { calculateThreeWayRuleFieldsDiff } from '../../logic/diff/calculation/calculate_three_way_rule_fields_diff';
-import { convertPrebuiltRuleAssetToRuleResponse } from '../../../rule_management/logic/detection_rules_client/converters/convert_prebuilt_rule_asset_to_rule_response';
-import type { RuleTriad } from '../../model/rule_groups/get_rule_groups';
-import { getValueForField } from './get_value_for_field';
-import type { RuleUpgradeContext } from './update_rule_telemetry';
+} from '../../../../../common/api/detection_engine';
+import type {
+  UpgradeConflictResolutionStrategy,
+  RuleUpgradeSpecifier,
+} from '../../../../../common/api/detection_engine/prebuilt_rules';
+import { UpgradeConflictResolutionStrategyEnum } from '../../../../../common/api/detection_engine/prebuilt_rules';
+import { convertRuleToDiffable } from '../../../../../common/detection_engine/prebuilt_rules/diff/convert_rule_to_diffable';
+import type { PrebuiltRuleAsset } from '../model/rule_assets/prebuilt_rule_asset';
+import { assertPickVersionIsTarget } from '../api/perform_rule_upgrade/assert_pick_version_is_target';
+import { FIELD_NAMES_BY_RULE_TYPE_MAP } from '../api/perform_rule_upgrade/create_props_to_rule_type_map';
+import { calculateThreeWayRuleFieldsDiff } from './diff/calculation/calculate_three_way_rule_fields_diff';
+import { convertPrebuiltRuleAssetToRuleResponse } from '../../rule_management/logic/detection_rules_client/converters/convert_prebuilt_rule_asset_to_rule_response';
+import type { RuleTriad } from '../model/rule_groups/get_rule_groups';
+import { getValueForField } from '../api/perform_rule_upgrade/get_value_for_field';
+import type { RuleUpgradeContext } from '../api/perform_rule_upgrade/update_rule_telemetry';
 
-interface CreateModifiedPrebuiltRuleAssetsProps {
+export interface CreateModifiedPrebuiltRuleAssetsArgs {
   upgradeableRules: RuleTriad[];
-  requestBody: PerformRuleUpgradeRequestBody;
-  defaultPickVersion: PickVersionValues;
+  globalPickVersion: PickVersionValues;
+  conflictResolutionStrategy?: UpgradeConflictResolutionStrategy;
+  upgradeSpecifiers?: Map<string, RuleUpgradeSpecifier>;
 }
 
 interface ProcessedRules {
@@ -40,16 +43,11 @@ interface ProcessedRules {
 
 export const createModifiedPrebuiltRuleAssets = ({
   upgradeableRules,
-  requestBody,
-  defaultPickVersion,
-}: CreateModifiedPrebuiltRuleAssetsProps) => {
+  globalPickVersion,
+  conflictResolutionStrategy,
+  upgradeSpecifiers,
+}: CreateModifiedPrebuiltRuleAssetsArgs) => {
   return withSecuritySpanSync(createModifiedPrebuiltRuleAssets.name, () => {
-    const {
-      pick_version: globalPickVersion = defaultPickVersion,
-      mode,
-      on_conflict: onConflict,
-    } = requestBody;
-
     const { modifiedPrebuiltRuleAssets, processingErrors, ruleUpgradeContexts } =
       upgradeableRules.reduce<ProcessedRules>(
         (processedRules, upgradeableRule) => {
@@ -64,7 +62,11 @@ export const createModifiedPrebuiltRuleAssets = ({
 
             const { current, target } = upgradeableRule;
             if (current.type !== target.type) {
-              assertPickVersionIsTarget({ ruleId, requestBody });
+              assertPickVersionIsTarget({
+                ruleId,
+                globalPickVersion,
+                ruleUpgradeSpecifier: upgradeSpecifiers?.get(ruleId),
+              });
             }
 
             const isCustomized = isRuleCustomized(current);
@@ -84,13 +86,12 @@ export const createModifiedPrebuiltRuleAssets = ({
               isCustomized
             ) as AllThreeWayFieldsDiff;
 
-            if (mode === 'ALL_RULES' && globalPickVersion === 'MERGED') {
+            // For ALL_RULES mode with MERGED pick version, check for unresolvable conflicts
+            if (upgradeSpecifiers === undefined && globalPickVersion === 'MERGED') {
               const fieldsWithConflicts = Object.keys(
-                getFieldsDiffConflicts(calculatedRuleDiff, onConflict)
+                getFieldsDiffConflicts(calculatedRuleDiff, conflictResolutionStrategy)
               );
               if (fieldsWithConflicts.length > 0) {
-                // If the mode is ALL_RULES, no fields can be overriden to any other pick_version
-                // than "MERGED", so throw an error for the fields that have conflicts.
                 throw new Error(
                   `Merge conflicts found in rule '${ruleId}' for fields: ${fieldsWithConflicts.join(
                     ', '
@@ -102,8 +103,9 @@ export const createModifiedPrebuiltRuleAssets = ({
             const modifiedPrebuiltRuleAsset = createModifiedPrebuiltRuleAsset({
               upgradeableRule,
               fieldNames,
-              requestBody,
               globalPickVersion,
+              upgradeSpecifier: upgradeSpecifiers?.get(ruleId),
+              conflictResolutionStrategy,
               calculatedRuleDiff,
             });
 
@@ -145,7 +147,8 @@ interface CreateModifiedPrebuiltRuleAssetParams {
   upgradeableRule: RuleTriad;
   fieldNames: Array<keyof PrebuiltRuleAsset>;
   globalPickVersion: PickVersionValues;
-  requestBody: PerformRuleUpgradeRequestBody;
+  upgradeSpecifier?: RuleUpgradeSpecifier;
+  conflictResolutionStrategy?: UpgradeConflictResolutionStrategy;
   calculatedRuleDiff: AllThreeWayFieldsDiff;
 }
 
@@ -153,7 +156,8 @@ function createModifiedPrebuiltRuleAsset({
   upgradeableRule,
   fieldNames,
   globalPickVersion,
-  requestBody,
+  upgradeSpecifier,
+  conflictResolutionStrategy,
   calculatedRuleDiff,
 }: CreateModifiedPrebuiltRuleAssetParams): PrebuiltRuleAsset {
   const modifiedPrebuiltRuleAsset = {} as Record<string, unknown>;
@@ -163,7 +167,8 @@ function createModifiedPrebuiltRuleAsset({
       fieldName,
       upgradeableRule,
       globalPickVersion,
-      requestBody,
+      upgradeSpecifier,
+      conflictResolutionStrategy,
       ruleFieldsDiff: calculatedRuleDiff,
     });
   }
@@ -173,10 +178,10 @@ function createModifiedPrebuiltRuleAsset({
 
 const getFieldsDiffConflicts = (
   ruleFieldsDiff: Partial<AllThreeWayFieldsDiff>,
-  onConflict?: UpgradeConflictResolution
+  conflictResolutionStrategy?: UpgradeConflictResolutionStrategy
 ) =>
   pickBy(ruleFieldsDiff, (diff) =>
-    onConflict === UpgradeConflictResolutionEnum.UPGRADE_SOLVABLE
+    conflictResolutionStrategy === UpgradeConflictResolutionStrategyEnum.UPGRADE_SOLVABLE
       ? diff.conflict !== 'NONE' && diff.conflict !== 'SOLVABLE'
       : diff.conflict !== 'NONE'
   );

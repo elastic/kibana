@@ -21,25 +21,27 @@ import { convertRuleResponseToAlertingRule } from '../converters/convert_rule_re
 import { applyRuleDefaults } from '../mergers/apply_rule_defaults';
 import { validateMlAuth } from '../utils';
 
-interface CreateRuleOptions {
+interface CreateRuleDeps {
   actionsClient: ActionsClient;
   rulesClient: RulesClient;
   mlAuthz: MlAuthz;
+}
+
+interface CreateRuleParams {
   rule: RuleCreateProps & { immutable: boolean };
   id?: string;
   allowMissingConnectorSecrets?: boolean;
+  deps: CreateRuleDeps;
   changeTracking?: SecurityRuleChangeTracking;
 }
 
-export const createRule = async ({
-  actionsClient,
-  rulesClient,
-  mlAuthz,
+export async function createRule({
   rule,
   id,
   allowMissingConnectorSecrets,
+  deps: { actionsClient, rulesClient, mlAuthz },
   changeTracking,
-}: CreateRuleOptions): Promise<RuleResponse> => {
+}: CreateRuleParams): Promise<RuleResponse> {
   await validateMlAuth(mlAuthz, rule.type);
 
   const ruleWithDefaults = applyRuleDefaults(rule);
@@ -61,4 +63,4 @@ export const createRule = async ({
   });
 
   return convertAlertingRuleToRuleResponse(createdRule);
-};
+}

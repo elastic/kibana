@@ -13,61 +13,53 @@ import type { IDetectionRulesClient } from '../detection_rules_client/detection_
 import { isRuleConflictError, isRuleImportError } from './errors';
 
 /**
- * Takes a stream of rules to be imported and either creates or updates rules
+ * Takes a list of rules to be imported and either creates or updates rules
  * based on user overwrite preferences
- * @param ruleChunks {@link RuleToImport} - rules being imported
+ * @param rules {@link RuleToImport} - rules being imported
  * @param overwriteRules {boolean} - whether to overwrite existing rules
  * with imported rules if their rule_id matches
  * @param detectionRulesClient {object}
  * @returns {Promise} an array of error and success messages from import
  */
 export const importRules = async ({
-  ruleChunks,
+  rules,
   changeTracking,
   overwriteRules,
   detectionRulesClient,
   ruleSourceImporter,
   allowMissingConnectorSecrets,
 }: {
-  ruleChunks: RuleToImport[][];
+  rules: RuleToImport[];
   changeTracking?: SecurityRuleChangeTracking<never>;
   overwriteRules: boolean;
   detectionRulesClient: IDetectionRulesClient;
   ruleSourceImporter: IRuleSourceImporter;
   allowMissingConnectorSecrets?: boolean;
 }): Promise<ImportRuleResponse[]> => {
-  const response: ImportRuleResponse[] = [];
-
-  if (ruleChunks.length === 0) {
-    return response;
+  if (rules.length === 0) {
+    return [];
   }
 
-  for (const rules of ruleChunks) {
-    const importedRulesResponse = await detectionRulesClient.importRules({
-      allowMissingConnectorSecrets,
-      overwriteRules,
-      ruleSourceImporter,
-      rules,
-      changeTracking,
-    });
+  const importedRulesResponse = await detectionRulesClient.importRules({
+    allowMissingConnectorSecrets,
+    overwriteRules,
+    ruleSourceImporter,
+    rules,
+    changeTracking,
+  });
 
-    const importResponses = importedRulesResponse.map((rule) => {
-      if (isRuleImportError(rule)) {
-        return createBulkErrorObject({
-          message: rule.error.message,
-          statusCode: isRuleConflictError(rule) ? 409 : 400,
-          ruleId: rule.error.ruleId,
-        });
-      }
+  return importedRulesResponse.map((rule) => {
+    if (isRuleImportError(rule)) {
+      return createBulkErrorObject({
+        message: rule.error.message,
+        statusCode: isRuleConflictError(rule) ? 409 : 400,
+        ruleId: rule.error.ruleId,
+      });
+    }
 
-      return {
-        rule_id: rule.rule_id,
-        status_code: 200,
-      };
-    });
-
-    response.push(...importResponses);
-  }
-
-  return response;
+    return {
+      rule_id: rule.rule_id,
+      status_code: 200,
+    };
+  });
 };

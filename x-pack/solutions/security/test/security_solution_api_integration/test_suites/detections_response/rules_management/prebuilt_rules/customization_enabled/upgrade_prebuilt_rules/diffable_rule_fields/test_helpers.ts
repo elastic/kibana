@@ -10,9 +10,9 @@ import { isUndefined, omitBy } from 'lodash';
 import type {
   PartialThreeWayRuleDiff,
   RuleResponse,
-  UpgradeConflictResolution,
+  UpgradeConflictResolutionStrategy,
 } from '@kbn/security-solution-plugin/common/api/detection_engine';
-import { UpgradeConflictResolutionEnum } from '@kbn/security-solution-plugin/common/api/detection_engine';
+import { UpgradeConflictResolutionStrategyEnum } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import { ModeEnum } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import {
   ThreeWayDiffConflict,
@@ -172,7 +172,7 @@ export function testFieldUpgradeReview(
 
 interface TestFieldUpgradesToMergedValueParams {
   ruleUpgradeAssets: TestFieldRuleUpgradeAssets;
-  onConflict?: UpgradeConflictResolution;
+  conflictResolutionStrategy?: UpgradeConflictResolutionStrategy;
   diffableRuleFieldName: string;
   expectedFieldsAfterUpgrade: Partial<RuleResponse>;
 }
@@ -190,7 +190,7 @@ interface TestFieldUpgradesToMergedValueParams {
 export function testFieldUpgradesToMergedValue(
   {
     ruleUpgradeAssets,
-    onConflict = UpgradeConflictResolutionEnum.SKIP,
+    conflictResolutionStrategy = UpgradeConflictResolutionStrategyEnum.SKIP,
     diffableRuleFieldName,
     expectedFieldsAfterUpgrade,
   }: TestFieldUpgradesToMergedValueParams,
@@ -222,7 +222,7 @@ export function testFieldUpgradesToMergedValue(
 
     const response = await performUpgradePrebuiltRules(es, supertest, {
       mode: ModeEnum.SPECIFIC_RULES,
-      on_conflict: onConflict,
+      on_conflict: conflictResolutionStrategy,
       rules: [
         {
           rule_id: ruleId,

@@ -7,8 +7,9 @@
 
 import type {
   PickVersionValues,
-  PerformRuleUpgradeRequestBody,
   AllThreeWayFieldsDiff,
+  UpgradeConflictResolutionStrategy,
+  RuleUpgradeSpecifier,
 } from '../../../../../../common/api/detection_engine';
 import type { PrebuiltRuleAsset } from '../../model/rule_assets/prebuilt_rule_asset';
 import type { RuleTriad } from '../../model/rule_groups/get_rule_groups';
@@ -21,7 +22,8 @@ interface GetValueForFieldArgs {
   fieldName: keyof PrebuiltRuleAsset;
   upgradeableRule: RuleTriad;
   globalPickVersion: PickVersionValues;
-  requestBody: PerformRuleUpgradeRequestBody;
+  upgradeSpecifier?: RuleUpgradeSpecifier;
+  conflictResolutionStrategy?: UpgradeConflictResolutionStrategy;
   ruleFieldsDiff: AllThreeWayFieldsDiff;
 }
 
@@ -29,7 +31,8 @@ export const getValueForField = ({
   fieldName,
   upgradeableRule,
   globalPickVersion,
-  requestBody,
+  upgradeSpecifier,
+  conflictResolutionStrategy,
   ruleFieldsDiff,
 }: GetValueForFieldArgs) => {
   const fieldStatus = getFieldPredefinedValue(fieldName, upgradeableRule);
@@ -38,7 +41,8 @@ export const getValueForField = ({
     return fieldStatus.value;
   }
 
-  if (requestBody.mode === 'ALL_RULES') {
+  if (!upgradeSpecifier) {
+    // ALL_RULES mode
     return globalPickVersion === 'MERGED'
       ? getValueFromMergedVersion({
           fieldName,
@@ -47,7 +51,7 @@ export const getValueForField = ({
             pick_version: globalPickVersion,
           },
           ruleFieldsDiff,
-          onConflict: requestBody.on_conflict,
+          conflictResolutionStrategy,
         })
       : getValueFromRuleTriad({
           fieldName,
@@ -58,25 +62,16 @@ export const getValueForField = ({
         });
   }
 
-  // Handle SPECIFIC_RULES mode
-  const ruleUpgradeSpecifier = requestBody.rules.find(
-    (r) => r.rule_id === upgradeableRule.target.rule_id
-  );
-
-  if (!ruleUpgradeSpecifier) {
-    throw new Error(`Rule payload for upgradable rule ${upgradeableRule.target.rule_id} not found`);
-  }
-
+  // SPECIFIC_RULES mode
   const fieldUpgradeSpecifier = createFieldUpgradeSpecifier({
     fieldName,
-    ruleUpgradeSpecifier,
+    ruleUpgradeSpecifier: upgradeSpecifier,
     targetRuleType: upgradeableRule.target.type,
     globalPickVersion,
   });
 
   if (fieldUpgradeSpecifier.pick_version === 'RESOLVED') {
     const resolvedValue = fieldUpgradeSpecifier.resolved_value;
-
     return mapDiffableRuleFieldValueToRuleSchemaFormat(fieldName, resolvedValue);
   }
 
@@ -86,7 +81,7 @@ export const getValueForField = ({
         upgradeableRule,
         fieldUpgradeSpecifier,
         ruleFieldsDiff,
-        onConflict: requestBody.on_conflict,
+        conflictResolutionStrategy,
       })
     : getValueFromRuleTriad({
         fieldName,

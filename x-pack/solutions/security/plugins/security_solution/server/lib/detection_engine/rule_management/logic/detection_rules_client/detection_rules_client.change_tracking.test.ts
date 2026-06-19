@@ -12,18 +12,12 @@ import { licenseMock } from '@kbn/licensing-plugin/common/licensing.mock';
 
 import { SecurityRuleChangeTrackingAction } from '../../../../../../common/detection_engine/rule_management/rule_change_tracking';
 import {
-  getCreateEqlRuleSchemaMock,
   getCreateRulesSchemaMock,
   getRulesSchemaMock,
-  getRulesEqlSchemaMock,
 } from '../../../../../../common/api/detection_engine/model/rule_schema/mocks';
-import {
-  getImportRulesSchemaMock,
-  getValidatedRuleToImportMock,
-} from '../../../../../../common/api/detection_engine/rule_management/mocks';
-import type { PrebuiltRuleAsset } from '../../../prebuilt_rules';
+import { getImportRulesSchemaMock } from '../../../../../../common/api/detection_engine/rule_management/mocks';
 import { getRuleMock } from '../../../routes/__mocks__/request_responses';
-import { getQueryRuleParams, getEqlRuleParams } from '../../../rule_schema/mocks';
+import { getQueryRuleParams } from '../../../rule_schema/mocks';
 import { buildMlAuthz } from '../../../../machine_learning/authz';
 import { createProductFeaturesServiceMock } from '../../../../product_features_service/mocks';
 import { createDetectionRulesClient } from './detection_rules_client';
@@ -126,110 +120,6 @@ describe('DetectionRulesClient change tracking', () => {
         })
       );
     });
-
-    describe('importRule', () => {
-      it('uses ruleImport action when creating a new rule', async () => {
-        await detectionRulesClient.importRule({
-          ruleToImport: getValidatedRuleToImportMock(),
-          overwriteRules: true,
-        });
-
-        expect(rulesClient.create).toHaveBeenCalledWith(
-          expect.objectContaining({
-            changeTracking: expect.objectContaining({
-              action: SecurityRuleChangeTrackingAction.ruleImport,
-            }),
-          })
-        );
-      });
-
-      it('uses ruleImport action when overwriting an existing rule', async () => {
-        const existingRule = getRulesSchemaMock();
-        (getRuleByRuleId as jest.Mock).mockResolvedValueOnce(existingRule);
-
-        await detectionRulesClient.importRule({
-          ruleToImport: { ...getValidatedRuleToImportMock(), rule_id: existingRule.rule_id },
-          overwriteRules: true,
-        });
-
-        expect(rulesClient.update).toHaveBeenCalledWith(
-          expect.objectContaining({
-            changeTracking: expect.objectContaining({
-              action: SecurityRuleChangeTrackingAction.ruleImport,
-            }),
-          })
-        );
-      });
-    });
-
-    describe('upgradePrebuiltRule', () => {
-      it('uses ruleUpgrade action when upgrading a same-type rule', async () => {
-        const installedRule = getRulesEqlSchemaMock();
-        (getRuleByRuleId as jest.Mock).mockResolvedValueOnce(installedRule);
-        rulesClient.update.mockResolvedValue(getRuleMock(getEqlRuleParams()));
-
-        const ruleAsset: PrebuiltRuleAsset = {
-          ...getCreateEqlRuleSchemaMock(),
-          type: 'eql',
-          version: 1,
-          rule_id: installedRule.rule_id,
-        };
-
-        await detectionRulesClient.upgradePrebuiltRule({ ruleAsset });
-
-        expect(rulesClient.update).toHaveBeenCalledWith(
-          expect.objectContaining({
-            changeTracking: expect.objectContaining({
-              action: SecurityRuleChangeTrackingAction.ruleUpgrade,
-            }),
-          })
-        );
-      });
-
-      it('uses ruleUpgrade action when upgrading a rule with a type change', async () => {
-        const installedRule = getRulesSchemaMock(); // query type
-        installedRule.rule_id = 'rule-id';
-        (getRuleByRuleId as jest.Mock).mockResolvedValueOnce(installedRule);
-
-        const ruleAsset: PrebuiltRuleAsset = {
-          ...getCreateEqlRuleSchemaMock(), // eql type
-          type: 'eql',
-          version: 1,
-          rule_id: 'rule-id',
-        };
-
-        await detectionRulesClient.upgradePrebuiltRule({ ruleAsset });
-
-        expect(rulesClient.create).toHaveBeenCalledWith(
-          expect.objectContaining({
-            changeTracking: expect.objectContaining({
-              action: SecurityRuleChangeTrackingAction.ruleUpgrade,
-            }),
-          })
-        );
-      });
-    });
-
-    it('revertPrebuiltRule uses ruleRevert action', async () => {
-      const existingRule = getRulesEqlSchemaMock();
-      const ruleAsset: PrebuiltRuleAsset = {
-        ...getCreateEqlRuleSchemaMock(),
-        type: 'eql',
-        version: 1,
-        rule_id: existingRule.rule_id,
-      };
-      rulesClient.update.mockResolvedValue(getRuleMock(getEqlRuleParams()));
-
-      await detectionRulesClient.revertPrebuiltRule({ ruleAsset, existingRule });
-
-      expect(rulesClient.update).toHaveBeenCalledWith(
-        expect.objectContaining({
-          changeTracking: expect.objectContaining({
-            action: SecurityRuleChangeTrackingAction.ruleRevert,
-          }),
-        })
-      );
-    });
   });
 
   describe('changeTracking.bulkCount', () => {
@@ -260,26 +150,24 @@ describe('DetectionRulesClient change tracking', () => {
       );
     });
 
-    it('importRules passes bulkCount through to importRule', async () => {
-      const importRuleSpy = jest
-        .spyOn(detectionRulesClient, 'importRule')
-        .mockResolvedValue(getRulesSchemaMock());
+    it('importRules sets bulkCount to the total number of rules', async () => {
       const mockRuleSourceImporter = ruleSourceImporterMock.create();
       mockRuleSourceImporter.calculateRuleSource.mockReturnValue({
         ruleSource: { type: 'internal' },
         immutable: false,
       });
+      (getRuleByRuleId as jest.Mock).mockResolvedValue(null);
 
+      const rules = [getImportRulesSchemaMock(), getImportRulesSchemaMock()];
       await detectionRulesClient.importRules({
-        rules: [getImportRulesSchemaMock()],
+        rules,
         overwriteRules: false,
         ruleSourceImporter: mockRuleSourceImporter,
-        changeTracking: { metadata: { bulkCount: 5 } },
       });
 
-      expect(importRuleSpy).toHaveBeenCalledWith(
+      expect(rulesClient.create).toHaveBeenCalledWith(
         expect.objectContaining({
-          changeTracking: expect.objectContaining({ metadata: { bulkCount: 5 } }),
+          changeTracking: expect.objectContaining({ metadata: { bulkCount: rules.length } }),
         })
       );
     });

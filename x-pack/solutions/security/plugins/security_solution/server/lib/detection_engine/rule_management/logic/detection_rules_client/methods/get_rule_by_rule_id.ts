@@ -13,15 +13,15 @@ import type {
 import { findRules } from '../../search/find_rules';
 import { convertAlertingRuleToRuleResponse } from '../converters/convert_alerting_rule_to_rule_response';
 
-interface GetRuleByRuleIdOptions {
-  rulesClient: RulesClient;
+interface GetRuleByRuleIdParams {
   ruleId: RuleSignatureId;
+  rulesClient: RulesClient;
 }
 
-export const getRuleByRuleId = async ({
-  rulesClient,
+export async function getRuleByRuleId({
   ruleId,
-}: GetRuleByRuleIdOptions): Promise<RuleResponse | null> => {
+  rulesClient,
+}: GetRuleByRuleIdParams): Promise<RuleResponse | null> {
   const findRuleResponse = await findRules({
     rulesClient,
     filter: `alert.attributes.params.ruleId: "${ruleId}"`,
@@ -35,4 +35,4 @@ export const getRuleByRuleId = async ({
     return null;
   }
   return convertAlertingRuleToRuleResponse(findRuleResponse.data[0]);
-};
+}

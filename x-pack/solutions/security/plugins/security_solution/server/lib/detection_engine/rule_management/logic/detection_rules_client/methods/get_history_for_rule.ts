@@ -16,19 +16,23 @@ import { mapRuleHistoryItem } from '../../history/map_rule_history_item';
 const DEFAULT_PAGE = 1;
 const DEFAULT_PER_PAGE = 20;
 
-export interface GetHistoryForRuleArgs {
+interface GetHistoryForRuleDeps {
   rulesClient: RulesClient;
+}
+
+interface GetHistoryForRuleParams {
   ruleId: RuleObjectId;
   page?: number;
   perPage?: number;
+  deps: GetHistoryForRuleDeps;
 }
 
-export const getHistoryForRule = async ({
-  rulesClient,
+export async function getHistoryForRule({
   ruleId,
   page = DEFAULT_PAGE,
   perPage = DEFAULT_PER_PAGE,
-}: GetHistoryForRuleArgs): Promise<RuleChangesHistoryResponse> => {
+  deps: { rulesClient },
+}: GetHistoryForRuleParams): Promise<RuleChangesHistoryResponse> {
   // Fetch one extra entry past the requested page so the oldest item on the
   // page can be paired with its predecessor (older revision) for `old_values`.
   const result = await rulesClient.getHistory({
@@ -51,4 +55,4 @@ export const getHistoryForRule = async ({
     total: result.total,
     items: resultItems,
   };
-};
+}

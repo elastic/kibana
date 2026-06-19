@@ -8,8 +8,7 @@
 import { rulesClientMock } from '@kbn/alerting-plugin/server/mocks';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
 import { SecurityRuleChangeTrackingAction } from '../../../../../../common/detection_engine/rule_management/rule_change_tracking';
-import { savedObjectsClientMock } from '@kbn/core/server/mocks';
-
+import type { RuleCreateProps } from '../../../../../../common/api/detection_engine/model/rule_schema';
 import {
   getCreateRulesSchemaMock,
   getCreateMachineLearningRulesSchemaMock,
@@ -20,45 +19,35 @@ import { getQueryRuleParams } from '../../../rule_schema/mocks';
 import { DEFAULT_INDICATOR_SOURCE_PATH } from '../../../../../../common/constants';
 import { buildMlAuthz } from '../../../../machine_learning/authz';
 import { throwAuthzError } from '../../../../machine_learning/validation';
-import { createDetectionRulesClient } from './detection_rules_client';
-import type { IDetectionRulesClient } from './detection_rules_client_interface';
-import { licenseMock } from '@kbn/licensing-plugin/common/licensing.mock';
-import { createProductFeaturesServiceMock } from '../../../../product_features_service/mocks';
-import { getMockRulesAuthz } from '../../__mocks__/authz';
+import { createRule } from './methods/create_rule';
 
 jest.mock('../../../../machine_learning/authz');
 jest.mock('../../../../machine_learning/validation');
 
-describe('DetectionRulesClient.createPrebuiltRule', () => {
+describe('createPrebuiltRule behavior (via createRule with prebuilt params)', () => {
   let rulesClient: ReturnType<typeof rulesClientMock.create>;
-  let detectionRulesClient: IDetectionRulesClient;
 
   const mlAuthz = (buildMlAuthz as jest.Mock)();
-  const rulesAuthz = getMockRulesAuthz();
-  const actionsClient: jest.Mocked<ActionsClient> = {} as unknown as jest.Mocked<ActionsClient>;
+  const actionsClient: jest.Mocked<ActionsClient> = {
+    isSystemAction: jest.fn(() => false),
+  } as unknown as jest.Mocked<ActionsClient>;
+
+  const callCreatePrebuiltRule = (params: RuleCreateProps) =>
+    createRule({
+      rule: { ...params, immutable: true },
+      deps: { actionsClient, rulesClient, mlAuthz },
+      changeTracking: { action: SecurityRuleChangeTrackingAction.ruleInstall },
+    });
 
   beforeEach(() => {
     rulesClient = rulesClientMock.create();
     rulesClient.create.mockResolvedValue(getRuleMock(getQueryRuleParams()));
-
-    const savedObjectsClient = savedObjectsClientMock.create();
-    detectionRulesClient = createDetectionRulesClient({
-      actionsClient,
-      rulesClient,
-      mlAuthz,
-      rulesAuthz,
-      savedObjectsClient,
-      license: licenseMock.createLicenseMock(),
-      productFeaturesService: createProductFeaturesServiceMock(),
-    });
   });
 
   it('creates a rule with the correct parameters and options', async () => {
     const params = { ...getCreateRulesSchemaMock(), version: 1, rule_id: 'rule-id' };
 
-    await detectionRulesClient.createPrebuiltRule({
-      params,
-    });
+    await callCreatePrebuiltRule(params);
 
     expect(rulesClient.create).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -83,9 +72,7 @@ describe('DetectionRulesClient.createPrebuiltRule', () => {
       throw new Error('mocked MLAuth error');
     });
 
-    await expect(detectionRulesClient.createPrebuiltRule({ params })).rejects.toThrow(
-      'mocked MLAuth error'
-    );
+    await expect(callCreatePrebuiltRule(params)).rejects.toThrow('mocked MLAuth error');
 
     expect(rulesClient.create).not.toHaveBeenCalled();
   });
@@ -96,9 +83,7 @@ describe('DetectionRulesClient.createPrebuiltRule', () => {
       version: 1,
       rule_id: 'rule-id',
     };
-    await detectionRulesClient.createPrebuiltRule({
-      params,
-    });
+    await callCreatePrebuiltRule(params);
 
     expect(rulesClient.create).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -121,9 +106,7 @@ describe('DetectionRulesClient.createPrebuiltRule', () => {
       version: 1,
       rule_id: 'rule-id',
     };
-    await detectionRulesClient.createPrebuiltRule({
-      params,
-    });
+    await callCreatePrebuiltRule(params);
 
     expect(rulesClient.create).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -143,9 +126,7 @@ describe('DetectionRulesClient.createPrebuiltRule', () => {
     const params = { ...getCreateThreatMatchRulesSchemaMock(), version: 1, rule_id: 'rule-id' };
     delete params.threat_indicator_path;
 
-    await detectionRulesClient.createPrebuiltRule({
-      params,
-    });
+    await callCreatePrebuiltRule(params);
 
     expect(rulesClient.create).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -162,14 +143,12 @@ describe('DetectionRulesClient.createPrebuiltRule', () => {
 
   it('does not populate a threatIndicatorPath value for other rules if empty', async () => {
     const params = { ...getCreateRulesSchemaMock(), version: 1, rule_id: 'rule-id' };
-    await detectionRulesClient.createPrebuiltRule({ params });
+    await callCreatePrebuiltRule(params);
     expect(rulesClient.create).not.toHaveBeenCalledWith(
       expect.objectContaining({
         data: expect.objectContaining({
-          enabled: false,
           params: expect.objectContaining({
             threatIndicatorPath: DEFAULT_INDICATOR_SOURCE_PATH,
-            immutable: true,
           }),
         }),
       })

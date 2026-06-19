@@ -7,7 +7,7 @@
 
 import {
   ThreeWayDiffOutcome,
-  UpgradeConflictResolutionEnum,
+  UpgradeConflictResolutionStrategyEnum,
 } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import type { FtrProviderContext } from '../../../../../../../../ftr_provider_context';
 import type { TestFieldRuleUpgradeAssets } from '../test_helpers';
@@ -318,7 +318,7 @@ export function newTermsFieldsField({ getService }: FtrProviderContext): void {
         testFieldUpgradesToMergedValue(
           {
             ruleUpgradeAssets,
-            onConflict: UpgradeConflictResolutionEnum.UPGRADE_SOLVABLE,
+            conflictResolutionStrategy: UpgradeConflictResolutionStrategyEnum.UPGRADE_SOLVABLE,
             diffableRuleFieldName: 'new_terms_fields',
             expectedFieldsAfterUpgrade: { new_terms_fields: ['fieldA', 'fieldC'] },
           },

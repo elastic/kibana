@@ -58,6 +58,7 @@ export interface RuleSummary {
   rule_id: RuleSignatureId;
   version: RuleVersion;
   tags: RuleTagArray;
+  revision: number;
 }
 
 export interface IPrebuiltRuleObjectsClient {
@@ -139,12 +140,13 @@ export const createPrebuiltRuleObjectsClient = (
             page: 1,
             sortField,
             sortOrder,
-            fields: ['params.ruleId', 'params.version', 'tags'],
+            fields: ['params.ruleId', 'params.version', 'revision', 'tags'],
           });
           return rulesData.data.map((rule) => ({
             id: rule.id,
             rule_id: rule.params.ruleId,
             version: rule.params.version,
+            revision: rule.revision,
             tags: rule.tags,
           }));
         }
@@ -164,12 +166,13 @@ export const createPrebuiltRuleObjectsClient = (
           page: 1,
           sortField,
           sortOrder,
-          fields: ['params.ruleId', 'params.version', 'tags'],
+          fields: ['params.ruleId', 'params.version', 'revision', 'tags'],
         });
         return rulesData.data.map((rule) => ({
           id: rule.id,
           rule_id: rule.params.ruleId,
           version: rule.params.version,
+          revision: rule.revision,
           tags: rule.tags,
         }));
       });

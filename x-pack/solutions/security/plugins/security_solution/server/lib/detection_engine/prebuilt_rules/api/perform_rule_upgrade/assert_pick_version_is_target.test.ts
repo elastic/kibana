@@ -7,8 +7,8 @@
 
 import { assertPickVersionIsTarget } from './assert_pick_version_is_target';
 import type {
-  PerformRuleUpgradeRequestBody,
   PickVersionValues,
+  RuleUpgradeSpecifier,
 } from '../../../../../../common/api/detection_engine';
 
 describe('assertPickVersionIsTarget', () => {
@@ -17,50 +17,38 @@ describe('assertPickVersionIsTarget', () => {
     `Rule update for rule ${id} has a rule type change. All 'pick_version' values for rule must match 'TARGET'`;
 
   describe('valid cases - ', () => {
-    it('should not throw when pick_version is TARGET for ALL_RULES mode', () => {
-      const requestBody: PerformRuleUpgradeRequestBody = {
-        mode: 'ALL_RULES',
-        pick_version: 'TARGET',
-      };
-
-      expect(() => assertPickVersionIsTarget({ requestBody, ruleId })).not.toThrow();
+    it('should not throw when pick_version is TARGET for ALL_RULES mode (no specifier)', () => {
+      expect(() =>
+        assertPickVersionIsTarget({ ruleId, globalPickVersion: 'TARGET' })
+      ).not.toThrow();
     });
 
     it('should not throw when pick_version is TARGET for SPECIFIC_RULES mode', () => {
-      const requestBody: PerformRuleUpgradeRequestBody = {
-        mode: 'SPECIFIC_RULES',
-        rules: [
-          {
-            rule_id: ruleId,
-            revision: 1,
-            version: 1,
-            pick_version: 'TARGET',
-          },
-        ],
+      const ruleUpgradeSpecifier: RuleUpgradeSpecifier = {
+        rule_id: ruleId,
+        revision: 1,
+        version: 1,
+        pick_version: 'TARGET',
       };
 
-      expect(() => assertPickVersionIsTarget({ requestBody, ruleId })).not.toThrow();
+      expect(() => assertPickVersionIsTarget({ ruleId, ruleUpgradeSpecifier })).not.toThrow();
     });
 
     it('should not throw when all pick_version values are TARGET', () => {
-      const requestBody: PerformRuleUpgradeRequestBody = {
-        mode: 'SPECIFIC_RULES',
+      const ruleUpgradeSpecifier: RuleUpgradeSpecifier = {
+        rule_id: ruleId,
+        revision: 1,
+        version: 1,
         pick_version: 'TARGET',
-        rules: [
-          {
-            rule_id: ruleId,
-            revision: 1,
-            version: 1,
-            pick_version: 'TARGET',
-            fields: {
-              name: { pick_version: 'TARGET' },
-              description: { pick_version: 'TARGET' },
-            },
-          },
-        ],
+        fields: {
+          name: { pick_version: 'TARGET' },
+          description: { pick_version: 'TARGET' },
+        },
       };
 
-      expect(() => assertPickVersionIsTarget({ requestBody, ruleId })).not.toThrow();
+      expect(() =>
+        assertPickVersionIsTarget({ ruleId, globalPickVersion: 'TARGET', ruleUpgradeSpecifier })
+      ).not.toThrow();
     });
   });
 
@@ -68,64 +56,50 @@ describe('assertPickVersionIsTarget', () => {
     it('should throw when pick_version is not TARGET for ALL_RULES mode', () => {
       const pickVersions: PickVersionValues[] = ['BASE', 'CURRENT', 'MERGED'];
 
-      pickVersions.forEach((pickVersion) => {
-        const requestBody: PerformRuleUpgradeRequestBody = {
-          mode: 'ALL_RULES',
-          pick_version: pickVersion,
-        };
-
-        expect(() => assertPickVersionIsTarget({ requestBody, ruleId })).toThrowError(
+      pickVersions.forEach((globalPickVersion) => {
+        expect(() => assertPickVersionIsTarget({ ruleId, globalPickVersion })).toThrowError(
           createExpectedError(ruleId)
         );
       });
     });
 
     it('should throw when pick_version is not TARGET for SPECIFIC_RULES mode', () => {
-      const requestBody: PerformRuleUpgradeRequestBody = {
-        mode: 'SPECIFIC_RULES',
-        rules: [
-          {
-            rule_id: ruleId,
-            revision: 1,
-            version: 1,
-            pick_version: 'BASE',
-          },
-        ],
+      const ruleUpgradeSpecifier: RuleUpgradeSpecifier = {
+        rule_id: ruleId,
+        revision: 1,
+        version: 1,
+        pick_version: 'BASE',
       };
 
-      expect(() => assertPickVersionIsTarget({ requestBody, ruleId })).toThrowError(
+      expect(() => assertPickVersionIsTarget({ ruleId, ruleUpgradeSpecifier })).toThrowError(
         createExpectedError(ruleId)
       );
     });
 
     it('should throw when any field-specific pick_version is not TARGET', () => {
-      const requestBody: PerformRuleUpgradeRequestBody = {
-        mode: 'SPECIFIC_RULES',
-        rules: [
-          {
-            rule_id: ruleId,
-            revision: 1,
-            version: 1,
-            pick_version: 'TARGET',
-            fields: {
-              name: { pick_version: 'BASE' },
-            },
-          },
-        ],
+      const ruleUpgradeSpecifier: RuleUpgradeSpecifier = {
+        rule_id: ruleId,
+        revision: 1,
+        version: 1,
+        pick_version: 'TARGET',
+        fields: {
+          name: { pick_version: 'BASE' },
+        },
       };
 
-      expect(() => assertPickVersionIsTarget({ requestBody, ruleId })).toThrowError(
+      expect(() => assertPickVersionIsTarget({ ruleId, ruleUpgradeSpecifier })).toThrowError(
         createExpectedError(ruleId)
       );
     });
 
     it('should throw when pick_version is missing (defaults to MERGED)', () => {
-      const requestBody: PerformRuleUpgradeRequestBody = {
-        mode: 'SPECIFIC_RULES',
-        rules: [{ rule_id: ruleId, revision: 1, version: 1 }],
+      const ruleUpgradeSpecifier: RuleUpgradeSpecifier = {
+        rule_id: ruleId,
+        revision: 1,
+        version: 1,
       };
 
-      expect(() => assertPickVersionIsTarget({ requestBody, ruleId })).toThrow();
+      expect(() => assertPickVersionIsTarget({ ruleId, ruleUpgradeSpecifier })).toThrow();
     });
   });
 });

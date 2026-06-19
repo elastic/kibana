@@ -10,18 +10,17 @@ import type { BulkOperationError, RulesClient } from '@kbn/alerting-plugin/serve
 import { SEARCH_AI_LAKE_PACKAGES } from '@kbn/fleet-plugin/common';
 import type { IDetectionRulesClient } from '../../../rule_management/logic/detection_rules_client/detection_rules_client_interface';
 import type { IPrebuiltRuleAssetsClient } from '../rule_assets/prebuilt_rule_assets_client';
-import { createPrebuiltRules } from '../rule_objects/create_prebuilt_rules';
 import type { IPrebuiltRuleObjectsClient } from '../rule_objects/prebuilt_rule_objects_client';
-import { upgradePrebuiltRules } from '../rule_objects/upgrade_prebuilt_rules';
 import type {
   RuleBootstrapError,
   RuleBootstrapResults,
 } from '../../../../../../common/api/detection_engine/prebuilt_rules/bootstrap_ease_rules/bootstrap_ease_rules.gen';
 import { getErrorMessage } from '../../../../../utils/error_helpers';
 import type { EndpointInternalFleetServicesInterface } from '../../../../../endpoint/services/fleet';
-import { PROMOTION_RULE_TAGS } from '../../../../../../common/constants';
 import type { PrebuiltRuleAsset } from '../../model/rule_assets/prebuilt_rule_asset';
+import { PROMOTION_RULE_TAGS } from '../../../../../../common/constants';
 import { getFleetPackageInstallation } from './get_fleet_package_installation';
+import type { PromisePoolError } from '../../../../../utils/promise_pool';
 
 interface InstallPromotionRulesParams {
   rulesClient: RulesClient;
@@ -60,10 +59,6 @@ export async function installPromotionRules({
     (
       await Promise.all(
         SEARCH_AI_LAKE_PACKAGES.map(async (integration) => {
-          // We don't care about installation status of the integration as all
-          // EASE integrations are agentless (don't require setting up an
-          // integration policy). So the fact that the corresponding package is
-          // installed is enough.
           const installation = await getFleetPackageInstallation(
             fleetServices,
             integration,
@@ -78,7 +73,6 @@ export async function installPromotionRules({
   const latestRuleAssets = await ruleAssetsClient.fetchLatestAssets();
 
   const latestPromotionRules = latestRuleAssets.filter((rule) => {
-    // Rule should be tagged as 'Promotion' and should be related to an enabled integration
     return (
       isPromotionRule(rule) &&
       rule.related_integrations?.some((integration) =>
@@ -95,40 +89,41 @@ export async function installPromotionRules({
   const promotionRulesToInstall = latestPromotionRules.filter(({ rule_id: ruleId }) => {
     return !installedRuleVersionsMap.has(ruleId);
   });
-  const installChangeTracking = {
-    metadata: {
-      bulkCount: promotionRulesToInstall.length,
-    },
-  };
-  const { results: installationResults, errors: installationErrors } = await createPrebuiltRules(
-    detectionRulesClient,
-    promotionRulesToInstall.map((asset) => ({
-      ...asset,
-      enabled: true,
-    })),
-    installChangeTracking,
-    logger
+
+  const { installedRules, errors: installErrors } = await detectionRulesClient.installPrebuiltRules(
+    {
+      ruleSpecifiers: promotionRulesToInstall.map(({ rule_id, version }) => ({ rule_id, version })),
+    }
   );
+
+  // Promotion rules should be enabled by default
+  if (installedRules.length > 0) {
+    await Promise.all(installedRules.map((r) => rulesClient.enableRule({ id: r.id })));
+  }
 
   const promotionRulesToUpgrade = latestPromotionRules.filter(({ rule_id: ruleId, version }) => {
     const installedVersion = installedRuleVersionsMap.get(ruleId);
     return installedVersion && installedVersion.version < version;
   });
-  const upgradeChangeTracking = {
-    metadata: {
-      bulkCount: promotionRulesToUpgrade.length,
-    },
-  };
-  const { results: upgradeResults, errors: upgradeErrors } = await upgradePrebuiltRules(
-    detectionRulesClient,
-    promotionRulesToUpgrade,
-    upgradeChangeTracking,
-    logger
-  );
 
-  // Cleanup any unknown rules, we don't allow users to install any detection
-  // rules that are not part of the enabled integrations, although that is not
-  // enforced via the API
+  // Fetch current revisions for optimistic concurrency control
+  const currentRules = await ruleObjectsClient.fetchInstalledRulesByIds({
+    ruleIds: promotionRulesToUpgrade.map((r) => r.rule_id),
+  });
+  const revisionMap = new Map(currentRules.map((r) => [r.rule_id, r.revision]));
+
+  const { updatedRules, errors: upgradeErrors } = await detectionRulesClient.upgradePrebuiltRules({
+    ruleSpecifiers: promotionRulesToUpgrade.map(({ rule_id, version }) => ({
+      rule_id,
+      version,
+      revision: revisionMap.get(rule_id) ?? 0,
+    })),
+    conflictResolutionStrategy: 'UPGRADE_SOLVABLE',
+    defaultPickVersion: 'TARGET',
+    isDryRun: false,
+  });
+
+  // Cleanup any unknown rules
   const rulesToDelete = installedRuleVersions.filter(({ rule_id: ruleId }) => {
     return !latestPromotionRules.some((rule) => rule.rule_id === ruleId);
   });
@@ -145,26 +140,28 @@ export async function installPromotionRules({
     return installedVersion && installedVersion.version === version;
   });
 
-  const allErrors = [...installationErrors, ...upgradeErrors, ...deletionErrors].reduce(
-    (errorsMap, currentError) => {
-      const errorMessage =
-        'error' in currentError ? getErrorMessage(currentError.error) : currentError.message;
-      const ruleId = 'item' in currentError ? currentError.item.rule_id : currentError.rule.id;
-      const existingError = errorsMap.get(errorMessage);
-      if (existingError) {
-        existingError.rules.push({ rule_id: ruleId });
-      } else {
-        errorsMap.set(errorMessage, { rules: [{ rule_id: ruleId }], message: errorMessage });
-      }
-      return errorsMap;
-    },
-    new Map<string, RuleBootstrapError>()
-  );
+  const allPoolErrors: Array<PromisePoolError<{ rule_id: string }>> = [
+    ...installErrors,
+    ...upgradeErrors,
+  ];
+
+  const allErrors = [...allPoolErrors, ...deletionErrors].reduce((errorsMap, currentError) => {
+    const errorMessage =
+      'error' in currentError ? getErrorMessage(currentError.error) : currentError.message;
+    const ruleId = 'item' in currentError ? currentError.item.rule_id : currentError.rule.id;
+    const existingError = errorsMap.get(errorMessage);
+    if (existingError) {
+      existingError.rules.push({ rule_id: ruleId });
+    } else {
+      errorsMap.set(errorMessage, { rules: [{ rule_id: ruleId }], message: errorMessage });
+    }
+    return errorsMap;
+  }, new Map<string, RuleBootstrapError>());
 
   const installationResult = {
     total: latestPromotionRules.length,
-    installed: installationResults.length,
-    updated: upgradeResults.length,
+    installed: installedRules.length,
+    updated: updatedRules.length,
     deleted: rulesToDelete.length,
     skipped: alreadyUpToDate.length,
     errors: allErrors.size > 0 ? Array.from(allErrors.values()) : [],

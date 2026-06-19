@@ -18,23 +18,26 @@ import { convertRuleResponseToAlertingRule } from '../converters/convert_rule_re
 import { applyRuleUpdate } from '../mergers/apply_rule_update';
 import { validateMlAuth, mergeExceptionLists } from '../utils';
 
-export const revertPrebuiltRule = async ({
-  actionsClient,
-  rulesClient,
-  ruleAsset,
-  mlAuthz,
-  existingRule,
-  prebuiltRuleAssetClient,
-  changeTracking,
-}: {
+interface RevertPrebuiltRuleDeps {
   actionsClient: ActionsClient;
   rulesClient: RulesClient;
-  ruleAsset: PrebuiltRuleAsset;
   mlAuthz: MlAuthz;
-  existingRule: RuleResponse;
   prebuiltRuleAssetClient: IPrebuiltRuleAssetsClient;
+}
+
+interface RevertPrebuiltRuleParams {
+  ruleAsset: PrebuiltRuleAsset;
+  existingRule: RuleResponse;
+  deps: RevertPrebuiltRuleDeps;
   changeTracking?: SecurityRuleChangeTracking<never>;
-}): Promise<RuleResponse> => {
+}
+
+export async function revertPrebuiltRule({
+  ruleAsset,
+  existingRule,
+  deps: { actionsClient, rulesClient, mlAuthz, prebuiltRuleAssetClient },
+  changeTracking,
+}: RevertPrebuiltRuleParams): Promise<RuleResponse> {
   await validateMlAuth(mlAuthz, ruleAsset.type);
   const updatedRule = await applyRuleUpdate({
     prebuiltRuleAssetClient,
@@ -59,4 +62,4 @@ export const revertPrebuiltRule = async ({
   });
 
   return convertAlertingRuleToRuleResponse(updatedInternalRule);
-};
+}

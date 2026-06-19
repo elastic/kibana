@@ -14,38 +14,48 @@ import type {
   RuleObjectId,
   RuleResponse,
   RuleToImport,
-  RuleSource,
+  PrebuiltRulesFilter,
 } from '../../../../../../common/api/detection_engine';
+import type {
+  InstalledRuleBasicInfo,
+  SkippedRuleInstall,
+  SkippedRuleUpgrade,
+  UpgradedRuleBasicInfo,
+  RuleUpgradeSpecifier,
+  PickVersionValues,
+  UpgradeConflictResolutionStrategy,
+} from '../../../../../../common/api/detection_engine/prebuilt_rules';
 import type { RuleChangesHistoryResponse } from '../../../../../../common/api/detection_engine/rule_management';
 import type { IRuleSourceImporter } from '../import/rule_source_importer';
 import type { RuleImportErrorObject } from '../import/errors';
-import type { PrebuiltRuleAsset } from '../../../prebuilt_rules';
 import type { PrebuiltRulesCustomizationStatus } from '../../../../../../common/detection_engine/prebuilt_rules/prebuilt_rule_customization_status';
 import type { RuleAlertType } from '../../../rule_schema';
+import type { PromisePoolError, PromisePoolResult } from '../../../../../utils/promise_pool';
+import type { RuleTriad } from '../../../prebuilt_rules/model/rule_groups/get_rule_groups';
+import type { RuleUpgradeContext } from '../../../prebuilt_rules/api/perform_rule_upgrade/update_rule_telemetry';
+import type { RuleVersionSpecifier } from '../../../prebuilt_rules/logic/rule_versions/rule_version_specifier';
 
 export interface IDetectionRulesClient {
   getRuleCustomizationStatus: () => PrebuiltRulesCustomizationStatus;
   createCustomRule: (args: CreateCustomRuleArgs) => Promise<RuleResponse>;
-  createPrebuiltRule: (args: CreatePrebuiltRuleArgs) => Promise<RuleResponse>;
   updateRule: (args: UpdateRuleArgs) => Promise<RuleResponse>;
   patchRule: (args: PatchRuleArgs) => Promise<RuleResponse>;
   deleteRule: (args: DeleteRuleArgs) => Promise<void>;
   bulkDeleteRules: (args: BulkDeleteRulesArgs) => Promise<BulkDeleteRulesReturn>;
-  upgradePrebuiltRule: (args: UpgradePrebuiltRuleArgs) => Promise<RuleResponse>;
-  revertPrebuiltRule: (args: RevertPrebuiltRuleArgs) => Promise<RuleResponse>;
-  importRule: (args: ImportRuleArgs) => Promise<RuleResponse>;
   importRules: (args: ImportRulesArgs) => Promise<Array<RuleResponse | RuleImportErrorObject>>;
+  installPrebuiltRules: (args: InstallPrebuiltRulesArgs) => Promise<InstallPrebuiltRulesResult>;
+  installAllPrebuiltRules: () => Promise<InstallPrebuiltRulesResult>;
+  upgradePrebuiltRules: (args: UpgradePrebuiltRulesArgs) => Promise<UpgradePrebuiltRulesResult>;
+  upgradeAllPrebuiltRules: (
+    args: UpgradeAllPrebuiltRulesArgs
+  ) => Promise<UpgradePrebuiltRulesResult>;
+  revertPrebuiltRules: (args: RevertPrebuiltRulesArgs) => Promise<RevertPrebuiltRulesResult>;
   getHistoryForRule: (args: GetHistoryForRuleArgs) => Promise<RuleChangesHistoryResponse>;
 }
 
 export interface CreateCustomRuleArgs {
   params: RuleCreateProps;
   changeTracking?: SecurityRuleChangeTracking;
-}
-
-export interface CreatePrebuiltRuleArgs {
-  params: RuleCreateProps;
-  changeTracking?: SecurityRuleChangeTracking<never>;
 }
 
 export interface UpdateRuleArgs {
@@ -72,25 +82,6 @@ export interface BulkDeleteRulesReturn {
   errors: BulkOperationError[];
 }
 
-export interface UpgradePrebuiltRuleArgs {
-  ruleAsset: PrebuiltRuleAsset;
-  changeTracking?: SecurityRuleChangeTracking<never>;
-}
-
-export interface RevertPrebuiltRuleArgs {
-  ruleAsset: PrebuiltRuleAsset;
-  existingRule: RuleResponse;
-  changeTracking?: SecurityRuleChangeTracking<never>;
-}
-
-export interface ImportRuleArgs {
-  ruleToImport: RuleToImport;
-  overrideFields?: { rule_source: RuleSource; immutable: boolean };
-  overwriteRules?: boolean;
-  allowMissingConnectorSecrets?: boolean;
-  changeTracking?: SecurityRuleChangeTracking<never>;
-}
-
 export interface ImportRulesArgs {
   rules: RuleToImport[];
   overwriteRules: boolean;
@@ -103,4 +94,44 @@ export interface GetHistoryForRuleArgs {
   ruleId: RuleObjectId;
   page?: number;
   perPage?: number;
+}
+
+export interface InstallPrebuiltRulesArgs {
+  ruleSpecifiers: Array<RuleVersionSpecifier>;
+}
+
+export interface InstallPrebuiltRulesResult {
+  installedRules: InstalledRuleBasicInfo[];
+  skippedRules: SkippedRuleInstall[];
+  errors: Array<PromisePoolError<{ rule_id: string }>>;
+}
+
+export interface UpgradePrebuiltRulesArgs {
+  ruleSpecifiers: RuleUpgradeSpecifier[];
+  conflictResolutionStrategy?: UpgradeConflictResolutionStrategy;
+  defaultPickVersion: PickVersionValues;
+  isDryRun: boolean;
+}
+
+export interface UpgradeAllPrebuiltRulesArgs {
+  filter?: PrebuiltRulesFilter;
+  conflictResolutionStrategy?: UpgradeConflictResolutionStrategy;
+  defaultPickVersion: PickVersionValues;
+  isDryRun: boolean;
+}
+
+export interface UpgradePrebuiltRulesResult {
+  updatedRules: UpgradedRuleBasicInfo[];
+  skippedRules: SkippedRuleUpgrade[];
+  errors: Array<PromisePoolError<{ rule_id: string }>>;
+  ruleUpgradeContexts: Map<string, RuleUpgradeContext>;
+}
+
+export interface RevertPrebuiltRulesArgs {
+  rules: RuleTriad[];
+}
+
+export interface RevertPrebuiltRulesResult {
+  results: Array<PromisePoolResult<RuleTriad, RuleResponse>>;
+  errors: Array<PromisePoolError<RuleTriad>>;
 }

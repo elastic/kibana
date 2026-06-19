@@ -17,16 +17,16 @@ import type { RuleAlertType } from '../../../../rule_schema';
 const CHUNK_SIZE = 1000;
 
 interface BulkDeleteRulesParams {
-  rulesClient: RulesClient;
   ruleIds: RuleObjectId[];
+  rulesClient: RulesClient;
   changeTracking?: SecurityRuleChangeTracking<never>;
 }
 
-export const bulkDeleteRules = async ({
-  rulesClient,
+export async function bulkDeleteRules({
   ruleIds,
+  rulesClient,
   changeTracking,
-}: BulkDeleteRulesParams): Promise<{ rules: RuleAlertType[]; errors: BulkOperationError[] }> => {
+}: BulkDeleteRulesParams): Promise<{ rules: RuleAlertType[]; errors: BulkOperationError[] }> {
   const chunks = chunk(ruleIds, CHUNK_SIZE);
   const allRules: RuleAlertType[] = [];
   const allErrors: BulkOperationError[] = [];
@@ -41,4 +41,4 @@ export const bulkDeleteRules = async ({
   }
 
   return { rules: allRules, errors: allErrors };
-};
+}

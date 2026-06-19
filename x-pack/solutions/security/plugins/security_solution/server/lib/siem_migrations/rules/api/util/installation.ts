@@ -12,7 +12,6 @@ import type { UpdateRuleMigrationRule } from '../../../../../../common/siem_migr
 import { initPromisePool } from '../../../../../utils/promise_pool';
 import type { SecuritySolutionApiRequestHandlerContext } from '../../../../..';
 import { performTimelinesInstallation } from '../../../../detection_engine/prebuilt_rules/logic/perform_timelines_installation';
-import { createPrebuiltRules } from '../../../../detection_engine/prebuilt_rules/logic/rule_objects/create_prebuilt_rules';
 import type { IDetectionRulesClient } from '../../../../detection_engine/rule_management/logic/detection_rules_client/detection_rules_client_interface';
 import type { RuleResponse } from '../../../../../../common/api/detection_engine';
 import type { StoredRuleMigrationRule } from '../../types';
@@ -54,19 +53,26 @@ const installPrebuiltRules = async (
 
   const errors: Error[] = [];
 
-  // Install prebuilt rules
-  const { results: newlyInstalledRules, errors: installPrebuiltRulesErrors } =
-    await createPrebuiltRules(detectionRulesClient, installable);
+  // Install prebuilt rules that are not yet installed
+  const { installedRules: newlyInstalledRules, errors: installPrebuiltRulesErrors } =
+    await detectionRulesClient.installPrebuiltRules({
+      ruleSpecifiers: installable,
+    });
   errors.push(
     ...installPrebuiltRulesErrors.map(
-      (err) => new Error(`Error installing prebuilt rule: ${getErrorMessage(err)}`)
+      ({ error }) => new Error(`Error installing prebuilt rule: ${getErrorMessage(error)}`)
     )
   );
 
-  const installedRules = [
-    ...alreadyInstalledRules,
-    ...newlyInstalledRules.map((value) => value.result),
-  ];
+  // Enable newly installed rules if requested
+  if (enabled && newlyInstalledRules.length > 0) {
+    await rulesClient.bulkEnableRules({
+      ids: newlyInstalledRules.map((r) => r.id),
+    });
+  }
+
+  // Combine already-installed and newly-installed rule info (only id + rule_id are needed below)
+  const installedRules = [...alreadyInstalledRules, ...newlyInstalledRules];
 
   // Create migration rules updates templates
   const rulesToUpdate: UpdateRuleMigrationRule[] = [];

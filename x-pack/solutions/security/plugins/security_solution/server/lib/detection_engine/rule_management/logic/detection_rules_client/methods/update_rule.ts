@@ -34,33 +34,33 @@ import { convertAlertingRuleToRuleResponse } from '../converters/convert_alertin
 import type { RuleParams } from '../../../../rule_schema';
 import { updateReadAuthEditRuleFields } from './rbac_methods/update_rule_with_read_privileges';
 
-interface UpdateRuleArguments {
+interface UpdateRuleDeps {
   actionsClient: ActionsClient;
   rulesClient: RulesClient;
   prebuiltRuleAssetClient: IPrebuiltRuleAssetsClient;
-  ruleUpdate: RuleUpdateProps;
   mlAuthz: MlAuthz;
   rulesAuthz: DetectionRulesAuthz;
+}
+
+interface UpdateRuleParams {
+  ruleUpdate: RuleUpdateProps;
+  deps: UpdateRuleDeps;
   changeTracking?: SecurityRuleChangeTracking;
 }
 
-export const updateRule = async ({
-  actionsClient,
-  rulesClient,
-  prebuiltRuleAssetClient,
+export async function updateRule({
   ruleUpdate,
-  mlAuthz,
-  rulesAuthz,
+  deps: { actionsClient, rulesClient, prebuiltRuleAssetClient, mlAuthz, rulesAuthz },
   changeTracking,
-}: UpdateRuleArguments): Promise<RuleResponse> => {
+}: UpdateRuleParams): Promise<RuleResponse> {
   const { rule_id: ruleId, id } = ruleUpdate;
 
   await validateMlAuth(mlAuthz, ruleUpdate.type);
 
   const existingRule = await getRuleByIdOrRuleId({
-    rulesClient,
     ruleId,
     id,
+    rulesClient,
   });
 
   if (existingRule == null) {
@@ -128,4 +128,4 @@ export const updateRule = async ({
     ...updatedRule,
     enabled,
   });
-};
+}

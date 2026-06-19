@@ -5,7 +5,10 @@
  * 2.0.
  */
 
+import { chunk } from 'lodash';
 import { i18n } from '@kbn/i18n';
+import type { ActionsClient } from '@kbn/actions-plugin/server';
+import type { RulesClient } from '@kbn/alerting-plugin/server';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import type { SecurityRuleChangeTracking } from '../../../../../../../common/detection_engine/rule_management/rule_change_tracking';
 
@@ -19,89 +22,130 @@ import {
 } from '../../import/errors';
 import { checkRuleExceptionReferences } from '../../import/check_rule_exception_references';
 import { getReferencedExceptionLists } from '../../import/gather_referenced_exceptions';
-import type { IDetectionRulesClient } from '../detection_rules_client_interface';
+import type { MlAuthz } from '../../../../../machine_learning/authz';
+import type { IPrebuiltRuleAssetsClient } from '../../../../prebuilt_rules/logic/rule_assets/prebuilt_rule_assets_client';
+import { importRule } from './import_rule';
+
+const CHUNK_PARSED_OBJECT_SIZE = 50;
+
+interface ImportRulesParams {
+  rulesToImport: RuleToImport[];
+  importOptions: ImportOptions;
+  deps: ImportRulesDeps;
+  changeTracking?: SecurityRuleChangeTracking<never>;
+}
+
+interface ImportOptions {
+  overwriteRules: boolean;
+  allowMissingConnectorSecrets?: boolean;
+}
+
+interface ImportRulesDeps {
+  actionsClient: ActionsClient;
+  rulesClient: RulesClient;
+  mlAuthz: MlAuthz;
+  prebuiltRuleAssetClient: IPrebuiltRuleAssetsClient;
+  ruleSourceImporter: IRuleSourceImporter;
+  savedObjectsClient: SavedObjectsClientContract;
+}
 
 /**
- * Imports rules
+ * Imports rules in batches of 50, setting bulkCount to the total number of rules.
  */
 
-export const importRules = async ({
-  allowMissingConnectorSecrets,
-  detectionRulesClient,
-  overwriteRules,
-  ruleSourceImporter,
-  rules,
-  savedObjectsClient,
+export async function importRules({
+  rulesToImport,
+  importOptions: { overwriteRules, allowMissingConnectorSecrets },
+  deps: {
+    actionsClient,
+    rulesClient,
+    mlAuthz,
+    prebuiltRuleAssetClient,
+    ruleSourceImporter,
+    savedObjectsClient,
+  },
   changeTracking,
-}: {
-  allowMissingConnectorSecrets?: boolean;
-  detectionRulesClient: IDetectionRulesClient;
-  overwriteRules: boolean;
-  ruleSourceImporter: IRuleSourceImporter;
-  rules: RuleToImport[];
-  savedObjectsClient: SavedObjectsClientContract;
-  changeTracking?: SecurityRuleChangeTracking<never>;
-}): Promise<Array<RuleResponse | RuleImportErrorObject>> => {
+}: ImportRulesParams): Promise<Array<RuleResponse | RuleImportErrorObject>> {
+  const bulkCount = rulesToImport.length;
+  const trackingWithBulkCount: SecurityRuleChangeTracking<never> = {
+    ...changeTracking,
+    metadata: {
+      bulkCount,
+      ...changeTracking?.metadata,
+    },
+  };
+
   const existingLists = await getReferencedExceptionLists({
-    rules,
+    rules: rulesToImport,
     savedObjectsClient,
   });
-  await ruleSourceImporter.setup(rules);
+  await ruleSourceImporter.setup(rulesToImport);
 
-  return Promise.all(
-    rules.map(async (rule) => {
-      const errors: RuleImportErrorObject[] = [];
+  const allResults: Array<RuleResponse | RuleImportErrorObject> = [];
 
-      try {
-        if (!ruleSourceImporter.isPrebuiltRule(rule)) {
-          rule.version = rule.version ?? 1;
-        }
+  for (const rulesBatch of chunk(rulesToImport, CHUNK_PARSED_OBJECT_SIZE)) {
+    const batchResults = await Promise.all(
+      rulesBatch.map(async (rule) => {
+        const errors: RuleImportErrorObject[] = [];
 
-        if (!ruleToImportHasVersion(rule)) {
-          return createRuleImportErrorObject({
-            message: i18n.translate(
-              'xpack.securitySolution.detectionEngine.rules.cannotImportPrebuiltRuleWithoutVersion',
-              {
-                defaultMessage:
-                  'Prebuilt rules must specify a "version" to be imported. [rule_id: {ruleId}]',
-                values: { ruleId: rule.rule_id },
-              }
-            ),
-            ruleId: rule.rule_id,
-          });
-        }
+        try {
+          if (!ruleSourceImporter.isPrebuiltRule(rule)) {
+            rule.version = rule.version ?? 1;
+          }
 
-        const [exceptionErrors, exceptions] = checkRuleExceptionReferences({
-          rule,
-          existingLists,
-        });
-        errors.push(...exceptionErrors);
-
-        const { immutable, ruleSource } = ruleSourceImporter.calculateRuleSource(rule);
-        const importedRule = await detectionRulesClient.importRule({
-          ruleToImport: {
-            ...rule,
-            exceptions_list: [...exceptions],
-          },
-          changeTracking,
-          overrideFields: { rule_source: ruleSource, immutable },
-          overwriteRules,
-          allowMissingConnectorSecrets,
-        });
-
-        return [...errors, importedRule];
-      } catch (err) {
-        const { error, message } = err;
-
-        const caughtError = isRuleImportError(err)
-          ? err
-          : createRuleImportErrorObject({
+          if (!ruleToImportHasVersion(rule)) {
+            return createRuleImportErrorObject({
+              message: i18n.translate(
+                'xpack.securitySolution.detectionEngine.rules.cannotImportPrebuiltRuleWithoutVersion',
+                {
+                  defaultMessage:
+                    'Prebuilt rules must specify a "version" to be imported. [rule_id: {ruleId}]',
+                  values: { ruleId: rule.rule_id },
+                }
+              ),
               ruleId: rule.rule_id,
-              message: message ?? error?.message ?? 'unknown error',
             });
+          }
 
-        return [...errors, caughtError];
-      }
-    })
-  ).then((results) => results.flat());
-};
+          const [exceptionErrors, exceptions] = checkRuleExceptionReferences({
+            rule,
+            existingLists,
+          });
+          errors.push(...exceptionErrors);
+
+          const { immutable, ruleSource } = ruleSourceImporter.calculateRuleSource(rule);
+          const importedRule = await importRule({
+            ruleToImport: {
+              ...rule,
+              exceptions_list: [...exceptions],
+            },
+            importOptions: {
+              overwriteRule: overwriteRules,
+              allowMissingConnectorSecrets,
+              overrideFields: { rule_source: ruleSource, immutable },
+            },
+            deps: { actionsClient, rulesClient, mlAuthz, prebuiltRuleAssetClient },
+            changeTracking: trackingWithBulkCount,
+          });
+
+          return [...errors, importedRule];
+        } catch (err) {
+          const { error, message } = err;
+
+          const caughtError = isRuleImportError(err)
+            ? err
+            : createRuleImportErrorObject({
+                ruleId: rule.rule_id,
+                message: message ?? error?.message ?? 'unknown error',
+              });
+
+          return [...errors, caughtError];
+        }
+      })
+    );
+
+    allResults.push(...batchResults.flat());
+  }
+
+  return allResults;
+}
