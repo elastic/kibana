@@ -181,7 +181,7 @@ describe('AlertConditionStep', () => {
       ).toBeInTheDocument();
     });
 
-    it('shows alert-query-missing callout when base query is present but alert query is empty', () => {
+    it('shows alert-condition-missing callout when base query is present but alert condition is empty', () => {
       renderStep(
         { queryCommitted: true },
         {
@@ -193,12 +193,29 @@ describe('AlertConditionStep', () => {
       );
 
       expect(screen.getByTestId('composeDiscoverAlertQueryMissing')).toBeInTheDocument();
-      expect(screen.getByText('Alert query required')).toBeInTheDocument();
+      expect(screen.getByText('Alert condition required')).toBeInTheDocument();
       expect(
         screen.getByText(
-          'Define an alert query in the query editor before continuing to the next step.'
+          'Define an alert condition in the query editor before continuing to the next step.'
         )
       ).toBeInTheDocument();
+    });
+
+    it('does not show alert-condition-missing callout when splitFailed callout is already shown', () => {
+      renderStep(
+        { queryCommitted: true },
+        {
+          formValueOverrides: {
+            kind: 'alert',
+            query: { format: 'composed', base: '', breach: { segment: '' } },
+          },
+        }
+      );
+
+      expect(
+        screen.getByText(/Couldn't automatically separate base query from alert condition/)
+      ).toBeInTheDocument();
+      expect(screen.queryByTestId('composeDiscoverAlertQueryMissing')).not.toBeInTheDocument();
     });
 
     it('does not show alert-query-missing callout when both queries are defined', () => {

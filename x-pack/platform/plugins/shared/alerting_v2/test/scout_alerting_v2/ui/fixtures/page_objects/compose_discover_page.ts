@@ -43,7 +43,7 @@ export class ComposeDiscoverPage {
   public readonly cancelButton: Locator;
   /**
    * Warning callout shown when the base query is applied but the breach
-   * (alert query) segment is missing.
+   * (alert condition) segment is missing.
    */
   public readonly breachQueryMissingCallout: Locator;
 

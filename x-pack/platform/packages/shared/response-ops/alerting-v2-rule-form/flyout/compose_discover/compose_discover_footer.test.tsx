@@ -222,6 +222,17 @@ describe('ComposeDiscoverFooter', () => {
       expect(screen.getByTestId('composeDiscoverNext')).toBeDisabled();
     });
 
+    it('disables Next when both base and breach segments are empty', () => {
+      renderFooter({
+        stateOverrides: { queryCommitted: true },
+        formValues: {
+          kind: 'alert',
+          query: { format: 'composed', base: '', breach: { segment: '' } },
+        },
+      });
+      expect(screen.getByTestId('composeDiscoverNext')).toBeDisabled();
+    });
+
     it('enables Next when both base and breach queries are defined', () => {
       renderFooter({
         stateOverrides: { queryCommitted: true },

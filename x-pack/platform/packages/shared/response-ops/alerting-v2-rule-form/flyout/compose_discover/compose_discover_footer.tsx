@@ -54,9 +54,9 @@ const VALIDATION_ERRORS_NEXT_TOOLTIP = i18n.translate(
   { defaultMessage: 'Resolve ES|QL control placeholders before continuing' }
 );
 
-const ALERT_QUERY_REQUIRED_TOOLTIP = i18n.translate(
-  'xpack.alertingV2.composeDiscover.flyout.alertQueryRequiredTooltip',
-  { defaultMessage: 'Define an alert query in the query editor before continuing' }
+const ALERT_CONDITION_REQUIRED_TOOLTIP = i18n.translate(
+  'xpack.alertingV2.composeDiscover.flyout.alertConditionRequiredTooltip',
+  { defaultMessage: 'Define an alert condition in the query editor before continuing' }
 );
 
 export interface ComposeDiscoverFooterProps {
@@ -99,7 +99,6 @@ export const ComposeDiscoverFooter = ({
     isAlert &&
     uiState.queryCommitted &&
     watchedQuery.format === 'composed' &&
-    watchedQuery.base.trim().length > 0 &&
     !watchedQuery.breach.segment.trim();
 
   const nextDisabled =
@@ -111,8 +110,7 @@ export const ComposeDiscoverFooter = ({
   const getNextTooltip = (): string | undefined => {
     if (hasValidationErrors) return VALIDATION_ERRORS_NEXT_TOOLTIP;
     if (isConditionStep && !uiState.queryCommitted) return NEXT_DISABLED_TOOLTIP;
-    // FIX(rna-program#600): Show a tooltip explaining why Next is disabled.
-    if (missingBreachQuery) return ALERT_QUERY_REQUIRED_TOOLTIP;
+    if (missingBreachQuery) return ALERT_CONDITION_REQUIRED_TOOLTIP;
     return undefined;
   };
 

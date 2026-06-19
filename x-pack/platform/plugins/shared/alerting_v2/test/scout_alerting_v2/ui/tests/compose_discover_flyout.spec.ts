@@ -309,6 +309,25 @@ test.describe(
       });
     });
 
+    test('breach query validation: Apply without typing anything disables Next', async ({
+      pageObjects,
+    }) => {
+      await test.step('open create flyout (sandbox opens automatically)', async () => {
+        await pageObjects.composeDiscover.openCreateFlyout();
+        await expect(pageObjects.composeDiscover.flyout).toBeVisible();
+        await expect(pageObjects.composeDiscover.sandboxApplyButton).toBeVisible();
+      });
+
+      await test.step('click Apply without typing anything', async () => {
+        await pageObjects.composeDiscover.clickApply();
+        await expect(pageObjects.composeDiscover.sandboxApplyButton).toBeHidden();
+      });
+
+      await test.step('Next button is disabled', async () => {
+        await expect(pageObjects.composeDiscover.nextButton).toBeDisabled();
+      });
+    });
+
     test('breach query validation: base-only query shows callout and disables Next', async ({
       pageObjects,
     }) => {
@@ -326,7 +345,7 @@ test.describe(
       await test.step('breach query missing callout is visible', async () => {
         await expect(pageObjects.composeDiscover.breachQueryMissingCallout).toBeVisible();
         await expect(pageObjects.composeDiscover.breachQueryMissingCallout).toContainText(
-          'Alert query required'
+          'Alert condition required'
         );
       });
 
