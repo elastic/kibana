@@ -11,7 +11,7 @@ import { relative } from 'path';
 import Fs from 'fs';
 import { createGunzip, createGzip, constants } from 'zlib';
 import { promisify } from 'util';
-import globby from 'globby';
+import { globby } from 'globby';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { createPromiseFromStreams } from '@kbn/utils';
 

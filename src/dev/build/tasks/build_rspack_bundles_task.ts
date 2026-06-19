@@ -13,7 +13,7 @@ import zlib from 'zlib';
 import { promisify } from 'util';
 import { availableParallelism } from 'os';
 
-import globby from 'globby';
+import { globby } from 'globby';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { runBuild } from '@kbn/rspack-optimizer';
 import { asyncForEachWithLimit } from '@kbn/std';

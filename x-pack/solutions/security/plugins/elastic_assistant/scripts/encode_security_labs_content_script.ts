@@ -10,7 +10,7 @@
 import * as fs from 'fs/promises';
 
 import * as path from 'path';
-import globby from 'globby';
+import { globby } from 'globby';
 import { existsSync } from 'fs';
 import {
   ENCODED_FILE_MICROMATCH_PATTERN,

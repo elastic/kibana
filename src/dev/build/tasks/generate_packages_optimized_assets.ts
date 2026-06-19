@@ -19,7 +19,7 @@ import { transform as lightningTransform, browserslistToTargets } from 'lightnin
 import browserslist from 'browserslist';
 import { asyncForEachWithLimit } from '@kbn/std';
 import type { ToolingLog } from '@kbn/tooling-log';
-import globby from 'globby';
+import { globby, globbySync } from 'globby';
 import del from 'del';
 
 import type { Task } from '../lib';
@@ -116,8 +116,7 @@ const getCategory = (relative: string) => {
 
 function categorizeAssets(assetDirs: string[]) {
   const assets = assetDirs.flatMap((assetDir) =>
-    globby
-      .sync(['**/*'], {
+    globbySync(['**/*'], {
         cwd: assetDir,
         ignore: ['*-manifest.json', '*.gz', '*.br'],
         absolute: true,

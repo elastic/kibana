@@ -10,7 +10,7 @@
 import Mustache from 'mustache';
 import { join } from 'path';
 import { readFileSync, writeFileSync, mkdirSync } from 'fs';
-import globby from 'globby';
+import { globbySync } from 'globby';
 import type { Task } from '../../lib';
 
 export const CopyBinScripts: Task = {
@@ -32,14 +32,13 @@ export const CopyBinScripts: Task = {
       };
 
       if (platform.isWindows()) {
-        globby.sync(['*.bat'], { cwd: scriptsSrc }).forEach((script) => {
+        globbySync(['*.bat'], { cwd: scriptsSrc }).forEach((script) => {
           const template = readFileSync(join(scriptsSrc, script), { encoding: 'utf-8' });
           const output = Mustache.render(template, templateVars);
           writeFileSync(join(scriptsDest, script), output);
         });
       } else {
-        globby
-          .sync(['*'], {
+        globbySync(['*'], {
             ignore: ['*.bat'],
             cwd: scriptsSrc,
           })
