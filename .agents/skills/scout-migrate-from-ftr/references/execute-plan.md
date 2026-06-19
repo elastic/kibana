@@ -60,6 +60,8 @@ FTR **deployment-agnostic** configs often load the same files under both statefu
 
 API and UI specs should both carry tags that match the intended `run-tests` / CI targets; see step 9.
 
+**Prefer tags inline.** Avoid wrapping tags in a named constant unless the same tag set is reused across multiple suites. Never change an existing tag constant's value to fit a different suite. Apply per-issue tag instructions inline and only to the tests specified.
+
 ### 3) Translate the test structure
 
 - `describe/it` -> `test.describe/test` or `apiTest.describe/apiTest` (but don't assume 1:1 `it` -> `test`).
@@ -131,7 +133,7 @@ For general Scout API auth patterns (`requestAuth`, `samlAuth`, common headers, 
 ### 6) Add helpers and constants
 
 - Put shared helpers in `test/scout*/ui/fixtures/helpers.ts` (or API helpers in API fixtures).
-- Add test-subject constants in `fixtures/constants.ts` for reuse across tests and page objects.
+- Add test-subject constants in `fixtures/constants.ts` for reuse across tests and page objects. For other shared values (archive paths, time ranges, etc.), follow the plan's "Shared constants to extract" list rather than introducing new constants during execution.
 - For `parallel_tests/` ingestion, use `parallel_tests/global.setup.ts` + `globalSetupHook` (no `esArchiver` in spec files).
 - For suite-wide Elasticsearch/Kibana state reset (e.g. reverting feature flags or global `uiSettings`, dropping hand-indexed data that affects other Scout configs sharing the cluster), use the **optional** `globalTeardownHook` in `parallel_tests/global.teardown.ts`. Picked up automatically when `runGlobalSetup: true` — no extra config flag. Use `esClient.indices.delete` / `deleteDataStream` / `deleteByQuery`, `kbnClient.uiSettings.unset(...)`, and `apiServices.core.settings(...)` to reset state. Per-test/per-suite cleanup still belongs in `afterEach`/`afterAll`.
 
