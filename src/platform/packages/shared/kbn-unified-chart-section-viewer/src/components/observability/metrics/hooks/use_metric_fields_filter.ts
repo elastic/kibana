@@ -19,14 +19,14 @@ export const useMetricFieldsFilter = ({
   searchTerm: string;
 }) => {
   const filteredMetricItems = useMemo(() => {
-    const fieldSearchHighlight = searchTerm.trim().toLowerCase();
+    const normalizedSearchTerm = searchTerm.trim().toLowerCase();
 
     return metricItems.filter((metricItem) => {
-      if (!fieldSearchHighlight) {
+      if (!normalizedSearchTerm) {
         return true;
       }
 
-      return fieldNameWildcardMatcher({ name: metricItem.metricName }, fieldSearchHighlight);
+      return fieldNameWildcardMatcher({ name: metricItem.metricName }, normalizedSearchTerm);
     });
   }, [metricItems, searchTerm]);
 
