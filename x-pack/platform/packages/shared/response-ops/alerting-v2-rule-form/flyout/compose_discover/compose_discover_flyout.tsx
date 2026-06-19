@@ -165,8 +165,6 @@ export interface ComposeDiscoverFlyoutProps {
   initialQuery?: string;
   /** ES|QL control variables from Discover — inlined into initialQuery when provided. */
   esqlVariables?: ESQLControlVariable[];
-  /** Time field from the Discover data view — seeds timeField in create mode. */
-  initialTimeField?: string;
 }
 
 const FLYOUT_TITLE_ID = 'composeDiscoverFlyoutTitle';
@@ -207,7 +205,6 @@ export function ComposeDiscoverFlyout({
   initialBuilderState,
   initialQuery,
   esqlVariables,
-  initialTimeField,
 }: ComposeDiscoverFlyoutProps): React.ReactElement | null {
   const isBuilderMode = Boolean(builderType);
   /*
@@ -279,12 +276,11 @@ export function ComposeDiscoverFlyout({
     if (initialQuery !== undefined) {
       return {
         ...EMPTY_FORM_VALUES,
-        timeField: initialTimeField ?? EMPTY_FORM_VALUES.timeField,
         query: discoverComposedQuery ?? discoverQueryToComposed(''),
       };
     }
     return EMPTY_FORM_VALUES;
-  }, [rule, mode, initialQuery, discoverComposedQuery, initialTimeField]);
+  }, [rule, mode, initialQuery, discoverComposedQuery]);
 
   const methods = useForm<FormValues>({ mode: 'onBlur', defaultValues });
   const [isConfirmCloseVisible, setIsConfirmCloseVisible] = useState(false);
@@ -394,11 +390,19 @@ export function ComposeDiscoverFlyout({
 
   const { timeFieldOptions, isTimeFieldResolved } = useResolveTimeField({
     query: timeFieldResolutionQuery,
-    timeField: watchedTimeField ?? '@timestamp',
+    timeField: (uiState.childOpen ? sandboxTimeField : watchedTimeField) ?? '@timestamp',
     onTimeFieldChange: handleResolvedTimeFieldChange,
     http: baseServices.http,
     dataViews: baseServices.dataViews,
   });
+
+  // Gate sandbox autoRun on the time field the sandbox actually executes with — not
+  // only the form value, which can lead autoRun by one render.
+  const sandboxIsTimeFieldResolved = useMemo(
+    () =>
+      isTimeFieldResolved && timeFieldOptions.some((option) => option.value === sandboxTimeField),
+    [isTimeFieldResolved, timeFieldOptions, sandboxTimeField]
+  );
 
   useEffect(() => {
     if (rule || initialQuery === undefined) {
@@ -949,7 +953,7 @@ export function ComposeDiscoverFlyout({
                 timeField={sandboxTimeField}
                 onTimeFieldChange={isBuilderMode ? undefined : setSandboxTimeField}
                 timeFieldOptions={timeFieldOptions}
-                isTimeFieldResolved={isTimeFieldResolved}
+                isTimeFieldResolved={sandboxIsTimeFieldResolved}
                 dateRange={dateRange}
                 onDateRangeChange={setDateRange}
                 activeTab={uiState.activeTab}

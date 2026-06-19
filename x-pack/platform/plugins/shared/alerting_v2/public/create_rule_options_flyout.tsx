@@ -37,8 +37,6 @@ export interface CreateRuleOptionsFlyoutLegacyItem {
 export interface CreateRuleOptionsFlyoutProps {
   onClose: () => void;
   initialQuery?: string;
-  /** Time field from the Discover data view — forwarded to the compose flyout. */
-  initialTimeField?: string;
   esqlVariables?: ESQLControlVariable[];
   legacyRuleTypes?: CreateRuleOptionsFlyoutLegacyItem[];
   /**
@@ -75,7 +73,6 @@ interface DiscoverQuerySnapshot {
 const CreateRuleOptionsFlyoutInner = ({
   onClose,
   initialQuery,
-  initialTimeField,
   esqlVariables: staticEsqlVariables,
   legacyRuleTypes,
   subscribe,
@@ -249,7 +246,6 @@ const CreateRuleOptionsFlyoutInner = ({
         onCreateRule={handleCreateRule}
         isSaving={isSaving}
         initialQuery={query}
-        initialTimeField={initialTimeField}
         esqlVariables={esqlVariables}
       />
     );

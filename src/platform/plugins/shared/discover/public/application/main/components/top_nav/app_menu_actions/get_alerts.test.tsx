@@ -248,7 +248,6 @@ describe('getAlertsAppMenuItem', () => {
 
       expect(flyoutElement.type).toBe(createRuleOptionsFlyoutMock);
       expect(flyoutElement.props.initialQuery).toBe('FROM test-index | WHERE message != ""');
-      expect(flyoutElement.props.initialTimeField).toBe('@timestamp');
       expect(flyoutElement.props.onClose).toBe(onFinishAction);
       expect(flyoutElement.props.subscribe).toEqual(expect.any(Function));
       expect(flyoutElement.props.getQuery).toEqual(expect.any(Function));

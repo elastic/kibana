@@ -195,7 +195,6 @@ export const getAlertsAppMenuItem = ({
             <CreateRuleOptionsFlyout
               onClose={onFinishAction}
               initialQuery={esqlQuery}
-              initialTimeField={timeField}
               esqlVariables={esqlVariables}
               legacyRuleTypes={legacyRuleTypes}
               subscribe={subscribe}

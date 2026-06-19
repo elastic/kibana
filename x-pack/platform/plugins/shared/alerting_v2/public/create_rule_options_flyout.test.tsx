@@ -157,22 +157,6 @@ describe('CreateRuleOptionsFlyout', () => {
       expect(capturedComposeProps.esqlVariables).toBe(esqlVariables);
     });
 
-    it('passes initialTimeField through to ComposeDiscoverFlyout', async () => {
-      renderFlyout({ initialQuery: 'FROM logs-*', initialTimeField: 'timestamp' });
-      resolveServices(mockServices);
-
-      await waitFor(() => {
-        expect(screen.getByTestId('mockRuleCreateOptionsFlyout')).toBeInTheDocument();
-      });
-
-      fireEvent.click(screen.getByTestId('esqlBtn'));
-
-      await waitFor(() => {
-        expect(screen.getByTestId('mockComposeDiscoverFlyout')).toBeInTheDocument();
-      });
-      expect(capturedComposeProps.initialTimeField).toBe('timestamp');
-    });
-
     it('passes undefined initialQuery when initialQuery is not provided', async () => {
       renderFlyout();
       resolveServices(mockServices);
