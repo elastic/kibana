@@ -47,7 +47,7 @@ apiTest.describe('POST /api/data_views - as code', { tag: tags.deploymentAgnosti
   });
 
   apiTest('can create a data view with index_pattern only', async ({ apiClient }) => {
-    const uniqueId = `dv-create-basic-${Date.now()}-${Math.random()}`;
+    const uniqueIndexPattern = `logs-basic-${Date.now()}-*`;
 
     const response = await apiClient.post(BASE_PATH, {
       headers: {
@@ -55,18 +55,17 @@ apiTest.describe('POST /api/data_views - as code', { tag: tags.deploymentAgnosti
         ...adminApiCredentials.apiKeyHeader,
       },
       body: {
-        id: uniqueId,
-        index_pattern: 'logs-*',
+        index_pattern: uniqueIndexPattern,
       },
       responseType: 'json',
     });
 
-    createdIds.push(uniqueId);
+    createdIds.push(response.body.id);
 
     expect(response).toHaveStatusCode(201);
-    expect(response.body.id).toBe(uniqueId);
+    expect(response.body.id).toBeDefined();
     expect(response.body.data).toMatchObject({
-      index_pattern: 'logs-*',
+      index_pattern: uniqueIndexPattern,
     });
     expect(response.body.meta.managed).toBe(false);
     expect(response.body.meta.version).toBeDefined();
@@ -76,7 +75,7 @@ apiTest.describe('POST /api/data_views - as code', { tag: tags.deploymentAgnosti
   apiTest(
     'can create a data view with index_pattern, name, and time_field',
     async ({ apiClient }) => {
-      const uniqueId = `dv-create-full-${Date.now()}-${Math.random()}`;
+      const uniqueIndexPattern = `metrics-full-${Date.now()}-*`;
 
       const response = await apiClient.post(BASE_PATH, {
         headers: {
@@ -84,20 +83,19 @@ apiTest.describe('POST /api/data_views - as code', { tag: tags.deploymentAgnosti
           ...adminApiCredentials.apiKeyHeader,
         },
         body: {
-          id: uniqueId,
-          index_pattern: 'metrics-*',
+          index_pattern: uniqueIndexPattern,
           name: 'My Metrics View',
           time_field: 'timestamp',
         },
         responseType: 'json',
       });
 
-      createdIds.push(uniqueId);
+      createdIds.push(response.body.id);
 
       expect(response).toHaveStatusCode(201);
-      expect(response.body.id).toBe(uniqueId);
+      expect(response.body.id).toBeDefined();
       expect(response.body.data).toMatchObject({
-        index_pattern: 'metrics-*',
+        index_pattern: uniqueIndexPattern,
         name: 'My Metrics View',
         time_field: 'timestamp',
       });
@@ -107,7 +105,6 @@ apiTest.describe('POST /api/data_views - as code', { tag: tags.deploymentAgnosti
   apiTest(
     'can create a data view with field_settings and return transformed shape',
     async ({ apiClient }) => {
-      const uniqueId = `dv-create-field-settings-${Date.now()}-${Math.random()}`;
       const uniqueIndexPattern = `logs-field-settings-${Date.now()}-*`;
 
       const response = await apiClient.post(BASE_PATH, {
@@ -116,7 +113,6 @@ apiTest.describe('POST /api/data_views - as code', { tag: tags.deploymentAgnosti
           ...adminApiCredentials.apiKeyHeader,
         },
         body: {
-          id: uniqueId,
           index_pattern: uniqueIndexPattern,
           field_settings: {
             bytes_field: {
@@ -138,10 +134,10 @@ apiTest.describe('POST /api/data_views - as code', { tag: tags.deploymentAgnosti
         responseType: 'json',
       });
 
-      createdIds.push(uniqueId);
+      createdIds.push(response.body.id);
 
       expect(response).toHaveStatusCode(201);
-      expect(response.body.id).toBe(uniqueId);
+      expect(response.body.id).toBeDefined();
       expect(response.body.data.index_pattern).toBe(uniqueIndexPattern);
       expect(response.body.data.field_settings).toMatchObject({
         bytes_field: {
@@ -191,7 +187,6 @@ apiTest.describe('POST /api/data_views - as code', { tag: tags.deploymentAgnosti
           ...readOnlyApiCredentials.apiKeyHeader,
         },
         body: {
-          id: `dv-create-no-manage-${Date.now()}-${Math.random()}`,
           index_pattern: 'forbidden-*',
         },
         responseType: 'json',
@@ -208,7 +203,6 @@ apiTest.describe('POST /api/data_views - as code', { tag: tags.deploymentAgnosti
         ...adminApiCredentials.apiKeyHeader,
       },
       body: {
-        id: 'dv-missing-pattern',
         name: 'No Pattern',
       },
       responseType: 'json',
@@ -224,7 +218,6 @@ apiTest.describe('POST /api/data_views - as code', { tag: tags.deploymentAgnosti
         ...adminApiCredentials.apiKeyHeader,
       },
       body: {
-        id: `dv-empty-pattern-${Date.now()}-${Math.random()}`,
         index_pattern: '',
       },
       responseType: 'json',
@@ -247,48 +240,27 @@ apiTest.describe('POST /api/data_views - as code', { tag: tags.deploymentAgnosti
     expect(response).toHaveStatusCode(400);
   });
 
-  apiTest('returns 409 when creating a data view with a duplicate id', async ({ apiClient }) => {
-    const uniqueId = `dv-create-dup-id-${Date.now()}-${Math.random()}`;
-
-    // Create the first data view
-    const firstResponse = await apiClient.post(BASE_PATH, {
+  apiTest('returns 400 when id is provided in the request body', async ({ apiClient }) => {
+    const response = await apiClient.post(BASE_PATH, {
       headers: {
         ...COMMON_HEADERS,
         ...adminApiCredentials.apiKeyHeader,
       },
       body: {
-        id: uniqueId,
-        index_pattern: 'first-pattern-*',
+        id: `dv-should-be-rejected-${Date.now()}-${Math.random()}`,
+        index_pattern: `id-rejected-${Date.now()}-*`,
       },
       responseType: 'json',
     });
 
-    createdIds.push(uniqueId);
-    expect(firstResponse).toHaveStatusCode(201);
-
-    // Attempt to create another data view with the same id
-    const duplicateResponse = await apiClient.post(BASE_PATH, {
-      headers: {
-        ...COMMON_HEADERS,
-        ...adminApiCredentials.apiKeyHeader,
-      },
-      body: {
-        id: uniqueId,
-        index_pattern: 'second-pattern-*',
-        name: 'Different Name',
-      },
-      responseType: 'json',
-    });
-
-    expect(duplicateResponse).toHaveStatusCode(409);
-    expect(duplicateResponse.body.message).toContain(uniqueId);
-    expect(duplicateResponse.body.message.toLowerCase()).toContain('conflict');
+    expect(response).toHaveStatusCode(400);
+    expect(response.body.message).toContain('id');
   });
 
-  apiTest('returns 400 when creating a data view with a duplicate name', async ({ apiClient }) => {
+  apiTest('returns 409 when creating a data view with a duplicate name', async ({ apiClient }) => {
     const sharedName = `Duplicate Name Test ${Date.now()}-${Math.random()}`;
-    const firstId = `dv-create-dup-name-1-${Date.now()}-${Math.random()}`;
-    const secondId = `dv-create-dup-name-2-${Date.now()}-${Math.random()}`;
+    const firstIndexPattern = `name-dup-first-${Date.now()}-*`;
+    const secondIndexPattern = `name-dup-second-${Date.now()}-*`;
 
     // Create the first data view with an explicit name
     const firstResponse = await apiClient.post(BASE_PATH, {
@@ -297,44 +269,37 @@ apiTest.describe('POST /api/data_views - as code', { tag: tags.deploymentAgnosti
         ...adminApiCredentials.apiKeyHeader,
       },
       body: {
-        id: firstId,
-        index_pattern: 'name-dup-first-*',
+        index_pattern: firstIndexPattern,
         name: sharedName,
       },
       responseType: 'json',
     });
 
-    createdIds.push(firstId);
+    createdIds.push(firstResponse.body.id);
     expect(firstResponse).toHaveStatusCode(201);
 
-    // Attempt to create a second data view with the same name but different id
+    // Attempt to create a second data view with the same name
     const duplicateResponse = await apiClient.post(BASE_PATH, {
       headers: {
         ...COMMON_HEADERS,
         ...adminApiCredentials.apiKeyHeader,
       },
       body: {
-        id: secondId,
-        index_pattern: 'name-dup-second-*',
+        index_pattern: secondIndexPattern,
         name: sharedName,
       },
       responseType: 'json',
     });
 
-    // Track for cleanup in case it unexpectedly succeeds
-    createdIds.push(secondId);
-
-    expect(duplicateResponse).toHaveStatusCode(400);
+    expect(duplicateResponse).toHaveStatusCode(409);
     expect(duplicateResponse.body.message).toContain('Duplicate data view');
     expect(duplicateResponse.body.message).toContain(sharedName);
   });
 
   apiTest(
-    'returns 400 when index_pattern collides with an existing unnamed data view',
+    'returns 409 when index_pattern collides with an existing unnamed data view',
     async ({ apiClient }) => {
       const sharedPattern = `collision-pattern-${Date.now()}-*`;
-      const firstId = `dv-create-dup-pattern-1-${Date.now()}-${Math.random()}`;
-      const secondId = `dv-create-dup-pattern-2-${Date.now()}-${Math.random()}`;
 
       // Create a data view without an explicit name (getName falls back to index_pattern)
       const firstResponse = await apiClient.post(BASE_PATH, {
@@ -343,13 +308,12 @@ apiTest.describe('POST /api/data_views - as code', { tag: tags.deploymentAgnosti
           ...adminApiCredentials.apiKeyHeader,
         },
         body: {
-          id: firstId,
           index_pattern: sharedPattern,
         },
         responseType: 'json',
       });
 
-      createdIds.push(firstId);
+      createdIds.push(firstResponse.body.id);
       expect(firstResponse).toHaveStatusCode(201);
 
       // Attempt to create another data view with the same index_pattern and no name
@@ -359,16 +323,12 @@ apiTest.describe('POST /api/data_views - as code', { tag: tags.deploymentAgnosti
           ...adminApiCredentials.apiKeyHeader,
         },
         body: {
-          id: secondId,
           index_pattern: sharedPattern,
         },
         responseType: 'json',
       });
 
-      // Track for cleanup in case it unexpectedly succeeds
-      createdIds.push(secondId);
-
-      expect(duplicateResponse).toHaveStatusCode(400);
+      expect(duplicateResponse).toHaveStatusCode(409);
       expect(duplicateResponse.body.message).toContain('Duplicate data view');
     }
   );

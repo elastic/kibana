@@ -8,9 +8,7 @@
  */
 
 import type { IRouter, StartServicesAccessor } from '@kbn/core/server';
-import { savedDataViewSpecSchema } from '@kbn/as-code-data-views-schema';
-
-import { asCodeResponseSchema } from './schema';
+import { asCodeResponseSchema, savedDataViewSpecSchemaWithoutId } from './schema';
 import { getDataViewsAsCodeService, handleErrors } from './utils';
 import { BASE_PATH, INITIAL_REST_VERSION } from './constants';
 import type { DataViewsAsCodeServerPluginStartDependencies } from '../types';
@@ -37,7 +35,7 @@ export const registerPostDataViewAsCodeRoute = (
         version: INITIAL_REST_VERSION,
         validate: {
           request: {
-            body: savedDataViewSpecSchema,
+            body: savedDataViewSpecSchemaWithoutId,
           },
           response: {
             201: {
