@@ -8,12 +8,6 @@ on:
 jobs:
   trigger_flaky:
     name: Trigger flaky test runner on /flaky comment
-    # Human commenters must be org members/owners. First-party automations (the
-    # Flaky Fix Confidence workflow) post `/flaky` as `kibanamachine` or
-    # `github-actions[bot]` depending on the gh-aw token; allow those bot logins
-    # explicitly so the agent can self-trigger the runner. Only first-party
-    # workflows can post as these accounts, and the command body is still validated
-    # against the strict config regex below.
     if: |
       github.event.issue.pull_request
       && (
