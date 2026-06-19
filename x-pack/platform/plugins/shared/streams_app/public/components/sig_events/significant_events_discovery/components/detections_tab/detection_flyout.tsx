@@ -270,12 +270,10 @@ const PEAK_ALERTS_LABEL = i18n.translate('xpack.streams.detectionFlyout.peakAler
   defaultMessage: 'Peak alerts',
 });
 
-const STATUS_PROCESSED_LABEL = i18n.translate(
-  'xpack.streams.detectionFlyout.status.processed',
-  { defaultMessage: 'Processed' }
-);
+const STATUS_PROCESSED_LABEL = i18n.translate('xpack.streams.detectionFlyout.status.processed', {
+  defaultMessage: 'Processed',
+});
 
-const STATUS_PENDING_LABEL = i18n.translate(
-  'xpack.streams.detectionFlyout.status.pending',
-  { defaultMessage: 'Pending' }
-);
+const STATUS_PENDING_LABEL = i18n.translate('xpack.streams.detectionFlyout.status.pending', {
+  defaultMessage: 'Pending',
+});
