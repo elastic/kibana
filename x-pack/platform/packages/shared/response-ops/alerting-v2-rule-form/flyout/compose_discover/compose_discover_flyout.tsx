@@ -116,6 +116,11 @@ const NEXT_DISABLED_TOOLTIP = i18n.translate(
   { defaultMessage: 'Define a query in the editor before continuing' }
 );
 
+const NEXT_BUILDER_DISABLED_TOOLTIP = i18n.translate(
+  'xpack.alertingV2.composeDiscover.flyout.nextBuilderDisabledTooltip',
+  { defaultMessage: 'Complete the required fields before continuing' }
+);
+
 const VALIDATION_ERRORS_NEXT_TOOLTIP = i18n.translate(
   'xpack.alertingV2.composeDiscover.flyout.validationErrorsNextTooltip',
   {
@@ -577,6 +582,24 @@ export function ComposeDiscoverFlyout({
   const currentStep = steps[uiState.step];
   const isLastStep = uiState.step === steps.length - 1;
 
+  const builderFirstStepValid = useMemo(() => {
+    if (!isBuilderMode || currentStep?.id !== 'builderCondition') {
+      return true;
+    }
+    const definition = builderType ? RULE_BUILDER_REGISTRY[builderType] : undefined;
+    return definition?.validate?.(uiState, builderState) ?? false;
+  }, [isBuilderMode, builderType, currentStep?.id, uiState, builderState]);
+
+  const isFirstStepReady = useMemo(() => {
+    if (currentStep?.id === 'builderCondition') {
+      return builderFirstStepValid;
+    }
+    if (currentStep?.id === 'alertCondition') {
+      return uiState.queryCommitted;
+    }
+    return true;
+  }, [currentStep?.id, builderFirstStepValid, uiState.queryCommitted]);
+
   // ── YAML mode state ──────────────────────────────────────────────────────
   const [yamlText, setYamlText] = useState('');
   yamlTextRef.current = yamlText;
@@ -913,10 +936,12 @@ export function ComposeDiscoverFlyout({
                             content={
                               hasValidationErrors
                                 ? VALIDATION_ERRORS_NEXT_TOOLTIP
-                                : (currentStep?.id === 'alertCondition' ||
-                                    currentStep?.id === 'builderCondition') &&
-                                  !uiState.queryCommitted
-                                ? NEXT_DISABLED_TOOLTIP
+                                : !isFirstStepReady &&
+                                  (currentStep?.id === 'alertCondition' ||
+                                    currentStep?.id === 'builderCondition')
+                                ? currentStep?.id === 'builderCondition'
+                                  ? NEXT_BUILDER_DISABLED_TOOLTIP
+                                  : NEXT_DISABLED_TOOLTIP
                                 : undefined
                             }
                           >
@@ -925,11 +950,7 @@ export function ComposeDiscoverFlyout({
                               iconType="arrowRight"
                               iconSide="right"
                               isDisabled={
-                                uiState.childOpen ||
-                                hasValidationErrors ||
-                                ((currentStep?.id === 'alertCondition' ||
-                                  currentStep?.id === 'builderCondition') &&
-                                  !uiState.queryCommitted)
+                                uiState.childOpen || hasValidationErrors || !isFirstStepReady
                               }
                               onClick={handleNext}
                               data-test-subj="composeDiscoverNext"
