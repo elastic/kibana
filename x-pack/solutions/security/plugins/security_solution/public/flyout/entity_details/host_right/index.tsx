@@ -246,7 +246,8 @@ export const HostPanel = memo(function HostPanel({
     [openDetailsPanel, defaultTab]
   );
 
-  const noEntityInStore = entityStoreV2Enabled && !entityFromStoreResult.isLoading && !observedHost.entityRecord;
+  const noEntityInStore =
+    entityStoreV2Enabled && !entityFromStoreResult.isLoading && !observedHost.entityRecord;
 
   const { tabs, selectedTabId, setSelectedTabId } = useEntityPanelTabs({
     entityRecord: observedHost.entityRecord ?? null,
