@@ -235,7 +235,7 @@ describe('ensureAgentPoliciesFleetServerKeysAndPolicies', () => {
     ]);
   });
 
-  it('should throw if preconfigured fleet server policy deploy fails due to ES bulk error', async () => {
+  it('should log an error and still schedule regular policies if a preconfigured fleet server policy deploy fails', async () => {
     const logger = loggingSystemMock.createLogger();
     const esClient = elasticsearchServiceMock.createInternalClient();
     const soClient = savedObjectsClientMock.create();
@@ -248,17 +248,24 @@ describe('ensureAgentPoliciesFleetServerKeysAndPolicies', () => {
           is_default_fleet_server: true,
           is_preconfigured: true,
         },
+        { id: 'policy1', revision: 3 },
       ],
     } as any);
 
-    mockSetupQueries(esClient, { revisions: { 'fleet-server-policy': 1 } });
+    mockSetupQueries(esClient, { revisions: { 'fleet-server-policy': 1, policy1: 1 } });
     mockedAgentPolicyService.deployPolicies.mockRejectedValue(
       new Error('ES bulk operation failed')
     );
 
-    await expect(
-      ensureAgentPoliciesFleetServerKeysAndPolicies({ logger, esClient, soClient })
-    ).rejects.toThrow('ES bulk operation failed');
+    await ensureAgentPoliciesFleetServerKeysAndPolicies({ logger, esClient, soClient });
+
+    expect(logger.error).toBeCalledWith(
+      expect.stringContaining('Failed to deploy fleet server policies [fleet-server-policy]')
+    );
+    // A fleet server deploy failure must not prevent regular outdated policies from being scheduled
+    expect(scheduleDeployAgentPoliciesTask).toBeCalledWith(undefined, [
+      { id: 'policy1', spaceId: undefined },
+    ]);
   });
 
   it('should synchronously deploy preconfigured fleet server policies identified by has_fleet_server flag', async () => {
