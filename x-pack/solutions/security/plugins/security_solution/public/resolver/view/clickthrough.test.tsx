@@ -64,7 +64,7 @@ describe("Resolver, when rendered with the `indices` prop set to `[]` and the `d
   });
 
   describe("when rerendered with the `indices` prop set to `['awesome_index'`]", () => {
-    beforeEach(async () => {
+    beforeEach(() => {
       simulator.indices = ['awesome_index'];
     });
     // Combining assertions here for performance. Unfortunately, Enzyme + jsdom + React is slow.
