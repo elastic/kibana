@@ -30,7 +30,7 @@ export function validateRelatedIntegration(
   }
 
   // Accept any valid semver range-set, e.g. `^8.2.0 || ^9.0.0`, `>=8.2.0`, `~1.2.3`
-  if (semver.validRange(value.version) === null) {
+  if (!semver.validRange(value.version)) {
     return {
       code: 'ERR_FIELD_FORMAT',
       path: `${path}.version`,

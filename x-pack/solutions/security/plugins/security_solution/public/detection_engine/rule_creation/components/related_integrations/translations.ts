@@ -74,7 +74,7 @@ export const VERSION_DEPENDENCY_INVALID = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleDescription.relatedIntegrations.validation.versionInvalid',
   {
     defaultMessage:
-      'Version constraint is invalid. Provide a valid semver range, e.g. 1.2.3, ^1.2.3, ~1.2.3, >=8.2.0 or ^8.2.0 || ^9.0.0.',
+      'Version constraint is invalid. Use a valid semver range expression e.g. ^1.2.3, ~1.2.3, 1.2.3, >=1.2.3, or ^1.2.3 || ^2.0.0.',
   }
 );
 
