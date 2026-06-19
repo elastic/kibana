@@ -1,0 +1,31 @@
+{
+  "sha1": "eaac37715d45942c6452c041fd8cdb007e1677a8",
+  "tests": [
+    {
+      "id": "1ba94a566a4a9c8-175e93d0dd1adc4",
+      "title": "Global rule event log list loads the shareable component with the all-spaces switch",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/examples/triggers_actions_ui_example/test/scout_examples/ui/tests/global_rule_event_log_list.spec.ts",
+        "line": 130,
+        "column": 7
+      }
+    },
+    {
+      "id": "1ba94a566a4a9c8-4ffc18980f40763",
+      "title": "Global rule event log list filters rule types via filteredRuleTypes and respects the active space",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/examples/triggers_actions_ui_example/test/scout_examples/ui/tests/global_rule_event_log_list.spec.ts",
+        "line": 135,
+        "column": 7
+      }
+    }
+  ]
+}

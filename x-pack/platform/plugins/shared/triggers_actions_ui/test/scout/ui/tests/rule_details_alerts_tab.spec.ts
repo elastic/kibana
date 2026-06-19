@@ -16,8 +16,7 @@ const ALERTS_INDEX_PATTERN = '.alerts-stack.alerts-*';
 const STATEFUL_ALERTS_INDEX = '.internal.alerts-stack.alerts-default-000001';
 const INDEX_THRESHOLD_RULE_TYPE_ID = '.index-threshold';
 
-// Failing: See https://github.com/elastic/kibana/issues/255610
-test.describe.skip('Rule details alerts tab', { tag: tags.stateful.classic }, () => {
+test.describe('Rule details alerts tab', { tag: tags.stateful.classic }, () => {
   let indexThresholdRuleId: string;
 
   test.beforeAll(async ({ apiServices }) => {
@@ -162,7 +161,10 @@ test.describe.skip('Rule details alerts tab', { tag: tags.stateful.classic }, ()
       await expect(statusCells).toHaveCount(1);
       await expect(statusCells).toHaveText(/active/i);
 
-      await expect(pageObjects.ruleDetailsPage.alertSummaryTotalCount).toHaveText('1');
+      // The alert summary widget is scoped to the rule UUID + time range only; it is
+      // not wired to the alerts table search bar, so its total stays at 2 (1 active +
+      // 1 recovered) even though the table is now filtered down to the single active alert.
+      await expect(pageObjects.ruleDetailsPage.alertSummaryTotalCount).toHaveText('2');
     });
   });
 });
