@@ -89,7 +89,7 @@ export const OverviewPage: React.FC = () => {
           <QuickFilters />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <FilterGroup handleFilterChange={handleFilterChange} />
+          <FilterGroup handleFilterChange={handleFilterChange} showRemoteClusterFilter />
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer />

@@ -56,8 +56,8 @@ export function AlertConditionStep({
   const query = watch('query');
 
   const baseQuery = query.format === 'composed' ? query.base : '';
-  const alertBlock = query.format === 'composed' ? query.blocks.breach : '';
-  const fullQuery = query.format === 'standalone' ? query.breach : '';
+  const alertBlock = query.format === 'composed' ? query.breach.segment : '';
+  const fullQuery = query.format === 'standalone' ? query.breach.query : '';
 
   // Use the base query for field lookup when tracking is on; fall back to full breach query.
   const committedQuery = useMemo(() => {
@@ -101,7 +101,8 @@ export function AlertConditionStep({
   // Auto-populate group fields from the STATS BY clause whenever the committed
   // query changes. Re-derives on every new Apply so switching indices updates
   // the group fields instead of leaving stale values from the previous query.
-  const autoPopulatedForRef = useRef<string | null>(null);
+  // Skips the first run when editing to preserve API-seeded grouping defaults.
+  const autoPopulatedForRef = useRef<string | null>(isEditing ? committedQuery : null);
   useEffect(() => {
     if (!state.queryCommitted || !committedQuery) return;
     if (autoPopulatedForRef.current === committedQuery) return;
@@ -203,7 +204,7 @@ export function AlertConditionStep({
                 announceOnMount={false}
                 size="s"
                 color="primary"
-                iconType="iInCircle"
+                iconType="info"
                 title={i18n.translate(
                   'xpack.alertingV2.composeDiscover.alertCondition.splitFailedTitle',
                   {

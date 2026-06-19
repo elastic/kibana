@@ -6,12 +6,13 @@
  */
 
 import { Logger, OnSetup, PluginSetup, PluginStart } from '@kbn/core-di';
-import { CoreSetup } from '@kbn/core-di-server';
+import type { PluginInitializerContext } from '@kbn/core/server';
+import { CoreSetup, PluginInitializer } from '@kbn/core-di-server';
 import type { ContainerModuleLoadOptions } from 'inversify';
+import type { PluginConfig } from '../config';
 import type { AlertingServerSetupDependencies, AlertingServerStartDependencies } from '../types';
 import { registerFeaturePrivileges } from '../lib/security/privileges';
 import { registerSavedObjects } from '../saved_objects';
-import { alertingV2UiSettings } from '../ui_settings/advanced_settings';
 import { EventLoggerToken } from '../lib/services/event_log_service/tokens';
 import { registerStepDefinitions } from '../lib/workflow_extensions/register_step_definitions';
 import { registerTriggerDefinitions } from '../lib/workflow_extensions/register_trigger_definitions';
@@ -20,6 +21,7 @@ import {
   ACTION_POLICY_EVENT_ACTIONS,
   ACTION_POLICY_EVENT_PROVIDER,
 } from '../lib/dispatcher/steps/constants';
+import { alertingAdvancedSettings } from '../settings/advanced_settings';
 
 /**
  * Core platform setup-phase registrations (feature privileges, saved objects,
@@ -36,23 +38,26 @@ export function bindOnSetup({ bind }: ContainerModuleLoadOptions) {
 
     registerFeaturePrivileges(container.get(PluginSetup('features')));
 
-    registerSavedObjects({
-      savedObjects: container.get(CoreSetup('savedObjects')),
-      encryptedSavedObjects: container.get(
-        PluginSetup<AlertingServerSetupDependencies['encryptedSavedObjects']>(
-          'encryptedSavedObjects'
-        )
-      ),
-      logger,
-    });
+    const config = container
+      .get<PluginInitializerContext<PluginConfig>['config']>(PluginInitializer('config'))
+      .get<PluginConfig>();
 
-    container.get(CoreSetup('capabilities')).registerProvider(() => ({
-      alertingVTwo: {},
-    }));
+    // Adding the config check bc alertingV2 SOs are WIP
+    if (config.enabled) {
+      registerSavedObjects({
+        savedObjects: container.get(CoreSetup('savedObjects')),
+        encryptedSavedObjects: container.get(
+          PluginSetup<AlertingServerSetupDependencies['encryptedSavedObjects']>(
+            'encryptedSavedObjects'
+          )
+        ),
+        logger,
+      });
+    }
 
     const uiSettingsSetup = container.get(CoreSetup('uiSettings'));
 
-    uiSettingsSetup.registerGlobal(alertingV2UiSettings);
+    uiSettingsSetup.registerGlobal(alertingAdvancedSettings);
 
     const eventLogService = container.get(
       PluginSetup<AlertingServerSetupDependencies['eventLog']>('eventLog')
