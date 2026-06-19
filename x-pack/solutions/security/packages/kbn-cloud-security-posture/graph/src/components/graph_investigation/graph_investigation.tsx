@@ -12,6 +12,7 @@ import { i18n } from '@kbn/i18n';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { buildEsQuery, isCombinedFilter } from '@kbn/es-query';
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
+import type { ProjectRouting } from '@kbn/cloud-security-posture-common/schema/graph/v1';
 import { css } from '@emotion/react';
 import { Panel } from '@xyflow/react';
 import { getEsQueryConfig } from '@kbn/data-service';
@@ -188,6 +189,13 @@ export interface GraphInvestigationProps {
      * The initial timerange for the graph investigation view.
      */
     timeRange: TimeRange;
+
+    /**
+     * CPS project routing for the logs/events query. Forwarded as-is to the Graph API.
+     * Alerts and entity-store enrichment are always fetched from the origin project,
+     * regardless of this value. Leave undefined for non-CPS environments.
+     */
+    projectRouting?: ProjectRouting;
   };
 
   /**
@@ -236,6 +244,7 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
       originEventIds,
       entityIds,
       timeRange: initialTimeRange,
+      projectRouting,
     },
     showInvestigateInTimeline = false,
     showToggleSearch = false,
@@ -315,6 +324,7 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
           end: timeRange.to,
           entityIds: entityIdsForApi,
           pinnedIds: pinnedEuids,
+          projectRouting,
         },
         nodesLimit: GRAPH_NODES_LIMIT,
       },
@@ -358,6 +368,51 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
       countryFlagsPopover,
       eventPopover,
     ].some(({ state: { isOpen } }) => isOpen);
+
+    // d3-zoom suppresses native `mousedown`/`mouseup` on the ReactFlow pane,
+    // so `react-focus-on` (EuiPopover) and `EuiOutsideClickDetector` (KQL
+    // autocomplete) never see the click. Synthesize both events on the
+    // graph container in capture phase (before d3-zoom) so they reach those
+    // detectors but stay "inside" the parent EuiFlyout. Graph-internal
+    // popovers own their own dismissal and are mutually exclusive with
+    // external ones — when any is open, every `.euiPopover__panel` is ours.
+    const isExternalOverlayOpen = useCallback(
+      () =>
+        (!isPopoverOpen && document.querySelector('.euiPopover__panel') !== null) ||
+        document.querySelector('#kbnTypeahead__items') !== null,
+      [isPopoverOpen]
+    );
+
+    const handlePointerDownCapture = useCallback(
+      (event: React.PointerEvent<HTMLDivElement>) => {
+        const eventTarget = event.target as HTMLElement | null;
+        if (!eventTarget?.closest?.('.react-flow__pane')) return;
+
+        // The KQL search input grows to fit a long query while it is focused.
+        // d3-zoom calls `preventDefault()` on the pane's pointer events, which
+        // suppresses the browser's native focus change — so clicking the graph
+        // would otherwise leave the input focused and expanded. Blur it
+        // explicitly so it collapses back to a single line, matching what
+        // happens when clicking any other DOM node outside the input.
+        const activeElement = document.activeElement as HTMLElement | null;
+        const isSearchInputFocused = Boolean(activeElement?.closest?.('.kbnQueryBar__wrap'));
+        if (isSearchInputFocused) {
+          activeElement?.blur();
+        }
+
+        // Synthesize the suppressed `mousedown`/`mouseup` on the graph container
+        // in capture phase (before d3-zoom) so `EuiOutsideClickDetector` (which
+        // collapses the search input and closes KQL autocomplete) and
+        // `react-focus-on` (EuiPopover) react to the click while it stays
+        // "inside" the parent EuiFlyout.
+        if (!isSearchInputFocused && !isExternalOverlayOpen()) return;
+
+        const opts = { bubbles: true, cancelable: true, view: window, button: 0 };
+        event.currentTarget.dispatchEvent(new MouseEvent('mousedown', opts));
+        event.currentTarget.dispatchEvent(new MouseEvent('mouseup', opts));
+      },
+      [isExternalOverlayOpen]
+    );
 
     const { originEventIdsSet, originAlertIdsSet, originEntityIdsSet } = useMemo(() => {
       const eventIds = new Set<string>();
@@ -491,6 +546,7 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
           data-test-subj={GRAPH_INVESTIGATION_TEST_ID}
           direction="column"
           gutterSize="none"
+          onPointerDownCapture={handlePointerDownCapture}
           css={css`
             height: 100%;
 

@@ -56,7 +56,6 @@ export class UnifiedTabsExamplesPlugin
           href: 'https://github.com/elastic/kibana/tree/main/src/platform/packages/shared/kbn-unified-tabs/README.md',
           iconType: 'logoGithub',
           target: '_blank',
-          size: 's',
         },
       ],
     });

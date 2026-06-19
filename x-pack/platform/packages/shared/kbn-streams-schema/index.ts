@@ -87,6 +87,7 @@ export {
   hasSameEsql,
   replaceFromSources,
   rewriteFromSources,
+  stripMetadata,
 } from './src/helpers/esql_helpers';
 
 export * from './src/ingest_pipeline_processors';
@@ -137,6 +138,8 @@ export {
 export {
   type EsqlQuery,
   esqlQuerySchema,
+  type QueryFeature,
+  queryFeatureSchema,
   type StreamQuery,
   type QueryLink,
   type QueryType,
@@ -204,11 +207,11 @@ export {
 export type {
   SignificantEventsResponse,
   SignificantEventsGetResponse,
-  SignificantEventsPreviewResponse,
-  SignificantEventsGenerateResponse,
   GeneratedSignificantEventQuery,
   SignificantEventsQueriesGenerationResult,
   SignificantEventsQueriesGenerationTaskResult,
+  LifecycleDetection,
+  EventLifecycleResponse,
 } from './src/api/significant_events';
 export { generatedSignificantEventQuerySchema } from './src/api/significant_events';
 
@@ -227,7 +230,6 @@ export {
   type BaseFeature,
   type IdentifiedFeature,
   type IgnoredFeature,
-  type FeatureStatus,
   DATASET_ANALYSIS_FEATURE_TYPE,
   LOG_SAMPLES_FEATURE_TYPE,
   LOG_PATTERNS_FEATURE_TYPE,
@@ -245,7 +247,6 @@ export {
   baseFeatureSchema,
   identifiedFeatureSchema,
   ignoredFeatureSchema,
-  featureStatusSchema,
 } from './src/feature';
 
 export { FeatureAccumulator } from './src/feature_accumulator';
@@ -271,27 +272,33 @@ export type { IdentifyFeaturesResult, IterationResult } from './src/api/features
 export { tokenCountSchema, iterationResultSchema } from './src/api/features';
 
 export {
-  type GenerateInsightsResult,
-  type Insight,
-  type InsightCore,
-  type InsightEvidence,
-  type InsightImpactLevel,
-  type InsightImpactLevelNumeric,
-  type InsightUserEvaluation,
-  type InsightMeta,
-  type SaveInsightBody,
-  insightSchema,
-  insightCoreSchema,
-  insightMetaSchema,
-  insightEvidenceSchema,
-  insightImpactLevelSchema,
-  insightImpactLevelNumericSchema,
-  insightUserEvaluationSchema,
-  INSIGHT_IMPACT_LEVEL_MAP,
-  getImpactLevel,
-} from './src/insights';
-export type { OnboardingResult } from './src/onboarding';
-export { OnboardingStep } from './src/onboarding';
+  SIG_EVENT_STATUS_OPTIONS,
+  SIG_EVENT_IMPACT_OPTIONS,
+  detectionSchema,
+  type Detection,
+  discoverySchema,
+  type Discovery,
+  sigEventSchema,
+  sigEventStatusSchema,
+  sigEventImpactSchema,
+  type SigEvent,
+  type KnowledgeIndicator,
+  type SigEventStatus,
+  type SigEventImpact,
+} from './src/sig_events';
+export type {
+  StreamsKIsOnboardingResult,
+  StreamsKIsOnboardingFeaturesResult,
+  StreamsKIsOnboardingQueriesResult,
+  StreamsKIsOnboardingStatusResult,
+} from './src/onboarding';
+export {
+  StreamsKIsOnboardingStep,
+  STREAMS_KIS_ONBOARDING_IN_PROGRESS_STATUSES,
+} from './src/onboarding';
+export type { SigEventsWorkflowStatusResult } from './src/workflows';
+export { SigEventsWorkflowStatus } from './src/workflows';
+
 export { streamsOasDefinitions } from './src/oas_definitions';
 export type { StreamsOasDefinitions } from './src/oas_definitions';
 

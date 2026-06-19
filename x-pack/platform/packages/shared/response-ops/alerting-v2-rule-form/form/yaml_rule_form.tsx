@@ -26,48 +26,39 @@ export { formValuesToYamlObject, parseYamlToFormValues, serializeFormToYaml };
 
 export interface YamlRuleFormProps {
   services: RuleFormServices;
-  onSubmit: (values: FormValues) => void;
+  /** Optional submit handler. In the compose-discover flyout context, save is
+   *  handled externally via methods.handleSubmit() — no onSubmit needed. The
+   *  standalone RuleForm still passes this to handle its own submit flow. */
+  onSubmit?: (values: FormValues) => void;
   isDisabled?: boolean;
   isSubmitting?: boolean;
   /** YAML buffer, lifted to the parent so it survives Form↔YAML toggle. */
   yamlText: string;
   /** Setter for the lifted YAML buffer. */
   setYamlText: (yaml: string) => void;
+  /**
+   * Synchronous commit for blur events. In the compose-discover flyout the RHF
+   * form uses `ComposeFormValues`, so a raw `reset(FormValues)` would corrupt it.
+   * The flyout passes a callback that routes through `formValuesFromYamlToCompose`.
+   * When absent (standalone context), blur falls back to `useFormContext().reset()`.
+   */
+  onBlurSync?: (values: FormValues) => void;
 }
 
 /**
  * YAML-based rule form editor.
  *
  * Provides a YAML editor for editing rule configuration with ES|QL autocomplete.
- * Validates the YAML on submission and converts it to FormValues.
+ * Parsing is always lenient — YAML syntax errors are surfaced, but missing
+ * required fields get safe defaults. Field-level validation is handled by RHF
+ * at submit time through `methods.handleSubmit()`.
  *
- * ## YAML→Form sync — design notes
+ * In the compose-discover flyout context, the parent owns submission and
+ * passes a debounced `setYamlText` that also syncs into RHF on every
+ * keystroke. The blur handler here acts as a "flush now" fallback.
  *
- * The YAML buffer (`yamlText`) is the source of truth while the user is in YAML
- * mode. Form state must be synced from `yamlText` before the user can act on
- * form-shaped data (toggle to Form view, save the rule, etc.). There are three
- * sync points today:
- *
- *   1. **`handleBlur`** (this component) — fires when the Monaco editor loses
- *      focus. Best-effort: covers cases where focus moves to non-state-changing
- *      targets (clicking page chrome, etc.). Can race with synchronous
- *      unmounts, so it cannot be the only mechanism.
- *
- *   2. **`handleModeChange`** in `RuleFormContent` — when the user toggles to
- *      Form view, that handler explicitly flushes YAML→Form *before* changing
- *      mode. This avoids the race where setting `editMode='form'` would
- *      unmount this component and dispose the Monaco blur listener before its
- *      callback fires.
- *
- *   3. **`handleSubmit`** (this component) — Save submits the form, which
- *      runs through this component's submit handler. It re-parses `yamlText`
- *      and passes parsed values to the parent's `onSubmit` directly; doesn't
- *      depend on blur having fired.
- *
- * **If you add a new path that unmounts this component or acts on form state
- * while in YAML mode, you must flush YAML→Form at that point.** Don't rely
- * on the blur callback — Monaco's `onDidBlurEditorText` is disposed during
- * unmount and can race with synchronous state changes.
+ * In the standalone RuleForm context, the parent passes `onSubmit` and
+ * this component renders an `<EuiForm>` with its own submit handler.
  */
 export const YamlRuleForm = ({
   services,
@@ -76,6 +67,7 @@ export const YamlRuleForm = ({
   isSubmitting = false,
   yamlText,
   setYamlText,
+  onBlurSync,
 }: YamlRuleFormProps) => {
   const [error, setError] = useState<string | null>(null);
   const { reset } = useFormContext<FormValues>();
@@ -86,45 +78,33 @@ export const YamlRuleForm = ({
     search: services.data.search.search,
   });
 
-  const applyYamlValuesToForm = useCallback(
-    (values: FormValues) => {
-      reset(values);
-    },
-    [reset]
-  );
-
-  // Shared parse step used by both submit and blur. Returns the parsed
-  // FormValues on success, null on failure (with side-effect of setting error).
-  const parseAndStoreError = useCallback((): FormValues | null => {
-    const result = parseYamlToFormValues(yamlText);
-    if (result.error) {
-      setError(result.error);
-      return null;
-    }
-    if (result.values) {
-      setError(null);
-      return result.values;
-    }
-    return null;
-  }, [yamlText]);
-
   const handleSubmit = useCallback(
     (e: React.FormEvent) => {
       e.preventDefault();
-      const values = parseAndStoreError();
-      if (values) {
-        onSubmit(values);
+      const result = parseYamlToFormValues(yamlText);
+      if (result.error !== null) {
+        setError(result.error);
+        return;
       }
+      setError(null);
+      onSubmit?.(result.values);
     },
-    [parseAndStoreError, onSubmit]
+    [yamlText, onSubmit]
   );
 
   const handleBlur = useCallback(() => {
-    const values = parseAndStoreError();
-    if (values) {
-      applyYamlValuesToForm(values);
+    const result = parseYamlToFormValues(yamlText);
+    if (result.error !== null) {
+      setError(result.error);
+      return;
     }
-  }, [parseAndStoreError, applyYamlValuesToForm]);
+    setError(null);
+    if (onBlurSync) {
+      onBlurSync(result.values);
+    } else {
+      reset(result.values);
+    }
+  }, [yamlText, onBlurSync, reset]);
 
   const handleYamlChange = useCallback(
     (newYaml: string) => {

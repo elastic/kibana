@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { WorkflowsSearchParams } from '@kbn/workflows';
+
 export const ruleKeys = {
   all: ['rule'] as const,
   lists: () => [...ruleKeys.all, 'list'] as const,
@@ -18,7 +20,7 @@ export const ruleKeys = {
   }) => [...ruleKeys.lists(), filters] as const,
   details: () => [...ruleKeys.all, 'details'] as const,
   detail: (id: string) => [...ruleKeys.details(), id] as const,
-  tags: () => [...ruleKeys.all, 'tags'] as const,
+  tags: (filter?: string) => [...ruleKeys.all, 'tags', { filter }] as const,
 };
 
 export const workflowKeys = {
@@ -26,12 +28,14 @@ export const workflowKeys = {
   details: () => [...workflowKeys.all, 'details'] as const,
   detail: (id: string) => [...workflowKeys.details(), id] as const,
   searches: () => [...workflowKeys.all, 'search'] as const,
-  search: (params: { query: string }) => [...workflowKeys.searches(), params] as const,
+  search: (params: Pick<WorkflowsSearchParams, 'query' | 'tags'>) =>
+    [...workflowKeys.searches(), params] as const,
 };
 
 export const matcherSuggestionKeys = {
   all: ['matcherSuggestions'] as const,
-  dataFields: () => [...matcherSuggestionKeys.all, 'dataFields'] as const,
+  dataFields: (matcher?: string) =>
+    [...matcherSuggestionKeys.all, 'dataFields', { matcher: matcher || undefined }] as const,
 };
 
 export const actionPolicyKeys = {
@@ -53,7 +57,19 @@ export const actionPolicyKeys = {
 
 export const executionHistoryKeys = {
   all: ['executionHistory'] as const,
-  list: (filters: { page: number; perPage: number }) =>
-    [...executionHistoryKeys.all, 'list', filters] as const,
-  countSince: (since: string) => [...executionHistoryKeys.all, 'countSince', since] as const,
+  list: (filters: {
+    page: number;
+    perPage: number;
+    search?: string;
+    outcome?: 'all' | 'dispatched' | 'throttled';
+  }) => [...executionHistoryKeys.all, 'list', filters] as const,
+  countSince: (
+    since: string,
+    filters: { search?: string; outcome?: 'all' | 'dispatched' | 'throttled' } = {}
+  ) => [...executionHistoryKeys.all, 'countSince', since, filters] as const,
+};
+
+export const userProfileKeys = {
+  all: ['userProfile'] as const,
+  bulk: (uids: string[]) => [...userProfileKeys.all, 'bulk', [...uids].sort()] as const,
 };

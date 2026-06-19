@@ -47,7 +47,6 @@ export class ESQLUxExamplePlugin
           label: 'ES|QL Editor',
           href: 'https://github.com/elastic/kibana/tree/main/src/platform/packages/private/kbn-esql-editor',
           iconType: 'logoGithub',
-          size: 's',
           target: '_blank',
         },
       ],

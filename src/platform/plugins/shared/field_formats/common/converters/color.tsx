@@ -12,7 +12,7 @@ import React from 'react';
 import { findLast, cloneDeep } from 'lodash';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import { FieldFormat } from '../field_format';
-import type { ReactContextTypeSingleConvert, TextContextTypeConvert } from '../types';
+import type { ReactConvertFunction, TextContextTypeConvert } from '../types';
 import { FIELD_FORMAT_IDS } from '../types';
 import { asPrettyString } from '../utils';
 import { DEFAULT_CONVERTER_COLOR } from '../constants/color_default';
@@ -70,7 +70,7 @@ export class ColorFormat extends FieldFormat {
     return asPrettyString(val, options);
   };
 
-  reactConvertSingle: ReactContextTypeSingleConvert = (val, options) => {
+  reactConvert: ReactConvertFunction = (val, options) => {
     const missing = this.checkForMissingValueReact(val);
     if (missing) {
       return missing;

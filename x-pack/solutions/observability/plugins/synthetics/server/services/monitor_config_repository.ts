@@ -6,8 +6,10 @@
  */
 
 import type {
+  ISavedObjectsRepository,
   SavedObject,
   SavedObjectReference,
+  SavedObjectsBulkGetObject,
   SavedObjectsClientContract,
   SavedObjectsFindOptions,
   SavedObjectsFindResult,
@@ -66,6 +68,46 @@ export class MonitorConfigRepository {
       { type: legacySyntheticsMonitorTypeSingle, id },
     ]);
     const resolved = results.saved_objects.find((obj) => obj?.attributes);
+    if (!resolved) {
+      throw SavedObjectsErrorHelpers.createGenericNotFoundError(
+        syntheticsMonitorSavedObjectType,
+        id
+      );
+    }
+    return resolved;
+  }
+
+  /**
+   * Look up a monitor by id across the supplied spaces.
+   *
+   * Required for cross-space callers (e.g. the monitor health API) because
+   * `get` is bound to the request-scoped saved objects client and therefore
+   * only ever sees the request's space — see Kibana issue #270477.
+   *
+   * The multi-space type (`syntheticsMonitorSavedObjectType`,
+   * `namespaceType: 'multiple'`) supports a per-object `namespaces` array, so
+   * a single entry covers all spaces. The legacy type
+   * (`legacySyntheticsMonitorTypeSingle`, `namespaceType: 'single'`) only
+   * accepts one namespace per object, so we add one entry per space.
+   */
+  async getAcrossSpaces(
+    id: string,
+    namespaces: string[],
+    soClient: SavedObjectsClientContract | ISavedObjectsRepository = this.soClient
+  ): Promise<SavedObject<EncryptedSyntheticsMonitorAttributes>> {
+    const uniqueNamespaces = [...new Set(namespaces)];
+    const bulkObjects: SavedObjectsBulkGetObject[] = [
+      { type: syntheticsMonitorSavedObjectType, id, namespaces: uniqueNamespaces },
+      ...uniqueNamespaces.map((namespace) => ({
+        type: legacySyntheticsMonitorTypeSingle,
+        id,
+        namespaces: [namespace],
+      })),
+    ];
+    const { saved_objects: results } = await soClient.bulkGet<EncryptedSyntheticsMonitorAttributes>(
+      bulkObjects
+    );
+    const resolved = results.find((obj) => obj?.attributes && !obj.error);
     if (!resolved) {
       throw SavedObjectsErrorHelpers.createGenericNotFoundError(
         syntheticsMonitorSavedObjectType,

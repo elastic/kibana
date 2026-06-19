@@ -19,7 +19,7 @@ import { USER_PANEL_OBSERVED_USER_QUERY_ID, USER_PANEL_RISK_SCORE_QUERY_ID } fro
 import type { EntityDetailsPath } from '../shared/components/left_panel/left_panel_header';
 import { EntityInsight } from '../../../cloud_security_posture/components/entity_insight';
 import type { IdentityFields } from '../../document_details/shared/utils';
-import type { UserItem } from '../../../../common/search_strategy';
+import type { EntityRiskScore, UserItem } from '../../../../common/search_strategy';
 import type { ObservedEntityData } from '../shared/components/observed_entity/types';
 import type { EntityStoreRecord } from '../shared/hooks/use_entity_from_store';
 import { VisualizationsSection } from '../shared/components/right/visualizations_section';
@@ -44,6 +44,8 @@ interface UserPanelContentProps {
   /** When true (e.g. entity store v2 enabled but no entity found), hide risk score and asset criticality. */
   skipRiskAndCriticality?: boolean;
   entityStoreEntityId?: string;
+  /** See {@link RiskSummaryProps.prefetchedResolutionRisk}. */
+  prefetchedResolutionRisk?: EntityRiskScore<EntityType.user>;
 }
 
 export const UserPanelContent = ({
@@ -59,6 +61,7 @@ export const UserPanelContent = ({
   entityRecord,
   skipRiskAndCriticality = false,
   entityStoreEntityId,
+  prefetchedResolutionRisk,
 }: UserPanelContentProps) => {
   const hasEntityResolutionLicense = useHasEntityResolutionLicense();
 
@@ -87,6 +90,7 @@ export const UserPanelContent = ({
               isPreviewMode={isPreviewMode}
               entityType={EntityType.user}
               entityId={entityRecord?.entity.id}
+              prefetchedResolutionRisk={prefetchedResolutionRisk}
             />
             <EuiHorizontalRule />
           </>

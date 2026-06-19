@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { monaco } from '@kbn/monaco';
+import { monaco } from '@kbn/code-editor';
 import { ESQL_APPLY_TEXT_REPLACEMENT_COMMAND } from '@kbn/esql-language';
 import {
   ESQLVariableType,
@@ -314,13 +314,20 @@ export const addEditorKeyBindings = (
   editor: monaco.editor.IStandaloneCodeEditor,
   onQuerySubmit: (source: QuerySource) => void,
   toggleVisor: () => void,
-  onPrettifyQuery: () => void
+  onPrettifyQuery: () => void,
+  onGenerateFromComment?: () => void
 ) => {
   // Add editor key bindings
   editor.addCommand(
     // eslint-disable-next-line no-bitwise
     monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter,
     () => onQuerySubmit(QuerySource.MANUAL)
+  );
+
+  editor.addCommand(
+    // eslint-disable-next-line no-bitwise
+    monaco.KeyMod.Shift | monaco.KeyCode.Enter,
+    () => editor.trigger('keyboard', 'type', { text: '\n' })
   );
 
   editor.addCommand(
@@ -336,6 +343,14 @@ export const addEditorKeyBindings = (
       onPrettifyQuery();
     }
   );
+
+  if (onGenerateFromComment) {
+    editor.addCommand(
+      // eslint-disable-next-line no-bitwise
+      monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyJ,
+      () => onGenerateFromComment()
+    );
+  }
 };
 
 export const addTabKeybindingRules = () => {

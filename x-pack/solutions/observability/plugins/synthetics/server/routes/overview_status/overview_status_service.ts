@@ -42,6 +42,10 @@ interface LocationStatusEntry {
   monitorIntervalSeconds?: number;
   configId?: string;
   tags?: string[];
+  // Human-readable location label from observer.geo.name. Resolved via a
+  // terms sub-agg because the field is wildcard-typed and top_metrics cannot
+  // collect it. Falls back to locationId when unavailable.
+  locationLabel?: string;
   // The latest error reason for the most recent final summary on this
   // (monitor, location). Only populated for down checks where the heartbeat
   // doc has an `error` object — `error.message` is `text` so we collect it
@@ -73,6 +77,29 @@ export class OverviewStatusService {
       this.getQueryResult(),
     ]);
 
+    return this.buildOverviewStatusResult(allConfigs, statusResult);
+  }
+
+  /**
+   * Same output as {@link getOverviewStatus}, but reuses monitor saved objects already loaded
+   * (e.g. diagnostics bundle) to avoid a second full `getAll` over synthetics monitors.
+   */
+  async getOverviewStatusWithPrefetchedMonitors(
+    allConfigs: Array<
+      SavedObjectsFindResult<EncryptedSyntheticsMonitorAttributes & { [ConfigKey.URLS]?: string }>
+    >
+  ) {
+    this.filterData = await getMonitorFilters(this.routeContext);
+    const statusResult = await this.getQueryResult();
+    return this.buildOverviewStatusResult(allConfigs, statusResult);
+  }
+
+  private buildOverviewStatusResult(
+    allConfigs: Array<
+      SavedObjectsFindResult<EncryptedSyntheticsMonitorAttributes & { [ConfigKey.URLS]?: string }>
+    >,
+    statusResult: Map<string, LocationStatus>
+  ) {
     const { up, down, pending, upConfigs, downConfigs, pendingConfigs, disabledConfigs } =
       this.processOverviewStatus(allConfigs, statusResult);
 
@@ -103,7 +130,7 @@ export class OverviewStatusService {
     };
   }
 
-  getEsDataFilters() {
+  async getEsDataFilters() {
     const { spaceId, request } = this.routeContext;
     const params = request.query || {};
     const {
@@ -112,9 +139,11 @@ export class OverviewStatusService {
       tags,
       monitorTypes,
       projects,
+      remoteNames,
       showFromAllSpaces,
     } = params;
     const { locationIds } = this.filterData;
+    const ccsEnabled = isCCSEnabled(this.routeContext.server);
     const getTermFilter = (field: string, value: string | string[] | undefined) => {
       if (!value || isEmpty(value)) {
         return [];
@@ -136,34 +165,27 @@ export class OverviewStatusService {
         },
       ];
     };
-    // Local pings must always honour the active space, otherwise a monitor in
-    // a different local space would surface as a remote-rendered entry on the
-    // Overview. Remote-cluster pings (with `_index` like
-    // "cluster1:.ds-synthetics-*") carry the *remote* cluster's
-    // `meta.space_id`, so applying the local space terms there would
-    // over-filter them — accept them regardless of space via a `wildcard`
-    // match on the cluster-alias prefix in `_index`. Note: `regexp` is not
-    // allowed on `_index`; `wildcard` is.
-    const ccsEnabled = isCCSEnabled(this.routeContext.server);
-    const skipSpaceFilter = showFromAllSpaces || !spaceId || spaceId === ALL_SPACES_ID;
-    const localSpaceTerms: QueryDslQueryContainer = {
-      terms: { 'meta.space_id': [spaceId, ALL_SPACES_ID] },
-    };
-    const spaceFilter: QueryDslQueryContainer = ccsEnabled
-      ? {
-          bool: {
-            should: [localSpaceTerms, { wildcard: { _index: '*:*' } }],
-            minimum_should_match: 1,
-          },
-        }
-      : localSpaceTerms;
-
     const filters: QueryDslQueryContainer[] = [
-      ...(skipSpaceFilter ? [] : [spaceFilter]),
+      ...(await this.getSpaceFilters(spaceId, Boolean(showFromAllSpaces))),
       ...getTermFilter('monitor.type', monitorTypes),
       ...getTermFilter('tags', tags),
       ...getTermFilter('monitor.project.id', projects),
     ];
+
+    // `remoteNames` filters pings to those originating from the selected
+    // remote clusters. Cluster alias is encoded in the `_index` metadata field
+    // as `<alias>:<index>` (CCS convention). `_index` does not support
+    // `terms`/`regexp`, so we use a `bool.should` of `wildcard` filters — one
+    // per selected alias.
+    if (ccsEnabled && remoteNames?.length) {
+      const aliases = Array.isArray(remoteNames) ? remoteNames : [remoteNames];
+      filters.push({
+        bool: {
+          should: aliases.map((alias) => ({ wildcard: { _index: `${alias}:*` } })),
+          minimum_should_match: 1,
+        },
+      });
+    }
 
     if (query) {
       filters.push({
@@ -183,6 +205,86 @@ export class OverviewStatusService {
       });
     }
     return filters;
+  }
+
+  /**
+   * Build the `meta.space_id` scoping for the status query.
+   *
+   * Local pings are already bounded by the saved-object query, which fetches
+   * monitors with `namespaces: ['*']` intersected with the user's permitted
+   * spaces; any local ping without a matching saved object is dropped during
+   * reconciliation. So local pings never need a `meta.space_id` constraint here.
+   *
+   * Remote (CCS) pings have *no* local saved object to join against, so they are
+   * the only pings that can leak across spaces. We therefore tie remote pings to
+   * the active space's `meta.space_id` (plus `*`). The one exception is a user
+   * who can read synthetics in *all* spaces — they are allowed to see remote
+   * pings from every space, so the constraint is dropped entirely for them.
+   */
+  private async getSpaceFilters(
+    spaceId: string,
+    showFromAllSpaces: boolean
+  ): Promise<QueryDslQueryContainer[]> {
+    if (!spaceId || spaceId === ALL_SPACES_ID) {
+      return [];
+    }
+
+    const activeSpaceTerms: QueryDslQueryContainer = {
+      terms: { 'meta.space_id': [spaceId, ALL_SPACES_ID] },
+    };
+
+    // Single-space view: both local and remote pings are tied to the active space.
+    if (!showFromAllSpaces) {
+      return [activeSpaceTerms];
+    }
+
+    // "All permitted spaces" on a local-only cluster: there are no remote pings,
+    // and local pings are bounded by the SO join, so nothing to add. Checked
+    // before the privilege lookup below so non-CCS deployments short-circuit
+    // without an authz round-trip.
+    if (!isCCSEnabled(this.routeContext.server)) {
+      return [];
+    }
+
+    // "All permitted spaces" + the user can read synthetics everywhere: no
+    // scoping at all (local via the SO join, remote unbounded across clusters).
+    if (await this.hasAllSpacesReadAccess()) {
+      return [];
+    }
+
+    // "All permitted spaces" without all-spaces access: keep local pings
+    // unconstrained (bounded by the SO join) while tying remote pings to the
+    // active space so they cannot leak in from spaces the user isn't viewing.
+    return [
+      {
+        bool: {
+          minimum_should_match: 1,
+          should: [
+            // Local pings have no cluster-alias prefix in `_index` → any space.
+            { bool: { must_not: [{ wildcard: { _index: '*:*' } }] } },
+            // Remote pings carry a cluster-alias prefix → tied to the active space.
+            { bool: { filter: [{ wildcard: { _index: '*:*' } }, activeSpaceTerms] } },
+          ],
+        },
+      },
+    ];
+  }
+
+  /**
+   * Whether the current user can read synthetics in every space (current and
+   * future). Mirrors the saved-object query's permitted-spaces semantics for the
+   * remote-ping path, which has no saved-object join to rely on.
+   */
+  private async hasAllSpacesReadAccess(): Promise<boolean> {
+    const { server, request } = this.routeContext;
+    const { authz } = server.security;
+    if (!authz.mode.useRbacForRequest(request)) {
+      return true;
+    }
+    const { hasAllRequested } = await authz
+      .checkPrivilegesWithRequest(request)
+      .globally({ kibana: [authz.actions.api.get('uptime-read')] });
+    return hasAllRequested;
   }
 
   async getQueryResult() {
@@ -209,7 +311,7 @@ export class OverviewStatusService {
         // Note: _index is NOT included here because top_metrics does not support
         // metadata fields. We use a separate terms sub-aggregation for _index instead.
         // observer.geo.name is also excluded because it is a wildcard type field
-        // which top_metrics cannot collect. We fall back to locationId for remote monitors.
+        // which top_metrics cannot collect. We use a separate terms sub-agg instead.
         ...(ccsEnabled
           ? [
               { field: 'kibanaUrl' },
@@ -232,7 +334,7 @@ export class OverviewStatusService {
                   FINAL_SUMMARY_FILTER,
                   getRangeFilter({ from: range.from, to: range.to }),
                   getTimespanFilter({ from: 'now-15m', to: 'now' }),
-                  ...this.getEsDataFilters(),
+                  ...(await this.getEsDataFilters()),
                 ] as QueryDslQueryContainer[],
               },
             },
@@ -271,11 +373,20 @@ export class OverviewStatusService {
                   // so we use a separate terms agg to determine the source index.
                   // For a given monitor+location bucket the latest ping typically
                   // comes from a single index, so size:1 is sufficient.
+                  // observer.geo.name is a wildcard field which top_metrics
+                  // cannot collect, so we use a terms sub-agg to resolve
+                  // the human-readable location label for remote monitors.
                   ...(ccsEnabled
                     ? {
                         index_name: {
                           terms: {
                             field: '_index',
+                            size: 1,
+                          },
+                        },
+                        location_name: {
+                          terms: {
+                            field: 'observer.geo.name',
                             size: 1,
                           },
                         },
@@ -368,9 +479,11 @@ export class OverviewStatusService {
             monitorByIds.set(monitorId, []);
           }
 
-          // _index comes from the terms sub-agg, not top_metrics
+          // _index and observer.geo.name come from terms sub-aggs, not top_metrics
           const indexNameAgg = ccsEnabled ? (rest as any).index_name : undefined;
           const indexName = indexNameAgg?.buckets?.[0]?.key;
+          const locationNameAgg = ccsEnabled ? (rest as any).location_name : undefined;
+          const locationLabel = locationNameAgg?.buckets?.[0]?.key;
           const kibanaUrl = ccsEnabled ? metrics?.kibanaUrl : undefined;
           const monitorName = ccsEnabled ? metrics?.['monitor.name'] : undefined;
           const monitorType = ccsEnabled ? metrics?.['monitor.type'] : undefined;
@@ -384,6 +497,7 @@ export class OverviewStatusService {
             timestamp,
             monitorUrl: rawMonitorUrl != null ? String(rawMonitorUrl) : undefined,
             ...(indexName ? { index: String(indexName) } : {}),
+            ...(locationLabel ? { locationLabel: String(locationLabel) } : {}),
             ...(kibanaUrl ? { kibanaUrl: String(kibanaUrl) } : {}),
             ...(monitorName ? { monitorName: String(monitorName) } : {}),
             ...(monitorType ? { monitorType: String(monitorType) } : {}),
@@ -593,7 +707,7 @@ export class OverviewStatusService {
           const isDown = status === MONITOR_STATUS_ENUM.DOWN;
           const location = {
             id: locData.locationId,
-            label: locData.locationId,
+            label: locData.locationLabel || locData.locationId,
             status,
             ...(isDown && locData.error ? { error: locData.error } : {}),
             ...(isDown && locData.downSince ? { downSince: locData.downSince } : {}),
@@ -616,7 +730,11 @@ export class OverviewStatusService {
             overallStatus: status,
           };
 
-          const monLocId = `${configId}-${locData.locationId}`;
+          // Include the remote cluster name in the bucket key so that two
+          // remote clusters that host the same monitor configId in the same
+          // locationId (e.g. an imported project monitor synced to both)
+          // don't collide and silently overwrite each other
+          const monLocId = `${remote.remoteName}-${configId}-${locData.locationId}`;
           if (status === MONITOR_STATUS_ENUM.DOWN) {
             down += 1;
             downConfigs[monLocId] = meta;
@@ -642,14 +760,24 @@ export class OverviewStatusService {
   }
 
   async getMonitorConfigs() {
-    const { request } = this.routeContext;
-    const { query, showFromAllSpaces } = request.query || {};
+    const { request, server } = this.routeContext;
+    const { query, showFromAllSpaces, remoteNames } = request.query || {};
     /**
      * Walk through all monitor saved objects, bucket IDs by disabled/enabled status.
      *
      * Track max period to make sure the snapshot query should reach back far enough to catch
      * latest ping for all enabled monitors.
      */
+
+    // When the user has narrowed the overview to specific remote clusters,
+    // skip the local saved-object lookup entirely. Local monitors don't belong
+    // to any remote cluster, so a remote-cluster filter implies "remote-only".
+    // Returning an empty list here also avoids dragging local monitors through
+    // `processOverviewStatus`, where the filtered ping query has no rows for
+    // them and they would otherwise surface as misleading "Pending" entries.
+    if (isCCSEnabled(server) && remoteNames?.length) {
+      return [];
+    }
 
     const { filtersStr } = this.filterData;
 

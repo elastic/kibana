@@ -219,6 +219,10 @@ describe('createActionPolicyDataSchema', () => {
 });
 
 describe('updateActionPolicyDataSchema', () => {
+  it('rejects any unknown key (strict)', () => {
+    expect(() => updateActionPolicyDataSchema.parse({ name: 'New', futureField: 'x' })).toThrow();
+  });
+
   describe('valid payloads', () => {
     it('accepts an empty partial update', () => {
       const result = updateActionPolicyDataSchema.parse({});

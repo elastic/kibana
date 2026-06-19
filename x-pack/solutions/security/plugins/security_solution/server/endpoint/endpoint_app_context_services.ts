@@ -8,13 +8,17 @@
 import type {
   AnalyticsServiceSetup,
   ElasticsearchClient,
-  HttpServiceSetup,
   KibanaRequest,
   LoggerFactory,
+  SavedObjectsClientContract,
   SavedObjectsServiceStart,
   SecurityServiceStart,
 } from '@kbn/core/server';
-import type { ExceptionListClient, ListsServerExtensionRegistrar } from '@kbn/lists-plugin/server';
+import type {
+  ExceptionListClient,
+  ListPluginSetup,
+  ListsServerExtensionRegistrar,
+} from '@kbn/lists-plugin/server';
 import type { CasesClient, CasesServerStart } from '@kbn/cases-plugin/server';
 import type {
   FleetFromHostFileClientInterface,
@@ -27,7 +31,7 @@ import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { FleetActionsClientInterface } from '@kbn/fleet-plugin/server/services/actions/types';
 import type { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server';
 import type { Space } from '@kbn/spaces-plugin/common';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { SpacesServiceStart } from '@kbn/spaces-plugin/server';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import {
@@ -76,13 +80,13 @@ import type { FeatureUsageService } from './services/feature_usage/service';
 import type { ExperimentalFeatures } from '../../common/experimental_features';
 import type { ProductFeaturesService } from '../lib/product_features_service/product_features_service';
 import type { ResponseActionAgentType } from '../../common/endpoint/service/response_actions/constants';
+import { ScopedEndpointArtifactListClient } from './services/scoped_endpoint_artifact_list_client';
 
 export interface EndpointAppContextServiceSetupContract {
   securitySolutionRequestContextFactory: IRequestContextFactory;
   cloud: CloudSetup;
   loggerFactory: LoggerFactory;
   telemetry: AnalyticsServiceSetup;
-  httpServiceSetup: HttpServiceSetup;
 }
 
 export interface EndpointAppContextServiceStartContract {
@@ -105,6 +109,7 @@ export interface EndpointAppContextServiceStartContract {
   telemetryConfigProvider: TelemetryConfigProvider;
   spacesService: SpacesServiceStart | undefined;
   agentBuilder?: AgentBuilderPluginStart;
+  getExceptionListClient?: ListPluginSetup['getExceptionListClient'];
 }
 
 /**
@@ -139,8 +144,7 @@ export class EndpointAppContextService {
     }
 
     const savedObjectsFactory = new SavedObjectsClientFactory(
-      dependencies.savedObjectsServiceStart,
-      this.setupDependencies.httpServiceSetup
+      dependencies.savedObjectsServiceStart
     );
 
     this.savedObjectsFactoryService = savedObjectsFactory;
@@ -377,6 +381,23 @@ export class EndpointAppContextService {
     }
 
     return this.startDependencies.exceptionListsClient;
+  }
+
+  public getScopedEndpointArtifactClient(
+    savedObjectsClient: SavedObjectsClientContract,
+    request: KibanaRequest,
+    username: string
+  ): ScopedEndpointArtifactListClient {
+    if (!this.startDependencies?.getExceptionListClient) {
+      throw new EndpointError('Endpoint artifact client unavailable: lists plugin is not enabled');
+    }
+
+    const client = this.startDependencies.getExceptionListClient(
+      savedObjectsClient,
+      username,
+      false
+    );
+    return new ScopedEndpointArtifactListClient(client, this, request);
   }
 
   public getMessageSigningService(): MessageSigningServiceInterface {

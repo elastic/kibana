@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { EvaluatorStats } from '../score_repository';
+import type { EvaluatorStats } from '../evals_client';
 import type { EvaluatorDisplayGroup, EvaluatorDisplayOptions } from './report_table';
 import { createTable } from './report_table';
 

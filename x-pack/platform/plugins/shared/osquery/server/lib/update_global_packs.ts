@@ -22,7 +22,8 @@ export const updateGlobalPacksCreateCallback = async (
   packsClient: SavedObjectsClient,
   allPacks: PackSavedObject[],
   osqueryContext: OsqueryAppContextService,
-  spaceId?: string
+  spaceId?: string,
+  isRruleFeatureEnabled: boolean = false
 ) => {
   const agentPolicyService = osqueryContext.getAgentPolicyService();
 
@@ -75,10 +76,20 @@ export const updateGlobalPacksCreateCallback = async (
       const resolvedSpaceId = spaceId || 'default';
       map(packsContainingShardForPolicy, (pack) => {
         const packKey = makePackKey(pack.name, resolvedSpaceId);
+        const { queries, ...packDefaults } = convertSOQueriesToPackConfig(pack.queries, {
+          spaceId: resolvedSpaceId,
+          packSchedule: {
+            schedule_type: pack.schedule_type,
+            interval: pack.interval,
+            rrule_schedule: pack.rrule_schedule,
+          },
+          isRruleFeatureEnabled,
+        });
         set(draft, `inputs[0].config.osquery.value.packs.${packKey}`, {
           shard: 100,
           pack_id: pack.saved_object_id,
-          queries: convertSOQueriesToPackConfig(pack.queries, resolvedSpaceId),
+          ...packDefaults,
+          queries,
         });
       });
 

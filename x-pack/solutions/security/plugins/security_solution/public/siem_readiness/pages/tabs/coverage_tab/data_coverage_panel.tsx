@@ -21,8 +21,8 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useSiemReadinessApi } from '@kbn/siem-readiness';
 import type { SiemReadinessPackageInfo } from '@kbn/siem-readiness';
+import { useSiemReadinessApi } from '../../../hooks/use_siem_readiness_api';
 import { useSiemReadinessCases } from '../../../hooks/use_siem_readiness_cases';
 import { useBasePath } from '../../../../common/lib/kibana';
 import { IntegrationSelectablePopover } from '../../components/integrations_selectable_popover';

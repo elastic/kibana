@@ -19,12 +19,17 @@ import type {
 import type { AtomicGraphNode } from '@kbn/workflows/graph';
 import { WorkflowGraph } from '@kbn/workflows/graph';
 import { mockContextDependencies } from '../../execution_functions/__mock__/context_dependencies';
+import { callKibanaApi } from '../../lib/call_kibana_api';
 import type { WorkflowTemplatingEngine } from '../../templating_engine';
 import type { StepIoService } from '../step_io_service';
 import { WorkflowContextManager } from '../workflow_context_manager';
 import type { WorkflowExecutionState } from '../workflow_execution_state';
 
 const dependencies = mockContextDependencies();
+
+jest.mock('../../lib/call_kibana_api', () => ({
+  callKibanaApi: jest.fn(),
+}));
 
 jest.mock('../../utils', () => ({
   ...jest.requireActual<typeof import('../../utils')>('../../utils'),
@@ -296,16 +301,20 @@ describe('WorkflowContextManager', () => {
       description: 'A test workflow',
       enabled: true,
       consts: {},
-      triggers: [],
-      steps: [],
-      inputs: [
+      triggers: [
         {
-          name: 'name',
-          type: 'string',
-          required: false,
-          default: '',
+          type: 'manual',
+          inputs: [
+            {
+              name: 'name',
+              type: 'string',
+              required: false,
+              default: '',
+            },
+          ],
         },
       ],
+      steps: [],
     } as WorkflowYaml;
     let testContainer: ReturnType<typeof createTestContainer>;
 
@@ -1975,6 +1984,69 @@ describe('WorkflowContextManager', () => {
       // Resolver delegates to graph.getAllPredecessors — for step_a (no
       // predecessors) the resolver returns [].
       expect(args.predecessorsResolver(testContainer.underTest.node)).toEqual([]);
+    });
+  });
+
+  describe('callKibanaApi', () => {
+    const workflow: WorkflowYaml = {
+      name: 'Test Workflow',
+      version: '1',
+      description: 'A test workflow',
+      enabled: true,
+      triggers: [],
+      steps: [],
+    };
+
+    beforeEach(() => {
+      (callKibanaApi as jest.Mock).mockReset();
+    });
+
+    it('forwards the fake request, core start, cloud setup, and workflow run id to the helper', async () => {
+      const testContainer = createTestContainer(workflow);
+      testContainer.workflowExecutionState.getWorkflowExecution = jest.fn().mockReturnValue({
+        id: 'workflow-run-123',
+        scopeStack: [] as StackFrame[],
+        workflowDefinition: workflow,
+      } as unknown as EsWorkflowExecution);
+
+      (callKibanaApi as jest.Mock).mockResolvedValue({
+        status: 200,
+        headers: {},
+        body: { ok: true },
+      });
+
+      const result = await testContainer.underTest.callKibanaApi({
+        method: 'GET',
+        path: '/api/status',
+      });
+
+      expect(result).toEqual({ status: 200, headers: {}, body: { ok: true } });
+      expect(callKibanaApi).toHaveBeenCalledTimes(1);
+      const [deps, params] = (callKibanaApi as jest.Mock).mock.calls[0];
+      expect(deps.fakeRequest).toBe(
+        (testContainer.underTest as unknown as { fakeRequest: unknown }).fakeRequest
+      );
+      expect(deps.coreStart).toBe(
+        (testContainer.underTest as unknown as { coreStart: unknown }).coreStart
+      );
+      expect(deps.cloudSetup).toBe(dependencies.cloudSetup);
+      expect(deps.workflowRunId).toBe('workflow-run-123');
+      expect(params).toEqual({ method: 'GET', path: '/api/status' });
+    });
+
+    it('propagates errors from the helper', async () => {
+      const testContainer = createTestContainer(workflow);
+      testContainer.workflowExecutionState.getWorkflowExecution = jest.fn().mockReturnValue({
+        id: 'workflow-run-err',
+        scopeStack: [] as StackFrame[],
+        workflowDefinition: workflow,
+      } as unknown as EsWorkflowExecution);
+
+      (callKibanaApi as jest.Mock).mockRejectedValue(new Error('HTTP 403: forbidden'));
+
+      await expect(
+        testContainer.underTest.callKibanaApi({ method: 'GET', path: '/api/forbidden' })
+      ).rejects.toThrow('HTTP 403: forbidden');
     });
   });
 });

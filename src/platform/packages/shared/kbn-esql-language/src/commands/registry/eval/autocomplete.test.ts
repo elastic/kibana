@@ -171,8 +171,14 @@ describe('EVAL Autocomplete', () => {
     ]);
   });
 
+  test('does not suggest subqueries after IN', async () => {
+    await evalExpectSuggestions('from a | eval col = doubleField in ', ['($0)']);
+    await evalExpectSuggestions('from a | eval col = doubleField not in ', ['($0)']);
+  });
+
   test('after column after assignment', async () => {
     await evalExpectSuggestions('from a | eval col = doubleField ', [
+      '\n',
       ', ',
       '| ',
       ...getFunctionSignaturesByReturnType(
@@ -231,6 +237,7 @@ describe('EVAL Autocomplete', () => {
     await evalExpectSuggestions(
       'from a | eval a=round(doubleField) ',
       [
+        '\n',
         ', ',
         '| ',
         ...getFunctionSignaturesByReturnType(
@@ -431,6 +438,7 @@ describe('EVAL Autocomplete', () => {
   test('discards query after cursor', async () => {
     // Smoke testing for suggestions in previous position than the end of the statement
     await evalExpectSuggestions('from a | eval col0 = abs(doubleField) / | eval abs(col0)', [
+      '\n',
       ...getFunctionSignaturesByReturnType(
         Location.EVAL,
         'any',
@@ -468,6 +476,7 @@ describe('EVAL Autocomplete', () => {
     const dateSuggestions = timeUnitsToSuggest.map(({ name }) => name);
 
     await evalExpectSuggestions('from a | eval a = 1 ', [
+      '\n',
       ', ',
       '| ',
       ...getFunctionSignaturesByReturnType(
@@ -478,7 +487,7 @@ describe('EVAL Autocomplete', () => {
       ),
     ]);
 
-    await evalExpectSuggestions('from a | eval a = 1 year ', [', ', '| ', '+ $0', '- $0']);
+    await evalExpectSuggestions('from a | eval a = 1 year ', ['\n', ', ', '| ', '+ $0', '- $0']);
 
     await evalExpectSuggestions('from a | eval col0=date_trunc(2 ', [
       ...dateSuggestions.map((t) => `${t}, `),

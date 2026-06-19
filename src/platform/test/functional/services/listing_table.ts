@@ -15,7 +15,6 @@ const PREFIX_MAP = {
   visualize: 'vis',
   dashboard: 'dashboard',
   map: 'map',
-  eventAnnotation: 'eventAnnotation',
 };
 
 export class ListingTableService extends FtrService {
@@ -88,9 +87,7 @@ export class ListingTableService extends FtrService {
 
   public async waitUntilTableIsLoaded() {
     await this.retry.try(async () => {
-      const isLoaded = await this.find.existsByDisplayedByCssSelector(
-        '[data-test-subj="itemsInMemTable"]:not(.euiBasicTable-loading)'
-      );
+      const isLoaded = await this.testSubjects.exists('listingTable-isLoaded');
 
       if (isLoaded) {
         return true;
@@ -350,12 +347,6 @@ export class ListingTableService extends FtrService {
 
   public async isShowingEmptyPromptCreateNewButton(): Promise<void> {
     await this.testSubjects.existOrFail('newItemButton');
-  }
-
-  public async onListingPage(appName: AppName) {
-    return await this.testSubjects.exists(`${appName}LandingPage`, {
-      timeout: 5000,
-    });
   }
 
   public async selectTab(which: number) {

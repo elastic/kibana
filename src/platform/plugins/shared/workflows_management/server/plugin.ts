@@ -13,11 +13,16 @@ import type {
   Plugin,
   PluginInitializerContext,
 } from '@kbn/core/server';
+
 import { defineRoutes } from './api/routes';
+import { WorkflowManagementAuditLog } from './api/routes/utils/workflow_audit_logging';
 import { WorkflowsManagementApi } from './api/workflows_management_api';
 import { WorkflowsService } from './api/workflows_management_service';
 import { AvailabilityUpdater } from './availability';
-import { createWorkflowsClientProvider } from './client/workflows_client';
+import {
+  createManagedWorkflowsSystemApiProvider,
+  createWorkflowsClientProvider,
+} from './client/workflows_client';
 import type { WorkflowsManagementConfig } from './config';
 import {
   getWorkflowsConnectorAdapter,
@@ -46,12 +51,15 @@ export class WorkflowsPlugin
 {
   private readonly logger: Logger;
   private config: WorkflowsManagementConfig;
+  private readonly kibanaVersion: string;
   private availabilityUpdater: AvailabilityUpdater | null = null;
   private api: WorkflowsManagementApi | null = null;
+  private workflowsService: WorkflowsService | null = null;
 
   constructor(initializerContext: PluginInitializerContext<WorkflowsManagementConfig>) {
     this.logger = initializerContext.logger.get();
     this.config = initializerContext.config.get<WorkflowsManagementConfig>();
+    this.kibanaVersion = initializerContext.env.packageInfo.version;
   }
 
   public setup(
@@ -66,7 +74,12 @@ export class WorkflowsPlugin
 
     this.logger.debug('Workflows Management: Creating workflows service');
 
-    const workflowsService = new WorkflowsService(core.getStartServices, this.logger);
+    const workflowsService = new WorkflowsService(
+      core.getStartServices,
+      this.logger,
+      this.kibanaVersion
+    );
+    this.workflowsService = workflowsService;
 
     const api = new WorkflowsManagementApi(workflowsService, this.config.available);
     this.api = api;
@@ -82,16 +95,20 @@ export class WorkflowsPlugin
     plugins.workflowsExtensions.registerWorkflowsClientProvider(
       createWorkflowsClientProvider(workflowsService, this.config, this.logger)
     );
+    plugins.workflowsExtensions.registerManagedWorkflowsSystemApiProvider(
+      createManagedWorkflowsSystemApiProvider(workflowsService, this.config, this.logger)
+    );
 
     const spaces = plugins.spaces.spacesService;
 
     const router = core.http.createRouter<WorkflowsRequestHandlerContext>();
-    defineRoutes(router, api, this.logger, spaces, workflowsService);
+    const audit = new WorkflowManagementAuditLog({ service: workflowsService });
+    defineRoutes(router, api, this.logger, spaces, workflowsService, audit);
 
     if (plugins.inbox) {
       this.logger.debug('Workflows Management: registering inbox provider');
       plugins.inbox.registerActionProvider(
-        createWorkflowsInboxProvider({ api, logger: this.logger })
+        createWorkflowsInboxProvider({ api, logger: this.logger, audit })
       );
     }
 
@@ -114,8 +131,30 @@ export class WorkflowsPlugin
       });
     }
 
+    if (this.workflowsService) {
+      // Managed workflow owners register through workflows_extensions because owner
+      // plugins cannot depend on workflows_management. Pass the setup-time owner
+      // snapshot into workflows_management for storage reconciliation.
+      const registeredOwnerPluginIds = plugins.workflowsExtensions.getManagedWorkflowPluginIds();
+      // Safe to run in the background: this cleanup only removes docs for owners
+      // missing from the setup-time registry, so it cannot race valid start installs.
+      void this.runGlobalOrphanCleanup(registeredOwnerPluginIds);
+    }
+
     this.logger.debug('Workflows Management: Started');
+
     return {};
+  }
+
+  private async runGlobalOrphanCleanup(registeredOwnerPluginIds: string[]): Promise<void> {
+    try {
+      await this.workflowsService?.cleanupUnregisteredOrphans(registeredOwnerPluginIds);
+    } catch (error) {
+      this.logger.warn(
+        'Workflows Management: Failed to complete global orphan cleanup for unregistered workflows',
+        { error }
+      );
+    }
   }
 
   public stop() {

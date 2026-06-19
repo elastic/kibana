@@ -53,6 +53,10 @@ const baseWorkflowExecutionSchema: RootSchema<{
   triggerType: WellKnownWorkflowTriggerSource | 'event';
   eventTriggerId?: string;
   isTestRun: boolean;
+  isManaged: boolean;
+  managedBy?: string;
+  originManagedWorkflowId?: string;
+  managedVersion?: number;
   ruleId?: string;
   compositionDepth?: number;
   parentWorkflowId?: string;
@@ -101,6 +105,35 @@ const baseWorkflowExecutionSchema: RootSchema<{
     _meta: {
       description: 'Whether this is a test run',
       optional: false,
+    },
+  },
+  isManaged: {
+    type: 'boolean',
+    _meta: {
+      description: 'Whether this execution belongs to a managed workflow',
+      optional: false,
+    },
+  },
+  managedBy: {
+    type: 'keyword',
+    _meta: {
+      description: 'Owning plugin for managed workflow executions',
+      optional: true,
+    },
+  },
+  originManagedWorkflowId: {
+    type: 'keyword',
+    _meta: {
+      description: 'Registered managed workflow definition ID, when this execution came from one',
+      optional: true,
+    },
+  },
+  managedVersion: {
+    type: 'long',
+    _meta: {
+      description:
+        'Registered managed workflow definition version, when this execution came from one',
+      optional: true,
     },
   },
   ruleId: {
