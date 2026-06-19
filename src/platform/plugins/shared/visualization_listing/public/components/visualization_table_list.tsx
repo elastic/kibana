@@ -15,7 +15,6 @@ import type { CoreStart } from '@kbn/core/public';
 import type { Reference } from '@kbn/content-management-utils';
 import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
 import type { EmbeddableStart } from '@kbn/embeddable-plugin/public';
-import type { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import type { OpenContentEditorParams } from '@kbn/content-management-content-editor';
 import type { TableListTabParentProps } from '@kbn/content-management-tabbed-table-list-view';
 import { TableListViewTable } from '@kbn/content-management-table-list-view-table';
@@ -41,7 +40,6 @@ interface VisualizationTableListProps {
   visualizations: VisualizationsStart;
   contentManagement: ContentManagementPublicStart;
   embeddable: EmbeddableStart;
-  savedObjectsTagging?: SavedObjectsTaggingApi;
   parentProps: TableListTabParentProps;
 }
 
@@ -50,7 +48,6 @@ export const VisualizationTableList = ({
   visualizations,
   contentManagement,
   embeddable,
-  savedObjectsTagging,
   parentProps,
 }: VisualizationTableListProps) => {
   const { getBreadcrumbs, onFetchSuccess, setPageDataTestSubject, showCreateButton } = parentProps;
