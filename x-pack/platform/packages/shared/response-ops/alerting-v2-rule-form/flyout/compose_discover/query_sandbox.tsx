@@ -257,7 +257,7 @@ export const QuerySandbox: React.FC<QuerySandboxProps> = ({
           <EuiButton
             size="s"
             color="text"
-            iconType="branch"
+            iconType="inputOutput"
             onClick={onEditManually}
             data-test-subj="querySandboxSeparateBaseAndAlert"
           >
