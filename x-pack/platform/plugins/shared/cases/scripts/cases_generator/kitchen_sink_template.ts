@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import yaml from 'js-yaml';
+import { parse as yamlParse } from 'yaml';
 import { pick, rng, sampleN } from './utils';
 
 // Source-of-truth kitchen-sink template definition. Edit this YAML to change
@@ -251,7 +251,7 @@ export interface KitchenSinkTemplateDefinition {
   fields: KitchenSinkFieldDef[];
 }
 
-const PARSED_DEFINITION = yaml.load(KITCHEN_SINK_TEMPLATE_YAML) as KitchenSinkTemplateDefinition;
+const PARSED_DEFINITION = yamlParse(KITCHEN_SINK_TEMPLATE_YAML) as KitchenSinkTemplateDefinition;
 
 if (!PARSED_DEFINITION || !Array.isArray(PARSED_DEFINITION.fields)) {
   throw new Error('Kitchen sink template YAML is malformed: expected a top-level `fields` array.');

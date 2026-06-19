@@ -14,7 +14,7 @@ import {
   CODE_ANALYSIS_PROVIDER_KEY,
   type ComputedFeatureProvider,
 } from '@kbn/streams-ai';
-import type { FeatureClient } from '../../streams/feature/feature_client';
+import type { KnowledgeIndicatorClient } from '../../streams/ki';
 import { createCodeAnalysisProvider } from '../../semantic_code_search_grounding/compute_code_analysis';
 import type { EbtTelemetryClient } from '../../telemetry';
 import { reconcileComputedFeatures } from './reconcile_features';
@@ -25,9 +25,8 @@ export interface IdentifyComputedFeaturesOptions {
   start: number;
   end: number;
   esClient: ElasticsearchClient;
-  featureClient: FeatureClient;
+  kiClient: KnowledgeIndicatorClient;
   logger: Logger;
-  featureTtlDays?: number;
   runId: string;
   /**
    * Agent Builder tools + request enable the `code_analysis` computed feature
@@ -46,9 +45,8 @@ export async function identifyComputedFeatures({
   start,
   end,
   esClient,
-  featureClient,
+  kiClient,
   logger,
-  featureTtlDays,
   runId,
   agentBuilderTools,
   request,
@@ -87,12 +85,11 @@ export async function identifyComputedFeatures({
   const reconciledComputedFeatures = reconcileComputedFeatures({
     computedFeatures,
     streamName,
-    featureTtlDays,
     runId,
   });
 
   if (reconciledComputedFeatures.length > 0) {
-    await featureClient.bulk(
+    await kiClient.bulk(
       streamName,
       reconciledComputedFeatures.map((feature) => ({ index: { feature } }))
     );

@@ -26,8 +26,7 @@ import { isSignificantEventsMemoryEnabled } from '../memory/is_significant_event
 import { isSignificantEventsSemanticCodeSearchGroundingEnabled } from '../semantic_code_search_grounding/is_significant_events_semantic_code_search_grounding_enabled';
 import { createSemanticCodeSearchTools } from '../semantic_code_search_grounding/semantic_code_search_tools';
 import type { StreamsClient } from '../streams/client';
-import type { FeatureClient } from '../streams/feature/feature_client';
-import type { QueryClient } from '../streams/assets/query/query_client';
+import type { KnowledgeIndicatorClient } from '../streams/ki';
 import type { EbtTelemetryClient } from '../telemetry';
 import { resolveConnectorForFeature } from '../../routes/utils/resolve_connector_for_feature';
 import { formatInferenceProviderError } from '../../routes/utils/create_connector_sse_error';
@@ -46,8 +45,7 @@ export interface GenerateKIQueriesDependencies {
   streamsClient: StreamsClient;
   inferenceClient: InferenceClient;
   soClient: SavedObjectsClientContract;
-  featureClient: FeatureClient;
-  queryClient: QueryClient;
+  kiClient: KnowledgeIndicatorClient;
   esClient: ElasticsearchClient;
   featureFlags: FeatureFlagsStart;
   searchInferenceEndpoints: SearchInferenceEndpointsPluginStart | undefined;
@@ -72,8 +70,7 @@ export async function generateKIQueries(
     streamsClient,
     inferenceClient,
     soClient,
-    featureClient,
-    queryClient,
+    kiClient,
     esClient,
     featureFlags,
     searchInferenceEndpoints,
@@ -118,10 +115,6 @@ export async function generateKIQueries(
 
   const semanticCodeSearchLogger = logger.get('semantic_code_search_grounding');
 
-  // Code grounding is active whenever the feature is enabled and Agent Builder
-  // is available. The reasoning agent discovers and selects which code index to
-  // ground against at runtime via the list_code_indices / select_code_index
-  // tools.
   const isCodeGroundingActive = useSemanticCodeSearchGrounding && Boolean(agentBuilderTools);
 
   const semanticCodeSearchTools =
@@ -140,6 +133,7 @@ export async function generateKIQueries(
     );
   }
 
+  const startedAt = Date.now();
   const result = await generateSignificantEventDefinitions(
     {
       definition,
@@ -150,8 +144,7 @@ export async function generateKIQueries(
     {
       inferenceClient,
       esClient,
-      featureClient,
-      queryClient,
+      kiClient,
       logger: logger.get('significant_events_generation'),
       signal,
       memoryTools,
@@ -166,6 +159,7 @@ export async function generateKIQueries(
     }
     throw error;
   });
+  const durationMs = Date.now() - startedAt;
 
   telemetry.trackSignificantEventsQueriesGenerated({
     count: result.queries.length,
@@ -173,6 +167,8 @@ export async function generateKIQueries(
     stream_type: getStreamTypeFromDefinition(definition),
     input_tokens_used: result.tokensUsed.prompt,
     output_tokens_used: result.tokensUsed.completion,
+    cached_tokens_used: result.tokensUsed.cached ?? 0,
+    duration_ms: durationMs,
     tool_usage: result.toolUsage,
   });
 

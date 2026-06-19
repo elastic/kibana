@@ -33,15 +33,11 @@ interface StreamsSignificantEventsQueriesGeneratedProps {
   count: number;
   input_tokens_used: number;
   output_tokens_used: number;
+  cached_tokens_used: number;
+  duration_ms: number;
   stream_name: string;
   stream_type: StreamType;
   tool_usage: SignificantEventsToolUsage;
-}
-
-interface StreamsInsightsGeneratedProps {
-  input_tokens_used: number;
-  output_tokens_used: number;
-  cached_tokens_used?: number;
 }
 
 interface StreamsProcessingPipelineSuggestedProps {
@@ -122,12 +118,20 @@ interface StreamsSignificantEventsDiscoveryTriggeredProps {
   space_id: string;
 }
 
+interface StreamsOnboardingScheduledProps {
+  stream_name: string;
+  execution_id: string;
+  workflow_id: string;
+  space_id: string;
+  skip_features: boolean;
+  skip_queries: boolean;
+}
+
 export {
   type StreamEndpointLatencyProps,
   type StreamsStateErrorProps,
   type StreamsDescriptionGeneratedProps,
   type StreamsSignificantEventsQueriesGeneratedProps,
-  type StreamsInsightsGeneratedProps,
   type StreamsProcessingPipelineSuggestedProps,
   type StreamsFeaturesIdentifiedProps,
   type StreamsAgentBuilderKnowledgeIndicatorCreatedProps,
@@ -136,4 +140,5 @@ export {
   type StreamsAgentToolEventStatusUpdateProps,
   type StreamsCodeAnalysisGroundingProps,
   type StreamsSignificantEventsDiscoveryTriggeredProps,
+  type StreamsOnboardingScheduledProps,
 };

@@ -230,7 +230,6 @@ export {
   type BaseFeature,
   type IdentifiedFeature,
   type IgnoredFeature,
-  type FeatureStatus,
   DATASET_ANALYSIS_FEATURE_TYPE,
   LOG_SAMPLES_FEATURE_TYPE,
   LOG_PATTERNS_FEATURE_TYPE,
@@ -249,7 +248,6 @@ export {
   baseFeatureSchema,
   identifiedFeatureSchema,
   ignoredFeatureSchema,
-  featureStatusSchema,
 } from './src/feature';
 
 export { FeatureAccumulator } from './src/feature_accumulator';
@@ -273,26 +271,7 @@ export { TaskStatus, type TaskResult } from './src/tasks/types';
 export type { GenerateDescriptionResult } from './src/api/description_generation';
 export type { IdentifyFeaturesResult, IterationResult } from './src/api/features';
 export { tokenCountSchema, iterationResultSchema } from './src/api/features';
-export {
-  type GenerateInsightsResult,
-  type Insight,
-  type InsightCore,
-  type InsightEvidence,
-  type InsightImpactLevel,
-  type InsightImpactLevelNumeric,
-  type InsightUserEvaluation,
-  type InsightMeta,
-  type SaveInsightBody,
-  insightSchema,
-  insightCoreSchema,
-  insightMetaSchema,
-  insightEvidenceSchema,
-  insightImpactLevelSchema,
-  insightImpactLevelNumericSchema,
-  insightUserEvaluationSchema,
-  INSIGHT_IMPACT_LEVEL_MAP,
-  getImpactLevel,
-} from './src/insights';
+
 export {
   SIG_EVENT_STATUS_OPTIONS,
   SIG_EVENT_IMPACT_OPTIONS,
