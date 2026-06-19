@@ -147,12 +147,11 @@ export const getESQLControlFactory = <
             labelManager.reinitializeState(updatedState);
           };
 
-          /** For static ??field or ??function controls, we need to know which query to pull suggestions from */
+          /** For static ??field controls, we need to know which query to pull suggestions from */
           let relatedQuery;
           if (
             isStaticESQLControl(nextState) &&
-            (nextState.variable_type === ESQLVariableType.FIELDS ||
-              nextState.variable_type === ESQLVariableType.FUNCTIONS)
+            nextState.variable_type === ESQLVariableType.FIELDS
           ) {
             const variableKey = selections.api.esqlVariable$.getValue().key; // key of variable to search for
             const getRelatedQuery = (_api: unknown) => {
