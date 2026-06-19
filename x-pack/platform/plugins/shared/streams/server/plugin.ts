@@ -571,7 +571,6 @@ export class StreamsPlugin
       this.server.licensing = plugins.licensing;
       this.server.taskManager = plugins.taskManager;
       this.server.searchInferenceEndpoints = plugins.searchInferenceEndpoints;
-      this.server.workflowsExtensions = plugins.workflowsExtensions;
       this.server.spaces = plugins.spaces;
       this.server.workflowsExtensions = plugins.workflowsExtensions;
       this.server.agentBuilder = plugins.agentBuilder;

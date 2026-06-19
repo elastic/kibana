@@ -29,44 +29,6 @@ export const discoveriesMappings = {
         rule_uuid: { type: 'keyword' as const },
       },
     }),
-    investigation: mappings.object({
-      properties: {
-        completed_at: { type: 'date' as const },
-        workflow_execution_id: { type: 'keyword' as const },
-        contributing_factors: { type: 'text' as const },
-        confidence: { type: 'float' as const },
-        impact: { type: 'text' as const },
-        investigation_complete: { type: 'boolean' as const },
-        ranked_hypotheses: mappings.object({
-          properties: {
-            rank: { type: 'integer' as const },
-            hypothesis_id: { type: 'keyword' as const },
-            statement: { type: 'text' as const },
-            verdict: { type: 'keyword' as const },
-            prior_confidence: { type: 'float' as const },
-            posterior_confidence: { type: 'float' as const },
-            evidence_summary: { type: 'text' as const },
-          },
-        }),
-        discarded_hypotheses: mappings.object({
-          properties: {
-            hypothesis_id: { type: 'keyword' as const },
-            statement: { type: 'text' as const },
-            discard_reason: { type: 'text' as const },
-          },
-        }),
-        remediation_options: mappings.object({
-          properties: {
-            rank: { type: 'integer' as const },
-            action: { type: 'text' as const },
-            rationale: { type: 'text' as const },
-            risk_level: { type: 'keyword' as const },
-          },
-        }),
-        gaps_found: { type: 'keyword' as const },
-        memory_pages_written: { type: 'keyword' as const },
-      },
-    }),
   },
 } satisfies MappingsDefinition;
 
@@ -78,7 +40,7 @@ export const discoveriesDataStream: DataStreamDefinition<
   StoredDiscovery
 > = {
   name: DISCOVERIES_DATA_STREAM,
-  version: 4,
+  version: 3,
   hidden: true,
   template: {
     priority: 500,

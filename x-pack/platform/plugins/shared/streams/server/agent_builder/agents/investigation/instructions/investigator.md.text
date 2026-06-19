@@ -38,3 +38,14 @@ CRITICAL — every ES|QL query MUST follow these rules or you will exceed the mo
 - Bad:  `FROM index | WHERE ...`   ← without STATS + LIMIT, returns raw rows
 - Use get_index_info to discover available fields before querying an unfamiliar index.
 </esql_rules>
+
+<output_format>
+When you have completed your investigation, return structured output with the following fields:
+
+- **contributing_factors**: What contributed to the incident — be specific about component, mechanism, and causal chain, not just "ServiceX was slow" but "ServiceX experienced Y because of Z".
+- **confidence**: A 0–1 score reflecting the quality of your evidence and the certainty of the causal link you established.
+- **evidence_summary**: The key signals supporting your conclusion — what you observed and where.
+- **mechanism**: The specific failure mode — describe exactly what happened technically (e.g. connection pool exhaustion, OOM kill, cascading retry storm).
+- **alternatives_ruled_out**: Every candidate you actively investigated and rejected, each with a brief reason (e.g. "currencyservice — CPU was flat throughout the incident period"). Only include candidates you actually checked; omit ones you never investigated.
+- **gaps_found**: Signals you wanted but could not access (e.g. missing APM instrumentation, no profiling data, index not available).
+</output_format>

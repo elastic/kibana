@@ -104,6 +104,43 @@ function collectNestedSequentialStepNames(step: unknown): string[] {
 }
 
 /**
+ * Walks all steps (including sequential container bodies) to locate parallel branches
+ * and validate each branch as an independent scope. Does NOT check scope uniqueness —
+ * that is handled by the enclosing validateStepList call whose collectScopedStepNames
+ * already includes these steps in the current scope's name pool.
+ */
+function findAndValidateBranches(steps: WorkflowYaml['steps']): StepNameValidationError[] {
+  const errors: StepNameValidationError[] = [];
+  if (!steps || !Array.isArray(steps)) return errors;
+
+  for (const step of steps) {
+    const s = step as {
+      branches?: Array<{ steps?: unknown }>;
+      steps?: unknown;
+      else?: unknown;
+      'on-failure'?: { fallback?: unknown };
+    };
+
+    if (s.branches && Array.isArray(s.branches)) {
+      errors.push(...validateParallelBranches(s.branches));
+    }
+
+    if (s.steps && Array.isArray(s.steps)) {
+      errors.push(...findAndValidateBranches(s.steps as WorkflowYaml['steps']));
+    }
+    if (s.else && Array.isArray(s.else)) {
+      errors.push(...findAndValidateBranches(s.else as WorkflowYaml['steps']));
+    }
+    const fallback = s['on-failure']?.fallback;
+    if (Array.isArray(fallback)) {
+      errors.push(...findAndValidateBranches(fallback as WorkflowYaml['steps']));
+    }
+  }
+
+  return errors;
+}
+
+/**
  * Validates step name uniqueness within a single sequential step list (one scope).
  * Also recursively validates parallel branches, which each form their own scope.
  */
@@ -130,13 +167,13 @@ function validateStepList(steps: WorkflowYaml['steps']): StepNameValidationError
     }
   }
 
-  // Recursively validate parallel branches as independent scopes
-  for (const step of steps) {
-    const s = step as { branches?: Array<{ steps?: unknown }> };
-    if (s.branches && Array.isArray(s.branches)) {
-      errors.push(...validateParallelBranches(s.branches));
-    }
-  }
+  // Find and validate parallel branches at all depths within this scope's steps.
+  // Sequential containers are already included in the current scope's name pool
+  // (via collectScopedStepNames), so we must NOT call validateStepList on them
+  // again — that would double-count uniqueness errors. We only need to locate
+  // parallel branches wherever they are nested and validate each branch as its
+  // own independent scope.
+  errors.push(...findAndValidateBranches(steps));
 
   return errors;
 }

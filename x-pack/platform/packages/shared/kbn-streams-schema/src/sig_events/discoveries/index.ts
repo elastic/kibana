@@ -19,7 +19,6 @@ import {
   MAX_TITLE_LENGTH,
   MAX_TEXT_LENGTH,
 } from '../constants';
-import { investigationResultSchema } from '../investigations/schema';
 
 const discoveryDetectionSchema = z.object({
   kind: z.enum(['detection', 'quiet', 'handled']),
@@ -60,13 +59,6 @@ export const discoverySchema = z.object({
   workflow_execution_id: z.string().max(MAX_ID_LENGTH).optional(),
   conversation_id: z.string().max(MAX_ID_LENGTH).optional(),
   closed_by_execution_id: z.string().max(MAX_ID_LENGTH).optional(),
-  investigation: z
-    .object({
-      completed_at: z.iso.datetime(),
-      workflow_execution_id: z.string(),
-      ...investigationResultSchema.shape,
-    })
-    .optional(),
   processed: z.boolean(),
 });
 
