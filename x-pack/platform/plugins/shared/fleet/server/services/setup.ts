@@ -342,7 +342,9 @@ async function createSetupSideEffects(
       `Fleet setup encountered ${rawNonFatalErrors.length} non-fatal errors; storing only the first ${MAX_NON_FATAL_ERRORS}`
     );
   }
-  const nonFatalErrors = rawNonFatalErrors.slice(0, MAX_NON_FATAL_ERRORS).map(sanitizeNonFatalError);
+  const nonFatalErrors = rawNonFatalErrors
+    .slice(0, MAX_NON_FATAL_ERRORS)
+    .map(sanitizeNonFatalError);
 
   logger.info('Fleet setup completed');
 
