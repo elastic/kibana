@@ -235,8 +235,7 @@ export function AlertConditionStep({
                 title={i18n.translate(
                   'xpack.alertingV2.composeDiscover.alertCondition.alertQueryRequiredTitle',
                   {
-                    defaultMessage:
-                      'Alert condition required',
+                    defaultMessage: 'Alert condition required',
                   }
                 )}
                 data-test-subj="composeDiscoverAlertQueryMissing"
