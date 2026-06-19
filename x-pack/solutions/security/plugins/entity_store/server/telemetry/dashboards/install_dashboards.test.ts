@@ -10,7 +10,9 @@ import { loggerMock } from '@kbn/logging-mocks';
 import { installEntityStoreDashboards } from './install_dashboards';
 
 const makeImporter = (
-  override?: Partial<ReturnType<ISavedObjectsImporter['import']> extends Promise<infer R> ? R : never>
+  override?: Partial<
+    ReturnType<ISavedObjectsImporter['import']> extends Promise<infer R> ? R : never
+  >
 ): jest.Mocked<ISavedObjectsImporter> => {
   const defaultResult = {
     success: true,
@@ -79,9 +81,7 @@ describe('installEntityStoreDashboards', () => {
       errors: [{ type: 'dashboard', id: 'test-id', error: { type: 'unknown' } } as never],
     });
 
-    await expect(
-      installEntityStoreDashboards({ importer, logger, spaceId })
-    ).rejects.toThrow();
+    await expect(installEntityStoreDashboards({ importer, logger, spaceId })).rejects.toThrow();
 
     // pRetry with 2 retries → 3 total attempts
     expect(importer.import).toHaveBeenCalledTimes(3);
@@ -93,8 +93,6 @@ describe('installEntityStoreDashboards', () => {
     });
     await installEntityStoreDashboards({ importer, logger, spaceId });
 
-    expect(logger.warn).toHaveBeenCalledWith(
-      expect.stringContaining('something deprecated')
-    );
+    expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('something deprecated'));
   });
 });

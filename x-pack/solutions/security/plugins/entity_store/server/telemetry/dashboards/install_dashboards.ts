@@ -67,10 +67,7 @@ export const installEntityStoreDashboards = async ({
  * line (which lacks a `type` field and is not a saved object).
  */
 const loadDashboardObjects = (): object[] => {
-  const ndjson = fs.readFileSync(
-    path.join(__dirname, 'entity_store_apm.ndjson'),
-    'utf-8'
-  );
+  const ndjson = fs.readFileSync(path.join(__dirname, 'entity_store_apm.ndjson'), 'utf-8');
   return ndjson
     .split('\n')
     .filter((line) => line.trim().length > 0)
