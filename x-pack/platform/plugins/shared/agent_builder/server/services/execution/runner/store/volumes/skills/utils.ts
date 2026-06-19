@@ -12,14 +12,32 @@ import type { InternalSkillDefinition } from '@kbn/agent-builder-server/skills';
 import type { SkillFileEntry, SkillReferencedContentFileEntry } from './types';
 
 /**
- * Get the VFS entry path for a skill.
+ * Strip the conventional `skills/` prefix that `basePath` carries today so
+ * the store works in paths relative to the `/skills` mount. Also collapses
+ * any `.` (current-dir) segments and empty segments along the way, so callers
+ * can pass `referencedContent.relativePath` shapes like `'.'` or `'./queries'`
+ * without polluting the stored path. Returns a single leading slash regardless
+ * of input form.
+ */
+const toStoreRelativePath = (segments: string[]): string => {
+  const parts = segments
+    .flatMap((s) => s.split('/'))
+    .filter((s) => s.length > 0 && s !== '.');
+  const stripped = parts[0] === 'skills' ? parts.slice(1) : parts;
+  return `/${stripped.join('/')}`;
+};
+
+/**
+ * Get the store-relative entry path for a skill. The returned path is
+ * relative to the `/skills` mount: e.g. `/platform/foo/SKILL.md`. The
+ * agent-visible path is `MOUNT_POINTS.skills + this`; compose at the boundary.
  */
 export const getSkillEntryPath = ({
   skill,
 }: {
   skill: Pick<InternalSkillDefinition, 'basePath' | 'name'>;
 }): string => {
-  return `${skill.basePath}/${skill.name}/SKILL.md`;
+  return toStoreRelativePath([skill.basePath, skill.name, 'SKILL.md']);
 };
 
 export const getSkillReferencedContentEntryPath = ({
@@ -29,7 +47,12 @@ export const getSkillReferencedContentEntryPath = ({
   skill: Pick<InternalSkillDefinition, 'basePath' | 'name'>;
   referencedContent: { relativePath: string; name: string };
 }): string => {
-  return `${skill.basePath}/${skill.name}/${referencedContent.relativePath}/${referencedContent.name}.md`;
+  return toStoreRelativePath([
+    skill.basePath,
+    skill.name,
+    referencedContent.relativePath,
+    `${referencedContent.name}.md`,
+  ]);
 };
 
 export const getSkillPlainText = ({

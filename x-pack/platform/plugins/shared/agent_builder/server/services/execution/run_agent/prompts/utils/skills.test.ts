@@ -13,6 +13,7 @@ const skill = (overrides: Partial<InternalSkillDefinition>): InternalSkillDefini
     id: 'platform.core.test-skill',
     name: 'test-skill',
     description: 'A test skill',
+    basePath: 'skills/platform/core',
     referencedContent: [],
     ...overrides,
   } as unknown as InternalSkillDefinition);

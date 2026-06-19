@@ -9,6 +9,7 @@ import type { AfterToolCallHookContext } from '@kbn/agent-builder-server';
 import { internalTools } from '@kbn/agent-builder-common/tools';
 import { loadSkillTools } from '../../services/skills/load_skill_tools';
 import { isSkillFileEntry } from '../../services/execution/runner/store/volumes/skills/utils';
+import { MOUNT_POINTS } from '../../services/execution/filesystem/mount_points';
 import type { AnalyticsService, TrackingService } from '../../telemetry';
 
 export const createLoadSkillToolsAfterRead = ({
@@ -28,7 +29,16 @@ export const createLoadSkillToolsAfterRead = ({
       return;
     }
 
-    const entry = await skillsStore.getEntry(path);
+    // The LLM passes the agent-visible path (e.g. `/skills/platform/foo/SKILL.md`);
+    // the store works in mount-relative paths. If the path isn't under the
+    // skills mount, there's no skill to match.
+    const skillsMountPrefix = `${MOUNT_POINTS.skills}/`;
+    if (!path.startsWith(skillsMountPrefix)) {
+      return;
+    }
+    const relativePath = path.slice(MOUNT_POINTS.skills.length);
+
+    const entry = await skillsStore.getEntry(relativePath);
     if (!entry || !isSkillFileEntry(entry)) {
       return;
     }

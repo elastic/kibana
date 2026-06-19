@@ -125,36 +125,4 @@ describe('VolumeBackedReadOnlyFs', () => {
     });
   });
 
-  describe('mount-point prefix translation', () => {
-    it('translates incoming paths to fully-qualified volume paths', async () => {
-      // The legacy volumes store entries under /tool_calls/... ; when mounted
-      // under /tool_calls in MountableFs, the adapter receives stripped paths
-      // (e.g. `/foo.json`) and must re-prepend the mount point before querying.
-      const mountedVolume = new MemoryVolume();
-      mountedVolume.add(makeFileEntry('/tool_calls/foo.json', 'tool result'));
-      const mountedFs = new VolumeBackedReadOnlyFs(mountedVolume, '/tool_calls');
-
-      // What MountableFs would forward after stripping the mount prefix:
-      expect(await mountedFs.readFile('/foo.json')).toBe('tool result');
-      expect(await mountedFs.exists('/foo.json')).toBe(true);
-      expect((await mountedFs.stat('/foo.json')).isFile).toBe(true);
-    });
-
-    it('lists volume entries at the mount root', async () => {
-      const mountedVolume = new MemoryVolume();
-      mountedVolume.add(makeFileEntry('/tool_calls/a.json', 'a'));
-      mountedVolume.add(makeFileEntry('/tool_calls/b.json', 'b'));
-      const mountedFs = new VolumeBackedReadOnlyFs(mountedVolume, '/tool_calls');
-
-      const entries = await mountedFs.readdir('/');
-      expect(entries.sort()).toEqual(['a.json', 'b.json']);
-    });
-
-    it('tolerates a trailing slash on the mount point', async () => {
-      const mountedVolume = new MemoryVolume();
-      mountedVolume.add(makeFileEntry('/skills/SKILL.md', 'hi'));
-      const mountedFs = new VolumeBackedReadOnlyFs(mountedVolume, '/skills/');
-      expect(await mountedFs.readFile('/SKILL.md')).toBe('hi');
-    });
-  });
 });

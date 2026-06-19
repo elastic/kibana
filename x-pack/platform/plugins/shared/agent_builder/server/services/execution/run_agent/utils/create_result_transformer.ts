@@ -11,6 +11,7 @@ import type { ToolResultStore } from '@kbn/agent-builder-server/runner';
 import type { ToolRegistry } from '@kbn/agent-builder-server';
 import type { ToolManager } from '@kbn/agent-builder-server/runner/tool_manager';
 import { getToolCallEntryPath } from '../../runner/store/volumes/tool_results/utils';
+import { MOUNT_POINTS } from '../../filesystem/mount_points';
 import type { ToolCallResultTransformer } from './tool_summarization';
 import {
   areAllResultsCleaned,
@@ -143,14 +144,17 @@ const tryFilestoreSubstitution = async ({
     return result;
   }
 
-  const path = getToolCallEntryPath({
+  // Store-relative path used for the lookup; agent-visible path (with the
+  // mount prefix) is what the LLM uses to reference the file.
+  const relativePath = getToolCallEntryPath({
     toolId,
     toolCallId,
     toolResultId: result.tool_result_id,
   });
+  const agentVisiblePath = `${MOUNT_POINTS.toolCalls}${relativePath}`;
 
   try {
-    const entry = await resultStore.getEntry(path);
+    const entry = await resultStore.getEntry(relativePath);
 
     // If entry exists and exceeds threshold, substitute with file reference
     if (entry && entry.metadata.token_count > threshold) {
@@ -158,7 +162,7 @@ const tryFilestoreSubstitution = async ({
         tool_result_id: result.tool_result_id,
         type: ToolResultType.fileReference,
         data: {
-          filepath: path,
+          filepath: agentVisiblePath,
           comment:
             'The result has been stored on the filestore. You can access it using the filestore_read tool with the specified filepath',
         },

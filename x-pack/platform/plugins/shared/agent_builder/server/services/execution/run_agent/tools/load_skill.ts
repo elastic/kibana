@@ -16,6 +16,7 @@ import type {
 } from '@kbn/agent-builder-server';
 import { loadSkillTools } from '../../../skills/load_skill_tools';
 import { resolveSkill } from '../../../skills/utils';
+import { MOUNT_POINTS } from '../../filesystem/mount_points';
 import {
   getSkillEntryPath,
   getSkillReferencedContentEntryPath,
@@ -88,12 +89,17 @@ The 'skill' parameter accepts the skill name, the full path of the skill's folde
           skill: {
             id: skill.id,
             name: skill.name,
-            path: getSkillEntryPath({ skill }),
+            // Agent-visible path (with /skills mount prefix); the store keeps
+            // entries under the mount-relative form.
+            path: `${MOUNT_POINTS.skills}${getSkillEntryPath({ skill })}`,
           },
           content: skill.content,
           referenced_files: (skill.referencedContent ?? []).map((rc) => ({
             name: rc.name,
-            path: getSkillReferencedContentEntryPath({ skill, referencedContent: rc }),
+            path: `${MOUNT_POINTS.skills}${getSkillReferencedContentEntryPath({
+              skill,
+              referencedContent: rc,
+            })}`,
           })),
           loaded_tools: loadedToolIds,
         }),

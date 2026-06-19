@@ -8,6 +8,7 @@
 import type { InternalSkillDefinition } from '@kbn/agent-builder-server/skills';
 import { cleanPrompt } from '@kbn/agent-builder-genai-utils/prompts';
 import { getSkillEntryPath } from '../../../runner/store/volumes/skills/utils';
+import { MOUNT_POINTS } from '../../../filesystem/mount_points';
 
 // The "load skills before other tool calls" guidance exists because skills dynamically
 // register tools when loaded. If the LLM parallelizes a load_skill call with other tool
@@ -21,8 +22,10 @@ export const getSkillsInstructions = ({
   const sorted = [...skills].toSorted((a, b) => a.name.localeCompare(b.name));
 
   const skillToLine = (skill: InternalSkillDefinition) => {
-    const path = getSkillEntryPath({ skill });
-    return `- ${skill.name} (${path}): ${skill.description}`;
+    // Display the agent-visible path (with the `/skills` mount prefix), not
+    // the store-relative one.
+    const agentVisiblePath = `${MOUNT_POINTS.skills}${getSkillEntryPath({ skill })}`;
+    return `- ${skill.name} (${agentVisiblePath}): ${skill.description}`;
   };
 
   if (sorted.length === 0) {

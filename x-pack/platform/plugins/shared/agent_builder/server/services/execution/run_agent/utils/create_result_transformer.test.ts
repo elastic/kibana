@@ -262,9 +262,9 @@ describe('createResultTransformer', () => {
 
       const entries = new Map<string, FileEntry>();
       entries.set(
-        '/tool_calls/search/call-1/result-1.json',
+        '/search/call-1/result-1.json',
         createFileEntry(
-          '/tool_calls/search/call-1/result-1.json',
+          '/search/call-1/result-1.json',
           FS_TOOL_CALL_TOKEN_THRESHOLD + 100,
           { large: 'data' }
         )
@@ -298,8 +298,8 @@ describe('createResultTransformer', () => {
 
       const entries = new Map<string, FileEntry>();
       entries.set(
-        '/tool_calls/search/call-1/result-1.json',
-        createFileEntry('/tool_calls/search/call-1/result-1.json', 100, { small: 'data' })
+        '/search/call-1/result-1.json',
+        createFileEntry('/search/call-1/result-1.json', 100, { small: 'data' })
       );
       const resultStore = createMockResultStore(entries);
 
@@ -349,9 +349,9 @@ describe('createResultTransformer', () => {
 
       const entries = new Map<string, FileEntry>();
       entries.set(
-        '/tool_calls/search/call-1/result-1.json',
+        '/search/call-1/result-1.json',
         createFileEntry(
-          '/tool_calls/search/call-1/result-1.json',
+          '/search/call-1/result-1.json',
           FS_TOOL_CALL_TOKEN_THRESHOLD + 100,
           { large: 'data' }
         )
@@ -396,9 +396,9 @@ describe('createResultTransformer', () => {
       // Even if we have large file entries, summarized results should not be substituted
       const entries = new Map<string, FileEntry>();
       entries.set(
-        '/tool_calls/search/call-1/summarized.json',
+        '/search/call-1/summarized.json',
         createFileEntry(
-          '/tool_calls/search/call-1/summarized.json',
+          '/search/call-1/summarized.json',
           FS_TOOL_CALL_TOKEN_THRESHOLD + 1000,
           { summary: 'Summarized data' }
         )
@@ -517,8 +517,8 @@ describe('createResultTransformer', () => {
       const entries = new Map<string, FileEntry>();
       // Token count of 200 - above custom threshold of 100
       entries.set(
-        '/tool_calls/search/call-1/result-1.json',
-        createFileEntry('/tool_calls/search/call-1/result-1.json', 200, { some: 'data' })
+        '/search/call-1/result-1.json',
+        createFileEntry('/search/call-1/result-1.json', 200, { some: 'data' })
       );
       const resultStore = createMockResultStore(entries);
 
@@ -545,9 +545,9 @@ describe('createResultTransformer', () => {
 
       const entries = new Map<string, FileEntry>();
       entries.set(
-        '/tool_calls/search/call-1/result-1.json',
+        '/search/call-1/result-1.json',
         createFileEntry(
-          '/tool_calls/search/call-1/result-1.json',
+          '/search/call-1/result-1.json',
           FS_TOOL_CALL_TOKEN_THRESHOLD + 100,
           { large: 'data' }
         )

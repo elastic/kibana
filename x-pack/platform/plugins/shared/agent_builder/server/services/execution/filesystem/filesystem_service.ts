@@ -50,11 +50,8 @@ export class FilesystemService implements IFilesystemService {
 
     await this.deps.workspaceVolume.load();
 
-    const toolCallsFs = new VolumeBackedReadOnlyFs(
-      this.deps.toolResultsSource,
-      MOUNT_POINTS.toolCalls
-    );
-    const skillsFs = new VolumeBackedReadOnlyFs(this.deps.skillsSource, MOUNT_POINTS.skills);
+    const toolCallsFs = new VolumeBackedReadOnlyFs(this.deps.toolResultsSource);
+    const skillsFs = new VolumeBackedReadOnlyFs(this.deps.skillsSource);
 
     this.fs = new MountableFs({
       base,

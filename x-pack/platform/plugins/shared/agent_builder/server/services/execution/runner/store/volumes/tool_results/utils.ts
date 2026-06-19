@@ -12,9 +12,13 @@ import type { ToolResultWithMeta } from '@kbn/agent-builder-server/runner';
 import { FileEntryType } from '@kbn/agent-builder-server/runner/filestore';
 import { sanitizeToolId } from '@kbn/agent-builder-genai-utils/langchain';
 import { estimateTokens } from '@kbn/agent-builder-genai-utils/tools/utils/token_count';
-import { MOUNT_POINTS } from '../../../../filesystem/mount_points';
 import type { ToolCallFileEntry } from './types';
 
+/**
+ * Returns the store-relative entry path for a tool-call result. The path is
+ * relative to the `/tool_calls` mount: e.g. `/{tool_id}/{call_id}/{result_id}.json`.
+ * The agent-visible path is `MOUNT_POINTS.toolCalls + this`; compose at the boundary.
+ */
 export const getToolCallEntryPath = ({
   toolId,
   toolCallId,
@@ -24,7 +28,7 @@ export const getToolCallEntryPath = ({
   toolCallId: string;
   toolResultId: string;
 }): string => {
-  return `${MOUNT_POINTS.toolCalls}/${sanitizeToolId(toolId)}/${toolCallId}/${toolResultId}.json`;
+  return `/${sanitizeToolId(toolId)}/${toolCallId}/${toolResultId}.json`;
 };
 
 export const createToolCallEntry = (result: ToolResultWithMeta): ToolCallFileEntry => {

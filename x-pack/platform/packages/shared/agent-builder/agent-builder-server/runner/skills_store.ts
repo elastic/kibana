@@ -9,10 +9,7 @@ import type { InternalSkillDefinition } from '../skills';
 import type { FileEntryAccessor } from './file_entry_accessor';
 
 /**
- * Store to access skills during execution. Extends `FileEntryAccessor` so
- * callers that need per-file skill metadata (e.g. `skill_id`, entry type to
- * distinguish main files from reference content) can read it without going
- * through the byte-level `IFileSystem`.
+ * Store to access skills during execution.
  */
 export interface SkillsStore extends FileEntryAccessor {
   has(skillId: string): boolean;

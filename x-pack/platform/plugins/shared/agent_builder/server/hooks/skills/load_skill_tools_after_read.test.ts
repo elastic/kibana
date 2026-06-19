@@ -36,7 +36,7 @@ const createTrackingServiceMock = (): jest.Mocked<
 const createSkillFileEntry = (
   overrides: Partial<{ path: string; skillId: string }> = {}
 ): SkillFileEntry => ({
-  path: overrides.path ?? 'skills/platform/my-skill/SKILL.md',
+  path: overrides.path ?? '/platform/my-skill/SKILL.md',
   type: 'file',
   metadata: {
     type: FileEntryType.skill,
@@ -86,7 +86,7 @@ const createMockSkill = (
 
 const createHookContext = ({
   toolId = internalTools.readFile,
-  toolParams = { path: 'skills/platform/my-skill/SKILL.md' },
+  toolParams = { path: '/skills/platform/my-skill/SKILL.md' },
   toolHandlerContext,
 }: {
   toolId?: string;
@@ -143,7 +143,7 @@ describe('createLoadSkillToolsAfterRead', () => {
       await loadSkillToolsAfterRead(context);
 
       expect(toolHandlerContext.skillsStore.getEntry).toHaveBeenCalledWith(
-        'skills/platform/my-skill/SKILL.md'
+        '/platform/my-skill/SKILL.md'
       );
       expect(toolHandlerContext.toolManager.addTools).not.toHaveBeenCalled();
     });
