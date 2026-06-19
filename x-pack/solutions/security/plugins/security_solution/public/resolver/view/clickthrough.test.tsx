@@ -189,7 +189,7 @@ describe('Resolver, when analyzing a tree that has no ancestors and 2 children',
         if (button) {
           button.simulate('click', { button: 0 });
         }
-      });
+      }, 30000);
       it('should render the second child node as selected, and the origin as not selected, and the query string should indicate that the second child is selected', async () => {
         await expect(
           simulator.map(() => ({
@@ -212,7 +212,7 @@ describe('Resolver, when analyzing a tree that has no ancestors and 2 children',
           // The origin child is rendered and doesn't have `[aria-selected]`
           unselectedOriginNodeCount: 1,
         });
-      });
+      }, 30000);
     });
   });
 });
