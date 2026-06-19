@@ -392,6 +392,52 @@ describe('PollPolicyStepHandler', () => {
     });
   });
 
+  describe('task scheduling', () => {
+    const stepDefinition = {
+      poll: jest.fn().mockResolvedValue({ state: {} }),
+      policy: { strategy: 'fixed' as const, intervalMs: 1_000 },
+      ceilings: { maxAttempts: 10, maxWaitMs: 60_000 },
+    };
+
+    it('does not force task scheduling on the first poll continuation', async () => {
+      const startedAt = new Date().toISOString();
+      const mocks = createHandlerTestMocks({
+        [DURABLE_STEP_STATE_KEY]: {
+          startedAt,
+          pollState: { attempt: 0, nextPollAt: startedAt, lastPollAt: startedAt },
+        },
+      });
+      const handler = buildPollHandler(stepDefinition, mocks);
+
+      await handler.run({}, {}, pollNode.configuration);
+
+      expect(mocks.stepExecutionRuntime.enterWaitUntil).toHaveBeenCalledWith(
+        expect.any(Date),
+        undefined,
+        false
+      );
+    });
+
+    it('forces task scheduling from the second poll continuation onward', async () => {
+      const startedAt = new Date().toISOString();
+      const mocks = createHandlerTestMocks({
+        [DURABLE_STEP_STATE_KEY]: {
+          startedAt,
+          pollState: { attempt: 1, nextPollAt: startedAt, lastPollAt: startedAt },
+        },
+      });
+      const handler = buildPollHandler(stepDefinition, mocks);
+
+      await handler.run({}, {}, pollNode.configuration);
+
+      expect(mocks.stepExecutionRuntime.enterWaitUntil).toHaveBeenCalledWith(
+        expect.any(Date),
+        undefined,
+        true
+      );
+    });
+  });
+
   describe('onCancel', () => {
     it('invokes step definition onCancel with poll context when defined', async () => {
       const onCancel = jest.fn();

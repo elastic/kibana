@@ -1026,7 +1026,7 @@ You can omit `policy` and `ceilings` entirely for quick prototypes; **override b
   - **`undefined`** — continue polling; keep the previously persisted author state (same as returning `{}` without `output` / `error`).
   - **`{ state?, nextPollDelayMs? }`** — continue and optionally update state or override the next delay. Omit `state` to keep prior author state. If `nextPollDelayMs` is a positive number, the **next** wake-up uses that delay from now; otherwise spacing follows `policy`. The override applies to **one** sleep only — the poll `attempt` counter still increments, and the wake-up after that uses `policy` computed from the updated attempt (for exponential policies, backoff continues from the incremented attempt, not from the override value).
 
-Optional **`stateSchema`**: a `z.object({ ... })` describing author state passed between `start` and `poll` invocations. It types `context.state` in `poll` and the `state` field on `{ state }` continuations from `start` / `poll`.
+Optional **`stateSchema`**: a `z.object({ ... })` used **only for TypeScript inference** of author state passed between `start` and `poll` invocations. It types `context.state` in `poll` and the `state` field on `{ state }` continuations from `start` / `poll`. The engine does **not** validate author state at runtime — authors are responsible for returning a consistent shape.
 
 **`poll` context** (`PollContext`): extends `StepHandlerContext` with:
 

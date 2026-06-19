@@ -75,7 +75,6 @@ export {
 export {
   createServerStepDefinition,
   createPollServerStepDefinition,
-  DEFAULT_POLL_CEILINGS,
   PollStepDefaults,
 } from './step_registry/types';
 

@@ -94,6 +94,8 @@ export async function handleExecutionDelay(
     return;
   }
   const resumeAtFromState = stepExecutionRuntime.stepExecution.state?.resumeAt;
+  // When set, skip in-process sleep for short delays and schedule a resume task so this task
+  // is not held for the full wait (see enterWaitUntil forceTaskSchedule).
   const forceTaskScheduleFromState = stepExecutionRuntime.stepExecution.state?.forceTaskSchedule;
 
   if (typeof resumeAtFromState !== 'string') {

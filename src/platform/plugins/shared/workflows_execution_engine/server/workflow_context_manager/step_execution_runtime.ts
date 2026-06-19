@@ -369,6 +369,9 @@ export class StepExecutionRuntime {
    * @param resumeDate When the step should be woken via the resume task.
    * @param additionalState Fields to merge into the persisted step state. The
    *   engine writes `resumeAt` itself; callers do not need to pass it.
+   * @param forceTaskSchedule When true, {@link handle_execution_delay} schedules a Task Manager
+   *   resume even if the sleep is under its 5 s in-process threshold. Durable poll steps set this
+   *   after the first continuation so sub-5 s poll intervals do not pin the worker.
    */
   public enterWaitUntil(
     resumeDate: Date,

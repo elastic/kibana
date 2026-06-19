@@ -12,6 +12,7 @@ import { ExecutionError } from '@kbn/workflows/server';
 import {
   isPollStepDefinition,
   isStartPlusPollStepDefinition,
+  PollStepDefaults,
 } from '@kbn/workflows-extensions/server';
 import type {
   DurablePhaseResult,
@@ -21,29 +22,19 @@ import type {
   StepHandlerContext,
 } from '@kbn/workflows-extensions/server';
 import { createBaseHandlerContext } from './create_base_handler_context';
+import { DURABLE_STEP_STATE_KEY, type DurableStepState } from './durable_step_state';
 import { applyBackoffJitter } from '../../../utils/backoff_jitter/backoff_jitter';
 import type { StepExecutionRuntime } from '../../../workflow_context_manager/step_execution_runtime';
 import type { IWorkflowEventLogger } from '../../../workflow_event_logger';
 import type { RunStepResult } from '../../node_implementation';
 import type { CustomStepDefinitionHandler } from '../types';
 
-const bookkeepingKey = '__durableStepState';
-
-interface DurableStepState {
-  /** Author state JSON persisted between polls (opaque to the engine). */
-  customState?: Record<string, unknown>;
-  initialStartState?: {
-    isStart: boolean;
-  };
-  pollState?: {
-    attempt: number;
-    nextPollAt: string;
-    /** ISO time when the poll/start phase last completed (not used for ceiling math). */
-    lastPollAt: string;
-  };
-  /** Epoch ms when the step entered its poll loop (after `start`). */
-  startedAt?: string;
-}
+/**
+ * After the first poll continuation, force Task Manager scheduling even when sleep is under
+ * handle_execution_delay's in-process threshold (5 s), so the worker is not pinned across
+ * long-running poll loops.
+ */
+const FORCE_TASK_SCHEDULE_FROM_ATTEMPT = 2;
 
 type PolicyCalculationResult =
   | { outcome: 'success'; nextPollAt: string }
@@ -206,21 +197,21 @@ export class PollPolicyStepHandler implements CustomStepDefinitionHandler {
     this.stepExecutionRuntime.enterWaitUntil(
       new Date(nextPollAt),
       undefined,
-      nextAttempt >= 2 // force task schedule for more than 2 attempts
+      nextAttempt >= FORCE_TASK_SCHEDULE_FROM_ATTEMPT
     );
     return { suspended: true, input };
   }
 
   private getDurableStepState(): DurableStepState {
     const durableStepState =
-      this.stepExecutionRuntime.getCurrentStepState()?.[bookkeepingKey] || {};
+      this.stepExecutionRuntime.getCurrentStepState()?.[DURABLE_STEP_STATE_KEY] || {};
 
     return durableStepState as DurableStepState;
   }
 
   private setDurableStepState(durableStepState: DurableStepState): void {
     this.stepExecutionRuntime.setCurrentStepState({
-      [bookkeepingKey]: durableStepState,
+      [DURABLE_STEP_STATE_KEY]: durableStepState,
     });
   }
 
@@ -254,7 +245,7 @@ export class PollPolicyStepHandler implements CustomStepDefinitionHandler {
 
   private async calculateNextPollAt(params: { currentAttempt: number }): Promise<string> {
     const { currentAttempt } = params;
-    const policy = this.stepDefinition.policy;
+    const policy = this.stepDefinition.policy ?? PollStepDefaults.policy;
 
     const now = new Date();
 

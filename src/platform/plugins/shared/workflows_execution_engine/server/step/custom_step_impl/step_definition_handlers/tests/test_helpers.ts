@@ -7,14 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const DURABLE_STEP_STATE_KEY = '__durableStepState';
+import { DURABLE_STEP_STATE_KEY, type DurableStepState } from '../durable_step_state';
 
-export interface DurableStepState {
-  customState?: Record<string, unknown>;
-  initialStartState?: { isStart: boolean };
-  pollState?: { attempt: number; nextPollAt: string; lastPollAt: string };
-  startedAt?: string;
-}
+export { DURABLE_STEP_STATE_KEY, type DurableStepState };
 
 export const getDurableState = (persisted: Record<string, unknown> | undefined): DurableStepState =>
   (persisted?.[DURABLE_STEP_STATE_KEY] ?? {}) as DurableStepState;

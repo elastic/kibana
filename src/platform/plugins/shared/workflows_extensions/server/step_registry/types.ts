@@ -18,14 +18,6 @@ import type { CommonStepDefinition } from '../../common';
 // -----------------------------------------------------------------------------
 
 /**
- * @deprecated Use {@link PollStepDefaults} instead. Retained for backward-compatible imports only.
- */
-export const DEFAULT_POLL_CEILINGS: Required<PollCeilings> = {
-  maxAttempts: 120,
-  maxWaitMs: 60 * 60_000,
-};
-
-/**
  * Applied by {@link createPollServerStepDefinition} when `policy` or `ceilings` fields are omitted
  * (or when individual ceiling properties are missing). Override in your step definition for
  * production integrations.
@@ -256,7 +248,9 @@ export type PollOnCancelHandler<
 > = (context: PollHandlerContext<Input, Config, State>) => Promise<void> | void;
 
 /**
- * Full server definition for **`poll` only** (flat `poll`, `policy`, `ceilings`).
+ * Full server definition for **`poll` only** (flat `poll`, optional `policy`, `ceilings`).
+ * Omit `policy` to use {@link PollStepDefaults.policy} (fixed 1 s interval) via
+ * {@link createPollServerStepDefinition}.
  */
 export type PollOnlyStepDefinition<
   Input extends z.ZodType = z.ZodType,
@@ -265,8 +259,12 @@ export type PollOnlyStepDefinition<
   State extends z.ZodObject = z.ZodObject
 > = Omit<CommonServerStepDefinition<Input, Output, Config>, 'handler'> & {
   poll: PollHandler<Input, Output, Config, State>;
-  policy: PollPolicy;
+  policy?: PollPolicy;
   ceilings?: PollCeilings;
+  /**
+   * Optional Zod object used only for TypeScript inference of `context.state` and `{ state }`
+   * continuations. The engine does not validate author state at runtime.
+   */
   stateSchema?: State;
   onCancel?: PollOnCancelHandler<Input, Config, State>;
 };
