@@ -52,9 +52,9 @@ interface Props {
   onCancelSnooze: (id: string) => void;
   onUpdateApiKey: (id: string) => void;
   isStateLoading?: boolean;
-  session: EuiFlyoutProps['session'];
-  ownFocus: EuiFlyoutProps['ownFocus'];
-  hasAnimation: EuiFlyoutProps['hasAnimation'];
+  session?: EuiFlyoutProps['session'];
+  ownFocus?: EuiFlyoutProps['ownFocus'];
+  hasAnimation?: EuiFlyoutProps['hasAnimation'];
 }
 
 export const ActionPolicyDetailsFlyout = ({
