@@ -79,7 +79,9 @@ export const RuleChangesHistory = memo(function RuleChangesHistory({
   useChangeHistoryAutoSelection({
     ruleId,
     items,
+    selectedItem,
     setSelectedItem,
+    loadMore: handleNextPageLoading,
   });
 
   const styles = useMemo(
