@@ -12,6 +12,8 @@ import {
   type AgentCapabilities,
 } from '@kbn/agent-builder-common';
 import type { AgentHandlerContext } from '@kbn/agent-builder-server';
+import type { BuiltinToolDefinition } from '@kbn/agent-builder-server/tools';
+import type { ScopedRunner } from '@kbn/agent-builder-server/runner';
 import { ToolManagerToolType } from '@kbn/agent-builder-server/runner';
 import { createSubagentTool } from './run_subagent';
 import { createSleepTool } from './sleep';
@@ -61,101 +63,56 @@ export const registerInternalTools = async ({
     todoStateManager,
   } = context;
 
-  // Filesystem tools — read_file and list_files are always on; bash is FF-gated.
-  const filesystemTools = [
-    {
-      ...builtinToolToExecutable({ tool: createReadFileTool({ filesystemService }), runner }),
-      origin: ToolOrigin.internal,
-    },
-    {
-      ...builtinToolToExecutable({ tool: createListFilesTool({ filesystemService }), runner }),
-      origin: ToolOrigin.internal,
-    },
-    ...(experimentalFeatures.bash && bashService
-      ? [
-          {
-            ...builtinToolToExecutable({ tool: createBashTool({ bashService }), runner }),
-            origin: ToolOrigin.internal,
-          },
-        ]
-      : []),
-  ];
-  await toolManager.addTools({
-    type: ToolManagerToolType.executable,
-    tools: filesystemTools,
-    logger,
-  });
+  const interactive = executionMode !== AgentExecutionMode.standalone;
 
-  // Todo tool — FF-gated on `todos`.
+  // Collect the tools that apply to this run, then register them in a single
+  // addTools call.
+  const tools: Array<BuiltinToolDefinition<any>> = [];
+
+  // Filesystem — read_file and list_files are always on; bash is FF-gated.
+  tools.push(createReadFileTool({ filesystemService }));
+  tools.push(createListFilesTool({ filesystemService }));
+  if (experimentalFeatures.bash && bashService) {
+    tools.push(createBashTool({ bashService }));
+  }
+
+  // Todos — FF-gated.
   if (experimentalFeatures.todos) {
-    const todoTool = createTodoTool({ todoStateManager });
-    await toolManager.addTools({
-      type: ToolManagerToolType.executable,
-      tools: [
-        {
-          ...builtinToolToExecutable({ tool: todoTool, runner }),
-          origin: ToolOrigin.internal,
-        },
-      ],
-      logger,
-    });
+    tools.push(createTodoTool({ todoStateManager }));
   }
 
-  // Sub-agent and sleep tools — experimental, and not available in standalone mode
-  if (experimentalFeatures.subagents && executionMode !== AgentExecutionMode.standalone) {
-    const subagentTool = createSubagentTool({
-      agentId: agentId ?? agentBuilderDefaultAgentId,
-      executionId: executionId ?? '',
-      connectorId: defaultConnectorId,
-      capabilities,
-      subAgentExecutor,
-      abortSignal,
-      backgroundExecutionService,
-    });
-    const sleepTool = createSleepTool();
-    await toolManager.addTools({
-      type: ToolManagerToolType.executable,
-      tools: [
-        {
-          ...builtinToolToExecutable({ tool: subagentTool, runner }),
-          origin: ToolOrigin.internal,
-        },
-        {
-          ...builtinToolToExecutable({ tool: sleepTool, runner }),
-          origin: ToolOrigin.internal,
-        },
-      ],
-      logger,
-    });
+  // Sub-agent + sleep — experimental, and not available in standalone mode.
+  if (experimentalFeatures.subagents && interactive) {
+    tools.push(
+      createSubagentTool({
+        agentId: agentId ?? agentBuilderDefaultAgentId,
+        executionId: executionId ?? '',
+        connectorId: defaultConnectorId,
+        capabilities,
+        subAgentExecutor,
+        abortSignal,
+        backgroundExecutionService,
+      })
+    );
+    tools.push(createSleepTool());
   }
 
-  // ask_user_question — experimental, and not available in standalone mode
-  if (experimentalFeatures.askUserQuestion && executionMode !== AgentExecutionMode.standalone) {
-    const askUserQuestionTool = createAskUserQuestionTool();
-    await toolManager.addTools({
-      type: ToolManagerToolType.executable,
-      tools: [
-        {
-          ...builtinToolToExecutable({ tool: askUserQuestionTool, runner }),
-          origin: ToolOrigin.internal,
-        },
-      ],
-      logger,
-    });
+  // ask_user_question — experimental, and not available in standalone mode.
+  if (experimentalFeatures.askUserQuestion && interactive) {
+    tools.push(createAskUserQuestionTool());
   }
 
   // load_skill — gated on the skills feature only.
   if (experimentalFeatures.skills) {
-    const loadSkillTool = createLoadSkillTool({ analyticsService, trackingService });
-    await toolManager.addTools({
-      type: ToolManagerToolType.executable,
-      tools: [
-        {
-          ...builtinToolToExecutable({ tool: loadSkillTool, runner }),
-          origin: ToolOrigin.internal,
-        },
-      ],
-      logger,
-    });
+    tools.push(createLoadSkillTool({ analyticsService, trackingService }));
   }
+
+  await toolManager.addTools({
+    type: ToolManagerToolType.executable,
+    tools: tools.map((tool) => ({
+      ...builtinToolToExecutable({ tool, runner: runner as ScopedRunner }),
+      origin: ToolOrigin.internal,
+    })),
+    logger,
+  });
 };
