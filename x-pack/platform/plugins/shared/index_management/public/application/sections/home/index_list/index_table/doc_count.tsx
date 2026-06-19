@@ -10,6 +10,10 @@ import { EuiIcon, EuiLoadingSpinner, EuiText, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import useObservable from 'react-use/lib/useObservable';
 import { type DocCountResult, type docCountApi, RequestResultType } from './get_doc_count';
+import {
+  docCountApproximateTooltip,
+  docCountClosedIndexTooltip,
+} from '../translations';
 interface DocCountCellProps {
   indexName: string;
   docCountApi: ReturnType<typeof docCountApi>;
@@ -18,19 +22,6 @@ interface DocCountCellProps {
   /** Index status — 'close' prevents ES|QL from running at all. */
   status?: string;
 }
-
-const approximateTooltip = i18n.translate('xpack.idxMgmt.indexTable.docCountApproximateTooltip', {
-  defaultMessage:
-    'Approximate count from index metadata. An exact count requires read access to the index.',
-});
-
-const closedIndexTooltip = i18n.translate(
-  'xpack.idxMgmt.indexTable.docCountClosedIndexTooltip',
-  {
-    defaultMessage:
-      'Approximate count from index metadata. Exact counts are not available for closed indices.',
-  }
-);
 
 export const DocCountCell = ({ indexName, docCountApi, metadataCount, status }: DocCountCellProps) => {
   const isClosed = status === 'close';
@@ -52,10 +43,10 @@ export const DocCountCell = ({ indexName, docCountApi, metadataCount, status }: 
   if (isClosed) {
     if (metadataCount !== undefined) {
       return (
-        <EuiToolTip content={closedIndexTooltip}>
+        <EuiToolTip content={docCountClosedIndexTooltip}>
           <span style={{ cursor: 'default' }}>
             {Number(metadataCount).toLocaleString()}&nbsp;
-            <EuiIcon type="info" size="s" color="subdued" aria-label={closedIndexTooltip} />
+            <EuiIcon type="info" size="s" color="subdued" aria-label={docCountClosedIndexTooltip} />
           </span>
         </EuiToolTip>
       );
@@ -71,10 +62,10 @@ export const DocCountCell = ({ indexName, docCountApi, metadataCount, status }: 
     // Fall back to metadata count (e.g. no read privilege) rather than showing "Error".
     if (metadataCount !== undefined) {
       return (
-        <EuiToolTip content={approximateTooltip}>
+        <EuiToolTip content={docCountApproximateTooltip}>
           <span style={{ cursor: 'default' }}>
             {Number(metadataCount).toLocaleString()}&nbsp;
-            <EuiIcon type="info" size="s" color="subdued" aria-label={approximateTooltip} />
+            <EuiIcon type="info" size="s" color="subdued" aria-label={docCountApproximateTooltip} />
           </span>
         </EuiToolTip>
       );

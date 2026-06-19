@@ -20,21 +20,7 @@ export const docCountErrorLabel = i18n.translate(
   { defaultMessage: 'Unable to retrieve' }
 );
 
-export const docCountApproximateTooltip = i18n.translate(
-  'xpack.idxMgmt.indexDetails.overviewTab.status.docCountApproximateTooltip',
-  {
-    defaultMessage:
-      'Approximate count from index metadata. An exact count requires read access to the index.',
-  }
-);
-
-export const docCountClosedIndexTooltip = i18n.translate(
-  'xpack.idxMgmt.indexDetails.overviewTab.status.docCountClosedIndexTooltip',
-  {
-    defaultMessage:
-      'Approximate count from index metadata. Exact counts are not available for closed indices.',
-  }
-);
+export { docCountApproximateTooltip, docCountClosedIndexTooltip } from '../../translations';
 
 export const storageCardTitle = i18n.translate(
   'xpack.idxMgmt.indexDetails.overviewTab.storage.cardTitle',
