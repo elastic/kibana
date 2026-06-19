@@ -37,6 +37,8 @@ import type {
   PluginsService,
   ToolManager,
   TodoStateManager,
+  IFilesystemService,
+  IBashService,
 } from '../runner';
 import type { IFileStore } from '../runner/filestore';
 import type { AttachmentStateManager } from '../attachments';
@@ -106,6 +108,8 @@ export interface ExperimentalFeatures {
   todos: boolean;
   /** Whether the ask_user_question HITL tool is enabled */
   askUserQuestion: boolean;
+  /** Whether the bash tool (and the just-bash runtime) is enabled */
+  bash: boolean;
 }
 
 export interface AgentHandlerContext {
@@ -203,9 +207,19 @@ export interface AgentHandlerContext {
    */
   hooks: AgentBuilderHooks;
   /**
-   * File store to access data from the agent's virtual filesystem
+   * File store to access data from the agent's virtual filesystem.
+   * @deprecated Use `filesystemService` instead. Will be removed once the
+   * unified VFS migration completes.
    */
   filestore: IFileStore;
+  /**
+   * Unified virtual filesystem service.
+   */
+  filesystemService: IFilesystemService;
+  /**
+   * Bash runtime service. Present only when `experimentalFeatures.bash` is on.
+   */
+  bashService?: IBashService;
   /**
    * Experimental features configuration for this agent execution.
    * Determined by the UI setting at the start of execution.
