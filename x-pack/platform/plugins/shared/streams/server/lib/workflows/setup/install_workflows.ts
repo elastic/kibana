@@ -51,10 +51,9 @@ export const installWorkflows = async ({
       client.install(workflowId, { spaceId })
     ),
     ...(isSignificantEventsMemoryEnabled ? [installMemoryWorkflows({ client })] : []),
-    // Installed unconditionally so it is available the moment the feature flag
-    // (observability:streamsEnableInvestigation) is toggled on. The events route
-    // gates on the flag at call-time; the orchestrator triggers unconditionally
-    // but only for discoveries that have already been promoted via triage.
+    // Installed unconditionally so the workflow is available when investigation is
+    // enabled. Triggering is manual today; automatic post-promotion triggering is
+    // wired in a follow-up PR via InvestigationService.
     client.install(STREAMS_INVESTIGATION_WORKFLOW_ID, { spaceId: GLOBAL_WORKFLOW_SPACE_ID }),
   ]);
 };

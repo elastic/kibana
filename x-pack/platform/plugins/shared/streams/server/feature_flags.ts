@@ -131,7 +131,7 @@ export function registerFeatureFlags(
             value: false,
             description: i18n.translate('xpack.streams.investigationSettingsDescription', {
               defaultMessage:
-                'Enable automatic root cause investigation after significant event promotion.',
+                'Enable the root cause investigation workflow and agent for significant events.',
             }),
             type: 'boolean',
             schema: schema.boolean(),
