@@ -140,7 +140,11 @@ describe('registerAndroidRoutes', () => {
               _source: {
                 attributes: {
                   'exception.stacktrace': 'java.lang.RuntimeException: boom',
-                  'app.build_id': 'build-1',
+                },
+                resource: {
+                  attributes: {
+                    'app.build_id': 'build-1',
+                  },
                 },
               },
             },
@@ -155,7 +159,7 @@ describe('registerAndroidRoutes', () => {
         index: DEFAULT_CRASH_INDEX,
         query: { ids: { values: ['doc-1'] } },
         size: 1,
-        _source: ['attributes'],
+        _source: ['attributes', 'resource.attributes'],
       });
       expect(response.ok).toHaveBeenCalledWith({
         body: {
@@ -175,7 +179,11 @@ describe('registerAndroidRoutes', () => {
               _source: {
                 attributes: {
                   'exception.stacktrace': 'trace',
-                  'app.build_id': 'build-1',
+                },
+                resource: {
+                  attributes: {
+                    'app.build_id': 'build-1',
+                  },
                 },
               },
             },
@@ -219,7 +227,14 @@ describe('registerAndroidRoutes', () => {
         createContext(
           jest.fn().mockResolvedValue({
             hits: {
-              hits: [{ _source: { attributes: { 'app.build_id': 'build-1' } } }],
+              hits: [
+                {
+                  _source: {
+                    attributes: {},
+                    resource: { attributes: { 'app.build_id': 'build-1' } },
+                  },
+                },
+              ],
             },
           })
         ),
