@@ -179,7 +179,6 @@ async function savePackagePolicy(
         'inputs',
         'vars',
         'id',
-        'var_group_selections',
         'condition',
         'supports_agentless',
         'supports_cloud_connector',

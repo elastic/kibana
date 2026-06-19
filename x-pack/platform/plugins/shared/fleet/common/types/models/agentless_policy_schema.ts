@@ -10,6 +10,7 @@ import { schema } from '@kbn/config-schema';
 import {
   SimplifiedPackagePolicyInputRecordSchema,
   SimplifiedVarsSchema,
+  VarGroupSelectionsSchema,
 } from './package_policy_schema';
 
 const AgentlessPolicyPackageSchema = schema.object(
@@ -76,6 +77,7 @@ export const AgentlessPolicySchema = schema.object(
       })
     ),
     vars: schema.maybe(SimplifiedVarsSchema),
+    var_group_selections: VarGroupSelectionsSchema,
     additional_datastreams_permissions: schema.maybe(
       schema.arrayOf(schema.string({ maxLength: 256 }), {
         maxSize: 1000,

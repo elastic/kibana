@@ -44,6 +44,7 @@ const validFullPolicy = {
     },
   },
   vars: { some_var: 'some_value' },
+  var_group_selections: { auth: 'oauth2' },
   additional_datastreams_permissions: ['logs-test-default', 'metrics-test-default'],
   global_data_tags: [
     { name: 'team', value: 'cloud-security' },
@@ -266,6 +267,31 @@ describe('AgentlessPolicySchema', () => {
         vars: { myVar: null },
       });
       expect(result.vars?.myVar).toBeNull();
+    });
+  });
+
+  describe('var_group_selections', () => {
+    it('should accept a policy with var_group_selections', () => {
+      expect(() =>
+        AgentlessPolicySchema.validate({
+          ...validMinimalPolicy,
+          var_group_selections: { auth: 'oauth2' },
+        })
+      ).not.toThrow();
+    });
+
+    it('should accept a policy without var_group_selections', () => {
+      const { var_group_selections: _, ...policy } = validFullPolicy;
+      expect(() => AgentlessPolicySchema.validate(policy)).not.toThrow();
+    });
+
+    it('should reject non-string var_group_selections values', () => {
+      expect(() =>
+        AgentlessPolicySchema.validate({
+          ...validMinimalPolicy,
+          var_group_selections: { auth: 123 },
+        })
+      ).toThrow();
     });
   });
 
