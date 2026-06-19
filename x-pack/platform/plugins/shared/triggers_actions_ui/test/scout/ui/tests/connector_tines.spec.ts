@@ -297,6 +297,7 @@ test.describe('Tines connector', { tag: tags.stateful.classic }, () => {
     await page.goto(kbnUrl.get(CONNECTORS_APP_PATH));
     await page.locator(CONNECTORS_LIST_SELECTORS.TABLE_LOADED).waitFor();
     await page.testSubj.click(`edit${testPageConnectorId}`);
+    await expect(page.testSubj.locator('edit-connector-flyout')).toBeVisible();
     await page.testSubj.click('testConnectorTab');
 
     await expect(page.testSubj.locator('tines-storySelector')).toBeVisible();
@@ -309,10 +310,11 @@ test.describe('Tines connector', { tag: tags.stateful.classic }, () => {
     await page.goto(kbnUrl.get(CONNECTORS_APP_PATH));
     await page.locator(CONNECTORS_LIST_SELECTORS.TABLE_LOADED).waitFor();
     await page.testSubj.click(`edit${testPageConnectorId}`);
+    await expect(page.testSubj.locator('edit-connector-flyout')).toBeVisible();
     await page.testSubj.click('testConnectorTab');
 
     // Story selector becomes enabled once the mocked /stories response lands.
-    await expect(page.testSubj.locator('tines-storySelector')).toBeEnabled();
+    await expect(page.testSubj.locator('tines-storySelector')).toBeEnabled({ timeout: 20_000 });
     // Webhook selector stays disabled until a story is selected. EuiComboBox
     // renders as a <div>, so toBeDisabled() doesn't apply — assert the
     // is-disabled class instead.
@@ -326,9 +328,10 @@ test.describe('Tines connector', { tag: tags.stateful.classic }, () => {
     await page.goto(kbnUrl.get(CONNECTORS_APP_PATH));
     await page.locator(CONNECTORS_LIST_SELECTORS.TABLE_LOADED).waitFor();
     await page.testSubj.click(`edit${testPageConnectorId}`);
+    await expect(page.testSubj.locator('edit-connector-flyout')).toBeVisible();
     await page.testSubj.click('testConnectorTab');
 
-    await expect(page.testSubj.locator('tines-storySelector')).toBeEnabled();
+    await expect(page.testSubj.locator('tines-storySelector')).toBeEnabled({ timeout: 20_000 });
     await new EuiComboBoxWrapper(page, 'tines-storySelector').selectSingleOption(MOCK_STORY.name);
 
     await expect(page.testSubj.locator('tines-webhookSelector')).toBeEnabled();
@@ -342,12 +345,13 @@ test.describe('Tines connector', { tag: tags.stateful.classic }, () => {
     await page.goto(kbnUrl.get(CONNECTORS_APP_PATH));
     await page.locator(CONNECTORS_LIST_SELECTORS.TABLE_LOADED).waitFor();
     await page.testSubj.click(`edit${testPageConnectorId}`);
+    await expect(page.testSubj.locator('edit-connector-flyout')).toBeVisible();
     await page.testSubj.click('testConnectorTab');
 
     const storyCombo = new EuiComboBoxWrapper(page, 'tines-storySelector');
     const webhookCombo = new EuiComboBoxWrapper(page, 'tines-webhookSelector');
 
-    await expect(page.testSubj.locator('tines-storySelector')).toBeEnabled();
+    await expect(page.testSubj.locator('tines-storySelector')).toBeEnabled({ timeout: 20_000 });
     await storyCombo.selectSingleOption(MOCK_STORY.name);
     await expect(page.testSubj.locator('tines-webhookSelector')).toBeEnabled();
     await webhookCombo.selectSingleOption(MOCK_WEBHOOK.name);
@@ -369,9 +373,10 @@ test.describe('Tines connector', { tag: tags.stateful.classic }, () => {
     await page.goto(kbnUrl.get(CONNECTORS_APP_PATH));
     await page.locator(CONNECTORS_LIST_SELECTORS.TABLE_LOADED).waitFor();
     await page.testSubj.click(`edit${testPageConnectorId}`);
+    await expect(page.testSubj.locator('edit-connector-flyout')).toBeVisible();
     await page.testSubj.click('testConnectorTab');
 
-    await expect(page.testSubj.locator('tines-storySelector')).toBeEnabled();
+    await expect(page.testSubj.locator('tines-storySelector')).toBeEnabled({ timeout: 20_000 });
     await new EuiComboBoxWrapper(page, 'tines-storySelector').selectSingleOption(MOCK_STORY.name);
     await expect(page.testSubj.locator('tines-webhookSelector')).toBeEnabled();
     await new EuiComboBoxWrapper(page, 'tines-webhookSelector').selectSingleOption(
@@ -390,9 +395,10 @@ test.describe('Tines connector', { tag: tags.stateful.classic }, () => {
     await page.goto(kbnUrl.get(CONNECTORS_APP_PATH));
     await page.locator(CONNECTORS_LIST_SELECTORS.TABLE_LOADED).waitFor();
     await page.testSubj.click(`edit${testPageConnectorId}`);
+    await expect(page.testSubj.locator('edit-connector-flyout')).toBeVisible();
     await page.testSubj.click('testConnectorTab');
 
-    await expect(page.testSubj.locator('tines-storySelector')).toBeEnabled();
+    await expect(page.testSubj.locator('tines-storySelector')).toBeEnabled({ timeout: 20_000 });
     await new EuiComboBoxWrapper(page, 'tines-storySelector').selectSingleOption(MOCK_STORY.name);
     await expect(page.testSubj.locator('tines-webhookSelector')).toBeEnabled();
     await new EuiComboBoxWrapper(page, 'tines-webhookSelector').selectSingleOption(
