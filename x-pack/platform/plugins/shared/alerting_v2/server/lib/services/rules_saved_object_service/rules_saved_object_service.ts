@@ -14,6 +14,7 @@ import type { SavedObjectError } from '@kbn/core/types';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../saved_objects';
 import type { RuleSavedObjectAttributes } from '../../../saved_objects';
 import type { AlertingServerStartDependencies } from '../../../types';
+import { convertEveryToSchedulesPerMinute } from '../../duration';
 import { spaceIdToNamespace } from '../../space_id_to_namespace';
 import { RuleSavedObjectsClientToken } from './tokens';
 
@@ -78,6 +79,7 @@ export interface RulesSavedObjectServiceContract {
     total: number;
   }>;
   findTags(params?: { filter?: string }): Promise<string[]>;
+  getTotalScheduledPerMinute(): Promise<number>;
 }
 
 @injectable()
@@ -266,6 +268,40 @@ export class RulesSavedObjectService implements RulesSavedObjectServiceContract 
       ...(filter ? { filter } : {}),
       ...(search ? { search, searchFields, defaultSearchOperator: 'AND' as const } : {}),
     });
+  }
+
+  /**
+   * Sums the scheduled rule runs per minute across all enabled rules in every
+   * space. Used to enforce the `maxScheduledPerMinute` guardrail. Scans rules
+   * via a point-in-time finder so it does not depend on `schedule.every` being
+   * an indexed (mapped) field.
+   */
+  public async getTotalScheduledPerMinute(): Promise<number> {
+    let totalScheduledPerMinute = 0;
+
+    const finder = this.client.createPointInTimeFinder<RuleSavedObjectAttributes>({
+      type: RULE_SAVED_OBJECT_TYPE,
+      perPage: 1000,
+      namespaces: ['*'],
+      filter: `${RULE_SAVED_OBJECT_TYPE}.attributes.enabled: true`,
+    });
+
+    try {
+      for await (const response of finder.find()) {
+        for (const doc of response.saved_objects) {
+          if ('error' in doc && doc.error) {
+            continue;
+          }
+          totalScheduledPerMinute += convertEveryToSchedulesPerMinute(
+            doc.attributes.schedule.every
+          );
+        }
+      }
+    } finally {
+      await finder.close();
+    }
+
+    return totalScheduledPerMinute;
   }
 
   public async findTags({ filter }: { filter?: string } = {}): Promise<string[]> {
