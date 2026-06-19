@@ -260,7 +260,6 @@ export default function ({ getService }: FtrProviderContext) {
         'slo:temp-summary-cleanup-task',
         'streams_description_generation',
         'streams_features_identification',
-        'streams_insights_discovery',
         'streams_onboarding',
         'streams_significant_events_queries_generation',
         'task_manager:delete_inactive_background_task_nodes',

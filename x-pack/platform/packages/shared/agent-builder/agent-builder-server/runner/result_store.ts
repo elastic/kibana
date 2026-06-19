@@ -6,6 +6,7 @@
  */
 
 import type { ToolResult } from '@kbn/agent-builder-common/tools';
+import type { Volume } from './volume';
 
 /**
  * Store to access tool results during execution
@@ -22,6 +23,8 @@ export interface WritableToolResultStore extends ToolResultStore {
   add(result: ToolResultWithMeta): void;
   delete(resultId: string): boolean;
   asReadonly(): ToolResultStore;
+  /** Returns the underlying volume — used by the agent's filesystem layer. */
+  getVolume(): Volume;
 }
 
 export interface ToolResultWithMeta {
