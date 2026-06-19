@@ -329,7 +329,28 @@ describe('handleExecutionDelay', () => {
   });
 
   describe('short wait — abort during in-process sleep (real timers)', () => {
-    it('on step abort during sleep sets RUNNING and returns (cancel / interrupt path)', async () => {
+    it('flushes state during short waits for live progress', async () => {
+      const params = makeParams();
+      const resumeAt = new Date(Date.now() + 2000).toISOString();
+      const stepRuntime = makeStepRuntime({
+        node: { stepType: 'wait' } as any,
+        stepExecution: {
+          status: ExecutionStatus.WAITING,
+          state: { resumeAt },
+        } as any,
+      });
+
+      const delayPromise = handleExecutionDelay(params, stepRuntime);
+      await Promise.resolve();
+      stepRuntime.abortController.abort();
+      await delayPromise;
+
+      expect(params.stepIoService.flush).toHaveBeenCalled();
+      expect(params.workflowLogger.flushEvents).toHaveBeenCalled();
+      expect(params.workflowTaskManager.scheduleResumeTask).not.toHaveBeenCalled();
+    });
+
+    it('does not reset workflow status to RUNNING when delay is aborted for cancellation', async () => {
       const params = makeParams();
       const resumeAt = new Date(Date.now() + 3000).toISOString();
       const ac = new AbortController();
@@ -342,12 +363,13 @@ describe('handleExecutionDelay', () => {
         } as any,
       });
 
-      queueMicrotask(() => ac.abort());
-
-      await handleExecutionDelay(params, stepRuntime);
+      const delayPromise = handleExecutionDelay(params, stepRuntime);
+      await Promise.resolve();
+      ac.abort();
+      await delayPromise;
 
       expect(params.workflowTaskManager.scheduleResumeTask).not.toHaveBeenCalled();
-      expect(params.workflowExecutionState.updateWorkflowExecution).toHaveBeenCalledWith({
+      expect(params.workflowExecutionState.updateWorkflowExecution).not.toHaveBeenCalledWith({
         status: ExecutionStatus.RUNNING,
       });
     });
@@ -368,7 +390,7 @@ describe('handleExecutionDelay', () => {
 
       await handleExecutionDelay(params, stepRuntime);
 
-      expect(params.stepIoService.flush).toHaveBeenCalled();
+      expect(params.stepIoService.flush).not.toHaveBeenCalled();
       expect(params.workflowTaskManager.scheduleResumeTask).toHaveBeenCalledTimes(1);
       const call = (params.workflowTaskManager.scheduleResumeTask as jest.Mock).mock.calls[0][0];
       expect(call.workflowExecution).toEqual(expect.objectContaining({ id: 'exec-parent' }));
