@@ -6,8 +6,8 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core/server';
-import { createPrometheusApiKey } from './create_prometheus_api_key';
-import { INDEX_PROMETHEUS_REMOTE_WRITE } from './privileges';
+import { createManagedOtlpServiceApiKey } from './create_managed_otlp_service_api_key';
+import { APM_EVENT_WRITE_APPLICATION } from './privileges';
 
 const createMockEsClient = () => {
   const createApiKey = jest.fn().mockResolvedValue({ encoded: 'encoded-key' });
@@ -17,11 +17,11 @@ const createMockEsClient = () => {
   };
 };
 
-describe('createPrometheusApiKey', () => {
-  it('creates a managed metrics API key scoped to prometheus remote write indices', async () => {
+describe('createManagedOtlpServiceApiKey', () => {
+  it('creates a managed API key scoped to the APM event:write application privilege', async () => {
     const { client, createApiKey } = createMockEsClient();
 
-    await createPrometheusApiKey(client, 'onboarding-prometheus-api');
+    await createManagedOtlpServiceApiKey(client, 'onboarding-opentelemetry-api');
 
     expect(createApiKey).toHaveBeenCalledTimes(1);
     expect(createApiKey).toHaveBeenCalledWith(
@@ -30,14 +30,17 @@ describe('createPrometheusApiKey', () => {
           managed: true,
         },
         role_descriptors: {
-          prometheus_remote_write: {
+          otel_managed_service: {
             cluster: [],
-            indices: [INDEX_PROMETHEUS_REMOTE_WRITE],
+            index: [],
+            applications: [APM_EVENT_WRITE_APPLICATION],
           },
         },
       })
     );
-    await expect(createPrometheusApiKey(client, 'onboarding-prometheus-api')).resolves.toEqual({
+    await expect(
+      createManagedOtlpServiceApiKey(client, 'onboarding-opentelemetry-api')
+    ).resolves.toEqual({
       encoded: 'encoded-key',
     });
   });

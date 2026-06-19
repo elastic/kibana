@@ -37,15 +37,13 @@ export function useApiEndpoints(): { endpoints: ResolvedApiEndpoint[]; isLoading
       isManagedOtlpServiceAvailable,
     };
 
-    return API_ENDPOINTS.filter((definition) => definition.isVisible(endpointContext)).map(
-      (definition) => ({
-        id: definition.id,
-        label: definition.label,
-        logo: definition.logo,
-        euiIconType: definition.euiIconType,
-        url: definition.getUrl(endpointContext),
-      })
-    );
+    return API_ENDPOINTS.map((definition) => ({
+      id: definition.id,
+      label: definition.label,
+      logo: definition.logo,
+      euiIconType: definition.euiIconType,
+      url: definition.getUrl(endpointContext),
+    }));
   }, [data?.elasticsearchUrl, data?.managedOtlpServiceUrl, isManagedOtlpServiceAvailable]);
 
   return { endpoints, isLoading: isPending(status) };

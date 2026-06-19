@@ -7,11 +7,17 @@
 
 import * as t from 'io-ts';
 import Boom from '@hapi/boom';
+import type { ElasticsearchClient } from '@kbn/core/server';
 import { createObservabilityOnboardingServerRoute } from '../create_observability_onboarding_server_route';
 import { getFallbackESUrl } from '../../lib/get_fallback_urls';
 import { getManagedOtlpServiceUrl } from '../../lib/get_managed_otlp_service_url';
 import { resolveApiKeyFactory } from '../../lib/api_key/resolve_api_key_factory';
 import { hasLogMonitoringPrivileges } from '../../lib/api_key/has_log_monitoring_privileges';
+import { hasApiKeyPrivileges } from '../../lib/api_key/has_api_key_privileges';
+import {
+  APM_EVENT_WRITE_APPLICATION,
+  INDEX_OTLP_LOGS_METRICS_AND_TRACES,
+} from '../../lib/api_key/privileges';
 import { ApiEndpointId } from '../../../common/api_endpoints';
 import { IS_MANAGED_OTLP_SERVICE_ENABLED } from '../../../common/feature_flags';
 
@@ -22,6 +28,28 @@ export interface ApiEndpointsRouteResponse {
 
 export interface ApiEndpointApiKeyResponse {
   encodedApiKey: string;
+}
+
+/**
+ * Verifies the current user holds the privileges granted by the key that
+ * `resolveApiKeyFactory` will create for the given endpoint, mirroring its branching.
+ */
+function hasRequiredPrivileges(
+  id: ApiEndpointId,
+  isManagedOtlpServiceAvailable: boolean,
+  esClient: ElasticsearchClient
+): Promise<boolean> {
+  switch (id) {
+    case ApiEndpointId.OpenTelemetry:
+      return isManagedOtlpServiceAvailable
+        ? hasApiKeyPrivileges(esClient, { application: [APM_EVENT_WRITE_APPLICATION] })
+        : hasApiKeyPrivileges(esClient, { index: [INDEX_OTLP_LOGS_METRICS_AND_TRACES] });
+    case ApiEndpointId.Elasticsearch:
+      return hasLogMonitoringPrivileges(esClient, true);
+    case ApiEndpointId.Prometheus:
+    default:
+      return hasLogMonitoringPrivileges(esClient, false);
+  }
 }
 
 const apiEndpointsRoute = createObservabilityOnboardingServerRoute({
@@ -78,21 +106,22 @@ const createApiKeyRoute = createObservabilityOnboardingServerRoute({
       featureFlags,
     } = await context.core;
 
-    const hasPrivileges = await hasLogMonitoringPrivileges(
-      client.asCurrentUser,
-      id === ApiEndpointId.Elasticsearch
+    const managedOtlpServiceUrl = getManagedOtlpServiceUrl(plugins);
+    const isManagedOtlpServiceAvailable =
+      config.serverless.enabled ||
+      ((await featureFlags.getBooleanValue(IS_MANAGED_OTLP_SERVICE_ENABLED, false)) &&
+        Boolean(managedOtlpServiceUrl));
+
+    const hasPrivileges = await hasRequiredPrivileges(
+      id,
+      isManagedOtlpServiceAvailable,
+      client.asCurrentUser
     );
     if (!hasPrivileges) {
       throw Boom.forbidden(
         "You don't have enough privileges to create an API key. Contact your system administrator to grant you the required privileges."
       );
     }
-
-    const managedOtlpServiceUrl = getManagedOtlpServiceUrl(plugins);
-    const isManagedOtlpServiceAvailable =
-      config.serverless.enabled ||
-      ((await featureFlags.getBooleanValue(IS_MANAGED_OTLP_SERVICE_ENABLED, false)) &&
-        Boolean(managedOtlpServiceUrl));
 
     const createApiKey = resolveApiKeyFactory(id, isManagedOtlpServiceAvailable);
     const { encoded } = await createApiKey(client.asCurrentUser, `onboarding-${id}-api`);

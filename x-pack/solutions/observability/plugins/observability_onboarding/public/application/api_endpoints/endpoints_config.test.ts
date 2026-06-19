@@ -23,37 +23,6 @@ const createContext = (overrides: Partial<ApiEndpointContext> = {}): ApiEndpoint
 });
 
 describe('API_ENDPOINTS', () => {
-  describe('visibility matrix', () => {
-    it('always shows Elasticsearch', () => {
-      expect(getEndpoint('elasticsearch').isVisible(createContext())).toBe(true);
-      expect(
-        getEndpoint('elasticsearch').isVisible(
-          createContext({ isManagedOtlpServiceAvailable: true })
-        )
-      ).toBe(true);
-    });
-
-    it('always shows Prometheus', () => {
-      expect(getEndpoint('prometheus').isVisible(createContext())).toBe(true);
-      expect(
-        getEndpoint('prometheus').isVisible(createContext({ isManagedOtlpServiceAvailable: true }))
-      ).toBe(true);
-    });
-
-    it('shows OpenTelemetry only when the managed OTLP service is available', () => {
-      expect(
-        getEndpoint('opentelemetry').isVisible(
-          createContext({ isManagedOtlpServiceAvailable: false })
-        )
-      ).toBe(false);
-      expect(
-        getEndpoint('opentelemetry').isVisible(
-          createContext({ isManagedOtlpServiceAvailable: true })
-        )
-      ).toBe(true);
-    });
-  });
-
   describe('getUrl', () => {
     it('returns the Elasticsearch URL unchanged', () => {
       expect(
@@ -63,12 +32,55 @@ describe('API_ENDPOINTS', () => {
       ).toBe('https://es.example.com');
     });
 
-    it('returns the managed OTLP URL for OpenTelemetry', () => {
-      expect(
-        getEndpoint('opentelemetry').getUrl(
-          createContext({ managedOtlpServiceUrl: 'https://otlp.example.com:443' })
-        )
-      ).toBe('https://otlp.example.com:443');
+    describe('OpenTelemetry URL', () => {
+      it('returns the managed OTLP URL when the managed service is available', () => {
+        expect(
+          getEndpoint('opentelemetry').getUrl(
+            createContext({
+              isManagedOtlpServiceAvailable: true,
+              managedOtlpServiceUrl: 'https://otlp.example.com:443',
+            })
+          )
+        ).toBe('https://otlp.example.com:443');
+      });
+
+      it('falls back to the Elasticsearch OTLP endpoint when the managed service is unavailable', () => {
+        expect(
+          getEndpoint('opentelemetry').getUrl(
+            createContext({
+              isManagedOtlpServiceAvailable: false,
+              elasticsearchUrl: 'https://es.example.com',
+            })
+          )
+        ).toBe('https://es.example.com/_otlp');
+      });
+
+      it('trims trailing slashes from the Elasticsearch URL in the fallback', () => {
+        expect(
+          getEndpoint('opentelemetry').getUrl(
+            createContext({
+              isManagedOtlpServiceAvailable: false,
+              elasticsearchUrl: 'https://es.example.com//',
+            })
+          )
+        ).toBe('https://es.example.com/_otlp');
+      });
+
+      it('falls back to the Elasticsearch OTLP endpoint when the managed OTLP URL is missing', () => {
+        expect(
+          getEndpoint('opentelemetry').getUrl(
+            createContext({
+              isManagedOtlpServiceAvailable: true,
+              managedOtlpServiceUrl: undefined,
+              elasticsearchUrl: 'https://es.example.com',
+            })
+          )
+        ).toBe('https://es.example.com/_otlp');
+      });
+
+      it('returns undefined when no URL can be derived', () => {
+        expect(getEndpoint('opentelemetry').getUrl(createContext())).toBeUndefined();
+      });
     });
 
     describe('Prometheus remote write URL', () => {

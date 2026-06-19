@@ -10,6 +10,7 @@ import { ApiEndpointId } from '../../../common/api_endpoints';
 import { createShipperApiKey } from './create_shipper_api_key';
 import { createManagedOtlpServiceApiKey } from './create_managed_otlp_service_api_key';
 import { createPrometheusApiKey } from './create_prometheus_api_key';
+import { createEsOtlpApiKey } from './create_es_otlp_api_key';
 
 type ApiKeyFactory = (esClient: ElasticsearchClient, name: string) => Promise<{ encoded: string }>;
 
@@ -19,7 +20,7 @@ export function resolveApiKeyFactory(
 ): ApiKeyFactory {
   switch (id) {
     case ApiEndpointId.OpenTelemetry:
-      return createManagedOtlpServiceApiKey;
+      return isManagedOtlpServiceAvailable ? createManagedOtlpServiceApiKey : createEsOtlpApiKey;
     case ApiEndpointId.Prometheus:
       return isManagedOtlpServiceAvailable
         ? createManagedOtlpServiceApiKey

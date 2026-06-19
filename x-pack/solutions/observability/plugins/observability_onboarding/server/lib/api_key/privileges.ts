@@ -28,3 +28,19 @@ export const INDEX_PROMETHEUS_REMOTE_WRITE: estypes.SecurityIndicesPrivileges = 
   names: ['metrics-*.prometheus-*'],
   privileges: ['auto_configure', 'create_doc'],
 };
+
+// https://www.elastic.co/docs/manage-data/ingest/otlp-endpoint#create-an-api-key
+export const INDEX_OTLP_LOGS_METRICS_AND_TRACES: estypes.SecurityIndicesPrivileges = {
+  names: ['logs-*', 'metrics-*', 'traces-*'],
+  privileges: ['auto_configure', 'create_doc'],
+};
+
+/**
+ * Application privilege required to ingest through the managed OTLP service (APM).
+ * Shared so the managed OTLP key and its privilege pre-check stay in sync.
+ */
+export const APM_EVENT_WRITE_APPLICATION: estypes.SecurityApplicationPrivileges = {
+  application: 'apm',
+  privileges: ['event:write'],
+  resources: ['*'],
+};

@@ -21,7 +21,6 @@ export interface ApiEndpointDefinition {
   label: string;
   logo?: SupportedLogo;
   euiIconType?: EuiIconType;
-  isVisible: (context: ApiEndpointContext) => boolean;
   getUrl: (context: ApiEndpointContext) => string | undefined;
 }
 
@@ -34,7 +33,6 @@ export const API_ENDPOINTS: readonly ApiEndpointDefinition[] = [
       defaultMessage: 'Prometheus',
     }),
     logo: 'prometheus',
-    isVisible: () => true,
     getUrl: ({ isManagedOtlpServiceAvailable, managedOtlpServiceUrl, elasticsearchUrl }) => {
       if (isManagedOtlpServiceAvailable && managedOtlpServiceUrl) {
         return `${trimTrailingSlashes(managedOtlpServiceUrl)}/api/v1/write`;
@@ -51,8 +49,15 @@ export const API_ENDPOINTS: readonly ApiEndpointDefinition[] = [
       defaultMessage: 'OpenTelemetry',
     }),
     logo: 'opentelemetry',
-    isVisible: ({ isManagedOtlpServiceAvailable }) => isManagedOtlpServiceAvailable,
-    getUrl: ({ managedOtlpServiceUrl }) => managedOtlpServiceUrl,
+    getUrl: ({ isManagedOtlpServiceAvailable, managedOtlpServiceUrl, elasticsearchUrl }) => {
+      if (isManagedOtlpServiceAvailable && managedOtlpServiceUrl) {
+        return managedOtlpServiceUrl;
+      }
+      if (elasticsearchUrl) {
+        return `${trimTrailingSlashes(elasticsearchUrl)}/_otlp`;
+      }
+      return undefined;
+    },
   },
   {
     id: ApiEndpointId.Elasticsearch,
@@ -60,7 +65,6 @@ export const API_ENDPOINTS: readonly ApiEndpointDefinition[] = [
       defaultMessage: 'Elasticsearch',
     }),
     euiIconType: 'logoElasticsearch',
-    isVisible: () => true,
     getUrl: ({ elasticsearchUrl }) => elasticsearchUrl,
   },
 ];

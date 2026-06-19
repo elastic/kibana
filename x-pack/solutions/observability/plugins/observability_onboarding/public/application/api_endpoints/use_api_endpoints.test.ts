@@ -77,10 +77,13 @@ describe('useApiEndpoints', () => {
     );
   });
 
-  it('does not expose the OpenTelemetry endpoint when the managed service is unavailable', () => {
-    const { result } = setup({ isManagedOtlpServiceAvailable: false });
+  it('falls back to the Elasticsearch OTLP endpoint when the managed service is unavailable', () => {
+    const { result } = setup({
+      isManagedOtlpServiceAvailable: false,
+      elasticsearchUrl: 'https://es.onprem.local:9200',
+    });
 
-    expect(findEndpoint(result, 'opentelemetry')).toBeUndefined();
+    expect(findEndpoint(result, 'opentelemetry')?.url).toBe('https://es.onprem.local:9200/_otlp');
   });
 
   it('exposes the OpenTelemetry endpoint with the managed OTLP URL when available', () => {

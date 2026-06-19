@@ -15,7 +15,6 @@ export function createPrometheusApiKey(esClient: ElasticsearchClient, name: stri
     name: `${name}-${timestamp}`,
     metadata: {
       managed: true,
-      application: 'metrics',
     },
     role_descriptors: {
       prometheus_remote_write: {
