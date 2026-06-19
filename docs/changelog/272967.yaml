@@ -8,4 +8,4 @@ products:
   target: 2026-06-18
 areas:
 - AI and machine Learning
-title: Remove reasoning panel and render as stream
+title: Remove reasoning panel and render as stream in Agent Builder

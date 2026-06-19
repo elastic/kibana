@@ -8,4 +8,4 @@ products:
   target: 2026-06-16
 areas:
 - Kibana platform
-title: Add notifications.connectors.default.email to Docker ENV variables
+title: "Fix missing `notifications.connectors.default.email` in Docker ENV variables"

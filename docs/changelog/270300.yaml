@@ -9,4 +9,5 @@ products:
 areas:
 - Dashboards and visualizations
 - Alerting and reporting
-title: Validate each dashboard key seperately
+title: Fix dashboard read validation failures by validating each key separately
+description: Invalid dashboard panels, pinned panels, and filters are now dropped individually with warnings instead of failing the entire request.

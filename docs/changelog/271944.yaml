@@ -6,4 +6,5 @@ type: bug-fix
 products:
 - product: cloud-serverless
   target: 2026-06-16
-title: Restore telemetry collector wiring and unskip test
+title: Fix asset inventory telemetry collector not registering
+description: Restores asset inventory usage telemetry collection that stopped registering after the entity-store-v2 migration.

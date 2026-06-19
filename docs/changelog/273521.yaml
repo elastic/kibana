@@ -4,5 +4,5 @@ type: bug-fix
 products:
 - product: cloud-serverless
   target: 2026-06-18
-title: Fix flyout scroll jump when hover cell actions popover closes
-description: Fixed a scroll-position jump in the Security alert flyout Table tab that occurred when moving the cursor off a cell with hover actions after previously interacting with the "Rows per page" control.
+title: Fix scroll jump in Security alert flyout table
+description: Fixes a scroll-position jump that occurred when moving the cursor off a cell with hover actions after previously interacting with the "Rows per page" control.

@@ -6,4 +6,4 @@ products:
   target: 2026-06-18
 areas:
 - Discover and ES|QL
-title: Render Background searches “Extend” action icon as inline SVG
+title: Render the Discover background searches “Extend” action icon as inline SVG

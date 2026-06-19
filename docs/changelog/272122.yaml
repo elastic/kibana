@@ -4,4 +4,4 @@ type: bug-fix
 products:
 - product: cloud-serverless
   target: 2026-06-16
-title: Attack Discovery mistakenly checks privileges for `.internal.alerts-security.attack.discovery.alerts` index (#17655)
+title: Fix Attack Discovery privilege check for internal alerts index

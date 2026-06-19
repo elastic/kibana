@@ -6,5 +6,5 @@ products:
   target: 2026-06-16
 areas:
 - Search and data
-title: Model Management section disappearing for users with only Inference Endpoints permission
-description: 'Fixes Model Management pages disappearing from Stack Management for users with only the Inference Endpoints: All privilege.'
+title: Fix disappearance of Model Management pages
+description: "Model Management pages no longer disappear from Stack Management for users with only the `Inference Endpoints: All` privilege."

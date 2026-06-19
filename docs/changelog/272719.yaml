@@ -7,5 +7,5 @@ products:
 areas:
 - Search and data
 - AI and machine Learning
-title: Fix tool id telemetry hashing
-description: Fix Agent Builder tool telemetry so built-in tools are reported with their real tool IDs instead of anonymized hashes.
+title: Fix Agent Builder tool telemetry hashing
+description: Fixes Agent Builder tool telemetry so built-in tools are reported with their real tool IDs instead of anonymized hashes.

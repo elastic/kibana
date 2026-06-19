@@ -4,4 +4,5 @@ type: bug-fix
 products:
 - product: cloud-serverless
   target: 2026-06-16
-title: improve investigation skills time range handling with alerts
+title: Fix investigation skill time range handling for alerts
+description: "Investigation skills now anchor to an alert's start time instead of the screen context window, with per-signal lookbacks matching alert AI insight time ranges."
