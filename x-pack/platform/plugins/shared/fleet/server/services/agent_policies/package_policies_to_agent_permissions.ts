@@ -16,9 +16,10 @@ import {
   FLEET_CONNECTORS_PACKAGE,
   FLEET_UNIVERSAL_PROFILING_COLLECTOR_PACKAGE,
   FLEET_UNIVERSAL_PROFILING_SYMBOLIZER_PACKAGE,
-  FLEET_UNMANAGED_OTEL_DATA_STREAM_INDEX_PATTERNS,
+  FLEET_UNMANAGED_DATA_STREAM_INDEX_PATTERNS,
   OTEL_COLLECTOR_INPUT_TYPE,
   OTEL_TEMPLATE_SUFFIX,
+  UNIVERSAL_PROFILING_INDEX_PATTERN,
   USE_APM_VAR_NAME,
 } from '../../../common/constants';
 
@@ -377,10 +378,10 @@ export function getDataStreamPrivileges(
   dataStream: DataStreamMeta,
   namespace: string = '*'
 ): SecurityIndicesPrivileges {
-  // Fleet-unmanaged signals (e.g. profiles) are written by the Elasticsearch exporter to
+  // Fleet-unmanaged signals (e.g. profiles) are written by their producer/exporter to
   // dedicated indices that don't follow the `<type>-<dataset>-<namespace>` convention, so
   // their write permissions target that fixed pattern instead (e.g. profiles -> profiling-*).
-  const unmanagedIndexPattern = FLEET_UNMANAGED_OTEL_DATA_STREAM_INDEX_PATTERNS[dataStream.type];
+  const unmanagedIndexPattern = FLEET_UNMANAGED_DATA_STREAM_INDEX_PATTERNS[dataStream.type];
   if (unmanagedIndexPattern) {
     return {
       names: [unmanagedIndexPattern],
@@ -419,7 +420,7 @@ export function getDataStreamPrivileges(
 }
 
 function universalProfilingPermissions(packagePolicyId: string): [string, SecurityRoleDescriptor] {
-  const profilingIndexPattern = 'profiling-*';
+  const profilingIndexPattern = UNIVERSAL_PROFILING_INDEX_PATTERN;
   return [
     packagePolicyId,
     {

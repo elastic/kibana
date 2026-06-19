@@ -111,12 +111,16 @@ export const dataTypes = {
 // currently identical but may be a subset or otherwise different some day
 export const monitoringTypes = Object.values(dataTypes);
 
+/** Dedicated indices Universal Profiling reads from and the Elasticsearch exporter writes to. */
+export const UNIVERSAL_PROFILING_INDEX_PATTERN = 'profiling-*';
+
 /**
- * Data stream types that Fleet must not manage for OTel inputs: it neither injects a
- * `data_stream.*` routing transform into the generated collector config nor creates
- * dataset index templates/data streams for them. Each maps to the Elasticsearch index
- * pattern the Elasticsearch exporter actually writes the signal to, which is what the
- * agent's write permissions must target.
+ * Data stream types that Fleet must not manage, regardless of how they are collected
+ * (OTel or a dedicated input): Fleet neither injects a `data_stream.*` routing transform
+ * into the generated OTel collector config, nor creates dataset index templates/data
+ * streams for them, nor grants `<type>-<dataset>-<namespace>` write permissions. Each
+ * maps to the Elasticsearch index pattern the data is actually written to, which is what
+ * the agent's write permissions target instead.
  *
  * `profiles` is owned end-to-end by Universal Profiling: data is stored in dedicated
  * `profiling-*` indices created by the Elasticsearch profiling plugin, and routing is
@@ -124,12 +128,12 @@ export const monitoringTypes = Object.values(dataTypes);
  * data to the wrong indices and collapse profiling's multiple data streams into one,
  * making it unusable. See https://github.com/elastic/package-spec/issues/1191.
  */
-export const FLEET_UNMANAGED_OTEL_DATA_STREAM_INDEX_PATTERNS: Readonly<Record<string, string>> = {
-  profiles: 'profiling-*',
+export const FLEET_UNMANAGED_DATA_STREAM_INDEX_PATTERNS: Readonly<Record<string, string>> = {
+  profiles: UNIVERSAL_PROFILING_INDEX_PATTERN,
 };
 
-export const FLEET_UNMANAGED_OTEL_DATA_STREAM_TYPES: readonly string[] = Object.keys(
-  FLEET_UNMANAGED_OTEL_DATA_STREAM_INDEX_PATTERNS
+export const FLEET_UNMANAGED_DATA_STREAM_TYPES: readonly string[] = Object.keys(
+  FLEET_UNMANAGED_DATA_STREAM_INDEX_PATTERNS
 );
 
 export const installationStatuses = {

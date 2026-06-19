@@ -825,6 +825,55 @@ describe('storedPackagePoliciesToAgentPermissions()', () => {
     });
   });
 
+  it('Returns profiling-* permissions for a non-dynamic OTel profiles input', async () => {
+    const packagePolicies: PackagePolicy[] = [
+      {
+        id: 'package-policy-otel-profiles',
+        name: 'profiling-otel-policy',
+        namespace: 'test',
+        enabled: true,
+        package: { name: 'test_package', version: '0.0.0', title: 'Test Package' },
+        inputs: [
+          {
+            type: 'otelcol',
+            enabled: true,
+            streams: [
+              {
+                id: 'otel-profiles',
+                enabled: true,
+                data_stream: { type: 'profiles', dataset: 'profilingreceiver' },
+              },
+            ],
+          },
+        ],
+        created_at: '',
+        updated_at: '',
+        created_by: '',
+        updated_by: '',
+        revision: 1,
+        policy_id: '',
+        policy_ids: [''],
+      },
+    ];
+
+    const permissions = await storedPackagePoliciesToAgentPermissions(
+      packageInfoCache,
+      'test',
+      packagePolicies
+    );
+    // profiles is written to the dedicated profiling-* indices, not a profiles-<dataset> data stream.
+    expect(permissions).toMatchObject({
+      'package-policy-otel-profiles': {
+        indices: [
+          {
+            names: ['profiling-*'],
+            privileges: UNIVERSAL_PROFILING_PERMISSIONS,
+          },
+        ],
+      },
+    });
+  });
+
   it('Returns additional logs permissions for OTel traces span events', async () => {
     const packagePolicies: PackagePolicy[] = [
       {

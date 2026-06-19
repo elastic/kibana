@@ -21,7 +21,7 @@ import type {
 } from '../../../common/types';
 import {
   dataTypes,
-  FLEET_UNMANAGED_OTEL_DATA_STREAM_TYPES,
+  FLEET_UNMANAGED_DATA_STREAM_TYPES,
   OTEL_COLLECTOR_INPUT_TYPE,
   outputType,
   USE_APM_VAR_NAME,
@@ -372,16 +372,10 @@ function generateOtelTypeTransforms(
           },
         ],
       };
-    case 'profiles':
-      return {
-        profile_statements: [
-          {
-            context: 'profile',
-            statements: buildDataStreamStatements('profiles', dataset, namespace),
-          },
-        ],
-      };
     default:
+      // `profiles` is intentionally absent: it is filtered out before this function is
+      // called (see FLEET_UNMANAGED_DATA_STREAM_TYPES) because the Elasticsearch
+      // exporter — not Fleet — routes it. Any other type here is unexpected.
       throw new FleetError(`unexpected data stream type ${type}`);
   }
 }
@@ -413,12 +407,12 @@ function generateOTelAttributesTransform(
     signalTypes
       // Fleet-unmanaged signals (e.g. profiles) are routed by the Elasticsearch exporter,
       // not by Fleet, so they must not get a data_stream.* routing transform.
-      .filter((signalType) => !FLEET_UNMANAGED_OTEL_DATA_STREAM_TYPES.includes(signalType))
+      .filter((signalType) => !FLEET_UNMANAGED_DATA_STREAM_TYPES.includes(signalType))
       .forEach((signalType) => {
         const typeTransforms = generateOtelTypeTransforms(signalType, dataset, namespace);
         Object.assign(transformStatements, typeTransforms);
       });
-  } else if (!FLEET_UNMANAGED_OTEL_DATA_STREAM_TYPES.includes(type)) {
+  } else if (!FLEET_UNMANAGED_DATA_STREAM_TYPES.includes(type)) {
     // Default: single signal type from stream.data_stream.type
     transformStatements = generateOtelTypeTransforms(type, dataset, namespace);
   }

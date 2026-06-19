@@ -19,7 +19,7 @@ import type {
 import {
   DATASET_VAR_NAME,
   DATA_STREAM_TYPE_VAR_NAME,
-  FLEET_UNMANAGED_OTEL_DATA_STREAM_TYPES,
+  FLEET_UNMANAGED_DATA_STREAM_TYPES,
   OTEL_COLLECTOR_INPUT_TYPE,
 } from '../../../../common/constants';
 import { PackagePolicyValidationError, PackageNotFoundError, FleetError } from '../../../errors';
@@ -72,8 +72,8 @@ export const getCustomDatasetStreams = (
           ]
     )
       // Fleet does not create data streams for unmanaged signal types (e.g. profiles);
-      // those are owned by the producer/exporter (see FLEET_UNMANAGED_OTEL_DATA_STREAM_TYPES).
-      .filter((type) => !FLEET_UNMANAGED_OTEL_DATA_STREAM_TYPES.includes(type));
+      // those are owned by the producer/exporter (see FLEET_UNMANAGED_DATA_STREAM_TYPES).
+      .filter((type) => !FLEET_UNMANAGED_DATA_STREAM_TYPES.includes(type));
 
     return signalTypes.map((type) => ({
       datasetName,
