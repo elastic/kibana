@@ -458,6 +458,36 @@ describe('TemplatesMigrationTaskManager', () => {
       );
     });
 
+    it('runs field-def phase but skips template phase when legacyTemplatesMigrated is already true', async () => {
+      const configSO = buildConfigureSO({
+        customFields: [buildLegacyCustomField('cf_text')],
+        templates: [buildLegacyTemplate('T', ['cf_text'])],
+        legacyTemplatesMigrated: true,
+        legacyCustomFieldsMigrated: false,
+      });
+
+      repo.find
+        .mockResolvedValueOnce({ saved_objects: [configSO], total: 1 })
+        .mockResolvedValueOnce({ saved_objects: [], total: 0 }); // field-defs find
+
+      const manager = await buildAndSchedule();
+      await getTaskRunner(manager).run();
+
+      // Field-def phase must run (flag is false), template phase must not (flag already true)
+      expect(repo.create).toHaveBeenCalledTimes(1);
+      expect(repo.create.mock.calls[0][0]).toBe(CASE_FIELD_DEFINITION_SAVED_OBJECT);
+      expect(repo.create.mock.calls[0][1]).toMatchObject({ name: 'cf_text', isGlobal: true });
+
+      // Only the custom fields flag is written; templates flag is already true
+      expect(repo.update).toHaveBeenCalledWith(
+        CASE_CONFIGURE_SAVED_OBJECT,
+        configSO.id,
+        { legacyCustomFieldsMigrated: true },
+        expect.anything()
+      );
+      expect(repo.update.mock.calls[0][2]).not.toHaveProperty('legacyTemplatesMigrated');
+    });
+
     it('does not add flags that are already true', async () => {
       const configSO = buildConfigureSO({
         customFields: [],
