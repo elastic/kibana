@@ -7,7 +7,7 @@
 
 import type { EuiIconType } from '@elastic/eui/src/components/icon/icon';
 import { useMemo } from 'react';
-import { isPending, useFetcher } from '../../hooks/use_fetcher';
+import { FETCH_STATUS, isPending, useFetcher } from '../../hooks/use_fetcher';
 import { useManagedOtlpServiceAvailability } from '../shared/use_managed_otlp_service_availability';
 import type { SupportedLogo } from '../shared/logo_icon';
 import type { ApiEndpointId } from '../../../common/api_endpoints';
@@ -21,7 +21,11 @@ export interface ResolvedApiEndpoint {
   url?: string;
 }
 
-export function useApiEndpoints(): { endpoints: ResolvedApiEndpoint[]; isLoading: boolean } {
+export function useApiEndpoints(): {
+  endpoints: ResolvedApiEndpoint[];
+  isLoading: boolean;
+  isError: boolean;
+} {
   const isManagedOtlpServiceAvailable = useManagedOtlpServiceAvailability();
 
   const { data, status } = useFetcher(
@@ -48,5 +52,5 @@ export function useApiEndpoints(): { endpoints: ResolvedApiEndpoint[]; isLoading
     );
   }, [data?.elasticsearchUrl, data?.managedOtlpServiceUrl, isManagedOtlpServiceAvailable]);
 
-  return { endpoints, isLoading: isPending(status) };
+  return { endpoints, isLoading: isPending(status), isError: status === FETCH_STATUS.FAILURE };
 }
