@@ -82,24 +82,26 @@ export const ResumeExecutionModal: React.FC<ResumeExecutionModalProps> = ({
   useRunButton = false,
 }) => {
   useWorkflowsMonacoTheme();
-  const euiThemeContext = useEuiTheme();
+  const { euiTheme, colorMode, modifications, highContrastMode } = useEuiTheme();
   const modalTitleId = useGeneratedHtmlId();
 
   const descriptionStyle = useMemo(
-    () => css({ ...euiFontSize(euiThemeContext, 's'), fontWeight: 'normal' }),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [euiThemeContext.euiTheme]
+    () =>
+      css({
+        ...euiFontSize({ euiTheme, colorMode, modifications, highContrastMode }, 's'),
+        fontWeight: 'normal',
+      }),
+    [euiTheme, colorMode, modifications, highContrastMode]
   );
 
   const modalBodyStyle = useMemo(
     () =>
       css({
-        backgroundColor: euiThemeContext.euiTheme.colors.backgroundBaseSubdued,
-        borderTop: `1px solid ${euiThemeContext.euiTheme.colors.borderBasePlain}`,
-        borderBottom: `1px solid ${euiThemeContext.euiTheme.colors.borderBasePlain}`,
+        backgroundColor: euiTheme.colors.backgroundBaseSubdued,
+        borderTop: `1px solid ${euiTheme.colors.borderBasePlain}`,
+        borderBottom: `1px solid ${euiTheme.colors.borderBasePlain}`,
       }),
-
-    [euiThemeContext.euiTheme]
+    [euiTheme]
   );
 
   const [inputsJson, setInputsJson] = useState<string>(
@@ -107,7 +109,6 @@ export const ResumeExecutionModal: React.FC<ResumeExecutionModalProps> = ({
       ? JSON.stringify(initialcontextOverride.stepContext, null, 2)
       : '{}'
   );
-
   const isResumePayloadValid = useMemo(() => {
     try {
       const parsed: unknown = JSON.parse(inputsJson);
