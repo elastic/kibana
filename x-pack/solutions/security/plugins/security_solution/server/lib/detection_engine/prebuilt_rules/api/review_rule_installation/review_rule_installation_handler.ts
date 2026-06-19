@@ -18,7 +18,6 @@ import type { SecuritySolutionRequestHandlerContext } from '../../../../../types
 import { buildSiemResponse } from '../../../routes/utils';
 import type { IPrebuiltRuleAssetsClient } from '../../logic/rule_assets/prebuilt_rule_assets_client';
 import { createPrebuiltRuleAssetsClient } from '../../logic/rule_assets/prebuilt_rule_assets_client';
-import { createPrebuiltRuleObjectsClient } from '../../logic/rule_objects/prebuilt_rule_objects_client';
 import type { MlAuthz } from '../../../../machine_learning/authz';
 import { buildPrebuiltRuleInstallationKql } from '../../logic/build_prebuilt_rule_installation_kql';
 import { expandRawAggregationResult } from '../../../rule_management/logic/search/granular_facet_aggregations';
@@ -27,10 +26,7 @@ import {
   getInstallableRulesForReview,
   getInstallableRuleVersions,
 } from '../../logic/get_installable_rules_for_review';
-
-// Re-exported to preserve the import path used by existing consumers (e.g. Agent
-// Builder tools) after the helper moved to `logic/get_installable_rules_for_review`.
-export { getInstallableRuleVersions };
+import { fetchInstalledRuleVersionsMap } from '../../logic/fetch_installed_rule_versions_map';
 
 const PREBUILT_RULE_INSTALLATION_FACET_AGG_SIZE = 200;
 
@@ -73,17 +69,10 @@ export const reviewRuleInstallationHandler = async (
     const ctx = await context.resolve(['core', 'alerting', 'securitySolution']);
     const soClient = ctx.core.savedObjects.client;
     const rulesClient = await ctx.alerting.getRulesClient();
-    const ruleAssetsClient = createPrebuiltRuleAssetsClient(soClient);
-    const ruleObjectsClient = createPrebuiltRuleObjectsClient(rulesClient);
     const mlAuthz = ctx.securitySolution.getMlAuthz();
 
-    const installedRuleVersions = await ruleObjectsClient.fetchInstalledRuleVersions();
-    logger.debug(
-      `reviewRuleInstallationHandler: Found ${installedRuleVersions.length} currently installed prebuilt rules`
-    );
-    const installedRuleVersionsMap = new Map(
-      installedRuleVersions.map((version) => [version.rule_id, version])
-    );
+    const ruleAssetsClient = createPrebuiltRuleAssetsClient(soClient);
+    const installedRuleVersionsMap = await fetchInstalledRuleVersionsMap(rulesClient);
 
     const combinedKql = buildPrebuiltRuleInstallationKql({
       filter,
