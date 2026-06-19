@@ -102,6 +102,8 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     events,
     promptManager,
     filestore,
+    filesystemService,
+    bashService,
     skills,
     skillsStore,
     toolManager,
@@ -175,7 +177,8 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     toolProvider,
     agentConfiguration,
     attachmentsService: attachments,
-    filestore,
+    filesystemService,
+    bashService,
     request,
     experimentalFeatures,
     spaceId: context.spaceId,
@@ -351,6 +354,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
       compactionResult,
       roundId,
       initialTodos,
+      getWorkspaceId: () => context.bashService?.getWorkspaceId(),
     }),
     evictInternalEvents(),
     shareReplay()
@@ -364,6 +368,13 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
   });
 
   const round = await extractRound(events$);
+
+  // Persist filesystem state for this round (today: the workspace volume).
+  try {
+    await context.filesystemService.flush();
+  } catch (err) {
+    logger.error(`Failed to flush filesystem state after round: ${err.message ?? err}`);
+  }
   return {
     round,
   };
