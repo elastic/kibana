@@ -385,6 +385,28 @@ export class DatePicker {
     }
   }
 
+  async pauseAutoRefresh() {
+    if (await this.isNewDateRangePicker()) {
+      await this.page.testSubj.locator('dateRangePickerControlButton').click();
+      await this.page.testSubj.locator('dateRangePickerSettingsButton').click();
+      await this.page.testSubj.locator('dateRangePickerSettingsPanel').waitFor();
+
+      const toggle = this.page.testSubj.locator('dateRangePickerAutoRefreshToggle');
+      const isRunning = (await toggle.getAttribute('aria-checked')) === 'true';
+
+      if (isRunning) await toggle.click();
+
+      await this.page.keyboard.press('Escape');
+    } else {
+      await this.quickMenuButton.click();
+      const isRunning = (await this.toggleRefreshButton.getAttribute('aria-checked')) === 'true';
+
+      if (isRunning) await this.toggleRefreshButton.click();
+
+      await this.quickMenuButton.click();
+    }
+  }
+
   async waitToBeHidden() {
     // Wait for both picker variants' popovers to be hidden. We don't call
     // `isNewDateRangePicker()` first because pages can render multiple pickers

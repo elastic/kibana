@@ -15,6 +15,7 @@ import { KibanaCodeEditorWrapper } from '../ui_components';
 import { resolveSelector } from '../utils/locator_helper';
 
 const DISCOVER_QUERY_MODE_KEY = 'discover.defaultQueryMode';
+const META_FIELDS = new Set(['_score', '_id', '_index']);
 
 export type DiscoverQueryMode = 'esql' | 'classic';
 export type DiscoverGridDensity = 'Compact' | 'Normal' | 'Expanded';
@@ -638,12 +639,23 @@ export class DiscoverApp {
     await input.fill(newValue.toString());
   }
 
+  private async openMetaFieldsSectionIfNeeded(field: string) {
+    if (!META_FIELDS.has(field)) return;
+
+    const metaFieldsSection = this.page.testSubj.locator('fieldListGroupedMetaFields');
+    await expect(metaFieldsSection).toBeVisible();
+
+    const isExpanded = (await metaFieldsSection.getAttribute('aria-expanded')) === 'true';
+    if (!isExpanded) await metaFieldsSection.click();
+  }
+
   async addFieldFromSidebar(field: string) {
     const sidebarToggleButton = this.page.testSubj.locator('discover-sidebar-fields-button');
     if (await sidebarToggleButton.isVisible()) await sidebarToggleButton.click();
 
     await this.waitUntilFieldListHasCountOfFields();
     await this.page.testSubj.fill('fieldListFiltersFieldSearch', field);
+    await this.openMetaFieldsSectionIfNeeded(field);
     await this.page.testSubj.click(`fieldToggle-${field}`);
     await this.waitUntilSearchingHasFinished();
   }
