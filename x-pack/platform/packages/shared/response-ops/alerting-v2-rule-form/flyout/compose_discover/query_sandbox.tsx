@@ -239,6 +239,7 @@ export const QuerySandbox: React.FC<QuerySandboxProps> = ({
       return (
         <EuiButton
           size="s"
+          color="text"
           iconType="branch"
           onClick={onEditManually}
           data-test-subj="querySandboxSeparateBaseAndAlert"
@@ -252,6 +253,7 @@ export const QuerySandbox: React.FC<QuerySandboxProps> = ({
       return (
         <EuiButton
           size="s"
+          color="text"
           iconType="merge"
           onClick={onUseSingleEditor}
           data-test-subj="querySandboxUseSingleEditor"
@@ -389,7 +391,7 @@ export const QuerySandbox: React.FC<QuerySandboxProps> = ({
         <>
           {showEsqlQueryHeader && (
             <>
-              <EuiFlexGroup alignItems="flexStart" gutterSize="m" responsive={false}>
+              <EuiFlexGroup alignItems="flexEnd" gutterSize="m" responsive={false}>
                 <EuiFlexItem>
                   <EuiTitle size="xs" data-test-subj="querySandboxEsqlQueryTitle">
                     <h3>{querySectionTitle}</h3>
