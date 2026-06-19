@@ -106,12 +106,14 @@ safe-outputs:
     target: *issue_number
 
 strict: false
-timeout-minutes: 30
+timeout-minutes: 35
 ---
 
 # Failed Test Investigator
 
 Investigate a failed-test issue, classify the failure, and propose a fix when appropriate.
+
+This run is killed at a hard timeout and posts a single, write-once comment that cannot be edited or replaced. If you run out of time before posting, nothing is recorded. The objective is a correct comment that ships (an investigation that is "more thorough" but never posts is a failure).
 
 ## Target issue
 
@@ -170,14 +172,6 @@ Add `failure:ai-fixable` to the issue if we are confident that a fix is availabl
 
 - Mention a commit (or small set of commits, last 3 months) only when evidence strongly implicates it.
 - Never speculate or use attribution as a fallback for weak evidence.
-
-## References
-
-- Link repository files with Markdown GitHub links — never bare paths.
-- Prefer blob links with line anchors: `[path/to/file.ts](https://github.com/${{ github.repository }}/blob/${{ github.event.repository.default_branch }}/path/to/file.ts#L123-L140)`.
-- For historical evidence, use a commit link instead of the default-branch blob link.
-- Always link commits — never bare SHAs.
-- Bare paths (`file.ts:123`) are allowed only as a supplement to a link.
 
 ## Comment format
 

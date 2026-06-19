@@ -12,6 +12,7 @@ import type { Locator } from '../../..';
 import type { ScoutPage } from '..';
 import { expect } from '..';
 import { KibanaCodeEditorWrapper } from '../ui_components';
+import { resolveSelector } from '../utils/locator_helper';
 
 const DISCOVER_QUERY_MODE_KEY = 'discover.defaultQueryMode';
 
@@ -565,8 +566,10 @@ export class DiscoverApp {
   }
 
   async dragFieldToGrid(fieldName: string[]) {
+    const gridLocator = this.page.testSubj.locator('euiDataGridBody');
     for (const field of fieldName) {
-      await this.page.testSubj.dragTo(`field-${field}`, 'euiDataGridBody');
+      // Fields can appear in both "Popular fields" and the full field list.
+      await resolveSelector(this.page, `field-${field}`).dragTo(gridLocator);
     }
   }
 
@@ -579,8 +582,8 @@ export class DiscoverApp {
   }
 
   async exportAsCsv(): Promise<Download> {
-    // 1. Navigate to the export menu
-    await this.page.testSubj.click('exportTopNavButton');
+    // Export may live in the top nav or the overflow menu depending on viewport / Discover layout.
+    await this.clickAppMenuItem('exportTopNavButton');
     await this.page.testSubj.click('exportMenuItem-CSV');
 
     // 2. Trigger the report generation
