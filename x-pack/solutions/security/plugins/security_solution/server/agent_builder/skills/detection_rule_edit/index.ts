@@ -56,8 +56,8 @@ Then stop. Do not create anything. Do not offer alternatives unless the user exp
 
 Before entering either branch, determine intent and resolve prerequisites:
 
-1. **User wants to create a new rule** → proceed to Step 2 then Step 3 (creation path). No attachment needed.
-2. **User wants to edit an existing rule and an attachment is already in context** → proceed to the edit branch (Step 1 → Step 2 → Step 3, edit path).
+1. **User wants to create a brand-new rule** (either no rule attachment exists yet, OR the user explicitly wants a **separate, additional** rule) → proceed to Step 2 then Step 3 (creation path). No \`attachment_id\` needed.
+2. **User wants to modify, update, change, or refine an existing rule already in context** → proceed to the edit branch (Step 1 → Step 2 → Step 3, edit path). This applies even when the user's message describes a query change, a threshold, or a count condition — if the user's intent is to adjust the rule already shown in the conversation, use the edit path and provide \`attachment_id\`.
 3. **User wants to edit an existing rule but no attachment is in context** → call \`attachment_list\` to check whether a rule attachment exists in the session but wasn't yet referenced.
    - If one is found → proceed to the edit branch.
    - If nothing is found → call \`security.find_rules\` with \`nameContains\` to search for rules matching the user's description. Present any matches to the user and ask them to confirm which rule they mean. Once confirmed, load it as an attachment and proceed to the edit branch.
@@ -65,7 +65,7 @@ Before entering either branch, determine intent and resolve prerequisites:
 
 ### Step 1: Read the Attachment (edit path only)
 
-Before accessing or modifying any rule data, call \`attachment_read\` on the rule attachment to get the current state. Never assume attachment contents.
+Find the attachment id by looking at your most recent \`<render_attachment id="...">\` tag in the conversation — that exact string is the id. Do NOT invent an id or derive one from the rule name. Call \`attachment_read\` with that id to get the current state before modifying anything.
 
 ### Step 2: Research Before Creating or Editing
 
@@ -81,6 +81,8 @@ This is especially important when:
 ### Step 3: Create or Modify the Rule
 
 #### Creation path (no attachment in context)
+
+> **⚠️ Only follow this path for a genuinely new, separate rule.** If the user's message is about adjusting, refining, or updating a rule already shown in the conversation — even phrased as "make it detect only when..." or "update it to alert when..." — use the **edit path** above and include \`attachment_id\`. The creation path is only for when the user explicitly wants a distinct new rule, not a refinement of the one already in context.
 
 Before calling \`security.create_detection_rule\`, apply the clarification gate:
 
@@ -326,7 +328,7 @@ _This example assumes the edit path — a rule attachment is already in context.
 
 User says: "Add the tags Network and Lateral Movement to the rule"
 
-Pre-check: attachment exists in context → edit path → proceed to Step 1.
+Pre-check: user wants to modify existing rule → edit path → proceed to Step 1.
 
 1. Call \`attachment_read\` with the rule attachment ID.
 2. The attachment \`text\` field contains:
@@ -348,7 +350,7 @@ _This example assumes the edit path — a rule attachment is already in context.
 
 User says: "Update the query to also filter on process.name"
 
-Pre-check: attachment exists in context → edit path → proceed to Step 1.
+Pre-check: user wants to modify existing rule → edit path → proceed to Step 1.
 
 1. Call \`attachment_read\` with the rule attachment ID.
 2. Call \`security.create_detection_rule\`:
@@ -368,9 +370,10 @@ Pre-check: attachment exists in context → edit path → proceed to Step 1.
 3. ALWAYS read the attachment before modifying it (edit path only — skip for fresh creation).
 4. For \`attachment_update\` edits, ALWAYS re-stringify the FULL rule object — never send partial updates. On the creation path, pass natural language to \`security.create_detection_rule\`, not JSON.
 5. **ALWAYS render the attachment inline after EVERY modification** — this is the most important rule. Every single call to \`security.create_detection_rule\` or \`attachment_update\` MUST be followed by \`<render_attachment id="ATTACHMENT_ID" version="VERSION" />\` using the version from the tool result. NEVER omit this. The user cannot see changes without it.
-6. ALWAYS use \`security.create_detection_rule\` when creating a new rule (\`user_query\` only — no \`attachment_id\`).
+6. When creating a **fresh, separate** rule: use \`security.create_detection_rule\` with \`user_query\` only — do NOT include \`attachment_id\`. When **rewriting the query** of an existing rule — including follow-up refinements to a rule you created earlier in this conversation (e.g., "update it to only alert when...", "change the threshold to...") — use \`security.create_detection_rule\` WITH \`attachment_id\` — never omit it.
 7. ALWAYS use \`security.create_detection_rule\` with \`attachment_id\` when rewriting the query.
 8. Use \`attachment_update\` only for non-query field edits (tags, severity, schedule, name, description, MITRE, enabled, etc.). NEVER use \`attachment_update\` to change \`query\`.
-9. NEVER include \`id\` or \`rule_id\` in a generated or draft rule — these are server-assigned identifiers. Including them pollutes the attachment and breaks save/update flows.
-10. **ES|QL only**: If the user explicitly requests a non-ES|QL rule type (KQL, EQL, threshold, new terms, machine learning, indicator match, etc.), do NOT create it and do NOT automatically offer or pivot to an ES|QL alternative. Simply explain the limitation and stop.
+9. NEVER invent attachment ids. The correct id for any edit-path call (\`security.create_detection_rule\` with \`attachment_id\`, or \`attachment_update\`) is the one that appears in the most recent \`<render_attachment id="...">\` tag — it looks like \`ai-rule-creation\` or \`air:xxxxxxxx-...\`. Using a name you derive from the rule content (e.g. \`"rule-failed-ssh-logins"\`) will create a new orphan attachment and lose the saved-rule link.
+10. NEVER include \`id\` or \`rule_id\` in a generated or draft rule — these are server-assigned identifiers. Including them pollutes the attachment and breaks save/update flows.
+11. **ES|QL only**: If the user explicitly requests a non-ES|QL rule type (KQL, EQL, threshold, new terms, machine learning, indicator match, etc.), do NOT create it and do NOT automatically offer or pivot to an ES|QL alternative. Simply explain the limitation and stop.
 `;

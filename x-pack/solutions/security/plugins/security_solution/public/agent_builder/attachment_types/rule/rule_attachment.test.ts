@@ -98,12 +98,16 @@ describe('shouldShowViewRuleButton', () => {
     expect(shouldShowViewRuleButton('rule-b', '/app/security/rules')).toBe(true);
   });
 
-  it('is false when the edit form is open for the same rule', () => {
-    expect(shouldShowViewRuleButton('rule-a', '/app/security/rules/id/rule-a/edit')).toBe(false);
+  it('is true when the edit form is open for the same rule (edit form != details page)', () => {
+    expect(shouldShowViewRuleButton('rule-a', '/app/security/rules/id/rule-a/edit')).toBe(true);
   });
 
   it('is true when the edit form is open for a different rule', () => {
     expect(shouldShowViewRuleButton('rule-b', '/app/security/rules/id/rule-a/edit')).toBe(true);
+  });
+
+  it('is false when on the rule details page for the same rule', () => {
+    expect(shouldShowViewRuleButton('rule-a', '/app/security/rules/id/rule-a')).toBe(false);
   });
 
   it('is true on the create form (attachment targets another saved rule)', () => {
@@ -321,6 +325,7 @@ describe('buildRuleActionButtons', () => {
       ruleId: undefined,
       attachmentId: 'air:testcard',
       createCardVersion: undefined,
+      showViewRule: false,
     };
   });
 
@@ -387,7 +392,7 @@ describe('buildRuleActionButtons', () => {
     expect(aiRuleCreation.requestSaveRule).not.toHaveBeenCalled();
   });
 
-  it('omits View rule from action buttons for create intent (View rule lives in inline content)', () => {
+  it('omits View rule from action buttons when showViewRule is false', () => {
     expect(labels(buildRuleActionButtons({ ...baseProps, ruleId: 'rule-123' }))).not.toContain(
       'View rule'
     );
@@ -406,9 +411,22 @@ describe('buildRuleActionButtons', () => {
     });
   });
 
-  it('never includes View rule in action buttons (View rule is in the inline content component)', () => {
+  it('omits View rule from action buttons when showViewRule is false even for update intent', () => {
     expect(
       labels(buildRuleActionButtons({ ...baseProps, intent: 'update', ruleId: 'rule-123' }))
     ).not.toContain('View rule');
+  });
+
+  it('includes View rule in action buttons when showViewRule is true and ruleId is set', () => {
+    expect(
+      labels(
+        buildRuleActionButtons({
+          ...baseProps,
+          intent: 'update',
+          ruleId: 'rule-123',
+          showViewRule: true,
+        })
+      )
+    ).toContain('View rule');
   });
 });

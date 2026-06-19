@@ -23,6 +23,7 @@ import {
   getRuleIdFromAttachment,
   getRuleAttachmentIntent,
   parseRuleFromAttachment,
+  shouldShowViewRuleButton,
 } from './helpers';
 
 export {
@@ -64,9 +65,7 @@ export const createRuleAttachmentDefinition = ({
       defaultMessage: 'Security Rule',
     }),
   getIcon: () => 'securityApp',
-  renderInlineContent: (props) => (
-    <RuleInlineContent {...props} aiRuleCreation={aiRuleCreation} application={application} />
-  ),
+  renderInlineContent: (props) => <RuleInlineContent {...props} aiRuleCreation={aiRuleCreation} />,
   getActionButtons: ({ attachment }) => {
     const intent = getRuleAttachmentIntent(attachment);
     const ruleId = getRuleIdFromAttachment(attachment) ?? undefined;
@@ -79,6 +78,7 @@ export const createRuleAttachmentDefinition = ({
       ruleId,
       attachmentId: attachment.id,
       createCardVersion: attachment.version,
+      showViewRule: shouldShowViewRuleButton(ruleId, window.location.pathname),
     });
   },
 });

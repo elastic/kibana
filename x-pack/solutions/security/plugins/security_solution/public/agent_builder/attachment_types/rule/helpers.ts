@@ -84,10 +84,7 @@ export const shouldShowViewRuleButton = (
   if (!attachmentRuleId) {
     return false;
   }
-  return (
-    !isAttachmentRuleOpenOnFormPage(attachmentRuleId, pathname) &&
-    !isOnRuleDetailsPage(attachmentRuleId, pathname)
-  );
+  return !isOnRuleDetailsPage(attachmentRuleId, pathname);
 };
 
 /**

@@ -14,7 +14,10 @@ import { RULES_UI_EDIT_PRIVILEGE } from '@kbn/security-solution-features/constan
 import type { AiRuleCreationService } from '../../../detection_engine/common/ai_rule_creation_store';
 import { hasCapabilities } from '../../../common/lib/capabilities';
 import { RULES_PATH, RULES_CREATE_PATH } from '../../../../common/constants';
-import { getEditRuleUrl } from '../../../common/components/link_to/redirect_to_detection_engine';
+import {
+  getEditRuleUrl,
+  getRuleDetailsUrl,
+} from '../../../common/components/link_to/redirect_to_detection_engine';
 import { type RuleAttachmentIntent, getRuleTypeLabel } from './helpers';
 import type { RuleResponse } from '../../../../common/api/detection_engine/model/rule_schema';
 import { getNonEsqlRuleActionDisabledReason } from '../../components/translations';
@@ -32,6 +35,8 @@ interface BuildRuleActionButtonsParams {
   attachmentId: string;
   /** Version of the rendered create card, recorded on save to scope the duplicate-save warning. */
   createCardVersion: number | undefined;
+  /** Whether to show a "View rule" link — true when the rule is saved and not already being viewed. */
+  showViewRule: boolean;
 }
 
 /** Builds action buttons for a rule attachment. Called from `getActionButtons` (not a hook). */
@@ -44,6 +49,7 @@ export const buildRuleActionButtons = ({
   ruleId,
   attachmentId,
   createCardVersion,
+  showViewRule,
 }: BuildRuleActionButtonsParams): ActionButton[] => {
   const canEditRules = hasCapabilities(application.capabilities, RULES_UI_EDIT_PRIVILEGE);
   if (!rule || !canEditRules || (rule.type === 'esql' && !uiSettings.get(ENABLE_ESQL))) {
@@ -71,6 +77,22 @@ export const buildRuleActionButtons = ({
         });
       },
     },
+    ...(showViewRule && ruleId
+      ? [
+          {
+            label: i18n.translate('xpack.securitySolution.agentBuilder.ruleAttachment.viewRule', {
+              defaultMessage: 'View rule',
+            }),
+            icon: 'popout' as const,
+            type: ActionButtonType.SECONDARY,
+            handler: () => {
+              application.navigateToApp('securitySolutionUI', {
+                path: `${RULES_PATH}${getRuleDetailsUrl(ruleId)}`,
+              });
+            },
+          },
+        ]
+      : []),
     isUpdate
       ? {
           label: i18n.translate('xpack.securitySolution.agentBuilder.ruleAttachment.updateRule', {

@@ -7,7 +7,6 @@
 
 import React from 'react';
 import { render } from '@testing-library/react';
-import type { ApplicationStart } from '@kbn/core-application-browser';
 import { AiRuleCreationService } from '../../../detection_engine/common/ai_rule_creation_store';
 import { RuleInlineContent } from './rule_inline_content';
 import type { RuleAttachment } from './helpers';
@@ -24,9 +23,6 @@ const makeAttachment = (ruleData: Record<string, unknown>, origin?: string): Rul
 
 describe('RuleInlineContent', () => {
   let aiRuleCreation: AiRuleCreationService;
-  const mockApplication = {
-    navigateToApp: jest.fn(),
-  } as unknown as ApplicationStart;
 
   beforeEach(() => {
     aiRuleCreation = new AiRuleCreationService();
@@ -43,7 +39,6 @@ describe('RuleInlineContent', () => {
       <RuleInlineContent
         attachment={attachment}
         aiRuleCreation={aiRuleCreation}
-        application={mockApplication}
         isSidebar={false}
       />
     );
@@ -120,28 +115,6 @@ describe('RuleInlineContent', () => {
       } as unknown as RuleAttachment;
       const { queryByText } = renderContent(updateCard);
       expect(queryByText('This rule has already been saved')).not.toBeInTheDocument();
-    });
-  });
-
-  describe('View rule button', () => {
-    const updateAttachment = (ruleId: string): RuleAttachment =>
-      ({
-        id: 'attachment-1',
-        type: 'security.rule',
-        data: { text: JSON.stringify(rule), attachmentLabel: rule.name, ruleId },
-      } as unknown as RuleAttachment);
-
-    it('shows for a saved rule when not already on the details page', () => {
-      const { getByText } = renderContent(updateAttachment('rule-123'), '/some/other/page');
-      expect(getByText('View rule')).toBeInTheDocument();
-    });
-
-    it('hides when already viewing the rule details page', () => {
-      const { queryByText } = renderContent(
-        updateAttachment('rule-123'),
-        '/app/security/rules/id/rule-123'
-      );
-      expect(queryByText('View rule')).not.toBeInTheDocument();
     });
   });
 });

@@ -160,16 +160,25 @@ Limitations: only ES|QL rules are supported; requires relevant data in existing 
         let existingRuleText: string | undefined;
         let existingRuleId: string | null | undefined;
         let isNewCard: boolean;
+        // True only for Branch 1 (explicit attachment_id). Drives whether ruleIdForAttachment
+        // carries forward the existing ruleId or is forced to null.
+        let isQueryRewrite: boolean;
 
         if (attachmentId) {
           // Branch 1: explicit update
           const record = attachments.getAttachmentRecord(attachmentId);
           const latestVersion = record ? getLatestVersion(record) : undefined;
+          if (!latestVersion) {
+            logger.warn(
+              `create_detection_rule: attachment ${attachmentId} has no resolvable version — treating as fresh create`
+            );
+          }
           const versionData = latestVersion?.data as Record<string, unknown> | undefined;
           existingRuleText = versionData?.text as string | undefined;
           existingRuleId = versionData?.ruleId as string | null | undefined;
           resolvedAttachmentId = attachmentId;
           isNewCard = false;
+          isQueryRewrite = true;
         } else {
           // No explicit id — look for an empty placeholder card
           const placeholderRecord = attachments.getAttachmentRecord(SECURITY_RULE_ATTACHMENT_ID);
@@ -185,12 +194,14 @@ Limitations: only ES|QL rules are supported; requires relevant data in existing 
             existingRuleText = undefined; // placeholder has no real rule content
             existingRuleId = undefined;
             isNewCard = false;
+            isQueryRewrite = false;
           } else {
             // Branch 3: mint a new id for a genuinely additional rule
             resolvedAttachmentId = mintRuleAttachmentId();
             existingRuleText = undefined;
             existingRuleId = undefined;
             isNewCard = true;
+            isQueryRewrite = false;
           }
         }
 
@@ -257,12 +268,10 @@ Limitations: only ES|QL rules are supported; requires relevant data in existing 
         const attachmentDescription = `Rule: ${result.rule.name}`;
 
         // Per-version save signal that drives the create/update button:
-        //  - Update branch (attachment_id provided): carry the card's own saved id forward, so a
-        //    query rewrite of an already-saved rule stays "Update rule". If it was never saved (ruleId
-        //    was null/absent), keep null so it stays "Create rule".
-        //  - Create branches (no attachment_id): explicit null → "Create rule".
-        const ruleIdForAttachment: string | null =
-          attachmentId !== undefined ? existingRuleId ?? null : null;
+        //  - Query-rewrite branches (1, 1.5): carry the card's own saved id forward so the button
+        //    stays "Update rule". If the rule was never saved (ruleId null/absent), keep null.
+        //  - Fresh-create branches (2, 3): explicit null → "Create rule".
+        const ruleIdForAttachment: string | null = isQueryRewrite ? existingRuleId ?? null : null;
 
         const attachmentData: Record<string, unknown> = {
           text: JSON.stringify(ruleWithoutIds),
@@ -307,7 +316,7 @@ Limitations: only ES|QL rules are supported; requires relevant data in existing 
               type: ToolResultType.other,
               data: {
                 success: true,
-                rule: result.rule,
+                rule: ruleWithoutIds,
                 attachmentId: resolvedAttachmentId,
                 isNewCard,
                 ...(resultVersion !== undefined && { version: resultVersion }),
