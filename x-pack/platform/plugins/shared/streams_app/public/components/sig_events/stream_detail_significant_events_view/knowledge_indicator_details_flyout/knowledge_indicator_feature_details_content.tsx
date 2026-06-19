@@ -83,12 +83,8 @@ export function KnowledgeIndicatorFeatureDetailsContent({ feature }: Props) {
           ),
       },
       {
-        title: DETAILS_LAST_SEEN_LABEL,
-        description: <EuiText size="s">{feature.last_seen || EMPTY_VALUE}</EuiText>,
-      },
-      {
-        title: DETAILS_EXPIRES_AT_LABEL,
-        description: <EuiText size="s">{feature.expires_at ?? EMPTY_VALUE}</EuiText>,
+        title: DETAILS_UPDATED_AT_LABEL,
+        description: <EuiText size="s">{feature.updated_at || EMPTY_VALUE}</EuiText>,
       },
     ];
   }, [feature]);
@@ -198,14 +194,10 @@ const DETAILS_TAGS_LABEL = i18n.translate('xpack.streams.featureDetailsFlyout.ta
   defaultMessage: 'Tags',
 });
 
-const DETAILS_LAST_SEEN_LABEL = i18n.translate('xpack.streams.featureDetailsFlyout.lastSeenLabel', {
-  defaultMessage: 'Last seen',
-});
-
-const DETAILS_EXPIRES_AT_LABEL = i18n.translate(
-  'xpack.streams.featureDetailsFlyout.expiresAtLabel',
+const DETAILS_UPDATED_AT_LABEL = i18n.translate(
+  'xpack.streams.featureDetailsFlyout.updatedAtLabel',
   {
-    defaultMessage: 'Expires at',
+    defaultMessage: 'Updated',
   }
 );
 
