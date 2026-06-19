@@ -35,9 +35,10 @@ export const codeAnalysisGenerator: ComputedFeatureGenerator = {
   description:
     'Log/error message strings, error types, and dependency calls extracted from the source code that produces this stream, verified against values actually present in the logs',
 
-  llmInstructions: `Contains exact log/error message strings, error types, and dependency calls found in the source code that emits this stream, intersected with values actually observed in the logs (so every string is known to occur in both code and data).
-Use these strings verbatim when wording detection queries and when choosing \`MATCH_PHRASE\` vs \`:\`. This is your primary source of code-grounded evidence; treat it as a hint that refines queries already anchored in other features, never as a replacement for \`dataset_analysis\`.
-The \`properties.evidence\` entries (\`code: <file>:<line> <snippet>\`) can be copied into a query's \`evidence\`.`,
+  llmInstructions: `Contains source code evidence from the repository that produces this stream, in two parts.
+\`properties.verified_strings\` and \`properties.evidence\` are confirmed: each string appears in both the source code and the observed logs. Use \`verified_strings\` verbatim when wording detection queries and when choosing \`MATCH_PHRASE\` vs \`:\`. \`properties.evidence\` entries (\`code: <file>:<line> <snippet>\`) can be copied directly into a query's \`evidence\`.
+\`properties.code_context\` entries are broader: code snippets from the same repository surfaced by semantic search that may contain log/error strings the service can emit but that have not yet appeared in the lookback window. Use these as proactive hints for detection queries — the same way \`technology\` and \`infrastructure\` features work.
+Treat all entries as hints that refine queries already anchored in \`dataset_analysis\`, never as a replacement for it.`,
 
   generate: async (options) => {
     const provider = options.providers?.[CODE_ANALYSIS_PROVIDER_KEY];

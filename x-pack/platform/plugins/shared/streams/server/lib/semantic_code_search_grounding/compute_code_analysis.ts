@@ -228,7 +228,15 @@ export const createCodeAnalysisProvider = ({
       normalized: normalize(value),
     }));
 
-    let best: { candidate: Candidate; verified: Set<string>; evidence: string[] } | undefined;
+    let best:
+      | {
+          candidate: Candidate;
+          verified: Set<string>;
+          evidence: string[];
+          hits: CodeHit[];
+          verifiedHitIndices: Set<number>;
+        }
+      | undefined;
 
     for (const candidate of candidates) {
       const response = await execute(SCS_SEMANTIC_SEARCH_TOOL_ID, {
@@ -242,9 +250,11 @@ export const createCodeAnalysisProvider = ({
 
       const hits = extractHits(getOutputText(response));
       const verified = new Set<string>();
+      const verifiedHitIndices = new Set<number>();
       const evidence: string[] = [];
 
-      for (const hit of hits) {
+      for (let i = 0; i < hits.length; i++) {
+        const hit = hits[i];
         const normalizedSnippet = normalize(hit.snippet);
         for (const { raw, normalized: normalizedString } of normalizedStrings) {
           if (normalizedString.length > 0 && normalizedSnippet.includes(normalizedString)) {
@@ -253,12 +263,13 @@ export const createCodeAnalysisProvider = ({
               evidence.push(`code: ${location} ${truncate(hit.snippet)}`);
             }
             verified.add(raw);
+            verifiedHitIndices.add(i);
           }
         }
       }
 
       if (verified.size > (best?.verified.size ?? 0)) {
-        best = { candidate, verified, evidence };
+        best = { candidate, verified, evidence, hits, verifiedHitIndices };
       }
     }
 
@@ -282,10 +293,19 @@ export const createCodeAnalysisProvider = ({
       verifiedCount: best.verified.size,
     });
 
+    const codeContext = best.hits
+      .filter((_, i) => !best!.verifiedHitIndices.has(i))
+      .slice(0, MAX_EVIDENCE)
+      .map((hit) => {
+        const location = hit.line !== undefined ? `${hit.file}:${hit.line}` : hit.file;
+        return `code: ${location} ${truncate(hit.snippet)}`;
+      });
+
     return {
       repository,
       verified_strings: Array.from(best.verified),
       evidence: best.evidence,
+      code_context: codeContext,
     };
   };
 };

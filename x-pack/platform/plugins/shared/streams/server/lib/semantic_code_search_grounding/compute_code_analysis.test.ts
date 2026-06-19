@@ -118,12 +118,40 @@ describe('createCodeAnalysisProvider', () => {
       repository: 'acme/checkout',
       verified_strings: ['connection refused'],
       evidence: ['code: src/net.go:42 log.Error("connection refused")'],
+      code_context: [],
     });
     expect(lastOutcome()).toEqual({
       status: 'feature',
       repository: 'acme/checkout',
       candidateCount: 2,
       verifiedCount: 1,
+    });
+  });
+
+  it('includes unmatched code hits in code_context as proactive seed evidence', async () => {
+    const multiHitMarkdown = [
+      searchMarkdown('src/net.go:42-58', 'log.Error("connection refused")'),
+      searchMarkdown('src/net.go:90-105', 'log.Warn("rate limit exceeded, retrying")'),
+    ].join('\n');
+
+    execute.mockImplementation(async ({ toolId }) => {
+      if (toolId === SCS_LIST_REPOS_TOOL_ID) {
+        return toolOutput(listMarkdown(['acme/checkout']));
+      }
+      if (toolId === SCS_SEMANTIC_SEARCH_TOOL_ID) {
+        return toolOutput(multiHitMarkdown);
+      }
+      return { results: [] };
+    });
+
+    const value = await run();
+
+    expect(value).toEqual({
+      repository: 'acme/checkout',
+      verified_strings: ['connection refused'],
+      evidence: ['code: src/net.go:42 log.Error("connection refused")'],
+      // second hit doesn't match any observed log string → seed role
+      code_context: ['code: src/net.go:90 log.Warn("rate limit exceeded, retrying")'],
     });
   });
 
