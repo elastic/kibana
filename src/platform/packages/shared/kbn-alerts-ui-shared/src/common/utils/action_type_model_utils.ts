@@ -88,6 +88,7 @@ export function transformSpecToActionTypeModel(
     iconClass: getIconFromSpec(spec),
     subtype: undefined,
     isExperimental: spec.metadata.isTechnicalPreview ?? false,
+    ...(spec.metadata.docsUrl !== undefined ? { docsUrl: spec.metadata.docsUrl } : {}),
     getHideInUi: (_actionTypes: ActionType[]) =>
       shouldHideWorkflowsOnlyConnector(spec.metadata.supportedFeatureIds, uiSettings),
     actionConnectorFields: lazy(async () => {

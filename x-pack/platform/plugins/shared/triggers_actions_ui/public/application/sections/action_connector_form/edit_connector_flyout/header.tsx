@@ -13,6 +13,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
+  EuiLink,
   EuiText,
   EuiFlyoutHeader,
   EuiBetaBadge,
@@ -39,6 +40,7 @@ const FlyoutHeaderComponent: React.FC<{
   icon?: IconType | null;
   isTestable?: boolean;
   hideRulesTab?: boolean;
+  docsUrl?: string;
 }> = ({
   icon,
   isExperimental = false,
@@ -50,6 +52,7 @@ const FlyoutHeaderComponent: React.FC<{
   setTab,
   isTestable,
   hideRulesTab = false,
+  docsUrl,
 }) => {
   const {
     application: { capabilities },
@@ -123,28 +126,46 @@ const FlyoutHeaderComponent: React.FC<{
                   values={{ connectorTypeDesc }}
                 />
               </EuiText>
+              {docsUrl && (
+                <EuiLink href={docsUrl} target="_blank" external>
+                  <FormattedMessage
+                    id="xpack.triggersActionsUI.sections.editConnectorForm.flyoutHeaderDocsLink"
+                    defaultMessage="View documentation"
+                  />
+                </EuiLink>
+              )}
             </>
           ) : (
-            <EuiFlexGroup gutterSize="s" alignItems="center" wrap={true}>
-              <EuiFlexItem style={{ minWidth: '200px' }}>
-                <EuiTitle size="s">
-                  <h3 id="flyoutTitle">
-                    <FormattedMessage
-                      defaultMessage="Edit connector"
-                      id="xpack.triggersActionsUI.sections.editConnectorForm.flyoutPreconfiguredTitle"
-                    />
-                  </h3>
-                </EuiTitle>
-              </EuiFlexItem>
-              {isExperimental && (
-                <EuiFlexItem grow={false}>
-                  <EuiBetaBadge
-                    label={TECH_PREVIEW_LABEL}
-                    tooltipContent={TECH_PREVIEW_DESCRIPTION}
-                  />
+            <>
+              <EuiFlexGroup gutterSize="s" alignItems="center" wrap={true}>
+                <EuiFlexItem style={{ minWidth: '200px' }}>
+                  <EuiTitle size="s">
+                    <h3 id="flyoutTitle">
+                      <FormattedMessage
+                        defaultMessage="Edit connector"
+                        id="xpack.triggersActionsUI.sections.editConnectorForm.flyoutPreconfiguredTitle"
+                      />
+                    </h3>
+                  </EuiTitle>
                 </EuiFlexItem>
+                {isExperimental && (
+                  <EuiFlexItem grow={false}>
+                    <EuiBetaBadge
+                      label={TECH_PREVIEW_LABEL}
+                      tooltipContent={TECH_PREVIEW_DESCRIPTION}
+                    />
+                  </EuiFlexItem>
+                )}
+              </EuiFlexGroup>
+              {docsUrl && (
+                <EuiLink href={docsUrl} target="_blank" external>
+                  <FormattedMessage
+                    id="xpack.triggersActionsUI.sections.editConnectorForm.flyoutHeaderDocsLink"
+                    defaultMessage="View documentation"
+                  />
+                </EuiLink>
               )}
-            </EuiFlexGroup>
+            </>
           )}
         </EuiFlexItem>
       </EuiFlexGroup>

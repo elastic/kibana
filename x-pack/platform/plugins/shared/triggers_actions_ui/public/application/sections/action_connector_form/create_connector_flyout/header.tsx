@@ -13,6 +13,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
+  EuiLink,
   EuiText,
   EuiFlyoutHeader,
   EuiSpacer,
@@ -27,6 +28,7 @@ interface Props {
   actionTypeMessage?: string | null;
   compatibility?: string[] | null;
   isExperimental?: boolean;
+  docsUrl?: string;
 }
 
 const FlyoutHeaderComponent: React.FC<Props> = ({
@@ -35,6 +37,7 @@ const FlyoutHeaderComponent: React.FC<Props> = ({
   actionTypeMessage,
   compatibility,
   isExperimental,
+  docsUrl,
 }) => {
   return (
     <EuiFlyoutHeader hasBorder data-test-subj="create-connector-flyout-header">
@@ -73,6 +76,14 @@ const FlyoutHeaderComponent: React.FC<Props> = ({
               <EuiText size="s" color="subdued">
                 {actionTypeMessage}
               </EuiText>
+              {docsUrl && (
+                <EuiLink href={docsUrl} target="_blank" external>
+                  <FormattedMessage
+                    id="xpack.triggersActionsUI.sections.addConnectorForm.flyoutHeaderDocsLink"
+                    defaultMessage="View documentation"
+                  />
+                </EuiLink>
+              )}
               {compatibility && compatibility.length > 0 && (
                 <>
                   <EuiSpacer size="m" />
