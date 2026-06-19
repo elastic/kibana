@@ -15,6 +15,33 @@ import { isTimeChart } from '../../common/helpers';
 import { getFilteredLayers } from './layers';
 import { isDataLayer, getDataLayers } from './visualization';
 
+const DURATION_UNITS = {
+  second: 's',
+  seconds: 's',
+  minute: 'm',
+  minutes: 'm',
+  hour: 'h',
+  hours: 'h',
+  day: 'd',
+  week: 'w',
+  weeks: 'w',
+  month: 'M',
+  months: 'M',
+  year: 'y',
+  years: 'y',
+};
+
+const isDurationUnit = (unit: string): unit is keyof typeof DURATION_UNITS => {
+  return unit in DURATION_UNITS;
+};
+
+const normaliseUnit = (unit: string) => {
+  if (isDurationUnit(unit)) {
+    return DURATION_UNITS[unit];
+  }
+  return unit;
+};
+
 export function calculateMinInterval(
   datatableUtilities: DatatableUtilitiesService,
   { args: { layers, minTimeBarInterval } }: XYChartProps
@@ -28,6 +55,19 @@ export function calculateMinInterval(
     getColumnByAccessor(filteredLayers[0].xAccessor, filteredLayers[0].table.columns);
 
   if (!xColumn) return;
+
+  const bucket = xColumn.meta.bucket;
+
+  if (bucket) {
+    if (bucket.unit) {
+      const durationString = `${bucket.interval}${normaliseUnit(bucket.unit)}`;
+      const duration = search.aggs.parseInterval(durationString)?.as('milliseconds');
+      return duration;
+    }
+
+    return bucket.interval;
+  }
+
   if (minTimeBarInterval) {
     return search.aggs.parseInterval(minTimeBarInterval)?.as('milliseconds');
   }

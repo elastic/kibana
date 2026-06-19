@@ -115,7 +115,7 @@ function mapResponseToDatatable(body: ESQLSearchResponse, query: string, input: 
     : null;
 
   const allColumns =
-    (body.all_columns ?? body.columns)?.map(({ name, type, original_types }) => {
+    (body.all_columns ?? body.columns)?.map(({ name, type, original_types, _meta }) => {
       const originalTypes = original_types ?? [];
       const hasConflict = type === 'unsupported' && originalTypes.length > 1;
       const kibanaFieldType = hasConflict
@@ -130,21 +130,12 @@ function mapResponseToDatatable(body: ESQLSearchResponse, query: string, input: 
         meta: {
           type: kibanaFieldType,
           esType: type,
-          sourceParams:
-            type === 'date'
-              ? {
-                  appliedTimeRange,
-                  params: {},
-                  indexPattern,
-                  sourceField,
-                }
-              : {
-                  indexPattern,
-                  sourceField,
-                },
-          params: {
-            id: kibanaFieldType,
+          sourceParams: {
+            indexPattern,
+            sourceField,
+            ...(type === 'date' && { appliedTimeRange, params: {} }),
           },
+          bucket: _meta?.bucket,
         },
         isNull: hasEmptyColumns ? !lookup.has(name) : false,
         isComputedColumn: isComputedColumn(name, querySummary),

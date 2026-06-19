@@ -280,7 +280,6 @@ export const getXyChartRenderer = ({
     });
 
     performanceTracker.mark(PERFORMANCE_TRACKER_MARKS.RENDER_START);
-
     ReactDOM.render(
       <KibanaRenderContextProvider {...deps.startServices}>
         <div css={chartContainerStyle} data-test-subj="xyVisChart">

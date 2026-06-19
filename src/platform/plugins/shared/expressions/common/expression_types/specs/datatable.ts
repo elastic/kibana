@@ -11,6 +11,7 @@ import type { SerializableRecord } from '@kbn/utility-types';
 import { map, pick, zipObject } from 'lodash';
 import type { SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
 
+import type { ESQLBucketMetadata } from '@kbn/es-types/src/search';
 import type { ExpressionTypeDefinition, ExpressionValueBoxed } from '../types';
 import type { PointSeries, PointSeriesColumn } from './pointseries';
 import type { ExpressionValueRender } from './render';
@@ -103,6 +104,10 @@ export interface DatatableColumnMeta {
    * any extra parameters for the source that produced this column
    */
   sourceParams?: SerializableRecord;
+  /**
+   * bucket metadata for the column
+   */
+  bucket?: ESQLBucketMetadata;
 }
 
 interface SourceParamsESQL extends Record<string, unknown> {
