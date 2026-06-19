@@ -83,6 +83,8 @@ import {
   MonitorTypeEnum,
   FormMonitorType,
   HTTPMethod,
+  HttpAuthMethod,
+  KerberosAuthType,
   ScreenshotOption,
   Mode,
   TLSVersion,
@@ -741,6 +743,54 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
       defaultMessage: 'Wait duration is invalid.',
     }),
   },
+  authType: {
+    fieldKey: 'authType',
+    component: Select,
+    controlled: true,
+    label: i18n.translate('xpack.synthetics.monitorConfig.authType.label', {
+      defaultMessage: 'Authentication method',
+    }),
+    helpText: i18n.translate('xpack.synthetics.monitorConfig.authType.helpText', {
+      defaultMessage: 'Select how the monitor authenticates with the server.',
+    }),
+    props: ({ field, setValue }): EuiSelectProps => ({
+      'data-test-subj': 'syntheticsMonitorConfigAuthType',
+      options: [
+        {
+          value: HttpAuthMethod.NONE,
+          text: i18n.translate('xpack.synthetics.monitorConfig.authType.none', {
+            defaultMessage: 'None',
+          }),
+        },
+        {
+          value: HttpAuthMethod.BASIC,
+          text: i18n.translate('xpack.synthetics.monitorConfig.authType.basic', {
+            defaultMessage: 'Basic',
+          }),
+        },
+        {
+          value: HttpAuthMethod.KERBEROS,
+          text: i18n.translate('xpack.synthetics.monitorConfig.authType.kerberos', {
+            defaultMessage: 'Kerberos',
+          }),
+        },
+        {
+          value: HttpAuthMethod.NTLM,
+          text: i18n.translate('xpack.synthetics.monitorConfig.authType.ntlm', {
+            defaultMessage: 'NTLM',
+          }),
+        },
+      ],
+      value: (field?.value as HttpAuthMethod) ?? HttpAuthMethod.NONE,
+      onChange: (event) => {
+        const value = event.target.value as HttpAuthMethod;
+        setValue('authType', value);
+        setValue(ConfigKey.KERBEROS_ENABLED, value === HttpAuthMethod.KERBEROS);
+        setValue(ConfigKey.NTLM_ENABLED, value === HttpAuthMethod.NTLM);
+      },
+      disabled: readOnly,
+    }),
+  },
   [ConfigKey.USERNAME]: {
     fieldKey: ConfigKey.USERNAME,
     component: FieldText,
@@ -750,6 +800,11 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
     helpText: i18n.translate('xpack.synthetics.monitorConfig.username.helpText', {
       defaultMessage: 'Username for authenticating with the server.',
     }),
+    hidden: (dependencies) => {
+      const [authType] = dependencies;
+      return authType !== HttpAuthMethod.BASIC;
+    },
+    dependencies: ['authType'],
     props: (): EuiFieldTextProps => ({
       readOnly,
     }),
@@ -763,7 +818,216 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
     helpText: i18n.translate('xpack.synthetics.monitorConfig.password.helpText', {
       defaultMessage: 'Password for authenticating with the server.',
     }),
+    hidden: (dependencies) => {
+      const [authType] = dependencies;
+      return authType !== HttpAuthMethod.BASIC;
+    },
+    dependencies: ['authType'],
     props: (): EuiFieldPasswordProps => ({
+      readOnly,
+    }),
+  },
+  [ConfigKey.KERBEROS_AUTH_TYPE]: {
+    fieldKey: ConfigKey.KERBEROS_AUTH_TYPE,
+    component: Select,
+    label: i18n.translate('xpack.synthetics.monitorConfig.kerberosAuthType.label', {
+      defaultMessage: 'Kerberos authentication type',
+    }),
+    helpText: i18n.translate('xpack.synthetics.monitorConfig.kerberosAuthType.helpText', {
+      defaultMessage: 'Authenticate with a username and password, or with a keytab file.',
+    }),
+    hidden: (dependencies) => {
+      const [authType] = dependencies;
+      return authType !== HttpAuthMethod.KERBEROS;
+    },
+    dependencies: ['authType'],
+    props: (): EuiSelectProps => ({
+      'data-test-subj': 'syntheticsMonitorConfigKerberosAuthType',
+      options: [
+        {
+          value: KerberosAuthType.PASSWORD,
+          text: i18n.translate('xpack.synthetics.monitorConfig.kerberosAuthType.password', {
+            defaultMessage: 'Password',
+          }),
+        },
+        {
+          value: KerberosAuthType.KEYTAB,
+          text: i18n.translate('xpack.synthetics.monitorConfig.kerberosAuthType.keytab', {
+            defaultMessage: 'Keytab',
+          }),
+        },
+      ],
+      disabled: readOnly,
+    }),
+  },
+  [ConfigKey.KERBEROS_REALM]: {
+    fieldKey: ConfigKey.KERBEROS_REALM,
+    component: FieldText,
+    label: i18n.translate('xpack.synthetics.monitorConfig.kerberosRealm.label', {
+      defaultMessage: 'Realm',
+    }),
+    helpText: i18n.translate('xpack.synthetics.monitorConfig.kerberosRealm.helpText', {
+      defaultMessage: 'The Kerberos realm, e.g. CORP.LOCAL.',
+    }),
+    hidden: (dependencies) => {
+      const [authType] = dependencies;
+      return authType !== HttpAuthMethod.KERBEROS;
+    },
+    dependencies: ['authType'],
+    props: (): EuiFieldTextProps => ({
+      'data-test-subj': 'syntheticsMonitorConfigKerberosRealm',
+      readOnly,
+    }),
+  },
+  [ConfigKey.KERBEROS_CONFIG_PATH]: {
+    fieldKey: ConfigKey.KERBEROS_CONFIG_PATH,
+    component: FieldText,
+    label: i18n.translate('xpack.synthetics.monitorConfig.kerberosConfigPath.label', {
+      defaultMessage: 'Configuration file path',
+    }),
+    helpText: i18n.translate('xpack.synthetics.monitorConfig.kerberosConfigPath.helpText', {
+      defaultMessage: 'Path to the krb5.conf file on the agent host, e.g. /etc/krb5.conf.',
+    }),
+    hidden: (dependencies) => {
+      const [authType] = dependencies;
+      return authType !== HttpAuthMethod.KERBEROS;
+    },
+    dependencies: ['authType'],
+    props: (): EuiFieldTextProps => ({
+      'data-test-subj': 'syntheticsMonitorConfigKerberosConfigPath',
+      readOnly,
+    }),
+  },
+  [ConfigKey.KERBEROS_SERVICE_NAME]: {
+    fieldKey: ConfigKey.KERBEROS_SERVICE_NAME,
+    component: FieldText,
+    label: i18n.translate('xpack.synthetics.monitorConfig.kerberosServiceName.label', {
+      defaultMessage: 'Service name',
+    }),
+    helpText: i18n.translate('xpack.synthetics.monitorConfig.kerberosServiceName.helpText', {
+      defaultMessage: 'Optional service principal name (SPN) to request a ticket for.',
+    }),
+    hidden: (dependencies) => {
+      const [authType] = dependencies;
+      return authType !== HttpAuthMethod.KERBEROS;
+    },
+    dependencies: ['authType'],
+    props: (): EuiFieldTextProps => ({
+      'data-test-subj': 'syntheticsMonitorConfigKerberosServiceName',
+      readOnly,
+    }),
+  },
+  [ConfigKey.KERBEROS_USERNAME]: {
+    fieldKey: ConfigKey.KERBEROS_USERNAME,
+    component: FieldText,
+    label: i18n.translate('xpack.synthetics.monitorConfig.kerberosUsername.label', {
+      defaultMessage: 'Username',
+    }),
+    helpText: i18n.translate('xpack.synthetics.monitorConfig.kerberosUsername.helpText', {
+      defaultMessage: 'Username of the Kerberos principal.',
+    }),
+    hidden: (dependencies) => {
+      const [authType, kerberosAuthType] = dependencies;
+      return authType !== HttpAuthMethod.KERBEROS || kerberosAuthType !== KerberosAuthType.PASSWORD;
+    },
+    dependencies: ['authType', ConfigKey.KERBEROS_AUTH_TYPE],
+    props: (): EuiFieldTextProps => ({
+      'data-test-subj': 'syntheticsMonitorConfigKerberosUsername',
+      readOnly,
+    }),
+  },
+  [ConfigKey.KERBEROS_PASSWORD]: {
+    fieldKey: ConfigKey.KERBEROS_PASSWORD,
+    component: FieldPassword,
+    label: i18n.translate('xpack.synthetics.monitorConfig.kerberosPassword.label', {
+      defaultMessage: 'Password',
+    }),
+    helpText: i18n.translate('xpack.synthetics.monitorConfig.kerberosPassword.helpText', {
+      defaultMessage: 'Password of the Kerberos principal.',
+    }),
+    hidden: (dependencies) => {
+      const [authType, kerberosAuthType] = dependencies;
+      return authType !== HttpAuthMethod.KERBEROS || kerberosAuthType !== KerberosAuthType.PASSWORD;
+    },
+    dependencies: ['authType', ConfigKey.KERBEROS_AUTH_TYPE],
+    props: (): EuiFieldPasswordProps => ({
+      'data-test-subj': 'syntheticsMonitorConfigKerberosPassword',
+      readOnly,
+    }),
+  },
+  [ConfigKey.KERBEROS_KEYTAB]: {
+    fieldKey: ConfigKey.KERBEROS_KEYTAB,
+    component: FieldText,
+    label: i18n.translate('xpack.synthetics.monitorConfig.kerberosKeytab.label', {
+      defaultMessage: 'Keytab file path',
+    }),
+    helpText: i18n.translate('xpack.synthetics.monitorConfig.kerberosKeytab.helpText', {
+      defaultMessage: 'Path to the keytab file on the agent host.',
+    }),
+    hidden: (dependencies) => {
+      const [authType, kerberosAuthType] = dependencies;
+      return authType !== HttpAuthMethod.KERBEROS || kerberosAuthType !== KerberosAuthType.KEYTAB;
+    },
+    dependencies: ['authType', ConfigKey.KERBEROS_AUTH_TYPE],
+    props: (): EuiFieldTextProps => ({
+      'data-test-subj': 'syntheticsMonitorConfigKerberosKeytab',
+      readOnly,
+    }),
+  },
+  [ConfigKey.NTLM_USERNAME]: {
+    fieldKey: ConfigKey.NTLM_USERNAME,
+    component: FieldText,
+    label: i18n.translate('xpack.synthetics.monitorConfig.ntlmUsername.label', {
+      defaultMessage: 'Username',
+    }),
+    helpText: i18n.translate('xpack.synthetics.monitorConfig.ntlmUsername.helpText', {
+      defaultMessage: 'Username for NTLM authentication.',
+    }),
+    hidden: (dependencies) => {
+      const [authType] = dependencies;
+      return authType !== HttpAuthMethod.NTLM;
+    },
+    dependencies: ['authType'],
+    props: (): EuiFieldTextProps => ({
+      'data-test-subj': 'syntheticsMonitorConfigNtlmUsername',
+      readOnly,
+    }),
+  },
+  [ConfigKey.NTLM_PASSWORD]: {
+    fieldKey: ConfigKey.NTLM_PASSWORD,
+    component: FieldPassword,
+    label: i18n.translate('xpack.synthetics.monitorConfig.ntlmPassword.label', {
+      defaultMessage: 'Password',
+    }),
+    helpText: i18n.translate('xpack.synthetics.monitorConfig.ntlmPassword.helpText', {
+      defaultMessage: 'Password for NTLM authentication.',
+    }),
+    hidden: (dependencies) => {
+      const [authType] = dependencies;
+      return authType !== HttpAuthMethod.NTLM;
+    },
+    dependencies: ['authType'],
+    props: (): EuiFieldPasswordProps => ({
+      'data-test-subj': 'syntheticsMonitorConfigNtlmPassword',
+      readOnly,
+    }),
+  },
+  [ConfigKey.NTLM_DOMAIN]: {
+    fieldKey: ConfigKey.NTLM_DOMAIN,
+    component: FieldText,
+    label: i18n.translate('xpack.synthetics.monitorConfig.ntlmDomain.label', {
+      defaultMessage: 'Domain',
+    }),
+    helpText: i18n.translate('xpack.synthetics.monitorConfig.ntlmDomain.helpText', {
+      defaultMessage: 'Optional Windows domain for NTLM authentication.',
+    }),
+    hidden: (dependencies) => {
+      const [authType] = dependencies;
+      return authType !== HttpAuthMethod.NTLM;
+    },
+    dependencies: ['authType'],
+    props: (): EuiFieldTextProps => ({
+      'data-test-subj': 'syntheticsMonitorConfigNtlmDomain',
       readOnly,
     }),
   },

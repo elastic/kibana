@@ -18,6 +18,8 @@ import type {
   ConfigKey,
   ServiceLocation,
   FormMonitorType,
+  HttpAuthMethod,
+  KerberosAuthType,
   MonitorFields,
   ResponseCheckJSON,
   RequestBodyCheck,
@@ -45,6 +47,8 @@ export interface FormLocation {
 
 export type FormConfig = MonitorFields & {
   isTLSEnabled: boolean;
+  // UI-only selector that controls which mutually exclusive HTTP auth scheme is shown.
+  authType: HttpAuthMethod;
   ['schedule.number']: string;
   ['schedule.unit']: string;
   ['source.inline']: string;
@@ -70,6 +74,22 @@ export type FormConfig = MonitorFields & {
     response: {
       json: ResponseCheckJSON[];
     };
+  };
+  kerberos: {
+    enabled: boolean;
+    auth_type: KerberosAuthType;
+    username: string;
+    password: string;
+    keytab: string;
+    config_path: string;
+    realm: string;
+    service_name: string;
+  };
+  ntlm: {
+    enabled: boolean;
+    username: string;
+    password: string;
+    domain: string;
   };
 };
 
@@ -138,8 +158,19 @@ export interface FieldMap {
   [ConfigKey.TIMEOUT]: FieldMeta<ConfigKey.TIMEOUT>;
   [ConfigKey.MAX_REDIRECTS]: FieldMeta<ConfigKey.MAX_REDIRECTS>;
   [ConfigKey.WAIT]: FieldMeta<ConfigKey.WAIT>;
+  ['authType']: FieldMeta<'authType'>;
   [ConfigKey.USERNAME]: FieldMeta<ConfigKey.USERNAME>;
   [ConfigKey.PASSWORD]: FieldMeta<ConfigKey.PASSWORD>;
+  [ConfigKey.KERBEROS_AUTH_TYPE]: FieldMeta<ConfigKey.KERBEROS_AUTH_TYPE>;
+  [ConfigKey.KERBEROS_USERNAME]: FieldMeta<ConfigKey.KERBEROS_USERNAME>;
+  [ConfigKey.KERBEROS_PASSWORD]: FieldMeta<ConfigKey.KERBEROS_PASSWORD>;
+  [ConfigKey.KERBEROS_KEYTAB]: FieldMeta<ConfigKey.KERBEROS_KEYTAB>;
+  [ConfigKey.KERBEROS_CONFIG_PATH]: FieldMeta<ConfigKey.KERBEROS_CONFIG_PATH>;
+  [ConfigKey.KERBEROS_REALM]: FieldMeta<ConfigKey.KERBEROS_REALM>;
+  [ConfigKey.KERBEROS_SERVICE_NAME]: FieldMeta<ConfigKey.KERBEROS_SERVICE_NAME>;
+  [ConfigKey.NTLM_USERNAME]: FieldMeta<ConfigKey.NTLM_USERNAME>;
+  [ConfigKey.NTLM_PASSWORD]: FieldMeta<ConfigKey.NTLM_PASSWORD>;
+  [ConfigKey.NTLM_DOMAIN]: FieldMeta<ConfigKey.NTLM_DOMAIN>;
   [ConfigKey.PROXY_URL]: FieldMeta<ConfigKey.PROXY_URL>;
   [ConfigKey.PROXY_HEADERS]: FieldMeta<ConfigKey.PROXY_HEADERS>;
   ['proxy_url__tcp']: FieldMeta<ConfigKey.PROXY_URL>;

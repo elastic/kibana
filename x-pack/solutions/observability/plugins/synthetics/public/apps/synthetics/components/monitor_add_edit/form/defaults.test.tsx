@@ -5,7 +5,7 @@
  * 2.0.
  */
 import type { SyntheticsMonitor } from '../types';
-import { ConfigKey, MonitorTypeEnum, FormMonitorType } from '../types';
+import { ConfigKey, HttpAuthMethod, MonitorTypeEnum, FormMonitorType } from '../types';
 import { DEFAULT_FIELDS, PROFILE_VALUES_ENUM, PROFILES_MAP } from '../constants';
 import { formatDefaultFormValues } from './defaults';
 
@@ -148,6 +148,7 @@ describe('defaults', () => {
       ...monitor,
       [ConfigKey.TLS_CERTIFICATE_AUTHORITIES]: 'mockCA',
       isTLSEnabled,
+      ...(formType === MonitorTypeEnum.HTTP ? { authType: HttpAuthMethod.NONE } : {}),
     });
   });
 
