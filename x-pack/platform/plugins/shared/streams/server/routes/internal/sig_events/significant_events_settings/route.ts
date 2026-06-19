@@ -87,21 +87,28 @@ export const putSignificantEventsSettingsRoute = createServerRoute({
       await globalUiSettingsClient.setMany(updates);
     }
 
-    try {
-      const enabled =
-        continuousKiExtraction.enabled ??
-        (allSettings[OBSERVABILITY_STREAMS_CONTINUOUS_KI_EXTRACTION_ENABLED] as boolean);
-      await continuousKiOnboardingWorkflowService.ensureWorkflow({
-        enabled,
-        request,
-      });
-    } catch (err) {
-      if (Object.keys(previousValues).length > 0) {
-        await globalUiSettingsClient.setMany(previousValues).catch((rollbackErr) => {
-          logger.warn(`Failed to rollback settings after workflow sync error: ${rollbackErr}`);
+    // Only reconcile the workflow on an actual enabled-state transition so the
+    // legacy and managed workflows never run at the same time. Interval/excluded
+    // changes are picked up by the running workflow at execution time.
+    const previousEnabled = allSettings[
+      OBSERVABILITY_STREAMS_CONTINUOUS_KI_EXTRACTION_ENABLED
+    ] as boolean;
+    const nextEnabled = continuousKiExtraction.enabled;
+
+    if (nextEnabled !== undefined && nextEnabled !== previousEnabled) {
+      try {
+        await continuousKiOnboardingWorkflowService.ensureWorkflow({
+          enabled: nextEnabled,
+          request,
         });
+      } catch (err) {
+        if (Object.keys(previousValues).length > 0) {
+          await globalUiSettingsClient.setMany(previousValues).catch((rollbackErr) => {
+            logger.warn(`Failed to rollback settings after workflow sync error: ${rollbackErr}`);
+          });
+        }
+        throw err;
       }
-      throw err;
     }
 
     return { success: true };
