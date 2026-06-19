@@ -10,21 +10,15 @@ import { z } from '@kbn/zod/v4';
 import { createPanelFailureResult, type PanelContentAttempt } from '../resolve_panel';
 import { indexPanelsById, updatePanelInDashboard } from '../dashboard_state';
 import { DASHBOARD_OPERATION_FAILURE_TYPES } from '../failure_types';
-import { panelRequestSchema } from './panel_kinds';
 import { MARKDOWN_EMBEDDABLE_TYPE, editMarkdownPanelConfigInputSchema } from './panels/markdown';
+import { editPanelRequestInputSchema, type EditPanelRequestInput } from './panels/vis';
 import { defineOperation } from './types';
-
-const editPanelRequestInputSchema = panelRequestSchema.omit({ grid: true, index: true }).extend({
-  panelId: z.string().describe('Existing Lens panel id to update.'),
-  query: z.string().describe('A natural language query describing how to update the panel.'),
-});
 
 const editPanelItemSchema = z.discriminatedUnion('kind', [
   editPanelRequestInputSchema,
   editMarkdownPanelConfigInputSchema,
 ]);
 
-type EditPanelRequestInput = z.infer<typeof editPanelRequestInputSchema>;
 type EditPanelItem = z.infer<typeof editPanelItemSchema>;
 
 /**

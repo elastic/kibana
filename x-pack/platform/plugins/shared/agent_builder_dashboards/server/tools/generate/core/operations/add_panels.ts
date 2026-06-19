@@ -10,11 +10,8 @@ import type { AttachmentPanel } from '@kbn/agent-builder-dashboards-common';
 import { z } from '@kbn/zod/v4';
 import { appendPanelsToDashboard } from '../dashboard_state';
 import { defineOperation } from './types';
-import {
-  visPanelConfigInputSchema,
-  panelRequestSchema,
-  PANEL_TYPE_TO_EMBEDDABLE_TYPE,
-} from './panel_kinds';
+import { PANEL_TYPE_TO_EMBEDDABLE_TYPE } from './panel_kinds';
+import { visPanelConfigInputSchema, panelRequestSchema } from './panels/vis';
 import { markdownPanelConfigInputSchema } from './panels/markdown';
 import { getResolvedPanelCreationRequests } from './panel_creation';
 

@@ -8,7 +8,7 @@
 import type { ResolvePanelContent } from '../resolve_panel';
 import type { DashboardOperation } from './registry';
 import type { AddPanelsItemInput } from './add_panels';
-import type { PanelRequestInput } from './panel_kinds';
+import type { PanelRequestInput } from './panels/vis';
 
 type ResolvedPanelContent = Awaited<ReturnType<ResolvePanelContent>>;
 
