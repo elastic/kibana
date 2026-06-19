@@ -688,7 +688,6 @@ function isEsqlLayerWithIndex(
  */
 function buildEsqlTrendlineLayer(
   config: MetricConfig,
-  mainLayerId: string,
   mainLayer: {
     index: string;
     query: { esql: string };
@@ -782,7 +781,7 @@ export function fromAPItoLensState(config: MetricConfig): MetricAttributesWithou
   const trendlineLayerId = (visualization as MetricVisualizationState).trendlineLayerId;
   const mainLayer = layers.textBased?.layers?.[DEFAULT_LAYER_ID];
   if (trendlineLayerId && isEsqlLayerWithIndex(mainLayer)) {
-    const trendlineResult = buildEsqlTrendlineLayer(config, DEFAULT_LAYER_ID, {
+    const trendlineResult = buildEsqlTrendlineLayer(config, {
       index: mainLayer.index,
       query: { esql: mainLayer.query.esql },
       timeField: mainLayer.timeField,
