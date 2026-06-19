@@ -22,6 +22,5 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
     });
 
     loadTestFile(require.resolve('./_data_grid_footer'));
-    loadTestFile(require.resolve('./_data_grid_field_tokens'));
   });
 }

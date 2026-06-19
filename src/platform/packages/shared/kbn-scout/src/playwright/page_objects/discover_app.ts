@@ -374,6 +374,41 @@ export class DiscoverApp {
   }
 
   /**
+   * Read the field-type token icon labels (`.kbnFieldIcon` `aria-label`s) rendered
+   * in the data-grid column headers, in visual order. Returns at most `limit`
+   * labels (mirrors the FTR helper that inspected the first 10). The result is
+   * empty when the grid shows only the summary `Document` column. Works for the
+   * main Discover grid and the surrounding-documents (context) grid.
+   */
+  async getDataGridHeaderFieldTokens(limit = 10): Promise<string[]> {
+    const header = this.page.testSubj
+      .locator('euiDataGridBody')
+      .locator('[data-test-subj="dataGridHeader"]');
+    return this.readFieldTokenLabels(header, limit);
+  }
+
+  /**
+   * Read the field-type token icon labels (`.kbnFieldIcon` `aria-label`s) rendered
+   * in the open document-viewer flyout, in visual order. Returns at most `limit`
+   * labels. The caller must open the flyout first (e.g. via
+   * {@link openAndWaitForDocViewerFlyout}).
+   */
+  async getDocViewerFieldTokens(limit = 10): Promise<string[]> {
+    const flyout = this.page.testSubj.locator('docViewerFlyout');
+    await flyout.waitFor({ state: 'visible' });
+    return this.readFieldTokenLabels(flyout, limit);
+  }
+
+  private async readFieldTokenLabels(scope: Locator, limit: number): Promise<string[]> {
+    return scope
+      .locator('.kbnFieldIcon svg')
+      .evaluateAll(
+        (icons, max) => icons.slice(0, max).map((icon) => icon.getAttribute('aria-label') ?? ''),
+        limit
+      );
+  }
+
+  /**
    * Hover the given data-grid cell and click its "expand" action, opening the
    * cell-value popover (which embeds a Monaco editor with the row JSON).
    *
