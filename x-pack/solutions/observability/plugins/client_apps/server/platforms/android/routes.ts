@@ -44,7 +44,7 @@ export function registerAndroidRoutes({ router, logger }: { router: IRouter; log
           index,
           query: { ids: { values: [docId] } },
           size: 1,
-          _source: ['attributes'],
+          _source: ['attributes', 'resource.attributes'],
         });
 
         const hit = result.hits?.hits?.[0];
@@ -57,8 +57,10 @@ export function registerAndroidRoutes({ router, logger }: { router: IRouter; log
         }
 
         const attrs: Record<string, unknown> = (hit._source as any)?.attributes ?? {};
+        const resourceAttrs: Record<string, unknown> =
+          (hit._source as any)?.resource?.attributes ?? {};
         const stacktrace = attrs['exception.stacktrace'];
-        const buildId = attrs['app.build_id'];
+        const buildId = resourceAttrs['app.build_id'];
 
         if (typeof stacktrace !== 'string' || !stacktrace) {
           return response.badRequest({
