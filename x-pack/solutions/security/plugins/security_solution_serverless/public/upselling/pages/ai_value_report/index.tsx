@@ -5,20 +5,18 @@
  * 2.0.
  */
 
-import React, { lazy, Suspense, useMemo } from 'react';
+import React, { Suspense, useMemo } from 'react';
 import { EuiLoadingSpinner, EuiPageHeader, EuiSpacer } from '@elastic/eui';
+import { useKibana } from '../../../common/services';
 import { AIValueReportUpgradeBanner } from './upgrade_banner';
 import * as i18n from './translations';
-
-const AIValueReportLazy = lazy(() =>
-  import('@kbn/security-solution-plugin/public').then(({ AIValueReport }) => ({
-    default: AIValueReport,
-  }))
-);
 
 const noop = () => {};
 
 export const AIValueReportUpsellPage: React.FC = () => {
+  const { services } = useKibana();
+  const AIValueReportComponent = services.securitySolution.getAIValueReport();
+
   const { from, to } = useMemo(() => {
     const now = new Date();
     const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
@@ -35,7 +33,7 @@ export const AIValueReportUpsellPage: React.FC = () => {
       <EuiPageHeader pageTitle={i18n.AI_VALUE_DASHBOARD} />
       <EuiSpacer size="l" />
       <Suspense fallback={<EuiLoadingSpinner />}>
-        <AIValueReportLazy
+        <AIValueReportComponent
           from={from}
           to={to}
           setHasReportData={noop}

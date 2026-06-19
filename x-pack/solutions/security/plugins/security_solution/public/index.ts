@@ -11,7 +11,6 @@ import type { PluginSetup, PluginStart } from './types';
 export type { TimelineModel } from './timelines/store/model';
 export type { LinkItem } from './common/links';
 export type { FetchRulesResponse } from './detection_engine/rule_management/logic/types';
-export { AIValueReport } from './reports/components/ai_value';
 export { default as analyticsSpeedAccelerationSvg } from './reports/components/ai_value/analytics_speed_acceleration.svg';
 
 export const plugin = (context: PluginInitializerContext): Plugin => new Plugin(context);

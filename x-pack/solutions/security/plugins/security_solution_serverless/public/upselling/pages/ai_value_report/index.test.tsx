@@ -8,10 +8,17 @@
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 
+const MockAIValueReport = ({ sampleBanner }: { sampleBanner?: React.ReactNode }) => (
+  <div data-test-subj="mock-ai-value-report">{sampleBanner}</div>
+);
+
 jest.mock('../../../common/services', () => ({
   useKibana: jest.fn(() => ({
     services: {
       cloud: {},
+      securitySolution: {
+        getAIValueReport: jest.fn(() => MockAIValueReport),
+      },
     },
   })),
 }));
@@ -25,9 +32,7 @@ jest.mock('../../hooks/use_product_type_by_pli', () => ({
 }));
 
 jest.mock('@kbn/security-solution-plugin/public', () => ({
-  AIValueReport: ({ sampleBanner }: { sampleBanner?: React.ReactNode }) => (
-    <div data-test-subj="mock-ai-value-report">{sampleBanner}</div>
-  ),
+  analyticsSpeedAccelerationSvg: 'mock-svg',
 }));
 
 import { getProjectFeaturesUrl } from '../../../navigation/util';
