@@ -18,9 +18,9 @@ project:
   sourceRoot: src/core/packages/i18n/server-mocks
 dependsOn:
   - '@kbn/utility-types'
+  - '@kbn/core-i18n-server'
   - '@kbn/core-i18n-server-internal'
   - '@kbn/lazy-object'
-  - '@kbn/core-i18n-server'
 tags:
   - shared-server
   - package

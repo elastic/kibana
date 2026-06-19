@@ -1,7 +1,7 @@
 {
   "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
-    "outDir": "target/types"
+    "outDir": "target/types",
   },
   "include": ["common/**/*", "public/**/*", "index.ts"],
   "kbn_references": [
@@ -11,14 +11,16 @@
     "@kbn/i18n",
     "@kbn/test-jest-helpers",
     "@kbn/i18n-react",
+    "@kbn/monaco",
     "@kbn/core-ui-settings-browser-mocks",
     "@kbn/core-ui-settings-browser",
     "@kbn/std",
     "@kbn/code-editor",
     "@kbn/core-lifecycle-browser",
     "@kbn/presentation-util",
-    "@kbn/shared-ux-utility",
-    "@kbn/monaco"
+    "@kbn/shared-ux-utility"
   ],
-  "exclude": ["target/**/*"]
+  "exclude": [
+    "target/**/*",
+  ]
 }

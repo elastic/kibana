@@ -15,12 +15,7 @@ EXIT_CODE=0
 
 # Large changes can cause this to run long. Cap at 20 minutes since the goal
 # is early failure detection; the full jest suite runs separately in CI.
-FIX_FLAG=""
-if is_pr && ! is_auto_commit_disabled; then
-  FIX_FLAG="--fix"
-fi
-
-timeout 1200 node scripts/check --scope branch $FIX_FLAG || EXIT_CODE=$?
+timeout 1200 node scripts/check --scope branch || EXIT_CODE=$?
 
 if [[ $EXIT_CODE -ne 0 && $EXIT_CODE -ne 124 ]]; then
   FAILED=true
@@ -34,7 +29,7 @@ if [[ "$FAILED" == "true" ]]; then
 fi
 
 if is_pr && ! is_auto_commit_disabled; then
-  check_for_changed_files "node scripts/check --fix" true
+  check_for_changed_files "node scripts/check" true
 fi
 
 if [[ "$FAILED" == "true" ]]; then

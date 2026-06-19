@@ -23,6 +23,7 @@ dependsOn:
   - '@kbn/i18n'
   - '@kbn/test-jest-helpers'
   - '@kbn/i18n-react'
+  - '@kbn/monaco'
   - '@kbn/core-ui-settings-browser-mocks'
   - '@kbn/core-ui-settings-browser'
   - '@kbn/std'
@@ -30,7 +31,6 @@ dependsOn:
   - '@kbn/core-lifecycle-browser'
   - '@kbn/presentation-util'
   - '@kbn/shared-ux-utility'
-  - '@kbn/monaco'
 tags:
   - plugin
   - prod
