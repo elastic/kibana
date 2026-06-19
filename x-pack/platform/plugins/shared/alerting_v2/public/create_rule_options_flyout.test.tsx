@@ -22,7 +22,7 @@ import { ESQLVariableType } from '@kbn/esql-types';
 import type { ESQLControlVariable } from '@kbn/esql-types';
 import { AGENT_BUILDER_NEW_CONVERSATION_PATH, CREATE_WITH_AGENT_INITIAL_PROMPT } from './constants';
 
-const createMockServices = (): RuleFormServices => ({
+const createMockServices = (): RuleFormServices & { container: unknown } => ({
   http: httpServiceMock.createStartContract(),
   data: dataPluginMock.createStartContract(),
   dataViews: dataViewPluginMocks.createStartContract(),
@@ -30,6 +30,7 @@ const createMockServices = (): RuleFormServices => ({
   application: applicationServiceMock.createStartContract(),
   lens: lensPluginMock.createStartContract(),
   uiActions: uiActionsPluginMock.createStartContract(),
+  container: {},
 });
 
 let capturedSelectorProps: Record<string, unknown> = {};
@@ -69,7 +70,6 @@ jest.mock('./kibana_services', () => ({
     new Promise<RuleFormServices>((resolve) => {
       pendingResolvers.push(resolve);
     }),
-  getDiContainer: () => undefined,
 }));
 
 jest.mock('./services/rules_api', () => ({

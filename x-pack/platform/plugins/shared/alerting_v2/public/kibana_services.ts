@@ -13,11 +13,10 @@ import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 /** Services shared by rule UI, episodes UI, and other alerting_v2 surfaces. */
 export type AlertingV2KibanaServices = RuleFormServices & {
   expressions: ExpressionsStart;
+  container: Container;
 };
 
 const servicesReady$ = new BehaviorSubject<AlertingV2KibanaServices | undefined>(undefined);
-
-let pluginDiContainer: Container | undefined;
 
 export const untilPluginStartServicesReady = (): Promise<AlertingV2KibanaServices> => {
   if (servicesReady$.value) return Promise.resolve(servicesReady$.value);
@@ -34,9 +33,3 @@ export const untilPluginStartServicesReady = (): Promise<AlertingV2KibanaService
 export const setKibanaServices = (services: AlertingV2KibanaServices) => {
   servicesReady$.next(services);
 };
-
-export const setDiContainer = (container: Container) => {
-  pluginDiContainer = container;
-};
-
-export const getDiContainer = (): Container | undefined => pluginDiContainer;
