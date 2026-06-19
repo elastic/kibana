@@ -166,12 +166,24 @@ const PackFormComponent: React.FC<PackFormProps> = ({
   } = hooksForm;
   const { policy_ids: policyIds, shards, pack_type: packType, schedule, queries } = watch();
 
+  const originalStartDate = useMemo(() => {
+    if (!editMode || !defaultValue) {
+      return undefined;
+    }
+
+    return deserializeSchedule({
+      schedule_type: defaultValue.schedule_type,
+      interval: defaultValue.interval,
+      rrule_schedule: defaultValue.rrule_schedule,
+    }).startDate;
+  }, [editMode, defaultValue]);
+
   const scheduleErrors = useMemo(() => {
     if (!isRruleSchedulingEnabled || !schedule) {
       return [];
     }
 
-    const errors = validateScheduleFormData(schedule);
+    const errors = validateScheduleFormData(schedule, { originalStartDate });
 
     if (
       schedule.scheduleType === 'rrule' &&
@@ -181,7 +193,7 @@ const PackFormComponent: React.FC<PackFormProps> = ({
     }
 
     return errors;
-  }, [isRruleSchedulingEnabled, schedule, queries]);
+  }, [isRruleSchedulingEnabled, schedule, queries, originalStartDate]);
 
   const [showScheduleErrors, setShowScheduleErrors] = useState(false);
 
@@ -224,7 +236,9 @@ const PackFormComponent: React.FC<PackFormProps> = ({
       // enough to block submit. Re-validate the whole schedule here and abort
       // when it fails — the inline errors already do the visual work.
       if (isRruleSchedulingEnabled && values.schedule) {
-        const submitScheduleErrors = validateScheduleFormData(values.schedule);
+        const submitScheduleErrors = validateScheduleFormData(values.schedule, {
+          originalStartDate,
+        });
         if (submitScheduleErrors.length > 0) {
           return;
         }
@@ -279,6 +293,7 @@ const PackFormComponent: React.FC<PackFormProps> = ({
       editMode,
       getShards,
       isRruleSchedulingEnabled,
+      originalStartDate,
       shards,
       updateAsync,
     ]

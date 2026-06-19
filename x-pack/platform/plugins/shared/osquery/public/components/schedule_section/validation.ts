@@ -19,6 +19,19 @@ import {
 const isValidDate = (date: unknown): date is Date =>
   date instanceof Date && !Number.isNaN(date.getTime());
 
+export interface ValidateScheduleOptions {
+  /**
+   * The start date hydrated from the persisted schedule (via
+   * `deserializeSchedule`). When the current `startDate` is unchanged from this
+   * value, the past-start rule is skipped: an existing long-running RRULE pack
+   * legitimately has an elapsed `DTSTART`, and editing unrelated fields (rename,
+   * splay, queries) must not be blocked just because the original start is in
+   * the past. The rule still fires when the user actively picks a new past slot,
+   * and always fires in create mode (no original to compare against).
+   */
+  originalStartDate?: Date;
+}
+
 /**
  * Pure submit-time validator for the schedule section. Mirrors the inline field
  * errors but answers a single question for the form / flyout `onSubmit`: "is the
@@ -28,7 +41,10 @@ const isValidDate = (date: unknown): date is Date =>
  * Interval-mode schedules are always valid here (the numeric field clamps its
  * own input). The rules below only apply to recurrence mode.
  */
-export const validateScheduleFormData = (data: ScheduleFormData): string[] => {
+export const validateScheduleFormData = (
+  data: ScheduleFormData,
+  options: ValidateScheduleOptions = {}
+): string[] => {
   const errors: string[] = [];
 
   if (data.scheduleType !== 'rrule') {
@@ -40,7 +56,13 @@ export const validateScheduleFormData = (data: ScheduleFormData): string[] => {
     errors.push(AT_LEAST_ONE_DAY_ERROR);
   }
 
+  const startIsUnchanged =
+    isValidDate(options.originalStartDate) &&
+    isValidDate(data.startDate) &&
+    data.startDate.getTime() === options.originalStartDate.getTime();
+
   if (
+    !startIsUnchanged &&
     isValidDate(data.startDate) &&
     data.startDate.getTime() < floorTo30Min(new Date()).getTime()
   ) {

@@ -204,6 +204,29 @@ describe('validateScheduleFormData', () => {
 
       expect(validateScheduleFormData(data)).not.toContain(START_DATE_IN_PAST_ERROR);
     });
+
+    it('exempts an unchanged past start from a persisted schedule (edit mode)', () => {
+      // An existing long-running pack has an elapsed DTSTART. Editing unrelated
+      // fields must not be blocked, so a start unchanged from the persisted
+      // value is exempt from the past-start rule.
+      const past = new Date('2024-01-01T00:00:00.000Z');
+      const data = recurrenceState({ startDate: past });
+
+      expect(
+        validateScheduleFormData(data, { originalStartDate: past })
+      ).not.toContain(START_DATE_IN_PAST_ERROR);
+    });
+
+    it('still flags a newly-picked past start even in edit mode', () => {
+      // The user actively moved the start to a different past slot — that is a
+      // fresh invalid choice, not the preserved original, so it is still caught.
+      const original = new Date('2024-01-01T00:00:00.000Z');
+      const data = recurrenceState({ startDate: new Date('2026-06-19T10:00:00.000Z') });
+
+      expect(validateScheduleFormData(data, { originalStartDate: original })).toContain(
+        START_DATE_IN_PAST_ERROR
+      );
+    });
   });
 
   it('accumulates multiple errors at once', () => {

@@ -97,15 +97,36 @@ const QueryFlyoutComponent: React.FC<QueryFlyoutProps> = ({
   const overridePackSchedule = watch('override_pack_schedule');
   const schedule = watch('schedule');
 
+  const originalStartDate = useMemo(() => {
+    if (!isRruleSchedulingEnabled) {
+      return undefined;
+    }
+
+    const hasOverride = !!defaultValue?.schedule_type;
+
+    return deserializeSchedule(
+      hasOverride
+        ? {
+            schedule_type: defaultValue?.schedule_type,
+            rrule_schedule: defaultValue?.rrule_schedule,
+          }
+        : {
+            schedule_type: packSchedule?.schedule_type,
+            interval: packSchedule?.interval,
+            rrule_schedule: packSchedule?.rrule_schedule,
+          }
+    ).startDate;
+  }, [isRruleSchedulingEnabled, defaultValue, packSchedule]);
+
   // Single source of truth for the override schedule. Only an
   // active override has a schedule to validate — an inherited query defers to
   // the pack. Empty when the flag is off (schedule is undefined).
   const scheduleErrors = useMemo(
     () =>
       isRruleSchedulingEnabled && overridePackSchedule && schedule
-        ? validateScheduleFormData(schedule)
+        ? validateScheduleFormData(schedule, { originalStartDate })
         : [],
-    [isRruleSchedulingEnabled, overridePackSchedule, schedule]
+    [isRruleSchedulingEnabled, overridePackSchedule, schedule, originalStartDate]
   );
 
   const incomingPackMode = packSchedule?.schedule_type;
@@ -167,7 +188,7 @@ const QueryFlyoutComponent: React.FC<QueryFlyoutProps> = ({
       // Final guard (§11.1): the controlled schedule object doesn't register
       // with RHF, so re-validate here and abort on error.
       if (payload.override_pack_schedule && payload.schedule) {
-        const errors = validateScheduleFormData(payload.schedule);
+        const errors = validateScheduleFormData(payload.schedule, { originalStartDate });
         if (errors.length > 0) {
           return;
         }
@@ -177,7 +198,7 @@ const QueryFlyoutComponent: React.FC<QueryFlyoutProps> = ({
       await onSave(serializedData);
       onClose();
     },
-    [serializer, onSave, onClose]
+    [serializer, onSave, onClose, originalStartDate]
   );
 
   const handleSaveClick = useCallback(() => {
