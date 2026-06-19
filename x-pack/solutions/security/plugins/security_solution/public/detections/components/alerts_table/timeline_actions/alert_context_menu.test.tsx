@@ -124,6 +124,11 @@ jest.mock('./use_run_document_workflow_panel', () => ({
   useRunDocumentWorkflowPanel: (...args: unknown[]) => mockUseRunDocumentWorkflowPanel(...args),
 }));
 
+const mockUseAddToChatAction = jest.fn().mockReturnValue({ addToChatActionItems: [] });
+jest.mock('./use_add_to_chat_action', () => ({
+  useAddToChatAction: (...args: unknown[]) => mockUseAddToChatAction(...args),
+}));
+
 const actionMenuButton = 'timeline-context-menu-button';
 const addToExistingCaseButton = 'add-to-existing-case-action';
 const addToNewCaseButton = 'add-to-new-case-action';
@@ -536,6 +541,52 @@ describe('Alert table context menu', () => {
           expect(wrapper.getByTestId(applyAlertAssigneesButton)).toBeTruthy();
         });
       });
+    });
+  });
+
+  describe('Add to chat action', () => {
+    const addToChatButton = 'add-to-chat-action';
+
+    test('it renders the add to chat action when agent builder returns an item', async () => {
+      mockUseAddToChatAction.mockReturnValue({
+        addToChatActionItems: [
+          {
+            'data-test-subj': addToChatButton,
+            name: 'Add to chat',
+            onClick: jest.fn(),
+          },
+        ],
+      });
+
+      const wrapper = render(
+        <TestProviders>
+          <AlertContextMenu {...props} scopeId={TimelineId.active} />
+        </TestProviders>
+      );
+
+      await userEvent.click(wrapper.getByTestId(actionMenuButton));
+
+      await waitFor(() => {
+        expect(wrapper.getByTestId(addToChatButton)).toBeInTheDocument();
+      });
+    });
+
+    test('it does not render the add to chat action when agent builder is disabled', async () => {
+      mockUseAddToChatAction.mockReturnValue({ addToChatActionItems: [] });
+
+      const wrapper = render(
+        <TestProviders>
+          <AlertContextMenu {...props} scopeId={TimelineId.active} />
+        </TestProviders>
+      );
+
+      await userEvent.click(wrapper.getByTestId(actionMenuButton));
+
+      expect(wrapper.queryByTestId(addToChatButton)).not.toBeInTheDocument();
+    });
+
+    afterEach(() => {
+      mockUseAddToChatAction.mockReturnValue({ addToChatActionItems: [] });
     });
   });
 });

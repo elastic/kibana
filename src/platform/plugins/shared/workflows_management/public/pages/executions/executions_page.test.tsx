@@ -14,7 +14,7 @@ import { createStartServicesMock } from '../../mocks';
 import { getTestProvider } from '../../shared/mocks/test_providers';
 
 describe('WorkflowExecutionsPage', () => {
-  it('renders the executions shell and stub grid', async () => {
+  it('renders the executions shell and filter scaffold', () => {
     const services = createStartServicesMock();
     services.workflowsManagement.globalExecutionsView.enabled = true;
 
@@ -22,6 +22,5 @@ describe('WorkflowExecutionsPage', () => {
 
     expect(screen.getByTestId('workflowExecutionsPage')).toBeInTheDocument();
     expect(screen.getByTestId('workflowExecutionsSearchFilterScaffold')).toBeInTheDocument();
-    await screen.findByTestId('discoverDocTable');
   });
 });
