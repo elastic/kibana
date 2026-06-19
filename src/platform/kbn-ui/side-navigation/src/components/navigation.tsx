@@ -62,13 +62,6 @@ const createPanelFooter =
     );
   };
 
-const usesFullHeightPanel = (item: MenuItem): boolean =>
-  Boolean(
-    item.panelFooterActions?.length ||
-      item.panelHeaderActions?.length ||
-      item.panelNestedPanels?.length
-  );
-
 export interface NavigationProps {
   /**
    * The active path for the navigation, used for highlighting the current item.
@@ -207,7 +200,6 @@ export const Navigation = ({
                 return (
                   <SideNav.Popover
                     key={item.id}
-                    fillHeight={usesFullHeightPanel(item)}
                     footer={createPanelFooter(item.panelFooterActions, onItemClick)}
                     hasContent={getHasSubmenu(item)}
                     isSidePanelOpen={!isCollapsed && item.id === openerNode?.id}
@@ -401,7 +393,6 @@ export const Navigation = ({
                 return (
                   <SideNav.Popover
                     key={item.id}
-                    fillHeight={usesFullHeightPanel(item)}
                     footer={createPanelFooter(item.panelFooterActions, onItemClick)}
                     hasContent={getHasSubmenu(item)}
                     isSidePanelOpen={!isCollapsed && item.id === openerNode?.id}

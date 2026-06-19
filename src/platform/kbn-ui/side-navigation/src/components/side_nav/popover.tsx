@@ -52,7 +52,6 @@ export interface PopoverProps {
   children?: PopoverChildren;
   container?: HTMLElement;
   footer?: PopoverFooter;
-  fillHeight?: boolean;
   hasContent: boolean;
   isSidePanelOpen: boolean;
   isAnyPopoverLocked?: boolean;
@@ -82,7 +81,6 @@ export const Popover = ({
   children,
   container,
   footer,
-  fillHeight = false,
   hasContent,
   isSidePanelOpen,
   isAnyPopoverLocked = false,
@@ -267,21 +265,12 @@ export const Popover = ({
     width: 100%;
   `;
 
-  const hasFooter = Boolean(footer);
-  const useFullHeight = fillHeight || hasFooter;
-
   const popoverPanelStyles = css`
     --popover-max-height: 37.5rem;
     display: flex;
     flex-direction: column;
     max-height: var(--popover-max-height);
     width: ${SIDE_PANEL_WIDTH}px;
-    ${useFullHeight
-      ? css`
-          height: var(--popover-max-height);
-          min-height: var(--popover-max-height);
-        `
-      : undefined}
   `;
 
   const popoverContentStyles = css`
