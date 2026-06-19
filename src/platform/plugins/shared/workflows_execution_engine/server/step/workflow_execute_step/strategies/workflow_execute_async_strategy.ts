@@ -15,7 +15,7 @@ import type { WorkflowsExecutionEnginePluginStart } from '../../../types';
 import type { StepExecutionRuntime } from '../../../workflow_context_manager/step_execution_runtime';
 import type { IWorkflowEventLogger } from '../../../workflow_event_logger';
 import type { StrategyResult } from '../types';
-import { toExecutionModel } from '../utils';
+import { buildChildWorkflowTraceContext, toExecutionModel } from '../utils';
 
 export class WorkflowExecuteAsyncStrategy {
   constructor(
@@ -47,6 +47,7 @@ export class WorkflowExecuteAsyncStrategy {
           parentWorkflowExecutionId: workflowExecution.id,
           parentStepId: this.stepExecutionRuntime.node.stepId,
           parentDepth,
+          ...buildChildWorkflowTraceContext(workflowExecution),
         },
         request
       );

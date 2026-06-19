@@ -147,6 +147,7 @@ export interface EsWorkflowExecution {
   taskRunAt?: string | null; // Task's runAt timestamp to link execution to specific scheduled run
   traceId?: string; // APM trace ID for observability
   entryTransactionId?: string; // APM root transaction ID for trace embeddable
+  traceParent?: string; // W3C traceparent for Task Manager resume propagation
   concurrencyGroupKey?: string; // Evaluated concurrency group key for grouping executions
   queueMetrics?: QueueMetrics; // Queue delay metrics for observability
   /** IDs of all step executions, enables O(1) mget lookup instead of search */

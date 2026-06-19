@@ -75,6 +75,7 @@ export class WorkflowTaskManager {
         state: {},
         runAt: resumeAt,
         scope: generateExecutionTaskScope(workflowExecution as EsWorkflowExecution),
+        ...(workflowExecution.traceParent ? { traceparent: workflowExecution.traceParent } : {}),
       },
       { request: fakeRequest }
     );
@@ -104,6 +105,7 @@ export class WorkflowTaskManager {
         state: {},
         runAt: resumeAt,
         scope: generateExecutionTaskScope(workflowExecution as EsWorkflowExecution),
+        ...(workflowExecution.traceParent ? { traceparent: workflowExecution.traceParent } : {}),
       },
       { request: fakeRequest }
     );
@@ -117,10 +119,12 @@ export class WorkflowTaskManager {
     executionId,
     spaceId,
     fakeRequest,
+    traceParent,
   }: {
     executionId: string;
     spaceId: string;
     fakeRequest?: KibanaRequest;
+    traceParent?: string;
   }): Promise<{ taskId: string }> {
     const task = await this.taskManager.schedule(
       {
@@ -132,6 +136,7 @@ export class WorkflowTaskManager {
         } satisfies ResumeWorkflowExecutionParams,
         state: {},
         scope: [`workflow:execution:${executionId}`],
+        ...(traceParent ? { traceparent: traceParent } : {}),
       },
       fakeRequest ? { request: fakeRequest } : undefined
     );
@@ -143,7 +148,7 @@ export class WorkflowTaskManager {
 
   async forceRunIdleTasks(
     workflowExecutionId: string,
-    options?: { spaceId: string; fakeRequest?: KibanaRequest }
+    options?: { spaceId: string; fakeRequest?: KibanaRequest; traceParent?: string }
   ): Promise<void> {
     const scopeTerm = {
       term: {
@@ -200,6 +205,7 @@ export class WorkflowTaskManager {
         executionId: workflowExecutionId,
         spaceId: options.spaceId,
         fakeRequest: options.fakeRequest,
+        traceParent: options.traceParent,
       });
       await this.taskManager.runSoon(taskId);
     }

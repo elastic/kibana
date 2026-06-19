@@ -44,7 +44,10 @@ import {
   resolveInterruptedWorkflowResumeTask,
   resolveInterruptedWorkflowRunTask,
 } from './lib/task_recovery';
-import { normalizeEventChainVisitedWorkflowIds } from './lib/telemetry/utils/extract_execution_metadata';
+import {
+  normalizeEventChainVisitedWorkflowIds,
+  parseEventChainDepth,
+} from './lib/telemetry/utils/extract_execution_metadata';
 import { WorkflowExecutionTelemetryClient } from './lib/telemetry/workflow_execution_telemetry_client';
 import { validateWorkflowInputs } from './lib/validate_workflow_inputs';
 import { WorkflowsMeteringService } from './metering/metering_service';
@@ -682,18 +685,9 @@ export class WorkflowsExecutionEnginePlugin
       const spaceId = (context.spaceId as string | undefined) || 'default';
       const metadata = context.metadata as Record<string, unknown> | undefined;
       const eventPayload = context.event as Record<string, unknown> | undefined;
-      let rootEventChainDepth: number | undefined;
-      if (eventPayload) {
-        const rawDepth = eventPayload.eventChainDepth;
-        if (typeof rawDepth === 'number' && !Number.isNaN(rawDepth) && rawDepth >= 0) {
-          rootEventChainDepth = rawDepth;
-        } else if (typeof rawDepth === 'string' && rawDepth.trim() !== '') {
-          const parsed = parseInt(rawDepth, 10);
-          if (!Number.isNaN(parsed) && parsed >= 0) {
-            rootEventChainDepth = parsed;
-          }
-        }
-      }
+      const rootEventChainDepth = eventPayload
+        ? parseEventChainDepth(eventPayload.eventChainDepth)
+        : undefined;
       const rootVisited = normalizeEventChainVisitedWorkflowIds(
         eventPayload?.eventChainVisitedWorkflowIds,
         this.config.eventDriven.maxChainDepth
@@ -717,6 +711,15 @@ export class WorkflowsExecutionEnginePlugin
         ...(rootEventChainDepth !== undefined ? { eventChainDepth: rootEventChainDepth } : {}),
         ...(rootVisited.length > 0 ? { eventChainVisitedWorkflowIds: rootVisited } : {}),
         ...(dispatchEventId ? { dispatchEventId } : {}),
+        ...(typeof context.rootTraceId === 'string' && context.rootTraceId
+          ? { traceId: context.rootTraceId }
+          : {}),
+        ...(typeof context.rootEntryTransactionId === 'string' && context.rootEntryTransactionId
+          ? { entryTransactionId: context.rootEntryTransactionId }
+          : {}),
+        ...(typeof context.parentTraceParent === 'string' && context.parentTraceParent
+          ? { traceParent: context.parentTraceParent }
+          : {}),
       };
 
       const concurrencyGroupKey = this.getConcurrencyGroupKey(
@@ -791,6 +794,7 @@ export class WorkflowsExecutionEnginePlugin
         },
         scope,
         enabled: true,
+        ...(workflowExecution.traceParent ? { traceparent: workflowExecution.traceParent } : {}),
       };
     };
 
@@ -1288,10 +1292,16 @@ export class WorkflowsExecutionEnginePlugin
         });
       }
 
+      const execution = await workflowExecutionRepository.getWorkflowExecutionById(
+        executionId,
+        spaceId
+      );
+
       await workflowTaskManager.scheduleImmediateResume({
         executionId,
         spaceId,
         fakeRequest: request,
+        traceParent: execution?.traceParent,
       });
 
       await plugins.taskManager
@@ -1305,7 +1315,11 @@ export class WorkflowsExecutionEnginePlugin
         });
 
       // Same idea as cancel: nudge TM so the resume task runs as soon as possible
-      await workflowTaskManager.forceRunIdleTasks(executionId);
+      await workflowTaskManager.forceRunIdleTasks(executionId, {
+        spaceId,
+        fakeRequest: request,
+        traceParent: execution?.traceParent,
+      });
     };
 
     this.internalResumeWorkflowExecutionHandler = internalResumeWorkflowExecution;

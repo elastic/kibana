@@ -15,6 +15,10 @@ import type { WorkflowsExecutionEnginePluginStart } from '../../../types';
 import type { StepExecutionRuntime } from '../../../workflow_context_manager/step_execution_runtime';
 import type { IWorkflowEventLogger } from '../../../workflow_event_logger';
 
+jest.mock('../../../workflow_context_manager/apm_internal', () => ({
+  getCurrentTraceParent: jest.fn().mockReturnValue('00-parent-trace-span-01'),
+}));
+
 const createMockWorkflow = (overrides: Partial<EsWorkflow> = {}): EsWorkflow =>
   ({
     id: 'child-workflow-id',
@@ -51,6 +55,8 @@ describe('WorkflowExecuteAsyncStrategy', () => {
         id: 'parent-exec-1',
         workflowId: 'parent-workflow-id',
         isTestRun: false,
+        traceId: 'root-trace-id',
+        entryTransactionId: 'root-entry-txn',
       },
       node: { stepId: 'async-step-1' },
     } as any;
@@ -92,6 +98,9 @@ describe('WorkflowExecuteAsyncStrategy', () => {
         parentWorkflowExecutionId: 'parent-exec-1',
         parentStepId: 'async-step-1',
         parentDepth: 0,
+        rootTraceId: 'root-trace-id',
+        rootEntryTransactionId: 'root-entry-txn',
+        parentTraceParent: '00-parent-trace-span-01',
       }),
       mockRequest
     );

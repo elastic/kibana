@@ -202,6 +202,24 @@ spaceTest.describe('Workflow composition', { tag: tags.deploymentAgnostic }, () 
     expect(completedChildren.length).toBeGreaterThan(0);
   });
 
+  spaceTest('sync: child inherits parent trace identifiers when APM captures a trace', async () => {
+    const { workflowExecutionId } = await workflowsApi.run(syncParentId, {
+      service_name: 'trace-service',
+    });
+
+    const parentExecution = await waitForExecution(workflowsApi, workflowExecutionId);
+    const { results: childExecutions } = await workflowsApi.getExecutions(childWorkflowId);
+    const completedChild = childExecutions.find(
+      (execution) => execution.status === ExecutionStatus.COMPLETED
+    );
+
+    expect(parentExecution?.status).toBe(ExecutionStatus.COMPLETED);
+    expect(completedChild).toBeDefined();
+    expect(parentExecution?.traceId).toBeDefined();
+    expect(completedChild?.traceId).toBe(parentExecution?.traceId);
+    expect(completedChild?.entryTransactionId).toBe(parentExecution?.entryTransactionId);
+  });
+
   spaceTest('sync: fails when child workflow fails', async () => {
     const failingChild = await workflowsApi.create(FAILING_CHILD_YAML);
     const failingParent = await workflowsApi.create(getSyncParentYaml(failingChild.id));

@@ -7,8 +7,23 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { EsWorkflow, WorkflowExecutionEngineModel } from '@kbn/workflows';
+import type { EsWorkflow, EsWorkflowExecution, WorkflowExecutionEngineModel } from '@kbn/workflows';
 import { pickManagedWorkflowFields } from '@kbn/workflows';
+import { getCurrentTraceParent } from '../../workflow_context_manager/apm_internal';
+
+export function buildChildWorkflowTraceContext(
+  parentExecution: Pick<EsWorkflowExecution, 'traceId' | 'entryTransactionId'>
+) {
+  const parentTraceParent = getCurrentTraceParent();
+
+  return {
+    ...(parentExecution.traceId ? { rootTraceId: parentExecution.traceId } : {}),
+    ...(parentExecution.entryTransactionId
+      ? { rootEntryTransactionId: parentExecution.entryTransactionId }
+      : {}),
+    ...(parentTraceParent ? { parentTraceParent } : {}),
+  };
+}
 
 export function toExecutionModel(
   workflow: EsWorkflow,

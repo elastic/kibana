@@ -12,10 +12,11 @@
 // rest of the workflow engine is `any`-free; this module is the chokepoint
 // where the upstream typing gaps are absorbed so they don't bleed elsewhere.
 
-import type agent from 'elastic-apm-node';
+import agent from 'elastic-apm-node';
 
 type ApmAgentInternals = typeof agent & {
   setCurrentTransaction: (transaction: agent.Transaction) => void;
+  currentTraceparent?: string | null;
 };
 
 type TransactionInternals = agent.Transaction & {
@@ -56,4 +57,12 @@ export function getTraceId(transaction: agent.Transaction): string | undefined {
  */
 export function setCurrentTransaction(apm: typeof agent, transaction: agent.Transaction): void {
   (apm as ApmAgentInternals).setCurrentTransaction(transaction);
+}
+
+/**
+ * Returns the W3C traceparent for the active APM transaction/span.
+ */
+export function getCurrentTraceParent(): string | undefined {
+  const traceparent = (agent as ApmAgentInternals).currentTraceparent;
+  return typeof traceparent === 'string' && traceparent.length > 0 ? traceparent : undefined;
 }

@@ -351,6 +351,24 @@ describe('WorkflowTaskManager', () => {
         undefined
       );
     });
+
+    it('should pass persisted traceparent when provided', async () => {
+      mockTaskManager.schedule.mockResolvedValue({ id: 'trace-task-id' } as any);
+
+      await workflowTaskManager.scheduleImmediateResume({
+        executionId: 'exec-trace',
+        spaceId: 'default',
+        fakeRequest,
+        traceParent: '00-stored-trace-span-01',
+      });
+
+      expect(mockTaskManager.schedule).toHaveBeenCalledWith(
+        expect.objectContaining({
+          traceparent: '00-stored-trace-span-01',
+        }),
+        { request: fakeRequest }
+      );
+    });
   });
 
   describe('forceRunIdleTasks', () => {

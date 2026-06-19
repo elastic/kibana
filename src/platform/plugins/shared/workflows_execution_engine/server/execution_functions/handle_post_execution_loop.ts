@@ -66,10 +66,15 @@ export async function handlePostExecutionLoop({
       );
       if (workflowTaskManager) {
         try {
+          const parentExecution = await workflowExecutionRepository.getWorkflowExecutionById(
+            parentExecId,
+            spaceId
+          );
           await workflowTaskManager.scheduleImmediateResume({
             executionId: parentExecId,
             spaceId,
             fakeRequest,
+            traceParent: parentExecution?.traceParent,
           });
           logger.info(
             `Scheduled immediate Task Manager resume as fallback for parent ${parentExecId} after inline resume failure`
