@@ -9,9 +9,8 @@
 
 import { toStoredTags } from '@kbn/as-code-shared-transforms';
 import type { Reference } from '@kbn/content-management-utils';
-import { transformIn as transformEmbeddableIn } from '../../../common/embeddable/transforms/transform_in';
-import type { StoredLinksState } from '../../links_saved_object';
-import type { LinksApiState } from '../../types';
+import type { LinksApiState, StoredLinksState } from '../../../server';
+import { transformIn as transformEmbeddableIn } from '../../embeddable/transforms/transform_in';
 
 export function transformIn(state: LinksApiState): {
   state: StoredLinksState;

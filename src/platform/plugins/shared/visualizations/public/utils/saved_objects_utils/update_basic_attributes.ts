@@ -94,7 +94,7 @@ export const updateBasicSoAttributes = async (
       ...attributes,
     },
     options: {
-      references,
+      references: [...so.item.references, ...references],
       ...getAdditionalOptionsForUpdate(type, dependencies.typesService, 'update'),
     },
   });

@@ -11,8 +11,8 @@ import type { RequestHandlerContext } from '@kbn/core/server';
 import { LINKS_LIBRARY_TYPE } from '../../../common/constants';
 import type { StoredLinksState } from '../../links_saved_object';
 import { getLinksCRUResponseBody } from '../get_cru_response_body';
-import { transformIn } from '../transforms';
 import type { LinksCreateRequestBody, LinksCreateResponseBody } from './types';
+import { transformIn } from '../../../common/api/transforms';
 
 export async function create(
   requestCtx: RequestHandlerContext,

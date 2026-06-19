@@ -8,3 +8,4 @@
  */
 
 export { transformIn } from './transform_in';
+export { transformOut } from './transform_out';

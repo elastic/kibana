@@ -12,8 +12,9 @@ import { buildPath } from '@kbn/core-http-browser';
 import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/common';
 import type { VisualizationClient } from '@kbn/visualizations-plugin/public';
 
+import { transformIn, transformOut } from '../../common/api/transforms';
 import { LINKS_API_PATH, LINKS_LIBRARY_TYPE, PUBLIC_API_VERSION } from '../../common/constants';
-import type { LinksByValueState } from '../../server';
+import type { StoredLinksState } from '../../server';
 import type { LinksCreateRequestBody, LinksCreateResponseBody } from '../../server/api/create';
 import type { LinksReadResponseBody } from '../../server/api/read';
 import type { LinksSearchRequestParams, LinksSearchResponseBody } from '../../server/api/search';
@@ -69,26 +70,30 @@ export const linksClient = {
 };
 
 export function getLinksClient<
-  Attr extends LinksByValueState = LinksByValueState
+  Attr extends StoredLinksState = StoredLinksState
 >(): VisualizationClient<typeof LINKS_LIBRARY_TYPE, Attr> {
   return {
     get: async (id: string) => {
       const result = await linksClient.get(id);
+      const { state: attributes, references } = transformIn(result.data);
       return {
         item: {
           id,
           type: LINKS_LIBRARY_TYPE,
           ...result.meta,
-          attributes: result.data,
+          attributes,
+          references,
         },
         meta: { outcome: 'exactMatch' },
       };
     },
-    create: async ({ data }) => {
-      const result = await linksClient.create(data);
+    create: async ({ data, options }) => {
+      const transformedData = transformOut(data, options?.references ?? []);
+      const result = await linksClient.create(transformedData);
       return { item: { id: result.id, attributes: result.data } };
     },
     update: async ({ id, data, options }) => {
+      const transformedData = transformOut(data, options?.references ?? []);
       let tags: string[] = [];
       if (savedObjectsTaggingService) {
         tags =
@@ -96,9 +101,12 @@ export function getLinksClient<
             .getTaggingApi()
             ?.ui.getTagIdsFromReferences(options?.references ?? []) ?? [];
       }
+
       const original = await linksClient.get(id); // get the original library item so we can perform a full update
-      const result = await linksClient.update(id, { ...original.data, ...data, tags });
-      return { item: { id: result.id, attributes: result.data } };
+      const result = await linksClient.update(id, { ...original.data, ...transformedData, tags });
+      const { state: attributes, references } = transformIn(result.data);
+
+      return { item: { id: result.id, attributes, references } };
     },
     delete: linksClient.delete,
     search: async ({ text: query }) => {
