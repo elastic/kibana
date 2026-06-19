@@ -9,6 +9,7 @@ import type {
   CoreSetup,
   CoreStart,
   FeatureFlagsStart,
+  IUiSettingsClient,
   KibanaRequest,
   Logger,
   Plugin,
@@ -82,6 +83,8 @@ import {
 } from './lib/workflows/continuous_onboarding_workflow';
 import { createWorkflowClients } from './lib/workflows/create_workflow_clients';
 import { installMemoryWorkflows } from './lib/memory/install_managed_workflows';
+import { isInvestigationEnabled } from './lib/sig_events/investigations/is_investigation_enabled';
+import { installInvestigationWorkflow } from './lib/sig_events/investigations/install_investigation_workflow';
 import { STREAMS_SIGNIFICANT_EVENTS_MEMORY_ENABLED_FLAG } from '../common/feature_flags';
 
 const STREAMS_MANAGED_WORKFLOW_OWNER = 'streams';
@@ -316,17 +319,25 @@ export class StreamsPlugin
     const streamsKIsOnboardingClient = workflowClients.streamsKIsOnboardingClient;
 
     if (plugins.agentBuilder) {
-      registerStreamsAgentBuilder({
-        agentBuilder: plugins.agentBuilder,
-        getScopedClients: this.streamsGetScopedClients,
-        agentContextLayer: plugins.agentContextLayer,
-        server: this.server,
-        logger: this.logger,
-        telemetry: telemetryClient,
-        streamsKIsOnboardingClient,
-      }).catch((err) => {
-        this.logger.error(`Failed to register agent builder: ${err.message}`);
-      });
+      void core
+        .getStartServices()
+        .then(async ([coreStart]) => {
+          const investigationEnabled = await isInvestigationEnabled(coreStart.uiSettings.client);
+
+          await registerStreamsAgentBuilder({
+            agentBuilder: plugins.agentBuilder!,
+            getScopedClients: this.streamsGetScopedClients,
+            agentContextLayer: plugins.agentContextLayer,
+            server: this.server,
+            logger: this.logger,
+            telemetry: telemetryClient,
+            streamsKIsOnboardingClient,
+            investigationEnabled,
+          });
+        })
+        .catch((err) => {
+          this.logger.error(`Failed to register agent builder: ${err.message}`);
+        });
     }
 
     let continuousKiOnboardingWorkflowService: ContinuousKiOnboardingWorkflowService | undefined;
@@ -612,15 +623,17 @@ export class StreamsPlugin
     if (plugins.workflowsExtensions) {
       const { workflowsExtensions } = plugins;
 
-      void this.installManagedWorkflows(workflowsExtensions, core.featureFlags).catch(
-        (error: unknown) => {
-          this.logger.error(
-            `streams: Failed to install managed workflows: ${
-              error instanceof Error ? error.message : String(error)
-            }`
-          );
-        }
-      );
+      void this.installManagedWorkflows(
+        workflowsExtensions,
+        core.featureFlags,
+        core.uiSettings.client
+      ).catch((error: unknown) => {
+        this.logger.error(
+          `streams: Failed to install managed workflows: ${
+            error instanceof Error ? error.message : String(error)
+          }`
+        );
+      });
 
       memoryEnabled$.subscribe(() => {
         void this.installMemoryWorkflowsIfEnabled(workflowsExtensions, core.featureFlags).catch(
@@ -683,7 +696,8 @@ export class StreamsPlugin
 
   private async installManagedWorkflows(
     workflowsExtensions: WorkflowsExtensionsServerPluginStart,
-    featureFlags: FeatureFlagsStart
+    featureFlags: FeatureFlagsStart,
+    uiSettingsClient: IUiSettingsClient
   ): Promise<void> {
     try {
       const client = await workflowsExtensions.initManagedWorkflowsClient(
@@ -694,6 +708,15 @@ export class StreamsPlugin
         client,
         isSignificantEventsMemoryEnabled: await isSignificantEventsMemoryEnabled(featureFlags),
       });
+
+      if (await isInvestigationEnabled(uiSettingsClient)) {
+        await installInvestigationWorkflow({ client });
+      } else {
+        this.logger.debug(
+          'streams: investigation is disabled, skipping investigation workflow installation'
+        );
+      }
+
       this.logger.info('Streams managed workflows installed');
 
       await client.ready();

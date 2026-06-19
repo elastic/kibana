@@ -21,11 +21,9 @@ export interface StepNameValidationResult {
 }
 
 /**
- * Collects all step names from a sequential list of steps (a single scope).
- * Steps inside parallel branches are NOT included — each branch is a separate
- * execution scope and its step names are validated independently.
+ * Collects all step names from a workflow definition recursively
  */
-function collectScopedStepNames(steps: WorkflowYaml['steps']): string[] {
+function collectAllStepNames(steps: WorkflowYaml['steps']): string[] {
   const stepNames: string[] = [];
 
   if (!steps || !Array.isArray(steps)) {
@@ -36,8 +34,9 @@ function collectScopedStepNames(steps: WorkflowYaml['steps']): string[] {
     if (step.name) {
       stepNames.push(step.name);
     }
-    // Collect from sequential nested step lists (foreach, if, while, merge, on-failure)
-    stepNames.push(...collectNestedSequentialStepNames(step));
+
+    // Collect nested step names using a generic approach
+    stepNames.push(...collectNestedStepNames(step));
   }
 
   return stepNames;
@@ -54,26 +53,9 @@ function getOnFailureFallbackSteps(
 }
 
 /**
- * Returns the errors from parallel branches themselves (validates each branch independently).
+ * Helper function to collect step names from nested structures
  */
-function validateParallelBranches(branches: Array<{ steps?: unknown }>): StepNameValidationError[] {
-  const errors: StepNameValidationError[] = [];
-  for (const branch of branches) {
-    if (branch.steps && Array.isArray(branch.steps)) {
-      // Each branch is an independent execution scope; validate within it
-      const branchErrors = validateStepList(branch.steps as WorkflowYaml['steps']);
-      errors.push(...branchErrors);
-    }
-  }
-  return errors;
-}
-
-/**
- * Collects step names from sequential nested containers (foreach body, if/else,
- * on-failure fallback). Parallel branches are NOT included here — they are
- * validated separately to avoid false-positive duplicate detection.
- */
-function collectNestedSequentialStepNames(step: unknown): string[] {
+function collectNestedStepNames(step: unknown): string[] {
   const stepNames: string[] = [];
 
   const s = step as {
@@ -83,114 +65,63 @@ function collectNestedSequentialStepNames(step: unknown): string[] {
     'on-failure'?: { fallback?: unknown };
   };
 
-  // Handle steps property (foreach, if, while, merge) — these are sequential
+  // Handle steps property (foreach, if, atomic, merge)
   if (s.steps && Array.isArray(s.steps)) {
-    stepNames.push(...collectScopedStepNames(s.steps as WorkflowYaml['steps']));
+    stepNames.push(...collectAllStepNames(s.steps as WorkflowYaml['steps']));
   }
 
-  // Handle else branch for if steps — sequential
+  // Handle else branch for if steps
   if (s.else && Array.isArray(s.else)) {
-    stepNames.push(...collectScopedStepNames(s.else as WorkflowYaml['steps']));
+    stepNames.push(...collectAllStepNames(s.else as WorkflowYaml['steps']));
   }
 
-  // Parallel branches are intentionally omitted here — validated separately below
+  // Handle branches for parallel steps
+  if (s.branches && Array.isArray(s.branches)) {
+    for (const branch of s.branches) {
+      if (branch.steps && Array.isArray(branch.steps)) {
+        stepNames.push(...collectAllStepNames(branch.steps as WorkflowYaml['steps']));
+      }
+    }
+  }
 
   const fallbackSteps = getOnFailureFallbackSteps(s);
   if (fallbackSteps) {
-    stepNames.push(...collectScopedStepNames(fallbackSteps));
+    stepNames.push(...collectAllStepNames(fallbackSteps));
   }
 
   return stepNames;
 }
 
 /**
- * Walks all steps (including sequential container bodies) to locate parallel branches
- * and validate each branch as an independent scope. Does NOT check scope uniqueness —
- * that is handled by the enclosing validateStepList call whose collectScopedStepNames
- * already includes these steps in the current scope's name pool.
- */
-function findAndValidateBranches(steps: WorkflowYaml['steps']): StepNameValidationError[] {
-  const errors: StepNameValidationError[] = [];
-  if (!steps || !Array.isArray(steps)) return errors;
-
-  for (const step of steps) {
-    const s = step as {
-      branches?: Array<{ steps?: unknown }>;
-      steps?: unknown;
-      else?: unknown;
-      'on-failure'?: { fallback?: unknown };
-    };
-
-    if (s.branches && Array.isArray(s.branches)) {
-      errors.push(...validateParallelBranches(s.branches));
-    }
-
-    if (s.steps && Array.isArray(s.steps)) {
-      errors.push(...findAndValidateBranches(s.steps as WorkflowYaml['steps']));
-    }
-    if (s.else && Array.isArray(s.else)) {
-      errors.push(...findAndValidateBranches(s.else as WorkflowYaml['steps']));
-    }
-    const fallback = s['on-failure']?.fallback;
-    if (Array.isArray(fallback)) {
-      errors.push(...findAndValidateBranches(fallback as WorkflowYaml['steps']));
-    }
-  }
-
-  return errors;
-}
-
-/**
- * Validates step name uniqueness within a single sequential step list (one scope).
- * Also recursively validates parallel branches, which each form their own scope.
- */
-function validateStepList(steps: WorkflowYaml['steps']): StepNameValidationError[] {
-  const errors: StepNameValidationError[] = [];
-
-  if (!steps || !Array.isArray(steps)) {
-    return errors;
-  }
-
-  // Check uniqueness within this scope (excluding parallel branch internals)
-  const scopedNames = collectScopedStepNames(steps);
-  const nameCount = new Map<string, number>();
-  for (const name of scopedNames) {
-    nameCount.set(name, (nameCount.get(name) ?? 0) + 1);
-  }
-  for (const [name, count] of nameCount) {
-    if (count > 1) {
-      errors.push({
-        stepName: name,
-        occurrences: count,
-        message: `Step name "${name}" is not unique. Found ${count} steps with this name.`,
-      });
-    }
-  }
-
-  // Find and validate parallel branches at all depths within this scope's steps.
-  // Sequential containers are already included in the current scope's name pool
-  // (via collectScopedStepNames), so we must NOT call validateStepList on them
-  // again — that would double-count uniqueness errors. We only need to locate
-  // parallel branches wherever they are nested and validate each branch as its
-  // own independent scope.
-  errors.push(...findAndValidateBranches(steps));
-
-  return errors;
-}
-
-/**
- * Validates that all step names in a workflow are unique within their execution scope.
- * Steps inside parallel branches are validated per-branch and are allowed to share
- * names with steps in other branches (they run in separate namespaces).
+ * Validates that all step names in a workflow are unique
  */
 export function validateStepNameUniqueness(workflow: WorkflowYaml): StepNameValidationResult {
-  const errors = validateStepList(workflow.steps);
+  const stepNames = collectAllStepNames(workflow.steps);
 
   const workflowLevelFallback = getOnFailureFallbackSteps(
     workflow.settings as { 'on-failure'?: { fallback?: unknown } } | undefined
   );
   if (workflowLevelFallback) {
-    errors.push(...validateStepList(workflowLevelFallback));
+    stepNames.push(...collectAllStepNames(workflowLevelFallback));
+  }
+
+  const stepNameCounts = new Map<string, number>();
+  const errors: StepNameValidationError[] = [];
+
+  // Count occurrences of each step name
+  for (const stepName of stepNames) {
+    stepNameCounts.set(stepName, (stepNameCounts.get(stepName) || 0) + 1);
+  }
+
+  // Find duplicates
+  for (const [stepName, count] of stepNameCounts) {
+    if (count > 1) {
+      errors.push({
+        stepName,
+        occurrences: count,
+        message: `Step name "${stepName}" is not unique. Found ${count} steps with this name.`,
+      });
+    }
   }
 
   return {
