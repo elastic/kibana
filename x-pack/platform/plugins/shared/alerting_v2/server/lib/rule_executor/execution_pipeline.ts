@@ -71,7 +71,6 @@ export class RuleExecutionPipeline implements RuleExecutionPipelineContract {
     })();
 
     for (const step of this.steps) {
-      this.logger.debug({ message: `RuleExecutor: Executing step: ${step.name}` });
       stream = this.runMiddlewareChain({ step }, stream);
     }
 
