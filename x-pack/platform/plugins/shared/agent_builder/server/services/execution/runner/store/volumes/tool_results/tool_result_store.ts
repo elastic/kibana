@@ -11,7 +11,7 @@ import type {
   WritableToolResultStore,
   ToolResultWithMeta,
 } from '@kbn/agent-builder-server/runner';
-import { MemoryVolume } from '../../filesystem';
+import { MemoryVolume } from '../../memory_volume';
 import { extractConversationToolResults, createToolCallEntry, getToolCallEntryPath } from './utils';
 
 export const createResultStore = ({ conversation }: { conversation?: Conversation }) => {

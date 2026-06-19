@@ -6,7 +6,7 @@
  */
 
 import { FileEntryType, type FileEntry } from '@kbn/agent-builder-server/runner/filestore';
-import { MemoryVolume } from '../runner/store/filesystem/memory_volume';
+import { MemoryVolume } from '../runner/store/memory_volume';
 import { VolumeBackedReadOnlyFs } from './volume_backed_read_only_fs';
 
 const makeFileEntry = (path: string, plainText?: string, raw: object = {}): FileEntry => ({

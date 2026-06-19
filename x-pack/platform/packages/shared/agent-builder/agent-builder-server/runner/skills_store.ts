@@ -6,29 +6,17 @@
  */
 
 import type { InternalSkillDefinition } from '../skills';
-import type { FileEntry, FsEntry } from './filestore';
+import type { FileEntryAccessor } from './file_entry_accessor';
 
 /**
- * Store to access skills during execution
+ * Store to access skills during execution. Extends `FileEntryAccessor` so
+ * callers that need per-file skill metadata (e.g. `skill_id`, entry type to
+ * distinguish main files from reference content) can read it without going
+ * through the byte-level `IFileSystem`.
  */
-export interface SkillsStore {
+export interface SkillsStore extends FileEntryAccessor {
   has(skillId: string): boolean;
-  get(resultId: string): InternalSkillDefinition;
-  /**
-   * Lookup a skill file entry by its absolute path. Returns `undefined`
-   * when the path doesn't belong to any registered skill. Use this when
-   * you need typed per-file metadata (e.g. `metadata.skill_id`,
-   * `metadata.type` to distinguish main files from reference content) that
-   * the byte-level `IFileSystem.readFile` doesn't expose.
-   */
-  getEntry(path: string): Promise<FileEntry | undefined>;
-  /**
-   * List entries under a directory. Empty array when the directory doesn't
-   * exist.
-   */
-  listEntries(dirPath: string): Promise<FsEntry[]>;
-  /** Check whether the given path exists (file or directory) in the store. */
-  entryExists(path: string): Promise<boolean>;
+  get(skillId: string): InternalSkillDefinition;
 }
 
 /**

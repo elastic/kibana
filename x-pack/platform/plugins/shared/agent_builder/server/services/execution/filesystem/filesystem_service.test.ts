@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { MemoryVolume } from '../runner/store/filesystem/memory_volume';
+import { MemoryVolume } from '../runner/store/memory_volume';
 import { FilesystemService } from './filesystem_service';
 import { WorkspaceVolume } from './workspace_volume';
 import type { IWorkspaceClient } from '../../workspaces';

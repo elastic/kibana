@@ -6,29 +6,16 @@
  */
 
 import type { ToolResult } from '@kbn/agent-builder-common/tools';
-import type { FileEntry, FsEntry } from './filestore';
+import type { FileEntryAccessor } from './file_entry_accessor';
 
 /**
- * Store to access tool results during execution
+ * Store to access tool results during execution. Extends `FileEntryAccessor`
+ * so callers that need per-result file-level metadata (e.g. `token_count`)
+ * can read it without going through the byte-level `IFileSystem`.
  */
-export interface ToolResultStore {
+export interface ToolResultStore extends FileEntryAccessor {
   has(resultId: string): boolean;
   get(resultId: string): ToolResult;
-  /**
-   * Lookup a tool-result file entry by its absolute path (e.g.
-   * `/tool_calls/{tool_id}/{tool_call_id}/{tool_result_id}.json`). Returns
-   * `undefined` when the path is unknown. Use this when you need the typed
-   * metadata that the byte-level `IFileSystem.readFile` doesn't expose
-   * (e.g. `token_count`).
-   */
-  getEntry(path: string): Promise<FileEntry | undefined>;
-  /**
-   * List entries under a directory. Empty array when the directory doesn't
-   * exist.
-   */
-  listEntries(dirPath: string): Promise<FsEntry[]>;
-  /** Check whether the given path exists (file or directory) in the store. */
-  entryExists(path: string): Promise<boolean>;
 }
 
 /**

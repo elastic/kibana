@@ -9,7 +9,8 @@ import type { IFileSystem } from 'just-bash';
 import { InMemoryFs, MountableFs } from 'just-bash';
 import type { IFilesystemService } from '@kbn/agent-builder-server/runner';
 import { CapacityLimitedFs } from './capacity_limited_fs';
-import { VolumeBackedReadOnlyFs, type VolumeBackedSource } from './volume_backed_read_only_fs';
+import type { FileEntryAccessor } from '@kbn/agent-builder-server/runner';
+import { VolumeBackedReadOnlyFs } from './volume_backed_read_only_fs';
 import type { WorkspaceVolume } from './workspace_volume';
 import { MOUNT_POINTS } from './mount_points';
 
@@ -17,8 +18,8 @@ export const EPHEMERAL_FS_CAPACITY_BYTES = 20 * 1024 * 1024;
 
 export interface FilesystemServiceDeps {
   workspaceVolume: WorkspaceVolume;
-  toolResultsSource: VolumeBackedSource;
-  skillsSource: VolumeBackedSource;
+  toolResultsSource: FileEntryAccessor;
+  skillsSource: FileEntryAccessor;
 }
 
 /**

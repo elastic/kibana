@@ -7,19 +7,7 @@
 
 import type { ByteString, IFileSystem, FsStat } from 'just-bash';
 import { unsafeBytesFromLatin1 } from 'just-bash';
-import type { FileEntry, FsEntry } from '@kbn/agent-builder-server/runner/filestore';
-
-/**
- * Minimal internal interface this adapter needs from a content source. Both
- * `ToolResultStore` and `SkillsStore` implement these via their typed
- * accessors (`getEntry` / `listEntries` / `entryExists`). Keeps the adapter
- * decoupled from the broader public `Volume` interface, which is going away.
- */
-export interface VolumeBackedSource {
-  getEntry(path: string): Promise<FileEntry | undefined>;
-  listEntries(dirPath: string): Promise<FsEntry[]>;
-  entryExists(path: string): Promise<boolean>;
-}
+import type { FileEntry, FileEntryAccessor } from '@kbn/agent-builder-server/runner';
 
 interface DirentEntry {
   name: string;
@@ -46,7 +34,7 @@ const entryToString = (entry: FileEntry): string =>
 const entryBytes = (entry: FileEntry): Uint8Array => encoder.encode(entryToString(entry));
 
 /**
- * Read-only `IFileSystem` adapter over a {@link VolumeBackedSource}.
+ * Read-only `IFileSystem` adapter over a {@link FileEntryAccessor}.
  *
  * Delegates each read method to the underlying source on every call — no
  * caching or refresh dance. New entries appearing in the source mid-session
@@ -58,10 +46,10 @@ const entryBytes = (entry: FileEntry): Uint8Array => encoder.encode(entryToStrin
  * re-prepend `mountPoint` before querying the source.
  */
 export class VolumeBackedReadOnlyFs implements IFileSystem {
-  private readonly source: VolumeBackedSource;
+  private readonly source: FileEntryAccessor;
   private readonly mountPoint: string;
 
-  constructor(source: VolumeBackedSource, mountPoint: string = '') {
+  constructor(source: FileEntryAccessor, mountPoint: string = '') {
     this.source = source;
     // Normalize: strip any trailing slash so the join is unambiguous.
     this.mountPoint = mountPoint.endsWith('/') ? mountPoint.slice(0, -1) : mountPoint;

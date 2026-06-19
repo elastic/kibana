@@ -7,7 +7,7 @@
 
 import type { SkillsStore, WritableSkillsStore } from '@kbn/agent-builder-server/runner';
 import type { InternalSkillDefinition } from '@kbn/agent-builder-server/skills';
-import { MemoryVolume } from '../../filesystem';
+import { MemoryVolume } from '../../memory_volume';
 import { createSkillEntries, getSkillEntryPath, getSkillReferencedContentEntryPath } from './utils';
 
 export const createSkillsStore = ({ skills }: { skills: InternalSkillDefinition[] }) => {
@@ -61,8 +61,6 @@ export class SkillsStoreImpl implements WritableSkillsStore {
     return this.skills.get(skillId)!;
   }
 
-  // Typed entry accessors — replace the previous getVolume() consumers. Backed
-  // by the same MemoryVolume so writes through add()/delete() are reflected.
   async getEntry(path: string) {
     return this.volume.get(path);
   }

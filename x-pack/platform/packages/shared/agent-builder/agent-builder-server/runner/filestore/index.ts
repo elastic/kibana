@@ -5,10 +5,6 @@
  * 2.0.
  */
 
-// File-entry shape kept around for ResultStore/SkillsStore typed accessors —
-// `FileEntry.metadata` is what consumers like `tryFilestoreSubstitution` and
-// `load_skill_tools_after_read` read. The legacy `IFileStore` aggregator that
-// originally owned these types has been deleted.
 export {
   FileEntryType,
   type FileEntry,

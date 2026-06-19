@@ -71,5 +71,6 @@ export type {
   FileEntryMetadata,
   FileEntryContent,
 } from './filestore';
+export type { FileEntryAccessor } from './file_entry_accessor';
 export type { IFilesystemService } from './filesystem_service';
 export type { IBashService, BashExecResult } from './bash_service';
