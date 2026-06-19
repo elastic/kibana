@@ -2472,6 +2472,34 @@ describe('getDataStreamPrivileges()', () => {
       privileges: ['auto_configure', 'create_doc'],
     });
   });
+
+  it('targets the profiling-* indices for the profiles signal regardless of dataset/namespace', () => {
+    const dataStream = { type: 'profiles', dataset: 'profilingreceiver' } as DataStreamMeta;
+    const privileges = getDataStreamPrivileges(dataStream, 'namespace');
+
+    // profiles is written by the Elasticsearch exporter to the dedicated profiling-* indices,
+    // not to a profiles-<dataset>-<namespace> data stream.
+    expect(privileges).toEqual({
+      names: ['profiling-*'],
+      privileges: UNIVERSAL_PROFILING_PERMISSIONS,
+    });
+  });
+
+  it('uses custom privileges for the profiles signal when present', () => {
+    const dataStream = {
+      type: 'profiles',
+      dataset: 'profilingreceiver',
+      elasticsearch: {
+        privileges: { indices: ['create_doc'] },
+      },
+    } as DataStreamMeta;
+    const privileges = getDataStreamPrivileges(dataStream, 'namespace');
+
+    expect(privileges).toEqual({
+      names: ['profiling-*'],
+      privileges: ['create_doc'],
+    });
+  });
 });
 
 it('Returns the Elastic Connectors permissions for elastic_connectors package', async () => {
