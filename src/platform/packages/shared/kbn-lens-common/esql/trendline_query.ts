@@ -7,7 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { esql, Parser, BasicPrettyPrinter, isOptionNode } from '@elastic/esql';
+import {
+  esql,
+  Parser,
+  BasicPrettyPrinter,
+  isOptionNode,
+  isFunctionExpression,
+} from '@elastic/esql';
 import type { ESQLCommand, ESQLCommandOption } from '@elastic/esql/types';
 import { AUTO_TARGET_NUMBER_OF_BUCKETS } from './constants';
 
@@ -53,6 +59,18 @@ const findByOption = (statsCmd: ESQLCommand): ESQLCommandOption => {
 };
 
 /**
+ * Checks whether a BY option already contains a BUCKET() call on the given time field.
+ */
+const hasBucketForField = (byOption: ESQLCommandOption, timeField: string): boolean =>
+  byOption.args.some((arg) => {
+    if (!isFunctionExpression(arg) || arg.name !== 'bucket' || arg.args.length === 0) {
+      return false;
+    }
+    const firstArg = arg.args[0];
+    return !Array.isArray(firstArg) && firstArg.type === 'column' && firstArg.name === timeField;
+  });
+
+/**
  * Appends a BUCKET time-bucketing clause to an ES|QL query for trendline use.
  *
  * Uses `@elastic/esql` AST parsing and manipulation for correct handling of
@@ -82,10 +100,10 @@ export const appendTimeBucketToEsqlQuery = (esqlQuery: string, timeField: string
   if (statsCmd) {
     const byOption = statsCmd.args.find(isOptionNode);
 
-    if (byOption) {
+    if (byOption && !hasBucketForField(byOption, timeField)) {
       // STATS ... BY ... → append to existing BY
       byOption.args.push(bucketNode);
-    } else {
+    } else if (!byOption) {
       // STATS without BY → extract a typed BY option node from a helper parse
       const { root: byHelper } = Parser.parse(`FROM _x | STATS _x BY ${bucketExpr}`);
       const byNode = findByOption(findStatsCommand(byHelper.commands));

@@ -80,4 +80,18 @@ describe('appendTimeBucketToEsqlQuery', () => {
       'Cannot append time bucket to an empty ES|QL query'
     );
   });
+
+  it('does not add a duplicate BUCKET when one already exists for the same field', () => {
+    const query = 'FROM index | STATS COUNT(*) BY BUCKET(timestamp, 75, ?_tstart, ?_tend)';
+    const result = appendTimeBucketToEsqlQuery(query, 'timestamp');
+    expect(result).toBe('FROM index | STATS COUNT(*) BY BUCKET(timestamp, 75, ?_tstart, ?_tend)');
+  });
+
+  it('adds BUCKET when one exists for a different field', () => {
+    const query = 'FROM index | STATS COUNT(*) BY BUCKET(other_field, 75, ?_tstart, ?_tend)';
+    const result = appendTimeBucketToEsqlQuery(query, 'timestamp');
+    expect(result).toBe(
+      'FROM index | STATS COUNT(*) BY BUCKET(other_field, 75, ?_tstart, ?_tend), BUCKET(timestamp, 75, ?_tstart, ?_tend)'
+    );
+  });
 });
