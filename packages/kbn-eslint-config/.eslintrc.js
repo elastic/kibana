@@ -132,6 +132,7 @@ module.exports = {
     '@kbn/eslint-plugin-telemetry',
     '@kbn/eslint-plugin-i18n',
     '@kbn/eslint-plugin-alerting-v2',
+    '@kbn/eslint-plugin-kbn-ui',
     '@elastic/eui',
     'eslint-plugin-depend',
     'prettier',
