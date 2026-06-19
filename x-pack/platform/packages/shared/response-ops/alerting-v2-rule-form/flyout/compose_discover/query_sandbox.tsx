@@ -111,6 +111,14 @@ const SPLIT_BASE_AND_ALERT_LABEL = i18n.translate(
   { defaultMessage: 'Split base and alert' }
 );
 
+const SPLIT_BASE_AND_ALERT_TOOLTIP = i18n.translate(
+  'xpack.alertingV2.composeDiscover.querySandbox.splitBaseAndAlertTooltip',
+  {
+    defaultMessage:
+      'Open separate editors for the base query and alert condition. Automatic splitting is disabled in this mode.',
+  }
+);
+
 const MERGE_TO_SINGLE_EDITOR_LABEL = i18n.translate(
   'xpack.alertingV2.composeDiscover.querySandbox.mergeToSingleEditorButton',
   { defaultMessage: 'Merge to single editor' }
@@ -237,15 +245,17 @@ export const QuerySandbox: React.FC<QuerySandboxProps> = ({
   const modeSwitchButton = useMemo(() => {
     if (onEditManually) {
       return (
-        <EuiButton
-          size="s"
-          color="text"
-          iconType="branch"
-          onClick={onEditManually}
-          data-test-subj="querySandboxSeparateBaseAndAlert"
-        >
-          {SPLIT_BASE_AND_ALERT_LABEL}
-        </EuiButton>
+        <EuiToolTip content={SPLIT_BASE_AND_ALERT_TOOLTIP}>
+          <EuiButton
+            size="s"
+            color="text"
+            iconType="branch"
+            onClick={onEditManually}
+            data-test-subj="querySandboxSeparateBaseAndAlert"
+          >
+            {SPLIT_BASE_AND_ALERT_LABEL}
+          </EuiButton>
+        </EuiToolTip>
       );
     }
 
