@@ -112,6 +112,7 @@ describe('ResumeExecutionModal', () => {
           stepContext: { approved: true } as Partial<StepContext>,
         },
       });
+      // toHaveTextContent normalises whitespace, so check for the key content
       expect(screen.getByTestId('editorValue')).toHaveTextContent('"approved": true');
     });
 
@@ -124,6 +125,8 @@ describe('ResumeExecutionModal', () => {
           stepContext: undefined as unknown as Partial<StepContext>,
         },
       });
+      // undefined stepContext must not produce "null" or cause the editor to be empty —
+      // it must fall back to '{}'.
       expect(screen.getByTestId('editorValue')).toHaveTextContent('{}');
     });
   });
