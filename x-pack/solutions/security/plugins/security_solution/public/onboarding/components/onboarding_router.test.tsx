@@ -14,7 +14,7 @@ import { OnboardingRouter } from './onboarding_router';
 import { useSyncUrlDetails } from './hooks/use_url_detail';
 import { useOnboardingContext } from './onboarding_context';
 
-const mockRedirect = jest.fn(() => null);
+const mockRedirect = jest.fn((_props: unknown) => null);
 jest.mock('react-router-dom', () => {
   const actual = jest.requireActual('react-router-dom');
   return {
@@ -46,7 +46,9 @@ describe('OnboardingRouter', () => {
     jest.clearAllMocks();
     (useSyncUrlDetails as jest.Mock).mockReturnValue({ isLoading: false });
     (useOnboardingContext as jest.Mock).mockReturnValue({
-      config: new Map([[OnboardingTopicId.siemMigrations, { id: OnboardingTopicId.siemMigrations }]]),
+      config: new Map([
+        [OnboardingTopicId.siemMigrations, { id: OnboardingTopicId.siemMigrations }],
+      ]),
     });
   });
 
