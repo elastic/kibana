@@ -36,13 +36,6 @@ import {
   getVisualizationListingTableStyles,
 } from '@kbn/visualization-listing-components';
 
-interface SavedObjectWithReferences {
-  id: string;
-  type: string;
-  attributes: Record<string, unknown>;
-  references: Reference[];
-}
-
 interface VisualizationTableListProps {
   core: CoreStart;
   visualizations: VisualizationsStart;
@@ -169,7 +162,7 @@ export const VisualizationTableList = ({
     async (args: { id: string; title: string; description?: string; tags: string[] }) => {
       const content = visualizedUserContent.current?.find(({ id }) => id === args.id);
       if (content) {
-        return await visualizations.updateVisualizationLibraryItem(content.id, content.type, {
+        await visualizations.updateVisualizationLibraryItem(content.id, content.type, {
           title: args.title,
           description: args.description ?? '',
           tags: args.tags,
