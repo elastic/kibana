@@ -110,6 +110,7 @@ export interface ESQLFieldWithMetadata {
   userDefined: false;
   isEcs?: boolean;
   hasConflict?: boolean;
+  originalTypes?: string[];
   isUnmappedField?: boolean;
   metadata?: {
     description?: string;

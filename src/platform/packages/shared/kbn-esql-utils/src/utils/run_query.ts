@@ -9,12 +9,12 @@
 
 import { i18n } from '@kbn/i18n';
 import dateMath from '@kbn/datemath';
-import type { DatatableColumn } from '@kbn/expressions-plugin/common';
+import type { DatatableColumn, DatatableColumnType } from '@kbn/expressions-plugin/common';
 import type { KibanaExecutionContext } from '@kbn/core/public';
 import type { ISearchGeneric } from '@kbn/search-types';
 import type { TimeRange } from '@kbn/es-query';
 import { getTimeZoneFromSettings } from '@kbn/es-query';
-import { esFieldTypeToKibanaFieldType } from '@kbn/field-types';
+import { esFieldTypeToKibanaFieldType, KBN_FIELD_TYPES } from '@kbn/field-types';
 import type { ESQLColumn, ESQLSearchResponse, ESQLSearchParams } from '@kbn/es-types';
 import { lastValueFrom } from 'rxjs';
 import { type ESQLControlVariable } from '@kbn/esql-types';
@@ -56,13 +56,21 @@ export const getNamedParams = (
 };
 
 export function formatESQLColumns(columns: ESQLColumn[]): DatatableColumn[] {
-  return columns.map(({ name, type }) => {
-    const kibanaType = esFieldTypeToKibanaFieldType(type);
+  return columns.map(({ name, type, original_types }) => {
+    const originalTypes = original_types ?? [];
+    const hasConflict = type === 'unsupported' && originalTypes.length > 1;
+    const conflictingEsTypes = hasConflict ? originalTypes : undefined;
+    const kibanaType = hasConflict ? KBN_FIELD_TYPES.CONFLICT : esFieldTypeToKibanaFieldType(type);
+
     return {
       id: name,
       name,
-      meta: { type: kibanaType, esType: type },
-    } as DatatableColumn;
+      meta: {
+        type: kibanaType as DatatableColumnType,
+        esType: type,
+        conflictingEsTypes,
+      },
+    };
   });
 }
 
@@ -109,10 +117,11 @@ export async function getESQLQueryColumnsRaw({
     const lookup = new Set(hasEmptyColumns ? table.columns?.map(({ name }) => name) || [] : []);
 
     const allColumns =
-      (table.all_columns ?? table.columns)?.map(({ name, type }) => {
+      (table.all_columns ?? table.columns)?.map(({ name, type, original_types }) => {
         return {
           name,
           type,
+          original_types,
           isNull: hasEmptyColumns ? !lookup.has(name) : false,
         };
       }) ?? [];

@@ -50,6 +50,7 @@ export const getEsqlColumns = async ({
             name: c.name,
             type: c.meta.esType as EsqlFieldType,
             hasConflict: c.meta.type === KBN_FIELD_TYPES.CONFLICT,
+            originalTypes: c.meta.conflictingEsTypes,
             userDefined: false,
           };
         }) || []

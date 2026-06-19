@@ -14,19 +14,25 @@ import { errors } from '../errors';
 import { getColumnExists, getColumnName } from '../columns';
 import type { ESQLMessage } from '../../types';
 
+interface ColumnValidationOptions {
+  skipUnsupportedOrConflictingFieldValidation?: boolean;
+}
+
 export function validateColumnForCommand(
   column: ESQLColumn | ESQLIdentifier,
   commandName: string,
-  context: ICommandContext
+  context: ICommandContext,
+  options?: ColumnValidationOptions
 ): ESQLMessage[] {
-  return new ColumnValidator(column, context, commandName).validate();
+  return new ColumnValidator(column, context, commandName, options).validate();
 }
 
 export class ColumnValidator {
   constructor(
     private readonly column: ESQLColumn | ESQLIdentifier,
     private readonly context: ICommandContext,
-    private readonly commandName: string
+    private readonly commandName: string,
+    private readonly options: ColumnValidationOptions = {}
   ) {}
 
   validate(): ESQLMessage[] {
@@ -35,6 +41,32 @@ export class ColumnValidator {
         return [errors.unmappedColumnWarning(this.column)];
       } else {
         return [errors.unknownColumn(this.column)];
+      }
+    }
+
+    if (!this.options.skipUnsupportedOrConflictingFieldValidation) {
+      const columnName = getColumnName(this.column);
+      const column = this.context.columns.get(columnName);
+
+      if (column && !column.userDefined && column.type === 'unsupported') {
+        if (column.hasConflict) {
+          return [
+            errors.fieldTypeConflict(
+              this.column,
+              columnName,
+              column.originalTypes,
+              this.shouldWarnForUnsupportedOrConflictingField
+            ),
+          ];
+        }
+
+        return [
+          errors.unsupportedFieldType(
+            this.column,
+            columnName,
+            this.shouldWarnForUnsupportedOrConflictingField
+          ),
+        ];
       }
     }
 
@@ -65,5 +97,9 @@ export class ColumnValidator {
     const columnName = getColumnName(this.column);
     const column = this.context.columns.get(columnName);
     return Boolean(column && column.isUnmappedField);
+  }
+
+  private get shouldWarnForUnsupportedOrConflictingField(): boolean {
+    return this.commandName === 'keep' || this.commandName === 'drop';
   }
 }

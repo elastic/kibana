@@ -54,7 +54,7 @@ export function argMatchesParamType(
     return true;
   }
 
-  if (givenType === 'unknown' || givenType === 'unsupported') return acceptUnknown;
+  if (givenType === 'unknown') return acceptUnknown;
 
   if (
     givenIsLiteral &&
