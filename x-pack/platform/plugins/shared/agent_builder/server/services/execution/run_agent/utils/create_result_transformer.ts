@@ -10,8 +10,10 @@ import { ToolResultType } from '@kbn/agent-builder-common';
 import type { ToolResultStore } from '@kbn/agent-builder-server/runner';
 import type { ToolRegistry } from '@kbn/agent-builder-server';
 import type { ToolManager } from '@kbn/agent-builder-server/runner/tool_manager';
-import { getToolCallEntryPath } from '../../runner/store/volumes/tool_results/utils';
-import { MOUNT_POINTS } from '../../filesystem/mount_points';
+import {
+  getToolCallEntryPath,
+  getToolCallEntryAbsolutePath,
+} from '../../runner/store/volumes/tool_results/utils';
 import type { ToolCallResultTransformer } from './tool_summarization';
 import {
   areAllResultsCleaned,
@@ -146,12 +148,13 @@ const tryFilestoreSubstitution = async ({
 
   // Store-relative path used for the lookup; agent-visible path (with the
   // mount prefix) is what the LLM uses to reference the file.
-  const relativePath = getToolCallEntryPath({
+  const lookupArgs = {
     toolId,
     toolCallId,
     toolResultId: result.tool_result_id,
-  });
-  const agentVisiblePath = `${MOUNT_POINTS.toolCalls}${relativePath}`;
+  };
+  const relativePath = getToolCallEntryPath(lookupArgs);
+  const agentVisiblePath = getToolCallEntryAbsolutePath(lookupArgs);
 
   try {
     const entry = await resultStore.getEntry(relativePath);

@@ -19,7 +19,6 @@ const schema = z.object({
   path: z.string().describe('Absolute path of the directory to list'),
   depth: z
     .number()
-    .int()
     .min(1)
     .max(MAX_DEPTH)
     .optional()
@@ -28,6 +27,33 @@ const schema = z.object({
       `Level of depth to include (1 = immediate children only, 2 = include children of subdirectories, etc.). Capped at ${MAX_DEPTH}.`
     ),
 });
+
+export const createListFilesTool = ({
+  filesystemService,
+}: {
+  filesystemService: IFilesystemService;
+}): BuiltinToolDefinition<typeof schema> => {
+  return {
+    id: internalTools.listFiles,
+    description: `List the entries of a directory in the virtual file system (VFS).`,
+    type: ToolType.builtin,
+    schema,
+    tags: ['filesystem'],
+    handler: async ({ path, depth = 1 }) => {
+      const fs = filesystemService.getFilesystem();
+      try {
+        const entries = await walk(fs, path, depth);
+        return {
+          results: [createOtherResult({ path, depth, entries })],
+        };
+      } catch (err) {
+        return {
+          results: [createErrorResult(`list_files '${path}': ${(err as Error).message}`)],
+        };
+      }
+    },
+  };
+};
 
 interface ListEntry {
   name: string;
@@ -54,32 +80,4 @@ const walk = async (fs: IFileSystem, dir: string, remaining: number): Promise<Li
       return { name, type: 'file' };
     })
   );
-};
-
-export const createListFilesTool = ({
-  filesystemService,
-}: {
-  filesystemService: IFilesystemService;
-}): BuiltinToolDefinition<typeof schema> => {
-  return {
-    id: internalTools.listFiles,
-    description:
-      'List the entries (files and subdirectories) of a directory in the virtual file system (VFS). Pass `depth` > 1 to recursively include entries from subdirectories.',
-    type: ToolType.builtin,
-    schema,
-    tags: ['filesystem'],
-    handler: async ({ path, depth = 1 }) => {
-      const fs = filesystemService.getFilesystem();
-      try {
-        const entries = await walk(fs, path, depth);
-        return {
-          results: [createOtherResult({ path, depth, entries })],
-        };
-      } catch (err) {
-        return {
-          results: [createErrorResult(`list_files '${path}': ${(err as Error).message}`)],
-        };
-      }
-    },
-  };
 };

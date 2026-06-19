@@ -29,9 +29,6 @@ export const createLoadSkillToolsAfterRead = ({
       return;
     }
 
-    // The LLM passes the agent-visible path (e.g. `/skills/platform/foo/SKILL.md`);
-    // the store works in mount-relative paths. If the path isn't under the
-    // skills mount, there's no skill to match.
     const skillsMountPrefix = `${MOUNT_POINTS.skills}/`;
     if (!path.startsWith(skillsMountPrefix)) {
       return;

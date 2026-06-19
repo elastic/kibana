@@ -9,6 +9,7 @@ import type { FileEntry } from '@kbn/agent-builder-server/runner/filestore';
 import { FileEntryType } from '@kbn/agent-builder-server/runner/filestore';
 import { estimateTokens } from '@kbn/agent-builder-genai-utils/tools/utils/token_count';
 import type { InternalSkillDefinition } from '@kbn/agent-builder-server/skills';
+import { MOUNT_POINTS } from '../../../../filesystem/mount_points';
 import type { SkillFileEntry, SkillReferencedContentFileEntry } from './types';
 
 /**
@@ -51,6 +52,36 @@ export const getSkillReferencedContentEntryPath = ({
     referencedContent.relativePath,
     `${referencedContent.name}.md`,
   ]);
+};
+
+/**
+ * Get the agent-visible (absolute, mount-prefixed) path for a skill — i.e.
+ * what the LLM sees and what it should pass back to tools like `read_file`.
+ * Composes `MOUNT_POINTS.skills` over the store-relative {@link getSkillEntryPath}.
+ */
+export const getSkillAbsolutePath = ({
+  skill,
+}: {
+  skill: Pick<InternalSkillDefinition, 'basePath' | 'name'>;
+}): string => {
+  return `${MOUNT_POINTS.skills}${getSkillEntryPath({ skill })}`;
+};
+
+/**
+ * Agent-visible (absolute, mount-prefixed) path for a skill's referenced
+ * content file. Mirrors {@link getSkillAbsolutePath}.
+ */
+export const getSkillReferencedContentAbsolutePath = ({
+  skill,
+  referencedContent,
+}: {
+  skill: Pick<InternalSkillDefinition, 'basePath' | 'name'>;
+  referencedContent: { relativePath: string; name: string };
+}): string => {
+  return `${MOUNT_POINTS.skills}${getSkillReferencedContentEntryPath({
+    skill,
+    referencedContent,
+  })}`;
 };
 
 export const getSkillPlainText = ({

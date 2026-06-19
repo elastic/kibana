@@ -39,11 +39,6 @@ const entryBytes = (entry: FileEntry): Uint8Array => encoder.encode(entryToStrin
  * Delegates each read method to the underlying source on every call — no
  * caching or refresh dance. New entries appearing in the source mid-session
  * are visible immediately. All mutating methods throw `EROFS`.
- *
- * Paths flow through unchanged: `MountableFs` strips the mount prefix before
- * calling into this adapter, and the source (`ToolResultStore` / `SkillsStore`)
- * stores entries under those mount-relative paths. The adapter is fully
- * mount-agnostic.
  */
 export class VolumeBackedReadOnlyFs implements IFileSystem {
   private readonly source: FileEntryAccessor;

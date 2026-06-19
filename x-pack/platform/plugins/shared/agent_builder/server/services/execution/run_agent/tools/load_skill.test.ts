@@ -13,8 +13,7 @@ import {
   createToolHandlerContextMock,
   type ToolHandlerContextMock,
 } from '../../../../test_utils/runner';
-import { getSkillReferencedContentEntryPath } from '../../runner/store/volumes/skills/utils';
-import { MOUNT_POINTS } from '../../filesystem/mount_points';
+import { getSkillReferencedContentAbsolutePath } from '../../runner/store/volumes/skills/utils';
 import { createLoadSkillTool } from './load_skill';
 
 const callHandler = (
@@ -134,10 +133,7 @@ describe('load_skill tool', () => {
     expect((result.results[0] as any).data.referenced_files).toEqual([
       {
         name: 'patterns',
-        path: `${MOUNT_POINTS.skills}${getSkillReferencedContentEntryPath({
-          skill,
-          referencedContent,
-        })}`,
+        path: getSkillReferencedContentAbsolutePath({ skill, referencedContent }),
       },
     ]);
   });

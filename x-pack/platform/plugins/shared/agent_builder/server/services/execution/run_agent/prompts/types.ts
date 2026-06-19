@@ -19,10 +19,6 @@ export interface PromptFactoryParams {
   configuration: ResolvedConfiguration;
   capabilities: ResolvedAgentCapabilities;
   processedConversation: ProcessedConversation;
-  /**
-   * Filtered list of skills available for this run. Used to render the SKILLS
-   * section of the system prompt.
-   */
   skills: InternalSkillDefinition[];
   /**
    * Tool manager, used by intra-round compaction to map tool ids and look up summarizers.

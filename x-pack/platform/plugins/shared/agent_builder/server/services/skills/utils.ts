@@ -7,8 +7,7 @@
 
 import type { InternalSkillDefinition } from '@kbn/agent-builder-server/skills';
 import type { PublicSkillDefinition, PublicSkillSummary } from '@kbn/agent-builder-common';
-import { getSkillEntryPath } from '../execution/runner/store/volumes/skills/utils';
-import { MOUNT_POINTS } from '../execution/filesystem/mount_points';
+import { getSkillAbsolutePath } from '../execution/runner/store/volumes/skills/utils';
 
 /**
  * Converts an InternalSkillDefinition to a PublicSkillDefinition
@@ -94,9 +93,7 @@ export const resolveSkill = (
     return { error: `Skill '${input}' not found.` };
   }
   if (matches.length > 1) {
-    const paths = matches
-      .map((s) => `${MOUNT_POINTS.skills}${getSkillEntryPath({ skill: s })}`)
-      .join(', ');
+    const paths = matches.map((s) => getSkillAbsolutePath({ skill: s })).join(', ');
     return {
       error: `Skill name '${input}' is ambiguous. Multiple skills match: ${paths}. Re-call load_skill using the full path to disambiguate.`,
     };
