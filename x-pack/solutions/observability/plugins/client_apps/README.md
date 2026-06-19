@@ -84,17 +84,16 @@ Utilities needed by more than one platform belong in:
 ### URL drilldown integration
 
 The plugin registers with `visibleIn: []`, meaning that it does not appear in Kibana's navigation menu.
-Users reach platform views via URL drilldowns configured on dashboard panels:
+Users reach platform views via URL drilldowns configured on dashboard panels.
 
 ```
-{{kibanaUrl}}/app/clientApps/<platform>/<action>?doc_id={{event._id}}
+{{kibanaUrl}}/app/clientApps/<platform>/<action>?doc_id={{event.value}}
 ```
 
-`{{event._id}}` is the Elasticsearch document `_id` of the log event in the clicked row.
 For example, an Android crash dashboard drills down to:
 
 ```
-{{kibanaUrl}}/app/clientApps/android/retrace?doc_id={{event._id}}
+{{kibanaUrl}}/app/clientApps/android/retrace?doc_id={{event.value}}
 ```
 
 For environments where crash documents are written outside the default
@@ -102,7 +101,7 @@ For environments where crash documents are written outside the default
 index pattern:
 
 ```
-{{kibanaUrl}}/app/clientApps/android/retrace?doc_id={{event._id}}&index=logs-myapp.otel*
+{{kibanaUrl}}/app/clientApps/android/retrace?doc_id={{event.value}}&index=logs-myapp.otel*
 ```
 
 The `index` value is passed to Elasticsearch as the current Kibana user. It is intentionally
