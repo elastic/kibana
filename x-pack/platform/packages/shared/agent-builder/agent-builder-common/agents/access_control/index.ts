@@ -20,7 +20,7 @@ import {
 export type EffectiveAgentRole = AgentAccessControlRole | 'owner' | 'admin';
 
 export interface AgentAuthzArgs {
-  access_control?: AgentAccessControl;
+  accessControl?: AgentAccessControl;
   owner?: UserIdAndName;
   currentUser?: CurrentUser | null;
   isAdmin: boolean;
@@ -90,7 +90,7 @@ const accessControlRoleForUser = (
  *   4. access-control mode baseline (Public→Editor, Shared→User, Private→nothing)
  */
 export const getEffectiveAgentRole = ({
-  access_control,
+  accessControl,
   owner,
   currentUser,
   isAdmin,
@@ -101,8 +101,8 @@ export const getEffectiveAgentRole = ({
   if (isAgentOwner({ owner, currentUser })) {
     return 'owner';
   }
-  const entryRole = accessControlRoleForUser(access_control, currentUser);
-  const baseline = accessControlModeRole(access_control?.access_mode);
+  const entryRole = accessControlRoleForUser(accessControl, currentUser);
+  const baseline = accessControlModeRole(accessControl?.access_mode);
   return maxAccessControlRole(entryRole, baseline);
 };
 
@@ -210,7 +210,7 @@ export const canCurrentUserEditAgent = ({
   }
 
   return hasAgentWriteAccess({
-    access_control: agent.access_control,
+    accessControl: agent.access_control,
     owner: agent.created_by,
     currentUser,
     isAdmin,

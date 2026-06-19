@@ -85,7 +85,7 @@ export const AgentSettingsTab: React.FC<AgentSettingsTabProps> = ({
     isCreateMode ||
     canChangeAgentAccessControlMode({
       agentId,
-      access_control: {
+      accessControl: {
         access_mode: currentAccessControlMode,
         entries: currentEntries,
       },

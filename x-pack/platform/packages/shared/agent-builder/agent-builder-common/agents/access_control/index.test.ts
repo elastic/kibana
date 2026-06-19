@@ -151,7 +151,7 @@ describe('hasAgentReadAccess', () => {
     expect(
       hasAgentReadAccess({
         ...baseArgs,
-        access_control: { access_mode: AgentAccessControlMode.Private, entries: [] },
+        accessControl: { access_mode: AgentAccessControlMode.Private, entries: [] },
         isAdmin: true,
       })
     ).toBe(true);
@@ -161,7 +161,7 @@ describe('hasAgentReadAccess', () => {
     expect(
       hasAgentReadAccess({
         ...baseArgs,
-        access_control: { access_mode: AgentAccessControlMode.Private, entries: [] },
+        accessControl: { access_mode: AgentAccessControlMode.Private, entries: [] },
         currentUser,
       })
     ).toBe(true);
@@ -171,7 +171,7 @@ describe('hasAgentReadAccess', () => {
     expect(
       hasAgentReadAccess({
         ...baseArgs,
-        access_control: { access_mode: AgentAccessControlMode.Public, entries: [] },
+        accessControl: { access_mode: AgentAccessControlMode.Public, entries: [] },
       })
     ).toBe(true);
   });
@@ -180,7 +180,7 @@ describe('hasAgentReadAccess', () => {
     expect(
       hasAgentReadAccess({
         ...baseArgs,
-        access_control: { access_mode: AgentAccessControlMode.Shared, entries: [] },
+        accessControl: { access_mode: AgentAccessControlMode.Shared, entries: [] },
       })
     ).toBe(true);
   });
@@ -189,7 +189,7 @@ describe('hasAgentReadAccess', () => {
     expect(
       hasAgentReadAccess({
         ...baseArgs,
-        access_control: { access_mode: AgentAccessControlMode.Private, entries: [] },
+        accessControl: { access_mode: AgentAccessControlMode.Private, entries: [] },
       })
     ).toBe(false);
   });
@@ -216,7 +216,7 @@ describe('hasAgentWriteAccess', () => {
     expect(
       hasAgentWriteAccess({
         ...baseArgs,
-        access_control: { access_mode: AgentAccessControlMode.Private, entries: [] },
+        accessControl: { access_mode: AgentAccessControlMode.Private, entries: [] },
         isAdmin: true,
       })
     ).toBe(true);
@@ -226,7 +226,7 @@ describe('hasAgentWriteAccess', () => {
     expect(
       hasAgentWriteAccess({
         ...baseArgs,
-        access_control: { access_mode: AgentAccessControlMode.Private, entries: [] },
+        accessControl: { access_mode: AgentAccessControlMode.Private, entries: [] },
         currentUser,
       })
     ).toBe(true);
@@ -236,7 +236,7 @@ describe('hasAgentWriteAccess', () => {
     expect(
       hasAgentWriteAccess({
         ...baseArgs,
-        access_control: { access_mode: AgentAccessControlMode.Public, entries: [] },
+        accessControl: { access_mode: AgentAccessControlMode.Public, entries: [] },
       })
     ).toBe(true);
   });
@@ -245,7 +245,7 @@ describe('hasAgentWriteAccess', () => {
     expect(
       hasAgentWriteAccess({
         ...baseArgs,
-        access_control: { access_mode: AgentAccessControlMode.Shared, entries: [] },
+        accessControl: { access_mode: AgentAccessControlMode.Shared, entries: [] },
       })
     ).toBe(false);
   });
@@ -254,7 +254,7 @@ describe('hasAgentWriteAccess', () => {
     expect(
       hasAgentWriteAccess({
         ...baseArgs,
-        access_control: { access_mode: AgentAccessControlMode.Private, entries: [] },
+        accessControl: { access_mode: AgentAccessControlMode.Private, entries: [] },
       })
     ).toBe(false);
   });
@@ -399,7 +399,7 @@ describe('ACL-aware authorization', () => {
     test('returns "admin" when isAdmin', () => {
       expect(
         getEffectiveAgentRole({
-          access_control: { access_mode: AgentAccessControlMode.Private, entries: [] },
+          accessControl: { access_mode: AgentAccessControlMode.Private, entries: [] },
           owner: aliceOwner,
           currentUser: bob,
           isAdmin: true,
@@ -410,7 +410,7 @@ describe('ACL-aware authorization', () => {
     test('returns "owner" for the agent owner', () => {
       expect(
         getEffectiveAgentRole({
-          access_control: { access_mode: AgentAccessControlMode.Private, entries: [] },
+          accessControl: { access_mode: AgentAccessControlMode.Private, entries: [] },
           owner: aliceOwner,
           currentUser: { id: 'owner-id', username: 'alice' },
           isAdmin: false,
@@ -421,7 +421,7 @@ describe('ACL-aware authorization', () => {
     test('returns undefined for a private agent with no ACL match', () => {
       expect(
         getEffectiveAgentRole({
-          access_control: { access_mode: AgentAccessControlMode.Private, entries: [] },
+          accessControl: { access_mode: AgentAccessControlMode.Private, entries: [] },
           owner: aliceOwner,
           currentUser: bob,
           isAdmin: false,
@@ -432,7 +432,7 @@ describe('ACL-aware authorization', () => {
     test('matches a user-type ACL entry by username', () => {
       expect(
         getEffectiveAgentRole({
-          access_control: {
+          accessControl: {
             access_mode: AgentAccessControlMode.Private,
             entries: [{ type: 'user', name: 'bob', role: AgentAccessControlRole.User }],
           },
@@ -446,7 +446,7 @@ describe('ACL-aware authorization', () => {
     test('does not match a user-type ACL entry by anything other than username', () => {
       expect(
         getEffectiveAgentRole({
-          access_control: {
+          accessControl: {
             access_mode: AgentAccessControlMode.Private,
             entries: [{ type: 'user', name: 'analyst', role: AgentAccessControlRole.Manager }],
           },
@@ -460,7 +460,7 @@ describe('ACL-aware authorization', () => {
     test('picks the highest role across multiple matching user entries', () => {
       expect(
         getEffectiveAgentRole({
-          access_control: {
+          accessControl: {
             access_mode: AgentAccessControlMode.Private,
             entries: [
               { type: 'user', name: 'bob', role: AgentAccessControlRole.User },
@@ -477,7 +477,7 @@ describe('ACL-aware authorization', () => {
     test('Public access-control mode grants Editor baseline to non-owners', () => {
       expect(
         getEffectiveAgentRole({
-          access_control: { access_mode: AgentAccessControlMode.Public, entries: [] },
+          accessControl: { access_mode: AgentAccessControlMode.Public, entries: [] },
           owner: aliceOwner,
           currentUser: bob,
           isAdmin: false,
@@ -488,7 +488,7 @@ describe('ACL-aware authorization', () => {
     test('Shared access-control mode grants User baseline to non-owners', () => {
       expect(
         getEffectiveAgentRole({
-          access_control: { access_mode: AgentAccessControlMode.Shared, entries: [] },
+          accessControl: { access_mode: AgentAccessControlMode.Shared, entries: [] },
           owner: aliceOwner,
           currentUser: bob,
           isAdmin: false,
@@ -500,7 +500,7 @@ describe('ACL-aware authorization', () => {
       // Public alone gives Editor; ACL Manager wins.
       expect(
         getEffectiveAgentRole({
-          access_control: {
+          accessControl: {
             access_mode: AgentAccessControlMode.Public,
             entries: [{ type: 'user', name: 'bob', role: AgentAccessControlRole.Manager }],
           },
@@ -524,7 +524,7 @@ describe('ACL-aware authorization', () => {
 
   describe('hierarchy checks', () => {
     const privateAgent = {
-      access_control: { access_mode: AgentAccessControlMode.Private, entries: [] },
+      accessControl: { access_mode: AgentAccessControlMode.Private, entries: [] },
       owner: aliceOwner,
       isAdmin: false,
     };
@@ -535,7 +535,7 @@ describe('ACL-aware authorization', () => {
         access_mode: AgentAccessControlMode.Private,
         entries: [{ type: 'user' as const, name: 'bob', role: AgentAccessControlRole.User }],
       };
-      const args = { ...privateAgent, access_control: accessControl, currentUser: bob };
+      const args = { ...privateAgent, accessControl, currentUser: bob };
       expect(hasAgentReadAccess(args)).toBe(true);
       expect(hasAgentUseAccess(args)).toBe(true);
       expect(hasAgentWriteAccess(args)).toBe(false);
@@ -558,7 +558,7 @@ describe('ACL-aware authorization', () => {
         access_mode: AgentAccessControlMode.Private,
         entries: [{ type: 'user' as const, name: 'bob', role: AgentAccessControlRole.Editor }],
       };
-      const args = { ...privateAgent, access_control: accessControl, currentUser: bob };
+      const args = { ...privateAgent, accessControl, currentUser: bob };
       expect(hasAgentWriteAccess(args)).toBe(true);
       expect(canManageAgentAccessControl(args)).toBe(true);
       expect(canDeleteAgent(args)).toBe(false);
@@ -569,7 +569,7 @@ describe('ACL-aware authorization', () => {
         access_mode: AgentAccessControlMode.Private,
         entries: [{ type: 'user' as const, name: 'bob', role: AgentAccessControlRole.Manager }],
       };
-      const args = { ...privateAgent, access_control: accessControl, currentUser: bob };
+      const args = { ...privateAgent, accessControl, currentUser: bob };
       expect(canDeleteAgent(args)).toBe(true);
       expect(canManageAgentAccessControl(args)).toBe(true);
     });
@@ -583,7 +583,7 @@ describe('ACL-aware authorization', () => {
       expect(
         canDeleteAgent({
           owner: aliceOwner,
-          access_control: accessControl,
+          accessControl,
           currentUser: carol,
           isAdmin: false,
         })
@@ -592,7 +592,7 @@ describe('ACL-aware authorization', () => {
 
     test('owner is implicitly Manager regardless of ACL', () => {
       const args = {
-        access_control: { access_mode: AgentAccessControlMode.Private, entries: [] },
+        accessControl: { access_mode: AgentAccessControlMode.Private, entries: [] },
         owner: aliceOwner,
         currentUser: { id: 'owner-id', username: 'alice' } as CurrentUser,
         isAdmin: false,
@@ -616,7 +616,7 @@ describe('ACL-aware authorization', () => {
     test('grants for the agent owner on a Private agent', () => {
       expect(
         canManageAgentAccessControl({
-          access_control: { access_mode: AgentAccessControlMode.Private, entries: [] },
+          accessControl: { access_mode: AgentAccessControlMode.Private, entries: [] },
           owner: aliceOwner,
           currentUser: { id: 'owner-id', username: 'alice' },
           isAdmin: false,
@@ -627,7 +627,7 @@ describe('ACL-aware authorization', () => {
     test('denies a non-owner on a Private agent with no ACL grant', () => {
       expect(
         canManageAgentAccessControl({
-          access_control: { access_mode: AgentAccessControlMode.Private, entries: [] },
+          accessControl: { access_mode: AgentAccessControlMode.Private, entries: [] },
           owner: aliceOwner,
           currentUser: bob,
           isAdmin: false,
@@ -638,7 +638,7 @@ describe('ACL-aware authorization', () => {
     test('grants for an ACL Editor grant on a Private agent', () => {
       expect(
         canManageAgentAccessControl({
-          access_control: {
+          accessControl: {
             access_mode: AgentAccessControlMode.Private,
             entries: [{ type: 'user', name: 'bob', role: AgentAccessControlRole.Editor }],
           },
@@ -652,7 +652,7 @@ describe('ACL-aware authorization', () => {
     test('grants for an ACL Manager grant on a Private agent', () => {
       expect(
         canManageAgentAccessControl({
-          access_control: {
+          accessControl: {
             access_mode: AgentAccessControlMode.Private,
             entries: [{ type: 'user', name: 'bob', role: AgentAccessControlRole.Manager }],
           },
@@ -666,7 +666,7 @@ describe('ACL-aware authorization', () => {
     test('grants for any non-owner on a Public agent (access-control mode baseline = Editor)', () => {
       expect(
         canManageAgentAccessControl({
-          access_control: { access_mode: AgentAccessControlMode.Public, entries: [] },
+          accessControl: { access_mode: AgentAccessControlMode.Public, entries: [] },
           owner: aliceOwner,
           currentUser: bob,
           isAdmin: false,
@@ -677,7 +677,7 @@ describe('ACL-aware authorization', () => {
     test('grants for cluster admin regardless of agent state', () => {
       expect(
         canManageAgentAccessControl({
-          access_control: { access_mode: AgentAccessControlMode.Private, entries: [] },
+          accessControl: { access_mode: AgentAccessControlMode.Private, entries: [] },
           owner: aliceOwner,
           currentUser: bob,
           isAdmin: true,
@@ -689,7 +689,7 @@ describe('ACL-aware authorization', () => {
       expect(
         canManageAgentAccessControl({
           agentId: agentBuilderDefaultAgentId,
-          access_control: { access_mode: AgentAccessControlMode.Public, entries: [] },
+          accessControl: { access_mode: AgentAccessControlMode.Public, entries: [] },
           owner: aliceOwner,
           currentUser: bob,
           isAdmin: true,
@@ -701,7 +701,7 @@ describe('ACL-aware authorization', () => {
       expect(
         canManageAgentAccessControl({
           agentId: agentBuilderDefaultAgentId,
-          access_control: { access_mode: AgentAccessControlMode.Public, entries: [] },
+          accessControl: { access_mode: AgentAccessControlMode.Public, entries: [] },
           owner: aliceOwner,
           currentUser: { id: 'owner-id', username: 'alice' },
           isAdmin: false,
@@ -715,7 +715,7 @@ describe('ACL-aware authorization', () => {
       expect(
         canChangeAgentAccessControlMode({
           agentId: agentBuilderDefaultAgentId,
-          access_control: {
+          accessControl: {
             access_mode: AgentAccessControlMode.Private,
             entries: [{ type: 'user', name: 'bob', role: AgentAccessControlRole.Manager }],
           },
@@ -730,7 +730,7 @@ describe('ACL-aware authorization', () => {
       expect(
         canChangeAgentAccessControlMode({
           agentId: 'custom-agent',
-          access_control: {
+          accessControl: {
             access_mode: AgentAccessControlMode.Private,
             entries: [{ type: 'user', name: 'bob', role: AgentAccessControlRole.Manager }],
           },

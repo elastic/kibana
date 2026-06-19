@@ -70,7 +70,7 @@ export const AgentOverview: React.FC = () => {
     if (!isExperimentalFeaturesEnabled || !agent) return false;
     return canChangeAgentAccessControlMode({
       agentId: agent.id,
-      access_control: agent.access_control,
+      accessControl: agent.access_control,
       owner: agent.created_by,
       currentUser: currentUser ?? undefined,
       isAdmin,

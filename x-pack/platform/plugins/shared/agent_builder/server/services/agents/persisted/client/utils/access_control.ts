@@ -53,7 +53,7 @@ export const hasReadAccess = ({
   isAdmin: boolean;
 }): boolean =>
   hasAgentReadAccess({
-    access_control: normalizeAccessControl(source),
+    accessControl: normalizeAccessControl(source),
     owner: sourceToOwner(source),
     currentUser: user,
     isAdmin,
@@ -69,7 +69,7 @@ export const hasUseAccess = ({
   isAdmin: boolean;
 }): boolean =>
   hasAgentUseAccess({
-    access_control: normalizeAccessControl(source),
+    accessControl: normalizeAccessControl(source),
     owner: sourceToOwner(source),
     currentUser: user,
     isAdmin,
@@ -85,7 +85,7 @@ export const hasWriteAccess = ({
   isAdmin: boolean;
 }): boolean =>
   hasAgentWriteAccess({
-    access_control: normalizeAccessControl(source),
+    accessControl: normalizeAccessControl(source),
     owner: sourceToOwner(source),
     currentUser: user,
     isAdmin,
@@ -101,7 +101,7 @@ export const hasDeleteAccess = ({
   isAdmin: boolean;
 }): boolean =>
   canDeleteAgent({
-    access_control: normalizeAccessControl(source),
+    accessControl: normalizeAccessControl(source),
     owner: sourceToOwner(source),
     currentUser: user,
     isAdmin,
@@ -118,7 +118,7 @@ export const hasManageAccessControlAccess = ({
 }): boolean =>
   canManageAgentAccessControl({
     agentId: source.id,
-    access_control: normalizeAccessControl(source),
+    accessControl: normalizeAccessControl(source),
     owner: sourceToOwner(source),
     currentUser: user,
     isAdmin,
@@ -271,7 +271,7 @@ export const validateAccessControlUpdateAccess = ({
     !isAccessModeChange ||
     canChangeAgentAccessControlMode({
       agentId: source.id,
-      access_control: currentAccessControl,
+      accessControl: currentAccessControl,
       owner: sourceToOwner(source),
       currentUser: user,
       isAdmin,
