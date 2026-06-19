@@ -89,7 +89,7 @@ export const configSchema = schema.object({
     // templates and component templates. Raise this above the alert mapping's
     // field count to avoid the framework's reset-then-increase churn against
     // Elasticsearch. Keep the default in sync with `TOTAL_FIELDS_LIMIT`.
-    totalFieldsLimit: schema.number({ defaultValue: 2800, min: 1, max: 5000 }),
+    totalFieldsLimit: schema.number({ defaultValue: 2800, min: 2500, max: 5000 }),
   }),
   ruleChangeTracking: schema.object({
     enabled: schema.boolean({ defaultValue: false }),
