@@ -26,12 +26,18 @@ const makeService = async () => {
   return service;
 };
 
+interface ListEntry {
+  name: string;
+  type: 'file' | 'directory';
+  children?: ListEntry[];
+}
+
 interface StandardReturn {
   results: Array<{
     type: string;
     data: {
       path?: string;
-      entries?: Array<{ name: string; type: 'file' | 'directory' }>;
+      entries?: ListEntry[];
     } & Record<string, unknown>;
   }>;
 }
@@ -46,7 +52,10 @@ describe('list_files', () => {
     await fs.mkdir('/workspace/sub/nested', { recursive: true });
 
     const tool = createListFilesTool({ filesystemService: service });
-    const out = (await tool.handler({ path: '/workspace/sub' }, {} as never)) as StandardReturn;
+    const out = (await tool.handler(
+      { path: '/workspace/sub', depth: 1 },
+      {} as never
+    )) as StandardReturn;
 
     expect(out.results).toHaveLength(1);
     expect(out.results[0].type).toBe('other');
@@ -63,10 +72,65 @@ describe('list_files', () => {
   it('returns an error result for a nonexistent path', async () => {
     const service = await makeService();
     const tool = createListFilesTool({ filesystemService: service });
-    const out = (await tool.handler({ path: '/workspace/does-not-exist' }, {} as never)) as {
-      results: Array<{ type: string; data: { message: string } }>;
-    };
+    const out = (await tool.handler(
+      { path: '/workspace/does-not-exist', depth: 1 },
+      {} as never
+    )) as { results: Array<{ type: string; data: { message: string } }> };
     expect(out.results[0].type).toBe('error');
     expect(out.results[0].data.message).toMatch(/list_files '\/workspace\/does-not-exist'/);
+  });
+
+  it('returns nested children when depth > 1', async () => {
+    const service = await makeService();
+    const fs = service.getFilesystem();
+    await fs.mkdir('/workspace/root/a/inner', { recursive: true });
+    await fs.writeFile('/workspace/root/top.txt', 't');
+    await fs.writeFile('/workspace/root/a/mid.txt', 'm');
+    await fs.writeFile('/workspace/root/a/inner/leaf.txt', 'l');
+
+    const tool = createListFilesTool({ filesystemService: service });
+    const out = (await tool.handler(
+      { path: '/workspace/root', depth: 3 },
+      {} as never
+    )) as StandardReturn;
+
+    expect(out.results[0].type).toBe('other');
+    const entries = out.results[0].data.entries as ListEntry[];
+    const a = entries.find((e) => e.name === 'a');
+    expect(a).toEqual({
+      name: 'a',
+      type: 'directory',
+      children: expect.arrayContaining([
+        { name: 'mid.txt', type: 'file' },
+        {
+          name: 'inner',
+          type: 'directory',
+          children: [{ name: 'leaf.txt', type: 'file' }],
+        },
+      ]),
+    });
+    // depth bounds: with depth=3 starting at root, leaf.txt (depth 3) should appear,
+    // but a hypothetical 4th level would not — verified above by the strict structure.
+    expect(entries).toEqual(
+      expect.arrayContaining([{ name: 'top.txt', type: 'file' }, expect.objectContaining({ name: 'a' })])
+    );
+  });
+
+  it('only returns immediate children with depth=1 (default)', async () => {
+    const service = await makeService();
+    const fs = service.getFilesystem();
+    await fs.mkdir('/workspace/d1/d2', { recursive: true });
+    await fs.writeFile('/workspace/d1/d2/leaf.txt', 'x');
+
+    const tool = createListFilesTool({ filesystemService: service });
+    const out = (await tool.handler(
+      { path: '/workspace/d1', depth: 1 },
+      {} as never
+    )) as StandardReturn;
+
+    const entries = out.results[0].data.entries as ListEntry[];
+    const d2 = entries.find((e) => e.name === 'd2');
+    expect(d2).toEqual({ name: 'd2', type: 'directory' });
+    expect(d2?.children).toBeUndefined();
   });
 });
