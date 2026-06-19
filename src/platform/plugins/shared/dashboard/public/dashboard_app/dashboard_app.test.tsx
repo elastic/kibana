@@ -18,6 +18,7 @@ import { DashboardRenderer } from '../dashboard_renderer/dashboard_renderer';
 import { DashboardTopNav } from '../dashboard_top_nav';
 import { buildMockDashboardApi } from '../mocks';
 import { dataService, embeddableService, coreServices } from '../services/kibana_services';
+import { resetDashboardSideNavAutoCollapsePreference } from './hooks/use_collapse_side_nav';
 import { DashboardApp } from './dashboard_app';
 import type { EmbeddableStateTransfer } from '@kbn/embeddable-plugin/public';
 import { createEmbeddableStateTransferMock } from '@kbn/embeddable-plugin/public/mocks';
@@ -58,6 +59,7 @@ describe('Dashboard App', () => {
 
   beforeEach(() => {
     // reset the spies before each test
+    resetDashboardSideNavAutoCollapsePreference();
     expandPanelSpy.mockClear();
     historySpy.mockClear();
     (coreServices.chrome.sideNav.setIsCollapsed as jest.Mock).mockClear();

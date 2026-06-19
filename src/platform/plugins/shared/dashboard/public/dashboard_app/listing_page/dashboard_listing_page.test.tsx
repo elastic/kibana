@@ -16,6 +16,7 @@ import { createKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import type { DashboardListingPageProps } from './dashboard_listing_page';
 import { DashboardListingPage } from './dashboard_listing_page';
 import { coreServices } from '../../services/kibana_services';
+import { resetDashboardSideNavAutoCollapsePreference } from '../hooks/use_collapse_side_nav';
 
 const mockUseParams = jest.fn().mockReturnValue({});
 jest.mock('react-router-dom', () => ({
@@ -69,6 +70,7 @@ const renderDashboardListingPage = (props: Partial<DashboardListingPageProps> = 
   );
 
 beforeEach(() => {
+  resetDashboardSideNavAutoCollapsePreference();
   (coreServices.chrome.sideNav.setIsCollapsed as jest.Mock).mockClear();
 });
 
