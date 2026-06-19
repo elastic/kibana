@@ -177,7 +177,9 @@ export function initRoutes(
 
       const fakeRawRequest: FakeRawRequest = {
         headers: {
-          authorization: `ApiKey ${apiKeyCreateResult?.api_key}`,
+          authorization: `ApiKey ${Buffer.from(
+            `${apiKeyCreateResult!.id}:${apiKeyCreateResult!.api_key}`
+          ).toString('base64')}`,
         },
       };
       const fakeRequest = kibanaRequestFactory(fakeRawRequest);
@@ -286,7 +288,9 @@ export function initRoutes(
 
         const fakeRawRequest: FakeRawRequest = {
           headers: {
-            authorization: `ApiKey ${apiKeyCreateResult?.api_key}`,
+            authorization: `ApiKey ${Buffer.from(
+              `${apiKeyCreateResult!.id}:${apiKeyCreateResult!.api_key}`
+            ).toString('base64')}`,
           },
         };
         const fakeRequest = kibanaRequestFactory(fakeRawRequest);
