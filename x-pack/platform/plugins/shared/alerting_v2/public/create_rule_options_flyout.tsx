@@ -22,7 +22,12 @@ import type { ESQLControlVariable } from '@kbn/esql-types';
 import type { CreateRuleData } from '@kbn/alerting-v2-schemas';
 import { AGENT_BUILDER_APP_ID } from '@kbn/deeplinks-agent-builder';
 import type { ComposeDiscoverFlyoutProps } from '@kbn/alerting-v2-rule-form';
-import { untilPluginStartServicesReady, type AlertingV2KibanaServices } from './kibana_services';
+import { Context } from '@kbn/core-di-browser';
+import {
+  untilPluginStartServicesReady,
+  getDiContainer,
+  type AlertingV2KibanaServices,
+} from './kibana_services';
 import { RuleCreateOptionsFlyout } from './components/rule_create_options/rule_create_options_flyout';
 import { RulesApi } from './services/rules_api';
 import { CREATE_WITH_AGENT_INITIAL_PROMPT, AGENT_BUILDER_NEW_CONVERSATION_PATH } from './constants';
@@ -285,11 +290,14 @@ const CreateRuleOptionsFlyoutInner = ({
 
 export const CreateRuleOptionsFlyout = (props: CreateRuleOptionsFlyoutProps) => {
   const queryClient = useMemo(() => new QueryClient(), []);
+  const container = getDiContainer();
   return (
     <EuiErrorBoundary>
-      <QueryClientProvider client={queryClient}>
-        <CreateRuleOptionsFlyoutInner {...props} />
-      </QueryClientProvider>
+      <Context.Provider value={container}>
+        <QueryClientProvider client={queryClient}>
+          <CreateRuleOptionsFlyoutInner {...props} />
+        </QueryClientProvider>
+      </Context.Provider>
     </EuiErrorBoundary>
   );
 };
