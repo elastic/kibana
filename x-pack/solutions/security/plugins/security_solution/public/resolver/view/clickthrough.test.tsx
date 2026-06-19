@@ -49,6 +49,10 @@ describe("Resolver, when rendered with the `indices` prop set to `[]` and the `d
     });
   });
 
+  afterEach(() => {
+    simulator.unmount();
+  });
+
   it('should render no processes', async () => {
     await expect(
       simulator.map(() => ({
