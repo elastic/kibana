@@ -36,7 +36,7 @@ import {
   UNIT_WEEKS,
 } from './translations';
 import type { FrequencyMode, RecurrenceFormState } from './types';
-import { WEEKDAY_TOKENS } from './types';
+import { clampInt, WEEKDAY_TOKENS } from './types';
 
 export interface FrequencySelectorProps {
   value: RecurrenceFormState;
@@ -72,14 +72,6 @@ const WEEKDAY_LABEL: Record<WeekdayStr, string> = {
 
 const isFrequencyMode = (value: string): value is FrequencyMode =>
   FREQUENCY_OPTION_TEMPLATES.some((opt) => opt.mode === value);
-
-const clampInt = (value: number, min: number, max: number, fallback: number): number => {
-  if (!Number.isFinite(value) || !Number.isInteger(value)) return fallback;
-  if (value < min) return min;
-  if (value > max) return max;
-
-  return value;
-};
 
 export const FrequencySelector = ({
   value,

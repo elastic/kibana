@@ -157,3 +157,28 @@ export const CALENDAR_ANCHORED_FREQUENCIES: ReadonlySet<FrequencyMode> = new Set
   'daily',
   'custom',
 ]);
+
+/**
+ * Clamp a numeric field value into `[min, max]`. Shared by the interval and
+ * frequency-interval inputs so both numeric fields agree on the bound math.
+ *
+ * - `truncate: true` floors fractional input toward zero (the interval seconds
+ *   field accepts a typed `120.7` and keeps `120`).
+ * - `truncate: false` (default) rejects non-integer / non-finite input back to
+ *   `fallback` (the RRULE INTERVAL field only ever holds whole repeats).
+ */
+export const clampInt = (
+  value: number,
+  min: number,
+  max: number,
+  fallback: number,
+  { truncate = false }: { truncate?: boolean } = {}
+): number => {
+  if (!Number.isFinite(value)) return fallback;
+  const normalized = truncate ? Math.trunc(value) : value;
+  if (!Number.isInteger(normalized)) return fallback;
+  if (normalized < min) return min;
+  if (normalized > max) return max;
+
+  return normalized;
+};

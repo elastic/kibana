@@ -8,6 +8,7 @@
 import React, { useCallback } from 'react';
 import { EuiFieldNumber, EuiFormRow } from '@elastic/eui';
 import { INTERVAL_FIELD_LABEL, INTERVAL_FIELD_UNIT } from './translations';
+import { clampInt } from './types';
 
 /**
  * Minimum 1 second, maximum 604,800 seconds (7 days) — matches the existing
@@ -28,11 +29,11 @@ export const IntervalField = ({ value, onChange, disabled }: IntervalFieldProps)
       const raw = Number(event.target.value);
       if (!Number.isFinite(raw)) return;
 
-      const clamped = Math.min(
-        MAX_INTERVAL_SECONDS,
-        Math.max(MIN_INTERVAL_SECONDS, Math.trunc(raw))
+      onChange(
+        clampInt(raw, MIN_INTERVAL_SECONDS, MAX_INTERVAL_SECONDS, MIN_INTERVAL_SECONDS, {
+          truncate: true,
+        })
       );
-      onChange(clamped);
     },
     [onChange]
   );
