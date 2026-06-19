@@ -28,6 +28,7 @@ import {
 import { useController, useForm } from 'react-hook-form';
 
 import type { DataSetWithName, DataSource } from '../../common';
+import { DATA_SOURCE_TYPES_TO_HELP_TEXT } from '../../common';
 import { getFlyoutSaveErrorMessage } from '../get_flyout_save_error_message';
 import {
   buildDatasetSettingsFromFormValues,
@@ -148,6 +149,16 @@ export const CreateDatasetFlyout: FunctionComponent<CreateDatasetFlyoutProps> = 
     return [placeholder, ...fromSources];
   }, [dataSources]);
 
+  const resourceHelpText = useMemo(() => {
+    const selected = dataSources.find((ds) => ds.name === dataSourceIdField.value);
+    if (!selected) {
+      return createDatasetFlyoutStrings.resourceHelp();
+    }
+    return (
+      DATA_SOURCE_TYPES_TO_HELP_TEXT[selected.type] ?? createDatasetFlyoutStrings.resourceHelp()
+    );
+  }, [dataSourceIdField.value, dataSources]);
+
   const onSubmit = async (values: CreateDatasetFormValues) => {
     setSaveError(undefined);
     setIsSaving(true);
@@ -221,6 +232,7 @@ export const CreateDatasetFlyout: FunctionComponent<CreateDatasetFlyoutProps> = 
           </EuiFormRow>
           <EuiFormRow
             label={createDatasetFlyoutStrings.nameLabel()}
+            helpText={createDatasetFlyoutStrings.nameHelp()}
             fullWidth
             isInvalid={Boolean(errors.name)}
             error={errors.name?.message}
@@ -250,7 +262,7 @@ export const CreateDatasetFlyout: FunctionComponent<CreateDatasetFlyoutProps> = 
           </EuiFormRow>
           <EuiFormRow
             label={createDatasetFlyoutStrings.resourceLabel()}
-            helpText={createDatasetFlyoutStrings.resourceHelp()}
+            helpText={resourceHelpText}
             fullWidth
             isInvalid={Boolean(errors.resource)}
             error={errors.resource?.message}

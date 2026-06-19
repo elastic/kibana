@@ -17,23 +17,20 @@ export interface DataSourceCommon<T extends DataSourceType, S extends {}> {
   settings: S;
 }
 
-export type DataSource =
-  | S3DataSource
-  | GCSDataSource
-  | AzureDataSource
-  | IcebergDataSource
-  | JdbcDataSource
-  | FlightDataSource;
+export type DataSource = S3DataSource | GCSDataSource | AzureDataSource;
+// | IcebergDataSource
+// | JdbcDataSource
+// | FlightDataSource;
 
 export type DataSourceWithSecrets =
   | S3DataSourceWithSecrets
   | GCSDataSourceWithSecrets
-  | AzureDataSourceWithSecrets
-  | IcebergDataSourceWithSecrets
-  | JdbcDataSourceWithSecrets
-  | FlightDataSource;
+  | AzureDataSourceWithSecrets;
+// | IcebergDataSourceWithSecrets
+// | JdbcDataSourceWithSecrets
+// | FlightDataSource;
 
-export type DataSourceType = 's3' | 'gcs' | 'azure' | 'iceberg' | 'jdbc' | 'flight';
+export type DataSourceType = 's3' | 'gcs' | 'azure'; // | 'iceberg' | 'jdbc' | 'flight';
 
 /** All supported data source type values, for select components and validation. */
 export const ALL_DATA_SOURCE_TYPES: DataSourceType[] = [
@@ -54,9 +51,20 @@ export const DATA_SOURCE_TYPES_TO_ICONS: Record<DataSourceType, string> = {
   s3: 'logoAWS',
   gcs: 'logoGCP',
   azure: 'logoAzure',
-  iceberg: 'logoIceberg',
-  jdbc: 'logoJdbc',
-  flight: 'logoFlight',
+  // iceberg: 'logoIceberg',
+  // jdbc: 'logoJdbc',
+  // flight: 'logoFlight',
+} as const;
+
+export const DATA_SOURCE_TYPES_TO_HELP_TEXT: Partial<Record<DataSourceType, string>> = {
+  // TODO
+  // URI, glob pattern, table name, or SQL query that identifies the data (e.g. s3://logs-bucket/access/**/*.parquet).
+  s3: 'URI with path and glob pattern(e.g. s3://logs-bucket/access/**/*.parquet)',
+  gcs: 'URI with path and glob pattern(e.g. s3://logs-bucket/access/**/*.parquet)',
+  azure: 'URI with path and glob pattern(e.g. s3://logs-bucket/access/**/*.parquet)',
+  // iceberg: 'icebergHelpText',
+  // jdbc: 'jdbcHelpText',
+  // flight: 'flightHelpText',
 } as const;
 
 export type S3DataSource = DataSourceCommon<'s3', S3DataSourceSettings>;
@@ -118,7 +126,7 @@ export interface AzureDataSourceSettingsWithSecrets extends AzureDataSourceSetti
   client_id?: string;
   jwt_audience?: string;
 }
-
+/*
 export type IcebergDataSource = DataSourceCommon<'iceberg', IcebergDataSourceSettings>;
 
 export type IcebergDataSourceWithSecrets = DataSourceCommon<
@@ -160,3 +168,4 @@ export interface FlightDataSourceSettings {
   host: string;
   port?: number;
 }
+*/

@@ -6,12 +6,13 @@
  */
 
 import React, { useMemo, useState } from 'react';
+import { css } from '@emotion/react';
 import {
   EuiButtonEmpty,
   EuiFormRow,
   EuiSelect,
   EuiSpacer,
-  EuiText,
+  useEuiTheme,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import type { Control } from 'react-hook-form';
@@ -22,8 +23,6 @@ import type { CreateDatasetFormValues } from './create_dataset_flyout_form_state
 import {
   DATASET_FORMAT_AUTOMATIC,
   showsDatasetFileSettings,
-  validateMaxErrorRatio,
-  validateMaxErrors,
 } from './create_dataset_flyout_form_state';
 
 export function CreateDatasetFlyoutSettings({
@@ -31,6 +30,7 @@ export function CreateDatasetFlyoutSettings({
 }: {
   control: Control<CreateDatasetFormValues>;
 }) {
+  const { euiTheme } = useEuiTheme();
   const [isOpen, setIsOpen] = useState(false);
   const contentId = useGeneratedHtmlId({ prefix: 'createDatasetFlyoutOptionalSettings' });
   const { field: formatField } = useController({
@@ -83,11 +83,13 @@ export function CreateDatasetFlyoutSettings({
           ? createDatasetFlyoutStrings.optionalSettingsHide()
           : createDatasetFlyoutStrings.optionalSettingsShow()}
       </EuiButtonEmpty>
-      <div id={contentId} hidden={!isOpen}>
-        <EuiSpacer size="s" />
-        <EuiText size="s" color="subdued" data-test-subj="createDatasetFlyoutSettingsHelp">
-          {createDatasetFlyoutStrings.settingsSectionHelp()}
-        </EuiText>
+      <div
+        id={contentId}
+        hidden={!isOpen}
+        css={css`
+          padding-left: ${euiTheme.size.l};
+        `}
+      >
         <EuiSpacer size="s" />
         {/**
       <EuiFormRow label={createDatasetFlyoutStrings.settingsFormatLabel()} fullWidth>
@@ -120,6 +122,7 @@ function CreateDatasetFlyoutFileSettings({
     name: 'settings.error_mode',
     control,
   });
+  /*
   const { field: maxErrorsField, fieldState: maxErrorsState } = useController({
     name: 'settings.max_errors',
     control,
@@ -130,10 +133,12 @@ function CreateDatasetFlyoutFileSettings({
     control,
     rules: { validate: validateMaxErrorRatio },
   });
+  */
   const { field: partitionDetectionField } = useController({
     name: 'settings.partition_detection',
     control,
   });
+  /*
   const { field: partitionPathField } = useController({
     name: 'settings.partition_path',
     control,
@@ -142,6 +147,7 @@ function CreateDatasetFlyoutFileSettings({
     name: 'settings.hive_partitioning',
     control,
   });
+  */
 
   const errorModeOptions = useMemo(
     () => [
