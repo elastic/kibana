@@ -324,13 +324,15 @@ export class StreamsPlugin
       void core
         .getStartServices()
         .then(async ([coreStart]) => {
+          const { streamsGetScopedClients, server } = this;
+          if (!streamsGetScopedClients || !server) return;
           const investigationEnabled = await isInvestigationEnabled(coreStart.featureFlags);
 
           await registerStreamsAgentBuilder({
             agentBuilder: plugins.agentBuilder!,
-            getScopedClients: this.streamsGetScopedClients,
+            getScopedClients: streamsGetScopedClients,
             agentContextLayer: plugins.agentContextLayer,
-            server: this.server,
+            server,
             logger: this.logger,
             telemetry: telemetryClient,
             streamsKIsOnboardingClient,
