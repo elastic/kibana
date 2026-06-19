@@ -110,13 +110,25 @@ export const composeFormToUpdateRequest = (
   builderType?: string
 ): UpdateRuleData => {
   const { kind, ...request } = composeFormToCreateRequest(formValues, builderType);
-  const { grouping, state_transition, artifacts, metadata, ...rest } = request;
+  const {
+    grouping,
+    state_transition,
+    artifacts,
+    metadata,
+    recovery_strategy,
+    no_data_strategy,
+    ...rest
+  } = request;
   return {
     ...rest,
     metadata: {
       ...metadata,
       builder_type: metadata.builder_type ?? null,
     },
+    // Read directly from formValues to bypass the create-path inference that
+    // re-adds 'query' when a recovery query block exists (see composeFormToCreateRequest).
+    recovery_strategy: formValues.recoveryStrategy ?? null,
+    no_data_strategy: no_data_strategy ?? null,
     grouping: grouping ?? null,
     state_transition: state_transition ?? null,
     artifacts: artifacts ?? null,

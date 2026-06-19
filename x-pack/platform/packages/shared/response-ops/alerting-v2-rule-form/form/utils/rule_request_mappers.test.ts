@@ -492,6 +492,8 @@ describe('rule_request_mappers', () => {
       expect(updateRequest.grouping).toBeNull();
       expect(updateRequest.state_transition).toBeNull();
       expect(updateRequest.artifacts).toBeNull();
+      expect(updateRequest.recovery_strategy).toBeNull();
+      expect(updateRequest.no_data_strategy).toBeNull();
     });
 
     it('does not include kind in the update payload', () => {
@@ -505,6 +507,8 @@ describe('rule_request_mappers', () => {
         ...baseFormValues,
         kind: 'alert',
         grouping: { fields: ['host.name'] },
+        recoveryStrategy: 'no_breach',
+        noDataStrategy: 'emit',
         stateTransitionAlertDelayMode: 'duration',
         stateTransitionRecoveryDelayMode: 'immediate',
         stateTransition: { pendingCount: 2, pendingTimeframe: '5m' },
@@ -513,6 +517,8 @@ describe('rule_request_mappers', () => {
       const result = mapFormValuesToUpdateRequest(formValues);
 
       expect(result.grouping).toEqual({ fields: ['host.name'] });
+      expect(result.recovery_strategy).toBe('no_breach');
+      expect(result.no_data_strategy).toBe('emit');
       expect(result.state_transition).toEqual({
         pending_count: 2,
         pending_timeframe: '5m',

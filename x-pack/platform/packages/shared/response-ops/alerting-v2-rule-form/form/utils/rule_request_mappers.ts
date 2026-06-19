@@ -153,10 +153,15 @@ export const mapFormValuesToCreateRequest = (formValues: FormValues): CreateRule
 });
 
 export const mapFormValuesToUpdateRequest = (formValues: FormValues): UpdateRuleData => {
-  const { grouping, state_transition, artifacts, ...rest } = mapFormValuesToRuleRequest(formValues);
+  const { grouping, state_transition, artifacts, recovery_strategy, no_data_strategy, ...rest } =
+    mapFormValuesToRuleRequest(formValues);
 
   return {
     ...rest,
+    // Read directly from formValues to bypass the create-path inference that
+    // re-adds 'query' when a recovery query block exists (see mapFormValuesToRuleRequest).
+    recovery_strategy: formValues.recoveryStrategy ?? null,
+    no_data_strategy: no_data_strategy ?? null,
     grouping: grouping ?? null,
     state_transition: state_transition ?? null,
     artifacts: artifacts ?? null,

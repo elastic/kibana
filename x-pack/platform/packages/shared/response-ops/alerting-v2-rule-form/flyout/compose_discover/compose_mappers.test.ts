@@ -242,6 +242,8 @@ describe('composeFormToUpdateRequest', () => {
     const result = composeFormToUpdateRequest(baseFormValues);
     expect(result.grouping).toBeNull();
     expect(result.artifacts).toBeNull();
+    expect(result.recovery_strategy).toBeNull();
+    expect(result.no_data_strategy).toBeNull();
   });
 
   it('preserves grouping when present', () => {
@@ -251,6 +253,17 @@ describe('composeFormToUpdateRequest', () => {
     };
     const result = composeFormToUpdateRequest(values);
     expect(result.grouping).toEqual({ fields: ['host.name'] });
+  });
+
+  it('preserves recovery_strategy and no_data_strategy when present', () => {
+    const values: ComposeFormValues = {
+      ...baseFormValues,
+      recoveryStrategy: 'no_breach',
+      noDataStrategy: 'emit',
+    };
+    const result = composeFormToUpdateRequest(values);
+    expect(result.recovery_strategy).toBe('no_breach');
+    expect(result.no_data_strategy).toBe('emit');
   });
 });
 
