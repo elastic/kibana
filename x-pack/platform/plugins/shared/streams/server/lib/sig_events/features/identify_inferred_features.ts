@@ -59,6 +59,7 @@ type IterationTuningParams = Partial<
 
 export interface FeaturesIdentifiedTelemetry {
   run_id: string;
+  connector_id: string;
   iteration: number;
   stream_name: string;
   stream_type: StreamType;
@@ -81,6 +82,7 @@ export interface FeaturesIdentifiedTelemetry {
 
 export interface TelemetryContext {
   run_id: string;
+  connector_id: string;
   iteration: number;
   stream_name: string;
   stream_type: StreamType;
@@ -342,6 +344,7 @@ export interface IdentifyInferredFeaturesOptions {
   kiClient: KnowledgeIndicatorClient;
   soClient: SavedObjectsClientContract;
   inferenceClient: BoundInferenceClient;
+  connectorId: string;
   logger: Logger;
   signal: AbortSignal;
   streamName: string;
@@ -369,6 +372,7 @@ export async function identifyInferredFeatures({
   kiClient,
   soClient,
   inferenceClient,
+  connectorId,
   logger,
   signal,
   streamName,
@@ -438,6 +442,7 @@ export async function identifyInferredFeatures({
 
   const telemetryCtx: TelemetryContext = {
     run_id: runId,
+    connector_id: connectorId,
     iteration,
     stream_name: streamName,
     stream_type: streamType,
