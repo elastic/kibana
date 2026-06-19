@@ -6,7 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
+import type { MappingProperty, MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
 
 export const WORKFLOWS_STEP_EXECUTIONS_INDEX_PREFIX = '.workflows-step-executions';
 
@@ -16,6 +16,18 @@ export const WORKFLOWS_STEP_EXECUTIONS_INDEX = WORKFLOWS_STEP_EXECUTIONS_INDEX_P
 export const WORKFLOWS_STEP_EXECUTIONS_INDEX_PATTERN = `${WORKFLOWS_STEP_EXECUTIONS_INDEX_PREFIX}-*`;
 
 export const WORKFLOWS_STEP_EXECUTIONS_INITIAL_INDEX = `${WORKFLOWS_STEP_EXECUTIONS_INDEX_PREFIX}-000001`;
+
+// Normalized LLM token usage. Shared between the step-execution mapping (per-step
+// usage extracted from `output.metadata.usage`) and the execution mapping (the
+// aggregated per-execution total). Present only for token-consuming (`ai.*`) steps.
+export const TOKEN_USAGE_MAPPING: MappingProperty = {
+  type: 'object',
+  properties: {
+    inputTokens: { type: 'long' },
+    outputTokens: { type: 'long' },
+    totalTokens: { type: 'long' },
+  },
+};
 
 export const WORKFLOWS_STEP_EXECUTIONS_INDEX_MAPPINGS: MappingTypeMapping = {
   dynamic: false,
@@ -90,5 +102,7 @@ export const WORKFLOWS_STEP_EXECUTIONS_INDEX_MAPPINGS: MappingTypeMapping = {
       // milliseconds
       type: 'long',
     },
+    // Per-step token usage, extracted from `output.metadata.usage`.
+    usage: TOKEN_USAGE_MAPPING,
   },
 };

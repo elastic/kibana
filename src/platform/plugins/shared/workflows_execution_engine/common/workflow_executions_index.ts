@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
+import { TOKEN_USAGE_MAPPING } from './step_executions_index';
 
 export const PLUGIN_ID = 'workflowsExecutionEngine';
 export const PLUGIN_NAME = 'Workflows Execution Engine';
@@ -91,5 +92,8 @@ export const WORKFLOWS_EXECUTIONS_INDEX_MAPPINGS: MappingTypeMapping = {
     concurrencyGroupKey: {
       type: 'keyword',
     },
+    // Aggregated token usage across all token-consuming steps, accumulated
+    // incrementally as each step finishes.
+    usage: TOKEN_USAGE_MAPPING,
   },
 };
