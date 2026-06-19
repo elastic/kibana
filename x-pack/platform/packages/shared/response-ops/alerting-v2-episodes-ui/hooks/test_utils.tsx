@@ -9,7 +9,8 @@ import React, { type PropsWithChildren } from 'react';
 import type { QueryClientConfig } from '@kbn/react-query';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { of } from 'rxjs';
-import { DEFAULT_SPACE_ID, type Space } from '@kbn/spaces-plugin/common';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
+import { type Space } from '@kbn/spaces-plugin/common';
 import { spacesPluginMock } from '@kbn/spaces-plugin/public/mocks';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
@@ -24,7 +25,7 @@ import type { AlertEpisodeDetailsServices } from '../components/details/types';
 
 export const createMockSpaces = (): jest.Mocked<SpacesPluginStart> => {
   const spaces = spacesPluginMock.createStartContract();
-  const activeSpace = { id: DEFAULT_SPACE_ID } as Space;
+  const activeSpace: Space = { id: DEFAULT_SPACE_ID, name: DEFAULT_SPACE_ID, disabledFeatures: [] };
   spaces.getActiveSpace.mockResolvedValue(activeSpace);
   spaces.getActiveSpace$.mockReturnValue(of(activeSpace));
   return spaces;
@@ -82,6 +83,6 @@ export const createMockRule = (overrides: Partial<RuleResponse> = {}): RuleRespo
     enabled: true,
     kind: 'alerting',
     metadata: { name: 'Rule 1' },
-    evaluation: { query: { base: 'FROM logs' } },
+    query: { format: 'standalone', breach: { query: 'FROM logs' } },
     ...overrides,
   } as RuleResponse);

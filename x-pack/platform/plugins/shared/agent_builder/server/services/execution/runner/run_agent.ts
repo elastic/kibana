@@ -12,7 +12,10 @@ import type {
   ExperimentalFeatures,
 } from '@kbn/agent-builder-server';
 import { getConnectorProvider } from '@kbn/inference-common';
-import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
+import {
+  AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID,
+  AGENT_BUILDER_BASH_SUPPORT_SETTING_ID,
+} from '@kbn/management-settings-ids';
 import { getCurrentSpaceId } from '../../../utils/spaces';
 import { withAgentSpan } from '../../../tracing';
 import { createAgentHandler } from '../run_agent/create_handler';
@@ -22,6 +25,7 @@ import {
   createAttachmentsService,
   createToolProvider,
   createSkillsService,
+  createFilesystemServices,
 } from './utils';
 import { createPluginsService } from './utils/plugins';
 import type { RunnerManager } from './runner';
@@ -63,16 +67,29 @@ export const createAgentHandlerContext = async <TParams = Record<string, unknown
   const uiSettingsClient = manager.deps.uiSettings.asScopedToClient(
     manager.deps.savedObjects.getScopedClient(request)
   );
-  const isExperimentalEnabled = await uiSettingsClient
-    .get<boolean>(AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID)
-    .catch(() => false);
+  const [isExperimentalEnabled, isBashEnabled] = await Promise.all([
+    uiSettingsClient
+      .get<boolean>(AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID)
+      .catch(() => false),
+    uiSettingsClient.get<boolean>(AGENT_BUILDER_BASH_SUPPORT_SETTING_ID).catch(() => false),
+  ]);
 
   const experimentalFeatures: ExperimentalFeatures = {
     filestore: true,
     skills: true,
     subagents: isExperimentalEnabled,
     todos: isExperimentalEnabled,
+    bash: isBashEnabled,
+    // forcefully disabled until the UI is implemented
+    askUserQuestion: false, // isExperimentalEnabled,
   };
+
+  const { filesystemService, bashService } = await createFilesystemServices({
+    manager,
+    experimentalFeatures,
+    workspaceId: agentExecutionParams.agentParams?.conversation?.workspace_id,
+    spaceId,
+  });
 
   return {
     request,
@@ -119,6 +136,8 @@ export const createAgentHandlerContext = async <TParams = Record<string, unknown
     subAgentExecutor: manager.deps.subAgentExecutor,
     analyticsService,
     trackingService,
+    filesystemService,
+    bashService,
   };
 };
 
