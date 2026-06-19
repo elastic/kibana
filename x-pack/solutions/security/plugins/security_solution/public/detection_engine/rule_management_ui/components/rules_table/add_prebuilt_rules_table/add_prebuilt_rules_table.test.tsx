@@ -5,7 +5,6 @@
  * 2.0.
  */
 import React from 'react';
-import { MemoryRouter } from 'react-router-dom';
 import { render, screen } from '@testing-library/react';
 import { AddPrebuiltRulesTable } from './add_prebuilt_rules_table';
 import { AddPrebuiltRulesHeaderButtons } from './add_prebuilt_rules_header_buttons';
@@ -124,14 +123,12 @@ describe('AddPrebuiltRulesTable', () => {
     });
 
     render(
-      <MemoryRouter>
-        <QueryClientProvider client={new QueryClient()}>
-          <AddPrebuiltRulesTableContextProvider>
-            <AddPrebuiltRulesHeaderButtons />
-            <AddPrebuiltRulesTable />
-          </AddPrebuiltRulesTableContextProvider>
-        </QueryClientProvider>
-      </MemoryRouter>
+      <QueryClientProvider client={new QueryClient()}>
+        <AddPrebuiltRulesTableContextProvider>
+          <AddPrebuiltRulesHeaderButtons />
+          <AddPrebuiltRulesTable />
+        </AddPrebuiltRulesTableContextProvider>
+      </QueryClientProvider>
     );
 
     const installAllButton = screen.getByTestId('installAllRulesButton');
@@ -154,14 +151,12 @@ describe('AddPrebuiltRulesTable', () => {
     });
 
     render(
-      <MemoryRouter>
-        <QueryClientProvider client={new QueryClient()}>
-          <AddPrebuiltRulesTableContextProvider>
-            <AddPrebuiltRulesHeaderButtons />
-            <AddPrebuiltRulesTable />
-          </AddPrebuiltRulesTableContextProvider>
-        </QueryClientProvider>
-      </MemoryRouter>
+      <QueryClientProvider client={new QueryClient()}>
+        <AddPrebuiltRulesTableContextProvider>
+          <AddPrebuiltRulesHeaderButtons />
+          <AddPrebuiltRulesTable />
+        </AddPrebuiltRulesTableContextProvider>
+      </QueryClientProvider>
     );
 
     const installAllButton = screen.getByTestId('installAllRulesButton');
@@ -180,14 +175,12 @@ describe('AddPrebuiltRulesTable', () => {
     });
 
     render(
-      <MemoryRouter>
-        <QueryClientProvider client={new QueryClient()}>
-          <AddPrebuiltRulesTableContextProvider>
-            <AddPrebuiltRulesHeaderButtons />
-            <AddPrebuiltRulesTable />
-          </AddPrebuiltRulesTableContextProvider>
-        </QueryClientProvider>
-      </MemoryRouter>
+      <QueryClientProvider client={new QueryClient()}>
+        <AddPrebuiltRulesTableContextProvider>
+          <AddPrebuiltRulesHeaderButtons />
+          <AddPrebuiltRulesTable />
+        </AddPrebuiltRulesTableContextProvider>
+      </QueryClientProvider>
     );
 
     const installAllButton = screen.getByTestId('installAllRulesButton');
@@ -230,13 +223,11 @@ describe('AddPrebuiltRulesTable', () => {
       });
 
       const { findByText } = render(
-        <MemoryRouter>
-          <QueryClientProvider client={new QueryClient()}>
-            <AddPrebuiltRulesTableContextProvider>
-              <AddPrebuiltRulesTable />
-            </AddPrebuiltRulesTableContextProvider>
-          </QueryClientProvider>
-        </MemoryRouter>
+        <QueryClientProvider client={new QueryClient()}>
+          <AddPrebuiltRulesTableContextProvider>
+            <AddPrebuiltRulesTable />
+          </AddPrebuiltRulesTableContextProvider>
+        </QueryClientProvider>
       );
 
       expect(await findByText('All Elastic rules have been installed')).toBeInTheDocument();
@@ -282,13 +273,11 @@ describe('AddPrebuiltRulesTable', () => {
     });
 
     render(
-      <MemoryRouter>
-        <QueryClientProvider client={new QueryClient()}>
-          <AddPrebuiltRulesTableContextProvider>
-            <AddPrebuiltRulesTable />
-          </AddPrebuiltRulesTableContextProvider>
-        </QueryClientProvider>
-      </MemoryRouter>
+      <QueryClientProvider client={new QueryClient()}>
+        <AddPrebuiltRulesTableContextProvider>
+          <AddPrebuiltRulesTable />
+        </AddPrebuiltRulesTableContextProvider>
+      </QueryClientProvider>
     );
 
     const installRuleButton = screen.queryByTestId(`installSinglePrebuiltRuleButton-${id}`);
@@ -335,13 +324,11 @@ describe('AddPrebuiltRulesTable', () => {
     });
 
     render(
-      <MemoryRouter>
-        <QueryClientProvider client={new QueryClient()}>
-          <AddPrebuiltRulesTableContextProvider>
-            <AddPrebuiltRulesTable />
-          </AddPrebuiltRulesTableContextProvider>
-        </QueryClientProvider>
-      </MemoryRouter>
+      <QueryClientProvider client={new QueryClient()}>
+        <AddPrebuiltRulesTableContextProvider>
+          <AddPrebuiltRulesTable />
+        </AddPrebuiltRulesTableContextProvider>
+      </QueryClientProvider>
     );
 
     const installRuleButton = screen.queryByTestId(`installSinglePrebuiltRuleButton-${id}`);

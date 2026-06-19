@@ -73,10 +73,3 @@ export const INSTALL_RULES_OVERFLOW_BUTTON_ARIA_LABEL = i18n.translate(
     defaultMessage: 'More install options',
   }
 );
-
-export const RULE_ALREADY_INSTALLED_TOOLTIP = i18n.translate(
-  'xpack.securitySolution.detectionEngine.ruleDetails.ruleAlreadyInstalledTooltip',
-  {
-    defaultMessage: 'This rule is already installed.',
-  }
-);

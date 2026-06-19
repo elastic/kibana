@@ -5,20 +5,10 @@
  * 2.0.
  */
 
-import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
+import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { useIsMutating } from '@kbn/react-query';
 import type { Dispatch, SetStateAction } from 'react';
-import React, {
-  createContext,
-  useCallback,
-  useContext,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from 'react';
-import { useHistory, useParams } from 'react-router-dom';
-import { RULES_ADD_PATH } from '../../../../../../common/constants';
+import React, { createContext, useCallback, useContext, useMemo, useState } from 'react';
 import type { RuleSignatureId } from '../../../../../../common/api/detection_engine';
 import type { RuleResponse } from '../../../../../../common/api/detection_engine/model/rule_schema';
 import { invariant } from '../../../../../../common/utils/invariant';
@@ -30,7 +20,6 @@ import {
   usePerformInstallSpecificRules,
 } from '../../../../rule_management/logic/prebuilt_rules/use_perform_rule_install';
 import { usePrebuiltRulesInstallReview } from '../../../../rule_management/logic/prebuilt_rules/use_prebuilt_rules_install_review';
-import { useFindInstalledPrebuiltRuleByRuleId } from '../../../../rule_management/logic/use_find_installed_prebuilt_rule_by_rule_id';
 import { useIsInitializingPrebuiltRulesPackage } from '../../../../rule_management/logic/prebuilt_rules/use_is_initializing_prebuilt_rules_package';
 import { useRulePreviewFlyout } from '../use_rule_preview_flyout';
 import { isUpgradeReviewRequestEnabled } from './add_prebuilt_rules_utils';
@@ -142,9 +131,6 @@ const PREBUILT_RULE_INSTALL_FLYOUT_ANCHOR = 'installPrebuiltRulePreview';
 export const AddPrebuiltRulesTableContextProvider = ({
   children,
 }: AddPrebuiltRulesTableContextProviderProps) => {
-  const history = useHistory();
-  const { ruleId: ruleIdFromUrl } = useParams<{ ruleId?: string }>();
-
   const [loadingRules, setLoadingRules] = useState<RuleSignatureId[]>([]);
   const [selectedRules, setSelectedRules] = useState<RuleResponse[]>([]);
 
@@ -212,55 +198,6 @@ export const AddPrebuiltRulesTableContextProvider = ({
 
   const rules = useMemo(() => reviewResponse?.rules ?? [], [reviewResponse]);
 
-  // When deep-linked to a specific rule (e.g. from a chat recommendation link at
-  // /rules/add_rules/<rule_id>), the target may not fall on the current page of the
-  // catalog. Fetch it directly by `rule_id` so the preview flyout has data regardless of
-  // pagination. Scoped to the flyout only — the table keeps rendering the paginated `rules`.
-  const {
-    data: deepLinkReviewResponse,
-    isFetching: isFetchingDeepLinkRule,
-    isFetched: isFetchedDeepLinkRule,
-  } = usePrebuiltRulesInstallReview(
-    {
-      page: 1,
-      perPage: 1,
-      ruleIds: ruleIdFromUrl ? [ruleIdFromUrl] : undefined,
-    },
-    {
-      // Only run when deep-linked and the target isn't already on the current page.
-      enabled: Boolean(ruleIdFromUrl) && !rules.some((r) => r.rule_id === ruleIdFromUrl),
-    }
-  );
-  const deepLinkInstallableRule = deepLinkReviewResponse?.rules?.[0];
-
-  // If the deep-link target isn't in the installable catalog (most commonly because it was
-  // already installed), fall back to fetching the installed alerting rule by `rule_id` so
-  // the preview flyout can still open — just with disabled install actions.
-  const shouldLookupInstalledFallback =
-    Boolean(ruleIdFromUrl) &&
-    isFetchedDeepLinkRule &&
-    !isFetchingDeepLinkRule &&
-    !deepLinkInstallableRule &&
-    !rules.some((r) => r.rule_id === ruleIdFromUrl);
-  const {
-    rule: installedFallbackRule,
-    isFetching: isFetchingInstalledFallback,
-    isFetched: isFetchedInstalledFallback,
-  } = useFindInstalledPrebuiltRuleByRuleId(ruleIdFromUrl, {
-    enabled: shouldLookupInstalledFallback,
-  });
-
-  // Rules array passed to the preview flyout: the installable rules from the current page
-  // plus the optional deep-link target — either an installable rule fetched by id, or an
-  // already-installed fallback. The table itself still renders only `rules`.
-  const flyoutRules = useMemo(() => {
-    const deepLinkRule = deepLinkInstallableRule ?? installedFallbackRule;
-    if (deepLinkRule && !rules.some((r) => r.rule_id === deepLinkRule.rule_id)) {
-      return [...rules, deepLinkRule];
-    }
-    return rules;
-  }, [rules, deepLinkInstallableRule, installedFallbackRule]);
-
   const rulesMatchingFilterCount = reviewResponse?.total ?? 0;
   const installableRulesCount = reviewResponse?.stats.num_rules_to_install ?? 0;
 
@@ -327,135 +264,52 @@ export const AddPrebuiltRulesTableContextProvider = ({
 
   const ruleActionsFactory = useCallback(
     (rule: RuleResponse, closeRulePreview: () => void) => {
-      const isPreviewRuleAlreadyInstalled = installedFallbackRule?.rule_id === rule.rule_id;
       const isPreviewRuleLoading = loadingRules.includes(rule.rule_id);
       const canPreviewedRuleBeInstalled =
         canEditRules &&
-        !isPreviewRuleAlreadyInstalled &&
         !(isPreviewRuleLoading || isRefetching || isInitializingPrebuiltRulesPackage);
-
-      const installWithoutEnablingButton = (
-        <EuiButton
-          disabled={!canPreviewedRuleBeInstalled}
-          onClick={() => {
-            installOneRule(rule.rule_id);
-            closeRulePreview();
-          }}
-          data-test-subj="installPrebuiltRuleFromFlyoutButton"
-        >
-          {i18n.INSTALL_WITHOUT_ENABLING_BUTTON_LABEL}
-        </EuiButton>
-      );
-      const installAndEnableButton = (
-        <EuiButton
-          disabled={!canPreviewedRuleBeInstalled}
-          onClick={() => {
-            installOneRule(rule.rule_id, true);
-            closeRulePreview();
-          }}
-          fill
-          data-test-subj="installAndEnablePrebuiltRuleFromFlyoutButton"
-        >
-          {i18n.INSTALL_AND_ENABLE_BUTTON_LABEL}
-        </EuiButton>
-      );
 
       return (
         <EuiFlexGroup>
           <EuiFlexItem>
-            {isPreviewRuleAlreadyInstalled ? (
-              <EuiToolTip content={i18n.RULE_ALREADY_INSTALLED_TOOLTIP}>
-                {installWithoutEnablingButton}
-              </EuiToolTip>
-            ) : (
-              installWithoutEnablingButton
-            )}
+            <EuiButton
+              disabled={!canPreviewedRuleBeInstalled}
+              onClick={() => {
+                installOneRule(rule.rule_id);
+                closeRulePreview();
+              }}
+              data-test-subj="installPrebuiltRuleFromFlyoutButton"
+            >
+              {i18n.INSTALL_WITHOUT_ENABLING_BUTTON_LABEL}
+            </EuiButton>
           </EuiFlexItem>
           <EuiFlexItem>
-            {isPreviewRuleAlreadyInstalled ? (
-              <EuiToolTip content={i18n.RULE_ALREADY_INSTALLED_TOOLTIP}>
-                {installAndEnableButton}
-              </EuiToolTip>
-            ) : (
-              installAndEnableButton
-            )}
+            <EuiButton
+              disabled={!canPreviewedRuleBeInstalled}
+              onClick={() => {
+                installOneRule(rule.rule_id, true);
+                closeRulePreview();
+              }}
+              fill
+              data-test-subj="installAndEnablePrebuiltRuleFromFlyoutButton"
+            >
+              {i18n.INSTALL_AND_ENABLE_BUTTON_LABEL}
+            </EuiButton>
           </EuiFlexItem>
         </EuiFlexGroup>
       );
     },
-    [
-      installedFallbackRule,
-      loadingRules,
-      canEditRules,
-      isRefetching,
-      isInitializingPrebuiltRulesPackage,
-      installOneRule,
-    ]
+    [loadingRules, canEditRules, isRefetching, isInitializingPrebuiltRulesPackage, installOneRule]
   );
 
-  // On close, drop the :ruleId path segment so the URL reflects "flyout
-  // closed" — a subsequent click on the same chat link then re-navigates to
-  // the same URL, which re-fires the auto-open effect with a fresh ref state.
-  const closeRulePreviewAction = useCallback(() => {
-    if (ruleIdFromUrl) {
-      history.replace(RULES_ADD_PATH);
-    }
-  }, [history, ruleIdFromUrl]);
-
   const { rulePreviewFlyout, openRulePreview } = useRulePreviewFlyout({
-    rules: flyoutRules,
+    rules,
     ruleActionsFactory,
-    closeRulePreviewAction,
     flyoutProps: {
       id: PREBUILT_RULE_INSTALL_FLYOUT_ANCHOR,
       dataTestSubj: PREBUILT_RULE_INSTALL_FLYOUT_ANCHOR,
     },
   });
-
-  // Auto-open the preview flyout when a rule_id is present in the URL path
-  // (e.g. /rules/add_rules/<rule_id>). Wait for both queries to settle on
-  // fresh data — otherwise a stale install-review cache could surface a rule
-  // that was installed in this session, and we'd open the install flyout for
-  // an already-installed rule with active install buttons.
-  const autoOpenedRuleIdRef = useRef<string | null>(null);
-  useEffect(() => {
-    if (!ruleIdFromUrl) {
-      autoOpenedRuleIdRef.current = null;
-      return;
-    }
-    if (autoOpenedRuleIdRef.current === ruleIdFromUrl) return;
-    if (!isFetched || isFetching) return;
-    // When the target isn't on the current page, wait for the by-rule_id deep-link lookup
-    // (and, if it found nothing, the installed-rule fallback) to settle before deciding.
-    if (
-      !rules.some((r) => r.rule_id === ruleIdFromUrl) &&
-      (!isFetchedDeepLinkRule || isFetchingDeepLinkRule)
-    ) {
-      return;
-    }
-    if (
-      shouldLookupInstalledFallback &&
-      (!isFetchedInstalledFallback || isFetchingInstalledFallback)
-    ) {
-      return;
-    }
-    const found = flyoutRules.find((r) => r.rule_id === ruleIdFromUrl);
-    if (!found) return;
-    autoOpenedRuleIdRef.current = ruleIdFromUrl;
-    openRulePreview(ruleIdFromUrl);
-  }, [
-    ruleIdFromUrl,
-    isFetched,
-    isFetching,
-    rules,
-    isFetchedDeepLinkRule,
-    isFetchingDeepLinkRule,
-    shouldLookupInstalledFallback,
-    isFetchedInstalledFallback,
-    isFetchingInstalledFallback,
-    flyoutRules,
-    openRulePreview,
-  ]);
 
   const actions = useMemo(
     () => ({
