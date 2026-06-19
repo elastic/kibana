@@ -64,6 +64,11 @@ export const createDatasetFlyoutStrings = {
       defaultMessage: 'Create a data source on the Sources tab before adding a data set.',
     }),
 
+  dataSourceHelp: () =>
+    i18n.translate('dataSets.createDatasetFlyout.dataSourceHelp', {
+      defaultMessage: 'Select the external connection this data set belongs to.',
+    }),
+
   resourceLabel: () =>
     i18n.translate('dataSets.createDatasetFlyout.resourceLabel', {
       defaultMessage: 'Resource',

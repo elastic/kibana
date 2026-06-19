@@ -200,6 +200,26 @@ export const CreateDatasetFlyout: FunctionComponent<CreateDatasetFlyoutProps> = 
             </>
           ) : null}
           <EuiFormRow
+            label={createDatasetFlyoutStrings.dataSourceLabel()}
+            fullWidth
+            helpText={createDatasetFlyoutStrings.dataSourceHelp()}
+            isInvalid={Boolean(errors.data_source)}
+            error={errors.data_source?.message}
+          >
+            <EuiSelect
+              options={dataSourceOptions}
+              data-test-subj="createDatasetFlyoutDataSource"
+              fullWidth
+              aria-label={createDatasetFlyoutStrings.dataSourceLabel()}
+              value={dataSourceIdField.value}
+              onChange={(e) => dataSourceIdField.onChange(e.target.value)}
+              name={dataSourceIdField.name}
+              inputRef={dataSourceIdField.ref}
+              disabled={dataSources.length === 0}
+              isInvalid={Boolean(errors.data_source)}
+            />
+          </EuiFormRow>
+          <EuiFormRow
             label={createDatasetFlyoutStrings.nameLabel()}
             fullWidth
             isInvalid={Boolean(errors.name)}
@@ -226,30 +246,6 @@ export const CreateDatasetFlyout: FunctionComponent<CreateDatasetFlyoutProps> = 
               onChange={(e) => descriptionField.onChange(e.target.value)}
               name={descriptionField.name}
               inputRef={descriptionField.ref}
-            />
-          </EuiFormRow>
-          <EuiFormRow
-            label={createDatasetFlyoutStrings.dataSourceLabel()}
-            fullWidth
-            helpText={
-              dataSources.length === 0
-                ? createDatasetFlyoutStrings.dataSourceEmptyHelp()
-                : undefined
-            }
-            isInvalid={Boolean(errors.data_source)}
-            error={errors.data_source?.message}
-          >
-            <EuiSelect
-              options={dataSourceOptions}
-              data-test-subj="createDatasetFlyoutDataSource"
-              fullWidth
-              aria-label={createDatasetFlyoutStrings.dataSourceLabel()}
-              value={dataSourceIdField.value}
-              onChange={(e) => dataSourceIdField.onChange(e.target.value)}
-              name={dataSourceIdField.name}
-              inputRef={dataSourceIdField.ref}
-              disabled={dataSources.length === 0}
-              isInvalid={Boolean(errors.data_source)}
             />
           </EuiFormRow>
           <EuiFormRow
