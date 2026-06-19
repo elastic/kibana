@@ -82,16 +82,14 @@ describe('Dashboard App', () => {
     });
   });
 
-  it('does not collapse the side nav when creating a new dashboard', async () => {
+  it('collapses the side nav when creating a new dashboard', async () => {
     render(
       <DashboardApp redirectTo={jest.fn()} history={mockHistory} setDashboardAppApi={jest.fn()} />
     );
 
     await waitFor(() => {
-      expect(screen.getByText('Test renderer')).toBeInTheDocument();
+      expect(coreServices.chrome.sideNav.setIsCollapsed).toHaveBeenCalledWith(true);
     });
-
-    expect(coreServices.chrome.sideNav.setIsCollapsed).not.toHaveBeenCalled();
   });
 
   it('test the default behavior without an expandedPanel id passed as a prop to the DashboardApp', async () => {
