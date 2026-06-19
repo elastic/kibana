@@ -119,9 +119,17 @@ const SPLIT_BASE_AND_ALERT_TOOLTIP = i18n.translate(
   }
 );
 
-const MERGE_TO_SINGLE_EDITOR_LABEL = i18n.translate(
-  'xpack.alertingV2.composeDiscover.querySandbox.mergeToSingleEditorButton',
-  { defaultMessage: 'Merge to single editor' }
+const USE_SINGLE_EDITOR_LABEL = i18n.translate(
+  'xpack.alertingV2.composeDiscover.querySandbox.useSingleEditorButton',
+  { defaultMessage: 'Use single editor' }
+);
+
+const USE_SINGLE_EDITOR_TOOLTIP = i18n.translate(
+  'xpack.alertingV2.composeDiscover.querySandbox.useSingleEditorTooltip',
+  {
+    defaultMessage:
+      'Combine the base query and alert condition in one editor. When you apply, we automatically split them again.',
+  }
 );
 
 const UNIFIED_QUERY_HELPER_TEXT = i18n.translate(
@@ -261,15 +269,17 @@ export const QuerySandbox: React.FC<QuerySandboxProps> = ({
 
     if (onUseSingleEditor) {
       return (
-        <EuiButton
-          size="s"
-          color="text"
-          iconType="merge"
-          onClick={onUseSingleEditor}
-          data-test-subj="querySandboxUseSingleEditor"
-        >
-          {MERGE_TO_SINGLE_EDITOR_LABEL}
-        </EuiButton>
+        <EuiToolTip content={USE_SINGLE_EDITOR_TOOLTIP}>
+          <EuiButton
+            size="s"
+            color="text"
+            iconType="merge"
+            onClick={onUseSingleEditor}
+            data-test-subj="querySandboxUseSingleEditor"
+          >
+            {USE_SINGLE_EDITOR_LABEL}
+          </EuiButton>
+        </EuiToolTip>
       );
     }
 

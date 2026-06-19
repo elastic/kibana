@@ -184,9 +184,7 @@ describe('QuerySandbox', () => {
       },
     });
     expect(screen.getByTestId('querySandboxEsqlQueryTitle')).toBeInTheDocument();
-    expect(screen.getByTestId('querySandboxUseSingleEditor')).toHaveTextContent(
-      'Merge to single editor'
-    );
+    expect(screen.getByTestId('querySandboxUseSingleEditor')).toHaveTextContent('Use single editor');
     expect(screen.getByTestId('querySandboxSeparateQueryHelper')).toHaveTextContent(
       'Define the base query and alert condition separately. Automatic query splitting is disabled in this mode.'
     );
