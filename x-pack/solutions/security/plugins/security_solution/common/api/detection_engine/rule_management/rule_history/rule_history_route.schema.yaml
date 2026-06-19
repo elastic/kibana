@@ -3,7 +3,7 @@ info:
   title: Rule Changes History API endpoint
   version: '1'
 paths:
-  /internal/detection_engine/rules/{ruleId}/history:
+  /internal/detection_engine/rules/{ruleId}/history/_list:
     get:
       x-labels: [ess, serverless]
       x-internal: true
