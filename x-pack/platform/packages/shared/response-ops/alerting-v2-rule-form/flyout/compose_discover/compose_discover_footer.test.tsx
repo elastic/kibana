@@ -80,6 +80,7 @@ const renderFooter = ({
     isLastStep: false,
     isCreate: true,
     hasValidationErrors: false,
+    yamlHasErrors: false,
     isSaving: false,
     onNext,
     onFinalSubmit,
