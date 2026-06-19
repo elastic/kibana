@@ -724,6 +724,9 @@ test.describe('Rules list', { tag: tags.stateful.classic }, () => {
   });
 
   test('should filter alerts by the rule status', async ({ page, apiServices, kbnClient }) => {
+    // Five scenarios, each re-establishing the baseline and toggling then clearing
+    // several filters with bounded retries — exceeds the 60s default test timeout.
+    test.setTimeout(180_000);
     const uniqueTag = `status-filter-${Date.now()}`;
     const makeRule = (prefix: string) =>
       apiServices.alerting.rules.create({ ...makeEsQueryRule(prefix), tags: [uniqueTag] });
@@ -761,14 +764,22 @@ test.describe('Rules list', { tag: tags.stateful.classic }, () => {
     // stuck). A fresh popover means EUI derives option state from the latest
     // selectedStatuses and the click lands on a stable list. Asserting the badge
     // count after each toggle confirms it registered before moving on.
+    // A single option click is still occasionally swallowed (the EuiSelectable
+    // list isn't interactive the instant the popover renders, or a prior toggle's
+    // refetch interferes), leaving the badge unchanged. Retry the whole
+    // open→click→close cycle until the badge reaches the expected count. A lost
+    // click has no effect, so re-clicking just toggles correctly; the inner
+    // timeout is generous enough that a registered click is never double-toggled.
     const toggleOption = async (filterSubj: string, expectedBadge: number) => {
-      await expect(optionsPanel).toBeHidden();
-      await page.testSubj.click('ruleStatusFilterButton');
-      await expect(optionsPanel).toBeVisible();
-      await page.testSubj.click(filterSubj);
-      await expect(activeFilterBadge).toHaveText(String(expectedBadge));
-      await page.keyboard.press('Escape');
-      await expect(optionsPanel).toBeHidden();
+      await expect(async () => {
+        await expect(optionsPanel).toBeHidden();
+        await page.testSubj.click('ruleStatusFilterButton');
+        await expect(optionsPanel).toBeVisible();
+        await page.testSubj.click(filterSubj);
+        await page.keyboard.press('Escape');
+        await expect(optionsPanel).toBeHidden();
+        await expect(activeFilterBadge).toHaveText(String(expectedBadge), { timeout: 5_000 });
+      }).toPass({ timeout: 30_000 });
     };
 
     const applyFilters = async (
@@ -897,7 +908,11 @@ test.describe('Rules list', { tag: tags.stateful.classic }, () => {
     await expect(page.testSubj.locator('selectActionButton')).toBeEnabled();
   });
 
-  test('should untrack disable rule if untrack switch is true', async ({ page, kbnClient }) => {
+  test('should untrack disable rule if untrack switch is true', async ({
+    page,
+    kbnClient,
+    esClient,
+  }) => {
     // Up to 60s waiting for the alert to fire + up to 60s waiting for untracking,
     // plus UI steps — exceeds the 60s default test timeout.
     test.setTimeout(150_000);
@@ -905,8 +920,13 @@ test.describe('Rules list', { tag: tags.stateful.classic }, () => {
     createdRuleIds.push(rule.id);
     await runRuleSoon(kbnClient, rule.id);
 
-    // Wait for the rule to fire and create a tracked alert instance
+    // Wait for the rule to fire and create a tracked alert instance. Refresh the
+    // alerts index on each poll so the active alert is searchable before we
+    // disable: untracking-on-disable is an update-by-query that must find the
+    // alert, otherwise the server logs "Failed to untrack 1 of 1", gives up after
+    // its retries, and the alert stays tracked (no later re-attempt once disabled).
     await expect(async () => {
+      await esClient.indices.refresh({ index: '.alerts-stack.alerts-default' }, { ignore: [404] });
       const summary = await getAlertSummary(kbnClient, rule.id);
       if (!summary.alerts['query matched']?.tracked) {
         throw new Error('Alert instance not yet tracked');
