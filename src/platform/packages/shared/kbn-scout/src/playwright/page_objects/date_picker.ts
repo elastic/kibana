@@ -42,11 +42,17 @@ export class DatePicker {
    */
   private async isNewDateRangePicker(containerLocator?: Locator): Promise<boolean> {
     const root = containerLocator ?? this.page;
-    const control = root
-      .getByTestId('dateRangePickerControlButton')
-      .or(root.getByTestId('superDatePickerToggleQuickMenuButton'));
-    await control.waitFor({ timeout: 10_000 });
-    return (await control.getAttribute('data-test-subj')) === 'dateRangePickerControlButton';
+    const newPicker = root.getByTestId('dateRangePickerControlButton');
+    const legacyPicker = root.getByTestId('superDatePickerToggleQuickMenuButton');
+    // Wait until either variant has mounted. `waitFor` is not a strict-mode
+    // action, so it tolerates pages that render multiple pickers (e.g. several
+    // data source cards in a flyout); `getAttribute` on the combined locator
+    // would throw there — see the sibling note in `waitToBeHidden()`.
+    await newPicker.or(legacyPicker).waitFor({ timeout: 10_000 });
+    // `count()` likewise never throws on multiple matches. The variant is
+    // globally flag-driven, so any `dateRangePickerControlButton` on the page
+    // means the new picker is active.
+    return (await newPicker.count()) > 0;
   }
 
   private getTestSubjLocator(selector: string, containerLocator?: Locator) {
