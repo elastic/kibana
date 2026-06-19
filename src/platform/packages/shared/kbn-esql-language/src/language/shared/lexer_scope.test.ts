@@ -25,4 +25,12 @@ describe('getEsqlLexerTokens', () => {
 
     expect(visibleTokenTexts).toEqual(['FROM', 'a', '|', 'EVAL']);
   });
+
+  it('keeps tokens emitted before a lexer error', () => {
+    const visibleTokenTexts = getEsqlLexerTokens('FROM a | EVAL )')
+      .filter(isVisibleToken)
+      .map(({ text }) => text);
+
+    expect(visibleTokenTexts).toEqual(['FROM', 'a', '|', 'EVAL']);
+  });
 });

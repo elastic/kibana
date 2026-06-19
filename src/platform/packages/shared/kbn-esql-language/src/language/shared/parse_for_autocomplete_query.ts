@@ -31,6 +31,7 @@ interface ParsedAutocompleteQuery {
  */
 export function parseAutocompleteQuery(fullText: string, offset: number): ParsedAutocompleteQuery {
   const innerText = fullText.substring(0, offset);
+  // Keep tokens tied to the real editor text; correctedQuery can add synthetic markers/brackets.
   const tokens = getEsqlLexerTokens(innerText);
   const correctedQuery = correctQuerySyntax(innerText);
   const { root } = Parser.parse(correctedQuery, { withFormatting: true });

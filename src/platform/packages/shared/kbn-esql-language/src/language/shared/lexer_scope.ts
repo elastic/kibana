@@ -20,6 +20,8 @@ export function getEsqlLexerTokens(text: string): EsqlLexerToken[] {
   try {
     const parser = Parser.create(text);
 
+    // Normal inputs stop on EOF. This cap is only a defensive guard in case the
+    // lexer does not reach EOF;
     while (tokens.length <= maxTokens) {
       const token = parser.lexer.nextToken();
 

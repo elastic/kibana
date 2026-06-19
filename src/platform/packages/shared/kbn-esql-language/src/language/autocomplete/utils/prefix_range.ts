@@ -87,10 +87,9 @@ export interface AttachReplacementRangesOptions {
 }
 
 /**
- * Resolves the prefix currently under the cursor and the text range that should
- * be replaced if a suggestion is accepted.
- * This standalone helper reads lexer tokens itself; callers that already have
- * tokens should go through attachReplacementRanges.
+ * Standalone prefix resolver for callers that only have text.
+ * The final suggestion range path passes prepared tokens to attachReplacementRanges
+ * so it does not re-lex the same innerText.
  */
 export function computePrefixRange(query: string): PrefixResult {
   return computePrefixRangeFromTokens(query, getEsqlLexerTokens(query));
