@@ -17,6 +17,9 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiDescriptionList,
+  EuiLoadingSpinner,
+  EuiTimeline,
+  EuiTimelineItem,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -24,6 +27,7 @@ import type { Detection } from '@kbn/streams-schema';
 import { formatTimestamp } from '../../../../../util/formatters';
 import { changeTypeLabel, DETECTION_KIND_LABELS } from '../shared/translations';
 import { DETECTION_KIND_COLORS } from '../shared/constants';
+import { useFetchDetectionHistory } from '../../../../../hooks/sig_events/use_fetch_detections';
 const formatPValue = (pValue?: number | string): string => {
   if (pValue === undefined || pValue === null) return '-';
   const n = Number(pValue);
@@ -48,6 +52,9 @@ interface DetectionFlyoutProps {
 
 export const DetectionFlyout = ({ detection, onClose }: DetectionFlyoutProps) => {
   const titleId = useGeneratedHtmlId();
+  const { data: historyData, isLoading: isHistoryLoading } = useFetchDetectionHistory(
+    detection.detection_id
+  );
 
   const diagnostics = useMemo(
     () => [
@@ -55,7 +62,7 @@ export const DetectionFlyout = ({ detection, onClose }: DetectionFlyoutProps) =>
         title: i18n.translate('xpack.streams.detectionFlyout.detectedAt', {
           defaultMessage: 'Detected at',
         }),
-        description: formatTimestamp(detection.detected_at ?? detection['@timestamp']),
+        description: formatTimestamp(detection['@timestamp']),
       },
       {
         title: i18n.translate('xpack.streams.detectionFlyout.changeType', {
@@ -116,6 +123,56 @@ export const DetectionFlyout = ({ detection, onClose }: DetectionFlyoutProps) =>
           listItems={diagnostics}
           compressed
         />
+
+        <EuiSpacer size="l" />
+
+        <EuiTitle size="xs">
+          <h3>
+            {i18n.translate('xpack.streams.detectionFlyout.timeline', {
+              defaultMessage: 'Timeline',
+            })}
+          </h3>
+        </EuiTitle>
+        <EuiSpacer size="s" />
+
+        {isHistoryLoading ? (
+          <EuiLoadingSpinner size="m" />
+        ) : !historyData?.hits.length ? (
+          <EuiText size="s" color="subdued">
+            {i18n.translate('xpack.streams.detectionFlyout.noHistory', {
+              defaultMessage: 'No history available.',
+            })}
+          </EuiText>
+        ) : (
+          <EuiTimeline
+            aria-label={i18n.translate('xpack.streams.detectionFlyout.timeline.title', {
+              defaultMessage: 'Timeline',
+            })}
+            gutterSize="m"
+          >
+            {historyData.hits.map((entry, idx) => (
+              <EuiTimelineItem
+                key={`${entry['@timestamp']}-${idx}`}
+                icon="dot"
+                iconAriaLabel={DETECTION_KIND_LABELS[entry.kind] ?? entry.kind}
+                verticalAlign="top"
+              >
+                <EuiFlexGroup gutterSize="xs" alignItems="center" wrap responsive={false}>
+                  <EuiFlexItem grow={false}>
+                    <EuiBadge color={DETECTION_KIND_COLORS[entry.kind] ?? 'hollow'}>
+                      {DETECTION_KIND_LABELS[entry.kind] ?? entry.kind}
+                    </EuiBadge>
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiText size="xs" color="subdued">
+                      {formatTimestamp(entry['@timestamp'])}
+                    </EuiText>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiTimelineItem>
+            ))}
+          </EuiTimeline>
+        )}
       </EuiFlyoutBody>
     </EuiFlyout>
   );
