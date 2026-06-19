@@ -94,7 +94,7 @@ const readStreamSignificantEventsRoute = createServerRoute({
   }): Promise<SignificantEventsGetResponse> => {
     const {
       streamsClient,
-      getQueryClient,
+      getKnowledgeIndicatorClient,
       getAlertingV2RulesClient,
       scopedClusterClient,
       licensing,
@@ -112,7 +112,7 @@ const readStreamSignificantEventsRoute = createServerRoute({
       uiSettingsClient,
       alertingV2RulesClient: await getAlertingV2RulesClient(),
     });
-    const queryClient = await getQueryClient();
+    const kiClient = await getKnowledgeIndicatorClient();
     return readSignificantEventsFromAlertsIndices(
       {
         streamNames: [name],
@@ -123,7 +123,7 @@ const readStreamSignificantEventsRoute = createServerRoute({
         searchMode,
         alertsSource,
       },
-      { queryClient, scopedClusterClient }
+      { kiClient, scopedClusterClient }
     );
   },
 });
