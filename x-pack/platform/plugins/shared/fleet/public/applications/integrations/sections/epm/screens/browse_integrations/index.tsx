@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo } from 'react';
 import { EuiFlexItem, EuiFlexGroup, EuiSpacer, useEuiTheme } from '@elastic/eui';
 import { useLocation, useHistory } from 'react-router-dom';
 
@@ -24,12 +24,14 @@ import {
   type CreatedIntegrationRow,
 } from './components/manage_integrations_table';
 
+const OBLT_DEFAULT_CATEGORY = 'opentelemetry';
+
 export const BrowseIntegrationsPage: React.FC<{ prereleaseIntegrationsEnabled: boolean }> = ({
   prereleaseIntegrationsEnabled,
 }) => {
   useBreadcrumbs('integrations_all');
 
-  const { automaticImport, application } = useStartServices();
+  const { automaticImport, application, cloud } = useStartServices();
   const { pathname, search } = useLocation();
   const history = useHistory();
   const euiTheme = useEuiTheme();
@@ -84,6 +86,19 @@ export const BrowseIntegrationsPage: React.FC<{ prereleaseIntegrationsEnabled: b
     onCategoryChange,
     availableSubCategories,
   } = useBrowseIntegrationHook({ prereleaseIntegrationsEnabled });
+
+  const isObservability = cloud?.serverless?.projectType === 'observability';
+
+  useEffect(() => {
+    if (
+      isObservability &&
+      !isLoading &&
+      !initialSelectedCategory &&
+      categoryExists(OBLT_DEFAULT_CATEGORY, allCategories)
+    ) {
+      setUrlCategory({ category: OBLT_DEFAULT_CATEGORY }, { replace: true });
+    }
+  }, [isObservability, isLoading, initialSelectedCategory, allCategories, setUrlCategory]);
 
   if (!isLoading && !categoryExists(initialSelectedCategory, allCategories)) {
     setUrlCategory({ category: '' }, { replace: true });
