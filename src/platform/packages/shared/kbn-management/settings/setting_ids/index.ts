@@ -66,6 +66,15 @@ export const AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID = 'agentBuilder:expe
 export const AGENT_BUILDER_PRE_PROMPT_WORKFLOW_IDS = 'agentBuilder:prePromptWorkflowIds';
 export const AGENT_BUILDER_UIAM_OAUTH_CLIENT_MANAGEMENT_SETTING_ID =
   'agentBuilder:uiamOAuthClientManagement';
+export const AGENT_BUILDER_TRACING_ENABLED_SETTING_ID = 'agentBuilder:tracing:enabled';
+export const AGENT_BUILDER_TRACING_USER_PROMPTS_SETTING_ID =
+  'agentBuilder:tracing:includeUserPrompts';
+export const AGENT_BUILDER_TRACING_LLM_RESPONSES_SETTING_ID =
+  'agentBuilder:tracing:includeLlmResponses';
+export const AGENT_BUILDER_TRACING_SYSTEM_PROMPT_SETTING_ID =
+  'agentBuilder:tracing:includeSystemPrompt';
+export const AGENT_BUILDER_TRACING_REAL_NAMES_SETTING_ID = 'agentBuilder:tracing:includeRealNames';
+export const AGENT_BUILDER_TRACING_REAL_IDS_SETTING_ID = 'agentBuilder:tracing:includeRealIds';
 
 // Autocomplete settings
 export const AUTOCOMPLETE_USE_TIME_RANGE_ID = 'autocomplete:useTimeRange';

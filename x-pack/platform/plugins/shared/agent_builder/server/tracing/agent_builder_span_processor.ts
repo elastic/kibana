@@ -7,14 +7,81 @@
 
 import type { api } from '@elastic/opentelemetry-node/sdk';
 import { resources, tracing } from '@elastic/opentelemetry-node/sdk';
+import { GenAISemanticConventions } from '@kbn/inference-tracing';
+import { isInternalTool } from '@kbn/agent-builder-common/tools';
+import { AGENT_BUILDER_BUILTIN_TOOLS } from '@kbn/agent-builder-server/allow_lists';
 import { DATA_STREAM_NAMESPACE_ATTR, isAgentBuilderSpan } from './agent_builder_context';
+import { normalizeAgentIdForTelemetry, toHashedId } from '../telemetry/utils';
+
+const BUILTIN_TOOL_IDS: Set<string> = new Set(AGENT_BUILDER_BUILTIN_TOOLS);
 
 const SHOULD_TRACK_ATTR = '_agent_builder_should_track';
+
+export interface TracingPrivacySettings {
+  enabled: boolean;
+  includeUserPrompts: boolean;
+  includeLlmResponses: boolean;
+  includeSystemPrompt: boolean;
+  includeRealNames: boolean;
+  includeRealIds: boolean;
+}
 
 interface AgentBuilderSpanProcessorOpts {
   exporter: tracing.SpanExporter;
   scheduledDelayMillis: number;
-  isEnabled?: () => boolean;
+  getSettings: () => TracingPrivacySettings;
+}
+
+/**
+ * Hashes security-sensitive identifiers on span attributes before export.
+ * Built-in agent IDs are kept in plain text; user-owned IDs are hashed
+ * using the same scheme as EBT telemetry (SHA-256, 16-char hex prefix).
+ */
+function hashSensitiveAttributes(attributes: Record<string, unknown>): Record<string, unknown> {
+  const result = { ...attributes };
+
+  const agentId = result[GenAISemanticConventions.GenAIAgentId];
+  if (agentId != null) {
+    result[GenAISemanticConventions.GenAIAgentId] = normalizeAgentIdForTelemetry(String(agentId));
+  }
+
+  const conversationId = result[GenAISemanticConventions.GenAIConversationId];
+  if (conversationId != null) {
+    result[GenAISemanticConventions.GenAIConversationId] = toHashedId(String(conversationId));
+  }
+
+  const workflowId = result['elastic.workflow.id'];
+  if (workflowId != null) {
+    result['elastic.workflow.id'] = toHashedId(String(workflowId));
+  }
+
+  const workflowExecId = result['elastic.workflow.execution_id'];
+  if (workflowExecId != null) {
+    result['elastic.workflow.execution_id'] = toHashedId(String(workflowExecId));
+  }
+
+  return result;
+}
+
+/**
+ * Replaces user-created tool and agent names with 'custom' to avoid leaking
+ * user-chosen identifiers. Built-in tools and agents keep their real names.
+ */
+function anonymizeNames(attributes: Record<string, unknown>): Record<string, unknown> {
+  const result = { ...attributes };
+
+  const agentName = result[GenAISemanticConventions.GenAIAgentName];
+  if (agentName != null) {
+    result[GenAISemanticConventions.GenAIAgentName] = 'custom';
+  }
+
+  const toolName = result[GenAISemanticConventions.GenAIToolName];
+  if (toolName != null) {
+    const isBuiltin = BUILTIN_TOOL_IDS.has(String(toolName)) || isInternalTool(String(toolName));
+    result[GenAISemanticConventions.GenAIToolName] = isBuiltin ? toolName : 'custom';
+  }
+
+  return result;
 }
 
 /**
@@ -22,17 +89,18 @@ interface AgentBuilderSpanProcessorOpts {
  */
 export class AgentBuilderSpanProcessor implements tracing.SpanProcessor {
   private readonly batchProcessor: tracing.SpanProcessor;
-  private readonly isEnabled: () => boolean;
+  private readonly getSettings: () => TracingPrivacySettings;
 
   constructor(opts: AgentBuilderSpanProcessorOpts) {
     this.batchProcessor = new tracing.BatchSpanProcessor(opts.exporter, {
       scheduledDelayMillis: opts.scheduledDelayMillis,
     });
-    this.isEnabled = opts.isEnabled ?? (() => true);
+    this.getSettings = opts.getSettings;
   }
 
   async onStart(span: tracing.Span, parentContext: api.Context): Promise<void> {
-    if (!this.isEnabled()) {
+    const settings = this.getSettings();
+    if (!settings.enabled) {
       return;
     }
     if (isAgentBuilderSpan(span, parentContext)) {
@@ -46,11 +114,39 @@ export class AgentBuilderSpanProcessor implements tracing.SpanProcessor {
       return;
     }
 
+    const settings = this.getSettings();
+    if (!settings.enabled) {
+      return;
+    }
+
+    const filteredEvents = span.events.filter((event) => {
+      if (!settings.includeSystemPrompt && event.name === 'gen_ai.system.message') return false;
+      if (!settings.includeUserPrompts && event.name === 'gen_ai.user.message') return false;
+      if (
+        !settings.includeLlmResponses &&
+        (event.name === 'gen_ai.assistant.message' ||
+          event.name === 'gen_ai.tool.message' ||
+          event.name === 'gen_ai.choice')
+      ) {
+        return false;
+      }
+      return true;
+    });
+
     const {
       [SHOULD_TRACK_ATTR]: _,
+      _should_track: __,
       [DATA_STREAM_NAMESPACE_ATTR]: namespace,
       ...cleanAttributes
     } = span.attributes;
+
+    const processedAttributes = settings.includeRealIds
+      ? cleanAttributes
+      : hashSensitiveAttributes(cleanAttributes);
+
+    const finalAttributes = settings.includeRealNames
+      ? processedAttributes
+      : anonymizeNames(processedAttributes);
 
     const datasetResource = resources.resourceFromAttributes({
       'data_stream.dataset': 'agent_builder',
@@ -63,7 +159,11 @@ export class AgentBuilderSpanProcessor implements tracing.SpanProcessor {
         enumerable: true,
       },
       attributes: {
-        value: cleanAttributes,
+        value: finalAttributes,
+        enumerable: true,
+      },
+      events: {
+        value: filteredEvents,
         enumerable: true,
       },
     });

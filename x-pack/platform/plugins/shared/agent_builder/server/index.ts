@@ -53,6 +53,8 @@ export const plugin: PluginInitializer<
 
 export { config } from './config';
 
+export { syncAgentBuilderOverviewDashboard } from './dashboard';
+
 export { ExecutionStatus } from '@kbn/agent-builder-common';
 export type {
   ConversationExecutionParams,

@@ -101,7 +101,7 @@ describe('registerTracingExporter', () => {
     jest.useRealTimers();
   });
 
-  it('returns undefined when no exporters are configured', async () => {
+  it('always initializes the tracing pipeline (ES exporter is always set up for uiSetting-based toggling)', async () => {
     const coreStart = createCore();
     const tracingConfig: TracingConfig = {
       send_to_self: false,
@@ -116,8 +116,12 @@ describe('registerTracingExporter', () => {
       logger,
     });
 
-    expect(result).toBeUndefined();
-    expect(initInferenceTracerProvider).not.toHaveBeenCalled();
+    // Pipeline is always initialized so the uiSetting can toggle tracing without a restart.
+    expect(result).toBeDefined();
+    expect(MockedEsOtlpExporter).toHaveBeenCalledWith(
+      coreStart.elasticsearch.client.asInternalUser
+    );
+    expect(initInferenceTracerProvider).toHaveBeenCalled();
   });
 
   it('creates OTLPTraceExporter when exporters with url are configured', async () => {
@@ -144,13 +148,16 @@ describe('registerTracingExporter', () => {
       url: 'http://otel-collector:4318/v1/traces',
       headers: { Authorization: 'Bearer token' },
     });
-    expect(MockedEsOtlpExporter).not.toHaveBeenCalled();
+    // ES exporter is always created alongside external exporters.
+    expect(MockedEsOtlpExporter).toHaveBeenCalledWith(
+      coreStart.elasticsearch.client.asInternalUser
+    );
   });
 
-  it('creates ElasticsearchOtlpExporter when send_to_self is true', async () => {
+  it('creates ElasticsearchOtlpExporter (always, not gated by send_to_self)', async () => {
     const coreStart = createCore();
     const tracingConfig: TracingConfig = {
-      send_to_self: true,
+      send_to_self: false,
       exporters: [],
       scheduledDelay: 500,
       opik_distributed_tracing: false,
@@ -165,7 +172,6 @@ describe('registerTracingExporter', () => {
     expect(MockedEsOtlpExporter).toHaveBeenCalledWith(
       coreStart.elasticsearch.client.asInternalUser
     );
-    expect(MockedOtlpExporter).not.toHaveBeenCalled();
   });
 
   it('initializes inference tracer provider with span processors', async () => {
@@ -195,7 +201,7 @@ describe('registerTracingExporter', () => {
     expect(mockResource.waitForAsyncAttributes).toHaveBeenCalledTimes(1);
   });
 
-  it('createCachedIsEnabled returns true after registerTracingExporter resolves', async () => {
+  it('createCachedTracingSettings returns enabled=true after registerTracingExporter resolves', async () => {
     const coreStart = createCore();
     const tracingConfig: TracingConfig = {
       send_to_self: true,
@@ -211,8 +217,8 @@ describe('registerTracingExporter', () => {
     });
 
     const ctorOpts = MockedAgentBuilderProcessor.mock.calls[0][0];
-    const { isEnabled } = ctorOpts;
-    expect(isEnabled!()).toBe(true);
+    const { getSettings } = ctorOpts;
+    expect(getSettings().enabled).toBe(true);
   });
 
   it('refreshes the cached value when the polling interval fires', async () => {
@@ -229,14 +235,14 @@ describe('registerTracingExporter', () => {
 
     await registerTracingExporter({ core: coreStart, tracingConfig, logger });
 
-    const { isEnabled } = MockedAgentBuilderProcessor.mock.calls[0][0];
-    expect(isEnabled!()).toBe(true);
+    const { getSettings } = MockedAgentBuilderProcessor.mock.calls[0][0];
+    expect(getSettings().enabled).toBe(true);
 
     scopedUiSettings.get.mockResolvedValue(false);
     jest.advanceTimersByTime(30_000);
     await Promise.resolve();
 
-    expect(isEnabled!()).toBe(false);
+    expect(getSettings().enabled).toBe(false);
   });
 
   it('logs error when polling refresh rejects', async () => {
@@ -283,7 +289,7 @@ describe('registerTracingExporter', () => {
     jest.advanceTimersByTime(30_000);
     await Promise.resolve();
 
-    const { isEnabled } = MockedAgentBuilderProcessor.mock.calls[0][0];
-    expect(isEnabled!()).toBe(true);
+    const { getSettings } = MockedAgentBuilderProcessor.mock.calls[0][0];
+    expect(getSettings().enabled).toBe(true);
   });
 });
