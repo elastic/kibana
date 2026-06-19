@@ -10,11 +10,25 @@ import type { Attachment } from '@kbn/agent-builder-common/attachments';
 import { platformCoreTools } from '@kbn/agent-builder-common';
 import { z } from '@kbn/zod/v4';
 import { SecurityAgentBuilderAttachments } from '../../../common/constants';
+import { PARAMS_RULE_ID_FIELD } from '../../../common/detection_engine/rule_management/rule_fields';
+import { prepareKQLStringParam } from '../../../common/utils/kql';
+import type { SecuritySolutionPluginCoreSetupDependencies } from '../../plugin_contract';
+import { findRules } from '../../lib/detection_engine/rule_management/logic/search/find_rules';
 import { SECURITY_CREATE_DETECTION_RULE_TOOL_ID, SECURITY_LABS_SEARCH_TOOL_ID } from '../tools';
 
 import { securityAttachmentDataSchema } from './security_attachment_data_schema';
 
+interface RuleAttachmentTypeDeps {
+  getStartServices: SecuritySolutionPluginCoreSetupDependencies['getStartServices'];
+}
+
 export const ruleAttachmentDataSchema = securityAttachmentDataSchema.extend({
+  /**
+   * Detection rule signature ID this attachment was resolved from.
+   * Present when the attachment was created by investigate-rule.resolve_rule_attachment
+   * (i.e. the user selected a rule from find-rules output rather than creating a new one).
+   */
+  origin: z.string().max(512).optional(),
   text: z.string().max(500_000),
   attachmentLabel: z.string().max(1_000).optional(),
   // Save signal: `null` while unsaved (create), the saved id once saved (update). Nullable so the
@@ -23,13 +37,16 @@ export const ruleAttachmentDataSchema = securityAttachmentDataSchema.extend({
 });
 
 const DETECTION_RULE_SKILL_NAME_ID = 'detection-rule-edit';
+const INVESTIGATE_RULE_SKILL_NAME_ID = 'investigate-rule';
 
 type RuleAttachmentData = z.infer<typeof ruleAttachmentDataSchema>;
 
 const isRuleAttachmentData = (data: unknown): data is RuleAttachmentData => {
   return ruleAttachmentDataSchema.safeParse(data).success;
 };
-export const createRuleAttachmentType = (): AttachmentTypeDefinition => {
+export const createRuleAttachmentType = ({
+  getStartServices,
+}: RuleAttachmentTypeDeps): AttachmentTypeDefinition => {
   return {
     id: SecurityAgentBuilderAttachments.rule,
     validate: (input) => {
@@ -39,6 +56,54 @@ export const createRuleAttachmentType = (): AttachmentTypeDefinition => {
       } else {
         return { valid: false, error: parseResult.error.message };
       }
+    },
+    // Resolve a rule attachment from a detection rule signature ID and store a rule snapshot
+    // as attachment content. Called once at add-time for by-reference creation.
+    resolve: async (origin, ctx): Promise<RuleAttachmentData> => {
+      const [, startPlugins] = await getStartServices();
+      const rulesClient = await startPlugins.alerting.getRulesClientWithRequest(ctx.request);
+
+      const { data } = await findRules({
+        rulesClient,
+        filter: `${PARAMS_RULE_ID_FIELD}: ${prepareKQLStringParam(origin)}`,
+        page: 1,
+        fields: undefined,
+        perPage: undefined,
+        sortField: undefined,
+        sortOrder: undefined,
+      });
+      const ruleObject = data[0];
+      if (!ruleObject) {
+        throw new Error(`Rule with rule_id "${origin}" was not found`);
+      }
+      const params = (ruleObject.params ?? {}) as Record<string, unknown>;
+      const ruleName = String(ruleObject.name ?? origin);
+
+      const rule = {
+        id: ruleObject.id,
+        rule_id: params.ruleId ?? params.rule_id,
+        name: ruleObject.name,
+        description: params.description,
+        type: params.type,
+        language: params.language,
+        query: params.query,
+        index: params.index,
+        interval: ruleObject.schedule?.interval,
+        from: params.from,
+        enabled: ruleObject.enabled,
+        tags: ruleObject.tags,
+        threat: params.threat,
+        investigation_fields: params.investigation_fields,
+      };
+
+      // Carry the saved-object id as `ruleId` so a follow-up detection-rule-edit treats this as
+      // an update (PATCH) of the existing rule rather than a create (which would duplicate it).
+      return {
+        origin,
+        text: JSON.stringify(rule),
+        attachmentLabel: ruleName,
+        ruleId: ruleObject.id,
+      };
     },
     format: (attachment: Attachment<string, unknown>) => {
       const data = attachment.data;
@@ -69,7 +134,8 @@ SECURITY RULE DATA:
 Complete in order:
 
 1. When asked to modify, update, or create a detection rule, ALWAYS read the ${DETECTION_RULE_SKILL_NAME_ID} skill from the skills/security/rules directory.
-2. Use the available tools to research, create, or edit the rule and provide a response.`;
+2. When asked why the rule is failing, noisy, slow, or not producing alerts, ALWAYS read the ${INVESTIGATE_RULE_SKILL_NAME_ID} skill from the skills/security/rules directory.
+3. Use the available tools to research, create, or edit the rule and provide a response.`;
       return description;
     },
   };
