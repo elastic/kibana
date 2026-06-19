@@ -19,10 +19,16 @@ const NOT_FOUND_SENTINEL = { status: 404 };
 const buildServer = ({
   isElasticsearchServerless = false,
   ccsEnabled = true,
-}: { isElasticsearchServerless?: boolean; ccsEnabled?: boolean } = {}) =>
+  invalidateCache = jest.fn(),
+}: {
+  isElasticsearchServerless?: boolean;
+  ccsEnabled?: boolean;
+  invalidateCache?: jest.Mock;
+} = {}) =>
   ({
     isElasticsearchServerless,
     config: { experimental: { ccs: { enabled: ccsEnabled } } },
+    syntheticsIndicesCache: { invalidate: invalidateCache, get: jest.fn() },
   } as unknown as RouteContext['server']);
 
 const buildResponse = () =>
@@ -178,6 +184,45 @@ describe('multi space settings routes', () => {
       expect(response.notFound).toHaveBeenCalledTimes(1);
       expect(result).toBe(NOT_FOUND_SENTINEL);
       expect(saveSpy).not.toHaveBeenCalled();
+    });
+
+    it('invalidates the synthetics indices cache after a successful save', async () => {
+      jest
+        .spyOn(DefaultSyntheticsMultiSpaceSettingsRepository.prototype, 'save')
+        .mockResolvedValue({
+          useAllRemoteClusters: true,
+          selectedRemoteClusters: ['cluster-a'],
+          spaces: ['default'],
+        });
+
+      const invalidateCache = jest.fn();
+      const route = createPutMultiSpaceSettingsRoute();
+      await route.handler(
+        buildRouteContext({
+          server: buildServer({ invalidateCache }),
+          request: {
+            body: { useAllRemoteClusters: true, selectedRemoteClusters: ['cluster-a'] },
+          } as unknown as RouteContext['request'],
+        })
+      );
+
+      expect(invalidateCache).toHaveBeenCalledTimes(1);
+      expect(invalidateCache).toHaveBeenCalledWith();
+    });
+
+    it('does not invalidate the cache when the route short-circuits on serverless', async () => {
+      jest.spyOn(DefaultSyntheticsMultiSpaceSettingsRepository.prototype, 'save');
+      const invalidateCache = jest.fn();
+
+      const route = createPutMultiSpaceSettingsRoute();
+      await route.handler(
+        buildRouteContext({
+          server: buildServer({ isElasticsearchServerless: true, invalidateCache }),
+          request: { body: { useAllRemoteClusters: true } } as unknown as RouteContext['request'],
+        })
+      );
+
+      expect(invalidateCache).not.toHaveBeenCalled();
     });
   });
 });

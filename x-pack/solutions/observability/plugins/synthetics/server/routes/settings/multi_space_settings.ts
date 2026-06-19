@@ -62,6 +62,12 @@ export const createPutMultiSpaceSettingsRoute: SyntheticsRestApiRouteFactory<
     }
     const repository = new DefaultSyntheticsMultiSpaceSettingsRepository(savedObjectsClient);
     const { spaces, ...attributes } = request.body;
-    return repository.save(attributes, spaces);
+    const result = await repository.save(attributes, spaces);
+    // The `spaces` argument can re-share the singleton SO across arbitrary
+    // spaces, so a save in one space can change what every other space sees.
+    // Clearing the whole cache keeps this node consistent immediately; other
+    // Kibana nodes converge within the cache TTL.
+    server.syntheticsIndicesCache.invalidate();
+    return result;
   },
 });
