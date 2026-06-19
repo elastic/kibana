@@ -9,6 +9,7 @@ import React from 'react';
 import { act, render, screen, waitFor } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
+import { I18nProvider } from '@kbn/i18n-react';
 import { AlertEpisodesListPage } from './alert_episodes_list_page';
 import type { CustomBulkActions } from '@kbn/unified-data-table';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
@@ -151,11 +152,13 @@ const getCapturedBulkActions = (): CustomBulkActions => {
 const renderPage = () => {
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   return render(
-    <MemoryRouter>
-      <QueryClientProvider client={queryClient}>
-        <AlertEpisodesListPage />
-      </QueryClientProvider>
-    </MemoryRouter>
+    <I18nProvider>
+      <MemoryRouter>
+        <QueryClientProvider client={queryClient}>
+          <AlertEpisodesListPage />
+        </QueryClientProvider>
+      </MemoryRouter>
+    </I18nProvider>
   );
 };
 

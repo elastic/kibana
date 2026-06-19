@@ -17,7 +17,10 @@ import {
   EuiSpacer,
   logicalCSS,
   useEuiTheme,
+  EuiButtonEmpty,
+  EuiText,
 } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { CellActionsProvider } from '@kbn/cell-actions';
 import type { RenderDocumentViewCallback, SortOrder } from '@kbn/unified-data-table';
 import {
@@ -32,6 +35,7 @@ import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type { RowControlColumn, RowControlRowProps } from '@kbn/discover-utils';
 import { AlertEpisodeDetailsFlyout } from '@kbn/alerting-v2-episodes-ui/components/details/details_flyout';
 import { css } from '@emotion/react';
+import deepEqual from 'fast-deep-equal';
 import { useQueryClient } from '@kbn/react-query';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useFetchAlertingEpisodesQuery } from '@kbn/alerting-v2-episodes-ui/hooks/use_fetch_alerting_episodes_query';
@@ -40,6 +44,7 @@ import type { EpisodesSortState } from '@kbn/alerting-v2-episodes-ui/queries/epi
 import { useAlertingRulesCache } from '@kbn/alerting-v2-episodes-ui/hooks/use_alerting_rules_cache';
 import { getBreachEsqlQuery } from '@kbn/alerting-v2-schemas';
 import { createEpisodeActions, type EpisodeAction } from '@kbn/alerting-v2-episodes-ui/actions';
+import { useEpisodesKpisQuery } from '@kbn/alerting-v2-episodes-ui/hooks/use_episodes_kpis_query';
 import {
   EpisodeStatusCell,
   EpisodeTagsCell,
@@ -59,6 +64,7 @@ import { dataTableRecordToEpisode } from './utils/data_table_record_to_episode';
 import { getDiscoverHrefForRuleAndEpisodeTimestamp } from '../../utils/discover_href_for_episode';
 import { useEpisodesListUrlState } from './hooks/use_episodes_list_url_state';
 import { useEpisodesBulkActions } from './hooks/use_episodes_bulk_actions';
+import { DEFAULT_EPISODES_LIST_FILTER } from './utils/episodes_list_url_state';
 
 const PAGE_SIZE = 1000;
 
@@ -128,6 +134,16 @@ export const AlertEpisodesListPage = () => {
     histogramBreakdownField,
     setHistogramBreakdownField,
   } = useEpisodesListUrlState(timefilter);
+
+  const hasActiveFilters = useMemo(
+    () => !deepEqual(filterState, DEFAULT_EPISODES_LIST_FILTER),
+    [filterState]
+  );
+
+  const handleClearFilters = useCallback(() => {
+    setFilterState({ ...DEFAULT_EPISODES_LIST_FILTER });
+  }, [setFilterState]);
+
   const [sortState, setSortState] = useState<EpisodesSortState>(DEFAULT_SORT);
   const [columns, setColumns] = useState<string[]>([
     'episode.status',
@@ -152,6 +168,12 @@ export const AlertEpisodesListPage = () => {
     sortState,
     timeRange,
   });
+
+  const { data: filteredKpis } = useEpisodesKpisQuery({ services, filterState, timeRange });
+  const { data: totalKpis } = useEpisodesKpisQuery({ services, timeRange });
+
+  const filteredAlertEpisodesCount = filteredKpis?.alertsCount ?? 0;
+  const totalAlertEpisodesCount = totalKpis?.alertsCount ?? 0;
 
   const sort: SortOrder[] = useMemo(
     () => [[sortState.sortField, sortState.sortDirection]],
@@ -381,6 +403,45 @@ export const AlertEpisodesListPage = () => {
             onBreakdownFieldChange={setHistogramBreakdownField}
           />
         </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiFlexGroup alignItems="center" responsive={false} gutterSize="s">
+            <EuiFlexItem grow={false}>
+              <EuiText size="xs">
+                <FormattedMessage
+                  id="xpack.alertingV2.episodes.itemCount"
+                  defaultMessage="Showing {filtered} of {total} {total, plural, one {alert} other {alerts}}"
+                  values={{
+                    filtered: <strong>{filteredAlertEpisodesCount}</strong>,
+                    total: <strong>{totalAlertEpisodesCount}</strong>,
+                  }}
+                />
+              </EuiText>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiText size="xs" color="subdued">
+                |
+              </EuiText>
+            </EuiFlexItem>
+            <EuiFlexItem
+              grow={false}
+              // css={css`
+              //   align-self: stretch;
+              //   border-left: ${euiTheme.border.thick};
+              // `}
+            >
+              <EuiButtonEmpty
+                size="xs"
+                iconType="eraser"
+                disabled={!hasActiveFilters}
+                onClick={handleClearFilters}
+                data-test-subj="episodesFilterBar-resetFilters"
+              >
+                {i18n.EPISODES_FILTER_BAR_RESET_FILTERS}
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+
         <EuiFlexItem
           grow
           css={css`
