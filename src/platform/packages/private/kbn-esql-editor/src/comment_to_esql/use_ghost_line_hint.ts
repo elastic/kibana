@@ -75,11 +75,11 @@ export const useGhostLineHint = ({
 
   const commandKey = isMac ? '⌘' : 'Ctrl';
   const emptyLineHintText = i18n.translate('esqlEditor.ghostLineHint', {
-    defaultMessage: 'Type // and describe a step, then press {commandKey}+J to add it',
+    defaultMessage: 'Type // and describe what you want, then press {commandKey}+J to generate it using AI',
     values: { commandKey },
   });
   const commentLineHintText = i18n.translate('esqlEditor.ghostCommentHint', {
-    defaultMessage: 'Press {commandKey}+J to generate ES|QL from this comment',
+    defaultMessage: 'Describe what you want, then press {commandKey}+J to generate it using AI',
     values: { commandKey },
   });
 
