@@ -153,7 +153,8 @@ export class UnifiedTabs {
    * active-tab marker to move to a different test subject before returning.
    */
   async duplicateActiveTab() {
-    await this.duplicateTabByTestSubj(await this.getActiveTabTestSubj());
+    const testSubj = await this.getActiveTabTestSubj();
+    await this.duplicateTabByTestSubj(testSubj);
   }
 
   /**
