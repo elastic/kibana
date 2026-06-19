@@ -11,11 +11,37 @@
 //   - connectors/with_email_aws_ses_kbn_config/email.ts
 //   - connectors/webhook_disabled_ssl_pfx/webhook.ts
 
-import type { ScoutPage } from '@kbn/scout';
+import type { KibanaRole, ScoutPage } from '@kbn/scout';
 import { tags, test } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 
 const CONNECTORS_APP_PATH = '/app/management/insightsAndAlerting/triggersActionsConnectors';
+
+// Minimal role for the connector suites — manage connectors (`actions`) and rules
+// (`stackAlerts`), plus ES read on the alerts/test indices the rule forms inspect.
+// Mirrors the CONNECTORS_ROLE used by the other triggers_actions_ui connector specs.
+const CONNECTORS_ROLE: KibanaRole = {
+  elasticsearch: {
+    cluster: [],
+    indices: [
+      {
+        names: ['.alerts-*', 'scout-threshold-rule-test*'],
+        privileges: ['read', 'view_index_metadata'],
+      },
+      {
+        names: ['scout-idx-*'],
+        privileges: ['create_index', 'write'],
+      },
+    ],
+  },
+  kibana: [
+    {
+      base: [],
+      feature: { actions: ['all'], stackAlerts: ['all'] },
+      spaces: ['*'],
+    },
+  ],
+};
 
 // Mirrors the `xpack.actions.email.services.ses.*` overrides in the
 // connectors_custom_config server config set.
@@ -37,7 +63,7 @@ const openConnectorCard = async (page: ScoutPage, cardSubj: string) => {
 
 test.describe('Connector custom Kibana config', { tag: tags.stateful.classic }, () => {
   test.beforeEach(async ({ browserAuth, page, kbnUrl }) => {
-    await browserAuth.loginAsAdmin();
+    await browserAuth.loginWithCustomRole(CONNECTORS_ROLE);
     await page.goto(kbnUrl.get(CONNECTORS_APP_PATH));
   });
 
