@@ -7,6 +7,8 @@
 
 import { z } from '@kbn/zod/v4';
 import { isEqual, uniq } from 'lodash';
+import objectHash from 'object-hash';
+import { v5 } from 'uuid';
 import { conditionSchema, type Condition } from '@kbn/streamlang';
 
 export const DATASET_ANALYSIS_FEATURE_TYPE = 'dataset_analysis' as const;
@@ -29,6 +31,7 @@ export const INFERRED_FEATURE_TYPES = [
   'schema',
 ] as const;
 
+// TODO: it would be nice to rename id->slug and uuid->id for consistency with queries
 export const baseFeatureSchema = z.object({
   id: z.string(),
   stream_name: z.string(),
@@ -70,7 +73,10 @@ export const ignoredFeatureSchema = z.object({
 
 export type IgnoredFeature = z.infer<typeof ignoredFeatureSchema>;
 
-export const featureSchema = baseFeatureSchema.and(
+// Creation/write payload. `uuid` is derived from (id, stream_name, type) at the
+// storage boundary (see `computeFeatureUuid` / `toStoredFeature`), so it is not
+// part of the input — callers never supply it.
+export const featureUpsertSchema = baseFeatureSchema.and(
   z.object({
     run_id: z.string().optional(),
     excluded: z.boolean().optional(),
@@ -79,8 +85,32 @@ export const featureSchema = baseFeatureSchema.and(
   })
 );
 
+export type FeatureUpsert = z.infer<typeof featureUpsertSchema>;
+
+// Canonical persisted feature. Once a feature has been stored and read back it
+// always carries its derived `uuid`.
+export const featureSchema = featureUpsertSchema.and(
+  z.object({
+    uuid: z.string(),
+  })
+);
+
 export type Feature = z.infer<typeof featureSchema>;
 export type FeatureWithFilter = Feature & { filter: Condition };
+
+/**
+ * Computes a deterministic, stable uuid for a feature from its identifying
+ * triple (slug, stream_name, type). The slug is normalized (trimmed +
+ * lowercased) so it matches `isDuplicateFeature`'s case-insensitive slug
+ * semantics. Used as the storage document id and for delete/exclude/restore
+ * operations.
+ */
+export function computeFeatureUuid(
+  feature: Pick<BaseFeature, 'id' | 'stream_name' | 'type'>
+): string {
+  const slug = feature.id.trim().toLowerCase();
+  return v5(objectHash([feature.stream_name, feature.type, slug]), v5.DNS);
+}
 
 export function isFeature(feature: unknown): feature is Feature {
   return featureSchema.safeParse(feature).success;

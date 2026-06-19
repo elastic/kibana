@@ -226,6 +226,7 @@ export {
 
 export {
   type Feature,
+  type FeatureUpsert,
   type FeatureWithFilter,
   type BaseFeature,
   type IdentifiedFeature,
@@ -241,9 +242,11 @@ export {
   isComputedFeature,
   isDuplicateFeature,
   hasSameFingerprint,
+  computeFeatureUuid,
   mergeFeature,
   toBaseFeature,
   featureSchema,
+  featureUpsertSchema,
   baseFeatureSchema,
   identifiedFeatureSchema,
   ignoredFeatureSchema,

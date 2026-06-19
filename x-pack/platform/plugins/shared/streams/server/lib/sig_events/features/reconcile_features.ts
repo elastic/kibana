@@ -9,6 +9,7 @@ import { isEqual } from 'lodash';
 import type { Logger } from '@kbn/logging';
 import {
   type Feature,
+  type FeatureUpsert,
   type BaseFeature,
   isDuplicateFeature,
   hasSameFingerprint,
@@ -17,7 +18,7 @@ import {
 } from '@kbn/streams-schema';
 import type { IgnoredFeature } from '@kbn/streams-ai';
 
-export const toFeatureSummary = ({ id, title }: Feature) => ({ id, title: title ?? id });
+export const toFeatureSummary = ({ id, title }: BaseFeature) => ({ id, title: title ?? id });
 
 export const toFeatureProjection = ({
   id,
@@ -26,7 +27,7 @@ export const toFeatureProjection = ({
   title,
   description,
   properties,
-}: Feature) => ({
+}: BaseFeature) => ({
   id,
   type,
   subtype,
@@ -47,7 +48,7 @@ export function reconcileComputedFeatures({
   computedFeatures: BaseFeature[];
   streamName: string;
   runId: string;
-}): Feature[] {
+}): FeatureUpsert[] {
   const metadata = createFeatureMetadata({ runId });
   return computedFeatures.map((feature) => ({
     ...feature,
@@ -102,10 +103,10 @@ export function reconcileInferredFeatures({
   excludedFeatures: ReadonlyArray<Feature>;
   runId: string;
   logger: Logger;
-}): { newFeatures: Feature[]; updatedFeatures: Feature[]; codeIgnoredCount: number } {
+}): { newFeatures: FeatureUpsert[]; updatedFeatures: FeatureUpsert[]; codeIgnoredCount: number } {
   const metadata = createFeatureMetadata({ runId });
-  const newFeatures: Feature[] = [];
-  const updatedFeatures: Feature[] = [];
+  const newFeatures: FeatureUpsert[] = [];
+  const updatedFeatures: FeatureUpsert[] = [];
 
   for (const ignored of ignoredFeatures) {
     logger.debug(
