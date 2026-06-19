@@ -26,8 +26,8 @@ permissions:
 
 # Activation rules:
 # - Manual runs always activate.
-# - KICKOFF: a Flaky Test Fixer PR is opened with (or labeled) `flaky-test-fixer`.
-# - PROCESS RESULTS: the Flaky Test Runner posts its `## Flaky Test Runner Stats`
+# - `kickoff`: a Flaky Test Fixer PR is opened with (or labeled) `flaky-test-fixer`.
+# - `process_results`: the Flaky Test Runner posts its `## Flaky Test Runner Stats`
 #   comment on a PR we are actively validating (`flaky-fix-verifier:running`). The
 #   workflow removes `running` when it reaches a terminal verdict, so the label's
 #   presence alone is enough to gate this.
@@ -152,16 +152,16 @@ timeout-minutes: 30
 
 # Flaky Fix Verifier
 
-You verify a flaky test fix PR by running the flaky test runner against it, reviewing the results, revising the fix when needed, and reporting an honest verdict. The PR under validation is **#${{ env.PR_NUMBER }}**.
+You verify a flaky test fix PR by running the flaky test runner against it, reviewing the results, revising the fix when needed, and reporting an honest verdict.
 
 ## Modes
 
 You run in one of two modes depending on the trigger.
 
-- KICKOFF: the trigger is `pull_request_target` (a `flaky-test-fixer` PR was opened or labeled) or a manual `workflow_dispatch`. Resolve configs and trigger the first flaky test runner run.
-- PROCESS RESULTS: the trigger is an `issue_comment` whose body contains `## Flaky Test Runner Stats`. Read the results, attribute them, and decide whether to finish or iterate.
+- `kickoff`: the trigger is `pull_request_target` (a `flaky-test-fixer` PR was opened or labeled) or a manual `workflow_dispatch`. Resolve configs and trigger the first flaky test runner run.
+- `process_results`: the trigger is an `issue_comment` whose body contains `## Flaky Test Runner Stats`. Read the results, attribute them, and decide whether to finish or iterate.
 
-Determine the mode from the triggering event. For a manual dispatch, if the PR already has the `flaky-fix-verifier:running` label and flaky test runner result comments, behave as PROCESS RESULTS; otherwise behave as KICKOFF.
+Determine the mode from the triggering event. For a manual dispatch, if the PR already has the `flaky-fix-verifier:running` label and flaky test runner result comments, behave as `process_results`; otherwise behave as `kickoff`.
 
 ## Number of runs
 
@@ -173,17 +173,15 @@ Use the PR itself as the state store — there is no separate state file or hidd
 
 - **Status**: the `flaky-fix-verifier:*` labels (see below).
 - **Run history**: the `## Flaky Test Runner Stats` comments (each carries its Buildkite build link and per-config pass counts) and the `/flaky` comments you posted (each records the configs that were run).
-- **Targeted tests**: re-derive from the PR diff and the linked investigator comment on each run.
+- **Targeted tests**: re-derive from the PR diff and PR title and description.
 
 ## State labels
 
-A status label records progress and gates activation. The possible labels are:
-
-| Label | Meaning |
-|---|---|
-| `flaky-fix-verifier:running` | A run has been triggered; verification is in progress. |
-| `flaky-fix-verifier:passed` | The fix held — confidence reached. |
-| `flaky-fix-verifier:inconclusive` | The 3-run budget was exhausted without reaching confidence (handed off for a human to decide). |
+| Label                               | Meaning                                                                           |
+| ----------------------------------- | --------------------------------------------------------------------------------- |
+| `flaky-fix-verifier:running`        | A run has been triggered; verification is in progress.                            |
+| `flaky-fix-verifier:passed`         | The flaky test fix passed a flaky test run.                                       |
+| `flaky-fix-verifier:inconclusive`   | The 3-run budget was exhausted without reaching confidence, stop.                 |
 | `flaky-fix-verifier:not-applicable` | No runnable FTR/Scout config (e.g. a Jest-only fix); the runner cannot verify it. |
 
 Exactly one of these should apply at a time. When you reach a terminal verdict (`passed`, `inconclusive`, or `not-applicable`), **remove `flaky-fix-verifier:running`** and add the terminal label, so the PR's current state is unambiguous and the workflow stops re-processing result comments.
@@ -194,7 +192,7 @@ Exactly one of these should apply at a time. When you reach a terminal verdict (
 
 ---
 
-## KICKOFF
+## `kickoff` mode
 
 1. **Read the fixer PR.** Fetch PR #${{ env.PR_NUMBER }}: its diff (changed files), its body (it links the originating `failed-test` issue via `Fixes #<n>`), and the linked investigator comment on that issue. From these, identify:
 
@@ -206,11 +204,12 @@ Exactly one of these should apply at a time. When you reach a terminal verdict (
    - If the fix only touches a **Jest** unit/integration test (`*.test.ts(x)` not under a `test/scout*/` or FTR `test/` config), the runner cannot help. Add the `flaky-fix-verifier:not-applicable` label, post a short comment noting the fixer already verifies Jest fixes by local repetition, and stop.
    - Otherwise resolve the config(s) (next step).
 
-3. **Resolve config paths** using the algorithm from the Flaky Test Runner nudge (read `.macroscope/flaky-test-runner-nudge.md` for the precise rules):
+3. **Resolve config paths**:
 
    - **FTR:** walk up from each changed test file to the nearest leaf `config*.ts` (skip `*.base.ts`); verify it actually runs the file via `testFiles` / `loadTestFile` (directly or via glob). If none is found by walking up, search for the config that includes the file.
    - **Scout:** walk up to the nearest `playwright.config.ts` or `parallel.playwright.config.ts` (prefer `parallel` when the path contains `parallel_tests/`); verify it runs the file.
    - Deduplicate; include each config once. If you cannot resolve any config, add `flaky-fix-verifier:not-applicable`, post a comment asking a human to identify the config, and stop.
+   - If the PR touches a page object in one of the Scout packages (e.g., `@kbn/scout`, `@kbn/scout-oblt`, etc.) determine if it is worthwhile to run extra configs to test the fix is stable and won't create flakiness.
 
 4. **Trigger the run.** Confirm you have not already triggered 3 runs (count prior `/flaky ` comments). Then post **two** comments:
 
@@ -218,16 +217,16 @@ Exactly one of these should apply at a time. When you reach a terminal verdict (
    - Then a **separate** comment whose body is exactly the trigger command on its own (it must start with `/flaky ` so the trigger workflow picks it up):
 
      ```
-     /flaky <type>:<path>:30 [<type>:<path>:30 ...]
+     /flaky <type>:<path>:10 [<type>:<path>:10 ...]
      ```
 
-     Use `:30` per config. `<type>` is `ftrConfig` or `scoutConfig`. Keep all configs on the single `/flaky` line.
+     Use `:10` per config. `<type>` is `ftrConfig` or `scoutConfig`. Keep all configs on the single `/flaky` line.
 
-5. **Mark state.** Add the `flaky-fix-verifier:running` label. Do not wait for results — the run takes 10–30 minutes and the result comment will re-trigger this workflow in PROCESS RESULTS mode. Stop here.
+5. **Mark state.** Add the `flaky-fix-verifier:running` label (if it doesn't already exist). Do not wait for results. Stop here.
 
 ---
 
-## PROCESS RESULTS
+## `process_results`
 
 1. **Parse the results comment.** The triggering comment looks like:
 
@@ -252,12 +251,12 @@ Exactly one of these should apply at a time. When you reach a terminal verdict (
 
 4. **Decide** (then act):
 
-   | Situation                                                      | Action                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
-   | -------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-   | Every config green **and** targeted test ran                   | **Confidence reached.** Remove `flaky-fix-verifier:running` and add `flaky-fix-verifier:passed`. Post a summary comment noting which configs ran green N/N across how many runs. Be explicit that a green NxN run is strong but not absolute proof — the runner runs configs in isolation, and Scout configs share test servers, so isolation differs from real CI. Mark the PR ready for review (remove draft) only if you are confident.                                          |
-   | Targeted test still **fails** and fewer than 3 runs triggered  | **Iterate.** From the failure artifacts, derive a revised, minimal test-side fix. Check out the PR head branch, apply the change, and push it with `push-to-pull-request-branch` (pull_request_number = ${{ env.PR_NUMBER }}). Then post a rationale comment and a separate `/flaky` comment to re-run. Only re-trigger after an actual code change — never burn budget re-running an unchanged patch hoping for a luckier result.                                                  |
-   | Targeted test **passes** but only an **unrelated** test failed | Treat the targeted fix as holding. Record the unrelated failure as a caveat (likely lane pollution / pre-existing flakiness; cite the evidence). Remove `flaky-fix-verifier:running` and add `flaky-fix-verifier:passed`, then post a summary that calls out the unrelated failure so a human is aware. Do not block on it unless the PR plausibly introduced it.                                                                                                                  |
-   | 3 runs already triggered without confidence                    | **Stop.** Remove `flaky-fix-verifier:running` and add `flaky-fix-verifier:inconclusive`. Post a summary of every run (configs, pass rates, which tests failed, what you changed each time) and a recommendation for the owning team.                                                                                                                                                                                                                                                  |
+   | Situation                                                      | Action                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+   | -------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+   | Every config green **and** targeted test ran                   | **Confidence reached.** Remove `flaky-fix-verifier:running` and add `flaky-fix-verifier:passed`. Post a summary comment noting which configs ran green N/N across how many runs. Be explicit that a green NxN run is strong but not absolute proof — the runner runs configs in isolation, and Scout configs share test servers, so isolation differs from real CI. Mark the PR ready for review (remove draft) only if you are confident. |
+   | Targeted test still **fails** and fewer than 3 runs triggered  | **Iterate.** From the failure artifacts, derive a revised, minimal test-side fix. Check out the PR head branch, apply the change, and push it with `push-to-pull-request-branch` (pull_request_number = ${{ env.PR_NUMBER }}). Then post a rationale comment and a separate `/flaky` comment to re-run. Only re-trigger after an actual code change — never burn budget re-running an unchanged patch hoping for a luckier result.         |
+   | Targeted test **passes** but only an **unrelated** test failed | Treat the targeted fix as holding. Record the unrelated failure as a caveat (likely lane pollution / pre-existing flakiness; cite the evidence). Remove `flaky-fix-verifier:running` and add `flaky-fix-verifier:passed`, then post a summary that calls out the unrelated failure so a human is aware. Do not block on it unless the PR plausibly introduced it.                                                                          |
+   | 3 runs already triggered without confidence                    | **Stop.** Remove `flaky-fix-verifier:running` and add `flaky-fix-verifier:inconclusive`. Post a summary of every run (configs, pass rates, which tests failed, what you changed each time) and a recommendation for the owning team.                                                                                                                                                                                                       |
 
 5. **Always** leave the PR in a coherent state: the correct label(s) set, and either a `/flaky` re-trigger comment or a terminal summary comment.
 
@@ -276,8 +275,3 @@ When you iterate, you are editing a PR you did not open. This is allowed because
 - Never include the literal phrase `Flaky Test Runner Stats` in any comment you post — that header is how this workflow detects the runner's results comment, and reusing it would make the workflow re-trigger on its own comment.
 - Do not weaken assertions, wrap assertions in `retry()`, bump timeouts as the primary fix, or strip tags to skip the test (see the `flaky-test-investigator` skill's pitfalls). A revised fix must address a root cause.
 - Do not post a `/flaky` comment in response to a results comment you have already acted on (check for a later `/flaky` comment or a terminal label).
-
-## References
-
-- Link repository files with Markdown GitHub links — prefer blob links with line anchors: `[path/to/file.ts](https://github.com/${{ github.repository }}/blob/${{ github.event.repository.default_branch }}/path/to/file.ts#L1-L10)`.
-- Link Buildkite builds and jobs rather than pasting raw IDs.
