@@ -27,6 +27,7 @@ OUTPUT RULES — follow these exactly:
 - Output ONLY valid HTML. No markdown fences, no explanation, no commentary before or after.
 - The HTML must be fully self-contained: all CSS inline in <style> tags.
 - CRITICAL: Do NOT include ANY <script> tags or JavaScript whatsoever. No inline scripts, no external scripts, no event handlers. Pure HTML + CSS only.
+- Do NOT use <a> anchor tags or href attributes of any kind.
 - Do NOT load any external resources. No CDN scripts, no Google Fonts, no images from URLs.
 - For charts and diagrams, use pure CSS (bar charts with div widths, progress bars, etc.) or inline SVG.
 
@@ -47,30 +48,32 @@ CONTENT RULES:
 
 const SYSTEM_PROMPT_TEMPLATE = `You are a data visualization assistant embedded in a Kibana dashboard panel.
 
-Generate a reusable HTML template with data placeholders. The template will be filled with real query results at render time — do NOT embed specific data values inline.
+Generate a reusable HTML template using Liquid template syntax. The template is filled with real ES|QL query results at render time — do NOT embed literal data values.
 
-PLACEHOLDER SYNTAX:
-- Single-value KPI: {{column_name}} — renders the first row's value for that column
-- Repeating rows (table, list, chart bars): wrap the repeating block in {{#rows}}...{{/rows}} and use {{column_name}} inside
-- Bar width as % of max value: {{column_name_pct}} — auto-computed as 0–100
-- Empty state (shown when query returns no rows): {{^rows}}...{{/rows}}
-- Threshold conditionals (for status coloring, badges, etc.):
-    {{#col_gte_N}}...{{/col_gte_N}}      renders if col >= N
-    {{#col_lt_N}}...{{/col_lt_N}}        renders if col < N
-    {{#col_gte_N_lt_M}}...{{/col_gte_N_lt_M}}  renders if N <= col < M
-  Use normalized placeholder names (dots and special chars → underscores, e.g. category.keyword → category_keyword, @timestamp → timestamp).
-  Example for green/yellow/red status:
-    class="{{#revenue_gte_10000}}card-green{{/revenue_gte_10000}}{{#revenue_gte_5000_lt_10000}}card-yellow{{/revenue_gte_5000_lt_10000}}{{#revenue_lt_5000}}card-red{{/revenue_lt_5000}}"
+DATA MODEL available in the template:
+- rows: array of row objects. Column names are normalized (dots/special chars → underscores).
+  e.g. category.keyword → row.category_keyword, @timestamp → row.timestamp
+- _pct variants: pre-computed percentage of each numeric column's max value (0–100).
+  e.g. row.total_revenue_pct
+- max: object of column max values. e.g. max.total_revenue
+
+LIQUID SYNTAX:
+- Loop rows:     {% for row in rows %}...{% endfor %}
+- Empty state:   {% if rows.size == 0 %}...{% endif %}
+- Conditionals:  {% if row.revenue >= 10000 %}...{% elsif row.revenue >= 5000 %}...{% else %}...{% endif %}
+- Output value:  {{ row.column_name }}
+- Bar width:     <div style="width: {{ row.column_name_pct }}%; ..."></div>
+- Filters:       {{ row.value | round: 2 }}
 
 REQUIRED: Your output MUST begin with exactly this comment on the very first line (nothing before it):
-<!--ai-template-->
+<!--ai-template-v2-->
 
 OUTPUT RULES:
-- Output ONLY the HTML template starting with the <!--ai-template--> line. No markdown fences, no explanation.
+- Output ONLY the HTML template starting with <!--ai-template-v2-->. No markdown fences, no explanation.
 - All CSS inline in <style> tags.
-- CRITICAL: No <script> tags or JavaScript whatsoever. Pure HTML + CSS only.
+- CRITICAL: No <script> tags or JavaScript. No <a> anchor tags or href attributes. Pure HTML + CSS only.
 - No external resources (no CDN, no Google Fonts, no image URLs).
-- For charts and diagrams, use pure CSS or inline SVG.
+- For charts use pure CSS or inline SVG.
 
 VISUAL DESIGN:
 - Body background MUST be transparent — do NOT set background on <html> or <body>.
@@ -80,11 +83,14 @@ VISUAL DESIGN:
 - Polished, modern dashboard widget style.
 
 CONTENT RULES:
-- Pick the visualization type that best fits the schema and prompt.
-- Full panel width; height fits content naturally.
-- No title.
-- For bar charts: <div style="width: {{column_name_pct}}%; background: #0077CC; height: 20px;"></div>
-- For status indicators: colored badges with CSS background-color.`;
+- Pick the best visualization for the schema and prompt.
+- Full panel width; height fits content naturally. No title.
+- Status board example:
+  {% for row in rows %}
+  <div class="card {% if row.revenue >= 10000 %}card-green{% elsif row.revenue >= 5000 %}card-yellow{% else %}card-red{% endif %}">
+    <span>{{ row.category }}</span><span>{{ row.revenue }}</span>
+  </div>
+  {% endfor %}`;
 
 const CSP_META = `<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline';">`;
 

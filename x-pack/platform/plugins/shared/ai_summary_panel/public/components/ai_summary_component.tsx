@@ -25,6 +25,7 @@ import {
   sanitizeTemplate,
   isValidTemplate,
   injectCsp,
+  sanitizeHtml,
 } from '../utils/template_fill';
 import type { TemplateColumn } from '../utils/template_fill';
 
@@ -104,9 +105,9 @@ export const AiSummaryComponent = ({
 
     const template = savedTemplateRef.current;
 
-    // Fast path — static panel with stored HTML: render directly, no server calls.
+    // Fast path — static panel with stored HTML: sanitize then render, no server calls.
     if (template && !esqlQuery) {
-      setHtml(injectCsp(template));
+      setHtml(injectCsp(sanitizeHtml(template)));
       setIsLoading(false);
       setError(undefined);
       return;

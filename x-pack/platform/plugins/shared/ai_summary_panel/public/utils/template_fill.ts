@@ -5,11 +5,18 @@
  * 2.0.
  */
 
+import DOMPurify from 'dompurify';
+import { Liquid } from 'liquidjs';
 import { normalizeColumnName } from '../../common/utils';
 
-export const TEMPLATE_SENTINEL = '<!--ai-template-->';
+// v2 sentinel — templates use Liquid syntax. Old v1 Mustache-style templates
+// won't match and will trigger re-generation automatically.
+export const TEMPLATE_SENTINEL = '<!--ai-template-v2-->';
 
 const CSP_META = `<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline';">`;
+
+// Single shared engine — stateless, safe to reuse across renders.
+const liquid = new Liquid({ strictFilters: false, strictVariables: false });
 
 export function injectCsp(html: string): string {
   if (html.includes(CSP_META)) return html;
@@ -21,14 +28,20 @@ export function injectCsp(html: string): string {
   return CSP_META + html;
 }
 
+// Strips <a> anchor tags and other unsafe elements before the HTML reaches the iframe.
+// Applied after Liquid rendering so injected data values are also covered.
+export function sanitizeHtml(html: string): string {
+  return DOMPurify.sanitize(html, {
+    FORBID_TAGS: ['a'],
+    WHOLE_DOCUMENT: true,
+    FORCE_BODY: false,
+  }) as string;
+}
+
 export function isTemplate(html: string): boolean {
   return html.includes(TEMPLATE_SENTINEL);
 }
 
-// Cleans raw LLM output before storing or filling:
-// - Strips markdown code fences (```html...```)
-// - Discards any text the LLM emitted before the sentinel
-// - Adds the sentinel if the LLM forgot it entirely
 export function sanitizeTemplate(raw: string): string {
   let s = raw.trim();
   s = s
@@ -44,7 +57,6 @@ export function sanitizeTemplate(raw: string): string {
   return s;
 }
 
-// Returns true if the template contains at least one HTML element.
 export function isValidTemplate(template: string): boolean {
   return /<[a-zA-Z]/.test(template);
 }
@@ -54,131 +66,48 @@ export interface TemplateColumn {
   type: string;
 }
 
-// Comparison operators recognised in conditional block names, e.g. {{#revenue_gte_10000}}.
-// Longer tokens checked first so "_gte_" is never mis-parsed as "_gt_".
-const COND_OPS: Array<{ token: string; fn: (a: number, b: number) => boolean }> = [
-  { token: '_gte_', fn: (a, b) => a >= b },
-  { token: '_lte_', fn: (a, b) => a <= b },
-  { token: '_gt_', fn: (a, b) => a > b },
-  { token: '_lt_', fn: (a, b) => a < b },
-];
-
-function escapeHtml(s: string): string {
-  return s
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;');
-}
-
 export function fillTemplate(
   template: string,
   columns: TemplateColumn[],
   rows: unknown[][]
 ): string {
-  const colIndex = new Map(columns.map((c, i) => [c.name, i]));
-  const colNormIndex = new Map(columns.map((c, i) => [normalizeColumnName(c.name), i]));
-
-  const maxValues = new Map<string, number>();
-  for (const col of columns) {
-    const idx = colIndex.get(col.name)!;
-    const nums = rows.map((r) => Number(r[idx])).filter((v) => isFinite(v));
-    if (nums.length > 0) maxValues.set(col.name, Math.max(...nums));
+  let tpl = template.trimStart();
+  if (tpl.startsWith(TEMPLATE_SENTINEL)) {
+    tpl = tpl.slice(TEMPLATE_SENTINEL.length);
   }
 
-  function resolveIdx(col: string): number | undefined {
-    return colIndex.get(col) ?? colNormIndex.get(normalizeColumnName(col));
-  }
+  // Pre-compute column max values for _pct variants
+  const maxValues: Record<string, number> = {};
+  columns.forEach((col, i) => {
+    const key = normalizeColumnName(col.name);
+    const nums = rows.map((r) => Number(r[i])).filter((v) => isFinite(v));
+    if (nums.length > 0) maxValues[key] = Math.max(...nums);
+  });
 
-  function resolveVal(col: string, pct: boolean, row: unknown[]): string {
-    const idx = resolveIdx(col);
-    if (idx === undefined) return '';
-    const colName = columns[idx].name;
-    const val = row[idx];
-    if (pct) {
-      const max = maxValues.get(colName) ?? 1;
-      const num = Number(val);
-      if (!isFinite(num)) return '0';
-      return max !== 0 ? String(Math.min(100, Math.max(0, Math.round((num / max) * 100)))) : '0';
-    }
-    return escapeHtml(String(val ?? ''));
-  }
-
-  // Evaluates conditional block names like "revenue_gte_10000" or "revenue_gte_5000_lt_10000".
-  // Returns true/false when recognised, null otherwise.
-  function evalConditional(blockName: string, row: unknown[]): boolean | null {
-    for (const op of COND_OPS) {
-      const opIdx = blockName.indexOf(op.token);
-      if (opIdx === -1) continue;
-
-      const colPart = blockName.slice(0, opIdx);
-      const colIdx = resolveIdx(colPart);
-      if (colIdx === undefined) continue;
-
-      const val = Number(row[colIdx]);
-      if (!isFinite(val)) return false;
-
-      const rest = blockName.slice(opIdx + op.token.length);
-      const numMatch = rest.match(/^(\d+(?:\.\d+)?)/);
-      if (!numMatch) continue;
-      if (!op.fn(val, parseFloat(numMatch[1]))) return false;
-
-      const rest2 = rest.slice(numMatch[0].length);
-      for (const op2 of COND_OPS) {
-        if (rest2.startsWith(op2.token)) {
-          const numMatch2 = rest2.slice(op2.token.length).match(/^(\d+(?:\.\d+)?)/);
-          if (numMatch2 && !op2.fn(val, parseFloat(numMatch2[1]))) return false;
-          break;
-        }
+  // Each row becomes a plain object: { col_name: value, col_name_pct: 0–100 }
+  const rowObjects = rows.map((row) => {
+    const obj: Record<string, unknown> = {};
+    columns.forEach((col, i) => {
+      const key = normalizeColumnName(col.name);
+      obj[key] = row[i];
+      const max = maxValues[key];
+      if (max !== undefined && max !== 0) {
+        const num = Number(row[i]);
+        obj[`${key}_pct`] = isFinite(num)
+          ? Math.min(100, Math.max(0, Math.round((num / max) * 100)))
+          : 0;
       }
-      return true;
-    }
-    return null;
+    });
+    return obj;
+  });
+
+  let rendered: string;
+  try {
+    rendered = liquid.parseAndRenderSync(tpl, { rows: rowObjects, max: maxValues });
+  } catch {
+    rendered =
+      '<p style="color:#d36086;padding:16px">Template error — please edit the prompt to regenerate.</p>';
   }
 
-  // Fills one row's copy of the template, recursively resolving nested conditional blocks.
-  function fillRow(rowTpl: string, row: unknown[]): string {
-    let filled = rowTpl.replace(
-      /\{\{#(\w[\w.]*?)\}\}([\s\S]*?)\{\{\/\1\}\}/g,
-      (_m: string, blockName: string, content: string) => {
-        const result = evalConditional(blockName, row);
-        if (result === null) return '';
-        return result ? fillRow(content, row) : '';
-      }
-    );
-    filled = filled.replace(/\{\{(\w[\w.]*?)(_pct)?\}\}/g, (_m: string, col: string, p?: string) =>
-      resolveVal(col, Boolean(p), row)
-    );
-    return filled;
-  }
-
-  let result = template.trimStart();
-  if (result.startsWith(TEMPLATE_SENTINEL)) {
-    result = result.slice(TEMPLATE_SENTINEL.length);
-  }
-
-  if (rows.length > 0) {
-    result = result.replace(
-      /\{\{#rows\}\}([\s\S]*?)\{\{\/rows\}\}/g,
-      (_match: string, rowTpl: string) => rows.map((row) => fillRow(rowTpl, row)).join('')
-    );
-    result = result.replace(/\{\{\^rows\}\}[\s\S]*?\{\{\/rows\}\}/g, '');
-  } else {
-    result = result.replace(/\{\{#rows\}\}[\s\S]*?\{\{\/rows\}\}/g, '');
-    result = result.replace(/\{\{\^rows\}\}([\s\S]*?)\{\{\/rows\}\}/g, '$1');
-  }
-
-  // Top-level {{col}} — single-value KPIs using first row
-  const firstRow = rows[0] ?? [];
-  result = result.replace(/\{\{(\w[\w.]*?)(_pct)?\}\}/g, (_m: string, col: string, p?: string) =>
-    resolveVal(col, Boolean(p), firstRow)
-  );
-
-  // Strip any remaining unresolved block tags (unclosed {{#tag}} or {{/tag}})
-  result = result.replace(/\{\{[#^/][^}]*\}\}/g, '');
-
-  // Strip any remaining unresolved value placeholders (wrong column names from LLM)
-  result = result.replace(/\{\{[^}]+\}\}/g, '');
-
-  return injectCsp(result);
+  return injectCsp(sanitizeHtml(rendered));
 }
