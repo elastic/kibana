@@ -44,6 +44,8 @@ export const EBT_CLICK_ACTIONS = {
   OPEN_IN_APM: 'openInApm',
   /** User sets a breakdown field on a chart. */
   SET_BREAKDOWN: 'setBreakdown',
+  /** User intends to view active alerts for an entity. */
+  VIEW_ALERTS: 'viewAlerts',
 } as const;
 
 /**

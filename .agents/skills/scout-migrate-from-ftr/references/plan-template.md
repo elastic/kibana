@@ -127,11 +127,11 @@ Values that appear in ≥2 files and should live in a shared constants file:
 
 ### Role inventory
 
-| Role name | Source | Privileges (summary) | Used by (files) | Notes |
-|-----------|--------|---------------------|-----------------|-------|
-| `superuser` (default) | `config.base.ts` | Full cluster + all Kibana features | 12 files | Over-privileged for most tests |
-| `dashboard_only_user` | `config.base.ts` | `feature: { dashboard: ['read'] }, spaces: ['*']` | 4 files | Matches a built-in viewer role |
-| `custom_analyst` | `data_counts.ts:20` | `indices: [{ names: ['logs-*'], privileges: ['read'] }]` | 1 file | Inline definition, narrow scope |
+| Role name | Source | Privileges (summary) | Used by (files) | Scout role target | Notes |
+|-----------|--------|---------------------|-----------------|-------------------|-------|
+| `superuser` (default) | `config.base.ts` | Full cluster + all Kibana features | 12 files | `loginAsAdmin()` (downgrade where possible) | Over-privileged for most tests |
+| `dashboard_only_user` | `config.base.ts` | `feature: { dashboard: ['read'] }, spaces: ['*']` | 4 files | `loginAsViewer()` | Matches a built-in viewer role |
+| `custom_analyst` | `data_counts.ts:20` | `indices: [{ names: ['logs-*'], privileges: ['read'] }]` | 1 file | `loginAsViewer()` unless scoping is under test | Custom scope looks incidental; keep `loginWithCustomRole` only if the test validates the index limitation |
 
 ### Over-privileged tests
 
