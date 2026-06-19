@@ -16,7 +16,7 @@ import type {
 import { fromFormatAPIToLensState, fromFormatLensStateToAPI } from './format';
 import { getLensAPIMetricSharedProps, getLensStateMetricSharedProps } from './utils';
 
-export function getCumulativeSumReferenceApiField(
+function getCumulativeSumReferenceApiField(
   ref: LensApiCountMetricOperation | LensApiSumMetricOperation
 ): string {
   return ref.operation === 'count' ? LENS_DOCUMENT_FIELD_NAME : ref.field;
