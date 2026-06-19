@@ -8,13 +8,16 @@
 import Boom from '@hapi/boom';
 import type { CasesClient, CasesClientArgs } from '..';
 
-import type { CustomFieldPutRequest } from '../../../common/types/api';
-import { CustomFieldPutRequestRt, CaseRequestCustomFieldsRt } from '../../../common/types/api';
+import type { CustomFieldPutRequest, CaseRequestCustomFields } from '../../../common/types/api';
+import {
+  CustomFieldPutRequestSchema,
+  CaseRequestCustomFieldsSchema,
+} from '../../../common/types/api';
 import { Operations } from '../../authorization';
 import { createCaseError } from '../../common/error';
-import { decodeWithExcessOrThrow, decodeOrThrow } from '../../common/runtime_types';
+import { decodeWithExcessOrThrowZod, decodeOrThrowZod } from '../../common/runtime_types';
 import type { CaseCustomField } from '../../../common/types/domain';
-import { CaseCustomFieldRt } from '../../../common/types/domain';
+import { CaseCustomFieldSchema } from '../../../common/types/domain';
 import { validateCustomFieldTypesInRequest } from './validators';
 import type { UserActionEvent } from '../../services/user_actions/types';
 import { validateMaxUserActions } from '../../common/validators';
@@ -54,7 +57,7 @@ export const replaceCustomField = async (
   try {
     const { value, caseVersion } = request;
 
-    decodeWithExcessOrThrow(CustomFieldPutRequestRt)(request);
+    decodeWithExcessOrThrowZod(CustomFieldPutRequestSchema)(request);
 
     const caseToUpdate = await caseService.getCase({
       id: caseId,
@@ -107,8 +110,9 @@ export const replaceCustomField = async (
       ...caseToUpdate.attributes.customFields.filter((field) => field.key !== customFieldId),
     ];
 
-    const decodedCustomFields =
-      decodeWithExcessOrThrow(CaseRequestCustomFieldsRt)(customFieldsToUpdate);
+    const decodedCustomFields = decodeWithExcessOrThrowZod(CaseRequestCustomFieldsSchema)(
+      customFieldsToUpdate
+    ) as CaseRequestCustomFields;
 
     const updatedAt = new Date().toISOString();
 
@@ -156,7 +160,7 @@ export const replaceCustomField = async (
       builtUserActions,
     });
 
-    return decodeOrThrow(CaseCustomFieldRt)(updatedCustomField);
+    return decodeOrThrowZod(CaseCustomFieldSchema)(updatedCustomField);
   } catch (error) {
     throw createCaseError({
       message: `Failed to replace customField, id: ${customFieldId} of case: ${caseId} version:${request.caseVersion} : ${error}`,

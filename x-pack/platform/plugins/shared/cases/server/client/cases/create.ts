@@ -9,8 +9,8 @@ import Boom from '@hapi/boom';
 import { SavedObjectsUtils } from '@kbn/core/server';
 
 import type { Case } from '../../../common/types/domain';
-import { CaseSeverity, UserActionTypes, CaseRt } from '../../../common/types/domain';
-import { decodeWithExcessOrThrow, decodeOrThrow } from '../../common/runtime_types';
+import { CaseSeverity, UserActionTypes, CaseSchema } from '../../../common/types/domain';
+import { decodeWithExcessOrThrowZod, decodeOrThrowZod } from '../../common/runtime_types';
 
 import { Operations } from '../../authorization';
 import { createCaseError } from '../../common/error';
@@ -19,7 +19,7 @@ import type { CasesClient, CasesClientArgs } from '..';
 import { LICENSING_CASE_ASSIGNMENT_FEATURE } from '../../common/constants';
 import type { Owner } from '../../../common/constants/types';
 import type { CasePostRequest } from '../../../common/types/api';
-import { CasePostRequestRt } from '../../../common/types/api';
+import { CasePostRequestSchema } from '../../../common/types/api';
 import { validateCustomFields } from './validators';
 import { emptyCaseAssigneesSanitizer } from './sanitizers';
 import { normalizeCreateCaseRequest } from './utils';
@@ -49,7 +49,7 @@ export const create = async (
   } = clientArgs;
 
   try {
-    const rawQuery = decodeWithExcessOrThrow(CasePostRequestRt)(data);
+    const rawQuery = decodeWithExcessOrThrowZod(CasePostRequestSchema)(data);
     const query = emptyCaseAssigneesSanitizer(rawQuery);
     const configurations = await casesClient.configure.get({ owner: data.owner });
     const customFieldsConfiguration = configurations[0]?.customFields;
@@ -174,7 +174,7 @@ export const create = async (
       savedObject: newCase,
     });
 
-    const createdCase = decodeOrThrow(CaseRt)(res);
+    const createdCase = decodeOrThrowZod(CaseSchema)(res);
 
     clientArgs.casesEventBus?.emitCaseCreated(clientArgs.request, {
       caseId: createdCase.id,

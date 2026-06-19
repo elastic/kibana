@@ -7,12 +7,12 @@
 
 import Boom from '@hapi/boom';
 
-import { AttachmentPatchRequestRtV2 } from '../../../common/types/api';
+import { AttachmentPatchRequestSchemaV2 } from '../../../common/types/api/attachment/v2';
 import { CaseCommentModel } from '../../common/models';
 import { createCaseError } from '../../common/error';
 import { isCommentRequestTypeExternalReference } from '../../../common/utils/attachments';
 import type { Case } from '../../../common/types/domain';
-import { decodeWithExcessOrThrow } from '../../common/runtime_types';
+import { decodeWithExcessOrThrowZod } from '../../common/runtime_types';
 import { CASE_SAVED_OBJECT } from '../../../common/constants';
 import type { CasesClientArgs } from '..';
 import { decodeCommentRequestV2 } from '../utils';
@@ -44,7 +44,7 @@ export async function update(
       id: queryCommentId,
       version: queryCommentVersion,
       ...queryRestAttributes
-    } = decodeWithExcessOrThrow(AttachmentPatchRequestRtV2)(queryParams);
+    } = decodeWithExcessOrThrowZod(AttachmentPatchRequestSchemaV2)(queryParams);
     await validateMaxUserActions({
       caseId: caseID,
       userActionService,

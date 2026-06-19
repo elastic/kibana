@@ -46,7 +46,7 @@ describe('update', () => {
       await expect(
         update({ updateRequest: { ...updateComment, comment: longComment }, caseID }, clientArgs)
       ).rejects.toThrow(
-        `Failed to patch comment case id: test-case: Error: The length of the comment is too long. The maximum length is ${MAX_COMMENT_LENGTH}.`
+        `Failed to patch comment case id: test-case: Error: comment: The length of the comment is too long. The maximum length is ${MAX_COMMENT_LENGTH}.`
       );
     });
 
@@ -54,7 +54,7 @@ describe('update', () => {
       await expect(
         update({ updateRequest: { ...updateComment, comment: '' }, caseID }, clientArgs)
       ).rejects.toThrow(
-        'Failed to patch comment case id: test-case: Error: The comment field cannot be an empty string.'
+        'Failed to patch comment case id: test-case: Error: comment: The comment field cannot be an empty string.'
       );
     });
 
@@ -62,7 +62,7 @@ describe('update', () => {
       await expect(
         update({ updateRequest: { ...updateComment, comment: '  ' }, caseID }, clientArgs)
       ).rejects.toThrow(
-        'Failed to patch comment case id: test-case: Error: The comment field cannot be an empty string.'
+        'Failed to patch comment case id: test-case: Error: comment: The comment field cannot be an empty string.'
       );
     });
 
@@ -93,7 +93,7 @@ describe('update', () => {
           clientArgs
         )
       ).rejects.toThrow(
-        `Failed to patch comment case id: test-case: Error: The length of the comment is too long. The maximum length is ${MAX_COMMENT_LENGTH}.`
+        `Failed to patch comment case id: test-case: Error: comment: The length of the comment is too long. The maximum length is ${MAX_COMMENT_LENGTH}.`
       );
     });
 
@@ -101,7 +101,7 @@ describe('update', () => {
       await expect(
         update({ updateRequest: { ...updateActionComment, comment: '' }, caseID }, clientArgs)
       ).rejects.toThrow(
-        'Failed to patch comment case id: test-case: Error: The comment field cannot be an empty string.'
+        'Failed to patch comment case id: test-case: Error: comment: The comment field cannot be an empty string.'
       );
     });
 
@@ -109,7 +109,7 @@ describe('update', () => {
       await expect(
         update({ updateRequest: { ...updateActionComment, comment: '  ' }, caseID }, clientArgs)
       ).rejects.toThrow(
-        'Failed to patch comment case id: test-case: Error: The comment field cannot be an empty string.'
+        'Failed to patch comment case id: test-case: Error: comment: The comment field cannot be an empty string.'
       );
     });
   });

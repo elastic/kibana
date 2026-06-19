@@ -11,7 +11,7 @@ import type { SavedObjectsFindResponse } from '@kbn/core-saved-objects-api-serve
 import type { UserActionFindRequestTypes } from '../../../../common/types/api';
 import { DEFAULT_PAGE, DEFAULT_PER_PAGE } from '../../../routes/api';
 import { defaultSortField } from '../../../common/utils';
-import { decodeOrThrow } from '../../../common/runtime_types';
+import { decodeOrThrowZod } from '../../../common/runtime_types';
 import {
   CASE_SAVED_OBJECT,
   CASE_USER_ACTION_SAVED_OBJECT,
@@ -28,8 +28,8 @@ import type {
   UserActionTransformedAttributes,
 } from '../../../common/types/user_actions';
 import { bulkDecodeSOAttributes } from '../../utils';
-import { UserActionTransformedAttributesRt } from '../../../common/types/user_actions';
-import type { UserActionType } from '../../../../common/types/domain';
+import { UserActionTransformedAttributesSchema } from '../../../common/types/user_actions';
+import type { UserActionAttributes, UserActionType } from '../../../../common/types/domain';
 import {
   UserActionActions,
   UserActionTypes,
@@ -67,7 +67,7 @@ export class UserActionFinder {
 
       const decodeRes = bulkDecodeSOAttributes(
         res.saved_objects,
-        UserActionTransformedAttributesRt
+        UserActionTransformedAttributesSchema
       );
 
       return {
@@ -231,7 +231,9 @@ export class UserActionFinder {
           findResults.saved_objects.map((so) => {
             const res = transformToExternalModel(so);
 
-            const decodeRes = decodeOrThrow(UserActionTransformedAttributesRt)(res.attributes);
+            const decodeRes = decodeOrThrowZod(UserActionTransformedAttributesSchema)(
+              res.attributes
+            ) as UserActionAttributes;
 
             return {
               ...res,

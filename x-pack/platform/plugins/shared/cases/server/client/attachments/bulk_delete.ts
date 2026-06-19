@@ -13,14 +13,14 @@ import type { Logger } from '@kbn/core/server';
 import type { File, FileJSON } from '@kbn/files-plugin/common';
 import type { FileServiceStart } from '@kbn/files-plugin/server';
 import { FileNotFoundError } from '@kbn/files-plugin/server/file_service/errors';
-import { BulkDeleteFileAttachmentsRequestRt } from '../../../common/types/api';
-import { decodeWithExcessOrThrow } from '../../common/runtime_types';
+import { BulkDeleteFileAttachmentsRequestSchema } from '../../../common/types/api';
+import { decodeWithExcessOrThrowZod } from '../../common/runtime_types';
 import { MAX_CONCURRENT_SEARCHES } from '../../../common/constants';
 import type { CasesClientArgs } from '../types';
 import { createCaseError } from '../../common/error';
 import { Operations } from '../../authorization';
 import type { BulkDeleteFileArgs } from './types';
-import { CaseFileMetadataForDeletionRt } from '../../../common/files';
+import { CaseFileMetadataForDeletionSchema } from '../../../common/files';
 import type { CasesClient } from '../client';
 import { createFileEntities, deleteFiles } from '../files';
 
@@ -38,7 +38,9 @@ export const bulkDeleteFileAttachments = async (
   } = clientArgs;
 
   try {
-    const request = decodeWithExcessOrThrow(BulkDeleteFileAttachmentsRequestRt)({ ids: fileIds });
+    const request = decodeWithExcessOrThrowZod(BulkDeleteFileAttachmentsRequestSchema)({
+      ids: fileIds,
+    });
 
     await casesClient.cases.resolve({ id: caseId, includeComments: false });
 
@@ -144,10 +146,9 @@ const getFiles = async ({
   const files = retrieveFilesIgnoringNotFound(fileSettleResults, fileIds, logger);
 
   const [validFiles, invalidFiles] = partition(files, (file) => {
+    const parsed = CaseFileMetadataForDeletionSchema.safeParse(file.data.meta);
     return (
-      CaseFileMetadataForDeletionRt.is(file.data.meta) &&
-      file.data.meta.caseIds.length === 1 &&
-      file.data.meta.caseIds.includes(caseId)
+      parsed.success && parsed.data.caseIds.length === 1 && parsed.data.caseIds.includes(caseId)
     );
   }) as [File[], File[]];
 

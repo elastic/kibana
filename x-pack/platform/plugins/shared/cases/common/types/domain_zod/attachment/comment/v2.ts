@@ -7,7 +7,7 @@
 
 import { z } from '@kbn/zod/v4';
 import { COMMENT_ATTACHMENT_TYPE } from '../../../../constants/attachments';
-import { MAX_COMMENT_LENGTH } from '../../../../constants';
+import { MAX_COMMENT_LENGTH, MAX_TITLE_LENGTH } from '../../../../constants';
 
 export const CommentAttachmentDataSchema = z
   .object({
@@ -28,7 +28,7 @@ export type CommentAttachmentData = z.infer<typeof CommentAttachmentDataSchema>;
 export const CommentAttachmentPayloadSchema = z
   .object({
     type: z.literal(COMMENT_ATTACHMENT_TYPE),
-    owner: z.string(),
+    owner: z.string().max(MAX_TITLE_LENGTH),
     data: CommentAttachmentDataSchema,
   })
   .strict();

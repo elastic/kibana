@@ -11,19 +11,21 @@ import Boom from '@hapi/boom';
 
 import { MAX_OBSERVABLES_PER_CASE } from '../../../common/constants';
 import type { Observable } from '../../../common/types/domain';
-import { CaseRt, UserActionTypes } from '../../../common/types/domain';
+import { UserActionTypes, CaseSchema } from '../../../common/types/domain';
 import {
-  AddObservableRequestRt,
   type AddObservableRequest,
   type UpdateObservableRequest,
-  UpdateObservableRequestRt,
   type BulkAddObservablesRequest,
-  BulkAddObservablesRequestRt,
   type ObservablePost,
+} from '../../../common/types/api';
+import {
+  AddObservableRequestSchema,
+  UpdateObservableRequestSchema,
+  BulkAddObservablesRequestSchema,
 } from '../../../common/types/api';
 import type { CasesClient } from '../client';
 import type { CasesClientArgs } from '../types';
-import { decodeOrThrow, decodeWithExcessOrThrow } from '../../common/runtime_types';
+import { decodeOrThrowZod, decodeWithExcessOrThrowZod } from '../../common/runtime_types';
 import type { Authorization } from '../../authorization';
 import { Operations } from '../../authorization';
 import type { CaseSavedObjectTransformed } from '../../common/types/case';
@@ -74,7 +76,7 @@ export const addObservable = async (
   licensingService.notifyUsage(LICENSING_CASE_OBSERVABLES_FEATURE);
 
   try {
-    const paramArgs = decodeWithExcessOrThrow(AddObservableRequestRt)(params);
+    const paramArgs = decodeWithExcessOrThrowZod(AddObservableRequestSchema)(params);
     const retrievedCase = await caseService.getCase({ id: caseId });
     await ensureUpdateAuthorized(authorization, retrievedCase);
 
@@ -135,7 +137,7 @@ export const addObservable = async (
       },
     });
 
-    return decodeOrThrow(CaseRt)(res);
+    return decodeOrThrowZod(CaseSchema)(res);
   } catch (error) {
     throw Boom.badRequest(`Failed to add observable: ${error}`);
   }
@@ -165,7 +167,7 @@ export const updateObservable = async (
   licensingService.notifyUsage(LICENSING_CASE_OBSERVABLES_FEATURE);
 
   try {
-    const paramArgs = decodeWithExcessOrThrow(UpdateObservableRequestRt)(params);
+    const paramArgs = decodeWithExcessOrThrowZod(UpdateObservableRequestSchema)(params);
     const retrievedCase = await caseService.getCase({ id: caseId });
     await ensureUpdateAuthorized(authorization, retrievedCase);
 
@@ -225,7 +227,7 @@ export const updateObservable = async (
       },
     });
 
-    return decodeOrThrow(CaseRt)(res);
+    return decodeOrThrowZod(CaseSchema)(res);
   } catch (error) {
     throw Boom.badRequest(`Failed to update observable: ${error}`);
   }
@@ -312,7 +314,7 @@ export const bulkAddObservables = async (
   licensingService.notifyUsage(LICENSING_CASE_OBSERVABLES_FEATURE);
 
   try {
-    const paramArgs = decodeWithExcessOrThrow(BulkAddObservablesRequestRt)(params);
+    const paramArgs = decodeWithExcessOrThrowZod(BulkAddObservablesRequestSchema)(params);
     const retrievedCase = await caseService.getCase({ id: paramArgs.caseId });
     await ensureUpdateAuthorized(authorization, retrievedCase);
 
@@ -372,7 +374,7 @@ export const bulkAddObservables = async (
       },
     });
 
-    return decodeOrThrow(CaseRt)(res);
+    return decodeOrThrowZod(CaseSchema)(res);
   } catch (error) {
     throw Boom.badRequest(`Failed to add observable: ${error}`);
   }

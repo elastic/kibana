@@ -154,7 +154,7 @@ describe('find', () => {
         // @ts-expect-error foo is an invalid field
         find({ ...findRequest, foo: 'bar' }, clientArgs)
       ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Failed to find cases: {\\"search\\":\\"sample_text\\",\\"searchFields\\":[\\"title\\",\\"description\\",\\"incremental_id.text\\"],\\"severity\\":\\"low\\",\\"assignees\\":[],\\"reporters\\":[],\\"status\\":\\"open\\",\\"tags\\":[],\\"owner\\":[],\\"sortField\\":\\"createdAt\\",\\"sortOrder\\":\\"desc\\",\\"customFields\\":{},\\"foo\\":\\"bar\\"}: Error: invalid keys \\"foo\\""`
+        `"Failed to find cases: {\\"search\\":\\"sample_text\\",\\"searchFields\\":[\\"title\\",\\"description\\",\\"incremental_id.text\\"],\\"severity\\":\\"low\\",\\"assignees\\":[],\\"reporters\\":[],\\"status\\":\\"open\\",\\"tags\\":[],\\"owner\\":[],\\"sortField\\":\\"createdAt\\",\\"sortOrder\\":\\"desc\\",\\"customFields\\":{},\\"foo\\":\\"bar\\"}: Error: Excess keys are not allowed"`
       );
     });
 
@@ -165,7 +165,7 @@ describe('find', () => {
       const findRequest = createCasesClientMockFindRequest({ searchFields });
 
       await expect(find(findRequest, clientArgs, casesClientMock)).rejects.toThrow(
-        'Error: Invalid value "foobar" supplied to "searchFields"'
+        'Invalid option: expected one of'
       );
     });
 
@@ -176,7 +176,7 @@ describe('find', () => {
       const findRequest = createCasesClientMockFindRequest({ searchFields });
 
       await expect(find(findRequest, clientArgs, casesClientMock)).rejects.toThrow(
-        'Error: Invalid value "foobar" supplied to "searchFields"'
+        'Invalid option: expected one of'
       );
     });
 
@@ -187,7 +187,7 @@ describe('find', () => {
       const findRequest = createCasesClientMockFindRequest({ sortField });
 
       await expect(find(findRequest, clientArgs, casesClientMock)).rejects.toThrow(
-        'Error: Invalid value "foobar" supplied to "sortField"'
+        'Error: sortField: Invalid option: expected one of'
       );
     });
 
@@ -197,7 +197,7 @@ describe('find', () => {
       const findRequest = createCasesClientMockFindRequest({ category });
 
       await expect(find(findRequest, clientArgs, casesClientMock)).rejects.toThrow(
-        `Error: The length of the field category is too long. Array must be of length <= ${MAX_CATEGORY_FILTER_LENGTH}`
+        `Error: category: The length of the field category is too long. Array must be of length <= ${MAX_CATEGORY_FILTER_LENGTH}`
       );
     });
 
@@ -207,7 +207,7 @@ describe('find', () => {
       const findRequest = createCasesClientMockFindRequest({ tags });
 
       await expect(find(findRequest, clientArgs, casesClientMock)).rejects.toThrowError(
-        `Error: The length of the field tags is too long. Array must be of length <= ${MAX_TAGS_FILTER_LENGTH}`
+        `Error: tags: The length of the field tags is too long. Array must be of length <= ${MAX_TAGS_FILTER_LENGTH}`
       );
     });
 
@@ -217,7 +217,7 @@ describe('find', () => {
       const findRequest = createCasesClientMockFindRequest({ assignees });
 
       await expect(find(findRequest, clientArgs, casesClientMock)).rejects.toThrowError(
-        `Error: The length of the field assignees is too long. Array must be of length <= ${MAX_ASSIGNEES_FILTER_LENGTH}`
+        `Error: assignees: The length of the field assignees is too long. Array must be of length <= ${MAX_ASSIGNEES_FILTER_LENGTH}`
       );
     });
 
@@ -227,7 +227,7 @@ describe('find', () => {
       const findRequest = createCasesClientMockFindRequest({ reporters });
 
       await expect(find(findRequest, clientArgs, casesClientMock)).rejects.toThrowError(
-        `Error: The length of the field reporters is too long. Array must be of length <= ${MAX_REPORTERS_FILTER_LENGTH}.`
+        `Error: reporters: The length of the field reporters is too long. Array must be of length <= ${MAX_REPORTERS_FILTER_LENGTH}.`
       );
     });
 

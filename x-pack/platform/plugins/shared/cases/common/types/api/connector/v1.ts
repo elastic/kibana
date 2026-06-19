@@ -5,60 +5,49 @@
  * 2.0.
  */
 
-import * as rt from 'io-ts';
-import { ExternalServiceRt } from '../../domain/external_service/v1';
-import { CaseConnectorRt, ConnectorMappingsRt } from '../../domain/connector/v1';
+import { z } from '@kbn/zod/v4';
+import { MAX_TITLE_LENGTH } from '../../../constants';
+import { ExternalServiceSchema } from '../../domain/external_service/v1';
+import { CaseConnectorSchema, ConnectorMappingsSchema } from '../../domain/connector/v1';
 
-const PushDetailsRt = rt.strict({
-  latestUserActionPushDate: rt.string,
-  oldestUserActionPushDate: rt.string,
-  externalService: ExternalServiceRt,
+const PushDetailsSchema = z.object({
+  latestUserActionPushDate: z.string().max(50),
+  oldestUserActionPushDate: z.string().max(50),
+  externalService: ExternalServiceSchema,
 });
 
-const CaseConnectorPushInfoRt = rt.intersection([
-  rt.strict({
-    needsToBePushed: rt.boolean,
-    hasBeenPushed: rt.boolean,
-  }),
-  rt.exact(
-    rt.partial({
-      details: PushDetailsRt,
-    })
-  ),
-]);
+const CaseConnectorPushInfoSchema = z.object({
+  needsToBePushed: z.boolean(),
+  hasBeenPushed: z.boolean(),
+  details: PushDetailsSchema.optional(),
+});
 
-export const GetCaseConnectorsResponseRt = rt.record(
-  rt.string,
-  rt.intersection([
-    rt.strict({
-      push: CaseConnectorPushInfoRt,
-    }),
-    CaseConnectorRt,
-  ])
+export const GetCaseConnectorsResponseSchema = z.record(
+  z.string().max(512),
+  CaseConnectorSchema.and(z.object({ push: CaseConnectorPushInfoSchema }))
 );
 
-const ActionConnectorResultRt = rt.intersection([
-  rt.strict({
-    id: rt.string,
-    actionTypeId: rt.string,
-    name: rt.string,
-    isDeprecated: rt.boolean,
-    isPreconfigured: rt.boolean,
-    isSystemAction: rt.boolean,
-    referencedByCount: rt.number,
-    isConnectorTypeDeprecated: rt.boolean,
-  }),
-  rt.exact(rt.partial({ config: rt.record(rt.string, rt.unknown), isMissingSecrets: rt.boolean })),
-]);
-
-export const FindActionConnectorResponseRt = rt.array(ActionConnectorResultRt);
-
-export const ConnectorMappingResponseRt = rt.strict({
-  id: rt.string,
-  version: rt.string,
-  mappings: ConnectorMappingsRt,
+const ActionConnectorResultSchema = z.object({
+  id: z.string().max(512),
+  actionTypeId: z.string().max(256),
+  name: z.string().max(MAX_TITLE_LENGTH),
+  isDeprecated: z.boolean(),
+  isPreconfigured: z.boolean(),
+  isSystemAction: z.boolean(),
+  referencedByCount: z.number(),
+  isConnectorTypeDeprecated: z.boolean(),
+  config: z.record(z.string().max(256), z.unknown()).optional(),
+  isMissingSecrets: z.boolean().optional(),
 });
 
-export type ConnectorMappingResponse = rt.TypeOf<typeof ConnectorMappingResponseRt>;
-export type GetCaseConnectorsResponse = rt.TypeOf<typeof GetCaseConnectorsResponseRt>;
-export type GetCaseConnectorsPushDetails = rt.TypeOf<typeof PushDetailsRt>;
+export const FindActionConnectorResponseSchema = z.array(ActionConnectorResultSchema);
+
+export const ConnectorMappingResponseSchema = z.object({
+  id: z.string().max(512),
+  version: z.string().max(512),
+  mappings: ConnectorMappingsSchema,
+});
+
+export type ConnectorMappingResponse = z.infer<typeof ConnectorMappingResponseSchema>;
+export type GetCaseConnectorsResponse = z.infer<typeof GetCaseConnectorsResponseSchema>;
+export type GetCaseConnectorsPushDetails = z.infer<typeof PushDetailsSchema>;

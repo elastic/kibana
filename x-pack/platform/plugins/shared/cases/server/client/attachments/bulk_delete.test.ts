@@ -28,7 +28,7 @@ describe('bulk_delete', () => {
         await expect(
           bulkDeleteFileAttachments({ caseId: 'mock-id', fileIds }, clientArgs, casesClient)
         ).rejects.toThrowError(
-          'Failed to delete file attachments for case: mock-id: Error: The length of the field ids is too long. Array must be of length <= 10'
+          'Failed to delete file attachments for case: mock-id: Error: ids: The length of the field ids is too long. Array must be of length <= 10'
         );
       });
     });

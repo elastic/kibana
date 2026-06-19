@@ -6,12 +6,10 @@
  */
 
 import { AttachmentType } from '../attachment/v1';
-import { UserActionTypes } from './action/v1';
-import { UserActionsRt } from './v1';
-import { UserActionsSchema } from '../../domain_zod/user_action/v1';
+import { UserActionTypes, UserActionsSchema } from './v1';
 
 describe('User actions', () => {
-  describe('UserActionsRt', () => {
+  describe('UserActionsSchema', () => {
     const defaultRequest = [
       {
         type: UserActionTypes.comment,
@@ -37,41 +35,12 @@ describe('User actions', () => {
     ];
 
     it('has expected attributes in request', () => {
-      const query = UserActionsRt.decode(defaultRequest);
-
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: [...defaultRequest],
-      });
-    });
-
-    it('removes foo:bar attributes from request', () => {
-      const query = UserActionsRt.decode([{ ...defaultRequest[0], foo: 'bar' }]);
-
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: defaultRequest,
-      });
-    });
-
-    it('removes foo:bar attributes from payload', () => {
-      const query = UserActionsRt.decode([
-        { ...defaultRequest[0], payload: { ...defaultRequest[0].payload, foo: 'bar' } },
-      ]);
-
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: defaultRequest,
-      });
-    });
-
-    it('zod: has expected attributes in request', () => {
       const result = UserActionsSchema.safeParse(defaultRequest);
       expect(result.success).toBe(true);
       expect(result.data).toStrictEqual(defaultRequest);
     });
 
-    it('zod: strips unknown fields', () => {
+    it('strips unknown fields', () => {
       const result = UserActionsSchema.safeParse([{ ...defaultRequest[0], foo: 'bar' }]);
       expect(result.success).toBe(true);
       expect(result.data).toStrictEqual(defaultRequest);

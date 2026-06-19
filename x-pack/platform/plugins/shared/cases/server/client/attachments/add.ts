@@ -7,9 +7,9 @@
 
 import { SavedObjectsUtils } from '@kbn/core/server';
 
-import { AttachmentRequestRtV2 } from '../../../common/types/api/attachment/v2';
+import { AttachmentRequestSchemaV2 } from '../../../common/types/api/attachment/v2';
 import type { Case } from '../../../common/types/domain';
-import { decodeWithExcessOrThrow } from '../../common/runtime_types';
+import { decodeWithExcessOrThrowZod } from '../../common/runtime_types';
 import { CaseCommentModel } from '../../common/models';
 import { createCaseError } from '../../common/error';
 import type { CasesClientArgs } from '..';
@@ -37,7 +37,7 @@ export const addComment = async (addArgs: AddArgs, clientArgs: CasesClientArgs):
   } = clientArgs;
 
   try {
-    const query = decodeWithExcessOrThrow(AttachmentRequestRtV2)(comment);
+    const query = decodeWithExcessOrThrowZod(AttachmentRequestSchemaV2)(comment);
 
     await validateMaxUserActions({ caseId, userActionService, userActionsToAdd: 1 });
     decodeCommentRequestV2(

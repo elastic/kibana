@@ -5,50 +5,43 @@
  * 2.0.
  */
 
-import * as rt from 'io-ts';
+import { z } from '@kbn/zod/v4';
 
-const UserWithoutProfileUidRt = rt.strict({
-  email: rt.union([rt.undefined, rt.null, rt.string]),
-  full_name: rt.union([rt.undefined, rt.null, rt.string]),
-  username: rt.union([rt.undefined, rt.null, rt.string]),
+const UserWithoutProfileUidSchema = z.object({
+  email: z.union([z.string(), z.null(), z.undefined()]),
+  full_name: z.union([z.string(), z.null(), z.undefined()]),
+  username: z.union([z.string(), z.null(), z.undefined()]),
 });
 
-export const UserRt = rt.intersection([
-  UserWithoutProfileUidRt,
-  rt.exact(rt.partial({ profile_uid: rt.string })),
-]);
+export const UserSchema = UserWithoutProfileUidSchema.extend({
+  profile_uid: z.string().optional(),
+});
 
-export const UserWithProfileInfoRt = rt.intersection([
-  rt.strict({
-    user: UserWithoutProfileUidRt,
-  }),
-  rt.exact(rt.partial({ uid: rt.string })),
-  rt.exact(
-    rt.partial({
-      avatar: rt.exact(
-        rt.partial({
-          initials: rt.union([rt.string, rt.null]),
-          color: rt.union([rt.string, rt.null]),
-          imageUrl: rt.union([rt.string, rt.null]),
-        })
-      ),
+export const UserWithProfileInfoSchema = z.object({
+  user: UserWithoutProfileUidSchema,
+  uid: z.string().optional(),
+  avatar: z
+    .object({
+      initials: z.string().nullable().optional(),
+      color: z.string().nullable().optional(),
+      imageUrl: z.string().nullable().optional(),
     })
-  ),
-]);
-
-export const UsersRt = rt.array(UserRt);
-
-export type User = rt.TypeOf<typeof UserRt>;
-export type UserWithProfileInfo = rt.TypeOf<typeof UserWithProfileInfoRt>;
-
-export const CaseUserProfileRt = rt.strict({
-  uid: rt.string,
+    .optional(),
 });
 
-export type CaseUserProfile = rt.TypeOf<typeof CaseUserProfileRt>;
+export const UsersSchema = z.array(UserSchema);
+
+export type User = z.infer<typeof UserSchema>;
+export type UserWithProfileInfo = z.infer<typeof UserWithProfileInfoSchema>;
+
+export const CaseUserProfileSchema = z.object({
+  uid: z.string(),
+});
+
+export type CaseUserProfile = z.infer<typeof CaseUserProfileSchema>;
 
 /**
  * Assignees
  */
-export const CaseAssigneesRt = rt.array(CaseUserProfileRt);
-export type CaseAssignees = rt.TypeOf<typeof CaseAssigneesRt>;
+export const CaseAssigneesSchema = z.array(CaseUserProfileSchema);
+export type CaseAssignees = z.infer<typeof CaseAssigneesSchema>;

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import * as rt from 'io-ts';
+import { z } from '@kbn/zod/v4';
 import {
   MAX_BULK_CREATE_ATTACHMENTS,
   MAX_BULK_GET_ATTACHMENTS,
@@ -13,6 +13,7 @@ import {
   MAX_COMMENT_LENGTH,
   MAX_DELETE_FILES,
   MAX_FILENAME_LENGTH,
+  MAX_TITLE_LENGTH,
 } from '../../../constants';
 import {
   limitedArraySchema,
@@ -21,18 +22,19 @@ import {
   paginationSchema,
 } from '../../../schema';
 import {
-  UserCommentAttachmentPayloadRt,
-  AlertAttachmentPayloadRt,
-  ActionsAttachmentPayloadRt,
-  ExternalReferenceNoSOAttachmentPayloadRt,
-  ExternalReferenceSOAttachmentPayloadRt,
-  ExternalReferenceSOWithoutRefsAttachmentPayloadRt,
-  PersistableStateAttachmentPayloadRt,
+  UserCommentAttachmentPayloadSchema,
+  AlertAttachmentPayloadSchema,
+  ActionsAttachmentPayloadSchema,
+  ExternalReferenceNoSOAttachmentPayloadSchema,
+  ExternalReferenceSOAttachmentPayloadSchema,
+  ExternalReferenceSOWithoutRefsAttachmentPayloadSchema,
+  PersistableStateAttachmentPayloadSchema,
   AttachmentType,
-  AttachmentRt,
-  AttachmentsRt,
-  EventAttachmentPayloadRt,
+  AttachmentsSchema,
+  EventAttachmentPayloadSchema,
 } from '../../domain/attachment/v1';
+
+export { AttachmentType };
 
 /**
  * Files
@@ -40,7 +42,7 @@ import {
 
 const MIN_DELETE_IDS = 1;
 
-export const BulkDeleteFileAttachmentsRequestRt = rt.strict({
+export const BulkDeleteFileAttachmentsRequestSchema = z.object({
   ids: limitedArraySchema({
     codec: NonEmptyString,
     min: MIN_DELETE_IDS,
@@ -49,129 +51,119 @@ export const BulkDeleteFileAttachmentsRequestRt = rt.strict({
   }),
 });
 
-export const PostFileAttachmentRequestRt = rt.intersection([
-  rt.strict({
-    file: rt.unknown,
-  }),
-  rt.exact(
-    rt.partial({
-      filename: limitedStringSchema({ fieldName: 'filename', min: 1, max: MAX_FILENAME_LENGTH }),
-    })
-  ),
-]);
-
-export type BulkDeleteFileAttachmentsRequest = rt.TypeOf<typeof BulkDeleteFileAttachmentsRequestRt>;
-export type PostFileAttachmentRequest = rt.TypeOf<typeof PostFileAttachmentRequestRt>;
+export const PostFileAttachmentRequestSchema = z.object({
+  file: z.unknown(),
+  filename: limitedStringSchema({
+    fieldName: 'filename',
+    min: 1,
+    max: MAX_FILENAME_LENGTH,
+  }).optional(),
+});
 
 /**
  * Attachments
  */
 
-const BasicAttachmentRequestRt = rt.union([
-  UserCommentAttachmentPayloadRt,
-  AlertAttachmentPayloadRt,
-  ActionsAttachmentPayloadRt,
-  ExternalReferenceNoSOAttachmentPayloadRt,
-  PersistableStateAttachmentPayloadRt,
-  EventAttachmentPayloadRt,
-]);
-
-export const AttachmentRequestRt = rt.union([
-  rt.strict({
+export const AttachmentRequestSchema = z.union([
+  z.object({
     comment: limitedStringSchema({ fieldName: 'comment', min: 1, max: MAX_COMMENT_LENGTH }),
-    type: rt.literal(AttachmentType.user),
-    owner: rt.string,
+    type: z.literal(AttachmentType.user),
+    owner: z.string().max(MAX_TITLE_LENGTH),
   }),
-  EventAttachmentPayloadRt,
-  AlertAttachmentPayloadRt,
-  rt.strict({
-    type: rt.literal(AttachmentType.actions),
+  EventAttachmentPayloadSchema,
+  AlertAttachmentPayloadSchema,
+  z.object({
+    type: z.literal(AttachmentType.actions),
     comment: limitedStringSchema({ fieldName: 'comment', min: 1, max: MAX_COMMENT_LENGTH }),
-    actions: rt.strict({
-      targets: rt.array(
-        rt.strict({
-          hostname: rt.string,
-          endpointId: rt.string,
+    actions: z.object({
+      targets: z.array(
+        z.object({
+          hostname: z.string().max(255),
+          endpointId: z.string().max(512),
         })
       ),
-      type: rt.string,
+      type: z.string().max(256),
     }),
-    owner: rt.string,
+    owner: z.string().max(MAX_TITLE_LENGTH),
   }),
-  ExternalReferenceNoSOAttachmentPayloadRt,
-  ExternalReferenceSOAttachmentPayloadRt,
-  PersistableStateAttachmentPayloadRt,
+  ExternalReferenceNoSOAttachmentPayloadSchema,
+  ExternalReferenceSOAttachmentPayloadSchema,
+  PersistableStateAttachmentPayloadSchema,
 ]);
 
-export const AttachmentRequestWithoutRefsRt = rt.union([
-  BasicAttachmentRequestRt,
-  ExternalReferenceSOWithoutRefsAttachmentPayloadRt,
+export const AttachmentRequestWithoutRefsSchema = z.union([
+  UserCommentAttachmentPayloadSchema,
+  AlertAttachmentPayloadSchema,
+  EventAttachmentPayloadSchema,
+  ActionsAttachmentPayloadSchema,
+  ExternalReferenceNoSOAttachmentPayloadSchema,
+  ExternalReferenceSOWithoutRefsAttachmentPayloadSchema,
+  PersistableStateAttachmentPayloadSchema,
 ]);
 
-export const AttachmentPatchRequestRt = rt.intersection([
-  /**
-   * Partial updates are not allowed.
-   * We want to prevent the user for changing the type without removing invalid fields.
-   *
-   * injectAttachmentSOAttributesFromRefsForPatch is dependent on this assumption.
-   * The consumers of the persistable attachment service should always get the
-   * persistableStateAttachmentState on a patch.
-   */
-  AttachmentRequestRt,
-  rt.strict({ id: rt.string, version: rt.string }),
-]);
+/**
+ * Partial updates are not allowed.
+ * We want to prevent the user for changing the type without removing invalid fields.
+ * injectAttachmentSOAttributesFromRefsForPatch is dependent on this assumption.
+ * The consumers of the persistable attachment service should always get the
+ * persistableStateAttachmentState on a patch.
+ */
+export const AttachmentPatchRequestSchema = AttachmentRequestSchema.and(
+  z.object({ id: z.string().max(512), version: z.string().max(512) })
+);
 
-export const AttachmentsFindResponseRt = rt.strict({
-  comments: rt.array(AttachmentRt),
-  page: rt.number,
-  per_page: rt.number,
-  total: rt.number,
+export const AttachmentsFindResponseSchema = z.object({
+  comments: AttachmentsSchema,
+  page: z.number(),
+  per_page: z.number(),
+  total: z.number(),
 });
 
-export const FindAttachmentsQueryParamsRt = rt.intersection([
-  rt.exact(
-    rt.partial({
-      /**
-       * Order to sort the response
-       */
-      sortOrder: rt.union([rt.literal('desc'), rt.literal('asc')]),
-    })
-  ),
-  paginationSchema({ maxPerPage: MAX_COMMENTS_PER_PAGE }),
-]);
+export const FindAttachmentsQueryParamsSchema = paginationSchema({
+  maxPerPage: MAX_COMMENTS_PER_PAGE,
+}).extend({
+  /**
+   * Order to sort the response
+   */
+  sortOrder: z.enum(['desc', 'asc']).optional(),
+});
 
-export const BulkCreateAttachmentsRequestRt = limitedArraySchema({
-  codec: AttachmentRequestRt,
+export const BulkCreateAttachmentsRequestSchema = limitedArraySchema({
+  codec: AttachmentRequestSchema,
   min: 0,
   max: MAX_BULK_CREATE_ATTACHMENTS,
   fieldName: 'attachments',
 });
 
-export const BulkGetAttachmentsRequestRt = rt.strict({
+export const BulkGetAttachmentsRequestSchema = z.object({
   ids: limitedArraySchema({
-    codec: rt.string,
+    codec: z.string().max(512),
     min: 1,
     max: MAX_BULK_GET_ATTACHMENTS,
     fieldName: 'ids',
   }),
 });
 
-export const BulkGetAttachmentsResponseRt = rt.strict({
-  attachments: AttachmentsRt,
-  errors: rt.array(
-    rt.strict({
-      error: rt.string,
-      message: rt.string,
-      status: rt.union([rt.undefined, rt.number]),
-      savedObjectId: rt.string,
+export const BulkGetAttachmentsResponseSchema = z.object({
+  attachments: AttachmentsSchema,
+  errors: z.array(
+    z.object({
+      error: z.string().max(32000),
+      message: z.string().max(32000),
+      status: z.number().optional(),
+      savedObjectId: z.string().max(512),
     })
   ),
 });
 
-export type FindAttachmentsQueryParams = rt.TypeOf<typeof FindAttachmentsQueryParamsRt>;
-export type AttachmentsFindResponse = rt.TypeOf<typeof AttachmentsFindResponseRt>;
-export type AttachmentRequest = rt.TypeOf<typeof AttachmentRequestRt>;
-export type AttachmentPatchRequest = rt.TypeOf<typeof AttachmentPatchRequestRt>;
-export type BulkCreateAttachmentsRequest = rt.TypeOf<typeof BulkCreateAttachmentsRequestRt>;
-export type BulkGetAttachmentsResponse = rt.TypeOf<typeof BulkGetAttachmentsResponseRt>;
-export type BulkGetAttachmentsRequest = rt.TypeOf<typeof BulkGetAttachmentsRequestRt>;
+export type BulkDeleteFileAttachmentsRequest = z.infer<
+  typeof BulkDeleteFileAttachmentsRequestSchema
+>;
+export type PostFileAttachmentRequest = z.infer<typeof PostFileAttachmentRequestSchema>;
+export type AttachmentRequest = z.infer<typeof AttachmentRequestSchema>;
+export type AttachmentPatchRequest = z.infer<typeof AttachmentPatchRequestSchema>;
+export type AttachmentsFindResponse = z.infer<typeof AttachmentsFindResponseSchema>;
+export type FindAttachmentsQueryParams = z.infer<typeof FindAttachmentsQueryParamsSchema>;
+export type BulkCreateAttachmentsRequest = z.infer<typeof BulkCreateAttachmentsRequestSchema>;
+export type BulkGetAttachmentsRequest = z.infer<typeof BulkGetAttachmentsRequestSchema>;
+export type BulkGetAttachmentsResponse = z.infer<typeof BulkGetAttachmentsResponseSchema>;

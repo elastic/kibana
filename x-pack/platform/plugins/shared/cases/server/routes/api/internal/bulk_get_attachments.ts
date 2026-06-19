@@ -6,8 +6,8 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { BulkGetAttachmentsRequestRt } from '../../../../common/types/api/attachment/v1';
-import { decodeWithExcessOrThrow } from '../../../common/runtime_types';
+import { BulkGetAttachmentsRequestSchema } from '../../../../common/types/api';
+import { decodeWithExcessOrThrowZod } from '../../../common/runtime_types';
 import type { attachmentApiV2 } from '../../../../common/types/api';
 
 import { INTERNAL_BULK_GET_ATTACHMENTS_URL } from '../../../../common/constants';
@@ -34,8 +34,8 @@ export const bulkGetAttachmentsRoute = createCasesRoute({
       const caseContext = await context.cases;
       const client = await caseContext.getCasesClient();
 
-      const requestBody: attachmentApiV2.BulkGetAttachmentsRequestV2 = decodeWithExcessOrThrow(
-        BulkGetAttachmentsRequestRt
+      const requestBody: attachmentApiV2.BulkGetAttachmentsRequestV2 = decodeWithExcessOrThrowZod(
+        BulkGetAttachmentsRequestSchema
       )(request.body);
 
       const res: attachmentApiV2.BulkGetAttachmentsResponseV2 = await client.attachments.bulkGet({

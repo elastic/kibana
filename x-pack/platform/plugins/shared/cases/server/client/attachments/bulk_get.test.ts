@@ -40,7 +40,7 @@ describe('bulkGet', () => {
           casesClient
         )
       ).rejects.toThrow(
-        `Error: The length of the field ids is too long. Array must be of length <= ${MAX_BULK_GET_ATTACHMENTS}.`
+        `Error: ids: The length of the field ids is too long. Array must be of length <= ${MAX_BULK_GET_ATTACHMENTS}.`
       );
     });
 
@@ -48,7 +48,7 @@ describe('bulkGet', () => {
       await expect(
         bulkGet({ savedObjectIds: [], caseID: '123', mode: 'legacy' }, clientArgs, casesClient)
       ).rejects.toThrow(
-        'Error: The length of the field ids is too short. Array must be of length >= 1.'
+        'Error: ids: The length of the field ids is too short. Array must be of length >= 1.'
       );
     });
 

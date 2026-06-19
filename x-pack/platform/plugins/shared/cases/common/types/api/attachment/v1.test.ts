@@ -5,565 +5,338 @@
  * 2.0.
  */
 
-import { PathReporter } from 'io-ts/lib/PathReporter';
 import {
   MAX_BULK_CREATE_ATTACHMENTS,
+  MAX_BULK_GET_ATTACHMENTS,
   MAX_COMMENT_LENGTH,
-  MAX_FILENAME_LENGTH,
+  MAX_DELETE_FILES,
 } from '../../../constants';
-import { AttachmentType } from '../../domain/attachment/v1';
-import {
-  AttachmentPatchRequestRt,
-  AttachmentRequestRt,
-  AttachmentsFindResponseRt,
-  BulkCreateAttachmentsRequestRt,
-  BulkDeleteFileAttachmentsRequestRt,
-  BulkGetAttachmentsRequestRt,
-  BulkGetAttachmentsResponseRt,
-  FindAttachmentsQueryParamsRt,
-  PostFileAttachmentRequestRt,
-} from './v1';
+import { DeepStrict } from '@kbn/zod-helpers';
+import { parseErrors } from '../../../test_helpers/zod_schema_test_utils';
+import { AttachmentType, ExternalReferenceStorageType } from '../../domain/attachment/v1';
 import {
   AttachmentPatchRequestSchema,
   AttachmentRequestSchema,
-  AttachmentsFindResponseSchema,
   BulkCreateAttachmentsRequestSchema,
   BulkDeleteFileAttachmentsRequestSchema,
   BulkGetAttachmentsRequestSchema,
-  BulkGetAttachmentsResponseSchema,
-  FindAttachmentsQueryParamsSchema,
-  PostFileAttachmentRequestSchema,
-} from '../../api_zod/attachment/v1';
+} from './v1';
 
-describe('Attachments', () => {
-  describe('BulkDeleteFileAttachmentsRequestRt', () => {
-    it('has expected attributes in request', () => {
-      const query = BulkDeleteFileAttachmentsRequestRt.decode({ ids: ['abc', 'xyz'] });
+const validUserComment = {
+  type: AttachmentType.user,
+  comment: 'Hello',
+  owner: 'cases',
+};
 
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: { ids: ['abc', 'xyz'] },
-      });
+const validAlert = {
+  type: AttachmentType.alert,
+  alertId: ['alert-1'],
+  index: ['.alerts-1'],
+  rule: { id: 'rule-1', name: 'Rule One' },
+  owner: 'cases',
+};
+
+const validEvent = {
+  type: AttachmentType.event,
+  eventId: ['evt-1'],
+  index: ['.events-1'],
+  owner: 'cases',
+};
+
+const validActions = {
+  type: AttachmentType.actions,
+  comment: 'Isolating host',
+  actions: {
+    targets: [{ hostname: 'host-1', endpointId: 'ep-1' }],
+    type: 'isolate',
+  },
+  owner: 'cases',
+};
+
+const validExternalRefNoSO = {
+  type: AttachmentType.externalReference,
+  externalReferenceId: 'ext-1',
+  externalReferenceStorage: { type: ExternalReferenceStorageType.elasticSearchDoc },
+  externalReferenceAttachmentTypeId: 'foo',
+  externalReferenceMetadata: null,
+  owner: 'cases',
+};
+
+const validExternalRefSO = {
+  type: AttachmentType.externalReference,
+  externalReferenceId: 'ext-2',
+  externalReferenceStorage: {
+    type: ExternalReferenceStorageType.savedObject,
+    soType: 'my-so-type',
+  },
+  externalReferenceAttachmentTypeId: 'foo',
+  externalReferenceMetadata: { foo: 'bar' },
+  owner: 'cases',
+};
+
+const validPersistableState = {
+  type: AttachmentType.persistableState,
+  persistableStateAttachmentTypeId: 'persistable-1',
+  persistableStateAttachmentState: { key: 'value' },
+  owner: 'cases',
+};
+
+describe('AttachmentRequestSchema', () => {
+  describe('user comment variant', () => {
+    it('accepts a valid user comment', () => {
+      expect(AttachmentRequestSchema.safeParse(validUserComment).success).toBe(true);
     });
 
-    it('removes foo:bar attributes from request', () => {
-      const query = BulkDeleteFileAttachmentsRequestRt.decode({
-        ids: ['abc', 'xyz'],
-        foo: 'bar',
-      });
-
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: { ids: ['abc', 'xyz'] },
-      });
+    it('rejects an empty comment string', () => {
+      expect(parseErrors(AttachmentRequestSchema, { ...validUserComment, comment: '' })).toContain(
+        'The comment field cannot be an empty string.'
+      );
     });
 
-    it('zod: has expected attributes in request', () => {
-      const result = BulkDeleteFileAttachmentsRequestSchema.safeParse({ ids: ['abc', 'xyz'] });
-      expect(result.success).toBe(true);
-      expect(result.data).toStrictEqual({ ids: ['abc', 'xyz'] });
+    it('rejects whitespace-only comment (limitedStringSchema parity)', () => {
+      expect(
+        parseErrors(AttachmentRequestSchema, { ...validUserComment, comment: '   ' })
+      ).toContain('The comment field cannot be an empty string.');
     });
 
-    it('zod: strips unknown fields', () => {
-      const result = BulkDeleteFileAttachmentsRequestSchema.safeParse({
-        ids: ['abc', 'xyz'],
-        foo: 'bar',
-      });
-      expect(result.success).toBe(true);
-      expect(result.data).toStrictEqual({ ids: ['abc', 'xyz'] });
-    });
-  });
-
-  describe('AttachmentRequestRt', () => {
-    const defaultRequest = {
-      comment: 'Solve this fast!',
-      type: AttachmentType.user,
-      owner: 'cases',
-    };
-
-    it('has expected attributes in request', () => {
-      const query = AttachmentRequestRt.decode(defaultRequest);
-
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: defaultRequest,
-      });
+    it(`rejects a comment longer than MAX_COMMENT_LENGTH (${MAX_COMMENT_LENGTH})`, () => {
+      const comment = 'a'.repeat(MAX_COMMENT_LENGTH + 1);
+      expect(parseErrors(AttachmentRequestSchema, { ...validUserComment, comment })).toContain(
+        `The length of the comment is too long. The maximum length is ${MAX_COMMENT_LENGTH}.`
+      );
     });
 
-    it('removes foo:bar attributes from request', () => {
-      const query = AttachmentRequestRt.decode({ ...defaultRequest, foo: 'bar' });
-
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: defaultRequest,
-      });
-    });
-
-    it('zod: has expected attributes in request', () => {
-      const result = AttachmentRequestSchema.safeParse(defaultRequest);
-      expect(result.success).toBe(true);
-      expect(result.data).toStrictEqual(defaultRequest);
-    });
-
-    it('zod: strips unknown fields', () => {
-      const result = AttachmentRequestSchema.safeParse({ ...defaultRequest, foo: 'bar' });
-      expect(result.success).toBe(true);
-      expect(result.data).toStrictEqual(defaultRequest);
-    });
-
-    describe('errors', () => {
-      describe('commentType: user', () => {
-        it('throws error when comment is too long', () => {
-          const longComment = 'x'.repeat(MAX_COMMENT_LENGTH + 1);
-
-          expect(
-            PathReporter.report(
-              AttachmentRequestRt.decode({ ...defaultRequest, comment: longComment })
-            )
-          ).toContain('The length of the comment is too long. The maximum length is 30000.');
-        });
-
-        it('throws error when comment is empty', () => {
-          expect(
-            PathReporter.report(AttachmentRequestRt.decode({ ...defaultRequest, comment: '' }))
-          ).toContain('The comment field cannot be an empty string.');
-        });
-
-        it('throws error when comment string of empty characters', () => {
-          expect(
-            PathReporter.report(AttachmentRequestRt.decode({ ...defaultRequest, comment: '   ' }))
-          ).toContain('The comment field cannot be an empty string.');
-        });
-      });
-
-      describe('commentType: action', () => {
-        const request = {
-          type: AttachmentType.actions,
-          actions: {
-            targets: [
-              {
-                hostname: 'host1',
-                endpointId: '001',
-              },
-            ],
-            type: 'isolate',
-          },
-          owner: 'cases',
-        };
-
-        it('throws error when comment is too long', () => {
-          const longComment = 'x'.repeat(MAX_COMMENT_LENGTH + 1);
-
-          expect(
-            PathReporter.report(AttachmentRequestRt.decode({ ...request, comment: longComment }))
-          ).toContain('The length of the comment is too long. The maximum length is 30000.');
-        });
-
-        it('throws error when comment is empty', () => {
-          expect(
-            PathReporter.report(AttachmentRequestRt.decode({ ...request, comment: '' }))
-          ).toContain('The comment field cannot be an empty string.');
-        });
-
-        it('throws error when comment string of empty characters', () => {
-          expect(
-            PathReporter.report(AttachmentRequestRt.decode({ ...request, comment: '   ' }))
-          ).toContain('The comment field cannot be an empty string.');
-        });
-      });
+    it('rejects a missing owner', () => {
+      const { owner, ...rest } = validUserComment;
+      expect(AttachmentRequestSchema.safeParse(rest).success).toBe(false);
     });
   });
 
-  describe('AttachmentPatchRequestRt', () => {
-    const defaultRequest = {
-      alertId: 'alert-id-1',
-      index: 'alert-index-1',
-      type: AttachmentType.alert,
-      id: 'alert-comment-id',
-      owner: 'cases',
-      rule: {
-        id: 'rule-id-1',
-        name: 'Awesome rule',
-      },
-      version: 'WzQ3LDFc',
-    };
-    it('has expected attributes in request', () => {
-      const query = AttachmentPatchRequestRt.decode(defaultRequest);
+  describe('alert variant', () => {
+    it('accepts a valid alert payload (array form)', () => {
+      expect(AttachmentRequestSchema.safeParse(validAlert).success).toBe(true);
+    });
 
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: defaultRequest,
+    it('accepts a valid alert payload (string form for alertId / index)', () => {
+      const result = AttachmentRequestSchema.safeParse({
+        ...validAlert,
+        alertId: 'alert-1',
+        index: '.alerts-1',
       });
+      expect(result.success).toBe(true);
     });
 
-    it('removes foo:bar attributes from request', () => {
-      const query = AttachmentPatchRequestRt.decode({ ...defaultRequest, foo: 'bar' });
-
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: defaultRequest,
+    it('accepts null rule id and name (legacy alerts)', () => {
+      const result = AttachmentRequestSchema.safeParse({
+        ...validAlert,
+        rule: { id: null, name: null },
       });
+      expect(result.success).toBe(true);
     });
 
-    it('zod: has expected attributes in request', () => {
-      const result = AttachmentPatchRequestSchema.safeParse(defaultRequest);
-      expect(result.success).toBe(true);
-      expect(result.data).toStrictEqual(defaultRequest);
-    });
-
-    it('zod: strips unknown fields', () => {
-      const result = AttachmentPatchRequestSchema.safeParse({ ...defaultRequest, foo: 'bar' });
-      expect(result.success).toBe(true);
-      expect(result.data).toStrictEqual(defaultRequest);
+    it('rejects a missing rule', () => {
+      const { rule, ...rest } = validAlert;
+      expect(AttachmentRequestSchema.safeParse(rest).success).toBe(false);
     });
   });
 
-  describe('AttachmentsFindResponseRt', () => {
-    const defaultRequest = {
-      comments: [
-        {
-          comment: 'Solve this fast!',
-          type: AttachmentType.user,
-          owner: 'cases',
-          created_at: '2020-02-19T23:06:33.798Z',
-          created_by: {
-            full_name: 'Leslie Knope',
-            username: 'lknope',
-            email: 'leslie.knope@elastic.co',
-          },
-          pushed_at: null,
-          pushed_by: null,
-          updated_at: null,
-          updated_by: null,
-          id: 'basic-comment-id',
-          version: 'WzQ3LDFc',
-        },
-      ],
-      page: 1,
-      per_page: 10,
-      total: 1,
-    };
-    it('has expected attributes in request', () => {
-      const query = AttachmentsFindResponseRt.decode(defaultRequest);
-
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: defaultRequest,
-      });
+  describe('event variant', () => {
+    it('accepts a valid event payload', () => {
+      expect(AttachmentRequestSchema.safeParse(validEvent).success).toBe(true);
     });
 
-    it('removes foo:bar attributes from request', () => {
-      const query = AttachmentsFindResponseRt.decode({ ...defaultRequest, foo: 'bar' });
-
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: defaultRequest,
-      });
-    });
-
-    it('removes foo:bar attributes from comments', () => {
-      const query = AttachmentsFindResponseRt.decode({
-        ...defaultRequest,
-        comments: [{ ...defaultRequest.comments[0], foo: 'bar' }],
-      });
-
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: defaultRequest,
-      });
-    });
-
-    it('zod: has expected attributes in request', () => {
-      const result = AttachmentsFindResponseSchema.safeParse(defaultRequest);
-      expect(result.success).toBe(true);
-      expect(result.data).toStrictEqual(defaultRequest);
-    });
-
-    it('zod: strips unknown fields', () => {
-      const result = AttachmentsFindResponseSchema.safeParse({ ...defaultRequest, foo: 'bar' });
-      expect(result.success).toBe(true);
-      expect(result.data).toStrictEqual(defaultRequest);
+    it('rejects a missing eventId', () => {
+      const { eventId, ...rest } = validEvent;
+      expect(AttachmentRequestSchema.safeParse(rest).success).toBe(false);
     });
   });
 
-  describe('FindAttachmentsQueryParamsRt', () => {
-    const defaultRequest = {
-      page: 1,
-      perPage: 10,
-      sortOrder: 'asc',
-    };
+  describe('actions variant', () => {
+    it('accepts a valid actions payload', () => {
+      expect(AttachmentRequestSchema.safeParse(validActions).success).toBe(true);
+    });
 
-    it('has expected attributes in request', () => {
-      const query = FindAttachmentsQueryParamsRt.decode(defaultRequest);
+    it('rejects an empty actions comment', () => {
+      expect(parseErrors(AttachmentRequestSchema, { ...validActions, comment: '' })).toContain(
+        'The comment field cannot be an empty string.'
+      );
+    });
 
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: defaultRequest,
+    it('rejects malformed actions.targets', () => {
+      const result = AttachmentRequestSchema.safeParse({
+        ...validActions,
+        actions: { ...validActions.actions, targets: [{ hostname: 'h' }] },
       });
-    });
-
-    it('removes foo:bar attributes from request', () => {
-      const query = FindAttachmentsQueryParamsRt.decode({ ...defaultRequest, foo: 'bar' });
-
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: defaultRequest,
-      });
-    });
-
-    it('zod: has expected attributes in request', () => {
-      const result = FindAttachmentsQueryParamsSchema.safeParse(defaultRequest);
-      expect(result.success).toBe(true);
-      expect(result.data).toStrictEqual(defaultRequest);
-    });
-
-    it('zod: strips unknown fields', () => {
-      const result = FindAttachmentsQueryParamsSchema.safeParse({ ...defaultRequest, foo: 'bar' });
-      expect(result.success).toBe(true);
-      expect(result.data).toStrictEqual(defaultRequest);
+      expect(result.success).toBe(false);
     });
   });
 
-  describe('BulkCreateAttachmentsRequestRt', () => {
-    const defaultRequest = [
-      {
-        comment: 'Solve this fast!',
-        type: AttachmentType.user,
+  describe('externalReference variant', () => {
+    it('accepts the elasticSearchDoc-storage form', () => {
+      expect(AttachmentRequestSchema.safeParse(validExternalRefNoSO).success).toBe(true);
+    });
+
+    it('accepts the savedObject-storage form', () => {
+      expect(AttachmentRequestSchema.safeParse(validExternalRefSO).success).toBe(true);
+    });
+
+    it('rejects an unknown storage type', () => {
+      const result = AttachmentRequestSchema.safeParse({
+        ...validExternalRefNoSO,
+        externalReferenceStorage: { type: 'mongo' },
+      });
+      expect(result.success).toBe(false);
+    });
+  });
+
+  describe('persistableState variant', () => {
+    it('accepts a valid persistableState payload', () => {
+      expect(AttachmentRequestSchema.safeParse(validPersistableState).success).toBe(true);
+    });
+
+    it('rejects a missing persistableStateAttachmentState', () => {
+      const { persistableStateAttachmentState, ...rest } = validPersistableState;
+      expect(AttachmentRequestSchema.safeParse(rest).success).toBe(false);
+    });
+  });
+
+  describe('union dispatch', () => {
+    it('rejects an unknown type literal', () => {
+      const result = AttachmentRequestSchema.safeParse({
+        type: 'banana',
         owner: 'cases',
-      },
-    ];
-
-    it('has expected attributes in request', () => {
-      const query = BulkCreateAttachmentsRequestRt.decode(defaultRequest);
-
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: defaultRequest,
+        comment: 'x',
       });
-    });
-
-    it('removes foo:bar attributes from request', () => {
-      const query = BulkCreateAttachmentsRequestRt.decode([
-        { comment: 'Solve this fast!', type: AttachmentType.user, owner: 'cases', foo: 'bar' },
-      ]);
-
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: defaultRequest,
-      });
-    });
-
-    it('zod: has expected attributes in request', () => {
-      const result = BulkCreateAttachmentsRequestSchema.safeParse(defaultRequest);
-      expect(result.success).toBe(true);
-      expect(result.data).toStrictEqual(defaultRequest);
-    });
-
-    it('zod: strips unknown fields', () => {
-      const result = BulkCreateAttachmentsRequestSchema.safeParse([
-        { comment: 'Solve this fast!', type: AttachmentType.user, owner: 'cases', foo: 'bar' },
-      ]);
-      expect(result.success).toBe(true);
-      expect(result.data).toStrictEqual(defaultRequest);
-    });
-
-    describe('errors', () => {
-      it(`throws error when attachments are more than ${MAX_BULK_CREATE_ATTACHMENTS}`, () => {
-        const comment = {
-          comment: 'Solve this fast!',
-          type: AttachmentType.user,
-          owner: 'cases',
-        };
-        const attachments = Array(MAX_BULK_CREATE_ATTACHMENTS + 1).fill(comment);
-
-        expect(PathReporter.report(BulkCreateAttachmentsRequestRt.decode(attachments))).toContain(
-          `The length of the field attachments is too long. Array must be of length <= ${MAX_BULK_CREATE_ATTACHMENTS}.`
-        );
-      });
-
-      it(`no errors when empty array of attachments`, () => {
-        expect(PathReporter.report(BulkCreateAttachmentsRequestRt.decode([]))).toStrictEqual([
-          'No errors!',
-        ]);
-      });
+      expect(result.success).toBe(false);
     });
   });
+});
 
-  describe('BulkGetAttachmentsRequestRt', () => {
-    it('has expected attributes in request', () => {
-      const query = BulkGetAttachmentsRequestRt.decode({ ids: ['abc', 'xyz'] });
-
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: { ids: ['abc', 'xyz'] },
-      });
+describe('AttachmentPatchRequestSchema', () => {
+  it('requires id and version on top of a full type body', () => {
+    const result = AttachmentPatchRequestSchema.safeParse({
+      ...validUserComment,
+      id: 'a',
+      version: 'b',
     });
-
-    it('removes foo:bar attributes from request', () => {
-      const query = BulkGetAttachmentsRequestRt.decode({ ids: ['abc', 'xyz'], foo: 'bar' });
-
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: { ids: ['abc', 'xyz'] },
-      });
-    });
-
-    it('zod: has expected attributes in request', () => {
-      const result = BulkGetAttachmentsRequestSchema.safeParse({ ids: ['abc', 'xyz'] });
-      expect(result.success).toBe(true);
-      expect(result.data).toStrictEqual({ ids: ['abc', 'xyz'] });
-    });
-
-    it('zod: strips unknown fields', () => {
-      const result = BulkGetAttachmentsRequestSchema.safeParse({
-        ids: ['abc', 'xyz'],
-        foo: 'bar',
-      });
-      expect(result.success).toBe(true);
-      expect(result.data).toStrictEqual({ ids: ['abc', 'xyz'] });
-    });
+    expect(result.success).toBe(true);
   });
 
-  describe('BulkGetAttachmentsResponseRt', () => {
-    const defaultRequest = {
-      attachments: [
-        {
-          comment: 'Solve this fast!',
-          type: AttachmentType.user,
-          owner: 'cases',
-          id: 'basic-comment-id',
-          version: 'WzQ3LDFc',
-          created_at: '2020-02-19T23:06:33.798Z',
-          created_by: {
-            full_name: 'Leslie Knope',
-            username: 'lknope',
-            email: 'leslie.knope@elastic.co',
-          },
-          pushed_at: null,
-          pushed_by: null,
-          updated_at: null,
-          updated_by: null,
-        },
-      ],
-      errors: [
-        {
-          error: 'error',
-          message: 'not found',
-          status: 404,
-          savedObjectId: 'abc',
-        },
-      ],
-    };
-
-    it('has expected attributes in request', () => {
-      const query = BulkGetAttachmentsResponseRt.decode(defaultRequest);
-
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: defaultRequest,
-      });
+  it('rejects a body missing id', () => {
+    const result = AttachmentPatchRequestSchema.safeParse({
+      ...validUserComment,
+      version: 'b',
     });
-
-    it('removes foo:bar attributes from request', () => {
-      const query = BulkGetAttachmentsResponseRt.decode({ ...defaultRequest, foo: 'bar' });
-
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: defaultRequest,
-      });
-    });
-
-    it('removes foo:bar attributes from attachments', () => {
-      const query = BulkGetAttachmentsResponseRt.decode({
-        ...defaultRequest,
-        attachments: [{ ...defaultRequest.attachments[0], foo: 'bar' }],
-      });
-
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: defaultRequest,
-      });
-    });
-
-    it('removes foo:bar attributes from errors', () => {
-      const query = BulkGetAttachmentsResponseRt.decode({
-        ...defaultRequest,
-        errors: [{ ...defaultRequest.errors[0], foo: 'bar' }],
-      });
-
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: defaultRequest,
-      });
-    });
-
-    it('zod: has expected attributes in request', () => {
-      const result = BulkGetAttachmentsResponseSchema.safeParse(defaultRequest);
-      expect(result.success).toBe(true);
-      expect(result.data).toStrictEqual(defaultRequest);
-    });
-
-    it('zod: strips unknown fields', () => {
-      const result = BulkGetAttachmentsResponseSchema.safeParse({ ...defaultRequest, foo: 'bar' });
-      expect(result.success).toBe(true);
-      expect(result.data).toStrictEqual(defaultRequest);
-    });
+    expect(result.success).toBe(false);
   });
 
-  describe('PostFileAttachmentRequestRt', () => {
-    const defaultRequest = {
-      file: 'Solve this fast!',
-      filename: 'filename',
-    };
-
-    it('has the expected attributes in request', () => {
-      const query = PostFileAttachmentRequestRt.decode(defaultRequest);
-
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: defaultRequest,
-      });
+  it('rejects a body missing version', () => {
+    const result = AttachmentPatchRequestSchema.safeParse({
+      ...validUserComment,
+      id: 'a',
     });
+    expect(result.success).toBe(false);
+  });
 
-    it('removes foo:bar attributes from request', () => {
-      const query = PostFileAttachmentRequestRt.decode({ ...defaultRequest, foo: 'bar' });
-
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: defaultRequest,
-      });
+  it('rejects a body missing the type / payload (partial updates not allowed)', () => {
+    const result = AttachmentPatchRequestSchema.safeParse({
+      id: 'a',
+      version: 'b',
+      comment: 'just an update',
+      owner: 'cases',
     });
+    expect(result.success).toBe(false);
+  });
 
-    it('zod: has expected attributes in request', () => {
-      const result = PostFileAttachmentRequestSchema.safeParse(defaultRequest);
-      expect(result.success).toBe(true);
-      expect(result.data).toStrictEqual(defaultRequest);
+  it('honors the type-specific validation on top of id/version', () => {
+    const result = AttachmentPatchRequestSchema.safeParse({
+      ...validUserComment,
+      comment: '',
+      id: 'a',
+      version: 'b',
     });
+    expect(result.success).toBe(false);
+  });
 
-    it('zod: strips unknown fields', () => {
-      const result = PostFileAttachmentRequestSchema.safeParse({ ...defaultRequest, foo: 'bar' });
-      expect(result.success).toBe(true);
-      expect(result.data).toStrictEqual(defaultRequest);
+  it('DeepStrict-wrapped schema rejects unknown top-level fields on patch (route-layer parity)', () => {
+    const result = DeepStrict(AttachmentPatchRequestSchema).safeParse({
+      ...validUserComment,
+      id: 'a',
+      version: 'b',
+      rogue: 'field',
     });
+    expect(result.success).toBe(false);
+  });
+});
 
-    describe('errors', () => {
-      it('throws an error when the filename is too long', () => {
-        const longFilename = 'x'.repeat(MAX_FILENAME_LENGTH + 1);
+describe('BulkCreateAttachmentsRequestSchema', () => {
+  it('accepts an empty array', () => {
+    expect(BulkCreateAttachmentsRequestSchema.safeParse([]).success).toBe(true);
+  });
 
-        expect(
-          PathReporter.report(
-            PostFileAttachmentRequestRt.decode({ ...defaultRequest, filename: longFilename })
-          )
-        ).toContain('The length of the filename is too long. The maximum length is 160.');
-      });
+  it('accepts a mix of valid attachment variants', () => {
+    expect(
+      BulkCreateAttachmentsRequestSchema.safeParse([validUserComment, validAlert, validActions])
+        .success
+    ).toBe(true);
+  });
 
-      it('throws an error when the filename is too small', () => {
-        expect(
-          PathReporter.report(
-            PostFileAttachmentRequestRt.decode({ ...defaultRequest, filename: '' })
-          )
-        ).toContain('The filename field cannot be an empty string.');
-      });
-    });
+  it(`rejects more than MAX_BULK_CREATE_ATTACHMENTS (${MAX_BULK_CREATE_ATTACHMENTS}) items`, () => {
+    const items = Array(MAX_BULK_CREATE_ATTACHMENTS + 1).fill(validUserComment);
+    expect(parseErrors(BulkCreateAttachmentsRequestSchema, items)).toContain(
+      `The length of the field attachments is too long. Array must be of length <= ${MAX_BULK_CREATE_ATTACHMENTS}.`
+    );
+  });
+});
+
+describe('BulkDeleteFileAttachmentsRequestSchema', () => {
+  it('accepts a single non-empty id', () => {
+    expect(BulkDeleteFileAttachmentsRequestSchema.safeParse({ ids: ['file-1'] }).success).toBe(
+      true
+    );
+  });
+
+  it('rejects an empty ids array', () => {
+    expect(parseErrors(BulkDeleteFileAttachmentsRequestSchema, { ids: [] })).toContain(
+      'The length of the field ids is too short. Array must be of length >= 1.'
+    );
+  });
+
+  it(`rejects more than MAX_DELETE_FILES (${MAX_DELETE_FILES}) ids`, () => {
+    const ids = Array(MAX_DELETE_FILES + 1).fill('id');
+    expect(parseErrors(BulkDeleteFileAttachmentsRequestSchema, { ids })).toContain(
+      `The length of the field ids is too long. Array must be of length <= ${MAX_DELETE_FILES}.`
+    );
+  });
+
+  it('rejects an empty-string id (NonEmptyString parity)', () => {
+    expect(parseErrors(BulkDeleteFileAttachmentsRequestSchema, { ids: [''] })).toContain(
+      'string must have length >= 1'
+    );
+  });
+
+  it('rejects a whitespace-only id (NonEmptyString parity)', () => {
+    expect(parseErrors(BulkDeleteFileAttachmentsRequestSchema, { ids: ['   '] })).toContain(
+      'string must have length >= 1'
+    );
+  });
+});
+
+describe('BulkGetAttachmentsRequestSchema', () => {
+  it('accepts a single id', () => {
+    expect(BulkGetAttachmentsRequestSchema.safeParse({ ids: ['a'] }).success).toBe(true);
+  });
+
+  it('rejects an empty ids array', () => {
+    expect(parseErrors(BulkGetAttachmentsRequestSchema, { ids: [] })).toContain(
+      'The length of the field ids is too short. Array must be of length >= 1.'
+    );
+  });
+
+  it(`rejects more than MAX_BULK_GET_ATTACHMENTS (${MAX_BULK_GET_ATTACHMENTS}) ids`, () => {
+    const ids = Array(MAX_BULK_GET_ATTACHMENTS + 1).fill('id');
+    expect(parseErrors(BulkGetAttachmentsRequestSchema, { ids })).toContain(
+      `The length of the field ids is too long. Array must be of length <= ${MAX_BULK_GET_ATTACHMENTS}.`
+    );
   });
 });

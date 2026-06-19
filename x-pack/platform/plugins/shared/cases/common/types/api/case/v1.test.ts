@@ -6,120 +6,51 @@
  */
 
 import {
-  CASE_EXTENDED_FIELDS,
-  MAX_CATEGORY_FILTER_LENGTH,
-  MAX_TAGS_FILTER_LENGTH,
   MAX_ASSIGNEES_FILTER_LENGTH,
-  MAX_REPORTERS_FILTER_LENGTH,
   MAX_ASSIGNEES_PER_CASE,
-  MAX_DESCRIPTION_LENGTH,
-  MAX_TAGS_PER_CASE,
-  MAX_LENGTH_PER_TAG,
-  MAX_TITLE_LENGTH,
+  MAX_CASES_PER_PAGE,
+  MAX_CASES_TO_UPDATE,
+  MAX_CATEGORY_FILTER_LENGTH,
   MAX_CATEGORY_LENGTH,
   MAX_CUSTOM_FIELDS_PER_CASE,
   MAX_CUSTOM_FIELD_TEXT_VALUE_LENGTH,
+  MAX_DESCRIPTION_LENGTH,
+  MAX_LENGTH_PER_TAG,
+  MAX_REPORTERS_FILTER_LENGTH,
+  MAX_TAGS_FILTER_LENGTH,
+  MAX_TAGS_PER_CASE,
+  MAX_TITLE_LENGTH,
 } from '../../../constants';
-import { PathReporter } from 'io-ts/lib/PathReporter';
-import { AttachmentType } from '../../domain/attachment/v1';
-import type { Case } from '../../domain/case/v1';
+import { DeepStrict } from '@kbn/zod-helpers';
+import { parseErrors } from '../../../test_helpers/zod_schema_test_utils';
 import { CaseSeverity, CaseStatuses } from '../../domain/case/v1';
 import { ConnectorTypes } from '../../domain/connector/v1';
-import { CasesStatusRequestRt, CasesStatusResponseRt } from '../stats/v1';
+import { CustomFieldTypes } from '../../domain/custom_field/v1';
 import type { CasePostRequest } from './v1';
 import {
-  AllReportersFindRequestRt,
-  CasePatchRequestRt,
-  CasePostRequestRt,
-  CasePushRequestParamsRt,
-  CaseResolveResponseRt,
-  CasesBulkGetRequestRt,
-  CasesBulkGetResponseRt,
-  CasesByAlertIDRequestRt,
-  CasesFindRequestRt,
-  CasesFindRequestSearchFieldsRt,
-  CasesFindRequestSortFieldsRt,
-  CasesFindResponseRt,
-  CasesPatchRequestRt,
-  CasesSearchRequestRt,
-} from './v1';
-import { CustomFieldTypes } from '../../domain/custom_field/v1';
-import {
-  AllReportersFindRequestSchema,
   CasePatchRequestSchema,
   CasePostRequestSchema,
-  CasePushRequestParamsSchema,
-  CaseResolveResponseSchema,
-  CasesBulkGetRequestSchema,
-  CasesBulkGetResponseSchema,
-  CasesByAlertIDRequestSchema,
   CasesFindRequestSchema,
-  CasesFindResponseSchema,
   CasesPatchRequestSchema,
   CasesSearchRequestSchema,
-} from '../../api_zod/case/v1';
-import { CasesStatusRequestSchema, CasesStatusResponseSchema } from '../../api_zod/stats/v1';
+} from './v1';
 
-const basicCase: Case = {
-  owner: 'cases',
-  closed_at: null,
-  closed_by: null,
-  id: 'basic-case-id',
-  comments: [
-    {
-      comment: 'Solve this fast!',
-      type: AttachmentType.user,
-      id: 'basic-comment-id',
-      created_at: '2020-02-19T23:06:33.798Z',
-      created_by: {
-        full_name: 'Leslie Knope',
-        username: 'lknope',
-        email: 'leslie.knope@elastic.co',
-      },
-      owner: 'cases',
-      pushed_at: null,
-      pushed_by: null,
-      updated_at: null,
-      updated_by: null,
-      version: 'WzQ3LDFc',
-    },
-  ],
-  created_at: '2020-02-19T23:06:33.798Z',
-  created_by: {
-    full_name: 'Leslie Knope',
-    username: 'lknope',
-    email: 'leslie.knope@elastic.co',
-  },
+const validPostRequest: CasePostRequest = {
+  description: 'A description',
+  tags: ['new', 'case'],
+  title: 'My new case',
   connector: {
-    id: 'none',
-    name: 'My Connector',
-    type: ConnectorTypes.none,
-    fields: null,
+    id: '123',
+    name: 'My connector',
+    type: ConnectorTypes.jira,
+    fields: { issueType: 'Task', priority: 'High', parent: null },
   },
-  description: 'Security banana Issue',
-  severity: CaseSeverity.LOW,
-  duration: null,
-  external_service: null,
-  status: CaseStatuses.open,
-  tags: ['coke', 'pepsi'],
-  title: 'Another horrible breach!!',
-  totalComment: 1,
-  totalAlerts: 0,
-  totalEvents: 0,
-  updated_at: '2020-02-20T15:02:57.995Z',
-  updated_by: {
-    full_name: 'Leslie Knope',
-    username: 'lknope',
-    email: 'leslie.knope@elastic.co',
-  },
-  version: 'WzQ3LDFd',
   settings: {
     syncAlerts: true,
-    extractObservables: false,
   },
-  // damaged_raccoon uid
+  owner: 'cases',
+  severity: CaseSeverity.LOW,
   assignees: [{ uid: 'u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0' }],
-  category: null,
   customFields: [
     {
       key: 'first_custom_field_key',
@@ -133,1125 +64,320 @@ const basicCase: Case = {
     },
     {
       key: 'third_custom_field_key',
-      type: CustomFieldTypes.TEXT,
-      value: 'www.example.com',
-    },
-    {
-      key: 'fourth_custom_field_key',
       type: CustomFieldTypes.NUMBER,
       value: 3,
     },
   ],
-  observables: [
-    {
-      value: 'test',
-      typeKey: '9b557398-0289-4e00-b696-5b277608789c',
-      id: 'df927ab8-54ed-47d6-be07-9948c255c097',
-      createdAt: '2024-11-14',
-      updatedAt: '2024-11-14',
-      description: null,
-    },
-  ],
-  total_observables: 1,
-  incremental_id: 123,
 };
 
-describe('CasePostRequestRt', () => {
-  const defaultRequest: CasePostRequest = {
-    description: 'A description',
-    tags: ['new', 'case'],
-    title: 'My new case',
-    connector: {
-      id: '123',
-      name: 'My connector',
-      type: ConnectorTypes.jira,
-      fields: { issueType: 'Task', priority: 'High', parent: null },
-    },
-    settings: {
-      syncAlerts: true,
-      extractObservables: undefined,
-    },
-    owner: 'cases',
-    severity: CaseSeverity.LOW,
-    assignees: [{ uid: 'u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0' }],
-    customFields: [
-      {
-        key: 'first_custom_field_key',
-        type: CustomFieldTypes.TEXT,
-        value: 'this is a text field value',
-      },
-      {
-        key: 'second_custom_field_key',
-        type: CustomFieldTypes.TOGGLE,
-        value: true,
-      },
-      {
-        key: 'third_custom_field_key',
-        type: CustomFieldTypes.NUMBER,
-        value: 3,
-      },
-    ],
-  };
-
-  it('has expected attributes in request', () => {
-    const query = CasePostRequestRt.decode(defaultRequest);
-
-    expect(query).toStrictEqual({
-      _tag: 'Right',
-      right: defaultRequest,
-    });
+describe('CasePostRequestSchema', () => {
+  it('accepts a valid request', () => {
+    const result = CasePostRequestSchema.safeParse(validPostRequest);
+    expect(result.success).toBe(true);
+    if (result.success) expect(result.data).toEqual(validPostRequest);
   });
 
-  it('removes foo:bar attributes from request', () => {
-    const query = CasePostRequestRt.decode({ ...defaultRequest, foo: 'bar' });
-
-    expect(query).toStrictEqual({
-      _tag: 'Right',
-      right: defaultRequest,
-    });
+  it('strips unknown top-level fields', () => {
+    const result = CasePostRequestSchema.safeParse({ ...validPostRequest, foo: 'bar' });
+    expect(result.success).toBe(true);
+    if (result.success) expect(result.data).not.toHaveProperty('foo');
   });
 
-  it('removes foo:bar attributes from connector', () => {
-    const query = CasePostRequestRt.decode({
-      ...defaultRequest,
-      connector: { ...defaultRequest.connector, foo: 'bar' },
+  it('strips unknown fields from connector', () => {
+    const result = CasePostRequestSchema.safeParse({
+      ...validPostRequest,
+      connector: { ...validPostRequest.connector, foo: 'bar' },
     });
-
-    expect(query).toStrictEqual({
-      _tag: 'Right',
-      right: defaultRequest,
-    });
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect((result.data.connector as Record<string, unknown>).foo).toBeUndefined();
+    }
   });
 
-  it(`throws an error when the assignees are more than ${MAX_ASSIGNEES_PER_CASE}`, async () => {
+  it('rejects more than MAX_ASSIGNEES_PER_CASE assignees', () => {
     const assignees = Array(MAX_ASSIGNEES_PER_CASE + 1).fill({ uid: 'foobar' });
-
-    expect(
-      PathReporter.report(CasePostRequestRt.decode({ ...defaultRequest, assignees }))
-    ).toContain('The length of the field assignees is too long. Array must be of length <= 10.');
+    expect(parseErrors(CasePostRequestSchema, { ...validPostRequest, assignees })).toContain(
+      `The length of the field assignees is too long. Array must be of length <= ${MAX_ASSIGNEES_PER_CASE}.`
+    );
   });
 
-  it('does not throw an error with empty assignees', async () => {
-    expect(
-      PathReporter.report(CasePostRequestRt.decode({ ...defaultRequest, assignees: [] }))
-    ).toContain('No errors!');
+  it('accepts an empty assignees array', () => {
+    const result = CasePostRequestSchema.safeParse({ ...validPostRequest, assignees: [] });
+    expect(result.success).toBe(true);
   });
 
-  it('does not throw an error with undefined assignees', async () => {
-    const { assignees, ...rest } = defaultRequest;
-
-    expect(PathReporter.report(CasePostRequestRt.decode(rest))).toContain('No errors!');
+  it('accepts undefined assignees', () => {
+    const { assignees, ...rest } = validPostRequest;
+    expect(CasePostRequestSchema.safeParse(rest).success).toBe(true);
   });
 
-  it(`throws an error when the description contains more than ${MAX_DESCRIPTION_LENGTH} characters`, async () => {
+  it('rejects description exceeding MAX_DESCRIPTION_LENGTH', () => {
     const description = 'a'.repeat(MAX_DESCRIPTION_LENGTH + 1);
-
-    expect(
-      PathReporter.report(CasePostRequestRt.decode({ ...defaultRequest, description }))
-    ).toContain('The length of the description is too long. The maximum length is 30000.');
+    expect(parseErrors(CasePostRequestSchema, { ...validPostRequest, description })).toContain(
+      `The length of the description is too long. The maximum length is ${MAX_DESCRIPTION_LENGTH}.`
+    );
   });
 
-  it(`throws an error when there are more than ${MAX_TAGS_PER_CASE} tags`, async () => {
+  it('rejects whitespace-only description (limitedStringSchema parity)', () => {
+    expect(
+      parseErrors(CasePostRequestSchema, { ...validPostRequest, description: '   ' })
+    ).toContain('The description field cannot be an empty string.');
+  });
+
+  it('rejects more than MAX_TAGS_PER_CASE tags', () => {
     const tags = Array(MAX_TAGS_PER_CASE + 1).fill('foobar');
-
-    expect(PathReporter.report(CasePostRequestRt.decode({ ...defaultRequest, tags }))).toContain(
-      'The length of the field tags is too long. Array must be of length <= 200.'
+    expect(parseErrors(CasePostRequestSchema, { ...validPostRequest, tags })).toContain(
+      `The length of the field tags is too long. Array must be of length <= ${MAX_TAGS_PER_CASE}.`
     );
   });
 
-  it(`throws an error when the a tag is more than ${MAX_LENGTH_PER_TAG} characters`, async () => {
-    const tag = 'a'.repeat(MAX_LENGTH_PER_TAG + 1);
-
-    expect(
-      PathReporter.report(CasePostRequestRt.decode({ ...defaultRequest, tags: [tag] }))
-    ).toContain('The length of the tag is too long. The maximum length is 256.');
+  it('rejects a tag exceeding MAX_LENGTH_PER_TAG', () => {
+    const tags = ['a'.repeat(MAX_LENGTH_PER_TAG + 1)];
+    expect(parseErrors(CasePostRequestSchema, { ...validPostRequest, tags })).toContain(
+      `The length of the tag is too long. The maximum length is ${MAX_LENGTH_PER_TAG}.`
+    );
   });
 
-  it(`throws an error when the title contains more than ${MAX_TITLE_LENGTH} characters`, async () => {
+  it('rejects title exceeding MAX_TITLE_LENGTH', () => {
     const title = 'a'.repeat(MAX_TITLE_LENGTH + 1);
-
-    expect(PathReporter.report(CasePostRequestRt.decode({ ...defaultRequest, title }))).toContain(
-      'The length of the title is too long. The maximum length is 160.'
+    expect(parseErrors(CasePostRequestSchema, { ...validPostRequest, title })).toContain(
+      `The length of the title is too long. The maximum length is ${MAX_TITLE_LENGTH}.`
     );
   });
 
-  it(`throws an error when the category contains more than ${MAX_CATEGORY_LENGTH} characters`, async () => {
+  it('rejects category exceeding MAX_CATEGORY_LENGTH', () => {
     const category = 'a'.repeat(MAX_CATEGORY_LENGTH + 1);
-
-    expect(
-      PathReporter.report(CasePostRequestRt.decode({ ...defaultRequest, category }))
-    ).toContain('The length of the category is too long. The maximum length is 50.');
+    expect(parseErrors(CasePostRequestSchema, { ...validPostRequest, category })).toContain(
+      `The length of the category is too long. The maximum length is ${MAX_CATEGORY_LENGTH}.`
+    );
   });
 
-  it('removes foo:bar attributes from customFields', () => {
-    const customField = {
-      key: 'first_custom_field_key',
-      type: CustomFieldTypes.TEXT,
-      value: 'this is a text field value',
-    };
-
-    const query = CasePostRequestRt.decode({
-      ...defaultRequest,
-      customFields: [{ ...customField, foo: 'bar' }],
-    });
-
-    expect(query).toStrictEqual({
-      _tag: 'Right',
-      right: { ...defaultRequest, customFields: [{ ...customField }] },
-    });
-  });
-
-  it('removes foo:bar attributes from field inside customFields', () => {
-    const customField = {
-      key: 'first_custom_field_key',
-      type: CustomFieldTypes.TEXT,
-      value: 'this is a text field value',
-    };
-
-    const query = CasePostRequestRt.decode({
-      ...defaultRequest,
-      customFields: [{ ...customField, foo: 'bar' }],
-    });
-
-    expect(query).toStrictEqual({
-      _tag: 'Right',
-      right: { ...defaultRequest, customFields: [{ ...customField }] },
-    });
-  });
-
-  it(`limits customFields to ${MAX_CUSTOM_FIELDS_PER_CASE}`, () => {
+  it('rejects more than MAX_CUSTOM_FIELDS_PER_CASE customFields', () => {
     const customFields = Array(MAX_CUSTOM_FIELDS_PER_CASE + 1).fill({
-      key: 'first_custom_field_key',
+      key: 'k',
       type: CustomFieldTypes.TEXT,
-      value: 'this is a text field value',
+      value: 'v',
     });
-
-    expect(
-      PathReporter.report(
-        CasePostRequestRt.decode({
-          ...defaultRequest,
-          customFields,
-        })
-      )
-    ).toContain(
+    expect(parseErrors(CasePostRequestSchema, { ...validPostRequest, customFields })).toContain(
       `The length of the field customFields is too long. Array must be of length <= ${MAX_CUSTOM_FIELDS_PER_CASE}.`
     );
   });
 
-  it('does not throw an error with undefined customFields', async () => {
-    const { customFields, ...rest } = defaultRequest;
-
-    expect(PathReporter.report(CasePostRequestRt.decode(rest))).toContain('No errors!');
-  });
-
-  it('accepts optional template and extended_fields', () => {
-    const request = {
-      ...defaultRequest,
-      template: { id: 'template-id', version: 1 },
-      [CASE_EXTENDED_FIELDS]: { field1: 'foo' },
-    };
-
-    const query = CasePostRequestRt.decode(request);
-
-    expect(query).toStrictEqual({
-      _tag: 'Right',
-      right: request,
-    });
-  });
-
-  it('removes unknown attributes from template', () => {
-    const request = {
-      ...defaultRequest,
-      template: { id: 'template-id', version: 1, foo: 'bar' },
-    };
-
-    const query = CasePostRequestRt.decode(request);
-
-    expect(query).toStrictEqual({
-      _tag: 'Right',
-      right: {
-        ...defaultRequest,
-        template: { id: 'template-id', version: 1 },
+  it('rejects a TEXT customField value exceeding MAX_CUSTOM_FIELD_TEXT_VALUE_LENGTH', () => {
+    const customFields = [
+      {
+        key: 'k',
+        type: CustomFieldTypes.TEXT,
+        value: 'a'.repeat(MAX_CUSTOM_FIELD_TEXT_VALUE_LENGTH + 1),
       },
+    ];
+    const result = CasePostRequestSchema.safeParse({ ...validPostRequest, customFields });
+    expect(result.success).toBe(false);
+  });
+
+  it('rejects an empty TEXT customField value', () => {
+    const customFields = [{ key: 'k', type: CustomFieldTypes.TEXT, value: '' }];
+    const result = CasePostRequestSchema.safeParse({ ...validPostRequest, customFields });
+    expect(result.success).toBe(false);
+  });
+
+  it('rejects a NUMBER customField value above Number.MAX_SAFE_INTEGER', () => {
+    const customFields = [
+      { key: 'k', type: CustomFieldTypes.NUMBER, value: Number.MAX_SAFE_INTEGER + 1 },
+    ];
+    const result = CasePostRequestSchema.safeParse({ ...validPostRequest, customFields });
+    expect(result.success).toBe(false);
+  });
+
+  it('rejects a NUMBER customField value below Number.MIN_SAFE_INTEGER', () => {
+    const customFields = [
+      { key: 'k', type: CustomFieldTypes.NUMBER, value: Number.MIN_SAFE_INTEGER - 1 },
+    ];
+    const result = CasePostRequestSchema.safeParse({ ...validPostRequest, customFields });
+    expect(result.success).toBe(false);
+  });
+
+  it('DeepStrict-wrapped schema rejects unknown top-level fields (route-layer parity)', () => {
+    const result = DeepStrict(CasePostRequestSchema).safeParse({
+      ...validPostRequest,
+      foo: 'bar',
     });
+    expect(result.success).toBe(false);
   });
 
-  it(`throws an error when a text customFields is longer than ${MAX_CUSTOM_FIELD_TEXT_VALUE_LENGTH}`, () => {
-    expect(
-      PathReporter.report(
-        CasePostRequestRt.decode({
-          ...defaultRequest,
-          customFields: [
-            {
-              key: 'first_custom_field_key',
-              type: CustomFieldTypes.TEXT,
-              value: '#'.repeat(MAX_CUSTOM_FIELD_TEXT_VALUE_LENGTH + 1),
-            },
-          ],
-        })
-      )
-    ).toContain(
-      `The length of the value is too long. The maximum length is ${MAX_CUSTOM_FIELD_TEXT_VALUE_LENGTH}.`
-    );
-  });
-
-  it(`throws an error when a number customFields is more than ${Number.MAX_SAFE_INTEGER}`, () => {
-    expect(
-      PathReporter.report(
-        CasePostRequestRt.decode({
-          ...defaultRequest,
-          customFields: [
-            {
-              key: 'first_custom_field_key',
-              type: CustomFieldTypes.NUMBER,
-              value: Number.MAX_SAFE_INTEGER + 1,
-            },
-          ],
-        })
-      )
-    ).toContain(
-      `The value field should be an integer between -(2^53 - 1) and 2^53 - 1, inclusive.`
-    );
-  });
-
-  it(`throws an error when a number customFields is less than ${Number.MIN_SAFE_INTEGER}`, () => {
-    expect(
-      PathReporter.report(
-        CasePostRequestRt.decode({
-          ...defaultRequest,
-          customFields: [
-            {
-              key: 'first_custom_field_key',
-              type: CustomFieldTypes.NUMBER,
-              value: Number.MIN_SAFE_INTEGER - 1,
-            },
-          ],
-        })
-      )
-    ).toContain(
-      `The value field should be an integer between -(2^53 - 1) and 2^53 - 1, inclusive.`
-    );
-  });
-
-  it('throws an error when a text customField is an empty string', () => {
-    expect(
-      PathReporter.report(
-        CasePostRequestRt.decode({
-          ...defaultRequest,
-          customFields: [
-            {
-              key: 'first_custom_field_key',
-              type: CustomFieldTypes.TEXT,
-              value: '',
-            },
-          ],
-        })
-      )
-    ).toContain('The value field cannot be an empty string.');
-  });
-
-  it('zod: has expected attributes in request', () => {
-    // Zod strips keys with undefined values, so omit extractObservables: undefined
-    const zodRequest = { ...defaultRequest, settings: { syncAlerts: true } };
-    const result = CasePostRequestSchema.safeParse(zodRequest);
-    expect(result.success).toBe(true);
-    expect(result.data).toStrictEqual(zodRequest);
-  });
-
-  it('zod: strips unknown fields', () => {
-    const zodRequest = { ...defaultRequest, settings: { syncAlerts: true } };
-    const result = CasePostRequestSchema.safeParse({ ...zodRequest, foo: 'bar' });
-    expect(result.success).toBe(true);
-    expect(result.data).toStrictEqual(zodRequest);
+  it('rejects missing required fields', () => {
+    const { description, ...rest } = validPostRequest;
+    expect(CasePostRequestSchema.safeParse(rest).success).toBe(false);
   });
 });
 
-describe('CasesFindRequestRt', () => {
-  const defaultRequest = {
-    tags: ['new', 'case'],
-    status: CaseStatuses.open,
-    severity: CaseSeverity.LOW,
-    assignees: ['damaged_racoon'],
-    reporters: ['damaged_racoon'],
-    defaultSearchOperator: 'AND',
-    from: 'now',
-    page: '1',
-    perPage: '10',
-    search: 'search text',
-    searchFields: ['title', 'description', 'incremental_id.text'],
-    to: '1w',
-    sortOrder: 'desc',
-    sortField: 'createdAt',
-    owner: 'cases',
+describe('CasePatchRequestSchema', () => {
+  const validPatch = {
+    id: 'abc-123',
+    version: 'WzQ3LDFc',
+    title: 'Updated title',
   };
 
-  it('has expected attributes in request', () => {
-    const query = CasesFindRequestRt.decode(defaultRequest);
-
-    expect(query).toStrictEqual({
-      _tag: 'Right',
-      right: { ...defaultRequest, page: 1, perPage: 10 },
-    });
+  it('accepts a valid partial update with id and version', () => {
+    expect(CasePatchRequestSchema.safeParse(validPatch).success).toBe(true);
   });
 
-  it('removes foo:bar attributes from request', () => {
-    const query = CasesFindRequestRt.decode({ ...defaultRequest, foo: 'bar' });
-
-    expect(query).toStrictEqual({
-      _tag: 'Right',
-      right: { ...defaultRequest, page: 1, perPage: 10 },
-    });
+  it('rejects missing id', () => {
+    const { id, ...rest } = validPatch;
+    expect(CasePatchRequestSchema.safeParse(rest).success).toBe(false);
   });
 
-  const searchFields = Object.keys(CasesFindRequestSearchFieldsRt.keys);
-
-  it.each(searchFields)('succeeds with %s as searchFields', (field) => {
-    const query = CasesFindRequestRt.decode({ ...defaultRequest, searchFields: field });
-
-    expect(query).toStrictEqual({
-      _tag: 'Right',
-      right: { ...defaultRequest, searchFields: field, page: 1, perPage: 10 },
-    });
+  it('rejects missing version', () => {
+    const { version, ...rest } = validPatch;
+    expect(CasePatchRequestSchema.safeParse(rest).success).toBe(false);
   });
 
-  const sortFields = Object.keys(CasesFindRequestSortFieldsRt.keys);
-
-  it.each(sortFields)('succeeds with %s as sortField', (sortField) => {
-    const query = CasesFindRequestRt.decode({ ...defaultRequest, sortField });
-
-    expect(query).toStrictEqual({
-      _tag: 'Right',
-      right: { ...defaultRequest, sortField, page: 1, perPage: 10 },
-    });
+  it('accepts id and version with no other fields', () => {
+    expect(CasePatchRequestSchema.safeParse({ id: 'a', version: 'b' }).success).toBe(true);
   });
 
-  it('removes rootSearchField when passed', () => {
-    expect(
-      PathReporter.report(
-        CasesFindRequestRt.decode({ ...defaultRequest, rootSearchField: ['foobar'] })
-      )
-    ).toContain('No errors!');
-  });
-
-  it('zod: has expected attributes in request', () => {
-    const result = CasesFindRequestSchema.safeParse(defaultRequest);
-    expect(result.success).toBe(true);
-    expect(result.data).toStrictEqual({ ...defaultRequest, page: 1, perPage: 10 });
-  });
-
-  it('zod: strips unknown fields', () => {
-    const result = CasesFindRequestSchema.safeParse({ ...defaultRequest, foo: 'bar' });
-    expect(result.success).toBe(true);
-    expect(result.data).toStrictEqual({ ...defaultRequest, page: 1, perPage: 10 });
-  });
-
-  describe('errors', () => {
-    it('throws error when invalid searchField passed', () => {
-      expect(
-        PathReporter.report(
-          CasesFindRequestRt.decode({ ...defaultRequest, searchFields: 'foobar' })
-        )
-      ).not.toContain('No errors!');
-    });
-
-    it('throws error when invalid sortField passed', () => {
-      expect(
-        PathReporter.report(CasesFindRequestRt.decode({ ...defaultRequest, sortField: 'foobar' }))
-      ).not.toContain('No errors!');
-    });
-
-    it('succeeds when valid parameters passed', () => {
-      expect(PathReporter.report(CasesFindRequestRt.decode(defaultRequest))).toContain(
-        'No errors!'
-      );
-    });
-
-    it(`throws an error when the category array has ${MAX_CATEGORY_FILTER_LENGTH} items`, async () => {
-      const category = Array(MAX_CATEGORY_FILTER_LENGTH + 1).fill('foobar');
-
-      expect(PathReporter.report(CasesFindRequestRt.decode({ category }))).toContain(
-        'The length of the field category is too long. Array must be of length <= 100.'
-      );
-    });
-
-    it(`throws an error when the tags array has ${MAX_TAGS_FILTER_LENGTH} items`, async () => {
-      const tags = Array(MAX_TAGS_FILTER_LENGTH + 1).fill('foobar');
-
-      expect(PathReporter.report(CasesFindRequestRt.decode({ tags }))).toContain(
-        'The length of the field tags is too long. Array must be of length <= 100.'
-      );
-    });
-
-    it(`throws an error when the assignees array has ${MAX_ASSIGNEES_FILTER_LENGTH} items`, async () => {
-      const assignees = Array(MAX_ASSIGNEES_FILTER_LENGTH + 1).fill('foobar');
-
-      expect(PathReporter.report(CasesFindRequestRt.decode({ assignees }))).toContain(
-        'The length of the field assignees is too long. Array must be of length <= 100.'
-      );
-    });
-
-    it(`throws an error when the reporters array has ${MAX_REPORTERS_FILTER_LENGTH} items`, async () => {
-      const reporters = Array(MAX_REPORTERS_FILTER_LENGTH + 1).fill('foobar');
-
-      expect(PathReporter.report(CasesFindRequestRt.decode({ reporters }))).toContain(
-        'The length of the field reporters is too long. Array must be of length <= 100.'
-      );
-    });
+  it('rejects whitespace-only title (length-bounded fields enforce trim parity)', () => {
+    expect(parseErrors(CasePatchRequestSchema, { ...validPatch, title: '   ' })).toContain(
+      'The title field cannot be an empty string.'
+    );
   });
 });
 
-describe('CasesSearchRequestRt', () => {
-  const defaultRequest = {
-    tags: ['new', 'case'],
-    status: CaseStatuses.open,
-    severity: CaseSeverity.LOW,
-    assignees: ['damaged_racoon'],
-    reporters: ['damaged_racoon'],
-    defaultSearchOperator: 'AND',
-    from: 'now',
-    page: '1',
-    perPage: '10',
-    search: 'search text',
-    searchFields: [
-      'cases.title',
-      'cases.description',
-      'cases.incremental_id.text',
-      'cases.observables.value',
-      'cases.customFields.value',
-      'cases-comments.comment',
-      'cases-comments.alertId',
-      'cases-comments.eventId',
-    ],
-    to: '1w',
-    sortOrder: 'desc',
-    sortField: 'createdAt',
-    owner: 'cases',
-    customFields: {
-      toggle_custom_field_key: [true],
-      another_custom_field: [null, false],
-      text_custom_field: ['hello'],
-      number_custom_field: [1234],
-    },
-  };
+describe('CasesPatchRequestSchema', () => {
+  const validPatch = { id: 'abc-123', version: 'WzQ3LDFc', title: 'Updated' };
 
-  it('has expected attributes in request', () => {
-    const query = CasesSearchRequestRt.decode(defaultRequest);
-
-    expect(query).toStrictEqual({
-      _tag: 'Right',
-      right: { ...defaultRequest, page: 1, perPage: 10 },
-    });
+  it('accepts a non-empty cases array', () => {
+    expect(CasesPatchRequestSchema.safeParse({ cases: [validPatch] }).success).toBe(true);
   });
 
-  it('removes foo:bar attributes from request', () => {
-    const query = CasesSearchRequestRt.decode({ ...defaultRequest, foo: 'bar' });
-
-    expect(query).toStrictEqual({
-      _tag: 'Right',
-      right: { ...defaultRequest, page: 1, perPage: 10 },
-    });
+  it('rejects an empty cases array', () => {
+    expect(parseErrors(CasesPatchRequestSchema, { cases: [] })).toContain(
+      'The length of the field cases is too short. Array must be of length >= 1.'
+    );
   });
 
-  it('zod: has expected attributes in request', () => {
-    const result = CasesSearchRequestSchema.safeParse(defaultRequest);
-    expect(result.success).toBe(true);
-    expect(result.data).toStrictEqual({ ...defaultRequest, page: 1, perPage: 10 });
-  });
-
-  it('zod: strips unknown fields', () => {
-    const result = CasesSearchRequestSchema.safeParse({ ...defaultRequest, foo: 'bar' });
-    expect(result.success).toBe(true);
-    expect(result.data).toStrictEqual({ ...defaultRequest, page: 1, perPage: 10 });
+  it(`rejects more than ${MAX_CASES_TO_UPDATE} cases`, () => {
+    const cases = Array(MAX_CASES_TO_UPDATE + 1).fill(validPatch);
+    expect(parseErrors(CasesPatchRequestSchema, { cases })).toContain(
+      `The length of the field cases is too long. Array must be of length <= ${MAX_CASES_TO_UPDATE}.`
+    );
   });
 });
 
-describe('Status', () => {
-  describe('CasesStatusRequestRt', () => {
-    const defaultRequest = {
-      from: '2022-04-28T15:18:00.000Z',
-      to: '2022-04-28T15:22:00.000Z',
+describe('CasesFindRequestSchema', () => {
+  it('accepts an empty body (all filters optional)', () => {
+    expect(CasesFindRequestSchema.safeParse({}).success).toBe(true);
+  });
+
+  it('accepts numeric strings for page/perPage (NumberFromString parity)', () => {
+    expect(CasesFindRequestSchema.safeParse({ page: '1', perPage: '20' }).success).toBe(true);
+  });
+
+  it('rejects non-numeric strings for page/perPage (NumberFromString parity)', () => {
+    const result = CasesFindRequestSchema.safeParse({ page: 'a', perPage: 'b' });
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      const messages = result.error.issues.map((i) => i.message);
+      expect(messages).toEqual(
+        expect.arrayContaining(['cannot parse to a number', 'cannot parse to a number'])
+      );
+    }
+  });
+
+  it(`rejects perPage above MAX_CASES_PER_PAGE (${MAX_CASES_PER_PAGE})`, () => {
+    expect(parseErrors(CasesFindRequestSchema, { perPage: MAX_CASES_PER_PAGE + 1 })).toContain(
+      `The provided perPage value is too high. The maximum allowed perPage value is ${MAX_CASES_PER_PAGE}.`
+    );
+  });
+
+  it('accepts both array and string forms of tags / status / severity / assignees / reporters / owner', () => {
+    const arrayForm = CasesFindRequestSchema.safeParse({
+      tags: ['a', 'b'],
+      status: [CaseStatuses.open, CaseStatuses.closed],
+      severity: [CaseSeverity.LOW, CaseSeverity.HIGH],
+      assignees: ['u1', 'u2'],
+      reporters: ['r1'],
+      owner: ['cases'],
+    });
+    expect(arrayForm.success).toBe(true);
+
+    const stringForm = CasesFindRequestSchema.safeParse({
+      tags: 'a',
+      status: CaseStatuses.open,
+      severity: CaseSeverity.LOW,
+      assignees: 'u1',
+      reporters: 'r1',
       owner: 'cases',
-    };
-
-    it('has expected attributes in request', () => {
-      const query = CasesStatusRequestRt.decode(defaultRequest);
-
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: defaultRequest,
-      });
     });
-
-    it('has removes foo:bar attributes from request', () => {
-      const query = CasesStatusRequestRt.decode({ ...defaultRequest, foo: 'bar' });
-
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: defaultRequest,
-      });
-    });
-
-    it('zod: has expected attributes in request', () => {
-      const result = CasesStatusRequestSchema.safeParse(defaultRequest);
-      expect(result.success).toBe(true);
-      expect(result.data).toStrictEqual(defaultRequest);
-    });
-
-    it('zod: strips unknown fields', () => {
-      const result = CasesStatusRequestSchema.safeParse({ ...defaultRequest, foo: 'bar' });
-      expect(result.success).toBe(true);
-      expect(result.data).toStrictEqual(defaultRequest);
-    });
+    expect(stringForm.success).toBe(true);
   });
 
-  describe('CasesStatusResponseRt', () => {
-    const defaultResponse = {
-      count_closed_cases: 1,
-      count_in_progress_cases: 2,
-      count_open_cases: 1,
-    };
-
-    it('has expected attributes in response', () => {
-      const query = CasesStatusResponseRt.decode(defaultResponse);
-
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: defaultResponse,
-      });
-    });
-
-    it('removes foo:bar attributes from response', () => {
-      const query = CasesStatusResponseRt.decode({ ...defaultResponse, foo: 'bar' });
-
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: defaultResponse,
-      });
-    });
-
-    it('zod: has expected attributes in response', () => {
-      const result = CasesStatusResponseSchema.safeParse(defaultResponse);
-      expect(result.success).toBe(true);
-      expect(result.data).toStrictEqual(defaultResponse);
-    });
-
-    it('zod: strips unknown fields', () => {
-      const result = CasesStatusResponseSchema.safeParse({ ...defaultResponse, foo: 'bar' });
-      expect(result.success).toBe(true);
-      expect(result.data).toStrictEqual(defaultResponse);
-    });
-  });
-});
-
-describe('CasesByAlertIDRequestRt', () => {
-  it('has expected attributes in request', () => {
-    const query = CasesByAlertIDRequestRt.decode({ owner: 'cases' });
-
-    expect(query).toStrictEqual({
-      _tag: 'Right',
-      right: { owner: 'cases' },
-    });
-  });
-
-  it('removes foo:bar attributes from request', () => {
-    const query = CasesByAlertIDRequestRt.decode({ owner: ['cases'], foo: 'bar' });
-
-    expect(query).toStrictEqual({
-      _tag: 'Right',
-      right: { owner: ['cases'] },
-    });
-  });
-
-  it('zod: has expected attributes in request', () => {
-    const result = CasesByAlertIDRequestSchema.safeParse({ owner: 'cases' });
-    expect(result.success).toBe(true);
-    expect(result.data).toStrictEqual({ owner: 'cases' });
-  });
-
-  it('zod: strips unknown fields', () => {
-    const result = CasesByAlertIDRequestSchema.safeParse({ owner: ['cases'], foo: 'bar' });
-    expect(result.success).toBe(true);
-    expect(result.data).toStrictEqual({ owner: ['cases'] });
-  });
-});
-
-describe('CaseResolveResponseRt', () => {
-  const defaultRequest = {
-    case: { ...basicCase },
-    outcome: 'exactMatch',
-    alias_target_id: 'sample-target-id',
-    alias_purpose: 'savedObjectConversion',
-  };
-
-  it('has expected attributes in request', () => {
-    const query = CaseResolveResponseRt.decode(defaultRequest);
-
-    expect(query).toStrictEqual({
-      _tag: 'Right',
-      right: defaultRequest,
-    });
-  });
-
-  it('removes foo:bar attributes from request', () => {
-    const query = CaseResolveResponseRt.decode({ ...defaultRequest, foo: 'bar' });
-
-    expect(query).toStrictEqual({
-      _tag: 'Right',
-      right: defaultRequest,
-    });
-  });
-
-  it('zod: has expected attributes in request', () => {
-    const result = CaseResolveResponseSchema.safeParse(defaultRequest);
-    expect(result.success).toBe(true);
-    expect(result.data).toStrictEqual(defaultRequest);
-  });
-
-  it('zod: strips unknown fields', () => {
-    const result = CaseResolveResponseSchema.safeParse({ ...defaultRequest, foo: 'bar' });
-    expect(result.success).toBe(true);
-    expect(result.data).toStrictEqual(defaultRequest);
-  });
-});
-
-describe('CasesFindResponseRt', () => {
-  const defaultRequest = {
-    cases: [{ ...basicCase }],
-    page: 1,
-    per_page: 10,
-    total: 20,
-    count_open_cases: 10,
-    count_in_progress_cases: 5,
-    count_closed_cases: 5,
-  };
-
-  it('has expected attributes in request', () => {
-    const query = CasesFindResponseRt.decode(defaultRequest);
-
-    expect(query).toStrictEqual({
-      _tag: 'Right',
-      right: defaultRequest,
-    });
-  });
-
-  it('removes foo:bar attributes from request', () => {
-    const query = CasesFindResponseRt.decode({ ...defaultRequest, foo: 'bar' });
-
-    expect(query).toStrictEqual({
-      _tag: 'Right',
-      right: defaultRequest,
-    });
-  });
-
-  it('removes foo:bar attributes from cases', () => {
-    const query = CasesFindResponseRt.decode({
-      ...defaultRequest,
-      cases: [{ ...basicCase, foo: 'bar' }],
-    });
-
-    expect(query).toStrictEqual({
-      _tag: 'Right',
-      right: defaultRequest,
-    });
-  });
-
-  it('zod: has expected attributes in request', () => {
-    const result = CasesFindResponseSchema.safeParse(defaultRequest);
-    expect(result.success).toBe(true);
-    expect(result.data).toStrictEqual(defaultRequest);
-  });
-
-  it('zod: strips unknown fields', () => {
-    const result = CasesFindResponseSchema.safeParse({ ...defaultRequest, foo: 'bar' });
-    expect(result.success).toBe(true);
-    expect(result.data).toStrictEqual(defaultRequest);
-  });
-});
-
-describe('CasePatchRequestRt', () => {
-  const defaultRequest = {
-    id: 'basic-case-id',
-    version: 'WzQ3LDFd',
-    description: 'Updated description',
-    customFields: [
-      {
-        key: 'first_custom_field_key',
-        type: CustomFieldTypes.TEXT,
-        value: 'this is a text field value',
-      },
-      {
-        key: 'second_custom_field_key',
-        type: 'toggle',
-        value: true,
-      },
-      {
-        key: 'third_custom_field_key',
-        type: 'number',
-        value: 123,
-      },
-    ],
-  };
-
-  it('has expected attributes in request', () => {
-    const query = CasePatchRequestRt.decode(defaultRequest);
-
-    expect(query).toStrictEqual({
-      _tag: 'Right',
-      right: defaultRequest,
-    });
-  });
-
-  it('removes foo:bar attributes from request', () => {
-    const query = CasePatchRequestRt.decode({ ...defaultRequest, foo: 'bar' });
-
-    expect(query).toStrictEqual({
-      _tag: 'Right',
-      right: defaultRequest,
-    });
-  });
-
-  it(`throws an error when the assignees are more than ${MAX_ASSIGNEES_PER_CASE}`, async () => {
-    const assignees = Array(MAX_ASSIGNEES_PER_CASE + 1).fill({ uid: 'foobar' });
-
-    expect(
-      PathReporter.report(CasePatchRequestRt.decode({ ...defaultRequest, assignees }))
-    ).toContain('The length of the field assignees is too long. Array must be of length <= 10.');
-  });
-
-  it('does not throw an error with empty assignees', async () => {
-    expect(
-      PathReporter.report(CasePatchRequestRt.decode({ ...defaultRequest, assignees: [] }))
-    ).toContain('No errors!');
-  });
-
-  it('does not throw an error with undefined assignees', async () => {
-    expect(PathReporter.report(CasePatchRequestRt.decode(defaultRequest))).toContain('No errors!');
-  });
-
-  it(`throws an error when the description contains more than ${MAX_DESCRIPTION_LENGTH} characters`, async () => {
-    const description = 'a'.repeat(MAX_DESCRIPTION_LENGTH + 1);
-
-    expect(
-      PathReporter.report(CasePatchRequestRt.decode({ ...defaultRequest, description }))
-    ).toContain('The length of the description is too long. The maximum length is 30000.');
-  });
-
-  it(`throws an error when there are more than ${MAX_TAGS_PER_CASE} tags`, async () => {
-    const tags = Array(MAX_TAGS_PER_CASE + 1).fill('foobar');
-
-    expect(PathReporter.report(CasePatchRequestRt.decode({ ...defaultRequest, tags }))).toContain(
-      'The length of the field tags is too long. Array must be of length <= 200.'
+  it(`rejects category array with ${MAX_CATEGORY_FILTER_LENGTH + 1} items`, () => {
+    const category = Array(MAX_CATEGORY_FILTER_LENGTH + 1).fill('x');
+    expect(parseErrors(CasesFindRequestSchema, { category })).toContain(
+      `The length of the field category is too long. Array must be of length <= ${MAX_CATEGORY_FILTER_LENGTH}.`
     );
   });
 
-  it(`throws an error when the a tag is more than ${MAX_LENGTH_PER_TAG} characters`, async () => {
-    const tag = 'a'.repeat(MAX_LENGTH_PER_TAG + 1);
-
-    expect(
-      PathReporter.report(CasePatchRequestRt.decode({ ...defaultRequest, tags: [tag] }))
-    ).toContain('The length of the tag is too long. The maximum length is 256.');
-  });
-
-  it(`throws an error when the title contains more than ${MAX_TITLE_LENGTH} characters`, async () => {
-    const title = 'a'.repeat(MAX_TITLE_LENGTH + 1);
-
-    expect(PathReporter.report(CasePatchRequestRt.decode({ ...defaultRequest, title }))).toContain(
-      'The length of the title is too long. The maximum length is 160.'
+  it(`rejects tags array with ${MAX_TAGS_FILTER_LENGTH + 1} items`, () => {
+    const tags = Array(MAX_TAGS_FILTER_LENGTH + 1).fill('x');
+    expect(parseErrors(CasesFindRequestSchema, { tags })).toContain(
+      `The length of the field tags is too long. Array must be of length <= ${MAX_TAGS_FILTER_LENGTH}.`
     );
   });
 
-  it(`throws an error when the category contains more than ${MAX_CATEGORY_LENGTH} characters`, async () => {
-    const category = 'a'.repeat(MAX_CATEGORY_LENGTH + 1);
-
-    expect(
-      PathReporter.report(CasePatchRequestRt.decode({ ...defaultRequest, category }))
-    ).toContain('The length of the category is too long. The maximum length is 50.');
-  });
-
-  it(`limits customFields to ${MAX_CUSTOM_FIELDS_PER_CASE}`, () => {
-    const customFields = Array(MAX_CUSTOM_FIELDS_PER_CASE + 1).fill({
-      key: 'first_custom_field_key',
-      type: CustomFieldTypes.TEXT,
-      value: 'this is a text field value',
-    });
-
-    expect(
-      PathReporter.report(
-        CasePatchRequestRt.decode({
-          ...defaultRequest,
-          customFields,
-        })
-      )
-    ).toContain(
-      `The length of the field customFields is too long. Array must be of length <= ${MAX_CUSTOM_FIELDS_PER_CASE}.`
+  it(`rejects assignees array with ${MAX_ASSIGNEES_FILTER_LENGTH + 1} items`, () => {
+    const assignees = Array(MAX_ASSIGNEES_FILTER_LENGTH + 1).fill('x');
+    expect(parseErrors(CasesFindRequestSchema, { assignees })).toContain(
+      `The length of the field assignees is too long. Array must be of length <= ${MAX_ASSIGNEES_FILTER_LENGTH}.`
     );
   });
 
-  it(`throws an error when a text customFields is longer than ${MAX_CUSTOM_FIELD_TEXT_VALUE_LENGTH}`, () => {
-    expect(
-      PathReporter.report(
-        CasePatchRequestRt.decode({
-          ...defaultRequest,
-          customFields: [
-            {
-              key: 'first_custom_field_key',
-              type: CustomFieldTypes.TEXT,
-              value: '#'.repeat(MAX_CUSTOM_FIELD_TEXT_VALUE_LENGTH + 1),
-            },
-          ],
-        })
-      )
-    ).toContain(
-      `The length of the value is too long. The maximum length is ${MAX_CUSTOM_FIELD_TEXT_VALUE_LENGTH}.`
+  it(`rejects reporters array with ${MAX_REPORTERS_FILTER_LENGTH + 1} items`, () => {
+    const reporters = Array(MAX_REPORTERS_FILTER_LENGTH + 1).fill('x');
+    expect(parseErrors(CasesFindRequestSchema, { reporters })).toContain(
+      `The length of the field reporters is too long. Array must be of length <= ${MAX_REPORTERS_FILTER_LENGTH}.`
     );
   });
 
-  it('zod: has expected attributes in request', () => {
-    const result = CasePatchRequestSchema.safeParse(defaultRequest);
-    expect(result.success).toBe(true);
-    expect(result.data).toStrictEqual(defaultRequest);
+  it('rejects an invalid sortField enum value', () => {
+    expect(CasesFindRequestSchema.safeParse({ sortField: 'badField' }).success).toBe(false);
   });
 
-  it('zod: strips unknown fields', () => {
-    const result = CasePatchRequestSchema.safeParse({ ...defaultRequest, foo: 'bar' });
-    expect(result.success).toBe(true);
-    expect(result.data).toStrictEqual(defaultRequest);
+  it('rejects an invalid searchField enum value', () => {
+    expect(CasesFindRequestSchema.safeParse({ searchFields: ['badField'] }).success).toBe(false);
+  });
+
+  it('DeepStrict-wrapped schema rejects unknown top-level fields (route-layer parity)', () => {
+    const result = DeepStrict(CasesFindRequestSchema).safeParse({ rootSearchField: 'bad' });
+    expect(result.success).toBe(false);
   });
 });
 
-describe('CasesPatchRequestRt', () => {
-  const defaultRequest = {
-    cases: [
-      {
-        id: 'basic-case-id',
-        version: 'WzQ3LDFd',
-        description: 'Updated description',
-      },
-    ],
-  };
-
-  it('has expected attributes in request', () => {
-    const query = CasesPatchRequestRt.decode(defaultRequest);
-
-    expect(query).toStrictEqual({
-      _tag: 'Right',
-      right: defaultRequest,
+describe('CasesSearchRequestSchema', () => {
+  it('accepts the documented searchFields enum values', () => {
+    const result = CasesSearchRequestSchema.safeParse({
+      searchFields: ['cases.description', 'cases-comments.comment'],
     });
+    expect(result.success).toBe(true);
   });
 
-  it('removes foo:bar attributes from request', () => {
-    const query = CasesPatchRequestRt.decode({ ...defaultRequest, foo: 'bar' });
-
-    expect(query).toStrictEqual({
-      _tag: 'Right',
-      right: defaultRequest,
-    });
+  it('rejects an unsupported searchFields value', () => {
+    expect(CasesSearchRequestSchema.safeParse({ searchFields: ['cases.unknown'] }).success).toBe(
+      false
+    );
   });
 
-  it(`throws an error when the assignees are more than ${MAX_ASSIGNEES_PER_CASE}`, async () => {
-    const assignees = Array(MAX_ASSIGNEES_PER_CASE + 1).fill({ uid: 'foobar' });
+  it('accepts extendedFieldFilters', () => {
+    const result = CasesSearchRequestSchema.safeParse({
+      extendedFieldFilters: [{ label: 'priority', value: 'high' }],
+    });
+    expect(result.success).toBe(true);
+  });
 
+  it('rejects extendedFieldFilters with missing fields', () => {
     expect(
-      PathReporter.report(
-        CasesPatchRequestRt.decode({
-          cases: [
-            {
-              id: 'basic-case-id',
-              version: 'WzQ3LDFd',
-              assignees,
-            },
-          ],
-        })
-      )
-    ).toContain('The length of the field assignees is too long. Array must be of length <= 10.');
-  });
-
-  it('zod: has expected attributes in request', () => {
-    const result = CasesPatchRequestSchema.safeParse(defaultRequest);
-    expect(result.success).toBe(true);
-    expect(result.data).toStrictEqual(defaultRequest);
-  });
-
-  it('zod: strips unknown fields', () => {
-    const result = CasesPatchRequestSchema.safeParse({ ...defaultRequest, foo: 'bar' });
-    expect(result.success).toBe(true);
-    expect(result.data).toStrictEqual(defaultRequest);
-  });
-});
-
-describe('CasePushRequestParamsRt', () => {
-  const defaultRequest = {
-    case_id: 'basic-case-id',
-    connector_id: 'basic-connector-id',
-  };
-
-  it('has expected attributes in request', () => {
-    const query = CasePushRequestParamsRt.decode(defaultRequest);
-
-    expect(query).toStrictEqual({
-      _tag: 'Right',
-      right: defaultRequest,
-    });
-  });
-
-  it('removes foo:bar attributes from request', () => {
-    const query = CasePushRequestParamsRt.decode({ ...defaultRequest, foo: 'bar' });
-
-    expect(query).toStrictEqual({
-      _tag: 'Right',
-      right: defaultRequest,
-    });
-  });
-
-  it('zod: has expected attributes in request', () => {
-    const result = CasePushRequestParamsSchema.safeParse(defaultRequest);
-    expect(result.success).toBe(true);
-    expect(result.data).toStrictEqual(defaultRequest);
-  });
-
-  it('zod: strips unknown fields', () => {
-    const result = CasePushRequestParamsSchema.safeParse({ ...defaultRequest, foo: 'bar' });
-    expect(result.success).toBe(true);
-    expect(result.data).toStrictEqual(defaultRequest);
-  });
-});
-
-describe('AllReportersFindRequestRt', () => {
-  const defaultRequest = {
-    owner: ['cases', 'security-solution'],
-  };
-
-  it('has expected attributes in request', () => {
-    const query = AllReportersFindRequestRt.decode(defaultRequest);
-
-    expect(query).toStrictEqual({
-      _tag: 'Right',
-      right: defaultRequest,
-    });
-  });
-
-  it('removes foo:bar attributes from request', () => {
-    const query = AllReportersFindRequestRt.decode({ ...defaultRequest, foo: 'bar' });
-
-    expect(query).toStrictEqual({
-      _tag: 'Right',
-      right: defaultRequest,
-    });
-  });
-
-  it('zod: has expected attributes in request', () => {
-    const result = AllReportersFindRequestSchema.safeParse(defaultRequest);
-    expect(result.success).toBe(true);
-    expect(result.data).toStrictEqual(defaultRequest);
-  });
-
-  it('zod: strips unknown fields', () => {
-    const result = AllReportersFindRequestSchema.safeParse({ ...defaultRequest, foo: 'bar' });
-    expect(result.success).toBe(true);
-    expect(result.data).toStrictEqual(defaultRequest);
-  });
-});
-
-describe('CasesBulkGetRequestRt', () => {
-  const defaultRequest = {
-    ids: ['case-1', 'case-2'],
-  };
-
-  it('has expected attributes in request', () => {
-    const query = CasesBulkGetRequestRt.decode(defaultRequest);
-
-    expect(query).toStrictEqual({
-      _tag: 'Right',
-      right: defaultRequest,
-    });
-  });
-
-  it('removes foo:bar attributes from request', () => {
-    const query = CasesBulkGetRequestRt.decode({ ...defaultRequest, foo: 'bar' });
-
-    expect(query).toStrictEqual({
-      _tag: 'Right',
-      right: defaultRequest,
-    });
-  });
-
-  it('zod: has expected attributes in request', () => {
-    const result = CasesBulkGetRequestSchema.safeParse(defaultRequest);
-    expect(result.success).toBe(true);
-    expect(result.data).toStrictEqual(defaultRequest);
-  });
-
-  it('zod: strips unknown fields', () => {
-    const result = CasesBulkGetRequestSchema.safeParse({ ...defaultRequest, foo: 'bar' });
-    expect(result.success).toBe(true);
-    expect(result.data).toStrictEqual(defaultRequest);
-  });
-});
-
-describe('CasesBulkGetResponseRt', () => {
-  const defaultRequest = {
-    cases: [basicCase],
-    errors: [
-      {
-        error: 'error',
-        message: 'error-message',
-        status: 403,
-        caseId: 'basic-case-id',
-      },
-    ],
-  };
-
-  it('has expected attributes in request', () => {
-    const query = CasesBulkGetResponseRt.decode(defaultRequest);
-
-    expect(query).toStrictEqual({
-      _tag: 'Right',
-      right: defaultRequest,
-    });
-  });
-
-  it('removes foo:bar attributes from request', () => {
-    const query = CasesBulkGetResponseRt.decode({ ...defaultRequest, foo: 'bar' });
-
-    expect(query).toStrictEqual({
-      _tag: 'Right',
-      right: defaultRequest,
-    });
-  });
-
-  it('removes foo:bar attributes from cases', () => {
-    const query = CasesBulkGetResponseRt.decode({
-      ...defaultRequest,
-      cases: [{ ...defaultRequest.cases[0], foo: 'bar' }],
-    });
-
-    expect(query).toStrictEqual({
-      _tag: 'Right',
-      right: { ...defaultRequest, cases: defaultRequest.cases },
-    });
-  });
-
-  it('removes foo:bar attributes from errors', () => {
-    const query = CasesBulkGetResponseRt.decode({
-      ...defaultRequest,
-      errors: [{ ...defaultRequest.errors[0], foo: 'bar' }],
-    });
-
-    expect(query).toStrictEqual({
-      _tag: 'Right',
-      right: defaultRequest,
-    });
-  });
-
-  it('zod: has expected attributes in request', () => {
-    const result = CasesBulkGetResponseSchema.safeParse(defaultRequest);
-    expect(result.success).toBe(true);
-    expect(result.data).toStrictEqual(defaultRequest);
-  });
-
-  it('zod: strips unknown fields', () => {
-    const result = CasesBulkGetResponseSchema.safeParse({ ...defaultRequest, foo: 'bar' });
-    expect(result.success).toBe(true);
-    expect(result.data).toStrictEqual(defaultRequest);
+      CasesSearchRequestSchema.safeParse({ extendedFieldFilters: [{ label: 'priority' }] }).success
+    ).toBe(false);
   });
 });

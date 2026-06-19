@@ -127,7 +127,7 @@ describe('UserActionPersister', () => {
         unset(req, 'userAction.payload.connector.fields');
 
         await expect(persister.createUserAction(req)).rejects.toThrow(
-          'Invalid value "undefined" supplied to "payload,connector,fields"'
+          'payload.connector.fields: Invalid input'
         );
       });
 
@@ -174,7 +174,7 @@ describe('UserActionPersister', () => {
           persister.bulkCreateUserAction({
             userActions: [req],
           })
-        ).rejects.toThrow('Invalid value "undefined" supplied to "owner"');
+        ).rejects.toThrow('owner: Invalid input');
       });
 
       it('strips out excess attributes', async () => {
@@ -219,7 +219,7 @@ describe('UserActionPersister', () => {
         unset(req, 'attachments[0].owner');
 
         await expect(persister.bulkCreateAttachmentCreation(req)).rejects.toThrow(
-          'Invalid value "undefined" supplied to "owner"'
+          'owner: Invalid input'
         );
       });
 

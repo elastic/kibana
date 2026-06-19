@@ -5,44 +5,36 @@
  * 2.0.
  */
 
-import { isLeft } from 'fp-ts/Either';
-import * as rt from 'io-ts';
-import { CaseSeverityRt, CaseStatusRt } from '../../../common/types/domain';
+import { z } from '@kbn/zod/v4';
+import { CaseSeveritySchema, CaseStatusSchema } from '../../../common/types/domain';
 
-export const AllCasesURLQueryParamsRt = rt.exact(
-  rt.partial({
-    search: rt.string,
-    severity: rt.array(CaseSeverityRt),
-    status: rt.array(CaseStatusRt),
-    tags: rt.array(rt.string),
-    category: rt.array(rt.string),
-    assignees: rt.array(rt.union([rt.string, rt.null])),
-    customFields: rt.record(rt.string, rt.array(rt.string)),
-    from: rt.string,
-    to: rt.string,
-    sortOrder: rt.union([rt.literal('asc'), rt.literal('desc')]),
-    sortField: rt.union([
-      rt.literal('closedAt'),
-      rt.literal('createdAt'),
-      rt.literal('updatedAt'),
-      rt.literal('severity'),
-      rt.literal('status'),
-      rt.literal('title'),
-      rt.literal('category'),
+export const AllCasesURLQueryParamsSchema = z
+  .object({
+    search: z.string(),
+    severity: z.array(CaseSeveritySchema),
+    status: z.array(CaseStatusSchema),
+    tags: z.array(z.string()),
+    category: z.array(z.string()),
+    assignees: z.array(z.union([z.string(), z.null()])),
+    customFields: z.record(z.string(), z.array(z.string())),
+    from: z.string(),
+    to: z.string(),
+    sortOrder: z.union([z.literal('asc'), z.literal('desc')]),
+    sortField: z.union([
+      z.literal('closedAt'),
+      z.literal('createdAt'),
+      z.literal('updatedAt'),
+      z.literal('severity'),
+      z.literal('status'),
+      z.literal('title'),
+      z.literal('category'),
     ]),
-    page: rt.number,
-    perPage: rt.number,
+    page: z.number(),
+    perPage: z.number(),
   })
-);
+  .partial();
 
-export const validateSchema = <T extends rt.Mixed>(
-  obj: unknown,
-  schema: T
-): rt.TypeOf<T> | null => {
-  const decoded = schema.decode(obj);
-  if (isLeft(decoded)) {
-    return null;
-  } else {
-    return decoded.right;
-  }
+export const validateSchema = <T>(obj: unknown, schema: z.ZodType<T>): T | null => {
+  const result = schema.safeParse(obj);
+  return result.success ? result.data : null;
 };

@@ -234,7 +234,7 @@ describe('client', () => {
       await expect(
         // @ts-expect-error: excess attribute
         get({ owner: 'cases', foo: 'bar' }, clientArgs, casesClientInternal)
-      ).rejects.toThrow('invalid keys "foo"');
+      ).rejects.toThrow('Excess keys are not allowed');
     });
   });
 
@@ -243,7 +243,7 @@ describe('client', () => {
       await expect(
         // @ts-expect-error: excess attribute
         update('test-id', { version: 'test-version', foo: 'bar' }, clientArgs, casesClientInternal)
-      ).rejects.toThrow('invalid keys "foo"');
+      ).rejects.toThrow('Excess keys are not allowed');
     });
 
     it(`throws when trying to update more than ${MAX_CUSTOM_FIELDS_PER_CASE} custom fields`, async () => {
@@ -263,7 +263,7 @@ describe('client', () => {
           casesClientInternal
         )
       ).rejects.toThrow(
-        `Failed to get patch configure in route: Error: The length of the field customFields is too long. Array must be of length <= ${MAX_CUSTOM_FIELDS_PER_CASE}.`
+        `Failed to get patch configure in route: Error: customFields: The length of the field customFields is too long. Array must be of length <= ${MAX_CUSTOM_FIELDS_PER_CASE}.`
       );
     });
 
@@ -506,7 +506,7 @@ describe('client', () => {
             casesClientInternal
           )
         ).rejects.toThrow(
-          `Failed to get patch configure in route: Error: The length of the field templates is too long. Array must be of length <= ${MAX_TEMPLATES_LENGTH}.`
+          `Failed to get patch configure in route: Error: templates: The length of the field templates is too long. Array must be of length <= ${MAX_TEMPLATES_LENGTH}.`
         );
       });
 
@@ -1242,7 +1242,7 @@ describe('client', () => {
           casesClientInternal
         )
       ).rejects.toThrow(
-        `Failed to create case configuration: Error: The length of the field customFields is too long. Array must be of length <= ${MAX_CUSTOM_FIELDS_PER_CASE}.`
+        `Failed to create case configuration: Error: customFields: The length of the field customFields is too long. Array must be of length <= ${MAX_CUSTOM_FIELDS_PER_CASE}.`
       );
     });
 
@@ -1291,7 +1291,7 @@ describe('client', () => {
             casesClientInternal
           )
         ).rejects.toThrow(
-          `Failed to create case configuration: Error: The length of the field templates is too long. Array must be of length <= ${MAX_TEMPLATES_LENGTH}.`
+          `Failed to create case configuration: Error: templates: The length of the field templates is too long. Array must be of length <= ${MAX_TEMPLATES_LENGTH}.`
         );
       });
 

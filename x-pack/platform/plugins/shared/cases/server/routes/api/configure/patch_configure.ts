@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { CaseConfigureRequestParamsRt } from '../../../../common/types/api';
-import { decodeWithExcessOrThrow } from '../../../common/runtime_types';
+import { CaseConfigureRequestParamsSchema } from '../../../../common/types/api';
+import { decodeWithExcessOrThrowZod } from '../../../common/runtime_types';
 import { CASE_CONFIGURE_DETAILS_URL } from '../../../../common/constants';
 import { createCaseError } from '../../../common/error';
 import { createCasesRoute } from '../create_cases_route';
@@ -27,7 +27,7 @@ export const patchCaseConfigureRoute = createCasesRoute({
   },
   handler: async ({ context, request, response }) => {
     try {
-      const params = decodeWithExcessOrThrow(CaseConfigureRequestParamsRt)(request.params);
+      const params = decodeWithExcessOrThrowZod(CaseConfigureRequestParamsSchema)(request.params);
 
       const caseContext = await context.cases;
       const client = await caseContext.getCasesClient();

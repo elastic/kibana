@@ -29,11 +29,11 @@ import type {
 } from '../../common/types/domain';
 import {
   AttachmentType,
-  ExternalReferenceSOAttachmentPayloadRt,
-  FileAttachmentMetadataRt,
   CaseSeverity,
   CaseStatuses,
   ConnectorTypes,
+  ExternalReferenceSOAttachmentPayloadSchema,
+  FileAttachmentMetadataSchema,
 } from '../../common/types/domain';
 import { isValidOwner } from '../../common/utils/owner';
 import {
@@ -311,9 +311,10 @@ export const isPersistableStateOrExternalReference = (context: AttachmentRequest
 export const isFileAttachmentRequest = (
   context: Partial<AttachmentRequest>
 ): context is FileAttachmentRequest => {
+  const parsed = ExternalReferenceSOAttachmentPayloadSchema.safeParse(context);
   return (
-    ExternalReferenceSOAttachmentPayloadRt.is(context) &&
-    FileAttachmentMetadataRt.is(context.externalReferenceMetadata)
+    parsed.success &&
+    FileAttachmentMetadataSchema.safeParse(parsed.data.externalReferenceMetadata).success
   );
 };
 

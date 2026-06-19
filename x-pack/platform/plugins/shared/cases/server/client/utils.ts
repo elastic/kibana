@@ -30,19 +30,19 @@ import type {
   CustomFieldTypes,
 } from '../../common/types/domain';
 import {
-  ActionsAttachmentPayloadRt,
-  AlertAttachmentPayloadRt,
-  EventAttachmentPayloadRt,
-  ExternalReferenceNoSOAttachmentPayloadRt,
-  ExternalReferenceSOAttachmentPayloadRt,
   ExternalReferenceStorageType,
-  PersistableStateAttachmentPayloadRt,
-  UserCommentAttachmentPayloadRt,
+  ActionsAttachmentPayloadSchema,
+  AlertAttachmentPayloadSchema,
+  EventAttachmentPayloadSchema,
+  ExternalReferenceNoSOAttachmentPayloadSchema,
+  ExternalReferenceSOAttachmentPayloadSchema,
+  PersistableStateAttachmentPayloadSchema,
+  UserCommentAttachmentPayloadSchema,
 } from '../../common/types/domain';
 import type { SavedObjectFindOptionsKueryNode } from '../common/types';
 import type { CasesSearchParams } from './types';
 
-import { decodeWithExcessOrThrow } from '../common/runtime_types';
+import { decodeWithExcessOrThrowZod } from '../common/runtime_types';
 import {
   CASE_SAVED_OBJECT,
   FILE_ATTACHMENT_TYPE,
@@ -85,11 +85,11 @@ export const decodeCommentRequest = (
   externalRefRegistry: ExternalReferenceAttachmentTypeRegistry
 ) => {
   if (isLegacyCommentAttachment(comment)) {
-    decodeWithExcessOrThrow(UserCommentAttachmentPayloadRt)(comment);
+    decodeWithExcessOrThrowZod(UserCommentAttachmentPayloadSchema)(comment);
   } else if (isCommentRequestTypeActions(comment)) {
-    decodeWithExcessOrThrow(ActionsAttachmentPayloadRt)(comment);
+    decodeWithExcessOrThrowZod(ActionsAttachmentPayloadSchema)(comment);
   } else if (isCommentRequestTypeAlert(comment)) {
-    decodeWithExcessOrThrow(AlertAttachmentPayloadRt)(comment);
+    decodeWithExcessOrThrowZod(AlertAttachmentPayloadSchema)(comment);
 
     const { ids, indices } = getIDsAndIndicesAsArrays(comment);
 
@@ -134,11 +134,11 @@ export const decodeCommentRequest = (
       );
     }
   } else if (isCommentRequestTypeEvent(comment)) {
-    decodeWithExcessOrThrow(EventAttachmentPayloadRt)(comment);
+    decodeWithExcessOrThrowZod(EventAttachmentPayloadSchema)(comment);
   } else if (isCommentRequestTypeExternalReference(comment)) {
     decodeExternalReferenceAttachment(comment, externalRefRegistry);
   } else if (isCommentRequestTypePersistableState(comment)) {
-    decodeWithExcessOrThrow(PersistableStateAttachmentPayloadRt)(comment);
+    decodeWithExcessOrThrowZod(PersistableStateAttachmentPayloadSchema)(comment);
   } else {
     /**
      * This assertion ensures that TS will show an error
@@ -154,9 +154,9 @@ const decodeExternalReferenceAttachment = (
   externalRefRegistry: ExternalReferenceAttachmentTypeRegistry
 ) => {
   if (attachment.externalReferenceStorage.type === ExternalReferenceStorageType.savedObject) {
-    decodeWithExcessOrThrow(ExternalReferenceSOAttachmentPayloadRt)(attachment);
+    decodeWithExcessOrThrowZod(ExternalReferenceSOAttachmentPayloadSchema)(attachment);
   } else {
-    decodeWithExcessOrThrow(ExternalReferenceNoSOAttachmentPayloadRt)(attachment);
+    decodeWithExcessOrThrowZod(ExternalReferenceNoSOAttachmentPayloadSchema)(attachment);
   }
 
   const metadata = attachment.externalReferenceMetadata;

@@ -7,17 +7,18 @@
 
 import { z } from '@kbn/zod/v4';
 import { LENS_ATTACHMENT_TYPE } from '../../../../constants/attachments';
+import { MAX_TITLE_LENGTH } from '../../../../constants';
 
 /** `state` shape is owned by the lens plugin; kept permissive to round-trip what lens persists. */
 export const LensAttachmentDataSchema = z.object({
-  state: z.record(z.string(), z.unknown()),
+  state: z.record(z.string().max(MAX_TITLE_LENGTH), z.unknown()),
 });
 export type LensAttachmentData = z.infer<typeof LensAttachmentDataSchema>;
 
 export const LensAttachmentPayloadSchema = z
   .object({
     type: z.literal(LENS_ATTACHMENT_TYPE),
-    owner: z.string(),
+    owner: z.string().max(MAX_TITLE_LENGTH),
     data: LensAttachmentDataSchema,
   })
   .strict();

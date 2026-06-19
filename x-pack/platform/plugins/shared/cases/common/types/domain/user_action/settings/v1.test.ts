@@ -6,61 +6,52 @@
  */
 
 import { UserActionTypes } from '../action/v1';
-import { SettingsUserActionPayloadRt, SettingsUserActionRt } from './v1';
+import { SettingsUserActionPayloadSchema, SettingsUserActionSchema } from './v1';
 
 describe('Settings', () => {
-  describe('SettingsUserActionPayloadRt', () => {
+  describe('SettingsUserActionPayloadSchema', () => {
     const defaultRequest = {
       settings: { syncAlerts: true, extractObservables: true },
     };
 
     it('has expected attributes in request', () => {
-      const query = SettingsUserActionPayloadRt.decode(defaultRequest);
-
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: defaultRequest,
-      });
+      const result = SettingsUserActionPayloadSchema.safeParse(defaultRequest);
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual(defaultRequest);
     });
 
     it('has expected attributes in request with only syncAlerts', () => {
-      const query = SettingsUserActionPayloadRt.decode({
+      const result = SettingsUserActionPayloadSchema.safeParse({
         settings: { syncAlerts: true },
       });
 
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: { settings: { syncAlerts: true } },
-      });
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual({ settings: { syncAlerts: true } });
     });
 
     it('has expected attributes in request with only extractObservables', () => {
-      const query = SettingsUserActionPayloadRt.decode({
+      const result = SettingsUserActionPayloadSchema.safeParse({
         settings: { extractObservables: true },
       });
 
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: { settings: { extractObservables: true } },
-      });
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual({ settings: { extractObservables: true } });
     });
 
-    it('removes foo:bar attributes from request', () => {
-      const query = SettingsUserActionPayloadRt.decode({
+    it('strips unknown fields', () => {
+      const result = SettingsUserActionPayloadSchema.safeParse({
         settings: { syncAlerts: false, extractObservables: false },
         foo: 'bar',
       });
 
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: {
-          settings: { syncAlerts: false, extractObservables: false },
-        },
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual({
+        settings: { syncAlerts: false, extractObservables: false },
       });
     });
   });
 
-  describe('SettingsUserActionRt', () => {
+  describe('SettingsUserActionSchema', () => {
     const defaultRequest = {
       type: UserActionTypes.settings,
       payload: {
@@ -69,63 +60,51 @@ describe('Settings', () => {
     };
 
     it('has expected attributes in request', () => {
-      const query = SettingsUserActionRt.decode(defaultRequest);
-
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: defaultRequest,
-      });
+      const result = SettingsUserActionSchema.safeParse(defaultRequest);
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual(defaultRequest);
     });
 
     it('has expected attributes in request with only syncAlerts', () => {
-      const query = SettingsUserActionRt.decode({
+      const result = SettingsUserActionSchema.safeParse({
         ...defaultRequest,
         payload: { ...defaultRequest.payload, settings: { syncAlerts: true } },
       });
 
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: {
-          ...defaultRequest,
-          payload: { ...defaultRequest.payload, settings: { syncAlerts: true } },
-        },
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual({
+        ...defaultRequest,
+        payload: { ...defaultRequest.payload, settings: { syncAlerts: true } },
       });
     });
 
     it('has expected attributes in request with only extractObservables', () => {
-      const query = SettingsUserActionRt.decode({
+      const result = SettingsUserActionSchema.safeParse({
         ...defaultRequest,
         payload: { ...defaultRequest.payload, settings: { extractObservables: true } },
       });
 
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: {
-          ...defaultRequest,
-          payload: { ...defaultRequest.payload, settings: { extractObservables: true } },
-        },
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual({
+        ...defaultRequest,
+        payload: { ...defaultRequest.payload, settings: { extractObservables: true } },
       });
     });
 
-    it('removes foo:bar attributes from request', () => {
-      const query = SettingsUserActionRt.decode({ ...defaultRequest, foo: 'bar' });
-
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: defaultRequest,
-      });
+    it('strips unknown fields', () => {
+      const result = SettingsUserActionSchema.safeParse({ ...defaultRequest, foo: 'bar' });
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual(defaultRequest);
     });
 
-    it('removes foo:bar attributes from payload', () => {
-      const query = SettingsUserActionRt.decode({
+    it('strips unknown fields from payload', () => {
+      const result = SettingsUserActionSchema.safeParse({
         ...defaultRequest,
         payload: { ...defaultRequest.payload, foo: 'bar' },
       });
 
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: defaultRequest,
-      });
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual(defaultRequest);
     });
   });
 });

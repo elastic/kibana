@@ -5,20 +5,19 @@
  * 2.0.
  */
 
-import * as rt from 'io-ts';
+import { z } from '@kbn/zod/v4';
 import { UserActionTypes } from '../action/v1';
 
-export const TemplateUserActionPayloadRt = rt.strict({
-  template: rt.union([
-    rt.strict({
-      id: rt.string,
-      version: rt.number,
-    }),
-    rt.null,
-  ]),
+export const TemplateUserActionPayloadSchema = z.object({
+  template: z
+    .object({
+      id: z.string(),
+      version: z.number(),
+    })
+    .nullable(),
 });
 
-export const TemplateUserActionRt = rt.strict({
-  type: rt.literal(UserActionTypes.template),
-  payload: TemplateUserActionPayloadRt,
+export const TemplateUserActionSchema = z.object({
+  type: z.literal(UserActionTypes.template),
+  payload: TemplateUserActionPayloadSchema,
 });

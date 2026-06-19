@@ -5,10 +5,6 @@
  * 2.0.
  */
 
-import { fold } from 'fp-ts/Either';
-import { identity } from 'fp-ts/function';
-import { pipe } from 'fp-ts/pipeable';
-
 import type {
   CasesFindResponse,
   CasesBulkGetResponse,
@@ -16,30 +12,23 @@ import type {
   CasesSimilarResponse,
 } from '../../common/types/api';
 import {
-  CasesFindResponseRt,
-  CasesBulkGetResponseRt,
-  CasesMetricsResponseRt,
-  CasesSimilarResponseRt,
+  CasesFindResponseSchema,
+  CasesBulkGetResponseSchema,
+  CasesMetricsResponseSchema,
+  CasesSimilarResponseSchema,
 } from '../../common/types/api';
-import { createToasterPlainError } from '../containers/utils';
-import { throwErrors } from '../../common';
+import { decodeWithToasterError } from '../containers/utils';
 
 export const decodeCasesFindResponse = (respCases?: CasesFindResponse) =>
-  pipe(CasesFindResponseRt.decode(respCases), fold(throwErrors(createToasterPlainError), identity));
+  decodeWithToasterError(CasesFindResponseSchema, respCases);
+
 export const decodeCasesMetricsResponse = (metrics?: CasesMetricsResponse) =>
-  pipe(
-    CasesMetricsResponseRt.decode(metrics),
-    fold(throwErrors(createToasterPlainError), identity)
-  );
+  decodeWithToasterError(CasesMetricsResponseSchema, metrics);
 
 export const decodeCasesBulkGetResponse = (res: CasesBulkGetResponse) => {
-  pipe(CasesBulkGetResponseRt.decode(res), fold(throwErrors(createToasterPlainError), identity));
-
+  decodeWithToasterError(CasesBulkGetResponseSchema, res);
   return res;
 };
 
 export const decodeCasesSimilarResponse = (respCases?: CasesSimilarResponse) =>
-  pipe(
-    CasesSimilarResponseRt.decode(respCases),
-    fold(throwErrors(createToasterPlainError), identity)
-  );
+  decodeWithToasterError(CasesSimilarResponseSchema, respCases);

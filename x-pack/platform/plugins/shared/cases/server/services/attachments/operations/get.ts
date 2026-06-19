@@ -14,13 +14,13 @@ import {
   UNIFIED_ALERT_TYPES_ARRAY,
 } from '../../../../common/utils/attachments';
 import { isSOError } from '../../../common/error';
-import { decodeOrThrow } from '../../../common/runtime_types';
+import { decodeOrThrowZod } from '../../../common/runtime_types';
 import type {
   AttachmentPersistedAttributes,
   AttachmentTransformedAttributes,
   AttachmentSavedObjectTransformed,
 } from '../../../common/types/attachments_v1';
-import { AttachmentTransformedAttributesRt } from '../../../common/types/attachments_v1';
+import { AttachmentTransformedAttributesSchema } from '../../../common/types/attachments_v1';
 import {
   CASE_ATTACHMENT_SAVED_OBJECT,
   CASE_COMMENT_SAVED_OBJECT,
@@ -38,7 +38,8 @@ import type {
   AttachmentTotals,
   DocumentAttachmentAttributesV2,
 } from '../../../../common/types/domain';
-import { AttachmentType, DocumentAttachmentAttributesRtV2 } from '../../../../common/types/domain';
+import { AttachmentType } from '../../../../common/types/domain';
+import { DocumentAttachmentAttributesSchemaV2 } from '../../../../common/types/domain/attachment/v2';
 import type {
   AlertIdsAggsResult,
   BulkOptionalAttributes,
@@ -146,7 +147,7 @@ export class AttachmentGetter {
           ...injectedSo,
           attributes: transformed.attributes,
         } as SavedObject<AttachmentPersistedAttributes>;
-        const validatedAttributes = decodeOrThrow(AttachmentTransformedAttributesRt)(
+        const validatedAttributes = decodeOrThrowZod(AttachmentTransformedAttributesSchema)(
           legacySo.attributes
         );
         validatedAttachments.push(Object.assign(legacySo, { attributes: validatedAttributes }));
@@ -195,7 +196,7 @@ export class AttachmentGetter {
             ...injectedSo,
             attributes: legacyTransformed.attributes,
           } as SavedObject<AttachmentPersistedAttributes>;
-          const validatedAttributes = decodeOrThrow(AttachmentTransformedAttributesRt)(
+          const validatedAttributes = decodeOrThrowZod(AttachmentTransformedAttributesSchema)(
             legacySo.attributes
           );
 
@@ -314,7 +315,9 @@ export class AttachmentGetter {
     response: SavedObjectsFindResponse<AttachmentAttributesV2>
   ): Array<SavedObject<DocumentAttachmentAttributesV2>> {
     return response.saved_objects.map((so) => {
-      const validatedAttributes = decodeOrThrow(DocumentAttachmentAttributesRtV2)(so.attributes);
+      const validatedAttributes = decodeOrThrowZod(DocumentAttachmentAttributesSchemaV2)(
+        so.attributes
+      );
 
       return Object.assign(so, { attributes: validatedAttributes });
     });
@@ -508,7 +511,7 @@ export class AttachmentGetter {
         return Object.assign(injectedRes, { attributes: transformed.attributes });
       }
 
-      const validatedAttributes = decodeOrThrow(AttachmentTransformedAttributesRt)(
+      const validatedAttributes = decodeOrThrowZod(AttachmentTransformedAttributesSchema)(
         transformed.attributes
       );
 
@@ -828,7 +831,7 @@ export class AttachmentGetter {
         }) as AttachmentSavedObjectTransformedV2;
       }
 
-      const validatedAttributes = decodeOrThrow(AttachmentTransformedAttributesRt)(
+      const validatedAttributes = decodeOrThrowZod(AttachmentTransformedAttributesSchema)(
         transformed.attributes
       );
 

@@ -5,46 +5,15 @@
  * 2.0.
  */
 
-import * as rt from 'io-ts';
-import { limitedStringSchema, mimeTypeString } from '../../../schema';
-import { jsonValueRt } from '../../../api';
-import { UserRt } from '../user/v1';
-import { MAX_FILENAME_LENGTH } from '../../../constants';
-
-/**
- * Files
- */
-export const SingleFileAttachmentMetadataRt = rt.strict({
-  name: rt.string,
-  extension: rt.string,
-  mimeType: rt.string,
-  created: rt.string,
-});
-
-export const FileAttachmentMetadataRt = rt.strict({
-  files: rt.array(SingleFileAttachmentMetadataRt),
-});
-
-export type FileAttachmentMetadata = rt.TypeOf<typeof FileAttachmentMetadataRt>;
-
-export const AttachmentAttributesBasicRt = rt.strict({
-  created_at: rt.string,
-  created_by: UserRt,
-  owner: rt.string,
-  pushed_at: rt.union([rt.string, rt.null]),
-  pushed_by: rt.union([UserRt, rt.null]),
-  updated_at: rt.union([rt.string, rt.null]),
-  updated_by: rt.union([UserRt, rt.null]),
-});
-
-export const FileAttachmentMetadataPayloadRt = rt.strict({
-  mimeType: mimeTypeString,
-  filename: limitedStringSchema({ fieldName: 'filename', min: 1, max: MAX_FILENAME_LENGTH }),
-});
-
-/**
- * User comment
- */
+import { z } from '@kbn/zod/v4';
+import { limitedStringSchema, mimeTypeString, jsonValueSchema } from '../../../schema';
+import { UserSchema } from '../user/v1';
+import {
+  MAX_COMMENT_LENGTH,
+  MAX_FILENAME_LENGTH,
+  MAX_RULE_NAME_LENGTH,
+  MAX_TITLE_LENGTH,
+} from '../../../constants';
 
 export enum AttachmentType {
   actions = 'actions',
@@ -55,322 +24,314 @@ export enum AttachmentType {
   user = 'user',
 }
 
-export const UserCommentAttachmentPayloadRt = rt.strict({
-  comment: rt.string,
-  type: rt.literal(AttachmentType.user),
-  owner: rt.string,
-});
-
-const UserCommentAttachmentAttributesRt = rt.intersection([
-  UserCommentAttachmentPayloadRt,
-  AttachmentAttributesBasicRt,
-]);
-
-export const UserCommentAttachmentRt = rt.intersection([
-  UserCommentAttachmentAttributesRt,
-  rt.strict({
-    id: rt.string,
-    version: rt.string,
-  }),
-]);
-
-export type UserCommentAttachmentPayload = rt.TypeOf<typeof UserCommentAttachmentPayloadRt>;
-export type UserCommentAttachmentAttributes = rt.TypeOf<typeof UserCommentAttachmentAttributesRt>;
-export type UserCommentAttachment = rt.TypeOf<typeof UserCommentAttachmentRt>;
-
-/**
- * Generic event
- */
-
-export const EventAttachmentPayloadRt = rt.strict({
-  type: rt.literal(AttachmentType.event),
-  eventId: rt.union([rt.array(rt.string), rt.string]),
-  index: rt.union([rt.array(rt.string), rt.string]),
-  owner: rt.string,
-});
-
-/**
- * Alerts
- */
-
-export const AlertAttachmentPayloadRt = rt.strict({
-  type: rt.literal(AttachmentType.alert),
-  alertId: rt.union([rt.array(rt.string), rt.string]),
-  index: rt.union([rt.array(rt.string), rt.string]),
-  rule: rt.strict({
-    id: rt.union([rt.string, rt.null]),
-    name: rt.union([rt.string, rt.null]),
-  }),
-  owner: rt.string,
-});
-
-export const AlertAttachmentAttributesRt = rt.intersection([
-  AlertAttachmentPayloadRt,
-  AttachmentAttributesBasicRt,
-]);
-
-export const EventAttachmentAttributesRt = rt.intersection([
-  EventAttachmentPayloadRt,
-  AttachmentAttributesBasicRt,
-]);
-
-export const AlertAttachmentRt = rt.intersection([
-  AlertAttachmentAttributesRt,
-  rt.strict({
-    id: rt.string,
-    version: rt.string,
-  }),
-]);
-
-export const EventAttachmentRt = rt.intersection([
-  EventAttachmentAttributesRt,
-  rt.strict({
-    id: rt.string,
-    version: rt.string,
-  }),
-]);
-
-export type AlertAttachmentPayload = rt.TypeOf<typeof AlertAttachmentPayloadRt>;
-export type AlertAttachmentAttributes = rt.TypeOf<typeof AlertAttachmentAttributesRt>;
-export type AlertAttachment = rt.TypeOf<typeof AlertAttachmentRt>;
-
-export type EventAttachmentPayload = rt.TypeOf<typeof EventAttachmentPayloadRt>;
-export type EventAttachmentAttributes = rt.TypeOf<typeof EventAttachmentAttributesRt>;
-export type EventAttachment = rt.TypeOf<typeof EventAttachmentRt>;
-
-export const DocumentAttachmentAttributesRt = rt.union([
-  AlertAttachmentAttributesRt,
-  EventAttachmentAttributesRt,
-]);
-export type DocumentAttachmentAttributes = rt.TypeOf<typeof DocumentAttachmentAttributesRt>;
-
-/**
- * Actions
- */
-
-export const ActionsAttachmentPayloadRt = rt.strict({
-  type: rt.literal(AttachmentType.actions),
-  comment: rt.string,
-  actions: rt.strict({
-    targets: rt.array(
-      rt.strict({
-        hostname: rt.string,
-        endpointId: rt.string,
-      })
-    ),
-    type: rt.string,
-  }),
-  owner: rt.string,
-});
-
-const ActionsAttachmentAttributesRt = rt.intersection([
-  ActionsAttachmentPayloadRt,
-  AttachmentAttributesBasicRt,
-]);
-
-export const ActionsAttachmentRt = rt.intersection([
-  ActionsAttachmentAttributesRt,
-  rt.strict({
-    id: rt.string,
-    version: rt.string,
-  }),
-]);
-
-export type ActionsAttachmentPayload = rt.TypeOf<typeof ActionsAttachmentPayloadRt>;
-export type ActionsAttachmentAttributes = rt.TypeOf<typeof ActionsAttachmentAttributesRt>;
-export type ActionsAttachment = rt.TypeOf<typeof ActionsAttachmentRt>;
-
-/**
- * External reference
- */
-
 export enum ExternalReferenceStorageType {
   savedObject = 'savedObject',
   elasticSearchDoc = 'elasticSearchDoc',
 }
 
-const ExternalReferenceStorageNoSORt = rt.strict({
-  type: rt.literal(ExternalReferenceStorageType.elasticSearchDoc),
+/**
+ * Files
+ */
+export const SingleFileAttachmentMetadataSchema = z.object({
+  name: z.string().max(MAX_FILENAME_LENGTH),
+  extension: z.string().max(10),
+  mimeType: z.string().max(100),
+  created: z.string().max(30),
 });
 
-const ExternalReferenceStorageSORt = rt.strict({
-  type: rt.literal(ExternalReferenceStorageType.savedObject),
-  soType: rt.string,
+export const FileAttachmentMetadataSchema = z.object({
+  files: z.array(SingleFileAttachmentMetadataSchema),
 });
 
-const ExternalReferenceBaseAttachmentPayloadRt = rt.strict({
-  externalReferenceAttachmentTypeId: rt.string,
-  externalReferenceMetadata: rt.union([rt.null, rt.record(rt.string, jsonValueRt)]),
-  type: rt.literal(AttachmentType.externalReference),
-  owner: rt.string,
+export type FileAttachmentMetadata = z.infer<typeof FileAttachmentMetadataSchema>;
+
+export const AttachmentAttributesBasicSchema = z.object({
+  created_at: z.string().max(30),
+  created_by: UserSchema,
+  owner: z.string().max(MAX_TITLE_LENGTH),
+  pushed_at: z.string().max(30).nullable(),
+  pushed_by: UserSchema.nullable(),
+  updated_at: z.string().max(30).nullable(),
+  updated_by: UserSchema.nullable(),
 });
 
-export const ExternalReferenceNoSOAttachmentPayloadRt = rt.strict({
-  ...ExternalReferenceBaseAttachmentPayloadRt.type.props,
-  externalReferenceId: rt.string,
-  externalReferenceStorage: ExternalReferenceStorageNoSORt,
+export const FileAttachmentMetadataPayloadSchema = z.object({
+  mimeType: mimeTypeString,
+  filename: limitedStringSchema({ fieldName: 'filename', min: 1, max: MAX_FILENAME_LENGTH }),
 });
 
-export const ExternalReferenceSOAttachmentPayloadRt = rt.strict({
-  ...ExternalReferenceBaseAttachmentPayloadRt.type.props,
-  externalReferenceId: rt.string,
-  externalReferenceStorage: ExternalReferenceStorageSORt,
+/**
+ * User comment
+ */
+export const UserCommentAttachmentPayloadSchema = z.object({
+  comment: z.string().max(MAX_COMMENT_LENGTH),
+  type: z.literal(AttachmentType.user),
+  owner: z.string().max(MAX_TITLE_LENGTH),
 });
 
-// externalReferenceId is missing.
-export const ExternalReferenceSOWithoutRefsAttachmentPayloadRt = rt.strict({
-  ...ExternalReferenceBaseAttachmentPayloadRt.type.props,
-  externalReferenceStorage: ExternalReferenceStorageSORt,
+const UserCommentAttachmentAttributesSchema = UserCommentAttachmentPayloadSchema.merge(
+  AttachmentAttributesBasicSchema
+);
+
+export const UserCommentAttachmentSchema = UserCommentAttachmentAttributesSchema.extend({
+  id: z.string().max(512),
+  version: z.string().max(512),
 });
 
-export const ExternalReferenceAttachmentPayloadRt = rt.union([
-  ExternalReferenceNoSOAttachmentPayloadRt,
-  ExternalReferenceSOAttachmentPayloadRt,
-]);
+export type UserCommentAttachmentPayload = z.infer<typeof UserCommentAttachmentPayloadSchema>;
+export type UserCommentAttachmentAttributes = z.infer<typeof UserCommentAttachmentAttributesSchema>;
+export type UserCommentAttachment = z.infer<typeof UserCommentAttachmentSchema>;
 
-export const ExternalReferenceWithoutRefsAttachmentPayloadRt = rt.union([
-  ExternalReferenceNoSOAttachmentPayloadRt,
-  ExternalReferenceSOWithoutRefsAttachmentPayloadRt,
-]);
+/**
+ * Generic event
+ */
+export const EventAttachmentPayloadSchema = z.object({
+  type: z.literal(AttachmentType.event),
+  eventId: z.union([z.array(z.string().max(MAX_TITLE_LENGTH)), z.string().max(MAX_TITLE_LENGTH)]),
+  index: z.union([z.array(z.string().max(MAX_TITLE_LENGTH)), z.string().max(MAX_TITLE_LENGTH)]),
+  owner: z.string().max(MAX_TITLE_LENGTH),
+});
 
-const ExternalReferenceAttachmentAttributesRt = rt.intersection([
-  ExternalReferenceAttachmentPayloadRt,
-  AttachmentAttributesBasicRt,
-]);
-
-const ExternalReferenceWithoutRefsAttachmentAttributesRt = rt.intersection([
-  ExternalReferenceWithoutRefsAttachmentPayloadRt,
-  AttachmentAttributesBasicRt,
-]);
-
-const ExternalReferenceNoSOAttachmentAttributesRt = rt.intersection([
-  ExternalReferenceNoSOAttachmentPayloadRt,
-  AttachmentAttributesBasicRt,
-]);
-
-const ExternalReferenceSOAttachmentAttributesRt = rt.intersection([
-  ExternalReferenceSOAttachmentPayloadRt,
-  AttachmentAttributesBasicRt,
-]);
-
-export const ExternalReferenceAttachmentRt = rt.intersection([
-  ExternalReferenceAttachmentAttributesRt,
-  rt.strict({
-    id: rt.string,
-    version: rt.string,
+/**
+ * Alerts
+ */
+export const AlertAttachmentPayloadSchema = z.object({
+  type: z.literal(AttachmentType.alert),
+  alertId: z.union([z.array(z.string().max(MAX_TITLE_LENGTH)), z.string().max(MAX_TITLE_LENGTH)]),
+  index: z.union([z.array(z.string().max(MAX_TITLE_LENGTH)), z.string().max(MAX_TITLE_LENGTH)]),
+  rule: z.object({
+    id: z.string().max(MAX_TITLE_LENGTH).nullable(),
+    name: z.string().max(MAX_RULE_NAME_LENGTH).nullable(),
   }),
+  owner: z.string().max(MAX_TITLE_LENGTH),
+});
+
+export const AlertAttachmentAttributesSchema = AlertAttachmentPayloadSchema.merge(
+  AttachmentAttributesBasicSchema
+);
+
+export const EventAttachmentAttributesSchema = EventAttachmentPayloadSchema.merge(
+  AttachmentAttributesBasicSchema
+);
+
+export const AlertAttachmentSchema = AlertAttachmentAttributesSchema.extend({
+  id: z.string().max(512),
+  version: z.string().max(512),
+});
+
+export const EventAttachmentSchema = EventAttachmentAttributesSchema.extend({
+  id: z.string().max(512),
+  version: z.string().max(512),
+});
+
+export type AlertAttachmentPayload = z.infer<typeof AlertAttachmentPayloadSchema>;
+export type AlertAttachmentAttributes = z.infer<typeof AlertAttachmentAttributesSchema>;
+export type AlertAttachment = z.infer<typeof AlertAttachmentSchema>;
+
+export type EventAttachmentPayload = z.infer<typeof EventAttachmentPayloadSchema>;
+export type EventAttachmentAttributes = z.infer<typeof EventAttachmentAttributesSchema>;
+export type EventAttachment = z.infer<typeof EventAttachmentSchema>;
+
+export const DocumentAttachmentAttributesSchema = z.union([
+  AlertAttachmentAttributesSchema,
+  EventAttachmentAttributesSchema,
+]);
+export type DocumentAttachmentAttributes = z.infer<typeof DocumentAttachmentAttributesSchema>;
+
+/**
+ * Actions
+ */
+export enum IsolateHostActionType {
+  isolate = 'isolate',
+  unisolate = 'unisolate',
+}
+
+export const ActionsAttachmentPayloadSchema = z.object({
+  type: z.literal(AttachmentType.actions),
+  comment: z.string().max(MAX_COMMENT_LENGTH),
+  actions: z.object({
+    targets: z.array(
+      z.object({
+        hostname: z.string().max(256),
+        endpointId: z.string().max(MAX_TITLE_LENGTH),
+      })
+    ),
+    type: z.string().max(MAX_TITLE_LENGTH),
+  }),
+  owner: z.string().max(MAX_TITLE_LENGTH),
+});
+
+const ActionsAttachmentAttributesSchema = ActionsAttachmentPayloadSchema.merge(
+  AttachmentAttributesBasicSchema
+);
+
+export const ActionsAttachmentSchema = ActionsAttachmentAttributesSchema.extend({
+  id: z.string().max(512),
+  version: z.string().max(512),
+});
+
+export type ActionsAttachmentPayload = z.infer<typeof ActionsAttachmentPayloadSchema>;
+export type ActionsAttachmentAttributes = z.infer<typeof ActionsAttachmentAttributesSchema>;
+export type ActionsAttachment = z.infer<typeof ActionsAttachmentSchema>;
+
+/**
+ * External reference
+ */
+const ExternalReferenceStorageNoSOSchema = z.object({
+  type: z.literal(ExternalReferenceStorageType.elasticSearchDoc),
+});
+
+const ExternalReferenceStorageSOSchema = z.object({
+  type: z.literal(ExternalReferenceStorageType.savedObject),
+  soType: z.string().max(MAX_TITLE_LENGTH),
+});
+
+const ExternalReferenceBaseAttachmentPayloadSchema = z.object({
+  externalReferenceAttachmentTypeId: z.string().max(MAX_TITLE_LENGTH),
+  externalReferenceMetadata: z.record(z.string().max(MAX_TITLE_LENGTH), jsonValueSchema).nullable(),
+  type: z.literal(AttachmentType.externalReference),
+  owner: z.string().max(MAX_TITLE_LENGTH),
+});
+
+export const ExternalReferenceNoSOAttachmentPayloadSchema =
+  ExternalReferenceBaseAttachmentPayloadSchema.extend({
+    externalReferenceId: z.string().max(MAX_TITLE_LENGTH),
+    externalReferenceStorage: ExternalReferenceStorageNoSOSchema,
+  });
+
+export const ExternalReferenceSOAttachmentPayloadSchema =
+  ExternalReferenceBaseAttachmentPayloadSchema.extend({
+    externalReferenceId: z.string().max(MAX_TITLE_LENGTH),
+    externalReferenceStorage: ExternalReferenceStorageSOSchema,
+  });
+
+export const ExternalReferenceSOWithoutRefsAttachmentPayloadSchema =
+  ExternalReferenceBaseAttachmentPayloadSchema.extend({
+    externalReferenceStorage: ExternalReferenceStorageSOSchema,
+  });
+
+export const ExternalReferenceAttachmentPayloadSchema = z.union([
+  ExternalReferenceNoSOAttachmentPayloadSchema,
+  ExternalReferenceSOAttachmentPayloadSchema,
 ]);
 
-export type ExternalReferenceAttachmentPayload = rt.TypeOf<
-  typeof ExternalReferenceAttachmentPayloadRt
->;
+export const ExternalReferenceWithoutRefsAttachmentPayloadSchema = z.union([
+  ExternalReferenceNoSOAttachmentPayloadSchema,
+  ExternalReferenceSOWithoutRefsAttachmentPayloadSchema,
+]);
 
-export type ExternalReferenceSOAttachmentPayload = rt.TypeOf<
-  typeof ExternalReferenceSOAttachmentPayloadRt
->;
-export type ExternalReferenceNoSOAttachmentPayload = rt.TypeOf<
-  typeof ExternalReferenceNoSOAttachmentPayloadRt
->;
+const ExternalReferenceAttachmentAttributesSchema = ExternalReferenceAttachmentPayloadSchema.and(
+  AttachmentAttributesBasicSchema
+);
 
-export type ExternalReferenceAttachmentAttributes = rt.TypeOf<
-  typeof ExternalReferenceAttachmentAttributesRt
->;
+const ExternalReferenceWithoutRefsAttachmentAttributesSchema =
+  ExternalReferenceWithoutRefsAttachmentPayloadSchema.and(AttachmentAttributesBasicSchema);
 
-export type ExternalReferenceSOAttachmentAttributes = rt.TypeOf<
-  typeof ExternalReferenceSOAttachmentAttributesRt
->;
+const ExternalReferenceNoSOAttachmentAttributesSchema =
+  ExternalReferenceNoSOAttachmentPayloadSchema.merge(AttachmentAttributesBasicSchema);
 
-export type ExternalReferenceNoSOAttachmentAttributes = rt.TypeOf<
-  typeof ExternalReferenceNoSOAttachmentAttributesRt
->;
+const ExternalReferenceSOAttachmentAttributesSchema =
+  ExternalReferenceSOAttachmentPayloadSchema.merge(AttachmentAttributesBasicSchema);
 
-export type ExternalReferenceWithoutRefsAttachmentPayload = rt.TypeOf<
-  typeof ExternalReferenceWithoutRefsAttachmentPayloadRt
+export const ExternalReferenceAttachmentSchema = ExternalReferenceAttachmentAttributesSchema.and(
+  z.object({ id: z.string().max(512), version: z.string().max(512) })
+);
+
+export type ExternalReferenceAttachmentPayload = z.infer<
+  typeof ExternalReferenceAttachmentPayloadSchema
 >;
-export type ExternalReferenceAttachment = rt.TypeOf<typeof ExternalReferenceAttachmentRt>;
+export type ExternalReferenceSOAttachmentPayload = z.infer<
+  typeof ExternalReferenceSOAttachmentPayloadSchema
+>;
+export type ExternalReferenceNoSOAttachmentPayload = z.infer<
+  typeof ExternalReferenceNoSOAttachmentPayloadSchema
+>;
+export type ExternalReferenceAttachmentAttributes = z.infer<
+  typeof ExternalReferenceAttachmentAttributesSchema
+>;
+export type ExternalReferenceSOAttachmentAttributes = z.infer<
+  typeof ExternalReferenceSOAttachmentAttributesSchema
+>;
+export type ExternalReferenceNoSOAttachmentAttributes = z.infer<
+  typeof ExternalReferenceNoSOAttachmentAttributesSchema
+>;
+export type ExternalReferenceWithoutRefsAttachmentPayload = z.infer<
+  typeof ExternalReferenceWithoutRefsAttachmentPayloadSchema
+>;
+export type ExternalReferenceAttachment = z.infer<typeof ExternalReferenceAttachmentSchema>;
 
 /**
  * Persistable state
  */
-
-export const PersistableStateAttachmentPayloadRt = rt.strict({
-  type: rt.literal(AttachmentType.persistableState),
-  owner: rt.string,
-  persistableStateAttachmentTypeId: rt.string,
-  persistableStateAttachmentState: rt.record(rt.string, jsonValueRt),
+export const PersistableStateAttachmentPayloadSchema = z.object({
+  type: z.literal(AttachmentType.persistableState),
+  owner: z.string().max(MAX_TITLE_LENGTH),
+  persistableStateAttachmentTypeId: z.string().max(MAX_TITLE_LENGTH),
+  persistableStateAttachmentState: z.record(z.string().max(MAX_TITLE_LENGTH), jsonValueSchema),
 });
 
-const PersistableStateAttachmentAttributesRt = rt.intersection([
-  PersistableStateAttachmentPayloadRt,
-  AttachmentAttributesBasicRt,
-]);
+const PersistableStateAttachmentAttributesSchema = PersistableStateAttachmentPayloadSchema.merge(
+  AttachmentAttributesBasicSchema
+);
 
-export const PersistableStateAttachmentRt = rt.intersection([
-  PersistableStateAttachmentAttributesRt,
-  rt.strict({
-    id: rt.string,
-    version: rt.string,
-  }),
-]);
+export const PersistableStateAttachmentSchema = PersistableStateAttachmentAttributesSchema.extend({
+  id: z.string().max(512),
+  version: z.string().max(512),
+});
 
-export type PersistableStateAttachmentPayload = rt.TypeOf<
-  typeof PersistableStateAttachmentPayloadRt
+export type PersistableStateAttachmentPayload = z.infer<
+  typeof PersistableStateAttachmentPayloadSchema
 >;
-export type PersistableStateAttachment = rt.TypeOf<typeof PersistableStateAttachmentRt>;
-export type PersistableStateAttachmentAttributes = rt.TypeOf<
-  typeof PersistableStateAttachmentAttributesRt
+export type PersistableStateAttachment = z.infer<typeof PersistableStateAttachmentSchema>;
+export type PersistableStateAttachmentAttributes = z.infer<
+  typeof PersistableStateAttachmentAttributesSchema
 >;
 
 /**
  * Common
  */
-
-export const AttachmentPayloadRt = rt.union([
-  UserCommentAttachmentPayloadRt,
-  AlertAttachmentPayloadRt,
-  EventAttachmentPayloadRt,
-  ActionsAttachmentPayloadRt,
-  ExternalReferenceNoSOAttachmentPayloadRt,
-  ExternalReferenceSOAttachmentPayloadRt,
-  PersistableStateAttachmentPayloadRt,
+export const AttachmentPayloadSchema = z.union([
+  UserCommentAttachmentPayloadSchema,
+  AlertAttachmentPayloadSchema,
+  EventAttachmentPayloadSchema,
+  ActionsAttachmentPayloadSchema,
+  ExternalReferenceNoSOAttachmentPayloadSchema,
+  ExternalReferenceSOAttachmentPayloadSchema,
+  PersistableStateAttachmentPayloadSchema,
 ]);
 
-export const AttachmentAttributesRt = rt.union([
-  UserCommentAttachmentAttributesRt,
-  AlertAttachmentAttributesRt,
-  EventAttachmentAttributesRt,
-  ActionsAttachmentAttributesRt,
-  ExternalReferenceAttachmentAttributesRt,
-  PersistableStateAttachmentAttributesRt,
+export const AttachmentAttributesSchema = z.union([
+  UserCommentAttachmentAttributesSchema,
+  AlertAttachmentAttributesSchema,
+  EventAttachmentAttributesSchema,
+  ActionsAttachmentAttributesSchema,
+  ExternalReferenceAttachmentAttributesSchema,
+  PersistableStateAttachmentAttributesSchema,
 ]);
 
-const AttachmentAttributesNoSORt = rt.union([
-  UserCommentAttachmentAttributesRt,
-  AlertAttachmentAttributesRt,
-  EventAttachmentAttributesRt,
-  ActionsAttachmentAttributesRt,
-  ExternalReferenceNoSOAttachmentAttributesRt,
-  PersistableStateAttachmentAttributesRt,
+const AttachmentAttributesNoSOSchema = z.union([
+  UserCommentAttachmentAttributesSchema,
+  AlertAttachmentAttributesSchema,
+  EventAttachmentAttributesSchema,
+  ActionsAttachmentAttributesSchema,
+  ExternalReferenceNoSOAttachmentAttributesSchema,
+  PersistableStateAttachmentAttributesSchema,
 ]);
 
-const AttachmentAttributesWithoutRefsRt = rt.union([
-  UserCommentAttachmentAttributesRt,
-  AlertAttachmentAttributesRt,
-  EventAttachmentAttributesRt,
-  ActionsAttachmentAttributesRt,
-  ExternalReferenceWithoutRefsAttachmentAttributesRt,
-  PersistableStateAttachmentAttributesRt,
+const AttachmentAttributesWithoutRefsSchema = z.union([
+  UserCommentAttachmentAttributesSchema,
+  AlertAttachmentAttributesSchema,
+  EventAttachmentAttributesSchema,
+  ActionsAttachmentAttributesSchema,
+  ExternalReferenceWithoutRefsAttachmentAttributesSchema,
+  PersistableStateAttachmentAttributesSchema,
 ]);
 
-export const AttachmentRt = rt.intersection([
-  AttachmentAttributesRt,
-  rt.strict({
-    id: rt.string,
-    version: rt.string,
-  }),
-]);
+export const AttachmentSchema = AttachmentAttributesSchema.and(
+  z.object({ id: z.string().max(512), version: z.string().max(512) })
+);
 
-export const AttachmentsRt = rt.array(AttachmentRt);
+export const AttachmentsSchema = z.array(AttachmentSchema);
 
 /**
  * This type is used by the CaseService.
@@ -378,22 +339,21 @@ export const AttachmentsRt = rt.array(AttachmentRt);
  * we need to make all of our attributes partial too.
  * We ensure that partial updates of CommentContext is not going to happen inside the patch comment route.
  */
-export const AttachmentPatchAttributesRt = rt.intersection([
-  rt.union([
-    rt.exact(rt.partial(UserCommentAttachmentPayloadRt.type.props)),
-    rt.exact(rt.partial(AlertAttachmentPayloadRt.type.props)),
-    rt.exact(rt.partial(EventAttachmentPayloadRt.type.props)),
-    rt.exact(rt.partial(ActionsAttachmentPayloadRt.type.props)),
-    rt.exact(rt.partial(ExternalReferenceNoSOAttachmentPayloadRt.type.props)),
-    rt.exact(rt.partial(ExternalReferenceSOAttachmentPayloadRt.type.props)),
-    rt.exact(rt.partial(PersistableStateAttachmentPayloadRt.type.props)),
-  ]),
-  rt.exact(rt.partial(AttachmentAttributesBasicRt.type.props)),
-]);
+export const AttachmentPatchAttributesSchema = z
+  .union([
+    UserCommentAttachmentPayloadSchema.partial(),
+    AlertAttachmentPayloadSchema.partial(),
+    EventAttachmentPayloadSchema.partial(),
+    ActionsAttachmentPayloadSchema.partial(),
+    ExternalReferenceNoSOAttachmentPayloadSchema.partial(),
+    ExternalReferenceSOAttachmentPayloadSchema.partial(),
+    PersistableStateAttachmentPayloadSchema.partial(),
+  ])
+  .and(AttachmentAttributesBasicSchema.partial());
 
-export type AttachmentAttributes = rt.TypeOf<typeof AttachmentAttributesRt>;
-export type AttachmentAttributesNoSO = rt.TypeOf<typeof AttachmentAttributesNoSORt>;
-export type AttachmentAttributesWithoutRefs = rt.TypeOf<typeof AttachmentAttributesWithoutRefsRt>;
-export type AttachmentPatchAttributes = rt.TypeOf<typeof AttachmentPatchAttributesRt>;
-export type Attachment = rt.TypeOf<typeof AttachmentRt>;
-export type Attachments = rt.TypeOf<typeof AttachmentsRt>;
+export type AttachmentAttributes = z.infer<typeof AttachmentAttributesSchema>;
+export type AttachmentAttributesNoSO = z.infer<typeof AttachmentAttributesNoSOSchema>;
+export type AttachmentAttributesWithoutRefs = z.infer<typeof AttachmentAttributesWithoutRefsSchema>;
+export type AttachmentPatchAttributes = z.infer<typeof AttachmentPatchAttributesSchema>;
+export type Attachment = z.infer<typeof AttachmentSchema>;
+export type Attachments = z.infer<typeof AttachmentsSchema>;

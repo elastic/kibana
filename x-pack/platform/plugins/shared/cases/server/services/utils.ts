@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import type { Type } from 'io-ts';
-import { decodeOrThrow } from '../common/runtime_types';
+import type { ZodType } from '@kbn/zod/v4';
+import { decodeOrThrowZod } from '../common/runtime_types';
 
 export const bulkDecodeSOAttributes = <T>(
-  savedObjects: Array<{ id: string; attributes: T }>,
-  type: Type<T>
+  savedObjects: Array<{ id: string; attributes: unknown }>,
+  schema: ZodType<T>
 ) => {
   const decodeRes = new Map<string, T>();
 
   for (const so of savedObjects) {
-    decodeRes.set(so.id, decodeOrThrow(type)(so.attributes));
+    decodeRes.set(so.id, decodeOrThrowZod(schema)(so.attributes));
   }
 
   return decodeRes;

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { PathReporter } from 'io-ts/lib/PathReporter';
 import { CaseSeverity } from '../case/v1';
 import { ConnectorTypes } from '../connector/v1';
+import { CustomFieldTypes } from '../custom_field/v1';
 import {
   ConfigurationAttributesSchema,
   ConfigurationSchema,
@@ -16,16 +16,6 @@ import {
   TextCustomFieldConfigurationSchema,
   ToggleCustomFieldConfigurationSchema,
   NumberCustomFieldConfigurationSchema,
-} from '../../domain_zod/configure/v1';
-import { CustomFieldTypes } from '../custom_field/v1';
-import {
-  ConfigurationAttributesRt,
-  ConfigurationRt,
-  CustomFieldConfigurationWithoutTypeRt,
-  TemplateConfigurationRt,
-  TextCustomFieldConfigurationRt,
-  ToggleCustomFieldConfigurationRt,
-  NumberCustomFieldConfigurationRt,
 } from './v1';
 
 describe('configure', () => {
@@ -112,7 +102,7 @@ describe('configure', () => {
     caseFields: null,
   };
 
-  describe('ConfigurationAttributesRt', () => {
+  describe('ConfigurationAttributesSchema', () => {
     const defaultRequest = {
       connector: resilient,
       closure_type: 'close-by-user',
@@ -140,58 +130,19 @@ describe('configure', () => {
     };
 
     it('has expected attributes in request', () => {
-      const query = ConfigurationAttributesRt.decode(defaultRequest);
-
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: {
-          ...defaultRequest,
-          customFields: [textCustomField, toggleCustomField, numberCustomField],
-        },
-      });
-    });
-
-    it('removes foo:bar attributes from request', () => {
-      const query = ConfigurationAttributesRt.decode({ ...defaultRequest, foo: 'bar' });
-
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: {
-          ...defaultRequest,
-          customFields: [textCustomField, toggleCustomField, numberCustomField],
-        },
-      });
-    });
-
-    it('removes foo:bar attributes from custom fields', () => {
-      const query = ConfigurationAttributesRt.decode({
-        ...defaultRequest,
-        customFields: [{ ...textCustomField, foo: 'bar' }, toggleCustomField, numberCustomField],
-      });
-
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: {
-          ...defaultRequest,
-          customFields: [textCustomField, toggleCustomField, numberCustomField],
-        },
-      });
-    });
-
-    it('zod: has expected attributes in request', () => {
       const result = ConfigurationAttributesSchema.safeParse(defaultRequest);
       expect(result.success).toBe(true);
       expect(result.data).toStrictEqual(defaultRequest);
     });
 
-    it('zod: strips unknown fields', () => {
+    it('strips unknown fields', () => {
       const result = ConfigurationAttributesSchema.safeParse({ ...defaultRequest, foo: 'bar' });
       expect(result.success).toBe(true);
       expect(result.data).toStrictEqual(defaultRequest);
     });
   });
 
-  describe('ConfigurationRt', () => {
+  describe('ConfigurationSchema', () => {
     const defaultRequest = {
       connector: serviceNow,
       closure_type: 'close-by-user',
@@ -225,49 +176,19 @@ describe('configure', () => {
     };
 
     it('has expected attributes in request', () => {
-      const query = ConfigurationRt.decode(defaultRequest);
-
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: defaultRequest,
-      });
-    });
-
-    it('removes foo:bar attributes from request', () => {
-      const query = ConfigurationRt.decode({ ...defaultRequest, foo: 'bar' });
-
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: defaultRequest,
-      });
-    });
-
-    it('removes foo:bar attributes from mappings', () => {
-      const query = ConfigurationRt.decode({
-        ...defaultRequest,
-        mappings: [{ ...defaultRequest.mappings[0], foo: 'bar' }],
-      });
-
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: defaultRequest,
-      });
-    });
-
-    it('zod: has expected attributes in request', () => {
       const result = ConfigurationSchema.safeParse(defaultRequest);
       expect(result.success).toBe(true);
       expect(result.data).toStrictEqual(defaultRequest);
     });
 
-    it('zod: strips unknown fields', () => {
+    it('strips unknown fields', () => {
       const result = ConfigurationSchema.safeParse({ ...defaultRequest, foo: 'bar' });
       expect(result.success).toBe(true);
       expect(result.data).toStrictEqual(defaultRequest);
     });
   });
 
-  describe('CustomFieldConfigurationWithoutTypeRt', () => {
+  describe('CustomFieldConfigurationWithoutTypeSchema', () => {
     const defaultRequest = {
       key: 'custom_field_key',
       label: 'Custom field label',
@@ -275,30 +196,12 @@ describe('configure', () => {
     };
 
     it('has expected attributes in request', () => {
-      const query = CustomFieldConfigurationWithoutTypeRt.decode(defaultRequest);
-
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: { ...defaultRequest },
-      });
-    });
-
-    it('removes foo:bar attributes from request', () => {
-      const query = CustomFieldConfigurationWithoutTypeRt.decode({ ...defaultRequest, foo: 'bar' });
-
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: { ...defaultRequest },
-      });
-    });
-
-    it('zod: has expected attributes in request', () => {
       const result = CustomFieldConfigurationWithoutTypeSchema.safeParse(defaultRequest);
       expect(result.success).toBe(true);
       expect(result.data).toStrictEqual(defaultRequest);
     });
 
-    it('zod: strips unknown fields', () => {
+    it('strips unknown fields', () => {
       const result = CustomFieldConfigurationWithoutTypeSchema.safeParse({
         ...defaultRequest,
         foo: 'bar',
@@ -308,7 +211,7 @@ describe('configure', () => {
     });
   });
 
-  describe('TextCustomFieldConfigurationRt', () => {
+  describe('TextCustomFieldConfigurationSchema', () => {
     const defaultRequest = {
       key: 'my_text_custom_field',
       label: 'Text Custom Field',
@@ -316,60 +219,13 @@ describe('configure', () => {
       required: false,
     };
 
-    it('has expected attributes in request with required: false', () => {
-      const query = TextCustomFieldConfigurationRt.decode(defaultRequest);
-
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: { ...defaultRequest },
-      });
-    });
-
-    it('has expected attributes in request with defaultValue and required: true', () => {
-      const query = TextCustomFieldConfigurationRt.decode({
-        ...defaultRequest,
-        required: true,
-        defaultValue: 'foobar',
-      });
-
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: {
-          ...defaultRequest,
-          required: true,
-          defaultValue: 'foobar',
-        },
-      });
-    });
-
-    it('defaultValue fails if the type is not string', () => {
-      expect(
-        PathReporter.report(
-          TextCustomFieldConfigurationRt.decode({
-            ...defaultRequest,
-            required: true,
-            defaultValue: false,
-          })
-        )[0]
-      ).toContain('Invalid value false supplied');
-    });
-
-    it('removes foo:bar attributes from request', () => {
-      const query = TextCustomFieldConfigurationRt.decode({ ...defaultRequest, foo: 'bar' });
-
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: { ...defaultRequest },
-      });
-    });
-
-    it('zod: has expected attributes with required: false', () => {
+    it('has expected attributes with required: false', () => {
       const result = TextCustomFieldConfigurationSchema.safeParse(defaultRequest);
       expect(result.success).toBe(true);
       expect(result.data).toStrictEqual(defaultRequest);
     });
 
-    it('zod: has expected attributes with defaultValue', () => {
+    it('has expected attributes with defaultValue', () => {
       const result = TextCustomFieldConfigurationSchema.safeParse({
         ...defaultRequest,
         required: true,
@@ -383,7 +239,7 @@ describe('configure', () => {
       });
     });
 
-    it('zod: fails if defaultValue is not string', () => {
+    it('fails if defaultValue is not string', () => {
       const result = TextCustomFieldConfigurationSchema.safeParse({
         ...defaultRequest,
         required: true,
@@ -392,7 +248,7 @@ describe('configure', () => {
       expect(result.success).toBe(false);
     });
 
-    it('zod: strips unknown fields', () => {
+    it('strips unknown fields', () => {
       const result = TextCustomFieldConfigurationSchema.safeParse({
         ...defaultRequest,
         foo: 'bar',
@@ -402,7 +258,7 @@ describe('configure', () => {
     });
   });
 
-  describe('ToggleCustomFieldConfigurationRt', () => {
+  describe('ToggleCustomFieldConfigurationSchema', () => {
     const defaultRequest = {
       key: 'my_toggle_custom_field',
       label: 'Toggle Custom Field',
@@ -410,60 +266,13 @@ describe('configure', () => {
       required: false,
     };
 
-    it('has expected attributes in request with required: false', () => {
-      const query = ToggleCustomFieldConfigurationRt.decode(defaultRequest);
-
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: { ...defaultRequest },
-      });
-    });
-
-    it('has expected attributes in request with defaultValue and required: true', () => {
-      const query = ToggleCustomFieldConfigurationRt.decode({
-        ...defaultRequest,
-        required: true,
-        defaultValue: false,
-      });
-
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: {
-          ...defaultRequest,
-          required: true,
-          defaultValue: false,
-        },
-      });
-    });
-
-    it('defaultValue fails if the type is not boolean', () => {
-      expect(
-        PathReporter.report(
-          ToggleCustomFieldConfigurationRt.decode({
-            ...defaultRequest,
-            required: true,
-            defaultValue: 'foobar',
-          })
-        )[0]
-      ).toContain('Invalid value "foobar" supplied');
-    });
-
-    it('removes foo:bar attributes from request', () => {
-      const query = ToggleCustomFieldConfigurationRt.decode({ ...defaultRequest, foo: 'bar' });
-
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: { ...defaultRequest },
-      });
-    });
-
-    it('zod: has expected attributes with required: false', () => {
+    it('has expected attributes with required: false', () => {
       const result = ToggleCustomFieldConfigurationSchema.safeParse(defaultRequest);
       expect(result.success).toBe(true);
       expect(result.data).toStrictEqual(defaultRequest);
     });
 
-    it('zod: has expected attributes with defaultValue', () => {
+    it('has expected attributes with defaultValue', () => {
       const result = ToggleCustomFieldConfigurationSchema.safeParse({
         ...defaultRequest,
         required: true,
@@ -473,7 +282,7 @@ describe('configure', () => {
       expect(result.data).toStrictEqual({ ...defaultRequest, required: true, defaultValue: false });
     });
 
-    it('zod: fails if defaultValue is not boolean', () => {
+    it('fails if defaultValue is not boolean', () => {
       const result = ToggleCustomFieldConfigurationSchema.safeParse({
         ...defaultRequest,
         required: true,
@@ -482,7 +291,7 @@ describe('configure', () => {
       expect(result.success).toBe(false);
     });
 
-    it('zod: strips unknown fields', () => {
+    it('strips unknown fields', () => {
       const result = ToggleCustomFieldConfigurationSchema.safeParse({
         ...defaultRequest,
         foo: 'bar',
@@ -492,7 +301,7 @@ describe('configure', () => {
     });
   });
 
-  describe('NumberCustomFieldConfigurationRt', () => {
+  describe('NumberCustomFieldConfigurationSchema', () => {
     const defaultRequest = {
       key: 'my_number_custom_field',
       label: 'Number Custom Field',
@@ -500,60 +309,13 @@ describe('configure', () => {
       required: false,
     };
 
-    it('has expected attributes in request with required: false', () => {
-      const query = NumberCustomFieldConfigurationRt.decode(defaultRequest);
-
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: { ...defaultRequest },
-      });
-    });
-
-    it('has expected attributes in request with defaultValue and required: true', () => {
-      const query = NumberCustomFieldConfigurationRt.decode({
-        ...defaultRequest,
-        required: true,
-        defaultValue: 0,
-      });
-
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: {
-          ...defaultRequest,
-          required: true,
-          defaultValue: 0,
-        },
-      });
-    });
-
-    it('defaultValue fails if the type is not number', () => {
-      expect(
-        PathReporter.report(
-          NumberCustomFieldConfigurationRt.decode({
-            ...defaultRequest,
-            required: true,
-            defaultValue: 'foobar',
-          })
-        )[0]
-      ).toContain('Invalid value "foobar" supplied');
-    });
-
-    it('removes foo:bar attributes from request', () => {
-      const query = NumberCustomFieldConfigurationRt.decode({ ...defaultRequest, foo: 'bar' });
-
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: { ...defaultRequest },
-      });
-    });
-
-    it('zod: has expected attributes with required: false', () => {
+    it('has expected attributes with required: false', () => {
       const result = NumberCustomFieldConfigurationSchema.safeParse(defaultRequest);
       expect(result.success).toBe(true);
       expect(result.data).toStrictEqual(defaultRequest);
     });
 
-    it('zod: has expected attributes with defaultValue', () => {
+    it('has expected attributes with defaultValue', () => {
       const result = NumberCustomFieldConfigurationSchema.safeParse({
         ...defaultRequest,
         required: true,
@@ -563,7 +325,7 @@ describe('configure', () => {
       expect(result.data).toStrictEqual({ ...defaultRequest, required: true, defaultValue: 0 });
     });
 
-    it('zod: fails if defaultValue is not number', () => {
+    it('fails if defaultValue is not number', () => {
       const result = NumberCustomFieldConfigurationSchema.safeParse({
         ...defaultRequest,
         required: true,
@@ -572,7 +334,7 @@ describe('configure', () => {
       expect(result.success).toBe(false);
     });
 
-    it('zod: strips unknown fields', () => {
+    it('strips unknown fields', () => {
       const result = NumberCustomFieldConfigurationSchema.safeParse({
         ...defaultRequest,
         foo: 'bar',
@@ -582,79 +344,16 @@ describe('configure', () => {
     });
   });
 
-  describe('TemplateConfigurationRt', () => {
+  describe('TemplateConfigurationSchema', () => {
     const defaultRequest = templateWithAllCaseFields;
 
-    it('has expected attributes in request ', () => {
-      const query = TemplateConfigurationRt.decode(defaultRequest);
-
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: { ...defaultRequest },
-      });
-    });
-
-    it('removes foo:bar attributes from request', () => {
-      const query = TemplateConfigurationRt.decode({ ...defaultRequest, foo: 'bar' });
-
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: { ...defaultRequest },
-      });
-    });
-
-    it('removes foo:bar attributes from caseFields', () => {
-      const query = TemplateConfigurationRt.decode({
-        ...defaultRequest,
-        caseFields: { ...templateWithAllCaseFields.caseFields, foo: 'bar' },
-      });
-
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: { ...defaultRequest },
-      });
-    });
-
-    it('accepts few caseFields', () => {
-      const query = TemplateConfigurationRt.decode(templateWithFewCaseFields);
-
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: { ...templateWithFewCaseFields },
-      });
-    });
-
-    it('accepts null for caseFields', () => {
-      const query = TemplateConfigurationRt.decode({
-        ...defaultRequest,
-        caseFields: null,
-      });
-
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: { ...defaultRequest, caseFields: null },
-      });
-    });
-
-    it('accepts {} for caseFields', () => {
-      const query = TemplateConfigurationRt.decode({
-        ...defaultRequest,
-        caseFields: {},
-      });
-
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: { ...defaultRequest, caseFields: {} },
-      });
-    });
-
-    it('zod: has expected attributes in request', () => {
+    it('has expected attributes in request', () => {
       const result = TemplateConfigurationSchema.safeParse(defaultRequest);
       expect(result.success).toBe(true);
       expect(result.data).toStrictEqual(defaultRequest);
     });
 
-    it('zod: strips unknown fields', () => {
+    it('strips unknown fields', () => {
       const result = TemplateConfigurationSchema.safeParse({
         ...defaultRequest,
         foo: 'bar',
@@ -663,13 +362,28 @@ describe('configure', () => {
       expect(result.data).toStrictEqual(defaultRequest);
     });
 
-    it('zod: accepts null for caseFields', () => {
+    it('accepts null for caseFields', () => {
       const result = TemplateConfigurationSchema.safeParse({
         ...defaultRequest,
         caseFields: null,
       });
       expect(result.success).toBe(true);
       expect(result.data).toStrictEqual({ ...defaultRequest, caseFields: null });
+    });
+
+    it('accepts few caseFields', () => {
+      const result = TemplateConfigurationSchema.safeParse(templateWithFewCaseFields);
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual(templateWithFewCaseFields);
+    });
+
+    it('accepts {} for caseFields', () => {
+      const result = TemplateConfigurationSchema.safeParse({
+        ...defaultRequest,
+        caseFields: {},
+      });
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual({ ...defaultRequest, caseFields: {} });
     });
   });
 });

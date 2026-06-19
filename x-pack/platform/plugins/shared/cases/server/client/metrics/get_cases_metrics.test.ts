@@ -37,7 +37,7 @@ describe('getCasesMetrics', () => {
       await expect(
         // @ts-expect-error: excess attribute
         getCasesMetrics({ features: [CaseMetricsFeature.MTTR], foo: 'bar' }, client, clientArgs)
-      ).rejects.toThrow('invalid keys "foo"');
+      ).rejects.toThrow('Excess keys are not allowed');
     });
 
     it('returns the mttr metric', async () => {
@@ -145,7 +145,7 @@ describe('getCasesMetrics', () => {
     it('throws with unknown feature value', async () => {
       // @ts-expect-error: invalid feature value
       await expect(getCasesMetrics({ features: ['foobar'] }, client, clientArgs)).rejects.toThrow(
-        'Invalid value "foobar" supplied to "features"'
+        'Invalid input: expected'
       );
     });
   });

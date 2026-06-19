@@ -186,7 +186,7 @@ describe('Replace custom field', () => {
         casesClient
       )
     ).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"Failed to replace customField, id: first_key of case: mock-id-1 version:WzAsMV0= : Error: Invalid value \\"undefined\\" supplied to \\"value\\""`
+      `"Failed to replace customField, id: first_key of case: mock-id-1 version:WzAsMV0= : Error: Invalid input: expected boolean, received undefined, Invalid input: expected null, received undefined, Invalid input: expected string, received undefined, Invalid input: expected number, received undefined"`
     );
   });
 
@@ -243,7 +243,7 @@ describe('Replace custom field', () => {
         casesClient
       )
     ).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"Failed to replace customField, id: first_key of case: mock-id-1 version:WzAsMV0= : Error: Invalid value \\"            \\" supplied to \\"value\\",The value field cannot be an empty string."`
+      `"Failed to replace customField, id: first_key of case: mock-id-1 version:WzAsMV0= : Error: value: The value field cannot be an empty string."`
     );
   });
 
@@ -263,7 +263,7 @@ describe('Replace custom field', () => {
         casesClient
       )
     ).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"Failed to replace customField, id: first_key of case: mock-id-1 version:WzAsMV0= : Error: Invalid value \\"undefined\\" supplied to \\"value\\""`
+      `"Failed to replace customField, id: first_key of case: mock-id-1 version:WzAsMV0= : Error: Invalid input: expected boolean, received undefined, Invalid input: expected null, received undefined, Invalid input: expected string, received undefined, Invalid input: expected number, received undefined"`
     );
   });
 
@@ -303,7 +303,7 @@ describe('Replace custom field', () => {
         casesClient
       )
     ).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"Failed to replace customField, id: second_key of case: mock-id-1 version:WzAsMV0= : Error: Invalid value \\"foobar\\" supplied to \\"value\\""`
+      `"Failed to replace customField, id: second_key of case: mock-id-1 version:WzAsMV0= : Error: type: Invalid input: expected \\"text\\", value: Invalid input: expected boolean, received string, type: Invalid input: expected \\"number\\", Invalid input: expected number, received string, Invalid input: expected null, received string"`
     );
   });
 

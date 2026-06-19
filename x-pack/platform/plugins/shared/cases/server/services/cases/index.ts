@@ -40,7 +40,7 @@ import {
   MAX_DOCS_PER_PAGE,
 } from '../../../common/constants';
 import { UNIFIED_ALERT_TYPES_ARRAY } from '../../../common/utils/attachments';
-import { decodeOrThrow } from '../../common/runtime_types';
+import { decodeOrThrowZod } from '../../common/runtime_types';
 import type {
   SavedObjectFindOptionsKueryNode,
   SavedObjectsBulkResponseWithErrors,
@@ -76,10 +76,10 @@ import type {
   CaseTransformedAttributes,
 } from '../../common/types/case';
 import {
-  CaseTransformedAttributesRt,
+  CaseTransformedAttributesSchema,
   CasePersistedStatus,
-  getPartialCaseTransformedAttributesRt,
-  OwnerRt,
+  getPartialCaseTransformedAttributesSchema,
+  OwnerSchema,
 } from '../../common/types/case';
 import type {
   GetCaseIdsByAlertIdArgs,
@@ -106,7 +106,7 @@ import {
   mergeSearchQuery,
 } from './utils';
 
-const PartialCaseTransformedAttributesRt = getPartialCaseTransformedAttributesRt();
+const PartialCaseTransformedAttributesSchema = getPartialCaseTransformedAttributesSchema();
 
 /**
  * Merges the legacy (`cases-comments`) and unified (`cases-attachments`) responses for
@@ -296,7 +296,7 @@ export class CasesService {
 
     const owners: Array<SavedObjectsFindResult<{ owner: string }>> = [];
     for (const so of response.saved_objects) {
-      const validatedAttributes = decodeOrThrow(OwnerRt)(so.attributes);
+      const validatedAttributes = decodeOrThrowZod(OwnerSchema)(so.attributes);
 
       owners.push(Object.assign(so, { attributes: validatedAttributes }));
     }
@@ -578,7 +578,9 @@ export class CasesService {
       );
 
       const res = transformSavedObjectToExternalModel(caseSavedObject);
-      const decodeRes = decodeOrThrow(CaseTransformedAttributesRt)(res.attributes);
+      const decodeRes = decodeOrThrowZod(CaseTransformedAttributesSchema)(
+        res.attributes
+      ) as CaseTransformedAttributes;
 
       return {
         ...res,
@@ -602,7 +604,9 @@ export class CasesService {
         );
 
       const resolvedSO = transformSavedObjectToExternalModel(resolveCaseResult.saved_object);
-      const decodeRes = decodeOrThrow(CaseTransformedAttributesRt)(resolvedSO.attributes);
+      const decodeRes = decodeOrThrowZod(CaseTransformedAttributesSchema)(
+        resolvedSO.attributes
+      ) as CaseTransformedAttributes;
 
       return {
         ...resolveCaseResult,
@@ -629,7 +633,9 @@ export class CasesService {
         }
 
         const so = Object.assign(theCase, transformSavedObjectToExternalModel(theCase));
-        const decodeRes = decodeOrThrow(CaseTransformedAttributesRt)(so.attributes);
+        const decodeRes = decodeOrThrowZod(CaseTransformedAttributesSchema)(
+          so.attributes
+        ) as CaseTransformedAttributes;
         const soWithDecodedRes = Object.assign(so, { attributes: decodeRes });
 
         return soWithDecodedRes;
@@ -656,7 +662,7 @@ export class CasesService {
       });
 
       const res = transformFindResponseToExternalModel(cases);
-      const decodeRes = bulkDecodeSOAttributes(res.saved_objects, CaseTransformedAttributesRt);
+      const decodeRes = bulkDecodeSOAttributes(res.saved_objects, CaseTransformedAttributesSchema);
 
       return {
         ...res,
@@ -907,7 +913,9 @@ export class CasesService {
     try {
       this.log.debug(`Attempting to create a new case`);
 
-      const decodedAttributes = decodeOrThrow(CaseTransformedAttributesRt)(attributes);
+      const decodedAttributes = decodeOrThrowZod(CaseTransformedAttributesSchema)(
+        attributes
+      ) as CaseTransformedAttributes;
       const transformedAttributes = transformAttributesToESModel(decodedAttributes);
 
       transformedAttributes.attributes.total_alerts = 0;
@@ -921,7 +929,9 @@ export class CasesService {
       );
 
       const res = transformSavedObjectToExternalModel(createdCase);
-      const decodedRes = decodeOrThrow(CaseTransformedAttributesRt)(res.attributes);
+      const decodedRes = decodeOrThrowZod(CaseTransformedAttributesSchema)(
+        res.attributes
+      ) as CaseTransformedAttributes;
 
       return { ...res, attributes: decodedRes };
     } catch (error) {
@@ -938,7 +948,9 @@ export class CasesService {
       this.log.debug(`Attempting to bulk create cases`);
 
       const bulkCreateRequest = cases.map(({ id, ...attributes }) => {
-        const decodedAttributes = decodeOrThrow(CaseTransformedAttributesRt)(attributes);
+        const decodedAttributes = decodeOrThrowZod(CaseTransformedAttributesSchema)(
+          attributes
+        ) as CaseTransformedAttributes;
 
         const { attributes: transformedAttributes, referenceHandler } =
           transformAttributesToESModel(decodedAttributes);
@@ -969,7 +981,9 @@ export class CasesService {
         }
 
         const transformedCase = transformSavedObjectToExternalModel(theCase);
-        const decodedRes = decodeOrThrow(CaseTransformedAttributesRt)(transformedCase.attributes);
+        const decodedRes = decodeOrThrowZod(CaseTransformedAttributesSchema)(
+          transformedCase.attributes
+        ) as CaseTransformedAttributes;
 
         return { ...transformedCase, attributes: decodedRes };
       });
@@ -991,9 +1005,9 @@ export class CasesService {
     try {
       this.log.debug(`Attempting to UPDATE case ${caseId}`);
 
-      const decodedAttributes = decodeOrThrow(PartialCaseTransformedAttributesRt)(
+      const decodedAttributes = decodeOrThrowZod(PartialCaseTransformedAttributesSchema)(
         updatedAttributes
-      );
+      ) as Partial<CaseTransformedAttributes>;
       const transformedAttributes = transformAttributesToESModel(decodedAttributes);
 
       const updatedCase = await this.unsecuredSavedObjectsClient.update<CasePersistedAttributes>(
@@ -1008,7 +1022,9 @@ export class CasesService {
       );
 
       const res = transformUpdateResponseToExternalModel(updatedCase);
-      const decodeRes = decodeOrThrow(PartialCaseTransformedAttributesRt)(res.attributes);
+      const decodeRes = decodeOrThrowZod(PartialCaseTransformedAttributesSchema)(
+        res.attributes
+      ) as Partial<CaseTransformedAttributes>;
 
       return {
         ...res,
@@ -1028,9 +1044,9 @@ export class CasesService {
       this.log.debug(`Attempting to UPDATE case ${cases.map((c) => c.caseId).join(', ')}`);
 
       const bulkUpdate = cases.map(({ caseId, updatedAttributes, version, originalCase }) => {
-        const decodedAttributes = decodeOrThrow(PartialCaseTransformedAttributesRt)(
+        const decodedAttributes = decodeOrThrowZod(PartialCaseTransformedAttributesSchema)(
           updatedAttributes
-        );
+        ) as Partial<CaseTransformedAttributes>;
 
         const { attributes, referenceHandler } = transformAttributesToESModel(decodedAttributes);
         return {
@@ -1054,7 +1070,9 @@ export class CasesService {
         }
 
         const so = Object.assign(theCase, transformUpdateResponseToExternalModel(theCase));
-        const decodeRes = decodeOrThrow(PartialCaseTransformedAttributesRt)(so.attributes);
+        const decodeRes = decodeOrThrowZod(PartialCaseTransformedAttributesSchema)(
+          so.attributes
+        ) as Partial<CaseTransformedAttributes>;
         const soWithDecodedRes = Object.assign(so, { attributes: decodeRes });
 
         acc.push(soWithDecodedRes);

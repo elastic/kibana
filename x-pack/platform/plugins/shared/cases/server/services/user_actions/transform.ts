@@ -156,7 +156,7 @@ const addReferenceIdToPayload = (
       const { attachmentId } = userActionAttributes.payload.comment;
 
       if (typeof attachmentId === 'string' && attachmentId.length > 0) {
-        return userAction.attributes.payload;
+        return userAction.attributes.payload as UserActionAttributes['payload'];
       }
 
       const refId = findReferenceId(
@@ -175,7 +175,7 @@ const addReferenceIdToPayload = (
     }
   }
 
-  return userAction.attributes.payload;
+  return userAction.attributes.payload as UserActionAttributes['payload'];
 };
 
 function getConnectorIdFromReferences(

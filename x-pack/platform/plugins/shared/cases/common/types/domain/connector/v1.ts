@@ -5,13 +5,9 @@
  * 2.0.
  */
 
-import * as rt from 'io-ts';
-
+import { z } from '@kbn/zod/v4';
 import type { ActionType as ConnectorActionType } from '@kbn/actions-plugin/common';
 import type { ActionResult } from '@kbn/actions-plugin/server/types';
-
-export type ActionConnector = ActionResult;
-export type ActionTypeConnector = ConnectorActionType;
 
 export enum ConnectorTypes {
   casesWebhook = '.cases-webhook',
@@ -24,238 +20,207 @@ export enum ConnectorTypes {
   theHive = '.thehive',
 }
 
-const ConnectorCasesWebhookTypeFieldsRt = rt.strict({
-  type: rt.literal(ConnectorTypes.casesWebhook),
-  fields: rt.null,
-});
-
-/**
- * Jira
- */
-
-export const JiraFieldsRt = rt.intersection([
-  rt.strict({
-    issueType: rt.union([rt.string, rt.null]),
-    priority: rt.union([rt.string, rt.null]),
-    parent: rt.union([rt.string, rt.null]),
-  }),
-  rt.exact(
-    rt.partial({
-      otherFields: rt.union([rt.string, rt.null]),
-    })
-  ),
-]);
-
-export type JiraFieldsType = rt.TypeOf<typeof JiraFieldsRt>;
-
-const ConnectorJiraTypeFieldsRt = rt.strict({
-  type: rt.literal(ConnectorTypes.jira),
-  fields: rt.union([JiraFieldsRt, rt.null]),
-});
-
-/**
- * Resilient
- */
-
-export const ResilientFieldsRt = rt.intersection([
-  rt.strict({
-    incidentTypes: rt.union([rt.array(rt.string), rt.null]),
-    severityCode: rt.union([rt.string, rt.null]),
-  }),
-  rt.exact(
-    rt.partial({
-      additionalFields: rt.union([rt.string, rt.null]),
-    })
-  ),
-]);
-
-export type ResilientFieldsType = rt.TypeOf<typeof ResilientFieldsRt>;
-
-const ConnectorResilientTypeFieldsRt = rt.intersection([
-  rt.strict({
-    type: rt.literal(ConnectorTypes.resilient),
-    fields: rt.union([ResilientFieldsRt, rt.null]),
-  }),
-  rt.exact(
-    rt.partial({
-      additionalFields: rt.union([rt.string, rt.null]),
-    })
-  ),
-]);
-
-/**
- * ServiceNow
- */
-
-export const ServiceNowITSMFieldsRt = rt.intersection([
-  rt.strict({
-    impact: rt.union([rt.string, rt.null]),
-    severity: rt.union([rt.string, rt.null]),
-    urgency: rt.union([rt.string, rt.null]),
-    category: rt.union([rt.string, rt.null]),
-    subcategory: rt.union([rt.string, rt.null]),
-  }),
-  rt.exact(
-    rt.partial({
-      additionalFields: rt.union([rt.string, rt.null]),
-    })
-  ),
-]);
-
-export type ServiceNowITSMFieldsType = rt.TypeOf<typeof ServiceNowITSMFieldsRt>;
-
-const ConnectorServiceNowITSMTypeFieldsRt = rt.strict({
-  type: rt.literal(ConnectorTypes.serviceNowITSM),
-  fields: rt.union([ServiceNowITSMFieldsRt, rt.null]),
-});
-
-export const ServiceNowSIRFieldsRt = rt.intersection([
-  rt.strict({
-    category: rt.union([rt.string, rt.null]),
-    destIp: rt.union([rt.boolean, rt.null]),
-    malwareHash: rt.union([rt.boolean, rt.null]),
-    malwareUrl: rt.union([rt.boolean, rt.null]),
-    priority: rt.union([rt.string, rt.null]),
-    sourceIp: rt.union([rt.boolean, rt.null]),
-    subcategory: rt.union([rt.string, rt.null]),
-  }),
-  rt.exact(
-    rt.partial({
-      additionalFields: rt.union([rt.string, rt.null]),
-    })
-  ),
-]);
-
-export type ServiceNowSIRFieldsType = rt.TypeOf<typeof ServiceNowSIRFieldsRt>;
-
-const ConnectorServiceNowSIRTypeFieldsRt = rt.strict({
-  type: rt.literal(ConnectorTypes.serviceNowSIR),
-  fields: rt.union([ServiceNowSIRFieldsRt, rt.null]),
-});
-
-/**
- * Swimlane
- */
-
-export const SwimlaneFieldsRt = rt.strict({
-  caseId: rt.union([rt.string, rt.null]),
-});
-
 export enum SwimlaneConnectorType {
   All = 'all',
   Alerts = 'alerts',
   Cases = 'cases',
 }
 
-export type SwimlaneFieldsType = rt.TypeOf<typeof SwimlaneFieldsRt>;
+export type ActionConnector = ActionResult;
+export type ActionTypeConnector = ConnectorActionType;
 
-const ConnectorSwimlaneTypeFieldsRt = rt.strict({
-  type: rt.literal(ConnectorTypes.swimlane),
-  fields: rt.union([SwimlaneFieldsRt, rt.null]),
+const ConnectorCasesWebhookTypeFieldsSchema = z.object({
+  type: z.literal(ConnectorTypes.casesWebhook),
+  fields: z.null(),
 });
 
 /**
- * Thehive
+ * Jira
  */
-
-export const TheHiveFieldsRt = rt.strict({
-  tlp: rt.union([rt.number, rt.null]),
+export const JiraFieldsSchema = z.object({
+  issueType: z.string().nullable(),
+  priority: z.string().nullable(),
+  parent: z.string().nullable(),
+  otherFields: z.string().nullable().optional(),
 });
 
-export type TheHiveFieldsType = rt.TypeOf<typeof TheHiveFieldsRt>;
+const ConnectorJiraTypeFieldsSchema = z.object({
+  type: z.literal(ConnectorTypes.jira),
+  fields: JiraFieldsSchema.nullable(),
+});
 
-const ConnectorTheHiveTypeFieldsRt = rt.strict({
-  type: rt.literal(ConnectorTypes.theHive),
-  fields: rt.union([TheHiveFieldsRt, rt.null]),
+/**
+ * Resilient
+ */
+export const ResilientFieldsSchema = z.object({
+  incidentTypes: z.array(z.string()).nullable(),
+  severityCode: z.string().nullable(),
+  additionalFields: z.string().nullable().optional(),
+});
+
+const ConnectorResilientTypeFieldsSchema = z.object({
+  type: z.literal(ConnectorTypes.resilient),
+  fields: ResilientFieldsSchema.nullable(),
+});
+
+/**
+ * ServiceNow ITSM
+ */
+export const ServiceNowITSMFieldsSchema = z.object({
+  impact: z.string().nullable(),
+  severity: z.string().nullable(),
+  urgency: z.string().nullable(),
+  category: z.string().nullable(),
+  subcategory: z.string().nullable(),
+  additionalFields: z.string().nullable().optional(),
+});
+
+const ConnectorServiceNowITSMTypeFieldsSchema = z.object({
+  type: z.literal(ConnectorTypes.serviceNowITSM),
+  fields: ServiceNowITSMFieldsSchema.nullable(),
+});
+
+/**
+ * ServiceNow SIR
+ */
+export const ServiceNowSIRFieldsSchema = z.object({
+  category: z.string().nullable(),
+  destIp: z.boolean().nullable(),
+  malwareHash: z.boolean().nullable(),
+  malwareUrl: z.boolean().nullable(),
+  priority: z.string().nullable(),
+  sourceIp: z.boolean().nullable(),
+  subcategory: z.string().nullable(),
+  additionalFields: z.string().nullable().optional(),
+});
+
+const ConnectorServiceNowSIRTypeFieldsSchema = z.object({
+  type: z.literal(ConnectorTypes.serviceNowSIR),
+  fields: ServiceNowSIRFieldsSchema.nullable(),
+});
+
+/**
+ * Swimlane
+ */
+export const SwimlaneFieldsSchema = z.object({
+  caseId: z.string().nullable(),
+});
+
+const ConnectorSwimlaneTypeFieldsSchema = z.object({
+  type: z.literal(ConnectorTypes.swimlane),
+  fields: SwimlaneFieldsSchema.nullable(),
+});
+
+/**
+ * TheHive
+ */
+export const TheHiveFieldsSchema = z.object({
+  tlp: z.number().nullable(),
+});
+
+const ConnectorTheHiveTypeFieldsSchema = z.object({
+  type: z.literal(ConnectorTypes.theHive),
+  fields: TheHiveFieldsSchema.nullable(),
 });
 
 /**
  * None connector
  */
-
-const ConnectorNoneTypeFieldsRt = rt.strict({
-  type: rt.literal(ConnectorTypes.none),
-  fields: rt.null,
+const ConnectorNoneTypeFieldsSchema = z.object({
+  type: z.literal(ConnectorTypes.none),
+  fields: z.null(),
 });
 
-export const ConnectorTypeFieldsRt = rt.union([
-  ConnectorCasesWebhookTypeFieldsRt,
-  ConnectorJiraTypeFieldsRt,
-  ConnectorNoneTypeFieldsRt,
-  ConnectorResilientTypeFieldsRt,
-  ConnectorServiceNowITSMTypeFieldsRt,
-  ConnectorServiceNowSIRTypeFieldsRt,
-  ConnectorSwimlaneTypeFieldsRt,
-  ConnectorTheHiveTypeFieldsRt,
+export const ConnectorTypeFieldsSchema = z.discriminatedUnion('type', [
+  ConnectorCasesWebhookTypeFieldsSchema,
+  ConnectorJiraTypeFieldsSchema,
+  ConnectorNoneTypeFieldsSchema,
+  ConnectorResilientTypeFieldsSchema,
+  ConnectorServiceNowITSMTypeFieldsSchema,
+  ConnectorServiceNowSIRTypeFieldsSchema,
+  ConnectorSwimlaneTypeFieldsSchema,
+  ConnectorTheHiveTypeFieldsSchema,
 ]);
 
-/**
- * This type represents the connector's format when it is encoded within a user action.
- */
-export const CaseUserActionConnectorRt = rt.union([
-  rt.intersection([ConnectorCasesWebhookTypeFieldsRt, rt.strict({ name: rt.string })]),
-  rt.intersection([ConnectorJiraTypeFieldsRt, rt.strict({ name: rt.string })]),
-  rt.intersection([ConnectorNoneTypeFieldsRt, rt.strict({ name: rt.string })]),
-  rt.intersection([ConnectorResilientTypeFieldsRt, rt.strict({ name: rt.string })]),
-  rt.intersection([ConnectorServiceNowITSMTypeFieldsRt, rt.strict({ name: rt.string })]),
-  rt.intersection([ConnectorServiceNowSIRTypeFieldsRt, rt.strict({ name: rt.string })]),
-  rt.intersection([ConnectorSwimlaneTypeFieldsRt, rt.strict({ name: rt.string })]),
-  rt.intersection([ConnectorTheHiveTypeFieldsRt, rt.strict({ name: rt.string })]),
+const NameSchema = z.object({ name: z.string() });
+
+export const CaseUserActionConnectorSchema = z.discriminatedUnion('type', [
+  ConnectorCasesWebhookTypeFieldsSchema.merge(NameSchema),
+  ConnectorJiraTypeFieldsSchema.merge(NameSchema),
+  ConnectorNoneTypeFieldsSchema.merge(NameSchema),
+  ConnectorResilientTypeFieldsSchema.merge(NameSchema),
+  ConnectorServiceNowITSMTypeFieldsSchema.merge(NameSchema),
+  ConnectorServiceNowSIRTypeFieldsSchema.merge(NameSchema),
+  ConnectorSwimlaneTypeFieldsSchema.merge(NameSchema),
+  ConnectorTheHiveTypeFieldsSchema.merge(NameSchema),
 ]);
 
-export const CaseConnectorRt = rt.intersection([
-  rt.strict({
-    id: rt.string,
-  }),
-  CaseUserActionConnectorRt,
+const IdSchema = z.object({ id: z.string() });
+
+export const CaseConnectorSchema = z.discriminatedUnion('type', [
+  ConnectorCasesWebhookTypeFieldsSchema.merge(NameSchema).merge(IdSchema),
+  ConnectorJiraTypeFieldsSchema.merge(NameSchema).merge(IdSchema),
+  ConnectorNoneTypeFieldsSchema.merge(NameSchema).merge(IdSchema),
+  ConnectorResilientTypeFieldsSchema.merge(NameSchema).merge(IdSchema),
+  ConnectorServiceNowITSMTypeFieldsSchema.merge(NameSchema).merge(IdSchema),
+  ConnectorServiceNowSIRTypeFieldsSchema.merge(NameSchema).merge(IdSchema),
+  ConnectorSwimlaneTypeFieldsSchema.merge(NameSchema).merge(IdSchema),
+  ConnectorTheHiveTypeFieldsSchema.merge(NameSchema).merge(IdSchema),
 ]);
 
 /**
  * Mappings
  */
-
-const ConnectorMappingActionTypeRt = rt.union([
-  rt.literal('append'),
-  rt.literal('nothing'),
-  rt.literal('overwrite'),
+const ConnectorMappingActionTypeSchema = z.union([
+  z.literal('append'),
+  z.literal('nothing'),
+  z.literal('overwrite'),
 ]);
 
-const ConnectorMappingSourceRt = rt.union([
-  rt.literal('title'),
-  rt.literal('description'),
-  rt.literal('comments'),
-  rt.literal('tags'),
+const ConnectorMappingSourceSchema = z.union([
+  z.literal('title'),
+  z.literal('description'),
+  z.literal('comments'),
+  z.literal('tags'),
 ]);
 
-const ConnectorMappingTargetRt = rt.union([rt.string, rt.literal('not_mapped')]);
+const ConnectorMappingTargetSchema = z.union([z.string(), z.literal('not_mapped')]);
 
-const ConnectorMappingRt = rt.strict({
-  action_type: ConnectorMappingActionTypeRt,
-  source: ConnectorMappingSourceRt,
-  target: ConnectorMappingTargetRt,
+const ConnectorMappingSchema = z.object({
+  action_type: ConnectorMappingActionTypeSchema,
+  source: ConnectorMappingSourceSchema,
+  target: ConnectorMappingTargetSchema,
 });
 
-export const ConnectorMappingsRt = rt.array(ConnectorMappingRt);
+export const ConnectorMappingsSchema = z.array(ConnectorMappingSchema);
 
-export const ConnectorMappingsAttributesRt = rt.strict({
-  mappings: ConnectorMappingsRt,
-  owner: rt.string,
+export const ConnectorMappingsAttributesSchema = z.object({
+  mappings: ConnectorMappingsSchema,
+  owner: z.string(),
 });
 
-export type ConnectorMappingsAttributes = rt.TypeOf<typeof ConnectorMappingsAttributesRt>;
-export type ConnectorMappings = rt.TypeOf<typeof ConnectorMappingsRt>;
-export type ConnectorMappingActionType = rt.TypeOf<typeof ConnectorMappingActionTypeRt>;
-export type ConnectorMappingSource = rt.TypeOf<typeof ConnectorMappingSourceRt>;
-export type ConnectorMappingTarget = rt.TypeOf<typeof ConnectorMappingTargetRt>;
-export type CaseUserActionConnector = rt.TypeOf<typeof CaseUserActionConnectorRt>;
-export type CaseConnector = rt.TypeOf<typeof CaseConnectorRt>;
-export type ConnectorTypeFields = rt.TypeOf<typeof ConnectorTypeFieldsRt>;
-export type ConnectorCasesWebhookTypeFields = rt.TypeOf<typeof ConnectorCasesWebhookTypeFieldsRt>;
-export type ConnectorJiraTypeFields = rt.TypeOf<typeof ConnectorJiraTypeFieldsRt>;
-export type ConnectorResilientTypeFields = rt.TypeOf<typeof ConnectorResilientTypeFieldsRt>;
-export type ConnectorSwimlaneTypeFields = rt.TypeOf<typeof ConnectorSwimlaneTypeFieldsRt>;
-export type ConnectorServiceNowITSMTypeFields = rt.TypeOf<
-  typeof ConnectorServiceNowITSMTypeFieldsRt
+export type ConnectorMappingsAttributes = z.infer<typeof ConnectorMappingsAttributesSchema>;
+export type ConnectorMappings = z.infer<typeof ConnectorMappingsSchema>;
+export type ConnectorMappingActionType = z.infer<typeof ConnectorMappingActionTypeSchema>;
+export type ConnectorMappingSource = z.infer<typeof ConnectorMappingSourceSchema>;
+export type ConnectorMappingTarget = z.infer<typeof ConnectorMappingTargetSchema>;
+export type CaseUserActionConnector = z.infer<typeof CaseUserActionConnectorSchema>;
+export type CaseConnector = z.infer<typeof CaseConnectorSchema>;
+export type ConnectorTypeFields = z.infer<typeof ConnectorTypeFieldsSchema>;
+export type JiraFieldsType = z.infer<typeof JiraFieldsSchema>;
+export type ResilientFieldsType = z.infer<typeof ResilientFieldsSchema>;
+export type SwimlaneFieldsType = z.infer<typeof SwimlaneFieldsSchema>;
+export type ServiceNowITSMFieldsType = z.infer<typeof ServiceNowITSMFieldsSchema>;
+export type ServiceNowSIRFieldsType = z.infer<typeof ServiceNowSIRFieldsSchema>;
+export type TheHiveFieldsType = z.infer<typeof TheHiveFieldsSchema>;
+export type ConnectorCasesWebhookTypeFields = z.infer<typeof ConnectorCasesWebhookTypeFieldsSchema>;
+export type ConnectorJiraTypeFields = z.infer<typeof ConnectorJiraTypeFieldsSchema>;
+export type ConnectorResilientTypeFields = z.infer<typeof ConnectorResilientTypeFieldsSchema>;
+export type ConnectorServiceNowITSMTypeFields = z.infer<
+  typeof ConnectorServiceNowITSMTypeFieldsSchema
 >;
-export type ConnectorServiceNowSIRTypeFields = rt.TypeOf<typeof ConnectorServiceNowSIRTypeFieldsRt>;
-export type ConnectorTheHiveTypeFields = rt.TypeOf<typeof ConnectorTheHiveTypeFieldsRt>;
+export type ConnectorServiceNowSIRTypeFields = z.infer<
+  typeof ConnectorServiceNowSIRTypeFieldsSchema
+>;
+export type ConnectorSwimlaneTypeFields = z.infer<typeof ConnectorSwimlaneTypeFieldsSchema>;
+export type ConnectorTheHiveTypeFields = z.infer<typeof ConnectorTheHiveTypeFieldsSchema>;

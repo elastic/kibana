@@ -41,7 +41,7 @@ describe('bulkCreate', () => {
     await expect(
       // @ts-expect-error: excess attribute
       bulkCreate({ attachments: [{ ...comment, foo: 'bar' }], caseId }, clientArgs)
-    ).rejects.toThrow('invalid keys "foo"');
+    ).rejects.toThrow('Excess keys are not allowed');
   });
 
   it(`throws error when attachments are more than ${MAX_BULK_CREATE_ATTACHMENTS}`, async () => {
@@ -73,7 +73,7 @@ describe('bulkCreate', () => {
       await expect(
         bulkCreate({ attachments: [{ ...comment, comment: longComment }], caseId }, clientArgs)
       ).rejects.toThrow(
-        `Failed while bulk creating attachment to case id: test-case error: Error: The length of the comment is too long. The maximum length is ${MAX_COMMENT_LENGTH}.`
+        `Failed while bulk creating attachment to case id: test-case error: Error: 0.comment: The length of the comment is too long. The maximum length is ${MAX_COMMENT_LENGTH}.`
       );
     });
 
@@ -81,7 +81,7 @@ describe('bulkCreate', () => {
       await expect(
         bulkCreate({ attachments: [{ ...comment, comment: '' }], caseId }, clientArgs)
       ).rejects.toThrow(
-        'Failed while bulk creating attachment to case id: test-case error: Error: The comment field cannot be an empty string.'
+        'Failed while bulk creating attachment to case id: test-case error: Error: 0.comment: The comment field cannot be an empty string.'
       );
     });
 
@@ -89,7 +89,7 @@ describe('bulkCreate', () => {
       await expect(
         bulkCreate({ attachments: [{ ...comment, comment: '  ' }], caseId }, clientArgs)
       ).rejects.toThrow(
-        'Failed while bulk creating attachment to case id: test-case error: Error: The comment field cannot be an empty string.'
+        'Failed while bulk creating attachment to case id: test-case error: Error: 0.comment: The comment field cannot be an empty string.'
       );
     });
   });
@@ -106,7 +106,7 @@ describe('bulkCreate', () => {
           clientArgs
         )
       ).rejects.toThrow(
-        `Failed while bulk creating attachment to case id: test-case error: Error: The length of the comment is too long. The maximum length is ${MAX_COMMENT_LENGTH}.`
+        `Failed while bulk creating attachment to case id: test-case error: Error: 0.comment: The length of the comment is too long. The maximum length is ${MAX_COMMENT_LENGTH}.`
       );
     });
 
@@ -114,7 +114,7 @@ describe('bulkCreate', () => {
       await expect(
         bulkCreate({ attachments: [{ ...actionComment, comment: '' }], caseId }, clientArgs)
       ).rejects.toThrow(
-        'Failed while bulk creating attachment to case id: test-case error: Error: The comment field cannot be an empty string.'
+        'Failed while bulk creating attachment to case id: test-case error: Error: 0.comment: The comment field cannot be an empty string.'
       );
     });
 
@@ -122,7 +122,7 @@ describe('bulkCreate', () => {
       await expect(
         bulkCreate({ attachments: [{ ...actionComment, comment: '  ' }], caseId }, clientArgs)
       ).rejects.toThrow(
-        'Failed while bulk creating attachment to case id: test-case error: Error: The comment field cannot be an empty string.'
+        'Failed while bulk creating attachment to case id: test-case error: Error: 0.comment: The comment field cannot be an empty string.'
       );
     });
   });

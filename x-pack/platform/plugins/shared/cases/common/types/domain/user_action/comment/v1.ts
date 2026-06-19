@@ -5,25 +5,25 @@
  * 2.0.
  */
 
-import * as rt from 'io-ts';
+import { z } from '@kbn/zod/v4';
 import { UserActionTypes } from '../action/v1';
 import {
-  AttachmentRequestRtV2,
-  AttachmentRequestWithoutRefsRtV2,
+  AttachmentRequestSchemaV2,
+  AttachmentRequestWithoutRefsSchemaV2,
 } from '../../../api/attachment/v2';
 
-export const CommentUserActionPayloadRt = rt.strict({ comment: AttachmentRequestRtV2 });
+export const CommentUserActionPayloadSchema = z.object({ comment: AttachmentRequestSchemaV2 });
 
-export const CommentUserActionPayloadWithoutIdsRt = rt.strict({
-  comment: AttachmentRequestWithoutRefsRtV2,
+export const CommentUserActionPayloadWithoutIdsSchema = z.object({
+  comment: AttachmentRequestWithoutRefsSchemaV2,
 });
 
-export const CommentUserActionRt = rt.strict({
-  type: rt.literal(UserActionTypes.comment),
-  payload: CommentUserActionPayloadRt,
+export const CommentUserActionSchema = z.object({
+  type: z.literal(UserActionTypes.comment),
+  payload: CommentUserActionPayloadSchema,
 });
 
-export const CommentUserActionWithoutIdsRt = rt.strict({
-  type: rt.literal(UserActionTypes.comment),
-  payload: CommentUserActionPayloadWithoutIdsRt,
+export const CommentUserActionWithoutIdsSchema = z.object({
+  type: z.literal(UserActionTypes.comment),
+  payload: CommentUserActionPayloadWithoutIdsSchema,
 });

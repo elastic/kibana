@@ -23,12 +23,15 @@ import {
   UNIFIED_ALERT_TYPES_ARRAY,
   isAlertAttachmentType,
 } from '../../../common/utils/attachments';
-import type { AttachmentMode } from '../../../common/types/domain/attachment/v2';
-import {
-  AttachmentAttributesRtV2,
-  AttachmentPatchAttributesRtV2,
+import type {
+  AttachmentMode,
+  AttachmentPatchAttributesV2,
 } from '../../../common/types/domain/attachment/v2';
-import { decodeOrThrow } from '../../common/runtime_types';
+import {
+  AttachmentAttributesSchemaV2,
+  AttachmentPatchAttributesSchemaV2,
+} from '../../../common/types/domain/attachment/v2';
+import { decodeOrThrowZod } from '../../common/runtime_types';
 import {
   CASE_ATTACHMENT_SAVED_OBJECT,
   CASE_COMMENT_SAVED_OBJECT,
@@ -72,8 +75,8 @@ import type {
   AttachmentSavedObjectTransformed,
 } from '../../common/types/attachments_v1';
 import {
-  AttachmentTransformedAttributesRt,
-  AttachmentPartialAttributesRt,
+  AttachmentTransformedAttributesSchema,
+  AttachmentPartialAttributesSchema,
 } from '../../common/types/attachments_v1';
 import type {
   AttachmentAttributesV2,
@@ -448,7 +451,7 @@ export class AttachmentService {
     try {
       this.context.log.debug(`Attempting to POST a new comment`);
 
-      const decodedAttributes = decodeOrThrow(AttachmentAttributesRtV2)(attributes);
+      const decodedAttributes = decodeOrThrowZod(AttachmentAttributesSchemaV2)(attributes);
       const savedObjectType = getAttachmentSavedObjectType(this.context.config);
       const transformer = getAttachmentTypeTransformers(
         getAttachmentTypeFromAttributes(decodedAttributes),
@@ -474,7 +477,7 @@ export class AttachmentService {
         );
         // v2 union accepts both unified- and legacy-shape attributes (some
         // unmigrated types still pass through legacy-shaped).
-        const validatedAttributes = decodeOrThrow(AttachmentAttributesRtV2)(
+        const validatedAttributes = decodeOrThrowZod(AttachmentAttributesSchemaV2)(
           injectedAttachment.attributes
         );
         return Object.assign(injectedAttachment, {
@@ -499,7 +502,7 @@ export class AttachmentService {
 
       const transformedAttachment = injectAttachmentSOAttributesFromRefs(attachment);
 
-      const validatedAttributes = decodeOrThrow(AttachmentTransformedAttributesRt)(
+      const validatedAttributes = decodeOrThrowZod(AttachmentTransformedAttributesSchema)(
         transformedAttachment.attributes
       );
 
@@ -523,7 +526,7 @@ export class AttachmentService {
         const res =
           await this.context.unsecuredSavedObjectsClient.bulkCreate<UnifiedAttachmentAttributes>(
             attachments.map((attachment) => {
-              const decodedAttributes = decodeOrThrow(AttachmentAttributesRtV2)(
+              const decodedAttributes = decodeOrThrowZod(AttachmentAttributesSchemaV2)(
                 attachment.attributes
               );
               const transformer = getAttachmentTypeTransformers(
@@ -554,7 +557,7 @@ export class AttachmentService {
       const res =
         await this.context.unsecuredSavedObjectsClient.bulkCreate<AttachmentPersistedAttributes>(
           attachments.map((attachment) => {
-            const decodedAttributes = decodeOrThrow(AttachmentAttributesRtV2)(
+            const decodedAttributes = decodeOrThrowZod(AttachmentAttributesSchemaV2)(
               attachment.attributes
             );
 
@@ -601,7 +604,7 @@ export class AttachmentService {
           so as unknown as SavedObject<AttachmentPersistedAttributes>
         );
         // v2 union accepts both unified- and legacy-shape attributes.
-        const validatedAttributes = decodeOrThrow(AttachmentAttributesRtV2)(
+        const validatedAttributes = decodeOrThrowZod(AttachmentAttributesSchemaV2)(
           injectedAttachment.attributes
         );
         validatedAttachments.push(
@@ -613,7 +616,7 @@ export class AttachmentService {
         const legacySo = so as SavedObject<AttachmentPersistedAttributes>;
         const transformedAttachment = injectAttachmentSOAttributesFromRefs(legacySo);
 
-        const validatedAttributes = decodeOrThrow(AttachmentTransformedAttributesRt)(
+        const validatedAttributes = decodeOrThrowZod(AttachmentTransformedAttributesSchema)(
           transformedAttachment.attributes
         );
 
@@ -639,7 +642,9 @@ export class AttachmentService {
         throw new Error(`Attachment ${savedObjectId} not found`);
       }
 
-      const decodedAttributes = decodeOrThrow(AttachmentPatchAttributesRtV2)(updatedAttributes);
+      const decodedAttributes = decodeOrThrowZod(AttachmentPatchAttributesSchemaV2)(
+        updatedAttributes
+      ) as AttachmentPatchAttributesV2;
       assertAlertAttachmentHasRuleName(decodedAttributes as Record<string, unknown>);
       const transformer = getAttachmentTypeTransformers(
         getAttachmentTypeFromAttributes(decodedAttributes),
@@ -691,7 +696,7 @@ export class AttachmentService {
       );
 
       assertAlertAttachmentHasRuleName(transformedAttachment.attributes as Record<string, unknown>);
-      const validatedAttributes = decodeOrThrow(AttachmentPartialAttributesRt)(
+      const validatedAttributes = decodeOrThrowZod(AttachmentPartialAttributesSchema)(
         transformedAttachment.attributes
       );
 
@@ -720,9 +725,9 @@ export class AttachmentService {
         const res =
           await this.context.unsecuredSavedObjectsClient.bulkUpdate<UnifiedAttachmentAttributes>(
             comments.map((c) => {
-              const decodedAttributes = decodeOrThrow(AttachmentPatchAttributesRtV2)(
+              const decodedAttributes = decodeOrThrowZod(AttachmentPatchAttributesSchemaV2)(
                 c.updatedAttributes
-              );
+              ) as AttachmentPatchAttributesV2;
               const transformer = getTransformerForPatchAttributes(
                 decodedAttributes,
                 requestWithoutType
@@ -744,9 +749,9 @@ export class AttachmentService {
       const res =
         await this.context.unsecuredSavedObjectsClient.bulkUpdate<AttachmentPersistedAttributes>(
           comments.map((c) => {
-            const decodedAttributes = decodeOrThrow(AttachmentPatchAttributesRtV2)(
+            const decodedAttributes = decodeOrThrowZod(AttachmentPatchAttributesSchemaV2)(
               c.updatedAttributes
-            );
+            ) as AttachmentPatchAttributesV2;
             assertAlertAttachmentHasRuleName(decodedAttributes as Record<string, unknown>);
             const transformer = getTransformerForPatchAttributes(
               decodedAttributes,
@@ -811,14 +816,14 @@ export class AttachmentService {
       } else if (attachment.type === CASE_ATTACHMENT_SAVED_OBJECT) {
         // Saved Objects bulkUpdate may return only the attributes that were sent in the request, not
         // the full merged document. Match single update(): return the validated patch from the request.
-        const validatedAttributes = decodeOrThrow(AttachmentPatchAttributesRtV2)(
+        const validatedAttributes = decodeOrThrowZod(AttachmentPatchAttributesSchemaV2)(
           comments[i].updatedAttributes
-        );
+        ) as AttachmentPatchAttributesV2;
         validatedAttachments.push(Object.assign(attachment, { attributes: validatedAttributes }));
       } else {
-        const decodedAttributes = decodeOrThrow(AttachmentPatchAttributesRtV2)(
+        const decodedAttributes = decodeOrThrowZod(AttachmentPatchAttributesSchemaV2)(
           comments[i].updatedAttributes
-        );
+        ) as AttachmentPatchAttributesV2;
         const transformer = getTransformerForPatchAttributes(decodedAttributes, requestWithoutType);
         const legacyAttributes = transformer.toLegacySchema(decodedAttributes);
         const transformedAttachment = injectAttachmentSOAttributesFromRefsForPatch(
@@ -829,7 +834,7 @@ export class AttachmentService {
         assertAlertAttachmentHasRuleName(
           transformedAttachment.attributes as Record<string, unknown>
         );
-        const validatedAttributes = decodeOrThrow(AttachmentPartialAttributesRt)(
+        const validatedAttributes = decodeOrThrowZod(AttachmentPartialAttributesSchema)(
           transformedAttachment.attributes
         );
 
@@ -872,12 +877,12 @@ export class AttachmentService {
           mode,
         });
         if (transformed.isUnified) {
-          const validatedAttributes = decodeOrThrow(AttachmentAttributesRtV2)(
+          const validatedAttributes = decodeOrThrowZod(AttachmentAttributesSchemaV2)(
             transformed.attributes
           );
           validatedAttachments.push(Object.assign(injectedSo, { attributes: validatedAttributes }));
         } else {
-          const validatedAttributes = decodeOrThrow(AttachmentTransformedAttributesRt)(
+          const validatedAttributes = decodeOrThrowZod(AttachmentTransformedAttributesSchema)(
             transformed.attributes
           );
 

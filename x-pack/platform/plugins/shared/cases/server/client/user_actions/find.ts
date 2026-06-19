@@ -5,9 +5,12 @@
  * 2.0.
  */
 
-import type { UserActionFindResponse } from '../../../common/types/api';
-import { UserActionFindRequestRt, UserActionFindResponseRt } from '../../../common/types/api';
-import { decodeWithExcessOrThrow, decodeOrThrow } from '../../common/runtime_types';
+import type { UserActionFindRequest, UserActionFindResponse } from '../../../common/types/api';
+import {
+  UserActionFindRequestSchema,
+  UserActionFindResponseSchema,
+} from '../../../common/types/api';
+import { decodeWithExcessOrThrowZod, decodeOrThrowZod } from '../../common/runtime_types';
 import type { CasesClientArgs } from '../types';
 import type { UserActionFind } from './types';
 import { Operations } from '../../authorization';
@@ -31,7 +34,10 @@ export const find = async (
     // supertest and query-string encode a single entry in an array as just a string so make sure we have an array
     const types = asArray(params.types);
 
-    const queryParams = decodeWithExcessOrThrow(UserActionFindRequestRt)({ ...params, types });
+    const queryParams = decodeWithExcessOrThrowZod(UserActionFindRequestSchema)({
+      ...params,
+      types,
+    }) as UserActionFindRequest;
 
     const [authorizationFilterRes] = await Promise.all([
       authorization.getAuthorizationFilter(Operations.findUserActions),
@@ -58,7 +64,7 @@ export const find = async (
       total: userActions.total,
     };
 
-    return decodeOrThrow(UserActionFindResponseRt)(res);
+    return decodeOrThrowZod(UserActionFindResponseSchema)(res);
   } catch (error) {
     throw createCaseError({
       message: `Failed to find user actions for case id: ${caseId}: ${error}`,

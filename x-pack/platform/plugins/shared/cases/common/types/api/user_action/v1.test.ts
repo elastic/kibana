@@ -9,20 +9,14 @@ import { AttachmentType } from '../../domain/attachment/v1';
 import { UserActionTypes } from '../../domain/user_action/action/v1';
 import {
   type CaseUserActionStatsResponse,
-  CaseUserActionStatsResponseRt,
-  CaseUserActionStatsRt,
-  UserActionFindRequestRt,
-  UserActionFindResponseRt,
-} from './v1';
-import {
   CaseUserActionStatsSchema,
   UserActionFindRequestSchema,
   UserActionFindResponseSchema,
-} from '../../api_zod/user_action/v1';
+} from './v1';
 
 describe('User actions APIs', () => {
   describe('Find API', () => {
-    describe('UserActionFindRequestRt', () => {
+    describe('UserActionFindRequestSchema', () => {
       const defaultRequest = {
         types: [UserActionTypes.comment],
         sortOrder: 'desc',
@@ -31,45 +25,19 @@ describe('User actions APIs', () => {
       };
 
       it('has expected attributes in request', () => {
-        const query = UserActionFindRequestRt.decode(defaultRequest);
-
-        expect(query).toStrictEqual({
-          _tag: 'Right',
-          right: {
-            ...defaultRequest,
-            page: 1,
-            perPage: 10,
-          },
-        });
-      });
-
-      it('removes foo:bar attributes from request', () => {
-        const query = UserActionFindRequestRt.decode({ ...defaultRequest, foo: 'bar' });
-
-        expect(query).toStrictEqual({
-          _tag: 'Right',
-          right: {
-            ...defaultRequest,
-            page: 1,
-            perPage: 10,
-          },
-        });
-      });
-
-      it('zod: has expected attributes in request', () => {
         const result = UserActionFindRequestSchema.safeParse(defaultRequest);
         expect(result.success).toBe(true);
         expect(result.data).toStrictEqual({ ...defaultRequest, page: 1, perPage: 10 });
       });
 
-      it('zod: strips unknown fields', () => {
+      it('strips unknown fields', () => {
         const result = UserActionFindRequestSchema.safeParse({ ...defaultRequest, foo: 'bar' });
         expect(result.success).toBe(true);
         expect(result.data).toStrictEqual({ ...defaultRequest, page: 1, perPage: 10 });
       });
     });
 
-    describe('UserActionFindResponseRt', () => {
+    describe('UserActionFindResponseSchema', () => {
       const defaultRequest = {
         userActions: [
           {
@@ -100,42 +68,12 @@ describe('User actions APIs', () => {
       };
 
       it('has expected attributes in request', () => {
-        const query = UserActionFindResponseRt.decode(defaultRequest);
-
-        expect(query).toStrictEqual({
-          _tag: 'Right',
-          right: defaultRequest,
-        });
-      });
-
-      it('removes foo:bar attributes from request', () => {
-        const query = UserActionFindResponseRt.decode({ ...defaultRequest, foo: 'bar' });
-
-        expect(query).toStrictEqual({
-          _tag: 'Right',
-          right: defaultRequest,
-        });
-      });
-
-      it('removes foo:bar attributes from userActions', () => {
-        const query = UserActionFindResponseRt.decode({
-          ...defaultRequest,
-          userActions: [{ ...defaultRequest.userActions[0], foo: 'bar' }],
-        });
-
-        expect(query).toStrictEqual({
-          _tag: 'Right',
-          right: defaultRequest,
-        });
-      });
-
-      it('zod: has expected attributes in request', () => {
         const result = UserActionFindResponseSchema.safeParse(defaultRequest);
         expect(result.success).toBe(true);
         expect(result.data).toStrictEqual(defaultRequest);
       });
 
-      it('zod: strips unknown fields', () => {
+      it('strips unknown fields', () => {
         const result = UserActionFindResponseSchema.safeParse({ ...defaultRequest, foo: 'bar' });
         expect(result.success).toBe(true);
         expect(result.data).toStrictEqual(defaultRequest);
@@ -144,38 +82,7 @@ describe('User actions APIs', () => {
   });
 
   describe('User actions stats API', () => {
-    describe('CaseUserActionStatsResponseRt', () => {
-      const defaultRequest: CaseUserActionStatsResponse = {
-        total: 15,
-        total_deletions: 0,
-        total_comments: 10,
-        total_comment_deletions: 0,
-        total_comment_creations: 0,
-        total_hidden_comment_updates: 0,
-        total_other_actions: 5,
-        total_other_action_deletions: 0,
-      };
-
-      it('has expected attributes in request', () => {
-        const query = CaseUserActionStatsResponseRt.decode(defaultRequest);
-
-        expect(query).toStrictEqual({
-          _tag: 'Right',
-          right: defaultRequest,
-        });
-      });
-
-      it('removes foo:bar attributes from request', () => {
-        const query = CaseUserActionStatsResponseRt.decode({ ...defaultRequest, foo: 'bar' });
-
-        expect(query).toStrictEqual({
-          _tag: 'Right',
-          right: defaultRequest,
-        });
-      });
-    });
-
-    describe('CaseUserActionStatsRt', () => {
+    describe('CaseUserActionStatsSchema', () => {
       const defaultRequest: CaseUserActionStatsResponse = {
         total: 100,
         total_deletions: 0,
@@ -188,30 +95,12 @@ describe('User actions APIs', () => {
       };
 
       it('has expected attributes in request', () => {
-        const query = CaseUserActionStatsRt.decode(defaultRequest);
-
-        expect(query).toStrictEqual({
-          _tag: 'Right',
-          right: defaultRequest,
-        });
-      });
-
-      it('removes foo:bar attributes from request', () => {
-        const query = CaseUserActionStatsRt.decode({ ...defaultRequest, foo: 'bar' });
-
-        expect(query).toStrictEqual({
-          _tag: 'Right',
-          right: defaultRequest,
-        });
-      });
-
-      it('zod: has expected attributes in request', () => {
         const result = CaseUserActionStatsSchema.safeParse(defaultRequest);
         expect(result.success).toBe(true);
         expect(result.data).toStrictEqual(defaultRequest);
       });
 
-      it('zod: strips unknown fields', () => {
+      it('strips unknown fields', () => {
         const result = CaseUserActionStatsSchema.safeParse({ ...defaultRequest, foo: 'bar' });
         expect(result.success).toBe(true);
         expect(result.data).toStrictEqual(defaultRequest);

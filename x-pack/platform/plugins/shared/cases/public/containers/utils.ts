@@ -6,19 +6,18 @@
  */
 
 import { isObject, transform, snakeCase, isEmpty } from 'lodash';
-import { fold } from 'fp-ts/Either';
-import { identity, pipe as v2Pipe } from 'fp-ts/function';
-import { pipe } from 'fp-ts/pipeable';
+import type { ZodType } from '@kbn/zod/v4';
+import { stringifyZodError } from '@kbn/zod-helpers';
 
 import type { ToastInputFields } from '@kbn/core/public';
 import { builderMap as customFieldsBuilder } from '../components/custom_fields/builder';
 import {
   AttachmentType,
-  CaseRt,
-  CasesRt,
-  ConfigurationRt,
-  ConfigurationsRt,
-  UserActionsRt,
+  CaseSchema,
+  CasesSchema,
+  ConfigurationSchema,
+  ConfigurationsSchema,
+  UserActionsSchema,
 } from '../../common/types/domain';
 import type {
   CasePatchRequest,
@@ -29,11 +28,11 @@ import type {
   SingleCaseMetricsResponse,
 } from '../../common/types/api';
 import {
-  CaseResolveResponseRt,
-  PatchCasesResponseRt,
-  CaseUserActionStatsResponseRt,
-  FindCasesContainingAllAlertsResponseRt,
-  SingleCaseMetricsResponseRt,
+  CaseResolveResponseSchema,
+  PatchCasesResponseSchema,
+  CaseUserActionStatsResponseSchema,
+  FindCasesContainingAllAlertsResponseSchema,
+  SingleCaseMetricsResponseSchema,
 } from '../../common/types/api';
 import type {
   Case,
@@ -44,7 +43,6 @@ import type {
   UserActions,
 } from '../../common/types/domain';
 import { NO_ASSIGNEES_FILTERING_KEYWORD } from '../../common/constants';
-import { throwErrors } from '../../common/api';
 import type { CaseUI, ExtendedFieldFilter, FilterOptions, UpdateByKey } from './types';
 import * as i18n from './translations';
 import type { CustomFieldFactoryFilterOption } from '../components/custom_fields/types';
@@ -59,55 +57,42 @@ export const covertToSnakeCase = (obj: Record<string, unknown>) =>
 
 export const createToasterPlainError = (message: string) => new ToasterError([message]);
 
-export const decodeCaseResponse = (respCase?: Case) =>
-  pipe(CaseRt.decode(respCase), fold(throwErrors(createToasterPlainError), identity));
-
-export const decodeCaseResolveResponse = (respCase?: CaseResolveResponse) =>
-  pipe(
-    CaseResolveResponseRt.decode(respCase),
-    fold(throwErrors(createToasterPlainError), identity)
-  );
-
-export const decodeSingleCaseMetricsResponse = (respCase?: SingleCaseMetricsResponse) =>
-  pipe(
-    SingleCaseMetricsResponseRt.decode(respCase),
-    fold(throwErrors(createToasterPlainError), identity)
-  );
-
-export const decodeCasesResponse = (respCase?: Cases) =>
-  pipe(CasesRt.decode(respCase), fold(throwErrors(createToasterPlainError), identity));
-
-export const decodeCasesWithUpdateSummaryResponse = (response?: CasesPatchResponse) =>
-  pipe(PatchCasesResponseRt.decode(response), fold(throwErrors(createToasterPlainError), identity));
-
-export const decodeCaseConfigurationsResponse = (respCase?: Configurations) => {
-  return pipe(
-    ConfigurationsRt.decode(respCase),
-    fold(throwErrors(createToasterPlainError), identity)
-  );
+export const decodeWithToasterError = <T>(schema: ZodType<unknown>, value: T): NonNullable<T> => {
+  const result = schema.safeParse(value);
+  if (result.success) return result.data as NonNullable<T>;
+  throw new ToasterError([stringifyZodError(result.error)]);
 };
 
+export const decodeCaseResponse = (respCase?: Case) => decodeWithToasterError(CaseSchema, respCase);
+
+export const decodeCaseResolveResponse = (respCase?: CaseResolveResponse) =>
+  decodeWithToasterError(CaseResolveResponseSchema, respCase);
+
+export const decodeSingleCaseMetricsResponse = (respCase?: SingleCaseMetricsResponse) =>
+  decodeWithToasterError(SingleCaseMetricsResponseSchema, respCase);
+
+export const decodeCasesResponse = (respCase?: Cases) =>
+  decodeWithToasterError(CasesSchema, respCase);
+
+export const decodeCasesWithUpdateSummaryResponse = (response?: CasesPatchResponse) =>
+  decodeWithToasterError(PatchCasesResponseSchema, response);
+
+export const decodeCaseConfigurationsResponse = (respCase?: Configurations) =>
+  decodeWithToasterError(ConfigurationsSchema, respCase);
+
 export const decodeCaseConfigureResponse = (respCase?: Configuration) =>
-  pipe(ConfigurationRt.decode(respCase), fold(throwErrors(createToasterPlainError), identity));
+  decodeWithToasterError(ConfigurationSchema, respCase);
 
 export const decodeCaseUserActionsResponse = (respUserActions?: UserActions) =>
-  pipe(UserActionsRt.decode(respUserActions), fold(throwErrors(createToasterPlainError), identity));
+  decodeWithToasterError(UserActionsSchema, respUserActions);
 
 export const decodeCaseUserActionStatsResponse = (
   caseUserActionsStats: CaseUserActionStatsResponse
-) =>
-  pipe(
-    CaseUserActionStatsResponseRt.decode(caseUserActionsStats),
-    fold(throwErrors(createToasterPlainError), identity)
-  );
+) => decodeWithToasterError(CaseUserActionStatsResponseSchema, caseUserActionsStats);
 
 export const decodeFindAllAttachedAlertsResponse = (
   respCase?: FindCasesContainingAllAlertsResponse
-) =>
-  v2Pipe(
-    FindCasesContainingAllAlertsResponseRt.decode(respCase),
-    fold(throwErrors(createToasterPlainError), identity)
-  );
+) => decodeWithToasterError(FindCasesContainingAllAlertsResponseSchema, respCase);
 
 export const valueToUpdateIsSettings = (
   key: UpdateByKey['updateKey'],

@@ -24,10 +24,10 @@ import type {
   ConnectorMappingsAttributesTransformed,
 } from '../../common/types/connector_mappings';
 import {
-  ConnectorMappingsAttributesPartialRt,
-  ConnectorMappingsAttributesTransformedRt,
+  ConnectorMappingsAttributesPartialSchema,
+  ConnectorMappingsAttributesTransformedSchema,
 } from '../../common/types/connector_mappings';
-import { decodeOrThrow } from '../../common/runtime_types';
+import { decodeOrThrowZod } from '../../common/runtime_types';
 
 export class ConnectorMappingsService {
   constructor(private readonly log: Logger) {}
@@ -51,7 +51,7 @@ export class ConnectorMappingsService {
       > = [];
 
       for (const mapping of connectorMappings.saved_objects) {
-        const validatedMapping = decodeOrThrow(ConnectorMappingsAttributesTransformedRt)(
+        const validatedMapping = decodeOrThrowZod(ConnectorMappingsAttributesTransformedSchema)(
           mapping.attributes
         );
 
@@ -74,7 +74,9 @@ export class ConnectorMappingsService {
     try {
       this.log.debug(`Attempting to POST a new connector mappings`);
 
-      const decodedAttributes = decodeOrThrow(ConnectorMappingsAttributesTransformedRt)(attributes);
+      const decodedAttributes = decodeOrThrowZod(ConnectorMappingsAttributesTransformedSchema)(
+        attributes
+      );
 
       const connectorMappings =
         await unsecuredSavedObjectsClient.create<ConnectorMappingsPersistedAttributes>(
@@ -86,7 +88,7 @@ export class ConnectorMappingsService {
           }
         );
 
-      const validatedAttributes = decodeOrThrow(ConnectorMappingsAttributesTransformedRt)(
+      const validatedAttributes = decodeOrThrowZod(ConnectorMappingsAttributesTransformedSchema)(
         connectorMappings.attributes
       );
 
@@ -109,7 +111,9 @@ export class ConnectorMappingsService {
     try {
       this.log.debug(`Attempting to UPDATE connector mappings ${mappingId}`);
 
-      const decodedAttributes = decodeOrThrow(ConnectorMappingsAttributesPartialRt)(attributes);
+      const decodedAttributes = decodeOrThrowZod(ConnectorMappingsAttributesPartialSchema)(
+        attributes
+      );
 
       const updatedMappings =
         await unsecuredSavedObjectsClient.update<ConnectorMappingsPersistedAttributes>(
@@ -122,7 +126,7 @@ export class ConnectorMappingsService {
           }
         );
 
-      const validatedAttributes = decodeOrThrow(ConnectorMappingsAttributesPartialRt)(
+      const validatedAttributes = decodeOrThrowZod(ConnectorMappingsAttributesPartialSchema)(
         updatedMappings.attributes
       );
 

@@ -344,7 +344,7 @@ describe('update', () => {
           casesClientMock
         )
       ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Failed to update case, ids: [{\\"id\\":\\"mock-id-1\\",\\"version\\":\\"WzAsMV0=\\"}]: Error: invalid keys \\"foo\\""`
+        `"Failed to update case, ids: [{\\"id\\":\\"mock-id-1\\",\\"version\\":\\"WzAsMV0=\\"}]: Error: Excess keys are not allowed"`
       );
     });
 
@@ -366,7 +366,7 @@ describe('update', () => {
           casesClientMock
         )
       ).rejects.toThrow(
-        'Failed to update case, ids: [{"id":"mock-id-1","version":"WzAsMV0="}]: Error: The length of the field assignees is too long. Array must be of length <= 10.'
+        'Failed to update case, ids: [{"id":"mock-id-1","version":"WzAsMV0="}]: Error: cases.0.assignees: The length of the field assignees is too long. Array must be of length <= 10.'
       );
     });
 
@@ -533,7 +533,7 @@ describe('update', () => {
           casesClientMock
         )
       ).rejects.toThrow(
-        `Failed to update case, ids: [{"id":"mock-id-1","version":"WzAsMV0="}]: Error: The length of the category is too long. The maximum length is ${MAX_CATEGORY_LENGTH}.,Invalid value \"A very long category with more than fifty characters!\" supplied to \"cases,category\"`
+        `Failed to update case, ids: [{"id":"mock-id-1","version":"WzAsMV0="}]: Error: cases.0.category: The length of the category is too long. The maximum length is ${MAX_CATEGORY_LENGTH}.`
       );
     });
 
@@ -553,7 +553,7 @@ describe('update', () => {
           casesClientMock
         )
       ).rejects.toThrow(
-        'Failed to update case, ids: [{"id":"mock-id-1","version":"WzAsMV0="}]: Error: The category field cannot be an empty string.,Invalid value "" supplied to "cases,category"'
+        'Failed to update case, ids: [{"id":"mock-id-1","version":"WzAsMV0="}]: Error: cases.0.category: The category field cannot be an empty string.'
       );
     });
 
@@ -573,7 +573,7 @@ describe('update', () => {
           casesClientMock
         )
       ).rejects.toThrow(
-        'Failed to update case, ids: [{"id":"mock-id-1","version":"WzAsMV0="}]: Error: The category field cannot be an empty string.,Invalid value "   " supplied to "cases,category"'
+        'Failed to update case, ids: [{"id":"mock-id-1","version":"WzAsMV0="}]: Error: cases.0.category: The category field cannot be an empty string.'
       );
     });
 
@@ -670,7 +670,7 @@ describe('update', () => {
           casesClientMock
         )
       ).rejects.toThrow(
-        `Failed to update case, ids: [{"id":"mock-id-1","version":"WzAsMV0="}]: Error: The length of the title is too long. The maximum length is ${MAX_TITLE_LENGTH}.`
+        `Failed to update case, ids: [{"id":"mock-id-1","version":"WzAsMV0="}]: Error: cases.0.title: The length of the title is too long. The maximum length is ${MAX_TITLE_LENGTH}.`
       );
     });
 
@@ -690,7 +690,7 @@ describe('update', () => {
           casesClientMock
         )
       ).rejects.toThrow(
-        'Failed to update case, ids: [{"id":"mock-id-1","version":"WzAsMV0="}]: Error: The title field cannot be an empty string.'
+        'Failed to update case, ids: [{"id":"mock-id-1","version":"WzAsMV0="}]: Error: cases.0.title: The title field cannot be an empty string.'
       );
     });
 
@@ -710,7 +710,7 @@ describe('update', () => {
           casesClientMock
         )
       ).rejects.toThrow(
-        'Failed to update case, ids: [{"id":"mock-id-1","version":"WzAsMV0="}]: Error: The title field cannot be an empty string.'
+        'Failed to update case, ids: [{"id":"mock-id-1","version":"WzAsMV0="}]: Error: cases.0.title: The title field cannot be an empty string.'
       );
     });
 
@@ -810,7 +810,7 @@ describe('update', () => {
           casesClientMock
         )
       ).rejects.toThrow(
-        `Failed to update case, ids: [{"id":"mock-id-1","version":"WzAsMV0="}]: Error: The length of the description is too long. The maximum length is ${MAX_DESCRIPTION_LENGTH}.`
+        `Failed to update case, ids: [{"id":"mock-id-1","version":"WzAsMV0="}]: Error: cases.0.description: The length of the description is too long. The maximum length is ${MAX_DESCRIPTION_LENGTH}.`
       );
     });
 
@@ -830,7 +830,7 @@ describe('update', () => {
           casesClientMock
         )
       ).rejects.toThrow(
-        'Failed to update case, ids: [{"id":"mock-id-1","version":"WzAsMV0="}]: Error: The description field cannot be an empty string.'
+        'Failed to update case, ids: [{"id":"mock-id-1","version":"WzAsMV0="}]: Error: cases.0.description: The description field cannot be an empty string.'
       );
     });
 
@@ -850,7 +850,7 @@ describe('update', () => {
           casesClientMock
         )
       ).rejects.toThrow(
-        'Failed to update case, ids: [{"id":"mock-id-1","version":"WzAsMV0="}]: Error: The description field cannot be an empty string.'
+        'Failed to update case, ids: [{"id":"mock-id-1","version":"WzAsMV0="}]: Error: cases.0.description: The description field cannot be an empty string.'
       );
     });
 
@@ -1126,7 +1126,7 @@ describe('update', () => {
           casesClientMock
         )
       ).rejects.toThrow(
-        `Failed to update case, ids: [{"id":"mock-id-1","version":"WzAsMV0="}]: Error: The length of the field tags is too long. Array must be of length <= ${MAX_TAGS_PER_CASE}.`
+        `Failed to update case, ids: [{"id":"mock-id-1","version":"WzAsMV0="}]: Error: cases.0.tags: The length of the field tags is too long. Array must be of length <= ${MAX_TAGS_PER_CASE}.`
       );
     });
 
@@ -1150,7 +1150,7 @@ describe('update', () => {
           casesClientMock
         )
       ).rejects.toThrow(
-        `Failed to update case, ids: [{"id":"mock-id-1","version":"WzAsMV0="}]: Error: The length of the tag is too long. The maximum length is ${MAX_LENGTH_PER_TAG}.`
+        `Failed to update case, ids: [{"id":"mock-id-1","version":"WzAsMV0="}]: Error: cases.0.tags.0: The length of the tag is too long. The maximum length is ${MAX_LENGTH_PER_TAG}.`
       );
     });
 
@@ -1170,7 +1170,7 @@ describe('update', () => {
           casesClientMock
         )
       ).rejects.toThrow(
-        'Failed to update case, ids: [{"id":"mock-id-1","version":"WzAsMV0="}]: Error: The tag field cannot be an empty string.'
+        'Failed to update case, ids: [{"id":"mock-id-1","version":"WzAsMV0="}]: Error: cases.0.tags.0: The tag field cannot be an empty string.'
       );
     });
 
@@ -1190,7 +1190,7 @@ describe('update', () => {
           casesClientMock
         )
       ).rejects.toThrow(
-        'Failed to update case, ids: [{"id":"mock-id-1","version":"WzAsMV0="}]: Error: The tag field cannot be an empty string.'
+        'Failed to update case, ids: [{"id":"mock-id-1","version":"WzAsMV0="}]: Error: cases.0.tags.0: The tag field cannot be an empty string.'
       );
     });
 
@@ -1462,7 +1462,7 @@ describe('update', () => {
           casesClient
         )
       ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Failed to update case, ids: [{\\"id\\":\\"mock-id-1\\",\\"version\\":\\"WzAsMV0=\\"}]: Error: The length of the field customFields is too long. Array must be of length <= 10."`
+        `"Failed to update case, ids: [{\\"id\\":\\"mock-id-1\\",\\"version\\":\\"WzAsMV0=\\"}]: Error: cases.0.customFields: The length of the field customFields is too long. Array must be of length <= 10."`
       );
     });
 
@@ -1677,7 +1677,7 @@ describe('update', () => {
           casesClientMock
         )
       ).rejects.toThrow(
-        'Error: The length of the field cases is too long. Array must be of length <= 100.'
+        'Error: cases: The length of the field cases is too long. Array must be of length <= 100.'
       );
     });
 
@@ -1691,7 +1691,7 @@ describe('update', () => {
           casesClientMock
         )
       ).rejects.toThrow(
-        'Error: The length of the field cases is too short. Array must be of length >= 1.'
+        'Error: cases: The length of the field cases is too short. Array must be of length >= 1.'
       );
     });
 

@@ -11,10 +11,10 @@ import type {
   BulkGetAttachmentsResponseV2,
 } from '../../../common/types/api';
 import {
-  BulkGetAttachmentsRequestRt,
-  BulkGetAttachmentsResponseRt,
-  BulkGetAttachmentsResponseRtV2,
+  BulkGetAttachmentsRequestSchema,
+  BulkGetAttachmentsResponseSchema,
 } from '../../../common/types/api';
+import { BulkGetAttachmentsResponseSchemaV2 } from '../../../common/types/api/attachment/v2';
 import type { AttachmentAttributes, AttachmentAttributesV2 } from '../../../common/types/domain';
 import { flattenAttachmentSavedObjects } from '../../common/utils';
 import { createCaseError, generateCaseErrorResponse } from '../../common/error';
@@ -25,7 +25,7 @@ import type { BulkOptionalAttributes, OptionalAttributes } from '../../services/
 import type { CasesClient } from '../client';
 import type { AttachmentSavedObject, SOWithErrors } from '../../common/types';
 import { partitionByCaseAssociation } from '../../common/partitioning';
-import { decodeOrThrow, decodeWithExcessOrThrow } from '../../common/runtime_types';
+import { decodeOrThrowZod, decodeWithExcessOrThrowZod } from '../../common/runtime_types';
 
 type AttachmentSavedObjectWithErrors = Array<SOWithErrors<AttachmentAttributes>>;
 
@@ -44,7 +44,9 @@ export async function bulkGet(
   } = clientArgs;
 
   try {
-    const request = decodeWithExcessOrThrow(BulkGetAttachmentsRequestRt)({ ids: savedObjectIds });
+    const request = decodeWithExcessOrThrowZod(BulkGetAttachmentsRequestSchema)({
+      ids: savedObjectIds,
+    });
 
     // perform an authorization check for the case
     await casesClient.cases.resolve({ id: caseID });
@@ -72,9 +74,13 @@ export async function bulkGet(
       errors,
     };
     if (mode === 'legacy') {
-      return decodeOrThrow(BulkGetAttachmentsResponseRt)(res);
+      return decodeOrThrowZod(BulkGetAttachmentsResponseSchema)(
+        res
+      ) as unknown as BulkGetAttachmentsResponseV2;
     }
-    return decodeOrThrow(BulkGetAttachmentsResponseRtV2)(res);
+    return decodeOrThrowZod(BulkGetAttachmentsResponseSchemaV2)(
+      res
+    ) as BulkGetAttachmentsResponseV2;
   } catch (error) {
     throw createCaseError({
       message: `Failed to bulk get attachments for case id: ${caseID}: ${error}`,

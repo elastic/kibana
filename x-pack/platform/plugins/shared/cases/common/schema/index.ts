@@ -5,13 +5,9 @@
  * 2.0.
  */
 
-import * as rt from 'io-ts';
-import { either } from 'fp-ts/Either';
-
-import { MAX_DOCS_PER_PAGE } from '../constants';
-import type { PartialPaginationType } from './types';
-import { PaginationSchemaRt } from './types';
+import { z } from '@kbn/zod/v4';
 import { ALLOWED_MIME_TYPES } from '../constants/mime_types';
+import { MAX_COMMENT_LENGTH, MAX_DOCS_PER_PAGE } from '../constants';
 
 export interface LimitedSchemaType {
   fieldName: string;
@@ -19,193 +15,184 @@ export interface LimitedSchemaType {
   max: number;
 }
 
-export const NonEmptyString = new rt.Type<string, string, unknown>(
-  'NonEmptyString',
-  rt.string.is,
-  (input, context) =>
-    either.chain(rt.string.validate(input, context), (s) => {
-      if (s.trim() !== '') {
-        return rt.success(s);
-      } else {
-        return rt.failure(input, context, 'string must have length >= 1');
-      }
-    }),
-  rt.identity
-);
+// Matches io-ts parity: rejects strings whose `.trim()` is empty (e.g. "   ", "\t\n").
+// Preserves the original (untrimmed) string on success.
+export const NonEmptyString = z
+  .string()
+  .max(1000)
+  .refine((s) => s.trim().length >= 1, 'string must have length >= 1');
 
 export const limitedStringSchema = ({ fieldName, min, max }: LimitedSchemaType) =>
-  new rt.Type<string, string, unknown>(
-    'LimitedString',
-    rt.string.is,
-    (input, context) =>
-      either.chain(rt.string.validate(input, context), (s) => {
-        const trimmedString = s.trim();
+  z.string().superRefine((s, ctx) => {
+    const trimmed = s.trim();
 
-        if (trimmedString.length === 0 && trimmedString.length < min) {
-          return rt.failure(input, context, `The ${fieldName} field cannot be an empty string.`);
-        }
+    // io-ts parity: an empty / whitespace-only string is only rejected when
+    // `min > 0`; with `min === 0` it should pass through.
+    if (trimmed.length === 0 && min > 0) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: `The ${fieldName} field cannot be an empty string.`,
+      });
+      return;
+    }
 
-        if (trimmedString.length < min) {
-          return rt.failure(
-            input,
-            context,
-            `The length of the ${fieldName} is too short. The minimum length is ${min}.`
-          );
-        }
+    if (trimmed.length < min) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: `The length of the ${fieldName} is too short. The minimum length is ${min}.`,
+      });
+      return;
+    }
 
-        if (trimmedString.length > max) {
-          return rt.failure(
-            input,
-            context,
-            `The length of the ${fieldName} is too long. The maximum length is ${max}.`
-          );
-        }
+    if (trimmed.length > max) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: `The length of the ${fieldName} is too long. The maximum length is ${max}.`,
+      });
+    }
+  });
 
-        return rt.success(s);
-      }),
-    rt.identity
-  );
-
-export const limitedArraySchema = <T extends rt.Mixed>({
+export const limitedArraySchema = <T extends z.ZodTypeAny>({
   codec,
   fieldName,
   min,
   max,
 }: { codec: T } & LimitedSchemaType) =>
-  new rt.Type<Array<rt.TypeOf<typeof codec>>, Array<rt.TypeOf<typeof codec>>, unknown>(
-    'LimitedArray',
-    (input): input is T[] => rt.array(codec).is(input),
-    (input, context) =>
-      either.chain(rt.array(codec).validate(input, context), (s) => {
-        if (s.length < min) {
-          return rt.failure(
-            input,
-            context,
-            `The length of the field ${fieldName} is too short. Array must be of length >= ${min}.`
-          );
-        }
+  z.array(codec).superRefine((s, ctx) => {
+    if (s.length < min) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: `The length of the field ${fieldName} is too short. Array must be of length >= ${min}.`,
+      });
+      return;
+    }
 
-        if (s.length > max) {
-          return rt.failure(
-            input,
-            context,
-            `The length of the field ${fieldName} is too long. Array must be of length <= ${max}.`
-          );
-        }
-
-        return rt.success(s);
-      }),
-    rt.identity
-  );
-
-export const paginationSchema = ({ maxPerPage }: { maxPerPage: number }) =>
-  new rt.PartialType<undefined, PartialPaginationType, PartialPaginationType, unknown>(
-    'Pagination',
-    PaginationSchemaRt.is,
-    (u, c) =>
-      either.chain(PaginationSchemaRt.validate(u, c), (params) => {
-        if (params.page == null && params.perPage == null) {
-          return rt.success(params);
-        }
-
-        const pageAsNumber = params.page ?? 0;
-        const perPageAsNumber = params.perPage ?? 0;
-
-        if (perPageAsNumber > maxPerPage) {
-          return rt.failure(
-            u,
-            c,
-            `The provided perPage value is too high. The maximum allowed perPage value is ${maxPerPage}.`
-          );
-        }
-
-        if (Math.max(pageAsNumber, pageAsNumber * perPageAsNumber) > MAX_DOCS_PER_PAGE) {
-          return rt.failure(
-            u,
-            c,
-            `The number of documents is too high. Paginating through more than ${MAX_DOCS_PER_PAGE} documents is not possible.`
-          );
-        }
-
-        return rt.success({
-          ...(params.page != null && { page: pageAsNumber }),
-          ...(params.perPage != null && { perPage: perPageAsNumber }),
-        });
-      }),
-    rt.identity,
-    undefined
-  );
+    if (s.length > max) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: `The length of the field ${fieldName} is too long. Array must be of length <= ${max}.`,
+      });
+    }
+  });
 
 export const limitedNumberSchema = ({ fieldName, min, max }: LimitedSchemaType) =>
-  new rt.Type<number, number, unknown>(
-    'LimitedNumber',
-    rt.number.is,
-    (input, context) =>
-      either.chain(rt.number.validate(input, context), (s) => {
-        if (s < min) {
-          return rt.failure(input, context, `The ${fieldName} field cannot be less than ${min}.`);
-        }
+  z.number().superRefine((s, ctx) => {
+    if (s < min) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: `The ${fieldName} field cannot be less than ${min}.`,
+      });
+      return;
+    }
 
-        if (s > max) {
-          return rt.failure(input, context, `The ${fieldName} field cannot be more than ${max}.`);
-        }
+    if (s > max) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: `The ${fieldName} field cannot be more than ${max}.`,
+      });
+    }
+  });
 
-        return rt.success(s);
-      }),
-    rt.identity
-  );
+export const paginationSchema = ({ maxPerPage }: { maxPerPage: number }) => {
+  // Matches io-ts `NumberFromString` parity: a string input must parse to a finite
+  // number. `Number('abc')` returns `NaN`, which previously failed validation —
+  // a plain `transform((s) => Number(s))` would let `NaN` through silently and
+  // bypass the downstream `> maxPerPage` / `MAX_DOCS_PER_PAGE` guards.
+  // The transform is on the union (rather than only on the string variant) so
+  // the custom error message survives instead of being swallowed by the
+  // union's "no variant matched" error.
+  const pageCoerce = z.union([z.number(), z.string().max(20)]).transform((value, ctx) => {
+    if (typeof value === 'number') return value;
+    const n = Number(value);
+    if (!Number.isFinite(n)) {
+      ctx.addIssue({ code: z.ZodIssueCode.custom, message: 'cannot parse to a number' });
+      return z.NEVER;
+    }
+    return n;
+  });
+  return z
+    .object({
+      page: pageCoerce.optional(),
+      perPage: pageCoerce.optional(),
+    })
+    .superRefine((params, ctx) => {
+      if (params.page == null && params.perPage == null) return;
 
-export const limitedNumberAsIntegerSchema = ({ fieldName }: { fieldName: string }) =>
-  new rt.Type<number, number, unknown>(
-    'LimitedNumberAsInteger',
-    rt.number.is,
-    (input, context) =>
-      either.chain(rt.number.validate(input, context), (s) => {
-        if (!Number.isSafeInteger(s)) {
-          return rt.failure(
-            input,
-            context,
-            `The ${fieldName} field should be an integer between -(2^53 - 1) and 2^53 - 1, inclusive.`
-          );
-        }
-        return rt.success(s);
-      }),
-    rt.identity
-  );
+      const pageAsNumber = params.page ?? 0;
+      const perPageAsNumber = params.perPage ?? 0;
 
-export interface RegexStringSchemaType {
-  codec: rt.Type<string, string, unknown>;
-  pattern: string;
-  message: string;
-}
-
-export const regexStringRt = ({ codec, pattern, message }: RegexStringSchemaType) =>
-  new rt.Type<string, string, unknown>(
-    'RegexString',
-    codec.is,
-    (input, context) =>
-      either.chain(codec.validate(input, context), (value) => {
-        const regex = new RegExp(pattern, 'g');
-
-        if (!regex.test(value)) {
-          return rt.failure(input, context, message);
-        }
-
-        return rt.success(value);
-      }),
-    rt.identity
-  );
-
-export const mimeTypeString = new rt.Type<string, string, unknown>(
-  'mimeTypeString',
-  rt.string.is,
-  (input, context) =>
-    either.chain(rt.string.validate(input, context), (s) => {
-      if (!ALLOWED_MIME_TYPES.includes(s)) {
-        return rt.failure(input, context, `The mime type field value ${s} is not allowed.`);
+      if (perPageAsNumber > maxPerPage) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: `The provided perPage value is too high. The maximum allowed perPage value is ${maxPerPage}.`,
+        });
+        return;
       }
 
-      return rt.success(s);
-    }),
-  rt.identity
+      if (Math.max(pageAsNumber, pageAsNumber * perPageAsNumber) > MAX_DOCS_PER_PAGE) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: `The number of documents is too high. Paginating through more than ${MAX_DOCS_PER_PAGE} documents is not possible.`,
+        });
+      }
+    });
+};
+
+export const limitedNumberAsIntegerSchema = ({ fieldName }: { fieldName: string }) =>
+  z.number().superRefine((s, ctx) => {
+    if (!Number.isSafeInteger(s)) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: `The ${fieldName} field should be an integer between -(2^53 - 1) and 2^53 - 1, inclusive.`,
+      });
+    }
+  });
+
+export const regexStringSchema = ({
+  codec,
+  pattern,
+  message,
+}: {
+  codec: z.ZodType<string>;
+  pattern: string;
+  message: string;
+}) =>
+  codec.superRefine((value, ctx) => {
+    if (!new RegExp(pattern).test(value)) {
+      ctx.addIssue({ code: z.ZodIssueCode.custom, message });
+    }
+  });
+
+export const mimeTypeString = z
+  .string()
+  .max(255)
+  .superRefine((s, ctx) => {
+    if (!ALLOWED_MIME_TYPES.includes(s)) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: `The mime type field value ${s} is not allowed.`,
+      });
+    }
+  });
+
+/**
+ * Zod equivalent of jsonValueRt — a recursive JSON value type.
+ */
+export type JsonValue =
+  | string
+  | number
+  | boolean
+  | null
+  | JsonValue[]
+  | { [key: string]: JsonValue };
+
+export const jsonValueSchema: z.ZodType<JsonValue> = z.lazy(() =>
+  z.union([
+    z.string().max(MAX_COMMENT_LENGTH),
+    z.number(),
+    z.boolean(),
+    z.null(),
+    z.array(jsonValueSchema),
+    z.record(z.string().max(1000), jsonValueSchema),
+  ])
 );

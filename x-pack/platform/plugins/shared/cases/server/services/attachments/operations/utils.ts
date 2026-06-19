@@ -6,14 +6,14 @@
  */
 
 import { passThroughTransformer } from '../../../common/attachments/base';
-import { decodeOrThrow } from '../../../common/runtime_types';
+import { decodeOrThrowZod } from '../../../common/runtime_types';
 import type { AttachmentPersistedAttributes } from '../../../common/types/attachments_v1';
 import type { UnifiedAttachmentAttributes } from '../../../common/types/attachments_v2';
-import {
-  type AttachmentPatchAttributesV2,
-  type AttachmentMode,
-  UnifiedAttachmentAttributesRt,
+import type {
+  AttachmentPatchAttributesV2,
+  AttachmentMode,
 } from '../../../../common/types/domain/attachment/v2';
+import { UnifiedAttachmentAttributesSchema } from '../../../../common/types/domain/attachment/v2';
 import {
   isMigratedAttachmentType,
   isUnifiedOnlyAttachmentType,
@@ -44,7 +44,9 @@ export function transformAttributesForMode({
 
   if ((mode === 'unified' || isUnifiedOnly) && isMigratedAttachmentType(attachmentType, owner)) {
     const unifiedAttrs = transformer.toUnifiedSchema(attributes);
-    const validatedAttributes = decodeOrThrow(UnifiedAttachmentAttributesRt)(unifiedAttrs);
+    const validatedAttributes = decodeOrThrowZod(UnifiedAttachmentAttributesSchema)(
+      unifiedAttrs
+    ) as UnifiedAttachmentAttributes;
     return { isUnified: true, attributes: validatedAttributes };
   }
 

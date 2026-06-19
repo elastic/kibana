@@ -8,28 +8,28 @@
 import { isString } from 'lodash';
 import type { CaseAssignees, CaseCustomFields, CaseSettings } from '../../../common/types/domain';
 import {
-  CaseAssigneesRt,
-  CaseCustomFieldsRt,
-  CaseSettingsRt,
-  ExtendedFieldsRt,
+  CaseAssigneesSchema,
+  CaseCustomFieldsSchema,
+  CaseSettingsSchema,
 } from '../../../common/types/domain';
+import { ExtendedFieldsSchema } from '../../../common/types/domain/user_action/extended_fields/v1';
 
 export const isStringArray = (value: unknown): value is string[] => {
   return Array.isArray(value) && value.every((val) => isString(val));
 };
 
 export const isAssigneesArray = (value: unknown): value is CaseAssignees => {
-  return CaseAssigneesRt.is(value);
+  return CaseAssigneesSchema.safeParse(value).success;
 };
 
 export const isCustomFieldsArray = (value: unknown): value is CaseCustomFields => {
-  return CaseCustomFieldsRt.is(value);
+  return CaseCustomFieldsSchema.safeParse(value).success;
 };
 
 export const isCaseSettings = (value: unknown): value is CaseSettings => {
-  return CaseSettingsRt.is(value);
+  return CaseSettingsSchema.safeParse(value).success;
 };
 
 export const isExtendedFields = (value: unknown): value is Record<string, string> => {
-  return ExtendedFieldsRt.is(value);
+  return ExtendedFieldsSchema.safeParse(value).success;
 };

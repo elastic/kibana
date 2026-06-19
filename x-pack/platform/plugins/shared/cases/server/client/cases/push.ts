@@ -19,10 +19,10 @@ import type {
   ConfigurationAttributes,
 } from '../../../common/types/domain';
 import {
-  CaseRt,
   CaseStatuses,
   UserActionTypes,
   AttachmentType,
+  CaseSchema,
 } from '../../../common/types/domain';
 import {
   CASE_COMMENT_SAVED_OBJECT,
@@ -49,7 +49,7 @@ import { Operations } from '../../authorization';
 import { casesConnectors } from '../../connectors';
 import { getAlerts } from '../alerts/get';
 import { buildFilter, combineFilters, NodeBuilderOperators } from '../utils';
-import { decodeOrThrow } from '../../common/runtime_types';
+import { decodeOrThrowZod } from '../../common/runtime_types';
 import type { ExternalServiceResponse } from '../../../common/types/api';
 
 /**
@@ -358,7 +358,7 @@ export const push = async (
       }),
     });
 
-    return decodeOrThrow(CaseRt)(res);
+    return decodeOrThrowZod(CaseSchema)(res);
   } catch (error) {
     throw createCaseError({ message: `Failed to push case: ${error}`, error, logger });
   }

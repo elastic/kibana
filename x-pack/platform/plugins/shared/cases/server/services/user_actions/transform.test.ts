@@ -241,7 +241,7 @@ describe('transform', () => {
             },
           },
           references: [],
-        } as typeof base;
+        } as unknown as typeof base;
 
         const transformed = transformer(createSOFindResponse([createUserActionFindSO(userAction)]));
 

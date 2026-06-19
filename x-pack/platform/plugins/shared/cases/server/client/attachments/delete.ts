@@ -8,7 +8,7 @@
 import Boom from '@hapi/boom';
 
 import { UserActionActions, UserActionTypes } from '../../../common/types/domain';
-import { decodeOrThrow } from '../../common/runtime_types';
+import { decodeOrThrowZod } from '../../common/runtime_types';
 import { CASE_SAVED_OBJECT } from '../../../common/constants';
 import { getAlertInfoFromComments } from '../../common/utils';
 import type { CasesClientArgs } from '../types';
@@ -16,7 +16,7 @@ import { createCaseError } from '../../common/error';
 import { Operations } from '../../authorization';
 import type { DeleteAllArgs, DeleteArgs } from './types';
 import type { AttachmentRequestV2 } from '../../../common/types/api';
-import { AttachmentRequestRtV2 } from '../../../common/types/api';
+import { AttachmentRequestSchemaV2 } from '../../../common/types/api/attachment/v2';
 
 /**
  * Delete all comments for a case.
@@ -136,7 +136,9 @@ export async function deleteComment(
     // we only want to store the fields related to the original request of the attachment, not fields like
     // created_at etc. So we'll use the decode to strip off the other fields. This is necessary because we don't know
     // what type of attachment this is. Depending on the type it could have various fields.
-    const attachmentRequestAttributes = decodeOrThrow(AttachmentRequestRtV2)(attachment.attributes);
+    const attachmentRequestAttributes = decodeOrThrowZod(AttachmentRequestSchemaV2)(
+      attachment.attributes
+    ) as AttachmentRequestV2;
 
     await userActionService.creator.createUserAction({
       userAction: {

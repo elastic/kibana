@@ -6,41 +6,39 @@
  */
 
 import { UserActionTypes } from '../action/v1';
-import { TemplateUserActionPayloadRt, TemplateUserActionRt } from './v1';
+import { TemplateUserActionPayloadSchema, TemplateUserActionSchema } from './v1';
 
-describe('TemplateUserActionPayloadRt', () => {
+describe('TemplateUserActionPayloadSchema', () => {
   it('accepts a payload with a template object', () => {
-    expect(
-      TemplateUserActionPayloadRt.decode({ template: { id: 'tmpl-1', version: 3 } })
-    ).toStrictEqual({
-      _tag: 'Right',
-      right: { template: { id: 'tmpl-1', version: 3 } },
+    const result = TemplateUserActionPayloadSchema.safeParse({
+      template: { id: 'tmpl-1', version: 3 },
     });
+    expect(result.success).toBe(true);
+    expect(result.data).toStrictEqual({ template: { id: 'tmpl-1', version: 3 } });
   });
 
   it('accepts a payload with null template (remove)', () => {
-    expect(TemplateUserActionPayloadRt.decode({ template: null })).toStrictEqual({
-      _tag: 'Right',
-      right: { template: null },
-    });
+    const result = TemplateUserActionPayloadSchema.safeParse({ template: null });
+    expect(result.success).toBe(true);
+    expect(result.data).toStrictEqual({ template: null });
   });
 
   it('rejects a payload with a missing template field', () => {
-    const result = TemplateUserActionPayloadRt.decode({});
-    expect(result._tag).toBe('Left');
+    const result = TemplateUserActionPayloadSchema.safeParse({});
+    expect(result.success).toBe(false);
   });
 
   it('strips extra fields from the payload', () => {
-    expect(
-      TemplateUserActionPayloadRt.decode({ template: { id: 'tmpl-1', version: 3 }, extra: 'drop' })
-    ).toStrictEqual({
-      _tag: 'Right',
-      right: { template: { id: 'tmpl-1', version: 3 } },
+    const result = TemplateUserActionPayloadSchema.safeParse({
+      template: { id: 'tmpl-1', version: 3 },
+      extra: 'drop',
     });
+    expect(result.success).toBe(true);
+    expect(result.data).toStrictEqual({ template: { id: 'tmpl-1', version: 3 } });
   });
 });
 
-describe('TemplateUserActionRt', () => {
+describe('TemplateUserActionSchema', () => {
   const validApplyRequest = {
     type: UserActionTypes.template,
     payload: { template: { id: 'tmpl-1', version: 3 } },
@@ -52,40 +50,34 @@ describe('TemplateUserActionRt', () => {
   };
 
   it('accepts an apply-template action', () => {
-    expect(TemplateUserActionRt.decode(validApplyRequest)).toStrictEqual({
-      _tag: 'Right',
-      right: validApplyRequest,
-    });
+    const result = TemplateUserActionSchema.safeParse(validApplyRequest);
+    expect(result.success).toBe(true);
+    expect(result.data).toStrictEqual(validApplyRequest);
   });
 
   it('accepts a remove-template action (null payload)', () => {
-    expect(TemplateUserActionRt.decode(validRemoveRequest)).toStrictEqual({
-      _tag: 'Right',
-      right: validRemoveRequest,
-    });
+    const result = TemplateUserActionSchema.safeParse(validRemoveRequest);
+    expect(result.success).toBe(true);
+    expect(result.data).toStrictEqual(validRemoveRequest);
   });
 
   it('strips extra top-level fields', () => {
-    expect(TemplateUserActionRt.decode({ ...validApplyRequest, extra: 'drop' })).toStrictEqual({
-      _tag: 'Right',
-      right: validApplyRequest,
-    });
+    const result = TemplateUserActionSchema.safeParse({ ...validApplyRequest, extra: 'drop' });
+    expect(result.success).toBe(true);
+    expect(result.data).toStrictEqual(validApplyRequest);
   });
 
   it('strips extra fields from payload', () => {
-    expect(
-      TemplateUserActionRt.decode({
-        ...validApplyRequest,
-        payload: { ...validApplyRequest.payload, extra: 'drop' },
-      })
-    ).toStrictEqual({
-      _tag: 'Right',
-      right: validApplyRequest,
+    const result = TemplateUserActionSchema.safeParse({
+      ...validApplyRequest,
+      payload: { ...validApplyRequest.payload, extra: 'drop' },
     });
+    expect(result.success).toBe(true);
+    expect(result.data).toStrictEqual(validApplyRequest);
   });
 
   it('rejects a wrong type', () => {
-    const result = TemplateUserActionRt.decode({ ...validApplyRequest, type: 'title' });
-    expect(result._tag).toBe('Left');
+    const result = TemplateUserActionSchema.safeParse({ ...validApplyRequest, type: 'title' });
+    expect(result.success).toBe(false);
   });
 });

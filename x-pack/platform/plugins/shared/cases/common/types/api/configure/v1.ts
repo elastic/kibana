@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import * as rt from 'io-ts';
+import { z } from '@kbn/zod/v4';
 import {
   MAX_CUSTOM_FIELDS_PER_CASE,
   MAX_CUSTOM_FIELD_KEY_LENGTH,
@@ -19,27 +19,28 @@ import {
   MAX_TEMPLATE_KEY_LENGTH,
   MAX_TEMPLATE_NAME_LENGTH,
   MAX_TEMPLATE_TAG_LENGTH,
+  MAX_TITLE_LENGTH,
 } from '../../../constants';
-import { limitedArraySchema, limitedStringSchema, regexStringRt } from '../../../schema';
+import { limitedArraySchema, limitedStringSchema, regexStringSchema } from '../../../schema';
 import {
-  CustomFieldTextTypeRt,
-  CustomFieldToggleTypeRt,
-  CustomFieldNumberTypeRt,
-} from '../../domain';
-import type { Configurations, Configuration } from '../../domain/configure/v1';
-import { ConfigurationBasicWithoutOwnerRt, ClosureTypeRt } from '../../domain/configure/v1';
-import { CaseConnectorRt } from '../../domain/connector/v1';
-import { CaseBaseOptionalFieldsRequestRt } from '../case/v1';
+  CustomFieldTextTypeSchema,
+  CustomFieldToggleTypeSchema,
+  CustomFieldNumberTypeSchema,
+} from '../../domain/custom_field/v1';
+import { ClosureTypeSchema, ConfigurationBasicWithoutOwnerSchema } from '../../domain/configure/v1';
+import type { Configuration, Configurations } from '../../domain/configure/v1';
+import { CaseConnectorSchema } from '../../domain/connector/v1';
+import { CaseBaseOptionalFieldsRequestSchema } from '../case/v1';
 import {
-  CaseCustomFieldTextWithValidationValueRt,
-  CaseCustomFieldNumberWithValidationValueRt,
+  CaseCustomFieldTextWithValidationValueSchema,
+  CaseCustomFieldNumberWithValidationValueSchema,
 } from '../custom_field/v1';
 
-export const CustomFieldConfigurationWithoutTypeRt = rt.strict({
+export const CustomFieldConfigurationWithoutTypeSchema = z.object({
   /**
    * key of custom field
    */
-  key: regexStringRt({
+  key: regexStringSchema({
     codec: limitedStringSchema({ fieldName: 'key', min: 1, max: MAX_CUSTOM_FIELD_KEY_LENGTH }),
     pattern: '^[a-z0-9_-]+$',
     message: `Key must be lower case, a-z, 0-9, '_', and '-' are allowed`,
@@ -51,60 +52,50 @@ export const CustomFieldConfigurationWithoutTypeRt = rt.strict({
   /**
    * custom field options - required
    */
-  required: rt.boolean,
+  required: z.boolean(),
 });
 
-export const TextCustomFieldConfigurationRt = rt.intersection([
-  rt.strict({ type: CustomFieldTextTypeRt }),
-  CustomFieldConfigurationWithoutTypeRt,
-  rt.exact(
-    rt.partial({
-      defaultValue: rt.union([CaseCustomFieldTextWithValidationValueRt('defaultValue'), rt.null]),
-    })
-  ),
-]);
+export const TextCustomFieldConfigurationSchema = CustomFieldConfigurationWithoutTypeSchema.extend({
+  type: CustomFieldTextTypeSchema,
+  defaultValue: CaseCustomFieldTextWithValidationValueSchema('defaultValue').nullable().optional(),
+});
 
-export const ToggleCustomFieldConfigurationRt = rt.intersection([
-  rt.strict({ type: CustomFieldToggleTypeRt }),
-  CustomFieldConfigurationWithoutTypeRt,
-  rt.exact(
-    rt.partial({
-      defaultValue: rt.union([rt.boolean, rt.null]),
-    })
-  ),
-]);
+export const ToggleCustomFieldConfigurationSchema =
+  CustomFieldConfigurationWithoutTypeSchema.extend({
+    type: CustomFieldToggleTypeSchema,
+    defaultValue: z.boolean().nullable().optional(),
+  });
 
-export const NumberCustomFieldConfigurationRt = rt.intersection([
-  rt.strict({ type: CustomFieldNumberTypeRt }),
-  CustomFieldConfigurationWithoutTypeRt,
-  rt.exact(
-    rt.partial({
-      defaultValue: rt.union([
-        CaseCustomFieldNumberWithValidationValueRt({ fieldName: 'defaultValue' }),
-        rt.null,
-      ]),
-    })
-  ),
-]);
+export const NumberCustomFieldConfigurationSchema =
+  CustomFieldConfigurationWithoutTypeSchema.extend({
+    type: CustomFieldNumberTypeSchema,
+    defaultValue: CaseCustomFieldNumberWithValidationValueSchema({ fieldName: 'defaultValue' })
+      .nullable()
+      .optional(),
+  });
 
-export const CustomFieldsConfigurationRt = limitedArraySchema({
-  codec: rt.union([
-    TextCustomFieldConfigurationRt,
-    ToggleCustomFieldConfigurationRt,
-    NumberCustomFieldConfigurationRt,
+export const CustomFieldsConfigurationSchema = limitedArraySchema({
+  codec: z.union([
+    TextCustomFieldConfigurationSchema,
+    ToggleCustomFieldConfigurationSchema,
+    NumberCustomFieldConfigurationSchema,
   ]),
   min: 0,
   max: MAX_CUSTOM_FIELDS_PER_CASE,
   fieldName: 'customFields',
 });
 
-export const ObservableTypesConfigurationRt = limitedArraySchema({
+export const ObservableTypesConfigurationSchema = limitedArraySchema({
   min: 0,
   max: MAX_CUSTOM_OBSERVABLE_TYPES,
   fieldName: 'observableTypes',
-  codec: rt.strict({
-    key: regexStringRt({
-      codec: limitedStringSchema({ fieldName: 'key', min: 1, max: MAX_OBSERVABLE_TYPE_KEY_LENGTH }),
+  codec: z.object({
+    key: regexStringSchema({
+      codec: limitedStringSchema({
+        fieldName: 'key',
+        min: 1,
+        max: MAX_OBSERVABLE_TYPE_KEY_LENGTH,
+      }),
       pattern: '^[a-z0-9_-]+$',
       message: `Key must be lower case, a-z, 0-9, '_', and '-' are allowed`,
     }),
@@ -116,113 +107,97 @@ export const ObservableTypesConfigurationRt = limitedArraySchema({
   }),
 });
 
-export const TemplateConfigurationRt = rt.intersection([
-  rt.strict({
-    /**
-     * key of template
-     */
-    key: regexStringRt({
-      codec: limitedStringSchema({ fieldName: 'key', min: 1, max: MAX_TEMPLATE_KEY_LENGTH }),
-      pattern: '^[a-z0-9_-]+$',
-      message: `Key must be lower case, a-z, 0-9, '_', and '-' are allowed`,
-    }),
-    /**
-     * name of template
-     */
-    name: limitedStringSchema({ fieldName: 'name', min: 1, max: MAX_TEMPLATE_NAME_LENGTH }),
-    /**
-     * case fields
-     */
-    caseFields: rt.union([rt.null, CaseBaseOptionalFieldsRequestRt]),
+export const TemplateConfigurationSchema = z.object({
+  /**
+   * key of template
+   */
+  key: regexStringSchema({
+    codec: limitedStringSchema({ fieldName: 'key', min: 1, max: MAX_TEMPLATE_KEY_LENGTH }),
+    pattern: '^[a-z0-9_-]+$',
+    message: `Key must be lower case, a-z, 0-9, '_', and '-' are allowed`,
   }),
-  rt.exact(
-    rt.partial({
-      /**
-       * description of templates
-       */
-      description: limitedStringSchema({
-        fieldName: 'description',
-        min: 0,
-        max: MAX_TEMPLATE_DESCRIPTION_LENGTH,
-      }),
-      /**
-       * tags of templates
-       */
-      tags: limitedArraySchema({
-        codec: limitedStringSchema({
-          fieldName: `template's tag`,
-          min: 1,
-          max: MAX_TEMPLATE_TAG_LENGTH,
-        }),
-        min: 0,
-        max: MAX_TAGS_PER_TEMPLATE,
-        fieldName: `template's tags`,
-      }),
-    })
-  ),
-]);
+  /**
+   * name of template
+   */
+  name: limitedStringSchema({ fieldName: 'name', min: 1, max: MAX_TEMPLATE_NAME_LENGTH }),
+  /**
+   * case fields
+   */
+  caseFields: CaseBaseOptionalFieldsRequestSchema.nullable(),
+  /**
+   * description of templates
+   */
+  description: limitedStringSchema({
+    fieldName: 'description',
+    min: 0,
+    max: MAX_TEMPLATE_DESCRIPTION_LENGTH,
+  }).optional(),
+  /**
+   * tags of templates
+   */
+  tags: limitedArraySchema({
+    codec: limitedStringSchema({
+      fieldName: `template's tag`,
+      min: 1,
+      max: MAX_TEMPLATE_TAG_LENGTH,
+    }),
+    min: 0,
+    max: MAX_TAGS_PER_TEMPLATE,
+    fieldName: `template's tags`,
+  }).optional(),
+});
 
-export const TemplatesConfigurationRt = limitedArraySchema({
-  codec: TemplateConfigurationRt,
+export const TemplatesConfigurationSchema = limitedArraySchema({
+  codec: TemplateConfigurationSchema,
   min: 0,
   max: MAX_TEMPLATES_LENGTH,
   fieldName: 'templates',
 });
 
-export const ConfigurationRequestRt = rt.intersection([
-  rt.strict({
-    /**
-     * The external connector
-     */
-    connector: CaseConnectorRt,
-    /**
-     * Whether to close the case after it has been synced with the external system
-     */
-    closure_type: ClosureTypeRt,
-    /**
-     * The plugin owner that manages this configuration
-     */
-    owner: rt.string,
-  }),
-  rt.exact(
-    rt.partial({
-      customFields: CustomFieldsConfigurationRt,
-      templates: TemplatesConfigurationRt,
-      observableTypes: ObservableTypesConfigurationRt,
-    })
-  ),
-]);
-
-export const GetConfigurationFindRequestRt = rt.exact(
-  rt.partial({
-    /**
-     * The configuration plugin owner to filter the search by. If this is left empty the results will include all configurations
-     * that the user has permissions to access
-     */
-    owner: rt.union([rt.array(rt.string), rt.string]),
-  })
-);
-
-export const CaseConfigureRequestParamsRt = rt.strict({
-  configuration_id: rt.string,
+export const ConfigurationRequestSchema = z.object({
+  /**
+   * The external connector
+   */
+  connector: CaseConnectorSchema,
+  /**
+   * Whether to close the case after it has been synced with the external system
+   */
+  closure_type: ClosureTypeSchema,
+  /**
+   * The plugin owner that manages this configuration
+   */
+  owner: z.string().max(MAX_TITLE_LENGTH),
+  customFields: CustomFieldsConfigurationSchema.optional(),
+  templates: TemplatesConfigurationSchema.optional(),
+  observableTypes: ObservableTypesConfigurationSchema.optional(),
 });
 
-export const ConfigurationPatchRequestRt = rt.intersection([
-  rt.exact(
-    rt.partial({
-      closure_type: ConfigurationBasicWithoutOwnerRt.type.props.closure_type,
-      connector: ConfigurationBasicWithoutOwnerRt.type.props.connector,
-      customFields: CustomFieldsConfigurationRt,
-      templates: TemplatesConfigurationRt,
-      observableTypes: ObservableTypesConfigurationRt,
-    })
-  ),
-  rt.strict({ version: rt.string }),
-]);
+export const GetConfigurationFindRequestSchema = z.object({
+  /**
+   * The configuration plugin owner to filter the search by. If this is left empty the results will include all configurations
+   * that the user has permissions to access
+   */
+  owner: z
+    .union([z.array(z.string().max(MAX_TITLE_LENGTH)), z.string().max(MAX_TITLE_LENGTH)])
+    .optional(),
+});
 
-export type ConfigurationRequest = rt.TypeOf<typeof ConfigurationRequestRt>;
-export type ConfigurationPatchRequest = rt.TypeOf<typeof ConfigurationPatchRequestRt>;
-export type GetConfigurationFindRequest = rt.TypeOf<typeof GetConfigurationFindRequestRt>;
+export const CaseConfigureRequestParamsSchema = z.object({
+  configuration_id: z.string().max(512),
+});
+
+export const ConfigurationPatchRequestSchema = z.object({
+  closure_type: ClosureTypeSchema.optional(),
+  connector: ConfigurationBasicWithoutOwnerSchema.shape.connector.optional(),
+  customFields: CustomFieldsConfigurationSchema.optional(),
+  templates: TemplatesConfigurationSchema.optional(),
+  observableTypes: ObservableTypesConfigurationSchema.optional(),
+  version: z.string().max(512),
+});
+
+export type ConfigurationRequest = z.infer<typeof ConfigurationRequestSchema>;
+export type ConfigurationPatchRequest = z.infer<typeof ConfigurationPatchRequestSchema>;
+export type GetConfigurationFindRequest = z.infer<typeof GetConfigurationFindRequestSchema>;
 export type GetConfigureResponse = Configurations;
 export type CreateConfigureResponse = Configuration;
 export type UpdateConfigureResponse = Configuration;

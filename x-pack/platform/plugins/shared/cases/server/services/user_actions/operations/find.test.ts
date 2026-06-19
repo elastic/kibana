@@ -137,9 +137,7 @@ describe('UserActionsService: Finder', () => {
       const soFindRes = createSOFindResponse([{ ...userAction, attributes, score: 0 }]);
       method(soFindRes);
 
-      await expect(finder[soMethodName]({ caseId: '1' })).rejects.toThrow(
-        `Invalid value "undefined" supplied to "${key}"`
-      );
+      await expect(finder[soMethodName]({ caseId: '1' })).rejects.toThrow(`Invalid`);
     });
 
     it('throws if type is omitted', async () => {
@@ -157,9 +155,7 @@ describe('UserActionsService: Finder', () => {
       const soFindRes = createSOFindResponse([{ ...userAction, attributes, score: 0 }]);
       method(soFindRes);
 
-      await expect(finder[soMethodName]({ caseId: '1' })).rejects.toThrow(
-        'Invalid value "undefined" supplied to "payload,title"'
-      );
+      await expect(finder[soMethodName]({ caseId: '1' })).rejects.toThrow('Invalid');
     });
 
     it('throws if missing nested attributes from the payload', async () => {
@@ -168,9 +164,7 @@ describe('UserActionsService: Finder', () => {
       const soFindRes = createSOFindResponse([{ ...userAction, attributes, score: 0 }]);
       method(soFindRes);
 
-      await expect(finder[soMethodName]({ caseId: '1' })).rejects.toThrow(
-        'Invalid value "undefined" supplied to "payload,connector,fields,issueType",Invalid value "{"priority":"high","parent":"2"}" supplied to "payload,connector,fields"'
-      );
+      await expect(finder[soMethodName]({ caseId: '1' })).rejects.toThrow('Invalid');
     });
 
     it('strips out excess attributes', async () => {

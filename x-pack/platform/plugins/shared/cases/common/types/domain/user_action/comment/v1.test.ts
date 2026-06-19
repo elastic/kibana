@@ -7,10 +7,10 @@
 
 import { AttachmentType } from '../../attachment/v1';
 import { UserActionTypes } from '../action/v1';
-import { CommentUserActionPayloadRt, CommentUserActionRt } from './v1';
+import { CommentUserActionPayloadSchema, CommentUserActionSchema } from './v1';
 
 describe('Attachment', () => {
-  describe('CommentUserActionPayloadRt', () => {
+  describe('CommentUserActionPayloadSchema', () => {
     const defaultRequest = {
       comment: {
         comment: 'this is a sample comment',
@@ -20,32 +20,24 @@ describe('Attachment', () => {
     };
 
     it('has expected attributes in request', () => {
-      const query = CommentUserActionPayloadRt.decode(defaultRequest);
-
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: defaultRequest,
-      });
+      const result = CommentUserActionPayloadSchema.safeParse(defaultRequest);
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual(defaultRequest);
     });
 
-    it('removes foo:bar attributes from request', () => {
-      const query = CommentUserActionPayloadRt.decode({ ...defaultRequest, foo: 'bar' });
-
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: defaultRequest,
-      });
+    it('strips unknown fields', () => {
+      const result = CommentUserActionPayloadSchema.safeParse({ ...defaultRequest, foo: 'bar' });
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual(defaultRequest);
     });
 
-    it('removes foo:bar attributes from comment', () => {
-      const query = CommentUserActionPayloadRt.decode({
+    it('strips unknown fields from comment', () => {
+      const result = CommentUserActionPayloadSchema.safeParse({
         comment: { ...defaultRequest.comment, foo: 'bar' },
       });
 
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: defaultRequest,
-      });
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual(defaultRequest);
     });
 
     it('accepts v2 unified format (comment payload with type and data)', () => {
@@ -56,12 +48,12 @@ describe('Attachment', () => {
           owner: 'cases',
         },
       };
-      const query = CommentUserActionPayloadRt.decode(v2UnifiedRequest);
+      const result = CommentUserActionPayloadSchema.safeParse(v2UnifiedRequest);
 
-      expect(query._tag).toBe('Right');
-      if (query._tag === 'Right') {
-        expect(query.right.comment).toHaveProperty('type', 'comment');
-        expect(query.right.comment).toHaveProperty('data', { content: 'unified comment content' });
+      expect(result.success).toBe(true);
+      if (result.success) {
+        expect(result.data.comment).toHaveProperty('type', 'comment');
+        expect(result.data.comment).toHaveProperty('data', { content: 'unified comment content' });
       }
     });
 
@@ -76,15 +68,16 @@ describe('Attachment', () => {
           },
         },
       };
-      const query = CommentUserActionPayloadRt.decode(v2UnifiedRequest);
+      const result = CommentUserActionPayloadSchema.safeParse(v2UnifiedRequest);
 
-      expect(query._tag).toBe('Right');
-      if (query._tag === 'Right') {
-        expect(query.right.comment).toEqual(v2UnifiedRequest.comment);
+      expect(result.success).toBe(true);
+      if (result.success) {
+        expect(result.data.comment).toEqual(v2UnifiedRequest.comment);
       }
     });
   });
-  describe('CommentUserActionRt', () => {
+
+  describe('CommentUserActionSchema', () => {
     const defaultRequest = {
       type: UserActionTypes.comment,
       payload: {
@@ -97,33 +90,25 @@ describe('Attachment', () => {
     };
 
     it('has expected attributes in request', () => {
-      const query = CommentUserActionRt.decode(defaultRequest);
-
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: defaultRequest,
-      });
+      const result = CommentUserActionSchema.safeParse(defaultRequest);
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual(defaultRequest);
     });
 
-    it('removes foo:bar attributes from request', () => {
-      const query = CommentUserActionRt.decode({ ...defaultRequest, foo: 'bar' });
-
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: defaultRequest,
-      });
+    it('strips unknown fields', () => {
+      const result = CommentUserActionSchema.safeParse({ ...defaultRequest, foo: 'bar' });
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual(defaultRequest);
     });
 
-    it('removes foo:bar attributes from payload', () => {
-      const query = CommentUserActionRt.decode({
+    it('strips unknown fields from payload', () => {
+      const result = CommentUserActionSchema.safeParse({
         ...defaultRequest,
         payload: { ...defaultRequest.payload, foo: 'bar' },
       });
 
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: defaultRequest,
-      });
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual(defaultRequest);
     });
 
     it('accepts v2 shape in payload', () => {
@@ -137,13 +122,13 @@ describe('Attachment', () => {
           },
         },
       };
-      const query = CommentUserActionRt.decode(v2PayloadRequest);
+      const result = CommentUserActionSchema.safeParse(v2PayloadRequest);
 
-      expect(query._tag).toBe('Right');
-      if (query._tag === 'Right') {
-        expect(query.right.type).toBe(UserActionTypes.comment);
-        expect(query.right.payload.comment).toHaveProperty('type', 'comment');
-        expect(query.right.payload.comment).toHaveProperty('data', {
+      expect(result.success).toBe(true);
+      if (result.success) {
+        expect(result.data.type).toBe(UserActionTypes.comment);
+        expect(result.data.payload.comment).toHaveProperty('type', 'comment');
+        expect(result.data.payload.comment).toHaveProperty('data', {
           content: 'v2 unified comment',
         });
       }

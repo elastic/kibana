@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { ConfigurationRequestRt } from '../../../../common/types/api';
-import { decodeWithExcessOrThrow } from '../../../common/runtime_types';
+import type { ConfigurationRequest, configureApiV1 } from '../../../../common/types/api';
+import { ConfigurationRequestSchema } from '../../../../common/types/api';
+import { decodeWithExcessOrThrowZod } from '../../../common/runtime_types';
 import { CASE_CONFIGURE_URL } from '../../../../common/constants';
 import { createCaseError } from '../../../common/error';
 import { createCasesRoute } from '../create_cases_route';
-import type { configureApiV1 } from '../../../../common/types/api';
 import { DEFAULT_CASES_ROUTE_SECURITY } from '../constants';
 
 export const postCaseConfigureRoute = createCasesRoute({
@@ -27,7 +27,9 @@ export const postCaseConfigureRoute = createCasesRoute({
   },
   handler: async ({ context, request, response }) => {
     try {
-      const query = decodeWithExcessOrThrow(ConfigurationRequestRt)(request.body);
+      const query = decodeWithExcessOrThrowZod(ConfigurationRequestSchema)(
+        request.body
+      ) as ConfigurationRequest;
 
       const caseContext = await context.cases;
       const client = await caseContext.getCasesClient();

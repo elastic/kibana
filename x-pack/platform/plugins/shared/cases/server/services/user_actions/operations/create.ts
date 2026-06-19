@@ -19,11 +19,11 @@ import type {
 } from '../../../../common/types/domain';
 import { UserActionActions, UserActionTypes } from '../../../../common/types/domain';
 import type { UserActionPersistedAttributes } from '../../../common/types/user_actions';
-import { UserActionPersistedAttributesRt } from '../../../common/types/user_actions';
+import { UserActionPersistedAttributesSchema } from '../../../common/types/user_actions';
 import { CASE_SAVED_OBJECT, CASE_USER_ACTION_SAVED_OBJECT } from '../../../../common/constants';
 import { arraysDifference } from '../../../client/utils';
 import { isUserActionType } from '../../../../common/utils/user_actions';
-import { decodeOrThrow } from '../../../common/runtime_types';
+import { decodeOrThrowZod } from '../../../common/runtime_types';
 import { BuilderFactory } from '../builder_factory';
 import type {
   AddSyncedAlertsCountToUserActionsParams,
@@ -488,9 +488,9 @@ export class UserActionPersister {
 
       return await this.context.unsecuredSavedObjectsClient.bulkCreate<UserActionPersistedAttributes>(
         actions.map((action) => {
-          const decodedAttributes = decodeOrThrow(UserActionPersistedAttributesRt)(
+          const decodedAttributes = decodeOrThrowZod(UserActionPersistedAttributesSchema)(
             action.parameters.attributes
-          );
+          ) as UserActionPersistedAttributes;
 
           return {
             type: CASE_USER_ACTION_SAVED_OBJECT,
@@ -593,7 +593,9 @@ export class UserActionPersister {
     try {
       this.context.log.debug(`Attempting to POST a new case user action`);
 
-      const decodedAttributes = decodeOrThrow(UserActionPersistedAttributesRt)(attributes);
+      const decodedAttributes = decodeOrThrowZod(UserActionPersistedAttributesSchema)(
+        attributes
+      ) as UserActionPersistedAttributes;
 
       const res = await this.context.unsecuredSavedObjectsClient.create<T>(
         CASE_USER_ACTION_SAVED_OBJECT,

@@ -6,40 +6,35 @@
  */
 
 import { UserActionTypes } from '../action/v1';
-import { DeleteCaseUserActionRt } from './v1';
+import { DeleteCaseUserActionSchema } from './v1';
 
 describe('Delete_case', () => {
-  describe('DeleteCaseUserActionRt', () => {
+  describe('DeleteCaseUserActionSchema', () => {
     const defaultRequest = {
       type: UserActionTypes.delete_case,
       payload: {},
     };
 
     it('has expected attributes in request', () => {
-      const query = DeleteCaseUserActionRt.decode(defaultRequest);
-
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: defaultRequest,
-      });
+      const result = DeleteCaseUserActionSchema.safeParse(defaultRequest);
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual(defaultRequest);
     });
 
-    it('removes foo:bar attributes from request', () => {
-      const query = DeleteCaseUserActionRt.decode({ ...defaultRequest, foo: 'bar' });
-
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: defaultRequest,
-      });
+    it('strips unknown fields', () => {
+      const result = DeleteCaseUserActionSchema.safeParse({ ...defaultRequest, foo: 'bar' });
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual(defaultRequest);
     });
 
-    it('removes foo:bar attributes from payload', () => {
-      const query = DeleteCaseUserActionRt.decode({ ...defaultRequest, payload: { foo: 'bar' } });
-
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: defaultRequest,
+    it('strips unknown fields from payload', () => {
+      const result = DeleteCaseUserActionSchema.safeParse({
+        ...defaultRequest,
+        payload: { foo: 'bar' },
       });
+
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual(defaultRequest);
     });
   });
 });

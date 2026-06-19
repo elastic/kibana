@@ -40,7 +40,7 @@ describe('addComment', () => {
     await expect(
       // @ts-expect-error: excess attribute
       addComment({ comment: { ...comment, foo: 'bar' }, caseId }, clientArgs)
-    ).rejects.toThrow('invalid keys "foo"');
+    ).rejects.toThrow('Excess keys are not allowed');
   });
 
   it('should throw an error if the comment length is too long', async () => {
@@ -49,7 +49,7 @@ describe('addComment', () => {
     await expect(
       addComment({ comment: { ...comment, comment: longComment }, caseId }, clientArgs)
     ).rejects.toThrow(
-      `Failed while adding a comment to case id: test-case error: Error: The length of the comment is too long. The maximum length is ${MAX_COMMENT_LENGTH}.`
+      `Failed while adding a comment to case id: test-case error: Error: comment: The length of the comment is too long. The maximum length is ${MAX_COMMENT_LENGTH}.`
     );
   });
 
@@ -57,7 +57,7 @@ describe('addComment', () => {
     await expect(
       addComment({ comment: { ...comment, comment: '' }, caseId }, clientArgs)
     ).rejects.toThrow(
-      'Failed while adding a comment to case id: test-case error: Error: The comment field cannot be an empty string.'
+      'Failed while adding a comment to case id: test-case error: Error: comment: The comment field cannot be an empty string.'
     );
   });
 
@@ -65,7 +65,7 @@ describe('addComment', () => {
     await expect(
       addComment({ comment: { ...comment, comment: '  ' }, caseId }, clientArgs)
     ).rejects.toThrow(
-      'Failed while adding a comment to case id: test-case error: Error: The comment field cannot be an empty string.'
+      'Failed while adding a comment to case id: test-case error: Error: comment: The comment field cannot be an empty string.'
     );
   });
 

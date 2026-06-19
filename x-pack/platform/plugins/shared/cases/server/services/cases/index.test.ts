@@ -58,7 +58,7 @@ import type {
 import {
   CasePersistedSeverity,
   CasePersistedStatus,
-  CaseTransformedAttributesRt,
+  CaseTransformedAttributesSchema,
 } from '../../common/types/case';
 import type { ConfigType } from '../../config';
 
@@ -2274,10 +2274,7 @@ describe('CasesService', () => {
   });
 
   describe('Decoding responses', () => {
-    const caseTransformedAttributesProps = CaseTransformedAttributesRt.types.reduce(
-      (acc, type) => ({ ...acc, ...type.type.props }),
-      {}
-    );
+    const caseTransformedAttributesProps = CaseTransformedAttributesSchema.shape;
 
     /**
      * The following fields are set to a default value if missing:
@@ -2347,7 +2344,7 @@ describe('CasesService', () => {
         await expect(
           service.getCaseIdsByAlertId({ alertId: '1' })
         ).rejects.toThrowErrorMatchingInlineSnapshot(
-          `"Invalid value \\"undefined\\" supplied to \\"owner\\""`
+          `"owner: Invalid input: expected string, received undefined"`
         );
       });
 
@@ -2430,9 +2427,7 @@ describe('CasesService', () => {
           const attributes = omit({ ...theCase.attributes }, key);
           unsecuredSavedObjectsClient.get.mockResolvedValue({ ...theCase, attributes });
 
-          await expect(service.getCase({ id: 'a' })).rejects.toThrow(
-            `Invalid value "undefined" supplied to "${key}"`
-          );
+          await expect(service.getCase({ id: 'a' })).rejects.toThrow(`${key}: Invalid input`);
         }
       );
 
@@ -2527,7 +2522,7 @@ describe('CasesService', () => {
           });
 
           await expect(service.getResolveCase({ id: 'a' })).rejects.toThrow(
-            `Invalid value "undefined" supplied to "${key}"`
+            `${key}: Invalid input`
           );
         }
       );
@@ -2722,7 +2717,7 @@ describe('CasesService', () => {
           });
 
           await expect(service.getCases({ caseIds: ['a', 'b'] })).rejects.toThrow(
-            `Invalid value "undefined" supplied to "${key}"`
+            `${key}: Invalid input`
           );
         }
       );
@@ -2826,9 +2821,7 @@ describe('CasesService', () => {
 
           unsecuredSavedObjectsClient.find.mockResolvedValue(findMockReturn);
 
-          await expect(service.findCases()).rejects.toThrow(
-            `Invalid value "undefined" supplied to "${key}"`
-          );
+          await expect(service.findCases()).rejects.toThrow(`${key}: Invalid input`);
         }
       );
 
@@ -2998,7 +2991,7 @@ describe('CasesService', () => {
               attributes: createCasePostParams({ connector: createJiraConnector() }),
               id: '1',
             })
-          ).rejects.toThrow(`Invalid value "undefined" supplied to "${key}"`);
+          ).rejects.toThrow(`${key}: Invalid input`);
         }
       );
 
@@ -3112,7 +3105,7 @@ describe('CasesService', () => {
                 },
               ],
             })
-          ).rejects.toThrow(`Invalid value "undefined" supplied to "${key}"`);
+          ).rejects.toThrow(`${key}: Invalid input`);
         }
       );
 
@@ -3385,7 +3378,7 @@ describe('CasesService', () => {
             attributes,
             id: '1',
           })
-        ).rejects.toThrow(`Invalid value "undefined" supplied to "title"`);
+        ).rejects.toThrow(`title: Invalid input`);
       });
 
       it('remove excess fields', async () => {
@@ -3434,7 +3427,7 @@ describe('CasesService', () => {
 
         await expect(
           service.bulkCreateCases({ cases: [{ id: '1', ...attributes }] })
-        ).rejects.toThrow(`Invalid value "undefined" supplied to "title"`);
+        ).rejects.toThrow(`title: Invalid input`);
       });
 
       it('remove excess fields', async () => {

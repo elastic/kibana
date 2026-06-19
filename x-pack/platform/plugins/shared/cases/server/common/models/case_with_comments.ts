@@ -27,11 +27,11 @@ import type {
   UserCommentAttachmentPayload,
 } from '../../../common/types/domain';
 import {
-  CaseRt,
   CaseStatuses,
   UserActionActions,
   UserActionTypes,
   AttachmentType,
+  CaseSchema,
 } from '../../../common/types/domain';
 
 import { CASE_SAVED_OBJECT, MAX_DOCS_PER_PAGE } from '../../../common/constants';
@@ -52,7 +52,7 @@ import {
   isCommentRequestTypeEvent,
   countEventsForID,
 } from '../utils';
-import { decodeOrThrow } from '../runtime_types';
+import { decodeOrThrowZod } from '../runtime_types';
 import type {
   AttachmentRequest,
   AttachmentPatchRequestV2,
@@ -659,7 +659,7 @@ export class CaseCommentModel {
         ...this.formatForEncoding(comments.total),
       };
 
-      return decodeOrThrow(CaseRt)(caseResponse);
+      return decodeOrThrowZod(CaseSchema)(caseResponse);
     } catch (error) {
       throw createCaseError({
         message: `Failed encoding the commentable case, case id: ${this.caseInfo.id}: ${error}`,

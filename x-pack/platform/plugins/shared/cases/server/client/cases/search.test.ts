@@ -160,7 +160,7 @@ describe('search', () => {
         // @ts-expect-error foo is an invalid field
         search({ ...searchRequest, foo: 'bar' }, clientArgs, casesClientMock)
       ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Failed to find cases: {\\"search\\":\\"sample_text\\",\\"searchFields\\":[\\"cases.title\\",\\"cases.description\\",\\"cases.incremental_id.text\\",\\"cases-comments.comment\\"],\\"severity\\":\\"low\\",\\"assignees\\":[],\\"reporters\\":[],\\"status\\":\\"open\\",\\"tags\\":[],\\"owner\\":[],\\"sortField\\":\\"createdAt\\",\\"sortOrder\\":\\"desc\\",\\"customFields\\":{},\\"foo\\":\\"bar\\"}: Error: invalid keys \\"foo\\""`
+        `"Failed to find cases: {\\"search\\":\\"sample_text\\",\\"searchFields\\":[\\"cases.title\\",\\"cases.description\\",\\"cases.incremental_id.text\\",\\"cases-comments.comment\\"],\\"severity\\":\\"low\\",\\"assignees\\":[],\\"reporters\\":[],\\"status\\":\\"open\\",\\"tags\\":[],\\"owner\\":[],\\"sortField\\":\\"createdAt\\",\\"sortOrder\\":\\"desc\\",\\"customFields\\":{},\\"foo\\":\\"bar\\"}: Error: Excess keys are not allowed"`
       );
     });
 
@@ -171,7 +171,7 @@ describe('search', () => {
       const searchRequest = createCasesClientMockSearchRequest({ searchFields });
 
       await expect(search(searchRequest, clientArgs, casesClientMock)).rejects.toThrow(
-        'Error: Invalid value "foobar" supplied to "searchFields"'
+        'Invalid option: expected one of'
       );
     });
 
@@ -182,7 +182,7 @@ describe('search', () => {
       const searchRequest = createCasesClientMockSearchRequest({ searchFields });
 
       await expect(search(searchRequest, clientArgs, casesClientMock)).rejects.toThrow(
-        'Error: Invalid value "foobar" supplied to "searchFields"'
+        'Invalid option: expected one of'
       );
     });
 
@@ -193,7 +193,7 @@ describe('search', () => {
       const searchRequest = createCasesClientMockSearchRequest({ sortField });
 
       await expect(search(searchRequest, clientArgs, casesClientMock)).rejects.toThrow(
-        'Error: Invalid value "foobar" supplied to "sortField"'
+        'Error: sortField: Invalid option: expected one of'
       );
     });
 
@@ -203,7 +203,7 @@ describe('search', () => {
       const searchRequest = createCasesClientMockSearchRequest({ category });
 
       await expect(search(searchRequest, clientArgs, casesClientMock)).rejects.toThrow(
-        `Error: The length of the field category is too long. Array must be of length <= ${MAX_CATEGORY_FILTER_LENGTH}`
+        `Error: category: The length of the field category is too long. Array must be of length <= ${MAX_CATEGORY_FILTER_LENGTH}`
       );
     });
 
@@ -213,7 +213,7 @@ describe('search', () => {
       const searchRequest = createCasesClientMockSearchRequest({ tags });
 
       await expect(search(searchRequest, clientArgs, casesClientMock)).rejects.toThrowError(
-        `Error: The length of the field tags is too long. Array must be of length <= ${MAX_TAGS_FILTER_LENGTH}`
+        `Error: tags: The length of the field tags is too long. Array must be of length <= ${MAX_TAGS_FILTER_LENGTH}`
       );
     });
 
@@ -223,7 +223,7 @@ describe('search', () => {
       const searchRequest = createCasesClientMockSearchRequest({ assignees });
 
       await expect(search(searchRequest, clientArgs, casesClientMock)).rejects.toThrowError(
-        `Error: The length of the field assignees is too long. Array must be of length <= ${MAX_ASSIGNEES_FILTER_LENGTH}`
+        `Error: assignees: The length of the field assignees is too long. Array must be of length <= ${MAX_ASSIGNEES_FILTER_LENGTH}`
       );
     });
 
@@ -233,7 +233,7 @@ describe('search', () => {
       const searchRequest = createCasesClientMockSearchRequest({ reporters });
 
       await expect(search(searchRequest, clientArgs, casesClientMock)).rejects.toThrowError(
-        `Error: The length of the field reporters is too long. Array must be of length <= ${MAX_REPORTERS_FILTER_LENGTH}.`
+        `Error: reporters: The length of the field reporters is too long. Array must be of length <= ${MAX_REPORTERS_FILTER_LENGTH}.`
       );
     });
 

@@ -27,7 +27,7 @@ describe('suggest', () => {
         },
       })
     ).rejects.toThrow(
-      `Failed to retrieve suggested user profiles in service: Error: The size field cannot be more than ${MAX_SUGGESTED_PROFILES}.`
+      `Failed to retrieve suggested user profiles in service: Error: size: The size field cannot be more than ${MAX_SUGGESTED_PROFILES}.`
     );
   });
 });

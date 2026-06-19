@@ -5,173 +5,147 @@
  * 2.0.
  */
 
-import * as rt from 'io-ts';
-import { CaseConnectorRt, ConnectorMappingsRt } from '../connector/v1';
-import { UserRt } from '../user/v1';
+import { z } from '@kbn/zod/v4';
+import { CaseConnectorSchema, ConnectorMappingsSchema } from '../connector/v1';
+import { UserSchema } from '../user/v1';
 import {
-  CustomFieldTextTypeRt,
-  CustomFieldToggleTypeRt,
-  CustomFieldNumberTypeRt,
+  CustomFieldTextTypeSchema,
+  CustomFieldToggleTypeSchema,
+  CustomFieldNumberTypeSchema,
 } from '../custom_field/v1';
-import { CaseBaseOptionalFieldsRt } from '../case/v1';
-import { CaseObservableTypeRt } from '../observable/v1';
+import { CaseBaseOptionalFieldsSchema } from '../case/v1';
+import { CaseObservableTypeSchema } from '../observable/v1';
 
-export const ClosureTypeRt = rt.union([
-  rt.literal('close-by-user'),
-  rt.literal('close-by-pushing'),
+export const ClosureTypeSchema = z.union([
+  z.literal('close-by-user'),
+  z.literal('close-by-pushing'),
 ]);
 
-export const CustomFieldConfigurationWithoutTypeRt = rt.strict({
+export const CustomFieldConfigurationWithoutTypeSchema = z.object({
   /**
    * key of custom field
    */
-  key: rt.string,
+  key: z.string(),
   /**
    * label of custom field
    */
-  label: rt.string,
+  label: z.string(),
   /**
    * custom field options - required
    */
-  required: rt.boolean,
+  required: z.boolean(),
 });
 
-export const TextCustomFieldConfigurationRt = rt.intersection([
-  rt.strict({ type: CustomFieldTextTypeRt }),
-  CustomFieldConfigurationWithoutTypeRt,
-  rt.exact(
-    rt.partial({
-      defaultValue: rt.union([rt.string, rt.null]),
-    })
-  ),
+export const TextCustomFieldConfigurationSchema = CustomFieldConfigurationWithoutTypeSchema.extend({
+  type: CustomFieldTextTypeSchema,
+  defaultValue: z.string().nullable().optional(),
+});
+
+export const ToggleCustomFieldConfigurationSchema =
+  CustomFieldConfigurationWithoutTypeSchema.extend({
+    type: CustomFieldToggleTypeSchema,
+    defaultValue: z.boolean().nullable().optional(),
+  });
+
+export const NumberCustomFieldConfigurationSchema =
+  CustomFieldConfigurationWithoutTypeSchema.extend({
+    type: CustomFieldNumberTypeSchema,
+    defaultValue: z.number().nullable().optional(),
+  });
+
+export const CustomFieldConfigurationSchema = z.union([
+  TextCustomFieldConfigurationSchema,
+  ToggleCustomFieldConfigurationSchema,
+  NumberCustomFieldConfigurationSchema,
 ]);
 
-export const ToggleCustomFieldConfigurationRt = rt.intersection([
-  rt.strict({ type: CustomFieldToggleTypeRt }),
-  CustomFieldConfigurationWithoutTypeRt,
-  rt.exact(
-    rt.partial({
-      defaultValue: rt.union([rt.boolean, rt.null]),
-    })
-  ),
-]);
+export const CustomFieldsConfigurationSchema = z.array(CustomFieldConfigurationSchema);
 
-export const NumberCustomFieldConfigurationRt = rt.intersection([
-  rt.strict({ type: CustomFieldNumberTypeRt }),
-  CustomFieldConfigurationWithoutTypeRt,
-  rt.exact(
-    rt.partial({
-      defaultValue: rt.union([rt.number, rt.null]),
-    })
-  ),
-]);
+export const ObservableTypesConfigurationSchema = z.array(CaseObservableTypeSchema);
 
-export const CustomFieldConfigurationRt = rt.union([
-  TextCustomFieldConfigurationRt,
-  ToggleCustomFieldConfigurationRt,
-  NumberCustomFieldConfigurationRt,
-]);
+export const TemplateConfigurationSchema = z.object({
+  /**
+   * key of template
+   */
+  key: z.string(),
+  /**
+   * name of template
+   */
+  name: z.string(),
+  /**
+   * case fields of template
+   */
+  caseFields: CaseBaseOptionalFieldsSchema.nullable(),
+  /**
+   * description of template
+   */
+  description: z.string().optional(),
+  /**
+   * tags of template
+   */
+  tags: z.array(z.string()).optional(),
+});
 
-export const CustomFieldsConfigurationRt = rt.array(CustomFieldConfigurationRt);
+export const TemplatesConfigurationSchema = z.array(TemplateConfigurationSchema);
 
-export const ObservableTypesConfigurationRt = rt.array(CaseObservableTypeRt);
-
-export const TemplateConfigurationRt = rt.intersection([
-  rt.strict({
-    /**
-     * key of template
-     */
-    key: rt.string,
-    /**
-     * name of template
-     */
-    name: rt.string,
-    /**
-     * case fields of template
-     */
-    caseFields: rt.union([rt.null, CaseBaseOptionalFieldsRt]),
-  }),
-  rt.exact(
-    rt.partial({
-      /**
-       * description of template
-       */
-      description: rt.string,
-      /**
-       * tags of template
-       */
-      tags: rt.array(rt.string),
-    })
-  ),
-]);
-
-export const TemplatesConfigurationRt = rt.array(TemplateConfigurationRt);
-
-export const ConfigurationBasicWithoutOwnerRt = rt.strict({
+export const ConfigurationBasicWithoutOwnerSchema = z.object({
   /**
    * The external connector
    */
-  connector: CaseConnectorRt,
+  connector: CaseConnectorSchema,
   /**
    * Whether to close the case after it has been synced with the external system
    */
-  closure_type: ClosureTypeRt,
+  closure_type: ClosureTypeSchema,
   /**
    * The custom fields configured for the case
    */
-  customFields: CustomFieldsConfigurationRt,
+  customFields: CustomFieldsConfigurationSchema,
   /**
    * Templates configured for the case
    */
-  templates: TemplatesConfigurationRt,
+  templates: TemplatesConfigurationSchema,
   /**
    * Observable types configured for the case
    */
-  observableTypes: ObservableTypesConfigurationRt,
+  observableTypes: ObservableTypesConfigurationSchema,
 });
 
-export const CasesConfigureBasicRt = rt.intersection([
-  ConfigurationBasicWithoutOwnerRt,
-  rt.strict({
-    /**
-     * The plugin owner that manages this configuration
-     */
-    owner: rt.string,
-  }),
-]);
-
-export const ConfigurationActivityFieldsRt = rt.strict({
-  created_at: rt.string,
-  created_by: UserRt,
-  updated_at: rt.union([rt.string, rt.null]),
-  updated_by: rt.union([UserRt, rt.null]),
+export const CasesConfigureBasicSchema = ConfigurationBasicWithoutOwnerSchema.extend({
+  /**
+   * The plugin owner that manages this configuration
+   */
+  owner: z.string(),
 });
 
-export const ConfigurationAttributesRt = rt.intersection([
-  CasesConfigureBasicRt,
-  ConfigurationActivityFieldsRt,
-]);
+export const ConfigurationActivityFieldsSchema = z.object({
+  created_at: z.string(),
+  created_by: UserSchema,
+  updated_at: z.string().nullable(),
+  updated_by: UserSchema.nullable(),
+});
 
-export const ConfigurationRt = rt.intersection([
-  ConfigurationAttributesRt,
-  rt.strict({
-    id: rt.string,
-    version: rt.string,
-    error: rt.union([rt.string, rt.null]),
-    owner: rt.string,
-    mappings: ConnectorMappingsRt,
-  }),
-]);
+export const ConfigurationAttributesSchema = CasesConfigureBasicSchema.merge(
+  ConfigurationActivityFieldsSchema
+);
 
-export const ConfigurationsRt = rt.array(ConfigurationRt);
+export const ConfigurationSchema = ConfigurationAttributesSchema.extend({
+  id: z.string(),
+  version: z.string(),
+  error: z.string().nullable(),
+  owner: z.string(),
+  mappings: ConnectorMappingsSchema,
+});
 
-export type CustomFieldsConfiguration = rt.TypeOf<typeof CustomFieldsConfigurationRt>;
-export type CustomFieldConfiguration = rt.TypeOf<typeof CustomFieldConfigurationRt>;
-export type TemplatesConfiguration = rt.TypeOf<typeof TemplatesConfigurationRt>;
-export type TemplateConfiguration = rt.TypeOf<typeof TemplateConfigurationRt>;
-export type ClosureType = rt.TypeOf<typeof ClosureTypeRt>;
-export type ConfigurationAttributes = rt.TypeOf<typeof ConfigurationAttributesRt>;
-export type Configuration = rt.TypeOf<typeof ConfigurationRt>;
-export type Configurations = rt.TypeOf<typeof ConfigurationsRt>;
-export type ObservableTypesConfiguration = rt.TypeOf<typeof ObservableTypesConfigurationRt>;
-export type ObservableTypeConfiguration = rt.TypeOf<typeof CaseObservableTypeRt>;
+export const ConfigurationsSchema = z.array(ConfigurationSchema);
+
+export type CustomFieldsConfiguration = z.infer<typeof CustomFieldsConfigurationSchema>;
+export type CustomFieldConfiguration = z.infer<typeof CustomFieldConfigurationSchema>;
+export type TemplatesConfiguration = z.infer<typeof TemplatesConfigurationSchema>;
+export type TemplateConfiguration = z.infer<typeof TemplateConfigurationSchema>;
+export type ClosureType = z.infer<typeof ClosureTypeSchema>;
+export type ConfigurationAttributes = z.infer<typeof ConfigurationAttributesSchema>;
+export type Configuration = z.infer<typeof ConfigurationSchema>;
+export type Configurations = z.infer<typeof ConfigurationsSchema>;
+export type ObservableTypesConfiguration = z.infer<typeof ObservableTypesConfigurationSchema>;
+export type ObservableTypeConfiguration = z.infer<typeof CaseObservableTypeSchema>;

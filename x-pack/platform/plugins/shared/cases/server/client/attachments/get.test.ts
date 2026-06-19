@@ -48,7 +48,7 @@ describe('get', () => {
           clientArgs
         )
       ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Failed to find comments case id: mock-id: Error: invalid keys \\"foo\\""`
+        `"Failed to find comments case id: mock-id: Error: Excess keys are not allowed"`
       );
     });
   });

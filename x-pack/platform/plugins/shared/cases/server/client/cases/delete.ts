@@ -10,8 +10,8 @@ import { chunk } from 'lodash';
 import type { SavedObjectsBulkDeleteObject } from '@kbn/core/server';
 import type { FileServiceStart } from '@kbn/files-plugin/server';
 import type { CasesDeleteRequest } from '../../../common/types/api';
-import { CasesDeleteRequestRt } from '../../../common/types/api';
-import { decodeWithExcessOrThrow } from '../../common/runtime_types';
+import { CasesDeleteRequestSchema } from '../../../common/types/api';
+import { decodeWithExcessOrThrowZod } from '../../common/runtime_types';
 import {
   CASE_SAVED_OBJECT,
   CASE_USER_ACTION_SAVED_OBJECT,
@@ -39,7 +39,7 @@ export async function deleteCases(
   } = clientArgs;
 
   try {
-    const caseIds = decodeWithExcessOrThrow(CasesDeleteRequestRt)(ids);
+    const caseIds = decodeWithExcessOrThrowZod(CasesDeleteRequestSchema)(ids);
     const cases = await caseService.getCases({ caseIds });
     const entities = new Map<string, OwnerEntity>();
 
