@@ -5,43 +5,51 @@
  * 2.0.
  */
 
-import { transformError } from '@kbn/securitysolution-es-utils';
 import { uniq } from 'lodash/fp';
 import type { Indices } from '@elastic/elasticsearch/lib/api/types';
-import type { KibanaRequest, KibanaResponseFactory } from '@kbn/core/server';
 
 import type { SecuritySolutionRequestHandlerContext } from '../../../../types';
 import type { SetAlertAssigneesRequestBody } from '../../../../../common/api/detection_engine/alert_assignees';
-import { buildSiemResponse } from '../utils';
-import { validateAlertAssigneesArrays } from '../signals/helpers';
 
-interface SetAlertAssigneesProps {
+interface UpdateAlertsAssigneesArgs {
   context: SecuritySolutionRequestHandlerContext;
-  request: KibanaRequest<unknown, unknown, SetAlertAssigneesRequestBody>;
-  response: KibanaResponseFactory;
-  getIndexPattern: () => Promise<Indices>;
+  index: Indices;
+  ids: string[];
+  assignees: SetAlertAssigneesRequestBody['assignees'];
 }
 
-export const setAlertAssigneesHandler = async ({
+/**
+ * Adds/removes assignees on the alerts matching the provided `ids` within `index`.
+ * Returns the raw `updateByQuery` response; throws on Elasticsearch errors.
+ */
+export const updateAlertsAssignees = async ({
   context,
-  request,
-  response,
-  getIndexPattern,
-}: SetAlertAssigneesProps) => {
+  index,
+  ids,
+  assignees,
+}: UpdateAlertsAssigneesArgs) => {
   const esClient = (await context.core).elasticsearch.client.asCurrentUser;
-  const siemResponse = buildSiemResponse(response);
 
-  const { assignees, ids } = request.body;
-  const validationErrors = validateAlertAssigneesArrays(assignees);
+  return esClient.updateByQuery({
+    index,
+    refresh: true,
+    script: getUpdateAlertAssigneesScript(assignees),
+    query: {
+      bool: {
+        filter: { terms: { _id: ids } },
+      },
+    },
+    ignore_unavailable: true,
+  });
+};
 
-  if (validationErrors.length) {
-    return siemResponse.error({ statusCode: 400, body: validationErrors });
-  }
-
+export const getUpdateAlertAssigneesScript = (
+  assignees: SetAlertAssigneesRequestBody['assignees']
+) => {
   const assigneesToAdd = uniq(assignees.add);
   const assigneesToRemove = uniq(assignees.remove);
 
-  const painlessScript = {
+  return {
     params: { assigneesToAdd, assigneesToRemove },
     source: `List newAssigneesArray = [];
         if (ctx._source["kibana.alert.workflow_assignee_ids"] != null) {
@@ -62,28 +70,4 @@ export const setAlertAssigneesHandler = async ({
         `,
     lang: 'painless',
   };
-
-  try {
-    const indexPattern = await getIndexPattern();
-
-    const result = await esClient.updateByQuery({
-      index: indexPattern,
-      refresh: true,
-      script: painlessScript,
-      query: {
-        bool: {
-          filter: { terms: { _id: ids } },
-        },
-      },
-      ignore_unavailable: true,
-    });
-
-    return response.ok({ body: result });
-  } catch (err) {
-    const error = transformError(err);
-    return siemResponse.error({
-      body: error.message,
-      statusCode: error.statusCode,
-    });
-  }
 };
