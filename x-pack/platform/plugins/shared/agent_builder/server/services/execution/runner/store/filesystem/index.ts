@@ -5,11 +5,4 @@
  * 2.0.
  */
 
-export { VirtualFileSystem } from './virtual_filesystem';
 export { MemoryVolume } from './memory_volume';
-export {
-  type IVirtualFileSystem,
-  type MountOptions,
-  type GlobOptions,
-  type ListOptions,
-} from './types';

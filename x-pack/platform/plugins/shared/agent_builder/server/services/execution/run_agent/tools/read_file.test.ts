@@ -19,8 +19,8 @@ const makeService = async () => {
   const workspaceVolume = new WorkspaceVolume({ workspaceClient });
   const service = new FilesystemService({
     workspaceVolume,
-    toolResultsVolume: new MemoryVolume('tool_results'),
-    skillsVolume: new MemoryVolume('skills'),
+    toolResultsSource: new MemoryVolume(),
+    skillsSource: new MemoryVolume(),
   });
   await service.init();
   return service;

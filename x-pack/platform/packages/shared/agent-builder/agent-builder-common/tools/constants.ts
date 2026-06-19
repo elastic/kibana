@@ -73,6 +73,7 @@ export const internalTools = {
   loadSkill: 'load_skill',
   askUserQuestion: 'ask_user_question',
   readFile: 'read_file',
+  listFiles: 'list_files',
   bash: 'bash',
 };
 
@@ -96,6 +97,14 @@ export const isInternalTool = (toolName: string) =>
   isAttachmentTool(toolName) || isLegacyFilestoreTool(toolName) || isInternalToolName(toolName);
 
 export const isExcludedFromFilestore = (toolName: string) => isInternalTool(toolName);
+
+/**
+ * Returns true if the given id collides with an `internalTools.*` reserved id.
+ * Used at registry validation to prevent user-defined tools from shadowing
+ * internal tools (which would block the internal tool from being registered
+ * by `registerInternalTools` after the registry has already claimed the id).
+ */
+export const isReservedInternalToolId = (toolId: string) => isInternalToolName(toolId);
 
 /**
  * List of tool types which can be created / edited by a user.

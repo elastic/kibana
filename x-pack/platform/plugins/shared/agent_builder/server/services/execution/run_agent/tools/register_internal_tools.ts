@@ -17,6 +17,10 @@ import { createSubagentTool } from './run_subagent';
 import { createSleepTool } from './sleep';
 import { createLoadSkillTool } from './load_skill';
 import { createAskUserQuestionTool } from './ask_user_question';
+import { createReadFileTool } from './read_file';
+import { createListFilesTool } from './list_files';
+import { createBashTool } from './bash';
+import { createTodoTool } from '../../../tools/builtin/todo';
 import { builtinToolToExecutable } from '../utils/select_tools';
 import type { BackgroundExecutionService } from '../background_execution_service';
 
@@ -52,7 +56,50 @@ export const registerInternalTools = async ({
     subAgentExecutor,
     analyticsService,
     trackingService,
+    filesystemService,
+    bashService,
+    todoStateManager,
   } = context;
+
+  // Filesystem tools — read_file and list_files are always on; bash is FF-gated.
+  const filesystemTools = [
+    {
+      ...builtinToolToExecutable({ tool: createReadFileTool({ filesystemService }), runner }),
+      origin: ToolOrigin.internal,
+    },
+    {
+      ...builtinToolToExecutable({ tool: createListFilesTool({ filesystemService }), runner }),
+      origin: ToolOrigin.internal,
+    },
+    ...(experimentalFeatures.bash && bashService
+      ? [
+          {
+            ...builtinToolToExecutable({ tool: createBashTool({ bashService }), runner }),
+            origin: ToolOrigin.internal,
+          },
+        ]
+      : []),
+  ];
+  await toolManager.addTools({
+    type: ToolManagerToolType.executable,
+    tools: filesystemTools,
+    logger,
+  });
+
+  // Todo tool — FF-gated on `todos`.
+  if (experimentalFeatures.todos) {
+    const todoTool = createTodoTool({ todoStateManager });
+    await toolManager.addTools({
+      type: ToolManagerToolType.executable,
+      tools: [
+        {
+          ...builtinToolToExecutable({ tool: todoTool, runner }),
+          origin: ToolOrigin.internal,
+        },
+      ],
+      logger,
+    });
+  }
 
   // Sub-agent and sleep tools — experimental, and not available in standalone mode
   if (experimentalFeatures.subagents && executionMode !== AgentExecutionMode.standalone) {

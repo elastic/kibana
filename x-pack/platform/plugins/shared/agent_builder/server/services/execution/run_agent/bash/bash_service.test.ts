@@ -24,8 +24,8 @@ const makeFixture = async (opts?: { workspaceId?: string; generateId?: () => str
   });
   const fsService = new FilesystemService({
     workspaceVolume,
-    toolResultsVolume: new MemoryVolume('tool_results'),
-    skillsVolume: new MemoryVolume('skills'),
+    toolResultsSource: new MemoryVolume(),
+    skillsSource: new MemoryVolume(),
   });
   await fsService.init();
   return { fsService, workspaceVolume, workspaceClient };

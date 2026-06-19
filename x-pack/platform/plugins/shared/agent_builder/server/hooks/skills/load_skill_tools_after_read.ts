@@ -20,7 +20,7 @@ export const createLoadSkillToolsAfterRead = ({
       return;
     }
 
-    const { filestore, skills, toolProvider, toolManager, request, logger, runContext } =
+    const { skillsStore, skills, toolProvider, toolManager, request, logger, runContext } =
       context.toolHandlerContext;
 
     const path = context.toolParams.path as string | undefined;
@@ -28,7 +28,7 @@ export const createLoadSkillToolsAfterRead = ({
       return;
     }
 
-    const entry = await filestore.read(path);
+    const entry = await skillsStore.getEntry(path);
     if (!entry || !isSkillFileEntry(entry)) {
       return;
     }

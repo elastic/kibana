@@ -43,10 +43,12 @@ export const createFilesystemServices = async ({
     initialWorkspaceId: workspaceId,
   });
 
+  // Stores expose typed accessors (getEntry / listEntries / entryExists) which
+  // satisfy the VolumeBackedSource shape `FilesystemService` consumes.
   const filesystemService = new FilesystemService({
     workspaceVolume,
-    toolResultsVolume: resultStore.getVolume(),
-    skillsVolume: skillsStore.getVolume(),
+    toolResultsSource: resultStore,
+    skillsSource: skillsStore,
   });
   await filesystemService.init();
 

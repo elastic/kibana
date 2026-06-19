@@ -19,12 +19,8 @@ export class SkillsStoreImpl implements WritableSkillsStore {
   private readonly volume: MemoryVolume;
 
   constructor({ skills = [] }: { skills?: InternalSkillDefinition[] }) {
-    this.volume = new MemoryVolume('skills');
+    this.volume = new MemoryVolume();
     skills.forEach((skill) => this.add(skill));
-  }
-
-  getVolume() {
-    return this.volume;
   }
 
   add(skill: InternalSkillDefinition): void {
@@ -65,10 +61,25 @@ export class SkillsStoreImpl implements WritableSkillsStore {
     return this.skills.get(skillId)!;
   }
 
+  // Typed entry accessors — replace the previous getVolume() consumers. Backed
+  // by the same MemoryVolume so writes through add()/delete() are reflected.
+  async getEntry(path: string) {
+    return this.volume.get(path);
+  }
+  async listEntries(dirPath: string) {
+    return this.volume.list(dirPath);
+  }
+  async entryExists(path: string) {
+    return this.volume.exists(path);
+  }
+
   asReadonly(): SkillsStore {
     return {
       has: (skillId) => this.has(skillId),
       get: (skillId) => this.get(skillId),
+      getEntry: (path) => this.getEntry(path),
+      listEntries: (dirPath) => this.listEntries(dirPath),
+      entryExists: (path) => this.entryExists(path),
     };
   }
 }

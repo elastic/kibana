@@ -30,7 +30,7 @@ describe('VolumeBackedReadOnlyFs', () => {
   let fs: VolumeBackedReadOnlyFs;
 
   beforeEach(() => {
-    volume = new MemoryVolume('test');
+    volume = new MemoryVolume();
     fs = new VolumeBackedReadOnlyFs(volume);
   });
 
@@ -130,7 +130,7 @@ describe('VolumeBackedReadOnlyFs', () => {
       // The legacy volumes store entries under /tool_calls/... ; when mounted
       // under /tool_calls in MountableFs, the adapter receives stripped paths
       // (e.g. `/foo.json`) and must re-prepend the mount point before querying.
-      const mountedVolume = new MemoryVolume('mounted');
+      const mountedVolume = new MemoryVolume();
       mountedVolume.add(makeFileEntry('/tool_calls/foo.json', 'tool result'));
       const mountedFs = new VolumeBackedReadOnlyFs(mountedVolume, '/tool_calls');
 
@@ -141,7 +141,7 @@ describe('VolumeBackedReadOnlyFs', () => {
     });
 
     it('lists volume entries at the mount root', async () => {
-      const mountedVolume = new MemoryVolume('mounted');
+      const mountedVolume = new MemoryVolume();
       mountedVolume.add(makeFileEntry('/tool_calls/a.json', 'a'));
       mountedVolume.add(makeFileEntry('/tool_calls/b.json', 'b'));
       const mountedFs = new VolumeBackedReadOnlyFs(mountedVolume, '/tool_calls');
@@ -151,7 +151,7 @@ describe('VolumeBackedReadOnlyFs', () => {
     });
 
     it('tolerates a trailing slash on the mount point', async () => {
-      const mountedVolume = new MemoryVolume('mounted');
+      const mountedVolume = new MemoryVolume();
       mountedVolume.add(makeFileEntry('/skills/SKILL.md', 'hi'));
       const mountedFs = new VolumeBackedReadOnlyFs(mountedVolume, '/skills/');
       expect(await mountedFs.readFile('/SKILL.md')).toBe('hi');

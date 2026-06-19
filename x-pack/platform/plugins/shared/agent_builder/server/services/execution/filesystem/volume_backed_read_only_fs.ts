@@ -7,8 +7,19 @@
 
 import type { ByteString, IFileSystem, FsStat } from 'just-bash';
 import { unsafeBytesFromLatin1 } from 'just-bash';
-import type { FileEntry } from '@kbn/agent-builder-server/runner/filestore';
-import type { Volume } from '@kbn/agent-builder-server/runner';
+import type { FileEntry, FsEntry } from '@kbn/agent-builder-server/runner/filestore';
+
+/**
+ * Minimal internal interface this adapter needs from a content source. Both
+ * `ToolResultStore` and `SkillsStore` implement these via their typed
+ * accessors (`getEntry` / `listEntries` / `entryExists`). Keeps the adapter
+ * decoupled from the broader public `Volume` interface, which is going away.
+ */
+export interface VolumeBackedSource {
+  getEntry(path: string): Promise<FileEntry | undefined>;
+  listEntries(dirPath: string): Promise<FsEntry[]>;
+  entryExists(path: string): Promise<boolean>;
+}
 
 interface DirentEntry {
   name: string;
@@ -35,31 +46,30 @@ const entryToString = (entry: FileEntry): string =>
 const entryBytes = (entry: FileEntry): Uint8Array => encoder.encode(entryToString(entry));
 
 /**
- * Read-only `IFileSystem` adapter over a {@link Volume} content source.
+ * Read-only `IFileSystem` adapter over a {@link VolumeBackedSource}.
  *
- * Delegates each read method to the underlying volume on every call — no caching
- * or refresh dance. New entries appearing in the volume mid-session are visible
- * immediately. All mutating methods throw `EROFS`.
+ * Delegates each read method to the underlying source on every call — no
+ * caching or refresh dance. New entries appearing in the source mid-session
+ * are visible immediately. All mutating methods throw `EROFS`.
  *
- * The underlying volumes store entries under their fully-qualified path
- * (e.g. `/tool_calls/foo/...` for the tool_results volume). `MountableFs`
+ * The underlying store keeps entries under their fully-qualified path
+ * (e.g. `/tool_calls/foo/...` for the tool-result store). `MountableFs`
  * strips the mount-point prefix before calling into this adapter, so we
- * re-prepend `mountPoint` before querying the volume to match the storage
- * scheme used by the legacy aggregator.
+ * re-prepend `mountPoint` before querying the source.
  */
 export class VolumeBackedReadOnlyFs implements IFileSystem {
-  private readonly volume: Volume;
+  private readonly source: VolumeBackedSource;
   private readonly mountPoint: string;
 
-  constructor(volume: Volume, mountPoint: string = '') {
-    this.volume = volume;
+  constructor(source: VolumeBackedSource, mountPoint: string = '') {
+    this.source = source;
     // Normalize: strip any trailing slash so the join is unambiguous.
     this.mountPoint = mountPoint.endsWith('/') ? mountPoint.slice(0, -1) : mountPoint;
   }
 
   /**
    * Translate a relative path (as received from `MountableFs`) back to the
-   * absolute path the volume stores entries under.
+   * absolute path the source stores entries under.
    */
   private toVolumePath(relativePath: string): string {
     if (!this.mountPoint) return relativePath;
@@ -69,9 +79,9 @@ export class VolumeBackedReadOnlyFs implements IFileSystem {
 
   async readFile(path: string): Promise<string> {
     const vp = this.toVolumePath(path);
-    const entry = await this.volume.get(vp);
+    const entry = await this.source.getEntry(vp);
     if (!entry) {
-      if (await this.volume.exists(vp)) {
+      if (await this.source.entryExists(vp)) {
         throw new Error(`EISDIR: illegal operation on a directory, read '${path}'`);
       }
       throw new Error(`ENOENT: no such file or directory, open '${path}'`);
@@ -81,9 +91,9 @@ export class VolumeBackedReadOnlyFs implements IFileSystem {
 
   async readFileBuffer(path: string): Promise<Uint8Array> {
     const vp = this.toVolumePath(path);
-    const entry = await this.volume.get(vp);
+    const entry = await this.source.getEntry(vp);
     if (!entry) {
-      if (await this.volume.exists(vp)) {
+      if (await this.source.entryExists(vp)) {
         throw new Error(`EISDIR: illegal operation on a directory, read '${path}'`);
       }
       throw new Error(`ENOENT: no such file or directory, open '${path}'`);
@@ -105,10 +115,10 @@ export class VolumeBackedReadOnlyFs implements IFileSystem {
 
   async readdirWithFileTypes(path: string): Promise<DirentEntry[]> {
     const vp = this.toVolumePath(path);
-    if (!(await this.volume.exists(vp))) {
+    if (!(await this.source.entryExists(vp))) {
       throw new Error(`ENOENT: no such file or directory, scandir '${path}'`);
     }
-    const fsEntries = await this.volume.list(vp);
+    const fsEntries = await this.source.listEntries(vp);
     const prefix = vp === '/' ? '/' : `${vp}/`;
     return fsEntries.map((e) => {
       const name = e.path.startsWith(prefix) ? e.path.slice(prefix.length) : e.path;
@@ -122,7 +132,7 @@ export class VolumeBackedReadOnlyFs implements IFileSystem {
   }
 
   async exists(path: string): Promise<boolean> {
-    return this.volume.exists(this.toVolumePath(path));
+    return this.source.entryExists(this.toVolumePath(path));
   }
 
   async stat(path: string): Promise<FsStat> {
@@ -135,7 +145,7 @@ export class VolumeBackedReadOnlyFs implements IFileSystem {
 
   private async statInternal(path: string, op: 'stat' | 'lstat'): Promise<FsStat> {
     const vp = this.toVolumePath(path);
-    const fileEntry = await this.volume.get(vp);
+    const fileEntry = await this.source.getEntry(vp);
     if (fileEntry) {
       return {
         isFile: true,
@@ -146,7 +156,7 @@ export class VolumeBackedReadOnlyFs implements IFileSystem {
         mtime: SYNTHETIC_MTIME,
       };
     }
-    if (await this.volume.exists(vp)) {
+    if (await this.source.entryExists(vp)) {
       return {
         isFile: false,
         isDirectory: true,
@@ -160,9 +170,9 @@ export class VolumeBackedReadOnlyFs implements IFileSystem {
   }
 
   getAllPaths(): string[] {
-    // IFileSystem.getAllPaths is sync; volume.glob is async. just-bash uses
-    // this method only for glob expansion, which we keep best-effort here:
-    // returning [] forces just-bash to walk via readdir as needed.
+    // IFileSystem.getAllPaths is sync; our source is async. just-bash uses
+    // this method only for glob expansion — returning [] forces just-bash to
+    // walk via readdir as needed.
     return [];
   }
 
@@ -173,7 +183,7 @@ export class VolumeBackedReadOnlyFs implements IFileSystem {
   }
 
   async realpath(path: string): Promise<string> {
-    if (!(await this.volume.exists(this.toVolumePath(path)))) {
+    if (!(await this.source.entryExists(this.toVolumePath(path)))) {
       throw new Error(`ENOENT: no such file or directory, realpath '${path}'`);
     }
     return path;
