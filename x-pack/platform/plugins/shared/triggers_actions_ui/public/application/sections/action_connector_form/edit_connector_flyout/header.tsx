@@ -9,11 +9,11 @@ import React, { memo, Suspense, useCallback } from 'react';
 import { css } from '@emotion/react';
 import type { IconType } from '@elastic/eui';
 import {
+  EuiButtonEmpty,
   EuiTitle,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
-  EuiLink,
   EuiText,
   EuiFlyoutHeader,
   EuiBetaBadge,
@@ -79,7 +79,12 @@ const FlyoutHeaderComponent: React.FC<{
         {icon ? (
           <Suspense fallback={null}>
             <EuiFlexItem grow={false}>
-              <EuiIcon type={icon} size="m" data-test-subj="edit-connector-flyout-header-icon" />
+              <EuiIcon
+                type={icon}
+                size="m"
+                aria-hidden={true}
+                data-test-subj="edit-connector-flyout-header-icon"
+              />
             </EuiFlexItem>
           </Suspense>
         ) : null}
@@ -126,14 +131,6 @@ const FlyoutHeaderComponent: React.FC<{
                   values={{ connectorTypeDesc }}
                 />
               </EuiText>
-              {docsUrl && (
-                <EuiLink href={docsUrl} target="_blank" external>
-                  <FormattedMessage
-                    id="xpack.triggersActionsUI.sections.editConnectorForm.flyoutHeaderDocsLink"
-                    defaultMessage="View documentation"
-                  />
-                </EuiLink>
-              )}
             </>
           ) : (
             <>
@@ -157,17 +154,25 @@ const FlyoutHeaderComponent: React.FC<{
                   </EuiFlexItem>
                 )}
               </EuiFlexGroup>
-              {docsUrl && (
-                <EuiLink href={docsUrl} target="_blank" external>
-                  <FormattedMessage
-                    id="xpack.triggersActionsUI.sections.editConnectorForm.flyoutHeaderDocsLink"
-                    defaultMessage="View documentation"
-                  />
-                </EuiLink>
-              )}
             </>
           )}
         </EuiFlexItem>
+        <EuiFlexItem grow={true} />
+        {docsUrl && (
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty
+              data-test-subj="edit-connector-flyout-header-docs-link"
+              href={docsUrl}
+              target="_blank"
+              iconType="question"
+            >
+              <FormattedMessage
+                id="xpack.triggersActionsUI.sections.editConnectorForm.flyoutHeaderDocsLink"
+                defaultMessage="Documentation"
+              />
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+        )}
       </EuiFlexGroup>
       <EuiTabs
         className="connectorEditFlyoutTabs"
