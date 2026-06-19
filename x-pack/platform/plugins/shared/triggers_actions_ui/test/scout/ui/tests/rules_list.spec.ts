@@ -777,6 +777,14 @@ test.describe('Rules list', { tag: tags.stateful.classic }, () => {
 
       await expect(activeFilterBadge).toHaveText(String(expectedSelectedCount));
       await expect(getTableRows(page)).toHaveCount(expectedRowCount);
+
+      // Status filters persist in localStorage + the URL, so refreshRulesList does
+      // NOT reset them — deselect everything here so the next call starts from a
+      // clean, unfiltered baseline (badge back to 0).
+      for (const filterSubj of filterSubjs) {
+        await page.testSubj.click(filterSubj);
+      }
+      await expect(activeFilterBadge).toHaveText('0');
       await page.keyboard.press('Escape');
       await expect(optionsPanel).toBeHidden();
     };
