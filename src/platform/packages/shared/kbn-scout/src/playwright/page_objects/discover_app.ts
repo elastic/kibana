@@ -567,6 +567,79 @@ export class DiscoverApp {
     return this.page.testSubj.locator(`dataGridHeaderCell-${name}`);
   }
 
+  private getColumnIdSelector(field: string): string {
+    const escapedField = field.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+    return `[data-gridcell-column-id="${escapedField}"]`;
+  }
+
+  private async getColumnResizer(field: string): Promise<Locator> {
+    const droppableHeader = this.page.testSubj.locator('euiDataGridHeaderDroppable');
+
+    if (await droppableHeader.isVisible()) {
+      return droppableHeader
+        .locator(':scope > div')
+        .filter({ has: this.page.locator(this.getColumnIdSelector(field)) })
+        .locator('[data-test-subj="dataGridColumnResizer"]');
+    }
+
+    return this.getColumnHeader(field).locator('[data-test-subj="dataGridColumnResizer"]');
+  }
+
+  async getColumnWidth(field: string): Promise<number> {
+    const header = this.getColumnHeader(field);
+    await expect(header).toBeVisible();
+
+    const headerBox = await header.boundingBox();
+    if (!headerBox) {
+      throw new Error(`Unable to measure column width for field ${field}`);
+    }
+
+    return headerBox.width;
+  }
+
+  async resizeColumn(
+    field: string,
+    delta: number
+  ): Promise<{ originalWidth: number; newWidth: number }> {
+    const originalWidth = await this.getColumnWidth(field);
+    const resizer = await this.getColumnResizer(field);
+    await expect(resizer).toBeVisible();
+
+    const resizerBox = await resizer.boundingBox();
+    if (!resizerBox) {
+      throw new Error(`Unable to find column resizer for field ${field}`);
+    }
+
+    const startX = resizerBox.x + resizerBox.width / 2;
+    const startY = resizerBox.y + resizerBox.height / 2;
+
+    await this.page.mouse.move(startX, startY);
+    await this.page.mouse.down();
+    await this.page.mouse.move(startX + delta, startY, { steps: 5 });
+    await this.page.mouse.up();
+
+    await expect.poll(() => this.getColumnWidth(field)).not.toBe(originalWidth);
+
+    return { originalWidth, newWidth: await this.getColumnWidth(field) };
+  }
+
+  async resetColumnWidthExists(field: string): Promise<boolean> {
+    await this.openColumnMenuByField(field);
+    return await this.page.testSubj.locator('unifiedDataTableResetColumnWidth').isVisible();
+  }
+
+  async resetColumnWidth(field: string) {
+    await this.openColumnMenuByField(field);
+    await this.page.testSubj.click('unifiedDataTableResetColumnWidth');
+  }
+
+  async removeColumn(field: string) {
+    await this.openColumnMenuByField(field);
+    await this.page.getByRole('button', { name: 'Remove column' }).click();
+    await expect(this.getColumnHeader(field)).toBeHidden();
+    await this.waitUntilSearchingHasFinished();
+  }
+
   private async openColumnMenuByField(field: string) {
     await expect(async () => {
       await this.page.testSubj.hover(`dataGridHeaderCell-${field}`);
