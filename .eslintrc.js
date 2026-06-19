@@ -2077,38 +2077,40 @@ module.exports = {
     {
       files: [
         // src/platform/plugins
-        'src/platform/plugins/shared/visualizations/**/!(*.stories.tsx|*.test.tsx|*.storybook_decorator.tsx|*.mock.tsx)',
-        'src/platform/plugins/shared/visualization_listing/**/!(*.stories.tsx|*.test.tsx|*.storybook_decorator.tsx|*.mock.tsx)',
-        'src/platform/plugins/shared/data/**/!(*.stories.tsx|*.test.tsx|*.storybook_decorator.tsx|*.mock.tsx)',
-        'src/platform/plugins/shared/expressions/**/!(*.stories.tsx|*.test.tsx|*.storybook_decorator.tsx|*.mock.tsx)',
-        'src/platform/plugins/shared/charts/**/!(*.stories.tsx|*.test.tsx|*.storybook_decorator.tsx|*.mock.tsx)',
-        'src/platform/plugins/shared/vis_types/timeseries/**/!(*.stories.tsx|*.test.tsx|*.storybook_decorator.tsx|*.mock.tsx)',
-        'src/platform/plugins/shared/chart_expressions/**/!(*.stories.tsx|*.test.tsx|*.storybook_decorator.tsx|*.mock.tsx)',
-        'src/platform/plugins/private/vis_types/**/!(*.stories.tsx|*.test.tsx|*.storybook_decorator.tsx|*.mock.tsx)',
-        'src/platform/plugins/private/event_annotation/**/!(*.stories.tsx|*.test.tsx|*.storybook_decorator.tsx|*.mock.tsx)',
-        'src/platform/plugins/private/event_annotation_listing/**/!(*.stories.tsx|*.test.tsx|*.storybook_decorator.tsx|*.mock.tsx)',
-        'src/platform/plugins/private/vis_default_editor/**/!(*.stories.tsx|*.test.tsx|*.storybook_decorator.tsx|*.mock.tsx)',
+        'src/platform/plugins/shared/visualizations',
+        'src/platform/plugins/shared/visualization_listing',
+        'src/platform/plugins/shared/data',
+        'src/platform/plugins/shared/expressions',
+        'src/platform/plugins/shared/charts',
+        'src/platform/plugins/shared/vis_types/timeseries',
+        'src/platform/plugins/shared/chart_expressions',
+        'src/platform/plugins/private/vis_types',
+        'src/platform/plugins/private/event_annotation',
+        'src/platform/plugins/private/event_annotation_listing',
+        'src/platform/plugins/private/vis_default_editor',
 
         // src/platform/packages
-        'src/platform/packages/shared/kbn-visualization-listing-components/**/!(*.stories.tsx|*.test.tsx|*.storybook_decorator.tsx|*.mock.tsx)',
-        'src/platform/packages/shared/kbn-visualizations-common/**/!(*.stories.tsx|*.test.tsx|*.storybook_decorator.tsx|*.mock.tsx)',
-        'src/platform/packages/shared/kbn-visualization-utils/**/!(*.stories.tsx|*.test.tsx|*.storybook_decorator.tsx|*.mock.tsx)',
-        'src/platform/packages/shared/kbn-visualization-ui-components/**/!(*.stories.tsx|*.test.tsx|*.storybook_decorator.tsx|*.mock.tsx)',
-        'src/platform/packages/shared/kbn-palettes/**/!(*.stories.tsx|*.test.tsx|*.storybook_decorator.tsx|*.mock.tsx)',
-        'src/platform/packages/shared/kbn-event-annotation-components/**/!(*.stories.tsx|*.test.tsx|*.storybook_decorator.tsx|*.mock.tsx)',
-        'src/platform/packages/shared/kbn-dom-drag-drop/**/!(*.stories.tsx|*.test.tsx|*.storybook_decorator.tsx|*.mock.tsx)',
-        'src/platform/packages/shared/kbn-coloring/**/!(*.stories.tsx|*.test.tsx|*.storybook_decorator.tsx|*.mock.tsx)',
-        'src/platform/packages/shared/kbn-chart-icons/**/!(*.stories.tsx|*.test.tsx|*.storybook_decorator.tsx|*.mock.tsx)',
-        'src/platform/packages/shared/chart-test-jest-helpers/**/!(*.stories.tsx|*.test.tsx|*.storybook_decorator.tsx|*.mock.tsx)',
-        'src/platform/packages/private/kbn-test-eui-helpers/**/!(*.stories.tsx|*.test.tsx|*.storybook_decorator.tsx|*.mock.tsx)',
+        'src/platform/packages/shared/kbn-visualization-listing-components',
+        'src/platform/packages/shared/kbn-visualizations-common',
+        'src/platform/packages/shared/kbn-visualization-utils',
+        'src/platform/packages/shared/kbn-visualization-ui-components',
+        'src/platform/packages/shared/kbn-palettes',
+        'src/platform/packages/shared/kbn-event-annotation-components',
+        'src/platform/packages/shared/kbn-dom-drag-drop',
+        'src/platform/packages/shared/kbn-coloring',
+        'src/platform/packages/shared/kbn-chart-icons',
+        'src/platform/packages/shared/chart-test-jest-helpers',
+        'src/platform/packages/private/kbn-test-eui-helpers',
 
         // x-pack/platform/plugins
-        'x-pack/platform/plugins/shared/lens/**/!(*.stories.tsx|*.test.tsx|*.storybook_decorator.tsx|*.mock.tsx)',
-        'x-pack/platform/plugins/private/graph/**/!(*.stories.tsx|*.test.tsx|*.storybook_decorator.tsx|*.mock.tsx)',
+        'x-pack/platform/plugins/shared/lens',
+        'x-pack/platform/plugins/private/graph',
 
         // x-pack/platform/packages
-        'x-pack/platform/packages/private/kbn-random-sampling/**/!(*.stories.tsx|*.test.tsx|*.storybook_decorator.tsx|*.mock.tsx)',
-      ],
+        'x-pack/platform/packages/private/kbn-random-sampling',
+      ].map(
+        (path) => `${path}/**/!(*.stories.tsx|*.test.tsx|*.storybook_decorator.tsx|*.mock.tsx)`
+      ),
       rules: {
         '@kbn/i18n/strings_should_be_translated_with_i18n': 'warn',
         '@kbn/i18n/strings_should_be_translated_with_formatted_message': 'warn',
