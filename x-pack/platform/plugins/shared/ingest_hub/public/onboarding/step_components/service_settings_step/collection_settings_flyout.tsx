@@ -279,7 +279,7 @@ export function CollectionSettingsFlyout({
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty onClick={onClose}>
+            <EuiButtonEmpty onClick={onClose} data-test-subj="collectionSettingsFlyout-closeButton">
               <FormattedMessage
                 id="xpack.ingestHub.serviceSettingsStep.flyout.closeButton"
                 defaultMessage="Close"

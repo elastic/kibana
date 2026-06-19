@@ -167,7 +167,7 @@ test.describe('Onboarding Service Settings step', { tag: tags.stateful.classic }
     );
 
     // Close via Close button
-    await page.getByRole('button', { name: 'Close' }).click();
+    await page.testSubj.locator('collectionSettingsFlyout-closeButton').click();
     await expect(page.getByText('Collection settings — AWS EC2')).toBeHidden();
   });
 });
