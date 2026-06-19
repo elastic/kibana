@@ -40,6 +40,7 @@ dependsOn:
   - '@kbn/fields-metadata-plugin'
   - '@kbn/react-query'
   - '@kbn/zod'
+  - '@kbn/scout'
 tags:
   - plugin
   - prod
@@ -51,5 +52,6 @@ fileGroups:
     - public/**/*.ts
     - public/**/*.tsx
     - server/**/*.ts
+    - test/scout_examples/**/*
     - '!target/**/*'
 tasks: {}
