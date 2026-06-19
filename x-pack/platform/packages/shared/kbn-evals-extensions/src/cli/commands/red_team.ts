@@ -85,9 +85,9 @@ export const redTeamCmd: Command<void> = {
   then delegates to \`node scripts/evals run\`.
 
   Examples:
-    node scripts/evals_ext red-team --suite agent-builder --dry-run
-    node scripts/evals_ext red-team --suite agent-builder --judge eis-gpt-4.1 --skip-server
-    node scripts/evals_ext red-team --suite agent-builder --modules prompt_injection,jailbreaking --count 5
+    node scripts/evals ext red-team --suite agent-builder --dry-run
+    node scripts/evals ext red-team --suite agent-builder --judge eis-gpt-4.1 --skip-server
+    node scripts/evals ext red-team --suite agent-builder --modules prompt_injection,jailbreaking --count 5
   `,
   flags: redTeamFlags,
   run: async ({ log, flagsReader }) => {

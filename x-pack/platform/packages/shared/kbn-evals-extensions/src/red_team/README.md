@@ -8,16 +8,16 @@ Minimal scaffold for adversarial testing. Full implementation from [PR #272115](
 | --------------------------------- | ----------------------------------------------------------------------- |
 | `types.ts`                        | Minimal `RedTeamConfig` / `RedTeamReport`                               |
 | `orchestrator.ts`                 | Stub `runRedTeam` (returns empty report)                                |
-| `node scripts/evals_ext red-team` | Wires `ensureEvalStack` + `resolveRunContext`, delegates to `evals run` |
+| `node scripts/evals ext red-team` | Wires `ensureEvalStack` + `resolveRunContext`, delegates to `evals run` |
 
 **Not yet implemented:** modules, strategies, judge, guardrails, YAML templates, score ingestion.
 
 ## CLI
 
 ```bash
-node scripts/evals_ext red-team --suite agent-builder --dry-run
-node scripts/evals_ext red-team --suite agent-builder --judge eis-gpt-4.1 --skip-server
-node scripts/evals_ext red-team --suite agent-builder --modules prompt_injection,jailbreaking --count 5
+node scripts/evals ext red-team --suite agent-builder --dry-run
+node scripts/evals ext red-team --suite agent-builder --judge eis-gpt-4.1 --skip-server
+node scripts/evals ext red-team --suite agent-builder --modules prompt_injection,jailbreaking --count 5
 ```
 
 Red-team flags (in addition to eval orchestration flags from `evals start`):

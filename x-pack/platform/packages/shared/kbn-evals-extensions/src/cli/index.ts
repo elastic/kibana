@@ -11,6 +11,7 @@ import { redTeamCmd } from './commands/red_team';
 export async function run() {
   await new RunWithCommands(
     {
+      usage: 'node scripts/evals ext',
       description: 'Evals extensions CLI (experimental)',
     },
     [redTeamCmd]
