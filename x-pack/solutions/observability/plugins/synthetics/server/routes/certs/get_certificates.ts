@@ -51,8 +51,15 @@ export const getSyntheticsCertsRoute: SyntheticsRestApiRouteFactory<
     }),
   },
   handler: async ({ request, syntheticsEsClient, monitorConfigRepository, server, spaceId }) => {
-    const { monitorTypes, browserResourceTypes, party, tags, issuers, remoteNames, ...queryParams } =
-      request.query;
+    const {
+      monitorTypes,
+      browserResourceTypes,
+      party,
+      tags,
+      issuers,
+      remoteNames,
+      ...queryParams
+    } = request.query;
 
     const toList = (value?: string) => (value ? value.split(',').filter(Boolean) : undefined);
 

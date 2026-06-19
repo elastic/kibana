@@ -199,7 +199,12 @@ export const getCertsRequestBody = (
     issuers,
     includeBrowserCerts = false,
   }: GetCertsParams,
-  { ccsEnabled = false, remoteNames, spaceId, showFromAllSpaces = false }: GetCertsRequestBodyOptions = {}
+  {
+    ccsEnabled = false,
+    remoteNames,
+    spaceId,
+    showFromAllSpaces = false,
+  }: GetCertsRequestBodyOptions = {}
 ) => {
   const sort = SortFields[sortBy as keyof typeof SortFields];
 

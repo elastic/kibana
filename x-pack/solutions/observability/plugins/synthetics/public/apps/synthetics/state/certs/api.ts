@@ -45,9 +45,7 @@ export const getCertsList = async (queryParams: GetCertsParams): Promise<CertRes
   return result.data;
 };
 
-export const getCertFacets = async (
-  remoteNames?: string[]
-): Promise<CertFacets> => {
+export const getCertFacets = async (remoteNames?: string[]): Promise<CertFacets> => {
   const result = (await apiService.get(SYNTHETICS_API_URLS.CERTS_FACETS, {
     remoteNames: toParam(remoteNames),
   })) as {

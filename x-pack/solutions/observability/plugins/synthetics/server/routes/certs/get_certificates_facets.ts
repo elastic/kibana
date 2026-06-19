@@ -42,9 +42,7 @@ export const getSyntheticsCertsFacetsRoute: SyntheticsRestApiRouteFactory<{
     const { from, to, remoteNames } = request.query;
 
     const ccsEnabled = isCCSEnabled(server);
-    const remoteNameList = remoteNames
-      ? remoteNames.split(',').filter(Boolean)
-      : undefined;
+    const remoteNameList = remoteNames ? remoteNames.split(',').filter(Boolean) : undefined;
 
     const monitors = await monitorConfigRepository.getAll({
       filter: `${syntheticsMonitorAttributes}.${ConfigKey.ENABLED}: true`,

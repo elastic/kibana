@@ -48,9 +48,7 @@ export const MonitorPageLink: FC<PropsWithChildren<DetailPageLinkProps>> = ({
     }
   }
 
-  const search = remote?.remoteName
-    ? `?remoteName=${encodeURIComponent(remote.remoteName)}`
-    : '';
+  const search = remote?.remoteName ? `?remoteName=${encodeURIComponent(remote.remoteName)}` : '';
 
   return (
     <EuiLink

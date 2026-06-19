@@ -26,9 +26,7 @@ describe('getCertsFacetsRequestBody', () => {
     const body = getCertsFacetsRequestBody(params) as estypes.SearchRequest;
     expect(findScopingClause(body)).toBeUndefined();
     const filters = (body.query?.bool?.filter ?? []) as estypes.QueryDslQueryContainer[];
-    expect(filters).toEqual(
-      expect.arrayContaining([{ terms: { 'monitor.id': ['monitor-1'] } }])
-    );
+    expect(filters).toEqual(expect.arrayContaining([{ terms: { 'monitor.id': ['monitor-1'] } }]));
   });
 
   it('switches to the local/remote bool.should split when CCS is enabled', () => {
