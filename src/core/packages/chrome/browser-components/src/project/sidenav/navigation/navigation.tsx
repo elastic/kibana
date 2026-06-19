@@ -12,6 +12,7 @@ import { map } from 'rxjs';
 import { Navigation as NavigationComponent } from '@kbn/ui-side-navigation';
 import classnames from 'classnames';
 import type { SolutionId } from '@kbn/core-chrome-browser';
+import { renderSidePanelNestedPanel as renderRegisteredSidePanelNestedPanel } from '@kbn/core-chrome-browser';
 import type { MenuItem, NavigationStructure, SecondaryMenuItem, SideNavLogo } from '@kbn/ui-side-navigation/types';
 import { useObservable } from '@kbn/use-observable';
 import { useChromeService } from '@kbn/core-chrome-browser-context';
@@ -59,6 +60,14 @@ export const Navigation = (props: ChromeNavigationProps) => {
     [state]
   );
 
+  const renderSidePanelNestedPanel = useCallback(
+    (panelId: string) =>
+      renderRegisteredSidePanelNestedPanel(panelId, {
+        onItemClick: (item: { href: string; id: string; label: string }) => handleItemClick(item),
+      }),
+    [handleItemClick]
+  );
+
   if (!state) {
     return null;
   }
@@ -75,6 +84,7 @@ export const Navigation = (props: ChromeNavigationProps) => {
         onToggleCollapsed={props.onToggleCollapsed}
         activeItemId={clickedActiveItemId ?? activeItemId}
         onItemClick={handleItemClick}
+        renderSidePanelNestedPanel={renderSidePanelNestedPanel}
         showTopSeparator={isNextChrome}
         data-test-subj={classnames(`${solutionId}SideNav`, 'projectSideNav', 'projectSideNavV2')}
       />

@@ -115,6 +115,15 @@ export interface PanelHeaderActionDefinition {
   ariaLabel: string;
   iconType: IconType;
   id: string;
+  /**
+   * When set, clicking the header action opens the nested side panel with this id.
+   */
+  opensNestedPanel?: string;
+}
+
+export interface PanelNestedPanelDefinition {
+  id: string;
+  title: string;
 }
 
 export interface PanelFooterActionDefinition {
@@ -182,6 +191,11 @@ interface NodeDefinitionBase {
    * (optional) Icon buttons rendered in the side panel header next to the panel title.
    */
   panelHeaderActions?: PanelHeaderActionDefinition[];
+
+  /**
+   * (optional) Nested side panels opened from panel header actions.
+   */
+  panelNestedPanels?: PanelNestedPanelDefinition[];
 
   /**
    * (optional) Actions rendered at the bottom of the side panel for panel opener nodes.

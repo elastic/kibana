@@ -12,6 +12,20 @@ import type { IconType } from '@elastic/eui';
 export type BadgeType = 'beta' | 'techPreview' | 'new';
 
 /**
+ * A nested side panel opened from a side panel header action.
+ */
+export interface PanelNestedPanel {
+  /**
+   * The unique identifier of the nested panel.
+   */
+  id: string;
+  /**
+   * The title to display in the nested panel header.
+   */
+  title: string;
+}
+
+/**
  * An icon button rendered in a side panel header next to the panel title.
  */
 export interface PanelHeaderAction {
@@ -35,6 +49,10 @@ export interface PanelHeaderAction {
    * (optional) Click handler for the header action button.
    */
   onClick?: () => void;
+  /**
+   * (optional) When set, clicking the header action opens the nested side panel with this id.
+   */
+  opensNestedPanel?: string;
 }
 
 /**
@@ -150,6 +168,10 @@ export interface MenuItem {
    * (optional) Icon buttons rendered in the side panel header next to the panel title.
    */
   panelHeaderActions?: PanelHeaderAction[];
+  /**
+   * (optional) Nested side panels opened from panel header actions.
+   */
+  panelNestedPanels?: PanelNestedPanel[];
   /**
    * (optional) Text buttons rendered at the bottom of the side panel.
    */

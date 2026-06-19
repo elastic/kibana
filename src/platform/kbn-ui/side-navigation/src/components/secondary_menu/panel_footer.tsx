@@ -31,6 +31,7 @@ export const SecondaryMenuPanelFooter = ({
   const footerStyles = css`
     display: flex;
     flex-direction: column;
+    flex-shrink: 0;
     padding: ${euiTheme.size.s} ${euiTheme.size.m} ${euiTheme.size.m};
     width: 100%;
   `;

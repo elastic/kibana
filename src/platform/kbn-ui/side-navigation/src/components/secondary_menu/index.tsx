@@ -73,11 +73,12 @@ const SecondaryMenuBase = forwardRef<HTMLDivElement, SecondaryMenuProps>(
               <BetaBadge type={badgeType} alignment="text-bottom" />
             )}
           </div>
-          {isPanel && panelHeaderActions && panelHeaderActions.length > 0 && (
+          {panelHeaderActions && panelHeaderActions.length > 0 && (
             <div css={headerActionsStyles}>
               {panelHeaderActions.map((action) => (
                 <EuiButtonIcon
                   key={action.id}
+                  id={action.id}
                   aria-label={action['aria-label']}
                   color="text"
                   data-test-subj={action['data-test-subj']}

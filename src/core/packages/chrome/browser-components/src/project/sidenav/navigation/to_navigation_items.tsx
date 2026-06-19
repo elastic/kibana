@@ -278,6 +278,12 @@ export const toNavigationItems = (
       iconType: action.iconType,
       'aria-label': action.ariaLabel,
       'data-test-subj': getTestSubj(navNode, [`panel-header-action-${action.id}`]),
+      ...(action.opensNestedPanel ? { opensNestedPanel: action.opensNestedPanel } : {}),
+    }));
+
+    const panelNestedPanels = navNode.panelNestedPanels?.map((panel) => ({
+      id: panel.id,
+      title: panel.title,
     }));
 
     const panelFooterActions = navNode.panelFooterActions?.map((action) => ({
@@ -295,6 +301,7 @@ export const toNavigationItems = (
       href: itemHref,
       sections: secondarySections,
       ...(panelHeaderActions ? { panelHeaderActions } : {}),
+      ...(panelNestedPanels ? { panelNestedPanels } : {}),
       ...(panelFooterActions ? { panelFooterActions } : {}),
       'data-test-subj': getTestSubj(navNode),
       badgeType: navNode.badgeType,

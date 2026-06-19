@@ -39,7 +39,14 @@ describe('createDashboardsNavigationNode', () => {
         {
           id: 'dashboards_search',
           iconType: 'search',
+          opensNestedPanel: 'dashboards_search',
           ariaLabel: 'Search dashboards',
+        },
+      ],
+      panelNestedPanels: [
+        {
+          id: 'dashboards_search',
+          title: 'Search dashboards',
         },
       ],
       panelFooterActions: [
@@ -107,7 +114,7 @@ describe('createDashboardsNavigationNode', () => {
     };
 
     const { navigationTreeUI } = parseNavigationTree(
-      'observability',
+      'oblt',
       {
         body: [
           createDashboardsNavigationNode({
@@ -138,8 +145,16 @@ describe('createDashboardsNavigationNode', () => {
       expect.objectContaining({
         id: 'dashboards_search',
         iconType: 'search',
+        opensNestedPanel: 'dashboards_search',
         'aria-label': 'Search dashboards',
       }),
+    ]);
+
+    expect(dashboardsItem?.panelNestedPanels).toEqual([
+      {
+        id: 'dashboards_search',
+        title: 'Search dashboards',
+      },
     ]);
 
     expect(dashboardsItem?.panelFooterActions).toEqual([
@@ -200,7 +215,7 @@ describe('createDashboardsNavigationNode', () => {
     };
 
     const { navigationTreeUI } = parseNavigationTree(
-      'observability',
+      'oblt',
       {
         body: [
           createDashboardsNavigationNode({

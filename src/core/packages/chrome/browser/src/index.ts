@@ -66,7 +66,19 @@ export type {
   SolutionNavigationDefinitions,
   EuiSideNavItemTypeEnhanced,
   RenderAs,
+  PanelNestedPanelDefinition,
 } from './project_navigation';
+
+export type {
+  SidePanelNestedPanelRenderProps,
+  SidePanelNestedPanelRenderer,
+} from './side_panel_nested_panels';
+
+export {
+  getSidePanelNestedPanelRenderer,
+  registerSidePanelNestedPanelRenderer,
+  renderSidePanelNestedPanel,
+} from './side_panel_nested_panels';
 
 export type {
   SidebarApp,

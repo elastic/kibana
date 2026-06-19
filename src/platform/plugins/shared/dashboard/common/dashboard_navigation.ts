@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { NodeDefinition } from '@kbn/core-chrome-browser';
+import type { AppDeepLinkId, NodeDefinition } from '@kbn/core-chrome-browser';
 import { i18n } from '@kbn/i18n';
 
 import {
@@ -114,7 +114,16 @@ export const createDashboardsNavigationNode = (
       {
         id: 'dashboards_search',
         iconType: 'search',
+        opensNestedPanel: 'dashboards_search',
         ariaLabel: i18n.translate('dashboard.nav.searchDashboards', {
+          defaultMessage: 'Search dashboards',
+        }),
+      },
+    ],
+    panelNestedPanels: [
+      {
+        id: 'dashboards_search',
+        title: i18n.translate('dashboard.nav.searchDashboards', {
           defaultMessage: 'Search dashboards',
         }),
       },
@@ -126,7 +135,7 @@ export const createDashboardsNavigationNode = (
           defaultMessage: 'Create dashboard',
         }),
         iconType: 'plus',
-        link: DASHBOARD_CREATE_NAV_LINK,
+        link: DASHBOARD_CREATE_NAV_LINK as AppDeepLinkId,
       },
     ],
     children,

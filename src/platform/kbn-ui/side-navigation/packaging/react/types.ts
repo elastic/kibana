@@ -70,6 +70,18 @@ export interface PanelHeaderAction {
   id: string;
   /** Optional click handler for the header action button. */
   onClick?: () => void;
+  /** When set, clicking the header action opens the nested side panel with this id. */
+  opensNestedPanel?: string;
+}
+
+/**
+ * A nested side panel opened from a side panel header action.
+ */
+export interface PanelNestedPanel {
+  /** Unique identifier for this nested panel. */
+  id: string;
+  /** Title to display in the nested panel header. */
+  title: string;
 }
 
 /**
@@ -108,6 +120,8 @@ export interface MenuItem {
   badgeType?: BadgeType;
   /** Optional icon buttons rendered in the side panel header next to the panel title. */
   panelHeaderActions?: PanelHeaderAction[];
+  /** Optional nested side panels opened from panel header actions. */
+  panelNestedPanels?: PanelNestedPanel[];
   /** Optional text buttons rendered at the bottom of the side panel. */
   panelFooterActions?: PanelFooterAction[];
   /** Optional array of secondary menu sections for nested navigation. */

@@ -64,10 +64,19 @@ export type {
   EuiSideNavItemTypeEnhanced,
   RenderAs,
   SolutionId,
+  PanelNestedPanelDefinition,
+  SidePanelNestedPanelRenderProps,
+  SidePanelNestedPanelRenderer,
   SidebarApp,
   SidebarAppConfig,
   SidebarAppDefinition,
   SidebarSetup,
   SidebarStart,
   GlobalSearchConfig,
+} from './src';
+
+export {
+  getSidePanelNestedPanelRenderer,
+  registerSidePanelNestedPanelRenderer,
+  renderSidePanelNestedPanel,
 } from './src';
