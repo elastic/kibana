@@ -6,6 +6,7 @@
  */
 
 import { renderHook } from '@testing-library/react';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { FETCH_STATUS, useFetcher } from '../../hooks/use_fetcher';
 import { useManagedOtlpServiceAvailability } from '../shared/use_managed_otlp_service_availability';
 import { useApiEndpoints } from './use_api_endpoints';
@@ -22,14 +23,20 @@ jest.mock('../shared/use_managed_otlp_service_availability', () => ({
   useManagedOtlpServiceAvailability: jest.fn(),
 }));
 
+jest.mock('@kbn/kibana-react-plugin/public', () => ({
+  useKibana: jest.fn(),
+}));
+
 const mockUseFetcher = useFetcher as jest.MockedFunction<typeof useFetcher>;
 const mockUseManagedOtlpServiceAvailability =
   useManagedOtlpServiceAvailability as jest.MockedFunction<
     typeof useManagedOtlpServiceAvailability
   >;
+const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
 
 interface Options {
   isManagedOtlpServiceAvailable?: boolean;
+  isServerless?: boolean;
   elasticsearchUrl?: string;
   managedOtlpServiceUrl?: string;
   status?: FETCH_STATUS;
@@ -37,11 +44,15 @@ interface Options {
 
 const setup = ({
   isManagedOtlpServiceAvailable = false,
+  isServerless = false,
   elasticsearchUrl = 'https://es.example.com',
   managedOtlpServiceUrl = '',
   status = FETCH_STATUS.SUCCESS,
 }: Options = {}) => {
   mockUseManagedOtlpServiceAvailability.mockReturnValue(isManagedOtlpServiceAvailable);
+  mockUseKibana.mockReturnValue({
+    services: { context: { isServerless } },
+  } as unknown as ReturnType<typeof useKibana>);
   mockUseFetcher.mockReturnValue({
     data: { elasticsearchUrl, managedOtlpServiceUrl },
     status,
@@ -68,7 +79,7 @@ describe('useApiEndpoints', () => {
 
   it('uses the on-prem Elasticsearch URL resolved server-side for Prometheus', () => {
     const { result } = setup({
-      isManagedOtlpServiceAvailable: false,
+      isServerless: false,
       elasticsearchUrl: 'https://es.onprem.local:9200',
     });
 
@@ -95,14 +106,27 @@ describe('useApiEndpoints', () => {
     expect(findEndpoint(result, 'opentelemetry')?.url).toBe('https://otlp.example.com:443');
   });
 
-  it('builds the managed Prometheus URL from the managed OTLP URL when available', () => {
+  it('builds the managed Prometheus URL from the managed OTLP URL on Serverless', () => {
     const { result } = setup({
-      isManagedOtlpServiceAvailable: true,
+      isServerless: true,
       managedOtlpServiceUrl: 'https://otlp.example.com:443',
     });
 
     expect(findEndpoint(result, 'prometheus')?.url).toBe(
       'https://otlp.example.com:443/api/v1/write'
+    );
+  });
+
+  it('uses the ES-native Prometheus URL on ECH even when the managed OTLP service is available', () => {
+    const { result } = setup({
+      isServerless: false,
+      isManagedOtlpServiceAvailable: true,
+      managedOtlpServiceUrl: 'https://otlp.example.com:443',
+      elasticsearchUrl: 'https://es.cloud.example.com',
+    });
+
+    expect(findEndpoint(result, 'prometheus')?.url).toBe(
+      'https://es.cloud.example.com/_prometheus/api/v1/write'
     );
   });
 

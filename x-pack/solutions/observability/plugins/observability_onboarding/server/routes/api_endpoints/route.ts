@@ -106,9 +106,10 @@ const createApiKeyRoute = createObservabilityOnboardingServerRoute({
       featureFlags,
     } = await context.core;
 
+    const isServerless = config.serverless.enabled;
     const managedOtlpServiceUrl = getManagedOtlpServiceUrl(plugins);
     const isManagedOtlpServiceAvailable =
-      config.serverless.enabled ||
+      isServerless ||
       ((await featureFlags.getBooleanValue(IS_MANAGED_OTLP_SERVICE_ENABLED, false)) &&
         Boolean(managedOtlpServiceUrl));
 
@@ -123,7 +124,7 @@ const createApiKeyRoute = createObservabilityOnboardingServerRoute({
       );
     }
 
-    const createApiKey = resolveApiKeyFactory(id, isManagedOtlpServiceAvailable);
+    const createApiKey = resolveApiKeyFactory(id, { isManagedOtlpServiceAvailable, isServerless });
     const { encoded } = await createApiKey(client.asCurrentUser, `onboarding-${id}-api`);
 
     return { encodedApiKey: encoded };

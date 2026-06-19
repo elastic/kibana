@@ -7,10 +7,12 @@
 
 import type { EuiIconType } from '@elastic/eui/src/components/icon/icon';
 import { useMemo } from 'react';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { FETCH_STATUS, isPending, useFetcher } from '../../hooks/use_fetcher';
 import { useManagedOtlpServiceAvailability } from '../shared/use_managed_otlp_service_availability';
 import type { SupportedLogo } from '../shared/logo_icon';
 import type { ApiEndpointId } from '../../../common/api_endpoints';
+import type { ObservabilityOnboardingAppServices } from '../..';
 import { API_ENDPOINTS, type ApiEndpointContext } from './endpoints_config';
 
 export interface ResolvedApiEndpoint {
@@ -27,6 +29,11 @@ export function useApiEndpoints(): {
   isError: boolean;
 } {
   const isManagedOtlpServiceAvailable = useManagedOtlpServiceAvailability();
+  const {
+    services: {
+      context: { isServerless },
+    },
+  } = useKibana<ObservabilityOnboardingAppServices>();
 
   const { data, status } = useFetcher(
     (callApi) => callApi('GET /internal/observability_onboarding/api_endpoints'),
@@ -39,6 +46,7 @@ export function useApiEndpoints(): {
       elasticsearchUrl: data?.elasticsearchUrl || undefined,
       managedOtlpServiceUrl: data?.managedOtlpServiceUrl || undefined,
       isManagedOtlpServiceAvailable,
+      isServerless,
     };
 
     return API_ENDPOINTS.map((definition) => ({
@@ -48,7 +56,12 @@ export function useApiEndpoints(): {
       euiIconType: definition.euiIconType,
       url: definition.getUrl(endpointContext),
     }));
-  }, [data?.elasticsearchUrl, data?.managedOtlpServiceUrl, isManagedOtlpServiceAvailable]);
+  }, [
+    data?.elasticsearchUrl,
+    data?.managedOtlpServiceUrl,
+    isManagedOtlpServiceAvailable,
+    isServerless,
+  ]);
 
   return { endpoints, isLoading: isPending(status), isError: status === FETCH_STATUS.FAILURE };
 }

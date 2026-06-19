@@ -19,6 +19,7 @@ const createContext = (overrides: Partial<ApiEndpointContext> = {}): ApiEndpoint
   elasticsearchUrl: undefined,
   managedOtlpServiceUrl: undefined,
   isManagedOtlpServiceAvailable: false,
+  isServerless: false,
   ...overrides,
 });
 
@@ -84,11 +85,11 @@ describe('API_ENDPOINTS', () => {
     });
 
     describe('Prometheus remote write URL', () => {
-      it('derives the on-prem URL from the Elasticsearch URL', () => {
+      it('derives the ES-native URL from the Elasticsearch URL on non-Serverless deployments', () => {
         expect(
           getEndpoint('prometheus').getUrl(
             createContext({
-              isManagedOtlpServiceAvailable: false,
+              isServerless: false,
               elasticsearchUrl: 'https://es.example.com',
             })
           )
@@ -99,29 +100,42 @@ describe('API_ENDPOINTS', () => {
         expect(
           getEndpoint('prometheus').getUrl(
             createContext({
-              isManagedOtlpServiceAvailable: false,
+              isServerless: false,
               elasticsearchUrl: 'https://es.example.com//',
             })
           )
         ).toBe('https://es.example.com/_prometheus/api/v1/write');
       });
 
-      it('derives the managed URL from the managed OTLP URL', () => {
+      it('uses the managed OTLP URL on Serverless', () => {
         expect(
           getEndpoint('prometheus').getUrl(
             createContext({
-              isManagedOtlpServiceAvailable: true,
+              isServerless: true,
               managedOtlpServiceUrl: 'https://otlp.example.com:443',
             })
           )
         ).toBe('https://otlp.example.com:443/api/v1/write');
       });
 
-      it('prefers the on-prem URL when the managed OTLP URL is missing', () => {
+      it('uses the ES-native URL even when the managed OTLP service is available but not Serverless', () => {
         expect(
           getEndpoint('prometheus').getUrl(
             createContext({
+              isServerless: false,
               isManagedOtlpServiceAvailable: true,
+              managedOtlpServiceUrl: 'https://otlp.example.com:443',
+              elasticsearchUrl: 'https://es.example.com',
+            })
+          )
+        ).toBe('https://es.example.com/_prometheus/api/v1/write');
+      });
+
+      it('falls back to the ES-native URL on Serverless when the managed OTLP URL is missing', () => {
+        expect(
+          getEndpoint('prometheus').getUrl(
+            createContext({
+              isServerless: true,
               managedOtlpServiceUrl: undefined,
               elasticsearchUrl: 'https://es.example.com',
             })
