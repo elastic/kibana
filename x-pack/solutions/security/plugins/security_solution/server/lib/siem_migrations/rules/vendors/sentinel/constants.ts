@@ -10,6 +10,10 @@ export {
   SENTINEL_NRT_RULE_KIND,
   SENTINEL_SCHEDULED_RULE_KIND,
 } from '../../../../../../common/siem_migrations/parsers/sentinel/types';
+export {
+  SENTINEL_DEFAULT_QUERY_FREQUENCY,
+  SENTINEL_RULE_KIND_ANNOTATION_KEY,
+} from '../../../../../../common/siem_migrations/constants';
 
 /**
  * Map of Sentinel tactic display names to MITRE ATT&CK tactic IDs.
@@ -57,9 +61,6 @@ export const SENTINEL_TACTIC_NAME_TO_DISPLAY: Record<string, string> = {
   ImpairProcessControl: 'Impair Process Control',
   InhibitResponseFunction: 'Inhibit Response Function',
 };
-
-export const SENTINEL_DEFAULT_QUERY_FREQUENCY = '1m';
-export const SENTINEL_RULE_KIND_ANNOTATION_KEY = 'sentinel_rule_kind';
 
 /**
  * Matches the integer-only ISO 8601 duration subset supported by the Sentinel rule transform.

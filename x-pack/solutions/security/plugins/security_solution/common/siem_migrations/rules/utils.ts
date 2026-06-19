@@ -6,8 +6,13 @@
  */
 
 import type { Severity } from '../../api/detection_engine';
-import { DEFAULT_TRANSLATION_FIELDS } from '../constants';
-import type { ElasticRule, ElasticRulePartial } from '../model/rule_migration.gen';
+import {
+  DEFAULT_TRANSLATION_FIELDS,
+  SENTINEL_DEFAULT_QUERY_FREQUENCY,
+  SENTINEL_RULE_KIND_ANNOTATION_KEY,
+} from '../constants';
+import type { ElasticRule, ElasticRulePartial, OriginalRule } from '../model/rule_migration.gen';
+import { SENTINEL_NRT_RULE_KIND } from '../parsers/sentinel/types';
 
 export interface MigrationTranslationFields {
   from: string;
@@ -37,6 +42,25 @@ export const isMigrationPrebuiltRule = (rule?: ElasticRule): rule is MigrationPr
 export const isMigrationCustomRule = (rule?: ElasticRule): rule is MigrationCustomRule =>
   !isMigrationPrebuiltRule(rule) &&
   !!(rule?.title && rule?.description && rule?.query && rule?.query_language);
+
+export const getTranslationFieldsFromAnnotations = (
+  originalRule: OriginalRule
+): MigrationTranslationFields => {
+  const { annotations } = originalRule;
+  const isSentinelNrtRule =
+    originalRule.vendor === 'microsoft-sentinel' &&
+    annotations?.[SENTINEL_RULE_KIND_ANNOTATION_KEY] === SENTINEL_NRT_RULE_KIND;
+  const defaultInterval = isSentinelNrtRule
+    ? SENTINEL_DEFAULT_QUERY_FREQUENCY
+    : DEFAULT_TRANSLATION_FIELDS.interval;
+
+  return {
+    from:
+      typeof annotations?.from === 'string' ? annotations.from : DEFAULT_TRANSLATION_FIELDS.from,
+    to: typeof annotations?.to === 'string' ? annotations.to : DEFAULT_TRANSLATION_FIELDS.to,
+    interval: typeof annotations?.interval === 'string' ? annotations.interval : defaultInterval,
+  };
+};
 
 export const convertMigrationCustomRuleToSecurityRulePayload = (
   rule: MigrationCustomRule,

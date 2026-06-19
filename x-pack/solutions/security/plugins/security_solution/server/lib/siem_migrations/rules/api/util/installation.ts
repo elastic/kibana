@@ -8,10 +8,7 @@
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import type { RulesClient } from '@kbn/alerting-plugin/server';
 import { getErrorMessage } from '../../../../../utils/error_helpers';
-import type {
-  OriginalRule,
-  UpdateRuleMigrationRule,
-} from '../../../../../../common/siem_migrations/model/rule_migration.gen';
+import type { UpdateRuleMigrationRule } from '../../../../../../common/siem_migrations/model/rule_migration.gen';
 import { initPromisePool } from '../../../../../utils/promise_pool';
 import type { SecuritySolutionApiRequestHandlerContext } from '../../../../..';
 import { performTimelinesInstallation } from '../../../../detection_engine/prebuilt_rules/logic/perform_timelines_installation';
@@ -22,37 +19,12 @@ import type { StoredRuleMigrationRule } from '../../types';
 import { getPrebuiltRules, getUniquePrebuiltRuleIds } from './prebuilt_rules';
 import {
   convertMigrationCustomRuleToSecurityRulePayload,
+  getTranslationFieldsFromAnnotations,
   isMigrationCustomRule,
-  type MigrationTranslationFields,
 } from '../../../../../../common/siem_migrations/rules/utils';
-import { DEFAULT_TRANSLATION_FIELDS } from '../../../../../../common/siem_migrations/constants';
 import { getVendorTag } from '../../../common/api/util/tags';
-import {
-  SENTINEL_DEFAULT_QUERY_FREQUENCY,
-  SENTINEL_NRT_RULE_KIND,
-  SENTINEL_RULE_KIND_ANNOTATION_KEY,
-} from '../../vendors/sentinel/constants';
 
 const MAX_CUSTOM_RULES_TO_CREATE_IN_PARALLEL = 50;
-
-const getTranslationFieldsFromAnnotations = (
-  originalRule: OriginalRule
-): MigrationTranslationFields => {
-  const { annotations } = originalRule;
-  const isSentinelNrtRule =
-    originalRule.vendor === 'microsoft-sentinel' &&
-    annotations?.[SENTINEL_RULE_KIND_ANNOTATION_KEY] === SENTINEL_NRT_RULE_KIND;
-  const defaultInterval = isSentinelNrtRule
-    ? SENTINEL_DEFAULT_QUERY_FREQUENCY
-    : DEFAULT_TRANSLATION_FIELDS.interval;
-
-  return {
-    from:
-      typeof annotations?.from === 'string' ? annotations.from : DEFAULT_TRANSLATION_FIELDS.from,
-    to: typeof annotations?.to === 'string' ? annotations.to : DEFAULT_TRANSLATION_FIELDS.to,
-    interval: typeof annotations?.interval === 'string' ? annotations.interval : defaultInterval,
-  };
-};
 
 const installPrebuiltRules = async (
   rulesToInstall: StoredRuleMigrationRule[],
