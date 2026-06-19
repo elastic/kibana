@@ -116,15 +116,22 @@ export const updateRequestToEs = ({
   const { configuration, access_control, ...restUpdate } = update;
   const currentAccessControl = normalizeAccessControl(currentProps);
 
+  // Strip legacy fields from the persisted doc: `access_control` and `config` are now the source of
+  // truth, so any leftover `visibility`/`acl`/`configuration` is migrated into them and discarded.
+  const {
+    visibility,
+    acl,
+    configuration: _legacyConfiguration,
+    ...restCurrentProps
+  } = currentProps;
+
   const updated: AgentProperties = {
-    ...currentProps,
+    ...restCurrentProps,
     ...restUpdate,
     id: agentId,
     access_control: access_control
       ? { ...currentAccessControl, access_mode: access_control.access_mode }
-      : currentProps.access_control,
-    // Explicitly omit configuration to ensure migration
-    configuration: undefined,
+      : currentAccessControl,
     config: {
       ...currentConfig,
       ...configuration,

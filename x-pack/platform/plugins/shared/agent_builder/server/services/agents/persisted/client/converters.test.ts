@@ -561,7 +561,7 @@ describe('updateRequestToEs', () => {
     });
   });
 
-  it('updates access-control mode while preserving legacy acl entries', () => {
+  it('migrates legacy acl entries into access_control and drops the legacy fields', () => {
     const newUpdateDate = new Date();
     const entries = [{ type: 'user' as const, name: 'alice', role: AgentAccessControlRole.Editor }];
 
@@ -599,5 +599,52 @@ describe('updateRequestToEs', () => {
       access_mode: AgentAccessControlMode.Shared,
       entries,
     });
+    // Legacy fields are emptied once their data has been migrated into access_control.
+    expect(docProperties.visibility).toBeUndefined();
+    expect(docProperties.acl).toBeUndefined();
+  });
+
+  it('drops legacy fields even when the update does not touch access control', () => {
+    const newUpdateDate = new Date();
+    const entries = [{ type: 'user' as const, name: 'alice', role: AgentAccessControlRole.Editor }];
+
+    const agentProps: AgentProperties = {
+      id: 'id',
+      type: AgentType.chat,
+      name: 'name',
+      description: 'description',
+      space: 'space',
+      config: {
+        instructions: 'instructions',
+        tools: [],
+      },
+      labels: [],
+      visibility: AgentAccessControlMode.Shared,
+      acl: { entries },
+      created_by_id: 'test-user-id',
+      created_by_name: 'test-user',
+      created_at: creationDate,
+      updated_at: updateDate,
+    };
+
+    const updateRequest: AgentUpdateRequest = {
+      name: 'new name',
+    };
+
+    const docProperties = updateRequestToEs({
+      agentId: 'id',
+      currentProps: agentProps,
+      update: updateRequest,
+      updateDate: newUpdateDate,
+    });
+
+    expect(docProperties.name).toBe('new name');
+    // The legacy visibility/acl are normalized into access_control and removed from the doc.
+    expect(docProperties.access_control).toEqual({
+      access_mode: AgentAccessControlMode.Shared,
+      entries,
+    });
+    expect(docProperties.visibility).toBeUndefined();
+    expect(docProperties.acl).toBeUndefined();
   });
 });
