@@ -730,7 +730,7 @@ export default function ({ getService }: FtrProviderContext) {
       const result = await currentTask('test-task-for-sample-task-plugin-to-test-task-api-key');
 
       expect(result.apiKey).not.empty();
-      expect(result.userScope?.apiKeyCreatedByUser).to.be(true);
+      expect(result.userScope?.apiKeyCreatedByUser).to.be(false);
 
       queryResult = await supertest
         .post('/internal/security/api_key/_query')
@@ -738,8 +738,14 @@ export default function ({ getService }: FtrProviderContext) {
         .set('kbn-xsrf', 'xxx')
         .expect(200);
 
-      // should be one new api key generated in the route
-      expect(queryResult.body.apiKeys.length).eql(apiKeysLength + 1);
+      // route creates one key for the fake request; task manager clones another for the task
+      expect(
+        queryResult.body.apiKeys.filter((apiKey: { id: string }) => {
+          return apiKey.id === result.userScope?.apiKeyId;
+        }).length
+      ).eql(1);
+
+      expect(queryResult.body.apiKeys.length).eql(apiKeysLength + 2);
 
       await supertest.delete('/api/sample_tasks').set('kbn-xsrf', 'xxx').expect(200);
 
@@ -749,8 +755,57 @@ export default function ({ getService }: FtrProviderContext) {
         .set('kbn-xsrf', 'xxx')
         .expect(200);
 
-      // api key should not have been invalidated when the task was deleted
-      expect(queryResult.body.apiKeys.length).eql(apiKeysLength + 1);
+      // cloned task api key should still exist until invalidation runs
+      expect(
+        queryResult.body.apiKeys.filter((apiKey: { id: string }) => {
+          return apiKey.id === result.userScope?.apiKeyId;
+        }).length
+      ).eql(1);
+
+      // api_key_to_invalidate saved object should be created for the cloned key
+      await retry.try(async () => {
+        const response = await es.search({
+          index: '.kibana_task_manager',
+          size: 100,
+          query: {
+            term: {
+              type: 'api_key_to_invalidate',
+            },
+          },
+        });
+
+        expect(response.hits.hits.length).to.eql(1);
+        expect((response.hits?.hits?.[0]._source as any).api_key_to_invalidate?.apiKeyId).to.eql(
+          result.userScope?.apiKeyId
+        );
+      });
+
+      // wait for the api_key_to_invalidate saved object to be older than the invalidation removalDelay (1s)
+      await delay(1000);
+
+      // run the api key invalidation task
+      await supertest
+        .post('/api/invalidate_api_key_task/run_soon')
+        .send({})
+        .set('kbn-xsrf', 'xxx')
+        .expect(200);
+
+      // cloned task api key should be invalidated; route-created key remains
+      await retry.try(async () => {
+        queryResult = await supertest
+          .post('/internal/security/api_key/_query')
+          .send({})
+          .set('kbn-xsrf', 'xxx')
+          .expect(200);
+
+        expect(
+          queryResult.body.apiKeys.filter((apiKey: { id: string }) => {
+            return apiKey.id === result.userScope?.apiKeyId;
+          }).length
+        ).eql(0);
+
+        expect(queryResult.body.apiKeys.length).eql(apiKeysLength + 1);
+      });
     });
 
     it('should return a task run result when asked to run a task now', async () => {
