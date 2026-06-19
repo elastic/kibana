@@ -171,7 +171,6 @@ export const AskUserQuestionPrompt = ({
       gutterSize="m"
       css={containerStyles}
       data-test-subj="agentBuilderAskUserQuestionPrompt"
-      data-prompt-id={promptId}
     >
       {/* Question text (left) + progress label (right) */}
       <EuiFlexItem grow={false}>
