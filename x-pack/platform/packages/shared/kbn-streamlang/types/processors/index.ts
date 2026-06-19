@@ -6,7 +6,7 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { createIsNarrowSchema, DeepStrict, NonEmptyString } from '@kbn/zod-helpers/v4';
+import { createIsNarrowSchema, NonEmptyString } from '@kbn/zod-helpers/v4';
 import type { Condition } from '../conditions';
 import { conditionSchema, isAlwaysCondition } from '../conditions';
 import {
@@ -729,17 +729,9 @@ export interface NetworkDirectionWithInternalNetworks {
   internal_networks: string[];
 }
 
-const networkDirectionWithInternalNetworksSchema = z.object({
-  internal_networks: z.array(z.string()),
-}) satisfies z.Schema<NetworkDirectionWithInternalNetworks>;
-
 export interface NetworkDirectionWithInternalNetworksField {
   internal_networks_field: string;
 }
-
-const networkDirectionWithInternalNetworksFieldSchema = z.object({
-  internal_networks_field: StreamlangSourceField,
-}) satisfies z.Schema<NetworkDirectionWithInternalNetworksField>;
 
 export interface NetworkDirectionCommonFields extends ProcessorBaseWithWhere {
   action: 'network_direction';
@@ -760,15 +752,14 @@ const networkDirectionCommonFieldsSchema = processorBaseWithWhereSchema.extend({
 export type NetworkDirectionProcessor = NetworkDirectionCommonFields &
   (NetworkDirectionWithInternalNetworks | NetworkDirectionWithInternalNetworksField);
 
-export const networkDirectionProcessorSchema = DeepStrict(
-  z.intersection(
-    networkDirectionCommonFieldsSchema,
-    z.union([
-      networkDirectionWithInternalNetworksSchema,
-      networkDirectionWithInternalNetworksFieldSchema,
-    ])
-  )
-) satisfies z.Schema<NetworkDirectionProcessor>;
+export const networkDirectionProcessorSchema = z.union([
+  networkDirectionCommonFieldsSchema.extend({
+    internal_networks: z.array(z.string()),
+  }),
+  networkDirectionCommonFieldsSchema.extend({
+    internal_networks_field: StreamlangSourceField,
+  }),
+]) satisfies z.Schema<NetworkDirectionProcessor>;
 
 /**
  * Enrich processor
