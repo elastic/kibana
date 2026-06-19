@@ -192,11 +192,14 @@ const lifecycleInheritedRoute = createServerRoute({
       logger,
     });
 
-    if (template) {
-      return { lifecycle: getTemplateLifecycle(template) };
+    if (!template || !template.settings) {
+      throw new StatusError(
+        `Cannot determine template lifecycle for ${name} — the data stream may be replicated and managed by a remote cluster`,
+        400
+      );
     }
 
-    return { lifecycle: { disabled: {} } };
+    return { lifecycle: getTemplateLifecycle(template) };
   },
 });
 
