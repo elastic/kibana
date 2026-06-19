@@ -9,26 +9,12 @@ import { expect } from '@kbn/scout/ui';
 import { test, tags } from '@kbn/scout';
 import fs from 'fs';
 import os from 'os';
-import {
-  SavedObjectsTracker,
-  cleanupDownloadedFile,
-  installLogsSampleData,
-  removeLogsSampleData,
-} from '../../helpers';
-
-const defaultSettings = {
-  defaultIndex: 'kibana_sample_data_logs',
-  'dateFormat:tz': 'UTC',
-};
+import { SavedObjectsTracker, cleanupDownloadedFile } from '../../helpers';
 
 const tracker = new SavedObjectsTracker();
 let downloadedFilePath: string | null = null;
 
 test.describe('Dashboard app', { tag: tags.stateful.classic }, () => {
-  test.beforeAll(async ({ kbnClient, apiServices }) => {
-    await installLogsSampleData({ apiServices, kbnClient, settings: defaultSettings });
-  });
-
   test.beforeEach(async ({ browserAuth, pageObjects, uiSettings }) => {
     await browserAuth.loginAsAdmin();
     await uiSettings.set({
@@ -42,11 +28,7 @@ test.describe('Dashboard app', { tag: tags.stateful.classic }, () => {
     await tracker.cleanup(kbnClient);
   });
 
-  test.afterAll(async ({ kbnClient, apiServices }) => {
-    await removeLogsSampleData({ apiServices, kbnClient });
-  });
-
-  test('should create dashboard with ES|QL, Lens, and Custom visualization panels', async ({
+  test('should create dashboard with ES|QL, Lens, and Vega panels', async ({
     page,
     pageObjects,
   }) => {
@@ -236,6 +218,7 @@ test.describe('Dashboard app', { tag: tags.stateful.classic }, () => {
       await pageObjects.dashboard.exitFullscreen();
     });
 
+    await page.testSubj.click('app-menu-overflow-button');
     await expect(page.testSubj.locator('dashboardFullScreenMode')).toBeVisible();
   });
 
