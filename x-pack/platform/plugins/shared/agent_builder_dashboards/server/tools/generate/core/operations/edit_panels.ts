@@ -25,20 +25,16 @@ const editPanelItemSchema = z.discriminatedUnion('kind', [
 ]);
 
 type EditPanelRequestInput = z.infer<typeof editPanelRequestInputSchema>;
-type EditMarkdownConfigInput = z.infer<typeof editMarkdownPanelConfigInputSchema>;
+type EditPanelItem = z.infer<typeof editPanelItemSchema>;
 
-interface ValidMarkdownEdit {
-  kind: 'panelConfig';
-  panelInput: EditMarkdownConfigInput;
+/**
+ * An edit that passed validation. `existingPanel` is only carried for panel
+ * request edits (the resolver needs it); markdown edits don't have one.
+ */
+interface ValidEdit {
+  panelInput: EditPanelItem;
+  existingPanel?: AttachmentPanel;
 }
-
-interface ValidPanelRequestEdit {
-  kind: 'panelRequest';
-  panelInput: EditPanelRequestInput;
-  existingPanel: AttachmentPanel;
-}
-
-type ValidEdit = ValidMarkdownEdit | ValidPanelRequestEdit;
 
 const missingPanelResolverError =
   'Inline panel resolver is required for edit_panels panel requests.';
@@ -102,18 +98,19 @@ export const editPanelsOperation = defineOperation({
           );
           continue;
         }
-        validEdits.push({ kind: 'panelConfig', panelInput });
+        validEdits.push({ panelInput });
         continue;
       }
 
       // Panel request edits: the resolver enforces the Lens-type check and
       // returns a failure attempt if the existing panel isn't supported.
-      validEdits.push({ kind: 'panelRequest', panelInput, existingPanel });
+      validEdits.push({ panelInput, existingPanel });
     }
 
     // Resolve valid panel request edits in parallel from the entry-time snapshot.
     const validPanelRequestEdits = validEdits.filter(
-      (validEdit): validEdit is ValidPanelRequestEdit => validEdit.kind === 'panelRequest'
+      (validEdit): validEdit is ValidEdit & { panelInput: EditPanelRequestInput } =>
+        validEdit.panelInput.kind === 'panelRequest'
     );
 
     const panelContentAttemptByPanelId = new Map<string, PanelContentAttempt>();
@@ -141,22 +138,17 @@ export const editPanelsOperation = defineOperation({
 
     // Apply valid edits in input order so state changes remain deterministic.
     let nextDashboardData = dashboardData;
-    for (const validEdit of validEdits) {
-      if (validEdit.kind === 'panelConfig') {
+    for (const { panelInput } of validEdits) {
+      if (panelInput.kind === 'panelConfig') {
+        const { config } = panelInput;
         const updateResult = updatePanelInDashboard({
           dashboardData: nextDashboardData,
-          panelId: validEdit.panelInput.panelId,
-          transformPanel: (panel) => ({
-            ...panel,
-            config: validEdit.panelInput.config,
-          }),
+          panelId: panelInput.panelId,
+          transformPanel: (panel) => ({ ...panel, config }),
         });
 
         if (!updateResult.updated) {
-          recordFailure(
-            validEdit.panelInput.panelId,
-            `Panel "${validEdit.panelInput.panelId}" not found.`
-          );
+          recordFailure(panelInput.panelId, `Panel "${panelInput.panelId}" not found.`);
           continue;
         }
 
@@ -164,11 +156,9 @@ export const editPanelsOperation = defineOperation({
         continue;
       }
 
-      const attempt = panelContentAttemptByPanelId.get(validEdit.panelInput.panelId);
+      const attempt = panelContentAttemptByPanelId.get(panelInput.panelId);
       if (!attempt) {
-        throw new Error(
-          `Panel edit result for panel "${validEdit.panelInput.panelId}" is missing.`
-        );
+        throw new Error(`Panel edit result for panel "${panelInput.panelId}" is missing.`);
       }
 
       if (attempt.type === 'failure') {
@@ -178,18 +168,12 @@ export const editPanelsOperation = defineOperation({
 
       const updateResult = updatePanelInDashboard({
         dashboardData: nextDashboardData,
-        panelId: validEdit.panelInput.panelId,
-        transformPanel: (panel) => ({
-          ...panel,
-          ...attempt.panelContent,
-        }),
+        panelId: panelInput.panelId,
+        transformPanel: (panel) => ({ ...panel, ...attempt.panelContent }),
       });
 
       if (!updateResult.updated) {
-        recordFailure(
-          validEdit.panelInput.panelId,
-          `Panel "${validEdit.panelInput.panelId}" not found.`
-        );
+        recordFailure(panelInput.panelId, `Panel "${panelInput.panelId}" not found.`);
         continue;
       }
 
