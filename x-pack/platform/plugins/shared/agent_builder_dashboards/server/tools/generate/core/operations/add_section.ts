@@ -11,13 +11,7 @@ import type { AttachmentPanel, DashboardSection } from '@kbn/agent-builder-dashb
 import { z } from '@kbn/zod/v4';
 import { getResolvedPanelCreationRequests } from './panel_creation';
 import { defineOperation } from './types';
-import { panelConfigPanelInputSchema, PANEL_TYPE_TO_EMBEDDABLE_TYPE } from './panel_kinds';
-import { panelRequestSchema } from './panels/vis';
-
-const addSectionPanelItemSchema = z.discriminatedUnion('kind', [
-  panelConfigPanelInputSchema,
-  panelRequestSchema,
-]);
+import { addSectionPanelItemSchema, PANEL_TYPE_TO_EMBEDDABLE_TYPE } from './panels';
 
 export const addSectionOperation = defineOperation({
   schema: z.object({

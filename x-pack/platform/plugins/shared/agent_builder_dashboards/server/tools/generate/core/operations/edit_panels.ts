@@ -10,16 +10,13 @@ import { z } from '@kbn/zod/v4';
 import { createPanelFailureResult, type PanelContentAttempt } from '../resolve_panel';
 import { indexPanelsById, updatePanelInDashboard } from '../dashboard_state';
 import { DASHBOARD_OPERATION_FAILURE_TYPES } from '../failure_types';
-import { MARKDOWN_EMBEDDABLE_TYPE, editMarkdownPanelConfigInputSchema } from './panels/markdown';
-import { editPanelRequestInputSchema, type EditPanelRequestInput } from './panels/vis';
+import {
+  MARKDOWN_EMBEDDABLE_TYPE,
+  editPanelItemSchema,
+  type EditPanelItem,
+  type EditPanelRequestInput,
+} from './panels';
 import { defineOperation } from './types';
-
-const editPanelItemSchema = z.discriminatedUnion('kind', [
-  editPanelRequestInputSchema,
-  editMarkdownPanelConfigInputSchema,
-]);
-
-type EditPanelItem = z.infer<typeof editPanelItemSchema>;
 
 /**
  * An edit that passed validation. `existingPanel` is only carried for panel

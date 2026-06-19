@@ -10,27 +10,8 @@ import type { AttachmentPanel } from '@kbn/agent-builder-dashboards-common';
 import { z } from '@kbn/zod/v4';
 import { appendPanelsToDashboard } from '../dashboard_state';
 import { defineOperation } from './types';
-import { PANEL_TYPE_TO_EMBEDDABLE_TYPE } from './panel_kinds';
-import { visPanelConfigInputSchema, panelRequestSchema } from './panels/vis';
-import { markdownPanelConfigInputSchema } from './panels/markdown';
+import { addPanelsItemSchema, PANEL_TYPE_TO_EMBEDDABLE_TYPE } from './panels';
 import { getResolvedPanelCreationRequests } from './panel_creation';
-
-const sectionIdField = z
-  .string()
-  .optional()
-  .describe(
-    'ID of an existing section to add this panel into. The section must already exist (use add_section first). If omitted, panel is added at the top level.'
-  );
-
-const addPanelsItemSchema = z.discriminatedUnion('kind', [
-  z.discriminatedUnion('type', [
-    visPanelConfigInputSchema.extend({ sectionId: sectionIdField }),
-    markdownPanelConfigInputSchema.extend({ sectionId: sectionIdField }),
-  ]),
-  panelRequestSchema.extend({ sectionId: sectionIdField }),
-]);
-
-export type AddPanelsItemInput = z.infer<typeof addPanelsItemSchema>;
 
 export const addPanelsOperation = defineOperation({
   schema: z.object({
