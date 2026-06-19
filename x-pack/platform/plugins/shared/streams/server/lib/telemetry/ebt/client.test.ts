@@ -110,6 +110,8 @@ describe('EbtTelemetryClient', () => {
         count: 5,
         input_tokens_used: 300,
         output_tokens_used: 150,
+        cached_tokens_used: 20,
+        duration_ms: 1200,
         stream_name: 'test-stream',
         stream_type: 'wired',
         tool_usage: {
@@ -132,6 +134,8 @@ describe('EbtTelemetryClient', () => {
           count: 5,
           input_tokens_used: 300,
           output_tokens_used: 150,
+          cached_tokens_used: 20,
+          duration_ms: 1200,
           stream_name: 'test-stream',
           stream_type: 'wired',
           tool_usage: {
