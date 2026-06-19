@@ -38,7 +38,9 @@ describe('transformSloToCloneState', () => {
 
   it('produces clone state whose labels parse back into form key/value pairs', () => {
     const formState = transformPartialSLODataToFormState(
-      transformSloToCloneState(buildSlo({ labels: { team: 'platform', cost_center: 'engineering' } }))
+      transformSloToCloneState(
+        buildSlo({ labels: { team: 'platform', cost_center: 'engineering' } })
+      )
     );
     expect(formState?.labels).toEqual([
       { key: 'team', value: 'platform' },
