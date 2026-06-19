@@ -262,12 +262,13 @@ describe('buildFieldEvaluations', () => {
     expect(fragment).toContain('NULL');
   });
 
-  it('should return an EVAL pipeline fragment when shared and identity field evaluations exist', () => {
+  it('should return only entity.source for user (entity.namespace moved to getEuidEsqlEvaluation)', () => {
     const fragment = buildFieldEvaluations(getEntityDefinition('user', 'default'));
     expect(fragment.startsWith('| EVAL ')).toBe(true);
     expect(fragment.length).toBeGreaterThan('| EVAL '.length);
     expect(fragment).toContain('entity.source = CASE(');
-    expect(fragment).toContain('entity.namespace');
+    // entity.namespace is now part of getEuidEsqlEvaluation, not shared field evals
+    expect(fragment).not.toContain('entity.namespace');
   });
 });
 
