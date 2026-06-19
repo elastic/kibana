@@ -193,9 +193,11 @@ export const redTeamCmd: Command<void> = {
         env: childEnv,
       });
 
-      child.on('exit', (code) => {
+      child.on('exit', (code, signal) => {
         if (code === 0) {
           resolve();
+        } else if (signal) {
+          reject(new Error(`evals run was killed by signal ${signal}`));
         } else {
           reject(new Error(`evals run exited with code ${code}`));
         }
