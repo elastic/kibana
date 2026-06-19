@@ -34,6 +34,14 @@ import { DISCOVERY_KIND_COLORS } from '../shared/constants';
 
 const MAX_VISIBLE_STREAMS = 3;
 
+const EVENT_PROCESSED_LABEL = i18n.translate('xpack.streams.discoveriesTab.eventStatus.processed', {
+  defaultMessage: 'Processed',
+});
+
+const EVENT_PENDING_LABEL = i18n.translate('xpack.streams.discoveriesTab.eventStatus.pending', {
+  defaultMessage: 'Pending',
+});
+
 const columns: Array<EuiBasicTableColumn<Discovery>> = [
   {
     field: 'discovered_at',
@@ -49,7 +57,7 @@ const columns: Array<EuiBasicTableColumn<Discovery>> = [
     name: i18n.translate('xpack.streams.discoveriesTab.kindColumn', {
       defaultMessage: 'Kind',
     }),
-    width: '90px',
+    width: '100px',
     render: (kind: Discovery['kind']) => (
       <EuiBadge color={DISCOVERY_KIND_COLORS[kind]}>{DISCOVERY_KIND_LABELS[kind]}</EuiBadge>
     ),
@@ -103,6 +111,18 @@ const columns: Array<EuiBasicTableColumn<Discovery>> = [
     }),
     width: '100px',
     render: (value: number | undefined) => (value != null ? `${value}%` : '-'),
+  },
+  {
+    name: i18n.translate('xpack.streams.discoveriesTab.eventColumn', {
+      defaultMessage: 'Status',
+    }),
+    width: '130px',
+    render: (discovery: Discovery) =>
+      discovery.processed ? (
+        <EuiBadge color="success">{EVENT_PROCESSED_LABEL}</EuiBadge>
+      ) : (
+        <EuiBadge color="hollow">{EVENT_PENDING_LABEL}</EuiBadge>
+      ),
   },
 ];
 
