@@ -118,8 +118,9 @@ describe('executeDashboardOperations', () => {
             grid: { x: 0, y: 0, w: 24, h: 9 },
           },
           {
-            kind: 'markdown',
-            markdownContent: '### Updated summary',
+            kind: 'panelConfig',
+            type: 'markdown',
+            config: { content: '### Updated summary' },
             grid: { x: 0, y: 9, w: 48, h: 5 },
           },
         ],
@@ -218,8 +219,9 @@ describe('executeDashboardOperations', () => {
           operation: 'add_panels',
           panels: [
             {
-              kind: 'markdown',
-              markdownContent: '### Summary',
+              kind: 'panelConfig',
+              type: 'markdown',
+              config: { content: '### Summary' },
               grid: { x: 0, y: 0, w: 24, h: 4 },
             },
             {
@@ -507,8 +509,9 @@ describe('executeDashboardOperations', () => {
           grid: { y: 12 },
           panels: [
             {
-              kind: 'markdown',
-              markdownContent: '### Section Summary',
+              kind: 'panelConfig',
+              type: 'markdown',
+              config: { content: '### Section Summary' },
               grid: { x: 0, y: 0, w: 24, h: 4 },
             },
             {
@@ -885,8 +888,9 @@ describe('executeDashboardOperations', () => {
           operation: 'add_panels',
           panels: [
             {
-              kind: 'markdown',
-              markdownContent: '### Section Summary',
+              kind: 'panelConfig',
+              type: 'markdown',
+              config: { content: '### Section Summary' },
               grid: { x: 0, y: 0, w: 24, h: 4 },
               sectionId: 'section-a',
             },
@@ -1496,7 +1500,14 @@ describe('executeDashboardOperations', () => {
         operations: [
           {
             operation: 'edit_panels',
-            panels: [{ kind: 'markdown', panelId: 'md-1', markdownContent: '### Updated summary' }],
+            panels: [
+              {
+                kind: 'panelConfig',
+                type: 'markdown',
+                panelId: 'md-1',
+                config: { content: '### Updated summary' },
+              },
+            ],
           },
         ],
         logger,
@@ -1517,7 +1528,7 @@ describe('executeDashboardOperations', () => {
       );
     });
 
-    it('records a failure when kind: "markdown" targets a non-markdown panel', async () => {
+    it('records a failure when a markdown panelConfig edit targets a non-markdown panel', async () => {
       const resolvePanelContent = jest.fn<
         ReturnType<ResolvePanelContent>,
         Parameters<ResolvePanelContent>
@@ -1532,7 +1543,14 @@ describe('executeDashboardOperations', () => {
         operations: [
           {
             operation: 'edit_panels',
-            panels: [{ kind: 'markdown', panelId: 'panel-1', markdownContent: 'new text' }],
+            panels: [
+              {
+                kind: 'panelConfig',
+                type: 'markdown',
+                panelId: 'panel-1',
+                config: { content: 'new text' },
+              },
+            ],
           },
         ],
         logger,
@@ -1575,7 +1593,12 @@ describe('executeDashboardOperations', () => {
           {
             operation: 'edit_panels',
             panels: [
-              { kind: 'markdown', panelId: 'md-1', markdownContent: '### New summary' },
+              {
+                kind: 'panelConfig',
+                type: 'markdown',
+                panelId: 'md-1',
+                config: { content: '### New summary' },
+              },
               { kind: 'panelRequest', panelId: 'panel-1', query: 'turn into a bar chart' },
             ],
           },
@@ -1625,8 +1648,9 @@ describe('executeDashboardOperations', () => {
             operation: 'add_panels',
             panels: [
               {
-                kind: 'markdown',
-                markdownContent: '### Summary',
+                kind: 'panelConfig',
+                type: 'markdown',
+                config: { content: '### Summary' },
                 grid: { x: 0, y: 0, w: 48, h: 5 },
                 sectionId: 'nonexistent-section',
               },

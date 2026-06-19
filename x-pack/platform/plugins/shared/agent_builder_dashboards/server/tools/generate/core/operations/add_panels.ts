@@ -6,12 +6,11 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import { MARKDOWN_EMBEDDABLE_TYPE } from '@kbn/dashboard-markdown/server';
+import type { AttachmentPanel } from '@kbn/agent-builder-dashboards-common';
 import { z } from '@kbn/zod/v4';
 import { appendPanelsToDashboard } from '../dashboard_state';
 import { defineOperation } from './types';
 import {
-  markdownPanelInputSchema,
   panelConfigPanelInputSchema,
   panelRequestSchema,
   PANEL_TYPE_TO_EMBEDDABLE_TYPE,
@@ -26,7 +25,6 @@ const sectionIdField = z
   );
 
 const addPanelsItemSchema = z.discriminatedUnion('kind', [
-  markdownPanelInputSchema.extend({ sectionId: sectionIdField }),
   panelConfigPanelInputSchema.extend({ sectionId: sectionIdField }),
   panelRequestSchema.extend({ sectionId: sectionIdField }),
 ]);
@@ -48,61 +46,29 @@ export const addPanelsOperation = defineOperation({
     );
 
     for (const [panelInputIndex, item] of operation.panels.entries()) {
-      switch (item.kind) {
-        case 'markdown':
-          nextDashboardData = appendPanelsToDashboard({
-            dashboardData: nextDashboardData,
-            panelsToAdd: [
-              {
-                id: uuidv4(),
-                type: MARKDOWN_EMBEDDABLE_TYPE,
-                config: { content: item.markdownContent },
-                grid: item.grid,
-              },
-            ],
-            sectionId: item.sectionId,
-          });
-          break;
-        case 'panelConfig':
-          nextDashboardData = appendPanelsToDashboard({
-            dashboardData: nextDashboardData,
-            panelsToAdd: [
-              {
-                id: uuidv4(),
-                type: PANEL_TYPE_TO_EMBEDDABLE_TYPE[item.type],
-                config: item.config,
-                grid: item.grid,
-              },
-            ],
-            sectionId: item.sectionId,
-          });
-          break;
-        case 'panelRequest': {
-          const resolvedRequest = resolvedRequestsByInputIndex.get(panelInputIndex);
-          if (!resolvedRequest) {
-            throw new Error(
-              `Missing pre-resolved panel request for ${operation.operation} operation at index ${operationIndex}, panel input index ${panelInputIndex}.`
-            );
-          }
-          if (resolvedRequest.resolvedPanel.type === 'failure') {
-            context.failures.push(resolvedRequest.resolvedPanel.failure);
-          } else {
-            nextDashboardData = appendPanelsToDashboard({
-              dashboardData: nextDashboardData,
-              panelsToAdd: [
-                {
-                  id: uuidv4(),
-                  type: resolvedRequest.resolvedPanel.panelContent.type,
-                  config: resolvedRequest.resolvedPanel.panelContent.config,
-                  grid: item.grid,
-                },
-              ],
-              sectionId: item.sectionId,
-            });
-          }
-          break;
+      let panelContent: Pick<AttachmentPanel, 'type' | 'config'>;
+
+      if (item.kind === 'panelConfig') {
+        panelContent = { type: PANEL_TYPE_TO_EMBEDDABLE_TYPE[item.type], config: item.config };
+      } else {
+        const resolvedRequest = resolvedRequestsByInputIndex.get(panelInputIndex);
+        if (!resolvedRequest) {
+          throw new Error(
+            `Missing pre-resolved panel request for ${operation.operation} operation at index ${operationIndex}, panel input index ${panelInputIndex}.`
+          );
         }
+        if (resolvedRequest.resolvedPanel.type === 'failure') {
+          context.failures.push(resolvedRequest.resolvedPanel.failure);
+          continue;
+        }
+        panelContent = resolvedRequest.resolvedPanel.panelContent;
       }
+
+      nextDashboardData = appendPanelsToDashboard({
+        dashboardData: nextDashboardData,
+        panelsToAdd: [{ id: uuidv4(), ...panelContent, grid: item.grid }],
+        sectionId: item.sectionId,
+      });
     }
 
     return nextDashboardData;

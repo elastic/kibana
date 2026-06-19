@@ -11,12 +11,6 @@ import { MARKDOWN_EMBEDDABLE_TYPE } from '@kbn/dashboard-markdown/server';
 import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
 import { z } from '@kbn/zod/v4';
 
-export const markdownPanelInputSchema = z.object({
-  kind: z.literal('markdown'),
-  grid: panelGridSchema,
-  markdownContent: z.string().describe('Markdown content for the panel.'),
-});
-
 export const panelConfigPanelInputSchema = z.object({
   kind: z.literal('panelConfig'),
   grid: panelGridSchema,
@@ -28,7 +22,7 @@ export const panelConfigPanelInputSchema = z.object({
   config: z
     .record(z.string().max(256), z.unknown())
     .describe(
-      'Already-resolved panel configuration. Supply the config of an existing visualization (e.g. read from a visualization attachment) rather than an attachment ID. The generation tool does not read any attachment store.'
+      'Already-resolved panel configuration passed by value. For "vis", the Lens config (e.g. read from a visualization attachment). For "markdown", the markdown panel config (e.g. { content }). The generation tool does not read any attachment store, so the config must be supplied directly rather than as an attachment ID.'
     ),
 });
 

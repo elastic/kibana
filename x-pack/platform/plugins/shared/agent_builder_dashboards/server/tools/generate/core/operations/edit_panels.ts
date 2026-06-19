@@ -6,12 +6,12 @@
  */
 
 import type { AttachmentPanel } from '@kbn/agent-builder-dashboards-common';
-import { MARKDOWN_EMBEDDABLE_TYPE } from '@kbn/dashboard-markdown/server';
 import { z } from '@kbn/zod/v4';
 import { createPanelFailureResult, type PanelContentAttempt } from '../resolve_panel';
 import { indexPanelsById, updatePanelInDashboard } from '../dashboard_state';
 import { DASHBOARD_OPERATION_FAILURE_TYPES } from '../failure_types';
 import { panelRequestSchema } from './panel_kinds';
+import { MARKDOWN_EMBEDDABLE_TYPE } from './panels/markdown';
 import { defineOperation } from './types';
 
 const editPanelRequestInputSchema = panelRequestSchema.omit({ grid: true, index: true }).extend({
@@ -19,25 +19,26 @@ const editPanelRequestInputSchema = panelRequestSchema.omit({ grid: true, index:
   query: z.string().describe('A natural language query describing how to update the panel.'),
 });
 
-const editMarkdownPanelInputSchema = z.object({
-  kind: z.literal('markdown'),
+const editMarkdownConfigSchema = z.object({
+  kind: z.literal('panelConfig'),
+  type: z.literal('markdown'),
   panelId: z.string().describe('Existing markdown panel id to update.'),
-  markdownContent: z
-    .string()
-    .describe('New markdown content. Fully replaces the existing markdown content.'),
+  config: z
+    .record(z.string().max(256), z.unknown())
+    .describe('New markdown panel config (e.g. { content }). Fully replaces the existing config.'),
 });
 
 const editPanelItemSchema = z.discriminatedUnion('kind', [
   editPanelRequestInputSchema,
-  editMarkdownPanelInputSchema,
+  editMarkdownConfigSchema,
 ]);
 
 type EditPanelRequestInput = z.infer<typeof editPanelRequestInputSchema>;
-type EditMarkdownPanelInput = z.infer<typeof editMarkdownPanelInputSchema>;
+type EditMarkdownConfigInput = z.infer<typeof editMarkdownConfigSchema>;
 
 interface ValidMarkdownEdit {
-  kind: 'markdown';
-  panelInput: EditMarkdownPanelInput;
+  kind: 'panelConfig';
+  panelInput: EditMarkdownConfigInput;
 }
 
 interface ValidPanelRequestEdit {
@@ -58,7 +59,7 @@ export const editPanelsOperation = defineOperation({
       panels: z.array(editPanelItemSchema).min(1),
     })
     .describe(
-      'Edit existing panels in place by panelId. Supports ES|QL-backed Lens visualization panels (kind: "panelRequest") and markdown panels (kind: "markdown"). DSL, form-based, and other non-ES|QL visualization panels are not supported for direct editing and should be recreated as new ES|QL-based Lens panels instead.'
+      'Edit existing panels in place by panelId. Supports ES|QL-backed Lens visualization panels (kind: "panelRequest") and markdown panels (kind: "panelConfig", type: "markdown"). DSL, form-based, and other non-ES|QL visualization panels are not supported for direct editing and should be recreated as new ES|QL-based Lens panels instead.'
     ),
   handler: async ({ dashboardData, operation, context }) => {
     const { resolvePanelContent } = context;
@@ -102,7 +103,7 @@ export const editPanelsOperation = defineOperation({
         continue;
       }
 
-      if (panelInput.kind === 'markdown') {
+      if (panelInput.kind === 'panelConfig') {
         if (existingPanel.type !== MARKDOWN_EMBEDDABLE_TYPE) {
           recordFailure(
             panelInput.panelId,
@@ -110,7 +111,7 @@ export const editPanelsOperation = defineOperation({
           );
           continue;
         }
-        validEdits.push({ kind: 'markdown', panelInput });
+        validEdits.push({ kind: 'panelConfig', panelInput });
         continue;
       }
 
@@ -150,13 +151,13 @@ export const editPanelsOperation = defineOperation({
     // Apply valid edits in input order so state changes remain deterministic.
     let nextDashboardData = dashboardData;
     for (const validEdit of validEdits) {
-      if (validEdit.kind === 'markdown') {
+      if (validEdit.kind === 'panelConfig') {
         const updateResult = updatePanelInDashboard({
           dashboardData: nextDashboardData,
           panelId: validEdit.panelInput.panelId,
           transformPanel: (panel) => ({
             ...panel,
-            config: { ...panel.config, content: validEdit.panelInput.markdownContent },
+            config: validEdit.panelInput.config,
           }),
         });
 

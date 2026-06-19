@@ -8,19 +8,16 @@
 import { v4 as uuidv4 } from 'uuid';
 import { sectionGridSchema } from '@kbn/agent-builder-dashboards-common';
 import type { AttachmentPanel, DashboardSection } from '@kbn/agent-builder-dashboards-common';
-import { MARKDOWN_EMBEDDABLE_TYPE } from '@kbn/dashboard-markdown/server';
 import { z } from '@kbn/zod/v4';
 import { getResolvedPanelCreationRequests } from './panel_creation';
 import { defineOperation } from './types';
 import {
-  markdownPanelInputSchema,
   panelConfigPanelInputSchema,
   panelRequestSchema,
   PANEL_TYPE_TO_EMBEDDABLE_TYPE,
 } from './panel_kinds';
 
 const addSectionPanelItemSchema = z.discriminatedUnion('kind', [
-  markdownPanelInputSchema,
   panelConfigPanelInputSchema,
   panelRequestSchema,
 ]);
@@ -35,7 +32,7 @@ export const addSectionOperation = defineOperation({
       .min(1)
       .optional()
       .describe(
-        'Optional inline panels (markdown, panelConfig, or panelRequest) to create inside the new section. Panel grids are section-relative.'
+        'Optional inline panels (panelConfig or panelRequest) to create inside the new section. Panel grids are section-relative.'
       ),
   }),
   handler: ({ dashboardData, operation, operationIndex, context }) => {
@@ -59,14 +56,6 @@ export const addSectionOperation = defineOperation({
 
       for (const [panelInputIndex, item] of operation.panels.entries()) {
         switch (item.kind) {
-          case 'markdown':
-            sectionPanels.push({
-              id: uuidv4(),
-              type: MARKDOWN_EMBEDDABLE_TYPE,
-              config: { content: item.markdownContent },
-              grid: item.grid,
-            });
-            break;
           case 'panelConfig':
             sectionPanels.push({
               id: uuidv4(),
