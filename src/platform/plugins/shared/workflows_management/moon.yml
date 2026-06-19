@@ -59,6 +59,7 @@ dependsOn:
   - '@kbn/react-field'
   - '@kbn/storage-adapter'
   - '@kbn/occ'
+  - '@kbn/change-history'
   - '@kbn/core-i18n-browser-mocks'
   - '@kbn/core-lifecycle-browser-mocks'
   - '@kbn/serverless'
