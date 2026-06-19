@@ -15,6 +15,7 @@ import {
   SECURITY_SOLUTION_ALERT_VALIDATION_WORKFLOW_AUTO_CLOSE_CONFIDENCE_SCORE_MIN_THRESHOLD,
   SECURITY_SOLUTION_ALERT_VALIDATION_WORKFLOW_AUTO_CLOSE_ENABLED,
   SECURITY_SOLUTION_ALERT_VALIDATION_WORKFLOW_CONNECTOR_ID,
+  SECURITY_SOLUTION_ALERT_VALIDATION_WORKFLOW_ENABLED,
   SECURITY_SOLUTION_DEFAULT_VALUE_REPORT_MINUTES,
   SECURITY_SOLUTION_DEFAULT_VALUE_REPORT_RATE,
   SECURITY_SOLUTION_DEFAULT_VALUE_REPORT_TITLE,
@@ -670,6 +671,28 @@ export const getDefaultColdAndFrozenTiersSettings = (): SettingsConfig => ({
 });
 
 export const getAlertValidationWorkflowSettings = (): SettingsConfig => ({
+  [SECURITY_SOLUTION_ALERT_VALIDATION_WORKFLOW_ENABLED]: {
+    name: i18n.translate(
+      'xpack.securitySolution.uiSettings.alertValidationWorkflowEnabledLabel',
+      {
+        defaultMessage: 'Enable alert analysis workflow',
+      }
+    ),
+    value: true,
+    description: i18n.translate(
+      'xpack.securitySolution.uiSettings.alertValidationWorkflowEnabledDescription',
+      {
+        defaultMessage:
+          'When enabled, the managed alert analysis workflow automatically triages incoming alerts.',
+      }
+    ),
+    type: 'boolean',
+    category: [APP_ID],
+    requiresPageReload: false,
+    schema: schema.boolean(),
+    solutionViews: ['classic', 'security'],
+    technicalPreview: true,
+  },
   [SECURITY_SOLUTION_ALERT_VALIDATION_WORKFLOW_AUTO_CLOSE_ENABLED]: {
     name: i18n.translate(
       'xpack.securitySolution.uiSettings.alertValidationWorkflowAutoCloseEnabledLabel',

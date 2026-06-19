@@ -809,6 +809,10 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
       description: 'Switches the Entity Store Engine to v2',
     },
   },
+  'securitySolution:alertValidationWorkflowEnabled': {
+    type: 'boolean',
+    _meta: { description: 'Whether the managed alert analysis workflow is enabled' },
+  },
   'securitySolution:alertValidationWorkflowAutoCloseEnabled': {
     type: 'boolean',
     _meta: {

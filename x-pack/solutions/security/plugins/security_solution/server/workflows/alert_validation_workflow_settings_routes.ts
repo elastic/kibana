@@ -13,6 +13,7 @@ import {
   SECURITY_SOLUTION_ALERT_VALIDATION_WORKFLOW_AUTO_CLOSE_CONFIDENCE_SCORE_MIN_THRESHOLD,
   SECURITY_SOLUTION_ALERT_VALIDATION_WORKFLOW_AUTO_CLOSE_ENABLED,
   SECURITY_SOLUTION_ALERT_VALIDATION_WORKFLOW_CONNECTOR_ID,
+  SECURITY_SOLUTION_ALERT_VALIDATION_WORKFLOW_ENABLED,
 } from '@kbn/management-settings-ids';
 import {
   ALERT_VALIDATION_WORKFLOW_API_VERSION,
@@ -35,6 +36,7 @@ export { ALERT_VALIDATION_WORKFLOW_SETTINGS_ROUTE };
 const AlertValidationWorkflowSettingsWithConnectorRequestBody =
   AlertValidationWorkflowSettings.extend({
     connectorId: z.string().optional(),
+    workflowEnabled: z.boolean().optional(),
   }).refine(
     ({ autoCloseConfidenceScoreMinThreshold, autoCloseConfidenceScoreMaxThreshold }) =>
       autoCloseConfidenceScoreMinThreshold < autoCloseConfidenceScoreMaxThreshold,
@@ -53,11 +55,13 @@ const toWorkflowSettings = ({
   autoCloseConfidenceScoreMinThreshold,
   autoCloseConfidenceScoreMaxThreshold,
   connectorId,
+  workflowEnabled,
 }: AlertValidationWorkflowSettingsWithConnectorRequestBodyType): SecurityAlertValidationWorkflowSettings => ({
   autoCloseEnabled,
   autoCloseConfidenceScoreMinThreshold,
   autoCloseConfidenceScoreMaxThreshold,
   connectorId: connectorId ?? '',
+  workflowEnabled: workflowEnabled ?? true,
 });
 
 export const registerAlertValidationWorkflowSettingsRoutes = (
@@ -87,6 +91,9 @@ export const registerAlertValidationWorkflowSettingsRoutes = (
         );
 
         const settings = {
+          workflowEnabled: await uiSettingsClient.get<boolean>(
+            SECURITY_SOLUTION_ALERT_VALIDATION_WORKFLOW_ENABLED
+          ),
           autoCloseEnabled: await uiSettingsClient.get<boolean>(
             SECURITY_SOLUTION_ALERT_VALIDATION_WORKFLOW_AUTO_CLOSE_ENABLED
           ),
@@ -158,6 +165,10 @@ export const registerAlertValidationWorkflowSettingsRoutes = (
           const settings = toWorkflowSettings(request.body);
           const uiSettingsClient = coreStart.uiSettings.asScopedToClient(
             coreStart.savedObjects.getScopedClient(request)
+          );
+          await uiSettingsClient.set(
+            SECURITY_SOLUTION_ALERT_VALIDATION_WORKFLOW_ENABLED,
+            settings.workflowEnabled
           );
           await uiSettingsClient.set(
             SECURITY_SOLUTION_ALERT_VALIDATION_WORKFLOW_AUTO_CLOSE_ENABLED,

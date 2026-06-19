@@ -49,6 +49,7 @@ const areSettingsEqual = (
   right: AlertValidationWorkflowSettingsWithConnector | undefined
 ): boolean => {
   return (
+    left?.workflowEnabled === right?.workflowEnabled &&
     left?.autoCloseEnabled === right?.autoCloseEnabled &&
     left?.autoCloseConfidenceScoreMinThreshold === right?.autoCloseConfidenceScoreMinThreshold &&
     left?.autoCloseConfidenceScoreMaxThreshold === right?.autoCloseConfidenceScoreMaxThreshold &&
@@ -161,6 +162,48 @@ export const AlertValidationWorkflowPage: React.FC = () => {
           <EuiLoadingSpinner data-test-subj="alertValidationWorkflowSettingsLoading" />
         ) : (
           <>
+            <EuiDescribedFormGroup
+              fullWidth
+              title={
+                <h4>
+                  <FormattedMessage
+                    id="xpack.securitySolution.alertValidationWorkflow.workflowEnabledSectionTitle"
+                    defaultMessage="Workflow enabled"
+                  />
+                </h4>
+              }
+              description={
+                <p>
+                  <FormattedMessage
+                    id="xpack.securitySolution.alertValidationWorkflow.workflowEnabledSectionDescription"
+                    defaultMessage="Enable or disable the managed alert analysis workflow."
+                  />
+                </p>
+              }
+            >
+              <EuiFormRow fullWidth>
+                <EuiSwitch
+                  data-test-subj="alertValidationWorkflowEnabled"
+                  showLabel={false}
+                  aria-label={i18n.translate(
+                    'xpack.securitySolution.alertValidationWorkflow.workflowEnabledAriaLabel',
+                    { defaultMessage: 'Enable alert analysis workflow' }
+                  )}
+                  label={i18n.translate(
+                    'xpack.securitySolution.alertValidationWorkflow.workflowEnabledHiddenLabel',
+                    { defaultMessage: 'Enable alert analysis workflow' }
+                  )}
+                  checked={pageSettings.workflowEnabled ?? true}
+                  disabled={!canEditAdvancedSettings}
+                  onChange={(event) =>
+                    setPageSettings({
+                      ...pageSettings,
+                      workflowEnabled: event.target.checked,
+                    })
+                  }
+                />
+              </EuiFormRow>
+            </EuiDescribedFormGroup>
             <EuiDescribedFormGroup
               fullWidth
               title={

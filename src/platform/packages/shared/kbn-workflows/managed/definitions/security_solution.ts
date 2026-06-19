@@ -15,6 +15,7 @@ export const SECURITY_ALERT_VALIDATION_WORKFLOW_ID = 'system-security-alert-vali
 
 export interface SecurityAlertValidationWorkflowTemplateValues
   extends ManagedWorkflowTemplateValues {
+  workflowEnabled: boolean;
   autoCloseEnabled: boolean;
   autoCloseConfidenceScoreMinThreshold: number;
   autoCloseConfidenceScoreMaxThreshold: number;
@@ -22,6 +23,7 @@ export interface SecurityAlertValidationWorkflowTemplateValues
 }
 
 const renderAlertValidationWorkflowYaml = ({
+  workflowEnabled,
   autoCloseEnabled,
   autoCloseConfidenceScoreMinThreshold,
   autoCloseConfidenceScoreMaxThreshold,
@@ -29,6 +31,7 @@ const renderAlertValidationWorkflowYaml = ({
 }: SecurityAlertValidationWorkflowTemplateValues): string => {
   const document = parseDocument(ALERT_VALIDATION_WORKFLOW_YAML);
 
+  document.setIn(['enabled'], workflowEnabled);
   document.setIn(['consts', 'auto_close_enabled'], autoCloseEnabled);
   document.setIn(
     ['consts', 'auto_close_confidence_score_min_threshold'],

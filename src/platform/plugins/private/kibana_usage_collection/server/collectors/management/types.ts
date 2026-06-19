@@ -197,6 +197,7 @@ export interface UsageStats {
   'observability:streamsEnableDraftStreams': boolean;
   'observability:streamsSigEventsIndexPatterns': string;
   'securitySolution:entityStoreEnableV2': boolean;
+  'securitySolution:alertValidationWorkflowEnabled': boolean;
   'securitySolution:alertValidationWorkflowAutoCloseEnabled': boolean;
   'securitySolution:alertValidationWorkflowAutoCloseConfidenceScoreMinThreshold': number;
   'securitySolution:alertValidationWorkflowAutoCloseConfidenceScoreMaxThreshold': number;

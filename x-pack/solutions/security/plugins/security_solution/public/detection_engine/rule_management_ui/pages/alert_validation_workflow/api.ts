@@ -48,6 +48,7 @@ export type {
 
 export type AlertValidationWorkflowSettingsWithConnector = AlertValidationWorkflowSettings & {
   connectorId?: string;
+  workflowEnabled?: boolean;
 };
 
 export interface AlertValidationWorkflowSettingsWithConnectorResponse {

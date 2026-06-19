@@ -40,9 +40,11 @@ const templateRepresentativeValuesById: ManagedWorkflowTemplateValuesById = {
     recipient: 'World',
   },
   [SECURITY_ALERT_VALIDATION_WORKFLOW_ID]: {
+    workflowEnabled: true,
     autoCloseEnabled: true,
     autoCloseConfidenceScoreMinThreshold: 0.85,
     autoCloseConfidenceScoreMaxThreshold: 1,
+    connectorId: '',
   },
 };
 
@@ -125,9 +127,11 @@ describe('managedWorkflowDefinitions', () => {
 
   it('renders the Security alert validation workflow with template values', () => {
     const renderedYaml = SECURITY_ALERT_VALIDATION_WORKFLOW.yamlTemplate({
+      workflowEnabled: true,
       autoCloseEnabled: false,
       autoCloseConfidenceScoreMinThreshold: 0.7,
       autoCloseConfidenceScoreMaxThreshold: 0.9,
+      connectorId: '',
     });
 
     const workflow = parse(renderedYaml) as { consts: Record<string, unknown> };

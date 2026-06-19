@@ -226,6 +226,8 @@ export const SECURITY_SOLUTION_ALERT_VALIDATION_WORKFLOW_AUTO_CLOSE_CONFIDENCE_S
   'securitySolution:alertValidationWorkflowAutoCloseConfidenceScoreMaxThreshold' as const;
 export const SECURITY_SOLUTION_ALERT_VALIDATION_WORKFLOW_CONNECTOR_ID =
   'securitySolution:alertValidationWorkflowConnectorId' as const;
+export const SECURITY_SOLUTION_ALERT_VALIDATION_WORKFLOW_ENABLED =
+  'securitySolution:alertValidationWorkflowEnabled' as const;
 // Cases settings
 export const CASES_MAX_OPEN_CASES_PER_RULE_RUN_ID = 'cases:maxOpenCasesPerRuleRun' as const;
 

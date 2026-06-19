@@ -48,9 +48,11 @@ describe('managed workflows', () => {
   it('installs the per-space alert validation workflow with template values', async () => {
     const managed = createManagedClient();
     const settings = {
+      workflowEnabled: true,
       autoCloseEnabled: true,
       autoCloseConfidenceScoreMinThreshold: 0.8,
       autoCloseConfidenceScoreMaxThreshold: 0.95,
+      connectorId: '',
     };
 
     await installSecurityAlertValidationWorkflow({
