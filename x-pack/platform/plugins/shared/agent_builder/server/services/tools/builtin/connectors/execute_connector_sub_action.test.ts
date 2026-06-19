@@ -209,6 +209,77 @@ describe('createExecuteConnectorSubActionTool', () => {
     });
   });
 
+  describe('allowedSubActions enforcement', () => {
+    it('returns error when sub-action is blocked by per-instance allowedSubActions', async () => {
+      mockGet.mockResolvedValue({
+        id: 'conn-123',
+        actionTypeId: '.slack2',
+        allowedSubActions: ['listChannels'],
+      });
+
+      const tool = createExecuteConnectorSubActionTool({ getActions });
+      const result = await tool.handler(
+        {
+          connectorId: 'conn-123',
+          subAction: 'searchMessages',
+          params: {},
+        },
+        mockContext
+      );
+
+      expect((result as ToolHandlerStandardReturn).results).toHaveLength(1);
+      expect((result as ToolHandlerStandardReturn).results[0].type).toBe(ToolResultType.error);
+      expect(
+        ((result as ToolHandlerStandardReturn).results[0] as ErrorResult).data.message
+      ).toContain("Sub-action 'searchMessages' is not permitted on connector 'conn-123'");
+      expect(mockExecute).not.toHaveBeenCalled();
+    });
+
+    it('executes when allowedSubActions is undefined (no restriction)', async () => {
+      mockGet.mockResolvedValue({
+        id: 'conn-123',
+        actionTypeId: '.slack2',
+        allowedSubActions: undefined,
+      });
+      mockExecute.mockResolvedValue({ status: 'ok', data: { ok: true } });
+
+      const tool = createExecuteConnectorSubActionTool({ getActions });
+      const result = await tool.handler(
+        {
+          connectorId: 'conn-123',
+          subAction: 'searchMessages',
+          params: {},
+        },
+        mockContext
+      );
+
+      expect((result as ToolHandlerStandardReturn).results[0].type).toBe(ToolResultType.other);
+      expect(mockExecute).toHaveBeenCalled();
+    });
+
+    it('executes when sub-action is included in allowedSubActions', async () => {
+      mockGet.mockResolvedValue({
+        id: 'conn-123',
+        actionTypeId: '.slack2',
+        allowedSubActions: ['searchMessages'],
+      });
+      mockExecute.mockResolvedValue({ status: 'ok', data: { ok: true } });
+
+      const tool = createExecuteConnectorSubActionTool({ getActions });
+      const result = await tool.handler(
+        {
+          connectorId: 'conn-123',
+          subAction: 'searchMessages',
+          params: {},
+        },
+        mockContext
+      );
+
+      expect((result as ToolHandlerStandardReturn).results[0].type).toBe(ToolResultType.other);
+      expect(mockExecute).toHaveBeenCalled();
+    });
+  });
+
   it('rejects sub-actions not marked as isTool', async () => {
     getConnectorSpecMock.mockReturnValue({
       metadata: {

@@ -220,13 +220,14 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
        * At this point the form is valid
        * and there are no pre submit error messages.
        */
-      const { actionTypeId, name, config, secrets, id } = data;
+      const { actionTypeId, name, config, secrets, id, allowedSubActions } = data;
       const validConnector = {
         actionTypeId,
         name: name ?? '',
         config: config ?? {},
         secrets: secrets ?? {},
         id: id ?? '',
+        allowedSubActions,
       };
 
       const createdConnector = await createConnector(validConnector);

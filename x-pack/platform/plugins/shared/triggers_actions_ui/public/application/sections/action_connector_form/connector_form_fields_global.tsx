@@ -228,10 +228,15 @@ const ConnectorFormFieldsGlobalComponent: React.FC<ConnectorFormFieldsProps> = (
     };
   }, [actionTypeId, http]);
 
+  const resolvedAllowedSubActions = Array.isArray(allowedSubActions)
+    ? allowedSubActions
+    : undefined;
   const allSubActionOptions = toolSubActions.map((subActionName) => ({ label: subActionName }));
-  const selectedSubActionOptions = (allowedSubActions ?? toolSubActions).map((subActionName) => ({
-    label: subActionName,
-  }));
+  const selectedSubActionOptions = (resolvedAllowedSubActions ?? toolSubActions).map(
+    (subActionName) => ({
+      label: subActionName,
+    })
+  );
 
   const handleSubActionsChange = useCallback(
     (selected: Array<{ label: string }>) => {
@@ -291,6 +296,7 @@ const ConnectorFormFieldsGlobalComponent: React.FC<ConnectorFormFieldsProps> = (
       />
       {toolSubActions.length > 0 && (
         <>
+          <UseField path="allowedSubActions" component={HiddenField} />
           <EuiSpacer size="m" />
           <EuiFormRow
             label={i18n.translate(

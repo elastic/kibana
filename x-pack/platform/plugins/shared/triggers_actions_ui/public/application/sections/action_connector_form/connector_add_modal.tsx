@@ -168,8 +168,15 @@ const ConnectorAddModal = ({
        * and there are no pre submit error messages.
        */
 
-      const { actionTypeId, name, config, secrets, id } = data;
-      const validConnector = { actionTypeId, name: name ?? '', config, secrets, id: id ?? '' };
+      const { actionTypeId, name, config, secrets, id, allowedSubActions } = data;
+      const validConnector = {
+        actionTypeId,
+        name: name ?? '',
+        config,
+        secrets,
+        id: id ?? '',
+        allowedSubActions,
+      };
 
       const createdConnector = await createConnector(validConnector);
       return createdConnector;

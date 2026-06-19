@@ -579,6 +579,48 @@ describe('CreateConnectorFlyout', () => {
       expect(screen.queryByTestId('connector-form-header-error-label')).not.toBeInTheDocument();
     });
 
+    it('includes allowedSubActions in create request when sub-actions are restricted', async () => {
+      appMockRenderer.coreStart.http.get = jest.fn().mockImplementation((path: string) => {
+        if (path.includes('/spec')) {
+          return Promise.resolve({ tool_sub_actions: ['searchMessages', 'listChannels'] });
+        }
+        return Promise.resolve([]);
+      });
+
+      appMockRenderer.render(
+        <CreateConnectorFlyout
+          actionTypeRegistry={actionTypeRegistry}
+          onClose={onClose}
+          onConnectorCreated={onConnectorCreated}
+          onTestConnector={onTestConnector}
+        />
+      );
+
+      await userEvent.click(await screen.findByTestId(`${actionTypeModel.id}-card`));
+      await waitFor(() => {
+        expect(screen.getByTestId('allowedSubActionsInput')).toBeInTheDocument();
+      });
+
+      await userEvent.click(screen.getByTestId('nameInput'));
+      await userEvent.paste('My test');
+
+      const removeListChannelsButton = within(
+        screen.getByTestId('allowedSubActionsInput')
+      ).getByLabelText('Remove listChannels from selection in this group');
+      await userEvent.click(removeListChannelsButton);
+
+      await userEvent.click(screen.getByTestId('create-connector-flyout-save-btn'));
+
+      await waitFor(() => {
+        expect(appMockRenderer.coreStart.http.post).toHaveBeenCalledWith(
+          '/api/actions/connector/my-test',
+          {
+            body: `{"name":"My test","config":{},"secrets":{},"connector_type_id":"${actionTypeModel.id}","allowed_sub_actions":["searchMessages"]}`,
+          }
+        );
+      });
+    });
+
     it('show error message in the form header', async () => {
       appMockRenderer.render(
         <CreateConnectorFlyout
