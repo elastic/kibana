@@ -12,7 +12,6 @@ import { isContentPackStreamRequest } from './archive';
 
 const wiredUpsert: ContentPackStreamRequest = {
   ...emptyAssets,
-  queries: [],
   stream: {
     type: 'wired',
     description: '',
@@ -26,40 +25,24 @@ const wiredUpsert: ContentPackStreamRequest = {
   },
 };
 
-const validQuery = {
-  id: 'query-1',
-  title: 'A query',
-  description: '',
-  esql: { query: 'FROM logs | LIMIT 1' },
-};
-
 describe('isContentPackStreamRequest', () => {
-  it('accepts a wired upsert request with an empty queries array', () => {
+  it('accepts a wired upsert request', () => {
     expect(isContentPackStreamRequest(wiredUpsert)).toBe(true);
-  });
-
-  it('accepts a wired upsert request with valid queries', () => {
-    expect(isContentPackStreamRequest({ ...wiredUpsert, queries: [validQuery] })).toBe(true);
-  });
-
-  it('rejects a request that is missing the queries field', () => {
-    const { queries: _queries, ...withoutQueries } = wiredUpsert;
-    expect(isContentPackStreamRequest(withoutQueries)).toBe(false);
-  });
-
-  it('rejects queries that are not a valid StreamQuery array', () => {
-    expect(isContentPackStreamRequest({ ...wiredUpsert, queries: [{ id: 'no-title' }] })).toBe(
-      false
-    );
-    expect(isContentPackStreamRequest({ ...wiredUpsert, queries: 'not-an-array' })).toBe(false);
-  });
-
-  it('rejects an invalid wired upsert shape', () => {
-    expect(isContentPackStreamRequest({ queries: [], stream: { type: 'wired' } })).toBe(false);
   });
 
   it('rejects unknown keys on the upsert request (strict)', () => {
     expect(isContentPackStreamRequest({ ...wiredUpsert, unexpected: true })).toBe(false);
+  });
+
+  it('rejects a request carrying significant-event queries', () => {
+    // Queries are no longer part of content packs, so the strict wired upsert guard
+    // rejects them. `extractEntries` strips the field before calling this guard so
+    // older query-bearing archives still import as structural-only packs.
+    expect(isContentPackStreamRequest({ ...wiredUpsert, queries: [] })).toBe(false);
+  });
+
+  it('rejects an invalid wired upsert shape', () => {
+    expect(isContentPackStreamRequest({ stream: { type: 'wired' } })).toBe(false);
   });
 
   it('rejects non-object values', () => {

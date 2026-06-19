@@ -33,7 +33,6 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '../../../../hooks/use_kibana';
-import { useStreamsPrivileges } from '../../../../hooks/use_streams_privileges';
 import { ContentPackObjectsList } from './objects_list';
 import { importContent, previewContent } from './requests';
 import { getFormattedError } from '../../../../util/errors';
@@ -51,10 +50,6 @@ export function ImportContentPackFlyout({
   const {
     core: { http, notifications },
   } = useKibana();
-
-  const {
-    features: { significantEvents },
-  } = useStreamsPrivileges();
 
   const modalTitleId = useGeneratedHtmlId();
 
@@ -191,9 +186,6 @@ export function ImportContentPackFlyout({
             <ContentPackObjectsList
               objects={contentPackObjects}
               onSelectionChange={setIncludedObjects}
-              significantEventsAvailable={
-                (!!significantEvents?.enabled && !!significantEvents?.available) ?? false
-              }
             />
           </>
         ) : null}

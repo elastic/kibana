@@ -17,11 +17,10 @@ import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { isNotFoundError } from '@kbn/es-errors';
 import type { LockManagerService } from '@kbn/lock-manager';
 import type { Condition } from '@kbn/streamlang';
-import type { QueryLink, RoutingStatus, StreamQuery } from '@kbn/streams-schema';
+import type { RoutingStatus } from '@kbn/streams-schema';
 import {
   Streams,
   convertUpsertRequestIntoDefinition,
-  deriveQueryType,
   getAncestors,
   getParentId,
   LOGS_ROOT_STREAM_NAME,
@@ -452,23 +451,11 @@ export class StreamsClient {
   async bulkUpsert(
     streams: Array<{ name: string; request: Streams.all.UpsertRequest }>
   ): Promise<BulkUpsertStreamsResponse> {
-    return this.bulkUpsertDefinitions(
-      streams.map(({ name, request }) => ({
-        request,
-        definition: convertUpsertRequestIntoDefinition(name, request),
-      }))
-    );
-  }
+    const definitions = streams.map(({ name, request }) => ({
+      request,
+      definition: convertUpsertRequestIntoDefinition(name, request),
+    }));
 
-  /**
-   * Upserts pre-built stream definitions plus their dashboard/rule attachments. Callers
-   * that also need the {@link Streams.all.Definition} for follow-up work (e.g. {@link importStreams}
-   * reconciling queries) build it once and pass it here, avoiding a second
-   * {@link convertUpsertRequestIntoDefinition} pass.
-   */
-  private async bulkUpsertDefinitions(
-    definitions: Array<{ request: Streams.all.UpsertRequest; definition: Streams.all.Definition }>
-  ): Promise<BulkUpsertStreamsResponse> {
     const result = await State.attemptChanges(
       definitions.map(({ definition }) => ({
         type: 'upsert',
@@ -488,64 +475,6 @@ export class StreamsClient {
       acknowledged: true,
       result: { created: result.changes.created, updated: result.changes.updated },
     };
-  }
-
-  /**
-   * Imports content-pack streams: upserts the stream definitions plus dashboards/rules
-   * (via {@link bulkUpsert}), then installs each stream's significant-event queries via
-   * the KI client.
-   *
-   * Query installation is intentionally kept off the regular stream upsert path — stream
-   * CRUD (`PUT /{name}`, `_ingest`) no longer touches the KI data stream — so content
-   * import is the only write path that still reconciles queries.
-   *
-   * `currentLinks` is the authoritative KI snapshot read once by the caller and reused
-   * here, so `syncQueries` reconciles the merged desired set (existing + incoming queries)
-   * against the same view used to build the merge input. Definitions are committed before
-   * queries are synced; a `syncQueries` failure surfaces as an error after the definitions
-   * have already been persisted.
-   *
-   * Reconciling queries requires the KI client. Content import always provides it, so a
-   * missing client paired with incoming queries is a wiring bug and throws before anything
-   * is persisted rather than silently dropping the queries.
-   */
-  async importStreams(
-    entries: Array<{
-      name: string;
-      request: Streams.WiredStream.UpsertRequest;
-      queries: StreamQuery[];
-      currentLinks: QueryLink[];
-    }>
-  ): Promise<BulkUpsertStreamsResponse> {
-    const enriched = entries.map((entry) => ({
-      ...entry,
-      definition: convertUpsertRequestIntoDefinition(entry.name, entry.request),
-    }));
-
-    const hasQueries = enriched.some(({ queries }) => queries.length > 0);
-    if (hasQueries && !this.dependencies.getKnowledgeIndicatorClient) {
-      throw new StatusError(
-        'Cannot import significant-event queries without a Knowledge Indicator client',
-        500
-      );
-    }
-
-    const result = await this.bulkUpsertDefinitions(enriched);
-
-    if (this.dependencies.getKnowledgeIndicatorClient) {
-      const kiClient = await this.dependencies.getKnowledgeIndicatorClient();
-      await Promise.all(
-        enriched.map(({ definition, queries, currentLinks }) =>
-          kiClient.syncQueries(
-            definition,
-            queries.map((query) => ({ ...query, type: deriveQueryType(query.esql.query) })),
-            { currentLinks }
-          )
-        )
-      );
-    }
-
-    return result;
   }
 
   /**

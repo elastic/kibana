@@ -13,7 +13,6 @@ import { Streams, emptyAssets, getInheritedFieldsFromAncestors } from '@kbn/stre
 import { omit } from 'lodash';
 import { OBSERVABILITY_STREAMS_ENABLE_CONTENT_PACKS } from '@kbn/management-settings-ids';
 import type { RequestHandlerContext } from '@kbn/core/server';
-import type { QueryLink } from '../../../common/queries';
 import { STREAMS_API_PRIVILEGES } from '../../../common/constants';
 import { createServerRoute } from '../create_server_route';
 import { StatusError } from '../../lib/streams/errors/status_error';
@@ -77,7 +76,7 @@ const exportContentRoute = createServerRoute({
   async handler({ params, request, response, context, getScopedClients }) {
     await checkEnabled(context);
 
-    const { getKnowledgeIndicatorClient, streamsClient } = await getScopedClients({ request });
+    const { streamsClient } = await getScopedClients({ request });
 
     const root = await streamsClient.getStream(params.path.name);
     if (!Streams.WiredStream.Definition.is(root)) {
@@ -89,11 +88,6 @@ const exportContentRoute = createServerRoute({
       streamsClient.getDescendants(params.path.name),
     ]);
 
-    const kiClient = await getKnowledgeIndicatorClient();
-    const queryLinks = await kiClient.getStreamToQueryLinksMap([
-      params.path.name,
-      ...descendants.map((stream) => stream.name),
-    ]);
     const inheritedFields = getInheritedFieldsFromAncestors(ancestors);
 
     const exportedTree = asTree({
@@ -114,7 +108,7 @@ const exportContentRoute = createServerRoute({
           );
         }
 
-        return asContentPackEntry({ stream, queryLinks: queryLinks[stream.name] });
+        return asContentPackEntry({ stream });
       }),
     });
 
@@ -135,10 +129,8 @@ const exportContentRoute = createServerRoute({
 
 function asContentPackEntry({
   stream,
-  queryLinks,
 }: {
   stream: Streams.WiredStream.Definition;
-  queryLinks: QueryLink[];
 }): ContentPackStream {
   return {
     type: 'stream' as const,
@@ -152,7 +144,6 @@ function asContentPackEntry({
         },
       },
       ...emptyAssets,
-      queries: queryLinks.map(({ query }) => query),
     },
   };
 }
@@ -213,7 +204,7 @@ const importContentRoute = createServerRoute({
   async handler({ params, request, context, getScopedClients }) {
     await checkEnabled(context);
 
-    const { getKnowledgeIndicatorClient, streamsClient } = await getScopedClients({ request });
+    const { streamsClient } = await getScopedClients({ request });
 
     const root = await streamsClient.getStream(params.path.name);
     if (!Streams.WiredStream.Definition.is(root)) {
@@ -223,18 +214,11 @@ const importContentRoute = createServerRoute({
     const contentPack = await parseArchive(params.body.content);
 
     const descendants = await streamsClient.getDescendants(params.path.name);
-    const kiClient = await getKnowledgeIndicatorClient();
-    const queryLinks = await kiClient.getStreamToQueryLinksMap([
-      params.path.name,
-      ...descendants.map(({ name }) => name),
-    ]);
 
     const existingTree = asTree({
       root: params.path.name,
       include: { objects: { all: {} } },
-      streams: [root, ...descendants].map((stream) =>
-        asContentPackEntry({ stream, queryLinks: queryLinks[stream.name] })
-      ),
+      streams: [root, ...descendants].map((stream) => asContentPackEntry({ stream })),
     });
 
     const incomingTree = asTree({
@@ -253,19 +237,8 @@ const importContentRoute = createServerRoute({
 
     const streams = prepareStreamsForImport({ existing: existingTree, incoming: incomingTree });
 
-    // Stream definitions (and dashboards/rules) are upserted without queries; the
-    // significant-event queries are reconciled separately against the same KI snapshot
-    // (`queryLinks`) used to build `existingTree`, passing the merged desired set per stream.
-    return await streamsClient.importStreams(
-      streams.map(({ name, request: entryRequest }) => {
-        const { queries, ...upsertRequest } = entryRequest;
-        return {
-          name,
-          request: upsertRequest,
-          queries,
-          currentLinks: queryLinks[name] ?? [],
-        };
-      })
+    return await streamsClient.bulkUpsert(
+      streams.map(({ name, request: entryRequest }) => ({ name, request: entryRequest }))
     );
   },
 });

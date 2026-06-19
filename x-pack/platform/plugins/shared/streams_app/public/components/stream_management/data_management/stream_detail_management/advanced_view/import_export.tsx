@@ -43,7 +43,7 @@ export function ImportExportPanel({
                 <EuiText color="subdued" size="s">
                   {i18n.translate('xpack.streams.streamDetailView.importAndExportDescription', {
                     defaultMessage:
-                      "Package and export this stream's configuration including significant events and child streams, or import a package with a guided preview.",
+                      "Package and export this stream's configuration and child streams, or import a package with a guided preview.",
                   })}
                 </EuiText>
               </EuiFlexItem>

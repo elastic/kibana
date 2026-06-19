@@ -6,7 +6,6 @@
  */
 
 import YAML from 'yaml';
-import { z } from '@kbn/zod/v4';
 import { DeepStrict } from '@kbn/zod-helpers/v4';
 import type {
   ContentPack,
@@ -26,36 +25,27 @@ import {
   isSupportedFile,
   isSupportedReferenceType,
 } from '@kbn/content-packs-schema';
-import { Streams, streamQuerySchema } from '@kbn/streams-schema';
+import { Streams } from '@kbn/streams-schema';
 import AdmZip from 'adm-zip';
 import path from 'path';
 import type { Readable } from 'stream';
-import { compact, pick, uniqBy } from 'lodash';
+import { compact, omit, pick, uniqBy } from 'lodash';
 import { InvalidContentPackError } from './error';
 
 const ARCHIVE_ENTRY_MAX_SIZE_BYTES = 1 * 1024 * 1024; // 1MB
 
-const queriesSchema = z.array(streamQuerySchema);
-// Strict wired upsert schema, mirroring `Streams.WiredStream.UpsertRequest.is`, applied to the
-// request with `queries` removed so it can be `safeParse`d without a type assertion.
+// Strict wired upsert schema, mirroring `Streams.WiredStream.UpsertRequest.is`, applied so the
+// parsed request can be `safeParse`d without a type assertion.
 const wiredUpsertRequestSchema = DeepStrict(Streams.WiredStream.UpsertRequest.right);
 
 /**
- * Content-pack stream entries carry significant-event `queries` on top of the wired
- * stream upsert request. The stream CRUD `UpsertRequest` no longer includes `queries`,
- * so validate the wired upsert shape (strict) and the `queries` array separately. This
- * keeps the on-disk archive format unchanged and lets existing query-bearing packs import.
- * A missing `queries` is defaulted to `[]` by `extractEntries` before this guard runs.
+ * Content-pack stream entries match the wired stream upsert request. Significant-event
+ * queries are not part of content packs (they are managed via the dedicated sig-events
+ * `/queries` endpoints), so any `queries` field carried by older or hand-authored archives
+ * is stripped by `extractEntries` before this guard validates the strict wired upsert shape.
  */
 export function isContentPackStreamRequest(value: unknown): value is ContentPackStreamRequest {
-  if (typeof value !== 'object' || value === null || !('queries' in value)) {
-    return false;
-  }
-
-  const { queries, ...request } = value as Record<string, unknown>;
-  return (
-    queriesSchema.safeParse(queries).success && wiredUpsertRequestSchema.safeParse(request).success
-  );
+  return wiredUpsertRequestSchema.safeParse(value).success;
 }
 
 export async function parseArchive(archive: Readable): Promise<ContentPack> {
@@ -178,11 +168,12 @@ async function extractEntries(rootDir: string, zip: AdmZip): Promise<ContentPack
               name?: string;
               request?: Record<string, unknown>;
             };
-            // Default a missing `queries` to an empty array so packs that omit it (older or
-            // hand-authored) still import; Kibana-generated archives always include it.
+            // Significant-event queries are no longer part of content packs. Strip any
+            // `queries` field carried by older or hand-authored archives so they still
+            // import as structural-only packs; the queries are ignored.
             const request =
               parsed.request && typeof parsed.request === 'object'
-                ? { queries: [], ...parsed.request }
+                ? omit(parsed.request, 'queries')
                 : parsed.request;
             if (!parsed.name || !isContentPackStreamRequest(request)) {
               throw new InvalidContentPackError(
