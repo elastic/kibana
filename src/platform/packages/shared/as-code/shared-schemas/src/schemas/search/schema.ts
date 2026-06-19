@@ -8,8 +8,9 @@
  */
 
 import { schema, type Type, type TypeOf } from '@kbn/config-schema';
+import { MAX_ID_LENGTH } from '../../constants';
 import { asCodePaginationParamsSchema } from '../pagination';
-import { MAX_TAG_C0UNT, MAX_TAG_LENGTH } from '../tags/schema';
+import { MAX_TAG_C0UNT } from '../tags/schema';
 
 type PaginationParamsSchema = ReturnType<typeof asCodePaginationParamsSchema.getPropSchemas>;
 type PartialPaginationParamsSchema = {
@@ -29,8 +30,8 @@ export const asCodeSearchRequestSchema = schema.object({
   tags: schema.maybe(
     schema.oneOf(
       [
-        schema.string({ maxLength: MAX_TAG_LENGTH }),
-        schema.arrayOf(schema.string({ maxLength: MAX_TAG_LENGTH }), { maxSize: MAX_TAG_C0UNT }),
+        schema.string({ maxLength: MAX_ID_LENGTH }),
+        schema.arrayOf(schema.string({ maxLength: MAX_ID_LENGTH }), { maxSize: MAX_TAG_C0UNT }),
       ],
       {
         meta: {
@@ -43,8 +44,8 @@ export const asCodeSearchRequestSchema = schema.object({
   excluded_tags: schema.maybe(
     schema.oneOf(
       [
-        schema.string({ maxLength: MAX_TAG_LENGTH }),
-        schema.arrayOf(schema.string({ maxLength: MAX_TAG_LENGTH }), { maxSize: MAX_TAG_C0UNT }),
+        schema.string({ maxLength: MAX_ID_LENGTH }),
+        schema.arrayOf(schema.string({ maxLength: MAX_ID_LENGTH }), { maxSize: MAX_TAG_C0UNT }),
       ],
       {
         meta: {
