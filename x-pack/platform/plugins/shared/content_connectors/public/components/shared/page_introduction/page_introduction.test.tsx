@@ -37,7 +37,7 @@ describe('PageIntroduction component', () => {
   it('renders with description only', () => {
     renderWithKibanaRenderContext(<PageIntroduction description="some description" />);
 
-    expect(screen.getByTestId('pageIntroductionTitleContainer')).toHaveTextContent('');
+    expect(screen.getByTestId('pageIntroductionTitleContainer').textContent?.trim()).toBe('');
     expect(screen.getByTestId('pageIntroductionDescriptionText')).toHaveTextContent(
       'some description'
     );

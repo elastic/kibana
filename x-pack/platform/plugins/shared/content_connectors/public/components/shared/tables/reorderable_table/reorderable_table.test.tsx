@@ -55,7 +55,7 @@ describe('ReorderableTable', () => {
       expect(rows).toHaveLength(3);
       expect(rows[1]).toHaveAttribute('aria-rowindex', '2');
       expect(rows[2]).toHaveAttribute('aria-rowindex', '3');
-      expect(screen.getAllByLabelText('Drag handle')).toHaveLength(2);
+      expect(screen.getAllByTestId('dragHandle')).toHaveLength(2);
     });
 
     it('can append additional properties to each row, which can be dynamically calculated from the item in that row', () => {
@@ -85,7 +85,7 @@ describe('ReorderableTable', () => {
         />
       );
       // When dragging is disabled, drag handle icons are replaced with a fixed-width spacer
-      expect(screen.queryAllByLabelText('Drag handle')).toHaveLength(0);
+      expect(screen.queryAllByTestId('dragHandle')).toHaveLength(0);
     });
 
     it('will accept a callback which will be triggered every time a row is reordered', () => {
@@ -161,7 +161,7 @@ describe('ReorderableTable', () => {
         />
       );
       // No drag handles when reordering is disabled
-      expect(screen.queryAllByLabelText('Drag handle')).toHaveLength(0);
+      expect(screen.queryAllByTestId('dragHandle')).toHaveLength(0);
       // Items are still rendered at correct row indices
       const rows = screen.getAllByRole('row');
       expect(rows[1]).toHaveAttribute('aria-rowindex', '2');

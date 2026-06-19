@@ -103,9 +103,10 @@ describe('SyncsContextMenu', () => {
     expect(
       screen.queryByTestId('entSearchContent-connector-header-sync-startSync')
     ).not.toBeInTheDocument();
-    expect(screen.getByText('Cancel Syncs')).toBeInTheDocument();
+    const cancelButton = screen.getByTestId('entSearchContent-connector-header-sync-cancelSync');
+    expect(cancelButton.closest('button')).not.toBeDisabled();
 
-    fireEvent.click(screen.getByText('Cancel Syncs'));
+    fireEvent.click(cancelButton);
     expect(cancelSyncs).toHaveBeenCalled();
   });
 

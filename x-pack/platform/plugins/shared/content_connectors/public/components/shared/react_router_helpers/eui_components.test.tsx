@@ -5,15 +5,28 @@
  * 2.0.
  */
 
+const mockNavigateToUrl = jest.fn();
+
 jest.mock('.', () => ({
-  generateReactRouterProps: ({ to }: { to: string }) => ({
+  generateReactRouterProps: ({
+    to,
+    navigateToUrl: nav,
+  }: {
+    to: string;
+    navigateToUrl?: (path: string) => void;
+  }) => ({
     href: `/app/content_connectors${to}`,
-    onClick: () => {},
+    onClick: (e?: { preventDefault?: () => void }) => {
+      e?.preventDefault?.();
+      nav?.(`/app/content_connectors${to}`);
+    },
   }),
 }));
 
 jest.mock('@kbn/kibana-react-plugin/public', () => ({
-  useKibana: () => ({ services: { http: {}, application: {} } }),
+  useKibana: () => ({
+    services: { http: {}, application: { navigateToUrl: mockNavigateToUrl } },
+  }),
 }));
 
 jest.mock('react-router-dom', () => ({
@@ -23,7 +36,7 @@ jest.mock('react-router-dom', () => ({
 
 import React from 'react';
 
-import { screen } from '@testing-library/react';
+import { screen, fireEvent } from '@testing-library/react';
 import { renderWithKibanaRenderContext } from '@kbn/test-jest-helpers';
 
 import {
@@ -37,6 +50,10 @@ import {
 } from './eui_components';
 
 describe('React Router EUI component helpers', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
   it('renders an EuiLink', () => {
     renderWithKibanaRenderContext(<EuiLinkTo to="/" />);
 
@@ -91,5 +108,8 @@ describe('React Router EUI component helpers', () => {
 
     const link = screen.getByTestId('contentConnectorsEuiLinkToLink');
     expect(link).toHaveAttribute('href', '/app/content_connectors/hello/world');
+
+    fireEvent.click(link);
+    expect(mockNavigateToUrl).toHaveBeenCalledWith('/app/content_connectors/hello/world');
   });
 });

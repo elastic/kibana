@@ -101,7 +101,7 @@ describe('InlineEditableTable', () => {
         description={<p>Some Description</p>}
       />
     );
-    expect(screen.getByTestId('inlineEditableTableTitle')).toHaveTextContent('');
+    expect(screen.getByTestId('inlineEditableTableTitle').textContent?.trim()).toBe('');
   });
 
   it('renders a description if one is provided', () => {
