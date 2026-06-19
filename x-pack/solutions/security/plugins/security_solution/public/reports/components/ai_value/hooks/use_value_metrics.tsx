@@ -80,6 +80,7 @@ export const useValueMetrics = ({
     from,
     signalIndexName,
     filters,
+    skip: !isEnabled,
     queryName: ALERTS_QUERY_NAMES.COUNT_AI_VALUE,
   });
 
@@ -88,6 +89,7 @@ export const useValueMetrics = ({
     from: compareTimeRange.from,
     signalIndexName,
     filters: filtersCompare,
+    skip: !isEnabled,
     queryName: ALERTS_QUERY_NAMES.COUNT_AI_VALUE_COMPARE,
   });
 
@@ -95,12 +97,14 @@ export const useValueMetrics = ({
     to,
     from,
     signalIndexName,
+    skip: !isEnabled,
     queryName: ALERTS_QUERY_NAMES.COUNT_AI_VALUE_TOTAL,
   });
   const { alertCount: alertCountCompare, isLoading: isLoadingAlertsCompare } = useAlertCountQuery({
     to: compareTimeRange.to,
     from: compareTimeRange.from,
     signalIndexName,
+    skip: !isEnabled,
     queryName: ALERTS_QUERY_NAMES.COUNT_AI_VALUE_TOTAL_COMPARE,
   });
   const isLoading = useMemo(

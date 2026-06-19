@@ -160,8 +160,14 @@ describe('useValueReportData', () => {
       mockMetrics({ valueMetrics: LIVE_METRICS });
       mockHistory({ hasEverUsedAttackDiscovery: true });
 
-      const { result } = renderHook(() => useValueReportData({ ...PROPS, forceSampleData: true }));
+      let renderCount = 0;
+      const { result } = renderHook(() => {
+        renderCount++;
+        return useValueReportData({ ...PROPS, forceSampleData: true });
+      });
 
+      // No state transitions — the hook settled in a single render with no re-renders
+      expect(renderCount).toBe(1);
       expect(result.current.isSample).toBe(true);
       expect(result.current.isLoading).toBe(false);
       expect(result.current.hasEverUsedAttackDiscovery).toBe(false);
