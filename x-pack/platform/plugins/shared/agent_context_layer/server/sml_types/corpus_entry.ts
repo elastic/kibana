@@ -16,9 +16,9 @@ export const CORPUS_ENTRY_SML_TYPE = 'corpus_entry';
  * 'manual'`).
  *
  * It is intentionally registered by the Agent Context Layer host plugin rather
- * than a solution plugin: corpus entries (e.g. the BrowseComp-Plus eval corpus)
- * do not belong to any product surface, so this gives workflow authors a
- * non-solution-specific namespace to sink documents into for end-to-end tests.
+ * than a solution plugin: corpus entries do not belong to any product surface,
+ * so this gives workflow authors a non-solution-specific namespace to sink
+ * documents into for end-to-end tests and ad-hoc use cases.
  *
  * There is no crawler integration: `list` yields nothing and `getSmlData`
  * returns `undefined`, so the crawler never produces entries for this type
