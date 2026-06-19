@@ -273,7 +273,7 @@ export const QuerySandbox: React.FC<QuerySandboxProps> = ({
           <EuiButton
             size="s"
             color="text"
-            iconType="merge"
+            iconType="querySelector"
             onClick={onUseSingleEditor}
             data-test-subj="querySandboxUseSingleEditor"
           >
