@@ -145,13 +145,6 @@ export class StreamsApp {
     await this.gotoStreamManagementTab(streamName, 'significantEvents');
   }
 
-  async gotoAdvancedTab(streamName: string) {
-    // Navigate to a stable tab first, then open Advanced to avoid races from direct URL nav
-    await this.gotoDataRetentionTab(streamName);
-    await this.page.getByRole('tab', { name: 'Advanced' }).click();
-    await this.page.waitForURL(/\/advanced/);
-  }
-
   async gotoAttachmentsTab(streamName: string) {
     await this.gotoStreamManagementTab(streamName, 'attachments');
   }
@@ -1342,6 +1335,7 @@ export class StreamsApp {
   }
 
   async clickDeleteQueryStreamButton() {
+    await this.page.getByTestId('streamsAppStreamDetailActionsButton').click();
     await this.page.getByTestId('deleteQueryStreamButton').click();
   }
 
@@ -1442,9 +1436,9 @@ export class StreamsApp {
     }
   }
 
-  async deleteQueryStreamFromAdvancedTab(streamName: string) {
+  async deleteQueryStreamFromOverviewTab(streamName: string) {
     await this.clickStreamNameLink(streamName);
-    await this.clickQueryStreamDetailsTab('advanced');
+    await this.clickQueryStreamDetailsTab('overview');
     await this.clickDeleteQueryStreamButton();
     await this.fillDeleteQueryStreamModalInput(streamName);
     await this.clickDeleteQueryStreamModalDeleteButton();
