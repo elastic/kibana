@@ -15,6 +15,8 @@ import {
   SECURITY_SOLUTION_ALERT_VALIDATION_WORKFLOW_AUTO_CLOSE_CONFIDENCE_SCORE_MAX_THRESHOLD,
   SECURITY_SOLUTION_ALERT_VALIDATION_WORKFLOW_AUTO_CLOSE_CONFIDENCE_SCORE_MIN_THRESHOLD,
   SECURITY_SOLUTION_ALERT_VALIDATION_WORKFLOW_AUTO_CLOSE_ENABLED,
+  SECURITY_SOLUTION_ALERT_VALIDATION_WORKFLOW_CONNECTOR_ID,
+  SECURITY_SOLUTION_ALERT_VALIDATION_WORKFLOW_ENABLED,
 } from '@kbn/management-settings-ids';
 import type { StartPlugins } from '../plugin';
 import type {
@@ -99,9 +101,11 @@ describe('registerAlertValidationWorkflowSettingsRoutes', () => {
 
   it('returns the current space-scoped settings', async () => {
     uiSettingsClient.get
-      .mockResolvedValueOnce(false)
-      .mockResolvedValueOnce(0.7)
-      .mockResolvedValueOnce(0.9);
+      .mockResolvedValueOnce(true) // workflowEnabled
+      .mockResolvedValueOnce(false) // autoCloseEnabled
+      .mockResolvedValueOnce(0.7) // autoCloseConfidenceScoreMinThreshold
+      .mockResolvedValueOnce(0.9) // autoCloseConfidenceScoreMaxThreshold
+      .mockResolvedValueOnce('connector-abc'); // connectorId
 
     const handler = router.versioned.getRoute('get', ALERT_VALIDATION_WORKFLOW_SETTINGS_ROUTE)
       .versions['1'].handler;
@@ -111,9 +115,11 @@ describe('registerAlertValidationWorkflowSettingsRoutes', () => {
     expect(mockResponse.ok).toHaveBeenCalledWith({
       body: {
         settings: {
+          workflowEnabled: true,
           autoCloseEnabled: false,
           autoCloseConfidenceScoreMinThreshold: 0.7,
           autoCloseConfidenceScoreMaxThreshold: 0.9,
+          connectorId: 'connector-abc',
         },
         workflowId: 'system-security-alert-validation-space-1',
       },
@@ -122,15 +128,21 @@ describe('registerAlertValidationWorkflowSettingsRoutes', () => {
 
   it('persists settings and installs the per-space managed workflow', async () => {
     const settings = {
+      workflowEnabled: true,
       autoCloseEnabled: true,
       autoCloseConfidenceScoreMinThreshold: 0.75,
       autoCloseConfidenceScoreMaxThreshold: 0.95,
+      connectorId: 'connector-xyz',
     };
     const handler = router.versioned.getRoute('put', ALERT_VALIDATION_WORKFLOW_SETTINGS_ROUTE)
       .versions['1'].handler;
 
     await handler(createContext(), createRequest(settings), mockResponse);
 
+    expect(uiSettingsClient.set).toHaveBeenCalledWith(
+      SECURITY_SOLUTION_ALERT_VALIDATION_WORKFLOW_ENABLED,
+      settings.workflowEnabled
+    );
     expect(uiSettingsClient.set).toHaveBeenCalledWith(
       SECURITY_SOLUTION_ALERT_VALIDATION_WORKFLOW_AUTO_CLOSE_ENABLED,
       settings.autoCloseEnabled
@@ -142,6 +154,10 @@ describe('registerAlertValidationWorkflowSettingsRoutes', () => {
     expect(uiSettingsClient.set).toHaveBeenCalledWith(
       SECURITY_SOLUTION_ALERT_VALIDATION_WORKFLOW_AUTO_CLOSE_CONFIDENCE_SCORE_MAX_THRESHOLD,
       settings.autoCloseConfidenceScoreMaxThreshold
+    );
+    expect(uiSettingsClient.set).toHaveBeenCalledWith(
+      SECURITY_SOLUTION_ALERT_VALIDATION_WORKFLOW_CONNECTOR_ID,
+      settings.connectorId
     );
     expect(managedWorkflowsClient.install).toHaveBeenCalledWith(
       SECURITY_ALERT_VALIDATION_WORKFLOW_ID,
