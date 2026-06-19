@@ -28,7 +28,7 @@ export const DEFAULT_TOKEN_LIMIT = 8191;
 export const claudeModelSupportsTemperature = (modelId?: string): boolean => {
   if (!modelId) return true;
   const match = modelId.toLowerCase().match(/claude-[a-z][\w]*-(\d+)-(\d+)/);
-  if (!match) return true;
+  if (!match || match.length < 3) return true;
   const major = parseInt(match[1], 10);
   const minor = parseInt(match[2], 10);
   return !(major > 4 || (major === 4 && minor >= 7));
