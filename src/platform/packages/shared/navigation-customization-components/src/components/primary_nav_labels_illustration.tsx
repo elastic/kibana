@@ -20,8 +20,6 @@ interface Props {
   selected: boolean;
 }
 
-const ILLUSTRATION_BORDER_RADIUS = 2;
-
 const ILLUSTRATIONS = {
   iconsAndText: {
     selected: iconsAndTextSelected,
@@ -43,8 +41,6 @@ export const PrimaryNavLabelsIllustration = ({ showText, selected }: Props) => {
         display: inline-flex;
         inline-size: fit-content;
         block-size: fit-content;
-        border-radius: ${ILLUSTRATION_BORDER_RADIUS}px;
-        overflow: hidden;
         flex-shrink: 0;
       `}
     >

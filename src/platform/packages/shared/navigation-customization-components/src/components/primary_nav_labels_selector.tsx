@@ -51,7 +51,7 @@ const PrimaryNavLabelsOptionCard = ({
       hasBorder={false}
       hasShadow={false}
       borderRadius="none"
-      paddingSize="s"
+      paddingSize="none"
       onClick={onSelect}
       aria-checked={isSelected}
       aria-label={label}
@@ -62,6 +62,7 @@ const PrimaryNavLabelsOptionCard = ({
         inline-size: 100%;
         text-align: start;
         border-radius: ${euiTheme.border.radius.small};
+        overflow: hidden;
         background-color: ${isSelected
           ? euiTheme.colors.backgroundBaseInteractiveSelect
           : euiTheme.colors.backgroundBasePlain};
