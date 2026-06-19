@@ -476,7 +476,7 @@ function errorNeedRollover(err: any): boolean {
  * Returns true when the error is an ES `total_fields` limit breach
  * (`index.mapping.total_fields.limit` exceeded).
  */
-function isTotalFieldsLimitError(err: any): boolean {
+export function isTotalFieldsLimitError(err: any): boolean {
   const reason: string = err.body?.error?.reason ?? '';
   return reason.includes('Limit of total fields') && reason.includes('has been exceeded');
 }
