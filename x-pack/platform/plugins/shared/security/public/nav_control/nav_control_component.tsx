@@ -100,17 +100,18 @@ export const SecurityNavControl: FunctionComponent<SecurityNavControlProps> = ({
     [user]
   );
 
-  const avatar =
-    isLoading && !user ? (
-      <EuiLoadingSpinner size="m" />
-    ) : (
-      <UserAvatar
-        user={user ?? undefined}
-        avatar={user?.avatar ?? undefined}
-        size={avatarSize}
-        data-test-subj="userMenuAvatar"
-      />
-    );
+  const avatar = user?.profile ? (
+    <UserAvatar
+      user={user?.profile.user}
+      avatar={user?.profile.data.avatar}
+      size={avatarSize}
+      data-test-subj="userMenuAvatar"
+    />
+  ) : user && !isLoading ? (
+    <UserAvatar user={user} size={avatarSize} data-test-subj="userMenuAvatar" />
+  ) : (
+    <EuiLoadingSpinner size="m" />
+  );
 
   const button = renderButton ? (
     renderButton({ isOpen: isPopoverOpen, toggleMenu, avatar })

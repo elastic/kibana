@@ -14,41 +14,25 @@ import { I18nProvider } from '@kbn/i18n-react';
 
 import { SecurityNavControl } from './nav_control_component';
 import { mockAuthenticatedUser } from '../../common/model/authenticated_user.mock';
-import { userProfileMock } from '../../common/model/user_profile.mock';
 import * as UseCurrentUserImports from '../components/use_current_user';
 
 jest.mock('../components/use_current_user');
 jest.mock('react-use/lib/useObservable');
 
 const useObservableMock = useObservable as jest.Mock;
-const useUserProfileMock = jest.spyOn(UseCurrentUserImports, 'useUserProfile');
 const useCurrentUserMock = jest.spyOn(UseCurrentUserImports, 'useCurrentUser');
 
-const userProfileWithSecurity = userProfileMock.createWithSecurity();
-const userProfile = {
-  ...userProfileWithSecurity,
-  user: {
-    ...userProfileWithSecurity.user,
-    authentication_provider: { type: 'basic', name: 'basic1' },
-  },
-};
 const userMenuLinks$ = new BehaviorSubject([]);
 
 const renderWithIntl = (ui: React.ReactElement) => render(<I18nProvider>{ui}</I18nProvider>);
 
 describe('SecurityNavControl', () => {
   beforeEach(() => {
-    useUserProfileMock.mockReset();
-    useUserProfileMock.mockReturnValue({
-      loading: false,
-      value: userProfile,
-    });
-
     useCurrentUserMock.mockReset();
     useCurrentUserMock.mockReturnValue({
       isLoading: false,
-      user: { ...mockAuthenticatedUser(), profileUid: null, avatar: null, userSettings: null },
-      error: null,
+      user: mockAuthenticatedUser(),
+      error: undefined,
     });
 
     useObservableMock.mockReset();
@@ -104,13 +88,10 @@ describe('SecurityNavControl', () => {
   });
 
   it('should render a spinner while loading', () => {
-    useUserProfileMock.mockReturnValue({
-      loading: true,
-    });
     useCurrentUserMock.mockReturnValue({
       isLoading: true,
       user: null,
-      error: null,
+      error: undefined,
     });
 
     renderWithIntl(
@@ -161,13 +142,10 @@ describe('SecurityNavControl', () => {
   });
 
   it('should not open popover while loading', () => {
-    useUserProfileMock.mockReturnValue({
-      loading: true,
-    });
     useCurrentUserMock.mockReturnValue({
       isLoading: true,
       user: null,
-      error: null,
+      error: undefined,
     });
 
     renderWithIntl(
@@ -532,23 +510,14 @@ describe('SecurityNavControl', () => {
   });
 
   it('should render anonymous user', async () => {
-    useUserProfileMock.mockReturnValue({
-      loading: false,
-      value: undefined,
-      error: new Error('404'),
-    });
-
     useCurrentUserMock.mockReturnValue({
       isLoading: false,
       user: {
         ...mockAuthenticatedUser({
           authentication_provider: { type: 'anonymous', name: 'does no matter' },
         }),
-        profileUid: null,
-        avatar: null,
-        userSettings: null,
       },
-      error: null,
+      error: undefined,
     });
 
     renderWithIntl(

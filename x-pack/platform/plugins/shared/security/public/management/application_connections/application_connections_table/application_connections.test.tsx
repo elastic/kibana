@@ -23,13 +23,8 @@ jest.mock('../assets/illustration_empty_state.svg', () => 'illustration-empty-st
 
 jest.spyOn(UseCurrentUserModule, 'useCurrentUser').mockReturnValue({
   isLoading: false,
-  user: {
-    ...mockAuthenticatedUser({ username: 'current_user', full_name: 'Current User' }),
-    profileUid: null,
-    avatar: null,
-    userSettings: null,
-  },
-  error: null,
+  user: mockAuthenticatedUser({ username: 'current_user', full_name: 'Current User' }),
+  error: undefined,
 });
 
 type CoreStartMock = ReturnType<typeof coreMock.createStart>;
