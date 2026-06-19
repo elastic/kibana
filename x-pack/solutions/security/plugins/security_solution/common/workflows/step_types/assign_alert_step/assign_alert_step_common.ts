@@ -17,7 +17,7 @@ import {
 
 export const AssignAlertStepId = 'security.assignAlert' as const;
 
-const assigneesArraySchema = z.array(z.string().min(1).max(MAX_USER_ID_LENGTH)).default([]);
+const assigneesArraySchema = z.array(z.string().min(1).max(MAX_USER_ID_LENGTH));
 
 export const assignAlertInputSchema = z
   .object({
@@ -71,6 +71,7 @@ export const assignAlertStepCommonDefinition: BaseStepDefinition<
     alert_ids: "{{ variables.alert_id }}"
     assignees_to_add:
       - "user1"
+    assignees_to_remove: []
 \`\`\``,
       `## Remove a user from multiple alerts
 \`\`\`yaml
@@ -80,6 +81,7 @@ export const assignAlertStepCommonDefinition: BaseStepDefinition<
     alert_ids:
       - "alert-1"
       - "alert-2"
+    assignees_to_add: []
     assignees_to_remove:
       - "user2"
 \`\`\``,

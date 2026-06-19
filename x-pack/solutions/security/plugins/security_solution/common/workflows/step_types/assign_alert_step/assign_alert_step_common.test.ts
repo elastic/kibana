@@ -10,19 +10,17 @@ import { MAX_ALERT_ID_LENGTH, MAX_USER_ID_LENGTH } from '../common/constants';
 
 describe('assignAlertInputSchema', () => {
   it('should validate valid input for assigning users with array', () => {
-    const input = { alert_ids: 'alert-1', assignees_to_add: ['user1'] };
-    expect(assignAlertInputSchema.parse(input)).toEqual({
-      ...input,
-      assignees_to_remove: [],
-    });
+    const input = { alert_ids: 'alert-1', assignees_to_add: ['user1'], assignees_to_remove: [] };
+    expect(assignAlertInputSchema.parse(input)).toEqual(input);
   });
 
   it('should validate valid input for unassigning users with array', () => {
-    const input = { alert_ids: ['alert-1', 'alert-2'], assignees_to_remove: ['user2'] };
-    expect(assignAlertInputSchema.parse(input)).toEqual({
-      ...input,
+    const input = {
+      alert_ids: ['alert-1', 'alert-2'],
       assignees_to_add: [],
-    });
+      assignees_to_remove: ['user2'],
+    };
+    expect(assignAlertInputSchema.parse(input)).toEqual(input);
   });
 
   it('should validate valid input for both assignees_to_add and assignees_to_remove', () => {
@@ -49,28 +47,46 @@ describe('assignAlertInputSchema', () => {
     expect(() => assignAlertInputSchema.parse(input)).toThrow();
   });
 
+  it('should fail if assignees_to_add is missing', () => {
+    const input = { alert_ids: 'alert-1', assignees_to_remove: ['user1'] };
+    expect(() => assignAlertInputSchema.parse(input)).toThrow();
+  });
+
+  it('should fail if assignees_to_remove is missing', () => {
+    const input = { alert_ids: 'alert-1', assignees_to_add: ['user1'] };
+    expect(() => assignAlertInputSchema.parse(input)).toThrow();
+  });
+
   it('should fail if alert_ids is missing', () => {
-    const input = { assignees_to_add: ['user1'] };
+    const input = { assignees_to_add: ['user1'], assignees_to_remove: [] };
     expect(() => assignAlertInputSchema.parse(input)).toThrow();
   });
 
   it('should fail if alert_ids is an empty string', () => {
-    const input = { alert_ids: '', assignees_to_add: ['user1'] };
+    const input = { alert_ids: '', assignees_to_add: ['user1'], assignees_to_remove: [] };
     expect(() => assignAlertInputSchema.parse(input)).toThrow();
   });
 
   it('should fail if alert_ids is an empty array', () => {
-    const input = { alert_ids: [], assignees_to_add: ['user1'] };
+    const input = { alert_ids: [], assignees_to_add: ['user1'], assignees_to_remove: [] };
     expect(() => assignAlertInputSchema.parse(input)).toThrow();
   });
 
   it('should fail if alert_ids array contains an empty string', () => {
-    const input = { alert_ids: ['alert-1', ''], assignees_to_add: ['user1'] };
+    const input = {
+      alert_ids: ['alert-1', ''],
+      assignees_to_add: ['user1'],
+      assignees_to_remove: [],
+    };
     expect(() => assignAlertInputSchema.parse(input)).toThrow();
   });
 
   it('should fail if alert_ids string is too long', () => {
-    const input = { alert_ids: 'a'.repeat(MAX_ALERT_ID_LENGTH + 1), assignees_to_add: ['user1'] };
+    const input = {
+      alert_ids: 'a'.repeat(MAX_ALERT_ID_LENGTH + 1),
+      assignees_to_add: ['user1'],
+      assignees_to_remove: [],
+    };
     expect(() => assignAlertInputSchema.parse(input)).toThrow();
   });
 
@@ -78,17 +94,18 @@ describe('assignAlertInputSchema', () => {
     const input = {
       alert_ids: ['alert-1', 'a'.repeat(MAX_ALERT_ID_LENGTH + 1)],
       assignees_to_add: ['user1'],
+      assignees_to_remove: [],
     };
     expect(() => assignAlertInputSchema.parse(input)).toThrow();
   });
 
   it('should fail if assignees_to_add array contains an empty string', () => {
-    const input = { alert_ids: 'alert-1', assignees_to_add: [''] };
+    const input = { alert_ids: 'alert-1', assignees_to_add: [''], assignees_to_remove: [] };
     expect(() => assignAlertInputSchema.parse(input)).toThrow();
   });
 
   it('should fail if assignees_to_remove array contains an empty string', () => {
-    const input = { alert_ids: 'alert-1', assignees_to_remove: [''] };
+    const input = { alert_ids: 'alert-1', assignees_to_add: [], assignees_to_remove: [''] };
     expect(() => assignAlertInputSchema.parse(input)).toThrow();
   });
 
@@ -96,6 +113,7 @@ describe('assignAlertInputSchema', () => {
     const input = {
       alert_ids: 'alert-1',
       assignees_to_add: ['a'.repeat(MAX_USER_ID_LENGTH + 1)],
+      assignees_to_remove: [],
     };
     expect(() => assignAlertInputSchema.parse(input)).toThrow();
   });
@@ -103,6 +121,7 @@ describe('assignAlertInputSchema', () => {
   it('should fail if assignees_to_remove array contains a string that is too long', () => {
     const input = {
       alert_ids: 'alert-1',
+      assignees_to_add: [],
       assignees_to_remove: ['a'.repeat(MAX_USER_ID_LENGTH + 1)],
     };
     expect(() => assignAlertInputSchema.parse(input)).toThrow();

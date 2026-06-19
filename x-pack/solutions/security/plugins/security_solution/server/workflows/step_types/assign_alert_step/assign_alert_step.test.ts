@@ -45,6 +45,7 @@ describe('assignAlertStepDefinition', () => {
       const mockContext = createMockContext({
         alert_ids: 'alert-1',
         assignees_to_add: ['user1'],
+        assignees_to_remove: [],
       });
       (mockContext.contextManager.callKibanaApi as jest.Mock).mockResolvedValue({
         status: 200,
@@ -75,6 +76,7 @@ describe('assignAlertStepDefinition', () => {
     it('should call Kibana API successfully with multiple alert IDs and unassign users with array', async () => {
       const mockContext = createMockContext({
         alert_ids: ['alert-1', 'alert-2'],
+        assignees_to_add: [],
         assignees_to_remove: ['user2'],
       });
       (mockContext.contextManager.callKibanaApi as jest.Mock).mockResolvedValue({
@@ -104,7 +106,11 @@ describe('assignAlertStepDefinition', () => {
     });
 
     it('should throw ExecutionError if API returns >= 400', async () => {
-      const mockContext = createMockContext({ alert_ids: 'alert-1', assignees_to_add: ['user1'] });
+      const mockContext = createMockContext({
+        alert_ids: 'alert-1',
+        assignees_to_add: ['user1'],
+        assignees_to_remove: [],
+      });
       (mockContext.contextManager.callKibanaApi as jest.Mock).mockResolvedValue({
         status: 404,
         body: { error: 'Not found' },
@@ -114,7 +120,11 @@ describe('assignAlertStepDefinition', () => {
     });
 
     it('should throw ExecutionError if API call throws an error', async () => {
-      const mockContext = createMockContext({ alert_ids: 'alert-1', assignees_to_add: ['user1'] });
+      const mockContext = createMockContext({
+        alert_ids: 'alert-1',
+        assignees_to_add: ['user1'],
+        assignees_to_remove: [],
+      });
       (mockContext.contextManager.callKibanaApi as jest.Mock).mockRejectedValue(
         new Error('Network error')
       );
