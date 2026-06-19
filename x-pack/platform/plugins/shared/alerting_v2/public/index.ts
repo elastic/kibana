@@ -72,6 +72,7 @@ export const module = new ContainerModule(({ bind }) => {
         http: coreStart.http,
         notifications: coreStart.notifications,
         application: coreStart.application,
+        uiSettings: coreStart.uiSettings,
         data: diContainer.get(PluginStart('data')) as DataPublicPluginStart,
         dataViews: diContainer.get(PluginStart('dataViews')) as DataViewsPublicPluginStart,
         lens: diContainer.get(PluginStart('lens')) as LensPublicStart,
