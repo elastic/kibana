@@ -7,12 +7,15 @@
 
 import type { ESQLSearchResponse } from '@kbn/es-types';
 import type { EntityDefinition } from '../../../common/domain/definitions/entity_schema';
-import { getEuidEsqlEvaluation } from '../../../common/domain/euid/esql';
+import {
+  getEuidEsqlEvaluation,
+  getFieldEvaluationsEsqlFromDefinition,
+} from '../../../common/domain/euid/esql';
 import type { PaginationFields } from './query_builder_commons';
 import {
   buildExtractionSourceClause,
-  buildFieldEvaluations,
   buildSetFieldsByCondition,
+  buildSetFieldsByConditionAssignments,
   type PaginationParams,
   type LogSlicePaginationParams,
   ENGINE_METADATA_PAGINATION_FIRST_SEEN_LOG_FIELD,
@@ -22,7 +25,6 @@ import {
   fieldsToKeep,
   extractPaginationParams,
   buildPaginationSection,
-  hasFieldEvaluations,
   NULLIFY_UNMAPPED_FIELDS_SETTING,
 } from './query_builder_commons';
 
@@ -84,9 +86,11 @@ export function buildCcsLogsExtractionEsqlQuery({
     })
   );
 
-  // Special evaluations for entity id
-  if (hasFieldEvaluations(entityDefinition)) {
-    parts.push(buildFieldEvaluations(entityDefinition));
+  // Single | EVAL stage: later assignments can reference columns from earlier ones.
+  {
+    const fieldEvalsEsql = getFieldEvaluationsEsqlFromDefinition(entityDefinition);
+    const euidEsql = getEuidEsqlEvaluation(type, MAIN_ENTITY_ID_FIELD);
+    parts.push(`| EVAL ${fieldEvalsEsql ? `${fieldEvalsEsql},\n ${euidEsql}` : euidEsql}`);
   }
 
   if (entityDefinition.whenConditionTrueSetFieldsPreAgg?.length) {
@@ -94,9 +98,6 @@ export function buildCcsLogsExtractionEsqlQuery({
       parts.push(buildSetFieldsByCondition(entry));
     }
   }
-
-  // Builds the id
-  parts.push(`| EVAL ${MAIN_ENTITY_ID_FIELD} = ${getEuidEsqlEvaluation(type)}`);
 
   // Main stats aggregation from incoming data
   parts.push(`| STATS
@@ -106,14 +107,15 @@ export function buildCcsLogsExtractionEsqlQuery({
     BY ${MAIN_ENTITY_ID_FIELD}`);
 
   if (entityDefinition.whenConditionTrueSetFieldsAfterStats?.length) {
-    for (const entry of entityDefinition.whenConditionTrueSetFieldsAfterStats) {
-      parts.push(
-        buildSetFieldsByCondition(entry, {
+    // Merge all post-STATS overrides into a single | EVAL stage.
+    const postStatsAssignments = entityDefinition.whenConditionTrueSetFieldsAfterStats.map(
+      (entry) =>
+        buildSetFieldsByConditionAssignments(entry, {
           entityFields: fields,
           useRecentDataPrefix: false,
         })
-      );
-    }
+    );
+    parts.push(`| EVAL ${postStatsAssignments.join(',\n    ')}`);
   }
 
   // Keep fields
