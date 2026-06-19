@@ -98,10 +98,7 @@ describe('SyntheticsIndicesCache', () => {
   it('does not cache rejected results so the next caller retries', async () => {
     const cache = new SyntheticsIndicesCache({ ttlMs: 1_000, now });
     const error = new Error('elasticsearch unavailable');
-    const resolver = jest
-      .fn()
-      .mockRejectedValueOnce(error)
-      .mockResolvedValueOnce('synthetics-*');
+    const resolver = jest.fn().mockRejectedValueOnce(error).mockResolvedValueOnce('synthetics-*');
 
     await expect(cache.get('default', resolver)).rejects.toBe(error);
     await expect(cache.get('default', resolver)).resolves.toBe('synthetics-*');
@@ -111,10 +108,7 @@ describe('SyntheticsIndicesCache', () => {
   it('drops the in-flight entry after rejection so a later concurrent caller can retry', async () => {
     const cache = new SyntheticsIndicesCache({ ttlMs: 1_000, now });
     const error = new Error('boom');
-    const resolver = jest
-      .fn()
-      .mockRejectedValueOnce(error)
-      .mockResolvedValueOnce('synthetics-*');
+    const resolver = jest.fn().mockRejectedValueOnce(error).mockResolvedValueOnce('synthetics-*');
 
     const failing = cache.get('default', resolver);
     await expect(failing).rejects.toBe(error);
