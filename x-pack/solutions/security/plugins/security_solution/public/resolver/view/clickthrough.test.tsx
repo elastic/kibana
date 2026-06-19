@@ -113,17 +113,25 @@ describe('Resolver, when analyzing a tree that has no ancestors and 2 children',
          * If you do them concurrently with each other, you'll have incorrect results.
          *
          * For example, there might be no loading element at one point, and 1 graph element at one point, but never a single time when there is both 1 graph element and 0 loading elements.
+         *
+         * nodeListLinkCount is included here so that the node list panel is also confirmed
+         * ready before any `it` in this describe runs. The node list may render one React
+         * cycle after the graph (e.g. when EUI's AutoSizer provides its size), so verifying
+         * it here prevents the "should show links to the 3 nodes in the node list" test from
+         * reading a stale wrapper on its first yield.
          */
         simulator.map(() => ({
           graphElements: simulator.testSubject('resolver:graph').length,
           graphLoadingElements: simulator.testSubject('resolver:graph:loading').length,
           graphErrorElements: simulator.testSubject('resolver:graph:error').length,
+          nodeListLinkCount: simulator.testSubject('resolver:node-list:node-link:title').length,
         }))
       ).toYieldEqualTo({
         // it should have 1 graph element, an no error or loading elements.
         graphElements: 1,
         graphLoadingElements: 0,
         graphErrorElements: 0,
+        nodeListLinkCount: 3,
       });
     }, 30000);
 
