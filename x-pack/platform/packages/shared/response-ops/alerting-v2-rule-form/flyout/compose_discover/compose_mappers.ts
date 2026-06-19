@@ -69,6 +69,7 @@ const composeQueryToApiQuery = (q: ComposeFormValues['query']): Query => {
     format: 'standalone',
     breach: { query: q.breach.query },
     ...(q.recovery ? { recovery: { query: q.recovery.query } } : {}),
+    ...(q.no_data ? { no_data: { query: q.no_data.query } } : {}),
   };
 };
 
@@ -78,6 +79,9 @@ export const composeFormToCreateRequest = (
 ): CreateRuleData => {
   const artifacts = mapArtifacts(mergeArtifactsByType(formValues));
   const hasRecovery = formValues.query.recovery != null;
+
+  const recoveryStrategy =
+    formValues.recoveryStrategy ?? (hasRecovery ? ('query' as const) : undefined);
 
   return {
     kind: formValues.kind,
@@ -91,7 +95,8 @@ export const composeFormToCreateRequest = (
     time_field: formValues.timeField,
     schedule: { every: formValues.schedule.every, lookback: formValues.schedule.lookback },
     query: composeQueryToApiQuery(formValues.query),
-    ...(hasRecovery ? { recovery_strategy: 'query' as const } : {}),
+    ...(recoveryStrategy ? { recovery_strategy: recoveryStrategy } : {}),
+    ...(formValues.noDataStrategy ? { no_data_strategy: formValues.noDataStrategy } : {}),
     grouping: formValues.grouping?.fields?.length
       ? { fields: formValues.grouping.fields }
       : undefined,
@@ -147,6 +152,7 @@ const apiQueryToRuleQuery = (
     ...(recoveryStrategy === 'query' && q.recovery
       ? { recovery: { query: q.recovery.query } }
       : {}),
+    ...(q.no_data ? { no_data: { query: q.no_data.query } } : {}),
   };
 };
 
@@ -197,6 +203,8 @@ export const mapRuleToComposeFormValues = (rule: RuleResponse): ComposeFormValue
       lookback: rule.schedule.lookback ?? '1m',
     },
     query: apiQueryToRuleQuery(rule.query, rule.recovery_strategy),
+    recoveryStrategy: rule.recovery_strategy ?? undefined,
+    noDataStrategy: rule.no_data_strategy ?? undefined,
     ...(rule.grouping ? { grouping: { fields: rule.grouping.fields } } : {}),
     stateTransition,
     stateTransitionAlertDelayMode: deriveAlertDelayMode(stateTransition),

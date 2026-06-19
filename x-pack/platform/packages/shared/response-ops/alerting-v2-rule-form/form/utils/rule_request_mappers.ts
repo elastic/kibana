@@ -5,7 +5,14 @@
  * 2.0.
  */
 
-import type { RuleResponse, CreateRuleData, Query, UpdateRuleData } from '@kbn/alerting-v2-schemas';
+import type {
+  RuleResponse,
+  CreateRuleData,
+  Query,
+  UpdateRuleData,
+  RecoveryStrategy,
+  NoDataStrategy,
+} from '@kbn/alerting-v2-schemas';
 import { DELAY_MODE } from '../types';
 import type { FormValues, StateTransition, RuleQuery } from '../types';
 import {
@@ -48,6 +55,7 @@ const mapQuery = (query: RuleQuery): Query => {
     format: 'standalone',
     breach: { query: query.breach.query },
     ...(query.recovery ? { recovery: { query: query.recovery.query } } : {}),
+    ...(query.no_data ? { no_data: { query: query.no_data.query } } : {}),
   };
 };
 
@@ -106,7 +114,8 @@ export interface RuleRequestCommon {
   time_field: string;
   schedule: { every: string; lookback?: string };
   query: Query;
-  recovery_strategy?: 'query';
+  recovery_strategy?: RecoveryStrategy;
+  no_data_strategy?: NoDataStrategy;
   grouping?: { fields: string[] };
   state_transition?: {
     pending_count?: number;
@@ -122,12 +131,16 @@ export const mapFormValuesToRuleRequest = (formValues: FormValues): RuleRequestC
   const mappedArtifacts = mapArtifacts(mergeArtifactsByType(formValues));
   const hasRecovery = query.recovery != null;
 
+  const recoveryStrategy =
+    formValues.recoveryStrategy ?? (hasRecovery ? ('query' as const) : undefined);
+
   return {
     metadata: mapMetadata(metadata),
     time_field: timeField,
     schedule: mapSchedule(schedule),
     query: mapQuery(query),
-    ...(hasRecovery ? { recovery_strategy: 'query' as const } : {}),
+    ...(recoveryStrategy ? { recovery_strategy: recoveryStrategy } : {}),
+    ...(formValues.noDataStrategy ? { no_data_strategy: formValues.noDataStrategy } : {}),
     grouping: mapGrouping(grouping),
     state_transition: mapStateTransition(formValues),
     ...(mappedArtifacts ? { artifacts: mappedArtifacts } : {}),
@@ -174,6 +187,7 @@ const apiQueryToRuleQuery = (
     ...(recoveryStrategy === 'query' && q.recovery
       ? { recovery: { query: q.recovery.query } }
       : {}),
+    ...(q.no_data ? { no_data: { query: q.no_data.query } } : {}),
   };
 };
 
@@ -200,6 +214,8 @@ export const mapRuleResponseToFormValues = (rule: RuleResponse): Partial<FormVal
       lookback: rule.schedule.lookback ?? '1m',
     },
     query: apiQueryToRuleQuery(rule.query, rule.recovery_strategy),
+    recoveryStrategy: rule.recovery_strategy ?? undefined,
+    noDataStrategy: rule.no_data_strategy ?? undefined,
     ...(rule.grouping ? { grouping: { fields: rule.grouping.fields } } : {}),
     stateTransition,
     stateTransitionAlertDelayMode: deriveAlertDelayModeFromStateTransition(stateTransition),

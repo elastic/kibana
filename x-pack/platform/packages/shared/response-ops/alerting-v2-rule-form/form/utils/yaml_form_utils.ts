@@ -7,7 +7,13 @@
 
 import { i18n } from '@kbn/i18n';
 import { dump, load } from 'js-yaml';
-import type { FormValues, StateTransition, RuleQuery } from '../types';
+import type {
+  FormValues,
+  StateTransition,
+  RuleQuery,
+  RecoveryStrategy,
+  NoDataStrategy,
+} from '../types';
 import {
   deriveAlertDelayModeFromStateTransition,
   deriveRecoveryDelayModeFromStateTransition,
@@ -65,6 +71,7 @@ interface YamlRuleObject {
   schedule: { every: string; lookback: string };
   query: YamlQuery;
   recovery_strategy?: string;
+  no_data_strategy?: string;
   grouping?: { fields: string[] };
   state_transition?: YamlStateTransition;
   artifacts?: Array<{ id: string; type: string; value: string }>;
@@ -110,6 +117,8 @@ export const formValuesToYamlObject = (values: FormValues): YamlRuleObject => {
   const hasRecovery = values.query.recovery != null;
   const allArtifacts = mergeArtifactsByType(values);
 
+  const recoveryStrategy = values.recoveryStrategy ?? (hasRecovery ? 'query' : undefined);
+
   return {
     kind: values.kind,
     metadata: {
@@ -124,7 +133,8 @@ export const formValuesToYamlObject = (values: FormValues): YamlRuleObject => {
       lookback: values.schedule.lookback,
     },
     query: serializeQuery(values.query),
-    ...(hasRecovery ? { recovery_strategy: 'query' } : {}),
+    ...(recoveryStrategy ? { recovery_strategy: recoveryStrategy } : {}),
+    ...(values.noDataStrategy ? { no_data_strategy: values.noDataStrategy } : {}),
     ...(values.grouping?.fields?.length && { grouping: { fields: values.grouping.fields } }),
     ...(st && { state_transition: st }),
     ...(allArtifacts?.length && { artifacts: allArtifacts }),
@@ -245,6 +255,23 @@ export const parseYamlToFormValues = (yamlString: string): YamlParseResult => {
 
   const name = metadata?.name;
 
+  const rawRecoveryStrategy = obj.recovery_strategy;
+  const recoveryStrategy =
+    rawRecoveryStrategy === 'no_breach' ||
+    rawRecoveryStrategy === 'query' ||
+    rawRecoveryStrategy === 'none'
+      ? (rawRecoveryStrategy as RecoveryStrategy)
+      : undefined;
+
+  const rawNoDataStrategy = obj.no_data_strategy;
+  const noDataStrategy =
+    rawNoDataStrategy === 'last_known_status' ||
+    rawNoDataStrategy === 'emit' ||
+    rawNoDataStrategy === 'recover' ||
+    rawNoDataStrategy === 'none'
+      ? (rawNoDataStrategy as NoDataStrategy)
+      : undefined;
+
   return {
     values: {
       kind: (kind as 'alert' | 'signal') ?? 'alert',
@@ -261,6 +288,8 @@ export const parseYamlToFormValues = (yamlString: string): YamlParseResult => {
         lookback: typeof schedule?.lookback === 'string' ? schedule.lookback : '1m',
       },
       query: parseQuery(queryObj),
+      recoveryStrategy,
+      noDataStrategy,
       grouping: Array.isArray(grouping?.fields)
         ? { fields: grouping.fields as string[] }
         : undefined,
