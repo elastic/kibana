@@ -6,11 +6,9 @@
  */
 
 /**
- * Short-lived per-space cache for the CCS-resolved heartbeat indices string.
- *
- * Avoids resolving settings (and `cluster.remoteInfo()` on the specific-clusters
- * path) on every request. Concurrent misses share one in-flight resolution.
- * Errors are not cached so failures can retry instead of pinning the fallback.
+ * Coalesces concurrent misses on the same key and does not cache rejections,
+ * so transient failures retry on the next request instead of pinning the
+ * fallback for the TTL window.
  */
 
 interface CacheEntry {
