@@ -127,7 +127,7 @@ export const metricTrendlineFunction = (): TrendlineExpressionFunctionDefinition
       for (const breakdownTerm in rowsByBreakdown) {
         if (!Object.hasOwn(rowsByBreakdown, breakdownTerm)) continue;
         trends[breakdownTerm] = rowsByBreakdown[breakdownTerm].map((row) => ({
-          x: row[timeColId] !== null ? toEpochMs(row[timeColId]) : NaN,
+          x: toEpochMs(row[timeColId]),
           y: row[metricColId] !== null ? row[metricColId] : NaN,
         }));
       }
