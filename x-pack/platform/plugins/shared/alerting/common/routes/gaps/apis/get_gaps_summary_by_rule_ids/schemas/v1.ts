@@ -12,7 +12,9 @@ export const getGapsSummaryByRuleIdsBodySchema = schema.object(
   {
     end: schema.string(),
     start: schema.string(),
-    rule_ids: schema.arrayOf(schema.string(), { maxSize: MAX_ARRAY_FIELDS }),
+    rule_ids: schema.arrayOf(schema.string({ maxLength: MAX_ID_LENGTH }), {
+      maxSize: MAX_ARRAY_FIELDS,
+    }),
     excluded_reasons: optionalExcludedGapReasonsSchema,
     gap_auto_fill_scheduler_id: schema.maybe(schema.string({ maxLength: MAX_ID_LENGTH })),
   },
