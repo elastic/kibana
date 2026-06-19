@@ -20,7 +20,6 @@ dependsOn:
   - '@kbn/es-query'
   - '@kbn/as-code-shared-schemas'
   - '@kbn/content-management-utils'
-  - '@kbn/saved-objects-tagging-plugin'
 tags:
   - shared-common
   - package
