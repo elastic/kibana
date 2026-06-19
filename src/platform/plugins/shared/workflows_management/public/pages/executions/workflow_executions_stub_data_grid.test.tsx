@@ -9,18 +9,23 @@
 
 import { render, screen } from '@testing-library/react';
 import React from 'react';
-import { WorkflowExecutionsPage } from './executions_page';
+import { WorkflowExecutionsStubDataGrid } from './workflow_executions_stub_data_grid';
 import { createStartServicesMock } from '../../mocks';
 import { getTestProvider } from '../../shared/mocks/test_providers';
 
-describe('WorkflowExecutionsPage', () => {
-  it('renders the executions shell and filter scaffold', () => {
+jest.mock('@kbn/unified-data-table', () => ({
+  UnifiedDataTable: () => <div data-test-subj="discoverDocTable" />,
+  DataLoadingState: { loading: 'loading', loaded: 'loaded' },
+}));
+
+describe('WorkflowExecutionsStubDataGrid', () => {
+  it('renders the stub data grid table', () => {
     const services = createStartServicesMock();
-    services.workflowsManagement.globalExecutionsView.enabled = true;
 
-    render(<WorkflowExecutionsPage />, { wrapper: getTestProvider({ services }) });
+    render(<WorkflowExecutionsStubDataGrid services={services} />, {
+      wrapper: getTestProvider({ services }),
+    });
 
-    expect(screen.getByTestId('workflowExecutionsPage')).toBeInTheDocument();
-    expect(screen.getByTestId('workflowExecutionsSearchFilterScaffold')).toBeInTheDocument();
+    expect(screen.getByTestId('discoverDocTable')).toBeInTheDocument();
   });
 });
