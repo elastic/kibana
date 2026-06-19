@@ -12,6 +12,7 @@ import { i18n } from '@kbn/i18n';
 
 import {
   DASHBOARD_ALL_NAV_ITEM_ID,
+  DASHBOARD_ALL_NAV_LINK,
   DASHBOARD_APP_ID,
   DASHBOARD_CREATE_NAV_LINK,
   LANDING_PAGE_PATH,
@@ -70,7 +71,7 @@ export const createDashboardsNavigationNode = (
       children: [
         {
           id: DASHBOARD_ALL_NAV_ITEM_ID,
-          link: DASHBOARD_APP_ID,
+          link: DASHBOARD_ALL_NAV_LINK,
           title: i18n.translate('dashboard.nav.allDashboards', {
             defaultMessage: 'All dashboards',
           }),
@@ -110,6 +111,7 @@ export const createDashboardsNavigationNode = (
       }),
     renderAs: 'panelOpener',
     icon: 'productDashboard',
+    link: DASHBOARD_ALL_NAV_LINK,
     panelHeaderActions: [
       {
         id: 'dashboards_search',

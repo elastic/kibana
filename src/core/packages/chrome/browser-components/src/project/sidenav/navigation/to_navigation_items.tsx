@@ -584,23 +584,16 @@ const getPanelOpenerHref = (
   secondarySections: SecondaryMenuSection[],
   panelStateManager: PanelStateManager
 ): string => {
+  if (navNode.href) {
+    return navNode.href;
+  }
+
   // Try to use last active item first
   const lastActiveHref = findItemByLastActive(navNode.id, secondarySections, panelStateManager);
   if (lastActiveHref) return lastActiveHref;
 
   // Fall back to first available href
   const firstAvailableHref = findFirstAvailableHref(secondarySections);
-
-  // Warn if panel opener has its own href (which it shouldn't)
-  if (navNode.href) {
-    warnOnce(
-      `Panel opener node "${navNode.id}" has a href "${
-        navNode.href
-      }", but it should not. We're using it as a panel opener that contains sections with links and we use the first link inside the section as the href ${
-        firstAvailableHref ?? 'missing-href-😭'
-      }.`
-    );
-  }
 
   return firstAvailableHref ?? 'missing-href-😭';
 };

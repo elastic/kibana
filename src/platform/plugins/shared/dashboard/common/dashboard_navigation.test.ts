@@ -15,6 +15,7 @@ import type { ChromeNavLink } from '@kbn/core-chrome-browser';
 import { createDashboardsNavigationNode } from './dashboard_navigation';
 import {
   DASHBOARD_ALL_NAV_ITEM_ID,
+  DASHBOARD_ALL_NAV_LINK,
   DASHBOARD_APP_ID,
   DASHBOARD_CREATE_NAV_LINK,
 } from './page_bundle_constants';
@@ -35,6 +36,7 @@ describe('createDashboardsNavigationNode', () => {
       title: 'Dashboards',
       renderAs: 'panelOpener',
       icon: 'productDashboard',
+      link: DASHBOARD_ALL_NAV_LINK,
       panelHeaderActions: [
         {
           id: 'dashboards_search',
@@ -63,7 +65,7 @@ describe('createDashboardsNavigationNode', () => {
           children: [
             {
               id: DASHBOARD_ALL_NAV_ITEM_ID,
-              link: DASHBOARD_APP_ID,
+              link: DASHBOARD_ALL_NAV_LINK,
               title: 'All dashboards',
               getIsActive: expect.any(Function),
             },
@@ -106,6 +108,11 @@ describe('createDashboardsNavigationNode', () => {
   it('creates secondary panel sections when the dashboards app link is registered', () => {
     const deepLinks = {
       [DASHBOARD_APP_ID]: getDeepLink(DASHBOARD_APP_ID, 'app/dashboards#/list', 'Dashboards'),
+      [DASHBOARD_ALL_NAV_LINK]: getDeepLink(
+        DASHBOARD_ALL_NAV_LINK,
+        'app/dashboards#/list',
+        'All dashboards'
+      ),
       [DASHBOARD_CREATE_NAV_LINK]: getDeepLink(
         DASHBOARD_CREATE_NAV_LINK,
         'app/dashboards#/create',
@@ -140,6 +147,8 @@ describe('createDashboardsNavigationNode', () => {
 
     const { navItems } = toNavigationItems(navigationTreeUI, [], new PanelStateManager());
     const dashboardsItem = navItems.primaryItems.find((item) => item.id === DASHBOARD_APP_ID);
+
+    expect(dashboardsItem?.href).toBe('/foo/app/dashboards#/list');
 
     expect(dashboardsItem?.panelHeaderActions).toEqual([
       expect.objectContaining({
@@ -203,10 +212,57 @@ describe('createDashboardsNavigationNode', () => {
     ]);
   });
 
+  it('uses the all dashboards listing href for the primary dashboards item even with last active history', () => {
+    const deepLinks = {
+      [DASHBOARD_APP_ID]: getDeepLink(DASHBOARD_APP_ID, 'app/dashboards#/list', 'Dashboards'),
+      [DASHBOARD_ALL_NAV_LINK]: getDeepLink(
+        DASHBOARD_ALL_NAV_LINK,
+        'app/dashboards#/list',
+        'All dashboards'
+      ),
+      [DASHBOARD_CREATE_NAV_LINK]: getDeepLink(
+        DASHBOARD_CREATE_NAV_LINK,
+        'app/dashboards#/create',
+        'Create dashboard'
+      ),
+    };
+
+    const { navigationTreeUI } = parseNavigationTree(
+      'oblt',
+      {
+        body: [
+          createDashboardsNavigationNode({
+            recentDashboards: [
+              {
+                id: 'recent_1',
+                title: 'Recent dashboard',
+                href: 'http://mocked/kibana/foo/app/dashboards#/view/1',
+              },
+            ],
+          }),
+        ],
+      },
+      { deepLinks, cloudLinks: {} }
+    );
+
+    const panelStateManager = new PanelStateManager();
+    panelStateManager.setPanelLastActive(DASHBOARD_APP_ID, 'recent_1');
+
+    const { navItems } = toNavigationItems(navigationTreeUI, [], panelStateManager);
+    const dashboardsItem = navItems.primaryItems.find((item) => item.id === DASHBOARD_APP_ID);
+
+    expect(dashboardsItem?.href).toBe('/foo/app/dashboards#/list');
+  });
+
   it('highlights only the last-clicked item when the same dashboard is in recent and starred', () => {
     const sharedHref = 'http://mocked/kibana/foo/app/dashboards#/view/flights';
     const deepLinks = {
       [DASHBOARD_APP_ID]: getDeepLink(DASHBOARD_APP_ID, 'app/dashboards#/list', 'Dashboards'),
+      [DASHBOARD_ALL_NAV_LINK]: getDeepLink(
+        DASHBOARD_ALL_NAV_LINK,
+        'app/dashboards#/list',
+        'All dashboards'
+      ),
       [DASHBOARD_CREATE_NAV_LINK]: getDeepLink(
         DASHBOARD_CREATE_NAV_LINK,
         'app/dashboards#/create',
