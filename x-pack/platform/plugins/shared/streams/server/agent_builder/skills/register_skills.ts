@@ -13,11 +13,6 @@ import { streamsManagementSkill } from './streams_management_skill';
 import { knowledgeIndicatorsManagementSkill } from './knowledge_indicators_management';
 import { createKiIdentificationManagementSkill } from './ki_identification_management';
 import { sigEventsManagementSkill } from './sig_events_management';
-import {
-  createMemorySynthesisSkill,
-  createMemoryConsolidationSkill,
-  createConversationScraperSkill,
-} from './memory';
 import { createSigEventsOnboardingSkill } from './sigevents_onboarding_skill';
 
 export const registerAgentBuilderSkills = ({
@@ -42,9 +37,6 @@ export const registerAgentBuilderSkills = ({
     ...(streamsKIsOnboardingClient
       ? [createKiIdentificationManagementSkill({ telemetry, streamsKIsOnboardingClient })]
       : []),
-    createMemorySynthesisSkill(memoryToolsOptions),
-    createMemoryConsolidationSkill(memoryToolsOptions),
-    createConversationScraperSkill(memoryToolsOptions),
     createSigEventsOnboardingSkill(memoryToolsOptions),
   ];
 
