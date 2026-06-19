@@ -29,89 +29,9 @@
  *     --testFiles x-pack/solutions/security/plugins/security_solution/test/scout/ui/parallel_tests/entity_analytics/entity_cases.spec.ts
  */
 
-import { spaceTest, tags } from '@kbn/scout-security';
 import { expect } from '@kbn/scout-security/ui';
 import { CUSTOM_QUERY_RULE } from '@kbn/scout-security/src/playwright/constants/detection_rules';
-import { SECURITY_ENTITY_ATTACHMENT_TYPE } from '@kbn/cases-plugin/common';
-
-// ── Selectors ────────────────────────────────────────────────────────────────
-
-// Flyout footer / Take Action popover
-const TAKE_ACTION_BUTTON = 'take-action-button';
-const ADD_TO_NEW_CASE_ITEM = 'eaCasesAddToNewCase';
-const ADD_TO_EXISTING_CASE_ITEM = 'eaCasesAddToExistingCase';
-
-// Cases UI
-const CASE_VIEW_ENTITIES_TAB = 'case-view-tab-title-entities';
-const ENTITY_TAB_TABLE = 'eaCasesEntityTabTable';
-const ENTITY_TAB_EMPTY = 'eaCasesEntityTabEmpty';
-
-// Cases new-case flyout (from the Cases plugin UI)
-const CREATE_CASE_SUBMIT_BUTTON = 'create-case-submit';
-const CREATE_CASE_NAME_INPUT = 'input[data-test-subj="input"][aria-label*="Case name"]';
-
-// ── Helpers ───────────────────────────────────────────────────────────────────
-
-const CASES_API = '/api/cases';
-
-async function deleteAllCasesInSpace(
-  kbnClient: import('@kbn/scout').KbnClient,
-  spaceId: string
-): Promise<void> {
-  const response = await kbnClient.request<{ cases: Array<{ id: string }> }>({
-    method: 'GET',
-    path: `/s/${spaceId}${CASES_API}?perPage=100`,
-  });
-  const ids = (response.data?.cases ?? []).map((c) => c.id);
-  if (ids.length > 0) {
-    await kbnClient.request({
-      method: 'DELETE',
-      path: `/s/${spaceId}${CASES_API}`,
-      body: { ids },
-      headers: { 'kbn-xsrf': 'scout' },
-    });
-  }
-}
-
-async function createCaseWithEntityAttachment(
-  kbnClient: import('@kbn/scout').KbnClient,
-  spaceId: string,
-  {
-    caseName,
-    entityStoreId,
-    entityName,
-    entityType,
-  }: { caseName: string; entityStoreId: string; entityName: string; entityType: 'host' | 'user' }
-): Promise<string> {
-  const caseResp = await kbnClient.request<{ id: string }>({
-    method: 'POST',
-    path: `/s/${spaceId}${CASES_API}`,
-    headers: { 'kbn-xsrf': 'scout' },
-    body: {
-      title: caseName,
-      description: 'Created by Scout entity attachment test',
-      tags: ['scout'],
-      connector: { id: 'none', name: 'none', type: '.none', fields: null },
-      settings: { syncAlerts: false },
-      owner: 'securitySolution',
-    },
-  });
-  const caseId = caseResp.data.id;
-
-  await kbnClient.request({
-    method: 'POST',
-    path: `/s/${spaceId}${CASES_API}/${caseId}/comments`,
-    headers: { 'kbn-xsrf': 'scout' },
-    body: {
-      type: SECURITY_ENTITY_ATTACHMENT_TYPE,
-      attachmentId: entityStoreId,
-      metadata: { entityName, entityType },
-      owner: 'securitySolution',
-    },
-  });
-
-  return caseId;
-}
+import { spaceTest, tags } from '../../fixtures';
 
 // ── Test suite ────────────────────────────────────────────────────────────────
 
@@ -131,8 +51,8 @@ spaceTest.describe.skip(
   'Entity attachment cases – flyout add-to-case actions and Entities tab',
   { tag: [...tags.stateful.classic] },
   () => {
-    spaceTest.beforeEach(async ({ browserAuth, apiServices, scoutSpace, kbnClient }) => {
-      await deleteAllCasesInSpace(kbnClient, scoutSpace.id);
+    spaceTest.beforeEach(async ({ browserAuth, apiServices, scoutSpace, casesApi }) => {
+      await casesApi.deleteAll();
       await apiServices.detectionRule.deleteAll();
       await apiServices.detectionAlerts.deleteAll();
 
@@ -141,155 +61,109 @@ spaceTest.describe.skip(
         name: `${ALERT_RULE.name}_${scoutSpace.id}`,
       });
 
-      await browserAuth.loginAsAdmin();
+      await browserAuth.loginAsPlatformEngineer();
     });
 
-    spaceTest.afterEach(async ({ apiServices, scoutSpace, kbnClient }) => {
-      await deleteAllCasesInSpace(kbnClient, scoutSpace.id);
+    spaceTest.afterEach(async ({ apiServices, casesApi }) => {
+      await casesApi.deleteAll();
       await apiServices.detectionRule.deleteAll();
       await apiServices.detectionAlerts.deleteAll();
     });
 
-    // ── Take Action menu ──────────────────────────────────────────────────────
-
     spaceTest(
       'shows Add to new case and Add to existing case in the host flyout Take Action menu',
-      async ({ page }) => {
-        await page.gotoApp('security/alerts');
+      async ({ pageObjects, scoutSpace }) => {
+        const { entityCases } = pageObjects;
+        const ruleName = `${ALERT_RULE.name}_${scoutSpace.id}`;
+        await entityCases.navigateToAlerts();
+        await entityCases.openHostFlyoutForRule(ruleName);
+        await entityCases.openTakeActionMenu();
 
-        // Wait for an alert row and open the host entity flyout via its link.
-        // eslint-disable-next-line playwright/no-nth-methods
-        const hostLink = page.testSubj.locator('host-details-button').first();
-        await hostLink.waitFor();
-        await hostLink.click();
-
-        // The host right panel footer renders the Take Action popover.
-        const takeActionButton = page.testSubj.locator(TAKE_ACTION_BUTTON);
-        await takeActionButton.waitFor();
-        await takeActionButton.click();
-
-        await expect(page.testSubj.locator(ADD_TO_NEW_CASE_ITEM)).toBeVisible();
-        await expect(page.testSubj.locator(ADD_TO_EXISTING_CASE_ITEM)).toBeVisible();
+        await expect(entityCases.addToNewCaseItem).toBeVisible();
+        await expect(entityCases.addToExistingCaseItem).toBeVisible();
       }
     );
 
     spaceTest(
       'shows Add to new case and Add to existing case in the user flyout Take Action menu',
-      async ({ page }) => {
-        await page.gotoApp('security/alerts');
+      async ({ pageObjects, scoutSpace }) => {
+        const { entityCases } = pageObjects;
+        const ruleName = `${ALERT_RULE.name}_${scoutSpace.id}`;
+        await entityCases.navigateToAlerts();
+        await entityCases.openUserFlyoutForRule(ruleName);
+        await entityCases.openTakeActionMenu();
 
-        // eslint-disable-next-line playwright/no-nth-methods
-        const userLink = page.testSubj.locator('users-link').first();
-        await userLink.waitFor();
-        await userLink.click();
-
-        const takeActionButton = page.testSubj.locator(TAKE_ACTION_BUTTON);
-        await takeActionButton.waitFor();
-        await takeActionButton.click();
-
-        await expect(page.testSubj.locator(ADD_TO_NEW_CASE_ITEM)).toBeVisible();
-        await expect(page.testSubj.locator(ADD_TO_EXISTING_CASE_ITEM)).toBeVisible();
+        await expect(entityCases.addToNewCaseItem).toBeVisible();
+        await expect(entityCases.addToExistingCaseItem).toBeVisible();
       }
     );
-
-    // ── Add to new case flow ──────────────────────────────────────────────────
 
     spaceTest(
       'adds a host entity to a new case and the Entities tab shows the attached entity',
-      async ({ page, scoutSpace }) => {
+      async ({ pageObjects, scoutSpace }) => {
+        const { entityCases } = pageObjects;
         const caseName = `Scout entity case – host – ${scoutSpace.id}`;
 
-        await page.gotoApp('security/alerts');
-
         await spaceTest.step('open host flyout and click Add to new case', async () => {
-          // eslint-disable-next-line playwright/no-nth-methods
-          const hostLink = page.testSubj.locator('host-details-button').first();
-          await hostLink.waitFor();
-          await hostLink.click();
-
-          const takeActionButton = page.testSubj.locator(TAKE_ACTION_BUTTON);
-          await takeActionButton.waitFor();
-          await takeActionButton.click();
-
-          await page.testSubj.locator(ADD_TO_NEW_CASE_ITEM).click();
+          await entityCases.navigateToAlerts();
+          await entityCases.openHostFlyoutForRule(`${ALERT_RULE.name}_${scoutSpace.id}`);
+          await entityCases.openTakeActionMenu();
+          await entityCases.clickAddToNewCase();
         });
 
         await spaceTest.step('create the case via the Cases flyout', async () => {
-          // The cases plugin renders a flyout with a name field.
-          const nameField = page.locator(CREATE_CASE_NAME_INPUT);
-          await nameField.waitFor();
-          await nameField.fill(caseName);
-
-          await page.testSubj.locator(CREATE_CASE_SUBMIT_BUTTON).click();
+          await entityCases.fillCaseName(caseName);
+          await entityCases.submitNewCase();
         });
 
         await spaceTest.step('navigate to the new case and check the Entities tab', async () => {
-          // A toast with a link to the case is shown; click it.
-          const caseToastLink = page.locator('[data-test-subj*="toastLink"]');
-          // eslint-disable-next-line playwright/no-nth-methods
-          await caseToastLink.first().click();
+          await entityCases.clickCaseToastLink();
 
-          // The Entities tab should be visible for cases that have entity attachments.
-          await expect(page.testSubj.locator(CASE_VIEW_ENTITIES_TAB)).toBeVisible({
-            timeout: 15000,
-          });
-          await page.testSubj.locator(CASE_VIEW_ENTITIES_TAB).click();
+          await expect(entityCases.entitiesTab).toBeVisible({ timeout: 15000 });
+          await entityCases.clickEntitiesTab();
 
-          await expect(page.testSubj.locator(ENTITY_TAB_TABLE)).toBeVisible({ timeout: 15000 });
+          await expect(entityCases.entityTabTable).toBeVisible({ timeout: 15000 });
         });
       }
     );
 
-    // ── Entities tab – pre-seeded via API ─────────────────────────────────────
-
     spaceTest(
       'Entities tab renders the entity table when attachments were added via API',
-      async ({ page, scoutSpace, kbnClient }) => {
-        const caseId = await createCaseWithEntityAttachment(kbnClient, scoutSpace.id, {
+      async ({ pageObjects, scoutSpace, casesApi }) => {
+        const { entityCases } = pageObjects;
+        const caseId = await casesApi.createWithEntityAttachment({
           caseName: `Scout entity case – API – ${scoutSpace.id}`,
           entityStoreId: 'test-entity-store-id',
           entityName: 'scout-host',
           entityType: 'host',
         });
 
-        await page.gotoApp(`security/cases/${caseId}`);
+        await entityCases.navigateToCase(caseId);
 
-        await expect(page.testSubj.locator(CASE_VIEW_ENTITIES_TAB)).toBeVisible({
-          timeout: 15000,
-        });
-        await page.testSubj.locator(CASE_VIEW_ENTITIES_TAB).click();
+        await expect(entityCases.entitiesTab).toBeVisible({ timeout: 15000 });
+        await entityCases.clickEntitiesTab();
 
-        await expect(page.testSubj.locator(ENTITY_TAB_TABLE)).toBeVisible({ timeout: 15000 });
+        await expect(entityCases.entityTabTable).toBeVisible({ timeout: 15000 });
       }
     );
 
     spaceTest(
       'Entities tab renders the empty state when a case has no entity attachments',
-      async ({ page, scoutSpace, kbnClient }) => {
-        // Create a plain case with no entity attachments.
-        const caseResp = await kbnClient.request<{ id: string }>({
-          method: 'POST',
-          path: `/s/${scoutSpace.id}${CASES_API}`,
-          headers: { 'kbn-xsrf': 'scout' },
-          body: {
-            title: `Scout entity case – empty – ${scoutSpace.id}`,
-            description: 'No entity attachments',
-            tags: [],
-            connector: { id: 'none', name: 'none', type: '.none', fields: null },
-            settings: { syncAlerts: false },
-            owner: 'securitySolution',
-          },
+      async ({ pageObjects, scoutSpace, casesApi }) => {
+        const { entityCases } = pageObjects;
+        const caseId = await casesApi.createCase({
+          title: `Scout entity case – empty – ${scoutSpace.id}`,
+          description: 'No entity attachments',
+          tags: [],
         });
 
-        await page.gotoApp(`security/cases/${caseResp.data.id}`);
+        await entityCases.navigateToCase(caseId);
 
-        await expect(page.testSubj.locator(CASE_VIEW_ENTITIES_TAB)).toBeVisible({
-          timeout: 15000,
-        });
-        await page.testSubj.locator(CASE_VIEW_ENTITIES_TAB).click();
+        await expect(entityCases.entitiesTab).toBeVisible({ timeout: 15000 });
+        await entityCases.clickEntitiesTab();
 
-        await expect(page.testSubj.locator(ENTITY_TAB_EMPTY)).toBeVisible({ timeout: 15000 });
-        await expect(page.testSubj.locator(ENTITY_TAB_TABLE)).toBeHidden();
+        await expect(entityCases.entityTabEmpty).toBeVisible({ timeout: 15000 });
+        await expect(entityCases.entityTabTable).toBeHidden();
       }
     );
   }
