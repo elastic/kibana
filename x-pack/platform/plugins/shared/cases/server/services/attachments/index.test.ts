@@ -24,6 +24,7 @@ import { createErrorSO, createSOFindResponse } from '../test_utils';
 import {
   CASE_ATTACHMENT_SAVED_OBJECT,
   CASE_COMMENT_SAVED_OBJECT,
+  SECURITY_ENTITY_ATTACHMENT_TYPE,
   SECURITY_SOLUTION_OWNER,
 } from '../../../common/constants';
 import type { ConfigType } from '../../config';
@@ -541,6 +542,31 @@ describe('AttachmentService', () => {
             externalReferenceAttachmentTypeId: 'endpoint',
           })
         );
+      });
+
+      it('create throws Boom 400 for unified-only types (no legacy equivalent) when attachments flag is off', async () => {
+        const entityAttrs = {
+          type: SECURITY_ENTITY_ATTACHMENT_TYPE,
+          attachmentId: 'entity-1',
+          metadata: { entityName: 'alice', entityType: 'user' },
+          owner: SECURITY_SOLUTION_OWNER,
+          created_at: '2024-01-01T00:00:00.000Z',
+          created_by: { username: 'u', full_name: null, email: null },
+          pushed_at: null,
+          pushed_by: null,
+          updated_at: null,
+          updated_by: null,
+        };
+
+        await expect(
+          service.create({ attributes: entityAttrs, references: [], id: '1' })
+        ).rejects.toMatchObject({
+          isBoom: true,
+          output: { statusCode: 400 },
+          message: expect.stringContaining(SECURITY_ENTITY_ATTACHMENT_TYPE),
+        });
+
+        expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
       });
 
       it('bulkCreate strips attachmentId/metadata/data when writing unified payload to cases-comments', async () => {

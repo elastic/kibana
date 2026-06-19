@@ -45,6 +45,7 @@ import {
   getAttachmentTypeTransformers,
   resolveAttachmentSavedObjectType,
 } from '../../common/attachments';
+import { isUnifiedOnlyAttachmentType } from '../../../common/utils/attachments/migration_utils';
 
 import { buildFilter, combineFilters } from '../../client/utils';
 import { defaultSortField } from '../../common/utils';
@@ -480,6 +481,13 @@ export class AttachmentService {
         return Object.assign(injectedAttachment, {
           attributes: validatedAttributes,
         }) as unknown as UnifiedAttachmentSavedObjectTransformed;
+      }
+
+      const attachmentType = getAttachmentTypeFromAttributes(decodedAttributes);
+      if (isUnifiedOnlyAttachmentType(attachmentType, decodedAttributes.owner)) {
+        throw Boom.badRequest(
+          `Attachment type '${attachmentType}' has no legacy representation and requires the unified attachment SO type. Enable xpack.cases.attachments.enabled in your Kibana configuration.`
+        );
       }
 
       const legacyAttributes = transformer.toLegacySchema(decodedAttributes);

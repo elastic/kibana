@@ -12,5 +12,10 @@ export default createTestConfig('security_and_spaces', {
   ssl: true,
   testFiles: [require.resolve('./tests/trial')],
   publicBaseUrl: true,
-  kbnServerArgs: ['--xpack.cases.templates.enabled=true'],
+  kbnServerArgs: [
+    '--xpack.cases.templates.enabled=true',
+    // Required for unified-only attachment types (e.g. security.entity) that have
+    // no legacy cases-comments SO representation.
+    '--xpack.cases.attachments.enabled=true',
+  ],
 });
