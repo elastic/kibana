@@ -10,6 +10,7 @@
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import { isTerminalStatus } from '@kbn/workflows';
+import type { WorkflowExecutionDto } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows/types/latest';
 import type { WorkflowsApiService } from '../../../common/apis/workflows';
 import { waitForConditionOrThrow } from '../../../common/utils/wait_for_condition';
@@ -129,6 +130,18 @@ async function waitForExecution(workflowsApi: WorkflowsApiService, executionId: 
   });
 }
 
+async function getChildExecutionForParent(
+  workflowsApi: WorkflowsApiService,
+  childWorkflowId: string,
+  parentExecutionId: string
+): Promise<WorkflowExecutionDto | undefined> {
+  const { results } = await workflowsApi.getExecutions(childWorkflowId);
+  const executions = await Promise.all(results.map((item) => workflowsApi.getExecution(item.id)));
+  return executions.find(
+    (execution) => execution?.context?.parentWorkflowExecutionId === parentExecutionId
+  );
+}
+
 // ---------------------------------------------------------------------------
 // Tests
 // ---------------------------------------------------------------------------
@@ -208,16 +221,20 @@ spaceTest.describe('Workflow composition', { tag: tags.deploymentAgnostic }, () 
     });
 
     const parentExecution = await waitForExecution(workflowsApi, workflowExecutionId);
-    const { results: childExecutions } = await workflowsApi.getExecutions(childWorkflowId);
-    const completedChild = childExecutions.find(
-      (execution) => execution.status === ExecutionStatus.COMPLETED
-    );
+    const childExecution = await waitForConditionOrThrow({
+      action: () => getChildExecutionForParent(workflowsApi, childWorkflowId, workflowExecutionId),
+      condition: (execution) => execution !== undefined,
+      interval: 1000,
+      timeout: SYNC_POLL_TIMEOUT,
+      errorMessage: () =>
+        `Child execution for parent ${workflowExecutionId} was not found within ${SYNC_POLL_TIMEOUT}ms`,
+    });
 
     expect(parentExecution?.status).toBe(ExecutionStatus.COMPLETED);
-    expect(completedChild).toBeDefined();
+    expect(childExecution?.status).toBe(ExecutionStatus.COMPLETED);
     expect(parentExecution?.traceId).toBeDefined();
-    expect(completedChild?.traceId).toBe(parentExecution?.traceId);
-    expect(completedChild?.entryTransactionId).toBe(parentExecution?.entryTransactionId);
+    expect(childExecution?.traceId).toBe(parentExecution?.traceId);
+    expect(childExecution?.entryTransactionId).toBe(parentExecution?.entryTransactionId);
   });
 
   spaceTest('sync: fails when child workflow fails', async () => {
