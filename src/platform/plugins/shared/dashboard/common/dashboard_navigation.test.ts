@@ -13,7 +13,11 @@ import { PanelStateManager } from '@kbn/core-chrome-browser-components/src/proje
 import type { ChromeNavLink } from '@kbn/core-chrome-browser';
 
 import { createDashboardsNavigationNode } from './dashboard_navigation';
-import { DASHBOARD_ALL_NAV_ITEM_ID, DASHBOARD_APP_ID } from './page_bundle_constants';
+import {
+  DASHBOARD_ALL_NAV_ITEM_ID,
+  DASHBOARD_APP_ID,
+  DASHBOARD_CREATE_NAV_LINK,
+} from './page_bundle_constants';
 
 const getDeepLink = (id: string, path: string, title: string): ChromeNavLink => ({
   id,
@@ -36,6 +40,14 @@ describe('createDashboardsNavigationNode', () => {
           id: 'dashboards_search',
           iconType: 'search',
           ariaLabel: 'Search dashboards',
+        },
+      ],
+      panelFooterActions: [
+        {
+          id: 'dashboards_create',
+          label: 'Create dashboard',
+          iconType: 'plus',
+          link: DASHBOARD_CREATE_NAV_LINK,
         },
       ],
       children: [
@@ -87,6 +99,11 @@ describe('createDashboardsNavigationNode', () => {
   it('creates secondary panel sections when the dashboards app link is registered', () => {
     const deepLinks = {
       [DASHBOARD_APP_ID]: getDeepLink(DASHBOARD_APP_ID, 'app/dashboards#/list', 'Dashboards'),
+      [DASHBOARD_CREATE_NAV_LINK]: getDeepLink(
+        DASHBOARD_CREATE_NAV_LINK,
+        'app/dashboards#/create',
+        'Create dashboard'
+      ),
     };
 
     const { navigationTreeUI } = parseNavigationTree(
@@ -122,6 +139,15 @@ describe('createDashboardsNavigationNode', () => {
         id: 'dashboards_search',
         iconType: 'search',
         'aria-label': 'Search dashboards',
+      }),
+    ]);
+
+    expect(dashboardsItem?.panelFooterActions).toEqual([
+      expect.objectContaining({
+        id: 'dashboards_create',
+        label: 'Create dashboard',
+        iconType: 'plus',
+        href: 'http://mocked/kibana/foo/app/dashboards#/create',
       }),
     ]);
 
@@ -166,6 +192,11 @@ describe('createDashboardsNavigationNode', () => {
     const sharedHref = 'http://mocked/kibana/foo/app/dashboards#/view/flights';
     const deepLinks = {
       [DASHBOARD_APP_ID]: getDeepLink(DASHBOARD_APP_ID, 'app/dashboards#/list', 'Dashboards'),
+      [DASHBOARD_CREATE_NAV_LINK]: getDeepLink(
+        DASHBOARD_CREATE_NAV_LINK,
+        'app/dashboards#/create',
+        'Create dashboard'
+      ),
     };
 
     const { navigationTreeUI } = parseNavigationTree(

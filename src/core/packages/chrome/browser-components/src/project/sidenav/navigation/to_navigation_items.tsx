@@ -280,6 +280,14 @@ export const toNavigationItems = (
       'data-test-subj': getTestSubj(navNode, [`panel-header-action-${action.id}`]),
     }));
 
+    const panelFooterActions = navNode.panelFooterActions?.map((action) => ({
+      id: action.id,
+      label: action.label,
+      href: action.href,
+      iconType: action.iconType,
+      'data-test-subj': getTestSubj(navNode, [`panel-footer-action-${action.id}`]),
+    }));
+
     return {
       id: navNode.id,
       label: toSentenceCase(warnIfMissing(navNode, 'title', 'Missing Title 😭')),
@@ -287,6 +295,7 @@ export const toNavigationItems = (
       href: itemHref,
       sections: secondarySections,
       ...(panelHeaderActions ? { panelHeaderActions } : {}),
+      ...(panelFooterActions ? { panelFooterActions } : {}),
       'data-test-subj': getTestSubj(navNode),
       badgeType: navNode.badgeType,
     } as MenuItem;

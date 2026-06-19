@@ -75,9 +75,11 @@ import { DashboardAppLocatorDefinition } from '../common/locator/locator';
 import type { DashboardMountContextProps } from './dashboard_app/types';
 import type { DashboardListingTab } from './dashboard_listing/types';
 import {
+  CREATE_NEW_DASHBOARD_PATH,
   DASHBOARD_APP_ID,
   DASHBOARD_DRILLDOWN_TYPE,
   DASHBOARD_ALL_DEEP_LINK_ID,
+  DASHBOARD_CREATE_DEEP_LINK_ID,
   LANDING_PAGE_PATH,
   SEARCH_SESSION_ID,
 } from '../common/page_bundle_constants';
@@ -180,8 +182,22 @@ export class DashboardPlugin
     };
   }
 
+  private getCreateDashboardDeepLink(): AppDeepLink {
+    return {
+      id: DASHBOARD_CREATE_DEEP_LINK_ID,
+      title: i18n.translate('dashboard.nav.createDashboard', {
+        defaultMessage: 'Create dashboard',
+      }),
+      path: `#${CREATE_NEW_DASHBOARD_PATH}`,
+      visibleIn: ['projectSideNav'],
+    };
+  }
+
   private getDashboardDeepLinks(): AppDeepLink[] {
-    const deepLinks: AppDeepLink[] = [this.getAllDashboardsDeepLink()];
+    const deepLinks: AppDeepLink[] = [
+      this.getAllDashboardsDeepLink(),
+      this.getCreateDashboardDeepLink(),
+    ];
 
     for (const tab of this.listingViewRegistry as Set<DashboardListingTab>) {
       if (tab.deepLink) {

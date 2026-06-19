@@ -13,6 +13,7 @@ import { i18n } from '@kbn/i18n';
 import {
   DASHBOARD_ALL_NAV_ITEM_ID,
   DASHBOARD_APP_ID,
+  DASHBOARD_CREATE_NAV_LINK,
   LANDING_PAGE_PATH,
 } from './page_bundle_constants';
 
@@ -116,6 +117,16 @@ export const createDashboardsNavigationNode = (
         ariaLabel: i18n.translate('dashboard.nav.searchDashboards', {
           defaultMessage: 'Search dashboards',
         }),
+      },
+    ],
+    panelFooterActions: [
+      {
+        id: 'dashboards_create',
+        label: i18n.translate('dashboard.nav.createDashboard', {
+          defaultMessage: 'Create dashboard',
+        }),
+        iconType: 'plus',
+        link: DASHBOARD_CREATE_NAV_LINK,
       },
     ],
     children,

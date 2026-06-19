@@ -13,7 +13,7 @@ import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { useEuiTheme, useIsWithinBreakpoints } from '@elastic/eui';
 
-import type { NavigationStructure, SideNavLogo, MenuItem, SecondaryMenuItem } from '../../types';
+import type { NavigationStructure, SideNavLogo, MenuItem, SecondaryMenuItem, PanelFooterAction } from '../../types';
 import {
   MAIN_PANEL_ID,
   MAX_FOOTER_ITEMS,
@@ -30,6 +30,7 @@ import { useNavigation } from '../hooks/use_navigation';
 import { useNewItems } from '../hooks/use_new_items';
 import { useResponsiveMenu } from '../hooks/use_responsive_menu';
 import { getHighContrastSeparator } from '../hooks/use_high_contrast_mode_styles';
+import { SecondaryMenuPanelFooter } from './secondary_menu/panel_footer';
 
 const navigationWrapperStyles = css`
   display: flex;
@@ -439,7 +440,25 @@ export const Navigation = ({
       </SideNav>
 
       {isSidePanelOpen && openerNode && (
-        <SideNav.SidePanel footer={sidePanelFooter} openerNode={openerNode}>
+        <SideNav.SidePanel
+          footer={
+            openerNode.panelFooterActions?.length ? (
+              <SecondaryMenuPanelFooter
+                actions={openerNode.panelFooterActions}
+                onActionClick={(action: PanelFooterAction) =>
+                  onItemClick?.({
+                    id: action.id,
+                    label: action.label,
+                    href: action.href,
+                  })
+                }
+              />
+            ) : (
+              sidePanelFooter
+            )
+          }
+          openerNode={openerNode}
+        >
           {({ secondaryNavigationInstructionsId }) => {
             const firstNonEmptySectionIndex = openerNode.sections?.findIndex(
               (s) => s.items.length > 0

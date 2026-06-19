@@ -38,6 +38,36 @@ export interface PanelHeaderAction {
 }
 
 /**
+ * A text button rendered at the bottom of a side panel for panel opener nodes.
+ */
+export interface PanelFooterAction {
+  /**
+   * (optional) `data-test-subj` attribute for testing and tracking purposes.
+   */
+  'data-test-subj'?: string;
+  /**
+   * The URL for the footer action link.
+   */
+  href: string;
+  /**
+   * The EUI icon to display on the button.
+   */
+  iconType: IconType;
+  /**
+   * The unique identifier of the footer action.
+   */
+  id: string;
+  /**
+   * The label to display for the footer action.
+   */
+  label: string;
+  /**
+   * (optional) Click handler for the footer action button.
+   */
+  onClick?: () => void;
+}
+
+/**
  * A navigation item within a secondary/nested menu.
  * Secondary items appear when a primary menu item with sections is clicked or hovered.
  */
@@ -120,6 +150,10 @@ export interface MenuItem {
    * (optional) Icon buttons rendered in the side panel header next to the panel title.
    */
   panelHeaderActions?: PanelHeaderAction[];
+  /**
+   * (optional) Text buttons rendered at the bottom of the side panel.
+   */
+  panelFooterActions?: PanelFooterAction[];
   /**
    * (optional) The secondary menu sections belonging to the menu item.
    */

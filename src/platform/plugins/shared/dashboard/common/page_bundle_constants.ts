@@ -9,9 +9,14 @@
 
 import { ON_APPLY_FILTER, ON_CLICK_IMAGE } from '@kbn/ui-actions-plugin/common/trigger_ids';
 
+export const CREATE_NEW_DASHBOARD_PATH = '/create';
+/** Deep link id for the create dashboard page. */
+export const DASHBOARD_CREATE_DEEP_LINK_ID = 'create';
 export const LANDING_PAGE_PATH = '/list';
 /** The application ID for the Dashboard app. */
 export const DASHBOARD_APP_ID = 'dashboards';
+/** Project navigation deep link id for the create dashboard page. */
+export const DASHBOARD_CREATE_NAV_LINK = `${DASHBOARD_APP_ID}:${DASHBOARD_CREATE_DEEP_LINK_ID}`;
 /** Deep link id for the dashboards listing page. */
 export const DASHBOARD_ALL_DEEP_LINK_ID = 'all';
 /** Project navigation link id for the dashboards listing page. */

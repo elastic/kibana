@@ -73,6 +73,24 @@ export interface PanelHeaderAction {
 }
 
 /**
+ * A text button rendered at the bottom of a side panel for panel opener nodes.
+ */
+export interface PanelFooterAction {
+  /** Optional test selector for automated testing. */
+  'data-test-subj'?: string;
+  /** URL or hash for navigation. */
+  href: string;
+  /** EUI icon name — see https://eui.elastic.co/#/display/icons. */
+  iconType: string;
+  /** Unique identifier for this footer action. */
+  id: string;
+  /** Display text for the footer action. */
+  label: string;
+  /** Optional click handler for the footer action button. */
+  onClick?: () => void;
+}
+
+/**
  * A primary navigation menu item displayed in the sidebar.
  */
 export interface MenuItem {
@@ -90,6 +108,8 @@ export interface MenuItem {
   badgeType?: BadgeType;
   /** Optional icon buttons rendered in the side panel header next to the panel title. */
   panelHeaderActions?: PanelHeaderAction[];
+  /** Optional text buttons rendered at the bottom of the side panel. */
+  panelFooterActions?: PanelFooterAction[];
   /** Optional array of secondary menu sections for nested navigation. */
   sections?: SecondaryMenuSection[];
 }

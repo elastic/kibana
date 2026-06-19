@@ -117,6 +117,18 @@ export interface PanelHeaderActionDefinition {
   id: string;
 }
 
+export interface PanelFooterActionDefinition {
+  iconType: IconType;
+  id: string;
+  label: string;
+  href?: string;
+  link?: AppDeepLinkId;
+}
+
+export interface PanelFooterAction extends PanelFooterActionDefinition {
+  href: string;
+}
+
 export type GetIsActiveFn = (params: {
   /** The current path name including the basePath + hash value but **without** any query params */
   pathNameSerialized: string;
@@ -170,6 +182,11 @@ interface NodeDefinitionBase {
    * (optional) Icon buttons rendered in the side panel header next to the panel title.
    */
   panelHeaderActions?: PanelHeaderActionDefinition[];
+
+  /**
+   * (optional) Actions rendered at the bottom of the side panel for panel opener nodes.
+   */
+  panelFooterActions?: PanelFooterActionDefinition[];
 }
 
 /** @public */
@@ -199,6 +216,10 @@ export interface ChromeProjectNavigationNode extends NodeDefinitionBase {
    * Flag to indicate if the node is an "external" cloud link
    */
   isExternalLink?: boolean;
+  /**
+   * Resolved panel footer actions with absolute hrefs.
+   */
+  panelFooterActions?: PanelFooterAction[];
 }
 
 /** @public */
