@@ -6,11 +6,7 @@
  */
 import type { AnomalyExplorerChartsEmbeddableType } from '@kbn/ml-common-types/embeddables/anomaly_charts';
 import type { AnomalySwimLaneEmbeddableType } from '@kbn/ml-common-types/embeddables/anomaly_swimlane';
-
-export const ANOMALY_SINGLE_METRIC_VIEWER_EMBEDDABLE_TYPE = 'ml_single_metric_viewer' as const;
-
-export type AnomalySingleMetricViewerEmbeddableType =
-  typeof ANOMALY_SINGLE_METRIC_VIEWER_EMBEDDABLE_TYPE;
+import type { AnomalySingleMetricViewerEmbeddableType } from '@kbn/ml-common-types/embeddables/single_metric_viewer';
 
 export type MlEmbeddableTypes =
   | AnomalySwimLaneEmbeddableType

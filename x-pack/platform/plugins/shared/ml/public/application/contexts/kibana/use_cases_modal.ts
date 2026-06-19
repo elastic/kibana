@@ -15,9 +15,9 @@ import {
 import { i18n } from '@kbn/i18n';
 import { ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE } from '@kbn/ml-common-types/embeddables/anomaly_charts';
 import { ANOMALY_SWIMLANE_EMBEDDABLE_TYPE } from '@kbn/ml-common-types/embeddables/anomaly_swimlane';
+import { ANOMALY_SINGLE_METRIC_VIEWER_EMBEDDABLE_TYPE } from '@kbn/ml-common-types/embeddables/single_metric_viewer';
 import { useMlKibana } from './kibana_context';
 import type { MappedEmbeddableTypeOf, MlEmbeddableTypes } from '../../../embeddables';
-import { ANOMALY_SINGLE_METRIC_VIEWER_EMBEDDABLE_TYPE } from '../../../embeddables';
 
 const attachmentTypeByEmbeddableType: Record<MlEmbeddableTypes, string> = {
   [ANOMALY_SWIMLANE_EMBEDDABLE_TYPE]: ML_ANOMALY_SWIMLANE_ATTACHMENT_TYPE,
