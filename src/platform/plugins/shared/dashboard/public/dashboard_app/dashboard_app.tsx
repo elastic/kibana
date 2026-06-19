@@ -85,6 +85,18 @@ export function DashboardApp({
       canceled = true;
     };
   }, [incomingEmbeddables, savedDashboardId]);
+
+  /**
+   * Collapse the project side nav when viewing a dashboard to maximize canvas space.
+   */
+  useEffect(() => {
+    if (!savedDashboardId || embedSettings) {
+      return;
+    }
+
+    coreServices.chrome.sideNav.setIsCollapsed(true);
+  }, [savedDashboardId, embedSettings]);
+
   const [dashboardApi, setDashboardApi] = useState<DashboardApi | undefined>(undefined);
   const [dashboardInternalApi, setDashboardInternalApi] = useState<
     DashboardInternalApi | undefined

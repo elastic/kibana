@@ -17,7 +17,7 @@ import type { DashboardRendererProps } from '../dashboard_renderer/dashboard_ren
 import { DashboardRenderer } from '../dashboard_renderer/dashboard_renderer';
 import { DashboardTopNav } from '../dashboard_top_nav';
 import { buildMockDashboardApi } from '../mocks';
-import { dataService, embeddableService } from '../services/kibana_services';
+import { dataService, embeddableService, coreServices } from '../services/kibana_services';
 import { DashboardApp } from './dashboard_app';
 import type { EmbeddableStateTransfer } from '@kbn/embeddable-plugin/public';
 import { createEmbeddableStateTransferMock } from '@kbn/embeddable-plugin/public/mocks';
@@ -60,10 +60,38 @@ describe('Dashboard App', () => {
     // reset the spies before each test
     expandPanelSpy.mockClear();
     historySpy.mockClear();
+    (coreServices.chrome.sideNav.setIsCollapsed as jest.Mock).mockClear();
   });
 
   afterAll(() => {
     cleanup();
+  });
+
+  it('collapses the side nav when opening a saved dashboard view', async () => {
+    render(
+      <DashboardApp
+        redirectTo={jest.fn()}
+        history={mockHistory}
+        savedDashboardId="dashboard-1"
+        setDashboardAppApi={jest.fn()}
+      />
+    );
+
+    await waitFor(() => {
+      expect(coreServices.chrome.sideNav.setIsCollapsed).toHaveBeenCalledWith(true);
+    });
+  });
+
+  it('does not collapse the side nav when creating a new dashboard', async () => {
+    render(
+      <DashboardApp redirectTo={jest.fn()} history={mockHistory} setDashboardAppApi={jest.fn()} />
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText('Test renderer')).toBeInTheDocument();
+    });
+
+    expect(coreServices.chrome.sideNav.setIsCollapsed).not.toHaveBeenCalled();
   });
 
   it('test the default behavior without an expandedPanel id passed as a prop to the DashboardApp', async () => {
