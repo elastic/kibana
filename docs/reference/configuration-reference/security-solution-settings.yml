@@ -1,0 +1,49 @@
+---
+# This file is used to generate "Security Solution settings" page in the product docs
+# For the schema and an example refer to the automated settings reference:
+# https://github.com/elastic/docs-builder/blob/main/docs/syntax/automated_settings.md
+
+product: Kibana
+collection: Security Solution settings in Kibana
+id: security-solution-settings
+page_description: |
+  Configure the following Security Solution settings in the `kibana.yml` file:
+
+groups:
+  - group: Cloud Security Posture settings
+    id: cloud-security-posture-settings
+    settings:
+
+      - setting: xpack.cloudSecurityPosture.enabled
+        description: |
+          Set to `false` to disable the Kibana UI for Elastic's Cloud Security Posture solution, which provides compliance checks on Cloud and Kubernetes environments.
+        datatype: bool
+        default: true
+        applies_to:
+          stack: ga 8.3
+          ech: ga
+          self: ga
+
+  - group: Value lists settings
+    id: value-lists-settings
+    settings:
+
+      - setting: xpack.lists.maxImportPayloadBytes
+        description: |
+          Sets the maximum number of bytes allowed for uploading Security Solution [value lists](docs-content://solutions/security/detect-and-alert/value-lists-exceptions.md). For every 10 MB, it is recommended to have an additional 1 GB of RAM reserved for Kibana.
+        datatype: int
+        default: 9000000
+        applies_to:
+          stack: ga
+          ech: ga
+          self: ga
+
+      - setting: xpack.lists.importBufferSize
+        description: |
+          Sets the buffer size used for uploading Security Solution [value lists](docs-content://solutions/security/detect-and-alert/value-lists-exceptions.md). Increase the value to improve upload throughput at the expense of higher Kibana memory usage; decrease it to reduce memory usage at the cost of throughput.
+        datatype: int
+        default: 1000
+        applies_to:
+          stack: ga
+          ech: ga
+          self: ga
