@@ -6,7 +6,10 @@
  */
 
 import { SmithyMessageDecoderStream } from '@smithy/eventstream-codec';
-import { DEFAULT_TOKEN_LIMIT, claudeModelSupportsTemperature } from '@kbn/connector-schemas/bedrock';
+import {
+  DEFAULT_TOKEN_LIMIT,
+  claudeModelSupportsTemperature,
+} from '@kbn/connector-schemas/bedrock';
 import type { BedrockMessage, BedrockToolChoice } from '@kbn/connector-schemas/bedrock';
 
 export { claudeModelSupportsTemperature };

@@ -159,7 +159,7 @@ describe('getTemperatureIfValid', () => {
       config: { provider: 'amazonbedrock' },
     } as unknown as InferenceConnector;
 
-    it("returns an empty object for Claude 4.7+ models via inference connector (temperature deprecated)", () => {
+    it('returns an empty object for Claude 4.7+ models via inference connector (temperature deprecated)', () => {
       [
         'us.anthropic.claude-sonnet-4-7-20251101-v1:0',
         'us.anthropic.claude-opus-4-8-20251101-v1:0',
@@ -197,4 +197,3 @@ describe('getTemperatureIfValid', () => {
     });
   });
 });
-

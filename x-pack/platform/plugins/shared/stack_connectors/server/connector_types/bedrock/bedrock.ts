@@ -389,7 +389,7 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon B
   ): Promise<IncomingMessage> {
     const actualModel = model ?? this.model;
     const effectiveTemperature = claudeModelSupportsTemperature(actualModel)
-      ? (temperature ?? 0)
+      ? temperature ?? 0
       : undefined;
     const res = (await this.streamApi(
       {
@@ -437,7 +437,7 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon B
   ): Promise<InvokeAIActionResponse> {
     const actualModel = model ?? this.model;
     const effectiveTemperature = claudeModelSupportsTemperature(actualModel)
-      ? (temperature ?? 0)
+      ? temperature ?? 0
       : undefined;
     const res = (await this.runApi(
       {

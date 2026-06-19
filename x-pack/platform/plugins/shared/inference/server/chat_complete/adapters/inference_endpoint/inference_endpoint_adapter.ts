@@ -16,6 +16,7 @@ import type {
   ChatCompletionChunkEvent,
   ChatCompletionTokenCountEvent,
 } from '@kbn/inference-common';
+import { claudeModelSupportsTemperature } from '@kbn/connector-schemas/bedrock';
 import { eventSourceStreamIntoObservable } from '../../../util/event_source_stream_into_observable';
 import {
   processOpenAIStream,
@@ -30,7 +31,6 @@ import {
 } from '../../simulated_function_calling';
 import type { InferenceEndpointExecutor } from '../../utils/inference_endpoint_executor';
 import type { OpenAIRequest } from '../openai/types';
-import { claudeModelSupportsTemperature } from '@kbn/connector-schemas/bedrock';
 
 export interface InferenceEndpointAdapterChatCompleteOptions {
   executor: InferenceEndpointExecutor;
@@ -113,8 +113,7 @@ const createEndpointRequest = ({
   modelName?: string;
 }): OpenAIRequest => {
   const supportsTemperature = claudeModelSupportsTemperature(modelName);
-  const temperatureSpread =
-    supportsTemperature && temperature >= 0 ? { temperature } : {};
+  const temperatureSpread = supportsTemperature && temperature >= 0 ? { temperature } : {};
 
   if (simulatedFunctionCalling) {
     const wrapped = wrapWithSimulatedFunctionCalling({
