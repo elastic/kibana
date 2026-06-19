@@ -46,7 +46,7 @@ describe('DocCountCell', () => {
     expect(screen.getByTestId('docCountLoadingSpinner')).toBeInTheDocument();
   });
 
-  it('renders an error label when the index count failed to load', () => {
+  it('renders an error label when the index count failed to load and no metadata count is available', () => {
     mockedUseObservable.mockReturnValue({
       'index-a': { status: RequestResultType.Error },
     });
@@ -54,6 +54,33 @@ describe('DocCountCell', () => {
     render(<DocCountCell indexName="index-a" docCountApi={docCountApi} />);
 
     expect(screen.getByText('Error')).toBeInTheDocument();
+  });
+
+  it('renders the metadata count with an info icon instead of "Error" when ES|QL fails but metadata is available', () => {
+    mockedUseObservable.mockReturnValue({
+      'index-a': { status: RequestResultType.Error },
+    });
+
+    render(<DocCountCell indexName="index-a" docCountApi={docCountApi} metadataCount={500} />);
+
+    // Should show the formatted count, not "Error"
+    expect(screen.queryByText('Error')).not.toBeInTheDocument();
+    expect(screen.getByText(/500/)).toBeInTheDocument();
+  });
+
+  it('renders the metadata count directly for a closed index without calling getByName', () => {
+    // Observable returns nothing for closed index (getByName was never called)
+    mockedUseObservable.mockReturnValue({});
+
+    render(
+      <DocCountCell indexName="index-a" docCountApi={docCountApi} metadataCount={42} status="close" />
+    );
+
+    // getByName must NOT be called for closed indices
+    expect(docCountApi.getByName).not.toHaveBeenCalled();
+
+    // The metadata count should be rendered
+    expect(screen.getByText(/42/)).toBeInTheDocument();
   });
 
   it('renders the formatted count when available', () => {

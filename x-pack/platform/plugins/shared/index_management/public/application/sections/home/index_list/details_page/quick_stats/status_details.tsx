@@ -26,7 +26,12 @@ import { useAppContext } from '../../../../../app_context';
 import type { Index } from '../../../../../../../common';
 import { OverviewCard } from './overview_card';
 import type { DocCountState } from './quick_stats';
-import { docCountErrorTooltip, docCountErrorLabel } from './translations';
+import {
+  docCountErrorTooltip,
+  docCountErrorLabel,
+  docCountApproximateTooltip,
+  docCountClosedIndexTooltip,
+} from './translations';
 
 type NormalizedHealth = 'green' | 'red' | 'yellow';
 const healthToBadgeMapping: Record<
@@ -98,7 +103,13 @@ export const StatusDetails: FunctionComponent<{
       );
     }
 
-    return (
+    const approximateHint = docCount.isApproximate
+      ? status === 'close'
+        ? docCountClosedIndexTooltip
+        : docCountApproximateTooltip
+      : undefined;
+
+    const docCountContent = (
       <EuiFlexGroup gutterSize="xs" data-test-subj="indexDetailsStatusDocCount">
         <EuiFlexItem grow={false}>
           <EuiIcon type="documents" color="subdued" aria-hidden={true} />
@@ -115,8 +126,24 @@ export const StatusDetails: FunctionComponent<{
             })}
           </EuiTextColor>
         </EuiFlexItem>
+        {approximateHint && (
+          <EuiFlexItem grow={false}>
+            <EuiIcon
+              type="info"
+              size="s"
+              color="subdued"
+              aria-label={approximateHint}
+            />
+          </EuiFlexItem>
+        )}
       </EuiFlexGroup>
     );
+
+    if (approximateHint) {
+      return <EuiToolTip content={approximateHint}>{docCountContent}</EuiToolTip>;
+    }
+
+    return docCountContent;
   };
 
   return (

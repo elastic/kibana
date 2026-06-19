@@ -23,7 +23,12 @@ import { EuiI18nNumber } from '@elastic/eui';
 import { useAppContext } from '../../../../../app_context';
 import { OverviewCard } from './overview_card';
 import type { DocCountState } from './quick_stats';
-import { docCountErrorTooltip, docCountErrorLabel, storageCardTitle } from './translations';
+import {
+  docCountErrorTooltip,
+  docCountErrorLabel,
+  docCountApproximateTooltip,
+  storageCardTitle,
+} from './translations';
 
 export const SizeDocCountDetails: FunctionComponent<{
   size: string;
@@ -52,7 +57,7 @@ export const SizeDocCountDetails: FunctionComponent<{
       );
     }
 
-    return (
+    const docCountContent = (
       <EuiFlexGroup gutterSize="xs">
         <EuiFlexItem grow={false}>
           <EuiIcon type="documents" aria-hidden={true} />
@@ -73,8 +78,24 @@ export const SizeDocCountDetails: FunctionComponent<{
             )}
           </EuiTextColor>
         </EuiFlexItem>
+        {docCount.isApproximate && (
+          <EuiFlexItem grow={false}>
+            <EuiIcon
+              type="info"
+              size="s"
+              color="subdued"
+              aria-label={docCountApproximateTooltip}
+            />
+          </EuiFlexItem>
+        )}
       </EuiFlexGroup>
     );
+
+    if (docCount.isApproximate) {
+      return <EuiToolTip content={docCountApproximateTooltip}>{docCountContent}</EuiToolTip>;
+    }
+
+    return docCountContent;
   };
 
   return (

@@ -20,6 +20,8 @@ export interface DocCountState {
   count?: number;
   isLoading: boolean;
   isError: boolean;
+  /** True when the count comes from index metadata rather than a live ES|QL query. */
+  isApproximate?: boolean;
 }
 interface Props {
   indexDetails: Index;
@@ -42,20 +44,43 @@ export const QuickStats = ({ indexDetails }: Props) => {
   const sizeFormatted = formatBytes(size);
   const primarySizeFormatted = formatBytes(primarySize);
 
+  const metadataDocCount = indexDetails.documents;
+  const isClosed = status === 'close';
+
   const [docCount, setDocCount] = useState<DocCountState>({ isLoading: true, isError: false });
 
   const fetchDocCount = useCallback(async () => {
+    // ES|QL can't read closed indices. Skip the request entirely and fall back to metadata.
+    if (isClosed) {
+      setDocCount({
+        count: metadataDocCount,
+        isLoading: false,
+        isError: false,
+        isApproximate: true,
+      });
+      return;
+    }
     try {
       const { data, error } = await loadIndexDocCount(name);
       if (error || !data) {
-        setDocCount({ isLoading: false, isError: true });
+        // Fall back to the metadata count (already available from the index stats response).
+        // Only mark as an error when there's nothing to show.
+        if (metadataDocCount !== undefined) {
+          setDocCount({ count: metadataDocCount, isLoading: false, isError: false, isApproximate: true });
+        } else {
+          setDocCount({ isLoading: false, isError: true });
+        }
       } else {
         setDocCount({ count: data[name], isLoading: false, isError: false });
       }
     } catch {
-      setDocCount({ isLoading: false, isError: true });
+      if (metadataDocCount !== undefined) {
+        setDocCount({ count: metadataDocCount, isLoading: false, isError: false, isApproximate: true });
+      } else {
+        setDocCount({ isLoading: false, isError: true });
+      }
     }
-  }, [name]);
+  }, [name, isClosed, metadataDocCount]);
 
   useEffect(() => {
     fetchDocCount();
