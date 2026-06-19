@@ -149,12 +149,19 @@ export function CollectionSettingsFlyout({
           <p>
             <FormattedMessage
               id="xpack.ingestHub.serviceSettingsStep.flyout.callout.body"
-              defaultMessage="{awsRegion} overrides the global region for this service only. {regions} is an optional filter to restrict collection to specific regions."
-              values={{
-                awsRegion: <strong>AWS Region</strong>,
-                regions: <strong>Regions</strong>,
-              }}
+              defaultMessage="{awsRegion} overrides the global region for this service only."
+              values={{ awsRegion: <strong>AWS Region</strong> }}
             />
+            {otherFlyoutFields.includes('regions') && (
+              <>
+                {' '}
+                <FormattedMessage
+                  id="xpack.ingestHub.serviceSettingsStep.flyout.callout.bodyRegions"
+                  defaultMessage="{regions} is an optional filter to restrict collection to specific regions."
+                  values={{ regions: <strong>Regions</strong> }}
+                />
+              </>
+            )}
           </p>
         </EuiCallOut>
         <EuiSpacer size="m" />
@@ -180,10 +187,7 @@ export function CollectionSettingsFlyout({
             onChange={handleRegionChange}
             onCreateOption={handleRegionCreate}
             isInvalid={!regionValue.trim()}
-            customOptionText={i18n.translate(
-              'xpack.ingestHub.serviceSettingsStep.flyout.regionComboBox.customOption',
-              { defaultMessage: 'Use "{searchValue}" as region' }
-            )}
+            customOptionText='Use "{searchValue}" as region'
           />
         </EuiFormRow>
         {otherFlyoutFields.map((fieldName) => {

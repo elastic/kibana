@@ -106,10 +106,7 @@ export function ServiceSettingsStep({ onNext, onBack }: ServiceSettingsStepProps
               onChange={(selected) => setGlobalRegion(selected[0]?.label ?? '')}
               onCreateOption={(searchValue) => setGlobalRegion(searchValue)}
               isInvalid={!globalRegion.trim()}
-              customOptionText={i18n.translate(
-                'xpack.ingestHub.serviceSettingsStep.globalRegion.customOption',
-                { defaultMessage: 'Use "{searchValue}" as region' }
-              )}
+              customOptionText='Use "{searchValue}" as region'
               placeholder={i18n.translate(
                 'xpack.ingestHub.serviceSettingsStep.globalRegion.placeholder',
                 { defaultMessage: 'Select or enter a region' }
