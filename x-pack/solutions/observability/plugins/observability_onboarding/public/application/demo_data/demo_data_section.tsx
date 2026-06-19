@@ -21,9 +21,7 @@ import React from 'react';
 import type { ObservabilityOnboardingAppServices } from '../..';
 import { AlertsSlosPanel } from './alerts_slos_panel';
 import { MlJobsPanel } from './ml_jobs_panel';
-import { SynthtracePanel } from './synthtrace_panel';
 import { useApmEnvironments } from './use_apm_environments';
-import { useSynthtraceAvailability } from './use_synthtrace_availability';
 
 export const DemoDataSection: React.FC = () => {
   const {
@@ -32,7 +30,6 @@ export const DemoDataSection: React.FC = () => {
 
   const accordionId = useGeneratedHtmlId({ prefix: 'demoDataSection' });
   const { environments, isLoading: isLoadingEnvironments } = useApmEnvironments(http);
-  const canRunSynthtraceInBrowser = useSynthtraceAvailability(http);
   const canCreateMlJob = Boolean(application.capabilities.ml?.canCreateJob);
 
   const tabs: EuiTabbedContentTab[] = [
@@ -71,22 +68,6 @@ export const DemoDataSection: React.FC = () => {
         </>
       ),
     },
-    {
-      id: 'synthtrace',
-      name: i18n.translate('xpack.observability_onboarding.demoData.tab.synthtrace', {
-        defaultMessage: 'Synthtrace data',
-      }),
-      content: (
-        <>
-          <EuiSpacer size="m" />
-          <SynthtracePanel
-            http={http}
-            notifications={notifications}
-            canRunInBrowser={canRunSynthtraceInBrowser}
-          />
-        </>
-      ),
-    },
   ];
 
   return (
@@ -113,7 +94,7 @@ export const DemoDataSection: React.FC = () => {
           <p>
             {i18n.translate('xpack.observability_onboarding.demoData.subtitle', {
               defaultMessage:
-                'Quickly set up recommended alerts, SLOs and ML jobs, or ingest synthetic data to explore Observability.',
+                'Quickly set up recommended alerts, SLOs and ML jobs to explore Observability.',
             })}
           </p>
         </EuiText>

@@ -20,8 +20,6 @@ import {
   ML_MODULE_SETUP_API_PATH,
   SLO_API_PATH,
   SLO_API_VERSION,
-  SYNTHTRACE_RUN_API_PATH,
-  SYNTHTRACE_STATUS_API_PATH,
 } from './constants';
 import type { CreateRuleBody, CreateSloBody } from './recommended_config';
 
@@ -124,10 +122,10 @@ export const setupLogsCategoriesModule = (http: HttpStart): Promise<unknown> =>
 
 /**
  * The `metrics_ui_hosts` module's network jobs query `system.network.in/out.bytes`
- * (Metricbeat system module schema). Synthtrace emits host network throughput as
- * the ECS fields `host.network.ingress/egress.bytes`, so without these overrides
- * the network datafeeds match zero documents. We redirect their query + aggregation
- * to the fields the demo data actually contains. The memory job already matches.
+ * (Metricbeat system module schema). Hosts data ingested via Elastic Agent / OTel
+ * exposes network throughput as the ECS fields `host.network.ingress/egress.bytes`,
+ * so without these overrides the network datafeeds match zero documents. We redirect
+ * their query + aggregation to those ECS fields. The memory job already matches.
  */
 const buildNetworkDatafeedOverride = (
   jobId: 'hosts_network_in' | 'hosts_network_out',
@@ -207,140 +205,4 @@ export const setupMetricsHostsModule = async (http: HttpStart): Promise<unknown>
     prefix: `kibana-metrics-ui-${spaceId}-${INFRA_METRICS_SOURCE_ID}-`,
     datafeedOverrides: METRICS_HOSTS_DATAFEED_OVERRIDES,
   });
-};
-
-export interface SynthtraceConnectionOverride {
-  esUrl?: string;
-  kibanaUrl?: string;
-  username?: string;
-  password?: string;
-  apiKey?: string;
-}
-
-export interface RunSynthtraceBody {
-  scenarioId: string;
-  from: string;
-  to: string;
-  clean?: boolean;
-  connection?: SynthtraceConnectionOverride;
-}
-
-export interface RunSynthtraceResponse {
-  scenarioId: string;
-  eventsIndexed: number;
-}
-
-export type SynthtraceRunPhase = 'installing_packages' | 'generating' | 'indexing';
-
-export type SynthtraceProgressEvent =
-  | { type: 'phase'; phase: SynthtraceRunPhase }
-  | { type: 'progress'; eventsIndexed: number }
-  | { type: 'complete'; eventsIndexed: number }
-  | { type: 'error'; message: string };
-
-/**
- * Runs a scenario and consumes the NDJSON progress stream, invoking `onProgress`
- * for each event. Uses the native fetch API (rather than the core HTTP client)
- * so the response body can be read incrementally as it streams in.
- */
-export const runSynthtraceStreaming = async (
-  http: HttpStart,
-  body: RunSynthtraceBody,
-  onProgress: (event: SynthtraceProgressEvent) => void
-): Promise<RunSynthtraceResponse> => {
-  const response = await fetch(http.basePath.prepend(SYNTHTRACE_RUN_API_PATH), {
-    method: 'POST',
-    credentials: 'include',
-    headers: {
-      'Content-Type': 'application/json',
-      'kbn-xsrf': 'true',
-      'x-elastic-internal-origin': 'Kibana',
-    },
-    body: JSON.stringify(body),
-  });
-
-  if (!response.ok || !response.body) {
-    const text = await response.text().catch(() => '');
-    let message = `Request failed with status ${response.status}`;
-    try {
-      message = (JSON.parse(text) as { message?: string }).message ?? message;
-    } catch {
-      if (text) {
-        message = text;
-      }
-    }
-    throw new Error(message);
-  }
-
-  const reader = response.body.getReader();
-  const decoder = new TextDecoder();
-  let buffer = '';
-  let eventsIndexed = 0;
-  let errorMessage: string | undefined;
-  // The server always ends the stream with a `complete` or `error` event. If we
-  // reach the end without one, the run was interrupted (proxy timeout, server
-  // restart, tab/connection drop) and we must not report success.
-  let sawTerminalEvent = false;
-
-  const handleLine = (line: string): void => {
-    const trimmed = line.trim();
-    if (!trimmed) {
-      return;
-    }
-    let event: SynthtraceProgressEvent;
-    try {
-      event = JSON.parse(trimmed) as SynthtraceProgressEvent;
-    } catch {
-      // A non-JSON line means a truncated/partial chunk; skip it. A genuinely
-      // incomplete stream is caught below by the missing terminal event.
-      return;
-    }
-    if (event.type === 'progress' || event.type === 'complete') {
-      eventsIndexed = event.eventsIndexed;
-    }
-    if (event.type === 'complete' || event.type === 'error') {
-      sawTerminalEvent = true;
-    }
-    if (event.type === 'error') {
-      errorMessage = event.message;
-    }
-    onProgress(event);
-  };
-
-  for (;;) {
-    const { done, value } = await reader.read();
-    if (done) {
-      break;
-    }
-    buffer += decoder.decode(value, { stream: true });
-    const lines = buffer.split('\n');
-    buffer = lines.pop() ?? '';
-    lines.forEach(handleLine);
-  }
-  handleLine(buffer);
-
-  if (errorMessage) {
-    throw new Error(errorMessage);
-  }
-
-  if (!sawTerminalEvent) {
-    throw new Error(
-      'The synthtrace run ended unexpectedly before completing. Check the Kibana server logs.'
-    );
-  }
-
-  return { scenarioId: body.scenarioId, eventsIndexed };
-};
-
-/**
- * Feature-detects the dev-only synthtrace runner plugin. Returns false when the
- * endpoint is absent (e.g. production builds) so the UI can fall back to CLI.
- */
-export const checkSynthtraceAvailability = async (http: HttpStart): Promise<boolean> => {
-  try {
-    const response = await http.get<{ available: boolean }>(SYNTHTRACE_STATUS_API_PATH);
-    return Boolean(response?.available);
-  } catch {
-    return false;
-  }
 };

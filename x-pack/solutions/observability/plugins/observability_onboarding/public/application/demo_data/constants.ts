@@ -5,15 +5,6 @@
  * 2.0.
  */
 
-/**
- * Paths exposed by the dev-only `observabilityDemoData` plugin. They are
- * duplicated here as plain strings on purpose: that plugin is `devOnly` and
- * therefore must not be imported from this production plugin. Availability is
- * feature-detected at runtime via the status endpoint.
- */
-export const SYNTHTRACE_STATUS_API_PATH = '/internal/observability_demo_data/synthtrace/status';
-export const SYNTHTRACE_RUN_API_PATH = '/internal/observability_demo_data/synthtrace/run';
-
 export const APM_ANOMALY_DETECTION_ENVIRONMENTS_API_PATH =
   '/internal/apm/settings/anomaly-detection/environments';
 export const APM_ANOMALY_DETECTION_JOBS_API_PATH = '/internal/apm/settings/anomaly-detection/jobs';

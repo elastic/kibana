@@ -32,7 +32,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useCallback, useMemo, useState } from 'react';
 import { createRule, createSlo } from './api';
-import { DATA_TYPE_META, type SynthtraceDataType } from './data_types';
+import { DATA_TYPE_META, type DemoDataType } from './data_types';
 import {
   buildAlertRulePreviews,
   buildRecommendedRules,
@@ -58,11 +58,11 @@ const ALL_ENVIRONMENTS_LABEL = i18n.translate(
   { defaultMessage: 'All environments' }
 );
 
-const PREVIEW_DATA_TYPE_ORDER: SynthtraceDataType[] = ['apm', 'logs', 'infra'];
+const PREVIEW_DATA_TYPE_ORDER: DemoDataType[] = ['apm', 'logs', 'infra'];
 
-const groupPreviewsByDataType = <T extends { dataType: SynthtraceDataType }>(
+const groupPreviewsByDataType = <T extends { dataType: DemoDataType }>(
   previews: T[]
-): Array<{ dataType: SynthtraceDataType; items: T[] }> =>
+): Array<{ dataType: DemoDataType; items: T[] }> =>
   PREVIEW_DATA_TYPE_ORDER.flatMap((dataType) => {
     const items = previews.filter((preview) => preview.dataType === dataType);
     return items.length > 0 ? [{ dataType, items }] : [];
@@ -115,7 +115,7 @@ const PreviewRow: React.FC<PreviewRowProps> = ({
 );
 
 const buildSignalTabs = (
-  groups: Array<{ dataType: SynthtraceDataType; items: Array<AlertRulePreview | SloPreview> }>,
+  groups: Array<{ dataType: DemoDataType; items: Array<AlertRulePreview | SloPreview> }>,
   detailLabel: string,
   kind: PreviewKind,
   excluded: Set<string>,

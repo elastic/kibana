@@ -8046,10 +8046,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/observability-demo-data-plugin@link:x-pack/solutions/observability/plugins/observability_demo_data":
-  version "0.0.0"
-  uid ""
-
 "@kbn/observability-fixtures-plugin@link:x-pack/platform/test/cases_api_integration/common/plugins/observability":
   version "0.0.0"
   uid ""

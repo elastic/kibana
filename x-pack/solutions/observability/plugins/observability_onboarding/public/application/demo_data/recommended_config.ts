@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { SynthtraceDataType } from './data_types';
+import type { DemoDataType } from './data_types';
 import { APM_METRICS_INDEX, DEMO_DATA_TAG } from './constants';
 
 /** APM rule type ids. Hardcoded to avoid a runtime dependency on the APM plugin. */
@@ -129,14 +129,14 @@ export interface AlertRulePreview {
   name: string;
   description: string;
   detail: string;
-  dataType: SynthtraceDataType;
+  dataType: DemoDataType;
 }
 
 export interface SloPreview {
   name: string;
   description: string;
   detail: string;
-  dataType: SynthtraceDataType;
+  dataType: DemoDataType;
 }
 
 export interface MlJobPreview {
@@ -215,14 +215,10 @@ const RULE_PRESETS: Record<PresetId, RulePresetValues> = {
   },
 };
 
-// NOTE: `latencyThresholdMs` is intentionally set ABOVE the ~1s transaction
-// latency that the bundled synthtrace scenarios generate. A threshold at or
-// below the demo baseline would make the latency SLI a flat 0% ("good"
-// transactions = those faster than the threshold), so the SLO would look
-// permanently breached on demo data even though nothing is wrong. These are
-// demo-friendly starting values; lower them to match real workload latencies.
-// `availabilityTarget` is kept at realistic SRE values — note that scenarios
-// with a high injected failure rate will show this SLO as breached by design.
+// NOTE: these are intentionally generous starting values so the SLOs look
+// meaningful out of the box rather than permanently breached. `latencyThresholdMs`
+// should be lowered to match your real workload latencies, and `availabilityTarget`
+// adjusted to your SLA — they are demo defaults, not production recommendations.
 const SLO_PRESETS: Record<PresetId, SloPresetValues> = {
   loose: {
     availabilityTarget: 0.95,
