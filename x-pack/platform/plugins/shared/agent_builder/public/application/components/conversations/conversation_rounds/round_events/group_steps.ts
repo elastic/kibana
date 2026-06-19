@@ -9,7 +9,7 @@ import type {
   ConversationRoundStep,
   ToolCallStep,
 } from '@kbn/agent-builder-common/chat/conversation';
-import { isToolCallStep } from '@kbn/agent-builder-common/chat/conversation';
+import { isToolCallStep, isTodosStep } from '@kbn/agent-builder-common/chat/conversation';
 
 export type GroupedStep =
   | { kind: 'step'; step: ConversationRoundStep; index: number }
@@ -18,32 +18,19 @@ export type GroupedStep =
 export const groupSteps = (steps: ConversationRoundStep[]): GroupedStep[] => {
   const result: GroupedStep[] = [];
   let toolBuffer: ToolCallStep[] = [];
-  let bufferGroupId: string | undefined;
 
   const flushBuffer = () => {
     if (toolBuffer.length > 0) {
       result.push({ kind: 'group', steps: toolBuffer });
       toolBuffer = [];
-      bufferGroupId = undefined;
     }
   };
 
   for (let i = 0; i < steps.length; i++) {
     const step = steps[i];
     if (isToolCallStep(step)) {
-      const stepGroupId = step.tool_call_group_id;
-      if (
-        stepGroupId !== undefined &&
-        bufferGroupId !== undefined &&
-        stepGroupId !== bufferGroupId
-      ) {
-        flushBuffer();
-      }
-      if (toolBuffer.length === 0) {
-        bufferGroupId = stepGroupId;
-      }
       toolBuffer.push(step);
-    } else {
+    } else if (!isTodosStep(step)) {
       flushBuffer();
       result.push({ kind: 'step', step, index: i });
     }

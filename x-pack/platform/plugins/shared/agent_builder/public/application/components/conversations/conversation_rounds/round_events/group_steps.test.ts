@@ -13,6 +13,7 @@ import {
 import type {
   BackgroundAgentCompleteStep,
   CompactionStep,
+  TodosStep,
   ToolCallStep,
 } from '@kbn/agent-builder-common/chat/conversation';
 import { groupSteps } from './group_steps';
@@ -218,7 +219,7 @@ describe('groupSteps', () => {
     ]);
   });
 
-  it('splits consecutive parallel batches with different group IDs into separate groups even without a reasoning step between them', () => {
+  it('merges consecutive parallel batches with different group IDs into one group when no reasoning step separates them', () => {
     const a = toolStep('a', 'grp-1');
     const b = toolStep('b', 'grp-1');
     const c = toolStep('c', 'grp-2');
@@ -226,22 +227,47 @@ describe('groupSteps', () => {
 
     const result = groupSteps([a, b, c, d]);
 
-    expect(result).toEqual([
-      { kind: 'group', steps: [a, b] },
-      { kind: 'group', steps: [c, d] },
-    ]);
+    expect(result).toEqual([{ kind: 'group', steps: [a, b, c, d] }]);
   });
 
-  it('a solo tool call (no group_id) between two batches merges into the preceding batch, not the following one', () => {
+  it('merges a solo tool call between two parallel batches into a single group', () => {
     const a = toolStep('a', 'grp-1');
     const solo = toolStep('solo');
     const c = toolStep('c', 'grp-2');
 
     const result = groupSteps([a, solo, c]);
 
+    expect(result).toEqual([{ kind: 'group', steps: [a, solo, c] }]);
+  });
+
+  it('does not flush the tool buffer when a TodosStep arrives mid-stream between tool calls', () => {
+    const todos: TodosStep = {
+      type: ConversationRoundStepType.updateTodos,
+      todos: [{ content: 'do thing', status: 'in_progress' }],
+    };
+    const a = toolStep('a');
+    const b = toolStep('b');
+    const c = toolStep('c');
+    const result = groupSteps([a, b, todos, c]);
+
+    expect(result).toEqual([{ kind: 'group', steps: [a, b, c] }]);
+  });
+
+  it('keeps a TodosStep between two reasoning steps from affecting grouping', () => {
+    const todos: TodosStep = {
+      type: ConversationRoundStepType.updateTodos,
+      todos: [],
+    };
+    const r1 = reasoningStep('r1');
+    const a = toolStep('a');
+    const r2 = reasoningStep('r2');
+
+    const result = groupSteps([r1, todos, a, todos, r2]);
+
     expect(result).toEqual([
-      { kind: 'group', steps: [a, solo] },
-      { kind: 'group', steps: [c] },
+      { kind: 'step', step: r1, index: 0 },
+      { kind: 'group', steps: [a] },
+      { kind: 'step', step: r2, index: 4 },
     ]);
   });
 });
