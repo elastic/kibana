@@ -59,7 +59,7 @@ FTR **deployment-agnostic** configs often load the same files under both statefu
 
 API and UI specs should both carry tags that match the intended `run-tests` / CI targets; see step 9.
 
-**Tags are always inline.** Never wrap tags in a named constant. Never change an existing tag constant's value to fit a different suite. Apply per-issue tag instructions inline and only to the tests specified.
+**Prefer tags inline.** Avoid wrapping tags in a named constant unless the same tag set is reused across multiple suites. Never change an existing tag constant's value to fit a different suite. Apply per-issue tag instructions inline and only to the tests specified.
 
 ### 3) Translate the test structure
 
