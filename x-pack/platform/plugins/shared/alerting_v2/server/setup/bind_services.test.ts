@@ -16,7 +16,10 @@ import {
   EsServiceScopedToken,
   EsServiceScopedSpaceRoutingToken,
 } from '../lib/services/es_service/tokens';
-import { QueryServiceScopedToken } from '../lib/services/query_service/tokens';
+import {
+  QueryServiceScopedToken,
+  QueryServiceScopedSpaceRoutingToken,
+} from '../lib/services/query_service/tokens';
 import { bindServices } from './bind_services';
 
 const createClientMock = () =>
@@ -71,8 +74,18 @@ describe('bindServices - Elasticsearch client routing', () => {
     expect(asScoped).toHaveBeenCalledWith(fakeRequest, { projectRouting: 'space' });
   });
 
-  it('wires the scoped QueryService to the space-routed client', async () => {
+  it('wires the scoped QueryService to the origin-only (local) client', async () => {
     const queryService = container.get(QueryServiceScopedToken);
+
+    await queryService.executeQuery({ query: 'FROM logs-*' });
+
+    expect(asScoped).toHaveBeenCalledWith(fakeRequest);
+    expect(scopedLocalCurrentUser.esql.query as jest.Mock).toHaveBeenCalledTimes(1);
+    expect(scopedSpaceCurrentUser.esql.query as jest.Mock).not.toHaveBeenCalled();
+  });
+
+  it('wires the space-routed scoped QueryService to the space-routed client', async () => {
+    const queryService = container.get(QueryServiceScopedSpaceRoutingToken);
 
     await queryService.executeQuery({ query: 'FROM logs-*' });
 

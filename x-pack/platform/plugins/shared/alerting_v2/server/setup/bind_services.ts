@@ -50,6 +50,7 @@ import { QueryService } from '../lib/services/query_service/query_service';
 import {
   QueryServiceInternalToken,
   QueryServiceScopedToken,
+  QueryServiceScopedSpaceRoutingToken,
 } from '../lib/services/query_service/tokens';
 import { ResourceManager } from '../lib/services/resource_service/resource_manager';
 import { AlertingRetryService } from '../lib/services/retry_service';
@@ -227,6 +228,14 @@ export function bindServices({ bind }: ContainerModuleLoadOptions) {
     .inSingletonScope();
 
   bind(QueryServiceScopedToken)
+    .toDynamicValue(({ get }) => {
+      const loggerService = get(LoggerServiceToken);
+      const esClient = get(EsServiceScopedToken);
+      return new QueryService(esClient, loggerService);
+    })
+    .inRequestScope();
+
+  bind(QueryServiceScopedSpaceRoutingToken)
     .toDynamicValue(({ get }) => {
       const loggerService = get(LoggerServiceToken);
       // Rule-execution queries run against user data and must respect the space project routing.
