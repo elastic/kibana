@@ -43,6 +43,11 @@ export class LensApp {
     await expect(this.lensApp).toBeVisible();
   }
 
+  async gotoNewLensEditor() {
+    await this.page.gotoApp('lens');
+    await this.waitForLensApp();
+  }
+
   async switchToVisualization(visType: string) {
     await this.openChartSwitchPopover();
     await this.page.testSubj.locator(`lnsChartSwitchPopover_${visType}`).click();

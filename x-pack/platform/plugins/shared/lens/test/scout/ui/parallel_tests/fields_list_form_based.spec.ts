@@ -13,23 +13,28 @@ spaceTest.describe(
   'Lens fields list - form-based datasource',
   { tag: tags.stateful.classic },
   () => {
-    spaceTest.beforeAll(async ({ scoutSpace }) => {
+    spaceTest.beforeAll(async ({ apiServices, scoutSpace }) => {
+      const { data: dataView } = await apiServices.dataViews.create({
+        title: testData.DATA_VIEW_ID.LOGSTASH,
+        name: testData.DATA_VIEW_ID.LOGSTASH,
+        timeFieldName: '@timestamp',
+        override: true,
+        spaceId: scoutSpace.id,
+      });
+
       await scoutSpace.uiSettings.set({
-        defaultIndex: testData.DATA_VIEW_ID.LOGSTASH,
+        defaultIndex: dataView.id,
         'dateFormat:tz': 'UTC',
-        'timepicker:timeDefaults': JSON.stringify({
-          from: testData.LOGSTASH_DEFAULT_TIME_RANGE.from,
-          to: testData.LOGSTASH_DEFAULT_TIME_RANGE.to,
-        }),
+      });
+      await scoutSpace.uiSettings.setDefaultTime({
+        from: testData.LOGSTASH_DEFAULT_TIME_RANGE.from,
+        to: testData.LOGSTASH_DEFAULT_TIME_RANGE.to,
       });
     });
 
     spaceTest.beforeEach(async ({ browserAuth, pageObjects }) => {
       await browserAuth.loginAsPrivilegedUser();
-      await pageObjects.visualize.goto();
-      await pageObjects.visualize.openNewVisualizationWizard();
-      await pageObjects.visualize.clickVisType('lens');
-      await pageObjects.lens.waitForLensApp();
+      await pageObjects.lens.gotoNewLensEditor();
     });
 
     spaceTest.afterAll(async ({ scoutSpace }) => {
