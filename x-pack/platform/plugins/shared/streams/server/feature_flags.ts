@@ -21,7 +21,6 @@ import {
   OBSERVABILITY_STREAMS_SIG_EVENTS_INDEX_PATTERNS,
   OBSERVABILITY_STREAMS_SIG_EVENTS_TUNING_CONFIG,
   OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS_ALERTING_V2,
-  OBSERVABILITY_STREAMS_ENABLE_INVESTIGATION,
 } from '@kbn/management-settings-ids';
 import { DEFAULT_INDEX_PATTERNS } from '@kbn/streams-schema';
 import type { StreamsPluginStartDependencies } from './types';
@@ -118,24 +117,6 @@ export function registerFeatureFlags(
             type: 'boolean',
             schema: schema.boolean(),
             requiresPageReload: true,
-            solutionViews: ['classic', 'oblt'],
-            technicalPreview: true,
-            readonly: true,
-            readonlyMode: 'ui',
-          },
-          [OBSERVABILITY_STREAMS_ENABLE_INVESTIGATION]: {
-            category: ['observability'],
-            name: i18n.translate('xpack.streams.investigationSettingsName', {
-              defaultMessage: 'Streams significant events investigation',
-            }) as string,
-            value: false,
-            description: i18n.translate('xpack.streams.investigationSettingsDescription', {
-              defaultMessage:
-                'Enable automatic root cause investigation after significant event promotion.',
-            }),
-            type: 'boolean',
-            schema: schema.boolean(),
-            requiresPageReload: false,
             solutionViews: ['classic', 'oblt'],
             technicalPreview: true,
             readonly: true,

@@ -20,15 +20,15 @@ import {
   OBSERVABILITY_GET_TRACES_TOOL_ID,
 } from '../discovery/constants';
 
-export const SIGEVENTS_INVESTIGATION_AGENT_ID = 'platform.streams.significant-events.investigation';
+export const STREAMS_INVESTIGATION_AGENT_ID = 'platform.streams.investigation';
 
 const investigationAgent = {
-  id: SIGEVENTS_INVESTIGATION_AGENT_ID,
-  name: 'Significant Events Investigator',
+  id: STREAMS_INVESTIGATION_AGENT_ID,
+  name: 'Streams Investigator',
   description:
-    'Investigates a significant event by querying observability signals (logs, traces, metrics), ' +
+    'Investigates an observability issue by querying available signals (logs, traces, metrics), ' +
     'reasoning about causality direction, and producing a contributing-factors conclusion with supporting evidence.',
-  labels: ['observability', 'streams', 'significant-events', 'investigation'],
+  labels: ['observability', 'streams', 'investigation', 'root-cause'],
   avatar_icon: 'logoElastic',
   configuration: {
     instructions,

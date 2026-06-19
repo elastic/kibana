@@ -107,8 +107,7 @@ describe('validateStepNameUniqueness', () => {
     expect(result.errors[0].occurrences).toBe(2);
   });
 
-  it('should allow the same step name in different parallel branches', () => {
-    // Parallel branches are independent execution scopes — same names across branches are valid
+  it('should validate nested steps in parallel branches', () => {
     const workflow: WorkflowYaml = {
       version: '1',
       name: 'Test Workflow',
@@ -134,38 +133,9 @@ describe('validateStepNameUniqueness', () => {
 
     const result = validateStepNameUniqueness(workflow);
 
-    expect(result.isValid).toBe(true);
-    expect(result.errors).toHaveLength(0);
-  });
-
-  it('should catch duplicate step names within a single parallel branch', () => {
-    const workflow: WorkflowYaml = {
-      version: '1',
-      name: 'Test Workflow',
-      enabled: true,
-      triggers: [{ type: 'manual' }],
-      steps: [
-        {
-          name: 'parallel_step',
-          type: 'parallel',
-          branches: [
-            {
-              name: 'branch1',
-              steps: [
-                { name: 'dup_step', type: 'console' },
-                { name: 'dup_step', type: 'http' },
-              ],
-            },
-          ],
-        },
-      ],
-    };
-
-    const result = validateStepNameUniqueness(workflow);
-
     expect(result.isValid).toBe(false);
     expect(result.errors).toHaveLength(1);
-    expect(result.errors[0].stepName).toBe('dup_step');
+    expect(result.errors[0].stepName).toBe('branch_step');
     expect(result.errors[0].occurrences).toBe(2);
   });
 

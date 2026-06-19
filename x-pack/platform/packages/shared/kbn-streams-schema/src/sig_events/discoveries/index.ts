@@ -22,19 +22,20 @@ import {
 import { investigationResultSchema } from '../investigations/schema';
 
 const discoveryDetectionSchema = z.object({
+  kind: z.enum(['detection', 'quiet', 'handled']),
   detection_id: z.string().max(MAX_ID_LENGTH).optional(),
   rule_name: z.string().max(MAX_RULE_NAME_LENGTH).optional(),
   rule_uuid: z.string().max(MAX_ID_LENGTH).optional(),
   stream_name: z.string().max(MAX_STREAM_NAME_LENGTH).optional(),
   change_point_type: z.string().max(MAX_ID_LENGTH).optional(),
+  p_value: z.number().optional(),
   event_count: z.number().optional(),
   alert_count: z.number().optional(),
-  detected_at: z.string().optional(),
 });
 
 export const discoverySchema = z.object({
   '@timestamp': z.iso.datetime(),
-  kind: z.enum(['finding', 'clearance']),
+  kind: z.enum(['discovery', 'clearance', 'handled']),
   discovery_id: z.string().max(MAX_ID_LENGTH),
   discovery_slug: z.string().max(MAX_ID_LENGTH),
   discovered_at: z.iso.datetime().optional(),
@@ -51,7 +52,7 @@ export const discoverySchema = z.object({
   infra_components: z.array(infraComponentSchema).optional(),
   cause_kis: z.array(causeKiSchema).optional(),
   evidences: z.array(evidenceSchema).optional(),
-  closes_discovery_id: z.string().max(MAX_ID_LENGTH).optional(),
+  parent_discovery_id: z.string().max(MAX_ID_LENGTH).optional(),
   grouped_discovery_ids: z.array(z.string().max(MAX_ID_LENGTH)).optional(),
   grouping_rationale: z.string().max(MAX_TEXT_LENGTH).optional(),
   previous_discovery_id: z.string().max(MAX_ID_LENGTH).optional(),
@@ -66,6 +67,7 @@ export const discoverySchema = z.object({
       ...investigationResultSchema.shape,
     })
     .optional(),
+  processed: z.boolean(),
 });
 
 export type Discovery = z.infer<typeof discoverySchema>;
