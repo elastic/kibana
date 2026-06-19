@@ -12,10 +12,10 @@ import { appendPanelsToDashboard } from '../dashboard_state';
 import { defineOperation } from './types';
 import {
   visPanelConfigInputSchema,
-  markdownPanelConfigInputSchema,
   panelRequestSchema,
   PANEL_TYPE_TO_EMBEDDABLE_TYPE,
 } from './panel_kinds';
+import { markdownPanelConfigInputSchema } from './panels/markdown';
 import { getResolvedPanelCreationRequests } from './panel_creation';
 
 const sectionIdField = z

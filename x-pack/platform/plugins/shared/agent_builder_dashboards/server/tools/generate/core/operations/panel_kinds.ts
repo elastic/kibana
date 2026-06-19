@@ -9,7 +9,7 @@ import { SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result'
 import { panelGridSchema } from '@kbn/agent-builder-dashboards-common';
 import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
 import { z } from '@kbn/zod/v4';
-import { MARKDOWN_EMBEDDABLE_TYPE, markdownPanelConfigSchema } from './panels/markdown';
+import { MARKDOWN_EMBEDDABLE_TYPE, markdownPanelConfigInputSchema } from './panels/markdown';
 
 /**
  * A `panelConfig` adds a panel from an already-resolved configuration passed by
@@ -26,13 +26,6 @@ export const visPanelConfigInputSchema = z.object({
     .describe(
       'Already-resolved Lens config, passed by value (e.g. read from a visualization attachment). Do not hand-build a Lens config for a new visualization here — use kind: "panelRequest" instead.'
     ),
-});
-
-export const markdownPanelConfigInputSchema = z.object({
-  kind: z.literal('panelConfig'),
-  type: z.literal('markdown'),
-  grid: panelGridSchema,
-  config: markdownPanelConfigSchema.describe('Markdown panel config (e.g. { content }).'),
 });
 
 export const panelConfigPanelInputSchema = z.discriminatedUnion('type', [

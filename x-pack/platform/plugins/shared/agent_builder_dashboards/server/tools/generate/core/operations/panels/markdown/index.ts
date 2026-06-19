@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { panelGridSchema } from '@kbn/agent-builder-dashboards-common';
 import { z } from '@kbn/zod/v4';
 
 /**
@@ -12,9 +13,10 @@ import { z } from '@kbn/zod/v4';
  *
  * Markdown is authored as a `panelConfig` (`type: 'markdown'`) whose `config` is
  * passed through to the embeddable unchanged, exactly like a Lens `panelConfig`.
- * This module owns the markdown embeddable-type identity and the markdown
- * by-value config contract, and is the place for future markdown-specific
- * behavior (e.g. a markdown generation prompt that authors the content).
+ * This module owns the markdown embeddable-type identity, the markdown by-value
+ * config contract, and the markdown `panelConfig` input schema, and is the place
+ * for future markdown-specific behavior (e.g. a markdown generation prompt that
+ * authors the content).
  */
 export { MARKDOWN_EMBEDDABLE_TYPE } from '@kbn/dashboard-markdown/server';
 
@@ -37,3 +39,16 @@ export const markdownPanelConfigSchema = z.object({
 });
 
 export type MarkdownPanelConfig = z.infer<typeof markdownPanelConfigSchema>;
+
+/**
+ * The markdown variant of a `panelConfig` panel input, discriminated by
+ * `type: 'markdown'`.
+ */
+export const markdownPanelConfigInputSchema = z.object({
+  kind: z.literal('panelConfig'),
+  type: z.literal('markdown'),
+  grid: panelGridSchema,
+  config: markdownPanelConfigSchema.describe('Markdown panel config (e.g. { content }).'),
+});
+
+export type MarkdownPanelConfigInput = z.infer<typeof markdownPanelConfigInputSchema>;
