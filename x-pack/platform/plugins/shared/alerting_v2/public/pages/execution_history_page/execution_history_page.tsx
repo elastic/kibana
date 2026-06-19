@@ -75,12 +75,12 @@ export const ExecutionHistoryPage = () => {
   const handlePolicyClick = (policyId: string) => {
     setRuleToViewId(null);
     setPolicyToViewId(policyId);
-  }
+  };
 
   const handleRuleClick = (ruleId: string) => {
     setPolicyToViewId(null);
     setRuleToViewId(ruleId);
-  }
+  };
 
   return (
     <>

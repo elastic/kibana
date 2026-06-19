@@ -76,11 +76,7 @@ export const ActionPolicyDetailsFlyoutContainer = ({ policyId, onClose }: Props)
   };
 
   if (isLoading) {
-    return (
-      <LoadingFlyout
-        onClose={onClose}
-      />
-    );
+    return <LoadingFlyout onClose={onClose} />;
   }
 
   if (isError || !policy) {
