@@ -74,7 +74,7 @@ export const VERSION_DEPENDENCY_INVALID = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleDescription.relatedIntegrations.validation.versionInvalid',
   {
     defaultMessage:
-      'Version constraint is invalid. Only tilde, caret or plain version supported e.g. ~1.2.3, ^1.2.3 or 1.2.3.',
+      'Version constraint is invalid. Provide a valid semver range, e.g. 1.2.3, ^1.2.3, ~1.2.3, >=8.2.0 or ^8.2.0 || ^9.0.0.',
   }
 );
 
