@@ -9,6 +9,7 @@ import {
   LENS_DATASOURCE_ID,
   appendTimeBucketToEsqlQuery,
   buildTrendlineBucketExpression,
+  queryHasStatsCommand,
 } from '@kbn/lens-common';
 
 import React from 'react';
@@ -398,9 +399,23 @@ export function getTextBasedDatasource({
         const sourceCol = fromLayer.columns.find((c) => c.columnId === link.from.columnId);
         if (!sourceCol) continue;
 
+        // Check whether the source query already contains a STATS command.
+        // When it doesn't, the trendline query will auto-generate one and raw
+        // field references must be wrapped in an aggregation (AVG) so that
+        // the synced column's fieldName matches the ES|QL result column.
+        const sourceQueryHasStats =
+          fromLayer.query &&
+          isOfAggregateQueryType(fromLayer.query) &&
+          queryHasStatsCommand(fromLayer.query.esql);
+
         const newCol: TextBasedLayerColumn = {
           ...sourceCol,
           columnId: link.to.columnId,
+          // When the source has no STATS, wrap the raw field in AVG() so the
+          // fieldName matches the auto-generated trendline STATS expression.
+          ...(!sourceQueryHasStats && {
+            fieldName: `AVG(${sourceCol.fieldName})`,
+          }),
         };
 
         const existingCol = toLayer.columns.find((c) => c.columnId === link.to.columnId);
@@ -409,11 +424,22 @@ export function getTextBasedDatasource({
         let updatedColumns = toLayer.columns;
         if (!existingCol) {
           updatedColumns = [...toLayer.columns, newCol];
-        } else if (existingCol.fieldName !== sourceCol.fieldName) {
+        } else if (existingCol.fieldName !== newCol.fieldName) {
           updatedColumns = toLayer.columns.map((c) =>
             c.columnId === link.to.columnId ? newCol : c
           );
         }
+
+        // Collect metric field names from all links targeting the same
+        // trendline layer so the auto-generated STATS uses AVG(<field>)
+        // instead of COUNT(*) when the source query has no STATS.
+        const metricFields = !sourceQueryHasStats
+          ? links
+              .filter((l) => l.to.layerId === link.to.layerId)
+              .map((l) => fromLayer.columns.find((c) => c.columnId === l.from.columnId))
+              .filter((c): c is TextBasedLayerColumn => Boolean(c))
+              .map((c) => c.fieldName)
+          : undefined;
 
         // Sync the trendline layer's query from the source layer.
         // The trendline query is derived from the main query with an appended
@@ -423,7 +449,8 @@ export function getTextBasedDatasource({
           try {
             const newTrendlineQuery = appendTimeBucketToEsqlQuery(
               fromLayer.query.esql,
-              toLayer.timeField
+              toLayer.timeField,
+              metricFields
             );
             if (
               !updatedQuery ||

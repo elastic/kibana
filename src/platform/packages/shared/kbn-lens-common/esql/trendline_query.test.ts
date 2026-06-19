@@ -94,4 +94,38 @@ describe('appendTimeBucketToEsqlQuery', () => {
       'FROM index | STATS COUNT(*) BY BUCKET(other_field, 75, ?_tstart, ?_tend), BUCKET(timestamp, 75, ?_tstart, ?_tend)'
     );
   });
+
+  it('uses AVG(field) instead of COUNT(*) when metricFields are provided and query has no STATS', () => {
+    const result = appendTimeBucketToEsqlQuery('FROM index', 'timestamp', ['bytes']);
+    expect(result).toBe('FROM index | STATS AVG(bytes) BY BUCKET(timestamp, 75, ?_tstart, ?_tend)');
+  });
+
+  it('uses AVG for multiple metric fields when query has no STATS', () => {
+    const result = appendTimeBucketToEsqlQuery('FROM index', 'timestamp', [
+      'bytes',
+      'response_time',
+    ]);
+    expect(result).toBe(
+      'FROM index | STATS AVG(bytes), AVG(response_time) BY BUCKET(timestamp, 75, ?_tstart, ?_tend)'
+    );
+  });
+
+  it('escapes dotted metric field names in AVG', () => {
+    const result = appendTimeBucketToEsqlQuery('FROM index', 'timestamp', ['order.bytes']);
+    expect(result).toBe(
+      'FROM index | STATS AVG(`order.bytes`) BY BUCKET(timestamp, 75, ?_tstart, ?_tend)'
+    );
+  });
+
+  it('ignores metricFields when query already has STATS', () => {
+    const result = appendTimeBucketToEsqlQuery('FROM index | STATS SUM(bytes)', 'timestamp', [
+      'bytes',
+    ]);
+    expect(result).toBe('FROM index | STATS SUM(bytes) BY BUCKET(timestamp, 75, ?_tstart, ?_tend)');
+  });
+
+  it('falls back to COUNT(*) when metricFields is empty and query has no STATS', () => {
+    const result = appendTimeBucketToEsqlQuery('FROM index', 'timestamp', []);
+    expect(result).toBe('FROM index | STATS COUNT(*) BY BUCKET(timestamp, 75, ?_tstart, ?_tend)');
+  });
 });

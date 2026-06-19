@@ -59,6 +59,14 @@ const findByOption = (statsCmd: ESQLCommand): ESQLCommandOption => {
 };
 
 /**
+ * Returns true when the ES|QL query contains at least one STATS command.
+ */
+export const queryHasStatsCommand = (esqlQuery: string): boolean => {
+  const { root } = Parser.parse(esqlQuery);
+  return root.commands.some((c) => c.name === 'stats');
+};
+
+/**
  * Checks whether a BY option already contains a BUCKET() call on the given time field.
  */
 const hasBucketForField = (byOption: ESQLCommandOption, timeField: string): boolean =>
@@ -83,9 +91,17 @@ const hasBucketForField = (byOption: ESQLCommandOption, timeField: string): bool
  * Handles three cases:
  * - Query has `STATS ... BY ...` → appends BUCKET to the existing BY clause
  * - Query has `STATS` without `BY` → adds a BY clause with BUCKET
- * - Query has no `STATS` → appends a `STATS COUNT(*) BY BUCKET(...)` command
+ * - Query has no `STATS` → appends a `STATS <agg> BY BUCKET(...)` command
+ *
+ * When the query has no STATS and `metricFields` are provided, each field is
+ * wrapped in `AVG()` (e.g. `STATS AVG(bytes) BY BUCKET(...)`). When no metric
+ * fields are given, it falls back to `STATS COUNT(*) BY BUCKET(...)`.
  */
-export const appendTimeBucketToEsqlQuery = (esqlQuery: string, timeField: string): string => {
+export const appendTimeBucketToEsqlQuery = (
+  esqlQuery: string,
+  timeField: string,
+  metricFields?: string[]
+): string => {
   const bucketExpr = buildTrendlineBucketExpression(timeField);
   const bucketNode = parseBucketNode(bucketExpr);
 
@@ -110,8 +126,13 @@ export const appendTimeBucketToEsqlQuery = (esqlQuery: string, timeField: string
       statsCmd.args.push(byNode);
     }
   } else {
-    // No STATS → append full STATS COUNT(*) BY BUCKET(...) command
-    const { root: helperAst } = Parser.parse(`FROM _x | STATS COUNT(*) BY ${bucketExpr}`);
+    // No STATS → append full STATS <agg> BY BUCKET(...) command.
+    // Use AVG(<field>) for each provided metric field, or COUNT(*) as fallback.
+    const statsExprs =
+      metricFields && metricFields.length > 0
+        ? metricFields.map((f) => `AVG(${esql.col(f)})`).join(', ')
+        : 'COUNT(*)';
+    const { root: helperAst } = Parser.parse(`FROM _x | STATS ${statsExprs} BY ${bucketExpr}`);
     root.commands.push(findStatsCommand(helperAst.commands));
   }
 

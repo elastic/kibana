@@ -421,4 +421,5 @@ export { AUTO_TARGET_NUMBER_OF_BUCKETS } from './esql/constants';
 export {
   buildTrendlineBucketExpression,
   appendTimeBucketToEsqlQuery,
+  queryHasStatsCommand,
 } from './esql/trendline_query';
