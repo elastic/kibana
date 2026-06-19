@@ -90,7 +90,7 @@ export const editPanelsOperation = defineOperation({
         continue;
       }
 
-      if (panelInput.kind === 'panelConfig') {
+      if (panelInput.kind === 'panelConfig' && panelInput.type === 'markdown') {
         if (existingPanel.type !== MARKDOWN_EMBEDDABLE_TYPE) {
           recordFailure(
             panelInput.panelId,
@@ -139,7 +139,7 @@ export const editPanelsOperation = defineOperation({
     // Apply valid edits in input order so state changes remain deterministic.
     let nextDashboardData = dashboardData;
     for (const { panelInput } of validEdits) {
-      if (panelInput.kind === 'panelConfig') {
+      if (panelInput.kind === 'panelConfig' && panelInput.type === 'markdown') {
         const { config } = panelInput;
         const updateResult = updatePanelInDashboard({
           dashboardData: nextDashboardData,
