@@ -168,39 +168,53 @@ export const computeSuccessfulLifecycleFlyoutPreview = (
   } = args;
 
   if (inheritLifecycle) {
-    if (inheritedEffectiveLifecycle) {
-      return previewFromLifecycle({
-        lifecycle: inheritedEffectiveLifecycle,
-        ilmPolicies,
-        isServerless,
-        ilmPhases,
-        hotColor,
-        stats,
-        indexMode,
-      });
+    if (!inheritedEffectiveLifecycle) {
+      return { action: 'clear' };
     }
-    return { action: 'clear' };
+
+    const inheritedBaseline = effectiveToIngestLifecycle(inheritedEffectiveLifecycle);
+    if ('ilm' in inheritedBaseline) {
+      const found = ilmPolicies.find((p) => p.name === inheritedBaseline.ilm.policy);
+      if (!found?.serializedPolicy) {
+        return { action: 'clear' };
+      }
+    }
+
+    return previewFromLifecycle({
+      lifecycle: inheritedEffectiveLifecycle,
+      ilmPolicies,
+      isServerless,
+      ilmPhases,
+      hotColor,
+      stats,
+      indexMode,
+    });
   }
 
   if (method === 'ilm') {
     if (inspectedIlmPolicyName && selectedIlmPolicyName === selectedIlmPolicyNameAtInspect) {
       const inspected = ilmPolicies.find((p) => p.name === inspectedIlmPolicyName);
-      if (inspected?.serializedPolicy) {
-        return {
-          ...previewFromSerializedIlmPolicy({
-            policy: inspected.serializedPolicy,
-            ilmPhases,
-            stats,
-            indexMode,
-          }),
-          suppressUnsavedChanges: true,
-        };
+      if (!inspected?.serializedPolicy) {
+        return { action: 'clear' };
       }
+
+      return {
+        ...previewFromSerializedIlmPolicy({
+          policy: inspected.serializedPolicy,
+          ilmPhases,
+          stats,
+          indexMode,
+        }),
+        suppressUnsavedChanges: true,
+      };
     }
 
     const selected = selectedIlmPolicyName
       ? ilmPolicies.find((p) => p.name === selectedIlmPolicyName)
       : undefined;
+    if (selectedIlmPolicyName && !selected?.serializedPolicy) {
+      return { action: 'clear' };
+    }
     if (selected?.serializedPolicy) {
       return previewFromSerializedIlmPolicy({
         policy: selected.serializedPolicy,
