@@ -13,7 +13,6 @@ import {
 } from '../../form/utils/artifact_mappers';
 import type { FormValues } from '../../form/types';
 import type { ComposeFormValues } from './compose_form_types';
-import { splitQuery } from './use_heuristic_split';
 
 const DELAY_IMMEDIATE = 'immediate';
 const DELAY_BREACHES = 'breaches';
@@ -168,41 +167,10 @@ const deriveRecoveryDelayMode = (
 };
 
 /** Bridge YAML parse output into compose form values for the Discover flyout. */
-export const mapYamlFormValuesToComposeFormValues = (parsed: FormValues): ComposeFormValues => {
-  const shared = {
-    kind: parsed.kind,
-    metadata: parsed.metadata,
-    timeField: parsed.timeField,
-    schedule: parsed.schedule,
-    grouping: parsed.grouping,
-    stateTransition: parsed.stateTransition,
-    stateTransitionAlertDelayMode: parsed.stateTransitionAlertDelayMode,
-    stateTransitionRecoveryDelayMode: parsed.stateTransitionRecoveryDelayMode,
-    ...splitArtifactsByType(parsed.artifacts),
-  };
-
-  if (parsed.kind === 'alert') {
-    const { base, alertBlock } = splitQuery(parsed.query.breach);
-    return {
-      ...shared,
-      query: {
-        format: 'composed',
-        base,
-        breach: { segment: alertBlock },
-        ...(parsed.query.recover ? { recovery: { segment: parsed.query.recover } } : {}),
-      },
-    };
-  }
-
-  return {
-    ...shared,
-    query: {
-      format: 'standalone',
-      breach: { query: parsed.query.breach },
-      ...(parsed.query.recover ? { recovery: { query: parsed.query.recover } } : {}),
-    },
-  };
-};
+export const mapYamlFormValuesToComposeFormValues = (parsed: FormValues): ComposeFormValues => ({
+  ...parsed,
+  ...splitArtifactsByType(parsed.artifacts),
+});
 
 export const mapRuleToComposeFormValues = (rule: RuleResponse): ComposeFormValues => {
   const stateTransition: ComposeFormValues['stateTransition'] = rule.state_transition

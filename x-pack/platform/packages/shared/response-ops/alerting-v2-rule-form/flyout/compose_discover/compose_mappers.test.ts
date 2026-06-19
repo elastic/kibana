@@ -432,35 +432,32 @@ describe('mapYamlFormValuesToComposeFormValues', () => {
     timeField: '@timestamp',
     schedule: { every: '1m', lookback: '5m' },
     query: {
-      breach: `${BASE}\n| ${ALERT_SEGMENT}`,
+      format: 'composed',
+      base: BASE,
+      breach: { segment: `| ${ALERT_SEGMENT}` },
     },
     stateTransitionAlertDelayMode: 'immediate',
     stateTransitionRecoveryDelayMode: 'immediate',
     artifacts: [],
   };
 
-  it('splits alert YAML queries into composed base and breach segments', () => {
+  it('passes through composed alert queries', () => {
     const result = mapYamlFormValuesToComposeFormValues(parsedYaml);
 
-    expect(result.query.format).toBe('composed');
-    if (result.query.format !== 'composed') {
-      throw new Error('expected composed query');
-    }
-    expect(result.query.base).toBe(BASE);
-    expect(result.query.breach.segment).toBe(`| ${ALERT_SEGMENT}`);
+    expect(result.query).toEqual(parsedYaml.query);
   });
 
-  it('keeps signal YAML queries in standalone format', () => {
+  it('passes through standalone signal queries', () => {
+    const signalQuery = {
+      format: 'standalone' as const,
+      breach: { query: 'FROM logs-* | LIMIT 10' },
+    };
     const result = mapYamlFormValuesToComposeFormValues({
       ...parsedYaml,
       kind: 'signal',
-      query: { breach: 'FROM logs-* | LIMIT 10' },
+      query: signalQuery,
     });
 
-    expect(result.query.format).toBe('standalone');
-    if (result.query.format !== 'standalone') {
-      throw new Error('expected standalone query');
-    }
-    expect(result.query.breach.query).toBe('FROM logs-* | LIMIT 10');
+    expect(result.query).toEqual(signalQuery);
   });
 });
