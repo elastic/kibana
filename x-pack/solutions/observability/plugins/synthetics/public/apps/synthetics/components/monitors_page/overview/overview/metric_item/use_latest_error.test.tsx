@@ -9,10 +9,7 @@ import { renderHook } from '@testing-library/react';
 import * as observabilitySharedPublic from '@kbn/observability-shared-plugin/public';
 import { useLatestError } from './use_latest_error';
 import { SYNTHETICS_INDEX_PATTERN } from '../../../../../../../../common/constants';
-import type {
-  OverviewStatusMetaData,
-  Ping,
-} from '../../../../../../../../common/runtime_types';
+import type { OverviewStatusMetaData, Ping } from '../../../../../../../../common/runtime_types';
 import {
   getMonitorLastErrorRunAction,
   selectErrorPopoverState,
