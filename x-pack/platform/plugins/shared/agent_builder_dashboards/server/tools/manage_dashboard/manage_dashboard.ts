@@ -85,6 +85,10 @@ Use operations[] to:
               logger,
             }),
           resolveVisualizationConfig,
+          getDefaultConnectorId: async () => {
+            const model = await modelProvider.getDefaultModel();
+            return model.connector.connectorId;
+          },
         });
 
         const failures: VisualizationFailure[] = operationResult.failures;

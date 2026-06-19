@@ -14,6 +14,7 @@ import {
   attachmentPanelInputSchema,
   markdownPanelInputSchema,
   visualizationPanelInputSchema,
+  aiPanelInputSchema,
 } from './panel_kinds';
 import { getResolvedVisualizationCreationRequests } from './visualization_creation';
 
@@ -28,6 +29,7 @@ const addPanelsItemSchema = z.discriminatedUnion('kind', [
   markdownPanelInputSchema.extend({ sectionId: sectionIdField }),
   attachmentPanelInputSchema.extend({ sectionId: sectionIdField }),
   visualizationPanelInputSchema.extend({ sectionId: sectionIdField }),
+  aiPanelInputSchema.extend({ sectionId: sectionIdField }),
 ]);
 
 export type AddPanelsItemInput = z.infer<typeof addPanelsItemSchema>;
@@ -37,7 +39,7 @@ export const addPanelsOperation = defineOperation({
     operation: z.literal('add_panels'),
     panels: z.array(addPanelsItemSchema).min(1),
   }),
-  handler: ({ dashboardData, operation, operationIndex, context }) => {
+  handler: async ({ dashboardData, operation, operationIndex, context }) => {
     let nextDashboardData = dashboardData;
     const resolvedRequestsByInputIndex = new Map(
       getResolvedVisualizationCreationRequests({
@@ -74,6 +76,25 @@ export const addPanelsOperation = defineOperation({
             });
           }
           context.failures.push(...result.failures);
+          break;
+        }
+        case 'ai_panel': {
+          nextDashboardData = appendPanelsToDashboard({
+            dashboardData: nextDashboardData,
+            panelsToAdd: [
+              {
+                id: uuidv4(),
+                type: 'ai_summary_panel',
+                config: {
+                  prompt: item.prompt,
+                  content: '',
+                  ...(item.esqlQuery ? { esqlQuery: item.esqlQuery } : {}),
+                },
+                grid: item.grid,
+              },
+            ],
+            sectionId: item.sectionId,
+          });
           break;
         }
         case 'visualization': {

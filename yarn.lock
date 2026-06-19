@@ -4597,6 +4597,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/ai-summary-panel-plugin@link:x-pack/platform/plugins/shared/ai_summary_panel":
+  version "0.0.0"
+  uid ""
+
 "@kbn/ai-tools-cli@link:x-pack/platform/packages/shared/kbn-ai-tools-cli":
   version "0.0.0"
   uid ""

@@ -1,0 +1,19 @@
+{
+  "type": "plugin",
+  "id": "@kbn/ai-summary-panel-plugin",
+  "owner": "@elastic/kibana-presentation",
+  "group": "platform",
+  "visibility": "shared",
+  "description": "AI Summary panel embeddable for dashboards",
+  "plugin": {
+    "id": "aiSummaryPanel",
+    "browser": true,
+    "server": true,
+    "requiredPlugins": [
+      "embeddable",
+      "dashboard",
+      "inference",
+      "taskManager"
+    ]
+  }
+}

@@ -49,3 +49,21 @@ export const visualizationPanelInputSchema = visualizationPanelBaseInputSchema.e
 });
 
 export type VisualizationPanelInput = z.infer<typeof visualizationPanelInputSchema>;
+
+export const aiPanelInputSchema = z.object({
+  kind: z.literal('ai_panel'),
+  prompt: z
+    .string()
+    .describe(
+      'Describe exactly what the AI panel should render. Be specific: chart type, data shape, visual style, any annotations. The LLM will generate self-contained HTML — it can produce anything: KPI cards, status boards, custom charts, tables, rich layouts, chart types Lens does not support.'
+    ),
+  esqlQuery: z
+    .string()
+    .optional()
+    .describe(
+      '(optional) An ES|QL query whose results are passed as live data context to the AI when the panel renders. Generate this with the generateEsql tool whenever the panel should reflect real index data.'
+    ),
+  grid: panelGridSchema,
+});
+
+export type AiPanelInput = z.infer<typeof aiPanelInputSchema>;

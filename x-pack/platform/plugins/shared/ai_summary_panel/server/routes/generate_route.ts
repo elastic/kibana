@@ -1,0 +1,336 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { PassThrough } from 'stream';
+import { schema } from '@kbn/config-schema';
+import type { IRouter, CoreSetup, IUiSettingsClient, KibanaRequest } from '@kbn/core/server';
+import { ChatCompletionEventType, MessageRole } from '@kbn/inference-common';
+import type { InferenceServerStart } from '@kbn/inference-plugin/server';
+import { GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR } from '@kbn/management-settings-ids';
+import {
+  getCached,
+  setCached,
+  hashKey,
+  L3_TTL_SECONDS,
+  TEMPLATE_TTL_SECONDS,
+  CACHE_SO_TYPE,
+} from '../cache/html_cache';
+import { runEsqlQuery } from '../utils/esql_query';
+import type { EsqlColumn } from '../utils/esql_query';
+
+const SOCKET_TIMEOUT_MS = 5 * 60 * 1000;
+const NO_DEFAULT_CONNECTOR = 'NO_DEFAULT_CONNECTOR';
+const MAX_HTML_BYTES = 500_000;
+
+// Used for static panels (no esqlQuery) — generates full self-contained HTML.
+const SYSTEM_PROMPT_STATIC = `You are a data visualization assistant embedded in a Kibana dashboard panel.
+
+Your job is to generate a single self-contained HTML document that presents the user's data or answers their prompt in the most appropriate visual form.
+
+OUTPUT RULES — follow these exactly:
+- Output ONLY valid HTML. No markdown fences, no explanation, no commentary before or after.
+- The HTML must be fully self-contained: all CSS inline in <style> tags.
+- CRITICAL: Do NOT include ANY <script> tags or JavaScript whatsoever. No inline scripts, no external scripts, no event handlers. Pure HTML + CSS only.
+- Do NOT load any external resources. No CDN scripts, no Google Fonts, no images from URLs.
+- For charts and diagrams, use pure CSS (bar charts with div widths, progress bars, etc.) or inline SVG.
+
+VISUAL DESIGN:
+- Body background MUST be transparent — do NOT set any background color on <html> or <body>. The panel background is handled by the container.
+- Text color: #343741 (dark gray). NEVER use #1a1a2e as a background — it is a text color only.
+- Use clean, modern design. Comfortable padding. No harsh borders.
+- Accent colors for data elements only: #0077CC (blue), #00BFB3 (teal), #F04E98 (pink), #FEC514 (yellow), #1BA9F5, #D36086.
+- Make it look like a polished dashboard widget, not a raw HTML page.
+- Required body reset: body { margin: 0; padding: 16px; box-sizing: border-box; font-family: Inter, system-ui, sans-serif; color: #343741; }
+
+CONTENT RULES:
+- Pick the visualization type that best fits the data and the prompt. Do NOT default to charts when a table, list, KPI card, or status board is more appropriate.
+- Fill the full panel width. Height should fit the content naturally.
+- Do not add a title — the dashboard panel has its own title.
+- For bar charts: use a div with a colored background and width set to the percentage value inline style. Example: <div style="width: 42%; background: #0077CC; height: 20px;"></div>
+- For status indicators: use colored badges/pills with CSS background-color.`;
+
+// Used for panels with an esqlQuery — generates a reusable HTML template with data placeholders.
+// The client fills placeholders with real query results at render time.
+const SYSTEM_PROMPT_TEMPLATE = `You are a data visualization assistant embedded in a Kibana dashboard panel.
+
+Generate a reusable HTML template with data placeholders. The template will be filled with real query results at render time — do NOT embed specific data values inline.
+
+PLACEHOLDER SYNTAX:
+- Single-value KPI: {{column_name}} — renders the first row's value for that column
+- Repeating rows (table, list, chart bars): wrap the repeating block in {{#rows}}...{{/rows}} and use {{column_name}} inside
+- Bar width as % of max value: {{column_name_pct}} — auto-computed as 0–100
+- Empty state (shown when query returns no rows): {{^rows}}...{{/rows}}
+- Threshold conditionals (for status coloring, badges, etc.):
+    {{#col_gte_N}}...{{/col_gte_N}}      renders if col >= N
+    {{#col_lt_N}}...{{/col_lt_N}}        renders if col < N
+    {{#col_gte_N_lt_M}}...{{/col_gte_N_lt_M}}  renders if N <= col < M
+  Use normalized placeholder names (dots → underscores, e.g. category.keyword → category_keyword).
+  Example for green/yellow/red status:
+    class="{{#revenue_gte_10000}}card-green{{/revenue_gte_10000}}{{#revenue_gte_5000_lt_10000}}card-yellow{{/revenue_gte_5000_lt_10000}}{{#revenue_lt_5000}}card-red{{/revenue_lt_5000}}"
+
+REQUIRED: Your output MUST begin with exactly this comment on the very first line (nothing before it):
+<!--ai-template-->
+
+OUTPUT RULES:
+- Output ONLY the HTML template starting with the <!--ai-template--> line. No markdown fences, no explanation.
+- All CSS inline in <style> tags.
+- CRITICAL: No <script> tags or JavaScript whatsoever. Pure HTML + CSS only.
+- No external resources (no CDN, no Google Fonts, no image URLs).
+- For charts and diagrams, use pure CSS or inline SVG.
+
+VISUAL DESIGN:
+- Body background MUST be transparent — do NOT set background on <html> or <body>.
+- Text: #343741 (dark gray).
+- Required reset: body { margin: 0; padding: 16px; box-sizing: border-box; font-family: Inter, system-ui, sans-serif; color: #343741; }
+- Accent colors: #0077CC (blue), #00BFB3 (teal), #F04E98 (pink), #FEC514 (yellow), #1BA9F5, #D36086.
+- Polished, modern dashboard widget style.
+
+CONTENT RULES:
+- Pick the visualization type that best fits the schema and prompt.
+- Full panel width; height fits content naturally.
+- No title.
+- For bar charts: <div style="width: {{column_name_pct}}%; background: #0077CC; height: 20px;"></div>
+- For status indicators: colored badges with CSS background-color.`;
+
+const STATIC_PROMPT_HASH = hashKey(SYSTEM_PROMPT_STATIC.replace(/\s+/g, ' ').trim()).slice(0, 8);
+const TEMPLATE_PROMPT_HASH = hashKey(SYSTEM_PROMPT_TEMPLATE.replace(/\s+/g, ' ').trim()).slice(
+  0,
+  8
+);
+
+const CSP_META = `<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline';">`;
+
+function injectCsp(html: string): string {
+  const headMatch = html.match(/<head[^>]*>/i);
+  if (headMatch?.index !== undefined) {
+    const at = headMatch.index + headMatch[0].length;
+    return html.slice(0, at) + CSP_META + html.slice(at);
+  }
+  return CSP_META + html;
+}
+
+function sanitizeCellValue(v: unknown): string {
+  return String(v ?? '')
+    .replace(/[<>]/g, '')
+    .replace(/[\r\n]+/g, ' ')
+    .slice(0, 500);
+}
+
+function formatSampleTable(columns: EsqlColumn[], rows: unknown[][]): string {
+  const header = columns.map((c) => c.name.replace(/[<>]/g, '')).join(' | ');
+  const separator = columns.map(() => '---').join(' | ');
+  const dataRows = rows
+    .slice(0, 3)
+    .map((row) => row.map(sanitizeCellValue).join(' | '))
+    .join('\n');
+  return `${header}\n${separator}\n${dataRows}`;
+}
+
+interface StartDeps {
+  inference: InferenceServerStart;
+}
+
+async function resolveConnectorId({
+  uiSettingsClient,
+  inference,
+  request,
+}: {
+  uiSettingsClient: IUiSettingsClient;
+  inference: InferenceServerStart;
+  request: KibanaRequest;
+}): Promise<string | undefined> {
+  try {
+    const defaultSetting = await uiSettingsClient.get<string>(GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR);
+    if (defaultSetting && defaultSetting !== NO_DEFAULT_CONNECTOR) {
+      return defaultSetting;
+    }
+  } catch {
+    // UI setting may not be registered
+  }
+  try {
+    const connector = await inference.getDefaultConnector(request);
+    return connector?.connectorId;
+  } catch {
+    // no connectors available
+  }
+  return undefined;
+}
+
+export function registerGenerateRoute(
+  router: IRouter,
+  getStartServices: CoreSetup<StartDeps>['getStartServices']
+) {
+  router.post(
+    {
+      path: '/internal/ai_summary_panel/generate',
+      security: {
+        authz: { enabled: false, reason: 'Delegates auth to the inference plugin' },
+      },
+      options: {
+        access: 'internal',
+        timeout: { idleSocket: SOCKET_TIMEOUT_MS },
+      },
+      validate: {
+        body: schema.object({
+          prompt: schema.string({ minLength: 1, maxLength: 10_000 }),
+          esqlQuery: schema.maybe(schema.string({ maxLength: 10_000 })),
+          timeRange: schema.maybe(schema.object({ from: schema.string(), to: schema.string() })),
+        }),
+      },
+    },
+    async (context, request, response) => {
+      const [coreStart, { inference }] = await getStartServices();
+      const { prompt, esqlQuery, timeRange } = request.body;
+      const core = await context.core;
+
+      const connectorId = await resolveConnectorId({
+        uiSettingsClient: core.uiSettings.client,
+        inference,
+        request,
+      });
+      if (!connectorId) {
+        return response.badRequest({ body: 'No inference connector configured' });
+      }
+
+      const passThrough = new PassThrough();
+      const abortController = new AbortController();
+      request.events.aborted$.subscribe(() => abortController.abort());
+
+      const cacheRepo = coreStart.savedObjects.createInternalRepository([CACHE_SO_TYPE]);
+
+      let userMessage: string;
+      let cacheKey: string;
+      let systemPrompt: string;
+      let isTemplatePath: boolean;
+
+      if (esqlQuery) {
+        // Template path: LLM generates reusable HTML with placeholders.
+        // Cache key is schema-based (prompt + column names), not data-based — one template
+        // serves all time ranges as long as the schema doesn't change.
+        isTemplatePath = true;
+        systemPrompt = SYSTEM_PROMPT_TEMPLATE;
+
+        let columns: EsqlColumn[] = [];
+        let sampleRows: unknown[][] = [];
+        try {
+          const result = await runEsqlQuery(
+            core.elasticsearch.client.asCurrentUser,
+            esqlQuery,
+            timeRange
+          );
+          columns = result.columns;
+          sampleRows = result.rows;
+        } catch {
+          /* non-fatal — generate template from prompt + partial schema */
+        }
+
+        const colNamesKey = columns
+          .map((c) => c.name)
+          .sort()
+          .join('|');
+        cacheKey = hashKey(`${TEMPLATE_PROMPT_HASH}:tpl:${prompt}:${colNamesKey}`);
+
+        if (columns.length > 0) {
+          // Show each column's name, type, and the exact placeholder name to use.
+          // Dots/hyphens in column names (e.g. "category.keyword") are normalized to underscores
+          // so placeholder names are valid identifiers (e.g. {{category_keyword}}).
+          const normalize = (s: string) => s.replace(/[.\-\s]+/g, '_');
+          const schemaLines = columns
+            .map((c) => `  - ${c.name} (${c.type}) → placeholder: {{${normalize(c.name)}}}`)
+            .join('\n');
+          const sampleSection =
+            sampleRows.length > 0
+              ? `\n\nSample rows:\n${formatSampleTable(columns, sampleRows)}`
+              : '\n\nNote: no rows available for the current time range.';
+          userMessage = `${prompt}\n\nData schema:\n${schemaLines}${sampleSection}\n\nGenerate an HTML template using the placeholder names shown above.`;
+        } else {
+          userMessage = `${prompt}\n\nNote: schema unavailable. Generate a suitable template based on the prompt.`;
+        }
+      } else {
+        // Static path: no data, just the prompt. Returns full self-contained HTML.
+        isTemplatePath = false;
+        systemPrompt = SYSTEM_PROMPT_STATIC;
+        cacheKey = hashKey(`${STATIC_PROMPT_HASH}:l3:${prompt}`);
+        userMessage = prompt;
+      }
+
+      const cacheResult = await getCached(cacheRepo, cacheKey);
+      if (cacheResult) {
+        if (!cacheResult.stale) {
+          const payload = isTemplatePath ? cacheResult.html : injectCsp(cacheResult.html);
+          passThrough.write(JSON.stringify({ token: payload }) + '\n');
+          passThrough.end();
+          return response.ok({
+            headers: { 'Content-Type': 'application/x-ndjson' },
+            body: passThrough,
+          });
+        }
+        const stalePayload = isTemplatePath ? cacheResult.html : injectCsp(cacheResult.html);
+        passThrough.write(JSON.stringify({ stale: stalePayload }) + '\n');
+      }
+
+      // For static panels, prepend CSP as the first streaming token so the iframe gets it
+      // even before the LLM finishes. Template panels skip this — CSP is injected on the
+      // client after placeholder fill.
+      if (!isTemplatePath) {
+        passThrough.write(JSON.stringify({ token: CSP_META }) + '\n');
+      }
+
+      const client = inference.getClient({ request });
+      const events$ = client.chatComplete({
+        connectorId,
+        system: systemPrompt,
+        messages: [{ role: MessageRole.User, content: userMessage }],
+        stream: true,
+        abortSignal: abortController.signal,
+      });
+
+      let accHtml = '';
+      let sizeLimitExceeded = false;
+      events$.subscribe({
+        next: (event) => {
+          if (sizeLimitExceeded) return;
+          if (event.type === ChatCompletionEventType.ChatCompletionChunk && event.content) {
+            accHtml += event.content;
+            if (accHtml.length > MAX_HTML_BYTES) {
+              sizeLimitExceeded = true;
+              abortController.abort();
+              if (!passThrough.destroyed) {
+                passThrough.write(
+                  JSON.stringify({ error: 'Generated content exceeded size limit' }) + '\n'
+                );
+                passThrough.end();
+              }
+              return;
+            }
+            if (!passThrough.destroyed)
+              passThrough.write(JSON.stringify({ token: event.content }) + '\n');
+          }
+        },
+        error: (err) => {
+          if (!passThrough.destroyed) {
+            passThrough.write(JSON.stringify({ error: err.message }) + '\n');
+            passThrough.end();
+          }
+        },
+        complete: () => {
+          if (sizeLimitExceeded) return;
+          if (!passThrough.destroyed) passThrough.end();
+          if (accHtml) {
+            const ttl = isTemplatePath ? TEMPLATE_TTL_SECONDS : L3_TTL_SECONDS;
+            setCached(cacheRepo, cacheKey, accHtml, ttl).catch(() => {});
+          }
+        },
+      });
+
+      return response.ok({
+        headers: { 'Content-Type': 'application/x-ndjson' },
+        body: passThrough,
+      });
+    }
+  );
+}

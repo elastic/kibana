@@ -23,6 +23,7 @@ export interface OperationExecutionContext {
     attachmentInputs: Array<{ attachmentId: string; grid: AttachmentPanel['grid'] }>
   ) => { panels: AttachmentPanel[]; failures: VisualizationFailure[] };
   resolveVisualizationConfig?: ResolveVisualizationConfig;
+  getDefaultConnectorId: () => Promise<string>;
 }
 
 export interface OperationHandlerParams<TOperation> {
