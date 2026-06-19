@@ -13,7 +13,7 @@ import { defineAttachment } from '@kbn/cases-plugin/public';
 import { SECURITY_ENTITY_ATTACHMENT_TYPE } from '@kbn/cases-plugin/common';
 import type { JsonValue } from '@kbn/utility-types';
 import React, { Suspense, type ComponentType } from 'react';
-import { EuiAvatar, EuiLoadingSpinner } from '@elastic/eui';
+import { EuiAvatar } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import type { EntityAttachmentMetadata } from '../../../../common/cases/attachments/entity';
@@ -43,7 +43,7 @@ const EntityAttachmentChildrenLazy = React.lazy(() => import('./components/attac
 const EntityTabContentLazy = React.lazy(() => import('./components/entity_tab_content'));
 
 const EntityTabContentWrapper: ComponentType<CommonAttachmentTabViewProps> = (props) => (
-  <Suspense fallback={<EuiLoadingSpinner size="l" />}>
+  <Suspense fallback={null}>
     <EntityTabContentLazy {...props} />
   </Suspense>
 );
@@ -51,30 +51,6 @@ const EntityTabContentWrapper: ComponentType<CommonAttachmentTabViewProps> = (pr
 const DISPLAY_NAME = i18n.translate('xpack.securitySolution.entityAnalytics.cases.displayName', {
   defaultMessage: 'Entities',
 });
-const ENTITY_AVATAR_ARIA = i18n.translate(
-  'xpack.securitySolution.entityAnalytics.cases.entityAttachment.avatarAriaLabel',
-  {
-    defaultMessage: 'entity',
-  }
-);
-const ENTITY_AVATAR_NAME = i18n.translate(
-  'xpack.securitySolution.entityAnalytics.cases.entityAttachment.avatarNameLabel',
-  {
-    defaultMessage: 'entity',
-  }
-);
-const REMOVED_ENTITY_LABEL = i18n.translate(
-  'xpack.securitySolution.entityAnalytics.cases.entityAttachment.removedLabel',
-  {
-    defaultMessage: 'removed entity',
-  }
-);
-const DELETE_ENTITY_SUCCESS_TITLE = i18n.translate(
-  'xpack.securitySolution.entityAnalytics.cases.entityAttachment.deleteSuccessTitle',
-  {
-    defaultMessage: 'Deleted entity attachment',
-  }
-);
 
 /**
  * Defines the `security.entity` cases attachment registered with the cases attachment framework.
@@ -93,19 +69,8 @@ export const getEntityAttachment = () =>
           defaultMessage="added an entity"
         />
       ),
-      timelineAvatar: (
-        <EuiAvatar
-          name={ENTITY_AVATAR_NAME}
-          color="subdued"
-          iconType="user"
-          aria-label={ENTITY_AVATAR_ARIA}
-        />
-      ),
+      timelineAvatar: <EuiAvatar name="entity" color="subdued" iconType="user" />,
       children: EntityAttachmentChildrenLazy,
-      deleteSuccessTitle: DELETE_ENTITY_SUCCESS_TITLE,
-    }),
-    getAttachmentRemovalObject: () => ({
-      event: REMOVED_ENTITY_LABEL,
     }),
     getAttachmentTabViewObject: () => ({
       children: EntityTabContentWrapper,

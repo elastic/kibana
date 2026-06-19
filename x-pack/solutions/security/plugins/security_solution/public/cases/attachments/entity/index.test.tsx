@@ -32,7 +32,6 @@ describe('Entity attachment', () => {
       displayName: 'Entities',
       schema: EntityAttachmentPayloadSchema,
       getAttachmentViewObject: expect.any(Function),
-      getAttachmentRemovalObject: expect.any(Function),
       getAttachmentTabViewObject: expect.any(Function),
     });
   });
