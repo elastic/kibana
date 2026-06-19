@@ -9,7 +9,7 @@ import React from 'react';
 import { EuiIcon } from '@elastic/eui';
 import { AnnouncementBanner } from '@kbn/announcement-banner';
 import { ProductFeatureKey } from '@kbn/security-solution-features/keys';
-import { analyticsSpeedAccelerationSvg as analyticsSpeedAcceleration } from '@kbn/security-solution-plugin/public';
+import analyticsSpeedAcceleration from './analytics_speed_acceleration.svg';
 import { useKibana } from '../../../common/services';
 import { getProjectFeaturesUrl } from '../../../navigation/util';
 import { getProductTypeByPLI } from '../../hooks/use_product_type_by_pli';

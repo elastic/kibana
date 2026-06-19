@@ -31,9 +31,7 @@ jest.mock('../../hooks/use_product_type_by_pli', () => ({
   getProductTypeByPLI: jest.fn(() => 'Security Complete'),
 }));
 
-jest.mock('@kbn/security-solution-plugin/public', () => ({
-  analyticsSpeedAccelerationSvg: 'mock-svg',
-}));
+jest.mock('./analytics_speed_acceleration.svg', () => 'mock-svg');
 
 import { getProjectFeaturesUrl } from '../../../navigation/util';
 import { getProductTypeByPLI } from '../../hooks/use_product_type_by_pli';
