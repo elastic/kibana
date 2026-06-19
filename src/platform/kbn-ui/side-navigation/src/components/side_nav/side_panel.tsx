@@ -7,9 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { type ReactNode, useMemo } from 'react';
+import React, { type ReactNode, useCallback, useEffect, useMemo, useRef } from 'react';
 import {
   EuiScreenReaderOnly,
+  euiCanAnimate,
   euiShadow,
   EuiSplitPanel,
   useEuiTheme,
@@ -30,11 +31,48 @@ import { NAVIGATION_SELECTOR_PREFIX, SIDE_PANEL_ID } from '../../constants';
 import { getHighContrastBorder } from '../../hooks/use_high_contrast_mode_styles';
 import { SidePanelResizeHandle } from './panel_resize_handle';
 
-const sidePanelContainerStyles = css`
+const getAnimationDurationMs = (duration: string): number => {
+  const millisecondsMatch = duration.match(/^([\d.]+)ms$/);
+  if (millisecondsMatch) {
+    return Number(millisecondsMatch[1]);
+  }
+
+  const secondsMatch = duration.match(/^([\d.]+)s$/);
+  if (secondsMatch) {
+    return Number(secondsMatch[1]) * 1000;
+  }
+
+  return 250;
+};
+
+const getSidePanelContainerStyles =
+  (
+    sidePanelWidth: number,
+    isPanelShown: boolean,
+    isAnimating: boolean,
+    transitionTiming: string
+  ) =>
+    css`
+      display: flex;
+      flex-direction: row;
+      height: 100%;
+      flex-shrink: 0;
+      max-width: ${isPanelShown ? sidePanelWidth : 0}px;
+      opacity: ${isPanelShown ? 1 : 0};
+      overflow: ${isAnimating && !isPanelShown ? 'hidden' : 'visible'};
+      pointer-events: ${isAnimating && !isPanelShown ? 'none' : 'auto'};
+      ${isAnimating &&
+      euiCanAnimate} {
+        transition: max-width ${transitionTiming}, opacity ${transitionTiming};
+      }
+    `;
+
+const getSidePanelContentStyles = (sidePanelWidth: number) => css`
   display: flex;
   flex-direction: row;
-  height: 100%;
   flex-shrink: 0;
+  width: ${sidePanelWidth}px;
+  height: 100%;
 `;
 
 const getSidePanelWrapperStyles =
@@ -66,6 +104,9 @@ export type SidePanelChildren = ReactNode | ((ids: SidePanelIds) => ReactNode);
 export interface SidePanelProps {
   children: SidePanelChildren;
   footer?: ReactNode;
+  isAnimating?: boolean;
+  isPanelShown?: boolean;
+  onAnimationEnd?: () => void;
   openerNode: MenuItem;
   sidePanelWidth: number;
   onSidePanelDragWidthChange: (rawWidth: number) => void;
@@ -81,6 +122,9 @@ export interface SidePanelProps {
 export const SidePanel = ({
   children,
   footer,
+  isAnimating = false,
+  isPanelShown = true,
+  onAnimationEnd,
   openerNode,
   sidePanelWidth,
   onSidePanelDragWidthChange,
@@ -90,10 +134,63 @@ export const SidePanel = ({
 }: SidePanelProps): JSX.Element => {
   const euiThemeContext = useEuiTheme();
   const scrollStyles = useScroll();
+  const hasCompletedAnimationRef = useRef(false);
+  const animationDuration = euiThemeContext.euiTheme.animation.slow;
+  const transitionTiming = `${animationDuration} ${euiThemeContext.euiTheme.animation.resistance}`;
+  const containerStyles = useMemo(
+    () =>
+      getSidePanelContainerStyles(
+        sidePanelWidth,
+        isPanelShown,
+        isAnimating,
+        transitionTiming
+      ),
+    [isAnimating, isPanelShown, sidePanelWidth, transitionTiming]
+  );
+  const contentStyles = useMemo(() => getSidePanelContentStyles(sidePanelWidth), [sidePanelWidth]);
   const wrapperStyles = useMemo(
     () => getSidePanelWrapperStyles(sidePanelWidth)(euiThemeContext),
     [euiThemeContext, sidePanelWidth]
   );
+
+  const completeAnimation = useCallback(() => {
+    if (!isAnimating || hasCompletedAnimationRef.current) {
+      return;
+    }
+
+    hasCompletedAnimationRef.current = true;
+    onAnimationEnd?.();
+  }, [isAnimating, onAnimationEnd]);
+
+  useEffect(() => {
+    if (!isAnimating) {
+      hasCompletedAnimationRef.current = false;
+      return;
+    }
+
+    const timeoutId = window.setTimeout(
+      completeAnimation,
+      getAnimationDurationMs(animationDuration)
+    );
+
+    return () => window.clearTimeout(timeoutId);
+  }, [animationDuration, completeAnimation, isAnimating]);
+
+  const handleTransitionEnd = useCallback(
+    (event: React.TransitionEvent<HTMLDivElement>) => {
+      if (
+        !isAnimating ||
+        event.propertyName !== 'max-width' ||
+        event.target !== event.currentTarget
+      ) {
+        return;
+      }
+
+      completeAnimation();
+    },
+    [completeAnimation, isAnimating]
+  );
+
   const secondaryNavigationInstructionsId = useGeneratedHtmlId({
     prefix: 'secondary-navigation-instructions',
   });
@@ -135,50 +232,52 @@ export const SidePanel = ({
         </p>
       </EuiScreenReaderOnly>
       <SidePanelWidthProvider value={sidePanelWidth}>
-        <div css={sidePanelContainerStyles}>
-          <EuiSplitPanel.Outer
-            id={SIDE_PANEL_ID}
-            aria-label={i18n.translate('kbnUI.sideNavigation.sidePanelAriaLabel', {
-              defaultMessage: `Side panel for {label}`,
-              values: {
-                label: openerNode.label,
-              },
-            })}
-            aria-describedby={secondaryNavigationInstructionsId}
-            borderRadius="none"
-            className={sidePanelClassName} // Used in Storybook to limit the height of the panel
-            css={wrapperStyles}
-            data-test-subj={`${sidePanelClassName} ${sidePanelClassName}_${openerNode.id}`}
-            hasShadow={false}
-            role="region"
-            color="transparent"
-          >
-            <EuiSplitPanel.Inner
+        <div css={containerStyles} onTransitionEnd={handleTransitionEnd}>
+          <div css={contentStyles}>
+            <EuiSplitPanel.Outer
+              id={SIDE_PANEL_ID}
+              aria-label={i18n.translate('kbnUI.sideNavigation.sidePanelAriaLabel', {
+                defaultMessage: `Side panel for {label}`,
+                values: {
+                  label: openerNode.label,
+                },
+              })}
+              aria-describedby={secondaryNavigationInstructionsId}
+              borderRadius="none"
+              className={sidePanelClassName}
+              css={wrapperStyles}
+              data-test-subj={`${sidePanelClassName} ${sidePanelClassName}_${openerNode.id}`}
+              hasShadow={false}
+              role="region"
               color="transparent"
-              css={navigationPanelStyles}
-              data-test-subj={`${NAVIGATION_SELECTOR_PREFIX}-panelContent`}
-              onKeyDown={handleRovingIndex}
-              panelRef={panelRef}
-              paddingSize="none"
             >
-              {renderChildren()}
-            </EuiSplitPanel.Inner>
-            <EuiSplitPanel.Inner
-              color="transparent"
-              data-test-subj={`${NAVIGATION_SELECTOR_PREFIX}-panelFooter`}
-              paddingSize="none"
-              grow={false}
-            >
-              {footer}
-            </EuiSplitPanel.Inner>
-          </EuiSplitPanel.Outer>
-          <SidePanelResizeHandle
-            width={sidePanelWidth}
-            onDragWidthChange={onSidePanelDragWidthChange}
-            onDragWidthCommit={onSidePanelDragWidthCommit}
-            onCollapse={onSidePanelCollapse}
-            onWidthChange={onSidePanelWidthChange}
-          />
+              <EuiSplitPanel.Inner
+                color="transparent"
+                css={navigationPanelStyles}
+                data-test-subj={`${NAVIGATION_SELECTOR_PREFIX}-panelContent`}
+                onKeyDown={handleRovingIndex}
+                panelRef={panelRef}
+                paddingSize="none"
+              >
+                {renderChildren()}
+              </EuiSplitPanel.Inner>
+              <EuiSplitPanel.Inner
+                color="transparent"
+                data-test-subj={`${NAVIGATION_SELECTOR_PREFIX}-panelFooter`}
+                paddingSize="none"
+                grow={false}
+              >
+                {footer}
+              </EuiSplitPanel.Inner>
+            </EuiSplitPanel.Outer>
+            <SidePanelResizeHandle
+              width={sidePanelWidth}
+              onDragWidthChange={onSidePanelDragWidthChange}
+              onDragWidthCommit={onSidePanelDragWidthCommit}
+              onCollapse={onSidePanelCollapse}
+              onWidthChange={onSidePanelWidthChange}
+            />
+          </div>
         </div>
       </SidePanelWidthProvider>
     </>

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const MIN_SIDE_PANEL_WIDTH = 180;
+export const MIN_SIDE_PANEL_WIDTH = 200;
 const MAX_SIDE_PANEL_WIDTH_PERCENT = 0.4;
 
 /** How far past the minimum (in px) a drag can go before collapsing on release. */

@@ -25,8 +25,9 @@ import { SideNav } from './side_nav';
 import { SideNavCollapseButton } from './collapse_button';
 import { focusMainContent } from '../utils/focus_main_content';
 import { getHasSubmenu } from '../utils/get_has_submenu';
-import { useLayoutWidth } from '../hooks/use_layout_width';
+import { useSidePanelLayoutWidth } from '../hooks/use_side_panel_layout_width';
 import { useSidePanelWidth } from '../hooks/use_side_panel_width';
+import { useSidePanelVisibility } from '../hooks/use_side_panel_visibility';
 import { useNavigation } from '../hooks/use_navigation';
 import { useNewItems } from '../hooks/use_new_items';
 import { useResponsiveMenu } from '../hooks/use_responsive_menu';
@@ -152,6 +153,14 @@ export const Navigation = ({
 
   const { width: sidePanelWidth, setWidth: setSidePanelWidth, setDragWidth: setSidePanelDragWidth, commitDragWidth: commitSidePanelDragWidth } = useSidePanelWidth();
 
+  const {
+    isSidePanelAnimating,
+    isSidePanelRendered,
+    isSidePanelShown,
+    renderedOpenerNode,
+    onSidePanelAnimationEnd,
+  } = useSidePanelVisibility(isSidePanelOpen, openerNode);
+
   const handleSidePanelCollapse = useCallback(() => {
     onToggleCollapsed?.(true);
   }, [onToggleCollapsed]);
@@ -167,7 +176,13 @@ export const Navigation = ({
     [commitSidePanelDragWidth, handleSidePanelCollapse]
   );
 
-  useLayoutWidth({ hidePrimaryLabels, isSidePanelOpen, sidePanelWidth, setWidth });
+  useSidePanelLayoutWidth({
+    hidePrimaryLabels,
+    isSidePanelOpen,
+    isSidePanelVisibilityAnimating: isSidePanelAnimating,
+    sidePanelWidth,
+    setWidth,
+  });
 
   // Create the collapse button if a toggle callback is provided or if the navigation is not forced to be collapsed (e.g. on mobile)
   const collapseButton =
@@ -496,10 +511,13 @@ export const Navigation = ({
         </SideNav.Footer>
       </SideNav>
 
-      {isSidePanelOpen && openerNode && (
+      {isSidePanelRendered && renderedOpenerNode && (
         <SideNav.SidePanel
           footer={sidePanelFooter}
-          openerNode={openerNode}
+          isAnimating={isSidePanelAnimating}
+          isPanelShown={isSidePanelShown}
+          onAnimationEnd={onSidePanelAnimationEnd}
+          openerNode={renderedOpenerNode}
           sidePanelWidth={sidePanelWidth}
           onSidePanelDragWidthChange={setSidePanelDragWidth}
           onSidePanelDragWidthCommit={handleSidePanelDragCommit}
@@ -507,18 +525,18 @@ export const Navigation = ({
           onSidePanelWidthChange={setSidePanelWidth}
         >
           {({ secondaryNavigationInstructionsId }) => {
-            const firstNonEmptySectionIndex = openerNode.sections?.findIndex(
+            const firstNonEmptySectionIndex = renderedOpenerNode.sections?.findIndex(
               (s) => s.items.length > 0
             );
 
             return (
               <SideNav.SecondaryMenu
-                badgeType={openerNode.badgeType}
+                badgeType={renderedOpenerNode.badgeType}
                 isPanel
-                title={openerNode.label}
-                isNew={getIsNewSecondary(openerNode.id)}
+                title={renderedOpenerNode.label}
+                isNew={getIsNewSecondary(renderedOpenerNode.id)}
               >
-                {openerNode.sections?.map((section, sectionIndex) => (
+                {renderedOpenerNode.sections?.map((section, sectionIndex) => (
                   <SideNav.SecondaryMenu.Section key={section.id} label={section.label}>
                     {section.items.map((subItem, subItemIndex) => {
                       const isFirstItem =

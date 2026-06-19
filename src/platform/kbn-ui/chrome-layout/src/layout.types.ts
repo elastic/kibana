@@ -39,6 +39,8 @@ export interface LayoutState extends LayoutDimensions {
   hasNavigation: boolean;
   hasApplicationTopBar: boolean;
   hasApplicationBottomBar: boolean;
+  /** When set, animates grid column width changes (e.g. side panel show/hide). */
+  navigationWidthTransition?: string;
 }
 
 /**
