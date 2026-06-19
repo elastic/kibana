@@ -69,4 +69,25 @@ describe('transformConnectorsResponse', () => {
       },
     ]);
   });
+
+  test('should transform allowed_sub_actions to allowedSubActions', () => {
+    const result = transformConnectorResponse([
+      {
+        id: 'restricted-gh',
+        name: 'Restricted GitHub',
+        connector_type_id: '.github',
+        is_preconfigured: false,
+        is_deprecated: false,
+        is_missing_secrets: false,
+        is_system_action: false,
+        referenced_by_count: 0,
+        secrets: {},
+        config: {},
+        is_connector_type_deprecated: false,
+        allowed_sub_actions: ['searchIssues', 'getIssue'],
+      },
+    ]);
+
+    expect(result[0].allowedSubActions).toEqual(['searchIssues', 'getIssue']);
+  });
 });

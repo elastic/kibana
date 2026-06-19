@@ -32,6 +32,7 @@ const toActionConnector = (c: ConnectorItem): ActionConnector =>
     config: c.config,
     isMissingSecrets: c.isMissingSecrets ?? false,
     authMode: c.authMode,
+    ...(c.allowedSubActions !== undefined ? { allowedSubActions: c.allowedSubActions } : {}),
     secrets: {},
   } as ActionConnector);
 

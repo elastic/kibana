@@ -13,7 +13,7 @@ import {
 } from '@kbn/agent-builder-common/attachments';
 import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
 import { formatSchemaForLlm } from '@kbn/agent-builder-server';
-import { getConnectorSpec } from '@kbn/connector-specs';
+import { getConnectorSpec, isConnectorSubActionAllowed } from '@kbn/connector-specs';
 
 /**
  * Creates the definition for the `connector` attachment type.
@@ -53,7 +53,7 @@ export const createConnectorAttachmentType = (): AttachmentTypeDefinition<
       const subActionEntries = spec
         ? Object.entries(spec.actions).filter(
             ([name, action]) =>
-              action.isTool && (allowedSubActions === undefined || allowedSubActions.includes(name))
+              action.isTool && isConnectorSubActionAllowed(name, allowedSubActions)
           )
         : [];
 

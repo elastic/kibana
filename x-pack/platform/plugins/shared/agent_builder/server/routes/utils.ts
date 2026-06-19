@@ -6,7 +6,11 @@
  */
 
 import type { Connector } from '@kbn/actions-plugin/server';
-import { getConnectorSpec, isToolAction } from '@kbn/connector-specs';
+import {
+  getConnectorSpec,
+  isConnectorSubActionAllowed,
+  isToolAction,
+} from '@kbn/connector-specs';
 import type { ConnectorItem, ConnectorSubAction, OAuthStatus } from '../../common/http_api/tools';
 
 export const getTechnicalPreviewWarning = (featureName: string) => {
@@ -33,11 +37,22 @@ export const getSSEResponseHeaders = (isCloud: boolean): Record<string, string> 
   'X-Accel-Buffering': 'no',
 });
 
-export const getConnectorSubActions = (actionTypeId: string): ConnectorSubAction[] => {
+export const getConnectorSubActionCount = (actionTypeId: string): number => {
+  const spec = getConnectorSpec(actionTypeId);
+  if (!spec) return 0;
+  return Object.keys(spec.actions).filter((name) => isToolAction(spec, name)).length;
+};
+
+export const getConnectorSubActions = (
+  actionTypeId: string,
+  allowedSubActions?: string[]
+): ConnectorSubAction[] => {
   const spec = getConnectorSpec(actionTypeId);
   if (!spec) return [];
   return Object.entries(spec.actions)
-    .filter(([name]) => isToolAction(spec, name))
+    .filter(
+      ([name]) => isToolAction(spec, name) && isConnectorSubActionAllowed(name, allowedSubActions)
+    )
     .map(([name, action]) => ({ name, description: action.description }));
 };
 
@@ -47,6 +62,9 @@ export const toConnectorItem = (
     oauthStatus?: OAuthStatus;
   }
 ): ConnectorItem => {
+  const totalSubActionCount = getConnectorSubActionCount(connector.actionTypeId);
+  const allowedSubActions = connector.allowedSubActions;
+
   return {
     id: connector.id,
     name: connector.name,
@@ -59,6 +77,8 @@ export const toConnectorItem = (
     config: connector.config,
     authMode: connector.authMode,
     oauthStatus: options?.oauthStatus,
-    subActions: getConnectorSubActions(connector.actionTypeId),
+    ...(allowedSubActions !== undefined ? { allowedSubActions } : {}),
+    ...(totalSubActionCount > 0 ? { totalSubActionCount } : {}),
+    subActions: getConnectorSubActions(connector.actionTypeId, allowedSubActions),
   };
 };

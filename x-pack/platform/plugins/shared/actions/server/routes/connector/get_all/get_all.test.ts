@@ -141,6 +141,45 @@ describe('getAllConnectorsRoute', () => {
     expect(actionsClient.getAll).toHaveBeenCalledTimes(1);
   });
 
+  it('returns allowed_sub_actions when present on the connector', async () => {
+    const licenseState = licenseStateMock.create();
+    const router = httpServiceMock.createRouter();
+
+    getAllConnectorsRoute(router, licenseState);
+
+    const [, handler] = router.get.mock.calls[0];
+
+    const actionsClient = actionsClientMock.create();
+    actionsClient.getAll.mockResolvedValueOnce([
+      {
+        id: 'restricted-gh',
+        name: 'Restricted GitHub',
+        actionTypeId: '.github',
+        config: {},
+        isPreconfigured: false,
+        isDeprecated: false,
+        isSystemAction: false,
+        isConnectorTypeDeprecated: false,
+        referencedByCount: 0,
+        authMode: 'shared',
+        allowedSubActions: ['searchIssues', 'getIssue'],
+      },
+    ]);
+
+    const [context, req, res] = mockHandlerArguments({ actionsClient }, {}, ['ok']);
+
+    const result = await handler(context, req, res);
+
+    expect(result).toMatchObject({
+      body: [
+        {
+          id: 'restricted-gh',
+          allowed_sub_actions: ['searchIssues', 'getIssue'],
+        },
+      ],
+    });
+  });
+
   it('returns connectors with authMode "per-user"', async () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();

@@ -198,7 +198,11 @@ export interface ConnectorItem {
   isConnectorTypeDeprecated: boolean;
   authMode?: 'shared' | 'per-user';
   oauthStatus?: OAuthStatus;
-  /** Sub-actions derived from the connector spec (isTool: true actions) */
+  /** When set, only these named sub-actions (plus listTools/callTool) are agent-accessible */
+  allowedSubActions?: string[];
+  /** Total tool sub-actions defined on the connector spec */
+  totalSubActionCount?: number;
+  /** Sub-actions agents can call (filtered by allowedSubActions when set) */
   subActions: ConnectorSubAction[];
 }
 

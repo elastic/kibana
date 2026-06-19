@@ -25,6 +25,13 @@ export {
 export { getConnectorSpec } from './src/get_connector_spec';
 export { isToolAction } from './src/connector_spec';
 export {
+  CONNECTOR_META_SUB_ACTIONS,
+  isConnectorMetaSubAction,
+  isConnectorSubActionAllowed,
+  partitionToolSubActions,
+} from './src/connector_meta_sub_actions';
+export type { ConnectorMetaSubAction } from './src/connector_meta_sub_actions';
+export {
   getConnectorActionErrorMeta,
   setConnectorActionErrorMeta,
   getFinitePositiveNumber,

@@ -1609,6 +1609,11 @@ export const labels = {
         defaultMessage: 'Sub-actions ({count} available)',
         values: { count },
       }),
+    subActionsRestrictedTitle: (allowedCount: number, totalCount: number) =>
+      i18n.translate('xpack.agentBuilder.agentConnectors.detail.subActionsRestrictedTitle', {
+        defaultMessage: 'Sub-actions ({allowedCount} of {totalCount} allowed)',
+        values: { allowedCount, totalCount },
+      }),
     connectionSectionTitle: i18n.translate(
       'xpack.agentBuilder.agentConnectors.detail.connectionSectionTitle',
       { defaultMessage: 'Connection' }

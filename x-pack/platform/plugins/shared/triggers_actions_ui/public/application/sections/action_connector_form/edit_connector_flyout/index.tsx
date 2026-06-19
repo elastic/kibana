@@ -380,6 +380,7 @@ const EditConnectorFlyoutComponent: React.FC<EditConnectorFlyoutProps> = ({
               {actionTypeModel && !isLoadingActionTypeModel && !actionTypeModelError && (
                 <>
                   <ConnectorForm
+                    key={`${connector.id}:${(connector.allowedSubActions ?? []).join('\u0000')}`}
                     actionTypeModel={actionTypeModel}
                     connector={connectorWithoutSecrets}
                     isEdit={isEdit}

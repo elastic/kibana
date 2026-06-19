@@ -34,6 +34,7 @@ describe('ConnectorFormFieldsGlobal', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     const httpMock = httpServiceMock.createStartContract();
+    httpMock.get.mockResolvedValue({ tool_sub_actions: [] });
     useKibanaMock().services.http = httpMock;
     checkConnectorIdAvailability.mockResolvedValue({ isAvailable: true });
   });
@@ -231,6 +232,51 @@ describe('ConnectorFormFieldsGlobal', () => {
 
     await waitFor(() => {
       expect(checkConnectorIdAvailability).not.toHaveBeenCalled();
+    });
+  });
+
+  it('excludes listTools and callTool from the allowed sub-actions picker', async () => {
+    useKibanaMock().services.http.get.mockResolvedValue({
+      tool_sub_actions: ['searchIssues', 'listTools', 'callTool'],
+    });
+
+    render(
+      <FormTestProvider
+        onSubmit={onSubmit}
+        defaultValue={{ ...defaultValue, actionTypeId: '.github' }}
+      >
+        <ConnectorFormFieldsGlobal canSave={true} isEdit={false} />
+      </FormTestProvider>
+    );
+
+    expect(await screen.findByTestId('allowedSubActionsInput')).toBeInTheDocument();
+    expect(screen.getByText('searchIssues')).toBeInTheDocument();
+    expect(screen.queryByText('listTools')).not.toBeInTheDocument();
+    expect(screen.queryByText('callTool')).not.toBeInTheDocument();
+  });
+
+  it('shows only saved allowed sub-actions when editing a restricted connector', async () => {
+    useKibanaMock().services.http.get.mockResolvedValue({
+      tool_sub_actions: ['searchIssues', 'getIssue', 'listTools', 'callTool'],
+    });
+
+    render(
+      <FormTestProvider
+        onSubmit={onSubmit}
+        defaultValue={{
+          ...defaultValue,
+          actionTypeId: '.github',
+          allowedSubActions: ['searchIssues'],
+        }}
+      >
+        <ConnectorFormFieldsGlobal canSave={true} isEdit={true} />
+      </FormTestProvider>
+    );
+
+    await waitFor(() => {
+      expect(screen.getByTestId('allowedSubActionsInput')).toBeInTheDocument();
+      expect(document.querySelectorAll('.euiComboBoxPill').length).toBe(1);
+      expect(screen.getByText('searchIssues')).toBeInTheDocument();
     });
   });
 

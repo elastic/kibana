@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useState, useCallback, useEffect } from 'react';
+import React, { memo, useState, useCallback, useEffect, useMemo } from 'react';
 import { EuiComboBox, EuiFormRow, EuiSpacer } from '@elastic/eui';
 
 import type {
@@ -24,6 +24,10 @@ import { isHttpFetchError } from '@kbn/core-http-browser';
 import { toSlugIdentifier } from '@kbn/std';
 import { isValidId } from '@kbn/human-readable-id';
 import type { ConnectorSpecWireResponse } from '@kbn/alerts-ui-shared/src/common/apis/fetch_connector_spec';
+import {
+  isConnectorMetaSubAction,
+  partitionToolSubActions,
+} from '@kbn/connector-specs';
 import { useKibana } from '../../../common/lib/kibana';
 import { checkConnectorIdAvailability } from '../../lib/action_connector_api';
 
@@ -79,6 +83,14 @@ const CONNECTOR_ID_CHECK_FAILED_ERROR = i18n.translate(
 );
 
 const CONNECTOR_ID_MAX_LENGTH = 36;
+
+const normalizeAllowedSubActions = (value: unknown): string[] | undefined => {
+  if (!Array.isArray(value) || value.length === 0) {
+    return undefined;
+  }
+  const names = value.filter((item): item is string => typeof item === 'string' && item.length > 0);
+  return names.length > 0 ? names : undefined;
+};
 
 const getAvailabilityCheckErrorMessage = (error: unknown): string => {
   if (isHttpFetchError(error)) {
@@ -200,10 +212,12 @@ const ConnectorFormFieldsGlobalComponent: React.FC<ConnectorFormFieldsProps> = (
   isEdit,
 }) => {
   const { http } = useKibana().services;
-  const { setFieldValue } = useFormContext();
-  const [{ name, actionTypeId, allowedSubActions }] = useFormData<ConnectorFormData>({
-    watch: ['name', 'id', 'actionTypeId', 'allowedSubActions'],
-  });
+  const form = useFormContext<ConnectorFormData>();
+  const { setFieldValue } = form;
+  const [{ name, actionTypeId, allowedSubActions: formAllowedSubActions }] =
+    useFormData<ConnectorFormData>({
+      watch: ['name', 'id', 'actionTypeId', 'allowedSubActions'],
+    });
   const [usingCustomIdentifier, setUsingCustomIdentifier] = useState(false);
   const [toolSubActions, setToolSubActions] = useState<string[]>([]);
 
@@ -228,25 +242,62 @@ const ConnectorFormFieldsGlobalComponent: React.FC<ConnectorFormFieldsProps> = (
     };
   }, [actionTypeId, http]);
 
-  const resolvedAllowedSubActions = Array.isArray(allowedSubActions)
-    ? allowedSubActions
-    : undefined;
-  const allSubActionOptions = toolSubActions.map((subActionName) => ({ label: subActionName }));
-  const selectedSubActionOptions = (resolvedAllowedSubActions ?? toolSubActions).map(
-    (subActionName) => ({
-      label: subActionName,
-    })
+  const { restrictableSubActions } = useMemo(
+    () => partitionToolSubActions(toolSubActions),
+    [toolSubActions]
   );
+
+  const allowedSubActions = useMemo(() => {
+    const fromForm = normalizeAllowedSubActions(formAllowedSubActions);
+    if (fromForm) {
+      return fromForm;
+    }
+    return normalizeAllowedSubActions(form.getFieldDefaultValue('allowedSubActions'));
+  }, [form, formAllowedSubActions]);
+
+  const resolvedRestrictableAllowedSubActions = useMemo(() => {
+    if (!allowedSubActions) {
+      return undefined;
+    }
+    return allowedSubActions.filter((subActionName) => !isConnectorMetaSubAction(subActionName));
+  }, [allowedSubActions]);
+
+  useEffect(() => {
+    if (restrictableSubActions.length === 0 || !resolvedRestrictableAllowedSubActions) {
+      return;
+    }
+
+    const currentValue = normalizeAllowedSubActions(formAllowedSubActions);
+    if (currentValue) {
+      return;
+    }
+
+    setFieldValue('allowedSubActions', resolvedRestrictableAllowedSubActions);
+  }, [
+    formAllowedSubActions,
+    resolvedRestrictableAllowedSubActions,
+    restrictableSubActions.length,
+    setFieldValue,
+  ]);
+
+  const allSubActionOptions = restrictableSubActions.map((subActionName) => ({
+    label: subActionName,
+  }));
+  const selectedSubActionOptions = (
+    resolvedRestrictableAllowedSubActions ?? restrictableSubActions
+  ).map((subActionName) => ({
+    label: subActionName,
+  }));
 
   const handleSubActionsChange = useCallback(
     (selected: Array<{ label: string }>) => {
       const selectedNames = selected.map(({ label }) => label);
       const allSelected =
-        selectedNames.length === toolSubActions.length &&
-        toolSubActions.every((s) => selectedNames.includes(s));
+        selectedNames.length === restrictableSubActions.length &&
+        restrictableSubActions.every((subActionName) => selectedNames.includes(subActionName));
       setFieldValue('allowedSubActions', allSelected ? undefined : selectedNames);
     },
-    [toolSubActions, setFieldValue]
+    [restrictableSubActions, setFieldValue]
   );
 
   useEffect(() => {
@@ -294,9 +345,9 @@ const ConnectorFormFieldsGlobalComponent: React.FC<ConnectorFormFieldsProps> = (
           },
         }}
       />
-      {toolSubActions.length > 0 && (
+      {actionTypeId && <UseField path="allowedSubActions" component={HiddenField} />}
+      {restrictableSubActions.length > 0 && (
         <>
-          <UseField path="allowedSubActions" component={HiddenField} />
           <EuiSpacer size="m" />
           <EuiFormRow
             label={i18n.translate(
@@ -307,7 +358,7 @@ const ConnectorFormFieldsGlobalComponent: React.FC<ConnectorFormFieldsProps> = (
               'xpack.triggersActionsUI.sections.actionConnectorForm.allowedSubActionsHelpText',
               {
                 defaultMessage:
-                  'Restrict which sub-actions agents can call on this connector. Leave all selected for no restrictions.',
+                  'Restrict which named sub-actions agents can call on this connector. listTools and callTool are always available. Leave all selected for no restrictions.',
               }
             )}
             fullWidth

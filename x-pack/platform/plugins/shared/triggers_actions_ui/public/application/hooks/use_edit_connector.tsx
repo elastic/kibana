@@ -11,7 +11,10 @@ import type { ActionConnector, ActionConnectorWithoutId } from '../../types';
 import { updateActionConnector } from '../lib/action_connector_api';
 import { useKibana } from '../../common/lib/kibana';
 
-type UpdateConnectorSchema = Pick<ActionConnectorWithoutId, 'name' | 'config' | 'secrets'> & {
+type UpdateConnectorSchema = Pick<
+  ActionConnectorWithoutId,
+  'name' | 'config' | 'secrets' | 'allowedSubActions'
+> & {
   id: string;
 };
 
