@@ -14,28 +14,21 @@ import { z } from '@kbn/zod';
  */
 export const notificationSchema = z
   .object({
-    /** Ingest time, ISO 8601. Drives ordering and severity-based retention. */
+    /** Ingest time, into the datastream, ISO 8601. Determines ordering and retention. */
     '@timestamp': z.iso.datetime(),
     /**
-     * Deterministic idempotency key. Re-pushing the same `notification_id`
-     * collapses to a single entry at query time (no upsert). See the ID
-     * conventions in `notification_id.ts`.
+     * Deterministic idempotency key. See the ID conventions in `notification_id.ts`.
      */
     notification_id: z.string().min(1),
     /** Timestamp of the notification event, ISO 8601. */
     event_timestamp: z.iso.datetime(),
-    /** Registered notification type id, e.g. `modelStatus`. */
+    /** Registered notification type, e.g. `inferenceModelStatus`. */
     type: z.string().min(1),
     /** Short, human-readable headline. */
     title: z.string().min(1),
-    /** Longer human-readable body. */
-    body: z.string().min(1),
+    /** Longer human-readable description. */
+    description: z.string().min(1),
     /** App id of the producing application, e.g. `inference`. */
     source_app_id: z.string().min(1),
-    /**
-     * Producer-owned identifier for the underlying entity/event this
-     * notification is about (e.g. an inference endpoint id). Optional.
-     */
-    external_id: z.string().min(1).optional(),
   })
   .strict();

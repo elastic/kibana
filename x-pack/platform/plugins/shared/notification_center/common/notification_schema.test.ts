@@ -14,21 +14,13 @@ const validNotification: Notification = {
   event_timestamp: '2026-06-17T00:00:00.000Z',
   type: 'modelStatus',
   title: 'Inference endpoint deprecated',
-  body: 'Your inference endpoint is deprecated and will stop working in a future version.',
+  description: 'Your inference endpoint is deprecated and will stop working in a future version.',
   source_app_id: 'inference',
 };
 
 describe('notificationSchema', () => {
-  it('accepts a minimal valid notification (no optional fields)', () => {
+  it('accepts a valid notification', () => {
     expect(notificationSchema.parse(validNotification)).toEqual(validNotification);
-  });
-
-  it('accepts a fully populated notification', () => {
-    const full: Notification = {
-      ...validNotification,
-      external_id: 'my-endpoint',
-    };
-    expect(notificationSchema.parse(full)).toEqual(full);
   });
 
   it.each(['@timestamp', 'event_timestamp'] as const)('rejects a non-ISO %s', (field) => {
@@ -37,7 +29,7 @@ describe('notificationSchema', () => {
     ).toThrow();
   });
 
-  it.each(['notification_id', 'type', 'title', 'body', 'source_app_id'] as const)(
+  it.each(['notification_id', 'type', 'title', 'description', 'source_app_id'] as const)(
     'rejects an empty %s',
     (field) => {
       expect(() => notificationSchema.parse({ ...validNotification, [field]: '' })).toThrow();
@@ -50,7 +42,7 @@ describe('notificationSchema', () => {
     'event_timestamp',
     'type',
     'title',
-    'body',
+    'description',
     'source_app_id',
   ] as const)('requires %s', (field) => {
     const { [field]: _omitted, ...rest } = validNotification;
