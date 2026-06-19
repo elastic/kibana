@@ -12,12 +12,14 @@ import {
   test,
   CONNECTORS_ROLE,
   navigateToConnectors,
-  searchAndOpenConnector,
+  searchConnectors,
   closeFlyoutIfOpen,
 } from '../fixtures';
 
-const openTestTab = async (page: ScoutPage, connectorName: string) => {
-  await searchAndOpenConnector(page, connectorName);
+const openTestTab = async (page: ScoutPage, connectorId: string, connectorName: string) => {
+  await searchConnectors(page, connectorName);
+  await expect(page.testSubj.locator('connectors-row')).toHaveCount(1);
+  await page.testSubj.click(`edit${connectorId}`);
   // The flyout header renders immediately from props, but its body's ConnectorForm
   // mounts and lazy-loads afterwards. Switching tabs while the body is still in that
   // transitional state can leave the Test tab content from rendering. Wait for the
@@ -88,10 +90,10 @@ test.describe('Email connector', { tag: tags.stateful.classic }, () => {
     apiServices,
   }) => {
     const connectorName = `scout-email-${Date.now()}`;
-    await createEmailConnector(apiServices, connectorName);
+    const connector = await createEmailConnector(apiServices, connectorName);
 
     await navigateToConnectors(page, kbnUrl);
-    await openTestTab(page, connectorName);
+    await openTestTab(page, connector.id, connectorName);
     await fillSubjectAndMessage(page);
 
     // Touch and blur the To combobox to surface the field-level error
@@ -110,10 +112,10 @@ test.describe('Email connector', { tag: tags.stateful.classic }, () => {
     apiServices,
   }) => {
     const connectorName = `scout-email-${Date.now()}`;
-    await createEmailConnector(apiServices, connectorName);
+    const connector = await createEmailConnector(apiServices, connectorName);
 
     await navigateToConnectors(page, kbnUrl);
-    await openTestTab(page, connectorName);
+    await openTestTab(page, connector.id, connectorName);
     await fillSubjectAndMessage(page);
 
     const toInput = page.testSubj.locator('toEmailAddressInput').locator('input');
@@ -133,10 +135,10 @@ test.describe('Email connector', { tag: tags.stateful.classic }, () => {
     apiServices,
   }) => {
     const connectorName = `scout-email-${Date.now()}`;
-    await createEmailConnector(apiServices, connectorName);
+    const connector = await createEmailConnector(apiServices, connectorName);
 
     await navigateToConnectors(page, kbnUrl);
-    await openTestTab(page, connectorName);
+    await openTestTab(page, connector.id, connectorName);
     await fillSubjectAndMessage(page);
 
     const toInput = page.testSubj.locator('toEmailAddressInput').locator('input');
@@ -155,10 +157,10 @@ test.describe('Email connector', { tag: tags.stateful.classic }, () => {
     apiServices,
   }) => {
     const connectorName = `scout-email-${Date.now()}`;
-    await createEmailConnector(apiServices, connectorName);
+    const connector = await createEmailConnector(apiServices, connectorName);
 
     await navigateToConnectors(page, kbnUrl);
-    await openTestTab(page, connectorName);
+    await openTestTab(page, connector.id, connectorName);
     await fillSubjectAndMessage(page);
 
     const toInput = page.testSubj.locator('toEmailAddressInput').locator('input');
@@ -177,10 +179,10 @@ test.describe('Email connector', { tag: tags.stateful.classic }, () => {
     apiServices,
   }) => {
     const connectorName = `scout-email-${Date.now()}`;
-    await createEmailConnector(apiServices, connectorName);
+    const connector = await createEmailConnector(apiServices, connectorName);
 
     await navigateToConnectors(page, kbnUrl);
-    await openTestTab(page, connectorName);
+    await openTestTab(page, connector.id, connectorName);
     await fillSubjectAndMessage(page);
 
     // Trigger the recipients-required error
