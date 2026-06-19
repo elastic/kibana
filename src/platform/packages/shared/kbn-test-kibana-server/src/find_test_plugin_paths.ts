@@ -8,12 +8,12 @@
  */
 
 import Path from 'path';
-import globby from 'globby';
+import { globbySync } from 'globby';
 
 export function findTestPluginPaths(dirs: string | string[]) {
   return (Array.isArray(dirs) ? dirs : [dirs])
     .flatMap((dir) =>
-      globby.sync('*/kibana.jsonc', {
+      globbySync('*/kibana.jsonc', {
         cwd: dir,
         absolute: true,
         onlyFiles: true,

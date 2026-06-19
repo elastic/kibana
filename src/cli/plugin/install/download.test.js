@@ -13,7 +13,7 @@ import http from 'http';
 
 import sinon from 'sinon';
 import nock from 'nock';
-import globby from 'globby';
+import { globbySync } from 'globby';
 import del from 'del';
 
 import { Logger } from '../../logger';
@@ -34,12 +34,12 @@ describe('kibana cli', function () {
     const logger = new Logger(settings);
 
     function expectWorkingPathEmpty() {
-      const files = globby.sync('**/*', { cwd: testWorkingPath, onlyFiles: false });
+      const files = globbySync('**/*', { cwd: testWorkingPath, onlyFiles: false });
       expect(files).toEqual([]);
     }
 
     function expectWorkingPathNotEmpty() {
-      const files = globby.sync('**/*', { cwd: testWorkingPath, onlyFiles: false });
+      const files = globbySync('**/*', { cwd: testWorkingPath, onlyFiles: false });
       const expected = ['archive.part'];
 
       expect(files.sort()).toEqual(expected.sort());

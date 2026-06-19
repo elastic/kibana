@@ -11,7 +11,7 @@ import Fs from 'fs';
 import { join } from 'path';
 
 import sinon from 'sinon';
-import globby from 'globby';
+import { globbySync } from 'globby';
 import del from 'del';
 
 import { Logger } from '../../logger';
@@ -72,7 +72,7 @@ describe('kibana cli', function () {
         await getPackData(settings, logger);
         await extract(settings, logger);
 
-        expect(globby.sync('**/*', { cwd: testWorkingPath, onlyFiles: false }).sort())
+        expect(globbySync('**/*', { cwd: testWorkingPath, onlyFiles: false }).sort())
           .toMatchInlineSnapshot(`
           Array [
             "archive.part",

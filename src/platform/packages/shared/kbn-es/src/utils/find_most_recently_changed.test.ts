@@ -32,7 +32,7 @@ jest.mock('fs', () => ({
 }));
 
 jest.mock('globby', () => ({
-  sync: jest.fn().mockImplementation(() => {
+  globbySync: jest.fn().mockImplementation(() => {
     return ['/data/oldest.yml', '/data/newest.yml', '/data/middle.yml'];
   }),
 }));

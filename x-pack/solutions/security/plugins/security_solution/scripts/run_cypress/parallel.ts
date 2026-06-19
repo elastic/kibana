@@ -8,7 +8,7 @@
 import { run } from '@kbn/dev-cli-runner';
 import yargs from 'yargs';
 import _ from 'lodash';
-import globby from 'globby';
+import { globbySync } from 'globby';
 import pMap from 'p-map';
 import { withProcRunner } from '@kbn/dev-proc-runner';
 import cypress from 'cypress';
@@ -154,7 +154,7 @@ ${JSON.stringify(cypressConfigFile, null, 2)}
 
       const concreteFilePaths = isGrepReturnedFilePaths
         ? grepSpecPattern
-        : globby.sync(
+        : globbySync(
             specPattern,
             excludeSpecPattern
               ? {
