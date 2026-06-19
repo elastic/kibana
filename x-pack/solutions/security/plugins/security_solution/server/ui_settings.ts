@@ -672,12 +672,9 @@ export const getDefaultColdAndFrozenTiersSettings = (): SettingsConfig => ({
 
 export const getAlertValidationWorkflowSettings = (): SettingsConfig => ({
   [SECURITY_SOLUTION_ALERT_VALIDATION_WORKFLOW_ENABLED]: {
-    name: i18n.translate(
-      'xpack.securitySolution.uiSettings.alertValidationWorkflowEnabledLabel',
-      {
-        defaultMessage: 'Enable alert analysis workflow',
-      }
-    ),
+    name: i18n.translate('xpack.securitySolution.uiSettings.alertValidationWorkflowEnabledLabel', {
+      defaultMessage: 'Enable alert analysis workflow',
+    }),
     value: true,
     description: i18n.translate(
       'xpack.securitySolution.uiSettings.alertValidationWorkflowEnabledDescription',
