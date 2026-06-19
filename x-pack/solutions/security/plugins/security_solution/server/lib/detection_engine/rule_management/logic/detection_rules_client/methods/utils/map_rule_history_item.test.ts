@@ -7,8 +7,8 @@
 
 import type { Rule, RuleChangeHistoryDocument } from '@kbn/alerting-plugin/server';
 import { generateChangeHistoryDocument } from '@kbn/change-history/test_utils';
-import { getQueryRuleParams } from '../../../rule_schema/mocks';
-import type { RuleParams } from '../../../rule_schema';
+import { getQueryRuleParams } from '../../../../../rule_schema/mocks';
+import type { RuleParams } from '../../../../../rule_schema';
 import { mapRuleHistoryItem } from './map_rule_history_item';
 
 describe('mapRuleHistoryItem', () => {
@@ -70,6 +70,13 @@ describe('mapRuleHistoryItem', () => {
       buildHistoryDoc({}, { metadata: { reason: 'ui edit', extra: { key: 1 } } })
     );
     expect(item.metadata).toEqual({ reason: 'ui edit', extra: { key: 1 } });
+  });
+
+  it('normalizes metadata bulkCount to bulk_count', () => {
+    const item = mapRuleHistoryItem(
+      buildHistoryDoc({}, { metadata: { bulkCount: 3, reason: 'bulk op' } })
+    );
+    expect(item.metadata).toEqual({ bulk_count: 3, reason: 'bulk op' });
   });
 
   const buildRule = (overrides: Partial<Rule<RuleParams>> = {}): Rule<RuleParams> => ({
