@@ -6,13 +6,14 @@
  */
 
 import { assignAlertStepDefinition } from './assign_alert_step';
+import { assignAlertInputSchema } from '../../../../common/workflows/step_types/assign_alert_step/assign_alert_step_common';
 import { ExecutionError } from '@kbn/workflows/server';
 import { DETECTION_ENGINE_ALERT_ASSIGNEES_URL } from '../../../../common/constants';
 import type { StepHandlerContext } from '@kbn/workflows-extensions/server';
 
 const createMockContext = (input: Record<string, unknown>) => {
   return {
-    input,
+    input: assignAlertInputSchema.parse(input),
     config: {},
     rawInput: input,
     contextManager: {

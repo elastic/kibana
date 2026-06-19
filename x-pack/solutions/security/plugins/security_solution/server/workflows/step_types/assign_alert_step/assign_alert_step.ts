@@ -13,9 +13,11 @@ import { assignAlertStepCommonDefinition } from '../../../../common/workflows/st
 export const assignAlertStepDefinition = createServerStepDefinition({
   ...assignAlertStepCommonDefinition,
   handler: async (context) => {
-    const { alert_ids: alertIds } = context.input;
-    const add = 'assignees_to_add' in context.input ? context.input.assignees_to_add : [];
-    const remove = 'assignees_to_remove' in context.input ? context.input.assignees_to_remove : [];
+    const {
+      alert_ids: alertIds,
+      assignees_to_add: add,
+      assignees_to_remove: remove,
+    } = context.input;
 
     const signalIds = Array.isArray(alertIds) ? alertIds : [alertIds];
 

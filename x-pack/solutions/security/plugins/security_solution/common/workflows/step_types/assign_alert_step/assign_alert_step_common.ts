@@ -17,29 +17,23 @@ import {
 
 export const AssignAlertStepId = 'security.assignAlert' as const;
 
-const assigneesArraySchema = z.array(z.string().min(1).max(MAX_USER_ID_LENGTH)).min(1);
+const assigneesArraySchema = z.array(z.string().min(1).max(MAX_USER_ID_LENGTH)).default([]);
 
-const baseInputSchema = z.object({
-  alert_ids: z
-    .union([
-      z.string().min(1).max(MAX_ALERT_ID_LENGTH),
-      z.array(z.string().min(1).max(MAX_ALERT_ID_LENGTH)).min(1),
-    ])
-    .describe('A single alert ID or a list of IDs to support bulk updates'),
-});
-
-export const assignAlertInputSchema = z.union([
-  baseInputSchema.extend({
+export const assignAlertInputSchema = z
+  .object({
+    alert_ids: z
+      .union([
+        z.string().min(1).max(MAX_ALERT_ID_LENGTH),
+        z.array(z.string().min(1).max(MAX_ALERT_ID_LENGTH)).min(1),
+      ])
+      .describe('A single alert ID or a list of IDs to support bulk updates'),
     assignees_to_add: assigneesArraySchema.describe('A list of user IDs to assign'),
     assignees_to_remove: assigneesArraySchema.describe('A list of user IDs to unassign'),
-  }),
-  baseInputSchema.extend({
-    assignees_to_add: assigneesArraySchema.describe('A list of user IDs to assign'),
-  }),
-  baseInputSchema.extend({
-    assignees_to_remove: assigneesArraySchema.describe('A list of user IDs to unassign'),
-  }),
-]);
+  })
+  .refine((value) => value.assignees_to_add.length > 0 || value.assignees_to_remove.length > 0, {
+    message: 'At least one of assignees_to_add or assignees_to_remove must be a non-empty array',
+    path: ['assignees_to_add'],
+  });
 
 export const assignAlertOutputSchema = z.object({
   success: z.boolean(),

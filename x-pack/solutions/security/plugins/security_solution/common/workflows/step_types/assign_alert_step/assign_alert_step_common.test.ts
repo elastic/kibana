@@ -11,12 +11,18 @@ import { MAX_ALERT_ID_LENGTH, MAX_USER_ID_LENGTH } from '../common/constants';
 describe('assignAlertInputSchema', () => {
   it('should validate valid input for assigning users with array', () => {
     const input = { alert_ids: 'alert-1', assignees_to_add: ['user1'] };
-    expect(assignAlertInputSchema.parse(input)).toEqual(input);
+    expect(assignAlertInputSchema.parse(input)).toEqual({
+      ...input,
+      assignees_to_remove: [],
+    });
   });
 
   it('should validate valid input for unassigning users with array', () => {
     const input = { alert_ids: ['alert-1', 'alert-2'], assignees_to_remove: ['user2'] };
-    expect(assignAlertInputSchema.parse(input)).toEqual(input);
+    expect(assignAlertInputSchema.parse(input)).toEqual({
+      ...input,
+      assignees_to_add: [],
+    });
   });
 
   it('should validate valid input for both assignees_to_add and assignees_to_remove', () => {
