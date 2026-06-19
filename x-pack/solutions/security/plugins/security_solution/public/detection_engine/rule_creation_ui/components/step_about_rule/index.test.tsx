@@ -89,6 +89,7 @@ export const stepDefineStepMLRule: DefineStepRule = {
 };
 
 describe('StepAboutRuleComponent', () => {
+  const user = userEvent.setup({ delay: null, pointerEventsCheck: 0 });
   let useGetInstalledJobMock: jest.Mock;
   let useSecurityJobsMock: jest.Mock;
   const TestComp = ({
@@ -199,7 +200,7 @@ describe('StepAboutRuleComponent', () => {
   it('is invalid if description is not present', async () => {
     render(<TestComp />, { wrapper: TestProviders });
 
-    await userEvent.type(
+    await user.type(
       within(screen.getByTestId('detectionEngineStepAboutRuleName')).getByRole('textbox'),
       'Test name text'
     );
@@ -217,7 +218,7 @@ describe('StepAboutRuleComponent', () => {
       { wrapper: TestProviders }
     );
 
-    await userEvent.clear(
+    await user.clear(
       within(screen.getByTestId('ruleThreatMatchIndicatorPath')).getByRole('textbox')
     );
 
@@ -231,11 +232,11 @@ describe('StepAboutRuleComponent', () => {
   it('is valid if is not a threat match rule and threat_indicator_path is not present', async () => {
     render(<TestComp />, { wrapper: TestProviders });
 
-    await userEvent.type(
+    await user.type(
       within(screen.getByTestId('detectionEngineStepAboutRuleDescription')).getByRole('textbox'),
       'Test description text'
     );
-    await userEvent.type(
+    await user.type(
       within(screen.getByTestId('detectionEngineStepAboutRuleName')).getByRole('textbox'),
       'Test name text'
     );
@@ -252,7 +253,7 @@ describe('StepAboutRuleComponent', () => {
   it('is invalid if no "name" is present', async () => {
     render(<TestComp />, { wrapper: TestProviders });
 
-    await userEvent.type(
+    await user.type(
       within(screen.getByTestId('detectionEngineStepAboutRuleDescription')).getByRole('textbox'),
       'Test description text'
     );
@@ -269,11 +270,11 @@ describe('StepAboutRuleComponent', () => {
 
     render(<TestComp onSubmit={handleSubmit} />, { wrapper: TestProviders });
 
-    await userEvent.type(
+    await user.type(
       within(screen.getByTestId('detectionEngineStepAboutRuleDescription')).getByRole('textbox'),
       'Test description text'
     );
-    await userEvent.type(
+    await user.type(
       within(screen.getByTestId('detectionEngineStepAboutRuleName')).getByRole('textbox'),
       'Test name text'
     );
@@ -298,20 +299,20 @@ describe('StepAboutRuleComponent', () => {
 
     render(<TestComp onSubmit={handleSubmit} />, { wrapper: TestProviders });
 
-    await userEvent.type(
+    await user.type(
       within(screen.getByTestId('detectionEngineStepAboutRuleName')).getByRole('textbox'),
       'Test name text'
     );
-    await userEvent.type(
+    await user.type(
       within(screen.getByTestId('detectionEngineStepAboutRuleDescription')).getByRole('textbox'),
       'Test description text'
     );
-    await userEvent.clear(
+    await user.clear(
       within(screen.getByTestId('detectionEngineStepAboutRuleRiskScore-defaultRisk')).getByRole(
         'spinbutton'
       )
     );
-    await userEvent.type(
+    await user.type(
       within(screen.getByTestId('detectionEngineStepAboutRuleRiskScore-defaultRisk')).getByRole(
         'spinbutton'
       ),
@@ -337,11 +338,11 @@ describe('StepAboutRuleComponent', () => {
 
     render(<TestComp onSubmit={handleSubmit} />, { wrapper: TestProviders });
 
-    await userEvent.type(
+    await user.type(
       within(screen.getByTestId('detectionEngineStepAboutRuleName')).getByRole('textbox'),
       'Test name text'
     );
-    await userEvent.type(
+    await user.type(
       within(screen.getByTestId('detectionEngineStepAboutRuleDescription')).getByRole('textbox'),
       'Test description text'
     );
@@ -357,10 +358,10 @@ describe('StepAboutRuleComponent', () => {
 
     handleSubmit.mockClear();
 
-    await userEvent.click(
+    await user.click(
       within(screen.getByTestId('detectionEngineStepAboutRuleSeverity')).getByTestId('select')
     );
-    await userEvent.click(screen.getByRole('option', { name: /medium/i }));
+    await user.click(screen.getByRole('option', { name: /medium/i }));
 
     await submitForm();
 
