@@ -7,6 +7,7 @@
 
 import { SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
 import { panelGridSchema } from '@kbn/agent-builder-dashboards-common';
+import { MARKDOWN_EMBEDDABLE_TYPE } from '@kbn/dashboard-markdown/server';
 import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
 import { z } from '@kbn/zod/v4';
 
@@ -20,10 +21,9 @@ export const panelConfigPanelInputSchema = z.object({
   kind: z.literal('panelConfig'),
   grid: panelGridSchema,
   type: z
-    .string()
-    .max(256)
+    .enum(['vis', 'markdown'])
     .describe(
-      `Embeddable type for the panel (e.g. the ${LENS_EMBEDDABLE_TYPE} embeddable type for a visualization).`
+      'Panel type, one-to-one with the embeddable type: "vis" for a Lens visualization, "markdown" for a markdown panel.'
     ),
   config: z
     .record(z.string().max(256), z.unknown())
@@ -33,6 +33,13 @@ export const panelConfigPanelInputSchema = z.object({
 });
 
 export type PanelConfigPanelInput = z.infer<typeof panelConfigPanelInputSchema>;
+export type PanelType = PanelConfigPanelInput['type'];
+
+/** Maps a model-facing panel `type` to its embeddable type id (1:1). */
+export const PANEL_TYPE_TO_EMBEDDABLE_TYPE: Record<PanelType, string> = {
+  vis: LENS_EMBEDDABLE_TYPE,
+  markdown: MARKDOWN_EMBEDDABLE_TYPE,
+};
 
 export const panelRequestSchema = z.object({
   kind: z.literal('panelRequest'),

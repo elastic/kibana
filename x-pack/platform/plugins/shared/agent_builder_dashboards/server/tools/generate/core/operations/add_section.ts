@@ -16,6 +16,7 @@ import {
   markdownPanelInputSchema,
   panelConfigPanelInputSchema,
   panelRequestSchema,
+  PANEL_TYPE_TO_EMBEDDABLE_TYPE,
 } from './panel_kinds';
 
 const addSectionPanelItemSchema = z.discriminatedUnion('kind', [
@@ -69,7 +70,7 @@ export const addSectionOperation = defineOperation({
           case 'panelConfig':
             sectionPanels.push({
               id: uuidv4(),
-              type: item.type,
+              type: PANEL_TYPE_TO_EMBEDDABLE_TYPE[item.type],
               config: item.config,
               grid: item.grid,
             });

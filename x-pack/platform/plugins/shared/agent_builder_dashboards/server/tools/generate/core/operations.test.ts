@@ -113,7 +113,7 @@ describe('executeDashboardOperations', () => {
         panels: [
           {
             kind: 'panelConfig',
-            type: LENS_EMBEDDABLE_TYPE,
+            type: 'vis',
             config: { type: 'metric' },
             grid: { x: 0, y: 0, w: 24, h: 9 },
           },
@@ -159,13 +159,13 @@ describe('executeDashboardOperations', () => {
           panels: [
             {
               kind: 'panelConfig',
-              type: LENS_EMBEDDABLE_TYPE,
+              type: 'vis',
               config: { type: 'metric' },
               grid: { x: 0, y: 0, w: 24, h: 9 },
             },
             {
               kind: 'panelConfig',
-              type: LENS_EMBEDDABLE_TYPE,
+              type: 'vis',
               config: { type: 'metric' },
               grid: { x: 24, y: 0, w: 24, h: 9 },
             },
@@ -176,7 +176,7 @@ describe('executeDashboardOperations', () => {
           panels: [
             {
               kind: 'panelConfig',
-              type: LENS_EMBEDDABLE_TYPE,
+              type: 'vis',
               config: { type: 'metric' },
               grid: { x: 0, y: 9, w: 12, h: 5 },
             },
@@ -224,7 +224,7 @@ describe('executeDashboardOperations', () => {
             },
             {
               kind: 'panelConfig',
-              type: LENS_EMBEDDABLE_TYPE,
+              type: 'vis',
               config: { type: 'metric' },
               sectionId: 'section-a',
               grid: { x: 0, y: 0, w: 24, h: 9 },
@@ -236,7 +236,7 @@ describe('executeDashboardOperations', () => {
             },
             {
               kind: 'panelConfig',
-              type: LENS_EMBEDDABLE_TYPE,
+              type: 'vis',
               config: { type: 'metric' },
               grid: { x: 0, y: 9, w: 24, h: 9 },
             },
@@ -311,7 +311,7 @@ describe('executeDashboardOperations', () => {
           panels: [
             {
               kind: 'panelConfig',
-              type: LENS_EMBEDDABLE_TYPE,
+              type: 'vis',
               config: { type: 'metric' },
               grid: { x: 0, y: 0, w: 12, h: 5 },
             },
@@ -513,7 +513,7 @@ describe('executeDashboardOperations', () => {
             },
             {
               kind: 'panelConfig',
-              type: LENS_EMBEDDABLE_TYPE,
+              type: 'vis',
               config: { type: 'metric' },
               grid: { x: 24, y: 0, w: 24, h: 9 },
             },
@@ -775,7 +775,7 @@ describe('executeDashboardOperations', () => {
           panels: [
             {
               kind: 'panelConfig',
-              type: LENS_EMBEDDABLE_TYPE,
+              type: 'vis',
               config: { type: 'metric' },
               sectionId: 'section-a',
               grid: { x: 12, y: 0, w: 12, h: 5 },

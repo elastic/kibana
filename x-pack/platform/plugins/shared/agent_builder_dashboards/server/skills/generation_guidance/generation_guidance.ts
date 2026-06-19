@@ -56,7 +56,7 @@ Supported operations:
 ## Panel Inputs
 
 - \`kind: "panelRequest"\` (in \`add_panels\`/\`add_section\`) and \`edit_panels\` with \`kind: "panelRequest"\` create or edit Lens panels inline from natural language / ES|QL. This is the correct way to create a new visualization from a query — supply \`query\` (and optionally \`esql\`), and the tool resolves it into a valid Lens panel for you.
-- \`kind: "panelConfig"\` adds a panel from an already-resolved configuration. Supply the panel \`type\` and \`config\` directly (for example, the visualization config you obtained from an existing visualization). The generation tool never reads an attachment or saved-object store, so all external content must already be resolved into \`config\` before you call it. Do **not** hand-build a Lens \`config\` for a new visualization here — use \`kind: "panelRequest"\` instead.
+- \`kind: "panelConfig"\` adds a panel from an already-resolved configuration. Supply the panel \`type\` (\`"vis"\` for a Lens visualization, \`"markdown"\` for a markdown panel) and \`config\` directly (for example, the visualization config you obtained from an existing visualization). The generation tool never reads an attachment or saved-object store, so all external content must already be resolved into \`config\` before you call it. Do **not** hand-build a Lens \`config\` for a new visualization here — use \`kind: "panelRequest"\` instead.
 
 ${dashboardDesignGuidancePrompt}
 

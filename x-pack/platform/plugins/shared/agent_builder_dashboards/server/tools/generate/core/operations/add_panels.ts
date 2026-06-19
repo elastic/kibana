@@ -14,6 +14,7 @@ import {
   markdownPanelInputSchema,
   panelConfigPanelInputSchema,
   panelRequestSchema,
+  PANEL_TYPE_TO_EMBEDDABLE_TYPE,
 } from './panel_kinds';
 import { getResolvedPanelCreationRequests } from './panel_creation';
 
@@ -68,7 +69,7 @@ export const addPanelsOperation = defineOperation({
             panelsToAdd: [
               {
                 id: uuidv4(),
-                type: item.type,
+                type: PANEL_TYPE_TO_EMBEDDABLE_TYPE[item.type],
                 config: item.config,
                 grid: item.grid,
               },
