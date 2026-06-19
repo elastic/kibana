@@ -8,7 +8,6 @@
  */
 
 import { lastValueFrom, takeWhile } from 'rxjs';
-import { i18n } from '@kbn/i18n';
 import type {
   ISearchMethods,
   IDslSearchParams,
@@ -37,8 +36,13 @@ import type {
   ESQL_ASYNC_SEARCH_STRATEGY,
   EQL_SEARCH_STRATEGY,
   SQL_SEARCH_STRATEGY,
-} from '.';
-import { getResponseInspectorStats, getEsqlInspectorStats } from './inspect/inspector_stats';
+} from '..';
+import {
+  getDslRequestInspectorStats,
+  getDslResponseInspectorStats,
+  getEsqlInspectorStats,
+  getSqlInspectorStats,
+} from './inspector_stats';
 
 /**
  * SearchMethodsService provides strategy-specific search methods with type-safe
@@ -67,9 +71,6 @@ export class SearchMethodsService implements ISearchMethods {
     });
 
     requestResponder?.json((request.params ?? {}) as Record<string, unknown>);
-    if (options?.inspector?.getRequestStats) {
-      requestResponder?.stats(options.inspector.getRequestStats());
-    }
 
     try {
       const response = await this.executeSearch(request, searchOptions);
@@ -104,14 +105,14 @@ export class SearchMethodsService implements ISearchMethods {
     });
 
     requestResponder?.json((request.params?.body ?? {}) as Record<string, unknown>);
-    if (options?.inspector?.getRequestStats) {
-      requestResponder?.stats(options.inspector.getRequestStats());
+    if (params.index && typeof params.index === 'object') {
+      requestResponder?.stats(getDslRequestInspectorStats(params.index));
     }
 
     try {
       const response = await this.executeSearch(request, searchOptions);
 
-      requestResponder?.stats(getResponseInspectorStats(response.rawResponse));
+      requestResponder?.stats(getDslResponseInspectorStats(response.rawResponse));
       requestResponder?.ok({
         json: { rawResponse: response.rawResponse },
         requestParams: response.requestParams,
@@ -205,31 +206,7 @@ export class SearchMethodsService implements ISearchMethods {
     try {
       const response = await this.executeSearch(request, searchOptions);
 
-      requestResponder?.stats({
-        hits: {
-          label: i18n.translate('data.search.es_search.hitsLabel', {
-            defaultMessage: 'Hits',
-          }),
-          value: `${response.rawResponse.rows?.length ?? 0}`,
-          description: i18n.translate('data.search.es_search.hitsDescription', {
-            defaultMessage: 'The number of documents returned by the query.',
-          }),
-        },
-        queryTime: {
-          label: i18n.translate('data.search.es_search.queryTimeLabel', {
-            defaultMessage: 'Query time',
-          }),
-          value: i18n.translate('data.search.es_search.queryTimeValue', {
-            defaultMessage: '{queryTime}ms',
-            values: { queryTime: response.took },
-          }),
-          description: i18n.translate('data.search.es_search.queryTimeDescription', {
-            defaultMessage:
-              'The time it took to process the query. ' +
-              'Does not include the time to send the request or parse it in the browser.',
-          }),
-        },
-      });
+      requestResponder?.stats(getSqlInspectorStats(response.rawResponse, response.took));
       requestResponder?.ok({
         json: { rawResponse: response.rawResponse },
         requestParams: response.requestParams,
@@ -265,7 +242,6 @@ export class SearchMethodsService implements ISearchMethods {
   // ============================================================================
   // DSL Search Helpers
   // ============================================================================
-
   private buildDslRequest(params: IDslSearchParams, options?: IDslSearchOptions): IEsSearchRequest {
     const {
       index: _,

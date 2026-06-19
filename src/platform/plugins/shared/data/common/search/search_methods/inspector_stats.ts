@@ -17,7 +17,7 @@
 import type { estypes } from '@elastic/elasticsearch';
 import { i18n } from '@kbn/i18n';
 import type { RequestStatistics } from '@kbn/inspector-plugin/common';
-import type { ISearchSource } from '../search_source';
+import type { AbstractDataView } from '@kbn/data-views-plugin/common';
 
 /** @public */
 export function getEsqlInspectorStats(resp?: estypes.EsqlAsyncQueryResponse): RequestStatistics {
@@ -68,28 +68,54 @@ export function getEsqlInspectorStats(resp?: estypes.EsqlAsyncQueryResponse): Re
 }
 
 /** @public */
-export function getRequestInspectorStats(searchSource: ISearchSource) {
+export function getSqlInspectorStats(
+  resp?: estypes.SqlQueryResponse,
+  took?: number
+): RequestStatistics {
   const stats: RequestStatistics = {};
-  const index = searchSource.getField('index');
-  const indexFilters = searchSource.getActiveIndexFilter();
 
-  if (index) {
-    if (indexFilters.length > 0) {
-      stats.indexFilter = {
-        label: i18n.translate('data.search.searchSource.indexFilterLabel', {
-          defaultMessage: 'Index Pattern',
-        }),
-        value: indexFilters.join(', '),
-        description: i18n.translate('data.search.searchSource.indexFilterDescription', {
-          defaultMessage: 'The active index pattern.',
-        }),
-      };
-    }
+  if (resp?.rows) {
+    stats.hits = {
+      label: i18n.translate('data.search.es_search.hitsLabel', {
+        defaultMessage: 'Hits',
+      }),
+      value: `${resp.rows.length}`,
+      description: i18n.translate('data.search.es_search.hitsDescription', {
+        defaultMessage: 'The number of documents returned by the query.',
+      }),
+    };
+  }
+
+  if (took !== undefined) {
+    stats.queryTime = {
+      label: i18n.translate('data.search.es_search.queryTimeLabel', {
+        defaultMessage: 'Query time',
+      }),
+      value: i18n.translate('data.search.es_search.queryTimeValue', {
+        defaultMessage: '{queryTime}ms',
+        values: { queryTime: took },
+      }),
+      description: i18n.translate('data.search.es_search.queryTimeDescription', {
+        defaultMessage:
+          'The time it took to process the query. ' +
+          'Does not include the time to send the request or parse it in the browser.',
+      }),
+    };
+  }
+
+  return stats;
+}
+
+/** @public */
+export function getDslRequestInspectorStats(dataView?: AbstractDataView): RequestStatistics {
+  const stats: RequestStatistics = {};
+
+  if (dataView) {
     stats.indexPattern = {
       label: i18n.translate('data.search.searchSource.dataViewLabel', {
         defaultMessage: 'Data view',
       }),
-      value: index.title,
+      value: dataView.getIndexPattern(),
       description: i18n.translate('data.search.searchSource.dataViewDescription', {
         defaultMessage: 'The data view that was queried.',
       }),
@@ -98,7 +124,7 @@ export function getRequestInspectorStats(searchSource: ISearchSource) {
       label: i18n.translate('data.search.searchSource.dataViewIdLabel', {
         defaultMessage: 'Data view ID',
       }),
-      value: index.id!,
+      value: dataView.id!,
       description: i18n.translate('data.search.searchSource.indexPatternIdDescription', {
         defaultMessage: 'The ID in the {kibanaIndexPattern} index.',
         values: { kibanaIndexPattern: '.kibana' },
@@ -110,12 +136,7 @@ export function getRequestInspectorStats(searchSource: ISearchSource) {
 }
 
 /** @public */
-export function getResponseInspectorStats(
-  resp?: estypes.SearchResponse<unknown>,
-  searchSource?: ISearchSource
-) {
-  const lastRequest =
-    searchSource?.history && searchSource.history[searchSource.history.length - 1];
+export function getDslResponseInspectorStats(resp?: estypes.SearchResponse<unknown>) {
   const stats: RequestStatistics = {};
 
   if (resp && resp.took) {
@@ -163,23 +184,6 @@ export function getResponseInspectorStats(
       value: `${resp.hits.hits.length}`,
       description: i18n.translate('data.search.searchSource.hitsDescription', {
         defaultMessage: 'The number of documents returned by the query.',
-      }),
-    };
-  }
-
-  if (lastRequest && (lastRequest.ms === 0 || lastRequest.ms)) {
-    stats.requestTime = {
-      label: i18n.translate('data.search.searchSource.requestTimeLabel', {
-        defaultMessage: 'Request time',
-      }),
-      value: i18n.translate('data.search.searchSource.requestTimeValue', {
-        defaultMessage: '{requestTime}ms',
-        values: { requestTime: lastRequest.ms },
-      }),
-      description: i18n.translate('data.search.searchSource.requestTimeDescription', {
-        defaultMessage:
-          'The time of the request from the browser to Elasticsearch and back. ' +
-          'Does not include the time the requested waited in the queue.',
       }),
     };
   }
