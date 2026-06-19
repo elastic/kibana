@@ -11,7 +11,8 @@ import { MlLocatorDefinition } from '@kbn/ml-plugin/public';
 import { enableInspectEsQueries } from '@kbn/observability-plugin/common';
 import { UI_SETTINGS } from '@kbn/observability-shared-plugin/public/hooks/use_kibana_ui_settings';
 import { UrlService } from '@kbn/share-plugin/common/url_service';
-import { PerformanceContextProvider } from '@kbn/ebt-tools';
+import { PerformanceContext } from '@kbn/ebt-tools';
+import type { Router } from '@kbn/typed-react-router-config';
 import { RouterProvider } from '@kbn/typed-react-router-config';
 import { createMemoryHistory } from 'history';
 import { merge, noop } from 'lodash';
@@ -20,7 +21,6 @@ import React from 'react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { Observable, of } from 'rxjs';
 import { getMockApiCache } from '../../services/rest/call_apm_api_spy';
-import { apmRouter } from '../../components/routing/apm_route_config';
 import type { ITelemetryClient } from '../../services/telemetry/types';
 import { createCallApmApi } from '../../services/rest/create_call_apm_api';
 import type { APMServiceContextValue } from '../apm_service/apm_service_context';
@@ -215,6 +215,11 @@ export const storybookTelemetry: ITelemetryClient = {
   reportMetricsCalloutLoaded: () => {},
 };
 
+const mockPerformanceApi = {
+  onPageReady: () => {},
+  onPageRefreshStart: () => {},
+};
+
 const mockUnifiedSearchBar = {
   ui: {
     SearchBar: () => <div />,
@@ -239,11 +244,18 @@ export const mockApmPluginContext = {
 
 export function MockApmPluginStorybook({
   children,
+  router,
   apmContext = {} as ApmPluginContextValue,
   routePath,
   serviceContextValue = {} as APMServiceContextValue,
 }: {
   children?: ReactNode;
+  /**
+   * The typed router to provide. Callers must pass `apmRouter` (or another router) explicitly:
+   * importing `apmRouter` here would eagerly load the full route tree, which breaks per-test
+   * `jest.mock()` hoisting in tests that mock modules reachable from the route config.
+   */
+  router: Router<any>;
   routePath?: string;
   apmContext?: ApmPluginContextValue;
   serviceContextValue?: APMServiceContextValue;
@@ -282,14 +294,14 @@ export function MockApmPluginStorybook({
         <KibanaReactContext.Provider>
           <ApmPluginContext.Provider value={contextMock}>
             <APMServiceContext.Provider value={serviceContextValue}>
-              <RouterProvider router={apmRouter as any} history={history}>
-                <PerformanceContextProvider>
+              <RouterProvider router={router as any} history={history}>
+                <PerformanceContext.Provider value={mockPerformanceApi}>
                   <MockTimeRangeContextProvider>
                     <ApmTimeRangeMetadataContextProvider>
                       {children}
                     </ApmTimeRangeMetadataContextProvider>
                   </MockTimeRangeContextProvider>
-                </PerformanceContextProvider>
+                </PerformanceContext.Provider>
               </RouterProvider>
             </APMServiceContext.Provider>
           </ApmPluginContext.Provider>

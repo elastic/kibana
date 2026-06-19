@@ -10,6 +10,7 @@ import type { Decorator } from '@storybook/react';
 import * as jest from 'jest-mock';
 import '@elastic/charts/dist/theme_only_light.css';
 import { MockApmPluginStorybook } from '../public/context/apm_plugin/mock_apm_plugin_storybook';
+import { apmRouter } from '../public/components/routing/apm_route_config';
 
 (window as any).jest = jest;
 
@@ -18,6 +19,7 @@ const ApmDecorator: Decorator = (Story, context) => (
     routePath={context.parameters.routePath}
     apmContext={context.parameters.apmContext}
     serviceContextValue={context.parameters.serviceContextValue}
+    router={apmRouter as any}
   >
     <Story />
   </MockApmPluginStorybook>

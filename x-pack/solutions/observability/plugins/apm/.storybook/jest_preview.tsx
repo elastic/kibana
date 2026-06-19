@@ -26,14 +26,15 @@ const ApmJestDecorator: Decorator = (Story, context) => {
 
   // Lazy require: `jest.mock()` calls in the test file are hoisted and registered before this
   // line runs, so any modules reachable from `apmRouter` resolve through those mocks.
-
-  require('../public/components/routing/apm_route_config');
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  const { apmRouter } = require('../public/components/routing/apm_route_config');
 
   return (
     <MockApmPluginStorybook
       routePath={context.parameters.routePath}
       apmContext={context.parameters.apmContext}
       serviceContextValue={context.parameters.serviceContextValue}
+      router={apmRouter}
     >
       <Story />
     </MockApmPluginStorybook>
