@@ -135,7 +135,7 @@ const recurrenceToRRuleFields = (recurrence: RecurrenceFormState): RRuleFields =
  * Map parsed {@link RRuleFields} → UI recurrence form state. The reverse of
  * {@link recurrenceToRRuleFields}.
  */
-const rruleFieldsToRecurrence = (fields: RRuleFields): RecurrenceFormState => {
+export const rruleFieldsToRecurrence = (fields: RRuleFields): RecurrenceFormState => {
   const base = createDefaultRecurrence();
   let frequency: FrequencyMode = base.frequency;
   let byweekday: WeekdayStr[] = base.byweekday;

@@ -73,7 +73,7 @@ export const ToggleableRow = ({
           />
         </EuiFlexItem>
       </EuiFlexGroup>
-      {enabled && children ? (
+      {children ? (
         <>
           <EuiSpacer size="l" />
           {children}

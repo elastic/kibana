@@ -53,8 +53,14 @@ jest.mock('../../saved_queries/saved_queries_dropdown', () => ({
 // tree. Render a minimal marker that surfaces the schedule type so tests can
 // assert the value the flyout passed in.
 jest.mock('../../components/schedule_section', () => ({
-  ScheduleSection: ({ value }: { value: Record<string, unknown> }) => (
-    <div data-test-subj="mocked-schedule-section">
+  ScheduleSection: ({
+    value,
+    disabled,
+  }: {
+    value: Record<string, unknown>;
+    disabled?: boolean;
+  }) => (
+    <div data-test-subj="mocked-schedule-section" data-disabled={String(!!disabled)}>
       {JSON.stringify(value?.scheduleType ?? 'unknown')}
     </div>
   ),
@@ -234,7 +240,7 @@ describe('QueryFlyout', () => {
     });
 
     // E3 ────────────────────────────────────────────────────────────────────
-    it('E3: should show ScheduleSection and hide "Using pack schedule" when override toggle is turned on', async () => {
+    it('E3: should render ScheduleSection disabled when override is off, then enable it when toggled on', async () => {
       renderFlyout({
         packSchedule: {
           schedule_type: 'rrule',
@@ -245,10 +251,14 @@ describe('QueryFlyout', () => {
         },
       });
 
-      // Initially, the using-pack-schedule label is visible and ScheduleSection
-      // is hidden (override_pack_schedule = false → ToggleableRow children hidden)
+      // Initially, the using-pack-schedule label is visible and the inherited
+      // ScheduleSection renders read-only (disabled) so the user can see what
+      // they inherit.
       expect(screen.getByTestId('osquery-using-pack-schedule')).toBeInTheDocument();
-      expect(screen.queryByTestId('mocked-schedule-section')).not.toBeInTheDocument();
+      expect(screen.getByTestId('mocked-schedule-section')).toHaveAttribute(
+        'data-disabled',
+        'true'
+      );
 
       // Click the EuiSwitch to enable the override toggle.
       // EuiSwitch renders as a button[role="switch"] with the data-test-subj.
@@ -258,8 +268,11 @@ describe('QueryFlyout', () => {
       });
 
       await waitFor(() => {
-        // After enabling the override, the ScheduleSection should appear
-        expect(screen.getByTestId('mocked-schedule-section')).toBeInTheDocument();
+        // After enabling the override, the ScheduleSection becomes editable.
+        expect(screen.getByTestId('mocked-schedule-section')).toHaveAttribute(
+          'data-disabled',
+          'false'
+        );
         // The "Using pack schedule" label should be gone
         expect(screen.queryByTestId('osquery-using-pack-schedule')).not.toBeInTheDocument();
       });
@@ -425,13 +438,17 @@ describe('QueryFlyout', () => {
         packSchedule: { schedule_type: 'interval', interval: 3600 },
       });
 
-      // Inherited (override-off): the ScheduleSection is hidden inside the
-      // collapsed ToggleableRow.
-      expect(screen.queryByTestId('mocked-schedule-section')).not.toBeInTheDocument();
+      // Inherited (override-off): the ScheduleSection renders disabled and
+      // reflects the inherited interval mode.
+      expect(screen.getByTestId('mocked-schedule-section')).toHaveAttribute(
+        'data-disabled',
+        'true'
+      );
+      expect(screen.getByTestId('mocked-schedule-section')).toHaveTextContent('interval');
 
       // Flip the pack mode to rrule (simulates the pack form switching modes
-      // while the flyout is open). The guarded effect re-seeds the hidden
-      // inherited schedule to the new mode.
+      // while the flyout is open). The guarded effect re-seeds the inherited
+      // schedule to the new mode.
       rerender(
         <EuiProvider>
           <IntlProvider locale="en">
@@ -515,6 +532,76 @@ describe('QueryFlyout', () => {
       // Override is off by default → timeout is inherited from the rrule pack
       // schedule and the field must be disabled.
       expect(screen.getByTestId('timeout-input')).toBeDisabled();
+    });
+
+    // ───────────────────────────────────────────────────────────────────────
+    // Inherited-fields visibility (Problem 2)
+    // ───────────────────────────────────────────────────────────────────────
+    describe('inherited ScheduleSection visibility', () => {
+      it('renders the inherited ScheduleSection disabled when the override is off', () => {
+        renderFlyout({
+          packSchedule: {
+            schedule_type: 'rrule',
+            rrule_schedule: {
+              rrule: 'FREQ=DAILY',
+              start_date: '2024-01-01T00:00:00.000Z',
+            },
+          },
+        });
+
+        const section = screen.getByTestId('mocked-schedule-section');
+        expect(section).toBeInTheDocument();
+        expect(section).toHaveAttribute('data-disabled', 'true');
+      });
+
+      it('renders the ScheduleSection editable when the override is on', async () => {
+        renderFlyout({
+          packSchedule: {
+            schedule_type: 'rrule',
+            rrule_schedule: {
+              rrule: 'FREQ=DAILY',
+              start_date: '2024-01-01T00:00:00.000Z',
+            },
+          },
+        });
+
+        act(() => {
+          fireEvent.click(screen.getByTestId('osquery-query-override-pack-schedule'));
+        });
+
+        await waitFor(() => {
+          expect(screen.getByTestId('mocked-schedule-section')).toHaveAttribute(
+            'data-disabled',
+            'false'
+          );
+        });
+      });
+
+      it('does not surface a validation toast while inheriting an invalid pack schedule', async () => {
+        const onSave = jest.fn().mockResolvedValue(undefined);
+
+        // Pack carries an over-cap (13h) splay. While inherited (override off),
+        // the disabled fields must NOT trigger validation or block save.
+        renderFlyout({
+          onSave,
+          packSchedule: {
+            schedule_type: 'rrule',
+            rrule_schedule: {
+              rrule: 'FREQ=DAILY',
+              start_date: '2024-01-01T00:00:00.000Z',
+              splay: '13h',
+            },
+          },
+        });
+
+        const idInput = screen.getByRole('textbox', { name: /ID/i });
+        fireEvent.change(idInput, { target: { value: 'inherited-invalid-query' } });
+
+        fireEvent.click(screen.getByTestId('query-flyout-save-button'));
+
+        await waitFor(() => expect(onSave).toHaveBeenCalled());
+        expect(mockAddDanger).not.toHaveBeenCalled();
+      });
     });
   });
 });

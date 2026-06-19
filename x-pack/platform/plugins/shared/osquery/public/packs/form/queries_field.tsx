@@ -222,6 +222,7 @@ const QueriesFieldComponent: React.FC<QueriesFieldProps> = ({ euiFieldProps }) =
           onDeleteClick={handleDeleteClick}
           selectedItems={tableSelectedItems}
           setSelectedItems={setTableSelectedItems}
+          packSchedule={packSchedule}
         />
       ) : null}
       <EuiSpacer />

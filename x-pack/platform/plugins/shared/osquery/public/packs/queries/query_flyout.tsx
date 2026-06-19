@@ -293,6 +293,7 @@ const QueryFlyoutComponent: React.FC<QueryFlyoutProps> = ({
                         lockedScheduleType={packSchedule?.schedule_type}
                         title={null}
                         showErrors={scheduleErrors.length > 0}
+                        disabled={!overridePackSchedule}
                       />
                     ) : null}
                   </ToggleableRow>
