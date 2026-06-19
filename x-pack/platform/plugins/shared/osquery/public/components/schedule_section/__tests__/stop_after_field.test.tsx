@@ -38,6 +38,16 @@ describe('StopAfterField', () => {
       expect(screen.getByTestId('osquery-schedule-stop-after-date')).toBeInTheDocument();
     });
 
+    it('keeps the input editable at the DOM level so the picker popover can still open', () => {
+      renderWithProviders(
+        <StopAfterField enabled value={afterStart} startDate={startDate} onChange={jest.fn()} />
+      );
+
+      expect(screen.getByTestId('osquery-schedule-stop-after-date-input')).not.toHaveAttribute(
+        'readonly'
+      );
+    });
+
     it('fires onChange({ enabled: true, date }) when the toggle is flipped on', () => {
       const onChange = jest.fn();
       renderWithProviders(

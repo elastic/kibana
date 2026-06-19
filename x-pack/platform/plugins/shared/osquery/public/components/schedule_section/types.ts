@@ -8,6 +8,7 @@
 import type { WeekdayStr } from '@kbn/rrule';
 import type { ScheduleType } from '../../../common/schedule';
 import type { SplayFormState } from '../../../common/utils/splay_utils';
+import { roundUpTo30Min } from './slot_utils';
 
 /**
  * UI-level frequency token. Mirrors the {@link Frequency} subset supported by
@@ -133,18 +134,15 @@ const ONE_DAY_MS = 24 * 60 * 60 * 1000;
 export const createDefaultScheduleFormData = (
   scheduleType: ScheduleType = 'interval'
 ): ScheduleFormData => {
-  const now = new Date();
+  const startDate = roundUpTo30Min(new Date());
 
   return {
     scheduleType,
     interval: DEFAULT_INTERVAL_SECONDS,
-    startDate: now,
+    startDate,
     stopAfter: {
       enabled: false,
-      // Default UNTIL is strictly after DTSTART so the field is valid as soon
-      // as the user toggles it on. RRULE requires UNTIL > DTSTART or it never
-      // fires.
-      date: new Date(now.getTime() + ONE_DAY_MS),
+      date: new Date(startDate.getTime() + ONE_DAY_MS),
     },
     recurrence: createDefaultRecurrence(),
     splay: createDefaultSplay(),

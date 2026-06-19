@@ -144,6 +144,11 @@ export const STOP_AFTER_BEFORE_START_ERROR = i18n.translate(
   { defaultMessage: 'Stop date must be after the start date.' }
 );
 
+export const START_DATE_IN_PAST_ERROR = i18n.translate(
+  'xpack.osquery.scheduleSection.startDateInPastError',
+  { defaultMessage: 'Start date and time must not be in the past.' }
+);
+
 export const SPLAY_LABEL = i18n.translate('xpack.osquery.scheduleSection.splayLabel', {
   defaultMessage: 'Splay time',
 });

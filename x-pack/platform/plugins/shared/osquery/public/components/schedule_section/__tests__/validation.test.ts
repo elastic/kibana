@@ -11,6 +11,7 @@ import type { ScheduleFormData } from '../types';
 import {
   AT_LEAST_ONE_DAY_ERROR,
   SPLAY_MAX_ERROR,
+  START_DATE_IN_PAST_ERROR,
   STOP_AFTER_BEFORE_START_ERROR,
 } from '../translations';
 
@@ -19,9 +20,22 @@ const recurrenceState = (overrides: Partial<ScheduleFormData> = {}): ScheduleFor
   ...overrides,
 });
 
-const START = new Date('2026-01-01T00:00:00.000Z');
+// "now" pinned with fake timers so the past-start rule (floorTo30Min(now)) is
+// deterministic regardless of when the suite runs.
+const NOW = new Date('2026-06-19T12:00:00.000Z');
+// A start safely in the future relative to NOW — used by cases that exercise
+// the OTHER rules without tripping the past-start rule.
+const START = new Date('2026-06-20T00:00:00.000Z');
 
 describe('validateScheduleFormData', () => {
+  beforeAll(() => {
+    jest.useFakeTimers().setSystemTime(NOW);
+  });
+
+  afterAll(() => {
+    jest.useRealTimers();
+  });
+
   describe('interval mode', () => {
     it('is always valid (the numeric field clamps its own input)', () => {
       expect(validateScheduleFormData(createDefaultScheduleFormData('interval'))).toEqual([]);
@@ -144,6 +158,51 @@ describe('validateScheduleFormData', () => {
       });
 
       expect(validateScheduleFormData(data)).not.toContain(SPLAY_MAX_ERROR);
+    });
+  });
+
+  describe('rule (a2): start date in the past', () => {
+    it('flags a start date whose 30-minute slot has fully elapsed', () => {
+      const data = recurrenceState({
+        // 11:00 — its slot (11:00–11:30) is entirely before NOW (12:00).
+        startDate: new Date('2026-06-19T11:00:00.000Z'),
+      });
+
+      expect(validateScheduleFormData(data)).toContain(START_DATE_IN_PAST_ERROR);
+    });
+
+    it('does not flag a start in the current 30-minute slot (tick tolerance)', () => {
+      const data = recurrenceState({
+        // 12:00 == floorTo30Min(NOW); the current slot is not yet "past".
+        startDate: new Date('2026-06-19T12:00:00.000Z'),
+      });
+
+      expect(validateScheduleFormData(data)).not.toContain(START_DATE_IN_PAST_ERROR);
+    });
+
+    it('does not flag a start a few seconds before now but within the current slot', () => {
+      const data = recurrenceState({
+        // 12:00:00 .. NOW is 12:00:00; a value at 12:00 sits at the slot floor
+        // and stays valid even though wall-clock may have ticked past it.
+        startDate: new Date('2026-06-19T12:15:00.000Z'),
+      });
+
+      expect(validateScheduleFormData(data)).not.toContain(START_DATE_IN_PAST_ERROR);
+    });
+
+    it('does not flag a future start date', () => {
+      const data = recurrenceState({ startDate: START });
+
+      expect(validateScheduleFormData(data)).not.toContain(START_DATE_IN_PAST_ERROR);
+    });
+
+    it('does not apply the past-start rule in interval mode', () => {
+      const data: ScheduleFormData = {
+        ...createDefaultScheduleFormData('interval'),
+        startDate: new Date('2026-06-19T11:00:00.000Z'),
+      };
+
+      expect(validateScheduleFormData(data)).not.toContain(START_DATE_IN_PAST_ERROR);
     });
   });
 

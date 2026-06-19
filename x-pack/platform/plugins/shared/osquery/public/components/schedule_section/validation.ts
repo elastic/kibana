@@ -7,10 +7,12 @@
 
 import { MAX_SPLAY_SECONDS } from '../../../common/schedule';
 import { splayInSeconds, sumCompoundSeconds } from '../../../common/utils/splay_utils';
+import { floorTo30Min } from './slot_utils';
 import type { ScheduleFormData } from './types';
 import {
   AT_LEAST_ONE_DAY_ERROR,
   SPLAY_MAX_ERROR,
+  START_DATE_IN_PAST_ERROR,
   STOP_AFTER_BEFORE_START_ERROR,
 } from './translations';
 
@@ -36,6 +38,13 @@ export const validateScheduleFormData = (data: ScheduleFormData): string[] => {
   // (a) Custom (WEEKLY) recurrence with no weekday selected never fires.
   if (data.recurrence.frequency === 'custom' && data.recurrence.byweekday.length === 0) {
     errors.push(AT_LEAST_ONE_DAY_ERROR);
+  }
+
+  if (
+    isValidDate(data.startDate) &&
+    data.startDate.getTime() < floorTo30Min(new Date()).getTime()
+  ) {
+    errors.push(START_DATE_IN_PAST_ERROR);
   }
 
   // (b) Stop date must be strictly after the start date (RRULE UNTIL > DTSTART).

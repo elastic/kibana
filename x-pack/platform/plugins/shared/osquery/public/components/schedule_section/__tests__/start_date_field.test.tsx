@@ -28,4 +28,21 @@ describe('StartDateField', () => {
     // ScheduleSection composer relies on).
     expect(screen.getByText(START_DATE_LABEL)).toBeInTheDocument();
   });
+
+  it('keeps the input editable at the DOM level so the picker popover can still open', () => {
+    // The field blocks manual typing via `onChangeRaw` rather than a plain
+    // `readOnly` attribute — a read-only input would also stop react-datepicker
+    // from opening the calendar popover (the reported bug).
+    const value = new Date('2026-12-26T10:00:00.000Z');
+    renderWithProviders(<StartDateField value={value} onChange={jest.fn()} />);
+
+    expect(screen.getByTestId('osquery-schedule-start-date-input')).not.toHaveAttribute('readonly');
+  });
+
+  it('disables the input when disabled', () => {
+    const value = new Date('2026-12-26T10:00:00.000Z');
+    renderWithProviders(<StartDateField value={value} onChange={jest.fn()} disabled />);
+
+    expect(screen.getByTestId('osquery-schedule-start-date-input')).toBeDisabled();
+  });
 });

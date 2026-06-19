@@ -339,6 +339,7 @@ export const convertSOQueriesToPackConfig = (
         interval,
         schedule_type: querySchedType,
         rrule_schedule: queryRrule,
+        start_date: legacyStartDate,
         ...rest
       }: SOPackQuery,
       key: number
@@ -385,9 +386,21 @@ export const convertSOQueriesToPackConfig = (
         }
       }
 
+      // Suppress the legacy top-level `start_date` for rrule-mode queries.
+      // The authoritative time-of-day lives in `rrule_schedule.start_date`;
+      // emitting both causes osquerybeat to honour the stale create-time
+      // top-level value instead of the user-chosen override.
+      const startDateField =
+        isRruleFeatureEnabled && (packMode === 'rrule' || querySchedType === 'rrule')
+          ? {}
+          : legacyStartDate !== undefined
+          ? { start_date: legacyStartDate }
+          : {};
+
       queriesOut[index] = omitBy(
         {
           ...rest,
+          ...startDateField,
           ...scheduleFields,
           query: removeMultilines(query),
           ...(!isEmpty(ecs_mapping)

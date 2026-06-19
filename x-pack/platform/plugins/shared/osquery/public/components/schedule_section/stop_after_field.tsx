@@ -8,6 +8,7 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import moment from 'moment';
 import { EuiDatePicker, EuiFormRow } from '@elastic/eui';
+import { SLOT_MINUTES } from './slot_utils';
 import { ToggleableRow } from './toggleable_row';
 import {
   STOP_AFTER_BEFORE_START_ERROR,
@@ -73,6 +74,10 @@ export const StopAfterField = ({
     setTouched(true);
   }, []);
 
+  const handleChangeRaw = useCallback((event: React.FocusEvent<HTMLInputElement>) => {
+    event.preventDefault();
+  }, []);
+
   const selectedMoment = useMemo(() => moment(value), [value]);
   const minMoment = useMemo(() => moment(startDate), [startDate]);
   const isBeforeStart = enabled && value.getTime() <= startDate.getTime();
@@ -97,8 +102,10 @@ export const StopAfterField = ({
           aria-label={STOP_AFTER_DATE_LABEL}
           selected={selectedMoment}
           onChange={handleDateChange}
+          onChangeRaw={handleChangeRaw}
           onBlur={handleBlur}
           showTimeSelect
+          timeIntervals={SLOT_MINUTES}
           minDate={minMoment}
           disabled={disabled}
           data-test-subj="osquery-schedule-stop-after-date"
