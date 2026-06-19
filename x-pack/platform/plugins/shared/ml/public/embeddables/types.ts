@@ -43,9 +43,13 @@ import type { MlTimeSeriesSearchService } from '../application/timeseriesexplore
 import type { TimeSeriesExplorerService } from '../application/util/time_series_explorer_service';
 import type { ToastNotificationService } from '../application/services/toast_notification_service';
 import type { MlPublicUsageCollection } from '../application/services/usage_collection';
-import type { MlEmbeddableTypes } from './constants';
 
 export type { AnomalySwimLaneEmbeddableApi } from './anomaly_swimlane/types';
+
+export type MlEmbeddableTypes =
+  | AnomalySwimLaneEmbeddableType
+  | AnomalyExplorerChartsEmbeddableType
+  | AnomalySingleMetricViewerEmbeddableType;
 
 /**
  * Common API for all ML embeddables
