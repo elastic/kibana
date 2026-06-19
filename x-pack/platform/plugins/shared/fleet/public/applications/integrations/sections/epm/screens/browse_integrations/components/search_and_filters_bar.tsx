@@ -122,6 +122,10 @@ const SortFilter: React.FC = () => {
   return (
     <EuiFilterGroup compressed>
       <EuiPopover
+        aria-label={i18n.translate(
+          'xpack.fleet.epm.browseIntegrations.searchAndFilterBar.sortPopoverAriaLabel',
+          { defaultMessage: 'Sort' }
+        )}
         id="browseIntegrationsSortPopover"
         isOpen={isOpen}
         closePopover={closePopover}
@@ -208,6 +212,10 @@ const SetupMethodFilter: React.FC<{
 
   return (
     <EuiPopover
+      aria-label={i18n.translate(
+        'xpack.fleet.epm.browseIntegrations.searchAndFilterBar.setupMethodPopoverAriaLabel',
+        { defaultMessage: 'Setup method filter' }
+      )}
       id="browseIntegrationsSetupMethodPopover"
       isOpen={isOpen}
       closePopover={closePopover}
@@ -303,6 +311,10 @@ const SignalFilter: React.FC<{
 
   return (
     <EuiPopover
+      aria-label={i18n.translate(
+        'xpack.fleet.epm.browseIntegrations.searchAndFilterBar.signalPopoverAriaLabel',
+        { defaultMessage: 'Signal filter' }
+      )}
       id="browseIntegrationsSignalPopover"
       isOpen={isOpen}
       closePopover={closePopover}
@@ -378,6 +390,10 @@ const ContentFilter: React.FC<{
 
   return (
     <EuiPopover
+      aria-label={i18n.translate(
+        'xpack.fleet.epm.browseIntegrations.searchAndFilterBar.contentPopoverAriaLabel',
+        { defaultMessage: 'Content filter' }
+      )}
       id="browseIntegrationsContentPopover"
       isOpen={isOpen}
       closePopover={closePopover}
@@ -668,6 +684,10 @@ export const SearchAndFiltersBar: React.FC<SearchAndFiltersBarProps> = ({
             {hiddenSubCategoriesItems && hiddenSubCategoriesItems.length > 0 && (
               <EuiFlexItem grow={false}>
                 <EuiPopover
+                  aria-label={i18n.translate(
+                    'xpack.fleet.epm.browseIntegrations.searchAndFilterBar.subCategoriesPopoverAriaLabel',
+                    { defaultMessage: 'More subcategories' }
+                  )}
                   data-test-subj="browseIntegrations.showMoreSubCategoriesButton"
                   id="browseIntegrationsMoreSubCategories"
                   button={
