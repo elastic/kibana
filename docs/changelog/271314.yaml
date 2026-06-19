@@ -1,0 +1,12 @@
+prs:
+- https://github.com/elastic/kibana/pull/271314
+issues:
+- https://github.com/elastic/kibana/issues/268959
+type: bug-fix
+products:
+- product: cloud-serverless
+  target: 2026-06-16
+areas:
+- Kibana platform
+title: Fix user profile retrieval for proxy run_as
+description: Fixes an issue in reverse proxy run_as configurations where the user avatar and tooltip did not match the run_as user.

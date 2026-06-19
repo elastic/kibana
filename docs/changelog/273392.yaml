@@ -1,0 +1,9 @@
+prs:
+- https://github.com/elastic/kibana/pull/273392
+issues:
+- https://github.com/elastic/kibana/issues/273246
+type: bug-fix
+products:
+- product: cloud-serverless
+  target: 2026-06-18
+title: Remove actionsAuthorization.execute gate from per-alert mute/unmute

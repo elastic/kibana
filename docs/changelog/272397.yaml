@@ -1,0 +1,10 @@
+prs:
+- https://github.com/elastic/kibana/pull/272397
+type: bug-fix
+products:
+- product: cloud-serverless
+  target: 2026-06-16
+areas:
+- Search and data
+title: Fix i18n config
+description: Fixes translations for the Elasticsearch solution getting started page.

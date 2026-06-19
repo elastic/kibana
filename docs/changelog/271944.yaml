@@ -1,0 +1,9 @@
+prs:
+- https://github.com/elastic/kibana/pull/271944
+issues:
+- https://github.com/elastic/kibana/issues/247313
+type: bug-fix
+products:
+- product: cloud-serverless
+  target: 2026-06-16
+title: Restore telemetry collector wiring and unskip test

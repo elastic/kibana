@@ -1,0 +1,10 @@
+prs:
+- https://github.com/elastic/kibana/pull/270904
+issues:
+- https://github.com/elastic/security-team/issues/17496
+type: feature
+products:
+- product: cloud-serverless
+  target: 2026-06-16
+title: Bulk add alerts to Agent Builder chat
+description: '> Adds an "Add to chat" bulk action to the alerts table, enabling analysts to send selected alerts directly to the AI Agent chat for triage.'

@@ -1,0 +1,11 @@
+prs:
+- https://github.com/elastic/kibana/pull/272715
+issues:
+- https://github.com/elastic/kibana/issues/234653
+type: bug-fix
+products:
+- product: cloud-serverless
+  target: 2026-06-18
+areas:
+- Search and data
+title: Add timeout and configuration for product_versions fetch

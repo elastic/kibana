@@ -1,0 +1,10 @@
+prs:
+- https://github.com/elastic/kibana/pull/272429
+type: bug-fix
+products:
+- product: cloud-serverless
+  target: 2026-06-16
+areas:
+- Search and data
+title: Optimize agent count retrieval on get agent policies request
+description: Optimized the agent policies list (withAgentCount=true) to compute agent counts in a single aggregation instead of several queries per policy, greatly improving response time for deployments with many agent policies.
