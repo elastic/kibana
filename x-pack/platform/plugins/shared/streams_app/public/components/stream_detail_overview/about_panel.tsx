@@ -353,7 +353,7 @@ export function AboutPanel() {
           {!isEditing && !description && canEditDescription && (
             <EuiText size="s" color="subdued">
               <FormattedMessage
-                id="xpack.streams.streamOverview.attachedAssetsPanel.contentLabel"
+                id="xpack.streams.streamOverview.aboutPanel.contentLabel"
                 defaultMessage="{button} to help identify this stream."
                 values={{
                   button: (

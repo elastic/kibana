@@ -8,9 +8,11 @@ import { EuiFlexGroup, EuiFlexItem, EuiPageHeader, useEuiTheme } from '@elastic/
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { Streams } from '@kbn/streams-schema';
+import { STREAMS_UI_PRIVILEGES } from '@kbn/streams-plugin/public';
 import React from 'react';
 import { useStreamsAppParams } from '../../../../hooks/use_streams_app_params';
 import { useStreamsAppRouter } from '../../../../hooks/use_streams_app_router';
+import { useStreamsPrivileges } from '../../../../hooks/use_streams_privileges';
 import { useTimeRange } from '../../../../hooks/use_time_range';
 import { QueryStreamSchemaEditor } from '../../../query_streams/query_stream_schema_editor';
 import { RedirectTo } from '../../../redirect_to';
@@ -49,8 +51,10 @@ export function QueryStreamDetailManagement({
     path: { key, tab },
   } = useStreamsAppParams('/{key}/management/{tab}');
   const { rangeFrom, rangeTo } = useTimeRange();
+  const streamsPrivileges = useStreamsPrivileges();
 
   const { euiTheme } = useEuiTheme();
+  const canDeleteQueryStream = streamsPrivileges.ui[STREAMS_UI_PRIVILEGES.manage];
 
   const { significantEvents } = useStreamsDetailManagementTabs({
     definition,
@@ -126,7 +130,7 @@ export function QueryStreamDetailManagement({
               <DiscoverBadgeButton stream={definition.stream} hasDataStream spellOut />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <StreamDetailActionsMenu canDelete={true} definition={definition} />
+              <StreamDetailActionsMenu canDelete={canDeleteQueryStream} definition={definition} />
             </EuiFlexItem>
           </EuiFlexGroup>,
         ]}
