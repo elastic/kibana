@@ -7,6 +7,7 @@
 
 import { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import { getRangeFilter } from '../../../../../../../../common/constants/client_defaults';
 import { getSyntheticsCcsIndex } from '../../../../../../../../common/get_synthetics_indices';
 import type { OverviewStatusMetaData, Ping } from '../../../../../../../../common/runtime_types';
 import { useSyntheticsRefreshContext } from '../../../../../contexts';
@@ -34,8 +35,8 @@ export const useLatestError = ({ monitor, configIdByLocation }: UseMonitorLatest
   const isOpenForThisMonitor = isPopoverOpen === configIdByLocation;
   const locationLabel = monitor?.locations?.[0]?.label;
 
-  // `monitorQueryId` (not `configId`) matches the heartbeat doc's `monitor.id`;
-  // they diverge for project monitors with a `custom_heartbeat_id`.
+  // `monitorQueryId` matches heartbeat `monitor.id` (diverges from `configId`
+  // for project monitors with a `custom_heartbeat_id`).
   const remote = useRemoteMonitorLatestError({
     monitorId: monitor.monitorQueryId,
     locationLabel,
@@ -45,8 +46,6 @@ export const useLatestError = ({ monitor, configIdByLocation }: UseMonitorLatest
   });
 
   useEffect(() => {
-    // Local SO-backed route can't see remote heartbeat indices; remote monitors
-    // are handled by `useRemoteMonitorLatestError` above.
     if (!isRemote && locationLabel && isOpenForThisMonitor) {
       dispatch(getMonitorLastErrorRunAction.get({ monitorId: monitor.configId, locationLabel }));
     }
@@ -59,8 +58,8 @@ export const useLatestError = ({ monitor, configIdByLocation }: UseMonitorLatest
   return { loading, latestPing };
 };
 
-// Client-side CCS variant of `getLatestTestRun`. The popover only renders for
-// `down` monitors, so the latest ping with `summary` IS the latest error run.
+// Client-side CCS variant of `getLatestTestRun`. Popover only renders for
+// `down` monitors, so the latest ping with `summary` is the latest error run.
 const useRemoteMonitorLatestError = ({
   monitorId,
   locationLabel,
@@ -87,6 +86,8 @@ const useRemoteMonitorLatestError = ({
             { term: { 'monitor.id': monitorId } },
             ...(locationLabel ? [{ term: { 'observer.geo.name': locationLabel } }] : []),
             { exists: { field: 'summary' } },
+            // Bound the search to avoid scanning frozen/cold tiers on the remote cluster;
+            getRangeFilter({ from: 'now-30d', to: 'now' }),
           ],
         },
       },

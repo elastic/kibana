@@ -156,7 +156,7 @@ describe('useLatestError', () => {
       );
     });
 
-    it('filters by monitor.id, observer.geo.name, and summary existence; sorts by @timestamp desc', () => {
+    it('filters by monitor.id, observer.geo.name, summary existence, and a 30d range; sorts by @timestamp desc', () => {
       setSelectorState({ popoverOpenForCfg: 'cfg-1-us-east' });
 
       renderHook(() =>
@@ -168,6 +168,7 @@ describe('useLatestError', () => {
         { term: { 'monitor.id': 'cfg-1' } },
         { term: { 'observer.geo.name': 'US East' } },
         { exists: { field: 'summary' } },
+        { range: { '@timestamp': { gte: 'now-30d', lte: 'now' } } },
       ]);
       expect(params.sort).toEqual([{ '@timestamp': 'desc' }]);
       expect(params.size).toBe(1);
