@@ -2614,7 +2614,6 @@ components:
                   description: Indicates if the user is privileged.
                   type: boolean
                 name:
-                  maxLength: 512
                   type: string
     MonitoredUserUpdateDoc:
       type: object
