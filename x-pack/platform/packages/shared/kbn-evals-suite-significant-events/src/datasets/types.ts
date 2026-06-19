@@ -7,6 +7,7 @@
 
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { EvaluationCriterionStructured } from '@kbn/evals';
+import type { Detection, Discovery } from '@kbn/streams-schema';
 import type { GcsConfig } from '../data_generators/replay';
 import type { ValidKIFeatureType } from '../evaluators/ki_feature_extraction';
 
@@ -18,6 +19,7 @@ interface ScenarioMetadata {
   difficulty: 'easy' | 'medium' | 'hard';
   failure_domain: string;
   failure_mode?: string;
+  adversarial?: boolean;
 }
 
 export interface SnapshotSourceOverride {
@@ -88,6 +90,36 @@ export interface KIFeatureDeduplicationScenario {
   snapshot_source?: SnapshotSourceOverride;
 }
 
+export interface DiscoveryInvestigatorScenario {
+  input: {
+    scenario_id: string;
+    stream_name: string;
+    detections: Array<Partial<Detection>>;
+    continuation_candidates?: Array<Partial<Discovery>>;
+  };
+  output: {
+    criteria: SamplingCriterion[];
+    expected_kind: 'discovery' | 'clearance' | 'handled' | 'any';
+    expected_min_evidence_count?: number;
+  };
+  metadata: Record<string, unknown> & ScenarioMetadata;
+  snapshot_source?: SnapshotSourceOverride;
+}
+
+export interface DiscoveryJudgeScenario {
+  input: {
+    scenario_id: string;
+    discoveries: Array<Partial<Discovery>>;
+  };
+  output: {
+    criteria: SamplingCriterion[];
+    expected_status: 'promoted' | 'demoted' | 'acknowledged' | 'resolved' | 'any';
+    expect_assessment_note?: boolean;
+  };
+  metadata: Record<string, unknown> & ScenarioMetadata;
+  snapshot_source?: SnapshotSourceOverride;
+}
+
 export interface DatasetConfig {
   id: string;
   description: string;
@@ -96,4 +128,6 @@ export interface DatasetConfig {
   kiFeatureExtraction: KIFeatureExtractionScenario[];
   kiFeatureExclusion: KIFeatureExclusionScenario[];
   kiFeatureDeduplication: KIFeatureDeduplicationScenario[];
+  discoveryInvestigator: DiscoveryInvestigatorScenario[];
+  discoveryJudge: DiscoveryJudgeScenario[];
 }

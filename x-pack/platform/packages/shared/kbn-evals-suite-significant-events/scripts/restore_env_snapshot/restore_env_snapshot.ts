@@ -64,7 +64,7 @@ async function repromoteQueries({
   await promoteQueries(config);
 }
 
-async function restoreKiDataStream({
+async function restoreDataStream({
   esClient,
   log,
   repository,
@@ -277,7 +277,7 @@ export const restoreEnvSnapshot = async ({
     const dataStreamStatuses: string[] = [];
     for (const dataStream of SIGNIFICANT_EVENTS_DATA_STREAMS) {
       dataStreamStatuses.push(
-        await restoreKiDataStream({ esClient, log, repository, snapshotName, dataStream })
+        await restoreDataStream({ esClient, log, repository, snapshotName, dataStream })
       );
     }
 

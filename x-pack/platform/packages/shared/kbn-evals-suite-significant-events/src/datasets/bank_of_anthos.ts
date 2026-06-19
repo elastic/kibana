@@ -477,6 +477,8 @@ export const bankOfAnthosDataset: DatasetConfig = {
       },
     },
   ],
+  discoveryInvestigator: [],
+  discoveryJudge: [],
   kiQueryGeneration: [
     {
       input: {
