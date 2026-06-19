@@ -6,8 +6,9 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { QuerySandbox } from './query_sandbox';
 import type { QuerySandboxProps } from './query_sandbox';
 import type { QueryExecutionResult } from './use_query_execution';
@@ -32,8 +33,13 @@ jest.mock('./use_query_execution', () => ({
   useQueryExecution: () => mockExecutionResult,
 }));
 
+jest.mock('@kbn/esql-utils', () => ({
+  ...jest.requireActual('@kbn/esql-utils'),
+  getESQLTimeFieldFromQuery: jest.fn().mockResolvedValue(undefined),
+}));
+
 jest.mock('../../form/hooks/use_data_fields', () => ({
-  useDataFields: () => ({ data: {} }),
+  useDataFields: () => ({ data: {}, isLoading: false }),
 }));
 
 jest.mock('../../form/contexts/rule_form_context', () => ({
@@ -70,11 +76,17 @@ const defaultProps: QuerySandboxProps = {
   onDateRangeChange: jest.fn(),
 };
 
+const testQueryClient = new QueryClient({
+  defaultOptions: { queries: { retry: false } },
+});
+
 const renderSandbox = (overrides: Partial<QuerySandboxProps> = {}) =>
   render(
-    <I18nProvider>
-      <QuerySandbox {...defaultProps} {...overrides} />
-    </I18nProvider>
+    <QueryClientProvider client={testQueryClient}>
+      <I18nProvider>
+        <QuerySandbox {...defaultProps} {...overrides} />
+      </I18nProvider>
+    </QueryClientProvider>
   );
 
 describe('QuerySandbox', () => {
@@ -149,9 +161,11 @@ describe('QuerySandbox', () => {
     expect(screen.getByText('Run your query to see results')).toBeInTheDocument();
   });
 
-  it('calls run on mount when autoRun is true', () => {
+  it('calls run on mount when autoRun is true', async () => {
     renderSandbox({ autoRun: true });
-    expect(mockRun).toHaveBeenCalledTimes(1);
+    await waitFor(() => {
+      expect(mockRun).toHaveBeenCalledTimes(1);
+    });
   });
 
   it('does not call run on mount when autoRun is false', () => {

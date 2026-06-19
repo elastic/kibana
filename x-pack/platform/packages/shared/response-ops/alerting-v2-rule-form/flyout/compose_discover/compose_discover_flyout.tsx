@@ -50,6 +50,9 @@ import { getSandboxTabs, useComposeDiscoverState } from './use_compose_discover_
 import { useEsqlAutocomplete } from './use_esql_providers';
 import { guessRecoveryBlock, discoverQueryToComposed, splitQuery } from './use_heuristic_split';
 import { useSplitQueryCompletion } from './use_split_query_completion';
+import { getTimeFieldResolutionQuery } from './get_time_field_resolution_query';
+import { ComposeDiscoverTimeFieldContextProvider } from './compose_discover_time_field_context';
+import { useResolveTimeField } from './use_resolve_time_field';
 
 const LazyYamlRuleForm = React.lazy(() =>
   import('../../form/yaml_rule_form').then((m) => ({ default: m.YamlRuleForm }))
@@ -164,6 +167,8 @@ export interface ComposeDiscoverFlyoutProps {
   initialQuery?: string;
   /** ES|QL control variables from Discover — inlined into initialQuery when provided. */
   esqlVariables?: ESQLControlVariable[];
+  /** Time field from the Discover data view — seeds timeField in create mode. */
+  initialTimeField?: string;
 }
 
 const FLYOUT_TITLE_ID = 'composeDiscoverFlyoutTitle';
@@ -241,6 +246,7 @@ export function ComposeDiscoverFlyout({
   initialBuilderState,
   initialQuery,
   esqlVariables,
+  initialTimeField,
 }: ComposeDiscoverFlyoutProps): React.ReactElement | null {
   const isBuilderMode = Boolean(builderType);
   /*
@@ -312,11 +318,12 @@ export function ComposeDiscoverFlyout({
     if (initialQuery !== undefined) {
       return {
         ...EMPTY_FORM_VALUES,
+        timeField: initialTimeField ?? EMPTY_FORM_VALUES.timeField,
         query: discoverComposedQuery ?? discoverQueryToComposed(''),
       };
     }
     return EMPTY_FORM_VALUES;
-  }, [rule, mode, initialQuery, discoverComposedQuery]);
+  }, [rule, mode, initialQuery, discoverComposedQuery, initialTimeField]);
 
   const methods = useForm<ComposeFormValues>({ mode: 'onBlur', defaultValues });
   const [isConfirmCloseVisible, setIsConfirmCloseVisible] = useState(false);
@@ -396,6 +403,42 @@ export function ComposeDiscoverFlyout({
   );
   const [dateRange, setDateRange] = useState({ dateStart: 'now-15m', dateEnd: 'now' });
 
+  const watchedTimeField = useWatch({ control: methods.control, name: 'timeField' });
+  useEffect(() => {
+    if (watchedTimeField && watchedTimeField !== sandboxTimeField) {
+      setSandboxTimeField(watchedTimeField);
+    }
+  }, [watchedTimeField, sandboxTimeField]);
+
+  const isAlert = useWatch({ control: methods.control, name: 'kind' }) === 'alert';
+  const watchedQuery = useWatch({ control: methods.control, name: 'query' });
+
+  const timeFieldResolutionQuery = useMemo(
+    () =>
+      getTimeFieldResolutionQuery(
+        uiState.childOpen ? sandboxQuery : watchedQuery,
+        isAlert,
+        uiState.queryCommitted || uiState.childOpen
+      ),
+    [uiState.childOpen, uiState.queryCommitted, sandboxQuery, watchedQuery, isAlert]
+  );
+
+  const handleResolvedTimeFieldChange = useCallback(
+    (field: string) => {
+      methods.setValue('timeField', field, { shouldDirty: false });
+      setSandboxTimeField(field);
+    },
+    [methods]
+  );
+
+  const { timeFieldOptions, isTimeFieldResolved } = useResolveTimeField({
+    query: timeFieldResolutionQuery,
+    timeField: watchedTimeField ?? '@timestamp',
+    onTimeFieldChange: handleResolvedTimeFieldChange,
+    http: baseServices.http,
+    dataViews: baseServices.dataViews,
+  });
+
   useEffect(() => {
     if (rule || initialQuery === undefined) {
       return;
@@ -441,7 +484,6 @@ export function ComposeDiscoverFlyout({
     search: services.data.search.search,
   });
 
-  const isAlert = useWatch({ control: methods.control, name: 'kind' }) === 'alert';
   const isAlertRef = useRef(isAlert);
   isAlertRef.current = isAlert;
 
@@ -767,202 +809,206 @@ export function ComposeDiscoverFlyout({
   return (
     <RuleFormProvider services={services} meta={{ layout: 'flyout' }}>
       <FormProvider {...methods}>
-        <EuiFlyout
-          key={flyoutKey}
-          type="overlay"
-          session="start"
-          historyKey={historyKey}
-          onClose={handleRequestClose}
-          aria-labelledby={FLYOUT_TITLE_ID}
-          size={480}
-        >
-          <EuiFlyoutHeader hasBorder>
-            <EuiTitle size="s" id={FLYOUT_TITLE_ID}>
-              <h2>{title}</h2>
-            </EuiTitle>
+        <ComposeDiscoverTimeFieldContextProvider value={{ timeFieldOptions, isTimeFieldResolved }}>
+          <EuiFlyout
+            key={flyoutKey}
+            type="overlay"
+            session="start"
+            historyKey={historyKey}
+            onClose={handleRequestClose}
+            aria-labelledby={FLYOUT_TITLE_ID}
+            size={480}
+          >
+            <EuiFlyoutHeader hasBorder>
+              <EuiTitle size="s" id={FLYOUT_TITLE_ID}>
+                <h2>{title}</h2>
+              </EuiTitle>
 
-            <EuiFlexGroup
-              justifyContent="spaceBetween"
-              alignItems="center"
-              responsive={false}
-              style={{ marginTop: 8 }}
-            >
-              {uiState.yamlMode ? (
-                <EuiFlexItem grow={false}>
-                  <EuiBadge color="hollow" data-test-subj="composeDiscoverYamlBadge">
-                    {YAML_MODE_BADGE_LABEL}
-                  </EuiBadge>
-                </EuiFlexItem>
-              ) : (
-                <EuiFlexItem grow>
-                  <HorizontalMinimalStepper
-                    steps={steps.map(
-                      (s, i): MinimalStep => ({
-                        title: s.title,
-                        status: getStepStatus(uiState.step, i),
-                      })
-                    )}
-                  />
-                </EuiFlexItem>
-              )}
-              {!isBuilderMode && (
-                <EuiFlexItem grow={false}>
-                  <EuiButtonGroup
-                    legend={EDIT_MODE_LEGEND}
-                    options={EDIT_MODE_OPTIONS}
-                    idSelected={uiState.yamlMode ? 'yaml' : 'form'}
-                    onChange={(id) => handleToggleYamlMode(id === 'yaml')}
-                    isIconOnly
-                    buttonSize="compressed"
-                    data-test-subj="composeDiscoverEditModeToggle"
-                  />
-                </EuiFlexItem>
-              )}
-            </EuiFlexGroup>
-          </EuiFlyoutHeader>
-
-          <EuiFlyoutBody>
-            {validationCallout}
-            {uiState.yamlMode ? (
-              <React.Suspense fallback={null}>
-                <LazyYamlRuleForm
-                  services={baseServices}
-                  yamlText={yamlText}
-                  setYamlText={handleSetYamlText}
-                  onBlurSync={handleBlurSync}
-                  isSubmitting={isSaving}
-                />
-              </React.Suspense>
-            ) : (
-              <BuilderStateProvider builderState={builderState} setBuilderState={setBuilderState}>
-                <ComposeDiscoverForm
-                  state={uiState}
-                  dispatch={dispatch}
-                  services={baseServices}
-                  onRecoveryTypeChange={handleRecoveryTypeChange}
-                  onKindChange={handleKindChange}
-                  isEditing={isEditing}
-                  ruleId={ruleId}
-                  builderType={builderType}
-                />
-              </BuilderStateProvider>
-            )}
-          </EuiFlyoutBody>
-
-          <EuiFlyoutFooter>
-            {uiState.yamlMode ? (
-              <EuiFlexGroup justifyContent="flexEnd">
-                <EuiFlexItem grow={false}>
-                  <EuiButton
-                    fill
-                    onClick={handleYamlSave}
-                    isLoading={isSaving}
-                    isDisabled={hasValidationErrors}
-                    data-test-subj="composeDiscoverYamlSubmit"
-                  >
-                    {isCreate ? CREATE_RULE_BUTTON_LABEL : SAVE_RULE_BUTTON_LABEL}
-                  </EuiButton>
-                </EuiFlexItem>
+              <EuiFlexGroup
+                justifyContent="spaceBetween"
+                alignItems="center"
+                responsive={false}
+                style={{ marginTop: 8 }}
+              >
+                {uiState.yamlMode ? (
+                  <EuiFlexItem grow={false}>
+                    <EuiBadge color="hollow" data-test-subj="composeDiscoverYamlBadge">
+                      {YAML_MODE_BADGE_LABEL}
+                    </EuiBadge>
+                  </EuiFlexItem>
+                ) : (
+                  <EuiFlexItem grow>
+                    <HorizontalMinimalStepper
+                      steps={steps.map(
+                        (s, i): MinimalStep => ({
+                          title: s.title,
+                          status: getStepStatus(uiState.step, i),
+                        })
+                      )}
+                    />
+                  </EuiFlexItem>
+                )}
+                {!isBuilderMode && (
+                  <EuiFlexItem grow={false}>
+                    <EuiButtonGroup
+                      legend={EDIT_MODE_LEGEND}
+                      options={EDIT_MODE_OPTIONS}
+                      idSelected={uiState.yamlMode ? 'yaml' : 'form'}
+                      onChange={(id) => handleToggleYamlMode(id === 'yaml')}
+                      isIconOnly
+                      buttonSize="compressed"
+                      data-test-subj="composeDiscoverEditModeToggle"
+                    />
+                  </EuiFlexItem>
+                )}
               </EuiFlexGroup>
-            ) : (
-              <EuiFlexGroup justifyContent="spaceBetween">
-                <EuiFlexItem grow={false}>
-                  <EuiButtonEmpty
-                    onClick={() => {
-                      closeSourceRef.current = 'button';
-                      handleRequestClose();
-                    }}
-                    data-test-subj="composeDiscoverCancel"
-                  >
-                    {CANCEL_BUTTON_LABEL}
-                  </EuiButtonEmpty>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiFlexGroup gutterSize="s" responsive={false}>
-                    {uiState.step > 0 && (
+            </EuiFlyoutHeader>
+
+            <EuiFlyoutBody>
+              {validationCallout}
+              {uiState.yamlMode ? (
+                <React.Suspense fallback={null}>
+                  <LazyYamlRuleForm
+                    services={baseServices}
+                    yamlText={yamlText}
+                    setYamlText={handleSetYamlText}
+                    onBlurSync={handleBlurSync}
+                    isSubmitting={isSaving}
+                  />
+                </React.Suspense>
+              ) : (
+                <BuilderStateProvider builderState={builderState} setBuilderState={setBuilderState}>
+                  <ComposeDiscoverForm
+                    state={uiState}
+                    dispatch={dispatch}
+                    services={baseServices}
+                    onRecoveryTypeChange={handleRecoveryTypeChange}
+                    onKindChange={handleKindChange}
+                    isEditing={isEditing}
+                    ruleId={ruleId}
+                    builderType={builderType}
+                  />
+                </BuilderStateProvider>
+              )}
+            </EuiFlyoutBody>
+
+            <EuiFlyoutFooter>
+              {uiState.yamlMode ? (
+                <EuiFlexGroup justifyContent="flexEnd">
+                  <EuiFlexItem grow={false}>
+                    <EuiButton
+                      fill
+                      onClick={handleYamlSave}
+                      isLoading={isSaving}
+                      isDisabled={hasValidationErrors}
+                      data-test-subj="composeDiscoverYamlSubmit"
+                    >
+                      {isCreate ? CREATE_RULE_BUTTON_LABEL : SAVE_RULE_BUTTON_LABEL}
+                    </EuiButton>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              ) : (
+                <EuiFlexGroup justifyContent="spaceBetween">
+                  <EuiFlexItem grow={false}>
+                    <EuiButtonEmpty
+                      onClick={() => {
+                        closeSourceRef.current = 'button';
+                        handleRequestClose();
+                      }}
+                      data-test-subj="composeDiscoverCancel"
+                    >
+                      {CANCEL_BUTTON_LABEL}
+                    </EuiButtonEmpty>
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiFlexGroup gutterSize="s" responsive={false}>
+                      {uiState.step > 0 && (
+                        <EuiFlexItem grow={false}>
+                          <EuiButtonEmpty
+                            iconType="arrowLeft"
+                            isDisabled={uiState.childOpen}
+                            onClick={() => dispatch({ type: 'GO_BACK' })}
+                            data-test-subj="composeDiscoverBack"
+                          >
+                            {BACK_BUTTON_LABEL}
+                          </EuiButtonEmpty>
+                        </EuiFlexItem>
+                      )}
                       <EuiFlexItem grow={false}>
-                        <EuiButtonEmpty
-                          iconType="arrowLeft"
-                          isDisabled={uiState.childOpen}
-                          onClick={() => dispatch({ type: 'GO_BACK' })}
-                          data-test-subj="composeDiscoverBack"
-                        >
-                          {BACK_BUTTON_LABEL}
-                        </EuiButtonEmpty>
-                      </EuiFlexItem>
-                    )}
-                    <EuiFlexItem grow={false}>
-                      {isLastStep ? (
-                        <EuiButton
-                          fill
-                          isLoading={isSaving}
-                          isDisabled={hasValidationErrors}
-                          onClick={handleFinalSubmit}
-                          data-test-subj="composeDiscoverSubmit"
-                        >
-                          {isCreate ? CREATE_RULE_BUTTON_LABEL : SAVE_RULE_BUTTON_LABEL}
-                        </EuiButton>
-                      ) : (
-                        <EuiToolTip
-                          content={
-                            hasValidationErrors
-                              ? VALIDATION_ERRORS_NEXT_TOOLTIP
-                              : (currentStep?.id === 'alertCondition' ||
-                                  currentStep?.id === 'builderCondition') &&
-                                !uiState.queryCommitted
-                              ? NEXT_DISABLED_TOOLTIP
-                              : undefined
-                          }
-                        >
+                        {isLastStep ? (
                           <EuiButton
                             fill
-                            iconType="arrowRight"
-                            iconSide="right"
-                            isDisabled={
-                              uiState.childOpen ||
-                              hasValidationErrors ||
-                              ((currentStep?.id === 'alertCondition' ||
-                                currentStep?.id === 'builderCondition') &&
-                                !uiState.queryCommitted)
-                            }
-                            onClick={handleNext}
-                            data-test-subj="composeDiscoverNext"
+                            isLoading={isSaving}
+                            isDisabled={hasValidationErrors}
+                            onClick={handleFinalSubmit}
+                            data-test-subj="composeDiscoverSubmit"
                           >
-                            {NEXT_BUTTON_LABEL}
+                            {isCreate ? CREATE_RULE_BUTTON_LABEL : SAVE_RULE_BUTTON_LABEL}
                           </EuiButton>
-                        </EuiToolTip>
-                      )}
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            )}
-          </EuiFlyoutFooter>
+                        ) : (
+                          <EuiToolTip
+                            content={
+                              hasValidationErrors
+                                ? VALIDATION_ERRORS_NEXT_TOOLTIP
+                                : (currentStep?.id === 'alertCondition' ||
+                                    currentStep?.id === 'builderCondition') &&
+                                  !uiState.queryCommitted
+                                ? NEXT_DISABLED_TOOLTIP
+                                : undefined
+                            }
+                          >
+                            <EuiButton
+                              fill
+                              iconType="arrowRight"
+                              iconSide="right"
+                              isDisabled={
+                                uiState.childOpen ||
+                                hasValidationErrors ||
+                                ((currentStep?.id === 'alertCondition' ||
+                                  currentStep?.id === 'builderCondition') &&
+                                  !uiState.queryCommitted)
+                              }
+                              onClick={handleNext}
+                              data-test-subj="composeDiscoverNext"
+                            >
+                              {NEXT_BUTTON_LABEL}
+                            </EuiButton>
+                          </EuiToolTip>
+                        )}
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              )}
+            </EuiFlyoutFooter>
 
-          {uiState.childOpen && (
-            <QuerySandboxFlyout
-              query={sandboxQuery}
-              onQueryChange={isBuilderMode ? undefined : setSandboxQuery}
-              tabs={sandboxTabs}
-              timeField={sandboxTimeField}
-              onTimeFieldChange={isBuilderMode ? undefined : setSandboxTimeField}
-              dateRange={dateRange}
-              onDateRangeChange={setDateRange}
-              activeTab={uiState.activeTab}
-              onTabChange={(tab) => dispatch({ type: 'SET_TAB', tab })}
-              onAlertEditorMount={onAlertEditorMount}
-              onRecoveryEditorMount={onRecoveryEditorMount}
-              onClose={() => {
-                syncSandbox();
-                dispatch({ type: 'CLOSE_CHILD' });
-              }}
-              onApply={isBuilderMode ? undefined : handleSandboxApply}
-            />
+            {uiState.childOpen && (
+              <QuerySandboxFlyout
+                query={sandboxQuery}
+                onQueryChange={isBuilderMode ? undefined : setSandboxQuery}
+                tabs={sandboxTabs}
+                timeField={sandboxTimeField}
+                onTimeFieldChange={isBuilderMode ? undefined : setSandboxTimeField}
+                timeFieldOptions={timeFieldOptions}
+                isTimeFieldResolved={isTimeFieldResolved}
+                dateRange={dateRange}
+                onDateRangeChange={setDateRange}
+                activeTab={uiState.activeTab}
+                onTabChange={(tab) => dispatch({ type: 'SET_TAB', tab })}
+                onAlertEditorMount={onAlertEditorMount}
+                onRecoveryEditorMount={onRecoveryEditorMount}
+                onClose={() => {
+                  syncSandbox();
+                  dispatch({ type: 'CLOSE_CHILD' });
+                }}
+                onApply={isBuilderMode ? undefined : handleSandboxApply}
+              />
+            )}
+          </EuiFlyout>
+          {isConfirmCloseVisible && (
+            <ConfirmRuleClose onCancel={handleCancelDiscard} onConfirm={handleConfirmDiscard} />
           )}
-        </EuiFlyout>
-        {isConfirmCloseVisible && (
-          <ConfirmRuleClose onCancel={handleCancelDiscard} onConfirm={handleConfirmDiscard} />
-        )}
+        </ComposeDiscoverTimeFieldContextProvider>
       </FormProvider>
     </RuleFormProvider>
   );

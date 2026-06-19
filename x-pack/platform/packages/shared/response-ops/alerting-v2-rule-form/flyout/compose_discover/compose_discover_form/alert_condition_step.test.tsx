@@ -17,6 +17,7 @@ import { createInitialState } from '../use_compose_discover_state';
 import type { ComposeDiscoverState } from '../types';
 import type { ComposeFormValues, RuleQuery } from '../compose_form_types';
 import { AlertConditionStep } from './alert_condition_step';
+import { ComposeDiscoverTimeFieldContextProvider } from '../compose_discover_time_field_context';
 
 jest.mock('@kbn/code-editor', () => ({
   ...jest.requireActual('@kbn/code-editor'),
@@ -25,10 +26,6 @@ jest.mock('@kbn/code-editor', () => ({
 
 jest.mock('@kbn/esql-utils', () => ({
   getEsqlColumns: jest.fn(async () => []),
-}));
-
-jest.mock('../../../form/hooks/use_data_fields', () => ({
-  useDataFields: jest.fn(() => ({ data: {} })),
 }));
 
 let getFormValues: (() => ComposeFormValues) | undefined;
@@ -77,7 +74,14 @@ const createComposeFormWrapper = (
         <QueryClientProvider client={queryClient}>
           <FormProvider {...form}>
             <RuleFormProvider services={services} meta={{ layout: 'flyout' }}>
-              {children}
+              <ComposeDiscoverTimeFieldContextProvider
+                value={{
+                  timeFieldOptions: [{ value: '@timestamp', text: '@timestamp' }],
+                  isTimeFieldResolved: true,
+                }}
+              >
+                {children}
+              </ComposeDiscoverTimeFieldContextProvider>
             </RuleFormProvider>
           </FormProvider>
         </QueryClientProvider>
