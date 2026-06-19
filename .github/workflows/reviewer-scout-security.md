@@ -34,12 +34,13 @@ engine:
 # Activation rules:
 # - Manual runs always activate.
 # - Auto-triggered on opened/synchronize/reopened for PRs that touch Security Scout paths.
+# - Only PRs from branches in the same repo (not forks) activate, preventing secret exposure.
 # - Skip bot senders; skip PRs labeled reviewer:skip-ai.
 if: >-
-  !github.event.repository.fork &&
   (
     github.event_name == 'workflow_dispatch' ||
     (
+      github.event.pull_request.head.repo.full_name == github.repository &&
       github.event.sender.type != 'Bot' &&
       !contains(github.event.pull_request.labels.*.name, 'reviewer:skip-ai') &&
       github.event_name == 'pull_request_target'
@@ -96,13 +97,6 @@ safe-outputs:
     target: ${{ env.PR_NUMBER }}
     allowed-events: [COMMENT]
     footer: if-body
-  add-comment:
-    max: 1
-    target: ${{ env.PR_NUMBER }}
-    discussions: false
-  reply-to-pull-request-review-comment:
-    max: 10
-    target: ${{ env.PR_NUMBER }}
   resolve-pull-request-review-thread:
     max: 10
 ---
