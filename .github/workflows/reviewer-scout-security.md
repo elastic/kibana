@@ -34,13 +34,11 @@ engine:
 # Activation rules:
 # - Manual runs always activate.
 # - Auto-triggered on opened/synchronize/reopened for PRs that touch Security Scout paths.
-# - Only PRs from branches in the same repo (not forks) activate, preventing secret exposure.
 # - Skip bot senders; skip PRs labeled reviewer:skip-ai.
 if: >-
   (
     github.event_name == 'workflow_dispatch' ||
     (
-      github.event.pull_request.head.repo.full_name == github.repository &&
       github.event.sender.type != 'Bot' &&
       !contains(github.event.pull_request.labels.*.name, 'reviewer:skip-ai') &&
       github.event_name == 'pull_request_target'
