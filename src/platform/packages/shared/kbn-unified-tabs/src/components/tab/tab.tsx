@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { MouseEvent, KeyboardEvent } from 'react';
+import type { MouseEvent, KeyboardEvent, CSSProperties } from 'react';
 import React, { useCallback, useState, useRef, useEffect, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
@@ -184,9 +184,12 @@ export const Tab: React.FC<TabProps> = (props) => {
     [isSelected, isDragging, onSelectEvent, setActionPopover, onSelectedTabKeyDown]
   );
 
+  const fontWeight = isSelected ? euiTheme.font.weight.semiBold : euiTheme.font.weight.regular;
+
   const { tabLabelRef, tabLabelWidth, tabLabelTextWidth } = useTabLabelWidth({
     item,
     tabsSizeConfig,
+    fontWeight,
   });
 
   useEffect(() => {
@@ -206,7 +209,7 @@ export const Tab: React.FC<TabProps> = (props) => {
   const isLoading = previewData?.status === TabStatus.RUNNING;
 
   const mainTabContent = (
-    <div css={getTabContainerCss(euiTheme, tabsSizeConfig, isSelected, isDragging)}>
+    <div css={getTabContainerCss(euiTheme, tabsSizeConfig, isSelected, fontWeight, isDragging)}>
       <div
         ref={tabInteractiveElementRef}
         {...(!disableDragAndDrop ? dragHandleProps : {})}
@@ -258,7 +261,7 @@ export const Tab: React.FC<TabProps> = (props) => {
                 justifyContent="spaceBetween"
                 wrap={false}
                 responsive={false}
-                style={{ width: tabLabelWidth }}
+                style={{ width: tabLabelWidth, fontWeight }}
               >
                 <EuiText
                   id={tabLabelId}
@@ -360,6 +363,7 @@ function getTabContainerCss(
   euiTheme: EuiThemeComputed,
   tabsSizeConfig: TabsSizeConfig,
   isSelected: boolean,
+  fontWeight: CSSProperties['fontWeight'],
   isDragging?: boolean
 ) {
   // TODO: remove the usage of deprecated colors
@@ -379,7 +383,7 @@ function getTabContainerCss(
 
     .unifiedTabs__tabLabelText {
       color: ${isSelected || isDragging ? euiTheme.colors.text : euiTheme.colors.subduedText};
-      font-weight: ${isSelected ? euiTheme.font.weight.semiBold : euiTheme.font.weight.regular};
+      font-weight: ${fontWeight};
     }
 
     &:hover .unifiedTabs__tabLabelText {
