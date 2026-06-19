@@ -138,12 +138,6 @@ export const redTeamCmd: Command<void> = {
     }
     log.info('');
 
-    const report = await runRedTeam(redTeamConfig, log);
-    log.info(
-      `Stub report: ${report.attackCount} attacks, ${report.passCount} pass, ${report.failCount} fail`
-    );
-    log.info('');
-
     const runArgs = buildEvalRunArgs({
       suiteId,
       configPath,
@@ -160,6 +154,12 @@ export const redTeamCmd: Command<void> = {
       log.info('Dry run -- exiting.');
       return;
     }
+
+    const report = await runRedTeam(redTeamConfig, log);
+    log.info(
+      `Stub report: ${report.attackCount} attacks, ${report.passCount} pass, ${report.failCount} fail`
+    );
+    log.info('');
 
     if (!skipServer) {
       await ensureEvalStack({
