@@ -99,11 +99,9 @@ steps:
               strategy: drop
           
           steps:
-            - name: loop
+            - name: long_loop
               type: foreach
-              {% raw %}
               foreach: '${{ (0..2000) | json }}'
-              {% endraw %}
               steps:
                 - name: loop
                   type: foreach
@@ -286,38 +284,38 @@ steps:
                                   ctx._source.id = metricId;
                                   ctx._id = metricId;
 
-            - name: collect_workflow_status_counts
-              type: foreach
-              foreach:
-                - metric: workflowExecution.pendingCount
-                  status: pending
-                - metric: workflowExecution.runningCount
-                  status: running
-                - metric: workflowExecution.completeCount
-                  status: completed
-                - metric: workflowExecution.failedCount
-                  status: failed
-              steps:
-                - name: get_workflow_executions_count_by_status
-                  type: elasticsearch.request
-                  with:
-                    method: POST
-                    path: .workflows-executions*/_count
-                    body:
-                      query:
-                        term:
-                          status: '{{foreach.item.status}}'
+                - name: collect_workflow_status_counts
+                  type: foreach
+                  foreach:
+                    - metric: workflowExecution.pendingCount
+                      status: pending
+                    - metric: workflowExecution.runningCount
+                      status: running
+                    - metric: workflowExecution.completeCount
+                      status: completed
+                    - metric: workflowExecution.failedCount
+                      status: failed
+                  steps:
+                    - name: get_workflow_executions_count_by_status
+                      type: elasticsearch.request
+                      with:
+                        method: POST
+                        path: .workflows-executions*/_count
+                        body:
+                          query:
+                            term:
+                              status: '{{foreach.item.status}}'
 
-                - name: index_workflow_executions_count_by_status
-                  type: elasticsearch.request
-                  with:
-                    method: POST
-                    path: /{{consts.WORKFLOW_METRICS_COLLECTOR_INDEX}}/_doc
-                    body:
-                      "@timestamp": "${{ 'now' | date: '%Y-%m-%dT%H:%M:%S.%LZ', 'UTC' }}"
-                      metric: '{{foreach.item.metric}}'
-                      value: ${{steps.get_workflow_executions_count_by_status.output.count}}
-                      unit: int
+                    - name: index_workflow_executions_count_by_status
+                      type: elasticsearch.request
+                      with:
+                        method: POST
+                        path: /{{consts.WORKFLOW_METRICS_COLLECTOR_INDEX}}/_doc
+                        body:
+                          "@timestamp": "${{ 'now' | date: '%Y-%m-%dT%H:%M:%S.%LZ', 'UTC' }}"
+                          metric: '{{foreach.item.metric}}'
+                          value: ${{steps.get_workflow_executions_count_by_status.output.count}}
+                          unit: int
                 - name: sleep
                   type: wait
                   with:
