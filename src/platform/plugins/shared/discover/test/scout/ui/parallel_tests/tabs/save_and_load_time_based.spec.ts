@@ -209,12 +209,6 @@ spaceTest.describe('tabs - time based save behavior', { tag: '@local-stateful-cl
 });
 
 const closeSaveModal = async (page: ScoutPage) => {
-  await page.keyboard.press('Escape');
-  await expect(page.testSubj.locator('confirmSaveSavedObjectButton')).toBeHidden();
-
-  const popover = page.testSubj.locator('app-menu-popover');
-  if (await popover.isVisible()) {
-    await page.keyboard.press('Escape');
-    await expect(popover).toBeHidden();
-  }
+  await page.testSubj.click('saveCancelButton');
+  await expect(page.testSubj.locator('savedObjectSaveModal')).toBeHidden();
 };
