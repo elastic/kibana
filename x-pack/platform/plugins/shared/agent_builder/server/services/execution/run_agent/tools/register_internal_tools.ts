@@ -65,8 +65,6 @@ export const registerInternalTools = async ({
 
   const interactive = executionMode !== AgentExecutionMode.standalone;
 
-  // Collect the tools that apply to this run, then register them in a single
-  // addTools call.
   const tools: Array<BuiltinToolDefinition<any>> = [];
 
   // Filesystem — read_file and list_files are always on; bash is FF-gated.

@@ -43,8 +43,6 @@ export const createFilesystemServices = async ({
     initialWorkspaceId: workspaceId,
   });
 
-  // Stores expose typed accessors (getEntry / listEntries / entryExists) which
-  // satisfy the VolumeBackedSource shape `FilesystemService` consumes.
   const filesystemService = new FilesystemService({
     workspaceVolume,
     toolResultsSource: resultStore,

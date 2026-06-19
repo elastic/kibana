@@ -59,8 +59,6 @@ export class ToolResultStoreImpl implements WritableToolResultStore {
     return this.results.get(resultId)!.result;
   }
 
-  // Typed entry accessors — replace the previous getVolume() consumers. Backed
-  // by the same MemoryVolume so writes through add()/delete() are reflected.
   async getEntry(path: string) {
     return this.volume.get(path);
   }

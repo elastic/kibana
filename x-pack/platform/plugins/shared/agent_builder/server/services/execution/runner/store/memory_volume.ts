@@ -19,17 +19,11 @@ interface DirNode {
 }
 
 /**
- * In-memory index of `FileEntry` records keyed by path, with a derived directory
- * tree for `list()` queries. Used internally by `ToolResultStore` / `SkillsStore`
- * to back their typed accessors and the `VolumeBackedReadOnlyFs` view.
- *
- * Not exported from `agent-builder-server`; treat as a private implementation
- * detail of each store.
+ * In-memory index of `FileEntry` records.
  */
 export class MemoryVolume {
   /** Map of normalized path to FileEntry for O(1) file lookup */
   private readonly fileIndex: Map<string, FileEntry> = new Map();
-
   /** Root of the directory tree */
   private readonly root: DirNode = this.createDirNode();
 
@@ -118,10 +112,6 @@ export class MemoryVolume {
     return entries;
   }
 
-  // Aliases that satisfy the `VolumeBackedSource` shape (the read surface
-  // `VolumeBackedReadOnlyFs` needs). Defined as method aliases so tests can
-  // pass a `MemoryVolume` directly anywhere a `VolumeBackedSource` is
-  // expected.
   async getEntry(path: string): Promise<FileEntry | undefined> {
     return this.get(path);
   }

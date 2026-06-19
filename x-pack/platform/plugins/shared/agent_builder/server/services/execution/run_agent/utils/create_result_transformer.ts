@@ -48,9 +48,8 @@ export interface CreateResultTransformerOptions {
    */
   toolManager: ToolManager;
   /**
-   * Tool-result store used to look up per-result entry metadata
-   * (specifically `token_count`) when deciding whether to substitute an
-   * oversize result with a file reference.
+   * Tool-result store used to look up per-result entry metadata when deciding whether
+   * to substitute an oversize result with a file reference.
    */
   resultStore: ToolResultStore;
   /**
@@ -146,8 +145,6 @@ const tryFilestoreSubstitution = async ({
     return result;
   }
 
-  // Store-relative path used for the lookup; agent-visible path (with the
-  // mount prefix) is what the LLM uses to reference the file.
   const lookupArgs = {
     toolId,
     toolCallId,
