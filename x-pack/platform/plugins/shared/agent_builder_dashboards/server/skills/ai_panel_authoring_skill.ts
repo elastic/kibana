@@ -13,7 +13,7 @@ import { dashboardTools } from '../../common';
 export const aiPanelAuthoringSkill = defineSkillType({
   id: 'ai-panel-authoring',
   name: 'ai-panel-authoring',
-  basePath: 'skills/platform/ai_panel',
+  basePath: 'skills/platform/dashboard',
   description:
     'Creates AI-generated dashboard panels that render anything: KPI cards, status boards, custom chart types Lens does not support, mixed layouts, rich HTML — all driven by a prompt and optional live ES|QL data.',
   content: `## When to Use This Skill
@@ -65,6 +65,25 @@ A good \`prompt\` tells the LLM what to render, not just what data to show:
 - Good: "A horizontal bar chart of the top 10 services by error count. Bars colored red (#D36086). Service name on the Y axis, count on the X axis. No chart title — the dashboard panel title already has one."
 
 You may mix \`kind: "ai_panel"\` with \`kind: "visualization"\` (Lens) and \`kind: "markdown"\` in the same \`add_panels\` call when a dashboard benefits from both.
+
+## Dashboard Summary Panel (\`kind: "ai_dashboard_summary"\`)
+
+Use this when the user asks to **summarise the dashboard** or wants to know what to focus on:
+- "Summarise this dashboard"
+- "What should I pay attention to?"
+- "Give me an overview of the key metrics"
+- "What's important here?"
+
+The panel automatically discovers all ES|QL panels on the dashboard (both \`ai_panel\` and Lens ES|QL panels), runs their queries, and generates a concise narrative. **No prompt or query is needed.**
+
+Add it as a wide panel at the top of the dashboard:
+\`\`\`
+{
+  kind: "ai_dashboard_summary",
+  customInstructions: "Focus on anomalies and flag anything below target.", // optional
+  grid: { x: 0, y: 0, w: 48, h: 8 }
+}
+\`\`\`
 `,
   getInlineTools: () => [manageDashboardTool()],
   getRegistryTools: () => [platformCoreTools.generateEsql, platformCoreTools.executeEsql],

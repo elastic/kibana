@@ -61,6 +61,18 @@ function detectTimeFieldFromQuery(esqlQuery: string): string | null {
   return null;
 }
 
+// Sanitizes a cell value before it is included in an LLM prompt.
+// Strips HTML angle brackets, newlines, Liquid template delimiters ({{ and {%),
+// and truncates to avoid overly large prompts.
+export function sanitizeCellValue(v: unknown): string {
+  return String(v ?? '')
+    .replace(/[<>]/g, '')
+    .replace(/[\r\n]+/g, ' ')
+    .replace(/\{\{/g, '{ {')
+    .replace(/\{%/g, '{ %')
+    .slice(0, 500);
+}
+
 export interface EsqlColumn {
   name: string;
   type: string;

@@ -7,3 +7,6 @@
 
 export const AI_SUMMARY_PANEL_EMBEDDABLE_TYPE = 'ai_summary_panel';
 export const AI_SUMMARY_PANEL_APP_NAME = 'AI Summary';
+
+export const AI_DASHBOARD_SUMMARY_EMBEDDABLE_TYPE = 'ai_dashboard_summary';
+export const AI_DASHBOARD_SUMMARY_APP_NAME = 'AI Dashboard Summary';

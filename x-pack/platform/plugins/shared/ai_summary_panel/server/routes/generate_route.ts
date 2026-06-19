@@ -11,7 +11,7 @@ import type { IRouter, CoreSetup, IUiSettingsClient, KibanaRequest } from '@kbn/
 import { ChatCompletionEventType, MessageRole } from '@kbn/inference-common';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import { GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR } from '@kbn/management-settings-ids';
-import { runEsqlQuery } from '../utils/esql_query';
+import { runEsqlQuery, sanitizeCellValue } from '../utils/esql_query';
 import type { EsqlColumn } from '../utils/esql_query';
 import { normalizeColumnName } from '../../common/utils';
 
@@ -93,13 +93,6 @@ CONTENT RULES:
   {% endfor %}`;
 
 const CSP_META = `<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline';">`;
-
-function sanitizeCellValue(v: unknown): string {
-  return String(v ?? '')
-    .replace(/[<>]/g, '')
-    .replace(/[\r\n]+/g, ' ')
-    .slice(0, 500);
-}
 
 function formatSampleTable(columns: EsqlColumn[], rows: unknown[][]): string {
   const header = columns.map((c) => c.name.replace(/[<>]/g, '')).join(' | ');

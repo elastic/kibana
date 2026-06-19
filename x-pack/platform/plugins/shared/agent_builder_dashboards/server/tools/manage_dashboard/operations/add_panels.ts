@@ -15,6 +15,7 @@ import {
   markdownPanelInputSchema,
   visualizationPanelInputSchema,
   aiPanelInputSchema,
+  aiDashboardSummaryPanelInputSchema,
 } from './panel_kinds';
 import { getResolvedVisualizationCreationRequests } from './visualization_creation';
 
@@ -30,6 +31,7 @@ const addPanelsItemSchema = z.discriminatedUnion('kind', [
   attachmentPanelInputSchema.extend({ sectionId: sectionIdField }),
   visualizationPanelInputSchema.extend({ sectionId: sectionIdField }),
   aiPanelInputSchema.extend({ sectionId: sectionIdField }),
+  aiDashboardSummaryPanelInputSchema.extend({ sectionId: sectionIdField }),
 ]);
 
 export type AddPanelsItemInput = z.infer<typeof addPanelsItemSchema>;
@@ -89,6 +91,25 @@ export const addPanelsOperation = defineOperation({
                   prompt: item.prompt,
                   content: '',
                   ...(item.esqlQuery ? { esqlQuery: item.esqlQuery } : {}),
+                },
+                grid: item.grid,
+              },
+            ],
+            sectionId: item.sectionId,
+          });
+          break;
+        }
+        case 'ai_dashboard_summary': {
+          nextDashboardData = appendPanelsToDashboard({
+            dashboardData: nextDashboardData,
+            panelsToAdd: [
+              {
+                id: uuidv4(),
+                type: 'ai_dashboard_summary',
+                config: {
+                  ...(item.customInstructions
+                    ? { customInstructions: item.customInstructions }
+                    : {}),
                 },
                 grid: item.grid,
               },

@@ -67,3 +67,16 @@ export const aiPanelInputSchema = z.object({
 });
 
 export type AiPanelInput = z.infer<typeof aiPanelInputSchema>;
+
+export const aiDashboardSummaryPanelInputSchema = z.object({
+  kind: z.literal('ai_dashboard_summary'),
+  customInstructions: z
+    .string()
+    .optional()
+    .describe(
+      '(optional) Custom instructions for the summary, e.g. "Focus on anomalies and revenue trends". If omitted, the AI will summarise all ES|QL panels on the dashboard automatically.'
+    ),
+  grid: panelGridSchema,
+});
+
+export type AiDashboardSummaryPanelInput = z.infer<typeof aiDashboardSummaryPanelInputSchema>;

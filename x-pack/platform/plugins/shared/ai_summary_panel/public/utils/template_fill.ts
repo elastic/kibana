@@ -14,7 +14,9 @@ export const TEMPLATE_SENTINEL = '<!--ai-template-->';
 const CSP_META = `<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline';">`;
 
 // Single shared engine — stateless, safe to reuse across renders.
-const liquid = new Liquid({ strictFilters: false, strictVariables: false });
+// dynamicPartials: false disables {% include %} / {% render %} tags which in the
+// browser bundle would otherwise fire synchronous XHR requests.
+const liquid = new Liquid({ strictFilters: false, strictVariables: false, dynamicPartials: false });
 
 export function injectCsp(html: string): string {
   if (html.includes(CSP_META)) return html;
@@ -105,6 +107,59 @@ export function fillTemplate(
   } catch {
     rendered =
       '<p style="color:#d36086;padding:16px">Template error — please edit the prompt to regenerate.</p>';
+  }
+
+  return injectCsp(sanitizeHtml(rendered));
+}
+
+export interface SummaryPanelData {
+  key: string;
+  title: string;
+  columns: TemplateColumn[];
+  rows: unknown[][];
+}
+
+// Fills a summary template with data from multiple dashboard panels.
+// Liquid context: { panels: { key: { title, rows: [{ col: val, col_pct: 0-100 }], max: { col: maxVal } } } }
+export function fillSummaryTemplate(template: string, panelData: SummaryPanelData[]): string {
+  let tpl = template.trimStart();
+  if (tpl.startsWith(TEMPLATE_SENTINEL)) {
+    tpl = tpl.slice(TEMPLATE_SENTINEL.length);
+  }
+
+  const panels: Record<string, unknown> = {};
+  for (const { key, title, columns, rows } of panelData) {
+    const maxValues: Record<string, number> = {};
+    columns.forEach((col, i) => {
+      const k = normalizeColumnName(col.name);
+      const nums = rows.map((r) => Number(r[i])).filter((v) => isFinite(v));
+      if (nums.length > 0) maxValues[k] = Math.max(...nums);
+    });
+
+    const rowObjects = rows.map((row) => {
+      const obj: Record<string, unknown> = {};
+      columns.forEach((col, i) => {
+        const k = normalizeColumnName(col.name);
+        obj[k] = row[i];
+        const max = maxValues[k];
+        if (max !== undefined && max !== 0) {
+          const num = Number(row[i]);
+          obj[`${k}_pct`] = isFinite(num)
+            ? Math.min(100, Math.max(0, Math.round((num / max) * 100)))
+            : 0;
+        }
+      });
+      return obj;
+    });
+
+    panels[key] = { title, rows: rowObjects, max: maxValues };
+  }
+
+  let rendered: string;
+  try {
+    rendered = liquid.parseAndRenderSync(tpl, { panels });
+  } catch {
+    rendered = '<p style="color:#d36086;padding:16px">Summary error — please regenerate.</p>';
   }
 
   return injectCsp(sanitizeHtml(rendered));

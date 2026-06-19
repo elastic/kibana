@@ -158,7 +158,7 @@ export const AiSummaryComponent = ({
     // Stream partial HTML into the iframe for static panels (no placeholders to leak through).
     if (!htmlRef.current && !esqlQuery) {
       intervalRef = setInterval(() => {
-        if (accRef.current) setHtml(accRef.current);
+        if (accRef.current) setHtml(sanitizeHtml(accRef.current));
       }, 300);
     }
 
@@ -178,8 +178,10 @@ export const AiSummaryComponent = ({
         rendered = fillTemplate(cleaned, esqlData.columns, esqlData.rows);
         onTemplateChangeRef.current(cleaned);
       } else if (!esqlQuery) {
-        // Static panel: full HTML already has CSP from the route's first token.
-        rendered = accRef.current;
+        // Static panel: sanitize then store. CSP is already in the accumulator
+        // from the route's first token, but sanitizeHtml must still run to strip
+        // any anchor tags the LLM emitted.
+        rendered = injectCsp(sanitizeHtml(accRef.current));
         onTemplateChangeRef.current(rendered);
       } else {
         return; // esqlQuery present but data fetch failed — error already set
