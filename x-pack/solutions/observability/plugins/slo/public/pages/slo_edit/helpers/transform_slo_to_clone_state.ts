@@ -20,6 +20,8 @@ export function transformSloToCloneState(
     name: `[Copy] ${slo.name}`,
     description: slo.description,
     tags: slo.tags,
+    // labels stay in the CreateSLOInput record shape here; the encoded clone state is parsed
+    // back through transformPartialSLODataToFormState, which converts them to key/value pairs.
     labels: slo.labels,
     objective: slo.objective,
     indicator: slo.indicator,

@@ -10,6 +10,10 @@ import type { SavedObjectMigrationFn, SavedObjectsType } from '@kbn/core-saved-o
 import type { SavedObject } from '@kbn/core/server';
 import type { StoredSLODefinition } from '../domain/models';
 
+// Matches the `ignore_above: 1024` on the flattened `labels` mapping; also bounds the
+// label key/value strings so the create schema guards against unbounded input (CodeQL DoS rule).
+const MAX_LABEL_LENGTH = 1024;
+
 // Config-schema mirror of the stored SLO attributes. Nested objects stay permissive
 // (`unknowns: 'allow'`) because the indicator params and settings vary by indicator
 // type; only the top level uses `unknowns: 'ignore'` so that, on rollback, fields
@@ -65,7 +69,12 @@ const storedSloFields = {
   ),
 };
 
-const labelsField = { labels: schema.recordOf(schema.string(), schema.string()) };
+const labelsField = {
+  labels: schema.recordOf(
+    schema.string({ maxLength: MAX_LABEL_LENGTH }),
+    schema.string({ maxLength: MAX_LABEL_LENGTH })
+  ),
+};
 
 const sloSchemaV1 = schema.object(storedSloFields, { unknowns: 'ignore' });
 const sloSchemaV2 = schema.object({ ...storedSloFields, ...labelsField }, { unknowns: 'ignore' });
