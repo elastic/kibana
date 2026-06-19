@@ -273,7 +273,7 @@ export const ensureEvalStack = async ({
   serverConfigSet = 'evals_tracing',
   requiresEisCcm,
 }: EnsureEvalStackOptions): Promise<void> => {
-  await ensureEdot({ repoRoot, log, elasticsearchHost: profileEnvOverrides.ELASTICSEARCH_HOST });
+  await ensureEdot({ repoRoot, log, elasticsearchHost: profileEnvOverrides.TRACING_ES_URL });
 
   await ensureScout({
     repoRoot,
