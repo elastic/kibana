@@ -107,7 +107,7 @@ jest.mock('../../form/utils/yaml_form_utils', () => ({
           metadata: { name: 'changed', enabled: true, description: '', tags: [] },
           timeField: '@timestamp',
           schedule: { every: '1m', lookback: '5m' },
-          query: { breach: '' },
+          query: { format: 'standalone', breach: { query: '' } },
           stateTransitionAlertDelayMode: 'immediate',
           stateTransitionRecoveryDelayMode: 'immediate',
           artifacts: [],

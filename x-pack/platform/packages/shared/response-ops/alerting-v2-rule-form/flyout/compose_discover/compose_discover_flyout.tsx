@@ -31,12 +31,10 @@ import { inlineEsqlVariables } from '../../utils/esql_rule_utils';
 import type { RuleFormServices } from '../../form/contexts/rule_form_context';
 import { RuleFormProvider } from '../../form/contexts/rule_form_context';
 import { ConfirmRuleClose } from '../confirm_rule_close';
-import type { FormValues, RuleNotificationsValue } from '../../form/types';
-import { mergeArtifactsByType, splitArtifactsByType } from '../../form/utils/artifact_mappers';
+import type { FormValues, RuleNotificationsValue, RuleQuery } from '../../form/types';
+import { getBreachQuery } from '../../form/types';
 import { parseYamlToFormValues, serializeFormToYaml } from '../../form/utils/yaml_form_utils';
 import { ComposeDiscoverForm, getSteps } from './compose_discover_form';
-import type { ComposeFormValues, RuleQuery } from './compose_form_types';
-import { getBreachQuery, getRecoverQuery } from './compose_form_types';
 import {
   composeFormToCreateRequest,
   composeFormToUpdateRequest,
@@ -180,44 +178,7 @@ const getStepStatus = (currentStep: number, stepIndex: number): MinimalStep['sta
   return 'incomplete';
 };
 
-/** Bridge YAML parse (FormValues) into compose form shape. */
-const formValuesFromYamlToCompose = (parsed: FormValues): ComposeFormValues => ({
-  kind: parsed.kind,
-  metadata: parsed.metadata,
-  timeField: parsed.timeField,
-  schedule: parsed.schedule,
-  query: {
-    format: 'standalone',
-    breach: { query: parsed.query.breach },
-    ...(parsed.query.recover ? { recovery: { query: parsed.query.recover } } : {}),
-  },
-  grouping: parsed.grouping,
-  stateTransition: parsed.stateTransition,
-  stateTransitionAlertDelayMode: parsed.stateTransitionAlertDelayMode,
-  stateTransitionRecoveryDelayMode: parsed.stateTransitionRecoveryDelayMode,
-  ...splitArtifactsByType(parsed.artifacts),
-});
-
-/** Compose form → FormValues for YAML serialization via yaml_form_utils. */
-const composeFormValuesForYamlSerialize = (compose: ComposeFormValues): FormValues => {
-  const breach = getBreachQuery(compose.query);
-  const recover = getRecoverQuery(compose.query) || undefined;
-
-  return {
-    kind: compose.kind,
-    metadata: compose.metadata,
-    timeField: compose.timeField,
-    schedule: compose.schedule,
-    query: { breach, ...(recover ? { recover } : {}) },
-    grouping: compose.grouping,
-    stateTransition: compose.stateTransition,
-    stateTransitionAlertDelayMode: compose.stateTransitionAlertDelayMode,
-    stateTransitionRecoveryDelayMode: compose.stateTransitionRecoveryDelayMode,
-    artifacts: mergeArtifactsByType(compose),
-  };
-};
-
-const EMPTY_FORM_VALUES: ComposeFormValues = {
+const EMPTY_FORM_VALUES: FormValues = {
   kind: 'alert',
   metadata: { name: '', enabled: true, description: '', tags: [] },
   timeField: '@timestamp',
@@ -301,7 +262,7 @@ export function ComposeDiscoverFlyout({
   const hasValidationErrors = validationErrors.length > 0;
 
   // ── Form values (submitted to the API) ──
-  const defaultValues = useMemo<ComposeFormValues>(() => {
+  const defaultValues = useMemo<FormValues>(() => {
     if (rule) {
       const mapped = mapRuleToComposeFormValues(rule);
       if (mode === 'clone') {
@@ -325,7 +286,7 @@ export function ComposeDiscoverFlyout({
     return EMPTY_FORM_VALUES;
   }, [rule, mode, initialQuery, discoverComposedQuery, initialTimeField]);
 
-  const methods = useForm<ComposeFormValues>({ mode: 'onBlur', defaultValues });
+  const methods = useForm<FormValues>({ mode: 'onBlur', defaultValues });
   const [isConfirmCloseVisible, setIsConfirmCloseVisible] = useState(false);
   // EuiFlyout with session="start" uses EUI's managed flyout system, which
   // calls closeAllFlyouts() synchronously (via flushSync) *before* invoking
@@ -622,7 +583,7 @@ export function ComposeDiscoverFlyout({
     const result = parseYamlToFormValues(yaml);
     if (result.values) {
       methods.reset({
-        ...formValuesFromYamlToCompose(result.values),
+        ...result.values,
         notifications: methods.getValues('notifications'),
       });
       syncSandbox();
@@ -640,7 +601,7 @@ export function ComposeDiscoverFlyout({
   const handleBlurSync = useCallback(
     (values: FormValues) => {
       cancelYamlParse();
-      methods.reset(formValuesFromYamlToCompose(values));
+      methods.reset(values);
       syncSandbox();
     },
     [cancelYamlParse, methods, syncSandbox]
@@ -649,9 +610,7 @@ export function ComposeDiscoverFlyout({
   const handleToggleYamlMode = useCallback(
     (enabled: boolean) => {
       if (enabled) {
-        const serialized = serializeFormToYaml(
-          composeFormValuesForYamlSerialize(methods.getValues())
-        );
+        const serialized = serializeFormToYaml(methods.getValues());
         setYamlText(serialized);
         yamlBaselineRef.current = serialized;
       } else {
@@ -661,13 +620,13 @@ export function ComposeDiscoverFlyout({
         cancelYamlParse();
         const result = parseYamlToFormValues(yamlText);
         if (result.values) {
-          const composed = {
-            ...formValuesFromYamlToCompose(result.values),
+          const merged = {
+            ...result.values,
             notifications: methods.getValues('notifications'),
           };
-          methods.reset(composed);
+          methods.reset(merged);
           syncSandbox();
-          if (getBreachQuery(composed.query).trim()) {
+          if (getBreachQuery(merged.query).trim()) {
             dispatch({ type: 'COMMIT_QUERY' });
           }
           if (yamlWasDirty) {
@@ -688,7 +647,7 @@ export function ComposeDiscoverFlyout({
     methods.setValue('timeField', sandboxTimeField, { shouldDirty: true });
     if (uiState.yamlMode) {
       const current = { ...methods.getValues(), query: sandboxQuery, timeField: sandboxTimeField };
-      setYamlText(serializeFormToYaml(composeFormValuesForYamlSerialize(current)));
+      setYamlText(serializeFormToYaml(current));
     }
     dispatch({ type: 'COMMIT_QUERY' });
     if (!uiState.yamlMode) {
@@ -726,7 +685,7 @@ export function ComposeDiscoverFlyout({
     cancelYamlParse();
     const result = parseYamlToFormValues(yamlText);
     if (result.values) {
-      methods.reset(formValuesFromYamlToCompose(result.values));
+      methods.reset(result.values);
       // No syncSandbox() here: draft is temporarily stale after methods.reset(), but
       // we're about to submit. On success the flyout closes; on failure the user is still
       // in YAML mode and handleToggleYamlMode(false) will resync when they switch back.
