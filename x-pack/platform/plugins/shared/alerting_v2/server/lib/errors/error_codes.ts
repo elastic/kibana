@@ -44,8 +44,6 @@ export const ALERTING_V2_ERROR_CODES = {
   ACTION_POLICY_VERSION_CONFLICT: 'ACTION_POLICY_VERSION_CONFLICT',
   /** The submitted action policy body failed schema validation. */
   INVALID_ACTION_POLICY_DATA: 'INVALID_ACTION_POLICY_DATA',
-  /** A `single_rule` action policy referenced a rule that does not exist. */
-  RULE_NOT_FOUND_FOR_POLICY: 'RULE_NOT_FOUND_FOR_POLICY',
   /** A user-supplied date string failed ISO-8601 parsing. */
   INVALID_DATE_STRING: 'INVALID_DATE_STRING',
 
@@ -56,6 +54,14 @@ export const ALERTING_V2_ERROR_CODES = {
   // ──────────────────── Rule doctor insights ─────────────────
   /** A rule doctor insight with the given identifier does not exist. */
   INSIGHT_NOT_FOUND: 'INSIGHT_NOT_FOUND',
+
+  // ───────────────────────── Engine state ────────────────────
+  /**
+   * The alerting engine is administratively disabled via the
+   * `alerting:v2:enabled` advanced setting. Emitted by every HTTP route
+   * with status 503 before any route-specific work runs.
+   */
+  ALERTING_DISABLED: 'ALERTING_DISABLED',
 
   // ──────────────────────────── Generic ──────────────────────
   /** Catch-all 5xx code when no domain-specific code applies. */

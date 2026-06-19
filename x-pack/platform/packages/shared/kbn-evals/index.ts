@@ -21,6 +21,11 @@
  * @module @kbn/evals
  */
 
+// Register the `.text` require hook before any evaluator module (which import `*.text`
+// templates) is loaded. Under Playwright >=1.61 on Node >=23.5 the default loader would
+// otherwise Babel-parse the raw templates and throw "Missing semicolon". Keep this first.
+import './src/setup_dot_text';
+
 // CLI tools
 export * as cli from './src/cli';
 export {
