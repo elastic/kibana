@@ -11,8 +11,7 @@ import type { InferenceClient } from '@kbn/inference-common';
 import type { Streams } from '@kbn/streams-schema';
 import { generateSignificantEvents } from '@kbn/streams-ai';
 import type { SemanticCodeSearchTools } from '../semantic_code_search_grounding/semantic_code_search_tools';
-import type { FeatureClient } from '../streams/feature/feature_client';
-import type { QueryClient } from '../streams/assets/query/query_client';
+import type { KnowledgeIndicatorClient } from '../streams/ki';
 import { generateSignificantEventDefinitions } from './generate_significant_events';
 
 jest.mock('@kbn/streams-ai', () => ({
@@ -32,10 +31,10 @@ describe('generateSignificantEventDefinitions (semantic code search wiring)', ()
     overrides: Partial<Parameters<typeof generateSignificantEventDefinitions>[1]> = {}
   ) => ({
     inferenceClient: { bindTo: jest.fn().mockReturnValue({}) } as unknown as InferenceClient,
-    featureClient: { getFeatures: jest.fn() } as unknown as FeatureClient,
-    queryClient: {
+    kiClient: {
+      getFeatures: jest.fn(),
       getStreamToQueryLinksMap: jest.fn().mockResolvedValue({ 'logs.test': [] }),
-    } as unknown as QueryClient,
+    } as unknown as KnowledgeIndicatorClient,
     logger,
     signal: new AbortController().signal,
     esClient: {} as ElasticsearchClient,
