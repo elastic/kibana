@@ -36,7 +36,6 @@ export const AnimatedSearchBarContainer = styled.div`
   }
 
   & > div {
-    overflow: hidden;
     padding: 0;
 
     ${euiCanAnimate} {
@@ -47,7 +46,14 @@ export const AnimatedSearchBarContainer = styled.div`
     }
   }
 
+  /* Clip the inner div only while toggled-off (the collapse animation needs
+     it). In the expanded state we must NOT clip, so the upstream KQL
+     textarea overlay design works: the textarea wrap is z-indexed above
+     siblings and has overflow: visible !important, so a long query grows
+     beyond the search bar row and overlays the content below it without
+     pushing the row's controls — same behavior as the Alerts page. */
   &.toggled-off > div {
+    overflow: hidden;
     padding: 0;
   }
 `;
