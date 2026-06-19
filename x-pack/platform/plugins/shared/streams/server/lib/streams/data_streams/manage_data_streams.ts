@@ -190,15 +190,12 @@ export async function updateDataStreamsLifecycle({
       });
     } else if (isDslLifecycle(lifecycle)) {
       const dslDownsampling = lifecycle.dsl.downsample;
-      await retryTransientEsErrors(
-        () =>
-          esClient.indices.putDataLifecycle({
-            name: names,
-            data_retention: lifecycle.dsl.data_retention,
-            ...(dslDownsampling?.length ? { downsampling: dslDownsampling } : {}),
-          } as IndicesPutDataLifecycleRequest),
-        { logger }
-      );
+      const request: IndicesPutDataLifecycleRequest = {
+        name: names,
+        data_retention: lifecycle.dsl.data_retention,
+        ...(dslDownsampling?.length ? { downsampling: dslDownsampling } : {}),
+      };
+      await retryTransientEsErrors(() => esClient.indices.putDataLifecycle(request), { logger });
 
       if (!isServerless) {
         // we don't need overrides for serverless since data streams can
@@ -233,15 +230,14 @@ export async function updateDataStreamsLifecycle({
           const templateLifecycle = getTemplateLifecycle(template);
           if (isDslLifecycle(templateLifecycle)) {
             const templateDownsampling = templateLifecycle.dsl.downsample;
-            await retryTransientEsErrors(
-              () =>
-                esClient.indices.putDataLifecycle({
-                  name,
-                  data_retention: templateLifecycle.dsl.data_retention,
-                  ...(templateDownsampling?.length ? { downsampling: templateDownsampling } : {}),
-                } as IndicesPutDataLifecycleRequest),
-              { logger }
-            );
+            const request: IndicesPutDataLifecycleRequest = {
+              name,
+              data_retention: templateLifecycle.dsl.data_retention,
+              ...(templateDownsampling?.length ? { downsampling: templateDownsampling } : {}),
+            };
+            await retryTransientEsErrors(() => esClient.indices.putDataLifecycle(request), {
+              logger,
+            });
           } else {
             await retryTransientEsErrors(() => esClient.indices.deleteDataLifecycle({ name }), {
               logger,
