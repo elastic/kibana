@@ -120,7 +120,7 @@ describe('OneShotStepDefinitionHandler', () => {
       );
     });
 
-    it('falls back to node configuration when onCancel runs before run', async () => {
+    it('forwards input, rawInput, and config passed to onCancel', async () => {
       const onCancel = jest.fn();
       const node: TestNode = {
         stepId: 'custom-step',
@@ -133,7 +133,11 @@ describe('OneShotStepDefinitionHandler', () => {
         node
       );
 
-      await asHandler(stepHandler).onCancel({}, {}, {});
+      await asHandler(stepHandler).onCancel(
+        {},
+        { fromNode: true },
+        node.configuration as Record<string, unknown>
+      );
 
       expect(onCancel).toHaveBeenCalledWith(
         expect.objectContaining({
