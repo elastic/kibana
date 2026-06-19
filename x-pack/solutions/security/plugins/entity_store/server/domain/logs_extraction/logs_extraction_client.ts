@@ -10,6 +10,12 @@ import moment from 'moment';
 import { SavedObjectsErrorHelpers, type ElasticsearchClient } from '@kbn/core/server';
 import type { DataViewsService } from '@kbn/data-views-plugin/common';
 import { isNonLocalIndexName } from '@kbn/es-query';
+import type { StreamsKnowledgeIndicatorsReader } from '@kbn/streams-plugin/server';
+import {
+  loadPerTypeSourceIndices,
+  type PerTypeSourceIndices,
+  type PerTypeSourceProvenance,
+} from '../streams_features';
 import type {
   EntityType,
   ManagedEntityDefinition,
@@ -102,6 +108,13 @@ export interface LogsExtractionClientDependencies {
   engineDescriptorClient: EngineDescriptorClient;
   globalStateClient: EntityStoreGlobalStateClient;
   ccsLogsExtractionClient: CcsLogsExtractionClient;
+  /**
+   * Optional Knowledge Indicators reader used by the KI-discovered index source
+   * feature (`LogExtractionConfig.useDiscoveredIndexSource`). Absent / no-op
+   * when the streams plugin is not enabled, in which case the feature stays
+   * off regardless of the flag.
+   */
+  knowledgeIndicatorsReader?: StreamsKnowledgeIndicatorsReader;
 }
 
 export class LogsExtractionClient {
@@ -112,6 +125,7 @@ export class LogsExtractionClient {
   engineDescriptorClient: EngineDescriptorClient;
   globalStateClient: EntityStoreGlobalStateClient;
   ccsLogsExtractionClient: CcsLogsExtractionClient;
+  knowledgeIndicatorsReader?: StreamsKnowledgeIndicatorsReader;
 
   constructor({
     logger,
@@ -121,6 +135,7 @@ export class LogsExtractionClient {
     engineDescriptorClient,
     globalStateClient,
     ccsLogsExtractionClient,
+    knowledgeIndicatorsReader,
   }: LogsExtractionClientDependencies) {
     this.logger = logger;
     this.namespace = namespace;
@@ -129,6 +144,66 @@ export class LogsExtractionClient {
     this.engineDescriptorClient = engineDescriptorClient;
     this.globalStateClient = globalStateClient;
     this.ccsLogsExtractionClient = ccsLogsExtractionClient;
+    this.knowledgeIndicatorsReader = knowledgeIndicatorsReader;
+  }
+
+  /**
+   * Resolves the per-entity-type KI-discovered source index patterns for a run,
+   * or `undefined` when the feature is disabled (flag off or streams absent).
+   * `undefined` signals the index-pattern builders to keep the legacy
+   * Security-Solution-data-view source; a defined array (even empty) signals the
+   * data-view replacement path.
+   */
+  private async resolveDiscoveredSourcePatterns(
+    type: EntityType,
+    config: LogExtractionConfig
+  ): Promise<string[] | undefined> {
+    if (!config.useDiscoveredIndexSource || !this.knowledgeIndicatorsReader) {
+      return undefined;
+    }
+    const { sources } = await loadPerTypeSourceIndices(this.knowledgeIndicatorsReader, this.logger);
+    const patterns = sources[type];
+    this.logger.debug(
+      `[entity_store] KI-discovered index source for type "${type}": ${patterns.length} pattern(s)${
+        patterns.length ? ` (${patterns.join(', ')})` : ''
+      }`
+    );
+    return patterns;
+  }
+
+  /**
+   * Read-only visibility into what the entity store auto-derives from KI
+   * dataset_analysis features for each entity type, plus provenance (which
+   * stream/feature contributed and on which identity fields). Returns empty
+   * sources when the streams plugin is absent. Reports `enabled` (the flag
+   * state) so operators can tell whether these sources are actually being used
+   * for extraction or are merely a preview.
+   */
+  public async getDiscoveredSources(): Promise<{
+    enabled: boolean;
+    sources: PerTypeSourceIndices;
+    provenance: PerTypeSourceProvenance[];
+  }> {
+    const globalState = await this.globalStateClient.findOrThrow();
+    const { useDiscoveredIndexSource } = globalState.logsExtraction;
+
+    if (!this.knowledgeIndicatorsReader) {
+      return {
+        enabled: useDiscoveredIndexSource,
+        sources: { user: [], host: [], service: [], generic: [] },
+        provenance: [],
+      };
+    }
+
+    const { sources, provenance } = await loadPerTypeSourceIndices(
+      this.knowledgeIndicatorsReader,
+      this.logger
+    );
+    return {
+      enabled: useDiscoveredIndexSource,
+      sources,
+      provenance,
+    };
   }
 
   private async getLogExtractionConfigAndState(
@@ -218,9 +293,11 @@ export class LogsExtractionClient {
   public async getRemainingLogsCount(type: EntityType): Promise<number> {
     try {
       const { config, engineState } = await this.getLogExtractionConfigAndState(type);
+      const discoveredSourcePatterns = await this.resolveDiscoveredSourcePatterns(type, config);
       const indexPatterns = await this.getLocalIndexPatterns(
         config.additionalIndexPatterns,
-        config.excludedIndexPatterns
+        config.excludedIndexPatterns,
+        discoveredSourcePatterns
       );
       const { fromDateISO } = resolveMainExtractionWindow({ config, engineState });
       const toDateISO = moment().utc().toISOString();
@@ -272,9 +349,11 @@ export class LogsExtractionClient {
     logsCapApplied: boolean;
     logsProcessed: number;
   }> {
+    const discoveredSourcePatterns = await this.resolveDiscoveredSourcePatterns(type, config);
     const { localIndexPatterns, remoteIndexPatterns } = await this.getLocalAndRemoteIndexPatterns(
       config.additionalIndexPatterns,
-      config.excludedIndexPatterns
+      config.excludedIndexPatterns,
+      discoveredSourcePatterns
     );
     const latestIndex = getLatestEntitiesIndexName(this.namespace);
 
@@ -867,9 +946,13 @@ export class LogsExtractionClient {
    */
   public async getLocalAndRemoteIndexPatterns(
     additionalIndexPatterns: string[] = [],
-    excludedIndexPatterns: string[] = []
+    excludedIndexPatterns: string[] = [],
+    discoveredSourcePatterns?: string[]
   ): Promise<{ localIndexPatterns: string[]; remoteIndexPatterns: string[] }> {
-    const all = await this.getAllIndexPatternsIncludingRemote(additionalIndexPatterns);
+    const all = await this.getAllIndexPatternsIncludingRemote(
+      additionalIndexPatterns,
+      discoveredSourcePatterns
+    );
     const alertsIndex = getAlertsIndexName(this.namespace);
     const withoutAlerts = all.filter((index) => index !== alertsIndex);
 
@@ -899,24 +982,47 @@ export class LogsExtractionClient {
 
   public async getLocalIndexPatterns(
     additionalIndexPatterns: string[] = [],
-    excludedIndexPatterns: string[] = []
+    excludedIndexPatterns: string[] = [],
+    discoveredSourcePatterns?: string[]
   ): Promise<string[]> {
     const { localIndexPatterns } = await this.getLocalAndRemoteIndexPatterns(
       additionalIndexPatterns,
-      excludedIndexPatterns
+      excludedIndexPatterns,
+      discoveredSourcePatterns
     );
     return localIndexPatterns;
   }
 
   /**
-   * Builds the full list of index patterns (updates, additional, security data view)
-   * including CCS remote indices, without filtering by alerts or CCS.
+   * Builds the full list of source index patterns (including CCS remote indices,
+   * without filtering by alerts or CCS).
+   *
+   * Two mutually exclusive source models:
+   * - **KI-discovered (data-view replacement).** When `discoveredSourcePatterns`
+   *   is defined (the `useDiscoveredIndexSource` flag is on), the per-entity-type
+   *   KI-discovered patterns are the sole stream source. The Security Solution
+   *   data view is NOT queried and there is no `logs-*` fallback. An empty
+   *   discovered set means this engine sources only from `updates` + operator
+   *   `additionalIndexPatterns` (typically nothing new) — deliberate, so a type
+   *   with no qualifying dataset_analysis features does not silently fall back
+   *   to the coarse data view.
+   * - **Legacy (default).** When `discoveredSourcePatterns` is `undefined`, the
+   *   Security Solution data view is appended as before (`logs-*` on failure).
+   *
+   * `updates` and operator `additionalIndexPatterns` are a hard union in both
+   * models.
    */
   private async getAllIndexPatternsIncludingRemote(
-    additionalIndexPatterns: string[] = []
+    additionalIndexPatterns: string[] = [],
+    discoveredSourcePatterns?: string[]
   ): Promise<string[]> {
     const updatesDataStream = getUpdatesEntitiesDataStreamName(this.namespace);
     const indexPatterns: string[] = [updatesDataStream, ...additionalIndexPatterns];
+
+    if (discoveredSourcePatterns !== undefined) {
+      indexPatterns.push(...discoveredSourcePatterns);
+      return indexPatterns;
+    }
 
     try {
       const secSolDataView = await this.dataViewsService.get(

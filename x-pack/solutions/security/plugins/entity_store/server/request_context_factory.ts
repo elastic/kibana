@@ -24,6 +24,7 @@ import { CcsLogsExtractionClient, LogsExtractionClient } from './domain/logs_ext
 import { HistorySnapshotClient } from './domain/history_snapshot';
 import { CRUDClient } from './domain/crud';
 import { ResolutionClient } from './domain/resolution';
+import { createKnowledgeIndicatorsReaderFromStreamsStart } from './domain/streams_features';
 import type { TelemetryReporter } from './telemetry/events';
 
 interface EntityStoreApiRequestHandlerContextDeps {
@@ -83,6 +84,11 @@ export async function createRequestHandlerContext({
     namespace,
     ccsLogExtractionStateClient
   );
+  const knowledgeIndicatorsReader = await createKnowledgeIndicatorsReaderFromStreamsStart({
+    streams: startPlugins.streams,
+    request,
+    logger,
+  });
   const logsExtractionClient = new LogsExtractionClient({
     logger,
     namespace,
@@ -91,6 +97,7 @@ export async function createRequestHandlerContext({
     engineDescriptorClient,
     globalStateClient,
     ccsLogsExtractionClient,
+    knowledgeIndicatorsReader,
   });
 
   const historySnapshotClient = new HistorySnapshotClient({
@@ -136,6 +143,7 @@ export async function createRequestHandlerContext({
     logsExtractionClient,
     historySnapshotClient,
     security: startPlugins.security,
+    streams: startPlugins.streams,
     namespace,
   };
 }

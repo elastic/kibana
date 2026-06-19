@@ -10,6 +10,8 @@ import type { CcsLogsExtractionClient } from '.';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { DataViewsService } from '@kbn/data-views-plugin/common';
+import type { Feature } from '@kbn/streams-schema';
+import type { StreamsKnowledgeIndicatorsReader } from '@kbn/streams-plugin/server';
 import type { ESQLSearchResponse } from '@kbn/es-types';
 import moment from 'moment';
 import { executeEsqlQuery } from '../../infra/elasticsearch/esql';
@@ -1824,6 +1826,165 @@ describe('LogsExtractionClient', () => {
       const result = await client.getRemainingLogsCount('user');
 
       expect(result).toBe(100);
+    });
+  });
+});
+
+describe('LogsExtractionClient — KI-discovered index source', () => {
+  const buildClient = (
+    reader?: StreamsKnowledgeIndicatorsReader,
+    configOverrides?: Partial<{
+      useDiscoveredIndexSource: boolean;
+      additionalIndexPatterns: string[];
+    }>
+  ) => {
+    const logsExtraction = LogExtractionConfig.parse({
+      docsLimit: 10000,
+      ...configOverrides,
+    });
+    const state = { logsExtraction } as EntityStoreGlobalState;
+    const globalStateClient = {
+      find: jest.fn().mockResolvedValue(state),
+      findOrThrow: jest.fn().mockResolvedValue(state),
+      update: jest.fn().mockResolvedValue({}),
+    };
+    const dataViewsService = {
+      get: jest.fn().mockResolvedValue({
+        getIndexPattern: jest.fn().mockReturnValue('logs-*,filebeat-*'),
+      }),
+    } as unknown as jest.Mocked<DataViewsService>;
+
+    const client = new LogsExtractionClient({
+      logger: loggerMock.create(),
+      namespace: 'default',
+      esClient: {} as ElasticsearchClient,
+      dataViewsService,
+      engineDescriptorClient: {
+        findOrThrow: jest.fn(),
+        update: jest.fn(),
+      } as unknown as EngineDescriptorClient,
+      globalStateClient: globalStateClient as unknown as EntityStoreGlobalStateClient,
+      ccsLogsExtractionClient:
+        createMockCcsLogsExtractionClient() as unknown as CcsLogsExtractionClient,
+      knowledgeIndicatorsReader: reader,
+    });
+    return { client, dataViewsService };
+  };
+
+  /**
+   * Builds the `properties.analysis.fields` shape a `dataset_analysis` feature
+   * carries, keyed by `formatDocumentAnalysis`'s `"<name> (<types>)"` format.
+   */
+  const analysisProps = (fieldKeys: string[]): Record<string, unknown> => ({
+    analysis: {
+      total: 100,
+      sampled: 100,
+      fields: Object.fromEntries(fieldKeys.map((key) => [key, ['sample (1%)']])),
+    },
+  });
+
+  const readerWith = (
+    features: Array<{ stream_name: string; properties?: Record<string, unknown> }>
+  ): StreamsKnowledgeIndicatorsReader => ({
+    listDatasetAnalysisFeatures: jest.fn(async () =>
+      features.map(
+        (f, i) =>
+          ({
+            id: `f${i}`,
+            uuid: `u${i}`,
+            type: 'dataset_analysis',
+            description: '',
+            confidence: 100,
+            status: 'active',
+            last_seen: '2026-06-01T00:00:00.000Z',
+            stream_name: f.stream_name,
+            properties: f.properties ?? {},
+          } as Feature)
+      )
+    ),
+    resolveIndexPatterns: jest.fn(async (streamName: string) => [streamName]),
+  });
+
+  it('keeps the security data view source when the flag is OFF (legacy behavior)', async () => {
+    const reader = readerWith([
+      { stream_name: 'logs.okta', properties: analysisProps(['user.name (keyword)']) },
+    ]);
+    const { client, dataViewsService } = buildClient(reader, {
+      useDiscoveredIndexSource: false,
+    });
+
+    const { localIndexPatterns } = await client.getLocalAndRemoteIndexPatterns([], [], undefined);
+
+    expect(dataViewsService.get).toHaveBeenCalledTimes(1);
+    expect(localIndexPatterns).toContain('logs-*');
+    expect(localIndexPatterns).toContain('filebeat-*');
+  });
+
+  it('replaces the data view with discovered patterns when patterns are provided', async () => {
+    const { client, dataViewsService } = buildClient(undefined, {});
+
+    const { localIndexPatterns } = await client.getLocalAndRemoteIndexPatterns(
+      ['operator-extra-*'],
+      [],
+      ['logs.okta', 'logs.apm']
+    );
+
+    // Data view is NOT queried, and its patterns are absent.
+    expect(dataViewsService.get).not.toHaveBeenCalled();
+    expect(localIndexPatterns).not.toContain('logs-*');
+    expect(localIndexPatterns).not.toContain('filebeat-*');
+    // Updates stream + operator additionalIndexPatterns + discovered are a union.
+    expect(localIndexPatterns).toContain('operator-extra-*');
+    expect(localIndexPatterns).toContain('logs.okta');
+    expect(localIndexPatterns).toContain('logs.apm');
+  });
+
+  it('extracts from updates + additional only (no data view) when discovered set is empty', async () => {
+    const { client, dataViewsService } = buildClient(undefined, {});
+
+    const { localIndexPatterns } = await client.getLocalAndRemoteIndexPatterns(
+      ['operator-extra-*'],
+      [],
+      [] // zero qualifying dataset_analysis features for this type
+    );
+
+    expect(dataViewsService.get).not.toHaveBeenCalled();
+    expect(localIndexPatterns).not.toContain('logs-*');
+    expect(localIndexPatterns).toContain('operator-extra-*');
+  });
+
+  describe('getDiscoveredSources', () => {
+    it('reports disabled + empty when streams reader is absent', async () => {
+      const { client } = buildClient(undefined, { useDiscoveredIndexSource: true });
+      const result = await client.getDiscoveredSources();
+      expect(result.enabled).toBe(true);
+      expect(result.sources).toEqual({ user: [], host: [], service: [], generic: [] });
+      expect(result.provenance).toEqual([]);
+    });
+
+    it('returns per-type sources + provenance derived from dataset_analysis features', async () => {
+      const reader = readerWith([
+        {
+          stream_name: 'logs.okta',
+          properties: analysisProps(['user.name (keyword)', 'host.id (keyword)']),
+        },
+        {
+          stream_name: 'logs.apm',
+          properties: analysisProps(['service.name (keyword)']),
+        },
+      ]);
+      const { client } = buildClient(reader, {
+        useDiscoveredIndexSource: true,
+      });
+
+      const result = await client.getDiscoveredSources();
+
+      expect(result.enabled).toBe(true);
+      expect(result.sources.user).toEqual(['logs.okta']);
+      expect(result.sources.host).toEqual(['logs.okta']);
+      expect(result.sources.service).toEqual(['logs.apm']);
+      expect(reader.listDatasetAnalysisFeatures).toHaveBeenCalledWith();
+      expect(result.provenance.length).toBeGreaterThan(0);
     });
   });
 });

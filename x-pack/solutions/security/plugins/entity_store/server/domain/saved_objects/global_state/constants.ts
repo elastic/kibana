@@ -26,6 +26,14 @@ export type LogExtractionConfig = z.infer<typeof LogExtractionConfig>;
 export const LogExtractionConfig = z.object({
   additionalIndexPatterns: z.array(z.string()).default([]),
   excludedIndexPatterns: z.array(z.string()).default([]),
+  /**
+   * POC feature flag (idea 01 re-scope): when true, each engine sources its
+   * `FROM` from KI-discovered, per-entity-type index patterns instead of the
+   * Security Solution data view. The data view is NOT used as a source while
+   * this is enabled (no silent fallback). Default `false` keeps behavior
+   * byte-identical to a deployment without this feature.
+   */
+  useDiscoveredIndexSource: z.boolean().default(false),
   fieldHistoryLength: z.number().int().default(10),
   lookbackPeriod: z
     .string()
