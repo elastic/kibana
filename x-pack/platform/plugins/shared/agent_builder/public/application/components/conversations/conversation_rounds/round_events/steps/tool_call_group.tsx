@@ -28,7 +28,7 @@ export const ToolCallGroup: React.FC<ToolCallGroupProps> = ({ steps }) => {
   const hasError = steps.some((s) => s.results.some(isErrorResult));
 
   const label = (
-    <EuiText size="s" color={hasError && allResponded ? 'danger' : 'inherit'}>
+    <EuiText size="s" color={hasError ? 'danger' : 'inherit'}>
       <p role="status">
         {allResponded ? (
           <FormattedMessage

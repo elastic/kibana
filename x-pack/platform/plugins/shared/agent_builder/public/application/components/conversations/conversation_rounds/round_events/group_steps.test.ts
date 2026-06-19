@@ -11,6 +11,7 @@ import {
   createToolCallStep,
 } from '@kbn/agent-builder-common/chat/conversation';
 import type {
+  AskUserQuestionStep,
   BackgroundAgentCompleteStep,
   CompactionStep,
   TodosStep,
@@ -269,5 +270,19 @@ describe('groupSteps', () => {
       { kind: 'group', steps: [a] },
       { kind: 'step', step: r2, index: 4 },
     ]);
+  });
+
+  it('does not flush the tool buffer when an AskUserQuestionStep arrives mid-stream between tool calls', () => {
+    const askUserQuestion: AskUserQuestionStep = {
+      type: ConversationRoundStepType.askUserQuestion,
+      questions: [{ id: 'q1', question: 'Do you want to proceed?' }],
+    };
+    const a = toolStep('a');
+    const b = toolStep('b');
+    const c = toolStep('c');
+
+    const result = groupSteps([a, b, askUserQuestion, c]);
+
+    expect(result).toEqual([{ kind: 'group', steps: [a, b, c] }]);
   });
 });
