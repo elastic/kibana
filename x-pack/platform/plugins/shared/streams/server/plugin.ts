@@ -9,7 +9,6 @@ import type {
   CoreSetup,
   CoreStart,
   FeatureFlagsStart,
-  IUiSettingsClient,
   KibanaRequest,
   Logger,
   Plugin,
@@ -83,9 +82,12 @@ import {
 } from './lib/workflows/continuous_onboarding_workflow';
 import { createWorkflowClients } from './lib/workflows/create_workflow_clients';
 import { installMemoryWorkflows } from './lib/memory/install_managed_workflows';
-import { isInvestigationEnabled } from './lib/sig_events/investigations/is_investigation_enabled';
+import { isSignificantEventsInvestigationEnabled } from './lib/sig_events/investigations/is_significant_events_investigation_enabled';
 import { installInvestigationWorkflow } from './lib/sig_events/investigations/install_investigation_workflow';
-import { STREAMS_SIGNIFICANT_EVENTS_MEMORY_ENABLED_FLAG } from '../common/feature_flags';
+import {
+  STREAMS_SIGNIFICANT_EVENTS_INVESTIGATION_ENABLED_FLAG,
+  STREAMS_SIGNIFICANT_EVENTS_MEMORY_ENABLED_FLAG,
+} from '../common/feature_flags';
 
 const STREAMS_MANAGED_WORKFLOW_OWNER = 'streams';
 
@@ -322,7 +324,9 @@ export class StreamsPlugin
       void core
         .getStartServices()
         .then(async ([coreStart]) => {
-          const investigationEnabled = await isInvestigationEnabled(coreStart.uiSettings.client);
+          const investigationEnabled = await isSignificantEventsInvestigationEnabled(
+            coreStart.featureFlags
+          );
 
           await registerStreamsAgentBuilder({
             agentBuilder: plugins.agentBuilder!,
@@ -609,6 +613,14 @@ export class StreamsPlugin
         filter((enabled) => enabled)
       );
 
+    const investigationEnabled$ = core.featureFlags
+      .getBooleanValue$(STREAMS_SIGNIFICANT_EVENTS_INVESTIGATION_ENABLED_FLAG, false)
+      .pipe(
+        distinctUntilChanged(),
+        skip(1),
+        filter((enabled) => enabled)
+      );
+
     initializeKnowledgeIndicatorsTemplate({
       esClient: core.elasticsearch.client.asInternalUser,
       logger: this.logger,
@@ -623,17 +635,15 @@ export class StreamsPlugin
     if (plugins.workflowsExtensions) {
       const { workflowsExtensions } = plugins;
 
-      void this.installManagedWorkflows(
-        workflowsExtensions,
-        core.featureFlags,
-        core.uiSettings.client
-      ).catch((error: unknown) => {
-        this.logger.error(
-          `streams: Failed to install managed workflows: ${
-            error instanceof Error ? error.message : String(error)
-          }`
-        );
-      });
+      void this.installManagedWorkflows(workflowsExtensions, core.featureFlags).catch(
+        (error: unknown) => {
+          this.logger.error(
+            `streams: Failed to install managed workflows: ${
+              error instanceof Error ? error.message : String(error)
+            }`
+          );
+        }
+      );
 
       memoryEnabled$.subscribe(() => {
         void this.installMemoryWorkflowsIfEnabled(workflowsExtensions, core.featureFlags).catch(
@@ -645,6 +655,19 @@ export class StreamsPlugin
             );
           }
         );
+      });
+
+      investigationEnabled$.subscribe(() => {
+        void this.installInvestigationWorkflowIfEnabled(
+          workflowsExtensions,
+          core.featureFlags
+        ).catch((error: unknown) => {
+          this.logger.error(
+            `streams: Failed to install investigation managed workflow after feature flag change: ${
+              error instanceof Error ? error.message : String(error)
+            }`
+          );
+        });
       });
     }
 
@@ -694,10 +717,27 @@ export class StreamsPlugin
     await client.ready();
   }
 
+  private async installInvestigationWorkflowIfEnabled(
+    workflowsExtensions: WorkflowsExtensionsServerPluginStart,
+    featureFlags: FeatureFlagsStart
+  ): Promise<void> {
+    if (!(await isSignificantEventsInvestigationEnabled(featureFlags))) {
+      this.logger.debug(
+        'streams: investigation is disabled, skipping investigation workflow installation'
+      );
+      return;
+    }
+
+    const client = await workflowsExtensions.initManagedWorkflowsClient(
+      STREAMS_MANAGED_WORKFLOW_OWNER
+    );
+    await installInvestigationWorkflow({ client });
+    await client.ready();
+  }
+
   private async installManagedWorkflows(
     workflowsExtensions: WorkflowsExtensionsServerPluginStart,
-    featureFlags: FeatureFlagsStart,
-    uiSettingsClient: IUiSettingsClient
+    featureFlags: FeatureFlagsStart
   ): Promise<void> {
     try {
       const client = await workflowsExtensions.initManagedWorkflowsClient(
@@ -709,7 +749,7 @@ export class StreamsPlugin
         isSignificantEventsMemoryEnabled: await isSignificantEventsMemoryEnabled(featureFlags),
       });
 
-      if (await isInvestigationEnabled(uiSettingsClient)) {
+      if (await isSignificantEventsInvestigationEnabled(featureFlags)) {
         await installInvestigationWorkflow({ client });
       } else {
         this.logger.debug(
