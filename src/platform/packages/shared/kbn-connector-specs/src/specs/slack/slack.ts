@@ -171,20 +171,13 @@ async function slackRequestWithRateLimitRetry<TData>(params: {
  * with an additional temporary bearer token option for local testing.
  *
  * Required Slack App scopes:
- * MVP:
- * - channels:read - to list channels/conversations (public/private/DMs depending on workspace + membership)
- * - chat:write - for sending messages to public channels
- * - search:read.public (and related granular scopes) - for searching messages (requires a user token)
- * - groups:write - to create private channels and invite users
- *
- * Optional (possible future usage):
- * - groups:read - to list private channels (future)
- * - im:read - to list DMs (future)
- * - mpim:read - to list group DMs (future)
- * - groups:history - to read private channel history (future)
- * - im:history - to read DM history (future)
- * - mpim:history - to read group DM history (future)
- * - users:read,users:read.email - to support user-targeted lookups (not used in MVP)
+ * - channels:read, groups:read, im:read, mpim:read - list public channels, private channels, DMs, and group DMs
+ * - channels:history, groups:history, im:history, mpim:history - read message history from each conversation type
+ * - chat:write - send messages
+ * - groups:write - create private channels and invite users
+ * - search:read.public, search:read.private, search:read.im, search:read.mpim, search:read.files - search messages and files
+ * - files:read - read file metadata referenced by messages
+ * - users:read, users:read.email - list workspace users and look up users by email
  */
 export const Slack: ConnectorSpec = {
   metadata: {
@@ -192,7 +185,7 @@ export const Slack: ConnectorSpec = {
     displayName: 'Slack (v2)',
     description: i18n.translate('core.kibanaConnectorSpecs.slack.metadata.description', {
       defaultMessage:
-        'Search messages, list channels (with pagination), resolve channel names to IDs, and send messages in Slack',
+        'Search messages, list channels and users, read conversation history, look up users by email, and send messages in Slack',
     }),
     minimumLicense: 'enterprise',
     isTechnicalPreview: true,
@@ -458,7 +451,7 @@ export const Slack: ConnectorSpec = {
 
     // https://api.slack.com/methods/conversations.history
     getConversationHistory: {
-      isTool: false,
+      isTool: true,
       description:
         'Fetch a page of recent messages from a Slack channel or DM. Returns messages newest-first. Pass nextCursor from the response to fetch older pages.',
       input: SlackGetConversationHistoryInputSchema,
@@ -534,7 +527,7 @@ export const Slack: ConnectorSpec = {
 
     // https://api.slack.com/methods/conversations.info
     getConversationInfo: {
-      isTool: false,
+      isTool: true,
       description:
         'Look up metadata for a single Slack channel or DM by ID. Returns the channel object (name, privacy, membership, topic, purpose).',
       input: SlackGetConversationInfoInputSchema,
@@ -575,7 +568,7 @@ export const Slack: ConnectorSpec = {
 
     // https://api.slack.com/methods/users.lookupByEmail
     lookupUserByEmail: {
-      isTool: false,
+      isTool: true,
       description:
         'Find a Slack user by email address. Returns the matching user object including id, name, and profile. Throws if no user has that email.',
       input: SlackLookupUserByEmailInputSchema,
@@ -609,7 +602,7 @@ export const Slack: ConnectorSpec = {
 
     // https://api.slack.com/methods/users.list
     listUsers: {
-      isTool: false,
+      isTool: true,
       description:
         'List Slack workspace users (one page per call). Pass nextCursor from the previous response to fetch the next page.',
       input: SlackListUsersInputSchema,
@@ -660,7 +653,7 @@ export const Slack: ConnectorSpec = {
 
     // https://api.slack.com/methods/users.conversations
     listUserConversations: {
-      isTool: false,
+      isTool: true,
       description:
         'List the channels/conversations a Slack user is a member of (one page per call). Omit user to list for the authenticated user. Pass nextCursor to fetch the next page.',
       input: SlackListUserConversationsInputSchema,
@@ -923,5 +916,10 @@ export const Slack: ConnectorSpec = {
     'To list Slack channels or answer which channels exist, use listChannels. When the response has hasMore true, call listChannels again with the nextCursor from the previous response until you have enough context.',
     'When sending to a channel whose name you know but whose ID you do not, call resolveChannelId to get the channel ID, then pass it to sendMessage.',
     'Do not use resolveChannelId to discover channels—for example, do not use contains with a very short partial name to probe the workspace. Use listChannels for discovery instead.',
+    'To read messages from a channel or DM, use getConversationHistory with a channel ID. Returns messages newest-first; pass nextCursor from the previous response (or use oldest/latest timestamps) to walk further back in time.',
+    'getConversationInfo returns metadata (name, privacy, topic, purpose) for a single channel/DM by ID. Prefer it over listChannels when you already have the ID and only need that conversation’s details.',
+    'To find a Slack user, prefer lookupUserByEmail when you have the email. Use listUsers only when you need to browse or enumerate the workspace; it is paginated.',
+    'listUserConversations returns the channels a given user (or the authenticated user, if user is omitted) is a member of. Prefer it over listChannels when you only care about a specific user’s memberships.',
+    'When a user identity comes back from one action as an ID (e.g. a message author_user_id) and you need their email or profile, resolve it via listUsers or by feeding a known email to lookupUserByEmail.',
   ].join('\n'),
 };
