@@ -25,6 +25,5 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./_data_grid_row_height'));
     loadTestFile(require.resolve('./_data_grid_row_selection'));
     loadTestFile(require.resolve('./_data_grid_sample_size'));
-    loadTestFile(require.resolve('./_data_grid_pagination'));
   });
 }

@@ -312,6 +312,34 @@ export class DiscoverApp {
       .toBe(true);
   }
 
+  async getDocTableRowCount(): Promise<number> {
+    await this.waitForDocTableRendered();
+    const table = this.page.testSubj.locator('docTable');
+    await table.waitFor({ state: 'visible' });
+    return table.locator('.euiDataGridRowCell--firstColumn').count();
+  }
+
+  async getCurrentRowsPerPage(): Promise<number> {
+    const buttonText = await this.page.testSubj.innerText('tablePaginationPopoverButton');
+    const rowsPerPage = buttonText.match(/Rows per page:\s*(\d+)/)?.[1];
+
+    if (!rowsPerPage) {
+      throw new Error(`Unable to parse rows per page from "${buttonText}"`);
+    }
+
+    return Number(rowsPerPage);
+  }
+
+  async changeRowsPerPageTo(rowsPerPage: number) {
+    await this.page.testSubj.click('tablePaginationPopoverButton');
+    const option = this.page.testSubj.locator(`tablePagination-${rowsPerPage}-rows`);
+    await option.waitFor({ state: 'visible' });
+    await option.click();
+    await this.page.testSubj.waitForSelector(`tablePagination-${rowsPerPage}-rows`, {
+      state: 'hidden',
+    });
+  }
+
   async openDocumentDetails({ rowIndex }: { rowIndex: number }) {
     const expandButton = this.page.locator(
       `[data-grid-visible-row-index="${rowIndex}"] [data-test-subj="docTableExpandToggleColumn"]`
