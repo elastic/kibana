@@ -1,0 +1,47 @@
+{
+  "sha1": "6371ce94646258aff10903ef7cb162bf399da2e7",
+  "tests": [
+    {
+      "id": "c699879b975237f-9d5b29a62c50f4b",
+      "title": "Connector custom Kibana config email connector lists only the enabled services (Gmail + Amazon SES)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout_connectors_custom_config/ui/tests/connectors_custom_config.spec.ts",
+        "line": 44,
+        "column": 7
+      }
+    },
+    {
+      "id": "c699879b975237f-643833d123f1e48",
+      "title": "Connector custom Kibana config email connector applies the AWS SES host/port from kibana config",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout_connectors_custom_config/ui/tests/connectors_custom_config.spec.ts",
+        "line": 53,
+        "column": 7
+      }
+    },
+    {
+      "id": "c699879b975237f-efbc1548df5282b",
+      "title": "Connector custom Kibana config webhook connector hides the PFX cert tab when pfx is disabled",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout_connectors_custom_config/ui/tests/connectors_custom_config.spec.ts",
+        "line": 69,
+        "column": 7
+      }
+    }
+  ]
+}

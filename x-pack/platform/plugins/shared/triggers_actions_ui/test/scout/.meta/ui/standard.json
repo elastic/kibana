@@ -1,5 +1,5 @@
 {
-  "sha1": "8544cccea711bf10657c1e4ab193d91d28e91f61",
+  "sha1": "a826602c9a635cfed382bb6f4913ae0ceb75e04e",
   "tests": [
     {
       "id": "7f4d24df5ef863e-6b9d865caafbc3b",
@@ -1530,14 +1530,14 @@
     {
       "id": "b4b539a64e36b08-cf340212ea83da6",
       "title": "Rule details alerts tab filters alerts table with search bar query",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/rule_details_alerts_tab.spec.ts",
-        "line": 80,
+        "line": 79,
         "column": 7
       }
     },

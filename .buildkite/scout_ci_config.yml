@@ -74,6 +74,7 @@ plugins:
     - task_manager
     - transform
     - triggers_actions_ui
+    - triggersActionsUiExample
     - unified_search
     - upgrade_assistant
     - uptime
