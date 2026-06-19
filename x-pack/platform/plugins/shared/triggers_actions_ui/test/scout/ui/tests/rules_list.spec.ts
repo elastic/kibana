@@ -757,15 +757,24 @@ test.describe('Rules list', { tag: tags.stateful.classic }, () => {
     const activeFilterBadge = page.testSubj
       .locator('ruleStatusFilterButton')
       .locator('.euiFilterButton__notification');
-    const applyFilter = async (
-      filterSubj: string,
+    const applyFilters = async (
+      filterSubjs: string[],
       expectedSelectedCount: number,
       expectedRowCount: number
     ) => {
+      await refreshRulesList(page);
+      await searchRules(page, uniqueTag);
+      await expect(getTableRows(page)).toHaveCount(4);
+
       await expect(optionsPanel).toBeHidden();
       await page.testSubj.click('ruleStatusFilterButton');
       await expect(optionsPanel).toBeVisible();
-      await page.testSubj.click(filterSubj);
+
+      for (const [index, filterSubj] of filterSubjs.entries()) {
+        await page.testSubj.click(filterSubj);
+        await expect(activeFilterBadge).toHaveText(String(index + 1));
+      }
+
       await expect(activeFilterBadge).toHaveText(String(expectedSelectedCount));
       await expect(getTableRows(page)).toHaveCount(expectedRowCount);
       await page.keyboard.press('Escape');
@@ -773,26 +782,23 @@ test.describe('Rules list', { tag: tags.stateful.classic }, () => {
     };
 
     // Select only enabled → 2 rules (enabled + snoozed)
-    await applyFilter('ruleStatusFilterOption-enabled', 1, 2);
-    // Add disabled → all 4
-    await applyFilter('ruleStatusFilterOption-disabled', 2, 4);
-    // Deselect enabled → only disabled (2)
-    await applyFilter('ruleStatusFilterOption-enabled', 1, 2);
-    // Deselect disabled → no status filter, all 4
-    await applyFilter('ruleStatusFilterOption-disabled', 0, 4);
-
-    // Start from a freshly mounted filter before reusing options that were
-    // selected and cleared above.
-    await refreshRulesList(page);
-    await searchRules(page, uniqueTag);
-    await expect(getTableRows(page)).toHaveCount(4);
-
+    await applyFilters(['ruleStatusFilterOption-enabled'], 1, 2);
+    // Select only disabled → 2 rules (disabled + snoozed disabled)
+    await applyFilters(['ruleStatusFilterOption-disabled'], 1, 2);
     // Select snoozed → only snoozed (2)
-    await applyFilter('ruleStatusFilterOption-snoozed', 1, 2);
-    // Add disabled → disabled + snoozed (3)
-    await applyFilter('ruleStatusFilterOption-disabled', 2, 3);
-    // Add enabled → all 4
-    await applyFilter('ruleStatusFilterOption-enabled', 3, 4);
+    await applyFilters(['ruleStatusFilterOption-snoozed'], 1, 2);
+    // Select disabled + snoozed → 3 rules
+    await applyFilters(['ruleStatusFilterOption-snoozed', 'ruleStatusFilterOption-disabled'], 2, 3);
+    // Select enabled + disabled + snoozed → all 4
+    await applyFilters(
+      [
+        'ruleStatusFilterOption-enabled',
+        'ruleStatusFilterOption-disabled',
+        'ruleStatusFilterOption-snoozed',
+      ],
+      3,
+      4
+    );
 
     await expect(optionsPanel).toBeHidden();
   });
