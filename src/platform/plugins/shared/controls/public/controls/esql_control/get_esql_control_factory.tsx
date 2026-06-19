@@ -15,6 +15,7 @@ import type { OptionsListESQLControlState } from '@kbn/controls-schemas';
 import type { EmbeddablePublicDefinition } from '@kbn/embeddable-plugin/public';
 import {
   apiPublishesESQLVariables,
+  ESQLVariableType,
   isStaticESQLControl,
   type QueryESQLControl,
   type StaticESQLControl,
@@ -148,7 +149,11 @@ export const getESQLControlFactory = <
 
           /** For static ??field or ??function controls, we need to know which query to pull suggestions from */
           let relatedQuery;
-          if (isStaticESQLControl(nextState)) {
+          if (
+            isStaticESQLControl(nextState) &&
+            (nextState.variable_type === ESQLVariableType.FIELDS ||
+              nextState.variable_type === ESQLVariableType.FUNCTIONS)
+          ) {
             const variableKey = selections.api.esqlVariable$.getValue().key; // key of variable to search for
             const getRelatedQuery = (_api: unknown) => {
               const query = apiPublishesESQLQuery(_api) ? _api.query$.getValue().esql : undefined;
