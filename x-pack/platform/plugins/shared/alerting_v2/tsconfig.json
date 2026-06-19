@@ -116,7 +116,9 @@
     "@kbn/datemath",
     "@kbn/css-utils",
     "@kbn/dashboard-plugin",
-    "@kbn/cps"
+    "@kbn/cps",
+    "@kbn/core-ui-settings-browser",
+    "@kbn/management-settings-ids"
   ],
   "exclude": ["target/**/*", ".storybook/**/*.js"]
 }
