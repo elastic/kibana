@@ -64,7 +64,9 @@ export const createRuleAttachmentDefinition = ({
       defaultMessage: 'Security Rule',
     }),
   getIcon: () => 'securityApp',
-  renderInlineContent: (props) => <RuleInlineContent {...props} aiRuleCreation={aiRuleCreation} />,
+  renderInlineContent: (props) => (
+    <RuleInlineContent {...props} aiRuleCreation={aiRuleCreation} application={application} />
+  ),
   getActionButtons: ({ attachment }) => {
     const intent = getRuleAttachmentIntent(attachment);
     const ruleId = getRuleIdFromAttachment(attachment) ?? undefined;

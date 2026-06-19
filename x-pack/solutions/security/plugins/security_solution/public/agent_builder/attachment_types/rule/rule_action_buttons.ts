@@ -14,11 +14,8 @@ import { RULES_UI_EDIT_PRIVILEGE } from '@kbn/security-solution-features/constan
 import type { AiRuleCreationService } from '../../../detection_engine/common/ai_rule_creation_store';
 import { hasCapabilities } from '../../../common/lib/capabilities';
 import { RULES_PATH, RULES_CREATE_PATH } from '../../../../common/constants';
-import {
-  getEditRuleUrl,
-  getRuleDetailsUrl,
-} from '../../../common/components/link_to/redirect_to_detection_engine';
-import { shouldShowViewRuleButton, type RuleAttachmentIntent, getRuleTypeLabel } from './helpers';
+import { getEditRuleUrl } from '../../../common/components/link_to/redirect_to_detection_engine';
+import { type RuleAttachmentIntent, getRuleTypeLabel } from './helpers';
 import type { RuleResponse } from '../../../../common/api/detection_engine/model/rule_schema';
 import { getNonEsqlRuleActionDisabledReason } from '../../components/translations';
 
@@ -111,20 +108,5 @@ export const buildRuleActionButtons = ({
           },
         },
   ];
-  if (isUpdate && ruleId && shouldShowViewRuleButton(ruleId, window.location.pathname)) {
-    buttons.push({
-      label: i18n.translate('xpack.securitySolution.agentBuilder.ruleAttachment.viewRule', {
-        defaultMessage: 'View rule',
-      }),
-      icon: 'popout',
-      type: ActionButtonType.SECONDARY,
-      handler: () => {
-        application.navigateToApp('securitySolutionUI', {
-          path: `${RULES_PATH}${getRuleDetailsUrl(ruleId)}`,
-        });
-      },
-    });
-  }
-
   return buttons;
 };

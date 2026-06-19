@@ -387,7 +387,7 @@ describe('buildRuleActionButtons', () => {
     expect(aiRuleCreation.requestSaveRule).not.toHaveBeenCalled();
   });
 
-  it('omits View rule for create intent even when a ruleId is present', () => {
+  it('omits View rule from action buttons for create intent (View rule lives in inline content)', () => {
     expect(labels(buildRuleActionButtons({ ...baseProps, ruleId: 'rule-123' }))).not.toContain(
       'View rule'
     );
@@ -406,34 +406,9 @@ describe('buildRuleActionButtons', () => {
     });
   });
 
-  it('includes View rule for update intent when a ruleId exists and the user is not on a rule form page', () => {
-    expect(
-      labels(buildRuleActionButtons({ ...baseProps, intent: 'update', ruleId: 'rule-123' }))
-    ).toContain('View rule');
-  });
-
-  it('omits View rule when there is no ruleId', () => {
-    expect(labels(buildRuleActionButtons(baseProps))).not.toContain('View rule');
-  });
-
-  it('omits View rule when the edit form is open for the same rule', () => {
-    window.history.pushState({}, '', '/app/security/rules/id/rule-123/edit');
+  it('never includes View rule in action buttons (View rule is in the inline content component)', () => {
     expect(
       labels(buildRuleActionButtons({ ...baseProps, intent: 'update', ruleId: 'rule-123' }))
     ).not.toContain('View rule');
-  });
-
-  it('includes View rule when the edit form is open for a different rule', () => {
-    window.history.pushState({}, '', '/app/security/rules/id/rule-a/edit');
-    expect(
-      labels(buildRuleActionButtons({ ...baseProps, intent: 'update', ruleId: 'rule-b' }))
-    ).toContain('View rule');
-  });
-
-  it('includes View rule on the create form when the attachment targets another saved rule', () => {
-    window.history.pushState({}, '', '/app/security/rules/create');
-    expect(
-      labels(buildRuleActionButtons({ ...baseProps, intent: 'update', ruleId: 'rule-123' }))
-    ).toContain('View rule');
   });
 });

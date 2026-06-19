@@ -67,6 +67,15 @@ export const isAttachmentRuleOpenOnFormPage = (
   return formRuleId !== undefined && formRuleId === attachmentRuleId;
 };
 
+/** True when the user is already viewing the details page for this specific rule. */
+const isOnRuleDetailsPage = (ruleId: string, pathname: string): boolean => {
+  if (!pathname.includes(RULES_PATH)) return false;
+  const match = pathname.match(/\/id\/([^/]+)/);
+  if (!match) return false;
+  const pathRuleId = decodeURIComponent(match[1]);
+  return pathRuleId === ruleId && !pathname.includes('/edit');
+};
+
 /** Whether "View rule" should appear for an update-intent attachment with this rule id. */
 export const shouldShowViewRuleButton = (
   attachmentRuleId: string | undefined,
@@ -75,7 +84,10 @@ export const shouldShowViewRuleButton = (
   if (!attachmentRuleId) {
     return false;
   }
-  return !isAttachmentRuleOpenOnFormPage(attachmentRuleId, pathname);
+  return (
+    !isAttachmentRuleOpenOnFormPage(attachmentRuleId, pathname) &&
+    !isOnRuleDetailsPage(attachmentRuleId, pathname)
+  );
 };
 
 /**

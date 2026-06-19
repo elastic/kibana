@@ -77,7 +77,6 @@ export const AddRuleAttachmentToChatButton: React.FC<AddRuleAttachmentToChatButt
   const { services } = useKibana();
   const { aiRuleCreation } = services;
 
-  // Format rule for AI assistant attachment from either form state or an existing rule response.
   const isFormBased =
     defineStepData != null &&
     aboutStepData != null &&
@@ -95,7 +94,6 @@ export const AddRuleAttachmentToChatButton: React.FC<AddRuleAttachmentToChatButt
         actionsStepData,
         actionTypeRegistry
       );
-      // Inject id so the attachment treats this as an update, not a new rule.
       formattedRule = existingRuleId ? { ...fromForm, id: existingRuleId } : fromForm;
     } else {
       formattedRule = rule;
@@ -109,11 +107,7 @@ export const AddRuleAttachmentToChatButton: React.FC<AddRuleAttachmentToChatButt
           )
         : undefined);
     const attachmentData = JSON.stringify(formattedRule);
-
-    // A RuleResponse (or a form edit with existingRuleId) is tied to an existing saved rule, so
-    // the attachment is born 'update' and links that rule id; otherwise it's a fresh 'create'.
     const linkedRuleId = rule?.id ?? existingRuleId;
-    const intent: 'create' | 'update' = linkedRuleId ? 'update' : 'create';
 
     return {
       attachmentId: SECURITY_RULE_ATTACHMENT_ID,
@@ -121,10 +115,8 @@ export const AddRuleAttachmentToChatButton: React.FC<AddRuleAttachmentToChatButt
       attachmentData: {
         text: attachmentData,
         attachmentLabel,
-        intent,
         ...(linkedRuleId ? { ruleId: linkedRuleId } : {}),
       },
-      // description populates the chat's "Attachment added: …" label.
       attachmentDescription: attachmentLabel,
     };
   }, [
@@ -144,6 +136,7 @@ export const AddRuleAttachmentToChatButton: React.FC<AddRuleAttachmentToChatButt
     if (isFormBased) {
       aiRuleCreation.activateFormSync();
     }
+    aiRuleCreation.releaseBind();
     openAgentBuilderFlyout();
   }, [isFormBased, aiRuleCreation, openAgentBuilderFlyout]);
 

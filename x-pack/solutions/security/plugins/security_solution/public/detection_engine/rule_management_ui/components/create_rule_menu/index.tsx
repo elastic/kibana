@@ -138,6 +138,7 @@ export const CreateRuleMenu: React.FC<CreateRuleContextMenuProps> = ({ loading, 
     };
 
     if (agentBuilder?.openChat) {
+      aiRuleCreation.releaseBind();
       agentBuilder.openChat({
         newConversation: true,
         sessionTag: 'security',

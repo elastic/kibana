@@ -7,9 +7,11 @@
 
 import React, { useMemo } from 'react';
 import useObservable from 'react-use/lib/useObservable';
+import { useLocation } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import {
   EuiBadge,
+  EuiButton,
   EuiCallOut,
   EuiCodeBlock,
   EuiFlexGroup,
@@ -20,8 +22,11 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { type AttachmentRenderProps } from '@kbn/agent-builder-browser/attachments';
+import type { ApplicationStart } from '@kbn/core-application-browser';
 import type { RuleResponse } from '../../../../common/api/detection_engine/model/rule_schema';
 import type { AiRuleCreationService } from '../../../detection_engine/common/ai_rule_creation_store';
+import { RULES_PATH } from '../../../../common/constants';
+import { getRuleDetailsUrl } from '../../../common/components/link_to/redirect_to_detection_engine';
 import { FiltersDisplay } from './filters_display';
 import { RuleTypeDetails } from './rule_type_details';
 import { ScheduleDisplay } from './schedule_display';
@@ -30,6 +35,8 @@ import {
   getRuleTypeLabel,
   getQueryLabel,
   getRuleAttachmentIntent,
+  getRuleIdFromAttachment,
+  shouldShowViewRuleButton,
 } from './helpers';
 import type { RuleAttachment } from './helpers';
 import { INDEX_FIELD_LABEL, RULE_TYPE_FIELD_LABEL } from './translations';
@@ -105,12 +112,15 @@ const getRuleDisplayFields = (rule: RuleResponse) => ({
 
 interface RuleInlineContentProps extends AttachmentRenderProps<RuleAttachment> {
   aiRuleCreation: AiRuleCreationService;
+  application: ApplicationStart;
 }
 
 export const RuleInlineContent: React.FC<RuleInlineContentProps> = ({
   attachment,
   aiRuleCreation,
+  application,
 }) => {
+  const { pathname } = useLocation();
   const isSaving = useObservable(aiRuleCreation.saving$, false);
   const savedCreateVersions = useObservable(
     aiRuleCreation.savedCreateVersions$,
@@ -119,11 +129,16 @@ export const RuleInlineContent: React.FC<RuleInlineContentProps> = ({
 
   const rule = useMemo(() => parseRuleFromAttachment(attachment), [attachment]);
 
+  const intent = getRuleAttachmentIntent(attachment);
+  const ruleId = getRuleIdFromAttachment(attachment) ?? undefined;
+  const showViewRule =
+    intent === 'update' && ruleId !== undefined && shouldShowViewRuleButton(ruleId, pathname);
+
   // The label is frozen per version, so a saved rule's create card keeps saying "Create rule".
   // Warn that clicking it again duplicates the rule. The guard is keyed on (attachmentId, version)
   // so saving card A-v1 never triggers the warning on card B-v1.
   const willDuplicateOnSave =
-    getRuleAttachmentIntent(attachment) === 'create' &&
+    intent === 'create' &&
     attachment.version !== undefined &&
     savedCreateVersions.has(`${attachment.id}:${attachment.version}`);
 
@@ -274,6 +289,25 @@ export const RuleInlineContent: React.FC<RuleInlineContentProps> = ({
               )}
             </EuiText>
           </EuiCallOut>
+        </>
+      )}
+
+      {showViewRule && ruleId && (
+        <>
+          <EuiSpacer size="s" />
+          <EuiButton
+            size="s"
+            iconType="popout"
+            onClick={() => {
+              application.navigateToApp('securitySolutionUI', {
+                path: `${RULES_PATH}${getRuleDetailsUrl(ruleId)}`,
+              });
+            }}
+          >
+            {i18n.translate('xpack.securitySolution.agentBuilder.ruleAttachment.viewRule', {
+              defaultMessage: 'View rule',
+            })}
+          </EuiButton>
         </>
       )}
     </EuiPanel>

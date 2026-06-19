@@ -109,7 +109,11 @@ export const useAgentBuilderRuleCreation = ({
 
   useEffect(() => {
     const subscription = aiRuleCreation.formSyncActive$.subscribe(setIsSyncActive);
-    return () => subscription.unsubscribe();
+    return () => {
+      subscription.unsubscribe();
+      aiRuleCreation.deactivateFormSync();
+      aiRuleCreation.releaseBind();
+    };
   }, [aiRuleCreation]);
 
   useEffect(() => {
@@ -245,7 +249,6 @@ export const useAgentBuilderRuleCreation = ({
     const subscription = agentBuilder.events.chat$.subscribe((event) => {
       if (!isRoundCompleteEvent(event)) return;
 
-      // Find the last rule-editing tool call in this round.
       const steps = event.data.round?.steps ?? [];
       let touchedAttachmentId: string | undefined;
       let touchedIsNewCard = false;
@@ -254,7 +257,6 @@ export const useAgentBuilderRuleCreation = ({
         if (isToolCallStep(step)) {
           const toolId = step.tool_id;
           if (toolId === RULE_CREATE_TOOL_ID || toolId === ATTACHMENT_UPDATE_TOOL_ID) {
-            // Each result is a ToolResult; we need the first 'other' result's data.
             for (const result of step.results) {
               const resultData = result.data as Record<string, unknown> | undefined;
               if (resultData) {
@@ -303,7 +305,6 @@ export const useAgentBuilderRuleCreation = ({
         if (!result || typeof result !== 'object' || Array.isArray(result)) return;
         parsed = result as RuleResponse;
       } catch {
-        // Malformed attachment text — ignore silently
         return;
       }
       intentRef.current = getRuleAttachmentIntent(ruleAttachment as never);
@@ -360,7 +361,7 @@ export const useAgentBuilderRuleCreation = ({
           ruleIdForSync
         );
       } catch {
-        // Incomplete form data may cause formatting errors — ignore silently
+        // ignored
       }
     }, SYNC_DEBOUNCE_MS);
 
