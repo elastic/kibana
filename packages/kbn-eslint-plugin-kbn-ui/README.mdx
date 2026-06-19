@@ -7,3 +7,7 @@ tags: ['kibana', 'dev', 'contributor', 'operations', 'eslint', 'kbn-ui']
 ---
 
 `@kbn/eslint-plugin-kbn-ui` is a collection of custom ESLint rules for `@kbn/ui-` components.
+
+## `@kbn/kbn-ui/prefer_toast_action_props`
+
+Flags legacy usage of passing actions as content to toasts that are added via the `ToastsApi`'s methods (`add()`, `addInfo()`, `addSuccess()`, `addWarning()`, `addDanger()`) as actions should instead be passed via the `actionProps` prop.
