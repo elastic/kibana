@@ -11,6 +11,7 @@ import {
   WORKFLOWS_EXECUTIONS_INDEX,
   WORKFLOWS_STEP_EXECUTIONS_INDEX,
 } from '../../../common';
+import { WORKFLOWS_EXECUTIONS_INDEX_MAPPINGS } from '../../../common/workflow_executions_index';
 import {
   rolloverExecutionIndexIfRequired,
   rolloverWorkflowExecutionIndexes,
@@ -20,8 +21,11 @@ const CONDITIONS = { maxAge: '1m', maxPrimaryShardSize: '1gb' };
 
 const createEsClientMock = () => ({
   indices: {
-    existsAlias: jest.fn(),
+    getAlias: jest.fn(),
     rollover: jest.fn(),
+    exists: jest.fn(),
+    create: jest.fn(),
+    updateAliases: jest.fn(),
   },
 });
 
@@ -32,52 +36,13 @@ const createLoggerMock = () => ({
 });
 
 describe('rolloverExecutionIndexIfRequired', () => {
-  it('skips rollover when the alias does not exist', async () => {
+  it('returns false when dry-run rollover conditions are not met', async () => {
     const esClient = createEsClientMock();
-    esClient.indices.existsAlias.mockResolvedValue(false);
-    const logger = createLoggerMock();
-
-    const rolledOver = await rolloverExecutionIndexIfRequired({
-      esClient: esClient as any,
-      aliasName: WORKFLOWS_EXECUTIONS_INDEX,
-      conditions: CONDITIONS,
-      logger: logger as any,
+    esClient.indices.getAlias.mockResolvedValue({
+      '.workflows-executions-000001': { aliases: {} },
     });
-
-    expect(rolledOver).toBe(false);
-    expect(esClient.indices.rollover).not.toHaveBeenCalled();
-  });
-
-  it('calls rollover with max_age and max_primary_shard_size conditions', async () => {
-    const esClient = createEsClientMock();
-    esClient.indices.existsAlias.mockResolvedValue(true);
-    esClient.indices.rollover.mockResolvedValue({ rolled_over: false });
-    const logger = createLoggerMock();
-
-    await rolloverExecutionIndexIfRequired({
-      esClient: esClient as any,
-      aliasName: WORKFLOWS_EXECUTIONS_INDEX,
-      conditions: CONDITIONS,
-      logger: logger as any,
-    });
-
-    expect(esClient.indices.rollover).toHaveBeenCalledWith(
-      {
-        alias: WORKFLOWS_EXECUTIONS_INDEX,
-        conditions: {
-          max_age: '1m',
-          max_primary_shard_size: '1gb',
-        },
-      },
-      { signal: undefined }
-    );
-  });
-
-  it('returns true when Elasticsearch rolls over the write index', async () => {
-    const esClient = createEsClientMock();
-    esClient.indices.existsAlias.mockResolvedValue(true);
     esClient.indices.rollover.mockResolvedValue({
-      rolled_over: true,
+      conditions: {},
       old_index: '.workflows-executions-000001',
       new_index: '.workflows-executions-000002',
     });
@@ -90,18 +55,105 @@ describe('rolloverExecutionIndexIfRequired', () => {
       logger: logger as any,
     });
 
-    expect(rolledOver).toBe(true);
-    expect(logger.info).toHaveBeenCalledWith(
-      expect.stringContaining('Rolled over alias .workflows-executions')
+    expect(rolledOver).toBe(false);
+    expect(esClient.indices.rollover).toHaveBeenCalledWith(
+      {
+        alias: WORKFLOWS_EXECUTIONS_INDEX,
+        dry_run: true,
+        conditions: {
+          max_age: '1m',
+          max_primary_shard_size: '1gb',
+        },
+      },
+      { signal: undefined }
     );
+    expect(esClient.indices.create).not.toHaveBeenCalled();
+  });
+
+  it('creates the new backing index and updates aliases when conditions are met', async () => {
+    const esClient = createEsClientMock();
+    esClient.indices.getAlias.mockResolvedValue({
+      '.workflows-executions-000001': { aliases: {} },
+    });
+    esClient.indices.rollover.mockResolvedValue({
+      conditions: { max_age: true },
+      old_index: '.workflows-executions-000001',
+      new_index: '.workflows-executions-000002',
+    });
+    esClient.indices.exists.mockResolvedValue(false);
+    esClient.indices.create.mockResolvedValue({});
+    esClient.indices.updateAliases.mockResolvedValue({});
+    const logger = createLoggerMock();
+
+    const rolledOver = await rolloverExecutionIndexIfRequired({
+      esClient: esClient as any,
+      aliasName: WORKFLOWS_EXECUTIONS_INDEX,
+      conditions: CONDITIONS,
+      logger: logger as any,
+    });
+
+    expect(rolledOver).toBe(true);
+    expect(esClient.indices.create).toHaveBeenCalledWith({
+      index: '.workflows-executions-000002',
+      mappings: WORKFLOWS_EXECUTIONS_INDEX_MAPPINGS,
+    });
+    expect(esClient.indices.updateAliases).toHaveBeenCalledWith({
+      actions: [
+        {
+          add: {
+            index: '.workflows-executions-000002',
+            alias: WORKFLOWS_EXECUTIONS_INDEX,
+            is_write_index: true,
+          },
+        },
+        {
+          add: {
+            index: '.workflows-executions-000001',
+            alias: WORKFLOWS_EXECUTIONS_INDEX,
+            is_write_index: false,
+          },
+        },
+      ],
+    });
+  });
+
+  it('returns false when the target backing index already exists', async () => {
+    const esClient = createEsClientMock();
+    esClient.indices.getAlias.mockResolvedValue({
+      '.workflows-executions-000001': { aliases: {} },
+    });
+    esClient.indices.rollover.mockResolvedValue({
+      conditions: { max_primary_shard_size: true },
+      old_index: '.workflows-executions-000001',
+      new_index: '.workflows-executions-000002',
+    });
+    esClient.indices.exists.mockResolvedValue(true);
+    const logger = createLoggerMock();
+
+    const rolledOver = await rolloverExecutionIndexIfRequired({
+      esClient: esClient as any,
+      aliasName: WORKFLOWS_EXECUTIONS_INDEX,
+      conditions: CONDITIONS,
+      logger: logger as any,
+    });
+
+    expect(rolledOver).toBe(false);
+    expect(esClient.indices.create).not.toHaveBeenCalled();
+    expect(esClient.indices.updateAliases).not.toHaveBeenCalled();
   });
 });
 
 describe('rolloverWorkflowExecutionIndexes', () => {
   it('evaluates rollover for workflow and step execution aliases', async () => {
     const esClient = createEsClientMock();
-    esClient.indices.existsAlias.mockResolvedValue(true);
-    esClient.indices.rollover.mockResolvedValue({ rolled_over: false });
+    esClient.indices.getAlias.mockResolvedValue({
+      '.workflows-executions-000001': { aliases: {} },
+    });
+    esClient.indices.rollover.mockResolvedValue({
+      conditions: {},
+      old_index: '.workflows-executions-000001',
+      new_index: '.workflows-executions-000002',
+    });
     const logger = createLoggerMock();
 
     await rolloverWorkflowExecutionIndexes({
@@ -110,23 +162,30 @@ describe('rolloverWorkflowExecutionIndexes', () => {
       logger: logger as any,
     });
 
+    expect(esClient.indices.getAlias).toHaveBeenCalledTimes(2);
+    expect(esClient.indices.getAlias).toHaveBeenCalledWith(
+      { name: WORKFLOWS_EXECUTIONS_INDEX },
+      { signal: undefined }
+    );
+    expect(esClient.indices.getAlias).toHaveBeenCalledWith(
+      { name: WORKFLOWS_STEP_EXECUTIONS_INDEX },
+      { signal: undefined }
+    );
     expect(esClient.indices.rollover).toHaveBeenCalledTimes(2);
-    expect(esClient.indices.rollover).toHaveBeenCalledWith(
-      expect.objectContaining({ alias: WORKFLOWS_EXECUTIONS_INDEX }),
-      expect.any(Object)
-    );
-    expect(esClient.indices.rollover).toHaveBeenCalledWith(
-      expect.objectContaining({ alias: WORKFLOWS_STEP_EXECUTIONS_INDEX }),
-      expect.any(Object)
-    );
   });
 
   it('continues with the second alias when the first rollover throws', async () => {
     const esClient = createEsClientMock();
-    esClient.indices.existsAlias.mockResolvedValue(true);
-    esClient.indices.rollover
+    esClient.indices.getAlias
       .mockRejectedValueOnce(new Error('rollover failed'))
-      .mockResolvedValueOnce({ rolled_over: false });
+      .mockResolvedValueOnce({
+        '.workflows-step-executions-000001': { aliases: {} },
+      });
+    esClient.indices.rollover.mockResolvedValue({
+      conditions: {},
+      old_index: '.workflows-step-executions-000001',
+      new_index: '.workflows-step-executions-000002',
+    });
     const logger = createLoggerMock();
 
     await rolloverWorkflowExecutionIndexes({
@@ -135,7 +194,8 @@ describe('rolloverWorkflowExecutionIndexes', () => {
       logger: logger as any,
     });
 
-    expect(esClient.indices.rollover).toHaveBeenCalledTimes(2);
+    expect(esClient.indices.getAlias).toHaveBeenCalledTimes(2);
     expect(logger.error).toHaveBeenCalledWith(expect.stringContaining(WORKFLOWS_EXECUTIONS_INDEX));
+    expect(esClient.indices.rollover).toHaveBeenCalledTimes(1);
   });
 });

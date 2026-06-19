@@ -163,6 +163,7 @@ const createBroaderSurfaceContainer = () => {
   workflowExecutionState.getWorkflowExecution = jest.fn().mockReturnValue({
     scopeStack: [] as StackFrame[],
     workflowDefinition: workflow,
+    stepExecutionsIndex: '.workflows-step-executions-000001',
   } as EsWorkflowExecution);
   workflowExecutionState.getLatestStepExecution = jest
     .fn()
