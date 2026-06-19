@@ -260,7 +260,6 @@ describe('RetentionCard', () => {
         inherited_fields: {},
         dashboards: [],
         rules: [],
-        queries: [],
         privileges: {
           manage: true,
           monitor: true,

@@ -165,12 +165,13 @@ The `GET /api/streams/{name}` response enriches the raw stream definition with d
   privileges: { manage, read_failure_store, ... },
   dashboards: ["id1", "id2"],
   rules: ["id3"],
-  queries: [{ ... }],
   index_mode: "...",
 }
 ```
 
 The `stream` object is what can be sent back to `PUT`. Everything outside of `stream` is derived or stored separately (assets, inherited fields, privileges).
+
+**Significant-event queries are not part of the stream payload.** `GET`/`PUT /api/streams/{name}` and `PUT /api/streams/{name}/_ingest` neither return nor accept a `queries` field, and the `PUT` endpoints silently drop one if a client sends it. Manage queries through the dedicated `GET`/`PUT`/`DELETE /api/streams/{name}/queries` endpoints instead. Content packs still carry queries (`ContentPackStreamRequest`), and content import reconciles them through the knowledge indicator client. Keeping `queries` off stream read/write means plain stream operations no longer touch the knowledge-indicator data stream, so editor-role users are no longer blocked from `GET`/`PUT` on a stream.
 
 ### End-to-End Type Safety
 

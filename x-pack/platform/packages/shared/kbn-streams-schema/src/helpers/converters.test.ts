@@ -192,5 +192,51 @@ describe('Converter Helpers', () => {
         '$.my-query-stream'
       );
     });
+
+    it('never carries significant-event queries onto the upsert request', () => {
+      const validResponse: Streams.WiredStream.GetResponse = {
+        stream: {
+          type: 'wired',
+          name: 'wired-stream',
+          description: '',
+          updated_at: new Date().toISOString(),
+          ingest: {
+            lifecycle: { inherit: {} },
+            processing: { steps: [], updated_at: new Date().toISOString() },
+            settings: {},
+            wired: { fields: {}, routing: [] },
+            failure_store: { inherit: {} },
+          },
+        },
+        privileges: {
+          lifecycle: true,
+          manage: true,
+          monitor: true,
+          simulate: true,
+          text_structure: true,
+          read_failure_store: true,
+          manage_failure_store: true,
+          view_index_metadata: true,
+          create_snapshot_repository: true,
+        },
+        effective_lifecycle: { dsl: {}, from: 'logs' },
+        effective_settings: {},
+        data_stream_exists: true,
+        inherited_fields: {},
+        effective_failure_store: { disabled: {}, from: 'logs' },
+        ...emptyAssets,
+      };
+      // Simulate a stale response that still carries top-level queries (pre-decoupling shape).
+      const staleResponse = {
+        ...validResponse,
+        queries: [{ id: 'q1' }],
+      } as Streams.WiredStream.GetResponse;
+
+      const upsertRequest = convertGetResponseIntoUpsertRequest(staleResponse);
+
+      expect(upsertRequest).not.toHaveProperty('queries');
+      expect(upsertRequest.stream).not.toHaveProperty('queries');
+      expect(Streams.WiredStream.UpsertRequest.is(upsertRequest)).toEqual(true);
+    });
   });
 });

@@ -5,12 +5,22 @@
  * 2.0.
  */
 
-import type { Streams } from '@kbn/streams-schema';
+import type { StreamQuery, Streams } from '@kbn/streams-schema';
 
 export const ROOT_STREAM_ID = '__ROOT__';
+
+/**
+ * Content packs bundle significant-event queries as portable content, so the
+ * content-pack stream request retains `queries`. The stream CRUD `UpsertRequest`
+ * intentionally omits `queries` (they are managed via the dedicated sig-events
+ * `/queries` endpoints), so this type re-adds them on top of the wired upsert shape.
+ */
+export type ContentPackStreamRequest = Streams.WiredStream.UpsertRequest & {
+  queries: StreamQuery[];
+};
 
 export interface ContentPackStream {
   type: 'stream';
   name: string;
-  request: Streams.WiredStream.UpsertRequest;
+  request: ContentPackStreamRequest;
 }

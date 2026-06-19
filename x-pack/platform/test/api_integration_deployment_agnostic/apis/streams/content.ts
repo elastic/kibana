@@ -6,12 +6,17 @@
  */
 
 import expect from '@kbn/expect';
-import { generateArchive, parseArchive } from '@kbn/streams-plugin/server/lib/content';
+import {
+  generateArchive,
+  isContentPackStreamRequest,
+  parseArchive,
+} from '@kbn/streams-plugin/server/lib/content';
 import { Readable } from 'stream';
 import type { ContentPack, ContentPackStream } from '@kbn/content-packs-schema';
 import { ROOT_STREAM_ID } from '@kbn/content-packs-schema';
-import type { FieldDefinition, RoutingDefinition, StreamQuery } from '@kbn/streams-schema';
-import { Streams, emptyAssets } from '@kbn/streams-schema';
+import type { FieldDefinition, RoutingDefinition, Streams } from '@kbn/streams-schema';
+import { emptyAssets } from '@kbn/streams-schema';
+import { STREAMS_ESQL_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 import {
   OBSERVABILITY_STREAMS_ENABLE_CONTENT_PACKS,
   OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS,
@@ -20,25 +25,32 @@ import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_co
 import type { StreamsSupertestRepositoryClient } from './helpers/repository_client';
 import { createStreamsRepositoryAdminClient } from './helpers/repository_client';
 import {
+  bulkQueries,
   disableStreams,
   enableStreams,
   exportContent,
+  getQueries,
   getStream,
   importContent,
   putStream,
 } from './helpers/requests';
+import type { RoleCredentials } from '../../services';
+
+interface FoundRule {
+  id: string;
+  name: string;
+  enabled: boolean;
+  rule_type_id: string;
+}
 
 const upsertRequest = ({
   fields = {},
   routing = [],
-  queries = [],
 }: {
   fields?: FieldDefinition;
   routing?: RoutingDefinition[];
-  queries?: StreamQuery[];
 }): Streams.WiredStream.UpsertRequest => ({
   ...emptyAssets,
-  queries,
   stream: {
     type: 'wired',
     description: 'Test stream',
@@ -55,6 +67,9 @@ const upsertRequest = ({
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const roleScopedSupertest = getService('roleScopedSupertest');
   const kibanaServer = getService('kibanaServer');
+  const alertingApi = getService('alertingApiCommon');
+  const samlAuth = getService('samlAuth');
+  let roleAuthc: RoleCredentials;
   let apiClient: StreamsSupertestRepositoryClient;
 
   describe('Content packs', () => {
@@ -65,27 +80,24 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
       await kibanaServer.uiSettings.waitForEventualCacheRefresh();
 
+      roleAuthc = await samlAuth.createM2mApiKeyWithRoleScope('admin');
       apiClient = await createStreamsRepositoryAdminClient(roleScopedSupertest);
       await enableStreams(apiClient);
 
-      await putStream(
-        apiClient,
-        'logs.otel.branch_a.child1.nested',
-        upsertRequest({
-          queries: [
-            {
-              id: 'my-error-query',
-              type: 'match',
-              title: 'error query',
-              description: '',
-              esql: {
-                query:
-                  'FROM logs.otel.branch_a.child1.nested,logs.otel.branch_a.child1.nested.* METADATA _id, _source | WHERE KQL("message: ERROR")',
-              },
+      await putStream(apiClient, 'logs.otel.branch_a.child1.nested', upsertRequest({}));
+      await bulkQueries(apiClient, 'logs.otel.branch_a.child1.nested', [
+        {
+          index: {
+            id: 'my-error-query',
+            title: 'error query',
+            description: '',
+            esql: {
+              query:
+                'FROM logs.otel.branch_a.child1.nested,logs.otel.branch_a.child1.nested.* METADATA _id, _source | WHERE KQL("message: ERROR")',
             },
-          ],
-        })
-      );
+          },
+        },
+      ]);
       await putStream(
         apiClient,
         'logs.otel.branch_a.child1',
@@ -145,6 +157,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
     after(async () => {
       await disableStreams(apiClient);
+      await samlAuth.invalidateM2mApiKeyWithRoleScope(roleAuthc);
 
       await kibanaServer.uiSettings.update({
         [OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS]: false,
@@ -173,7 +186,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           (entry): entry is ContentPackStream => entry.type === 'stream'
         );
 
-        expect(streamEntries.every((entry) => Streams.all.UpsertRequest.is(entry.request))).to.eql(
+        expect(streamEntries.every((entry) => isContentPackStreamRequest(entry.request))).to.eql(
           true
         );
         expect(streamEntries.map((entry) => entry.name).sort()).to.eql([
@@ -418,6 +431,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                   },
                 },
                 ...emptyAssets,
+                queries: [],
               },
             },
             {
@@ -436,6 +450,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                   },
                 },
                 ...emptyAssets,
+                queries: [],
               },
             },
           ]
@@ -483,6 +498,14 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
         await putStream(apiClient, 'logs.otel.branch_c', upsertRequest({}));
 
+        // 'error query' rules already exist for other streams, so snapshot the current set
+        // to isolate the rule this import creates for logs.otel.branch_c.nested.
+        const ruleIdsBeforeImport = new Set(
+          (
+            await alertingApi.searchRules(roleAuthc, 'alert.attributes.name:"error query"')
+          ).body.data.map((rule: FoundRule) => rule.id)
+        );
+
         const importResponse = await importContent(apiClient, 'logs.otel.branch_c', {
           include: { objects: { all: {} } },
           content: Readable.from(archiveBuffer),
@@ -511,11 +534,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         });
 
         // check that the created stream includes the queries
-        const createdStream = (await getStream(
-          apiClient,
-          'logs.otel.branch_c.nested'
-        )) as Streams.WiredStream.GetResponse;
-        expect(createdStream.queries).to.eql([
+        const createdStreamQueries = await getQueries(apiClient, 'logs.otel.branch_c.nested');
+        expect(createdStreamQueries.queries).to.eql([
           {
             id: 'my-error-query',
             type: 'match',
@@ -527,6 +547,16 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             },
           },
         ]);
+
+        // the imported 'match' query is rule-backed, so importing must also create its
+        // enabled alerting rule — not just persist the query in the knowledge indicator store
+        const newRules = (
+          await alertingApi.searchRules(roleAuthc, 'alert.attributes.name:"error query"')
+        ).body.data.filter((rule: FoundRule) => !ruleIdsBeforeImport.has(rule.id));
+        expect(newRules).to.have.length(1);
+        expect(newRules[0].name).to.eql('error query');
+        expect(newRules[0].enabled).to.be(true);
+        expect(newRules[0].rule_type_id).to.eql(STREAMS_ESQL_RULE_TYPE_ID);
       });
 
       it('imports selected streams', async () => {
@@ -613,6 +643,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                     },
                   },
                   ...emptyAssets,
+                  queries: [],
                 },
               },
             ]
@@ -713,6 +744,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                   },
                 },
                 ...emptyAssets,
+                queries: [],
               },
             },
             {
@@ -731,6 +763,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                   },
                 },
                 ...emptyAssets,
+                queries: [],
               },
             },
           ]

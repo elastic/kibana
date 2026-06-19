@@ -253,7 +253,20 @@ const importContentRoute = createServerRoute({
 
     const streams = prepareStreamsForImport({ existing: existingTree, incoming: incomingTree });
 
-    return await streamsClient.bulkUpsert(streams);
+    // Stream definitions (and dashboards/rules) are upserted without queries; the
+    // significant-event queries are reconciled separately against the same KI snapshot
+    // (`queryLinks`) used to build `existingTree`, passing the merged desired set per stream.
+    return await streamsClient.importStreams(
+      streams.map(({ name, request: entryRequest }) => {
+        const { queries, ...upsertRequest } = entryRequest;
+        return {
+          name,
+          request: upsertRequest,
+          queries,
+          currentLinks: queryLinks[name] ?? [],
+        };
+      })
+    );
   },
 });
 
