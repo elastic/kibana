@@ -491,24 +491,6 @@ export function ComposeDiscoverFlyout({
   const currentStep = steps[uiState.step];
   const isLastStep = uiState.step === steps.length - 1;
 
-  const builderFirstStepValid = useMemo(() => {
-    if (!isBuilderMode || currentStep?.id !== 'builderCondition') {
-      return true;
-    }
-    const definition = builderType ? RULE_BUILDER_REGISTRY[builderType] : undefined;
-    return definition?.validate?.(uiState, builderState) ?? false;
-  }, [isBuilderMode, builderType, currentStep?.id, uiState, builderState]);
-
-  const isFirstStepReady = useMemo(() => {
-    if (currentStep?.id === 'builderCondition') {
-      return builderFirstStepValid;
-    }
-    if (currentStep?.id === 'alertCondition') {
-      return uiState.queryCommitted;
-    }
-    return true;
-  }, [currentStep?.id, builderFirstStepValid, uiState.queryCommitted]);
-
   // ── YAML mode state ──────────────────────────────────────────────────────
   const [yamlText, setYamlText] = useState('');
   yamlTextRef.current = yamlText;
