@@ -63,6 +63,22 @@ describe('getTemplateLifecycle', () => {
     expect(result).toEqual({ dsl: { data_retention: '30d' } });
   });
 
+  it('maps template downsampling into dsl downsample', () => {
+    const result = getTemplateLifecycle({
+      aliases: {},
+      mappings: {},
+      lifecycle: {
+        enabled: true,
+        data_retention: '30d',
+        downsampling: [{ after: '1d', fixed_interval: '1h' }],
+      },
+      settings: { index: { lifecycle: { prefer_ilm: false } } },
+    });
+    expect(result).toEqual({
+      dsl: { data_retention: '30d', downsample: [{ after: '1d', fixed_interval: '1h' }] },
+    });
+  });
+
   it('returns dsl when enabled is omitted but data_retention is set', () => {
     const result = getTemplateLifecycle({
       aliases: {},
@@ -232,7 +248,11 @@ describe('updateDataStreamsLifecycle inherit', () => {
         simulateIndexTemplate: jest.fn().mockResolvedValue({
           template: {
             settings: { index: { lifecycle: { prefer_ilm: false } } },
-            lifecycle: { enabled: true, data_retention: '80d' },
+            lifecycle: {
+              enabled: true,
+              data_retention: '80d',
+              downsampling: [{ after: '7d', fixed_interval: '1h' }],
+            },
           },
         }),
         putDataLifecycle: jest.fn().mockResolvedValue({}),
@@ -261,6 +281,7 @@ describe('updateDataStreamsLifecycle inherit', () => {
     expect(mockEsClient.indices.putDataLifecycle).toHaveBeenCalledWith({
       name: 'logs-foo-default',
       data_retention: '80d',
+      downsampling: [{ after: '7d', fixed_interval: '1h' }],
     });
     expect(mockEsClient.indices.deleteDataLifecycle).not.toHaveBeenCalled();
   });

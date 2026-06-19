@@ -475,7 +475,20 @@ export function getTemplateLifecycle(
       typeof template.lifecycle?.data_retention === 'string'
         ? template.lifecycle.data_retention
         : undefined;
-    return { dsl: { data_retention: dataRetention } };
+    const downsample: IngestStreamLifecycleDSL['dsl']['downsample'] = Array.isArray(
+      template.lifecycle?.downsampling
+    )
+      ? template.lifecycle.downsampling.flatMap(({ after, fixed_interval }) => {
+          return typeof after === 'string' ? [{ after, fixed_interval }] : [];
+        })
+      : undefined;
+
+    return {
+      dsl: {
+        data_retention: dataRetention,
+        ...(downsample?.length ? { downsample } : {}),
+      },
+    };
   }
 
   if (ilmPolicyName) {
