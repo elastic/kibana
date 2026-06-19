@@ -364,23 +364,6 @@ function extractEmitToStartMs(workflowExecution: EsWorkflowExecution): number | 
 type ParentWorkflowInvocationMode = 'sync' | 'async';
 
 /**
- * Parses an incoming `eventChainDepth` value (number or numeric string) into a
- * non-negative integer, returning undefined when it is missing or invalid.
- */
-export function parseEventChainDepth(raw: unknown): number | undefined {
-  if (typeof raw === 'number' && !Number.isNaN(raw) && raw >= 0) {
-    return raw;
-  }
-  if (typeof raw === 'string' && raw.trim() !== '') {
-    const parsed = parseInt(raw, 10);
-    if (!Number.isNaN(parsed) && parsed >= 0) {
-      return parsed;
-    }
-  }
-  return undefined;
-}
-
-/**
  * Normalizes persisted or incoming `eventChainVisitedWorkflowIds` to a bounded string array.
  * The cap should match {@link WorkflowsExecutionEngineConfig.eventDriven.maxChainDepth} for the
  * current deployment so stored chains align with the event-chain depth guardrail.

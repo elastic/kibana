@@ -59,10 +59,26 @@ export function setCurrentTransaction(apm: typeof agent, transaction: agent.Tran
   (apm as ApmAgentInternals).setCurrentTransaction(transaction);
 }
 
-/**
- * Returns the W3C traceparent for the active APM transaction/span.
- */
 export function getCurrentTraceParent(): string | undefined {
   const traceparent = (agent as ApmAgentInternals).currentTraceparent;
-  return typeof traceparent === 'string' && traceparent.length > 0 ? traceparent : undefined;
+  return typeof traceparent === 'string' && traceparent ? traceparent : undefined;
+}
+
+export async function withTraceParent<T>(
+  traceParent: string | undefined,
+  run: () => Promise<T>
+): Promise<T> {
+  if (!traceParent) {
+    return run();
+  }
+
+  const transaction = agent.startTransaction('workflow task schedule', 'workflow', {
+    childOf: traceParent,
+  });
+
+  try {
+    return await run();
+  } finally {
+    transaction?.end();
+  }
 }

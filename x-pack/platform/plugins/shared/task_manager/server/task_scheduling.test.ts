@@ -154,31 +154,6 @@ describe('TaskScheduling', () => {
     );
   });
 
-  test('honors caller-provided traceparent when active transaction is unavailable', async () => {
-    const apm = jest.requireMock('elastic-apm-node');
-    const originalTransaction = apm.currentTransaction;
-    apm.currentTransaction = undefined;
-
-    try {
-      const taskScheduling = new TaskScheduling(taskSchedulingOpts);
-      const task = {
-        taskType: 'foo',
-        params: {},
-        state: {},
-        traceparent: 'stored-parent',
-      };
-      await taskScheduling.schedule(task);
-      expect(mockTaskStore.schedule).toHaveBeenCalledWith(
-        expect.objectContaining({
-          traceparent: 'stored-parent',
-        }),
-        undefined
-      );
-    } finally {
-      apm.currentTransaction = originalTransaction;
-    }
-  });
-
   test('allows scheduling existing tasks that may have already been scheduled', async () => {
     const taskScheduling = new TaskScheduling(taskSchedulingOpts);
     mockTaskStore.schedule.mockRejectedValueOnce({

@@ -135,7 +135,7 @@ export class TaskScheduling {
     return await this.store.schedule(
       {
         ...modifiedTask,
-        traceparent: traceparent || modifiedTask.traceparent || '',
+        traceparent: traceparent || '',
         enabled: modifiedTask.enabled ?? true,
       },
       scheduleOptionsToStoreApiKeyOptions(options)
@@ -174,7 +174,7 @@ export class TaskScheduling {
         }
         return {
           ...modifiedTask,
-          traceparent: traceparent || modifiedTask.traceparent || '',
+          traceparent: traceparent || '',
           enabled,
           ...scheduling,
         };

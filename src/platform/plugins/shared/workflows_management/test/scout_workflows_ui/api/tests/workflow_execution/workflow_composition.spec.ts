@@ -202,7 +202,7 @@ spaceTest.describe('Workflow composition', { tag: tags.deploymentAgnostic }, () 
     expect(completedChildren.length).toBeGreaterThan(0);
   });
 
-  spaceTest('sync: child inherits parent trace identifiers when APM captures a trace', async () => {
+  spaceTest('sync: child inherits parent trace identifiers', async () => {
     const { workflowExecutionId } = await workflowsApi.run(syncParentId, {
       service_name: 'trace-service',
     });

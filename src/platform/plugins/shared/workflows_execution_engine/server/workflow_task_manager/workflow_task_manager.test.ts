@@ -7,6 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+jest.mock('../workflow_context_manager/apm_internal', () => {
+  const actual = jest.requireActual('../workflow_context_manager/apm_internal');
+  return {
+    ...actual,
+    withTraceParent: jest.fn((_traceParent: string | undefined, run: () => Promise<unknown>) =>
+      run()
+    ),
+  };
+});
+
 import type { KibanaRequest } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
@@ -16,6 +26,7 @@ import { WORKFLOW_RESUME_TASK_TYPE } from './types';
 import type { ResumeWorkflowExecutionParams } from './types';
 import { getWorkflowGlobalTimeoutResumeTaskId, WorkflowTaskManager } from './workflow_task_manager';
 import { generateExecutionTaskScope } from '../utils';
+import { withTraceParent } from '../workflow_context_manager/apm_internal';
 
 // Mock uuid
 jest.mock('uuid', () => ({
@@ -352,7 +363,7 @@ describe('WorkflowTaskManager', () => {
       );
     });
 
-    it('should pass persisted traceparent when provided', async () => {
+    it('should schedule under persisted trace parent context when provided', async () => {
       mockTaskManager.schedule.mockResolvedValue({ id: 'trace-task-id' } as any);
 
       await workflowTaskManager.scheduleImmediateResume({
@@ -362,12 +373,7 @@ describe('WorkflowTaskManager', () => {
         traceParent: '00-stored-trace-span-01',
       });
 
-      expect(mockTaskManager.schedule).toHaveBeenCalledWith(
-        expect.objectContaining({
-          traceparent: '00-stored-trace-span-01',
-        }),
-        { request: fakeRequest }
-      );
+      expect(withTraceParent).toHaveBeenCalledWith('00-stored-trace-span-01', expect.any(Function));
     });
   });
 

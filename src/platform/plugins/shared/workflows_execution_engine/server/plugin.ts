@@ -44,10 +44,7 @@ import {
   resolveInterruptedWorkflowResumeTask,
   resolveInterruptedWorkflowRunTask,
 } from './lib/task_recovery';
-import {
-  normalizeEventChainVisitedWorkflowIds,
-  parseEventChainDepth,
-} from './lib/telemetry/utils/extract_execution_metadata';
+import { normalizeEventChainVisitedWorkflowIds } from './lib/telemetry/utils/extract_execution_metadata';
 import { WorkflowExecutionTelemetryClient } from './lib/telemetry/workflow_execution_telemetry_client';
 import { validateWorkflowInputs } from './lib/validate_workflow_inputs';
 import { WorkflowsMeteringService } from './metering/metering_service';
@@ -72,6 +69,7 @@ import type {
   WorkflowsExecutionEnginePluginStartDeps,
 } from './types';
 import { generateExecutionTaskScope } from './utils';
+import { withTraceParent } from './workflow_context_manager/apm_internal';
 import {
   buildWorkflowContext,
   type WorkflowExecutionForInputRendering,
@@ -685,9 +683,18 @@ export class WorkflowsExecutionEnginePlugin
       const spaceId = (context.spaceId as string | undefined) || 'default';
       const metadata = context.metadata as Record<string, unknown> | undefined;
       const eventPayload = context.event as Record<string, unknown> | undefined;
-      const rootEventChainDepth = eventPayload
-        ? parseEventChainDepth(eventPayload.eventChainDepth)
-        : undefined;
+      let rootEventChainDepth: number | undefined;
+      if (eventPayload) {
+        const rawDepth = eventPayload.eventChainDepth;
+        if (typeof rawDepth === 'number' && !Number.isNaN(rawDepth) && rawDepth >= 0) {
+          rootEventChainDepth = rawDepth;
+        } else if (typeof rawDepth === 'string' && rawDepth.trim() !== '') {
+          const parsed = parseInt(rawDepth, 10);
+          if (!Number.isNaN(parsed) && parsed >= 0) {
+            rootEventChainDepth = parsed;
+          }
+        }
+      }
       const rootVisited = normalizeEventChainVisitedWorkflowIds(
         eventPayload?.eventChainVisitedWorkflowIds,
         this.config.eventDriven.maxChainDepth
@@ -711,13 +718,11 @@ export class WorkflowsExecutionEnginePlugin
         ...(rootEventChainDepth !== undefined ? { eventChainDepth: rootEventChainDepth } : {}),
         ...(rootVisited.length > 0 ? { eventChainVisitedWorkflowIds: rootVisited } : {}),
         ...(dispatchEventId ? { dispatchEventId } : {}),
-        ...(typeof context.rootTraceId === 'string' && context.rootTraceId
-          ? { traceId: context.rootTraceId }
-          : {}),
-        ...(typeof context.rootEntryTransactionId === 'string' && context.rootEntryTransactionId
+        ...(typeof context.rootTraceId === 'string' ? { traceId: context.rootTraceId } : {}),
+        ...(typeof context.rootEntryTransactionId === 'string'
           ? { entryTransactionId: context.rootEntryTransactionId }
           : {}),
-        ...(typeof context.parentTraceParent === 'string' && context.parentTraceParent
+        ...(typeof context.parentTraceParent === 'string'
           ? { traceParent: context.parentTraceParent }
           : {}),
       };
@@ -794,7 +799,6 @@ export class WorkflowsExecutionEnginePlugin
         },
         scope,
         enabled: true,
-        ...(workflowExecution.traceParent ? { traceparent: workflowExecution.traceParent } : {}),
       };
     };
 
@@ -883,7 +887,9 @@ export class WorkflowsExecutionEnginePlugin
       } else {
         // Schedule a task: either we're not in a task, or this is a child execution (must not run inline)
         const taskInstance = createTaskInstance(workflowExecution, ['workflows']);
-        await plugins.taskManager.schedule(taskInstance, { request: request as KibanaRequest });
+        await withTraceParent(workflowExecution.traceParent, () =>
+          plugins.taskManager.schedule(taskInstance, { request: request as KibanaRequest })
+        );
         this.logger.debug(
           `Scheduling workflow task for workflow ${workflow.id}, execution ${workflowExecution.id}${
             isChildExecution ? ' (child execution)' : ''
