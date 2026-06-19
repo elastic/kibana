@@ -12,11 +12,6 @@ import { AiRuleCreationService } from '../../../detection_engine/common/ai_rule_
 import { RuleInlineContent } from './rule_inline_content';
 import type { RuleAttachment } from './helpers';
 
-jest.mock('react-router-dom', () => ({
-  ...jest.requireActual('react-router-dom'),
-  useLocation: jest.fn(() => ({ pathname: '/' })),
-}));
-
 const rule = { name: 'Test Rule', type: 'esql', query: 'FROM logs-*' };
 
 const makeAttachment = (ruleData: Record<string, unknown>, origin?: string): RuleAttachment =>
@@ -40,8 +35,10 @@ describe('RuleInlineContent', () => {
   afterEach(() => jest.clearAllMocks());
 
   const renderContent = (attachment: RuleAttachment, pathname = '/') => {
-    const { useLocation } = jest.requireMock('react-router-dom');
-    useLocation.mockReturnValue({ pathname });
+    Object.defineProperty(window, 'location', {
+      value: { ...window.location, pathname },
+      writable: true,
+    });
     return render(
       <RuleInlineContent
         attachment={attachment}

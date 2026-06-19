@@ -7,7 +7,6 @@
 
 import React, { useMemo } from 'react';
 import useObservable from 'react-use/lib/useObservable';
-import { useLocation } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import {
   EuiBadge,
@@ -120,7 +119,6 @@ export const RuleInlineContent: React.FC<RuleInlineContentProps> = ({
   aiRuleCreation,
   application,
 }) => {
-  const { pathname } = useLocation();
   const isSaving = useObservable(aiRuleCreation.saving$, false);
   const savedCreateVersions = useObservable(
     aiRuleCreation.savedCreateVersions$,
@@ -132,7 +130,9 @@ export const RuleInlineContent: React.FC<RuleInlineContentProps> = ({
   const intent = getRuleAttachmentIntent(attachment);
   const ruleId = getRuleIdFromAttachment(attachment) ?? undefined;
   const showViewRule =
-    intent === 'update' && ruleId !== undefined && shouldShowViewRuleButton(ruleId, pathname);
+    intent === 'update' &&
+    ruleId !== undefined &&
+    shouldShowViewRuleButton(ruleId, window.location.pathname);
 
   // The label is frozen per version, so a saved rule's create card keeps saying "Create rule".
   // Warn that clicking it again duplicates the rule. The guard is keyed on (attachmentId, version)
