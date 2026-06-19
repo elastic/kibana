@@ -6,7 +6,6 @@ disabled:
   # Base config files, only necessary to inform config finding script
   - src/platform/test/functional/config.base.js
   - src/platform/test/functional/config.base.http2.ts
-  - src/platform/test/functional/firefox/config.base.ts
   - x-pack/platform/test/functional/config.base.ts
   - x-pack/platform/test/localization/config.base.ts
   - src/platform/test/server_integration/config.base.js
@@ -21,9 +20,6 @@ disabled:
   # QA suites that are run out-of-band
   - x-pack/platform/test/stack_functional_integration/configs/config.stack_functional_integration_base.js
   - x-pack/platform/test/upgrade/config.ts
-  - src/platform/test/functional/config.edge.js
-  - x-pack/platform/test/functional/config.edge.ts
-
   # Configs that exist but weren't running in CI when this file was introduced
   - x-pack/platform/test/alerting_api_integration/security_and_spaces/group2/tests/actions/config.ts
   - x-pack/platform/test/alerting_api_integration/security_and_spaces/group2/tests/telemetry/config.ts
@@ -69,7 +65,6 @@ enabled:
   - src/platform/test/examples/config.js
   - src/platform/test/functional/apps/bundles/config.ts
   - src/platform/test/functional/apps/console/config.ts
-  - src/platform/test/functional/apps/context/config.ts
   - src/platform/test/functional/apps/dashboard_elements/controls/common/config.ts
   - src/platform/test/functional/apps/dashboard_elements/controls/options_list/config.ts
   - src/platform/test/functional/apps/dashboard_elements/image_embeddable/config.ts
@@ -139,10 +134,6 @@ enabled:
   - src/platform/test/functional/apps/visualize/replaced_vislib_chart_types_2/config.ts
   - src/platform/test/functional/apps/visualize/replaced_vislib_chart_types_3/config.ts
   - src/platform/test/functional/config.ccs.ts
-  - src/platform/test/functional/firefox/console.config.ts
-  - src/platform/test/functional/firefox/dashboard.config.ts
-  - src/platform/test/functional/firefox/discover.config.ts
-  - src/platform/test/functional/firefox/visualize.config.ts
   - src/platform/test/health_gateway/config.ts
   - src/platform/test/interactive_setup_api_integration/enrollment_flow.config.ts
   - src/platform/test/interactive_setup_api_integration/manual_configuration_flow_without_tls.config.ts
@@ -250,7 +241,6 @@ enabled:
   - x-pack/platform/test/functional_with_es_ssl/apps/triggers_actions_ui/connectors/webhook_disabled_ssl_pfx/config.ts
   - x-pack/platform/test/functional/apps/aiops/config.ts
   - x-pack/platform/test/functional/apps/api_keys/config.ts
-  - x-pack/platform/test/functional/apps/canvas/config.ts
   - x-pack/platform/test/functional/apps/dashboard/group1/config.ts
   - x-pack/platform/test/functional/apps/dashboard/group3/config.ts
   - x-pack/platform/test/functional/apps/discover/group1/config.ts
@@ -323,10 +313,8 @@ enabled:
   - x-pack/platform/test/functional/apps/transform/permissions/config.ts
   - x-pack/platform/test/functional/apps/user_profiles/config.ts
   - x-pack/platform/test/functional/apps/visualize/config.ts
-  - x-pack/platform/test/functional/apps/watcher/config.ts
   - x-pack/platform/test/functional/config_security_basic.ts
   - x-pack/platform/test/functional/config.ccs.ts
-  - x-pack/platform/test/functional/config.firefox.ts
   - x-pack/platform/test/licensing_plugin/config.public.ts
   - x-pack/platform/test/licensing_plugin/config.ts
   - x-pack/platform/test/reporting_api_integration/reporting_and_security.config.ts
@@ -440,7 +428,6 @@ enabled:
   - x-pack/platform/test/api_integration/apis/stats/config.ts
   - x-pack/platform/test/api_integration/apis/status/config.ts
   - x-pack/platform/test/api_integration/apis/telemetry/config.ts
-  - x-pack/platform/test/api_integration/apis/watcher/config.ts
   - x-pack/platform/test/api_integration_basic/apis/aiops/config.ts
   - x-pack/platform/test/api_integration_basic/apis/security/config.ts
   - x-pack/platform/test/automatic_import_api_integration/configs/config.stateful.ts
@@ -458,5 +445,4 @@ enabled:
   - x-pack/platform/test/api_integration_deployment_agnostic/configs/stateful/platform.stateful.config.ts
   - x-pack/platform/test/api_integration_deployment_agnostic/configs/stateful/platform.streams_ccr.stateful.config.ts
   - x-pack/platform/test/api_integration/apis/streams/streams_without_security.config.ts
-  - x-pack/platform/test/api_integration_deployment_agnostic/configs/stateful/platform.alerting_v2.stateful.config.ts
   - x-pack/platform/test/api_integration_deployment_agnostic/configs/stateful/platform.streams_definitions.feature_flag.stateful.config.ts

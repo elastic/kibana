@@ -19,7 +19,10 @@ const baseRule: RuleApiResponse = {
   metadata: { name: 'Test Rule' },
   time_field: '@timestamp',
   schedule: { every: '5m', lookback: '10m' },
-  evaluation: { query: { base: 'FROM logs-* | STATS count() BY host.name' } },
+  query: {
+    format: 'standalone',
+    breach: { query: 'FROM logs-* | STATS count() BY host.name' },
+  },
   createdBy: 'alice@example.com',
   createdAt: '2026-03-01T12:00:00.000Z',
   updatedBy: 'bob@example.com',

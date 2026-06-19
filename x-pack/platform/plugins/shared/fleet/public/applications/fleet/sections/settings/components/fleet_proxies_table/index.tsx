@@ -7,7 +7,14 @@
 
 import React, { useMemo } from 'react';
 import styled from 'styled-components';
-import { EuiBasicTable, EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiIconTip } from '@elastic/eui';
+import {
+  EuiBasicTable,
+  EuiButtonIcon,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIconTip,
+  EuiToolTip,
+} from '@elastic/eui';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
@@ -92,27 +99,29 @@ export const FleetProxiesTable: React.FunctionComponent<FleetProxiesTableProps> 
             <EuiFlexGroup gutterSize="s" justifyContent="flexEnd">
               <EuiFlexItem grow={false}>
                 {isDeleteVisible && (
-                  <EuiButtonIcon
-                    aria-label={deleteButtonLabel}
-                    color="text"
-                    iconType="trash"
-                    onClick={() => deleteFleetProxy(fleetProxy)}
-                    title={deleteButtonLabel}
-                    data-test-subj="fleetProxiesTable.delete.btn"
-                  />
+                  <EuiToolTip content={deleteButtonLabel} disableScreenReaderOutput>
+                    <EuiButtonIcon
+                      aria-label={deleteButtonLabel}
+                      color="text"
+                      iconType="trash"
+                      onClick={() => deleteFleetProxy(fleetProxy)}
+                      data-test-subj="fleetProxiesTable.delete.btn"
+                    />
+                  </EuiToolTip>
                 )}
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiButtonIcon
-                  aria-label={editButtonLabel}
-                  color="text"
-                  iconType="pencil"
-                  href={getHref('settings_edit_fleet_proxy', {
-                    itemId: fleetProxy.id,
-                  })}
-                  title={editButtonLabel}
-                  data-test-subj="fleetProxiesTable.edit.btn"
-                />
+                <EuiToolTip content={editButtonLabel} disableScreenReaderOutput>
+                  <EuiButtonIcon
+                    aria-label={editButtonLabel}
+                    color="text"
+                    iconType="pencil"
+                    href={getHref('settings_edit_fleet_proxy', {
+                      itemId: fleetProxy.id,
+                    })}
+                    data-test-subj="fleetProxiesTable.edit.btn"
+                  />
+                </EuiToolTip>
               </EuiFlexItem>
             </EuiFlexGroup>
           );

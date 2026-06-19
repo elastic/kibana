@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import { useEsSearch } from '@kbn/observability-shared-plugin/public';
 import { useMemo } from 'react';
+import { useSyntheticsEsSearch } from './use_synthetics_es_search';
 import { MONITOR_STATUS_ENUM } from '../../../../common/constants/monitor_management';
 import { useMonitorHealthColor } from '../components/monitors_page/hooks/use_monitor_health_color';
-import { SYNTHETICS_INDEX_PATTERN, UNNAMED_LOCATION } from '../../../../common/constants';
+import { UNNAMED_LOCATION } from '../../../../common/constants';
+import { getSyntheticsCcsIndex } from '../../../../common/get_synthetics_indices';
 import {
   EXCLUDE_RUN_ONCE_FILTER,
   FINAL_SUMMARY_FILTER,
@@ -33,11 +34,9 @@ export function useStatusByLocation({
 
   const { locations: allLocations } = useLocations();
 
-  const { data, loading } = useEsSearch(
+  const { data, loading } = useSyntheticsEsSearch(
     {
-      // For remote monitors the heartbeat docs live on the source cluster, so
-      // query `${remoteName}:synthetics-*` via CCS instead of the local index.
-      index: remoteName ? `${remoteName}:${SYNTHETICS_INDEX_PATTERN}` : SYNTHETICS_INDEX_PATTERN,
+      index: getSyntheticsCcsIndex(remoteName),
       size: 0,
       query: {
         bool: {

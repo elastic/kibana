@@ -43,6 +43,7 @@ export class StreamsApp {
   public readonly deleteQueryStreamModalInput;
   public readonly queryStreamDeletedSuccessToast;
   public readonly queryStreamCreateErrorToast;
+  public readonly fetchMoreMatchingSamplesButton;
 
   constructor(private readonly page: ScoutPage) {
     this.processorFieldComboBox = new EuiComboBoxWrapper(
@@ -99,6 +100,9 @@ export class StreamsApp {
     );
     this.queryStreamDeletedSuccessToast = this.page.getByText('Stream deleted');
     this.queryStreamCreateErrorToast = this.page.getByText('Error creating query stream');
+    this.fetchMoreMatchingSamplesButton = this.page.getByTestId(
+      'streamsAppFetchMoreMatchingSamplesButton'
+    );
   }
 
   async goto() {
@@ -139,13 +143,6 @@ export class StreamsApp {
 
   async gotoSignificantEventsTab(streamName: string) {
     await this.gotoStreamManagementTab(streamName, 'significantEvents');
-  }
-
-  async gotoAdvancedTab(streamName: string) {
-    // Navigate to a stable tab first, then open Advanced to avoid races from direct URL nav
-    await this.gotoDataRetentionTab(streamName);
-    await this.page.getByRole('tab', { name: 'Advanced' }).click();
-    await this.page.waitForURL(/\/advanced/);
   }
 
   async gotoAttachmentsTab(streamName: string) {
@@ -1338,6 +1335,7 @@ export class StreamsApp {
   }
 
   async clickDeleteQueryStreamButton() {
+    await this.page.getByTestId('streamsAppStreamDetailActionsButton').click();
     await this.page.getByTestId('deleteQueryStreamButton').click();
   }
 
@@ -1420,9 +1418,27 @@ export class StreamsApp {
     await this.saveChildQueryStream();
   }
 
-  async deleteQueryStreamFromAdvancedTab(streamName: string) {
+  async clickFetchMoreUntilThresholdReached({ maxClicks = 10 } = {}) {
+    let clicks = 0;
+    while (await this.fetchMoreMatchingSamplesButton.isVisible()) {
+      if (clicks >= maxClicks) {
+        throw new Error(
+          `Fetch more button still visible after ${maxClicks} clicks. ` +
+            `The match rate may not have crossed the threshold — check that enough matching data exists in ES.`
+        );
+      }
+      await this.fetchMoreMatchingSamplesButton.click();
+      clicks++;
+      // Wait for the button to either disappear or become clickable again
+      await this.fetchMoreMatchingSamplesButton
+        .waitFor({ state: 'hidden', timeout: 10000 })
+        .catch(() => {});
+    }
+  }
+
+  async deleteQueryStreamFromOverviewTab(streamName: string) {
     await this.clickStreamNameLink(streamName);
-    await this.clickQueryStreamDetailsTab('advanced');
+    await this.clickQueryStreamDetailsTab('overview');
     await this.clickDeleteQueryStreamButton();
     await this.fillDeleteQueryStreamModalInput(streamName);
     await this.clickDeleteQueryStreamModalDeleteButton();

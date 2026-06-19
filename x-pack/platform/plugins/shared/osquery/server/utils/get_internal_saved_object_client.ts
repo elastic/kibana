@@ -8,7 +8,7 @@
 import type { CoreStart } from '@kbn/core-lifecycle-server';
 import { SavedObjectsClient } from '@kbn/core-saved-objects-api-server-internal';
 import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import { asSpaceId, DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { SECURITY_EXTENSION_ID } from '@kbn/core-saved-objects-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
 
@@ -22,15 +22,11 @@ export function getInternalSavedObjectsClientForSpaceId(
 ): SavedObjectsClient {
   const request = kibanaRequestFactory({
     headers: {},
-    path: '/',
     route: { settings: {} },
     url: { href: '', hash: '' } as URL,
     raw: { req: { url: '/' } } as any,
+    spaceId: spaceId ? asSpaceId(spaceId) : undefined,
   });
-
-  if (spaceId && spaceId !== DEFAULT_SPACE_ID) {
-    coreStart.http.basePath.set(request, `/s/${spaceId}`);
-  }
 
   // soClient as kibana internal users, be careful on how you use it, security is not enabled
   return coreStart.savedObjects.getScopedClient(request, {
