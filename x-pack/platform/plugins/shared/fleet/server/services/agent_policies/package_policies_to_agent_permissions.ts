@@ -133,6 +133,12 @@ export function storedPackagePoliciesToAgentPermissions(
 
     // Special handling for Universal Profiling packages, as it does not use data streams _only_,
     // but also indices that do not adhere to the convention.
+    //
+    // These are `integration` packages with no data streams, so the generic `profiles` ->
+    // `profiling-*` mapping (FLEET_UNMANAGED_DATA_STREAM_INDEX_PATTERNS, applied in
+    // getDataStreamPrivileges) never runs for them: the empty-data-streams gate below short-circuits
+    // first. If they were migrated to `input` packages with a `profiles` policy template, that
+    // generic path would cover them and this name-based special case could be removed.
     if (
       pkg.name === FLEET_UNIVERSAL_PROFILING_SYMBOLIZER_PACKAGE ||
       pkg.name === FLEET_UNIVERSAL_PROFILING_COLLECTOR_PACKAGE
