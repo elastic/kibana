@@ -8,6 +8,8 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
+import { ESQLVariableType } from '@kbn/esql-types';
+import type { ESQLControlVariable } from '@kbn/esql-types';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
@@ -35,6 +37,7 @@ const mockComposeDiscoverForm = jest.fn((_props: FormProps) => (
 ));
 
 jest.mock('./compose_discover_form', () => {
+  const { useFormContext } = jest.requireActual('react-hook-form');
   const actual = jest.requireActual('./use_compose_discover_state');
   return {
     getSteps: (isAlert: boolean) => ({
@@ -47,7 +50,21 @@ jest.mock('./compose_discover_form', () => {
         return { id, title: titles[id], render: () => <div /> };
       }),
     }),
-    ComposeDiscoverForm: (props: FormProps) => mockComposeDiscoverForm(props),
+    ComposeDiscoverForm: (props: FormProps) => {
+      mockComposeDiscoverForm(props);
+      const { setValue } = useFormContext();
+      return (
+        <div data-test-subj="composeDiscoverFormMock">
+          <button
+            data-test-subj="mockMakeDirty"
+            onClick={() => setValue('metadata.name', 'changed', { shouldDirty: true })}
+            type="button"
+          >
+            Make dirty
+          </button>
+        </div>
+      );
+    },
   };
 });
 
@@ -65,11 +82,34 @@ jest.mock('./use_split_query_completion', () => ({
 
 jest.mock('../../form/utils/yaml_form_utils', () => ({
   serializeFormToYaml: () => '',
-  parseYamlToFormValues: () => ({ values: null }),
+  parseYamlToFormValues: (yaml: string) => ({
+    values: yaml
+      ? {
+          kind: 'signal',
+          metadata: { name: 'changed', enabled: true, description: '', tags: [] },
+          timeField: '@timestamp',
+          schedule: { every: '1m', lookback: '5m' },
+          query: { format: 'standalone', breach: { query: '' } },
+          stateTransitionAlertDelayMode: 'immediate',
+          stateTransitionRecoveryDelayMode: 'immediate',
+          artifacts: [],
+        }
+      : null,
+  }),
 }));
 
 jest.mock('../../form/yaml_rule_form', () => ({
-  YamlRuleForm: () => <div data-test-subj="yamlRuleFormMock" />,
+  YamlRuleForm: ({ setYamlText }: { setYamlText: (yaml: string) => void }) => (
+    <div data-test-subj="yamlRuleFormMock">
+      <button
+        data-test-subj="mockMakeYamlDirty"
+        onClick={() => setYamlText('name: changed\n')}
+        type="button"
+      >
+        Make YAML dirty
+      </button>
+    </div>
+  ),
 }));
 
 const createMockServices = (): RuleFormServices => ({
@@ -79,7 +119,6 @@ const createMockServices = (): RuleFormServices => ({
   notifications: notificationServiceMock.createStartContract(),
   application: applicationServiceMock.createStartContract(),
   lens: lensPluginMock.createStartContract(),
-  workflowForm: { Component: () => null, defaultValue: () => ({}) },
   uiActions: uiActionsPluginMock.createStartContract(),
 });
 
@@ -97,6 +136,15 @@ const renderFlyout = (overrides: Partial<ComposeDiscoverFlyoutProps> = {}) =>
       <ComposeDiscoverFlyout {...defaultProps} {...overrides} />
     </IntlProvider>
   );
+
+const getEditModeButton = (mode: 'form' | 'yaml') => {
+  const buttons = screen.getByTestId('composeDiscoverEditModeToggle').querySelectorAll('button');
+  return mode === 'form' ? buttons[0] : buttons[1];
+};
+
+const clickEditMode = (mode: 'form' | 'yaml') => {
+  fireEvent.click(getEditModeButton(mode)!);
+};
 
 describe('ComposeDiscoverFlyout', () => {
   describe('HorizontalMinimalStepper', () => {
@@ -117,11 +165,7 @@ describe('ComposeDiscoverFlyout', () => {
     it('does not render the stepper in YAML mode', () => {
       renderFlyout();
 
-      const toggleGroup = screen.getByTestId('composeDiscoverEditModeToggle');
-      const yamlButton =
-        toggleGroup.querySelector('button[data-test-subj="yaml"]') ??
-        toggleGroup.querySelectorAll('button')[1];
-      fireEvent.click(yamlButton!);
+      clickEditMode('yaml');
 
       expect(screen.queryByRole('group', { name: /Step \d+ of \d+/ })).not.toBeInTheDocument();
       expect(screen.getByTestId('composeDiscoverYamlBadge')).toBeInTheDocument();
@@ -182,6 +226,223 @@ describe('ComposeDiscoverFlyout', () => {
     it('disables Next when query is not committed on alertCondition step', () => {
       renderFlyout();
       expect(screen.getByTestId('composeDiscoverNext')).toBeDisabled();
+    });
+  });
+
+  describe('unsaved-changes confirmation', () => {
+    it('closes immediately when the form is pristine and the X button is clicked', () => {
+      const onClose = jest.fn();
+      renderFlyout({ onClose });
+
+      fireEvent.click(screen.getByTestId('euiFlyoutCloseButton'));
+
+      expect(onClose).toHaveBeenCalledTimes(1);
+      expect(screen.queryByTestId('alertingV2ConfirmRuleCloseModal')).not.toBeInTheDocument();
+    });
+
+    it('closes immediately when the form is pristine and Cancel is clicked', () => {
+      const onClose = jest.fn();
+      renderFlyout({ onClose });
+
+      fireEvent.click(screen.getByTestId('composeDiscoverCancel'));
+
+      expect(onClose).toHaveBeenCalledTimes(1);
+      expect(screen.queryByTestId('alertingV2ConfirmRuleCloseModal')).not.toBeInTheDocument();
+    });
+
+    it('shows the confirmation modal when the form is dirty and the X button is clicked', () => {
+      const onClose = jest.fn();
+      renderFlyout({ onClose });
+
+      fireEvent.click(screen.getByTestId('mockMakeDirty'));
+      fireEvent.click(screen.getByTestId('euiFlyoutCloseButton'));
+
+      expect(onClose).not.toHaveBeenCalled();
+      expect(screen.getByTestId('alertingV2ConfirmRuleCloseModal')).toBeInTheDocument();
+    });
+
+    it('shows the confirmation modal when the form is dirty and Cancel is clicked', () => {
+      const onClose = jest.fn();
+      renderFlyout({ onClose });
+
+      fireEvent.click(screen.getByTestId('mockMakeDirty'));
+      fireEvent.click(screen.getByTestId('composeDiscoverCancel'));
+
+      expect(onClose).not.toHaveBeenCalled();
+      expect(screen.getByTestId('alertingV2ConfirmRuleCloseModal')).toBeInTheDocument();
+    });
+
+    it('"Continue editing" dismisses the modal and keeps the flyout open', () => {
+      const onClose = jest.fn();
+      renderFlyout({ onClose });
+
+      fireEvent.click(screen.getByTestId('mockMakeDirty'));
+      fireEvent.click(screen.getByTestId('euiFlyoutCloseButton'));
+      fireEvent.click(screen.getByTestId('confirmModalCancelButton'));
+
+      expect(onClose).not.toHaveBeenCalled();
+      expect(screen.queryByTestId('alertingV2ConfirmRuleCloseModal')).not.toBeInTheDocument();
+      expect(screen.getByTestId('composeDiscoverFormMock')).toBeInTheDocument();
+    });
+
+    it('"Discard changes" calls onClose', () => {
+      const onClose = jest.fn();
+      renderFlyout({ onClose });
+
+      fireEvent.click(screen.getByTestId('mockMakeDirty'));
+      fireEvent.click(screen.getByTestId('euiFlyoutCloseButton'));
+      fireEvent.click(screen.getByTestId('confirmModalConfirmButton'));
+
+      expect(onClose).toHaveBeenCalledTimes(1);
+    });
+
+    it('shows confirmation in YAML mode when text differs from baseline', () => {
+      const onClose = jest.fn();
+      renderFlyout({ onClose });
+
+      clickEditMode('yaml');
+
+      fireEvent.click(screen.getByTestId('mockMakeYamlDirty'));
+      fireEvent.click(screen.getByTestId('euiFlyoutCloseButton'));
+
+      expect(onClose).not.toHaveBeenCalled();
+      expect(screen.getByTestId('alertingV2ConfirmRuleCloseModal')).toBeInTheDocument();
+    });
+
+    it('closes immediately in YAML mode when text matches baseline', () => {
+      const onClose = jest.fn();
+      renderFlyout({ onClose });
+
+      clickEditMode('yaml');
+
+      fireEvent.click(screen.getByTestId('euiFlyoutCloseButton'));
+
+      expect(onClose).toHaveBeenCalledTimes(1);
+      expect(screen.queryByTestId('alertingV2ConfirmRuleCloseModal')).not.toBeInTheDocument();
+    });
+
+    it('"Continue editing" does not open sandbox when it was closed before close attempt', () => {
+      const onClose = jest.fn();
+      renderFlyout({ onClose, mode: 'edit' });
+
+      expect(screen.queryByTestId('composeDiscoverChildMock')).not.toBeInTheDocument();
+
+      fireEvent.click(screen.getByTestId('mockMakeDirty'));
+      fireEvent.click(screen.getByTestId('euiFlyoutCloseButton'));
+      fireEvent.click(screen.getByTestId('confirmModalCancelButton'));
+
+      expect(screen.queryByTestId('composeDiscoverChildMock')).not.toBeInTheDocument();
+    });
+
+    it('"Continue editing" reopens sandbox in YAML mode', () => {
+      const onClose = jest.fn();
+      renderFlyout({ onClose });
+
+      clickEditMode('yaml');
+
+      expect(screen.getByTestId('composeDiscoverChildMock')).toBeInTheDocument();
+
+      fireEvent.click(screen.getByTestId('mockMakeYamlDirty'));
+      fireEvent.click(screen.getByTestId('euiFlyoutCloseButton'));
+      fireEvent.click(screen.getByTestId('confirmModalCancelButton'));
+
+      expect(screen.getByTestId('composeDiscoverChildMock')).toBeInTheDocument();
+    });
+
+    it('shows confirmation after editing in YAML mode and switching back to form mode', () => {
+      const onClose = jest.fn();
+      renderFlyout({ onClose });
+
+      clickEditMode('yaml');
+      fireEvent.click(screen.getByTestId('mockMakeYamlDirty'));
+      clickEditMode('form');
+
+      fireEvent.click(screen.getByTestId('euiFlyoutCloseButton'));
+
+      expect(onClose).not.toHaveBeenCalled();
+      expect(screen.getByTestId('alertingV2ConfirmRuleCloseModal')).toBeInTheDocument();
+    });
+  });
+
+  describe('initialQuery from Discover', () => {
+    const timeLiteralVariable: ESQLControlVariable[] = [
+      { key: 'window', value: '15m', type: ESQLVariableType.TIME_LITERAL },
+    ];
+
+    it('shows unresolved variables in a callout and disables YAML Create rule', () => {
+      renderFlyout({
+        initialQuery: 'FROM logs-* | WHERE @timestamp > NOW() - ?window | LIMIT 5',
+        esqlVariables: timeLiteralVariable,
+      });
+
+      const callout = screen.getByTestId('ruleV2FlyoutValidationErrors');
+      expect(callout).toHaveTextContent('?window');
+      expect(screen.getByTestId('composeDiscoverNext')).toBeDisabled();
+
+      clickEditMode('yaml');
+
+      expect(screen.getByTestId('composeDiscoverYamlSubmit')).toBeDisabled();
+    });
+
+    it('does not show a validation callout when all variables are inlined', () => {
+      const esqlVariables: ESQLControlVariable[] = [
+        { key: 'host', value: 'web-1', type: ESQLVariableType.VALUES },
+      ];
+      renderFlyout({
+        initialQuery: 'FROM logs-* | WHERE host == ?host | LIMIT 5',
+        esqlVariables,
+      });
+
+      expect(screen.queryByTestId('ruleV2FlyoutValidationErrors')).not.toBeInTheDocument();
+    });
+
+    it('updates validation when initialQuery changes before the form is edited', () => {
+      const props = {
+        ...defaultProps,
+        initialQuery: 'FROM logs-* | LIMIT 5',
+        esqlVariables: [] as ESQLControlVariable[],
+      };
+      const { rerender } = render(
+        <IntlProvider locale="en">
+          <ComposeDiscoverFlyout {...props} />
+        </IntlProvider>
+      );
+
+      expect(screen.queryByTestId('ruleV2FlyoutValidationErrors')).not.toBeInTheDocument();
+
+      rerender(
+        <IntlProvider locale="en">
+          <ComposeDiscoverFlyout
+            {...props}
+            initialQuery="FROM logs-* | WHERE host == ?host | LIMIT 5"
+          />
+        </IntlProvider>
+      );
+
+      expect(screen.getByTestId('ruleV2FlyoutValidationErrors')).toHaveTextContent('?host');
+    });
+
+    it('does not update the query after the user edits the form', () => {
+      const props = {
+        ...defaultProps,
+        initialQuery: 'FROM logs-* | LIMIT 5',
+        esqlVariables: [] as ESQLControlVariable[],
+      };
+      const { rerender } = render(
+        <IntlProvider locale="en">
+          <ComposeDiscoverFlyout {...props} />
+        </IntlProvider>
+      );
+
+      fireEvent.click(screen.getByTestId('mockMakeDirty'));
+
+      rerender(
+        <IntlProvider locale="en">
+          <ComposeDiscoverFlyout {...props} initialQuery="FROM metrics-* | LIMIT 5" />
+        </IntlProvider>
+      );
+
+      expect(screen.queryByTestId('ruleV2FlyoutValidationErrors')).not.toBeInTheDocument();
     });
   });
 });
