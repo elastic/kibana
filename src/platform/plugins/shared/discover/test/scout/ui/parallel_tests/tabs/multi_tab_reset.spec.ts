@@ -11,7 +11,7 @@
  * Multi-tab Discover session reset and uninitialized-tab restore flows.
  */
 
-import { spaceTest, tags, type ScoutPage, type ScoutTestFixtures } from '@kbn/scout';
+import { spaceTest, type ScoutPage, type ScoutTestFixtures } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { testData } from '../../fixtures/common';
 import {
@@ -23,7 +23,7 @@ import {
 
 spaceTest.describe(
   'tabs - multi-tab Discover session reset behavior',
-  { tag: tags.stateful.all },
+  { tag: '@local-stateful-classic' },
   () => {
     spaceTest.setTimeout(180_000);
 

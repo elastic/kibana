@@ -14,7 +14,7 @@
  * data views, ad-hoc data views, and ES|QL tabs.
  */
 
-import { spaceTest, tags } from '@kbn/scout';
+import { spaceTest } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { testData } from '../../fixtures/common';
 import {
@@ -40,7 +40,7 @@ const SAVED_SESSION_NAME = 'Saved multi-tab Discover session';
 const LOADED_SESSION_NAME = 'Loaded multi-tab Discover session';
 const UNSAVED_CHANGES_SESSION_NAME = 'Unsaved changes Discover session';
 
-spaceTest.describe('tabs - multi-tab Discover sessions', { tag: tags.stateful.all }, () => {
+spaceTest.describe('tabs - multi-tab Discover sessions', { tag: '@local-stateful-classic' }, () => {
   spaceTest.setTimeout(180_000);
 
   spaceTest.beforeAll(async ({ scoutSpace }) => {

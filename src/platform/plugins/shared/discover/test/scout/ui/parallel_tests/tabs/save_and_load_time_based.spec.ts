@@ -14,7 +14,7 @@
  * in the save dialog depending on whether any tab uses a time-based source.
  */
 
-import { spaceTest, tags } from '@kbn/scout';
+import { spaceTest, type ScoutPage } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { testData } from '../../fixtures/common';
 import {
@@ -26,7 +26,7 @@ const AD_HOC_WITH_TIME_RANGE = 'log';
 const AD_HOC_WITHOUT_TIME_RANGE = 'logs';
 const PERSISTED_WITHOUT_TIME_RANGE = 'without-timefield';
 
-spaceTest.describe('tabs - time based save behavior', { tag: tags.stateful.all }, () => {
+spaceTest.describe('tabs - time based save behavior', { tag: '@local-stateful-classic' }, () => {
   spaceTest.setTimeout(180_000);
 
   spaceTest.beforeAll(async ({ scoutSpace }) => {
@@ -56,8 +56,7 @@ spaceTest.describe('tabs - time based save behavior', { tag: tags.stateful.all }
       const expectTimeSwitchVisible = async () => {
         await openSaveDiscoverSessionModal(page);
         await expect(page.testSubj.locator('storeTimeWithSearch')).toBeVisible();
-        await page.keyboard.press('Escape');
-        await expect(page.testSubj.locator('confirmSaveSavedObjectButton')).toBeHidden();
+        await closeSaveModal(page);
       };
 
       await spaceTest.step('case A: persisted DV is time-based, others are not', async () => {
@@ -174,8 +173,7 @@ spaceTest.describe('tabs - time based save behavior', { tag: tags.stateful.all }
       const expectTimeSwitchMissing = async () => {
         await openSaveDiscoverSessionModal(page);
         await expect(page.testSubj.locator('storeTimeWithSearch')).toBeHidden();
-        await page.keyboard.press('Escape');
-        await expect(page.testSubj.locator('confirmSaveSavedObjectButton')).toBeHidden();
+        await closeSaveModal(page);
       };
 
       // Tab 1: persisted data view without time field
@@ -209,3 +207,14 @@ spaceTest.describe('tabs - time based save behavior', { tag: tags.stateful.all }
     }
   );
 });
+
+const closeSaveModal = async (page: ScoutPage) => {
+  await page.keyboard.press('Escape');
+  await expect(page.testSubj.locator('confirmSaveSavedObjectButton')).toBeHidden();
+
+  const popover = page.testSubj.locator('app-menu-popover');
+  if (await popover.isVisible()) {
+    await page.keyboard.press('Escape');
+    await expect(popover).toBeHidden();
+  }
+};

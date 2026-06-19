@@ -14,7 +14,7 @@
  * tab and can be extended with additional tabs and re-saved.
  */
 
-import { spaceTest, tags } from '@kbn/scout';
+import { spaceTest } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { testData } from '../../fixtures/common';
 import { saveDiscoverSession, getHitCount } from '../../fixtures/tabs/helpers';
@@ -22,7 +22,7 @@ import { saveDiscoverSession, getHitCount } from '../../fixtures/tabs/helpers';
 const LEGACY_SESSION_NAME = 'A Saved Search';
 const UPDATED_SESSION_NAME = 'Updated legacy session';
 
-spaceTest.describe('tabs - legacy Discover sessions', { tag: tags.stateful.all }, () => {
+spaceTest.describe('tabs - legacy Discover sessions', { tag: '@local-stateful-classic' }, () => {
   spaceTest.beforeAll(async ({ scoutSpace }) => {
     await scoutSpace.savedObjects.load(testData.DISCOVER_KBN_ARCHIVE);
     await scoutSpace.uiSettings.setDefaultIndex(testData.DEFAULT_DATA_VIEW);
