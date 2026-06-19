@@ -12,7 +12,6 @@ import type { MlSavedObjectType } from '@kbn/ml-common-types/saved_objects';
 import type { MemoryUsageInfo } from '@kbn/ml-common-types/trained_models';
 import { useRefresh } from '../routing/use_refresh';
 import { useTrainedModelsApiService } from '../services/ml_api_service/trained_models';
-import { usePermissionCheck } from '../capabilities/check_capabilities';
 
 export const useMemoryUsage = (node?: string, type?: MlSavedObjectType) => {
   const [loading, setLoading] = useState<boolean>(false);
@@ -21,14 +20,9 @@ export const useMemoryUsage = (node?: string, type?: MlSavedObjectType) => {
   const refresh = useRefresh();
   const trainedModelsApiService = useTrainedModelsApiService();
   const isMounted = useMountedState();
-  const canViewMlNodes = usePermissionCheck('canViewMlNodes');
 
   useEffect(
     function getMemoryData() {
-      if (!canViewMlNodes) {
-        return;
-      }
-
       const fetchData = async () => {
         setLoading(true);
         try {
@@ -46,7 +40,7 @@ export const useMemoryUsage = (node?: string, type?: MlSavedObjectType) => {
 
       fetchData();
     },
-    [node, type, trainedModelsApiService, isMounted, refresh, canViewMlNodes]
+    [node, type, trainedModelsApiService, isMounted, refresh]
   );
 
   return { loading, data, error };
