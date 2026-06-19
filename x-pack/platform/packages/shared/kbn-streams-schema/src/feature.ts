@@ -10,6 +10,7 @@ import { isEqual, uniq } from 'lodash';
 import objectHash from 'object-hash';
 import { v5 } from 'uuid';
 import { conditionSchema, type Condition } from '@kbn/streamlang';
+import { MAX_ID_LENGTH } from './sig_events/constants';
 
 export const DATASET_ANALYSIS_FEATURE_TYPE = 'dataset_analysis' as const;
 export const LOG_SAMPLES_FEATURE_TYPE = 'log_samples' as const;
@@ -91,7 +92,7 @@ export type FeatureUpsert = z.infer<typeof featureUpsertSchema>;
 // always carries its derived `uuid`.
 export const featureSchema = featureUpsertSchema.and(
   z.object({
-    uuid: z.string(),
+    uuid: z.string().max(MAX_ID_LENGTH),
   })
 );
 
