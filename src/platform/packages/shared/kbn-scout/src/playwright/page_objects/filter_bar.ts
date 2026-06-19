@@ -173,10 +173,10 @@ export class FilterBar {
   async fillFilterForm(path: string, options: FilterFormOptions) {
     const form = this.page.locator(`[data-test-subj="filter-${path}"]`);
     await form.locator('[data-test-subj="filterFieldSuggestionList"] input').fill(options.field);
-    await this.page.locator(`.euiComboBoxOption[title="${options.field}"]`).click();
+    await this.page.testSubj.click(`filterFieldOption-${options.field}`);
 
     await form.locator('[data-test-subj="filterOperatorList"] input').fill(options.operator);
-    await this.page.locator(`.euiComboBoxOption[title="${options.operator}"]`).click();
+    await this.page.testSubj.click(`filterOperatorOption-${options.operator}`);
 
     if (options.value === undefined) {
       return;
