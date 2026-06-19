@@ -45,6 +45,13 @@ const tabs: AppHeaderTab[] = [
   { id: 'overview', label: 'Overview', isSelected: true, onClick: action('tab-overview') },
   { id: 'alerts', label: 'Alerts', badge: 3, onClick: action('tab-alerts') },
   { id: 'settings', label: 'Settings', onClick: action('tab-settings') },
+  {
+    id: 'logs',
+    label: 'Logs',
+    onClick: action('tab-logs'),
+    disabled: true,
+    toolTipContent: 'Logs are disabled for this app',
+  },
 ];
 
 const metadata: AppHeaderMetadataItems = [
