@@ -420,16 +420,20 @@ export function getTextBasedDatasource({
         // BUCKET() clause. When the main query changes we must regenerate it.
         let updatedQuery = toLayer.query;
         if (fromLayer.query && isOfAggregateQueryType(fromLayer.query) && toLayer.timeField) {
-          const newTrendlineQuery = appendTimeBucketToEsqlQuery(
-            fromLayer.query.esql,
-            toLayer.timeField
-          );
-          if (
-            !updatedQuery ||
-            !isOfAggregateQueryType(updatedQuery) ||
-            updatedQuery.esql !== newTrendlineQuery
-          ) {
-            updatedQuery = { esql: newTrendlineQuery };
+          try {
+            const newTrendlineQuery = appendTimeBucketToEsqlQuery(
+              fromLayer.query.esql,
+              toLayer.timeField
+            );
+            if (
+              !updatedQuery ||
+              !isOfAggregateQueryType(updatedQuery) ||
+              updatedQuery.esql !== newTrendlineQuery
+            ) {
+              updatedQuery = { esql: newTrendlineQuery };
+            }
+          } catch {
+            // If the query can't be parsed, keep the existing query unchanged
           }
         }
 
@@ -511,7 +515,11 @@ export function getTextBasedDatasource({
         // Auto-modify query to add time bucketing for trendline
         let trendlineQuery = layer.query;
         if (trendlineQuery && 'esql' in trendlineQuery) {
-          trendlineQuery = { esql: appendTimeBucketToEsqlQuery(trendlineQuery.esql, tf) };
+          try {
+            trendlineQuery = { esql: appendTimeBucketToEsqlQuery(trendlineQuery.esql, tf) };
+          } catch {
+            // If the query can't be parsed, keep the existing query unchanged
+          }
         }
 
         return {
