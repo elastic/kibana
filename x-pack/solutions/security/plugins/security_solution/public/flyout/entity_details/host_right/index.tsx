@@ -10,7 +10,7 @@ import type { FlyoutPanelProps } from '@kbn/expandable-flyout';
 import { useHasMisconfigurations } from '@kbn/cloud-security-posture/src/hooks/use_has_misconfigurations';
 import { useHasVulnerabilities } from '@kbn/cloud-security-posture/src/hooks/use_has_vulnerabilities';
 import { TableId } from '@kbn/securitysolution-data-table';
-import { useEntityStoreEuidApi } from '@kbn/entity-store/public';
+import { FF_ENABLE_ENTITY_STORE_V2, useEntityStoreEuidApi } from '@kbn/entity-store/public';
 import { EuiSpacer } from '@elastic/eui';
 import { useAssetCriticalityPrivileges } from '../../../entity_analytics/components/asset_criticality/use_asset_criticality';
 import { useUpdateAssetCriticality } from '../../../entity_analytics/api/hooks/use_update_asset_criticality';
@@ -25,7 +25,7 @@ import { useRiskScore } from '../../../entity_analytics/api/hooks/use_risk_score
 import { useQueryInspector } from '../../../common/components/page/manage_query';
 import { useGlobalTime } from '../../../common/containers/use_global_time';
 import { buildHostNamesFilter, type RiskSeverity } from '../../../../common/search_strategy';
-import { useKibana } from '../../../common/lib/kibana';
+import { useKibana, useUiSetting } from '../../../common/lib/kibana';
 import { FlyoutNavigation } from '../../shared/components/flyout_navigation';
 import { HostPanelFooter } from './footer';
 import { HostPanelContent } from './content';
@@ -91,6 +91,7 @@ export const HostPanel = memo(function HostPanel({
   const { uiSettings } = useKibana().services;
   const euidApi = useEntityStoreEuidApi();
   const assetInventoryEnabled = uiSettings.get(ENABLE_ASSET_INVENTORY_SETTING, true);
+  const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2);
 
   const safeContextID = contextID ?? scopeId ?? 'host-panel';
   const { to, from, setQuery, deleteQuery, isInitializing } = useGlobalTime();
@@ -104,7 +105,7 @@ export const HostPanel = memo(function HostPanel({
     entityId,
     identityFields: hostStoreIdentityFields,
     entityType: 'host',
-    skip: isInitializing,
+    skip: !entityStoreV2Enabled || isInitializing,
   });
 
   const documentEntityIdentifiers = useMemo<IdentityFields>(() => {
@@ -245,7 +246,7 @@ export const HostPanel = memo(function HostPanel({
     [openDetailsPanel, defaultTab]
   );
 
-  const noEntityInStore = !entityFromStoreResult.isLoading && !observedHost.entityRecord;
+  const noEntityInStore = entityStoreV2Enabled && !entityFromStoreResult.isLoading && !observedHost.entityRecord;
 
   const { tabs, selectedTabId, setSelectedTabId } = useEntityPanelTabs({
     entityRecord: observedHost.entityRecord ?? null,
