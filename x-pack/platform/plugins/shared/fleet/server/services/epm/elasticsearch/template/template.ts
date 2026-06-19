@@ -48,6 +48,7 @@ import { retryTransientEsErrors } from '../retry';
 import { PackageESError, PackageInvalidArchiveError } from '../../../../errors';
 
 import { getDefaultProperties, histogram, keyword, scaledFloat } from './mappings';
+import { retryDataStreamUpdateOnClusterEventTimeout } from './retry_data_stream_update';
 import { isUserSettingsTemplate, fillConstantKeywordValues } from './utils';
 
 interface Properties {
@@ -1029,12 +1030,25 @@ const MAPPER_EXCEPTION_REASONS_REQUIRING_ROLLOVER = [
   "[enabled] parameter can't be updated for the object mapping",
 ];
 
-function errorNeedRollover(err: any) {
+/**
+ * Returns true when the ES error indicates that the mapping change is incompatible with the
+ * current write index and a data-stream rollover is the right recovery action.
+ *
+ * `total_fields` limit breaches are deliberately excluded: they surface as
+ * `illegal_argument_exception` but a rollover cannot fix them — the new write index is built
+ * from the same index template and inherits the same field-count limit, so the oversized
+ * mapping would fail again immediately.  Callers should surface those errors clearly instead.
+ */
+function errorNeedRollover(err: any): boolean {
   if (
     isResponseError(err) &&
     err.statusCode === 400 &&
     err.body?.error?.type === 'illegal_argument_exception'
   ) {
+    // total_fields limit errors cannot be resolved by a rollover — skip them.
+    if (isTotalFieldsLimitError(err)) {
+      return false;
+    }
     return true;
   }
   if (
@@ -1048,21 +1062,31 @@ function errorNeedRollover(err: any) {
   }
 }
 
-const rolloverDataStream = (dataStreamName: string, esClient: ElasticsearchClient) => {
-  try {
-    // Do no wrap rollovers in retryTransientEsErrors since it is not idempotent
-    return esClient.transport.request({
-      method: 'POST',
-      path: `/${dataStreamName}/_rollover`,
-      querystring: {
-        lazy: true,
-      },
-    });
-  } catch (error) {
-    throw new PackageESError(
-      `Cannot rollover data stream [${dataStreamName}] due to error: ${error}`
-    );
-  }
+/**
+ * Returns true when the error is an ES `total_fields` limit breach
+ * (`index.mapping.total_fields.limit` exceeded).
+ */
+export function isTotalFieldsLimitError(err: any): boolean {
+  const reason: string = err.body?.error?.reason ?? '';
+  return reason.includes('Limit of total fields') && reason.includes('has been exceeded');
+}
+
+const rolloverDataStream = (
+  dataStreamName: string,
+  esClient: ElasticsearchClient,
+  logger: Logger
+) => {
+  return retryDataStreamUpdateOnClusterEventTimeout(
+    () =>
+      esClient.transport.request({
+        method: 'POST',
+        path: `/${dataStreamName}/_rollover`,
+        querystring: {
+          lazy: true,
+        },
+      }),
+    { logger, dataStreamName }
+  );
 };
 
 const updateAllDataStreams = async (
@@ -1176,9 +1200,23 @@ const updateExistingDataStream = async ({
         return;
       } else {
         logger.info(`Triggering a rollover for ${dataStreamName}`);
-        await rolloverDataStream(dataStreamName, esClient);
+        await rolloverDataStream(dataStreamName, esClient, logger);
         return;
       }
+    }
+    // total_fields limit errors cannot be resolved by a rollover (the new write index inherits
+    // the same limit from the index template).  Log clearly and skip the rollover so we don't
+    // add churn to an already-overloaded cluster.
+    if (isTotalFieldsLimitError(err)) {
+      logger.warn(
+        `Mappings update for ${dataStreamName} failed because the index mapping total_fields limit has been exceeded. ` +
+          `Skipping rollover as it would not resolve the issue. ` +
+          `The total_fields limit must be raised on the index template to allow this mapping update: ${err}`
+      );
+      if (options?.ignoreMappingUpdateErrors !== true) {
+        throw err;
+      }
+      return;
     }
     logger.error(`Mappings update for ${dataStreamName} failed due to unexpected error: ${err}`);
     logger.trace(`Attempted mappings: ${mappings}`);
@@ -1233,7 +1271,7 @@ const updateExistingDataStream = async ({
           ? `Dynamic dimension mappings changed for ${dataStreamName}, triggering a rollover`
           : `Index mode or source type has changed for ${dataStreamName}, triggering a rollover`
       );
-      await rolloverDataStream(dataStreamName, esClient);
+      await rolloverDataStream(dataStreamName, esClient, logger);
     }
   }
 
