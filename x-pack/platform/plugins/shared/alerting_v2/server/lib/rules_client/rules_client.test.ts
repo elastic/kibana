@@ -65,7 +65,9 @@ describe('RulesClient', () => {
   });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    jest.resetAllMocks();
+
+    queryService.validateQueryExecutable.mockResolvedValue(undefined);
 
     ({ userService } = createUserService());
     mockSavedObjectsClient.create.mockResolvedValue({
@@ -649,7 +651,7 @@ describe('RulesClient', () => {
   describe('upsertRule', () => {
     describe('create rule (id does not exist)', () => {
       beforeEach(() => {
-        mockSavedObjectsClient.get.mockRejectedValueOnce(
+        mockSavedObjectsClient.get.mockRejectedValue(
           SavedObjectsErrorHelpers.createGenericNotFoundError(RULE_SAVED_OBJECT_TYPE, 'rule-id-1')
         );
       });
