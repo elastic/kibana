@@ -263,11 +263,9 @@ describe('createResultTransformer', () => {
       const entries = new Map<string, FileEntry>();
       entries.set(
         '/search/call-1/result-1.json',
-        createFileEntry(
-          '/search/call-1/result-1.json',
-          FS_TOOL_CALL_TOKEN_THRESHOLD + 100,
-          { large: 'data' }
-        )
+        createFileEntry('/search/call-1/result-1.json', FS_TOOL_CALL_TOKEN_THRESHOLD + 100, {
+          large: 'data',
+        })
       );
       const resultStore = createMockResultStore(entries);
 
@@ -350,11 +348,9 @@ describe('createResultTransformer', () => {
       const entries = new Map<string, FileEntry>();
       entries.set(
         '/search/call-1/result-1.json',
-        createFileEntry(
-          '/search/call-1/result-1.json',
-          FS_TOOL_CALL_TOKEN_THRESHOLD + 100,
-          { large: 'data' }
-        )
+        createFileEntry('/search/call-1/result-1.json', FS_TOOL_CALL_TOKEN_THRESHOLD + 100, {
+          large: 'data',
+        })
       );
       const resultStore = createMockResultStore(entries);
 
@@ -397,11 +393,9 @@ describe('createResultTransformer', () => {
       const entries = new Map<string, FileEntry>();
       entries.set(
         '/search/call-1/summarized.json',
-        createFileEntry(
-          '/search/call-1/summarized.json',
-          FS_TOOL_CALL_TOKEN_THRESHOLD + 1000,
-          { summary: 'Summarized data' }
-        )
+        createFileEntry('/search/call-1/summarized.json', FS_TOOL_CALL_TOKEN_THRESHOLD + 1000, {
+          summary: 'Summarized data',
+        })
       );
       const resultStore = createMockResultStore(entries);
 
@@ -546,11 +540,9 @@ describe('createResultTransformer', () => {
       const entries = new Map<string, FileEntry>();
       entries.set(
         '/search/call-1/result-1.json',
-        createFileEntry(
-          '/search/call-1/result-1.json',
-          FS_TOOL_CALL_TOKEN_THRESHOLD + 100,
-          { large: 'data' }
-        )
+        createFileEntry('/search/call-1/result-1.json', FS_TOOL_CALL_TOKEN_THRESHOLD + 100, {
+          large: 'data',
+        })
       );
       const resultStore = createMockResultStore(entries);
 

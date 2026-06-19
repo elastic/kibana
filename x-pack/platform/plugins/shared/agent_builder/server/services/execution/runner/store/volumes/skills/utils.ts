@@ -20,9 +20,7 @@ import type { SkillFileEntry, SkillReferencedContentFileEntry } from './types';
  * of input form.
  */
 const toStoreRelativePath = (segments: string[]): string => {
-  const parts = segments
-    .flatMap((s) => s.split('/'))
-    .filter((s) => s.length > 0 && s !== '.');
+  const parts = segments.flatMap((s) => s.split('/')).filter((s) => s.length > 0 && s !== '.');
   const stripped = parts[0] === 'skills' ? parts.slice(1) : parts;
   return `/${stripped.join('/')}`;
 };

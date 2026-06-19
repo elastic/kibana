@@ -112,7 +112,10 @@ describe('list_files', () => {
     // depth bounds: with depth=3 starting at root, leaf.txt (depth 3) should appear,
     // but a hypothetical 4th level would not — verified above by the strict structure.
     expect(entries).toEqual(
-      expect.arrayContaining([{ name: 'top.txt', type: 'file' }, expect.objectContaining({ name: 'a' })])
+      expect.arrayContaining([
+        { name: 'top.txt', type: 'file' },
+        expect.objectContaining({ name: 'a' }),
+      ])
     );
   });
 

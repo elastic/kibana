@@ -124,5 +124,4 @@ describe('VolumeBackedReadOnlyFs', () => {
       await expect(op()).rejects.toThrow(/EROFS/);
     });
   });
-
 });
