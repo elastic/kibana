@@ -9,18 +9,18 @@ import { Query } from '@elastic/eui';
 import { parseSearchQuery } from './utils';
 
 describe('parseSearchQuery', () => {
-  it('returns undefined for empty input', () => {
-    expect(parseSearchQuery('')).toBeUndefined();
+  it('returns an empty query for empty input', () => {
+    expect(parseSearchQuery('').ast.clauses).toEqual([]);
   });
 
   it('preserves the raw text for plain-text input', () => {
-    expect(parseSearchQuery('logs')?.text).toBe('logs');
+    expect(parseSearchQuery('logs').text).toBe('logs');
   });
 
   it('parses field clauses such as dataQuality', () => {
     const query = parseSearchQuery('dataQuality:degraded');
 
-    expect(query?.ast.getFieldClauses('dataQuality')).toEqual([
+    expect(query.ast.getFieldClauses('dataQuality')).toEqual([
       expect.objectContaining({ field: 'dataQuality', value: 'degraded' }),
     ]);
   });
@@ -32,7 +32,7 @@ describe('parseSearchQuery', () => {
     // ...while the wrapper keeps the raw text as a plain-text filter with no clauses.
     const query = parseSearchQuery(',');
 
-    expect(query?.text).toBe(',');
-    expect(query?.ast.clauses).toEqual([]);
+    expect(query.text).toBe(',');
+    expect(query.ast.clauses).toEqual([]);
   });
 });

@@ -53,11 +53,7 @@ export function shouldComposeTree(sortField: SortableField) {
 // query syntax and throws on characters such as a leading comma. When parsing fails
 // we keep the raw input as a plain-text filter with no clauses, so the table still
 // filters by name instead of the page crashing.
-export function parseSearchQuery(searchText: string): Query | undefined {
-  if (!searchText) {
-    return undefined;
-  }
-
+export function parseSearchQuery(searchText: string): Query {
   try {
     return Query.parse(searchText);
   } catch {
