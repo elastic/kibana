@@ -164,10 +164,7 @@ interface ToastMountArg {
  * Util that locates all `text: mountFn()` patterns inside a toast method call and invokes
  * the callback for each one.
  */
-const forEachToastMountArg = (
-  node: Rule.Node,
-  callback: (ctx: ToastMountArg) => void
-): void => {
+const forEachToastMountArg = (node: Rule.Node, callback: (ctx: ToastMountArg) => void): void => {
   const callNode = node as unknown as TSESTree.CallExpression;
 
   if (
