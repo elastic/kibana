@@ -277,6 +277,7 @@ export const LOCAL_STORAGE_KEYS = {
   templatesTableState: 'templates.list.state',
   templatesYamlEditorCreateState: 'templates.yaml.editor.create',
   templatesYamlEditorEditState: 'templates.yaml.editor.edit',
+  userActivitySortOrder: 'cases.userActivity.sortOrder',
 };
 
 /**
