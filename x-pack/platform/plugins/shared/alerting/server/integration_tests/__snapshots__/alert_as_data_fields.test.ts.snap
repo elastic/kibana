@@ -11933,10 +11933,20 @@ Object {
       "required": false,
       "type": "keyword",
     },
+    "slo.labels": Object {
+      "array": false,
+      "required": false,
+      "type": "flattened",
+    },
     "slo.revision": Object {
       "array": false,
       "required": false,
       "type": "long",
+    },
+    "slo.tags": Object {
+      "array": true,
+      "required": false,
+      "type": "keyword",
     },
   },
 }

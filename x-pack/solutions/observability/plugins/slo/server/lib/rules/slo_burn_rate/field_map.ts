@@ -9,7 +9,9 @@ import {
   SLO_DATA_VIEW_ID_FIELD,
   SLO_ID_FIELD,
   SLO_INSTANCE_ID_FIELD,
+  SLO_LABELS_FIELD,
   SLO_REVISION_FIELD,
+  SLO_TAGS_FIELD,
 } from '../../../../common/burn_rate_rule/field_names';
 
 export const sloRuleFieldMap = {
@@ -30,6 +32,16 @@ export const sloRuleFieldMap = {
   },
   [SLO_DATA_VIEW_ID_FIELD]: {
     type: 'keyword',
+    array: false,
+    required: false,
+  },
+  [SLO_TAGS_FIELD]: {
+    type: 'keyword',
+    array: true,
+    required: false,
+  },
+  [SLO_LABELS_FIELD]: {
+    type: 'flattened',
     array: false,
     required: false,
   },

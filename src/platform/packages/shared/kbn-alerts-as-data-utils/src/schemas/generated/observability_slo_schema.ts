@@ -88,7 +88,9 @@ const ObservabilitySloAlertOptional = rt.partial({
   'slo.dataViewId': schemaString,
   'slo.id': schemaString,
   'slo.instanceId': schemaString,
+  'slo.labels': schemaUnknown,
   'slo.revision': schemaStringOrNumber,
+  'slo.tags': schemaStringArray,
 });
 
 // prettier-ignore

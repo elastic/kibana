@@ -39,7 +39,9 @@ import {
   SLO_DATA_VIEW_ID_FIELD,
   SLO_ID_FIELD,
   SLO_INSTANCE_ID_FIELD,
+  SLO_LABELS_FIELD,
   SLO_REVISION_FIELD,
+  SLO_TAGS_FIELD,
 } from '../../../../common/burn_rate_rule/field_names';
 import type { Duration, SLODefinition } from '../../../domain/models';
 import { DefaultSLODefinitionRepository } from '../../../services';
@@ -213,6 +215,8 @@ export const getRuleExecutor = (basePath: IBasePath) =>
                   [SLO_REVISION_FIELD]: slo.revision,
                   [SLO_INSTANCE_ID_FIELD]: instanceId,
                   [SLO_DATA_VIEW_ID_FIELD]: slo.indicator.params.dataViewId,
+                  [SLO_TAGS_FIELD]: slo.tags,
+                  [SLO_LABELS_FIELD]: slo.labels,
                   ...getEcsGroupsFromFlattenGrouping(groupingsFlattened),
                   ...apmFields,
                 },
@@ -234,6 +238,8 @@ export const getRuleExecutor = (basePath: IBasePath) =>
                 sloId: slo.id,
                 sloName: slo.name,
                 sloInstanceId: instanceId,
+                sloTags: slo.tags,
+                sloLabels: slo.labels,
                 slo,
                 sliValue: sloSummary?.sliValue ?? -1,
                 sloStatus: sloSummary?.status ?? 'NO_DATA',
@@ -272,6 +278,8 @@ export const getRuleExecutor = (basePath: IBasePath) =>
             sloId: slo.id,
             sloName: slo.name,
             sloInstanceId: alertId,
+            sloTags: slo.tags,
+            sloLabels: slo.labels,
             grouping: recoveredAlert.hit?.[ALERT_GROUPING],
           };
 

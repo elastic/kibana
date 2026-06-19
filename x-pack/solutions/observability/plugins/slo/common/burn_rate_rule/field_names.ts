@@ -9,3 +9,5 @@ export const SLO_ID_FIELD = 'slo.id';
 export const SLO_REVISION_FIELD = 'slo.revision';
 export const SLO_INSTANCE_ID_FIELD = 'slo.instanceId';
 export const SLO_DATA_VIEW_ID_FIELD = 'slo.dataViewId';
+export const SLO_TAGS_FIELD = 'slo.tags';
+export const SLO_LABELS_FIELD = 'slo.labels';

@@ -75,6 +75,8 @@ export function sloBurnRateRuleType(
         { name: 'sloId', description: sloIdActionVariableDescription },
         { name: 'sloName', description: sloNameActionVariableDescription },
         { name: 'sloInstanceId', description: sloInstanceIdActionVariableDescription },
+        { name: 'sloTags', description: sloTagsActionVariableDescription },
+        { name: 'sloLabels', description: sloLabelsActionVariableDescription },
         { name: 'suppressedAction', description: suppressedActionVariableDescription },
         { name: 'sliValue', description: sliValueActionVariableDescription },
         { name: 'sloStatus', description: sloStatusActionVariableDescription },
@@ -178,6 +180,20 @@ export const sloInstanceIdActionVariableDescription = i18n.translate(
   'xpack.slo.alerting.sloInstanceIdDescription',
   {
     defaultMessage: 'The SLO instance id.',
+  }
+);
+
+export const sloTagsActionVariableDescription = i18n.translate(
+  'xpack.slo.alerting.sloTagsDescription',
+  {
+    defaultMessage: 'The SLO tags.',
+  }
+);
+
+export const sloLabelsActionVariableDescription = i18n.translate(
+  'xpack.slo.alerting.sloLabelsDescription',
+  {
+    defaultMessage: 'The SLO labels as key/value pairs.',
   }
 );
 

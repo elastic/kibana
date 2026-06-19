@@ -52,7 +52,9 @@ import {
 import {
   SLO_ID_FIELD,
   SLO_INSTANCE_ID_FIELD,
+  SLO_LABELS_FIELD,
   SLO_REVISION_FIELD,
+  SLO_TAGS_FIELD,
 } from '../../../../common/burn_rate_rule/field_names';
 import type { SLODefinition, StoredSLODefinition } from '../../../domain/models';
 import { SLONotFound } from '../../../errors';
@@ -440,6 +442,8 @@ describe('BurnRateRuleExecutor', () => {
           [ALERT_EVALUATION_VALUE]: 2.1,
           [SLO_ID_FIELD]: slo.id,
           [SLO_REVISION_FIELD]: slo.revision,
+          [SLO_TAGS_FIELD]: slo.tags,
+          [SLO_LABELS_FIELD]: slo.labels,
           [SLO_INSTANCE_ID_FIELD]: 'foo,asia',
           [ALERT_GROUP]: [
             {
@@ -471,6 +475,8 @@ describe('BurnRateRuleExecutor', () => {
           [ALERT_EVALUATION_VALUE]: 2.2,
           [SLO_ID_FIELD]: slo.id,
           [SLO_REVISION_FIELD]: slo.revision,
+          [SLO_TAGS_FIELD]: slo.tags,
+          [SLO_LABELS_FIELD]: slo.labels,
           [SLO_INSTANCE_ID_FIELD]: 'bar,asia',
           [ALERT_GROUP]: [
             {
@@ -607,6 +613,8 @@ describe('BurnRateRuleExecutor', () => {
           [ALERT_EVALUATION_VALUE]: 2.1,
           [SLO_ID_FIELD]: slo.id,
           [SLO_REVISION_FIELD]: slo.revision,
+          [SLO_TAGS_FIELD]: slo.tags,
+          [SLO_LABELS_FIELD]: slo.labels,
           [SLO_INSTANCE_ID_FIELD]: 'foo',
           [ALERT_GROUP]: [
             {
@@ -632,6 +640,8 @@ describe('BurnRateRuleExecutor', () => {
           [ALERT_EVALUATION_VALUE]: 2.2,
           [SLO_ID_FIELD]: slo.id,
           [SLO_REVISION_FIELD]: slo.revision,
+          [SLO_TAGS_FIELD]: slo.tags,
+          [SLO_LABELS_FIELD]: slo.labels,
           [SLO_INSTANCE_ID_FIELD]: 'bar',
           [ALERT_GROUP]: [
             {
@@ -746,6 +756,8 @@ describe('BurnRateRuleExecutor', () => {
           [ALERT_EVALUATION_VALUE]: 1.2,
           [SLO_ID_FIELD]: slo.id,
           [SLO_REVISION_FIELD]: slo.revision,
+          [SLO_TAGS_FIELD]: slo.tags,
+          [SLO_LABELS_FIELD]: slo.labels,
           [SLO_INSTANCE_ID_FIELD]: 'foo',
           [ALERT_GROUP]: [
             {
@@ -771,6 +783,8 @@ describe('BurnRateRuleExecutor', () => {
           [ALERT_EVALUATION_VALUE]: 1.1,
           [SLO_ID_FIELD]: slo.id,
           [SLO_REVISION_FIELD]: slo.revision,
+          [SLO_TAGS_FIELD]: slo.tags,
+          [SLO_LABELS_FIELD]: slo.labels,
           [SLO_INSTANCE_ID_FIELD]: 'bar',
           [ALERT_GROUP]: [
             {
@@ -876,6 +890,8 @@ describe('BurnRateRuleExecutor', () => {
         payload: expect.objectContaining({
           [SLO_ID_FIELD]: slo.id,
           [SLO_REVISION_FIELD]: slo.revision,
+          [SLO_TAGS_FIELD]: slo.tags,
+          [SLO_LABELS_FIELD]: slo.labels,
           [SLO_INSTANCE_ID_FIELD]: '*',
           'service.name': 'my-service',
           'service.environment': 'production',
