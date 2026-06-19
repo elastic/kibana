@@ -207,7 +207,7 @@ const StreamDetailGeneralDataInner = ({
   }, [definition]);
 
   const previewHeader = successfulLifecycleFlyout.isOpen
-    ? successfulLifecycleFlyout.previewHeader
+    ? successfulLifecycleFlyout.previewHeader ?? baselinePreviewHeader
     : baselinePreviewHeader;
 
   const openEditSuccessfulDeletePhaseFlyout = useCallback(() => {

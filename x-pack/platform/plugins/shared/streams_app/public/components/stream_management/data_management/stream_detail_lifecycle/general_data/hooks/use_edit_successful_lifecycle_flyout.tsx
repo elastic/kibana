@@ -113,24 +113,34 @@ export const useEditSuccessfulLifecycleFlyout = ({
 
   const inheritedFetchEnabled = isOpen && !isServerless && canShowInherit;
 
-  const { value: inheritedEffectiveLifecycle, refresh: resetInheritedEffectiveLifecycle } =
-    useStreamsAppFetch(
-      async ({ signal: fetchSignal }) => {
-        if (!inheritedFetchEnabled) {
-          return null;
+  const {
+    value: inheritedEffectiveLifecycle,
+    loading: isLoadingInheritedEffectiveLifecycle,
+    refresh: resetInheritedEffectiveLifecycle,
+  } = useStreamsAppFetch(
+    async ({ signal: fetchSignal }) => {
+      if (!inheritedFetchEnabled) {
+        return null;
+      }
+      const { lifecycle } = await streamsRepositoryClient.fetch(
+        'GET /internal/streams/{name}/lifecycle/_inherited',
+        {
+          signal: fetchSignal,
+          params: { path: { name: definition.stream.name } },
         }
-        const { lifecycle } = await streamsRepositoryClient.fetch(
-          'GET /internal/streams/{name}/lifecycle/_inherited',
-          {
-            signal: fetchSignal,
-            params: { path: { name: definition.stream.name } },
-          }
-        );
-        return lifecycle;
-      },
-      [inheritedFetchEnabled, streamsRepositoryClient, definition.stream.name],
-      { withTimeRange: false, withRefresh: false }
-    );
+      );
+      return lifecycle;
+    },
+    [inheritedFetchEnabled, streamsRepositoryClient, definition.stream.name],
+    { withTimeRange: false, withRefresh: false }
+  );
+
+  const inheritedEffectiveLifecycleOrNull = isLoadingInheritedEffectiveLifecycle
+    ? null
+    : inheritedEffectiveLifecycle ?? null;
+
+  const isLoadingInherited =
+    inheritLifecycle && inheritedFetchEnabled && inheritedEffectiveLifecycleOrNull === null;
 
   const hotColor = isServerless ? euiTheme.colors.severity.success : ilmPhases.hot.color;
 
@@ -214,23 +224,23 @@ export const useEditSuccessfulLifecycleFlyout = ({
     (next: boolean) => {
       if (next) {
         setInheritLifecycle(true);
-        applyInheritedLifecycle(inheritedEffectiveLifecycle);
-        if (!inheritedEffectiveLifecycle) {
+        applyInheritedLifecycle(inheritedEffectiveLifecycleOrNull);
+        if (inheritedEffectiveLifecycleOrNull === null) {
           resetInheritedEffectiveLifecycle();
         }
         return;
       }
       setInheritLifecycle(false);
     },
-    [applyInheritedLifecycle, inheritedEffectiveLifecycle, resetInheritedEffectiveLifecycle]
+    [applyInheritedLifecycle, inheritedEffectiveLifecycleOrNull, resetInheritedEffectiveLifecycle]
   );
 
   useEffect(() => {
     if (!inheritLifecycle) {
       return;
     }
-    applyInheritedLifecycle(inheritedEffectiveLifecycle);
-  }, [applyInheritedLifecycle, inheritLifecycle, inheritedEffectiveLifecycle]);
+    applyInheritedLifecycle(inheritedEffectiveLifecycleOrNull);
+  }, [applyInheritedLifecycle, inheritLifecycle, inheritedEffectiveLifecycleOrNull]);
 
   const inheritLabel = StreamsSchema.WiredStream.GetResponse.is(definition)
     ? i18n.translate('xpack.streams.editSuccessfulLifecycle.inheritFromParentLabel', {
@@ -299,11 +309,16 @@ export const useEditSuccessfulLifecycleFlyout = ({
     if (!definition.privileges.lifecycle) return true;
     if (!applyPayload) return true;
     if (!nextLifecycle) return true;
+    if (inheritLifecycle && inheritedFetchEnabled && inheritedEffectiveLifecycleOrNull === null)
+      return true;
     return isEqual(definition.stream.ingest.lifecycle, nextLifecycle) || updateInProgress;
   }, [
     applyPayload,
     definition.privileges.lifecycle,
     definition.stream.ingest.lifecycle,
+    inheritLifecycle,
+    inheritedFetchEnabled,
+    inheritedEffectiveLifecycleOrNull,
     nextLifecycle,
     updateInProgress,
   ]);
@@ -314,7 +329,7 @@ export const useEditSuccessfulLifecycleFlyout = ({
     }
     return computeSuccessfulLifecycleFlyoutPreview({
       inheritLifecycle,
-      inheritedEffectiveLifecycle: inheritedEffectiveLifecycle ?? definition.effective_lifecycle,
+      inheritedEffectiveLifecycle: inheritedEffectiveLifecycleOrNull,
       method,
       selectedIlmPolicyName,
       inspectedIlmPolicyName,
@@ -334,7 +349,7 @@ export const useEditSuccessfulLifecycleFlyout = ({
     ilmPhases,
     ilmPolicies,
     inheritLifecycle,
-    inheritedEffectiveLifecycle,
+    inheritedEffectiveLifecycleOrNull,
     inspectedIlmPolicyName,
     isOpen,
     isServerless,
@@ -375,10 +390,13 @@ export const useEditSuccessfulLifecycleFlyout = ({
 
   const previewHeader = useMemo(() => {
     if (inheritLifecycle) {
-      const inheritedLifecycle = inheritedEffectiveLifecycle ?? definition.effective_lifecycle;
+      if (inheritedEffectiveLifecycleOrNull === null) {
+        return undefined;
+      }
+
       const ilmPolicyName =
-        inheritedLifecycle && isIlmLifecycle(inheritedLifecycle)
-          ? inheritedLifecycle.ilm.policy
+        isIlmLifecycle(inheritedEffectiveLifecycleOrNull)
+          ? inheritedEffectiveLifecycleOrNull.ilm.policy
           : undefined;
       const inheritedMethod: 'dlm' | 'ilm' = ilmPolicyName ? 'ilm' : 'dlm';
       return {
@@ -398,15 +416,14 @@ export const useEditSuccessfulLifecycleFlyout = ({
 
     return {
       inheritLifecycle,
-      method: method as 'dlm' | 'ilm',
+      method,
       ilmPolicyName: previewIlmPolicyName,
       canShowInheritBadge: canShowInherit,
     };
   }, [
     canShowInherit,
-    definition.effective_lifecycle,
     inheritLifecycle,
-    inheritedEffectiveLifecycle,
+    inheritedEffectiveLifecycleOrNull,
     inspectedIlmPolicyName,
     method,
     selectedIlmPolicyName,
@@ -504,6 +521,7 @@ export const useEditSuccessfulLifecycleFlyout = ({
               : {
                   policies: isLoadingIlmPolicies ? [] : ilmPolicies,
                   selectedPolicyName: selectedIlmPolicyName,
+                  isLoadingInherited,
                   onSelect: setSelectedIlmPolicyName,
                   onInspect: openInspectPolicy,
                 }
