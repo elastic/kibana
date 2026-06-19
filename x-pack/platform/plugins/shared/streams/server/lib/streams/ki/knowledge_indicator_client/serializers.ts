@@ -6,7 +6,12 @@
  */
 
 import type { Feature, FeatureUpsert, QueryLink, StreamQuery } from '@kbn/streams-schema';
-import { QUERY_TYPE_STATS, computeFeatureUuid, deriveQueryType } from '@kbn/streams-schema';
+import {
+  QUERY_TYPE_STATS,
+  computeFeatureUuid,
+  normalizeFeatureSlug,
+  deriveQueryType,
+} from '@kbn/streams-schema';
 import type {
   StoredFeatureKnowledgeIndicator,
   StoredKnowledgeIndicator,
@@ -47,9 +52,10 @@ export function toStoredFeature(
 ): StoredFeatureKnowledgeIndicator {
   const embedding = buildSearchEmbeddingFeature(feature, streamName);
   const timestamp = new Date().toISOString();
+  const slug = normalizeFeatureSlug(feature.id);
   return {
     '@timestamp': timestamp,
-    id: computeFeatureUuid({ id: feature.id, stream_name: streamName, type: feature.type }),
+    id: computeFeatureUuid({ id: slug, stream_name: streamName, type: feature.type }),
     type: KI_TYPE_FEATURE,
     title: feature.title,
     description: feature.description,
@@ -67,7 +73,7 @@ export function toStoredFeature(
       evidence_doc_ids: feature.evidence_doc_ids,
       filter: feature.filter,
       meta: feature.meta,
-      slug: feature.id,
+      slug,
     },
     ...(includeEmbedding && embedding ? { search_embedding: embedding } : {}),
   };

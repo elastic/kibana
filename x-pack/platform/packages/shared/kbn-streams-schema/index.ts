@@ -243,6 +243,7 @@ export {
   isDuplicateFeature,
   hasSameFingerprint,
   computeFeatureUuid,
+  normalizeFeatureSlug,
   mergeFeature,
   toBaseFeature,
   featureSchema,

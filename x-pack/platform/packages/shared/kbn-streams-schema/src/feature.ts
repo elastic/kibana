@@ -100,16 +100,25 @@ export type Feature = z.infer<typeof featureSchema>;
 export type FeatureWithFilter = Feature & { filter: Condition };
 
 /**
+ * Normalizes a feature id into its canonical slug form. Slugs are always
+ * trimmed and lowercased so they match `isDuplicateFeature`'s case-insensitive
+ * semantics and so the persisted slug stays in sync with the value the uuid is
+ * derived from.
+ */
+export function normalizeFeatureSlug(id: string): string {
+  return id.trim().toLowerCase();
+}
+
+/**
  * Computes a deterministic, stable uuid for a feature from its identifying
- * triple (slug, stream_name, type). The slug is normalized (trimmed +
- * lowercased) so it matches `isDuplicateFeature`'s case-insensitive slug
- * semantics. Used as the storage document id and for delete/exclude/restore
- * operations.
+ * triple (slug, stream_name, type). The slug is normalized via
+ * `normalizeFeatureSlug`. Used as the storage document id and for
+ * delete/exclude/restore operations.
  */
 export function computeFeatureUuid(
   feature: Pick<BaseFeature, 'id' | 'stream_name' | 'type'>
 ): string {
-  const slug = feature.id.trim().toLowerCase();
+  const slug = normalizeFeatureSlug(feature.id);
   return v5(objectHash([feature.stream_name, feature.type, slug]), v5.DNS);
 }
 
