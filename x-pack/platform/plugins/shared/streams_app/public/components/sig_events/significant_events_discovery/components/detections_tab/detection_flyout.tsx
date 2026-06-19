@@ -35,10 +35,6 @@ import { formatTimestamp } from '../../../../../util/formatters';
 import { changeTypeLabel, DETECTION_KIND_LABELS } from '../shared/translations';
 import { DETECTION_KIND_COLORS } from '../shared/constants';
 
-// Unhandled detections older than this window are outside the discovery lookback
-// and won't be picked up automatically by the discovery pipeline.
-const DISCOVERY_LOOKBACK_MS = 2 * 60 * 60 * 1000;
-
 const formatPValue = (pValue?: number | string): string => {
   if (pValue === undefined || pValue === null) return '-';
   const n = Number(pValue);
@@ -67,16 +63,13 @@ export const DetectionFlyout = ({ detection, onClose }: DetectionFlyoutProps) =>
     detection.detection_id
   );
 
-  const discoveryStatus = useMemo(() => {
-    if (detection.processed) {
-      return { label: DISCOVERY_PROCESSED_LABEL, color: 'success' as const };
-    }
-    const docAgeMs = Date.now() - new Date(detection['@timestamp']).getTime();
-    if (docAgeMs > DISCOVERY_LOOKBACK_MS) {
-      return { label: DISCOVERY_MISSED_LABEL, color: 'warning' as const };
-    }
-    return { label: DISCOVERY_PENDING_LABEL, color: 'hollow' as const };
-  }, [detection]);
+  const status = useMemo(
+    () =>
+      detection.processed
+        ? { label: STATUS_PROCESSED_LABEL, color: 'success' as const }
+        : { label: STATUS_PENDING_LABEL, color: 'hollow' as const },
+    [detection.processed]
+  );
 
   const generalInfoItems = useMemo(() => {
     const changeType = detection.detection_evidence?.change_point_type;
@@ -153,8 +146,8 @@ export const DetectionFlyout = ({ detection, onClose }: DetectionFlyoutProps) =>
             </FlyoutMetadataCard>
           </EuiFlexItem>
           <EuiFlexItem>
-            <FlyoutMetadataCard title={DISCOVERY_LABEL}>
-              <EuiBadge color={discoveryStatus.color}>{discoveryStatus.label}</EuiBadge>
+            <FlyoutMetadataCard title={STATUS_LABEL}>
+              <EuiBadge color={status.color}>{status.label}</EuiBadge>
             </FlyoutMetadataCard>
           </EuiFlexItem>
           {detection.stream_name && (
@@ -252,8 +245,8 @@ const KIND_LABEL = i18n.translate('xpack.streams.detectionFlyout.kindLabel', {
   defaultMessage: 'Kind',
 });
 
-const DISCOVERY_LABEL = i18n.translate('xpack.streams.detectionFlyout.discoveryLabel', {
-  defaultMessage: 'Discovery',
+const STATUS_LABEL = i18n.translate('xpack.streams.detectionFlyout.statusLabel', {
+  defaultMessage: 'Status',
 });
 
 const STREAM_LABEL = i18n.translate('xpack.streams.detectionFlyout.streamLabel', {
@@ -277,17 +270,12 @@ const PEAK_ALERTS_LABEL = i18n.translate('xpack.streams.detectionFlyout.peakAler
   defaultMessage: 'Peak alerts',
 });
 
-const DISCOVERY_PROCESSED_LABEL = i18n.translate(
-  'xpack.streams.detectionFlyout.discoveryStatus.processed',
+const STATUS_PROCESSED_LABEL = i18n.translate(
+  'xpack.streams.detectionFlyout.status.processed',
   { defaultMessage: 'Processed' }
 );
 
-const DISCOVERY_MISSED_LABEL = i18n.translate(
-  'xpack.streams.detectionFlyout.discoveryStatus.missed',
-  { defaultMessage: 'Missed' }
-);
-
-const DISCOVERY_PENDING_LABEL = i18n.translate(
-  'xpack.streams.detectionFlyout.discoveryStatus.pending',
+const STATUS_PENDING_LABEL = i18n.translate(
+  'xpack.streams.detectionFlyout.status.pending',
   { defaultMessage: 'Pending' }
 );
