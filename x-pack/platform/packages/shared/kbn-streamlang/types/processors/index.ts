@@ -982,7 +982,6 @@ interface ZodProcessorSchemaLike {
     schema?: ZodProcessorSchemaLike;
     left?: ZodProcessorSchemaLike;
     options?: ZodProcessorSchemaLike[];
-    out?: ZodProcessorSchemaLike;
   };
   shape?: { action?: { value?: ProcessorType } };
 }
@@ -996,11 +995,6 @@ export const processorTypes: ProcessorType[] = (
   // Handle ZodEffects (from .refine()) by unwrapping to get the base schema
   let baseSchema: ZodProcessorSchemaLike =
     '_def' in schema && schema._def && 'schema' in schema._def ? schema._def.schema! : schema;
-
-  // Handle ZodPipe (from z.pipe() / DeepStrict) by unwrapping the output schema
-  if ('_def' in baseSchema && baseSchema._def && 'out' in baseSchema._def) {
-    baseSchema = baseSchema._def.out!;
-  }
 
   // Handle ZodIntersection (from z.intersection()) by getting the left side which contains the action
   if ('_def' in baseSchema && baseSchema._def && 'left' in baseSchema._def) {
