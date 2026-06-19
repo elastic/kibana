@@ -48,8 +48,6 @@ const mockStateContainerDefaults = {
   onKueryChange: jest.fn(),
   filters: [],
   onFiltersChange: jest.fn(),
-  controlFilters: [],
-  onControlFiltersChange: jest.fn(),
   rangeFrom: 'now-15m',
   onRangeFromChange: jest.fn(),
   rangeTo: 'now',
@@ -64,6 +62,7 @@ const mockStateContainerDefaults = {
 const defaultProps = {
   appName: 'test',
   onEsQueryChange: jest.fn(),
+  onFilterControlsChange: jest.fn(),
 };
 
 const TestComponent = (propOverrides: Partial<UrlSyncedAlertsSearchBarProps>) => (
@@ -96,6 +95,60 @@ describe('UrlSyncedAlertsSearchBar', () => {
       expect.objectContaining({ storageKey: 'ruleDetailsAlerts.filterControls' }),
       expect.anything()
     );
+  });
+
+  it('forwards onFilterControlsChange and onControlApiAvailable to AlertFilterControls', () => {
+    jest.mocked(AlertFilterControls).mockImplementation(() => <div>AlertFilterControls</div>);
+    const onFilterControlsChange = jest.fn();
+    const onControlApiAvailable = jest.fn();
+    render(
+      <TestComponent
+        showFilterControls
+        onFilterControlsChange={onFilterControlsChange}
+        onControlApiAvailable={onControlApiAvailable}
+      />
+    );
+    expect(jest.mocked(AlertFilterControls)).toHaveBeenCalledWith(
+      expect.objectContaining({
+        onFiltersChange: onFilterControlsChange,
+        onInit: onControlApiAvailable,
+      }),
+      expect.anything()
+    );
+  });
+
+  it('wires setControlsUrlState to the URL state container so config edits round-trip', () => {
+    jest.mocked(AlertFilterControls).mockImplementation(() => <div>AlertFilterControls</div>);
+    const onFilterControlsConfigChange = jest.fn();
+    jest.mocked(useAlertSearchBarStateContainer).mockReturnValue({
+      ...mockStateContainerDefaults,
+      onFilterControlsChange: onFilterControlsConfigChange,
+    });
+    render(<TestComponent showFilterControls />);
+    expect(jest.mocked(AlertFilterControls)).toHaveBeenCalledWith(
+      expect.objectContaining({ setControlsUrlState: onFilterControlsConfigChange }),
+      expect.anything()
+    );
+  });
+
+  it('builds the ES query from page-supplied filterControls', () => {
+    jest.mocked(AlertFilterControls).mockImplementation(() => <div>AlertFilterControls</div>);
+    const onEsQueryChange = jest.fn();
+    const filterControls = [
+      {
+        meta: { key: ALERT_STATUS, params: { query: 'active' } },
+        query: { match_phrase: { [ALERT_STATUS]: 'active' } },
+      },
+    ];
+    render(
+      <TestComponent
+        showFilterControls
+        filterControls={filterControls}
+        onEsQueryChange={onEsQueryChange}
+      />
+    );
+    const lastCall = onEsQueryChange.mock.calls[onEsQueryChange.mock.calls.length - 1][0];
+    expect(JSON.stringify(lastCall)).toContain(ALERT_STATUS);
   });
 
   describe('defaultFilterControls', () => {

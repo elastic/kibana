@@ -46,8 +46,6 @@ const AlertsTabContainer = styled.div<{ $highlightFilteredOutAlerts: boolean }>`
 interface AlertsTabProps {
   /** The alert ids of the selected attack */
   attackAlertIds: string[];
-  /** Filters applied from grouping */
-  groupingFilters: Filter[];
   /** Default filters to apply to the alerts table */
   defaultFilters: Filter[];
   /** Whether the alerts table is in a loading state */
@@ -59,7 +57,7 @@ interface AlertsTabProps {
  * with filters for the specific attack's alerts.
  */
 export const AlertsTab = React.memo<AlertsTabProps>(
-  ({ attackAlertIds, groupingFilters, defaultFilters, isTableLoading }) => {
+  ({ attackAlertIds, defaultFilters, isTableLoading }) => {
     const {
       services: { telemetry },
     } = useKibana();
@@ -73,10 +71,22 @@ export const AlertsTab = React.memo<AlertsTabProps>(
       }),
     });
 
-    const filteredRelatedAlertFilters = useMemo(
-      () => [...defaultFilters, ...groupingFilters],
-      [defaultFilters, groupingFilters]
+    const attackAlertsFilter = useMemo<Filter>(
+      () => ({
+        meta: {
+          alias: null,
+          disabled: false,
+          negate: false,
+          type: 'custom',
+        },
+        query: {
+          ids: { values: attackAlertIds },
+        },
+      }),
+      [attackAlertIds]
     );
+
+    const filteredRelatedAlertFilters = useMemo(() => [...defaultFilters], [defaultFilters]);
 
     const {
       filteredAlertIds,
@@ -85,7 +95,7 @@ export const AlertsTab = React.memo<AlertsTabProps>(
     } = useFilteredRelatedAlertIds({
       attackAlertIds,
       filters: filteredRelatedAlertFilters,
-      enabled: groupingFilters.length > 0 && !showMatchingAlertsOnly,
+      enabled: !showMatchingAlertsOnly,
     });
 
     const shouldHighlightFilteredOutAlert = useCallback(
@@ -116,7 +126,7 @@ export const AlertsTab = React.memo<AlertsTabProps>(
         data-test-subj={ALERTS_TAB_TEST_ID}
         $highlightFilteredOutAlerts={!showMatchingAlertsOnly && hasFilteredOutAlerts}
       >
-        {groupingFilters.length > 0 && (hasFilteredOutAlerts || showMatchingAlertsOnly) && (
+        {(hasFilteredOutAlerts || showMatchingAlertsOnly) && (
           <>
             <EuiCallOut
               announceOnMount
@@ -151,13 +161,10 @@ export const AlertsTab = React.memo<AlertsTabProps>(
         )}
         <AlertsTable
           tableType={TableId.alertsOnAttacksPage}
-          inputFilters={[...defaultFilters, ...groupingFilters]}
-          isLoading={
-            isTableLoading ||
-            (groupingFilters.length > 0 && !showMatchingAlertsOnly && isFilteredAlertIdsLoading)
-          }
+          inputFilters={[...defaultFilters, attackAlertsFilter]}
+          isLoading={isTableLoading || (!showMatchingAlertsOnly && isFilteredAlertIdsLoading)}
           pageScope={PageScope.alerts} // show only detection alerts
-          disableAdditionalToolbarControls={groupingFilters.length > 0}
+          disableAdditionalToolbarControls={true}
           {...(!showMatchingAlertsOnly
             ? {
                 query: { ids: { values: attackAlertIds } },
