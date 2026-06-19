@@ -179,7 +179,9 @@ export const getESQLControlFactory = <
 
           try {
             await uiActionsService.executeTriggerActions('ESQL_CONTROL_TRIGGER', {
-              queryString: isStaticESQLControl(nextState) ? relatedQuery : nextState.esql_query,
+              queryString: isStaticESQLControl(nextState)
+                ? relatedQuery ?? ''
+                : nextState.esql_query,
               variableType: nextState.variable_type,
               controlType: nextState.control_type,
               esqlVariables: variablesInParent,
