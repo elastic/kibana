@@ -72,5 +72,5 @@ export const registerStreamsAgentBuilder = async ({
     streamsKIsOnboardingClient,
     memoryToolsOptions,
   });
-  registerSignificantEventsDiscoveryAgents(agentBuilder);
+  registerSignificantEventsDiscoveryAgents({ agentBuilder, server });
 };

@@ -22,6 +22,8 @@ import {
   ENGINE_STATUS_TAB_TEST_ID,
   ENTITY_STORE_FEATURE_FLAG_CALLOUT_TEST_ID,
 } from '../test_ids';
+import { useUiSetting$ } from '../../common/lib/kibana';
+import { useHasEntityResolutionLicense } from '../../common/hooks/use_has_entity_resolution_license';
 
 const mockAddSuccess = jest.fn();
 const mockAddError = jest.fn();
@@ -78,7 +80,11 @@ jest.mock('../../common/lib/kibana', () => ({
       },
     },
   }),
-  useUiSetting$: () => [false],
+  useUiSetting$: jest.fn(() => [false]),
+}));
+
+jest.mock('../../common/hooks/use_has_entity_resolution_license', () => ({
+  useHasEntityResolutionLicense: jest.fn(() => false),
 }));
 
 jest.mock('../../helper_hooks', () => ({
@@ -156,6 +162,12 @@ jest.mock('../components/entity_analytics_toggle', () => ({
     <span data-test-subj="mock-entity-analytics-toggle">{'Entity analytics toggle'}</span>
   ),
 }));
+
+jest.mock('../components/entity_resolution', () => ({
+  EntityResolutionTab: () => (
+    <span data-test-subj="mock-entity-resolution-tab">{'Entity resolution tab'}</span>
+  ),
+}));
 jest.mock('../components/risk_score_management/risk_score_useful_links_section', () => ({
   RiskScoreUsefulLinksSection: () => 'Useful links',
 }));
@@ -225,6 +237,8 @@ const buildConfig = (overrides: Record<string, unknown> = {}) => {
 describe('EntityAnalyticsManagementPage', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    (useUiSetting$ as jest.Mock).mockReturnValue([false]);
+    (useHasEntityResolutionLicense as jest.Mock).mockReturnValue(false);
     mockUseConfigurableRiskEngineSettings.mockReturnValue(buildConfig());
     mockUseIsExperimentalFeatureEnabled.mockReturnValue(false);
     mockUseEntityStoreStatus.mockReturnValue({
@@ -264,6 +278,20 @@ describe('EntityAnalyticsManagementPage', () => {
     expect(screen.getByTestId(ENTITY_ANALYTICS_MANAGEMENT_PAGE_TITLE_TEST_ID)).toBeInTheDocument();
     expect(screen.getByTestId(RISK_SCORE_TAB_TEST_ID)).toBeInTheDocument();
     expect(screen.getByTestId(ASSET_CRITICALITY_TAB_TEST_ID)).toBeInTheDocument();
+  });
+
+  it('shows the Resolution tab when entityStoreEnableV2 setting is enabled and license is active', () => {
+    (useUiSetting$ as jest.Mock).mockReturnValue([true]);
+    (useHasEntityResolutionLicense as jest.Mock).mockReturnValue(true);
+    render(pageComponent());
+    expect(screen.getByTestId('entityResolutionTab')).toBeInTheDocument();
+  });
+
+  it('hides the Resolution tab when license is inactive', () => {
+    (useUiSetting$ as jest.Mock).mockReturnValue([true]);
+    (useHasEntityResolutionLicense as jest.Mock).mockReturnValue(false);
+    render(pageComponent());
+    expect(screen.queryByTestId('entityResolutionTab')).not.toBeInTheDocument();
   });
 
   it('has the risk score tab selected by default with content visible', () => {
