@@ -14,7 +14,11 @@ import type {
 import { isSection } from '@kbn/agent-builder-dashboards-common';
 import { MARKDOWN_EMBEDDABLE_TYPE } from '@kbn/dashboard-markdown/server';
 import type { ResolvePanelContent, PanelContentAttempt } from './resolve_panel';
-import { executeDashboardOperations, type DashboardOperation } from './operations';
+import {
+  executeDashboardOperations,
+  dashboardOperationSchema,
+  type DashboardOperation,
+} from './operations';
 import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
 import { DASHBOARD_OPERATION_FAILURE_TYPES } from './failure_types';
 
@@ -1660,5 +1664,37 @@ describe('executeDashboardOperations', () => {
         logger,
       })
     ).rejects.toThrow('Section "nonexistent-section" not found.');
+  });
+
+  it('accepts a markdown panelConfig with content and optional settings', () => {
+    const result = dashboardOperationSchema.safeParse({
+      operation: 'add_panels',
+      panels: [
+        {
+          kind: 'panelConfig',
+          type: 'markdown',
+          config: { content: '## Hi', settings: { open_links_in_new_tab: true } },
+          grid: { x: 0, y: 0, w: 48, h: 5 },
+        },
+      ],
+    });
+
+    expect(result.success).toBe(true);
+  });
+
+  it('rejects a markdown panelConfig whose config is missing content', () => {
+    const result = dashboardOperationSchema.safeParse({
+      operation: 'add_panels',
+      panels: [
+        {
+          kind: 'panelConfig',
+          type: 'markdown',
+          config: { settings: { open_links_in_new_tab: false } },
+          grid: { x: 0, y: 0, w: 48, h: 5 },
+        },
+      ],
+    });
+
+    expect(result.success).toBe(false);
   });
 });

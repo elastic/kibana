@@ -11,7 +11,8 @@ import { z } from '@kbn/zod/v4';
 import { appendPanelsToDashboard } from '../dashboard_state';
 import { defineOperation } from './types';
 import {
-  panelConfigPanelInputSchema,
+  visPanelConfigInputSchema,
+  markdownPanelConfigInputSchema,
   panelRequestSchema,
   PANEL_TYPE_TO_EMBEDDABLE_TYPE,
 } from './panel_kinds';
@@ -25,7 +26,10 @@ const sectionIdField = z
   );
 
 const addPanelsItemSchema = z.discriminatedUnion('kind', [
-  panelConfigPanelInputSchema.extend({ sectionId: sectionIdField }),
+  z.discriminatedUnion('type', [
+    visPanelConfigInputSchema.extend({ sectionId: sectionIdField }),
+    markdownPanelConfigInputSchema.extend({ sectionId: sectionIdField }),
+  ]),
   panelRequestSchema.extend({ sectionId: sectionIdField }),
 ]);
 

@@ -11,7 +11,7 @@ import { createPanelFailureResult, type PanelContentAttempt } from '../resolve_p
 import { indexPanelsById, updatePanelInDashboard } from '../dashboard_state';
 import { DASHBOARD_OPERATION_FAILURE_TYPES } from '../failure_types';
 import { panelRequestSchema } from './panel_kinds';
-import { MARKDOWN_EMBEDDABLE_TYPE } from './panels/markdown';
+import { MARKDOWN_EMBEDDABLE_TYPE, markdownPanelConfigSchema } from './panels/markdown';
 import { defineOperation } from './types';
 
 const editPanelRequestInputSchema = panelRequestSchema.omit({ grid: true, index: true }).extend({
@@ -23,9 +23,9 @@ const editMarkdownConfigSchema = z.object({
   kind: z.literal('panelConfig'),
   type: z.literal('markdown'),
   panelId: z.string().describe('Existing markdown panel id to update.'),
-  config: z
-    .record(z.string().max(256), z.unknown())
-    .describe('New markdown panel config (e.g. { content }). Fully replaces the existing config.'),
+  config: markdownPanelConfigSchema.describe(
+    'New markdown panel config (e.g. { content }). Fully replaces the existing config.'
+  ),
 });
 
 const editPanelItemSchema = z.discriminatedUnion('kind', [

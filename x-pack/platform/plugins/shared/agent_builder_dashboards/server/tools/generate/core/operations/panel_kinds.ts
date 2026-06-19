@@ -7,24 +7,38 @@
 
 import { SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
 import { panelGridSchema } from '@kbn/agent-builder-dashboards-common';
-import { MARKDOWN_EMBEDDABLE_TYPE } from '@kbn/dashboard-markdown/server';
 import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
 import { z } from '@kbn/zod/v4';
+import { MARKDOWN_EMBEDDABLE_TYPE, markdownPanelConfigSchema } from './panels/markdown';
 
-export const panelConfigPanelInputSchema = z.object({
+/**
+ * A `panelConfig` adds a panel from an already-resolved configuration passed by
+ * value. It is discriminated by `type`, so each panel type can describe its own
+ * `config` shape. The generation tool never reads an attachment or saved-object
+ * store, so the config must be supplied directly rather than as an attachment ID.
+ */
+export const visPanelConfigInputSchema = z.object({
   kind: z.literal('panelConfig'),
+  type: z.literal('vis'),
   grid: panelGridSchema,
-  type: z
-    .enum(['vis', 'markdown'])
-    .describe(
-      'Panel type, one-to-one with the embeddable type: "vis" for a Lens visualization, "markdown" for a markdown panel.'
-    ),
   config: z
     .record(z.string().max(256), z.unknown())
     .describe(
-      'Already-resolved panel configuration passed by value. For "vis", the Lens config (e.g. read from a visualization attachment). For "markdown", the markdown panel config (e.g. { content }). The generation tool does not read any attachment store, so the config must be supplied directly rather than as an attachment ID.'
+      'Already-resolved Lens config, passed by value (e.g. read from a visualization attachment). Do not hand-build a Lens config for a new visualization here — use kind: "panelRequest" instead.'
     ),
 });
+
+export const markdownPanelConfigInputSchema = z.object({
+  kind: z.literal('panelConfig'),
+  type: z.literal('markdown'),
+  grid: panelGridSchema,
+  config: markdownPanelConfigSchema.describe('Markdown panel config (e.g. { content }).'),
+});
+
+export const panelConfigPanelInputSchema = z.discriminatedUnion('type', [
+  visPanelConfigInputSchema,
+  markdownPanelConfigInputSchema,
+]);
 
 export type PanelConfigPanelInput = z.infer<typeof panelConfigPanelInputSchema>;
 export type PanelType = PanelConfigPanelInput['type'];
