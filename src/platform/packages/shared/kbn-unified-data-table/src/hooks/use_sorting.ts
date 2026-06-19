@@ -26,6 +26,7 @@ export const useSorting = ({
   dataView,
   isPlainRecord,
   isSortEnabled,
+  isInMemorySortEnabled,
   defaultColumns,
   onSort,
 }: {
@@ -36,6 +37,7 @@ export const useSorting = ({
   dataView: DataView;
   isPlainRecord: boolean;
   isSortEnabled: boolean;
+  isInMemorySortEnabled: boolean;
   defaultColumns: boolean;
   onSort: ((sort: SortOrder[]) => void) | undefined;
 }) => {
@@ -46,7 +48,7 @@ export const useSorting = ({
   }, [sort, visibleColumns]);
 
   const comparators = useMemo(() => {
-    if (!isPlainRecord || !rows || !sortingColumns.length) {
+    if (!isInMemorySortEnabled || !isPlainRecord || !rows || !sortingColumns.length) {
       return;
     }
 
@@ -70,7 +72,7 @@ export const useSorting = ({
       },
       []
     );
-  }, [columnsMeta, dataView, isPlainRecord, rows, sortingColumns]);
+  }, [columnsMeta, dataView, isInMemorySortEnabled, isPlainRecord, rows, sortingColumns]);
 
   const sortedRows = useMemo(() => {
     if (!rows || !comparators) {

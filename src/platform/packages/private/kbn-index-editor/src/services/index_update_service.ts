@@ -396,6 +396,8 @@ export class IndexUpdateService {
     shareReplay({ bufferSize: 1, refCount: true })
   );
 
+  public readonly savingDocs$ = this._savingDocs$;
+
   public readonly dataView$: Observable<DataView> = combineLatest([
     this._indexName$,
     this._indexCreated$,

@@ -26,8 +26,9 @@ import type { RestorableStateProviderApi } from '@kbn/restorable-state';
 import React, { useCallback, useMemo, useRef, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { difference, intersection, isEqual } from 'lodash';
-import { useEuiTheme } from '@elastic/eui';
+import { useEuiTheme, type EuiThemeComputed } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 import { memoize } from 'lodash';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import { getColumnHeaderRenderer } from './grid_custom_renderers/column_header_renderer';
@@ -77,6 +78,7 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
 
   const isFetching = useObservable(indexUpdateService.isFetching$, false);
   const sortOrder = useObservable(indexUpdateService.sortOrder$, []);
+  const savingDocs = useObservable(indexUpdateService.savingDocs$, new Map());
 
   const [activeColumns, setActiveColumns] = useState<string[]>(
     (props.initialColumns || props.columns).map((c) => c.name)
@@ -149,6 +151,24 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
       indexUpdateService.setSort(sort);
     },
     [indexUpdateService]
+  );
+
+  // Highlight rows with unsaved additions/edits. They keep their current position because sorting
+  // is performed server-side and unsaved values do not participate in it.
+  const getRowIndicator = useCallback(
+    (row: DataTableRecord, euiThemeComputed: EuiThemeComputed) => {
+      const pendingUpdate = savingDocs.get(row.id);
+      if (!pendingUpdate || pendingUpdate.type === 'delete-doc') {
+        return undefined;
+      }
+      return {
+        color: euiThemeComputed.colors.warning,
+        label: i18n.translate('indexEditor.flyout.grid.unsavedRowIndicator', {
+          defaultMessage: 'Unsaved changes',
+        }),
+      };
+    },
+    [savingDocs]
   );
 
   const dataTableRef = useRef<EuiDataGridRefProps & RestorableStateProviderApi>(null);
@@ -265,6 +285,7 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
       renderCellPopover={indexUpdateService.canEditIndex ? renderCellPopover : undefined}
       isPlainRecord
       isSortEnabled={true}
+      isInMemorySortEnabled={false}
       showMultiFields={false}
       showColumnTokens
       showTimeCol
@@ -281,6 +302,7 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
       onUpdateRowsPerPage={setRowsPerPage}
       sort={sortOrder}
       onSort={onSort}
+      getRowIndicator={getRowIndicator}
       ariaLabelledBy="lookupIndexDataGrid"
       maxDocFieldsDisplayed={100}
       showFullScreenButton={false}
