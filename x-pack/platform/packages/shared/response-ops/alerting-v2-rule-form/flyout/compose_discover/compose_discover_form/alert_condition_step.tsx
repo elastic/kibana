@@ -204,7 +204,7 @@ export function AlertConditionStep({
                 announceOnMount={false}
                 size="s"
                 color="primary"
-                iconType="iInCircle"
+                iconType="info"
                 title={i18n.translate(
                   'xpack.alertingV2.composeDiscover.alertCondition.splitFailedTitle',
                   {
