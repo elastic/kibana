@@ -11,13 +11,10 @@ import type { CoreStart } from '@kbn/core/public';
 import type { NodeDefinition } from '@kbn/core-chrome-browser';
 import {
   combineLatest,
-  debounceTime,
   from,
   map,
-  merge,
-  of,
-  skip,
   type Observable,
+  startWith,
   switchMap,
   timer,
 } from 'rxjs';
@@ -33,8 +30,6 @@ import { toAbsoluteNavHref } from './to_absolute_nav_href';
 
 const RECENT_DASHBOARDS_LIMIT = 5;
 const STARRED_DASHBOARDS_REFRESH_MS = 5000;
-/** Delay before reordering recent dashboards in the side nav after a visit is recorded. */
-export const RECENT_DASHBOARDS_REORDER_DELAY_MS = 1200;
 
 const mapRecentDashboards = (
   core: CoreStart,
@@ -45,14 +40,6 @@ const mapRecentDashboards = (
     title: item.label,
     href: toAbsoluteNavHref(core.http.basePath.prepend(item.link.split('?')[0])),
   }));
-
-const createRecentDashboards$ = (
-  recentlyAccessed: ReturnType<typeof getDashboardRecentlyAccessedService>
-): Observable<ReturnType<typeof recentlyAccessed.get>> =>
-  merge(
-    of(recentlyAccessed.get()),
-    recentlyAccessed.get$().pipe(skip(1), debounceTime(RECENT_DASHBOARDS_REORDER_DELAY_MS))
-  );
 
 export const getDashboardsNavigationNode$ = (
   core: CoreStart,
@@ -66,7 +53,7 @@ export const getDashboardsNavigationNode$ = (
   );
 
   return combineLatest([
-    createRecentDashboards$(recentlyAccessed),
+    recentlyAccessed.get$().pipe(startWith(recentlyAccessed.get())),
     starredDashboards$,
   ]).pipe(
     map(([recent, starred]) =>

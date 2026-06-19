@@ -109,6 +109,15 @@ export const createDashboardsNavigationNode = (
       }),
     renderAs: 'panelOpener',
     icon: 'productDashboard',
+    panelHeaderActions: [
+      {
+        id: 'dashboards_search',
+        iconType: 'search',
+        ariaLabel: i18n.translate('dashboard.nav.searchDashboards', {
+          defaultMessage: 'Search dashboards',
+        }),
+      },
+    ],
     children,
     getIsActive:
       options.getIsActive ??

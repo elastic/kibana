@@ -273,12 +273,20 @@ export const toNavigationItems = (
 
     maybeMarkActive(navNode, 1);
 
+    const panelHeaderActions = navNode.panelHeaderActions?.map((action) => ({
+      id: action.id,
+      iconType: action.iconType,
+      'aria-label': action.ariaLabel,
+      'data-test-subj': getTestSubj(navNode, [`panel-header-action-${action.id}`]),
+    }));
+
     return {
       id: navNode.id,
       label: toSentenceCase(warnIfMissing(navNode, 'title', 'Missing Title 😭')),
       iconType: getIcon(navNode),
       href: itemHref,
       sections: secondarySections,
+      ...(panelHeaderActions ? { panelHeaderActions } : {}),
       'data-test-subj': getTestSubj(navNode),
       badgeType: navNode.badgeType,
     } as MenuItem;

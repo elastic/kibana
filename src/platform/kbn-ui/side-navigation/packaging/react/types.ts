@@ -57,6 +57,22 @@ export interface SecondaryMenuSection {
 }
 
 /**
+ * An icon button rendered in a side panel header next to the panel title.
+ */
+export interface PanelHeaderAction {
+  /** Accessible label for the header action button. */
+  'aria-label': string;
+  /** Optional test selector for automated testing. */
+  'data-test-subj'?: string;
+  /** EUI icon name — see https://eui.elastic.co/#/display/icons. */
+  iconType: string;
+  /** Unique identifier for this header action. */
+  id: string;
+  /** Optional click handler for the header action button. */
+  onClick?: () => void;
+}
+
+/**
  * A primary navigation menu item displayed in the sidebar.
  */
 export interface MenuItem {
@@ -72,6 +88,8 @@ export interface MenuItem {
   'data-test-subj'?: string;
   /** Optional badge to display next to the label. */
   badgeType?: BadgeType;
+  /** Optional icon buttons rendered in the side panel header next to the panel title. */
+  panelHeaderActions?: PanelHeaderAction[];
   /** Optional array of secondary menu sections for nested navigation. */
   sections?: SecondaryMenuSection[];
 }

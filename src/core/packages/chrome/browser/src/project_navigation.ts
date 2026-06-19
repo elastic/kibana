@@ -111,6 +111,12 @@ export type SideNavNodeStatus = 'hidden' | 'visible';
 
 export type RenderAs = 'home' | 'panelOpener';
 
+export interface PanelHeaderActionDefinition {
+  ariaLabel: string;
+  iconType: IconType;
+  id: string;
+}
+
 export type GetIsActiveFn = (params: {
   /** The current path name including the basePath + hash value but **without** any query params */
   pathNameSerialized: string;
@@ -159,6 +165,11 @@ interface NodeDefinitionBase {
    * (optional) The type of badge shown next to the item (e.g. `beta`, `techPreview`, `new`).
    */
   badgeType?: BadgeType;
+
+  /**
+   * (optional) Icon buttons rendered in the side panel header next to the panel title.
+   */
+  panelHeaderActions?: PanelHeaderActionDefinition[];
 }
 
 /** @public */

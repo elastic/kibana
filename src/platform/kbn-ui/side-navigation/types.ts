@@ -12,6 +12,32 @@ import type { IconType } from '@elastic/eui';
 export type BadgeType = 'beta' | 'techPreview' | 'new';
 
 /**
+ * An icon button rendered in a side panel header next to the panel title.
+ */
+export interface PanelHeaderAction {
+  /**
+   * Accessible label for the header action button.
+   */
+  'aria-label': string;
+  /**
+   * (optional) `data-test-subj` attribute for testing and tracking purposes.
+   */
+  'data-test-subj'?: string;
+  /**
+   * The EUI icon to display on the button.
+   */
+  iconType: IconType;
+  /**
+   * The unique identifier of the header action.
+   */
+  id: string;
+  /**
+   * (optional) Click handler for the header action button.
+   */
+  onClick?: () => void;
+}
+
+/**
  * A navigation item within a secondary/nested menu.
  * Secondary items appear when a primary menu item with sections is clicked or hovered.
  */
@@ -90,6 +116,10 @@ export interface MenuItem {
    * (optional) The type of badge shown next to the item (e.g. `beta`, `techPreview`, `new`).
    */
   badgeType?: BadgeType;
+  /**
+   * (optional) Icon buttons rendered in the side panel header next to the panel title.
+   */
+  panelHeaderActions?: PanelHeaderAction[];
   /**
    * (optional) The secondary menu sections belonging to the menu item.
    */

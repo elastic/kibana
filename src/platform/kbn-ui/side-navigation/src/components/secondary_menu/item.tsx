@@ -68,14 +68,10 @@ export const SecondaryMenuItemComponent = ({
     ...(isExternal && { target: '_blank' }),
   };
 
-  const buttonPaddingInlineStart = euiTheme.size.s;
-  const buttonPaddingInlineEnd = euiTheme.size.m;
-
   const buttonStyles = css`
     font-weight: ${isHighlighted ? euiTheme.font.weight.semiBold : euiTheme.font.weight.regular};
     // 6px comes from Figma, no token
-    padding-block: 6px;
-    padding-inline: ${buttonPaddingInlineStart} ${buttonPaddingInlineEnd};
+    padding: 6px ${euiTheme.size.s};
     width: 100%;
 
     > span {
@@ -98,13 +94,9 @@ export const SecondaryMenuItemComponent = ({
     gap: ${euiTheme.size.xs};
   `;
 
-  const getSizeInPixels = (size: string) => parseInt(size, 10) || 0;
-
   const getMaxWidth = () => {
-    const buttonHorizontalPadding =
-      getSizeInPixels(buttonPaddingInlineStart) + getSizeInPixels(buttonPaddingInlineEnd);
     const isInSidePanel = testSubjPrefix?.includes('sidePanel');
-    let maxWidth = SIDE_PANEL_WIDTH - ITEM_HORIZONTAL_SPACING_OFFSET - buttonHorizontalPadding;
+    let maxWidth = SIDE_PANEL_WIDTH - ITEM_HORIZONTAL_SPACING_OFFSET;
     // Secondary item label inside side panel (narrower)
     if (isInSidePanel) maxWidth -= SIDE_PANEL_CONTENT_GAP;
     // Secondary item label + badge

@@ -449,6 +449,7 @@ export const Navigation = ({
               <SideNav.SecondaryMenu
                 badgeType={openerNode.badgeType}
                 isPanel
+                panelHeaderActions={openerNode.panelHeaderActions}
                 title={openerNode.label}
                 isNew={getIsNewSecondary(openerNode.id)}
               >

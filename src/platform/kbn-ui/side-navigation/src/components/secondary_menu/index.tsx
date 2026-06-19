@@ -9,10 +9,10 @@
 
 import React, { forwardRef } from 'react';
 import type { ForwardRefExoticComponent, ReactNode, RefAttributes } from 'react';
-import { EuiTitle, useEuiTheme } from '@elastic/eui';
+import { EuiButtonIcon, EuiTitle, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 
-import type { BadgeType } from '../../../types';
+import type { BadgeType, PanelHeaderAction } from '../../../types';
 import { BetaBadge } from '../beta_badge';
 import { SecondaryMenuItemComponent } from './item';
 import { SecondaryMenuSectionComponent } from './section';
@@ -23,6 +23,7 @@ export interface SecondaryMenuProps {
   children: ReactNode;
   isNew?: boolean;
   isPanel?: boolean;
+  panelHeaderActions?: PanelHeaderAction[];
   title: string;
 }
 
@@ -33,33 +34,62 @@ interface SecondaryMenuComponent
 }
 
 const SecondaryMenuBase = forwardRef<HTMLDivElement, SecondaryMenuProps>(
-  ({ badgeType, children, title, isNew = false }, ref) => {
+  ({ badgeType, children, isPanel = false, isNew = false, panelHeaderActions, title }, ref) => {
     const { euiTheme } = useEuiTheme();
     const headerStyle = useMenuHeaderStyle();
 
-    const titleWithBadgeStyles = css`
-      display: flex;
+    const headerRowStyles = css`
       align-items: center;
-      gap: ${euiTheme.size.xs};
-    `;
-
-    const titleStyles = css`
-      ${headerStyle}
       background: ${euiTheme.colors.backgroundBasePlain};
       border-radius: ${euiTheme.border.radius.medium};
+      display: flex;
+      gap: ${euiTheme.size.s};
+      justify-content: space-between;
+      ${headerStyle}
+    `;
+
+    const titleGroupStyles = css`
+      align-items: center;
+      display: flex;
+      gap: ${euiTheme.size.xs};
+      min-width: 0;
+    `;
+
+    const headerActionsStyles = css`
+      display: flex;
+      flex-shrink: 0;
+      gap: ${euiTheme.size.xs};
     `;
 
     return (
       <div ref={ref}>
-        <EuiTitle css={titleStyles} size="xs">
-          <div css={titleWithBadgeStyles}>
-            <h4>{title}</h4>
+        <div css={headerRowStyles}>
+          <div css={titleGroupStyles}>
+            <EuiTitle size="xs">
+              <h4>{title}</h4>
+            </EuiTitle>
             {/* Always show non-new badges, only show new ones if isNew check allows it */}
             {badgeType && (badgeType !== 'new' || isNew) && (
               <BetaBadge type={badgeType} alignment="text-bottom" />
             )}
           </div>
-        </EuiTitle>
+          {isPanel && panelHeaderActions && panelHeaderActions.length > 0 && (
+            <div css={headerActionsStyles}>
+              {panelHeaderActions.map((action) => (
+                <EuiButtonIcon
+                  key={action.id}
+                  aria-label={action['aria-label']}
+                  color="text"
+                  data-test-subj={action['data-test-subj']}
+                  display="empty"
+                  iconType={action.iconType}
+                  onClick={action.onClick}
+                  size="xs"
+                />
+              ))}
+            </div>
+          )}
+        </div>
         {children}
       </div>
     );

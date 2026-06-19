@@ -7,12 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useLayoutEffect, useRef } from 'react';
+import React from 'react';
 import type { ReactNode } from 'react';
 import { EuiText, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
-
-const REORDER_ANIMATION_MS = 300;
 
 export interface SecondaryMenuSectionProps {
   children: ReactNode;
@@ -25,45 +23,6 @@ export const SecondaryMenuSectionComponent = ({
 }: SecondaryMenuSectionProps): JSX.Element => {
   const euiThemeContext = useEuiTheme();
   const { euiTheme, highContrastMode } = euiThemeContext;
-  const listRef = useRef<HTMLUListElement>(null);
-  const previousItemPositionsRef = useRef<Map<string, DOMRect>>(new Map());
-
-  useLayoutEffect(() => {
-    const list = listRef.current;
-    if (!list) {
-      return;
-    }
-
-    const nextPositions = new Map<string, DOMRect>();
-
-    list.querySelectorAll<HTMLLIElement>(':scope > li').forEach((item) => {
-      const itemId = item.querySelector<HTMLElement>('[id]')?.id;
-      if (!itemId) {
-        return;
-      }
-
-      const nextRect = item.getBoundingClientRect();
-      const previousRect = previousItemPositionsRef.current.get(itemId);
-
-      if (previousRect) {
-        const deltaY = previousRect.top - nextRect.top;
-
-        if (Math.abs(deltaY) > 0.5) {
-          item.style.transform = `translateY(${deltaY}px)`;
-          item.style.transition = 'transform 0s';
-
-          requestAnimationFrame(() => {
-            item.style.transition = `transform ${REORDER_ANIMATION_MS}ms ease-out`;
-            item.style.transform = '';
-          });
-        }
-      }
-
-      nextPositions.set(itemId, nextRect);
-    });
-
-    previousItemPositionsRef.current = nextPositions;
-  }, [children]);
 
   const sectionId = label ? label.replace(/\s+/g, '-').toLowerCase() : undefined;
 
@@ -114,7 +73,7 @@ export const SecondaryMenuSectionComponent = ({
           {label}
         </EuiText>
       )}
-      <ul ref={listRef} css={listStyles} role="none">
+      <ul css={listStyles} role="none">
         {children}
       </ul>
     </div>

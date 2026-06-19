@@ -31,6 +31,13 @@ describe('createDashboardsNavigationNode', () => {
       title: 'Dashboards',
       renderAs: 'panelOpener',
       icon: 'productDashboard',
+      panelHeaderActions: [
+        {
+          id: 'dashboards_search',
+          iconType: 'search',
+          ariaLabel: 'Search dashboards',
+        },
+      ],
       children: [
         {
           id: 'dashboards_overview',
@@ -109,6 +116,14 @@ describe('createDashboardsNavigationNode', () => {
 
     const { navItems } = toNavigationItems(navigationTreeUI, [], new PanelStateManager());
     const dashboardsItem = navItems.primaryItems.find((item) => item.id === DASHBOARD_APP_ID);
+
+    expect(dashboardsItem?.panelHeaderActions).toEqual([
+      expect.objectContaining({
+        id: 'dashboards_search',
+        iconType: 'search',
+        'aria-label': 'Search dashboards',
+      }),
+    ]);
 
     expect(dashboardsItem?.sections).toEqual([
       {
