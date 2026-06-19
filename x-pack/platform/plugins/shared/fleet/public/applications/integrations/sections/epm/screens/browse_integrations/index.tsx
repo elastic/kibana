@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { EuiFlexItem, EuiFlexGroup, EuiSpacer, useEuiTheme } from '@elastic/eui';
 import { useLocation, useHistory } from 'react-router-dom';
 
@@ -89,13 +89,20 @@ export const BrowseIntegrationsPage: React.FC<{ prereleaseIntegrationsEnabled: b
 
   const isObservability = cloud?.serverless?.projectType === 'observability';
 
+  // Tracks whether we've already auto-redirected to the default category this page visit.
+  // Without this, clicking "All categories" (which clears initialSelectedCategory) would
+  // immediately trigger another redirect back to the default — preventing removal.
+  const hasAutoRedirectedRef = useRef(false);
+
   useEffect(() => {
     if (
+      !hasAutoRedirectedRef.current &&
       isObservability &&
       !isLoading &&
       !initialSelectedCategory &&
       categoryExists(OBLT_DEFAULT_CATEGORY, allCategories)
     ) {
+      hasAutoRedirectedRef.current = true;
       setUrlCategory({ category: OBLT_DEFAULT_CATEGORY }, { replace: true });
     }
   }, [isObservability, isLoading, initialSelectedCategory, allCategories, setUrlCategory]);

@@ -156,5 +156,30 @@ describe('BrowseIntegrationsPage', () => {
         );
       });
     });
+
+    it('does not redirect again after the user navigates to All categories', async () => {
+      // Simulate the initial load: no URL category → redirect fires
+      const { rerender } = renderPage();
+      await waitFor(() => {
+        expect(mockSetUrlCategory).toHaveBeenCalledTimes(1);
+      });
+
+      // Simulate the user clicking "All categories": initialSelectedCategory goes back to ''
+      mockUseBrowseIntegrationHook.mockReturnValue(
+        makeDefaultHookReturn({ initialSelectedCategory: '', selectedCategory: '' })
+      );
+      rerender(
+        <I18nProvider>
+          <EuiThemeProvider>
+            <BrowseIntegrationsPage prereleaseIntegrationsEnabled={false} />
+          </EuiThemeProvider>
+        </I18nProvider>
+      );
+
+      // The redirect must not fire a second time
+      await waitFor(() => {
+        expect(mockSetUrlCategory).toHaveBeenCalledTimes(1);
+      });
+    });
   });
 });
