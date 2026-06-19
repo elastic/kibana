@@ -56,7 +56,9 @@ export function getEditorFlyout({
         };
         if (initialState?.refId) {
           const { refId, ...updateState } = newState;
+          const original = await linksClient.get(initialState.refId); // get the original library item so we can perform a full update
           await linksClient.update(initialState.refId, {
+            ...original.data,
             ...updateState,
             links: serializeResolvedLinks(newLinks),
           });
