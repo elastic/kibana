@@ -73,11 +73,11 @@ export interface StreamsAppStartDependencies {
   unifiedDocViewer: UnifiedDocViewerStart;
   dashboard: DashboardStart;
   cloud?: CloudStart;
-  agentBuilder?: AgentBuilderPluginStart;
   cps?: CPSPluginStart;
   spaces?: SpacesPluginStart;
   console: ConsolePluginStart;
   evals?: EvalsPublicStart;
+  agentBuilder?: AgentBuilderPluginStart;
 }
 
 export interface StreamsAppPublicSetup {}
