@@ -159,16 +159,34 @@ export const executeNewTermsEsqlApproach = async (execOptions: NewTermsExecutorO
     ruleExecutionTimeout: undefined,
   });
 
-  const esqlResponse = await performEsqlRequest({
-    esClient: services.scopedClusterClient.asCurrentUser,
-    requestBody: esqlRequest,
-    requestQueryParams: {
-      drop_null_columns: true,
-    },
-    ruleExecutionLogger,
-    shouldStopExecution: services.shouldStopExecution,
-    loggedRequests: isLoggedRequestsEnabled ? loggedRequests : undefined,
-  });
+  let esqlResponse;
+  try {
+    esqlResponse = await performEsqlRequest({
+      esClient: services.scopedClusterClient.asCurrentUser,
+      requestBody: esqlRequest,
+      requestQueryParams: {
+        drop_null_columns: true,
+      },
+      ruleExecutionLogger,
+      shouldStopExecution: services.shouldStopExecution,
+      loggedRequests: isLoggedRequestsEnabled ? loggedRequests : undefined,
+    });
+  } catch (error) {
+    // A failed ES|QL query (e.g. unsupported field types producing an "Unknown column"
+    // verification_exception) must degrade to a rule-level error. Letting it propagate
+    // turns into an unhandled promise rejection that crashes the Kibana process.
+    const message = error instanceof Error ? error.message : String(error);
+    result.errors.push(`ES|QL request to find new terms failed: ${message}`);
+    result.success = false;
+
+    scheduleNotificationResponseActionsService({
+      signals: result.createdSignals,
+      signalsCount: result.createdSignalsCount,
+      responseActions: completeRule.ruleParams.responseActions,
+    });
+
+    return { ...result, state, ...(isLoggedRequestsEnabled ? { loggedRequests } : {}) };
+  }
 
   // Parse ES|QL results to extract bucket keys
   // ES|QL returns columns and values array
