@@ -19,6 +19,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import type { monaco } from '@kbn/code-editor';
 import type { RuleQuery } from './compose_form_types';
+import { getBreachQuery } from './compose_form_types';
 import type { QueryTab } from './types';
 import { QuerySandbox } from './query_sandbox';
 import type { QuerySandboxProps } from './query_sandbox';
@@ -140,10 +141,7 @@ export const QuerySandboxFlyout: React.FC<QuerySandboxFlyoutProps> = ({
     [query, queryFields, onQueryChange]
   );
 
-  const activeQuery =
-    query.format === 'composed'
-      ? [query.base, query.breach.segment].filter(Boolean).join('\n')
-      : query.breach.query;
+  const activeQuery = query.format === 'composed' ? getBreachQuery(query) : query.breach.query;
 
   const handleQueryChange = useCallback((v: string) => updateQuery({ breach: v }), [updateQuery]);
 
