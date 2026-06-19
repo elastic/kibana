@@ -1,4 +1,4 @@
-# gh-aw-metadata: {"schema_version":"v3","frontmatter_hash":"e4d2449d046e39025a28a090d586819d91317568c4abf6738ac5a48e30e55402","compiler_version":"v0.76.1","agent_id":"claude","agent_model":"opus"}
+# gh-aw-metadata: {"schema_version":"v3","frontmatter_hash":"e61a1bec2d522282cdc522b3835ce34f99990acfaa9b32a82c78628874a68212","compiler_version":"v0.76.1","agent_id":"claude","agent_model":"opus"}
 # gh-aw-manifest: {"version":1,"secrets":["GH_AW_CI_TRIGGER_TOKEN","GH_AW_GITHUB_MCP_SERVER_TOKEN","GH_AW_GITHUB_TOKEN","GITHUB_TOKEN","LITELLM_API_KEY","OPS_BUILDKITE_TOKEN"],"actions":[{"repo":"actions/checkout","sha":"de0fac2e4500dabe0009e67214ff5f5447ce83dd","version":"v6.0.2"},{"repo":"actions/download-artifact","sha":"3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c","version":"v8.0.1"},{"repo":"actions/github-script","sha":"373c709c69115d41ff229c7e5df9f8788daa9553","version":"v9"},{"repo":"actions/github-script","sha":"3a2844b7e9c422d3c10d287c895573f7108da1b3","version":"v9.0.0"},{"repo":"actions/setup-node","sha":"48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e","version":"v6.4.0"},{"repo":"actions/upload-artifact","sha":"043fb46d1a93c77aae656e7c1c64a875d1fc6a0a","version":"v7.0.1"},{"repo":"github/gh-aw-actions/setup","sha":"46d564922b082d0db93244972e8005ea6904ee5f","version":"v0.76.1"}],"containers":[{"image":"ghcr.io/github/gh-aw-firewall/agent:0.25.55"},{"image":"ghcr.io/github/gh-aw-firewall/api-proxy:0.25.55"},{"image":"ghcr.io/github/gh-aw-firewall/squid:0.25.55"},{"image":"ghcr.io/github/gh-aw-mcpg:v0.3.19"},{"image":"ghcr.io/github/github-mcp-server:v1.0.4","digest":"sha256:e3816a476a977cfb836e7d221510011436c654d11861db66ecfd826601aba6a4","pinned_image":"ghcr.io/github/github-mcp-server:v1.0.4@sha256:e3816a476a977cfb836e7d221510011436c654d11861db66ecfd826601aba6a4"},{"image":"node:lts-alpine","digest":"sha256:2bdb65ed1dab192432bc31c95f94155ca5ad7fc1392fb7eb7526ab682fa5bf14","pinned_image":"node:lts-alpine@sha256:2bdb65ed1dab192432bc31c95f94155ca5ad7fc1392fb7eb7526ab682fa5bf14"}]}
 #    ___                   _   _      
 #   / _ \                 | | (_)     
@@ -22,7 +22,7 @@
 #
 # For more information: https://github.github.com/gh-aw/introduction/overview/
 #
-# Validate a Flaky Test Fixer PR by running the Flaky Test Runner, attributing results, iterating the fix, and reporting confidence.
+# Verify a Flaky Test Fixer PR by running the Flaky Test Runner, attributing results, iterating the fix, and reporting confidence.
 #
 # Frontmatter env variables:
 #   - BUILDKITE_ORGANIZATION_SLUG: (main workflow)
@@ -53,7 +53,7 @@
 #   - ghcr.io/github/github-mcp-server:v1.0.4@sha256:e3816a476a977cfb836e7d221510011436c654d11861db66ecfd826601aba6a4
 #   - node:lts-alpine@sha256:2bdb65ed1dab192432bc31c95f94155ca5ad7fc1392fb7eb7526ab682fa5bf14
 
-name: "Flaky Fix Confidence"
+name: "Flaky Fix Verifier"
 on:
   # bots: # Bots processed as bot check in pre-activation job
   # - github-actions[bot] # Bots processed as bot check in pre-activation job
@@ -81,9 +81,9 @@ permissions: {}
 
 concurrency:
   cancel-in-progress: false
-  group: flaky-confidence-${{ github.event.pull_request.number || github.event.issue.number || github.event.inputs.pr_number }}
+  group: flaky-fix-verifier-${{ github.event.pull_request.number || github.event.issue.number || github.event.inputs.pr_number }}
 
-run-name: "Flaky Fix Confidence"
+run-name: "Flaky Fix Verifier"
 
 env:
   BUILDKITE_ORGANIZATION_SLUG: elastic
@@ -106,10 +106,10 @@ jobs:
       github.event_name == 'issue_comment' &&
       github.event.issue.pull_request &&
       contains(github.event.comment.body, 'Flaky Test Runner Stats') &&
-      contains(github.event.issue.labels.*.name, 'flaky-confidence:running') &&
-      !contains(github.event.issue.labels.*.name, 'flaky-confidence:passed') &&
-      !contains(github.event.issue.labels.*.name, 'flaky-confidence:needs-human') &&
-      !contains(github.event.issue.labels.*.name, 'flaky-confidence:not-applicable')
+      contains(github.event.issue.labels.*.name, 'flaky-fix-verifier:running') &&
+      !contains(github.event.issue.labels.*.name, 'flaky-fix-verifier:passed') &&
+      !contains(github.event.issue.labels.*.name, 'flaky-fix-verifier:needs-human') &&
+      !contains(github.event.issue.labels.*.name, 'flaky-fix-verifier:not-applicable')
       )
       ))
     runs-on: ubuntu-slim
@@ -140,8 +140,8 @@ jobs:
           trace-id: ${{ needs.pre_activation.outputs.setup-trace-id }}
           parent-span-id: ${{ needs.pre_activation.outputs.setup-parent-span-id || needs.pre_activation.outputs.setup-span-id }}
         env:
-          GH_AW_SETUP_WORKFLOW_NAME: "Flaky Fix Confidence"
-          GH_AW_CURRENT_WORKFLOW_REF: ${{ github.repository }}/.github/workflows/flaky-confidence.lock.yml@${{ github.ref }}
+          GH_AW_SETUP_WORKFLOW_NAME: "Flaky Fix Verifier"
+          GH_AW_CURRENT_WORKFLOW_REF: ${{ github.repository }}/.github/workflows/flaky-fix-verifier.lock.yml@${{ github.ref }}
           GH_AW_INFO_VERSION: "2.1.165"
           GH_AW_INFO_AWF_VERSION: "v0.25.55"
           GH_AW_INFO_ENGINE_ID: "claude"
@@ -154,7 +154,7 @@ jobs:
           GH_AW_INFO_VERSION: "2.1.165"
           GH_AW_INFO_AGENT_VERSION: "2.1.165"
           GH_AW_INFO_CLI_VERSION: "v0.76.1"
-          GH_AW_INFO_WORKFLOW_NAME: "Flaky Fix Confidence"
+          GH_AW_INFO_WORKFLOW_NAME: "Flaky Fix Verifier"
           GH_AW_INFO_EXPERIMENTAL: "false"
           GH_AW_INFO_SUPPORTS_TOOLS_ALLOWLIST: "true"
           GH_AW_INFO_STAGED: "false"
@@ -202,7 +202,7 @@ jobs:
         id: check-lock-file
         uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
         env:
-          GH_AW_WORKFLOW_FILE: "flaky-confidence.lock.yml"
+          GH_AW_WORKFLOW_FILE: "flaky-fix-verifier.lock.yml"
           GH_AW_CONTEXT_WORKFLOW_REF: "${{ github.workflow_ref }}"
         with:
           script: |
@@ -251,23 +251,23 @@ jobs:
         run: |
           bash "${RUNNER_TEMP}/gh-aw/actions/create_prompt_first.sh"
           {
-          cat << 'GH_AW_PROMPT_e9170a583d5be55c_EOF'
+          cat << 'GH_AW_PROMPT_6147500dda2332d0_EOF'
           <system>
-          GH_AW_PROMPT_e9170a583d5be55c_EOF
+          GH_AW_PROMPT_6147500dda2332d0_EOF
           cat "${RUNNER_TEMP}/gh-aw/prompts/xpia.md"
           cat "${RUNNER_TEMP}/gh-aw/prompts/temp_folder_prompt.md"
           cat "${RUNNER_TEMP}/gh-aw/prompts/markdown.md"
           cat "${RUNNER_TEMP}/gh-aw/prompts/safe_outputs_prompt.md"
-          cat << 'GH_AW_PROMPT_e9170a583d5be55c_EOF'
+          cat << 'GH_AW_PROMPT_6147500dda2332d0_EOF'
           <safe-output-tools>
           Tools: add_comment(max:3), add_labels(max:2), push_to_pull_request_branch, missing_tool, missing_data, noop
-          GH_AW_PROMPT_e9170a583d5be55c_EOF
+          GH_AW_PROMPT_6147500dda2332d0_EOF
           cat "${RUNNER_TEMP}/gh-aw/prompts/safe_outputs_push_to_pr_branch.md"
-          cat << 'GH_AW_PROMPT_e9170a583d5be55c_EOF'
+          cat << 'GH_AW_PROMPT_6147500dda2332d0_EOF'
           </safe-output-tools>
-          GH_AW_PROMPT_e9170a583d5be55c_EOF
+          GH_AW_PROMPT_6147500dda2332d0_EOF
           cat "${RUNNER_TEMP}/gh-aw/prompts/mcp_cli_tools_prompt.md"
-          cat << 'GH_AW_PROMPT_e9170a583d5be55c_EOF'
+          cat << 'GH_AW_PROMPT_6147500dda2332d0_EOF'
           <github-context>
           The following GitHub context information is available for this workflow:
           {{#if github.actor}}
@@ -296,7 +296,7 @@ jobs:
           {{/if}}
           </github-context>
           
-          GH_AW_PROMPT_e9170a583d5be55c_EOF
+          GH_AW_PROMPT_6147500dda2332d0_EOF
           cat "${RUNNER_TEMP}/gh-aw/prompts/github_mcp_tools_with_safeoutputs_prompt.md"
           if [ "$GITHUB_EVENT_NAME" = "issue_comment" ] && [ -n "$GH_AW_IS_PR_COMMENT" ] || [ "$GITHUB_EVENT_NAME" = "pull_request_review_comment" ] || [ "$GITHUB_EVENT_NAME" = "pull_request_review" ]; then
             cat "${RUNNER_TEMP}/gh-aw/prompts/pr_context_prompt.md"
@@ -304,10 +304,10 @@ jobs:
           if [ "$GITHUB_EVENT_NAME" = "issue_comment" ] && [ -n "$GH_AW_IS_PR_COMMENT" ] || [ "$GITHUB_EVENT_NAME" = "pull_request_review_comment" ] || [ "$GITHUB_EVENT_NAME" = "pull_request_review" ]; then
             cat "${RUNNER_TEMP}/gh-aw/prompts/pr_context_push_to_pr_branch_guidance.md"
           fi
-          cat << 'GH_AW_PROMPT_e9170a583d5be55c_EOF'
+          cat << 'GH_AW_PROMPT_6147500dda2332d0_EOF'
           </system>
-          {{#runtime-import .github/workflows/flaky-confidence.md}}
-          GH_AW_PROMPT_e9170a583d5be55c_EOF
+          {{#runtime-import .github/workflows/flaky-fix-verifier.md}}
+          GH_AW_PROMPT_6147500dda2332d0_EOF
           } > "$GH_AW_PROMPT"
       - name: Interpolate variables and render templates
         uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
@@ -410,7 +410,7 @@ jobs:
       GH_AW_ASSETS_BRANCH: ""
       GH_AW_ASSETS_MAX_SIZE_KB: 0
       GH_AW_MCP_LOG_DIR: /tmp/gh-aw/mcp-logs/safeoutputs
-      GH_AW_WORKFLOW_ID_SANITIZED: flakyconfidence
+      GH_AW_WORKFLOW_ID_SANITIZED: flakyfixverifier
     outputs:
       checkout_pr_success: ${{ steps.checkout-pr.outputs.checkout_pr_success || 'true' }}
       effective_tokens: ${{ steps.parse-mcp-gateway.outputs.effective_tokens }}
@@ -432,8 +432,8 @@ jobs:
           trace-id: ${{ needs.activation.outputs.setup-trace-id }}
           parent-span-id: ${{ needs.activation.outputs.setup-parent-span-id || needs.activation.outputs.setup-span-id }}
         env:
-          GH_AW_SETUP_WORKFLOW_NAME: "Flaky Fix Confidence"
-          GH_AW_CURRENT_WORKFLOW_REF: ${{ github.repository }}/.github/workflows/flaky-confidence.lock.yml@${{ github.ref }}
+          GH_AW_SETUP_WORKFLOW_NAME: "Flaky Fix Verifier"
+          GH_AW_CURRENT_WORKFLOW_REF: ${{ github.repository }}/.github/workflows/flaky-fix-verifier.lock.yml@${{ github.ref }}
           GH_AW_INFO_VERSION: "2.1.165"
           GH_AW_INFO_AWF_VERSION: "v0.25.55"
           GH_AW_INFO_ENGINE_ID: "claude"
@@ -549,16 +549,16 @@ jobs:
           mkdir -p "${RUNNER_TEMP}/gh-aw/safeoutputs"
           mkdir -p /tmp/gh-aw/safeoutputs
           mkdir -p /tmp/gh-aw/mcp-logs/safeoutputs
-          cat > "${RUNNER_TEMP}/gh-aw/safeoutputs/config.json" << 'GH_AW_SAFE_OUTPUTS_CONFIG_b0e8d976de5c83b6_EOF'
-          {"add_comment":{"max":3,"target":"${{ github.event.pull_request.number || github.event.issue.number || github.event.inputs.pr_number }}"},"add_labels":{"allowed":["flaky-confidence:running","flaky-confidence:passed","flaky-confidence:needs-human","flaky-confidence:not-applicable"],"max":2,"target":"${{ github.event.pull_request.number || github.event.issue.number || github.event.inputs.pr_number }}"},"create_report_incomplete_issue":{},"missing_data":{},"missing_tool":{},"noop":{"max":1,"report-as-issue":"true"},"push_to_pull_request_branch":{"if_no_changes":"warn","max":1,"max_patch_size":1024,"patch_format":"am","protect_top_level_dot_folders":true,"protected_files":["package.json","bun.lockb","bunfig.toml","deno.json","deno.jsonc","deno.lock","global.json","NuGet.Config","Directory.Packages.props","mix.exs","mix.lock","go.mod","go.sum","stack.yaml","stack.yaml.lock","pom.xml","build.gradle","build.gradle.kts","settings.gradle","settings.gradle.kts","gradle.properties","package-lock.json","yarn.lock","pnpm-lock.yaml","npm-shrinkwrap.json","requirements.txt","Pipfile","Pipfile.lock","pyproject.toml","setup.py","setup.cfg","Gemfile","Gemfile.lock","uv.lock","CODEOWNERS","DESIGN.md","README.md","CONTRIBUTING.md","CHANGELOG.md","SECURITY.md","CODE_OF_CONDUCT.md","CLAUDE.md","AGENTS.md"],"protected_files_policy":"fallback-to-issue","required_labels":["flaky-test-fixer"],"target":"*"},"report_incomplete":{}}
-          GH_AW_SAFE_OUTPUTS_CONFIG_b0e8d976de5c83b6_EOF
+          cat > "${RUNNER_TEMP}/gh-aw/safeoutputs/config.json" << 'GH_AW_SAFE_OUTPUTS_CONFIG_98e4d5838b6bd5a0_EOF'
+          {"add_comment":{"max":3,"target":"${{ github.event.pull_request.number || github.event.issue.number || github.event.inputs.pr_number }}"},"add_labels":{"allowed":["flaky-fix-verifier:running","flaky-fix-verifier:passed","flaky-fix-verifier:needs-human","flaky-fix-verifier:not-applicable"],"max":2,"target":"${{ github.event.pull_request.number || github.event.issue.number || github.event.inputs.pr_number }}"},"create_report_incomplete_issue":{},"missing_data":{},"missing_tool":{},"noop":{"max":1,"report-as-issue":"true"},"push_to_pull_request_branch":{"if_no_changes":"warn","max":1,"max_patch_size":1024,"patch_format":"am","protect_top_level_dot_folders":true,"protected_files":["package.json","bun.lockb","bunfig.toml","deno.json","deno.jsonc","deno.lock","global.json","NuGet.Config","Directory.Packages.props","mix.exs","mix.lock","go.mod","go.sum","stack.yaml","stack.yaml.lock","pom.xml","build.gradle","build.gradle.kts","settings.gradle","settings.gradle.kts","gradle.properties","package-lock.json","yarn.lock","pnpm-lock.yaml","npm-shrinkwrap.json","requirements.txt","Pipfile","Pipfile.lock","pyproject.toml","setup.py","setup.cfg","Gemfile","Gemfile.lock","uv.lock","CODEOWNERS","DESIGN.md","README.md","CONTRIBUTING.md","CHANGELOG.md","SECURITY.md","CODE_OF_CONDUCT.md","CLAUDE.md","AGENTS.md"],"protected_files_policy":"fallback-to-issue","required_labels":["flaky-test-fixer"],"target":"*"},"report_incomplete":{}}
+          GH_AW_SAFE_OUTPUTS_CONFIG_98e4d5838b6bd5a0_EOF
       - name: Generate Safe Outputs Tools
         env:
           GH_AW_TOOLS_META_JSON: |
             {
               "description_suffixes": {
                 "add_comment": " CONSTRAINTS: Maximum 3 comment(s) can be added. Target: ${{ github.event.pull_request.number || github.event.issue.number || github.event.inputs.pr_number }}. Supports reply_to_id for discussion threading.",
-                "add_labels": " CONSTRAINTS: Maximum 2 label(s) can be added. Only these labels are allowed: [\"flaky-confidence:running\" \"flaky-confidence:passed\" \"flaky-confidence:needs-human\" \"flaky-confidence:not-applicable\"]. Target: ${{ github.event.pull_request.number || github.event.issue.number || github.event.inputs.pr_number }}.",
+                "add_labels": " CONSTRAINTS: Maximum 2 label(s) can be added. Only these labels are allowed: [\"flaky-fix-verifier:running\" \"flaky-fix-verifier:passed\" \"flaky-fix-verifier:needs-human\" \"flaky-fix-verifier:not-applicable\"]. Target: ${{ github.event.pull_request.number || github.event.issue.number || github.event.inputs.pr_number }}.",
                 "push_to_pull_request_branch": " CONSTRAINTS: Maximum 1 push(es) can be made."
               },
               "repo_params": {},
@@ -785,7 +785,7 @@ jobs:
           export MCP_GATEWAY_DOCKER_COMMAND='docker run -i --rm --network host --add-host host.docker.internal:127.0.0.1 --user '"${MCP_GATEWAY_UID}"':'"${MCP_GATEWAY_GID}"' --group-add '"${DOCKER_SOCK_GID}"' -v '"${DOCKER_SOCK_PATH}"':/var/run/docker.sock -e MCP_GATEWAY_PORT -e MCP_GATEWAY_DOMAIN -e MCP_GATEWAY_API_KEY -e MCP_GATEWAY_PAYLOAD_DIR -e MCP_GATEWAY_PAYLOAD_SIZE_THRESHOLD -e DOCKER_HOST=unix:///var/run/docker.sock -e DEBUG -e MCP_GATEWAY_LOG_DIR -e GH_AW_MCP_LOG_DIR -e GH_AW_SAFE_OUTPUTS -e GH_AW_SAFE_OUTPUTS_CONFIG_PATH -e GH_AW_SAFE_OUTPUTS_TOOLS_PATH -e GH_AW_ASSETS_BRANCH -e GH_AW_ASSETS_MAX_SIZE_KB -e GH_AW_ASSETS_ALLOWED_EXTS -e DEFAULT_BRANCH -e GITHUB_MCP_SERVER_TOKEN -e GITHUB_MCP_GUARD_MIN_INTEGRITY -e GITHUB_MCP_GUARD_REPOS -e GITHUB_REPOSITORY -e GITHUB_SERVER_URL -e GITHUB_SHA -e GITHUB_WORKSPACE -e GITHUB_TOKEN -e GITHUB_RUN_ID -e GITHUB_RUN_NUMBER -e GITHUB_RUN_ATTEMPT -e GITHUB_JOB -e GITHUB_ACTION -e GITHUB_EVENT_NAME -e GITHUB_EVENT_PATH -e GITHUB_ACTOR -e GITHUB_ACTOR_ID -e GITHUB_TRIGGERING_ACTOR -e GITHUB_WORKFLOW -e GITHUB_WORKFLOW_REF -e GITHUB_WORKFLOW_SHA -e GITHUB_REF -e GITHUB_REF_NAME -e GITHUB_REF_TYPE -e GITHUB_HEAD_REF -e GITHUB_BASE_REF -e GH_AW_SAFE_OUTPUTS_PORT -e GH_AW_SAFE_OUTPUTS_API_KEY -v /tmp/gh-aw/mcp-payloads:/tmp/gh-aw/mcp-payloads:rw -v /opt:/opt:ro -v /tmp:/tmp:rw -v '"${GITHUB_WORKSPACE}"':'"${GITHUB_WORKSPACE}"':rw ghcr.io/github/gh-aw-mcpg:v0.3.19'
           
           GH_AW_NODE=$(which node 2>/dev/null || command -v node 2>/dev/null || echo node)
-          cat << GH_AW_MCP_CONFIG_4134eb615d90c5a2_EOF | "$GH_AW_NODE" "${RUNNER_TEMP}/gh-aw/actions/start_mcp_gateway.cjs"
+          cat << GH_AW_MCP_CONFIG_f5bd6ab4db4a1c4e_EOF | "$GH_AW_NODE" "${RUNNER_TEMP}/gh-aw/actions/start_mcp_gateway.cjs"
           {
             "mcpServers": {
               "github": {
@@ -825,7 +825,7 @@ jobs:
               "payloadDir": "${MCP_GATEWAY_PAYLOAD_DIR}"
             }
           }
-          GH_AW_MCP_CONFIG_4134eb615d90c5a2_EOF
+          GH_AW_MCP_CONFIG_f5bd6ab4db4a1c4e_EOF
       - name: Mount MCP servers as CLIs
         id: mount-mcp-clis
         continue-on-error: true
@@ -1138,7 +1138,7 @@ jobs:
       issues: write
       pull-requests: write
     concurrency:
-      group: "gh-aw-conclusion-flaky-confidence"
+      group: "gh-aw-conclusion-flaky-fix-verifier"
       cancel-in-progress: false
       queue: max
     outputs:
@@ -1156,8 +1156,8 @@ jobs:
           trace-id: ${{ needs.activation.outputs.setup-trace-id }}
           parent-span-id: ${{ needs.activation.outputs.setup-parent-span-id || needs.activation.outputs.setup-span-id }}
         env:
-          GH_AW_SETUP_WORKFLOW_NAME: "Flaky Fix Confidence"
-          GH_AW_CURRENT_WORKFLOW_REF: ${{ github.repository }}/.github/workflows/flaky-confidence.lock.yml@${{ github.ref }}
+          GH_AW_SETUP_WORKFLOW_NAME: "Flaky Fix Verifier"
+          GH_AW_CURRENT_WORKFLOW_REF: ${{ github.repository }}/.github/workflows/flaky-fix-verifier.lock.yml@${{ github.ref }}
           GH_AW_INFO_VERSION: "2.1.165"
           GH_AW_INFO_AWF_VERSION: "v0.25.55"
           GH_AW_INFO_ENGINE_ID: "claude"
@@ -1181,8 +1181,8 @@ jobs:
         env:
           GH_AW_AGENT_OUTPUT: ${{ steps.setup-agent-output-env.outputs.GH_AW_AGENT_OUTPUT }}
           GH_AW_NOOP_MAX: "1"
-          GH_AW_WORKFLOW_NAME: "Flaky Fix Confidence"
-          GH_AW_WORKFLOW_SOURCE_URL: "${{ github.server_url }}/${{ github.repository }}/blob/${{ github.ref_name }}/.github/workflows/flaky-confidence.md"
+          GH_AW_WORKFLOW_NAME: "Flaky Fix Verifier"
+          GH_AW_WORKFLOW_SOURCE_URL: "${{ github.server_url }}/${{ github.repository }}/blob/${{ github.ref_name }}/.github/workflows/flaky-fix-verifier.md"
           GH_AW_RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
           GH_AW_AGENT_CONCLUSION: ${{ needs.agent.result }}
           GH_AW_NOOP_REPORT_AS_ISSUE: "true"
@@ -1198,8 +1198,8 @@ jobs:
         uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
         env:
           GH_AW_AGENT_OUTPUT: ${{ steps.setup-agent-output-env.outputs.GH_AW_AGENT_OUTPUT }}
-          GH_AW_WORKFLOW_NAME: "Flaky Fix Confidence"
-          GH_AW_WORKFLOW_SOURCE_URL: "${{ github.server_url }}/${{ github.repository }}/blob/${{ github.ref_name }}/.github/workflows/flaky-confidence.md"
+          GH_AW_WORKFLOW_NAME: "Flaky Fix Verifier"
+          GH_AW_WORKFLOW_SOURCE_URL: "${{ github.server_url }}/${{ github.repository }}/blob/${{ github.ref_name }}/.github/workflows/flaky-fix-verifier.md"
           GH_AW_RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
           GH_AW_DETECTION_CONCLUSION: ${{ needs.detection.outputs.detection_conclusion }}
           GH_AW_DETECTION_REASON: ${{ needs.detection.outputs.detection_reason }}
@@ -1216,8 +1216,8 @@ jobs:
         env:
           GH_AW_AGENT_OUTPUT: ${{ steps.setup-agent-output-env.outputs.GH_AW_AGENT_OUTPUT }}
           GH_AW_MISSING_TOOL_CREATE_ISSUE: "true"
-          GH_AW_WORKFLOW_NAME: "Flaky Fix Confidence"
-          GH_AW_WORKFLOW_SOURCE_URL: "${{ github.server_url }}/${{ github.repository }}/blob/${{ github.ref_name }}/.github/workflows/flaky-confidence.md"
+          GH_AW_WORKFLOW_NAME: "Flaky Fix Verifier"
+          GH_AW_WORKFLOW_SOURCE_URL: "${{ github.server_url }}/${{ github.repository }}/blob/${{ github.ref_name }}/.github/workflows/flaky-fix-verifier.md"
         with:
           github-token: ${{ secrets.GH_AW_GITHUB_TOKEN || secrets.GITHUB_TOKEN }}
           script: |
@@ -1231,8 +1231,8 @@ jobs:
         env:
           GH_AW_AGENT_OUTPUT: ${{ steps.setup-agent-output-env.outputs.GH_AW_AGENT_OUTPUT }}
           GH_AW_REPORT_INCOMPLETE_CREATE_ISSUE: "true"
-          GH_AW_WORKFLOW_NAME: "Flaky Fix Confidence"
-          GH_AW_WORKFLOW_SOURCE_URL: "${{ github.server_url }}/${{ github.repository }}/blob/${{ github.ref_name }}/.github/workflows/flaky-confidence.md"
+          GH_AW_WORKFLOW_NAME: "Flaky Fix Verifier"
+          GH_AW_WORKFLOW_SOURCE_URL: "${{ github.server_url }}/${{ github.repository }}/blob/${{ github.ref_name }}/.github/workflows/flaky-fix-verifier.md"
         with:
           github-token: ${{ secrets.GH_AW_GITHUB_TOKEN || secrets.GITHUB_TOKEN }}
           script: |
@@ -1246,11 +1246,11 @@ jobs:
         uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
         env:
           GH_AW_AGENT_OUTPUT: ${{ steps.setup-agent-output-env.outputs.GH_AW_AGENT_OUTPUT }}
-          GH_AW_WORKFLOW_NAME: "Flaky Fix Confidence"
-          GH_AW_WORKFLOW_SOURCE_URL: "${{ github.server_url }}/${{ github.repository }}/blob/${{ github.ref_name }}/.github/workflows/flaky-confidence.md"
+          GH_AW_WORKFLOW_NAME: "Flaky Fix Verifier"
+          GH_AW_WORKFLOW_SOURCE_URL: "${{ github.server_url }}/${{ github.repository }}/blob/${{ github.ref_name }}/.github/workflows/flaky-fix-verifier.md"
           GH_AW_RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
           GH_AW_AGENT_CONCLUSION: ${{ needs.agent.result }}
-          GH_AW_WORKFLOW_ID: "flaky-confidence"
+          GH_AW_WORKFLOW_ID: "flaky-fix-verifier"
           GH_AW_ACTION_FAILURE_ISSUE_EXPIRES_HOURS: "168"
           GH_AW_ENGINE_ID: "claude"
           GH_AW_SECRET_VERIFICATION_RESULT: ${{ needs.activation.outputs.secret_verification_result }}
@@ -1300,8 +1300,8 @@ jobs:
           trace-id: ${{ needs.activation.outputs.setup-trace-id }}
           parent-span-id: ${{ needs.activation.outputs.setup-parent-span-id || needs.activation.outputs.setup-span-id }}
         env:
-          GH_AW_SETUP_WORKFLOW_NAME: "Flaky Fix Confidence"
-          GH_AW_CURRENT_WORKFLOW_REF: ${{ github.repository }}/.github/workflows/flaky-confidence.lock.yml@${{ github.ref }}
+          GH_AW_SETUP_WORKFLOW_NAME: "Flaky Fix Verifier"
+          GH_AW_CURRENT_WORKFLOW_REF: ${{ github.repository }}/.github/workflows/flaky-fix-verifier.lock.yml@${{ github.ref }}
           GH_AW_INFO_VERSION: "2.1.165"
           GH_AW_INFO_AWF_VERSION: "v0.25.55"
           GH_AW_INFO_ENGINE_ID: "claude"
@@ -1369,8 +1369,8 @@ jobs:
         if: always() && steps.detection_guard.outputs.run_detection == 'true'
         uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
         env:
-          WORKFLOW_NAME: "Flaky Fix Confidence"
-          WORKFLOW_DESCRIPTION: "Validate a Flaky Test Fixer PR by running the Flaky Test Runner, attributing results, iterating the fix, and reporting confidence."
+          WORKFLOW_NAME: "Flaky Fix Verifier"
+          WORKFLOW_DESCRIPTION: "Verify a Flaky Test Fixer PR by running the Flaky Test Runner, attributing results, iterating the fix, and reporting confidence."
           HAS_PATCH: ${{ needs.agent.outputs.has_patch }}
         with:
           script: |
@@ -1510,10 +1510,10 @@ jobs:
       github.event_name == 'issue_comment' &&
       github.event.issue.pull_request &&
       contains(github.event.comment.body, 'Flaky Test Runner Stats') &&
-      contains(github.event.issue.labels.*.name, 'flaky-confidence:running') &&
-      !contains(github.event.issue.labels.*.name, 'flaky-confidence:passed') &&
-      !contains(github.event.issue.labels.*.name, 'flaky-confidence:needs-human') &&
-      !contains(github.event.issue.labels.*.name, 'flaky-confidence:not-applicable')
+      contains(github.event.issue.labels.*.name, 'flaky-fix-verifier:running') &&
+      !contains(github.event.issue.labels.*.name, 'flaky-fix-verifier:passed') &&
+      !contains(github.event.issue.labels.*.name, 'flaky-fix-verifier:needs-human') &&
+      !contains(github.event.issue.labels.*.name, 'flaky-fix-verifier:not-applicable')
       )
       ))
     runs-on: ubuntu-slim
@@ -1531,8 +1531,8 @@ jobs:
           destination: ${{ runner.temp }}/gh-aw/actions
           job-name: ${{ github.job }}
         env:
-          GH_AW_SETUP_WORKFLOW_NAME: "Flaky Fix Confidence"
-          GH_AW_CURRENT_WORKFLOW_REF: ${{ github.repository }}/.github/workflows/flaky-confidence.lock.yml@${{ github.ref }}
+          GH_AW_SETUP_WORKFLOW_NAME: "Flaky Fix Verifier"
+          GH_AW_CURRENT_WORKFLOW_REF: ${{ github.repository }}/.github/workflows/flaky-fix-verifier.lock.yml@${{ github.ref }}
           GH_AW_INFO_VERSION: "2.1.165"
           GH_AW_INFO_AWF_VERSION: "v0.25.55"
           GH_AW_INFO_ENGINE_ID: "claude"
@@ -1564,7 +1564,7 @@ jobs:
       pull-requests: write
     timeout-minutes: 15
     env:
-      GH_AW_CALLER_WORKFLOW_ID: "${{ github.repository }}/flaky-confidence"
+      GH_AW_CALLER_WORKFLOW_ID: "${{ github.repository }}/flaky-fix-verifier"
       GH_AW_DETECTION_CONCLUSION: ${{ needs.detection.outputs.detection_conclusion }}
       GH_AW_DETECTION_REASON: ${{ needs.detection.outputs.detection_reason }}
       GH_AW_EFFECTIVE_TOKENS: ${{ needs.agent.outputs.effective_tokens }}
@@ -1572,9 +1572,9 @@ jobs:
       GH_AW_ENGINE_MODEL: "opus"
       GH_AW_ENGINE_VERSION: "2.1.165"
       GH_AW_SAFE_OUTPUT_MESSAGES: "{\"activationComments\":\"false\"}"
-      GH_AW_WORKFLOW_ID: "flaky-confidence"
-      GH_AW_WORKFLOW_NAME: "Flaky Fix Confidence"
-      GH_AW_WORKFLOW_SOURCE_URL: "${{ github.server_url }}/${{ github.repository }}/blob/${{ github.ref_name }}/.github/workflows/flaky-confidence.md"
+      GH_AW_WORKFLOW_ID: "flaky-fix-verifier"
+      GH_AW_WORKFLOW_NAME: "Flaky Fix Verifier"
+      GH_AW_WORKFLOW_SOURCE_URL: "${{ github.server_url }}/${{ github.repository }}/blob/${{ github.ref_name }}/.github/workflows/flaky-fix-verifier.md"
     outputs:
       code_push_failure_count: ${{ steps.process_safe_outputs.outputs.code_push_failure_count }}
       code_push_failure_errors: ${{ steps.process_safe_outputs.outputs.code_push_failure_errors }}
@@ -1596,8 +1596,8 @@ jobs:
           trace-id: ${{ needs.activation.outputs.setup-trace-id }}
           parent-span-id: ${{ needs.activation.outputs.setup-parent-span-id || needs.activation.outputs.setup-span-id }}
         env:
-          GH_AW_SETUP_WORKFLOW_NAME: "Flaky Fix Confidence"
-          GH_AW_CURRENT_WORKFLOW_REF: ${{ github.repository }}/.github/workflows/flaky-confidence.lock.yml@${{ github.ref }}
+          GH_AW_SETUP_WORKFLOW_NAME: "Flaky Fix Verifier"
+          GH_AW_CURRENT_WORKFLOW_REF: ${{ github.repository }}/.github/workflows/flaky-fix-verifier.lock.yml@${{ github.ref }}
           GH_AW_INFO_VERSION: "2.1.165"
           GH_AW_INFO_AWF_VERSION: "v0.25.55"
           GH_AW_INFO_ENGINE_ID: "claude"
@@ -1692,7 +1692,7 @@ jobs:
           GH_AW_ALLOWED_DOMAINS: "*.buildkite.com,*.githubusercontent.com,anthropic.com,api.anthropic.com,api.github.com,api.snapcraft.io,archive.ubuntu.com,azure.archive.ubuntu.com,buildkite.com,buildkiteartifacts.com,cdn.playwright.dev,ci-stats.kibana.dev,codeload.github.com,crl.geotrust.com,crl.globalsign.com,crl.identrust.com,crl.sectigo.com,crl.thawte.com,crl.usertrust.com,crl.verisign.com,crl3.digicert.com,crl4.digicert.com,crls.ssl.com,elastic.litellm-prod.ai,files.pythonhosted.org,ghcr.io,github-cloud.githubusercontent.com,github-cloud.s3.amazonaws.com,github.com,host.docker.internal,json-schema.org,json.schemastore.org,keyserver.ubuntu.com,lfs.github.com,objects.githubusercontent.com,ocsp.digicert.com,ocsp.geotrust.com,ocsp.globalsign.com,ocsp.identrust.com,ocsp.sectigo.com,ocsp.ssl.com,ocsp.thawte.com,ocsp.usertrust.com,ocsp.verisign.com,packagecloud.io,packages.cloud.google.com,packages.microsoft.com,playwright.download.prss.microsoft.com,ppa.launchpad.net,pypi.org,raw.githubusercontent.com,registry.npmjs.org,s.symcb.com,s.symcd.com,security.ubuntu.com,sentry.io,statsig.anthropic.com,ts-crl.ws.symantec.com,ts-ocsp.ws.symantec.com,www.googleapis.com"
           GITHUB_SERVER_URL: ${{ github.server_url }}
           GITHUB_API_URL: ${{ github.api_url }}
-          GH_AW_SAFE_OUTPUTS_HANDLER_CONFIG: "{\"add_comment\":{\"max\":3,\"target\":\"${{ github.event.pull_request.number || github.event.issue.number || github.event.inputs.pr_number }}\"},\"add_labels\":{\"allowed\":[\"flaky-confidence:running\",\"flaky-confidence:passed\",\"flaky-confidence:needs-human\",\"flaky-confidence:not-applicable\"],\"max\":2,\"target\":\"${{ github.event.pull_request.number || github.event.issue.number || github.event.inputs.pr_number }}\"},\"create_report_incomplete_issue\":{},\"missing_data\":{},\"missing_tool\":{},\"noop\":{\"max\":1,\"report-as-issue\":\"true\"},\"push_to_pull_request_branch\":{\"if_no_changes\":\"warn\",\"max\":1,\"max_patch_size\":1024,\"patch_format\":\"am\",\"protect_top_level_dot_folders\":true,\"protected_files\":[\"package.json\",\"bun.lockb\",\"bunfig.toml\",\"deno.json\",\"deno.jsonc\",\"deno.lock\",\"global.json\",\"NuGet.Config\",\"Directory.Packages.props\",\"mix.exs\",\"mix.lock\",\"go.mod\",\"go.sum\",\"stack.yaml\",\"stack.yaml.lock\",\"pom.xml\",\"build.gradle\",\"build.gradle.kts\",\"settings.gradle\",\"settings.gradle.kts\",\"gradle.properties\",\"package-lock.json\",\"yarn.lock\",\"pnpm-lock.yaml\",\"npm-shrinkwrap.json\",\"requirements.txt\",\"Pipfile\",\"Pipfile.lock\",\"pyproject.toml\",\"setup.py\",\"setup.cfg\",\"Gemfile\",\"Gemfile.lock\",\"uv.lock\",\"CODEOWNERS\",\"DESIGN.md\",\"README.md\",\"CONTRIBUTING.md\",\"CHANGELOG.md\",\"SECURITY.md\",\"CODE_OF_CONDUCT.md\",\"CLAUDE.md\",\"AGENTS.md\"],\"protected_files_policy\":\"fallback-to-issue\",\"required_labels\":[\"flaky-test-fixer\"],\"target\":\"*\"},\"report_incomplete\":{}}"
+          GH_AW_SAFE_OUTPUTS_HANDLER_CONFIG: "{\"add_comment\":{\"max\":3,\"target\":\"${{ github.event.pull_request.number || github.event.issue.number || github.event.inputs.pr_number }}\"},\"add_labels\":{\"allowed\":[\"flaky-fix-verifier:running\",\"flaky-fix-verifier:passed\",\"flaky-fix-verifier:needs-human\",\"flaky-fix-verifier:not-applicable\"],\"max\":2,\"target\":\"${{ github.event.pull_request.number || github.event.issue.number || github.event.inputs.pr_number }}\"},\"create_report_incomplete_issue\":{},\"missing_data\":{},\"missing_tool\":{},\"noop\":{\"max\":1,\"report-as-issue\":\"true\"},\"push_to_pull_request_branch\":{\"if_no_changes\":\"warn\",\"max\":1,\"max_patch_size\":1024,\"patch_format\":\"am\",\"protect_top_level_dot_folders\":true,\"protected_files\":[\"package.json\",\"bun.lockb\",\"bunfig.toml\",\"deno.json\",\"deno.jsonc\",\"deno.lock\",\"global.json\",\"NuGet.Config\",\"Directory.Packages.props\",\"mix.exs\",\"mix.lock\",\"go.mod\",\"go.sum\",\"stack.yaml\",\"stack.yaml.lock\",\"pom.xml\",\"build.gradle\",\"build.gradle.kts\",\"settings.gradle\",\"settings.gradle.kts\",\"gradle.properties\",\"package-lock.json\",\"yarn.lock\",\"pnpm-lock.yaml\",\"npm-shrinkwrap.json\",\"requirements.txt\",\"Pipfile\",\"Pipfile.lock\",\"pyproject.toml\",\"setup.py\",\"setup.cfg\",\"Gemfile\",\"Gemfile.lock\",\"uv.lock\",\"CODEOWNERS\",\"DESIGN.md\",\"README.md\",\"CONTRIBUTING.md\",\"CHANGELOG.md\",\"SECURITY.md\",\"CODE_OF_CONDUCT.md\",\"CLAUDE.md\",\"AGENTS.md\"],\"protected_files_policy\":\"fallback-to-issue\",\"required_labels\":[\"flaky-test-fixer\"],\"target\":\"*\"},\"report_incomplete\":{}}"
           GH_AW_CI_TRIGGER_TOKEN: ${{ secrets.GH_AW_CI_TRIGGER_TOKEN }}
         with:
           github-token: ${{ secrets.GH_AW_GITHUB_TOKEN || secrets.GITHUB_TOKEN }}
