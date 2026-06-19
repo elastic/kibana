@@ -956,55 +956,46 @@ The public definition must include:
 
 ## Step Definition Approval Process
 
-All custom step definitions must be approved by the workflows-eng team before being merged. This is enforced through a Scout API test that validates registered steps against an approved list.
+All custom step definitions must be approved by the workflows-eng team before being merged. This is enforced through a Scout API test that validates registered steps against a set of approved hashes.
 
 ### How It Works
 
-1. **Registration Detection**: When you register a new step or modify an existing step's handler, the test will detect it during CI runs.
+1. **Registration Detection**: When you register a new step or change an existing step definition (id, label, schemas, category, documentation, etc.), the test will detect it during CI runs.
 
-2. **Handler Hash**: The test generates a SHA256 hash of each step's handler function implementation. This ensures that:
+2. **Definition Hash**: The test generates a SHA256 hash of each step's definition and exposes it on the `internal/workflows_extensions/step_definitions` endpoint as `definitionHash`. Any meaningful change to the definition produces a new hash.
 
-   - New steps are detected
-   - Changes to handler implementations are detected (even if the step ID remains the same)
+3. **Per-step approval files**: Each approved step is stored in its own file under:
 
-3. **Approval Required**: The test compares registered steps against the approved list in:
    ```
-   test/scout/api/fixtures/approved_step_definitions.ts
+   test/scout/api/fixtures/approved_step_definitions/<step.id>.txt
    ```
 
-### Adding a New Step
+   The file contains a single line: the approved `definitionHash` for that step. One file per step means PRs that add or update different steps never conflict on a shared list.
 
-When registering a new step, you must:
+### Adding a New Step or Updating an Existing One
 
-1. **Run the test locally** to get the step ID and handler hash:
+1. **Run the approval test locally** so it prints the exact commands you need:
 
    ```bash
    node scripts/scout.js run-tests --arch stateful --domain classic \
      --config src/platform/plugins/shared/workflows_extensions/test/scout/api/playwright.config.ts
    ```
 
-2. **Add the step to the approved list** in `test/scout/api/fixtures/approved_step_definitions.ts`:
+   When a step is unapproved (new id or changed hash), the test fails with a message like:
 
-   ```typescript
-   export const APPROVED_STEP_DEFINITIONS: Array<{ id: string; handlerHash: string }> = [
-     {
-       id: 'my-namespace.myCustomStep',
-       handlerHash: 'abc123...', // SHA256 hash from test output
-     },
-   ];
+   ```
+   Found 1 unapproved step definition(s). Run the following command(s) from your kibana directory and request review from the workflows-eng team:
+
+   echo <definitionHash> > src/platform/plugins/shared/workflows_extensions/test/scout/api/fixtures/approved_step_definitions/my-namespace.myCustomStep.txt
    ```
 
-3. **Get approval** from the workflows-eng team (via PR review)
+2. **Run the printed `echo` command(s) from your kibana directory.** This creates (or overwrites) the per-step approval file with the new hash.
 
-4. **Update the test** to include your new step in the approved list
+3. **Re-run the test** to confirm it passes.
 
-### Modifying an Existing Step Handler
+4. **Commit the new/updated file** under `approved_step_definitions/` and request approval from the workflows-eng team in your PR.
 
-If you modify a step's handler implementation:
-
-1. The handler hash will change
-2. The test will fail until you update the hash in `approved_step_definitions.ts`
-3. You must get re-approval from the workflows-eng team
+If you change a step's definition later, only its own approval file needs updating — repeat the steps above.
 
 ### Running the Approval Test
 
@@ -1019,5 +1010,5 @@ node scripts/scout.js start-server --arch stateful --domain classic
 node scripts/playwright test --config src/platform/plugins/shared/workflows_extensions/test/scout/api/playwright.config.ts --project local
 ```
 
-The test will fail with a clear error message indicating which steps need to be added or updated in the approved list.
+The test prints one `echo … > …` command per offending step, ready to copy-paste from your kibana directory.
 
