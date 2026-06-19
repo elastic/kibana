@@ -31,8 +31,7 @@ export const getHistoryForRule = async ({
 }: GetHistoryForRuleArgs): Promise<RuleChangesHistoryResponse> => {
   // Run queries concurrently:
   // - main: the requested page (newest-first, +1 extra for old_values computation)
-  // - oldest: single item ascending by timestamp to get tracking_started_at (page 1 only —
-  //   the oldest item never changes, so subsequent pages skip this query)
+  // - oldest: single item ascending by timestamp to get tracking_started_at
   const [result, oldestResult] = await Promise.all([
     rulesClient.getHistory({
       module: 'security',
