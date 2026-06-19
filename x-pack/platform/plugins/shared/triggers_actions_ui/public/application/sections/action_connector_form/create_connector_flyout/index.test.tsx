@@ -14,6 +14,7 @@ import CreateConnectorFlyout from '.';
 import type { AppMockRenderer } from '../../test_utils';
 import { createAppMockRenderer } from '../../test_utils';
 import { TECH_PREVIEW_LABEL } from '../../translations';
+import { AgentBuilderConnectorFeatureId } from '@kbn/actions-plugin/common';
 
 jest.mock('../../../lib/action_connector_api', () => ({
   ...(jest.requireActual('../../../lib/action_connector_api') as any),
@@ -874,6 +875,80 @@ describe('CreateConnectorFlyout', () => {
 
       expect(onConnectorCreated).toHaveBeenCalled();
       expect(onClose).toHaveBeenCalled();
+    });
+  });
+
+  describe('Documentation button', () => {
+    it('links to the generic connectors docs on the Select a connector step', async () => {
+      appMockRenderer.render(
+        <CreateConnectorFlyout
+          actionTypeRegistry={actionTypeRegistry}
+          onClose={onClose}
+          onConnectorCreated={onConnectorCreated}
+        />
+      );
+
+      const docsBtn = await screen.findByTestId('create-connector-flyout-header-docs-link');
+      expect(docsBtn).toBeInTheDocument();
+      expect(docsBtn).toHaveAttribute(
+        'href',
+        appMockRenderer.coreStart.docLinks.links.alerting.connectors
+      );
+    });
+
+    it('links to the agent builder connectors docs when featureId is agentBuilder', async () => {
+      appMockRenderer.render(
+        <CreateConnectorFlyout
+          actionTypeRegistry={actionTypeRegistry}
+          onClose={onClose}
+          onConnectorCreated={onConnectorCreated}
+          featureId={AgentBuilderConnectorFeatureId}
+        />
+      );
+
+      const docsBtn = await screen.findByTestId('create-connector-flyout-header-docs-link');
+      expect(docsBtn).toBeInTheDocument();
+      expect(docsBtn).toHaveAttribute(
+        'href',
+        appMockRenderer.coreStart.docLinks.links.alerting.agentBuilderConnectors
+      );
+    });
+
+    it('links to the connector-type docs when an action type with a docsUrl is selected', async () => {
+      const connectorDocsUrl =
+        'https://www.elastic.co/docs/reference/kibana/connectors-kibana/test-action-type';
+      const modelWithDocs = actionTypeRegistryMock.createMockActionTypeModel({
+        id: actionTypeModel.id,
+        actionConnectorFields: lazy(() => import('../connector_mock')),
+        docsUrl: connectorDocsUrl,
+      });
+      actionTypeRegistry.get.mockReturnValue(modelWithDocs);
+      loadActionTypes.mockResolvedValue([
+        {
+          id: actionTypeModel.id,
+          enabled: true,
+          name: 'Test',
+          enabledInConfig: true,
+          enabledInLicense: true,
+          minimumLicenseRequired: 'basic' as const,
+          supportedFeatureIds: ['alerting', 'siem'],
+        },
+      ]);
+
+      appMockRenderer.render(
+        <CreateConnectorFlyout
+          actionTypeRegistry={actionTypeRegistry}
+          onClose={onClose}
+          onConnectorCreated={onConnectorCreated}
+        />
+      );
+
+      await userEvent.click(await screen.findByTestId(`${actionTypeModel.id}-card`));
+
+      await waitFor(() => {
+        const docsBtn = screen.getByTestId('create-connector-flyout-header-docs-link');
+        expect(docsBtn).toHaveAttribute('href', connectorDocsUrl);
+      });
     });
   });
 });

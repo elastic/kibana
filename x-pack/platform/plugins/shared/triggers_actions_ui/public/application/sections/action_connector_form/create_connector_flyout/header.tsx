@@ -30,6 +30,7 @@ interface Props {
   compatibility?: string[] | null;
   isExperimental?: boolean;
   docsUrl?: string;
+  selectConnectorDocsUrl?: string;
 }
 
 const FlyoutHeaderComponent: React.FC<Props> = ({
@@ -39,13 +40,16 @@ const FlyoutHeaderComponent: React.FC<Props> = ({
   compatibility,
   isExperimental,
   docsUrl,
+  selectConnectorDocsUrl,
 }) => {
   const {
     docLinks: { links },
   } = useKibana().services;
 
   const documentationUrl =
-    actionTypeName && actionTypeMessage ? docsUrl : links.alerting.connectors;
+    actionTypeName && actionTypeMessage
+      ? docsUrl
+      : selectConnectorDocsUrl ?? links.alerting.connectors;
 
   return (
     <EuiFlyoutHeader hasBorder data-test-subj="create-connector-flyout-header">

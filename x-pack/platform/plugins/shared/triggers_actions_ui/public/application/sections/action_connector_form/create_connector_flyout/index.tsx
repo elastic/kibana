@@ -23,7 +23,11 @@ import type { IconType } from '@elastic/eui';
 import { ACTION_TYPE_SOURCES } from '@kbn/actions-types';
 
 import { i18n } from '@kbn/i18n';
-import { getConnectorCompatibility, getConnectorFeatureName } from '@kbn/actions-plugin/common';
+import {
+  AgentBuilderConnectorFeatureId,
+  getConnectorCompatibility,
+  getConnectorFeatureName,
+} from '@kbn/actions-plugin/common';
 import type { ConnectorFormSchema } from '@kbn/alerts-ui-shared';
 import { useActionTypeModel } from '@kbn/alerts-ui-shared/src/common/hooks/use_action_type_model';
 import { isLLMConnectorTypeId } from '@kbn/response-ops-rule-form/src/constants';
@@ -71,6 +75,7 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
 }) => {
   const {
     application: { capabilities },
+    docLinks,
     http,
     uiSettings,
   } = useKibana().services;
@@ -328,6 +333,11 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
         compatibility={getConnectorCompatibility(actionType?.supportedFeatureIds)}
         isExperimental={actionTypeModel?.isExperimental}
         docsUrl={actionTypeModel?.docsUrl}
+        selectConnectorDocsUrl={
+          featureId === AgentBuilderConnectorFeatureId
+            ? docLinks.links.alerting.agentBuilderConnectors
+            : undefined
+        }
       />
       <EuiFlyoutBody
         banner={!actionType && hasActionsUpgradeableByTrial ? <UpgradeLicenseCallOut /> : null}
