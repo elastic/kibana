@@ -31,12 +31,10 @@ import { inlineEsqlVariables } from '../../utils/esql_rule_utils';
 import type { RuleFormServices } from '../../form/contexts/rule_form_context';
 import { RuleFormProvider } from '../../form/contexts/rule_form_context';
 import { ConfirmRuleClose } from '../confirm_rule_close';
-import type { FormValues, RuleNotificationsValue } from '../../form/types';
-import { mergeArtifactsByType } from '../../form/utils/artifact_mappers';
+import type { FormValues, RuleNotificationsValue, RuleQuery } from '../../form/types';
+import { getBreachQuery } from '../../form/types';
 import { parseYamlToFormValues, serializeFormToYaml } from '../../form/utils/yaml_form_utils';
 import { ComposeDiscoverForm, getSteps } from './compose_discover_form';
-import type { ComposeFormValues, RuleQuery } from './compose_form_types';
-import { getBreachQuery, getRecoverQuery } from './compose_form_types';
 import {
   composeFormToCreateRequest,
   composeFormToUpdateRequest,
@@ -177,26 +175,7 @@ const getStepStatus = (currentStep: number, stepIndex: number): MinimalStep['sta
   return 'incomplete';
 };
 
-/** Compose form → FormValues for YAML serialization via yaml_form_utils. */
-const composeFormValuesForYamlSerialize = (compose: ComposeFormValues): FormValues => {
-  const breach = getBreachQuery(compose.query);
-  const recover = getRecoverQuery(compose.query) || undefined;
-
-  return {
-    kind: compose.kind,
-    metadata: compose.metadata,
-    timeField: compose.timeField,
-    schedule: compose.schedule,
-    query: { breach, ...(recover ? { recover } : {}) },
-    grouping: compose.grouping,
-    stateTransition: compose.stateTransition,
-    stateTransitionAlertDelayMode: compose.stateTransitionAlertDelayMode,
-    stateTransitionRecoveryDelayMode: compose.stateTransitionRecoveryDelayMode,
-    artifacts: mergeArtifactsByType(compose),
-  };
-};
-
-const EMPTY_FORM_VALUES: ComposeFormValues = {
+const EMPTY_FORM_VALUES: FormValues = {
   kind: 'alert',
   metadata: { name: '', enabled: true, description: '', tags: [] },
   timeField: '@timestamp',
@@ -279,7 +258,7 @@ export function ComposeDiscoverFlyout({
   const hasValidationErrors = validationErrors.length > 0;
 
   // ── Form values (submitted to the API) ──
-  const defaultValues = useMemo<ComposeFormValues>(() => {
+  const defaultValues = useMemo<FormValues>(() => {
     if (rule) {
       const mapped = mapRuleToComposeFormValues(rule);
       if (mode === 'clone') {
@@ -302,7 +281,7 @@ export function ComposeDiscoverFlyout({
     return EMPTY_FORM_VALUES;
   }, [rule, mode, initialQuery, discoverComposedQuery]);
 
-  const methods = useForm<ComposeFormValues>({ mode: 'onBlur', defaultValues });
+  const methods = useForm<FormValues>({ mode: 'onBlur', defaultValues });
   const [isConfirmCloseVisible, setIsConfirmCloseVisible] = useState(false);
   // EuiFlyout with session="start" uses EUI's managed flyout system, which
   // calls closeAllFlyouts() synchronously (via flushSync) *before* invoking
@@ -411,7 +390,7 @@ export function ComposeDiscoverFlyout({
   }, [methods]);
 
   const applyYamlValuesToFormAndSandbox = useCallback(
-    (parsed: FormValues): ComposeFormValues => {
+    (parsed: FormValues): FormValues => {
       const composed = {
         ...mapYamlFormValuesToComposeFormValues(parsed),
         notifications: methods.getValues('notifications'),
@@ -600,9 +579,7 @@ export function ComposeDiscoverFlyout({
   const handleToggleYamlMode = useCallback(
     (enabled: boolean) => {
       if (enabled) {
-        const serialized = serializeFormToYaml(
-          composeFormValuesForYamlSerialize(methods.getValues())
-        );
+        const serialized = serializeFormToYaml(methods.getValues());
         setYamlText(serialized);
         yamlBaselineRef.current = serialized;
         cancelYamlParse();
@@ -640,7 +617,7 @@ export function ComposeDiscoverFlyout({
     if (uiState.yamlMode) {
       cancelYamlParse();
       const current = { ...methods.getValues(), query: sandboxQuery, timeField: sandboxTimeField };
-      const serialized = serializeFormToYaml(composeFormValuesForYamlSerialize(current));
+      const serialized = serializeFormToYaml(current);
       setYamlText(serialized);
       yamlBaselineRef.current = serialized;
     }
