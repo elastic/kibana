@@ -8,14 +8,13 @@
  */
 
 import type { Reference } from '@kbn/content-management-utils';
-import { toStoredTags } from '@kbn/as-code-shared-transforms';
 
 import type { StoredLinksState } from '../../../server';
 import { LINKS_LIBRARY_TYPE } from '../../constants';
-import type { LinksByReferenceState, LinksByValueState, LinksApiState } from '../types';
+import type { LinksByReferenceState, LinksByValueState, LinksEmbeddableState } from '../types';
 import { transformLinksIn } from './transform_links';
 
-export function transformIn(state: LinksApiState): {
+export function transformIn(state: LinksEmbeddableState): {
   state: StoredLinksState;
   references: Reference[];
 } {
@@ -34,13 +33,11 @@ export function transformIn(state: LinksApiState): {
   }
 
   const { links, references } = transformLinksIn((state as LinksByValueState).links);
-  const { state: updatedState, references: tagReferences } = toStoredTags(state);
-
   return {
     state: {
-      ...updatedState,
+      ...state,
       links,
     },
-    references: [...references, ...tagReferences],
+    references,
   };
 }

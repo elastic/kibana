@@ -9,9 +9,9 @@
 
 import type { RequestHandlerContext } from '@kbn/core/server';
 import { LINKS_LIBRARY_TYPE } from '../../../common';
-import { transformIn } from '../../../common/embeddable/transforms/transform_in';
 import type { StoredLinksState } from '../../links_saved_object';
 import { getLinksCRUResponseBody } from '../get_cru_response_body';
+import { transformIn } from '../transforms';
 import type { LinksUpdateRequestBody, LinksUpdateResponseBody } from './types';
 
 export async function update(

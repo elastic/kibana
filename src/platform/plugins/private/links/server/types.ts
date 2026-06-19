@@ -21,7 +21,7 @@ import type {
 export type LinksByValueState = TypeOf<typeof linksByValueSchema>;
 export type LinksByReferenceState = TypeOf<typeof linksByReferenceSchema>;
 export type LinksEmbeddableState = TypeOf<typeof linksEmbeddableSchema>;
-export type LinksApiState = TypeOf<typeof linksApiStateSchema> | LinksByReferenceState;
+export type LinksApiState = TypeOf<typeof linksApiStateSchema>;
 
 export type DashboardLink = TypeOf<typeof dashboardLinkSchema>;
 export type ExternalLink = TypeOf<typeof externalLinkSchema>;
