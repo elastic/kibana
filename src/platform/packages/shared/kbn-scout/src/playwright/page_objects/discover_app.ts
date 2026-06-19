@@ -722,9 +722,9 @@ export class DiscoverApp {
     return (await selectedButton.innerText()).trim() as DiscoverGridRowHeight;
   }
 
-  async setRowHeight(newValue: DiscoverGridRowHeight) {
+  async setRowHeight(newValue: DiscoverGridRowHeight, scope: 'row' | 'header' = 'row') {
     const buttonGroup = this.page.testSubj.locator(
-      'unifiedDataTableRowHeightSettings_rowHeightButtonGroup'
+      `unifiedDataTable${scope === 'header' ? 'Header' : ''}RowHeightSettings_rowHeightButtonGroup`
     );
 
     await expect(buttonGroup).toBeVisible();
