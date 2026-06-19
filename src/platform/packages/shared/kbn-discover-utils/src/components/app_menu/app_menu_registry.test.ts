@@ -161,6 +161,39 @@ describe('AppMenuRegistry', () => {
       expect(parent?.items).toHaveLength(1);
       expect(parent?.items?.[0]).toEqual(popoverItem);
     });
+
+    it('should convert an action parent into a submenu item', () => {
+      const parentItem: DiscoverAppMenuItemType = {
+        id: 'parent',
+        order: 1,
+        label: 'Parent',
+        iconType: 'warning',
+        href: '/parent',
+        run: jest.fn(),
+      };
+
+      const popoverItem: DiscoverAppMenuPopoverItem = {
+        id: 'child-1',
+        order: 1,
+        label: 'Child 1',
+        iconType: 'bell',
+        run: jest.fn(),
+      };
+
+      registry.registerItem(parentItem);
+      registry.registerPopoverItem('parent', popoverItem);
+
+      const config = registry.getAppMenuConfig();
+      const parent = config.items?.find((item) => item.id === 'parent');
+
+      expect(parent).toEqual({
+        id: 'parent',
+        order: 1,
+        label: 'Parent',
+        iconType: 'warning',
+        items: [popoverItem],
+      });
+    });
   });
 
   describe('getPopoverItems', () => {

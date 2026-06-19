@@ -56,34 +56,48 @@ export type DiscoverAppMenuRenderAction = (
   params: DiscoverAppMenuRunActionParams
 ) => ReactElement | null;
 
+type DiscoverAppMenuActionItem =
+  | {
+      run: DiscoverAppMenuRunAction;
+      render?: never;
+      items?: never;
+    }
+  | {
+      render: DiscoverAppMenuRenderAction;
+      run?: never;
+      items?: never;
+    }
+  | {
+      run?: never;
+      render?: never;
+      items?: never;
+    };
+
+interface DiscoverAppMenuSubmenu {
+  items: DiscoverAppMenuPopoverItem[];
+  run?: never;
+  render?: never;
+}
+
+type DiscoverAppMenuActionItemOrSubmenu = DiscoverAppMenuActionItem | DiscoverAppMenuSubmenu;
+
 /**
  * Discover-specific popover item with typed run action and nested items
  */
-export type DiscoverAppMenuPopoverItem = Omit<AppMenuPopoverItem, 'run' | 'items'> & {
-  run?: DiscoverAppMenuRunAction;
-  render?: DiscoverAppMenuRenderAction;
-  /**
-   * Sub-items for nested submenus (e.g., "Create legacy rules" submenu)
-   */
-  items?: DiscoverAppMenuPopoverItem[];
-};
+export type DiscoverAppMenuPopoverItem = Omit<AppMenuPopoverItem, 'run' | 'items'> &
+  DiscoverAppMenuActionItemOrSubmenu;
 
 /**
  * Discover-specific menu item type with typed run action and items
  */
-export type DiscoverAppMenuItemType = Omit<AppMenuItemType, 'run' | 'items'> & {
-  run?: DiscoverAppMenuRunAction;
-  render?: DiscoverAppMenuRenderAction;
-  items?: DiscoverAppMenuPopoverItem[];
-};
+export type DiscoverAppMenuItemType = Omit<AppMenuItemType, 'run' | 'items'> &
+  DiscoverAppMenuActionItemOrSubmenu;
 
 /**
  * Discover-specific primary action item with typed run action
  */
-export type DiscoverAppMenuPrimaryActionItem = Omit<AppMenuPrimaryActionItem, 'run'> & {
-  run?: DiscoverAppMenuRunAction;
-  render?: DiscoverAppMenuRenderAction;
-};
+export type DiscoverAppMenuPrimaryActionItem = Omit<AppMenuPrimaryActionItem, 'run' | 'items'> &
+  DiscoverAppMenuActionItemOrSubmenu;
 
 /**
  * Discover-specific app menu config with typed menu items

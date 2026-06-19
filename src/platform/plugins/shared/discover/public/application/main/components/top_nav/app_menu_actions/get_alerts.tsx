@@ -171,7 +171,8 @@ export const getCreateRuleOptionsAppMenuItem = ({
   getState: () => DiscoverInternalState;
   subscribe: (listener: () => void) => () => void;
 }): DiscoverAppMenuItemType => {
-  const { items, popoverWidth, popoverTestId, ...baseAppMenuItem } = baseItem ?? {};
+  const { href, items, popoverWidth, popoverTestId, run, target, ...baseAppMenuItem } =
+    baseItem ?? {};
 
   return {
     ...baseAppMenuItem,

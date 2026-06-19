@@ -75,7 +75,10 @@ export async function runAppMenuAction({
     },
   };
 
-  await appMenuItem.run?.(params);
+  if (appMenuItem.run) {
+    await appMenuItem.run(params);
+    return;
+  }
 
   const result = appMenuItem.render?.(params);
 

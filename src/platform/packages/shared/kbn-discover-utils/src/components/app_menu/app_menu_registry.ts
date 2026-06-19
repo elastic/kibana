@@ -23,6 +23,18 @@ export class AppMenuRegistry {
   private items: Map<string, DiscoverAppMenuItemType & { isCustom?: boolean }> = new Map();
   private primaryActionItem?: DiscoverAppMenuPrimaryActionItem;
 
+  private addPopoverItem(parentId: string, popoverItem: DiscoverAppMenuPopoverItem) {
+    const parent = this.items.get(parentId);
+    if (parent) {
+      const { href, render, run, target, ...parentSubmenuItem } = parent;
+
+      this.items.set(parentId, {
+        ...parentSubmenuItem,
+        items: [...(parent.items || []), popoverItem],
+      });
+    }
+  }
+
   /**
    * Register a custom menu item.
    * @param item The menu item to register
@@ -37,13 +49,7 @@ export class AppMenuRegistry {
    * @param popoverItem The popover item to register
    */
   public registerCustomPopoverItem(parentId: string, popoverItem: DiscoverAppMenuPopoverItem) {
-    const parent = this.items.get(parentId);
-    if (parent) {
-      this.items.set(parentId, {
-        ...parent,
-        items: [...(parent.items || []), popoverItem],
-      });
-    }
+    this.addPopoverItem(parentId, popoverItem);
   }
 
   /**
@@ -76,13 +82,7 @@ export class AppMenuRegistry {
    * @param popoverItem The popover item to register
    */
   public registerPopoverItem(parentId: string, popoverItem: DiscoverAppMenuPopoverItem) {
-    const parent = this.items.get(parentId);
-    if (parent) {
-      this.items.set(parentId, {
-        ...parent,
-        items: [...(parent.items || []), popoverItem],
-      });
-    }
+    this.addPopoverItem(parentId, popoverItem);
   }
 
   public getPopoverItems(parentId: string): DiscoverAppMenuPopoverItem[] {

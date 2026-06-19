@@ -107,33 +107,6 @@ describe('run app menu actions', () => {
       expect(document.querySelector('[data-test-subj="test-content"]')).toBeInTheDocument();
     });
 
-    it('should run before rendering content', async () => {
-      const calls: string[] = [];
-      const appMenuItem: DiscoverAppMenuItemType = {
-        id: 'action-1',
-        order: 1,
-        label: 'Action 1',
-        testId: 'action-1',
-        iconType: 'share',
-        run: async () => {
-          calls.push('run');
-        },
-        render: () => {
-          calls.push('render');
-          return <div data-test-subj="test-content">Custom Content</div>;
-        },
-      };
-
-      await runAppMenuAction({
-        appMenuItem,
-        anchorElement: document.createElement('div'),
-        services: discoverServiceMock,
-        returnFocus: jest.fn(),
-      });
-
-      expect(calls).toEqual(['run', 'render']);
-    });
-
     it('should call onFinishAction to cleanup', async () => {
       let capturedParams: DiscoverAppMenuRunActionParams | undefined;
 
@@ -169,7 +142,12 @@ describe('run app menu actions', () => {
       expect(document.querySelector('[data-test-subj="test-content"]')).toBeInTheDocument();
 
       const onFinishAction = capturedParams?.context?.onFinishAction;
-      onFinishAction!();
+
+      if (!onFinishAction) {
+        throw new Error('Expected onFinishAction to be captured');
+      }
+
+      onFinishAction();
 
       expect(document.querySelector('[data-test-subj="test-content"]')).not.toBeInTheDocument();
       expect(returnFocusMock).toHaveBeenCalled();
