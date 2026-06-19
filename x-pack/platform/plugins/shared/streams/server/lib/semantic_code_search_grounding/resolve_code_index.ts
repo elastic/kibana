@@ -48,3 +48,41 @@ export const resolveRepositoryForCodeIndex = async ({
     return undefined;
   }
 };
+
+/**
+ * Reverse of `resolveRepositoryForCodeIndex`: given a repository identifier
+ * (e.g. `"acme/checkout"`), finds the `code-*` index that contains chunks with
+ * that repository stamp. Used when the agent selects by repository so that
+ * legacy index-addressed SCS workflows still receive an `index` param.
+ *
+ * Returns `undefined` when no matching index is found or on any read error.
+ */
+export const resolveIndexForRepository = async ({
+  esClient,
+  repository,
+  logger,
+}: {
+  esClient: ElasticsearchClient;
+  repository: string;
+  logger: Logger;
+}): Promise<string | undefined> => {
+  try {
+    const response = await esClient.search({
+      index: 'code-*',
+      size: 1,
+      _source: false,
+      query: { term: { repository } },
+      terminate_after: 1,
+    });
+
+    const index = response.hits.hits[0]?._index;
+    return typeof index === 'string' && index.length > 0 ? index : undefined;
+  } catch (error) {
+    logger.warn(
+      `Failed to resolve code index for repository "${repository}": ${
+        error instanceof Error ? error.message : String(error)
+      }`
+    );
+    return undefined;
+  }
+};

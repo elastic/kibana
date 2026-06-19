@@ -193,6 +193,7 @@ const identifyComputedFeaturesRoute = createServerRoute({
   options: {
     access: 'internal',
     summary: 'Generate and persist computed KI features for a stream',
+    timeout: { idleSocket: 300_000 },
   },
   security: {
     authz: {

@@ -8,7 +8,7 @@
 import type { ElasticsearchClient, KibanaRequest, Logger } from '@kbn/core/server';
 import type { ToolCallback, ToolDefinition } from '@kbn/inference-common';
 import type { ToolsStart } from '@kbn/agent-builder-server';
-import { resolveRepositoryForCodeIndex } from './resolve_code_index';
+import { resolveRepositoryForCodeIndex, resolveIndexForRepository } from './resolve_code_index';
 import {
   createInferenceToolsFromAgentBuilder,
   type BridgePrepareOutcome,
@@ -91,6 +91,16 @@ export const createSemanticCodeSearchTools = async ({
     const repository = await resolveRepositoryForCodeIndex({ esClient, codeIndex: index, logger });
     repositoryCache.set(index, repository);
     return repository;
+  };
+
+  const indexCache = new Map<string, string | undefined>();
+  const resolveIndex = async (repo: string): Promise<string | undefined> => {
+    if (indexCache.has(repo)) {
+      return indexCache.get(repo);
+    }
+    const index = await resolveIndexForRepository({ esClient, repository: repo, logger });
+    indexCache.set(repo, index);
+    return index;
   };
 
   // Code tools require an active selection. We offer both `index` and
@@ -260,6 +270,11 @@ export const createSemanticCodeSearchTools = async ({
     // Prefer an explicitly provided repository; otherwise resolve it from the
     // index so the git_* history tools can be used.
     activeRepository = repository ?? (index ? await resolveRepository(index) : undefined);
+    // When only repository was provided, also resolve the index so that
+    // legacy index-addressed SCS workflows receive an `index` param.
+    if (!activeIndex && activeRepository) {
+      activeIndex = await resolveIndex(activeRepository);
+    }
 
     return {
       response: {

@@ -335,7 +335,7 @@ evaluate.describe('KI query generation', { tag: tags.serverless.observability.co
                   getFeatures: async () => kis,
                   additionalTools: groundingTools?.additionalTools,
                   additionalToolCallbacks: groundingTools?.additionalToolCallbacks,
-                  maxSteps: groundingTools ? 8 : undefined,
+                  maxSteps: groundingTools ? 10 : undefined,
                 });
 
                 logger.info(

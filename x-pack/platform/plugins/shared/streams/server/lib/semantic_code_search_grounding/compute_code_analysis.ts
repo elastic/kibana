@@ -24,8 +24,6 @@ const LOG_MESSAGE_FIELDS = ['message', 'body.text'];
 
 /** Max distinctive log strings used to select and verify against code. */
 const MAX_DISTINCTIVE_STRINGS = 12;
-/** Max candidate repositories scored before selection. */
-const MAX_CANDIDATES = 8;
 /** Minimum verified strings required to emit a feature. */
 const MIN_VERIFIED_STRINGS = 1;
 /** Max evidence/snippet entries kept on the feature. */
@@ -213,7 +211,7 @@ export const createCodeAnalysisProvider = ({
       return undefined;
     }
 
-    const candidates = extractCandidates(getOutputText(reposResponse)).slice(0, MAX_CANDIDATES);
+    const candidates = extractCandidates(getOutputText(reposResponse));
     if (candidates.length === 0) {
       logger.debug('code_analysis: no candidate code repositories found; skipping');
       emit({ status: 'no_candidates', candidateCount: 0, verifiedCount: 0 });
