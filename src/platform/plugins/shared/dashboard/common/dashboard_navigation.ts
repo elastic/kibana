@@ -115,16 +115,16 @@ export const createDashboardsNavigationNode = (
         id: 'dashboards_search',
         iconType: 'search',
         opensNestedPanel: 'dashboards_search',
-        ariaLabel: i18n.translate('dashboard.nav.searchDashboards', {
-          defaultMessage: 'Search dashboards',
+        ariaLabel: i18n.translate('dashboard.nav.findDashboard', {
+          defaultMessage: 'Find dashboard',
         }),
       },
     ],
     panelNestedPanels: [
       {
         id: 'dashboards_search',
-        title: i18n.translate('dashboard.nav.searchDashboards', {
-          defaultMessage: 'Search dashboards',
+        title: i18n.translate('dashboard.nav.findDashboard', {
+          defaultMessage: 'Find dashboard',
         }),
       },
     ],

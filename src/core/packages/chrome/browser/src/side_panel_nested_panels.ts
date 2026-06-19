@@ -19,23 +19,61 @@ export type SidePanelNestedPanelRenderer = (
   props: SidePanelNestedPanelRenderProps
 ) => ReactNode;
 
-const renderers = new Map<string, SidePanelNestedPanelRenderer>();
+/**
+ * Global registry for ensuring a single renderer map across bundles loaded from different plugins.
+ * @internal
+ */
+const REGISTRY_KEY = '__KIBANA_SIDE_PANEL_NESTED_PANEL_RENDERERS__';
+
+interface SidePanelNestedPanelRegistry {
+  renderers: Map<string, SidePanelNestedPanelRenderer>;
+  listeners: Set<() => void>;
+}
+
+const getGlobalRegistry = (): SidePanelNestedPanelRegistry => {
+  if (typeof globalThis === 'undefined') {
+    return {
+      renderers: new Map<string, SidePanelNestedPanelRenderer>(),
+      listeners: new Set(),
+    };
+  }
+
+  return ((globalThis as Record<string, SidePanelNestedPanelRegistry>)[REGISTRY_KEY] ??= {
+    renderers: new Map<string, SidePanelNestedPanelRenderer>(),
+    listeners: new Set(),
+  });
+};
+
+const notifyRegistryListeners = () => {
+  getGlobalRegistry().listeners.forEach((listener) => listener());
+};
 
 /** @public */
 export const registerSidePanelNestedPanelRenderer = (
   panelId: string,
   renderer: SidePanelNestedPanelRenderer
 ): void => {
-  renderers.set(panelId, renderer);
+  getGlobalRegistry().renderers.set(panelId, renderer);
+  notifyRegistryListeners();
 };
 
 /** @public */
 export const getSidePanelNestedPanelRenderer = (
   panelId: string
-): SidePanelNestedPanelRenderer | undefined => renderers.get(panelId);
+): SidePanelNestedPanelRenderer | undefined => getGlobalRegistry().renderers.get(panelId);
 
 /** @public */
 export const renderSidePanelNestedPanel = (
   panelId: string,
   props: SidePanelNestedPanelRenderProps
 ): ReactNode => getSidePanelNestedPanelRenderer(panelId)?.(props) ?? null;
+
+/** @internal */
+export const subscribeSidePanelNestedPanelRenderers = (listener: () => void): (() => void) => {
+  const registry = getGlobalRegistry();
+  registry.listeners.add(listener);
+
+  return () => {
+    registry.listeners.delete(listener);
+  };
+};

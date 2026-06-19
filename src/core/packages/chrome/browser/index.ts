@@ -79,4 +79,5 @@ export {
   getSidePanelNestedPanelRenderer,
   registerSidePanelNestedPanelRenderer,
   renderSidePanelNestedPanel,
+  subscribeSidePanelNestedPanelRenderers,
 } from './src';

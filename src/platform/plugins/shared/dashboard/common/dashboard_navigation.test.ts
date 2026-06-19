@@ -40,13 +40,13 @@ describe('createDashboardsNavigationNode', () => {
           id: 'dashboards_search',
           iconType: 'search',
           opensNestedPanel: 'dashboards_search',
-          ariaLabel: 'Search dashboards',
+          ariaLabel: 'Find dashboard',
         },
       ],
       panelNestedPanels: [
         {
           id: 'dashboards_search',
-          title: 'Search dashboards',
+          title: 'Find dashboard',
         },
       ],
       panelFooterActions: [
@@ -146,14 +146,14 @@ describe('createDashboardsNavigationNode', () => {
         id: 'dashboards_search',
         iconType: 'search',
         opensNestedPanel: 'dashboards_search',
-        'aria-label': 'Search dashboards',
+        'aria-label': 'Find dashboard',
       }),
     ]);
 
     expect(dashboardsItem?.panelNestedPanels).toEqual([
       {
         id: 'dashboards_search',
-        title: 'Search dashboards',
+        title: 'Find dashboard',
       },
     ]);
 

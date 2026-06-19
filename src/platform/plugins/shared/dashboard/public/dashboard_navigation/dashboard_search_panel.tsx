@@ -8,7 +8,7 @@
  */
 
 import { debounce } from 'lodash';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { css } from '@emotion/react';
 import {
   EuiButtonEmpty,
@@ -20,66 +20,106 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { SidePanelNestedPanelRenderProps } from '@kbn/core-chrome-browser';
-import type { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
 
 import { DASHBOARD_APP_ID } from '../../common/page_bundle_constants';
-import { coreServices, uiActionsService } from '../services/kibana_services';
+import { dashboardClient } from '../dashboard_client';
+import { coreServices, untilPluginStartServicesReady } from '../services/kibana_services';
 import { toAbsoluteNavHref } from './to_absolute_nav_href';
 
 interface DashboardSearchResult {
   id: string;
-  isManaged: boolean;
   title: string;
 }
 
-const SEARCH_RESULTS_LIMIT = 30;
+const SEARCH_RESULTS_PER_PAGE = 100;
 
-async function searchDashboards(search?: string): Promise<DashboardSearchResult[]> {
-  const searchAction = await uiActionsService.getAction('searchDashboardAction');
+const fetchAllDashboards = async (search?: string): Promise<DashboardSearchResult[]> => {
+  await untilPluginStartServicesReady();
 
-  return new Promise((resolve) => {
-    searchAction.execute({
-      onResults(dashboards: DashboardSearchResult[]) {
-        resolve(dashboards);
-      },
-      search: {
-        query: search,
-        per_page: SEARCH_RESULTS_LIMIT,
-      },
-      trigger: { id: 'searchDashboards' },
-    } as ActionExecutionContext);
-  });
-}
+  const dashboards: DashboardSearchResult[] = [];
+  let page = 1;
+  let total = Number.POSITIVE_INFINITY;
+
+  while ((page - 1) * SEARCH_RESULTS_PER_PAGE < total) {
+    const response = await dashboardClient.search({
+      ...(search ? { query: search } : {}),
+      per_page: SEARCH_RESULTS_PER_PAGE,
+      page,
+    });
+
+    total = response.total;
+
+    response.dashboards.forEach(({ id, data, meta }) => {
+      if (Boolean(meta?.managed)) {
+        return;
+      }
+
+      dashboards.push({
+        id,
+        title: data.title,
+      });
+    });
+
+    if (response.dashboards.length === 0) {
+      break;
+    }
+
+    page += 1;
+  }
+
+  return dashboards;
+};
 
 export const DashboardSearchPanel = ({
   onItemClick,
 }: SidePanelNestedPanelRenderProps): JSX.Element => {
   const { euiTheme } = useEuiTheme();
+  const searchInputRef = useRef<HTMLInputElement | null>(null);
   const [query, setQuery] = useState('');
   const [debouncedQuery, setDebouncedQuery] = useState('');
   const [results, setResults] = useState<DashboardSearchResult[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [hasLoadedOnce, setHasLoadedOnce] = useState(false);
 
   const debouncedSetQuery = useMemo(
     () => debounce((latestQuery: string) => setDebouncedQuery(latestQuery), 150),
     []
   );
 
+  const setSearchInputRef = useCallback((inputElement: HTMLInputElement | null) => {
+    searchInputRef.current = inputElement;
+  }, []);
+
+  useEffect(() => {
+    const timeoutId = window.setTimeout(() => {
+      searchInputRef.current?.focus();
+    }, 0);
+
+    return () => {
+      window.clearTimeout(timeoutId);
+    };
+  }, []);
+
   useEffect(() => {
     debouncedSetQuery(query);
+
+    return () => {
+      debouncedSetQuery.cancel();
+    };
   }, [debouncedSetQuery, query]);
 
   useEffect(() => {
     let canceled = false;
     setIsLoading(true);
 
-    searchDashboards(debouncedQuery)
+    fetchAllDashboards(debouncedQuery)
       .then((dashboards) => {
         if (canceled) {
           return;
         }
 
-        setResults(dashboards.filter((dashboard) => !dashboard.isManaged));
+        setResults(dashboards);
+        setHasLoadedOnce(true);
         setIsLoading(false);
       })
       .catch(() => {
@@ -88,6 +128,7 @@ export const DashboardSearchPanel = ({
         }
 
         setResults([]);
+        setHasLoadedOnce(true);
         setIsLoading(false);
       });
 
@@ -95,6 +136,8 @@ export const DashboardSearchPanel = ({
       canceled = true;
     };
   }, [debouncedQuery]);
+
+  const isInitialLoading = isLoading && !hasLoadedOnce;
 
   const searchBoxStyles = css`
     padding: ${euiTheme.size.s} ${euiTheme.size.m};
@@ -104,10 +147,13 @@ export const DashboardSearchPanel = ({
     padding: ${euiTheme.size.s} ${euiTheme.size.m};
   `;
 
+  const resultsListStyles = css`
+    padding-inline: ${euiTheme.size.m};
+  `;
+
   const resultButtonStyles = css`
     font-weight: ${euiTheme.font.weight.regular};
     padding-block: 6px;
-    padding-inline: ${euiTheme.size.s};
     width: 100%;
 
     > span {
@@ -125,24 +171,26 @@ export const DashboardSearchPanel = ({
     <>
       <div css={searchBoxStyles}>
         <EuiFieldSearch
-          aria-label={i18n.translate('dashboard.nav.searchDashboardsInputAriaLabel', {
-            defaultMessage: 'Search dashboards',
+          aria-label={i18n.translate('dashboard.nav.findDashboardInputAriaLabel', {
+            defaultMessage: 'Find dashboard',
           })}
+          compressed
           data-test-subj="dashboardNavSearchInput"
           fullWidth
+          inputRef={setSearchInputRef}
           isLoading={isLoading}
           onChange={(event) => setQuery(event.target.value)}
-          placeholder={i18n.translate('dashboard.nav.searchDashboardsPlaceholder', {
-            defaultMessage: 'Search dashboards',
+          placeholder={i18n.translate('dashboard.nav.findDashboardPlaceholder', {
+            defaultMessage: 'Type text',
           })}
           value={query}
         />
       </div>
-      {isLoading ? (
+      {isInitialLoading ? (
         <div css={statusStyles}>
           <EuiLoadingSpinner size="m" />
         </div>
-      ) : results.length === 0 ? (
+      ) : !isLoading && results.length === 0 ? (
         <div css={statusStyles}>
           <EuiText color="subdued" size="s">
             {i18n.translate('dashboard.nav.searchDashboardsEmpty', {
@@ -151,7 +199,7 @@ export const DashboardSearchPanel = ({
           </EuiText>
         </div>
       ) : (
-        <ul role="none">
+        <ul css={resultsListStyles} role="none">
           {results.map((dashboard) => {
             const itemId = `dashboard_search_${dashboard.id}`;
             const href = toAbsoluteNavHref(

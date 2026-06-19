@@ -12,7 +12,10 @@ import { map } from 'rxjs';
 import { Navigation as NavigationComponent } from '@kbn/ui-side-navigation';
 import classnames from 'classnames';
 import type { SolutionId } from '@kbn/core-chrome-browser';
-import { renderSidePanelNestedPanel as renderRegisteredSidePanelNestedPanel } from '@kbn/core-chrome-browser';
+import {
+  renderSidePanelNestedPanel as renderRegisteredSidePanelNestedPanel,
+  subscribeSidePanelNestedPanelRenderers,
+} from '@kbn/core-chrome-browser';
 import type { MenuItem, NavigationStructure, SecondaryMenuItem, SideNavLogo } from '@kbn/ui-side-navigation/types';
 import { useObservable } from '@kbn/use-observable';
 import { useChromeService } from '@kbn/core-chrome-browser-context';
@@ -33,6 +36,13 @@ export const Navigation = (props: ChromeNavigationProps) => {
   const state = useNavigationItems();
   const isNextChrome = useIsNextChrome();
   const [clickedActiveItemId, setClickedActiveItemId] = useState<string | undefined>();
+  const [, rerenderNestedPanels] = useState(0);
+
+  useEffect(() => {
+    return subscribeSidePanelNestedPanelRenderers(() => {
+      rerenderNestedPanels((version) => version + 1);
+    });
+  }, []);
 
   useEffect(() => {
     setClickedActiveItemId(undefined);
