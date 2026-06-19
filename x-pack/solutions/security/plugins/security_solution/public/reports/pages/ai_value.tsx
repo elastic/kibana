@@ -4,23 +4,25 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import React, { useState, useRef, useMemo } from 'react';
 import {
   EuiButtonEmpty,
+  EuiContext,
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiLoadingSpinner,
 } from '@elastic/eui';
 import type { DocLinks } from '@kbn/doc-links';
 import { css } from '@emotion/css';
 import { useSyncTimerangeUrlParam } from '../../common/hooks/search_bar/use_sync_timerange_url_param';
 import { ValueReportExporter } from '../components/ai_value/value_report_exporter';
-import { EXPORT_REPORT } from '../components/ai_value/translations';
+import {
+  EXPORT_REPORT,
+  SAMPLE_REPORT_DATE_PICKER_DISABLED_TOOLTIP,
+} from '../components/ai_value/translations';
 import { useDeepEqualSelector } from '../../common/hooks/use_selector';
 import { SuperDatePicker } from '../../common/components/super_date_picker';
-import { AIValueMetrics } from '../components/ai_value';
+import { AIValueReport } from '../components/ai_value';
 import { InputsModelId } from '../../common/store/inputs/constants';
 import { SecuritySolutionPageWrapper } from '../../common/components/page_wrapper';
 import { HeaderPage } from '../../common/components/header_page';
@@ -59,9 +61,13 @@ const BaseComponent = () => {
 
   const { status } = useDataView();
 
+  const isSourcererLoading = status !== 'ready';
+
   const hasSocManagementCapability = useHasSecurityCapability('socManagement');
 
-  const [hasAttackDiscoveries, setHasAttackDiscoveries] = useState(false);
+  const [hasReportData, setHasReportData] = useState(false);
+  const [isDatePickerDisabled, setIsDatePickerDisabled] = useState(true);
+  const [isSampleMode, setIsSampleMode] = useState(false);
   const exportPDFRef = useRef<(() => void) | null>(null);
 
   const { serverless } = useKibana().services;
@@ -84,27 +90,30 @@ const BaseComponent = () => {
       isServerless ? (
         <EuiButtonEmpty
           className="exportPdfButton"
+          data-test-subj="aiValueExportButton"
           iconType="export"
           onClick={() => exportPDFRef.current?.()}
           size="s"
           aria-label={EXPORT_REPORT}
+          isDisabled={!hasReportData}
         >
           {EXPORT_REPORT}
         </EuiButtonEmpty>
       ) : (
         <EuiButtonEmpty
           className="exportPdfButton"
+          data-test-subj="aiValueExportButton"
           iconType="export"
           buttonRef={setExportButtonElement}
           size="s"
           aria-label={EXPORT_REPORT}
           onClick={toggleContextMenu}
-          isLoading={!isExportEnabled}
+          isDisabled={!hasReportData || !isExportEnabled}
         >
           {EXPORT_REPORT}
         </EuiButtonEmpty>
       ),
-    [isServerless, isExportEnabled, toggleContextMenu]
+    [isServerless, isExportEnabled, hasReportData, toggleContextMenu]
   );
 
   if (!hasSocManagementCapability) {
@@ -144,38 +153,61 @@ const BaseComponent = () => {
         <HeaderPage
           title={i18n.AI_VALUE_DASHBOARD}
           rightSideItems={[
-            <SuperDatePicker
-              id={InputsModelId.valueReport}
-              showUpdateButton="iconOnly"
-              width="auto"
-              compressed
-            />,
-            ...(hasAttackDiscoveries ? [exportButton] : []),
+            <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+              <EuiFlexItem grow={false}>
+                {isSampleMode ? (
+                  <EuiContext
+                    i18n={{
+                      mapping: {
+                        'euiSuperUpdateButton.cannotUpdateTooltip':
+                          SAMPLE_REPORT_DATE_PICKER_DISABLED_TOOLTIP,
+                      },
+                    }}
+                  >
+                    <SuperDatePicker
+                      id={InputsModelId.valueReport}
+                      showUpdateButton="iconOnly"
+                      width="auto"
+                      compressed
+                      disabled={isSourcererLoading || isDatePickerDisabled}
+                    />
+                  </EuiContext>
+                ) : (
+                  <SuperDatePicker
+                    id={InputsModelId.valueReport}
+                    showUpdateButton="iconOnly"
+                    width="auto"
+                    compressed
+                    disabled={isSourcererLoading || isDatePickerDisabled}
+                  />
+                )}
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>{exportButton}</EuiFlexItem>
+            </EuiFlexGroup>,
           ]}
         />
       )}
-      {status === 'loading' ? (
-        <EuiLoadingSpinner size="l" data-test-subj="aiValueLoader" />
-      ) : (
-        <EuiFlexGroup direction="column" data-test-subj="aiValueSections">
-          <EuiFlexItem>
-            <ValueReportExporter>
-              {(exportPDF) => {
-                // Store the export function in the ref
-                exportPDFRef.current = exportPDF;
+      <EuiFlexGroup direction="column" data-test-subj="aiValueSections">
+        <EuiFlexItem>
+          <ValueReportExporter>
+            {(exportPDF) => {
+              // Store the export function in the ref
+              exportPDFRef.current = exportPDF;
 
-                return (
-                  <AIValueMetrics
-                    from={from}
-                    to={to}
-                    setHasAttackDiscoveries={setHasAttackDiscoveries}
-                  />
-                );
-              }}
-            </ValueReportExporter>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      )}
+              return (
+                <AIValueReport
+                  from={from}
+                  to={to}
+                  setHasReportData={setHasReportData}
+                  setIsDatePickerDisabled={setIsDatePickerDisabled}
+                  setIsSampleMode={setIsSampleMode}
+                  isSourcererLoading={isSourcererLoading}
+                />
+              );
+            }}
+          </ValueReportExporter>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     </SecuritySolutionPageWrapper>
   );
 };
