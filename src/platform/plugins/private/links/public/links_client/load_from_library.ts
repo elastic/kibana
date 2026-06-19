@@ -8,8 +8,10 @@
  */
 
 import { linksClient } from '.';
+import type { LinksByValueState } from '../../server';
 
-export async function loadFromLibrary(libraryId: string) {
+export async function loadFromLibrary(libraryId: string): Promise<LinksByValueState> {
   const response = await linksClient.get(libraryId);
-  return response.data;
+  const { tags, ...rest } = response.data; // the embeddable does not use tags
+  return rest;
 }
