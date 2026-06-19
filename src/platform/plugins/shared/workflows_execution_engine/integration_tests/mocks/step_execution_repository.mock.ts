@@ -53,7 +53,10 @@ export class StepExecutionRepositoryMock implements Required<StepExecutionReposi
             delete (filtered as Record<string, unknown>)[field];
           }
         }
-        if (sourceIncludes?.includes('output' as StepExecutionField) && filtered.output === undefined) {
+        if (
+          sourceIncludes?.includes('output' as StepExecutionField) &&
+          filtered.output === undefined
+        ) {
           filtered.output = null;
         }
         return filtered;

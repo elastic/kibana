@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { WORKFLOWS_STEP_EXECUTIONS_INDEX } from '../../common';
 import { StepExecutionRepository } from './step_execution_repository';
+import { WORKFLOWS_STEP_EXECUTIONS_INDEX } from '../../common';
 
 const TARGET_INDEX = '.workflows-step-executions-000001';
 
