@@ -8,7 +8,7 @@
  */
 
 import type { ScoutPage } from '@kbn/scout';
-import { EuiToastWrapper, spaceTest, tags } from '@kbn/scout';
+import { EuiToastWrapper, spaceTest } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { testData } from '../../fixtures/common';
 
@@ -45,7 +45,7 @@ const tryReadClipboard = async (page: ScoutPage): Promise<string | null> => {
 
 spaceTest.describe(
   'Discover data grid - copy to clipboard',
-  { tag: tags.deploymentAgnostic },
+  { tag: '@local-stateful-classic' },
   () => {
     spaceTest.beforeAll(async ({ scoutSpace }) => {
       await scoutSpace.savedObjects.load(testData.DISCOVER_KBN_ARCHIVE);

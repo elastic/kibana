@@ -12,12 +12,12 @@
  */
 
 import { expect } from '@kbn/scout/ui';
-import { spaceTest, tags } from '@kbn/scout';
+import { spaceTest } from '@kbn/scout';
 import { testData } from '../../fixtures/common';
 
 spaceTest.describe(
   'Discover data grid - document navigation',
-  { tag: tags.deploymentAgnostic },
+  { tag: '@local-stateful-classic' },
   () => {
     spaceTest.use({ viewport: { width: 1600, height: 1200 } });
 

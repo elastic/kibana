@@ -9,7 +9,7 @@
 
 import type { ScoutPage } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import { spaceTest, tags } from '@kbn/scout';
+import { spaceTest } from '@kbn/scout';
 import { testData } from '../../fixtures/common';
 
 const CONTEXT_COLUMN = '@message';
@@ -29,7 +29,7 @@ const getColumnTitles = async (page: ScoutPage): Promise<string[]> => {
 
 const normalizeTimestamp = (timestamp: string) => timestamp.replace('↦', '').trim();
 
-spaceTest.describe('Discover data grid - context view', { tag: tags.deploymentAgnostic }, () => {
+spaceTest.describe('Discover data grid - context view', { tag: '@local-stateful-classic' }, () => {
   spaceTest.beforeAll(async ({ scoutSpace }) => {
     await scoutSpace.savedObjects.load(testData.DISCOVER_KBN_ARCHIVE);
     await scoutSpace.uiSettings.setDefaultIndex(testData.DEFAULT_DATA_VIEW);

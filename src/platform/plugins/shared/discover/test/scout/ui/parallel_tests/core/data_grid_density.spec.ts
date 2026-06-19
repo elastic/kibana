@@ -14,10 +14,10 @@
  */
 
 import { expect } from '@kbn/scout/ui';
-import { spaceTest, tags } from '@kbn/scout';
+import { spaceTest } from '@kbn/scout';
 import { testData } from '../../fixtures/common';
 
-spaceTest.describe('Discover data grid density', { tag: tags.deploymentAgnostic }, () => {
+spaceTest.describe('Discover data grid density', { tag: '@local-stateful-classic' }, () => {
   spaceTest.beforeAll(async ({ scoutSpace }) => {
     await scoutSpace.savedObjects.load(testData.DISCOVER_KBN_ARCHIVE);
     await scoutSpace.uiSettings.setDefaultIndex(testData.DEFAULT_DATA_VIEW);

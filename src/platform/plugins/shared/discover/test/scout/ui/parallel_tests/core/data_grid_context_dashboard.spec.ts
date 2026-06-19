@@ -8,12 +8,12 @@
  */
 
 import { expect } from '@kbn/scout/ui';
-import { spaceTest, tags } from '@kbn/scout';
+import { spaceTest } from '@kbn/scout';
 import { testData } from '../../fixtures/common';
 
 spaceTest.describe(
   'Discover data grid - dashboard context view',
-  { tag: tags.deploymentAgnostic },
+  { tag: '@local-stateful-classic' },
   () => {
     spaceTest.beforeAll(async ({ scoutSpace }) => {
       await scoutSpace.savedObjects.load(testData.DISCOVER_KBN_ARCHIVE);

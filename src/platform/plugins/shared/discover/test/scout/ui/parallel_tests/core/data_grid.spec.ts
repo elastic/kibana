@@ -9,7 +9,7 @@
 
 import type { ScoutPage } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import { spaceTest, tags } from '@kbn/scout';
+import { spaceTest } from '@kbn/scout';
 import { testData } from '../../fixtures/common';
 
 // Mirrors the FTR `dataGrid.getHeaderFields`: only the data-column titles live in
@@ -53,7 +53,7 @@ const toggleColumnFromSidebar = async (page: ScoutPage, column: string) => {
   await page.testSubj.click(`fieldToggle-${column}`);
 };
 
-spaceTest.describe('Discover data grid', { tag: tags.deploymentAgnostic }, () => {
+spaceTest.describe('Discover data grid', { tag: '@local-stateful-classic' }, () => {
   spaceTest.beforeAll(async ({ scoutSpace }) => {
     await scoutSpace.savedObjects.load(testData.DISCOVER_KBN_ARCHIVE);
     await scoutSpace.uiSettings.setDefaultIndex(testData.DEFAULT_DATA_VIEW);
