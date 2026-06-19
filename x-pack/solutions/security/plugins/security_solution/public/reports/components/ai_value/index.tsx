@@ -42,6 +42,8 @@ interface Props {
   isSourcererLoading: boolean;
   from: string;
   to: string;
+  sampleBanner?: React.ReactNode;
+  forceSampleData?: boolean;
 }
 
 type AIValueReportContentProps = Omit<Props, 'isSourcererLoading'>;
@@ -52,6 +54,8 @@ const AIValueReportContent: React.FC<AIValueReportContentProps> = ({
   setIsSampleMode,
   from: propFrom,
   to: propTo,
+  sampleBanner,
+  forceSampleData,
 }) => {
   const { settings } = useKibana().services;
   const exportContext = useAIValueExportContext();
@@ -87,7 +91,13 @@ const AIValueReportContent: React.FC<AIValueReportContentProps> = ({
     [settings.client]
   );
 
-  const data = useValueReportData({ from, to, minutesPerAlert, analystHourlyRate });
+  const data = useValueReportData({
+    from,
+    to,
+    minutesPerAlert,
+    analystHourlyRate,
+    forceSampleData,
+  });
 
   useEffect(() => {
     if (data.isLoading || data.isSample || !setReportInputForExportContext) {
@@ -123,24 +133,26 @@ const AIValueReportContent: React.FC<AIValueReportContentProps> = ({
     // to show the full report layout and provide an example of how the metrics are calculated
     return (
       <>
-        <AnnouncementBanner
-          data-test-subj="aiValueSampleAttackDiscoveryBanner"
-          title={i18n.RUN_ATTACK_DISCOVERY_TEXT}
-          headingElement="h3"
-          text={i18n.GET_STARTED_ATTACK_DISCOVERY_TEXT}
-          media={<EuiIcon type={analyticsSpeedAcceleration} size="original" aria-hidden={true} />}
-          actionProps={{
-            primary: {
-              children: i18n.ATTACK_DISCOVERY_LINK,
-              href: attackDiscoveryHref,
-              iconType: 'popout',
-              iconSide: 'left',
-              target: '_blank',
-              rel: 'noopener noreferrer',
-              'data-test-subj': 'sampleAttackDiscoveryCtaButton',
-            },
-          }}
-        />
+        {sampleBanner ?? (
+          <AnnouncementBanner
+            data-test-subj="aiValueSampleAttackDiscoveryBanner"
+            title={i18n.RUN_ATTACK_DISCOVERY_TEXT}
+            headingElement="h3"
+            text={i18n.GET_STARTED_ATTACK_DISCOVERY_TEXT}
+            media={<EuiIcon type={analyticsSpeedAcceleration} size="original" aria-hidden={true} />}
+            actionProps={{
+              primary: {
+                children: i18n.ATTACK_DISCOVERY_LINK,
+                href: attackDiscoveryHref,
+                iconType: 'popout',
+                iconSide: 'left',
+                target: '_blank',
+                rel: 'noopener noreferrer',
+                'data-test-subj': 'sampleAttackDiscoveryCtaButton',
+              },
+            }}
+          />
+        )}
         <EuiSpacer size="l" />
         <EuiPanel hasBorder={true} borderRadius="m" color="transparent" paddingSize="l">
           <EuiFlexGroup responsive={false} alignItems="center" justifyContent="spaceBetween">
@@ -228,6 +240,8 @@ export const AIValueReport: React.FC<Props> = ({
   isSourcererLoading,
   from,
   to,
+  sampleBanner,
+  forceSampleData,
 }) => {
   useEffect(() => {
     if (isSourcererLoading) {
@@ -249,6 +263,8 @@ export const AIValueReport: React.FC<Props> = ({
       setIsSampleMode={setIsSampleMode}
       from={from}
       to={to}
+      sampleBanner={sampleBanner}
+      forceSampleData={forceSampleData}
     />
   );
 };
