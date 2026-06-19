@@ -67,6 +67,9 @@ import { ensureCorrectAgentlessSettingsIds } from './agentless_settings_ids';
 import { getSpaceAwareSaveobjectsClients } from './epm/kibana/assets/saved_objects';
 import { ensureFleetGlobalEsAssets } from './setup/ensure_fleet_global_es_assets';
 
+/** Maximum number of non-fatal errors retained in memory after setup. */
+const MAX_NON_FATAL_ERRORS = 100;
+
 export interface SetupStatus {
   isInitialized: boolean;
   nonFatalErrors: Array<
@@ -331,10 +334,15 @@ async function createSetupSideEffects(
       });
   }
 
-  // Strip heavy ES connection metadata from stored errors to prevent large ResponseError
+  // Strip heavy ES connection metadata and cap stored errors to prevent large ResponseError
   // objects from being retained in the module-level promise.
   // See https://github.com/elastic/kibana/issues/273921
-  const nonFatalErrors = rawNonFatalErrors.map(sanitizeNonFatalError);
+  if (rawNonFatalErrors.length > MAX_NON_FATAL_ERRORS) {
+    logger.warn(
+      `Fleet setup encountered ${rawNonFatalErrors.length} non-fatal errors; storing only the first ${MAX_NON_FATAL_ERRORS}`
+    );
+  }
+  const nonFatalErrors = rawNonFatalErrors.slice(0, MAX_NON_FATAL_ERRORS).map(sanitizeNonFatalError);
 
   logger.info('Fleet setup completed');
 

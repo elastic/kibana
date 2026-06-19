@@ -199,6 +199,28 @@ describe('setupFleet', () => {
     expect(stored.package).toEqual({ name: 'test', version: '1.0.0' });
   });
 
+  it('should cap stored nonFatalErrors at 100 and log a warning', async () => {
+    const soClient = getMockedSoClient();
+    const startService = createAppContextStartContractMock();
+    mockedAppContextService.getLogger.mockReturnValue(startService.logger);
+
+    const manyErrors = Array.from({ length: 120 }, (_, i) => ({
+      error: new Error(`error ${i}`),
+      package: { name: 'test', version: '1.0.0' },
+    }));
+
+    (ensurePreconfiguredPackagesAndPolicies as jest.Mock).mockResolvedValueOnce({
+      nonFatalErrors: manyErrors,
+    });
+
+    const result = await setupFleet(soClient, esClient);
+
+    expect(result.nonFatalErrors).toHaveLength(100);
+    expect(startService.logger.warn).toHaveBeenCalledWith(
+      expect.stringContaining('120 non-fatal errors')
+    );
+  });
+
   it('should return non fatal errors when generateKeyPair result has errors', async () => {
     const soClient = getMockedSoClient();
 
