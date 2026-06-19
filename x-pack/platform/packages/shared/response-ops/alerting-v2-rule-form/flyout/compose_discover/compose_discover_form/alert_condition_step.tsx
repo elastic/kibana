@@ -101,7 +101,8 @@ export function AlertConditionStep({
   // Auto-populate group fields from the STATS BY clause whenever the committed
   // query changes. Re-derives on every new Apply so switching indices updates
   // the group fields instead of leaving stale values from the previous query.
-  const autoPopulatedForRef = useRef<string | null>(null);
+  // Skips the first run when editing to preserve API-seeded grouping defaults.
+  const autoPopulatedForRef = useRef<string | null>(isEditing ? committedQuery : null);
   useEffect(() => {
     if (!state.queryCommitted || !committedQuery) return;
     if (autoPopulatedForRef.current === committedQuery) return;
@@ -128,6 +129,15 @@ export function AlertConditionStep({
   // Only relevant after Apply (when the committed query is in composed format).
   const splitFailed =
     isAlert && state.queryCommitted && query.format === 'composed' && !query.base.trim();
+
+  // Show a warning callout when the breach segment is empty after Apply.
+  // Skipped when splitFailed is already showing (which covers the empty-base case).
+  const missingBreachQuery =
+    !splitFailed &&
+    isAlert &&
+    state.queryCommitted &&
+    query.format === 'composed' &&
+    !query.breach.segment.trim();
 
   return (
     <>
@@ -203,7 +213,7 @@ export function AlertConditionStep({
                 announceOnMount={false}
                 size="s"
                 color="primary"
-                iconType="iInCircle"
+                iconType="info"
                 title={i18n.translate(
                   'xpack.alertingV2.composeDiscover.alertCondition.splitFailedTitle',
                   {
@@ -212,6 +222,29 @@ export function AlertConditionStep({
                   }
                 )}
               />
+              <EuiSpacer size="s" />
+            </>
+          )}
+          {missingBreachQuery && (
+            <>
+              <EuiCallOut
+                announceOnMount={false}
+                size="s"
+                color="warning"
+                iconType="warning"
+                title={i18n.translate(
+                  'xpack.alertingV2.composeDiscover.alertCondition.alertQueryRequiredTitle',
+                  {
+                    defaultMessage: 'Alert condition required',
+                  }
+                )}
+                data-test-subj="composeDiscoverAlertQueryMissing"
+              >
+                <FormattedMessage
+                  id="xpack.alertingV2.composeDiscover.alertCondition.alertQueryRequiredDescription"
+                  defaultMessage="Define an alert condition in the query editor before continuing to the next step."
+                />
+              </EuiCallOut>
               <EuiSpacer size="s" />
             </>
           )}
