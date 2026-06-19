@@ -358,6 +358,7 @@ export class RenderingService {
         branch: env.packageInfo.branch,
         basePath,
         serverBasePath,
+        spaceId: request.spaceId,
         publicBaseUrl,
         assetsHrefBase: staticAssetsHrefBase,
         logging: loggingConfig,
