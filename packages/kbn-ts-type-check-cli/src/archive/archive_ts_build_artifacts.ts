@@ -12,6 +12,7 @@ import globby from 'globby';
 import { CACHE_IGNORE_GLOBS, CACHE_MATCH_GLOBS, CACHE_INVALIDATION_FILES } from './constants';
 import { GcsFileSystem } from './file_system/gcs_file_system';
 import { LocalFileSystem } from './file_system/local_file_system';
+import { resolveRamdiskMountPath } from '../ramdisk_types';
 import {
   getPullRequestNumber,
   isCiEnvironment,
@@ -25,10 +26,14 @@ import {
  */
 export async function archiveTSBuildArtifacts(log: SomeDevLog) {
   try {
+    // When ramdisk mode is active, `target/types` is a symlink — globby must follow
+    // it so the archive contains the real .d.ts/.tsbuildinfo bytes, not link entries.
+    const followSymbolicLinks = Boolean(resolveRamdiskMountPath());
+
     const matches = await globby(CACHE_MATCH_GLOBS, {
       cwd: REPO_ROOT,
       dot: true,
-      followSymbolicLinks: false,
+      followSymbolicLinks,
       ignore: CACHE_IGNORE_GLOBS,
     });
 

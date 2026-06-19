@@ -17,6 +17,7 @@ import { getTarCreateArgs, getTarPlatformOptions, resolveTarEnvironment } from '
 import { AbstractFileSystem } from './abstract_file_system';
 import type { ArchiveMetadata } from './types';
 import { join } from './utils';
+import { resolveRamdiskMountPath } from '../../ramdisk_types';
 
 export class GcsFileSystem extends AbstractFileSystem {
   constructor(log: SomeDevLog) {
@@ -28,7 +29,10 @@ export class GcsFileSystem extends AbstractFileSystem {
   }
 
   protected async archive(archivePath: string, fileListPath: string): Promise<void> {
-    const tarProcess = execa('tar', getTarCreateArgs('-', fileListPath), {
+    const tarArgs = getTarCreateArgs('-', fileListPath, {
+      dereference: Boolean(resolveRamdiskMountPath()),
+    });
+    const tarProcess = execa('tar', tarArgs, {
       cwd: REPO_ROOT,
       stdout: 'pipe',
       stderr: 'inherit',

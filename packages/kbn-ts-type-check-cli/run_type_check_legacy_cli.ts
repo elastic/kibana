@@ -26,6 +26,11 @@ import { restoreTSBuildArtifacts } from './src/archive/restore_ts_build_artifact
 import { isCiEnvironment } from './src/archive/utils';
 import { normalizeProjectPath } from './src/normalize_project_path';
 import { resolveTypeCheckCompiler } from './src/resolve_compiler';
+import {
+  resolveRamdiskMountPath,
+  setupTypesRamdisk,
+  type RamdiskTypesSession,
+} from './src/ramdisk_types';
 
 /** Runs the legacy direct-target `scripts/type_check` CLI flow. */
 export const runLegacyTypeCheckCli = () => {
@@ -50,14 +55,6 @@ export const runLegacyTypeCheckCli = () => {
       // a reference to every composite project in the repo.
       await updateRootRefsConfig(log);
 
-      if (shouldRestoreArchive) {
-        await restoreTSBuildArtifacts(log);
-      } else {
-        log.verbose(
-          'Skipping TypeScript cache restore because --restore-archive was not provided.'
-        );
-      }
-
       const projectFilter = normalizeProjectPath(flagsReader.path('project'), log);
       const projects = TS_PROJECTS.filter(
         (project) =>
@@ -66,6 +63,22 @@ export const runLegacyTypeCheckCli = () => {
 
       if (projectFilter && projects.length === 0) {
         throw createFailError(`Could not find a TypeScript project at '${projectFilter}'.`);
+      }
+
+      // Set up the ramdisk mirror BEFORE restoring the archive so the tar extract
+      // writes into RAM directly (otherwise we'd extract to disk and then re-link).
+      const ramdiskMount = resolveRamdiskMountPath(flagsReader.path('ramdisk-types'));
+      let ramdiskSession: RamdiskTypesSession | undefined;
+      if (ramdiskMount) {
+        ramdiskSession = await setupTypesRamdisk(log, projects, ramdiskMount);
+      }
+
+      if (shouldRestoreArchive) {
+        await restoreTSBuildArtifacts(log);
+      } else {
+        log.verbose(
+          'Skipping TypeScript cache restore because --restore-archive was not provided.'
+        );
       }
 
       const createdConfigs = await createTypeCheckConfigs(log, projects, TS_PROJECTS);
@@ -129,6 +142,10 @@ export const runLegacyTypeCheckCli = () => {
           await asyncForEachWithLimit(createdConfigs, 40, async (path) => {
             await Fsp.unlink(path);
           });
+
+          if (ramdiskSession) {
+            await ramdiskSession.unlink();
+          }
         }
       }
 
@@ -148,7 +165,7 @@ export const runLegacyTypeCheckCli = () => {
         node scripts/type_check --project packages/kbn-pm/tsconfig.json
     `,
       flags: {
-        string: ['project'],
+        string: ['project', 'ramdisk-types'],
         boolean: [
           'clean-cache',
           'cleanup',
@@ -169,6 +186,10 @@ export const runLegacyTypeCheckCli = () => {
         --restore-archive       Restore cached artifacts from GCS before running tsc
         --upload-archive        Upload resulting artifacts to GCS after a successful tsc run
         --with-archive          Shorthand for \`--restore-archive --upload-archive\`
+        --ramdisk-types [path]  Symlink each project's target/types into a pre-mounted RAM volume
+                                  so emit I/O hits RAM. The path must already be a writable
+                                  tmpfs/APFS RAM volume. Alternatively, set
+                                  KBN_TYPECHECK_RAMDISK=/path/to/mount.
       `,
       },
     }
