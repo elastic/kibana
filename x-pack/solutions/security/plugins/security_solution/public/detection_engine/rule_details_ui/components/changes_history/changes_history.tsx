@@ -75,13 +75,10 @@ export const RuleChangesHistory = memo(function RuleChangesHistory({
     [trackingStartedAt]
   );
 
-  // Track rule change and makes sure the first item is selected when there is no selection
   useChangeHistoryAutoSelection({
     ruleId,
     items,
-    selectedItem,
     setSelectedItem,
-    loadMore: handleNextPageLoading,
   });
 
   const styles = useMemo(

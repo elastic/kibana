@@ -12,52 +12,35 @@ import { DIFFABLE_CHANGE_ACTIONS } from '../changes_history_timeline/constants';
 interface UseChangeHistoryAutoSelectionParams {
   ruleId: string;
   items: RuleHistoryItem[];
-  selectedItem: RuleHistoryItem | undefined;
   setSelectedItem: (item: RuleHistoryItem | undefined) => void;
-  loadMore: () => void;
 }
 
 export function useChangeHistoryAutoSelection({
   ruleId,
   items,
-  selectedItem,
   setSelectedItem,
-  loadMore,
 }: UseChangeHistoryAutoSelectionParams): void {
-  // Reset the selected item when ruleId changes
+  const decidedRef = useRef(false);
+
+  // Reset when ruleId changes.
   useEffect(() => {
     setSelectedItem(undefined);
+    decidedRef.current = false;
   }, [ruleId, setSelectedItem]);
 
-  // Auto-select the first active item. Track the id we last auto-selected so we
-  // can tell an auto-selection apart from a manual one: loading older pages keeps
-  // the current selection, a newly recorded change at the top advances the
-  // selection, but a selection the user picked themselves is always preserved.
-  const lastAutoSelectedIdRef = useRef<string | undefined>(undefined);
-
+  // Auto-select the first diffable item once, when the first page settles.
+  // After the initial decision the hook is inert — any further navigation is
+  // left entirely to the user.
   useEffect(() => {
+    if (items.length === 0 || decidedRef.current) {
+      return;
+    }
+
+    decidedRef.current = true;
     const firstActive = items.find((item) => DIFFABLE_CHANGE_ACTIONS.includes(item.action));
-    if (!firstActive) {
-      // The first active item may live on a later page (e.g. the first page only
-      // holds non-diffable events). Keep pulling pages until one shows up; the
-      // call is a no-op when there are no more pages or one is already loading.
-      loadMore();
-      return;
-    }
 
-    if (lastAutoSelectedIdRef.current === firstActive.id) {
-      return;
+    if (firstActive) {
+      setSelectedItem(firstActive);
     }
-
-    // Only advance when there is no selection, or the current selection is the
-    // one we auto-selected previously. A manual selection is left untouched.
-    const isManualSelection =
-      selectedItem !== undefined && selectedItem.id !== lastAutoSelectedIdRef.current;
-    if (isManualSelection) {
-      return;
-    }
-
-    lastAutoSelectedIdRef.current = firstActive.id;
-    setSelectedItem(firstActive);
-  }, [items, selectedItem, setSelectedItem, loadMore]);
+  }, [items, setSelectedItem]);
 }

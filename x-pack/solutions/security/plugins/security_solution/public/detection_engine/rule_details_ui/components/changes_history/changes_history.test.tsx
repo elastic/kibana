@@ -66,7 +66,7 @@ describe('RuleChangesHistory', () => {
     });
   });
 
-  it('advances the selection to a newly recorded change appearing at the top', async () => {
+  it('does not auto-advance when a new change appears at the top after the initial selection', async () => {
     const createItem = createHistoryItem({
       id: 'create-1',
       action: 'rule_create',
@@ -101,9 +101,9 @@ describe('RuleChangesHistory', () => {
       </TestProviders>
     );
 
-    // The selection advances to the new top item rather than staying on the old one.
+    // The selection stays on the initial item — no auto-advance for new changes.
     await waitFor(() => {
-      expect(screen.getByTestId('ruleChangesHistoryDiff')).toHaveTextContent('BetaRule');
+      expect(screen.getByTestId('ruleChangesHistoryDiff')).toHaveTextContent('AlphaRule');
     });
   });
 
@@ -165,45 +165,23 @@ describe('RuleChangesHistory', () => {
     expect(screen.getByTestId('ruleChangesHistoryDiff')).not.toHaveTextContent('BrandNewRule');
   });
 
-  it('keeps loading pages until the first active item is found', async () => {
-    const fetchNextPage = jest.fn();
+  it('shows nothing-selected state when the first page has no diffable items', async () => {
     const disableItem = createHistoryItem({ id: 'disable-1', action: 'rule_disable' });
     const enableItem = createHistoryItem({ id: 'enable-1', action: 'rule_enable' });
     mockUseInfiniteChangeHistory.mockReturnValue(
-      mockUseInfiniteQueryResult([disableItem, enableItem], { hasNextPage: true, fetchNextPage })
+      mockUseInfiniteQueryResult([disableItem, enableItem], { hasNextPage: true })
     );
 
-    const { rerender } = render(
+    render(
       <TestProviders>
         <RuleChangesHistory ruleId="rule-1" header={<span />} />
       </TestProviders>
     );
 
-    // The first page holds non active change history items, so the next page is requested automatically
-    // and nothing is selected yet.
+    // First page has only non-diffable events: nothing is auto-selected and no
+    // further pages are loaded automatically.
     await waitFor(() => {
-      expect(fetchNextPage).toHaveBeenCalled();
-    });
-    expect(screen.getByTestId('ruleChangesHistoryNothingSelected')).toBeInTheDocument();
-
-    // The next page brings an active change history item.
-    const createItem = createHistoryItem({
-      id: 'create-1',
-      action: 'rule_create',
-      rule: { name: 'PageTwoRule' } as RuleResponse,
-    });
-    mockUseInfiniteChangeHistory.mockReturnValue(
-      mockUseInfiniteQueryResult([disableItem, enableItem, createItem], { hasNextPage: false })
-    );
-    rerender(
-      <TestProviders>
-        <RuleChangesHistory ruleId="rule-1" header={<span />} />
-      </TestProviders>
-    );
-
-    // The diffable item from the later page gets auto-selected.
-    await waitFor(() => {
-      expect(screen.getByTestId('ruleChangesHistoryDiff')).toHaveTextContent('PageTwoRule');
+      expect(screen.getByTestId('ruleChangesHistoryNothingSelected')).toBeInTheDocument();
     });
   });
 });
