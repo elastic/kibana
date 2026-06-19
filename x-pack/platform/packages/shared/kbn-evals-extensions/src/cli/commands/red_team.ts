@@ -8,16 +8,16 @@
 import { spawn } from 'child_process';
 import { createFlagError } from '@kbn/dev-cli-errors';
 import type { Command, FlagOptions, FlagsReader } from '@kbn/dev-cli-runner';
-import { ensureEvalStack } from '@kbn/evals';
 import {
+  ensureEvalStack,
   ensureEvalInit,
   resolveEvalSuite,
   resolveEvalRunContext,
   buildEvalRunEnv,
   buildEvalRunArgs,
   formatEvalCliCommand,
-  flags as evalStartFlags,
-} from '@kbn/evals/src/cli/commands/start';
+  evalRunFlags as evalStartFlags,
+} from '@kbn/evals';
 import {
   runRedTeam,
   type RedTeamConfig,

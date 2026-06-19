@@ -35,6 +35,20 @@ export {
 } from './src/cli/eval_stack';
 
 export {
+  ensureEvalInit,
+  resolveEvalSuite,
+  resolveEvalRunContext,
+  buildEvalRunEnv,
+  buildEvalRunArgs,
+  formatEvalCliCommand,
+  evalRunFlags,
+  type EvalSuiteResolution,
+  type EvalRunContext,
+  type ResolveEvalRunContextOptions,
+  type BuildEvalRunArgsOptions,
+} from './src/cli/run_helpers';
+
+export {
   resolveEvalSuites,
   readSuiteMetadata,
   discoverEvalSuites,
