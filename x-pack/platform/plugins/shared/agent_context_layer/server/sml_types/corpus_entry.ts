@@ -32,7 +32,7 @@ export const CORPUS_ENTRY_SML_TYPE = 'corpus_entry';
 export const corpusEntrySmlType: SmlTypeDefinition = {
   id: CORPUS_ENTRY_SML_TYPE,
 
-  list: async function* () {},
+  async *list() {},
 
   getSmlData: async () => undefined,
 
