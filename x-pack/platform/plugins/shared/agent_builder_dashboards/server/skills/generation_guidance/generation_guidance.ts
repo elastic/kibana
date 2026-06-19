@@ -11,13 +11,11 @@ import { dashboardDesignGuidancePrompt } from './design';
 /**
  * Environment-agnostic dashboard *generation* guidance.
  *
- * This block describes how to build a dashboard payload from ordered operations
- * (metadata, panels, sections, layouts) using the generation tool, which returns
- * the dashboard payload as plain data and performs no persistence. It avoids
- * environment-specific rendering vocabulary so it can be reused across
+ * This block describes how to build a dashboard. It deliberately says nothing about how the current
+ * dashboard is referenced or how the result is returned/surfaced. Those are
+ * environment-specific and avoided here so the block can be reused across
  * environments. Pair it with an environment-specific rendering guidance block
- * (e.g. the Kibana one) that explains how inputs are resolved and how the
- * generated payload is surfaced.
+ * (e.g. the Kibana one) that explains how the generated dashboard is surfaced.
  */
 export const dashboardGenerationGuidance = `## Building a Dashboard
 

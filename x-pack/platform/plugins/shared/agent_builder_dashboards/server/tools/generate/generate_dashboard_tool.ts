@@ -156,7 +156,7 @@ Use operations[] to:
         return {
           results: [
             {
-              type: ToolResultType.other,
+              type: ToolResultType.dashboard,
               tool_result_id: getToolResultId(),
               data: {
                 attachment_id: attachment.id,

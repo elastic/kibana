@@ -12,10 +12,9 @@ import type { VisualizationFailure } from './utils';
 /**
  * Contract for inline visualization resolution.
  *
- * The generate core consumes this to turn an inline visualization request
- * (natural language / ES|QL) into panel content, without depending on any
- * environment-specific implementation. The host (e.g. Kibana) provides the
- * concrete resolver — see `visualization_resolver.ts`.
+ * The generate core consumes this to turn an inline visualization request (natural language) 
+ * into panel content, without depending on any environment-specific implementation. 
+ * The host (e.g. Kibana) provides the concrete resolver — see `visualization_resolver.ts`.
  */
 export type VisualizationAttempt =
   | {
