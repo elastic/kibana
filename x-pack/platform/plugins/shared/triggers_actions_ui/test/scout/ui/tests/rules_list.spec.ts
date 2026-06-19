@@ -898,6 +898,9 @@ test.describe('Rules list', { tag: tags.stateful.classic }, () => {
   });
 
   test('should untrack disable rule if untrack switch is true', async ({ page, kbnClient }) => {
+    // Up to 60s waiting for the alert to fire + up to 60s waiting for untracking,
+    // plus UI steps — exceeds the 60s default test timeout.
+    test.setTimeout(150_000);
     const rule = await createAlwaysFiringRule(kbnClient, `untrack-true-${Date.now()}`);
     createdRuleIds.push(rule.id);
     await runRuleSoon(kbnClient, rule.id);
@@ -924,20 +927,25 @@ test.describe('Rules list', { tag: tags.stateful.classic }, () => {
       .locator('[data-test-subj="confirmModalConfirmButton"]')
       .click();
 
-    // Alert instance should now be untracked
+    // Alert instance should now be untracked. Untracking on disable is processed
+    // asynchronously (alert doc update + index refresh), so allow the same budget
+    // as the initial "became tracked" wait — 30s is too tight on a loaded CI agent.
     await expect(async () => {
       const summary = await getAlertSummary(kbnClient, rule.id);
       const instance = summary.alerts['query matched'];
       if (!instance || instance.tracked !== false) {
         throw new Error('Alert instance still tracked');
       }
-    }).toPass({ timeout: 30_000, intervals: [2_000] });
+    }).toPass({ timeout: 60_000, intervals: [2_000] });
   });
 
   test('should not untrack disable rule if untrack switch if false', async ({
     page,
     kbnClient,
   }) => {
+    // Up to 60s waiting for the alert to fire plus UI steps — exceeds the 60s
+    // default test timeout.
+    test.setTimeout(150_000);
     const rule = await createAlwaysFiringRule(kbnClient, `untrack-false-${Date.now()}`);
     createdRuleIds.push(rule.id);
     await runRuleSoon(kbnClient, rule.id);
