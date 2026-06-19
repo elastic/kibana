@@ -163,8 +163,10 @@ export function useBrowseIntegrationHook({
   }, [filteredAllCategories]);
 
   const availableSubCategories = useMemo(() => {
-    return filteredAllCategories?.filter((c) => c.parent_id === selectedCategory);
-  }, [filteredAllCategories, selectedCategory]);
+    return filteredAllCategories?.filter(
+      (c) => c.parent_id !== undefined && effectiveCategories.includes(c.parent_id)
+    );
+  }, [filteredAllCategories, effectiveCategories]);
 
   const onCategoryChange = useCallback(
     ({ id }: { id: string }) => {

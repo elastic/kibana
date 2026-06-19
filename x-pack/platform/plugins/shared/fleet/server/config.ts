@@ -59,7 +59,6 @@ export const config: PluginConfigDescriptor = {
       excludeDataStreamTypes: true,
     },
     integrationsHomeOverride: true,
-    defaultIntegrationCategory: true,
     prereleaseEnabledByDefault: true,
     hideDashboards: true,
     isAirGapped: true,
@@ -445,7 +444,6 @@ export const config: PluginConfigDescriptor = {
         })
       ),
       integrationsHomeOverride: schema.maybe(schema.string()),
-      defaultIntegrationCategory: schema.maybe(schema.arrayOf(schema.string())),
       prereleaseEnabledByDefault: schema.boolean({ defaultValue: false }),
       hideDashboards: schema.boolean({ defaultValue: false }),
       integrationRollbackTTL: schema.maybe(schema.string()),

@@ -118,7 +118,6 @@ export interface FleetConfigType {
     taskInterval?: string;
   };
   integrationsHomeOverride?: string;
-  defaultIntegrationCategory?: string[];
   prereleaseEnabledByDefault?: boolean;
   hideDashboards?: boolean;
   integrationRollbackTTL?: string;

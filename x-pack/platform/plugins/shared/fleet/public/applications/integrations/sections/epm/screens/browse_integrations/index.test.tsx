@@ -15,7 +15,6 @@ const mockUseSetUrlCategory = jest.fn();
 const mockUseSetUrlDefaultCategories = jest.fn();
 const mockUseUrlDefaultCategories = jest.fn();
 const mockUseStartServices = jest.fn();
-const mockUseConfig = jest.fn();
 
 jest.mock('./hooks', () => ({
   useBrowseIntegrationHook: () => mockUseBrowseIntegrationHook(),
@@ -29,7 +28,6 @@ jest.mock('./hooks/url_categories', () => ({
 
 jest.mock('../../../../hooks', () => ({
   useStartServices: () => mockUseStartServices(),
-  useConfig: () => mockUseConfig(),
   useBreadcrumbs: jest.fn(),
 }));
 
@@ -70,6 +68,12 @@ const makeDefaultHookReturn = (overrides = {}) => ({
   ...overrides,
 });
 
+const observabilityStartServices = {
+  cloud: { serverless: { projectType: 'observability' } },
+  application: { capabilities: {} },
+  automaticImport: undefined,
+};
+
 describe('BrowseIntegrationsPage', () => {
   const mockSetUrlDefaultCategoriesFn = jest.fn();
   const mockSetUrlCategoryFn = jest.fn();
@@ -80,13 +84,7 @@ describe('BrowseIntegrationsPage', () => {
     mockUseSetUrlDefaultCategories.mockReturnValue(mockSetUrlDefaultCategoriesFn);
     mockUseSetUrlCategory.mockReturnValue(mockSetUrlCategoryFn);
     mockUseUrlDefaultCategories.mockReturnValue([]);
-    mockUseConfig.mockReturnValue({
-      defaultIntegrationCategory: ['opentelemetry', 'observability'],
-    });
-    mockUseStartServices.mockReturnValue({
-      application: { capabilities: {} },
-      automaticImport: undefined,
-    });
+    mockUseStartServices.mockReturnValue(observabilityStartServices);
   });
 
   function renderPage() {
@@ -100,7 +98,7 @@ describe('BrowseIntegrationsPage', () => {
   }
 
   describe('default multi-category redirect', () => {
-    it('sets both configured default categories as URL query params on first load', async () => {
+    it('sets both default categories as URL query params on first load in Observability projects', async () => {
       renderPage();
       await waitFor(() => {
         expect(mockSetUrlDefaultCategoriesFn).toHaveBeenCalledWith(
@@ -126,8 +124,12 @@ describe('BrowseIntegrationsPage', () => {
       });
     });
 
-    it('does not redirect when no default categories are configured', async () => {
-      mockUseConfig.mockReturnValue({});
+    it('does not redirect when not an Observability project', async () => {
+      mockUseStartServices.mockReturnValue({
+        cloud: { serverless: { projectType: 'security' } },
+        application: { capabilities: {} },
+        automaticImport: undefined,
+      });
       renderPage();
       await waitFor(() => {
         expect(mockSetUrlDefaultCategoriesFn).not.toHaveBeenCalled();

@@ -9,7 +9,7 @@ import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { EuiFlexItem, EuiFlexGroup, EuiSpacer, useEuiTheme } from '@elastic/eui';
 import { useLocation, useHistory } from 'react-router-dom';
 
-import { useBreadcrumbs, useStartServices, useConfig } from '../../../../hooks';
+import { useBreadcrumbs, useStartServices } from '../../../../hooks';
 import { NoEprCallout } from '../../components/no_epr_callout';
 import { categoryExists } from '../home';
 
@@ -28,13 +28,14 @@ import {
   type CreatedIntegrationRow,
 } from './components/manage_integrations_table';
 
+const OBLT_DEFAULT_CATEGORIES = ['opentelemetry', 'observability'];
+
 export const BrowseIntegrationsPage: React.FC<{ prereleaseIntegrationsEnabled: boolean }> = ({
   prereleaseIntegrationsEnabled,
 }) => {
   useBreadcrumbs('integrations_all');
 
-  const { automaticImport, application } = useStartServices();
-  const config = useConfig();
+  const { automaticImport, application, cloud } = useStartServices();
   const { pathname, search } = useLocation();
   const history = useHistory();
   const euiTheme = useEuiTheme();
@@ -97,15 +98,18 @@ export const BrowseIntegrationsPage: React.FC<{ prereleaseIntegrationsEnabled: b
   // trigger another redirect back to the defaults — preventing the user from removing them.
   const hasAutoRedirectedRef = useRef(false);
 
+  const isObservability = cloud?.serverless?.projectType === 'observability';
+
   useEffect(() => {
     if (
       hasAutoRedirectedRef.current ||
+      !isObservability ||
       isLoading ||
       initialSelectedCategory ||
       urlDefaultCategories.length > 0
     )
       return;
-    const validDefaults = (config.defaultIntegrationCategory ?? []).filter((cat) =>
+    const validDefaults = OBLT_DEFAULT_CATEGORIES.filter((cat) =>
       categoryExists(cat, allCategories)
     );
     if (validDefaults.length > 0) {
@@ -113,10 +117,10 @@ export const BrowseIntegrationsPage: React.FC<{ prereleaseIntegrationsEnabled: b
       setUrlDefaultCategories(validDefaults, { replace: true });
     }
   }, [
+    isObservability,
     isLoading,
     initialSelectedCategory,
     urlDefaultCategories.length,
-    config.defaultIntegrationCategory,
     allCategories,
     setUrlDefaultCategories,
   ]);
