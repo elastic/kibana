@@ -73,10 +73,7 @@ export const expandIndexPickerOptions = () => {
 };
 
 export const selectIndexPickerOption = (index: string) => {
-  cy.get('.euiComboBoxOption')
-    .contains(new RegExp(`^${index}$`))
-    .should('exist')
-    .click();
+  cy.get(`[data-test-subj="privMonIndexOption-${index}"]`).should('exist').click();
 };
 
 export const clickFileUploaderAssignButton = () => {
