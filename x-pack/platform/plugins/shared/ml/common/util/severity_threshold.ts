@@ -9,6 +9,15 @@ import { ML_ANOMALY_THRESHOLD } from '@kbn/ml-anomaly-utils';
 import type { SeverityThreshold } from '@kbn/ml-server-schemas/embeddables/anomaly_charts';
 
 /**
+ * Returns the upper bound of a severity threshold, or `undefined` for the
+ * open-ended `critical` band. `SeverityThreshold` is a discriminated union whose
+ * `critical` member carries no `max`, so the bound must be read through an `in`
+ * guard rather than a direct property access.
+ */
+export const getSeverityThresholdMax = (threshold: SeverityThreshold): number | undefined =>
+  'max' in threshold ? threshold.max : undefined;
+
+/**
  * Utility function to resolve severity format from old to new format
  * @param value - The severity value which could be in old (number) or new (array) format
  * @returns Resolved severity value in the new format (array)

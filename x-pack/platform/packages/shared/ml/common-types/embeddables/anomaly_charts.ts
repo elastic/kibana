@@ -5,14 +5,7 @@
  * 2.0.
  */
 
-import type { AnomalySingleMetricViewerEmbeddableType } from '@kbn/ml-common-types/embeddables/single_metric_viewer';
-import type { AnomalySwimLaneEmbeddableType } from '@kbn/ml-common-types/embeddables/anomaly_swimlane';
-
+// Do not change constant values - part of public REST APIs
 export const ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE = 'ml_anomaly_charts' as const;
 
 export type AnomalyExplorerChartsEmbeddableType = typeof ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE;
-
-export type MlEmbeddableTypes =
-  | AnomalySwimLaneEmbeddableType
-  | AnomalyExplorerChartsEmbeddableType
-  | AnomalySingleMetricViewerEmbeddableType;
