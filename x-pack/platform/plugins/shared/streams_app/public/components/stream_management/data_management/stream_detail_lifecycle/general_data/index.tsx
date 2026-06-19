@@ -18,7 +18,7 @@ import {
 } from '@kbn/streams-schema';
 import { useUnsavedChangesPrompt } from '@kbn/unsaved-changes-prompt';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { omit } from 'lodash';
+import { isEqual, omit } from 'lodash';
 import { useKibana } from '../../../../../hooks/use_kibana';
 import { useTimefilter } from '../../../../../hooks/use_timefilter';
 import { getFormattedError } from '../../../../../util/errors';
@@ -286,7 +286,7 @@ const StreamDetailGeneralDataInner = ({
       });
 
       setPreviewIsActive(true);
-      setPreviewHasUnsavedChanges(false);
+      setPreviewHasUnsavedChanges(!isEqual(next, successfulDeletePhaseInitialPreviewValue));
       setPreviewTimelineModel({ phases: model.phases, downsampleSteps: model.downsampleSteps });
       setPreviewRetentionPeriod(model.retentionPeriod);
       setPreviewDataPhasesCount(model.dataPhasesCount);
@@ -304,6 +304,7 @@ const StreamDetailGeneralDataInner = ({
       ilmPhases.hot.color,
       ilmPhases.hot.description,
       isServerless,
+      successfulDeletePhaseInitialPreviewValue,
       setPreviewDataPhasesCount,
       setPreviewDownsampleStepsCount,
       setPreviewHasUnsavedChanges,
