@@ -162,6 +162,11 @@ export const validateExtendedFields = (
           ? evaluateCondition(field.validation.required_when, fieldValues, fieldTypeMap)
           : false);
 
+      // `required_on_close` is intentionally NOT enforced here.
+      // Close-time enforcement will be added in a follow-up: when transitioning
+      // a case to `closed`, this validator should be called with a `{ onClose: true }`
+      // context flag and treat `required_on_close === true` as requiring a non-empty value.
+
       if (isRequired && isEmpty) {
         errors.push(`Field "${field.label ?? field.name}" is required`);
       } else if (!isEmpty) {
