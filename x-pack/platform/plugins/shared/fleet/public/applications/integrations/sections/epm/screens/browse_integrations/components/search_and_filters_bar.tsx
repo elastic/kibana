@@ -127,6 +127,10 @@ const SortFilter: React.FC = () => {
     <EuiFilterGroup compressed>
       <EuiPopover
         id="browseIntegrationsSortPopover"
+        aria-label={i18n.translate(
+          'xpack.fleet.epm.browseIntegrations.searchAndFilterBar.sortPopoverAriaLabel',
+          { defaultMessage: 'Sort options' }
+        )}
         isOpen={isOpen}
         closePopover={closePopover}
         panelPaddingSize="s"
@@ -213,6 +217,10 @@ const SetupMethodFilter: React.FC<{
   return (
     <EuiPopover
       id="browseIntegrationsSetupMethodPopover"
+      aria-label={i18n.translate(
+        'xpack.fleet.epm.browseIntegrations.searchAndFilterBar.setupMethodPopoverAriaLabel',
+        { defaultMessage: 'Setup method options' }
+      )}
       isOpen={isOpen}
       closePopover={closePopover}
       panelPaddingSize="s"
@@ -308,6 +316,10 @@ const SignalFilter: React.FC<{
   return (
     <EuiPopover
       id="browseIntegrationsSignalPopover"
+      aria-label={i18n.translate(
+        'xpack.fleet.epm.browseIntegrations.searchAndFilterBar.signalPopoverAriaLabel',
+        { defaultMessage: 'Signal type options' }
+      )}
       isOpen={isOpen}
       closePopover={closePopover}
       panelPaddingSize="s"
@@ -383,6 +395,10 @@ const ContentFilter: React.FC<{
   return (
     <EuiPopover
       id="browseIntegrationsContentPopover"
+      aria-label={i18n.translate(
+        'xpack.fleet.epm.browseIntegrations.searchAndFilterBar.contentPopoverAriaLabel',
+        { defaultMessage: 'Content options' }
+      )}
       isOpen={isOpen}
       closePopover={closePopover}
       panelPaddingSize="s"
@@ -598,9 +614,11 @@ export const SearchAndFiltersBar: React.FC<SearchAndFiltersBarProps> = ({
 
   const handleSubCategoryClick = useCallback(
     (subCategoryId: string) => {
-      setUrlCategory({ category: selectedCategory, subCategory: subCategoryId });
+      const parentId =
+        availableSubCategories?.find((c) => c.id === subCategoryId)?.parent_id ?? selectedCategory;
+      setUrlCategory({ category: parentId, subCategory: subCategoryId });
     },
-    [selectedCategory, setUrlCategory]
+    [availableSubCategories, selectedCategory, setUrlCategory]
   );
 
   const visibleSubCategories = useMemo(
@@ -690,6 +708,10 @@ export const SearchAndFiltersBar: React.FC<SearchAndFiltersBarProps> = ({
                 <EuiPopover
                   data-test-subj="browseIntegrations.showMoreSubCategoriesButton"
                   id="browseIntegrationsMoreSubCategories"
+                  aria-label={i18n.translate(
+                    'xpack.fleet.epm.browseIntegrations.searchAndFilterBar.moreSubCategoriesPopoverAriaLabel',
+                    { defaultMessage: 'More subcategories' }
+                  )}
                   button={
                     <EuiToolTip
                       content={i18n.translate(
