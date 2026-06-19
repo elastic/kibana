@@ -35,7 +35,7 @@ import { createSpaceDslFilter } from '../../../../utils/spaces';
 import type {
   AgentsUsingSkillsResult,
   AgentsUsingToolsResult,
-  PersistedAgentDefinition,
+  PersistedAgentDefinitionWithPermissions,
 } from '../types';
 import type { AgentAccess } from '../../agent_source';
 import type { AgentProfileStorage } from './storage';
@@ -53,6 +53,7 @@ import { runToolRefCleanup } from '../tool_reference_cleanup';
 import { runPluginRefCleanup } from '../plugin_reference_cleanup';
 import {
   buildReadAccessFilter,
+  getAgentPermissions,
   hasDeleteAccess,
   hasManageAccessControlAccess,
   hasReadAccess,
@@ -61,26 +62,33 @@ import {
   normalizeAccessControl,
   redactAccessControlForCaller,
   validateAccessControlUpdateAccess,
-} from './utils/access_control';
-import { validateAccessControlUpdate } from './utils/access_control_update_validation';
+} from '../../access_control/persisted';
+import { validateAccessControlUpdate } from '../../access_control/update_validation';
 import { hasRequiredDocumentFields } from './utils/helper';
 
 export interface GetAgentAccessControlResult {
-  /** True when the caller is allowed to read the principal list. */
-  can_manage: boolean;
   /** Always present; entries[] may be empty for default agents. */
   access_control: AgentAccessControl;
+  permissions: {
+    can_change_access_control: boolean;
+  };
 }
 
 export interface AgentClient {
   has(agentId: string): Promise<boolean>;
-  get(agentId: string): Promise<PersistedAgentDefinition>;
+  get(agentId: string): Promise<PersistedAgentDefinitionWithPermissions>;
   /** Get the agent and assert the caller has at least `access` rights on it. */
-  getWithAccess(agentId: string, access: AgentAccess): Promise<PersistedAgentDefinition>;
-  create(profile: AgentCreateRequest): Promise<PersistedAgentDefinition>;
-  ensureDefaultAgent(profile: AgentCreateRequest): Promise<PersistedAgentDefinition>;
-  update(agentId: string, profile: AgentUpdateRequest): Promise<PersistedAgentDefinition>;
-  list(options?: AgentListOptions): Promise<PersistedAgentDefinition[]>;
+  getWithAccess(
+    agentId: string,
+    access: AgentAccess
+  ): Promise<PersistedAgentDefinitionWithPermissions>;
+  create(profile: AgentCreateRequest): Promise<PersistedAgentDefinitionWithPermissions>;
+  ensureDefaultAgent(profile: AgentCreateRequest): Promise<PersistedAgentDefinitionWithPermissions>;
+  update(
+    agentId: string,
+    profile: AgentUpdateRequest
+  ): Promise<PersistedAgentDefinitionWithPermissions>;
+  list(options?: AgentListOptions): Promise<PersistedAgentDefinitionWithPermissions[]>;
   delete(options: AgentDeleteRequest): Promise<boolean>;
   getAccessControl(agentId: string): Promise<GetAgentAccessControlResult>;
   updateAccessControl(
@@ -229,25 +237,18 @@ class AgentClientImpl implements AgentClient {
     });
   }
 
-  async get(agentId: string): Promise<PersistedAgentDefinition> {
+  async get(agentId: string): Promise<PersistedAgentDefinitionWithPermissions> {
     const document = await this.getDocumentWithAccess({ agentId, access: 'read' });
 
-    return redactAccessControlForCaller({
-      definition: fromEs(document),
-      source: document._source,
-      user: this.user,
-      isAdmin: this.isAdmin,
-    });
+    return this.toResponseAgent(document);
   }
 
-  async getWithAccess(agentId: string, access: AgentAccess): Promise<PersistedAgentDefinition> {
+  async getWithAccess(
+    agentId: string,
+    access: AgentAccess
+  ): Promise<PersistedAgentDefinitionWithPermissions> {
     const document = await this.getDocumentWithAccess({ agentId, access });
-    return redactAccessControlForCaller({
-      definition: fromEs(document),
-      source: document._source,
-      user: this.user,
-      isAdmin: this.isAdmin,
-    });
+    return this.toResponseAgent(document);
   }
 
   async has(agentId: string): Promise<boolean> {
@@ -262,7 +263,7 @@ class AgentClientImpl implements AgentClient {
     }
   }
 
-  async list(options: AgentListOptions = {}): Promise<PersistedAgentDefinition[]> {
+  async list(options: AgentListOptions = {}): Promise<PersistedAgentDefinitionWithPermissions[]> {
     const filters = [createSpaceDslFilter(this.space)];
     if (!this.isAdmin) {
       filters.push(buildReadAccessFilter({ user: this.user }));
@@ -280,16 +281,11 @@ class AgentClientImpl implements AgentClient {
 
     return response.hits.hits.map((hit) => {
       const document = hit as Document;
-      return redactAccessControlForCaller({
-        definition: fromEs(document),
-        source: document._source!,
-        user: this.user,
-        isAdmin: this.isAdmin,
-      });
+      return this.toResponseAgent(document as Required<Document>);
     });
   }
 
-  async create(profile: AgentCreateRequest): Promise<PersistedAgentDefinition> {
+  async create(profile: AgentCreateRequest): Promise<PersistedAgentDefinitionWithPermissions> {
     const now = new Date();
 
     const validationError = validateAgentId({ agentId: profile.id, builtIn: false });
@@ -319,11 +315,13 @@ class AgentClientImpl implements AgentClient {
     return this.get(profile.id);
   }
 
-  async ensureDefaultAgent(profile: AgentCreateRequest): Promise<PersistedAgentDefinition> {
+  async ensureDefaultAgent(
+    profile: AgentCreateRequest
+  ): Promise<PersistedAgentDefinitionWithPermissions> {
     // Intentionally skipping access checks when ensuring an agent exists
     const defaultAgent = await this._get(profile.id);
     if (defaultAgent) {
-      return fromEs(defaultAgent);
+      return this.get(profile.id);
     }
 
     const now = new Date();
@@ -348,7 +346,7 @@ class AgentClientImpl implements AgentClient {
   async update(
     agentId: string,
     profileUpdate: AgentUpdateRequest
-  ): Promise<PersistedAgentDefinition> {
+  ): Promise<PersistedAgentDefinitionWithPermissions> {
     const document = await this.getDocumentWithAccess({ agentId, access: 'write' });
     const source = document._source;
 
@@ -400,8 +398,18 @@ class AgentClientImpl implements AgentClient {
       user: this.user,
       isAdmin: this.isAdmin,
     });
-    const accessControl = normalizeAccessControl(source);
-    return { can_manage: canManage, access_control: accessControl };
+    const definition = redactAccessControlForCaller({
+      definition: { access_control: normalizeAccessControl(source) },
+      source,
+      user: this.user,
+      isAdmin: this.isAdmin,
+    });
+    return {
+      access_control: definition.access_control,
+      permissions: {
+        can_change_access_control: canManage,
+      },
+    };
   }
 
   async updateAccessControl(
@@ -496,6 +504,24 @@ class AgentClientImpl implements AgentClient {
     }
 
     return document;
+  }
+
+  private toResponseAgent(document: Required<Document>): PersistedAgentDefinitionWithPermissions {
+    const source = document._source;
+    const redactedDefinition = redactAccessControlForCaller({
+      definition: fromEs(document),
+      source,
+      user: this.user,
+      isAdmin: this.isAdmin,
+    });
+    return {
+      ...redactedDefinition,
+      permissions: getAgentPermissions({
+        source,
+        user: this.user,
+        isAdmin: this.isAdmin,
+      }),
+    };
   }
 
   /**

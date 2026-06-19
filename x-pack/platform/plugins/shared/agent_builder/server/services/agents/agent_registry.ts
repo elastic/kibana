@@ -12,7 +12,6 @@ import {
   createBadRequestError,
   type AgentAccessControl,
 } from '@kbn/agent-builder-common';
-import type { AgentDefinition } from '@kbn/agent-builder-common/agents';
 import { validateAgentId } from '@kbn/agent-builder-common/agents';
 import type {
   AgentAvailabilityContext,
@@ -27,6 +26,7 @@ import type {
   AgentDeleteRequest,
   AgentUpdateRequest,
 } from '../../../common/agents';
+import type { AgentDefinitionWithPermissions } from '../../../common/http_api/agents';
 import type {
   AgentAccessControlResult,
   GetAgentOptions,
@@ -36,7 +36,7 @@ import type {
 import { isReadonlyProvider } from './agent_source';
 
 // internal definition for our agents
-export type InternalAgentDefinition = AgentDefinition & {
+export type InternalAgentDefinition = AgentDefinitionWithPermissions & {
   isAvailable: InternalAgentDefinitionAvailabilityHandler;
 };
 

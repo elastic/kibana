@@ -11,10 +11,19 @@ import type {
   AgentDefinition,
 } from '@kbn/agent-builder-common';
 
-export type GetAgentResponse = AgentDefinition;
+export interface AgentPermissions {
+  can_edit: boolean;
+  can_change_access_control: boolean;
+}
+
+export type AgentDefinitionWithPermissions = AgentDefinition & {
+  permissions: AgentPermissions;
+};
+
+export type GetAgentResponse = AgentDefinitionWithPermissions;
 
 export interface ListAgentResponse {
-  results: AgentDefinition[];
+  results: AgentDefinitionWithPermissions[];
 }
 
 export type UpdateAgentResponse = AgentDefinition;
@@ -28,12 +37,13 @@ export interface DeleteAgentResponse {
 /**
  * Response shape for `GET /api/agent_builder/agents/{id}/access_control`.
  *
- * `can_manage_access_control` indicates whether the requesting user can edit access control via PUT.
+ * `permissions.can_change_access_control` indicates whether the requesting user can edit access
+ * control via PUT.
  * `access_control` is always present and reflects the current persisted scope and entries.
  */
 export interface GetAgentAccessControlResponse {
-  can_manage_access_control: boolean;
   access_control: AgentAccessControl;
+  permissions: Pick<AgentPermissions, 'can_change_access_control'>;
 }
 
 /** Body for `PUT /api/agent_builder/agents/{id}/access_control`. */

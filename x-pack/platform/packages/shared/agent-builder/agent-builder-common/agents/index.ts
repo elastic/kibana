@@ -16,18 +16,6 @@ export {
   type AgentAnswerStepConfiguration,
 } from './definition';
 export {
-  canCurrentUserEditAgent,
-  isAgentOwner,
-  canChangeAgentAccessControl,
-  hasAgentReadAccess,
-  hasAgentUseAccess,
-  hasAgentWriteAccess,
-  canDeleteAgent,
-  getEffectiveAgentRole,
-  type EffectiveAgentRole,
-  type AgentAuthzArgs,
-} from './access_control';
-export {
   ACCESS_CONTROL_MODE_ICON,
   ACCESS_CONTROL_MODE_BADGE_COLOR,
   AgentAccessControlMode,

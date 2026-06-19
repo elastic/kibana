@@ -19,7 +19,7 @@ import type { ToolsServiceStart } from '../../tools';
 import { createClient } from './client';
 import type { AgentClient } from './client';
 import type { InternalAgentDefinition } from '../agent_registry';
-import type { PersistedAgentDefinition } from './types';
+import type { PersistedAgentDefinitionWithPermissions } from './types';
 import { getDefaultAgentCreateRequest } from '../default_agent_definition';
 
 export const createPersistedProviderFn =
@@ -37,7 +37,9 @@ export const createPersistedProviderFn =
     });
   };
 
-const ensureDefaultAgent = async (client: AgentClient): Promise<PersistedAgentDefinition> => {
+const ensureDefaultAgent = async (
+  client: AgentClient
+): Promise<PersistedAgentDefinitionWithPermissions> => {
   return client.ensureDefaultAgent(getDefaultAgentCreateRequest());
 };
 
@@ -114,7 +116,7 @@ const createPersistedProvider = async ({
     },
     getAccessControl: async (agentId: string) => {
       const result = await client.getAccessControl(agentId);
-      return { can_manage: result.can_manage, access_control: result.access_control };
+      return result;
     },
     updateAccessControl: async (agentId, update) => {
       return client.updateAccessControl(agentId, update);
@@ -125,7 +127,7 @@ const createPersistedProvider = async ({
 export const toInternalDefinition = ({
   definition,
 }: {
-  definition: PersistedAgentDefinition;
+  definition: PersistedAgentDefinitionWithPermissions;
 }): InternalAgentDefinition => {
   return {
     ...definition,

@@ -15,7 +15,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { canChangeAgentAccessControl, defaultAgentToolIds } from '@kbn/agent-builder-common';
+import { defaultAgentToolIds } from '@kbn/agent-builder-common';
 import { useAgentBuilderAgentById } from '../../../hooks/agents/use_agent_by_id';
 import { useCanEditAgent } from '../../../hooks/agents/use_can_edit_agent';
 import { useSkillsService } from '../../../hooks/skills/use_skills';
@@ -24,8 +24,6 @@ import { useToolsService } from '../../../hooks/tools/use_tools';
 import { useAgentBuilderServices } from '../../../hooks/use_agent_builder_service';
 import { useExperimentalFeatures } from '../../../hooks/use_experimental_features';
 import { useKibana } from '../../../hooks/use_kibana';
-import { useUiPrivileges } from '../../../hooks/use_ui_privileges';
-import { useCurrentUser } from '../../../hooks/agents/use_current_user';
 import { useNavigation } from '../../../hooks/use_navigation';
 import { appPaths } from '../../../utils/app_paths';
 import { isPreExecutionWorkflowEnabled } from '../../../utils/is_pre_execution_workflow_enabled';
@@ -54,9 +52,6 @@ export const AgentOverview: React.FC = () => {
     services: { uiSettings },
   } = useKibana();
 
-  const { isAdmin } = useUiPrivileges();
-  const { currentUser } = useCurrentUser();
-
   const { agent, isLoading } = useAgentBuilderAgentById(agentId);
   const { skills: allSkills, isLoading: skillsLoading } = useSkillsService();
   const { plugins: allPlugins, isLoading: pluginsLoading } = usePluginsService();
@@ -66,16 +61,8 @@ export const AgentOverview: React.FC = () => {
   const canEditAgent = useCanEditAgent({ agent });
   const { canManage: canManageAccess } = useCanManageAgentAccess(agent);
 
-  const canChangeAccessControlMode = useMemo(() => {
-    if (!isExperimentalFeaturesEnabled || !agent) return false;
-    return canChangeAgentAccessControl({
-      agentId: agent.id,
-      accessControl: agent.access_control,
-      owner: agent.created_by,
-      currentUser: currentUser ?? undefined,
-      isAdmin,
-    });
-  }, [isExperimentalFeaturesEnabled, agent, currentUser, isAdmin]);
+  const canChangeAccessControlMode =
+    isExperimentalFeaturesEnabled && Boolean(agent?.permissions.can_change_access_control);
 
   const showWorkflowSection = isPreExecutionWorkflowEnabled(uiSettings);
 

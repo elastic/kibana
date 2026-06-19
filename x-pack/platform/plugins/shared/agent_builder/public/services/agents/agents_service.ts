@@ -16,6 +16,7 @@ import type {
 import type {
   CreateAgentResponse,
   DeleteAgentResponse,
+  AgentDefinitionWithPermissions,
   GetAgentAccessControlResponse,
   GetAgentResponse,
   ListAgentResponse,
@@ -34,7 +35,7 @@ export class AgentService {
   /**
    * List all agents
    */
-  async list(options?: AgentListOptions): Promise<AgentDefinition[]> {
+  async list(options?: AgentListOptions): Promise<AgentDefinitionWithPermissions[]> {
     const res = await this.http.get<ListAgentResponse>(`${publicApiPath}/agents`);
     return res.results;
   }
@@ -42,7 +43,7 @@ export class AgentService {
   /**
    * Get a single agent by id
    */
-  async get(id: string): Promise<AgentDefinition> {
+  async get(id: string): Promise<AgentDefinitionWithPermissions> {
     return await this.http.get<GetAgentResponse>(`${publicApiPath}/agents/${id}`);
   }
 

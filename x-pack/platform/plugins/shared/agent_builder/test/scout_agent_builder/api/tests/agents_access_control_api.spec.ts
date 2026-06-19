@@ -199,7 +199,9 @@ apiTest.describe(
         });
       }
 
-      const bootstrapAgentId = trackAgent(`${ACCESS_CONTROL_TEST_PREFIX}-bootstrap-${testRunId}`);
+      const bootstrapAgentId = trackAgent(
+        `${ACCESS_CONTROL_TEST_PREFIX}-bootstrap-${testRunId.slice(0, 8)}`
+      );
       await asAdmin.post(`${accessControlApiBase}/agents`, {
         body: mockAgent(bootstrapAgentId),
         responseType: 'json',
@@ -308,6 +310,66 @@ apiTest.describe(
       trackAgent(agentId);
     };
 
+    // ── access-control mode create/update ───────────────────────────────────
+
+    apiTest('POST allows explicit private access-control mode', async ({ apiClient }) => {
+      const agentId = `${ACCESS_CONTROL_TEST_PREFIX}-private-${randomUUID()}`;
+      const response = await createAgentAs(
+        apiClient,
+        alice,
+        mockAgent(agentId, AgentAccessControlMode.Private)
+      );
+
+      expect(response.body).toMatchObject({
+        id: agentId,
+        access_control: { access_mode: AgentAccessControlMode.Private, entries: [] },
+        permissions: { can_edit: true, can_change_access_control: true },
+      });
+    });
+
+    apiTest('PUT updates access-control mode explicitly', async ({ apiClient }) => {
+      const agentId = `${ACCESS_CONTROL_TEST_PREFIX}-mode-${randomUUID()}`;
+      await createAgentAs(apiClient, alice, mockAgent(agentId, AgentAccessControlMode.Private));
+
+      const response = await apiClient.put(
+        `${accessControlApiBase}/agents/${encodeURIComponent(agentId)}`,
+        {
+          headers: headersFor(alice),
+          body: { access_control: { access_mode: AgentAccessControlMode.Shared } },
+          responseType: 'json',
+        }
+      );
+
+      expect(response).toHaveStatusCode(200);
+      expect(response.body).toMatchObject({
+        id: agentId,
+        access_control: { access_mode: AgentAccessControlMode.Shared, entries: [] },
+      });
+    });
+
+    apiTest(
+      'PUT rejects access-control mode change for default agent (404)',
+      async ({ apiClient }) => {
+        const getRes = await apiClient.get(
+          `${accessControlApiBase}/agents/${encodeURIComponent(agentBuilderDefaultAgentId)}`,
+          { headers: headersFor(alice), responseType: 'json' }
+        );
+        expect(getRes).toHaveStatusCode(200);
+
+        const response = await apiClient.put(
+          `${accessControlApiBase}/agents/${encodeURIComponent(agentBuilderDefaultAgentId)}`,
+          {
+            headers: headersFor(alice),
+            body: { access_control: { access_mode: AgentAccessControlMode.Private } },
+            responseType: 'json',
+          }
+        );
+        expect(response).toHaveStatusCode(404);
+        expect(response.body.message).toBeDefined();
+        expect(String(response.body.message)).toContain('not found');
+      }
+    );
+
     // ── read access ─────────────────────────────────────────────────────────
 
     apiTest('non-owner gets 404 on a Private agent until granted', async ({ apiClient }) => {
@@ -353,6 +415,12 @@ apiTest.describe(
       });
       const idsAfter = listAfterGrant.body.results.map((a: { id: string }) => a.id);
       expect(idsAfter).toContain(agentId);
+      const listedAgent = listAfterGrant.body.results.find((a: { id: string }) => a.id === agentId);
+      expect(listedAgent.access_control.entries).toHaveLength(1);
+      expect(listedAgent.permissions).toMatchObject({
+        can_edit: false,
+        can_change_access_control: false,
+      });
     });
 
     apiTest(
@@ -400,6 +468,10 @@ apiTest.describe(
           name: bob.username,
           role: AgentAccessControlRole.User,
         });
+        expect(granted.body.permissions).toMatchObject({
+          can_edit: false,
+          can_change_access_control: false,
+        });
 
         const list = await apiClient.get(`${accessControlApiBase}/agents`, {
           headers: headersFor(bob),
@@ -415,15 +487,20 @@ apiTest.describe(
           { headers: headersFor(bob), responseType: 'json' }
         );
         expect(bobAccessControl).toHaveStatusCode(200);
-        expect(bobAccessControl.body.can_manage_access_control).toBe(false);
-        expect(bobAccessControl.body.access_control.entries).toHaveLength(0);
+        expect(bobAccessControl.body.permissions.can_change_access_control).toBe(false);
+        expect(bobAccessControl.body.access_control.entries).toHaveLength(1);
+        expect(bobAccessControl.body.access_control.entries[0]).toMatchObject({
+          type: 'user',
+          name: bob.username,
+          role: AgentAccessControlRole.User,
+        });
 
         const eveAccessControl = await apiClient.get(
           `${accessControlApiBase}/agents/${encodeURIComponent(grantedAgentId)}/access_control`,
           { headers: headersFor(eve), responseType: 'json' }
         );
         expect(eveAccessControl).toHaveStatusCode(200);
-        expect(eveAccessControl.body.can_manage_access_control).toBe(true);
+        expect(eveAccessControl.body.permissions.can_change_access_control).toBe(true);
         expect(eveAccessControl.body.access_control.entries).toHaveLength(2);
       }
     );
@@ -457,6 +534,10 @@ apiTest.describe(
           name: eve.username,
           role: AgentAccessControlRole.Editor,
         });
+        expect(eveRes.body.permissions).toMatchObject({
+          can_edit: true,
+          can_change_access_control: false,
+        });
 
         // Bob has User → manage threshold NOT met → only his own grant is returned.
         const bobRes = await apiClient.get(
@@ -473,13 +554,17 @@ apiTest.describe(
           name: bob.username,
           role: AgentAccessControlRole.User,
         });
+        expect(bobRes.body.permissions).toMatchObject({
+          can_edit: false,
+          can_change_access_control: false,
+        });
       }
     );
 
     // ── /access_control endpoint ───────────────────────────────────────────────────────
 
     apiTest(
-      'GET /agents/{id}/access_control returns can_manage_access_control and redacts entries for non-managers',
+      'GET /agents/{id}/access_control returns permissions and redacts entries for non-managers',
       async ({ apiClient }) => {
         const agentId = `${ACCESS_CONTROL_TEST_PREFIX}-get-${randomUUID()}`;
         await createAgentAs(apiClient, alice, mockAgent(agentId, AgentAccessControlMode.Private));
@@ -493,7 +578,7 @@ apiTest.describe(
           { headers: headersFor(eve), responseType: 'json' }
         );
         expect(eveAccessControlRes).toHaveStatusCode(200);
-        expect(eveAccessControlRes.body.can_manage_access_control).toBe(true);
+        expect(eveAccessControlRes.body.permissions.can_change_access_control).toBe(true);
         expect(eveAccessControlRes.body.access_control.entries).toHaveLength(2);
 
         const bobAccessControlRes = await apiClient.get(
@@ -501,8 +586,13 @@ apiTest.describe(
           { headers: headersFor(bob), responseType: 'json' }
         );
         expect(bobAccessControlRes).toHaveStatusCode(200);
-        expect(bobAccessControlRes.body.can_manage_access_control).toBe(false);
-        expect(bobAccessControlRes.body.access_control.entries).toHaveLength(0);
+        expect(bobAccessControlRes.body.permissions.can_change_access_control).toBe(false);
+        expect(bobAccessControlRes.body.access_control.entries).toHaveLength(1);
+        expect(bobAccessControlRes.body.access_control.entries[0]).toMatchObject({
+          type: 'user',
+          name: bob.username,
+          role: AgentAccessControlRole.User,
+        });
       }
     );
 

@@ -8,6 +8,7 @@
 import type { MaybePromise } from '@kbn/utility-types';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { AgentAccessControl } from '@kbn/agent-builder-common';
+import type { GetAgentAccessControlResponse } from '../../../common/http_api/agents';
 import type {
   AgentAccessControlUpdateRequest,
   AgentCreateRequest,
@@ -22,10 +23,7 @@ export interface GetAgentOptions {
   access?: AgentAccess;
 }
 
-export interface AgentAccessControlResult {
-  can_manage: boolean;
-  access_control: AgentAccessControl;
-}
+export type AgentAccessControlResult = GetAgentAccessControlResponse;
 
 export interface ReadonlyAgentProvider {
   id: string;

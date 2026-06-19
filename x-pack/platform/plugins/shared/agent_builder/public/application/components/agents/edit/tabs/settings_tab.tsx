@@ -33,7 +33,6 @@ import {
   AgentAccessControlMode,
   AGENT_BUILDER_UI_EBT,
   ACCESS_CONTROL_MODE_ICON,
-  canChangeAgentAccessControl,
   type UserIdAndName,
 } from '@kbn/agent-builder-common';
 import { getEbtProps } from '@kbn/ebt-click';
@@ -45,8 +44,6 @@ import { labels } from '../../../../utils/i18n';
 import { useAgentLabels } from '../../../../hooks/agents/use_agent_labels';
 import { useAgentBuilderServices } from '../../../../hooks/use_agent_builder_service';
 import { useKibana } from '../../../../hooks/use_kibana';
-import { useCurrentUser } from '../../../../hooks/agents/use_current_user';
-import { useUiPrivileges } from '../../../../hooks/use_ui_privileges';
 import { WorkflowPicker } from '../../../tools/form/components/workflow/workflow_picker';
 import { isPreExecutionWorkflowEnabled } from '../../../../utils/is_pre_execution_workflow_enabled';
 import { ACCESS_CONTROL_MODE_LABELS } from '../../../../utils/access_control_mode_i18n';
@@ -58,6 +55,7 @@ interface AgentSettingsTabProps {
   formState: FormState<AgentFormData>;
   isCreateMode: boolean;
   isFormDisabled: boolean;
+  canChangeAccessControl: boolean;
   owner?: UserIdAndName;
   agentId?: string;
 }
@@ -67,6 +65,7 @@ export const AgentSettingsTab: React.FC<AgentSettingsTabProps> = ({
   formState,
   isCreateMode,
   isFormDisabled,
+  canChangeAccessControl,
   owner,
   agentId,
 }) => {
@@ -76,23 +75,7 @@ export const AgentSettingsTab: React.FC<AgentSettingsTabProps> = ({
     services: { uiSettings },
   } = useKibana();
 
-  const { currentUser } = useCurrentUser();
-  const { isAdmin } = useUiPrivileges();
   const currentAccessControlMode = useWatch({ control, name: 'access_control.access_mode' });
-  const currentEntries = useWatch({ control, name: 'access_control.entries' }) ?? [];
-
-  const canChangeAccessControlMode =
-    isCreateMode ||
-    canChangeAgentAccessControl({
-      agentId,
-      accessControl: {
-        access_mode: currentAccessControlMode,
-        entries: currentEntries,
-      },
-      owner,
-      currentUser,
-      isAdmin,
-    });
 
   // Lightweight projection used only by AccessForm to filter selectable access control roles.
   // The real entries come from the form's `access_control.entries` field via Controller
@@ -519,7 +502,7 @@ export const AgentSettingsTab: React.FC<AgentSettingsTabProps> = ({
                       defaultMessage: 'The default agent is always accessible to all users.',
                     }
                   )
-                : !canChangeAccessControlMode
+                : !canChangeAccessControl
                 ? i18n.translate('xpack.agentBuilder.agents.form.accessControlModeDisabledReason', {
                     defaultMessage:
                       'Only the owner or an administrator can change the access control mode.',
@@ -538,7 +521,7 @@ export const AgentSettingsTab: React.FC<AgentSettingsTabProps> = ({
                   options={accessControlModeOptions}
                   valueOfSelected={value}
                   onChange={onChange}
-                  disabled={isFormDisabled || !canChangeAccessControlMode}
+                  disabled={isFormDisabled || !canChangeAccessControl}
                   aria-label={i18n.translate(
                     'xpack.agentBuilder.agents.form.accessControlModeAriaLabel',
                     {
@@ -562,7 +545,7 @@ export const AgentSettingsTab: React.FC<AgentSettingsTabProps> = ({
                     agent={accessFormAgent}
                     entries={field.value ?? []}
                     ownerName={owner?.username}
-                    isDisabled={isFormDisabled || !canChangeAccessControlMode}
+                    isDisabled={isFormDisabled || !canChangeAccessControl}
                     onChange={field.onChange}
                   />
                 )}

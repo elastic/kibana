@@ -85,6 +85,10 @@ export const toInternalDefinition = async ({
     access_control: undefined,
     created_by: undefined,
     readonly: true,
+    permissions: {
+      can_edit: false,
+      can_change_access_control: false,
+    },
     isAvailable: async (ctx) => {
       if (definition.availability) {
         return availabilityCache.getOrCompute(definition.id, definition.availability, ctx);

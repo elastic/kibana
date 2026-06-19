@@ -7,24 +7,19 @@
 
 import { useMemo } from 'react';
 import type { AgentDefinition } from '@kbn/agent-builder-common';
-import { canCurrentUserEditAgent } from '@kbn/agent-builder-common';
-import { useUiPrivileges } from '../use_ui_privileges';
-import { useCurrentUser } from './use_current_user';
+import type { AgentPermissions } from '../../../../common/http_api/agents';
 
-export const useCanEditAgent = ({ agent }: { agent: AgentDefinition | null }): boolean => {
-  const { manageAgents, isAdmin } = useUiPrivileges();
-  const { currentUser, isLoading: isCurrentUserLoading } = useCurrentUser();
+type AgentWithOptionalPermissions = AgentDefinition & { permissions?: AgentPermissions };
 
+export const useCanEditAgent = ({
+  agent,
+}: {
+  agent: AgentWithOptionalPermissions | null;
+}): boolean => {
   return useMemo(() => {
     if (!agent) {
       return false;
     }
-    return canCurrentUserEditAgent({
-      agent,
-      manageAgents,
-      currentUser,
-      isAdmin,
-      isCurrentUserLoading,
-    });
-  }, [agent, manageAgents, currentUser, isAdmin, isCurrentUserLoading]);
+    return agent.permissions?.can_edit ?? false;
+  }, [agent]);
 };

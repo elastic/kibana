@@ -121,7 +121,7 @@ export function useAgentEdit({
     }
 
     if (agent) {
-      const { type, ...agentState } = agent;
+      const { type, permissions, ...agentState } = agent;
       agentState.access_control = agentState.access_control ?? {
         access_mode: AgentAccessControlMode.Public,
         entries: [],
@@ -201,6 +201,7 @@ export function useAgentEdit({
     isLoading,
     isSubmitting:
       createMutation.isLoading || updateMutation.isLoading || updateAccessControlMutation.isLoading,
+    permissions: agent?.permissions,
     submit,
     tools,
     skills,

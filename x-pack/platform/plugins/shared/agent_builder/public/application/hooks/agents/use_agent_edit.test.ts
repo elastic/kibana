@@ -12,7 +12,10 @@ import { useAgentEdit, type AgentEditState } from './use_agent_edit';
 const mockCreate = jest.fn();
 const mockUpdate = jest.fn();
 const mockUpdateAccessControl = jest.fn();
-let mockAgent: AgentEditState | undefined;
+type MockAgent = AgentEditState & {
+  permissions?: { can_edit: boolean; can_change_access_control: boolean };
+};
+let mockAgent: MockAgent | undefined;
 
 jest.mock('@kbn/react-query', () => ({
   // Run the mutationFn directly so the payload passed to the service is observable.
@@ -233,5 +236,33 @@ describe('useAgentEdit submit (create/clone branch)', () => {
       access_mode: AgentAccessControlMode.Private,
     });
     expect(mockUpdate.mock.calls[0][1].access_control).not.toHaveProperty('entries');
+  });
+
+  it('exposes permissions separately from editable form state', async () => {
+    mockAgent = {
+      id: 'existing-agent',
+      name: 'Existing Agent',
+      description: 'An existing agent',
+      access_control: { access_mode: AgentAccessControlMode.Private, entries: [] },
+      labels: [],
+      avatar_color: '',
+      avatar_symbol: '',
+      configuration: baseConfiguration,
+      permissions: { can_edit: true, can_change_access_control: false },
+    };
+
+    const { result } = renderHook(() =>
+      useAgentEdit({
+        editingAgentId: 'existing-agent',
+        onSaveSuccess: jest.fn(),
+        onSaveError: jest.fn(),
+      })
+    );
+
+    expect(result.current.permissions).toEqual({
+      can_edit: true,
+      can_change_access_control: false,
+    });
+    expect(result.current.state).not.toHaveProperty('permissions');
   });
 });

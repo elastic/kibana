@@ -529,7 +529,7 @@ export function registerAgentRoutes({
       access: 'public',
       summary: "Get an agent's access control list",
       description:
-        'Get the access control for a specific agent. Callers without permission to manage access control receive `can_manage_access_control: false` and an empty `entries` list — the principal list itself is sensitive. To learn more about agents, refer to the [agents documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/agent-builder-agents).',
+        'Get the access control for a specific agent. Callers without permission to manage access control receive `permissions.can_change_access_control: false` and only their own entry. To learn more about agents, refer to the [agents documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/agent-builder-agents).',
       options: {
         tags: ['agent', 'oas-tag:agent builder'],
         availability: { since: '9.5.0' },
@@ -557,14 +557,8 @@ export function registerAgentRoutes({
       wrapHandler(async (ctx, request, response) => {
         const { agents } = getInternalServices();
         const service = await agents.getRegistry({ request });
-        const result = await service.getAccessControl(request.params.id);
+        const body = await service.getAccessControl(request.params.id);
 
-        const body: GetAgentAccessControlResponse = {
-          can_manage_access_control: result.can_manage,
-          access_control: result.can_manage
-            ? result.access_control
-            : { ...result.access_control, entries: [] },
-        };
         return response.ok<GetAgentAccessControlResponse>({ body });
       })
     );
