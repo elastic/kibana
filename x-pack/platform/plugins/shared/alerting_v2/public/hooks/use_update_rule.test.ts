@@ -100,8 +100,7 @@ describe('useUpdateRule', () => {
       expect(enrichedError.stack).toBe('Error: Forbidden\n    at fetch');
       expect(options).toEqual({
         title: 'Failed to update rule',
-        toastMessage:
-          'You don\'t have permission to save this rule.',
+        toastMessage: "You don't have permission to save this rule.",
       });
       expect(mockAddSuccess).not.toHaveBeenCalled();
     });

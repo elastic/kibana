@@ -35,8 +35,7 @@ export const getFriendlyRuleHttpErrorToastMessage = (error: Error): string => {
       });
     case 404:
       return i18n.translate('xpack.alertingV2.httpError.notFound', {
-        defaultMessage:
-          'The rule could not be found. It may have been deleted by someone else.',
+        defaultMessage: 'The rule could not be found. It may have been deleted by someone else.',
       });
     case 408:
     case 504:
