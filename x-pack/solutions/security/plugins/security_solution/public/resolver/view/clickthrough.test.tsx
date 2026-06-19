@@ -105,6 +105,10 @@ describe('Resolver, when analyzing a tree that has no ancestors and 2 children',
     });
   });
 
+  afterEach(() => {
+    simulator.unmount();
+  });
+
   describe('when it has loaded', () => {
     beforeEach(async () => {
       await expect(
@@ -182,11 +186,11 @@ describe('Resolver, when analyzing a tree that has no ancestors and 2 children',
       ).toYieldEqualTo({ treeCount: 1, nodesOwnedByTrees: 3 });
     }, 30000);
 
-    it(`should show links to the 3 nodes in the node list.`, async () => {
-      await expect(
-        simulator.map(() => simulator.testSubject('resolver:node-list:node-link:title').length)
-      ).toYieldEqualTo(3);
-    }, 30000);
+    it(`should show links to the 3 nodes in the node list.`, () => {
+      // The beforeEach already confirmed nodeListLinkCount === 3 and updated the enzyme wrapper,
+      // so a direct synchronous assertion is sufficient and avoids any async timeout risk.
+      expect(simulator.testSubject('resolver:node-list:node-link:title').length).toBe(3);
+    });
 
     describe("when the second child node's first button has been clicked", () => {
       beforeEach(async () => {
