@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { NavigationTreeDefinition } from '@kbn/core-chrome-browser';
+import type { NavigationTreeDefinition, NodeDefinition } from '@kbn/core-chrome-browser';
 import type { CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import type { AddSolutionNavigationArg } from '@kbn/navigation-plugin/public';
@@ -48,12 +48,14 @@ function createNavTree({
   showAiAssistant,
   isCloudEnabled,
   ingestHubAvailable,
+  dashboardsNavigationNode,
 }: {
   coreStart: CoreStart;
   streamsAvailable?: boolean;
   showAiAssistant?: boolean;
   isCloudEnabled?: boolean;
   ingestHubAvailable?: boolean;
+  dashboardsNavigationNode: NodeDefinition;
 }) {
   const navTree: NavigationTreeDefinition = {
     body: [
@@ -71,8 +73,7 @@ function createNavTree({
         icon: 'productDiscover',
       },
       {
-        link: 'dashboards',
-        icon: 'productDashboard',
+        ...dashboardsNavigationNode,
         getIsActive: ({ pathNameSerialized, prepend, location }) =>
           pathNameSerialized.startsWith(prepend('/app/dashboards')) ||
           isEditingFromDashboard(location, pathNameSerialized, prepend),
@@ -716,14 +717,16 @@ export const createDefinition = (
     pluginsStart.streams?.navigationStatus$ || of({ status: 'disabled' as const }),
     coreStart.settings.client.get$<AIChatExperience>(AI_CHAT_EXPERIENCE_TYPE),
     pluginsStart.ingestHub?.navigationAvailable$ || of(false),
+    pluginsStart.dashboard.dashboardsNavigationNode$,
   ]).pipe(
-    map(([{ status }, chatExperience, ingestHubAvailable]) =>
+    map(([{ status }, chatExperience, ingestHubAvailable, dashboardsNavigationNode]) =>
       createNavTree({
         coreStart,
         streamsAvailable: status === 'enabled',
         showAiAssistant: chatExperience !== AIChatExperience.Agent,
         isCloudEnabled: pluginsStart.cloud?.isCloudEnabled,
         ingestHubAvailable,
+        dashboardsNavigationNode,
       })
     )
   ),

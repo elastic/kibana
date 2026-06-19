@@ -72,6 +72,7 @@ export const toNavigationItems = (
 
   let deepestActiveItemId: string | undefined;
   let currentActiveItemIdLevel = -1;
+  const urlActiveSecondaryByPanel = new Map<string, string[]>();
 
   const isActive = (navNode: ChromeProjectNavigationNode) =>
     isActiveFromUrl(navNode.path, activeNodes, false);
@@ -81,14 +82,42 @@ export const toNavigationItems = (
     level: number,
     parentNode?: ChromeProjectNavigationNode
   ) => {
-    if (deepestActiveItemId == null || currentActiveItemIdLevel < level) {
-      if (isActive(navNode)) {
-        deepestActiveItemId = navNode.id;
-        currentActiveItemIdLevel = level;
+    if (!isActive(navNode)) {
+      return;
+    }
 
-        if (parentNode?.id) {
-          panelStateManager.setPanelLastActive(parentNode.id, navNode.id);
-        }
+    if (level === 2 && parentNode?.id) {
+      const candidates = urlActiveSecondaryByPanel.get(parentNode.id) ?? [];
+      candidates.push(navNode.id);
+      urlActiveSecondaryByPanel.set(parentNode.id, candidates);
+      return;
+    }
+
+    if (deepestActiveItemId == null || currentActiveItemIdLevel < level) {
+      deepestActiveItemId = navNode.id;
+      currentActiveItemIdLevel = level;
+
+      if (parentNode?.id) {
+        panelStateManager.setPanelLastActive(parentNode.id, navNode.id);
+      }
+    }
+  };
+
+  const resolveSecondaryActiveItems = () => {
+    for (const [panelId, candidateIds] of urlActiveSecondaryByPanel) {
+      if (candidateIds.length === 0) {
+        continue;
+      }
+
+      const lastActiveItemId = panelStateManager.getPanelLastActive(panelId);
+      const activeItemId =
+        lastActiveItemId && candidateIds.includes(lastActiveItemId)
+          ? lastActiveItemId
+          : candidateIds[0];
+
+      if (deepestActiveItemId == null || currentActiveItemIdLevel <= 2) {
+        deepestActiveItemId = activeItemId;
+        currentActiveItemIdLevel = 2;
       }
     }
   };
@@ -257,6 +286,8 @@ export const toNavigationItems = (
 
   const primaryItems = filterEmpty(primaryNodes.flatMap(toMenuItem));
   const footerItems = filterEmpty(footerNodes.flatMap(toMenuItem));
+
+  resolveSecondaryActiveItems();
 
   if (footerItems.length > 5) {
     warnOnce(

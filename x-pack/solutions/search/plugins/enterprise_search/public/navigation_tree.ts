@@ -14,6 +14,7 @@ import type { CoreStart } from '@kbn/core/public';
 import type { NavigationTreeDefinition } from '@kbn/core-chrome-browser';
 import { STACK_MANAGEMENT_NAV_ID, DATA_MANAGEMENT_NAV_ID } from '@kbn/deeplinks-management';
 import { SEARCH_HOMEPAGE } from '@kbn/deeplinks-search';
+import { createDashboardsNavigationNode } from '@kbn/dashboard-plugin/common';
 import { i18n } from '@kbn/i18n';
 
 import type { AddSolutionNavigationArg } from '@kbn/navigation-plugin/public';
@@ -81,13 +82,11 @@ export const getNavigationTreeDefinition = ({
               icon: 'productDiscover',
               link: 'discover',
             },
-            {
+            createDashboardsNavigationNode({
               getIsActive: ({ pathNameSerialized, prepend, location }) =>
                 pathNameSerialized.startsWith(prepend('/app/dashboards')) ||
                 isEditingFromDashboard(location, pathNameSerialized, prepend),
-              icon: 'productDashboard',
-              link: 'dashboards',
-            },
+            }),
             {
               link: 'workflows',
             },

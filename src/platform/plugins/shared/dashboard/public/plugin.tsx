@@ -68,12 +68,16 @@ import type {
 } from '@kbn/usage-collection-plugin/public';
 import type { CPSPluginStart } from '@kbn/cps/public';
 import type { PublishingSubject } from '@kbn/presentation-publishing';
+import type { NodeDefinition } from '@kbn/core-chrome-browser';
+import type { Observable } from 'rxjs';
+import { getDashboardsNavigationNode$ } from './dashboard_navigation/get_dashboards_navigation_node';
 import { DashboardAppLocatorDefinition } from '../common/locator/locator';
 import type { DashboardMountContextProps } from './dashboard_app/types';
 import type { DashboardListingTab } from './dashboard_listing/types';
 import {
   DASHBOARD_APP_ID,
   DASHBOARD_DRILLDOWN_TYPE,
+  DASHBOARD_ALL_DEEP_LINK_ID,
   LANDING_PAGE_PATH,
   SEARCH_SESSION_ID,
 } from '../common/page_bundle_constants';
@@ -143,6 +147,9 @@ export interface DashboardStart {
   findDashboardsService: () => Promise<FindDashboardsService>;
 
   dashboardAppClientApi$: PublishingSubject<DashboardApi | undefined>;
+
+  /** Observable dashboards side-nav panel definition with recent and starred sections. */
+  dashboardsNavigationNode$: Observable<NodeDefinition>;
 }
 
 export class DashboardPlugin
@@ -161,6 +168,34 @@ export class DashboardPlugin
   private currentHistory: ScopedHistory | undefined = undefined;
   private listingViewRegistry: Set<DashboardListingTab> = new Set();
   private dashboardAppApi$ = new BehaviorSubject<DashboardApi | undefined>(undefined);
+
+  private getAllDashboardsDeepLink(): AppDeepLink {
+    return {
+      id: DASHBOARD_ALL_DEEP_LINK_ID,
+      title: i18n.translate('dashboard.nav.allDashboards', {
+        defaultMessage: 'All dashboards',
+      }),
+      path: `#${LANDING_PAGE_PATH}`,
+      visibleIn: ['projectSideNav', 'globalSearch'],
+    };
+  }
+
+  private getDashboardDeepLinks(): AppDeepLink[] {
+    const deepLinks: AppDeepLink[] = [this.getAllDashboardsDeepLink()];
+
+    for (const tab of this.listingViewRegistry as Set<DashboardListingTab>) {
+      if (tab.deepLink) {
+        deepLinks.push({
+          id: tab.id,
+          title: tab.deepLink.title,
+          path: `#${LANDING_PAGE_PATH}/${tab.id}`,
+          visibleIn: tab.deepLink.visibleIn,
+        });
+      }
+    }
+
+    return deepLinks;
+  }
 
   public setup(
     core: CoreSetup<DashboardStartDependencies, DashboardStart>,
@@ -256,14 +291,19 @@ export class DashboardPlugin
       }
     );
 
+    const allDashboardsDeepLink = this.getAllDashboardsDeepLink();
+    this.deepLinksUpdater.next(() => ({ deepLinks: [allDashboardsDeepLink] }));
+
     const app: App = {
       id: DASHBOARD_APP_ID,
       title: 'Dashboards',
       order: 2500,
       euiIconType: 'logoKibana',
       defaultPath: `#${LANDING_PAGE_PATH}`,
+      deepLinks: [allDashboardsDeepLink],
       updater$: this.appStateUpdater,
       category: DEFAULT_APP_CATEGORIES.kibana,
+      visibleIn: ['globalSearch', 'classicSideNav', 'projectSideNav', 'kibanaOverview'],
       mount: async (params: AppMountParameters) => {
         performance.mark(DASHBOARD_DURATION_START_MARK);
         this.currentHistory = params.history;
@@ -352,21 +392,11 @@ export class DashboardPlugin
       return getDashboardsByIdsAction;
     });
 
-    const deepLinks: AppDeepLink[] = [];
-    for (const tab of this.listingViewRegistry as Set<DashboardListingTab>) {
-      if (tab.deepLink) {
-        deepLinks.push({
-          id: tab.id,
-          title: tab.deepLink.title,
-          path: `#${LANDING_PAGE_PATH}/${tab.id}`,
-          visibleIn: tab.deepLink.visibleIn,
-        });
-      }
-    }
+    const deepLinks = this.getDashboardDeepLinks();
 
-    if (deepLinks.length > 0) {
-      this.deepLinksUpdater.next(() => ({ deepLinks }));
-    }
+    this.deepLinksUpdater.next(() => ({ deepLinks }));
+
+    const dashboardsNavigationNode$ = getDashboardsNavigationNode$(core);
 
     return {
       findDashboardsService: async () => {
@@ -374,6 +404,7 @@ export class DashboardPlugin
         return findService;
       },
       dashboardAppClientApi$: this.dashboardAppApi$,
+      dashboardsNavigationNode$,
     };
   }
 

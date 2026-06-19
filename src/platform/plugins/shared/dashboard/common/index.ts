@@ -20,3 +20,15 @@ export { getReferencesForPanelId, prefixReferencesFromPanel } from './reference_
 export { migrateLegacyQuery } from './migrate_legacy_query';
 export { isDashboardSection } from './is_dashboard_section';
 export { isDashboardPanel } from './is_dashboard_panel';
+export {
+  createDashboardsNavigationNode,
+  type DashboardNavigationPanelItem,
+  type DashboardsNavigationNodeOptions,
+} from './dashboard_navigation';
+export {
+  DASHBOARD_ALL_DEEP_LINK_ID,
+  DASHBOARD_ALL_NAV_ITEM_ID,
+  DASHBOARD_ALL_NAV_LINK,
+  DASHBOARD_APP_ID,
+  LANDING_PAGE_PATH,
+} from './page_bundle_constants';

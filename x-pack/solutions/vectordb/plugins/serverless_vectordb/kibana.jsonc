@@ -24,7 +24,8 @@
     ],
     "optionalPlugins": [
       "console",
-      "cloud"
+      "cloud",
+      "dashboard"
     ],
     "requiredBundles": [
       "kibanaReact"
