@@ -29,7 +29,6 @@ import { getRiskInputsIndex } from '../get_risk_inputs_index';
 import type { EntityAnalyticsRoutesDeps, RiskEngineConfiguration } from '../../types';
 import { RiskScoreAuditActions } from '../audit';
 import { AUDIT_CATEGORY, AUDIT_OUTCOME, AUDIT_TYPE } from '../../audit';
-import { getFieldForIdentifier } from '../helpers';
 import { withRiskEnginePrivilegeCheck } from '../../risk_engine/risk_engine_privileges';
 import { withMinimumLicense } from '../../utils/with_minimum_license';
 import { getConfiguration } from '../../risk_engine/utils/saved_object_configuration';
@@ -50,55 +49,31 @@ type Handler = (
 async function buildScoringContext({
   entityId,
   identifierType,
-  identifier,
   engineConfig,
   logger,
   crudClient,
 }: {
-  entityId: string | undefined;
+  entityId: string;
   identifierType: string;
-  identifier: string;
   engineConfig: RiskEngineConfiguration;
   logger: Logger;
   crudClient: EntityStoreCRUDClient;
 }) {
   const baseAlertFilters = buildAlertFilters(engineConfig, identifierType as EntityType, logger);
 
-  if (entityId) {
-    const { entities } = await crudClient.listEntities({
-      filter: { term: { 'entity.id': entityId } },
-      size: 1,
-    });
-    const entityDoc = entities[0];
-    const entityIdentityFilter = euid.dsl.getEuidFilterBasedOnDocument(
-      identifierType as EntityType,
-      entityDoc
-    );
-
-    const resolvedTo = entityDoc?.entity?.relationships?.resolution?.resolved_to ?? entityId;
-
-    return {
-      alertFilters: [...baseAlertFilters, entityIdentityFilter],
-      resolutionTargetIds: [resolvedTo],
-    };
-  }
-
-  const nameFilter = {
-    term: { [getFieldForIdentifier(identifierType as EntityType)]: identifier },
-  };
   const { entities } = await crudClient.listEntities({
-    filter: nameFilter,
+    filter: { term: { 'entity.id': entityId } },
+    size: 1,
   });
-  const resolutionTargetIds = entities
-    .map(
-      (entityDoc) =>
-        entityDoc?.entity?.relationships?.resolution?.resolved_to ?? entityDoc?.entity?.id
-    )
-    .filter((id): id is string => typeof id === 'string');
+  const entityDoc = entities[0];
+  const entityIdentityFilter = euid.dsl.getEuidFilterBasedOnDocument(
+    identifierType as EntityType,
+    entityDoc
+  );
 
   return {
-    alertFilters: [...baseAlertFilters, nameFilter],
-    resolutionTargetIds,
+    alertFilters: [...baseAlertFilters, entityIdentityFilter],
+    resolutionTargetId: entityDoc?.entity?.relationships?.resolution?.resolved_to ?? entityId,
   };
 }
 
@@ -115,6 +90,15 @@ const handler: (logger: Logger) => Handler = (logger) => async (context, request
     });
   }
 
+  const { identifier_type: identifierType, entity_id: entityId } = request.body;
+
+  if (!entityId) {
+    return siemResponse.error({
+      statusCode: 400,
+      body: 'Entity ID is required',
+    });
+  }
+
   securityContext.getAuditLogger()?.log({
     message: 'User triggered custom manual scoring',
     event: {
@@ -128,8 +112,6 @@ const handler: (logger: Logger) => Handler = (logger) => async (context, request
   const soClient = coreContext.savedObjects.client;
   const esClient = coreContext.elasticsearch.client.asCurrentUser;
   const namespace = securityContext.getSpaceId();
-
-  const { identifier_type: identifierType, identifier, entity_id: entityId } = request.body;
 
   try {
     const engineConfig = await getConfiguration({
@@ -152,10 +134,9 @@ const handler: (logger: Logger) => Handler = (logger) => async (context, request
     const crudClient = securityContext.getEntityStoreUpdateClient();
 
     const { index: alertsIndex } = await getRiskInputsIndex({ dataViewId, logger, soClient });
-    const { alertFilters, resolutionTargetIds } = await buildScoringContext({
+    const { alertFilters, resolutionTargetId } = await buildScoringContext({
       entityId,
       identifierType,
-      identifier,
       engineConfig,
       logger,
       crudClient,
@@ -187,7 +168,7 @@ const handler: (logger: Logger) => Handler = (logger) => async (context, request
       refresh: 'wait_for',
     });
 
-    if (resolutionTargetIds.length > 0) {
+    if (resolutionTargetId) {
       await runResolutionScoringStep({
         esClient,
         crudClient,
@@ -202,7 +183,7 @@ const handler: (logger: Logger) => Handler = (logger) => async (context, request
         watchlistConfigs,
         idBasedRiskScoringEnabled,
         writer,
-        targetEntityIds: resolutionTargetIds,
+        targetEntityIds: [resolutionTargetId],
         refresh: 'wait_for',
       });
     }

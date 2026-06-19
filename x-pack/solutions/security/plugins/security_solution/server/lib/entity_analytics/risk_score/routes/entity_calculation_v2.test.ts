@@ -29,12 +29,12 @@ import { fetchWatchlistConfigs } from '../maintainer/utils/fetch_watchlist_confi
 import { getIsIdBasedRiskScoringEnabled } from '../is_id_based_risk_scoring_enabled';
 import { buildAlertFilters } from '../maintainer/steps/build_alert_filters';
 
+const entityId = 'host:test-host-name';
+
 jest.mock('@kbn/entity-store/common/euid_helpers', () => ({
   euid: {
     dsl: {
-      getEuidFilterBasedOnDocument: jest
-        .fn()
-        .mockReturnValue({ term: { 'entity.id': 'mock-euid-filter' } }),
+      getEuidFilterBasedOnDocument: jest.fn().mockReturnValue({ term: { 'entity.id': entityId } }),
     },
   },
 }));
@@ -52,13 +52,12 @@ const defaultEngineConfig = {
   alertSampleSizePerShard: 10_000,
 };
 
-const mockEntityDoc = (overrides: object = {}) => ({
+const entityDocMock = {
   entity: {
-    id: 'host:test-host-name',
+    id: entityId,
     relationships: { resolution: { resolved_to: 'host:canonical-entity-id' } },
-    ...overrides,
   },
-});
+};
 
 describe('entity risk score V2 calculation route', () => {
   let server: ReturnType<typeof serverMock.create>;
@@ -70,6 +69,7 @@ describe('entity risk score V2 calculation route', () => {
   const defaultBody = {
     identifier: 'test-host-name',
     identifier_type: 'host',
+    entity_id: entityId,
   };
 
   beforeEach(() => {
@@ -88,9 +88,8 @@ describe('entity risk score V2 calculation route', () => {
       configMock.withExperimentalFeature(clients.config, 'entityAnalyticsEntityStoreV2')
     );
 
-    // Default: no entities found for identifier → no resolution scoring
     (clients.entityStoreCrudClient as unknown as jest.Mocked<EntityStoreCRUDClient>).listEntities =
-      jest.fn().mockResolvedValue({ entities: [] });
+      jest.fn().mockResolvedValue({ entities: [entityDocMock] });
 
     (getConfiguration as jest.Mock).mockResolvedValue(defaultEngineConfig);
     (getRiskInputsIndex as jest.Mock).mockResolvedValue({ index: 'default-alerts-index' });
@@ -118,7 +117,7 @@ describe('entity risk score V2 calculation route', () => {
       },
     });
 
-  it('should return 200 when risk score calculation is successful', async () => {
+  it('successfully recalculates risk score', async () => {
     const response = await server.inject(
       buildRequest(),
       requestContextMock.convertContext(context)
@@ -127,7 +126,17 @@ describe('entity risk score V2 calculation route', () => {
     expect(response.status).toEqual(200);
   });
 
-  it('returns 400 when Entity Store V2 feature flag is disabled', async () => {
+  it('throws an error when entity_id is missing', async () => {
+    const response = await server.inject(
+      buildRequest({ entity_id: undefined }),
+      requestContextMock.convertContext(context)
+    );
+
+    expect(response.status).toEqual(400);
+    expect(response.body.message).toEqual('Entity ID is required');
+  });
+
+  it('throws an error when Entity Store V2 feature flag is disabled', async () => {
     const defaultConfig = configMock.createDefault();
     context.securitySolution.getConfig.mockReturnValue({
       ...defaultConfig,
@@ -146,7 +155,7 @@ describe('entity risk score V2 calculation route', () => {
     expect(response.body.message).toEqual('Entity Store V2 is not enabled');
   });
 
-  it('returns 400 when no risk engine configuration is found', async () => {
+  it('throws an error when no risk engine configuration is found', async () => {
     (getConfiguration as jest.Mock).mockResolvedValue(null);
 
     const response = await server.inject(
@@ -158,178 +167,51 @@ describe('entity risk score V2 calculation route', () => {
     expect(response.body.message).toEqual('No Risk engine configuration found');
   });
 
-  it('maps host identifier_type to host.name field filter', async () => {
-    const body = {
-      identifier: 'test-host-name',
-      identifier_type: 'host',
-    };
-    await server.inject(buildRequest(body), requestContextMock.convertContext(context));
-
-    expect(scoreBaseEntities).toHaveBeenCalledWith(
-      expect.objectContaining({
-        entityType: body.identifier_type,
-        alertFilters: expect.arrayContaining([{ term: { 'host.name': body.identifier } }]),
-      })
-    );
-  });
-
-  it('maps user identifier_type to user.name field filter', async () => {
-    const body = {
-      identifier: 'test-user',
-      identifier_type: 'user',
-    };
-    await server.inject(buildRequest(body), requestContextMock.convertContext(context));
-
-    expect(scoreBaseEntities).toHaveBeenCalledWith(
-      expect.objectContaining({
-        entityType: body.identifier_type,
-        alertFilters: expect.arrayContaining([{ term: { 'user.name': body.identifier } }]),
-      })
-    );
-  });
-
-  it('merges buildAlertFilters output with the identifier filter', async () => {
+  it('filters alerts for the given entity', async () => {
     const engineFilter = { term: { 'kibana.alert.workflow_status': 'open' } };
     (buildAlertFilters as jest.Mock).mockReturnValue([engineFilter]);
 
     await server.inject(buildRequest(), requestContextMock.convertContext(context));
 
+    expect(euid.dsl.getEuidFilterBasedOnDocument).toHaveBeenCalled();
     expect(scoreBaseEntities).toHaveBeenCalledWith(
       expect.objectContaining({
-        alertFilters: expect.arrayContaining([
-          engineFilter,
-          { term: { 'host.name': defaultBody.identifier } },
-        ]),
+        alertFilters: expect.arrayContaining([engineFilter, { term: { 'entity.id': entityId } }]),
       })
     );
   });
 
-  describe('resolution scoring', () => {
-    it('does not run resolution scoring when no entities match the identifier', async () => {
-      // Default beforeEach mock: listEntities returns { entities: [] }
-      await server.inject(buildRequest(), requestContextMock.convertContext(context));
+  it('runs resolution scoring against the resolved entity', async () => {
+    await server.inject(buildRequest(), requestContextMock.convertContext(context));
 
-      expect(runResolutionScoringStep).not.toHaveBeenCalled();
-    });
-
-    it('runs resolution scoring when entities are found for the identifier', async () => {
-      const mockedEntityDoc = mockEntityDoc();
-      (
-        clients.entityStoreCrudClient as unknown as jest.Mocked<EntityStoreCRUDClient>
-      ).listEntities = jest.fn().mockResolvedValue({ entities: [mockedEntityDoc] });
-
-      await server.inject(buildRequest(), requestContextMock.convertContext(context));
-
-      expect(runResolutionScoringStep).toHaveBeenCalledWith(
-        expect.objectContaining({
-          targetEntityIds: [mockedEntityDoc.entity.relationships.resolution.resolved_to],
-        })
-      );
-    });
-
-    it('falls back to entity.id as resolution target when entity has no resolved_to', async () => {
-      const entityId = 'host:test-host-name';
-      (
-        clients.entityStoreCrudClient as unknown as jest.Mocked<EntityStoreCRUDClient>
-      ).listEntities = jest.fn().mockResolvedValue({
-        entities: [{ entity: { id: entityId } }],
-      });
-
-      await server.inject(buildRequest(), requestContextMock.convertContext(context));
-
-      expect(runResolutionScoringStep).toHaveBeenCalledWith(
-        expect.objectContaining({ targetEntityIds: [entityId] })
-      );
-    });
+    expect(runResolutionScoringStep).toHaveBeenCalledWith(
+      expect.objectContaining({
+        targetEntityIds: [entityDocMock.entity.relationships.resolution.resolved_to],
+      })
+    );
   });
 
-  describe('when entity_id is provided', () => {
-    it('always runs resolution scoring', async () => {
-      const mockedEntityDoc = mockEntityDoc();
-      (
-        clients.entityStoreCrudClient as unknown as jest.Mocked<EntityStoreCRUDClient>
-      ).listEntities = jest.fn().mockResolvedValue({ entities: [mockedEntityDoc] });
+  it('runs resolution scoring against the entity itself when no resolved entity exists', async () => {
+    // override default mock that returns an entity with a resolved_to
+    (clients.entityStoreCrudClient as unknown as jest.Mocked<EntityStoreCRUDClient>).listEntities =
+      jest.fn().mockResolvedValue({ entities: [{ entity: { id: entityId } }] });
 
-      await server.inject(
-        buildRequest({ entity_id: mockedEntityDoc.entity.id }),
-        requestContextMock.convertContext(context)
-      );
+    await server.inject(buildRequest(), requestContextMock.convertContext(context));
 
-      expect(runResolutionScoringStep).toHaveBeenCalled();
-    });
+    expect(runResolutionScoringStep).toHaveBeenCalledWith(
+      expect.objectContaining({ targetEntityIds: [entityId] })
+    );
+  });
 
-    it('uses entity resolved_to as the resolution target', async () => {
-      const mockedEntityDoc = mockEntityDoc();
-      (
-        clients.entityStoreCrudClient as unknown as jest.Mocked<EntityStoreCRUDClient>
-      ).listEntities = jest.fn().mockResolvedValue({ entities: [mockedEntityDoc] });
+  it('uses the same run ID across base and resolution scoring', async () => {
+    await server.inject(buildRequest(), requestContextMock.convertContext(context));
 
-      await server.inject(
-        buildRequest({ entity_id: mockedEntityDoc.entity.id }),
-        requestContextMock.convertContext(context)
-      );
+    const { calculationRunId: baseRunId } = (scoreBaseEntities as jest.Mock).mock.calls[0][0];
+    const { calculationRunId: resolutionRunId } = (runResolutionScoringStep as jest.Mock).mock
+      .calls[0][0];
 
-      expect(runResolutionScoringStep).toHaveBeenCalledWith(
-        expect.objectContaining({
-          targetEntityIds: [mockedEntityDoc.entity.relationships.resolution.resolved_to],
-        })
-      );
-    });
-
-    it('falls back to entity_id when entity has no resolved_to', async () => {
-      const entityId = 'host:test-host-name';
-      (
-        clients.entityStoreCrudClient as unknown as jest.Mocked<EntityStoreCRUDClient>
-      ).listEntities = jest.fn().mockResolvedValue({
-        entities: [{ entity: { id: entityId } }],
-      });
-
-      await server.inject(
-        buildRequest({ entity_id: entityId }),
-        requestContextMock.convertContext(context)
-      );
-
-      expect(runResolutionScoringStep).toHaveBeenCalledWith(
-        expect.objectContaining({ targetEntityIds: [entityId] })
-      );
-    });
-
-    it('uses the euid identity filter as the alert filter', async () => {
-      const mockedEntityDoc = mockEntityDoc();
-      (
-        clients.entityStoreCrudClient as unknown as jest.Mocked<EntityStoreCRUDClient>
-      ).listEntities = jest.fn().mockResolvedValue({ entities: [mockedEntityDoc] });
-
-      await server.inject(
-        buildRequest({ entity_id: mockedEntityDoc.entity.id }),
-        requestContextMock.convertContext(context)
-      );
-
-      expect(euid.dsl.getEuidFilterBasedOnDocument).toHaveBeenCalled();
-      expect(scoreBaseEntities).toHaveBeenCalledWith(
-        expect.objectContaining({
-          alertFilters: expect.arrayContaining([{ term: { 'entity.id': 'mock-euid-filter' } }]),
-        })
-      );
-    });
-
-    it('uses the same calculationRunId for both scoring steps', async () => {
-      (
-        clients.entityStoreCrudClient as unknown as jest.Mocked<EntityStoreCRUDClient>
-      ).listEntities = jest.fn().mockResolvedValue({ entities: [mockEntityDoc()] });
-
-      await server.inject(
-        buildRequest({ entity_id: 'host:test-host-name' }),
-        requestContextMock.convertContext(context)
-      );
-
-      const { calculationRunId: baseRunId } = (scoreBaseEntities as jest.Mock).mock.calls[0][0];
-      const { calculationRunId: resolutionRunId } = (runResolutionScoringStep as jest.Mock).mock
-        .calls[0][0];
-
-      expect(baseRunId).toBeDefined();
-      expect(baseRunId).toEqual(resolutionRunId);
-    });
+    expect(baseRunId).toBeDefined();
+    expect(baseRunId).toEqual(resolutionRunId);
   });
 
   describe('validation', () => {
@@ -339,12 +221,6 @@ describe('entity risk score V2 calculation route', () => {
       expect(result.badRequest).toHaveBeenCalledWith(expect.stringContaining('identifier_type'));
     });
 
-    it('requires identifier', () => {
-      const result = server.validate(buildRequest({ identifier: undefined }));
-
-      expect(result.badRequest).toHaveBeenCalledWith(expect.stringContaining('identifier'));
-    });
-
     it('rejects unknown identifier_type values', () => {
       const result = server.validate(buildRequest({ identifier_type: 'unknown' }));
 
@@ -352,7 +228,7 @@ describe('entity risk score V2 calculation route', () => {
     });
   });
 
-  it('returns 500 on unexpected errors', async () => {
+  it('throws an error on unhandled exceptions', async () => {
     (scoreBaseEntities as jest.Mock).mockRejectedValue(new Error('unexpected'));
 
     const response = await server.inject(
