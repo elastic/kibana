@@ -7,8 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { ESQLVariableType, type ESQLControlVariable } from '@kbn/esql-types';
-import { KBN_FIELD_TYPES } from '@kbn/field-types';
-import { getStartEndParams, getNamedParams, formatESQLColumns } from './run_query';
+import { getStartEndParams, getNamedParams } from './run_query';
 
 describe('run query helpers', () => {
   describe('getStartEndParams', () => {
@@ -160,21 +159,5 @@ describe('run query helpers', () => {
     expect(params[0]).toHaveProperty('_tstart');
     expect(params[1]).toHaveProperty('_tend');
     expect(params[0]._tstart).not.toEqual(params[1]._tend);
-  });
-
-  describe('formatESQLColumns', () => {
-    it('should mark a column with multiple ES types as a conflict and expose them', () => {
-      const columns = formatESQLColumns([
-        { name: 'mixed', type: 'unsupported', original_types: ['keyword', 'long'] },
-      ]);
-      expect(columns[0].meta.type).toBe(KBN_FIELD_TYPES.CONFLICT);
-      expect(columns[0].meta.conflictingEsTypes).toEqual(['keyword', 'long']);
-    });
-
-    it('should not flag a regular column as a conflict', () => {
-      const columns = formatESQLColumns([{ name: 'message', type: 'keyword' }]);
-      expect(columns[0].meta.type).not.toBe(KBN_FIELD_TYPES.CONFLICT);
-      expect(columns[0].meta.conflictingEsTypes).toBeUndefined();
-    });
   });
 });
