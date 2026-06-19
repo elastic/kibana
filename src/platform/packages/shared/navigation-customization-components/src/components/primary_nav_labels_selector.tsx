@@ -8,28 +8,106 @@
  */
 
 import {
-  EuiCheckableCard,
   EuiFlexGrid,
+  EuiFlexGroup,
   EuiFlexItem,
   EuiFormFieldset,
+  EuiPanel,
   EuiText,
-  htmlIdGenerator,
-  useGeneratedHtmlId,
+  useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import React, { useMemo } from 'react';
+import React from 'react';
+
+import { PrimaryNavLabelsIllustration } from './primary_nav_labels_illustration';
 
 interface Props {
   hidePrimaryLabels: boolean;
   onChange: (hidePrimaryLabels: boolean) => void;
 }
 
-export const PrimaryNavLabelsSelector = ({ hidePrimaryLabels, onChange }: Props) => {
-  const radioGroupName = useMemo(() => htmlIdGenerator()('primaryNavLabels'), []);
-  const showLabelsId = useGeneratedHtmlId({ prefix: 'primary-nav-labels-show' });
-  const hideLabelsId = useGeneratedHtmlId({ prefix: 'primary-nav-labels-hide' });
+interface OptionCardProps {
+  label: string;
+  showText: boolean;
+  isSelected: boolean;
+  onSelect: () => void;
+}
 
+const PrimaryNavLabelsOptionCard = ({
+  label,
+  showText,
+  isSelected,
+  onSelect,
+}: OptionCardProps) => {
+  const { euiTheme } = useEuiTheme();
+
+  return (
+    <EuiPanel
+      hasBorder={false}
+      hasShadow={false}
+      borderRadius="none"
+      paddingSize="s"
+      onClick={onSelect}
+      aria-checked={isSelected}
+      aria-label={label}
+      element="button"
+      role="radio"
+      css={css`
+        inline-size: 100%;
+        text-align: start;
+        box-shadow: inset 0 0 0
+          ${isSelected ? euiTheme.border.width.thick : euiTheme.border.width.thin}
+          ${isSelected ? euiTheme.colors.borderStrongPrimary : euiTheme.colors.borderBaseSubdued} !important;
+        border-radius: ${euiTheme.border.radius.small};
+        background-color: ${isSelected
+          ? euiTheme.colors.backgroundBaseInteractiveSelect
+          : euiTheme.colors.backgroundBasePlain};
+        border: none;
+        outline: none;
+        transition: background-color ${euiTheme.animation.fast} ${euiTheme.animation.resistance};
+
+        &:hover {
+          transform: none;
+          filter: none;
+          box-shadow: inset 0 0 0
+            ${isSelected ? euiTheme.border.width.thick : euiTheme.border.width.thin}
+            ${isSelected ? euiTheme.colors.borderStrongPrimary : euiTheme.colors.borderBaseSubdued} !important;
+          background-color: ${isSelected
+            ? euiTheme.colors.backgroundBaseInteractiveSelectHover
+            : euiTheme.colors.backgroundBaseInteractiveHover};
+        }
+
+        &:focus,
+        &:focus-visible,
+        &:not(:focus-visible) {
+          transform: none;
+          filter: none;
+          outline: none;
+          box-shadow: inset 0 0 0
+            ${isSelected ? euiTheme.border.width.thick : euiTheme.border.width.thin}
+            ${isSelected ? euiTheme.colors.borderStrongPrimary : euiTheme.colors.borderBaseSubdued} !important;
+        }
+      `}
+    >
+      <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
+        <EuiFlexItem grow={false}>
+          <PrimaryNavLabelsIllustration showText={showText} selected={isSelected} />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiText size="s">
+            <strong>{label}</strong>
+          </EuiText>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiPanel>
+  );
+};
+
+export const PrimaryNavLabelsSelector = ({ hidePrimaryLabels, onChange }: Props) => {
+  const legend = i18n.translate('navigationCustomizationComponents.primaryNavLabelsLegend', {
+    defaultMessage: 'Primary navigation labels',
+  });
   const showLabelsLabel = i18n.translate('navigationCustomizationComponents.showLabelsLabel', {
     defaultMessage: 'Icons and text',
   });
@@ -40,49 +118,31 @@ export const PrimaryNavLabelsSelector = ({ hidePrimaryLabels, onChange }: Props)
   return (
     <EuiFormFieldset
       legend={{
-        children: i18n.translate('navigationCustomizationComponents.primaryNavLabelsLegend', {
-          defaultMessage: 'Primary navigation labels',
-        }),
+        children: legend,
         display: 'hidden',
       }}
       data-test-subj="primaryNavLabelsSelector"
     >
-      <EuiFlexGrid columns={2} gutterSize="s">
-        <EuiFlexItem data-test-subj="primaryNavLabelsShow">
-          <EuiCheckableCard
-            id={showLabelsId}
-            name={radioGroupName}
-            checkableType="radio"
-            checked={!hidePrimaryLabels}
-            onChange={() => onChange(false)}
-            label={
-              <EuiText size="s">
-                <strong>{showLabelsLabel}</strong>
-              </EuiText>
-            }
-            css={css`
-              flex-grow: 1;
-            `}
-          />
-        </EuiFlexItem>
-        <EuiFlexItem data-test-subj="primaryNavLabelsHide">
-          <EuiCheckableCard
-            id={hideLabelsId}
-            name={radioGroupName}
-            checkableType="radio"
-            checked={hidePrimaryLabels}
-            onChange={() => onChange(true)}
-            label={
-              <EuiText size="s">
-                <strong>{hideLabelsLabel}</strong>
-              </EuiText>
-            }
-            css={css`
-              flex-grow: 1;
-            `}
-          />
-        </EuiFlexItem>
-      </EuiFlexGrid>
+      <div role="radiogroup" aria-label={legend}>
+        <EuiFlexGrid columns={2} gutterSize="s">
+          <EuiFlexItem data-test-subj="primaryNavLabelsShow">
+            <PrimaryNavLabelsOptionCard
+              label={showLabelsLabel}
+              showText={true}
+              isSelected={!hidePrimaryLabels}
+              onSelect={() => onChange(false)}
+            />
+          </EuiFlexItem>
+          <EuiFlexItem data-test-subj="primaryNavLabelsHide">
+            <PrimaryNavLabelsOptionCard
+              label={hideLabelsLabel}
+              showText={false}
+              isSelected={hidePrimaryLabels}
+              onSelect={() => onChange(true)}
+            />
+          </EuiFlexItem>
+        </EuiFlexGrid>
+      </div>
     </EuiFormFieldset>
   );
 };

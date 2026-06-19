@@ -1,0 +1,65 @@
+<svg width="68" height="56" viewBox="0 0 68 56" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g clip-path="url(#clip0_10542_2484)">
+<rect width="68" height="56" fill="#3788FF" fill-opacity="0.16"/>
+<g filter="url(#filter0_ddd_10542_2484)">
+<rect x="23" y="6" width="36" height="44" rx="2" fill="white"/>
+</g>
+<path d="M28 11.5C28 11.2239 28.2239 11 28.5 11H53.5C53.7761 11 54 11.2239 54 11.5V14.5C54 14.7761 53.7761 15 53.5 15H28.5C28.2239 15 28 14.7761 28 14.5V11.5Z" fill="#E3E8F2"/>
+<path d="M28 18.5C28 18.2239 28.2239 18 28.5 18H46.5C46.7761 18 47 18.2239 47 18.5V21.5C47 21.7761 46.7761 22 46.5 22H28.5C28.2239 22 28 21.7761 28 21.5V18.5Z" fill="#E3E8F2"/>
+<g clip-path="url(#clip1_10542_2484)">
+<path d="M8 10C8 7.79086 9.79086 6 12 6V6C14.2091 6 16 7.79086 16 10V10C16 12.2091 14.2091 14 12 14V14C9.79086 14 8 12.2091 8 10V10Z" fill="#61A2FF"/>
+<rect x="11" y="4" width="8" height="8" rx="4" fill="#A3CBFF"/>
+</g>
+<g clip-path="url(#clip2_10542_2484)">
+<path d="M8 22C8 19.7909 9.79086 18 12 18V18C14.2091 18 16 19.7909 16 22V22C16 24.2091 14.2091 26 12 26V26C9.79086 26 8 24.2091 8 22V22Z" fill="#61A2FF"/>
+<rect x="11" y="16" width="8" height="8" rx="4" fill="#A3CBFF"/>
+</g>
+<g clip-path="url(#clip3_10542_2484)">
+<path d="M8 34C8 31.7909 9.79086 30 12 30V30C14.2091 30 16 31.7909 16 34V34C16 36.2091 14.2091 38 12 38V38C9.79086 38 8 36.2091 8 34V34Z" fill="#61A2FF"/>
+<rect x="11" y="28" width="8" height="8" rx="4" fill="#A3CBFF"/>
+</g>
+<g clip-path="url(#clip4_10542_2484)">
+<path d="M8 46C8 43.7909 9.79086 42 12 42V42C14.2091 42 16 43.7909 16 46V46C16 48.2091 14.2091 50 12 50V50C9.79086 50 8 48.2091 8 46V46Z" fill="#61A2FF"/>
+<rect x="11" y="40" width="8" height="8" rx="4" fill="#A3CBFF"/>
+</g>
+</g>
+<defs>
+<filter id="filter0_ddd_10542_2484" x="15" y="0" width="52" height="60" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+<feFlood flood-opacity="0" result="BackgroundImageFix"/>
+<feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha"/>
+<feOffset dy="2"/>
+<feGaussianBlur stdDeviation="4"/>
+<feComposite in2="hardAlpha" operator="out"/>
+<feColorMatrix type="matrix" values="0 0 0 0 0.168627 0 0 0 0 0.223529 0 0 0 0 0.309804 0 0 0 0.05 0"/>
+<feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow_10542_2484"/>
+<feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha"/>
+<feOffset dy="1"/>
+<feGaussianBlur stdDeviation="2"/>
+<feComposite in2="hardAlpha" operator="out"/>
+<feColorMatrix type="matrix" values="0 0 0 0 0.168627 0 0 0 0 0.223529 0 0 0 0 0.309804 0 0 0 0.06 0"/>
+<feBlend mode="normal" in2="effect1_dropShadow_10542_2484" result="effect2_dropShadow_10542_2484"/>
+<feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha"/>
+<feOffset/>
+<feGaussianBlur stdDeviation="1"/>
+<feComposite in2="hardAlpha" operator="out"/>
+<feColorMatrix type="matrix" values="0 0 0 0 0.168627 0 0 0 0 0.223529 0 0 0 0 0.309804 0 0 0 0.16 0"/>
+<feBlend mode="normal" in2="effect2_dropShadow_10542_2484" result="effect3_dropShadow_10542_2484"/>
+<feBlend mode="normal" in="SourceGraphic" in2="effect3_dropShadow_10542_2484" result="shape"/>
+</filter>
+<clipPath id="clip0_10542_2484">
+<rect width="68" height="56" fill="white"/>
+</clipPath>
+<clipPath id="clip1_10542_2484">
+<path d="M8 10C8 7.79086 9.79086 6 12 6V6C14.2091 6 16 7.79086 16 10V10C16 12.2091 14.2091 14 12 14V14C9.79086 14 8 12.2091 8 10V10Z" fill="white"/>
+</clipPath>
+<clipPath id="clip2_10542_2484">
+<path d="M8 22C8 19.7909 9.79086 18 12 18V18C14.2091 18 16 19.7909 16 22V22C16 24.2091 14.2091 26 12 26V26C9.79086 26 8 24.2091 8 22V22Z" fill="white"/>
+</clipPath>
+<clipPath id="clip3_10542_2484">
+<path d="M8 34C8 31.7909 9.79086 30 12 30V30C14.2091 30 16 31.7909 16 34V34C16 36.2091 14.2091 38 12 38V38C9.79086 38 8 36.2091 8 34V34Z" fill="white"/>
+</clipPath>
+<clipPath id="clip4_10542_2484">
+<path d="M8 46C8 43.7909 9.79086 42 12 42V42C14.2091 42 16 43.7909 16 46V46C16 48.2091 14.2091 50 12 50V50C9.79086 50 8 48.2091 8 46V46Z" fill="white"/>
+</clipPath>
+</defs>
+</svg>
