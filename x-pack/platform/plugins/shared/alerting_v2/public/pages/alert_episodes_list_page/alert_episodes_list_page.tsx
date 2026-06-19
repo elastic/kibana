@@ -72,7 +72,7 @@ const DEFAULT_SORT: EpisodesSortState = { sortField: '@timestamp', sortDirection
 
 const ALERT_EPISODES_TABLE_SETTINGS: UnifiedDataTableSettings = {
   columns: {
-    duration: { width: 100 },
+    duration: { width: 110 },
     assignees: { width: 120 },
     'episode.status': { width: 110 },
   },
@@ -86,6 +86,19 @@ const CUSTOM_GRID_COLUMNS_CONFIGURATION: CustomGridColumnsConfiguration = {
   assignees: ({ column }) => ({
     ...column,
     displayAsText: i18n.EPISODES_LIST_COLUMN_ASSIGNEES,
+  }),
+  duration: ({ column }: { column: EuiDataGridColumn }): EuiDataGridColumn => ({
+    ...column,
+    display: (
+      <div
+        css={css`
+          text-align: left;
+          width: 100%;
+        `}
+      >
+        {column.displayAsText ?? column.id}
+      </div>
+    ),
   }),
 };
 
@@ -403,98 +416,108 @@ export const AlertEpisodesListPage = () => {
             onBreakdownFieldChange={setHistogramBreakdownField}
           />
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiFlexGroup alignItems="center" responsive={false} gutterSize="s">
-            <EuiFlexItem grow={false}>
-              <EuiText size="xs">
-                <FormattedMessage
-                  id="xpack.alertingV2.episodes.itemCount"
-                  defaultMessage="Showing {filtered} of {total} {total, plural, one {alert} other {alerts}}"
-                  values={{
-                    filtered: <strong>{filteredAlertEpisodesCount}</strong>,
-                    total: <strong>{totalAlertEpisodesCount}</strong>,
-                  }}
-                />
-              </EuiText>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiText size="xs" color="subdued">
-                |
-              </EuiText>
-            </EuiFlexItem>
-            <EuiFlexItem
-              grow={false}
-              // css={css`
-              //   align-self: stretch;
-              //   border-left: ${euiTheme.border.thick};
-              // `}
-            >
-              <EuiButtonEmpty
-                size="xs"
-                iconType="eraser"
-                disabled={!hasActiveFilters}
-                onClick={handleClearFilters}
-                data-test-subj="episodesFilterBar-resetFilters"
-              >
-                {i18n.EPISODES_FILTER_BAR_RESET_FILTERS}
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexItem>
-
         <EuiFlexItem
           grow
           css={css`
             min-width: 0;
           `}
         >
-          <CellActionsProvider
-            getTriggerCompatibleActions={services.uiActions.getTriggerCompatibleActions}
-          >
-            <EuiScreenReaderOnly>
-              <span id="alertingEpisodesTableAriaLabel">{i18n.EPISODES_LIST_TABLE_ARIA_LABEL}</span>
-            </EuiScreenReaderOnly>
-            {!dataView ? (
-              <EuiLoadingSpinner />
-            ) : (
-              <UnifiedDataTable
-                ariaLabelledBy="alertingEpisodesTableAriaLabel"
-                settings={ALERT_EPISODES_TABLE_SETTINGS}
-                css={getTableCss(euiTheme)}
-                gridStyleOverride={{
-                  stripes: false,
-                  cellPadding: 'l',
-                }}
-                dataView={dataView}
-                columns={columns}
-                onSetColumns={onSetColumns}
-                canDragAndDropColumns
-                showTimeCol={!!dataView.timeFieldName}
-                customGridColumnsConfiguration={CUSTOM_GRID_COLUMNS_CONFIGURATION}
-                externalCustomRenderers={externalCustomRenderers}
-                rows={rows}
-                totalHits={!episodesData?.length ? 0 : PAGE_SIZE + 1}
-                loadingState={isLoading ? DataLoadingState.loading : DataLoadingState.loaded}
-                isPaginationEnabled
-                paginationMode="singlePage"
-                sampleSizeState={PAGE_SIZE}
-                isSortEnabled
-                sort={sort}
-                onSort={onSort}
-                rowHeightState={rowHeight}
-                onUpdateRowHeight={setRowHeight}
-                configRowHeight={rowHeight}
-                customBulkActions={customBulkActions}
-                rowAdditionalLeadingControls={rowAdditionalLeadingControls}
-                visibleRowLeadingControls={3}
-                enableComparisonMode={false}
-                services={services}
-                expandedDoc={expandedDoc}
-                setExpandedDoc={setExpandedDoc}
-                renderDocumentView={renderDocumentView}
-              />
-            )}
-          </CellActionsProvider>
+          <EuiFlexGroup direction="column" gutterSize="xs" responsive={false}>
+            <EuiFlexItem
+              grow={false}
+              css={css`
+                margin-top: ${euiTheme.size.m};
+              `}
+            >
+              <EuiFlexGroup alignItems="center" responsive={false} gutterSize="xs">
+                <EuiFlexItem grow={false}>
+                  <EuiText size="xs" data-test-subj="alertEpisodesItemCount">
+                    <FormattedMessage
+                      id="xpack.alertingV2.episodes.itemCount"
+                      defaultMessage="Showing {filtered} of {total} {total, plural, one {alert} other {alerts}}"
+                      values={{
+                        filtered: <strong>{filteredAlertEpisodesCount}</strong>,
+                        total: <strong>{totalAlertEpisodesCount}</strong>,
+                      }}
+                    />
+                  </EuiText>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiText size="xs" color="subdued">
+                    |
+                  </EuiText>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiButtonEmpty
+                    size="xs"
+                    iconType="eraser"
+                    disabled={!hasActiveFilters}
+                    onClick={handleClearFilters}
+                    data-test-subj="episodesFilterBar-resetFilters"
+                  >
+                    {i18n.EPISODES_FILTER_BAR_RESET_FILTERS}
+                  </EuiButtonEmpty>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFlexItem>
+
+            <EuiFlexItem
+              grow
+              css={css`
+                min-width: 0;
+              `}
+            >
+              <CellActionsProvider
+                getTriggerCompatibleActions={services.uiActions.getTriggerCompatibleActions}
+              >
+                <EuiScreenReaderOnly>
+                  <span id="alertingEpisodesTableAriaLabel">
+                    {i18n.EPISODES_LIST_TABLE_ARIA_LABEL}
+                  </span>
+                </EuiScreenReaderOnly>
+                {!dataView ? (
+                  <EuiLoadingSpinner />
+                ) : (
+                  <UnifiedDataTable
+                    ariaLabelledBy="alertingEpisodesTableAriaLabel"
+                    settings={ALERT_EPISODES_TABLE_SETTINGS}
+                    css={getTableCss(euiTheme)}
+                    gridStyleOverride={{
+                      stripes: false,
+                      cellPadding: 'l',
+                    }}
+                    dataView={dataView}
+                    columns={columns}
+                    onSetColumns={onSetColumns}
+                    canDragAndDropColumns
+                    showTimeCol={!!dataView.timeFieldName}
+                    customGridColumnsConfiguration={CUSTOM_GRID_COLUMNS_CONFIGURATION}
+                    externalCustomRenderers={externalCustomRenderers}
+                    rows={rows}
+                    totalHits={!episodesData?.length ? 0 : PAGE_SIZE + 1}
+                    loadingState={isLoading ? DataLoadingState.loading : DataLoadingState.loaded}
+                    isPaginationEnabled
+                    paginationMode="singlePage"
+                    sampleSizeState={PAGE_SIZE}
+                    isSortEnabled
+                    sort={sort}
+                    onSort={onSort}
+                    rowHeightState={rowHeight}
+                    onUpdateRowHeight={setRowHeight}
+                    configRowHeight={rowHeight}
+                    customBulkActions={customBulkActions}
+                    rowAdditionalLeadingControls={rowAdditionalLeadingControls}
+                    visibleRowLeadingControls={3}
+                    enableComparisonMode={false}
+                    services={services}
+                    expandedDoc={expandedDoc}
+                    setExpandedDoc={setExpandedDoc}
+                    renderDocumentView={renderDocumentView}
+                  />
+                )}
+              </CellActionsProvider>
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
     </div>
