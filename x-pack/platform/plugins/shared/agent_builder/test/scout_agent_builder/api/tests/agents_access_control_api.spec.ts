@@ -393,7 +393,12 @@ apiTest.describe(
         expect(granted).toHaveStatusCode(200);
         expect(granted.body.access_control).toMatchObject({
           access_mode: AgentAccessControlMode.Private,
-          entries: [],
+        });
+        expect(granted.body.access_control.entries).toHaveLength(1);
+        expect(granted.body.access_control.entries[0]).toMatchObject({
+          type: 'user',
+          name: bob.username,
+          role: AgentAccessControlRole.User,
         });
 
         const list = await apiClient.get(`${accessControlApiBase}/agents`, {
