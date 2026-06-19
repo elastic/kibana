@@ -52,3 +52,19 @@ export const markdownPanelConfigInputSchema = z.object({
 });
 
 export type MarkdownPanelConfigInput = z.infer<typeof markdownPanelConfigInputSchema>;
+
+/**
+ * The markdown variant of an `edit_panels` item: targets an existing markdown
+ * panel by id and replaces its config. Derived from the add schema so the
+ * `kind`/`type`/`config` shape stays in sync.
+ */
+export const editMarkdownPanelConfigInputSchema = markdownPanelConfigInputSchema
+  .omit({ grid: true })
+  .extend({
+    panelId: z.string().describe('Existing markdown panel id to update.'),
+    config: markdownPanelConfigSchema.describe(
+      'New markdown panel config (e.g. { content }). Fully replaces the existing config.'
+    ),
+  });
+
+export type EditMarkdownPanelConfigInput = z.infer<typeof editMarkdownPanelConfigInputSchema>;
