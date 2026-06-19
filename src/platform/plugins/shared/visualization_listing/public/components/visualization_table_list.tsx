@@ -168,35 +168,15 @@ export const VisualizationTableList = ({
   const onContentEditorSave = useCallback(
     async (args: { id: string; title: string; description?: string; tags: string[] }) => {
       const content = visualizedUserContent.current?.find(({ id }) => id === args.id);
-
       if (content) {
-        const result = (await contentManagement.client.get({
-          contentTypeId: content.savedObjectType,
-          id: content.id,
-        })) as { item: SavedObjectWithReferences };
-
-        if (result?.item) {
-          let references = result.item.references || [];
-          if (savedObjectsTagging) {
-            references = savedObjectsTagging.ui.updateTagsReferences(references, args.tags || []);
-          }
-
-          await contentManagement.client.update({
-            contentTypeId: content.savedObjectType,
-            id: content.id,
-            data: {
-              ...result.item.attributes,
-              title: args.title,
-              description: args.description ?? '',
-            },
-            options: {
-              references,
-            },
-          });
-        }
+        return await visualizations.updateVisualizationLibraryItem(content.id, content.type, {
+          title: args.title,
+          description: args.description ?? '',
+          tags: args.tags,
+        });
       }
     },
-    [contentManagement, savedObjectsTagging]
+    [visualizations]
   );
 
   const contentEditorValidators: OpenContentEditorParams['customValidators'] = useMemo(
