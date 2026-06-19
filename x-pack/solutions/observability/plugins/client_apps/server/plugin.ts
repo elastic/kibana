@@ -12,25 +12,16 @@ import type {
   Plugin,
   PluginInitializerContext,
 } from '@kbn/core/server';
-import type { ClientAppsConfig } from '.';
 import { registerAndroidRoutes } from './platforms/android/routes';
 
 export class ClientAppsPlugin implements Plugin {
   private readonly logger: Logger;
-  private readonly initializerContext: PluginInitializerContext;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
-    this.initializerContext = initializerContext;
   }
 
   public setup(core: CoreSetup) {
-    const config = this.initializerContext.config.get<ClientAppsConfig>();
-    if (!config.enabled) {
-      this.logger.info('Client Apps plugin is disabled');
-      return {};
-    }
-
     const router = core.http.createRouter();
     const params = { router, logger: this.logger };
 
