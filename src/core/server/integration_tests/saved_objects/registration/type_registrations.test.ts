@@ -9,7 +9,12 @@
 
 import { createRoot } from '@kbn/core-test-helpers-kbn-server';
 import removedTypes from '@kbn/core-saved-objects-server-internal/removed_types.json';
-import wipTypes from '@kbn/core-saved-objects-server-internal/wip_types.json';
+import wipTypesJson from '@kbn/core-saved-objects-server-internal/wip_types.json';
+
+// `wip_types.json` can be empty, which TypeScript infers as `never[]` and breaks
+// the `.includes(type)` checks below. Widen to `readonly string[]` so the array
+// stays usable regardless of its contents.
+const wipTypes: readonly string[] = wipTypesJson;
 
 // Types should NEVER be removed from this array
 const previouslyRegisteredTypes = [
